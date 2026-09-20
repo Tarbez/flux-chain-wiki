@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- Placeholder monogram. Replace with a real photo by dropping a file in
+       assets/ and pointing -IMG- in js/scene.flux.js at it. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8a5a2b"/>
+      <stop offset="0.55" stop-color="#2a1d12"/>
+      <stop offset="1" stop-color="#0c0a08"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" fill="url(#g)"/>
+  <text x="24" y="32" font-family="Albert Sans, Helvetica Neue, Arial, sans-serif"
+        font-size="22" font-weight="700" fill="#efe6dc" text-anchor="middle">H</text>
+</svg>

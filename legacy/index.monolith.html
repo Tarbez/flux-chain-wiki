@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<title>ZERO &gt; 0 — Make it Useful</title>
+<meta name="description" content="ZERO > 0 — a single full-viewport scene rendered entirely from one dense Flux pattern by the Ark UI runtime. The halo is the void made visible. The step pill is the first emergence." />
+<style>
+  /* ------------------------------------------------------------------
+     FALLBACK DOCUMENT ONLY.
+     The ZERO > 0 scene carries zero CSS — every scene node is styled by
+     the Ark UI style atomizer at runtime. This block exists so the
+     semantic scroll fallback is readable with JavaScript disabled.
+     ------------------------------------------------------------------ */
+  html, body { margin: 0; padding: 0; background: #000; }
+  #fallback {
+    display: block;
+    background: #000;
+    color: #8a8a94;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 72px 24px 110px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    -webkit-font-smoothing: antialiased;
+  }
+  #fallback .wrap { max-width: 640px; margin: 0 auto; }
+  #fallback .eyebrow {
+    margin: 0 0 28px; font-size: 11px; letter-spacing: .24em;
+    text-transform: uppercase; color: #4a4a56;
+  }
+  #fallback h1 { margin: 0 0 14px; font-size: 24px; line-height: 1.3; font-weight: 700; color: #fff; }
+  #fallback .lede { margin: 0 0 28px; font-size: 20px; font-weight: 300; color: #c8c8c8; }
+  #fallback p { margin: 0 0 22px; }
+  #fallback a { color: #c8c8c8; text-decoration: underline; text-underline-offset: 3px; }
+  #fallback a:hover { color: #fff; }
+  #fallback .row { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; justify-content: space-between; }
+  #fallback .cta {
+    display: inline-block; padding: 10px 20px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18); text-decoration: none; color: #fff;
+    background: rgba(255,255,255,0.03);
+  }
+  #fallback :focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
+     single F-SCENE-RZERO_V0 pattern. No scene markup is authored by hand. -->
+<div id="scene"></div>
+
+<!-- Semantic scroll fallback — screen readers, SEO, reduced-motion, no-JS. -->
+<main id="fallback">
+  <div class="wrap">
+    <p class="eyebrow">ZERO &gt; 0</p>
+    <h1>2. Make it Useful</h1>
+    <p class="lede">Pretty is good, but purpose wins.</p>
+    <p>
+      Design must serve a clear purpose. Every feature, layout, or element should provide
+      real value — not just look attractive. A product becomes meaningful when functionality
+      leads the way, ensuring that users can achieve their goals efficiently while still
+      enjoying an experience that feels intuitive and effortless.
+    </p>
+    <p class="row">
+      <span>Find the one that speaks to you most?</span>
+      <a class="cta" href="#fallback">Continue&nbsp;&rarr;</a>
+    </p>
+    <p>
+      Designed by
+      <a href="https://harshdesigns.uk" rel="noopener">Harsh Randeria — harshdesigns.uk</a>
+    </p>
+  </div>
+</main>
+
+<script>
+/* =====================================================================
+   ARK UI RUNTIME
+   ---------------------------------------------------------------------
+   A tiny manifest registry + Flux resolver + style atomizer.
+   - register(id, manifest)   declare a resolver
+   - alias(id, canonicalId)   map an alternate fence id onto a resolver
+   - render(fluxSource, host) parse a dense Flux pattern and mount it
+   - atomize(styleObject)     hash a style object into an atomic class
+   No dependencies. No framework. No external CSS.
+   ===================================================================== */
+var ArkUI = (function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     STYLE ATOMIZER
+     Each unique declaration block becomes one class, injected once into
+     a single runtime-owned stylesheet. Identical styles collapse.
+     ------------------------------------------------------------------ */
+  var atomIndex = Object.create(null);
+  var sheetEl = null;
+  var baseWritten = false;
+
+  function kebab(k) {
+    return k.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); });
+  }
+
+  function hashStr(s) {
+    var h = 2166136261;
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0).toString(36);
+  }
+
+  function sheet() {
+    if (!sheetEl) {
+      sheetEl = document.createElement('style');
+      sheetEl.setAttribute('data-ark-ui', 'atomizer');
+      (document.head || document.documentElement).appendChild(sheetEl);
+    }
+    return sheetEl;
+  }
+
+  function writeBase() {
+    if (baseWritten) return;
+    baseWritten = true;
+    /* Base rules land BEFORE any atom, so atoms always win the cascade. */
+    sheet().appendChild(document.createTextNode(
+      '*,*::before,*::after{box-sizing:border-box}' +
+      'html,body{margin:0;padding:0;background:#000}' +
+      '.ark-zero{opacity:0}' +
+      ':focus-visible{outline:2px solid #ffffff;outline-offset:3px;border-radius:6px}'
+    ));
+  }
+
+  function atomize(styles) {
+    if (!styles) return '';
+    var keys = Object.keys(styles);
+    if (!keys.length) return '';
+    var decl = '';
+    for (var i = 0; i < keys.length; i++) {
+      var v = styles[keys[i]];
+      if (v === null || v === undefined || v === '') continue;
+      decl += (decl ? ';' : '') + kebab(keys[i]) + ':' + v;
+    }
+    if (!decl) return '';
+    var cls = 'k' + hashStr(decl);
+    if (!atomIndex[cls]) {
+      atomIndex[cls] = decl;
+      sheet().appendChild(document.createTextNode('.' + cls + '{' + decl + '}'));
+    }
+    return cls;
+  }
+
+  /* ------------------------------------------------------------------
+     FLUX PARSER
+     F-<NAME>-<RESOLVER_ID>          opens a fence
+     . F-<NAME>-<RESOLVER_ID>        opens a child fence
+     .                               closes the innermost fence
+     -<KEY>-<value_with_underscores> fence property
+     ------------------------------------------------------------------ */
+  function splitFence(line) {
+    var body = line.slice(2);
+    var i = body.indexOf('-');
+    if (i === -1) return { name: body, resolver: body };
+    return { name: body.slice(0, i), resolver: body.slice(i + 1) };
+  }
+
+  function parseFlux(src) {
+    var root = { name: 'SCENE', resolver: 'RZERO_V0', props: {}, children: [] };
+    var stack = [root];
+    var lines = String(src).split('\n');
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      var c = line.charCodeAt(0);
+
+      if (c === 46) {                                   /* '.' */
+        var rest = line.slice(1).trim();
+        if (!rest) { if (stack.length > 1) stack.pop(); continue; }
+        if (rest.slice(0, 2) === 'F-') {
+          var f = splitFence(rest);
+          var child = { name: f.name, resolver: f.resolver, props: {}, children: [] };
+          stack[stack.length - 1].children.push(child);
+          stack.push(child);
+        }
+        continue;
+      }
+
+      if (c === 45) {                                   /* '-' */
+        var j = line.indexOf('-', 1);
+        if (j === -1) continue;
+        var key = line.slice(1, j);
+        var val = line.slice(j + 1).replace(/_/g, ' ');
+        stack[stack.length - 1].props[key] = val;
+        continue;
+      }
+
+      if (line.slice(0, 2) === 'F-') {
+        var r = splitFence(line);
+        root.name = r.name;
+        root.resolver = r.resolver;
+        stack.length = 0;
+        stack.push(root);
+      }
+    }
+    return root;
+  }
+
+  /* ------------------------------------------------------------------
+     REGISTRY
+     ------------------------------------------------------------------ */
+  var registry = Object.create(null);
+
+  function register(id, manifest) {
+    registry[id] = manifest;
+  }
+
+  function alias(id, canonicalId) {
+    if (!registry[canonicalId]) throw new Error('ArkUI: unknown canonical resolver ' + canonicalId);
+    registry[id] = registry[canonicalId];
+  }
+
+  /* ------------------------------------------------------------------
+     BUILDER
+     ------------------------------------------------------------------ */
+  function build(node, ctx) {
+    var m = registry[node.resolver];
+    if (!m) {
+      if (window.console) console.warn('[ArkUI] unresolved resolver: ' + node.resolver);
+      return null;
+    }
+
+    /* map terse Flux keys through the resolver schema */
+    var p = {};
+    var schema = m.schema || {};
+    for (var k in node.props) {
+      if (!Object.prototype.hasOwnProperty.call(node.props, k)) continue;
+      p[schema[k] || k] = node.props[k];
+    }
+
+    var el = document.createElement(m.tag || 'div');
+
+    var classes = [];
+    if (m.base) classes.push(atomize(m.base));
+    if (m.style) classes.push(atomize(m.style(p)));
+    var cls = classes.filter(Boolean).join(' ');
+    if (cls) el.className = cls;
+
+    if (m.attrs) {
+      var attrs = m.attrs(p) || {};
+      for (var a in attrs) {
+        if (attrs[a] === null || attrs[a] === undefined) continue;
+        el.setAttribute(a, String(attrs[a]));
+      }
+    }
+
+    if (m.text) {
+      var t = m.text(p);
+      if (t !== null && t !== undefined) el.textContent = t;
+    }
+
+    if (m.decorate) m.decorate(el, p);
+
+    if (m.onMount) ctx.mounts.push({ el: el, p: p, fn: m.onMount });
+    if (m.emerge) ctx.emerge.push({ el: el, dur: m.emerge.dur, delay: m.emerge.delay });
+
+    for (var ci = 0; ci < node.children.length; ci++) {
+      var built = build(node.children[ci], ctx);
+      if (built) el.appendChild(built);
+    }
+    return el;
+  }
+
+  /* ------------------------------------------------------------------
+     RENDER
+     ------------------------------------------------------------------ */
+  var REDUCED = false;
+  try {
+    REDUCED = !!(window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  } catch (e) { REDUCED = false; }
+
+  function render(src, host) {
+    writeBase();
+    var tree = parseFlux(src);
+    var ctx = { mounts: [], emerge: [] };
+    var el = build(tree, ctx);
+    if (!el) throw new Error('ArkUI: scene root could not be resolved.');
+    host.appendChild(el);
+
+    /* Paint hooks run after the tree is in the document and has layout. */
+    for (var i = 0; i < ctx.mounts.length; i++) {
+      ctx.mounts[i].fn(ctx.mounts[i].el, ctx.mounts[i].p);
+    }
+
+    /* Emergence, not entrance. Nothing scales. Nothing bounces. */
+    if (!REDUCED && ctx.emerge.length) {
+      for (var a = 0; a < ctx.emerge.length; a++) ctx.emerge[a].el.classList.add('ark-zero');
+      void el.offsetHeight;                       /* commit the ZERO state */
+      for (var b = 0; b < ctx.emerge.length; b++) {
+        var e = ctx.emerge[b];
+        e.el.classList.add(atomize({
+          opacity: '1',
+          transition: 'opacity ' + e.dur + 'ms cubic-bezier(0.22, 0.61, 0.36, 1) ' + e.delay + 'ms',
+          willChange: 'opacity'
+        }));
+      }
+    }
+    return el;
+  }
+
+  return {
+    register: register,
+    alias: alias,
+    render: render,
+    atomize: atomize,
+    parse: parseFlux,
+    prefersReducedMotion: function () { return REDUCED; }
+  };
+})();
+
+
+/* =====================================================================
+   RESOLVER: RHALO_V1  —  the grainy ring
+   ---------------------------------------------------------------------
+   A seamless periodic value-noise tile is generated once (192×192,
+   3 octaves, fixed seed), drawn through a repeating canvas pattern, then
+   masked by a radial alpha gradient with soft falloff on BOTH edges.
+   All compositing happens on the GPU; the only main-thread work is the
+   one-time tile generation.
+   ===================================================================== */
+var Halo = (function () {
+  'use strict';
+
+  var TILE = null;
+  var attached = [];
+  var resizeTimer = 0;
+
+  /* -- integer hash -> [0,1) ---------------------------------------- */
+  function hashi(x, y, s) {
+    var n = Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(s, 1274126177);
+    n = Math.imul(n ^ (n >>> 13), 1274126177);
+    n = n ^ (n >>> 16);
+    return (n >>> 0) / 4294967296;
+  }
+
+  /* -- periodic value noise (tiles seamlessly) ----------------------- */
+  function pnoise(x, y, period, seed) {
+    var xi = Math.floor(x), yi = Math.floor(y);
+    var xf = x - xi, yf = y - yi;
+    var u = xf * xf * (3 - 2 * xf);
+    var v = yf * yf * (3 - 2 * yf);
+
+    var x0 = ((xi % period) + period) % period;
+    var y0 = ((yi % period) + period) % period;
+    var x1 = (x0 + 1) % period;
+    var y1 = (y0 + 1) % period;
+
+    var a = hashi(x0, y0, seed);
+    var b = hashi(x1, y0, seed);
+    var c = hashi(x0, y1, seed);
+    var d = hashi(x1, y1, seed);
+
+    var ab = a + (b - a) * u;
+    var cd = c + (d - c) * u;
+    return ab + (cd - ab) * v;
+  }
+
+  /* -- the grain tile ------------------------------------------------ */
+  function tile() {
+    if (TILE) return TILE;
+
+    var S = 192;          /* tile edge, device pixels                     */
+    var OCT = 3;          /* octaves                                      */
+    var BASE = 24;        /* lattice cells across the tile at octave 0    */
+    var SEED = 1337;      /* fixed seed — the grain never changes         */
+
+    var c = document.createElement('canvas');
+    c.width = S; c.height = S;
+    var ctx = c.getContext('2d');
+    var img = ctx.createImageData(S, S);
+    var d = img.data;
+
+    for (var y = 0; y < S; y++) {
+      for (var x = 0; x < S; x++) {
+        var amp = 0.5, freq = BASE, sum = 0, norm = 0;
+        for (var o = 0; o < OCT; o++) {
+          sum += amp * pnoise(x / S * freq, y / S * freq, freq, SEED + o * 71);
+          norm += amp;
+          amp *= 0.5;
+          freq *= 2;
+        }
+        var n = sum / norm;
+        n = n * n * n;                 /* sharpen — sparse bright specks */
+        var alpha = n * 3.2;
+        if (alpha > 1) alpha = 1;
+        var i = (y * S + x) << 2;
+        d[i] = 255; d[i + 1] = 255; d[i + 2] = 255;
+        d[i + 3] = (alpha * 255) | 0;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    TILE = c;
+    return c;
+  }
+
+  /* -- percent helpers ----------------------------------------------- */
+  function ratio(v, dflt) {
+    var n = parseFloat(v);
+    if (isNaN(n)) return dflt;
+    return n / 100;
+  }
+
+  /* -- paint --------------------------------------------------------- */
+  function paint(canvas, props) {
+    var host = canvas.parentNode;
+    if (!host) return;
+
+    var cssW = host.clientWidth || window.innerWidth;
+    var cssH = host.clientHeight || window.innerHeight;
+    if (cssW < 4 || cssH < 4) return;
+
+    var scale = Math.min(window.devicePixelRatio || 1, 2);
+    var MAX_PIXELS = 6e6;
+    if (cssW * cssH * scale * scale > MAX_PIXELS) {
+      scale = Math.sqrt(MAX_PIXELS / (cssW * cssH));
+    }
+    if (scale < 1) scale = 1;
+
+    var w = Math.max(1, Math.round(cssW * scale));
+    var h = Math.max(1, Math.round(cssH * scale));
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, w, h);
+
+    /* radii are expressed against viewport HEIGHT */
+    var R = ratio(props.radius, 0.45) * h;   /* outer ~45% */
+    var r = ratio(props.inner, 0.30) * h;    /* hollow ~30% */
+    if (R < 6) return;
+    if (r > R * 0.97) r = R * 0.97;
+
+    var cx = w * 0.5;
+    var cy = h * 0.5;
+
+    /* 1. lay the grain inside the ring's bounding box */
+    var pattern = ctx.createPattern(tile(), 'repeat');
+    if (pattern) {
+      ctx.fillStyle = pattern;
+      ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+    }
+
+    /* 2. carve the ring: hollow centre, soft falloff on both edges */
+    ctx.globalCompositeOperation = 'destination-in';
+    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+    var t = r / R;
+
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(clamp01(t - 0.13), 'rgba(255,255,255,0)');
+    grad.addColorStop(clamp01(t + 0.05), 'rgba(255,255,255,0.92)');
+    grad.addColorStop(clamp01(t + 0.20), 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function clamp01(v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
+
+  function attach(canvas, props) {
+    attached.push({ canvas: canvas, props: props });
+    paint(canvas, props);
+  }
+
+  function repaintAll() {
+    for (var i = 0; i < attached.length; i++) paint(attached[i].canvas, attached[i].props);
+  }
+
+  function queueRepaint() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(repaintAll, 180);
+  }
+
+  window.addEventListener('resize', queueRepaint, { passive: true });
+  window.addEventListener('orientationchange', queueRepaint, { passive: true });
+
+  return { attach: attach, repaintAll: repaintAll };
+})();
+
+
+/* =====================================================================
+   AVATAR — inline data URI. Zero external requests.
+   ===================================================================== */
+var AVATAR_DATA_URI = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">' +
+  '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+  '<stop offset="0" stop-color="#3a3a48"/><stop offset="1" stop-color="#101016"/>' +
+  '</linearGradient></defs>' +
+  '<rect width="48" height="48" rx="24" fill="url(#g)"/>' +
+  '<circle cx="24" cy="24" r="23" fill="none" stroke="rgba(255,255,255,0.14)"/>' +
+  '<text x="24" y="31" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" ' +
+  'font-size="19" font-weight="700" fill="#e8e8ee" text-anchor="middle">H</text>' +
+  '</svg>'
+);
+
+
+/* =====================================================================
+   SHARED PROP HELPERS
+   ===================================================================== */
+function col(v, dflt) {
+  if (!v) return dflt;
+  v = String(v).trim();
+  return v.charAt(0) === '#' ? v : '#' + v;
+}
+function px(v, dflt) {
+  var n = parseFloat(v);
+  return (isNaN(n) ? dflt : n) + 'px';
+}
+function n(v, dflt) {
+  var x = parseFloat(v);
+  return isNaN(x) ? dflt : x;
+}
+
+
+/* =====================================================================
+   RESOLVER REGISTRATIONS
+   ===================================================================== */
+
+/* ---- RZERO_V0 : the scene root, the void itself -------------------- */
+ArkUI.register('RZERO_V0', {
+  tag: 'div',
+  schema: { S: 'sigil', CX: 'context', SIG: 'signature' },
+  base: {
+    position: 'relative',
+    width: '100%',
+    height: '100vh',
+    background: '#000000',
+    overflow: 'hidden',
+    isolation: 'isolate',
+    colorScheme: 'dark',
+    color: '#ffffff',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    WebkitFontSmoothing: 'antialiased',
+    MozOsxFontSmoothing: 'grayscale'
+  },
+  attrs: function (p) {
+    return {
+      'data-pattern': 'F-SCENE-RZERO_V0',
+      'data-context': p.context || 'fullscreen black',
+      'data-signature': p.signature || '0x'
+    };
+  }
+});
+
+/* ---- RHALO_V1 : the grainy ring ------------------------------------ */
+ArkUI.register('RHALO_V1', {
+  tag: 'canvas',
+  schema: { R: 'radius', N: 'inner', D: 'density', C: 'color', F: 'falloff' },
+  base: {
+    position: 'absolute',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    display: 'block',
+    zIndex: '0',
+    pointerEvents: 'none'
+  },
+  attrs: function (p) {
+    return {
+      'aria-hidden': 'true',
+      'role': 'presentation',
+      'data-r': p.radius,
+      'data-n': p.inner,
+      'data-d': p.density,
+      'data-c': p.color,
+      'data-f': p.falloff
+    };
+  },
+  emerge: { delay: 600, dur: 900 },
+  onMount: function (el, p) { Halo.attach(el, p); }
+});
+
+/* ---- RSTEP_V1 : the step pill -------------------------------------- */
+ArkUI.register('RSTEP_V1', {
+  tag: 'div',
+  schema: { N: 'step', L: 'label', B: 'border', S: 'size', P: 'position' },
+  base: {
+    position: 'absolute',
+    left: '50%',
+    top: '52%',
+    transform: 'translate(-50%, -50%)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '999px',
+    border: '1px solid rgba(255,255,255,0.30)',
+    background: 'rgba(9,9,12,0.62)',
+    color: '#ffffff',
+    fontSize: '18px',
+    fontWeight: '700',
+    letterSpacing: '0.005em',
+    whiteSpace: 'nowrap',
+    padding: '0 28px',
+    maxWidth: 'calc(100vw - 48px)',
+    zIndex: '2'
+  },
+  style: function (p) {
+    var s = {};
+    var size = String(p.size || '').split('x');
+    if (size.length === 2) {
+      s.width = px(size[0], 260);
+      s.height = px(size[1], 64);
+    }
+    var m = /center\s+([\d.]+)pct/.exec(String(p.position || ''));
+    if (m) s.top = m[1] + '%';
+    if (p.border && String(p.border).indexOf('1px') === 0) {
+      s.border = '1px solid rgba(255,255,255,0.30)';
+    }
+    return s;
+  },
+  text: function (p) { return (p.step || '') + '. ' + (p.label || ''); },
+  emerge: { delay: 900, dur: 600 }
+});
+
+/* ---- RSUB_V1 : the subtitle ---------------------------------------- */
+ArkUI.register('RSUB_V1', {
+  tag: 'p',
+  schema: { T: 'text', S: 'size', C: 'color', P: 'position' },
+  base: {
+    position: 'absolute',
+    left: '50%',
+    top: 'calc(52% + 74px)',
+    transform: 'translateX(-50%)',
+    margin: '0',
+    textAlign: 'center',
+    fontSize: '24px',
+    fontWeight: '300',
+    lineHeight: '1.4',
+    letterSpacing: '-0.005em',
+    color: '#c8c8c8',
+    maxWidth: 'min(90vw, 760px)',
+    zIndex: '2'
+  },
+  style: function (p) {
+    return {
+      fontSize: px(p.size, 24),
+      color: col(p.color, '#c8c8c8')
+    };
+  },
+  text: function (p) { return p.text || ''; },
+  emerge: { delay: 1100, dur: 600 }
+});
+
+/* ---- RBODY_V1 : the body paragraph --------------------------------- */
+ArkUI.register('RBODY_V1', {
+  tag: 'p',
+  schema: { T: 'text', S: 'size', C: 'color', W: 'width', P: 'position' },
+  base: {
+    position: 'absolute',
+    left: '40px',
+    bottom: '110px',
+    margin: '0',
+    textAlign: 'left',
+    fontSize: '15px',
+    lineHeight: '1.7',
+    color: '#8a8a94',
+    zIndex: '2'
+  },
+  style: function (p) {
+    var w = n(p.width, 520);
+    return {
+      fontSize: px(p.size, 15),
+      color: col(p.color, '#8a8a94'),
+      maxWidth: 'min(' + w + 'px, calc(100vw - 80px))'
+    };
+  },
+  text: function (p) { return p.text || ''; },
+  emerge: { delay: 1300, dur: 600 }
+});
+
+/* ---- RBAR_V1 : the bottom bar container ---------------------------- */
+ArkUI.register('RBAR_V1', {
+  tag: 'div',
+  base: {
+    position: 'absolute',
+    left: '40px',
+    right: '40px',
+    bottom: '38px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '20px',
+    flexWrap: 'wrap',
+    zIndex: '3'
+  },
+  emerge: { delay: 1300, dur: 600 }
+});
+
+/* ---- RTEXT_V1 : a plain text node ---------------------------------- */
+ArkUI.register('RTEXT_V1', {
+  tag: 'span',
+  schema: { T: 'text', S: 'size', C: 'color', W: 'width' },
+  base: {
+    display: 'inline-block',
+    fontSize: '15px',
+    lineHeight: '1.5',
+    color: '#8a8a94'
+  },
+  style: function (p) {
+    return {
+      fontSize: px(p.size, 15),
+      color: col(p.color, '#8a8a94')
+    };
+  },
+  text: function (p) { return p.text || ''; }
+});
+
+/* ---- RLINE_V1 : the 1px rule in the top bar ------------------------ */
+ArkUI.register('RLINE_V1', {
+  tag: 'span',
+  schema: { W: 'width', H: 'height', C: 'color' },
+  base: {
+    display: 'inline-block',
+    width: '160px',
+    height: '1px',
+    background: '#1a1a22',
+    verticalAlign: 'middle',
+    flex: '0 0 auto'
+  },
+  style: function (p) {
+    return {
+      width: px(p.width, 160),
+      height: px(p.height, 1),
+      background: col(p.color, '#1a1a22')
+    };
+  },
+  attrs: function () { return { 'aria-hidden': 'true' }; }
+});
+
+/* ---- RTOP_V1 : the top bar container ------------------------------- */
+ArkUI.register('RTOP_V1', {
+  tag: 'div',
+  base: {
+    position: 'absolute',
+    top: '30px',
+    left: '40px',
+    right: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '16px',
+    flexWrap: 'wrap',
+    zIndex: '3'
+  },
+  emerge: { delay: 1500, dur: 600 }
+});
+
+/* ---- RAVATAR_V1 : the author pill ---------------------------------- */
+ArkUI.register('RAVATAR_V1', {
+  tag: 'a',
+  schema: { N: 'name', U: 'url', IMG: 'img' },
+  base: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '5px 15px 5px 5px',
+    borderRadius: '999px',
+    border: '1px solid rgba(255,255,255,0.14)',
+    background: 'rgba(255,255,255,0.035)',
+    textDecoration: 'none',
+    color: '#c8c8c8',
+    lineHeight: '1',
+    whiteSpace: 'nowrap'
+  },
+  attrs: function (p) {
+    return {
+      href: 'https://' + (p.url || ''),
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    };
+  },
+  decorate: function (el, p) {
+    var img = document.createElement('img');
+    img.src = AVATAR_DATA_URI;
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.width = 26;
+    img.height = 26;
+    img.className = ArkUI.atomize({
+      display: 'block',
+      width: '26px',
+      height: '26px',
+      borderRadius: '999px',
+      objectFit: 'cover',
+      background: '#15151c',
+      flex: '0 0 auto'
+    });
+
+    var name = document.createElement('span');
+    name.textContent = String(p.name || '').toUpperCase();
+    name.className = ArkUI.atomize({
+      display: 'block',
+      fontSize: '10px',
+      fontWeight: '700',
+      letterSpacing: '0.12em',
+      color: '#e6e6ec'
+    });
+
+    var url = document.createElement('span');
+    url.textContent = p.url || '';
+    url.className = ArkUI.atomize({
+      display: 'block',
+      marginTop: '3px',
+      fontSize: '10px',
+      letterSpacing: '0.04em',
+      color: '#6e6e7a'
+    });
+
+    var stack = document.createElement('span');
+    stack.className = ArkUI.atomize({ display: 'flex', flexDirection: 'column', lineHeight: '1' });
+    stack.appendChild(name);
+    stack.appendChild(url);
+
+    el.appendChild(img);
+    el.appendChild(stack);
+  }
+});
+
+/* ---- RPILL_DOT_V1 : the dotted progress pill ----------------------- */
+ArkUI.register('RPILL_DOT_V1', {
+  tag: 'button',
+  schema: { N: 'count', A: 'active', ARROW: 'arrow', B: 'border' },
+  base: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '14px',
+    padding: '11px 16px',
+    borderRadius: '999px',
+    border: '1px solid rgba(255,255,255,0.16)',
+    background: 'rgba(255,255,255,0.035)',
+    color: '#ffffff',
+    font: 'inherit',
+    lineHeight: '1',
+    cursor: 'pointer',
+    WebkitTapHighlightColor: 'transparent'
+  },
+  style: function (p) {
+    return (p.border && String(p.border).indexOf('1px') === 0)
+      ? { border: '1px solid rgba(255,255,255,0.16)' }
+      : null;
+  },
+  attrs: function (p) {
+    var count = n(p.count, 5);
+    var active = n(p.active, 0);
+    return {
+      type: 'button',
+      'aria-label': 'Continue — step ' + (active + 1) + ' of ' + count
+    };
+  },
+  decorate: function (el, p) {
+    var count = n(p.count, 5);
+    var active = n(p.active, 0);
+
+    var track = document.createElement('span');
+    track.className = ArkUI.atomize({
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px'
+    });
+    track.setAttribute('aria-hidden', 'true');
+
+    for (var i = 0; i < count; i++) {
+      var dot = document.createElement('span');
+      dot.className = ArkUI.atomize(i === active
+        ? { display: 'block', width: '16px', height: '6px', borderRadius: '999px', background: '#ffffff' }
+        : { display: 'block', width: '6px', height: '6px', borderRadius: '999px', background: 'rgba(255,255,255,0.22)' });
+      track.appendChild(dot);
+    }
+
+    var arrow = document.createElement('span');
+    arrow.setAttribute('aria-hidden', 'true');
+    arrow.textContent = (String(p.arrow || 'right') === 'left') ? '\u2190' : '\u2192';
+    arrow.className = ArkUI.atomize({
+      display: 'block',
+      fontSize: '15px',
+      lineHeight: '1',
+      color: '#ffffff'
+    });
+
+    el.appendChild(track);
+    el.appendChild(arrow);
+  }
+});
+
+/* ---- Flux fence ids used by the pattern, mapped onto the registry --- */
+ArkUI.alias('RRING_V1', 'RHALO_V1');     /* F-HALO-RRING_V1    */
+ArkUI.alias('RPILL_V1', 'RSTEP_V1');     /* F-STEP-RPILL_V1    */
+ArkUI.alias('RBOTTOM_V1', 'RBAR_V1');    /* F-BAR-RBOTTOM_V1   */
+
+
+/* =====================================================================
+   THE DENSE FLUX PATTERN
+   This is the entire scene. Everything on screen is a fence inside it.
+   ===================================================================== */
+var F_SCENE_RZERO_V0 = [
+  'F-SCENE-RZERO_V0',
+  '-S-PROD',
+  '-CX-fullscreen_black',
+  '. F-HALO-RRING_V1',
+  '    -R-45pct',
+  '    -N-30pct',
+  '    -D-dense',
+  '    -C-white_on_black',
+  '    -F-falloff_soft',
+  '  .',
+  '. F-STEP-RPILL_V1',
+  '    -N-2',
+  '    -L-Make_it_Useful',
+  '    -B-1px_light',
+  '    -S-260x64',
+  '    -P-center_52pct',
+  '  .',
+  '. F-SUB-RTEXT_V1',
+  '    -T-Pretty_is_good_but_purpose_wins',
+  '    -S-24',
+  '    -C-c8c8c8',
+  '    -P-center',
+  '  .',
+  '. F-BODY-RTEXT_V1',
+  '    -T-Design_must_serve_a_clear_purpose_Every_feature_layout_or_element_should_provide_real_value_not_just_look_attractive_A_product_becomes_meaningful_when_functionality_leads_the_way_ensuring_that_users_can_achieve_their_goals_efficiently_while_still_enjoying_an_experience_that_feels_intuitive_and_effortless',
+  '    -S-15',
+  '    -C-8a8a94',
+  '    -W-520',
+  '    -P-bottom_left',
+  '  .',
+  '. F-BAR-RBOTTOM_V1',
+  '    . F-TEXT-RTEXT_V1',
+  '        -T-Find_the_one_speaks_to_you_most',
+  '        -S-15',
+  '        -C-8a8a94',
+  '      .',
+  '    . F-PILL-RPILL_DOT_V1',
+  '        -N-5',
+  '        -A-3',
+  '        -ARROW-right',
+  '        -B-1px_light',
+  '      .',
+  '  .',
+  '. F-TOPBAR-RTOP_V1',
+  '    . F-LABEL-RTEXT_V1',
+  '        -T-Designed_by',
+  '      .',
+  '    . F-LINE-RLINE_V1',
+  '        -W-160',
+  '        -H-1',
+  '        -C-1a1a22',
+  '      .',
+  '    . F-AUTHOR-RAVATAR_V1',
+  '        -N-HARSH_RANDERIA',
+  '        -U-harshdesigns.uk',
+  '        -IMG-avatar_default',
+  '      .',
+  '  .',
+  '-SIG-0x7F3A9C21'
+].join('\n');
+
+
+/* =====================================================================
+   BOOT
+   ===================================================================== */
+(function () {
+  'use strict';
+  var host = document.getElementById('scene');
+  if (!host) return;
+  ArkUI.render(F_SCENE_RZERO_V0, host);
+})();
+</script>
+</body>
+</html>
