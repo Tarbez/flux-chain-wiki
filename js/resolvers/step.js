@@ -28,21 +28,19 @@ ArkUI.register('RSTEP_V1', {
     alignItems: 'center',
     justifyContent: 'center',
     width: 'max-content',
-    minWidth: Tokens.u(25),
-    minHeight: Tokens.u(5.8),
-    padding: Tokens.u(0.42) + ' ' + Tokens.u(1.5) + ' 0',   /* top pad: optical centring of the label */
-    border: Tokens.u(0.51) + ' solid transparent',
-    borderRadius: '999px',
-    background:
-      'linear-gradient(' + Tokens.v('step-fill') + ',' + Tokens.v('step-fill') + ') padding-box,' +
-      'linear-gradient(90deg,' + Tokens.v('step-edge-a') + ',' + Tokens.v('step-edge-b') + ') border-box',
-    color: Tokens.v('ink'),
-    fontSize: 'max(11px, ' + Tokens.u(1.1) + ')',
+    minWidth: '0',
+    minHeight: '0',
+    padding: '0',
+    border: '0',
+    borderRadius: '0',
+    background: 'transparent',
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 'max(10px, ' + Tokens.u(0.92) + ')',
     fontWeight: '500',
     lineHeight: '1',
     whiteSpace: 'nowrap',
     zIndex: '3',
-    backdropFilter: 'blur(10px)'
+    backdropFilter: 'none'
   },
   style: function (p) {
     var k = ArkProps.num(p.tracking, 0);
@@ -50,7 +48,7 @@ ArkUI.register('RSTEP_V1', {
       top: ArkProps.num(p.position, 48) + '%',
       letterSpacing: k + 'em',
       /* letter-spacing adds a gap after the last letter; pad the left to keep the word centred */
-      paddingLeft: 'calc(' + Tokens.u(1.5) + ' + ' + k + 'em)'
+      paddingLeft: k + 'em'
     };
   },
   text: function (p) { return p.step ? p.step + '. ' + (p.label || '') : (p.label || ''); },

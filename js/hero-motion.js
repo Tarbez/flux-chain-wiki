@@ -6,8 +6,11 @@
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
-  var paused = false;
   var visible = true;
+  var state = ArkUI.sceneState;
+  var persistent = scene.querySelector('[data-ark-layer="persistent"]');
+  var router = ArkUI.pageRouter;
+  var pages = router.pages;
   var frame = 0;
   var pointer = null;
 
@@ -17,52 +20,84 @@
     return node;
   }
 
-  /* Background 001 / Tide. The values mirror the source example. */
-  var shapes = [
-    [8,12,42,'#76d7d3',1.4,-18], [32,20,34,'#d6ece6',1.15,28],
-    [72,10,48,'#113348',1.5,-12], [96,28,38,'#46aab1',.72,22],
-    [18,70,46,'#0f4654',1.35,12], [48,58,28,'#9edbd4',1.75,-38],
-    [76,76,52,'#061927',1.2,18], [102,84,32,'#d7e8e3',.82,-20],
-    [42,104,44,'#2b7680',1.4,8]
-  ];
-  var extras = [
-    [-8,45,30,'#d8eeea',.7,30], [62,108,48,'#0c3748',1.6,-10],
-    [108,-6,36,'#6cc9c4',.8,35]
-  ];
-
-  function addShape(layer, values) {
-    var shape = make('i', 'hero-atmosphere__shape');
-    shape.style.setProperty('--x', values[0] + '%');
-    shape.style.setProperty('--y', values[1] + '%');
-    shape.style.setProperty('--size', values[2] + 'vmax');
-    shape.style.setProperty('--color', values[3]);
-    shape.style.setProperty('--aspect', values[4]);
-    shape.style.setProperty('--rotation', values[5] + 'deg');
-    shape.style.setProperty('--opacity', values[6] === undefined ? 1 : values[6]);
-    layer.appendChild(shape);
-  }
-
+  /* A quiet charcoal field lets the silver-sage particles supply the light. */
   var atmosphere = make('div', 'hero-atmosphere');
   atmosphere.setAttribute('aria-hidden', 'true');
-  atmosphere.dataset.source = 'ark-background-001-tide';
-  var sub = make('div', 'hero-atmosphere__layer hero-atmosphere__sub');
-  var base = make('div', 'hero-atmosphere__layer hero-atmosphere__base');
-  shapes.forEach(function (shape) {
-    addShape(sub, shape);
-    addShape(base, shape);
-  });
-  extras.forEach(function (shape) { addShape(base, shape); });
-  atmosphere.appendChild(sub);
-  atmosphere.appendChild(base);
-  atmosphere.appendChild(make('div', 'hero-atmosphere__fill'));
-  scene.insertBefore(atmosphere, scene.firstChild);
+  atmosphere.dataset.source = 'subzero-charcoal';
+  persistent.insertBefore(atmosphere, persistent.firstChild);
+
+  var wordTimer = 0;
 
   var toggle = make('button', 'hero-motion-toggle');
   toggle.type = 'button';
   scene.appendChild(toggle);
   scene.classList.add('hero-alive');
 
-  function enabled() { return !paused && !reduced.matches && visible && !document.hidden; }
+  var settings = make('div', 'site-settings');
+  scene.appendChild(settings);
+  var paths = make('nav', 'corner-navigation');
+  paths.setAttribute('aria-label', 'Explore Subzero');
+  [['Use cases', 'concept'], ['Tutorials', 'learnings'], ['Experiments', 'proximity']].forEach(function (item) {
+    var link = make('a'); link.href = router.url(item[1]); link.dataset.sceneLink = item[1];
+    link.textContent = item[0] + ' ↗'; paths.appendChild(link);
+  });
+  scene.appendChild(paths);
+
+  var latest = make('a', 'theory-invitation');
+  latest.href = router.url('concept');
+  latest.dataset.sceneLink = 'concept';
+  var latestLabel = make('span', 'theory-invitation-label'); latestLabel.textContent = 'The Subzero theory';
+  var latestTitle = make('strong'); latestTitle.textContent = 'Curiosity is our starting point.';
+  var latestFoot = make('span', 'theory-invitation-link'); latestFoot.textContent = 'Explore the theory ↗';
+  latest.appendChild(latestLabel); latest.appendChild(latestTitle); latest.appendChild(latestFoot);
+  scene.appendChild(latest);
+
+  router.onMount(function (page, name) {
+    var bindings = [];
+    page.querySelectorAll('[data-mesh-anchor]').forEach(function (anchor) {
+      if (!scene.classList.contains('has-particle-shapes')) return;
+      anchor.removeAttribute('aria-hidden');
+      bindings.push(ArkUI.bindMeshDrag(anchor, state));
+    });
+    page.querySelectorAll('[data-scene-link]').forEach(function (link) { link.href = router.url(link.dataset.sceneLink); });
+    var input = page.querySelector('[data-word-input]');
+    if (input && state.get().words[name]) input.value = state.get().words[name];
+    return function () { bindings.forEach(function (binding) { binding.dispose(); }); };
+  });
+  var status = make('div', 'route-load-status');
+  status.hidden = true; status.setAttribute('role', 'status');
+  var statusText = make('span'); status.appendChild(statusText);
+  var retry = make('button'); retry.type = 'button'; retry.textContent = 'TRY AGAIN'; status.appendChild(retry);
+  retry.addEventListener('click', function () { router.retry(); });
+  scene.appendChild(status);
+  router.onStatus(function (message, failed) { status.hidden = !message; statusText.textContent = message; retry.hidden = !failed; });
+  scene.addEventListener('input', function (event) {
+    if (event.target.dataset.wordInput !== undefined) {
+      window.clearTimeout(wordTimer);
+      var page = state.get().page, value = event.target.value;
+      wordTimer = window.setTimeout(function () { if (state.get().page === page) state.setWord(value); }, 160);
+    }
+  });
+  scene.addEventListener('click', function (event) {
+    var target = event.target.closest('[data-scene-link], [data-reset-word], [data-section-target]');
+    if (!target) {
+      var labLink = event.target.closest('a[href="#work"]');
+      if (labLink) { event.preventDefault(); navigate('lab'); }
+      return;
+    }
+    if (target.dataset.sceneLink) { event.preventDefault(); navigate(target.dataset.sceneLink); }
+    else if (target.dataset.resetWord !== undefined) {
+      window.clearTimeout(wordTimer);
+      pages[state.get().page].querySelector('[data-word-input]').value = target.dataset.resetWord;
+      state.setWord(target.dataset.resetWord);
+    } else {
+      var section = document.getElementById(target.dataset.sectionTarget);
+      section.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+      section.focus({ preventScroll: true });
+    }
+  });
+
+  function enabled() { return !state.get().paused && !reduced.matches && visible && !document.hidden; }
 
   function resetPointer() {
     if (frame) window.cancelAnimationFrame(frame);
@@ -73,17 +108,57 @@
   }
 
   function sync() {
-    scene.classList.toggle('hero-still', !enabled());
-    toggle.hidden = reduced.matches;
-    toggle.textContent = paused ? 'Motion / off' : 'Motion / on';
-    toggle.setAttribute('aria-pressed', String(paused));
-    toggle.setAttribute('aria-label', paused ? 'Resume hero animation' : 'Pause hero animation');
-    if (!enabled() || !finePointer.matches) resetPointer();
+    var current = state.get();
+    scene.querySelectorAll('.ark-header a').forEach(function (link) {
+      if (router.resolve(link.hash) === (current.page === 'lab' ? 'proximity' : current.page)) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    var paused = current.paused;
+    var isEnabled = enabled();
+    scene.classList.toggle('hero-still', !isEnabled);
+    toggle.hidden = current.page === 'zero';
+    paths.hidden = current.page !== 'zero';
+    var isArticle = current.page.indexOf('article/') === 0;
+    toggle.textContent = current.page === 'lab' ? '← EXPERIMENTS' : isArticle ? '← TUTORIALS' : '← BACK TO ZERO';
+    toggle.setAttribute('aria-expanded', String(current.page !== 'zero'));
+    toggle.setAttribute('aria-label', current.page === 'lab' ? 'Return to experiments' : current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to learnings' : 'Return to the zero hero');
+    latest.hidden = current.page !== 'zero';
+    var active = pages[current.page];
+    if (!active) return;
+    if (!active.id) active.id = 'scene-page-' + current.page.replace(/[^a-z0-9-]/g, '-');
+    toggle.setAttribute('aria-controls', active.id);
+    var fallbackWord = active.querySelector('.article-word-fallback');
+    if (fallbackWord) fallbackWord.textContent = state.mesh(current).text;
+    document.documentElement.classList.toggle('has-learning-page', current.page === 'learnings' || isArticle);
+    if (!isEnabled || !finePointer.matches) resetPointer();
+    document.dispatchEvent(new CustomEvent('hero:motionchange', {
+      detail: { enabled: isEnabled }
+    }));
   }
 
+  function navigate(page) {
+    window.clearTimeout(wordTimer);
+    return router.navigate(page).then(function (result) { sync(); return result; });
+  }
   toggle.addEventListener('click', function () {
-    paused = !paused;
-    sync();
+    var page = state.get().page;
+    navigate(page === 'lab' ? 'proximity' : page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : 'zero');
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
+    if (state.get().page === 'zero') return;
+    navigate(state.get().page === 'lab' ? 'proximity' : state.get().page.indexOf('article/') === 0 ? 'learnings' : 'zero');
+    toggle.focus({ preventScroll: true });
+  });
+  function restoreRoute() { return router.navigate(router.resolve(location.hash), { history: 'none' }).then(sync); }
+  window.addEventListener('popstate', restoreRoute);
+  window.addEventListener('hashchange', restoreRoute);
+  document.addEventListener('ark:enter', function () { navigate('proximity'); });
+  scene.querySelectorAll('.ark-header a').forEach(function (link) {
+    link.addEventListener('click', function (event) { event.preventDefault(); navigate(router.resolve(link.hash)); });
+  });
+  document.querySelector('.skip').addEventListener('click', function (event) {
+    event.preventDefault(); navigate('lab');
   });
   reduced.addEventListener('change', sync);
   finePointer.addEventListener('change', sync);
@@ -113,5 +188,6 @@
     observer.observe(scene);
   }
 
-  sync();
+  state.subscribe(sync);
+  restoreRoute();
 })();

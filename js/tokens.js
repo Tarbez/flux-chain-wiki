@@ -31,7 +31,7 @@ var Tokens = (function () {
 
   /* -- colour --------------------------------------------------------- */
   var COLOR = {
-    'canvas':      '#000000',                 /* the whole page                    */
+    'canvas':      '#050606',                 /* the whole page                    */
     'ink':         '#ffffff',                 /* pill title, CTA                   */
     'ink-body':    '#c9c9c9',                 /* the paragraph                     */
     'ink-eyebrow': '#8c8c8c',                 /* the breadcrumb line above it      */

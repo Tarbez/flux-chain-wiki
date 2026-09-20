@@ -1,0 +1,69 @@
+/* One spacing and type scale for every routed page. */
+.hero-alive { --page-width:1080px; --page-gutter:clamp(20px,4cqw,56px); --page-top:clamp(32px,6cqh,64px); }
+#scene .learning-page {
+ inset:84px 0 72px; width:calc(100% - 2 * clamp(16px,3cqw,48px)); max-width:var(--page-width); margin-inline:auto;
+ box-sizing:border-box; border:0; border-radius:0;
+ background:transparent;
+ backdrop-filter:none; -webkit-backdrop-filter:none;
+ box-shadow:none;
+}
+#scene .learning-page :is(.expansion,.article-body,.article-playground) { background:transparent; }
+#scene .learning-page .lab { background:hsl(var(--raised,140 10% 12%) / .3); }
+
+.learning-index,.concept-content,.article-header,.experiments-page .experiment-page-intro {
+  box-sizing:border-box; width:100%; max-width:var(--page-width); margin-inline:auto;
+  padding:var(--page-top) var(--page-gutter) 40px;
+}
+.learning-heading,.concept-content h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; font-weight:300; }
+.learning-intro,.concept-deck { max-width:40em; font:300 14px/1.75 var(--ark-font); color:#b2beb6; margin:0 0 36px; }
+.learning-eyebrow { margin-bottom:18px; }
+.concept-content { max-width:var(--page-width); }
+.concept-content h1 { margin:0 0 18px; max-width:16em; }
+.concept-principles { max-width:680px; }
+.concept-principles section { display:grid; grid-template-columns:24px 1fr; gap:20px; padding:20px 0; border-top:1px solid #bdcdbd26; }
+.concept-principles section > span { font:400 10px/1.5 var(--ark-font); color:#9aaa9f; padding-top:4px; }
+.concept-principles h2 { margin:0 0 8px; font:300 20px/1.3 var(--ark-font); letter-spacing:-.02em; }
+.concept-principles p { max-width:40em; margin:0; font:300 13px/1.7 var(--ark-font); color:#acb9b0; }
+.concept-content > .article-back { margin:22px 0 0; }
+.experiments-page .experiment-page-intro { min-height:calc(85cqh - 150px); }
+
+.experiments-page .expansion > .section { max-width:var(--page-width); margin-inline:auto; padding:40px var(--page-gutter); }
+.article-body { gap:36px; padding-inline:var(--page-gutter); background:transparent; }
+.hero-atmosphere { opacity:.72; filter:blur(12px); }
+.hero-alive { --mesh-opacity:.62; --mesh-blur:2px; }
+.hero-alive[data-page="zero"] { --mesh-blur:.65px; }
+.hero-alive[data-page="concept"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.62; --mesh-blur:.8px; }
+.hero-alive[data-page^="article/"] { --mesh-opacity:.82; --mesh-blur:0px; }
+.hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"] { filter:blur(2px); opacity:.5; }
+@media(max-width:760px) {
+ #scene .learning-page { top:76px; width:calc(100% - 32px); border-radius:0; }
+ .concept-content { max-width:100%; }
+ .concept-principles section { gap:12px; padding:18px 0; }
+ .concept-principles h2 { font-size:19px; }
+ .experiments-page .experiment-page-intro { min-height:calc(80cqh - 150px); }
+ .article-body { gap:26px; }
+}
+
+.experiments-page .hero-experiment-copy h2 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; }
+/* Every routed page is transparent; the shared atmosphere and mesh remain visible. */
+#scene .learning-page :is(.experiment-page-intro,.article-header,.concept-content,.learning-index) {
+ background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none;
+}
+/* The experiment intro and lab are separate routes, not a stacked document. */
+.experiments-page .experiment-page-intro { min-height:0; height:100%; }
+.experiments-page .experiment-mesh-anchor { top:10%; right:0; left:auto; width:52%; height:75%; }
+.lab-page .expansion > .section { padding:var(--page-top) var(--page-gutter) 28px; }
+.lab-page .expansion .experiments { border:0; }
+.lab-page .expansion .experiment-stage { height:clamp(180px,30cqh,300px); }
+.lab-page .expansion .section-heading { margin-bottom:24px; }
+.lab-page .expansion .lab-bottom { padding:20px 26px; }
+@media(max-width:760px) { .experiments-page .experiment-mesh-anchor { top:40%; height:55%; width:62%; } .lab-page .expansion .lab-bottom { padding:18px; } }
+
+/* Theory pairs its explanation with a shared two-mesh iceberg, without a card. */
+#scene .concept-page .concept-content { width:54%; margin-left:0; padding-right:24px; }
+.concept-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68cqh,640px); margin:0; pointer-events:none; }
+.hero-alive[data-page="concept"] { --mesh-opacity:.85; --mesh-blur:0px; }
+@media(max-width:760px) {
+ #scene .concept-page .concept-content { width:100%; padding-right:var(--page-gutter); padding-top:340px; }
+ .concept-iceberg { top:0; right:10%; width:80%; height:310px; }
+}

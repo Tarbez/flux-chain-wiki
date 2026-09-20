@@ -1,24 +1,20 @@
-(function () {
+/* The module is lazy-loaded once; values persist when the page is remounted. */
+ArkUI.studioValues = ArkUI.studioValues || { mode: 'spacing', spacing: 50, rhythm: 50, depth: 50 };
+ArkUI.mountStudio = function (root) {
   'use strict';
-  // Extend the original ENTER event into the lab without changing the scene.
-  document.addEventListener('ark:enter', function () {
-    var work = document.getElementById('work');
-    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    work.focus({ preventScroll: true });
-    work.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
-  });
+  function findById(id) { return root.querySelector('#' + id); }
   var studies = {
     spacing: { title: 'When does a collection become a group?', description: 'Bring things closer and they begin to belong together. Move them apart and new boundaries appear.', label: 'Distance between groups', start: 'Together', end: 'Apart', note: 'THE SAME ELEMENTS. A DIFFERENT RELATIONSHIP.', code: 'SZ—001' },
     rhythm: { title: 'What gives a pattern its rhythm?', description: 'A repeated beat feels steady. Introduce variation and the same elements begin to suggest movement.', label: 'Variation in height', start: 'Uniform', end: 'Expressive', note: 'REPETITION SETS THE RULE. VARIATION GIVES IT CHARACTER.', code: 'SZ—002' },
     depth: { title: 'How little does it take to suggest depth?', description: 'These are flat squares. A small shift in position makes them read as layers, with a space between them.', label: 'Separation of layers', start: 'Flat', end: 'Dimensional', note: 'A FLAT SURFACE. A SENSE OF SPACE.', code: 'SZ—003' }
   };
-  var mode = 'spacing'; var values = { spacing: 50, rhythm: 50, depth: 50 };
-  var specimen = document.querySelector('.specimen');
-  var range = document.getElementById('variable');
-  var stage = document.querySelector('.experiment-stage');
+  var mode = ArkUI.studioValues.mode; var values = ArkUI.studioValues;
+  var specimen = root.querySelector('.specimen');
+  var range = findById('variable');
+  var stage = root.querySelector('.experiment-stage');
   function update() {
     var value = Number(range.value); values[mode] = value;
-    document.getElementById('variable-value').textContent = value + '%';
+    findById('variable-value').textContent = value + '%';
     range.setAttribute('aria-valuetext', value + ' percent, ' + studies[mode].label.toLowerCase());
     specimen.style.setProperty('--distance', (4 + value * .7) + 'px');
     specimen.style.setProperty('--depth', value);
@@ -30,16 +26,16 @@
     stage.setAttribute('aria-label', descriptions[mode] + value + ' percent.');
   }
   function selectStudy(next) {
-    mode = next; var study = studies[mode];
-    document.querySelector('.lab').dataset.mode = mode;
-    document.querySelectorAll('[data-study]').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.study === mode)); });
-    document.getElementById('study-title').textContent = study.title;
-    document.getElementById('study-description').textContent = study.description;
-    document.querySelector('label[for="variable"]').textContent = study.label;
-    document.getElementById('range-start').textContent = study.start;
-    document.getElementById('range-end').textContent = study.end;
-    document.querySelector('.stage-footnote').textContent = study.note;
-    document.querySelector('.stage-corner').textContent = study.code;
+    mode = next; values.mode = next; var study = studies[mode];
+    root.querySelector('.lab').dataset.mode = mode;
+    root.querySelectorAll('[data-study]').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.study === mode)); });
+    findById('study-title').textContent = study.title;
+    findById('study-description').textContent = study.description;
+    root.querySelector('label[for="variable"]').textContent = study.label;
+    findById('range-start').textContent = study.start;
+    findById('range-end').textContent = study.end;
+    root.querySelector('.stage-footnote').textContent = study.note;
+    root.querySelector('.stage-corner').textContent = study.code;
     specimen.replaceChildren(); range.value = values[mode];
     var count = mode === 'spacing' ? 3 : mode === 'rhythm' ? 16 : 4;
     for (var j = 0; j < count; j++) {
@@ -51,9 +47,9 @@
     }
     update();
   }
-  document.querySelectorAll('[data-study]').forEach(function (button) { button.addEventListener('click', function () { selectStudy(button.dataset.study); }); });
+  root.querySelectorAll('[data-study]').forEach(function (button) { button.addEventListener('click', function () { selectStudy(button.dataset.study); }); });
   range.addEventListener('input', update);
   selectStudy(mode);
-  document.querySelectorAll('[data-study], #variable').forEach(function (control) { control.disabled = false; });
+  root.querySelectorAll('[data-study], #variable').forEach(function (control) { control.disabled = false; });
   document.documentElement.classList.add('is-ready');
-})();
+};

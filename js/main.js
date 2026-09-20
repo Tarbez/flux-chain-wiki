@@ -17,7 +17,8 @@
 
   try {
     ArkUI.base(Tokens.css());
-    ArkUI.render(F_SCENE_RZERO_V0, host);
+    var scene = ArkUI.render(F_SCENE_RZERO_V0, host);
+    ArkUI.pageRouter = ArkUI.createPageRouter({ scene: scene, state: ArkUI.sceneState });
     root.classList.add('ark-live');
     var fallback = document.getElementById('fallback');
     if (fallback) fallback.setAttribute('aria-hidden', 'true');

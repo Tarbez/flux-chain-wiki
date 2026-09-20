@@ -19,16 +19,24 @@ ArkUI.register('RHEADER_V1', {
     justifyContent: 'space-between',
     gap: '8px ' + Tokens.u(3),
     padding: 'max(18px, 2.35cqmin) max(20px, 2.8cqmin)',
-    borderBottom: '1px solid rgba(255,255,255,0.12)',
     zIndex: '4'
   },
   decorate: function (el) {
     el.classList.add('ark-header');
-    var status = document.createElement('span');
-    status.className = 'ark-live-status';
-    status.setAttribute('aria-label', 'Subzero field is live');
-    status.innerHTML = '<i aria-hidden="true"></i><span>FIELD 001</span><b>LIVE</b>';
-    el.appendChild(status);
+    var identity = document.createElement('a');
+    identity.className = 'ark-studio-identity';
+    identity.href = '#/';
+    identity.dataset.sceneLink = 'zero';
+    identity.setAttribute('aria-label', 'Subzero — home');
+    var wordmark = document.createElement('span');
+    wordmark.className = 'ark-wordmark';
+    wordmark.textContent = 'SUBZERO';
+    identity.appendChild(wordmark);
+    var label = document.createElement('span');
+    label.className = 'ark-studio-label';
+    label.textContent = 'INDEPENDENT STUDIO';
+    identity.appendChild(label);
+    el.appendChild(identity);
   },
-  emerge: { delay: 1500, dur: 600 }
+  emerge: { delay: 0, dur: 400 }
 });

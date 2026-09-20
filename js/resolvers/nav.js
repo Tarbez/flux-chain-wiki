@@ -41,12 +41,9 @@ ArkUI.register('RLINK_V1', {
   attrs: function (p) { return { href: p.href || '#' }; },
   decorate: function (el, p) {
     el.classList.add('ark-link');
-    var index = document.createElement('span');
-    index.className = 'ark-link-index';
-    index.textContent = p.index || '';
     var label = document.createElement('span');
+    label.className = 'ark-link-label';
     label.textContent = p.label || '';
-    el.appendChild(index);
     el.appendChild(label);
   }
 });

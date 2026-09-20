@@ -1,0 +1,39 @@
+/* Shared identity and navigation, without an enclosing rail. */
+.ark-header { display:flex !important; justify-content:flex-end !important; border:0 !important; background:none; }
+.ark-header::after { content:none; }
+.ark-header nav { display:flex; gap:8px !important; padding:0; border:0; background:none; }
+.ark-header .ark-link { min-height:44px !important; padding:0 12px; border:0; border-radius:2px; color:#9eaca2 !important; font-size:10px !important; letter-spacing:.09em !important; transition:color 180ms ease,background-color 180ms ease !important; }
+.ark-header .ark-link:hover { color:#d9e6dd !important; }
+@media(max-width:760px) { .ark-header { padding:14px 20px !important; } .ark-header nav { gap:0 !important; } }
+
+/* One corner: stacked destinations at home, a return control on inner pages. */
+.corner-navigation,.hero-motion-toggle { right:max(20px,2.8cqmin); bottom:max(14px,2cqmin); }
+.corner-navigation { position:absolute; z-index:6; display:flex; flex-direction:column; align-items:flex-end; gap:0; background:none; border:0; }
+.corner-navigation[hidden] { display:none; }
+.corner-navigation a { display:flex; align-items:center; min-height:44px; padding:8px 4px; color:#c2d0c7; font:500 10px var(--ark-font); letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
+.corner-navigation a:hover { color:#e2ece5; }
+@media(max-width:760px) { .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px !important; } }
+@media(max-width:480px) { .ark-header { gap:8px !important; padding-inline:16px !important; } .ark-header .ark-link { padding-inline:7px; font-size:8px !important; letter-spacing:.06em !important; } .ark-studio-label { max-width:85px; line-height:1.5; } }
+
+/* A quiet invitation in the shared layout, without a card surface. */
+.theory-invitation { position:absolute; top:112px; right:max(24px,3cqw); z-index:5; width:220px; padding:8px 0; display:grid; gap:12px; border:0; background:none; box-shadow:none; color:#d5dfd8; text-decoration:none; }
+.theory-invitation[hidden] { display:none; }
+.theory-invitation-label { color:#a7b7ab; font:400 10px/1.5 var(--ark-font); letter-spacing:.035em; }
+.theory-invitation strong { font:300 24px/1.18 var(--ark-font); letter-spacing:-.035em; }
+.theory-invitation-link { margin-top:4px; color:#a7b7ab; font:400 11px/1.5 var(--ark-font); transition:color 180ms ease; }
+.theory-invitation:hover .theory-invitation-link { color:#e4eee7; }
+#scene .theory-invitation:focus-visible { background:none; color:#e4eee7; }
+.theory-invitation:focus-visible .theory-invitation-link { text-decoration:underline; text-underline-offset:5px; }
+@media(max-width:760px) { .theory-invitation { top:94px; right:20px; width:175px; gap:9px; } .theory-invitation strong { font-size:21px; } }
+@media(prefers-reduced-motion:reduce) { .theory-invitation-link { transition:none; } }
+
+.ark-studio-identity { display:flex; flex-direction:column; align-items:flex-start; gap:7px; margin-right:auto; text-decoration:none; padding:4px 0; }
+#scene .ark-wordmark { font:400 17px/1 var(--ark-font); letter-spacing:.18em; color:hsl(var(--text-strong)); }
+.ark-studio-identity .ark-studio-label { font-size:8px; letter-spacing:.14em; }
+#scene .ark-studio-identity:focus-visible { background:none; }
+.ark-studio-identity:focus-visible .ark-wordmark { text-decoration:underline; text-underline-offset:5px; }
+@media(max-width:480px) { #scene .ark-wordmark { font-size:15px; } .ark-studio-identity .ark-studio-label { font-size:6px; max-width:none; letter-spacing:.06em; } }
+
+#scene .ark-header .ark-studio-identity:is([aria-current="page"],:focus,:focus-visible,:hover) { background:transparent !important; }
+#scene .ark-studio-identity:focus-visible .ark-wordmark { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:7px; }
+.ark-studio-identity { gap:9px; }

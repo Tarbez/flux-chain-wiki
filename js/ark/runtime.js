@@ -114,7 +114,7 @@ var ArkUI = (function () {
     }
 
     /* Emergence, not entrance. Nothing scales. Nothing bounces. */
-    if (!REDUCED && ctx.emerge.length) {
+    if (!REDUCED && ctx.emerge.length && !host.closest('[data-ark-layer="outlet"]')) {
       for (var a = 0; a < ctx.emerge.length; a++) ctx.emerge[a].el.classList.add('ark-zero');
       void el.offsetHeight;                       /* commit the ZERO state */
       for (var b = 0; b < ctx.emerge.length; b++) {
@@ -136,6 +136,6 @@ var ArkUI = (function () {
     base: ArkAtomizer.base,
     atomize: ArkAtomizer.atomize,
     parse: ArkFlux.parse,
-    prefersReducedMotion: function () { return REDUCED; }
+    prefersReducedMotion: function () { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   };
 })();

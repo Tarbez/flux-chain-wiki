@@ -1,0 +1,134 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const assert = require('node:assert/strict');
+function harness({reduced=false, webgl=true, words=true}={}) {
+ let fontReady=()=>{};
+ let conceptAnchorVisible=false, anchorReads=0;
+ let themeChange=()=>{}, canvasToken='180 9% 2%';
+ let meshData;
+ const uniforms={}, events={}, canvasEvents={}, callbacks=new Map(); let time=0, id=0, draws=0;
+ const classes=()=>({values:new Set(),add(v){this.values.add(v)},remove(v){this.values.delete(v)},toggle(v,on){on?this.add(v):this.remove(v)}});
+ const fallback={classList:classes(),insertAdjacentElement(){}};
+ const gl=new Proxy({bufferData:(_,data)=>{if(!meshData)meshData=Array.from(data)},getShaderParameter:()=>true,getProgramParameter:()=>true,getUniformLocation:(_,name)=>name,uniform1f:(name,value)=>uniforms[name]=value,uniform2f:(name,x,y)=>uniforms[name]=[x,y],uniform3f:(name,x,y,z)=>uniforms[name]=[x,y,z],uniform4f:(name,x,y,z,w)=>uniforms[name]=[x,y,z,w],drawArrays:()=>draws++,getExtension:()=>null},{get:(o,k)=>o[k]||(()=>({}))});
+ const canvas={style:{},clientWidth:900,clientHeight:900,classList:classes(),dataset:{},setAttribute(){},getContext:()=>webgl?gl:null,addEventListener:(n,fn)=>canvasEvents[n]=fn,remove(){this.removed=true}};
+ const persistent={querySelector:()=>fallback};
+ const anchor={getBoundingClientRect:()=>({left:100,top:140,width:800,height:260})};
+ const article={querySelector:()=>anchor};
+ const conceptAnchor={getBoundingClientRect(){anchorReads++;return {left:730,top:125,width:380,height:550}}};
+ const conceptPage={querySelector:()=>conceptAnchor};
+ const scene={clientWidth:1200,clientHeight:800,getBoundingClientRect:()=>({left:0,top:0,width:1200,height:800}),classList:classes(),appendChild(){},querySelector:q=>q.includes('data-ark-page=\"concept\"')?(conceptAnchorVisible?conceptPage:null):(q.includes('article/') || q.includes('learnings'))?article:persistent,addEventListener(){}};
+ const media={matches:reduced,addEventListener(n,fn){this.change=fn}};
+ const document={fonts:{ready:{then(fn){fontReady=fn;}}},querySelector:()=>scene,createElement:tag=>tag==='div'?{style:{},classList:classes(),setAttribute(){},remove(){}}:canvas,hidden:false,addEventListener:(n,fn)=>events[n]=fn};
+ const window={matchMedia:q=>q.includes('reduced')?media:{matches:false},devicePixelRatio:2,requestAnimationFrame:fn=>{callbacks.set(++id,fn);return id},cancelAnimationFrame:n=>callbacks.delete(n),addEventListener(){}};
+ const context=vm.createContext({getComputedStyle:()=>({getPropertyValue:()=>canvasToken}),MutationObserver:class {constructor(fn){themeChange=fn}observe(){}disconnect(){}},WordGeometry:{create:(text,n)=>{if(!words)return null;const a=new Float32Array(n*3);a.fill(text.length*.001);return a;}},ArkUI:{bindMeshDrag:()=>({cancel(){}})},document,window,navigator:{hardwareConcurrency:8},performance:{now:()=>time},Float32Array,Math,Number,String});
+ for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/ark/scene-state.js','js/halo/proximity.js','js/halo/surface-motion.js','js/halo/iceberg.js','js/halo/shaders.js','js/zero-webgl.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
+ const state=context.ArkUI.sceneState;
+ state.subscribe(current=>{ if(events['hero:motionchange']) events['hero:motionchange']({detail:{enabled:!current.paused}}); });
+
+ return {showConceptAnchor(value){conceptAnchorVisible=value;},get anchorReads(){return anchorReads;},setTheme(token){canvasToken=token;themeChange();},get meshData(){return meshData},setWordsAvailable(value){words=value;},fontReady(){fontReady();},state,canvas,fallback,uniforms,media,events,canvasEvents,callbacks,get draws(){return draws},advance(seconds){for(let i=0;i<seconds*60;i++){time+=1000/60;const pending=[...callbacks.values()];callbacks.clear();pending.forEach(fn=>fn(time));}}};
+}
+const h=harness();const canvas=h.canvas;assert(h.fallback.classList.values.has('zero-fallback-hidden'));
+h.advance(30);assert.equal(h.uniforms.uDissolve,0);
+const particleCount=Number(h.canvas.dataset.points);
+assert.equal(h.meshData.length,particleCount*8);
+const recess=h.meshData.filter((_,i)=>i%8===7).filter(v=>v>0);
+assert.equal(recess.length,24000,'desktop layer two has 24,000 actual particles, five times its previous 4,800');
+assert.equal(Number(h.canvas.dataset.primaryPoints),19200,'the original zero keeps its particle allocation');
+assert.equal(Number(h.canvas.dataset.surfacePoints),recess.length);
+assert(recess[0]>0 && recess.at(-1)===1,'surface samples span the full sheet');
+assert.equal(h.canvas.dataset.drawCalls,'1','the interior adds no draw call at rest');
+assert(h.uniforms.uProjection.every(Number.isFinite));
+assert(h.uniforms.uFieldExtent[0]*h.uniforms.uProjection[0]*.72>1,'sheet spans the viewport horizontally');
+assert(h.uniforms.uFieldExtent[1]*h.uniforms.uProjection[1]*.72>1,'sheet spans the viewport vertically');
+assert(h.canvas.style.transform.includes('scale(1.2)'));
+h.state.navigate('proximity');h.advance(.8);
+assert(h.uniforms.uShape[2]>0 && h.uniforms.uShape[2]<1);
+assert(h.uniforms.uDissolve>0);assert(h.uniforms.uBurst>0);
+assert.equal(h.canvas.dataset.phase,'travel');assert.equal(h.canvas.dataset.drawCalls,'3');
+const movingScale=Number(h.canvas.style.transform.match(/scale\(([^)]+)/)[1]);
+assert(movingScale>1 && movingScale<1.2, 'direct scale interpolation, no small exit zero');
+assert.equal(h.uniforms.uCircle,undefined);
+h.advance(4);assert.equal(h.uniforms.uDissolve,.5);assert.equal(h.uniforms.uShape[2],1);h.advance(60);assert.equal(h.uniforms.uDissolve,.5);assert.equal(h.canvas.dataset.drawCalls,'1');assert.equal(h.uniforms.uCircle,undefined);
+h.state.navigate('zero');h.advance(4);assert.equal(h.uniforms.uDissolve,0);assert.equal(h.uniforms.uShape[2],0);assert.equal(h.canvas,canvas);
+h.state.selectShape('orb');h.advance(4);assert.equal(h.uniforms.uShape[0],1);
+h.state.navigate('proximity');h.advance(.3);const before=h.uniforms.uShape[2];h.state.navigate('zero');h.advance(1/60);assert(Math.abs(h.uniforms.uShape[2]-before)<.01);h.advance(4);assert.equal(h.uniforms.uShape[0],1);assert.equal(h.uniforms.uDissolve,0);
+h.state.pause(true);h.advance(1);const frozen=h.uniforms.uTime;h.advance(3);assert.equal(h.uniforms.uTime,frozen);assert.equal(h.callbacks.size,0);
+h.state.navigate('proximity');h.advance(1);assert.equal(h.uniforms.uDissolve,.5);assert.equal(h.uniforms.uShape[2],1);
+h.state.pause(false);h.advance(1);assert(h.uniforms.uTime>frozen);
+h.state.navigate('learnings');h.advance(4);assert.equal(h.uniforms.uShape[3],0);assert.equal(h.uniforms.uDissolve,0);
+h.state.navigate('article/from-points-to-form');h.advance(4);assert.equal(h.uniforms.uShape[3],1);assert(!h.canvas.style.transform.includes('NaN'));
+h.state.setWord('A new title');h.advance(.4);assert(h.uniforms.uWordBlend>0 && h.uniforms.uWordBlend<1);h.state.setWord('Another title');h.advance(4);assert.equal(h.uniforms.uWordBlend,1);
+h.state.pause(true);h.state.rotate(1,90);h.advance(1);assert.equal(h.uniforms.uRotation[1],Math.PI/2);
+h.state.setWord('Paused title');h.advance(1);assert.equal(h.uniforms.uWordBlend,1);h.state.navigate('zero');h.advance(1);assert.equal(h.uniforms.uShape[3],0);
+h.canvasEvents.webglcontextlost({preventDefault(){}});assert(!h.fallback.classList.values.has('zero-fallback-hidden'));const count=h.draws;h.advance(1);assert.equal(h.draws,count);
+const r=harness({reduced:true});assert.equal(r.callbacks.size,0);r.state.navigate('proximity');r.advance(1);assert.equal(r.uniforms.uDissolve,.5);assert.equal(r.uniforms.uShape[2],1);r.state.navigate('zero');r.advance(1);assert.equal(r.uniforms.uDissolve,0);
+const f=harness({webgl:false});assert(f.canvas.removed);assert(!f.fallback.classList.values.has('zero-fallback-hidden'));
+console.log('PASS: shared state → persistent mesh, filament morph, half dissolve hold, rapid reversal continuity, restore home shape, pause navigation, reduced motion, missing WebGL, context loss. Mock GPU, actual Flux store.');
+
+const w=harness({words:false});w.state.navigate('article/from-points-to-form');w.advance(4);assert.equal(w.uniforms.uShape[3],0);w.setWordsAvailable(true);w.fontReady();w.advance(4);assert.equal(w.uniforms.uShape[3],1);console.log('PASS: a failed word stencil recovers after font readiness.');
+
+const cycle=harness();
+assert.equal(cycle.canvas.dataset.surfaceState,'full');
+cycle.advance(8.1);assert.equal(cycle.canvas.dataset.surfaceState,'inside');
+cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'full-screen');
+cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'full');
+cycle.state.pause(true);cycle.advance(.1);const frozenSurface=cycle.uniforms.uSurface.slice();
+cycle.advance(12);assert.deepEqual(cycle.uniforms.uSurface,frozenSurface);
+assert.deepEqual(r.uniforms.uSurface,[1,0,0,0],'reduced motion holds the first surface');
+console.log('PASS: all three surface states reach the GPU uniforms, cycle, and freeze on pause/reduced motion.');
+
+const theme=harness();
+theme.setTheme('40 20% 98%');theme.advance(.1);
+assert.equal(theme.uniforms.uLightTheme,1);assert.equal(theme.canvas.style.mixBlendMode,'multiply');
+theme.state.pause(true);theme.advance(.1);theme.setTheme('180 9% 2%');theme.advance(.1);
+assert.equal(theme.uniforms.uLightTheme,0);assert.equal(theme.canvas.style.mixBlendMode,'screen');
+for(const page of ['proximity','learnings','concept','about','article/from-points-to-form']) {
+ theme.state.navigate(page);theme.advance(.1);
+ assert.equal(theme.uniforms.uHome,0);
+ assert(theme.uniforms.uLayerPose.every(Number.isFinite));
+ assert(Math.abs(theme.uniforms.uSurface.reduce((a,b)=>a+b,0)-1)<1e-10);
+}
+console.log('PASS: live light/dark theme changes (including paused) and persistent surface uniforms across pages.');
+
+const depthRoute=harness();
+assert.deepEqual(depthRoute.uniforms.uPageSurface,[0,1,0,0]);
+depthRoute.state.navigate('proximity');depthRoute.advance(.65);
+assert(depthRoute.uniforms.uPageSurface[0]<0 && depthRoute.uniforms.uPageSurface[0]>-.55,'layer two depth interpolates with navigation');
+assert(depthRoute.uniforms.uHome>0 && depthRoute.uniforms.uHome<1,'foreground mask also transitions');
+const interrupted=depthRoute.uniforms.uPageSurface.slice();
+depthRoute.state.navigate('zero');depthRoute.advance(1/60);
+assert(depthRoute.uniforms.uPageSurface.every((v,i)=>Math.abs(v-interrupted[i])<.01),'rapid reversal retains the current layer-two pose');
+depthRoute.advance(3);assert.deepEqual(depthRoute.uniforms.uPageSurface,[0,1,0,0]);
+depthRoute.state.navigate('article/from-points-to-form');depthRoute.advance(3);
+assert.deepEqual(depthRoute.uniforms.uPageSurface,[-1.25,.32,-.10,1.5]);
+depthRoute.state.pause(true);depthRoute.advance(.1);depthRoute.state.navigate('learnings');depthRoute.advance(.1);
+assert.deepEqual(depthRoute.uniforms.uPageSurface,[-1,.38,-.16,1.45]);
+r.state.navigate('about');r.advance(.1);assert.deepEqual(r.uniforms.uPageSurface,[-.65,.38,.12,1.4]);
+console.log('PASS: layer-two page depth, interpolated mask, interrupted return, article pose and instant paused/reduced-motion navigation.');
+
+const reference=harness();reference.state.pause(true);reference.advance(.1);
+const destinations=['proximity','lab','learnings','concept','about','article/from-points-to-form'];
+destinations.forEach((page,index)=>{
+ reference.state.navigate(page);reference.advance(.1);
+ const weights=[...reference.uniforms.uReferenceA,...reference.uniforms.uReferenceB];
+ assert.equal(weights[index],1,'each inner page selects its own reference geometry');
+ assert.equal(weights.reduce((a,b)=>a+b,0),1);
+ assert(reference.uniforms.uPageSurface[1]<=.48,'reference scale stays below half the home scale');
+});
+reference.state.navigate('zero');reference.advance(.1);
+assert.equal(reference.uniforms.uHome,1);
+assert([...reference.uniforms.uReferenceA,...reference.uniforms.uReferenceB].every(v=>v===0));
+console.log('PASS: six distinct compact page references and restoration of the home cycle.');
+
+const exit=harness();exit.advance(1);exit.showConceptAnchor(true);
+const held=exit.uniforms.uSurface.slice();
+exit.state.navigate('concept');exit.advance(3);
+const anchored=exit.uniforms.uIcebergPlacement.slice();
+assert.equal(exit.anchorReads,1,'measure the concept anchor once, not every frame');
+assert.deepEqual(exit.uniforms.uSurface,held,'home cycle stops while another page is active');
+exit.showConceptAnchor(false);exit.state.navigate('zero');exit.advance(.8);
+assert.deepEqual(exit.uniforms.uIcebergPlacement,anchored,'removing outgoing DOM must not reset iceberg placement');
+assert.deepEqual(exit.uniforms.uSurface,held,'home destination holds still during the return morph');
+exit.advance(3);
+assert.notDeepEqual(exit.uniforms.uSurface,held,'home cycle resumes after the return settles');
+console.log('PASS: retained iceberg exit anchor, bounded layout reads, frozen morph destination and resumed home cycle.');
