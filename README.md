@@ -1,62 +1,49 @@
 # SUBZERO
 
-One full-screen scene: a grainy ring (the "0") under a full-screen blur layer, a **SUB** pill, an **ENTER**
-button, a short block of copy, and a header with the logo and three navigation links. Open `index.html`; there is no build step and no server needed.
+The original grain-built zero and full-screen blur veil remain the center of the
+opening. The zero is enlarged while ARK UI Background 001's Tide atmosphere sits
+beneath it at 30% opacity. Indexed navigation, live field status and a stronger
+headline frame the composition. The page continues into an experimental lab and
+concept section.
 
-## Where things live
+Open `index.html` directly. There is no build step or external dependency.
 
-```
-index.html                  shell only: meta, the no-JS fallback copy, script tags in order
-css/
-  fonts.css                 @font-face for Albert Sans (self-hosted, no network request)
-  fallback.css              styles for the no-JS / screen-reader copy. The scene itself has no CSS.
-assets/fonts/               Albert Sans variable woff2 (SIL OFL 1.1)
-js/
-  tokens.js                 every colour, the type family, and the two units (s and u)
-  scene.flux.js             THE SCENE: all copy and layout, as one Flux pattern
-  main.js                   boot: applies tokens, renders the pattern
-  ark/                      the runtime: atomizer, Flux parser, prop readers, registry/renderer
-  halo/grain.js             paints the ring's grain (the fitted model)
-  resolvers/                one file per kind of thing on screen
-    scene.js  halo.js  veil.js  header.js  logo.js  nav.js  step.js  cta.js  body.js
-    optional/               removed from the page but kept, unloaded (see below)
-legacy/index.monolith.html  the original single-file version, untouched
-```
+## Original scene
 
-Scripts are classic `<script defer>` tags, not ES modules, on purpose: modules are blocked on `file://`.
-Every file only *defines* something; `js/main.js` is the only one that runs on load.
+The scene is still rendered by Ark from `js/scene.flux.js`. Its ring geometry,
+blur strength, typography, logo, copy, and entrance fades are preserved.
+`css/hero-motion.css` and `js/hero-motion.js` reproduce the Tide field from
+`/Volumes/PortableSSD/shared/ark-ui/examples/background/` locally, then add slow
+atmosphere drift, a light/scale cycle on the original zero, bounded pointer
+parallax, ENTER hover/focus response, and a pause control. Motion pauses offscreen
+or in a hidden tab and respects reduced-motion settings. The atmosphere is
+decorative and hidden from assistive tech; the semantic headline, copy,
+navigation and button remain accessible.
 
-## Changing things
+- `js/tokens.js`: original scene tokens; document scrolling is now enabled.
+- `js/scene.flux.js`: original scene composition and navigation.
+- `js/resolvers/`: original zero, veil, logo, pill, CTA and other components.
+- `js/halo/grain.js`: original grain painter.
+- `js/main.js`: original scene boot.
 
-| To change… | Edit |
-|---|---|
-| the words, the ring size, the blur strength, the SUB label | `js/scene.flux.js` |
-| what a kind of thing looks like (the pill, the button) | its file in `js/resolvers/` |
-| a colour, the font, or how the layout scales | `js/tokens.js` |
-| where ENTER goes | add `-H-https://…` to the `F-CTA-RCTA_V1` fence, **or** listen: `document.addEventListener('ark:enter', …)` |
-| the blur (it covers the whole screen) | `-B-` on `F-VEIL-RVEIL_V1`, in units of `u`. `0` = off, `0.2` keeps some grain, `1.5` = smooth glow |
-| the navigation links | the three `F-LINK-RLINK_V1` fences in `js/scene.flux.js`: `-L-` label, `-H-` destination (currently placeholder `#concept`, `#work`, `#contact`) |
-| the logo | `js/resolvers/logo.js` (mark and wordmark), or `-A-`/`-B-`/`-H-` on `F-LOGO-RLOGO_V1` |
-| the ENTER button's look | `js/resolvers/cta.js`; its hover/press states and the nav underline are in `css()` in `js/tokens.js` |
+## Expansion
 
-Flux text values: underscores are spaces; everything else, punctuation included, is written as itself.
+- `index.html`: semantic content below the original scene.
+- `css/studio.css`: addition styles scoped to `.expansion`, with a mostly
+  monochrome palette and a restrained pale teal accent inside the lab.
+- `js/studio.js`: proximity, rhythm and depth studies, and the original
+  `ark:enter` event connected to the lab. Study slider values are remembered
+  while switching studies within the page.
 
-## How it scales
+Concept and Experiments link to the sections below. Contact navigation, the invitation
+block, and the footer have been removed.
+The original scene respects reduced-motion preferences. Experiment controls are
+keyboard accessible. Content remains readable without JavaScript.
 
-The layout was measured off a 3:4 poster. Two container-query units carry it to any screen, with no media
-queries: `s` is 1% of the poster's width (the largest 3:4 poster that fits the screen, centred), and `u` is
-the same but never below 7px, so text stays readable on small screens. See `js/tokens.js`.
 
-## Bringing back what was removed
+## Preserved files
 
-The header ("Designed by … author"), footer prompt, progress pill with arrow, and the centred subtitle are in
-`js/resolvers/optional/` and are **not loaded**. To restore one: add its `<script>` to `index.html` (after the
-other resolvers, before `scene.flux.js`) and add its fence back to `js/scene.flux.js`. Their
-colours are still in `tokens.js`.
-
-## Notes on fidelity
-
-Sizes, colours, the ring's radial profile, its top-to-bottom light gradient and its grain statistics were
-measured from the reference image, not eyeballed, and the grain constants in `js/halo/grain.js` were fitted
-numerically to those measurements. The typeface (Albert Sans) was identified by fitting candidate fonts to
-the measured line widths and pixel-correlating renders against the reference.
+`archive/index.poster.html` preserves the original standalone scene entry point.
+`legacy/index.monolith.html` remains untouched. `archive/index.studio.html` is an
+HTML snapshot of the superseded redesign, not the active page. The unused custom
+mark in `assets/mark.svg` is not loaded by the current page.

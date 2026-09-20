@@ -20,43 +20,47 @@
      -G-   distance below that anchor, in u
    ===================================================================== */
 ArkUI.register('RBODY_V1', {
-  tag: 'p',
-  schema: { E: 'eyebrow', T: 'text', S: 'size', C: 'color', P: 'position', G: 'gap' },
+  tag: 'section',
+  schema: { E: 'eyebrow', H: 'headline', T: 'text', S: 'size', C: 'color', P: 'position', G: 'gap' },
   base: {
     position: 'absolute',
-    left: Tokens.v('body-x'),
-    maxWidth: Tokens.v('body-w'),
+    left: 'max(20px, 5.2cqw)',
+    bottom: 'max(28px, 4.4cqh)',
+    maxWidth: 'min(42cqw, 560px)',
     margin: '0',
     textAlign: 'left',
-    textWrap: 'balance',
-    fontWeight: '300',
-    lineHeight: '1.43',
-    zIndex: '2'
+    zIndex: '3'
   },
   style: function (p) {
-    var a = ArkProps.num(p.position, 48) + '%';
     return {
-      top: 'max(calc(' + a + ' + ' + Tokens.u(17) + '), min(calc(' + a + ' + ' +
-           Tokens.u(ArkProps.num(p.gap, 30.5)) + '), calc(100% - ' + Tokens.u(24) + ')))',
       fontSize: Tokens.u(ArkProps.num(p.size, 1.98)),
       color: ArkProps.color(p.color, Tokens.v('ink-body'))
     };
   },
-  text: function (p) { return p.text || ''; },
   decorate: function (el, p) {
-    if (!p.eyebrow) return;
     var eyebrow = document.createElement('span');
-    eyebrow.textContent = p.eyebrow;
+    eyebrow.textContent = p.eyebrow || '';
+    eyebrow.className = 'ark-hero-eyebrow';
+    var headline = document.createElement('h1');
+    headline.className = 'ark-hero-title';
+    headline.textContent = p.headline || '';
+    var copy = document.createElement('p');
+    copy.className = 'ark-hero-copy';
+    copy.textContent = p.text || '';
+    el.appendChild(eyebrow);
+    el.appendChild(headline);
+    el.appendChild(copy);
+    el.classList.add('ark-hero-body');
+    /* Atomized baseline styles preserve the no-extra-stylesheet fallback. */
     eyebrow.className = ArkUI.atomize({
       display: 'block',
-      marginBottom: Tokens.u(1.1),
+      marginBottom: Tokens.u(1.4),
       fontSize: 'max(11px, ' + Tokens.u(1.05) + ')',
       fontWeight: '500',
       letterSpacing: '0.18em',
       textTransform: 'uppercase',
       color: Tokens.v('ink-eyebrow')
-    });
-    el.insertBefore(eyebrow, el.firstChild);
+    }) + ' ark-hero-eyebrow';
   },
   emerge: { delay: 1300, dur: 600 }
 });

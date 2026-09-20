@@ -28,20 +28,21 @@ ArkUI.register('RSTEP_V1', {
     alignItems: 'center',
     justifyContent: 'center',
     width: 'max-content',
-    minWidth: Tokens.u(28.5),
-    minHeight: Tokens.u(7.4),
+    minWidth: Tokens.u(25),
+    minHeight: Tokens.u(5.8),
     padding: Tokens.u(0.42) + ' ' + Tokens.u(1.5) + ' 0',   /* top pad: optical centring of the label */
     border: Tokens.u(0.51) + ' solid transparent',
-    borderRadius: Tokens.u(2.55),
+    borderRadius: '999px',
     background:
       'linear-gradient(' + Tokens.v('step-fill') + ',' + Tokens.v('step-fill') + ') padding-box,' +
       'linear-gradient(90deg,' + Tokens.v('step-edge-a') + ',' + Tokens.v('step-edge-b') + ') border-box',
     color: Tokens.v('ink'),
-    fontSize: Tokens.u(2.71),
-    fontWeight: '600',
+    fontSize: 'max(11px, ' + Tokens.u(1.1) + ')',
+    fontWeight: '500',
     lineHeight: '1',
     whiteSpace: 'nowrap',
-    zIndex: '2'
+    zIndex: '3',
+    backdropFilter: 'blur(10px)'
   },
   style: function (p) {
     var k = ArkProps.num(p.tracking, 0);
@@ -53,5 +54,6 @@ ArkUI.register('RSTEP_V1', {
     };
   },
   text: function (p) { return p.step ? p.step + '. ' + (p.label || '') : (p.label || ''); },
+  decorate: function (el) { el.classList.add('ark-field-pill'); },
   emerge: { delay: 900, dur: 600 }
 });

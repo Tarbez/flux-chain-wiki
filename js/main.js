@@ -19,6 +19,8 @@
     ArkUI.base(Tokens.css());
     ArkUI.render(F_SCENE_RZERO_V0, host);
     root.classList.add('ark-live');
+    var fallback = document.getElementById('fallback');
+    if (fallback) fallback.setAttribute('aria-hidden', 'true');
   } catch (err) {
     root.classList.remove('js');                  /* reveal the fallback */
     if (window.console) console.error('[ark] scene failed to render', err);

@@ -89,7 +89,7 @@ var Tokens = (function () {
       '@supports (height:100dvh){:root{--ark-stage-h:100dvh}}' +
 
       '*,*::before,*::after{box-sizing:border-box}' +
-      'html,body{margin:0;padding:0;background:var(--ark-canvas);overflow:hidden}' +
+      'html,body{margin:0;padding:0;background:var(--ark-canvas);overflow-x:clip}' +
       '.ark-zero{opacity:0}' +
       '.ark-link::after{content:"";position:absolute;left:0;right:0.16em;bottom:0.7em;height:1px;' +
         'background:currentColor;transform:scaleX(0);transform-origin:left center;' +

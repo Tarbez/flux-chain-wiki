@@ -35,24 +35,22 @@ ArkUI.register('RCTA_V1', {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 'max(' + Tokens.u(5.6) + ', 46px)',           /* 46px: a comfortable touch target */
-    padding: '0 ' + Tokens.u(4.4),
-    border: '0',
-    borderRadius: '999px',
-    background: 'linear-gradient(180deg,' + Tokens.v('cta-a') + ' 0%,' + Tokens.v('cta-b') + ' 100%)',
-    color: Tokens.v('cta-ink'),
+    minHeight: 'max(' + Tokens.u(5.2) + ', 48px)',
+    padding: '0 ' + Tokens.u(3.4),
+    border: '1px solid rgba(255,255,255,0.42)',
+    borderRadius: '2px',
+    background: 'rgba(4,6,6,0.58)',
+    color: Tokens.v('ink'),
     font: 'inherit',
     fontSize: 'max(13px, ' + Tokens.u(1.7) + ')',
-    fontWeight: '700',
+    fontWeight: '500',
     lineHeight: '1',
     textTransform: 'uppercase',
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     boxShadow: [
-      'inset 0 1px 0 rgba(255,255,255,0.95)',                            /* light catching the top edge */
-      'inset 0 -1px 0 rgba(0,0,0,0.14)',                                 /* the underside               */
-      '0 0 0 1px rgba(255,255,255,0.4)',                                 /* fine outline                */
-      '0 ' + Tokens.u(0.6) + ' ' + Tokens.u(2.2) + ' rgba(0,0,0,0.55)'  /* sits on the ring            */
+      'inset 0 1px 0 rgba(255,255,255,0.08)',
+      '0 ' + Tokens.u(0.6) + ' ' + Tokens.u(2.2) + ' rgba(0,0,0,0.42)'
     ].join(','),
     filter: 'drop-shadow(0 0 ' + Tokens.u(2.4) + ' rgba(255,255,255,0.16))',
     transition: 'translate 220ms ease, scale 140ms ease, filter 260ms ease',
@@ -65,7 +63,7 @@ ArkUI.register('RCTA_V1', {
       top: 'calc(' + ArkProps.num(p.position, 48) + '% + ' + Tokens.u(ArkProps.num(p.gap, 11)) + ')',
       letterSpacing: k + 'em',
       /* letter-spacing adds a gap after the last letter; pad the left to keep the word centred */
-      paddingLeft: 'calc(' + Tokens.u(4.4) + ' + ' + k + 'em)'
+      paddingLeft: 'calc(' + Tokens.u(3.4) + ' + ' + k + 'em)'
     };
   },
   attrs: function () { return { type: 'button' }; },

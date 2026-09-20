@@ -11,31 +11,48 @@
 
 <link rel="stylesheet" href="css/fonts.css" />
 <link rel="stylesheet" href="css/fallback.css" />
+<link rel="stylesheet" href="css/studio.css" />
+<link rel="stylesheet" href="css/hero-motion.css" />
 </head>
 <body>
+<a class="skip" href="#work">Skip to experiments</a>
 
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
      authored by hand. -->
+<main id="main">
 <div id="scene"></div>
 
 <!-- Semantic fallback — the page with JavaScript off, and the reading order
      for screen readers once the poster is up. -->
-<main id="fallback">
+<section id="fallback" aria-label="Introduction">
   <div class="wrap">
     <p class="brand">SUBZERO</p>
-    <nav aria-label="Primary">
-      <a href="#concept">Concept</a>
-      <a href="#work">Work</a>
-      <a href="#contact">Contact</a>
-    </nav>
     <p class="eyebrow">Concept of subzero &gt; Sub &gt; ZERO</p>
     <h1>SUB</h1>
     <p>
       Below the visual architecture of meaning and design. Building truly rich experiences.
     </p>
   </div>
+</section>
+
+<div class="expansion">
+    <section class="experiments section" id="work" tabindex="-1" aria-labelledby="experiments-title">
+      <div class="section-heading"><div><p class="eyebrow">01 / The open lab</p><h2 id="experiments-title">Small shifts.<br>Different perspectives.</h2></div><p>Change a variable. Notice what happens.<br>Three studies in how we see, group, and feel.</p></div>
+      <div class="lab" data-mode="spacing">
+        <div class="lab-toolbar"><div class="study-tabs" role="group" aria-label="Choose an experiment"><button type="button" disabled data-study="spacing" aria-pressed="true">01 <span>Proximity</span></button><button type="button" disabled data-study="rhythm" aria-pressed="false">02 <span>Rhythm</span></button><button type="button" disabled data-study="depth" aria-pressed="false">03 <span>Depth</span></button></div><span class="live-label"><span class="status-dot"></span> INTERACTIVE STUDY</span></div>
+        <div class="experiment-stage" role="img" aria-label="Twelve dots in three groups. Adjust the spacing to explore perceived grouping."><div class="experiment-grid"></div><span class="stage-corner">SZ—001</span><div class="specimen" aria-hidden="true"><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span></div><span class="stage-footnote">THE SAME ELEMENTS. A DIFFERENT RELATIONSHIP.</span><span class="stage-axis" aria-hidden="true">x →</span></div>
+        <div class="lab-bottom"><div class="study-description"><h3 id="study-title">When does a collection become a group?</h3><p id="study-description">Bring things closer and they begin to belong together. Move them apart and new boundaries appear.</p></div><div class="control"><div class="control-label"><label for="variable">Distance between groups</label><output for="variable" id="variable-value">50%</output></div><input id="variable" disabled type="range" min="0" max="100" value="50" aria-describedby="study-description"><div class="control-ends"><span id="range-start">Together</span><span id="range-end">Apart</span></div></div></div>
+        <p class="no-script">These studies need JavaScript to respond to your input.</p>
+      </div>
+      <p class="lab-note"><span aria-hidden="true">↳</span> No right answer. Just something worth noticing.</p>
+    </section>
+    <section class="approach section" id="concept" aria-labelledby="approach-title"><div class="approach-intro"><p class="eyebrow">02 / A way of seeing</p><h2 id="approach-title">Go beneath<br>the <em>obvious.</em></h2><p>SUBZERO is a space to explore the relationship between how something looks, how it works, and what it means.</p><p>We start with a question. Make something tangible. Pay attention to what changes. Then follow the interesting part.</p><a class="text-link" href="#work">Spend some time in the lab <span aria-hidden="true">↗</span></a></div><div class="principles"><article><span>01</span><div><h3>Meaning before decoration.</h3><p>Every choice should say something. Shape, color, and movement earn their place through what they help us understand.</p></div><span class="principle-symbol" aria-hidden="true">↗</span></article><article><span>02</span><div><h3>Curiosity as a method.</h3><p>Make room for unfinished ideas, unexpected results, and the small discoveries that change the direction.</p></div><span class="principle-symbol" aria-hidden="true">✳</span></article><article><span>03</span><div><h3>Simple can feel rich.</h3><p>A few thoughtful elements. A response that feels right. Enough space to notice the details.</p></div><span class="principle-symbol" aria-hidden="true">○</span></article></div></section>
+
+
+</div>
 </main>
+
 
 <!-- Classic scripts, in dependency order. Deliberately not ES modules: those
      are blocked on file://, and this page should open with a double-click.
@@ -67,6 +84,8 @@
 <!-- 5. the pattern, then boot. (The header, footer, progress-pill and subtitle
      components live, unloaded, in js/resolvers/optional/. See README.md.) -->
 <script src="js/scene.flux.js" defer></script>
-<script src="js/main.js" defer></script>
+<script src="js/main.js?v=2" defer></script>
+<script src="js/hero-motion.js?v=3" defer></script>
+<script src="js/studio.js" defer></script>
 </body>
 </html>

@@ -15,19 +15,20 @@ ArkUI.register('RNAV_V1', {
   base: {
     display: 'flex',
     alignItems: 'center',
-    gap: 'max(18px, ' + Tokens.u(2.8) + ')'
+    gap: 'max(18px, ' + Tokens.u(3.4) + ')'
   },
   attrs: function () { return { 'aria-label': 'Primary' }; }
 });
 
 ArkUI.register('RLINK_V1', {
   tag: 'a',
-  schema: { L: 'label', H: 'href' },
+  schema: { I: 'index', L: 'label', H: 'href' },
   base: {
     display: 'inline-flex',
     alignItems: 'center',
     minHeight: '44px',                               /* a comfortable touch target */
-    fontSize: 'max(12px, ' + Tokens.u(1.12) + ')',
+    gap: '0.7em',
+    fontSize: 'max(11px, ' + Tokens.u(1.02) + ')',
     fontWeight: '500',
     letterSpacing: '0.16em',
     textTransform: 'uppercase',
@@ -38,6 +39,14 @@ ArkUI.register('RLINK_V1', {
     transition: 'color 200ms ease'
   },
   attrs: function (p) { return { href: p.href || '#' }; },
-  text: function (p) { return p.label || ''; },
-  decorate: function (el) { el.classList.add('ark-link'); }
+  decorate: function (el, p) {
+    el.classList.add('ark-link');
+    var index = document.createElement('span');
+    index.className = 'ark-link-index';
+    index.textContent = p.index || '';
+    var label = document.createElement('span');
+    label.textContent = p.label || '';
+    el.appendChild(index);
+    el.appendChild(label);
+  }
 });

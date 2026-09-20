@@ -17,10 +17,18 @@ ArkUI.register('RHEADER_V1', {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: '4px ' + Tokens.u(3),
-    padding: 'max(20px, 2.8cqmin)',
+    gap: '8px ' + Tokens.u(3),
+    padding: 'max(18px, 2.35cqmin) max(20px, 2.8cqmin)',
+    borderBottom: '1px solid rgba(255,255,255,0.12)',
     zIndex: '4'
+  },
+  decorate: function (el) {
+    el.classList.add('ark-header');
+    var status = document.createElement('span');
+    status.className = 'ark-live-status';
+    status.setAttribute('aria-label', 'Subzero field is live');
+    status.innerHTML = '<i aria-hidden="true"></i><span>FIELD 001</span><b>LIVE</b>';
+    el.appendChild(status);
   },
   emerge: { delay: 1500, dur: 600 }
 });
