@@ -12,8 +12,9 @@
    word; engines without it simply wrap as usual.
 
    Flux props (sizes in u, 1u = 1% of the poster width; see js/tokens.js):
-     -E-   eyebrow line (optional). Shown in capitals.
-     -T-   paragraph
+     -E-   eyebrow line (optional). Shown in capitals.       } a copy key such as HOME.INTRO;
+     -H-   headline                                           } the words are in
+     -T-   paragraph                                          } js/content/copy.js
      -S-   paragraph size, in u
      -C-   paragraph colour, hex without '#'
      -P-   anchor: the pill's vertical centre, %
@@ -22,6 +23,7 @@
 ArkUI.register('RBODY_V1', {
   tag: 'section',
   schema: { E: 'eyebrow', H: 'headline', T: 'text', S: 'size', C: 'color', P: 'position', G: 'gap' },
+  copy: ['eyebrow', 'headline', 'text'],
   base: {
     position: 'absolute',
     left: 'max(20px, 5.2cqw)',

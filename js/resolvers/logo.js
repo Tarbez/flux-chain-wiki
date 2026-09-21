@@ -16,6 +16,7 @@
 ArkUI.register('RLOGO_V1', {
   tag: 'a',
   schema: { A: 'lead', B: 'tail', H: 'href' },
+  copy: ['lead', 'tail'],
   base: {
     display: 'inline-flex',
     alignItems: 'center',

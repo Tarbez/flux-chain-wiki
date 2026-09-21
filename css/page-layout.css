@@ -24,7 +24,53 @@
 .concept-principles section > span { font:400 10px/1.5 var(--ark-font); color:#9aaa9f; padding-top:4px; }
 .concept-principles h2 { margin:0 0 8px; font:300 20px/1.3 var(--ark-font); letter-spacing:-.02em; }
 .concept-principles p { max-width:40em; margin:0; font:300 13px/1.7 var(--ark-font); color:#acb9b0; }
-.concept-content > .article-back { margin:22px 0 0; }
+.concept-links { display:flex; flex-wrap:wrap; gap:0 26px; margin:14px 0 0; }
+.concept-links > .article-back { margin:0; }
+.cta-arrow { display:inline-block; margin-left:.3em; transition:transform 220ms cubic-bezier(.2,.7,.2,1); }
+:is(.article-back:hover,.concept-principles section:hover) .cta-arrow, .article-back:focus-visible .cta-arrow { transform:translate(2px,-2px); }
+.article-back { transition:color 200ms ease; }
+.article-back:hover { color:hsl(var(--text-strong)); }
+/* Compact, living principle rows: number, title and link share one line; a line draws in on hover. */
+.concept-page .concept-content { padding-bottom:24px; }
+.concept-page .learning-eyebrow { margin-bottom:14px; }
+.concept-page .concept-content h1 { margin-bottom:14px; }
+.concept-page .concept-deck { margin-bottom:22px; }
+.concept-page .concept-principles section { position:relative; isolation:isolate; grid-template-columns:24px 1fr auto; align-items:center; gap:14px; padding:14px 0; }
+.concept-page .concept-principles section > span { padding-top:0; transition:color 220ms ease; }
+.concept-page .concept-principles h2 { margin:0; font-size:19px; transition:transform 260ms cubic-bezier(.2,.7,.2,1),color 220ms ease; }
+.concept-page .concept-principles .article-back { margin:0; padding:0; }
+.concept-page .concept-principles .article-back::after { content:""; position:absolute; inset:0; }
+.concept-page .concept-principles section::before { content:""; position:absolute; top:-1px; left:0; height:1px; width:0; background:hsl(var(--accent)); transition:width 380ms cubic-bezier(.2,.7,.2,1); }
+.concept-page .concept-principles section::after { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,hsl(var(--accent-subtle) / .7),transparent 85%); opacity:0; transition:opacity 260ms ease; }
+.concept-page .concept-principles section:is(:hover,:focus-within)::before { width:100%; }
+.concept-page .concept-principles section:is(:hover,:focus-within)::after { opacity:1; }
+.concept-page .concept-principles section:is(:hover,:focus-within) h2 { transform:translateX(5px); color:hsl(var(--text-strong)); }
+.concept-page .concept-principles section:is(:hover,:focus-within) > span { color:hsl(var(--accent)); }
+.concept-page .concept-principles .article-back { color:hsl(var(--text)); }
+.concept-page .concept-principles section:is(:hover,:focus-within) .article-back { color:hsl(var(--text-strong)); }
+/* Detail pages of the theory reuse the same rows, with a short paragraph and an onward link. */
+.theory-page .concept-principles section { padding:15px 0; gap:16px; }
+.theory-page .concept-principles h2 { margin:0 0 5px; font-size:18px; }
+.theory-footer { display:flex; flex-wrap:wrap; align-items:center; gap:6px 28px; margin-top:16px; }
+.theory-footer .article-back { margin:0; padding:6px 0; }
+.theory-page .theory-cta { color:hsl(var(--accent)); font-size:10px; }
+.theory-page .theory-cta:hover { color:hsl(var(--text-strong)); }
+@keyframes concept-rise { from { opacity:0; transform:translateY(8px); } }
+:is(.concept-page,.theory-page) :is(.learning-eyebrow,.learning-heading,.concept-deck,.concept-principles section,.concept-links,.theory-footer) { animation:concept-rise 520ms cubic-bezier(.2,.7,.2,1) both; }
+:is(.concept-page,.theory-page) .learning-heading { animation-delay:60ms; }
+:is(.concept-page,.theory-page) .concept-deck { animation-delay:120ms; }
+:is(.concept-page,.theory-page) .concept-principles section:nth-child(1) { animation-delay:200ms; }
+:is(.concept-page,.theory-page) .concept-principles section:nth-child(2) { animation-delay:270ms; }
+:is(.concept-page,.theory-page) .concept-principles section:nth-child(3) { animation-delay:340ms; }
+:is(.concept-page,.theory-page) :is(.concept-links,.theory-footer) { animation-delay:420ms; }
+@media(prefers-reduced-motion:reduce) {
+ :is(.concept-page,.theory-page) * { animation:none !important; }
+ .cta-arrow,.concept-page .concept-principles :is(h2,section::before,section::after) { transition:none; }
+}
+@media(max-width:480px) {
+ .concept-page .concept-principles section { grid-template-columns:24px 1fr; gap:4px 14px; }
+ .concept-page .concept-principles .article-back { grid-column:2; }
+}
 .experiments-page .experiment-page-intro { min-height:calc(85cqh - 150px); }
 
 .experiments-page .expansion > .section { max-width:var(--page-width); margin-inline:auto; padding:40px var(--page-gutter); }
@@ -32,7 +78,7 @@
 .hero-atmosphere { opacity:.72; filter:blur(12px); }
 .hero-alive { --mesh-opacity:.62; --mesh-blur:2px; }
 .hero-alive[data-page="zero"] { --mesh-blur:.65px; }
-.hero-alive[data-page="concept"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.62; --mesh-blur:.8px; }
+.hero-alive[data-page="concept"],.hero-alive[data-page^="concept/"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.62; --mesh-blur:.8px; }
 .hero-alive[data-page^="article/"] { --mesh-opacity:.82; --mesh-blur:0px; }
 .hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"] { filter:blur(2px); opacity:.5; }
 @media(max-width:760px) {
@@ -63,6 +109,14 @@
 #scene .concept-page .concept-content { width:54%; margin-left:0; padding-right:24px; }
 .concept-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68cqh,640px); margin:0; pointer-events:none; }
 .hero-alive[data-page="concept"] { --mesh-opacity:.85; --mesh-blur:0px; }
+/* With room in the left margin the onward links leave the copy and sit beside it, aligned with the studio mark.
+   The page box spans the viewport so the margin is inside it; padding keeps the copy and iceberg where they were. */
+@media(min-width:1400px) {
+ #scene .concept-page { --concept-inset:max(clamp(16px,3cqw,48px),(100cqw - var(--page-width)) / 2); width:100%; max-width:none; padding-inline:var(--concept-inset); }
+ .concept-page .concept-iceberg { right:var(--concept-inset); width:calc((100% - 2 * var(--concept-inset)) * .44); }
+ .concept-page .concept-links { position:absolute; left:25px; top:50%; transform:translateY(-50%); flex-direction:column; flex-wrap:nowrap; align-items:flex-start; gap:22px; margin:0; animation-name:concept-fade; }
+ @keyframes concept-fade { from { opacity:0; } }
+}
 @media(max-width:760px) {
  #scene .concept-page .concept-content { width:100%; padding-right:var(--page-gutter); padding-top:340px; }
  .concept-iceberg { top:0; right:10%; width:80%; height:310px; }

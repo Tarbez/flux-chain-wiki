@@ -20,6 +20,7 @@ ArkUI.register('RSTEP_V1', {
   tag: 'div',
   aliases: ['RPILL_V1'],                               /* F-STEP-RPILL_V1 */
   schema: { N: 'step', L: 'label', K: 'tracking', P: 'position' },
+  copy: ['label'],
   base: {
     position: 'absolute',
     left: '50%',

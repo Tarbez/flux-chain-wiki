@@ -15,6 +15,9 @@
     if (typeof LearningContent !== 'undefined') LearningContent.articles.forEach(function (article) {
       pages['article/' + article.slug] = { mesh: 'word', title: article.title, dissolve: 0, depth: 0 };
     });
+    if (typeof TheoryContent !== 'undefined') TheoryContent.pages.forEach(function (entry) {
+      pages['concept/' + entry.slug] = { mesh: 'zero', dissolve: 0, depth: 0 };
+    });
     store.set('scene', { page: initialPage || 'zero', shape: 'zero', paused: false, rotation: [0, 0], words: {} });
     function update(patch) { store.set('scene', Object.assign({}, store.get('scene'), patch)); }
     return {

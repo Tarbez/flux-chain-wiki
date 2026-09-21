@@ -2,11 +2,11 @@ ArkUI.pageModules.zero = {
   mount: function (host) {
     var el = ArkUI.render([
       'F-HOME-RLAYER_V1', '-N-zero',
-      '. F-STEP-RSTEP_V1', '  -L-SUB', '  -K-0.2', '  -P-48', '  .',
+      '. F-STEP-RSTEP_V1', '  -L-HOME.STEP', '  -K-0.2', '  -P-48', '  .',
       '. F-BODY-RBODY_V1',
-      '  -E-SUBZERO_/_DESIGN_WITH_DEPTH',
-      '  -H-Below_the_surface.',
-      '  -T-Carefully_crafted_digital_experiences_that_invite_curiosity,_deepen_understanding,_and_make_every_step_mean_something.',
+      '  -E-HOME.EYEBROW',
+      '  -H-HOME.TITLE',
+      '  -T-HOME.INTRO',
       '  -S-1.42', '  .', '.'
     ].join('\n'), host);
     el.classList.add('ark-page'); el.dataset.arkPage = 'zero';

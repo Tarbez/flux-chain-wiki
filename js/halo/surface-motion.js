@@ -4,6 +4,7 @@ var SurfaceMotion = Object.freeze({
   // Depth, spread, tilt, horizontal bias, foreground-zero mask.
   forPage: function (page) {
     if (page.indexOf('article/') === 0) return [-1.25, .32, -.10, 1.5, 0, 0,0,0,0,0,1];
+    if (page.indexOf('concept/') === 0) page = 'about';
     var profiles = {
       zero: [0, 1, 0, 0, 1, 0,0,0,0,0,0],
       proximity: [-.55, .48, .18, 1.25, 0, 1,0,0,0,0,0],

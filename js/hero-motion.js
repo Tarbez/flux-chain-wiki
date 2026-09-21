@@ -109,8 +109,9 @@
 
   function sync() {
     var current = state.get();
+    var isTheory = current.page.indexOf('concept/') === 0;
     scene.querySelectorAll('.ark-header a').forEach(function (link) {
-      if (router.resolve(link.hash) === (current.page === 'lab' ? 'proximity' : current.page)) link.setAttribute('aria-current', 'page');
+      if (router.resolve(link.hash) === (current.page === 'lab' ? 'proximity' : isTheory ? 'concept' : current.page)) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
     var paused = current.paused;
@@ -119,9 +120,9 @@
     toggle.hidden = current.page === 'zero';
     paths.hidden = current.page !== 'zero';
     var isArticle = current.page.indexOf('article/') === 0;
-    toggle.textContent = current.page === 'lab' ? '← EXPERIMENTS' : isArticle ? '← TUTORIALS' : '← BACK TO ZERO';
+    toggle.textContent = current.page === 'lab' ? '← EXPERIMENTS' : isArticle ? '← TUTORIALS' : isTheory ? '← THE THEORY' : '← BACK TO ZERO';
     toggle.setAttribute('aria-expanded', String(current.page !== 'zero'));
-    toggle.setAttribute('aria-label', current.page === 'lab' ? 'Return to experiments' : current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to learnings' : 'Return to the zero hero');
+    toggle.setAttribute('aria-label', current.page === 'lab' ? 'Return to experiments' : current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to learnings' : isTheory ? 'Return to the theory' : 'Return to the zero hero');
     latest.hidden = current.page !== 'zero';
     var active = pages[current.page];
     if (!active) return;
@@ -142,12 +143,12 @@
   }
   toggle.addEventListener('click', function () {
     var page = state.get().page;
-    navigate(page === 'lab' ? 'proximity' : page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : 'zero');
+    navigate(page === 'lab' ? 'proximity' : page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
   });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
     if (state.get().page === 'zero') return;
-    navigate(state.get().page === 'lab' ? 'proximity' : state.get().page.indexOf('article/') === 0 ? 'learnings' : 'zero');
+    navigate(state.get().page === 'lab' ? 'proximity' : state.get().page.indexOf('article/') === 0 ? 'learnings' : state.get().page.indexOf('concept/') === 0 ? 'concept' : 'zero');
     toggle.focus({ preventScroll: true });
   });
   function restoreRoute() { return router.navigate(router.resolve(location.hash), { history: 'none' }).then(sync); }
@@ -157,7 +158,8 @@
   scene.querySelectorAll('.ark-header a').forEach(function (link) {
     link.addEventListener('click', function (event) { event.preventDefault(); navigate(router.resolve(link.hash)); });
   });
-  document.querySelector('.skip').addEventListener('click', function (event) {
+  var skip = document.querySelector('.skip');
+  if (skip) skip.addEventListener('click', function (event) {
     event.preventDefault(); navigate('lab');
   });
   reduced.addEventListener('change', sync);

@@ -10,11 +10,13 @@
                   from the pill (-P- is the pill's centre, -G- the gap below
                   it in u)
      colours      hex without '#'
-     text         underscores are spaces; punctuation is written as itself
+     copy         a key (NAV.THEORY), never words. The words are in js/content/copy.js;
+                  a resolver lists which of its props are copy, and the runtime
+                  swaps the key for the words. Words written here are refused.
 
-   The copy and the layout live here and only here. Change the words or the
-   ring here; change how a kind of thing looks in its resolver
-   (js/resolvers/); change a colour or a size in js/tokens.js.
+   The layout lives here and only here. Change the words in js/content/copy.js;
+   change the ring or the arrangement here; change how a kind of thing looks
+   in its resolver (js/resolvers/); change a colour or a size in js/tokens.js.
    ===================================================================== */
 var F_SCENE_RZERO_V0 = [
   'F-SCENE-RZERO_V0',
@@ -40,16 +42,20 @@ var F_SCENE_RZERO_V0 = [
   '. F-HEADER-RHEADER_V1',
   '    . F-NAV-RNAV_V1',
   '        . F-LINK-RLINK_V1',
-  '            -L-Theory',
+  '            -L-NAV.THEORY',
   '            -H-#/concept',
   '          .',
   '        . F-LINK-RLINK_V1',
-  '            -L-Experiments',
+  '            -L-NAV.EXPERIMENTS',
   '            -H-#/experiments',
   '          .',
   '        . F-LINK-RLINK_V1',
-  '            -L-About_us',
+  '            -L-NAV.ABOUT',
   '            -H-#/about',
+  '          .',
+   '        . F-LINK-RLINK_V1',
+  '            -L-NAV.WORK',
+  '            -H-#/work',
   '          .',
   '      .',
   '  .',

@@ -25,7 +25,6 @@
 <link rel="stylesheet" href="css/home.css" />
 </head>
 <body>
-<a class="skip" href="#work">Skip to experiments</a>
 
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
@@ -57,12 +56,14 @@
 <script src="js/tokens.js" defer></script>
 
 <!-- 2. runtime: atomizer -> flux parser -> prop readers -> registry/renderer -->
+<script src="js/content/copy.js" defer></script>
 <script src="js/ark/atomizer.js" defer></script>
 <script src="js/ark/flux.js" defer></script>
 <script src="js/ark/props.js" defer></script>
 <script src="js/ark/runtime.js" defer></script>
 <script src="js/ark/vendor/engines.js" defer></script>
 <script src="js/content/learnings.js" defer></script>
+<script src="js/content/theory.js" defer></script>
 <script src="js/ark/text-scramble.js" defer></script>
 <script src="js/ark/text-presence.js" defer></script>
 <script src="js/ark/scene-state.js" defer></script>
@@ -93,7 +94,7 @@
 <script src="js/halo/iceberg.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
 <script src="js/zero-webgl.js?v=12" defer></script>
-<script src="js/hero-motion.js?v=12" defer></script>
+<script src="js/hero-motion.js?v=13" defer></script>
 <script src="js/settings/panel.js" defer></script>
 </body>
 </html>

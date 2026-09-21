@@ -3,7 +3,16 @@ ArkUI.pageModules.concept = {
     var el = document.createElement('section');
     el.className = 'ark-page learning-page concept-page'; el.dataset.arkPage = 'concept';
     el.setAttribute('aria-labelledby', 'concept-title');
-    el.innerHTML = '<div class="concept-content"><p class="learning-eyebrow">THE SUBZERO THEORY</p><h1 id="concept-title" class="learning-heading">Go beneath the surface.</h1><p class="concept-deck">A rich experience gives attention somewhere meaningful to go. We believe digital spaces can invite curiosity, deepen understanding, and make the journey itself worth taking.</p><div class="concept-principles"><section><span>01</span><div><h2>Give every step a purpose.</h2><p>A page, a transition, a moment of pause: each should help someone discover, understand, or decide. Progress means more than moving further down a screen.</p></div></section><section><span>02</span><div><h2>Make depth accessible.</h2><p>Complex ideas deserve thoughtful explanations. Let people try things, see what changes, and learn at their own pace—without needing to know the tools first.</p></div></section><section><span>03</span><div><h2>Build a shared practice.</h2><p>Subzero is a starting point for a community of curious people: designers, learners, and people with something to build. We want to share questions, experiments, and discoveries that make the next experience better.</p></div></section></div><a class="article-back" href="#/learnings" data-scene-link="learnings">START WITH THE NOTES ↗</a><br><a class="article-back" href="#/about" data-scene-link="about">ABOUT THE STUDIO ↗</a></div>';
+    // Every link on this page opens one of the theory's own pages; the list in TheoryContent decides which.
+    function cta(entry) {
+      return '<a class="article-back" href="#/concept/' + entry.slug + '" data-scene-link="concept/' + entry.slug + '">' + entry.cta + ' <span class="cta-arrow" aria-hidden="true">↗</span></a>';
+    }
+    var pages = TheoryContent.pages;
+    var rows = pages.filter(function (entry) { return entry.number; }).map(function (entry) {
+      return '<section><span>' + entry.number + '</span><h2>' + entry.title + '</h2>' + cta(entry) + '</section>';
+    }).join('');
+    var rail = pages.filter(function (entry) { return !entry.number; }).map(cta).join('');
+    el.innerHTML = '<div class="concept-content"><p class="learning-eyebrow">THE SUBZERO THEORY</p><h1 id="concept-title" class="learning-heading">Go beneath the surface.</h1><p class="concept-deck">A rich experience gives attention somewhere meaningful to go. We believe digital spaces can invite curiosity, deepen understanding, and make the journey itself worth taking.</p><div class="concept-principles">' + rows + '</div><nav class="concept-links" aria-label="Continue exploring">' + rail + '</nav></div>';
     var figure = document.createElement('figure');
     figure.className = 'concept-iceberg';
     figure.setAttribute('data-iceberg-anchor', '');

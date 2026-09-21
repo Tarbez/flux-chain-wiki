@@ -28,6 +28,7 @@
 ArkUI.register('RCTA_V1', {
   tag: 'button',
   schema: { L: 'label', K: 'tracking', H: 'href', P: 'position', G: 'gap' },
+  copy: ['label'],
   base: {
     position: 'absolute',
     left: '50%',

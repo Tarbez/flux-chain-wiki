@@ -2,7 +2,7 @@
    ARK UI RUNTIME
    ---------------------------------------------------------------------
    A manifest registry, a builder and an emergence pass. Depends on
-   ArkAtomizer and ArkFlux (loaded before this file); knows nothing about
+   ArkAtomizer, ArkFlux and ArkCopy (loaded before this file); knows nothing about
    any particular resolver.
 
      register(id, manifest)    declare a resolver. A manifest may carry
@@ -17,6 +17,7 @@
    A resolver manifest is:
      tag        element to create                       (default 'div')
      schema     terse Flux key -> readable prop name    ({ N: 'count' })
+     copy       readable prop names that hold copy keys (see js/content/copy.js)
      base       style object applied to every instance
      style(p)   style object computed from props
      attrs(p)   attributes to set
@@ -57,6 +58,12 @@ var ArkUI = (function () {
     for (var k in node.props) {
       if (!Object.prototype.hasOwnProperty.call(node.props, k)) continue;
       p[schema[k] || k] = node.props[k];
+    }
+
+    /* props the resolver declares as copy hold a key; swap in the words */
+    var copy = m.copy || [];
+    for (var cp = 0; cp < copy.length; cp++) {
+      if (p[copy[cp]] !== undefined) p[copy[cp]] = ArkCopy.resolve(p[copy[cp]], node.resolver, copy[cp]);
     }
 
     var el = document.createElement(m.tag || 'div');

@@ -23,6 +23,7 @@ ArkUI.register('RNAV_V1', {
 ArkUI.register('RLINK_V1', {
   tag: 'a',
   schema: { I: 'index', L: 'label', H: 'href' },
+  copy: ['label'],
   base: {
     display: 'inline-flex',
     alignItems: 'center',

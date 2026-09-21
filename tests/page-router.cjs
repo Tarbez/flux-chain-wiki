@@ -36,6 +36,7 @@ for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/ark/
  await router.navigate('article/from-points-to-form',{history:'none'});assert.equal(outlet.children.length,1);
  assert.equal(scene.children[0],canvas);assert.equal(scene.children[1],header);assert.equal(scene.children[2],outlet);
  assert.equal(router.resolve('#/about'),'about');
+assert.equal(router.resolve('#/work'),'work');
  assert.equal(router.resolve('#/experiments/lab'),'lab');assert.equal(router.resolve('#work'),'lab');
  assert(!context.ArkUI.pageCatalog.proximity.scripts.includes('js/studio.js'));
  assert(!fs.readFileSync('js/pages/experiments.js','utf8').includes('mountStudio'));
