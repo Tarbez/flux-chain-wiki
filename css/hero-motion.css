@@ -1,8 +1,8 @@
 /* Optimized atmospheric hero: one gradient field, one low-resolution grain
    canvas, and compositor-only opacity/transform motion. */
 .hero-alive {
-  --field-accent: #dce5df;
-  --field-muted: rgba(225,235,232,.5);
+  --field-accent: #7fb5bd;
+  --field-muted: rgba(154,154,166,.5);
 }
 
 .hero-atmosphere {
@@ -13,9 +13,10 @@
   contain: strict;
   opacity: 1;
   background:
-    radial-gradient(ellipse 58% 65% at 53% 40%, rgba(125,151,134,.52), transparent 72%),
-    radial-gradient(ellipse 70% 75% at 84% 30%, rgba(83,110,93,.38), transparent 75%),
-    #050606;
+    radial-gradient(ellipse 58% 65% at 53% 40%, rgba(127,181,189,.14), transparent 72%),
+    radial-gradient(ellipse 70% 75% at 84% 30%, rgba(152,135,201,.10), transparent 75%),
+    radial-gradient(ellipse 60% 60% at 14% 72%, rgba(196,164,105,.07), transparent 75%),
+    #050507;
   transform: translate3d(-1.5%, -1%, 0) scale(1.03);
   transform-origin: center;
   animation: atmosphere-drift 34s ease-in-out infinite alternate;

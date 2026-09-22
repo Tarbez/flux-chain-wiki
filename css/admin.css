@@ -4,7 +4,12 @@
 html, body { height: 100%; }
 body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font: 400 14px/1.55 var(--sans); }
 button, input, select, textarea { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 2px; }
+/* No boxed outline anywhere: the routed site never uses one (css/focus.css, css/settings.css,
+   css/studio.css all set outline:none and shift a background/text colour instead), so admin
+   matches that rather than the generic UA ring. */
+:focus-visible { outline: none; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: hsl(var(--accent) / .6); }
+.btn:focus-visible, .link:focus-visible, .page-list button:focus-visible { background: hsl(var(--raised)); }
 
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 52px; padding: 0 20px; border-bottom: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); }
 .bar-brand { display: flex; align-items: baseline; gap: 12px; }
@@ -101,8 +106,9 @@ legend { padding: 0 0 10px; }
    ("accent is spent intentionally"). Numbered rows with a hairline top
    border are the concept page's own principle-row idiom, reused as-is
    for the sign-in ladder. It does not load the scene/WebGL runtime
-   admin.html has always kept independent of; the dot field and glow
-   below are plain CSS, evoking the same atmosphere at zero script cost.
+   admin.html has always kept independent of; the void-and-dot-ring below
+   is plain CSS standing in for it, at the same scale and screen position
+   as the real scene so the page reads as the same place, at zero script cost.
 
    The Auth Kit panel (`@deadark/ark-ui/flux-auth-ui`) ships no stylesheet
    here (scripts/auth-entry.js drops its default one on purpose): every
@@ -114,17 +120,28 @@ body.locked { overflow: auto; }
 .gate-shell {
   min-height: 100dvh; position: relative; overflow: hidden;
   background:
-    radial-gradient(120% 90% at 82% -10%, hsl(var(--accent) / .05), transparent 60%),
     radial-gradient(140% 100% at 12% 115%, hsl(var(--primary) / .04), transparent 55%),
     hsl(var(--canvas));
 }
+/* the void: a dark sphere silhouette standing in for the home scene's own black circle,
+   same right-of-centre placement so the two pages share one composition, not just one palette */
 .gate-shell::before {
-  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .3;
-  background-image: radial-gradient(hsl(var(--text-faint) / .4) 1px, transparent 1px);
-  background-size: 22px 22px;
-  mask-image: radial-gradient(60% 55% at 76% 26%, black, transparent 72%);
-  -webkit-mask-image: radial-gradient(60% 55% at 76% 26%, black, transparent 72%);
+  content: ""; position: absolute; pointer-events: none;
+  top: 50%; right: clamp(-360px, -10vw, -160px); width: min(880px, 92vw); aspect-ratio: 1;
+  transform: translateY(-50%); border-radius: 50%;
+  background: radial-gradient(circle at 42% 40%, hsl(var(--depth)) 0%, hsl(var(--canvas)) 58%, transparent 78%);
 }
+/* the ring: the home scene's radiating dot field, masked to an annulus around the void */
+.gate-shell::after {
+  content: ""; position: absolute; pointer-events: none;
+  top: 50%; right: clamp(-360px, -10vw, -160px); width: min(880px, 92vw); aspect-ratio: 1;
+  transform: translateY(-50%); border-radius: 50%; opacity: .55;
+  background-image: radial-gradient(hsl(var(--text-faint) / .55) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(circle at 42% 40%, transparent 0 39%, black 42% 64%, transparent 69%);
+  -webkit-mask-image: radial-gradient(circle at 42% 40%, transparent 0 39%, black 42% 64%, transparent 69%);
+}
+@media (max-width: 760px) { .gate-shell::before, .gate-shell::after { opacity: .35; } }
 .gate-bar { position: relative; z-index: 1; background: transparent; border-bottom: 0; }
 /* the wordmark stacks (brand, then a small tracked line beneath), matching .ark-studio-identity/.ark-wordmark on every routed page */
 .gate-bar .bar-brand { flex-direction: column; align-items: flex-start; gap: 6px; }
@@ -214,7 +231,7 @@ body.locked { overflow: auto; }
 .gate-countdown { font: 300 13px/1.6 var(--sans); }
 .gate-countdown strong { font-variant-numeric: tabular-nums; color: hsl(var(--text-strong)); }
 .gate-lastseen { margin: 0; font: 300 12px/1.5 var(--sans); color: hsl(var(--text-faint)); }
-.gate-safety { max-width: 640px; margin: 40px auto 0; padding-top: 18px; border-top: 1px solid hsl(var(--border-soft)); font: 300 12px/1.7 var(--sans); color: hsl(var(--text-faint)); }
+.gate-safety { max-width: 480px; margin: 40px 0 0; padding-top: 18px; border-top: 1px solid hsl(var(--border-soft)); font: 300 12px/1.7 var(--sans); color: hsl(var(--text-faint)); }
 
 @media (max-width: 760px) { .gate { padding-top: 64px; } .gate-safety { margin-top: 26px; } }
 @media (prefers-reduced-motion: reduce) { .gate-btn, .gate-steps li, [data-ark-auth="actions"] button { transition: none; } }

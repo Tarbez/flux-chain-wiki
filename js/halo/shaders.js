@@ -142,9 +142,10 @@ var ParticleShaders = (function () {
     '  vAlpha*=mix(1.0,.22,recessWeight*uSurface.z*uHome);',
     '  float surfaceSize=mix(2.6+aSeed*.8+crest*.5,1.1+aSeed*.45,uSurface.z*uHome);',
     '  gl_PointSize=mix(gl_PointSize,surfaceSize*uPixelRatio,recessWeight);',
-    '  vColor=mix(vec3(.43,.49,.46),vec3(.94,.96,.91),light);',
-    '  vec3 tint=vec3(.43,.76,.69)*uSurface.x+vec3(.76,.57,.78)*uSurface.z+vec3(.88,.71,.47)*uSurface.w;',
-    '  tint=mix(vec3(.58,.66,.62),tint,uHome);',
+    /* Flux Chain palette: steel-cyan body, dim cyan/violet/amber surface tints. */
+    '  vColor=mix(vec3(.24,.33,.35),vec3(.90,.93,.95),light);',
+    '  vec3 tint=vec3(.35,.58,.62)*uSurface.x+vec3(.56,.50,.74)*uSurface.z+vec3(.77,.64,.41)*uSurface.w;',
+    '  tint=mix(vec3(.40,.40,.48),tint,uHome);',
     '  vColor=mix(vColor,tint*(.8+sheetLight*.2),recessWeight);',
     '  vColor=mix(vColor,mix(vec3(.12,.19,.17),tint*.42,recessWeight),uLightTheme);',
     '  vAlpha*=mix(1.0,1.65,uLightTheme);',

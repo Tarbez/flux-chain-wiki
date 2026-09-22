@@ -1,53 +1,132 @@
-/* Home's editorial block and its single primary action. */
+/* Home: the manifest-lattice hero. Monospace, hairline rules, cyan accent.
+   The hero copy block is centred in the stage with a soft veil behind it,
+   the readout strip is pinned to the foot of the viewport. */
+
+/* --- the veil: the mesh dims behind the copy, as behind clean.html's lattice */
+.hero-alive[data-page="zero"] .ark-hero-body::before {
+ content:"";
+ position:absolute;
+ left:50%; top:50%;
+ transform:translate(-50%,-50%);
+ width:min(1100px,128cqw);
+ height:min(760px,118%);
+ background:radial-gradient(ellipse 50% 50% at 50% 50%,
+             rgba(5,5,7,.93) 0%,
+             rgba(5,5,7,.78) 38%,
+             rgba(5,5,7,.28) 66%,
+             rgba(5,5,7,0) 82%);
+ z-index:-1;
+ pointer-events:none;
+}
+
 .hero-alive[data-page="zero"] .ark-hero-body {
- left:clamp(24px,5cqw,88px) !important;
- bottom:clamp(76px,9cqh,100px) !important;
- max-width:min(44cqw,560px) !important;
+ left:50% !important;
+ bottom:auto !important;
+ top:46% !important;
+ transform:translate(-50%,-50%);
+ max-width:min(92cqw,760px) !important;
+ text-align:center;
+ pointer-events:none;
 }
 .hero-alive[data-page="zero"] .ark-hero-eyebrow {
- margin-bottom:20px; font:400 10px/1.5 var(--ark-font); letter-spacing:.13em; color:#b9c9bf !important;
+ display:flex; align-items:center; justify-content:center; gap:14px;
+ margin-bottom:22px; font:400 9.5px/1.5 var(--ark-font);
+ letter-spacing:.44em; text-indent:.44em; text-transform:uppercase; color:#6b6b76 !important;
+}
+.hero-alive[data-page="zero"] .ark-hero-eyebrow::before,
+.hero-alive[data-page="zero"] .ark-hero-eyebrow::after {
+ content:""; width:32px; height:1px; background:#1a1a22;
 }
 .hero-alive[data-page="zero"] .ark-hero-title {
- max-width:7.4em; font:300 clamp(42px,4.6cqw,72px)/1.02 var(--ark-font);
- letter-spacing:-.055em; margin:0 0 22px; color:#e5eee7;
+ max-width:none; margin:0 0 22px;
+ font:400 clamp(34px,7cqw,82px)/1.02 var(--ark-font);
+ letter-spacing:-.028em; color:#eaeaef;
 }
+.hero-alive[data-page="zero"] .ark-hero-title em { font-style:normal; color:#7fb5bd; }
 .hero-alive[data-page="zero"] .ark-hero-copy {
- max-width:35em; font:300 clamp(14px,1.05cqw,16px)/1.75 var(--ark-font);
- color:#bccac1; text-wrap:pretty;
+ max-width:56ch; margin-inline:auto;
+ font:400 clamp(11.5px,1cqw,12.5px)/1.9 var(--ark-font);
+ color:#9a9aa6; text-wrap:pretty;
 }
-#scene .home-primary-cta {
- display:inline-flex; align-items:center; justify-content:space-between; gap:30px;
- min-height:48px; margin-top:28px; padding:0;
- pointer-events:auto; border:0; border-radius:3px;
- background:none; color:hsl(var(--text-strong)) !important;
- font:400 13px/1.4 var(--ark-font); letter-spacing:.01em; text-decoration:none;
- transition:background-color 200ms ease,transform 200ms ease;
+
+/* --- actions: primary (ink face) + ghost (hairline) ----------------------- */
+.home-hero-actions { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:34px; pointer-events:auto; }
+#scene .home-primary-cta,
+#scene .home-ghost-cta {
+ display:inline-block; padding:14px 28px;
+ font:400 10px/1 var(--ark-font); letter-spacing:.24em; text-indent:.24em; text-transform:uppercase;
+ text-decoration:none; border-radius:2px; cursor:pointer;
+ transition:background-color .22s ease,color .22s ease,border-color .22s ease,transform .22s ease;
 }
-.home-cta-arrow { display:inline-grid; place-items:center; width:38px; height:38px; border-radius:50%; background:hsl(var(--text-strong) / .10); font-size:18px; transition:transform 200ms ease; }
-#scene .home-primary-cta:hover { background:none; transform:translateY(-2px); }
-.home-primary-cta:hover .home-cta-arrow { transform:translate(2px,-2px); }
-#scene .home-primary-cta:focus-visible { background:none; color:hsl(var(--text-strong)) !important; text-decoration:underline; text-underline-offset:4px; }
+#scene .home-primary-cta { background:#eaeaef; color:#050507 !important; border:1px solid #eaeaef; }
+#scene .home-primary-cta:hover,
+#scene .home-primary-cta:focus-visible { background:#fff; border-color:#fff; outline:none; }
+#scene .home-ghost-cta { background:transparent; color:#9a9aa6 !important; border:1px solid #26262f; }
+#scene .home-ghost-cta:hover,
+#scene .home-ghost-cta:focus-visible { color:#eaeaef !important; border-color:#42424f; outline:none; }
+#scene .home-primary-cta:active,
+#scene .home-ghost-cta:active { transform:translateY(1px); }
+
+/* --- the readout: four stat cells on a hairline grid ---------------------- */
+.home-readout {
+ position:absolute; left:50%; bottom:max(22px,3cqh); transform:translateX(-50%);
+ z-index:4; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px;
+ width:min(1240px,calc(100% - 44px));
+ background:rgba(26,26,34,.92); border:1px solid rgba(26,26,34,.92);
+ pointer-events:none;
+}
+.home-readout-item { background:rgba(5,5,7,.9); padding:12px 10px; text-align:center; min-width:0; }
+.home-readout-k {
+ display:block; margin-bottom:6px;
+ font:400 8.5px/1 var(--ark-font); letter-spacing:.24em; text-indent:.24em; text-transform:uppercase;
+ color:#6b6b76;
+}
+.home-readout-v {
+ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+ font:400 10.5px/1.4 var(--ark-font); letter-spacing:.1em; text-transform:uppercase;
+ color:#eaeaef;
+}
+.home-readout-v.c-cyan { color:#7fb5bd; }
+.home-readout-v.c-amber { color:#c4a469; }
+.home-readout-v.c-violet { color:#9887c9; }
+
+/* --- the registry invitation card, top right ------------------------------ */
+.hero-alive[data-page="zero"] .corner-navigation { bottom:96px; }
 .hero-alive[data-page="zero"] .theory-invitation { top:clamp(120px,19cqh,180px); right:clamp(24px,5cqw,88px); width:184px; gap:13px; }
-.theory-invitation .theory-invitation-label { font-size:8px; letter-spacing:.14em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-.theory-invitation strong { font-size:22px; line-height:1.3; letter-spacing:-.025em; color:hsl(var(--text-strong)); text-wrap:balance; }
-.theory-invitation .theory-invitation-link { font-size:10px; color:hsl(var(--text-muted)); margin-top:3px; }
-.theory-invitation:hover .theory-invitation-link { color:hsl(var(--text-strong)); }
+.theory-invitation .theory-invitation-label { font-size:8px; letter-spacing:.24em; text-transform:uppercase; color:#6b6b76; }
+.theory-invitation strong { font-size:22px; line-height:1.3; letter-spacing:-.025em; color:#eaeaef; text-wrap:balance; }
+.theory-invitation .theory-invitation-link { font-size:10px; color:#6b6b76; margin-top:3px; }
+.theory-invitation:hover .theory-invitation-link { color:#eaeaef; }
 
 @media(max-width:760px) {
- .hero-alive[data-page="zero"] .theory-invitation { top:108px; right:24px; width:155px; gap:8px; }
- .theory-invitation strong { font-size:18px; }
- .hero-alive[data-page="zero"] .ark-hero-body { left:24px !important; bottom:165px !important; max-width:calc(100% - 48px) !important; }
- .hero-alive[data-page="zero"] .ark-hero-title { font-size:clamp(38px,8cqw,54px); margin-bottom:16px; max-width:7.4em; }
+ .hero-alive[data-page="zero"] .ark-hero-body { top:44% !important; max-width:calc(100% - 40px) !important; }
+ .hero-alive[data-page="zero"] .ark-hero-title { font-size:clamp(32px,10cqw,54px); margin-bottom:16px; }
  .hero-alive[data-page="zero"] .ark-hero-eyebrow { font-size:8px; margin-bottom:14px; }
- .hero-alive[data-page="zero"] .ark-hero-copy { max-width:32em; font-size:13px; }
- #scene .home-primary-cta { margin-top:20px; }
+ .hero-alive[data-page="zero"] .ark-hero-copy { font-size:11.5px; }
+ .home-hero-actions { margin-top:22px; }
+ .home-readout { grid-template-columns:repeat(2,minmax(0,1fr)); bottom:14px; width:calc(100% - 28px); }
+ .home-readout-item { padding:8px; }
+ /* Secondary chrome steps aside on small screens; the readout and header carry the identity. */
+ .hero-alive[data-page="zero"] .theory-invitation,
+ .hero-alive[data-page="zero"] .corner-navigation { display:none; }
+ #scene .ark-wordmark { font-size:13px; }
+ .ark-studio-identity { gap:6px; }
+ .ark-studio-identity .ark-studio-label { display:none; }
+ .ark-header nav { gap:0 !important; }
+ .ark-header .ark-link { padding:0 8px !important; font-size:8px !important; letter-spacing:.1em !important; }
+ .ark-header .ark-link[href="#/experiments/lab"] { display:none; }
 }
 @media(max-height:600px) and (min-width:761px) {
- .hero-alive[data-page="zero"] .ark-hero-body { bottom:64px !important; max-width:48cqw !important; }
- .hero-alive[data-page="zero"] .ark-hero-title { font-size:38px; margin-bottom:12px; }
- .hero-alive[data-page="zero"] .ark-hero-eyebrow { margin-bottom:12px; }
- #scene .home-primary-cta { margin-top:16px; }
+ .hero-alive[data-page="zero"] .ark-hero-body { top:44% !important; }
+ .hero-alive[data-page="zero"] .ark-hero-title { font-size:clamp(28px,5cqw,52px); margin-bottom:12px; }
+ .home-hero-actions { margin-top:16px; }
+ .home-readout-item { padding:8px; }
 }
-@media(prefers-reduced-motion:reduce) { #scene .home-primary-cta,.home-cta-arrow { transition:none; } #scene .home-primary-cta:hover,.home-primary-cta:hover .home-cta-arrow { transform:none; } }
-
-@media(max-height:680px) and (max-width:760px) { .hero-alive[data-page="zero"] .theory-invitation { top:88px; } .theory-invitation strong { display:none; } }
+@media(max-height:680px) and (max-width:760px) {
+ .hero-alive[data-page="zero"] .theory-invitation { top:88px; }
+ .theory-invitation strong { display:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+ #scene .home-primary-cta,#scene .home-ghost-cta { transition:none; }
+ #scene .home-primary-cta:active,#scene .home-ghost-cta:active { transform:none; }
+}

@@ -1,17 +1,30 @@
 /* Shared identity and navigation, without an enclosing rail. */
-.ark-header { display:flex !important; justify-content:flex-end !important; border:0 !important; background:none; }
+.ark-header { display:flex !important; justify-content:flex-end !important; border:0 !important; background:rgba(5,5,7,.72); -webkit-backdrop-filter:blur(16px) saturate(120%); backdrop-filter:blur(16px) saturate(120%); border-bottom:1px solid rgba(26,26,34,.92) !important; }
 .ark-header::after { content:none; }
 .ark-header nav { display:flex; gap:8px !important; padding:0; border:0; background:none; }
-.ark-header .ark-link { min-height:44px !important; padding:0 12px; border:0; border-radius:2px; color:#9eaca2 !important; font-size:10px !important; letter-spacing:.09em !important; transition:color 180ms ease,background-color 180ms ease !important; }
-.ark-header .ark-link:hover { color:#d9e6dd !important; }
+.ark-header .ark-link { min-height:44px !important; padding:0 12px; border:0; border-radius:2px; color:#6b6b76 !important; font-size:10px !important; letter-spacing:.2em !important; text-transform:uppercase; transition:color 180ms ease,background-color 180ms ease !important; }
+.ark-header .ark-link:hover { color:#eaeaef !important; }
 @media(max-width:760px) { .ark-header { padding:14px 20px !important; } .ark-header nav { gap:0 !important; } }
+
+/* The blink-square brand mark: a hairline square with a cyan core that
+   pulses on a slow clock, like a registry heartbeat. */
+.ark-brand-mark { width:9px; height:9px; border:1px solid #6b6b76; position:relative; flex:0 0 auto; }
+.ark-brand-mark::after { content:""; position:absolute; inset:2px; background:#7fb5bd; animation:brand-blink 3.4s ease-in-out infinite; }
+@keyframes brand-blink { 0%,100% { opacity:.22; } 12% { opacity:1; } 26% { opacity:.35; } 38% { opacity:.9; } 60% { opacity:.22; } }
+
+/* The registry status pill at the end of the top bar. */
+.nav-status { display:flex; align-items:center; gap:8px; margin-left:14px; padding:6px 12px; border:1px solid rgba(26,26,34,.92); color:#6b6b76; font:400 9px var(--ark-font); letter-spacing:.22em; text-transform:uppercase; white-space:nowrap; }
+.nav-status-dot { width:5px; height:5px; background:#7cae7a; animation:status-blink 4.2s ease-in-out infinite; }
+@keyframes status-blink { 0%,100% { opacity:.25; } 14% { opacity:1; } 30% { opacity:.4; } 100% { opacity:.25; } }
+@media(max-width:760px) { .nav-status { display:none; } }
+@media (prefers-reduced-motion:reduce) { .ark-brand-mark::after,.nav-status-dot { animation:none; opacity:.72; } }
 
 /* One corner: stacked destinations at home, a return control on inner pages. */
 .corner-navigation,.hero-motion-toggle { right:max(20px,2.8cqmin); bottom:max(14px,2cqmin); }
 .corner-navigation { position:absolute; z-index:6; display:flex; flex-direction:column; align-items:flex-end; gap:0; background:none; border:0; }
 .corner-navigation[hidden] { display:none; }
-.corner-navigation a { display:flex; align-items:center; min-height:44px; padding:8px 4px; color:#c2d0c7; font:500 10px var(--ark-font); letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
-.corner-navigation a:hover { color:#e2ece5; }
+.corner-navigation a { display:flex; align-items:center; min-height:44px; padding:8px 4px; color:#9a9aa6; font:500 10px var(--ark-font); letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
+.corner-navigation a:hover { color:#eaeaef; }
 @media(max-width:760px) { .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px !important; } }
 @media(max-width:480px) { .ark-header { gap:8px !important; padding-inline:16px !important; } .ark-header .ark-link { padding-inline:7px; font-size:8px !important; letter-spacing:.06em !important; } .ark-studio-label { max-width:85px; line-height:1.5; } }
 

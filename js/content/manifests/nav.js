@@ -7,46 +7,46 @@ ArkManifest.define({
   "meta": {},
   "fields": {
     "THEORY": {
-      "label": "Header link: theory",
+      "label": "Header link: manifest",
       "kind": "line",
       "section": "Header links",
-      "value": "Theory"
+      "value": "Manifest"
     },
     "EXPERIMENTS": {
-      "label": "Header link: experiments",
+      "label": "Header link: registry",
       "kind": "line",
       "section": "Header links",
-      "value": "Experiments"
+      "value": "Registry"
     },
     "ABOUT": {
-      "label": "Header link: about",
+      "label": "Header link: observer",
       "kind": "line",
       "section": "Header links",
-      "value": "About us"
+      "value": "Observer"
     },
     "WORK": {
-      "label": "Header link: work",
+      "label": "Header link: spec",
       "kind": "line",
       "section": "Header links",
-      "value": "Work"
+      "value": "Spec"
     },
     "BRAND.NAME": {
       "label": "Wordmark",
       "kind": "line",
       "section": "Brand",
-      "value": "SUBZERO"
+      "value": "FLUX CHAIN"
     },
     "BRAND.TAGLINE": {
       "label": "Line under the wordmark",
       "kind": "line",
       "section": "Brand",
-      "value": "INDEPENDENT STUDIO"
+      "value": "MANIFEST LATTICE"
     },
     "BACK.ZERO": {
       "label": "Back to home (an arrow is added)",
       "kind": "line",
       "section": "Back button",
-      "value": "BACK TO ZERO"
+      "value": "BACK TO LATTICE"
     },
     "BACK.EXPERIMENTS": {
       "label": "Back to experiments",

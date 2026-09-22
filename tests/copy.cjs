@@ -2,9 +2,10 @@ const assert=require('node:assert/strict'), fs=require('node:fs'), vm=require('n
 // Copy lives in page manifests and is referred to by key. This reads the real manifests, patterns, resolvers and pages,
 // so a pattern or page that names a key nobody defines, or a manifest nobody uses, fails here rather than on screen.
 const manifests={}, rendered=[];
-const ArkUI={pageModules:{},register:(id,m)=>{manifests[id]=m;},alias(){},base(){},atomize(){},render:(src)=>{rendered.push(src);return {classList:{add(){}},dataset:{},querySelector:()=>({appendChild(){}})};}};
+const node=()=>({classList:{add(){}},dataset:{},appendChild(){},setAttribute(){},querySelector:()=>node(),textContent:''});
+const ArkUI={pageModules:{},register:(id,m)=>{manifests[id]=m;},alias(){},base(){},atomize(){},render:(src)=>{rendered.push(src);return node();}};
 const written=[];
-const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:()=>({dataset:{},appendChild(){},setAttribute(){}}),write:s=>written.push(s)},window:{}});
+const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{}});
 for(const file of ['js/content/manifest.js','js/ark/flux.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
 // The index loads each manifest by document.write in the browser; here we load the same files directly, in the same order.
 vm.runInContext(fs.readFileSync('js/content/manifests/index.js','utf8'),context);
@@ -50,7 +51,7 @@ assert.throws(()=>ArkCopy.resolve('DESIGN WITH DEPTH','RBODY_V1','eyebrow'),e=>/
 assert.throws(()=>ArkCopy.resolve('HOME.NOPE','RBODY_V1','text'),e=>/HOME\.NOPE.*no entry/.test(e.message)&&/manifests\/home\.js/.test(e.message));
 assert.throws(()=>ArkCopy.text('NOAREA.TITLE'),/no entry/);
 for(const words of ['Theory','HOME','home.title','DESIGN WITH DEPTH']) assert(!ArkCopy.isKey(words),words+' is words, not a key');
-assert.equal(ArkCopy.text('HOME.TITLE'),'Below the surface.');
+assert.equal(ArkCopy.text('HOME.TITLE'),'Every unit resolves.');
 assert.throws(()=>ArkManifest.define({id:'Bad',title:'x',route:'/',group:'page',fields:{}}),/id must be/);
 assert.throws(()=>ArkManifest.define({id:'ok',title:'x',route:'/',group:'page',fields:{lower:{label:'l',kind:'line',value:'v'}}}),/capitals/);
 // The runtime is the one place patterns swap keys for words; every resolver that shows copy declares it.

@@ -31,31 +31,31 @@ var Tokens = (function () {
 
   /* -- colour --------------------------------------------------------- */
   var COLOR = {
-    'canvas':      '#050606',                 /* the whole page                    */
-    'ink':         '#ffffff',                 /* pill title, CTA                   */
-    'ink-body':    '#c9c9c9',                 /* the paragraph                     */
-    'ink-eyebrow': '#8c8c8c',                 /* the breadcrumb line above it      */
-    'ink-muted':   '#b5b5b5',                 /* navigation links at rest          */
-    'cta-a':       '#f6f6f6',                 /* CTA face, top …                   */
-    'cta-b':       '#d3d3d3',                 /* … to bottom                       */
-    'cta-ink':     '#0a0a0a',                 /* CTA label                         */
-    'step-fill':   '#2a2a2a',                 /* step pill face                    */
-    'step-edge-a': '#5e5e5e',                 /* step pill border, left …          */
-    'step-edge-b': '#a5a5a5',                 /* … to right                        */
+    'canvas':      '#050507',                 /* the whole page                    */
+    'ink':         '#eaeaef',                 /* pill title, CTA                   */
+    'ink-body':    '#9a9aa6',                 /* the paragraph                     */
+    'ink-eyebrow': '#6b6b76',                 /* the breadcrumb line above it      */
+    'ink-muted':   '#6b6b76',                 /* navigation links at rest          */
+    'cta-a':       '#eaeaef',                 /* CTA face, top …                   */
+    'cta-b':       '#c9c9d2',                 /* … to bottom                       */
+    'cta-ink':     '#050507',                 /* CTA label                         */
+    'step-fill':   '#141419',                 /* step pill face                    */
+    'step-edge-a': '#3a3a46',                 /* step pill border, left …          */
+    'step-edge-b': '#6b6b76',                 /* … to right                        */
 
     /* used only by the optional components (js/resolvers/optional) */
-    'nav-edge':    '#ececec',
-    'ink-soft':    '#ebebeb',
-    'ink-handle':  '#d6d6d6',
-    'rule':        '#c0c0c0',
-    'author-edge': 'rgba(255,255,255,0.34)',
-    'dash':        'rgba(255,255,255,0.30)',
-    'dash-on':     '#ffffff'
+    'nav-edge':    '#eaeaef',
+    'ink-soft':    '#c9c9d2',
+    'ink-handle':  '#9a9aa6',
+    'rule':        '#6b6b76',
+    'author-edge': 'rgba(234,234,239,0.34)',
+    'dash':        'rgba(234,234,239,0.30)',
+    'dash-on':     '#eaeaef'
   };
 
-  /* -- type: a single family, weights carry the hierarchy -------------- */
-  var FONT = '"Albert Sans", "Avenir Next", "Helvetica Neue", -apple-system, ' +
-             'BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif';
+  /* -- type: one monospace family; weight and spacing carry hierarchy --- */
+  var FONT = 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, ' +
+             '"Liberation Mono", "Courier New", monospace';
 
   /* -- geometry ------------------------------------------------------- */
   var GEOMETRY = {

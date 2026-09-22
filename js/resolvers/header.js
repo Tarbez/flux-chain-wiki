@@ -27,7 +27,11 @@ ArkUI.register('RHEADER_V1', {
     identity.className = 'ark-studio-identity';
     identity.href = '#/';
     identity.dataset.sceneLink = 'zero';
-    identity.setAttribute('aria-label', 'Subzero — home');
+    identity.setAttribute('aria-label', 'Flux Chain — home');
+    var mark = document.createElement('span');
+    mark.className = 'ark-brand-mark';
+    mark.setAttribute('aria-hidden', 'true');
+    identity.appendChild(mark);
     var wordmark = document.createElement('span');
     wordmark.className = 'ark-wordmark';
     wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');

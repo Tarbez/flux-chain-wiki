@@ -20,11 +20,23 @@
     return node;
   }
 
-  /* A quiet charcoal field lets the silver-sage particles supply the light. */
+  /* A near-black field with faint cyan/violet/amber glows: the lattice veil. */
   var atmosphere = make('div', 'hero-atmosphere');
   atmosphere.setAttribute('aria-hidden', 'true');
-  atmosphere.dataset.source = 'subzero-charcoal';
+  atmosphere.dataset.source = 'flux-chain-lattice';
   persistent.insertBefore(atmosphere, persistent.firstChild);
+
+  /* The registry status pill, parked at the end of the top bar. */
+  var header = scene.querySelector('.ark-header');
+  if (header) {
+    var registry = make('div', 'nav-status');
+    var dot = make('span', 'nav-status-dot');
+    dot.setAttribute('aria-hidden', 'true');
+    var registryLabel = make('span');
+    registryLabel.textContent = 'Registered';
+    registry.appendChild(dot); registry.appendChild(registryLabel);
+    header.appendChild(registry);
+  }
 
   var wordTimer = 0;
 
