@@ -30,11 +30,11 @@ ArkUI.register('RHEADER_V1', {
     identity.setAttribute('aria-label', 'Subzero — home');
     var wordmark = document.createElement('span');
     wordmark.className = 'ark-wordmark';
-    wordmark.textContent = 'SUBZERO';
+    wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');
     identity.appendChild(wordmark);
     var label = document.createElement('span');
     label.className = 'ark-studio-label';
-    label.textContent = 'INDEPENDENT STUDIO';
+    label.textContent = ArkCopy.text('NAV.BRAND.TAGLINE');
     identity.appendChild(label);
     el.appendChild(identity);
   },

@@ -21,5 +21,11 @@ var ArkProps = (function () {
     return v.charAt(0) === '#' ? v : '#' + v;
   }
 
-  return { num: num, color: color };
+  /* Where copy may send a visitor: a hash route (#/...) or a same-origin path (/...). Nothing else: not javascript:, data:,
+     a protocol-relative //host, an absolute URL, or anything with whitespace or a backslash (which browsers can read as a slash). */
+  function isSiteHref(v) {
+    return typeof v === 'string' && /^(?:#[^\s\\]*|\/(?!\/)[^\s\\]*)$/.test(v);
+  }
+
+  return { num: num, color: color, isSiteHref: isSiteHref };
 })();

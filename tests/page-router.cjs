@@ -12,7 +12,7 @@ class Element {
 }
 const document={createElement:()=>new Element(),querySelector:()=>null,activeElement:null};
 const context=vm.createContext({console,document,window:{matchMedia:()=>({matches:true})},getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
-for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 (async()=>{
  const scene=new Element(),canvas=scene.appendChild(new Element()),header=scene.appendChild(new Element()),outlet=scene.appendChild(new Element());
  const loads={},mounts={},disposed={},writes=[];let resolveSlow,failConcept=true;
@@ -36,7 +36,9 @@ for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/ark/
  await router.navigate('article/from-points-to-form',{history:'none'});assert.equal(outlet.children.length,1);
  assert.equal(scene.children[0],canvas);assert.equal(scene.children[1],header);assert.equal(scene.children[2],outlet);
  assert.equal(router.resolve('#/about'),'about');
-assert.equal(router.resolve('#/work'),'work');
+// Reason this case exists: the header link was `#/work`, a catalog route whose page file had been deleted, so WORK opened a
+// page that could never load. Both legacy spellings now resolve to the lab, and the catalog assets check below keeps it so.
+assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.ArkUI.pageCatalog).includes('work'),false);
  assert.equal(router.resolve('#/experiments/lab'),'lab');assert.equal(router.resolve('#work'),'lab');
  assert(!context.ArkUI.pageCatalog.proximity.scripts.includes('js/studio.js'));
  assert(!fs.readFileSync('js/pages/experiments.js','utf8').includes('mountStudio'));

@@ -1,23 +1,37 @@
 ArkUI.pageModules.concept = {
   mount: function (host) {
-    var el = document.createElement('section');
-    el.className = 'ark-page learning-page concept-page'; el.dataset.arkPage = 'concept';
-    el.setAttribute('aria-labelledby', 'concept-title');
-    // Every link on this page opens one of the theory's own pages; the list in TheoryContent decides which.
-    function cta(entry) {
-      return '<a class="article-back" href="#/concept/' + entry.slug + '" data-scene-link="concept/' + entry.slug + '">' + entry.cta + ' <span class="cta-arrow" aria-hidden="true">↗</span></a>';
+    var el = ArkUI.el('section', 'ark-page learning-page concept-page');
+    el.dataset.arkPage = 'concept'; el.setAttribute('aria-labelledby', 'concept-title');
+    function words(role) { return ArkCopy.text('CONCEPT.' + role); }
+    // Every link on this page opens one of the theory's pages. The manifests decide which exist and where each sits.
+    function cta(manifest) {
+      var area = manifest.id.toUpperCase();
+      var a = ArkUI.el('a', 'article-back');
+      a.href = '#/concept/' + manifest.id; a.dataset.sceneLink = 'concept/' + manifest.id;
+      a.appendChild(document.createTextNode(ArkCopy.text(area + '.CTA') + ' '));
+      var arrow = ArkUI.el('span', 'cta-arrow', '↗'); arrow.setAttribute('aria-hidden', 'true');
+      a.appendChild(arrow); return a;
     }
-    var pages = TheoryContent.pages;
-    var rows = pages.filter(function (entry) { return entry.number; }).map(function (entry) {
-      return '<section><span>' + entry.number + '</span><h2>' + entry.title + '</h2>' + cta(entry) + '</section>';
-    }).join('');
-    var rail = pages.filter(function (entry) { return !entry.number; }).map(cta).join('');
-    el.innerHTML = '<div class="concept-content"><p class="learning-eyebrow">THE SUBZERO THEORY</p><h1 id="concept-title" class="learning-heading">Go beneath the surface.</h1><p class="concept-deck">A rich experience gives attention somewhere meaningful to go. We believe digital spaces can invite curiosity, deepen understanding, and make the journey itself worth taking.</p><div class="concept-principles">' + rows + '</div><nav class="concept-links" aria-label="Continue exploring">' + rail + '</nav></div>';
-    var figure = document.createElement('figure');
-    figure.className = 'concept-iceberg';
-    figure.setAttribute('data-iceberg-anchor', '');
-    figure.setAttribute('role', 'img');
-    figure.setAttribute('aria-label', 'An iceberg: a small visible peak above the water and a much larger mass below. The experience is what you see; thoughtful work gives it depth.');
+    var theory = ArkManifest.group('theory');
+    var content = ArkUI.el('div', 'concept-content');
+    content.appendChild(ArkUI.el('p', 'learning-eyebrow', words('EYEBROW')));
+    var title = ArkUI.el('h1', 'learning-heading', words('TITLE')); title.id = 'concept-title';
+    content.appendChild(title);
+    content.appendChild(ArkUI.el('p', 'concept-deck', words('DECK')));
+    var rows = ArkUI.el('div', 'concept-principles');
+    theory.filter(function (m) { return m.meta.placement === 'row'; }).forEach(function (m, i) {
+      var row = ArkUI.el('section');
+      row.appendChild(ArkUI.el('span', '', ('0' + (i + 1)).slice(-2)));
+      row.appendChild(ArkUI.el('h2', '', ArkCopy.text(m.id.toUpperCase() + '.TITLE')));
+      row.appendChild(cta(m)); rows.appendChild(row);
+    });
+    content.appendChild(rows);
+    var rail = ArkUI.el('nav', 'concept-links'); rail.setAttribute('aria-label', words('RAIL'));
+    theory.filter(function (m) { return m.meta.placement === 'rail'; }).forEach(function (m) { rail.appendChild(cta(m)); });
+    content.appendChild(rail); el.appendChild(content);
+    var figure = ArkUI.el('figure', 'concept-iceberg');
+    figure.setAttribute('data-iceberg-anchor', ''); figure.setAttribute('role', 'img');
+    figure.setAttribute('aria-label', words('ICEBERG'));
     el.appendChild(figure);
     host.appendChild(el); return el;
   }

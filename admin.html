@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; frame-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta name="referrer" content="no-referrer" />
+<meta name="robots" content="noindex" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Subzero admin</title>
+<link rel="stylesheet" href="css/themes.css" />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="locked">
+<!-- The admin is locked. This page holds the sign-in flow and the identity's signing key; the editor lives in
+     admin-app.html, which the local publish host serves only to a signed-in session, and is shown inside this
+     page once every step below has passed. Everything under #gateBody is built, from the current step, by
+     this page's own script (loaded below auth.js), the same h() pattern the editor's own script uses. -->
+<div id="gate" class="gate-shell">
+  <header class="bar gate-bar">
+    <div class="bar-brand"><strong>SUBZERO</strong><span>ADMIN</span></div>
+    <div class="bar-actions"><span id="gateStatus" class="status" role="status" aria-live="polite"></span></div>
+  </header>
+  <main class="gate">
+    <div class="gate-card">
+      <p class="gate-eyebrow">SECURE SIGN-IN</p>
+      <h1 id="gateHeading">Locked.</h1>
+      <p id="gateLead" class="gate-lead">Sign in with your DeadArk identity to edit or publish this site.</p>
+      <ol id="gateSteps" class="gate-steps"></ol>
+      <div id="gateBody" class="gate-body"></div>
+      <p id="gateNote" class="hint" role="status" aria-live="polite"></p>
+    </div>
+    <p class="gate-safety">Your recovery phrase and its signing key stay in this browser tab and are never sent
+      anywhere; only signatures and one-time codes are. Reloading or closing this tab drops them and locks the
+      admin again.</p>
+  </main>
+</div>
+<script src="js/admin/auth.js" defer></script>
+<script src="js/admin/gate.js" defer></script>
+</body>
+</html>

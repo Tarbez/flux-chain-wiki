@@ -82,8 +82,9 @@ motion paused or reduced.
 
 ## Learnings and particle titles
 
-`js/content/learnings.js` contains the lightweight article index: slug, title,
-category, reading time, and summary. Bodies live separately in
+`js/content/article-index.js` contains the lightweight article index: slug, title,
+category, reading time, and summary (`js/content/learnings.js` is the code that
+defines, validates and serializes it). Bodies live separately in
 `js/content/articles/<slug>.js` and load only when the article is opened.
 The shared article module renders a Dense Flux fence through
 `js/resolvers/learnings.js`; normal headings remain readable independently of
@@ -95,8 +96,8 @@ title edits can continue from their current pose. Font loading regenerates the
 stencil. Preview titles are session state, not edits to published articles, and
 are never interpreted as HTML.
 
-To add a learning, append metadata to the index and create its matching body file
-with `LearningContent.load(slug, { sections, numbers })`. Preview cards, catalog
+To add a learning, use the Articles list in `admin.html`, or by hand append metadata
+to the index and create its matching body file with `LearningContent.load(slug, { sections, numbers })`. Preview cards, catalog
 routes, and particle titles derive from the index. The home invitation links to the Subzero theory; article previews stay in
 the Learnings page. Keep educational examples tied to actual behavior and distinguish
 automated checks from device testing.
@@ -126,6 +127,20 @@ This is client-side hardening, not a complete security audit. Production hosting
 should deliver CSP through HTTP headers with `frame-ancestors 'none'` and add
 `X-Content-Type-Options: nosniff`. Remove `file:` allowances in a deployment-only
 policy. Browser enforcement and compatibility need deployment validation.
+
+A review of every `js/` file and `scripts/*.cjs` (script injection, XSS, router/hash
+handling, `localStorage`, the CSP itself) found no script-injection or XSS path: all
+rendered copy uses `textContent`, `page-loader.js`'s regex closes traversal/`javascript:`/
+`data:`/encoded variants, and the router rejects `__proto__`/`constructor`/`toString` as
+pages. It found two defense-in-depth gaps, both since closed: a CTA's `href` (from a
+content file) reached `window.location.assign` with no scheme check — `ArkProps.isSiteHref`
+now limits it to a hash route or a same-origin path (`tests/security.cjs`, mutation-verified);
+and the manifest index's `document.write` trusted a plain id — both the admin's generator
+(`js/admin/store.js`) and the file it wrote now refuse anything but `^[a-z][a-z0-9]*$` before
+it reaches a script tag, closed in the file the admin actually rewrites, not just the copy
+on disk. The same pass also found the header's WORK link pointed at `#/work`, a route whose
+page file had been deleted (`tests/page-router.cjs`); it now resolves to the lab, the route
+it actually leads to.
 
 ## Page layout
 
@@ -181,6 +196,10 @@ node tests/mesh-state.cjs
 node tests/proximity-geometry.cjs
 node tests/learnings.cjs
 node tests/mesh-drag.cjs
+node tests/admin.cjs
+node tests/auth-bundle.cjs
+node tests/admin-session.test.mjs
+node tests/site-bundle.test.mjs
 ```
 
 Router checks cover lazy loading, caching, DOM disposal, scroll restoration,
@@ -282,3 +301,121 @@ Particles retain their angular coordinates throughout contraction and expansion:
 no automatic spinning, twist-angle interpolation, breathing scale or surface
 zoom pulse. Direct user drag rotation remains available. Fast–slow–pause timing,
 page references, and the Theory iceberg transition are preserved.
+
+## Content
+
+Every word on the site lives in a page manifest, one file per page in
+`js/content/manifests/`. A manifest lists that page's fields (`TITLE`, `POINT1.TEXT`, ...),
+each with a label and a kind (`line` or `text`). Pages, the shell and the Flux patterns all
+read words through `ArkCopy` by key, `AREA.ROLE` in capitals, where `AREA` is the manifest's id
+(`HOME.TITLE`, `NAV.BRAND.NAME`). A Flux pattern holds the key, never the words, and writing words
+in a pattern is refused with a message saying where they belong.
+
+To change a word, edit the field in its manifest, or open `admin.html`:
+
+- Choose a page, edit its fields, and Save. Connect the project folder (Chrome or Edge) and Save
+  writes the file in place; otherwise Save downloads it to drop into `js/content/manifests/`.
+- Theory pages can be added and deleted there. A new one gets its own route and a link on the theory
+  page with no code change, because the catalog and the theory page are derived from the manifests.
+- A sheet has as many points as it has `POINT<n>.TITLE` fields; Add/Remove a point edits those.
+
+`admin.html` is a local editing tool. It never links from the site; do not deploy it.
+`js/content/manifests/index.js` is the display order and is rewritten by the admin page.
+Articles are edited in the same page (the Articles group in the sidebar: card fields, sections,
+paragraphs, the values table toggle; add and delete). Save writes `js/content/articles/<slug>.js` and
+`js/content/article-index.js` with the exact bytes `LearningContent.serializeBody/serializeIndex` produce.
+Reading order is the index order: a new article is appended, and reordering is a hand edit of the index.
+Experiments are not manifest-driven yet.
+
+## Publishing to the mesh
+
+The whole copy of the site (every page manifest and every article) is one `.flx` archive kept in an
+ark-miner-cli node and named by a signed `names/*` record: `subzero.ark` points at the archive's CID.
+An edit is a new archive and a new record version; old versions stay retrievable. The site itself stays a
+static page reading local files, so it needs no network and its Content Security Policy is unchanged.
+
+Double-click **`SUBZERO Admin.command`** (or run `node scripts/publish-host.mjs --open`). It starts the local
+publish host and opens the admin page in your browser; from then on everything is done in the page. Keep the
+window it opens running while you work (closing it stops the host); double-clicking again just reopens the page.
+A miner must be running: Ark Miner Desktop, or `npm start` in `ark-miner-cli`. The host finds it by itself (Desktop
+on 8866/5102, CLI on 8766/5002, each with its own credential file) and picks it up if it starts later; the Mesh
+panel says which miner and network it is publishing through, or that none was found. Only for a miner elsewhere:
+`--storage <STORAGE_PATH>`, or `--status`/`--pin`/`--key`. A named `--storage` folder is the only place its
+credential is looked for.
+
+```sh
+node scripts/pull-site.mjs            # dry run; add --write to replace local files. Same miner discovery.
+```
+
+Open the page through the host (the address it prints, `http://127.0.0.1:3437/admin.html`), not by opening
+`admin.html` from disk: a page opened from disk cannot reach a miner and says so, with a link.
+
+- `scripts/publish-host.mjs` serves `admin.html` from loopback and holds the miner's API credential. It
+  never holds a signing key. `--name` chooses another name than `subzero.ark`.
+- **The admin is locked until you pass three steps.** `admin.html` is only a locked page: it holds the sign-in
+  flow and nothing of the editor, shown as a ladder (Identity / Access / Code) so you can see where you are:
+  1. **Identity** — choose your DeadArk recovery file (`.auth.flx`, the same Auth Kit chat.deadark.com signs in
+     with) and enter its PIN (and password).
+  2. **Access** — the page proves that identity to the local host by signing a challenge the host made (single
+     use, 60 seconds, domain-separated so it can never be replayed as a name record), and the host checks that
+     the identity owns the site. These two steps issue only a short-lived ticket, never a session.
+  3. **Code** — a one-time code (TOTP) from an authenticator app (Google Authenticator, 1Password, Authy,
+     Aegis, or similar). The first time an identity signs in it enrolls one: the page shows a setup key and a
+     setup link to add, and also requires a short **setup code printed in the terminal window running the
+     admin** (`SUBZERO Admin.command`'s own window) — so holding someone's recovery file and PIN alone is not
+     enough to enroll an authenticator for them. Only a correct code turns the ticket into a session: an
+     HttpOnly, SameSite=Strict cookie that idles out after 30 minutes and dies after 12 hours or on sign-out.
+     Five wrong codes for one identity lock it out for a wait that doubles each time it happens again (5, 10,
+     20 minutes...), shown as a live countdown; a code already accepted is never accepted twice.
+
+  Until all three pass, the host serves **none** of the editor (`admin-app.html`, everything under `js/admin/`
+  except the two files the locked page loads, and every API but the sign-in routes): a hidden button would not
+  protect anything when the files are one request away. Anything later added under `js/admin/` is locked by
+  default. The editor then opens inside the locked page in a same-origin frame, which is how the identity's key
+  stays in the locked page's memory instead of being stored. Sign out (in the editor's top bar) or reload and
+  everything locks again; sign out asks first if you have unsaved edits. The last time an identity signed in is
+  shown on its next sign-in, so a session that was not yours stands out.
+- **Who may sign in.** Once `subzero.ark` has an owner, only that identity (a different one is refused at the door,
+  with the owner named). Before it is claimed, the first identity to sign in may claim it. If the miner cannot be
+  asked who owns the name, sign-in is refused rather than guessed. The site itself (`index.html`, `js/content/`)
+  stays public because it is the site. A session is one identity: it cannot prepare or publish as another key.
+- **Where authenticators live.** Enrolled secrets, sign-in lockout counters and a sign-in audit log (`event`,
+  `key`, timestamp — never a code, secret or PIN) are kept under `~/.subzero-admin` (files `0600`, folder `0700`),
+  outside the project so it is never published, committed or served; `--data <folder>` moves it. If that file
+  exists but cannot be read or parsed, the host refuses to start rather than treat it as empty — a silent reset
+  would let the next visitor enroll their own authenticator in place of the real one.
+- **Keys.** The identity's root key lives in a handle that never exposes its bytes, in the locked page's memory only,
+  and is dropped on sign-out or reload; nothing is written to storage and there is no separate owner key to
+  export or lose (the kit is the recovery path). The panel and envelope are `@deadark/ark-ui/flux-auth(-ui)`, the
+  `flux-bip39-v1` derivation is `flux-auth/root-from-mnemonic`, and `deadark-profile-v1` kits use
+  `deadark-identity-core/root-signing-handle`; the kit chooses which. A kit whose root cannot be proven is
+  refused, never used to sign. `js/admin/auth.js` is generated: after changing `scripts/auth-entry.js` or a shared
+  module it imports, run `node scripts/build-auth.cjs` (`tests/auth-bundle.cjs` fails while it is stale).
+- Publish needs everything saved, and asks before a version would remove a page or article that is
+  published now (a page whose saves were only downloaded can be out of date). Publishing unchanged
+  content mints no new version.
+- `scripts/lib/site-bundle.mjs` is the one place that knows how a site becomes an archive and back, and
+  it loads this project's own validators and serializers rather than copying them.
+- The name record format and its verification are the miner's own (`ark-miner-cli/src/state/name-record-validators.js`),
+  imported by sibling path, so this directory needs `ark-miner-cli/` and `shared/flx-codec/` beside it.
+- Measured on this content only: the archive is 63,061 bytes against 25,721 as JSON (about 2.5 times
+  larger), because the shared `encodeArchive` wraps every string reference in a structure. That is not the
+  `flx-learning` dense encoder the workspace's "47%" figure describes.
+
+Tests: `node tests/totp.test.mjs` (RFC 4226/6238/4648 vectors, drift, no replay), `node tests/admin-store.test.mjs`
+(the authenticator/lockout store on real disk: private files, unreadable-file refusal, persisted lockout with
+doubling), `node tests/admin-session.test.mjs` (the three-step lock; hermetic, real host, real signatures, real
+TOTP), `node tests/miner-discovery.test.mjs` (hermetic), `node tests/auth-bundle.cjs` (bundle is current, no
+second key authority), `node tests/security.cjs` (script-loading, CTA hrefs limited to this site, manifest ids
+guarded), `node tests/page-router.cjs` (routes, including the retired `#/work` link), `node tests/site-bundle.test.mjs`
+(round trip on the real content, refusals) and `node tests/publish.e2e.test.mjs`, which needs a running miner
+(`flux-miner` and `ark-miner` are the same program). Start an isolated one, for example
+`STORAGE_PATH=/tmp/sz GUN_PORT=18765 IPFS_PORT=14002 STATUS_PORT=18766 AUTH_KEYS=<key> GUN_MULTICAST=0 TLM_MANAGED=0 ARK_MINER_AUTO_EXPOSE_IP=0 ARK_MINER_NETWORK=subzero-local-test node src/cli.js start`
+in `ark-miner-cli`, then set `SUBZERO_TEST_KEY` (its `AUTH_KEYS` value), `SUBZERO_TEST_STATUS` (port 18766)
+and `SUBZERO_TEST_PIN` (port 15002, which is `IPFS_PORT` + 1000). Without a miner it prints SKIPPED, not pass.
+Not covered by an automated test: saving into a connected project folder in a real browser (the store is
+tested against a fake directory handle), replication to a second miner, and the Flux Auth client envelope
+(`flux-auth-client` `presentTo` a verifier) that chat.deadark.com also carries: it binds to a fixture-signed
+staging DAO until Batch 32.6, so a real check would prove nothing yet. The full sign-in flow (enrollment, a
+wrong code, the real lockout countdown, sign-out, and a return sign-in) was driven in headless Chrome with
+fixture kits from `flux-auth`'s `scripts/generate-founding-auth-kits.mjs` (PIN 24682468).

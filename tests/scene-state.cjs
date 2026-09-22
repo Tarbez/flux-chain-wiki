@@ -18,7 +18,7 @@ class Element {
 const context = vm.createContext({ console, ArkUI: {}, window: { matchMedia: () => ({ matches: reduced }) },
   document: { querySelector: () => null, createElement: () => new Element() },
   getComputedStyle: el => ({ opacity: el.style.opacity || '1', transform: el.style.transform || 'none' }) });
-for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js', 'js/ark/scene-state.js', 'js/ark/flux.js', 'js/scene.flux.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js','js/content/article-index.js', 'js/ark/scene-state.js', 'js/ark/flux.js', 'js/scene.flux.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 (async () => {
   const state = context.ArkUI.sceneState;
   state.selectShape('orb'); state.navigate('proximity');

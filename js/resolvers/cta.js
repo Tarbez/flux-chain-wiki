@@ -12,7 +12,10 @@
    transform). Reduced-motion turns the transitions off.
 
    Where it goes is not decided yet, so it does one of two things:
-     -H- given    navigates there.
+     -H- given    navigates there, but only within this site: a hash route (#/...)
+                  or a same-origin path (/...). Anything else, such as javascript:,
+                  data:, //host or https://..., is refused and does nothing, so copy
+                  can never turn this button into a script URL or an open redirect.
      -H- absent   fires a bubbling `ark:enter` event on the document, so
                   the destination can be wired without touching this file:
 
@@ -70,7 +73,7 @@ ArkUI.register('RCTA_V1', {
   decorate: function (el, p) {
     el.classList.add('ark-cta');                    /* hover/active states live in Tokens.css() */
     el.addEventListener('click', function () {
-      if (p.href) { window.location.assign(p.href); return; }
+      if (p.href) { if (ArkProps.isSiteHref(p.href)) window.location.assign(p.href); return; }
       document.dispatchEvent(new CustomEvent('ark:enter', { bubbles: true }));
     });
   },

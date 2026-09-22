@@ -37,18 +37,18 @@
   scene.appendChild(settings);
   var paths = make('nav', 'corner-navigation');
   paths.setAttribute('aria-label', 'Explore Subzero');
-  [['Use cases', 'concept'], ['Tutorials', 'learnings'], ['Experiments', 'proximity']].forEach(function (item) {
+  [['HOME.CORNER.USECASES', 'concept'], ['HOME.CORNER.TUTORIALS', 'learnings'], ['HOME.CORNER.EXPERIMENTS', 'proximity']].forEach(function (item) {
     var link = make('a'); link.href = router.url(item[1]); link.dataset.sceneLink = item[1];
-    link.textContent = item[0] + ' ↗'; paths.appendChild(link);
+    link.textContent = ArkCopy.text(item[0]) + ' ↗'; paths.appendChild(link);
   });
   scene.appendChild(paths);
 
   var latest = make('a', 'theory-invitation');
   latest.href = router.url('concept');
   latest.dataset.sceneLink = 'concept';
-  var latestLabel = make('span', 'theory-invitation-label'); latestLabel.textContent = 'The Subzero theory';
-  var latestTitle = make('strong'); latestTitle.textContent = 'Curiosity is our starting point.';
-  var latestFoot = make('span', 'theory-invitation-link'); latestFoot.textContent = 'Explore the theory ↗';
+  var latestLabel = make('span', 'theory-invitation-label'); latestLabel.textContent = ArkCopy.text('HOME.INVITE.LABEL');
+  var latestTitle = make('strong'); latestTitle.textContent = ArkCopy.text('HOME.INVITE.TITLE');
+  var latestFoot = make('span', 'theory-invitation-link'); latestFoot.textContent = ArkCopy.text('HOME.INVITE.LINK') + ' ↗';
   latest.appendChild(latestLabel); latest.appendChild(latestTitle); latest.appendChild(latestFoot);
   scene.appendChild(latest);
 
@@ -120,7 +120,7 @@
     toggle.hidden = current.page === 'zero';
     paths.hidden = current.page !== 'zero';
     var isArticle = current.page.indexOf('article/') === 0;
-    toggle.textContent = current.page === 'lab' ? '← EXPERIMENTS' : isArticle ? '← TUTORIALS' : isTheory ? '← THE THEORY' : '← BACK TO ZERO';
+    toggle.textContent = '← ' + ArkCopy.text(current.page === 'lab' ? 'NAV.BACK.EXPERIMENTS' : isArticle ? 'NAV.BACK.TUTORIALS' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
     toggle.setAttribute('aria-expanded', String(current.page !== 'zero'));
     toggle.setAttribute('aria-label', current.page === 'lab' ? 'Return to experiments' : current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to learnings' : isTheory ? 'Return to the theory' : 'Return to the zero hero');
     latest.hidden = current.page !== 'zero';

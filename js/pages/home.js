@@ -13,7 +13,7 @@ ArkUI.pageModules.zero = {
     var cta = document.createElement('a');
     cta.className = 'home-primary-cta';
     cta.href = '#/experiments'; cta.dataset.sceneLink = 'proximity';
-    var label = document.createElement('span'); label.textContent = 'Explore the experiments';
+    var label = document.createElement('span'); label.textContent = ArkCopy.text('HOME.CTA');
     var arrow = document.createElement('span'); arrow.className = 'home-cta-arrow';
     arrow.textContent = '↗'; arrow.setAttribute('aria-hidden', 'true');
     cta.appendChild(label); cta.appendChild(arrow);

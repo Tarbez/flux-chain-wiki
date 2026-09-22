@@ -142,6 +142,13 @@ var ArkUI = (function () {
     render: render,
     base: ArkAtomizer.base,
     atomize: ArkAtomizer.atomize,
+    /* a DOM node with text set as text, so copy from a manifest can never be read as markup */
+    el: function (tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text) node.textContent = text;
+      return node;
+    },
     parse: ArkFlux.parse,
     prefersReducedMotion: function () { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
   };

@@ -1,0 +1,224 @@
+/* Admin page. Uses the site's semantic tokens (css/themes.css); no palette of its own. */
+:root { --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; --sans: "Albert Sans", "Avenir Next", "Helvetica Neue", system-ui, sans-serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font: 400 14px/1.55 var(--sans); }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 2px; }
+
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 52px; padding: 0 20px; border-bottom: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); }
+.bar-brand { display: flex; align-items: baseline; gap: 12px; }
+.bar-brand strong { font-weight: 400; letter-spacing: .18em; color: hsl(var(--text-strong)); }
+.bar-brand span, .preview-bar, .field-key, .side-group, legend { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.bar-actions { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.status { font-size: 12px; color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 46vw; }
+.status[data-tone="ok"] { color: hsl(var(--trust)); }
+.status[data-tone="error"] { color: hsl(var(--danger)); }
+.status[data-tone="warn"] { color: hsl(var(--warning)); }
+
+.btn { padding: 7px 14px; border: 1px solid hsl(var(--border-default)); border-radius: 6px; background: hsl(var(--raised)); cursor: pointer; transition: background-color .15s, border-color .15s; }
+.btn:hover:not(:disabled) { border-color: hsl(var(--border-strong)); background: hsl(var(--nested)); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: hsl(var(--accent)); border-color: hsl(var(--accent)); color: hsl(var(--text-inverse)); font-weight: 500; }
+.btn.primary:hover:not(:disabled) { background: hsl(var(--accent-strong)); filter: brightness(1.08); }
+.btn.danger { color: hsl(var(--danger)); }
+.link { padding: 0; border: 0; background: none; color: hsl(var(--reference)); cursor: pointer; text-decoration: none; font: inherit; }
+.link:hover { color: hsl(var(--text-strong)); }
+
+.shell { display: grid; grid-template-columns: 250px minmax(0, 1fr) minmax(320px, .85fr); height: calc(100% - 52px); }
+.pages { padding: 18px 14px; border-right: 1px solid hsl(var(--border-soft)); overflow: auto; background: hsl(var(--depth)); }
+.page-list { list-style: none; margin: 0 0 22px; padding: 0; }
+.side-group { margin: 14px 8px 6px; }
+.page-list button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; text-align: left; cursor: pointer; color: hsl(var(--text)); }
+.page-list button:hover { background: hsl(var(--raised)); }
+.page-list button[aria-current="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--accent)); flex: none; }
+.new-form { padding: 14px 8px 0; border-top: 1px solid hsl(var(--border-soft)); }
+.new-form label { display: block; margin-bottom: 8px; font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.new-row { display: flex; gap: 8px; }
+.new-row input { flex: 1; min-width: 0; }
+.hint { margin: 8px 0 0; font-size: 12px; color: hsl(var(--text-faint)); }
+
+input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid hsl(var(--border-default)); border-radius: 6px; background: hsl(var(--surface)); }
+input[type="text"]:hover, input[type="password"]:hover, select:hover, textarea:hover { border-color: hsl(var(--border-strong)); }
+textarea { resize: vertical; min-height: 84px; line-height: 1.55; }
+
+.editor { padding: 22px 28px 60px; overflow: auto; }
+.editor-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; position: sticky; top: -22px; padding: 22px 0 14px; margin-top: -22px; background: hsl(var(--canvas)); z-index: 2; border-bottom: 1px solid hsl(var(--border-soft)); }
+.editor-head h1 { margin: 0 0 4px; font: 300 26px/1.2 var(--sans); letter-spacing: -.02em; color: hsl(var(--text-strong)); }
+.route { font: 500 11px/1.4 var(--mono); color: hsl(var(--text-muted)); }
+.editor-actions { display: flex; gap: 8px; flex: none; }
+fieldset { margin: 0 0 26px; padding: 0; border: 0; min-width: 0; }
+legend { padding: 0 0 10px; }
+.field { margin: 0 0 16px; }
+.field label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 6px; color: hsl(var(--text-strong)); font-size: 13px; }
+.field-key { text-transform: none; letter-spacing: .04em; white-space: nowrap; }
+.field .count { margin-top: 4px; font-size: 11px; color: hsl(var(--text-faint)); text-align: right; }
+.field.empty input, .field.empty textarea { border-color: hsl(var(--warning) / .7); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 26px; }
+.danger-zone { margin-top: 34px; padding-top: 16px; border-top: 1px solid hsl(var(--border-soft)); }
+.empty-state { color: hsl(var(--text-muted)); padding: 40px 0; }
+
+.preview { display: flex; flex-direction: column; min-width: 0; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); }
+.preview-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px solid hsl(var(--border-soft)); }
+.preview-actions { display: flex; gap: 14px; text-transform: none; letter-spacing: .04em; }
+.preview-note { margin: 0; padding: 28px 18px; color: hsl(var(--text-muted)); }
+.preview iframe[hidden], .preview-note[hidden] { display: none; }
+.preview iframe { flex: 1; width: 100%; border: 0; background: hsl(var(--canvas)); }
+
+@media (max-width: 1180px) { .shell { grid-template-columns: 220px minmax(0, 1fr); } .preview { display: none; } }
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; height: auto; }
+  .pages { border-right: 0; border-bottom: 1px solid hsl(var(--border-soft)); }
+  .editor { padding: 18px 16px 50px; }
+  .editor-head { position: static; flex-direction: column; }
+  .bar { height: auto; padding: 10px 16px; flex-wrap: wrap; }
+  body, html { height: auto; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* articles and the mesh panel */
+.section-box { margin: 0 0 18px; padding: 14px 16px 4px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface)); }
+.section-box legend { padding: 0 6px; }
+.check { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; }
+.check input { width: auto; }
+.mesh summary { cursor: pointer; font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.mesh .tools { margin: 10px 0 0; }
+.mono { font-family: var(--mono); word-break: break-all; }
+.mesh-auth { margin: 10px 0 12px; }
+.mesh-auth .ark-auth-panel { max-width: none; }
+
+/* =====================================================================
+   THE LOCKED PAGE (admin.html)
+   ---------------------------------------------------------------------
+   The same visual grammar the routed site actually uses, not an
+   approximation of it: Albert Sans (never mono) for every word of prose,
+   label and eyebrow — mono is reserved for literal data (keys, ids,
+   codes) exactly as the site itself never uses mono for copy. Primary
+   actions are text with a soft circular icon, the home page's own
+   `.home-primary-cta`/`.home-cta-arrow` recipe — never a filled accent
+   pill, because the site itself never fills a large area with accent
+   ("accent is spent intentionally"). Numbered rows with a hairline top
+   border are the concept page's own principle-row idiom, reused as-is
+   for the sign-in ladder. It does not load the scene/WebGL runtime
+   admin.html has always kept independent of; the dot field and glow
+   below are plain CSS, evoking the same atmosphere at zero script cost.
+
+   The Auth Kit panel (`@deadark/ark-ui/flux-auth-ui`) ships no stylesheet
+   here (scripts/auth-entry.js drops its default one on purpose): every
+   rule below styles its own `data-ark-auth` hooks directly, so there is
+   one design, not two stylesheets negotiating a cascade.
+   ===================================================================== */
+body.locked { overflow: auto; }
+.gate-shell[hidden] { display: none; }
+.gate-shell {
+  min-height: 100dvh; position: relative; overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 82% -10%, hsl(var(--accent) / .05), transparent 60%),
+    radial-gradient(140% 100% at 12% 115%, hsl(var(--primary) / .04), transparent 55%),
+    hsl(var(--canvas));
+}
+.gate-shell::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .3;
+  background-image: radial-gradient(hsl(var(--text-faint) / .4) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(60% 55% at 76% 26%, black, transparent 72%);
+  -webkit-mask-image: radial-gradient(60% 55% at 76% 26%, black, transparent 72%);
+}
+.gate-bar { position: relative; z-index: 1; background: transparent; border-bottom: 0; }
+/* the wordmark stacks (brand, then a small tracked line beneath), matching .ark-studio-identity/.ark-wordmark on every routed page */
+.gate-bar .bar-brand { flex-direction: column; align-items: flex-start; gap: 6px; }
+.gate-bar .bar-brand strong { font: 400 17px/1 var(--sans); letter-spacing: .18em; }
+.gate-bar .bar-brand span { font: 400 8px/1.4 var(--sans); letter-spacing: .14em; }
+.gate { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: clamp(56px, 12vh, 130px) clamp(20px, 4vw, 56px) 64px; }
+.gate-card { max-width: 480px; }
+.gate-eyebrow { margin: 0 0 18px; font: 400 10px/1.5 var(--sans); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.gate-card h1 { margin: 0 0 14px; font: 300 clamp(34px, 4.4vw, 52px)/1.05 var(--sans); letter-spacing: -.045em; color: hsl(var(--text-strong)); }
+.gate-lead { margin: 0 0 30px; max-width: 36em; font: 300 14px/1.7 var(--sans); color: hsl(var(--text-muted)); }
+
+/* the three-step ladder: the concept page's own numbered-principle-row idiom (index, hairline, title), reused verbatim */
+.gate-steps { list-style: none; margin: 0 0 28px; padding: 0; }
+.gate-steps li { position: relative; display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: baseline; padding: 11px 0; border-top: 1px solid hsl(var(--border-soft)); color: hsl(var(--text-faint)); transition: color 220ms ease; }
+.gate-steps li:last-child { border-bottom: 1px solid hsl(var(--border-soft)); }
+.gate-steps b { font: 400 10px/1.5 var(--sans); color: inherit; }
+.gate-steps .step-label { font: 400 13px/1.4 var(--sans); letter-spacing: -.005em; }
+.gate-steps li[data-state="active"] { color: hsl(var(--text-strong)); }
+.gate-steps li[data-state="active"]::before { content: ""; position: absolute; top: -1px; left: 0; height: 1px; width: 34px; background: hsl(var(--accent)); }
+.gate-steps li[data-state="done"] { color: hsl(var(--trust)); }
+.gate-steps li[data-state="done"] .step-label::after { content: " \2014 done"; font-size: 11px; color: hsl(var(--trust) / .8); }
+
+.gate-body { display: grid; gap: 18px; }
+.gate-note { font: 300 13px/1.6 var(--sans); }
+.gate-note[data-tone="error"] { color: hsl(var(--danger)); }
+.gate-note[data-tone="warn"] { color: hsl(var(--warning)); }
+.gate-note[data-tone="ok"] { color: hsl(var(--trust)); }
+
+/* ---- the Auth Kit panel: its own data-ark-auth hooks, styled as part of this page, not a second card ---- */
+[data-ark-auth="panel"] { display: grid; gap: 16px; max-width: none; }
+/* the panel's own heading repeats what #gateHeading already says at this stage; keep the hint, drop the second headline */
+[data-ark-auth="heading"] { display: none; }
+[data-ark-auth="hint"] { margin: 0; max-width: 36em; font: 300 13px/1.65 var(--sans); color: hsl(var(--text-muted)); }
+[data-ark-auth="rows"] { display: grid; gap: 10px; margin: 0; padding: 16px 18px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface)); }
+[data-ark-auth="rows"] > div { display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: baseline; }
+[data-ark-auth="rows"] dt { margin: 0; font: 400 10px/1.5 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+[data-ark-auth="rows"] dd { margin: 0; font: 13px/1.5 var(--sans); color: hsl(var(--text)); word-break: break-word; }
+[data-ark-auth="rows"] dd.ark-auth-mono { font-family: var(--mono); font-size: 12px; letter-spacing: .01em; word-break: break-all; }
+[data-ark-auth="rows"] > div[data-tone="warn"] dd { color: hsl(var(--warning)); }
+[data-ark-auth="form"] { display: grid; gap: 14px; }
+[data-ark-auth="form"] label { display: grid; gap: 7px; }
+[data-ark-auth="form"] label > span { font: 400 11px/1.4 var(--sans); color: hsl(var(--text-muted)); }
+[data-ark-auth="notice"] { margin: 0; padding: 10px 0 10px 14px; border-left: 2px solid hsl(var(--warning)); font: 300 12.5px/1.6 var(--sans); color: hsl(var(--text)); white-space: pre-wrap; }
+[data-ark-auth="notice"][data-tone="error"] { border-left-color: hsl(var(--danger)); }
+
+/* ---- one primary-action language for the whole flow: text + a soft circular icon, never a filled pill ----
+   This is `.home-primary-cta`/`.home-cta-arrow` from css/home.css, reused verbatim for the gate and the panel. */
+[data-ark-auth="actions"] { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.gate-actions { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
+[data-ark-auth="actions"] button, .gate-btn {
+  display: inline-flex; align-items: center; gap: 14px; min-height: 44px; padding: 0;
+  border: 0; background: none; color: hsl(var(--text-strong)); font: 400 13px/1.4 var(--sans);
+  letter-spacing: .01em; cursor: pointer; transition: transform 200ms ease, color 180ms ease;
+}
+[data-ark-auth="actions"] button::after, .gate-btn:not(.quiet)::after {
+  content: "\2192"; display: inline-grid; place-items: center; flex: none;
+  width: 34px; height: 34px; border-radius: 50%; background: hsl(var(--text-strong) / .1);
+  font-size: 15px; transition: transform 200ms ease;
+}
+[data-ark-auth="actions"] button:hover:not(:disabled), .gate-btn:hover:not(:disabled) { transform: translateY(-1px); }
+[data-ark-auth="actions"] button:hover:not(:disabled)::after, .gate-btn:hover:not(:disabled)::after { transform: translate(2px, -2px); }
+[data-ark-auth="actions"] button:disabled, .gate-btn:disabled { opacity: .4; cursor: default; transform: none; }
+[data-ark-auth="actions"] button[data-kind="quiet"], .gate-btn.quiet { color: hsl(var(--text-muted)); }
+[data-ark-auth="actions"] button[data-kind="quiet"]:hover:not(:disabled), .gate-btn.quiet:hover:not(:disabled) { color: hsl(var(--text-strong)); transform: none; }
+[data-ark-auth="actions"] button[data-kind="quiet"]::after { content: none; }
+
+/* authenticator enrollment: the setup key/URI and the host-window code */
+.otp-setup { display: grid; gap: 16px; padding: 18px 20px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface)); }
+.otp-setup h2 { margin: 0; font: 400 13px/1.4 var(--sans); color: hsl(var(--text-strong)); }
+.otp-setup p { margin: 0; font: 300 12.5px/1.6 var(--sans); color: hsl(var(--text-muted)); }
+.otp-key { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.otp-key code { font: 14px/1.6 var(--mono); letter-spacing: .08em; color: hsl(var(--text-strong)); word-break: break-all; }
+.copy-btn { flex: none; padding: 5px 10px; border: 1px solid hsl(var(--border-default)); border-radius: 5px; background: hsl(var(--raised)); font: 400 10px/1.4 var(--sans); letter-spacing: .04em; color: hsl(var(--text-muted)); cursor: pointer; }
+.copy-btn:hover { border-color: hsl(var(--border-strong)); color: hsl(var(--text-strong)); }
+.copy-btn[data-copied="true"] { color: hsl(var(--trust)); border-color: hsl(var(--trust) / .5); }
+
+.otp-field { display: grid; gap: 8px; }
+.otp-field > span { font: 400 11px/1.4 var(--sans); color: hsl(var(--text-muted)); }
+.otp-hostcode { max-width: 220px; font: 19px/1.4 var(--mono); letter-spacing: .28em; text-align: center; }
+
+/* six boxes for the authenticator code: large, monospace (it is literal data to key in), auto-advancing */
+.otp-digits { display: flex; gap: 8px; }
+.otp-digits input { width: 42px; height: 52px; padding: 0; text-align: center; font: 21px/1 var(--mono); }
+@media (max-width: 420px) { .otp-digits input { width: 34px; height: 44px; font-size: 17px; } }
+
+.gate-attempts { margin: 0; font: 300 12px/1.5 var(--sans); color: hsl(var(--warning)); }
+.gate-countdown { font: 300 13px/1.6 var(--sans); }
+.gate-countdown strong { font-variant-numeric: tabular-nums; color: hsl(var(--text-strong)); }
+.gate-lastseen { margin: 0; font: 300 12px/1.5 var(--sans); color: hsl(var(--text-faint)); }
+.gate-safety { max-width: 640px; margin: 40px auto 0; padding-top: 18px; border-top: 1px solid hsl(var(--border-soft)); font: 300 12px/1.7 var(--sans); color: hsl(var(--text-faint)); }
+
+@media (max-width: 760px) { .gate { padding-top: 64px; } .gate-safety { margin-top: 26px; } }
+@media (prefers-reduced-motion: reduce) { .gate-btn, .gate-steps li, [data-ark-auth="actions"] button { transition: none; } }
+
+/* the editor shown inside the locked page once every step passes */
+#app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: hsl(var(--canvas)); }
+.who { max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 11px/1.4 var(--mono); letter-spacing: .04em; color: hsl(var(--text-muted)); }

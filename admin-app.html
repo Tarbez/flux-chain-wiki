@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; frame-src 'self' file:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta name="referrer" content="no-referrer" />
+<meta name="robots" content="noindex" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Subzero content</title>
+<link rel="stylesheet" href="css/themes.css" />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+<header class="bar">
+  <div class="bar-brand"><strong>SUBZERO</strong><span>CONTENT</span></div>
+  <div class="bar-actions">
+    <span id="status" class="status" role="status" aria-live="polite"></span>
+    <button id="connect" type="button" class="btn">Connect project folder</button>
+    <span id="who" class="who" title="The identity you are signed in as"></span>
+    <button id="publish" type="button" class="btn primary" title="Publish every page and article to the mesh">Publish</button>
+    <button id="signOut" type="button" class="btn" title="Lock the admin and drop the signing key">Sign out</button>
+  </div>
+</header>
+<main class="shell">
+  <nav class="pages" aria-label="Pages">
+    <ul id="pageList" class="page-list"></ul>
+    <form id="newForm" class="new-form" autocomplete="off" novalidate>
+      <label for="newId">New theory page</label>
+      <div class="new-row">
+        <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="page-name" spellcheck="false" />
+        <button type="submit" class="btn">Add</button>
+      </div>
+      <p class="hint">Lowercase letters and digits. It gets its own route and a link on the theory page.</p>
+    </form>
+    <form id="newArticleForm" class="new-form" autocomplete="off" novalidate>
+      <label for="newSlug">New article</label>
+      <div class="new-row">
+        <input id="newSlug" type="text" inputmode="latin" placeholder="article-name" spellcheck="false" />
+        <button type="submit" class="btn">Add</button>
+      </div>
+      <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
+    </form>
+    <details id="mesh" class="new-form mesh">
+      <summary>Mesh</summary>
+      <p id="meshState" class="hint">Checking the publish host&hellip;</p>
+      <p id="meshOwner" class="hint mono"></p>
+      <div class="tools">
+        <button id="meshRefresh" type="button" class="btn">Refresh</button>
+      </div>
+      <p class="hint">Publishing is signed by the DeadArk identity you signed in with. Its key stays in the sign-in page&rsquo;s memory and is dropped when you sign out or reload.</p>
+    </details>
+  </nav>
+  <section id="editor" class="editor" aria-label="Editor"></section>
+  <aside class="preview" aria-label="Preview">
+    <div class="preview-bar">
+      <span>PREVIEW</span>
+      <span class="preview-actions"><button id="reload" type="button" class="link">Reload</button><a id="open" class="link" target="_blank" rel="noopener" href="index.html">Open page ↗</a></span>
+    </div>
+    <iframe id="frame" title="Page preview" hidden></iframe>
+    <p id="previewNote" class="preview-note" hidden>Save this page to preview it.</p>
+  </aside>
+</main>
+<!-- The site's own manifest loader, so the admin edits exactly the files the site reads. -->
+<script src="js/content/manifest.js" defer></script>
+<script src="js/content/manifests/index.js"></script>
+<script src="js/admin/env.js" defer></script>
+<script src="js/content/learnings.js" defer></script>
+<script src="js/content/article-index.js" defer></script>
+<script src="js/pages/catalog.js" defer></script>
+<script src="js/admin/store.js" defer></script>
+<script src="js/admin/publish.js" defer></script>
+<script src="js/admin/admin.js" defer></script>
+</body>
+</html>

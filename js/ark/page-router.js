@@ -15,7 +15,8 @@
     function url(page) { return '#' + catalog[page].path; }
     function resolve(hash) {
       var path = (hash || '#/').replace(/^#/, '');
-      if (path === 'work') return 'lab';
+      /* the old Work page is the lab now: `#work` and `#/work` both land there instead of on a page that no longer exists */
+      if (path === 'work' || path === '/work') return 'lab';
       if (path === 'proximity') return 'proximity';
       if (path === 'concept') return 'concept';
       if (Object.prototype.hasOwnProperty.call(catalog, path)) return path;

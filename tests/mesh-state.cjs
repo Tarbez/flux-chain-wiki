@@ -21,7 +21,7 @@ function harness({reduced=false, webgl=true, words=true}={}) {
  const document={fonts:{ready:{then(fn){fontReady=fn;}}},querySelector:()=>scene,createElement:tag=>tag==='div'?{style:{},classList:classes(),setAttribute(){},remove(){}}:canvas,hidden:false,addEventListener:(n,fn)=>events[n]=fn};
  const window={matchMedia:q=>q.includes('reduced')?media:{matches:false},devicePixelRatio:2,requestAnimationFrame:fn=>{callbacks.set(++id,fn);return id},cancelAnimationFrame:n=>callbacks.delete(n),addEventListener(){}};
  const context=vm.createContext({getComputedStyle:()=>({getPropertyValue:()=>canvasToken}),MutationObserver:class {constructor(fn){themeChange=fn}observe(){}disconnect(){}},WordGeometry:{create:(text,n)=>{if(!words)return null;const a=new Float32Array(n*3);a.fill(text.length*.001);return a;}},ArkUI:{bindMeshDrag:()=>({cancel(){}})},document,window,navigator:{hardwareConcurrency:8},performance:{now:()=>time},Float32Array,Math,Number,String});
- for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/ark/scene-state.js','js/halo/proximity.js','js/halo/surface-motion.js','js/halo/iceberg.js','js/halo/shaders.js','js/zero-webgl.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
+ for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/halo/proximity.js','js/halo/surface-motion.js','js/halo/iceberg.js','js/halo/shaders.js','js/zero-webgl.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
  const state=context.ArkUI.sceneState;
  state.subscribe(current=>{ if(events['hero:motionchange']) events['hero:motionchange']({detail:{enabled:!current.paused}}); });
 
