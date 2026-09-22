@@ -112,6 +112,11 @@
    <figure>, no content to size from), which makes measureIceberg()'s bounds.height check fail and
    leaves the iceberg at its unanchored fallback placement instead of this anchor. vh needs no container. */
 .concept-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68vh,640px); margin:0; pointer-events:none; }
+/* Generic version of the above for any other page that picks its own two
+   shape images (admin.html -> a page's Shapes tab): same box, no concept-only
+   inset variant. A page with unusual layout can still override this. */
+.page-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68vh,640px); margin:0; pointer-events:none; }
+@media(max-width:760px) { .page-iceberg { top:0; right:10%; width:80%; height:310px; } }
 .hero-alive[data-page="concept"] { --mesh-opacity:.85; --mesh-blur:0px; }
 /* With room in the left margin the onward links leave the copy and sit beside it, aligned with the studio mark.
    The page box spans the viewport so the margin is inside it; padding keeps the copy and iceberg where they were. */

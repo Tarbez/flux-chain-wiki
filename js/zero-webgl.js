@@ -122,30 +122,82 @@
   gl.enableVertexAttribArray(icebergLocation);
   gl.bindBuffer(gl.ARRAY_BUFFER, icebergBuffer);
   gl.vertexAttribPointer(icebergLocation, 4, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
-  // The faceted iceberg above is the instant fallback; if the source image
-  // loads, its brightness replaces the buffer with layered isometric blocks.
-  // The image itself is admin-editable (js/content/assets.js, id
-  // "iceberg-blocks"); assets/halo/flux-blocks.png is only the fallback
-  // for when no such asset is defined.
+  // The faceted iceberg above is the instant fallback; if a page has its own
+  // two shape images assigned (admin.html -> a page's Shapes tab, held in
+  // js/content/mesh-settings.js), their brightness replaces the buffer with
+  // the real photos once decoded. A page with no images assigned keeps its
+  // built-in orb/knot/word (zero) or reference symbol (other pages) instead:
+  // pageShapeConfig() below is what decides which.
   var icebergParams = Object.assign({}, (typeof ImageShape !== 'undefined' && ImageShape.defaults) || {},
-    (typeof ArkMeshSettings !== 'undefined' && ArkMeshSettings.get()) || {});
-  // The last decoded sample() is kept so a tuning-only change (no new image,
-  // no particle-count change) can rebuild the buffer without re-decoding.
-  var icebergSample = null;
-  function rebuildIceberg() {
-    if (contextLost) return;
+    (typeof ArkMeshSettings !== 'undefined' && ArkMeshSettings.get() && ArkMeshSettings.get().tuning) || {});
+  // Set only by an admin preview message, to show an unsaved page-shape edit
+  // immediately instead of waiting for whatever ArkMeshSettings has saved.
+  var previewPages = null;
+  function pageShapeConfig(page) {
+    var pages = previewPages || (typeof ArkMeshSettings !== 'undefined' && ArkMeshSettings.get() && ArkMeshSettings.get().pages);
+    return (pages && pages[page]) || { primary: null, surface: null, hidden: false, size: 1, x: 0, y: 0 };
+  }
+  // SurfaceMotion's own per-page profile, with its uReferenceA.w (index 8 --
+  // the iceberg/reference mix weight) forced to 1 whenever that page has a
+  // primary image configured, or forced to 0 when the admin explicitly
+  // hides the shape -- which overrides even a page (concept) whose profile
+  // forces its built-in shape on by default. Every other page keeps its
+  // original weight (0 for most, so it keeps showing its synthetic
+  // reference symbol).
+  function surfaceProfileFor(page) {
+    var profile = SurfaceMotion.forPage(page).slice();
+    var config = pageShapeConfig(page);
+    if (config.hidden) profile[8] = 0;
+    else if (config.primary) profile[8] = 1;
+    return profile;
+  }
+  // Decoded sample() functions, kept by asset id so switching between pages
+  // that reuse the same image (or re-tuning without a new image) never
+  // re-decodes anything. asset id -> sample(u,v).
+  var sampleCache = {};
+  function ensureSample(assetId, onReady) {
+    if (!assetId) { onReady(null); return; }
+    if (sampleCache[assetId]) { onReady(sampleCache[assetId]); return; }
+    var url = typeof ArkAsset !== 'undefined' && ArkAsset.dataUrl(assetId);
+    if (!url || typeof ImageShape === 'undefined') { onReady(null); return; }
+    ImageShape.load(url, function (sample) {
+      if (sample) sampleCache[assetId] = sample;
+      onReady(sample);
+    });
+  }
+  // The page these two samples were resolved for, and the samples
+  // themselves (surface may be null -- mesh two then falls back to the
+  // plain synthetic echo). null primary means "no image; use the fallback
+  // faceted geometry", the same instant-fallback the concept page always had.
+  var activeShape = { page: null, primary: null, surface: null };
+  function uploadIceberg() {
     gl.bindBuffer(gl.ARRAY_BUFFER, icebergBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, icebergSample ? ImageShape.create(primaryCount, surfaceCount, icebergSample, icebergParams)
+    gl.bufferData(gl.ARRAY_BUFFER, activeShape.primary
+      ? ImageShape.create(primaryCount, surfaceCount, activeShape.primary, activeShape.surface, icebergParams)
       : IcebergGeometry.create(primaryCount, surfaceCount), gl.STATIC_DRAW);
     icebergMeasureNeeded = true;
+  }
+  function rebuildIceberg() {
+    if (contextLost) return;
+    uploadIceberg();
     requestDraw();
   }
-  function loadIcebergImage(url) {
-    if (typeof ImageShape === 'undefined') return;
-    ImageShape.load(url, function (sample) {
-      if (!sample || contextLost) return;
-      icebergSample = sample;
-      rebuildIceberg();
+  function setActiveSamples(page, primarySample, surfaceSample) {
+    activeShape = { page: page, primary: primarySample, surface: surfaceSample };
+    if (page !== pageNow) return; // an older async decode resolved after the page moved on
+    uploadIceberg();
+    requestDraw();
+  }
+  // Resolves the page's configured images (decoding whichever are not
+  // already cached) and swaps them in once ready. Safe to call repeatedly
+  // (on every page change, and again whenever admin.html previews an edit).
+  function loadPageShape(page) {
+    var config = pageShapeConfig(page);
+    if (!config.primary) { setActiveSamples(page, null, null); return; }
+    ensureSample(config.primary, function (primarySample) {
+      if (!primarySample) { setActiveSamples(page, null, null); return; }
+      if (config.surface) ensureSample(config.surface, function (surfaceSample) { setActiveSamples(page, primarySample, surfaceSample); });
+      else setActiveSamples(page, primarySample, null);
     });
   }
   // Every buffer whose size depends on the particle count (the base sphere,
@@ -190,35 +242,59 @@
     gl.bufferData(gl.ARRAY_BUFFER, wordData, gl.DYNAMIC_DRAW);
     currentWord = ''; wordAvailable = false;
 
-    rebuildIceberg();
+    uploadIceberg();
     canvas.dataset.points = String(count);
     canvas.dataset.primaryPoints = String(primaryCount);
     canvas.dataset.surfacePoints = String(surfaceCount);
-    requestDraw();
   }
+  // No requestDraw here: this first call runs before `frame` (declared further
+  // down) is initialized, and scheduling one now would only be overwritten and
+  // orphaned. draw(start) at the bottom of this file renders the result anyway.
   rebuildParticles(
     icebergParams.primaryParticles != null ? icebergParams.primaryParticles : hardwarePrimary,
     icebergParams.surfaceParticles != null ? icebergParams.surfaceParticles : hardwareSurface
   );
-  loadIcebergImage((typeof ArkAsset !== 'undefined' && ArkAsset.dataUrl('iceberg-blocks')) || 'assets/halo/flux-blocks.png');
-  // The admin preview iframe posts an UNSAVED draft's bytes (or tuning
-  // params) here so editing shows its effect before Save writes anything --
-  // same origin only (the preview and the admin page that embeds it are
-  // always the same host).
+  loadPageShape('zero'); // the initial page, before pageNow itself exists below (see note there)
+  // The admin preview iframe posts an UNSAVED draft's asset bytes or an
+  // unsaved tuning/page-shape edit here so it shows its effect before Save
+  // writes anything -- same origin only (the preview and the admin page that
+  // embeds it are always the same host).
   window.addEventListener('message', function (event) {
     if (event.origin !== location.origin) return;
     var data = event.data;
     if (!data || typeof data !== 'object') return;
     if (data.type === 'subzero-preview-assets' && Array.isArray(data.assets)) {
-      var match = data.assets.find(function (a) { return a && a.id === 'iceberg-blocks' && a.dataBase64; });
-      if (match) loadIcebergImage('data:' + match.mime + ';base64,' + match.dataBase64);
-    } else if (data.type === 'subzero-preview-mesh' && data.params && typeof data.params === 'object') {
-      icebergParams = Object.assign({}, (typeof ImageShape !== 'undefined' && ImageShape.defaults) || {}, data.params);
-      if (icebergParams.primaryParticles !== primaryCount || icebergParams.surfaceParticles !== surfaceCount) {
-        rebuildParticles(icebergParams.primaryParticles, icebergParams.surfaceParticles);
-      } else {
-        rebuildIceberg();
-      }
+      // Re-decodes on every edit rather than trying to diff dataBase64: the
+      // admin only ever has a handful of images open, and correctness here
+      // (a stale sample never lingering) matters more than the extra decode.
+      data.assets.forEach(function (a) {
+        if (!a || !a.id || !a.dataBase64 || typeof ImageShape === 'undefined') return;
+        ImageShape.load('data:' + a.mime + ';base64,' + a.dataBase64, function (sample) {
+          if (!sample) return;
+          sampleCache[a.id] = sample;
+          var config = pageShapeConfig(pageNow);
+          if (config.primary === a.id || config.surface === a.id) loadPageShape(pageNow);
+        });
+      });
+    } else if (data.type === 'subzero-preview-mesh' && data.settings && typeof data.settings === 'object') {
+      var whole = data.settings;
+      icebergParams = Object.assign({}, (typeof ImageShape !== 'undefined' && ImageShape.defaults) || {}, whole.tuning || {});
+      previewPages = whole.pages || null;
+      // A partial params object (missing either count) means "leave the
+      // particle count alone", not "unset it": falling through to
+      // rebuildParticles(undefined, undefined) would corrupt every buffer
+      // with NaN sizes instead of just re-tuning the image's shading.
+      var nextPrimary = icebergParams.primaryParticles != null ? icebergParams.primaryParticles : primaryCount;
+      var nextSurface = icebergParams.surfaceParticles != null ? icebergParams.surfaceParticles : surfaceCount;
+      if (nextPrimary !== primaryCount || nextSurface !== surfaceCount) rebuildParticles(nextPrimary, nextSurface);
+      // A page-shape edit must show right away, not wait for the next
+      // navigation to pick up surfaceProfileFor's forcing.
+      var config = pageShapeConfig(pageNow);
+      var forced = config.hidden ? 0 : (config.primary ? 1 : SurfaceMotion.forPage(pageNow)[8]);
+      pageSurfaceNow[8] = forced; pageSurfaceTarget[8] = forced;
+      loadPageShape(pageNow);
+      icebergMeasureNeeded = true; // a size/position edit must re-measure even though the anchor box itself did not move
+      requestDraw();
     }
   });
   var surfaceTimeLocation = gl.getUniformLocation(program, 'uSurfaceTime');
@@ -274,7 +350,7 @@
   var wordTime = 1.2;
   var rotation = [0, 0];
   var pageNow = 'zero';
-  var pageSurfaceNow = SurfaceMotion.forPage('zero');
+  var pageSurfaceNow = surfaceProfileFor('zero');
   var pageSurfaceFrom = pageSurfaceNow.slice();
   var pageSurfaceTarget = pageSurfaceNow.slice();
   var placeNow = { x: 0, y: 0, scale: 1.2 };
@@ -282,16 +358,17 @@
   var icebergPlacement = [scene.clientWidth * .52 / canvas.clientWidth, 0, .7];
   var icebergMeasureNeeded = true;
   function measureIceberg() {
-    if (!icebergMeasureNeeded || pageNow !== 'concept') return;
-    var concept = scene.querySelector('[data-ark-page="concept"]');
-    var anchor = concept && concept.querySelector('[data-iceberg-anchor]');
-    if (!anchor || !anchor.getBoundingClientRect) return;
+    if (!icebergMeasureNeeded) return;
+    var host = scene.querySelector('[data-ark-page="' + pageNow + '"]');
+    var anchor = host && host.querySelector('[data-iceberg-anchor]');
+    if (!anchor || !anchor.getBoundingClientRect) { icebergMeasureNeeded = false; return; }
     var bounds = anchor.getBoundingClientRect(), rootBounds = scene.getBoundingClientRect();
     if (!bounds.width || !bounds.height) return;
+    var config = pageShapeConfig(pageNow);
     var x = bounds.left + bounds.width / 2 - rootBounds.left - scene.clientWidth / 2;
     var y = bounds.top + bounds.height / 2 - rootBounds.top - scene.clientHeight * .49;
-    icebergPlacement = [x * 2 / canvas.clientWidth, -y * 2 / canvas.clientHeight,
-      Math.min(bounds.width / (meshSize() * .90), bounds.height / (meshSize() * .90))];
+    icebergPlacement = [x * 2 / canvas.clientWidth + config.x, -y * 2 / canvas.clientHeight + config.y,
+      Math.min(bounds.width / (meshSize() * .90), bounds.height / (meshSize() * .90)) * config.size];
     icebergMeasureNeeded = false;
   }
 
@@ -481,9 +558,10 @@
     requestDraw();
     if (pageNow !== current.page || target.depth !== stateTarget || nextShape.some(function (value, index) { return value !== shapeTarget[index]; })) {
       pageSurfaceFrom = pageSurfaceNow.slice();
-      pageSurfaceTarget = SurfaceMotion.forPage(current.page);
+      pageSurfaceTarget = surfaceProfileFor(current.page);
       pageNow = current.page;
-      if (pageNow === 'concept') icebergMeasureNeeded = true;
+      icebergMeasureNeeded = true;
+      loadPageShape(pageNow);
       placeFrom = Object.assign({}, placeNow);
       stateFrom = stateNow;
       dissolveFrom = dissolveNow; burstFrom = burstNow;

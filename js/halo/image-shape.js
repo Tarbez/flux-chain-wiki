@@ -18,8 +18,11 @@
    22x22 then 40x40 shared columns, or quantised v into 10 tier rows, or
    rank-stacked solid columns capped by local brightness: all of them
    collapsed real photos into a vague fog or dotted blob. Mesh 2 (the
-   submerged echo) intentionally does NOT follow the image; it stays a
-   simple dim static echo under the waterline. */
+   submerged echo) takes an optional SECOND image: when given one, it
+   mirrors mesh 1's own mapping (sunk below the waterline instead of
+   rising above it) so each page's two shapes are two independent
+   pictures; with no second image it falls back to a plain dim static
+   echo, unrelated to the photo, as before. */
 var ImageShape = Object.freeze({
   DEPTH: .70,
   GAMMA: 1.50,
@@ -31,7 +34,13 @@ var ImageShape = Object.freeze({
      here, so this object is the one place the numbers are decided. */
   defaults: Object.freeze({
     gamma: 1.50, depth: .70,
-    lightLo: .40, lightSpan: .34, lightExp: .80, minLight: .12,
+    lightLo: .40, lightSpan: .34, lightExp: .80,
+    // .12 looked fine against the old synthetic test pattern but, measured
+    // against a real photo, painted its whole bounding rectangle as a faint
+    // visible box (every pixel gets at least this much alpha, background
+    // included). .03 keeps particles from vanishing to nothing without
+    // reintroducing that box.
+    minLight: .03,
     loPercentile: .20, hiPercentile: .95,
     yBase: .20, yScale: .80
   }),
@@ -59,14 +68,25 @@ var ImageShape = Object.freeze({
     return [pick(lows, p.loPercentile), Math.max(pick(highs, p.hiPercentile), pick(lows, p.loPercentile) + 1e-3)];
   },
 
-  create: function (primaryCount, surfaceCount, sample, params) {
+  /* surfaceSample is optional: with none, mesh 2 keeps the old synthetic
+     echo (a plain dim shape unrelated to any image); with one, it mirrors
+     mesh 1's own mapping using ITS OWN brightness range, sunk below the
+     waterline instead of rising above it. */
+  create: function (primaryCount, surfaceCount, sample, surfaceSample, params) {
     var p = Object.assign({}, this.defaults, params);
     var data = new Float32Array((primaryCount + surfaceCount) * 4);
-    var TIERS = 10, GAMMA = p.gamma, DEPTH = p.depth;
+    var GAMMA = p.gamma, DEPTH = p.depth;
     var range = this.measureRange(sample, p), lo = range[0], hi = range[1];
     function brightness(u, v) {
       var b = Math.max(0, Math.min(1, sample(u, v)));
       b = Math.max(0, Math.min(1, (b - lo) / (hi - lo)));
+      return Math.pow(b, GAMMA);
+    }
+    var surfaceRange = surfaceSample ? this.measureRange(surfaceSample, p) : null;
+    var surfaceLo = surfaceRange && surfaceRange[0], surfaceHi = surfaceRange && surfaceRange[1];
+    function surfaceBrightness(u, v) {
+      var b = Math.max(0, Math.min(1, surfaceSample(u, v)));
+      b = Math.max(0, Math.min(1, (b - surfaceLo) / (surfaceHi - surfaceLo)));
       return Math.pow(b, GAMMA);
     }
     // R2 low-discrepancy sequence: spreads particles evenly over the image
@@ -80,11 +100,21 @@ var ImageShape = Object.freeze({
       if (below && t > .80) {
         // Thin rippled water plane, identical to IcebergGeometry's: the
         // shader stretches this region across the full viewport regardless
-        // of the mesh's own content, so it must not depend on the image.
+        // of the mesh's own content, so it must not depend on either image.
         x = (((local * .61803398875) % 1) * 2 - 1) * 1.25;
         z = ((t - .8) / .2 * 2 - 1) * .62;
         y = .20 + Math.sin(x * 28 + z * 19) * .006;
         light = .45 + .30 * Math.sin(x * 16 + z * 12) ** 2;
+      } else if (below && surfaceSample) {
+        if (below) t /= .80;
+        var u2 = (0.5 + a1 * i) % 1, v2 = (0.5 + a2 * i) % 1;
+        var b2 = surfaceBrightness(u2, v2);
+        // Mirrors the primary mapping exactly, just sunk below the
+        // waterline (y negated from it) instead of rising above it.
+        x = (u2 * 2 - 1) * .90;
+        z = (b2 - .5) * DEPTH;
+        y = p.yBase - v2 * p.yScale;
+        light = Math.pow(Math.max(0, Math.min(1, (b2 - p.lightLo) / p.lightSpan)), p.lightExp);
       } else {
         if (below) t /= .80;
         var u = (0.5 + a1 * i) % 1, v = (0.5 + a2 * i) % 1;

@@ -36,7 +36,9 @@
 
   var state = { ids: ArkManifestIds.slice(), drafts: {}, saved: {}, current: null, dir: null,
                 kind: 'page', slugs: [], aDrafts: {}, aSaved: {}, aCurrent: null, cdirs: null,
-                assetIds: ArkAssetIds.slice(), assetDrafts: {}, assetSaved: {}, assetCurrent: null, assetDir: null };
+                assetIds: ArkAssetIds.slice(), assetDrafts: {}, assetSaved: {}, assetCurrent: null, assetDir: null,
+                shapeIds: [], shapeLabels: {}, shapeCurrent: null };
+  if (window.ArkMeshSettings) ArkMeshSettings.pages().forEach(function (p) { state.shapeIds.push(p.id); state.shapeLabels[p.id] = p.label; });
   state.ids.forEach(function (id) {
     var manifest = ArkManifest.get(id);
     state.drafts[id] = clone(manifest); state.saved[id] = JSON.stringify(manifest);
@@ -94,9 +96,16 @@
         h('span', { text: state.assetDrafts[id].label || id }), dirtyI(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
+    if (window.ArkMeshSettings && state.shapeIds.length) list.appendChild(h('li', { class: 'side-group', text: 'Shapes' }));
+    if (window.ArkMeshSettings) state.shapeIds.forEach(function (id) {
+      var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'shape' && id === state.shapeCurrent), 'data-shape': id, onclick: function () { selectShape(id); } },
+        h('span', { text: state.shapeLabels[id] || id }), reliefDirty() ? h('span', { class: 'dot', title: 'Tuning or a page’s images have unsaved changes' }) : null);
+      list.appendChild(h('li', {}, button));
+    });
   }
 
   function select(id) { state.kind = 'page'; state.current = id; renderList(); renderEditor(); reloadPreview(); }
+  function selectShape(id) { state.kind = 'shape'; state.shapeCurrent = id; renderList(); renderEditor(); reloadPreview(); }
 
   function selectArticle(slug) { state.kind = 'article'; state.aCurrent = slug; renderList(); renderEditor(); reloadPreview(); }
 
@@ -159,6 +168,7 @@
   function renderEditor() {
     if (state.kind === 'article') { renderArticleEditor(); return; }
     if (state.kind === 'asset') { renderAssetEditor(); return; }
+    if (state.kind === 'shape') { renderShapeEditor(); return; }
     var root = $('editor'); root.textContent = '';
     var id = state.current, manifest = state.drafts[id];
     if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
@@ -440,10 +450,6 @@
     box.appendChild(h('div', { class: 'field' }, h('label', { text: 'Replace the image' }), file));
     root.appendChild(box);
 
-    // Only this image drives the concept page's iceberg relief, so its tuning
-    // lives here rather than in a separate panel someone has to go find.
-    if (id === 'iceberg-blocks') root.appendChild(buildMeshTuningPanel());
-
     root.appendChild(h('div', { class: 'danger-zone' },
       h('button', { type: 'button', class: 'btn danger', text: 'Delete this image', onclick: deleteCurrent })));
     touch();
@@ -562,6 +568,7 @@
   function previewRoute() {
     if (state.kind === 'article') return state.aCurrent ? '/learnings/' + state.aCurrent : null;
     if (state.kind === 'asset') return state.assetCurrent ? '/concept' : null;
+    if (state.kind === 'shape') return state.shapeCurrent && ArkUI.pageCatalog[state.shapeCurrent] ? ArkUI.pageCatalog[state.shapeCurrent].path : null;
     var m = state.drafts[state.current];
     return m ? m.route : null;
   }
@@ -572,7 +579,8 @@
   function reloadPreview() {
     var route = previewRoute();
     $('open').href = previewUrl();
-    var saved = state.kind === 'article' ? state.aSaved[state.aCurrent] : state.kind === 'asset' ? state.assetSaved[state.assetCurrent] : state.saved[state.current];
+    var saved = state.kind === 'article' ? state.aSaved[state.aCurrent] : state.kind === 'asset' ? state.assetSaved[state.assetCurrent]
+      : state.kind === 'shape' ? (state.shapeCurrent ? '' : null) : state.saved[state.current];
     var ready = !!route && saved !== null && saved !== undefined;
     $('frame').hidden = !ready; $('previewNote').hidden = ready;
     if (ready) $('frame').src = 'index.html?preview=' + Date.now() + '#' + route;
@@ -588,70 +596,168 @@
     if (!assets.length) return;
     try { win.postMessage({ type: 'subzero-preview-assets', assets: assets }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
   }
-  /* Same idea as notifyPreviewAssets, for the iceberg relief's tuning numbers
-     (js/content/mesh-settings.js): a slider drag shows its effect on the
-     concept page immediately, before Save writes anything. */
-  var meshDraft = (window.ArkMeshSettings && ArkMeshSettings.get()) || (window.ArkMeshSettings && ArkMeshSettings.defaults()) || {};
+  /* Same idea as notifyPreviewAssets, for the shared relief tuning and each
+     page's two shape images (js/content/mesh-settings.js): an edit shows its
+     effect on the previewed page immediately, before Save writes anything. */
+  var meshDraft = (window.ArkMeshSettings && ArkMeshSettings.get()) || (window.ArkMeshSettings && ArkMeshSettings.defaults()) || { tuning: {}, pages: {} };
   var meshSaved = window.ArkMeshSettings ? JSON.stringify(ArkMeshSettings.sanitize(meshDraft)) : null;
   function notifyPreviewMesh() {
     var frame = $('frame'), win = frame && !frame.hidden && frame.contentWindow;
     if (!win) return;
-    try { win.postMessage({ type: 'subzero-preview-mesh', params: meshDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+    try { win.postMessage({ type: 'subzero-preview-mesh', settings: meshDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
   }
   $('frame').addEventListener('load', function () { notifyPreviewAssets(); notifyPreviewMesh(); });
   $('reload').addEventListener('click', reloadPreview);
 
-  /* ---- mesh tuning (js/content/mesh-settings.js) ---------------------- */
-  /* Built into the "iceberg-blocks" image's own editor (renderAssetEditor), right
-     next to the file picker, rather than a separate panel a person has to find:
-     that is the one image these numbers apply to, so that is where tuning them
-     belongs. Each call rebuilds the sliders (renderEditor already rebuilds the
-     whole pane on every edit), but meshDraft/meshSaved persist across rebuilds. */
+  /* ---- mesh tuning + page shapes (js/content/mesh-settings.js) ------- */
+  /* Built into each page's own "Shapes" editor (renderShapeEditor), right
+     where a person is already picking that page's two images, rather than a
+     separate panel to go find. meshDraft/meshSaved are shared module state
+     so an edit on one page's screen and Save from another never disagree. */
   function reliefDirty() { return !window.ArkMeshSettings || JSON.stringify(ArkMeshSettings.sanitize(meshDraft)) !== meshSaved; }
+  async function saveMeshDraft(button) {
+    try {
+      if (state.cdirs) {
+        await ArkAdminStore.saveMeshSettings(state.cdirs.content, meshDraft);
+        status('Saved js/content/mesh-settings-data.js', 'ok');
+      } else {
+        download('mesh-settings-data.js', ArkMeshSettings.serialize(meshDraft));
+        status('Downloaded mesh-settings-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
+      }
+    } catch (error) { status(error.message, 'error'); return; }
+    meshDraft = ArkMeshSettings.sanitize(meshDraft);
+    meshSaved = JSON.stringify(meshDraft);
+    ArkMeshSettings.define(meshDraft);
+    if (button) button.disabled = true;
+    renderList();
+  }
+  /* An image file picked right next to a shape's own select, so adding a new
+     photo never means leaving this screen for the Images list first. Reuses
+     the same decode + id rules as the standalone "add image" form. */
+  function quickAddAsset(file, onDone) {
+    readFileAsAsset(file, function (next) {
+      var id = assetIdSlug(file.name);
+      state.assetIds.push(id);
+      state.assetDrafts[id] = { id: id, label: id, mime: next.mime, dataBase64: next.dataBase64 };
+      state.assetSaved[id] = null;
+      onDone(id);
+    });
+  }
+  /* One page's two image pickers ("Primary shape image" / "Surface shape
+     image"), populated from every saved image, each with its own inline
+     upload. "None" keeps that page's built-in orb/knot/word (zero) or
+     reference symbol (other pages) -- unless "Hide this shape" is checked,
+     which removes the shape entirely, overriding even a page (Theory) whose
+     built-in shape normally shows without any image assigned. */
+  function buildShapePickers(pageId) {
+    var box = h('fieldset', {}, h('legend', { text: 'Images' }));
+    var hiddenId = 'shape-' + pageId + '-hidden';
+    var hiddenBox = h('input', { id: hiddenId, type: 'checkbox' });
+    hiddenBox.checked = !!meshDraft.pages[pageId].hidden;
+    hiddenBox.addEventListener('change', function () {
+      meshDraft.pages[pageId].hidden = hiddenBox.checked;
+      notifyPreviewMesh(); renderEditor(); renderList();
+    });
+    box.appendChild(h('div', { class: 'field field-inline' }, hiddenBox, h('label', { for: hiddenId, text: 'Hide this page’s shape entirely (no image, no built-in shape either)' })));
+    box.appendChild(h('p', { class: 'hint', text: 'Replaces this page’s built-in shape with two of your images: one rising above the waterline, one sunk below it. Leave either as None to keep the built-in look for that half.' }));
+    ['primary', 'surface'].forEach(function (slot) {
+      var id = 'shape-' + pageId + '-' + slot;
+      var select = h('select', { id: id, onchange: function () {
+        meshDraft.pages[pageId][slot] = select.value || null;
+        notifyPreviewMesh(); renderEditor(); renderList();
+      } });
+      select.appendChild(h('option', { value: '', text: 'None (built-in shape)' }));
+      state.assetIds.forEach(function (assetId) {
+        select.appendChild(h('option', { value: assetId, text: state.assetDrafts[assetId].label || assetId }));
+      });
+      select.value = meshDraft.pages[pageId][slot] || '';
+      var upload = h('input', { id: id + '-upload', type: 'file', accept: ArkAsset.mimeTypes.join(',') });
+      upload.addEventListener('change', function () {
+        var file = upload.files && upload.files[0];
+        if (!file) return;
+        quickAddAsset(file, function (assetId) {
+          meshDraft.pages[pageId][slot] = assetId;
+          notifyPreviewAssets(); notifyPreviewMesh();
+          renderEditor(); renderList();
+          status('Added "' + assetId + '" and set it as this page’s ' + slot + ' image. Save the image and Save this page’s shapes to keep it.', 'ok');
+        });
+      });
+      box.appendChild(h('div', { class: 'field' },
+        h('label', { for: id, text: slot === 'primary' ? 'Primary shape image (rises above the waterline)' : 'Surface shape image (sinks below the waterline)' }),
+        select,
+        h('label', { for: id + '-upload', class: 'hint', text: 'or upload a new image' }),
+        upload));
+    });
+    return box;
+  }
+  /* This page's own size and screen position -- independent of the shared
+     tuning below, since where a shape sits is a per-page layout choice, not
+     a look shared by every page. Stored on meshDraft.pages[pageId] itself. */
+  function buildPlacementPanel(pageId) {
+    var box = h('fieldset', { class: 'relief' }, h('legend', { text: 'Size and position' }));
+    box.appendChild(h('p', { class: 'hint', text: 'Where this page’s shape sits and how big it is. Shared tuning below still applies on top of this.' }));
+    var fields = h('div', { class: 'relief-fields' });
+    ArkMeshSettings.placementFields().forEach(function (f) {
+      var id = 'place-' + pageId + '-' + f.key;
+      var out = h('output', { for: id, text: String(meshDraft.pages[pageId][f.key]) });
+      var input = h('input', { id: id, type: 'range', min: f.min, max: f.max, step: f.step, oninput: function () {
+        meshDraft.pages[pageId][f.key] = Number(input.value);
+        out.textContent = String(meshDraft.pages[pageId][f.key]);
+        notifyPreviewMesh();
+      } });
+      input.value = meshDraft.pages[pageId][f.key];
+      fields.appendChild(h('div', { class: 'relief-field' },
+        h('div', { class: 'relief-field-head' }, h('label', { for: id, text: f.label }), out),
+        input));
+    });
+    box.appendChild(fields);
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset size and position', onclick: function () {
+      ArkMeshSettings.placementFields().forEach(function (f) { meshDraft.pages[pageId][f.key] = f.def; });
+      notifyPreviewMesh(); renderEditor();
+    } });
+    box.appendChild(h('div', { class: 'tools' }, reset));
+    return box;
+  }
   function buildMeshTuningPanel() {
-    var box = h('fieldset', { class: 'relief' }, h('legend', { text: 'Mesh tuning' }));
+    var box = h('fieldset', { class: 'relief' }, h('legend', { text: 'Shared shape tuning' }));
     if (!window.ArkMeshSettings) return box;
-    box.appendChild(h('p', { class: 'hint', text: 'Shapes the concept page’s iceberg relief from this image. Drag a slider to see it change in the preview on the right; nothing is written until Save.' }));
+    box.appendChild(h('p', { class: 'hint', text: 'Contrast, depth and particle count -- shared by every page’s shape images, not just this one. Drag a slider to see it change in the preview on the right; nothing is written until Save.' }));
     var fields = h('div', { class: 'relief-fields' });
     var save = h('button', { type: 'button', class: 'btn primary', text: 'Save' });
-    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset to defaults' });
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset tuning to defaults' });
     function refreshInputs() {
       fields.textContent = '';
       ArkMeshSettings.fields().forEach(function (f) {
         var id = 'relief-' + f.key;
-        var out = h('output', { for: id, text: String(meshDraft[f.key]) });
+        var out = h('output', { for: id, text: String(meshDraft.tuning[f.key]) });
         var input = h('input', { id: id, type: 'range', min: f.min, max: f.max, step: f.step, oninput: function () {
-          meshDraft[f.key] = Number(input.value);
-          out.textContent = String(meshDraft[f.key]);
+          meshDraft.tuning[f.key] = Number(input.value);
+          out.textContent = String(meshDraft.tuning[f.key]);
           notifyPreviewMesh(); save.disabled = !reliefDirty();
         } });
-        input.value = meshDraft[f.key];
+        input.value = meshDraft.tuning[f.key];
         fields.appendChild(h('div', { class: 'relief-field' },
           h('div', { class: 'relief-field-head' }, h('label', { for: id, text: f.label }), out),
           input));
       });
       save.disabled = !reliefDirty();
     }
-    reset.addEventListener('click', function () { meshDraft = ArkMeshSettings.defaults(); refreshInputs(); notifyPreviewMesh(); });
-    save.addEventListener('click', async function () {
-      try {
-        if (state.cdirs) {
-          await ArkAdminStore.saveMeshSettings(state.cdirs.content, meshDraft);
-          status('Saved js/content/mesh-settings-data.js', 'ok');
-        } else {
-          download('mesh-settings-data.js', ArkMeshSettings.serialize(meshDraft));
-          status('Downloaded mesh-settings-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
-        }
-      } catch (error) { status(error.message, 'error'); return; }
-      meshDraft = ArkMeshSettings.sanitize(meshDraft);
-      meshSaved = JSON.stringify(meshDraft);
-      ArkMeshSettings.define(meshDraft);
-      save.disabled = true;
-    });
+    reset.addEventListener('click', function () { meshDraft.tuning = ArkMeshSettings.defaults().tuning; refreshInputs(); notifyPreviewMesh(); });
+    save.addEventListener('click', function () { saveMeshDraft(save); });
     refreshInputs();
     box.appendChild(fields);
     box.appendChild(h('div', { class: 'tools' }, save, reset));
     return box;
+  }
+  function renderShapeEditor() {
+    var root = $('editor'); root.textContent = '';
+    var id = state.shapeCurrent;
+    if (!id || !window.ArkMeshSettings) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
+    root.appendChild(h('div', { class: 'editor-head' },
+      h('div', {}, h('h1', { text: state.shapeLabels[id] || id }), h('div', { class: 'route', text: 'js/content/mesh-settings-data.js' }))));
+    root.appendChild(buildShapePickers(id));
+    root.appendChild(buildPlacementPanel(id));
+    root.appendChild(buildMeshTuningPanel());
   }
 
   /* ---- project folder ----------------------------------------------- */

@@ -65,6 +65,15 @@ ArkUI.pageModules.zero = {
       readout.appendChild(item);
     });
     el.appendChild(readout);
+
+    // Optional: admin.html -> Home -> Shapes can give this page its own two
+    // particle-relief images instead of the built-in orb/knot/word system.
+    var figure = document.createElement('figure');
+    figure.className = 'page-iceberg';
+    figure.setAttribute('data-iceberg-anchor', '');
+    figure.setAttribute('role', 'img');
+    figure.setAttribute('aria-label', 'Decorative particle form');
+    el.appendChild(figure);
     return el;
   }
 };

@@ -1,0 +1,18 @@
+# This deploys the PUBLIC site only. admin.html/admin-app.html hold the door
+# to the signing flow (js/admin/publish.js) and are documented as
+# loopback-only, served only by scripts/publish-host.mjs on 127.0.0.1 -- they
+# must never be reachable at a public URL, so they are excluded here rather
+# than merely "not linked from the site".
+admin.html
+admin-app.html
+js/admin
+SUBZERO Admin.command
+
+# Local tooling and dev-only files: no build step needs them, and none of it
+# is meant to be fetched by a browser.
+scripts
+tests
+legacy
+archive
+README.md
+.git

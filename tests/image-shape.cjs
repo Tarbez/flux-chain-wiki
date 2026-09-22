@@ -17,7 +17,7 @@ for(let i=0;i<primary+secondary;i++){
  const y=mesh[i*4+1];
  const region=i<primary?above:i<primary+secondary*.8?below:water;
  region[0]=Math.min(region[0],y);region[1]=Math.max(region[1],y);
- assert(mesh[i*4+3]>=.11 && mesh[i*4+3]<=1);
+ assert(mesh[i*4+3]>=ctx.ImageShape.defaults.minLight-1e-6 && mesh[i*4+3]<=1);
 }
 assert(above[0]>=.20-1e-4 && above[1]>.99,'mesh one rises from the waterline');
 assert(below[1]<=.20 && below[0]<-1.27,'mesh two forms the submerged echo');
@@ -33,4 +33,15 @@ const bright=ctx.ImageShape.create(primary,secondary,()=>1);
 let dimLight=0,brightLight=0;
 for(let i=0;i<primary;i++){dimLight+=dim[i*4+3];brightLight+=bright[i*4+3];}
 assert(brightLight>dimLight*3,'image brightness reaches the light channel');
-console.log('PASS: stable two-mesh image shape, shared waterline, image brightness reaches the mesh, finite positions and light values.');
+
+// A second image for mesh 2: it must mirror mesh one's mapping (sunk below
+// the waterline, not rising above it) and use ITS OWN brightness range, not
+// leak the primary image's stretch.
+function surfaceSample(u,v){ return u; } // a plain left-to-right gradient, easy to tell apart from `sample`
+const dual=ctx.ImageShape.create(primary,secondary,sample,surfaceSample);
+let dualBelow=[Infinity,-Infinity];
+for(let i=primary;i<primary+secondary*.8;i++){const y=dual[i*4+1];dualBelow[0]=Math.min(dualBelow[0],y);dualBelow[1]=Math.max(dualBelow[1],y);}
+assert(dualBelow[1]<=.20+1e-6 && dualBelow[0]<-.55,'a second image still forms a submerged mesh, not a floating one');
+assert.notDeepEqual(Array.from(dual).slice(primary*4,(primary+10)*4),Array.from(mesh).slice(primary*4,(primary+10)*4),'the second image actually changes mesh two, not just mesh one');
+assert.deepEqual(ctx.ImageShape.create(primary,secondary,sample,surfaceSample),dual,'dual-image output is stable too');
+console.log('PASS: stable two-mesh image shape, shared waterline, image brightness reaches the mesh, finite positions and light values, independent second image for mesh two.');
