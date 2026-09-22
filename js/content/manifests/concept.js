@@ -10,25 +10,25 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE SUBZERO THEORY"
+      "value": "THE FLUX SPEC"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Go beneath the surface."
+      "value": "Four claims. Nothing else."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "A rich experience gives attention somewhere meaningful to go. We believe digital spaces can invite curiosity, deepen understanding, and make the journey itself worth taking."
+      "value": "Flux is a shared table of dense records — fetched by CID, resolved byte-identical, held by a five-node quorum. Query it, don't guess at it."
     },
     "ICEBERG": {
       "label": "Iceberg description (for screen readers)",
       "kind": "text",
       "section": "Page",
-      "value": "An iceberg: a small visible peak above the water and a much larger mass below. The experience is what you see; thoughtful work gives it depth."
+      "value": "A rotating particle form; decorative."
     },
     "RAIL": {
       "label": "Name of the links beside the page (for screen readers)",

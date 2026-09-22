@@ -14,7 +14,7 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE SUBZERO THEORY / NOTES"
+      "value": "THE FLUX SPEC / NOTES"
     },
     "TITLE": {
       "label": "Heading",

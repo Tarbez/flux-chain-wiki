@@ -52,7 +52,7 @@
   function dirty(id) { return state.saved[id] === null || JSON.stringify(state.drafts[id]) !== state.saved[id]; }
   function dirtyA(slug) { return state.aSaved[slug] === null || JSON.stringify(state.aDrafts[slug]) !== state.aSaved[slug]; }
   function dirtyI(id) { return state.assetSaved[id] === null || JSON.stringify(state.assetDrafts[id]) !== state.assetSaved[id]; }
-  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : dirty(state.current); }
+  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'mesh' ? false : dirty(state.current); }
   function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || reliefDirty(); }
 
   var statusTimer = 0;
@@ -73,30 +73,32 @@
 
   /* ---- page list ---------------------------------------------------- */
   function renderList() {
+    var meshNav = $('meshNav');
+    if (meshNav) meshNav.setAttribute('aria-current', String(state.kind === 'mesh'));
     var list = $('pageList'); list.textContent = '';
     ArkManifest.groups.forEach(function (group) {
       var ids = state.ids.filter(function (id) { return state.drafts[id].group === group; });
       if (!ids.length) return;
-      list.appendChild(h('li', { class: 'side-group', text: GROUP_NAMES[group] }));
+      list.appendChild(h('li', { class: 'side-group', 'data-icon': 'page', text: GROUP_NAMES[group] }));
       ids.forEach(function (id) {
         var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'page' && id === state.current), 'data-id': id, onclick: function () { select(id); } },
           h('span', { text: state.drafts[id].title }), dirty(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
         list.appendChild(h('li', {}, button));
       });
     });
-    if (state.slugs.length) list.appendChild(h('li', { class: 'side-group', text: 'Articles' }));
+    if (state.slugs.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'article', text: 'Articles' }));
     state.slugs.forEach(function (slug) {
       var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'article' && slug === state.aCurrent), 'data-slug': slug, onclick: function () { selectArticle(slug); } },
         h('span', { text: state.aDrafts[slug].title || slug }), dirtyA(slug) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
-    if (state.assetIds.length) list.appendChild(h('li', { class: 'side-group', text: 'Images' }));
+    if (state.assetIds.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'image', text: 'Images' }));
     state.assetIds.forEach(function (id) {
       var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'asset' && id === state.assetCurrent), 'data-asset': id, onclick: function () { selectAsset(id); } },
         h('span', { text: state.assetDrafts[id].label || id }), dirtyI(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
-    if (window.ArkMeshSettings && state.shapeIds.length) list.appendChild(h('li', { class: 'side-group', text: 'Shapes' }));
+    if (window.ArkMeshSettings && state.shapeIds.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'shape', text: 'Shapes' }));
     if (window.ArkMeshSettings) state.shapeIds.forEach(function (id) {
       var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'shape' && id === state.shapeCurrent), 'data-shape': id, onclick: function () { selectShape(id); } },
         h('span', { text: state.shapeLabels[id] || id }), reliefDirty() ? h('span', { class: 'dot', title: 'Tuning or a page’s images have unsaved changes' }) : null);
@@ -110,6 +112,8 @@
   function selectArticle(slug) { state.kind = 'article'; state.aCurrent = slug; renderList(); renderEditor(); reloadPreview(); }
 
   function selectAsset(id) { state.kind = 'asset'; state.assetCurrent = id; renderList(); renderEditor(); reloadPreview(); }
+
+  function selectMesh() { state.kind = 'mesh'; renderList(); renderEditor(); reloadPreview(); }
 
   /* ---- editor ------------------------------------------------------- */
   function sections(fields) {
@@ -169,6 +173,7 @@
     if (state.kind === 'article') { renderArticleEditor(); return; }
     if (state.kind === 'asset') { renderAssetEditor(); return; }
     if (state.kind === 'shape') { renderShapeEditor(); return; }
+    if (state.kind === 'mesh') { renderMeshEditor(); return; }
     var root = $('editor'); root.textContent = '';
     var id = state.current, manifest = state.drafts[id];
     if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
@@ -566,6 +571,7 @@
 
   /* ---- preview ------------------------------------------------------ */
   function previewRoute() {
+    if (state.kind === 'mesh') return null;
     if (state.kind === 'article') return state.aCurrent ? '/learnings/' + state.aCurrent : null;
     if (state.kind === 'asset') return state.assetCurrent ? '/concept' : null;
     if (state.kind === 'shape') return state.shapeCurrent && ArkUI.pageCatalog[state.shapeCurrent] ? ArkUI.pageCatalog[state.shapeCurrent].path : null;
@@ -578,7 +584,9 @@
   }
   function reloadPreview() {
     var route = previewRoute();
+    $('previewPath').textContent = route || '—';
     $('open').href = previewUrl();
+    $('previewNote').textContent = state.kind === 'mesh' ? 'The mesh has no live preview — see its status in the editor.' : 'Save this page to preview it.';
     var saved = state.kind === 'article' ? state.aSaved[state.aCurrent] : state.kind === 'asset' ? state.assetSaved[state.assetCurrent]
       : state.kind === 'shape' ? (state.shapeCurrent ? '' : null) : state.saved[state.current];
     var ready = !!route && saved !== null && saved !== undefined;
@@ -760,6 +768,107 @@
     root.appendChild(buildMeshTuningPanel());
   }
 
+  /* ---- mesh deployment view ------------------------------------------
+     A dedicated place to see the mesh the way it actually works: what is
+     published right now, how that differs from what is saved here, and --
+     the thing people otherwise assume wrong -- that none of it is
+     encrypted. Read-only: writing the published copy onto disk stays
+     scripts/pull-site.mjs's job, which already does that correctly with
+     real file semantics (added/changed/removed per file); reimplementing
+     a write path here would be a second place for the two to drift. */
+  function meshRow(label, value) {
+    return h('div', { class: 'mesh-row' }, h('span', { class: 'mesh-row-key', text: label }), h('span', { class: 'mesh-row-val mono', text: value || '—' }));
+  }
+  function buildMeshSecurityNote() {
+    var box = h('fieldset', { class: 'mesh-security' }, h('legend', { text: 'What’s actually protected' }));
+    box.appendChild(h('p', {}, h('strong', { text: 'Public: ' }),
+      document.createTextNode('everything published — every page, article and image — is one content-addressed archive on the mesh, unencrypted. Anyone who has the address (or finds the name record) can fetch and read all of it, the same as a public IPFS file. Publishing is distribution, not privacy.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Signed, not secret: ' }),
+      document.createTextNode('the record pointing subzero.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Actually private: ' }),
+      document.createTextNode('only your signing key, and only in this browser tab’s memory (js/admin/auth.js). It is never sent to the publish host, the miner, or the mesh, and is dropped on reload or sign-out. The sign-in gate protects who can edit and publish — it does not make the content itself confidential.')));
+    box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
+    return box;
+  }
+  function renderMeshEditor() {
+    var root = $('editor'); root.textContent = '';
+    var routeLabel = h('div', { class: 'route', text: 'P2P deployment' });
+    root.appendChild(h('div', { class: 'editor-head' },
+      h('div', {}, h('h1', { text: 'Mesh' }), routeLabel),
+      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', text: 'Refresh', onclick: function () { load(); } }))));
+
+    var statusRows = h('div', { class: 'mesh-rows' });
+    var diffText = h('p', { class: 'hint' });
+    var liveSummary = h('p', { class: 'hint' });
+    var liveList = h('ul', { class: 'mesh-list' });
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'Deployment status' }), statusRows));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'Local vs. published' }), diffText));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'What’s live on the mesh right now' }), liveSummary, liveList));
+    root.appendChild(buildMeshSecurityNote());
+
+    function fill(rows) { statusRows.textContent = ''; rows.forEach(function (r) { statusRows.appendChild(meshRow(r[0], r[1])); }); }
+
+    async function load() {
+      if (!mesh) {
+        fill([['Publish host', 'Not reachable from this copy of the page']]);
+        diffText.textContent = 'Open this page through the publish host (node scripts/publish-host.mjs) to compare.';
+        liveSummary.textContent = ''; liveList.textContent = '';
+        return;
+      }
+      fill([['Status', 'Checking…']]);
+      diffText.textContent = 'Checking…';
+      liveSummary.textContent = 'Checking…'; liveList.textContent = '';
+      var info;
+      try { info = await mesh.status(); }
+      catch (error) { fill([['Status', error.message]]); diffText.textContent = ''; liveSummary.textContent = ''; return; }
+      routeLabel.textContent = info.name + ' — P2P deployment';
+      var rows = [['Reachable', info.reachable ? 'Yes' : 'No — ' + (info.detail || '')]];
+      if (info.miner) rows.push(['Through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
+      if (info.current) {
+        rows.push(['Version', String(info.current.version)]);
+        rows.push(['Address (CID)', info.current.cid]);
+        rows.push(['Owner key', info.current.ownerPublicKey]);
+        rows.push(['Updated', info.current.updatedAt]);
+      } else rows.push(['Published', 'Not yet — Publish creates version 1.']);
+      fill(rows);
+
+      if (!info.current) {
+        diffText.textContent = 'Nothing is published yet, so everything saved here is local-only.';
+        liveSummary.textContent = 'Nothing published yet.'; liveList.textContent = '';
+        return;
+      }
+      try {
+        var pulled = await mesh.pullSite(); // { record, cid, site }
+        var site = pulled.site;
+        liveSummary.textContent = site.manifests.length + ' page(s), ' + site.articles.length + ' article(s), ' + site.assets.length + ' image(s) — all public and unencrypted (see below).';
+        liveList.textContent = '';
+        site.manifests.forEach(function (m) { liveList.appendChild(h('li', { text: (m.title || m.id) + ' — ' + (m.route || m.id) })); });
+        site.articles.forEach(function (a) { liveList.appendChild(h('li', { text: (a.title || a.slug) + ' (article)' })); });
+        site.assets.forEach(function (a) { liveList.appendChild(h('li', { text: (a.label || a.id) + ' (image)' })); });
+
+        var localPageIds = state.ids.filter(function (id) { return state.saved[id] !== null; });
+        var localArticleSlugs = state.slugs.filter(function (s) { return state.aSaved[s] !== null; });
+        var localAssetIds = state.assetIds.filter(function (id) { return state.assetSaved[id] !== null; });
+        var meshPageIds = site.manifests.map(function (m) { return m.id; });
+        var meshArticleSlugs = site.articles.map(function (a) { return a.slug; });
+        var meshAssetIds = site.assets.map(function (a) { return a.id; });
+        var notIn = function (list) { return function (x) { return list.indexOf(x) < 0; }; };
+        var added = localPageIds.filter(notIn(meshPageIds)).concat(localArticleSlugs.filter(notIn(meshArticleSlugs))).concat(localAssetIds.filter(notIn(meshAssetIds)));
+        var removed = meshPageIds.filter(notIn(localPageIds)).concat(meshArticleSlugs.filter(notIn(localArticleSlugs))).concat(meshAssetIds.filter(notIn(localAssetIds)));
+        var unsaved = state.ids.filter(dirty).length + state.slugs.filter(dirtyA).length + state.assetIds.filter(dirtyI).length + (reliefDirty() ? 1 : 0);
+        var parts = [];
+        if (added.length) parts.push(added.length + ' saved here but not on the mesh yet (' + added.join(', ') + ')');
+        if (removed.length) parts.push(removed.length + ' on the mesh but not here — Publish would remove these (' + removed.join(', ') + ')');
+        if (unsaved) parts.push(unsaved + ' unsaved edit(s) in this browser, not even written to the project folder yet');
+        diffText.textContent = parts.length ? parts.join('. ') + '.' : 'Every id saved here matches what is published. (This only compares which pages/articles/images exist, not their exact content — Publish always re-checks before it changes anything.)';
+      } catch (error) {
+        liveSummary.textContent = error.message; liveList.textContent = '';
+        diffText.textContent = 'Could not compare.';
+      }
+    }
+    load();
+  }
+
   /* ---- project folder ----------------------------------------------- */
   var supported = typeof window.showDirectoryPicker === 'function';
   function keep(handle) {
@@ -867,6 +976,7 @@
     publishing = false; button.disabled = false; refreshMesh();
   });
   $('meshRefresh').addEventListener('click', refreshMesh);
+  $('meshNav').addEventListener('click', selectMesh);
   $('signOut').addEventListener('click', function () { gate.signOut(); });
   /* the locked page asks before it signs out over unsaved work */
   window.ArkAdminApp = { unsaved: function () { return anyDirty(); } };

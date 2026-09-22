@@ -12,7 +12,7 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "ABOUT SUBZERO"
+      "value": "ABOUT FLUX CHAIN"
     },
     "TITLE": {
       "label": "Heading",
@@ -66,7 +66,7 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "EXPLORE THE SUBZERO THEORY"
+      "value": "EXPLORE THE FLUX SPEC"
     }
   }
 });

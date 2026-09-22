@@ -10,25 +10,25 @@ ArkManifest.define({
       "label": "Header link: manifest",
       "kind": "line",
       "section": "Header links",
-      "value": "Manifest"
+      "value": "Spec"
     },
     "EXPERIMENTS": {
       "label": "Header link: registry",
       "kind": "line",
       "section": "Header links",
-      "value": "Registry"
+      "value": "Demo"
     },
     "ABOUT": {
       "label": "Header link: observer",
       "kind": "line",
       "section": "Header links",
-      "value": "Observer"
+      "value": "About"
     },
     "WORK": {
       "label": "Header link: spec",
       "kind": "line",
       "section": "Header links",
-      "value": "Spec"
+      "value": "Lab"
     },
     "BRAND.NAME": {
       "label": "Wordmark",
@@ -40,13 +40,13 @@ ArkManifest.define({
       "label": "Line under the wordmark",
       "kind": "line",
       "section": "Brand",
-      "value": "MANIFEST LATTICE"
+      "value": "QUERY IT, DON'T GUESS AT IT"
     },
     "BACK.ZERO": {
       "label": "Back to home (an arrow is added)",
       "kind": "line",
       "section": "Back button",
-      "value": "BACK TO LATTICE"
+      "value": "BACK HOME"
     },
     "BACK.EXPERIMENTS": {
       "label": "Back to experiments",
@@ -64,7 +64,7 @@ ArkManifest.define({
       "label": "Back to the theory",
       "kind": "line",
       "section": "Back button",
-      "value": "THE THEORY"
+      "value": "THE SPEC"
     }
   }
 });

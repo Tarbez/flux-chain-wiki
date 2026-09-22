@@ -1,12 +1,12 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
-  "id": "depth",
-  "title": "Theory: Depth",
-  "route": "/concept/depth",
+  "id": "spec",
+  "title": "Theory: Spec",
+  "route": "/concept/spec",
   "group": "theory",
   "meta": {
-    "placement": "row",
-    "next": "proximity",
+    "placement": "rail",
+    "next": "about",
     "back": "concept"
   },
   "fields": {
@@ -14,67 +14,67 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / 02"
+      "value": "THE FLUX SPEC / QUORUM"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Fetch it. It resolves."
+      "value": "Five nodes. One ledger."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Records are CID-addressed. stable_content_cid hashes the JSON serialization of the payload, computed from the in-memory value — not from whatever bytes happen to be on disk."
+      "value": "The ledger is quorum-held: five flx-* writers hold the same records, queried through /explorer/v1, raw GUN reads off. You ask the ledger; you don't guess at it."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "READ THE CID RULES"
+      "value": "QUERY THE LEDGER"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "The hash covers the JSON, not the storage."
+      "value": "Five writers, not a public chain."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Storage can change shape entirely while every CID stays identical — provided the JSON a reader sees round-trips byte-identical."
+      "value": "Five flx-* VPS nodes act as the real writer quorum — a small, known set, not an open public network."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "An inexact round trip breaks everything."
+      "value": "Query, don't crawl."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "If the JSON a reader reconstructs isn't byte-identical to what was hashed, the CID no longer matches — and re-addresses the whole store."
+      "value": "Raw GUN reads are disabled. Records are fetched through the /explorer/v1 HTTP API instead."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "One fixed source of truth."
+      "value": "One ledger, not five opinions."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "There is no per-cell or per-observer resolution. The hash is fixed, and fetching by CID is the only way in."
+      "value": "Every node holds the same records. Asking a different node does not change what a CID resolves to."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "SEE IT WORKING"
+      "value": "ABOUT THE STUDIO"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

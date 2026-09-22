@@ -10,97 +10,97 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "THE MANIFEST LATTICE"
+      "value": "THE FLUX SPEC"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "Every unit resolves."
+      "value": "Query it, don't guess at it."
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "A fixed substrate of named dimensions. Each cell carries a short handle — the readable face of a registry entry. Approach a unit and its full manifest string resolves, dense as T203S031R5D2-F23. Sit still and the whole lattice re-rolls, the same mesh read by a different observer."
+      "value": "Every record is a reference into a shared table — dense, not spelled out. Fetch it by its CID, and the full JSON resolves, exactly as hashed. Nothing renders differently for a different reader. Five nodes hold the same ledger."
     },
     "STEP": {
       "label": "Label on the ring pill",
       "kind": "line",
       "section": "Hero",
-      "value": "T203S031R5D2-F23"
+      "value": "W392"
     },
     "CTA": {
       "label": "Main button",
       "kind": "line",
       "section": "Hero",
-      "value": "Read the manifest"
+      "value": "Fetch a Record"
     },
     "CTA.SPEC": {
       "label": "Second button",
       "kind": "line",
       "section": "Hero",
-      "value": "View the spec"
+      "value": "Read the Spec"
     },
     "READOUT.UNITS": {
       "label": "Readout label: units",
       "kind": "line",
       "section": "Readout",
-      "value": "Units"
+      "value": "Pages"
     },
     "READOUT.PAYLOAD": {
       "label": "Readout label: payload",
       "kind": "line",
       "section": "Readout",
-      "value": "Payload"
+      "value": "Weight"
     },
     "READOUT.REGISTRY": {
       "label": "Readout label: registry",
       "kind": "line",
       "section": "Readout",
-      "value": "Registry"
+      "value": "Site"
     },
     "READOUT.OBSERVER": {
       "label": "Readout label: observer",
       "kind": "line",
       "section": "Readout",
-      "value": "Observer"
+      "value": "Status"
     },
     "INVITE.LABEL": {
       "label": "Card label",
       "kind": "line",
       "section": "Theory card",
-      "value": "The registry"
+      "value": "The spec"
     },
     "INVITE.TITLE": {
       "label": "Card heading",
       "kind": "line",
       "section": "Theory card",
-      "value": "Named units, dense strings."
+      "value": "Dense, not spelled out."
     },
     "INVITE.LINK": {
       "label": "Card link (an arrow is added)",
       "kind": "line",
       "section": "Theory card",
-      "value": "View the spec"
+      "value": "Read the Spec"
     },
     "CORNER.USECASES": {
       "label": "Corner link: use cases",
       "kind": "line",
       "section": "Corner links",
-      "value": "Manifest"
+      "value": "Spec"
     },
     "CORNER.TUTORIALS": {
       "label": "Corner link: tutorials",
       "kind": "line",
       "section": "Corner links",
-      "value": "Resolutions"
+      "value": "Notes"
     },
     "CORNER.EXPERIMENTS": {
       "label": "Corner link: experiments",
       "kind": "line",
       "section": "Corner links",
-      "value": "Observer"
+      "value": "Demo"
     }
   }
 });

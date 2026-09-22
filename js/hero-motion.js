@@ -48,7 +48,7 @@
   var settings = make('div', 'site-settings');
   scene.appendChild(settings);
   var paths = make('nav', 'corner-navigation');
-  paths.setAttribute('aria-label', 'Explore Subzero');
+  paths.setAttribute('aria-label', 'Explore Flux Chain');
   [['HOME.CORNER.USECASES', 'concept'], ['HOME.CORNER.TUTORIALS', 'learnings'], ['HOME.CORNER.EXPERIMENTS', 'proximity']].forEach(function (item) {
     var link = make('a'); link.href = router.url(item[1]); link.dataset.sceneLink = item[1];
     link.textContent = ArkCopy.text(item[0]) + ' ↗'; paths.appendChild(link);

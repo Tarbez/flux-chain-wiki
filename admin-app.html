@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer" />
 <meta name="robots" content="noindex" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Subzero content</title>
+<title>Flux Chain content</title>
 <link rel="stylesheet" href="css/themes.css" />
 <link rel="stylesheet" href="css/fonts.css" />
 <link rel="stylesheet" href="css/admin.css" />
@@ -24,34 +24,41 @@
 </header>
 <main class="shell">
   <nav class="pages" aria-label="Pages">
+    <button id="meshNav" type="button" class="mesh-nav-btn" aria-current="false"><span class="icon icon-mesh"></span> Mesh</button>
     <ul id="pageList" class="page-list"></ul>
-    <form id="newForm" class="new-form" autocomplete="off" novalidate>
-      <label for="newId">New theory page</label>
-      <div class="new-row">
-        <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="page-name" spellcheck="false" />
-        <button type="submit" class="btn">Add</button>
-      </div>
-      <p class="hint">Lowercase letters and digits. It gets its own route and a link on the theory page.</p>
-    </form>
-    <form id="newArticleForm" class="new-form" autocomplete="off" novalidate>
-      <label for="newSlug">New article</label>
-      <div class="new-row">
-        <input id="newSlug" type="text" inputmode="latin" placeholder="article-name" spellcheck="false" />
-        <button type="submit" class="btn">Add</button>
-      </div>
-      <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
-    </form>
-    <form id="newAssetForm" class="new-form" autocomplete="off" novalidate>
-      <label for="newAssetFile">New image</label>
-      <img id="newAssetPreview" class="asset-preview new-asset-preview" alt="" hidden />
-      <input id="newAssetFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
-      <div class="new-row">
-        <input id="newAssetId" type="text" inputmode="latin" placeholder="image-name" spellcheck="false" />
-        <button type="submit" class="btn">Add</button>
-      </div>
-      <p class="hint">Choose a file to preview it here. Lowercase words joined by hyphens, plus a PNG, JPEG, WebP or SVG file under 3MB.</p>
-    </form>
-    <details id="mesh" class="new-form mesh">
+    <details class="add-toggle">
+      <summary>New theory page</summary>
+      <form id="newForm" class="new-form" autocomplete="off" novalidate>
+        <div class="new-row">
+          <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="page-name" spellcheck="false" />
+          <button type="submit" class="btn">Add</button>
+        </div>
+        <p class="hint">Lowercase letters and digits. It gets its own route and a link on the theory page.</p>
+      </form>
+    </details>
+    <details class="add-toggle">
+      <summary>New article</summary>
+      <form id="newArticleForm" class="new-form" autocomplete="off" novalidate>
+        <div class="new-row">
+          <input id="newSlug" type="text" inputmode="latin" placeholder="article-name" spellcheck="false" />
+          <button type="submit" class="btn">Add</button>
+        </div>
+        <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
+      </form>
+    </details>
+    <details class="add-toggle">
+      <summary>New image</summary>
+      <form id="newAssetForm" class="new-form" autocomplete="off" novalidate>
+        <img id="newAssetPreview" class="asset-preview new-asset-preview" alt="" hidden />
+        <input id="newAssetFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+        <div class="new-row">
+          <input id="newAssetId" type="text" inputmode="latin" placeholder="image-name" spellcheck="false" />
+          <button type="submit" class="btn">Add</button>
+        </div>
+        <p class="hint">Choose a file to preview it here. Lowercase words joined by hyphens, plus a PNG, JPEG, WebP or SVG file under 3MB.</p>
+      </form>
+    </details>
+    <details id="mesh" class="add-toggle mesh">
       <summary>Mesh</summary>
       <p id="meshState" class="hint">Checking the publish host&hellip;</p>
       <p id="meshOwner" class="hint mono"></p>
@@ -64,11 +71,14 @@
   <section id="editor" class="editor" aria-label="Editor"></section>
   <aside class="preview" aria-label="Preview">
     <div class="preview-bar">
-      <span>PREVIEW</span>
-      <span class="preview-actions"><button id="reload" type="button" class="link">Reload</button><a id="open" class="link" target="_blank" rel="noopener" href="index.html">Open page ↗</a></span>
+      <span class="preview-bar-label">Preview</span>
+      <code id="previewPath" class="preview-path"></code>
+      <span class="preview-actions"><button id="reload" type="button" class="link">Reload</button><a id="open" class="link" target="_blank" rel="noopener" href="index.html">Open ↗</a></span>
     </div>
-    <iframe id="frame" title="Page preview" hidden></iframe>
-    <p id="previewNote" class="preview-note" hidden>Save this page to preview it.</p>
+    <div class="preview-frame">
+      <iframe id="frame" title="Page preview" hidden></iframe>
+      <p id="previewNote" class="preview-note" hidden>Save this page to preview it.</p>
+    </div>
   </aside>
 </main>
 <!-- The site's own manifest loader, so the admin edits exactly the files the site reads. -->

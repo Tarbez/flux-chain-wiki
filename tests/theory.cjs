@@ -8,9 +8,9 @@ for(const id of vm.runInContext('ArkManifestIds',context)) vm.runInContext(fs.re
 for(const file of ['js/content/learnings.js','js/content/article-index.js','js/ark/vendor/engines.js','js/ark/scene-state.js','js/pages/catalog.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 const {ArkManifest,ArkCopy,ArkUI}=vm.runInContext('({ArkManifest,ArkCopy,ArkUI})',context);
 const theory=ArkManifest.group('theory');
-assert.equal(theory.length,5,'three principles plus two rail links');
+assert.equal(theory.length,6,'three principles plus three rail links');
 assert.equal(theory.filter(m=>m.meta.placement==='row').length,3);
-assert.equal(theory.filter(m=>m.meta.placement==='rail').length,2);
+assert.equal(theory.filter(m=>m.meta.placement==='rail').length,3);
 const scene=ArkUI.createSceneState('zero');
 for(const m of theory){
   const key='concept/'+m.id, route=ArkUI.pageCatalog[key], area=m.id.toUpperCase();
@@ -29,7 +29,7 @@ const concept=fs.readFileSync('js/pages/concept.js','utf8');
 assert(!/data-scene-link="(learnings|about|proximity)"/.test(concept));
 // A page the admin adds later routes with no code change: prove it with a manifest that exists nowhere on disk.
 vm.runInContext(`ArkManifest.define(${JSON.stringify({id:'extra',title:'Theory: Extra',route:'/concept/extra',group:'theory',meta:{placement:'rail',next:'learnings',back:'concept'},fields:{TITLE:{label:'Heading',kind:'line',value:'An extra page.',section:'Page'}}})})`,context);
-assert.equal(ArkManifest.group('theory').length,6);
+assert.equal(ArkManifest.group('theory').length,7);
 const html=fs.readFileSync('index.html','utf8');
 const motion=fs.readFileSync('js/halo/surface-motion.js','utf8');
 assert(motion.includes("indexOf('concept/') === 0"),'theory pages need a surface profile');
