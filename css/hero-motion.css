@@ -46,16 +46,16 @@
 }
 
 .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) {
-  opacity: .54;
+  opacity: .12;
   translate: var(--hero-x, 0px) var(--hero-y, 0px);
   transition: translate 1100ms cubic-bezier(.2,.65,.3,1);
-  animation: zero-breathe 13s ease-in-out 1.4s infinite;
+  animation: zero-breathe 18s ease-in-out 1.4s infinite;
   will-change: transform, opacity;
 }
 .hero-alive:has(.ark-cta:hover, .ark-cta:focus-visible) { --zero-high: .68; }
 @keyframes zero-breathe {
-  0%, 100% { scale: 1; opacity: .48; }
-  50% { scale: 1.014; opacity: var(--zero-high, .6); }
+  0%, 100% { scale: 1; opacity: .10; }
+  50% { scale: 1.018; opacity: var(--zero-high, .18); }
 }
 
 
@@ -207,7 +207,7 @@
   .ark-hero-eyebrow { margin-bottom: 7px !important; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { animation: none; transition: none; translate: 0 0; opacity: .54; }
+  .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { animation: none; transition: none; translate: 0 0; opacity: .12; }
   .hero-atmosphere,.ark-field-pill { animation: none !important; }
   .ark-field-pill,.ark-cta,.ark-hero-body,.hero-experiment-state { transition-duration: 1ms !important; transition-delay: 0s !important; }
 }

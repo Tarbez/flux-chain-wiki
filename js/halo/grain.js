@@ -70,6 +70,17 @@ var Halo = (function () {
     return t * t * (3 - 2 * t);
   }
 
+  function hslToRgb(h, s, l) {
+    h = ((h % 360) + 360) % 360 / 360;
+    s = Math.max(0, Math.min(1, s)); l = Math.max(0, Math.min(1, l));
+    var a = s * Math.min(l, 1 - l);
+    function f(n) {
+      var k = (n + h * 12) % 12;
+      return l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+    }
+    return [f(0), f(8), f(4)];
+  }
+
   /* props: radius, inner (same unit, e.g. % of stage width), density
      (cells across the diameter), alpha (peak, percent, 40 = the reference) */
   function paint(canvas, props) {
@@ -82,6 +93,9 @@ var Halo = (function () {
     canvas.height = D;
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    var theme = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim().match(/([\d.]+)\s+([\d.]+)%\s+([\d.]+)%/);
+    var tint = theme ? hslToRgb(Number(theme[1]), Number(theme[2]) / 100, Number(theme[3]) / 100) : [1, 1, 1];
 
     var in0 = inner / outer;                         /* where the hollow ends    */
     var in1 = in0 + INNER_RAMP;                      /* where the ring is full   */
@@ -99,10 +113,14 @@ var Halo = (function () {
 
       for (var x = 0; x < D; x++) {
         var dx = (x + 0.5 - half) / half;
-        var r = Math.sqrt(dx * dx + dy * dy);
+        /* Chebyshev distance makes the halo read as a square block frame. */
+        var r = Math.max(Math.abs(dx), Math.abs(dy));
         if (r >= 1) continue;                        /* transparent already */
 
-        var ring = Math.pow(smooth(in0, in1, r), INNER_GAMMA) * (1 - smooth(out0, 1, r));
+        var angle = Math.atan2(dy, dx);
+        var blockGap = .24 + .76 * smooth(.06, .24, Math.abs(Math.sin(angle * 4.0)));
+        var blockLift = .9 + .1 * Math.cos(Math.floor((dx + 1) * 8) * .7 + Math.floor((dy + 1) * 8) * .45);
+        var ring = Math.pow(smooth(in0, in1, r), INNER_GAMMA) * (1 - smooth(out0, 1, r)) * blockGap * blockLift;
         if (ring <= 0) continue;
 
         var v = ring * lift + NOISE * scale * smooth(0, GATE, ring) * gauss(x, y);
@@ -110,7 +128,7 @@ var Halo = (function () {
         if (v > cap) v = cap;
 
         var i = (y * D + x) << 2;
-        px[i] = 255; px[i + 1] = 255; px[i + 2] = 255;
+        px[i] = (tint[0] * 255) | 0; px[i + 1] = (tint[1] * 255) | 0; px[i + 2] = (tint[2] * 255) | 0;
         px[i + 3] = (v * 255 + 0.5) | 0;
       }
     }

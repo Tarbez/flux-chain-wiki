@@ -77,43 +77,21 @@
 
   var cores = Math.max(2, navigator.hardwareConcurrency || 4);
   var compact = window.matchMedia('(max-width:760px)').matches;
-  var count = compact ? Math.min(10000, cores * 1500) : Math.min(24000, cores * 3000);
-  count = Math.max(compact ? 6000 : 12000, count);
-  var primaryCount = Math.floor(count * .8);
-  var surfaceCount = compact ? 12000 : 24000;
-  count = primaryCount + surfaceCount;
-  var points = new Float32Array(count * 8);
-  var proximity = ProximityGeometry.create();
-  var randomState = 1847;
-  function random() { randomState = (Math.imul(randomState, 1664525) + 1013904223) >>> 0; return randomState / 4294967296; }
-  var golden = Math.PI * (3 - Math.sqrt(5));
-  for (var i = 0; i < count; i++) {
-    var seed = random();
-    var theta = i * golden;
-    var phi = ((i * 97) % count) / count * Math.PI * 2;
-    var surface = .265 + (seed - .5) * .026;
-    var ring = .735 + Math.cos(phi) * surface;
-    var o = i * 8;
-    points[o] = Math.cos(theta) * ring;
-    points[o + 1] = Math.sin(theta) * ring;
-    points[o + 2] = Math.sin(phi) * surface;
-    points[o + 3] = seed;
-    // Stratified length sampling preserves thin filaments, including at 50% dissolve.
-    var target = proximity.sample(((i % primaryCount) + random()) / primaryCount);
-    points[o + 4] = target[0];
-    points[o + 5] = target[1];
-    points[o + 6] = target[2];
-    // Layer two has its own budget; it does not take particles from the zero.
-    points[o + 7] = i >= primaryCount ? (i - primaryCount + 1) / surfaceCount : 0;
-  }
+  var hardwarePrimary = Math.floor((compact ? Math.max(6000, Math.min(10000, cores * 1500)) : Math.max(12000, Math.min(24000, cores * 3000))) * .8);
+  var hardwareSurface = compact ? 12000 : 24000;
+  // A phone must never be handed a desktop-tuned particle count: whatever
+  // admin.html sets is capped here, so raising the count for a good desktop
+  // render can't also hand a weak device a frame-rate cliff.
+  var COMPACT_PRIMARY_CAP = 12000, COMPACT_SURFACE_CAP = 16000;
 
+  var proximity = ProximityGeometry.create();
+  var primaryCount = 0, surfaceCount = 0, count = 0, wordData = null;
   var buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
   var stride = 8 * Float32Array.BYTES_PER_ELEMENT;
   var position = gl.getAttribLocation(program, 'aPosition');
   var seedLocation = gl.getAttribLocation(program, 'aSeed');
   gl.enableVertexAttribArray(position);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(position, 3, gl.FLOAT, false, stride, 0);
   gl.enableVertexAttribArray(seedLocation);
   gl.vertexAttribPointer(seedLocation, 1, gl.FLOAT, false, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
@@ -127,12 +105,10 @@
   gl.vertexAttribPointer(recessLocation, 1, gl.FLOAT, false, stride, 7 * Float32Array.BYTES_PER_ELEMENT);
 
   var wordBuffer = gl.createBuffer();
-  var wordData = new Float32Array(count * 6);
-  gl.bindBuffer(gl.ARRAY_BUFFER, wordBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, wordData, gl.DYNAMIC_DRAW);
   var wordFromLocation = gl.getAttribLocation(program, 'aWordFrom');
   var wordLocation = gl.getAttribLocation(program, 'aWord');
   gl.enableVertexAttribArray(wordFromLocation);
+  gl.bindBuffer(gl.ARRAY_BUFFER, wordBuffer);
   gl.vertexAttribPointer(wordFromLocation, 3, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 0);
   gl.enableVertexAttribArray(wordLocation);
   gl.vertexAttribPointer(wordLocation, 3, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
@@ -142,11 +118,109 @@
   var pageSurfaceLocation = gl.getUniformLocation(program, 'uPageSurface');
   var icebergPlacementLocation = gl.getUniformLocation(program, 'uIcebergPlacement');
   var icebergBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, icebergBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, IcebergGeometry.create(primaryCount, surfaceCount), gl.STATIC_DRAW);
   var icebergLocation = gl.getAttribLocation(program, 'aIceberg');
   gl.enableVertexAttribArray(icebergLocation);
+  gl.bindBuffer(gl.ARRAY_BUFFER, icebergBuffer);
   gl.vertexAttribPointer(icebergLocation, 4, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
+  // The faceted iceberg above is the instant fallback; if the source image
+  // loads, its brightness replaces the buffer with layered isometric blocks.
+  // The image itself is admin-editable (js/content/assets.js, id
+  // "iceberg-blocks"); assets/halo/flux-blocks.png is only the fallback
+  // for when no such asset is defined.
+  var icebergParams = Object.assign({}, (typeof ImageShape !== 'undefined' && ImageShape.defaults) || {},
+    (typeof ArkMeshSettings !== 'undefined' && ArkMeshSettings.get()) || {});
+  // The last decoded sample() is kept so a tuning-only change (no new image,
+  // no particle-count change) can rebuild the buffer without re-decoding.
+  var icebergSample = null;
+  function rebuildIceberg() {
+    if (contextLost) return;
+    gl.bindBuffer(gl.ARRAY_BUFFER, icebergBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, icebergSample ? ImageShape.create(primaryCount, surfaceCount, icebergSample, icebergParams)
+      : IcebergGeometry.create(primaryCount, surfaceCount), gl.STATIC_DRAW);
+    icebergMeasureNeeded = true;
+    requestDraw();
+  }
+  function loadIcebergImage(url) {
+    if (typeof ImageShape === 'undefined') return;
+    ImageShape.load(url, function (sample) {
+      if (!sample || contextLost) return;
+      icebergSample = sample;
+      rebuildIceberg();
+    });
+  }
+  // Every buffer whose size depends on the particle count (the base sphere,
+  // its word target and the iceberg relief all share one vertex index, so
+  // they must all be resized together): called once at startup and again
+  // whenever admin.html's particle-count sliders change. Reuses the buffer
+  // OBJECTS above -- gl.bufferData on an existing buffer just changes its
+  // size, so the attribute bindings already made against them stay valid.
+  function rebuildParticles(nextPrimary, nextSurface) {
+    primaryCount = Math.max(1000, Math.round(nextPrimary));
+    surfaceCount = Math.max(1000, Math.round(nextSurface));
+    if (compact) { primaryCount = Math.min(primaryCount, COMPACT_PRIMARY_CAP); surfaceCount = Math.min(surfaceCount, COMPACT_SURFACE_CAP); }
+    count = primaryCount + surfaceCount;
+    var points = new Float32Array(count * 8);
+    var randomState = 1847;
+    function random() { randomState = (Math.imul(randomState, 1664525) + 1013904223) >>> 0; return randomState / 4294967296; }
+    var golden = Math.PI * (3 - Math.sqrt(5));
+    for (var i = 0; i < count; i++) {
+      var seed = random();
+      var theta = i * golden;
+      var phi = ((i * 97) % count) / count * Math.PI * 2;
+      var surface = .265 + (seed - .5) * .026;
+      var ring = .735 + Math.cos(phi) * surface;
+      var o = i * 8;
+      points[o] = Math.cos(theta) * ring;
+      points[o + 1] = Math.sin(theta) * ring;
+      points[o + 2] = Math.sin(phi) * surface;
+      points[o + 3] = seed;
+      // Stratified length sampling preserves thin filaments, including at 50% dissolve.
+      var target = proximity.sample(((i % primaryCount) + random()) / primaryCount);
+      points[o + 4] = target[0];
+      points[o + 5] = target[1];
+      points[o + 6] = target[2];
+      // Layer two has its own budget; it does not take particles from the zero.
+      points[o + 7] = i >= primaryCount ? (i - primaryCount + 1) / surfaceCount : 0;
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
+
+    wordData = new Float32Array(count * 6);
+    gl.bindBuffer(gl.ARRAY_BUFFER, wordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, wordData, gl.DYNAMIC_DRAW);
+    currentWord = ''; wordAvailable = false;
+
+    rebuildIceberg();
+    canvas.dataset.points = String(count);
+    canvas.dataset.primaryPoints = String(primaryCount);
+    canvas.dataset.surfacePoints = String(surfaceCount);
+    requestDraw();
+  }
+  rebuildParticles(
+    icebergParams.primaryParticles != null ? icebergParams.primaryParticles : hardwarePrimary,
+    icebergParams.surfaceParticles != null ? icebergParams.surfaceParticles : hardwareSurface
+  );
+  loadIcebergImage((typeof ArkAsset !== 'undefined' && ArkAsset.dataUrl('iceberg-blocks')) || 'assets/halo/flux-blocks.png');
+  // The admin preview iframe posts an UNSAVED draft's bytes (or tuning
+  // params) here so editing shows its effect before Save writes anything --
+  // same origin only (the preview and the admin page that embeds it are
+  // always the same host).
+  window.addEventListener('message', function (event) {
+    if (event.origin !== location.origin) return;
+    var data = event.data;
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'subzero-preview-assets' && Array.isArray(data.assets)) {
+      var match = data.assets.find(function (a) { return a && a.id === 'iceberg-blocks' && a.dataBase64; });
+      if (match) loadIcebergImage('data:' + match.mime + ';base64,' + match.dataBase64);
+    } else if (data.type === 'subzero-preview-mesh' && data.params && typeof data.params === 'object') {
+      icebergParams = Object.assign({}, (typeof ImageShape !== 'undefined' && ImageShape.defaults) || {}, data.params);
+      if (icebergParams.primaryParticles !== primaryCount || icebergParams.surfaceParticles !== surfaceCount) {
+        rebuildParticles(icebergParams.primaryParticles, icebergParams.surfaceParticles);
+      } else {
+        rebuildIceberg();
+      }
+    }
+  });
   var surfaceTimeLocation = gl.getUniformLocation(program, 'uSurfaceTime');
   var lightThemeLocation = gl.getUniformLocation(program, 'uLightTheme');
   var layerPoseLocation = gl.getUniformLocation(program, 'uLayerPose');
@@ -241,7 +315,10 @@
     wordTime = reduced.matches || state.get().paused ? 1.2 : 0;
   }
 
-  function meshSize() { return Math.min(scene.clientWidth * .8472, scene.clientHeight * 1.1944); }
+  function meshSize() {
+    var base = Math.min(scene.clientWidth * .8472, scene.clientHeight * 1.1944);
+    return base * (pageNow === 'zero' ? 1.28 : 1);
+  }
 
   function placement() {
     var width = scene.clientWidth, height = scene.clientHeight;
@@ -256,7 +333,7 @@
       }
     }
     if (pageNow === 'learnings') return { x: width * .25, y: -height * .18, scale: .6 };
-    return { x: stateTarget * (compact ? .20 : .23) * width, y: stateTarget * (compact ? .18 : .03) * height, scale: pageNow === 'zero' ? 1.2 : 1 };
+    return { x: stateTarget * (compact ? .20 : .23) * width, y: stateTarget * (compact ? .18 : .03) * height, scale: pageNow === 'zero' ? 1.0 : 1 };
   }
 
   function resize() {

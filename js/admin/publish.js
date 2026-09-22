@@ -46,7 +46,7 @@ var ArkPublish = (function () {
       return data;
     }
 
-    /* site: { manifests: [...], articles: [{...index, sections, numbers}] } */
+    /* site: { manifests: [...], articles: [{...index, sections, numbers}], assets: [{id, label, mime, dataBase64}] } */
     async function publishSite(site, progress, confirmRemoval) {
       var say = progress || function () {};
       var who = identity();
@@ -56,7 +56,7 @@ var ArkPublish = (function () {
       if (prepared.unchanged) return { unchanged: true, version: prepared.currentVersion, cid: prepared.cid };
       /* removes is null when the published version could not be read to compare; treat that as worth asking about too */
       var removes = prepared.removes;
-      var removing = !removes || removes.manifests.length || removes.articles.length;
+      var removing = !removes || removes.manifests.length || removes.articles.length || removes.assets.length;
       if (removing && confirmRemoval && !(await confirmRemoval(removes))) return { cancelled: true, removes: removes };
       /* the identity may have signed out while the person read the prompt */
       who = identity();

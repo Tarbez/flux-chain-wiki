@@ -41,6 +41,16 @@
       </div>
       <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
     </form>
+    <form id="newAssetForm" class="new-form" autocomplete="off" novalidate>
+      <label for="newAssetFile">New image</label>
+      <img id="newAssetPreview" class="asset-preview new-asset-preview" alt="" hidden />
+      <input id="newAssetFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+      <div class="new-row">
+        <input id="newAssetId" type="text" inputmode="latin" placeholder="image-name" spellcheck="false" />
+        <button type="submit" class="btn">Add</button>
+      </div>
+      <p class="hint">Choose a file to preview it here. Lowercase words joined by hyphens, plus a PNG, JPEG, WebP or SVG file under 3MB.</p>
+    </form>
     <details id="mesh" class="new-form mesh">
       <summary>Mesh</summary>
       <p id="meshState" class="hint">Checking the publish host&hellip;</p>
@@ -64,6 +74,11 @@
 <!-- The site's own manifest loader, so the admin edits exactly the files the site reads. -->
 <script src="js/content/manifest.js" defer></script>
 <script src="js/content/manifests/index.js"></script>
+<script src="js/content/assets.js" defer></script>
+<script src="js/content/assets/index.js"></script>
+<script src="js/halo/image-shape.js" defer></script>
+<script src="js/content/mesh-settings.js" defer></script>
+<script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/admin/env.js" defer></script>
 <script src="js/content/learnings.js" defer></script>
 <script src="js/content/article-index.js" defer></script>

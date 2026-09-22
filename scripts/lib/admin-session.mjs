@@ -26,6 +26,14 @@
    Wrong codes are counted per IDENTITY (not per ticket), so starting over does not
    reset the count: five wrong codes lock that identity out for five minutes, doubling
    each time it happens again. A code that was accepted is never accepted twice.
+
+   STEP 3 IS CURRENTLY DISABLED at the one place that matters (scripts/publish-host.mjs
+   passes otpEnabled: false), not removed here: the Ark Pin browser extension that this
+   admin is meant to be used through has no OTP/TOTP support yet, so step 3 blocks sign-in
+   entirely rather than adding security. `otpEnabled` defaults to true in this module, so
+   every test and any other caller keeps exercising the real three-step flow unchanged.
+   Re-enable by flipping that one flag in publish-host.mjs once the extension can prompt
+   for and submit a TOTP code (or an equivalent second factor) itself.
    ===================================================================== */
 import { randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { verifyEd25519RawB64 } from '../../../ark-miner-cli/src/state/ed25519-verify.js';
@@ -50,6 +58,8 @@ export function createSessions({
   authorize, store, now = () => Date.now(), onNotice = () => {}, issuer = 'SUBZERO admin',
   challengeTtlMs = 60_000, ticketTtlMs = 5 * 60_000, idleMs = 30 * 60_000, absoluteMs = 12 * 60 * 60_000,
   maxChallenges = 64, maxTickets = 64, maxOtpAttempts = 5,
+  // See the file header: off only where scripts/publish-host.mjs constructs the real host.
+  otpEnabled = true,
 } = {}) {
   if (typeof authorize !== 'function') throw new TypeError('createSessions needs an authorize(publicKeyB64) function');
   if (!store) throw new TypeError('createSessions needs a store (createAdminStore) to hold authenticators and lockouts');
@@ -78,7 +88,17 @@ export function createSessions({
     return { nonce, message };
   }
 
-  /* steps 1 and 2. Returns a ticket for step 3, never a session. */
+  /* Common tail of a successful sign-in, whether it took three steps or (otpEnabled: false) two. */
+  function issueSession(publicKeyB64, { enrolled = false } = {}) {
+    store.clearFailures(publicKeyB64);
+    const previous = store.touchSignIn(publicKeyB64, new Date(now()).toISOString());
+    const token = randomBytes(32).toString('base64url');
+    sessions.set(token, { publicKeyB64, createdAt: now(), lastSeen: now() });
+    store.audit({ event: 'signed-in', key: publicKeyB64 });
+    return { token, publicKeyB64, lastSignIn: previous, enrolled };
+  }
+
+  /* steps 1 and 2. Returns a ticket for step 3 (otpEnabled) or, with OTP disabled, the session itself. */
   async function login({ publicKeyB64, nonce, signatureB64, label }) {
     sweep();
     // Single use, consumed before anything else can fail, so a bad guess cannot be retried on the same nonce.
@@ -94,8 +114,13 @@ export function createSessions({
     catch (error) { store.audit({ event: 'owner-refused', key: publicKeyB64 }); throw error; }
     const lock = store.lockState(publicKeyB64, now());
     if (lock.locked) { store.audit({ event: 'locked-out', key: publicKeyB64 }); throw lockedRefusal(lock); }
-    if (tickets.size >= maxTickets) throw new SessionRefusal('Too many sign-ins are in progress.', 'a moment.', 'wait a minute and try again.', 429);
 
+    if (!otpEnabled) {
+      store.audit({ event: 'proof-ok', key: publicKeyB64, next: 'session (otp disabled)' });
+      return { done: true, session: issueSession(publicKeyB64) };
+    }
+
+    if (tickets.size >= maxTickets) throw new SessionRefusal('Too many sign-ins are in progress.', 'a moment.', 'wait a minute and try again.', 429);
     const id = randomBytes(24).toString('base64url');
     const existing = store.getOtp(publicKeyB64);
     store.audit({ event: 'proof-ok', key: publicKeyB64, next: existing ? 'verify' : 'enroll' });
@@ -111,7 +136,7 @@ export function createSessions({
     return { ticket: id, otp: { mode: 'enroll', secret, uri: otpauthUri({ secret, issuer, account: cleanLabel(label) || publicKeyB64.slice(0, 12) }), hostCodeRequired: true } };
   }
 
-  /* step 3. The only thing that issues a session. */
+  /* step 3. The only thing that issues a session when otpEnabled. */
   function verifyOtp({ ticket, code, hostCode }) {
     sweep();
     const k = tickets.get(ticket);
@@ -143,12 +168,7 @@ export function createSessions({
     const iso = new Date(now()).toISOString();
     if (k.mode === 'enroll') { store.setOtp(k.key, { secret: k.secret, lastStep: step, enrolledAt: iso }); store.audit({ event: 'enrolled', key: k.key }); }
     else store.setLastStep(k.key, step);
-    store.clearFailures(k.key);
-    const previous = store.touchSignIn(k.key, iso);
-    const token = randomBytes(32).toString('base64url');
-    sessions.set(token, { publicKeyB64: k.key, createdAt: now(), lastSeen: now() });
-    store.audit({ event: 'signed-in', key: k.key });
-    return { token, publicKeyB64: k.key, lastSignIn: previous, enrolled: k.mode === 'enroll' };
+    return issueSession(k.key, { enrolled: k.mode === 'enroll' });
   }
 
   /* the live session for a token, sliding its idle clock, or null */

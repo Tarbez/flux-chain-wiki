@@ -35,17 +35,23 @@
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
 
   var state = { ids: ArkManifestIds.slice(), drafts: {}, saved: {}, current: null, dir: null,
-                kind: 'page', slugs: [], aDrafts: {}, aSaved: {}, aCurrent: null, cdirs: null };
+                kind: 'page', slugs: [], aDrafts: {}, aSaved: {}, aCurrent: null, cdirs: null,
+                assetIds: ArkAssetIds.slice(), assetDrafts: {}, assetSaved: {}, assetCurrent: null, assetDir: null };
   state.ids.forEach(function (id) {
     var manifest = ArkManifest.get(id);
     state.drafts[id] = clone(manifest); state.saved[id] = JSON.stringify(manifest);
   });
   state.current = state.ids[0];
+  state.assetIds.forEach(function (id) {
+    var asset = ArkAsset.get(id);
+    state.assetDrafts[id] = clone(asset); state.assetSaved[id] = JSON.stringify(asset);
+  });
 
   function dirty(id) { return state.saved[id] === null || JSON.stringify(state.drafts[id]) !== state.saved[id]; }
   function dirtyA(slug) { return state.aSaved[slug] === null || JSON.stringify(state.aDrafts[slug]) !== state.aSaved[slug]; }
-  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : dirty(state.current); }
-  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA); }
+  function dirtyI(id) { return state.assetSaved[id] === null || JSON.stringify(state.assetDrafts[id]) !== state.assetSaved[id]; }
+  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : dirty(state.current); }
+  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || reliefDirty(); }
 
   var statusTimer = 0;
   function status(message, tone) {
@@ -82,11 +88,19 @@
         h('span', { text: state.aDrafts[slug].title || slug }), dirtyA(slug) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
+    if (state.assetIds.length) list.appendChild(h('li', { class: 'side-group', text: 'Images' }));
+    state.assetIds.forEach(function (id) {
+      var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'asset' && id === state.assetCurrent), 'data-asset': id, onclick: function () { selectAsset(id); } },
+        h('span', { text: state.assetDrafts[id].label || id }), dirtyI(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
+      list.appendChild(h('li', {}, button));
+    });
   }
 
   function select(id) { state.kind = 'page'; state.current = id; renderList(); renderEditor(); reloadPreview(); }
 
   function selectArticle(slug) { state.kind = 'article'; state.aCurrent = slug; renderList(); renderEditor(); reloadPreview(); }
+
+  function selectAsset(id) { state.kind = 'asset'; state.assetCurrent = id; renderList(); renderEditor(); reloadPreview(); }
 
   /* ---- editor ------------------------------------------------------- */
   function sections(fields) {
@@ -144,6 +158,7 @@
 
   function renderEditor() {
     if (state.kind === 'article') { renderArticleEditor(); return; }
+    if (state.kind === 'asset') { renderAssetEditor(); return; }
     var root = $('editor'); root.textContent = '';
     var id = state.current, manifest = state.drafts[id];
     if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
@@ -179,11 +194,12 @@
 
   /* update everything that depends on "is it dirty" without rebuilding the form */
   function touch() {
-    var article = state.kind === 'article', now = currentDirty();
+    var article = state.kind === 'article', asset = state.kind === 'asset', now = currentDirty();
     var save = $('save'), revert = $('revert');
     if (save) save.disabled = !now;
-    if (revert) revert.disabled = (article ? state.aSaved[state.aCurrent] : state.saved[state.current]) === null || !now;
-    var button = document.querySelector(article ? '.page-list button[data-slug="' + state.aCurrent + '"]' : '.page-list button[data-id="' + state.current + '"]');
+    if (revert) revert.disabled = (article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : state.saved[state.current]) === null || !now;
+    var selector = article ? '.page-list button[data-slug="' + state.aCurrent + '"]' : asset ? '.page-list button[data-asset="' + state.assetCurrent + '"]' : '.page-list button[data-id="' + state.current + '"]';
+    var button = document.querySelector(selector);
     if (button) {
       var dot = button.querySelector('.dot');
       if (now && !dot) button.appendChild(h('span', { class: 'dot', title: 'Unsaved changes' }));
@@ -193,6 +209,7 @@
 
   function revertCurrent() {
     if (state.kind === 'article') { revertArticle(); return; }
+    if (state.kind === 'asset') { revertAsset(); return; }
     var id = state.current;
     if (state.saved[id] === null) return;
     state.drafts[id] = JSON.parse(state.saved[id]); renderEditor(); renderList(); status('Reverted to the saved version.', '');
@@ -207,6 +224,7 @@
 
   async function saveCurrent() {
     if (state.kind === 'article') { await saveArticleCurrent(); return; }
+    if (state.kind === 'asset') { await saveAssetCurrent(); return; }
     var id = state.current, manifest = state.drafts[id];
     var bad = ArkManifest.problems(manifest);
     if (bad.length) { status('Cannot save: ' + bad.join('; '), 'error'); return; }
@@ -228,6 +246,7 @@
 
   async function deleteCurrent() {
     if (state.kind === 'article') { await deleteArticle(); return; }
+    if (state.kind === 'asset') { await deleteAsset(); return; }
     var id = state.current, manifest = state.drafts[id];
     if (!state.dir && state.saved[id] !== null) { status('Connect the project folder to delete a page: this removes its file.', 'warn'); return; }
     if (!window.confirm('Delete "' + manifest.title + '"? This removes its file and its link on the theory page.')) return;
@@ -372,6 +391,144 @@
     input.value = ''; selectArticle(slug); status('New article. Edit it, then Save to create it.', '');
   });
 
+  /* ---- image assets --------------------------------------------------- */
+  /* file -> {mime, dataBase64}, or a status message and nothing if the file fails validation */
+  function readFileAsAsset(file, onReady) {
+    if (ArkAsset.mimeTypes.indexOf(file.type) < 0) { status('That file type is not supported. Use PNG, JPEG, WebP or SVG.', 'error'); return; }
+    if (file.size > ArkAsset.maxBytes) { status('That image is larger than ' + ArkAsset.sizeLabel(ArkAsset.maxBytes) + '.', 'error'); return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var result = reader.result, comma = result.indexOf(',');
+      onReady({ mime: file.type, dataBase64: result.slice(comma + 1) });
+    };
+    reader.onerror = function () { status('Could not read that file.', 'error'); };
+    reader.readAsDataURL(file);
+  }
+
+  function assetLabelField(asset) {
+    var id = 'as-' + asset.id + '-label';
+    var control = h('input', { id: id, type: 'text', spellcheck: true });
+    control.value = asset.label;
+    control.addEventListener('input', function () { asset.label = control.value; touch(); });
+    return h('div', { class: 'field' }, h('label', { for: id, text: 'Label' }), control);
+  }
+
+  function renderAssetEditor() {
+    var root = $('editor'); root.textContent = '';
+    var id = state.assetCurrent, asset = state.assetDrafts[id];
+    if (!asset) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick an image on the left.' })); return; }
+    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: saveCurrent });
+    var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
+    root.appendChild(h('div', { class: 'editor-head' },
+      h('div', {}, h('h1', { text: asset.label || id }), h('div', { class: 'route', text: 'js/content/assets/' + id + '.js' })),
+      h('div', { class: 'editor-actions' }, revert, save)));
+
+    var box = h('fieldset', {}, h('legend', { text: 'Image' }));
+    var preview = h('img', { src: 'data:' + asset.mime + ';base64,' + asset.dataBase64, alt: asset.label, class: 'asset-preview' });
+    box.appendChild(preview);
+    box.appendChild(assetLabelField(asset));
+    var file = h('input', { type: 'file', accept: ArkAsset.mimeTypes.join(',') });
+    file.addEventListener('change', function () {
+      var picked = file.files && file.files[0];
+      if (!picked) return;
+      readFileAsAsset(picked, function (next) {
+        asset.mime = next.mime; asset.dataBase64 = next.dataBase64;
+        preview.src = 'data:' + asset.mime + ';base64,' + asset.dataBase64;
+        touch(); notifyPreviewAssets();
+      });
+    });
+    box.appendChild(h('div', { class: 'field' }, h('label', { text: 'Replace the image' }), file));
+    root.appendChild(box);
+
+    // Only this image drives the concept page's iceberg relief, so its tuning
+    // lives here rather than in a separate panel someone has to go find.
+    if (id === 'iceberg-blocks') root.appendChild(buildMeshTuningPanel());
+
+    root.appendChild(h('div', { class: 'danger-zone' },
+      h('button', { type: 'button', class: 'btn danger', text: 'Delete this image', onclick: deleteCurrent })));
+    touch();
+  }
+
+  function revertAsset() {
+    var id = state.assetCurrent;
+    if (state.assetSaved[id] === null) return;
+    state.assetDrafts[id] = JSON.parse(state.assetSaved[id]); renderEditor(); renderList(); status('Reverted to the saved version.', '');
+  }
+
+  async function saveAssetCurrent() {
+    var id = state.assetCurrent, asset = state.assetDrafts[id];
+    var bad = ArkAsset.problems(asset);
+    if (bad.length) { status('Cannot save: ' + bad.join('; '), 'error'); return; }
+    var isNew = state.assetSaved[id] === null;
+    try {
+      if (state.assetDir) {
+        await ArkAdminStore.saveAsset(state.assetDir, asset, state.assetIds);
+        status('Saved js/content/assets/' + id + '.js', 'ok');
+      } else {
+        download(id + '.js', ArkAsset.serialize(asset));
+        if (isNew) download('index.js', ArkAdminStore.indexTextAssets(state.assetIds));
+        status('Downloaded ' + id + '.js' + (isNew ? ' and index.js' : '') + '. Put ' + (isNew ? 'them' : 'it') + ' in js/content/assets/, or connect the project folder to save directly.', 'warn');
+      }
+    } catch (error) { status(error.message, 'error'); return; }
+    state.assetSaved[id] = JSON.stringify(asset);
+    ArkAsset.define(clone(asset));
+    renderList(); touch(); reloadPreview();
+  }
+
+  async function deleteAsset() {
+    var id = state.assetCurrent, asset = state.assetDrafts[id];
+    if (!state.assetDir && state.assetSaved[id] !== null) { status('Connect the project folder to delete an image: this removes its file.', 'warn'); return; }
+    if (!window.confirm('Delete "' + (asset.label || id) + '"? Anything using this image (for example the concept page) falls back to its default.')) return;
+    try { if (state.assetSaved[id] !== null) await ArkAdminStore.removeAsset(state.assetDir, id, state.assetIds); }
+    catch (error) { status(error.message, 'error'); return; }
+    state.assetIds = state.assetIds.filter(function (other) { return other !== id; });
+    delete state.assetDrafts[id]; delete state.assetSaved[id]; ArkAsset.remove(id);
+    state.assetCurrent = state.assetIds[0] || null; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + (asset.label || id) + '.', 'ok');
+  }
+
+  function assetIdSlug(filename) {
+    var base = filename.toLowerCase().replace(/\.[a-z0-9]+$/i, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'image';
+    // A hash-style filename ("1b2d390dd280...jpg") slugifies to something that STARTS WITH A DIGIT,
+    // which the id rule (^[a-z]) then refuses -- silently, from the user's point of view, since the
+    // field already looks filled in. Never hand back a slug the validator would reject.
+    if (!/^[a-z]/.test(base)) base = 'image-' + base;
+    base = base.slice(0, 40).replace(/-+$/, '');
+    if (!state.assetDrafts[base]) return base;
+    var n = 2;
+    while (state.assetDrafts[base + '-' + n]) n += 1;
+    return base + '-' + n;
+  }
+
+  /* Read + validate the moment a file is chosen, so picking one is never silent: a thumbnail appears (or an
+     error does) before "Add" is ever clicked, and the id auto-fills so a blank id field is not a dead end. */
+  var newAssetPending = null;
+  $('newAssetFile').addEventListener('change', function () {
+    var preview = $('newAssetPreview'), idInput = $('newAssetId'), picked = this.files && this.files[0];
+    newAssetPending = null; preview.hidden = true; preview.removeAttribute('src');
+    if (!picked) return;
+    readFileAsAsset(picked, function (next) {
+      newAssetPending = next;
+      preview.src = 'data:' + next.mime + ';base64,' + next.dataBase64;
+      preview.hidden = false;
+      if (!idInput.value.trim()) idInput.value = assetIdSlug(picked.name);
+      status('', '');
+    });
+  });
+
+  $('newAssetForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var idInput = $('newAssetId'), id = idInput.value.trim();
+    if (!newAssetPending) { status('Choose an image file.', 'error'); return; }
+    if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) { status('An image name is lowercase words joined by hyphens, starting with a letter.', 'error'); return; }
+    if (state.assetDrafts[id]) { status('There is already an image called ' + id + '.', 'error'); return; }
+    state.assetIds.push(id);
+    state.assetDrafts[id] = { id: id, label: id, mime: newAssetPending.mime, dataBase64: newAssetPending.dataBase64 };
+    state.assetSaved[id] = null;
+    newAssetPending = null;
+    idInput.value = ''; $('newAssetFile').value = ''; $('newAssetPreview').hidden = true; $('newAssetPreview').removeAttribute('src');
+    selectAsset(id); status('New image. Edit the label, then Save to create it.', '');
+  });
+
   /* ---- new page ----------------------------------------------------- */
   function blueprint(id) {
     function line(label, value, section) { return { label: label, kind: 'line', section: section, value: value }; }
@@ -404,6 +561,7 @@
   /* ---- preview ------------------------------------------------------ */
   function previewRoute() {
     if (state.kind === 'article') return state.aCurrent ? '/learnings/' + state.aCurrent : null;
+    if (state.kind === 'asset') return state.assetCurrent ? '/concept' : null;
     var m = state.drafts[state.current];
     return m ? m.route : null;
   }
@@ -414,12 +572,87 @@
   function reloadPreview() {
     var route = previewRoute();
     $('open').href = previewUrl();
-    var saved = state.kind === 'article' ? state.aSaved[state.aCurrent] : state.saved[state.current];
+    var saved = state.kind === 'article' ? state.aSaved[state.aCurrent] : state.kind === 'asset' ? state.assetSaved[state.assetCurrent] : state.saved[state.current];
     var ready = !!route && saved !== null && saved !== undefined;
     $('frame').hidden = !ready; $('previewNote').hidden = ready;
     if (ready) $('frame').src = 'index.html?preview=' + Date.now() + '#' + route;
   }
+
+  /* Unsaved image edits reach the preview iframe live, the same way a saved one reaches the real
+     site: js/zero-webgl.js listens for this on every page (harmless outside a preview) and, for the
+     asset id it actually uses, swaps its buffer in without touching anything on disk. */
+  function notifyPreviewAssets() {
+    var frame = $('frame'), win = frame && !frame.hidden && frame.contentWindow;
+    if (!win) return;
+    var assets = state.assetIds.map(function (id) { return state.assetDrafts[id]; }).filter(function (a) { return a && a.dataBase64; });
+    if (!assets.length) return;
+    try { win.postMessage({ type: 'subzero-preview-assets', assets: assets }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+  }
+  /* Same idea as notifyPreviewAssets, for the iceberg relief's tuning numbers
+     (js/content/mesh-settings.js): a slider drag shows its effect on the
+     concept page immediately, before Save writes anything. */
+  var meshDraft = (window.ArkMeshSettings && ArkMeshSettings.get()) || (window.ArkMeshSettings && ArkMeshSettings.defaults()) || {};
+  var meshSaved = window.ArkMeshSettings ? JSON.stringify(ArkMeshSettings.sanitize(meshDraft)) : null;
+  function notifyPreviewMesh() {
+    var frame = $('frame'), win = frame && !frame.hidden && frame.contentWindow;
+    if (!win) return;
+    try { win.postMessage({ type: 'subzero-preview-mesh', params: meshDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+  }
+  $('frame').addEventListener('load', function () { notifyPreviewAssets(); notifyPreviewMesh(); });
   $('reload').addEventListener('click', reloadPreview);
+
+  /* ---- mesh tuning (js/content/mesh-settings.js) ---------------------- */
+  /* Built into the "iceberg-blocks" image's own editor (renderAssetEditor), right
+     next to the file picker, rather than a separate panel a person has to find:
+     that is the one image these numbers apply to, so that is where tuning them
+     belongs. Each call rebuilds the sliders (renderEditor already rebuilds the
+     whole pane on every edit), but meshDraft/meshSaved persist across rebuilds. */
+  function reliefDirty() { return !window.ArkMeshSettings || JSON.stringify(ArkMeshSettings.sanitize(meshDraft)) !== meshSaved; }
+  function buildMeshTuningPanel() {
+    var box = h('fieldset', { class: 'relief' }, h('legend', { text: 'Mesh tuning' }));
+    if (!window.ArkMeshSettings) return box;
+    box.appendChild(h('p', { class: 'hint', text: 'Shapes the concept page’s iceberg relief from this image. Drag a slider to see it change in the preview on the right; nothing is written until Save.' }));
+    var fields = h('div', { class: 'relief-fields' });
+    var save = h('button', { type: 'button', class: 'btn primary', text: 'Save' });
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset to defaults' });
+    function refreshInputs() {
+      fields.textContent = '';
+      ArkMeshSettings.fields().forEach(function (f) {
+        var id = 'relief-' + f.key;
+        var out = h('output', { for: id, text: String(meshDraft[f.key]) });
+        var input = h('input', { id: id, type: 'range', min: f.min, max: f.max, step: f.step, oninput: function () {
+          meshDraft[f.key] = Number(input.value);
+          out.textContent = String(meshDraft[f.key]);
+          notifyPreviewMesh(); save.disabled = !reliefDirty();
+        } });
+        input.value = meshDraft[f.key];
+        fields.appendChild(h('div', { class: 'relief-field' },
+          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: f.label }), out),
+          input));
+      });
+      save.disabled = !reliefDirty();
+    }
+    reset.addEventListener('click', function () { meshDraft = ArkMeshSettings.defaults(); refreshInputs(); notifyPreviewMesh(); });
+    save.addEventListener('click', async function () {
+      try {
+        if (state.cdirs) {
+          await ArkAdminStore.saveMeshSettings(state.cdirs.content, meshDraft);
+          status('Saved js/content/mesh-settings-data.js', 'ok');
+        } else {
+          download('mesh-settings-data.js', ArkMeshSettings.serialize(meshDraft));
+          status('Downloaded mesh-settings-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
+        }
+      } catch (error) { status(error.message, 'error'); return; }
+      meshDraft = ArkMeshSettings.sanitize(meshDraft);
+      meshSaved = JSON.stringify(meshDraft);
+      ArkMeshSettings.define(meshDraft);
+      save.disabled = true;
+    });
+    refreshInputs();
+    box.appendChild(fields);
+    box.appendChild(h('div', { class: 'tools' }, save, reset));
+    return box;
+  }
 
   /* ---- project folder ----------------------------------------------- */
   var supported = typeof window.showDirectoryPicker === 'function';
@@ -445,6 +678,7 @@
   async function attach(handle) {
     state.dir = await ArkAdminStore.manifestsDir(handle);
     state.cdirs = await ArkAdminStore.contentDirs(handle);
+    state.assetDir = await ArkAdminStore.assetsDir(handle);
     $('connect').textContent = 'Project folder connected';
     $('connect').disabled = true;
     status('Saving writes straight into ' + handle.name + '/js/content.', 'ok');
@@ -472,7 +706,9 @@
   function short(text) { return text ? text.slice(0, 8) + '…' + text.slice(-6) : ''; }
   function siteFromState() {
     return { manifests: state.ids.map(function (id) { return clone(state.drafts[id]); }),
-             articles: state.slugs.map(function (slug) { return articleCopy(state.aDrafts[slug]); }) };
+             articles: state.slugs.map(function (slug) { return articleCopy(state.aDrafts[slug]); }),
+             assets: state.assetIds.map(function (id) { return clone(state.assetDrafts[id]); }),
+             meshSettings: window.ArkMeshSettings ? clone(meshDraft) : null };
   }
 
   async function refreshMesh() {
@@ -503,12 +739,17 @@
 
   $('publish').addEventListener('click', async function () {
     if (!mesh) return;
-    if (!mesh.identity()) { status('You are signed out. Reload the admin and sign in with your recovery file.', 'warn'); return; }
+    if (!mesh.identity()) {
+      // A reload keeps the session but drops the signing key (js/admin/gate.js); get it back without losing this tab's edits.
+      status('Choose your recovery file to unlock signing, then publish again.', 'warn');
+      try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (error) { /* the button click above still told them what to do */ }
+      return;
+    }
     if (anyDirty()) { status('Save your changes first, so the site files and the published copy match.', 'warn'); return; }
     var button = $('publish'); button.disabled = true; publishing = true;
     try {
       var result = await mesh.publishSite(siteFromState(), function (message) { status(message, ''); }, function (removes) {
-        var what = removes ? removes.manifests.concat(removes.articles).join(', ') : 'possibly some pages or articles (the published version could not be compared)';
+        var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).join(', ') : 'possibly some pages, articles or images (the published version could not be compared)';
         return window.confirm('This version removes what is published now: ' + what + '.\n\nThis page may be out of date, for example if its saves were only downloaded. Publish anyway?');
       });
       if (result.cancelled) status('Not published. Reload this page to pick up the project files, or run node scripts/pull-site.mjs to bring in the published copy.', 'warn');

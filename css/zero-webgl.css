@@ -3,15 +3,15 @@
 .zero-webgl {
   position: absolute;
   left: 50%;
-  top: 49%;
+  top: 50%;
   z-index: 0;
-  width: 100cqw;
-  height: 102cqh;
+  width: 142cqw;
+  height: 142cqh;
   display: block;
   translate: -50% -50%;
-  opacity: var(--mesh-opacity, .55);
+  opacity: var(--mesh-opacity, .22);
   mix-blend-mode: screen;
-  filter:blur(var(--mesh-blur, 2px));
+  filter:blur(var(--mesh-blur, 1.6px));
   pointer-events: none;
   will-change: transform, opacity;
   /* Position and geometry share the renderer transition clock. */
@@ -20,14 +20,13 @@
 .zero-webgl.is-still { will-change: auto; }
 @keyframes webgl-zero-arrive {
   from { opacity: 0; scale: .985; }
-  to { opacity: var(--mesh-opacity, .55); scale: 1; }
+  to { opacity: var(--mesh-opacity, .22); scale: 1; }
 }
 .zero-fallback-hidden { opacity: 0 !important; animation: none !important; }
 @media (max-width:760px) {
-  .zero-webgl { width: 100cqw; height: 102cqh; opacity: var(--mesh-opacity, .55); }
-  @keyframes webgl-zero-arrive { from { opacity: 0; scale: .985; } to { opacity: var(--mesh-opacity, .55); scale: 1; } }
+  .zero-webgl { width: 156cqw; height: 156cqh; opacity: var(--mesh-opacity, .22); }
+  @keyframes webgl-zero-arrive { from { opacity: 0; scale: .985; } to { opacity: var(--mesh-opacity, .22); scale: 1; } }
 }
 @media (prefers-reduced-motion:reduce) {
   .zero-webgl { animation: none !important; transition: none !important; opacity: var(--mesh-opacity, .55); will-change: auto; }
 }
-

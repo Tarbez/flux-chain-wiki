@@ -18,6 +18,16 @@
                    scripts/lib/admin-session.mjs) — so opening someone's
                    recovery file and PIN is not enough on its own.
 
+                   TEMPORARILY SKIPPED: the host currently signs in with
+                   `otpEnabled: false` (scripts/publish-host.mjs), because
+                   the Ark Pin browser extension this admin is meant to be
+                   used through cannot prompt for or submit a TOTP code
+                   yet. `/api/session/login` then returns `{done: true}`
+                   and this page opens the editor straight after step 2 --
+                   see `finishSignIn` below. Re-enable step 3 in the host
+                   once the extension supports OTP; nothing about it was
+                   removed here, only bypassed.
+
    Steps 1+2 return a short-lived ticket, not a session: nothing opens
    until step 3 turns it into one. Wrong codes count against the identity
    and lock it out for a wait that doubles each time; the page shows that
@@ -26,7 +36,17 @@
    Once all three pass, the editor (admin-app.html) is shown in a
    same-origin frame inside this page. It reaches the identity through
    `window.parent.ArkGate`, so the key never has to leave this page.
-   Signing out, or reloading, ends the session and drops the key.
+   Signing out ends the session. A reload does NOT: the host's session
+   cookie (idles out at 30 minutes, dies at 12 hours regardless, per
+   scripts/lib/admin-session.mjs) is what the host actually trusts, so a
+   reload that finds it still valid reopens the editor immediately instead
+   of asking for the recovery file again. What a reload DOES always drop is
+   the identity's signing key, which only ever lives in this page's memory
+   and is never sent anywhere -- so browsing and editing keep working
+   across a reload, but Publish needs the recovery file unlocked again
+   (`ArkGate.reauthenticate`, called from admin.js when it finds no
+   identity in memory). This is not a weaker session: it is the same
+   session, with the one thing that can never be cached dropped as before.
    ===================================================================== */
 (function () {
   'use strict';
@@ -143,8 +163,28 @@
     if (challenge.message.indexOf(LOGIN_PREFIX + location.host + '|') !== 0) throw new Error('The publish host sent a login challenge this page will not sign.');
     var signature = await who.sign(challenge.message);
     var made = await api('/api/session/login', { publicKeyB64: who.publicKeyB64, nonce: challenge.nonce, signature: signature, label: who.displayName });
+    // otpEnabled: false on the host: the session is already open (its cookie is already set), no step 3.
+    if (made.done) {
+      busy = false;   // done, same as the OTP path: a sign-out fired from inside the editor a moment later must not be swallowed by the guard above
+      await finishSignIn(made);
+      return;
+    }
     ticket = made.ticket; otpInfo = made.otp;
     renderOtpStep();
+  }
+
+  /* ---- the shared "signed in" tail, whether it took three steps or (OTP disabled) two ---- */
+  async function finishSignIn(made) {
+    identity = pendingWho;
+    var when = made.lastSignIn ? new Date(made.lastSignIn).toLocaleString() : null;
+    renderSteps('code', ['kit', 'access', 'code']);
+    say('Signed in', 'ok');
+    $('gateHeading').textContent = made.enrolled ? 'Authenticator added.' : 'Welcome back.';
+    note(made.enrolled ? 'This authenticator now signs in as this identity. Keep it: there is no other way in.'
+      : when ? 'Last signed in ' + when + '. If that was not you, sign out and consider it compromised.' : 'Opening the editor...', 'ok');
+    $('gateBody').textContent = '';
+    await sleep(1100);
+    openEditor();
   }
 
   /* Retries beginTicket with the identity already open. A lockout that has not actually lifted yet
@@ -229,16 +269,7 @@
         var made = await api('/api/session/otp', { ticket: ticket, code: code, hostCode: hostInput ? hostInput.value : undefined });
         busy = false;   // done with this step; a sign-out fired from inside the editor a moment later must not be swallowed by the guard above
         ticket = null; otpInfo = null;
-        identity = pendingWho;
-        var when = made.lastSignIn ? new Date(made.lastSignIn).toLocaleString() : null;
-        renderSteps('code', ['kit', 'access', 'code']);
-        say('Signed in', 'ok');
-        $('gateHeading').textContent = made.enrolled ? 'Authenticator added.' : 'Welcome back.';
-        note(made.enrolled ? 'This authenticator now signs in as this identity. Keep it: there is no other way in.'
-          : when ? 'Last signed in ' + when + '. If that was not you, sign out and consider it compromised.' : 'Opening the editor...', 'ok');
-        body.textContent = '';
-        await sleep(1100);
-        openEditor();
+        await finishSignIn(made);
       } catch (error) {
         busy = false;
         var status = error.detail && (error.status || (error.message.indexOf('429') >= 0 ? 429 : null));
@@ -305,9 +336,25 @@
     }
   }
 
+  /* Bring back the locked screen to unlock the signing key, WITHOUT touching the host's session: used when
+     Publish finds no identity in memory (a reload, or straight after opening on an already-valid session). */
+  function reauthenticate() {
+    if (unsavedInEditor() && !window.confirm('You have unsaved changes. Unlock your identity and lose them?')) return false;
+    if (frame) { frame.remove(); frame = null; }
+    identity = null;
+    document.body.classList.add('locked'); $('gate').hidden = false;
+    renderSteps('kit', []);
+    $('gateHeading').textContent = 'Unlock to publish.';
+    $('gateLead').textContent = 'Your session is still open; choose your recovery file to unlock the signing key publishing needs.';
+    $('gateBody').textContent = ''; $('gateBody').appendChild(kitContainer);
+    say('', ''); note('');
+    return true;
+  }
+
   window.ArkGate = {
     identity: function () { return identity; },
     unsaved: unsavedInEditor,
+    reauthenticate: reauthenticate,
     signOut: function () {
       if (unsavedInEditor() && !window.confirm('You have unsaved changes. Sign out and lose them?')) return false;
       if (auth) auth.signOut();
@@ -328,8 +375,11 @@
     return;
   }
 
-  /* A reload always starts locked: end any session a previous load of this page left behind, so the host and this page agree. */
-  api('/api/session/logout', {}).catch(function () {}).then(function () {
-    auth = ArkAdminAuth.create({ container: kitContainer, product: 'SUBZERO admin', onChange: onIdentity });
-  });
+  /* The identity picker is always mounted (reauthenticate needs it live even after the editor has opened),
+     but a reload no longer forces a fresh sign-in: if the host's own session cookie is still valid, the
+     editor opens immediately and the recovery file is only asked for again when Publish actually needs it. */
+  auth = ArkAdminAuth.create({ container: kitContainer, product: 'SUBZERO admin', onChange: onIdentity });
+  api('/api/session').then(function (info) {
+    if (info.authenticated) openEditor();
+  }).catch(function () {});
 })();

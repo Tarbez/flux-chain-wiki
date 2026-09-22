@@ -29,6 +29,11 @@ import { clearedSessionCookie, createSessions, readSessionToken, SessionRefusal,
 import { PublishRefusal, publisherFromArgs } from './lib/publisher.mjs';
 import { defaultProjectRoot } from './lib/site-bundle.mjs';
 
+// TEMPORARY: the Ark Pin browser extension this admin is signed in through has no OTP/TOTP
+// support yet, so step 3 (scripts/lib/admin-session.mjs) blocks sign-in entirely instead of
+// adding security. Flip this back to true once the extension can prompt for and submit a
+// TOTP code itself; nothing else about the OTP flow was removed, only unwired here.
+const OTP_ENABLED = false;
 const SERVED = ['admin.html', 'admin-app.html', 'index.html'];
 /* The admin surface is deny-by-default: the editor page and everything under js/admin/ needs a session, except the two files
    the locked page itself must load. A file added under js/admin/ later is locked without anyone remembering to lock it. */
@@ -37,7 +42,7 @@ const isLockedAsset = (relative) => (relative === 'admin-app.html' || relative.s
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60;
 const SERVED_DIRS = ['css', 'js', 'assets'];
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json' };
-const MAX_BODY = 4 * 1024 * 1024;
+const MAX_BODY = 16 * 1024 * 1024;
 
 function parseArgs(argv) {
   const out = {};
@@ -48,14 +53,14 @@ function parseArgs(argv) {
 function readBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = []; let total = 0;
-    req.on('data', (chunk) => { total += chunk.length; if (total > MAX_BODY) { reject(new PublishRefusal('The request is too large.', 'a site under 4 MB.', 'shorten the content.', 413)); req.destroy(); } else chunks.push(chunk); });
+    req.on('data', (chunk) => { total += chunk.length; if (total > MAX_BODY) { reject(new PublishRefusal('The request is too large.', 'a site under 16 MB.', 'shorten the content.', 413)); req.destroy(); } else chunks.push(chunk); });
     req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
     req.on('error', reject);
   });
 }
 
 export function createHost({ root = defaultProjectRoot, publisher, port, dataDir = null, onNotice = (n) => console.log(`[subzero-admin] ${n.message}`),
-  sessions = createSessions({ authorize: (key) => publisher.authorize(key), store: createAdminStore({ dir: dataDir }), onNotice }) }) {
+  sessions = createSessions({ authorize: (key) => publisher.authorize(key), store: createAdminStore({ dir: dataDir }), onNotice, otpEnabled: OTP_ENABLED }) }) {
   const loopbackHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
   const send = (res, status, body, type = 'application/json') => {
     res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' });
@@ -93,10 +98,16 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       // Public: who is asking, and the way in. Nothing here reveals anything about the site or the miner.
       if (url.pathname === '/api/session' && req.method === 'GET') return send(res, 200, { ok: true, name: publisher.name, authenticated: !!session, publicKeyB64: session ? session.publicKeyB64 : null });
       if (url.pathname === '/api/session/challenge' && req.method === 'POST') return send(res, 200, { ok: true, ...sessions.challenge(req.headers.host) });
-      // Step 1+2 (sign the challenge, then the owner check): proves who is asking, but issues a TICKET, never a cookie.
+      // Step 1+2 (sign the challenge, then the owner check): proves who is asking, but issues a TICKET, never a
+      // cookie -- unless OTP_ENABLED is off, in which case a proven, authorized identity IS the session (see
+      // the constant above): this route then sets the cookie itself, same as /api/session/otp normally does.
       if (url.pathname === '/api/session/login' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req) || '{}');
         const made = await sessions.login({ publicKeyB64: body.publicKeyB64, nonce: body.nonce, signatureB64: body.signature, label: body.label });
+        if (made.session) {
+          res.setHeader('set-cookie', sessionCookie(made.session.token, SESSION_MAX_AGE_SECONDS));
+          return send(res, 200, { ok: true, done: true, publicKeyB64: made.session.publicKeyB64, lastSignIn: made.session.lastSignIn, enrolled: made.session.enrolled });
+        }
         return send(res, 200, { ok: true, ...made });
       }
       // Step 3: the one-time code. Only this route ever sets the session cookie.

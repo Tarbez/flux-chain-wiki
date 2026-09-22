@@ -46,6 +46,40 @@ var ArkAdminStore = (function () {
     }
   }
 
+  /* project folder -> js/content/assets, refusing a folder that is not the project */
+  async function assetsDir(root) {
+    try {
+      await root.getFileHandle('index.html');
+      var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
+      return await content.getDirectoryHandle('assets', { create: true });
+    } catch (e) {
+      throw new Error('That folder is not the Subzero project. Pick the folder that contains index.html and js/content.');
+    }
+  }
+
+  /* The list the site loads its image assets from. */
+  function indexTextAssets(ids) {
+    return '/* The image assets, in no particular order. The admin editor (admin-app.html) rewrites this list; edit it by hand only to reorder.\n' +
+      '   It loads each asset while the page is still being read, so every asset is defined before any script runs.\n' +
+      '   An id is written into a script tag, so only a plain id (lowercase letters, digits and hyphens, starting with a letter) is loaded. */\n' +
+      'var ArkAssetIds = ' + JSON.stringify(ids) + ';\n' +
+      'ArkAssetIds.forEach(function (id) {\n' +
+      '  if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;\n' +
+      '  document.write(\'<script src="js/content/assets/\' + id + \'.js" defer><\\/script>\');\n' +
+      '});\n';
+  }
+
+  /* `ids` is the full display order, including an asset that is being created */
+  async function saveAsset(dir, asset, ids) {
+    await write(dir, asset.id + '.js', ArkAsset.serialize(asset));
+    await write(dir, 'index.js', indexTextAssets(ids));
+  }
+
+  async function removeAsset(dir, id, ids) {
+    await dir.removeEntry(id + '.js');
+    await write(dir, 'index.js', indexTextAssets(ids.filter(function (other) { return other !== id; })));
+  }
+
   async function write(dir, name, text) {
     var handle = await dir.getFileHandle(name, { create: true });
     var out = await handle.createWritable();
@@ -75,6 +109,13 @@ var ArkAdminStore = (function () {
     await write(dirs.content, 'article-index.js', LearningContent.serializeIndex(list));
   }
 
+  /* the concept page's iceberg relief tuning is a single file, not a list: no index needed. */
+  async function saveMeshSettings(contentDir, params) {
+    await write(contentDir, 'mesh-settings-data.js', ArkMeshSettings.serialize(params));
+  }
+
   return { indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove,
-           contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle };
+           contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
+           assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
+           saveMeshSettings: saveMeshSettings };
 })();

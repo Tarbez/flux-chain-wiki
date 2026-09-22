@@ -199,7 +199,11 @@ node tests/mesh-drag.cjs
 node tests/admin.cjs
 node tests/auth-bundle.cjs
 node tests/admin-session.test.mjs
+node tests/admin-session-otp-disabled.test.mjs
 node tests/site-bundle.test.mjs
+node tests/iceberg-geometry.cjs
+node tests/image-shape.cjs
+node tests/asset-content.cjs
 ```
 
 Router checks cover lazy loading, caching, DOM disposal, scroll restoration,
@@ -280,9 +284,55 @@ body and 20% forms a thin rippled water plane. Both meet at y=.20. A shared
 Theory weight morphs position, blue lighting and point size together, reversing
 from the current pose when navigation is interrupted. The transparent page
 provides an anchor beside its text (above the text on mobile); the renderer fits
-both halves into that anchor. No raster image is used. Validate the generated
-positions with `node tests/iceberg-geometry.cjs`; this does not substitute for
-browser/GPU visual verification against the reference image.
+both halves into that anchor. Validate the generated positions with
+`node tests/iceberg-geometry.cjs`; this does not substitute for browser/GPU
+visual verification against the reference image.
+
+`js/halo/image-shape.js` can replace that faceted buffer with an image-driven
+one: `ImageShape.create(primaryCount, surfaceCount, sample)` keeps the same
+two-mesh/water-plane contract (same test shape, `node tests/image-shape.cjs`)
+but reads a `sample(u,v)` brightness function for the footprint, tier depth
+and light of each block, so the concept page reads as layered isometric
+blocks shaped by the source image instead of the procedural peak. The
+footprint is not grid-snapped — every particle takes its own R2
+low-discrepancy (u,v), and only the depth axis keeps tier quantization for
+the stepped look; brightness is first contrast-stretched (5th/95th
+percentile over a 32x32 lattice) and gamma-lifted, because real photos
+rarely span [0,1] and a linear map rendered as uniform mid-height fog.
+`ImageShape.load(url, done)` is the only DOM-dependent part: it draws the
+image to an offscreen canvas and hands back that sampler, or `null` if the
+canvas cannot be read. `js/zero-webgl.js` uploads the faceted iceberg first
+so the scene never waits on image decode, then swaps the buffer in once
+`ImageShape.load` resolves.
+
+The source image is an image asset (`js/content/assets.js`, `ArkAsset`), the
+same kind of content as a page manifest or an article: it holds its own
+bytes (`{id, label, mime, dataBase64}`), lives in `js/content/assets/<id>.js`,
+is listed in `js/content/assets/index.js`, and round-trips through the same
+`.flx` archive `encodeSite`/`decodeSite` build for manifests and articles
+(`scripts/lib/site-bundle.mjs`). The concept page's iceberg reads the asset
+`iceberg-blocks` by id (`ArkAsset.dataUrl('iceberg-blocks')`); if it is
+undefined, `js/zero-webgl.js` falls back to `assets/halo/flux-blocks.png`, a
+static file with the same pixels. Both come from one generator,
+`node scripts/make-flux-blocks-png.cjs`; never hand-edit the PNG bytes or
+the seed asset file. `node tests/asset-content.cjs` covers `ArkAsset`'s own
+contract (id/mime/size validation, the 3MB decoded cap, serialize
+round-trip); `tests/site-bundle.test.mjs` covers assets going through the
+archive alongside manifests and articles. The cap is sized for real photos;
+because base64 inflates an asset by 4/3 in the publish payload,
+`scripts/publish-host.mjs` MAX_BODY was raised with it (4MB to 16MB) so a
+cap-sized asset still publishes.
+
+admin.html edits this the same way it edits pages and articles: an "Images"
+group in the sidebar lists every asset, "New image" (`newAssetForm`) picks a
+PNG/JPEG/WebP/SVG file under 3MB and gives it an id, and Save/Revert/Delete
+work like any other content kind. Choosing a file previews it immediately
+(`#newAssetPreview`) and auto-fills the id from the filename if left blank,
+so picking a file is never silent even before "Add" is clicked; an invalid
+file (wrong type, over the size cap) is refused at that same moment, not
+only on submit. Publish sends it to the mesh in the same site payload
+(`site.assets`), and a stale admin session is warned before an image would
+be silently removed, the same as a page or an article.
 
 Water now projects across the full viewport independently of the iceberg's
 content anchor, with a small edge overscan. Theory exit retains the last measured
@@ -352,8 +402,18 @@ Open the page through the host (the address it prints, `http://127.0.0.1:3437/ad
 
 - `scripts/publish-host.mjs` serves `admin.html` from loopback and holds the miner's API credential. It
   never holds a signing key. `--name` chooses another name than `subzero.ark`.
-- **The admin is locked until you pass three steps.** `admin.html` is only a locked page: it holds the sign-in
-  flow and nothing of the editor, shown as a ladder (Identity / Access / Code) so you can see where you are:
+- **The admin is locked until you pass three steps** — currently two: `scripts/publish-host.mjs` sets
+  `OTP_ENABLED = false`, so step 3 is skipped and `admin-app.html` opens right after Access. This is
+  temporary: the Ark Pin browser extension this admin is meant to be used through cannot yet prompt for or
+  submit a TOTP code, and until it can, requiring one just blocks sign-in instead of adding security.
+  Nothing about step 3 was removed — `scripts/lib/admin-session.mjs`, `scripts/lib/totp.mjs` and the
+  enrollment UI in `js/admin/gate.js` are all intact — flip that one constant back to `true` once the
+  extension supports OTP. `node tests/admin-session-otp-disabled.test.mjs` covers the bypass itself (a
+  proven, authorized identity gets a session with no ticket, steps 1–2 still refuse exactly as before);
+  `node tests/admin-session.test.mjs` keeps covering the full three-step flow (it constructs its own
+  `createSessions` with OTP on, independent of the host's current setting). `admin.html` is only a locked
+  page: it holds the sign-in flow and nothing of the editor, shown as a ladder (Identity / Access / Code)
+  so you can see where you are:
   1. **Identity** — choose your DeadArk recovery file (`.auth.flx`, the same Auth Kit chat.deadark.com signs in
      with) and enter its PIN (and password).
   2. **Access** — the page proves that identity to the local host by signing a challenge the host made (single
@@ -372,9 +432,16 @@ Open the page through the host (the address it prints, `http://127.0.0.1:3437/ad
   except the two files the locked page loads, and every API but the sign-in routes): a hidden button would not
   protect anything when the files are one request away. Anything later added under `js/admin/` is locked by
   default. The editor then opens inside the locked page in a same-origin frame, which is how the identity's key
-  stays in the locked page's memory instead of being stored. Sign out (in the editor's top bar) or reload and
-  everything locks again; sign out asks first if you have unsaved edits. The last time an identity signed in is
-  shown on its next sign-in, so a session that was not yours stands out.
+  stays in the locked page's memory instead of being stored. Sign out (in the editor's top bar) always locks
+  everything and ends the session (`/api/session/logout`); sign out asks first if you have unsaved edits. A
+  **reload does not** — the host's session cookie is what it actually trusts, so `js/admin/gate.js` checks
+  `GET /api/session` on load and reopens the editor straight away if it is still valid (idles out at 30
+  minutes, dies at 12 hours regardless), rather than asking for the recovery file again just to keep browsing
+  and editing. What a reload still always drops is the identity's signing key (never sent anywhere, so it
+  cannot be cached) — Publish notices there is none in memory and calls `ArkGate.reauthenticate()`, which
+  brings back the locked screen to unlock it **without** touching the still-valid session, then reopens the
+  editor once you do. The last time an identity signed in is shown on its next sign-in, so a session that was
+  not yours stands out.
 - **Who may sign in.** Once `subzero.ark` has an owner, only that identity (a different one is refused at the door,
   with the owner named). Before it is claimed, the first identity to sign in may claim it. If the miner cannot be
   asked who owns the name, sign-in is refused rather than guessed. The site itself (`index.html`, `js/content/`)

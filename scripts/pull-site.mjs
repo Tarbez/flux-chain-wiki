@@ -25,7 +25,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const publisher = publisherFromArgs(args, defaultProjectRoot);
   const { record, cid, site } = await publisher.fetchSite();
-  console.log(`${publisher.name} v${record.version} -> ${cid} (${site.manifests.length} manifests, ${site.articles.length} articles, updated ${record.updatedAt})`);
+  console.log(`${publisher.name} v${record.version} -> ${cid} (${site.manifests.length} manifests, ${site.articles.length} articles, ${site.assets.length} assets, updated ${record.updatedAt})`);
   const plan = planWrite(site, defaultProjectRoot);
   if (!plan.length) { console.log('Local files already match the published site.'); return; }
   if (args.write) {

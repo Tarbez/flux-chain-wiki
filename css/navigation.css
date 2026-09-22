@@ -1,9 +1,11 @@
-/* Shared identity and navigation, without an enclosing rail. */
-.ark-header { display:flex !important; justify-content:flex-end !important; border:0 !important; background:rgba(5,5,7,.72); -webkit-backdrop-filter:blur(16px) saturate(120%); backdrop-filter:blur(16px) saturate(120%); border-bottom:1px solid rgba(26,26,34,.92) !important; }
+/* Shared identity and navigation: a transparent instrument strip over the lattice. */
+.ark-header { display:flex !important; justify-content:flex-end !important; border:0 !important; background:transparent !important; -webkit-backdrop-filter:none; backdrop-filter:none; }
 .ark-header::after { content:none; }
-.ark-header nav { display:flex; gap:8px !important; padding:0; border:0; background:none; }
-.ark-header .ark-link { min-height:44px !important; padding:0 12px; border:0; border-radius:2px; color:#6b6b76 !important; font-size:10px !important; letter-spacing:.2em !important; text-transform:uppercase; transition:color 180ms ease,background-color 180ms ease !important; }
-.ark-header .ark-link:hover { color:#eaeaef !important; }
+.ark-header nav { display:flex; gap:4px !important; padding:5px 0; border:0; background:none; }
+.ark-header .ark-link { position:relative; min-height:38px !important; padding:0 12px; border:0; border-radius:0; color:hsl(var(--text-muted)) !important; font-size:9px !important; letter-spacing:.18em !important; text-transform:uppercase; transition:color 180ms ease,background-color 180ms ease !important; }
+.ark-header .ark-link::after { content:""; position:absolute; left:12px; right:12px; bottom:3px; height:1px; background:hsl(var(--primary)); transform:scaleX(0); transform-origin:left; transition:transform 220ms ease; }
+.ark-header .ark-link:hover,.ark-header .ark-link[aria-current="page"] { color:hsl(var(--text-strong)) !important; background:hsl(var(--text-strong)/.035); }
+.ark-header .ark-link:hover::after,.ark-header .ark-link[aria-current="page"]::after { transform:scaleX(1); }
 @media(max-width:760px) { .ark-header { padding:14px 20px !important; } .ark-header nav { gap:0 !important; } }
 
 /* The blink-square brand mark: a hairline square with a cyan core that
@@ -13,8 +15,8 @@
 @keyframes brand-blink { 0%,100% { opacity:.22; } 12% { opacity:1; } 26% { opacity:.35; } 38% { opacity:.9; } 60% { opacity:.22; } }
 
 /* The registry status pill at the end of the top bar. */
-.nav-status { display:flex; align-items:center; gap:8px; margin-left:14px; padding:6px 12px; border:1px solid rgba(26,26,34,.92); color:#6b6b76; font:400 9px var(--ark-font); letter-spacing:.22em; text-transform:uppercase; white-space:nowrap; }
-.nav-status-dot { width:5px; height:5px; background:#7cae7a; animation:status-blink 4.2s ease-in-out infinite; }
+.nav-status { display:flex; align-items:center; gap:8px; margin-left:14px; padding:6px 0 6px 14px; border-left:1px solid hsl(var(--border-default)); color:hsl(var(--text-muted)); font:400 9px var(--ark-font); letter-spacing:.22em; text-transform:uppercase; white-space:nowrap; }
+.nav-status-dot { width:5px; height:5px; background:hsl(var(--live)); animation:status-blink 4.2s ease-in-out infinite; }
 @keyframes status-blink { 0%,100% { opacity:.25; } 14% { opacity:1; } 30% { opacity:.4; } 100% { opacity:.25; } }
 @media(max-width:760px) { .nav-status { display:none; } }
 @media (prefers-reduced-motion:reduce) { .ark-brand-mark::after,.nav-status-dot { animation:none; opacity:.72; } }
@@ -50,3 +52,5 @@
 #scene .ark-header .ark-studio-identity:is([aria-current="page"],:focus,:focus-visible,:hover) { background:transparent !important; }
 #scene .ark-studio-identity:focus-visible .ark-wordmark { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:7px; }
 .ark-studio-identity { gap:9px; }
+
+@media(prefers-reduced-motion:reduce) { .ark-header .ark-link::after { transition:none; } }

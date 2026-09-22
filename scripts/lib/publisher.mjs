@@ -202,13 +202,14 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     const cid = await add(bytes);
     const unchanged = current && targetCid(current) === cid;
     // What this version would take away from the one people can read now. A stale admin page must not delete content silently.
-    let removes = { manifests: [], articles: [] };
+    let removes = { manifests: [], articles: [], assets: [] };
     if (current && !unchanged) {
       try {
         const published = decodeSite(await cat(targetCid(current)));
         removes = {
           manifests: published.manifests.map((m) => m.id).filter((id) => !site.manifests.some((m) => m.id === id)),
           articles: published.articles.map((a) => a.slug).filter((slug) => !site.articles.some((a) => a.slug === slug)),
+          assets: published.assets.map((a) => a.id).filter((id) => !site.assets.some((a) => a.id === id)),
         };
       } catch { removes = null; }
     }
@@ -244,7 +245,7 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
       published: canonical.version, cid,
       readBack: readBack ? { version: readBack.version, cid: targetCid(readBack) } : null,
       confirmed: !!readBack && readBack.version === canonical.version && targetCid(readBack) === cid,
-      manifests: archived.manifests.length, articles: archived.articles.length,
+      manifests: archived.manifests.length, articles: archived.articles.length, assets: archived.assets.length,
     };
   }
 

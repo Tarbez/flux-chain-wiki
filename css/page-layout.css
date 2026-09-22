@@ -76,10 +76,10 @@
 .experiments-page .expansion > .section { max-width:var(--page-width); margin-inline:auto; padding:40px var(--page-gutter); }
 .article-body { gap:36px; padding-inline:var(--page-gutter); background:transparent; }
 .hero-atmosphere { opacity:.72; filter:blur(12px); }
-.hero-alive { --mesh-opacity:.62; --mesh-blur:2px; }
-.hero-alive[data-page="zero"] { --mesh-blur:.65px; }
-.hero-alive[data-page="concept"],.hero-alive[data-page^="concept/"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.62; --mesh-blur:.8px; }
-.hero-alive[data-page^="article/"] { --mesh-opacity:.82; --mesh-blur:0px; }
+.hero-alive { --mesh-opacity:.18; --mesh-blur:1.6px; }
+.hero-alive[data-page="zero"] { --mesh-opacity:.22; --mesh-blur:1.35px; }
+.hero-alive[data-page="concept"],.hero-alive[data-page^="concept/"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.17; --mesh-blur:1.7px; }
+.hero-alive[data-page^="article/"] { --mesh-opacity:.24; --mesh-blur:1.2px; }
 .hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"] { filter:blur(2px); opacity:.5; }
 @media(max-width:760px) {
  #scene .learning-page { top:76px; width:calc(100% - 32px); border-radius:0; }
@@ -107,7 +107,11 @@
 
 /* Theory pairs its explanation with a shared two-mesh iceberg, without a card. */
 #scene .concept-page .concept-content { width:54%; margin-left:0; padding-right:24px; }
-.concept-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68cqh,640px); margin:0; pointer-events:none; }
+/* vh, not cqh: no ancestor anywhere in this project declares container-type, so cqh is invalid at
+   computed-value time and height falls back to auto. That collapses to 0 on this element (an empty
+   <figure>, no content to size from), which makes measureIceberg()'s bounds.height check fail and
+   leaves the iceberg at its unanchored fallback placement instead of this anchor. vh needs no container. */
+.concept-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68vh,640px); margin:0; pointer-events:none; }
 .hero-alive[data-page="concept"] { --mesh-opacity:.85; --mesh-blur:0px; }
 /* With room in the left margin the onward links leave the copy and sit beside it, aligned with the studio mark.
    The page box spans the viewport so the margin is inside it; padding keeps the copy and iceberg where they were. */

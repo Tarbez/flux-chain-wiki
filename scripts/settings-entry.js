@@ -8,22 +8,23 @@ const ui = createArkUI();
 // The host forwards document events; ARK owns inside/branch detection and dismissal.
 const outsidePointer = event => { if (event.target instanceof Node) ui.handleOutsidePointer(event.target); };
 document.addEventListener('pointerdown', outsidePointer, true);
-const themes=['original',...themeOptions];
+const themes=themeOptions;
 const atmosphereFixed=Object.freeze({intensity:37,grain:90});
 const controls={softness:{label:'Softness',min:0,max:160,value:155},scale:{label:'Scale',min:60,max:180,value:66}};
 ui.register('ATMOSPHERERANGE|BUTTON',{tag:'input',attrs:{type:'range'}});
 const root=document.documentElement;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
 const save=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
-let theme=read('subzero-theme','original'),renderer,frame=0;
-if(!themes.includes(theme))theme='original';
+let theme=read('subzero-theme','ghost'),renderer,frame=0;
+if(!themes.includes(theme))theme='ghost';
 let saved={};try{saved=JSON.parse(read('subzero-atmosphere-v2','{}'))||{};}catch{}
 const values={};
 for(const [key,control] of Object.entries(controls)){const value=saved[key];values[key]=typeof value==='number'&&Number.isFinite(value)?Math.max(control.min,Math.min(control.max,value)):control.value;}
 root.dataset.background='atmosphere';
 const backgroundHost=document.createElement('div');backgroundHost.className='ark-background-host';backgroundHost.setAttribute('aria-hidden','true');
 document.querySelector('[data-ark-layer="persistent"]').prepend(backgroundHost);
-const title=value=>value==='original'?'Subzero':value[0].toUpperCase()+value.slice(1);
+const themeNames={bone:'Porcelain',glacier:'Icefield',moss:'Mosslight',ghost:'Night Signal',grove:'Canopy',marine:'Tideglass'};
+const title=value=>themeNames[value]||value[0].toUpperCase()+value.slice(1);
 const slots={};
 function slot(name,text,button=false,cls=''){
  const ref='SZ'+name.toUpperCase();

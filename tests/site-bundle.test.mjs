@@ -7,9 +7,10 @@ import { cidForBytes } from '../../shared/flx-codec/src/blake3.js';
 const site = readProject();
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
-// Real content: every page and every article, not a sample.
+// Real content: every page, every article and every image asset, not a sample.
 assert(site.manifests.length >= 9, 'reads every manifest the index lists');
 assert(site.articles.length >= 3 && site.articles.every((a) => Array.isArray(a.sections)), 'reads every article body, not only the index');
+assert(site.assets.length >= 1 && site.assets.every((a) => typeof a.dataBase64 === 'string' && a.dataBase64), 'reads every image asset the index lists');
 assert.deepEqual(siteProblems(site), [], 'the project content is itself publishable');
 
 // extract(parse(render(x))) == extract(x): the archive is a VIEW of the source, so prove the reader.
@@ -34,7 +35,17 @@ assert.deepEqual(decodeSite(encodeSite(reordered)).articles.map((a) => a.slug), 
 
 // Re-rendering the project's own files from the site must reproduce every byte on disk, or an admin save would churn them.
 assert.deepEqual(planWrite(site), [], 'writing the site back to the project changes nothing');
-assert(Object.keys(projectFiles(site)).length === site.manifests.length + site.articles.length + 2, 'one file per manifest and article, plus the two indexes');
+assert(Object.keys(projectFiles(site)).length === site.manifests.length + site.articles.length + site.assets.length + 4,
+  'one file per manifest, article and asset, plus the three indexes and the single mesh-settings file');
+
+// An asset round-trips through the archive and through the address the same way a manifest does.
+const editedAsset = clone(site); editedAsset.assets[0].label += ' (edited)';
+assert.notEqual(cidForBytes(encodeSite(editedAsset)), cidForBytes(bytes), 'editing an asset changes the address');
+assert.deepEqual(decodeSite(encodeSite(editedAsset)), editedAsset, 'and the edit round-trips');
+const droppedAsset = clone(site); const goneAsset = droppedAsset.assets.pop();
+const dropAssetPlan = planWrite(droppedAsset);
+assert(dropAssetPlan.some((c) => c.action === 'remove' && c.relative === `js/content/assets/${goneAsset.id}.js`), 'a removed asset is planned for deletion');
+assert(dropAssetPlan.some((c) => c.relative === 'js/content/assets/index.js' && c.action === 'update'), 'and the asset index is rewritten');
 
 // A pulled edit reaches the files: the plan names it, and only it.
 const plan = planWrite(edited);
@@ -53,6 +64,8 @@ for (const [label, mutate, pattern] of [
   ['an article with a bad slug', (s) => { s.articles[0].slug = 'Not A Slug'; }, /slug must be lowercase/],
   ['an article missing its body', (s) => { delete s.articles[0].sections; delete s.articles[0].numbers; }, /no body/],
   ['a duplicated slug', (s) => { s.articles[1].slug = s.articles[0].slug; }, /appears twice/],
+  ['an asset with a bad id', (s) => { s.assets[0].id = 'Bad Id'; }, /id must be lowercase/],
+  ['an asset with an unsupported mime', (s) => { s.assets[0].mime = 'image/gif'; }, /mime must be one of/],
 ]) {
   const bad = clone(site); mutate(bad);
   assert.throws(() => encodeSite(bad), pattern, label);
@@ -61,4 +74,4 @@ for (const [label, mutate, pattern] of [
 assert.throws(() => decodeSite(new Uint8Array([1, 2, 3])), /./);
 
 const json = Buffer.byteLength(JSON.stringify(site));
-console.log(`site bundle ok: ${site.manifests.length} manifests, ${site.articles.length} articles; ${bytes.length} bytes as .flx vs ${json} as JSON (this content, encodeArchive, nothing else compared)`);
+console.log(`site bundle ok: ${site.manifests.length} manifests, ${site.articles.length} articles, ${site.assets.length} assets; ${bytes.length} bytes as .flx vs ${json} as JSON (this content, encodeArchive, nothing else compared)`);

@@ -40,13 +40,16 @@ assert.equal(h.canvas.dataset.drawCalls,'1','the interior adds no draw call at r
 assert(h.uniforms.uProjection.every(Number.isFinite));
 assert(h.uniforms.uFieldExtent[0]*h.uniforms.uProjection[0]*.72>1,'sheet spans the viewport horizontally');
 assert(h.uniforms.uFieldExtent[1]*h.uniforms.uProjection[1]*.72>1,'sheet spans the viewport vertically');
-assert(h.canvas.style.transform.includes('scale(1.2)'));
+// The zero page being visually larger now lives in meshSize()'s own 1.28x
+// multiplier, not in placement().scale (which is 1 for every page): a CSS
+// transform scale would double-apply the effect on top of meshSize's.
+assert(h.canvas.style.transform.includes('scale(1)'));
 h.state.navigate('proximity');h.advance(.8);
 assert(h.uniforms.uShape[2]>0 && h.uniforms.uShape[2]<1);
 assert(h.uniforms.uDissolve>0);assert(h.uniforms.uBurst>0);
 assert.equal(h.canvas.dataset.phase,'travel');assert.equal(h.canvas.dataset.drawCalls,'3');
 const movingScale=Number(h.canvas.style.transform.match(/scale\(([^)]+)/)[1]);
-assert(movingScale>1 && movingScale<1.2, 'direct scale interpolation, no small exit zero');
+assert.equal(movingScale,1,'no small exit zero: scale has nothing left to interpolate, and stays put');
 assert.equal(h.uniforms.uCircle,undefined);
 h.advance(4);assert.equal(h.uniforms.uDissolve,.5);assert.equal(h.uniforms.uShape[2],1);h.advance(60);assert.equal(h.uniforms.uDissolve,.5);assert.equal(h.canvas.dataset.drawCalls,'1');assert.equal(h.uniforms.uCircle,undefined);
 h.state.navigate('zero');h.advance(4);assert.equal(h.uniforms.uDissolve,0);assert.equal(h.uniforms.uShape[2],0);assert.equal(h.canvas,canvas);
