@@ -80,6 +80,40 @@ var ArkAdminStore = (function () {
     await write(dir, 'index.js', indexTextAssets(ids.filter(function (other) { return other !== id; })));
   }
 
+  /* project folder -> js/content/secrets, refusing a folder that is not the project */
+  async function secretsDir(root) {
+    try {
+      await root.getFileHandle('index.html');
+      var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
+      return await content.getDirectoryHandle('secrets', { create: true });
+    } catch (e) {
+      throw new Error('That folder is not the Flux Chain project. Pick the folder that contains index.html and js/content.');
+    }
+  }
+
+  /* The list the site loads its encrypted content from. */
+  function indexTextSecrets(ids) {
+    return '/* The encrypted content items, in no particular order. The admin editor (admin-app.html) rewrites this list; edit it by hand only to reorder.\n' +
+      '   It loads each secret while the page is still being read, so every secret is defined before any script runs.\n' +
+      '   An id is written into a script tag, so only a plain id (lowercase letters, digits and hyphens, starting with a letter) is loaded. */\n' +
+      'var ArkSecretIds = ' + JSON.stringify(ids) + ';\n' +
+      'ArkSecretIds.forEach(function (id) {\n' +
+      '  if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;\n' +
+      '  document.write(\'<script src="js/content/secrets/\' + id + \'.js" defer><\\/script>\');\n' +
+      '});\n';
+  }
+
+  /* `ids` is the full display order, including a secret that is being created */
+  async function saveSecret(dir, secret, ids) {
+    await write(dir, secret.id + '.js', ArkSecret.serialize(secret));
+    await write(dir, 'index.js', indexTextSecrets(ids));
+  }
+
+  async function removeSecret(dir, id, ids) {
+    await dir.removeEntry(id + '.js');
+    await write(dir, 'index.js', indexTextSecrets(ids.filter(function (other) { return other !== id; })));
+  }
+
   async function write(dir, name, text) {
     var handle = await dir.getFileHandle(name, { create: true });
     var out = await handle.createWritable();
@@ -117,5 +151,6 @@ var ArkAdminStore = (function () {
   return { indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
+           secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,
            saveMeshSettings: saveMeshSettings };
 })();

@@ -13,7 +13,7 @@
 </head>
 <body>
 <header class="bar">
-  <div class="bar-brand"><strong>SUBZERO</strong><span>CONTENT</span></div>
+  <div class="bar-brand"><strong>FLUX CHAIN</strong><span>CONTENT</span></div>
   <div class="bar-actions">
     <span id="status" class="status" role="status" aria-live="polite"></span>
     <button id="connect" type="button" class="btn">Connect project folder</button>
@@ -58,6 +58,16 @@
         <p class="hint">Choose a file to preview it here. Lowercase words joined by hyphens, plus a PNG, JPEG, WebP or SVG file under 3MB.</p>
       </form>
     </details>
+    <details class="add-toggle">
+      <summary>New encrypted content</summary>
+      <form id="newSecretForm" class="new-form" autocomplete="off" novalidate>
+        <div class="new-row">
+          <input id="newSecretId" type="text" inputmode="latin" placeholder="content-name" spellcheck="false" />
+          <button type="submit" class="btn">Add</button>
+        </div>
+        <p class="hint">Lowercase words joined by hyphens. Write the content and its recipients on the next page, then encrypt it there &mdash; nothing here holds plaintext.</p>
+      </form>
+    </details>
     <details id="mesh" class="add-toggle mesh">
       <summary>Mesh</summary>
       <p id="meshState" class="hint">Checking the publish host&hellip;</p>
@@ -86,6 +96,8 @@
 <script src="js/content/manifests/index.js"></script>
 <script src="js/content/assets.js" defer></script>
 <script src="js/content/assets/index.js"></script>
+<script src="js/content/secrets.js" defer></script>
+<script src="js/content/secrets/index.js"></script>
 <script src="js/halo/image-shape.js" defer></script>
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
@@ -94,6 +106,8 @@
 <script src="js/content/article-index.js" defer></script>
 <script src="js/pages/catalog.js" defer></script>
 <script src="js/admin/store.js" defer></script>
+<script src="js/admin/vendor/tweetnacl.js" defer></script>
+<script src="js/admin/crypto.js" defer></script>
 <script src="js/admin/publish.js" defer></script>
 <script src="js/admin/admin.js" defer></script>
 </body>

@@ -11,7 +11,7 @@ const context = vm.createContext({
   atob: (s) => Buffer.from(s, 'base64').toString('binary'),
   TextEncoder, TextDecoder,
 });
-context.globalThis = context;
+context.globalThis = context; context.self = context;
 vm.runInContext(fs.readFileSync('js/admin/vendor/tweetnacl.js', 'utf8'), context);
 vm.runInContext(fs.readFileSync('js/admin/crypto.js', 'utf8'), context);
 const ArkContentCrypto = vm.runInContext('ArkContentCrypto', context);
@@ -35,10 +35,13 @@ const ArkContentCrypto = vm.runInContext('ArkContentCrypto', context);
 
   const secret = { ciphertextBase64: secretFields.ciphertextBase64, metadata: secretFields.metadata, recipients: secretFields.envelopes };
 
+  // Objects round-tripped through the vm sandbox are a different realm's Object, so compare by
+  // JSON text (the same fix scripts/lib/site-bundle.mjs and tests/asset-content.cjs use) rather
+  // than assert.deepEqual, which can see different Object constructors and fail on equal content.
   const aliceRead = await ArkContentCrypto.decryptForSelf(secret, alice);
-  assert.deepEqual(aliceRead, payload, 'a recipient decrypts the exact original payload');
+  assert.equal(JSON.stringify(aliceRead), JSON.stringify(payload), 'a recipient decrypts the exact original payload');
   const bobRead = await ArkContentCrypto.decryptForSelf(secret, bob);
-  assert.deepEqual(bobRead, payload, 'a second recipient decrypts the same payload independently');
+  assert.equal(JSON.stringify(bobRead), JSON.stringify(payload), 'a second recipient decrypts the same payload independently');
 
   const malloryRead = await ArkContentCrypto.decryptForSelf(secret, mallory);
   assert.equal(malloryRead, null, 'a non-recipient gets null, not a throw and not the content');

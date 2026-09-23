@@ -40,10 +40,10 @@ function read(root, relative) { return fs.readFileSync(path.join(root, relative)
 /* The project's own content code, run in a sandbox with nothing but what it needs. */
 function loadContentCode(root) {
   const context = vm.createContext({ console, document: { write() {} } });
-  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/mesh-settings.js', 'js/admin/store.js']) {
+  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js', 'js/content/mesh-settings.js', 'js/admin/store.js']) {
     vm.runInContext(read(root, file), context, { filename: file });
   }
-  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkMeshSettings, ArkAdminStore })', context);
+  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkMeshSettings, ArkAdminStore })', context);
 }
 
 /* the ids the manifest index lists, in display order */
@@ -77,6 +77,21 @@ function loadIndexedAssets(root, ids) {
   return vm.runInContext('ArkAsset.all()', context);
 }
 
+/* the ids the secret index lists */
+function secretIds(root) {
+  const writes = [];
+  const context = vm.createContext({ document: { write: (s) => writes.push(s) } });
+  vm.runInContext(read(root, 'js/content/secrets/index.js'), context);
+  return vm.runInContext('ArkSecretIds', context).slice();
+}
+
+function loadIndexedSecrets(root, ids) {
+  const context = vm.createContext({});
+  vm.runInContext(read(root, 'js/content/secrets.js'), context);
+  for (const id of ids) vm.runInContext(read(root, `js/content/secrets/${id}.js`), context, { filename: `secrets/${id}.js` });
+  return vm.runInContext('ArkSecret.all()', context);
+}
+
 /* the concept page's iceberg relief tuning: a single object, not a list. */
 function readMeshSettings(root) {
   const context = vm.createContext({});
@@ -90,6 +105,7 @@ export function readProject(root = defaultProjectRoot) {
   const ids = manifestIds(root);
   const manifests = JSON.parse(JSON.stringify(loadIndexed(root, ids)));
   const assets = JSON.parse(JSON.stringify(loadIndexedAssets(root, assetIds(root))));
+  const secrets = JSON.parse(JSON.stringify(loadIndexedSecrets(root, secretIds(root))));
   const meshSettings = readMeshSettings(root);
 
   const articleContext = vm.createContext({});
@@ -98,12 +114,12 @@ export function readProject(root = defaultProjectRoot) {
   const slugs = vm.runInContext('LearningContent.articles.map(function (a) { return a.slug; })', articleContext);
   for (const slug of slugs) vm.runInContext(read(root, `js/content/articles/${slug}.js`), articleContext, { filename: `articles/${slug}.js` });
   const articles = JSON.parse(JSON.stringify(vm.runInContext('LearningContent.articles', articleContext)));
-  return { manifests, articles, assets, meshSettings };
+  return { manifests, articles, assets, secrets, meshSettings };
 }
 
 /* every reason a site is not publishable, from the project's own validators */
 export function siteProblems(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkMeshSettings } = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkMeshSettings } = loadContentCode(root);
   const out = [];
   if (!site || !Array.isArray(site.manifests) || !Array.isArray(site.articles) || !Array.isArray(site.assets)) return ['a site has manifests, articles and assets'];
   const seen = new Set();
@@ -125,6 +141,18 @@ export function siteProblems(site, root = defaultProjectRoot) {
     if (assetIdsSeen.has(asset && asset.id)) out.push(`asset ${asset.id} appears twice`);
     assetIdsSeen.add(asset && asset.id);
   }
+  // Older sites predate encrypted content: absent means none, not a problem.
+  if (site.secrets != null) {
+    if (!Array.isArray(site.secrets)) out.push('secrets must be a list');
+    else {
+      const secretIdsSeen = new Set();
+      for (const secret of site.secrets) {
+        for (const bad of ArkSecret.problems(secret)) out.push(`secret ${secret && secret.id}: ${bad}`);
+        if (secretIdsSeen.has(secret && secret.id)) out.push(`secret ${secret.id} appears twice`);
+        secretIdsSeen.add(secret && secret.id);
+      }
+    }
+  }
   // Older sites predate mesh tuning: absent means "use image-shape.js's defaults", not a problem.
   if (site.meshSettings != null) for (const bad of ArkMeshSettings.problems(site.meshSettings)) out.push(`mesh settings: ${bad}`);
   return out;
@@ -140,10 +168,11 @@ export function encodeSite(site, root = defaultProjectRoot) {
     generatedBy: 'subzero/scripts/lib/site-bundle.mjs',
     sourceFormat: SITE_SCHEMA,
     routes: [
-      { routeId: 'site', path: '/', title: 'SUBZERO', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), meshSettings: site.meshSettings != null } },
+      { routeId: 'site', path: '/', title: 'SUBZERO', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null } },
       ...site.manifests.map((m) => ({ routeId: `manifest.${m.id}`, path: `/manifest/${m.id}`, title: m.title, payload: m })),
       ...site.articles.map((a) => ({ routeId: `article.${a.slug}`, path: `/article/${a.slug}`, title: a.title, payload: a })),
       ...site.assets.map((a) => ({ routeId: `asset.${a.id}`, path: `/asset/${a.id}`, title: a.label, payload: a })),
+      ...(site.secrets || []).map((s) => ({ routeId: `secret.${s.id}`, path: `/secret/${s.id}`, title: s.label, payload: s })),
       ...(site.meshSettings != null ? [{ routeId: 'meshSettings', path: '/mesh-settings', title: 'Mesh tuning', payload: site.meshSettings }] : []),
     ],
   });
@@ -164,6 +193,8 @@ export function decodeSite(bytes) {
     articles: entry.payload.articles.map((slug) => need(`article.${slug}`)),
     // Older archives predate assets: an absent list means none, not a broken read.
     assets: (entry.payload.assets || []).map((id) => need(`asset.${id}`)),
+    // Older archives predate encrypted content: an absent list means none, not a broken read.
+    secrets: (entry.payload.secrets || []).map((id) => need(`secret.${id}`)),
     // Older archives predate mesh tuning: absent means "use image-shape.js's defaults".
     meshSettings: entry.payload.meshSettings ? need('meshSettings') : null,
   };
@@ -171,7 +202,7 @@ export function decodeSite(bytes) {
 
 /* The exact set of files a site occupies in the project, as {relativePath: text}. */
 export function projectFiles(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkMeshSettings, ArkAdminStore } = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkMeshSettings, ArkAdminStore } = loadContentCode(root);
   const files = {};
   for (const manifest of site.manifests) files[`js/content/manifests/${manifest.id}.js`] = ArkManifest.serialize(manifest);
   files['js/content/manifests/index.js'] = ArkAdminStore.indexText(site.manifests.map((m) => m.id));
@@ -179,6 +210,9 @@ export function projectFiles(site, root = defaultProjectRoot) {
   files['js/content/article-index.js'] = LearningContent.serializeIndex(site.articles);
   for (const asset of site.assets) files[`js/content/assets/${asset.id}.js`] = ArkAsset.serialize(asset);
   files['js/content/assets/index.js'] = ArkAdminStore.indexTextAssets(site.assets.map((a) => a.id));
+  const secrets = site.secrets || [];
+  for (const secret of secrets) files[`js/content/secrets/${secret.id}.js`] = ArkSecret.serialize(secret);
+  files['js/content/secrets/index.js'] = ArkAdminStore.indexTextSecrets(secrets.map((s) => s.id));
   // A single file, not a per-id directory: there is only ever one mesh tuning.
   files['js/content/mesh-settings-data.js'] = ArkMeshSettings.serialize(site.meshSettings || {});
   return files;
@@ -188,7 +222,7 @@ export function projectFiles(site, root = defaultProjectRoot) {
 export function staleFiles(site, root = defaultProjectRoot) {
   const keep = new Set(Object.keys(projectFiles(site, root)));
   const out = [];
-  for (const dir of ['js/content/manifests', 'js/content/articles', 'js/content/assets']) {
+  for (const dir of ['js/content/manifests', 'js/content/articles', 'js/content/assets', 'js/content/secrets']) {
     for (const name of fs.readdirSync(path.join(root, dir))) {
       const relative = `${dir}/${name}`;
       if (name.endsWith('.js') && !keep.has(relative)) out.push(relative);

@@ -37,6 +37,7 @@
   var state = { ids: ArkManifestIds.slice(), drafts: {}, saved: {}, current: null, dir: null,
                 kind: 'page', slugs: [], aDrafts: {}, aSaved: {}, aCurrent: null, cdirs: null,
                 assetIds: ArkAssetIds.slice(), assetDrafts: {}, assetSaved: {}, assetCurrent: null, assetDir: null,
+                secretIds: ArkSecretIds.slice(), secretDrafts: {}, secretSaved: {}, secretCurrent: null, secretDir: null, secretPlaintext: {}, secretRecipientsText: {}, secretDecrypted: {},
                 shapeIds: [], shapeLabels: {}, shapeCurrent: null };
   if (window.ArkMeshSettings) ArkMeshSettings.pages().forEach(function (p) { state.shapeIds.push(p.id); state.shapeLabels[p.id] = p.label; });
   state.ids.forEach(function (id) {
@@ -48,12 +49,17 @@
     var asset = ArkAsset.get(id);
     state.assetDrafts[id] = clone(asset); state.assetSaved[id] = JSON.stringify(asset);
   });
+  state.secretIds.forEach(function (id) {
+    var secret = ArkSecret.get(id);
+    state.secretDrafts[id] = clone(secret); state.secretSaved[id] = JSON.stringify(secret);
+  });
 
   function dirty(id) { return state.saved[id] === null || JSON.stringify(state.drafts[id]) !== state.saved[id]; }
   function dirtyA(slug) { return state.aSaved[slug] === null || JSON.stringify(state.aDrafts[slug]) !== state.aSaved[slug]; }
   function dirtyI(id) { return state.assetSaved[id] === null || JSON.stringify(state.assetDrafts[id]) !== state.assetSaved[id]; }
-  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'mesh' ? false : dirty(state.current); }
-  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || reliefDirty(); }
+  function dirtyS(id) { return state.secretSaved[id] === null || JSON.stringify(state.secretDrafts[id]) !== state.secretSaved[id]; }
+  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'mesh' ? false : dirty(state.current); }
+  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || state.secretIds.some(dirtyS) || reliefDirty(); }
 
   var statusTimer = 0;
   function status(message, tone) {
@@ -67,7 +73,7 @@
   function routeOptions() {
     return Object.keys(ArkUI.pageCatalog).map(function (key) {
       var def = ArkUI.pageCatalog[key];
-      return { key: key, label: def.title.replace(' — SUBZERO', '') + '  ' + def.path };
+      return { key: key, label: def.title.replace(' — Flux Chain', '') + '  ' + def.path };
     });
   }
 
@@ -98,6 +104,12 @@
         h('span', { text: state.assetDrafts[id].label || id }), dirtyI(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
+    if (state.secretIds.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'lock', text: 'Encrypted' }));
+    state.secretIds.forEach(function (id) {
+      var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'secret' && id === state.secretCurrent), 'data-secret': id, onclick: function () { selectSecret(id); } },
+        h('span', { text: state.secretDrafts[id].label || id }), dirtyS(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
+      list.appendChild(h('li', {}, button));
+    });
     if (window.ArkMeshSettings && state.shapeIds.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'shape', text: 'Shapes' }));
     if (window.ArkMeshSettings) state.shapeIds.forEach(function (id) {
       var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'shape' && id === state.shapeCurrent), 'data-shape': id, onclick: function () { selectShape(id); } },
@@ -112,6 +124,8 @@
   function selectArticle(slug) { state.kind = 'article'; state.aCurrent = slug; renderList(); renderEditor(); reloadPreview(); }
 
   function selectAsset(id) { state.kind = 'asset'; state.assetCurrent = id; renderList(); renderEditor(); reloadPreview(); }
+
+  function selectSecret(id) { state.kind = 'secret'; state.secretCurrent = id; renderList(); renderEditor(); reloadPreview(); }
 
   function selectMesh() { state.kind = 'mesh'; renderList(); renderEditor(); reloadPreview(); }
 
@@ -172,6 +186,7 @@
   function renderEditor() {
     if (state.kind === 'article') { renderArticleEditor(); return; }
     if (state.kind === 'asset') { renderAssetEditor(); return; }
+    if (state.kind === 'secret') { renderSecretEditor(); return; }
     if (state.kind === 'shape') { renderShapeEditor(); return; }
     if (state.kind === 'mesh') { renderMeshEditor(); return; }
     var root = $('editor'); root.textContent = '';
@@ -209,11 +224,11 @@
 
   /* update everything that depends on "is it dirty" without rebuilding the form */
   function touch() {
-    var article = state.kind === 'article', asset = state.kind === 'asset', now = currentDirty();
+    var article = state.kind === 'article', asset = state.kind === 'asset', secret = state.kind === 'secret', now = currentDirty();
     var save = $('save'), revert = $('revert');
     if (save) save.disabled = !now;
-    if (revert) revert.disabled = (article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : state.saved[state.current]) === null || !now;
-    var selector = article ? '.page-list button[data-slug="' + state.aCurrent + '"]' : asset ? '.page-list button[data-asset="' + state.assetCurrent + '"]' : '.page-list button[data-id="' + state.current + '"]';
+    if (revert) revert.disabled = (article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : secret ? state.secretSaved[state.secretCurrent] : state.saved[state.current]) === null || !now;
+    var selector = article ? '.page-list button[data-slug="' + state.aCurrent + '"]' : asset ? '.page-list button[data-asset="' + state.assetCurrent + '"]' : secret ? '.page-list button[data-secret="' + state.secretCurrent + '"]' : '.page-list button[data-id="' + state.current + '"]';
     var button = document.querySelector(selector);
     if (button) {
       var dot = button.querySelector('.dot');
@@ -225,6 +240,7 @@
   function revertCurrent() {
     if (state.kind === 'article') { revertArticle(); return; }
     if (state.kind === 'asset') { revertAsset(); return; }
+    if (state.kind === 'secret') { revertSecret(); return; }
     var id = state.current;
     if (state.saved[id] === null) return;
     state.drafts[id] = JSON.parse(state.saved[id]); renderEditor(); renderList(); status('Reverted to the saved version.', '');
@@ -240,6 +256,7 @@
   async function saveCurrent() {
     if (state.kind === 'article') { await saveArticleCurrent(); return; }
     if (state.kind === 'asset') { await saveAssetCurrent(); return; }
+    if (state.kind === 'secret') { await saveSecretCurrent(); return; }
     var id = state.current, manifest = state.drafts[id];
     var bad = ArkManifest.problems(manifest);
     if (bad.length) { status('Cannot save: ' + bad.join('; '), 'error'); return; }
@@ -262,6 +279,7 @@
   async function deleteCurrent() {
     if (state.kind === 'article') { await deleteArticle(); return; }
     if (state.kind === 'asset') { await deleteAsset(); return; }
+    if (state.kind === 'secret') { await deleteSecret(); return; }
     var id = state.current, manifest = state.drafts[id];
     if (!state.dir && state.saved[id] !== null) { status('Connect the project folder to delete a page: this removes its file.', 'warn'); return; }
     if (!window.confirm('Delete "' + manifest.title + '"? This removes its file and its link on the theory page.')) return;
@@ -540,12 +558,167 @@
     selectAsset(id); status('New image. Edit the label, then Save to create it.', '');
   });
 
+  /* ---- encrypted content ---------------------------------------------- */
+  /* The keypair that wraps a file key for "this browser": one per DeadArk identity when signed
+     in, so the same person reuses the same media key across sessions; a stable local id
+     otherwise, so a draft made before sign-in is still readable by the same browser after. */
+  function mediaOwnerId() {
+    var who = null;
+    try { who = gate.identity(); } catch (e) { who = null; }
+    return (who && who.publicKeyB64) || 'local-admin';
+  }
+  function ownMediaKeyPair() { return ArkContentCrypto.createOrLoadKeyPair(mediaOwnerId()); }
+
+  function secretLabelField(secret) {
+    var id = 'sec-' + secret.id + '-label';
+    var control = h('input', { id: id, type: 'text', spellcheck: true });
+    control.value = secret.label;
+    control.addEventListener('input', function () { secret.label = control.value; touch(); });
+    return h('div', { class: 'field' }, h('label', { for: id, text: 'Label' }), control);
+  }
+
+  function parseRecipientKeys(text) {
+    return (text || '').split(/[\n,]/).map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  async function encryptSecretDraft(secret, id) {
+    var recipients = parseRecipientKeys(state.secretRecipientsText[id]);
+    var plaintext = (state.secretPlaintext[id] || '').trim();
+    if (!recipients.length) { status('Add at least one recipient public key first.', 'error'); return; }
+    if (!plaintext) { status('Write the content to encrypt first.', 'error'); return; }
+    try {
+      var result = await ArkContentCrypto.encryptForRecipients({ kind: 'flux_secret_payload', version: 1, title: secret.label, content: plaintext }, recipients);
+      secret.ciphertextBase64 = result.ciphertextBase64; secret.metadata = result.metadata; secret.recipients = result.envelopes;
+      state.secretPlaintext[id] = ''; delete state.secretDecrypted[id];
+      touch(); renderEditor(); status('Encrypted for ' + recipients.length + ' recipient' + (recipients.length === 1 ? '' : 's') + '. Save to write it.', 'ok');
+    } catch (error) { status('Could not encrypt: ' + error.message, 'error'); }
+  }
+
+  async function decryptSecretDraft(secret, id) {
+    try {
+      var own = ownMediaKeyPair();
+      var read = await ArkContentCrypto.decryptForSelf(secret, own);
+      if (read === null) { status('This browser’s key is not one of the recipients: cannot decrypt.', 'warn'); return; }
+      state.secretDecrypted[id] = read.content || ''; renderEditor();
+    } catch (error) { status('Could not decrypt: ' + error.message, 'error'); }
+  }
+
+  function renderSecretEditor() {
+    var root = $('editor'); root.textContent = '';
+    var id = state.secretCurrent, secret = state.secretDrafts[id];
+    if (!secret) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick an item on the left.' })); return; }
+    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: saveCurrent });
+    var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
+    root.appendChild(h('div', { class: 'editor-head' },
+      h('div', {}, h('h1', { text: secret.label || id }), h('div', { class: 'route', text: 'js/content/secrets/' + id + '.js' })),
+      h('div', { class: 'editor-actions' }, revert, save)));
+
+    var about = h('fieldset', {}, h('legend', { text: 'Encrypted content' }),
+      h('p', { class: 'hint' }, 'The body is AES-GCM ciphertext; the key is wrapped once per recipient with nacl box. Nothing on disk or on the mesh ever holds the plaintext — only what you encrypt here, in this browser, right now.'));
+    about.appendChild(secretLabelField(secret));
+    root.appendChild(about);
+
+    var keyBox = h('fieldset', {}, h('legend', { text: 'Your key (this browser)' }));
+    var own = ownMediaKeyPair();
+    var keyField = h('input', { type: 'text', readonly: true, value: own.publicKey });
+    var copyBtn = h('button', { type: 'button', class: 'btn', text: 'Copy', onclick: function () {
+      navigator.clipboard.writeText(own.publicKey).then(function () { status('Copied your public key.', 'ok'); }).catch(function () { status('Could not copy; select and copy it by hand.', 'warn'); });
+    } });
+    keyBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Share this so someone can add you as a recipient' }), h('div', { class: 'new-row' }, keyField, copyBtn)));
+    root.appendChild(keyBox);
+
+    var hasCiphertext = !!secret.ciphertextBase64;
+    if (hasCiphertext) {
+      var lockedBox = h('fieldset', {}, h('legend', { text: 'Currently encrypted' }));
+      lockedBox.appendChild(h('p', { class: 'hint' }, 'Encrypted for ' + (secret.recipients || []).length + ' recipient(s), ' + ArkSecret.sizeLabel(Math.floor((secret.ciphertextBase64.length * 3) / 4)) + '.'));
+      var revealBtn = h('button', { type: 'button', class: 'btn', text: 'Decrypt to check', onclick: function () { decryptSecretDraft(secret, id); } });
+      lockedBox.appendChild(revealBtn);
+      if (state.secretDecrypted[id] !== undefined) {
+        lockedBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Decrypted content (this browser only, not saved)' }),
+          h('textarea', { rows: 6, readonly: true, text: state.secretDecrypted[id] })));
+      }
+      root.appendChild(lockedBox);
+    }
+
+    var writeBox = h('fieldset', {}, h('legend', { text: hasCiphertext ? 'Re-encrypt (replaces the content above)' : 'Write and encrypt' }));
+    var recipientsArea = h('textarea', { rows: 3, spellcheck: false, placeholder: 'One recipient public key per line' });
+    recipientsArea.value = state.secretRecipientsText[id] || '';
+    recipientsArea.addEventListener('input', function () { state.secretRecipientsText[id] = recipientsArea.value; });
+    writeBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Recipients (public keys)' }), recipientsArea));
+    var addSelfBtn = h('button', { type: 'button', class: 'btn', text: 'Add my own key', onclick: function () {
+      var lines = parseRecipientKeys(recipientsArea.value);
+      if (lines.indexOf(own.publicKey) < 0) lines.push(own.publicKey);
+      recipientsArea.value = lines.join('\n'); state.secretRecipientsText[id] = recipientsArea.value;
+    } });
+    writeBox.appendChild(addSelfBtn);
+    var plaintextArea = h('textarea', { rows: 6, spellcheck: true, placeholder: 'The content to encrypt' });
+    plaintextArea.value = state.secretPlaintext[id] || '';
+    plaintextArea.addEventListener('input', function () { state.secretPlaintext[id] = plaintextArea.value; });
+    writeBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Content' }), plaintextArea));
+    writeBox.appendChild(h('button', { type: 'button', class: 'btn primary', text: 'Encrypt & lock', onclick: function () { encryptSecretDraft(secret, id); } }));
+    root.appendChild(writeBox);
+
+    root.appendChild(h('div', { class: 'danger-zone' },
+      h('button', { type: 'button', class: 'btn danger', text: 'Delete this item', onclick: deleteCurrent })));
+    touch();
+  }
+
+  function revertSecret() {
+    var id = state.secretCurrent;
+    if (state.secretSaved[id] === null) return;
+    state.secretDrafts[id] = JSON.parse(state.secretSaved[id]); state.secretPlaintext[id] = ''; delete state.secretDecrypted[id];
+    renderEditor(); renderList(); status('Reverted to the saved version.', '');
+  }
+
+  async function saveSecretCurrent() {
+    var id = state.secretCurrent, secret = state.secretDrafts[id];
+    var bad = ArkSecret.problems(secret);
+    if (bad.length) { status('Cannot save: encrypt the content first (' + bad.join('; ') + ')', 'error'); return; }
+    var isNew = state.secretSaved[id] === null;
+    try {
+      if (state.secretDir) {
+        await ArkAdminStore.saveSecret(state.secretDir, secret, state.secretIds);
+        status('Saved js/content/secrets/' + id + '.js', 'ok');
+      } else {
+        download(id + '.js', ArkSecret.serialize(secret));
+        if (isNew) download('index.js', ArkAdminStore.indexTextSecrets(state.secretIds));
+        status('Downloaded ' + id + '.js' + (isNew ? ' and index.js' : '') + '. Put ' + (isNew ? 'them' : 'it') + ' in js/content/secrets/, or connect the project folder to save directly.', 'warn');
+      }
+    } catch (error) { status(error.message, 'error'); return; }
+    state.secretSaved[id] = JSON.stringify(secret);
+    ArkSecret.define(clone(secret));
+    renderList(); touch(); reloadPreview();
+  }
+
+  async function deleteSecret() {
+    var id = state.secretCurrent, secret = state.secretDrafts[id];
+    if (!state.secretDir && state.secretSaved[id] !== null) { status('Connect the project folder to delete encrypted content: this removes its file.', 'warn'); return; }
+    if (!window.confirm('Delete "' + (secret.label || id) + '"? This cannot be undone.')) return;
+    try { if (state.secretSaved[id] !== null) await ArkAdminStore.removeSecret(state.secretDir, id, state.secretIds); }
+    catch (error) { status(error.message, 'error'); return; }
+    state.secretIds = state.secretIds.filter(function (other) { return other !== id; });
+    delete state.secretDrafts[id]; delete state.secretSaved[id]; delete state.secretPlaintext[id]; delete state.secretRecipientsText[id]; delete state.secretDecrypted[id];
+    ArkSecret.remove(id);
+    state.secretCurrent = state.secretIds[0] || null; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + (secret.label || id) + '.', 'ok');
+  }
+
+  $('newSecretForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var idInput = $('newSecretId'), id = idInput.value.trim();
+    if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) { status('A name is lowercase words joined by hyphens, starting with a letter.', 'error'); return; }
+    if (state.secretDrafts[id]) { status('There is already an item called ' + id + '.', 'error'); return; }
+    state.secretIds.push(id);
+    state.secretDrafts[id] = { id: id, label: id, ciphertextBase64: '', metadata: null, recipients: [] };
+    state.secretSaved[id] = null; state.secretPlaintext[id] = ''; state.secretRecipientsText[id] = '';
+    idInput.value = ''; selectSecret(id); status('New encrypted content. Write it and encrypt it, then Save.', '');
+  });
+
   /* ---- new page ----------------------------------------------------- */
   function blueprint(id) {
     function line(label, value, section) { return { label: label, kind: 'line', section: section, value: value }; }
     function text(label, value, section) { return { label: label, kind: 'text', section: section, value: value }; }
     var fields = {
-      EYEBROW: line('Eyebrow', 'THE SUBZERO THEORY / ' + id.toUpperCase(), 'Page'),
+      EYEBROW: line('Eyebrow', 'THE FLUX SPEC / ' + id.toUpperCase(), 'Page'),
       TITLE: line('Heading', 'New page.', 'Page'),
       DECK: text('Intro', 'Introduce the page here.', 'Page'),
       CTA: line('Link on the theory page', 'NEW PAGE', 'Links')
@@ -782,7 +955,9 @@
   function buildMeshSecurityNote() {
     var box = h('fieldset', { class: 'mesh-security' }, h('legend', { text: 'What’s actually protected' }));
     box.appendChild(h('p', {}, h('strong', { text: 'Public: ' }),
-      document.createTextNode('everything published — every page, article and image — is one content-addressed archive on the mesh, unencrypted. Anyone who has the address (or finds the name record) can fetch and read all of it, the same as a public IPFS file. Publishing is distribution, not privacy.')));
+      document.createTextNode('every page, article and image published here is one content-addressed archive on the mesh, unencrypted. Anyone who has the address (or finds the name record) can fetch and read all of it, the same as a public IPFS file. Publishing is distribution, not privacy.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Encrypted content: ' }),
+      document.createTextNode('an item under Encrypted is published the same way — content-addressed, fetchable by anyone — but its body is AES-GCM ciphertext and the file key is only wrapped for the recipients you chose. Only someone holding a matching secret key can read it; everyone else fetches opaque bytes.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Signed, not secret: ' }),
       document.createTextNode('the record pointing subzero.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Actually private: ' }),
@@ -840,7 +1015,7 @@
       try {
         var pulled = await mesh.pullSite(); // { record, cid, site }
         var site = pulled.site;
-        liveSummary.textContent = site.manifests.length + ' page(s), ' + site.articles.length + ' article(s), ' + site.assets.length + ' image(s) — all public and unencrypted (see below).';
+        liveSummary.textContent = site.manifests.length + ' page(s), ' + site.articles.length + ' article(s), ' + site.assets.length + ' image(s), ' + ((site.secrets || []).length) + ' encrypted item(s) (see below).';
         liveList.textContent = '';
         site.manifests.forEach(function (m) { liveList.appendChild(h('li', { text: (m.title || m.id) + ' — ' + (m.route || m.id) })); });
         site.articles.forEach(function (a) { liveList.appendChild(h('li', { text: (a.title || a.slug) + ' (article)' })); });
@@ -894,6 +1069,7 @@
     state.dir = await ArkAdminStore.manifestsDir(handle);
     state.cdirs = await ArkAdminStore.contentDirs(handle);
     state.assetDir = await ArkAdminStore.assetsDir(handle);
+    state.secretDir = await ArkAdminStore.secretsDir(handle);
     $('connect').textContent = 'Project folder connected';
     $('connect').disabled = true;
     status('Saving writes straight into ' + handle.name + '/js/content.', 'ok');
@@ -923,6 +1099,7 @@
     return { manifests: state.ids.map(function (id) { return clone(state.drafts[id]); }),
              articles: state.slugs.map(function (slug) { return articleCopy(state.aDrafts[slug]); }),
              assets: state.assetIds.map(function (id) { return clone(state.assetDrafts[id]); }),
+             secrets: state.secretIds.map(function (id) { return clone(state.secretDrafts[id]); }),
              meshSettings: window.ArkMeshSettings ? clone(meshDraft) : null };
   }
 
@@ -964,7 +1141,7 @@
     var button = $('publish'); button.disabled = true; publishing = true;
     try {
       var result = await mesh.publishSite(siteFromState(), function (message) { status(message, ''); }, function (removes) {
-        var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).join(', ') : 'possibly some pages, articles or images (the published version could not be compared)';
+        var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).concat(removes.secrets || []).join(', ') : 'possibly some pages, articles, images or encrypted items (the published version could not be compared)';
         return window.confirm('This version removes what is published now: ' + what + '.\n\nThis page may be out of date, for example if its saves were only downloaded. Publish anyway?');
       });
       if (result.cancelled) status('Not published. Reload this page to pick up the project files, or run node scripts/pull-site.mjs to bring in the published copy.', 'warn');
