@@ -11,7 +11,7 @@ import { createAdminStore } from '../scripts/lib/admin-store.mjs';
 import { createSessions, LOGIN_PREFIX, readSessionToken } from '../scripts/lib/admin-session.mjs';
 import { totpAt } from '../scripts/lib/totp.mjs';
 import { PublishRefusal } from '../scripts/lib/publisher.mjs';
-import { createFluxRootHandle } from '../../shared/flux-auth/src/rootFromMnemonic.mjs';
+import { createFluxRootHandle } from '../../flux-auth/src/rootFromMnemonic.mjs';
 
 const PHRASES = {
   owner: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',

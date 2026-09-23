@@ -2,35 +2,26 @@
 LearningContent.load("what-the-numbers-do", {
   "sections": [
     [
-      "Numbers are choices you can see",
-      "You do not need to understand a shader to notice what a control changes. Make one adjustment, look at the result, then return to the starting point. Changing everything at once makes it difficult to learn which choice mattered."
+      "The hash is the fixed point",
+      "stable_content_cid hashes the JSON serialization of a payload, computed from the in-memory value — not from whatever bytes happen to be sitting on disk. That's a narrower guarantee than it might sound: the CID doesn't promise anything about storage. It promises one thing, exactly: this JSON, hashed this way, produces this address."
     ],
     [
-      "More points means more samples",
-      "Our current budget ranges from 6,000 to 24,000 particles, selected from screen size and a rough hardware signal. These are samples of the shape, like the individual marks in a drawing. More samples can describe fine details better. They also ask the device to draw more. Doubling the count does not guarantee twice the quality, or a particular frame rate."
+      "Storage can move; the CID can't",
+      "Because the hash is over the JSON and not the file, storage is free to change shape entirely — a different layout, a different encoding, a different database — while every CID stays identical. The one condition is that the JSON a reader reconstructs has to round-trip byte-identical to what was originally hashed. Move a field, reorder a key in a way that changes the serialization, and the CID stops matching, silently, for every record built that way."
     ],
     [
-      "Fifty percent is a state, not a timer",
-      "Here, 0% dissolution means the complete arrangement. At 50%, points across the form have begun to disperse and fade. That number describes the effect, not an exact promise that half the pixels or brightness disappear. Opening the experiment asks for 50% and holds it there. Returning home asks for 0%.",
-      "This distinction matters. An automatic cycle tells you that time has passed. A change tied to a page tells you that you went somewhere. We use the second relationship for navigation."
+      "What an inexact round trip costs",
+      "An inexact round trip doesn't just break one record — it re-addresses the whole store, because every CID downstream was computed against an assumption that no longer holds. This is also why a content store is described as holding a VIEW of the data, not the source: reading the store back out means parsing whatever rendering it kept, and that cost is invisible right up until something tries to consume it.",
+      "The practical form of this law: before calling a store finished, write the reader and prove extract(parse(render(x))) equals extract(x). If that doesn't hold, the CID was never really addressing the thing you think it was addressing."
     ],
     [
-      "A turn has a direction",
-      "Rotation is measured in degrees. Zero shows the original view; 90 degrees is a quarter turn; 180 is a half turn. Turning left and right reveals the sides. Tilting reveals the top and bottom. A word may nearly disappear when viewed edge-on because most of its points lie close to the same plane. That is a consequence of the geometry, not a missing page."
+      "No observer-relative anything",
+      "This is the part that rules out a whole category of tempting designs: there is no per-reader, per-node, or per-moment resolution. A CID does not render differently because a different observer fetched it, and it does not change because time passed or someone asked from a different node. Determinism here isn't a performance property — it's the thing that makes \"verified\" mean anything at all."
     ],
     [
-      "Focus decides what deserves an edge",
-      "Depth of field describes how focus changes with distance. Think of a close object in a photograph: some edges are sharp while objects farther away soften. Our particle sizes and brightness respond to depth in the ribbon form. This is different from putting a blur over the entire screen. The reading text stays sharp."
-    ],
-    [
-      "Time changes the character of a transition",
-      "One second is 1,000 milliseconds. The mesh takes 1,800 milliseconds to reach a new state. Page entrances use up to 1,000; exits use 550. The mesh has a little more time because a large change in form needs room to be understood. These are starting choices, not universal rules. Reduced motion applies destination states directly."
-    ],
-    [
-      "A practical way to tune",
-      "Start with a still, readable result. Adjust the turn by about 15 degrees and observe the overlap. Change the sample count in small steps during development. Compare the complete form with its 50% dissolved state. Test a short title, then a long one. Finally, try the same result on a smaller screen.",
-      "Keep a note of the starting value, the new value, and what changed. “The title became harder to read” is more useful than “it feels off.” A useful parameter is one you can connect to a visible consequence."
+      "Verifying is recomputation, not opinion",
+      "Checking a record is mechanical: recompute the same hash over the same JSON serialization and compare it to the CID you were handed. It is not a matter of whether the content looks right, reads plausibly, or comes from a source you trust. A record that fails that recomputation is not \"probably fine\" — it's not the thing the CID names, full stop."
     ]
   ],
-  "numbers": true
+  "numbers": false
 });

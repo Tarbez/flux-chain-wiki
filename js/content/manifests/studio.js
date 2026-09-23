@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "studio",
-  "title": "Theory: Studio",
+  "title": "Theory: Publish",
   "route": "/concept/studio",
   "group": "theory",
   "meta": {
@@ -14,73 +14,73 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / STUDIO"
+      "value": "THE FLUX SPEC / PUBLISH"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "About the studio."
+      "value": "Prepare. Sign. Publish."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Subzero is an independent design and experimentation studio. We build rich digital experiences with a purpose: to enrich, educate, and make room for discovery."
+      "value": "Publishing is three steps, and the signed-in DeadArk identity owns the middle one. The local publish host never holds a signing key — it encodes the site and hands back a message to sign."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "ABOUT THE STUDIO"
+      "value": "SEE THE PUBLISH FLOW"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Thoughtful journeys."
+      "value": "Prepare."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Every step has a reason. We shape the path, the pace, and the small interactions so people can explore with intention."
+      "value": "The host encodes the site as one archive, adds it to the miner, and drafts the name record that would point the name at it."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Carefully crafted."
+      "value": "Sign."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Form, motion, words, and behavior work together. The details change how an experience feels and how well it serves someone."
+      "value": "The signed-in identity signs the drafted record's signing message, in the browser. Its key never reaches the host or the miner."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Learning belongs here."
+      "value": "Publish."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "We share experiments and explain what we learn in plain language, so the work leaves people with more than an impression."
+      "value": "The signed record goes back to the host, which checks it and hands it to the miner's name registry. Only the identity that owns the name can move it."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "MORE ABOUT FLUX CHAIN"
+      "value": "ABOUT FLUX CHAIN"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "THE THEORY"
+      "value": "THE SPEC"
     }
   }
 });

@@ -4,9 +4,9 @@ ArkUI.mountStudio = function (root) {
   'use strict';
   function findById(id) { return root.querySelector('#' + id); }
   var studies = {
-    spacing: { title: 'When does a collection become a group?', description: 'Bring things closer and they begin to belong together. Move them apart and new boundaries appear.', label: 'Distance between groups', start: 'Together', end: 'Apart', note: 'THE SAME ELEMENTS. A DIFFERENT RELATIONSHIP.', code: 'SZ—001' },
-    rhythm: { title: 'What gives a pattern its rhythm?', description: 'A repeated beat feels steady. Introduce variation and the same elements begin to suggest movement.', label: 'Variation in height', start: 'Uniform', end: 'Expressive', note: 'REPETITION SETS THE RULE. VARIATION GIVES IT CHARACTER.', code: 'SZ—002' },
-    depth: { title: 'How little does it take to suggest depth?', description: 'These are flat squares. A small shift in position makes them read as layers, with a space between them.', label: 'Separation of layers', start: 'Flat', end: 'Dimensional', note: 'A FLAT SURFACE. A SENSE OF SPACE.', code: 'SZ—003' }
+    spacing: { title: 'When do separate copies start to read as one?', description: 'Bring independent groups of points closer and they begin to read as a single shape. Move them apart and each looks like its own story — the same idea behind a quorum: several copies of a ledger, agreeing rather than any one dictating the rest.', label: 'How closely the copies agree', start: 'Diverging', end: 'Agreeing', note: 'SEVERAL COPIES. ONE LEDGER, ONCE THEY AGREE.', code: 'FX—001' },
+    rhythm: { title: 'What makes a reference feel dense?', description: 'A short, repeated pattern is compact — the same reference standing in for something bigger each time. Break the pattern and the same content has to be spelled out again, every time.', label: 'How much gets spelled out', start: 'Referenced', end: 'Spelled out', note: 'A REFERENCE REPEATS THE PATTERN. SPELLING IT OUT BREAKS IT.', code: 'FX—002' },
+    depth: { title: 'How much can storage change before identity does?', description: 'These are the same squares. Shift how they’re layered and the arrangement looks completely different — but nothing about what they are has changed.', label: 'How differently it’s stored', start: 'One shape', end: 'Rearranged', note: 'STORAGE CAN CHANGE SHAPE. THE HASH DOESN’T.', code: 'FX—003' }
   };
   var mode = ArkUI.studioValues.mode; var values = ArkUI.studioValues;
   var specimen = root.querySelector('.specimen');
@@ -22,7 +22,7 @@ ArkUI.mountStudio = function (root) {
       bar.style.setProperty('--amplitude', String(35 + Math.sin(index * .65) * value * .55 + value * .4));
       bar.style.setProperty('--opacity', String(1 - (value / 100) * (.55 - (Math.sin(index * .65) + 1) * .275)));
     });
-    var descriptions = { spacing: 'Twelve dots arranged in three groups of four. Distance between groups: ', rhythm: 'Sixteen vertical bars forming a wave. Variation in height: ', depth: 'Four overlapping square outlines. Separation of layers: ' };
+    var descriptions = { spacing: 'Twelve dots arranged in three independent groups. How closely the copies agree: ', rhythm: 'Sixteen vertical bars forming a wave. How much gets spelled out: ', depth: 'Four overlapping square outlines. How differently it’s stored: ' };
     stage.setAttribute('aria-label', descriptions[mode] + value + ' percent.');
   }
   function selectStudy(next) {

@@ -18,49 +18,49 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Care is part of the experience."
+      "value": "What Flux Chain actually is."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Subzero is an independent design and experimentation studio. We build rich digital experiences with a purpose: to enrich, educate, and make room for discovery."
+      "value": "Flux Chain is a shared, content-addressed table: records referenced by a dense symbol-table encoding, fetched by CID, resolved byte-identical, and held by a five-node quorum. This site is the spec, published the same way everything else on it is."
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Thoughtful journeys."
+      "value": "Compact, not spelled out."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Every step should have a reason. We shape the path, the pace, and the small interactions so people can explore with intention and understand where they are going."
+      "value": "Flux Compact (.compact) replaces a word with a reference into a shared symbol table instead of writing it out — no hex, no base64. See the spec's Compact page for the encoding and the measured numbers."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Carefully crafted."
+      "value": "Addressed, not guessed at."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "We bring form, motion, words, and behavior together. The details matter because they change how an experience feels—and how well it serves someone."
+      "value": "Every record's CID hashes its JSON serialization. Fetch a CID and the same JSON resolves, exactly as hashed, for every reader — never a different answer for a different observer."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Learning belongs here."
+      "value": "Held by a quorum, not one server."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "For designers, curious beginners, and people building something new, we share experiments and explain what we learn in plain language. The work should leave people with more than an impression."
+      "value": "Five independent flx-* nodes hold the same ledger, queried through /explorer/v1. There is no single writer to trust and no raw reads to guess at."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

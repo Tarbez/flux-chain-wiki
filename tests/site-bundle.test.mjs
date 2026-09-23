@@ -2,7 +2,7 @@
    Each case names the defect it guards: a plausible simplification would reintroduce it and still look right. */
 import assert from 'node:assert/strict';
 import { readProject, encodeSite, decodeSite, projectFiles, planWrite, siteProblems } from '../scripts/lib/site-bundle.mjs';
-import { cidForBytes } from '../../shared/flx-codec/src/blake3.js';
+import { cidForBytes } from '../../../flx/flx-codec/src/blake3.js';
 
 const site = readProject();
 const clone = (v) => JSON.parse(JSON.stringify(v));

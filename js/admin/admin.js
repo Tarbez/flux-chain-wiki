@@ -40,6 +40,16 @@
                 secretIds: ArkSecretIds.slice(), secretDrafts: {}, secretSaved: {}, secretCurrent: null, secretDir: null, secretPlaintext: {}, secretRecipientsText: {}, secretDecrypted: {},
                 shapeIds: [], shapeLabels: {}, shapeCurrent: null };
   if (window.ArkMeshSettings) ArkMeshSettings.pages().forEach(function (p) { state.shapeIds.push(p.id); state.shapeLabels[p.id] = p.label; });
+  /* Shape pages are keyed by the catalog module id (zero, proximity, lab, about, concept), not
+     the manifest id: 'home' the manifest is 'zero' the shape page; 'about' and 'concept' happen
+     to already match. Pages with no manifest at all (proximity, lab -- the Demo/Lab pages) have
+     no other editor, so they keep a shape entry of their own instead of being orphaned. */
+  function shapePageId(manifestId) { return manifestId === 'home' ? 'zero' : manifestId; }
+  function hasShape(manifestId) { return state.shapeIds.indexOf(shapePageId(manifestId)) >= 0; }
+  function orphanShapeIds() {
+    var mapped = state.ids.map(shapePageId);
+    return state.shapeIds.filter(function (id) { return mapped.indexOf(id) < 0; });
+  }
   state.ids.forEach(function (id) {
     var manifest = ArkManifest.get(id);
     state.drafts[id] = clone(manifest); state.saved[id] = JSON.stringify(manifest);
@@ -54,12 +64,12 @@
     state.secretDrafts[id] = clone(secret); state.secretSaved[id] = JSON.stringify(secret);
   });
 
-  function dirty(id) { return state.saved[id] === null || JSON.stringify(state.drafts[id]) !== state.saved[id]; }
+  function dirty(id) { return state.saved[id] === null || JSON.stringify(state.drafts[id]) !== state.saved[id] || (hasShape(id) && reliefDirty()); }
   function dirtyA(slug) { return state.aSaved[slug] === null || JSON.stringify(state.aDrafts[slug]) !== state.aSaved[slug]; }
   function dirtyI(id) { return state.assetSaved[id] === null || JSON.stringify(state.assetDrafts[id]) !== state.assetSaved[id]; }
   function dirtyS(id) { return state.secretSaved[id] === null || JSON.stringify(state.secretDrafts[id]) !== state.secretSaved[id]; }
-  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'mesh' ? false : dirty(state.current); }
-  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || state.secretIds.some(dirtyS) || reliefDirty(); }
+  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'mesh' || state.kind === 'design' ? false : dirty(state.current); }
+  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || state.secretIds.some(dirtyS) || reliefDirty() || themeDirty(); }
 
   var statusTimer = 0;
   function status(message, tone) {
@@ -81,6 +91,8 @@
   function renderList() {
     var meshNav = $('meshNav');
     if (meshNav) meshNav.setAttribute('aria-current', String(state.kind === 'mesh'));
+    var designNav = $('designNav');
+    if (designNav) designNav.setAttribute('aria-current', String(state.kind === 'design'));
     var list = $('pageList'); list.textContent = '';
     ArkManifest.groups.forEach(function (group) {
       var ids = state.ids.filter(function (id) { return state.drafts[id].group === group; });
@@ -88,7 +100,7 @@
       list.appendChild(h('li', { class: 'side-group', 'data-icon': 'page', text: GROUP_NAMES[group] }));
       ids.forEach(function (id) {
         var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'page' && id === state.current), 'data-id': id, onclick: function () { select(id); } },
-          h('span', { text: state.drafts[id].title }), dirty(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
+          h('span', { text: state.drafts[id].title }), dirty(id) ? h('span', { class: 'dot', title: hasShape(id) ? 'Unsaved changes, including its images or shared shape tuning' : 'Unsaved changes' }) : null);
         list.appendChild(h('li', {}, button));
       });
     });
@@ -110,22 +122,24 @@
         h('span', { text: state.secretDrafts[id].label || id }), dirtyS(id) ? h('span', { class: 'dot', title: 'Unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
-    if (window.ArkMeshSettings && state.shapeIds.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'shape', text: 'Shapes' }));
-    if (window.ArkMeshSettings) state.shapeIds.forEach(function (id) {
+    var orphans = window.ArkMeshSettings ? orphanShapeIds() : [];
+    if (orphans.length) list.appendChild(h('li', { class: 'side-group', 'data-icon': 'shape', text: 'Shapes' }));
+    orphans.forEach(function (id) {
       var button = h('button', { type: 'button', 'aria-current': String(state.kind === 'shape' && id === state.shapeCurrent), 'data-shape': id, onclick: function () { selectShape(id); } },
-        h('span', { text: state.shapeLabels[id] || id }), reliefDirty() ? h('span', { class: 'dot', title: 'Tuning or a page’s images have unsaved changes' }) : null);
+        h('span', { text: state.shapeLabels[id] || id }), reliefDirty() ? h('span', { class: 'dot', title: 'Tuning or this page’s images have unsaved changes' }) : null);
       list.appendChild(h('li', {}, button));
     });
   }
 
   function select(id) { state.kind = 'page'; state.current = id; renderList(); renderEditor(); reloadPreview(); }
-  function selectShape(id) { state.kind = 'shape'; state.shapeCurrent = id; renderList(); renderEditor(); reloadPreview(); }
 
   function selectArticle(slug) { state.kind = 'article'; state.aCurrent = slug; renderList(); renderEditor(); reloadPreview(); }
 
   function selectAsset(id) { state.kind = 'asset'; state.assetCurrent = id; renderList(); renderEditor(); reloadPreview(); }
 
   function selectSecret(id) { state.kind = 'secret'; state.secretCurrent = id; renderList(); renderEditor(); reloadPreview(); }
+
+  function selectShape(id) { state.kind = 'shape'; state.shapeCurrent = id; renderList(); renderEditor(); reloadPreview(); }
 
   function selectMesh() { state.kind = 'mesh'; renderList(); renderEditor(); reloadPreview(); }
 
@@ -189,6 +203,7 @@
     if (state.kind === 'secret') { renderSecretEditor(); return; }
     if (state.kind === 'shape') { renderShapeEditor(); return; }
     if (state.kind === 'mesh') { renderMeshEditor(); return; }
+    if (state.kind === 'design') { renderDesignEditor(); return; }
     var root = $('editor'); root.textContent = '';
     var id = state.current, manifest = state.drafts[id];
     if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
@@ -214,6 +229,12 @@
       root.appendChild(h('div', { class: 'tools' },
         h('button', { type: 'button', class: 'btn', text: 'Add a point', onclick: function () { addPoint(manifest); touch(); renderEditor(); } }),
         h('button', { type: 'button', class: 'btn', text: 'Remove the last point', disabled: ArkManifest.points(manifest) <= 1, onclick: function () { removePoint(manifest); touch(); renderEditor(); } })));
+    }
+    if (window.ArkMeshSettings && hasShape(id)) {
+      var spid = shapePageId(id);
+      root.appendChild(buildShapePickers(spid));
+      root.appendChild(buildPlacementPanel(spid));
+      root.appendChild(buildMeshTuningPanel());
     }
     if (manifest.group === 'theory') {
       root.appendChild(h('div', { class: 'danger-zone' },
@@ -745,6 +766,7 @@
   /* ---- preview ------------------------------------------------------ */
   function previewRoute() {
     if (state.kind === 'mesh') return null;
+    if (state.kind === 'design') return '/'; /* colours apply everywhere; show them against Home */
     if (state.kind === 'article') return state.aCurrent ? '/learnings/' + state.aCurrent : null;
     if (state.kind === 'asset') return state.assetCurrent ? '/concept' : null;
     if (state.kind === 'shape') return state.shapeCurrent && ArkUI.pageCatalog[state.shapeCurrent] ? ArkUI.pageCatalog[state.shapeCurrent].path : null;
@@ -761,7 +783,8 @@
     $('open').href = previewUrl();
     $('previewNote').textContent = state.kind === 'mesh' ? 'The mesh has no live preview — see its status in the editor.' : 'Save this page to preview it.';
     var saved = state.kind === 'article' ? state.aSaved[state.aCurrent] : state.kind === 'asset' ? state.assetSaved[state.assetCurrent]
-      : state.kind === 'shape' ? (state.shapeCurrent ? '' : null) : state.saved[state.current];
+      : state.kind === 'secret' ? state.secretSaved[state.secretCurrent] : state.kind === 'shape' ? (state.shapeCurrent ? '' : null)
+      : state.kind === 'design' ? '' : state.saved[state.current];
     var ready = !!route && saved !== null && saved !== undefined;
     $('frame').hidden = !ready; $('previewNote').hidden = ready;
     if (ready) $('frame').src = 'index.html?preview=' + Date.now() + '#' + route;
@@ -787,14 +810,113 @@
     if (!win) return;
     try { win.postMessage({ type: 'subzero-preview-mesh', settings: meshDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
   }
-  $('frame').addEventListener('load', function () { notifyPreviewAssets(); notifyPreviewMesh(); });
+  /* Same idea again, for the colour theme (js/content/theme.js): a picked colour shows on
+     the previewed page immediately, before Save writes anything. */
+  var themeDraft = (window.ArkTheme && ArkTheme.get()) || (window.ArkTheme && ArkTheme.defaults()) || {};
+  var themeSaved = window.ArkTheme ? JSON.stringify(ArkTheme.sanitize(themeDraft)) : null;
+  function notifyPreviewTheme() {
+    var frame = $('frame'), win = frame && !frame.hidden && frame.contentWindow;
+    if (!win) return;
+    try { win.postMessage({ type: 'subzero-preview-theme', theme: themeDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+  }
+  function themeDirty() { return !window.ArkTheme || JSON.stringify(ArkTheme.sanitize(themeDraft)) !== themeSaved; }
+  async function saveThemeDraft(button) {
+    try {
+      if (state.cdirs) {
+        await ArkAdminStore.saveTheme(state.cdirs.content, themeDraft);
+        status('Saved js/content/theme-data.js', 'ok');
+      } else {
+        download('theme-data.js', ArkTheme.serialize(themeDraft));
+        status('Downloaded theme-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
+      }
+    } catch (error) { status(error.message, 'error'); return; }
+    themeDraft = ArkTheme.sanitize(themeDraft);
+    themeSaved = JSON.stringify(themeDraft);
+    ArkTheme.define(themeDraft);
+    if (button) button.disabled = true;
+    renderList();
+  }
+  function selectDesign() { state.kind = 'design'; renderList(); renderEditor(); reloadPreview(); }
+  /* A small live thumbnail of a background style, mounted right in the admin (not just the
+     iframe): design/ark-ui's generators are pure DOM/SVG/canvas, so this is the same
+     ArkBackgrounds.<key>.mount() the public site uses, just in a small fixed box. */
+  function backgroundThumb(key) {
+    var box = h('div', { class: 'bg-thumb' });
+    if (window.ArkBackgrounds && ArkBackgrounds[key]) {
+      try { ArkBackgrounds[key].mount(box); } catch (error) { box.appendChild(h('span', { class: 'bg-thumb-fallback', text: key })); }
+    } else box.appendChild(h('span', { class: 'bg-thumb-fallback', text: key }));
+    return box;
+  }
+
+  function renderDesignEditor() {
+    var root = $('editor'); root.textContent = '';
+    root.appendChild(h('div', { class: 'editor-head' }, h('div', {}, h('h1', { text: 'Design' }), h('div', { class: 'route', text: 'js/content/theme-data.js' }))));
+    if (!window.ArkTheme) { root.appendChild(h('p', { class: 'empty-state', text: 'Theme editing is unavailable on this page.' })); return; }
+    var save = h('button', { type: 'button', class: 'btn primary', text: 'Save' });
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset everything to defaults' });
+
+    var colorsBox = h('fieldset', { class: 'relief' }, h('legend', { text: 'Shades' }));
+    colorsBox.appendChild(h('p', { class: 'hint', text: 'The site’s colour palette (js/tokens.js). Nothing here is written until Save; the preview on the right updates as you pick.' }));
+    var colorFields = h('div', { class: 'relief-fields' });
+    function refreshColors() {
+      colorFields.textContent = '';
+      ArkTheme.colorFields().forEach(function (f) {
+        var id = 'theme-' + f.key;
+        var swatch = h('input', { id: id, type: 'color', value: themeDraft.colors[f.key] || f.def });
+        swatch.addEventListener('input', function () {
+          themeDraft.colors[f.key] = swatch.value;
+          notifyPreviewTheme(); save.disabled = !themeDirty();
+        });
+        var revertOne = h('button', { type: 'button', class: 'btn tiny', text: 'Default', title: 'Reset just this colour', disabled: themeDraft.colors[f.key] === f.def, onclick: function () {
+          themeDraft.colors[f.key] = f.def; swatch.value = f.def; revertOne.disabled = true;
+          notifyPreviewTheme(); save.disabled = !themeDirty();
+        } });
+        colorFields.appendChild(h('div', { class: 'relief-field' },
+          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: f.label }), revertOne),
+          swatch));
+      });
+    }
+    colorsBox.appendChild(colorFields);
+
+    var bgBox = h('fieldset', { class: 'relief' }, h('legend', { text: 'Background' }));
+    bgBox.appendChild(h('p', { class: 'hint', text: 'A layer behind every page (js/ark/vendor/backgrounds.js, from design/ark-ui). ‘None’ keeps the site’s original flat canvas colour.' }));
+    var bgGrid = h('div', { class: 'bg-grid' });
+    function refreshBackground() {
+      bgGrid.textContent = '';
+      ArkTheme.backgroundStyles().forEach(function (s) {
+        var id = 'bg-' + s.key;
+        var picked = themeDraft.background.style === s.key;
+        var radio = h('input', { id: id, type: 'radio', name: 'bg-style', checked: picked });
+        radio.addEventListener('change', function () {
+          themeDraft.background = { style: s.key };
+          notifyPreviewTheme(); save.disabled = !themeDirty(); refreshBackground();
+        });
+        var card = h('label', { for: id, class: 'bg-card' + (picked ? ' picked' : '') },
+          radio, s.key === 'none' ? h('div', { class: 'bg-thumb bg-thumb-none' }) : backgroundThumb(s.key),
+          h('span', { text: s.label }));
+        bgGrid.appendChild(card);
+      });
+    }
+    bgBox.appendChild(bgGrid);
+
+    function refreshAll() { refreshColors(); refreshBackground(); save.disabled = !themeDirty(); }
+    reset.addEventListener('click', function () { themeDraft = ArkTheme.defaults(); refreshAll(); notifyPreviewTheme(); });
+    save.addEventListener('click', function () { saveThemeDraft(save); });
+    refreshAll();
+    root.appendChild(colorsBox);
+    root.appendChild(bgBox);
+    root.appendChild(h('div', { class: 'tools' }, save, reset));
+  }
+  $('designNav').addEventListener('click', selectDesign);
+
+  $('frame').addEventListener('load', function () { notifyPreviewAssets(); notifyPreviewMesh(); notifyPreviewTheme(); });
   $('reload').addEventListener('click', reloadPreview);
 
   /* ---- mesh tuning + page shapes (js/content/mesh-settings.js) ------- */
-  /* Built into each page's own "Shapes" editor (renderShapeEditor), right
-     where a person is already picking that page's two images, rather than a
-     separate panel to go find. meshDraft/meshSaved are shared module state
-     so an edit on one page's screen and Save from another never disagree. */
+  /* Built straight into a page's own editor (renderEditor, for a page hasShape() names),
+     right where a person is already reading that page's fields, instead of a separate
+     "Shapes" list to go find. meshDraft/meshSaved are shared module state so an edit on
+     one page's screen and Save from another never disagree. */
   function reliefDirty() { return !window.ArkMeshSettings || JSON.stringify(ArkMeshSettings.sanitize(meshDraft)) !== meshSaved; }
   async function saveMeshDraft(button) {
     try {
@@ -930,6 +1052,8 @@
     box.appendChild(h('div', { class: 'tools' }, save, reset));
     return box;
   }
+  /* Only for a shape page with no manifest of its own (Demo, Lab): everything else edits its
+     shapes inline on its real page (renderEditor, via hasShape/shapePageId above). */
   function renderShapeEditor() {
     var root = $('editor'); root.textContent = '';
     var id = state.shapeCurrent;
@@ -1100,7 +1224,8 @@
              articles: state.slugs.map(function (slug) { return articleCopy(state.aDrafts[slug]); }),
              assets: state.assetIds.map(function (id) { return clone(state.assetDrafts[id]); }),
              secrets: state.secretIds.map(function (id) { return clone(state.secretDrafts[id]); }),
-             meshSettings: window.ArkMeshSettings ? clone(meshDraft) : null };
+             meshSettings: window.ArkMeshSettings ? clone(meshDraft) : null,
+             theme: window.ArkTheme ? clone(themeDraft) : null };
   }
 
   async function refreshMesh() {

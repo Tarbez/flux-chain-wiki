@@ -148,9 +148,14 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'mesh-settings-data.js', ArkMeshSettings.serialize(params));
   }
 
+  /* the colour theme is a single file too, same as mesh settings. */
+  async function saveTheme(contentDir, whole) {
+    await write(contentDir, 'theme-data.js', ArkTheme.serialize(whole));
+  }
+
   return { indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
            secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,
-           saveMeshSettings: saveMeshSettings };
+           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme };
 })();

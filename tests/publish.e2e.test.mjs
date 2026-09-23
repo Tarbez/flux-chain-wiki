@@ -13,7 +13,7 @@ import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
 import { createHost } from '../scripts/publish-host.mjs';
 import { totpAt, base32Decode } from '../scripts/lib/totp.mjs';
-import { createFluxRootHandle } from '../../shared/flux-auth/src/rootFromMnemonic.mjs';
+import { createFluxRootHandle } from '../../flux-auth/src/rootFromMnemonic.mjs';
 import { buildNameRecordSigningMessage } from '../../ark-miner-cli/src/state/name-record-validators.js';
 import { createPublisher } from '../scripts/lib/publisher.mjs';
 import { readProject, decodeSite, encodeSite, defaultProjectRoot } from '../scripts/lib/site-bundle.mjs';

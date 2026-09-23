@@ -26,7 +26,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
-import { encodeArchive, decodeArchive } from '../../../shared/flx-codec/src/index.js';
+import { encodeArchive, decodeArchive } from '../../../../flx/flx-codec/src/index.js';
 
 export const SITE_SCHEMA = 'subzero-site/1';
 /* Fixed, so identical content is the identical archive and the same address. Publish time lives on the name record. */
@@ -40,10 +40,10 @@ function read(root, relative) { return fs.readFileSync(path.join(root, relative)
 /* The project's own content code, run in a sandbox with nothing but what it needs. */
 function loadContentCode(root) {
   const context = vm.createContext({ console, document: { write() {} } });
-  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js', 'js/content/mesh-settings.js', 'js/admin/store.js']) {
+  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js', 'js/tokens.js', 'js/ark/vendor/backgrounds.js', 'js/content/theme.js', 'js/content/mesh-settings.js', 'js/admin/store.js']) {
     vm.runInContext(read(root, file), context, { filename: file });
   }
-  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkMeshSettings, ArkAdminStore })', context);
+  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkMeshSettings, ArkAdminStore })', context);
 }
 
 /* the ids the manifest index lists, in display order */
@@ -100,6 +100,16 @@ function readMeshSettings(root) {
   return JSON.parse(JSON.stringify(vm.runInContext('ArkMeshSettings.get()', context)));
 }
 
+/* the colour theme override: a single object, not a list. */
+function readTheme(root) {
+  const context = vm.createContext({});
+  vm.runInContext(read(root, 'js/tokens.js'), context, { filename: 'tokens.js' });
+  vm.runInContext(read(root, 'js/ark/vendor/backgrounds.js'), context, { filename: 'backgrounds.js' });
+  vm.runInContext(read(root, 'js/content/theme.js'), context, { filename: 'theme.js' });
+  vm.runInContext(read(root, 'js/content/theme-data.js'), context, { filename: 'theme-data.js' });
+  return JSON.parse(JSON.stringify(vm.runInContext('ArkTheme.get()', context)));
+}
+
 /* the project's files -> a plain site object */
 export function readProject(root = defaultProjectRoot) {
   const ids = manifestIds(root);
@@ -107,6 +117,7 @@ export function readProject(root = defaultProjectRoot) {
   const assets = JSON.parse(JSON.stringify(loadIndexedAssets(root, assetIds(root))));
   const secrets = JSON.parse(JSON.stringify(loadIndexedSecrets(root, secretIds(root))));
   const meshSettings = readMeshSettings(root);
+  const theme = readTheme(root);
 
   const articleContext = vm.createContext({});
   vm.runInContext(read(root, 'js/content/learnings.js'), articleContext);
@@ -114,12 +125,12 @@ export function readProject(root = defaultProjectRoot) {
   const slugs = vm.runInContext('LearningContent.articles.map(function (a) { return a.slug; })', articleContext);
   for (const slug of slugs) vm.runInContext(read(root, `js/content/articles/${slug}.js`), articleContext, { filename: `articles/${slug}.js` });
   const articles = JSON.parse(JSON.stringify(vm.runInContext('LearningContent.articles', articleContext)));
-  return { manifests, articles, assets, secrets, meshSettings };
+  return { manifests, articles, assets, secrets, meshSettings, theme };
 }
 
 /* every reason a site is not publishable, from the project's own validators */
 export function siteProblems(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkMeshSettings } = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkMeshSettings } = loadContentCode(root);
   const out = [];
   if (!site || !Array.isArray(site.manifests) || !Array.isArray(site.articles) || !Array.isArray(site.assets)) return ['a site has manifests, articles and assets'];
   const seen = new Set();
@@ -155,6 +166,8 @@ export function siteProblems(site, root = defaultProjectRoot) {
   }
   // Older sites predate mesh tuning: absent means "use image-shape.js's defaults", not a problem.
   if (site.meshSettings != null) for (const bad of ArkMeshSettings.problems(site.meshSettings)) out.push(`mesh settings: ${bad}`);
+  // Older sites predate a theme override: absent means "use tokens.js's defaults", not a problem.
+  if (site.theme != null) for (const bad of ArkTheme.problems(site.theme)) out.push(`theme: ${bad}`);
   return out;
 }
 
@@ -168,12 +181,13 @@ export function encodeSite(site, root = defaultProjectRoot) {
     generatedBy: 'subzero/scripts/lib/site-bundle.mjs',
     sourceFormat: SITE_SCHEMA,
     routes: [
-      { routeId: 'site', path: '/', title: 'SUBZERO', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null } },
+      { routeId: 'site', path: '/', title: 'SUBZERO', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null, theme: site.theme != null } },
       ...site.manifests.map((m) => ({ routeId: `manifest.${m.id}`, path: `/manifest/${m.id}`, title: m.title, payload: m })),
       ...site.articles.map((a) => ({ routeId: `article.${a.slug}`, path: `/article/${a.slug}`, title: a.title, payload: a })),
       ...site.assets.map((a) => ({ routeId: `asset.${a.id}`, path: `/asset/${a.id}`, title: a.label, payload: a })),
       ...(site.secrets || []).map((s) => ({ routeId: `secret.${s.id}`, path: `/secret/${s.id}`, title: s.label, payload: s })),
       ...(site.meshSettings != null ? [{ routeId: 'meshSettings', path: '/mesh-settings', title: 'Mesh tuning', payload: site.meshSettings }] : []),
+      ...(site.theme != null ? [{ routeId: 'theme', path: '/theme', title: 'Colour theme', payload: site.theme }] : []),
     ],
   });
 }
@@ -197,12 +211,14 @@ export function decodeSite(bytes) {
     secrets: (entry.payload.secrets || []).map((id) => need(`secret.${id}`)),
     // Older archives predate mesh tuning: absent means "use image-shape.js's defaults".
     meshSettings: entry.payload.meshSettings ? need('meshSettings') : null,
+    // Older archives predate a theme override: absent means "use tokens.js's defaults".
+    theme: entry.payload.theme ? need('theme') : null,
   };
 }
 
 /* The exact set of files a site occupies in the project, as {relativePath: text}. */
 export function projectFiles(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkMeshSettings, ArkAdminStore } = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkMeshSettings, ArkAdminStore } = loadContentCode(root);
   const files = {};
   for (const manifest of site.manifests) files[`js/content/manifests/${manifest.id}.js`] = ArkManifest.serialize(manifest);
   files['js/content/manifests/index.js'] = ArkAdminStore.indexText(site.manifests.map((m) => m.id));
@@ -215,6 +231,8 @@ export function projectFiles(site, root = defaultProjectRoot) {
   files['js/content/secrets/index.js'] = ArkAdminStore.indexTextSecrets(secrets.map((s) => s.id));
   // A single file, not a per-id directory: there is only ever one mesh tuning.
   files['js/content/mesh-settings-data.js'] = ArkMeshSettings.serialize(site.meshSettings || {});
+  // A single file, not a per-id directory: there is only ever one theme.
+  files['js/content/theme-data.js'] = ArkTheme.serialize(site.theme || {});
   return files;
 }
 

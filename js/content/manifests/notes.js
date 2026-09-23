@@ -26,7 +26,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The notes are short written explanations of what we build and what we learn from it, in plain language, for designers, curious beginners, and anyone making something new."
+      "value": "The notes go one level deeper than the spec: worked examples, the numbers behind a claim, and what changes if you push on it."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -38,25 +38,25 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Written to be understood."
+      "value": "One claim, worked through."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Each note explains one idea and the reasoning behind it."
+      "value": "Each note takes one line from the spec and walks through what it actually means in practice."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Tied to something you can try."
+      "value": "Tied to the lab."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Notes point to an experiment, so an idea can be seen working and not only read about."
+      "value": "Notes point back to the interactive lab, so an idea can be felt, not only read about."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -74,13 +74,13 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "OPEN THE TUTORIALS"
+      "value": "READ THE NOTES"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "THE THEORY"
+      "value": "THE SPEC"
     }
   }
 });
