@@ -59,7 +59,7 @@ h.state.pause(true);h.advance(1);const frozen=h.uniforms.uTime;h.advance(3);asse
 h.state.navigate('proximity');h.advance(1);assert.equal(h.uniforms.uDissolve,.5);assert.equal(h.uniforms.uShape[2],1);
 h.state.pause(false);h.advance(1);assert(h.uniforms.uTime>frozen);
 h.state.navigate('learnings');h.advance(4);assert.equal(h.uniforms.uShape[3],0);assert.equal(h.uniforms.uDissolve,0);
-h.state.navigate('article/from-points-to-form');h.advance(4);assert.equal(h.uniforms.uShape[3],1);assert(!h.canvas.style.transform.includes('NaN'));
+h.state.navigate('article/why-the-chain-was-retired');h.advance(4);assert.equal(h.uniforms.uShape[3],1);assert(!h.canvas.style.transform.includes('NaN'));
 h.state.setWord('A new title');h.advance(.4);assert(h.uniforms.uWordBlend>0 && h.uniforms.uWordBlend<1);h.state.setWord('Another title');h.advance(4);assert.equal(h.uniforms.uWordBlend,1);
 h.state.pause(true);h.state.rotate(1,90);h.advance(1);assert.equal(h.uniforms.uRotation[1],Math.PI/2);
 h.state.setWord('Paused title');h.advance(1);assert.equal(h.uniforms.uWordBlend,1);h.state.navigate('zero');h.advance(1);assert.equal(h.uniforms.uShape[3],0);
@@ -68,7 +68,7 @@ const r=harness({reduced:true});assert.equal(r.callbacks.size,0);r.state.navigat
 const f=harness({webgl:false});assert(f.canvas.removed);assert(!f.fallback.classList.values.has('zero-fallback-hidden'));
 console.log('PASS: shared state → persistent mesh, filament morph, half dissolve hold, rapid reversal continuity, restore home shape, pause navigation, reduced motion, missing WebGL, context loss. Mock GPU, actual Flux store.');
 
-const w=harness({words:false});w.state.navigate('article/from-points-to-form');w.advance(4);assert.equal(w.uniforms.uShape[3],0);w.setWordsAvailable(true);w.fontReady();w.advance(4);assert.equal(w.uniforms.uShape[3],1);console.log('PASS: a failed word stencil recovers after font readiness.');
+const w=harness({words:false});w.state.navigate('article/why-the-chain-was-retired');w.advance(4);assert.equal(w.uniforms.uShape[3],0);w.setWordsAvailable(true);w.fontReady();w.advance(4);assert.equal(w.uniforms.uShape[3],1);console.log('PASS: a failed word stencil recovers after font readiness.');
 
 const cycle=harness();
 assert.equal(cycle.canvas.dataset.surfaceState,'full');
@@ -85,7 +85,7 @@ theme.setTheme('40 20% 98%');theme.advance(.1);
 assert.equal(theme.uniforms.uLightTheme,1);assert.equal(theme.canvas.style.mixBlendMode,'multiply');
 theme.state.pause(true);theme.advance(.1);theme.setTheme('180 9% 2%');theme.advance(.1);
 assert.equal(theme.uniforms.uLightTheme,0);assert.equal(theme.canvas.style.mixBlendMode,'screen');
-for(const page of ['proximity','learnings','concept','about','article/from-points-to-form']) {
+for(const page of ['proximity','learnings','concept','about','article/why-the-chain-was-retired']) {
  theme.state.navigate(page);theme.advance(.1);
  assert.equal(theme.uniforms.uHome,0);
  assert(theme.uniforms.uLayerPose.every(Number.isFinite));
@@ -102,7 +102,7 @@ const interrupted=depthRoute.uniforms.uPageSurface.slice();
 depthRoute.state.navigate('zero');depthRoute.advance(1/60);
 assert(depthRoute.uniforms.uPageSurface.every((v,i)=>Math.abs(v-interrupted[i])<.01),'rapid reversal retains the current layer-two pose');
 depthRoute.advance(3);assert.deepEqual(depthRoute.uniforms.uPageSurface,[0,1,0,0]);
-depthRoute.state.navigate('article/from-points-to-form');depthRoute.advance(3);
+depthRoute.state.navigate('article/why-the-chain-was-retired');depthRoute.advance(3);
 assert.deepEqual(depthRoute.uniforms.uPageSurface,[-1.25,.32,-.10,1.5]);
 depthRoute.state.pause(true);depthRoute.advance(.1);depthRoute.state.navigate('learnings');depthRoute.advance(.1);
 assert.deepEqual(depthRoute.uniforms.uPageSurface,[-1,.38,-.16,1.45]);
@@ -110,7 +110,7 @@ r.state.navigate('about');r.advance(.1);assert.deepEqual(r.uniforms.uPageSurface
 console.log('PASS: layer-two page depth, interpolated mask, interrupted return, article pose and instant paused/reduced-motion navigation.');
 
 const reference=harness();reference.state.pause(true);reference.advance(.1);
-const destinations=['proximity','lab','learnings','concept','about','article/from-points-to-form'];
+const destinations=['proximity','lab','learnings','concept','about','article/why-the-chain-was-retired'];
 destinations.forEach((page,index)=>{
  reference.state.navigate(page);reference.advance(.1);
  const weights=[...reference.uniforms.uReferenceA,...reference.uniforms.uReferenceB];

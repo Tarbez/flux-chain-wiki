@@ -10,8 +10,6 @@
   display: block;
   translate: -50% -50%;
   opacity: var(--mesh-opacity, .22);
-  mix-blend-mode: screen;
-  filter:blur(var(--mesh-blur, 1.6px));
   pointer-events: none;
   will-change: transform, opacity;
   /* Position and geometry share the renderer transition clock. */

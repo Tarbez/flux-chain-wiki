@@ -1,0 +1,44 @@
+/* The lifecycle is painted and operated on the persistent lattice canvases. */
+#scene .ark-page[hidden] { display:none !important; }
+.lifecycle-departing .ark-hero-body,
+.lifecycle-departing .home-tools,
+.lifecycle-departing .page-iceberg { visibility:hidden !important; }
+.hero-alive[data-page="lifecycle"] .lattice-field,
+.hero-alive[data-page^="lifecycle/"] .lattice-field { opacity:.58; }
+.hero-alive[data-page="lifecycle"] .mesh-drag-surface,
+.hero-alive[data-page^="lifecycle/"] .mesh-drag-surface { display:none !important; }
+.hero-alive[data-page="lifecycle"] .hero-motion-toggle,
+.hero-alive[data-page^="lifecycle/"] .hero-motion-toggle { display:none !important; }
+.hero-alive[data-page="lifecycle"] .lattice-activity,
+.hero-alive[data-page^="lifecycle/"] .lattice-activity {
+  z-index:2;
+  opacity:1;
+  pointer-events:auto;
+  touch-action:none;
+}
+.hero-alive.is-lifecycle-transition .lattice-activity {
+  z-index:2;
+  opacity:1;
+  transition:none;
+  pointer-events:none;
+}
+.hero-alive[data-page="lifecycle"] .lattice-activity:focus-visible,
+.hero-alive[data-page^="lifecycle/"] .lattice-activity:focus-visible {
+  outline:2px solid hsl(var(--accent));
+  outline-offset:-4px;
+}
+#scene .lifecycle-page {
+  position:absolute;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  pointer-events:none;
+}
+@media(max-width:760px) {
+  .hero-alive[data-page="lifecycle"] .lattice-field,
+  .hero-alive[data-page^="lifecycle/"] .lattice-field { opacity:.42; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .hero-alive .lattice-field { transition:none; }
+}

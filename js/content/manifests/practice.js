@@ -14,61 +14,61 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / 03"
+      "value": "FLUX PROTOCOL / 03"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Same bytes, every reader."
+      "value": "Authority appears, then dissolves."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Resolution is deterministic. There is no reader-dependent output — the record you fetch is the same record everyone else fetches."
+      "value": "No standing validator set. A small committee is derived for one object, certifies it, and disappears."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "VERIFY A RECORD"
+      "value": "SEE A CELL FORM"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "No observer-relative rendering."
+      "value": "Derived per object, not assigned forever."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "A record does not render differently depending on who or what fetched it. What resolves is fixed by the CID, full stop."
+      "value": "Derived deterministically from the object's CID, its next sequence, the registry root, and the policy CID. Never a fixed roster."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Verification is not a viewpoint."
+      "value": "One job, then it's gone."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Checking a record means recomputing the same hash over the same JSON and comparing it — not asking whether it looks right from here."
+      "value": "Verifies one transition, publishes threshold evidence, dissolves. It can't certify unrelated work."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Nothing re-rolls."
+      "value": "Separate again from mesh-operations governance."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Sitting still, coming back later, or asking from a different node changes nothing about what a CID resolves to."
+      "value": "The seven-operator ceremony that governs Flux Protocol itself is a separate authority set. See Governance, Two Ways."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

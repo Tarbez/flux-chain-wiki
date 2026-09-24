@@ -1,49 +1,11 @@
-/* Optimized atmospheric hero: one gradient field, one low-resolution grain
-   canvas, and compositor-only opacity/transform motion. */
 .hero-alive {
   --field-accent: #7fb5bd;
   --field-muted: rgba(154,154,166,.5);
 }
 
-.hero-atmosphere {
-  position: absolute;
-  inset: -7%;
-  z-index: 0;
-  overflow: hidden;
-  contain: strict;
-  opacity: 1;
-  background:
-    radial-gradient(ellipse 58% 65% at 53% 40%, rgba(127,181,189,.14), transparent 72%),
-    radial-gradient(ellipse 70% 75% at 84% 30%, rgba(152,135,201,.10), transparent 75%),
-    radial-gradient(ellipse 60% 60% at 14% 72%, rgba(196,164,105,.07), transparent 75%),
-    #050507;
-  transform: translate3d(-1.5%, -1%, 0) scale(1.03);
-  transform-origin: center;
-  animation: atmosphere-drift 34s ease-in-out infinite alternate;
-  will-change: transform;
-  pointer-events: none;
-}
-.hero-atmosphere::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 48% 28% at 45% 45%, rgba(208,219,210,.15), transparent 72%),
-    linear-gradient(125deg, rgba(255,255,255,.025), transparent 42%, rgba(110,123,113,.018));
-  mix-blend-mode: screen;
-}
-.hero-atmosphere::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: .1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  mix-blend-mode: soft-light;
-}
-@keyframes atmosphere-drift {
-  to { transform: translate3d(1.5%, 1.2%, 0) scale(1.075); }
-}
+/* Removed: the grid (css/lattice.css) is the site's one background layer.
+   An active ArkBackgrounds style (js/main.js) still overrides it directly. */
+.hero-atmosphere { display: none; }
 
 .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) {
   opacity: .12;
@@ -60,7 +22,6 @@
 
 
 .ark-field-pill {
-  text-shadow: 0 0 18px rgba(214,236,230,.28);
   animation: label-breathe 7s ease-in-out 2s infinite;
 }
 .ark-field-pill::before,
@@ -69,7 +30,7 @@
   width: clamp(24px, 3.6cqw, 58px);
   height: 1px;
   margin: 0 14px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.3));
+  background: hsl(var(--border-default));
 }
 .ark-field-pill::after { transform: rotate(180deg); }
 @keyframes label-breathe { 0%, 100% { opacity: .58; } 50% { opacity: .92; } }
@@ -85,6 +46,7 @@
 }
 
 .ark-hero-body { pointer-events: none; z-index: 3 !important; }
+.ark-hero-title,.ark-hero-copy,.ark-hero-eyebrow { pointer-events: auto; user-select: text; }
 .ark-hero-title {
   max-width: 8em;
   margin: 0 0 12px;
@@ -184,7 +146,7 @@
   letter-spacing: .14em;
   white-space: nowrap;
 }
-.hero-experiment-meter i { width: 100%; height: 1px; background: linear-gradient(90deg,var(--field-accent) 50%,rgba(255,255,255,.12) 50%); }
+.hero-experiment-meter i { width: 100%; height: 1px; background: hsl(var(--border-default)); }
 .hero-alive.hero-still .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl),
 .hero-alive.hero-still .hero-atmosphere,
 .hero-alive.hero-still .ark-field-pill { animation-play-state: paused !important; }

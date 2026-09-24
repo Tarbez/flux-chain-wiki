@@ -30,11 +30,29 @@ ArkManifest.define({
       "section": "Header links",
       "value": "Lab"
     },
+    "DEPLOY": {
+      "label": "Header link: deploy a network",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Deploy"
+    },
+    "DAO": {
+      "label": "Header link: governance",
+      "kind": "line",
+      "section": "Header links",
+      "value": "DAO"
+    },
+    "DOWNLOAD": {
+      "label": "Header link: download",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Download"
+    },
     "BRAND.NAME": {
       "label": "Wordmark",
       "kind": "line",
       "section": "Brand",
-      "value": "FLUX CHAIN"
+      "value": "Flux Protocol"
     },
     "BRAND.TAGLINE": {
       "label": "Line under the wordmark",

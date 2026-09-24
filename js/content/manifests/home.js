@@ -10,37 +10,37 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "THE FLUX SPEC"
+      "value": "FLUX PROTOCOL"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "Query it, don't guess at it."
+      "value": "Every Network Agrees"
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Every record is a reference into a shared table — dense, not spelled out. Fetch it by its CID, and the full JSON resolves, exactly as hashed. Nothing renders differently for a different reader. Five nodes hold the same ledger."
+      "value": "Deploy your own network with its own DAO — like a contract on an EVM chain, not a fork."
     },
     "STEP": {
       "label": "Label on the ring pill",
       "kind": "line",
       "section": "Hero",
-      "value": "W392"
+      "value": "flux/flux"
     },
     "CTA": {
       "label": "Main button",
       "kind": "line",
       "section": "Hero",
-      "value": "Fetch a Record"
+      "value": "Read the Spec"
     },
     "CTA.SPEC": {
       "label": "Second button",
       "kind": "line",
       "section": "Hero",
-      "value": "Read the Spec"
+      "value": "About"
     },
     "READOUT.UNITS": {
       "label": "Readout label: units",
@@ -70,19 +70,19 @@ ArkManifest.define({
       "label": "Card label",
       "kind": "line",
       "section": "Theory card",
-      "value": "The spec"
+      "value": "One substrate"
     },
     "INVITE.TITLE": {
       "label": "Card heading",
       "kind": "line",
       "section": "Theory card",
-      "value": "Dense, not spelled out."
+      "value": "Many networks, not one chain."
     },
     "INVITE.LINK": {
       "label": "Card link (an arrow is added)",
       "kind": "line",
       "section": "Theory card",
-      "value": "Read the Spec"
+      "value": "See how networks are created"
     },
     "CORNER.USECASES": {
       "label": "Corner link: use cases",

@@ -8,7 +8,7 @@
 
    plus an append-only audit log of sign-in events.
 
-   It lives in ~/.subzero-admin (folder 0700, files 0600), outside the project, so
+   It lives in ~/.flux-chain-admin (folder 0700, files 0600), outside the project, so
    it is never published, committed or served. With no folder it is memory only,
    which is what the tests use.
 
@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-export const defaultDataDir = () => path.join(os.homedir(), '.subzero-admin');
+export const defaultDataDir = () => path.join(os.homedir(), '.flux-chain-admin');
 
 export const LOCK_POLICY = Object.freeze({ threshold: 5, baseMs: 5 * 60_000, capMs: 60 * 60_000 });
 

@@ -19,24 +19,54 @@ ArkMeshSettings.define({
   },
   "pages": {
     "zero": {
-      "primary": null,
-      "surface": null
+      "primary": "iceberg-blocks",
+      "surface": null,
+      "primaryMode": "none",
+      "surfaceMode": "none",
+      "hidden": true,
+      "size": 1,
+      "x": 0,
+      "y": 0
     },
     "proximity": {
       "primary": null,
-      "surface": null
+      "surface": null,
+      "primaryMode": "built-in",
+      "surfaceMode": "built-in",
+      "hidden": false,
+      "size": 1,
+      "x": 0,
+      "y": 0
     },
     "lab": {
       "primary": null,
-      "surface": null
+      "surface": null,
+      "primaryMode": "built-in",
+      "surfaceMode": "built-in",
+      "hidden": false,
+      "size": 1,
+      "x": 0,
+      "y": 0
     },
     "about": {
       "primary": null,
-      "surface": null
+      "surface": null,
+      "primaryMode": "built-in",
+      "surfaceMode": "built-in",
+      "hidden": false,
+      "size": 1,
+      "x": 0,
+      "y": 0
     },
     "concept": {
       "primary": "iceberg-blocks",
-      "surface": null
+      "surface": null,
+      "primaryMode": "image",
+      "surfaceMode": "built-in",
+      "hidden": false,
+      "size": 1,
+      "x": 0,
+      "y": 0
     }
   }
 });

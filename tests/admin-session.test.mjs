@@ -24,19 +24,19 @@ const identity = async (name) => {
 const owner = await identity('owner'), stranger = await identity('stranger');
 
 // A project root with the admin surface, and a file added "later" under js/admin/ that nobody thought to list.
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'subzero-lock-'));
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-lock-'));
 const put = (rel, text) => { fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fs.writeFileSync(path.join(root, rel), text); };
 for (const rel of ['admin.html', 'admin-app.html', 'index.html', 'js/admin/auth.js', 'js/admin/gate.js', 'js/admin/admin.js', 'js/admin/store.js', 'js/admin/publish.js', 'js/admin/later.js', 'js/content/home.js', 'css/admin.css']) put(rel, `/* ${rel} */`);
 
 // The fake miner side: who owns the name, whether the miner answers, and what got through the door.
 const fake = { owner: null, down: false, calls: [] };
 const publisher = {
-  name: 'subzero.ark',
+  name: 'flux-chain.ark',
   authorize: async (key) => {
-    if (fake.down) throw new PublishRefusal('Cannot check who owns subzero.ark: no miner.', 'a reachable miner to ask.', 'start it.', 503);
-    if (fake.owner && fake.owner !== key) throw new PublishRefusal(`subzero.ark is owned by another identity (${fake.owner}), so this one cannot open its admin.`, 'the owner\'s identity.', 'sign in with the recovery file of the identity that owns the name.', 403);
+    if (fake.down) throw new PublishRefusal('Cannot check who owns flux-chain.ark: no miner.', 'a reachable miner to ask.', 'start it.', 503);
+    if (fake.owner && fake.owner !== key) throw new PublishRefusal(`flux-chain.ark is owned by another identity (${fake.owner}), so this one cannot open its admin.`, 'the owner\'s identity.', 'sign in with the recovery file of the identity that owns the name.', 403);
   },
-  status: async () => { fake.calls.push('status'); return { name: 'subzero.ark', reachable: true }; },
+  status: async () => { fake.calls.push('status'); return { name: 'flux-chain.ark', reachable: true }; },
   fetchSite: async () => { fake.calls.push('site'); return { site: {} }; },
   prepare: async (site, key) => { fake.calls.push('prepare'); return { record: { ownerPublicKey: key } }; },
   publish: async (record) => { fake.calls.push('publish'); return { published: 1 }; },
@@ -59,7 +59,7 @@ function browser() {
   const call = async (method, url, body, headers = {}) => {
     const response = await fetch(origin + url, { method, headers: { ...(body !== undefined ? { 'content-type': 'application/json' } : {}), ...(cookie ? { cookie } : {}), ...headers }, body: body === undefined ? undefined : JSON.stringify(body), redirect: 'manual' });
     const set = response.headers.get('set-cookie');
-    if (set) cookie = set.startsWith('subzero_admin=;') ? '' : set.split(';')[0];
+    if (set) cookie = set.startsWith('flux_chain_admin=;') ? '' : set.split(';')[0];
     const text = await response.text();
     let json = null; try { json = JSON.parse(text); } catch {}
     return { status: response.status, json, text, set };
@@ -114,7 +114,7 @@ try {
     const r = await b.call(method, url, body); assert.equal(r.status, 401, url); assert.match(r.json.remedy, /sign in with your recovery file/);
   }
   assert.deepEqual(fake.calls, [], 'a locked admin never touched the miner');
-  assert.deepEqual((await b.call('GET', '/api/session')).json, { ok: true, name: 'subzero.ark', authenticated: false, publicKeyB64: null });
+  assert.deepEqual((await b.call('GET', '/api/session')).json, { ok: true, name: 'flux-chain.ark', authenticated: false, publicKeyB64: null });
 
   // 3. Step 1 alone (a good signature, an owned name) issues NO session: it is a ticket for step 3, and nothing opens yet.
   const step1 = await proveAndAuthorize(b, owner);
@@ -178,7 +178,7 @@ try {
   assert.equal(again.status, 401); assert.match(again.json.error, /unknown, used, or expired/);
   // A valid signature by the owner over a DIFFERENT message (another host, a name-record-shaped string) is not a login.
   challenge = (await fresh.call('POST', '/api/session/challenge', {})).json;
-  for (const other of [`${LOGIN_PREFIX}evil.example|${challenge.nonce}`, JSON.stringify({ name: 'subzero.ark', ownerPublicKey: owner.publicKeyB64, version: 1 }), challenge.message + ' ']) {
+  for (const other of [`${LOGIN_PREFIX}evil.example|${challenge.nonce}`, JSON.stringify({ name: 'flux-chain.ark', ownerPublicKey: owner.publicKeyB64, version: 1 }), challenge.message + ' ']) {
     const c = (await fresh.call('POST', '/api/session/challenge', {})).json;
     const r = await fresh.call('POST', '/api/session/login', { publicKeyB64: owner.publicKeyB64, nonce: c.nonce, signature: owner.sign(other) });
     assert.equal(r.status, 403, 'signing anything but the host\'s message logs no one in'); assert.equal(r.set, null);
@@ -256,7 +256,7 @@ try {
   assert.equal(last.status, 429, 'a flood of challenges is capped');
 
   // 11. The cookie parser takes the right cookie among others.
-  assert.equal(readSessionToken('a=1; subzero_admin=tok123; b=2'), 'tok123'); assert.equal(readSessionToken('x_subzero_admin=nope'), null); assert.equal(readSessionToken(''), null);
+  assert.equal(readSessionToken('a=1; flux_chain_admin=tok123; b=2'), 'tok123'); assert.equal(readSessionToken('x_flux_chain_admin=nope'), null); assert.equal(readSessionToken(''), null);
 
   // 12. The store survives a restart: a new session set over the same store still knows the enrolled authenticator, so re-enrollment is never silently offered.
   const store2 = createAdminStore({ dir: null, now: () => clock });

@@ -1,56 +1,81 @@
-/* Shared identity and navigation: a transparent instrument strip over the lattice. */
-.ark-header { display:flex !important; justify-content:flex-end !important; border:0 !important; background:transparent !important; -webkit-backdrop-filter:none; backdrop-filter:none; }
+/* The shared chrome floats above the scene; destinations live in one compact index. */
+#scene .ark-header {
+ display:flex; align-items:center; justify-content:space-between;
+ position:absolute; top:0; left:0; right:0;
+ gap:12px; height:64px; min-height:0; padding:10px max(20px,3.2cqw); z-index:20;
+ border:0; background:transparent !important; box-sizing:border-box;
+ pointer-events:none;
+}
 .ark-header::after { content:none; }
-.ark-header nav { display:flex; gap:4px !important; padding:5px 0; border:0; background:none; }
-.ark-header .ark-link { position:relative; min-height:38px !important; padding:0 12px; border:0; border-radius:0; color:hsl(var(--text-muted)) !important; font-size:9px !important; letter-spacing:.18em !important; text-transform:uppercase; transition:color 180ms ease,background-color 180ms ease !important; }
-.ark-header .ark-link::after { content:""; position:absolute; left:12px; right:12px; bottom:3px; height:1px; background:hsl(var(--primary)); transform:scaleX(0); transform-origin:left; transition:transform 220ms ease; }
-.ark-header .ark-link:hover,.ark-header .ark-link[aria-current="page"] { color:hsl(var(--text-strong)) !important; background:hsl(var(--text-strong)/.035); }
-.ark-header .ark-link:hover::after,.ark-header .ark-link[aria-current="page"]::after { transform:scaleX(1); }
-@media(max-width:760px) { .ark-header { padding:14px 20px !important; } .ark-header nav { gap:0 !important; } }
-
-/* The blink-square brand mark: a hairline square with a cyan core that
-   pulses on a slow clock, like a registry heartbeat. */
-.ark-brand-mark { width:9px; height:9px; border:1px solid #6b6b76; position:relative; flex:0 0 auto; }
-.ark-brand-mark::after { content:""; position:absolute; inset:2px; background:#7fb5bd; animation:brand-blink 3.4s ease-in-out infinite; }
-@keyframes brand-blink { 0%,100% { opacity:.22; } 12% { opacity:1; } 26% { opacity:.35; } 38% { opacity:.9; } 60% { opacity:.22; } }
-
-/* The registry status pill at the end of the top bar. */
-.nav-status { display:flex; align-items:center; gap:8px; margin-left:14px; padding:6px 0 6px 14px; border-left:1px solid hsl(var(--border-default)); color:hsl(var(--text-muted)); font:400 9px var(--ark-font); letter-spacing:.22em; text-transform:uppercase; white-space:nowrap; }
-.nav-status-dot { width:5px; height:5px; background:hsl(var(--live)); animation:status-blink 4.2s ease-in-out infinite; }
-@keyframes status-blink { 0%,100% { opacity:.25; } 14% { opacity:1; } 30% { opacity:.4; } 100% { opacity:.25; } }
-@media(max-width:760px) { .nav-status { display:none; } }
-@media (prefers-reduced-motion:reduce) { .ark-brand-mark::after,.nav-status-dot { animation:none; opacity:.72; } }
+.ark-studio-identity {
+ display:inline-flex; align-items:center; justify-content:center;
+ width:40px; height:40px; flex:0 0 40px; margin-right:auto; text-decoration:none;
+ pointer-events:auto;
+}
+.ark-brand-mark { display:block; width:28px; height:28px; color:hsl(var(--text-strong)); }
+#scene .nav-toggle {
+ display:inline-grid; place-items:center; width:40px; height:40px; padding:0;
+ border:1px solid hsl(var(--text-strong) / .18); border-radius:0;
+ background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); cursor:pointer;
+ pointer-events:auto; transition:background-color 180ms ease,border-color 180ms ease;
+}
+#scene .nav-toggle:hover,
+#scene .ark-header.nav-open .nav-toggle { background:hsl(var(--surface)); border-color:hsl(var(--text-strong) / .36); }
+#scene .nav-toggle .nav-icon-close { display:none; }
+#scene .ark-header.nav-open .nav-icon-menu { display:none; }
+#scene .ark-header.nav-open .nav-icon-close { display:block; }
+#scene .ark-header nav {
+ display:none; position:absolute; top:56px; right:max(20px,3.2cqw); width:min(276px,calc(100vw - 40px));
+ max-height:calc(100dvh - 72px); overflow-y:auto; box-sizing:border-box;
+ padding:12px 16px 14px; margin:0; grid-template-columns:1fr; counter-reset:nav;
+ border:1px solid hsl(var(--text-strong) / .19); background:hsl(var(--canvas) / .98);
+ box-shadow:0 16px 40px hsl(var(--canvas) / .38); pointer-events:auto;
+}
+#scene .ark-header.nav-open nav { display:grid; }
+#scene .ark-header nav::before {
+ content:"INDEX / 07"; margin:0 0 7px; color:hsl(var(--text-muted));
+ font:500 9px/1.4 var(--mono-font,ui-monospace,monospace);
+}
+#scene .ark-header .ark-link {
+ position:relative; display:flex; align-items:center; gap:12px;
+ min-width:0; min-height:39px; padding:0 2px; counter-increment:nav;
+ border-top:1px solid hsl(var(--text-strong) / .12);
+ border-radius:0; background:none; color:hsl(var(--text-muted));
+ font:500 11px/1.3 var(--mono-font,ui-monospace,monospace);
+ letter-spacing:0; text-transform:uppercase; text-decoration:none;
+ transition:color 180ms ease,background-color 180ms ease;
+}
+#scene .ark-header .ark-link::before {
+ content:counter(nav, decimal-leading-zero);
+ color:hsl(var(--text-muted) / .7); font-size:9px;
+}
+#scene .ark-header .ark-link::after { content:"↗"; margin-left:auto; color:hsl(var(--accent)); font-size:13px; }
+:root[data-theme] #scene .ark-header .ark-link { color:hsl(var(--text-muted)) !important; }
+:root[data-theme] #scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { color:hsl(var(--text-strong)) !important; }
+#scene .ark-header .ark-link[aria-current="page"]::before { color:hsl(var(--accent)); }
+#scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { background:hsl(var(--text-strong) / .045); }
+#scene .ark-header a:focus-visible,
+#scene .nav-toggle:focus-visible { outline:2px solid hsl(var(--accent)); outline-offset:4px; }
+@media(max-width:520px) { #scene .ark-header { padding-inline:16px; } #scene .ark-header nav { right:16px; width:min(276px,calc(100vw - 32px)); } #scene .ark-header .ark-link { min-height:44px; } }
+@media(prefers-reduced-motion:reduce) { #scene .ark-header .ark-link { transition:none; } }
 
 /* One corner: stacked destinations at home, a return control on inner pages. */
 .corner-navigation,.hero-motion-toggle { right:max(20px,2.8cqmin); bottom:max(14px,2cqmin); }
 .corner-navigation { position:absolute; z-index:6; display:flex; flex-direction:column; align-items:flex-end; gap:0; background:none; border:0; }
 .corner-navigation[hidden] { display:none; }
-.corner-navigation a { display:flex; align-items:center; min-height:44px; padding:8px 4px; color:#9a9aa6; font:500 10px var(--ark-font); letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
-.corner-navigation a:hover { color:#eaeaef; }
+.corner-navigation a { display:flex; align-items:center; min-height:44px; padding:8px 4px; color:hsl(var(--text-muted)); font:500 10px var(--ark-font); letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
+.corner-navigation a:hover { color:hsl(var(--text-strong)); }
 @media(max-width:760px) { .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px !important; } }
-@media(max-width:480px) { .ark-header { gap:8px !important; padding-inline:16px !important; } .ark-header .ark-link { padding-inline:7px; font-size:8px !important; letter-spacing:.06em !important; } .ark-studio-label { max-width:85px; line-height:1.5; } }
+@media(max-width:480px) { .ark-studio-label { max-width:85px; line-height:1.5; } }
 
 /* A quiet invitation in the shared layout, without a card surface. */
-.theory-invitation { position:absolute; top:112px; right:max(24px,3cqw); z-index:5; width:220px; padding:8px 0; display:grid; gap:12px; border:0; background:none; box-shadow:none; color:#d5dfd8; text-decoration:none; }
+.theory-invitation { position:absolute; top:112px; right:max(24px,3cqw); z-index:5; width:220px; padding:8px 0; display:grid; gap:12px; border:0; background:none; box-shadow:none; color:hsl(var(--text)); text-decoration:none; }
 .theory-invitation[hidden] { display:none; }
-.theory-invitation-label { color:#a7b7ab; font:400 10px/1.5 var(--ark-font); letter-spacing:.035em; }
+.theory-invitation-label { color:hsl(var(--text-muted)); font:400 10px/1.5 var(--ark-font); letter-spacing:.035em; }
 .theory-invitation strong { font:300 24px/1.18 var(--ark-font); letter-spacing:-.035em; }
-.theory-invitation-link { margin-top:4px; color:#a7b7ab; font:400 11px/1.5 var(--ark-font); transition:color 180ms ease; }
-.theory-invitation:hover .theory-invitation-link { color:#e4eee7; }
-#scene .theory-invitation:focus-visible { background:none; color:#e4eee7; }
+.theory-invitation-link { margin-top:4px; color:hsl(var(--text-muted)); font:400 11px/1.5 var(--ark-font); transition:color 180ms ease; }
+.theory-invitation:hover .theory-invitation-link { color:hsl(var(--text-strong)); }
+#scene .theory-invitation:focus-visible { background:none; color:hsl(var(--text-strong)); }
 .theory-invitation:focus-visible .theory-invitation-link { text-decoration:underline; text-underline-offset:5px; }
 @media(max-width:760px) { .theory-invitation { top:94px; right:20px; width:175px; gap:9px; } .theory-invitation strong { font-size:21px; } }
 @media(prefers-reduced-motion:reduce) { .theory-invitation-link { transition:none; } }
-
-.ark-studio-identity { display:flex; flex-direction:column; align-items:flex-start; gap:7px; margin-right:auto; text-decoration:none; padding:4px 0; }
-#scene .ark-wordmark { font:400 17px/1 var(--ark-font); letter-spacing:.18em; color:hsl(var(--text-strong)); }
-.ark-studio-identity .ark-studio-label { font-size:8px; letter-spacing:.14em; }
-#scene .ark-studio-identity:focus-visible { background:none; }
-.ark-studio-identity:focus-visible .ark-wordmark { text-decoration:underline; text-underline-offset:5px; }
-@media(max-width:480px) { #scene .ark-wordmark { font-size:15px; } .ark-studio-identity .ark-studio-label { font-size:6px; max-width:none; letter-spacing:.06em; } }
-
-#scene .ark-header .ark-studio-identity:is([aria-current="page"],:focus,:focus-visible,:hover) { background:transparent !important; }
-#scene .ark-studio-identity:focus-visible .ark-wordmark { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:7px; }
-.ark-studio-identity { gap:9px; }
-
-@media(prefers-reduced-motion:reduce) { .ark-header .ark-link::after { transition:none; } }

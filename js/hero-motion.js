@@ -26,16 +26,31 @@
   atmosphere.dataset.source = 'flux-chain-lattice';
   persistent.insertBefore(atmosphere, persistent.firstChild);
 
-  /* The registry status pill, parked at the end of the top bar. */
   var header = scene.querySelector('.ark-header');
-  if (header) {
-    var registry = make('div', 'nav-status');
-    var dot = make('span', 'nav-status-dot');
-    dot.setAttribute('aria-hidden', 'true');
-    var registryLabel = make('span');
-    registryLabel.textContent = 'Registered';
-    registry.appendChild(dot); registry.appendChild(registryLabel);
-    header.appendChild(registry);
+  var navToggle = header && header.querySelector('.nav-toggle');
+  function closeNavigation(restoreFocus) {
+    if (!navToggle) return;
+    header.classList.remove('nav-open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Open navigation');
+    navToggle.title = 'Open navigation';
+    if (restoreFocus) navToggle.focus();
+  }
+  if (navToggle) {
+    navToggle.addEventListener('click', function () {
+      if (header.classList.contains('nav-open')) { closeNavigation(false); return; }
+      header.classList.add('nav-open');
+      navToggle.setAttribute('aria-expanded', 'true');
+      navToggle.setAttribute('aria-label', 'Close navigation');
+      navToggle.title = 'Close navigation';
+    });
+    document.addEventListener('click', function (event) {
+      if (!header.contains(event.target)) closeNavigation(false);
+    });
+    header.addEventListener('focusout', function (event) {
+      if (!header.contains(event.relatedTarget)) closeNavigation(false);
+    });
+    window.matchMedia('(max-width: 1000px)').addEventListener('change', function () { closeNavigation(false); });
   }
 
   var wordTimer = 0;
@@ -48,7 +63,7 @@
   var settings = make('div', 'site-settings');
   scene.appendChild(settings);
   var paths = make('nav', 'corner-navigation');
-  paths.setAttribute('aria-label', 'Explore Flux Chain');
+  paths.setAttribute('aria-label', 'Explore Flux Protocol');
   [['HOME.CORNER.USECASES', 'concept'], ['HOME.CORNER.TUTORIALS', 'learnings'], ['HOME.CORNER.EXPERIMENTS', 'proximity']].forEach(function (item) {
     var link = make('a'); link.href = router.url(item[1]); link.dataset.sceneLink = item[1];
     link.textContent = ArkCopy.text(item[0]) + ' ↗'; paths.appendChild(link);
@@ -150,6 +165,7 @@
   }
 
   function navigate(page) {
+    closeNavigation(header && header.contains(document.activeElement) && header.classList.contains('nav-open'));
     window.clearTimeout(wordTimer);
     return router.navigate(page).then(function (result) { sync(); return result; });
   }
@@ -159,6 +175,9 @@
   });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
+    if (header && header.classList.contains('nav-open')) {
+      event.preventDefault(); closeNavigation(true); return;
+    }
     if (state.get().page === 'zero') return;
     navigate(state.get().page === 'lab' ? 'proximity' : state.get().page.indexOf('article/') === 0 ? 'learnings' : state.get().page.indexOf('concept/') === 0 ? 'concept' : 'zero');
     toggle.focus({ preventScroll: true });

@@ -1,7 +1,7 @@
 /* =====================================================================
    PULL: materialise the published site into the project's files
    ---------------------------------------------------------------------
-   Run:  node scripts/pull-site.mjs [--name subzero.ark] [--write]
+   Run:  node scripts/pull-site.mjs [--name flux-chain.ark] [--write]
          [--storage <miner STORAGE_PATH>] [--status <url>] [--pin <url>] [--key <api key>]
    With none of the miner options it finds a running Ark Miner (Desktop or CLI) itself.
 

@@ -1,9 +1,11 @@
 const fs = require('node:fs'), vm = require('node:vm'), assert = require('node:assert/strict');
 class Element {
-  constructor(tag) { this.tagName = tag; this.children = []; this.attrs = {}; this.dataset = {}; this.classList = { add() {} }; }
+  constructor(tag) { this.tagName = tag; this.children = []; this.attrs = {}; this.dataset = {}; this.listeners = {}; this.classes = new Set(); this.classList = {
+    add: name => this.classes.add(name), toggle: (name, active) => active ? this.classes.add(name) : this.classes.delete(name)
+  }; }
   appendChild(child) { this.children.push(child); return child; }
   setAttribute(key, value) { this.attrs[key] = value; }
-  addEventListener() {}
+  addEventListener(name, listener) { this.listeners[name] = listener; }
 }
 const registry = {};
 const context = vm.createContext({ document: { createElement: tag => new Element(tag) }, ArkUI: { register: (id, manifest) => registry[id] = manifest } });
@@ -23,9 +25,29 @@ pages.slice(1).forEach((page, index) => {
   const all = descendants(page), article = context.LearningContent.articles[index];
   assert.equal(all.find(el => el.tagName === 'h1').textContent, article.title);
   assert.equal(all.filter(el => el.tagName === 'section').length, article.sections.length);
-  assert(all.some(el => el.dataset.wordInput !== undefined && el.maxLength === 72));
+  assert(!all.some(el => el.dataset.wordInput !== undefined), 'reading pages no longer mount the particle-title playground');
+  assert.equal(all.filter(el => el.className === 'article-section-index').length, article.sections.length);
+  assert(all.some(el => el.className === 'article-contents'), 'every article keeps section navigation');
+  assert(all.some(el => el.className === 'article-next'), 'every article links to the next note');
+  const choices = all.filter(el => el.className === 'article-choice');
+  const panels = all.filter(el => el.tagName === 'section');
+  const next = all.find(el => el.className === 'article-next');
+  assert.equal(choices.length, article.sections.length);
+  assert(all.some(el => el.className === 'article-core-text' && el.textContent === article.core), 'core claim is visible before a choice');
+  assert.equal(panels.filter(el => !el.hidden).length, 0, 'no answer is exposed before a choice');
+  assert.equal(all.find(el => el.className === 'article-reading').hidden, true, 'the answer region starts hidden');
+  assert.equal(next.hidden, true, 'the next article waits until the final answer');
+  choices.at(-1).listeners.click();
+  assert.equal(panels.filter(el => !el.hidden).length, 1, 'choosing an answer keeps all other chunks hidden');
+  assert.equal(panels.at(-1).hidden, false);
+  assert.equal(choices.at(-1).attrs['aria-pressed'], 'true');
+  assert.equal(next.hidden, false, 'the final answer opens the next note');
+  all.find(el => el.className === 'article-core-return').listeners.click();
+  assert.equal(panels.filter(el => !el.hidden).length, 0, 'core command restores the question map');
+  assert.equal(page.dataset.articleChoice, '-1');
   assert.equal(page.attrs['data-ark-page'], 'article/' + article.slug);
-  assert(all.filter(el => el.tagName === 'p').length > 10);
+  assert(all.filter(el => el.tagName === 'p').length >= article.sections.reduce((count, section) => count + section.length - 1, 0),
+    'every source paragraph remains in the article');
 });
 const ids = pages.flatMap(descendants).map(el => el.id).filter(Boolean);
 assert.equal(ids.length, new Set(ids).size, 'Article headings need unique navigation targets');
@@ -55,4 +77,4 @@ for (const text of ['', 'FORM', 'From points to form', 'W'.repeat(72), 'Learning
 }
 context.document.createElement = () => ({ getContext: () => null });
 assert.equal(context.WordGeometry.create('FORM', 100), null);
-console.log('PASS: Dense Flux → three full articles, three preview links, unique sections, title controls, word wrapping/sampling, missing Canvas2D fallback. Raster fixture, not browser font rendering.');
+console.log('PASS: three complete reading pages, index links, unique sections and navigation; word geometry fixture remains covered.');

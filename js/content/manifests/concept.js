@@ -10,19 +10,19 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC"
+      "value": "FLUX PROTOCOL"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Four claims. Nothing else."
+      "value": "Six claims. Nothing else."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Flux is a shared table of dense records — fetched by CID, resolved byte-identical, held by a five-node quorum. Query it, don't guess at it."
+      "value": "Signed agreements, not a block order. Authority derived per object, not a validator set. Any party registers a network. Query it, don't guess at it."
     },
     "ICEBERG": {
       "label": "Iceberg description (for screen readers)",

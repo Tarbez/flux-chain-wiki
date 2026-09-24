@@ -1,4 +1,4 @@
-# SUBZERO
+# Flux Chain
 
 A persistent silver-sage particle scene on a charcoal background, with lazy-loaded
 pages inside an ARK layout. Open `index.html`; no build step is required.
@@ -18,7 +18,7 @@ Canonical routes use hashes so static hosting does not need rewrite rules:
 - `#/experiments/lab`: the standalone interactive lab.
 - `#/learnings`: three article previews.
 - `#/learnings/<slug>`: an individual article.
-- `#/concept`: the Subzero theory and community vision.
+- `#/concept`: the Flux Chain theory and community vision.
 - `#/about`: the studio, its purpose, and its approach.
 
 Legacy `#zero`, `#proximity`, `#work`, `#learnings`, and `#article/<slug>` links
@@ -98,7 +98,7 @@ are never interpreted as HTML.
 
 To add a learning, use the Articles list in `admin.html`, or by hand append metadata
 to the index and create its matching body file with `LearningContent.load(slug, { sections, numbers })`. Preview cards, catalog
-routes, and particle titles derive from the index. The home invitation links to the Subzero theory; article previews stay in
+routes, and particle titles derive from the index. The home invitation links to the Flux Chain theory; article previews stay in
 the Learnings page. Keep educational examples tied to actual behavior and distinguish
 automated checks from device testing.
 
@@ -380,11 +380,11 @@ Experiments are not manifest-driven yet.
 ## Publishing to the mesh
 
 The whole copy of the site (every page manifest and every article) is one `.flx` archive kept in an
-ark-miner-cli node and named by a signed `names/*` record: `subzero.ark` points at the archive's CID.
+ark-miner-cli node and named by a signed `names/*` record: `flux-chain.ark` points at the archive's CID.
 An edit is a new archive and a new record version; old versions stay retrievable. The site itself stays a
 static page reading local files, so it needs no network and its Content Security Policy is unchanged.
 
-Double-click **`SUBZERO Admin.command`** (or run `node scripts/publish-host.mjs --open`). It starts the local
+Double-click **`Flux Chain Admin.command`** (or run `node scripts/publish-host.mjs --open`). It starts the local
 publish host and opens the admin page in your browser; from then on everything is done in the page. Keep the
 window it opens running while you work (closing it stops the host); double-clicking again just reopens the page.
 A miner must be running: Ark Miner Desktop, or `npm start` in `ark-miner-cli`. The host finds it by itself (Desktop
@@ -401,7 +401,7 @@ Open the page through the host (the address it prints, `http://127.0.0.1:3437/ad
 `admin.html` from disk: a page opened from disk cannot reach a miner and says so, with a link.
 
 - `scripts/publish-host.mjs` serves `admin.html` from loopback and holds the miner's API credential. It
-  never holds a signing key. `--name` chooses another name than `subzero.ark`.
+  never holds a signing key. `--name` chooses another name than `flux-chain.ark`.
 - **The admin is locked until you pass three steps** — currently two: `scripts/publish-host.mjs` sets
   `OTP_ENABLED = false`, so step 3 is skipped and `admin-app.html` opens right after Access. This is
   temporary: the Ark Pin browser extension this admin is meant to be used through cannot yet prompt for or
@@ -422,7 +422,7 @@ Open the page through the host (the address it prints, `http://127.0.0.1:3437/ad
   3. **Code** — a one-time code (TOTP) from an authenticator app (Google Authenticator, 1Password, Authy,
      Aegis, or similar). The first time an identity signs in it enrolls one: the page shows a setup key and a
      setup link to add, and also requires a short **setup code printed in the terminal window running the
-     admin** (`SUBZERO Admin.command`'s own window) — so holding someone's recovery file and PIN alone is not
+     admin** (`Flux Chain Admin.command`'s own window) — so holding someone's recovery file and PIN alone is not
      enough to enroll an authenticator for them. Only a correct code turns the ticket into a session: an
      HttpOnly, SameSite=Strict cookie that idles out after 30 minutes and dies after 12 hours or on sign-out.
      Five wrong codes for one identity lock it out for a wait that doubles each time it happens again (5, 10,
@@ -442,12 +442,12 @@ Open the page through the host (the address it prints, `http://127.0.0.1:3437/ad
   brings back the locked screen to unlock it **without** touching the still-valid session, then reopens the
   editor once you do. The last time an identity signed in is shown on its next sign-in, so a session that was
   not yours stands out.
-- **Who may sign in.** Once `subzero.ark` has an owner, only that identity (a different one is refused at the door,
+- **Who may sign in.** Once `flux-chain.ark` has an owner, only that identity (a different one is refused at the door,
   with the owner named). Before it is claimed, the first identity to sign in may claim it. If the miner cannot be
   asked who owns the name, sign-in is refused rather than guessed. The site itself (`index.html`, `js/content/`)
   stays public because it is the site. A session is one identity: it cannot prepare or publish as another key.
 - **Where authenticators live.** Enrolled secrets, sign-in lockout counters and a sign-in audit log (`event`,
-  `key`, timestamp — never a code, secret or PIN) are kept under `~/.subzero-admin` (files `0600`, folder `0700`),
+  `key`, timestamp — never a code, secret or PIN) are kept under `~/.flux-chain-admin` (files `0600`, folder `0700`),
   outside the project so it is never published, committed or served; `--data <folder>` moves it. If that file
   exists but cannot be read or parsed, the host refuses to start rather than treat it as empty — a silent reset
   would let the next visitor enroll their own authenticator in place of the real one.
@@ -477,9 +477,9 @@ second key authority), `node tests/security.cjs` (script-loading, CTA hrefs limi
 guarded), `node tests/page-router.cjs` (routes, including the retired `#/work` link), `node tests/site-bundle.test.mjs`
 (round trip on the real content, refusals) and `node tests/publish.e2e.test.mjs`, which needs a running miner
 (`flux-miner` and `ark-miner` are the same program). Start an isolated one, for example
-`STORAGE_PATH=/tmp/sz GUN_PORT=18765 IPFS_PORT=14002 STATUS_PORT=18766 AUTH_KEYS=<key> GUN_MULTICAST=0 TLM_MANAGED=0 ARK_MINER_AUTO_EXPOSE_IP=0 ARK_MINER_NETWORK=subzero-local-test node src/cli.js start`
-in `ark-miner-cli`, then set `SUBZERO_TEST_KEY` (its `AUTH_KEYS` value), `SUBZERO_TEST_STATUS` (port 18766)
-and `SUBZERO_TEST_PIN` (port 15002, which is `IPFS_PORT` + 1000). Without a miner it prints SKIPPED, not pass.
+`STORAGE_PATH=/tmp/sz GUN_PORT=18765 IPFS_PORT=14002 STATUS_PORT=18766 AUTH_KEYS=<key> GUN_MULTICAST=0 TLM_MANAGED=0 ARK_MINER_AUTO_EXPOSE_IP=0 ARK_MINER_NETWORK=flux-chain-local-test node src/cli.js start`
+in `ark-miner-cli`, then set `FLUX_CHAIN_TEST_KEY` (its `AUTH_KEYS` value), `FLUX_CHAIN_TEST_STATUS` (port 18766)
+and `FLUX_CHAIN_TEST_PIN` (port 15002, which is `IPFS_PORT` + 1000). Without a miner it prints SKIPPED, not pass.
 Not covered by an automated test: saving into a connected project folder in a real browser (the store is
 tested against a fake directory handle), replication to a second miner, and the Flux Auth client envelope
 (`flux-auth-client` `presentTo` a verifier) that chat.deadark.com also carries: it binds to a fixture-signed

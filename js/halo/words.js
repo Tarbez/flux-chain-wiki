@@ -6,7 +6,7 @@ var WordGeometry = (function () {
   function create(text, count) {
     var canvas = document.createElement('canvas');
     canvas.width = 960; canvas.height = 500;
-    var ctx = canvas.getContext('2d');
+    var ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return null;
     text = normalize(text).toUpperCase();
     var fontSize = 128, lines;

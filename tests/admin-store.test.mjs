@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createAdminStore, LOCK_POLICY } from '../scripts/lib/admin-store.mjs';
 
-const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'subzero-admin-store-'));
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-admin-store-'));
 const KEY = 'k1', KEY2 = 'k2';
 let clock = 1_000_000;
 
@@ -60,7 +60,7 @@ try {
   assert(outcome.retryAfterMs <= LOCK_POLICY.capMs);
 
   // Refusing an unreadable or foreign file: NOT treated as "nobody enrolled yet", which would let the next visitor enroll their own authenticator.
-  const badDir = fs.mkdtempSync(path.join(os.tmpdir(), 'subzero-admin-store-bad-'));
+  const badDir = fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-admin-store-bad-'));
   fs.writeFileSync(path.join(badDir, 'otp.json'), 'not json at all', { mode: 0o600 });
   assert.throws(() => createAdminStore({ dir: badDir }), /Refusing to start/);
   fs.writeFileSync(path.join(badDir, 'otp.json'), JSON.stringify({ version: 99, identities: {} }), { mode: 0o600 });
@@ -68,7 +68,7 @@ try {
   fs.rmSync(badDir, { recursive: true, force: true });
 
   // Audit: append-only, one line of JSON per event, oldest first, and it names no code, secret, PIN or private key.
-  const auditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'subzero-admin-audit-'));
+  const auditDir = fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-admin-audit-'));
   const s8 = createAdminStore({ dir: auditDir, now: () => clock });
   s8.audit({ event: 'proof-ok', key: KEY }); s8.audit({ event: 'enrolled', key: KEY }); s8.audit({ event: 'signed-in', key: KEY });
   const lines = fs.readFileSync(path.join(auditDir, 'audit.log'), 'utf8').trim().split('\n').map((l) => JSON.parse(l));

@@ -15,9 +15,9 @@ ui.register('ATMOSPHERERANGE|BUTTON',{tag:'input',attrs:{type:'range'}});
 const root=document.documentElement;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
 const save=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
-let theme=read('subzero-theme','ghost'),renderer,frame=0;
+let theme=read('flux-chain-theme','ghost'),renderer,frame=0;
 if(!themes.includes(theme))theme='ghost';
-let saved={};try{saved=JSON.parse(read('subzero-atmosphere-v2','{}'))||{};}catch{}
+let saved={};try{saved=JSON.parse(read('flux-chain-atmosphere-v2','{}'))||{};}catch{}
 const values={};
 for(const [key,control] of Object.entries(controls)){const value=saved[key];values[key]=typeof value==='number'&&Number.isFinite(value)?Math.max(control.min,Math.min(control.max,value)):control.value;}
 root.dataset.background='atmosphere';
@@ -43,13 +43,13 @@ const contents=[slot('label','Your space',false,'settings-title'),slot('descript
 slots.root={ref:'SZROOT',pattern:'R-SZROOT-F-ROOT-D-COLUMN',config:{attrs:{class:'settings-root'}}};
 slots.trigger={ref:'SZTRIGGER',pattern:'R-SZTRIGGER-X-SECONDARY-M-SETTINGS-A-CLICK',state:{text:'⚙'},config:{label:'Open settings',attrs:{class:'settings-trigger'}}};
 slots.content={ref:'SZCONTENT',pattern:'R-SZCONTENT-F-POPOVER-D-COLUMN',state:{open:false,hidden:true},config:{attrs:{class:'settings-panel'}}};
-const component=createArkHeadlessComponent(ui,defineArkHeadlessComponent({name:'subzero-settings',tree:{slot:'root',children:[{slot:'trigger'},{slot:'content',children:contents}]},slots,
+const component=createArkHeadlessComponent(ui,defineArkHeadlessComponent({name:'flux-chain-settings',tree:{slot:'root',children:[{slot:'trigger'},{slot:'content',children:contents}]},slots,
  mount(runtime,c){createArkPopover(runtime,{triggerRef:c.getRef('trigger'),contentRef:c.getRef('content'),labelRef:c.getRef('label'),placement:'top',align:'start',keepMounted:true});}
 }));
 component.render(host);component.mount();
 const bind=(name,fn)=>ui.onAction(component.getRef(name),(_,detail)=>{if(detail.action==='CLICK')fn();});
 function selected(group,values,current){values.forEach((value,i)=>{const ref=component.getRef(group+i);ui.configureRef(ref,{attrs:{'aria-pressed':String(value===current)}});ui.update(ref,{text:title(value)});});}
-function applyTheme(value){theme=value;root.dataset.theme=value;save('subzero-theme',value);selected('themes',themes,value);}
+function applyTheme(value){theme=value;root.dataset.theme=value;save('flux-chain-theme',value);selected('themes',themes,value);}
 const base=createArkBackgroundConfig(ARK_BACKGROUND_PRESETS.quiet);
 function atmosphereConfig(){
  const palette=['hsl(var(--primary))','hsl(var(--text-muted))','hsl(var(--surface))','hsl(var(--complement))'];
@@ -63,9 +63,9 @@ for(const [key,control] of Object.entries(controls)){
   values[key]=Math.max(control.min,Math.min(control.max,value));
   ui.update(component.getRef(key+'Label'),{text:control.label+' / '+values[key]});scheduleAtmosphere();
  });
- ui.bindRefEvent(component.getRef(key),'change',()=>save('subzero-atmosphere-v2',JSON.stringify(values)));
+ ui.bindRefEvent(component.getRef(key),'change',()=>save('flux-chain-atmosphere-v2',JSON.stringify(values)));
 }
-bind('restore',()=>{for(const [key,control] of Object.entries(controls)){values[key]=control.value;ui.update(component.getRef(key),{text:String(control.value)});ui.update(component.getRef(key+'Label'),{text:control.label+' / '+control.value});}save('subzero-atmosphere-v2',JSON.stringify(values));scheduleAtmosphere();});
+bind('restore',()=>{for(const [key,control] of Object.entries(controls)){values[key]=control.value;ui.update(component.getRef(key),{text:String(control.value)});ui.update(component.getRef(key+'Label'),{text:control.label+' / '+control.value});}save('flux-chain-atmosphere-v2',JSON.stringify(values));scheduleAtmosphere();});
 themes.forEach((value,i)=>bind('themes'+i,()=>applyTheme(value)));
 bind('pause',()=>ArkUI.sceneState.pause(!ArkUI.sceneState.get().paused));bind('reset',()=>ArkUI.sceneState.orient(0,0));
 let paused;

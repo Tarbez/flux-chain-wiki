@@ -25,27 +25,36 @@ assert.equal(ArkTheme.get(), null, 'get() is null before a data file calls defin
 const defaults = ArkTheme.defaults();
 assert.equal(JSON.stringify(defaults.colors), JSON.stringify(Object.fromEntries(colorFields.map((f) => [f.key, f.def]))), 'defaults().colors is every field at its tokens.js value');
 assert.equal(defaults.background.style, 'none', 'the default background style is none (the site’s original flat-canvas look)');
+assert.equal(defaults.activeTheme, 'ghost', 'the default active semantic theme is ghost');
+assert.equal(JSON.stringify(defaults.themes), '{}', 'semantic theme overrides start empty');
+assert(ArkTheme.themeOptions().some((t) => t.key === 'marine'), 'semantic theme options expose the routed site themes');
+assert(ArkTheme.semanticFields().some((f) => f.key === 'primary'), 'semantic fields expose real theme core colours');
 
 // sanitize(): a valid hex survives, an invalid one falls back to the default, per key;
 // an unknown background style falls back to 'none' rather than passing through.
 const canvasKey = colorFields[0].key;
-const partial = { colors: { [canvasKey]: '#112233' }, background: { style: 'lattice' } };
+const partial = { colors: { [canvasKey]: '#112233' }, activeTheme: 'marine', themes: { marine: { primary: '210 50% 60%', canvas: 'bad' } }, background: { style: 'lattice' } };
 const sanitized = ArkTheme.sanitize(partial);
 assert.equal(sanitized.colors[canvasKey], '#112233', 'a valid colour override survives sanitize()');
 colorFields.slice(1).forEach((f) => assert.equal(sanitized.colors[f.key], f.def, f.key + ' with no override falls back to its default'));
 assert.equal(ArkTheme.sanitize({ colors: { ink: 'not-a-color' } }).colors.ink, colorFields.find((f) => f.key === 'ink').def, 'an invalid colour is refused silently to the default, never passed through');
 assert.equal(sanitized.background.style, 'lattice', 'a known background style survives sanitize()');
 assert.equal(ArkTheme.sanitize({ background: { style: 'not-a-real-style' } }).background.style, 'none', 'an unknown background style falls back to none, never passed through');
+assert.equal(sanitized.activeTheme, 'marine', 'a known active theme survives sanitize()');
+assert.equal(sanitized.themes.marine.primary, '210 50% 60%', 'a valid semantic colour survives sanitize()');
+assert.equal(sanitized.themes.marine.canvas, undefined, 'an invalid semantic colour is refused silently');
 
 // define()/get() round-trip through sanitize().
 ArkTheme.define(partial);
 assert.equal(JSON.stringify(ArkTheme.get()), JSON.stringify(sanitized), 'get() returns exactly what define() sanitized');
 
-// css() emits one :root rule with every colour field as an --ark-* custom property, and
+// css() emits :root with every legacy colour field as an --ark-* custom property, plus
+// semantic theme override rules for the real routed data-theme selectors. It still says
 // nothing about the background style (that's a DOM mount, done in js/main.js, not CSS).
 const css = ArkTheme.css();
-assert(css.startsWith(':root{') && css.endsWith('}'), 'css() is a single :root block');
+assert(css.startsWith(':root{') && css.endsWith('}'), 'css() emits CSS rules');
 colorFields.forEach((f) => assert(css.includes('--ark-' + f.key + ':' + sanitized.colors[f.key] + ';'), 'css() declares --ark-' + f.key));
+assert(css.includes(':root[data-theme="marine"]{--primary:210 50% 60%;}'), 'css() declares semantic overrides for edited themes');
 assert(!css.includes('lattice'), 'css() never mentions the background style');
 
 // serialize()/define() round-trips the exact sanitized object.

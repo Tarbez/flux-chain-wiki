@@ -12,55 +12,55 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "ABOUT FLUX CHAIN"
+      "value": "ABOUT FLUX PROTOCOL"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "What Flux Chain actually is."
+      "value": "What Flux Protocol actually is."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Flux Chain is a shared, content-addressed table: records referenced by a dense symbol-table encoding, fetched by CID, resolved byte-identical, and held by a five-node quorum. This site is the spec, published the same way everything else on it is."
+      "value": "A network directory, agreement mechanics, and its own governance — any party registers its own network with its own DAO on top. DAO Chain is one network on Flux Protocol, not Flux Protocol itself."
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Compact, not spelled out."
+      "value": "Any network, one substrate."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Flux Compact (.compact) replaces a word with a reference into a shared symbol table instead of writing it out — no hex, no base64. See the spec's Compact page for the encoding and the measured numbers."
+      "value": "network create registers a new, independently addressable network — like deploying a contract on an EVM chain. Isolation is real but shallow today: presence is partitioned per network, accounts and DAOs aren't yet. Not a security boundary."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Addressed, not guessed at."
+      "value": "Agreements, not a block order."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Every record's CID hashes its JSON serialization. Fetch a CID and the same JSON resolves, exactly as hashed, for every reader — never a different answer for a different observer."
+      "value": "No global transaction stream. Signed manifests close through INTENT → OFFER → AGREEMENT → FULFILLMENT → RECEIPT, finalized only by the peers who care about that one agreement."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Held by a quorum, not one server."
+      "value": "Authority appears, then dissolves."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Five independent flx-* nodes hold the same ledger, queried through /explorer/v1. There is no single writer to trust and no raw reads to guess at."
+      "value": "No standing validator set. A small authority cell is derived for the exact change being made, certifies it, then dissolves. Mesh-operations governance — seven independent operators — is separate again from any network's DAO."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

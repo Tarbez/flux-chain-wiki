@@ -1,7 +1,7 @@
 /* =====================================================================
    ADMIN SIGN-IN (bundle entry)
    ---------------------------------------------------------------------
-   Publishing to subzero.ark is authorised by a DeadArk identity, the same
+   Publishing to flux-chain.ark is authorised by a DeadArk identity, the same
    Auth Kit (.auth.flx) chat.deadark.com signs in with. This file composes
    shared parts and adds no cryptography of its own:
 
@@ -46,7 +46,7 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
 /* container: where the sign-in panel is drawn.
    onChange(identity | null): called on sign-in and sign-out.
    identity: { publicKeyB64, displayName, sign(text) -> Promise<signatureB64> } */
-export function create({ container, onChange = () => {}, product = 'SUBZERO' }) {
+export function create({ container, onChange = () => {}, product = 'Flux Chain' }) {
   // No default stylesheet: the panel's own `data-ark-auth` hooks are styled entirely by css/admin.css,
   // so its look is one thing with the rest of the gate, not two stylesheets negotiating a cascade.
   let active = null;   // { handle, identity }

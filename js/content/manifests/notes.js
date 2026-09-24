@@ -14,61 +14,61 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / NOTES"
+      "value": "FLUX PROTOCOL / GOVERNANCE"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Start with the notes."
+      "value": "Governance, two ways."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The notes go one level deeper than the spec: worked examples, the numbers behind a claim, and what changes if you push on it."
+      "value": "Mesh-operations governance and any network's DAO are separate signer sets, separate thresholds. Neither quorum acts for the other."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "START WITH THE NOTES"
+      "value": "SEE THE TWO ROSTERS"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "One claim, worked through."
+      "value": "Mesh-operations: seven operators."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Each note takes one line from the spec and walks through what it actually means in practice."
+      "value": "Seven operators. 4-of-7 ordinary admission, 5-of-7 economic or runtime changes, 3-of-7 to pause, 5-of-7 to unpause. Governs the substrate, not any one network."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Tied to the lab."
+      "value": "Per-network: each DAO governs itself."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Notes point back to the interactive lab, so an idea can be felt, not only read about."
+      "value": "A network's own DAO signs its own decisions, its own threshold. DAO Chain and CR3TV are two examples — neither governs the other."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Read what fits your question."
+      "value": "An approved ceremony is not activation."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Pick the note that matches what you are curious about and begin there."
+      "value": "A fully signed result stays closed until separate activation gates open it. A signature is evidence, not a live switch."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

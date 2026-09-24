@@ -1,8 +1,8 @@
 /* =====================================================================
    PUBLISH HOST: serves admin.html and publishes what it edits
    ---------------------------------------------------------------------
-   Run:  double-click "SUBZERO Admin.command", or  node scripts/publish-host.mjs --open
-         [--port 3437] [--name subzero.ark] [--data <folder for authenticators, default ~/.subzero-admin>]
+   Run:  double-click "Flux Chain Admin.command", or  node scripts/publish-host.mjs --open
+         [--port 3437] [--name flux-chain.ark] [--data <folder for authenticators, default ~/.flux-chain-admin>]
          [--storage <miner STORAGE_PATH>] [--status <url>] [--pin <url>] [--key <api key>]
    With none of --storage/--status/--pin/--key it finds a running Ark Miner (Desktop or CLI) itself.
 
@@ -34,14 +34,17 @@ import { defaultProjectRoot } from './lib/site-bundle.mjs';
 // adding security. Flip this back to true once the extension can prompt for and submit a
 // TOTP code itself; nothing else about the OTP flow was removed, only unwired here.
 const OTP_ENABLED = false;
-const SERVED = ['admin.html', 'admin-app.html', 'index.html'];
+/* robots.txt/sitemap.xml are generated at the project root (scripts/lib/site-bundle.mjs's
+   projectFiles(), from js/content/seo.js) the same way theme-data.js etc. are -- served
+   here so a real crawler can fetch them, same as it fetches index.html. */
+const SERVED = ['admin.html', 'admin-app.html', 'index.html', 'robots.txt', 'sitemap.xml'];
 /* The admin surface is deny-by-default: the editor page and everything under js/admin/ needs a session, except the two files
    the locked page itself must load. A file added under js/admin/ later is locked without anyone remembering to lock it. */
 const PUBLIC_ADMIN = new Set(['js/admin/auth.js', 'js/admin/gate.js']);
 const isLockedAsset = (relative) => (relative === 'admin-app.html' || relative.startsWith('js/admin/')) && !PUBLIC_ADMIN.has(relative);
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60;
 const SERVED_DIRS = ['css', 'js', 'assets'];
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
 const MAX_BODY = 16 * 1024 * 1024;
 
 function parseArgs(argv) {
@@ -59,7 +62,7 @@ function readBody(req) {
   });
 }
 
-export function createHost({ root = defaultProjectRoot, publisher, port, dataDir = null, onNotice = (n) => console.log(`[subzero-admin] ${n.message}`),
+export function createHost({ root = defaultProjectRoot, publisher, port, dataDir = null, onNotice = (n) => console.log(`[flux-chain-admin] ${n.message}`),
   sessions = createSessions({ authorize: (key) => publisher.authorize(key), store: createAdminStore({ dir: dataDir }), onNotice, otpEnabled: OTP_ENABLED }) }) {
   const loopbackHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
   const send = (res, status, body, type = 'application/json') => {
@@ -77,7 +80,7 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
     const allowed = SERVED.includes(relative) || (SERVED_DIRS.includes(relative.split('/')[0]) && relative.includes('/'));
     if (!allowed || relative.startsWith('..')) return send(res, 404, { ok: false, error: 'NOT_FOUND' });
     if (isLockedAsset(relative) && !session) {
-      return send(res, 401, '<!doctype html><meta charset="utf-8"><title>Locked</title><p>The SUBZERO admin is locked. <a href="/admin.html">Sign in</a>.</p>', 'text/html; charset=utf-8');
+      return send(res, 401, '<!doctype html><meta charset="utf-8"><title>Locked</title><p>The Flux Chain admin is locked. <a href="/admin.html">Sign in</a>.</p>', 'text/html; charset=utf-8');
     }
     fs.readFile(file, (error, data) => (error ? send(res, 404, { ok: false, error: 'NOT_FOUND' }) : send(res, 200, data, TYPES[path.extname(file)] || 'application/octet-stream')));
   }
@@ -153,7 +156,7 @@ async function main() {
   const url = `http://127.0.0.1:${port}/admin.html`;
   const publisher = publisherFromArgs(args, defaultProjectRoot);
   const openPage = () => {
-    if (!args.open || process.env.SUBZERO_NO_OPEN) return;
+    if (!args.open || process.env.FLUX_CHAIN_NO_OPEN) return;
     spawn(process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open', process.platform === 'win32' ? ['/c', 'start', '', url] : [url], { stdio: 'ignore', detached: true }).unref();
   };
   const dataDir = typeof args.data === 'string' ? args.data : defaultDataDir();
@@ -166,7 +169,7 @@ async function main() {
     else { console.error(`Port ${port} is in use by something else. Pass --port <another>.`); process.exitCode = 1; }
   });
   server.listen(port, '127.0.0.1', async () => {
-    console.log(`SUBZERO publish host: ${url}  (name ${publisher.name}; loopback only). Close this window to stop it.`);
+    console.log(`Flux Chain publish host: ${url}  (name ${publisher.name}; loopback only). Close this window to stop it.`);
     const status = await publisher.status();
     console.log(status.reachable ? `Miner: ${status.miner?.label || status.miner?.statusBase}${status.miner?.networkId ? ` (network ${status.miner.networkId})` : ''}.` : `No miner yet: ${status.detail}`);
     openPage();

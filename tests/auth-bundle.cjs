@@ -3,7 +3,7 @@ const assert = require('node:assert/strict'), fs = require('node:fs'), os = requ
 
 // 1. js/admin/auth.js is generated. A stale copy would keep signing with old code and nothing would look wrong,
 //    so rebuild into a temp file and require the bytes to match what is checked in.
-const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'subzero-auth-')), 'auth.js');
+const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-auth-')), 'auth.js');
 const build = fs.readFileSync('scripts/build-auth.cjs', 'utf8').replace("'--outfile=js/admin/auth.js'", JSON.stringify('--outfile=' + out));
 assert(build.includes(out), 'the build script names js/admin/auth.js, so the test can redirect it');
 const tmpBuild = path.join(path.dirname(out), 'build.cjs'); fs.writeFileSync(tmpBuild, build);
@@ -31,7 +31,7 @@ assert(app.includes('js/admin/admin.js') && app.includes('js/admin/publish.js'))
 // 3c. The host's public admin files are exactly the ones the locked page loads: no more, so nothing else leaks before sign-in.
 const host = fs.readFileSync('scripts/publish-host.mjs', 'utf8');
 const publicAdmin = host.match(/PUBLIC_ADMIN = new Set\(\[(.*?)\]\)/)[1].split(',').map((x) => x.trim().replace(/'/g, ''));
-const loadedByGate = [...html.matchAll(/src="(js\/admin\/[^"]+)"/g)].map((m) => m[1]);
+const loadedByGate = [...html.matchAll(/src="(js\/admin\/[^"?]+)/g)].map((m) => m[1]);
 assert.deepEqual(publicAdmin.sort(), loadedByGate.sort(), 'PUBLIC_ADMIN must be exactly the scripts admin.html loads');
 
 // 4. No second authority. The old owner key was a random seed in IndexedDB that anyone at this browser could use.
@@ -41,7 +41,8 @@ for (const forbidden of [/indexedDB/i, /getRandomValues/, /importKey/, /exportSe
 assert(!/meshExport|meshImport/.test(html + app + fs.readFileSync('js/admin/admin.js', 'utf8')), 'no export/import key controls');
 // The gate signs only the host's login message, never arbitrary text handed to it.
 const gate = fs.readFileSync('js/admin/gate.js', 'utf8');
-assert(/LOGIN_PREFIX \+ location\.host/.test(gate) && gate.indexOf('LOGIN_PREFIX + location.host') < gate.indexOf('who.sign('), 'the gate checks the message is a login for this origin before signing it');
+assert(gate.indexOf('challenge.message.indexOf(LOGIN_PREFIX)') < gate.indexOf('who.sign('), 'the gate checks the message domain before signing it');
+assert(gate.indexOf('loopbackEquivalentHost(host)') < gate.indexOf('who.sign('), 'the gate checks the challenge host before signing it');
 
 // 5. Signing out drops the key; nothing is persisted by the sign-in.
 assert(/dispose\(\)/.test(entry) && /signOut/.test(entry));

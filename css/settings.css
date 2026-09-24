@@ -1,9 +1,15 @@
-/* SDK semantic tokens supply alternate palettes, while Subzero stays the default. */
+/* SDK semantic tokens supply alternate palettes, while Flux Protocol stays the default.
+   --ark-canvas (js/tokens.js) is a separate, hardcoded-dark token that ArkUI's atomizer
+   bakes straight into generated classes (eg. the scene wrapper's own background) -- it
+   was never theme-aware, and only read as correct because js/settings/panel.js's
+   atmosphere layer painted a themed fill on top of it. Redefining it here, at the one
+   place themes are switched, fixes every consumer instead of patching each one. */
+:root[data-theme]:not([data-theme="original"]) { --ark-canvas:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) body,
 :root[data-theme]:not([data-theme="original"]) #scene { background:hsl(var(--canvas)); }
-:root[data-theme]:not([data-theme="original"]) .hero-atmosphere { background:radial-gradient(ellipse at 55% 40%,hsl(var(--primary)/.2),transparent 70%),hsl(var(--canvas)); }
+:root[data-theme]:not([data-theme="original"]) .hero-atmosphere { background:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) :is(.learning-page,.expansion,.article-body,.article-playground) { color:hsl(var(--text)); }
-:root[data-theme]:not([data-theme="original"]) #scene :is(h1,h2,h3,a,button) { color:hsl(var(--text-strong)) !important; }
+:root[data-theme]:not([data-theme="original"]) #scene :is(h1,h2,h3,a,button):not(.home-primary-cta) { color:hsl(var(--text-strong)) !important; }
 :root[data-theme]:not([data-theme="original"]) #scene :is(p,small,.ark-studio-label,.learning-duration,.learning-number) { color:hsl(var(--text-muted)); }
 
 /* Atmosphere follows the same semantic palette as the page and settings. */
@@ -21,7 +27,7 @@
 .settings-root { display:block; }
 .settings-trigger { display:grid; place-items:center; width:44px; height:44px; padding:0; border:0; border-radius:50%; background:transparent; color:hsl(var(--text-muted)); font-size:19px; cursor:pointer; transition:color 180ms,background 180ms; }
 .settings-trigger:hover,.settings-trigger[aria-expanded="true"] { background:hsl(var(--text-strong)/.08); color:hsl(var(--text-strong)); }
-.settings-panel { box-sizing:border-box; width:310px; max-width:calc(100vw - 32px); max-height:min(680px,78dvh); overflow-y:auto; overscroll-behavior:contain; padding:26px; border:0; border-radius:16px; background:hsl(var(--overlay)/.92); backdrop-filter:blur(28px); color:hsl(var(--text)); box-shadow:0 18px 70px #0004,inset 0 1px 0 hsl(var(--text-strong)/.05); font:400 12px/1.5 var(--ark-font); z-index:100; scrollbar-width:thin; scrollbar-color:hsl(var(--text-muted)/.3) transparent; }
+.settings-panel { box-sizing:border-box; width:310px; max-width:calc(100vw - 32px); max-height:min(680px,78dvh); overflow-y:auto; overscroll-behavior:contain; padding:26px; border:1px solid hsl(var(--border-default)); border-radius:8px; background:hsl(var(--overlay)); color:hsl(var(--text)); font:400 12px/1.5 var(--ark-font); z-index:100; scrollbar-width:thin; scrollbar-color:hsl(var(--text-muted)/.3) transparent; }
 .settings-panel[hidden] { display:none !important; }
 .settings-title { display:block; font:300 26px/1.2 var(--ark-font); letter-spacing:-.04em; margin:0; color:hsl(var(--text-strong)); }
 .settings-description { display:block; margin-top:7px; font-size:11px; color:hsl(var(--text-muted)); }
@@ -34,7 +40,7 @@
 .settings-control-label { display:block; margin-top:14px; color:hsl(var(--text)); font:400 11px/1.4 var(--ark-font); font-variant-numeric:tabular-nums; }
 .settings-range { appearance:none; display:block; box-sizing:border-box; width:100%; height:28px; margin:5px 0 0; padding:0; background:transparent; cursor:pointer; }
 .settings-range::-webkit-slider-runnable-track { height:3px; border-radius:3px; background:hsl(var(--text-strong)/.15); }
-.settings-range::-webkit-slider-thumb { appearance:none; width:12px; height:12px; margin-top:-4.5px; border:0; border-radius:50%; background:hsl(var(--primary)); box-shadow:0 0 0 4px hsl(var(--primary)/.09); }
+.settings-range::-webkit-slider-thumb { appearance:none; width:12px; height:12px; margin-top:-4.5px; border:0; border-radius:50%; background:hsl(var(--primary)); }
 .settings-range::-moz-range-track { height:3px; border-radius:3px; background:hsl(var(--text-strong)/.15); }
 .settings-range::-moz-range-thumb { width:12px; height:12px; border:0; border-radius:50%; background:hsl(var(--primary)); }
 .settings-panel .settings-action { display:block; width:100%; min-height:38px; margin:3px 0 0; padding:10px 12px; border-radius:7px; background:transparent; text-align:left; font-size:11px; color:hsl(var(--text-muted)); }

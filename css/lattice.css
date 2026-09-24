@@ -1,75 +1,21 @@
-/* Clean.html's named block field. The background remains transparent so the
-   existing atmospheric veil and mesh can continue to show through. */
+/* The fine signal map is painted once; only a tiny activity canvas changes. */
 .lattice {
   position:absolute;
   inset:0;
   z-index:1;
-  display:grid;
-  grid-template-columns:repeat(var(--cols), minmax(0, 1fr));
-  grid-template-rows:repeat(var(--rows), minmax(0, 1fr));
-  overflow:hidden;
+  width:100%;
+  height:100%;
   opacity:0;
   pointer-events:none;
-  transform:translate3d(calc(var(--observer-x, 0) * 4px), calc(var(--observer-y, 0) * 3px), 0);
-  transition:opacity 520ms ease, transform 1800ms cubic-bezier(.2,.65,.3,1);
-  contain:layout paint style;
+  transition:opacity 520ms ease;
 }
-.lattice-active { opacity:.72; pointer-events:auto; }
-.lattice-idle { opacity:0; }
-.lattice-still { transition:none; }
-.lattice-cell {
-  position:relative;
-  min-width:0;
-  min-height:0;
-  border-right:1px solid rgba(184,204,198,.085);
-  border-bottom:1px solid rgba(184,204,198,.085);
-  color:rgba(202,220,215,.24);
-  transition:background-color 260ms ease, border-color 260ms ease, color 260ms ease, opacity 260ms ease;
-}
-.lattice-cell::before {
-  content:attr(data-s);
-  position:absolute;
-  left:10px;
-  top:9px;
-  font:500 8px/1 var(--ark-font);
-  letter-spacing:.16em;
-  opacity:.72;
-}
-.lattice-cell::after {
-  content:attr(data-l);
-  position:absolute;
-  right:10px;
-  bottom:9px;
-  font:400 7px/1 var(--ark-font);
-  letter-spacing:.1em;
-  opacity:.34;
-}
-.lattice-cell-cyan { --cell-accent:#7fb5bd; }
-.lattice-cell-violet { --cell-accent:#9887c9; }
-.lattice-cell-amber { --cell-accent:#c4a469; }
-.lattice-cell-neutral { --cell-accent:#b9c8c1; }
-.lattice-cell.is-ping { animation:lattice-ping 1250ms cubic-bezier(.2,.7,.2,1) both; }
-.lattice-cell.is-ping::before { color:var(--cell-accent); }
-.lattice-cell.is-current {
-  z-index:2;
-  color:var(--cell-accent);
-  background:color-mix(in srgb, var(--cell-accent) 9%, transparent);
-  border-color:color-mix(in srgb, var(--cell-accent) 45%, transparent);
-}
-.lattice-cell.is-current::before { opacity:1; text-shadow:0 0 16px color-mix(in srgb, var(--cell-accent) 70%, transparent); }
-.lattice-cell.is-dim { opacity:.16; }
-@keyframes lattice-ping {
-  0% { background:transparent; }
-  25% { background:color-mix(in srgb, var(--cell-accent) 12%, transparent); }
-  100% { background:transparent; }
-}
+.lattice { display:block; }
+.lattice-field.lattice-active { opacity:.55; }
+.lattice-activity.lattice-active { opacity:.7; }
 @media(max-width:760px) {
-  .lattice { opacity:.62; }
-  .lattice-cell::before { left:7px; top:7px; font-size:7px; }
-  .lattice-cell::after { right:7px; bottom:7px; font-size:6px; }
+  .lattice-field.lattice-active { opacity:.43; }
+  .lattice-activity.lattice-active { opacity:.55; }
 }
 @media(prefers-reduced-motion:reduce) {
-  .lattice { transition:none; transform:none; }
-  .lattice-cell { transition:none; }
-  .lattice-cell.is-ping { animation:none; }
+  .lattice { transition:none; }
 }

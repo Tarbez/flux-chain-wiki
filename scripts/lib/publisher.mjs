@@ -19,7 +19,7 @@
    that wire format is byte-for-byte shared with ark-browser, so a second
    implementation here would be a second place to drift. Like
    ark-miner-desktop importing the daemon by sibling path, this makes
-   subzero/ and ark-miner-cli/ neighbours in one workspace.
+   flux-chain/ and ark-miner-cli/ neighbours in one workspace.
    ===================================================================== */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -28,7 +28,7 @@ import { buildNameRecordSigningMessage, canonicalizeNameRecord, normalizeName, v
   from '../../../ark-miner-cli/src/state/name-record-validators.js';
 import { decodeSite, encodeSite, siteProblems } from './site-bundle.mjs';
 
-export const DEFAULT_NAME = 'subzero.ark';
+export const DEFAULT_NAME = 'flux-chain.ark';
 
 /* A refusal names the failure, what is missing, and what would fix it. */
 export class PublishRefusal extends Error {
@@ -50,7 +50,7 @@ function credentialIn(folder) {
    Only when no folder is named are the usual places tried. */
 export function readMinerKey({ key, storagePath, env = process.env, home = os.homedir() } = {}) {
   if (key) return key.trim();
-  if (env.SUBZERO_MINER_KEY) return env.SUBZERO_MINER_KEY.trim();
+  if (env.FLUX_CHAIN_MINER_KEY) return env.FLUX_CHAIN_MINER_KEY.trim();
   const roots = storagePath ? [storagePath] : [env.STORAGE_PATH, path.join(home, '.flux-miner'), path.join(home, '.ark-miner')].filter(Boolean);
   for (const root of roots) {
     const found = credentialIn(root);
@@ -58,8 +58,8 @@ export function readMinerKey({ key, storagePath, env = process.env, home = os.ho
   }
   throw new PublishRefusal(
     'No miner credential was found.',
-    'the miner API key (SUBZERO_MINER_KEY, --key, or pin-api-credential.txt in the folder named by --storage).',
-    'pass --storage <the miner STORAGE_PATH>, or set SUBZERO_MINER_KEY to one of the miner\'s AUTH_KEYS.', 401);
+    'the miner API key (FLUX_CHAIN_MINER_KEY, --key, or pin-api-credential.txt in the folder named by --storage).',
+    'pass --storage <the miner STORAGE_PATH>, or set FLUX_CHAIN_MINER_KEY to one of the miner\'s AUTH_KEYS.', 401);
 }
 
 /* The miners this tool knows how to find on a machine, in the order it prefers them. Ports and folders are the
@@ -85,7 +85,7 @@ export async function discoverMiner({ env = process.env, home = os.homedir(), fe
       info = await response.json();
     } catch { continue; }
     // This candidate's own folders only, so a Desktop miner is never used with the CLI's key, or the reverse.
-    let key = env.SUBZERO_MINER_KEY ? env.SUBZERO_MINER_KEY.trim() : null;
+    let key = env.FLUX_CHAIN_MINER_KEY ? env.FLUX_CHAIN_MINER_KEY.trim() : null;
     for (const folder of key ? [] : candidate.storage) { key = credentialIn(folder); if (key) break; }
     if (!key) { heard.push(`${candidate.label} answered on ${candidate.statusPort}, but its credential (pin-api-credential.txt) is not in ${candidate.storage.join(' or ')}`); continue; }
     return { label: candidate.label, networkId: info.network_id || null, statusBase, pinBase: `http://127.0.0.1:${candidate.pinPort}`, key };
@@ -93,7 +93,7 @@ export async function discoverMiner({ env = process.env, home = os.homedir(), fe
   throw new PublishRefusal(
     heard.length ? `A miner is running but cannot be used: ${heard.join('; ')}.` : 'No miner is running on this machine that this page can publish through.',
     heard.length ? 'the miner\'s API credential.' : 'a running Ark Miner (the Desktop app, or ark-miner-cli).',
-    heard.length ? 'pass --storage <that miner\'s STORAGE_PATH> or set SUBZERO_MINER_KEY, then press Refresh.' : 'open Ark Miner Desktop, or run npm start in ark-miner-cli, then press Refresh in the Mesh panel.', 502);
+    heard.length ? 'pass --storage <that miner\'s STORAGE_PATH> or set FLUX_CHAIN_MINER_KEY, then press Refresh.' : 'open Ark Miner Desktop, or run npm start in ark-miner-cli, then press Refresh in the Mesh panel.', 502);
 }
 
 /* One place that turns command-line options into a publisher, so the host and the pull script cannot drift.
@@ -150,7 +150,7 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
   }
 
   async function add(bytes) {
-    const response = await call('pin', '/api/v0/add?reference=subzero-site', { method: 'POST', body: bytes, headers: { 'content-type': 'application/octet-stream' } });
+    const response = await call('pin', '/api/v0/add?reference=flux-chain-site', { method: 'POST', body: bytes, headers: { 'content-type': 'application/octet-stream' } });
     if (!response.ok) throw new PublishRefusal(`The miner's pin API refused the upload (${response.status}).`, 'write access to the pin API.', 'check the API key and the per-file size cap.', 502);
     return (await response.json()).cid;
   }
@@ -235,7 +235,7 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     try { archived = decodeSite(await cat(cid)); }
     catch (error) {
       if (error instanceof PublishRefusal) throw error;
-      throw new PublishRefusal(`${cid} is retrievable but is not a subzero site (${error.message}).`, 'a subzero-site/1 archive.', 'run prepare again with the site.');
+      throw new PublishRefusal(`${cid} is retrievable but is not a flux-chain site (${error.message}).`, 'a flux-chain-site/1 archive.', 'run prepare again with the site.');
     }
     const response = await call('status', '/debug/name-record/publish', { method: 'POST', body: JSON.stringify({ record: canonical }), headers: { 'content-type': 'application/json' } });
     const body = await response.json().catch(() => ({}));

@@ -17,7 +17,7 @@ ArkUI.register('RNAV_V1', {
     alignItems: 'center',
     gap: 'max(18px, ' + Tokens.u(3.4) + ')'
   },
-  attrs: function () { return { 'aria-label': 'Primary' }; }
+  attrs: function () { return { 'aria-label': 'Primary', id: 'primary-navigation' }; }
 });
 
 ArkUI.register('RLINK_V1', {

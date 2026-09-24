@@ -14,61 +14,61 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / QUORUM"
+      "value": "FLUX PROTOCOL / BENCHMARKS"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Five nodes. One ledger."
+      "value": "Measured, release by release."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The ledger is quorum-held: five flx-* writers hold the same records, queried through /explorer/v1, raw GUN reads off. You ask the ledger; you don't guess at it."
+      "value": "Every number names its release and what it was tested against. No flattening into one clean figure."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "QUERY THE LEDGER"
+      "value": "READ THE FULL BREAKDOWN"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Five writers, not a public chain."
+      "value": "Best measured sustained throughput: 65.2/s."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Five flx-* VPS nodes act as the real writer quorum — a small, known set, not an open public network."
+      "value": "Release 2.0.4: 65.2/s concurrent, five-validator mesh (500 ops, concurrency 100). No valid concurrent Solana comparison exists — its own Devnet attempts hit rate limits every time."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Query, don't crawl."
+      "value": "vs. Solana: sequential only, three different releases."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Raw GUN reads are disabled. Records are fetched through the /explorer/v1 HTTP API instead."
+      "value": "Every multiplier compares a Flux sequential run to Solana Devnet's own sequential baseline (0.134/s): flxd-chain 5.85x, agreement fabric 7.34x early build, 20.46x at 1.5.1, 18.81x at 2.0.4 — three releases, not one number said three ways."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "One ledger, not five opinions."
+      "value": "The most recent release is still soaking."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Every node holds the same records. Asking a different node does not change what a CID resolves to."
+      "value": "Release 2.1.0's 24-hour soak had started, not finished, at last measurement — early batches ran near 2.8/s. A smoke sample, not a ceiling."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

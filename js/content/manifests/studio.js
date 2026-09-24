@@ -14,67 +14,67 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / PUBLISH"
+      "value": "FLUX PROTOCOL / CREATE"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Prepare. Sign. Publish."
+      "value": "Register. Join. Govern."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Publishing is three steps, and the signed-in DeadArk identity owns the middle one. The local publish host never holds a signing key — it encodes the site and hands back a message to sign."
+      "value": "Creating a network is a real command today — it partitions presence, not accounts or authority. Not yet a security boundary."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "SEE THE PUBLISH FLOW"
+      "value": "SEE THE NETWORK DIRECTORY"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Prepare."
+      "value": "Register."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "The host encodes the site as one archive, adds it to the miner, and drafts the name record that would point the name at it."
+      "value": "network create returns a networkId for a new, independently addressable network. Shared code, so it can't drift between apps."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Sign."
+      "value": "Join."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "The signed-in identity signs the drafted record's signing message, in the browser. Its key never reaches the host or the miner."
+      "value": "Point an app or miner at an existing networkId to join it instead — same primitive, other direction."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Publish."
+      "value": "Govern."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "The signed record goes back to the host, which checks it and hands it to the miner's name registry. Only the identity that owns the name can move it."
+      "value": "A network's own DAO governs it — its own roster, its own thresholds. Mesh-operations governance never substitutes for it."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "ABOUT FLUX CHAIN"
+      "value": "ABOUT FLUX PROTOCOL"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

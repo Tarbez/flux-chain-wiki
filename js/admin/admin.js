@@ -68,8 +68,8 @@
   function dirtyA(slug) { return state.aSaved[slug] === null || JSON.stringify(state.aDrafts[slug]) !== state.aSaved[slug]; }
   function dirtyI(id) { return state.assetSaved[id] === null || JSON.stringify(state.assetDrafts[id]) !== state.assetSaved[id]; }
   function dirtyS(id) { return state.secretSaved[id] === null || JSON.stringify(state.secretDrafts[id]) !== state.secretSaved[id]; }
-  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'mesh' || state.kind === 'design' ? false : dirty(state.current); }
-  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || state.secretIds.some(dirtyS) || reliefDirty() || themeDirty(); }
+  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'design' ? themeDirty() : state.kind === 'mesh' || state.kind === 'seo' ? false : dirty(state.current) || seoDirty(); }
+  function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || state.secretIds.some(dirtyS) || reliefDirty() || themeDirty() || seoDirty(); }
 
   var statusTimer = 0;
   function status(message, tone) {
@@ -93,6 +93,8 @@
     if (meshNav) meshNav.setAttribute('aria-current', String(state.kind === 'mesh'));
     var designNav = $('designNav');
     if (designNav) designNav.setAttribute('aria-current', String(state.kind === 'design'));
+    designNav && designNav.querySelector('.dot') && designNav.querySelector('.dot').remove();
+    if (designNav && themeDirty()) designNav.appendChild(h('span', { class: 'dot', title: 'Unsaved global design changes' }));
     var list = $('pageList'); list.textContent = '';
     ArkManifest.groups.forEach(function (group) {
       var ids = state.ids.filter(function (id) { return state.drafts[id].group === group; });
@@ -204,6 +206,7 @@
     if (state.kind === 'shape') { renderShapeEditor(); return; }
     if (state.kind === 'mesh') { renderMeshEditor(); return; }
     if (state.kind === 'design') { renderDesignEditor(); return; }
+    if (state.kind === 'seo') { renderSeoEditor(); return; }
     var root = $('editor'); root.textContent = '';
     var id = state.current, manifest = state.drafts[id];
     if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
@@ -213,29 +216,33 @@
       h('div', {}, h('h1', { text: manifest.title }), h('div', { class: 'route', text: manifest.route + '  ·  js/content/manifests/' + manifest.id + '.js' })),
       h('div', { class: 'editor-actions' }, revert, save)));
 
+    var contentPanel = h('div', { class: 'editor-tab-flow' });
     if (manifest.meta.next || manifest.meta.placement) {
       var where = h('fieldset', {}, h('legend', { text: 'Where it goes' }));
       if (manifest.meta.placement) where.appendChild(selectEl('Shown on the theory page as', manifest.meta.placement,
         [{ key: 'row', label: 'A numbered row' }, { key: 'rail', label: 'A link beside the page' }], function (v) { manifest.meta.placement = v; }));
       if (manifest.meta.next) where.appendChild(selectEl('The onward link opens', manifest.meta.next, routeOptions(), function (v) { manifest.meta.next = v; }));
-      root.appendChild(where);
+      contentPanel.appendChild(where);
     }
     sections(manifest.fields).forEach(function (section) {
       var set = h('fieldset', {}, h('legend', { text: section.name }));
       section.roles.forEach(function (role) { set.appendChild(fieldEl(manifest, role)); });
-      root.appendChild(set);
+      contentPanel.appendChild(set);
     });
     if (manifest.fields['POINT1.TITLE']) {
-      root.appendChild(h('div', { class: 'tools' },
+      contentPanel.appendChild(h('div', { class: 'tools' },
         h('button', { type: 'button', class: 'btn', text: 'Add a point', onclick: function () { addPoint(manifest); touch(); renderEditor(); } }),
         h('button', { type: 'button', class: 'btn', text: 'Remove the last point', disabled: ArkManifest.points(manifest) <= 1, onclick: function () { removePoint(manifest); touch(); renderEditor(); } })));
     }
+    var tabItems = [{ id: 'content', label: 'Content', content: contentPanel }];
     if (window.ArkMeshSettings && hasShape(id)) {
       var spid = shapePageId(id);
-      root.appendChild(buildShapePickers(spid));
-      root.appendChild(buildPlacementPanel(spid));
-      root.appendChild(buildMeshTuningPanel());
+      var shapePanel = h('div', { class: 'editor-tab-flow' }, buildShapePickers(spid), buildPlacementPanel(spid));
+      tabItems.push({ id: 'shape', label: 'Shape', content: shapePanel });
     }
+    tabItems.push({ id: 'seo', label: 'SEO', content: h('div', { class: 'editor-tab-flow' }, buildPageSeoPanel(id, manifest.title)) });
+    tabItems.push({ id: 'code', label: 'Code', content: buildCodePanel(id, manifest) });
+    root.appendChild(ArkAdminPrimitives.tabs({ label: manifest.title + ' editor sections', items: tabItems, value: 'content', className: 'ark-tabs page-editor-tabs' }));
     if (manifest.group === 'theory') {
       root.appendChild(h('div', { class: 'danger-zone' },
         h('button', { type: 'button', class: 'btn danger', text: 'Delete this page', onclick: deleteCurrent })));
@@ -248,7 +255,8 @@
     var article = state.kind === 'article', asset = state.kind === 'asset', secret = state.kind === 'secret', now = currentDirty();
     var save = $('save'), revert = $('revert');
     if (save) save.disabled = !now;
-    if (revert) revert.disabled = (article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : secret ? state.secretSaved[state.secretCurrent] : state.saved[state.current]) === null || !now;
+    if (revert) revert.disabled = (state.kind === 'design' ? themeSaved : article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : secret ? state.secretSaved[state.secretCurrent] : state.saved[state.current]) === null || !now;
+    if (state.kind === 'design') { renderList(); return; }
     var selector = article ? '.page-list button[data-slug="' + state.aCurrent + '"]' : asset ? '.page-list button[data-asset="' + state.assetCurrent + '"]' : secret ? '.page-list button[data-secret="' + state.secretCurrent + '"]' : '.page-list button[data-id="' + state.current + '"]';
     var button = document.querySelector(selector);
     if (button) {
@@ -262,7 +270,11 @@
     if (state.kind === 'article') { revertArticle(); return; }
     if (state.kind === 'asset') { revertAsset(); return; }
     if (state.kind === 'secret') { revertSecret(); return; }
+    if (state.kind === 'design') { revertDesign(); return; }
     var id = state.current;
+    if (window.ArkMeshSettings) meshDraft = ArkMeshSettings.get() || ArkMeshSettings.defaults();
+    if (window.ArkTheme) themeDraft = ArkTheme.get() || ArkTheme.defaults();
+    if (window.ArkSEO) seoDraft = ArkSEO.get() || ArkSEO.defaults();
     if (state.saved[id] === null) return;
     state.drafts[id] = JSON.parse(state.saved[id]); renderEditor(); renderList(); status('Reverted to the saved version.', '');
   }
@@ -278,6 +290,7 @@
     if (state.kind === 'article') { await saveArticleCurrent(); return; }
     if (state.kind === 'asset') { await saveAssetCurrent(); return; }
     if (state.kind === 'secret') { await saveSecretCurrent(); return; }
+    if (state.kind === 'design') { await saveThemeDraft($('save')); return; }
     var id = state.current, manifest = state.drafts[id];
     var bad = ArkManifest.problems(manifest);
     if (bad.length) { status('Cannot save: ' + bad.join('; '), 'error'); return; }
@@ -294,6 +307,8 @@
     } catch (error) { status(error.message, 'error'); return; }
     state.saved[id] = JSON.stringify(manifest);
     ArkManifest.define(clone(manifest));
+    if (window.ArkMeshSettings && hasShape(id) && reliefDirty()) await saveMeshDraft(null);
+    if (window.ArkSEO && seoDirty()) await saveSeoDraft(null);
     renderList(); touch(); reloadPreview();
   }
 
@@ -798,7 +813,7 @@
     if (!win) return;
     var assets = state.assetIds.map(function (id) { return state.assetDrafts[id]; }).filter(function (a) { return a && a.dataBase64; });
     if (!assets.length) return;
-    try { win.postMessage({ type: 'subzero-preview-assets', assets: assets }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+    try { win.postMessage({ type: 'flux-chain-preview-assets', assets: assets }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
   }
   /* Same idea as notifyPreviewAssets, for the shared relief tuning and each
      page's two shape images (js/content/mesh-settings.js): an edit shows its
@@ -808,7 +823,7 @@
   function notifyPreviewMesh() {
     var frame = $('frame'), win = frame && !frame.hidden && frame.contentWindow;
     if (!win) return;
-    try { win.postMessage({ type: 'subzero-preview-mesh', settings: meshDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+    try { win.postMessage({ type: 'flux-chain-preview-mesh', settings: meshDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
   }
   /* Same idea again, for the colour theme (js/content/theme.js): a picked colour shows on
      the previewed page immediately, before Save writes anything. */
@@ -817,7 +832,7 @@
   function notifyPreviewTheme() {
     var frame = $('frame'), win = frame && !frame.hidden && frame.contentWindow;
     if (!win) return;
-    try { win.postMessage({ type: 'subzero-preview-theme', theme: themeDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
+    try { win.postMessage({ type: 'flux-chain-preview-theme', theme: themeDraft }, window.location.origin); } catch (error) { /* preview not ready yet; the next edit or the frame's own load retries */ }
   }
   function themeDirty() { return !window.ArkTheme || JSON.stringify(ArkTheme.sanitize(themeDraft)) !== themeSaved; }
   async function saveThemeDraft(button) {
@@ -836,6 +851,13 @@
     if (button) button.disabled = true;
     renderList();
   }
+  function revertDesign() {
+    themeDraft = (window.ArkTheme && (ArkTheme.get() || ArkTheme.defaults())) || {};
+    notifyPreviewTheme();
+    renderDesignEditor();
+    renderList();
+    status('Reverted global design config.', '');
+  }
   function selectDesign() { state.kind = 'design'; renderList(); renderEditor(); reloadPreview(); }
   /* A small live thumbnail of a background style, mounted right in the admin (not just the
      iframe): design/ark-ui's generators are pure DOM/SVG/canvas, so this is the same
@@ -848,38 +870,89 @@
     return box;
   }
 
-  function renderDesignEditor() {
-    var root = $('editor'); root.textContent = '';
-    root.appendChild(h('div', { class: 'editor-head' }, h('div', {}, h('h1', { text: 'Design' }), h('div', { class: 'route', text: 'js/content/theme-data.js' }))));
-    if (!window.ArkTheme) { root.appendChild(h('p', { class: 'empty-state', text: 'Theme editing is unavailable on this page.' })); return; }
-    var save = h('button', { type: 'button', class: 'btn primary', text: 'Save' });
-    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset everything to defaults' });
-
-    var colorsBox = h('fieldset', { class: 'relief' }, h('legend', { text: 'Shades' }));
-    colorsBox.appendChild(h('p', { class: 'hint', text: 'The site’s colour palette (js/tokens.js). Nothing here is written until Save; the preview on the right updates as you pick.' }));
-    var colorFields = h('div', { class: 'relief-fields' });
+  function buildDesignPanel(options) {
+    options = options || {};
+    var wrap = h('div', { class: 'page-law-panel' });
+    if (!window.ArkTheme) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Theme editing is unavailable on this page.' })); return wrap; }
+    themeDraft = ArkTheme.sanitize(themeDraft);
+    var active = themeDraft.activeTheme || 'ghost';
+    var colorsBox = h('fieldset', { class: 'relief theme-core' }, h('legend', { text: 'Theme core' }));
+    colorsBox.appendChild(h('p', { class: 'hint', text: 'Pick a theme and edit the actual core colours the site uses: canvas, surfaces, text, primary, complement and accent.' }));
+    var themeSelect = h('select', { id: 'theme-active' });
+    ArkTheme.themeOptions().forEach(function (theme) {
+      themeSelect.appendChild(h('option', { value: theme.key, selected: theme.key === active, text: theme.label }));
+    });
+    var colorFields = h('div', { class: 'theme-fields' });
+    function hslToHex(value) {
+      var match = String(value || '').match(/^\s*(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/);
+      if (!match) return '#000000';
+      var h0 = Number(match[1]) / 360, s = Number(match[2]) / 100, l = Number(match[3]) / 100;
+      function hue(p, q, t) { if (t < 0) t += 1; if (t > 1) t -= 1; if (t < 1 / 6) return p + (q - p) * 6 * t; if (t < 1 / 2) return q; if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6; return p; }
+      var q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+      var rgb = s === 0 ? [l, l, l] : [hue(p, q, h0 + 1 / 3), hue(p, q, h0), hue(p, q, h0 - 1 / 3)];
+      return '#' + rgb.map(function (v) { return Math.round(v * 255).toString(16).padStart(2, '0'); }).join('');
+    }
+    function hexToHsl(hex) {
+      var n = parseInt(hex.slice(1), 16), r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b), h0 = 0, s = 0, l = (max + min) / 2, d = max - min;
+      if (d) {
+        s = l > .5 ? d / (2 - max - min) : d / (max + min);
+        h0 = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        h0 /= 6;
+      }
+      return Math.round(h0 * 360) + ' ' + Math.round(s * 100) + '% ' + Math.round(l * 100) + '%';
+    }
+    function computedThemeValue(theme, key) {
+      var old = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', theme);
+      var value = getComputedStyle(document.documentElement).getPropertyValue('--' + key).trim();
+      if (old) document.documentElement.setAttribute('data-theme', old); else document.documentElement.removeAttribute('data-theme');
+      return value;
+    }
+    function themeValue(theme, key) {
+      return themeDraft.themes && themeDraft.themes[theme] && themeDraft.themes[theme][key] ? themeDraft.themes[theme][key] : computedThemeValue(theme, key);
+    }
+    function setThemeValue(theme, key, value) {
+      if (!themeDraft.themes) themeDraft.themes = {};
+      if (!themeDraft.themes[theme]) themeDraft.themes[theme] = {};
+      themeDraft.themes[theme][key] = value;
+    }
     function refreshColors() {
+      active = themeDraft.activeTheme || active;
       colorFields.textContent = '';
-      ArkTheme.colorFields().forEach(function (f) {
-        var id = 'theme-' + f.key;
-        var swatch = h('input', { id: id, type: 'color', value: themeDraft.colors[f.key] || f.def });
+      ArkTheme.semanticFields().forEach(function (f) {
+        var id = 'semantic-' + active + '-' + f.key;
+        var inherited = computedThemeValue(active, f.key);
+        var current = themeValue(active, f.key);
+        var swatch = h('input', { id: id, type: 'color', value: hslToHex(current) });
+        var out = h('output', { text: current });
         swatch.addEventListener('input', function () {
-          themeDraft.colors[f.key] = swatch.value;
-          notifyPreviewTheme(); save.disabled = !themeDirty();
+          var next = hexToHsl(swatch.value);
+          setThemeValue(active, f.key, next);
+          out.textContent = next;
+          resetOne.disabled = false;
+          notifyPreviewTheme(); touch();
         });
-        var revertOne = h('button', { type: 'button', class: 'btn tiny', text: 'Default', title: 'Reset just this colour', disabled: themeDraft.colors[f.key] === f.def, onclick: function () {
-          themeDraft.colors[f.key] = f.def; swatch.value = f.def; revertOne.disabled = true;
-          notifyPreviewTheme(); save.disabled = !themeDirty();
+        var resetOne = h('button', { type: 'button', class: 'btn tiny', text: 'Default', disabled: current === inherited, onclick: function () {
+          if (themeDraft.themes && themeDraft.themes[active]) delete themeDraft.themes[active][f.key];
+          swatch.value = hslToHex(inherited); out.textContent = inherited; resetOne.disabled = true;
+          notifyPreviewTheme(); touch();
         } });
-        colorFields.appendChild(h('div', { class: 'relief-field' },
-          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: f.label }), revertOne),
-          swatch));
+        colorFields.appendChild(h('div', { class: 'theme-field' },
+          h('div', { class: 'theme-field-head' }, h('label', { for: id, text: f.label }), resetOne),
+          h('div', { class: 'theme-color-row' }, swatch, out)));
       });
     }
+    themeSelect.addEventListener('change', function () {
+      themeDraft.activeTheme = themeSelect.value;
+      active = themeSelect.value;
+      refreshColors(); notifyPreviewTheme(); touch();
+    });
+    colorsBox.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'theme-active', text: 'Editing theme' }), themeSelect));
     colorsBox.appendChild(colorFields);
 
     var bgBox = h('fieldset', { class: 'relief' }, h('legend', { text: 'Background' }));
-    bgBox.appendChild(h('p', { class: 'hint', text: 'A layer behind every page (js/ark/vendor/backgrounds.js, from design/ark-ui). ‘None’ keeps the site’s original flat canvas colour.' }));
+    bgBox.appendChild(h('p', { class: 'hint', text: 'A layer behind every page (js/ark/vendor/backgrounds.js). None keeps the flat canvas colour.' }));
     var bgGrid = h('div', { class: 'bg-grid' });
     function refreshBackground() {
       bgGrid.textContent = '';
@@ -889,7 +962,7 @@
         var radio = h('input', { id: id, type: 'radio', name: 'bg-style', checked: picked });
         radio.addEventListener('change', function () {
           themeDraft.background = { style: s.key };
-          notifyPreviewTheme(); save.disabled = !themeDirty(); refreshBackground();
+          notifyPreviewTheme(); touch(); refreshBackground();
         });
         var card = h('label', { for: id, class: 'bg-card' + (picked ? ' picked' : '') },
           radio, s.key === 'none' ? h('div', { class: 'bg-thumb bg-thumb-none' }) : backgroundThumb(s.key),
@@ -899,15 +972,180 @@
     }
     bgBox.appendChild(bgGrid);
 
-    function refreshAll() { refreshColors(); refreshBackground(); save.disabled = !themeDirty(); }
-    reset.addEventListener('click', function () { themeDraft = ArkTheme.defaults(); refreshAll(); notifyPreviewTheme(); });
-    save.addEventListener('click', function () { saveThemeDraft(save); });
+    function refreshAll() { refreshColors(); refreshBackground(); touch(); }
+    var removeBg = h('button', { type: 'button', class: 'btn', text: 'Remove background layer', onclick: function () { themeDraft.background = { style: 'none' }; refreshAll(); notifyPreviewTheme(); } });
+    var removeTheme = h('button', { type: 'button', class: 'btn', text: 'Remove this theme override', onclick: function () { if (themeDraft.themes) delete themeDraft.themes[active]; refreshAll(); notifyPreviewTheme(); } });
+    var removeAllThemes = h('button', { type: 'button', class: 'btn', text: 'Remove all theme overrides', onclick: function () { themeDraft.themes = {}; refreshAll(); notifyPreviewTheme(); } });
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset design to defaults', onclick: function () { themeDraft = ArkTheme.defaults(); refreshAll(); notifyPreviewTheme(); } });
     refreshAll();
-    root.appendChild(colorsBox);
-    root.appendChild(bgBox);
-    root.appendChild(h('div', { class: 'tools' }, save, reset));
+    wrap.appendChild(colorsBox);
+    wrap.appendChild(bgBox);
+    wrap.appendChild(h('div', { class: 'tools' }, removeBg, removeTheme, removeAllThemes, reset));
+    return wrap;
   }
-  $('designNav').addEventListener('click', selectDesign);
+
+  function buildCodePanel(id, manifest) {
+    var box = h('div', { class: 'editor-tab-flow code-panel' });
+    var inspector = h('fieldset', {}, h('legend', { text: 'Page structure' }));
+    var view = h('textarea', { class: 'code-view', readonly: true });
+    function manifestOutline() {
+      var lines = ['page#' + id + ' "' + manifest.title + '"'];
+      lines.push('  route: ' + (manifest.route || '/'));
+      lines.push('  group: ' + (manifest.group || 'page'));
+      Object.keys(manifest.fields || {}).forEach(function (key) {
+        var value = String(manifest.fields[key] || '').replace(/\s+/g, ' ').trim();
+        lines.push('  field[' + key + '] ' + (value ? '"' + value.slice(0, 96) + (value.length > 96 ? '...' : '') + '"' : '(empty)'));
+      });
+      return lines.join('\n');
+    }
+    function domOutline() {
+      var frame = $('frame');
+      var doc = frame && frame.contentDocument;
+      var start = doc && (doc.querySelector('[data-page], [data-ark-page], main, #scene') || doc.body);
+      if (!start) return manifestOutline();
+      var lines = [];
+      function walk(node, depth) {
+        if (!node || node.nodeType !== 1 || depth > 5 || lines.length > 160) return;
+        var label = node.tagName.toLowerCase();
+        if (node.id) label += '#' + node.id;
+        if (node.className && typeof node.className === 'string') label += '.' + node.className.trim().split(/\s+/).slice(0, 3).join('.');
+        ['data-role', 'data-layer', 'data-ark-layer', 'data-page'].forEach(function (attr) { if (node.getAttribute(attr)) label += '[' + attr + '="' + node.getAttribute(attr) + '"]'; });
+        lines.push('  '.repeat(depth) + label);
+        Array.prototype.slice.call(node.children || []).forEach(function (child) { walk(child, depth + 1); });
+      }
+      walk(start, 0);
+      return lines.join('\n') || manifestOutline();
+    }
+    function cleanTextFields() {
+      Object.keys(manifest.fields || {}).forEach(function (key) {
+        if (typeof manifest.fields[key] === 'string') manifest.fields[key] = manifest.fields[key].replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+      });
+      view.value = manifestOutline();
+      touch(); reloadPreview();
+    }
+    view.value = manifestOutline();
+    inspector.appendChild(h('p', { class: 'hint', text: 'Inspect the generated page structure or the manifest fields. Cleaning trims empty whitespace without deleting real sections.' }));
+    inspector.appendChild(view);
+    inspector.appendChild(h('div', { class: 'tools' },
+      h('button', { type: 'button', class: 'btn', text: 'Inspect preview divs', onclick: function () { view.value = domOutline(); } }),
+      h('button', { type: 'button', class: 'btn', text: 'Show manifest fields', onclick: function () { view.value = manifestOutline(); } }),
+      h('button', { type: 'button', class: 'btn', text: 'Clean text fields', onclick: cleanTextFields })));
+    box.appendChild(inspector);
+    return box;
+  }
+
+  function renderDesignEditor() {
+    var root = $('editor'); root.textContent = '';
+    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: function () { saveThemeDraft(save); } });
+    var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
+    save.disabled = !themeDirty();
+    revert.disabled = !themeDirty();
+    root.appendChild(h('div', { class: 'editor-head' },
+      h('div', {}, h('h1', { text: 'Design' }), h('div', { class: 'route', text: 'Global config · js/content/theme-data.js' })),
+      h('div', { class: 'editor-actions' }, revert, save)));
+    root.appendChild(buildDesignPanel());
+  }
+  if ($('designNav')) $('designNav').addEventListener('click', selectDesign);
+
+  /* ---- SEO (js/content/seo.js) --------------------------------------- */
+  /* Same shared-draft pattern as theme/mesh above: one object, edited here, written by Save. No
+     live preview message -- a title/meta tag has no visible effect in the iframe to show early. */
+  var seoDraft = (window.ArkSEO && ArkSEO.get()) || (window.ArkSEO && ArkSEO.defaults()) || { site: {}, pages: {}, articles: {} };
+  var seoSaved = window.ArkSEO ? JSON.stringify(ArkSEO.sanitize(seoDraft)) : null;
+  function seoDirty() { return !window.ArkSEO || JSON.stringify(ArkSEO.sanitize(seoDraft)) !== seoSaved; }
+  async function saveSeoDraft(button) {
+    try {
+      if (state.cdirs) {
+        await ArkAdminStore.saveSeo(state.cdirs.content, seoDraft);
+        status('Saved js/content/seo-data.js', 'ok');
+      } else {
+        download('seo-data.js', ArkSEO.serialize(seoDraft));
+        status('Downloaded seo-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
+      }
+    } catch (error) { status(error.message, 'error'); return; }
+    seoDraft = ArkSEO.sanitize(seoDraft);
+    seoSaved = JSON.stringify(seoDraft);
+    ArkSEO.define(seoDraft);
+    if (button) button.disabled = true;
+    renderList();
+  }
+  function selectSeo() { state.kind = 'seo'; renderList(); renderEditor(); reloadPreview(); }
+
+  function seoOverrideField(save, labelPrefix, value, placeholder, kind, onchange) {
+    var id = 'seo-' + labelPrefix.replace(/\W+/g, '-').toLowerCase() + '-' + kind;
+    var control = kind === 'description'
+      ? h('textarea', { id: id, rows: 2, spellcheck: true, placeholder: placeholder })
+      : h('input', { id: id, type: 'text', spellcheck: true, placeholder: placeholder });
+    control.value = value;
+    control.addEventListener('input', function () { onchange(control.value); if (save) save.disabled = !seoDirty(); touch(); });
+    return h('div', { class: 'field' }, h('label', { for: id, text: kind === 'description' ? 'Description' : 'Title' }), control);
+  }
+
+  function buildPageSeoPanel(pageId, label) {
+    var box = h('fieldset', {}, h('legend', { text: 'SEO' }));
+    if (!window.ArkSEO) { box.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable on this page.' })); return box; }
+    box.appendChild(h('p', { class: 'hint', text: 'These values belong to this page. Blank title and description derive from the page text and site defaults.' }));
+    var entry = seoDraft.pages[pageId] || (seoDraft.pages[pageId] = { title: '', description: '', ogImage: '', canonical: '' });
+    box.appendChild(seoOverrideField(null, pageId, entry.title, ArkSEO.pageTitle(pageId, label), 'title', function (v) { entry.title = v; }));
+    box.appendChild(seoOverrideField(null, pageId, entry.description, seoDraft.site.defaultDescription || 'No default set', 'description', function (v) { entry.description = v; }));
+    var advanced = h('div', { class: 'editor-tab-flow' });
+    ['ogImage', 'canonical'].forEach(function (key) {
+      var id = 'seo-' + pageId + '-' + key;
+      var input = h('input', { id: id, type: 'text', spellcheck: false, placeholder: key === 'ogImage' ? '/assets/share.png or https://...' : '/about or https://...' });
+      input.value = entry[key] || '';
+      input.addEventListener('input', function () { entry[key] = input.value; touch(); });
+      advanced.appendChild(h('div', { class: 'field' }, h('label', { for: id, text: key === 'ogImage' ? 'Social image' : 'Canonical URL' }), input));
+    });
+    box.appendChild(ArkAdminPrimitives.disclosure({ label: 'Advanced URLs', content: advanced }));
+    return box;
+  }
+
+  function renderSeoEditor() {
+    var root = $('editor'); root.textContent = '';
+    root.appendChild(h('div', { class: 'editor-head' }, h('div', {}, h('h1', { text: 'SEO' }), h('div', { class: 'route', text: 'js/content/seo-data.js' }))));
+    if (!window.ArkSEO) { root.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable on this page.' })); return; }
+    var save = h('button', { type: 'button', class: 'btn primary', text: 'Save', onclick: function () { saveSeoDraft(save); } });
+    save.disabled = !seoDirty();
+
+    var siteBox = h('fieldset', {}, h('legend', { text: 'Site' }));
+    siteBox.appendChild(h('p', { class: 'hint', text: 'Used as the " — <name>" suffix on every page’s title, the fallback meta description, and (with a base URL) to generate sitemap.xml and robots.txt on Save/Publish.' }));
+    var nameInput = h('input', { type: 'text', value: seoDraft.site.name || '' });
+    nameInput.addEventListener('input', function () { seoDraft.site.name = nameInput.value; save.disabled = !seoDirty(); });
+    siteBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Site name' }), nameInput));
+    var urlInput = h('input', { type: 'text', value: seoDraft.site.baseUrl || '', placeholder: 'https://example.com' });
+    urlInput.addEventListener('input', function () { seoDraft.site.baseUrl = urlInput.value; save.disabled = !seoDirty(); });
+    siteBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Base URL (leave blank to skip sitemap.xml)' }), urlInput));
+    var descInput = h('textarea', { rows: 2, value: seoDraft.site.defaultDescription || '' });
+    descInput.addEventListener('input', function () { seoDraft.site.defaultDescription = descInput.value; save.disabled = !seoDirty(); });
+    siteBox.appendChild(h('div', { class: 'field' }, h('label', { text: 'Default description' }), descInput));
+    root.appendChild(siteBox);
+
+    var pagesBox = h('fieldset', {}, h('legend', { text: 'Pages' }));
+    pagesBox.appendChild(h('p', { class: 'hint', text: 'Blank uses the page’s own title/the default description above.' }));
+    ArkSEO.pageEntries().forEach(function (p) {
+      var entry = seoDraft.pages[p.id] || (seoDraft.pages[p.id] = { title: '', description: '' });
+      var row = h('div', { class: 'relief-field' }, h('div', { class: 'relief-field-head' }, h('label', { text: p.label })));
+      row.appendChild(seoOverrideField(save, p.id, entry.title, ArkSEO.pageTitle(p.id, p.label), 'title', function (v) { entry.title = v; }));
+      row.appendChild(seoOverrideField(save, p.id, entry.description, seoDraft.site.defaultDescription || 'No default set', 'description', function (v) { entry.description = v; }));
+      pagesBox.appendChild(row);
+    });
+    root.appendChild(pagesBox);
+
+    if (ArkSEO.articleSlugs().length) {
+      var articlesBox = h('fieldset', {}, h('legend', { text: 'Articles' }));
+      ArkSEO.articleSlugs().forEach(function (slug) {
+        var article = state.aDrafts[slug];
+        var entry = seoDraft.articles[slug] || (seoDraft.articles[slug] = { title: '', description: '' });
+        var row = h('div', { class: 'relief-field' }, h('div', { class: 'relief-field-head' }, h('label', { text: article ? article.title : slug })));
+        row.appendChild(seoOverrideField(save, slug, entry.title, ArkSEO.articleTitle(slug, article && article.title), 'title', function (v) { entry.title = v; }));
+        row.appendChild(seoOverrideField(save, slug, entry.description, (article && article.summary) || seoDraft.site.defaultDescription || 'No default set', 'description', function (v) { entry.description = v; }));
+        articlesBox.appendChild(row);
+      });
+      root.appendChild(articlesBox);
+    }
+    root.appendChild(h('div', { class: 'tools' }, save));
+  }
+  if ($('seoNav')) $('seoNav').addEventListener('click', selectSeo);
 
   $('frame').addEventListener('load', function () { notifyPreviewAssets(); notifyPreviewMesh(); notifyPreviewTheme(); });
   $('reload').addEventListener('click', reloadPreview);
@@ -946,47 +1184,62 @@
       onDone(id);
     });
   }
-  /* One page's two image pickers ("Primary shape image" / "Surface shape
-     image"), populated from every saved image, each with its own inline
-     upload. "None" keeps that page's built-in orb/knot/word (zero) or
-     reference symbol (other pages) -- unless "Hide this shape" is checked,
-     which removes the shape entirely, overriding even a page (Theory) whose
-     built-in shape normally shows without any image assigned. */
+  /* One page's two shape layers, populated from every saved image, each with
+     its own inline upload. Each layer can use the page's built-in behavior,
+     an image, or no shape at all. */
   function buildShapePickers(pageId) {
     var box = h('fieldset', {}, h('legend', { text: 'Images' }));
+    var page = meshDraft.pages[pageId];
     var hiddenId = 'shape-' + pageId + '-hidden';
     var hiddenBox = h('input', { id: hiddenId, type: 'checkbox' });
-    hiddenBox.checked = !!meshDraft.pages[pageId].hidden;
+    hiddenBox.checked = !!page.hidden || (page.primaryMode === 'none' && page.surfaceMode === 'none');
     hiddenBox.addEventListener('change', function () {
-      meshDraft.pages[pageId].hidden = hiddenBox.checked;
+      page.hidden = hiddenBox.checked;
+      if (hiddenBox.checked) { page.primaryMode = 'none'; page.surfaceMode = 'none'; }
+      else { if (page.primaryMode === 'none') page.primaryMode = page.primary ? 'image' : 'built-in'; if (page.surfaceMode === 'none') page.surfaceMode = page.surface ? 'image' : 'built-in'; }
       notifyPreviewMesh(); renderEditor(); renderList();
     });
-    box.appendChild(h('div', { class: 'field field-inline' }, hiddenBox, h('label', { for: hiddenId, text: 'Hide this page’s shape entirely (no image, no built-in shape either)' })));
-    box.appendChild(h('p', { class: 'hint', text: 'Replaces this page’s built-in shape with two of your images: one rising above the waterline, one sunk below it. Leave either as None to keep the built-in look for that half.' }));
+    box.appendChild(h('div', { class: 'field field-inline' }, hiddenBox, h('label', { for: hiddenId, text: 'Hide both shapes for this page' })));
+    box.appendChild(h('p', { class: 'hint', text: 'Shape 1 and Shape 2 can each use the built-in page shape, one of your images, or nothing.' }));
     ['primary', 'surface'].forEach(function (slot) {
       var id = 'shape-' + pageId + '-' + slot;
-      var select = h('select', { id: id, onchange: function () {
-        meshDraft.pages[pageId][slot] = select.value || null;
+      var modeKey = slot + 'Mode';
+      var modeId = id + '-mode';
+      var mode = h('select', { id: modeId, onchange: function () {
+        page[modeKey] = mode.value;
+        page.hidden = page.primaryMode === 'none' && page.surfaceMode === 'none';
         notifyPreviewMesh(); renderEditor(); renderList();
       } });
-      select.appendChild(h('option', { value: '', text: 'None (built-in shape)' }));
+      mode.appendChild(h('option', { value: 'built-in', text: 'Built-in shape' }));
+      mode.appendChild(h('option', { value: 'image', text: 'Use image' }));
+      mode.appendChild(h('option', { value: 'none', text: 'No shape' }));
+      mode.value = page[modeKey] || (page[slot] ? 'image' : 'built-in');
+      var select = h('select', { id: id, onchange: function () {
+        page[slot] = select.value || null;
+        if (select.value) page[modeKey] = 'image';
+        notifyPreviewMesh(); renderEditor(); renderList();
+      } });
+      select.appendChild(h('option', { value: '', text: 'Choose an image' }));
       state.assetIds.forEach(function (assetId) {
         select.appendChild(h('option', { value: assetId, text: state.assetDrafts[assetId].label || assetId }));
       });
-      select.value = meshDraft.pages[pageId][slot] || '';
+      select.value = page[slot] || '';
       var upload = h('input', { id: id + '-upload', type: 'file', accept: ArkAsset.mimeTypes.join(',') });
       upload.addEventListener('change', function () {
         var file = upload.files && upload.files[0];
         if (!file) return;
         quickAddAsset(file, function (assetId) {
-          meshDraft.pages[pageId][slot] = assetId;
+          page[slot] = assetId;
+          page[modeKey] = 'image';
           notifyPreviewAssets(); notifyPreviewMesh();
           renderEditor(); renderList();
           status('Added "' + assetId + '" and set it as this page’s ' + slot + ' image. Save the image and Save this page’s shapes to keep it.', 'ok');
         });
       });
       box.appendChild(h('div', { class: 'field' },
-        h('label', { for: id, text: slot === 'primary' ? 'Primary shape image (rises above the waterline)' : 'Surface shape image (sinks below the waterline)' }),
+        h('label', { for: modeId, text: slot === 'primary' ? 'Shape 1' : 'Shape 2' }),
+        mode,
+        h('label', { for: id, class: 'hint', text: slot === 'primary' ? 'Image for Shape 1' : 'Image for Shape 2' }),
         select,
         h('label', { for: id + '-upload', class: 'hint', text: 'or upload a new image' }),
         upload));
@@ -1006,7 +1259,7 @@
       var input = h('input', { id: id, type: 'range', min: f.min, max: f.max, step: f.step, oninput: function () {
         meshDraft.pages[pageId][f.key] = Number(input.value);
         out.textContent = String(meshDraft.pages[pageId][f.key]);
-        notifyPreviewMesh();
+        notifyPreviewMesh(); touch();
       } });
       input.value = meshDraft.pages[pageId][f.key];
       fields.appendChild(h('div', { class: 'relief-field' },
@@ -1083,7 +1336,7 @@
     box.appendChild(h('p', {}, h('strong', { text: 'Encrypted content: ' }),
       document.createTextNode('an item under Encrypted is published the same way — content-addressed, fetchable by anyone — but its body is AES-GCM ciphertext and the file key is only wrapped for the recipients you chose. Only someone holding a matching secret key can read it; everyone else fetches opaque bytes.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Signed, not secret: ' }),
-      document.createTextNode('the record pointing subzero.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
+      document.createTextNode('the record pointing flux-chain.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Actually private: ' }),
       document.createTextNode('only your signing key, and only in this browser tab’s memory (js/admin/auth.js). It is never sent to the publish host, the miner, or the mesh, and is dropped on reload or sign-out. The sign-in gate protects who can edit and publish — it does not make the content itself confidential.')));
     box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
@@ -1172,14 +1425,14 @@
   var supported = typeof window.showDirectoryPicker === 'function';
   function keep(handle) {
     try {
-      var open = indexedDB.open('subzero-admin', 1);
+      var open = indexedDB.open('flux-chain-admin', 1);
       open.onupgradeneeded = function () { open.result.createObjectStore('handles'); };
       open.onsuccess = function () { open.result.transaction('handles', 'readwrite').objectStore('handles').put(handle, 'project'); };
     } catch (e) { /* remembering the folder is a convenience; saving still works */ }
   }
   function recall(callback) {
     try {
-      var open = indexedDB.open('subzero-admin', 1);
+      var open = indexedDB.open('flux-chain-admin', 1);
       open.onupgradeneeded = function () { open.result.createObjectStore('handles'); };
       open.onsuccess = function () {
         var get = open.result.transaction('handles').objectStore('handles').get('project');
@@ -1201,7 +1454,7 @@
   $('connect').addEventListener('click', async function () {
     if (!supported) { status('This browser cannot write to a folder. Saving downloads each file instead; use Chrome or Edge to save in place.', 'warn'); return; }
     try {
-      var handle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'subzero-project' });
+      var handle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'flux-chain-project' });
       await attach(handle); keep(handle);
     } catch (error) { if (error.name !== 'AbortError') status(error.message, 'error'); }
   });
@@ -1225,14 +1478,15 @@
              assets: state.assetIds.map(function (id) { return clone(state.assetDrafts[id]); }),
              secrets: state.secretIds.map(function (id) { return clone(state.secretDrafts[id]); }),
              meshSettings: window.ArkMeshSettings ? clone(meshDraft) : null,
-             theme: window.ArkTheme ? clone(themeDraft) : null };
+             theme: window.ArkTheme ? clone(themeDraft) : null,
+             seo: window.ArkSEO ? clone(seoDraft) : null };
   }
 
   async function refreshMesh() {
     var line = $('meshState'), owner = $('meshOwner');
     if (!mesh) {
       /* opened from disk: this page cannot reach a miner, but a plain link to the host's copy of it can be followed */
-      line.textContent = 'This copy of the page cannot publish. Double-click "SUBZERO Admin.command" in the subzero folder, or use the copy served by the host: ';
+      line.textContent = 'This copy of the page cannot publish. Double-click "Flux Chain Admin.command" in the flux-chain folder, or use the copy served by the host: ';
       line.appendChild(h('a', { href: 'http://127.0.0.1:3437/admin.html', text: 'http://127.0.0.1:3437/admin.html' }));
       owner.textContent = ''; $('publish').disabled = true; $('mesh').open = true;
       $('meshRefresh').disabled = true;

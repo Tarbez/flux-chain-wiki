@@ -14,61 +14,61 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / 02"
+      "value": "FLUX PROTOCOL / 01"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Fetch it. It resolves."
+      "value": "The agreement lifecycle."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Records are CID-addressed. stable_content_cid hashes the JSON serialization of the payload, computed from the in-memory value — not from whatever bytes happen to be on disk."
+      "value": "Every agreement moves through five signed stages, each pointing to the last by CID: INTENT, OFFER, AGREEMENT, FULFILLMENT, RECEIPT."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "READ THE CID RULES"
+      "value": "SEE THE LIFECYCLE RUN"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "The hash covers the JSON, not the storage."
+      "value": "Five stages, each a signed manifest."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Storage can change shape entirely while every CID stays identical — provided the JSON a reader sees round-trips byte-identical."
+      "value": "INTENT states what a peer wants. OFFER answers it. AGREEMENT is the signed match. FULFILLMENT is the work. RECEIPT closes it, auditable end to end."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "An inexact round trip breaks everything."
+      "value": "No global order between unrelated agreements."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "If the JSON a reader reconstructs isn't byte-identical to what was hashed, the CID no longer matches — and re-addresses the whole store."
+      "value": "A vote, a handoff, a resolver job — all close in parallel. Each agreement carries its own evidence trail, never serialized behind one block stream."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "One fixed source of truth."
+      "value": "This replaced a real block/validator chain."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "There is no per-cell or per-observer resolution. The hash is fixed, and fetching by CID is the only way in."
+      "value": "A conventional chain (flxd-chain) came first, got measured against this lifecycle on the same mesh, and lost. See Benchmarks for the numbers."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

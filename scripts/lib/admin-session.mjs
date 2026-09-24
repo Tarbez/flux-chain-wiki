@@ -7,7 +7,7 @@
      1  PROVE     challenge -> the identity signs it with its root key (in the
                   browser, from the unlocked Auth Kit). The host builds the message
                   itself: what it verifies is what it sent, not what the caller says
-                  it signed. Domain-separated (`subzero-admin-login/v1|<host>|<nonce>`),
+                  it signed. Domain-separated (`flux-chain-admin-login/v1|<host>|<nonce>`),
                   so it can never be replayed as a name record, nor a name record as
                   a login. Single use, 60 seconds.
      2  AUTHORIZE `authorize(key)` says whether this identity may administer the site
@@ -39,8 +39,8 @@ import { randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { verifyEd25519RawB64 } from '../../../ark-miner-cli/src/state/ed25519-verify.js';
 import { newSecret, otpauthUri, verifyTotp } from './totp.mjs';
 
-export const LOGIN_PREFIX = 'subzero-admin-login/v1|';
-export const SESSION_COOKIE = 'subzero_admin';
+export const LOGIN_PREFIX = 'flux-chain-admin-login/v1|';
+export const SESSION_COOKIE = 'flux_chain_admin';
 
 export class SessionRefusal extends Error {
   constructor(failure, missing, remedy, status = 401, extra = {}) {
@@ -55,7 +55,7 @@ const cleanLabel = (text) => String(text || '').replace(/[\u0000-\u001f\u007f]/g
 const minutes = (ms) => Math.max(1, Math.ceil(ms / 60_000));
 
 export function createSessions({
-  authorize, store, now = () => Date.now(), onNotice = () => {}, issuer = 'SUBZERO admin',
+  authorize, store, now = () => Date.now(), onNotice = () => {}, issuer = 'Flux Chain admin',
   challengeTtlMs = 60_000, ticketTtlMs = 5 * 60_000, idleMs = 30 * 60_000, absoluteMs = 12 * 60 * 60_000,
   maxChallenges = 64, maxTickets = 64, maxOtpAttempts = 5,
   // See the file header: off only where scripts/publish-host.mjs constructs the real host.

@@ -29,12 +29,20 @@
     document.body.insertBefore(backgroundHost, document.body.firstChild);
     return backgroundHost;
   }
+  /* Exactly one background shows at a time: an admin-picked ArkBackgrounds
+     style, when set, replaces the site's own flat .hero-atmosphere layer
+     instead of stacking on top of it and the lattice grid. */
   function applyBackground(background) {
     if (!window.ArkBackgrounds || !background) return;
     var style = background.style;
     if (backgroundHandle) { backgroundHandle.destroy(); backgroundHandle = null; }
-    if (!style || style === 'none' || !ArkBackgrounds[style]) { if (backgroundHost) backgroundHost.replaceChildren(); return; }
+    if (!style || style === 'none' || !ArkBackgrounds[style]) {
+      if (backgroundHost) backgroundHost.replaceChildren();
+      root.classList.remove('has-ark-background');
+      return;
+    }
     backgroundHandle = ArkBackgrounds[style].mount(backgroundElement());
+    root.classList.add('has-ark-background');
   }
 
   try {
@@ -42,7 +50,13 @@
     /* A later :root rule wins by source order, so this never touches tokens.js or the
        atomizer: it just appends the saved colour overrides (js/content/theme.js), if any. */
     var theme = window.ArkTheme ? (ArkTheme.get() || ArkTheme.defaults()) : null;
-    if (theme) { ArkUI.base(ArkTheme.css()); applyBackground(theme.background); }
+    if (theme) {
+      if (theme.activeTheme && !localStorage.getItem('flux-chain-theme')) root.dataset.theme = theme.activeTheme;
+      ArkUI.base(ArkTheme.css());
+      /* Never mount a saved ArkBackgrounds preset on the public site: it read
+         as an unwanted soft atmospheric glow. The grid (css/lattice.css) is
+         the one background. */
+    }
     var scene = ArkUI.render(F_SCENE_RZERO_V0, host);
     ArkUI.pageRouter = ArkUI.createPageRouter({ scene: scene, state: ArkUI.sceneState });
     root.classList.add('ark-live');
@@ -61,9 +75,10 @@
   window.addEventListener('message', function (event) {
     if (event.origin !== location.origin) return;
     var data = event.data;
-    if (!data || typeof data !== 'object' || data.type !== 'subzero-preview-theme' || !data.theme) return;
+    if (!data || typeof data !== 'object' || data.type !== 'flux-chain-preview-theme' || !data.theme) return;
     if (!window.ArkTheme) return;
-    if (data.theme.colors) ArkUI.base(':root{' + Object.keys(data.theme.colors).map(function (k) { return '--ark-' + k + ':' + data.theme.colors[k] + ';'; }).join('') + '}');
+    if (data.theme.activeTheme) root.dataset.theme = data.theme.activeTheme;
+    ArkUI.base(ArkTheme.css(data.theme));
     if (data.theme.background) applyBackground(data.theme.background);
   });
 })();

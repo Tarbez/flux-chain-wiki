@@ -100,7 +100,7 @@ var ArkMeshSettings = (function () {
 
   /* Ships with the theory page already wearing the image it always used, so
      upgrading this file does not blank out an existing site. */
-  var PAGE_DEFAULTS = { concept: { primary: 'iceberg-blocks', surface: null } };
+  var PAGE_DEFAULTS = { concept: { primary: 'iceberg-blocks', primaryMode: 'image', surface: null, surfaceMode: 'built-in' } };
 
   /* size/x/y place the mesh on screen (js/zero-webgl.js: measureIceberg()):
      size scales it, x/y nudge it, both in the same normalized units the
@@ -118,10 +118,16 @@ var ArkMeshSettings = (function () {
 
   function sanitizePageEntry(row) {
     var num = function (v, def, lo, hi) { var n = Number(v); return isFinite(n) ? Math.max(lo, Math.min(hi, n)) : def; };
+    var mode = function (v, fallback) { return v === 'image' || v === 'none' || v === 'built-in' ? v : fallback; };
+    var hidden = !!(row && row.hidden);
+    var primary = row && typeof row.primary === 'string' && row.primary ? row.primary : null;
+    var surface = row && typeof row.surface === 'string' && row.surface ? row.surface : null;
     return {
-      primary: row && typeof row.primary === 'string' && row.primary ? row.primary : null,
-      surface: row && typeof row.surface === 'string' && row.surface ? row.surface : null,
-      hidden: !!(row && row.hidden),
+      primary: primary,
+      surface: surface,
+      primaryMode: hidden ? 'none' : mode(row && row.primaryMode, primary ? 'image' : 'built-in'),
+      surfaceMode: hidden ? 'none' : mode(row && row.surfaceMode, surface ? 'image' : 'built-in'),
+      hidden: hidden,
       size: num(row && row.size, 1, .25, 3),
       x: num(row && row.x, 0, -1.5, 1.5),
       y: num(row && row.y, 0, -1.5, 1.5)
@@ -142,6 +148,12 @@ var ArkMeshSettings = (function () {
     return { tuning: sanitizeTuning(whole && whole.tuning), pages: sanitizePages(whole && whole.pages) };
   }
 
+  function shapeVisible(pageId, whole) {
+    var pages = whole && whole.pages ? sanitizePages(whole.pages) : (current ? current.pages : pagesDefaults());
+    var row = pages && pages[pageId];
+    return !(row && (row.hidden || (row.primaryMode === 'none' && row.surfaceMode === 'none')));
+  }
+
   function problems(whole) {
     if (!whole || typeof whole !== 'object') return ['settings must be an object'];
     return [];
@@ -160,6 +172,6 @@ var ArkMeshSettings = (function () {
       'ArkMeshSettings.define(' + JSON.stringify(sanitize(whole), null, 2) + ');\n';
   }
 
-  return { fields: fields, placementFields: placementFields, pages: function () { return PAGES.slice(); }, defaults: defaults,
+  return { fields: fields, placementFields: placementFields, pages: function () { return PAGES.slice(); }, shapeVisible: shapeVisible, defaults: defaults,
            sanitize: sanitize, problems: problems, define: define, get: get, serialize: serialize };
 })();

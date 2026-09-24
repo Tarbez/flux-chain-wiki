@@ -150,7 +150,7 @@ var ImageShape = Object.freeze({
         var size = 256;
         var canvas = document.createElement('canvas');
         canvas.width = canvas.height = size;
-        var ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d', { willReadFrequently: true });
         ctx.drawImage(img, 0, 0, size, size);
         var pixels = ctx.getImageData(0, 0, size, size).data;
         done(function (u, v) {

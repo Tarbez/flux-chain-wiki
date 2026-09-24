@@ -1,0 +1,39 @@
+/* Reading pages extend the document; only the canvas and shared chrome stay in view. */
+#scene .hero-alive:has(> .ark-layer-outlet > .learning-page:not([hidden])) {
+  height:auto;
+  min-height:100dvh;
+  container-type:inline-size;
+  overflow:visible;
+}
+#scene .hero-alive:has(> .ark-layer-outlet > .learning-page:not([hidden])) .ark-header {
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+}
+#scene .hero-alive:has(> .ark-layer-outlet > .learning-page:not([hidden])) .ark-layer-persistent {
+  position:fixed;
+  inset:0;
+  height:100dvh;
+}
+#scene .hero-alive:has(> .ark-layer-outlet > .learning-page:not([hidden])) .ark-layer-outlet {
+  position:relative;
+  inset:auto;
+  min-height:100dvh;
+  padding-top:64px;
+  box-sizing:border-box;
+}
+#scene .hero-alive .ark-layer-outlet > .learning-page {
+  position:relative;
+  inset:auto;
+  top:auto;
+  bottom:auto;
+  height:auto;
+  min-height:calc(100dvh - 128px);
+  overflow:visible;
+  overscroll-behavior:auto;
+}
+#scene .article-page.has-answer .article-header { top:64px; }
+@media(max-width:760px) {
+  #scene .hero-alive .ark-layer-outlet > .learning-page { min-height:calc(100dvh - 128px); }
+}

@@ -2,7 +2,7 @@
    Needs a miner (start one with an isolated STORAGE_PATH; see the README). Without one it says SKIPPED and exits 0,
    which is "not measured", never "passed".
 
-     SUBZERO_TEST_KEY=<AUTH_KEYS value>  SUBZERO_TEST_STATUS=http://127.0.0.1:18766  SUBZERO_TEST_PIN=http://127.0.0.1:15002 \
+     FLUX_CHAIN_TEST_KEY=<AUTH_KEYS value>  FLUX_CHAIN_TEST_STATUS=http://127.0.0.1:18766  FLUX_CHAIN_TEST_PIN=http://127.0.0.1:15002 \
        node tests/publish.e2e.test.mjs
 
    Each refusal case names what it guards. A published name is permanent on that miner, so the test uses its own name. */
@@ -18,13 +18,13 @@ import { buildNameRecordSigningMessage } from '../../ark-miner-cli/src/state/nam
 import { createPublisher } from '../scripts/lib/publisher.mjs';
 import { readProject, decodeSite, encodeSite, defaultProjectRoot } from '../scripts/lib/site-bundle.mjs';
 
-const statusBase = process.env.SUBZERO_TEST_STATUS || 'http://127.0.0.1:18766';
-const pinBase = process.env.SUBZERO_TEST_PIN || 'http://127.0.0.1:15002';
-const key = process.env.SUBZERO_TEST_KEY || 'subzero-test-key-0123456789';
+const statusBase = process.env.FLUX_CHAIN_TEST_STATUS || 'http://127.0.0.1:18766';
+const pinBase = process.env.FLUX_CHAIN_TEST_PIN || 'http://127.0.0.1:15002';
+const key = process.env.FLUX_CHAIN_TEST_KEY || 'flux-chain-test-key-0123456789';
 try { await fetch(`${statusBase}/status`, { signal: AbortSignal.timeout(3000) }); }
-catch { console.log(`SKIPPED (not run, not passed): no miner answers at ${statusBase}. Start one, or set SUBZERO_TEST_STATUS / SUBZERO_TEST_PIN / SUBZERO_TEST_KEY.`); process.exit(0); }
+catch { console.log(`SKIPPED (not run, not passed): no miner answers at ${statusBase}. Start one, or set FLUX_CHAIN_TEST_STATUS / FLUX_CHAIN_TEST_PIN / FLUX_CHAIN_TEST_KEY.`); process.exit(0); }
 
-const name = `subzero-e2e-${Date.now().toString(36)}.ark`;
+const name = `flux-chain-e2e-${Date.now().toString(36)}.ark`;
 const publisher = createPublisher({ name, statusBase, pinBase, key, root: defaultProjectRoot });
 const port = 34000 + Math.floor(Math.random() * 1000);
 const notices = [];
@@ -54,7 +54,7 @@ function client(who) {
   const jar = async (url, init = {}) => {
     const response = await fetch(url, { ...init, headers: { ...(init.headers || {}), ...(cookie ? { cookie } : {}) } });
     const set = response.headers.get('set-cookie');
-    if (set) cookie = set.startsWith('subzero_admin=;') ? '' : set.split(';')[0];
+    if (set) cookie = set.startsWith('flux_chain_admin=;') ? '' : set.split(';')[0];
     return response;
   };
   const context = vm.createContext({ btoa, atob, TextEncoder, Uint8Array, globalThis: {} });
@@ -160,7 +160,7 @@ try {
   const junkMessage = buildNameRecordSigningMessage({ ...junkRecord, proof: { alg: 'Ed25519', sig: 'x' } });
   const junkResult = await post('/api/publish', { record: await sign(junkRecord, junkMessage) });
   // Validly signed, so the ONLY thing left to refuse it is the check that the bytes are a site.
-  assert.equal(junkResult.status, 400); assert.match((await junkResult.json()).error, /not a subzero site/);
+  assert.equal(junkResult.status, 400); assert.match((await junkResult.json()).error, /not a flux-chain site/);
   assert.equal((await admin.status()).current.version, 3, 'the junk record changed nothing');
 
   // 9. The host is a mouth with a small door: loopback Host only, same-origin POSTs only, a whitelist of files.

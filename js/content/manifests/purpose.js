@@ -14,61 +14,61 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "THE FLUX SPEC / 01"
+      "value": "FLUX PROTOCOL / 02"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Dense, not spelled out."
+      "value": "Any network, one substrate."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Records are references, not spelled-out payloads. Flux Compact replaces a word with a reference into a shared symbol table instead of writing the word out."
+      "value": "Any party registers its own network with its own DAO — like deploying a contract on an EVM chain, no permission from the base layer."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "SEE THE ENCODING"
+      "value": "SEE HOW NETWORKS ARE CREATED"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "A word becomes an address."
+      "value": "A network is a real, working primitive."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "\"what\" becomes \"W392\" — a reference into the shared table, never the word spelled out. No hex, no base64."
+      "value": "network create returns a networkId. Point an app or miner at an existing one to join instead of creating a new one. DAO Chain and CR3TV are already registered."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Measured, not assumed."
+      "value": "Real, but not yet a full security boundary."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Against a 3,000-entry corpus: 47.3% of the JSON+base64 size without the shared table, about 57% with the table included (0.9 MB measured)."
+      "value": "Today it partitions presence only. Accounts, identities, and DAOs aren't network-scoped yet — stated plainly, not hidden."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "It has a break-even, not a guarantee."
+      "value": "One network is not the substrate."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Break-even is about 430 entries against plain text. Below that, or with no shared vocabulary, plain JSON wins — never hex."
+      "value": "DAO Chain, De Ark OS's own network, is one tenant here — never a parent of Flux Protocol, never the source of its rules."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

@@ -1,5 +1,5 @@
-/* Live-tunable colour overrides and background style (js/tokens.js's palette,
-   js/ark/vendor/backgrounds.js). Edit these in admin.html -> Design; this file
+/* Live-tunable themes and background layers (css/themes.css,
+   js/ark/vendor/backgrounds.js). Edit these inside each page in admin.html; this file
    is not meant for hand editing. */
 ArkTheme.define({
   "colors": {
@@ -19,6 +19,17 @@ ArkTheme.define({
     "ink-handle": "#9a9aa6",
     "rule": "#6b6b76",
     "dash-on": "#eaeaef"
+  },
+  "activeTheme": "ghost",
+  "themes": {
+    "ghost": {
+      "primary": "195 50% 36%",
+      "complement": "157 52% 27%",
+      "accent": "228 35% 40%",
+      "accent-subtle": "244 52% 51%",
+      "live": "244 44% 35%",
+      "badge": "228 31% 47%"
+    }
   },
   "background": {
     "style": "none"

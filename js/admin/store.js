@@ -31,7 +31,7 @@ var ArkAdminStore = (function () {
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
       return await content.getDirectoryHandle('manifests', { create: true });
     } catch (e) {
-      throw new Error('That folder is not the Subzero project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the Flux Chain project. Pick the folder that contains index.html and js/content.');
     }
   }
 
@@ -42,7 +42,7 @@ var ArkAdminStore = (function () {
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
       return { content: content, articles: await content.getDirectoryHandle('articles', { create: true }) };
     } catch (e) {
-      throw new Error('That folder is not the Subzero project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the Flux Chain project. Pick the folder that contains index.html and js/content.');
     }
   }
 
@@ -53,7 +53,7 @@ var ArkAdminStore = (function () {
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
       return await content.getDirectoryHandle('assets', { create: true });
     } catch (e) {
-      throw new Error('That folder is not the Subzero project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the Flux Chain project. Pick the folder that contains index.html and js/content.');
     }
   }
 
@@ -153,9 +153,14 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'theme-data.js', ArkTheme.serialize(whole));
   }
 
+  /* the SEO settings are a single file too, same as mesh settings and the theme. */
+  async function saveSeo(contentDir, whole) {
+    await write(contentDir, 'seo-data.js', ArkSEO.serialize(whole));
+  }
+
   return { indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
            secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,
-           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme };
+           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSeo: saveSeo };
 })();

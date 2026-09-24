@@ -1,5 +1,5 @@
 /* =====================================================================
-   THEME (admin-editable "shades" + "background")
+   THEME (admin-editable themes + background layers)
    ---------------------------------------------------------------------
    The palette js/tokens.js bakes into the base stylesheet at load time is
    fixed. This module holds an OVERRIDE on top of it: colour values,
@@ -22,6 +22,23 @@ var ArkTheme = (function () {
   'use strict';
 
   var HEX = /^#[0-9a-fA-F]{6}$/;
+  var HSL_VALUE = /^\s*\d+(?:\.\d+)?\s+\d+(?:\.\d+)?%\s+\d+(?:\.\d+)?%(?:\s*\/\s*(?:0|1|0?\.\d+|\d+(?:\.\d+)?%))?\s*$/;
+  var THEME_KEYS = ['ghost', 'bone', 'glacier', 'moss', 'clay', 'grove', 'ochre', 'marine'];
+  var THEME_LABELS = { ghost: 'Ghost', bone: 'Bone', glacier: 'Glacier', moss: 'Moss', clay: 'Clay', grove: 'Grove', ochre: 'Ochre', marine: 'Marine' };
+  var SEMANTIC_FIELDS = [
+    { key: 'canvas', label: 'Canvas' },
+    { key: 'surface', label: 'Surface' },
+    { key: 'raised', label: 'Raised surface' },
+    { key: 'text-strong', label: 'Strong text' },
+    { key: 'text', label: 'Body text' },
+    { key: 'text-muted', label: 'Muted text' },
+    { key: 'primary', label: 'Primary' },
+    { key: 'complement', label: 'Complement' },
+    { key: 'accent', label: 'Accent' },
+    { key: 'accent-subtle', label: 'Accent surface' },
+    { key: 'live', label: 'Live signal' },
+    { key: 'badge', label: 'Badge' }
+  ];
 
   /* 'none' keeps the flat canvas colour (this site's original look); every other key
      names a style in js/ark/vendor/backgrounds.js (ArkBackgrounds.<key>). */
@@ -59,6 +76,14 @@ var ArkTheme = (function () {
     return ['none'].concat(keys).map(function (key) { return { key: key, label: BACKGROUND_LABELS[key] || key }; });
   }
 
+  function themeOptions() {
+    return THEME_KEYS.map(function (key) { return { key: key, label: THEME_LABELS[key] || key }; });
+  }
+
+  function semanticFields() {
+    return SEMANTIC_FIELDS.map(function (f) { return Object.assign({}, f); });
+  }
+
   function sanitizeColors(overrides) {
     var out = {};
     colorFields().forEach(function (f) {
@@ -74,14 +99,39 @@ var ArkTheme = (function () {
     return { style: style };
   }
 
+  function sanitizeActiveTheme(key) {
+    return typeof key === 'string' && THEME_KEYS.indexOf(key) >= 0 ? key : 'ghost';
+  }
+
+  function sanitizeSemantic(themes) {
+    var out = {};
+    if (!themes || typeof themes !== 'object') return out;
+    THEME_KEYS.forEach(function (theme) {
+      var source = themes[theme];
+      if (!source || typeof source !== 'object') return;
+      var clean = {};
+      SEMANTIC_FIELDS.forEach(function (f) {
+        var v = source[f.key];
+        if (typeof v === 'string' && HSL_VALUE.test(v)) clean[f.key] = v.trim().replace(/\s+/g, ' ');
+      });
+      if (Object.keys(clean).length) out[theme] = clean;
+    });
+    return out;
+  }
+
   function sanitize(whole) {
-    return { colors: sanitizeColors(whole && whole.colors), background: sanitizeBackground(whole && whole.background) };
+    return {
+      colors: sanitizeColors(whole && whole.colors),
+      activeTheme: sanitizeActiveTheme(whole && whole.activeTheme),
+      themes: sanitizeSemantic(whole && whole.themes),
+      background: sanitizeBackground(whole && whole.background)
+    };
   }
 
   function defaults() {
     var colors = {};
     colorFields().forEach(function (f) { colors[f.key] = f.def; });
-    return { colors: colors, background: { style: 'none' } };
+    return { colors: colors, activeTheme: 'ghost', themes: {}, background: { style: 'none' } };
   }
 
   function problems(whole) {
@@ -91,24 +141,36 @@ var ArkTheme = (function () {
 
   var current = null;
   function define(whole) { current = sanitize(whole || {}); }
-  function get() { return current ? { colors: Object.assign({}, current.colors), background: Object.assign({}, current.background) } : null; }
+  function get() {
+    return current ? {
+      colors: Object.assign({}, current.colors),
+      activeTheme: current.activeTheme,
+      themes: JSON.parse(JSON.stringify(current.themes || {})),
+      background: Object.assign({}, current.background)
+    } : null;
+  }
 
   /* :root{--ark-canvas:#...;...} -- appended after Tokens.css() so it wins by source order.
      Only colours: the background style is a DOM mount (js/main.js), not a custom property. */
-  function css() {
-    var whole = get() || defaults();
+  function css(draft) {
+    var whole = draft ? sanitize(draft) : (get() || defaults());
     var decls = Object.keys(whole.colors).map(function (k) { return '--ark-' + k + ':' + whole.colors[k] + ';'; }).join('');
-    return ':root{' + decls + '}';
+    var rules = [':root{' + decls + '}'];
+    Object.keys(whole.themes || {}).forEach(function (theme) {
+      var body = Object.keys(whole.themes[theme]).map(function (k) { return '--' + k + ':' + whole.themes[theme][k] + ';'; }).join('');
+      if (body) rules.push(':root[data-theme="' + theme + '"]{' + body + '}');
+    });
+    return rules.join('\n');
   }
 
   /* the exact file text; the admin page and a hand edit produce the same bytes */
   function serialize(whole) {
-    return '/* Live-tunable colour overrides and background style (js/tokens.js\'s palette,\n' +
-      '   js/ark/vendor/backgrounds.js). Edit these in admin.html -> Design; this file\n' +
+    return '/* Live-tunable themes and background layers (css/themes.css,\n' +
+      '   js/ark/vendor/backgrounds.js). Edit these inside each page in admin.html; this file\n' +
       '   is not meant for hand editing. */\n' +
       'ArkTheme.define(' + JSON.stringify(sanitize(whole), null, 2) + ');\n';
   }
 
-  return { colorFields: colorFields, backgroundStyles: backgroundStyles, defaults: defaults, sanitize: sanitize, problems: problems,
+  return { colorFields: colorFields, semanticFields: semanticFields, themeOptions: themeOptions, backgroundStyles: backgroundStyles, defaults: defaults, sanitize: sanitize, problems: problems,
            define: define, get: get, css: css, serialize: serialize };
 })();

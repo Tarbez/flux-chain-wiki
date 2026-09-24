@@ -29,10 +29,12 @@ ArkUI.pageModules.concept = {
     var rail = ArkUI.el('nav', 'concept-links'); rail.setAttribute('aria-label', words('RAIL'));
     theory.filter(function (m) { return m.meta.placement === 'rail'; }).forEach(function (m) { rail.appendChild(cta(m)); });
     content.appendChild(rail); el.appendChild(content);
-    var figure = ArkUI.el('figure', 'concept-iceberg');
-    figure.setAttribute('data-iceberg-anchor', ''); figure.setAttribute('role', 'img');
-    figure.setAttribute('aria-label', words('ICEBERG'));
-    el.appendChild(figure);
+    if (!window.ArkMeshSettings || ArkMeshSettings.shapeVisible('concept')) {
+      var figure = ArkUI.el('figure', 'concept-iceberg');
+      figure.setAttribute('data-iceberg-anchor', ''); figure.setAttribute('role', 'img');
+      figure.setAttribute('aria-label', words('ICEBERG'));
+      el.appendChild(figure);
+    }
     host.appendChild(el); return el;
   }
 };

@@ -12,6 +12,11 @@
                theory; the concept page lists these and routes to them)
      meta      structure the words do not carry: placement ('row' or 'rail'
                on the concept page), next (route a page's onward link opens)
+     shape     optional per-page scene config: { kind: 'zero' | 'orb' |
+               'knot' | 'proximity' | 'word', rotation: [tilt, turn],
+               dissolve: 0..1, depth: 0..1 }. It overrides the scene's
+               built-in config for the page whose route matches. (SEO
+               titles/descriptions live in js/content/seo.js, not here.)
      fields    ROLE -> { label, kind: 'line' | 'text', section, value }
 
    Pages, the shell and Flux patterns all read words through ArkCopy, so
@@ -30,6 +35,7 @@ var ArkManifest = (function () {
   var ROLE = /^[A-Z][A-Z0-9]*(\.[A-Z][A-Z0-9]*)*$/;
   var GROUPS = ['site', 'page', 'theory'];
   var KINDS = ['line', 'text'];
+  var SHAPE_KINDS = ['zero', 'orb', 'knot', 'proximity', 'word'];
   var pages = [];
 
   function problems(m) {
@@ -39,6 +45,20 @@ var ArkManifest = (function () {
     if (typeof m.title !== 'string' || !m.title) out.push('title is missing');
     if (typeof m.route !== 'string' || m.route.charAt(0) !== '/') out.push('route must start with /');
     if (GROUPS.indexOf(m.group) < 0) out.push('group must be one of ' + GROUPS.join(', '));
+    if (m.shape !== undefined) {
+      var s = m.shape;
+      if (!s || typeof s !== 'object' || Array.isArray(s)) out.push('shape must be an object');
+      else {
+        if (SHAPE_KINDS.indexOf(s.kind) < 0) out.push('shape kind must be one of ' + SHAPE_KINDS.join(', '));
+        if (s.rotation !== undefined && (!Array.isArray(s.rotation) || s.rotation.length !== 2 ||
+            s.rotation.some(function (n) { return typeof n !== 'number' || !isFinite(n); })))
+          out.push('shape rotation must be two numbers (tilt, turn)');
+        ['dissolve', 'depth'].forEach(function (key) {
+          if (s[key] !== undefined && (typeof s[key] !== 'number' || !isFinite(s[key]) || s[key] < 0 || s[key] > 1))
+            out.push('shape ' + key + ' must be a number from 0 to 1');
+        });
+      }
+    }
     if (!m.fields || typeof m.fields !== 'object') { out.push('fields are missing'); return out; }
     Object.keys(m.fields).forEach(function (role) {
       var f = m.fields[role];
@@ -77,7 +97,7 @@ var ArkManifest = (function () {
   }
 
   return { define: define, get: get, all: all, group: group, remove: remove, points: points,
-           problems: problems, serialize: serialize, groups: GROUPS, kinds: KINDS };
+           problems: problems, serialize: serialize, groups: GROUPS, kinds: KINDS, shapeKinds: SHAPE_KINDS };
 })();
 
 /* =====================================================================

@@ -2,8 +2,8 @@
    RESOLVER  RHEADER_V1  —  the top bar
    ---------------------------------------------------------------------
    Spans the full width of the screen (not the centred poster): logo at
-   one end, navigation at the other. If they do not fit side by side, the
-   navigation wraps underneath rather than overflowing.
+   one end, navigation at the other. At compact widths the links move
+   into an index panel beneath the header.
 
    Its padding follows the smaller screen dimension, with a 20px floor.
    ===================================================================== */
@@ -27,20 +27,48 @@ ArkUI.register('RHEADER_V1', {
     identity.className = 'ark-studio-identity';
     identity.href = '#/';
     identity.dataset.sceneLink = 'zero';
-    identity.setAttribute('aria-label', 'Flux Chain — home');
-    var mark = document.createElement('span');
-    mark.className = 'ark-brand-mark';
+    identity.setAttribute('aria-label', 'Flux Protocol — home');
+    var mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    mark.setAttribute('class', 'ark-brand-mark');
+    mark.setAttribute('viewBox', '0 0 32 32');
+    mark.setAttribute('width', '32');
+    mark.setAttribute('height', '32');
     mark.setAttribute('aria-hidden', 'true');
+    mark.setAttribute('focusable', 'false');
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('fill', 'currentColor');
+    path.setAttribute('d', 'M5 4H29L25 10H11V28H5Z M15 14H25L21 20H15Z');
+    mark.appendChild(path);
     identity.appendChild(mark);
-    var wordmark = document.createElement('span');
-    wordmark.className = 'ark-wordmark';
-    wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');
-    identity.appendChild(wordmark);
-    var label = document.createElement('span');
-    label.className = 'ark-studio-label';
-    label.textContent = ArkCopy.text('NAV.BRAND.TAGLINE');
-    identity.appendChild(label);
     el.appendChild(identity);
+    var toggle = document.createElement('button');
+    toggle.className = 'nav-toggle';
+    toggle.type = 'button';
+    function toggleIcon(className, pathData) {
+      var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      icon.setAttribute('class', className);
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('width', '20');
+      icon.setAttribute('height', '20');
+      icon.setAttribute('aria-hidden', 'true');
+      icon.setAttribute('focusable', 'false');
+      var iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      iconPath.setAttribute('d', pathData);
+      iconPath.setAttribute('fill', 'none');
+      iconPath.setAttribute('stroke', 'currentColor');
+      iconPath.setAttribute('stroke-width', '1.75');
+      iconPath.setAttribute('stroke-linecap', 'round');
+      iconPath.setAttribute('stroke-linejoin', 'round');
+      icon.appendChild(iconPath);
+      toggle.appendChild(icon);
+    }
+    toggleIcon('nav-icon-menu', 'M4 7h16M4 12h16M4 17h16');
+    toggleIcon('nav-icon-close', 'M5 5l14 14M19 5 5 19');
+    toggle.setAttribute('aria-label', 'Open navigation');
+    toggle.setAttribute('title', 'Open navigation');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', 'primary-navigation');
+    el.appendChild(toggle);
   },
   emerge: { delay: 0, dur: 400 }
 });

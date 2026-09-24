@@ -32,7 +32,7 @@ async function fakeMiner(networkId, { ok = true } = {}) {
   servers.push(server);
   return server.address().port;
 }
-const home = fs.mkdtempSync(path.join(os.tmpdir(), 'subzero-disc-'));
+const home = fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-disc-'));
 const withKey = (dir, key) => { fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(path.join(dir, 'pin-api-credential.txt'), key + '\n'); return dir; };
 const deadPort = await fakeMiner('x'); await new Promise((r) => servers.pop().close(r));
 
@@ -46,7 +46,7 @@ try {
   await assert.rejects(discoverMiner({ candidates: [{ label: 'Sick', statusPort: sick, pinPort: 1, storage: [home] }], env: {} }), /No miner is running/);
 
   // A live miner with its credential: found, labelled, with the network it belongs to.
-  const desktopPort = await fakeMiner('deark-mainnet'), cliPort = await fakeMiner('subzero-local-test');
+  const desktopPort = await fakeMiner('deark-mainnet'), cliPort = await fakeMiner('flux-chain-local-test');
   const desktopStorage = withKey(path.join(home, 'desktop'), 'desktop-key'), cliStorage = withKey(path.join(home, 'cli'), 'cli-key');
   const candidates = [
     { label: 'Desktop', statusPort: desktopPort, pinPort: desktopPort + 1, storage: [path.join(home, 'nope'), desktopStorage] },
@@ -56,13 +56,13 @@ try {
   assert.deepEqual([found.label, found.networkId, found.key, found.pinBase], ['Desktop', 'deark-mainnet', 'desktop-key', `http://127.0.0.1:${desktopPort + 1}`], 'first candidate wins; its second storage folder is tried');
   // Only the second is running: the first is skipped, not an error.
   const second = await discoverMiner({ candidates: [{ ...candidates[0], statusPort: deadPort }, candidates[1]], env: {} });
-  assert.deepEqual([second.label, second.networkId], ['CLI', 'subzero-local-test']);
+  assert.deepEqual([second.label, second.networkId], ['CLI', 'flux-chain-local-test']);
   // The operator's explicit key wins over a file.
-  assert.equal((await discoverMiner({ candidates, env: { SUBZERO_MINER_KEY: 'from-env' } })).key, 'from-env');
+  assert.equal((await discoverMiner({ candidates, env: { FLUX_CHAIN_MINER_KEY: 'from-env' } })).key, 'from-env');
 
   // Reason this case exists: a miner that answers but whose credential we cannot read must NOT look like "no miner".
   await assert.rejects(discoverMiner({ candidates: [{ label: 'Locked', statusPort: cliPort, pinPort: 1, storage: [path.join(home, 'empty')] }], env: {} }),
-    (e) => /is running but cannot be used/.test(e.message) && /pin-api-credential\.txt/.test(e.message) && /SUBZERO_MINER_KEY/.test(e.remedy) && !/No miner is running/.test(e.message));
+    (e) => /is running but cannot be used/.test(e.message) && /pin-api-credential\.txt/.test(e.message) && /FLUX_CHAIN_MINER_KEY/.test(e.remedy) && !/No miner is running/.test(e.message));
 
   // Reason this case exists: a NAMED folder without a credential once fell back to ~/.ark-miner, i.e. another miner's key.
   const fakeHome = path.join(home, 'fake-home'); withKey(path.join(fakeHome, '.ark-miner'), 'the-cli-key');
@@ -75,9 +75,9 @@ try {
   const publisher = createPublisher({ name: 'later.ark', miner: async () => { if (!live) throw new PublishRefusal('No miner is running.', 'a miner.', 'start one.', 502); return live; }, root });
   const before = await publisher.status();
   assert.equal(before.reachable, false); assert.match(before.detail, /No miner is running/); assert.equal(before.miner, null);
-  live = { label: 'CLI', networkId: 'subzero-local-test', statusBase: `http://127.0.0.1:${cliPort}`, pinBase: `http://127.0.0.1:${cliPort + 1}`, key: 'k' };
+  live = { label: 'CLI', networkId: 'flux-chain-local-test', statusBase: `http://127.0.0.1:${cliPort}`, pinBase: `http://127.0.0.1:${cliPort + 1}`, key: 'k' };
   const after = await publisher.status();
-  assert.equal(after.reachable, true); assert.deepEqual([after.miner.label, after.miner.networkId], ['CLI', 'subzero-local-test']); assert.equal(after.current, null);
+  assert.equal(after.reachable, true); assert.deepEqual([after.miner.label, after.miner.networkId], ['CLI', 'flux-chain-local-test']); assert.equal(after.current, null);
   console.log('miner discovery ok: defaults match the products; refusals name what to start or supply; a late miner is picked up');
 } finally {
   for (const server of servers) await new Promise((r) => server.close(r));

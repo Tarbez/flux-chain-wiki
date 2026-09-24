@@ -13,7 +13,7 @@
      publish   POST the signed record back; the host checks it and hands it
                to the miner's names/* registry.
 
-   That identity's root public key IS the owner of subzero.ark: the registry
+   That identity's root public key IS the owner of flux-chain.ark: the registry
    accepts an update only from the key that holds the name. There is no other
    owner key: nothing here creates, stores, exports or imports one.
 

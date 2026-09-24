@@ -4,9 +4,9 @@ ArkUI.mountStudio = function (root) {
   'use strict';
   function findById(id) { return root.querySelector('#' + id); }
   var studies = {
-    spacing: { title: 'When do separate copies start to read as one?', description: 'Bring independent groups of points closer and they begin to read as a single shape. Move them apart and each looks like its own story — the same idea behind a quorum: several copies of a ledger, agreeing rather than any one dictating the rest.', label: 'How closely the copies agree', start: 'Diverging', end: 'Agreeing', note: 'SEVERAL COPIES. ONE LEDGER, ONCE THEY AGREE.', code: 'FX—001' },
-    rhythm: { title: 'What makes a reference feel dense?', description: 'A short, repeated pattern is compact — the same reference standing in for something bigger each time. Break the pattern and the same content has to be spelled out again, every time.', label: 'How much gets spelled out', start: 'Referenced', end: 'Spelled out', note: 'A REFERENCE REPEATS THE PATTERN. SPELLING IT OUT BREAKS IT.', code: 'FX—002' },
-    depth: { title: 'How much can storage change before identity does?', description: 'These are the same squares. Shift how they’re layered and the arrangement looks completely different — but nothing about what they are has changed.', label: 'How differently it’s stored', start: 'One shape', end: 'Rearranged', note: 'STORAGE CAN CHANGE SHAPE. THE HASH DOESN’T.', code: 'FX—003' }
+    spacing: { title: 'When does a cell stop needing a committee?', description: 'An ephemeral authority cell is derived for one object, verifies one transition, and dissolves. Bring the independent copies into agreement and the cell closes; keep them apart and it stays open, waiting for threshold evidence — never for one voice to just decide.', label: 'How close the copies are to threshold agreement', start: 'Diverging', end: 'At threshold', note: 'A CELL FORMS, CERTIFIES ONE TRANSITION, AND DISSOLVES.', code: 'FX—001' },
+    rhythm: { title: 'What does one agreement look like, closing?', description: 'INTENT, OFFER, AGREEMENT, FULFILLMENT, RECEIPT — five stages, each a signed manifest pointing at the one before it by CID. Scrub through and watch one agreement close, independent of every other agreement happening on the substrate at the same time.', label: 'How far through the lifecycle', start: 'INTENT', end: 'RECEIPT', note: 'FIVE STAGES. NO GLOBAL ORDER BETWEEN UNRELATED AGREEMENTS.', code: 'FX—002' },
+    depth: { title: 'How do networks share one substrate?', description: 'These are the same four networks. Shift how isolated they are and the arrangement looks completely different — but Flux Protocol underneath them hasn’t changed. Today that isolation partitions presence only; it is not yet a full security boundary.', label: 'How isolated the networks are', start: 'Shared', end: 'Isolated', note: 'ONE SUBSTRATE. NETWORK ISOLATION IS PARTIAL, NOT A GUARANTEE.', code: 'FX—003' }
   };
   var mode = ArkUI.studioValues.mode; var values = ArkUI.studioValues;
   var specimen = root.querySelector('.specimen');
@@ -22,7 +22,7 @@ ArkUI.mountStudio = function (root) {
       bar.style.setProperty('--amplitude', String(35 + Math.sin(index * .65) * value * .55 + value * .4));
       bar.style.setProperty('--opacity', String(1 - (value / 100) * (.55 - (Math.sin(index * .65) + 1) * .275)));
     });
-    var descriptions = { spacing: 'Twelve dots arranged in three independent groups. How closely the copies agree: ', rhythm: 'Sixteen vertical bars forming a wave. How much gets spelled out: ', depth: 'Four overlapping square outlines. How differently it’s stored: ' };
+    var descriptions = { spacing: 'Twelve dots arranged in three independent groups, standing in for an authority cell’s copies. How close to threshold agreement: ', rhythm: 'Sixteen vertical bars forming a wave, standing in for the five-stage agreement lifecycle. How far through the lifecycle: ', depth: 'Four overlapping square outlines, standing in for networks sharing one substrate. How isolated the networks are: ' };
     stage.setAttribute('aria-label', descriptions[mode] + value + ' percent.');
   }
   function selectStudy(next) {

@@ -1,0 +1,106 @@
+/* The home signal field is the fixed backdrop for every routed reading. */
+.hero-alive {
+  --mesh-opacity:0;
+  --mesh-blur:0px;
+  background:hsl(var(--canvas)) !important;
+}
+.hero-alive .ark-background-host,
+.hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.lattice),
+.hero-alive .theory-invitation { display:none !important; }
+.hero-alive[data-page^="article/"] {
+  --mesh-opacity:.5;
+  --mesh-blur:0px;
+}
+.hero-alive[data-page^="article/"] .ark-layer-persistent > canvas[role="presentation"] {
+  display:block !important;
+}
+.hero-alive .ark-header { background:hsl(var(--canvas) / .86) !important; }
+.hero-alive[data-page="zero"] .ark-header { background:transparent !important; }
+.hero-alive .corner-navigation { display:none !important; }
+
+/* Keep the home hierarchy: compact technical labels, large solid heads, quiet rules. */
+#scene .learning-page { --page-width:1160px; }
+#scene .learning-page :is(.learning-index,.concept-content,.article-header,.experiment-page-intro) {
+  padding-top:clamp(34px,6cqh,70px);
+}
+#scene .learning-page :is(.learning-eyebrow,.hero-experiment-kicker,.eyebrow) {
+  color:hsl(var(--accent));
+  font:600 10px/1.4 var(--mono-font,ui-monospace,monospace);
+  text-transform:uppercase;
+}
+#scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h2,.article-title,.article-word-fallback,.expansion .section-heading h2) {
+  color:hsl(var(--text-strong));
+  font-family:"Albert Sans",sans-serif;
+  font-weight:800;
+  letter-spacing:0;
+  text-transform:uppercase;
+}
+#scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h2) {
+  font-size:clamp(42px,5.4cqw,78px);
+  line-height:.95;
+  max-width:14ch;
+  overflow-wrap:anywhere;
+}
+#scene .article-page .article-title {
+  position:relative;
+  z-index:1;
+  max-width:18ch;
+  font-size:clamp(32px,4.4cqw,60px);
+  line-height:.98;
+}
+#scene .learning-page :is(.learning-intro,.concept-deck,.article-deck,.hero-experiment-note) {
+  color:hsl(var(--text-muted));
+  font:400 13px/1.75 var(--mono-font,ui-monospace,monospace);
+  max-width:56ch;
+  letter-spacing:0;
+}
+#scene .learning-page :is(.concept-principles,.learning-list,.deploy-steps) {
+  border-top:1px solid hsl(var(--text-strong) / .22);
+}
+#scene .learning-page :is(.concept-principles section,.learning-list li,.deploy-step) {
+  border-color:hsl(var(--text-strong) / .18);
+}
+#scene .learning-page :is(.concept-principles h2,.learning-entry h2,.deploy-step-body h2) {
+  color:hsl(var(--text-strong));
+  font-family:"Albert Sans",sans-serif;
+  font-weight:600;
+  letter-spacing:0;
+}
+#scene .learning-page :is(.learning-number,.learning-duration,.concept-principles section > span,.article-back,.theory-footer a) {
+  font-family:var(--mono-font,ui-monospace,monospace);
+  letter-spacing:0;
+}
+#scene .learning-page :is(.article-body,.expansion .section,.experiment-page-intro) {
+  background:transparent;
+}
+#scene .learning-page :is(.article-playground,.deploy-command,.deploy-caveat,.expansion .lab) {
+  border-radius:4px;
+  background:hsl(var(--surface) / .88);
+}
+#scene .learning-page .deploy-step-num {
+  width:auto;
+  height:auto;
+  align-self:start;
+  justify-content:flex-start;
+  border:0;
+  border-radius:0;
+  color:hsl(var(--accent));
+  font:600 10px/1.5 var(--mono-font,ui-monospace,monospace);
+}
+#scene .learning-page .deploy-step { grid-template-columns:28px minmax(0,1fr); }
+
+/* Page content alone changes; the shared grid and chrome do not. */
+#scene .learning-page :is(.learning-eyebrow,.learning-heading,.concept-deck,.concept-principles section,.concept-links,.theory-footer) {
+  animation:none !important;
+}
+#scene .learning-page :is(.reveal-letter,.reveal-word) { transform:none !important; }
+
+
+:root[data-theme] #scene .learning-page :is(h1,h2,h3) { color:hsl(var(--text-strong)) !important; }
+:root[data-theme] #scene .learning-page :is(.learning-eyebrow,.hero-experiment-kicker,.eyebrow) { color:hsl(var(--accent)) !important; }
+@media(max-width:760px) {
+  #scene .learning-page :is(.learning-index,.concept-content,.article-header,.experiment-page-intro) { padding-top:28px; }
+  #scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h2) { font-size:clamp(34px,9cqw,52px); }
+  #scene .learning-page .deploy-step { grid-template-columns:28px minmax(0,1fr); }
+  #scene .article-page .article-title { font-size:clamp(27px,7cqw,40px); }
+}

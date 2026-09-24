@@ -51,7 +51,7 @@
 (function () {
   'use strict';
 
-  var LOGIN_PREFIX = 'subzero-admin-login/v1|';
+  var LOGIN_PREFIX = 'flux-chain-admin-login/v1|';
   var STEPS = [
     { key: 'kit', num: '01', label: 'Identity' },
     { key: 'access', num: '02', label: 'Access' },
@@ -84,13 +84,19 @@
     var init = body === undefined ? { method: 'GET' } : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) };
     var response;
     try { response = await fetch(path, init); }
-    catch (e) { throw new Error('Cannot reach the publish host. Double-click "SUBZERO Admin.command" and open the page it opens.'); }
+    catch (e) { throw new Error('Cannot reach the publish host. Double-click "Flux Chain Admin.command" and open the page it opens.'); }
     var data = await response.json().catch(function () { return { ok: false, error: 'The publish host sent something that is not JSON.' }; });
     if (!response.ok || !data.ok) { var error = new Error(data.error || ('The publish host refused (' + response.status + ').')); error.detail = data; throw error; }
     return data;
   }
   function remedyLine(error) {
     return error.detail && error.detail.remedy && error.message.indexOf(error.detail.remedy) < 0 ? 'To fix: ' + error.detail.remedy : '';
+  }
+  function loopbackEquivalentHost(host) {
+    var mine = location.host.split(':');
+    var theirs = String(host || '').split(':');
+    var localNames = { '127.0.0.1': true, localhost: true };
+    return mine[1] && theirs[1] && mine[1] === theirs[1] && localNames[mine[0]] && localNames[theirs[0]];
   }
 
   /* ---- the step ladder --------------------------------------------- */
@@ -160,7 +166,9 @@
      SAME already-open identity when a ticket expires, with no need to reopen the recovery file. ---- */
   async function beginTicket(who) {
     var challenge = await api('/api/session/challenge', {});
-    if (challenge.message.indexOf(LOGIN_PREFIX + location.host + '|') !== 0) throw new Error('The publish host sent a login challenge this page will not sign.');
+    var tail = typeof challenge.message === 'string' && challenge.message.indexOf(LOGIN_PREFIX) === 0 ? challenge.message.slice(LOGIN_PREFIX.length) : '';
+    var host = tail.slice(0, tail.indexOf('|'));
+    if (!tail || (host !== location.host && !loopbackEquivalentHost(host))) throw new Error('The publish host sent a login challenge this page will not sign.');
     var signature = await who.sign(challenge.message);
     var made = await api('/api/session/login', { publicKeyB64: who.publicKeyB64, nonce: challenge.nonce, signature: signature, label: who.displayName });
     // otpEnabled: false on the host: the session is already open (its cookie is already set), no step 3.
@@ -286,7 +294,7 @@
 
   function openEditor() {
     frame = document.createElement('iframe');
-    frame.id = 'app'; frame.title = 'SUBZERO admin'; frame.src = 'admin-app.html';
+    frame.id = 'app'; frame.title = 'Flux Chain admin'; frame.src = 'admin-app.html';
     document.body.appendChild(frame);
     $('gate').hidden = true; document.body.classList.remove('locked');
   }
@@ -370,7 +378,7 @@
     say('', ''); $('gateLead').textContent = 'This copy of the page cannot sign in or edit.';
     $('gateSteps').hidden = true;
     var link = document.createElement('a'); link.href = 'http://127.0.0.1:3437/admin.html'; link.textContent = 'http://127.0.0.1:3437/admin.html';
-    $('gateNote').textContent = 'Double-click "SUBZERO Admin.command" in the subzero folder, or use the copy served by the host: ';
+    $('gateNote').textContent = 'Double-click "Flux Chain Admin.command" in the flux-chain folder, or use the copy served by the host: ';
     $('gateNote').appendChild(link);
     return;
   }
@@ -378,7 +386,7 @@
   /* The identity picker is always mounted (reauthenticate needs it live even after the editor has opened),
      but a reload no longer forces a fresh sign-in: if the host's own session cookie is still valid, the
      editor opens immediately and the recovery file is only asked for again when Publish actually needs it. */
-  auth = ArkAdminAuth.create({ container: kitContainer, product: 'SUBZERO admin', onChange: onIdentity });
+  auth = ArkAdminAuth.create({ container: kitContainer, product: 'Flux Chain admin', onChange: onIdentity });
   api('/api/session').then(function (info) {
     if (info.authenticated) openEditor();
   }).catch(function () {});

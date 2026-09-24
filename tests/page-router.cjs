@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'), fs=require('node:fs'), vm=require('node:vm');
 class Element {
-  constructor() { this.children=[];this.dataset={};this.attrs={};this.style={};this.scrollTop=0;this.hidden=false; }
+  constructor() { this.children=[];this.dataset={};this.attrs={};this.style={};this.scrollTop=0;this.hidden=false;this.classList={values:new Set(),add(name){this.values.add(name);},remove(name){this.values.delete(name);},contains(name){return this.values.has(name);},toggle(name,on){if(on)this.add(name);else this.remove(name);}}; }
   appendChild(el){el.parent=this;this.children.push(el);return el;}
   remove(){if(this.parent)this.parent.children=this.parent.children.filter(el=>el!==this);}
   setAttribute(key,value){this.attrs[key]=value;if(key==='hidden')this.hidden=true;}
@@ -11,12 +11,13 @@ class Element {
   querySelector(){return null;}
 }
 const document={createElement:()=>new Element(),querySelector:()=>null,activeElement:null};
-const context=vm.createContext({console,document,window:{matchMedia:()=>({matches:true})},getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
+const window={scrollY:0,scrollTo(x,y){this.scrollY=y;},matchMedia:()=>({matches:true})};
+const context=vm.createContext({console,document,window,getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
 for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 (async()=>{
  const scene=new Element(),canvas=scene.appendChild(new Element()),header=scene.appendChild(new Element()),outlet=scene.appendChild(new Element());
  const loads={},mounts={},disposed={},writes=[];let resolveSlow,failConcept=true;
- function module(page){return {mount(host){mounts[page]=(mounts[page]||0)+1;return host.appendChild(new Element());}};}
+ function module(page){return {mount(host){mounts[page]=(mounts[page]||0)+1;const el=host.appendChild(new Element());if(page==='learnings')el.classList.add('learning-page');return el;}};}
  const router=context.ArkUI.createPageRouter({scene,outlet,state:context.ArkUI.sceneState,writeHistory:(page,mode)=>writes.push([page,mode]),load:async(page)=>{
    loads[page]=(loads[page]||0)+1;
    if(page==='proximity')return new Promise(resolve=>{resolveSlow=()=>resolve(module(page));});
@@ -27,13 +28,14 @@ for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/cont
  let error=false;router.onStatus((message,failed)=>{error=failed;});
  assert(await router.navigate('zero'));assert.equal(outlet.children.length,1);
  assert.deepEqual(Object.keys(loads),['zero'],'Home must not fetch other pages');
- await router.navigate('learnings');const oldLearning=router.pages.learnings;oldLearning.scrollTop=321;
+ await router.navigate('learnings');const oldLearning=router.pages.learnings;window.scrollTo(0,321);
  await router.navigate('zero');assert.equal(oldLearning.parent.children.includes(oldLearning),false);assert.equal(disposed.learnings,1);
- await router.navigate('learnings');assert.notEqual(router.pages.learnings,oldLearning);assert.equal(router.pages.learnings.scrollTop,321);assert.equal(loads.learnings,1);
+ assert.equal(window.scrollY,0,'non-reading routes reset document scroll');
+ await router.navigate('learnings');assert.notEqual(router.pages.learnings,oldLearning);assert.equal(window.scrollY,321,'reading routes restore document scroll');assert.equal(router.pages.learnings.scrollTop,0,'reading pages do not scroll internally');assert.equal(loads.learnings,1);
  const slow=router.navigate('proximity');await router.navigate('zero');resolveSlow();assert.equal(await slow,false);assert.equal(router.active,'zero');assert(!mounts.proximity);
  assert.equal(await router.navigate('concept'),false);assert.equal(router.active,'zero');assert(error);assert.equal(outlet.children.length,1);
  assert(await router.retry());assert.equal(router.active,'concept');assert.equal(loads.concept,2);
- await router.navigate('article/from-points-to-form',{history:'none'});assert.equal(outlet.children.length,1);
+ await router.navigate('article/why-the-chain-was-retired',{history:'none'});assert.equal(outlet.children.length,1);
  assert.equal(scene.children[0],canvas);assert.equal(scene.children[1],header);assert.equal(scene.children[2],outlet);
  assert.equal(router.resolve('#/about'),'about');
 // Reason this case exists: the header link was `#/work`, a catalog route whose page file had been deleted, so WORK opened a
@@ -44,11 +46,94 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  assert(!fs.readFileSync('js/pages/experiments.js','utf8').includes('mountStudio'));
  assert(fs.readFileSync('js/pages/lab.js','utf8').includes('The open lab'));
  assert.equal(router.resolve('#/experiments'),'proximity');assert.equal(router.resolve('#proximity'),'proximity');
- assert.equal(router.resolve('#/learnings/from-points-to-form'),'article/from-points-to-form');assert.equal(router.url('zero'),'#/');
+ assert.equal(router.resolve('#/lifecycle'),'lifecycle');assert.equal(router.url('lifecycle'),'#/lifecycle');
+ assert.equal(context.ArkUI.sceneState.pages.lifecycle.mesh,'zero');
+ for(const id of ['intent','offer','agreement','fulfillment','receipt']) {
+  const key='lifecycle/'+id;
+  assert.equal(router.resolve('#/'+key),key);
+  assert.equal(router.url(key),'#/'+key);
+  assert.equal(context.ArkUI.sceneState.pages[key].mesh,'zero');
+ }
+ assert.equal(router.resolve('#/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.url('zero'),'#/');
+ assert.equal(router.resolve('#/learnings/why-the-chain-was-retired?q=3'),'article/why-the-chain-was-retired','question links resolve to the parent article');
  assert.equal(writes.at(-1)[1],'none');
  await router.navigate('about');assert.equal(router.active,'about');assert.equal(context.ArkUI.sceneState.get().page,'about');
  await router.navigate('lab');assert.equal(router.active,'lab');assert.equal(outlet.children.length,1);assert.equal(context.ArkUI.sceneState.get().page,'lab');
  for(const key of ['__proto__','constructor','toString']) { assert.equal(router.resolve('#'+key),'zero'); await assert.rejects(router.navigate(key),/Unknown page/); }
+
+ const animatedRoot=new Element();animatedRoot.dataset.arkPage='zero';
+ const staggered=Array.from({length:3},()=>animatedRoot.appendChild(new Element()));
+ staggered.forEach(item=>{item.calls=[];item.animate=function(frames,timing){this.calls.push({frames,timing});return {finished:Promise.resolve(),cancel(){}};};});
+ animatedRoot.querySelectorAll=()=>staggered;
+ const elementPresence=context.ArkUI.createPresence({zero:animatedRoot});
+ await elementPresence.hide('zero',false);
+ assert(staggered[0].calls[0].timing.delay>staggered[2].calls[0].timing.delay,'exit cascades across elements in reverse order');
+ assert(staggered.every(item=>!item.hidden),'exit does not hide individual elements permanently');
+ assert(animatedRoot.hidden,'the page hides only after its element exits');
+ await elementPresence.enter('zero',false);
+ assert(staggered[0].calls[1].timing.delay<staggered[2].calls[1].timing.delay,'enter reveals individual elements in reading order');
+ assert(!animatedRoot.hidden,'the page remains available after its element entrances');
+
+ const articleRoot=new Element();articleRoot.dataset.arkPage='article/test';articleRoot.hidden=true;
+ const articleTitle=articleRoot.appendChild(new Element()),hiddenAnswer=articleRoot.appendChild(new Element());
+ hiddenAnswer.hidden=true;
+ for(const item of [articleTitle,hiddenAnswer]) {
+  item.parentElement=articleRoot;item.calls=[];
+  item.animate=function(frames,timing){this.calls.push({frames,timing});return {finished:Promise.resolve(),cancel(){}};};
+ }
+ articleRoot.querySelectorAll=()=>[articleTitle,hiddenAnswer];
+ const articlePresence=context.ArkUI.createPresence({article:articleRoot});
+ await articlePresence.enter('article',false);
+ assert.equal(articleTitle.calls.length,1,'the visible article title enters even while its page root starts hidden');
+ assert.equal(hiddenAnswer.calls.length,0,'unselected answer chunks never animate');
+
+ const presenceCalls=[];
+ context.ArkUI.prefersReducedMotion=()=>false;
+ context.ArkUI.createPresence=()=>({
+   hide(page){presenceCalls.push('hide:'+page);return Promise.resolve();},
+   enter(page){presenceCalls.push('enter:'+page);return Promise.resolve();},
+   show(page){presenceCalls.push('show:'+page);return Promise.resolve();}
+ });
+ const transitionScene=new Element(),transitionOutlet=transitionScene.appendChild(new Element());
+ const transitionState={page:'zero',get(){return {page:this.page,paused:false};},navigate(page){this.page=page;}};
+ const transitionRouter=context.ArkUI.createPageRouter({scene:transitionScene,outlet:transitionOutlet,state:transitionState,
+   catalog:{zero:{path:'/',title:'Home'},'lifecycle/intent':{path:'/lifecycle/intent',title:'Intent'}},
+   load:async()=>({mount(host){return host.appendChild(new Element());}}),writeHistory(){}
+ });
+ await transitionRouter.navigate('zero');presenceCalls.length=0;
+ const transitioning=transitionRouter.navigate('lifecycle/intent');
+ for(let i=0;i<10&&!transitionState.lifecycleRun;i++)await Promise.resolve();
+ assert.equal(transitionState.page,'lifecycle/intent','grid zoom starts with route change');
+ assert(transitionScene.classList.contains('is-lifecycle-transition'),'canvas opacity stays stable during the zoom');
+ assert(transitionRouter.pages.zero.classList.contains('lifecycle-departing'),'departing home hero is hidden without removing the lifecycle rail');
+ assert.deepEqual(presenceCalls,[],'outgoing rail waits for zoom before fading');
+ const run=transitionState.lifecycleRun;
+ const timing=context.ArkUI.lifecycleTransition;
+ run.advance(timing.zoomMs);await Promise.resolve();await Promise.resolve();
+ assert.deepEqual(presenceCalls,['hide:zero'],'the rail fades once the zoom ends');
+ assert(Math.abs(timing.opacityOut(timing.enterMs)-.2)<.001,'incoming starts while 20% of outgoing content is still visible');
+ assert.equal(timing.opacityIn(timing.enterMs),0);
+ assert(timing.opacityOut(timing.enterMs+20)>0&&timing.opacityIn(timing.enterMs+20)>0,'both content layers are visible during the crossfade');
+ run.advance(timing.enterMs);await Promise.resolve();await Promise.resolve();
+ assert(presenceCalls.includes('enter:lifecycle/intent'),'new content begins at the overlap point');
+ run.finish();await transitioning;
+ assert(!transitionScene.classList.contains('is-lifecycle-transition'),'transition styles clear after arrival');
+ presenceCalls.length=0;
+ const returning=transitionRouter.navigate('zero');
+ for(let i=0;i<10&&transitionState.page!=='zero';i++)await Promise.resolve();
+ const reverseRun=transitionState.lifecycleRun;
+ assert(reverseRun,'zoom-out uses the same canvas timeline');
+ assert(transitionRouter.pages.zero.hidden,'home stays hidden while the grid zooms out');
+ assert.deepEqual(presenceCalls,[],'stage content remains until zoom-out ends');
+ reverseRun.advance(timing.zoomMs);await Promise.resolve();await Promise.resolve();
+ assert.deepEqual(presenceCalls,['hide:lifecycle/intent']);
+ reverseRun.advance(timing.enterMs);await Promise.resolve();await Promise.resolve();
+ assert(presenceCalls.includes('enter:zero'),'home begins entering at the 80% overlap point');
+ reverseRun.finish();await returning;
+ assert.equal(transitionRouter.active,'zero');
+ const lifecycleCss=fs.readFileSync('css/lifecycle.css','utf8');
+ assert(lifecycleCss.includes('.lifecycle-departing .ark-hero-body'));
+ assert(lifecycleCss.includes('#scene .ark-page[hidden] { display:none !important; }'),'hidden home page cannot show early on zoom-out');
  const html=fs.readFileSync('index.html','utf8');assert(!html.includes('class="expansion"'));assert(!html.includes('js/content/articles/'));assert(!html.includes('src="js/studio.js"'));assert(!html.includes('src="js/resolvers/learnings.js"'));
  for(const definition of Object.values(context.ArkUI.pageCatalog)) for(const file of definition.scripts)assert(fs.existsSync(file),file);
  console.log('PASS: lazy home, module caching, outgoing DOM disposal, scroll restoration, last request wins, failure/retry, deep links/history, stable canvas/header/outlet identities, catalog assets.');

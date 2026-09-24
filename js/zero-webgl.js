@@ -135,7 +135,19 @@
   var previewPages = null;
   function pageShapeConfig(page) {
     var pages = previewPages || (typeof ArkMeshSettings !== 'undefined' && ArkMeshSettings.get() && ArkMeshSettings.get().pages);
-    return (pages && pages[page]) || { primary: null, surface: null, hidden: false, size: 1, x: 0, y: 0 };
+    return (pages && pages[page]) || { primary: null, surface: null, primaryMode: 'built-in', surfaceMode: 'built-in', hidden: false, size: 1, x: 0, y: 0 };
+  }
+  function shapeHidden(config) {
+    return !!config.hidden || (config.primaryMode === 'none' && config.surfaceMode === 'none');
+  }
+  function primaryImage(config) {
+    return config.primaryMode === 'image' && config.primary ? config.primary : null;
+  }
+  function surfaceImage(config) {
+    return config.surfaceMode === 'image' && config.surface ? config.surface : null;
+  }
+  function currentShapeHidden() {
+    return shapeHidden(pageShapeConfig(pageNow));
   }
   // SurfaceMotion's own per-page profile, with its uReferenceA.w (index 8 --
   // the iceberg/reference mix weight) forced to 1 whenever that page has a
@@ -147,8 +159,8 @@
   function surfaceProfileFor(page) {
     var profile = SurfaceMotion.forPage(page).slice();
     var config = pageShapeConfig(page);
-    if (config.hidden) profile[8] = 0;
-    else if (config.primary) profile[8] = 1;
+    if (shapeHidden(config)) profile[8] = 0;
+    else if (primaryImage(config)) profile[8] = 1;
     return profile;
   }
   // Decoded sample() functions, kept by asset id so switching between pages
@@ -172,7 +184,9 @@
   var activeShape = { page: null, primary: null, surface: null };
   function uploadIceberg() {
     gl.bindBuffer(gl.ARRAY_BUFFER, icebergBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, activeShape.primary
+    gl.bufferData(gl.ARRAY_BUFFER, shapeHidden(pageShapeConfig(activeShape.page || pageNow))
+      ? new Float32Array((primaryCount + surfaceCount) * 4)
+      : activeShape.primary
       ? ImageShape.create(primaryCount, surfaceCount, activeShape.primary, activeShape.surface, icebergParams)
       : IcebergGeometry.create(primaryCount, surfaceCount), gl.STATIC_DRAW);
     icebergMeasureNeeded = true;
@@ -193,10 +207,12 @@
   // (on every page change, and again whenever admin.html previews an edit).
   function loadPageShape(page) {
     var config = pageShapeConfig(page);
-    if (!config.primary) { setActiveSamples(page, null, null); return; }
-    ensureSample(config.primary, function (primarySample) {
+    if (shapeHidden(config)) { setActiveSamples(page, null, null); return; }
+    var primary = primaryImage(config), surface = surfaceImage(config);
+    if (!primary) { setActiveSamples(page, null, null); return; }
+    ensureSample(primary, function (primarySample) {
       if (!primarySample) { setActiveSamples(page, null, null); return; }
-      if (config.surface) ensureSample(config.surface, function (surfaceSample) { setActiveSamples(page, primarySample, surfaceSample); });
+      if (surface) ensureSample(surface, function (surfaceSample) { setActiveSamples(page, primarySample, surfaceSample); });
       else setActiveSamples(page, primarySample, null);
     });
   }
@@ -263,7 +279,7 @@
     if (event.origin !== location.origin) return;
     var data = event.data;
     if (!data || typeof data !== 'object') return;
-    if (data.type === 'subzero-preview-assets' && Array.isArray(data.assets)) {
+    if (data.type === 'flux-chain-preview-assets' && Array.isArray(data.assets)) {
       // Re-decodes on every edit rather than trying to diff dataBase64: the
       // admin only ever has a handful of images open, and correctness here
       // (a stale sample never lingering) matters more than the extra decode.
@@ -276,7 +292,7 @@
           if (config.primary === a.id || config.surface === a.id) loadPageShape(pageNow);
         });
       });
-    } else if (data.type === 'subzero-preview-mesh' && data.settings && typeof data.settings === 'object') {
+    } else if (data.type === 'flux-chain-preview-mesh' && data.settings && typeof data.settings === 'object') {
       var whole = data.settings;
       icebergParams = Object.assign({}, (typeof ImageShape !== 'undefined' && ImageShape.defaults) || {}, whole.tuning || {});
       previewPages = whole.pages || null;
@@ -290,8 +306,9 @@
       // A page-shape edit must show right away, not wait for the next
       // navigation to pick up surfaceProfileFor's forcing.
       var config = pageShapeConfig(pageNow);
-      var forced = config.hidden ? 0 : (config.primary ? 1 : SurfaceMotion.forPage(pageNow)[8]);
+      var forced = shapeHidden(config) ? 0 : (primaryImage(config) ? 1 : SurfaceMotion.forPage(pageNow)[8]);
       pageSurfaceNow[8] = forced; pageSurfaceTarget[8] = forced;
+      if (shapeHidden(config)) shapeNow = shapeTarget = [0, 0, 0, 0];
       loadPageShape(pageNow);
       icebergMeasureNeeded = true; // a size/position edit must re-measure even though the anchor box itself did not move
       requestDraw();
@@ -457,10 +474,16 @@
     dragSurface.style.width = (meshSize() * placeNow.scale * .74) + 'px';
     dragSurface.style.height = (meshSize() * placeNow.scale * .74) + 'px';
     dragSurface.style.transform = 'translate3d(' + placeNow.x + 'px,' + placeNow.y + 'px,0)';
-    dragSurface.hidden = pageNow.indexOf('article/') === 0 || pageNow === 'learnings';
+    dragSurface.hidden = currentShapeHidden() || pageNow.indexOf('article/') === 0 || pageNow === 'learnings';
     // State owns dissolution: 0 = whole, 1 = half dispersed until Back.
     var dissolve = dissolveNow;
     gl.clear(gl.COLOR_BUFFER_BIT);
+    if (currentShapeHidden()) {
+      canvas.dataset.drawCalls = '0';
+      canvas.dataset.phase = 'hidden';
+      if (motionEnabled && visible && !document.hidden) frame = window.requestAnimationFrame(draw);
+      return;
+    }
     var surface = SurfaceMotion.sample(surfaceElapsed);
     gl.uniform4f(surfaceLocation, surface.weights[0], surface.weights[1], surface.weights[2], surface.weights[3]);
     canvas.dataset.surfaceState = surface.name;
@@ -549,7 +572,9 @@
   function syncScene(current) {
     var target = state.mesh(current);
     var shape = target.shape;
+    var config = pageShapeConfig(current.page);
     var nextShape = shape === 'orb' ? [1, 0, 0, 0] : shape === 'knot' ? [0, 1, 0, 0] : shape === 'proximity' ? [0, 0, 1, 0] : shape === 'word' ? [0, 0, 0, 1] : [0, 0, 0, 0];
+    if (shapeHidden(config)) nextShape = [0, 0, 0, 0];
     rotation = current.rotation.slice();
     if (shape === 'word') {
       updateWord(target.text);
