@@ -62,6 +62,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "flux-release:v1 is real: pinned Ed25519 publisher, SHA-256, mesh-quorum discovery. Public hosting isn't live — build from source until it is."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "What you should expect."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "This is operator software, not an app-store install. You are expected to run a daemon, inspect logs, and choose the network you intend to join."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "What is intentionally absent."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "No public binary channel is promised on this page. Until release hosting is live, source builds are the honest path and the release mechanism is described as infrastructure in progress."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

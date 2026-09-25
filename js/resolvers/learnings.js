@@ -63,7 +63,7 @@
       var header = node('header', 'article-header');
       var top = node('div', 'article-topline');
       top.appendChild(link('← ALL LEARNINGS', 'learnings', 'article-back'));
-      top.appendChild(node('span', 'article-position', String(articleIndex + 1).padStart(2, '0') + ' / ' + String(LearningContent.articles.length).padStart(2, '0')));
+      top.appendChild(node('span', 'article-position', (article.category || 'NOTE / ' + String(articleIndex + 1).padStart(2, '0')) + '  /  ' + article.minutes));
       var coreReturn = node('button', 'article-core-return', '← CORE');
       coreReturn.type = 'button'; coreReturn.hidden = true;
       top.appendChild(coreReturn);
@@ -77,10 +77,17 @@
       var body = node('div', 'article-body');
       var contents = node('nav', 'article-contents'); contents.setAttribute('aria-label', 'Choose a question');
       contents.appendChild(node('p', 'learning-eyebrow', 'QUESTIONS / ' + String(article.sections.length).padStart(2, '0')));
+      var coreChoice = node('button', 'article-core-choice', '00');
+      coreChoice.type = 'button';
+      coreChoice.setAttribute('aria-label', '00 Return to the core');
+      coreChoice.title = 'Return to the core';
+      contents.appendChild(coreChoice);
       var choices = [];
       article.sections.forEach(function (section, i) {
         var button = node('button', 'article-choice');
         button.type = 'button';
+        button.setAttribute('aria-label', String(i + 1).padStart(2, '0') + ' ' + ((article.questions || [])[i] || section[0]));
+        button.title = (article.questions || [])[i] || section[0];
         button.setAttribute('aria-controls',article.slug + '-section-' + i);
         button.appendChild(node('span', 'article-choice-number', String(i + 1).padStart(2, '0')));
         button.appendChild(node('span', 'article-choice-question', (article.questions || [])[i] || section[0]));
@@ -90,9 +97,11 @@
       body.appendChild(contents);
       var reading = node('div', 'article-reading');
       var panels = [];
+      var sectionLabels = [];
       article.sections.forEach(function (section, i) {
         var block = node('section'); block.id = article.slug + '-section-' + i; block.tabIndex = -1;
-        block.appendChild(node('span', 'article-section-index', String(i + 1).padStart(2, '0') + ' / ' + String(article.sections.length).padStart(2, '0')));
+        var sectionLabel = node('span', 'article-section-index');
+        block.appendChild(sectionLabel); sectionLabels.push(sectionLabel);
         block.appendChild(node('h2', '', section[0]));
         section.slice(1).forEach(function (paragraph) { block.appendChild(node('p', '', paragraph)); });
         reading.appendChild(block); panels.push(block);
@@ -110,6 +119,7 @@
       var controls = node('div', 'article-answer-controls');
       var previous = node('button', '', '← PREVIOUS'); previous.type = 'button';
       var counter = node('span', 'article-answer-count');
+      counter.setAttribute('aria-live', 'polite');
       var forward = node('button', '', 'NEXT QUESTION →'); forward.type = 'button';
       controls.appendChild(previous); controls.appendChild(counter); controls.appendChild(forward);
       reading.appendChild(controls);
@@ -118,6 +128,14 @@
       body.appendChild(reading); el.appendChild(body);
       var choiceAnimation = null;
       var choiceRevision = 0;
+      function setSectionLabel(hovered) {
+        var current = Number(el.dataset.articleChoice);
+        if (current < 0 || current >= panels.length) return;
+        sectionLabels[current].textContent = hovered === undefined
+          ? String(current + 1).padStart(2, '0') + ' / ' + ((article.questions || [])[current] || article.sections[current][0])
+          : hovered < 0 ? '00 / RETURN TO CORE'
+          : String(hovered + 1).padStart(2, '0') + ' / CONTINUE READING → ' + article.sections[hovered][0];
+      }
       function select(index, scroll, writeHistory) {
         var active = index >= 0 && index < panels.length;
         el.classList.toggle('has-answer',active);
@@ -128,11 +146,13 @@
           panels[i].hidden = i !== index;
         });
         previous.disabled = !active;
-        previous.textContent = index === 0 ? '← CORE' : '← PREVIOUS';
+        previous.textContent = index <= 0 ? '← THE CORE' : '← ' + ((article.questions || [])[index - 1] || article.sections[index - 1][0]);
         forward.hidden = !active || index === panels.length - 1;
+        if (active && index < panels.length - 1) forward.textContent = ((article.questions || [])[index + 1] || article.sections[index + 1][0]) + ' →';
         nextNote.hidden = index !== panels.length - 1;
         counter.textContent = active ? String(index + 1).padStart(2, '0') + ' / ' + String(panels.length).padStart(2, '0') : '';
         el.dataset.articleChoice = String(index);
+        if (active) setSectionLabel();
         if (writeHistory && typeof history !== 'undefined' && typeof location !== 'undefined') {
           var hash = '#/learnings/' + article.slug + (active ? '?q=' + (index + 1) : '');
           if (location.hash !== hash) history.pushState(null,'',hash);
@@ -144,8 +164,7 @@
             var target = 0;
             if (active) {
               var anchor = window.innerWidth <= 760 ? reading : body;
-              var chrome = 64;
-              target = window.scrollY + anchor.getBoundingClientRect().top - chrome - header.offsetHeight - 8;
+              target = window.scrollY + anchor.getBoundingClientRect().top - 92;
             }
             window.scrollTo({ top: Math.max(0,target),
               behavior: ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion() ? 'instant' : 'smooth' });
@@ -182,10 +201,31 @@
           }).catch(function () {});
         }).catch(function () {});
       }
-      choices.forEach(function (choice, i) { choice.addEventListener('click', function () { change(i,true,true); }); });
+      choices.forEach(function (choice, i) {
+        choice.addEventListener('click', function () { change(i,true,true); });
+        choice.addEventListener('mouseenter', function () { setSectionLabel(i); });
+        choice.addEventListener('focus', function () { setSectionLabel(i); });
+        choice.addEventListener('mouseleave', function () { setSectionLabel(); });
+        choice.addEventListener('blur', function () { setSectionLabel(); });
+      });
+      coreChoice.addEventListener('click', function () { change(-1,true,true); });
+      coreChoice.addEventListener('mouseenter', function () { setSectionLabel(-1); });
+      coreChoice.addEventListener('focus', function () { setSectionLabel(-1); });
+      coreChoice.addEventListener('mouseleave', function () { setSectionLabel(); });
+      coreChoice.addEventListener('blur', function () { setSectionLabel(); });
       coreReturn.addEventListener('click', function () { change(-1,true,true); });
       previous.addEventListener('click', function () { change(Number(el.dataset.articleChoice) - 1,true,true); });
       forward.addEventListener('click', function () { change(Number(el.dataset.articleChoice) + 1,true,true); });
+      el.addEventListener('keydown', function (event) {
+        if (event.altKey || event.ctrlKey || event.metaKey ||
+            !['ArrowLeft','ArrowRight'].includes(event.key) ||
+            (event.target.closest && event.target.closest('input,textarea,select,[contenteditable="true"],.article-table'))) return;
+        var current = Number(el.dataset.articleChoice);
+        var nextIndex = current + (event.key === 'ArrowRight' ? 1 : -1);
+        if (nextIndex < -1 || nextIndex >= panels.length) return;
+        event.preventDefault();
+        change(nextIndex,true,true);
+      });
       el.selectArticleQuestionFromRoute = function () {
         var index = questionFromHash(article.slug,panels.length);
         if (Number(el.dataset.articleChoice) !== index) change(index,true,false);

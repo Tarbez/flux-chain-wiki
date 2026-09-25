@@ -33,6 +33,18 @@ ArkUI.pageModules.deploy = {
         title: 'Inspect',
         body: 'List the networks a miner already knows about.',
         cmd: 'flux-network network list'
+      },
+      {
+        n: '04',
+        title: 'Run with intent',
+        body: 'Start the daemon with the network id visible in the process environment so it is clear which tenant the operator is serving.',
+        cmd: 'FLUX_MINER_NETWORK=<networkId> flux-miner start --log-level info'
+      },
+      {
+        n: '05',
+        title: 'Keep the boundary honest',
+        body: 'Use network scope for presence and coordination today. Do not treat it as account, identity, or treasury isolation until those layers are explicitly shipped.',
+        cmd: 'flux-network network inspect <networkId>'
       }
     ];
 

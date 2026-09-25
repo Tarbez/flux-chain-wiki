@@ -70,6 +70,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "A fully signed result stays closed until separate activation gates open it. A signature is evidence, not a live switch."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "Thresholds answer different questions."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "Ordinary admission, economic changes, runtime changes, pause, and unpause do not share one vague quorum. The required signer count changes with the consequence."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "Names matter."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "Saying \"the DAO\" is not enough. The page separates mesh operations from per-network DAOs so the reader can tell which roster has authority before trusting a decision."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

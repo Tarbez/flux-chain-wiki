@@ -23,7 +23,7 @@ for(const m of theory){
   assert(ArkUI.pageCatalog[m.meta.next],key+' onward link must resolve: '+m.meta.next);
   assert.equal(m.meta.back,'concept');
 }
-assert.equal(ArkManifest.points(ArkManifest.get('about')),3);assert(ArkUI.pageCatalog[ArkManifest.get('about').meta.next]);
+assert.equal(ArkManifest.points(ArkManifest.get('about')),5);assert(ArkUI.pageCatalog[ArkManifest.get('about').meta.next]);
 // Nothing on the concept page may point at an existing non-theory page: the point of the change is new pages.
 const concept=fs.readFileSync('js/pages/concept.js','utf8');
 assert(!/data-scene-link="(learnings|about|proximity)"/.test(concept));

@@ -45,6 +45,7 @@ ArkUI.register('RLINK_V1', {
     var label = document.createElement('span');
     label.className = 'ark-link-label';
     label.textContent = p.label || '';
+    el.setAttribute('title', p.label || '');
     el.appendChild(label);
   }
 });

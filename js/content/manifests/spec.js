@@ -70,6 +70,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "Release 2.1.0's 24-hour soak had started, not finished, at last measurement — early batches ran near 2.8/s. A smoke sample, not a ceiling."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "Sequential and concurrent are separate claims."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "The page keeps sequential baselines, concurrent mesh runs, and failed comparison attempts separate because combining them would make a cleaner but less truthful story."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "Benchmarks are audit notes, not slogans."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "Each number should answer: which release, which mode, how many validators, how much concurrency, and what baseline. If any of those are missing, the claim is incomplete."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

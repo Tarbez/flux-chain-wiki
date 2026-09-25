@@ -70,6 +70,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "DAO Chain, De Ark OS's own network, is one tenant here — never a parent of Flux Protocol, never the source of its rules."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "Creation and joining are the same directory primitive."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "A creator receives a networkId; a miner or app joins by pointing at one. The directory keeps network identity explicit instead of burying it in app configuration."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "The honest boundary is presence."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "For now, network scope means who appears together and which network a daemon announces. Treat account, identity, and DAO isolation as roadmap until those layers are actually network-scoped."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

@@ -16,13 +16,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Six claims. Nothing else."
+      "value": "The operating model."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Signed agreements, not a block order. Authority derived per object, not a validator set. Any party registers a network. Query it, don't guess at it."
+      "value": "Flux Protocol is easiest to read as six mechanics working together: network registration, agreement lifecycle, derived authority, governance separation, measured performance, and source-first distribution. Start anywhere; every page names what is live now and what is not yet a boundary."
     },
     "ICEBERG": {
       "label": "Iceberg description (for screen readers)",

@@ -62,7 +62,9 @@
 :is(.concept-page,.theory-page) .concept-principles section:nth-child(1) { animation-delay:200ms; }
 :is(.concept-page,.theory-page) .concept-principles section:nth-child(2) { animation-delay:270ms; }
 :is(.concept-page,.theory-page) .concept-principles section:nth-child(3) { animation-delay:340ms; }
-:is(.concept-page,.theory-page) :is(.concept-links,.theory-footer) { animation-delay:420ms; }
+:is(.concept-page,.theory-page) .concept-principles section:nth-child(4) { animation-delay:410ms; }
+:is(.concept-page,.theory-page) .concept-principles section:nth-child(5) { animation-delay:480ms; }
+:is(.concept-page,.theory-page) :is(.concept-links,.theory-footer) { animation-delay:560ms; }
 @media(prefers-reduced-motion:reduce) {
  :is(.concept-page,.theory-page) * { animation:none !important; }
  .cta-arrow,.concept-page .concept-principles :is(h2,section::before,section::after) { transition:none; }

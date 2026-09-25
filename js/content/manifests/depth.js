@@ -70,6 +70,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "A conventional chain (flxd-chain) came first, got measured against this lifecycle on the same mesh, and lost. See Benchmarks for the numbers."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "Evidence is local to the agreement."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "A receipt does not ask a global chain to remember everything. It points back through the signed trail so auditors can replay the exact path that mattered to that agreement."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "Failure is scoped too."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "If one agreement stalls, unrelated agreements can still complete. The model avoids making every participant wait behind a single shared transaction lane."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

@@ -70,6 +70,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "The seven-operator ceremony that governs Flux Protocol itself is a separate authority set. See Governance, Two Ways."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "The cell cannot expand its job."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "Its inputs bind it to one object and one transition. A certificate for one CID sequence is not reusable evidence for another network, object, or policy."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "Dissolving is a security property."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "No permanent committee accumulates soft power over the system. Authority appears because the object needs certification, then disappears when the evidence is published."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

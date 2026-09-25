@@ -70,6 +70,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "A network's own DAO governs it — its own roster, its own thresholds. Mesh-operations governance never substitutes for it."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "Build against an explicit network."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "Apps should carry network identity as an input, not a hidden assumption. The same resolver code can point at a different networkId without pretending the substrate changed."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "Do not oversell isolation."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "Creation is useful now because it partitions presence and coordination. Treat deeper isolation as an implementation target, not a property users should rely on today."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

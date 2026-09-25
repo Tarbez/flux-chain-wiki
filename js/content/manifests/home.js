@@ -10,19 +10,19 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "FLUX PROTOCOL"
+      "value": "Power Of Agreement inside a fabric mesh"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "Every Network Agrees"
+      "value": "WHERE Every Network Agrees"
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Deploy your own network with its own DAO — like a contract on an EVM chain, not a fork."
+      "value": "Deploy your own network with its own DAO. Like a smart-contracts on an EVM chain, or a program in side solana. Deploy your resolver."
     },
     "STEP": {
       "label": "Label on the ring pill",

@@ -45,6 +45,19 @@ pages.slice(1).forEach((page, index) => {
   all.find(el => el.className === 'article-core-return').listeners.click();
   assert.equal(panels.filter(el => !el.hidden).length, 0, 'core command restores the question map');
   assert.equal(page.dataset.articleChoice, '-1');
+  const key = value => ({ key: value, target: page, preventDefault() {} });
+  page.listeners.keydown(key('ArrowRight'));
+  assert.equal(page.dataset.articleChoice, '0', 'Right arrow opens the first answer from the intro');
+  page.listeners.keydown(key('ArrowRight'));
+  assert.equal(page.dataset.articleChoice, '1', 'Right arrow advances to the next answer');
+  page.listeners.keydown(key('ArrowLeft'));
+  page.listeners.keydown(key('ArrowLeft'));
+  assert.equal(page.dataset.articleChoice, '-1', 'Left arrow returns to the intro from the first answer');
+  page.listeners.keydown({ ...key('ArrowRight'), altKey: true });
+  assert.equal(page.dataset.articleChoice, '-1', 'modified arrow keys keep their native behavior');
+  page.listeners.keydown({ ...key('ArrowRight'), target: { closest: () => ({}) } });
+  assert.equal(page.dataset.articleChoice, '-1', 'arrow keys in editable controls do not navigate questions');
+  assert.equal(all.find(el => el.className === 'article-answer-count').attrs['aria-live'], 'polite');
   assert.equal(page.attrs['data-ark-page'], 'article/' + article.slug);
   assert(all.filter(el => el.tagName === 'p').length >= article.sections.reduce((count, section) => count + section.length - 1, 0),
     'every source paragraph remains in the article');

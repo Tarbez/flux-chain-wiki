@@ -62,6 +62,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "Mesh operations has no say in any network's decisions. No DAO has say over mesh operations. \"Flux governance\" alone doesn't mean either one."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "Activation is separate from approval."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "A signed ceremony records consent, but execution waits for the activation path that applies to that change. The signature is evidence; it is not automatically a live switch."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "Governance is intentionally plural."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "The system should let many networks govern themselves without inheriting the substrate's operator ceremony. That distinction is the point, not a naming detail."
+    },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",
       "kind": "line",

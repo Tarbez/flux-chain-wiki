@@ -62,6 +62,30 @@ ArkManifest.define({
       "section": "Point 3",
       "value": "No standing validator set. A small authority cell is derived for the exact change being made, certifies it, then dissolves. Mesh-operations governance — seven independent operators — is separate again from any network's DAO."
     },
+    "POINT4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 4",
+      "value": "What is live today."
+    },
+    "POINT4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 4",
+      "value": "The daemon, network directory, agreement-fabric provider, and source builds are real. Public release distribution and deeper network-scoped identity/account boundaries are still explicitly unfinished."
+    },
+    "POINT5.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 5",
+      "value": "How to verify it."
+    },
+    "POINT5.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 5",
+      "value": "Read the mechanism pages, run the source build, inspect registered networks, then compare the benchmark page release by release. The site is designed to expose the caveats beside the claims."
+    },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",

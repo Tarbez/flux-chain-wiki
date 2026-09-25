@@ -33,7 +33,6 @@
   overflow:visible;
   overscroll-behavior:auto;
 }
-#scene .article-page.has-answer .article-header { top:64px; }
 @media(max-width:760px) {
   #scene .hero-alive .ark-layer-outlet > .learning-page { min-height:calc(100dvh - 128px); }
 }
