@@ -4,6 +4,7 @@
    Run:  double-click "Flux Chain Admin.command", or  node scripts/publish-host.mjs --open
          [--port 3437] [--name flux-chain.ark] [--data <folder for authenticators, default ~/.flux-chain-admin>]
          [--storage <miner STORAGE_PATH>] [--status <url>] [--pin <url>] [--key <api key>]
+         [--resolver <ark-gateway base URL, default https://gateway.deadark.com, or FLUX_CHAIN_RESOLVER_URL>]
    With none of --storage/--status/--pin/--key it finds a running Ark Miner (Desktop or CLI) itself.
 
    A local, loopback-only tool, like admin.html itself: it is never
@@ -28,6 +29,9 @@ import { createAdminStore, defaultDataDir } from './lib/admin-store.mjs';
 import { clearedSessionCookie, createSessions, readSessionToken, SessionRefusal, sessionCookie } from './lib/admin-session.mjs';
 import { PublishRefusal, publisherFromArgs } from './lib/publisher.mjs';
 import { defaultProjectRoot } from './lib/site-bundle.mjs';
+import { verifyPublishedResolution } from './lib/resolve-check.mjs';
+
+const DEFAULT_RESOLVER_BASE = 'https://gateway.deadark.com';
 
 // TEMPORARY: the Ark Pin browser extension this admin is signed in through has no OTP/TOTP
 // support yet, so step 3 (scripts/lib/admin-session.mjs) blocks sign-in entirely instead of
@@ -63,6 +67,7 @@ function readBody(req) {
 }
 
 export function createHost({ root = defaultProjectRoot, publisher, port, dataDir = null, onNotice = (n) => console.log(`[flux-chain-admin] ${n.message}`),
+  resolverBase = process.env.FLUX_CHAIN_RESOLVER_URL || DEFAULT_RESOLVER_BASE, resolveCheck = verifyPublishedResolution,
   sessions = createSessions({ authorize: (key) => publisher.authorize(key), store: createAdminStore({ dir: dataDir }), onNotice, otpEnabled: OTP_ENABLED }) }) {
   const loopbackHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
   const send = (res, status, body, type = 'application/json') => {
@@ -138,7 +143,17 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       if (url.pathname === '/api/publish' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req) || '{}');
         if (body.record?.ownerPublicKey !== session.publicKeyB64) throw new SessionRefusal('This session belongs to a different identity than the record\'s owner.', 'the signed-in identity as owner.', 'sign in again, then publish.', 403);
-        return send(res, 200, { ok: true, ...(await publisher.publish(body.record)) });
+        const published = await publisher.publish(body.record);
+        // The mesh write above already succeeded -- this is a SEPARATE question (does the public
+        // gateway agree?), so its result never changes whether /api/publish itself reports success.
+        // It fails closed (an explicit {ok:false, reason}), never silently, and never assumes success.
+        let resolverCheck;
+        try {
+          resolverCheck = { ok: true, ...(await resolveCheck({ name: publisher.name, cid: published.cid, resolverBase })) };
+        } catch (error) {
+          resolverCheck = { ok: false, reason: error.reason || 'GATEWAY_CHECK_FAILED', detail: error.message, ...(error.url ? { url: error.url } : {}) };
+        }
+        return send(res, 200, { ok: true, ...published, resolverCheck });
       }
       return send(res, 404, { ok: false, error: 'NOT_FOUND' });
     } catch (error) {
@@ -160,7 +175,8 @@ async function main() {
     spawn(process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open', process.platform === 'win32' ? ['/c', 'start', '', url] : [url], { stdio: 'ignore', detached: true }).unref();
   };
   const dataDir = typeof args.data === 'string' ? args.data : defaultDataDir();
-  const server = createHost({ root: defaultProjectRoot, publisher, port, dataDir });
+  const resolverBase = typeof args.resolver === 'string' ? args.resolver : (process.env.FLUX_CHAIN_RESOLVER_URL || DEFAULT_RESOLVER_BASE);
+  const server = createHost({ root: defaultProjectRoot, publisher, port, dataDir, resolverBase });
   server.on('error', async (error) => {
     if (error.code !== 'EADDRINUSE') { console.error(error.message); process.exitCode = 1; return; }
     // Launching twice is normal ("I double-clicked it again"): if it is this tool already, just show the page.
