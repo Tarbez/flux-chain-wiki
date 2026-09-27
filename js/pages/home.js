@@ -8,6 +8,10 @@ ArkUI.pageModules.zero = {
     ].join('\n'), host);
     el.classList.add('ark-page'); el.dataset.arkPage = 'zero';
     var body = el.querySelector('.ark-hero-body');
+    var promise = document.createElement('p');
+    promise.className = 'home-promise';
+    promise.textContent = ArkCopy.text('HOME.PROMISE');
+    body.insertBefore(promise, body.firstChild);
     var title = el.querySelector('.ark-hero-title');
     var words = (title.textContent || '').trim().split(/\s+/);
     if (words.length > 2) {
@@ -40,14 +44,50 @@ ArkUI.pageModules.zero = {
 
     var actions = document.createElement('div');
     actions.className = 'home-hero-actions';
-    [['HOME.CTA', 'concept', 'home-primary-cta'], ['HOME.CTA.SPEC', 'about', 'home-ghost-cta']].forEach(function (item) {
+    var deploy = document.createElement('a');
+    deploy.className = 'home-primary-cta';
+    deploy.href = '#/deploy'; deploy.dataset.sceneLink = 'deploy';
+    deploy.textContent = ArkCopy.text('HOME.CTA');
+    actions.appendChild(deploy);
+    var questions = document.createElement('nav');
+    questions.className = 'home-question-links';
+    questions.setAttribute('aria-label', 'Learn about Flux');
+    [['HOME.QUESTION.RESOLVER', 'resolver'], ['HOME.QUESTION.FLUX', 'about']].forEach(function (item) {
       var link = document.createElement('a');
-      link.className = item[2];
       link.href = '#/' + item[1]; link.dataset.sceneLink = item[1];
       link.textContent = ArkCopy.text(item[0]);
-      actions.appendChild(link);
+      questions.appendChild(link);
     });
+    actions.appendChild(questions);
     body.appendChild(actions);
+
+    var signal = document.createElement('div');
+    signal.className = 'home-signal-map';
+    signal.setAttribute('aria-hidden', 'true');
+    var signalMeta = document.createElement('span');
+    signalMeta.className = 'home-signal-meta';
+    signalMeta.textContent = 'RESOLVER / LIVE';
+    signal.appendChild(signalMeta);
+    ['outer', 'middle', 'inner'].forEach(function (ring) {
+      var orbit = document.createElement('span');
+      orbit.className = 'home-signal-orbit home-signal-orbit-' + ring;
+      signal.appendChild(orbit);
+    });
+    var core = document.createElement('span');
+    core.className = 'home-signal-core';
+    core.textContent = 'R';
+    signal.appendChild(core);
+    [
+      ['manifest', 'MANIFEST'],
+      ['mesh', 'MESH'],
+      ['agreement', 'AGREEMENT']
+    ].forEach(function (item) {
+      var node = document.createElement('span');
+      node.className = 'home-signal-node home-signal-node-' + item[0];
+      node.textContent = item[1];
+      signal.appendChild(node);
+    });
+    el.appendChild(signal);
 
     var lifecycle = document.createElement('nav');
     lifecycle.className = 'home-lifecycle';
@@ -56,6 +96,15 @@ ArkUI.pageModules.zero = {
     caption.className = 'home-lifecycle-caption';
     caption.textContent = 'Agreement lifecycle';
     lifecycle.appendChild(caption);
+    var lifecycleIntro = document.createElement('div');
+    lifecycleIntro.className = 'home-lifecycle-intro';
+    var lifecycleTitle = document.createElement('strong');
+    lifecycleTitle.textContent = 'From intent to receipt.';
+    var lifecycleMeta = document.createElement('span');
+    lifecycleMeta.textContent = '05 stages / one verifiable agreement';
+    lifecycleIntro.appendChild(lifecycleTitle);
+    lifecycleIntro.appendChild(lifecycleMeta);
+    lifecycle.appendChild(lifecycleIntro);
     var seeAll = document.createElement('a');
     seeAll.className = 'home-lifecycle-all';
     seeAll.href = '#/lifecycle'; seeAll.dataset.sceneLink = 'lifecycle';
@@ -80,16 +129,25 @@ ArkUI.pageModules.zero = {
     lifecycle.appendChild(rail);
     el.appendChild(lifecycle);
 
-    var tools = document.createElement('nav');
-    tools.className = 'home-tools';
-    tools.setAttribute('aria-label', 'Network tools');
-    [['NAV.DEPLOY', 'deploy'], ['NAV.DAO', 'dao'], ['NAV.DOWNLOAD', 'download']].forEach(function (item) {
-      var link = document.createElement('a');
-      link.href = '#/' + item[1]; link.dataset.sceneLink = item[1];
-      link.textContent = ArkCopy.text(item[0]);
-      tools.appendChild(link);
+    var status = document.createElement('aside');
+    status.className = 'home-status-rail';
+    status.setAttribute('aria-label', 'Protocol status');
+    [
+      ['MESH', 'ONLINE'],
+      ['RESOLVERS', 'OPEN'],
+      ['AGREEMENTS', 'VERIFIABLE']
+    ].forEach(function (item) {
+      var readout = document.createElement('span');
+      readout.className = 'home-status-item';
+      var label = document.createElement('small');
+      label.textContent = item[0];
+      var value = document.createElement('strong');
+      value.textContent = item[1];
+      readout.appendChild(label);
+      readout.appendChild(value);
+      status.appendChild(readout);
     });
-    el.appendChild(tools);
+    el.appendChild(status);
 
     if (!window.ArkMeshSettings || ArkMeshSettings.shapeVisible('zero')) {
       var figure = document.createElement('figure');

@@ -14,6 +14,24 @@ ArkSEO.define({
       "ogImage": "",
       "canonical": ""
     },
+    "resolver": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "references": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "deployment": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": ""
+    },
     "concept": {
       "title": "",
       "description": "",

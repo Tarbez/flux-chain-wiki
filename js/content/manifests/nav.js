@@ -6,6 +6,24 @@ ArkManifest.define({
   "group": "site",
   "meta": {},
   "fields": {
+    "RESOLVER": {
+      "label": "Header link: what is a resolver",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Resolver"
+    },
+    "REFERENCES": {
+      "label": "Header link: reference resolvers",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Live resolvers"
+    },
+    "DEPLOYMENT": {
+      "label": "Header link: how deployment works",
+      "kind": "line",
+      "section": "Header links",
+      "value": "How it works"
+    },
     "THEORY": {
       "label": "Header link: manifest",
       "kind": "line",

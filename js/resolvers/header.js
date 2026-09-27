@@ -64,6 +64,10 @@ ArkUI.register('RHEADER_V1', {
     }
     toggleIcon('nav-icon-menu', 'M4 7h16M4 12h16M4 17h16');
     toggleIcon('nav-icon-close', 'M5 5l14 14M19 5 5 19');
+    var toggleLabel = document.createElement('span');
+    toggleLabel.className = 'nav-toggle-label';
+    toggleLabel.textContent = 'Menu';
+    toggle.appendChild(toggleLabel);
     toggle.setAttribute('aria-label', 'Open navigation');
     toggle.setAttribute('title', 'Open navigation');
     toggle.setAttribute('aria-expanded', 'false');

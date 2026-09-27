@@ -15,6 +15,9 @@ ArkUI.lifecycleStages = [
 ];
 ArkUI.pageCatalog = {
   zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home.js'] },
+  resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
+  references: { path: '/start-from-something-real', title: arkSeoTitle('references', 'Start from something real'), seoId: 'references', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
+  deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How deployment works'), seoId: 'deployment', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
   proximity: { path: '/experiments', title: arkSeoTitle('proximity', 'Demo'), seoId: 'proximity', module: 'proximity', scripts: ['js/resolvers/experiment.js', 'js/pages/experiments.js'] },
   lab: { path: '/experiments/lab', title: arkSeoTitle('lab', 'The open lab'), seoId: 'lab', module: 'lab', scripts: ['js/studio.js', 'js/pages/lab.js'] },
   learnings: { path: '/learnings', title: arkSeoTitle('learnings', 'Notes'), seoId: 'learnings', module: 'learnings', scripts: ['js/resolvers/learnings.js', 'js/pages/learnings.js'] },

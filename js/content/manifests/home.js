@@ -6,23 +6,29 @@ ArkManifest.define({
   "group": "page",
   "meta": {},
   "fields": {
+    "PROMISE": {
+      "label": "Promise",
+      "kind": "line",
+      "section": "Hero",
+      "value": "Solution for whole networks & institutions"
+    },
     "EYEBROW": {
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "Power Of Agreement inside a fabric mesh"
+      "value": "Own your network"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "WHERE Every Network Agrees"
+      "value": "Deploy parse resolve"
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Deploy your own network with its own DAO. Like a smart-contracts on an EVM chain, or a program in side solana. Deploy your resolver."
+      "value": "Deploy a resolver — a network, a DAO, an app, a DeFi protocol, \nor a bridge to any chain that already exists. You define your language resolution."
     },
     "STEP": {
       "label": "Label on the ring pill",
@@ -34,13 +40,19 @@ ArkManifest.define({
       "label": "Main button",
       "kind": "line",
       "section": "Hero",
-      "value": "Read the Spec"
+      "value": "Deploy a Resolver"
     },
-    "CTA.SPEC": {
-      "label": "Second button",
+    "QUESTION.RESOLVER": {
+      "label": "Question link: resolver",
       "kind": "line",
       "section": "Hero",
-      "value": "About"
+      "value": "What is a resolver?"
+    },
+    "QUESTION.FLUX": {
+      "label": "Question link: Flux",
+      "kind": "line",
+      "section": "Hero",
+      "value": "What is the flux?"
     },
     "READOUT.UNITS": {
       "label": "Readout label: units",
