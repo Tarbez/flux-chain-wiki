@@ -10,7 +10,7 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "Solution for whole networks & institutions"
+      "value": "networks & institutions"
     },
     "EYEBROW": {
       "label": "Eyebrow",

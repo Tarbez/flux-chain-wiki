@@ -31,9 +31,11 @@
   function closeNavigation(restoreFocus) {
     if (!navToggle) return;
     header.classList.remove('nav-open');
+    var menu = header.querySelector('#primary-navigation');
+    if (menu && menu.navLayers) menu.navLayers.reset();
     navToggle.setAttribute('aria-expanded', 'false');
-    navToggle.setAttribute('aria-label', 'Open navigation');
-    navToggle.title = 'Open navigation';
+    navToggle.setAttribute('aria-label', 'Open all pages');
+    navToggle.title = 'All pages';
     if (restoreFocus) navToggle.focus();
   }
   if (navToggle) {
@@ -41,8 +43,8 @@
       if (header.classList.contains('nav-open')) { closeNavigation(false); return; }
       header.classList.add('nav-open');
       navToggle.setAttribute('aria-expanded', 'true');
-      navToggle.setAttribute('aria-label', 'Close navigation');
-      navToggle.title = 'Close navigation';
+      navToggle.setAttribute('aria-label', 'Close all pages');
+      navToggle.title = 'Close all pages';
     });
     document.addEventListener('click', function (event) {
       if (!header.contains(event.target)) closeNavigation(false);
@@ -138,7 +140,7 @@
     var current = state.get();
     var isTheory = current.page.indexOf('concept/') === 0;
     scene.querySelectorAll('.ark-header a').forEach(function (link) {
-      if (router.resolve(link.hash) === (current.page === 'lab' ? 'proximity' : isTheory ? 'concept' : current.page)) link.setAttribute('aria-current', 'page');
+      if (router.resolve(link.hash) === current.page) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
     var paused = current.paused;
