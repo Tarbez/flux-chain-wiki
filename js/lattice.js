@@ -603,6 +603,9 @@
   }
 
   function tick() {
+    // The home diagram owns its ordered signal; retain this canvas as texture.
+    var homeFlow = scene.querySelector('.home-agreement-flow');
+    if (homeFlow && homeFlow.dataset && homeFlow.dataset.homeFlow === 'ordered') return clearActivity();
     if (!active || reduce.matches || document.hidden || readingProgress > .01) return clearActivity();
     var now = performance.now();
     if (now >= nextRoute && routes.length < 2) {
@@ -631,13 +634,14 @@
     if (changed || !initialized) animateReading(page,outgoingPage);
     active = page === 'zero';
     var still = reduce.matches || current.paused || document.hidden;
+    if (scene.dataset) scene.dataset.homeMotion = still ? 'paused' : 'running';
     field.classList.toggle('lattice-active', true);
     activity.classList.toggle('lattice-active', active);
     [field, activity].forEach(function (el) {
       el.classList.toggle('lattice-still', still);
     });
-    activity.setAttribute('aria-hidden',String(!isLifecycle(page)));
-    activity.tabIndex = isLifecycle(page) ? 0 : -1;
+    activity.setAttribute('aria-hidden','true');
+    activity.tabIndex = -1;
     if (!isLifecycle(page) && document.activeElement === activity && activity.blur) activity.blur();
     if (!active || still) clearActivity(changed && isLifecycle(outgoingPage) && !still);
     if (document.hidden && state.lifecycleRun && !changed) {
@@ -664,9 +668,6 @@
       keyboardIndex = 0;
       if (active && !isLifecycle(outgoingPage)) activity.getContext('2d').clearRect(0,0,width,height);
       animateCamera(page,outgoingPage);
-      if (isLifecycle(page) && activity.focus && window.requestAnimationFrame) {
-        window.requestAnimationFrame(function () { activity.focus({ preventScroll: true }); });
-      }
     } else if (isLifecycle(page)) paintLifecycle();
     if (active && !still && !timer && !cameraFrame) {
       nextRoute = 0;

@@ -9,6 +9,10 @@
 
      slug      lowercase letters, digits and hyphens; it is the route
      sections  [[heading, paragraph, ...], ...]
+     core      optional primary summary for the first reading layer
+     questions optional prompts, one for each section/inner reading layer
+     relevance, reviewed, evidenceLabel/evidenceHref, relatedPage, actionLabel/actionPage
+               required editorial context on a complete article body
      numbers   true adds the table of starting values after the last section
    ===================================================================== */
 var LearningContent = (function () {
@@ -23,19 +27,37 @@ var LearningContent = (function () {
     if (!a || typeof a !== 'object') return ['an article is an object'];
     if (!SLUG.test(a.slug || '')) out.push('slug must be lowercase letters, digits and single hyphens, starting with a letter');
     META.slice(1).forEach(function (key) { if (typeof a[key] !== 'string' || !a[key]) out.push(key + ' is missing'); });
+    if (a.core !== undefined && (typeof a.core !== 'string' || !a.core.trim())) out.push('core must be a non-empty summary');
+    if (a.questions !== undefined && (!Array.isArray(a.questions) || a.questions.some(function (q) { return typeof q !== 'string' || !q.trim(); }))) out.push('questions must be an array of non-empty prompts');
     if (a.sections !== undefined) {
+      ['relevance', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'].forEach(function (key) {
+        if (typeof a[key] !== 'string' || !a[key].trim()) out.push(key + ' is required for an article body');
+      });
+      if (typeof a.reviewed !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(a.reviewed) || Number.isNaN(Date.parse(a.reviewed))) out.push('reviewed needs a valid YYYY-MM-DD date');
+      if (a.evidenceHref && !/^docs\/[a-z0-9/_-]+\.md(?:#[a-z0-9_-]+)?$/.test(a.evidenceHref)) out.push('evidenceHref must be a local documentation link');
+      ['relatedPage', 'actionPage'].forEach(function (key) {
+        if (a[key] && !/^[a-z][a-z0-9/-]*$/.test(a[key])) out.push(key + ' must name a page key');
+      });
       if (!Array.isArray(a.sections) || !a.sections.length) out.push('an article needs at least one section');
       else a.sections.forEach(function (section, i) {
         if (!Array.isArray(section) || section.length < 2) out.push('section ' + (i + 1) + ' needs a heading and a paragraph');
         else if (section.some(function (part) { return typeof part !== 'string' || !part; })) out.push('section ' + (i + 1) + ' has an empty heading or paragraph');
       });
       if (typeof a.numbers !== 'boolean') out.push('numbers must be true or false');
+      if (Array.isArray(a.questions) && Array.isArray(a.sections) && a.questions.length !== a.sections.length) out.push('questions must match the number of sections');
     }
     return out;
   }
 
   function index(a) { var out = {}; META.forEach(function (key) { out[key] = a[key]; }); return out; }
-  function body(a) { return { sections: a.sections, numbers: a.numbers }; }
+  function body(a) {
+    var out = {};
+    if (a.core !== undefined) out.core = a.core;
+    ['relevance', 'reviewed', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'].forEach(function (key) { out[key] = a[key]; });
+    if (a.questions !== undefined) out.questions = a.questions.slice();
+    out.sections = a.sections; out.numbers = a.numbers;
+    return out;
+  }
 
   /* replace the index with `list`; bodies arrive separately, through load() */
   function define(list) {

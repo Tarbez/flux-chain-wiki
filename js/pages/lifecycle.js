@@ -4,58 +4,63 @@
 
   ArkUI.lifecycleContent = {
     intent: {
-      lead: 'A peer states what it wants to happen. This is the opening record, not an agreement yet.',
-      heading: 'State the need.',
-      body: 'Intent begins a single agreement object. The initiating peer signs the request so later responses can refer to a specific statement, rather than a loose conversation or a place in a global transaction queue.',
-      note: 'An intent alone does not bind another peer or complete the object.',
+      lead: 'Example: a client asks a provider to replicate a named dataset snapshot.',
+      heading: 'State the exact need.',
+      body: 'The client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. Later records can now refer to this request by CID instead of relying on a conversation or global queue position.',
+      note: 'What is still not true: no provider has committed, no work has occurred, and no result has been checked.',
       facts: [
-        ['Input', 'A requested action or outcome.'],
-        ['Record', 'A signed intent manifest with its own CID.'],
-        ['Next', 'An offer references that CID and answers this request.']
+        ['Who writes it', 'The client requesting replication.'],
+        ['References', 'The dataset snapshot and applicable request policy.'],
+        ['Becomes true', 'One signed, addressable request exists.'],
+        ['Next', 'A provider offer references this intent CID.']
       ]
     },
     offer: {
-      lead: 'Another peer answers the intent with proposed terms tied to that exact request.',
-      heading: 'Answer precisely.',
-      body: 'The offer is a signed response, not a free-floating bid. Its CID reference keeps the proposal attached to the intent it addresses. The participating peers can inspect the terms before anything is treated as agreed.',
-      note: 'A proposed offer is still open until the participating peers reach a signed match.',
+      lead: 'A provider proposes how it will replicate that exact snapshot and under which terms.',
+      heading: 'Answer the request precisely.',
+      body: 'The provider signs an offer that references the intent CID. The terms stay attached to the request they answer, so the client can inspect capability, constraints, and proposed evidence before accepting anything.',
+      note: 'What is still not true: a signed offer is a proposal, not a shared agreement or proof of capacity.',
       facts: [
-        ['Input', 'The intent CID and a proposed way to fulfill it.'],
-        ['Record', 'A signed offer manifest pointing back to intent.'],
-        ['Next', 'The matching terms become an agreement.']
+        ['Who writes it', 'The provider proposing the work.'],
+        ['References', 'The client intent CID.'],
+        ['Becomes true', 'One attributable proposal exists for that request.'],
+        ['Next', 'The participants accept matching terms.']
       ]
     },
     agreement: {
-      lead: 'The participating peers record the signed match between request and offer.',
-      heading: 'Commit the match.',
-      body: 'Agreement is the point at which the object has shared terms. Its authority is local to the peers concerned with this object; unrelated agreements do not wait behind it in one global block order.',
-      note: 'Finality belongs to the agreement and its evidence trail, not to a network-wide transaction slot.',
+      lead: 'The client and provider record the accepted match between request and offer.',
+      heading: 'Commit to the shared terms.',
+      body: 'The signed agreement links the accepted intent and offer. It defines what fulfillment will be checked against while unrelated agreements continue independently.',
+      note: 'What is still not true: accepted terms do not prove the replication happened or that downstream settlement occurred.',
       facts: [
-        ['Input', 'The intent and the accepted offer.'],
-        ['Record', 'A signed agreement manifest linking the prior stage.'],
-        ['Next', 'Fulfillment is checked against these terms.']
+        ['Who writes it', 'The participating client and provider.'],
+        ['References', 'The accepted intent and offer CIDs.'],
+        ['Becomes true', 'The participants have one inspectable set of terms.'],
+        ['Next', 'The provider performs and documents the work.']
       ]
     },
     fulfillment: {
-      lead: 'The work or handoff is recorded against the terms the peers agreed to.',
-      heading: 'Show the work.',
-      body: 'Fulfillment carries the evidence that the agreed action was undertaken. By pointing back to the agreement, it keeps the work attached to the object and terms that gave it meaning.',
-      note: 'Recording fulfillment is not the same as claiming that every downstream system has settled.',
+      lead: 'The provider submits the result and evidence for the requested replication.',
+      heading: 'Show what was produced.',
+      body: 'The fulfillment record references the agreement and carries the result evidence defined by its terms. The work remains attached to the request, provider, and policy that gave it meaning.',
+      note: 'What is still not true: submission is not acceptance, semantic truth, or proof of every downstream effect.',
       facts: [
-        ['Input', 'The agreement and evidence of work or handoff.'],
-        ['Record', 'A signed fulfillment manifest linked by CID.'],
-        ['Next', 'A receipt closes the trail for this object.']
+        ['Who writes it', 'The provider that performed the work.'],
+        ['References', 'The agreement CID and result artifacts.'],
+        ['Becomes true', 'A signed result is available for checking.'],
+        ['Next', 'The applicable checker and authority evaluate it.']
       ]
     },
     receipt: {
-      lead: 'The closing record makes the object auditable from its first request to its result.',
-      heading: 'Close the trail.',
-      body: 'Receipt links back through fulfillment, agreement, offer, and intent. A reader can follow those signed CID references to see what was requested, promised, done, and acknowledged without reconstructing a global chain.',
-      note: 'A receipt records closure of this agreement; it does not itself imply treasury settlement.',
+      lead: 'The verifying participant records the outcome under the identified checker and authority rules.',
+      heading: 'Close the evidence trail.',
+      body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification without reconstructing a global block order.',
+      note: 'What is still not true: a receipt is not universal truth, legal finality, treasury settlement, or production-readiness evidence.',
       facts: [
-        ['Input', 'The fulfillment record and its linked history.'],
-        ['Record', 'A signed receipt manifest.'],
-        ['Result', 'One object with a complete, inspectable evidence trail.']
+        ['Who writes it', 'The participant responsible for the verification outcome.'],
+        ['References', 'The fulfillment and its linked agreement history.'],
+        ['Becomes true', 'One policy-bound verification outcome is recorded.'],
+        ['Result', 'An inspectable intent-to-receipt evidence trail.']
       ]
     }
   };
@@ -65,21 +70,64 @@
       var id = page.split('/')[1];
       var detail = ArkUI.lifecycleContent[id];
       if (id && !detail) throw new Error('Unknown lifecycle stage: ' + id);
-      var el = ArkUI.el('section', 'ark-page lifecycle-page');
+      var el = ArkUI.el('section', 'ark-page learning-page lifecycle-page');
       el.dataset.arkPage = page;
       el.setAttribute('aria-label', id ? id + ' / Agreement lifecycle' : 'Agreement lifecycle');
-      el.appendChild(ArkUI.el('h1', '', 'Agreement lifecycle'));
+      var path = ArkUI.el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Content depth');
+      var model = ArkUI.el('a', '', '01 / Operating model'); model.href = '#/concept'; model.dataset.sceneLink = 'concept'; path.appendChild(model);
+      if (id) {
+        var overview = ArkUI.el('a', '', '02 / Agreement lifecycle'); overview.href = '#/lifecycle'; overview.dataset.sceneLink = 'lifecycle'; path.appendChild(overview);
+        var stageDepth = ArkUI.el('span', '', '03 / ' + id.charAt(0).toUpperCase() + id.slice(1)); stageDepth.setAttribute('aria-current', 'page'); path.appendChild(stageDepth);
+      } else {
+        var lifecycleDepth = ArkUI.el('span', '', '02 / Agreement lifecycle'); lifecycleDepth.setAttribute('aria-current', 'page'); path.appendChild(lifecycleDepth);
+      }
+      el.appendChild(path);
+      el.appendChild(ArkUI.el('h1', '', id ? detail.heading : 'How does one agreement become verifiable?'));
+      el.appendChild(ArkUI.el('p', 'lifecycle-scenario', id ? detail.lead : 'Illustrative scenario: a client asks a provider to replicate one named dataset snapshot. Follow the object through five stages.'));
       var stages = id ? ArkUI.lifecycleStages.filter(function (stage) { return stage.id === id; }) : ArkUI.lifecycleStages;
       stages.forEach(function (stage) {
         var copy = ArkUI.lifecycleContent[stage.id];
         var section = ArkUI.el('section', '');
-        section.appendChild(ArkUI.el('h2', '', stage.title));
-        section.appendChild(ArkUI.el('p', '', copy.heading + ' ' + copy.lead));
-        section.appendChild(ArkUI.el('p', '', copy.body));
-        section.appendChild(ArkUI.el('p', '', copy.note));
-        copy.facts.forEach(function (fact) { section.appendChild(ArkUI.el('p', '', fact[0] + ': ' + fact[1])); });
+        if (!id) section.className = 'lifecycle-stage-summary';
+        var heading = ArkUI.el('h2', '');
+        if (id) heading.textContent = stage.title;
+        else {
+          var stageLink = ArkUI.el('a', '', stage.title);
+          stageLink.href = '#/lifecycle/' + stage.id; stageLink.dataset.sceneLink = 'lifecycle/' + stage.id;
+          heading.appendChild(stageLink);
+        }
+        section.appendChild(heading);
+        if (!id) section.appendChild(ArkUI.el('p', '', copy.heading + ' ' + copy.lead));
+        if (id) {
+          section.appendChild(ArkUI.el('p', '', copy.body));
+          section.appendChild(ArkUI.el('p', '', copy.note));
+          var facts = ArkUI.el('div', 'lifecycle-facts');
+          var choices = ArkUI.el('nav', ''); choices.setAttribute('aria-label', 'Inspect ' + stage.title);
+          var answer = ArkUI.el('p', '', copy.facts[0][1]); answer.id = 'lifecycle-fact-' + stage.id; answer.setAttribute('aria-live', 'polite');
+          var factButtons = [];
+          copy.facts.forEach(function (fact, index) {
+            var choice = ArkUI.el('button', 'mechanism-step', fact[0]); choice.type = 'button';
+            choice.setAttribute('aria-pressed', String(index === 0)); choice.setAttribute('aria-controls', answer.id);
+            choice.addEventListener('click', function () {
+              answer.textContent = fact[1];
+              factButtons.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
+              if (answer.animate && !ArkUI.prefersReducedMotion() && !ArkUI.sceneState.get().paused) answer.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 220 });
+            });
+            factButtons.push(choice); choices.appendChild(choice);
+          });
+          facts.appendChild(choices); facts.appendChild(answer); section.appendChild(facts);
+        } else {
+          var openStage = ArkUI.el('a', 'lifecycle-stage-link', 'Open this stage ↗');
+          openStage.href = '#/lifecycle/' + stage.id; openStage.dataset.sceneLink = 'lifecycle/' + stage.id;
+          section.appendChild(openStage);
+        }
         el.appendChild(section);
       });
+      var evidence = ArkUI.el('aside', 'lifecycle-evidence');
+      evidence.appendChild(ArkUI.el('strong', '', 'Status / Partial'));
+      evidence.appendChild(ArkUI.el('p', '', 'The lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.'));
+      var guide = ArkUI.el('a', '', 'Read the agreement guide ↗');
+      guide.href = 'docs/protocol/agreements.md'; evidence.appendChild(guide); el.appendChild(evidence);
       host.appendChild(el);
       return el;
     }

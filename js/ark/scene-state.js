@@ -25,6 +25,11 @@
     if (typeof ArkManifest !== 'undefined') ArkManifest.group('theory').forEach(function (entry) {
       pages['concept/' + entry.id] = { mesh: 'zero', dissolve: 0, depth: 0 };
     });
+    /* Every routed page needs scene state. New content pages can inherit the
+       neutral mesh unless they declare a more specific shape below. */
+    if (ArkUI.pageCatalog) Object.keys(ArkUI.pageCatalog).forEach(function (key) {
+      if (!pages[key]) pages[key] = { mesh: 'zero', dissolve: 0, depth: 0 };
+    });
     /* A manifest's shape section overrides the built-in config for its page:
        the manifest route names the scene page ('/' is the home scene). */
     if (typeof ArkManifest !== 'undefined') ArkManifest.all().forEach(function (entry) {
@@ -140,14 +145,16 @@
       '.home-stage-link,.home-tools a';
     var pageItems = '.learning-eyebrow,.learning-heading,.learning-intro,.concept-deck,' +
       '.concept-principles > section,.concept-links > a,.theory-footer > a,.deploy-step,.deploy-caveat,' +
-      '.learning-list > li,.hero-experiment-kicker,.hero-experiment-index,.hero-experiment-copy h2,' +
+      '.learning-list > li,.hero-experiment-kicker,.hero-experiment-index,.hero-experiment-copy h1,' +
       '.hero-experiment-question,.hero-experiment-note,.hero-experiment-copy a,' +
       '.section-heading > div,.section-heading > p,.lab-toolbar,.experiment-stage,.lab-bottom > *,.lab-note,' +
       '.article-topline,.article-title,.article-core,.article-contents,.article-reading > section,' +
-      '.article-answer-controls,.article-next';
+      '.article-answer-controls,.article-next,.mechanism-depth,.mechanism-inner-title,' +
+      '.mechanism-inner,.mechanism-status-summary,.content-layer-path,' +
+      '.lifecycle-page > h1,.lifecycle-scenario,.lifecycle-page > section,.lifecycle-evidence';
 
     function targets(el) {
-      if (!el.querySelectorAll || el.classList.contains('lifecycle-page')) return [];
+      if (!el.querySelectorAll) return [];
       var matches = Array.from(el.querySelectorAll(el.dataset.arkPage === 'zero' ? homeItems : pageItems));
       return matches.filter(function (item) {
         for (var current = item; current && current !== el; current = current.parentElement) {
@@ -167,6 +174,7 @@
       var revision = (revisions.get(el) || 0) + 1;
       revisions.set(el, revision);
       var wasHidden = el.hidden;
+      var currentOpacity = wasHidden ? '0' : getComputedStyle(el).opacity;
       stop(el);
       el.inert = !active;
       el.setAttribute('aria-hidden', String(!active));
@@ -176,7 +184,7 @@
       }
       var items = targets(el);
       var canStagger = items.length && items.every(function (item) { return typeof item.animate === 'function'; });
-      var from = { opacity: wasHidden ? '0' : getComputedStyle(el).opacity };
+      var from = { opacity: currentOpacity };
       el.hidden = false;
       var animation;
       if (canStagger) {
@@ -199,6 +207,15 @@
               fill: 'both'
             });
         });
+        // The root envelopes ALL content, including new controls, decorative
+        // cards and status rows not listed in the stagger selectors. It also
+        // prevents a cancelled exit from flashing back to full opacity.
+        if (typeof el.animate === 'function') animations.push(el.animate(
+          [{ opacity: currentOpacity }, { opacity: active ? '1' : '0' }], {
+            duration: timing && timing.duration || (active ? 290 + maxDelay : 230 + maxDelay),
+            easing: 'linear', fill: 'both'
+          }
+        ));
         running.set(el,animations);
         animation = Promise.all(animations.map(function (item) { return item.finished.catch(function () {}); }));
       } else {

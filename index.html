@@ -2,11 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src http://127.0.0.1:8766 http://localhost:8766; object-src 'none'; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Flux Protocol — Query it, don't guess at it</title>
-<meta name="description" content="Flux Protocol — the substrate any network can register on. Signed agreements, ephemeral authority, no global block order." />
+<title>Run your own network — Flux Protocol</title>
+<meta name="description" content="Define network rules and signed agreements without a global block order. Explore source-backed capabilities, current limits, and the local operator path." />
+<meta property="og:title" content="Run your own network — Flux Protocol" />
+<meta property="og:description" content="Define network rules and signed agreements without a global block order. Explore source-backed capabilities, current limits, and the local operator path." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Run your own network — Flux Protocol" />
+<meta name="twitter:description" content="Define network rules and signed agreements without a global block order. Explore source-backed capabilities, current limits, and the local operator path." />
 
 <!-- Tells the stylesheet JS is available, so the fallback copy does not flash before the scene paints. -->
 <script src="js/bootstrap.js"></script>
@@ -22,14 +28,19 @@
 <link rel="stylesheet" href="css/learnings.css" />
 <link rel="stylesheet" href="css/navigation.css" />
 <link rel="stylesheet" href="css/focus.css" />
-<link rel="stylesheet" href="css/settings.css" />
-<link rel="stylesheet" href="css/page-layout.css" />
+<link rel="stylesheet" href="css/settings.css?v=20260930d" />
+<link rel="stylesheet" href="css/page-layout.css?v=20260930" />
 <link rel="stylesheet" href="css/home.css" />
 <link rel="stylesheet" href="css/resolver-guide.css" />
-<link rel="stylesheet" href="css/lifecycle.css" />
-<link rel="stylesheet" href="css/site-direction.css" />
-<link rel="stylesheet" href="css/article-reading.css" />
+<link rel="stylesheet" href="css/lifecycle.css?v=20260930" />
+<link rel="stylesheet" href="css/site-direction.css?v=20260930" />
+<link rel="stylesheet" href="css/article-reading.css?v=20260930" />
 <link rel="stylesheet" href="css/document-flow.css" />
+<link rel="stylesheet" href="css/experience.css?v=20260930-4" />
+<link rel="stylesheet" href="css/explorer.css?v=20260930c" />
+<link rel="stylesheet" href="css/economy-preview.css?v=20260930c" />
+<link rel="stylesheet" href="css/account.css?v=20260930c" />
+<link rel="stylesheet" href="css/home-drafting.css?v=20261002" />
 </head>
 <body>
 
@@ -44,17 +55,17 @@
 <section id="fallback" aria-label="Introduction">
   <div class="wrap">
     <p class="brand">Flux Protocol</p>
-    <p class="eyebrow">Solution for whole networks &amp; institutions</p>
-    <p>Own your network</p>
-    <h1>Deploy parse resolve</h1>
+    <p class="eyebrow">For protocol teams and technical operators</p>
+    <h1>Run your own network without inheriting someone else's chain.</h1>
     <p>
-      Deploy a resolver — a network, a DAO, an app, a DeFi protocol, or a
-      bridge to any chain that already exists. You define your language resolution.
+      Register a network, define its rules, and complete signed agreements without a global block order.
+      Available in source; network isolation currently covers miner presence.
+      Production activation and public binaries remain unverified.
     </p>
-    <p><a href="#/deploy">Deploy a Resolver</a></p>
+    <p><a href="docs/quickstart.md">Run Flux from source</a></p>
     <nav aria-label="Learn about Flux">
-      <a href="#/what-is-a-resolver">What is a resolver?</a>
-      <a href="#/about">What is the flux?</a>
+      <a href="docs/protocol/resolvers.md">What is a resolver?</a>
+      <a href="docs/overview.md">Read the protocol overview</a>
     </nav>
   </div>
 </section>
@@ -74,7 +85,9 @@
 
 <!-- 2. runtime: atomizer -> flux parser -> prop readers -> registry/renderer -->
 <script src="js/content/manifest.js" defer></script>
-<script src="js/content/manifests/index.js"></script>
+<script src="js/content/manifests/index.js?v=3"></script>
+<!-- Refresh the editable navigation manifest after the generated manifest list. -->
+<script src="js/content/manifests/nav.js?v=3" defer></script>
 <script src="js/content/assets.js" defer></script>
 <script src="js/content/assets/index.js"></script>
 <script src="js/content/secrets.js" defer></script>
@@ -86,14 +99,14 @@
 <script src="js/ark/vendor/engines.js" defer></script>
 <script src="js/content/learnings.js" defer></script>
 <script src="js/content/article-index.js" defer></script>
-<script src="js/content/seo.js" defer></script>
-<script src="js/content/seo-data.js" defer></script>
+<script src="js/content/seo.js?v=5" defer></script>
+<script src="js/content/seo-data.js?v=5" defer></script>
 <script src="js/ark/text-scramble.js" defer></script>
 <script src="js/ark/text-presence.js" defer></script>
-<script src="js/ark/scene-state.js" defer></script>
+<script src="js/pages/catalog.js?v=4" defer></script>
+<script src="js/ark/scene-state.js?v=4" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/pages/catalog.js" defer></script>
-<script src="js/ark/page-loader.js" defer></script>
+<script src="js/ark/page-loader.js?v=7" defer></script>
 <script src="js/ark/page-router.js" defer></script>
 
 <!-- 3. the grain painter the halo resolver calls -->
@@ -104,14 +117,14 @@
 <script src="js/resolvers/scene.js" defer></script>
 <script src="js/resolvers/halo.js" defer></script>
 <script src="js/resolvers/veil.js" defer></script>
-<script src="js/resolvers/header.js?v=2" defer></script>
+<script src="js/resolvers/header.js?v=4" defer></script>
 <script src="js/resolvers/nav.js?v=2" defer></script>
 <script src="js/resolvers/body.js" defer></script>
 
 <!-- 5. the pattern, then boot. (The header, footer, progress-pill and subtitle
      components live, unloaded, in js/resolvers/optional/. See README.md.) -->
 <script src="js/scene.flux.js" defer></script>
-<script src="js/main.js?v=2" defer></script>
+<script src="js/main.js?v=3" defer></script>
 <script src="js/halo/proximity.js" defer></script>
 <script src="js/halo/words.js" defer></script>
 <script src="js/halo/surface-motion.js" defer></script>

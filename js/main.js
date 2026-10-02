@@ -14,6 +14,9 @@
   var root = document.documentElement;
   var host = document.getElementById('scene');
   if (!host) return;
+  // The router owns per-page reading positions. Native fragment restoration can
+  // run after the first paint and clip a newly entered page's heading.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
   /* A fixed, full-viewport layer behind everything else, for an optional admin-picked
      background style (js/ark/vendor/backgrounds.js -- design/ark-ui's generators, see

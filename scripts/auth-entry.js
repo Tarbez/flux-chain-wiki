@@ -46,7 +46,7 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
 /* container: where the sign-in panel is drawn.
    onChange(identity | null): called on sign-in and sign-out.
    identity: { publicKeyB64, displayName, sign(text) -> Promise<signatureB64> } */
-export function create({ container, onChange = () => {}, product = 'Flux Chain' }) {
+export function create({ container, onChange = () => {}, product = 'Flux Protocol' }) {
   // No default stylesheet: the panel's own `data-ark-auth` hooks are styled entirely by css/admin.css,
   // so its look is one thing with the rest of the gate, not two stylesheets negotiating a cascade.
   let active = null;   // { handle, identity }
@@ -83,6 +83,10 @@ export function create({ container, onChange = () => {}, product = 'Flux Chain' 
       const identity = Object.freeze({
         publicKeyB64: handle.publicKeyB64,
         displayName: opened.summary?.displayName || '',
+        identityId: opened.summary?.identityId || '',
+        walletAddress: opened.summary?.walletAddress || '',
+        securityProfile: opened.summary?.securityProfile || '',
+        rootVerified: true,
         sign: async (text) => toBase64(handle.sign(new TextEncoder().encode(text))),
       });
       active = { handle, identity };
@@ -94,5 +98,6 @@ export function create({ container, onChange = () => {}, product = 'Flux Chain' 
   return {
     current: () => (active ? active.identity : null),
     signOut: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } drop(); },
+    dispose: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } drop(); },
   };
 }

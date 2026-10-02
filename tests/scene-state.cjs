@@ -24,13 +24,18 @@ for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js','js/co
   state.selectShape('orb'); state.navigate('proximity');
   assert.equal(state.mesh(state.get()).shape, 'proximity');
   assert.equal(state.mesh(state.get()).dissolve, .5);
-  state.selectShape('knot'); assert.equal(state.get().shape, 'orb');
+  state.selectShape('knot'); assert.equal(state.get().shapes.zero, 'orb');
+  assert.equal(state.mesh(state.get()).shape,'knot','shape choices belong to each page');
   state.navigate('zero'); assert.equal(state.mesh(state.get()).shape, 'orb');
   assert.equal(state.mesh(state.get()).dissolve, 0);
   assert.throws(() => state.navigate('missing'));
   state.navigate('learnings'); assert.equal(state.mesh(state.get()).shape, 'zero');
   context.LearningContent.articles.forEach(article => {
     state.navigate('article/' + article.slug);
+    assert.equal(state.mesh(state.get()).shape,'zero','reading pages use a quiet mesh by default');
+    state.setWord('Not a reading-page control');
+    assert.equal(state.mesh(state.get()).text,article.title,'word edits are ignored outside word mode');
+    state.pages['article/' + article.slug].mesh='word';
     assert.equal(state.mesh(state.get()).text, article.title);
     state.setWord('  My   title  '); assert.equal(state.mesh(state.get()).text, 'My title');
     state.setWord(''); assert.equal(state.mesh(state.get()).text, article.title);

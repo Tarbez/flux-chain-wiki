@@ -19,31 +19,31 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "What is a resolver"
+      "value": "The logic that turns an input into a checkable claim."
     },
     "BODY1": {
       "label": "First paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "A resolver is a network. Or a DAO. Or an app. Or a DeFi protocol.\nOr whatever you decide to build."
+      "value": "A resolver is addressed, deterministic logic on Flux. It accepts a defined input and produces a defined claim, so participants can refer to the exact logic they are evaluating."
     },
     "BODY2": {
       "label": "Second paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "It is a manifest on the mesh. The mesh reads it, registers it, and\nlets every other resolver agree with it by the rules you set."
+      "value": "For example, a resolver can accept a document identifier and return whether that document satisfies a named policy. Its address identifies the logic; a checker and authority rule determine whether a result is accepted."
     },
     "BODY3": {
       "label": "Closing paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "Deploy yours. Or start from one of ours."
+      "value": "Publishing makes a resolver addressable. It is deployed only when an admitted active provider reports fresh capacity. A signature identifies the signer; it does not make the claim true."
     },
     "NEXT": {
       "label": "Onward link",
       "kind": "line",
       "section": "Links",
-      "value": "Start from something real"
+      "value": "Inspect reference evidence"
     },
     "BACK": {
       "label": "Back link",

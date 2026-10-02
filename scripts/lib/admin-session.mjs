@@ -55,7 +55,7 @@ const cleanLabel = (text) => String(text || '').replace(/[\u0000-\u001f\u007f]/g
 const minutes = (ms) => Math.max(1, Math.ceil(ms / 60_000));
 
 export function createSessions({
-  authorize, store, now = () => Date.now(), onNotice = () => {}, issuer = 'Flux Chain admin',
+  authorize, store, now = () => Date.now(), onNotice = () => {}, issuer = 'Flux Protocol admin',
   challengeTtlMs = 60_000, ticketTtlMs = 5 * 60_000, idleMs = 30 * 60_000, absoluteMs = 12 * 60 * 60_000,
   maxChallenges = 64, maxTickets = 64, maxOtpAttempts = 5,
   // See the file header: off only where scripts/publish-host.mjs constructs the real host.

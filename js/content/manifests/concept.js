@@ -22,7 +22,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Flux Protocol is easiest to read as six mechanics working together: network registration, agreement lifecycle, derived authority, governance separation, measured performance, and source-first distribution. Start anywhere; every page names what is live now and what is not yet a boundary."
+      "value": "Start with one question: what your network shares, how an agreement closes, or who can approve a change. Open a mechanism to explore its steps, current limits, and source evidence."
     },
     "ICEBERG": {
       "label": "Iceberg description (for screen readers)",

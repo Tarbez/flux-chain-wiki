@@ -9,7 +9,7 @@
 :root[data-theme]:not([data-theme="original"]) #scene { background:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) .hero-atmosphere { background:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) :is(.learning-page,.expansion,.article-body,.article-playground) { color:hsl(var(--text)); }
-:root[data-theme]:not([data-theme="original"]) #scene :is(h1,h2,h3,a,button):not(.home-primary-cta) { color:hsl(var(--text-strong)) !important; }
+:root[data-theme]:not([data-theme="original"]) #scene :is(h1,h2,h3,a,button):not(.home-primary-cta):not(.mechanism-next):not(.economy-primary):not([data-explorer-connect]):not(.mesh-explorer-controls form button):not(.account-page .ark-auth-actions button[data-kind="primary"]) { color:hsl(var(--text-strong)) !important; }
 :root[data-theme]:not([data-theme="original"]) #scene :is(p,small,.ark-studio-label,.learning-duration,.learning-number) { color:hsl(var(--text-muted)); }
 
 /* Atmosphere follows the same semantic palette as the page and settings. */

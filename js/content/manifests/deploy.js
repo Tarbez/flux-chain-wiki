@@ -1,36 +1,36 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "deploy",
-  "title": "Deploy a network",
+  "title": "Create or join a network",
   "route": "/deploy",
   "group": "page",
   "meta": {
-    "back": "concept"
+    "back": "download"
   },
   "fields": {
     "EYEBROW": {
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / DEPLOY"
+      "value": "OPERATE FLUX / NAMED NETWORKS"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Register. Join. Govern."
+      "value": "Choose the miner-presence namespace you intend to serve."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Real commands, against a live flux-miner daemon. Today network creation partitions presence only — not accounts, identities, or DAOs. Not yet a security boundary."
+      "value": "These commands use the current flux-network CLI contract. A named network partitions miner presence only; it does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not a security boundary."
     },
     "BACK": {
       "label": "Link back (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "THE SPEC"
+      "value": "RUN FLUX FROM SOURCE"
     }
   }
 });

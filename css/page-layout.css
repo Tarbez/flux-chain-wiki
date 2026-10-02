@@ -23,7 +23,7 @@
 .concept-principles section { display:grid; grid-template-columns:24px 1fr; gap:20px; padding:20px 0; border-top:1px solid hsl(var(--border-subtle)); }
 .concept-principles section > span { font:400 10px/1.5 var(--ark-font); color:hsl(var(--text-faint)); padding-top:4px; }
 .concept-principles h2 { margin:0 0 8px; font:300 20px/1.3 var(--ark-font); letter-spacing:-.02em; }
-.concept-principles p { max-width:40em; margin:0; font:300 13px/1.7 var(--ark-font); color:hsl(var(--text-muted)); }
+.concept-principles p { max-width:40em; margin:0; font:400 16px/1.65 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
 .concept-links { display:flex; flex-wrap:wrap; gap:0 26px; margin:14px 0 0; }
 .concept-links > .article-back { margin:0; }
 .cta-arrow { display:inline-block; margin-left:.3em; transition:transform 220ms cubic-bezier(.2,.7,.2,1); }
@@ -55,6 +55,24 @@
 .theory-footer .article-back { margin:0; padding:6px 0; }
 .theory-page .theory-cta { color:hsl(var(--accent)); font-size:10px; }
 .theory-page .theory-cta:hover { color:hsl(var(--text-strong)); }
+.content-layer-path { display:flex; flex-wrap:wrap; gap:7px 18px; max-width:680px; margin:0 0 26px; }
+.content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 9px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
+.content-layer-path a:hover,.content-layer-path a:focus-visible,.content-layer-path [aria-current="page"] { color:hsl(var(--text-strong)); }
+.content-layer { max-width:680px; margin-top:16px; border-top:1px solid hsl(var(--border-subtle)); border-bottom:1px solid hsl(var(--border-subtle)); }
+.content-layer + .content-layer { margin-top:-1px; }
+.content-layer > summary { padding:16px 0; color:hsl(var(--text-strong)); cursor:pointer; font:600 10px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
+.content-layer > summary::marker { color:hsl(var(--accent)); }
+.content-layer[open] > summary { border-bottom:1px solid hsl(var(--border-subtle)); }
+.content-layer .concept-principles { padding-bottom:4px; }
+.mechanism-status-summary { max-width:680px; margin-top:22px; padding:16px; border:1px solid hsl(var(--border-default)); background:hsl(var(--surface) / .72); }
+.mechanism-status-summary h2,.content-layer-reference h2 {
+ margin:0 0 7px; color:hsl(var(--accent));
+ font:600 9px/1.4 var(--mono-font,ui-monospace,monospace); text-transform:uppercase;
+}
+.mechanism-status-summary p,.content-layer-reference p { margin:0; color:hsl(var(--text-muted)); font:400 16px/1.6 "Albert Sans",sans-serif; }
+.content-layer-reference section { padding:16px 0; }
+.content-layer-reference .theory-evidence-link { display:inline-block; margin:0 0 16px; }
+.theory-evidence-link { color:hsl(var(--text-strong)); }
 @keyframes concept-rise { from { opacity:0; transform:translateY(8px); } }
 :is(.concept-page,.theory-page) :is(.learning-eyebrow,.learning-heading,.concept-deck,.concept-principles section,.concept-links,.theory-footer) { animation:concept-rise 520ms cubic-bezier(.2,.7,.2,1) both; }
 :is(.concept-page,.theory-page) .learning-heading { animation-delay:60ms; }
@@ -72,6 +90,7 @@
 @media(max-width:480px) {
  .concept-page .concept-principles section { grid-template-columns:24px 1fr; gap:4px 14px; }
  .concept-page .concept-principles .article-back { grid-column:2; }
+ .content-layer-path { gap:6px 12px; }
 }
 .experiments-page .experiment-page-intro { min-height:calc(85cqh - 150px); }
 
@@ -92,7 +111,7 @@
  .article-body { gap:26px; }
 }
 
-.experiments-page .hero-experiment-copy h2 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; }
+.experiments-page .hero-experiment-copy h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; }
 /* Every routed page is transparent; the shared atmosphere and mesh remain visible. */
 #scene .learning-page :is(.experiment-page-intro,.article-header,.concept-content,.learning-index) {
  background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none;
@@ -143,7 +162,15 @@
 .deploy-command { position:relative; margin:0; padding:30px 16px 16px; background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
 .deploy-command::before { content:"RUN"; position:absolute; top:10px; left:16px; font:600 8px/1 var(--ark-font); letter-spacing:.24em; color:hsl(var(--text-faint)); }
 .deploy-command code { font:400 12px/1.5 var(--ark-font-mono, ui-monospace, "SF Mono", Menlo, monospace); color:hsl(var(--text)); white-space:pre; }
-.deploy-caveat { margin:28px 0 0; padding:14px 16px; border:1px solid hsl(var(--border-default)); border-radius:10px; background:hsl(var(--surface) / .5); font:400 12px/1.6 var(--ark-font); color:hsl(var(--text-muted)); }
+.deploy-copy {
+ position:absolute; top:8px; right:10px; min-height:22px; padding:2px 7px;
+ border:1px solid hsl(var(--border-default)); border-radius:5px;
+ background:transparent; color:hsl(var(--text-muted)); cursor:pointer;
+ font:600 8px/1 var(--ark-font-mono,ui-monospace,monospace); text-transform:uppercase;
+}
+.deploy-copy:hover,.deploy-copy:focus-visible { border-color:hsl(var(--accent)); color:hsl(var(--text-strong)); }
+.deploy-expected { margin:9px 0 0 !important; font-size:12px !important; color:hsl(var(--text-faint)) !important; }
+.deploy-caveat { margin:28px 0 0; padding:14px 16px; border:1px solid hsl(var(--border-default)); border-radius:4px; background:hsl(var(--surface) / .5); font:400 16px/1.6 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
 @media(max-width:760px) {
  .deploy-step { grid-template-columns:1fr; gap:8px; }
 }

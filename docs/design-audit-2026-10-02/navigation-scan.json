@@ -1,0 +1,106 @@
+[
+  {
+    "cards": [
+      {
+        "height": 88,
+        "label": "Home",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 88,
+        "label": "Overview",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 88,
+        "label": "Resolver",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 88,
+        "label": "How it works",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 88,
+        "label": "View the full lifecycle",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 88,
+        "label": "Intent",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 26,
+        "label": "Offer",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 26,
+        "label": "Agreement",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 26,
+        "label": "Fulfillment",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 26,
+        "label": "Receipt",
+        "labelHeight": 15.078125
+      }
+    ],
+    "layer": "understand",
+    "panelHeight": 467,
+    "rows": "88px 88px 88px 26px 26px",
+    "scrollHeight": 487,
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "cards": [
+      {
+        "height": 120,
+        "label": "Notes",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 120,
+        "label": "Model",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 120,
+        "label": "Interactive model",
+        "labelHeight": 15.078125
+      },
+      {
+        "height": 26,
+        "label": "Why the chain was retired",
+        "labelHeight": 30.15625
+      },
+      {
+        "height": 26,
+        "label": "One substrate, many networks",
+        "labelHeight": 30.15625
+      },
+      {
+        "height": 26,
+        "label": "Governance without a validator set",
+        "labelHeight": 30.15625
+      }
+    ],
+    "layer": "read",
+    "panelHeight": 467,
+    "rows": "120px 120px 26px 26px",
+    "scrollHeight": 467,
+    "viewport": [
+      390,
+      844
+    ]
+  }
+]

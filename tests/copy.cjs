@@ -2,10 +2,10 @@ const assert=require('node:assert/strict'), fs=require('node:fs'), vm=require('n
 // Copy lives in page manifests and is referred to by key. This reads the real manifests, patterns, resolvers and pages,
 // so a pattern or page that names a key nobody defines, or a manifest nobody uses, fails here rather than on screen.
 const manifests={}, rendered=[];
-const node=()=>({classList:{add(){}},dataset:{},appendChild(){},setAttribute(){},querySelector:()=>node(),textContent:''});
+const node=()=>({classList:{add(){}},dataset:{},appendChild(){},insertBefore(){},setAttribute(){},querySelector:()=>node(),textContent:''});
 const ArkUI={pageModules:{},register:(id,m)=>{manifests[id]=m;},alias(){},base(){},atomize(){},render:(src)=>{rendered.push(src);return node();}};
 const written=[];
-const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{}});
+const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{addEventListener(){}}});
 for(const file of ['js/content/manifest.js','js/ark/flux.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
 // The index loads each manifest by document.write in the browser; here we load the same files directly, in the same order.
 vm.runInContext(fs.readFileSync('js/content/manifests/index.js','utf8'),context);
@@ -14,6 +14,7 @@ assert.equal(written.length,ids.length,'the index writes one script per manifest
 ids.forEach((id,i)=>{assert(written[i].includes('js/content/manifests/'+id+'.js'));vm.runInContext(fs.readFileSync('js/content/manifests/'+id+'.js','utf8'),context);});
 for(const file of fs.readdirSync('js/resolvers')) if(file.endsWith('.js')) vm.runInContext(fs.readFileSync('js/resolvers/'+file,'utf8'),context);
 vm.runInContext(fs.readFileSync('js/scene.flux.js','utf8'),context);
+for(const file of ['js/content/learnings.js','js/content/article-index.js','js/pages/catalog.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
 context.ArkUI.pageModules.zero.mount({appendChild(){}});
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);
@@ -51,7 +52,7 @@ assert.throws(()=>ArkCopy.resolve('DESIGN WITH DEPTH','RBODY_V1','eyebrow'),e=>/
 assert.throws(()=>ArkCopy.resolve('HOME.NOPE','RBODY_V1','text'),e=>/HOME\.NOPE.*no entry/.test(e.message)&&/manifests\/home\.js/.test(e.message));
 assert.throws(()=>ArkCopy.text('NOAREA.TITLE'),/no entry/);
 for(const words of ['Theory','HOME','home.title','DESIGN WITH DEPTH']) assert(!ArkCopy.isKey(words),words+' is words, not a key');
-assert.equal(ArkCopy.text('HOME.TITLE'),"Query it, don't guess at it.");
+assert.equal(ArkCopy.text('HOME.TITLE'),"Run your own network without inheriting someone else's chain.");
 assert.throws(()=>ArkManifest.define({id:'Bad',title:'x',route:'/',group:'page',fields:{}}),/id must be/);
 assert.throws(()=>ArkManifest.define({id:'ok',title:'x',route:'/',group:'page',fields:{lower:{label:'l',kind:'line',value:'v'}}}),/capitals/);
 // The runtime is the one place patterns swap keys for words; every resolver that shows copy declares it.

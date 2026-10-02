@@ -15,8 +15,8 @@
                when a page or article sets no override of its own).
      pages     per-page override, keyed by the SAME id ArkManifest uses
                for manifest-backed pages (home, about, concept, and every
-               theory page), plus the three pages that have no manifest:
-               proximity, lab, learnings. Each entry: title, description,
+               theory page), plus manifest-less experiment, notes, and
+               lifecycle routes. Each entry: title, description,
                ogImage (an absolute URL or a path, made absolute with
                baseUrl), canonical (same rule).
      articles  per-article override, keyed by LearningContent's slug.
@@ -35,9 +35,19 @@ var ArkSEO = (function () {
   /* Pages with no manifest of their own: their copy is not admin-editable
      text, but their SEO title/description still are. */
   var EXTRA_PAGES = [
-    { id: 'proximity', label: 'Demo' },
-    { id: 'lab', label: 'The open lab' },
-    { id: 'learnings', label: 'Notes' }
+    { id: 'proximity', label: 'Interactive model' },
+    { id: 'lab', label: 'Interactive model' },
+    { id: 'learnings', label: 'Notes' },
+    { id: 'explorer', label: 'Mesh Explorer' },
+    { id: 'account', label: 'Your account' },
+    { id: 'treasury', label: 'Treasury preview' },
+    { id: 'deposits', label: 'Deposit preview' },
+    { id: 'lifecycle', label: 'Agreement lifecycle' },
+    { id: 'lifecycle/intent', label: 'Intent / Agreement lifecycle' },
+    { id: 'lifecycle/offer', label: 'Offer / Agreement lifecycle' },
+    { id: 'lifecycle/agreement', label: 'Agreement / Agreement lifecycle' },
+    { id: 'lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle' },
+    { id: 'lifecycle/receipt', label: 'Receipt / Agreement lifecycle' }
   ];
 
   /* Every call here takes an optional explicit manifests/articles list, used where the
@@ -136,8 +146,11 @@ var ArkSEO = (function () {
      every theory page, and every article -- exactly what js/pages/catalog.js
      registers, without needing it loaded (site-bundle.mjs runs headless). */
   function routes(manifests, articles) {
-    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/about' }, { path: '/concept' }];
-    (manifests || []).filter(function (m) { return m.group === 'theory'; }).forEach(function (m) { out.push({ path: m.route }); });
+    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explorer' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/about' }, { path: '/concept' }];
+    EXTRA_PAGES.filter(function (page) { return page.id.indexOf('lifecycle') === 0; }).forEach(function (page) { out.push({ path: '/' + page.id }); });
+    (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
+      if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route });
+    });
     (articles || []).forEach(function (a) { out.push({ path: '/learnings/' + a.slug }); });
     return out;
   }

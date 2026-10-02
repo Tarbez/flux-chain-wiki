@@ -1,5 +1,5 @@
 #!/bin/bash
-# Double-click to edit and publish Flux Chain from the browser. Starts the local publish host and opens the admin page.
+# Double-click to edit and publish Flux Protocol from the browser. Starts the local publish host and opens the admin page.
 # Needs a running Ark Miner (the Desktop app, or ark-miner-cli); the page tells you if it cannot find one.
 # Keep this window open while you work: closing it stops the host.
 cd "$(dirname "$0")" || exit 1

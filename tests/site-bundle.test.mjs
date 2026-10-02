@@ -35,8 +35,16 @@ assert.deepEqual(decodeSite(encodeSite(reordered)).articles.map((a) => a.slug), 
 
 // Re-rendering the project's own files from the site must reproduce every byte on disk, or an admin save would churn them.
 assert.deepEqual(planWrite(site), [], 'writing the site back to the project changes nothing');
-assert(Object.keys(projectFiles(site)).length === site.manifests.length + site.articles.length + site.assets.length + 4,
-  'one file per manifest, article and asset, plus the three indexes and the single mesh-settings file');
+assert.deepEqual(Object.keys(projectFiles(site)).sort(), [
+  ...site.manifests.map(m=>`js/content/manifests/${m.id}.js`),
+  ...site.articles.map(a=>`js/content/articles/${a.slug}.js`),
+  ...site.assets.map(a=>`js/content/assets/${a.id}.js`),
+  ...(site.secrets || []).map(s=>`js/content/secrets/${s.id}.js`),
+  'js/content/manifests/index.js','js/content/article-index.js','js/content/assets/index.js',
+  'js/content/secrets/index.js','js/content/mesh-settings-data.js','js/content/theme-data.js',
+  'js/content/seo-data.js','robots.txt',
+  ...(site.seo?.site?.baseUrl ? ['sitemap.xml'] : [])
+].sort(), 'bundle includes content, indexes, configuration and configured public metadata');
 
 // An asset round-trips through the archive and through the address the same way a manifest does.
 const editedAsset = clone(site); editedAsset.assets[0].label += ' (edited)';

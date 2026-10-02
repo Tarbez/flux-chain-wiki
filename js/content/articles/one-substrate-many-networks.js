@@ -1,6 +1,13 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("one-substrate-many-networks", {
-  "core": "Flux Protocol is the shared substrate; DAO Chain is one network on it. Network creation currently partitions miner presence, not a complete security boundary.",
+  "core": "Flux Protocol is the shared substrate; project material describes DAO Chain as a network on it. Network creation currently partitions miner presence, not a complete security boundary. Live registration of named examples remains unverified here.",
+  "relevance": "Use this note to distinguish the shared protocol from a network using it before relying on network isolation.",
+  "reviewed": "2026-09-30",
+  "evidenceLabel": "Named-network command and boundary documentation",
+  "evidenceHref": "docs/operators/networks.md",
+  "relatedPage": "concept/purpose",
+  "actionLabel": "Inspect network evidence",
+  "actionPage": "concept/studio",
   "questions": [
     "What is the substrate?",
     "What does create do today?",
@@ -15,17 +22,17 @@ LearningContent.load("one-substrate-many-networks", {
     ],
     [
       "What network create actually does today",
-      "The network directory's network create command returns a networkId for a new, independently addressable network. Pointing an app or miner at an existing networkId joins that network instead of creating a new isolated one — the same primitive, read the other direction. It's real, working code, not a roadmap item.",
+      "The network CLI defines a create command that returns a networkId. Pointing a miner at an existing networkId selects that presence namespace. The command contract is implemented in source; this audit did not complete a live create-and-participate run.",
       "It's also honestly scoped. Today it partitions presence only — the miner registry, not accounts, identities, or DAOs. The directory's own documentation says plainly that network creation is not yet a security boundary. That's not a criticism; it's the accurate current state, and pretending otherwise would cost more than it's worth the first time someone relies on isolation that isn't there yet."
     ],
     [
       "Two networks, one substrate, no hierarchy",
-      "DAO Chain (De Ark OS's own constitutional network) and CR3TV are two networks already registered this way — each with its own separately frozen DAO, neither one inferred from the other's name, neither implicitly governing the other. De Ark OS runs on Flux Protocol; it doesn't own it, and it isn't the only thing on it.",
+      "Project material names DAO Chain and CR3TV as intended network examples. A dated public directory record, network identifier, and independent live observation have not been registered here, so this note does not claim that either is currently active.",
       "This matters because it's an easy conflation to make by accident: a network built on a substrate can start to sound like the substrate itself, especially once it's the first or best-documented one. Keeping the two nouns separate — Flux Protocol the substrate, DAO Chain one network on it — is a discipline this site enforces on purpose."
     ],
     [
       "Where the boundary actually is",
-      "A network's own DAO governs that network: its own roster, its own signature threshold, its own scope. Flux Protocol's separate mesh-operations governance — the seven-operator ceremony that closes the substrate's own production policy — has no authority over any one network's internal decisions, and no network's DAO has authority over it. Two authority sets, not one, on purpose.",
+      "Under the documented policy model, a network DAO governs its own scope, while the separate mesh-operations roster governs substrate policy. Neither roster substitutes for the other. The policy distinction is documented; production activation and named live-network governance need separate evidence.",
       "If a claim about \"the chain\" doesn't say which of these two things it means, it isn't precise enough to act on yet."
     ]
   ],

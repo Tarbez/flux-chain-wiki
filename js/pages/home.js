@@ -1,5 +1,6 @@
 ArkUI.pageModules.zero = {
   mount: function (host) {
+    function pageHref(key) { return '#' + ArkUI.pageCatalog[key].path; }
     var el = ArkUI.render([
       'F-HOME-RLAYER_V1', '-N-zero',
       '. F-BODY-RBODY_V1',
@@ -7,91 +8,75 @@ ArkUI.pageModules.zero = {
       '  -S-1.42', '  .', '.'
     ].join('\n'), host);
     el.classList.add('ark-page'); el.dataset.arkPage = 'zero';
+    // A vector drafting plate keeps the pattern crisp at every viewport size.
+    var plate = document.createElement('div');
+    plate.className = 'home-drafting-plate';
+    plate.setAttribute('aria-hidden', 'true');
+    var arcs = '';
+    for (var r = 42; r <= 240; r += 14) {
+      arcs += '<circle cx="300" cy="250" r="' + r + '" />';
+    }
+    var strokes = '';
+    for (var n = 0; n < 24; n++) {
+      strokes += '<path d="M' + (370 + n * 9) + ' 470 l95 -150" stroke-width="' + (1 + n / 8) + '" />';
+    }
+    plate.innerHTML = '<svg viewBox="0 0 680 600" fill="none" xmlns="http://www.w3.org/2000/svg"><g class="plate-arcs">' + arcs + '</g><path class="plate-axis" d="M0 250H680M300 0V600M60 10V590M620 10V590"/><g class="plate-lines">' + strokes + '</g><path class="plate-block" d="M300 10H540V250H300Z"/><path class="plate-cut" d="M300 10a240 240 0 0 1 240 240H300Z"/><g class="plate-nodes"><path d="M54 250h12m-6 -6v12M294 490h12m-6 -6v12M614 250h12m-6 -6v12"/><rect x="294" y="244" width="12" height="12"/><rect x="54" y="484" width="12" height="12"/></g></svg><span class="plate-label">F / 01 — INDEPENDENT NETWORKS</span><span class="plate-index">SUBSTRATE / AGREEMENT / RECEIPT</span>';
+    el.appendChild(plate);
     var body = el.querySelector('.ark-hero-body');
+    var heading = body.querySelector('.ark-hero-title');
+    var headline = ArkCopy.text('HOME.TITLE');
+    if (heading && headline.indexOf('Run your own network ') === 0) {
+      heading.textContent = '';
+      var mainLine = document.createElement('span');
+      mainLine.className = 'home-headline-main'; mainLine.textContent = 'Run your own network';
+      var subLine = document.createElement('span');
+      subLine.className = 'home-headline-detail'; subLine.textContent = headline.slice(21);
+      heading.appendChild(mainLine); heading.appendChild(subLine);
+    }
     var promise = document.createElement('p');
     promise.className = 'home-promise';
     promise.textContent = ArkCopy.text('HOME.PROMISE');
     body.insertBefore(promise, body.firstChild);
-    var title = el.querySelector('.ark-hero-title');
-    var words = (title.textContent || '').trim().split(/\s+/);
-    if (words.length > 2) {
-      title.textContent = '';
-      var kicker = document.createElement('span');
-      kicker.className = 'home-title-kicker';
-      kicker.textContent = words.shift();
-      title.appendChild(kicker);
-      title.appendChild(document.createTextNode(' '));
-      var main = document.createElement('span');
-      main.className = 'home-title-main';
-      main.textContent = words.slice(0, -1).join(' ');
-      title.appendChild(main);
-      title.appendChild(document.createTextNode(' '));
-      var finish = document.createElement('em');
-      finish.className = 'home-title-finish';
-      finish.textContent = words[words.length - 1];
-      title.appendChild(finish);
-    } else if (words.length > 1) {
-      var accent = words.pop();
-      title.textContent = '';
-      var lead = document.createElement('span');
-      lead.textContent = words.join(' ');
-      title.appendChild(lead);
-      title.appendChild(document.createTextNode(' '));
-      var em = document.createElement('em');
-      em.textContent = accent;
-      title.appendChild(em);
-    }
-
     var actions = document.createElement('div');
     actions.className = 'home-hero-actions';
-    var deploy = document.createElement('a');
-    deploy.className = 'home-primary-cta';
-    deploy.href = '#/deploy'; deploy.dataset.sceneLink = 'deploy';
-    deploy.textContent = ArkCopy.text('HOME.CTA');
-    actions.appendChild(deploy);
+    var primary = document.createElement('a');
+    primary.className = 'home-primary-cta';
+    primary.href = pageHref('deployment'); primary.dataset.sceneLink = 'deployment';
+    primary.textContent = ArkCopy.text('HOME.CTA');
+    actions.appendChild(primary);
+    var secondary = document.createElement('a');
+    secondary.className = 'home-ghost-cta';
+    secondary.href = pageHref('download'); secondary.dataset.sceneLink = 'download';
+    secondary.textContent = ArkCopy.text('HOME.SECONDARY');
+    actions.appendChild(secondary);
     var questions = document.createElement('nav');
     questions.className = 'home-question-links';
     questions.setAttribute('aria-label', 'Learn about Flux');
     [['HOME.QUESTION.RESOLVER', 'resolver'], ['HOME.QUESTION.FLUX', 'about']].forEach(function (item) {
       var link = document.createElement('a');
-      link.href = '#/' + item[1]; link.dataset.sceneLink = item[1];
+      link.href = pageHref(item[1]); link.dataset.sceneLink = item[1];
       link.textContent = ArkCopy.text(item[0]);
       questions.appendChild(link);
     });
     actions.appendChild(questions);
     body.appendChild(actions);
 
-    var signal = document.createElement('div');
-    signal.className = 'home-signal-map';
-    signal.setAttribute('aria-hidden', 'true');
-    var signalMeta = document.createElement('span');
-    signalMeta.className = 'home-signal-meta';
-    signalMeta.textContent = 'RESOLVER / LIVE';
-    signal.appendChild(signalMeta);
-    ['outer', 'middle', 'inner'].forEach(function (ring) {
-      var orbit = document.createElement('span');
-      orbit.className = 'home-signal-orbit home-signal-orbit-' + ring;
-      signal.appendChild(orbit);
-    });
-    var core = document.createElement('span');
-    core.className = 'home-signal-core';
-    core.textContent = 'R';
-    signal.appendChild(core);
-    [
-      ['manifest', 'MANIFEST'],
-      ['mesh', 'MESH'],
-      ['agreement', 'AGREEMENT']
-    ].forEach(function (item) {
-      var node = document.createElement('span');
-      node.className = 'home-signal-node home-signal-node-' + item[0];
-      node.textContent = item[1];
-      signal.appendChild(node);
-    });
-    el.appendChild(signal);
-
     var lifecycle = document.createElement('nav');
     lifecycle.className = 'home-lifecycle';
     lifecycle.setAttribute('aria-label', 'The agreement lifecycle');
+    var flow = document.createElement('div');
+    flow.className = 'home-agreement-flow';
+    flow.dataset.homeFlow = 'ordered';
+    flow.setAttribute('aria-hidden', 'true');
+    var symbols = ['?', '↗', '=', '→', '✓'];
+    ArkUI.lifecycleStages.forEach(function (stage, i) {
+      var node = document.createElement('span');
+      node.className = 'home-flow-node';
+      node.style.setProperty('--flow-step', i);
+      node.textContent = symbols[i];
+      flow.appendChild(node);
+    });
+    lifecycle.appendChild(flow);
     var caption = document.createElement('p');
     caption.className = 'home-lifecycle-caption';
     caption.textContent = 'Agreement lifecycle';
@@ -107,7 +92,7 @@ ArkUI.pageModules.zero = {
     lifecycle.appendChild(lifecycleIntro);
     var seeAll = document.createElement('a');
     seeAll.className = 'home-lifecycle-all';
-    seeAll.href = '#/lifecycle'; seeAll.dataset.sceneLink = 'lifecycle';
+    seeAll.href = pageHref('lifecycle'); seeAll.dataset.sceneLink = 'lifecycle';
     seeAll.textContent = 'See all';
     lifecycle.appendChild(seeAll);
     var rail = document.createElement('ol');
@@ -116,7 +101,7 @@ ArkUI.pageModules.zero = {
       var li = document.createElement('li');
       var link = document.createElement('a');
       link.className = 'home-stage-link';
-      link.href = '#/lifecycle/' + stage.id; link.dataset.sceneLink = 'lifecycle/' + stage.id;
+      link.href = pageHref('lifecycle/' + stage.id); link.dataset.sceneLink = 'lifecycle/' + stage.id;
       var num = document.createElement('span');
       num.className = 'home-stage-num'; num.textContent = ('0' + (i + 1)).slice(-2);
       var name = document.createElement('span');
@@ -124,6 +109,7 @@ ArkUI.pageModules.zero = {
       var bar = document.createElement('span');
       bar.className = 'home-stage-bar'; bar.setAttribute('aria-hidden', 'true');
       link.appendChild(num); link.appendChild(name); link.appendChild(bar);
+      link.style.setProperty('--flow-step', i);
       li.appendChild(link); rail.appendChild(li);
     });
     lifecycle.appendChild(rail);
@@ -132,11 +118,8 @@ ArkUI.pageModules.zero = {
     var status = document.createElement('aside');
     status.className = 'home-status-rail';
     status.setAttribute('aria-label', 'Protocol status');
-    [
-      ['MESH', 'ONLINE'],
-      ['RESOLVERS', 'OPEN'],
-      ['AGREEMENTS', 'VERIFIABLE']
-    ].forEach(function (item) {
+    for (var s = 1; s <= 3; s++) {
+      var item = [ArkCopy.text('HOME.STATUS' + s + '.LABEL'), ArkCopy.text('HOME.STATUS' + s + '.VALUE')];
       var readout = document.createElement('span');
       readout.className = 'home-status-item';
       var label = document.createElement('small');
@@ -146,17 +129,14 @@ ArkUI.pageModules.zero = {
       readout.appendChild(label);
       readout.appendChild(value);
       status.appendChild(readout);
-    });
-    el.appendChild(status);
-
-    if (!window.ArkMeshSettings || ArkMeshSettings.shapeVisible('zero')) {
-      var figure = document.createElement('figure');
-      figure.className = 'page-iceberg';
-      figure.setAttribute('data-iceberg-anchor', '');
-      figure.setAttribute('role', 'img');
-      figure.setAttribute('aria-label', 'Decorative particle form');
-      el.appendChild(figure);
     }
+    var statusLink = document.createElement('a');
+    statusLink.className = 'home-status-link';
+    statusLink.href = 'docs/status.md';
+    statusLink.textContent = ArkCopy.text('HOME.STATUS.NOTE') + ' ↗';
+    status.appendChild(statusLink);
+    el.insertBefore(status, lifecycle);
+
     return el;
   }
 };

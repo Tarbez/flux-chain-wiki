@@ -1,4 +1,4 @@
-# Flux Chain
+# Flux Protocol site
 
 A persistent silver-sage particle scene on a charcoal background, with lazy-loaded
 pages inside an ARK layout. Open `index.html`; no build step is required.
@@ -18,8 +18,16 @@ Canonical routes use hashes so static hosting does not need rewrite rules:
 - `#/experiments/lab`: the standalone interactive lab.
 - `#/learnings`: three article previews.
 - `#/learnings/<slug>`: an individual article.
-- `#/concept`: the Flux Chain theory and community vision.
-- `#/about`: the studio, its purpose, and its approach.
+- `#/about`: the Flux Protocol overview and current capability boundary.
+- `#/what-is-a-resolver`: the canonical resolver definition.
+- `#/start-from-something-real`: reference-resolver evidence status.
+- `#/how-deployment-works`: the five-movement protocol flow.
+- `#/download`: the verified source-run path.
+- `#/deploy`: create or select a named miner-presence network.
+- `#/explorer`: read live, bounded data from a local Miner only.
+- `#/account`: locally verify an Auth Kit and inspect its identity facts.
+- `#/treasury` and `#/deposits`: design-only economy previews, not live balances.
+- `#/concept`: the deeper Flux Protocol operating model.
 
 Legacy `#zero`, `#proximity`, `#work`, `#learnings`, and `#article/<slug>` links
 also resolve. Back/Forward and direct links use the same router.
@@ -38,6 +46,17 @@ in sync. Page presence uses the actual ARK `FluxAnimate` engine; the atomic scen
 store uses `FluxMemoryStore`. Interrupted transitions cancel their animations,
 inactive pages are inert, and focus leaves a page before it becomes unavailable.
 Reduced motion applies destination states directly.
+
+The account route loads the shared Ark UI Auth Kit bundle on demand. Its
+verified root signer is held in browser memory and disposed when the route
+unmounts; the recovery file and PIN are not uploaded or persisted. The displayed
+wallet address comes from the kit and is **not** a live balance proof. When the
+Miner returns a signed identity-to-account binding, the page follows that exact
+account id to show its standing; it never infers one. FXN and Credits remain
+unavailable until a verified holdings read contract exists. The admin editor
+also consumes Ark UI's shared framework-neutral scoped-authorization view.
+Rebuild the generated bundles after shared-auth changes with
+`node scripts/build-auth.cjs`.
 
 `js/ark/text-presence.js` uses transform and opacity reveals, without animated
 clipping masks. It limits the effect to 12 visible text blocks and at most 48
@@ -98,9 +117,20 @@ are never interpreted as HTML.
 
 To add a learning, use the Articles list in `admin.html`, or by hand append metadata
 to the index and create its matching body file with `LearningContent.load(slug, { sections, numbers })`. Preview cards, catalog
-routes, and particle titles derive from the index. The home invitation links to the Flux Chain theory; article previews stay in
+routes, and particle titles derive from the index. The home invitation links to the Flux Protocol specification; article previews stay in
 the Learnings page. Keep educational examples tied to actual behavior and distinguish
 automated checks from device testing.
+
+## Product and operator documentation
+
+The canonical documentation starts at [`docs/index.md`](docs/index.md). Capability
+status, terminology, evidence ownership, operator procedures, and protocol guides
+live there. Public page manifests summarize those facts; they are not the source of
+truth for capability or production-readiness claims.
+
+Use **Flux Protocol** as the product name. Preserve **Flux Chain** only where an
+exact legacy file name, storage key, compatibility identifier, or historical
+artifact requires it.
 
 The lab is mounted by `ArkUI.mountStudio(root)` only on its own Lab route.
 “Open the experiment” navigates there; the same corner control and Escape return

@@ -3,18 +3,47 @@
 (function () {
   'use strict';
 
-  /* Upserts <meta name="description">: an admin SEO override for this route (js/content/seo.js),
-     falling back to whatever index.html already shipped with (the page's own tag, never removed). */
-  function applyMetaDescription(entry) {
+  /* Keep description, social tags and explicit canonical overrides in step with
+     the committed route. This is browser metadata, not server prerendering. */
+  var initialDescription;
+  function applyRouteMetadata(entry) {
     if (typeof ArkSEO === 'undefined' || !entry) return;
     var fallback = document.querySelector('meta[name="description"]');
-    var fallbackText = fallback ? fallback.getAttribute('content') : '';
+    if (initialDescription === undefined) initialDescription = fallback ? fallback.getAttribute('content') : '';
+    var fallbackText = initialDescription;
     var text = entry.seoArticle ? ArkSEO.articleDescription(entry.seoArticle, fallbackText)
       : entry.seoId ? ArkSEO.pageDescription(entry.seoId, fallbackText) : fallbackText;
     if (!text) return;
     var tag = fallback || document.createElement('meta');
     tag.setAttribute('name', 'description'); tag.setAttribute('content', text);
     if (!fallback) document.head.appendChild(tag);
+    // Remove optional route metadata when the next route has no override.
+    // Never carry an image or canonical URL across a navigation boundary.
+    function meta(attribute, key, value) {
+      var node = document.querySelector('meta[' + attribute + '="' + key + '"]');
+      if (!value) { if (node) node.remove(); return; }
+      if (!node) { node = document.createElement('meta'); node.setAttribute(attribute, key); document.head.appendChild(node); }
+      node.setAttribute('content', value);
+    }
+    var map = entry.seoArticle ? 'articles' : 'pages';
+    var id = entry.seoArticle || entry.seoId;
+    var image = ArkSEO.ogImage(map, id);
+    var canonical = ArkSEO.canonical(map, id);
+    meta('property', 'og:title', document.title);
+    meta('property', 'og:description', text);
+    meta('property', 'og:type', entry.seoArticle ? 'article' : 'website');
+    meta('property', 'og:image', image);
+    meta('property', 'og:url', canonical);
+    meta('name', 'twitter:card', image ? 'summary_large_image' : 'summary');
+    meta('name', 'twitter:title', document.title);
+    meta('name', 'twitter:description', text);
+    meta('name', 'twitter:image', image);
+    var link = document.querySelector('link[rel="canonical"]');
+    if (!canonical) { if (link) link.remove(); }
+    else {
+      if (!link) { link = document.createElement('link'); link.setAttribute('rel', 'canonical'); document.head.appendChild(link); }
+      link.setAttribute('href', canonical);
+    }
   }
 
   ArkUI.createPageRouter = function (options) {
@@ -61,9 +90,9 @@
     function remove(page) {
       var el = mounted[page];
       if (!el) return;
-      if (page === active) positions.set(page,pageScroll(page));
       (cleanups.get(page) || []).forEach(function (cleanup) { cleanup(); });
       cleanups.delete(page);
+      if (typeof el.arkDispose === 'function') el.arkDispose();
       el.getAnimations({ subtree: true }).forEach(function (animation) { animation.cancel(); });
       el.remove(); delete mounted[page];
     }
@@ -88,6 +117,11 @@
       report('Loading ' + catalog[page].title.replace(' — Flux Protocol', '') + '…', false);
       outlet.setAttribute('aria-busy', 'true');
       try {
+        // Reject a mismatched scene registry before mounting or hiding the
+        // current page. A late state.navigate failure would leave no page up.
+        if (state.pages && !Object.prototype.hasOwnProperty.call(state.pages, page)) {
+          throw new Error('Unknown scene page: ' + page);
+        }
         if (!modules.has(page)) modules.set(page, load(page, catalog[page]).catch(function (error) { modules.delete(page); throw error; }));
         var module = await modules.get(page);
         if (ticket !== request) return false;
@@ -107,7 +141,6 @@
           var cleanup = hooks.map(function (hook) { return hook(el, page); }).filter(function (fn) { return typeof fn === 'function'; });
           cleanups.set(page, cleanup);
         }
-        if (page === 'zero') mounted[page].classList.remove('lifecycle-departing');
         if (active && mounted[active]) positions.set(active,pageScroll(active));
         // Hand focus back to shared chrome before disabling an outgoing page.
         if (typeof document !== 'undefined' && active && mounted[active] && mounted[active].contains(document.activeElement)) {
@@ -119,35 +152,37 @@
         var outgoing = active;
         var zoomTransition = !immediate && outgoing && (isLifecycle(outgoing) || isLifecycle(page));
         if (state.lifecycleRun) state.lifecycleRun.cancel();
+        // Outgoing content must leave under its OWN route styles. Switching the
+        // ancestor's data-page first reflows home cards into the incoming layout.
+        if (outgoing) await presence.hide(outgoing, immediate, zoomTransition ? { duration: lifecycleTiming.fadeMs, quick: true } : undefined);
+        if (ticket !== request) return false;
+        // Discard interrupted exits as well: no third page may leak into this handoff.
+        Object.keys(mounted).forEach(function (key) { if (key !== page) remove(key); });
         run = zoomTransition ? lifecycleTiming.createRun() : null;
         state.lifecycleRun = run;
         scene.classList.toggle('is-lifecycle-transition',!!zoomTransition);
-        var leaveHome = zoomTransition && outgoing === 'zero' && isLifecycle(page);
-        if (leaveHome) mounted[outgoing].classList.add('lifecycle-departing');
-        if (!zoomTransition && outgoing) await presence.hide(outgoing, immediate);
-        if (ticket !== request) return false;
         active = page; var generation = ++commit;
         scene.dataset.page = page;
         state.navigate(page);
         writeHistory(page, settings.history);
         if (typeof document !== 'undefined') {
           document.title = catalog[page].title;
-          applyMetaDescription(catalog[page]);
+          applyRouteMetadata(catalog[page]);
         }
         report('', false); outlet.setAttribute('aria-busy', 'false');
         var entering;
         if (zoomTransition) {
-          await run.when('zoom');
-          if (ticket !== request) return false;
-          var leaving = presence.hide(outgoing, false, { duration: lifecycleTiming.fadeMs, quick: true });
-          await run.when('overlap');
-          if (ticket !== request) return false;
-          entering = Promise.all([leaving, presence.enter(page, false, { duration: lifecycleTiming.fadeMs, quick: true })]);
+          // The old page has already exited under its own styles. Reveal the
+          // new page as the mesh begins moving; waiting for its late overlap
+          // marker leaves a conspicuous blank content interval.
+          entering = presence.enter(page, false, { duration: lifecycleTiming.fadeMs, quick: true });
         } else entering = presence.show(page, immediate);
+        // Reveal sets up its first animation frame synchronously. Restore scroll
+        // now, before it paints, rather than jumping after the entry completes.
+        restoreScroll(page);
         if (page !== 'zero') mounted[page].focus({ preventScroll: true });
         await Promise.all([entering,run ? run.when('complete') : Promise.resolve()]);
         if (ticket !== request || generation !== commit) return false;
-        restoreScroll(page);
         Object.keys(mounted).forEach(function (key) { if (key !== active) remove(key); });
         scene.dataset.transition = 'idle';
         scene.classList.remove('is-lifecycle-transition');

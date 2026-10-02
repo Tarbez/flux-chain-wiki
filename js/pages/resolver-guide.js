@@ -7,7 +7,7 @@ ArkUI.pageModules.resolverGuide = {
     function words(role) { return ArkCopy.text(area + '.' + role); }
     function routeLink(role, target, className) {
       var link = ArkUI.el('a', className);
-      link.href = '#'; link.dataset.sceneLink = target;
+      link.href = '#' + ArkUI.pageCatalog[target].path; link.dataset.sceneLink = target;
       link.appendChild(document.createTextNode(words(role) + ' '));
       var arrow = ArkUI.el('span', 'cta-arrow', '↗');
       arrow.setAttribute('aria-hidden', 'true');

@@ -28,14 +28,14 @@
   font:600 10px/1.4 var(--mono-font,ui-monospace,monospace);
   text-transform:uppercase;
 }
-#scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h2,.article-title,.article-word-fallback,.expansion .section-heading h2) {
+#scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h1,.article-title,.article-word-fallback,.expansion .section-heading h1) {
   color:hsl(var(--text-strong));
   font-family:"Albert Sans",sans-serif;
   font-weight:800;
   letter-spacing:0;
   text-transform:uppercase;
 }
-#scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h2) {
+#scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h1) {
   font-size:clamp(42px,5.4cqw,78px);
   line-height:.95;
   max-width:14ch;
@@ -50,7 +50,7 @@
 }
 #scene .learning-page :is(.learning-intro,.concept-deck,.article-deck,.hero-experiment-note) {
   color:hsl(var(--text-muted));
-  font:400 13px/1.75 var(--mono-font,ui-monospace,monospace);
+  font:400 16px/1.65 "Albert Sans",sans-serif;
   max-width:56ch;
   letter-spacing:0;
 }
@@ -100,7 +100,7 @@
 :root[data-theme] #scene .learning-page :is(.learning-eyebrow,.hero-experiment-kicker,.eyebrow) { color:hsl(var(--accent)) !important; }
 @media(max-width:760px) {
   #scene .learning-page :is(.learning-index,.concept-content,.article-header,.experiment-page-intro) { padding-top:28px; }
-  #scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h2) { font-size:clamp(34px,9cqw,52px); }
+  #scene .learning-page :is(.learning-heading,.concept-content h1,.hero-experiment-copy h1) { font-size:clamp(34px,9cqw,52px); }
   #scene .learning-page .deploy-step { grid-template-columns:28px minmax(0,1fr); }
   #scene .article-page .article-title { font-size:clamp(27px,7cqw,40px); }
 }

@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "references",
-  "title": "Start from something real",
+  "title": "Reference resolvers",
   "route": "/start-from-something-real",
   "group": "page",
   "meta": {
@@ -19,31 +19,31 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Start from something real"
+      "value": "Reference evidence, without the leap of faith."
     },
     "BODY1": {
       "label": "First paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "CR3TV and DeArk are reference resolvers, running on the fabric today."
+      "value": "CR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, or dated live observation for either one."
     },
     "BODY2": {
       "label": "Second paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "They are not demos. They are how you build on top of the mesh —\nfork them, expand them, deploy your own alongside them."
+      "value": "Reference evidence pending. Until an inspectable record is registered, these names demonstrate intended examples, not independently verifiable deployment or production status."
     },
     "BODY3": {
       "label": "Closing paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "Every new resolver makes the fabric stronger.\nEvery resolver you deploy is yours to govern."
+      "value": "A publishable reference must include its purpose, current status and observation date, resolver or network identifier, source or manifest location, and the exact boundary of what it proves."
     },
     "NEXT": {
       "label": "Onward link",
       "kind": "line",
       "section": "Links",
-      "value": "See how deployment works"
+      "value": "See how Flux works"
     },
     "BACK": {
       "label": "Back link",

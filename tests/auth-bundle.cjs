@@ -27,6 +27,10 @@ for (const editorPiece of ['js/admin/admin.js', 'js/admin/store.js', 'js/admin/p
 const app = fs.readFileSync('admin-app.html', 'utf8');
 assert(!app.includes('js/admin/auth.js') && !app.includes('meshAuth'), 'the editor page carries no sign-in bundle');
 assert(app.includes('js/admin/admin.js') && app.includes('js/admin/publish.js'));
+assert(app.indexOf('js/admin/authorization-view.js') < app.indexOf('js/admin/admin.js'), 'admin editor loads the shared authorization view before its consumer');
+assert(fs.existsSync('js/admin/authorization-view.js'), 'shared authorization view bundle is missing');
+const authorizationEntry = fs.readFileSync('scripts/authorization-view-entry.js', 'utf8');
+assert(authorizationEntry.includes("'@deadark/ark-ui/flux-authorization-view'"), 'wiki authorization bridge must consume Ark UI shared view data');
 
 // 3c. The host's public admin files are exactly the ones the locked page loads: no more, so nothing else leaks before sign-in.
 const host = fs.readFileSync('scripts/publish-host.mjs', 'utf8');
@@ -47,4 +51,11 @@ assert(gate.indexOf('loopbackEquivalentHost(host)') < gate.indexOf('who.sign('),
 // 5. Signing out drops the key; nothing is persisted by the sign-in.
 assert(/dispose\(\)/.test(entry) && /signOut/.test(entry));
 assert(!/localStorage|sessionStorage|indexedDB/.test(entry), 'the sign-in must not persist anything');
+const account = fs.readFileSync('js/pages/account.js', 'utf8');
+assert(account.includes('ArkAdminAuth.create') && account.includes('page.arkDispose') && account.includes('auth.dispose()'), 'public account must reuse the shared Auth Kit and dispose it on route exit');
+assert(account.includes('Not connected') && account.includes('Not linked') && !/0 FXN|0 Credits/.test(account), 'account must not invent live holdings or standing');
+assert(account.includes("http://127.0.0.1:8766") && account.includes("'/explorer/v1/record'") && account.includes("sourceId: 'identities'") && account.includes('recordId: id'), 'account must use the exact-ID local Miner record contract');
+assert(account.includes("sourceId: 'accounts'") && account.includes('accountId') && account.includes('signed account binding'), 'account must follow a signed identity-to-account binding before showing standing');
+assert(account.includes("verification?.state !== 'verified'"), 'account must fail closed on unverified identity or standing records');
+assert(account.includes('AbortController') && account.includes('generation') && account.includes('identityId !== id'), 'account must discard stale mesh responses when identity or route changes');
 console.log('auth bundle ok: js/admin/auth.js matches its sources; publish.js holds no key of its own');

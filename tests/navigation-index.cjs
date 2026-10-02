@@ -33,7 +33,7 @@ class Element {
 }
 
 const ids = [
-  'zero', 'resolver', 'references', 'deployment', 'deploy', 'about',
+  'zero', 'resolver', 'references', 'deployment', 'explorer', 'account', 'treasury', 'deposits', 'deploy', 'about',
   'concept', 'proximity', 'lab', 'dao', 'download', 'learnings',
   'lifecycle', ...['intent', 'offer', 'agreement', 'fulfillment', 'receipt'].map((id) => 'lifecycle/' + id),
   ...['network', 'agreement', 'authority', 'governance', 'register', 'measured'].map((id) => 'concept/' + id),
@@ -70,37 +70,32 @@ const host = { querySelector: () => menu };
 header.onMount(host);
 const layers = menu.children;
 const layer = (name) => layers.find((item) => item.dataset.navLayer === name);
-assert.equal(menu.dataset.pageCount, '27');
-assert.equal(menu.querySelectorAll('a').length, 27, 'every page remains in navigation');
-assert.equal(layers.length, 7, 'index, five category layers, and the stage layer');
+assert.equal(menu.dataset.pageCount, '31');
+assert.equal(menu.querySelectorAll('a').length, 31, 'every page remains in navigation');
+assert.equal(layers.length, 5, 'index and four intent-based category layers');
 assert.equal(layer('index').hidden, false);
-for (const name of ['start', 'explore', 'lifecycle', 'mechanics', 'reading', 'stages']) {
+for (const name of ['understand', 'evaluate', 'run', 'read']) {
   assert.equal(layer(name).hidden, true, name + ' starts hidden');
 }
-assert.equal(layer('lifecycle').querySelectorAll('a').length, 1, 'overview remains in layer two');
-assert.equal(layer('stages').querySelectorAll('a').length, 5, 'stages live in layer three');
-layer('index').querySelector('[data-nav-target="lifecycle"]').listeners.click();
-assert.equal(menu.navLayers.current(), 'lifecycle');
+assert.equal(layer('understand').querySelectorAll('a').length, 10, 'overview and all lifecycle stages remain directly reachable');
+layer('index').querySelector('[data-nav-target="understand"]').listeners.click();
+assert.equal(menu.navLayers.current(), 'understand');
 assert.equal(layer('index').hidden, false, 'first layer stays until its exit finishes');
-assert.equal(layer('lifecycle').hidden, true, 'second layer does not enter early');
+assert.equal(layer('understand').hidden, true, 'second layer does not enter early');
 nextAnimationPhase();
 assert.equal(layer('index').hidden, true);
-assert.equal(layer('lifecycle').hidden, false);
-nextAnimationPhase();
-layer('lifecycle').querySelector('[data-nav-target="stages"]').listeners.click();
-assert.equal(menu.navLayers.current(), 'stages');
-nextAnimationPhase();
+assert.equal(layer('understand').hidden, false);
 nextAnimationPhase();
 menu.navLayers.back();
 nextAnimationPhase();
 nextAnimationPhase();
-assert.equal(menu.navLayers.current(), 'lifecycle');
+assert.equal(menu.navLayers.current(), 'index');
 menu.navLayers.reset();
 assert.equal(menu.navLayers.current(), 'index');
 assert.equal(layer('index').hidden, false);
-layer('index').querySelector('[data-nav-target="explore"]').listeners.click();
+layer('index').querySelector('[data-nav-target="evaluate"]').listeners.click();
 assert.equal(timers.size, 1);
 menu.navLayers.reset();
 assert.equal(timers.size, 0, 'closing during an exit cancels the transition');
-assert.equal(layer('explore').hidden, true);
-console.log('PASS: all 27 routes remain linked across animated navigation layers, including the third lifecycle layer.');
+assert.equal(layer('evaluate').hidden, true);
+console.log('PASS: all 31 routes remain linked across four intent-based animated navigation layers.');

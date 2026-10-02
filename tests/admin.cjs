@@ -44,13 +44,31 @@ const {ArkManifest,ArkAdminStore,LearningContent}=vm.runInContext('({ArkManifest
  assert.equal(adirs.articles.files.get(list[0].slug+'.js').text,fs.readFileSync('js/content/articles/'+list[0].slug+'.js','utf8'));
  assert.equal(adirs.content.files.get('article-index.js').text,fs.readFileSync('js/content/article-index.js','utf8'));
  // A new article lands in the index and loads back as itself, quotes and dashes included.
- const fresh={slug:'a-new-note',title:'A "new" note — with a dash',category:'NOTES / 004',minutes:'2 MIN READ',summary:'Short.',sections:[['Heading','One paragraph.','Two “curly” paragraphs.']],numbers:false};
+ const fresh={slug:'a-new-note',title:'A "new" note — with a dash',category:'NOTES / 004',minutes:'2 MIN READ',summary:'Short.',core:'The primary idea.',questions:['What does this establish?'],relevance:'Why this matters.',reviewed:'2026-09-30',evidenceLabel:'Evidence',evidenceHref:'docs/status.md',relatedPage:'concept',actionLabel:'Inspect the model',actionPage:'concept',sections:[['Heading','One paragraph.','Two “curly” paragraphs.']],numbers:false};
  assert.deepEqual(JSON.parse(JSON.stringify(LearningContent.problems(fresh))),[]);
  await ArkAdminStore.saveArticle(adirs,fresh,[...list,fresh]);
  assert(adirs.content.files.get('article-index.js').text.includes('"a-new-note"'));
  const back=vm.createContext({});vm.runInContext(fs.readFileSync('js/content/learnings.js','utf8'),back);
  vm.runInContext(adirs.content.files.get('article-index.js').text,back);vm.runInContext(adirs.articles.files.get('a-new-note.js').text,back);
  assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.find('a-new-note'))),fresh);
+ assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.put(fresh))),fresh,'registry updates preserve reading-layer fields');
+ const editorSource=fs.readFileSync('js/admin/admin.js','utf8');
+ const copyStart=editorSource.indexOf('  function articleCopy(a) {');
+ const copyEnd=editorSource.indexOf('  function adoptArticles()',copyStart);
+ const editorCopy=vm.runInNewContext(editorSource.slice(copyStart,copyEnd)+'\narticleCopy;', {clone:value=>JSON.parse(JSON.stringify(value))});
+ const draft=editorCopy(fresh);
+ assert.equal(draft.core,fresh.core,'editor draft preserves the core summary');
+ assert.deepEqual(draft.questions,fresh.questions,'editor draft preserves question prompts');
+ draft.questions[0]='Edited prompt';
+ assert.equal(fresh.questions[0],'What does this establish?','editing a draft does not mutate the loaded article');
+ assert(LearningContent.problems({...fresh,core:42}).length,'non-text core is rejected');
+ assert(LearningContent.problems({...fresh,questions:['']}).length,'empty question is rejected');
+ assert(LearningContent.problems({...fresh,questions:['One?','Orphan?']}).some(p=>/match the number of sections/.test(p)),'orphaned inner-layer prompts are rejected');
+ assert(LearningContent.problems({...fresh,evidenceHref:'javascript:alert(1)'}).some(p=>/local documentation link/.test(p)),'editor cannot save executable evidence links');
+ assert(LearningContent.problems({...fresh,reviewed:''}).some(p=>/YYYY-MM-DD/.test(p)),'article review date is required');
+ assert(editorSource.includes("box.appendChild(questionField(a, si))"),'article editor exposes each inner-layer prompt');
+ assert(editorSource.includes("articleField(a, 'core', 'Primary summary'"),'article editor exposes the primary layer');
+ assert(editorSource.includes("articleField(a, 'evidenceHref', 'Evidence doc path'"),'article editor exposes the evidence link');
  // Removing deletes the body and rewrites the index without it; removing twice is refused, not silent.
  await ArkAdminStore.removeArticle(adirs,'a-new-note',list);
  assert(!adirs.articles.files.has('a-new-note.js'));assert(!adirs.content.files.get('article-index.js').text.includes('a-new-note'));

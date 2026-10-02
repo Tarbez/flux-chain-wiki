@@ -12,7 +12,7 @@ const outside=new TestNode();documentEvents.pointerdown.fn({target:outside});ass
 const click=ref=>actions[ref](ref,{action:'CLICK'});
 click('SZPAUSE');assert(data.paused);assert.equal(refs.SZPAUSE.text,'Resume motion');
 click('SZPAUSE');assert(!data.paused);
-assert.equal(root.dataset.theme,'original');click('SZTHEMES2');assert.equal(root.dataset.theme,'bone');
+assert.equal(root.dataset.theme,'ghost','invalid saved themes fall back to Night Signal');click('SZTHEMES1');assert.equal(root.dataset.theme,'bone');
 assert.equal(root.dataset.background,'atmosphere');assert.equal(mounts.length,1);
 assert.equal(mounts[0].canvas,'hsl(var(--canvas))');assert.equal(mounts[0].sub.opacity,.37);
 assert.equal(mounts[0].sub.blur,155);assert.equal(mounts[0].grain.opacity,.09);assert.equal(refs.SZSCALE.text,'66');
@@ -27,6 +27,6 @@ click('SZRESET');assert.deepEqual(rotation,[0,0]);assert.equal(options.placement
 const content=spec.tree.children.find(n=>n.slot==='content');assert(content.children.some(n=>n.slot==='themes'));assert(!content.children.some(n=>n.slot==='backgrounds'));assert(!content.children.some(n=>n.slot==='strength'||n.slot==='grain'));assert(content.children.some(n=>n.slot==='softness'));
 for(const slot of Object.values(spec.slots)){const saved=refs[slot.ref];ui.update(slot.ref,saved);assert.equal(refs[slot.ref].attrs.class,slot.config?.attrs?.class);}
 assert.equal(configs.SZCONTENT.attrs.class,'settings-panel');assert.equal(configs.SZTRIGGER.attrs.class,'settings-trigger');
-assert.equal(refs.SZTHEMES2.attrs['aria-pressed'],'true');
+assert.equal(refs.SZTHEMES1.attrs['aria-pressed'],'true');
 windowEvents.pagehide();assert(!documentEvents.pointerdown);
 console.log('PASS: document pointer events forward to ARK with cleanup; declarative controls/styles survive simulated ARK replacement, theme selection, atmosphere-only controls, batched slider updates, bounds, reset, palette binding, pause integration. Runtime mocked.');

@@ -6,6 +6,36 @@ ArkManifest.define({
   "group": "site",
   "meta": {},
   "fields": {
+    "OVERVIEW": {
+      "label": "Header link: protocol overview",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Overview"
+    },
+    "HOW": {
+      "label": "Header link: how Flux works",
+      "kind": "line",
+      "section": "Header links",
+      "value": "How it works"
+    },
+    "RUN": {
+      "label": "Header link: run Flux",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Run Flux"
+    },
+    "MESH": {
+      "label": "Header link: mesh explorer",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Mesh Explorer"
+    },
+    "ACCOUNT": {
+      "label": "Header link: your account",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Account"
+    },
     "RESOLVER": {
       "label": "Header link: what is a resolver",
       "kind": "line",
@@ -16,7 +46,7 @@ ArkManifest.define({
       "label": "Header link: reference resolvers",
       "kind": "line",
       "section": "Header links",
-      "value": "Live resolvers"
+      "value": "Reference resolvers"
     },
     "DEPLOYMENT": {
       "label": "Header link: how deployment works",
@@ -28,31 +58,31 @@ ArkManifest.define({
       "label": "Header link: manifest",
       "kind": "line",
       "section": "Header links",
-      "value": "Spec"
+      "value": "Operating model"
     },
     "EXPERIMENTS": {
       "label": "Header link: registry",
       "kind": "line",
       "section": "Header links",
-      "value": "Demo"
+      "value": "Model"
     },
     "ABOUT": {
       "label": "Header link: observer",
       "kind": "line",
       "section": "Header links",
-      "value": "About"
+      "value": "Overview"
     },
     "WORK": {
       "label": "Header link: spec",
       "kind": "line",
       "section": "Header links",
-      "value": "Lab"
+      "value": "Interactive model"
     },
     "DEPLOY": {
       "label": "Header link: deploy a network",
       "kind": "line",
       "section": "Header links",
-      "value": "Deploy"
+      "value": "Create or join"
     },
     "DAO": {
       "label": "Header link: governance",
@@ -64,7 +94,7 @@ ArkManifest.define({
       "label": "Header link: download",
       "kind": "line",
       "section": "Header links",
-      "value": "Download"
+      "value": "Run Flux"
     },
     "BRAND.NAME": {
       "label": "Wordmark",

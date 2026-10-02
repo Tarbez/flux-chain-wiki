@@ -29,6 +29,7 @@ var ArkPublish = (function () {
     var base = env.base || '';
     /* () -> { publicKeyB64, displayName, sign(text) -> Promise<signatureB64> } | null */
     var identity = env.identity || function () { return null; };
+    var authorize = env.authorize || async function () { return true; };
 
     function signInRefusal() {
       var error = new Error('Sign in first: publishing is signed with your DeadArk identity, and no one is signed in.');
@@ -58,6 +59,12 @@ var ArkPublish = (function () {
       var removes = prepared.removes;
       var removing = !removes || removes.manifests.length || removes.articles.length || removes.assets.length || (removes.secrets && removes.secrets.length);
       if (removing && confirmRemoval && !(await confirmRemoval(removes))) return { cancelled: true, removes: removes };
+      if (!(await authorize({
+        title: 'Publish this site',
+        description: 'Review the exact name-record bytes before this identity signs and sends them to the local publish host.',
+        record: prepared.record,
+        signingMessage: prepared.signingMessage,
+      }))) return { cancelled: true, authorization: true };
       /* the identity may have signed out while the person read the prompt */
       who = identity();
       if (!who || who.publicKeyB64 !== prepared.record.ownerPublicKey) throw signInRefusal();

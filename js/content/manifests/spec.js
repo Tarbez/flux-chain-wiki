@@ -1,12 +1,13 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "spec",
-  "title": "Theory: Spec",
+  "title": "Benchmarks",
   "route": "/concept/spec",
   "group": "theory",
   "meta": {
     "placement": "rail",
-    "next": "about",
+    "next": "download",
+    "docs": "docs/protocol/benchmarks.md",
     "back": "concept"
   },
   "fields": {
@@ -20,85 +21,115 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Measured, release by release."
+      "value": "What can the current benchmark evidence support?"
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Every number names its release and what it was tested against. No flattening into one clean figure."
+      "value": "No canonical public benchmark artifact is registered in this repository. Performance numbers remain unverified until their workload, environment, source revision, method, raw output, and digest can be inspected together."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "READ THE FULL BREAKDOWN"
+      "value": "REVIEW THE EVIDENCE STANDARD"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Best measured sustained throughput: 65.2/s."
+      "value": "Current conclusion: Unverified."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Release 2.0.4: 65.2/s concurrent, five-validator mesh (500 ops, concurrency 100). No valid concurrent Solana comparison exists — its own Devnet attempts hit rate limits every time."
+      "value": "Historical numbers appear in project material, but the evidence registry does not contain the complete reproducible artifacts required to publish them as verified results."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "vs. Solana: sequential only, three different releases."
+      "value": "Comparable tests must share a mode."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Every multiplier compares a Flux sequential run to Solana Devnet's own sequential baseline (0.134/s): flxd-chain 5.85x, agreement fabric 7.34x early build, 20.46x at 1.5.1, 18.81x at 2.0.4 — three releases, not one number said three ways."
+      "value": "Sequential, concurrent, local-process, multi-host, and rate-limited external runs answer different questions. They must not be collapsed into one multiplier."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "The most recent release is still soaking."
+      "value": "Incomplete runs remain incomplete."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Release 2.1.0's 24-hour soak had started, not finished, at last measurement — early batches ran near 2.8/s. A smoke sample, not a ceiling."
+      "value": "A smoke sample or unfinished soak cannot be presented as sustained performance, a ceiling, or a production-readiness result."
     },
     "POINT4.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 4",
-      "value": "Sequential and concurrent are separate claims."
+      "value": "Every result needs its conditions."
     },
     "POINT4.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "The page keeps sequential baselines, concurrent mesh runs, and failed comparison attempts separate because combining them would make a cleaner but less truthful story."
+      "value": "A publishable record names hardware, operating system, network conditions, dataset, warm-up, repetitions, aggregation method, units, uncertainty, and known limitations."
     },
     "POINT5.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 5",
-      "value": "Benchmarks are audit notes, not slogans."
+      "value": "Raw artifacts come before the headline."
     },
     "POINT5.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Each number should answer: which release, which mode, how many validators, how much concurrency, and what baseline. If any of those are missing, the claim is incomplete."
+      "value": "The evidence registry must link the raw result and digest before a public page can promote a measurement from Unverified to Live or Partial."
+    },
+    "STATUS.TITLE": {
+      "label": "Status heading",
+      "kind": "line",
+      "section": "Evidence",
+      "value": "Status / Unverified"
+    },
+    "STATUS.TEXT": {
+      "label": "Status text",
+      "kind": "text",
+      "section": "Evidence",
+      "value": "BENCH-001 has no complete public benchmark artifact. This page therefore publishes the evidence standard, not unsupported performance numbers."
+    },
+    "LIMIT.TITLE": {
+      "label": "Limitation heading",
+      "kind": "line",
+      "section": "Evidence",
+      "value": "No cross-system conclusion"
+    },
+    "LIMIT.TEXT": {
+      "label": "Limitation text",
+      "kind": "text",
+      "section": "Evidence",
+      "value": "No current throughput, latency, scale, or external-chain comparison is verified by the evidence registered here."
+    },
+    "EVIDENCE": {
+      "label": "Canonical evidence link",
+      "kind": "line",
+      "section": "Links",
+      "value": "READ THE BENCHMARK STANDARD"
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "ABOUT THE STUDIO"
+      "value": "RUN FLUX FROM SOURCE"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

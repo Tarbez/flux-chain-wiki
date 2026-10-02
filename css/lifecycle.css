@@ -1,10 +1,7 @@
-/* The lifecycle is painted and operated on the persistent lattice canvases. */
+/* Lifecycle content is DOM-based; the persistent lattice is decorative. */
 #scene .ark-page[hidden] { display:none !important; }
-.lifecycle-departing .ark-hero-body,
-.lifecycle-departing .home-tools,
-.lifecycle-departing .page-iceberg { visibility:hidden !important; }
 .hero-alive[data-page="lifecycle"] .lattice-field,
-.hero-alive[data-page^="lifecycle/"] .lattice-field { opacity:.58; }
+.hero-alive[data-page^="lifecycle/"] .lattice-field { opacity:.18; }
 .hero-alive[data-page="lifecycle"] .mesh-drag-surface,
 .hero-alive[data-page^="lifecycle/"] .mesh-drag-surface { display:none !important; }
 .hero-alive[data-page="lifecycle"] .hero-motion-toggle,
@@ -12,13 +9,12 @@
 .hero-alive[data-page="lifecycle"] .lattice-activity,
 .hero-alive[data-page^="lifecycle/"] .lattice-activity {
   z-index:2;
-  opacity:1;
-  pointer-events:auto;
-  touch-action:none;
+  opacity:0;
+  pointer-events:none;
 }
 .hero-alive.is-lifecycle-transition .lattice-activity {
   z-index:2;
-  opacity:1;
+  opacity:0;
   transition:none;
   pointer-events:none;
 }
@@ -28,16 +24,63 @@
   outline-offset:-4px;
 }
 #scene .lifecycle-page {
-  position:absolute;
-  width:1px;
-  height:1px;
-  overflow:hidden;
-  clip-path:inset(50%);
-  pointer-events:none;
+  position:relative;
+  width:calc(100% - 2 * clamp(16px,3cqw,48px));
+  max-width:1080px;
+  min-height:calc(100dvh - 128px);
+  margin-inline:auto;
+  padding:clamp(34px,6cqh,70px) clamp(20px,4cqw,56px) 72px;
+  box-sizing:border-box;
+  overflow:visible;
+  clip-path:none;
+  pointer-events:auto;
+}
+#scene .lifecycle-page > h1 {
+  max-width:13ch; margin:0 0 18px; color:hsl(var(--text-strong));
+  font:800 clamp(42px,5.4cqw,74px)/.98 "Albert Sans",sans-serif;
+  letter-spacing:-.045em;
+}
+#scene .lifecycle-page .lifecycle-scenario {
+  max-width:62ch; margin:0 0 36px; color:hsl(var(--text-muted));
+  font:400 16px/1.65 "Albert Sans",sans-serif;
+}
+#scene .lifecycle-page .content-layer-path { margin-bottom:28px; }
+#scene .lifecycle-page > section {
+  display:grid; grid-template-columns:minmax(150px,.55fr) minmax(260px,1.45fr);
+  gap:8px 32px; max-width:800px; padding:24px 0;
+  border-top:1px solid hsl(var(--border-subtle));
+}
+#scene .lifecycle-page > section.lifecycle-stage-summary { grid-template-columns:minmax(150px,.55fr) minmax(260px,1.45fr) auto; align-items:start; }
+#scene .lifecycle-page > section h2 {
+  grid-row:1/8; margin:0; color:hsl(var(--text-strong));
+  font:600 24px/1.2 "Albert Sans",sans-serif;
+}
+#scene .lifecycle-page > section h2 a { color:inherit; text-decoration:none; }
+#scene .lifecycle-page > section h2 a:hover,#scene .lifecycle-page > section h2 a:focus-visible { color:hsl(var(--accent)); }
+#scene .lifecycle-page > section p {
+  margin:0; color:hsl(var(--text-muted)); font:400 16px/1.62 "Albert Sans",sans-serif;
+}
+#scene .lifecycle-page .lifecycle-stage-link { color:hsl(var(--accent)); font:600 9px/1.4 var(--mono-font,ui-monospace,monospace); text-decoration:none; text-transform:uppercase; white-space:nowrap; }
+#scene .lifecycle-page .lifecycle-stage-link:hover,#scene .lifecycle-page .lifecycle-stage-link:focus-visible { color:hsl(var(--text-strong)); }
+#scene .lifecycle-page > section p:first-of-type { color:hsl(var(--text-strong)); font-weight:600; }
+#scene .lifecycle-page .lifecycle-evidence {
+  display:grid; gap:8px; max-width:800px; margin-top:28px; padding:18px;
+  border:1px solid hsl(var(--border-default)); background:hsl(var(--surface) / .82);
+}
+#scene .lifecycle-page .lifecycle-evidence strong {
+  color:hsl(var(--accent)); font:600 10px/1.4 var(--mono-font,ui-monospace,monospace); text-transform:uppercase;
+}
+#scene .lifecycle-page .lifecycle-evidence p { margin:0; color:hsl(var(--text-muted)); font:400 16px/1.6 "Albert Sans",sans-serif; }
+#scene .lifecycle-page .lifecycle-evidence a { color:hsl(var(--text-strong)); font:600 10px/1.4 var(--mono-font,ui-monospace,monospace); text-transform:uppercase; text-decoration:none; }
+#scene .lifecycle-page .lifecycle-evidence a:hover { color:hsl(var(--accent)); }
+@media(max-width:620px) {
+  #scene .lifecycle-page > section { grid-template-columns:1fr; }
+  #scene .lifecycle-page > section.lifecycle-stage-summary { grid-template-columns:1fr; }
+  #scene .lifecycle-page > section h2 { grid-row:auto; }
 }
 @media(max-width:760px) {
   .hero-alive[data-page="lifecycle"] .lattice-field,
-  .hero-alive[data-page^="lifecycle/"] .lattice-field { opacity:.42; }
+  .hero-alive[data-page^="lifecycle/"] .lattice-field { opacity:.12; }
 }
 @media(prefers-reduced-motion:reduce) {
   .hero-alive .lattice-field { transition:none; }

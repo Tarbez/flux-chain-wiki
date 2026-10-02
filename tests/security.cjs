@@ -16,7 +16,7 @@ vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
  assert(!/<script>([\s\S]*?)<\/script>/.test(html));
  assert(html.includes("script-src 'self' file:;"));
  assert(html.includes("base-uri 'none'"));
- assert(html.includes("connect-src 'none'"));
+ assert(html.includes('connect-src http://127.0.0.1:8766 http://localhost:8766;'), 'Explorer may contact only the local Miner listener');
  assert(!html.includes('js/resolvers/logo.js'));
  // A CTA may send a visitor only within this site. Reason: `window.location.assign(p.href)` took whatever copy said, so a
  // `javascript:` or `//host` href in a content file would have run script or redirected off-site. Not reachable from a visitor

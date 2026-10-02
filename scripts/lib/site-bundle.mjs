@@ -199,7 +199,7 @@ export function encodeSite(site, root = defaultProjectRoot) {
     generatedBy: 'flux-chain/scripts/lib/site-bundle.mjs',
     sourceFormat: SITE_SCHEMA,
     routes: [
-      { routeId: 'site', path: '/', title: 'Flux Chain', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null, theme: site.theme != null, seo: site.seo != null } },
+      { routeId: 'site', path: '/', title: 'Flux Protocol', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null, theme: site.theme != null, seo: site.seo != null } },
       ...site.manifests.map((m) => ({ routeId: `manifest.${m.id}`, path: `/manifest/${m.id}`, title: m.title, payload: m })),
       ...site.articles.map((a) => ({ routeId: `article.${a.slug}`, path: `/article/${a.slug}`, title: a.title, payload: a })),
       ...site.assets.map((a) => ({ routeId: `asset.${a.id}`, path: `/asset/${a.id}`, title: a.label, payload: a })),

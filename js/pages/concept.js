@@ -23,6 +23,9 @@ ArkUI.pageModules.concept = {
       var row = ArkUI.el('section');
       row.appendChild(ArkUI.el('span', '', ('0' + (i + 1)).slice(-2)));
       row.appendChild(ArkUI.el('h2', '', ArkCopy.text(m.id.toUpperCase() + '.TITLE')));
+      var symbol = ArkUI.el('div', 'concept-symbol concept-symbol-' + m.id); symbol.setAttribute('aria-hidden', 'true');
+      for (var ring = 0; ring < 3; ring++) symbol.appendChild(ArkUI.el('i'));
+      row.appendChild(symbol);
       row.appendChild(cta(m)); rows.appendChild(row);
     });
     content.appendChild(rows);

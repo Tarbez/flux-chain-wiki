@@ -27,8 +27,8 @@ assert.match(a, /^[A-Z2-7]{32}$/); assert.notEqual(a, b);
 assert.equal(base32Decode(a).length, 20);
 
 // The URI an authenticator reads carries the secret, the issuer, and the parameters it must use.
-const uri = otpauthUri({ secret: a, issuer: 'Flux Chain admin', account: 'Founding browser 1' });
-assert(uri.startsWith('otpauth://totp/Flux%20Chain%20admin:Founding%20browser%201?')); assert(uri.includes(`secret=${a}`)); assert(/digits=6&period=30/.test(uri));
+const uri = otpauthUri({ secret: a, issuer: 'Flux Protocol admin', account: 'Founding browser 1' });
+assert(uri.startsWith('otpauth://totp/Flux%20Protocol%20admin:Founding%20browser%201?')); assert(uri.includes(`secret=${a}`)); assert(/digits=6&period=30/.test(uri));
 
 // Verification: current step and one either side; nothing further; and never twice.
 const secret = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ';                  // the RFC secret in base32

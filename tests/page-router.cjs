@@ -10,10 +10,18 @@ class Element {
   focus(){}
   querySelector(){return null;}
 }
-const document={createElement:()=>new Element(),querySelector:()=>null,activeElement:null};
+const description={value:'Initial site description',getAttribute(){return this.value;},setAttribute(key,value){if(key==='content')this.value=value;}};
+const head=new Element();
+const document={head,createElement:()=>new Element(),querySelector:selector=>{
+ if(selector==='meta[name="description"]')return description;
+ const match=selector.match(/\[(name|property|rel)="([^"]+)"\]/);
+ return match?head.children.find(el=>el.attrs[match[1]]===match[2])||null:null;
+},activeElement:null};
 const window={scrollY:0,scrollTo(x,y){this.scrollY=y;},matchMedia:()=>({matches:true})};
 const context=vm.createContext({console,document,window,getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
 for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific description':fallback,articleDescription:(id,fallback)=>fallback,
+ ogImage:(map,id)=>id==='about'?'https://example.com/about.png':'',canonical:(map,id)=>id==='about'?'https://example.com/about':''};
 (async()=>{
  const scene=new Element(),canvas=scene.appendChild(new Element()),header=scene.appendChild(new Element()),outlet=scene.appendChild(new Element());
  const loads={},mounts={},disposed={},writes=[];let resolveSlow,failConcept=true;
@@ -44,7 +52,7 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  assert.equal(router.resolve('#/experiments/lab'),'lab');assert.equal(router.resolve('#work'),'lab');
  assert(!context.ArkUI.pageCatalog.proximity.scripts.includes('js/studio.js'));
  assert(!fs.readFileSync('js/pages/experiments.js','utf8').includes('mountStudio'));
- assert(fs.readFileSync('js/pages/lab.js','utf8').includes('The open lab'));
+ assert(fs.readFileSync('js/pages/lab.js','utf8').includes('Interactive model'));
  assert.equal(router.resolve('#/experiments'),'proximity');assert.equal(router.resolve('#proximity'),'proximity');
  assert.equal(router.resolve('#/lifecycle'),'lifecycle');assert.equal(router.url('lifecycle'),'#/lifecycle');
  assert.equal(context.ArkUI.sceneState.pages.lifecycle.mesh,'zero');
@@ -58,10 +66,28 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  assert.equal(router.resolve('#/learnings/why-the-chain-was-retired?q=3'),'article/why-the-chain-was-retired','question links resolve to the parent article');
  assert.equal(writes.at(-1)[1],'none');
  await router.navigate('about');assert.equal(router.active,'about');assert.equal(context.ArkUI.sceneState.get().page,'about');
+ assert.equal(description.value,'About-specific description');
+ assert.equal(document.querySelector('meta[property="og:description"]').attrs.content,description.value);
+ assert.equal(document.querySelector('meta[property="og:title"]').attrs.content,document.title);
+ assert.equal(document.querySelector('meta[name="twitter:card"]').attrs.content,'summary_large_image');
+ assert.equal(document.querySelector('link[rel="canonical"]').attrs.href,'https://example.com/about');
  await router.navigate('lab');assert.equal(router.active,'lab');assert.equal(outlet.children.length,1);assert.equal(context.ArkUI.sceneState.get().page,'lab');
+ assert.equal(description.value,'Initial site description','routes without overrides must not inherit the previous route description');
+ for(const selector of ['link[rel="canonical"]','meta[property="og:url"]','meta[property="og:image"]','meta[name="twitter:image"]']) assert.equal(document.querySelector(selector),null,'stale optional metadata removed: '+selector);
+ assert.equal(document.querySelector('meta[name="twitter:card"]').attrs.content,'summary');
+ assert.equal(head.children.filter(el=>el.attrs.property==='og:title').length,1,'navigation updates tags without duplicates');
+ const savedAboutScene=context.ArkUI.sceneState.pages.about;
+ delete context.ArkUI.sceneState.pages.about;
+ const preservedPage=router.pages.lab;
+ assert.equal(await router.navigate('about'),false,'missing scene config fails before handoff');
+ assert.equal(router.active,'lab');assert.equal(router.pages.lab,preservedPage);
+ assert.equal(preservedPage.hidden,false,'failed route leaves current content visible');
+ assert.equal(outlet.children.length,1,'failed route does not mount a hidden replacement');
+ context.ArkUI.sceneState.pages.about=savedAboutScene;
  for(const key of ['__proto__','constructor','toString']) { assert.equal(router.resolve('#'+key),'zero'); await assert.rejects(router.navigate(key),/Unknown page/); }
 
  const animatedRoot=new Element();animatedRoot.dataset.arkPage='zero';
+ animatedRoot.calls=[];animatedRoot.animate=function(frames,timing){this.calls.push({frames,timing});return {finished:Promise.resolve(),cancel(){}};};
  const staggered=Array.from({length:3},()=>animatedRoot.appendChild(new Element()));
  staggered.forEach(item=>{item.calls=[];item.animate=function(frames,timing){this.calls.push({frames,timing});return {finished:Promise.resolve(),cancel(){}};};});
  animatedRoot.querySelectorAll=()=>staggered;
@@ -70,9 +96,11 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  assert(staggered[0].calls[0].timing.delay>staggered[2].calls[0].timing.delay,'exit cascades across elements in reverse order');
  assert(staggered.every(item=>!item.hidden),'exit does not hide individual elements permanently');
  assert(animatedRoot.hidden,'the page hides only after its element exits');
+ assert.equal(animatedRoot.calls[0].frames.at(-1).opacity,'0','root fades unmatched content as well as staggered elements');
  await elementPresence.enter('zero',false);
  assert(staggered[0].calls[1].timing.delay<staggered[2].calls[1].timing.delay,'enter reveals individual elements in reading order');
  assert(!animatedRoot.hidden,'the page remains available after its element entrances');
+ assert.equal(animatedRoot.calls[1].frames[0].opacity,'0','root starts concealed on entry');
 
  const articleRoot=new Element();articleRoot.dataset.arkPage='article/test';articleRoot.hidden=true;
  const articleTitle=articleRoot.appendChild(new Element()),hiddenAnswer=articleRoot.appendChild(new Element());
@@ -87,10 +115,10 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  assert.equal(articleTitle.calls.length,1,'the visible article title enters even while its page root starts hidden');
  assert.equal(hiddenAnswer.calls.length,0,'unselected answer chunks never animate');
 
- const presenceCalls=[];
+ const presenceCalls=[];let releaseExit;
  context.ArkUI.prefersReducedMotion=()=>false;
  context.ArkUI.createPresence=()=>({
-   hide(page){presenceCalls.push('hide:'+page);return Promise.resolve();},
+   hide(page){presenceCalls.push('hide:'+page);return new Promise(resolve=>{releaseExit=resolve;});},
    enter(page){presenceCalls.push('enter:'+page);return Promise.resolve();},
    show(page){presenceCalls.push('show:'+page);return Promise.resolve();}
  });
@@ -102,37 +130,64 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  });
  await transitionRouter.navigate('zero');presenceCalls.length=0;
  const transitioning=transitionRouter.navigate('lifecycle/intent');
+ for(let i=0;i<10&&!releaseExit;i++)await Promise.resolve();
+ assert.equal(transitionState.page,'zero','outgoing page keeps its layout for its entire exit');
+ assert(transitionRouter.pages.zero,'outgoing page remains mounted until its exit finishes');
+ assert(transitionRouter.pages['lifecycle/intent'].hidden,'incoming content remains hidden during exit');
+ releaseExit();releaseExit=null;
  for(let i=0;i<10&&!transitionState.lifecycleRun;i++)await Promise.resolve();
  assert.equal(transitionState.page,'lifecycle/intent','grid zoom starts with route change');
  assert(transitionScene.classList.contains('is-lifecycle-transition'),'canvas opacity stays stable during the zoom');
- assert(transitionRouter.pages.zero.classList.contains('lifecycle-departing'),'departing home hero is hidden without removing the lifecycle rail');
- assert.deepEqual(presenceCalls,[],'outgoing rail waits for zoom before fading');
+ assert.equal(transitionRouter.pages.zero,undefined,'home is removed before lifecycle styles can reflow its cards');
+ assert.deepEqual(presenceCalls,['hide:zero','enter:lifecycle/intent'],'incoming content starts as soon as the outgoing page is removed');
  const run=transitionState.lifecycleRun;
  const timing=context.ArkUI.lifecycleTransition;
  run.advance(timing.zoomMs);await Promise.resolve();await Promise.resolve();
- assert.deepEqual(presenceCalls,['hide:zero'],'the rail fades once the zoom ends');
+ assert.deepEqual(presenceCalls,['hide:zero','enter:lifecycle/intent'],'content stays in the same handoff as the mesh zoom');
  assert(Math.abs(timing.opacityOut(timing.enterMs)-.2)<.001,'incoming starts while 20% of outgoing content is still visible');
  assert.equal(timing.opacityIn(timing.enterMs),0);
  assert(timing.opacityOut(timing.enterMs+20)>0&&timing.opacityIn(timing.enterMs+20)>0,'both content layers are visible during the crossfade');
  run.advance(timing.enterMs);await Promise.resolve();await Promise.resolve();
- assert(presenceCalls.includes('enter:lifecycle/intent'),'new content begins at the overlap point');
+ assert(presenceCalls.includes('enter:lifecycle/intent'),'new content is not delayed until the late overlap point');
  run.finish();await transitioning;
  assert(!transitionScene.classList.contains('is-lifecycle-transition'),'transition styles clear after arrival');
  presenceCalls.length=0;
  const returning=transitionRouter.navigate('zero');
+ for(let i=0;i<10&&!releaseExit;i++)await Promise.resolve();
+ assert.equal(transitionState.page,'lifecycle/intent','reverse transition also retains outgoing route styles');
+ releaseExit();releaseExit=null;
  for(let i=0;i<10&&transitionState.page!=='zero';i++)await Promise.resolve();
  const reverseRun=transitionState.lifecycleRun;
  assert(reverseRun,'zoom-out uses the same canvas timeline');
- assert(transitionRouter.pages.zero.hidden,'home stays hidden while the grid zooms out');
- assert.deepEqual(presenceCalls,[],'stage content remains until zoom-out ends');
+ assert.equal(transitionRouter.pages['lifecycle/intent'],undefined,'the outgoing stage is removed before home styles apply');
+ assert.deepEqual(presenceCalls,['hide:lifecycle/intent','enter:zero'],'home begins entering with the zoom-out');
  reverseRun.advance(timing.zoomMs);await Promise.resolve();await Promise.resolve();
- assert.deepEqual(presenceCalls,['hide:lifecycle/intent']);
+ assert.deepEqual(presenceCalls,['hide:lifecycle/intent','enter:zero']);
  reverseRun.advance(timing.enterMs);await Promise.resolve();await Promise.resolve();
- assert(presenceCalls.includes('enter:zero'),'home begins entering at the 80% overlap point');
+ assert(presenceCalls.includes('enter:zero'),'home does not wait for the late overlap point');
  reverseRun.finish();await returning;
  assert.equal(transitionRouter.active,'zero');
+ // Apply the same handoff invariant to every registered route, not just lifecycle.
+ const allScene=new Element(),allOutlet=allScene.appendChild(new Element());
+ const allState={get(){return {paused:false};},navigate(page){
+   assert.equal(allOutlet.children.length,1,'no outgoing DOM survives the route-style switch: '+page);
+   assert.equal(allOutlet.children[0].dataset.arkPage,page);
+   assert(allOutlet.children[0].hidden,'incoming page is concealed at the route-style switch: '+page);
+ }};
+ const allRouter=context.ArkUI.createPageRouter({scene:allScene,outlet:allOutlet,state:allState,catalog:context.ArkUI.pageCatalog,
+   load:async()=>({mount(host){return host.appendChild(new Element());}}),writeHistory(){}
+ });
+ for(const page of Object.keys(context.ArkUI.pageCatalog)) {
+   let settled=false;const hop=allRouter.navigate(page).then(value=>{settled=true;return value;});
+   for(let i=0;i<40&&!settled;i++) {
+     await Promise.resolve();
+     if(releaseExit){const release=releaseExit;releaseExit=null;release();}
+     if(allState.lifecycleRun)allState.lifecycleRun.finish();
+   }
+   assert(settled,'transition settles: '+page);assert(await hop);
+ }
  const lifecycleCss=fs.readFileSync('css/lifecycle.css','utf8');
- assert(lifecycleCss.includes('.lifecycle-departing .ark-hero-body'));
+ assert(!lifecycleCss.includes('.lifecycle-departing'),'no partial home hide may leave its status and cards exposed');
  assert(lifecycleCss.includes('#scene .ark-page[hidden] { display:none !important; }'),'hidden home page cannot show early on zoom-out');
  const html=fs.readFileSync('index.html','utf8');assert(!html.includes('class="expansion"'));assert(!html.includes('js/content/articles/'));assert(!html.includes('src="js/studio.js"'));assert(!html.includes('src="js/resolvers/learnings.js"'));
  for(const definition of Object.values(context.ArkUI.pageCatalog)) for(const file of definition.scripts)assert(fs.existsSync(file),file);

@@ -92,8 +92,8 @@ var ArkMeshSettings = (function () {
      yet, so a page id absent from this list just keeps its built-in shape. */
   var PAGES = [
     { id: 'zero', label: 'Home' },
-    { id: 'proximity', label: 'Experiments' },
-    { id: 'lab', label: 'The open lab' },
+    { id: 'proximity', label: 'Interactive model' },
+    { id: 'lab', label: 'Interactive model controls' },
     { id: 'about', label: 'About' },
     { id: 'concept', label: 'Theory' }
   ];

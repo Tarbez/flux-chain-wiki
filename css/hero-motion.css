@@ -107,7 +107,7 @@
 .hero-experiment-kicker::after { content: ""; width: 64px; height: 1px; background: rgba(215,237,231,.24); }
 .hero-experiment-kicker b { order: 3; color: var(--field-accent); font: inherit; }
 .hero-experiment-index { margin: 0 0 12px; color: var(--field-accent); font: 500 9px/1 var(--ark-font); letter-spacing: .18em; }
-.hero-experiment-copy h2 {
+.hero-experiment-copy h1 {
   margin: 0 0 20px;
   font: 250 clamp(56px,8.4cqw,132px)/.78 var(--ark-font);
   letter-spacing: -.075em;
@@ -159,7 +159,7 @@
   .ark-hero-copy { max-width: 31em; font-size: 12px; }
   .hero-motion-toggle { bottom: 14px; }
   .hero-experiment-state { left: 20px; top: 24%; width: calc(100% - 40px); }
-  .hero-experiment-copy h2 { font-size: clamp(48px,18cqw,84px); }
+  .hero-experiment-copy h1 { font-size: clamp(48px,18cqw,84px); }
   .hero-experiment-note { max-width: 28em; }
   .hero-experiment-meter { display: none; }
 }

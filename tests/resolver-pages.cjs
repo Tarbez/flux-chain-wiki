@@ -16,13 +16,15 @@ assert.deepEqual(Array.from(manifests, (manifest) => manifest.route), [
 ]);
 assert.equal(manifests[0].meta.next, 'references');
 assert.equal(manifests[1].meta.next, 'deployment');
-assert.equal(manifests[2].meta.next, 'deploy');
+assert.equal(manifests[2].meta.next, 'download');
 
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
-assert(home.includes("deploy.dataset.sceneLink = 'deploy'"));
+assert(home.includes("primary.dataset.sceneLink = 'deployment'"));
+assert(home.includes("secondary.dataset.sceneLink = 'download'"));
 assert(home.includes("['HOME.QUESTION.RESOLVER', 'resolver']"));
 assert(home.includes("['HOME.QUESTION.FLUX', 'about']"));
 assert(home.includes("lifecycle.className = 'home-lifecycle'"), 'the right-side agreement lifecycle remains on the home page');
+assert(!home.includes("signal.className = 'home-signal-map'"), 'the decorative signal diagram no longer competes with the decision path');
 
 const catalogSource = fs.readFileSync('js/pages/catalog.js', 'utf8');
 for (const id of ['resolver', 'references', 'deployment']) {

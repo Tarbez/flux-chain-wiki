@@ -1,12 +1,13 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "notes",
-  "title": "Theory: Notes",
+  "title": "Activation",
   "route": "/concept/notes",
   "group": "theory",
   "meta": {
     "placement": "rail",
-    "next": "learnings",
+    "next": "dao",
+    "docs": "docs/protocol/governance.md",
     "back": "concept"
   },
   "fields": {
@@ -14,91 +15,121 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / GOVERNANCE"
+      "value": "FLUX PROTOCOL / ACTIVATION"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Governance, two ways."
+      "value": "When does an approved change become active?"
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Mesh-operations governance and any network's DAO are separate signer sets, separate thresholds. Neither quorum acts for the other."
+      "value": "Approval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed."
     },
     "CTA": {
       "label": "Link on the theory page",
       "kind": "line",
       "section": "Links",
-      "value": "SEE THE TWO ROSTERS"
+      "value": "SEPARATE APPROVAL FROM ACTIVATION"
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Mesh-operations: seven operators."
+      "value": "Approval answers who consented."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Seven operators. 4-of-7 ordinary admission, 5-of-7 economic or runtime changes, 3-of-7 to pause, 5-of-7 to unpause. Governs the substrate, not any one network."
+      "value": "The decision record identifies the policy, eligible roster, required threshold, and collected approvals. It does not by itself prove the change is running."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Per-network: each DAO governs itself."
+      "value": "Activation answers what was applied."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "A network's own DAO signs its own decisions, its own threshold. DAO Chain and CR3TV are two examples — neither governs the other."
+      "value": "Activation evidence must identify the approved action, target environment, applied revision, responsible actor or process, and observation time."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "An approved ceremony is not activation."
+      "value": "Readiness gates remain independent."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "A fully signed result stays closed until separate activation gates open it. A signature is evidence, not a live switch."
+      "value": "Independent-host role readiness, hostile testing, and signed soak evidence are separate from the approval ceremony and must not be inferred from it."
     },
     "POINT4.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 4",
-      "value": "Thresholds answer different questions."
+      "value": "Pause and unpause are intentionally asymmetric."
     },
     "POINT4.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "Ordinary admission, economic changes, runtime changes, pause, and unpause do not share one vague quorum. The required signer count changes with the consequence."
+      "value": "The source policy makes pausing easier than unpausing. That difference limits recovery risk; it does not prove any particular production environment is active."
     },
     "POINT5.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 5",
-      "value": "Names matter."
+      "value": "Missing evidence stays unverified."
     },
     "POINT5.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Saying \"the DAO\" is not enough. The page separates mesh operations from per-network DAOs so the reader can tell which roster has authority before trusting a decision."
+      "value": "If the applied revision, environment, observation time, or readiness artifacts are absent, report activation as Unverified rather than treating signatures as a live switch."
+    },
+    "STATUS.TITLE": {
+      "label": "Status heading",
+      "kind": "line",
+      "section": "Evidence",
+      "value": "Status / Unverified"
+    },
+    "STATUS.TEXT": {
+      "label": "Status text",
+      "kind": "text",
+      "section": "Evidence",
+      "value": "Independent production activation is not established by the evidence registered in this repository."
+    },
+    "LIMIT.TITLE": {
+      "label": "Limitation heading",
+      "kind": "line",
+      "section": "Evidence",
+      "value": "Do not infer"
+    },
+    "LIMIT.TEXT": {
+      "label": "Limitation text",
+      "kind": "text",
+      "section": "Evidence",
+      "value": "Do not infer runtime activation, economic settlement, or production readiness from a completed signature ceremony alone."
+    },
+    "EVIDENCE": {
+      "label": "Canonical evidence link",
+      "kind": "line",
+      "section": "Links",
+      "value": "READ THE GOVERNANCE GUIDE"
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "READ THE NOTES"
+      "value": "COMPARE GOVERNANCE ROSTERS"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

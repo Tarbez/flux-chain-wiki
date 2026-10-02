@@ -46,9 +46,11 @@ ArkUI.register('RHEADER_V1', {
     core.className = 'header-core-links';
     core.setAttribute('aria-label', 'Core pages');
     [
-      ['NAV.RESOLVER', 'resolver'],
-      ['NAV.DEPLOYMENT', 'deployment'],
-      ['NAV.DEPLOY', 'deploy']
+      ['NAV.OVERVIEW', 'about'],
+      ['NAV.HOW', 'deployment'],
+      ['NAV.MESH', 'explorer'],
+      ['NAV.ACCOUNT', 'account'],
+      ['NAV.RUN', 'download']
     ].forEach(function (item) {
       var link = document.createElement('a');
       link.href = '#' + ArkUI.pageCatalog[item[1]].path;
@@ -88,13 +90,18 @@ ArkUI.register('RHEADER_V1', {
     Array.prototype.forEach.call(menu.querySelectorAll('a'), function (link) {
       existing[link.getAttribute('href')] = link;
     });
-    var start = ['zero', 'resolver', 'references', 'deployment', 'deploy', 'about'];
-    var explore = ['concept', 'proximity', 'lab', 'dao', 'download', 'learnings'];
+    var understand = ['zero', 'about', 'resolver', 'deployment'];
+    var evaluate = ['explorer', 'account', 'treasury', 'deposits', 'references', 'concept', 'dao'];
+    var run = ['download', 'deploy'];
+    var read = ['learnings', 'proximity', 'lab'];
     var lifecycle = Object.keys(catalog).filter(function (key) { return key === 'lifecycle' || key.indexOf('lifecycle/') === 0; });
     var mechanics = Object.keys(catalog).filter(function (key) { return key.indexOf('concept/') === 0; });
     var articles = Object.keys(catalog).filter(function (key) { return key.indexOf('article/') === 0; });
-    var named = start.concat(explore, lifecycle, mechanics, articles);
-    Object.keys(catalog).forEach(function (key) { if (named.indexOf(key) < 0) explore.push(key); });
+    understand = understand.concat(lifecycle);
+    evaluate = evaluate.concat(mechanics);
+    read = read.concat(articles);
+    var named = understand.concat(evaluate, run, read);
+    Object.keys(catalog).forEach(function (key) { if (named.indexOf(key) < 0) evaluate.push(key); });
     menu.dataset.pageCount = String(Object.keys(catalog).length);
     function label(key) {
       if (key === 'zero') return 'Home';
@@ -213,22 +220,14 @@ ArkUI.register('RHEADER_V1', {
     }
     var index = layer('index', 'Explore Flux', 'Choose a path.');
     [
-      ['Start here', 'The essentials and the deployment path', start, 'start'],
-      ['Explore', 'Ideas and tools', explore, 'explore'],
-      ['Agreement lifecycle', 'From intent to receipt', lifecycle, 'lifecycle'],
-      ['The mechanics', 'How the system works', mechanics, 'mechanics'],
-      ['Reading', 'Essays and context', articles, 'reading']
+      ['Understand', 'Overview, resolvers, networks, and agreements', understand, 'understand'],
+      ['Evaluate', 'Live local mesh data, evidence, governance, and status', evaluate, 'evaluate'],
+      ['Run', 'Source setup and named-network operations', run, 'run'],
+      ['Read', 'Notes, articles, and the interactive model', read, 'read']
     ].forEach(function (entry) {
       index.appendChild(choice(entry[0], entry[1], entry[2].length, entry[3]));
       var body = layer(entry[3], entry[0], entry[1], 'the index');
-      if (entry[3] === 'lifecycle') {
-        body.appendChild(routeLink('lifecycle', false));
-        body.appendChild(choice('Five stages', 'Intent, offer, agreement, fulfillment, receipt', 5, 'stages'));
-      } else entry[2].forEach(function (key) { body.appendChild(routeLink(key, false)); });
-    });
-    var stages = layer('stages', 'Five stages', 'Follow an agreement from intent to receipt.', 'Agreement lifecycle');
-    lifecycle.filter(function (key) { return key !== 'lifecycle'; }).forEach(function (key) {
-      stages.appendChild(routeLink(key, true));
+      entry[2].forEach(function (key) { body.appendChild(routeLink(key, key.indexOf('lifecycle/') === 0)); });
     });
     menu.navLayers = { reset: reset, back: goBack, current: function () { return stack[stack.length - 1]; } };
   },

@@ -294,7 +294,7 @@
 
   function openEditor() {
     frame = document.createElement('iframe');
-    frame.id = 'app'; frame.title = 'Flux Chain admin'; frame.src = 'admin-app.html';
+    frame.id = 'app'; frame.title = 'Flux Protocol admin'; frame.src = 'admin-app.html';
     document.body.appendChild(frame);
     $('gate').hidden = true; document.body.classList.remove('locked');
   }
@@ -386,7 +386,7 @@
   /* The identity picker is always mounted (reauthenticate needs it live even after the editor has opened),
      but a reload no longer forces a fresh sign-in: if the host's own session cookie is still valid, the
      editor opens immediately and the recovery file is only asked for again when Publish actually needs it. */
-  auth = ArkAdminAuth.create({ container: kitContainer, product: 'Flux Chain admin', onChange: onIdentity });
+  auth = ArkAdminAuth.create({ container: kitContainer, product: 'Flux Protocol admin', onChange: onIdentity });
   api('/api/session').then(function (info) {
     if (info.authenticated) openEditor();
   }).catch(function () {});

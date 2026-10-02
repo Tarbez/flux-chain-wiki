@@ -8,7 +8,15 @@
   }
   function link(label, page, className) {
     var el = node('a', className, label);
-    el.href = '#' + page;
+    el.href = page.indexOf('article/') === 0 ? '#/learnings/' + page.slice(8) : '#/learnings';
+    el.dataset.sceneLink = page;
+    return el;
+  }
+  function pageLink(label, page, className) {
+    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[page];
+    if (!entry) return null;
+    var el = node('a', className, label);
+    el.href = '#' + entry.path;
     el.dataset.sceneLink = page;
     return el;
   }
@@ -72,6 +80,7 @@
       var core = node('div', 'article-core');
       core.appendChild(node('span', 'article-core-label', 'THE CORE'));
       core.appendChild(node('p', 'article-core-text', article.core || article.summary));
+      core.appendChild(node('p', 'article-relevance', article.relevance));
       header.appendChild(core);
       el.appendChild(header);
       var body = node('div', 'article-body');
@@ -125,7 +134,18 @@
       reading.appendChild(controls);
       var nextNote = link('NEXT NOTE / ' + next.title + ' ↗', 'article/' + next.slug, 'article-next');
       reading.appendChild(nextNote);
-      body.appendChild(reading); el.appendChild(body);
+      body.appendChild(reading);
+      var sources = node('details', 'article-sources');
+      sources.appendChild(node('summary', '', 'Evidence, review date & next step'));
+      sources.appendChild(node('p', 'article-reviewed', 'Editorial review: ' + article.reviewed + '. This is not live capability verification.'));
+      var evidenceLink = node('a', 'article-evidence-link', article.evidenceLabel);
+      evidenceLink.href = article.evidenceHref;
+      sources.appendChild(evidenceLink);
+      var related = pageLink('Related mechanism ↗', article.relatedPage, 'article-related');
+      var action = pageLink(article.actionLabel + ' ↗', article.actionPage, 'article-action');
+      if (related) sources.appendChild(related);
+      if (action) sources.appendChild(action);
+      body.appendChild(sources); el.appendChild(body);
       var choiceAnimation = null;
       var choiceRevision = 0;
       function setSectionLabel(hovered) {

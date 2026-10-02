@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "download",
-  "title": "Download",
+  "title": "Run Flux from source",
   "route": "/download",
   "group": "page",
   "meta": {
@@ -12,85 +12,91 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "GET FLUX PROTOCOL"
+      "value": "OPERATE FLUX / SOURCE PATH"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Run it from source. Today."
+      "value": "Start a local miner from a trusted checkout."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "No one-click installer yet. Build and run the CLI or Desktop from source — both are real, working software today."
+      "value": "The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so obtain an owner-approved checkout before running these commands."
     },
     "POINT1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "CLI: flux-miner"
+      "value": "1. Check the runtime."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "git clone ark-miner-cli, then npm install && npm start. A headless daemon: relay, presence, network directory, agreement-fabric provider."
+      "value": "Use Node.js 22 or newer. Confirm npm is available and the configured storage directory and status port are writable and free."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Desktop: Flux Miner Desktop"
+      "value": "2. Install the trusted checkout."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "git clone ark-miner-desktop, then npm install && npm run dev. Same daemon as the CLI, behind an operator UI — not a lighter build."
+      "value": "From ark-miner-cli, run npm install, copy .env.example to .env, review the configuration, then run npm start. The package exposes flux-miner; ark-miner is a legacy alias."
     },
     "POINT3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 3",
-      "value": "Signed releases are a real mechanism, not yet a public one"
+      "value": "3. Verify the process."
     },
     "POINT3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "flux-release:v1 is real: pinned Ed25519 publisher, SHA-256, mesh-quorum discovery. Public hosting isn't live — build from source until it is."
+      "value": "Confirm the daemon remains running and its status endpoint responds on the configured listener. The documented default is 127.0.0.1:8766. Record the source revision, package version, configuration, and observation time."
     },
     "POINT4.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 4",
-      "value": "What you should expect."
+      "value": "4. Know what success proves."
     },
     "POINT4.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "This is operator software, not an app-store install. You are expected to run a daemon, inspect logs, and choose the network you intend to join."
+      "value": "A successful local start proves local startup. It does not prove public-network membership, deployed resolver capacity, independent-host readiness, or production activation."
     },
     "POINT5.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 5",
-      "value": "What is intentionally absent."
+      "value": "5. Continue with a named network."
     },
     "POINT5.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "No public binary channel is promised on this page. Until release hosting is live, source builds are the honest path and the release mechanism is described as infrastructure in progress."
+      "value": "Once the miner and flux-network CLI are installed, create or select a network ID and start the miner against it. Named networks partition presence only today."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "DEPLOY A NETWORK"
+      "value": "CREATE OR JOIN A NETWORK"
+    },
+    "GUIDE": {
+      "label": "Operator documentation link",
+      "kind": "line",
+      "section": "Links",
+      "value": "OPEN THE FULL OPERATOR GUIDE"
     }
   }
 });

@@ -1,0 +1,1889 @@
+{
+  "date": "2026-10-02",
+  "desktop": [
+    {
+      "controls": 11,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "See how Flux works"
+        },
+        {
+          "disabled": false,
+          "text": "Run Flux from source"
+        },
+        {
+          "disabled": false,
+          "text": "What is a resolver?"
+        },
+        {
+          "disabled": false,
+          "text": "Read the protocol overview"
+        },
+        {
+          "disabled": false,
+          "text": "STATUS / 2026-09-30 ↗"
+        },
+        {
+          "disabled": false,
+          "text": "See all"
+        },
+        {
+          "disabled": false,
+          "text": "01Intent"
+        },
+        {
+          "disabled": false,
+          "text": "02Offer"
+        },
+        {
+          "disabled": false,
+          "text": "03Agreement"
+        },
+        {
+          "disabled": false,
+          "text": "04Fulfillment"
+        },
+        {
+          "disabled": false,
+          "text": "05Receipt"
+        }
+      ],
+      "path": "/",
+      "text": "FOR PROTOCOL TEAMS AND TECHNICAL OPERATORS\n\nPROTOCOL INFRASTRUCTURE FOR INDEPENDENT NETWORKS\nRun your own network\nwithout inheriting someone else's chain.\n\nRegister a network, define its rules, and complete signed agreements without a global block order. Available in source; network isolation currently covers miner presence. Production activation and public binaries remain unverified.\n\nSEE HOW FLUX WORKS\nRUN FLUX FROM SOURCE\nWhat is a resolver?\nRead the protocol overview\nF / 01 — INDEPENDENT NETWORKS\nSUBSTRATE / AGREEMENT / RECEIPT\nMINER DAEMON\nPARTIAL\nNAMED NETWORKS\nPRESENCE ONLY\nPUBLIC BINARIES\nUNVERIFIED\nSTATUS / 2026-09-30 ↗\n?\n↗\n=\n→\n✓\n\nAGREEMENT LIFECYCLE\n\nFrom intent to receipt.\n05 STAGES / ONE VERIFIABLE AGREEMENT\nSEE ALL\n01\nINTENT\n02\nOFFER\n03\nAGREEMENT\n04\nFULFILLMENT\n05\nRECEIPT",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 3,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "Context / inspect how Flux fits together"
+        },
+        {
+          "disabled": false,
+          "text": "SEE HOW FLUX WORKS ↗"
+        },
+        {
+          "disabled": false,
+          "text": "READ THE CURRENT STATUS ↗"
+        }
+      ],
+      "path": "/about",
+      "text": "FLUX PROTOCOL / OVERVIEW\n\nShared infrastructure for independently governed networks.\n\nFlux separates network discovery, signed agreement execution, and governance so one network can define its own rules without becoming the shared substrate. DAO Chain is one network on Flux Protocol, not Flux Protocol itself.\n\nCONTEXT / INSPECT HOW FLUX FITS TOGETHER\nSEE HOW FLUX WORKS\n↗\nREAD THE CURRENT STATUS ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "UNDERSTAND NETWORK SCOPE ↗"
+        },
+        {
+          "disabled": false,
+          "text": "FOLLOW ONE AGREEMENT ↗"
+        },
+        {
+          "disabled": false,
+          "text": "UNDERSTAND BOUNDED AUTHORITY ↗"
+        },
+        {
+          "disabled": false,
+          "text": "SEPARATE APPROVAL FROM ACTIVATION ↗"
+        },
+        {
+          "disabled": false,
+          "text": "INSPECT NETWORK EVIDENCE ↗"
+        },
+        {
+          "disabled": false,
+          "text": "REVIEW THE EVIDENCE STANDARD ↗"
+        }
+      ],
+      "path": "/concept",
+      "text": "FLUX PROTOCOL\n\nThe operating model.\n\nStart with one question: what your network shares, how an agreement closes, or who can approve a change. Open a mechanism to explore its steps, current limits, and source evidence.\n\n01\nWhat does a Flux network isolate today?\nUNDERSTAND NETWORK SCOPE\n↗\n02\nHow does one agreement become verifiable?\nFOLLOW ONE AGREEMENT\n↗\n03\nWho can approve this transition?\nUNDERSTAND BOUNDED AUTHORITY\n↗\nSEPARATE APPROVAL FROM ACTIVATION\n↗\nINSPECT NETWORK EVIDENCE\n↗\nREVIEW THE EVIDENCE STANDARD\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 2,
+      "documentHeight": 945,
+      "firstScreenControls": [],
+      "path": "/what-is-a-resolver",
+      "text": "FLUX PROTOCOL / RESOLVERS\n\nThe logic that turns an input into a checkable claim.\n\nA resolver is addressed, deterministic logic on Flux. It accepts a defined input and produces a defined claim, so participants can refer to the exact logic they are evaluating.\n\nFor example, a resolver can accept a document identifier and return whether that document satisfies a named policy. Its address identifies the logic; a checker and authority rule determine whether a result is accepted.\n\nPublishing makes a resolver addressable. It is deployed only when an admitted active provider reports fresh capacity. A signature identifies the signer; it does not make the claim true.\n\nINSPECT REFERENCE EVIDENCE\n↗\nBACK HOME\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 2,
+      "documentHeight": 879,
+      "firstScreenControls": [],
+      "path": "/start-from-something-real",
+      "text": "FLUX PROTOCOL / REFERENCE RESOLVERS\n\nReference evidence, without the leap of faith.\n\nCR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, or dated live observation for either one.\n\nReference evidence pending. Until an inspectable record is registered, these names demonstrate intended examples, not independently verifiable deployment or production status.\n\nA publishable reference must include its purpose, current status and observation date, resolver or network identifier, source or manifest location, and the exact boundary of what it proves.\n\nSEE HOW FLUX WORKS\n↗\nWHAT IS A RESOLVER\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 2,
+      "documentHeight": 989,
+      "firstScreenControls": [],
+      "path": "/how-deployment-works",
+      "text": "FLUX PROTOCOL / HOW IT WORKS\n\nFrom a network ID to a verifiable receipt.\n\n1. Register or select a named network ID. Today this creates a miner-presence namespace, not a complete security boundary.\n\n2. Publish or select the addressed resolver logic that defines the input and claim. Publication alone does not establish active execution capacity.\n\n3. Open an intent describing the work and constraints. A provider can answer with an offer, but no agreement exists until terms are accepted.\n\n4. Accept the offer, execute the resolver, and submit fulfillment evidence through the signed agreement path.\n\n5. Verify the receipt under the identified checker and authority rules. A receipt records that decision; it is not universal truth or proof of production readiness.\n\nRUN FLUX FROM SOURCE\n↗\nREFERENCE RESOLVERS\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "CREATE OR JOIN A NETWORK ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/purpose",
+      "text": "01 / OPERATING MODEL\n02 / NETWORKS\n\nFLUX PROTOCOL / NETWORKS\n\nWhat does a Flux network isolate today?\n\nA named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an authoritative membership list or security boundary.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nThe create/list command contract and miner-presence namespace are implemented in source. A complete independent live run is not registered in this audit.\n\nCREATE OR JOIN A NETWORK\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "FOLLOW THE FIVE STAGES ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/depth",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n\nFLUX PROTOCOL / AGREEMENTS\n\nHow does one agreement become verifiable?\n\nOne signed trail records what was requested, offered, accepted, produced, and checked. Each stage references the relevant prior record so an auditor can inspect the path without relying on a global block order.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nThe intent-to-receipt lifecycle and agreement-fabric inspection contract are implemented in source. A complete public production run is not registered here.\n\nFOLLOW THE FIVE STAGES\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "COMPARE GOVERNANCE ROSTERS ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/practice",
+      "text": "01 / OPERATING MODEL\n02 / AUTHORITY\n\nFLUX PROTOCOL / AUTHORITY\n\nWho can approve this transition?\n\nThe applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and then dissolves.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nAuthority policy structure and threshold concepts are documented in source. Independent production activation remains unverified.\n\nCOMPARE GOVERNANCE ROSTERS\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "COMPARE GOVERNANCE ROSTERS ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/notes",
+      "text": "01 / OPERATING MODEL\n02 / ACTIVATION\n\nFLUX PROTOCOL / ACTIVATION\n\nWhen does an approved change become active?\n\nApproval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / UNVERIFIED\n\nIndependent production activation is not established by the evidence registered in this repository.\n\nCOMPARE GOVERNANCE ROSTERS\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "CREATE OR JOIN A NETWORK ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/studio",
+      "text": "01 / OPERATING MODEL\n02 / NETWORK EVIDENCE\n\nFLUX PROTOCOL / NETWORK EVIDENCE\n\nHow do you verify a named network?\n\nA network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or hosts, observation time, and current isolation boundary.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nEVIDENCE RECORD / CAP-003\n\nThe network command contract is source-backed. A complete independent live create-and-participate artifact remains pending.\n\nCREATE OR JOIN A NETWORK\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 841,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        }
+      ],
+      "path": "/concept/spec",
+      "text": "01 / OPERATING MODEL\n02 / BENCHMARKS\n\nFLUX PROTOCOL / BENCHMARKS\n\nWhat can the current benchmark evidence support?\n\nNo canonical public benchmark artifact is registered in this repository. Performance numbers remain unverified until their workload, environment, source revision, method, raw output, and digest can be inspected together.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / UNVERIFIED\n\nBENCH-001 has no complete public benchmark artifact. This page therefore publishes the evidence standard, not unsupported performance numbers.\n\nRUN FLUX FROM SOURCE\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 5,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/dao",
+      "text": "01 / OPERATING MODEL\n02 / GOVERNANCE\n\nFLUX PROTOCOL / GOVERNANCE\n\nWho can change what?\n\nMesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are separate; neither quorum acts for the other.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nThe substrate policy structure and threshold rules exist in source. A public governance interface and independent production activation are not established by this audit.\n\nTHE SPEC\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 9,
+      "documentHeight": 822,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Check the runtime."
+        },
+        {
+          "disabled": false,
+          "text": "02 / Install the trusted checkout."
+        },
+        {
+          "disabled": false,
+          "text": "03 / Verify the process."
+        },
+        {
+          "disabled": false,
+          "text": "04 / Know what success proves."
+        },
+        {
+          "disabled": false,
+          "text": "05 / Continue with a named network."
+        },
+        {
+          "disabled": false,
+          "text": "Next step ↗"
+        },
+        {
+          "disabled": false,
+          "text": "Review all steps"
+        },
+        {
+          "disabled": false,
+          "text": "OPEN THE FULL OPERATOR GUIDE ↗"
+        },
+        {
+          "disabled": false,
+          "text": "CREATE OR JOIN A NETWORK ↗"
+        }
+      ],
+      "path": "/download",
+      "text": "OPERATE FLUX / SOURCE PATH\n\nStart a local miner from a trusted checkout.\n\nThe source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so obtain an owner-approved checkout before running these commands.\n\n01 / Check the runtime.\n02 / Install the trusted checkout.\n03 / Verify the process.\n04 / Know what success proves.\n05 / Continue with a named network.\n01\n1. Check the runtime.\n\nUse Node.js 22 or newer. Confirm npm is available and the configured storage directory and status port are writable and free.\n\nStep 1 of 5\n\nNext step ↗\nReview all steps\nOPEN THE FULL OPERATOR GUIDE ↗\nCREATE OR JOIN A NETWORK\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 9,
+      "documentHeight": 1160,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Check discovery"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Create or select"
+        },
+        {
+          "disabled": false,
+          "text": "03 / Start the miner"
+        },
+        {
+          "disabled": false,
+          "text": "04 / Verify health"
+        },
+        {
+          "disabled": false,
+          "text": "05 / Inspect topology"
+        },
+        {
+          "disabled": false,
+          "text": "Copy command for Check discovery"
+        }
+      ],
+      "path": "/deploy",
+      "text": "OPERATE FLUX / NAMED NETWORKS\n\nChoose the miner-presence namespace you intend to serve.\n\nThese commands use the current flux-network CLI contract. A named network partitions miner presence only; it does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not a security boundary.\n\n01 / Check discovery\n02 / Create or select\n03 / Start the miner\n04 / Verify health\n05 / Inspect topology\n01\nCheck discovery\n\nConfirm the network CLI can reach its configured peers. This directory is best-effort discovery, not authoritative membership.\n\nflux-network network list\nCOPY\n\nExpected: a \"Known networks\" list followed by the best-effort discovery warning.\n\nStep 1 of 5 / Check discovery\n\nNext step ↗\nReview all steps\n\nnetwork create / network list are not a security boundary today. Presence is partitioned per network; accounts, identities, and DAOs are not yet network-scoped.\n\nRUN FLUX FROM SOURCE\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 8,
+      "documentHeight": 1305,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "Unlock operator-only sources"
+        },
+        {
+          "disabled": false,
+          "text": "Connect to local Miner"
+        },
+        {
+          "disabled": true,
+          "text": "Refresh now"
+        },
+        {
+          "disabled": true,
+          "text": "Disconnect"
+        }
+      ],
+      "path": "/explorer",
+      "text": "FLUX PROTOCOL / LOCAL MESH EXPLORER\n\nInspect what the mesh reports.\n\nQuery bounded, read-only records from a local Flux Miner. This is a live observation of one connected Miner, not a global chain height or authoritative membership list.\n\nNot connected\nConnect a local Miner to inspect current data.\n\n01 / CONNECTION\n\nLocal Miner\n\nOnly 127.0.0.1:8766 is contacted. The Miner must allow this site origin for browser requests.\n\nOperator key (optional, memory only)\nConnect to local Miner\nRefresh now\nDisconnect\nCONNECTION\nOffline\nSOURCES\n—\nOBSERVED\n—\nCOVERAGE\n—\n\n02 / LIVE RECORDS\n\nExplore a source\nPOLLED EVERY 15 SECONDS WHILE CONNECTED\n\nSource availability and verification are reported by the Miner. A returned record is not automatically proof of a production deployment.\n\nSource\nConnect to load sources\nExact record ID\nInspect record\n\nConnect to see records. No sample data is substituted.\n\n03 / Operator topology and source context",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 3,
+      "documentHeight": 1287,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "Choose Auth Kit"
+        }
+      ],
+      "path": "/account",
+      "text": "FLUX / YOUR ACCOUNT\n\nYour identity, in context.\n\nOpen your Auth Kit locally to inspect the identity it names. This browser does not send your recovery file, PIN or signing key to the mesh.\n\nSign in to Flux Protocol\n\nChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.\n\nChoose Auth Kit\n\nCURRENT SESSION\n\nNot signed in\nIdentity ID\n—\nRoot key\n—\nWallet address in Auth Kit\n—\nSecurity profile\n—\n\nUnlock a kit to verify its root against its recovery phrase.\n\nLIVE ACCOUNT DATA\n\nWhat the mesh can confirm\nNot checked\n\nAfter sign-in, check this identity against the local Miner by exact ID.\n\nCheck local Miner\nFXN holdings\nNot connected\n\nNo verified balance source is wired to this identity.\n\nCredits\nNot connected\n\nCredits are identity-bound and non-transferable; no live balance is claimed here.\n\nMesh standing\nNot linked\n\nThe Miner exposes standing only through an exact, signed account binding.\n\nTo inspect live Miner records now, use the local Mesh Explorer. A displayed Auth Kit wallet address is not proof of current holdings.",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 4,
+      "documentHeight": 985,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "FXN / Tier 1"
+        },
+        {
+          "disabled": false,
+          "text": "Credits"
+        },
+        {
+          "disabled": false,
+          "text": "Inspect sample movements"
+        }
+      ],
+      "path": "/treasury",
+      "text": "DESIGN PREVIEW / NOT LIVE\n\nInspect a treasury before funds move.\n\nPreview assets, reserves, and the evidence behind each movement.\n\nDesign mock only — no wallet, balance, deposit, transfer, or ledger is connected.\n\nFXN / Tier 1\nCredits\nFXN / TIER 1\n12,400 FXN\n\nFictional sample amount for the native token. Not supply, price, or a real treasury balance.\n\nInspect sample movements\nPreview a deposit ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 4,
+      "documentHeight": 971,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "0.00"
+        },
+        {
+          "disabled": false,
+          "text": "Reserve for future operationFund a service agreementHold for review"
+        },
+        {
+          "disabled": false,
+          "text": "Preview draft"
+        }
+      ],
+      "path": "/deposits",
+      "text": "DESIGN PREVIEW / NOT LIVE\n\nPreview a deposit before any funds move.\n\nA local-only layout study for a future FXN deposit. Enter an example amount, inspect the proposed intent, then return to edit it. There is no submit action.\n\nDesign mock only — no wallet, balance, deposit, transfer, or ledger is connected.\n\nExample FXN amount\nIllustrative purpose\nReserve for future operation\nFund a service agreement\nHold for review\n\nCredits are identity-bound and non-transferable. They are not deposited, sent, or converted in this preview.\n\nPreview draft\nReturn to treasury preview ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 12,
+      "documentHeight": 1440,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "Intent"
+        },
+        {
+          "disabled": false,
+          "text": "Open this stage ↗"
+        },
+        {
+          "disabled": false,
+          "text": "Offer"
+        },
+        {
+          "disabled": false,
+          "text": "Open this stage ↗"
+        }
+      ],
+      "path": "/lifecycle",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\nHow does one agreement become verifiable?\n\nIllustrative scenario: a client asks a provider to replicate one named dataset snapshot. Follow the object through five stages.\n\nIntent\n\nState the exact need. Example: a client asks a provider to replicate a named dataset snapshot.\n\nOPEN THIS STAGE ↗\nOffer\n\nAnswer the request precisely. A provider proposes how it will replicate that exact snapshot and under which terms.\n\nOPEN THIS STAGE ↗\nAgreement\n\nCommit to the shared terms. The client and provider record the accepted match between request and offer.\n\nOPEN THIS STAGE ↗\nFulfillment\n\nShow what was produced. The provider submits the result and evidence for the requested replication.\n\nOPEN THIS STAGE ↗\nReceipt\n\nClose the evidence trail. The verifying participant records the outcome under the identified checker and authority rules.\n\nOPEN THIS STAGE ↗\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 988,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/intent",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / INTENT\nState the exact need.\n\nExample: a client asks a provider to replicate a named dataset snapshot.\n\nIntent\n\nThe client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. Later records can now refer to this request by CID instead of relying on a conversation or global queue position.\n\nWhat is still not true: no provider has committed, no work has occurred, and no result has been checked.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe client requesting replication.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 988,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/offer",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / OFFER\nAnswer the request precisely.\n\nA provider proposes how it will replicate that exact snapshot and under which terms.\n\nOffer\n\nThe provider signs an offer that references the intent CID. The terms stay attached to the request they answer, so the client can inspect capability, constraints, and proposed evidence before accepting anything.\n\nWhat is still not true: a signed offer is a proposal, not a shared agreement or proof of capacity.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe provider proposing the work.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 988,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/agreement",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / AGREEMENT\nCommit to the shared terms.\n\nThe client and provider record the accepted match between request and offer.\n\nAgreement\n\nThe signed agreement links the accepted intent and offer. It defines what fulfillment will be checked against while unrelated agreements continue independently.\n\nWhat is still not true: accepted terms do not prove the replication happened or that downstream settlement occurred.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe participating client and provider.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 988,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/fulfillment",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / FULFILLMENT\nShow what was produced.\n\nThe provider submits the result and evidence for the requested replication.\n\nFulfillment\n\nThe fulfillment record references the agreement and carries the result evidence defined by its terms. The work remains attached to the request, provider, and policy that gave it meaning.\n\nWhat is still not true: submission is not acceptance, semantic truth, or proof of every downstream effect.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe provider that performed the work.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 1015,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Result"
+        }
+      ],
+      "path": "/lifecycle/receipt",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / RECEIPT\nClose the evidence trail.\n\nThe verifying participant records the outcome under the identified checker and authority rules.\n\nReceipt\n\nThe receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification without reconstructing a global block order.\n\nWhat is still not true: a receipt is not universal truth, legal finality, treasury settlement, or production-readiness evidence.\n\nWho writes it\nReferences\nBecomes true\nResult\n\nThe participant responsible for the verification outcome.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 1,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "EXPLORE THE MODEL ↘"
+        }
+      ],
+      "path": "/experiments",
+      "text": "INTERACTIVE MODEL\nFX—001\n\n01 / AUTHORITY\n\nTHRESHOLD\n\nHow can threshold agreement be pictured?\n\nIllustrative, not live network data. The moving forms are a visual analogy for independent inputs approaching a threshold. They do not represent real nodes, votes, or a ledger.\n\nEXPLORE THE MODEL\n↘",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 848,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 Authority"
+        },
+        {
+          "disabled": false,
+          "text": "02 Lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "03 Networks"
+        },
+        {
+          "disabled": false,
+          "text": ""
+        }
+      ],
+      "path": "/experiments/lab",
+      "text": "01 / INTERACTIVE MODEL\n\nEXPLORE THREE PROTOCOL CONCEPTS.\n\nILLUSTRATIVE, NOT LIVE NETWORK DATA.\n\nChange a variable and watch a visual analogy respond. The controls help explain authority, lifecycle, and network boundaries; they do not measure or reproduce a running Flux network.\n\n01 Authority\n02 Lifecycle\n03 Networks\nINTERACTIVE MODEL\nFX—001\nA VISUAL ANALOGY FOR DERIVED, TEMPORARY AUTHORITY.\nx →\nHow can threshold agreement be pictured?\n\nThis model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.\n\nVisual convergence\n50%\nApart\nTogether\n\n↳ Evidence context: claim inventory and evidence registry.",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 3,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01Why the chain was retired7 MIN READ↗"
+        },
+        {
+          "disabled": false,
+          "text": "02One substrate, many networks6 MIN READ↗"
+        },
+        {
+          "disabled": false,
+          "text": "03Governance without a validator set6 MIN READ↗"
+        }
+      ],
+      "path": "/learnings",
+      "text": "NOTES / 03\n\nLearnings\n\nNotes from the work.\n\n01\nWhy the chain was retired\n7 MIN READ\n↗\n02\nOne substrate, many networks\n6 MIN READ\n↗\n03\nGovernance without a validator set\n6 MIN READ\n↗",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "← ALL LEARNINGS"
+        },
+        {
+          "disabled": false,
+          "text": "01 Was there a real chain?"
+        },
+        {
+          "disabled": false,
+          "text": "02 Why retire it?"
+        },
+        {
+          "disabled": false,
+          "text": "03 Which numbers can be compared?"
+        },
+        {
+          "disabled": false,
+          "text": "04 What remains unproven?"
+        },
+        {
+          "disabled": false,
+          "text": "05 Why keep the distinctions?"
+        },
+        {
+          "disabled": false,
+          "text": "Evidence, review date & next step"
+        }
+      ],
+      "path": "/learnings/why-the-chain-was-retired",
+      "text": "← ALL LEARNINGS\nBENCHMARKS / 001 / 7 MIN READ\nWHY THE CHAIN WAS RETIRED\nTHE CORE\n\nProject material describes replacing an earlier block-and-validator design with the agreement fabric. This site has no complete public benchmark record to verify the performance comparison yet.\n\nUse this note to understand the architectural change and the evidence still needed to evaluate its performance claims.\n\nQUESTIONS / 05\n\n01\nWas there a real chain?\n02\nWhy retire it?\n03\nWhich numbers can be compared?\n04\nWhat remains unproven?\n05\nWhy keep the distinctions?\nEvidence, review date & next step",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "← ALL LEARNINGS"
+        },
+        {
+          "disabled": false,
+          "text": "01 What is the substrate?"
+        },
+        {
+          "disabled": false,
+          "text": "02 What does create do today?"
+        },
+        {
+          "disabled": false,
+          "text": "03 Can networks govern each other?"
+        },
+        {
+          "disabled": false,
+          "text": "04 Where is the authority boundary?"
+        },
+        {
+          "disabled": false,
+          "text": "Evidence, review date & next step"
+        }
+      ],
+      "path": "/learnings/one-substrate-many-networks",
+      "text": "← ALL LEARNINGS\nNETWORKS / 002 / 6 MIN READ\nONE SUBSTRATE, MANY NETWORKS\nTHE CORE\n\nFlux Protocol is the shared substrate; project material describes DAO Chain as a network on it. Network creation currently partitions miner presence, not a complete security boundary. Live registration of named examples remains unverified here.\n\nUse this note to distinguish the shared protocol from a network using it before relying on network isolation.\n\nQUESTIONS / 04\n\n01\nWhat is the substrate?\n02\nWhat does create do today?\n03\nCan networks govern each other?\n04\nWhere is the authority boundary?\nEvidence, review date & next step",
+      "viewport": [
+        1280,
+        800
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 800,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "← ALL LEARNINGS"
+        },
+        {
+          "disabled": false,
+          "text": "01 Who approves a transition?"
+        },
+        {
+          "disabled": false,
+          "text": "02 How is a cell derived?"
+        },
+        {
+          "disabled": false,
+          "text": "03 Who governs mesh operations?"
+        },
+        {
+          "disabled": false,
+          "text": "04 Can either roster overrule the other?"
+        },
+        {
+          "disabled": false,
+          "text": "Evidence, review date & next step"
+        }
+      ],
+      "path": "/learnings/governance-without-a-validator-set",
+      "text": "← ALL LEARNINGS\nAUTHORITY / 003 / 6 MIN READ\nGOVERNANCE WITHOUT A VALIDATOR SET\nTHE CORE\n\nThe protocol model derives a short-lived authority cell for each contested transition instead of using a standing validator set. A separate mesh-operations policy describes a seven-operator substrate roster; production activation remains unverified.\n\nUse this note to tell transition authority apart from substrate policy and a network's own DAO.\n\nQUESTIONS / 04\n\n01\nWho approves a transition?\n02\nHow is a cell derived?\n03\nWho governs mesh operations?\n04\nCan either roster overrule the other?\nEvidence, review date & next step",
+      "viewport": [
+        1280,
+        800
+      ]
+    }
+  ],
+  "mobile": [
+    {
+      "controls": 11,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "See how Flux works"
+        },
+        {
+          "disabled": false,
+          "text": "Run Flux from source"
+        },
+        {
+          "disabled": false,
+          "text": "What is a resolver?"
+        },
+        {
+          "disabled": false,
+          "text": "Read the protocol overview"
+        },
+        {
+          "disabled": false,
+          "text": "STATUS / 2026-09-30 ↗"
+        },
+        {
+          "disabled": false,
+          "text": "See all"
+        },
+        {
+          "disabled": false,
+          "text": "01Intent"
+        },
+        {
+          "disabled": false,
+          "text": "02Offer"
+        },
+        {
+          "disabled": false,
+          "text": "03Agreement"
+        },
+        {
+          "disabled": false,
+          "text": "04Fulfillment"
+        },
+        {
+          "disabled": false,
+          "text": "05Receipt"
+        }
+      ],
+      "path": "/",
+      "text": "FOR PROTOCOL TEAMS AND TECHNICAL OPERATORS\n\nPROTOCOL INFRASTRUCTURE FOR INDEPENDENT NETWORKS\nRun your own network\nwithout inheriting someone else's chain.\n\nRegister a network, define its rules, and complete signed agreements without a global block order. Available in source; network isolation currently covers miner presence. Production activation and public binaries remain unverified.\n\nSEE HOW FLUX WORKS\nRUN FLUX FROM SOURCE\nWhat is a resolver?\nRead the protocol overview\nF / 01 — INDEPENDENT NETWORKS\nSUBSTRATE / AGREEMENT / RECEIPT\nMINER DAEMON\nPARTIAL\nNAMED NETWORKS\nPRESENCE ONLY\nPUBLIC BINARIES\nUNVERIFIED\nSTATUS / 2026-09-30 ↗\n?\n↗\n=\n→\n✓\n\nAGREEMENT LIFECYCLE\n\nSEE ALL\n01\nINTENT\n02\nOFFER\n03\nAGREEMENT\n04\nFULFILLMENT\n05\nRECEIPT",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 3,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "Context / inspect how Flux fits together"
+        },
+        {
+          "disabled": false,
+          "text": "SEE HOW FLUX WORKS ↗"
+        },
+        {
+          "disabled": false,
+          "text": "READ THE CURRENT STATUS ↗"
+        }
+      ],
+      "path": "/about",
+      "text": "FLUX PROTOCOL / OVERVIEW\n\nShared infrastructure for independently governed networks.\n\nFlux separates network discovery, signed agreement execution, and governance so one network can define its own rules without becoming the shared substrate. DAO Chain is one network on Flux Protocol, not Flux Protocol itself.\n\nCONTEXT / INSPECT HOW FLUX FITS TOGETHER\nSEE HOW FLUX WORKS\n↗\nREAD THE CURRENT STATUS ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 1488,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "UNDERSTAND NETWORK SCOPE ↗"
+        }
+      ],
+      "path": "/concept",
+      "text": "FLUX PROTOCOL\n\nThe operating model.\n\nStart with one question: what your network shares, how an agreement closes, or who can approve a change. Open a mechanism to explore its steps, current limits, and source evidence.\n\n01\nWhat does a Flux network isolate today?\nUNDERSTAND NETWORK SCOPE\n↗\n02\nHow does one agreement become verifiable?\nFOLLOW ONE AGREEMENT\n↗\n03\nWho can approve this transition?\nUNDERSTAND BOUNDED AUTHORITY\n↗\nSEPARATE APPROVAL FROM ACTIVATION\n↗\nINSPECT NETWORK EVIDENCE\n↗\nREVIEW THE EVIDENCE STANDARD\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 2,
+      "documentHeight": 929,
+      "firstScreenControls": [],
+      "path": "/what-is-a-resolver",
+      "text": "FLUX PROTOCOL / RESOLVERS\n\nThe logic that turns an input into a checkable claim.\n\nA resolver is addressed, deterministic logic on Flux. It accepts a defined input and produces a defined claim, so participants can refer to the exact logic they are evaluating.\n\nFor example, a resolver can accept a document identifier and return whether that document satisfies a named policy. Its address identifies the logic; a checker and authority rule determine whether a result is accepted.\n\nPublishing makes a resolver addressable. It is deployed only when an admitted active provider reports fresh capacity. A signature identifies the signer; it does not make the claim true.\n\nINSPECT REFERENCE EVIDENCE\n↗\nBACK HOME\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 2,
+      "documentHeight": 903,
+      "firstScreenControls": [],
+      "path": "/start-from-something-real",
+      "text": "FLUX PROTOCOL / REFERENCE RESOLVERS\n\nReference evidence, without the leap of faith.\n\nCR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, or dated live observation for either one.\n\nReference evidence pending. Until an inspectable record is registered, these names demonstrate intended examples, not independently verifiable deployment or production status.\n\nA publishable reference must include its purpose, current status and observation date, resolver or network identifier, source or manifest location, and the exact boundary of what it proves.\n\nSEE HOW FLUX WORKS\n↗\nWHAT IS A RESOLVER\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 2,
+      "documentHeight": 1077,
+      "firstScreenControls": [],
+      "path": "/how-deployment-works",
+      "text": "FLUX PROTOCOL / HOW IT WORKS\n\nFrom a network ID to a verifiable receipt.\n\n1. Register or select a named network ID. Today this creates a miner-presence namespace, not a complete security boundary.\n\n2. Publish or select the addressed resolver logic that defines the input and claim. Publication alone does not establish active execution capacity.\n\n3. Open an intent describing the work and constraints. A provider can answer with an offer, but no agreement exists until terms are accepted.\n\n4. Accept the offer, execute the resolver, and submit fulfillment evidence through the signed agreement path.\n\n5. Verify the receipt under the identified checker and authority rules. A receipt records that decision; it is not universal truth or proof of production readiness.\n\nRUN FLUX FROM SOURCE\n↗\nREFERENCE RESOLVERS\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "CREATE OR JOIN A NETWORK ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/purpose",
+      "text": "01 / OPERATING MODEL\n02 / NETWORKS\n\nFLUX PROTOCOL / NETWORKS\n\nWhat does a Flux network isolate today?\n\nA named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an authoritative membership list or security boundary.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nThe create/list command contract and miner-presence namespace are implemented in source. A complete independent live run is not registered in this audit.\n\nCREATE OR JOIN A NETWORK\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "FOLLOW THE FIVE STAGES ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/depth",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n\nFLUX PROTOCOL / AGREEMENTS\n\nHow does one agreement become verifiable?\n\nOne signed trail records what was requested, offered, accepted, produced, and checked. Each stage references the relevant prior record so an auditor can inspect the path without relying on a global block order.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nThe intent-to-receipt lifecycle and agreement-fabric inspection contract are implemented in source. A complete public production run is not registered here.\n\nFOLLOW THE FIVE STAGES\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "COMPARE GOVERNANCE ROSTERS ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/practice",
+      "text": "01 / OPERATING MODEL\n02 / AUTHORITY\n\nFLUX PROTOCOL / AUTHORITY\n\nWho can approve this transition?\n\nThe applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and then dissolves.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nAuthority policy structure and threshold concepts are documented in source. Independent production activation remains unverified.\n\nCOMPARE GOVERNANCE ROSTERS\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "COMPARE GOVERNANCE ROSTERS ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/notes",
+      "text": "01 / OPERATING MODEL\n02 / ACTIVATION\n\nFLUX PROTOCOL / ACTIVATION\n\nWhen does an approved change become active?\n\nApproval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / UNVERIFIED\n\nIndependent production activation is not established by the evidence registered in this repository.\n\nCOMPARE GOVERNANCE ROSTERS\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "CREATE OR JOIN A NETWORK ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/studio",
+      "text": "01 / OPERATING MODEL\n02 / NETWORK EVIDENCE\n\nFLUX PROTOCOL / NETWORK EVIDENCE\n\nHow do you verify a named network?\n\nA network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or hosts, observation time, and current isolation boundary.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nEVIDENCE RECORD / CAP-003\n\nThe network command contract is source-backed. A complete independent live create-and-participate artifact remains pending.\n\nCREATE OR JOIN A NETWORK\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "RUN FLUX FROM SOURCE ↗"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/concept/spec",
+      "text": "01 / OPERATING MODEL\n02 / BENCHMARKS\n\nFLUX PROTOCOL / BENCHMARKS\n\nWhat can the current benchmark evidence support?\n\nNo canonical public benchmark artifact is registered in this repository. Performance numbers remain unverified until their workload, environment, source revision, method, raw output, and digest can be inspected together.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / UNVERIFIED\n\nBENCH-001 has no complete public benchmark artifact. This page therefore publishes the evidence standard, not unsupported performance numbers.\n\nRUN FLUX FROM SOURCE\n↗\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 5,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "01The core idea"
+        },
+        {
+          "disabled": false,
+          "text": "02How it works"
+        },
+        {
+          "disabled": false,
+          "text": "03Evidence & limits"
+        },
+        {
+          "disabled": false,
+          "text": "THE SPEC ↗"
+        }
+      ],
+      "path": "/dao",
+      "text": "01 / OPERATING MODEL\n02 / GOVERNANCE\n\nFLUX PROTOCOL / GOVERNANCE\n\nWho can change what?\n\nMesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are separate; neither quorum acts for the other.\n\n01\nThe core idea\n02\nHow it works\n03\nEvidence & limits\nSTATUS / PARTIAL\n\nThe substrate policy structure and threshold rules exist in source. A public governance interface and independent production activation are not established by this audit.\n\nTHE SPEC\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 9,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Check the runtime."
+        },
+        {
+          "disabled": false,
+          "text": "02 / Install the trusted checkout."
+        },
+        {
+          "disabled": false,
+          "text": "03 / Verify the process."
+        },
+        {
+          "disabled": false,
+          "text": "04 / Know what success proves."
+        },
+        {
+          "disabled": false,
+          "text": "05 / Continue with a named network."
+        },
+        {
+          "disabled": false,
+          "text": "Next step ↗"
+        },
+        {
+          "disabled": false,
+          "text": "Review all steps"
+        },
+        {
+          "disabled": false,
+          "text": "OPEN THE FULL OPERATOR GUIDE ↗"
+        },
+        {
+          "disabled": false,
+          "text": "CREATE OR JOIN A NETWORK ↗"
+        }
+      ],
+      "path": "/download",
+      "text": "OPERATE FLUX / SOURCE PATH\n\nStart a local miner from a trusted checkout.\n\nThe source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so obtain an owner-approved checkout before running these commands.\n\n01 / Check the runtime.\n02 / Install the trusted checkout.\n03 / Verify the process.\n04 / Know what success proves.\n05 / Continue with a named network.\n01\n1. Check the runtime.\n\nUse Node.js 22 or newer. Confirm npm is available and the configured storage directory and status port are writable and free.\n\nStep 1 of 5\n\nNext step ↗\nReview all steps\nOPEN THE FULL OPERATOR GUIDE ↗\nCREATE OR JOIN A NETWORK\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 9,
+      "documentHeight": 1336,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Check discovery"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Create or select"
+        },
+        {
+          "disabled": false,
+          "text": "03 / Start the miner"
+        },
+        {
+          "disabled": false,
+          "text": "04 / Verify health"
+        },
+        {
+          "disabled": false,
+          "text": "05 / Inspect topology"
+        }
+      ],
+      "path": "/deploy",
+      "text": "OPERATE FLUX / NAMED NETWORKS\n\nChoose the miner-presence namespace you intend to serve.\n\nThese commands use the current flux-network CLI contract. A named network partitions miner presence only; it does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not a security boundary.\n\n01 / Check discovery\n02 / Create or select\n03 / Start the miner\n04 / Verify health\n05 / Inspect topology\n01\nCheck discovery\n\nConfirm the network CLI can reach its configured peers. This directory is best-effort discovery, not authoritative membership.\n\nflux-network network list\nCOPY\n\nExpected: a \"Known networks\" list followed by the best-effort discovery warning.\n\nStep 1 of 5 / Check discovery\n\nNext step ↗\nReview all steps\n\nnetwork create / network list are not a security boundary today. Presence is partitioned per network; accounts, identities, and DAOs are not yet network-scoped.\n\nRUN FLUX FROM SOURCE\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 8,
+      "documentHeight": 1769,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "Unlock operator-only sources"
+        },
+        {
+          "disabled": false,
+          "text": "Connect to local Miner"
+        },
+        {
+          "disabled": true,
+          "text": "Refresh now"
+        },
+        {
+          "disabled": true,
+          "text": "Disconnect"
+        }
+      ],
+      "path": "/explorer",
+      "text": "FLUX PROTOCOL / LOCAL MESH EXPLORER\n\nInspect what the mesh reports.\n\nQuery bounded, read-only records from a local Flux Miner. This is a live observation of one connected Miner, not a global chain height or authoritative membership list.\n\nNot connected\nConnect a local Miner to inspect current data.\n\n01 / CONNECTION\n\nLocal Miner\n\nOnly 127.0.0.1:8766 is contacted. The Miner must allow this site origin for browser requests.\n\nOperator key (optional, memory only)\nConnect to local Miner\nRefresh now\nDisconnect\nCONNECTION\nOffline\nSOURCES\n—\nOBSERVED\n—\nCOVERAGE\n—\n\n02 / LIVE RECORDS\n\nExplore a source\nPOLLED EVERY 15 SECONDS WHILE CONNECTED\n\nSource availability and verification are reported by the Miner. A returned record is not automatically proof of a production deployment.\n\nSource\nConnect to load sources\nExact record ID\nInspect record\n\nConnect to see records. No sample data is substituted.\n\n03 / Operator topology and source context",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 3,
+      "documentHeight": 2046,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "Choose Auth Kit"
+        }
+      ],
+      "path": "/account",
+      "text": "FLUX / YOUR ACCOUNT\n\nYour identity, in context.\n\nOpen your Auth Kit locally to inspect the identity it names. This browser does not send your recovery file, PIN or signing key to the mesh.\n\nSign in to Flux Protocol\n\nChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.\n\nChoose Auth Kit\n\nCURRENT SESSION\n\nNot signed in\nIdentity ID\n—\nRoot key\n—\nWallet address in Auth Kit\n—\nSecurity profile\n—\n\nUnlock a kit to verify its root against its recovery phrase.\n\nLIVE ACCOUNT DATA\n\nWhat the mesh can confirm\nNot checked\n\nAfter sign-in, check this identity against the local Miner by exact ID.\n\nCheck local Miner\nFXN holdings\nNot connected\n\nNo verified balance source is wired to this identity.\n\nCredits\nNot connected\n\nCredits are identity-bound and non-transferable; no live balance is claimed here.\n\nMesh standing\nNot linked\n\nThe Miner exposes standing only through an exact, signed account binding.\n\nTo inspect live Miner records now, use the local Mesh Explorer. A displayed Auth Kit wallet address is not proof of current holdings.",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 4,
+      "documentHeight": 902,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "FXN / Tier 1"
+        },
+        {
+          "disabled": false,
+          "text": "Credits"
+        },
+        {
+          "disabled": false,
+          "text": "Inspect sample movements"
+        },
+        {
+          "disabled": false,
+          "text": "Preview a deposit ↗"
+        }
+      ],
+      "path": "/treasury",
+      "text": "DESIGN PREVIEW / NOT LIVE\n\nInspect a treasury before funds move.\n\nPreview assets, reserves, and the evidence behind each movement.\n\nDesign mock only — no wallet, balance, deposit, transfer, or ledger is connected.\n\nFXN / Tier 1\nCredits\nFXN / TIER 1\n12,400 FXN\n\nFictional sample amount for the native token. Not supply, price, or a real treasury balance.\n\nInspect sample movements\nPreview a deposit ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 4,
+      "documentHeight": 1096,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "0.00"
+        },
+        {
+          "disabled": false,
+          "text": "Reserve for future operationFund a service agreementHold for review"
+        }
+      ],
+      "path": "/deposits",
+      "text": "DESIGN PREVIEW / NOT LIVE\n\nPreview a deposit before any funds move.\n\nA local-only layout study for a future FXN deposit. Enter an example amount, inspect the proposed intent, then return to edit it. There is no submit action.\n\nDesign mock only — no wallet, balance, deposit, transfer, or ledger is connected.\n\nExample FXN amount\nIllustrative purpose\nReserve for future operation\nFund a service agreement\nHold for review\n\nCredits are identity-bound and non-transferable. They are not deposited, sent, or converted in this preview.\n\nPreview draft\nReturn to treasury preview ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 12,
+      "documentHeight": 1684,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "Intent"
+        },
+        {
+          "disabled": false,
+          "text": "Open this stage ↗"
+        },
+        {
+          "disabled": false,
+          "text": "Offer"
+        },
+        {
+          "disabled": false,
+          "text": "Open this stage ↗"
+        }
+      ],
+      "path": "/lifecycle",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\nHow does one agreement become verifiable?\n\nIllustrative scenario: a client asks a provider to replicate one named dataset snapshot. Follow the object through five stages.\n\nIntent\n\nState the exact need. Example: a client asks a provider to replicate a named dataset snapshot.\n\nOPEN THIS STAGE ↗\nOffer\n\nAnswer the request precisely. A provider proposes how it will replicate that exact snapshot and under which terms.\n\nOPEN THIS STAGE ↗\nAgreement\n\nCommit to the shared terms. The client and provider record the accepted match between request and offer.\n\nOPEN THIS STAGE ↗\nFulfillment\n\nShow what was produced. The provider submits the result and evidence for the requested replication.\n\nOPEN THIS STAGE ↗\nReceipt\n\nClose the evidence trail. The verifying participant records the outcome under the identified checker and authority rules.\n\nOPEN THIS STAGE ↗\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 1193,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/intent",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / INTENT\nState the exact need.\n\nExample: a client asks a provider to replicate a named dataset snapshot.\n\nIntent\n\nThe client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. Later records can now refer to this request by CID instead of relying on a conversation or global queue position.\n\nWhat is still not true: no provider has committed, no work has occurred, and no result has been checked.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe client requesting replication.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 1220,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/offer",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / OFFER\nAnswer the request precisely.\n\nA provider proposes how it will replicate that exact snapshot and under which terms.\n\nOffer\n\nThe provider signs an offer that references the intent CID. The terms stay attached to the request they answer, so the client can inspect capability, constraints, and proposed evidence before accepting anything.\n\nWhat is still not true: a signed offer is a proposal, not a shared agreement or proof of capacity.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe provider proposing the work.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 1168,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/agreement",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / AGREEMENT\nCommit to the shared terms.\n\nThe client and provider record the accepted match between request and offer.\n\nAgreement\n\nThe signed agreement links the accepted intent and offer. It defines what fulfillment will be checked against while unrelated agreements continue independently.\n\nWhat is still not true: accepted terms do not prove the replication happened or that downstream settlement occurred.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe participating client and provider.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 1167,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Next"
+        }
+      ],
+      "path": "/lifecycle/fulfillment",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / FULFILLMENT\nShow what was produced.\n\nThe provider submits the result and evidence for the requested replication.\n\nFulfillment\n\nThe fulfillment record references the agreement and carries the result evidence defined by its terms. The work remains attached to the request, provider, and policy that gave it meaning.\n\nWhat is still not true: submission is not acceptance, semantic truth, or proof of every downstream effect.\n\nWho writes it\nReferences\nBecomes true\nNext\n\nThe provider that performed the work.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 1220,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 / Operating model"
+        },
+        {
+          "disabled": false,
+          "text": "02 / Agreement lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "Who writes it"
+        },
+        {
+          "disabled": false,
+          "text": "References"
+        },
+        {
+          "disabled": false,
+          "text": "Becomes true"
+        },
+        {
+          "disabled": false,
+          "text": "Result"
+        }
+      ],
+      "path": "/lifecycle/receipt",
+      "text": "01 / OPERATING MODEL\n02 / AGREEMENT LIFECYCLE\n03 / RECEIPT\nClose the evidence trail.\n\nThe verifying participant records the outcome under the identified checker and authority rules.\n\nReceipt\n\nThe receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification without reconstructing a global block order.\n\nWhat is still not true: a receipt is not universal truth, legal finality, treasury settlement, or production-readiness evidence.\n\nWho writes it\nReferences\nBecomes true\nResult\n\nThe participant responsible for the verification outcome.\n\nSTATUS / PARTIAL\n\nThe lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.\n\nREAD THE AGREEMENT GUIDE ↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 1,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "EXPLORE THE MODEL ↘"
+        }
+      ],
+      "path": "/experiments",
+      "text": "INTERACTIVE MODEL\nFX—001\n\n01 / AUTHORITY\n\nTHRESHOLD\n\nHow can threshold agreement be pictured?\n\nIllustrative, not live network data. The moving forms are a visual analogy for independent inputs approaching a threshold. They do not represent real nodes, votes, or a ledger.\n\nEXPLORE THE MODEL\n↘",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 1095,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01 Authority"
+        },
+        {
+          "disabled": false,
+          "text": "02 Lifecycle"
+        },
+        {
+          "disabled": false,
+          "text": "03 Networks"
+        }
+      ],
+      "path": "/experiments/lab",
+      "text": "01 / INTERACTIVE MODEL\n\nEXPLORE THREE PROTOCOL CONCEPTS.\n\nILLUSTRATIVE, NOT LIVE NETWORK DATA.\n\nChange a variable and watch a visual analogy respond. The controls help explain authority, lifecycle, and network boundaries; they do not measure or reproduce a running Flux network.\n\n01 Authority\n02 Lifecycle\n03 Networks\nFX—001\nA VISUAL ANALOGY FOR DERIVED, TEMPORARY AUTHORITY.\nx →\nHow can threshold agreement be pictured?\n\nThis model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.\n\nVisual convergence\n50%\nApart\nTogether\n\n↳ Evidence context: claim inventory and evidence registry.",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 3,
+      "documentHeight": 844,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "01Why the chain was retired7 MIN READ↗"
+        },
+        {
+          "disabled": false,
+          "text": "02One substrate, many networks6 MIN READ↗"
+        },
+        {
+          "disabled": false,
+          "text": "03Governance without a validator set6 MIN READ↗"
+        }
+      ],
+      "path": "/learnings",
+      "text": "NOTES / 03\n\nLearnings\n\nNotes from the work.\n\n01\nWhy the chain was retired\n7 MIN READ\n↗\n02\nOne substrate, many networks\n6 MIN READ\n↗\n03\nGovernance without a validator set\n6 MIN READ\n↗",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 7,
+      "documentHeight": 964,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "← ALL LEARNINGS"
+        },
+        {
+          "disabled": false,
+          "text": "01 Was there a real chain?"
+        },
+        {
+          "disabled": false,
+          "text": "02 Why retire it?"
+        },
+        {
+          "disabled": false,
+          "text": "03 Which numbers can be compared?"
+        },
+        {
+          "disabled": false,
+          "text": "04 What remains unproven?"
+        },
+        {
+          "disabled": false,
+          "text": "05 Why keep the distinctions?"
+        }
+      ],
+      "path": "/learnings/why-the-chain-was-retired",
+      "text": "← ALL LEARNINGS\nBENCHMARKS / 001 / 7 MIN READ\nWHY THE CHAIN WAS RETIRED\nTHE CORE\n\nProject material describes replacing an earlier block-and-validator design with the agreement fabric. This site has no complete public benchmark record to verify the performance comparison yet.\n\nUse this note to understand the architectural change and the evidence still needed to evaluate its performance claims.\n\nQUESTIONS / 05\n\n01\nWas there a real chain?\n02\nWhy retire it?\n03\nWhich numbers can be compared?\n04\nWhat remains unproven?\n05\nWhy keep the distinctions?\nEvidence, review date & next step",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 937,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "← ALL LEARNINGS"
+        },
+        {
+          "disabled": false,
+          "text": "01 What is the substrate?"
+        },
+        {
+          "disabled": false,
+          "text": "02 What does create do today?"
+        },
+        {
+          "disabled": false,
+          "text": "03 Can networks govern each other?"
+        },
+        {
+          "disabled": false,
+          "text": "04 Where is the authority boundary?"
+        }
+      ],
+      "path": "/learnings/one-substrate-many-networks",
+      "text": "← ALL LEARNINGS\nNETWORKS / 002 / 6 MIN READ\nONE SUBSTRATE, MANY NETWORKS\nTHE CORE\n\nFlux Protocol is the shared substrate; project material describes DAO Chain as a network on it. Network creation currently partitions miner presence, not a complete security boundary. Live registration of named examples remains unverified here.\n\nUse this note to distinguish the shared protocol from a network using it before relying on network isolation.\n\nQUESTIONS / 04\n\n01\nWhat is the substrate?\n02\nWhat does create do today?\n03\nCan networks govern each other?\n04\nWhere is the authority boundary?\nEvidence, review date & next step",
+      "viewport": [
+        390,
+        844
+      ]
+    },
+    {
+      "controls": 6,
+      "documentHeight": 957,
+      "firstScreenControls": [
+        {
+          "disabled": false,
+          "text": "← ALL LEARNINGS"
+        },
+        {
+          "disabled": false,
+          "text": "01 Who approves a transition?"
+        },
+        {
+          "disabled": false,
+          "text": "02 How is a cell derived?"
+        },
+        {
+          "disabled": false,
+          "text": "03 Who governs mesh operations?"
+        },
+        {
+          "disabled": false,
+          "text": "04 Can either roster overrule the other?"
+        }
+      ],
+      "path": "/learnings/governance-without-a-validator-set",
+      "text": "← ALL LEARNINGS\nAUTHORITY / 003 / 6 MIN READ\nGOVERNANCE WITHOUT A VALIDATOR SET\nTHE CORE\n\nThe protocol model derives a short-lived authority cell for each contested transition instead of using a standing validator set. A separate mesh-operations policy describes a seven-operator substrate roster; production activation remains unverified.\n\nUse this note to tell transition authority apart from substrate policy and a network's own DAO.\n\nQUESTIONS / 04\n\n01\nWho approves a transition?\n02\nHow is a cell derived?\n03\nWho governs mesh operations?\n04\nCan either roster overrule the other?\nEvidence, review date & next step",
+      "viewport": [
+        390,
+        844
+      ]
+    }
+  ]
+}

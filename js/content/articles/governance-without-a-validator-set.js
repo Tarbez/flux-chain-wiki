@@ -1,6 +1,13 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("governance-without-a-validator-set", {
-  "core": "No standing validator set approves agreement transitions. Each contested object gets a short-lived authority cell. A separate seven-operator roster governs the substrate, never a network DAO.",
+  "core": "The protocol model derives a short-lived authority cell for each contested transition instead of using a standing validator set. A separate mesh-operations policy describes a seven-operator substrate roster; production activation remains unverified.",
+  "relevance": "Use this note to tell transition authority apart from substrate policy and a network's own DAO.",
+  "reviewed": "2026-09-30",
+  "evidenceLabel": "Authority model, thresholds, and current limits",
+  "evidenceHref": "docs/protocol/authority.md",
+  "relatedPage": "concept/practice",
+  "actionLabel": "Inspect activation limits",
+  "actionPage": "concept/notes",
   "questions": [
     "Who approves a transition?",
     "How is a cell derived?",
@@ -19,12 +26,12 @@ LearningContent.load("governance-without-a-validator-set", {
     ],
     [
       "The other roster: mesh operations",
-      "Flux Protocol still has a real, standing governance body — it just governs the substrate itself, not any network's transactions. A seven-operator ceremony closes the frozen production policy bundle: 4-of-7 for ordinary admission, 5-of-7 for economic or runtime changes or a member replacement, 3-of-7 to pause, 5-of-7 to unpause — asymmetric on purpose, easy to pause, hard to unpause.",
+      "The mesh-operations policy describes a separate seven-operator roster for substrate changes, not network transactions. Its documented thresholds are 4-of-7 for ordinary admission, 5-of-7 for economic or runtime changes and member replacement, 3-of-7 to pause, and 5-of-7 to unpause. These are policy rules, not evidence that production activation completed.",
       "Even a fully signed result from that ceremony stays closed until separate network-proof and staged-activation gates open it. A completed signature ceremony is evidence toward activation, not activation itself — stated plainly in the ceremony's own documentation, not something this page is inferring."
     ],
     [
       "Why the two never substitute for each other",
-      "The mesh-operations roster has no authority over any one network's DAO decisions. A network's own DAO has no authority over the mesh-operations roster. This isn't an oversight to be closed later — it's the actual design: a network shouldn't be able to change the substrate it runs on by voting, and the substrate's own operators shouldn't be able to overrule a network's governance from underneath it.",
+      "In the documented design, the mesh-operations roster has no authority over a network DAO's decisions, and a network DAO has no authority over mesh operations. A network should not be able to change its substrate by voting, and substrate operators should not overrule network governance.",
       "Two authority sets, doing two different jobs, neither one a stand-in for the other. If something reads as governance on Flux Protocol, the first question worth asking is which of the two it actually is."
     ]
   ],

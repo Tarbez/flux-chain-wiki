@@ -83,7 +83,7 @@
   function routeOptions() {
     return Object.keys(ArkUI.pageCatalog).map(function (key) {
       var def = ArkUI.pageCatalog[key];
-      return { key: key, label: def.title.replace(' — Flux Chain', '') + '  ' + def.path };
+      return { key: key, label: def.title.replace(' — Flux Protocol', '') + '  ' + def.path };
     });
   }
 
@@ -328,7 +328,11 @@
 
   /* ---- articles ----------------------------------------------------- */
   function articleCopy(a) {
-    return { slug: a.slug, title: a.title, category: a.category, minutes: a.minutes, summary: a.summary, sections: clone(a.sections || []), numbers: !!a.numbers };
+    var draft = { slug: a.slug, title: a.title, category: a.category, minutes: a.minutes, summary: a.summary, sections: clone(a.sections || []), numbers: !!a.numbers };
+    ['relevance', 'reviewed', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'].forEach(function (key) { draft[key] = a[key] || ''; });
+    if (a.core !== undefined) draft.core = a.core;
+    if (a.questions !== undefined) draft.questions = clone(a.questions);
+    return draft;
   }
   function adoptArticles() {
     state.slugs = LearningContent.articles.map(function (a) { return a.slug; });
@@ -348,10 +352,10 @@
     });
   }
 
-  function articleField(article, key, label, kind) {
+  function articleField(article, key, label, kind, fallback) {
     var id = 'a-' + article.slug + '-' + key;
     var control = kind === 'text' ? h('textarea', { id: id, rows: 3, spellcheck: true }) : h('input', { id: id, type: 'text', spellcheck: true });
-    control.value = article[key];
+    control.value = article[key] === undefined ? (fallback || '') : article[key];
     control.addEventListener('input', function () { article[key] = control.value; touch(); });
     return h('div', { class: 'field' }, h('label', { for: id }, h('span', { text: label })), control);
   }
@@ -361,6 +365,17 @@
     control.value = section[pi];
     control.addEventListener('input', function () { section[pi] = control.value; touch(); });
     return h('div', { class: 'field' }, h('label', { for: id }, h('span', { text: pi === 0 ? 'Heading' : 'Paragraph ' + pi })), control);
+  }
+  function questionField(article, si) {
+    var id = 'a-' + article.slug + '-s' + si + '-question';
+    var control = h('input', { id: id, type: 'text', spellcheck: true });
+    control.value = (article.questions || [])[si] || article.sections[si][0];
+    control.addEventListener('input', function () {
+      if (!article.questions) article.questions = article.sections.map(function (section) { return section[0]; });
+      article.questions[si] = control.value;
+      touch();
+    });
+    return h('div', { class: 'field' }, h('label', { for: id }, h('span', { text: 'Question / layer ' + (si + 2) })), control);
   }
 
   function renderArticleEditor() {
@@ -380,17 +395,34 @@
     card.appendChild(articleField(a, 'summary', 'Summary', 'text'));
     root.appendChild(card);
 
+    var primary = h('fieldset', {}, h('legend', { text: 'Layer 1 / the core' }));
+    primary.appendChild(articleField(a, 'core', 'Primary summary', 'text', a.summary));
+    primary.appendChild(h('p', { class: 'field-key', text: 'The first view before readers open a question. Defaults to the card summary until edited.' }));
+    root.appendChild(primary);
+
+    var evidence = h('fieldset', {}, h('legend', { text: 'Editorial evidence and next move' }));
+    evidence.appendChild(articleField(a, 'relevance', 'Why this article matters', 'text'));
+    evidence.appendChild(articleField(a, 'reviewed', 'Last editorial review (YYYY-MM-DD)', 'line'));
+    evidence.appendChild(articleField(a, 'evidenceLabel', 'Evidence link label', 'line'));
+    evidence.appendChild(articleField(a, 'evidenceHref', 'Evidence doc path', 'line'));
+    evidence.appendChild(articleField(a, 'relatedPage', 'Related mechanism page key', 'line'));
+    evidence.appendChild(articleField(a, 'actionLabel', 'Next-action label', 'line'));
+    evidence.appendChild(articleField(a, 'actionPage', 'Next-action page key', 'line'));
+    evidence.appendChild(h('p', { class: 'field-key', text: 'These form the reference layer. A review date records editorial review, not live capability verification.' }));
+    root.appendChild(evidence);
+
     a.sections.forEach(function (section, si) {
       var box = h('fieldset', { class: 'section-box' }, h('legend', { text: 'Section ' + (si + 1) }));
+      box.appendChild(questionField(a, si));
       section.forEach(function (part, pi) { box.appendChild(partField(a, si, pi)); });
       box.appendChild(h('div', { class: 'tools' },
         h('button', { type: 'button', class: 'btn', text: 'Add a paragraph', onclick: function () { section.push('New paragraph.'); touch(); renderEditor(); } }),
         h('button', { type: 'button', class: 'btn', text: 'Remove the last paragraph', disabled: section.length <= 2, onclick: function () { section.pop(); touch(); renderEditor(); } }),
-        h('button', { type: 'button', class: 'btn', text: 'Remove this section', disabled: a.sections.length <= 1, onclick: function () { a.sections.splice(si, 1); touch(); renderEditor(); } })));
+        h('button', { type: 'button', class: 'btn', text: 'Remove this section', disabled: a.sections.length <= 1, onclick: function () { a.sections.splice(si, 1); if (a.questions) a.questions.splice(si, 1); touch(); renderEditor(); } })));
       root.appendChild(box);
     });
     root.appendChild(h('div', { class: 'tools' },
-      h('button', { type: 'button', class: 'btn', text: 'Add a section', onclick: function () { a.sections.push(['New section.', 'Write the first paragraph.']); touch(); renderEditor(); } })));
+      h('button', { type: 'button', class: 'btn', text: 'Add a section', onclick: function () { a.sections.push(['New section.', 'Write the first paragraph.']); if (a.questions) a.questions.push('What does this section explain?'); touch(); renderEditor(); } })));
 
     var box = h('input', { id: 'a-numbers', type: 'checkbox' });
     box.checked = a.numbers;
@@ -449,7 +481,9 @@
 
   function articleBlueprint(slug) {
     return { slug: slug, title: 'New note', category: 'NOTES / ' + String(state.slugs.length + 1).padStart(3, '0'), minutes: '3 MIN READ',
-             summary: 'Say what this note is about.', sections: [['First heading', 'Write the first paragraph.']], numbers: false };
+             summary: 'Say what this note is about.', core: 'State the central idea clearly.', questions: ['What does this note explain?'],
+             relevance: '', reviewed: '', evidenceLabel: '', evidenceHref: '', relatedPage: '', actionLabel: '', actionPage: '',
+             sections: [['First heading', 'Write the first paragraph.']], numbers: false };
   }
   $('newArticleForm').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -1470,8 +1504,68 @@
   /* ---- the mesh ------------------------------------------------------ */
   /* Only when this page is served by the publish host: from a file: URL there is no host to talk to. */
   var publishing = false;   /* a refresh that finishes mid-publish must not re-enable the button */
-  var mesh = window.ArkPublish ? ArkPublish.create({ identity: function () { return gate.identity(); } }) : null;
   function short(text) { return text ? text.slice(0, 8) + '…' + text.slice(-6) : ''; }
+  function authorizationDigest(text) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (bytes) {
+      return Array.from(new Uint8Array(bytes)).map(function (byte) { return byte.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+  function authorizePublish(input) {
+    var who = gate.identity();
+    if (!who) return Promise.resolve(false);
+    return authorizationDigest(input.signingMessage).then(function (digest) {
+      return new Promise(function (resolve) {
+        var previous = document.activeElement;
+        var backdrop = h('div', { class: 'admin-auth-backdrop', role: 'dialog', 'aria-modal': 'true', 'aria-label': input.title });
+        var panel = h('section', { class: 'admin-auth-panel' });
+        var title = h('div', { class: 'admin-auth-title' }, h('span', { class: 'kicker', text: 'Scoped publish authorization' }), h('h2', { text: input.title }));
+        var close = h('button', { type: 'button', class: 'admin-auth-close', 'aria-label': 'Cancel authorization', text: '×' });
+        panel.appendChild(h('header', {}, title, close));
+        var view = window.ArkAuthorizationView.scopedAuthorizationView({
+          title: input.title,
+          description: input.description,
+          requester: who.displayName || 'Signed-in identity',
+          network: 'Local publish host',
+          authority: who.publicKeyB64,
+          configuration: input.record.name || 'flux-chain.ark',
+          scope: 'site.publish',
+          action: 'flux.site.publish',
+          manifestDigest: digest,
+          claimStack: 'primary authorize flux.site.publish for exact name record ' + digest + '\nconstraint owner ' + who.publicKeyB64 + '\nfailure reject altered, expired or cross-site bytes\ntrust zero',
+          manifest: input.record,
+          authorizationBytes: input.signingMessage,
+          actionPayloadBytes: input.signingMessage,
+          facts: [{ label: 'Version', value: String(input.record.version || 'next') }, { label: 'Signing profile', value: who.securityProfile === 'hybrid-pq' ? 'Hybrid identity available; names/* record remains Ed25519' : 'Ed25519 name record' }]
+        });
+        panel.appendChild(h('p', { class: 'admin-auth-description', text: view.description }));
+        var context = h('dl', { class: 'admin-auth-context' });
+        view.rows.forEach(function (row) { context.appendChild(h('div', {}, h('dt', { text: row.label }), h('dd', { text: row.value }))); });
+        panel.appendChild(context);
+        panel.appendChild(h('div', { class: 'admin-auth-digest' }, h('small', { text: 'Exact manifest digest · SHA-256' }), h('code', { text: view.digest })));
+        view.disclosures.forEach(function (item) {
+          var details = document.createElement('details'); details.appendChild(h('summary', { text: item.label }));
+          var pre = document.createElement('pre'); pre.textContent = item.text; details.appendChild(pre); panel.appendChild(details);
+        });
+        panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety + ' This publish action still signs the existing Ed25519 names/* record contract.' }));
+        var footer = h('footer', {}, h('button', { type: 'button', class: 'btn', text: 'Cancel' }), h('button', { type: 'button', class: 'btn primary', 'data-autofocus': true, text: 'Approve scopes & sign' })); panel.appendChild(footer);
+        backdrop.appendChild(panel); document.body.appendChild(backdrop);
+        var cancelButton = footer.children[0], approveButton = footer.children[1], closed = false;
+        function finish(ok) { if (closed) return; closed = true; backdrop.remove(); if (previous && previous.focus) previous.focus(); resolve(ok); }
+        close.addEventListener('click', function () { finish(false); }); cancelButton.addEventListener('click', function () { finish(false); });
+        approveButton.addEventListener('click', function () { approveButton.disabled = true; cancelButton.disabled = true; approveButton.textContent = 'Signing locally…'; finish(true); });
+        backdrop.addEventListener('mousedown', function (event) { if (event.target === backdrop) finish(false); });
+        backdrop.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape') { event.preventDefault(); finish(false); return; }
+          if (event.key !== 'Tab') return;
+          var focusables = Array.prototype.slice.call(panel.querySelectorAll('button,summary')).filter(function (item) { return !item.disabled; });
+          if (event.shiftKey && document.activeElement === focusables[0]) { event.preventDefault(); focusables[focusables.length - 1].focus(); }
+          else if (!event.shiftKey && document.activeElement === focusables[focusables.length - 1]) { event.preventDefault(); focusables[0].focus(); }
+        });
+        approveButton.focus();
+      });
+    });
+  }
+  var mesh = window.ArkPublish ? ArkPublish.create({ identity: function () { return gate.identity(); }, authorize: authorizePublish }) : null;
   function siteFromState() {
     return { manifests: state.ids.map(function (id) { return clone(state.drafts[id]); }),
              articles: state.slugs.map(function (slug) { return articleCopy(state.aDrafts[slug]); }),

@@ -10,37 +10,43 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "networks & institutions"
+      "value": "For protocol teams and technical operators"
     },
     "EYEBROW": {
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "Own your network"
+      "value": "Protocol infrastructure for independent networks"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "Deploy parse resolve"
+      "value": "Run your own network without inheriting someone else's chain."
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Deploy a resolver — a network, a DAO, an app, a DeFi protocol, \nor a bridge to any chain that already exists. You define your language resolution."
+      "value": "Register a network, define its rules, and complete signed agreements without a global block order. Available in source; network isolation currently covers miner presence. Production activation and public binaries remain unverified."
     },
     "STEP": {
       "label": "Label on the ring pill",
       "kind": "line",
       "section": "Hero",
-      "value": "flux/flux"
+      "value": "SOURCE / PARTIAL"
     },
     "CTA": {
       "label": "Main button",
       "kind": "line",
       "section": "Hero",
-      "value": "Deploy a Resolver"
+      "value": "See how Flux works"
+    },
+    "SECONDARY": {
+      "label": "Secondary button",
+      "kind": "line",
+      "section": "Hero",
+      "value": "Run Flux from source"
     },
     "QUESTION.RESOLVER": {
       "label": "Question link: resolver",
@@ -52,7 +58,49 @@ ArkManifest.define({
       "label": "Question link: Flux",
       "kind": "line",
       "section": "Hero",
-      "value": "What is the flux?"
+      "value": "Read the protocol overview"
+    },
+    "STATUS1.LABEL": {
+      "label": "Status item 1 label",
+      "kind": "line",
+      "section": "Status",
+      "value": "MINER DAEMON"
+    },
+    "STATUS1.VALUE": {
+      "label": "Status item 1 value",
+      "kind": "line",
+      "section": "Status",
+      "value": "PARTIAL"
+    },
+    "STATUS2.LABEL": {
+      "label": "Status item 2 label",
+      "kind": "line",
+      "section": "Status",
+      "value": "NAMED NETWORKS"
+    },
+    "STATUS2.VALUE": {
+      "label": "Status item 2 value",
+      "kind": "line",
+      "section": "Status",
+      "value": "PRESENCE ONLY"
+    },
+    "STATUS3.LABEL": {
+      "label": "Status item 3 label",
+      "kind": "line",
+      "section": "Status",
+      "value": "PUBLIC BINARIES"
+    },
+    "STATUS3.VALUE": {
+      "label": "Status item 3 value",
+      "kind": "line",
+      "section": "Status",
+      "value": "UNVERIFIED"
+    },
+    "STATUS.NOTE": {
+      "label": "Status observation note",
+      "kind": "line",
+      "section": "Status",
+      "value": "STATUS / 2026-09-30"
     },
     "READOUT.UNITS": {
       "label": "Readout label: units",
@@ -112,7 +160,7 @@ ArkManifest.define({
       "label": "Corner link: experiments",
       "kind": "line",
       "section": "Corner links",
-      "value": "Demo"
+      "value": "Interactive model"
     }
   }
 });
