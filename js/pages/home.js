@@ -8,27 +8,16 @@ ArkUI.pageModules.zero = {
       '  -S-1.42', '  .', '.'
     ].join('\n'), host);
     el.classList.add('ark-page'); el.dataset.arkPage = 'zero';
-    // A vector drafting plate keeps the pattern crisp at every viewport size.
-    var plate = document.createElement('div');
-    plate.className = 'home-drafting-plate';
-    plate.setAttribute('aria-hidden', 'true');
-    var arcs = '';
-    for (var r = 42; r <= 240; r += 14) {
-      arcs += '<circle cx="300" cy="250" r="' + r + '" />';
-    }
-    var strokes = '';
-    for (var n = 0; n < 24; n++) {
-      strokes += '<path d="M' + (370 + n * 9) + ' 470 l95 -150" stroke-width="' + (1 + n / 8) + '" />';
-    }
-    plate.innerHTML = '<svg viewBox="0 0 680 600" fill="none" xmlns="http://www.w3.org/2000/svg"><g class="plate-arcs">' + arcs + '</g><path class="plate-axis" d="M0 250H680M300 0V600M60 10V590M620 10V590"/><g class="plate-lines">' + strokes + '</g><path class="plate-block" d="M300 10H540V250H300Z"/><path class="plate-cut" d="M300 10a240 240 0 0 1 240 240H300Z"/><g class="plate-nodes"><path d="M54 250h12m-6 -6v12M294 490h12m-6 -6v12M614 250h12m-6 -6v12"/><rect x="294" y="244" width="12" height="12"/><rect x="54" y="484" width="12" height="12"/></g></svg><span class="plate-label">F / 01 — INDEPENDENT NETWORKS</span><span class="plate-index">SUBSTRATE / AGREEMENT / RECEIPT</span>';
-    el.appendChild(plate);
     var body = el.querySelector('.ark-hero-body');
     var heading = body.querySelector('.ark-hero-title');
     var headline = ArkCopy.text('HOME.TITLE');
     if (heading && headline.indexOf('Run your own network ') === 0) {
       heading.textContent = '';
       var mainLine = document.createElement('span');
-      mainLine.className = 'home-headline-main'; mainLine.textContent = 'Run your own network';
+      mainLine.className = 'home-headline-main';
+      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='Run your own';
+      var noun=document.createElement('span');noun.className='home-headline-network';noun.textContent='network';
+      mainLine.appendChild(lead);mainLine.appendChild(document.createTextNode(' '));mainLine.appendChild(noun);
       var subLine = document.createElement('span');
       subLine.className = 'home-headline-detail'; subLine.textContent = headline.slice(21);
       heading.appendChild(mainLine); heading.appendChild(subLine);
@@ -51,8 +40,8 @@ ArkUI.pageModules.zero = {
     actions.appendChild(secondary);
     var questions = document.createElement('nav');
     questions.className = 'home-question-links';
-    questions.setAttribute('aria-label', 'Learn about Flux');
-    [['HOME.QUESTION.RESOLVER', 'resolver'], ['HOME.QUESTION.FLUX', 'about']].forEach(function (item) {
+    questions.setAttribute('aria-label', 'Learn about DEFXN');
+    [['HOME.QUESTION.RESOLVER', 'resolver']].forEach(function (item) {
       var link = document.createElement('a');
       link.href = pageHref(item[1]); link.dataset.sceneLink = item[1];
       link.textContent = ArkCopy.text(item[0]);
@@ -64,55 +53,54 @@ ArkUI.pageModules.zero = {
     var lifecycle = document.createElement('nav');
     lifecycle.className = 'home-lifecycle';
     lifecycle.setAttribute('aria-label', 'The agreement lifecycle');
-    var flow = document.createElement('div');
-    flow.className = 'home-agreement-flow';
-    flow.dataset.homeFlow = 'ordered';
-    flow.setAttribute('aria-hidden', 'true');
-    var symbols = ['?', '↗', '=', '→', '✓'];
-    ArkUI.lifecycleStages.forEach(function (stage, i) {
-      var node = document.createElement('span');
-      node.className = 'home-flow-node';
-      node.style.setProperty('--flow-step', i);
-      node.textContent = symbols[i];
-      flow.appendChild(node);
+    var caption = document.createElement('p'); caption.className = 'home-lifecycle-caption';
+    caption.textContent = '01 / The agreement fabric'; lifecycle.appendChild(caption);
+    var title = document.createElement('strong'); title.className = 'home-cycle-title';
+    title.textContent = 'Every step leaves a trace.'; lifecycle.appendChild(title);
+    var description=document.createElement('p');description.className='home-cycle-description';description.textContent='One request. Linked terms, work, and verification.';lifecycle.appendChild(description);
+    var windowEl=document.createElement('div');windowEl.className='home-substrate-window';windowEl.setAttribute('aria-hidden','true');
+    windowEl.innerHTML='<span class="home-window-label">Shared substrate / one connected trail</span><span class="home-window-bracket"></span>';lifecycle.appendChild(windowEl);
+    var drawing=document.createElement('div');drawing.className='home-cycle-drawing';drawing.setAttribute('aria-hidden','true');
+    var svgNS='http://www.w3.org/2000/svg';
+    function vector(tag,attrs,text){var node=document.createElementNS(svgNS,tag);Object.keys(attrs).forEach(function(key){node.setAttribute(key,attrs[key]);});if(text)node.textContent=text;return node;}
+    var svg=vector('svg',{viewBox:'0 0 480 120',fill:'none'});
+    // A request emerges from the substrate and accumulates linked records.
+    var trail='M240 0v12q0 8-8 8H56q-8 0-8 8v38h384';
+    svg.appendChild(vector('path',{d:trail,class:'home-record-connector'}));
+    [48,144,240,336,432].forEach(function(x,i){
+      var stage=ArkUI.lifecycleStages[i];
+      var record=vector('g',{class:'home-record','data-record':stage.id});
+      record.appendChild(vector('rect',{x:x-19,y:47,width:38,height:38,rx:7,class:'home-record-node'}));
+      record.appendChild(vector('text',{x:x,y:70,'text-anchor':'middle',class:'home-record-number'},String(i+1).padStart(2,'0')));
+      svg.appendChild(record);
+      if(i>0)svg.appendChild(vector('path',{d:'M'+(x-77)+' 66h58',class:'home-record-incoming','data-record':stage.id,pathLength:'1'}));
+      if(i<4)svg.appendChild(vector('path',{d:'M'+(x+48-3)+' 63l3 3-3 3',class:'home-record-direction'}));
     });
-    lifecycle.appendChild(flow);
-    var caption = document.createElement('p');
-    caption.className = 'home-lifecycle-caption';
-    caption.textContent = 'Agreement lifecycle';
-    lifecycle.appendChild(caption);
-    var lifecycleIntro = document.createElement('div');
-    lifecycleIntro.className = 'home-lifecycle-intro';
-    var lifecycleTitle = document.createElement('strong');
-    lifecycleTitle.textContent = 'From intent to receipt.';
-    var lifecycleMeta = document.createElement('span');
-    lifecycleMeta.textContent = '05 stages / one verifiable agreement';
-    lifecycleIntro.appendChild(lifecycleTitle);
-    lifecycleIntro.appendChild(lifecycleMeta);
-    lifecycle.appendChild(lifecycleIntro);
-    var seeAll = document.createElement('a');
-    seeAll.className = 'home-lifecycle-all';
-    seeAll.href = pageHref('lifecycle'); seeAll.dataset.sceneLink = 'lifecycle';
-    seeAll.textContent = 'See all';
-    lifecycle.appendChild(seeAll);
-    var rail = document.createElement('ol');
-    rail.className = 'home-stage-rail';
+    drawing.appendChild(svg);lifecycle.appendChild(drawing);
+    var rail = document.createElement('ol'); rail.className = 'home-cycle-records';
+    var contributions=[
+      'Intent defines what is being requested.',
+      'Offer proposes terms for the request.',
+      'Agreement links the accepted terms.',
+      'Fulfillment records the work and its result.',
+      'Receipt records the verification outcome.'
+    ];
     ArkUI.lifecycleStages.forEach(function (stage, i) {
-      var li = document.createElement('li');
-      var link = document.createElement('a');
-      link.className = 'home-stage-link';
-      link.href = pageHref('lifecycle/' + stage.id); link.dataset.sceneLink = 'lifecycle/' + stage.id;
-      var num = document.createElement('span');
-      num.className = 'home-stage-num'; num.textContent = ('0' + (i + 1)).slice(-2);
-      var name = document.createElement('span');
-      name.className = 'home-stage-name'; name.textContent = stage.title;
-      var bar = document.createElement('span');
-      bar.className = 'home-stage-bar'; bar.setAttribute('aria-hidden', 'true');
-      link.appendChild(num); link.appendChild(name); link.appendChild(bar);
-      link.style.setProperty('--flow-step', i);
-      li.appendChild(link); rail.appendChild(li);
-    });
-    lifecycle.appendChild(rail);
+      var item = document.createElement('li');
+      var link = document.createElement('a');link.className='home-cycle-step';link.dataset.stage=stage.id;
+      link.href=pageHref('lifecycle/'+stage.id);link.dataset.sceneLink='lifecycle/'+stage.id;
+      link.textContent=stage.title;link.setAttribute('aria-label','Explore '+stage.title+': '+contributions[i]);
+      item.appendChild(link);rail.appendChild(item);
+    }); lifecycle.appendChild(rail);
+    var insight=document.createElement('p');insight.className='home-cycle-insight';insight.setAttribute('aria-hidden','true');
+    var idle=document.createElement('span');idle.className='home-cycle-insight-idle';idle.textContent='Explore a record in the trail.';insight.appendChild(idle);
+    ArkUI.lifecycleStages.forEach(function(stage,i){var text=document.createElement('span');text.dataset.insight=stage.id;text.textContent=contributions[i];insight.appendChild(text);});
+    lifecycle.appendChild(insight);
+    var open = document.createElement('a'); open.className = 'home-lifecycle-all';
+    open.href = pageHref('lifecycle'); open.dataset.sceneLink = 'lifecycle';open.dataset.icon='arrow-right';
+    open.textContent = 'Follow one agreement →'; lifecycle.appendChild(open);
+    var note = document.createElement('small'); note.className = 'home-cycle-note';
+    note.textContent = 'Illustration / not a live agreement'; lifecycle.appendChild(note);
     el.appendChild(lifecycle);
 
     var status = document.createElement('aside');
@@ -137,6 +125,27 @@ ArkUI.pageModules.zero = {
     status.appendChild(statusLink);
     el.insertBefore(status, lifecycle);
 
+    // The original dense canvas field stays alive, cropped to the chosen panel.
+    // Its artwork cannot take focus or imply a verified live observation.
+    var scene=el.closest&&el.closest('.hero-alive'),observer=null,alignFrame=0,disposed=false,lastMeshBounds=null;
+    function alignMesh(){
+      if(disposed)return;
+      var currentWindow=el.querySelector('.home-substrate-window');
+      if(!scene||!currentWindow||!currentWindow.getBoundingClientRect)return;
+      var target=currentWindow.getBoundingClientRect(),base=scene.getBoundingClientRect();
+      if(!target.width||!target.height)return;
+      var bounds=[target.left-base.left,target.top-base.top,target.width,target.height];
+      if(lastMeshBounds&&bounds.every(function(value,index){return value===lastMeshBounds[index];}))return;
+      lastMeshBounds=bounds;
+      scene.style.setProperty('--home-mesh-left',bounds[0]+'px');
+      scene.style.setProperty('--home-mesh-top',(target.top-base.top)+'px');
+      scene.style.setProperty('--home-mesh-width',target.width+'px');
+      scene.style.setProperty('--home-mesh-height',target.height+'px');
+    }
+    if(typeof ResizeObserver!=='undefined'&&scene){observer=new ResizeObserver(alignMesh);observer.observe(el);observer.observe(lifecycle);observer.observe(windowEl);}
+    el.arkRestore=alignMesh;
+    if(typeof requestAnimationFrame==='function')alignFrame=requestAnimationFrame(function(){alignFrame=0;alignMesh();});
+    el.arkDispose=function(){disposed=true;if(observer)observer.disconnect();if(alignFrame&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(alignFrame);};
     return el;
   }
 };

@@ -76,3 +76,19 @@
  #scene .mesh-explorer-field { grid-template-columns:1fr; gap:4px; }
 }
 @media(prefers-reduced-motion:reduce) { #scene .mesh-explorer-page * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+
+/* Network at a glance: counts read live from the node, and the defxn node list. */
+#scene .mesh-explorer-glance { margin:0 0 54px; }
+#scene .mesh-explorer-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); border-top:1px solid hsl(var(--border-default)); margin-top:20px; }
+#scene .mesh-explorer-stat { display:grid; gap:6px; align-content:start; min-width:0; padding:18px 18px 18px 0; border-bottom:1px solid hsl(var(--border-default)); }
+#scene .mesh-explorer-stat span { color:hsl(var(--text-muted)); text-transform:uppercase; font:600 10px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.05em; }
+#scene .mesh-explorer-stat strong { overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:500 clamp(24px,3vw,38px)/1.1 "Albert Sans",sans-serif; letter-spacing:-.03em; }
+#scene .mesh-explorer-stat small { color:hsl(var(--text-muted)); font:400 13px/1.4 "Albert Sans",sans-serif; }
+#scene .mesh-explorer-subhead { margin:28px 0 8px; color:hsl(var(--text-strong)); font:600 13px/1.4 "Albert Sans",sans-serif; }
+#scene .mesh-explorer-nodes { display:grid; border-top:1px solid hsl(var(--border-default)); }
+#scene .mesh-explorer-node { display:grid; grid-template-columns:minmax(150px,1fr) 120px minmax(0,2fr); gap:16px; align-items:center; padding:12px 0; border-bottom:1px solid hsl(var(--border-default)); font:400 14px/1.4 "Albert Sans",sans-serif; color:hsl(var(--text)); }
+#scene .mesh-explorer-node strong { color:hsl(var(--text-strong)); font-weight:500; overflow-wrap:anywhere; }
+#scene .mesh-explorer-node-state { font:600 11px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.04em; text-transform:uppercase; }
+#scene .mesh-explorer-node[data-state="up"] .mesh-explorer-node-state { color:hsl(var(--accent)); }
+#scene .mesh-explorer-node[data-state="down"] .mesh-explorer-node-state { color:hsl(var(--text-muted)); }
+@media(max-width:760px) { #scene .mesh-explorer-node { grid-template-columns:1fr; gap:4px; } }

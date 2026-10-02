@@ -54,13 +54,17 @@
     var mounted = Object.create(null), modules = new Map(), positions = new Map();
     var hooks = [], cleanups = new Map();
     var presence = ArkUI.createPresence(mounted);
+    var continuity = ArkUI.createPanelContinuity && scene.getBoundingClientRect ? ArkUI.createPanelContinuity(scene) : null;
     var lifecycleTiming = ArkUI.lifecycleTransition;
-    var active = null, request = 0, commit = 0, requested = 'zero';
+    var active = null, request = 0, commit = 0, requested = 'zero', requestedSettings = {};
     var report = function () {};
     function isLifecycle(page) { return page === 'lifecycle' || page.indexOf('lifecycle/') === 0; }
-    function url(page) { return '#' + catalog[page].path; }
-    function resolve(hash) {
-      var path = (hash || '#/').replace(/^#/, '').split('?')[0];
+    function url(page) { return ArkUI.route.href(catalog[page].path); }
+    function resolve(address) {
+      var path = String(address == null || address === '' ? '/' : address).replace(/^#/, '').split('?')[0];
+      if (path.length > 1) path = path.replace(/\/+$/, '');
+      /* the explorer used to live at /explorer; /explore is its address now */
+      if (path === '/explorer') return 'explorer';
       /* the old Work page is the lab now: `#work` and `#/work` both land there instead of on a page that no longer exists */
       if (path === 'work' || path === '/work') return 'lab';
       if (path === 'proximity') return 'proximity';
@@ -68,10 +72,10 @@
       if (Object.prototype.hasOwnProperty.call(catalog, path)) return path;
       return Object.keys(catalog).find(function (key) { return catalog[key].path === path; }) || 'zero';
     }
-    function writeHistory(page, mode) {
-      if (options.writeHistory) return options.writeHistory(page, mode);
+    function writeHistory(page, mode, query) {
+      if (options.writeHistory) return options.writeHistory(page, mode, query);
       if (mode === 'none') return;
-      if (location.hash !== url(page)) history[mode === 'replace' ? 'replaceState' : 'pushState'](null, '', url(page));
+      ArkUI.route.write(catalog[page].path, query || '', mode === 'replace' ? 'replace' : 'push');
     }
     function isDocumentPage(page) {
       return mounted[page] && mounted[page].classList.contains('learning-page');
@@ -97,11 +101,20 @@
       el.remove(); delete mounted[page];
     }
     async function navigate(page, settings) {
-      settings = settings || {};
+      settings = Object.assign({}, settings || {});
+      if (settings.query === undefined && settings.history !== 'none' && continuity) settings.query = continuity.returnQuery(page);
       if (!Object.prototype.hasOwnProperty.call(catalog, page)) throw new Error('Unknown page: ' + page);
-      var ticket = ++request; requested = page;
+      var ticket = ++request; requested = page; requestedSettings = settings;
       var run = null;
       if (page === active) {
+        if (page === 'reference') {
+          try {
+            var reader = await modules.get(page);
+            await reader.prepare(page, settings);
+            if (ticket !== request) return false;
+            reader.update(mounted[page]); mounted[page].focus({ preventScroll:true });
+          } catch (error) { if (ticket !== request) return false; report('This reference could not load. Your current source is still here.', true); return false; }
+        }
         if (scene.dataset.transition === 'running') {
           if (state.lifecycleRun) await state.lifecycleRun.when('complete');
           await presence.show(page, state.get().paused || ArkUI.prefersReducedMotion());
@@ -111,7 +124,7 @@
         scene.dataset.transition = 'idle';
         scene.classList.remove('is-lifecycle-transition');
         state.lifecycleRun = null;
-        outlet.setAttribute('aria-busy', 'false'); report('', false); writeHistory(page, settings.history);
+        outlet.setAttribute('aria-busy', 'false'); report('', false); writeHistory(page, settings.history, settings.query);
         return true;
       }
       report('Loading ' + catalog[page].title.replace(' — Flux Protocol', '') + '…', false);
@@ -124,6 +137,7 @@
         }
         if (!modules.has(page)) modules.set(page, load(page, catalog[page]).catch(function (error) { modules.delete(page); throw error; }));
         var module = await modules.get(page);
+        if (module.prepare) await module.prepare(page, settings);
         if (ticket !== request) return false;
         report('', false);
         if (!mounted[page]) {
@@ -150,7 +164,8 @@
         var immediate = state.get().paused || ArkUI.prefersReducedMotion();
         scene.dataset.transition = 'running';
         var outgoing = active;
-        var zoomTransition = !immediate && outgoing && (isLifecycle(outgoing) || isLifecycle(page));
+        var panel = continuity && continuity.begin(outgoing, page, mounted, settings.source, immediate);
+        var zoomTransition = !panel && !immediate && outgoing && (isLifecycle(outgoing) || isLifecycle(page));
         if (state.lifecycleRun) state.lifecycleRun.cancel();
         // Outgoing content must leave under its OWN route styles. Switching the
         // ancestor's data-page first reflows home cards into the incoming layout.
@@ -164,12 +179,14 @@
         active = page; var generation = ++commit;
         scene.dataset.page = page;
         state.navigate(page);
-        writeHistory(page, settings.history);
+        writeHistory(page, settings.history, settings.query);
+        if (mounted[page].arkRestore) mounted[page].arkRestore();
         if (typeof document !== 'undefined') {
           document.title = catalog[page].title;
           applyRouteMetadata(catalog[page]);
         }
         report('', false); outlet.setAttribute('aria-busy', 'false');
+        var panelRun = panel ? panel.commit(mounted[page], immediate) : Promise.resolve();
         var entering;
         if (zoomTransition) {
           // The old page has already exited under its own styles. Reveal the
@@ -181,7 +198,7 @@
         // now, before it paints, rather than jumping after the entry completes.
         restoreScroll(page);
         if (page !== 'zero') mounted[page].focus({ preventScroll: true });
-        await Promise.all([entering,run ? run.when('complete') : Promise.resolve()]);
+        await Promise.all([entering,panelRun,run ? run.when('complete') : Promise.resolve()]);
         if (ticket !== request || generation !== commit) return false;
         Object.keys(mounted).forEach(function (key) { if (key !== active) remove(key); });
         scene.dataset.transition = 'idle';
@@ -202,9 +219,10 @@
     return {
       pages: mounted, navigate: navigate, url: url, resolve: resolve,
       get active() { return active; },
+      get panelHost() { return continuity && continuity.host; },
       onMount: function (hook) { hooks.push(hook); },
       onStatus: function (handler) { report = handler; },
-      retry: function () { return navigate(requested); }
+      retry: function () { return navigate(requested, requestedSettings); }
     };
   };
 })();

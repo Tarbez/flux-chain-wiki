@@ -69,7 +69,7 @@
 #scene .mechanism-inner .mechanism-progress { font:500 10px/1.5 ui-monospace,monospace; letter-spacing:.12em; color:hsl(var(--text-muted)); }
 .mechanism-inner .mechanism-limit h2 { font:500 28px/1.25 "Albert Sans",sans-serif; color:hsl(var(--text-strong)); }
 .mechanism-next { min-height:44px; padding:10px 18px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--canvas)); font:500 13px/1.3 "Albert Sans",sans-serif; cursor:pointer; }
-#scene .hero-alive .mechanism-next { color:hsl(var(--canvas)) !important; }
+#scene .hero-alive .learning-page .mechanism-next { color:hsl(var(--canvas)); }
 .mechanism-explorer .theory-footer { margin-top:36px; }
 .mechanism-explorer :is(button,a):focus-visible { outline:2px solid hsl(var(--text-strong)); outline-offset:4px; }
 #scene .concept-page .concept-content { width:100%; padding:var(--page-top) var(--page-gutter) 60px; }

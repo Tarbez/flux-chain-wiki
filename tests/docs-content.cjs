@@ -58,11 +58,11 @@ for (const surface of ['Home and protocol overview', 'Networks pages', 'Agreemen
 }
 
 const seo = fs.readFileSync('js/content/seo-data.js', 'utf8');
-assert(seo.includes('"name": "Flux Protocol"'), 'SEO data uses the canonical product name');
+assert(seo.includes('"name": "DEFXN"'), 'SEO data uses the canonical product name');
 
-assert(/<title>[^<]*\bFlux Protocol\b[^<]*<\/title>/.test(fs.readFileSync('index.html', 'utf8')), 'public title uses the canonical product name');
+assert(/<title>[^<]*\bDEFXN\b[^<]*<\/title>/.test(fs.readFileSync('index.html', 'utf8')), 'public title uses the canonical product name');
 assert(fs.readFileSync('admin.html', 'utf8').includes('<title>Flux Protocol admin</title>'), 'admin title uses the canonical product name');
 assert(fs.readFileSync('admin-app.html', 'utf8').includes('<title>Flux Protocol content</title>'), 'content editor title uses the canonical product name');
-assert(fs.readFileSync('js/content/manifests/nav.js', 'utf8').includes('"value": "Flux Protocol"'), 'navigation uses the canonical product name');
+assert(fs.readFileSync('js/content/manifests/nav.js', 'utf8').includes('"value": "Run DEFXN"'), 'navigation uses the canonical product name');
 
 console.log('PASS: Batch 1 documentation topology, status vocabulary, evidence records, and product naming.');

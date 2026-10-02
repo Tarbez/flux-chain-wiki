@@ -5,7 +5,7 @@ ArkManifest.define({
   "route": "/what-is-a-resolver",
   "group": "page",
   "meta": {
-    "next": "references",
+    "next": "deployment",
     "back": "zero"
   },
   "fields": {
@@ -43,7 +43,7 @@ ArkManifest.define({
       "label": "Onward link",
       "kind": "line",
       "section": "Links",
-      "value": "Inspect reference evidence"
+      "value": "See how Flux works"
     },
     "BACK": {
       "label": "Back link",

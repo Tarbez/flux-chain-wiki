@@ -151,7 +151,8 @@
       '.article-topline,.article-title,.article-core,.article-contents,.article-reading > section,' +
       '.article-answer-controls,.article-next,.mechanism-depth,.mechanism-inner-title,' +
       '.mechanism-inner,.mechanism-status-summary,.content-layer-path,' +
-      '.lifecycle-page > h1,.lifecycle-scenario,.lifecycle-page > section,.lifecycle-evidence';
+      '.lifecycle-page > h1,.lifecycle-scenario,.lifecycle-page > section,.lifecycle-evidence,' +
+      '.guided-page > h1,.guided-body,.guided-page > .story-depth,.lifecycle-trail,.lifecycle-dashboard-body,.lifecycle-next';
 
     function targets(el) {
       if (!el.querySelectorAll) return [];
@@ -189,7 +190,7 @@
       var animation;
       if (canStagger) {
         var maxDelay = timing && timing.quick ? Math.min(48,(items.length - 1) * 8)
-          : Math.min(active ? 220 : 160,(items.length - 1) * (active ? 26 : 18));
+          : Math.min(active ? 80 : 48,(items.length - 1) * (active ? 16 : 8));
         var step = items.length > 1 ? maxDelay / (items.length - 1) : 0;
         var animations = items.map(function (item,index) {
           var base = getComputedStyle(item).transform;
@@ -197,7 +198,7 @@
           var delay = step * (active ? index : items.length - index - 1);
           var duration = timing && timing.quick
             ? active ? timing.duration - maxDelay : (timing.duration * ArkUI.lifecycleTransition.overlap - delay) / ArkUI.lifecycleTransition.overlap
-            : active ? 290 : 230;
+            : active ? 260 : 160;
           return item.animate(active
             ? [{ opacity: 0, transform: shifted }, { opacity: 1, transform: base }]
             : [{ opacity: getComputedStyle(item).opacity, transform: base }, { opacity: 0, transform: shifted }], {
@@ -212,7 +213,7 @@
         // prevents a cancelled exit from flashing back to full opacity.
         if (typeof el.animate === 'function') animations.push(el.animate(
           [{ opacity: currentOpacity }, { opacity: active ? '1' : '0' }], {
-            duration: timing && timing.duration || (active ? 290 + maxDelay : 230 + maxDelay),
+            duration: timing && timing.duration || (active ? 260 + maxDelay : 160 + maxDelay),
             easing: 'linear', fill: 'both'
           }
         ));
@@ -220,7 +221,7 @@
         animation = Promise.all(animations.map(function (item) { return item.finished.catch(function () {}); }));
       } else {
         animation = engine.play(el,[from,{ opacity: active ? '1' : '0' }],{
-          duration: timing && timing.duration || (active ? 420 : 550), delay: 0,
+          duration: timing && timing.duration || (active ? 300 : 180), delay: 0,
           easing: timing && timing.quick ? 'linear' : 'cubic-bezier(.2,.72,.2,1)', fill: 'both'
         },!active);
       }

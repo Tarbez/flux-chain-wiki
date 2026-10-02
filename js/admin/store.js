@@ -18,9 +18,11 @@ var ArkAdminStore = (function () {
       '   It loads each manifest while the page is still being read, so every manifest is defined before any script runs.\n' +
       '   An id is written into a script tag, so only a plain id (lowercase letters and digits, starting with a letter) is loaded. */\n' +
       'var ArkManifestIds = ' + JSON.stringify(ids) + ';\n' +
+      'var ArkManifestVersion = document.currentScript && document.currentScript.src.match(/[?&]v=([a-z0-9_-]+)/i);\n' +
+      'var ArkManifestSearch = ArkManifestVersion ? \'?v=\' + ArkManifestVersion[1] : \'\';\n' +
       'ArkManifestIds.forEach(function (id) {\n' +
       '  if (!/^[a-z][a-z0-9]*$/.test(id)) return;\n' +
-      '  document.write(\'<script src="js/content/manifests/\' + id + \'.js" defer><\\/script>\');\n' +
+      '  document.write(\'<script src="js/content/manifests/\' + id + \'.js\' + ArkManifestSearch + \'" defer><\\/script>\');\n' +
       '});\n';
   }
 
@@ -65,7 +67,7 @@ var ArkAdminStore = (function () {
       'var ArkAssetIds = ' + JSON.stringify(ids) + ';\n' +
       'ArkAssetIds.forEach(function (id) {\n' +
       '  if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;\n' +
-      '  document.write(\'<script src="js/content/assets/\' + id + \'.js" defer><\\/script>\');\n' +
+      '  document.write(\'<script src="js/content/assets/\' + id + \'.js\' + ArkManifestSearch + \'" defer><\\/script>\');\n' +
       '});\n';
   }
 
@@ -99,7 +101,7 @@ var ArkAdminStore = (function () {
       'var ArkSecretIds = ' + JSON.stringify(ids) + ';\n' +
       'ArkSecretIds.forEach(function (id) {\n' +
       '  if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;\n' +
-      '  document.write(\'<script src="js/content/secrets/\' + id + \'.js" defer><\\/script>\');\n' +
+      '  document.write(\'<script src="js/content/secrets/\' + id + \'.js\' + ArkManifestSearch + \'" defer><\\/script>\');\n' +
       '});\n';
   }
 

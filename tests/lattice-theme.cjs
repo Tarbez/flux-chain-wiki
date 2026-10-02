@@ -50,7 +50,8 @@ const persistent = {
   insertBefore(element) { mounted.push(element); }
 };
 const scene = {
-  querySelector() { return persistent; },
+  addEventListener() {},
+  querySelector(selector) { return selector === '[data-ark-layer="persistent"]' ? persistent : null; },
   getBoundingClientRect() { return { width: 320, height: 240 }; }
 };
 const state = {

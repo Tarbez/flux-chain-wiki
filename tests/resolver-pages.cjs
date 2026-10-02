@@ -14,7 +14,7 @@ assert.deepEqual(Array.from(manifests, (manifest) => manifest.route), [
   '/start-from-something-real',
   '/how-deployment-works'
 ]);
-assert.equal(manifests[0].meta.next, 'references');
+assert.equal(manifests[0].meta.next, 'deployment', 'the primary journey does not force an unverified-reference detour');
 assert.equal(manifests[1].meta.next, 'deployment');
 assert.equal(manifests[2].meta.next, 'download');
 
@@ -22,7 +22,7 @@ const home = fs.readFileSync('js/pages/home.js', 'utf8');
 assert(home.includes("primary.dataset.sceneLink = 'deployment'"));
 assert(home.includes("secondary.dataset.sceneLink = 'download'"));
 assert(home.includes("['HOME.QUESTION.RESOLVER', 'resolver']"));
-assert(home.includes("['HOME.QUESTION.FLUX', 'about']"));
+assert(fs.readFileSync('js/resolvers/header.js', 'utf8').includes("['NAV.OVERVIEW', 'about']"), 'overview remains reachable in shared navigation');
 assert(home.includes("lifecycle.className = 'home-lifecycle'"), 'the right-side agreement lifecycle remains on the home page');
 assert(!home.includes("signal.className = 'home-signal-map'"), 'the decorative signal diagram no longer competes with the decision path');
 

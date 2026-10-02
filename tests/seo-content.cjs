@@ -21,7 +21,7 @@ assert.equal(JSON.stringify(ArkSEO.articleSlugs()), JSON.stringify(LearningConte
 // get() is null before define() ever ran.
 assert.equal(ArkSEO.get(), null, 'get() is null before a data file calls define()');
 const defaults = ArkSEO.defaults();
-assert.equal(defaults.site.name, 'Flux Protocol', 'default site name');
+assert.equal(defaults.site.name, 'DEFXN', 'default site name');
 assert.equal(defaults.site.baseUrl, '', 'default base URL is blank -- never a guessed host');
 pageIds.forEach((id) => assert.equal(JSON.stringify(defaults.pages[id]), JSON.stringify({ title: '', description: '', ogImage: '', canonical: '' }), id + ' defaults to "derive it"'));
 
@@ -59,9 +59,11 @@ const articles = LearningContent.articles;
 context.ArkUI={};
 context.ArkCopy={text:key=>key};
 vm.runInContext(fs.readFileSync('js/pages/catalog.js','utf8'),context);
-const catalogPaths=Object.values(context.ArkUI.pageCatalog).map(entry=>entry.path).sort();
+// /reference is the in-page document viewer: hiddenFromNavigation, no SEO identity of its own, so it is not a public route to list.
+const publicEntries=Object.values(context.ArkUI.pageCatalog).filter(entry=>!entry.hiddenFromNavigation);
+const catalogPaths=publicEntries.map(entry=>entry.path).sort();
 assert.deepEqual(Array.from(ArkSEO.routes(manifests,articles),entry=>entry.path).sort(),catalogPaths,'SEO routes match every live public route exactly once');
-for(const entry of Object.values(context.ArkUI.pageCatalog)) if(entry.seoId) assert(pageIds.includes(entry.seoId),'editable SEO exists for '+entry.path);
+for(const entry of publicEntries) if(entry.seoId) assert(pageIds.includes(entry.seoId),'editable SEO exists for '+entry.path);
 const xml = ArkSEO.sitemap({ site: { baseUrl: 'https://example.com' } }, manifests, articles);
 assert(xml.startsWith('<?xml'), 'sitemap.xml is real XML');
 assert(xml.includes('<loc>https://example.com/</loc>'), 'the home route is listed');
@@ -90,12 +92,12 @@ vm.runInContext(fs.readFileSync('js/content/seo-data.js','utf8'),context);
 const shipped=ArkSEO.get();
 const descriptions=[];
 const titles=[];
-for(const entry of Object.values(context.ArkUI.pageCatalog)) {
+for(const entry of publicEntries) {
  const metadata=entry.seoArticle?shipped.articles[entry.seoArticle]:shipped.pages[entry.seoId];
  assert(metadata.description.length>=60 && metadata.description.length<=190,'useful, concise description for '+entry.path);
  descriptions.push(metadata.description);
  titles.push(entry.seoArticle?ArkSEO.articleTitle(entry.seoArticle,entry.title):metadata.title);
- if(entry.seoId) assert(metadata.title.endsWith('Flux Protocol'),'page title names the product: '+entry.path);
+ if(entry.seoId) assert(metadata.title.endsWith('DEFXN'),'page title names the product: '+entry.path);
 }
 assert.equal(new Set(descriptions).size,descriptions.length,'each public route has a distinct description');
 assert.equal(new Set(titles).size,titles.length,'each public route has a distinct title');

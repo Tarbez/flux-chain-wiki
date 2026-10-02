@@ -8,18 +8,21 @@ for (const phrase of ['Focus', 'Context', 'Inner detail', 'Only one semantic lay
 
 const sheet = fs.readFileSync('js/pages/sheet.js', 'utf8');
 const about = fs.readFileSync('js/pages/about.js', 'utf8');
-assert(sheet.includes("'01 / Operating model'"), 'mechanism pages expose their parent layer');
-assert(sheet.includes("'02 / ' + manifest.title"), 'mechanism pages identify the current context layer');
-assert(sheet.includes("ArkUI.el('details', 'content-layer content-layer-context')"), 'supporting mechanics use progressive disclosure');
-assert(sheet.includes("ArkUI.el('details', 'content-layer content-layer-reference')"), 'limits and evidence use a distinct reference layer');
-assert(about.includes("contextLayer.className = 'content-layer content-layer-context'") && about.includes("ArkCopy.text('ABOUT.CONTEXT')"), 'overview supporting points yield to a named context layer');
-assert(sheet.indexOf("'STATUS.TEXT'") < sheet.indexOf('content-layer-reference'), 'current status remains visible before optional reference detail');
+assert(sheet.includes("'← Operating model'"), 'mechanism pages name their actual parent');
+assert(sheet.includes("'story-depth'"), 'the same frame owns depth choices');
+assert(sheet.includes("copy.replaceChildren()"), 'requesting detail replaces the answer surface');
+assert(sheet.includes("'mechanism-status-summary'"), 'current status stays outside the replaceable surface');
+assert(sheet.includes("'?view='") && sheet.includes("'&step='"), 'mechanism depth and detail are addressable');
+assert(about.includes("ArkUI.sheet('about','about')"), 'overview uses the shared guided reading contract');
 
 const lifecycle = fs.readFileSync('js/pages/lifecycle.js', 'utf8');
 assert(lifecycle.includes("'02 / Agreement lifecycle'"), 'lifecycle overview is layer two');
 assert(lifecycle.includes("'03 / ' + id.charAt(0).toUpperCase()"), 'stage route is layer three');
-assert(lifecycle.includes("if (id) {\n          section.appendChild"), 'full stage anatomy renders only on the inner stage route');
-assert(lifecycle.includes("'Open this stage ↗'"), 'overview advances explicitly to inner detail');
+assert(lifecycle.includes("'lifecycle-trail'"), 'the overview exposes a compact route trail instead of stacked stage detail');
+assert(lifecycle.includes("'Understand why'") && lifecycle.includes("'Evidence'"), 'stage anatomy is a requested inner explanation');
+assert(lifecycle.includes("'Continue to '") && lifecycle.includes("'lifecycle/' + nextStage.id"), 'Continue opens a real next-stage route');
+assert(lifecycle.includes("new URLSearchParams") && lifecycle.includes("'popstate'"), 'depth is addressable and restored by history');
+assert(lifecycle.includes("'lifecycle-boundary'"), 'essential limits remain outside the replaced answer contents');
 
 const lifecycleCss = fs.readFileSync('css/lifecycle.css', 'utf8');
 assert(/data-page="lifecycle"\] \.lattice-activity,[\s\S]*?opacity:0;[\s\S]*?pointer-events:none;/.test(lifecycleCss), 'steady reading state disables the transition canvas');

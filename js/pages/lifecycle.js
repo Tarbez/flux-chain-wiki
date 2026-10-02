@@ -67,69 +67,120 @@
 
   ArkUI.pageModules.lifecycle = {
     mount: function (host, page) {
-      var id = page.split('/')[1];
-      var detail = ArkUI.lifecycleContent[id];
-      if (id && !detail) throw new Error('Unknown lifecycle stage: ' + id);
-      var el = ArkUI.el('section', 'ark-page learning-page lifecycle-page');
+      var id = page.split('/')[1], index = Math.max(0, ArkUI.lifecycleStages.findIndex(function (stage) { return stage.id === id; }));
+      var stage = ArkUI.lifecycleStages[index], copy = ArkUI.lifecycleContent[stage.id];
+      if (id && !ArkUI.lifecycleContent[id]) throw new Error('Unknown lifecycle stage: ' + id);
+      var el = ArkUI.el('section', 'ark-page lifecycle-page');
       el.dataset.arkPage = page;
-      el.setAttribute('aria-label', id ? id + ' / Agreement lifecycle' : 'Agreement lifecycle');
-      var path = ArkUI.el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Content depth');
-      var model = ArkUI.el('a', '', '01 / Operating model'); model.href = '#/concept'; model.dataset.sceneLink = 'concept'; path.appendChild(model);
-      if (id) {
-        var overview = ArkUI.el('a', '', '02 / Agreement lifecycle'); overview.href = '#/lifecycle'; overview.dataset.sceneLink = 'lifecycle'; path.appendChild(overview);
-        var stageDepth = ArkUI.el('span', '', '03 / ' + id.charAt(0).toUpperCase() + id.slice(1)); stageDepth.setAttribute('aria-current', 'page'); path.appendChild(stageDepth);
-      } else {
-        var lifecycleDepth = ArkUI.el('span', '', '02 / Agreement lifecycle'); lifecycleDepth.setAttribute('aria-current', 'page'); path.appendChild(lifecycleDepth);
+      function link(label, key, cls) {
+        var a = ArkUI.el('a', cls || '', label); a.href = ArkUI.route.href(ArkUI.pageCatalog[key].path); a.dataset.sceneLink = key; return a;
       }
-      el.appendChild(path);
-      el.appendChild(ArkUI.el('h1', '', id ? detail.heading : 'How does one agreement become verifiable?'));
-      el.appendChild(ArkUI.el('p', 'lifecycle-scenario', id ? detail.lead : 'Illustrative scenario: a client asks a provider to replicate one named dataset snapshot. Follow the object through five stages.'));
-      var stages = id ? ArkUI.lifecycleStages.filter(function (stage) { return stage.id === id; }) : ArkUI.lifecycleStages;
-      stages.forEach(function (stage) {
-        var copy = ArkUI.lifecycleContent[stage.id];
-        var section = ArkUI.el('section', '');
-        if (!id) section.className = 'lifecycle-stage-summary';
-        var heading = ArkUI.el('h2', '');
-        if (id) heading.textContent = stage.title;
-        else {
-          var stageLink = ArkUI.el('a', '', stage.title);
-          stageLink.href = '#/lifecycle/' + stage.id; stageLink.dataset.sceneLink = 'lifecycle/' + stage.id;
-          heading.appendChild(stageLink);
-        }
-        section.appendChild(heading);
-        if (!id) section.appendChild(ArkUI.el('p', '', copy.heading + ' ' + copy.lead));
-        if (id) {
-          section.appendChild(ArkUI.el('p', '', copy.body));
-          section.appendChild(ArkUI.el('p', '', copy.note));
-          var facts = ArkUI.el('div', 'lifecycle-facts');
-          var choices = ArkUI.el('nav', ''); choices.setAttribute('aria-label', 'Inspect ' + stage.title);
-          var answer = ArkUI.el('p', '', copy.facts[0][1]); answer.id = 'lifecycle-fact-' + stage.id; answer.setAttribute('aria-live', 'polite');
-          var factButtons = [];
-          copy.facts.forEach(function (fact, index) {
-            var choice = ArkUI.el('button', 'mechanism-step', fact[0]); choice.type = 'button';
-            choice.setAttribute('aria-pressed', String(index === 0)); choice.setAttribute('aria-controls', answer.id);
-            choice.addEventListener('click', function () {
-              answer.textContent = fact[1];
-              factButtons.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
-              if (answer.animate && !ArkUI.prefersReducedMotion() && !ArkUI.sceneState.get().paused) answer.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 220 });
-            });
-            factButtons.push(choice); choices.appendChild(choice);
-          });
-          facts.appendChild(choices); facts.appendChild(answer); section.appendChild(facts);
-        } else {
-          var openStage = ArkUI.el('a', 'lifecycle-stage-link', 'Open this stage ↗');
-          openStage.href = '#/lifecycle/' + stage.id; openStage.dataset.sceneLink = 'lifecycle/' + stage.id;
-          section.appendChild(openStage);
-        }
-        el.appendChild(section);
+      var path = ArkUI.el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Your place');
+      path.appendChild(link('← Home', 'zero'));
+      if (id) path.appendChild(link('02 / Agreement lifecycle', 'lifecycle'));
+      var current = ArkUI.el('span', '', id ? '03 / ' + id.charAt(0).toUpperCase() + id.slice(1) : '02 / Agreement lifecycle');
+      current.setAttribute('aria-current', 'page'); path.appendChild(current); el.appendChild(path);
+      el.dataset.stage=id||'overview';
+      var heading=ArkUI.el('h1','',id?copy.heading:'From request to receipt.');
+      var trail = ArkUI.el('nav', 'lifecycle-trail'); trail.setAttribute('aria-label', 'Agreement stages');
+      ArkUI.lifecycleStages.forEach(function (item, i) {
+        var a = link(item.title, 'lifecycle/' + item.id, 'lifecycle-trail-item');
+        a.dataset.stage = item.id;
+        var number = ArkUI.el('span', 'story-index', String(i + 1).padStart(2, '0')); a.insertBefore(number, a.firstChild);
+        a.dataset.position=i<index&&id?'earlier':id===item.id?'current':'next';
+        if (id === item.id) a.setAttribute('aria-current', 'step');
+        trail.appendChild(a);
       });
-      var evidence = ArkUI.el('aside', 'lifecycle-evidence');
-      evidence.appendChild(ArkUI.el('strong', '', 'Status / Partial'));
-      evidence.appendChild(ArkUI.el('p', '', 'The lifecycle is implemented in source. Full public production automation and economic settlement are not established by this audit.'));
-      var guide = ArkUI.el('a', '', 'Read the agreement guide ↗');
-      guide.href = 'docs/protocol/agreements.md'; evidence.appendChild(guide); el.appendChild(evidence);
-      host.appendChild(el);
-      return el;
+      var body = ArkUI.el('div', 'lifecycle-dashboard-body');
+      var answer = ArkUI.el('div', 'lifecycle-answer');
+      answer.appendChild(ArkUI.el('p','story-kicker',id?String(index+1).padStart(2,'0')+' / '+stage.title.toUpperCase():'ONE SNAPSHOT / FIVE SIGNED RECORDS'));
+      answer.appendChild(heading);
+      var view = ArkUI.el('div', 'lifecycle-view'); view.setAttribute('aria-live', 'polite');
+      var modes = ArkUI.el('nav', 'story-depth'); modes.setAttribute('aria-label', 'Explanation depth');
+      var controls = [];
+      ['Answer', 'Understand why', 'Evidence'].forEach(function (label, i) {
+        var button = ArkUI.el('button', '', label); button.type = 'button';button.dataset.icon=['overview','layers','evidence'][i];
+        button.addEventListener('click', function () { select(i, true); });
+        controls.push(button); modes.appendChild(button);
+      }); answer.appendChild(view);answer.appendChild(modes);
+      var boundary = ArkUI.el('aside', 'lifecycle-boundary');
+      boundary.appendChild(ArkUI.el('strong', '', id ? 'Not yet established' : 'Status / Partial'));
+      boundary.appendChild(ArkUI.el('p', '', id ? copy.note.replace('What is still not true: ', '') : 'Implemented in source. Full public production automation and economic settlement remain unverified.'));
+      answer.appendChild(boundary); body.appendChild(answer);
+      var illustration = ArkUI.el('figure', 'lifecycle-object');
+      illustration.setAttribute('aria-label', 'Illustrative reference fabric, not a live agreement');
+      var figureTop=ArkUI.el('div','lifecycle-fabric-top');
+      figureTop.appendChild(ArkUI.el('span','', 'AGREEMENT FABRIC'));
+      figureTop.appendChild(ArkUI.el('span','', 'ILLUSTRATION'));
+      illustration.appendChild(figureTop);
+      var count=ArkUI.el('strong','lifecycle-fabric-count',id?String(index+1).padStart(2,'0'):'05');illustration.appendChild(count);
+      var figureTitle=ArkUI.el('figcaption','',id?stage.title+' / linked to the same snapshot':'Five records. One reference trail.');illustration.appendChild(figureTitle);
+      var mesh=ArkUI.el('canvas','lifecycle-fabric-mesh');mesh.setAttribute('aria-hidden','true');illustration.appendChild(mesh);
+      var preview=ArkUI.el('p','lifecycle-fabric-preview',id?copy.facts[2][1]:'Each signed record adds a reference to the same agreement.');illustration.appendChild(preview);
+      var foot=ArkUI.el('div','lifecycle-fabric-foot');foot.appendChild(ArkUI.el('span','','Dataset snapshot'));foot.appendChild(ArkUI.el('span','','References persist'));illustration.appendChild(foot);
+      body.appendChild(illustration);el.appendChild(body);el.appendChild(trail);
+      var fabric=ArkUI.createMeshFabric(mesh),previewStage=id||'receipt';
+      function paintFabric(selected,animate){fabric.select(selected,!!animate);}
+      function previewRecord(selected){
+        if(previewStage===selected)return;previewStage=selected;paintFabric(selected,true);
+        var item=ArkUI.lifecycleContent[selected],selectedIndex=ArkUI.lifecycleStages.findIndex(function(s){return s.id===selected;});
+        count.textContent=String(selectedIndex+1).padStart(2,'0');
+        figureTitle.textContent=ArkUI.lifecycleStages[selectedIndex].title+' / same snapshot';
+        preview.textContent=item.facts[2][1];
+      }
+      ArkUI.lifecycleStages.forEach(function(item,i){
+        var a=trail.children[i];
+        a.addEventListener('pointerenter',function(){previewRecord(item.id);});
+        a.addEventListener('focus',function(){previewRecord(item.id);});
+      });
+      function resetPreview(){previewRecord(id||'receipt');if(!id){count.textContent='05';figureTitle.textContent='Five records. One reference trail.';preview.textContent='Each signed record adds a reference to the same agreement.';}}
+      trail.addEventListener('pointerleave',resetPreview);
+      trail.addEventListener('focusout',function(event){if(!trail.contains||!trail.contains(event.relatedTarget))resetPreview();});
+      var next = ArkUI.el('nav', 'lifecycle-next'); next.setAttribute('aria-label', 'Continue the story');
+      if (id && index > 0) next.appendChild(link('← ' + ArkUI.lifecycleStages[index - 1].title, 'lifecycle/' + ArkUI.lifecycleStages[index - 1].id));
+      var nextStage = id ? ArkUI.lifecycleStages[index + 1] : stage;
+      next.appendChild(link(nextStage ? (id ? 'Continue to ' : 'Follow ') + nextStage.title + ' →' : 'Return to the full trail →', nextStage ? 'lifecycle/' + nextStage.id : 'lifecycle', 'story-primary'));
+      el.appendChild(next);
+      function select(depth, write) {
+        controls.forEach(function (control, i) { control.setAttribute('aria-pressed', String(i === depth)); });
+        el.dataset.depth = ['focus', 'context', 'reference'][depth];
+        view.replaceChildren();
+        if (depth === 0) {
+          view.appendChild(ArkUI.el('p', 'lifecycle-scenario', id ? copy.lead : 'A client asks a provider to replicate one named dataset snapshot. Signed records connect the request, terms, work, and policy-bound verification. Each stage answers a different question.'));
+          if (id) view.appendChild(ArkUI.el('p', 'story-result', copy.facts[2][1]));
+        } else if (depth === 1) {
+          if(!id)view.appendChild(ArkUI.el('p', '', 'Each record refers to the preceding request or result by CID. You can follow this one agreement without reconstructing a global block order. Choose a stage to inspect what becomes true and what remains unproven.'));
+          if (id) {
+            var facts = ArkUI.el('div', 'lifecycle-facts'), choices = ArkUI.el('nav', ''); choices.setAttribute('aria-label', 'Inspect ' + stage.title);
+            var factAnswer = ArkUI.el('p', '', copy.body); factAnswer.setAttribute('aria-live', 'polite');
+            var buttons = [];
+            [['Why it matters',copy.body]].concat(copy.facts).forEach(function (fact, i) {
+              var button = ArkUI.el('button', 'mechanism-step', fact[0] === 'Next' ? 'What follows' : fact[0]); button.type = 'button'; button.setAttribute('aria-pressed', String(i === 0));
+              button.addEventListener('click', function () { factAnswer.textContent = fact[1]; buttons.forEach(function (b, j) { b.setAttribute('aria-pressed', String(i === j)); }); });
+              buttons.push(button); choices.appendChild(button);
+            }); facts.appendChild(choices); facts.appendChild(factAnswer); view.appendChild(facts);
+          }
+        } else {
+          view.appendChild(ArkUI.el('p', '', id ? copy.facts[1][1] : 'The canonical agreement guide describes the record types and their reference chain. This is an illustrative walkthrough, not a live agreement or a verified production run.'));
+          var guide = ArkUI.el('a', 'story-reference', 'Read the agreement guide ↗'); guide.href = ArkUI.route.href('/reference?' + new URLSearchParams({doc:'docs/protocol/agreements.md',from:ArkUI.pageCatalog[page].path}).toString()); view.appendChild(guide);
+          if (id) view.appendChild(ArkUI.el('p', '', 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.'));
+        }
+        if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(view);
+        if (write) {
+          var query = depth ? 'view=' + ['focus', 'context', 'reference'][depth] : '';
+          ArkUI.route.write(ArkUI.pageCatalog[page].path, query, 'push');
+        }
+      }
+      function restore() {
+        var route = ArkUI.route.path();
+        if (route !== ArkUI.pageCatalog[page].path) return;
+        var selected = new URLSearchParams(ArkUI.route.search()).get('view');
+        select(selected === 'context' ? 1 : selected === 'reference' ? 2 : 0, false);
+      }
+      select(0, false); restore();
+      window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
+      el.arkDispose = function () { fabric.dispose();window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
+      host.appendChild(el);paintFabric(previewStage);return el;
     }
   };
 })();

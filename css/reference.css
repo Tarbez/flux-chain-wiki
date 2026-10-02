@@ -1,0 +1,17 @@
+#scene .reference-page { position:relative; box-sizing:border-box; width:100%; height:100%; max-width:none; margin:0; padding:clamp(18px,3vw,40px); overflow:auto; color:hsl(var(--text)); font:400 16px/1.65 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .reference-page:not(.continuity-host > *) { width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px; border:1px solid hsl(var(--border-default)); border-radius:8px; background:hsl(var(--canvas) / .97); }
+#scene .reference-page h1 { margin:16px 0; font:500 clamp(28px,3.6vw,48px)/1.1 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.04em; color:hsl(var(--text-strong)); }
+.reference-orientation { display:flex; align-items:center; flex-wrap:wrap; gap:12px 24px; }
+.reference-orientation a { display:inline-flex; align-items:center; min-height:44px; color:hsl(var(--reference)); }
+.reference-provenance { max-width:65ch; padding-left:12px; border-left:2px solid hsl(var(--reference)); font-size:14px; color:hsl(var(--text-muted)); }
+.reference-body { max-width:70ch; }
+.reference-body :is(h2,h3,h4) { margin:28px 0 12px; color:hsl(var(--text-strong)); font-weight:500; line-height:1.3; }
+.reference-body h2 { font-size:25px; }
+.reference-body h3 { font-size:20px; }
+.reference-body p { margin:14px 0; }
+.reference-body li { margin:10px 0; }
+.reference-body a { color:hsl(var(--reference)); text-underline-offset:4px; overflow-wrap:anywhere; }
+.reference-body pre { overflow:auto; padding:16px; border:1px solid hsl(var(--border-default)); border-radius:5px; background:hsl(var(--nested) / .4); font:400 13px/1.6 var(--mono-font,monospace); }
+.reference-body table { display:block; width:100%; overflow-x:auto; border-collapse:collapse; font-size:14px; }
+.reference-body :is(td,th) { border-bottom:1px solid hsl(var(--border-subtle)); padding:10px; min-width:100px; vertical-align:top; }
+.reference-page a:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }

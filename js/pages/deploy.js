@@ -4,7 +4,7 @@ ArkUI.pageModules.deploy = {
   mount: function (host) {
     var id = 'deploy';
     function words(role) { return ArkCopy.text('DEPLOY.' + role); }
-    var el = ArkUI.el('section', 'ark-page learning-page theory-page deploy-page');
+    var el = ArkUI.el('section', 'ark-page task-page theory-page deploy-page');
     el.dataset.arkPage = id;
     el.setAttribute('aria-labelledby', 'deploy-title');
 
@@ -61,7 +61,7 @@ ArkUI.pageModules.deploy = {
       var row = ArkUI.el('section', 'deploy-step');
       row.id = 'deploy-step-' + step.n;
       var choice = ArkUI.el('button', 'deploy-step-choice', step.n + ' / ' + step.title);
-      choice.type = 'button'; choice.setAttribute('aria-controls', row.id);
+      choice.type = 'button'; choice.dataset.stepNumber=step.n; choice.setAttribute('aria-controls', row.id);
       choice.addEventListener('click', function () { showAll = false; selectStep(rows.indexOf(row), true); });
       choices.push(choice); progress.appendChild(choice);
       row.appendChild(ArkUI.el('span', 'deploy-step-num', step.n));
@@ -118,6 +118,7 @@ ArkUI.pageModules.deploy = {
       all.textContent = showAll ? 'Return to one step' : 'Review all steps';
       all.setAttribute('aria-pressed', String(showAll));
       position.textContent = showAll ? 'All 5 steps / review only' : 'Step ' + (activeStep + 1) + ' of 5 / ' + STEPS[activeStep].title;
+      if(el.arkWriteState)el.arkWriteState({step:activeStep,review:showAll});
       if (focus) {
         var heading = rows[activeStep].querySelector('h2');
         heading.setAttribute('tabindex', '-1'); heading.focus({ preventScroll: true });
@@ -132,9 +133,10 @@ ArkUI.pageModules.deploy = {
     controls.appendChild(previous); controls.appendChild(next); controls.appendChild(all);
     content.appendChild(position); content.appendChild(controls);
     selectStep(0, false);
+    ArkUI.attachProcedureState(el,'deploy',rows.length,function(index,all){showAll=all;selectStep(index,false);});
 
     var note = ArkUI.el('p', 'deploy-caveat', 'network create / network list are not a security boundary today. Presence is partitioned per network; accounts, identities, and DAOs are not yet network-scoped.');
-    content.appendChild(note);
+    var help=ArkUI.el('details','procedure-help');help.appendChild(ArkUI.el('summary','','Network scope and source guide'));help.appendChild(note);var guide=ArkUI.el('a','story-reference','Read the network guide');guide.href='docs/operators/networks.md';help.appendChild(guide);content.appendChild(help);
 
     var footer = ArkUI.el('nav', 'theory-footer');
     footer.setAttribute('aria-label', 'Continue');

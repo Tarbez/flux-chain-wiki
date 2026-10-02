@@ -1,43 +1,13 @@
-ArkUI.pageModules.concept = {
-  mount: function (host) {
-    var el = ArkUI.el('section', 'ark-page learning-page concept-page');
-    el.dataset.arkPage = 'concept'; el.setAttribute('aria-labelledby', 'concept-title');
-    function words(role) { return ArkCopy.text('CONCEPT.' + role); }
-    // Every link on this page opens one of the theory's pages. The manifests decide which exist and where each sits.
-    function cta(manifest) {
-      var area = manifest.id.toUpperCase();
-      var a = ArkUI.el('a', 'article-back');
-      a.href = '#/concept/' + manifest.id; a.dataset.sceneLink = 'concept/' + manifest.id;
-      a.appendChild(document.createTextNode(ArkCopy.text(area + '.CTA') + ' '));
-      var arrow = ArkUI.el('span', 'cta-arrow', '↗'); arrow.setAttribute('aria-hidden', 'true');
-      a.appendChild(arrow); return a;
-    }
-    var theory = ArkManifest.group('theory');
-    var content = ArkUI.el('div', 'concept-content');
-    content.appendChild(ArkUI.el('p', 'learning-eyebrow', words('EYEBROW')));
-    var title = ArkUI.el('h1', 'learning-heading', words('TITLE')); title.id = 'concept-title';
-    content.appendChild(title);
-    content.appendChild(ArkUI.el('p', 'concept-deck', words('DECK')));
-    var rows = ArkUI.el('div', 'concept-principles');
-    theory.filter(function (m) { return m.meta.placement === 'row'; }).forEach(function (m, i) {
-      var row = ArkUI.el('section');
-      row.appendChild(ArkUI.el('span', '', ('0' + (i + 1)).slice(-2)));
-      row.appendChild(ArkUI.el('h2', '', ArkCopy.text(m.id.toUpperCase() + '.TITLE')));
-      var symbol = ArkUI.el('div', 'concept-symbol concept-symbol-' + m.id); symbol.setAttribute('aria-hidden', 'true');
-      for (var ring = 0; ring < 3; ring++) symbol.appendChild(ArkUI.el('i'));
-      row.appendChild(symbol);
-      row.appendChild(cta(m)); rows.appendChild(row);
-    });
-    content.appendChild(rows);
-    var rail = ArkUI.el('nav', 'concept-links'); rail.setAttribute('aria-label', words('RAIL'));
-    theory.filter(function (m) { return m.meta.placement === 'rail'; }).forEach(function (m) { rail.appendChild(cta(m)); });
-    content.appendChild(rail); el.appendChild(content);
-    if (!window.ArkMeshSettings || ArkMeshSettings.shapeVisible('concept')) {
-      var figure = ArkUI.el('figure', 'concept-iceberg');
-      figure.setAttribute('data-iceberg-anchor', ''); figure.setAttribute('role', 'img');
-      figure.setAttribute('aria-label', words('ICEBERG'));
-      el.appendChild(figure);
-    }
-    host.appendChild(el); return el;
-  }
-};
+/* The first choice is a question. The chosen card is the route's visual origin. */
+ArkUI.pageModules.concept = { mount:function(host){
+  var el=ArkUI.el('section','ark-page guided-page story-index');el.dataset.arkPage='concept';el.setAttribute('aria-labelledby','concept-title');
+  var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');var back=ArkUI.el('a','','← Overview');back.href='#/about';back.dataset.sceneLink='about';path.appendChild(back);el.appendChild(path);
+  var title=ArkUI.el('h1','',ArkCopy.text('CONCEPT.TITLE'));title.id='concept-title';el.appendChild(title);
+  el.appendChild(ArkUI.el('p','story-index-answer',ArkCopy.text('CONCEPT.DECK')));
+  var choices=ArkUI.el('nav','story-depth');choices.setAttribute('aria-label','Question group');var buttons=[];
+  ['Start with a question','Inspect evidence & activation'].forEach(function(label,i){var b=ArkUI.el('button','',label);b.type='button';b.addEventListener('click',function(){select(i,true);});buttons.push(b);choices.appendChild(b);});el.appendChild(choices);
+  var grid=ArkUI.el('div','story-topic-grid');el.appendChild(grid);
+  function select(group,write){buttons.forEach(function(b,i){b.setAttribute('aria-pressed',String(i===group));});grid.replaceChildren();ArkManifest.group('theory').filter(function(m){return m.meta.placement===(group?'rail':'row');}).forEach(function(m,i){var card=ArkUI.el('article','story-topic');card.dataset.continuityCard='concept/'+m.id;var icon=ArkUI.icon&&ArkUI.icon({purpose:'network',depth:'cycle',practice:'authority',notes:'layers',studio:'evidence',spec:'inspect'}[m.id]||'document');if(icon)card.appendChild(icon);card.appendChild(ArkUI.el('span','story-index-number',('0'+(i+1)).slice(-2)));var a=ArkUI.el('a','',ArkCopy.text(m.id.toUpperCase()+'.TITLE'));a.href='#'+m.route;a.dataset.sceneLink='concept/'+m.id;card.appendChild(a);card.appendChild(ArkUI.el('span','story-topic-purpose',m.title+' / open explanation →'));grid.appendChild(card);});if(write)ArkUI.route.write('/concept',group?'view=more':'','push');}
+  function restore(){if(ArkUI.route.path()==='/concept')select(new URLSearchParams(ArkUI.route.search()).get('view')==='more'?1:0,false);}
+  select(0,false);restore();el.arkRestore=restore;window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);el.arkDispose=function(){window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};host.appendChild(el);return el;
+} };

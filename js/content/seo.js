@@ -69,7 +69,7 @@ var ArkSEO = (function () {
   function sanitizeSite(s) {
     var baseUrl = s && typeof s.baseUrl === 'string' ? s.baseUrl.trim().replace(/\/+$/, '') : '';
     return {
-      name: (s && typeof s.name === 'string' && s.name) || 'Flux Protocol',
+      name: (s && typeof s.name === 'string' && s.name) || 'DEFXN',
       baseUrl: /^https?:\/\/[^/]+$/.test(baseUrl) ? baseUrl : '',
       defaultDescription: (s && typeof s.defaultDescription === 'string') ? s.defaultDescription : ''
     };
@@ -146,7 +146,7 @@ var ArkSEO = (function () {
      every theory page, and every article -- exactly what js/pages/catalog.js
      registers, without needing it loaded (site-bundle.mjs runs headless). */
   function routes(manifests, articles) {
-    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explorer' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/about' }, { path: '/concept' }];
+    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explore' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/about' }, { path: '/concept' }];
     EXTRA_PAGES.filter(function (page) { return page.id.indexOf('lifecycle') === 0; }).forEach(function (page) { out.push({ path: '/' + page.id }); });
     (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
       if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route });

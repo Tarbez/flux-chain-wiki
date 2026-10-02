@@ -18,23 +18,23 @@
   ArkUI.pageModules.account = {
     mount: function (host) {
       var page = document.createElement('section');
-      page.className = 'ark-page learning-page account-page';
+      page.className = 'ark-page task-page account-page';
       page.setAttribute('aria-labelledby', 'account-title');
       page.innerHTML = '<div class="account-shell"><header class="account-hero"><p class="account-kicker">FLUX / YOUR ACCOUNT</p>' +
         '<h1 id="account-title">Your identity, in context.</h1>' +
         '<p>Open your Auth Kit locally to inspect the identity it names. This browser does not send your recovery file, PIN or signing key to the mesh.</p></header>' +
         '<div class="account-layout"><section class="account-auth" aria-label="Sign in with Auth Kit"><div data-account-auth></div></section>' +
-        '<section class="account-state" aria-live="polite"><p class="account-kicker">CURRENT SESSION</p><h2 data-account-heading>Not signed in</h2>' +
+        '<section class="account-state" aria-live="polite" hidden><p class="account-kicker">CURRENT SESSION</p><h2 data-account-heading>Not signed in</h2>' +
         '<dl><div><dt>Identity ID</dt><dd data-account-id>—</dd></div><div><dt>Root key</dt><dd data-account-root>—</dd></div>' +
         '<div><dt>Wallet address in Auth Kit</dt><dd data-account-wallet>—</dd></div><div><dt>Security profile</dt><dd data-account-security>—</dd></div></dl>' +
         '<p data-account-verification>Unlock a kit to verify its root against its recovery phrase.</p></section></div>' +
-        '<section class="account-live" aria-labelledby="account-live-title"><p class="account-kicker">LIVE ACCOUNT DATA</p><h2 id="account-live-title">What the mesh can confirm</h2>' +
+        '<section class="account-live" aria-labelledby="account-live-title" hidden><p class="account-kicker">LIVE ACCOUNT DATA</p><h2 id="account-live-title">What the mesh can confirm</h2>' +
         '<div class="account-mesh-check" aria-live="polite"><div><strong data-account-mesh-status>Not checked</strong><p data-account-mesh-message>After sign-in, check this identity against the local Miner by exact ID.</p></div><button type="button" data-account-mesh-check disabled>Check local Miner</button></div>' +
         '<details class="account-mesh-detail" data-account-mesh-detail hidden><summary>Identity record details</summary><dl><div><dt>Record</dt><dd data-account-mesh-record>—</dd></div><div><dt>Verification</dt><dd data-account-mesh-verification>—</dd></div><div><dt>Updated</dt><dd data-account-mesh-updated>—</dd></div><div><dt>Provenance</dt><dd data-account-mesh-provenance>—</dd></div></dl></details>' +
-        '<div class="account-live-grid"><div><span>FXN holdings</span><strong>Not connected</strong><p>No verified balance source is wired to this identity.</p></div>' +
+        '<details class="account-unsupported"><summary>Holdings, Credits & standing limits</summary><div class="account-live-grid"><div><span>FXN holdings</span><strong>Not connected</strong><p>No verified balance source is wired to this identity.</p></div>' +
         '<div><span>Credits</span><strong>Not connected</strong><p>Credits are identity-bound and non-transferable; no live balance is claimed here.</p></div>' +
         '<div><span>Mesh standing</span><strong data-account-standing>Not linked</strong><p data-account-standing-message>The Miner exposes standing only through an exact, signed account binding.</p></div></div>' +
-        '<p class="account-next">To inspect live Miner records now, use the <a href="#/explorer">local Mesh Explorer</a>. A displayed Auth Kit wallet address is not proof of current holdings.</p></section></div>';
+        '</details><p class="account-next">To inspect live Miner records now, use the <a href="/explore" data-scene-link="explorer">Mesh Explorer</a>. A displayed Auth Kit wallet address is not proof of current holdings.</p></section></div>';
       host.appendChild(page);
       var fields = {
         heading: page.querySelector('[data-account-heading]'),
@@ -132,6 +132,9 @@
 
       var auth = ArkAdminAuth.create({ container: page.querySelector('[data-account-auth]'), product: 'Flux Protocol', onChange: function (next) {
         identity = next;
+        page.dataset.session=identity?'verified-local':'signed-out';
+        page.querySelector('.account-state').hidden=!identity;
+        page.querySelector('.account-live').hidden=!identity;
         fields.heading.textContent = identity ? identity.displayName || 'Identity verified' : 'Not signed in';
         fields.id.textContent = identity && identity.identityId || '—';
         fields.root.textContent = identity && identity.publicKeyB64 || '—';

@@ -25,9 +25,9 @@ ArkUI.register('RHEADER_V1', {
     el.classList.add('ark-header');
     var identity = document.createElement('a');
     identity.className = 'ark-studio-identity';
-    identity.href = '#/';
+    identity.href = ArkUI.route.href('/');
     identity.dataset.sceneLink = 'zero';
-    identity.setAttribute('aria-label', 'Flux Protocol — home');
+    identity.setAttribute('aria-label', 'DEFXN — home');
     var mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     mark.setAttribute('class', 'ark-brand-mark');
     mark.setAttribute('viewBox', '0 0 32 32');
@@ -37,9 +37,13 @@ ArkUI.register('RHEADER_V1', {
     mark.setAttribute('focusable', 'false');
     var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('fill', 'currentColor');
-    path.setAttribute('d', 'M5 4H29L25 10H11V28H5Z M15 14H25L21 20H15Z');
+    path.setAttribute('d', 'M6 5h9c7 0 12 4 12 11s-5 11-12 11H6V5Zm6 6v10h3c4 0 6-2 6-5s-2-5-6-5h-3Z');
     mark.appendChild(path);
     identity.appendChild(mark);
+    var wordmark = document.createElement('span');
+    wordmark.className = 'ark-brand-wordmark';
+    wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');
+    identity.appendChild(wordmark);
     el.appendChild(identity);
 
     var core = document.createElement('nav');
@@ -53,9 +57,10 @@ ArkUI.register('RHEADER_V1', {
       ['NAV.RUN', 'download']
     ].forEach(function (item) {
       var link = document.createElement('a');
-      link.href = '#' + ArkUI.pageCatalog[item[1]].path;
+      link.href = ArkUI.route.href(ArkUI.pageCatalog[item[1]].path);
       link.textContent = ArkCopy.text(item[0]);
-      core.appendChild(link);
+      if (item[1] === 'download') link.classList.add('header-run-link');
+      if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
     });
     el.appendChild(core);
 
@@ -90,6 +95,9 @@ ArkUI.register('RHEADER_V1', {
     Array.prototype.forEach.call(menu.querySelectorAll('a'), function (link) {
       existing[link.getAttribute('href')] = link;
     });
+    // Rebuild the menu from these detached links. Legacy hash links must not
+    // remain as visible siblings behind the new navigation layers.
+    menu.replaceChildren();
     var understand = ['zero', 'about', 'resolver', 'deployment'];
     var evaluate = ['explorer', 'account', 'treasury', 'deposits', 'references', 'concept', 'dao'];
     var run = ['download', 'deploy'];
@@ -97,12 +105,9 @@ ArkUI.register('RHEADER_V1', {
     var lifecycle = Object.keys(catalog).filter(function (key) { return key === 'lifecycle' || key.indexOf('lifecycle/') === 0; });
     var mechanics = Object.keys(catalog).filter(function (key) { return key.indexOf('concept/') === 0; });
     var articles = Object.keys(catalog).filter(function (key) { return key.indexOf('article/') === 0; });
-    understand = understand.concat(lifecycle);
-    evaluate = evaluate.concat(mechanics);
-    read = read.concat(articles);
-    var named = understand.concat(evaluate, run, read);
-    Object.keys(catalog).forEach(function (key) { if (named.indexOf(key) < 0) evaluate.push(key); });
-    menu.dataset.pageCount = String(Object.keys(catalog).length);
+    var named = understand.concat(evaluate, run, read, lifecycle, mechanics, articles);
+    Object.keys(catalog).forEach(function (key) { if (named.indexOf(key) < 0 && !catalog[key].hiddenFromNavigation) evaluate.push(key); });
+    menu.dataset.pageCount = String(Object.keys(catalog).filter(function (key) { return !catalog[key].hiddenFromNavigation; }).length);
     function label(key) {
       if (key === 'zero') return 'Home';
       if (key === 'learnings') return 'Notes';
@@ -196,15 +201,17 @@ ArkUI.register('RHEADER_V1', {
       });
     }
     function routeLink(key, stage) {
-      var href = '#' + catalog[key].path;
-      var link = existing[href];
+      var href = ArkUI.route.href(catalog[key].path);
+      var link = existing[href] || existing['#' + catalog[key].path];
       if (!link) {
         link = node('a', 'ark-link');
         link.href = href;
         link.appendChild(node('span', 'ark-link-label', label(key)));
       }
+      link.href = href;
       link.classList.add('nav-route-link');
       link.dataset.navRoute = key;
+      if(ArkUI.actionIcon)ArkUI.actionIcon(link,key.indexOf('lifecycle')===0?'cycle':key.indexOf('article/')===0?'document':key.indexOf('concept/')===0?'layers':({explorer:'network',account:'account',download:'terminal',deploy:'terminal',about:'overview',learnings:'document',lab:'model',proximity:'model',dao:'authority'}[key]||'open'));
       if (stage) link.classList.add('nav-lifecycle-stage');
       return link;
     }
@@ -218,16 +225,25 @@ ArkUI.register('RHEADER_V1', {
       button.addEventListener('click', function () { push(id); });
       return button;
     }
-    var index = layer('index', 'Explore Flux', 'Choose a path.');
+    var index = layer('index', 'Explore DEFXN', 'Choose a path.');
     [
       ['Understand', 'Overview, resolvers, networks, and agreements', understand, 'understand'],
       ['Evaluate', 'Live local mesh data, evidence, governance, and status', evaluate, 'evaluate'],
       ['Run', 'Source setup and named-network operations', run, 'run'],
       ['Read', 'Notes, articles, and the interactive model', read, 'read']
     ].forEach(function (entry) {
-      index.appendChild(choice(entry[0], entry[1], entry[2].length, entry[3]));
+      index.appendChild(choice(entry[0], entry[1], entry[2].length + (entry[3] === 'understand' ? lifecycle.length : entry[3] === 'evaluate' ? mechanics.length : entry[3] === 'read' ? articles.length : 0), entry[3]));
       var body = layer(entry[3], entry[0], entry[1], 'the index');
       entry[2].forEach(function (key) { body.appendChild(routeLink(key, key.indexOf('lifecycle/') === 0)); });
+    });
+    [
+      ['understand', 'stages', 'Agreement lifecycle', 'Follow one request through five signed records', lifecycle],
+      ['evaluate', 'mechanics', 'Operating model', 'Choose the mechanism you want to inspect', mechanics],
+      ['read', 'articles', 'Notes and articles', 'Choose an architectural question', articles]
+    ].forEach(function (entry) {
+      panels[entry[0]].body.appendChild(choice(entry[2], entry[3], entry[4].length, entry[1]));
+      var body = layer(entry[1], entry[2], entry[3], entry[0]);
+      entry[4].forEach(function (key) { body.appendChild(routeLink(key, key.indexOf('lifecycle/') === 0)); });
     });
     menu.navLayers = { reset: reset, back: goBack, current: function () { return stack[stack.length - 1]; } };
   },

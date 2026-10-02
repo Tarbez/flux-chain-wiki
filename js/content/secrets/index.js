@@ -4,5 +4,5 @@
 var ArkSecretIds = [];
 ArkSecretIds.forEach(function (id) {
   if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;
-  document.write('<script src="js/content/secrets/' + id + '.js" defer><\/script>');
+  document.write('<script src="js/content/secrets/' + id + '.js' + ArkManifestSearch + '" defer><\/script>');
 });

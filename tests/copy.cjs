@@ -5,7 +5,7 @@ const manifests={}, rendered=[];
 const node=()=>({classList:{add(){}},dataset:{},appendChild(){},insertBefore(){},setAttribute(){},querySelector:()=>node(),textContent:''});
 const ArkUI={pageModules:{},register:(id,m)=>{manifests[id]=m;},alias(){},base(){},atomize(){},render:(src)=>{rendered.push(src);return node();}};
 const written=[];
-const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{addEventListener(){}}});
+const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createElementNS:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{addEventListener(){}}});
 for(const file of ['js/content/manifest.js','js/ark/flux.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
 // The index loads each manifest by document.write in the browser; here we load the same files directly, in the same order.
 vm.runInContext(fs.readFileSync('js/content/manifests/index.js','utf8'),context);

@@ -1,0 +1,394 @@
+[
+  {
+    "document": [
+      1440,
+      900
+    ],
+    "rects": [
+      {
+        "bottom": 698.65625,
+        "height": 497.328125,
+        "left": 86.390625,
+        "right": 709,
+        "selector": ".ark-hero-body",
+        "top": 201.328125,
+        "width": 622.609375,
+        "x": 86.390625,
+        "y": 201.328125
+      },
+      {
+        "bottom": 700.84375,
+        "height": 501.6875,
+        "left": 797.703125,
+        "right": 1353.609375,
+        "selector": ".home-lifecycle",
+        "top": 199.15625,
+        "width": 555.90625,
+        "x": 797.703125,
+        "y": 199.15625
+      },
+      {
+        "bottom": 874,
+        "height": 62,
+        "left": 86.390625,
+        "right": 1353.609375,
+        "selector": ".home-status-rail",
+        "top": 812,
+        "width": 1267.21875,
+        "x": 86.390625,
+        "y": 812
+      },
+      {
+        "bottom": 642.65625,
+        "height": 48,
+        "left": 86.390625,
+        "right": 276.140625,
+        "selector": ".home-primary-cta",
+        "top": 594.65625,
+        "width": 189.75,
+        "x": 86.390625,
+        "y": 594.65625
+      },
+      {
+        "bottom": 651.046875,
+        "height": 48,
+        "left": 822.703125,
+        "right": 1328.609375,
+        "selector": ".home-lifecycle-all",
+        "top": 603.046875,
+        "width": 505.90625,
+        "x": 822.703125,
+        "y": 603.046875
+      }
+    ],
+    "root": [
+      900,
+      900
+    ],
+    "stageWidths": [
+      {
+        "content": 101,
+        "label": "01Intent",
+        "width": 101
+      },
+      {
+        "content": 101,
+        "label": "02Offer",
+        "width": 101
+      },
+      {
+        "content": 101,
+        "label": "03Agreement",
+        "width": 101
+      },
+      {
+        "content": 101,
+        "label": "04Fulfillment",
+        "width": 101
+      },
+      {
+        "content": 101,
+        "label": "05Receipt",
+        "width": 101
+      }
+    ],
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "document": [
+      1280,
+      800
+    ],
+    "rects": [
+      {
+        "bottom": 637.296875,
+        "height": 474.59375,
+        "left": 76.796875,
+        "right": 630.21875,
+        "selector": ".ark-hero-body",
+        "top": 162.703125,
+        "width": 553.421875,
+        "x": 76.796875,
+        "y": 162.703125
+      },
+      {
+        "bottom": 648.6875,
+        "height": 497.375,
+        "left": 709.0625,
+        "right": 1203.203125,
+        "selector": ".home-lifecycle",
+        "top": 151.3125,
+        "width": 494.140625,
+        "x": 709.0625,
+        "y": 151.3125
+      },
+      {
+        "bottom": 774,
+        "height": 62,
+        "left": 76.796875,
+        "right": 1203.203125,
+        "selector": ".home-status-rail",
+        "top": 712,
+        "width": 1126.40625,
+        "x": 76.796875,
+        "y": 712
+      },
+      {
+        "bottom": 581.296875,
+        "height": 48,
+        "left": 76.796875,
+        "right": 266.546875,
+        "selector": ".home-primary-cta",
+        "top": 533.296875,
+        "width": 189.75,
+        "x": 76.796875,
+        "y": 533.296875
+      },
+      {
+        "bottom": 598.890625,
+        "height": 48,
+        "left": 734.0625,
+        "right": 1178.203125,
+        "selector": ".home-lifecycle-all",
+        "top": 550.890625,
+        "width": 444.140625,
+        "x": 734.0625,
+        "y": 550.890625
+      }
+    ],
+    "root": [
+      800,
+      800
+    ],
+    "stageWidths": [
+      {
+        "content": 89,
+        "label": "01Intent",
+        "width": 89
+      },
+      {
+        "content": 89,
+        "label": "02Offer",
+        "width": 89
+      },
+      {
+        "content": 89,
+        "label": "03Agreement",
+        "width": 89
+      },
+      {
+        "content": 89,
+        "label": "04Fulfillment",
+        "width": 89
+      },
+      {
+        "content": 89,
+        "label": "05Receipt",
+        "width": 89
+      }
+    ],
+    "viewport": [
+      1280,
+      800
+    ]
+  },
+  {
+    "document": [
+      1280,
+      720
+    ],
+    "rects": [
+      {
+        "bottom": 571.46875,
+        "height": 420.9375,
+        "left": 76.796875,
+        "right": 630.21875,
+        "selector": ".ark-hero-body",
+        "top": 150.53125,
+        "width": 553.421875,
+        "x": 76.796875,
+        "y": 150.53125
+      },
+      {
+        "bottom": 588.6875,
+        "height": 455.375,
+        "left": 709.0625,
+        "right": 1203.203125,
+        "selector": ".home-lifecycle",
+        "top": 133.3125,
+        "width": 494.140625,
+        "x": 709.0625,
+        "y": 133.3125
+      },
+      {
+        "bottom": 702,
+        "height": 62,
+        "left": 76.796875,
+        "right": 1203.203125,
+        "selector": ".home-status-rail",
+        "top": 640,
+        "width": 1126.40625,
+        "x": 76.796875,
+        "y": 640
+      },
+      {
+        "bottom": 515.46875,
+        "height": 48,
+        "left": 76.796875,
+        "right": 266.546875,
+        "selector": ".home-primary-cta",
+        "top": 467.46875,
+        "width": 189.75,
+        "x": 76.796875,
+        "y": 467.46875
+      },
+      {
+        "bottom": 542.890625,
+        "height": 48,
+        "left": 730.0625,
+        "right": 1182.203125,
+        "selector": ".home-lifecycle-all",
+        "top": 494.890625,
+        "width": 452.140625,
+        "x": 730.0625,
+        "y": 494.890625
+      }
+    ],
+    "root": [
+      720,
+      720
+    ],
+    "stageWidths": [
+      {
+        "content": 90,
+        "label": "01Intent",
+        "width": 90
+      },
+      {
+        "content": 90,
+        "label": "02Offer",
+        "width": 90
+      },
+      {
+        "content": 90,
+        "label": "03Agreement",
+        "width": 90
+      },
+      {
+        "content": 90,
+        "label": "04Fulfillment",
+        "width": 90
+      },
+      {
+        "content": 90,
+        "label": "05Receipt",
+        "width": 90
+      }
+    ],
+    "viewport": [
+      1280,
+      720
+    ]
+  },
+  {
+    "document": [
+      1024,
+      768
+    ],
+    "rects": [
+      {
+        "bottom": 619.484375,
+        "height": 470.96875,
+        "left": 61.4375,
+        "right": 504.171875,
+        "selector": ".ark-hero-body",
+        "top": 148.515625,
+        "width": 442.734375,
+        "x": 61.4375,
+        "y": 148.515625
+      },
+      {
+        "bottom": 619.921875,
+        "height": 471.84375,
+        "left": 567.25,
+        "right": 962.5625,
+        "selector": ".home-lifecycle",
+        "top": 148.078125,
+        "width": 395.3125,
+        "x": 567.25,
+        "y": 148.078125
+      },
+      {
+        "bottom": 742,
+        "height": 62,
+        "left": 61.4375,
+        "right": 962.5625,
+        "selector": ".home-status-rail",
+        "top": 680,
+        "width": 901.125,
+        "x": 61.4375,
+        "y": 680
+      },
+      {
+        "bottom": 563.484375,
+        "height": 48,
+        "left": 61.4375,
+        "right": 251.1875,
+        "selector": ".home-primary-cta",
+        "top": 515.484375,
+        "width": 189.75,
+        "x": 61.4375,
+        "y": 515.484375
+      },
+      {
+        "bottom": 570.125,
+        "height": 48,
+        "left": 592.25,
+        "right": 937.5625,
+        "selector": ".home-lifecycle-all",
+        "top": 522.125,
+        "width": 345.3125,
+        "x": 592.25,
+        "y": 522.125
+      }
+    ],
+    "root": [
+      768,
+      768
+    ],
+    "stageWidths": [
+      {
+        "content": 69,
+        "label": "01Intent",
+        "width": 69
+      },
+      {
+        "content": 69,
+        "label": "02Offer",
+        "width": 69
+      },
+      {
+        "content": 69,
+        "label": "03Agreement",
+        "width": 69
+      },
+      {
+        "content": 69,
+        "label": "04Fulfillment",
+        "width": 69
+      },
+      {
+        "content": 69,
+        "label": "05Receipt",
+        "width": 69
+      }
+    ],
+    "viewport": [
+      1024,
+      768
+    ]
+  }
+]

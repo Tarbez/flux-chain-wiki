@@ -4,12 +4,13 @@ class Element {
     add: name => this.classes.add(name), toggle: (name, active) => active ? this.classes.add(name) : this.classes.delete(name)
   }; }
   appendChild(child) { this.children.push(child); return child; }
+  focus() { this.focused=true; }
   setAttribute(key, value) { this.attrs[key] = value; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
 }
 const registry = {};
 const context = vm.createContext({ document: { createElement: tag => new Element(tag) }, ArkUI: { register: (id, manifest) => registry[id] = manifest } });
-for (const file of ['js/ark/flux.js', 'js/content/learnings.js','js/content/article-index.js', 'js/resolvers/learnings.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+for (const file of ['js/ark/flux.js', 'js/content/learnings.js','js/content/article-index.js', 'js/ark/route.js', 'js/resolvers/learnings.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 function descendants(el) { return [el, ...el.children.flatMap(descendants)]; }
 assert(context.LearningContent.articles.every(article => !article.sections), 'Shared index must not load article bodies');
 context.LearningContent.articles.forEach(article => vm.runInContext(fs.readFileSync('js/content/articles/' + article.slug + '.js', 'utf8'), context));

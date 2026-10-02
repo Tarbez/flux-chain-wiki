@@ -8,7 +8,7 @@
   }
   function link(label, page, className) {
     var el = node('a', className, label);
-    el.href = page.indexOf('article/') === 0 ? '#/learnings/' + page.slice(8) : '#/learnings';
+    el.href = ArkUI.route.href(page.indexOf('article/') === 0 ? '/learnings/' + page.slice(8) : '/learnings');
     el.dataset.sceneLink = page;
     return el;
   }
@@ -21,13 +21,12 @@
     return el;
   }
   function attrs(page, label) {
-    return { class: 'ark-page learning-page', 'data-ark-page': page, 'aria-label': label, hidden: '', inert: '', 'aria-hidden': 'true', tabindex: '-1' };
+    return { class: 'ark-page task-page', 'data-ark-page': page, 'aria-label': label, hidden: '', inert: '', 'aria-hidden': 'true', tabindex: '-1' };
   }
   function questionFromHash(slug, count) {
     if (typeof location === 'undefined') return -1;
-    var parts = location.hash.split('?');
-    if (parts[0] !== '#/learnings/' + slug || !parts[1]) return -1;
-    var value = new URLSearchParams(parts[1]).get('q');
+    if (ArkUI.route.path() !== '/learnings/' + slug || !ArkUI.route.search()) return -1;
+    var value = new URLSearchParams(ArkUI.route.search()).get('q');
     var index = Number(value) - 1;
     return Number.isInteger(index) && index >= 0 && index < count ? index : -1;
   }
@@ -44,15 +43,17 @@
     decorate: function (el) {
       var wrap = node('div', 'learning-index');
       wrap.appendChild(node('p', 'learning-eyebrow', 'NOTES / ' + String(LearningContent.articles.length).padStart(2, '0')));
-      wrap.appendChild(node('h1', 'learning-heading', 'Learnings'));
-      wrap.appendChild(node('p', 'learning-intro', 'Notes from the work.'));
+      wrap.appendChild(node('h1', 'learning-heading', 'Notes from the work.'));
+      wrap.appendChild(node('p', 'learning-intro', 'Choose a question. Open the core answer, then follow its evidence.'));
+
       var list = node('ol', 'learning-list');
       LearningContent.articles.forEach(function (article, i) {
-        var item = node('li');
+        var item = node('li','story-topic');item.dataset.continuityCard='article/'+article.slug;
         var entry = link('', 'article/' + article.slug, 'learning-entry');
         entry.appendChild(node('span', 'learning-number', String(i + 1).padStart(2, '0')));
         entry.appendChild(node('h2', '', article.title));
         entry.appendChild(node('span', 'learning-duration', article.minutes));
+        item.appendChild(node('p','story-topic-purpose',article.summary));
         var arrow = node('span', 'learning-arrow', '↗');
         arrow.setAttribute('aria-hidden', 'true'); entry.appendChild(arrow);
         item.appendChild(entry); list.appendChild(item);
@@ -136,25 +137,23 @@
       reading.appendChild(nextNote);
       body.appendChild(reading);
       var sources = node('details', 'article-sources');
-      sources.appendChild(node('summary', '', 'Evidence, review date & next step'));
+      sources.appendChild(node('summary', '', 'Evidence & editorial review'));
       sources.appendChild(node('p', 'article-reviewed', 'Editorial review: ' + article.reviewed + '. This is not live capability verification.'));
       var evidenceLink = node('a', 'article-evidence-link', article.evidenceLabel);
       evidenceLink.href = article.evidenceHref;
       sources.appendChild(evidenceLink);
       var related = pageLink('Related mechanism ↗', article.relatedPage, 'article-related');
       var action = pageLink(article.actionLabel + ' ↗', article.actionPage, 'article-action');
-      if (related) sources.appendChild(related);
-      if (action) sources.appendChild(action);
+      var exits=node('nav','article-related-actions');exits.setAttribute('aria-label','Continue from this note');
+      if (related) exits.appendChild(related);
+      if (action) exits.appendChild(action);body.appendChild(exits);
       body.appendChild(sources); el.appendChild(body);
       var choiceAnimation = null;
       var choiceRevision = 0;
       function setSectionLabel(hovered) {
         var current = Number(el.dataset.articleChoice);
         if (current < 0 || current >= panels.length) return;
-        sectionLabels[current].textContent = hovered === undefined
-          ? String(current + 1).padStart(2, '0') + ' / ' + ((article.questions || [])[current] || article.sections[current][0])
-          : hovered < 0 ? '00 / RETURN TO CORE'
-          : String(hovered + 1).padStart(2, '0') + ' / CONTINUE READING → ' + article.sections[hovered][0];
+        sectionLabels[current].textContent = String(current + 1).padStart(2, '0') + ' / ' + ((article.questions || [])[current] || article.sections[current][0]);
       }
       function select(index, scroll, writeHistory) {
         var active = index >= 0 && index < panels.length;
@@ -174,21 +173,11 @@
         el.dataset.articleChoice = String(index);
         if (active) setSectionLabel();
         if (writeHistory && typeof history !== 'undefined' && typeof location !== 'undefined') {
-          var hash = '#/learnings/' + article.slug + (active ? '?q=' + (index + 1) : '');
-          if (location.hash !== hash) history.pushState(null,'',hash);
+          ArkUI.route.write('/learnings/' + article.slug, active ? 'q=' + (index + 1) : '', 'push');
         }
         if (scroll) {
-          var scene = el.closest && el.closest('.hero-alive');
-          if (scene) scene.scrollTop = 0;
-          if (typeof window !== 'undefined' && window.scrollTo) {
-            var target = 0;
-            if (active) {
-              var anchor = window.innerWidth <= 760 ? reading : body;
-              target = window.scrollY + anchor.getBoundingClientRect().top - 92;
-            }
-            window.scrollTo({ top: Math.max(0,target),
-              behavior: ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion() ? 'instant' : 'smooth' });
-          }
+          el.scrollTop=0;
+          if(active){panels[index].tabIndex=-1;panels[index].focus({preventScroll:true});}
         }
         if (typeof CustomEvent !== 'undefined' && typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('article:choice', { detail: { index: index, total: panels.length } }));
@@ -250,6 +239,8 @@
         var index = questionFromHash(article.slug,panels.length);
         if (Number(el.dataset.articleChoice) !== index) change(index,true,false);
       };
+      el.arkRestore=el.selectArticleQuestionFromRoute;
+      el.arkDispose=function(){choiceRevision+=1;if(choiceAnimation)choiceAnimation.cancel();};
       select(questionFromHash(article.slug,panels.length),false,false);
     }
   });

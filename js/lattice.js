@@ -72,12 +72,14 @@
   }
 
   function sizeCanvas(canvas) {
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
+    var pixelWidth=Math.round(width*ratio),pixelHeight=Math.round(height*ratio);
+    if(canvas.width!==pixelWidth)canvas.width=pixelWidth;
+    if(canvas.height!==pixelHeight)canvas.height=pixelHeight;
     canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
   }
 
   function draw() {
+    homeMeshInvalid=true;
     var rect = scene.getBoundingClientRect();
     var theme = getComputedStyle(document.documentElement);
     colors = {
@@ -181,6 +183,7 @@
     var from = readingProgress;
     var revision = ++readingRevision;
     if (readingFrame && window.cancelAnimationFrame) window.cancelAnimationFrame(readingFrame);
+    readingFrame=0;
     if (reduce.matches || document.hidden || !window.requestAnimationFrame || from === target ||
         isLifecycle(page) || isLifecycle(outgoingPage || '')) {
       readingProgress = target;
@@ -602,7 +605,102 @@
       : 'Agreement lifecycle. Five stages: Intent, Offer, Agreement, Fulfillment, Receipt.');
   }
 
+  // Home interactions repaint existing grid cells on the activity canvas.
+  // No pictograms or independent geometry: all fills share the substrate grid.
+  var homeMeshStage='',homeMeshFrame=0,homeHover='',homeFocus='';
+  var homeMeshRevision=0,homeMeshBounds=null,homeMeshStill=null,homeMeshInvalid=false;
+  var homeMeshCells=[],homeMeshColor='',homeMeshLastPaint=-Infinity;
+  function stopHomeMesh(){
+    if(homeMeshFrame)window.cancelAnimationFrame(homeMeshFrame);
+    homeMeshFrame=0;homeMeshRevision++;
+    if(homeMeshBounds)activity.getContext('2d').clearRect(homeMeshBounds.x,homeMeshBounds.y,homeMeshBounds.width,homeMeshBounds.height);
+    homeMeshBounds=null;homeMeshCells=[];
+    delete activity.dataset.homeMeshStage;
+  }
+  function agreementCellLevel(stage,progress,cell){
+    var x=cell.x,y=cell.y,col=cell.col,row=cell.row,level=0;
+      if(stage==='intent'){
+        var radius=Math.max(Math.abs(x-.18)*2,Math.abs(y-.5));
+        level=radius<.1+progress*.22 ? .28 : 0;
+        if(Math.abs(radius-(.1+progress*.22))<.055)level=.65;
+      }else if(stage==='offer'){
+        var band=Math.abs(y-.28)<.14||Math.abs(y-.72)<.14;
+        level=band&&x>.12&&x<.12+progress*.56 ? .42 : 0;
+        if(band&&Math.abs(x-(.12+progress*.56))<.055)level=.75;
+      }else if(stage==='agreement'){
+        var gap=(1-progress)*.35;
+        level=Math.abs(y-.5)<.23&&Math.abs(x-.5)>gap&&Math.abs(x-.5)<gap+.13 ? .55 : 0;
+        if(progress>.8&&Math.abs(x-.5)<.15&&Math.abs(y-.5)<.25)level=.5;
+      }else if(stage==='fulfillment'){
+        var frontier=progress*.95;
+        level=x<frontier&&((col+row)%3===0) ? .32 : 0;
+        if(Math.abs(x-frontier)<.05)level=.7;
+      }else if(stage==='receipt'){
+        var order=cell.order;
+        level=order<progress&&row%2===0 ? .36 : 0;
+        if(order<progress&&col%5===0&&row%2===0)level=.65;
+      }
+    return level;
+  }
+  ArkUI.agreementCellLevel=agreementCellLevel;
+  function measureHomeMesh(){
+    var box=scene.querySelector('.home-substrate-window');
+    if(!box)return false;
+    var area=box.getBoundingClientRect(),base=scene.getBoundingClientRect();
+    if(!area.width||!area.height)return false;
+    var left=Math.ceil((area.left-base.left)/cellWidth),right=Math.floor((area.right-base.left)/cellWidth);
+    var top=Math.ceil((area.top-base.top+28)/cellHeight),bottom=Math.floor((area.bottom-base.top)/cellHeight);
+    var countX=Math.max(1,right-left),countY=Math.max(1,bottom-top);
+    homeMeshBounds={x:left*cellWidth,y:top*cellHeight,width:countX*cellWidth,height:countY*cellHeight};
+    homeMeshCells=[];
+    for(var row=top;row<bottom;row++)for(var col=left;col<right;col++)homeMeshCells.push({
+      x:(col-left+.5)/countX,y:(row-top+.5)/countY,col:col,row:row,
+      px:col*cellWidth+1,py:row*cellHeight+1,order:((row-top)*countX+col-left)/(countX*countY)
+    });
+    homeMeshColor=colors.activeLabel;homeMeshInvalid=false;
+    return true;
+  }
+  function paintHomeMesh(stage,progress){
+    if(!homeMeshBounds)return;
+    var ctx=activity.getContext('2d');
+    ctx.clearRect(homeMeshBounds.x,homeMeshBounds.y,homeMeshBounds.width,homeMeshBounds.height);
+    ctx.fillStyle=homeMeshColor;
+    for(var i=0;i<homeMeshCells.length;i++){
+      var cell=homeMeshCells[i],x=cell.x,y=cell.y,col=cell.col,row=cell.row,level=0;
+      level=agreementCellLevel(stage,progress,cell);
+      if(level){ctx.globalAlpha=level;ctx.fillRect(cell.px,cell.py,cellWidth-2,cellHeight-2);}
+    }
+    ctx.globalAlpha=1;
+  }
+  function startHomeMesh(stage,still){
+    stopHomeMesh();
+    homeMeshStill=!!(still||reduce.matches||state.get().paused||document.hidden);
+    if(!stage||state.get().page!=='zero'||document.hidden||!measureHomeMesh())return;
+    activity.dataset.homeMeshStage=stage;
+    if(homeMeshStill){paintHomeMesh(stage,1);return;}
+    var started=performance.now(),revision=homeMeshRevision;homeMeshLastPaint=-Infinity;
+    function frame(now){
+      if(revision!==homeMeshRevision)return;
+      if(document.hidden||state.get().page!=='zero'){stopHomeMesh();return;}
+      var progress=unit((now-started)/850);
+      if(progress===1||now-homeMeshLastPaint>=1000/30){paintHomeMesh(stage,progress);homeMeshLastPaint=now;}
+      if(progress<1)homeMeshFrame=window.requestAnimationFrame(frame);else homeMeshFrame=0;
+    }
+    homeMeshFrame=window.requestAnimationFrame(frame);
+  }
+  function homeStep(target){var link=target&&target.closest&&target.closest('.home-cycle-step');return link&&scene.contains(link)?link.dataset.stage:'';}
+  function refreshHomeMesh(){
+    var next=homeHover||homeFocus;
+    if(next===homeMeshStage)return;
+    homeMeshStage=next;startHomeMesh(next,false);
+  }
+  scene.addEventListener('pointerover',function(event){homeHover=homeStep(event.target);refreshHomeMesh();});
+  scene.addEventListener('pointerout',function(event){homeHover=homeStep(event.relatedTarget);refreshHomeMesh();});
+  scene.addEventListener('focusin',function(event){homeFocus=homeStep(event.target);refreshHomeMesh();});
+  scene.addEventListener('focusout',function(event){homeFocus=homeStep(event.relatedTarget);refreshHomeMesh();});
+
   function tick() {
+    if(scene.querySelector('.home-lifecycle')){window.clearTimeout(timer);timer=0;return;}
     // The home diagram owns its ordered signal; retain this canvas as texture.
     var homeFlow = scene.querySelector('.home-agreement-flow');
     if (homeFlow && homeFlow.dataset && homeFlow.dataset.homeFlow === 'ordered') return clearActivity();
@@ -643,7 +741,10 @@
     activity.setAttribute('aria-hidden','true');
     activity.tabIndex = -1;
     if (!isLifecycle(page) && document.activeElement === activity && activity.blur) activity.blur();
-    if (!active || still) clearActivity(changed && isLifecycle(outgoingPage) && !still);
+    if (!active || still && !homeMeshStage) clearActivity(changed && isLifecycle(outgoingPage) && !still);
+    if(page!=='zero'){stopHomeMesh();homeMeshStage=homeHover=homeFocus='';}
+    else if(homeMeshStage&&(homeMeshStill!==still||homeMeshInvalid))startHomeMesh(homeMeshStage,still);
+    if(document.hidden&&readingFrame){window.cancelAnimationFrame(readingFrame);readingFrame=0;readingRevision++;}
     if (document.hidden && state.lifecycleRun && !changed) {
       cameraRevision++;
       if (cameraFrame && window.cancelAnimationFrame) window.cancelAnimationFrame(cameraFrame);
@@ -655,7 +756,7 @@
     }
     if (!initialized) {
       initialized = true;
-      var requested = window.location && window.location.hash.replace(/^#\//,'');
+      var requested = ArkUI.route ? ArkUI.route.path().replace(/^\//,'') : '';
       camera = targetCamera(page === 'zero' && isLifecycle(requested || '') ? requested : page);
       applyCamera();
       if (isLifecycle(page)) paintLifecycle();

@@ -19,7 +19,7 @@ const document={head,createElement:()=>new Element(),querySelector:selector=>{
 },activeElement:null};
 const window={scrollY:0,scrollTo(x,y){this.scrollY=y;},matchMedia:()=>({matches:true})};
 const context=vm.createContext({console,document,window,getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
-for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/route.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific description':fallback,articleDescription:(id,fallback)=>fallback,
  ogImage:(map,id)=>id==='about'?'https://example.com/about.png':'',canonical:(map,id)=>id==='about'?'https://example.com/about':''};
 (async()=>{
@@ -64,6 +64,9 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  }
  assert.equal(router.resolve('#/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.url('zero'),'#/');
  assert.equal(router.resolve('#/learnings/why-the-chain-was-retired?q=3'),'article/why-the-chain-was-retired','question links resolve to the parent article');
+// Clean paths (served over http) resolve exactly like the old #/ forms, and the explorer moved from /explorer to /explore.
+assert.equal(router.resolve('/explore'),'explorer');assert.equal(router.resolve('/explore/'),'explorer','a trailing slash is the same route');assert.equal(router.resolve('/explorer'),'explorer','the old explorer address still lands on the explorer');assert.equal(router.resolve('#/explorer'),'explorer');
+assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.resolve('/'),'zero');assert.equal(router.resolve('/no-such-page'),'zero');
  assert.equal(writes.at(-1)[1],'none');
  await router.navigate('about');assert.equal(router.active,'about');assert.equal(context.ArkUI.sceneState.get().page,'about');
  assert.equal(description.value,'About-specific description');

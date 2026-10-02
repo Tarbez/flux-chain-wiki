@@ -1,6 +1,7 @@
 ArkUI.pageModules.download = {
   mount: function (host) {
     var el = ArkUI.sheet('download', 'download');
+    el.classList.remove('learning-page');el.classList.add('task-page');
     var footer = el.querySelector('.theory-footer');
     if (footer) {
       var guide = ArkUI.el('a', 'article-back');
@@ -39,6 +40,7 @@ ArkUI.pageModules.download = {
         all.textContent = review ? 'Return to one step' : 'Review all steps';
         all.setAttribute('aria-pressed', String(review));
         progress.textContent = review ? 'All ' + steps.length + ' steps / review' : 'Step ' + (active + 1) + ' of ' + steps.length;
+        if(el.arkWriteState)el.arkWriteState({step:active,review:review});
         if (focus) { var heading = steps[active].querySelector('h2'); if (heading) { heading.tabIndex = -1; heading.focus({ preventScroll: true }); } }
       }
       previous.addEventListener('click', function () { select(active - 1, true); });
@@ -49,14 +51,7 @@ ArkUI.pageModules.download = {
       list.parentNode.insertBefore(progress, list.nextSibling);
       list.parentNode.insertBefore(controls, progress.nextSibling);
       select(0, false);
-    }
-    if (!window.ArkMeshSettings || ArkMeshSettings.shapeVisible('download')) {
-      var figure = document.createElement('figure');
-      figure.className = 'page-iceberg';
-      figure.setAttribute('data-iceberg-anchor', '');
-      figure.setAttribute('role', 'img');
-      figure.setAttribute('aria-label', 'Decorative particle form');
-      el.appendChild(figure);
+      ArkUI.attachProcedureState(el,'download',steps.length,function(index,all){review=all;select(index,false);});
     }
     host.appendChild(el); return el;
   }

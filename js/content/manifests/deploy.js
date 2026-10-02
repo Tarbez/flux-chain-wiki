@@ -18,13 +18,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Choose the miner-presence namespace you intend to serve."
+      "value": "Choose a network for miner presence."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "These commands use the current flux-network CLI contract. A named network partitions miner presence only; it does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not a security boundary."
+      "value": "Named networks partition miner presence only. They do not isolate accounts, identities, DAOs, records, or treasuries, and are not a security boundary."
     },
     "BACK": {
       "label": "Link back (an arrow is added)",

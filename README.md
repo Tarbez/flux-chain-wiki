@@ -47,6 +47,23 @@ store uses `FluxMemoryStore`. Interrupted transitions cancel their animations,
 inactive pages are inert, and focus leaves a page before it becomes unavailable.
 Reduced motion applies destination states directly.
 
+Selected Home-cycle, operating-model, and Notes surfaces retain their actual DOM
+box through expansion. `js/ark/panel-continuity.js` owns outer geometry; the
+router disposes inner contents separately. Outer boxes never use opacity fades.
+Direct links render the final frame. Query state addresses mechanism depth/detail,
+article questions, procedure step/review, and model selection/value.
+
+Canonical reference links open the in-shell `/reference` reader with the exact
+originating route/query and an Original Markdown link. Run
+`node scripts/sync-reference-docs.cjs` after editing a linked canonical document.
+It regenerates the approved-document list and lazy text/hash snapshot from the
+source files; do not hand-edit the generated copies. The reader uses the existing
+local script policy, including `file://`, without broadening `connect-src`.
+
+`js/ark/icons.js` supplies native inline SVG icons on one 24px grid. Their strokes
+inherit semantic colors; labels remain the accessible meaning. Desktop refinement
+and verification come first; mobile refinement is the final redesign pass.
+
 The account route loads the shared Ark UI Auth Kit bundle on demand. Its
 verified root signer is held in browser memory and disposed when the route
 unmounts; the recovery file and PIN are not uploaded or persisted. The displayed

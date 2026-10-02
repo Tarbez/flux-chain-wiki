@@ -65,7 +65,8 @@ function loadIndexed(root, ids) {
 /* the ids the asset index lists */
 function assetIds(root) {
   const writes = [];
-  const context = vm.createContext({ document: { write: (s) => writes.push(s) } });
+  /* ArkManifestSearch is the cache-busting suffix manifests/index.js defines first in the page; the other index files reuse it. */
+  const context = vm.createContext({ ArkManifestSearch: '', document: { write: (s) => writes.push(s) } });
   vm.runInContext(read(root, 'js/content/assets/index.js'), context);
   return vm.runInContext('ArkAssetIds', context).slice();
 }
@@ -80,7 +81,7 @@ function loadIndexedAssets(root, ids) {
 /* the ids the secret index lists */
 function secretIds(root) {
   const writes = [];
-  const context = vm.createContext({ document: { write: (s) => writes.push(s) } });
+  const context = vm.createContext({ ArkManifestSearch: '', document: { write: (s) => writes.push(s) } });
   vm.runInContext(read(root, 'js/content/secrets/index.js'), context);
   return vm.runInContext('ArkSecretIds', context).slice();
 }

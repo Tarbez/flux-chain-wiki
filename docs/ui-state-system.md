@@ -5,11 +5,13 @@ This contract applies the Slate interaction laws to the Flux Protocol public sit
 ## Route transition visibility
 
 - Mount incoming content hidden and inert. Never use a route-style change to conceal the outgoing page.
-- Finish the entire outgoing page's exit under its own route styles, then remove it before updating scene state. This applies to lifecycle routes as well as ordinary pages.
+- Finish outgoing semantic content under its own route styles, then dispose it before updating scene state. A selected panel can leave that root and remain in the shared shell as the next dashboard; its lifetime is separate from its contents.
 - Keep the grid/mesh transition, but do not carry readable outgoing cards into the new route's layout. A partial hide of only the hero is insufficient.
-- Wrap element stagger animations in a root opacity animation so status strips, new controls, and decorative cards cannot appear outside the transition.
+- Presence can fade disposable content roots, including their complete inner material. Never fade the retained panel host. Its measured position, dimensions, and soft boundary change continuously. Inner contents may fade during replacement.
 - Restore scroll before the incoming page's first visible animation frame, not after the entrance completes.
 - Interrupted navigation must dispose of stale pages and retain the latest requested route. Hidden inner panels remain excluded from entry animations.
+
+`tests/panel-continuity.cjs` proves selected-box identity, non-opacity geometry, child-content replacement, reverse return/focus, direct-link layout, and interrupted retargeting. Browser checks still establish clipping, readability, and perceived continuity.
 
 `tests/page-router.cjs` checks the handoff boundary against every catalog route and uses a deferred exit to prove that scene styles cannot change before the outgoing exit resolves.
 
@@ -21,7 +23,7 @@ The route hierarchy has three depths:
 2. **Context** — a mechanism route answers its named question directly. `How it works` opens a focused interactive level with selectable steps and one answer at a time.
 3. **Inner detail** — a stage route or `Evidence & limits` level holds implementation anatomy, limitations, and evidence links. It never repeats the parent page's full introduction.
 
-The lifecycle uses real inner routes: `/lifecycle` is the context overview and `/lifecycle/{stage}` is the stage detail, with selectable facts. Mechanism sheets use three explicit inner states within each route. Inactive panels are hidden and inert. Escape returns to the core idea; returning to a mechanism restores its selected level and detail for the session. Semantic `details` elements are the fallback before enhancement.
+The agreement-cycle panel expands into the lifecycle dashboard and contracts on parent return. Direct links show its final frame immediately. The lifecycle uses real inner routes: `/lifecycle` is the context overview and `/lifecycle/{stage}` is the stage detail, with selectable facts. Mechanism sheets use three explicit inner states within each route. Inactive panels are hidden and inert. Escape returns to the core idea; returning to a mechanism restores its selected level and detail for the session. Semantic `details` elements are the fallback before enhancement.
 
 ## Claim stack
 
@@ -38,7 +40,7 @@ Collapsing reference material must never hide the current status label or turn a
 The persistent scene has separate responsibilities:
 
 - the persistent canvas is atmosphere and transition context;
-- the route outlet owns the current readable page;
+- the route outlet owns ordinary pages and stages incoming contents; a retained panel host owns the current lifecycle dashboard contents after handoff;
 - the header navigation is a temporary overlay and disappears when focus resumes.
 
 Only one semantic layer may be readable and interactive at a time. During lifecycle navigation, the grid may move as atmosphere but the old canvas labels remain invisible. The route page owns reading and scrolling from the moment it mounts.

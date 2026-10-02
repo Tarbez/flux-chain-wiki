@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var scripts = new Map();
-  var pageAssetVersion = '20260930e';
+  var pageAssetVersion = '20261002-story59';
   function loadScript(url) {
     if (!/^js\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.js$/.test(url)) return Promise.reject(new Error('Invalid page asset'));
     if (scripts.has(url)) return scripts.get(url);

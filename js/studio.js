@@ -12,24 +12,26 @@ ArkUI.mountStudio = function (root) {
   var specimen = root.querySelector('.specimen');
   var range = findById('variable');
   var stage = root.querySelector('.experiment-stage');
-  function update() {
+  function update(write) {
     var value = Number(range.value); values[mode] = value;
-    findById('variable-value').textContent = value + '%';
+    var stageIndex=Math.min(4,Math.floor(value/20)),stageName=['Intent','Offer','Agreement','Fulfillment','Receipt'][stageIndex];
+    findById('variable-value').textContent = mode==='rhythm'?stageName:value + '%';
     range.setAttribute('aria-valuetext', value + ' percent, ' + studies[mode].label.toLowerCase());
-    specimen.style.setProperty('--distance', (4 + value * .7) + 'px');
+    specimen.style.setProperty('--distance', (4 + (100-value) * .7) + 'px');
     specimen.style.setProperty('--depth', value);
-    if (mode === 'rhythm') Array.from(specimen.children).forEach(function (bar, index) {
-      bar.style.setProperty('--amplitude', String(35 + Math.sin(index * .65) * value * .55 + value * .4));
-      bar.style.setProperty('--opacity', String(1 - (value / 100) * (.55 - (Math.sin(index * .65) + 1) * .275)));
-    });
+    if (mode === 'rhythm') Array.from(specimen.children).forEach(function (record,index){record.dataset.selected=String(index===stageIndex);record.dataset.reached=String(index<=stageIndex);});
     var descriptions = { spacing: 'Illustrative dots in three independent groups. Visual convergence: ', rhythm: 'Illustrative bars representing positions in a five-stage agreement lifecycle: ', depth: 'Illustrative square outlines representing named-network presence scope. Visual separation: ' };
-    stage.setAttribute('aria-label', descriptions[mode] + value + ' percent.');
+    stage.setAttribute('aria-label', mode==='rhythm'?'Illustrated lifecycle position: '+stageName+'. No signed record is loaded.':descriptions[mode]+value+' percent.');
+    var consequence=root.querySelector('.model-consequence');if(consequence)consequence.textContent=mode==='rhythm'?'Illustrated record: '+stageName+'. Earlier records remain in its reference trail; no real signature is verified.':mode==='spacing'?(value<50?'Independent groups remain apart.':'Independent groups draw together.')+' Visual spacing does not count approvals or prove a quorum.':(value<50?'Named presence groups share a close view.':'Named presence groups appear separately.')+' Shared accounts and authority remain outside this illustrated isolation.';
+    var canonical=root.querySelector('.model-canonical');if(canonical){var target=mode==='rhythm'?'lifecycle':mode==='depth'?'concept/purpose':'concept/practice';canonical.dataset.sceneLink=target;canonical.href='#'+ArkUI.pageCatalog[target].path;canonical.textContent='Read the '+(mode==='rhythm'?'agreement trail':mode==='depth'?'network boundary':'authority contract')+' →';}
+    if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(root);
+    if(write)writeState();
   }
-  function selectStudy(next) {
+  function selectStudy(next,write) {
     mode = next; values.mode = next; var study = studies[mode];
     root.querySelector('.lab').dataset.mode = mode;
     root.querySelectorAll('[data-study]').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.study === mode)); });
-    findById('study-title').textContent = study.title;
+    findById('study-title').textContent = study.title;findById('experiments-title').textContent=study.title;
     findById('study-description').textContent = study.description;
     root.querySelector('label[for="variable"]').textContent = study.label;
     findById('range-start').textContent = study.start;
@@ -37,19 +39,22 @@ ArkUI.mountStudio = function (root) {
     root.querySelector('.stage-footnote').textContent = study.note;
     root.querySelector('.stage-corner').textContent = study.code;
     specimen.replaceChildren(); range.value = values[mode];
-    var count = mode === 'spacing' ? 3 : mode === 'rhythm' ? 16 : 4;
+    var count = mode === 'spacing' ? 3 : mode === 'rhythm' ? 5 : 4;
     for (var j = 0; j < count; j++) {
       var item = document.createElement('span');
       item.className = mode === 'spacing' ? 'dot-group' : mode === 'rhythm' ? 'rhythm-bar' : 'depth-plane';
+      if(mode==='rhythm')item.textContent=['Intent','Offer','Agreement','Fulfillment','Receipt'][j];
       if (mode === 'spacing') for (var k = 0; k < 4; k++) item.appendChild(document.createElement('i'));
       if (mode === 'depth') item.style.setProperty('--layer', j - 1.5);
       specimen.appendChild(item);
     }
-    update();
+    update(false);if(write)writeState();
   }
-  root.querySelectorAll('[data-study]').forEach(function (button) { button.addEventListener('click', function () { selectStudy(button.dataset.study); }); });
-  range.addEventListener('input', update);
-  selectStudy(mode);
+  root.querySelectorAll('[data-study]').forEach(function (button) { button.addEventListener('click', function () { selectStudy(button.dataset.study,true); }); });
+  range.addEventListener('input',function(){update(true);});
+  function writeState(){ArkUI.route.write('/experiments/lab','model='+mode+'&value='+Number(range.value),'replace');}
+  function restore(){if(ArkUI.route.path()!=='/experiments/lab')return;var q=new URLSearchParams(ArkUI.route.search()),next=q.get('model');if(studies[next])mode=next;var value=q.get('value');if(value!==null&&Number.isFinite(Number(value)))values[mode]=Math.max(0,Math.min(100,Number(value)));selectStudy(mode,false);}
+  selectStudy(mode,false);root.arkRestore=restore;restore();window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);root.arkDispose=function(){window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};
   root.querySelectorAll('[data-study], #variable').forEach(function (control) { control.disabled = false; });
   document.documentElement.classList.add('is-ready');
 };

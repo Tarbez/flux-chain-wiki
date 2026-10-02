@@ -16,6 +16,7 @@ class Element {
     };
   }
   appendChild(child) { this.children.push(child); return child; }
+  replaceChildren(...children) { this.children = children; }
   setAttribute(name, value) { this.attributes[name] = value; }
   getAttribute(name) { return this.attributes[name]; }
   addEventListener(name, listener) { this.listeners[name] = listener; }
@@ -48,7 +49,8 @@ function nextAnimationPhase() {
   timers.delete(id);
   callback();
 }
-vm.runInNewContext(fs.readFileSync('js/resolvers/header.js', 'utf8'), {
+const headerSandbox = {
+  location: { protocol:'http:',pathname:'/',search:'',hash:'' },
   Tokens: { u: () => '1px' },
   ArkUI: {
     pageCatalog: catalog,
@@ -63,21 +65,29 @@ vm.runInNewContext(fs.readFileSync('js/resolvers/header.js', 'utf8'), {
     setTimeout: (fn) => { const id = ++clockId; timers.set(id, fn); return id; },
     clearTimeout: (id) => { timers.delete(id); }
   }
-});
+};
+vm.runInNewContext(fs.readFileSync('js/ark/route.js', 'utf8'), headerSandbox);
+vm.runInNewContext(fs.readFileSync('js/resolvers/header.js', 'utf8'), headerSandbox);
 
 const menu = new Element('nav');
+const legacy = new Element('a');legacy.setAttribute('href', '#/resolver');legacy.href='#/resolver';menu.appendChild(legacy);
 const host = { querySelector: () => menu };
 header.onMount(host);
 const layers = menu.children;
 const layer = (name) => layers.find((item) => item.dataset.navLayer === name);
 assert.equal(menu.dataset.pageCount, '31');
 assert.equal(menu.querySelectorAll('a').length, 31, 'every page remains in navigation');
-assert.equal(layers.length, 5, 'index and four intent-based category layers');
+assert(layers.every(item => item.dataset.navLayer), 'no legacy links remain behind the navigation layers');
+assert(layer('understand').querySelectorAll('a').includes(legacy), 'legacy hash links are reused inside their destination group');
+assert.equal(legacy.href, '/resolver', 'reused links adopt the active clean-path routing mode');
+assert.equal(layers.length, 8, 'index, four intent groups, and three focused destination sublevels');
 assert.equal(layer('index').hidden, false);
 for (const name of ['understand', 'evaluate', 'run', 'read']) {
   assert.equal(layer(name).hidden, true, name + ' starts hidden');
 }
-assert.equal(layer('understand').querySelectorAll('a').length, 10, 'overview and all lifecycle stages remain directly reachable');
+assert.equal(layer('understand').querySelectorAll('a').length, 4, 'primary orientation choices precede the lifecycle sublevel');
+assert.equal(layer('stages').querySelectorAll('a').length, 6, 'overview and all five stages remain reachable');
+assert.equal(layer('articles').querySelectorAll('a').length, 3, 'full article titles remain in a dedicated reading level');
 layer('index').querySelector('[data-nav-target="understand"]').listeners.click();
 assert.equal(menu.navLayers.current(), 'understand');
 assert.equal(layer('index').hidden, false, 'first layer stays until its exit finishes');
@@ -98,4 +108,4 @@ assert.equal(timers.size, 1);
 menu.navLayers.reset();
 assert.equal(timers.size, 0, 'closing during an exit cancels the transition');
 assert.equal(layer('evaluate').hidden, true);
-console.log('PASS: all 31 routes remain linked across four intent-based animated navigation layers.');
+console.log('PASS: all 31 routes remain linked through four primary intent groups and focused lifecycle, mechanism, and article sublevels.');

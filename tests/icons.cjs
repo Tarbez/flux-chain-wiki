@@ -1,0 +1,8 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+class Element{constructor(tag){this.tagName=tag;this.children=[];this.attrs={};this.dataset={};this.classList={add(){}};}setAttribute(k,v){this.attrs[k]=v;}appendChild(el){this.children.push(el);}insertBefore(el){this.children.unshift(el);}querySelector(){return null;}get childNodes(){return this.children;}get firstChild(){return this.children[0];}}
+const context={ArkUI:{},document:{createElementNS(_ns,tag){assert.equal(_ns,'http://www.w3.org/2000/svg');return new Element(tag);}}};vm.runInNewContext(fs.readFileSync('js/ark/icons.js','utf8'),context);
+for(const name of ['arrow-left','arrow-right','open','overview','network','layers','document','evidence','account','terminal','cycle','authority','model','inspect']){
+ const icon=context.ArkUI.icon(name);assert.equal(icon.tagName,'svg');assert.equal(icon.attrs.viewBox,'0 0 24 24');assert.equal(icon.attrs.stroke,'currentColor');assert.equal(icon.attrs.fill,'none');assert.equal(icon.attrs['aria-hidden'],'true');assert.equal(icon.attrs.focusable,'false');assert(icon.children.every(path=>path.tagName==='path'&&path.attrs.d));
+}
+const action=new Element('a');const label={nodeType:3,textContent:'Explore the agreement cycle →'};action.appendChild(label);context.ArkUI.actionIcon(action,'cycle');assert.equal(label.textContent,'Explore the agreement cycle');assert.equal(action.children.length,2);context.ArkUI.actionIcon(action,'cycle');assert.equal(action.children.length,2,'repeated decoration cannot duplicate icons');assert.equal(context.ArkUI.icon('unknown'),null);
+console.log('PASS: native SVG namespace, common stroke/grid, semantic currentColor, decorative accessibility, preserved labels, and no duplicate icons.');

@@ -18,7 +18,7 @@
 #scene .account-page [data-ark-auth="form"] input{width:100%;min-height:44px;box-sizing:border-box;padding:10px 12px;border:1px solid hsl(var(--border-default));background:hsl(var(--surface));color:hsl(var(--text-strong))}
 #scene .account-page [data-ark-auth="actions"]{display:flex;flex-wrap:wrap;gap:8px}
 #scene .account-page button{min-height:44px;padding:10px 14px;border:1px solid hsl(var(--border-default));background:transparent;color:hsl(var(--text-strong));cursor:pointer}
-#scene .account-page button[data-kind="primary"]{background:hsl(var(--text-strong));border-color:hsl(var(--text-strong));color:hsl(var(--canvas)) !important}
+#scene .account-page button[data-kind="primary"]{background:hsl(var(--text-strong));border-color:hsl(var(--text-strong));color:hsl(var(--canvas))}
 #scene .account-page :is(button,input,a):focus-visible{outline:2px solid hsl(var(--accent));outline-offset:3px}
 #scene .account-page [data-ark-auth="notice"][data-tone="error"]{color:hsl(var(--danger,var(--accent)))}
 #scene .account-state h2,#scene .account-live h2{margin:0 0 18px;color:hsl(var(--text-strong));font:500 clamp(26px,3vw,38px)/1.15 "Albert Sans",sans-serif}
@@ -30,7 +30,7 @@
 #scene .account-mesh-check{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 12px;padding:18px 20px;border:1px solid hsl(var(--border-default));background:hsl(var(--surface))}
 #scene .account-mesh-check strong{display:block;color:hsl(var(--text-strong));font:500 18px/1.2 "Albert Sans",sans-serif}
 #scene .account-mesh-check p{margin:6px 0 0;max-width:62ch;color:hsl(var(--text));font:400 13px/1.5 "Albert Sans",sans-serif}
-#scene .account-mesh-check button{flex:0 0 auto;background:hsl(var(--text-strong));border-color:hsl(var(--text-strong));color:hsl(var(--canvas)) !important}
+#scene .account-mesh-check button{flex:0 0 auto;background:hsl(var(--text-strong));border-color:hsl(var(--text-strong));color:hsl(var(--canvas))}
 #scene .account-mesh-check button:disabled{cursor:not-allowed;opacity:.45}
 #scene .account-mesh-detail{margin:0 0 20px;border-bottom:1px solid hsl(var(--border-default));color:hsl(var(--text))}
 #scene .account-mesh-detail summary{padding:10px 0;color:hsl(var(--text-strong));cursor:pointer;font:600 11px/1.4 var(--mono-font,ui-monospace,monospace);letter-spacing:.05em;text-transform:uppercase}

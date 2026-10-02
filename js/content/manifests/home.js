@@ -28,7 +28,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Register a network, define its rules, and complete signed agreements without a global block order. Available in source; network isolation currently covers miner presence. Production activation and public binaries remain unverified."
+      "value": "Define your rules. Run signed agreements without a global block order. Available in source; isolation currently covers miner presence only. Production activation and public binaries remain unverified."
     },
     "STEP": {
       "label": "Label on the ring pill",
@@ -40,13 +40,13 @@ ArkManifest.define({
       "label": "Main button",
       "kind": "line",
       "section": "Hero",
-      "value": "See how Flux works"
+      "value": "See how DEFXN works"
     },
     "SECONDARY": {
       "label": "Secondary button",
       "kind": "line",
       "section": "Hero",
-      "value": "Run Flux from source"
+      "value": "Run DEFXN from source"
     },
     "QUESTION.RESOLVER": {
       "label": "Question link: resolver",

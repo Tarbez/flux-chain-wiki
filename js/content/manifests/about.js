@@ -96,7 +96,7 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "SEE HOW FLUX WORKS"
+      "value": "EXPLORE THE OPERATING MODEL"
     },
     "STATUS": {
       "label": "Status documentation link",

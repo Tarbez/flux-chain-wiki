@@ -1,0 +1,137 @@
+/* A task owns one stable, softly rounded workspace; long evidence may scroll. */
+#scene .task-page { position:relative; inset:auto; box-sizing:border-box; width:100%; height:100%; max-width:none; margin:0; padding:clamp(18px,3vw,36px); overflow:auto; pointer-events:auto; color:hsl(var(--text)); font:400 16px/1.55 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .task-page [hidden] { display:none !important; }
+#scene .task-page :is(.concept-content,.deploy-content,.account-shell,.mesh-explorer-shell,.economy-preview-shell) { width:100%; max-width:none; margin:0; padding:0; box-sizing:border-box; }
+#scene .task-page h1 { margin:0 0 16px; max-width:25ch; font:500 clamp(28px,3.5vw,44px)/1.1 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.04em; }
+#scene .task-page h2 { font:500 22px/1.2 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .task-page :is(.concept-deck,.mesh-explorer-deck) { margin:0 0 20px; max-width:60ch; font-size:16px; }
+#scene .task-page :is(input,button,select,summary) { min-height:44px; border-radius:5px; }
+#scene .task-page :is(button,input,select,a,summary):focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:3px; }
+#scene .task-page :is(.mechanism-next,[data-explorer-connect],.ark-auth-actions button[data-kind="primary"],.economy-primary) { border:1px solid hsl(var(--primary)); background:hsl(var(--primary) / .1); color:hsl(var(--text-strong)); }
+#scene .task-page :is(.source-step-picker,.deploy-progress) { display:flex; gap:6px; flex-wrap:wrap; margin:16px 0; }
+#scene .task-page :is(.source-step-choice,.deploy-step-choice) { padding:8px 12px; font-size:13px; }
+#scene .task-page :is(.source-step-choice,.deploy-step-choice)[aria-pressed="true"] { color:hsl(var(--text-strong)); border-color:hsl(var(--primary)); background:hsl(var(--primary) / .08); }
+#scene .task-page .concept-principles { border:none; }
+#scene .task-page .concept-principles section { padding:0; border:none; display:block; }
+#scene .task-page .concept-principles section > span { display:none; }
+#scene .task-page .deploy-step { padding:0; border:none; }
+#scene .task-page :is(.source-step-controls,.deploy-workflow-controls) { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
+#scene .task-page :is(.source-step-controls,.deploy-workflow-controls) button { padding:9px 12px; font-size:13px; }
+#scene .task-page .deploy-caveat { margin:16px 0; font-size:14px; padding:10px 12px; border-color:hsl(var(--warning) / .4); }
+#scene .task-page .theory-footer { margin:16px 0 0; }
+#scene .task-page .account-hero { margin-bottom:20px; }
+#scene .task-page .account-layout { grid-template-columns:1fr; padding-top:16px; }
+#scene .task-page .account-live { margin-top:20px; }
+#scene .task-page .account-unsupported { margin-top:16px; }
+#scene .task-page .account-unsupported summary { display:flex; align-items:center; color:hsl(var(--reference)); cursor:pointer; }
+#scene .task-page .mesh-explorer-connect { margin:18px 0; padding:16px 0; gap:24px; }
+#scene .task-page .mesh-explorer-connect h2 { margin-top:0; }
+#scene .task-page .mesh-explorer-metrics { margin-bottom:20px; }
+#scene .task-page .mesh-explorer-reference { margin-top:18px; }
+#scene .task-page .mesh-operator-access summary { display:flex; align-items:center; color:hsl(var(--reference)); cursor:pointer; }
+#scene .task-page[data-connection="live"] .mesh-explorer-status-dot { background:hsl(var(--live)); }
+#scene .task-page[data-connection="error"] .mesh-explorer-status { color:hsl(var(--warning)); }
+#scene .task-page .mesh-explorer-record { border-radius:6px; }
+#scene .task-page .mesh-explorer-detail { border:1px solid hsl(var(--border-default)); border-radius:8px; padding:18px; }
+@media(max-width:620px) {
+ #scene .task-page :is(.source-step-choice,.deploy-step-choice) { font-size:0; width:44px; padding:8px; }
+ #scene .task-page :is(.source-step-choice,.deploy-step-choice)::after { content:attr(data-step-number); font:500 13px var(--mono-font,monospace); }
+ #scene .task-page .mesh-explorer-connect { grid-template-columns:1fr; gap:12px; }
+ #scene .task-page .deploy-expected { font-size:13px !important; }
+ #scene .task-page .deploy-command { padding:34px 12px 14px; }
+ #scene .task-page .mesh-explorer-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+
+#scene .task-page:not(.continuity-host > *) { width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px; border:1px solid hsl(var(--border-default)); border-radius:8px; background:hsl(var(--canvas) / .97); }
+#scene .task-page.economy-preview-page .economy-warning { border-left-color:hsl(var(--warning)); font-size:14px; padding-block:8px; }
+#scene .task-page.economy-preview-page :is(.economy-asset-tabs,.economy-deposit-form,.economy-movement-list,.economy-movement-detail,.economy-deposit-result) { margin-top:18px; }
+#scene .task-page.economy-preview-page .economy-asset-tabs button[aria-pressed="true"] { border-color:hsl(var(--primary)); }
+#scene .task-page.economy-preview-page .economy-asset-code { color:hsl(var(--text-muted)); }
+#scene .task-page.economy-preview-page .economy-page-next { margin-top:20px; }
+#scene .task-page.article-page { display:block; min-height:0; padding:24px; }
+#scene .task-page.article-page :is(.article-header,.article-body) { width:100%; padding:0; max-width:none; }
+#scene .task-page.article-page:not(.has-answer) .article-title { max-width:26ch; font-size:32px; }
+#scene .task-page.article-page .article-topline { margin-bottom:16px; }
+#scene .task-page.article-page:not(.has-answer) .article-core { max-width:65ch; margin:16px 0; }
+#scene .task-page.article-page .article-relevance { font-size:14px; }
+#scene .task-page.article-page .article-contents button { min-height:44px; }
+#scene .task-page.article-page:not(.has-answer) .article-contents { display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
+#scene .task-page.article-page .article-contents .learning-eyebrow { grid-column:1/-1; }
+#scene .task-page.article-page.has-answer .article-title { white-space:normal; overflow:visible; font-size:18px; }
+#scene .task-page.article-page .article-body { border:0; }
+#scene .task-page.article-page .article-section-index { color:hsl(var(--primary)); }
+#scene .task-page.article-page :is(.article-choice[aria-pressed="true"],.article-core-choice[aria-pressed="true"]) { border-color:hsl(var(--primary)); background:hsl(var(--primary) / .08); }
+#scene .task-page.article-page .article-related-actions { display:flex; flex-wrap:wrap; gap:16px; margin:14px 0; }
+#scene .task-page.article-page .article-sources { margin-top:16px; }
+#scene .task-page .learning-index { padding:0; max-width:none; }
+#scene .task-page .learning-list { display:grid; gap:12px; margin:20px 0 0; padding:0; list-style:none; }
+#scene .task-page .learning-entry { border:0; padding:0; }
+#scene .task-page.lab-page .expansion { display:block; margin:0; padding:0; width:100%; background:transparent; }
+#scene .task-page.lab-page .section { padding:0; }
+#scene .task-page.lab-page .section-heading { display:block; margin-bottom:14px; }
+#scene .task-page.lab-page .section-heading > p { display:none; }
+#scene .task-page.lab-page .experiment-stage { height:180px; border-radius:6px; }
+#scene .task-page.lab-page .lab-bottom { padding:16px; gap:20px; }
+#scene .task-page.lab-page .lab-bottom p { font-size:15px; }
+#scene .task-page.lab-page :is(.model-consequence,.model-canonical) { display:block; margin:12px 16px; font-size:14px; line-height:1.5; }
+#scene .task-page.lab-page .model-canonical { min-height:44px; color:hsl(var(--reference)); }
+#scene .task-page.lab-page .rhythm-bar { height:auto; width:auto; padding:12px 10px; margin:0; opacity:.4; background:transparent; border:1px solid hsl(var(--border-default)); color:hsl(var(--text)); border-radius:5px; font:500 12px var(--font-sans,"Albert Sans",sans-serif); }
+#scene .task-page.lab-page .rhythm-bar[data-reached="true"] { opacity:1; }
+#scene .task-page.lab-page .rhythm-bar[data-selected="true"] { border-color:hsl(var(--primary)); background:hsl(var(--primary) / .08); }
+#scene .task-page.lab-page .lab[data-mode="rhythm"] .specimen { gap:8px; }
+#scene .task-page.lab-page .depth-plane { border-radius:6px; transform:translate(calc(var(--layer)*var(--depth)*.7px),calc(var(--layer)*var(--depth)*-.35px)); }
+@media(max-width:620px){
+ #scene .task-page.article-page { padding:18px; }
+ #scene .task-page.article-page:not(.has-answer) .article-contents { grid-template-columns:1fr; }
+ #scene .task-page.article-page:not(.has-answer) .article-title { font-size:28px; }
+ #scene .task-page.article-page:not(.has-answer) .article-choice { font-size:16px; min-height:44px; padding:9px 0; }
+ #scene .task-page.lab-page .lab-bottom { padding:12px; gap:12px; }
+ #scene .task-page.lab-page .lab[data-mode="rhythm"] .specimen { flex-wrap:wrap; justify-content:center; padding:18px; }
+}
+
+#scene .task-page.lab-page .section-heading h1 { margin:8px 0 12px; }
+#scene .task-page.lab-page .section-heading .eyebrow { margin:0; }
+#scene .task-page.lab-page .model-status { margin:0; }
+#scene .task-page.lab-page .study-description summary { display:flex; align-items:center; color:hsl(var(--reference)); cursor:pointer; font-size:14px; }
+#scene .task-page.lab-page .study-description h3 { font-size:18px; }
+#scene .task-page.lab-page .lab-bottom { grid-template-columns:minmax(0,1fr) minmax(260px,.65fr); }
+@media(max-width:620px){#scene .task-page.lab-page .experiment-stage {height:140px;} #scene .task-page.lab-page .section-heading h1 {font-size:28px;} }
+
+@media(max-width:620px){#scene .task-page.lab-page .lab-bottom {grid-template-columns:1fr;}}
+
+@media(min-width:901px){
+ #scene .task-page h1 {max-width:40ch;}
+ #scene .task-page .learning-eyebrow {margin:0 0 10px;}
+ #scene .task-page .procedure-help {margin:12px 0;}
+ #scene .task-page .procedure-help summary {display:flex;align-items:center;color:hsl(var(--reference));cursor:pointer;font-size:14px;}
+}
+
+@media(min-width:901px){
+ #scene .task-page.deploy-page .concept-deck {max-width:78ch;margin-bottom:12px;line-height:1.5;}
+ #scene .task-page.deploy-page .deploy-steps {border:0;margin-top:0;}
+ #scene .task-page.deploy-page .deploy-step {grid-template-columns:1fr;gap:0;}
+ #scene .task-page.deploy-page .deploy-step-num {display:none;}
+ #scene .task-page.deploy-page .deploy-step-body {display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:8px 24px;align-items:start;}
+ #scene .task-page.deploy-page .deploy-step-body h2 {grid-column:1;margin:0;font-size:22px;}
+ #scene .task-page.deploy-page .deploy-step-body > p:not(.deploy-expected) {grid-column:1;margin:0;line-height:1.5;}
+ #scene .task-page.deploy-page .deploy-command {grid-column:2;grid-row:1/3;padding:54px 16px 16px;border-radius:6px;}
+ #scene .task-page.deploy-page .deploy-command::before {top:20px;}
+ #scene .task-page.deploy-page .deploy-copy-feedback {grid-column:2;min-height:0;font-size:13px;}
+ #scene .task-page.deploy-page .deploy-expected {grid-column:2;margin:0;font-size:14px;line-height:1.5;}
+ #scene .task-page.deploy-page .deploy-position {margin:12px 0 4px;font-size:13px;color:hsl(var(--text-muted));}
+ #scene .task-page.deploy-page .deploy-workflow-controls {margin-top:8px;}
+ #scene .task-page.mesh-explorer-page .mesh-explorer-header {padding-bottom:12px;}
+ #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect {grid-template-columns:1fr;margin:8px 0;padding:8px 0;}
+ #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect > div:first-child {display:none;}
+ #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect-actions {display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+ #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-metrics > div {padding-block:10px;gap:4px;}
+ #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-deck {max-width:82ch;margin-bottom:12px;}
+ #scene .task-page.mesh-explorer-page .mesh-explorer-section-head h2 {font-size:24px;}
+ #scene .task-page.mesh-explorer-page .mesh-explorer-boundary {font-size:14px;line-height:1.5;margin-bottom:12px;}
+}
+#scene .task-page .mesh-explorer-records {gap:8px;border:0;}
+#scene .task-page .mesh-record-box {border:1px solid hsl(var(--border-default));border-radius:6px;background:hsl(var(--surface) / .45);overflow:hidden;}
+#scene .task-page .mesh-record-box > .mesh-explorer-record {border:0 !important;border-radius:inherit !important;padding:14px;}
+#scene .task-page .mesh-record-box.mesh-explorer-detail {padding:18px;border-radius:6px;}
+#scene .task-page .mesh-explorer-detail .mesh-explorer-back {margin-bottom:16px;}
+#scene .task-page .mesh-explorer-detail h3 {margin-bottom:16px;}

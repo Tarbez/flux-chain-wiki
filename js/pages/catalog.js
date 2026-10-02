@@ -17,8 +17,8 @@ ArkUI.pageCatalog = {
   zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home.js'] },
   resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
   references: { path: '/start-from-something-real', title: arkSeoTitle('references', 'Start from something real'), seoId: 'references', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
-  deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How Flux works'), seoId: 'deployment', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
-  explorer: { path: '/explorer', title: arkSeoTitle('explorer', 'Mesh Explorer'), seoId: 'explorer', module: 'explorer', scripts: ['js/pages/explorer.js'] },
+  deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How Flux works'), seoId: 'deployment', module: 'deployment', scripts: ['js/pages/deployment.js'] },
+  explorer: { path: '/explore', title: arkSeoTitle('explorer', 'Mesh Explorer'), seoId: 'explorer', module: 'explorer', scripts: ['js/pages/explorer.js'] },
   account: { path: '/account', title: arkSeoTitle('account', 'Your account'), seoId: 'account', module: 'account', scripts: ['js/admin/auth.js', 'js/pages/account.js'] },
   treasury: { path: '/treasury', title: arkSeoTitle('treasury', 'Treasury preview'), seoId: 'treasury', module: 'economyPreview', scripts: ['js/pages/economy-preview.js'] },
   deposits: { path: '/deposits', title: arkSeoTitle('deposits', 'Deposit preview'), seoId: 'deposits', module: 'economyPreview', scripts: ['js/pages/economy-preview.js'] },
@@ -27,8 +27,8 @@ ArkUI.pageCatalog = {
   learnings: { path: '/learnings', title: arkSeoTitle('learnings', 'Notes'), seoId: 'learnings', module: 'learnings', scripts: ['js/resolvers/learnings.js', 'js/pages/learnings.js'] },
   about: { path: '/about', title: arkSeoTitle('about', 'Protocol overview'), seoId: 'about', module: 'about', scripts: ['js/pages/sheet.js', 'js/pages/about.js'] },
   concept: { path: '/concept', title: arkSeoTitle('concept', 'The Flux spec'), seoId: 'concept', module: 'concept', scripts: ['js/pages/concept.js'] },
-  download: { path: '/download', title: arkSeoTitle('download', 'Run Flux from source'), seoId: 'download', module: 'download', scripts: ['js/pages/sheet.js', 'js/pages/download.js'] },
-  deploy: { path: '/deploy', title: arkSeoTitle('deploy', 'Create or join a network'), seoId: 'deploy', module: 'deploy', scripts: ['js/pages/deploy.js'] },
+  download: { path: '/download', title: arkSeoTitle('download', 'Run Flux from source'), seoId: 'download', module: 'download', scripts: ['js/ark/procedure-state.js', 'js/pages/sheet.js', 'js/pages/download.js'] },
+  deploy: { path: '/deploy', title: arkSeoTitle('deploy', 'Create or join a network'), seoId: 'deploy', module: 'deploy', scripts: ['js/ark/procedure-state.js', 'js/pages/deploy.js'] },
   dao: { path: '/dao', title: arkSeoTitle('dao', 'Governance'), seoId: 'dao', module: 'dao', scripts: ['js/pages/sheet.js', 'js/pages/dao.js'] }
 };
 ArkUI.pageCatalog.lifecycle = {
@@ -52,3 +52,5 @@ if (typeof ArkManifest !== 'undefined') ArkManifest.group('theory').forEach(func
   var label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
   ArkUI.pageCatalog['concept/' + m.id] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, module: 'theory', scripts: ['js/pages/sheet.js', 'js/pages/theory.js'] };
 });
+
+ArkUI.pageCatalog.reference = { path:'/reference', title:'Canonical reference — Flux Protocol', module:'reference', hiddenFromNavigation:true, scripts:['js/content/reference-text.js','js/pages/reference.js'] };

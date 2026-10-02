@@ -20,7 +20,7 @@
     return item;
   }
   function buildBase(page, title, deck) {
-    var root = node('section', 'ark-page learning-page economy-preview-page ' + page + '-preview-page');
+    var root = node('section', 'ark-page task-page economy-preview-page ' + page + '-preview-page');
     root.dataset.arkPage = page;
     root.setAttribute('aria-labelledby', page + '-preview-title');
     var shell = node('div', 'economy-preview-shell');

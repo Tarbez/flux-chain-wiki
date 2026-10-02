@@ -1,8 +1,12 @@
 # Flux: guided knowledge, visual storytelling, and redesign batches
 
-Date: 2026-10-02 · Status: proposed direction and batch plan, awaiting user review. This document does not implement the redesign or start an implementation goal.
+Date: 2026-10-02 · Status: direction approved by the user; implementation active in the renamed `defxn` project. The full audit remains the goal; partial batch progress is recorded below.
 
-**Review sequence:** read this audit → confirm or revise the direction → set the implementation goal. The latest continuity requirement is part of the proposed foundation, not an optional animation polish batch.
+**Authorization:** the user set the implementation goal and explicitly confirmed “Approved — implement the audit.” The latest continuity requirement is part of the proposed foundation, not an optional animation polish batch.
+
+**Execution order — updated by the user:** focus on desktop first (1440 × 900, then 1280 × 800 and short desktop). Mobile refinement and its full verification matrix come at the end. Use native inline SVG icons with the existing semantic colors and one consistent stroke/grid; retain text labels and accessible names. Icons help distinguish navigation, models, references, and operator actions; they do not imply successful verification.
+
+**Home approval gate — latest user direction:** finish and present the desktop Home page, including visible hover and keyboard states, before further redesign of the other pages. The user must confirm Home’s direction before work resumes on those pages. Existing inner-page changes are provisional; the full audit remains active. Mobile comes last.
 
 ## Goal and intended experience
 
@@ -305,4 +309,22 @@ Acceptance questions:
 
 **Proposed first implementation slice, after review:** repair the shared navigation blockers in B0, then prove **Home agreement-cycle panel → lifecycle dashboard → one child stage → Context/Evidence → Back to the same compact panel**, across the relevant B0/B1/B3 pieces. This tests the user's defining continuity requirement before propagating the frame system across 31 pages. Then complete the Resolver → How it works explanation path and Explorer/Account state gating, followed by the remaining batches.
 
-**Current handoff:** the audit and batch plan are ready for the user to read. Confirm or revise the goal, persistent-box behavior, color/shape meanings, information budget, and first slice before setting the implementation goal. No redesign batch is authorized to begin by this document alone.
+**Current handoff:** the user approved the direction and implementation is active. The original audit findings above describe the pre-implementation state. Progress and remaining verification are recorded below. Desktop is now the first review target; mobile is the final pass.
+
+
+## Implementation progress — 2026-10-02
+
+**Current checkpoint: desktop Home, awaiting the user’s confirmation.** The implementation is not complete. Further inner-page redesign is gated on Home approval.
+
+- **Home:** editorial headline, concise intro with capability limits, primary explanation action and secondary source action; a softly rounded agreement panel contains a measured crop of the original dense canvas mesh and five labeled records. Hover and keyboard focus trace the path and emphasize the next action. The chosen panel itself expands; fixed-size inner wrappers prevent text reflow during the morph. Reverse return restores the panel and its entry focus.
+- **Desktop measurements:** Home has no document or page overflow at 1440 × 900, 1280 × 800, 1280 × 720, and 1024 × 768. Both principal actions and the full status rail fit. All five labels fit their allocated widths. Visual evidence and state measurements are in `design-audit-2026-10-02/home-review/`.
+- **Foundation, provisional:** content-safe navigation/sublevels, native SVG icons, retained dashboard host, query restoration, canonical reference reader with exact generated source bytes, and destination loading before handoff are implemented. Regression tests cover selected-object identity, opaque outer geometry, reverse focus, interruption, and reader/source safety.
+- **Inner pages, provisional:** explanation/mechanism/lifecycle families, operator prerequisite gating, local identity scope, bounded Explorer reads and exact-record box continuity, procedure steps, notes/article depth, models, and economy preview styling have implementation changes. They still need full visual/state validation after Home’s direction is confirmed. They are not accepted final designs.
+- **Remaining:** Home confirmation; propagate the confirmed visual and motion direction; complete B0–B7 route/state, theme, keyboard, error, pause, reduced-motion, and accessibility verification; perform the final mobile pass. Live Auth Kit/Miner success has not been exercised in the browser; fixtures remain test-only. No transaction or publication was performed.
+
+
+## Lifecycle checkpoint — explicit follow-up authorization
+
+The user subsequently requested `/lifecycle/` and all five inner pages, authorizing this desktop slice. The overview, Intent, Offer, Agreement, Fulfillment, and Receipt now share an answer-first soft dashboard, dense mesh stage previews, optional one-fact context, evidence/return navigation, and the retained continuous panel. The earlier Home approval gate does not block this explicitly requested slice.
+
+All six default and initial Context views fit 1280 × 720; overview and Agreement were reviewed at 1440 × 900. Regression checks pass. Review evidence and limitations: [Lifecycle review](design-audit-2026-10-02/lifecycle-review/README.md). Mobile and the remaining audit batches are still outstanding.

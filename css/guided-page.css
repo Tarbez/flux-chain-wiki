@@ -1,0 +1,46 @@
+#scene .guided-page { position:relative; inset:auto; box-sizing:border-box; width:100%; height:100%; margin:0; padding:clamp(18px,3vw,40px); display:flex; flex-direction:column; gap:16px; overflow:auto; pointer-events:auto; color:hsl(var(--text)); font:400 16px/1.6 var(--font-sans,"Albert Sans",sans-serif); }
+.guided-page .content-layer-path { margin:0; }
+#scene .guided-page h1 { max-width:22ch; margin:0; font:500 clamp(28px,3.6vw,48px)/1.08 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.04em; color:hsl(var(--text-strong)); }
+.guided-body { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(180px,.7fr); gap:32px; flex:1 0 auto; }
+.guided-answer p { max-width:55ch; margin:12px 0; }
+.guided-diagram { align-self:start; margin:0; padding:16px; border:1px solid hsl(var(--border-subtle)); border-radius:6px; background:radial-gradient(hsl(var(--text-faint) / .24) .7px,transparent .8px) 0 0 / 12px 12px; }
+.guided-diagram figcaption { margin-bottom:14px; font:500 10px/1.5 var(--mono-font,monospace); color:hsl(var(--text-muted)); }
+.guided-diagram .story-record { margin-left:0; }
+.guided-step-picker { display:flex; flex-wrap:wrap; gap:6px; }
+.guided-step-picker button { min-height:44px; padding:9px 12px; border:1px solid hsl(var(--border-default)); border-radius:5px; background:transparent; color:hsl(var(--text-muted)); font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif); cursor:pointer; }
+.guided-step-picker button[aria-pressed="true"] { color:hsl(var(--text-strong)); border-color:hsl(var(--primary)); background:hsl(var(--primary) / .08); }
+.guided-page :is(a,button):focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:3px; }
+#scene .guided-page .lifecycle-boundary p { font-size:14px; }
+@media(max-width:620px),(max-height:650px) { .guided-body { grid-template-columns:1fr; } .guided-diagram { display:none; } #scene .guided-page { gap:12px; } }
+
+/* Topic indices remain a measured source surface before expansion. */
+#scene .guided-page:not(.continuity-host > *) { width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px; border:1px solid hsl(var(--border-default)); border-radius:8px; background:hsl(var(--canvas) / .97); }
+#scene .guided-page p,#scene .reference-page p,#scene .reference-page li { color:hsl(var(--text)); }
+#scene .guided-page .mechanism-inner-answer h2,#scene .guided-page .content-layer-reference h2 { margin:16px 0 8px; font:500 20px/1.25 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-strong)); }
+.story-index-answer { max-width:60ch; margin:0; }
+.story-topic-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; flex:1; align-content:start; }
+.story-topic { position:relative; display:flex; flex-direction:column; gap:20px; padding:18px; min-height:180px; border:1px solid hsl(var(--border-default)); border-radius:8px; background:radial-gradient(hsl(var(--text-faint) / .2) .7px,transparent .8px) 0 0 / 14px 14px; }
+.story-index-number { font:500 11px var(--mono-font,monospace); color:hsl(var(--primary)); }
+#scene .story-topic > a { font:500 22px/1.2 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-strong)); text-decoration:none; }
+.story-topic > a::after { content:""; position:absolute; inset:0; border-radius:inherit; }
+.story-topic:focus-within,.story-topic:hover { border-color:hsl(var(--primary)); background-color:hsl(var(--primary) / .06); }
+.story-topic-purpose { margin-top:auto; font-size:13px; color:hsl(var(--text-muted)); }
+.mechanism-relationship .story-record { margin-left:0; }
+.purpose-page .mechanism-relationship .story-record::before,.dao-page .mechanism-relationship .story-record::before,.about-page .mechanism-relationship .story-record::before { content:none; }
+#scene .continuity-host.story-topic { display:block; gap:0; min-height:0; }
+@media(max-width:620px) { .story-topic-grid { grid-template-columns:1fr; } .story-topic { min-height:96px; gap:10px; padding:14px; } #scene .story-topic > a { font-size:18px; } }
+
+@media(max-width:620px) { .story-index > .story-depth { display:grid; grid-template-columns:1fr 1fr; } .story-topic { gap:8px; min-height:84px; } .story-topic-purpose { font-size:12px; } }
+/* Reading surfaces own their frame; the decorative mesh is not a turn control. */
+
+
+/* The primary decision fits the desktop frame; long requested context may scroll. */
+@media(min-width:901px){
+ #scene .guided-page {padding:32px;gap:12px;}
+ #scene .guided-page h1 {max-width:38ch;font-size:44px;}
+ #scene .guided-page > .story-kicker {display:none;}
+ #scene .guided-page .lifecycle-boundary {margin:0;max-width:none;}
+ #scene .guided-page .guided-diagram {padding:14px;}
+ #scene .guided-page .guided-diagram figcaption {margin-bottom:10px;}
+ #scene .guided-page .guided-diagram .story-record {padding:8px 10px;margin-top:6px;}
+}

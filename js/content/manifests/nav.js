@@ -22,7 +22,7 @@ ArkManifest.define({
       "label": "Header link: run Flux",
       "kind": "line",
       "section": "Header links",
-      "value": "Run Flux"
+      "value": "Run DEFXN"
     },
     "MESH": {
       "label": "Header link: mesh explorer",
@@ -94,13 +94,13 @@ ArkManifest.define({
       "label": "Header link: download",
       "kind": "line",
       "section": "Header links",
-      "value": "Run Flux"
+      "value": "Run DEFXN"
     },
     "BRAND.NAME": {
       "label": "Wordmark",
       "kind": "line",
       "section": "Brand",
-      "value": "Flux Protocol"
+      "value": "DEFXN"
     },
     "BRAND.TAGLINE": {
       "label": "Line under the wordmark",
@@ -130,7 +130,7 @@ ArkManifest.define({
       "label": "Back to the theory",
       "kind": "line",
       "section": "Back button",
-      "value": "THE SPEC"
+      "value": "OPERATING MODEL"
     }
   }
 });

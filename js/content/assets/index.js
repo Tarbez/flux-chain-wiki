@@ -4,5 +4,5 @@
 var ArkAssetIds = ["iceberg-blocks"];
 ArkAssetIds.forEach(function (id) {
   if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;
-  document.write('<script src="js/content/assets/' + id + '.js" defer><\/script>');
+  document.write('<script src="js/content/assets/' + id + '.js' + ArkManifestSearch + '" defer><\/script>');
 });

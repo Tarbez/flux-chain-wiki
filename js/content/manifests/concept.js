@@ -22,7 +22,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Start with one question: what your network shares, how an agreement closes, or who can approve a change. Open a mechanism to explore its steps, current limits, and source evidence."
+      "value": "Choose what your network shares, how an agreement closes, or who may approve a change. Each question opens its explanation, limits, and source evidence."
     },
     "ICEBERG": {
       "label": "Iceberg description (for screen readers)",

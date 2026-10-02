@@ -21,7 +21,7 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "What can the current benchmark evidence support?"
+      "value": "What is actually measured?"
     },
     "DECK": {
       "label": "Intro",
@@ -135,7 +135,7 @@ ArkManifest.define({
       "label": "Link back to the theory (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "THE SPEC"
+      "value": "OPERATING MODEL"
     }
   }
 });

@@ -9,8 +9,9 @@
 :root[data-theme]:not([data-theme="original"]) #scene { background:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) .hero-atmosphere { background:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) :is(.learning-page,.expansion,.article-body,.article-playground) { color:hsl(var(--text)); }
-:root[data-theme]:not([data-theme="original"]) #scene :is(h1,h2,h3,a,button):not(.home-primary-cta):not(.mechanism-next):not(.economy-primary):not([data-explorer-connect]):not(.mesh-explorer-controls form button):not(.account-page .ark-auth-actions button[data-kind="primary"]) { color:hsl(var(--text-strong)) !important; }
-:root[data-theme]:not([data-theme="original"]) #scene :is(p,small,.ark-studio-label,.learning-duration,.learning-number) { color:hsl(var(--text-muted)); }
+/* Route components own action, reference and caution colors. Theme switching
+   supplies their semantic values rather than overriding every link/button. */
+:root[data-theme]:not([data-theme="original"]) #scene .learning-page :is(h1,h2,h3) { color:hsl(var(--text-strong)); }
 
 /* Atmosphere follows the same semantic palette as the page and settings. */
 :root:not([data-theme]),:root[data-theme="original"] {
