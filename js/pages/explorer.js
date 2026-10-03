@@ -227,12 +227,14 @@
       if(selectedBox)animateBox(selectedBox,before);
       detail.querySelector('h3').tabIndex = -1; detail.querySelector('h3').focus({ preventScroll: true });
     }
+    /* The scope each listed record was read under, so inspecting it asks the same question. */
+    var recordScopes = {};
     async function inspect(id, origin) {
       var selected = source.value, token=generation, requestedDetail=++detailRequest;
       if (!selected || !id) return;
       resultMessage.textContent = 'Inspecting record…';
       try {
-        var payload = await request('/explorer/v1/record', { sourceId: selected, recordId: id });
+        var payload = await request('/explorer/v1/record', { sourceId: selected, recordId: id, scope: recordScopes[id] });
         if (token!==generation||requestedDetail!==detailRequest||source.value!==selected||!connected || !page.isConnected) return;
         if(!payload.data.record || payload.data.record.id!==id || payload.data.record.sourceId!==selected) throw new Error('The Miner returned a different record or source. The requested record is not displayed.');
         renderDetail(payload, origin); resultMessage.textContent = '';
@@ -243,10 +245,18 @@
       if (!selected || !sourceAllowsQuery(sources.find(function (item) { return item.id === selected; }))) return;
       var token = generation;
       try {
-        var payload = await request('/explorer/v1/query', { sourceId: selected, limit: 20 });
+        var scopes = await scopesFor(selected), payload = null, list = [];
+        lastCursor = null;
+        for (var s = 0; s < scopes.length && list.length < 20; s++) {
+          payload = await request('/explorer/v1/query', { sourceId: selected, scope: scopes[s], limit: 20 });
+          if (token !== generation || source.value !== selected || !page.isConnected) return;
+          var got = Array.isArray(payload.data.records) ? payload.data.records : [];
+          got.forEach(function (record) { recordScopes[record.id] = scopes[s]; });
+          list = list.concat(got);
+          lastCursor = lastCursor || payload.data.page && payload.data.page.nextCursor || null;
+        }
         if (token !== generation || source.value !== selected || !page.isConnected) return;
-        var list = Array.isArray(payload.data.records) ? payload.data.records.slice(0,20) : [];
-        lastCursor = payload.data.page && payload.data.page.nextCursor || null;
+        list = list.slice(0,20); payload = payload || { partial: false };
         if(page.dataset.recordView!=='detail'){
         records.replaceChildren();detail.replaceChildren();detail.hidden=true;records.hidden=false;
         list.forEach(function (record) {
@@ -276,11 +286,29 @@
         topology.appendChild(list);
       } catch (error) { if (page.isConnected) topology.textContent = errorText(error); }
     }
+    /* Miner records live under their network, and an unscoped query reads only the default network.
+       So the scopes come from the node's own network list, never from a name written here. */
+    async function minerScopes() {
+      var payload = await request('/explorer/v1/query', { sourceId: 'networks', limit: COUNT_PAGE });
+      var list = Array.isArray(payload.data.records) ? payload.data.records : [];
+      return list.map(function (record) { return record.fields && record.fields.networkId || record.id; })
+        .filter(Boolean).map(function (networkId) { return { networkId: networkId }; });
+    }
+    async function scopesFor(id) { return id === 'miners' ? minerScopes() : [undefined]; }
     /* A source's size, counted by following its own cursor pages. Reports N+ when the cap stops the walk. */
     async function countSource(id, token) {
+      var scopes = await scopesFor(id), total = 0, capped = false;
+      for (var s = 0; s < scopes.length; s++) {
+        var part = await countScoped(id, scopes[s], token);
+        if (!part) return null;
+        total += part.count; capped = capped || part.capped;
+      }
+      return { count: total, capped: capped };
+    }
+    async function countScoped(id, scope, token) {
       var total = 0, cursor = '';
       for (var i = 0; i < COUNT_PAGES; i++) {
-        var payload = await request('/explorer/v1/query', { sourceId: id, limit: COUNT_PAGE, cursor: cursor || undefined });
+        var payload = await request('/explorer/v1/query', { sourceId: id, scope: scope, limit: COUNT_PAGE, cursor: cursor || undefined });
         if (token !== generation || !page.isConnected) return null;
         var got = Array.isArray(payload.data.records) ? payload.data.records.length : 0;
         total += got;
