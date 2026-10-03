@@ -245,7 +245,7 @@
       if (!selected || !sourceAllowsQuery(sources.find(function (item) { return item.id === selected; }))) return;
       var token = generation;
       try {
-        var scopes = await scopesFor(selected), payload = null, list = [];
+        var scopes = selected === 'miners' ? await minerScopes() : [undefined], payload = null, list = [];
         lastCursor = null;
         for (var s = 0; s < scopes.length && list.length < 20; s++) {
           payload = await request('/explorer/v1/query', { sourceId: selected, scope: scopes[s], limit: 20 });
@@ -294,23 +294,15 @@
       return list.map(function (record) { return record.fields && record.fields.networkId || record.id; })
         .filter(Boolean).map(function (networkId) { return { networkId: networkId }; });
     }
-    async function scopesFor(id) { return id === 'miners' ? minerScopes() : [undefined]; }
-    /* A source's size, counted by following its own cursor pages. Reports N+ when the cap stops the walk. */
-    async function countSource(id, token) {
-      var scopes = await scopesFor(id), total = 0, capped = false;
-      for (var s = 0; s < scopes.length; s++) {
-        var part = await countScoped(id, scopes[s], token);
-        if (!part) return null;
-        total += part.count; capped = capped || part.capped;
-      }
-      return { count: total, capped: capped };
-    }
-    async function countScoped(id, scope, token) {
+    /* A source's size, counted by following its own cursor pages. Reports N+ when the cap stops the walk.
+       `each` sees every record on the way, so a second figure can come out of the same walk. */
+    async function countSource(id, token, each) {
       var total = 0, cursor = '';
       for (var i = 0; i < COUNT_PAGES; i++) {
-        var payload = await request('/explorer/v1/query', { sourceId: id, scope: scope, limit: COUNT_PAGE, cursor: cursor || undefined });
+        var payload = await request('/explorer/v1/query', { sourceId: id, limit: COUNT_PAGE, cursor: cursor || undefined });
         if (token !== generation || !page.isConnected) return null;
-        var got = Array.isArray(payload.data.records) ? payload.data.records.length : 0;
+        var list = Array.isArray(payload.data.records) ? payload.data.records : [], got = list.length;
+        if (each) list.forEach(each);
         total += got;
         cursor = payload.data.page && payload.data.page.nextCursor || '';
         if (!cursor || !got) return { count: total, capped: false };
@@ -327,8 +319,19 @@
       var started = Date.now();
       var cards = [];
       var counted = COUNTED.filter(function (entry) { return sourceAllowsQuery(sources.find(function (item) { return item.id === entry[0]; })); });
+      /* Each network record already carries its own miner count, so one query answers both cards.
+         Asking per network instead cost one more round trip per network, one after another. */
+      var miners = 0;
+      var networks = countSource('networks', token, function (record) {
+        var raw = record.fields && record.fields.sourceRecord || {};
+        miners += Number(raw.activeMinerCount != null ? raw.activeMinerCount : raw.minerCount) || 0;
+      });
+      networks.catch(function () {});
       var results = await Promise.all(counted.map(function (entry) {
-        return countSource(entry[0], token).catch(function () { return undefined; });
+        var pending = entry[0] === 'networks' ? networks
+          : entry[0] === 'miners' ? networks.then(function (walk) { return walk && { count: miners, capped: walk.capped }; })
+          : countSource(entry[0], token);
+        return pending.catch(function () { return undefined; });
       }));
       if (token !== generation || !page.isConnected) return;
       counted.forEach(function (entry, index) {
