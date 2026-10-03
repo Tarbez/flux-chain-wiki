@@ -278,9 +278,20 @@
       recordId.placeholder = kind === 'public' || kind === 'exact' ? 'Paste a ' + safeString(item.label || item.id) + ' record ID' : 'No record lookup for this source';
       recordId.disabled = kind === 'excluded'; lookup.querySelector('button').disabled = kind === 'excluded';
     }
-    function showInspect(text, state) {
+    function showInspect(text, state, action) {
       inspectResult.replaceChildren(); inspectResult.hidden = !text; inspectResult.dataset.state = state || '';
       if (text) inspectResult.appendChild(node('p', '', text));
+      if (action) {
+        var retry = node('button', 'mesh-inspect-retry', action.label); retry.type = 'button';
+        retry.addEventListener('click', action.run); inspectResult.appendChild(retry);
+      }
+    }
+    /* A record can live on one node and not another, so a miss offers the same lookup on the other node. */
+    async function retryOnOther(sourceId, id) {
+      originSelect.value = originSelect.value === 'local' ? 'public' : 'local';
+      await start();
+      if (!connected || !sources.some(function (item) { return item.id === sourceId; })) return;
+      chooseSource(sourceId, false); recordId.value = id; inspect(id);
     }
     function renderInspectRecord(payload) {
       var data = payload.data, record = data.record;
@@ -469,7 +480,11 @@
         if (inline) renderInspectRecord(payload); else { renderDetail(payload, origin); resultMessage.textContent = ''; }
       } catch (error) {
         if (token===generation&&requestedDetail===detailRequest&&page.isConnected) {
-          if (inline) showInspect(errorText(error), 'error'); else resultMessage.textContent = errorText(error);
+          if (inline) {
+            var other = originSelect.value === 'local' ? 'public mesh' : 'local Miner';
+            showInspect(errorText(error) + ' Asked the ' + originName() + ', source ' + selected + '.', 'error',
+              { label: 'Try the ' + other, run: function () { retryOnOther(selected, id); } });
+          } else resultMessage.textContent = errorText(error);
         }
       }
     }

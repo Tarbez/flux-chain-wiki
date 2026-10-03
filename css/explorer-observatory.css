@@ -428,3 +428,5 @@
 #scene .mesh-inspect-result dt {color:hsl(var(--text-faint));}
 #scene .mesh-inspect-result dd {color:hsl(var(--text-strong));}
 #scene .mesh-source-inspector > h2 {margin-bottom:8px;}
+#scene .mesh-inspect-retry {margin-top:8px;min-height:28px !important;padding:3px 10px !important;border:1px solid hsl(var(--reference));border-radius:999px;background:transparent;color:hsl(var(--reference));font:500 10px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
+#scene .mesh-inspect-result[data-state="error"] .mesh-inspect-retry {color:hsl(var(--reference));}
