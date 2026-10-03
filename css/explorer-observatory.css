@@ -338,3 +338,50 @@
 @media(prefers-reduced-motion:reduce) {
   #scene .mesh-explorer-page * {scroll-behavior:auto !important;transition:none !important;animation:none !important;}
 }
+
+/* Compact masthead: title, live status and connection controls share at most 150px on desktop. */
+@media(min-width:821px) {
+  #scene .mesh-explorer-page .mesh-explorer-shell {padding-top:10px;}
+  #scene .mesh-explorer-header {grid-template-columns:minmax(0,1fr) minmax(430px,560px);gap:20px;align-items:center;min-height:0;padding:0 0 6px;}
+  #scene .mesh-explorer-header .learning-eyebrow {margin:0 0 2px;font-size:8px;}
+  #scene .mesh-explorer-header h1 {margin:0;font-size:clamp(22px,2vw,28px);line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #scene .mesh-explorer-deck {display:none;}
+  #scene .mesh-explorer-live-panel {display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-status {min-height:0;padding:5px 10px;gap:9px;border-radius:5px 5px 0 0;}
+  #scene .mesh-explorer-status strong {font-size:11px;line-height:1.2;}
+  #scene .mesh-explorer-status > div {gap:0;grid-template-columns:auto minmax(0,1fr);align-items:baseline;column-gap:10px;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {grid-template-columns:repeat(4,minmax(0,1fr));border-radius:0 0 5px 5px;border-top:0;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div,
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div:nth-child(3) {display:grid;gap:1px;padding:4px 8px;border-top:0;border-right:1px solid hsl(var(--border-subtle));}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div:last-child {border-right:0;}
+  #scene .mesh-explorer-metrics span {font-size:6.5px;}
+  #scene .mesh-explorer-metrics strong {overflow:hidden;text-overflow:ellipsis;font-size:10px;}
+  #scene .mesh-explorer-connect,#scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect {padding:5px 0;}
+  #scene .mesh-explorer-connect-actions {gap:8px;}
+  #scene .mesh-explorer-connect-actions > label {display:flex;align-items:center;gap:8px;flex:0 1 380px;}
+  #scene .mesh-explorer-connect-actions > label select {flex:1 1 auto;min-height:30px;margin:0;padding:4px 9px;font-size:11px;}
+  #scene .mesh-explorer-buttons button,#scene .mesh-operator-access > summary {min-height:30px;padding-block:3px;}
+}
+@media(min-width:1100px) {
+  #scene .mesh-explorer-header {grid-template-columns:minmax(300px,1fr) minmax(0,780px);}
+  #scene .mesh-explorer-live-panel {grid-template-columns:minmax(0,1.15fr) minmax(0,1.5fr);grid-template-rows:auto;height:44px;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-status {display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;height:100%;box-sizing:border-box;border-radius:5px 0 0 5px;overflow:hidden;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-status > div {display:grid;gap:1px;grid-template-columns:minmax(0,1fr);}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {height:100%;box-sizing:border-box;border:1px solid hsl(var(--border-default));border-left:0;border-radius:0 5px 5px 0;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div:nth-child(1),
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div:nth-child(4) {display:none;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(min-width:1100px) {
+  #scene .mesh-explorer-live-panel {overflow:hidden;align-self:center;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div,
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div:nth-child(3) {align-content:center;padding:2px 8px;min-height:0;}
+}
+@media(min-width:1100px) {
+  #scene .mesh-explorer-live-panel {height:auto;min-height:44px;overflow:visible;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {height:auto;}
+}
+@media(min-width:821px) {
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {margin:0 !important;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div {padding:3px 8px !important;}
+}
