@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 class Element{
  constructor(tag='div'){this.tagName=tag;this.children=[];this.dataset={};this.attrs={};this.listeners={};this.selectors={};this.isConnected=true;this.value='';this.hidden=false;}
- appendChild(el){this.children.push(el);return el;}replaceChildren(...els){this.children=els;}setAttribute(k,v){this.attrs[k]=v;}removeAttribute(k){delete this.attrs[k];}addEventListener(k,fn){this.listeners[k]=fn;}querySelector(s){return this.selectors[s]||(this.selectors[s]=new Element());}focus(){this.focused=true;}blur(){}get textContent(){return this._text||'';}set textContent(v){this._text=v;this.children=[];}
+ appendChild(el){this.children.push(el);return el;}replaceChildren(...els){this.children=els;}setAttribute(k,v){this.attrs[k]=v;}removeAttribute(k){delete this.attrs[k];}addEventListener(k,fn){this.listeners[k]=fn;}querySelector(s){return this.selectors[s]||(this.selectors[s]=new Element());}querySelectorAll(){return [];}focus(){this.focused=true;}blur(){}get textContent(){return this._text||'';}set textContent(v){this._text=v;this.children=[];}
 }
 const document={createElement:t=>new Element(t),visibilityState:'visible'};
 const window={setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){}};
