@@ -385,3 +385,25 @@
   #scene .mesh-explorer-live-panel .mesh-explorer-metrics {margin:0 !important;}
   #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div {padding:3px 8px !important;}
 }
+
+/* Source field: category cards drill into one category's sources in place. */
+#scene .mesh-source-field {grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important;gap:8px;align-content:start;}
+#scene .mesh-source-field[data-view="cells"] {grid-template-columns:repeat(auto-fill,minmax(170px,1fr)) !important;gap:6px;}
+#scene .mesh-source-card {position:relative;min-height:64px !important;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;gap:2px 8px;padding:10px 12px;border:1px solid hsl(var(--border-subtle));border-radius:6px;background:hsl(var(--surface) / .18);color:hsl(var(--text-muted));text-align:left;cursor:pointer;}
+#scene .mesh-source-card span {color:hsl(var(--text-strong));font:500 12px/1.2 var(--font-sans,sans-serif);text-transform:capitalize;}
+#scene .mesh-source-card strong {grid-row:1 / 3;grid-column:2;color:hsl(var(--primary));font:500 20px/1 var(--font-sans,sans-serif);}
+#scene .mesh-source-card small {color:hsl(var(--text-faint));font:500 9px/1.2 var(--mono-font,monospace);}
+#scene .mesh-source-card:hover,#scene .mesh-source-card:focus-visible {border-color:hsl(var(--reference));background:hsl(var(--reference) / .08);}
+#scene .mesh-source-crumb {display:flex;align-items:center;gap:10px;margin:0 0 8px;color:hsl(var(--text-faint));font:500 9px/1.3 var(--mono-font,monospace);}
+#scene .mesh-source-crumb[hidden] {display:none;}
+#scene .mesh-source-crumb strong {color:hsl(var(--text-strong));font:500 12px/1.2 var(--font-sans,sans-serif);text-transform:capitalize;}
+#scene .mesh-source-back {min-height:26px !important;padding:2px 10px !important;border:1px solid hsl(var(--border-default));border-radius:999px;background:transparent;color:hsl(var(--reference));font:500 10px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
+#scene .mesh-source-cell {min-height:40px !important;padding:6px 9px;}
+#scene .mesh-source-cell span {font-size:10px;}
+#scene .mesh-source-cell small {font-size:8px;}
+/* Quieter summary: one slim line of figures instead of four tall tiles. */
+#scene .mesh-explorer-core-stats .mesh-explorer-stat {display:flex;align-items:baseline;gap:7px;padding:5px 10px;}
+#scene .mesh-explorer-core-stats .mesh-explorer-stat small {display:none;}
+#scene .mesh-explorer-core-stats .mesh-explorer-stat strong {font-size:13px;}
+#scene .mesh-explorer-core-stats .mesh-explorer-stat span {font-size:8px;}
+#scene .mesh-source-filter {margin-bottom:8px;padding-bottom:0;border-bottom:0;}

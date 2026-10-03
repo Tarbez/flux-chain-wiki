@@ -50,7 +50,7 @@
         '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
         '<details class="mesh-operator-access"><summary>Operator access</summary><label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources"></details></div></section>' +
         '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">01 / SOURCE FIELD</p><h2 id="mesh-glance-title">What this node exposes</h2></div><span data-explorer-glance-stamp>—</span></div>' +
-        '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div><div class="mesh-source-chips" role="group" aria-label="Filter by category" data-explorer-category-chips></div><p class="mesh-source-filter-status" role="status" aria-live="polite" data-explorer-filter-status></p></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
+        '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
         '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
         '<dl class="mesh-source-facts"><div><dt>Category</dt><dd data-explorer-source-category>—</dd></div><div><dt>State</dt><dd data-explorer-source-state>—</dd></div><div><dt>Access</dt><dd data-explorer-source-access>—</dd></div></dl>' +
         '<div class="mesh-explorer-controls"><label for="mesh-source">Selected source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
@@ -84,8 +84,8 @@
     var filterBox = $('[data-explorer-source-filter]');
     var filterSearch = $('[data-explorer-source-search]');
     var accessChips = $('[data-explorer-access-chips]');
-    var categoryChips = $('[data-explorer-category-chips]');
-    var filterStatus = $('[data-explorer-filter-status]');
+    var crumb = $('[data-explorer-crumb]');
+    var selectedId = null;
     var filters = { query: '', access: 'all', category: 'all' };
     var nodesBox = $('[data-explorer-nodes]');
     var glanceStamp = $('[data-explorer-glance-stamp]');
@@ -168,7 +168,7 @@
       topology.textContent = 'Connect with an operator key to inspect topology.';
       stats.replaceChildren(); stats.hidden = true; coreStats.replaceChildren();
       sourceField.replaceChildren(node('p', 'mesh-explorer-result-message', 'Waiting for the source catalog.'));
-      filterBox.hidden = true;
+      filterBox.hidden = true; crumb.hidden = true; selectedId = null;
       nodesBox.replaceChildren(); glanceStamp.textContent = '—';
       $('[data-explorer-source-title]').textContent = 'No source selected';
       $('[data-explorer-source-summary]').textContent = 'Connect to inspect the catalog returned by a Miner.';
@@ -231,7 +231,7 @@
     function chooseSource(id, read) {
       var item = sources.find(function (candidate) { return candidate.id === id; });
       if (!item) return;
-      source.value = item.id;
+      source.value = item.id; selectedId = item.id;
       inspectSource(item);
       if (!read) return;
       generation += 1; detailRequest += 1; restoreRecord(false, false); loadRecords();
@@ -240,83 +240,88 @@
       return sourceAllowsQuery(item) ? 'public' : item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only' ? 'exact' : item.visibility === 'operator_only' || item.state === 'restricted' ? 'operator' : 'excluded';
     }
     var ACCESS_LABELS = { all: 'All', public: 'Public query', exact: 'Exact ID', operator: 'Operator', excluded: 'Excluded' };
-    function applyFilters() {
-      var query = filters.query.trim().toLowerCase(), shown = 0;
-      sourceField.querySelectorAll('.mesh-source-group').forEach(function (group) {
-        var visible = 0;
-        group.querySelectorAll('.mesh-source-cell').forEach(function (button) {
-          var match = (filters.access === 'all' || button.dataset.access === filters.access) &&
-            (filters.category === 'all' || group.dataset.category === filters.category) &&
-            (!query || (button.dataset.search + ' ' + group.dataset.category).indexOf(query) >= 0);
-          button.hidden = !match; if (match) visible += 1;
-        });
-        group.hidden = !visible; shown += visible;
-      });
-      var empty = sourceField.querySelector('.mesh-source-empty');
-      if (!shown && !empty) sourceField.appendChild(node('p', 'mesh-source-empty', 'No sources match these filters.'));
-      else if (shown && empty) empty.remove();
-      filterStatus.textContent = 'Showing ' + shown + ' of ' + sources.length + ' sources';
+    function sourceCell(item) {
+      var button = node('button', 'mesh-source-cell'); button.type = 'button';
+      button.dataset.sourceId = item.id; button.dataset.access = sourceAccessKind(item);
+      button.setAttribute('aria-label', safeString(item.label || item.id) + ' · ' + sourceAccess(item));
+      button.setAttribute('aria-pressed', String(item.id === selectedId));
+      button.appendChild(node('span', '', safeString(item.label || item.id)));
+      button.appendChild(node('small', '', sourceAccess(item)));
+      button.addEventListener('click', function () { chooseSource(item.id, true); });
+      sourceButtons.push(button); return button;
     }
-    function renderChip(container, key, value, label, count) {
-      var chip = node('button', 'mesh-source-chip'); chip.type = 'button';
-      chip.dataset.value = value; chip.setAttribute('aria-pressed', String(filters[key] === value));
-      chip.appendChild(node('span', '', label)); chip.appendChild(node('small', '', String(count)));
-      chip.addEventListener('click', function () {
-        filters[key] = value;
-        container.querySelectorAll('.mesh-source-chip').forEach(function (other) { other.setAttribute('aria-pressed', String(other.dataset.value === value)); });
-        applyFilters();
+    /* The source field has two states drawn in place: category cards, and one category's sources
+       (or a flat result list while a search or access filter is active). */
+    function renderField() {
+      var query = filters.query.trim().toLowerCase(), groups = {};
+      sourceField.replaceChildren(); sourceButtons = [];
+      sources.forEach(function (item) { var c = item.category || 'other'; (groups[c] = groups[c] || []).push(item); });
+      if (!groups[filters.category]) filters.category = 'all';
+      var filtering = !!query || filters.access !== 'all';
+      var drilled = filters.category !== 'all';
+      var items = sources.filter(function (item) {
+        return (!drilled || (item.category || 'other') === filters.category) &&
+          (filters.access === 'all' || sourceAccessKind(item) === filters.access) &&
+          (!query || (safeString(item.label || item.id) + ' ' + safeString(item.id) + ' ' + (item.category || '')).toLowerCase().indexOf(query) >= 0);
       });
-      container.appendChild(chip);
+      crumb.replaceChildren(); crumb.hidden = !drilled && !filtering;
+      if (drilled) {
+        var back = node('button', 'mesh-source-back', '← All categories'); back.type = 'button';
+        back.addEventListener('click', function () { filters.category = 'all'; renderField(); });
+        crumb.appendChild(back); crumb.appendChild(node('strong', '', filters.category));
+      }
+      if (drilled || filtering) {
+        crumb.appendChild(node('span', '', items.length + ' of ' + (drilled ? groups[filters.category].length : sources.length) + ' sources'));
+        if (!items.length) sourceField.appendChild(node('p', 'mesh-source-empty', 'No sources match these filters.'));
+        items.forEach(function (item) { sourceField.appendChild(sourceCell(item)); });
+        sourceField.dataset.view = 'cells'; return;
+      }
+      sourceField.dataset.view = 'categories';
+      Object.keys(groups).sort().forEach(function (category) {
+        var list = groups[category], card = node('button', 'mesh-source-card'); card.type = 'button';
+        var open = list.filter(function (item) { return sourceAccessKind(item) === 'public'; }).length;
+        card.setAttribute('aria-label', category + ', ' + list.length + ' sources, ' + open + ' public query');
+        card.appendChild(node('span', '', category));
+        card.appendChild(node('strong', '', String(list.length)));
+        card.appendChild(node('small', '', open ? open + ' public' : 'no public query'));
+        card.addEventListener('click', function () { filters.category = category; renderField(); });
+        sourceField.appendChild(card);
+      });
     }
-    function renderFilters(groups) {
+    function renderFilters() {
       var counts = { all: sources.length, public: 0, exact: 0, operator: 0, excluded: 0 };
       sources.forEach(function (item) { counts[sourceAccessKind(item)] += 1; });
-      if (!groups[filters.category]) filters.category = 'all';
-      accessChips.replaceChildren(); categoryChips.replaceChildren();
+      accessChips.replaceChildren();
       Object.keys(ACCESS_LABELS).forEach(function (kind) {
-        if (kind === 'all' || counts[kind]) renderChip(accessChips, 'access', kind, ACCESS_LABELS[kind], counts[kind]);
+        if (kind !== 'all' && !counts[kind]) return;
+        var chip = node('button', 'mesh-source-chip'); chip.type = 'button'; chip.dataset.value = kind;
+        chip.setAttribute('aria-pressed', String(filters.access === kind));
+        chip.appendChild(node('span', '', ACCESS_LABELS[kind])); chip.appendChild(node('small', '', String(counts[kind])));
+        chip.addEventListener('click', function () {
+          filters.access = kind;
+          accessChips.querySelectorAll('.mesh-source-chip').forEach(function (other) { other.setAttribute('aria-pressed', String(other.dataset.value === kind)); });
+          renderField();
+        });
+        accessChips.appendChild(chip);
       });
-      renderChip(categoryChips, 'category', 'all', 'All categories', sources.length);
-      Object.keys(groups).sort().forEach(function (category) { renderChip(categoryChips, 'category', category, category, groups[category].length); });
       filterSearch.value = filters.query;
       filterBox.hidden = !sources.length;
     }
     function renderSources() {
       source.replaceChildren();
-      sourceField.replaceChildren(); sourceButtons = [];
-      var groups = {};
       sources.forEach(function (item) {
         var option = node('option', '', item.label + ' / ' + item.state + ' / ' + item.visibility);
         option.value = item.id; option.disabled = !sourceAllowsQuery(item); source.appendChild(option);
-        var category = item.category || 'other';
-        if (!groups[category]) groups[category] = [];
-        groups[category].push(item);
       });
-      Object.keys(groups).sort().forEach(function (category) {
-        var group = node('section', 'mesh-source-group'); group.dataset.category = category;
-        group.appendChild(node('h3', '', category));
-        var cells = node('div', 'mesh-source-cells');
-        groups[category].forEach(function (item) {
-          var button = node('button', 'mesh-source-cell'); button.type = 'button';
-          button.dataset.sourceId = item.id;
-          button.dataset.access = sourceAccessKind(item);
-          button.dataset.search = (safeString(item.label || item.id) + ' ' + safeString(item.id)).toLowerCase();
-          button.setAttribute('aria-label', safeString(item.label || item.id) + ' · ' + sourceAccess(item));
-          button.appendChild(node('span', '', safeString(item.label || item.id)));
-          button.appendChild(node('small', '', sourceAccess(item)));
-          button.addEventListener('click', function () { chooseSource(item.id, true); });
-          sourceButtons.push(button); cells.appendChild(button);
-        });
-        group.appendChild(cells); sourceField.appendChild(group);
-      });
-      renderFilters(groups); applyFilters();
       var first = sources.find(sourceAllowsQuery);
+      selectedId = first ? first.id : null;
+      renderFilters(); renderField();
       if (!first) { source.replaceChildren(node('option', '', 'No enumerable source available')); source.disabled = true; }
       else { source.value = first.id; source.disabled = false; inspectSource(first); }
       recordId.disabled = !sources.length;
       lookup.querySelector('button').disabled = !sources.length;
     }
-    filterSearch.addEventListener('input', function () { filters.query = filterSearch.value; applyFilters(); });
+    filterSearch.addEventListener('input', function () { filters.query = filterSearch.value; renderField(); });
     function row(label, value) {
       var item = node('div', 'mesh-explorer-field');
       item.appendChild(node('dt', '', label)); item.appendChild(node('dd', '', safeString(value)));
