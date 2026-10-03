@@ -30,6 +30,12 @@ class Element {
   getAnimations() { return []; }
   focus() { document.activeElement = this; }
   querySelector(selector) {
+    // HTML-authored task pages expose hooks without a browser HTML parser in this harness.
+    if (this.innerHTML && /^(?:\[data-account-|#account-title|\.account-)/.test(selector)) {
+      this.htmlHooks ||= new Map();
+      if (!this.htmlHooks.has(selector)) this.htmlHooks.set(selector, new Element());
+      return this.htmlHooks.get(selector);
+    }
     if (selector === '.ark-hero-body') return this.children.find(child => child.classList.contains('ark-hero-body'));
     if (selector === '.ark-hero-title') return this.children.find(child => child.classList.contains('ark-hero-title'));
     for (const child of this.children) {
@@ -42,7 +48,7 @@ class Element {
 }
 
 const document = { createElement: tag => new Element(tag), createElementNS: (ns,tag) => new Element(tag), createTextNode: value => ({ textContent: value }) };
-const window = { addEventListener() {}, removeEventListener() {}, matchMedia: () => ({ matches: true }) };
+const window = { localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} }, dispatchEvent() {}, addEventListener() {}, removeEventListener() {}, matchMedia: () => ({ matches: true }) };
 const ArkUI = {
   pageModules: {}, lifecycleStages: [], register(id, manifest) { this.resolvers[id] = manifest; }, resolvers: {},
   el(tag, className, value) { const el = new Element(tag); el.className = className || ''; if (value) el.textContent = value; return el; },
@@ -61,10 +67,10 @@ const ArkUI = {
   mountStudio() {}, prefersReducedMotion: () => true
 };
 const context = vm.createContext({ document, window, ArkUI, console, URL, URLSearchParams, AbortController, location:{href:'http://127.0.0.1/index.html',hash:'#/'}, fetch:async doc=>({ok:true,text:async()=>fs.readFileSync(doc,'utf8')}),
-  ArkAdminAuth: { create: () => ({ dispose() {} }) } });
+  ArkAdminAuth: { create: () => ({ current() { return null; }, signOut() {}, dispose() {} }) } });
 function load(file) { vm.runInContext(fs.readFileSync(file, 'utf8'), context, { filename: file }); }
 
-load('js/ark/mesh-fabric.js'); load('js/ark/route.js'); load('js/tokens.js'); load('js/content/manifest.js');
+load('js/ark/local-identity.js'); load('js/ark/mesh-fabric.js'); load('js/ark/stage-scenes.js'); load('js/ark/route.js'); load('js/tokens.js'); load('js/content/manifest.js');
 for (const id of JSON.parse(fs.readFileSync('js/content/manifests/index.js', 'utf8').match(/var ArkManifestIds = (\[[^;]+\]);/)[1])) load(`js/content/manifests/${id}.js`);
 load('js/content/learnings.js'); load('js/content/article-index.js');
 load('js/content/seo.js'); load('js/content/seo-data.js'); load('js/ark/vendor/engines.js');
@@ -111,17 +117,41 @@ for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
     assert.equal(page.querySelector('.lifecycle-boundary').textContent, boundary);
     controls[0].listeners.click();
     assert.equal(page.dataset.depth, 'focus');
+    if (key !== 'lifecycle') {
+      const scene = page.querySelector('.stage-scene');
+      assert(scene.classList.contains('stage-scene-'+key.split('/')[1]));
+      const inspect = scene.querySelector('.stage-scene-choices').children;
+      inspect[0].listeners.click();const firstInspection=scene.querySelector('.stage-scene-mesh').dataset.stage;
+      inspect[1].listeners.click();assert.notEqual(scene.querySelector('.stage-scene-mesh').dataset.stage,firstInspection,'lifecycle inspection controls have different patterns');
+      assert.equal(scene.querySelector('.stage-scene-detail').textContent,ArkUI.lifecycleContent[key.split('/')[1]].facts[1][1],'scene inspection reveals the actual reference fact');
+    }
     page.arkDispose();
   }
   if (key === 'deployment') {
     const cards=page.querySelector('.how-work-cards').children;
-    assert.equal(cards.length,3,'nontechnical story has exactly three parts');
-    assert.deepEqual(cards.map(card=>card.dataset.sceneLink),['lifecycle/intent','lifecycle/agreement','lifecycle/receipt']);
-    assert.equal(cards[1].children[2].textContent,context.ArkCopy.text('DEPLOYMENT.SIMPLE.WORK.TEXT'),'editable explanation survives into the actual card');
+    assert.equal(cards.length,3,'nontechnical story keeps three distinct journey surfaces');
+    assert.deepEqual(cards.map(card=>card.dataset.sceneLink),['how/ask','how/work','how/check']);
+    assert.deepEqual(cards.map(card=>card.dataset.continuityCard),['how/ask','how/work','how/check'],'each journey surface returns to its exact source');
+    assert.equal(cards[1].querySelector('.how-work-answer').textContent,context.ArkCopy.text('DEPLOYMENT.SIMPLE.WORK.TEXT'),'editable explanation survives into the actual card');
     cards[0].listeners.focus();assert.equal(cards[0].dataset.active,'true');
     cards[0].listeners.blur();assert.equal(cards[0].dataset.active,'false');
     cards[1].listeners.pointerenter();assert.equal(cards[1].dataset.active,'true');
     cards[1].listeners.pointerleave();assert.equal(cards[1].dataset.active,'false');
+    assert(page.querySelector('.how-simple-footer'),'implementation boundary and full lifecycle remain after the journey');
+    page.arkDispose();
+  }
+  if (key.startsWith('how/')) {
+    const id=key.split('/')[1];
+    assert(page.classList.contains('how-chapter-'+id));
+    const choices=page.querySelector(id==='ask'?'.how-request-choices':id==='work'?'.how-promise-parties':'.how-check-choices').children;
+    const canvas=page.querySelector('.how-chapter-mesh'),firstPattern=canvas.dataset.stage;
+    choices[1].listeners.click();
+    assert.notEqual(canvas.dataset.stage,firstPattern,'each chapter choice runs its own mesh pattern');
+    const selectedPattern=canvas.dataset.stage;
+    choices[0].listeners.pointerenter();assert.equal(canvas.dataset.stage,firstPattern);
+    choices[0].listeners.pointerleave();assert.equal(canvas.dataset.stage,selectedPattern,'preview exit restores the selected explanation');
+    assert.equal(page.querySelector('.how-chapter-detail').textContent,context.ArkCopy.text('DEPLOYMENT.CHAPTER.'+id.toUpperCase()+'.DETAIL2'));
+    assert.equal(choices[1].attributes['aria-pressed'],'true');
     page.arkDispose();
   }
   if (key === 'download') {

@@ -10,14 +10,14 @@
  height:1px;background:linear-gradient(90deg,hsl(var(--primary) / .35),hsl(var(--border-subtle)) 24%,hsl(var(--border-subtle)) 76%,transparent);
 }
 .ark-studio-identity {
- display:inline-flex;align-items:center;justify-content:flex-start;gap:10px;
- width:auto;height:44px;flex:0 0 auto;margin-right:auto;padding:0 4px;text-decoration:none;
+ display:inline-flex;align-items:center;justify-content:flex-start;gap:12px;
+ width:auto;height:48px;flex:0 0 auto;margin-right:auto;padding:0 4px;text-decoration:none;
  border:0 !important;border-radius:7px;background:transparent !important;box-shadow:none !important;pointer-events:auto;
  color:hsl(var(--text-strong));
 }
-.ark-brand-mark {display:block;width:30px;height:30px;color:hsl(var(--primary));transition:color 180ms;}
-.ark-brand-wordmark {font:600 23px/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:.055em;color:hsl(var(--text-strong));}
-.ark-studio-identity:hover .ark-brand-mark {color:hsl(var(--text-strong));}
+.ark-brand-lockup {display:flex;flex-direction:column;gap:5px;}
+.ark-brand-wordmark {font:650 24px/.95 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:.13em;color:hsl(var(--text-strong));}
+.ark-brand-descriptor {font:500 8px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.15em;color:hsl(var(--text-muted));}
 .header-core-links {
  display:flex;align-items:center;gap:3px;padding:4px;height:46px;box-sizing:border-box;
  border:1px solid hsl(var(--border-subtle));border-radius:9px;background:hsl(var(--canvas) / .65);pointer-events:auto;
@@ -274,3 +274,15 @@
 .theory-invitation:focus-visible .theory-invitation-link { text-decoration:underline; text-underline-offset:5px; }
 @media(max-width:760px) { .theory-invitation { top:94px; right:20px; width:175px; gap:9px; } .theory-invitation strong { font-size:21px; } }
 @media(prefers-reduced-motion:reduce) { .theory-invitation-link { transition:none; } }
+
+/* Identity is a live navigation destination, with status independent of route. */
+.header-account-label{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+.header-account-name{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.header-account-status{display:flex;align-items:center;gap:4px;font:500 8px/1 var(--mono-font,monospace);color:hsl(var(--text-muted))}
+.header-account-status:before{content:"";height:4px;width:4px;border-radius:50%;background:currentColor}
+.header-account-link[data-signed-in="true"] .header-account-status{color:hsl(var(--trust,var(--primary)))}
+@media(max-width:560px){
+ #scene .ark-header .header-core-links{display:flex;border:0;background:transparent;padding:0;margin-left:auto}
+ #scene .ark-header .header-core-links a:not(.header-account-link){display:none}
+ #scene .ark-header .header-core-links .header-account-link{display:flex;min-width:100px;font-size:12px;border:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .65)}
+}

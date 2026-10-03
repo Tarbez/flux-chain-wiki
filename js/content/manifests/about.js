@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "about",
-  "title": "Protocol overview",
+  "title": "DEFXN overview",
   "route": "/about",
   "group": "page",
   "meta": {
@@ -12,25 +12,55 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / OVERVIEW"
+      "value": "DEFXN / AGREEMENT FABRIC"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Shared infrastructure for independently governed networks."
+      "value": "One shared fabric. Your network's rules."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Flux separates network discovery, signed agreement execution, and governance so one network can define its own rules without becoming the shared substrate. DAO Chain is one network on Flux Protocol, not Flux Protocol itself."
+      "value": "DEFXN lets independently governed networks complete signed agreements without inheriting a global block order."
     },
     "CONTEXT": {
       "label": "Supporting explanation disclosure",
       "kind": "line",
       "section": "Page",
-      "value": "Context / inspect how Flux fits together"
+      "value": "Context / inspect the three layers"
+    },
+    "MODEL.TITLE": {
+      "label": "Model label",
+      "kind": "line",
+      "section": "Page",
+      "value": "ONE FABRIC / THREE BOUNDED LAYERS"
+    },
+    "MODEL.TEXT": {
+      "label": "Model summary",
+      "kind": "line",
+      "section": "Page",
+      "value": "Discovery finds the network. Agreements close the work. Authority stays bounded."
+    },
+    "ACTION": {
+      "label": "Primary action",
+      "kind": "line",
+      "section": "Links",
+      "value": "See how DEFXN works"
+    },
+    "BOUNDARY.TITLE": {
+      "label": "Visible source boundary",
+      "kind": "line",
+      "section": "Status",
+      "value": "Core paths exist in source. Production activation and packaged releases remain unverified."
+    },
+    "REFERENCE": {
+      "label": "Reference disclosure",
+      "kind": "line",
+      "section": "Status",
+      "value": "Evidence & verification"
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -42,7 +72,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "The directory creates or discovers a named network ID. Today that ID partitions miner presence only; it does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not a security boundary."
+      "value": "DEFXN assigns each network a named ID for discovery. Today that boundary partitions miner presence; account, identity, record, and treasury isolation remain outside the current implementation."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -54,7 +84,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Work moves from intent to offer, agreement, fulfillment, and receipt. Each stage preserves what was requested, accepted, produced, and checked without requiring a global block order."
+      "value": "DEFXN carries work through intent, offer, agreement, fulfillment, and receipt. Each signed stage keeps the request, terms, result, and verification linked without a global block order."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -66,7 +96,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Authority belongs to an identified scope and threshold. Mesh-operations policy is separate from a network DAO, and neither silently gains authority over the other."
+      "value": "Authority stays bound to a named scope and threshold. Network governance cannot silently take control of the shared mesh, and mesh policy cannot inherit control of a network."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -78,7 +108,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "The miner daemon, network CLI, resolver model, and agreement lifecycle are implemented in source. Full automated provider activation remains partial; public repositories, packaged downloads, independent production activation, and benchmark artifacts remain unverified in this audit."
+      "value": "The DEFXN miner, network CLI, resolver model, and complete agreement lifecycle are implemented in source. Automated provider activation remains partial; packaged releases, independent production activation, and benchmark artifacts remain unverified."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -90,19 +120,19 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Start the miner from a trusted checkout, record its status response, and inspect agreement evidence under a named source revision. Treat a successful local start as local evidence, not as proof of production readiness."
+      "value": "Run DEFXN from a trusted source revision, record the miner status response, then inspect the linked agreement evidence. A successful local run proves that environment only; it does not establish production readiness."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "EXPLORE THE OPERATING MODEL"
+      "value": "EXPLORE THE DEFXN MODEL"
     },
     "STATUS": {
       "label": "Status documentation link",
       "kind": "line",
       "section": "Links",
-      "value": "READ THE CURRENT STATUS"
+      "value": "READ DEFXN STATUS"
     }
   }
 });

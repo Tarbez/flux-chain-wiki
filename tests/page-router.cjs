@@ -118,12 +118,12 @@ assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why
  assert.equal(articleTitle.calls.length,1,'the visible article title enters even while its page root starts hidden');
  assert.equal(hiddenAnswer.calls.length,0,'unselected answer chunks never animate');
 
- const presenceCalls=[];let releaseExit;
+ const presenceCalls=[],presenceModes=[];let releaseExit;
  context.ArkUI.prefersReducedMotion=()=>false;
  context.ArkUI.createPresence=()=>({
-   hide(page){presenceCalls.push('hide:'+page);return new Promise(resolve=>{releaseExit=resolve;});},
+   hide(page,immediate){presenceCalls.push('hide:'+page);presenceModes.push(['hide',page,!!immediate]);if(immediate)return Promise.resolve();return new Promise(resolve=>{releaseExit=resolve;});},
    enter(page){presenceCalls.push('enter:'+page);return Promise.resolve();},
-   show(page){presenceCalls.push('show:'+page);return Promise.resolve();}
+   show(page,immediate){presenceCalls.push('show:'+page);presenceModes.push(['show',page,!!immediate]);return Promise.resolve();}
  });
  const transitionScene=new Element(),transitionOutlet=transitionScene.appendChild(new Element());
  const transitionState={page:'zero',get(){return {page:this.page,paused:false};},navigate(page){this.page=page;}};
@@ -170,6 +170,16 @@ assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why
  assert(presenceCalls.includes('enter:zero'),'home does not wait for the late overlap point');
  reverseRun.finish();await returning;
  assert.equal(transitionRouter.active,'zero');
+ const stageScene=new Element(),stageOutlet=stageScene.appendChild(new Element());
+ const stageState={get(){return {paused:false};},navigate(){}};
+ const stageRouter=context.ArkUI.createPageRouter({scene:stageScene,outlet:stageOutlet,state:stageState,
+   catalog:{'lifecycle/receipt':{path:'/lifecycle/receipt',title:'Receipt'},'lifecycle/agreement':{path:'/lifecycle/agreement',title:'Agreement'}},
+   load:async()=>({mount(host){return host.appendChild(new Element());}}),writeHistory(){}
+ });
+ await stageRouter.navigate('lifecycle/receipt');presenceCalls.length=0;presenceModes.length=0;
+ await stageRouter.navigate('lifecycle/agreement');
+ assert.deepEqual(presenceCalls,['hide:lifecycle/receipt','show:lifecycle/agreement'],'stage navigation swaps content without page entrance/exit fades');
+ assert.deepEqual(presenceModes,[['hide','lifecycle/receipt',true],['show','lifecycle/agreement',true]],'both sides of a stage swap use immediate page presence');
  // Apply the same handoff invariant to every registered route, not just lifecycle.
  const allScene=new Element(),allOutlet=allScene.appendChild(new Element());
  const allState={get(){return {paused:false};},navigate(page){

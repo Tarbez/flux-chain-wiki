@@ -25,12 +25,16 @@ ArkUI.pageCatalog = {
   proximity: { path: '/experiments', title: arkSeoTitle('proximity', 'Interactive model'), seoId: 'proximity', module: 'proximity', scripts: ['js/resolvers/experiment.js', 'js/pages/experiments.js'] },
   lab: { path: '/experiments/lab', title: arkSeoTitle('lab', 'Interactive model'), seoId: 'lab', module: 'lab', scripts: ['js/studio.js', 'js/pages/lab.js'] },
   learnings: { path: '/learnings', title: arkSeoTitle('learnings', 'Notes'), seoId: 'learnings', module: 'learnings', scripts: ['js/resolvers/learnings.js', 'js/pages/learnings.js'] },
-  about: { path: '/about', title: arkSeoTitle('about', 'Protocol overview'), seoId: 'about', module: 'about', scripts: ['js/pages/sheet.js', 'js/pages/about.js'] },
+  about: { path: '/about', title: arkSeoTitle('about', 'Protocol overview'), seoId: 'about', module: 'about', scripts: ['js/pages/about.js'] },
   concept: { path: '/concept', title: arkSeoTitle('concept', 'The Flux spec'), seoId: 'concept', module: 'concept', scripts: ['js/pages/concept.js'] },
   download: { path: '/download', title: arkSeoTitle('download', 'Run Flux from source'), seoId: 'download', module: 'download', scripts: ['js/ark/procedure-state.js', 'js/pages/sheet.js', 'js/pages/download.js'] },
+  bundledeployer: { path: '/bundle-deployer', title: arkSeoTitle('bundledeployer', 'FXN Bundle Deployer'), seoId: 'bundledeployer', module: 'bundledeployer', scripts: ['js/pages/bundle-deployer.js'] },
   deploy: { path: '/deploy', title: arkSeoTitle('deploy', 'Create or join a network'), seoId: 'deploy', module: 'deploy', scripts: ['js/ark/procedure-state.js', 'js/pages/deploy.js'] },
   dao: { path: '/dao', title: arkSeoTitle('dao', 'Governance'), seoId: 'dao', module: 'dao', scripts: ['js/pages/sheet.js', 'js/pages/dao.js'] }
 };
+['ask','work','check'].forEach(function(id,i){
+  ArkUI.pageCatalog['how/'+id]={path:'/how-deployment-works/'+id,title:['Ask for help','Agree and do the work','Check the result'][i]+' — DEFXN',module:'howStory',hiddenFromNavigation:true,scripts:['js/pages/how-stories.js']};
+});
 ArkUI.pageCatalog.lifecycle = {
   path: '/lifecycle', title: arkSeoTitle('lifecycle', 'Agreement lifecycle'), seoId: 'lifecycle',
   module: 'lifecycle', scripts: ['js/pages/lifecycle.js']

@@ -4,6 +4,9 @@ ArkUI.pageModules.download = {
     el.classList.remove('learning-page');el.classList.add('task-page');
     var footer = el.querySelector('.theory-footer');
     if (footer) {
+      var deployer = ArkUI.el('a', 'article-back', 'Deploy a site / FXN Bundle Deployer');
+      deployer.href = ArkUI.route.href(ArkUI.pageCatalog.bundledeployer.path); deployer.dataset.sceneLink = 'bundledeployer';
+      footer.appendChild(deployer);
       var guide = ArkUI.el('a', 'article-back');
       guide.href = 'docs/operators/run-from-source.md';
       guide.textContent = ArkCopy.text('DOWNLOAD.GUIDE') + ' ↗';

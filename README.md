@@ -60,20 +60,35 @@ It regenerates the approved-document list and lazy text/hash snapshot from the
 source files; do not hand-edit the generated copies. The reader uses the existing
 local script policy, including `file://`, without broadening `connect-src`.
 
+`css/color-system.css` enforces three color roles: primary for critical page
+information, complement for calls to action, reference for lower-level links and
+controls. All eight palettes keep neutral surfaces and three distinct, readable
+role inks in light and dark modes. `css/brand-identity.css` fades the existing
+mesh fabric toward the reading area. Blocks, Traces and Layers reuse
+`ArkUI.createMeshFabric`; Wave remains available. Run
+`node tests/theme-color-contrast.cjs` for role separation and text/action contrast,
+and `node tests/mesh-fabric.cjs` for shared mesh layouts and bounded rendering.
+
 `js/ark/icons.js` supplies native inline SVG icons on one 24px grid. Their strokes
 inherit semantic colors; labels remain the accessible meaning. Desktop refinement
 and verification come first; mobile refinement is the final redesign pass.
 
-The account route loads the shared Ark UI Auth Kit bundle on demand. Its
-verified root signer is held in browser memory and disposed when the route
-unmounts; the recovery file and PIN are not uploaded or persisted. The displayed
-wallet address comes from the kit and is **not** a live balance proof. When the
-Miner returns a signed identity-to-account binding, the page follows that exact
-account id to show its standing; it never infers one. FXN and Credits remain
-unavailable until a verified holdings read contract exists. The admin editor
-also consumes Ark UI's shared framework-neutral scoped-authorization view.
-Rebuild the generated bundles after shared-auth changes with
-`node scripts/build-auth.cjs`.
+The account route loads the shared Ark UI Auth Kit bundle on demand. Public identity
+metadata is remembered in `defxn-local-identity-v1`, following
+`chat.deadark.com/src/lib/identity/localIdentitySession.ts` and its reactive
+`IdentityProvider` pattern. The shell restores the username on every page, including
+a reload before Account has been opened. Cached metadata is display state, never
+proof of authorization. Root signing handles stay in memory across route changes
+and are disposed on document exit; reload preserves the remembered identity and
+locks the signing key. Unlock the Auth Kit to sign again. Sign-out clears the
+pointer, and storage events or focus changes reconcile other tabs and lock stale
+signers. No recovery file, PIN, phrase, root verification flag, or signer is saved.
+Storage failures are surfaced on Account instead of promising persistence.
+
+The exact-ID local Miner check remains read-only. If the Miner returns a signed
+identity-to-account binding, the page follows that exact account ID to show its
+standing; it never infers one. FXN and Credits remain unavailable until a verified
+balance source is connected.
 
 `js/ark/text-presence.js` uses transform and opacity reveals, without animated
 clipping masks. It limits the effect to 12 visible text blocks and at most 48
@@ -431,10 +446,17 @@ ark-miner-cli node and named by a signed `names/*` record: `flux-chain.ark` poin
 An edit is a new archive and a new record version; old versions stay retrievable. The site itself stays a
 static page reading local files, so it needs no network and its Content Security Policy is unchanged.
 
+The public `/bundle-deployer` page explains the required local FXN Bundle Deployer workflow.
+The CLI is planned and not yet released; no installation command, download or browser deployment
+is advertised. Local CMS editing remains available through the existing development host. The
+account page exposes the local CMS link only after that host confirms local-development mode.
+Public deployment links point to the guidance page. The future deployer must let users inspect the
+public bundle and keep Auth Kits, signing keys, credentials and local configuration outside it.
+
 Double-click **`Flux Chain Admin.command`** (or run `node scripts/publish-host.mjs --open`). It starts the local
 publish host and opens the admin page in your browser; from then on everything is done in the page. Keep the
 window it opens running while you work (closing it stops the host); double-clicking again just reopens the page.
-A miner must be running: Ark Miner Desktop, or `npm start` in `ark-miner-cli`. The host finds it by itself (Desktop
+Editing does not require a miner or sign-in. Publishing needs a reachable publishing connection, such as Ark Miner Desktop or `npm start` in `ark-miner-cli`. The host finds it by itself (Desktop
 on 8866/5102, CLI on 8766/5002, each with its own credential file) and picks it up if it starts later; the Mesh
 panel says which miner and network it is publishing through, or that none was found. Only for a miner elsewhere:
 `--storage <STORAGE_PATH>`, or `--status`/`--pin`/`--key`. A named `--storage` folder is the only place its
@@ -444,55 +466,39 @@ credential is looked for.
 node scripts/pull-site.mjs            # dry run; add --write to replace local files. Same miner discovery.
 ```
 
+The publish host derives page paths from `js/pages/catalog.js` and the indexed content. Every
+catalog route supports direct navigation and reload, including nested pages and articles. Nested
+shell asset URLs resolve to the same public files; unknown URLs, API routes and protected CMS
+assets do not receive the public shell. `tests/host-routes.test.mjs` exercises these HTTP boundaries.
+
 Open the page through the host (the address it prints, `http://127.0.0.1:3437/admin.html`), not by opening
 `admin.html` from disk: a page opened from disk cannot reach a miner and says so, with a link.
 
 - `scripts/publish-host.mjs` serves `admin.html` from loopback and holds the miner's API credential. It
   never holds a signing key. `--name` chooses another name than `flux-chain.ark`.
-- **The admin is locked until you pass three steps** — currently two: `scripts/publish-host.mjs` sets
-  `OTP_ENABLED = false`, so step 3 is skipped and `admin-app.html` opens right after Access. This is
-  temporary: the Ark Pin browser extension this admin is meant to be used through cannot yet prompt for or
-  submit a TOTP code, and until it can, requiring one just blocks sign-in instead of adding security.
-  Nothing about step 3 was removed — `scripts/lib/admin-session.mjs`, `scripts/lib/totp.mjs` and the
-  enrollment UI in `js/admin/gate.js` are all intact — flip that one constant back to `true` once the
-  extension supports OTP. `node tests/admin-session-otp-disabled.test.mjs` covers the bypass itself (a
-  proven, authorized identity gets a session with no ticket, steps 1–2 still refuse exactly as before);
-  `node tests/admin-session.test.mjs` keeps covering the full three-step flow (it constructs its own
-  `createSessions` with OTP on, independent of the host's current setting). `admin.html` is only a locked
-  page: it holds the sign-in flow and nothing of the editor, shown as a ladder (Identity / Access / Code)
-  so you can see where you are:
-  1. **Identity** — choose your DeadArk recovery file (`.auth.flx`, the same Auth Kit chat.deadark.com signs in
-     with) and enter its PIN (and password).
-  2. **Access** — the page proves that identity to the local host by signing a challenge the host made (single
-     use, 60 seconds, domain-separated so it can never be replayed as a name record), and the host checks that
-     the identity owns the site. These two steps issue only a short-lived ticket, never a session.
-  3. **Code** — a one-time code (TOTP) from an authenticator app (Google Authenticator, 1Password, Authy,
-     Aegis, or similar). The first time an identity signs in it enrolls one: the page shows a setup key and a
-     setup link to add, and also requires a short **setup code printed in the terminal window running the
-     admin** (`Flux Chain Admin.command`'s own window) — so holding someone's recovery file and PIN alone is not
-     enough to enroll an authenticator for them. Only a correct code turns the ticket into a session: an
-     HttpOnly, SameSite=Strict cookie that idles out after 30 minutes and dies after 12 hours or on sign-out.
-     Five wrong codes for one identity lock it out for a wait that doubles each time it happens again (5, 10,
-     20 minutes...), shown as a live countdown; a code already accepted is never accepted twice.
+- **Local editing** opens without sign-in when the launcher is bound to `127.0.0.1` and the request
+  comes directly from loopback. Forwarded requests do not receive this permission. This launcher is
+  a local tool, not the production-domain CMS server. Importing `createHost()` defaults to protected
+  mode; the local launcher explicitly enables `localDevelopment`.
+- **Identity and deployed access are separate.** A valid challenge signature establishes an identity
+  session without contacting a miner. Protected editor files and APIs then require a signed mesh
+  ownership record for the site's name, read from `public.defxn.com/explorer/v1/record` and verified
+  locally. The record's current owner is the maintainer. There is no separate owner allowlist,
+  automatic first-visitor grant, or permission based on saved browser details. Missing or invalid
+  ownership denies access; an unavailable lookup keeps the identity session but denies CMS access.
+- **Reload** retains a valid host session, not the signing key. Reopening the CMS does not require
+  importing the Auth Kit just to edit. Signing or publishing after reload requires selecting and
+  unlocking the Auth Kit again. Publishing always needs an authenticated identity matching the
+  record being prepared or published, and the publisher verifies mesh ownership before writing.
+- **Production integration** must connect the same permission check to the domain's server or mesh
+  gateway, using its resolved mesh name as the site identifier. Domain mode is explicit: `node scripts/publish-host.mjs --origin https://defxn.com --name <resolved-mesh-name>`.
+  Bind remains loopback behind a TLS proxy that preserves the configured Host. Domain mode requires
+  the exact HTTPS Origin on POST requests and uses Secure session cookies. The normal local launcher
+  accepts only loopback Host headers. Do not expose local-development
+  mode through a proxy. Production mode verifies ownership before serving editor assets or accepting
+  CMS writes, and rejects configuration that enables the local bypass. Standard domain and mesh-name aliases must
+  resolve to that same ownership record rather than infer the owner from the domain text.
 
-  Until all three pass, the host serves **none** of the editor (`admin-app.html`, everything under `js/admin/`
-  except the two files the locked page loads, and every API but the sign-in routes): a hidden button would not
-  protect anything when the files are one request away. Anything later added under `js/admin/` is locked by
-  default. The editor then opens inside the locked page in a same-origin frame, which is how the identity's key
-  stays in the locked page's memory instead of being stored. Sign out (in the editor's top bar) always locks
-  everything and ends the session (`/api/session/logout`); sign out asks first if you have unsaved edits. A
-  **reload does not** — the host's session cookie is what it actually trusts, so `js/admin/gate.js` checks
-  `GET /api/session` on load and reopens the editor straight away if it is still valid (idles out at 30
-  minutes, dies at 12 hours regardless), rather than asking for the recovery file again just to keep browsing
-  and editing. What a reload still always drops is the identity's signing key (never sent anywhere, so it
-  cannot be cached) — Publish notices there is none in memory and calls `ArkGate.reauthenticate()`, which
-  brings back the locked screen to unlock it **without** touching the still-valid session, then reopens the
-  editor once you do. The last time an identity signed in is shown on its next sign-in, so a session that was
-  not yours stands out.
-- **Who may sign in.** Once `flux-chain.ark` has an owner, only that identity (a different one is refused at the door,
-  with the owner named). Before it is claimed, the first identity to sign in may claim it. If the miner cannot be
-  asked who owns the name, sign-in is refused rather than guessed. The site itself (`index.html`, `js/content/`)
-  stays public because it is the site. A session is one identity: it cannot prepare or publish as another key.
 - **Where authenticators live.** Enrolled secrets, sign-in lockout counters and a sign-in audit log (`event`,
   `key`, timestamp — never a code, secret or PIN) are kept under `~/.flux-chain-admin` (files `0600`, folder `0700`),
   outside the project so it is never published, committed or served; `--data <folder>` moves it. If that file
@@ -533,3 +539,5 @@ tested against a fake directory handle), replication to a second miner, and the 
 staging DAO until Batch 32.6, so a real check would prove nothing yet. The full sign-in flow (enrollment, a
 wrong code, the real lockout countdown, sign-out, and a return sign-in) was driven in headless Chrome with
 fixture kits from `flux-auth`'s `scripts/generate-founding-auth-kits.mjs` (PIN 24682468).
+
+Public Account and the local CMS share an identity boundary. Unlocking Account signs the local host's origin-bound challenge and checks site ownership; a remembered public pointer alone grants no CMS permission. Account's **Open CMS** link keeps the same-origin account tab as the signer owner, so the gate can reuse its unlocked signer without copying or storing a key. A valid host cookie restores editing after a document reload; publishing still requires a live signer. The CMS updates the same public identity pointer, and explicit sign-out revokes CMS access. CMS ownership refusal preserves a valid public account sign-in. Run `node tests/cms-account-session.cjs` and `node tests/cms-gate-reuse.cjs` for access reuse, restored editing, origin checks, missing authority, and sign-out races.

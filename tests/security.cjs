@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
 const requests = [];
-const context = vm.createContext({ ArkUI: { pageModules: { sample: { mount() {} } } }, document: {
+const context = vm.createContext({ location:{protocol:'http:',pathname:'/lifecycle/offer'}, ArkUI: { pageModules: { sample: { mount() {} } } }, document: {
  createElement() { return {}; }, head: { appendChild(script) { requests.push(script.src); script.onload(); } }
 }});
 vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
@@ -12,12 +12,13 @@ vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
  await context.ArkUI.loadPage('sample', { module:'sample', scripts:['js/pages/home.js'] });
  await context.ArkUI.loadPage('sample', { module:'sample', scripts:['js/pages/home.js'] });
  assert.equal(requests.length,1);
+ assert(requests[0].startsWith('/js/pages/home.js?'),'nested clean routes must load dependencies from the site root');
  const html=fs.readFileSync('index.html','utf8');
  assert(!/<script>([\s\S]*?)<\/script>/.test(html));
  assert(html.includes("script-src 'self' file:;"));
  assert(html.includes("base-uri 'none'"));
  const connect = (html.match(/connect-src ([^;]+);/) || [])[1] || '';
- assert(connect.split(' ').every(origin => /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9])\.defxn\.com)$/.test(origin)), 'Explorer may contact only the local Miner and the named defxn public/storage hosts: ' + connect);
+ assert(connect.split(' ').every(origin => origin === "'self'" || /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9])\.defxn\.com)$/.test(origin)), 'Account/CMS may contact its own host; Explorer is limited to local Miner and named public/storage hosts: ' + connect);
  assert(!connect.includes('*'), 'connect-src must never use a wildcard');
  assert(!html.includes('js/resolvers/logo.js'));
  // A CTA may send a visitor only within this site. Reason: `window.location.assign(p.href)` took whatever copy said, so a

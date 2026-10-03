@@ -28,9 +28,9 @@ assert(value('references', 'BODY2').includes('Reference evidence pending'));
 assert(!Object.values(manifest('references').fields).some((field) => /running on the fabric today/i.test(field.value)));
 
 const how = manifest('deployment');
-assert.equal(how.title, 'How Flux works');
+assert.equal(how.title, 'How DEFXN works');
 assert.equal(how.meta.next, 'download');
-for (let i = 1; i <= 5; i++) assert(how.fields['BODY' + i], 'How Flux works includes movement ' + i);
+for (let i = 1; i <= 5; i++) assert(how.fields['BODY' + i], 'How DEFXN works includes movement ' + i);
 
 assert.equal(manifest('download').title, 'Run Flux from source');
 assert(value('download', 'DECK').includes('Public repository URLs and packaged downloads are not yet verified'));

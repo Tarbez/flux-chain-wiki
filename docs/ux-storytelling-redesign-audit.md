@@ -328,3 +328,18 @@ Acceptance questions:
 The user subsequently requested `/lifecycle/` and all five inner pages, authorizing this desktop slice. The overview, Intent, Offer, Agreement, Fulfillment, and Receipt now share an answer-first soft dashboard, dense mesh stage previews, optional one-fact context, evidence/return navigation, and the retained continuous panel. The earlier Home approval gate does not block this explicitly requested slice.
 
 All six default and initial Context views fit 1280 × 720; overview and Agreement were reviewed at 1440 × 900. Regression checks pass. Review evidence and limitations: [Lifecycle review](design-audit-2026-10-02/lifecycle-review/README.md). Mobile and the remaining audit batches are still outstanding.
+
+
+## How it works — user clarification: three simple boxes
+
+The user explicitly rejected a Lifecycle replica and requested a nontechnical, three-box explanation. `/how-deployment-works` now shows Ask for help → Agree, then do it → Check the result, with plain-language copy, small meaningful mesh responses, and inner-page links for technical depth. The five-part dashboard is superseded. Desktop fit and interaction evidence: [How it works review](design-audit-2026-10-02/how-it-works-review/README.md).
+
+
+## Original motion and distinct inner-stage objects
+
+The user requested new animation ideas and a unique design for each inner page. How it works now uses request transfer, joining commitments, and a checking sweep in its actual mesh cells. Intent, Offer, Agreement, Fulfillment, and Receipt now have distinct brief/reply/commitment/package/ledger objects and fact inspection controls within the continuous soft dashboard. Review evidence and verification: [Original stage review](design-audit-2026-10-02/original-stage-review/README.md).
+
+
+## Three new How it works chapter routes
+
+The three parent boxes now open dedicated `/how-deployment-works/ask`, `/work`, and `/check` pages with unique request-brief, two-party-promise, and result-checking layouts. The lifecycle links are optional deeper explanations, not the primary destinations. Desktop fit, plain-language inspections, and Next-page navigation are verified. [Chapter review](design-audit-2026-10-02/how-chapters-review/README.md).

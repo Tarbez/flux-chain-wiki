@@ -20,3 +20,10 @@ All six default views fit 1280 × 720; overview and Agreement were also visually
 Screenshots: [Overview](overview.png), [Agreement](agreement.png), [Context at 1280 × 720](context.png). The theme shown is the existing test tab’s theme.
 
 Mobile remains the final pass. Other site families are outside this completed slice and still require review. No commit, publication, or deployment was performed.
+
+
+## Illustration continuity correction
+
+When moving between lifecycle inner pages, the actual illustration figure now moves outside the fading route ancestry, keeps its opaque border visible, and receives the next stage’s content. The outer figure node is reused; only its contents animate. Incoming presence targets the answer and individual illustration contents rather than their shared dashboard-body ancestor. Outgoing inspection controls are inert during handoff. Interrupted transitions restore the figure to its source slot; reduced motion skips content motion.
+
+The dedicated retention fixture checks identical figure-node reuse, no surface opacity animation, content animation, interruption restoration, no orphan portal, and reduced motion. Browser navigation through Offer, Agreement, Fulfillment, Receipt, and back to Intent succeeded; arrivals have one illustration, opacity 1, and no leftover placeholder. Router, scene-state, route, panel, mesh, and Home animation regressions pass. [Retained illustration](retained-illustration.png).

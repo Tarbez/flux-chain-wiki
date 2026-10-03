@@ -52,7 +52,7 @@ assert(gate.indexOf('loopbackEquivalentHost(host)') < gate.indexOf('who.sign('),
 assert(/dispose\(\)/.test(entry) && /signOut/.test(entry));
 assert(!/localStorage|sessionStorage|indexedDB/.test(entry), 'the sign-in must not persist anything');
 const account = fs.readFileSync('js/pages/account.js', 'utf8');
-assert(account.includes('ArkAdminAuth.create') && account.includes('page.arkDispose') && account.includes('auth.dispose()'), 'public account must reuse the shared Auth Kit and dispose it on route exit');
+assert(account.includes('ArkAdminAuth.create') && account.includes('page.arkDispose') && account.includes('auth.dispose()'), 'public account must reuse the shared Auth Kit and dispose it on page exit');
 assert(account.includes('Not connected') && account.includes('Not linked') && !/0 FXN|0 Credits/.test(account), 'account must not invent live holdings or standing');
 assert(account.includes("http://127.0.0.1:8766") && account.includes("'/explorer/v1/record'") && account.includes("sourceId: 'identities'") && account.includes('recordId: id'), 'account must use the exact-ID local Miner record contract');
 assert(account.includes("sourceId: 'accounts'") && account.includes('accountId') && account.includes('signed account binding'), 'account must follow a signed identity-to-account binding before showing standing');

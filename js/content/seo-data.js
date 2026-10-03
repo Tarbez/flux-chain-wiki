@@ -39,8 +39,8 @@ ArkSEO.define({
       "canonical": ""
     },
     "about": {
-      "title": "Protocol overview — DEFXN",
-      "description": "Learn how Flux separates shared infrastructure, signed agreement execution, and independently governed networks. Understand what exists and what is unverified.",
+      "title": "How DEFXN works — DEFXN",
+      "description": "See how DEFXN separates network discovery, signed agreement execution, and governance across independently governed networks.",
       "ogImage": "",
       "canonical": ""
     },
@@ -83,6 +83,12 @@ ArkSEO.define({
     "download": {
       "title": "Run Flux from source — DEFXN",
       "description": "Start a local miner from an owner-approved source checkout. Follow prerequisites and verification steps; public binaries remain unverified.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "bundledeployer": {
+      "title": "FXN Bundle Deployer — DEFXN",
+      "description": "Site deployment requires the FXN Bundle Deployer running locally. The CLI is in development. Review what becomes public and how mesh ownership controls maintainer access.",
       "ogImage": "",
       "canonical": ""
     },

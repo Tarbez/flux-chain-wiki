@@ -28,22 +28,18 @@ ArkUI.register('RHEADER_V1', {
     identity.href = ArkUI.route.href('/');
     identity.dataset.sceneLink = 'zero';
     identity.setAttribute('aria-label', 'DEFXN — home');
-    var mark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    mark.setAttribute('class', 'ark-brand-mark');
-    mark.setAttribute('viewBox', '0 0 32 32');
-    mark.setAttribute('width', '32');
-    mark.setAttribute('height', '32');
-    mark.setAttribute('aria-hidden', 'true');
-    mark.setAttribute('focusable', 'false');
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('fill', 'currentColor');
-    path.setAttribute('d', 'M6 5h9c7 0 12 4 12 11s-5 11-12 11H6V5Zm6 6v10h3c4 0 6-2 6-5s-2-5-6-5h-3Z');
-    mark.appendChild(path);
-    identity.appendChild(mark);
+    var lockup = document.createElement('span');
+    lockup.className = 'ark-brand-lockup';
     var wordmark = document.createElement('span');
     wordmark.className = 'ark-brand-wordmark';
     wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');
-    identity.appendChild(wordmark);
+    var descriptor = document.createElement('span');
+    descriptor.className = 'ark-brand-descriptor';
+    descriptor.textContent = 'AGREEMENT FABRIC';
+    descriptor.setAttribute('aria-hidden', 'true');
+    lockup.appendChild(wordmark);
+    lockup.appendChild(descriptor);
+    identity.appendChild(lockup);
     el.appendChild(identity);
 
     var core = document.createElement('nav');
@@ -59,10 +55,43 @@ ArkUI.register('RHEADER_V1', {
       var link = document.createElement('a');
       link.href = ArkUI.route.href(ArkUI.pageCatalog[item[1]].path);
       link.textContent = ArkCopy.text(item[0]);
+      if (item[1] === 'account') {
+        link.classList.add('header-account-link');
+        link.textContent = '';
+        var accountName = document.createElement('span');
+        accountName.className = 'header-account-name';
+        accountName.textContent = 'Account';
+        var accountStatus = document.createElement('span');
+        accountStatus.className = 'header-account-status';
+        accountStatus.textContent = 'Signed out';
+        var accountLabel = document.createElement('span');
+        accountLabel.className = 'header-account-label';
+        accountLabel.appendChild(accountName); accountLabel.appendChild(accountStatus);
+        link.appendChild(accountLabel);
+      }
       if (item[1] === 'download') link.classList.add('header-run-link');
       if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
     });
     el.appendChild(core);
+    function paintAccount(link) {
+      if (!link) return;
+      var who = ArkUI.localIdentity && ArkUI.localIdentity.current();
+      var unlocked = ArkUI.accountSession && ArkUI.accountSession.isUnlocked();
+      var authenticated = who && ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(who.publicKeyB64);
+      link.dataset.signedIn = authenticated ? 'true' : 'false';
+      link.querySelector('.header-account-name').textContent = who ? who.displayName || 'Your account' : 'Account';
+      link.querySelector('.header-account-status').textContent = who ? (authenticated ? 'Signed in' : (unlocked ? 'Key unlocked' : 'Details saved')) : 'Signed out';
+      link.setAttribute('aria-label', who ? (who.displayName || 'Your account') + (authenticated ? ', signed in. Open account' : ', public identity details saved, not signed in. Select your Auth Kit to sign in') : 'Account, signed out. Sign in');
+    }
+    ArkUI.refreshAccountNav = function () {
+      document.querySelectorAll('.header-account-link').forEach(paintAccount);
+    };
+    if (ArkUI.localIdentity && !ArkUI.accountNavSubscribed) {
+      ArkUI.accountNavSubscribed = true;
+      ArkUI.localIdentity.subscribe(function () { ArkUI.refreshAccountNav(); });
+    }
+    // Paint this core before it has been attached to the document.
+    paintAccount(core.querySelector('.header-account-link'));
 
     var toggle = document.createElement('button');
     toggle.className = 'nav-toggle';
@@ -100,7 +129,7 @@ ArkUI.register('RHEADER_V1', {
     menu.replaceChildren();
     var understand = ['zero', 'about', 'resolver', 'deployment'];
     var evaluate = ['explorer', 'account', 'treasury', 'deposits', 'references', 'concept', 'dao'];
-    var run = ['download', 'deploy'];
+    var run = ['download', 'bundledeployer', 'deploy'];
     var read = ['learnings', 'proximity', 'lab'];
     var lifecycle = Object.keys(catalog).filter(function (key) { return key === 'lifecycle' || key.indexOf('lifecycle/') === 0; });
     var mechanics = Object.keys(catalog).filter(function (key) { return key.indexOf('concept/') === 0; });

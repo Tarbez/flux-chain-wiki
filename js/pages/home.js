@@ -93,14 +93,12 @@ ArkUI.pageModules.zero = {
       item.appendChild(link);rail.appendChild(item);
     }); lifecycle.appendChild(rail);
     var insight=document.createElement('p');insight.className='home-cycle-insight';insight.setAttribute('aria-hidden','true');
-    var idle=document.createElement('span');idle.className='home-cycle-insight-idle';idle.textContent='Explore a record in the trail.';insight.appendChild(idle);
+    var idle=document.createElement('span');idle.className='home-cycle-insight-idle';idle.textContent='Select a step to see what it records.';insight.appendChild(idle);
     ArkUI.lifecycleStages.forEach(function(stage,i){var text=document.createElement('span');text.dataset.insight=stage.id;text.textContent=contributions[i];insight.appendChild(text);});
     lifecycle.appendChild(insight);
     var open = document.createElement('a'); open.className = 'home-lifecycle-all';
     open.href = pageHref('lifecycle'); open.dataset.sceneLink = 'lifecycle';open.dataset.icon='arrow-right';
-    open.textContent = 'Follow one agreement →'; lifecycle.appendChild(open);
-    var note = document.createElement('small'); note.className = 'home-cycle-note';
-    note.textContent = 'Illustration / not a live agreement'; lifecycle.appendChild(note);
+    open.textContent = 'Trace one agreement, end to end →'; lifecycle.appendChild(open);
     el.appendChild(lifecycle);
 
     var status = document.createElement('aside');

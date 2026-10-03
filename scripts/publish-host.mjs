@@ -7,20 +7,23 @@
          [--resolver <ark-gateway base URL, default https://gateway.deadark.com, or FLUX_CHAIN_RESOLVER_URL>]
    With none of --storage/--status/--pin/--key it finds a running Ark Miner (Desktop or CLI) itself.
 
-   A local, loopback-only tool, like admin.html itself: it is never
-   deployed. It exists because the admin page (a) may not call the miner
+   Default mode is a local, loopback-only tool. --origin https://<domain>
+   --name <resolved-mesh-name> enables protected domain mode behind a TLS proxy. It exists because the admin page (a) may not call the miner
    itself, since the miner's pin API sends no CORS headers and the page's
    policy forbids network use, and (b) must not hold the miner's credential.
    The host holds that credential; it never holds a signing key. The signed-in
    identity's key lives in the browser and signs between /api/prepare and /api/publish.
-   The admin is locked: nothing of the editor or the API is served without a session
-   that scripts/lib/admin-session.mjs issues after an identity signs the host's challenge.
+   The local launcher opens editing without sign-in on direct loopback requests.
+   Publishing requires a signed identity session. Protected hosts authenticate identity
+   separately and verify maintainer permission against the signed mesh name record.
 
    Anything it serves is read-only project files under the whitelist below.
    Every request must come from a loopback Host, and every POST from this
    same origin, so another web page in your browser cannot drive it.
    ===================================================================== */
 import fs from 'node:fs';
+import { createCmsPermissions } from './lib/cms-permissions.mjs';
+import { readSiteRoutes, createSiteRouteResolver } from './lib/site-routes.mjs';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
 import path from 'node:path';
@@ -68,52 +71,74 @@ function readBody(req) {
 
 export function createHost({ root = defaultProjectRoot, publisher, port, dataDir = null, onNotice = (n) => console.log(`[flux-chain-admin] ${n.message}`),
   resolverBase = process.env.FLUX_CHAIN_RESOLVER_URL || DEFAULT_RESOLVER_BASE, resolveCheck = verifyPublishedResolution,
-  sessions = createSessions({ authorize: (key) => publisher.authorize(key), store: createAdminStore({ dir: dataDir }), onNotice, otpEnabled: OTP_ENABLED }) }) {
+  sessions, permissions, publicBase, localDevelopment = false, deployedOrigin = null, siteRoutes = readSiteRoutes(root) }) {
+  const routeFile = createSiteRouteResolver(siteRoutes);
+  // Injected legacy session managers already enforce owner authorization.
+  permissions = permissions || (sessions ? (key) => publisher.authorize(key) : createCmsPermissions({name:publisher.name,publicBase}));
+  sessions = sessions || createSessions({authorize:async () => {},store:createAdminStore({dir:dataDir}),onNotice,otpEnabled:OTP_ENABLED});
+  const production = deployedOrigin ? new URL(deployedOrigin) : null;
+  if (production && (production.protocol !== 'https:' || production.username || production.password || production.pathname !== '/' || production.search || production.hash)) throw new Error('Deployed CMS origin must be an HTTPS origin.');
+  if (production && localDevelopment) throw new Error('Deployed CMS cannot enable local development access.');
   const loopbackHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
+  if (production) { loopbackHosts.clear(); loopbackHosts.add(production.host); }
+  const cookieFor = (token) => sessionCookie(token, SESSION_MAX_AGE_SECONDS) + (production ? '; Secure' : '');
   const send = (res, status, body, type = 'application/json') => {
     res.writeHead(status, { 'content-type': type, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' });
     res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body));
   };
 
-  function serveFile(res, pathname, session) {
+  async function serveFile(res, pathname, session, localAccess) {
     let requested;
-    try { requested = decodeURIComponent(pathname === '/' ? '/admin.html' : pathname).replace(/^\/+/, ''); } catch { return send(res, 404, { ok: false, error: 'NOT_FOUND' }); }
+    try { requested = decodeURIComponent(pathname === '/admin' ? '/admin.html' : routeFile(pathname)).replace(/^\/+/, ''); } catch { return send(res, 404, { ok: false, error: 'NOT_FOUND' }); }
     if (requested.includes('\0')) return send(res, 404, { ok: false, error: 'NOT_FOUND' });
     // Judge where the path RESOLVES, not what it says: `js/../scripts/x` starts with an allowed directory and is not in one.
     const file = path.resolve(root, requested);
     const relative = path.relative(root, file).split(path.sep).join('/');
     const allowed = SERVED.includes(relative) || (SERVED_DIRS.includes(relative.split('/')[0]) && relative.includes('/'));
     if (!allowed || relative.startsWith('..')) return send(res, 404, { ok: false, error: 'NOT_FOUND' });
-    if (isLockedAsset(relative) && !session) {
+    if (isLockedAsset(relative) && !session && !localAccess) {
       return send(res, 401, '<!doctype html><meta charset="utf-8"><title>Locked</title><p>The Flux Protocol admin is locked. <a href="/admin.html">Sign in</a>.</p>', 'text/html; charset=utf-8');
     }
+    if (isLockedAsset(relative) && !localAccess) await permissions(session.publicKeyB64);
     fs.readFile(file, (error, data) => (error ? send(res, 404, { ok: false, error: 'NOT_FOUND' }) : send(res, 200, data, TYPES[path.extname(file)] || 'application/octet-stream')));
   }
 
   const server = http.createServer(async (req, res) => {
     try {
-      if (!loopbackHosts.has(req.headers.host || '')) return send(res, 403, { ok: false, error: 'HOST_NOT_LOOPBACK' });
+      if (!loopbackHosts.has(req.headers.host || '')) return send(res, 403, { ok: false, error: production ? 'HOST_NOT_CONFIGURED' : 'HOST_NOT_LOOPBACK' });
       const url = new URL(req.url, `http://127.0.0.1:${port}`);
+      if (url.pathname === '/index.html' && req.method === 'GET') {
+        res.writeHead(308, { location: '/' + url.search, 'cache-control': 'no-store' });
+        return res.end();
+      }
+      if (url.pathname === '/admin/' && req.method === 'GET') {
+        res.writeHead(308, { location: '/admin' + url.search, 'cache-control': 'no-store' });
+        return res.end();
+      }
+      if (url.pathname !== '/' && url.pathname.endsWith('/') && siteRoutes.has(url.pathname.replace(/\/+$/, '')) && req.method === 'GET') {
+        res.writeHead(308, {location:url.pathname.replace(/\/+$/, '') + url.search,'cache-control':'no-store'});
+        return res.end();
+      }
+      const localAccess = localDevelopment && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress) && !req.headers.forwarded && !req.headers['x-forwarded-for'] && !req.headers['x-forwarded-host'];
       const token = readSessionToken(req.headers.cookie);
       const session = sessions.get(token);
-      if (!url.pathname.startsWith('/api/')) return req.method === 'GET' ? serveFile(res, url.pathname, session) : send(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
+      if (!url.pathname.startsWith('/api/')) return req.method === 'GET' ? await serveFile(res, url.pathname, session, localAccess) : send(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
 
       if (req.method === 'POST') {
         const origin = req.headers.origin;
-        if (origin && !loopbackHosts.has(new URL(origin).host)) return send(res, 403, { ok: false, error: 'CROSS_ORIGIN' });
+        if ((production && origin !== production.origin) || (origin && !production && (!loopbackHosts.has(new URL(origin).host) || new URL(origin).protocol !== 'http:'))) return send(res, 403, { ok: false, error: 'CROSS_ORIGIN' });
         if (!/^application\/json\b/.test(req.headers['content-type'] || '')) return send(res, 415, { ok: false, error: 'JSON_ONLY' });
       }
       // Public: who is asking, and the way in. Nothing here reveals anything about the site or the miner.
-      if (url.pathname === '/api/session' && req.method === 'GET') return send(res, 200, { ok: true, name: publisher.name, authenticated: !!session, publicKeyB64: session ? session.publicKeyB64 : null });
+      if (url.pathname === '/api/session' && req.method === 'GET') return send(res, 200, { ok: true, name: publisher.name, ...(localAccess ? {localDevelopment:true} : {}), authenticated: !!session, publicKeyB64: session ? session.publicKeyB64 : null });
       if (url.pathname === '/api/session/challenge' && req.method === 'POST') return send(res, 200, { ok: true, ...sessions.challenge(req.headers.host) });
-      // Step 1+2 (sign the challenge, then the owner check): proves who is asking, but issues a TICKET, never a
-      // cookie -- unless OTP_ENABLED is off, in which case a proven, authorized identity IS the session (see
-      // the constant above): this route then sets the cookie itself, same as /api/session/otp normally does.
+      // Identity proof issues the session. CMS ownership is checked separately.
+      // With OTP enabled this issues a ticket until the code is verified.
       if (url.pathname === '/api/session/login' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req) || '{}');
         const made = await sessions.login({ publicKeyB64: body.publicKeyB64, nonce: body.nonce, signatureB64: body.signature, label: body.label });
         if (made.session) {
-          res.setHeader('set-cookie', sessionCookie(made.session.token, SESSION_MAX_AGE_SECONDS));
+          res.setHeader('set-cookie', cookieFor(made.session.token));
           return send(res, 200, { ok: true, done: true, publicKeyB64: made.session.publicKeyB64, lastSignIn: made.session.lastSignIn, enrolled: made.session.enrolled });
         }
         return send(res, 200, { ok: true, ...made });
@@ -122,16 +147,23 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       if (url.pathname === '/api/session/otp' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req) || '{}');
         const made = sessions.verifyOtp({ ticket: body.ticket, code: body.code, hostCode: body.hostCode });
-        res.setHeader('set-cookie', sessionCookie(made.token, SESSION_MAX_AGE_SECONDS));
+        res.setHeader('set-cookie', cookieFor(made.token));
         return send(res, 200, { ok: true, publicKeyB64: made.publicKeyB64, lastSignIn: made.lastSignIn, enrolled: made.enrolled });
       }
       if (url.pathname === '/api/session/logout' && req.method === 'POST') {
         sessions.end(token);
-        res.setHeader('set-cookie', clearedSessionCookie());
+        res.setHeader('set-cookie', clearedSessionCookie() + (production ? '; Secure' : ''));
         return send(res, 200, { ok: true });
       }
+      if (url.pathname === '/api/cms/access' && req.method === 'GET') {
+        if (localAccess) return send(res,200,{ok:true,authorized:true,source:'local-development'});
+        if (!session) return send(res,401,{ok:false,error:'Sign in to check CMS access.'});
+        try { return send(res,200,{ok:true,...await permissions(session.publicKeyB64),authorized:true}); }
+        catch (error) { return send(res,200,{ok:true,authorized:false,error:error.message,missing:error.missing,remedy:error.remedy}); }
+      }
       // Everything else is for a signed-in identity only.
-      if (!session) return send(res, 401, { ok: false, error: 'The admin is locked. Sign in with your recovery file first.', failure: 'No one is signed in.', missing: 'a signed-in identity.', remedy: 'open /admin.html and sign in with your recovery file (.auth.flx).' });
+      if (!session && (!localAccess || ['/api/prepare','/api/publish'].includes(url.pathname))) return send(res, 401, { ok: false, error: 'The admin is locked. Sign in with your recovery file first.', failure: 'No one is signed in.', missing: 'a signed-in identity.', remedy: 'open /admin.html and sign in with your recovery file (.auth.flx).' });
+      if (!localAccess) await permissions(session.publicKeyB64);
       if (url.pathname === '/api/status' && req.method === 'GET') return send(res, 200, { ok: true, ...(await publisher.status()) });
       if (url.pathname === '/api/site' && req.method === 'GET') return send(res, 200, { ok: true, ...(await publisher.fetchSite()) });
       if (url.pathname === '/api/prepare' && req.method === 'POST') {
@@ -168,8 +200,9 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
 /* The program is a function, so importing this file for its exports runs nothing. */
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.origin && typeof args.name !== 'string') throw new Error('Domain CMS requires --name with this deployment’s resolved mesh name.');
   const port = Number(args.port) || 3437;
-  const url = `http://127.0.0.1:${port}/admin.html`;
+  const url = args.origin ? new URL('/admin', args.origin).href : `http://127.0.0.1:${port}/admin`;
   const publisher = publisherFromArgs(args, defaultProjectRoot);
   const openPage = () => {
     if (!args.open || process.env.FLUX_CHAIN_NO_OPEN) return;
@@ -177,7 +210,7 @@ async function main() {
   };
   const dataDir = typeof args.data === 'string' ? args.data : defaultDataDir();
   const resolverBase = typeof args.resolver === 'string' ? args.resolver : (process.env.FLUX_CHAIN_RESOLVER_URL || DEFAULT_RESOLVER_BASE);
-  const server = createHost({ root: defaultProjectRoot, publisher, port, dataDir, resolverBase });
+  const server = createHost({ root: defaultProjectRoot, publisher, port, dataDir, resolverBase, localDevelopment:!args.origin, deployedOrigin:typeof args.origin === 'string' ? args.origin : null });
   server.on('error', async (error) => {
     if (error.code !== 'EADDRINUSE') { console.error(error.message); process.exitCode = 1; return; }
     // Launching twice is normal ("I double-clicked it again"): if it is this tool already, just show the page.
@@ -186,9 +219,9 @@ async function main() {
     else { console.error(`Port ${port} is in use by something else. Pass --port <another>.`); process.exitCode = 1; }
   });
   server.listen(port, '127.0.0.1', async () => {
-    console.log(`Flux Protocol publish host: ${url}  (name ${publisher.name}; loopback only). Close this window to stop it.`);
+    console.log(`Flux Protocol publish host: ${url}  (name ${publisher.name}; ${args.origin ? 'protected domain mode' : 'local development'}). Close this window to stop it.`);
     const status = await publisher.status();
-    console.log(status.reachable ? `Miner: ${status.miner?.label || status.miner?.statusBase}${status.miner?.networkId ? ` (network ${status.miner.networkId})` : ''}.` : `No miner yet: ${status.detail}`);
+    console.log(status.reachable ? `Miner: ${status.miner?.label || status.miner?.statusBase}${status.miner?.networkId ? ` (network ${status.miner.networkId})` : ''}.` : `Publishing connection unavailable: ${status.detail}`);
     openPage();
   });
 }

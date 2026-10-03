@@ -1627,6 +1627,7 @@
   });
   $('meshRefresh').addEventListener('click', refreshMesh);
   $('meshNav').addEventListener('click', selectMesh);
+  if (gate.localDevelopment && gate.localDevelopment()) { $('signOut').textContent = 'Sign out identity'; $('signOut').title = 'Drop the identity and signing key; local editing remains open.'; }
   $('signOut').addEventListener('click', function () { gate.signOut(); });
   /* the locked page asks before it signs out over unsaved work */
   window.ArkAdminApp = { unsaved: function () { return anyDirty(); } };

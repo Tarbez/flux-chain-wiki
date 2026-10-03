@@ -8,12 +8,29 @@ for (const phrase of ['Focus', 'Context', 'Inner detail', 'Only one semantic lay
 
 const sheet = fs.readFileSync('js/pages/sheet.js', 'utf8');
 const about = fs.readFileSync('js/pages/about.js', 'utf8');
+const deployment = fs.readFileSync('js/pages/deployment.js', 'utf8');
+const continuity = fs.readFileSync('js/ark/panel-continuity.js', 'utf8');
 assert(sheet.includes("'← Operating model'"), 'mechanism pages name their actual parent');
 assert(sheet.includes("'story-depth'"), 'the same frame owns depth choices');
 assert(sheet.includes("copy.replaceChildren()"), 'requesting detail replaces the answer surface');
 assert(sheet.includes("'mechanism-status-summary'"), 'current status stays outside the replaceable surface');
 assert(sheet.includes("'?view='") && sheet.includes("'&step='"), 'mechanism depth and detail are addressable');
-assert(about.includes("ArkUI.sheet('about','about')"), 'overview uses the shared guided reading contract');
+assert(about.includes("'details', 'about-context'"), 'overview keeps the three-layer model behind requested context');
+assert(about.includes("'about-primary-action'"), 'overview exposes one dominant next movement');
+assert(about.includes("'details', 'about-reference'"), 'overview keeps evidence and verification behind a named disclosure');
+assert(about.includes("'about-boundary'"), 'overview keeps the essential source boundary visible before disclosure');
+assert(deployment.includes("'how-work-cards'"), 'how it works retains its own three-part journey composition');
+assert(deployment.includes("'how-work-mesh-frame'"), 'each how-it-works chapter owns a mesh illustration');
+assert(deployment.includes("'how-simple-footer'"), 'how it works keeps its implementation boundary visible');
+assert(continuity.includes("panelPage === 'deployment' || panelPage === 'explorer' ? 1600"), 'how it works and the mesh observatory receive a wider desktop canvas than detail pages');
+
+const explorer = fs.readFileSync('js/pages/explorer.js', 'utf8');
+assert(explorer.includes('mesh-observatory'), 'explorer renders a dedicated observatory surface');
+assert(explorer.includes('data-explorer-source-field'), 'explorer renders the catalog as a source field');
+assert(explorer.includes('sourceAccess'), 'explorer derives access states from the real catalog');
+assert(explorer.includes('mesh-explorer-secondary'), 'explorer keeps dense operational detail behind disclosure');
+assert(explorer.includes('mesh-observatory-dock'), 'explorer keeps secondary observation layers in a compact interactive dock');
+assert(explorer.includes("other.open = false"), 'opening one observatory layer closes the others');
 
 const lifecycle = fs.readFileSync('js/pages/lifecycle.js', 'utf8');
 assert(lifecycle.includes("'02 / Agreement lifecycle'"), 'lifecycle overview is layer two');

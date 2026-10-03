@@ -21,16 +21,7 @@ ArkTheme.define({
     "dash-on": "#eaeaef"
   },
   "activeTheme": "ghost",
-  "themes": {
-    "ghost": {
-      "primary": "195 50% 36%",
-      "complement": "157 52% 27%",
-      "accent": "228 35% 40%",
-      "accent-subtle": "244 52% 51%",
-      "live": "244 44% 35%",
-      "badge": "228 31% 47%"
-    }
-  },
+  "themes": {},
   "background": {
     "style": "none"
   }

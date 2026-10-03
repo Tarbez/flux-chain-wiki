@@ -5,6 +5,7 @@ const vm = require('node:vm');
 const tokens = {
   'text-strong': '215 34% 95%',
   'text-muted': '216 16% 52%',
+  complement: '268 75% 72%',
   accent: '38 90% 64%',
   primary: '183 75% 62%'
 };
@@ -153,7 +154,7 @@ assert(staticLabels.length - labelsBeforeStage > 100, 'zoomed field retains popu
 assert.equal(activityStrokes, 0, 'stage content has no stroked panel or box layer');
 paintedLines = [];
 themeChanged();
-assert(paintedLines.includes('hsl(218 38% 17% / 0.31)'), 'theme change keeps the zoomed field rendered');
+assert(paintedLines.includes(majorLine), 'theme change keeps the zoomed field rendered');
 mounted[1].listeners.keydown({ key: 'ArrowRight', preventDefault() {} });
 assert(mounted[1].attrs['aria-label'].includes('Record: record'), 'keyboard navigation changes the focused canvas detail');
 

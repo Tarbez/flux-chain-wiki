@@ -55,10 +55,22 @@
     var hooks = [], cleanups = new Map();
     var presence = ArkUI.createPresence(mounted);
     var continuity = ArkUI.createPanelContinuity && scene.getBoundingClientRect ? ArkUI.createPanelContinuity(scene) : null;
+    var stageRetention=ArkUI.createStageRetention&&scene.getBoundingClientRect?ArkUI.createStageRetention(scene):null;
     var lifecycleTiming = ArkUI.lifecycleTransition;
     var active = null, request = 0, commit = 0, requested = 'zero', requestedSettings = {};
     var report = function () {};
     function isLifecycle(page) { return page === 'lifecycle' || page.indexOf('lifecycle/') === 0; }
+    function isLifecycleStage(page) { return String(page).indexOf('lifecycle/') === 0; }
+    function animateLifecycleInformation(el, immediate) {
+      if (immediate || !el || !el.querySelectorAll) return Promise.resolve();
+      var targets = Array.from(el.querySelectorAll('.story-kicker,.lifecycle-answer h1,.lifecycle-view,.lifecycle-boundary,.lifecycle-next'));
+      var runs = targets.filter(function (item) { return typeof item.animate === 'function'; }).map(function (item) {
+        return item.animate([{ transform:'translate3d(0,4px,0)' }, { transform:'translate3d(0,0,0)' }], {
+          duration:180, easing:'cubic-bezier(.2,.65,.2,1)'
+        });
+      });
+      return Promise.all(runs.map(function (run) { return run.finished.catch(function () {}); }));
+    }
     function url(page) { return ArkUI.route.href(catalog[page].path); }
     function resolve(address) {
       var path = String(address == null || address === '' ? '/' : address).replace(/^#/, '').split('?')[0];
@@ -107,6 +119,7 @@
       var ticket = ++request; requested = page; requestedSettings = settings;
       var run = null;
       if (page === active) {
+        if(stageRetention)stageRetention.restore();
         if (page === 'reference') {
           try {
             var reader = await modules.get(page);
@@ -164,12 +177,14 @@
         var immediate = state.get().paused || ArkUI.prefersReducedMotion();
         scene.dataset.transition = 'running';
         var outgoing = active;
+        var stageSwap = isLifecycleStage(outgoing) && isLifecycleStage(page);
         var panel = continuity && continuity.begin(outgoing, page, mounted, settings.source, immediate);
-        var zoomTransition = !panel && !immediate && outgoing && (isLifecycle(outgoing) || isLifecycle(page));
+        var zoomTransition = !stageSwap && !panel && !immediate && outgoing && (isLifecycle(outgoing) || isLifecycle(page));
         if (state.lifecycleRun) state.lifecycleRun.cancel();
+        if(stageRetention)stageRetention.hold(mounted[outgoing],mounted[page],immediate || stageSwap);
         // Outgoing content must leave under its OWN route styles. Switching the
         // ancestor's data-page first reflows home cards into the incoming layout.
-        if (outgoing) await presence.hide(outgoing, immediate, zoomTransition ? { duration: lifecycleTiming.fadeMs, quick: true } : undefined);
+        if (outgoing) await presence.hide(outgoing, immediate || stageSwap, zoomTransition ? { duration: lifecycleTiming.fadeMs, quick: true } : undefined);
         if (ticket !== request) return false;
         // Discard interrupted exits as well: no third page may leak into this handoff.
         Object.keys(mounted).forEach(function (key) { if (key !== page) remove(key); });
@@ -187,13 +202,21 @@
         }
         report('', false); outlet.setAttribute('aria-busy', 'false');
         var panelRun = panel ? panel.commit(mounted[page], immediate) : Promise.resolve();
+        if(stageRetention)stageRetention.commit(mounted[page]);
         var entering;
-        if (zoomTransition) {
+        if (stageSwap) {
+          entering = presence.show(page, true).then(function () {
+            if (stageRetention) stageRetention.activate(mounted[page]);
+            return animateLifecycleInformation(mounted[page], immediate);
+          });
+        } else if (zoomTransition) {
           // The old page has already exited under its own styles. Reveal the
           // new page as the mesh begins moving; waiting for its late overlap
           // marker leaves a conspicuous blank content interval.
           entering = presence.enter(page, false, { duration: lifecycleTiming.fadeMs, quick: true });
-        } else entering = presence.show(page, immediate);
+        } else entering = presence.show(page, immediate).then(function () {
+          if (stageRetention) stageRetention.activate(mounted[page]);
+        });
         // Reveal sets up its first animation frame synchronously. Restore scroll
         // now, before it paints, rather than jumping after the entry completes.
         restoreScroll(page);
@@ -208,6 +231,7 @@
         return true;
       } catch (error) {
         if (ticket !== request) return false;
+        if(stageRetention)stageRetention.restore();
         outlet.setAttribute('aria-busy', 'false');
         scene.classList.remove('is-lifecycle-transition');
         if (run && state.lifecycleRun === run) { run.cancel(); state.lifecycleRun = null; }

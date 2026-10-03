@@ -157,6 +157,12 @@
     function targets(el) {
       if (!el.querySelectorAll) return [];
       var matches = Array.from(el.querySelectorAll(el.dataset.arkPage === 'zero' ? homeItems : pageItems));
+      // A lifecycle illustration's border never belongs to a fading ancestor.
+      // Animate the answer and the illustration's contents as separate targets.
+      if(el.querySelector('.stage-scene')){
+        matches=matches.map(function(item){return item.classList.contains('lifecycle-dashboard-body')?item.querySelector('.lifecycle-answer'):item;}).filter(Boolean);
+        matches=matches.concat(Array.from(el.querySelector('.stage-scene').children));
+      }
       return matches.filter(function (item) {
         for (var current = item; current && current !== el; current = current.parentElement) {
           if (current.hidden) return false;

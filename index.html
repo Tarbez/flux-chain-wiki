@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com; object-src 'none'; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Run your own network — DEFXN</title>
@@ -26,26 +26,32 @@
 <link rel="stylesheet" href="css/zero-webgl.css" />
 <link rel="stylesheet" href="css/lattice.css" />
 <link rel="stylesheet" href="css/learnings.css" />
-<link rel="stylesheet" href="css/navigation.css?v=20261002-story59" />
+<link rel="stylesheet" href="css/navigation.css?v=20261003-alignment98" />
 <link rel="stylesheet" href="css/focus.css" />
-<link rel="stylesheet" href="css/settings.css?v=20261002-story59" />
+<link rel="stylesheet" href="css/settings.css?v=20261003-alignment98" />
 <link rel="stylesheet" href="css/page-layout.css?v=20260930" />
 <link rel="stylesheet" href="css/home.css" />
 <link rel="stylesheet" href="css/resolver-guide.css" />
 <link rel="stylesheet" href="css/site-direction.css?v=20260930" />
 <link rel="stylesheet" href="css/article-reading.css?v=20260930" />
 <link rel="stylesheet" href="css/document-flow.css" />
-<link rel="stylesheet" href="css/experience.css?v=20261002-story59" />
+<link rel="stylesheet" href="css/experience.css?v=20261003-alignment98" />
 <link rel="stylesheet" href="css/explorer.css?v=20260930c" />
 <link rel="stylesheet" href="css/economy-preview.css?v=20260930c" />
-<link rel="stylesheet" href="css/account.css?v=20261002-story59" />
-<link rel="stylesheet" href="css/home-drafting.css?v=20261002-story59" />
-<link rel="stylesheet" href="css/lifecycle.css?v=20261002-story59" />
-<link rel="stylesheet" href="css/reference.css?v=20261002-story59" />
-<link rel="stylesheet" href="css/guided-page.css?v=20261002-story59" />
-  <link rel="stylesheet" href="css/task-page.css?v=20261002-story59">
-<link rel="stylesheet" href="css/icons.css?v=20261002-story59">
-<link rel="stylesheet" href="css/story-diagrams.css?v=20261002-story59">
+<link rel="stylesheet" href="css/home-drafting.css?v=20261003-insight101" />
+<link rel="stylesheet" href="css/lifecycle.css?v=20261003-alignment98" />
+<link rel="stylesheet" href="css/reference.css?v=20261003-alignment98" />
+<link rel="stylesheet" href="css/guided-page.css?v=20261003-alignment98" />
+<link rel="stylesheet" href="css/about.css?v=20261003-about110" />
+  <link rel="stylesheet" href="css/task-page.css?v=20261003-alignment98">
+<link rel="stylesheet" href="css/account.css?v=20261003-alignment98" />
+<link rel="stylesheet" href="css/icons.css?v=20261003-alignment98">
+<link rel="stylesheet" href="css/story-diagrams.css?v=20261003-alignment98">
+<link rel="stylesheet" href="css/color-system.css?v=20261003-alignment98" />
+<link rel="stylesheet" href="css/brand-identity.css?v=20261003-alignment98" />
+<link rel="stylesheet" href="css/bundle-deployer.css?v=20261003-deployerui">
+<link rel="stylesheet" href="css/how-overview.css?v=20261003-how114">
+<link rel="stylesheet" href="css/explorer-observatory.css?v=20261003-explorer127">
 </head>
 <body>
 
@@ -90,9 +96,9 @@
 
 <!-- 2. runtime: atomizer -> flux parser -> prop readers -> registry/renderer -->
 <script src="js/content/manifest.js" defer></script>
-<script src="js/content/manifests/index.js?v=20261002-story59"></script>
+<script src="js/content/manifests/index.js?v=20261003-how112"></script>
 <!-- Refresh the editable navigation manifest after the generated manifest list. -->
-<script src="js/content/manifests/nav.js?v=20261002-story59" defer></script>
+<script src="js/content/manifests/nav.js?v=20261003-alignment98" defer></script>
 <script src="js/content/assets.js" defer></script>
 <script src="js/content/assets/index.js"></script>
 <script src="js/content/secrets.js" defer></script>
@@ -102,23 +108,26 @@
 <script src="js/ark/props.js" defer></script>
 <script src="js/ark/runtime.js" defer></script>
 <script src="js/ark/route.js" defer></script>
+<script src="js/ark/local-identity.js?v=20261003-alignment98" defer></script>
+<script src="js/ark/cms-session.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/vendor/engines.js" defer></script>
-<script src="js/ark/story-diagrams.js?v=20261002-story59" defer></script>
-<script src="js/ark/mesh-fabric.js?v=20261002-story59" defer></script>
-<script src="js/ark/icons.js?v=20261002-story59" defer></script>
+<script src="js/ark/story-diagrams.js?v=20261003-alignment98" defer></script>
+<script src="js/ark/stage-scenes.js?v=20261003-lifecycle103" defer></script>
+<script src="js/ark/mesh-fabric.js?v=20261003-alignment98" defer></script>
+<script src="js/ark/icons.js?v=20261003-alignment98" defer></script>
 <script src="js/content/learnings.js" defer></script>
 <script src="js/content/article-index.js" defer></script>
-<script src="js/content/seo.js?v=20261002-story59" defer></script>
-<script src="js/content/seo-data.js?v=20261002-story59" defer></script>
+<script src="js/content/seo.js?v=20261003-alignment98" defer></script>
+<script src="js/content/seo-data.js?v=20261003-about105" defer></script>
 <script src="js/ark/text-scramble.js" defer></script>
 <script src="js/ark/text-presence.js" defer></script>
-<script src="js/pages/catalog.js?v=20261002-story59" defer></script>
-<script src="js/ark/scene-state.js?v=20261002-story59" defer></script>
+<script src="js/pages/catalog.js?v=20261003-bundledeployer" defer></script>
+<script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/ark/page-loader.js?v=20261002-story59" defer></script>
+<script src="js/ark/page-loader.js?v=20261003-explorer127" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
-<script src="js/ark/panel-continuity.js?v=20261002-story59" defer></script>
-<script src="js/ark/page-router.js?v=20261002-story59" defer></script>
+<script src="js/ark/panel-continuity.js?v=20261003-explorer127" defer></script>
+<script src="js/ark/page-router.js?v=20261003-lifecycle103" defer></script>
 
 <!-- 3. the grain painter the halo resolver calls -->
 <script src="js/halo/grain.js" defer></script>
@@ -128,7 +137,7 @@
 <script src="js/resolvers/scene.js" defer></script>
 <script src="js/resolvers/halo.js" defer></script>
 <script src="js/resolvers/veil.js" defer></script>
-<script src="js/resolvers/header.js?v=20261002-story59" defer></script>
+<script src="js/resolvers/header.js?v=20261003-bundledeployer" defer></script>
 <script src="js/resolvers/nav.js?v=2" defer></script>
 <script src="js/resolvers/body.js" defer></script>
 
@@ -145,8 +154,8 @@
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
 <script src="js/zero-webgl.js?v=12" defer></script>
-<script src="js/hero-motion.js?v=20261002-story59" defer></script>
-<script src="js/lattice.js?v=20261002-story59" defer></script>
-<script src="js/settings/panel.js" defer></script>
+<script src="js/hero-motion.js?v=20261003-alignment98" defer></script>
+<script src="js/lattice.js?v=20261003-alignment98" defer></script>
+<script src="js/settings/panel.js?v=20261003-alignment98" defer></script>
 </body>
 </html>

@@ -4,8 +4,8 @@
 
   ArkUI.lifecycleContent = {
     intent: {
-      lead: 'Example: a client asks a provider to replicate a named dataset snapshot.',
-      heading: 'State the exact need.',
+      lead: 'Example: you ask someone to copy one named snapshot of a dataset.',
+      heading: 'Say what you need.',
       body: 'The client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. Later records can now refer to this request by CID instead of relying on a conversation or global queue position.',
       note: 'What is still not true: no provider has committed, no work has occurred, and no result has been checked.',
       facts: [
@@ -16,8 +16,8 @@
       ]
     },
     offer: {
-      lead: 'A provider proposes how it will replicate that exact snapshot and under which terms.',
-      heading: 'Answer the request precisely.',
+      lead: 'A provider offers to copy the snapshot and explains the proposed terms.',
+      heading: 'Consider their proposal.',
       body: 'The provider signs an offer that references the intent CID. The terms stay attached to the request they answer, so the client can inspect capability, constraints, and proposed evidence before accepting anything.',
       note: 'What is still not true: a signed offer is a proposal, not a shared agreement or proof of capacity.',
       facts: [
@@ -28,8 +28,8 @@
       ]
     },
     agreement: {
-      lead: 'The client and provider record the accepted match between request and offer.',
-      heading: 'Commit to the shared terms.',
+      lead: 'You and the provider record the same accepted terms for the job.',
+      heading: 'Agree on what comes next.',
       body: 'The signed agreement links the accepted intent and offer. It defines what fulfillment will be checked against while unrelated agreements continue independently.',
       note: 'What is still not true: accepted terms do not prove the replication happened or that downstream settlement occurred.',
       facts: [
@@ -40,8 +40,8 @@
       ]
     },
     fulfillment: {
-      lead: 'The provider submits the result and evidence for the requested replication.',
-      heading: 'Show what was produced.',
+      lead: 'The provider shares the result and the evidence required by the agreed terms.',
+      heading: 'Open the result package.',
       body: 'The fulfillment record references the agreement and carries the result evidence defined by its terms. The work remains attached to the request, provider, and policy that gave it meaning.',
       note: 'What is still not true: submission is not acceptance, semantic truth, or proof of every downstream effect.',
       facts: [
@@ -52,8 +52,8 @@
       ]
     },
     receipt: {
-      lead: 'The verifying participant records the outcome under the identified checker and authority rules.',
-      heading: 'Close the evidence trail.',
+      lead: 'The checking participant records the outcome under the identified rules and authority.',
+      heading: 'Read the checking decision.',
       body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification without reconstructing a global block order.',
       note: 'What is still not true: a receipt is not universal truth, legal finality, treasury settlement, or production-readiness evidence.',
       facts: [
@@ -107,6 +107,14 @@
       boundary.appendChild(ArkUI.el('strong', '', id ? 'Not yet established' : 'Status / Partial'));
       boundary.appendChild(ArkUI.el('p', '', id ? copy.note.replace('What is still not true: ', '') : 'Implemented in source. Full public production automation and economic settlement remain unverified.'));
       answer.appendChild(boundary); body.appendChild(answer);
+      var unique=id&&ArkUI.createStageScene?ArkUI.createStageScene(id,copy):null;
+      var previewStage=id||'receipt';
+      if(unique){
+        el.classList.add('lifecycle-unique');body.appendChild(unique.element);el.appendChild(body);el.appendChild(trail);
+        ArkUI.lifecycleStages.forEach(function(item,i){var a=trail.children[i];a.addEventListener('pointerenter',function(){unique.preview(item.id);});a.addEventListener('focus',function(){unique.preview(item.id);});});
+        trail.addEventListener('pointerleave',function(){unique.preview(id);});
+        trail.addEventListener('focusout',function(event){if(!trail.contains||!trail.contains(event.relatedTarget))unique.preview(id);});
+      }else{
       var illustration = ArkUI.el('figure', 'lifecycle-object');
       illustration.setAttribute('aria-label', 'Illustrative reference fabric, not a live agreement');
       var figureTop=ArkUI.el('div','lifecycle-fabric-top');
@@ -136,6 +144,8 @@
       function resetPreview(){previewRecord(id||'receipt');if(!id){count.textContent='05';figureTitle.textContent='Five records. One reference trail.';preview.textContent='Each signed record adds a reference to the same agreement.';}}
       trail.addEventListener('pointerleave',resetPreview);
       trail.addEventListener('focusout',function(event){if(!trail.contains||!trail.contains(event.relatedTarget))resetPreview();});
+
+      }
       var next = ArkUI.el('nav', 'lifecycle-next'); next.setAttribute('aria-label', 'Continue the story');
       if (id && index > 0) next.appendChild(link('← ' + ArkUI.lifecycleStages[index - 1].title, 'lifecycle/' + ArkUI.lifecycleStages[index - 1].id));
       var nextStage = id ? ArkUI.lifecycleStages[index + 1] : stage;
@@ -179,8 +189,8 @@
       }
       select(0, false); restore();
       window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
-      el.arkDispose = function () { fabric.dispose();window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
-      host.appendChild(el);paintFabric(previewStage);return el;
+      el.arkDispose = function () { if(unique)unique.dispose();else fabric.dispose();window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
+      host.appendChild(el);if(unique)unique.start();else fabric.select(previewStage,false);return el;
     }
   };
 })();

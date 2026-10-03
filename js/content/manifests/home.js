@@ -10,7 +10,7 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "For protocol teams and technical operators"
+      "value": "Define your rules - peer-to-peer at every layer"
     },
     "EYEBROW": {
       "label": "Eyebrow",
@@ -28,7 +28,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Define your rules. Run signed agreements without a global block order. Available in source; isolation currently covers miner presence only. Production activation and public binaries remain unverified."
+      "value": "Settle through signed agreements without a global block order required. DEFXN decentralizes all the way down, the fabric mesh included. We hold power over nothing we did not create."
     },
     "STEP": {
       "label": "Label on the ring pill",

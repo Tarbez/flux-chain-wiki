@@ -2,10 +2,10 @@
 .story-drawing {display:block;width:100%;height:auto;overflow:visible;color:hsl(var(--text));}
 .story-drawing :is(path,rect,circle) {fill:none;stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke;}
 .story-drawing .drawing-line {stroke:hsl(var(--text-muted));}
-.story-drawing .drawing-thread {stroke:hsl(var(--complement) / .65);}
+.story-drawing .drawing-thread {stroke:hsl(var(--primary) / .65);}
 .story-drawing .drawing-mesh {stroke:hsl(var(--text-muted) / .32);stroke-width:.7;}
 .story-drawing .drawing-register {stroke:hsl(var(--text-muted) / .6);}
-.story-drawing .drawing-boundary {stroke:hsl(var(--complement) / .8);fill:hsl(var(--complement) / .035);}
+.story-drawing .drawing-boundary {stroke:hsl(var(--primary) / .8);fill:hsl(var(--primary) / .035);}
 .story-drawing .drawing-dashed {stroke:hsl(var(--reference) / .75);stroke-dasharray:3 4;}
 .story-drawing .drawing-point {fill:hsl(var(--text-strong));stroke:none;}
 .story-drawing :is(.drawing-trace,.drawing-accent) {stroke:hsl(var(--primary));stroke-width:1.5;}

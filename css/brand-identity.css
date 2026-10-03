@@ -1,0 +1,19 @@
+/* The brand is the existing block fabric, not a separate ornament system.
+   Canvas cells and arrangements come directly from createMeshFabric. */
+.ark-background-host {mask-image:linear-gradient(90deg,#000,transparent 30%,transparent 72%,#000);}
+#scene .hero-alive .ark-background-host {display:block !important;}
+#scene .lattice-field {opacity:calc(var(--pattern-visibility,.6) * .3) !important;}
+.lattice-activity {opacity:calc(var(--pattern-visibility,.6) * .5);}
+.defxn-brand-field {position:absolute;inset:0;z-index:5;pointer-events:none;opacity:var(--pattern-visibility,.6);mask-image:linear-gradient(90deg,#000,transparent 25%,transparent 76%,#000);}
+.defxn-brand-mesh {display:block;width:100%;height:100%;}
+#scene .home-headline-network {letter-spacing:-.065em;}
+#scene .home-lifecycle {border:1px solid hsl(var(--border-default));border-radius:2px;background:hsl(var(--surface) / .8);box-shadow:none;}
+#scene .home-primary-cta,#scene .home-ghost-cta {border-radius:2px;}
+.settings-panel,.settings-panel .settings-choice {border-radius:2px;}
+@media(max-width:760px) {.defxn-brand-field {opacity:calc(var(--pattern-visibility,.6) * .7);}}
+
+.settings-range:disabled,.settings-action:disabled{opacity:.35;cursor:default;}
+
+:root[data-motif="none"] #scene .lattice-field,:root[data-motif="none"] #scene .lattice-activity{display:none!important;}
+.settings-choice[aria-checked="true"]{background:hsl(var(--reference) / .16);color:hsl(var(--reference));}
+:root[data-motif="none"] .defxn-brand-field{display:none;}

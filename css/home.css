@@ -362,14 +362,6 @@
 /* The settings layer applies important link/headline colors globally. Keep
    this page's own semantic hierarchy while still following the theme. */
 :root[data-theme] #scene .hero-alive[data-page="zero"] .ark-hero-title { color:hsl(var(--text-strong)) !important; }
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-question-links a,
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-stage-link,
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-lifecycle-all,
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-tools a { color:hsl(var(--text)) !important; }
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-question-links a:hover,
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-stage-link:hover,
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-lifecycle-all:hover,
-:root[data-theme] #scene .hero-alive[data-page="zero"] .home-tools a:hover { color:hsl(var(--text-strong)) !important; }
 @media(max-width:1150px) {
  .hero-alive[data-page="zero"] .ark-hero-body {
   width:calc(100% - 330px) !important;

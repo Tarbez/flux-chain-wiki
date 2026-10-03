@@ -35,7 +35,7 @@ class Element {
 
 const ids = [
   'zero', 'resolver', 'references', 'deployment', 'explorer', 'account', 'treasury', 'deposits', 'deploy', 'about',
-  'concept', 'proximity', 'lab', 'dao', 'download', 'learnings',
+  'concept', 'proximity', 'lab', 'dao', 'download', 'bundledeployer', 'learnings',
   'lifecycle', ...['intent', 'offer', 'agreement', 'fulfillment', 'receipt'].map((id) => 'lifecycle/' + id),
   ...['network', 'agreement', 'authority', 'governance', 'register', 'measured'].map((id) => 'concept/' + id),
   ...['chain', 'substrate', 'validators'].map((id) => 'article/' + id)
@@ -75,8 +75,8 @@ const host = { querySelector: () => menu };
 header.onMount(host);
 const layers = menu.children;
 const layer = (name) => layers.find((item) => item.dataset.navLayer === name);
-assert.equal(menu.dataset.pageCount, '31');
-assert.equal(menu.querySelectorAll('a').length, 31, 'every page remains in navigation');
+assert.equal(menu.dataset.pageCount, String(ids.length));
+assert.equal(menu.querySelectorAll('a').length, ids.length, 'every page remains in navigation');
 assert(layers.every(item => item.dataset.navLayer), 'no legacy links remain behind the navigation layers');
 assert(layer('understand').querySelectorAll('a').includes(legacy), 'legacy hash links are reused inside their destination group');
 assert.equal(legacy.href, '/resolver', 'reused links adopt the active clean-path routing mode');
@@ -108,4 +108,4 @@ assert.equal(timers.size, 1);
 menu.navLayers.reset();
 assert.equal(timers.size, 0, 'closing during an exit cancels the transition');
 assert.equal(layer('evaluate').hidden, true);
-console.log('PASS: all 31 routes remain linked through four primary intent groups and focused lifecycle, mechanism, and article sublevels.');
+console.log('PASS: all ' + ids.length + ' routes remain linked through four primary intent groups and focused lifecycle, mechanism, and article sublevels.');

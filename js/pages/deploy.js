@@ -14,6 +14,10 @@ ArkUI.pageModules.deploy = {
     title.id = 'deploy-title';
     content.appendChild(title);
     content.appendChild(ArkUI.el('p', 'concept-deck', words('DECK')));
+    var siteDeployment = ArkUI.el('p', 'concept-deck', 'Deploying a site? You will need the local FXN Bundle Deployer. ');
+    var deployerLink = ArkUI.el('a', 'article-back', 'CLI status and public bundle guidance →');
+    deployerLink.href = ArkUI.route.href(ArkUI.pageCatalog.bundledeployer.path); deployerLink.dataset.sceneLink = 'bundledeployer';
+    siteDeployment.appendChild(deployerLink); content.appendChild(siteDeployment);
 
     var STEPS = [
       {

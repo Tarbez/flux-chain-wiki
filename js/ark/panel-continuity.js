@@ -4,8 +4,8 @@
   'use strict';
   ArkUI.createPanelContinuity = function (scene) {
     var host = null, animation = null, revision = 0, sourceKey = null, sourcePage = null, sourceQuery = null, sourceClass = null, destination = null;
-    function family(page) { return ['reference', 'resolver', 'references', 'deployment'].indexOf(page) >= 0 || page === 'lifecycle' || String(page).indexOf('lifecycle/') === 0 || String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0; }
-    function group(page) { return page === 'reference' ? 'reference' : ['resolver', 'references', 'deployment'].indexOf(page) >= 0 ? 'guide' : String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' ? 'mechanism' : ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0 ? 'task' : 'lifecycle'; }
+    function family(page) { return String(page).indexOf('how/')===0 || ['reference', 'resolver', 'references', 'deployment'].indexOf(page) >= 0 || page === 'lifecycle' || String(page).indexOf('lifecycle/') === 0 || String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0; }
+    function group(page) { return page === 'reference' ? 'reference' : (String(page).indexOf('how/')===0 || ['resolver', 'references', 'deployment'].indexOf(page) >= 0) ? 'guide' : String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' ? 'mechanism' : ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0 ? 'task' : 'lifecycle'; }
     function bounds(el) {
       var box = el.getBoundingClientRect(), base = scene.getBoundingClientRect();
       return { left: box.left - base.left, top: box.top - base.top, width: box.width, height: box.height };
@@ -20,10 +20,12 @@
       animation.cancel(); animation = null;
       place(current);
     }
-    function target() {
+    function target(page) {
       var box = scene.getBoundingClientRect();
       var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
-      var width = Math.min(1080, box.width - gutter * 2);
+      var panelPage = page || host && host.dataset.panelPage;
+      var maxWidth = panelPage === 'about' ? 1920 : panelPage === 'deployment' || panelPage === 'explorer' ? 1600 : 1080;
+      var width = Math.min(maxWidth, box.width - gutter * 2);
       return { left: (box.width - width) / 2, top: 84, width: width, height: Math.max(180, box.height - 148) };
     }
     function animateTo(box, immediate) {
@@ -49,16 +51,17 @@
       }
       return inner;
     }
-    function activate(kind) {
+    function activate(kind, page) {
       host.classList.add('continuity-host');
       host.dataset.panelHost = kind || 'lifecycle';
+      host.dataset.panelPage = page || '';
       host.setAttribute('aria-label', 'Agreement lifecycle dashboard');
       host.inert = true;
       scene.appendChild(host);
     }
-    function fresh(kind) {
+    function fresh(kind, page) {
       host = document.createElement('div');
-      activate(kind); place(target());
+      activate(kind, page); place(target(page));
     }
     function settleGeometry() {
       if (host && destination) { stop(); place(destination); }
@@ -91,12 +94,13 @@
           placeholder.style.height = initial.height + 'px';
           origin.parentNode.replaceChild(placeholder, origin);
           holdContents(initial,originPadding,false,immediate!==false);
-          activate(group(incoming)); place(initial);
-        } else if (family(incoming) && !host) fresh(group(incoming));
+          activate(group(incoming), incoming); place(initial);
+        } else if (family(incoming) && !host) fresh(group(incoming), incoming);
+        if (host && family(incoming)) host.dataset.panelPage = incoming;
         if (host) host.inert = true;
         // Start the chosen object's expansion while the old page content leaves.
         // Inner replacement then uses the remaining geometry time, never a restart.
-        var opening=expanding && immediate===false ? animateTo(target(),false) : null;
+        var opening=expanding && immediate===false ? animateTo(target(incoming),false) : null;
         return {
           commit: function (el, immediate) {
             if (ticket !== revision) return Promise.resolve();
@@ -121,7 +125,7 @@
                 compactContents.remove();
                 compact.parentNode.replaceChild(host, compact);
                 host.classList.remove('continuity-host');
-                delete host.dataset.panelHost; delete host.dataset.panelMode;
+                delete host.dataset.panelHost; delete host.dataset.panelMode; delete host.dataset.panelPage;
                 host.removeAttribute('style'); host.inert = false;
                 if (sourcePage && sourcePage !== 'zero') host.removeAttribute('aria-label'); else host.setAttribute('aria-label', 'The agreement lifecycle');
                 var focus = sourceKey && host.querySelector('[data-scene-link="' + sourceKey + '"]') || host.querySelector('.home-lifecycle-all');

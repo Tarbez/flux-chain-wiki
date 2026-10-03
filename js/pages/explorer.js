@@ -41,24 +41,27 @@
       page.dataset.arkPage = 'explorer';
       page.setAttribute('aria-labelledby', 'mesh-explorer-title');
       page.innerHTML = '<div class="mesh-explorer-shell">' +
-        '<header class="mesh-explorer-header"><p class="learning-eyebrow">FLUX PROTOCOL / MESH EXPLORER</p>' +
-        '<h1 id="mesh-explorer-title">Inspect what the mesh reports.</h1>' +
-        '<p class="mesh-explorer-deck">A live, read-only view of the Flux mesh, read straight from the public nodes. Every number is what the node answering you reports right now, not a global chain height or an authoritative membership list.</p>' +
-        '<div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></header>' +
-        '<section class="mesh-explorer-connect" aria-labelledby="mesh-connect-title"><div><p class="mesh-explorer-kicker">01 / CONNECTION</p><h2 id="mesh-connect-title">Where to read from</h2><p>By default this reads <code>public.defxn.com</code>. Switch to a Miner on this computer (<code>127.0.0.1:8766</code>) if you run one. Only the selected node, plus the defxn node list below, is contacted.</p></div>' +
-        '<div class="mesh-explorer-connect-actions"><label for="mesh-origin">Read from<select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label><details class="mesh-operator-access"><summary>Operator-only sources / optional key</summary><label for="mesh-operator-key">Operator key <span>(optional, memory only)</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources">' +
-        '</details><div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh now</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div></div></section>' +
-        '<section class="mesh-explorer-glance" aria-labelledby="mesh-glance-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">02 / NETWORK AT A GLANCE</p><h2 id="mesh-glance-title">What the mesh holds</h2></div><span data-explorer-glance-stamp>—</span></div>' +
-        '<div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div>' +
-        '<h3 class="mesh-explorer-subhead">Nodes</h3><div class="mesh-explorer-nodes" data-explorer-nodes></div></section>' +
-        '<div class="mesh-explorer-metrics" aria-label="Current observation"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div>' +
-        '<section class="mesh-explorer-data" aria-labelledby="mesh-data-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">03 / LIVE RECORDS</p><h2 id="mesh-data-title">Explore a source</h2></div><span>REFRESHED EVERY 10 SECONDS WHILE THIS PAGE IS OPEN</span></div>' +
-        '<p class="mesh-explorer-boundary">Source availability and verification are reported by the Miner. A returned record is not automatically proof of a production deployment.</p>' +
-        '<div class="mesh-explorer-controls"><label for="mesh-source">Source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
-        '<form data-explorer-lookup><label for="mesh-record-id">Exact record ID<input id="mesh-record-id" type="search" autocomplete="off" placeholder="Paste an ID from this source" disabled></label><button type="submit" disabled>Inspect record</button></form></div>' +
+        '<header class="mesh-explorer-header"><div class="mesh-explorer-title-group"><p class="learning-eyebrow">DEFXN / MESH OBSERVATORY</p>' +
+        '<h1 id="mesh-explorer-title">Observe the mesh, one node at a time.</h1>' +
+        '<p class="mesh-explorer-deck">A read-only view of what the selected Miner reports now. Counts, availability, and records belong to this observation; they are not a global chain height or an authoritative membership list.</p></div>' +
+        '<aside class="mesh-explorer-live-panel" aria-label="Current observation"><div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><div><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></div>' +
+        '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside></header>' +
+        '<section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
+        '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
+        '<details class="mesh-operator-access"><summary>Operator access</summary><label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources"></details></div></section>' +
+        '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">01 / SOURCE FIELD</p><h2 id="mesh-glance-title">What this node exposes</h2></div><span data-explorer-glance-stamp>—</span></div>' +
+        '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
+        '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
+        '<dl class="mesh-source-facts"><div><dt>Category</dt><dd data-explorer-source-category>—</dd></div><div><dt>State</dt><dd data-explorer-source-state>—</dd></div><div><dt>Access</dt><dd data-explorer-source-access>—</dd></div></dl>' +
+        '<div class="mesh-explorer-controls"><label for="mesh-source">Selected source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
+        '<form data-explorer-lookup><label for="mesh-record-id">Exact record ID<input id="mesh-record-id" type="search" autocomplete="off" placeholder="Paste an exact record ID" disabled></label><button type="submit" disabled>Inspect</button></form></div>' +
+        '<p class="mesh-explorer-boundary">A returned record is evidence from this Miner, not automatic proof of a production deployment.</p></aside></section>' +
+        '<nav class="mesh-observatory-dock" aria-label="Observation layers"><details class="mesh-observatory-popover"><summary><span>03</span> Node pulse</summary><section class="mesh-node-strip" aria-labelledby="mesh-nodes-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">03 / NODE PULSE</p><h2 id="mesh-nodes-title">Public observation points</h2></div><span>REACHABILITY / RESPONSE</span></div><div class="mesh-explorer-nodes" data-explorer-nodes></div></section></details>' +
+        '<details class="mesh-observatory-popover"><summary><span>04</span> Record ledger</summary><section class="mesh-explorer-data" aria-labelledby="mesh-data-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">04 / RECORD LEDGER</p><h2 id="mesh-data-title">Records from the selected source</h2></div><span>REFRESHES EVERY 10 SECONDS</span></div>' +
         '<p class="mesh-explorer-result-message" data-explorer-result-message>Records appear once the node answers. No sample data is substituted.</p>' +
-        '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section>' +
-        '<details class="mesh-explorer-reference"><summary>04 / Operator topology and source context</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. The view reports only nodes and edges returned by this Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="docs/operators/verification.md">How to verify an observation ↗</a> · <a href="docs/evidence/registry.md">Evidence registry ↗</a></p></div></details>' +
+        '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section></details>' +
+        '<details class="mesh-observatory-popover mesh-explorer-secondary"><summary><span>05</span> Observation details</summary><div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div></details>' +
+        '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="docs/operators/verification.md">How to verify an observation ↗</a> · <a href="docs/evidence/registry.md">Evidence registry ↗</a></p></div></details></nav>' +
         '</div>';
       host.appendChild(page);
       if (page.querySelector('[data-explorer-connect]')) setup(page);
@@ -76,9 +79,11 @@
     var key = $('#mesh-operator-key');
     var originSelect = $('#mesh-origin');
     var stats = $('[data-explorer-stats]');
+    var coreStats = $('[data-explorer-core-stats]');
+    var sourceField = $('[data-explorer-source-field]');
     var nodesBox = $('[data-explorer-nodes]');
     var glanceStamp = $('[data-explorer-glance-stamp]');
-    var glance = $('.mesh-explorer-glance');
+    var glance = $('.mesh-observatory');
     function base() { return originSelect.value === 'local' ? LOCAL_MINER : PUBLIC_BASE; }
     function originName() { return originSelect.value === 'local' ? 'local Miner' : 'public mesh'; }
     var source = $('#mesh-source');
@@ -88,6 +93,18 @@
     var records = $('[data-explorer-records]');
     var detail = $('[data-explorer-detail]');
     var topology = $('[data-explorer-topology]');
+    var popovers = Array.from(page.querySelectorAll('.mesh-observatory-popover'));
+    popovers.forEach(function (popover) {
+      popover.addEventListener('toggle', function () {
+        if (!popover.open) return;
+        popovers.forEach(function (other) { if (other !== popover) other.open = false; });
+      });
+    });
+    page.addEventListener('keydown', function (event) {
+      if (event.key !== 'Escape' || !popovers.some(function (popover) { return popover.open; })) return;
+      event.preventDefault(); event.stopPropagation();
+      popovers.forEach(function (popover) { popover.open = false; });
+    });
     var fallbackDetail = detail, selectedBox = null, selectedContents = [], boxMotion = null;
     function settleBox() { if(boxMotion){boxMotion.cancel();boxMotion=null;} }
     function animateBox(box, before) {
@@ -113,7 +130,7 @@
       fallbackDetail.hidden=true;fallbackDetail.replaceChildren();records.hidden=false;
     }
     var connected = false, busy = false, timer = 0, generation = 0, observed = 0;
-    var controllers = new Set(), sources = [], lastCursor = null, detailRequest=0, lastHealth = null;
+    var controllers = new Set(), sources = [], sourceButtons = [], lastCursor = null, detailRequest=0, lastHealth = null;
     setStatus('offline','Connecting…','Reading the public mesh.');
 
     function setStatus(kind, title, text) {
@@ -143,7 +160,14 @@
       lookup.querySelector('button').disabled = true;
       records.replaceChildren(); detail.replaceChildren(); detail.hidden = true;
       topology.textContent = 'Connect with an operator key to inspect topology.';
-      stats.replaceChildren(); stats.hidden = true; nodesBox.replaceChildren(); glanceStamp.textContent = '—';
+      stats.replaceChildren(); stats.hidden = true; coreStats.replaceChildren();
+      sourceField.replaceChildren(node('p', 'mesh-explorer-result-message', 'Waiting for the source catalog.'));
+      nodesBox.replaceChildren(); glanceStamp.textContent = '—';
+      $('[data-explorer-source-title]').textContent = 'No source selected';
+      $('[data-explorer-source-summary]').textContent = 'Connect to inspect the catalog returned by a Miner.';
+      $('[data-explorer-source-category]').textContent = '—';
+      $('[data-explorer-source-state]').textContent = '—';
+      $('[data-explorer-source-access]').textContent = '—';
       $('[data-explorer-sources]').textContent = '—';
       $('[data-explorer-observed]').textContent = '—';
       $('[data-explorer-coverage]').textContent = '—';
@@ -176,15 +200,65 @@
         item.enumeration !== 'never' && item.enumeration !== 'exact_id_only' &&
         item.visibility !== 'excluded' && item.capabilities && item.capabilities.indexOf('query') >= 0;
     }
+    function sourceAccess(item) {
+      if (!item) return 'Unavailable';
+      if (item.visibility === 'excluded') return 'Excluded';
+      if (item.visibility === 'operator_only' || item.state === 'restricted') return 'Operator only';
+      if (item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only') return 'Exact ID only';
+      return sourceAllowsQuery(item) ? 'Public query' : safeString(item.visibility, 'Declared');
+    }
+    function inspectSource(item) {
+      if (!item) return;
+      $('[data-explorer-source-title]').textContent = safeString(item.label || item.id);
+      $('[data-explorer-source-category]').textContent = safeString(item.category, 'other');
+      $('[data-explorer-source-state]').textContent = safeString(item.state);
+      $('[data-explorer-source-access]').textContent = sourceAccess(item);
+      var summary = sourceAllowsQuery(item) ? 'This source can be enumerated from the selected Miner.'
+        : item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only' ? 'Records remain private until you provide an exact record ID.'
+        : item.visibility === 'operator_only' || item.state === 'restricted' ? 'This source requires operator access from the selected Miner.'
+        : item.visibility === 'excluded' ? 'The Miner declares this source but excludes it from Explorer reads.'
+        : 'The Miner declares this source without a public enumeration path.';
+      $('[data-explorer-source-summary]').textContent = summary;
+      sourceButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.sourceId === item.id)); });
+    }
+    function chooseSource(id, read) {
+      var item = sources.find(function (candidate) { return candidate.id === id; });
+      if (!item) return;
+      source.value = item.id;
+      inspectSource(item);
+      if (!read) return;
+      generation += 1; detailRequest += 1; restoreRecord(false, false); loadRecords();
+    }
     function renderSources() {
       source.replaceChildren();
+      sourceField.replaceChildren(); sourceButtons = [];
+      var groups = {};
       sources.forEach(function (item) {
         var option = node('option', '', item.label + ' / ' + item.state + ' / ' + item.visibility);
         option.value = item.id; option.disabled = !sourceAllowsQuery(item); source.appendChild(option);
+        var category = item.category || 'other';
+        if (!groups[category]) groups[category] = [];
+        groups[category].push(item);
+      });
+      Object.keys(groups).sort().forEach(function (category) {
+        var group = node('section', 'mesh-source-group');
+        group.appendChild(node('h3', '', category));
+        var cells = node('div', 'mesh-source-cells');
+        groups[category].forEach(function (item) {
+          var button = node('button', 'mesh-source-cell'); button.type = 'button';
+          button.dataset.sourceId = item.id;
+          button.dataset.access = sourceAllowsQuery(item) ? 'public' : item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only' ? 'exact' : item.visibility === 'operator_only' || item.state === 'restricted' ? 'operator' : 'excluded';
+          button.setAttribute('aria-label', safeString(item.label || item.id) + ' · ' + sourceAccess(item));
+          button.appendChild(node('span', '', safeString(item.label || item.id)));
+          button.appendChild(node('small', '', sourceAccess(item)));
+          button.addEventListener('click', function () { chooseSource(item.id, true); });
+          sourceButtons.push(button); cells.appendChild(button);
+        });
+        group.appendChild(cells); sourceField.appendChild(group);
       });
       var first = sources.find(sourceAllowsQuery);
       if (!first) { source.replaceChildren(node('option', '', 'No enumerable source available')); source.disabled = true; }
-      else { source.value = first.id; source.disabled = false; }
+      else { source.value = first.id; source.disabled = false; inspectSource(first); }
       recordId.disabled = !sources.length;
       lookup.querySelector('button').disabled = !sources.length;
     }
@@ -246,7 +320,17 @@
     }
     async function loadRecords() {
       var selected = source.value;
-      if (!selected || !sourceAllowsQuery(sources.find(function (item) { return item.id === selected; }))) return;
+      var selectedSource = sources.find(function (item) { return item.id === selected; });
+      if (!selected || !selectedSource) return;
+      if (!sourceAllowsQuery(selectedSource)) {
+        records.replaceChildren(); detail.replaceChildren(); detail.hidden = true; records.hidden = false;
+        resultMessage.textContent = selectedSource.enumeration === 'exact_id_only' || selectedSource.visibility === 'exact_id_only'
+          ? 'This source is exact-ID only. Paste a record ID in the inspector to request it.'
+          : selectedSource.visibility === 'operator_only' || selectedSource.state === 'restricted'
+            ? 'This source requires operator access from the selected Miner.'
+            : 'This source is declared but cannot be enumerated in this observation.';
+        return;
+      }
       var token = generation;
       try {
         var scopes = selected === 'miners' ? await minerScopes() : [undefined], payload = null, list = [];
@@ -348,7 +432,7 @@
     /* Draws the glance. Resolves to the health the summary carried, or null when the walk fallback ran. */
     async function loadGlance(token) {
       var started = Date.now();
-      var cards = [];
+      var cards = [], coreCards = [];
       var counted = COUNTED.filter(function (entry) {
         var item = sources.find(function (candidate) { return candidate.id === entry[0]; });
         return sourceAllowsQuery(item) && item.enumeration !== 'search';
@@ -367,19 +451,24 @@
       counted.forEach(function (entry, index) {
         var result = results[index];
         if (result === null) return;
-        cards.push(statCard(entry[1], result ? String(result.count) + (result.capped ? '+' : '') : 'Unavailable',
-          result ? (result.capped ? 'first ' + cap + ' counted' : 'counted from the node') : 'this node could not be read'));
+        var value = result ? String(result.count) + (result.capped ? '+' : '') : 'Unavailable';
+        var note = result ? (result.capped ? 'first ' + cap + ' counted' : 'counted from the node') : 'this node could not be read';
+        cards.push(statCard(entry[1], value, note));
+        if (entry[0] === 'networks' || entry[0] === 'miners') coreCards.push(statCard(entry[1], value, note));
       });
       /* Accounts are exact-ID lookups only. The API refuses to list them, so a wallet total cannot be read here. */
       cards.push(statCard('Wallets', 'Not public', 'accounts are looked up by exact ID, never listed'));
       var readable = sources.filter(sourceAllowsQuery).length;
       cards.push(statCard('Sources readable', readable + ' of ' + sources.length, 'the rest are private or operator-only'));
+      coreCards.push(statCard('Public sources', readable + ' / ' + sources.length, 'readable from this node'));
       var categories = {};
       sources.filter(sourceAllowsQuery).forEach(function (item) { categories[item.category || 'other'] = true; });
       cards.push(statCard('Record types', String(Object.keys(categories).length), Object.keys(categories).sort().join(' · ') || 'none'));
       cards.push(statCard('Node health', safeString(lastHealth && lastHealth.data && lastHealth.data.status, 'Unknown'), 'API ' + API_VERSION));
+      coreCards.push(statCard('Node health', safeString(lastHealth && lastHealth.data && lastHealth.data.status, 'Unknown'), 'reported by the node'));
       cards.push(statCard('Counted in', (Date.now() - started) + ' ms', 'live from ' + originName()));
       stats.replaceChildren.apply(stats, cards); stats.hidden = false;
+      coreStats.replaceChildren.apply(coreStats, coreCards);
       glanceStamp.textContent = 'UPDATED ' + new Date().toLocaleTimeString();
       return health;
     }
@@ -396,7 +485,7 @@
       try {
         var response = await fetch(entry[1] + '/explorer/v1/health', { headers: { accept: 'application/json' }, signal: controller.signal, cache: 'no-store' });
         var payload = await response.json().catch(function () { return null; });
-        if (!response.ok || !payload || payload.apiVersion !== API_VERSION) return { up: false, detail: 'answered, but not as a Flux node (HTTP ' + response.status + ')' };
+        if (!response.ok || !payload || payload.apiVersion !== API_VERSION) return { up: false, detail: 'answered, but not as a DEFXN Miner (HTTP ' + response.status + ')' };
         return { up: true, ms: Date.now() - started, detail: safeString(payload.data && payload.data.status, 'reported') };
       } catch (error) {
         return { up: false, detail: error && error.name === 'AbortError' ? 'no answer in 6 seconds' : 'cannot be reached' };
@@ -454,7 +543,7 @@
     originSelect.addEventListener('change', start);
     refresh.addEventListener('click', observe);
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });
-    source.addEventListener('change', function () { generation += 1;detailRequest+=1;restoreRecord(false,false);loadRecords(); });
+    source.addEventListener('change', function () { chooseSource(source.value, true); });
     lookup.addEventListener('submit', function (event) { event.preventDefault(); inspect(recordId.value.trim()); });
     page._explorerCleanup = function () { clearLive(); key.value = ''; };
     /* Start reading as soon as the page is on screen; no button press needed for the public mesh. */

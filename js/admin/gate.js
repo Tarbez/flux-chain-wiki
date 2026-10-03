@@ -51,6 +51,9 @@
 (function () {
   'use strict';
 
+  var account = window.ArkUI && window.ArkUI.localIdentity;
+  var bridge = window.ArkUI && window.ArkUI.cmsSession;
+  var securityEpoch = 0, suppressForget = false, authorizedKey = null;
   var LOGIN_PREFIX = 'flux-chain-admin-login/v1|';
   var STEPS = [
     { key: 'kit', num: '01', label: 'Identity' },
@@ -165,12 +168,16 @@
   /* ---- steps 1+2: sign the host's challenge, then its ownership check. Callable again with the
      SAME already-open identity when a ticket expires, with no need to reopen the recovery file. ---- */
   async function beginTicket(who) {
+    var epoch = securityEpoch;
     var challenge = await api('/api/session/challenge', {});
     var tail = typeof challenge.message === 'string' && challenge.message.indexOf(LOGIN_PREFIX) === 0 ? challenge.message.slice(LOGIN_PREFIX.length) : '';
     var host = tail.slice(0, tail.indexOf('|'));
     if (!tail || (host !== location.host && !loopbackEquivalentHost(host))) throw new Error('The publish host sent a login challenge this page will not sign.');
+    if (epoch !== securityEpoch) return;
     var signature = await who.sign(challenge.message);
+    if (epoch !== securityEpoch) return;
     var made = await api('/api/session/login', { publicKeyB64: who.publicKeyB64, nonce: challenge.nonce, signature: signature, label: who.displayName });
+    if (epoch !== securityEpoch) { await api('/api/session/logout', {}); return; }
     // otpEnabled: false on the host: the session is already open (its cookie is already set), no step 3.
     if (made.done) {
       busy = false;   // done, same as the OTP path: a sign-out fired from inside the editor a moment later must not be swallowed by the guard above
@@ -183,7 +190,12 @@
 
   /* ---- the shared "signed in" tail, whether it took three steps or (OTP disabled) two ---- */
   async function finishSignIn(made) {
+    var epoch = securityEpoch;
     identity = pendingWho;
+    authorizedKey = made.publicKeyB64 || (pendingWho && pendingWho.publicKeyB64);
+    var access = await api('/api/cms/access');
+    if (epoch !== securityEpoch) return;
+    if (!access.authorized) { showAccessDenied(access); return; }
     var when = made.lastSignIn ? new Date(made.lastSignIn).toLocaleString() : null;
     renderSteps('code', ['kit', 'access', 'code']);
     say('Signed in', 'ok');
@@ -192,7 +204,7 @@
       : when ? 'Last signed in ' + when + '. If that was not you, sign out and consider it compromised.' : 'Opening the editor...', 'ok');
     $('gateBody').textContent = '';
     await sleep(1100);
-    openEditor();
+    if (epoch === securityEpoch) openEditor();
   }
 
   /* Retries beginTicket with the identity already open. A lockout that has not actually lifted yet
@@ -293,6 +305,7 @@
   }
 
   function openEditor() {
+    if (frame) return;
     frame = document.createElement('iframe');
     frame.id = 'app'; frame.title = 'Flux Protocol admin'; frame.src = 'admin-app.html';
     document.body.appendChild(frame);
@@ -303,16 +316,53 @@
     try { return !!(frame && frame.contentWindow.ArkAdminApp && frame.contentWindow.ArkAdminApp.unsaved()); } catch (e) { return false; }
   }
 
+  function showAccessDenied(access) {
+    authorizedKey = null;
+    renderSteps('access', ['kit']);
+    $('gateHeading').textContent = 'Signed in. CMS access not granted.';
+    $('gateLead').textContent = access.error || 'This identity does not have CMS permission.';
+    $('gateBody').textContent = '';
+    $('gateBody').appendChild(h('button',{type:'button',text:'Check CMS access again',onclick:async function(){
+      try { var result = await api('/api/cms/access'); if (result.authorized) { authorizedKey = (identity || pendingWho || {}).publicKeyB64; openEditor(); } else showAccessDenied(result); }
+      catch(error){say(error.message,'error');}
+    }}));
+    say('Identity authenticated', 'ok'); note(access.remedy || '');
+  }
+
+  function showIdentityStep() {
+    var shared = bridge && bridge.sharedSigner();
+    var pointer = account && account.current();
+    var body = $('gateBody'); body.textContent = '';
+    if (shared) {
+      $('gateHeading').textContent = 'Check CMS access.';
+      $('gateLead').textContent = 'You’re signed in as ' + shared.displayName + '. Your unlocked identity is ready; the host must confirm publishing access.';
+      body.appendChild(h('button', {type:'button', text:'Check CMS access', onclick:function () {
+        var current = bridge.sharedSigner();
+        if (current) onIdentity(current); else showIdentityStep();
+      }}));
+    } else {
+      if (pointer) {
+        $('gateHeading').textContent = 'Unlock your identity.';
+        $('gateLead').textContent = 'Public details for ' + pointer.displayName + ' are saved. Select your .auth.flx file again and enter its PIN and password if you set one to check CMS access.';
+      } else {
+        $('gateHeading').textContent = 'Locked.';
+        $('gateLead').textContent = 'Sign in with your DeadArk identity to edit or publish this site.';
+      }
+      body.appendChild(kitContainer);
+    }
+  }
+
   async function resetToLocked(message, tone) {
+    ++securityEpoch;
     if (lockTimer) { clearInterval(lockTimer); lockTimer = null; }
     if (frame) { frame.remove(); frame = null; }
     document.body.classList.add('locked'); $('gate').hidden = false;
-    identity = null; pendingWho = null; ticket = null; otpInfo = null;
+    authorizedKey = null; identity = null; pendingWho = null; ticket = null; otpInfo = null;
     try { await api('/api/session/logout', {}); } catch (e) { /* the session dies with the host anyway */ }
     renderSteps('kit', []);
     $('gateHeading').textContent = 'Locked.';
     $('gateLead').textContent = 'Sign in with your DeadArk identity to edit or publish this site.';
-    $('gateBody').textContent = ''; $('gateBody').appendChild(kitContainer);
+    showIdentityStep();
     say(message || '', tone || ''); note('');
   }
 
@@ -338,7 +388,7 @@
       busy = false;
       if (error.detail && error.detail.retryAfterSeconds) { pendingWho = who; runLockout(error.detail.retryAfterSeconds, 'Too many attempts.'); return; }
       // Refused at identity or access: nobody is signed in, and there is nothing to retry automatically.
-      if (auth) auth.signOut();
+      if (auth) { suppressForget = true; try { auth.signOut(); } finally { suppressForget = false; } }
       await resetToLocked('', '');
       say(error.message, 'error'); note(remedyLine(error));
     }
@@ -359,13 +409,24 @@
     return true;
   }
 
+  var localEditor = false;
   window.ArkGate = {
-    identity: function () { return identity; },
+    localDevelopment: function () { return localEditor; },
+    identity: function () {
+      var shared = bridge && bridge.sharedSigner();
+      return shared && shared.publicKeyB64 === authorizedKey ? shared : identity;
+    },
     unsaved: unsavedInEditor,
     reauthenticate: reauthenticate,
     signOut: function () {
       if (unsavedInEditor() && !window.confirm('You have unsaved changes. Sign out and lose them?')) return false;
-      if (auth) auth.signOut();
+      try {
+        var source = window.opener;
+        if (source && source.location.origin === location.origin && source.ArkUI && source.ArkUI.accountSession) source.ArkUI.accountSession.signOut();
+      } catch (_) {}
+      if (account) account.clear();
+      if (auth) { suppressForget = true; try { auth.signOut(); } finally { suppressForget = false; } }
+      resetToLocked('Signed out.', 'ok').then(function () { if (localEditor) openEditor(); });
       return true;
     }
   };
@@ -386,8 +447,41 @@
   /* The identity picker is always mounted (reauthenticate needs it live even after the editor has opened),
      but a reload no longer forces a fresh sign-in: if the host's own session cookie is still valid, the
      editor opens immediately and the recovery file is only asked for again when Publish actually needs it. */
-  auth = ArkAdminAuth.create({ container: kitContainer, product: 'Flux Protocol admin', onChange: onIdentity });
-  api('/api/session').then(function (info) {
-    if (info.authenticated) openEditor();
-  }).catch(function () {});
+  auth = ArkAdminAuth.create({ container: kitContainer, product: 'DEFXN CMS', onChange: function (who) {
+    if (who && account) account.set(who);
+    if (!who && !suppressForget && (identity || pendingWho)) {
+      if (account) account.clear();
+      if (bridge) bridge.revoke();
+    }
+    onIdentity(who);
+  } });
+  if (account) account.subscribe(function (pointer) {
+    var active = identity || pendingWho;
+    if ((active && (!pointer || pointer.publicKeyB64 !== active.publicKeyB64)) ||
+        (frame && authorizedKey && (!pointer || pointer.publicKeyB64 !== authorizedKey))) {
+      suppressForget = true;
+      try { auth.signOut(); } finally { suppressForget = false; }
+      resetToLocked('The account changed. Unlock the current identity to continue.', '');
+    }
+    if (!active && !frame) { showIdentityStep(); if (!pointer) { say('', ''); note(''); } }
+  });
+  var startupEpoch = securityEpoch;
+  api('/api/session').then(async function (info) {
+    if (startupEpoch !== securityEpoch) return;
+    var shared = bridge && bridge.sharedSigner();
+    if (info.localDevelopment) { localEditor = true; identity = shared; openEditor(); return; }
+    var pointer = account && account.current();
+    if (info.authenticated) {
+      var access = await api('/api/cms/access');
+      if (startupEpoch !== securityEpoch) return;
+      if (!access.authorized) { identity = shared; showAccessDenied(access); return; }
+      authorizedKey = info.publicKeyB64;
+    }
+    if (shared) {
+      if (info.authenticated && info.publicKeyB64 === shared.publicKeyB64) {
+        identity = shared; openEditor();
+      } else onIdentity(shared);
+    } else if (info.authenticated && (!pointer || pointer.publicKeyB64 === info.publicKeyB64)) openEditor();
+    else if (info.authenticated) resetToLocked('Unlock this account to confirm CMS access.', '');
+  }).catch(function (error) { say(error.message, 'error'); note(remedyLine(error)); });
 })();

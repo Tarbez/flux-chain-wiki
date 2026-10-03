@@ -48,8 +48,8 @@
 .home-substrate-window {position:relative;height:118px;margin:24px 0 0;border:1px solid hsl(var(--border-subtle));border-radius:6px;background:linear-gradient(135deg,hsl(var(--primary) / .025),transparent 70%);}
 .home-window-label {position:absolute;top:9px;left:11px;font:500 9px/1.4 var(--mono-font,monospace);letter-spacing:.04em;color:hsl(var(--text-muted));background:hsl(var(--canvas) / .85);padding:3px 5px;}
 .home-window-bracket {position:absolute;bottom:10px;right:10px;width:22px;height:22px;border-right:1px solid hsl(var(--primary) / .6);border-bottom:1px solid hsl(var(--primary) / .6);border-radius:0 0 4px 0;}
-.home-cycle-drawing {margin:0 -5px -17px;pointer-events:none;}
-.home-cycle-drawing svg {display:block;width:100%;height:auto;max-height:114px;overflow:visible;}
+.home-cycle-drawing {margin:0 0 -17px;pointer-events:none;}
+.home-cycle-drawing svg {display:block;width:100%;height:auto;max-height:none;overflow:visible;}
 .home-cycle-drawing path,.home-cycle-drawing rect {vector-effect:non-scaling-stroke;}
 .home-record-connector {stroke:hsl(var(--text-muted) / .4);stroke-width:1;}
 .home-record-node {stroke:hsl(var(--border-default));fill:hsl(var(--canvas));}
@@ -57,9 +57,8 @@
 .home-record-direction {stroke:hsl(var(--text-muted) / .65);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;}
 .home-cycle-records {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;list-style:none;margin:0;padding:0;}
 .home-cycle-records li {display:block;text-align:center;font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-#scene .home-lifecycle-all {position:static;display:flex;align-items:center;justify-content:flex-start;min-height:48px;padding:10px 0 0;border-top:1px solid hsl(var(--border-subtle));font:500 15px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;color:hsl(var(--text-strong));}
+#scene .home-lifecycle-all {position:static;display:flex;align-items:center;justify-content:flex-start;min-height:56px;margin-top:12px;padding:0;border-top:1px solid hsl(var(--border-subtle));font:500 14px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;color:hsl(var(--text-strong));}
 #scene .home-lifecycle-all .native-icon {margin-left:auto;order:1;}
-.home-cycle-note {display:block;margin-top:8px;font:400 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 #scene .home-status-rail {grid-column:1/-1;grid-row:2;z-index:2;display:flex;gap:24px;padding-top:17px;margin:0;justify-content:space-between;border-top:1px solid hsl(var(--border-subtle));background:none;}
 #scene .home-status-item {display:flex;flex-direction:column;align-items:start;gap:6px;}
 #scene .home-status-item small {font:500 10px/1.3 var(--mono-font,monospace);color:hsl(var(--text-muted));letter-spacing:.08em;}
@@ -125,7 +124,7 @@
 #scene .hero-alive[data-page="zero"] .header-core-links a:is(:hover,:focus-visible) {color:hsl(var(--text-strong));background:hsl(var(--primary) / .08);}
 .home-record-node {transition:stroke 200ms,fill 200ms;transition-delay:var(--record-delay,0ms);}
 .home-cycle-records li {transition:color 200ms;}
-@media(prefers-reduced-motion:reduce){#scene .hero-alive[data-page="zero"] :is(a,.native-icon,.home-record-node) {transition:none;} }
+@media(prefers-reduced-motion:reduce){#scene .hero-alive[data-page="zero"] :is(a,.native-icon,.home-record-node) {transition:none;} .home-cycle-insight [data-insight]{animation:none;} }
 
 /* Each record owns its invitation; the surrounding panel stays quiet. */
 #scene .home-cycle-step {position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:center;box-sizing:border-box;min-height:82px;margin-top:-62px;padding:62px 0 2px;border:0;border-radius:7px;background:none;color:hsl(var(--text-muted));font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);text-decoration:none;letter-spacing:0;text-transform:none;transition:color 160ms;}
@@ -133,30 +132,32 @@
 #scene .home-cycle-step:is(:hover,:focus-visible) {color:hsl(var(--text-strong));background:transparent !important;}
 #scene .home-cycle-step:focus-visible {outline:1px solid hsl(var(--primary));outline-offset:3px;}
 #scene .home-lifecycle:focus-within {outline:none;}
-.home-cycle-insight {min-height:34px;margin:12px 0 14px;font:400 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-.home-cycle-insight [data-insight] {display:none;color:hsl(var(--text));}
+.home-cycle-insight {display:grid;place-items:center;box-sizing:border-box;min-height:42px;margin:12px 0 14px;padding:8px 18px;border-top:1px solid hsl(var(--border-subtle));border-bottom:1px solid hsl(var(--border-subtle));font:400 12px/1.45 var(--font-sans,"Albert Sans",sans-serif);text-align:center;color:hsl(var(--text-muted));}
+.home-cycle-insight > span {max-width:390px;}
+.home-cycle-insight [data-insight] {display:none;color:hsl(var(--text));animation:home-insight-in 160ms ease-out both;}
+@keyframes home-insight-in {from{opacity:0;transform:translateY(2px);}to{opacity:1;transform:none;}}
 .home-record-incoming {stroke:hsl(var(--primary));stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 300ms;}
 #scene .home-lifecycle-all:is(:hover,:focus-visible) {color:hsl(var(--primary));}
 #scene .home-lifecycle-all:is(:hover,:focus-visible) .native-icon {transform:translateX(4px);color:hsl(var(--primary));}
 .home-window-bracket {transition:width 220ms,height 220ms;}
 .home-substrate-window:hover .home-window-bracket {width:32px;height:32px;}
-.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="intent"]:is(:hover,:focus-visible)) .home-record[data-record="intent"] .home-record-node {stroke:hsl(var(--primary));fill:hsl(var(--primary) / .12);}
+.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="intent"]:is(:hover,:focus-visible)) .home-record[data-record="intent"] .home-record-node {stroke:var(--record-color);fill:color-mix(in srgb,var(--record-color) 22%,hsl(var(--canvas)));}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="intent"]:is(:hover,:focus-visible)) .home-record-incoming[data-record="intent"] {stroke-dashoffset:0;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="intent"]:is(:hover,:focus-visible)) .home-cycle-insight-idle {display:none;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="intent"]:is(:hover,:focus-visible)) [data-insight="intent"] {display:block;}
-.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="offer"]:is(:hover,:focus-visible)) .home-record[data-record="offer"] .home-record-node {stroke:hsl(var(--primary));fill:hsl(var(--primary) / .12);}
+.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="offer"]:is(:hover,:focus-visible)) .home-record[data-record="offer"] .home-record-node {stroke:var(--record-color);fill:color-mix(in srgb,var(--record-color) 22%,hsl(var(--canvas)));}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="offer"]:is(:hover,:focus-visible)) .home-record-incoming[data-record="offer"] {stroke-dashoffset:0;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="offer"]:is(:hover,:focus-visible)) .home-cycle-insight-idle {display:none;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="offer"]:is(:hover,:focus-visible)) [data-insight="offer"] {display:block;}
-.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="agreement"]:is(:hover,:focus-visible)) .home-record[data-record="agreement"] .home-record-node {stroke:hsl(var(--primary));fill:hsl(var(--primary) / .12);}
+.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="agreement"]:is(:hover,:focus-visible)) .home-record[data-record="agreement"] .home-record-node {stroke:var(--record-color);fill:color-mix(in srgb,var(--record-color) 22%,hsl(var(--canvas)));}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="agreement"]:is(:hover,:focus-visible)) .home-record-incoming[data-record="agreement"] {stroke-dashoffset:0;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="agreement"]:is(:hover,:focus-visible)) .home-cycle-insight-idle {display:none;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="agreement"]:is(:hover,:focus-visible)) [data-insight="agreement"] {display:block;}
-.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="fulfillment"]:is(:hover,:focus-visible)) .home-record[data-record="fulfillment"] .home-record-node {stroke:hsl(var(--primary));fill:hsl(var(--primary) / .12);}
+.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="fulfillment"]:is(:hover,:focus-visible)) .home-record[data-record="fulfillment"] .home-record-node {stroke:var(--record-color);fill:color-mix(in srgb,var(--record-color) 22%,hsl(var(--canvas)));}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="fulfillment"]:is(:hover,:focus-visible)) .home-record-incoming[data-record="fulfillment"] {stroke-dashoffset:0;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="fulfillment"]:is(:hover,:focus-visible)) .home-cycle-insight-idle {display:none;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="fulfillment"]:is(:hover,:focus-visible)) [data-insight="fulfillment"] {display:block;}
-.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="receipt"]:is(:hover,:focus-visible)) .home-record[data-record="receipt"] .home-record-node {stroke:hsl(var(--primary));fill:hsl(var(--primary) / .12);}
+.home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="receipt"]:is(:hover,:focus-visible)) .home-record[data-record="receipt"] .home-record-node {stroke:var(--record-color);fill:color-mix(in srgb,var(--record-color) 22%,hsl(var(--canvas)));}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="receipt"]:is(:hover,:focus-visible)) .home-record-incoming[data-record="receipt"] {stroke-dashoffset:0;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="receipt"]:is(:hover,:focus-visible)) .home-cycle-insight-idle {display:none;}
 .home-lifecycle:not(.continuity-host):has(.home-cycle-step[data-stage="receipt"]:is(:hover,:focus-visible)) [data-insight="receipt"] {display:block;}

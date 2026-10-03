@@ -1,7 +1,7 @@
 /* A task owns one stable, softly rounded workspace; long evidence may scroll. */
 #scene .task-page { position:relative; inset:auto; box-sizing:border-box; width:100%; height:100%; max-width:none; margin:0; padding:clamp(18px,3vw,36px); overflow:auto; pointer-events:auto; color:hsl(var(--text)); font:400 16px/1.55 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .task-page [hidden] { display:none !important; }
-#scene .task-page :is(.concept-content,.deploy-content,.account-shell,.mesh-explorer-shell,.economy-preview-shell) { width:100%; max-width:none; margin:0; padding:0; box-sizing:border-box; }
+#scene .task-page :is(.concept-content,.deploy-content,.mesh-explorer-shell,.economy-preview-shell) { width:100%; max-width:none; margin:0; padding:0; box-sizing:border-box; }
 #scene .task-page h1 { margin:0 0 16px; max-width:25ch; font:500 clamp(28px,3.5vw,44px)/1.1 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.04em; }
 #scene .task-page h2 { font:500 22px/1.2 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .task-page :is(.concept-deck,.mesh-explorer-deck) { margin:0 0 20px; max-width:60ch; font-size:16px; }
@@ -19,11 +19,6 @@
 #scene .task-page :is(.source-step-controls,.deploy-workflow-controls) button { padding:9px 12px; font-size:13px; }
 #scene .task-page .deploy-caveat { margin:16px 0; font-size:14px; padding:10px 12px; border-color:hsl(var(--warning) / .4); }
 #scene .task-page .theory-footer { margin:16px 0 0; }
-#scene .task-page .account-hero { margin-bottom:20px; }
-#scene .task-page .account-layout { grid-template-columns:1fr; padding-top:16px; }
-#scene .task-page .account-live { margin-top:20px; }
-#scene .task-page .account-unsupported { margin-top:16px; }
-#scene .task-page .account-unsupported summary { display:flex; align-items:center; color:hsl(var(--reference)); cursor:pointer; }
 #scene .task-page .mesh-explorer-connect { margin:18px 0; padding:16px 0; gap:24px; }
 #scene .task-page .mesh-explorer-connect h2 { margin-top:0; }
 #scene .task-page .mesh-explorer-metrics { margin-bottom:20px; }

@@ -49,7 +49,7 @@ const sessions = createSessions({
   challengeTtlMs: 60_000, ticketTtlMs: 5 * 60_000, idleMs: 30 * 60_000, absoluteMs: 12 * 3600_000, maxChallenges: 5, maxOtpAttempts: 5,
 });
 const port = 35000 + Math.floor(Math.random() * 1000);
-const server = createHost({ root, publisher, port, sessions });
+const server = createHost({ root, publisher, port, sessions, siteRoutes:new Set(['/','/account','/bundle-deployer']) });
 await new Promise((resolve) => server.listen(port, '127.0.0.1', resolve));
 const origin = `http://127.0.0.1:${port}`;
 
@@ -62,7 +62,7 @@ function browser() {
     if (set) cookie = set.startsWith('flux_chain_admin=;') ? '' : set.split(';')[0];
     const text = await response.text();
     let json = null; try { json = JSON.parse(text); } catch {}
-    return { status: response.status, json, text, set };
+    return { status: response.status, json, text, set, location: response.headers.get('location') };
   };
   return { call, cookie: () => cookie, setCookie: (c) => { cookie = c; } };
 }
@@ -97,10 +97,26 @@ async function finishOtp(b, ticket, otp, who) {
 
 try {
   const b = browser();
+  const homepage = await b.call('GET', '/');
+  assert.equal(homepage.status, 200, 'the public homepage is reachable at the root');
+  assert.equal((await b.call('GET', '/account')).text, homepage.text, 'the account route supports direct loads');
+  assert.equal(homepage.text, '/* index.html */', 'the root serves index.html');
+  const legacyHomepage = await b.call('GET', '/index.html');
+  assert.equal(legacyHomepage.status, 308, 'the explicit index path redirects to the canonical root');
+  assert.equal(legacyHomepage.location, '/');
+  assert.equal((await b.call('GET', '/index.html?theme=dark')).location, '/?theme=dark', 'the redirect preserves query parameters');
 
   // 1. Locked: the locked page and the two files it needs are public; the editor and everything else under js/admin/ are not.
   assert.equal((await b.call('GET', '/admin.html')).status, 200, 'the locked page itself is reachable');
-  for (const rel of ['/js/admin/auth.js', '/js/admin/gate.js', '/js/content/home.js', '/css/admin.css', '/index.html']) assert.equal((await b.call('GET', rel)).status, 200, rel + ' is public');
+  for (const route of ['/admin']) {
+    const gate = await b.call('GET', route);
+    assert.equal(gate.status, 200, route + ' opens the public sign-in gate');
+    assert.equal(gate.text, '/* admin.html */', route + ' serves the gate rather than the editor');
+  }
+  const adminSlash = await b.call('GET', '/admin/?from=test');
+  assert.equal(adminSlash.status, 308, 'trailing slash canonicalizes before relative assets load');
+  assert.equal(adminSlash.location, '/admin?from=test');
+  for (const rel of ['/js/admin/auth.js', '/js/admin/gate.js', '/js/content/home.js', '/css/admin.css']) assert.equal((await b.call('GET', rel)).status, 200, rel + ' is public');
   for (const rel of ['/admin-app.html', '/js/admin/admin.js', '/js/admin/store.js', '/js/admin/publish.js']) {
     const r = await b.call('GET', rel); assert.equal(r.status, 401, rel + ' is locked'); assert(!r.text.includes('/* '), 'and its contents are not sent');
   }

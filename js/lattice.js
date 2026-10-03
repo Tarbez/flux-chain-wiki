@@ -89,7 +89,7 @@
       label: themeColor(theme, 'text-muted', .45),
       quietLabel: themeColor(theme, 'text-muted', .28),
       symbol: themeColor(theme, 'text-strong', .31),
-      symbolAccent: themeColor(theme, 'accent', .57),
+      symbolAccent: themeColor(theme, 'text-muted', .4),
       stat: themeColor(theme, 'text-muted', .31),
       active: themeColor(theme, 'text-strong', .48),
       activeAccent: themeColor(theme, 'accent', .56),
