@@ -14,7 +14,8 @@ import { webcrypto } from 'node:crypto';
 import { createHost } from '../scripts/publish-host.mjs';
 import { totpAt, base32Decode } from '../scripts/lib/totp.mjs';
 import { createFluxRootHandle } from '../../flux-auth/src/rootFromMnemonic.mjs';
-import { buildNameRecordSigningMessage } from '../../ark-miner-cli/src/state/name-record-validators.js';
+import { buildNameRecordSigningMessage } from '../../bundle-deploy/src/name-record.js';
+import { buildMarkerFields, publicMarkerSigningMessage } from '../../bundle-deploy/src/public-marker.js';
 import { createPublisher } from '../scripts/lib/publisher.mjs';
 import { readProject, decodeSite, encodeSite, defaultProjectRoot } from '../scripts/lib/site-bundle.mjs';
 
@@ -133,33 +134,42 @@ try {
   await assert.rejects(stranger.login(), (e) => /owned by another identity/.test(e.message) && e.message.includes(identityA.publicKeyB64) && /recovery file of the identity that owns the name/.test(e.detail.remedy));
   assert.equal((await stranger.raw('/api/status')).status, 401, 'and it holds no session');
 
+  // A correctly built + signed public marker for a name record, so a manually-assembled /api/publish body can get
+  // past the marker checks and exercise whatever the NAME record is meant to test, not "marker missing/invalid".
+  const owner = identityA;
+  async function signedMarkerFor(record, signer = owner) {
+    const cid = record.targets[0].value;
+    const fields = buildMarkerFields({ cid, contentType: 'application/octet-stream', ownerPublicKey: signer.publicKeyB64, now: Date.parse(record.updatedAt) });
+    const signature = await signer.sign(Buffer.from(publicMarkerSigningMessage(fields)).toString('utf8'));
+    return { ...fields, signature };
+  }
+
   // 6. A forged signature is refused before it reaches the registry.
   const prepared = await (await post('/api/prepare', { site: edited, ownerPublicKey: identityA.publicKeyB64 })).json();
   assert.equal(prepared.ok, true);
   const forged = { ...prepared.record, proof: { alg: 'Ed25519', sig: Buffer.alloc(64, 7).toString('base64') } };
-  const forgedResult = await post('/api/publish', { record: forged });
+  const forgedResult = await post('/api/publish', { record: forged, marker: await signedMarkerFor(prepared.record) });
   assert.equal(forgedResult.status, 403); assert.match((await forgedResult.json()).error, /does not verify/);
   assert.equal((await admin.status()).current.version, 2, 'the forged record changed nothing');
 
   // 7. A stale record (prepared, then someone else published first) is refused with the way out.
-  const owner = identityA;
   const sign = async (record, message) => ({ ...record, proof: { alg: 'Ed25519', sig: await owner.sign(message) } });
   const one = clone(edited); one.articles[1].sections[0][1] += ' One.';
   const two = clone(edited); two.articles[1].sections[0][1] += ' Two.';
   const prepOne = await (await post('/api/prepare', { site: one, ownerPublicKey: owner.publicKeyB64 })).json();
   const prepTwo = await (await post('/api/prepare', { site: two, ownerPublicKey: owner.publicKeyB64 })).json();
   assert.equal(prepOne.record.version, 3); assert.equal(prepTwo.record.version, 3);
-  assert.equal((await post('/api/publish', { record: await sign(prepOne.record, prepOne.signingMessage) })).status, 200);
-  const stale = await post('/api/publish', { record: await sign(prepTwo.record, prepTwo.signingMessage) });
+  assert.equal((await post('/api/publish', { record: await sign(prepOne.record, prepOne.signingMessage), marker: await signedMarkerFor(prepOne.record) })).status, 200);
+  const stale = await post('/api/publish', { record: await sign(prepTwo.record, prepTwo.signingMessage), marker: await signedMarkerFor(prepTwo.record) });
   const staleBody = await stale.json();
   assert.equal(stale.status, 409); assert.match(staleBody.remedy, /prepare again/);
 
-  // 8. The name can never be aimed at bytes that are not a site, even with a valid owner signature.
+  // 8. The name can never be aimed at bytes that are not a site, even with a valid owner signature and a valid marker.
   const junk = await (await fetch(`${pinBase}/api/v0/add`, { method: 'POST', headers: { authorization: `Bearer ${key}`, 'content-type': 'application/octet-stream' }, body: encodeSite(edited).slice(0, 40) })).json();
   const junkRecord = { name, ownerPublicKey: owner.publicKeyB64, version: 4, updatedAt: new Date(Date.now() + 5000).toISOString(), targets: [{ type: 'ipfs_cid', value: junk.cid }] };
   const junkMessage = buildNameRecordSigningMessage({ ...junkRecord, proof: { alg: 'Ed25519', sig: 'x' } });
-  const junkResult = await post('/api/publish', { record: await sign(junkRecord, junkMessage) });
-  // Validly signed, so the ONLY thing left to refuse it is the check that the bytes are a site.
+  const junkResult = await post('/api/publish', { record: await sign(junkRecord, junkMessage), marker: await signedMarkerFor(junkRecord) });
+  // Validly signed, with a validly signed marker too, so the ONLY thing left to refuse it is the check that the bytes are a site.
   assert.equal(junkResult.status, 400); assert.match((await junkResult.json()).error, /not a flux-chain site/);
   assert.equal((await admin.status()).current.version, 3, 'the junk record changed nothing');
 

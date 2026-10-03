@@ -5,13 +5,15 @@
 
      prepare   POST the site to the local publish host, which encodes it as
                one .flx archive, adds it to the miner, and drafts the name
-               record that would point the name at it.
+               record AND the public marker (a separate, owner-signed record
+               that lets the archive be read without a credential) that
+               would point the name at it.
      sign      HERE. The signed-in DeadArk identity (js/admin/auth.js, the
-               same Auth Kit chat.deadark.com signs in with) signs the drafted
-               record's signing message. Its key lives in a handle that never
+               same Auth Kit chat.deadark.com signs in with) signs both
+               drafted signing messages. Its key lives in a handle that never
                exposes the bytes; the host and the miner never receive it.
-     publish   POST the signed record back; the host checks it and hands it
-               to the miner's names/* registry.
+     publish   POST both signed records back; the host checks them and hands
+               them to the miner's names/* registry and public-marker store.
 
    That identity's root public key IS the owner of flux-chain.ark: the registry
    accepts an update only from the key that holds the name. There is no other
@@ -61,17 +63,20 @@ var ArkPublish = (function () {
       if (removing && confirmRemoval && !(await confirmRemoval(removes))) return { cancelled: true, removes: removes };
       if (!(await authorize({
         title: 'Publish this site',
-        description: 'Review the exact name-record bytes before this identity signs and sends them to the local publish host.',
+        description: 'Review the exact bytes before this identity signs and sends them to the local publish host: the name record (points the name at this version) and the public marker (lets this version be read without a credential).',
         record: prepared.record,
         signingMessage: prepared.signingMessage,
+        marker: prepared.marker,
+        markerSigningMessage: prepared.markerSigningMessage,
       }))) return { cancelled: true, authorization: true };
       /* the identity may have signed out while the person read the prompt */
       who = identity();
       if (!who || who.publicKeyB64 !== prepared.record.ownerPublicKey) throw signInRefusal();
       say('Signing version ' + prepared.record.version + ' as ' + (who.displayName || 'your identity') + '...');
       var record = Object.assign({}, prepared.record, { proof: { alg: 'Ed25519', sig: await who.sign(prepared.signingMessage) } });
+      var marker = Object.assign({}, prepared.marker, { signature: await who.sign(prepared.markerSigningMessage) });
       say('Publishing to the name registry...');
-      var result = await api('/api/publish', { record: record });
+      var result = await api('/api/publish', { record: record, marker: marker });
       return Object.assign({ unchanged: false, byteLength: prepared.byteLength }, result);
     }
 

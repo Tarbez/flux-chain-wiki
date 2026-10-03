@@ -14,21 +14,30 @@
                retrievable and really are a site, hand the record to the
                miner's `names/*` registry, and read it back.
 
-   The record's signing message and its verification are the MINER's own
-   (ark-miner-cli/src/state/name-record-validators.js), imported, not copied:
-   that wire format is byte-for-byte shared with ark-browser, so a second
-   implementation here would be a second place to drift. Like
+   The record's signing message and its verification, and the public-marker
+   protocol (a separate, owner-signed, revocable record that lets the
+   published archive be read without a credential at a miner's
+   /explorer/v1/content/<cid>), both come from @flux/bundle-deploy, a small
+   sibling package built specifically so this admin does not need to depend
+   on ark-miner-cli's heavy tree (GUN, libp2p, an IPFS-style daemon) just to
+   draft and verify these two signed records. That package's own
+   name-record.js/public-marker.js are themselves vendored, cited copies of
+   ark-miner-cli/src/state/name-record-validators.js and
+   src/storage/public-markers.js -- see bundle-deploy/README.md. Like
    ark-miner-desktop importing the daemon by sibling path, this makes
-   flux-chain/ and ark-miner-cli/ neighbours in one workspace.
+   flux-chain/ (defxn) and bundle-deploy/ neighbours in one workspace.
    ===================================================================== */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { buildNameRecordSigningMessage, canonicalizeNameRecord, normalizeName, verifyNameRecord }
-  from '../../../ark-miner-cli/src/state/name-record-validators.js';
+  from '../../../bundle-deploy/src/name-record.js';
+import { buildMarkerFields, publicMarkerSigningMessage, submitSignedMarker, verifyMarkerSignature }
+  from '../../../bundle-deploy/src/public-marker.js';
 import { decodeSite, encodeSite, siteProblems } from './site-bundle.mjs';
 
-export const DEFAULT_NAME = 'flux-chain.ark';
+export const DEFAULT_NAME = 'defxn.fxn';
+const MARKER_CONTENT_TYPE = 'application/octet-stream';
 
 /* A refusal names the failure, what is missing, and what would fix it. */
 export class PublishRefusal extends Error {
@@ -155,6 +164,15 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     return (await response.json()).cid;
   }
 
+  /* bundle-deploy's submitSignedMarker expects `{ok, status?, code?, reason?}` and never throws itself -- it decides
+     what STALE means. This is the same POST /api/v0/public-marker shape bundle-deploy's own pin-client.js uses. */
+  async function markPublic(record) {
+    const response = await call('pin', '/api/v0/public-marker', { method: 'POST', body: JSON.stringify(record), headers: { 'content-type': 'application/json' } });
+    if (response.ok) return { ok: true };
+    const body = await response.json().catch(() => ({}));
+    return { ok: false, status: response.status, code: body.code, reason: body.error };
+  }
+
   const targetCid = (record) => record?.targets?.find((t) => t.type === 'ipfs_cid')?.value || null;
 
   async function status() {
@@ -217,12 +235,17 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     const previous = current ? Date.parse(current.updatedAt) : 0;
     const updatedAt = new Date(Math.max(now().getTime(), previous + 1)).toISOString();
     const record = { name: normalized, ownerPublicKey, version: current ? current.version + 1 : 1, updatedAt, targets: [{ type: 'ipfs_cid', value: cid }] };
-    // Derived by the miner's own builder, from the same fields the miner will verify.
+    // Derived by bundle-deploy's own builder, from the same fields the miner will verify.
     const signingMessage = buildNameRecordSigningMessage({ ...record, proof: { alg: 'Ed25519', sig: 'x' } });
-    return { cid, byteLength: bytes.length, unchanged: !!unchanged, removes, currentVersion: current ? current.version : 0, record, signingMessage };
+    // The public marker: a separate, owner-signed record so the published archive is readable by strangers
+    // without a fleet credential, via GET /explorer/v1/content/<cid>. Drafted alongside the name record so the
+    // browser can review and sign both bytes in one pass. A site archive is binary, never an executable type.
+    const marker = buildMarkerFields({ cid, contentType: MARKER_CONTENT_TYPE, ownerPublicKey, now: Date.parse(updatedAt) });
+    const markerSigningMessage = Buffer.from(publicMarkerSigningMessage(marker)).toString('utf8');
+    return { cid, byteLength: bytes.length, unchanged: !!unchanged, removes, currentVersion: current ? current.version : 0, record, signingMessage, marker, markerSigningMessage };
   }
 
-  async function publish(signed) {
+  async function publish(signed, signedMarker) {
     let canonical;
     try { canonical = canonicalizeNameRecord(signed); }
     catch (error) { throw new PublishRefusal(`The record is malformed: ${error.message}`, 'a record shaped as prepare drafted it, plus proof.', 'sign the record prepare returned without changing it.'); }
@@ -230,6 +253,16 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     if (!verifyNameRecord(canonical)) throw new PublishRefusal('The signature does not verify against the record\'s owner key.', 'a valid Ed25519 signature over the signing message.', 'sign again with the owner key, over exactly the message prepare returned.', 403);
     const cid = targetCid(canonical);
     if (!cid) throw new PublishRefusal('The record names no archive.', 'an ipfs_cid target.', 'run prepare again.');
+
+    if (!signedMarker || typeof signedMarker.signature !== 'string') {
+      throw new PublishRefusal('No signed public marker was supplied.', 'a marker object with the owner\'s signature over markerSigningMessage.', 'sign prepare\'s markerSigningMessage and attach it as marker.signature, then publish again.');
+    }
+    const { signature: markerSignature, ...markerFields } = signedMarker;
+    if (!verifyMarkerSignature(markerFields, markerSignature)) {
+      throw new PublishRefusal('The public marker signature does not verify against its owner key.', 'a valid Ed25519 signature over the marker signing message.', 'sign again with the owner key, over exactly prepare\'s markerSigningMessage.', 403);
+    }
+    if (markerFields.cid !== cid) throw new PublishRefusal('The marker is for a different archive than the name record.', 'a marker for the same CID the record names.', 'run prepare again and sign both messages it returns.');
+
     // The name must never point at bytes that are missing or are not a site.
     let archived;
     try { archived = decodeSite(await cat(cid)); }
@@ -241,12 +274,17 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     const body = await response.json().catch(() => ({}));
     if (!response.ok || !body.ok) throw new PublishRefusal(`The miner refused the record: ${body.error || response.status}.`, 'a record the names/* registry accepts.',
       /advance exactly/.test(body.error || '') ? 'someone published since you prepared; prepare again to get the next version.' : 'read the reason above; version and updatedAt must advance, and the owner must match.', 409);
+    // The mesh write above already succeeded; the marker is a separate record (same two-phase split
+    // bundle-deploy's deploy.js uses) and a STALE (409) means this owner already marked this exact CID
+    // as of an equal-or-newer time, which for an unchanged, content-addressed object is success, not failure.
+    const markerResult = await submitSignedMarker(markerFields, markerSignature, { markPublic });
     const readBack = await currentRecord();
     return {
       published: canonical.version, cid,
       readBack: readBack ? { version: readBack.version, cid: targetCid(readBack) } : null,
       confirmed: !!readBack && readBack.version === canonical.version && targetCid(readBack) === cid,
       manifests: archived.manifests.length, articles: archived.articles.length, assets: archived.assets.length, secrets: (archived.secrets || []).length,
+      marker: markerResult.record,
     };
   }
 

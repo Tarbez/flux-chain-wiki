@@ -143,7 +143,8 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       if (url.pathname === '/api/publish' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req) || '{}');
         if (body.record?.ownerPublicKey !== session.publicKeyB64) throw new SessionRefusal('This session belongs to a different identity than the record\'s owner.', 'the signed-in identity as owner.', 'sign in again, then publish.', 403);
-        const published = await publisher.publish(body.record);
+        if (body.marker?.ownerPublicKey !== session.publicKeyB64) throw new SessionRefusal('This session belongs to a different identity than the public marker\'s owner.', 'the signed-in identity as owner.', 'sign in again, then publish.', 403);
+        const published = await publisher.publish(body.record, body.marker);
         // The mesh write above already succeeded -- this is a SEPARATE question (does the public
         // gateway agree?), so its result never changes whether /api/publish itself reports success.
         // It fails closed (an explicit {ok:false, reason}), never silently, and never assumes success.
