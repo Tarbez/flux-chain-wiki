@@ -1,0 +1,15 @@
+These five files are verbatim copies of /Volumes/PortableSSD/flx/flx-codec/src/*.js
+(the @deadark/flx-codec package), vendored here because this project has no build step
+and *.defxn.com's gateway shell (../app.js) needs to import decodeArchiveAsync as a
+real browser ES module served same-origin, with no bundler/npm install to resolve a
+package specifier through.
+
+Vendored at flx-codec commit 3fb58e3 ("Make asset decode browser-safe (no Buffer, gzip
+via DecompressionStream)") -- the commit that made codec.js's decode path browser-safe.
+Do not hand-edit these files; re-copy them from flx-codec/src/ instead, the same
+"copy, cite, don't diverge" convention used elsewhere in this workspace (see
+CMS-ARK/src/lib/mesh/overlay.ts's header comment). flx-codec is the canonical source;
+this is a deployment artifact of it, not a fork.
+
+Resync command, from the defxn repo root:
+  cp ../../flx/flx-codec/src/{index,codec,binary,dictionary,blake3}.js gateway/vendor/flx-codec/
