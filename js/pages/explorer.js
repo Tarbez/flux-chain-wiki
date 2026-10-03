@@ -52,9 +52,9 @@
         '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">01 / SOURCE FIELD</p><h2 id="mesh-glance-title">What this node exposes</h2></div><span data-explorer-glance-stamp>—</span></div>' +
         '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
         '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
-        '<dl class="mesh-source-facts"><div><dt>Category</dt><dd data-explorer-source-category>—</dd></div><div><dt>State</dt><dd data-explorer-source-state>—</dd></div><div><dt>Access</dt><dd data-explorer-source-access>—</dd></div></dl>' +
+        '<div class="mesh-source-guide" data-explorer-source-guide></div><dl class="mesh-source-facts"><div><dt>Category</dt><dd data-explorer-source-category>—</dd></div><div><dt>State</dt><dd data-explorer-source-state>—</dd></div><div><dt>Access</dt><dd data-explorer-source-access>—</dd></div></dl>' +
         '<div class="mesh-explorer-controls"><label for="mesh-source">Selected source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
-        '<form data-explorer-lookup><label for="mesh-record-id">Exact record ID<input id="mesh-record-id" type="search" autocomplete="off" placeholder="Paste an exact record ID" disabled></label><button type="submit" disabled>Inspect</button></form></div>' +
+        '<form data-explorer-lookup><label for="mesh-record-id">Exact record ID<input id="mesh-record-id" type="search" autocomplete="off" placeholder="Paste an exact record ID" disabled></label><button type="submit" disabled>Inspect</button></form><div class="mesh-inspect-result" role="status" aria-live="polite" data-explorer-inspect-result hidden></div></div>' +
         '<p class="mesh-explorer-boundary">A returned record is evidence from this Miner, not automatic proof of a production deployment.</p></aside></section>' +
         '<nav class="mesh-observatory-dock" aria-label="Observation layers"><details class="mesh-observatory-popover"><summary><span>03</span> Node pulse</summary><section class="mesh-node-strip" aria-labelledby="mesh-nodes-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">03 / NODE PULSE</p><h2 id="mesh-nodes-title">Public observation points</h2></div><span>REACHABILITY / RESPONSE</span></div><div class="mesh-explorer-nodes" data-explorer-nodes></div></section></details>' +
         '<details class="mesh-observatory-popover"><summary><span>04</span> Record ledger</summary><section class="mesh-explorer-data" aria-labelledby="mesh-data-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">04 / RECORD LEDGER</p><h2 id="mesh-data-title">Records from the selected source</h2></div><span>REFRESHES EVERY 10 SECONDS</span></div>' +
@@ -95,6 +95,8 @@
     var source = $('#mesh-source');
     var recordId = $('#mesh-record-id');
     var lookup = $('[data-explorer-lookup]');
+    var guide = $('[data-explorer-source-guide]');
+    var inspectResult = $('[data-explorer-inspect-result]');
     var resultMessage = $('[data-explorer-result-message]');
     var records = $('[data-explorer-records]');
     var detail = $('[data-explorer-detail]');
@@ -162,7 +164,7 @@
       controllers.forEach(function (controller) { controller.abort(); }); controllers.clear();
       connected = false; sources = []; lastCursor = null;
       source.replaceChildren(node('option', '', 'Connect to load sources')); source.disabled = true;
-      recordId.value = ''; recordId.disabled = true;
+      recordId.value = ''; recordId.disabled = true; showInspect(''); guide.replaceChildren();
       lookup.querySelector('button').disabled = true;
       records.replaceChildren(); detail.replaceChildren(); detail.hidden = true;
       topology.textContent = 'Connect with an operator key to inspect topology.';
@@ -214,6 +216,93 @@
       if (item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only') return 'Exact ID only';
       return sourceAllowsQuery(item) ? 'Public query' : safeString(item.visibility, 'Declared');
     }
+    /* Plain-language notes shown beside a selected source. A catalog `description` from the Miner wins. */
+    var SOURCE_NOTES = {
+      'device-keys': 'Public keys a device has registered for an account. Each record ties a device to the key it signs with.',
+      'device-revocations': 'Notices that retire a device key so it can no longer be trusted. Look up a key to see whether it was revoked.',
+      'dm-devices': 'Devices enrolled to take part in direct messaging.',
+      'dm-device-approvals': 'Approvals that let an enrolled device join a direct-message conversation.',
+      'dm-core-coordinates': 'Routing coordinates for direct messages. The Miner declares them but keeps them out of Explorer.',
+      'dm-memberships': 'Who belongs to a direct-message conversation, as signed membership records.',
+      'dm-transitions': 'Signed changes to a conversation, such as members added or removed.',
+      'conversation-runtime': 'Live conversation state. Declared by the Miner but excluded from Explorer reads.',
+      'documents': 'Published documents and their metadata.',
+      'support-graph': 'Links showing who supports whom across the economy.',
+      'economy-policies': 'Rules that govern how value and rewards are shared.',
+      'payouts': 'Recorded payouts made under an economy policy.',
+      'dao-registry': 'The registry of DAOs known to this Miner.',
+      'dao-attestations': 'Signed statements made by or about a DAO.',
+      'writer-authorizations': 'Grants that let a key write to a source or namespace.',
+      'signer-governance': 'Rules and changes for who may sign on a group’s behalf.',
+      'checkpoints': 'Agreed snapshots of state that later records can build on.',
+      'disputes': 'Challenges raised against a record or decision.',
+      'dispute-resolutions': 'Outcomes recorded for disputes.',
+      'identities': 'Identity records: the public facts an identity has published.',
+      'names': 'Human-readable names and the identity each one points to.',
+      'name-revocations': 'Notices that a name no longer points where it did.',
+      'accounts': 'Account records. Never listed; you must supply the exact account ID.',
+      'miners': 'Miners announcing themselves on the network.',
+      'networks': 'Named miner-presence networks.',
+      'notifications': 'Notification records. Declared but excluded from Explorer reads.',
+      'presence': 'Live presence signals. Declared but excluded from Explorer reads.',
+      'publications': 'Items published to the mesh.',
+      'publication-assertions': 'Signed claims made about a publication.',
+      'flux-releases': 'Released versions of Flux software.',
+      'social-graph': 'Follow and connection records between identities.',
+      'flux-relationships': 'Declared relationships between Flux records.'
+    };
+    var CATEGORY_NOTES = {
+      device: 'Device identity records.', dm: 'Direct-message coordination records.', document: 'Published documents.',
+      economy: 'Economy rules and payouts.', governance: 'Governance, authorization and dispute records.',
+      identity: 'Identity and naming records.', network: 'Network and miner records.', notification: 'Notification records.',
+      presence: 'Presence records.', publication: 'Publication records.', runtime: 'Operator-facing runtime state.',
+      social: 'Social graph records.', storage: 'Storage and content records.', thread: 'Thread records.'
+    };
+    function accessSteps(item) {
+      var kind = sourceAccessKind(item);
+      return kind === 'public' ? ['Public query', 'The Miner lists the latest records. Open the Record ledger (04) to browse them, or paste an ID below to open one.']
+        : kind === 'exact' ? ['Exact ID only', 'Records are never listed. Paste the exact record ID below and press Inspect to read just that record.']
+        : kind === 'operator' ? ['Operator only', 'Needs an operator key. Add it under Operator access, then reconnect.']
+        : ['Excluded', 'The Miner declares this source but does not serve it through Explorer.'];
+    }
+    function renderGuide(item) {
+      guide.replaceChildren();
+      var note = item.description || SOURCE_NOTES[item.id] || CATEGORY_NOTES[item.category] || 'Declared by this Miner.';
+      var steps = accessSteps(item);
+      [['What it is', safeString(note)], ['How to read it', steps[1]],
+        ['Evidence', 'A returned record is evidence from this Miner, not proof of a production deployment.']].forEach(function (pair) {
+        var block = node('div', 'mesh-source-guide-step');
+        block.appendChild(node('h4', '', pair[0])); block.appendChild(node('p', '', pair[1])); guide.appendChild(block);
+      });
+      var kind = sourceAccessKind(item);
+      recordId.placeholder = kind === 'public' || kind === 'exact' ? 'Paste a ' + safeString(item.label || item.id) + ' record ID' : 'No record lookup for this source';
+      recordId.disabled = kind === 'excluded'; lookup.querySelector('button').disabled = kind === 'excluded';
+    }
+    function showInspect(text, state) {
+      inspectResult.replaceChildren(); inspectResult.hidden = !text; inspectResult.dataset.state = state || '';
+      if (text) inspectResult.appendChild(node('p', '', text));
+    }
+    function renderInspectRecord(payload) {
+      var data = payload.data, record = data.record;
+      inspectResult.replaceChildren(); inspectResult.hidden = false; inspectResult.dataset.state = 'found';
+      inspectResult.appendChild(node('h4', '', 'Record found'));
+      inspectResult.appendChild(node('p', 'mesh-inspect-id', record.id));
+      var facts = node('dl', 'mesh-explorer-fields');
+      facts.appendChild(row('Source', record.sourceId)); facts.appendChild(row('Kind', record.kind));
+      facts.appendChild(row('Verification', record.verification && record.verification.state));
+      facts.appendChild(row('Updated', time(record.updatedAt)));
+      facts.appendChild(row('Provenance', record.provenance && record.provenance.protocol));
+      var fields = data.safeDetail || record.fields || {};
+      Object.keys(fields).slice(0, 20).forEach(function (field) { facts.appendChild(row(field, fields[field])); });
+      inspectResult.appendChild(facts);
+      if (inspectResult.scrollIntoView) inspectResult.scrollIntoView({ block: 'nearest' });
+      if (Array.isArray(data.links) && data.links.length) {
+        inspectResult.appendChild(node('h4', '', 'Declared links'));
+        data.links.slice(0, 10).forEach(function (link) {
+          inspectResult.appendChild(node('p', 'mesh-explorer-link-fact', safeString(link.relation) + ' → ' + safeString(link.targetRecordId)));
+        });
+      }
+    }
     function inspectSource(item) {
       if (!item) return;
       $('[data-explorer-source-title]').textContent = safeString(item.label || item.id);
@@ -227,6 +316,7 @@
         : 'The Miner declares this source without a public enumeration path.';
       $('[data-explorer-source-summary]').textContent = summary;
       sourceButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.sourceId === item.id)); });
+      renderGuide(item); showInspect('');
     }
     function chooseSource(id, read) {
       var item = sources.find(function (candidate) { return candidate.id === id; });
@@ -368,15 +458,20 @@
     /* The scope each listed record was read under, so inspecting it asks the same question. */
     var recordScopes = {};
     async function inspect(id, origin) {
-      var selected = source.value, token=generation, requestedDetail=++detailRequest;
-      if (!selected || !id) return;
-      resultMessage.textContent = 'Inspecting record…';
+      var selected = source.value, token=generation, requestedDetail=++detailRequest, inline = !origin;
+      if (!selected) return;
+      if (!id) { if (inline) showInspect('Paste an exact record ID first.', 'error'); return; }
+      if (inline) showInspect('Inspecting ' + id + '…', 'busy'); else resultMessage.textContent = 'Inspecting record…';
       try {
         var payload = await request('/explorer/v1/record', { sourceId: selected, recordId: id, scope: recordScopes[id] });
         if (token!==generation||requestedDetail!==detailRequest||source.value!==selected||!connected || !page.isConnected) return;
         if(!payload.data.record || payload.data.record.id!==id || payload.data.record.sourceId!==selected) throw new Error('The Miner returned a different record or source. The requested record is not displayed.');
-        renderDetail(payload, origin); resultMessage.textContent = '';
-      } catch (error) { if (token===generation&&requestedDetail===detailRequest&&page.isConnected) resultMessage.textContent = errorText(error); }
+        if (inline) renderInspectRecord(payload); else { renderDetail(payload, origin); resultMessage.textContent = ''; }
+      } catch (error) {
+        if (token===generation&&requestedDetail===detailRequest&&page.isConnected) {
+          if (inline) showInspect(errorText(error), 'error'); else resultMessage.textContent = errorText(error);
+        }
+      }
     }
     async function loadRecords() {
       var selected = source.value;
