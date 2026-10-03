@@ -45,12 +45,13 @@
         '<h1 id="mesh-explorer-title">Observe the mesh, one node at a time.</h1>' +
         '<p class="mesh-explorer-deck">A read-only view of what the selected Miner reports now. Counts, availability, and records belong to this observation; they are not a global chain height or an authoritative membership list.</p></div>' +
         '<aside class="mesh-explorer-live-panel" aria-label="Current observation"><div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><div><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></div>' +
-        '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside></header>' +
-        '<section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
+        '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside>' +
+        '<details class="mesh-connect-popover"><summary aria-label="Observation controls"><span class="mesh-connect-dot" aria-hidden="true"></span><span data-explorer-origin-label>Public mesh</span></summary><section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
         '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
-        '<details class="mesh-operator-access"><summary>Operator access</summary><label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources"></details></div></section>' +
-        '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">01 / SOURCE FIELD</p><h2 id="mesh-glance-title">What this node exposes</h2></div><span data-explorer-glance-stamp>—</span></div>' +
-        '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
+        '<details class="mesh-operator-access"><summary>Operator access</summary><label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources"></details></div></section></details></header>' +
+        
+        '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head mesh-source-head"><h2 id="mesh-glance-title"><span class="mesh-explorer-kicker">01</span>What this node exposes</h2>' +
+        '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><span class="mesh-source-stamp" data-explorer-glance-stamp>—</span></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
         '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
         '<div class="mesh-source-guide" data-explorer-source-guide></div><dl class="mesh-source-facts"><div><dt>Category</dt><dd data-explorer-source-category>—</dd></div><div><dt>State</dt><dd data-explorer-source-state>—</dd></div><div><dt>Access</dt><dd data-explorer-source-access>—</dd></div></dl>' +
         '<div class="mesh-explorer-controls"><label for="mesh-source">Selected source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
@@ -101,7 +102,7 @@
     var records = $('[data-explorer-records]');
     var detail = $('[data-explorer-detail]');
     var topology = $('[data-explorer-topology]');
-    var popovers = Array.from(page.querySelectorAll('.mesh-observatory-popover'));
+    var popovers = Array.from(page.querySelectorAll('.mesh-observatory-popover,.mesh-connect-popover'));
     popovers.forEach(function (popover) {
       popover.addEventListener('toggle', function () {
         if (!popover.open) return;
@@ -686,7 +687,7 @@
       }
     }
     async function start() {
-      clearLive(); setBusy(true); setStatus('loading', 'Connecting…', 'Requesting catalog and health from the ' + originName() + '.');
+      syncOriginLabel(); clearLive(); setBusy(true); setStatus('loading', 'Connecting…', 'Requesting catalog and health from the ' + originName() + '.');
       var token = generation;
       try {
         var responses = await Promise.all([request('/explorer/v1/catalog'), request('/explorer/v1/health')]);
@@ -710,7 +711,9 @@
       }
     }
     connect.addEventListener('click', start);
-    originSelect.addEventListener('change', start);
+    var originLabel = $('[data-explorer-origin-label]');
+    function syncOriginLabel() { originLabel.textContent = originSelect.value === 'local' ? 'Local Miner' : 'Public mesh'; }
+    originSelect.addEventListener('change', function () { return start(); });
     refresh.addEventListener('click', observe);
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });
     source.addEventListener('change', function () { chooseSource(source.value, true); });
