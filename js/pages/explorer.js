@@ -9,6 +9,8 @@
   /* Counts come from walking a source's own cursor pages (the API has no total). Capped so a big source can't hang the page. */
   var COUNTED = [['identities', 'Identities'], ['networks', 'Networks'], ['miners', 'Miners announcing'], ['publications', 'Publications'], ['documents', 'Documents']];
   var COUNT_PAGE = 100, COUNT_PAGES = 5;
+  /* The node list is probed on connect and then on every sixth 10 s refresh: whether a node is up changes slowly. */
+  var NODE_PROBE_EVERY = 6;
   var API_VERSION = 'explorer-api-v1';
 
   function node(tag, className, value) {
@@ -110,7 +112,7 @@
       } else if(focus)source.focus();
       fallbackDetail.hidden=true;fallbackDetail.replaceChildren();records.hidden=false;
     }
-    var connected = false, busy = false, timer = 0, generation = 0;
+    var connected = false, busy = false, timer = 0, generation = 0, observed = 0;
     var controllers = new Set(), sources = [], lastCursor = null, detailRequest=0, lastHealth = null;
     setStatus('offline','Connecting…','Reading the public mesh.');
 
@@ -152,7 +154,9 @@
       var controller = new AbortController(); controllers.add(controller);
       var timeout = window.setTimeout(function () { controller.abort(); }, 10000);
       var headers = { accept: 'application/json' };
-      if (body) headers['content-type'] = 'application/json';
+      /* text/plain keeps a cross-origin POST a "simple" request, so the browser skips the preflight
+         round trip. The node parses the body as JSON whatever the type says. */
+      if (body) headers['content-type'] = 'text/plain;charset=UTF-8';
       if (key.value.trim()) headers['x-api-key'] = key.value.trim();
       try {
         var response = await fetch(base() + path, { method: body ? 'POST' : 'GET', headers: headers,
@@ -315,11 +319,18 @@
       if (note) card.appendChild(node('small', '', note));
       return card;
     }
-    async function loadGlance(token) {
-      var started = Date.now();
-      var cards = [];
-      var counted = COUNTED.filter(function (entry) { return sourceAllowsQuery(sources.find(function (item) { return item.id === entry[0]; })); });
-      /* Each network record already carries its own miner count, so one query answers both cards.
+    /* The node's own one-request summary. A plain GET, so the browser sends no preflight.
+       null when the node is older and has no such route: the caller then walks each source itself. */
+    async function readSummary(counted) {
+      try {
+        var payload = await request('/explorer/v1/summary?sources=' + counted.map(function (entry) { return entry[0]; }).join(','));
+        return payload.data && payload.data.counts ? payload : null;
+      } catch (error) { return null; }
+    }
+    /* One result per counted source: {count, capped}, undefined for "could not be read",
+       null for "this source cannot be counted" (no card is drawn for it). */
+    async function walkCounts(counted, token) {
+      /* Each network record already carries its own miner count, so one walk answers both cards.
          Asking per network instead cost one more round trip per network, one after another. */
       var miners = 0;
       var networks = countSource('networks', token, function (record) {
@@ -327,17 +338,37 @@
         miners += Number(raw.activeMinerCount != null ? raw.activeMinerCount : raw.minerCount) || 0;
       });
       networks.catch(function () {});
-      var results = await Promise.all(counted.map(function (entry) {
+      return Promise.all(counted.map(function (entry) {
         var pending = entry[0] === 'networks' ? networks
           : entry[0] === 'miners' ? networks.then(function (walk) { return walk && { count: miners, capped: walk.capped }; })
           : countSource(entry[0], token);
         return pending.catch(function () { return undefined; });
       }));
-      if (token !== generation || !page.isConnected) return;
+    }
+    /* Draws the glance. Resolves to the health the summary carried, or null when the walk fallback ran. */
+    async function loadGlance(token) {
+      var started = Date.now();
+      var cards = [];
+      var counted = COUNTED.filter(function (entry) {
+        var item = sources.find(function (candidate) { return candidate.id === entry[0]; });
+        return sourceAllowsQuery(item) && item.enumeration !== 'search';
+      });
+      var summary = counted.length ? await readSummary(counted) : null;
+      if (token !== generation || !page.isConnected) return null;
+      var cap = summary && summary.data.walk ? summary.data.walk.pageSize * summary.data.walk.maxPages : COUNT_PAGE * COUNT_PAGES;
+      var results = summary ? counted.map(function (entry) {
+        var figure = summary.data.counts[entry[0]];
+        if (!figure || figure.state === 'unavailable') return undefined;
+        return figure.state === 'counted' ? { count: figure.count, capped: figure.capped } : null;
+      }) : await walkCounts(counted, token);
+      if (token !== generation || !page.isConnected) return null;
+      var health = summary ? { generatedAt: summary.generatedAt, partial: summary.partial, data: { status: summary.data.health && summary.data.health.status } } : null;
+      if (health) lastHealth = health;
       counted.forEach(function (entry, index) {
         var result = results[index];
+        if (result === null) return;
         cards.push(statCard(entry[1], result ? String(result.count) + (result.capped ? '+' : '') : 'Unavailable',
-          result ? (result.capped ? 'first ' + (COUNT_PAGE * COUNT_PAGES) + ' counted' : 'counted from the node') : 'this node could not be read'));
+          result ? (result.capped ? 'first ' + cap + ' counted' : 'counted from the node') : 'this node could not be read'));
       });
       /* Accounts are exact-ID lookups only. The API refuses to list them, so a wallet total cannot be read here. */
       cards.push(statCard('Wallets', 'Not public', 'accounts are looked up by exact ID, never listed'));
@@ -350,6 +381,7 @@
       cards.push(statCard('Counted in', (Date.now() - started) + ' ms', 'live from ' + originName()));
       stats.replaceChildren.apply(stats, cards); stats.hidden = false;
       glanceStamp.textContent = 'UPDATED ' + new Date().toLocaleTimeString();
+      return health;
     }
     function nodeRow(name, host, result) {
       var row = node('div', 'mesh-explorer-node'); row.dataset.state = result.up ? 'up' : 'down';
@@ -378,15 +410,17 @@
     }
     async function observe() {
       if (!connected || busy || !page.isConnected) return;
-      var token = generation;
+      var token = generation, tick = ++observed;
       try {
-        var health = await request('/explorer/v1/health');
-        if (token !== generation || !page.isConnected) return;
-        lastHealth = health;
-        $('[data-explorer-observed]').textContent = time(health.generatedAt);
-        $('[data-explorer-coverage]').textContent = health.partial ? 'Partial' : safeString(health.data.status, 'Reported');
-        setStatus('live', (originSelect.value === 'local' ? 'Local' : 'Public') + ' live observation', 'Read from the ' + originName() + ' at ' + time(health.generatedAt) + (health.partial ? ' · partial coverage.' : '.'));
-        await Promise.all([loadRecords(), loadGlance(token), loadNodes(token)]);
+        /* Nothing waits on a health call first: the summary carries the node's status, and the
+           record list and the glance start together. Only a node without a summary is asked separately. */
+        await Promise.all([loadRecords(), loadGlance(token).then(async function (health) {
+          if (!health) { health = await request('/explorer/v1/health'); lastHealth = health; }
+          if (token !== generation || !page.isConnected) return;
+          $('[data-explorer-observed]').textContent = time(health.generatedAt);
+          $('[data-explorer-coverage]').textContent = health.partial ? 'Partial' : safeString(health.data.status, 'Reported');
+          setStatus('live', (originSelect.value === 'local' ? 'Local' : 'Public') + ' live observation', 'Read from the ' + originName() + ' at ' + time(health.generatedAt) + (health.partial ? ' · partial coverage.' : '.'));
+        }), tick % NODE_PROBE_EVERY === 0 ? loadNodes(token) : null]);
       } catch (error) {
         if (token !== generation || !page.isConnected) return;
         clearLive(); setStatus('error', 'Connection lost', errorText(error));

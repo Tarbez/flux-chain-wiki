@@ -6,12 +6,14 @@ class Element{
 }
 const document={createElement:t=>new Element(t),visibilityState:'visible'};
 const window={setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){}};
-const reads=[],pending=[];let authOptions,disposed=false;
+const reads=[],pending=[];let authOptions,disposed=false,summaryCounts=null;
 const context={ArkUI:{pageModules:{}},document,window,console,AbortController,Date,TypeError,ArkAdminAuth:{create(opts){authOptions=opts;return {dispose(){disposed=true;}};}},fetch:async(url,options)=>{
  reads.push({url,options});let data={};
  const src=(id,category)=>({id,label:id,category,state:'available',visibility:'public',enumeration:'enumerable',capabilities:['query']});
  if(url.endsWith('/catalog'))data={sources:[{id:'agreements',label:'Agreements',state:'available',visibility:'public',enumeration:'bounded',capabilities:['query']},src('identities','identity'),src('networks','network'),{id:'accounts',label:'accounts',category:'identity',state:'available',visibility:'exact_id_only',enumeration:'exact_id_only',capabilities:['query','record_detail']}]};
  if(url.endsWith('/health'))data={status:'running'};
+ // An older node has no summary route and answers with no counts; a current one answers with what the test sets.
+ if(url.includes('/summary'))data=summaryCounts?{health:{status:'running'},counts:summaryCounts,walk:{pageSize:100,maxPages:5}}:{};
  if(url.endsWith('/query')){
   const body=JSON.parse(options.body),rec=i=>({id:body.sourceId+'-'+i,kind:body.sourceId});
   // identities: 107 records over two pages. networks: a cursor that never ends (the walk must stop at its cap).
@@ -39,6 +41,16 @@ async function flush(){for(let i=0;i<20;i++)await Promise.resolve();}
  assert.equal(cards.Wallets,'Not public','accounts are exact-ID only, so no wallet total is invented');
  assert(!('Documents' in cards)&&!('Publications' in cards),'sources this node does not offer are not shown as zero');
  assert.equal(q('[data-explorer-nodes]').children.length,5,'public plus st1-st4 are probed for the node list');
+ // A node with the one-request summary: the glance comes from that single GET, with no health call, no count walks and no node probes on a refresh.
+ summaryCounts={identities:{state:'counted',count:3,capped:false},networks:{state:'unavailable',code:'SOURCE_UNAVAILABLE'}};const before=reads.length;
+ await q('[data-explorer-refresh]').listeners.click();const later=reads.slice(before);
+ const fresh=Object.fromEntries(q('[data-explorer-stats]').children.map(c=>[c.children[0].textContent,c.children[1].textContent]));
+ assert.equal(fresh.Identities,'3','a counted figure is shown');assert.equal(fresh.Networks,'Unavailable','a figure the node could not read is never shown as zero');
+ assert(later.some(r=>r.url.endsWith('/explorer/v1/summary?sources=identities,networks')),'the glance is one request');
+ assert(!later.some(r=>r.url.endsWith('/health')),'the summary carries the status, so no separate health call or node probe is made');
+ assert(later.filter(r=>r.url.endsWith('/query')).every(r=>JSON.parse(r.options.body).limit===20),'no count walks run beside the summary');
+ assert(later.filter(r=>r.options&&r.options.body).every(r=>/^text\/plain/.test(r.options.headers['content-type'])),'a POST stays a simple request, so the browser sends no preflight');
+ summaryCounts=null;
  // Switching to a local Miner reads only that Miner and stops probing the public nodes.
  const mark=reads.length;q('#mesh-origin').value='local';await q('#mesh-origin').listeners.change();
  assert(reads.length>mark&&reads.slice(mark).every(r=>r.url.startsWith('http://127.0.0.1:8766/explorer/v1/')),'local mode contacts only the local Miner');
