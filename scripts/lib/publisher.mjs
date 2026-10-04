@@ -28,6 +28,7 @@
    flux-chain/ (defxn) and bundle-deploy/ neighbours in one workspace.
    ===================================================================== */
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { buildNameRecordSigningMessage, canonicalizeNameRecord, normalizeName, verifyNameRecord }
@@ -109,10 +110,13 @@ export async function discoverMiner({ env = process.env, home = os.homedir(), fe
    With no --status/--pin/--key/--storage it finds the miner itself, and again whenever it is missing. */
 export function publisherFromArgs(args, root, { env = process.env } = {}) {
   const text = (v) => (typeof v === 'string' ? v : undefined);
-  const explicit = text(args.status) || text(args.pin) || text(args.key) || text(args.storage);
+  const explicit = text(args.status) || text(args.pin) || text(args.key) || text(args.storage) || text(args.controlSocket);
   const name = text(args.name) || DEFAULT_NAME;
   if (explicit) {
-    return createPublisher({ name, root, statusBase: text(args.status) || 'http://127.0.0.1:8766', pinBase: text(args.pin) || 'http://127.0.0.1:5002', key: readMinerKey({ key: text(args.key), storagePath: text(args.storage), env }) });
+    return createPublisher({
+      name, root, statusBase: text(args.status) || 'http://127.0.0.1:8766', pinBase: text(args.pin) || 'http://127.0.0.1:5002',
+      controlSocketPath: text(args.controlSocket), key: readMinerKey({ key: text(args.key), storagePath: text(args.storage), env }),
+    });
   }
   let cached = null;
   const miner = async () => {
@@ -124,18 +128,59 @@ export function publisherFromArgs(args, root, { env = process.env } = {}) {
   return createPublisher({ name, root, miner });
 }
 
-/* `miner` is {statusBase, pinBase, key, label?, networkId?} or an async function returning one, called for every request
-   so a miner started after this tool is picked up and one that stopped is reported, not assumed. The older
-   statusBase/pinBase/key options describe a fixed miner. */
-export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.0.0.1:8766', pinBase = 'http://127.0.0.1:5002', key, miner, root, now = () => new Date() } = {}) {
+/* A fleet miner sweeps every /debug/* route (name-record reads and publishes
+   included) onto a private Unix control socket -- F-14 control-plane
+   separation, ark-miner-cli's own doc comment on ARK_MINER_CONTROL_SOCKET --
+   and refuses them over its public TCP status port. That is only reachable
+   from the same machine, which is exactly where this admin host runs once
+   it is deployed alongside the miner it publishes through (not from a
+   stranger's browser, nor from this tool run remotely against a fleet node
+   it isn't co-located with). Returns a fetch-Response-shaped object so every
+   existing caller of call('status', ...) -- which only ever touches
+   .ok/.status/.json() -- needs no change at all. */
+function socketRequest(socketPath, pathAndQuery, { method = 'GET', headers = {}, body } = {}) {
+  return new Promise((resolve, reject) => {
+    const request = http.request({ socketPath, path: pathAndQuery, method, headers }, (response) => {
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve({
+          ok: response.statusCode >= 200 && response.statusCode < 300,
+          status: response.statusCode,
+          json: async () => JSON.parse(buffer.toString('utf8') || '{}'),
+          text: async () => buffer.toString('utf8'),
+        });
+      });
+    });
+    request.on('error', reject);
+    if (body) request.write(body);
+    request.end();
+  });
+}
+
+/* `miner` is {statusBase, pinBase, key, controlSocketPath?, label?, networkId?} or an async function returning one,
+   called for every request so a miner started after this tool is picked up and one that stopped is reported, not
+   assumed. The older statusBase/pinBase/key options describe a fixed miner. `controlSocketPath`, when set, routes
+   only the 'status' (name-record) calls through it -- the pin API ('pin' calls) is a separate HTTP server that
+   stays on its own public port regardless. */
+export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.0.0.1:8766', pinBase = 'http://127.0.0.1:5002', key, controlSocketPath, miner, root, now = () => new Date() } = {}) {
   const normalized = normalizeName(name).name;
-  const resolveMiner = typeof miner === 'function' ? miner : async () => miner || { statusBase, pinBase, key };
+  const resolveMiner = typeof miner === 'function' ? miner : async () => miner || { statusBase, pinBase, key, controlSocketPath };
 
   async function call(kind, pathAndQuery, init = {}) {
     const target = await resolveMiner();
+    const headers = { authorization: `Bearer ${target.key}`, 'x-api-key': target.key, ...(init.headers || {}) };
+    if (kind === 'status' && target.controlSocketPath) {
+      try { return await socketRequest(target.controlSocketPath, pathAndQuery, { ...init, headers }); }
+      catch (error) {
+        throw new PublishRefusal(`The miner's control socket did not answer at ${target.controlSocketPath}.`, 'a running miner with that control socket.',
+          'check ARK_MINER_CONTROL_SOCKET on that miner and the socket file\'s permissions.', 502);
+      }
+    }
     const url = (kind === 'pin' ? target.pinBase : target.statusBase) + pathAndQuery;
     let response;
-    try { response = await fetch(url, { ...init, headers: { authorization: `Bearer ${target.key}`, 'x-api-key': target.key, ...(init.headers || {}) } }); }
+    try { response = await fetch(url, { ...init, headers }); }
     catch (error) {
       throw new PublishRefusal(`The miner did not answer at ${url}.`, 'a running miner on those ports.',
         'start Ark Miner (Desktop, or npm start in ark-miner-cli), or pass --status and --pin with the ports it printed.', 502);

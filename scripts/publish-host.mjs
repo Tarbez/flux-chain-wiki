@@ -54,9 +54,15 @@ const SERVED_DIRS = ['css', 'js', 'assets'];
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
 const MAX_BODY = 16 * 1024 * 1024;
 
+// kebab-case -> camelCase (e.g. --control-socket -> args.controlSocket) so a
+// multi-word flag reads naturally; every existing flag is a single word, so
+// this is backward-compatible with all of them unchanged.
 function parseArgs(argv) {
   const out = {};
-  for (let i = 0; i < argv.length; i += 1) if (argv[i].startsWith('--')) out[argv[i].slice(2)] = argv[i + 1]?.startsWith('--') || argv[i + 1] === undefined ? true : argv[++i];
+  for (let i = 0; i < argv.length; i += 1) if (argv[i].startsWith('--')) {
+    const key = argv[i].slice(2).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+    out[key] = argv[i + 1]?.startsWith('--') || argv[i + 1] === undefined ? true : argv[++i];
+  }
   return out;
 }
 
@@ -71,10 +77,10 @@ function readBody(req) {
 
 export function createHost({ root = defaultProjectRoot, publisher, port, dataDir = null, onNotice = (n) => console.log(`[flux-chain-admin] ${n.message}`),
   resolverBase = process.env.FLUX_CHAIN_RESOLVER_URL || DEFAULT_RESOLVER_BASE, resolveCheck = verifyPublishedResolution,
-  sessions, permissions, publicBase, localDevelopment = false, deployedOrigin = null, siteRoutes = readSiteRoutes(root) }) {
+  sessions, permissions, publicBase, firstOwnerPublicKeyB64 = null, localDevelopment = false, deployedOrigin = null, siteRoutes = readSiteRoutes(root) }) {
   const routeFile = createSiteRouteResolver(siteRoutes);
   // Injected legacy session managers already enforce owner authorization.
-  permissions = permissions || (sessions ? (key) => publisher.authorize(key) : createCmsPermissions({name:publisher.name,publicBase}));
+  permissions = permissions || (sessions ? (key) => publisher.authorize(key) : createCmsPermissions({name:publisher.name,publicBase,firstOwnerPublicKeyB64}));
   sessions = sessions || createSessions({authorize:async () => {},store:createAdminStore({dir:dataDir}),onNotice,otpEnabled:OTP_ENABLED});
   const production = deployedOrigin ? new URL(deployedOrigin) : null;
   if (production && (production.protocol !== 'https:' || production.username || production.password || production.pathname !== '/' || production.search || production.hash)) throw new Error('Deployed CMS origin must be an HTTPS origin.');
@@ -210,7 +216,11 @@ async function main() {
   };
   const dataDir = typeof args.data === 'string' ? args.data : defaultDataDir();
   const resolverBase = typeof args.resolver === 'string' ? args.resolver : (process.env.FLUX_CHAIN_RESOLVER_URL || DEFAULT_RESOLVER_BASE);
-  const server = createHost({ root: defaultProjectRoot, publisher, port, dataDir, resolverBase, localDevelopment:!args.origin, deployedOrigin:typeof args.origin === 'string' ? args.origin : null });
+  // The ONE safe way a fleet-hosted admin bootstraps a brand-new name: the operator pre-declares their
+  // own public key before the admin is ever exposed publicly. An empty registry still grants nothing to
+  // anyone else -- see cms-permissions.mjs's own comment on why this isn't just "first signed-in wins".
+  const firstOwnerPublicKeyB64 = typeof args.firstOwnerKey === 'string' ? args.firstOwnerKey : (process.env.FLUX_CHAIN_FIRST_OWNER_KEY || null);
+  const server = createHost({ root: defaultProjectRoot, publisher, port, dataDir, resolverBase, firstOwnerPublicKeyB64, localDevelopment:!args.origin, deployedOrigin:typeof args.origin === 'string' ? args.origin : null });
   server.on('error', async (error) => {
     if (error.code !== 'EADDRINUSE') { console.error(error.message); process.exitCode = 1; return; }
     // Launching twice is normal ("I double-clicked it again"): if it is this tool already, just show the page.
