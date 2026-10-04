@@ -41,6 +41,7 @@ const FAILURE_MESSAGES = {
 };
 
 const app = document.getElementById("app");
+const footer = document.getElementById("page-footer");
 
 function labelFromHostname(hostname) {
   const suffix = ".defxn.com";
@@ -53,8 +54,15 @@ function labelFromHostname(hostname) {
 function renderStatus(reason, detail) {
   const message = FAILURE_MESSAGES[reason] || "Something went wrong reading this address.";
   app.innerHTML = "";
+  footer.textContent = "Served from the Flux mesh";
   const wrap = document.createElement("div");
   wrap.className = "status-page";
+  wrap.dataset.tone = "error";
+  const icon = document.createElement("div");
+  icon.className = "status-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = "!";
+  wrap.appendChild(icon);
   const h1 = document.createElement("h1");
   h1.textContent = message;
   wrap.appendChild(h1);
@@ -144,14 +152,22 @@ function fieldEntries(fields) {
 
 function renderSite(site) {
   const state = { site, path: location.pathname };
+  footer.innerHTML = "";
+  const verified = document.createElement("span");
+  verified.className = "verified";
+  verified.textContent = "Served from the Flux mesh — this page verified its signature itself";
+  footer.appendChild(verified);
 
+  const home = site.manifests.find((m) => m.route === "/") || site.manifests[0];
+
+  // Exact match only. The earlier version fell back to the home manifest for
+  // ANY unmatched path, which meant the "Page not found" branch below could
+  // never actually run -- a mistyped or stale link silently rendered the
+  // homepage instead of saying so. "/" alone still falls back to `home`, so
+  // a site with no manifest explicitly at route "/" still has a landing page.
   function manifestForPath(path) {
-    return (
-      site.manifests.find((m) => m.route === path) ||
-      site.manifests.find((m) => m.route === "/") ||
-      site.manifests[0] ||
-      null
-    );
+    if (path === "/") return home;
+    return site.manifests.find((m) => m.route === path) || null;
   }
 
   function articleForSlug(slug) {
@@ -212,10 +228,10 @@ function renderSite(site) {
     if (articleMatch) {
       const article = articleForSlug(decodeURIComponent(articleMatch[1]));
       if (!article) {
-        main.innerHTML = "";
-        const h1 = document.createElement("h1");
-        h1.textContent = "Article not found";
-        main.appendChild(h1);
+        const p = document.createElement("p");
+        p.className = "not-found";
+        p.textContent = "Article not found.";
+        main.appendChild(p);
       } else {
         const h1 = document.createElement("h1");
         h1.textContent = article.title || article.slug;
@@ -257,22 +273,26 @@ function renderSite(site) {
     } else {
       const manifest = manifestForPath(state.path);
       if (!manifest) {
-        const h1 = document.createElement("h1");
-        h1.textContent = "Page not found";
-        main.appendChild(h1);
+        const p = document.createElement("p");
+        p.className = "not-found";
+        p.textContent = "Page not found.";
+        main.appendChild(p);
       } else {
         const h1 = document.createElement("h1");
         h1.textContent = manifest.title || manifest.id;
         main.appendChild(h1);
         for (const [role, field] of fieldEntries(manifest.fields)) {
+          const row = document.createElement("div");
+          row.className = "field";
           const label = document.createElement("div");
           label.className = "field-label";
           label.textContent = field.label || role;
-          main.appendChild(label);
+          row.appendChild(label);
           const value = document.createElement("div");
           value.className = "field-value";
           value.textContent = field.value ?? "";
-          main.appendChild(value);
+          row.appendChild(value);
+          main.appendChild(row);
         }
       }
     }

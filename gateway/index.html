@@ -9,58 +9,206 @@
 <meta name="description" content="A site hosted on the Flux mesh, resolved live from its .fxn name." />
 <meta name="robots" content="noindex" />
 <style>
-  :root { color-scheme: light dark; }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    background: #fff;
-    color: #141414;
+  :root {
+    color-scheme: light dark;
+    --bg: #fbfbfa;
+    --surface: #ffffff;
+    --border: #e6e4df;
+    --text: #191815;
+    --text-muted: #6b6860;
+    --text-faint: #96938a;
+    --accent: #0f62fe;
+    --accent-ink: #ffffff;
+    --danger: #b3261e;
+    --radius: 10px;
+    --max-width: 760px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
-    body { background: #121212; color: #ededed; }
-    a { color: #8ab4ff; }
-    header { border-bottom-color: #2a2a2a !important; }
-    .asset-pill { background: #1f1f1f !important; border-color: #333 !important; }
+    :root {
+      --bg: #121212;
+      --surface: #191919;
+      --border: #2d2d2d;
+      --text: #f0efec;
+      --text-muted: #a8a59c;
+      --text-faint: #716e66;
+      --accent: #6ea8ff;
+      --accent-ink: #0b1220;
+      --danger: #ff8a80;
+    }
   }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
   header {
-    padding: 14px 20px;
-    border-bottom: 1px solid #e3e3e3;
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: flex;
-    align-items: baseline;
-    gap: 14px;
+    align-items: center;
+    gap: 16px;
     flex-wrap: wrap;
+    padding: 14px 24px;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
   }
-  header .site-name { font-weight: 600; font-size: 1.05rem; }
-  header .mesh-name { font-size: 0.8rem; opacity: 0.6; font-family: ui-monospace, Menlo, monospace; }
-  nav#site-nav { display: flex; gap: 14px; flex-wrap: wrap; margin-left: auto; }
-  nav#site-nav a { color: inherit; text-decoration: none; font-size: 0.92rem; opacity: 0.8; }
-  nav#site-nav a:hover, nav#site-nav a[aria-current="page"] { opacity: 1; text-decoration: underline; }
+  header .site-name {
+    font-weight: 650;
+    font-size: 1.02rem;
+    letter-spacing: -0.01em;
+  }
+  header .mesh-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.74rem;
+    color: var(--text-faint);
+    font-family: var(--font-mono);
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  header .mesh-name::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2ea043;
+    flex-shrink: 0;
+  }
+  nav#site-nav {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  nav#site-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    border-radius: 7px;
+  }
+  nav#site-nav a:hover { color: var(--text); background: var(--border); }
+  nav#site-nav a[aria-current="page"] { color: var(--text); font-weight: 600; background: var(--border); }
+
   main {
-    max-width: 760px;
+    max-width: var(--max-width);
     margin: 0 auto;
-    padding: 32px 20px 80px;
+    padding: 48px 24px 96px;
   }
-  main h1 { font-size: 1.6rem; margin-top: 0; }
-  main h2 { font-size: 1.2rem; }
-  .field-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.55; margin: 20px 0 4px; }
-  .field-value { white-space: pre-wrap; }
-  .article-list { list-style: none; padding: 0; }
-  .article-list li { padding: 10px 0; border-bottom: 1px solid #eee; }
-  .article-list a { color: inherit; font-weight: 500; }
-  .status-page { text-align: center; padding: 70px 20px; }
-  .status-page h1 { font-size: 1.4rem; }
-  .status-page p { opacity: 0.75; max-width: 440px; margin: 10px auto 0; }
-  .status-code { font-family: ui-monospace, Menlo, monospace; font-size: 0.75rem; opacity: 0.5; margin-top: 18px; }
-  footer { text-align: center; padding: 24px; font-size: 0.75rem; opacity: 0.45; }
+  main h1 {
+    font-size: 1.75rem;
+    letter-spacing: -0.015em;
+    margin: 0 0 28px;
+  }
+  main h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+  .field { margin-bottom: 24px; }
+  .field-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+  .field-value { white-space: pre-wrap; color: var(--text); }
+
+  .article-list { list-style: none; padding: 0; margin: 0; }
+  .article-list li { border-bottom: 1px solid var(--border); }
+  .article-list li:last-child { border-bottom: none; }
+  .article-list a {
+    display: block;
+    padding: 16px 4px;
+    color: var(--text);
+    font-weight: 550;
+    text-decoration: none;
+  }
+  .article-list a:hover { color: var(--accent); }
+
+  .not-found {
+    padding: 48px 0;
+    color: var(--text-muted);
+  }
+
+  .status-page {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 96px 24px;
+    text-align: center;
+  }
+  .status-page .status-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: var(--text-faint);
+  }
+  .status-page[data-tone="error"] .status-icon { color: var(--danger); border-color: var(--danger); }
+  .status-page h1 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .status-page p {
+    color: var(--text-muted);
+    margin: 0 auto;
+    font-size: 0.92rem;
+  }
+  .status-code {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    padding: 3px 9px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px 24px 32px;
+    font-size: 0.74rem;
+    color: var(--text-faint);
+  }
+  footer .verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  footer .verified::before { content: "✓"; color: #2ea043; font-weight: 700; }
+
+  @media (max-width: 520px) {
+    header { padding: 12px 16px; }
+    nav#site-nav { margin-left: 0; width: 100%; }
+    main { padding: 32px 16px 72px; }
+  }
 </style>
 </head>
 <body>
 <div id="app" role="main" aria-live="polite">
-  <div class="status-page"><p>Loading…</p></div>
+  <div class="status-page"><div class="status-icon">···</div><h1>Loading…</h1></div>
 </div>
-<footer>Served from the Flux mesh via this node's local gateway.</footer>
+<footer id="page-footer">Served from the Flux mesh</footer>
 <script type="module" src="app.js"></script>
 </body>
 </html>
