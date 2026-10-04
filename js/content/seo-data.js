@@ -39,8 +39,14 @@ ArkSEO.define({
       "canonical": ""
     },
     "about": {
-      "title": "How DEFXN works — DEFXN",
-      "description": "See how DEFXN separates network discovery, signed agreement execution, and governance across independently governed networks.",
+      "title": "About: everyone is our business partner — DEFXN",
+      "description": "DEFXN is a self-scaling fractal network where everyone is a business partner. The mesh is the database, the host and the cloud: no database, no hosting, no fees, no cloud.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions": {
+      "title": "Resolutions for the mesh — DEFXN",
+      "description": "Resolve your website, payments, data, governance, communications and more on the DEFXN mesh, with encrypted peer-to-peer hosting and permanence instead of renewals.",
       "ogImage": "",
       "canonical": ""
     },

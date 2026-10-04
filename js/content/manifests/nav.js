@@ -6,6 +6,12 @@ ArkManifest.define({
   "group": "site",
   "meta": {},
   "fields": {
+    "PRODUCTS": {
+      "label": "Header menu: products",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Products"
+    },
     "OVERVIEW": {
       "label": "Header link: protocol overview",
       "kind": "line",

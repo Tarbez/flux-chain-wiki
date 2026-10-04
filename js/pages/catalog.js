@@ -26,6 +26,7 @@ ArkUI.pageCatalog = {
   lab: { path: '/experiments/lab', title: arkSeoTitle('lab', 'Interactive model'), seoId: 'lab', module: 'lab', scripts: ['js/studio.js', 'js/pages/lab.js'] },
   learnings: { path: '/learnings', title: arkSeoTitle('learnings', 'Notes'), seoId: 'learnings', module: 'learnings', scripts: ['js/resolvers/learnings.js', 'js/pages/learnings.js'] },
   about: { path: '/about', title: arkSeoTitle('about', 'Protocol overview'), seoId: 'about', module: 'about', scripts: ['js/pages/about.js'] },
+  resolutions: { path: '/resolutions', title: arkSeoTitle('resolutions', 'Resolutions'), seoId: 'resolutions', module: 'resolutions', scripts: ['js/pages/resolutions.js'] },
   concept: { path: '/concept', title: arkSeoTitle('concept', 'The Flux spec'), seoId: 'concept', module: 'concept', scripts: ['js/pages/concept.js'] },
   download: { path: '/download', title: arkSeoTitle('download', 'Run Flux from source'), seoId: 'download', module: 'download', scripts: ['js/ark/procedure-state.js', 'js/pages/sheet.js', 'js/pages/download.js'] },
   bundledeployer: { path: '/bundle-deployer', title: arkSeoTitle('bundledeployer', 'FXN Bundle Deployer'), seoId: 'bundledeployer', module: 'bundledeployer', scripts: ['js/pages/bundle-deployer.js'] },

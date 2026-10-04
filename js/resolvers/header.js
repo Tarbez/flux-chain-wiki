@@ -7,6 +7,114 @@
 
    Its padding follows the smaller screen dimension, with a 20px floor.
    ===================================================================== */
+/* The Products megamenu: every resolution, grouped, one click from any page.
+   The trigger sits first in the core links; the panel hangs under the whole header. */
+function buildProducts(header, core) {
+  function make(tag, className, text) {
+    var item = document.createElement(tag);
+    if (className) item.className = className;
+    if (text) item.textContent = text;
+    return item;
+  }
+  var path = ArkUI.pageCatalog.resolutions.path;
+  var shortName = ArkResolutions.shortName;
+  var wrap = make('div', 'header-products');
+  var trigger = make('button', 'header-products-toggle');
+  trigger.type = 'button';
+  trigger.id = 'products-trigger';
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-controls', 'products-mega');
+  trigger.appendChild(make('span', 'header-products-label', ArkCopy.text('NAV.PRODUCTS')));
+  var chevron = make('span', 'header-products-chevron');
+  chevron.setAttribute('aria-hidden', 'true');
+  trigger.appendChild(chevron);
+  if (ArkUI.actionIcon) ArkUI.actionIcon(trigger, 'layers');
+  wrap.appendChild(trigger);
+  core.insertBefore(wrap, core.firstChild);
+
+  var mega = make('div', 'products-mega');
+  mega.id = 'products-mega';
+  mega.hidden = true;
+  mega.setAttribute('role', 'region');
+  mega.setAttribute('aria-labelledby', 'products-trigger');
+  var intro = make('div', 'products-mega-intro');
+  intro.appendChild(make('p', 'products-mega-kicker', ArkCopy.text('RESOLUTIONS.EYEBROW')));
+  intro.appendChild(make('h2', 'products-mega-title', ArkCopy.text('RESOLUTIONS.MEGA.TITLE')));
+  intro.appendChild(make('p', 'products-mega-text', ArkCopy.text('RESOLUTIONS.MEGA.TEXT')));
+  intro.appendChild(make('p', 'products-mega-promise', ArkCopy.text('RESOLUTIONS.PROMISE')));
+  var all = make('a', 'products-mega-all', ArkCopy.text('RESOLUTIONS.MEGA.ALL') + ' →');
+  all.href = ArkUI.route.href(path);
+  all.dataset.sceneLink = 'resolutions';
+  intro.appendChild(all);
+  intro.appendChild(make('p', 'products-mega-coin', ArkCopy.text('RESOLUTIONS.MEGA.COIN')));
+  mega.appendChild(intro);
+  var columns = make('div', 'products-mega-groups');
+  ArkResolutions.list().forEach(function (group) {
+    var column = make('section', 'products-mega-group');
+    column.appendChild(make('h3', '', group.title));
+    var list = make('ul');
+    group.items.forEach(function (entry) {
+      var row = make('li');
+      var link = make('a', 'products-mega-link');
+      link.href = ArkUI.route.href(path) + '?r=' + entry.slug;
+      link.dataset.sceneLink = 'resolutions';
+      link.dataset.routeQuery = 'r=' + entry.slug;
+      link.dataset.resolution = entry.slug;
+      link.appendChild(make('span', 'products-mega-name', shortName(entry.title)));
+      link.appendChild(make('span', 'products-mega-line', entry.text));
+      row.appendChild(link);
+      list.appendChild(row);
+    });
+    column.appendChild(list);
+    columns.appendChild(column);
+  });
+  mega.appendChild(columns);
+  header.appendChild(mega);
+
+  var closeTimer = 0, openedAt = 0;
+  var hover = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : { matches: false };
+  function setOpen(open, focusTrigger) {
+    window.clearTimeout(closeTimer);
+    if (mega.hidden === !open) return;
+    mega.hidden = !open;
+    if (open) openedAt = Date.now();
+    trigger.setAttribute('aria-expanded', String(open));
+    header.classList.toggle('products-open', open);
+    if (!open && focusTrigger) trigger.focus();
+  }
+  trigger.addEventListener('click', function () {
+    /* A hover that just opened the menu must not be undone by the click that follows it. */
+    if (!mega.hidden && Date.now() - openedAt < 400) return;
+    setOpen(mega.hidden, false);
+  });
+  [wrap, mega].forEach(function (zone) {
+    zone.addEventListener('pointerenter', function (event) { if (hover.matches && event.pointerType === 'mouse') setOpen(true); });
+    zone.addEventListener('pointerleave', function (event) {
+      if (!hover.matches || event.pointerType !== 'mouse') return;
+      window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(function () { setOpen(false); }, 220);
+    });
+  });
+  header.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !mega.hidden) { event.stopPropagation(); setOpen(false, true); }
+  });
+  header.addEventListener('focusout', function (event) {
+    if (!mega.hidden && !wrap.contains(event.relatedTarget) && !mega.contains(event.relatedTarget)) setOpen(false);
+  });
+  document.addEventListener('click', function (event) {
+    if (!mega.hidden && !wrap.contains(event.target) && !mega.contains(event.target)) setOpen(false);
+  });
+  mega.addEventListener('click', function (event) {
+    var link = event.target.closest('a');
+    if (!link) return;
+    setOpen(false);
+    /* Already on Resolutions: the router keeps the page, so tell it which card to bring forward. */
+    if (link.dataset.resolution && ArkUI.route.path() === path && ArkUI.focusResolution) ArkUI.focusResolution(link.dataset.resolution);
+  });
+  var toggle = header.querySelector('.nav-toggle');
+  if (toggle) toggle.addEventListener('click', function () { setOpen(false); });
+}
+
 ArkUI.register('RHEADER_V1', {
   tag: 'header',
   base: {
@@ -116,6 +224,7 @@ ArkUI.register('RHEADER_V1', {
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-controls', 'primary-navigation');
     el.appendChild(toggle);
+    if (ArkUI.pageCatalog.resolutions && typeof ArkResolutions !== 'undefined') buildProducts(el, core);
   },
   onMount: function (el) {
     var menu = el.querySelector('#primary-navigation');
@@ -127,7 +236,7 @@ ArkUI.register('RHEADER_V1', {
     // Rebuild the menu from these detached links. Legacy hash links must not
     // remain as visible siblings behind the new navigation layers.
     menu.replaceChildren();
-    var understand = ['zero', 'about', 'resolver', 'deployment'];
+    var understand = ['zero', 'about', 'resolutions', 'resolver', 'deployment'].filter(function (key) { return catalog[key]; });
     var evaluate = ['explorer', 'account', 'treasury', 'deposits', 'references', 'concept', 'dao'];
     var run = ['download', 'bundledeployer', 'deploy'];
     var read = ['learnings', 'proximity', 'lab'];

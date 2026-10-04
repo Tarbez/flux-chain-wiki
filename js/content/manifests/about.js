@@ -12,25 +12,25 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "DEFXN / AGREEMENT FABRIC"
+      "value": "DEFXN / ABOUT"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "One shared fabric. Your network's rules."
+      "value": "Resolutions for the mesh."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "DEFXN lets independently governed networks complete signed agreements without inheriting a global block order."
+      "value": "DEFXN is a self-scaling fractal network where everyone is our business partner. The mesh is the database, the host and the cloud, so what you build resolves on the mesh instead of on servers you rent."
     },
     "CONTEXT": {
       "label": "Supporting explanation disclosure",
       "kind": "line",
       "section": "Page",
-      "value": "Context / inspect the three layers"
+      "value": "Under the hood / the three layers"
     },
     "MODEL.TITLE": {
       "label": "Model label",
@@ -48,7 +48,7 @@ ArkManifest.define({
       "label": "Primary action",
       "kind": "line",
       "section": "Links",
-      "value": "See how DEFXN works"
+      "value": "Explore resolutions"
     },
     "BOUNDARY.TITLE": {
       "label": "Visible source boundary",
@@ -133,6 +133,186 @@ ArkManifest.define({
       "kind": "line",
       "section": "Links",
       "value": "READ DEFXN STATUS"
+    },
+    "ACTION2": {
+      "label": "Secondary action",
+      "kind": "line",
+      "section": "Links",
+      "value": "See how DEFXN works"
+    },
+    "PROMISE.LABEL": {
+      "label": "Promise label",
+      "kind": "line",
+      "section": "Promise",
+      "value": "RESOLVE YOUR WEBSITE"
+    },
+    "PROMISE.TITLE": {
+      "label": "Promise heading",
+      "kind": "line",
+      "section": "Promise",
+      "value": "No database. No hosting. No fees. No cloud."
+    },
+    "PROMISE.TEXT": {
+      "label": "Promise text",
+      "kind": "text",
+      "section": "Promise",
+      "value": "The mesh is the database, the host and the cloud. With encrypted peer-to-peer hosting we have replaced yearly renewals with permanence."
+    },
+    "NO1.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Promise",
+      "value": "No database"
+    },
+    "NO1.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Promise",
+      "value": "Records live on the mesh and are queried where they are."
+    },
+    "NO2.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Promise",
+      "value": "No hosting"
+    },
+    "NO2.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Promise",
+      "value": "Encrypted peer-to-peer hosting serves what you publish."
+    },
+    "NO3.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Promise",
+      "value": "No fees"
+    },
+    "NO3.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Promise",
+      "value": "No server bills or platform cuts between you and your partners."
+    },
+    "NO4.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Promise",
+      "value": "No cloud"
+    },
+    "NO4.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Promise",
+      "value": "No rented region, account or vendor to lock you in."
+    },
+    "PILLARS.LABEL": {
+      "label": "Pillars label",
+      "kind": "line",
+      "section": "Pillars",
+      "value": "WHAT DEFXN IS"
+    },
+    "PILLAR1.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Pillars",
+      "value": "Self-scaling fractal network"
+    },
+    "PILLAR1.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Pillars",
+      "value": "Every network can hold networks of its own. Each partner who joins adds capacity, so the mesh grows by repeating the same pattern at every scale."
+    },
+    "PILLAR2.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Pillars",
+      "value": "Everyone is our business partner"
+    },
+    "PILLAR2.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Pillars",
+      "value": "Builders, miners and members take part in the same agreements. Value moves between partners instead of being taken by a platform in the middle."
+    },
+    "PILLAR3.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Pillars",
+      "value": "DEFXN Coin — FXN"
+    },
+    "PILLAR3.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Pillars",
+      "value": "FXN is the DEFXN coin: the unit partners use to settle agreements and reward the miners who keep the mesh running."
+    },
+    "RESOLVE.LABEL": {
+      "label": "Resolutions label",
+      "kind": "line",
+      "section": "Resolutions",
+      "value": "RESOLVE YOUR…"
+    },
+    "RESOLVE.TITLE": {
+      "label": "Resolutions heading",
+      "kind": "line",
+      "section": "Resolutions",
+      "value": "One mesh. Every part of your work resolved on it."
+    },
+    "RESOLVE.ALL": {
+      "label": "Link to all resolutions (an arrow is added)",
+      "kind": "line",
+      "section": "Resolutions",
+      "value": "See every resolution"
+    },
+    "FLOW.LABEL": {
+      "label": "Flow label",
+      "kind": "line",
+      "section": "Flow",
+      "value": "HOW A RESOLUTION WORKS"
+    },
+    "FLOW1.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Flow",
+      "value": "Resolve"
+    },
+    "FLOW1.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Flow",
+      "value": "You state what you need: a site, a payment, a rule, a file."
+    },
+    "FLOW2.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Flow",
+      "value": "Resolver"
+    },
+    "FLOW2.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Flow",
+      "value": "A resolver applies the network’s published rules to your request and signs what it did."
+    },
+    "FLOW3.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Flow",
+      "value": "Resolution"
+    },
+    "FLOW3.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Flow",
+      "value": "The signed result lands on the mesh, where every partner can find and check it."
+    },
+    "FLOW.LINK": {
+      "label": "Link to the resolver guide (an arrow is added)",
+      "kind": "line",
+      "section": "Flow",
+      "value": "What is a resolver?"
     }
   }
 });

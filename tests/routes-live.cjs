@@ -72,7 +72,7 @@ function load(file) { vm.runInContext(fs.readFileSync(file, 'utf8'), context, { 
 
 load('js/ark/local-identity.js'); load('js/ark/mesh-fabric.js'); load('js/ark/stage-scenes.js'); load('js/ark/route.js'); load('js/tokens.js'); load('js/content/manifest.js');
 for (const id of JSON.parse(fs.readFileSync('js/content/manifests/index.js', 'utf8').match(/var ArkManifestIds = (\[[^;]+\]);/)[1])) load(`js/content/manifests/${id}.js`);
-load('js/content/learnings.js'); load('js/content/article-index.js');
+load('js/content/learnings.js'); load('js/content/article-index.js'); load('js/content/resolutions.js');
 load('js/content/seo.js'); load('js/content/seo-data.js'); load('js/ark/vendor/engines.js');
 const productionScripts = [...fs.readFileSync('index.html', 'utf8').matchAll(/<script src="([^"?]+)(?:\?[^\"]*)?" defer><\/script>/g)].map(match => match[1]);
 const routeBoot = productionScripts.filter(file => ['js/pages/catalog.js', 'js/ark/scene-state.js'].includes(file));
