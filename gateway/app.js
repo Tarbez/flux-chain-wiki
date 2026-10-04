@@ -19,16 +19,21 @@
    (name a few distinct reasons an honest "nothing here" page can mean, never
    a blank page or a bare 404), reused rather than copied because that file's
    failure set is for a different content shape (dense-encoding-v4 CMS posts)
-   entirely. This shell does not verify the name record's Ed25519 signature
-   client-side (unlike ArkOverlay) -- that is a real gap, not an oversight;
-   see the defxn gateway report for why it was left for a follow-up. */
+   entirely. This shell verifies the name record's Ed25519 signature
+   client-side (verify-name-record.js, a browser-safe port of bundle-deploy's
+   validators) before trusting anything it points at -- closed 2026-10-04.
+   The explorer API is read-only infrastructure, not a trust authority:
+   without this check a misbehaving node could point a name at arbitrary
+   content and this shell would render it. */
 import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
+import { verifyNameRecord } from "./verify-name-record.js";
 
 const SITE_SCHEMA = "flux-chain-site/1";
 
 const FAILURE_MESSAGES = {
   NAME_NOT_FOUND: "This address has nothing published on it.",
   NAME_UNRESOLVABLE: "Could not reach the mesh to resolve this address.",
+  SIGNATURE_INVALID: "This address's record exists but its signature does not verify. Refusing to render it.",
   CONTENT_UNREACHABLE: "This site's content is not reachable right now.",
   CONTENT_TOO_LARGE: "This site's content is larger than the public gateway will serve.",
   CONTENT_MALFORMED: "This site's content could not be read as a mesh site archive.",
@@ -91,7 +96,15 @@ async function resolveName(name) {
   // relative to what this fleet actually runs -- verified live 2026-10-03).
   const record = payload?.data?.records?.[0]?.fields?.sourceRecord;
   if (!record) return { ok: false, reason: "NAME_NOT_FOUND" };
-  return { ok: true, record };
+  let verified;
+  try {
+    verified = await verifyNameRecord(record);
+  } catch (error) {
+    return { ok: false, reason: "SIGNATURE_INVALID", detail: error.message };
+  }
+  if (!verified) return { ok: false, reason: "SIGNATURE_INVALID" };
+  if (verified.name !== name) return { ok: false, reason: "SIGNATURE_INVALID", detail: `Record is signed for ${verified.name}, not ${name}.` };
+  return { ok: true, record: verified };
 }
 
 async function fetchContent(cid) {
