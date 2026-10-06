@@ -1,6 +1,6 @@
 /* Account: the home page's editorial, zero-scroll direction applied to identity. */
 #scene .task-page.account-page {
-  --account-accent:var(--primary);
+  --account-accent:var(--reference);
   --account-rule:hsl(var(--text-strong) / .16);
   --account-muted:hsl(var(--text-strong) / .66);
   width:100%;

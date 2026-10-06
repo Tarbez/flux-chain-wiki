@@ -3,9 +3,9 @@
    phone width (Zero Scroll's "16px gutter, no horizontal page scroll"
    rule), hence the dedicated .stats-table-wrap scroll container. */
 #scene .task-page.stats-page {
-  --account-accent:var(--primary);
+  --account-accent:var(--reference);
   --account-rule:hsl(var(--text-strong) / .16);
-  --account-muted:hsl(var(--text-strong) / .66);
+  --account-muted:hsl(var(--text-muted));
   width:100%;
   max-width:none;
   overflow:auto;
@@ -25,11 +25,11 @@
   font:600 clamp(28px,5vw,40px)/1.08 var(--display-font,ui-sans-serif,sans-serif);
   color:hsl(var(--text-strong));
 }
-#scene .stats-hero p { max-width:62ch; color:hsl(var(--account-muted)); line-height:1.55; }
+#scene .stats-hero p { max-width:62ch; color:var(--account-muted); line-height:1.55; }
 #scene .stats-section { margin-top:clamp(36px,6vw,56px); padding-top:clamp(24px,4vw,36px); border-top:1px solid var(--account-rule); }
 #scene .stats-section h2 { margin:6px 0 10px; font:600 clamp(20px,3vw,26px)/1.2 var(--display-font,ui-sans-serif,sans-serif); color:hsl(var(--text-strong)); }
 #scene .stats-section h3 { margin:28px 0 10px; font:600 13px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.03em; text-transform:uppercase; color:hsl(var(--text-strong)); }
-#scene .stats-section > p { max-width:72ch; color:hsl(var(--account-muted)); line-height:1.6; }
+#scene .stats-section > p { max-width:72ch; color:var(--account-muted); line-height:1.6; }
 
 #scene .stats-table-wrap { overflow-x:auto; margin:14px 0; border:1px solid var(--account-rule); border-radius:10px; }
 #scene .stats-table { width:100%; border-collapse:collapse; font:500 12px/1.4 var(--mono-font,ui-monospace,monospace); white-space:nowrap; }
@@ -38,14 +38,28 @@
 #scene .stats-table tbody tr:last-child td { border-bottom:none; }
 #scene .stats-table tbody tr:hover td { background:hsl(var(--text-strong) / .04); }
 
-#scene .stats-note { max-width:72ch; margin-top:10px; font-size:12.5px; line-height:1.55; color:hsl(var(--account-muted)); }
-#scene .stats-note-warn { color:hsl(var(--warning,40 90% 55%)); }
-#scene .stats-scope-list { max-width:72ch; margin:12px 0; padding-left:20px; color:hsl(var(--account-muted)); line-height:1.6; }
+#scene .stats-note { max-width:72ch; margin-top:10px; font-size:12.5px; line-height:1.55; color:var(--account-muted); }
+#scene .stats-note-warn { color:hsl(var(--text)); padding-left:12px; border-left:2px solid hsl(var(--warning-400)); }
+#scene .stats-scope-list { max-width:72ch; margin:12px 0; padding-left:20px; color:var(--account-muted); line-height:1.6; }
 #scene .stats-scope-list li { margin-bottom:8px; }
-#scene .stats-section a { color:hsl(var(--primary)); text-decoration:none; font-weight:600; }
+#scene .stats-section a { color:hsl(var(--reference)); text-decoration:none; font-weight:600; }
 #scene .stats-section a:hover { text-decoration:underline; }
 
+/* At a glance: the shared headline figures (js/content/stats-highlights.js). */
+#scene .stats-highlights { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; margin:28px 0 8px; border:1px solid var(--account-rule); border-radius:10px; overflow:hidden; background:hsl(var(--surface)); }
+#scene .stats-highlights > div { padding:16px 18px; border-right:1px solid var(--account-rule); }
+#scene .stats-highlights > div:last-child { border-right:0; }
+#scene .stats-highlights dt { font:500 11px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.03em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+#scene .stats-highlights dd { margin:8px 0 0; }
+#scene .stats-highlights strong { display:block; font:600 30px/1 var(--font-sans,sans-serif); letter-spacing:-.03em; color:hsl(var(--text-strong)); }
+#scene .stats-highlights strong span { margin-left:5px; font:500 12px/1 var(--mono-font,ui-monospace,monospace); letter-spacing:0; color:hsl(var(--text-muted)); }
+#scene .stats-highlights small { display:block; margin-top:8px; font-size:12px; line-height:1.4; color:hsl(var(--text-faint)); }
+#scene .stats-highlights-scope { font-size:12px; color:hsl(var(--text-faint)) !important; }
+
 @media (max-width:640px) {
+  #scene .stats-highlights { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #scene .stats-highlights > div:nth-child(2n) { border-right:0; }
+  #scene .stats-highlights > div:nth-child(-n+2) { border-bottom:1px solid var(--account-rule); }
   #scene .stats-shell { padding:20px 16px 56px; }
   #scene .stats-table { font-size:11px; }
   #scene .stats-table th, #scene .stats-table td { padding:8px 10px; }

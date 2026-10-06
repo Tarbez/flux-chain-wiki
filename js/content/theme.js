@@ -23,8 +23,8 @@ var ArkTheme = (function () {
 
   var HEX = /^#[0-9a-fA-F]{6}$/;
   var HSL_VALUE = /^\s*\d+(?:\.\d+)?\s+\d+(?:\.\d+)?%\s+\d+(?:\.\d+)?%(?:\s*\/\s*(?:0|1|0?\.\d+|\d+(?:\.\d+)?%))?\s*$/;
-  var THEME_KEYS = ['ghost', 'bone', 'glacier', 'moss', 'clay', 'grove', 'ochre', 'marine'];
-  var THEME_LABELS = { ghost: 'Ghost', bone: 'Bone', glacier: 'Glacier', moss: 'Moss', clay: 'Clay', grove: 'Grove', ochre: 'Ochre', marine: 'Marine' };
+  var THEME_KEYS = ['ghost', 'bone', 'glacier', 'moss', 'clay', 'grove', 'ochre', 'marine', 'dusk', 'dawn'];
+  var THEME_LABELS = { ghost: 'Ember dark', glacier: 'Ember light', clay: 'Tide dark', grove: 'Tide light', ochre: 'Moss dark', moss: 'Moss light', marine: 'Dune dark', bone: 'Dune light', dusk: 'Dusk dark', dawn: 'Dusk light' };
   var SEMANTIC_FIELDS = [
     { key: 'canvas', label: 'Canvas' },
     { key: 'surface', label: 'Surface' },

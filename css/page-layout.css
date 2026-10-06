@@ -45,7 +45,7 @@
 .concept-page .concept-principles section:is(:hover,:focus-within)::before { width:100%; }
 .concept-page .concept-principles section:is(:hover,:focus-within)::after { opacity:1; }
 .concept-page .concept-principles section:is(:hover,:focus-within) h2 { transform:translateX(5px); color:hsl(var(--text-strong)); }
-.concept-page .concept-principles section:is(:hover,:focus-within) > span { color:hsl(var(--accent)); }
+.concept-page .concept-principles section:is(:hover,:focus-within) > span { color:hsl(var(--reference)); }
 .concept-page .concept-principles .article-back { color:hsl(var(--text)); }
 .concept-page .concept-principles section:is(:hover,:focus-within) .article-back { color:hsl(var(--text-strong)); }
 /* Detail pages of the theory reuse the same rows, with a short paragraph and an onward link. */
@@ -99,7 +99,7 @@
 #scene .content-layer-path > :first-child {
  flex:0 0 auto;
  border-radius:3px;
- background:hsl(var(--reference) / .08);
+ background:hsl(var(--reference-100));
  color:var(--signal-reference);
 }
 #scene .content-layer-path > :not(:first-child) {
@@ -108,7 +108,7 @@
 }
 #scene .content-layer-path > [aria-current="page"] { color:hsl(var(--text-muted)); }
 #scene .content-layer-path > a { transition:color 160ms ease,background-color 160ms ease; }
-#scene .content-layer-path > a:hover,#scene .content-layer-path > a:focus-visible { background:hsl(var(--reference) / .13); color:hsl(var(--text-strong)); }
+#scene .content-layer-path > a:hover,#scene .content-layer-path > a:focus-visible { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
 .content-layer { max-width:680px; margin-top:16px; border-top:1px solid hsl(var(--border-subtle)); border-bottom:1px solid hsl(var(--border-subtle)); }
 .content-layer + .content-layer { margin-top:-1px; }
 .content-layer > summary { padding:16px 0; color:hsl(var(--text-strong)); cursor:pointer; font:600 10px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
@@ -147,7 +147,7 @@
  #scene .content-layer-path { max-width:100%; }
  #scene .content-layer-path:has(> :nth-child(2)) { width:100%; }
  #scene .content-layer-path > :first-child:nth-last-child(n+3) { display:none; }
- #scene .content-layer-path > :first-child:nth-last-child(n+3) + * { border-left:0; border-radius:3px; background:hsl(var(--reference) / .08); color:var(--signal-reference); }
+ #scene .content-layer-path > :first-child:nth-last-child(n+3) + * { border-left:0; border-radius:3px; background:hsl(var(--reference-100)); color:var(--signal-reference); }
 }
 .experiments-page .experiment-page-intro { min-height:calc(85cqh - 150px); }
 
@@ -225,7 +225,7 @@
  background:transparent; color:hsl(var(--text-muted)); cursor:pointer;
  font:600 8px/1 var(--ark-font-mono,ui-monospace,monospace); text-transform:uppercase;
 }
-.deploy-copy:hover,.deploy-copy:focus-visible { border-color:hsl(var(--accent)); color:hsl(var(--text-strong)); }
+.deploy-copy:hover,.deploy-copy:focus-visible { border-color:hsl(var(--reference)); color:hsl(var(--text-strong)); }
 .deploy-expected { margin:9px 0 0 !important; font-size:12px !important; color:hsl(var(--text-faint)) !important; }
 .deploy-caveat { margin:28px 0 0; padding:14px 16px; border:1px solid hsl(var(--border-default)); border-radius:4px; background:hsl(var(--surface) / .5); font:400 16px/1.6 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
 @media(max-width:760px) {

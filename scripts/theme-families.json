@@ -1,0 +1,137 @@
+[
+ {
+  "name": "Ember",
+  "dark": "ghost",
+  "light": "glacier",
+  "rule": "split-complementary",
+  "primary": 45,
+  "secondary": 192,
+  "reference": 250,
+  "states": {
+   "dark": {
+    "primary": 45,
+    "secondary": 192,
+    "reference": 250,
+    "danger": 10,
+    "warning": 100,
+    "success": 144
+   },
+   "light": {
+    "primary": 45,
+    "secondary": 192,
+    "reference": 250,
+    "danger": 10,
+    "warning": 100,
+    "success": 144
+   }
+  }
+ },
+ {
+  "name": "Tide",
+  "dark": "clay",
+  "light": "grove",
+  "rule": "analogous",
+  "primary": 232,
+  "secondary": 282,
+  "reference": 190,
+  "states": {
+   "dark": {
+    "primary": 232,
+    "secondary": 282,
+    "reference": 190,
+    "danger": 30,
+    "warning": 100,
+    "success": 142
+   },
+   "light": {
+    "primary": 232,
+    "secondary": 282,
+    "reference": 190,
+    "danger": 30,
+    "warning": 100,
+    "success": 142
+   }
+  }
+ },
+ {
+  "name": "Moss",
+  "dark": "ochre",
+  "light": "moss",
+  "rule": "earth analogous",
+  "primary": 132,
+  "secondary": 46,
+  "reference": 236,
+  "states": {
+   "dark": {
+    "primary": 132,
+    "secondary": 46,
+    "reference": 236,
+    "danger": 10,
+    "warning": 89,
+    "success": 168
+   },
+   "light": {
+    "primary": 132,
+    "secondary": 46,
+    "reference": 236,
+    "danger": 10,
+    "warning": 89,
+    "success": 168
+   }
+  }
+ },
+ {
+  "name": "Dune",
+  "dark": "marine",
+  "light": "bone",
+  "rule": "complementary",
+  "primary": 66,
+  "secondary": 248,
+  "reference": 318,
+  "states": {
+   "dark": {
+    "primary": 66,
+    "secondary": 248,
+    "reference": 318,
+    "danger": 12,
+    "warning": 100,
+    "success": 168
+   },
+   "light": {
+    "primary": 66,
+    "secondary": 248,
+    "reference": 318,
+    "danger": 12,
+    "warning": 100,
+    "success": 168
+   }
+  }
+ },
+ {
+  "name": "Dusk",
+  "dark": "dusk",
+  "light": "dawn",
+  "rule": "analogous",
+  "primary": 300,
+  "secondary": 350,
+  "reference": 228,
+  "states": {
+   "dark": {
+    "primary": 300,
+    "secondary": 350,
+    "reference": 228,
+    "danger": 30,
+    "warning": 100,
+    "success": 159
+   },
+   "light": {
+    "primary": 300,
+    "secondary": 350,
+    "reference": 228,
+    "danger": 30,
+    "warning": 100,
+    "success": 160
+   }
+  }
+ }
+]

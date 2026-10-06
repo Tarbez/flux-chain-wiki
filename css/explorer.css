@@ -22,7 +22,7 @@
 #scene .mesh-explorer-buttons button { padding:9px 13px; }
 #scene .mesh-explorer-buttons [data-explorer-connect],#scene .mesh-explorer-controls form button { background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); border-color:hsl(var(--text-strong)); }
 #scene .mesh-explorer-page button:disabled { opacity:.42; cursor:not-allowed; }
-#scene .mesh-explorer-page :is(button,input,select,summary,a):focus-visible { outline:2px solid hsl(var(--accent)); outline-offset:3px; }
+#scene .mesh-explorer-page :is(button,input,select,summary,a):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 #scene .mesh-explorer-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border-block:1px solid hsl(var(--border-default)); margin:4px 0 54px; }
 #scene .mesh-explorer-metrics > div { min-width:0; display:grid; gap:8px; padding:18px; border-right:1px solid hsl(var(--border-default)); }
 #scene .mesh-explorer-metrics > div:first-child { padding-left:0; }

@@ -17,7 +17,7 @@ assert(/home-headline-main\s*\{[^}]*white-space:normal/.test(mobile), 'the struc
 assert(!mobile.includes('grid-template-rows:minmax(0,1fr)'), 'mobile no longer centers the hero in a collapsing row');
 assert(mobile.includes('grid-template-columns:repeat(4,minmax(0,1fr))'), 'tablet status metrics share one bounded row');
 assert(home.includes('@media(max-width:640px)') && home.includes('grid-template-columns:repeat(2,minmax(0,1fr))'), 'phone status metrics use a readable two-column grid');
-assert(mobile.includes('content:"PROTOCOL STATUS"'), 'the compact status panel has a clear section label');
+assert(mobile.includes('content:"MEASURED PERFORMANCE"'), 'the compact stats panel has a clear section label');
 assert(mobile.includes('home-lifecycle::before'), 'the compact lifecycle action retains a deliberate accent rail');
 assert(navigation.includes('env(safe-area-inset-top,0px)'), 'mobile chrome reserves the device safe area');
 assert(navigation.includes('.ark-studio-identity{min-width:0;flex:0 1 auto'), 'mobile identity can shrink instead of colliding with controls');

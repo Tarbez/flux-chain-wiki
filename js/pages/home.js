@@ -65,102 +65,42 @@ ArkUI.pageModules.zero = {
     caption.textContent = '01 / The agreement fabric'; lifecycle.appendChild(caption);
     var title = document.createElement('strong'); title.className = 'home-cycle-title';
     title.textContent = 'Every step leaves a trace.'; lifecycle.appendChild(title);
-    var description=document.createElement('p');description.className='home-cycle-description';description.textContent='One request. Linked terms, work, and verification.';lifecycle.appendChild(description);
-    var windowEl=document.createElement('div');windowEl.className='home-substrate-window';windowEl.setAttribute('aria-hidden','true');
-    windowEl.innerHTML='<span class="home-window-label">Shared substrate / one connected trail</span><span class="home-window-bracket"></span>';lifecycle.appendChild(windowEl);
-    var svgNS='http://www.w3.org/2000/svg';
-    function vector(tag,attrs,text){var node=document.createElementNS(svgNS,tag);Object.keys(attrs).forEach(function(key){node.setAttribute(key,attrs[key]);});if(text)node.textContent=text;return node;}
-    // Separate networks converge into one trail, under the live mesh, so the window is never blank.
-    var substrate=vector('svg',{class:'home-window-trail',viewBox:'0 0 360 118',preserveAspectRatio:'none',fill:'none'});
-    [[22,44],[22,70],[22,96]].forEach(function(p){
-      substrate.appendChild(vector('path',{d:'M'+p[0]+' '+p[1]+'C110 '+p[1]+' 120 70 196 70',class:'home-window-branch'}));
-      substrate.appendChild(vector('rect',{x:p[0]-3,y:p[1]-3,width:6,height:6,rx:1,class:'home-window-source'}));
-    });
-    substrate.appendChild(vector('path',{d:'M196 70H330',class:'home-window-joined'}));
-    substrate.appendChild(vector('rect',{x:192,y:66,width:8,height:8,rx:2,class:'home-window-join'}));
-    windowEl.insertBefore(substrate,windowEl.firstChild);
-    var drawing=document.createElement('div');drawing.className='home-cycle-drawing';drawing.setAttribute('aria-hidden','true');
-    var svg=vector('svg',{viewBox:'0 0 480 120',fill:'none'});
-    // A request emerges from the substrate and accumulates linked records.
-    var trail='M240 0v12q0 8-8 8H56q-8 0-8 8v38h384';
-    svg.appendChild(vector('path',{d:trail,class:'home-record-connector'}));
-    [48,144,240,336,432].forEach(function(x,i){
-      var stage=ArkUI.lifecycleStages[i];
-      var record=vector('g',{class:'home-record','data-record':stage.id});
-      record.appendChild(vector('rect',{x:x-19,y:47,width:38,height:38,rx:7,class:'home-record-node'}));
-      record.appendChild(vector('text',{x:x,y:70,'text-anchor':'middle',class:'home-record-number'},String(i+1).padStart(2,'0')));
-      svg.appendChild(record);
-      if(i>0)svg.appendChild(vector('path',{d:'M'+(x-77)+' 66h58',class:'home-record-incoming','data-record':stage.id,pathLength:'1'}));
-      if(i<4)svg.appendChild(vector('path',{d:'M'+(x+48-3)+' 63l3 3-3 3',class:'home-record-direction'}));
-    });
-    drawing.appendChild(svg);lifecycle.appendChild(drawing);
-    var rail = document.createElement('ol'); rail.className = 'home-cycle-records';
-    var contributions=[
-      'Intent defines what is being requested.',
-      'Offer proposes terms for the request.',
-      'Agreement links the accepted terms.',
-      'Fulfillment records the work and its result.',
-      'Receipt records the verification outcome.'
-    ];
-    ArkUI.lifecycleStages.forEach(function (stage, i) {
-      var item = document.createElement('li');
-      var link = document.createElement('a');link.className='home-cycle-step';link.dataset.stage=stage.id;
-      link.href=pageHref('lifecycle/'+stage.id);link.dataset.sceneLink='lifecycle/'+stage.id;
-      link.textContent=stage.title;link.setAttribute('aria-label','Explore '+stage.title+': '+contributions[i]);
-      item.appendChild(link);rail.appendChild(item);
-    }); lifecycle.appendChild(rail);
-    var insight=document.createElement('p');insight.className='home-cycle-insight';insight.setAttribute('aria-hidden','true');
-    var idle=document.createElement('span');idle.className='home-cycle-insight-idle';idle.textContent='Select a step to see what it records.';insight.appendChild(idle);
-    ArkUI.lifecycleStages.forEach(function(stage,i){var text=document.createElement('span');text.dataset.insight=stage.id;text.textContent=contributions[i];insight.appendChild(text);});
-    lifecycle.appendChild(insight);
+    var description=document.createElement('p');description.className='home-cycle-description';description.textContent='Watch one agreement happen: who acts at each step, and the record it leaves.';lifecycle.appendChild(description);
+    var flow=ArkUI.buildAgreementFlow({stages:ArkUI.lifecycleStages,hrefFor:function(id){return pageHref('lifecycle/'+id);}});
+    lifecycle.appendChild(flow.element);
     var open = document.createElement('a'); open.className = 'home-lifecycle-all';
     open.href = pageHref('lifecycle'); open.dataset.sceneLink = 'lifecycle';open.dataset.icon='arrow-right';
     open.textContent = 'Trace one agreement, end to end →'; lifecycle.appendChild(open);
     el.appendChild(lifecycle);
 
+    // Measured numbers, shared with /stats (js/content/stats-highlights.js).
+    var stats = window.ArkStatsHighlights;
     var status = document.createElement('aside');
     status.className = 'home-status-rail';
-    status.setAttribute('aria-label', 'Protocol status');
-    for (var s = 1; s <= 4; s++) {
-      var item = [ArkCopy.text('HOME.STATUS' + s + '.LABEL'), ArkCopy.text('HOME.STATUS' + s + '.VALUE')];
-      var readout = document.createElement('span');
-      readout.className = 'home-status-item';
-      var label = document.createElement('small');
-      label.textContent = item[0];
-      var value = document.createElement('strong');
-      value.textContent = item[1];
-      readout.appendChild(label);
-      readout.appendChild(value);
+    status.setAttribute('aria-label', 'Measured mesh performance');
+    stats.items.forEach(function (stat) {
+      var readout = document.createElement('div'); readout.className = 'home-status-item';
+      var label = document.createElement('small'); label.textContent = stat.label;
+      var value = document.createElement('strong'); value.className = 'home-status-value';
+      value.textContent = stat.value;
+      var unit = document.createElement('span'); unit.className = 'home-status-unit'; unit.textContent = stat.unit;
+      value.appendChild(unit);
+      var detail = document.createElement('span'); detail.className = 'home-status-detail'; detail.textContent = stat.detail;
+      readout.appendChild(label); readout.appendChild(value); readout.appendChild(detail);
       status.appendChild(readout);
-    }
+    });
     var statusLink = document.createElement('a');
     statusLink.className = 'home-status-link';
-    statusLink.href = 'docs/status.md';
-    statusLink.textContent = ArkCopy.text('HOME.STATUS.NOTE') + ' ↗';
+    statusLink.href = pageHref('stats'); statusLink.dataset.sceneLink = 'stats';
+    var scope = document.createElement('small'); scope.className = 'home-status-scope';
+    scope.textContent = 'Measured ' + stats.measured + ' · ' + stats.scope;
+    statusLink.appendChild(scope); statusLink.appendChild(document.createTextNode('All measurements →'));
+    statusLink.setAttribute('aria-label', 'All measurements. Measured ' + stats.measured + ', ' + stats.scope);
     status.appendChild(statusLink);
     el.insertBefore(status, lifecycle);
 
-    // The original dense canvas field stays alive, cropped to the chosen panel.
-    // Its artwork cannot take focus or imply a verified live observation.
-    var scene=el.closest&&el.closest('.hero-alive'),observer=null,alignFrame=0,disposed=false,lastMeshBounds=null;
-    function alignMesh(){
-      if(disposed)return;
-      var currentWindow=el.querySelector('.home-substrate-window');
-      if(!scene||!currentWindow||!currentWindow.getBoundingClientRect)return;
-      var target=currentWindow.getBoundingClientRect(),base=scene.getBoundingClientRect();
-      if(!target.width||!target.height)return;
-      var bounds=[target.left-base.left,target.top-base.top,target.width,target.height];
-      if(lastMeshBounds&&bounds.every(function(value,index){return value===lastMeshBounds[index];}))return;
-      lastMeshBounds=bounds;
-      scene.style.setProperty('--home-mesh-left',bounds[0]+'px');
-      scene.style.setProperty('--home-mesh-top',(target.top-base.top)+'px');
-      scene.style.setProperty('--home-mesh-width',target.width+'px');
-      scene.style.setProperty('--home-mesh-height',target.height+'px');
-    }
-    if(typeof ResizeObserver!=='undefined'&&scene){observer=new ResizeObserver(alignMesh);observer.observe(el);observer.observe(lifecycle);observer.observe(windowEl);}
-    el.arkRestore=alignMesh;
-    if(typeof requestAnimationFrame==='function')alignFrame=requestAnimationFrame(function(){alignFrame=0;alignMesh();});
-    el.arkDispose=function(){disposed=true;if(observer)observer.disconnect();if(alignFrame&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(alignFrame);};
+    el.arkRestore=flow.restore;
+    el.arkDispose=flow.dispose;
     return el;
   }
 };

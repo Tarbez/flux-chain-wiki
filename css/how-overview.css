@@ -42,7 +42,7 @@
   max-width:48ch;
   margin:0 0 3px;
   padding-left:22px;
-  border-left:1px solid hsl(var(--primary) / .48);
+  border-left:1px solid hsl(var(--primary-400));
   font:400 15px/1.55 var(--font-sans,"Albert Sans",sans-serif);
   color:hsl(var(--text));
 }
@@ -63,7 +63,7 @@
   right:5%;
   top:50%;
   height:1px;
-  background:linear-gradient(90deg,transparent,hsl(var(--reference) / .34) 12%,hsl(var(--reference) / .34) 88%,transparent);
+  background:linear-gradient(90deg,transparent,hsl(var(--reference-300)) 12%,hsl(var(--reference-300)) 88%,transparent);
   pointer-events:none;
 }
 #scene .how-work-card {
@@ -101,14 +101,14 @@
   top:calc(50% - 4px);
   width:8px;
   height:8px;
-  border-top:1px solid hsl(var(--reference) / .6);
-  border-right:1px solid hsl(var(--reference) / .6);
+  border-top:1px solid hsl(var(--reference-400));
+  border-right:1px solid hsl(var(--reference-400));
   transform:rotate(45deg);
 }
 #scene .how-work-card:last-child::after {display:none;}
 #scene .how-work-card:is(:hover,:focus-visible,[data-active="true"]) {
-  border-color:hsl(var(--reference) / .68);
-  background:linear-gradient(152deg,hsl(var(--reference) / .07),hsl(var(--canvas) / .96));
+  border-color:hsl(var(--reference-400));
+  background:linear-gradient(152deg,hsl(var(--reference-100)),hsl(var(--canvas) / .96));
   transform:translateY(-4px);
 }
 .how-work-card-top {display:flex;align-items:center;justify-content:space-between;gap:16px;}
@@ -145,10 +145,10 @@
   display:flex;
   align-items:center;
   min-height:30px;
-  color:hsl(var(--complement));
+  color:hsl(var(--reference));
   font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);
 }
-#scene .how-work-card:is(:hover,:focus-visible) .how-work-more {color:hsl(var(--complement));}
+#scene .how-work-card:is(:hover,:focus-visible) .how-work-more {color:hsl(var(--reference-700));}
 
 .how-simple-footer {
   display:grid;
@@ -174,7 +174,7 @@
   display:inline-flex;
   align-items:center;
   padding:8px 13px;
-  border:1px solid hsl(var(--reference) / .45);
+  border:1px solid hsl(var(--reference-400));
   border-radius:6px;
   background:transparent;
   color:hsl(var(--reference));
@@ -182,7 +182,7 @@
   text-decoration:none;
   white-space:nowrap;
 }
-#scene .how-triptych :is(a,button):focus-visible {outline:2px solid hsl(var(--primary));outline-offset:3px;}
+#scene .how-triptych :is(a,button):focus-visible {outline:2px solid hsl(var(--reference));outline-offset:3px;}
 
 .hero-alive[data-page="deployment"] .lattice-activity {opacity:0;pointer-events:none;}
 .hero-alive[data-page="deployment"] .lattice-field {opacity:.14;}

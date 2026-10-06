@@ -15,6 +15,10 @@ ids.forEach((id,i)=>{assert(written[i].includes('js/content/manifests/'+id+'.js'
 for(const file of fs.readdirSync('js/resolvers')) if(file.endsWith('.js')) vm.runInContext(fs.readFileSync('js/resolvers/'+file,'utf8'),context);
 vm.runInContext(fs.readFileSync('js/scene.flux.js','utf8'),context);
 for(const file of ['js/content/learnings.js','js/content/article-index.js','js/pages/catalog.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+// Home's other page scripts, as the catalog loads them: shared stats data and the
+// flow builder (stubbed: it draws an illustration and names no copy keys).
+vm.runInContext(fs.readFileSync('js/content/stats-highlights.js','utf8'),context);
+ArkUI.buildAgreementFlow=()=>({element:node(),restore(){},dispose(){}});
 vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
 context.ArkUI.pageModules.zero.mount({appendChild(){}});
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);

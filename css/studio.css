@@ -92,7 +92,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
   .expansion .principles article { padding: 24px 0; }
 }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } .expansion *, .expansion *::before, .expansion *::after { transition: none !important; animation: none !important; } }
-.expansion .text-link:hover { color: var(--accent); }
+.expansion .text-link:hover { color: hsl(var(--reference)); }
 @media (min-width: 1700px) {
   .expansion .section { padding-left: max(7%, calc((100% - 1500px)/2)); padding-right: max(7%, calc((100% - 1500px)/2)); }
 }

@@ -1,0 +1,162 @@
+/* Home: the agreement flow (js/pages/home-flow.js) and the measured stats rail.
+   Color restraint: the beam and the record being written carry the primary
+   ink; finished records are neutral; only a verified trail uses success.
+   Step links are reference only on hover/focus, since they are actions. */
+
+#scene .home-lifecycle .home-cycle-description {margin:10px 0 0;max-width:46ch;}
+.flow {--flow-step:3.2s;margin-top:18px;}
+
+/* Stage ------------------------------------------------------------------ */
+.flow-stage {position:relative;padding:12px 10px 8px;border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--surface));}
+.flow-stage-svg {display:block;width:100%;height:auto;overflow:visible;}
+.flow-stage-svg :is(path,rect) {vector-effect:non-scaling-stroke;}
+
+.flow-actor-chip {fill:hsl(var(--canvas));stroke:hsl(var(--border-default));stroke-width:1;transition:stroke 240ms,fill 240ms;}
+.flow-actor-dot {fill:hsl(var(--text-faint));transition:fill 240ms;}
+.flow-actor-label {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.04em;fill:hsl(var(--text-muted));transition:fill 240ms;}
+.flow[data-actors~="requester"] .flow-actor[data-actor="requester"] .flow-actor-chip,
+.flow[data-actors~="provider"] .flow-actor[data-actor="provider"] .flow-actor-chip,
+.flow[data-actors~="verifier"] .flow-actor[data-actor="verifier"] .flow-actor-chip {stroke:hsl(var(--text-strong) / .7);fill:hsl(var(--raised));}
+.flow[data-actors~="requester"] .flow-actor[data-actor="requester"] :is(.flow-actor-label),
+.flow[data-actors~="provider"] .flow-actor[data-actor="provider"] :is(.flow-actor-label),
+.flow[data-actors~="verifier"] .flow-actor[data-actor="verifier"] :is(.flow-actor-label) {fill:hsl(var(--text-strong));}
+.flow[data-actors~="requester"] .flow-actor[data-actor="requester"] .flow-actor-dot,
+.flow[data-actors~="provider"] .flow-actor[data-actor="provider"] .flow-actor-dot,
+.flow[data-actors~="verifier"] .flow-actor[data-actor="verifier"] .flow-actor-dot {fill:hsl(var(--primary));}
+
+/* Beams, links and records each carry data-state: future | current | written.
+   Beam: drawn from the acting party to the record it writes.
+   Record: dashed and empty -> primary stripe while written -> solid, neutral. */
+.flow-beam {stroke:hsl(var(--primary));stroke-width:1.25;stroke-dasharray:1;stroke-dashoffset:1;opacity:0;}
+.flow-beam[data-state="current"] {opacity:1;stroke-dashoffset:0;}
+.flow.flow-run .flow-beam[data-state="current"] {animation:flow-draw 700ms cubic-bezier(.22,1,.36,1) both;}
+
+.flow-link {stroke:hsl(var(--text-faint));stroke-width:1;stroke-linecap:round;stroke-linejoin:round;opacity:.22;transition:opacity 300ms,stroke 300ms;}
+.flow-link:not([data-state="future"]) {opacity:1;}
+
+.flow-card-box {fill:hsl(var(--canvas));stroke:hsl(var(--border-default));stroke-width:1;stroke-dasharray:3 3;transition:fill 300ms,stroke 300ms;}
+.flow-card-stripe {fill:transparent;transition:fill 300ms;}
+.flow-card-type {font:600 8.5px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;fill:hsl(var(--text-faint));transition:fill 300ms;}
+.flow-card-hash {font:500 10px var(--mono-font,ui-monospace,monospace);fill:hsl(var(--text-muted));opacity:0;transition:opacity 300ms;}
+.flow-card-empty {font:500 10px var(--mono-font,ui-monospace,monospace);fill:hsl(var(--text-faint));opacity:.6;transition:opacity 200ms;}
+.flow-card:not([data-state="future"]) .flow-card-box {stroke-dasharray:none;}
+.flow-card:not([data-state="future"]) .flow-card-hash {opacity:1;}
+.flow-card:not([data-state="future"]) .flow-card-empty {opacity:0;}
+.flow-card[data-state="written"] .flow-card-type {fill:hsl(var(--text-muted));}
+.flow-card[data-state="current"] .flow-card-box {stroke:hsl(var(--text-strong) / .6);fill:hsl(var(--raised));}
+.flow-card[data-state="current"] .flow-card-stripe {fill:hsl(var(--primary));}
+.flow-card[data-state="current"] .flow-card-type {fill:hsl(var(--text-strong));}
+.flow-card[data-state="current"] .flow-card-hash {fill:hsl(var(--text));}
+.flow.flow-run .flow-card[data-state="current"] {animation:flow-write 900ms ease-out both;}
+@keyframes flow-draw {from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
+@keyframes flow-write {0%,55%{opacity:.35;}100%{opacity:1;}}
+
+/* A finished trail: one success state, after the receipt is written. */
+.flow-verified {position:absolute;right:12px;bottom:-11px;padding:3px 9px;border:1px solid hsl(var(--success-300));border-radius:999px;background:hsl(var(--success-100));
+ font:600 10px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.04em;color:hsl(var(--success));opacity:0;transform:translateY(4px);transition:opacity 300ms,transform 300ms;}
+.flow-verified::before {content:"✓ ";}
+.flow[data-complete="true"] .flow-verified {opacity:1;transform:none;transition-delay:900ms;}
+.flow[data-complete="true"] .flow-link {stroke:hsl(var(--success-400));}
+
+/* Caption: who acts, what they say, what is recorded. */
+.flow-caption {display:grid;gap:4px;min-height:84px;margin:18px 0 0;padding:0 2px;}
+.flow-who {font:500 11px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.04em;text-transform:uppercase;color:hsl(var(--text-muted));}
+.flow-says {font:500 16px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.01em;color:hsl(var(--text-strong));}
+.flow-records {font:400 13px/1.45 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+.flow-records b {font:600 12px var(--mono-font,ui-monospace,monospace);color:hsl(var(--text));}
+.flow.flow-run .flow-caption > * {animation:flow-caption 420ms ease-out both;}
+.flow.flow-run .flow-says {animation-delay:60ms;}
+.flow.flow-run .flow-records {animation-delay:420ms;}
+@keyframes flow-caption {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+
+/* Stepper: the accessible step links, with a progress bar on the current one. */
+#scene .flow-steps {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:14px 0 0;padding:0;list-style:none;}
+#scene .flow-steps li {min-width:0;}
+#scene .flow-steps .home-cycle-step {position:relative;display:grid;gap:3px;min-height:48px;margin:0;padding:8px 2px 10px;border:0;background:none;
+ font:500 12px/1.3 var(--font-sans,"Albert Sans",sans-serif);text-align:left;text-decoration:none;color:hsl(var(--text-faint)) !important;transition:color 200ms;}
+#scene .flow-steps .flow-step-num {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;}
+#scene .flow-steps .flow-step-name {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#scene .flow-steps .flow-step-bar {position:absolute;left:0;right:0;bottom:0;height:2px;background:hsl(var(--border-subtle));overflow:hidden;}
+#scene .flow-steps .flow-step-bar::after {content:"";position:absolute;inset:0;background:hsl(var(--text-strong) / .7);transform:scaleX(0);transform-origin:left;}
+#scene .flow-steps .home-cycle-step[data-done] {color:hsl(var(--text-muted)) !important;}
+#scene .flow-steps .home-cycle-step[data-done] .flow-step-bar::after {transform:none;background:hsl(var(--text-faint));}
+#scene .flow-steps .home-cycle-step[data-current] {color:hsl(var(--text-strong)) !important;}
+#scene .flow-steps .home-cycle-step[data-current] .flow-step-bar::after {transform:none;}
+#scene .flow[data-playing="true"].flow-run .home-cycle-step[data-current] .flow-step-bar::after {animation:flow-progress var(--flow-step) linear both;}
+#scene .flow-steps .home-cycle-step:is(:hover,:focus-visible) {color:hsl(var(--reference)) !important;}
+#scene .flow-steps .home-cycle-step:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;border-radius:3px;}
+@keyframes flow-progress {from{transform:scaleX(0);}to{transform:scaleX(1);}}
+
+.flow-foot {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;}
+.flow-note {font:400 11px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-faint));}
+#scene .flow-toggle {flex:none;min-height:28px;padding:0 10px;border:1px solid hsl(var(--reference-300));border-radius:4px;background:hsl(var(--reference-100));
+ font:500 11px var(--mono-font,ui-monospace,monospace);color:hsl(var(--reference));cursor:pointer;}
+#scene .flow-toggle:is(:hover,:focus-visible) {background:hsl(var(--reference-200));border-color:hsl(var(--reference-400));}
+#scene .flow-toggle:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
+#scene .home-lifecycle .home-lifecycle-all {margin-top:8px;}
+
+@media(prefers-reduced-motion:reduce){
+ .flow *,.flow.flow-run * {animation:none !important;transition:none !important;}
+ #scene .flow-toggle {display:none;}
+}
+
+/* Measured stats rail ----------------------------------------------------- */
+#scene .home-status-rail {display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;align-items:start;gap:0 28px;}
+#scene .home-status-item {display:grid;gap:3px;align-content:start;min-width:0;}
+#scene .home-status-item small {font:500 11px/1.3 var(--mono-font,monospace);letter-spacing:.03em;text-transform:uppercase;color:hsl(var(--text-muted));}
+#scene .home-status-item .home-status-value {display:block;font:600 24px/1.05 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.03em;color:hsl(var(--text-strong));}
+#scene .home-status-item .home-status-value::before {content:none;}
+#scene .home-status-unit {margin-left:5px;font:500 11px var(--mono-font,monospace);letter-spacing:0;color:hsl(var(--text-muted));}
+#scene .home-status-detail {font:400 12px/1.35 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-faint));}
+#scene .home-status-link {display:grid;justify-items:end;align-content:start;gap:6px;min-height:44px;font:500 12px/1.3 var(--mono-font,monospace);text-align:right;color:hsl(var(--reference));text-decoration:none;}
+#scene .home-status-link::after {content:none;}
+#scene .home-status-scope {font:400 11px/1.35 var(--font-sans,sans-serif);color:hsl(var(--text-faint));white-space:nowrap;}
+#scene .home-status-link::before {content:none;}
+
+@media(max-width:1150px) and (min-width:901px){
+ #scene .home-status-rail {grid-template-columns:repeat(4,minmax(0,1fr));row-gap:6px;}
+ #scene .home-status-link {grid-column:1/-1;justify-items:start;min-height:30px;margin-top:8px;text-align:left;}
+}
+@media(max-width:900px){
+ #scene .home-lifecycle {display:block;padding:18px 16px 14px;}
+ #scene .home-lifecycle .home-cycle-title {font-size:22px;}
+ .flow-says {font-size:15px;}
+ #scene .home-status-rail {grid-template-columns:repeat(4,minmax(0,1fr));}
+ #scene .home-status-item :is(small,.home-status-value) {overflow:visible;white-space:normal;text-overflow:clip;}
+ #scene .home-status-item .home-status-value {font-size:20px;}
+ #scene .home-status-item small {font-size:9px;}
+ #scene .home-status-detail {font-size:11px;}
+ #scene .home-status-link {justify-items:start;text-align:left;padding:10px 12px;}
+ #scene .home-status-scope {white-space:normal;}
+}
+@media(max-width:640px){
+ #scene .home-status-rail {grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:480px){
+ #scene .flow-steps .flow-step-name {font-size:10.5px;}
+ .flow-note {font-size:10px;}
+}
+
+/* The panel clips its corners (overflow:hidden), which makes grid treat its
+   minimum height as zero: on short viewports its row collapsed and the panel
+   spilled over the hero (mobile) or the stats rail (desktop). Content rows are
+   sized max-content, and the home layer scrolls instead of clipping when the
+   content is genuinely taller than the screen. */
+@media(min-width:901px){
+ #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:minmax(0,1fr) max-content minmax(0,1fr) max-content;overflow-x:hidden;overflow-y:auto;}
+}
+@media(min-width:901px) and (max-height:880px){
+ #scene .home-lifecycle {padding:18px 22px;}
+ #scene .home-lifecycle .home-lifecycle-caption {margin-bottom:10px;}
+ #scene .home-lifecycle .home-cycle-title {font-size:26px;}
+ #scene .home-lifecycle .home-cycle-description {display:none;}
+ .flow {margin-top:14px;}
+ .flow-caption {min-height:70px;margin-top:12px;}
+ #scene .flow-steps {margin-top:8px;}
+ #scene .flow-steps .home-cycle-step {min-height:42px;padding:6px 2px 8px;}
+ #scene .home-lifecycle .home-lifecycle-all {min-height:40px;margin-top:4px;}
+}
+@media(max-width:900px){
+ #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:max-content max-content max-content;}
+ #scene .hero-alive[data-page="zero"] .home-lifecycle {align-self:start;}
+}

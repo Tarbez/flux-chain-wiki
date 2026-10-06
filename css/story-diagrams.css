@@ -2,14 +2,14 @@
 .story-drawing {display:block;width:100%;height:auto;overflow:visible;color:hsl(var(--text));}
 .story-drawing :is(path,rect,circle) {fill:none;stroke:currentColor;stroke-width:1;vector-effect:non-scaling-stroke;}
 .story-drawing .drawing-line {stroke:hsl(var(--text-muted));}
-.story-drawing .drawing-thread {stroke:hsl(var(--primary) / .65);}
+.story-drawing .drawing-thread {stroke:hsl(var(--primary-400));}
 .story-drawing .drawing-mesh {stroke:hsl(var(--text-muted) / .32);stroke-width:.7;}
 .story-drawing .drawing-register {stroke:hsl(var(--text-muted) / .6);}
-.story-drawing .drawing-boundary {stroke:hsl(var(--primary) / .8);fill:hsl(var(--primary) / .035);}
-.story-drawing .drawing-dashed {stroke:hsl(var(--reference) / .75);stroke-dasharray:3 4;}
+.story-drawing .drawing-boundary {stroke:hsl(var(--primary));fill:hsl(var(--primary-100));}
+.story-drawing .drawing-dashed {stroke:hsl(var(--reference));stroke-dasharray:3 4;}
 .story-drawing .drawing-point {fill:hsl(var(--text-strong));stroke:none;}
 .story-drawing :is(.drawing-trace,.drawing-accent) {stroke:hsl(var(--primary));stroke-width:1.5;}
-.story-drawing .drawing-selection {fill:hsl(var(--primary) / .12);stroke:hsl(var(--primary));}
+.story-drawing .drawing-selection {fill:hsl(var(--primary-200));stroke:hsl(var(--primary));}
 .story-drawing text {fill:hsl(var(--text-muted));font:500 10px var(--mono-font,monospace);letter-spacing:.04em;}
 .story-drawing .drawing-title {font-size:8px;letter-spacing:.045em;}
 #scene :is(.guided-diagram,.lifecycle-object):has(.story-drawing) {background:linear-gradient(135deg,hsl(var(--surface) / .5),hsl(var(--canvas) / .3));border-color:hsl(var(--border-default));}
@@ -58,7 +58,7 @@
  #scene .guided-diagram:has(.story-drawing) .story-record {margin:0;padding:5px 0;min-height:44px;align-items:center;text-align:left;}
  #scene .guided-diagram:has(.story-drawing) button.story-record {cursor:pointer;font-family:var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
  #scene .guided-diagram:has(.story-drawing) button.story-record:hover {color:hsl(var(--text-strong));}
- #scene .guided-diagram:has(.story-drawing) button.story-record[aria-pressed="true"] {color:hsl(var(--primary));}
+ #scene .guided-diagram:has(.story-drawing) button.story-record[aria-pressed="true"] {color:hsl(var(--reference));}
  #scene .lifecycle-page .lifecycle-object .story-drawing {max-height:155px;}
 }
 
