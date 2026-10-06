@@ -72,6 +72,5 @@
 
 .settings-choices[aria-label="themesDark"],.settings-choices[aria-label="themesLight"]{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:7px;}
 
-.settings-choice[data-theme-choice]::before{content:"";display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:1px;background:hsl(var(--choice-ink));}
-.settings-choice[data-theme-choice]{--choice-ink:var(--signal);}
+.settings-choice[data-theme-choice]::before{content:"";display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:1px;background:linear-gradient(135deg,hsl(var(--choice-ink)) 50%,hsl(var(--choice-ink-2,var(--choice-ink))) 50%);}
 .settings-choice[data-theme-choice][aria-pressed="true"]{box-shadow:inset 0 -2px hsl(var(--choice-ink));}

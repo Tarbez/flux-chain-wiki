@@ -1,0 +1,42 @@
+[
+ {
+  "name": "Ember",
+  "dark": "ghost",
+  "light": "glacier",
+  "primary": 18,
+  "secondary": 168,
+  "reference": 214
+ },
+ {
+  "name": "Tide",
+  "dark": "clay",
+  "light": "grove",
+  "primary": 200,
+  "secondary": 28,
+  "reference": 236
+ },
+ {
+  "name": "Moss",
+  "dark": "ochre",
+  "light": "moss",
+  "primary": 95,
+  "secondary": 22,
+  "reference": 205
+ },
+ {
+  "name": "Dune",
+  "dark": "marine",
+  "light": "bone",
+  "primary": 38,
+  "secondary": 176,
+  "reference": 222
+ },
+ {
+  "name": "Dusk",
+  "dark": "dusk",
+  "light": "dawn",
+  "primary": 255,
+  "secondary": 32,
+  "reference": 188
+ }
+]
