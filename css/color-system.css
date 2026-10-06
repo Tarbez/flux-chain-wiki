@@ -10,7 +10,7 @@
 }
 /* Records are information. Navigation between records is a reference action. */
 :is([data-stage],[data-record]) {--record-color:var(--signal-primary);}
-#scene .hero-alive[data-page="zero"] .home-headline-network {color:transparent;-webkit-text-stroke-color:var(--signal-primary);}
+#scene .hero-alive[data-page="zero"] .home-headline-network {color:var(--signal-primary);-webkit-text-stroke:0;}
 #scene .hero-alive[data-page="zero"] .home-headline-network::after {height:1px;background:var(--signal-primary);}
 #scene .hero-alive[data-page="zero"] .ark-hero-copy {color:hsl(var(--text));}
 #scene :is(.story-heading,.account-hero h1,.mesh-explorer-header h1,.reference-hero h1,.article-header h1) {color:var(--signal-primary);}
@@ -22,14 +22,16 @@
 #scene .home-record-incoming {stroke:hsl(var(--border-strong));}
 #scene :is(.story-kicker,.learning-eyebrow,.account-kicker,.reference-kicker,.article-eyebrow,.hero-experiment-kicker,.home-lifecycle-caption) {color:hsl(var(--text-muted));}
 
-/* Calls to action use only complementary ink; the principal CTA is filled. */
-#scene .home-primary-cta {background:linear-gradient(110deg,var(--signal-complement),color-mix(in srgb,var(--signal-complement) 78%,white));border-color:transparent;color:hsl(var(--text-inverse)) !important;}
-#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-complement) 90%,white),var(--signal-complement));border-color:transparent;}
+/* Calls to action use complementary ink. The home hero's principal CTA is the
+   exception: it is filled with the primary ink its headline already carries,
+   so the hero holds two accents (primary + reference) instead of three. */
+#scene .home-primary-cta {background:linear-gradient(110deg,var(--signal-primary),color-mix(in srgb,var(--signal-primary) 82%,white));border-color:transparent;color:hsl(var(--text-inverse)) !important;}
+#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-primary) 90%,white),var(--signal-primary));border-color:transparent;}
 #scene .home-primary-cta .native-icon {color:hsl(var(--text-inverse));}
 #scene :is(.story-primary,.resolver-primary-cta,.economy-primary,.mechanism-next,.account-page button[data-kind="primary"],.account-page [data-account-mesh-check],.mesh-explorer-page [data-explorer-connect]) {
  border-color:var(--signal-complement);background:hsl(var(--complement) / .08);color:var(--signal-complement) !important;
 }
-#scene .home-ghost-cta {border-color:hsl(var(--reference) / .55);background:linear-gradient(120deg,hsl(var(--reference) / .08),hsl(var(--canvas) / .76));color:var(--signal-reference) !important;}
+#scene .home-ghost-cta {border-color:var(--signal-reference);background:linear-gradient(120deg,hsl(var(--reference) / .14),hsl(var(--canvas) / .76));color:var(--signal-reference) !important;}
 #scene .ark-header .header-core-links .header-run-link {border-color:var(--signal-complement);background:hsl(var(--complement) / .08);color:var(--signal-complement) !important;}
 #scene .ark-header .header-core-links .header-run-link:is(:hover,:focus-visible) {background:hsl(var(--complement) / .15);border-color:var(--signal-complement);}
 #scene .account-cms a {color:var(--signal-complement);}

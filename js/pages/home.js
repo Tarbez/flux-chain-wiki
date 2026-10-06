@@ -68,9 +68,18 @@ ArkUI.pageModules.zero = {
     var description=document.createElement('p');description.className='home-cycle-description';description.textContent='One request. Linked terms, work, and verification.';lifecycle.appendChild(description);
     var windowEl=document.createElement('div');windowEl.className='home-substrate-window';windowEl.setAttribute('aria-hidden','true');
     windowEl.innerHTML='<span class="home-window-label">Shared substrate / one connected trail</span><span class="home-window-bracket"></span>';lifecycle.appendChild(windowEl);
-    var drawing=document.createElement('div');drawing.className='home-cycle-drawing';drawing.setAttribute('aria-hidden','true');
     var svgNS='http://www.w3.org/2000/svg';
     function vector(tag,attrs,text){var node=document.createElementNS(svgNS,tag);Object.keys(attrs).forEach(function(key){node.setAttribute(key,attrs[key]);});if(text)node.textContent=text;return node;}
+    // Separate networks converge into one trail, under the live mesh, so the window is never blank.
+    var substrate=vector('svg',{class:'home-window-trail',viewBox:'0 0 360 118',preserveAspectRatio:'none',fill:'none'});
+    [[22,44],[22,70],[22,96]].forEach(function(p){
+      substrate.appendChild(vector('path',{d:'M'+p[0]+' '+p[1]+'C110 '+p[1]+' 120 70 196 70',class:'home-window-branch'}));
+      substrate.appendChild(vector('rect',{x:p[0]-3,y:p[1]-3,width:6,height:6,rx:1,class:'home-window-source'}));
+    });
+    substrate.appendChild(vector('path',{d:'M196 70H330',class:'home-window-joined'}));
+    substrate.appendChild(vector('rect',{x:192,y:66,width:8,height:8,rx:2,class:'home-window-join'}));
+    windowEl.insertBefore(substrate,windowEl.firstChild);
+    var drawing=document.createElement('div');drawing.className='home-cycle-drawing';drawing.setAttribute('aria-hidden','true');
     var svg=vector('svg',{viewBox:'0 0 480 120',fill:'none'});
     // A request emerges from the substrate and accumulates linked records.
     var trail='M240 0v12q0 8-8 8H56q-8 0-8 8v38h384';
