@@ -33,15 +33,7 @@
 #scene :is(.story-heading,.account-hero h1,.mesh-explorer-header h1,.reference-hero h1,.article-header h1) {color:hsl(var(--text-strong));}
 #scene :is(.story-result,.reference-provenance,.article-evidence) {border-left-color:hsl(var(--primary-400));}
 #scene .story-result {color:hsl(var(--text-strong));}
-#scene .home-window-label {color:hsl(var(--text-muted));}
-#scene .home-status-item strong {color:hsl(var(--text-strong));}
-#scene .home-status-item strong::before {background:var(--signal-warning);}
-#scene .home-record .home-record-node {stroke:hsl(var(--border-strong));fill:hsl(var(--surface));stroke-width:1;}
-#scene .home-record .home-record-number {fill:hsl(var(--text-muted));}
-#scene .home-record-incoming {stroke:hsl(var(--reference-400));}
 #scene :is(.story-kicker,.learning-eyebrow,.account-kicker,.reference-kicker,.article-eyebrow,.hero-experiment-kicker,.home-lifecycle-caption) {color:hsl(var(--text-muted));}
-.home-window-joined {stroke:hsl(var(--text-muted) / .5);}
-.home-window-join {stroke:hsl(var(--primary));fill:hsl(var(--primary-200));}
 
 /* Secondary: the main CTA. Filled with the -500 base, -600 on hover, -700 pressed. */
 #scene .home-primary-cta {background:hsl(var(--secondary));border-color:transparent;color:hsl(var(--secondary-ink)) !important;box-shadow:0 10px 30px hsl(var(--secondary) / .12);}
@@ -66,10 +58,9 @@
 #scene .account-cms a {color:var(--signal-reference);}
 
 /* Reference is the low-level interaction color: links, pickers and disclosure. */
-#scene :is(.home-question-links a,.home-cycle-step,.home-lifecycle-all,.home-status-link,.story-reference,.article-evidence-link,.reference-orientation a,.resolver-back-link,.resolver-guide-links a,.lifecycle-trail-item,.source-step-choice,.deploy-step-choice,.guided-step-picker button,.story-depth button,.account-page summary,.mesh-explorer-page summary) {color:var(--signal-reference);}
+#scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.story-reference,.article-evidence-link,.reference-orientation a,.resolver-back-link,.resolver-guide-links a,.lifecycle-trail-item,.source-step-choice,.deploy-step-choice,.guided-step-picker button,.story-depth button,.account-page summary,.mesh-explorer-page summary) {color:var(--signal-reference);}
 #scene .home-lifecycle-all .native-icon {color:var(--signal-reference);}
 #scene .home-question-links a {border-color:hsl(var(--reference-300));}
-#scene .home-cycle-step:is(:hover,:focus-visible) {color:var(--signal-reference);text-decoration:underline;text-underline-offset:5px;}
 #scene .lifecycle-trail-item .story-index {color:var(--signal-reference);}
 #scene .lifecycle-trail-item:is(:hover,:focus-visible,[aria-current="step"]) {border-color:var(--signal-reference);background:hsl(var(--reference-100));}
 #scene :is(.source-step-choice,.deploy-step-choice,.guided-step-picker button,.story-depth button)[aria-pressed="true"] {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}

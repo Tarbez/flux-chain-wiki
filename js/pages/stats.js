@@ -13,6 +13,15 @@
   function row(cells) { return '<tr>' + cells.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }
   function headRow(cells) { return '<tr>' + cells.map(function (c) { return '<th scope="col">' + c + '</th>'; }).join('') + '</tr>'; }
 
+  // The same headline figures the home page shows, from one shared source.
+  function highlights() {
+    var stats = window.ArkStatsHighlights;
+    if (!stats) return '';
+    return '<dl class="stats-highlights" aria-label="At a glance, measured ' + stats.measured + '">' + stats.items.map(function (s) {
+      return '<div><dt>' + s.label + '</dt><dd><strong>' + s.value + '<span>' + s.unit + '</span></strong><small>' + s.detail + '</small></dd></div>';
+    }).join('') + '</dl><p class="stats-highlights-scope">Measured ' + stats.measured + ' · ' + stats.scope + '. Source rows: the fleet table below.</p>';
+  }
+
   ArkUI.pageModules.stats = {
     mount: function (host) {
       var page = document.createElement('section');
@@ -23,6 +32,7 @@
         '<header class="stats-hero"><p class="account-kicker">// MEASURED, NOT CLAIMED</p>' +
         '<h1 id="stats-title">Mesh performance.</h1>' +
         '<p>Every number on this page came from an actual run, against either this machine (zero-network, in-process) or the real production fleet (5-6 real InterServer VPS nodes, reached over SSH tunnel or the live WireGuard mesh). Dates and conditions are stated with every table. Nothing here is a projection.</p>' +
+        highlights() +
         '</header>' +
 
         '<section class="stats-section" aria-labelledby="stats-fabric-title">' +
@@ -122,6 +132,9 @@
         '</section>' +
         '</div>';
       host.appendChild(page);
+      // The router labels, hides and focuses the element mount() returns;
+      // returning nothing made navigation to /stats throw and strand the page.
+      return page;
     },
   };
 })();
