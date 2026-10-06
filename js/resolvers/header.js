@@ -37,17 +37,45 @@ function buildProducts(header, core) {
   mega.hidden = true;
   mega.setAttribute('role', 'region');
   mega.setAttribute('aria-labelledby', 'products-trigger');
+  var head = make('div', 'products-mega-head');
   var intro = make('div', 'products-mega-intro');
   intro.appendChild(make('p', 'products-mega-kicker', ArkCopy.text('RESOLUTIONS.EYEBROW')));
   intro.appendChild(make('h2', 'products-mega-title', ArkCopy.text('RESOLUTIONS.MEGA.TITLE')));
   intro.appendChild(make('p', 'products-mega-text', ArkCopy.text('RESOLUTIONS.MEGA.TEXT')));
   intro.appendChild(make('p', 'products-mega-promise', ArkCopy.text('RESOLUTIONS.PROMISE')));
+  var introActions = make('div', 'products-mega-actions');
   var all = make('a', 'products-mega-all', ArkCopy.text('RESOLUTIONS.MEGA.ALL') + ' →');
   all.href = ArkUI.route.href(path);
   all.dataset.sceneLink = 'resolutions';
-  intro.appendChild(all);
-  intro.appendChild(make('p', 'products-mega-coin', ArkCopy.text('RESOLUTIONS.MEGA.COIN')));
-  mega.appendChild(intro);
+  introActions.appendChild(all);
+  var how = make('a', 'products-mega-how', ArkCopy.text('RESOLUTIONS.MEGA.HOW') + ' ↗');
+  how.href = ArkUI.route.href(ArkUI.pageCatalog.resolver.path);
+  how.dataset.sceneLink = 'resolver';
+  introActions.appendChild(how);
+  intro.appendChild(introActions);
+  head.appendChild(intro);
+  var guide = make('section', 'products-mega-guide');
+  guide.appendChild(make('h3', '', ArkCopy.text('RESOLUTIONS.MEGA.GUIDE')));
+  var guideList = make('div', 'products-mega-guide-list');
+  [['WEBSITE', 'Publish something'], ['PAYMENTS', 'Move value'], ['NETWORK', 'Create a network']].forEach(function (choice, index) {
+    var entry = ArkResolutions.find(choice[0].toLowerCase());
+    var link = make('a', 'products-mega-guide-link');
+    var target = 'resolutions/' + entry.slug;
+    link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
+    link.dataset.sceneLink = target;
+    link.appendChild(make('small', '', '0' + (index + 1) + ' / ' + choice[1]));
+    link.appendChild(make('strong', '', shortName(entry.title)));
+    link.appendChild(make('span', '', entry.text));
+    guideList.appendChild(link);
+  });
+  guide.appendChild(guideList);
+  head.appendChild(guide);
+  mega.appendChild(head);
+  var browser = make('section', 'products-mega-browser');
+  var browserHead = make('div', 'products-mega-browser-head');
+  browserHead.appendChild(make('h3', '', ArkCopy.text('RESOLUTIONS.MEGA.RESOLVERS')));
+  browserHead.appendChild(make('span', '', ArkResolutions.all().length + ' named resolvers'));
+  browser.appendChild(browserHead);
   var columns = make('div', 'products-mega-groups');
   ArkResolutions.list().forEach(function (group) {
     var column = make('section', 'products-mega-group');
@@ -56,9 +84,9 @@ function buildProducts(header, core) {
     group.items.forEach(function (entry) {
       var row = make('li');
       var link = make('a', 'products-mega-link');
-      link.href = ArkUI.route.href(path) + '?r=' + entry.slug;
-      link.dataset.sceneLink = 'resolutions';
-      link.dataset.routeQuery = 'r=' + entry.slug;
+      var target = 'resolutions/' + entry.slug;
+      link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
+      link.dataset.sceneLink = target;
       link.dataset.resolution = entry.slug;
       link.appendChild(make('span', 'products-mega-name', shortName(entry.title)));
       link.appendChild(make('span', 'products-mega-line', entry.text));
@@ -68,7 +96,9 @@ function buildProducts(header, core) {
     column.appendChild(list);
     columns.appendChild(column);
   });
-  mega.appendChild(columns);
+  browser.appendChild(columns);
+  mega.appendChild(browser);
+  mega.appendChild(make('p', 'products-mega-coin', ArkCopy.text('RESOLUTIONS.MEGA.COIN')));
   header.appendChild(mega);
 
   var closeTimer = 0, openedAt = 0;
@@ -108,8 +138,6 @@ function buildProducts(header, core) {
     var link = event.target.closest('a');
     if (!link) return;
     setOpen(false);
-    /* Already on Resolutions: the router keeps the page, so tell it which card to bring forward. */
-    if (link.dataset.resolution && ArkUI.route.path() === path && ArkUI.focusResolution) ArkUI.focusResolution(link.dataset.resolution);
   });
   var toggle = header.querySelector('.nav-toggle');
   if (toggle) toggle.addEventListener('click', function () { setOpen(false); });
@@ -157,6 +185,7 @@ ArkUI.register('RHEADER_V1', {
       ['NAV.OVERVIEW', 'about'],
       ['NAV.HOW', 'deployment'],
       ['NAV.MESH', 'explorer'],
+      ['NAV.STATS', 'stats'],
       ['NAV.ACCOUNT', 'account'],
       ['NAV.RUN', 'download']
     ].forEach(function (item) {
@@ -178,7 +207,7 @@ ArkUI.register('RHEADER_V1', {
         link.appendChild(accountLabel);
       }
       if (item[1] === 'download') link.classList.add('header-run-link');
-      if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
+      if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',stats:'evidence',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
     });
     el.appendChild(core);
     function paintAccount(link) {
@@ -204,6 +233,10 @@ ArkUI.register('RHEADER_V1', {
     var toggle = document.createElement('button');
     toggle.className = 'nav-toggle';
     toggle.type = 'button';
+    var toggleLabel = document.createElement('span');
+    toggleLabel.className = 'nav-toggle-label';
+    toggleLabel.textContent = 'Menu';
+    toggle.appendChild(toggleLabel);
     var dots = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     dots.setAttribute('viewBox', '0 0 24 24');
     dots.setAttribute('width', '20');
@@ -243,9 +276,10 @@ ArkUI.register('RHEADER_V1', {
     var lifecycle = Object.keys(catalog).filter(function (key) { return key === 'lifecycle' || key.indexOf('lifecycle/') === 0; });
     var mechanics = Object.keys(catalog).filter(function (key) { return key.indexOf('concept/') === 0; });
     var articles = Object.keys(catalog).filter(function (key) { return key.indexOf('article/') === 0; });
-    var named = understand.concat(evaluate, run, read, lifecycle, mechanics, articles);
+    var nested = Object.keys(catalog).filter(function (key) { return catalog[key].nestedNavigation; });
+    var named = understand.concat(evaluate, run, read, lifecycle, mechanics, articles, nested);
     Object.keys(catalog).forEach(function (key) { if (named.indexOf(key) < 0 && !catalog[key].hiddenFromNavigation) evaluate.push(key); });
-    menu.dataset.pageCount = String(Object.keys(catalog).filter(function (key) { return !catalog[key].hiddenFromNavigation; }).length);
+    menu.dataset.pageCount = String(Object.keys(catalog).filter(function (key) { return !catalog[key].hiddenFromNavigation && !catalog[key].nestedNavigation; }).length);
     function label(key) {
       if (key === 'zero') return 'Home';
       if (key === 'learnings') return 'Notes';

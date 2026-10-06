@@ -146,9 +146,7 @@
           var column = ArkUI.el('div', 'about-resolve-group');
           column.appendChild(ArkUI.el('h3', '', group.title));
           group.items.forEach(function (item) {
-            var link = routeLink(ArkResolutions.shortName(item.title), 'resolutions', 'about-resolve-link');
-            link.dataset.routeQuery = 'r=' + item.slug;
-            link.href += '?' + link.dataset.routeQuery;
+            var link = routeLink(ArkResolutions.shortName(item.title), 'resolutions/' + item.slug, 'about-resolve-link');
             link.title = item.text;
             column.appendChild(link);
           });

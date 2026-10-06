@@ -57,7 +57,17 @@ var ArkSEO = (function () {
   function pageEntries(manifests) {
     var list = manifests || (typeof ArkManifest !== 'undefined' ? ArkManifest.all() : []);
     /* group 'site' (e.g. nav) is shared chrome text, not a route of its own. */
-    var out = list.filter(function (m) { return m.group !== 'site'; }).map(function (m) { return { id: m.id, label: m.title }; });
+    var out = [];
+    list.filter(function (m) { return m.group !== 'site'; }).forEach(function (manifest) {
+      out.push({ id: manifest.id, label: manifest.title });
+      if (manifest.id !== 'resolutions') return;
+      Object.keys(manifest.fields).forEach(function (role) {
+        var field = manifest.fields[role];
+        if (/^[A-Z]+\.TITLE$/.test(role) && field && field.label === 'Title') {
+          out.push({ id: 'resolutions/' + role.split('.')[0].toLowerCase(), label: field.value });
+        }
+      });
+    });
     return out.concat(EXTRA_PAGES);
   }
   function pageIds(manifests) { return pageEntries(manifests).map(function (p) { return p.id; }); }
@@ -143,13 +153,16 @@ var ArkSEO = (function () {
   }
 
   /* Every route a search engine should be told about: the fixed pages,
-     every theory page, and every article -- exactly what js/pages/catalog.js
+     every resolution, theory page, and article -- exactly what js/pages/catalog.js
      registers, without needing it loaded (site-bundle.mjs runs headless). */
   function routes(manifests, articles) {
     var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explore' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/about' }, { path: '/concept' }];
     EXTRA_PAGES.filter(function (page) { return page.id.indexOf('lifecycle') === 0; }).forEach(function (page) { out.push({ path: '/' + page.id }); });
     (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
       if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route });
+    });
+    pageEntries(manifests).filter(function (page) { return page.id.indexOf('resolutions/') === 0; }).forEach(function (page) {
+      out.push({ path: '/' + page.id });
     });
     (articles || []).forEach(function (a) { out.push({ path: '/learnings/' + a.slug }); });
     return out;

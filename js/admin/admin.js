@@ -18,6 +18,12 @@
   try { gate = window.parent !== window ? window.parent.ArkGate : null; } catch (e) { gate = null; }
   if (!gate) { window.location.replace('admin.html'); return; }
 
+  /* The real, shared <flux-authorization-dialog> (same element flux-dao-app
+     registers via @deadark/ark-ui/elements) -- an ARIA/focus-trap/busy-state
+     primitive with no template of its own; authorizePublish() below supplies
+     the light-DOM content, same shape as ScopedAuthorizationDialog's. */
+  if (window.ArkFluxElements) window.ArkFluxElements.defineFluxAuthorizationDialog();
+
   var $ = function (id) { return document.getElementById(id); };
   var GROUP_NAMES = { site: 'Site', page: 'Pages', theory: 'Theory pages' };
 
@@ -1510,17 +1516,24 @@
       return Array.from(new Uint8Array(bytes)).map(function (byte) { return byte.toString(16).padStart(2, '0'); }).join('');
     });
   }
+  /* Same inspect -> approve -> sign shape (and the same shared view-model,
+     ArkAuthorizationView.scopedAuthorizationView) as flux-dao-app's
+     ScopedAuthorizationDialog -- now the real <flux-authorization-dialog>
+     element too, instead of a hand-rolled lookalike. The element itself is
+     an ARIA/focus-trap/busy-state primitive with no visual template, so the
+     markup below mirrors ark-ui.flux-authorization-react.ts's exactly: a
+     dismissible backdrop over a panel, this page's own "admin-auth-*" CSS. */
   function authorizePublish(input) {
     var who = gate.identity();
     if (!who) return Promise.resolve(false);
     return authorizationDigest(input.signingMessage).then(function (digest) {
       return new Promise(function (resolve) {
-        var previous = document.activeElement;
-        var backdrop = h('div', { class: 'admin-auth-backdrop', role: 'dialog', 'aria-modal': 'true', 'aria-label': input.title });
-        var panel = h('section', { class: 'admin-auth-panel' });
-        var title = h('div', { class: 'admin-auth-title' }, h('span', { class: 'kicker', text: 'Scoped publish authorization' }), h('h2', { text: input.title }));
-        var close = h('button', { type: 'button', class: 'admin-auth-close', 'aria-label': 'Cancel authorization', text: '×' });
-        panel.appendChild(h('header', {}, title, close));
+        var titleId = 'authDialogTitle-' + Date.now(), descId = 'authDialogDesc-' + Date.now();
+        var dialog = document.createElement('flux-authorization-dialog');
+        dialog.action = 'flux.site.publish';
+        dialog.capability = 'site.publish';
+        dialog.setAttribute('aria-labelledby', titleId);
+        dialog.setAttribute('aria-describedby', descId);
         var view = window.ArkAuthorizationView.scopedAuthorizationView({
           title: input.title,
           description: input.description,
@@ -1537,7 +1550,12 @@
           actionPayloadBytes: input.signingMessage,
           facts: [{ label: 'Version', value: String(input.record.version || 'next') }, { label: 'Signing profile', value: who.securityProfile === 'hybrid-pq' ? 'Hybrid identity available; names/* record remains Ed25519' : 'Ed25519 name record' }]
         });
-        panel.appendChild(h('p', { class: 'admin-auth-description', text: view.description }));
+        var backdrop = h('div', { class: 'admin-auth-backdrop' });
+        var panel = h('section', { class: 'admin-auth-panel' });
+        var title = h('div', { class: 'admin-auth-title' }, h('span', { class: 'kicker', text: 'Scoped publish authorization' }), h('h2', { id: titleId, text: view.heading }));
+        var close = h('button', { type: 'button', class: 'admin-auth-close', 'aria-label': 'Cancel authorization', text: '×' });
+        panel.appendChild(h('header', {}, title, close));
+        panel.appendChild(h('p', { id: descId, class: 'admin-auth-description', text: view.description }));
         var context = h('dl', { class: 'admin-auth-context' });
         view.rows.forEach(function (row) { context.appendChild(h('div', {}, h('dt', { text: row.label }), h('dd', { text: row.value }))); });
         panel.appendChild(context);
@@ -1548,20 +1566,23 @@
         });
         panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety + ' This publish action still signs the existing Ed25519 names/* record contract.' }));
         var footer = h('footer', {}, h('button', { type: 'button', class: 'btn', text: 'Cancel' }), h('button', { type: 'button', class: 'btn primary', 'data-autofocus': true, text: 'Approve scopes & sign' })); panel.appendChild(footer);
-        backdrop.appendChild(panel); document.body.appendChild(backdrop);
+        backdrop.appendChild(panel); dialog.appendChild(backdrop); document.body.appendChild(dialog);
         var cancelButton = footer.children[0], approveButton = footer.children[1], closed = false;
-        function finish(ok) { if (closed) return; closed = true; backdrop.remove(); if (previous && previous.focus) previous.focus(); resolve(ok); }
-        close.addEventListener('click', function () { finish(false); }); cancelButton.addEventListener('click', function () { finish(false); });
-        approveButton.addEventListener('click', function () { approveButton.disabled = true; cancelButton.disabled = true; approveButton.textContent = 'Signing locally…'; finish(true); });
-        backdrop.addEventListener('mousedown', function (event) { if (event.target === backdrop) finish(false); });
-        backdrop.addEventListener('keydown', function (event) {
-          if (event.key === 'Escape') { event.preventDefault(); finish(false); return; }
-          if (event.key !== 'Tab') return;
-          var focusables = Array.prototype.slice.call(panel.querySelectorAll('button,summary')).filter(function (item) { return !item.disabled; });
-          if (event.shiftKey && document.activeElement === focusables[0]) { event.preventDefault(); focusables[focusables.length - 1].focus(); }
-          else if (!event.shiftKey && document.activeElement === focusables[focusables.length - 1]) { event.preventDefault(); focusables[0].focus(); }
+        function finish(ok) { if (closed) return; closed = true; dialog.remove(); resolve(ok); }
+        function busy() { return dialog.state === 'signing'; }
+        close.addEventListener('click', function () { if (!busy()) finish(false); });
+        cancelButton.addEventListener('click', function () { if (!busy()) finish(false); });
+        approveButton.addEventListener('click', function () {
+          dialog.state = 'signing';
+          close.disabled = true; cancelButton.disabled = true; approveButton.disabled = true;
+          approveButton.textContent = 'Signing locally…';
+          finish(true);
         });
-        approveButton.focus();
+        backdrop.addEventListener('mousedown', function (event) { if (event.target === backdrop && !busy()) finish(false); });
+        /* Capture-phase so it runs before FluxDialogElement's own bubble-phase
+           Escape handler, which otherwise closes the dialog mid-sign. */
+        dialog.addEventListener('keydown', function (event) { if (busy() && event.key === 'Escape') event.stopPropagation(); }, true);
+        dialog.open = true;
       });
     });
   }

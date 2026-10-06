@@ -19,6 +19,8 @@ Canonical routes use hashes so static hosting does not need rewrite rules:
 - `#/learnings`: three article previews.
 - `#/learnings/<slug>`: an individual article.
 - `#/about`: the Flux Protocol overview and current capability boundary.
+- `#/resolutions`: the category-based resolution index.
+- `#/resolutions/<slug>`: a focused resolution page, such as `#/resolutions/website`.
 - `#/what-is-a-resolver`: the canonical resolver definition.
 - `#/start-from-something-real`: reference-resolver evidence status.
 - `#/how-deployment-works`: the five-movement protocol flow.

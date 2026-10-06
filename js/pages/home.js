@@ -11,16 +11,16 @@ ArkUI.pageModules.zero = {
     var body = el.querySelector('.ark-hero-body');
     var heading = body.querySelector('.ark-hero-title');
     var headline = ArkCopy.text('HOME.TITLE');
-    if (heading && headline.indexOf('Run your own network ') === 0) {
+    if (heading) {
       heading.textContent = '';
       var mainLine = document.createElement('span');
       mainLine.className = 'home-headline-main';
-      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='Run your own';
-      var noun=document.createElement('span');noun.className='home-headline-network';noun.textContent='network';
-      mainLine.appendChild(lead);mainLine.appendChild(document.createTextNode(' '));mainLine.appendChild(noun);
-      var subLine = document.createElement('span');
-      subLine.className = 'home-headline-detail'; subLine.textContent = headline.slice(21);
-      heading.appendChild(mainLine); heading.appendChild(subLine);
+      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='What if agreement';
+      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent="didn't need";
+      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='a global chain?';
+      mainLine.appendChild(lead);mainLine.appendChild(pivot);mainLine.appendChild(reveal);
+      heading.appendChild(mainLine);
+      heading.setAttribute('aria-label', headline);
     }
     var promise = document.createElement('p');
     promise.className = 'home-promise';
@@ -28,15 +28,23 @@ ArkUI.pageModules.zero = {
     body.insertBefore(promise, body.firstChild);
     var actions = document.createElement('div');
     actions.className = 'home-hero-actions';
+    function actionCopy(link, kicker, label) {
+      var copy = document.createElement('span'); copy.className = 'home-cta-copy';
+      var meta = document.createElement('small'); meta.className = 'home-cta-kicker'; meta.textContent = kicker;
+      var text = document.createElement('strong'); text.className = 'home-cta-label'; text.textContent = label;
+      copy.appendChild(meta); copy.appendChild(text); link.appendChild(copy);
+    }
     var primary = document.createElement('a');
     primary.className = 'home-primary-cta';
     primary.href = pageHref('deployment'); primary.dataset.sceneLink = 'deployment';
-    primary.textContent = ArkCopy.text('HOME.CTA');
+    primary.setAttribute('aria-label', ArkCopy.text('HOME.CTA'));
+    actionCopy(primary, 'Interactive walkthrough', ArkCopy.text('HOME.CTA'));
     actions.appendChild(primary);
     var secondary = document.createElement('a');
     secondary.className = 'home-ghost-cta';
     secondary.href = pageHref('download'); secondary.dataset.sceneLink = 'download';
-    secondary.textContent = ArkCopy.text('HOME.SECONDARY');
+    secondary.setAttribute('aria-label', ArkCopy.text('HOME.SECONDARY'));
+    actionCopy(secondary, 'Build it yourself', ArkCopy.text('HOME.SECONDARY'));
     actions.appendChild(secondary);
     var questions = document.createElement('nav');
     questions.className = 'home-question-links';
@@ -104,7 +112,7 @@ ArkUI.pageModules.zero = {
     var status = document.createElement('aside');
     status.className = 'home-status-rail';
     status.setAttribute('aria-label', 'Protocol status');
-    for (var s = 1; s <= 3; s++) {
+    for (var s = 1; s <= 4; s++) {
       var item = [ArkCopy.text('HOME.STATUS' + s + '.LABEL'), ArkCopy.text('HOME.STATUS' + s + '.VALUE')];
       var readout = document.createElement('span');
       readout.className = 'home-status-item';

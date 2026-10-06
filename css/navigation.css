@@ -36,11 +36,12 @@
 #scene .ark-header .header-core-links .header-run-link {color:hsl(var(--text-strong)) !important;background:hsl(var(--primary) / .12);border:1px solid hsl(var(--primary) / .3);}
 #scene .ark-header .header-core-links .header-run-link:is(:hover,:focus-visible) {background:hsl(var(--primary) / .23);border-color:hsl(var(--primary) / .6);}
 #scene .nav-toggle {
- display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; padding:0;
+ display:inline-flex; align-items:center; justify-content:center; gap:9px; width:auto; min-width:74px; height:40px; padding:0 11px;
  border:1px solid hsl(var(--border-default)); border-radius:var(--size-card-radius,8px);
  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); cursor:pointer;
  pointer-events:auto; transition:background-color 180ms ease,border-color 180ms ease;
 }
+.nav-toggle-label {font:600 9px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.09em;text-transform:uppercase;}
 #scene .nav-toggle:hover,
 #scene .ark-header.nav-open .nav-toggle { background:hsl(var(--surface)); border-color:hsl(var(--text-strong) / .36); }
 #scene .ark-header #primary-navigation {
@@ -75,16 +76,29 @@
 
 #scene .ark-header a:focus-visible,
 #scene .nav-toggle:focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:4px; }
-@media(max-width:700px) {
- .header-core-links { gap:16px; }
- #scene .ark-header .header-core-links a { font-size:9px; }
+@media(max-width:1040px) {
+ #scene .ark-header .header-core-links {display:flex;min-width:0;height:40px;flex:0 1 auto;margin-left:auto;padding:0;border:0;background:transparent;}
+ #scene .ark-header .header-core-links > a:not(.header-account-link) {display:none;}
+ #scene .ark-header .header-core-links .header-account-link {display:flex;min-width:0;max-width:154px;height:40px;padding-inline:12px;border:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .68);}
+ #scene .ark-header .ark-studio-identity {min-width:0;flex:0 1 auto;margin-right:0;}
+ #scene .ark-header .ark-brand-lockup,#scene .ark-header .header-account-label {min-width:0;}
+ #scene .ark-header :is(.ark-brand-wordmark,.ark-brand-descriptor,.header-account-name,.header-account-status) {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 }
 @media(max-width:620px) {
- #scene .ark-header { padding-inline:16px; }
- #scene .ark-header #primary-navigation { top:75px; right:16px; width:min(380px,calc(100vw - 32px)); }
+ #scene .ark-header {
+  height:calc(76px + env(safe-area-inset-top,0px));
+  padding-top:calc(14px + env(safe-area-inset-top,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+ }
+ #scene .ark-header #primary-navigation { top:calc(75px + env(safe-area-inset-top,0px)); right:max(16px,env(safe-area-inset-right,0px)); width:min(380px,calc(100vw - 32px)); }
  #scene .ark-header .ark-link { min-height:44px; }
 }
 @media(max-width:560px) { .header-core-links { display:none; } }
+@media(max-width:420px) {
+ #scene .ark-header .nav-toggle {width:40px;min-width:40px;padding:0;}
+ #scene .ark-header .nav-toggle-label {display:none;}
+}
 @media(prefers-reduced-motion:reduce) { #scene .ark-header .ark-link { transition:none; } }
 
 /* The index is a stack of fixed-size views, never an expanding accordion. */
@@ -284,5 +298,18 @@
 @media(max-width:560px){
  #scene .ark-header .header-core-links{display:flex;border:0;background:transparent;padding:0;margin-left:auto}
  #scene .ark-header .header-core-links a:not(.header-account-link){display:none}
- #scene .ark-header .header-core-links .header-account-link{display:flex;min-width:100px;font-size:12px;border:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .65)}
+ #scene .ark-header .header-core-links .header-account-link{display:flex;min-width:0;max-width:112px;padding-inline:10px;font-size:12px;border:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .65)}
+ #scene .ark-header .ark-studio-identity{min-width:0;flex:0 1 auto;margin-right:0}
+ #scene .ark-header .ark-brand-lockup{min-width:0}
+ #scene .ark-header .ark-brand-wordmark,#scene .ark-header .ark-brand-descriptor{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #scene .ark-header .header-core-links{min-width:0;flex:0 1 auto}
+ #scene .ark-header .header-account-label{min-width:0}
+ #scene .ark-header :is(.header-account-name,.header-account-status){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #scene .ark-header .nav-toggle{flex:0 0 40px}
+}
+@media(max-width:360px){
+ #scene .ark-header{gap:7px;padding-right:max(12px,env(safe-area-inset-right,0px));padding-left:max(12px,env(safe-area-inset-left,0px))}
+ #scene .ark-header .ark-brand-wordmark{font-size:20px;letter-spacing:.1em}
+ #scene .ark-header .ark-brand-descriptor{font-size:7px;letter-spacing:.1em}
+ #scene .ark-header .header-core-links .header-account-link{max-width:92px;padding-inline:8px}
 }

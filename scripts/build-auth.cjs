@@ -16,3 +16,14 @@ execFileSync(designRoot + '/deadark-sdk/node_modules/.bin/esbuild', [
   '--alias:@deadark/ark-ui/flux-authorization-view=' + designRoot + '/ark-ui/dist/ark-ui.flux-authorization-view.js',
   '--outfile=js/admin/authorization-view.js',
 ], { stdio: 'inherit' });
+// The real <flux-authorization-dialog> custom element (same package the DAO
+// app uses via @deadark/ark-ui/elements) -- a behavior/ARIA primitive, no
+// visual template of its own; admin.js supplies the light-DOM content.
+execFileSync(designRoot + '/deadark-sdk/node_modules/.bin/esbuild', [
+  'scripts/elements-entry.js', '--bundle', '--format=iife', '--global-name=ArkFluxElements', '--minify', '--legal-comments=none',
+  '--alias:@deadark/ark-ui/elements=' + designRoot + '/ark-ui/dist/ark-ui.elements.js',
+  '--alias:@deadark/ark-elements/base=' + designRoot + '/ark-elements/src/base.js',
+  '--alias:@deadark/ark-elements/elements=' + designRoot + '/ark-elements/src/elements.js',
+  '--alias:@deadark/ark-a11y/element-style=' + designRoot + '/ark-a11y/src/element-style.js',
+  '--outfile=js/admin/vendor/flux-elements.js',
+], { stdio: 'inherit' });

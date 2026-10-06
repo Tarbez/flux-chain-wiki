@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta name="referrer" content="no-referrer" />
+<meta name="robots" content="noindex" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>defxn identity</title>
+<link rel="stylesheet" href="css/themes.css" />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="stylesheet" href="css/authorization-dialog.css" />
+</head>
+<body class="locked">
+<!-- Not a page people open directly. Any *.defxn.com site embeds this one, in a
+     popup it opens and reuses by name (js/ark/broker-client.js), and asks it, over
+     postMessage, to identify or sign for the one identity unlocked here -- so a
+     visitor unlocks a recovery file once per browser session, not once per site.
+     The key lives only in this page's memory (js/broker/broker.js), exactly like
+     admin.html's own gate, and is never written to storage or sent anywhere; only
+     signatures are. Two things make that safe: a real allowlist of which origins
+     this page will even answer, and the same <flux-authorization-dialog> the admin
+     publish flow uses (js/admin/vendor/flux-elements.js) for every single signature,
+     naming exactly which site asked and exactly what it asked to sign -- a site on
+     the allowlist can ask, it can never make this page sign silently. -->
+<main id="brokerRoot" class="gate-shell">
+  <header class="bar gate-bar">
+    <div class="bar-brand"><strong>defxn</strong><span>IDENTITY</span></div>
+    <div class="bar-actions"><span id="brokerBarStatus" class="status" role="status" aria-live="polite"></span></div>
+  </header>
+  <section class="gate">
+    <div class="gate-card">
+      <p class="gate-eyebrow">SHARED SIGN-IN</p>
+      <h1 id="brokerHeading">Unlock your identity</h1>
+      <p id="brokerLead" class="gate-lead">A defxn site is asking to use your identity. Choose your recovery file
+        (.auth.flx) below; it stays on this device. Every request to sign something is shown to you first, naming
+        the exact site and the exact bytes, before anything is signed.</p>
+      <div id="brokerAuthContainer"></div>
+      <p id="brokerStatus" class="hint" role="status" aria-live="polite"></p>
+    </div>
+    <p class="gate-safety">This tab holds your signing key only in memory, for every defxn site, until you close it.
+      Closing this tab signs you out everywhere. Nothing here is ever saved to disk or sent anywhere but the
+      signatures you approve.</p>
+  </section>
+</main>
+<script src="js/ark/ml-dsa.js?v=broker1" defer></script>
+<script src="js/admin/auth.js?v=broker1" defer></script>
+<script src="js/admin/vendor/flux-elements.js?v=broker1" defer></script>
+<script src="js/admin/authorization-view.js?v=broker1" defer></script>
+<script src="js/broker/broker.js?v=broker1" defer></script>
+</body>
+</html>

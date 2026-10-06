@@ -10,7 +10,7 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "Define your rules - peer-to-peer at every layer"
+      "value": "Peer-to-peer agreement, all the way down"
     },
     "EYEBROW": {
       "label": "Eyebrow",
@@ -22,13 +22,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "Run your own network without inheriting someone else's chain."
+      "value": "What if agreement didn't need a global chain?"
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Settle through signed agreements without a global block order required. DEFXN decentralizes all the way down, the fabric mesh included. We hold power over nothing we did not create."
+      "value": "DEFXN turns intent, terms, fulfillment, and receipts into one verifiable trail — without forcing every network into the same block order."
     },
     "STEP": {
       "label": "Label on the ring pill",
@@ -40,19 +40,19 @@ ArkManifest.define({
       "label": "Main button",
       "kind": "line",
       "section": "Hero",
-      "value": "See how DEFXN works"
+      "value": "See the protocol in motion"
     },
     "SECONDARY": {
       "label": "Secondary button",
       "kind": "line",
       "section": "Hero",
-      "value": "Run DEFXN from source"
+      "value": "Read the source"
     },
     "QUESTION.RESOLVER": {
       "label": "Question link: resolver",
       "kind": "line",
       "section": "Hero",
-      "value": "What is a resolver?"
+      "value": "Start with the resolver"
     },
     "QUESTION.FLUX": {
       "label": "Question link: Flux",
@@ -96,11 +96,23 @@ ArkManifest.define({
       "section": "Status",
       "value": "UNVERIFIED"
     },
+    "STATUS4.LABEL": {
+      "label": "Status item 4 label",
+      "kind": "line",
+      "section": "Status",
+      "value": "FXN TRANSFERS"
+    },
+    "STATUS4.VALUE": {
+      "label": "Status item 4 value",
+      "kind": "line",
+      "section": "Status",
+      "value": "20-35 TX/S · LIGHT LOAD"
+    },
     "STATUS.NOTE": {
       "label": "Status observation note",
       "kind": "line",
       "section": "Status",
-      "value": "STATUS / 2026-09-30"
+      "value": "STATUS / 2026-10-05"
     },
     "READOUT.UNITS": {
       "label": "Readout label: units",

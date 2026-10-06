@@ -14,6 +14,7 @@ export function readSiteRoutes(root) {
     load(`js/content/manifests/${id}.js`);
   }
   load('js/content/learnings.js'); load('js/content/article-index.js');
+  load('js/content/resolutions.js');
   load('js/pages/catalog.js');
   return new Set(Object.values(context.ArkUI.pageCatalog).map(entry=>entry.path));
 }

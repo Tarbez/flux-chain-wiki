@@ -42,25 +42,43 @@ ArkManifest.define({
       "label": "Menu heading",
       "kind": "line",
       "section": "Products menu",
-      "value": "Resolutions for the mesh"
+      "value": "Start with the outcome."
     },
     "MEGA.TEXT": {
       "label": "Menu intro",
       "kind": "text",
       "section": "Products menu",
-      "value": "Everyone is our business partner. The mesh is the database, the host and the cloud."
+      "value": "A resolution combines a named resolver with signed records, so the mesh can find, run, and verify an outcome."
     },
     "MEGA.ALL": {
       "label": "Menu link to every resolution (an arrow is added)",
       "kind": "line",
       "section": "Products menu",
-      "value": "See all resolutions"
+      "value": "Browse all resolutions"
     },
     "MEGA.COIN": {
       "label": "Menu coin line",
       "kind": "line",
       "section": "Products menu",
       "value": "Powered by FXN, the DEFXN coin"
+    },
+    "MEGA.GUIDE": {
+      "label": "Guided paths heading",
+      "kind": "line",
+      "section": "Products menu",
+      "value": "Choose a starting point"
+    },
+    "MEGA.RESOLVERS": {
+      "label": "Resolver list heading",
+      "kind": "line",
+      "section": "Products menu",
+      "value": "Or choose a resolver"
+    },
+    "MEGA.HOW": {
+      "label": "Resolver explainer link",
+      "kind": "line",
+      "section": "Products menu",
+      "value": "How resolvers work"
     },
     "GROUP.BUILD": {
       "label": "Group heading",

@@ -25,7 +25,7 @@ Missing evidence is `Unverified`, not `Not built`.
 | Authority policy | Partial | Policy structure and thresholds exist; production activation is separate and unverified. | CAP-007 |
 | Independent production activation | Unverified | Required readiness, hostile-matrix, and signed-soak artifacts are not registered here. | CAP-008 |
 | Public repository URLs and packaged downloads | Unverified | No durable canonical public location was established in this audit. | CAP-009 |
-| Public benchmark results | Unverified | No complete benchmark record is registered. | BENCH-001 |
+| Public benchmark results | Partial | Real local and real-fleet numbers exist for both the mesh value-object registry and the agreement-fabric quorum protocol; the registry's bulk-write path (10,000 transfers on the real fleet) did not complete and required a fix, verified only for writes, not transfers. | BENCH-001 |
 
 Evidence record details are in the [registry](evidence/registry.md). Change a status only when that record is updated with a reproducible source or artifact.
 

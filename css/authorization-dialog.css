@@ -1,0 +1,44 @@
+/* The real scoped-authorization confirm-and-sign dialog (js/admin/vendor/
+   flux-elements.js's <flux-authorization-dialog> + js/admin/authorization-view.js's
+   ArkAuthorizationView + js/ark/authorization-dialog.js). Shared, site-wide CSS --
+   previously lived only in css/admin.css (so it only rendered on admin.html/
+   admin-app.html/broker.html, "the admin side"); every real end-user signing
+   action (js/pages/account.js's Credits + FXN transfer forms, via
+   fabric-transfer-browser.js/value-registries-client.js) goes through the
+   SAME dialog now, so it needs this CSS loaded site-wide too, not just there.
+   Uses the real site-wide --font-sans/--font-mono tokens (css/themes.css),
+   not admin.css's own local --sans/--mono aliases, so the one dialog renders
+   identically wherever it appears. */
+flux-authorization-dialog { position: fixed; inset: 0; z-index: 50; }
+/* [open]/:not([open]) beat flux-elements.js's own dynamic `display` rule on
+   specificity ((0,1,1) vs its (0,1,0)) -- needed because that rule is keyed
+   by a per-module `data-ark-dynamic-style="d1"` counter that is NOT globally
+   unique: on the full site bundle (unlike a lean single-purpose page) another
+   already-loaded copy of the same helper can claim the same "d1" id for an
+   unrelated element and leave a stale display:none behind. Forcing it here
+   is cheap and correct regardless of that collision; it does not require
+   finding and de-duplicating every other user of the helper. */
+flux-authorization-dialog[open] { display: block !important; }
+flux-authorization-dialog:not([open]) { display: none !important; }
+.admin-auth-backdrop { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: hsl(var(--canvas) / .84); backdrop-filter: blur(18px); }
+.admin-auth-panel { width: min(720px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 28px; border: 1px solid hsl(var(--border-default)); border-radius: 18px; background: hsl(var(--overlay)); box-shadow: 0 30px 100px hsl(var(--canvas) / .75); color: hsl(var(--text)); }
+.admin-auth-panel > header { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.admin-auth-title h2 { margin: 7px 0 0; color: hsl(var(--text-strong)); font: 650 30px/1.05 var(--font-sans); letter-spacing: -.035em; }
+.admin-auth-title .kicker { color: hsl(var(--accent)); font: 700 9px var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
+.admin-auth-close { width: 34px; height: 34px; border: 1px solid hsl(var(--border-subtle)); border-radius: 50%; background: hsl(var(--nested)); color: hsl(var(--text-strong)); font-size: 20px; }
+.admin-auth-description { max-width: 62ch; color: hsl(var(--text-muted)); line-height: 1.55; }
+.admin-auth-context { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin: 22px 0; overflow: hidden; border: 1px solid hsl(var(--border-subtle)); border-radius: 12px; background: hsl(var(--border-subtle)); }
+.admin-auth-context > div { min-width: 0; padding: 12px; background: hsl(var(--surface)); }
+.admin-auth-context dt, .admin-auth-digest small { display: block; margin-bottom: 5px; color: hsl(var(--text-faint)); font: 700 9px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
+.admin-auth-context dd { margin: 0; overflow-wrap: anywhere; color: hsl(var(--text-strong)); font: 600 11px/1.45 var(--font-mono); }
+.admin-auth-digest { padding: 14px; border-left: 2px solid hsl(var(--trust)); border-radius: 5px; background: hsl(var(--nested)); }
+.admin-auth-digest code { display: block; overflow-wrap: anywhere; color: hsl(var(--text-strong)); font: 11px/1.5 var(--font-mono); }
+.admin-auth-panel details { margin-top: 12px; padding: 12px; border: 1px solid hsl(var(--border-subtle)); border-radius: 9px; }
+.admin-auth-panel summary { cursor: pointer; color: hsl(var(--text-muted)); font: 700 10px var(--font-mono); text-transform: uppercase; }
+.admin-auth-panel pre { max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: hsl(var(--text-muted)); font: 10px/1.5 var(--font-mono); }
+.admin-auth-safety { color: hsl(var(--text-faint)); font-size: 11px; line-height: 1.5; }
+.admin-auth-panel > footer { display: flex; justify-content: flex-end; gap: 9px; margin-top: 20px; }
+.admin-auth-panel .btn { background: hsl(var(--nested)); color: hsl(var(--text-strong)); border: 1px solid hsl(var(--border-default)); border-radius: 8px; padding: 10px 16px; font: 600 13px var(--font-sans); cursor: pointer; }
+.admin-auth-panel .btn.primary { background: hsl(var(--accent)); color: hsl(var(--canvas)); border-color: transparent; }
+.admin-auth-panel .btn:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 620px) { .admin-auth-backdrop { padding: 0; } .admin-auth-panel { height: 100vh; max-height: none; border-radius: 0; } .admin-auth-context { grid-template-columns: 1fr; } }

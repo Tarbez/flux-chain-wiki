@@ -195,9 +195,11 @@
   });
   /* An old https://host/#/explore link is opened once, then its address is rewritten to the clean path. */
   function restoreRoute() {
-    var rewrite = ArkUI.route.isLegacyHash();
-    var options = rewrite ? { history: 'replace', query: ArkUI.route.search() || undefined } : { history: 'none' };
-    return router.navigate(router.resolve(ArkUI.route.raw()), options).then(sync);
+    var resolutionSlug = ArkUI.route.path() === '/resolutions' ? new URLSearchParams(ArkUI.route.search()).get('r') : '';
+    var resolutionPage = resolutionSlug && ArkUI.pageCatalog['resolutions/' + resolutionSlug] ? 'resolutions/' + resolutionSlug : '';
+    var rewrite = ArkUI.route.isLegacyHash() || !!resolutionPage;
+    var options = rewrite ? { history: 'replace', query: resolutionPage ? undefined : ArkUI.route.search() || undefined } : { history: 'none' };
+    return router.navigate(resolutionPage || router.resolve(ArkUI.route.raw()), options).then(sync);
   }
   window.addEventListener('popstate', restoreRoute);
   window.addEventListener('hashchange', restoreRoute);

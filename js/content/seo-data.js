@@ -5,12 +5,12 @@ ArkSEO.define({
   "site": {
     "name": "DEFXN",
     "baseUrl": "",
-    "defaultDescription": "Define network rules and signed agreements without a global block order. Explore source-backed capabilities, current limits, and the local operator path."
+    "defaultDescription": "See how DEFXN turns intent, terms, fulfillment, and receipts into one verifiable trail without forcing every network into the same block order."
   },
   "pages": {
     "home": {
-      "title": "Run your own network — DEFXN",
-      "description": "Define network rules and signed agreements without a global block order. Explore source-backed capabilities, current limits, and the local operator path.",
+      "title": "Agreement without a global chain — DEFXN",
+      "description": "See how DEFXN turns intent, terms, fulfillment, and receipts into one verifiable trail without forcing every network into the same block order.",
       "ogImage": "",
       "canonical": ""
     },
@@ -47,6 +47,126 @@ ArkSEO.define({
     "resolutions": {
       "title": "Resolutions for the mesh — DEFXN",
       "description": "Resolve your website, payments, data, governance, communications and more on the DEFXN mesh, with encrypted peer-to-peer hosting and permanence instead of renewals.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/website": {
+      "title": "Resolve your website — DEFXN",
+      "description": "Publish a signed website bundle to the DEFXN mesh without a database, hosting plan, cloud account, or yearly renewal.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/content": {
+      "title": "Resolve your content — DEFXN",
+      "description": "Publish named, signed content to the DEFXN mesh so it remains addressable, traceable to its origin, and independent of a platform.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/files": {
+      "title": "Resolve your files — DEFXN",
+      "description": "Encrypt, distribute, and retrieve verifiable files through peer storage while keeping access under keys you control.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/deployments": {
+      "title": "Resolve your deployments — DEFXN",
+      "description": "Package and sign an exact release, then publish its addressable bundle to the mesh instead of a rented deployment server.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/payments": {
+      "title": "Resolve your payments — DEFXN",
+      "description": "Describe direct partner settlement in an agreement and retain a signed receipt both sides can independently verify.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/finance": {
+      "title": "Resolve your personal finance — DEFXN",
+      "description": "Keep inspectable books and balances under your keys, reconciling changes from partner agreements and signed receipts.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/community": {
+      "title": "Resolve your community — DEFXN",
+      "description": "Build a community whose members retain identity and history while shared membership rules remain explicit and checkable.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/communications": {
+      "title": "Resolve your communications — DEFXN",
+      "description": "Establish encrypted peer channels and resolve shared conversation records without placing message custody in a platform.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/collaborations": {
+      "title": "Resolve your collaborations — DEFXN",
+      "description": "Coordinate shared work through signed changes and resolve the agreed state without a central application owner.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/governance": {
+      "title": "Resolve your governance — DEFXN",
+      "description": "Write decision rules before a vote, gather the required approvals, and activate an outcome with its evidence attached.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/intelligence": {
+      "title": "Resolve your intelligence — DEFXN",
+      "description": "Run agreed intelligence beside relevant mesh data and return a claim with evidence that participating partners can check.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/data": {
+      "title": "Resolve your data — DEFXN",
+      "description": "Write signed, addressed records, replicate them through peers, and query the mesh instead of maintaining a database server.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/algorithms": {
+      "title": "Resolve your algorithms — DEFXN",
+      "description": "Publish deterministic algorithms as named resolvers so anyone can run the logic and check the resulting claim.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/information": {
+      "title": "Resolve your information — DEFXN",
+      "description": "Give information a stable address and preserve its source trail so the current claim remains findable and inspectable.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/rules": {
+      "title": "Resolve your rules and patterns — DEFXN",
+      "description": "Express rules as deterministic resolver logic, agree on a named version, and apply it consistently with retained evidence.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/network": {
+      "title": "Resolve your network — DEFXN",
+      "description": "Create or join a named network, participate from a local node, and discover peers as the network grows.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/encryptions": {
+      "title": "Resolve your encryptions — DEFXN",
+      "description": "Choose who may read, encrypt before information enters the mesh, and keep decryption under the required partner keys.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/automation": {
+      "title": "Resolve your automation — DEFXN",
+      "description": "Define a permitted action, bind it to an agreement, and run it when verifiable evidence satisfies the rule.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/productivity": {
+      "title": "Resolve your productivity — DEFXN",
+      "description": "Build repeatable work around shared records and resolvers while keeping the resulting work under partner control.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolutions/logistics": {
+      "title": "Resolve your logistics — DEFXN",
+      "description": "Name items and expected movements, sign each custody handoff, and resolve responsibility from a shared trail.",
       "ogImage": "",
       "canonical": ""
     },

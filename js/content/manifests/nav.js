@@ -7,10 +7,10 @@ ArkManifest.define({
   "meta": {},
   "fields": {
     "PRODUCTS": {
-      "label": "Header menu: products",
+      "label": "Header menu: resolutions",
       "kind": "line",
       "section": "Header links",
-      "value": "Products"
+      "value": "Resolutions"
     },
     "OVERVIEW": {
       "label": "Header link: protocol overview",
@@ -41,6 +41,12 @@ ArkManifest.define({
       "kind": "line",
       "section": "Header links",
       "value": "Account"
+    },
+    "STATS": {
+      "label": "Header link: performance stats",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Stats"
     },
     "RESOLVER": {
       "label": "Header link: what is a resolver",

@@ -3,19 +3,20 @@ function load(context) {
   vm.runInContext(fs.readFileSync('js/content/manifest.js', 'utf8'), context, { filename: 'manifest.js' });
   const ids = fs.readdirSync('js/content/manifests').filter(name=>name.endsWith('.js') && name!=='index.js').map(name=>name.slice(0,-3));
   ids.forEach((id) => vm.runInContext(fs.readFileSync('js/content/manifests/' + id + '.js', 'utf8'), context, { filename: id + '.js' }));
+  vm.runInContext(fs.readFileSync('js/content/resolutions.js', 'utf8'), context, { filename: 'resolutions.js' });
   vm.runInContext(fs.readFileSync('js/content/learnings.js', 'utf8'), context, { filename: 'learnings.js' });
   vm.runInContext(fs.readFileSync('js/content/article-index.js', 'utf8'), context, { filename: 'article-index.js' });
   vm.runInContext(fs.readFileSync('js/content/seo.js', 'utf8'), context, { filename: 'seo.js' });
 }
 const context = vm.createContext({});
 load(context);
-const { ArkManifest, LearningContent, ArkSEO } = vm.runInContext('({ ArkManifest, LearningContent, ArkSEO })', context);
+const { ArkManifest, LearningContent, ArkResolutions, ArkSEO } = vm.runInContext('({ ArkManifest, LearningContent, ArkResolutions, ArkSEO })', context);
 
 // pageEntries(): every non-'site'-group manifest, plus the three manifest-less pages, and never 'nav'.
 const pageIds = ArkSEO.pageIds();
 assert(pageIds.indexOf('nav') < 0, 'group "site" (shared chrome, e.g. nav) is not a route and is excluded');
-const extraIds = ['proximity', 'lab', 'learnings', 'explorer', 'account', 'treasury', 'deposits', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id)];
-assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site').map((m) => m.id).concat(extraIds).sort()), 'pageIds includes all manifest-less lifecycle pages');
+const extraIds = ['proximity', 'lab', 'learnings', 'explorer', 'account', 'treasury', 'deposits', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
+assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site').map((m) => m.id).concat(extraIds).sort()), 'pageIds includes manifest-less lifecycle and nested resolution pages');
 assert.equal(JSON.stringify(ArkSEO.articleSlugs()), JSON.stringify(LearningContent.articles.map((a) => a.slug)), 'articleSlugs is every article, in order');
 
 // get() is null before define() ever ran.

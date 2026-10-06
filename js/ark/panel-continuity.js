@@ -4,8 +4,8 @@
   'use strict';
   ArkUI.createPanelContinuity = function (scene) {
     var host = null, animation = null, revision = 0, sourceKey = null, sourcePage = null, sourceQuery = null, sourceClass = null, destination = null;
-    function family(page) { return String(page).indexOf('how/')===0 || ['reference', 'resolver', 'references', 'deployment'].indexOf(page) >= 0 || page === 'lifecycle' || String(page).indexOf('lifecycle/') === 0 || String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0; }
-    function group(page) { return page === 'reference' ? 'reference' : (String(page).indexOf('how/')===0 || ['resolver', 'references', 'deployment'].indexOf(page) >= 0) ? 'guide' : String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' ? 'mechanism' : ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0 ? 'task' : 'lifecycle'; }
+    function family(page) { return String(page).indexOf('how/')===0 || ['reference', 'resolver', 'references', 'deployment'].indexOf(page) >= 0 || page === 'lifecycle' || String(page).indexOf('lifecycle/') === 0 || String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || String(page).indexOf('resolutions/') === 0 || ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0; }
+    function group(page) { return page === 'reference' ? 'reference' : (String(page).indexOf('how/')===0 || ['resolver', 'references', 'deployment'].indexOf(page) >= 0) ? 'guide' : String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || String(page).indexOf('resolutions/') === 0 ? 'mechanism' : ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0 ? 'task' : 'lifecycle'; }
     function bounds(el) {
       var box = el.getBoundingClientRect(), base = scene.getBoundingClientRect();
       return { left: box.left - base.left, top: box.top - base.top, width: box.width, height: box.height };
@@ -22,9 +22,11 @@
     }
     function target(page) {
       var box = scene.getBoundingClientRect();
-      var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
       var panelPage = page || host && host.dataset.panelPage;
-      var maxWidth = panelPage === 'about' || panelPage === 'resolutions' ? 1920 : panelPage === 'deployment' || panelPage === 'explorer' ? 1600 : 1080;
+      if (panelPage === 'account') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-148) };
+      var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
+      var resolutionDetail = String(panelPage).indexOf('resolutions/') === 0;
+      var maxWidth = panelPage === 'about' ? 1920 : panelPage === 'resolutions' ? 1480 : resolutionDetail ? 1280 : panelPage === 'deployment' || panelPage === 'explorer' || panelPage === 'account' ? 1600 : 1080;
       var width = Math.min(maxWidth, box.width - gutter * 2);
       return { left: (box.width - width) / 2, top: 84, width: width, height: Math.max(180, box.height - 148) };
     }

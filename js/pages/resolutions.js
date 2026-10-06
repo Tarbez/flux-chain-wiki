@@ -1,9 +1,17 @@
-/* Resolutions: every product, grouped. ?r=<slug> brings one resolution forward. */
+/* Resolutions: a quiet category index and one canonical page per resolution. */
 (function () {
   'use strict';
 
+  var groupIntroductions = {
+    BUILD: 'Make, publish and keep digital work available without building a server stack around it.',
+    VALUE: 'Keep value exchange between the partners involved, with an inspectable trail of agreement and receipt.',
+    PEOPLE: 'Coordinate people as peers: shared rules and records without a platform sitting above the group.',
+    INTELLIGENCE: 'Put data, logic and provenance in the same resolvable fabric so results can be checked.',
+    OPERATIONS: 'Run the connective work of a network without handing its keys or continuity to a cloud account.'
+  };
+
   ArkUI.pageModules.resolutions = {
-    mount: function (host) {
+    mount: function (host, pageKey) {
       function words(role) { return ArkCopy.text('RESOLUTIONS.' + role); }
       function el(tag, className, text) { return ArkUI.el(tag, className || '', text); }
       function routeLink(label, target, className) {
@@ -12,108 +20,269 @@
         link.dataset.sceneLink = target;
         return link;
       }
+      function short(item) { return ArkResolutions.shortName(item.title); }
 
-      var page = el('section', 'ark-page resolutions-page');
-      page.dataset.arkPage = 'resolutions';
-      page.setAttribute('aria-labelledby', 'resolutions-title');
+      function breadcrumb(page, item) {
+        var path = el('nav', 'content-layer-path resolutions-path');
+        path.setAttribute('aria-label', 'Your place');
+        if (item) {
+          path.appendChild(routeLink('← All resolutions', 'resolutions'));
+          var current = el('span', '', short(item));
+          current.setAttribute('aria-current', 'page');
+          path.appendChild(current);
+        } else {
+          path.appendChild(routeLink('← Home', 'zero'));
+          var here = el('span', '', 'Resolutions');
+          here.setAttribute('aria-current', 'page');
+          path.appendChild(here);
+        }
+        page.appendChild(path);
+      }
 
-      var path = el('nav', 'content-layer-path resolutions-path');
-      path.setAttribute('aria-label', 'Your place');
-      path.appendChild(routeLink('← Home', 'zero'));
-      var here = el('span', '', ArkManifest.get('resolutions').title.replace(/\s*\(.*\)$/, ''));
-      here.setAttribute('aria-current', 'page');
-      path.appendChild(here);
-      page.appendChild(path);
+      function resolutionLink(item, index) {
+        var key = 'resolutions/' + item.slug;
+        var link = routeLink('', key, 'resolution-entry');
+        link.dataset.resolution = item.slug;
+        link.appendChild(el('span', 'resolution-entry-number', String(index + 1).padStart(2, '0')));
+        var copy = el('span', 'resolution-entry-copy');
+        copy.appendChild(el('strong', '', short(item)));
+        copy.appendChild(el('span', '', item.text));
+        link.appendChild(copy);
+        var arrow = el('span', 'resolution-entry-arrow', '↗');
+        arrow.setAttribute('aria-hidden', 'true');
+        link.appendChild(arrow);
+        return link;
+      }
 
-      var hero = el('header', 'resolutions-hero');
-      hero.appendChild(el('p', 'resolutions-eyebrow', words('EYEBROW')));
-      var title = el('h1', '', words('TITLE'));
-      title.id = 'resolutions-title';
-      hero.appendChild(title);
-      hero.appendChild(el('p', 'resolutions-deck', words('DECK')));
-      var promise = el('ul', 'resolutions-promise');
-      promise.setAttribute('aria-label', words('PROMISE'));
-      words('PROMISE').split('·').forEach(function (part) { promise.appendChild(el('li', '', part.trim())); });
-      hero.appendChild(promise);
-      page.appendChild(hero);
+      function mountIndex() {
+        var page = el('section', 'ark-page resolutions-page resolutions-index');
+        page.dataset.arkPage = 'resolutions';
+        page.setAttribute('aria-labelledby', 'resolutions-title');
+        breadcrumb(page);
 
-      var groups = ArkResolutions.list();
-      var jump = el('nav', 'resolutions-jump');
-      jump.setAttribute('aria-label', words('JUMP'));
-      jump.appendChild(el('span', 'resolutions-jump-label', words('JUMP')));
-      page.appendChild(jump);
-
-      var cards = Object.create(null);
-      groups.forEach(function (group) {
-        var section = el('section', 'resolutions-group');
-        section.id = 'resolutions-group-' + group.key.toLowerCase();
-        section.tabIndex = -1;
-        var heading = el('div', 'resolutions-group-head');
-        heading.appendChild(el('h2', '', group.title));
-        heading.appendChild(el('span', 'resolutions-group-count', String(group.items.length).padStart(2, '0')));
-        section.appendChild(heading);
-        var grid = el('div', 'resolutions-grid');
-        group.items.forEach(function (item) {
-          var card = el('article', 'resolution-card');
-          card.id = 'resolution-' + item.slug;
-          card.dataset.resolution = item.slug;
-          card.tabIndex = -1;
-          card.appendChild(el('h3', '', item.title));
-          card.appendChild(el('p', '', item.text));
-          if (item.start && ArkUI.pageCatalog[item.start]) card.appendChild(routeLink(words('START') + ' →', item.start, 'resolution-start'));
-          grid.appendChild(card);
-          cards[item.slug] = card;
+        var hero = el('header', 'resolutions-hero');
+        var heroCopy = el('div', 'resolutions-hero-copy');
+        heroCopy.appendChild(el('p', 'resolutions-eyebrow', words('EYEBROW')));
+        var title = el('h1', '', words('TITLE'));
+        title.id = 'resolutions-title';
+        heroCopy.appendChild(title);
+        heroCopy.appendChild(el('p', 'resolutions-deck', words('DECK')));
+        hero.appendChild(heroCopy);
+        var measure = el('dl', 'resolutions-measure');
+        [['20', 'resolutions'], ['05', 'domains'], ['01', 'mesh']].forEach(function (entry) {
+          var cell = el('div');
+          cell.appendChild(el('dt', '', entry[0]));
+          cell.appendChild(el('dd', '', entry[1]));
+          measure.appendChild(cell);
         });
-        section.appendChild(grid);
-        page.appendChild(section);
-        var chip = el('button', 'resolutions-jump-chip', group.title);
-        chip.type = 'button';
-        chip.addEventListener('click', function () {
-          section.scrollIntoView({ behavior: ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
-          section.focus({ preventScroll: true });
+        hero.appendChild(measure);
+        page.appendChild(hero);
+
+        var groups = ArkResolutions.list();
+        var browser = el('section', 'resolutions-browser');
+        browser.setAttribute('aria-label', 'Browse resolutions by domain');
+        var tabs = el('div', 'resolutions-domains');
+        tabs.setAttribute('role', 'tablist');
+        tabs.setAttribute('aria-label', 'Resolution domains');
+        var panel = el('div', 'resolutions-domain-panel');
+        panel.id = 'resolution-domain-panel';
+        panel.setAttribute('role', 'tabpanel');
+        panel.tabIndex = 0;
+        var buttons = [];
+
+        function selectGroup(selected) {
+          buttons.forEach(function (button, index) {
+            var active = index === selected;
+            button.setAttribute('aria-selected', String(active));
+            button.tabIndex = active ? 0 : -1;
+          });
+          var group = groups[selected];
+          panel.setAttribute('aria-labelledby', 'resolution-domain-' + group.key.toLowerCase());
+          panel.replaceChildren();
+          var head = el('div', 'resolutions-domain-head');
+          var headingCopy = el('div');
+          headingCopy.appendChild(el('p', 'resolutions-domain-index', String(selected + 1).padStart(2, '0') + ' / ' + String(groups.length).padStart(2, '0')));
+          headingCopy.appendChild(el('h2', '', group.title));
+          head.appendChild(headingCopy);
+          head.appendChild(el('p', '', groupIntroductions[group.key]));
+          panel.appendChild(head);
+          var list = el('div', 'resolutions-list');
+          group.items.forEach(function (item, index) { list.appendChild(resolutionLink(item, index)); });
+          panel.appendChild(list);
+        }
+
+        groups.forEach(function (group, index) {
+          var button = el('button', 'resolutions-domain-tab');
+          button.type = 'button';
+          button.id = 'resolution-domain-' + group.key.toLowerCase();
+          button.setAttribute('role', 'tab');
+          button.setAttribute('aria-label', group.title);
+          button.setAttribute('aria-controls', panel.id);
+          button.appendChild(el('span', 'resolutions-domain-tab-number', String(index + 1).padStart(2, '0')));
+          button.appendChild(el('span', 'resolutions-domain-tab-name', group.title));
+          button.appendChild(el('span', 'resolutions-domain-tab-count', String(group.items.length).padStart(2, '0')));
+          button.addEventListener('click', function () { selectGroup(index); });
+          button.addEventListener('keydown', function (event) {
+            if (event.key !== 'ArrowDown' && event.key !== 'ArrowRight' && event.key !== 'ArrowUp' && event.key !== 'ArrowLeft') return;
+            event.preventDefault();
+            var direction = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1;
+            var next = (index + direction + buttons.length) % buttons.length;
+            selectGroup(next);
+            buttons[next].focus();
+          });
+          buttons.push(button);
+          tabs.appendChild(button);
         });
-        jump.appendChild(chip);
-      });
+        browser.appendChild(tabs);
+        browser.appendChild(panel);
+        page.appendChild(browser);
+        selectGroup(0);
 
-      var note = el('aside', 'resolutions-note');
-      note.appendChild(el('p', '', words('NOTE')));
-      var status = el('a', 'resolutions-note-link', words('NOTE.LINK') + ' ↗');
-      status.href = 'docs/status.md';
-      note.appendChild(status);
-      page.appendChild(note);
+        var note = el('aside', 'resolutions-note');
+        note.appendChild(el('p', '', words('NOTE')));
+        var status = el('a', 'resolutions-note-link', words('NOTE.LINK') + ' ↗');
+        status.href = 'docs/status.md';
+        note.appendChild(status);
+        page.appendChild(note);
+        return page;
+      }
 
-      function bringForward(slug, smooth) {
-        var card = cards[slug];
-        if (!card) return;
-        Object.keys(cards).forEach(function (key) { cards[key].classList.toggle('is-focused', key === slug); });
-        card.scrollIntoView({ behavior: smooth && !(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion()) ? 'smooth' : 'auto', block: 'center' });
-        card.focus({ preventScroll: true });
-      }
-      function fromRoute(smooth) {
-        if (ArkUI.route.path() !== ArkUI.pageCatalog.resolutions.path) return false;
-        var slug = new URLSearchParams(ArkUI.route.search()).get('r');
-        if (slug) bringForward(slug, smooth);
-        return true;
-      }
-      function onPop() { fromRoute(false); }
-      /* The Products menu calls this when it is used while this page is already open. */
-      var focusHook = function (slug) { bringForward(slug, true); };
-      ArkUI.focusResolution = focusHook;
-      if (window.addEventListener) window.addEventListener('popstate', onPop);
-      /* The router writes the address once the page has arrived, so wait for it (briefly) before reading ?r=. */
-      var tries = 0, waitTimer = 0;
-      function waitForRoute() {
-        waitTimer = 0;
-        if ((page.isConnected && fromRoute(true)) || ++tries > 200) return;
-        waitTimer = window.setTimeout(waitForRoute, 75);
-      }
-      if (typeof window.setTimeout === 'function') waitTimer = window.setTimeout(waitForRoute, 75);
-      page.arkDispose = function () {
-        if (waitTimer) window.clearTimeout(waitTimer);
-        if (ArkUI.focusResolution === focusHook) ArkUI.focusResolution = null;
-        if (window.removeEventListener) window.removeEventListener('popstate', onPop);
-      };
+      function mountDetail(item) {
+        var all = ArkResolutions.all();
+        var position = all.findIndex(function (candidate) { return candidate.slug === item.slug; });
+        var group = ArkResolutions.groupFor(item.group);
+        var previous = all[(position - 1 + all.length) % all.length];
+        var next = all[(position + 1) % all.length];
+        var page = el('article', 'ark-page resolutions-page resolution-detail');
+        page.dataset.arkPage = pageKey;
+        page.dataset.resolutionGroup = item.group.toLowerCase();
+        page.setAttribute('aria-labelledby', 'resolution-title-' + item.slug);
+        breadcrumb(page, item);
 
+        var workspace = el('div', 'resolution-detail-workspace');
+        var hero = el('header', 'resolution-detail-hero');
+        var intro = el('div', 'resolution-detail-intro');
+        intro.appendChild(el('p', 'resolution-detail-index', String(position + 1).padStart(2, '0') + ' / ' + String(all.length).padStart(2, '0') + ' · ' + group.title));
+        var title = el('h1', '', item.title);
+        title.id = 'resolution-title-' + item.slug;
+        intro.appendChild(title);
+        intro.appendChild(el('p', 'resolution-detail-deck', item.text));
+        var actions = el('div', 'resolution-detail-actions');
+        if (item.start && ArkUI.pageCatalog[item.start]) actions.appendChild(routeLink(words('START') + ' →', item.start, 'resolution-primary-action'));
+        else actions.appendChild(routeLink('How resolvers work →', 'resolver', 'resolution-primary-action'));
+        actions.appendChild(routeLink('Browse all', 'resolutions', 'resolution-secondary-action'));
+        intro.appendChild(actions);
+        hero.appendChild(intro);
+
+        var experience = el('section', 'resolution-experience');
+        experience.setAttribute('aria-label', 'Explore this resolution');
+        var levelTabs = el('div', 'resolution-level-tabs');
+        levelTabs.setAttribute('role', 'tablist');
+        levelTabs.setAttribute('aria-label', 'Resolution information levels');
+        var level = el('div', 'resolution-level');
+        level.id = 'resolution-level-' + item.slug;
+        level.setAttribute('role', 'tabpanel');
+        level.tabIndex = 0;
+        var levelButtons = [];
+
+        function showLevel(selected) {
+          levelButtons.forEach(function (button, index) {
+            var active = index === selected;
+            button.setAttribute('aria-selected', String(active));
+            button.tabIndex = active ? 0 : -1;
+          });
+          level.setAttribute('aria-labelledby', 'resolution-level-tab-' + item.slug + '-' + selected);
+          level.replaceChildren();
+          if (selected === 0) {
+            var overview = el('div', 'resolution-level-overview');
+            var overviewCopy = el('div');
+            overviewCopy.appendChild(el('p', 'resolution-section-label', 'THE OUTCOME'));
+            overviewCopy.appendChild(el('h2', '', item.shift));
+            overview.appendChild(overviewCopy);
+            var signal = el('div', 'resolution-signal');
+            signal.setAttribute('aria-label', 'The resolution path: define, publish, resolve');
+            signal.appendChild(el('span', 'resolution-signal-core', short(item)));
+            ['Define', 'Publish', 'Resolve'].forEach(function (label, index) {
+              signal.appendChild(el('span', 'resolution-signal-node resolution-signal-node-' + (index + 1), label));
+            });
+            overview.appendChild(signal);
+            level.appendChild(overview);
+          } else if (selected === 1) {
+            var comparison = el('div', 'resolution-comparison');
+            var oldStack = el('div', 'resolution-comparison-old');
+            oldStack.appendChild(el('span', '', 'WITHOUT DEFXN'));
+            oldStack.appendChild(el('p', '', item.old));
+            var direction = el('span', 'resolution-comparison-arrow', '→');
+            direction.setAttribute('aria-hidden', 'true');
+            var mesh = el('div', 'resolution-comparison-new');
+            mesh.appendChild(el('span', '', 'ON THE MESH'));
+            mesh.appendChild(el('p', '', item.text));
+            comparison.appendChild(oldStack);
+            comparison.appendChild(direction);
+            comparison.appendChild(mesh);
+            level.appendChild(comparison);
+          } else {
+            var steps = el('ol', 'resolution-steps');
+            item.steps.forEach(function (step, index) {
+              var row = el('li', 'resolution-step');
+              row.appendChild(el('span', 'resolution-step-number', String(index + 1).padStart(2, '0')));
+              row.appendChild(el('strong', '', ['Define', 'Publish', 'Resolve'][index]));
+              row.appendChild(el('p', '', step));
+              steps.appendChild(row);
+            });
+            level.appendChild(steps);
+          }
+        }
+
+        ['Outcome', 'Shift', 'Path'].forEach(function (label, index) {
+          var button = el('button', 'resolution-level-tab');
+          button.type = 'button';
+          button.id = 'resolution-level-tab-' + item.slug + '-' + index;
+          button.setAttribute('role', 'tab');
+          button.setAttribute('aria-controls', level.id);
+          button.appendChild(el('span', '', String(index + 1).padStart(2, '0')));
+          button.appendChild(document.createTextNode(label));
+          button.addEventListener('click', function () { showLevel(index); });
+          button.addEventListener('keydown', function (event) {
+            if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+            event.preventDefault();
+            var nextLevel = (index + (event.key === 'ArrowRight' ? 1 : -1) + levelButtons.length) % levelButtons.length;
+            showLevel(nextLevel);
+            levelButtons[nextLevel].focus();
+          });
+          levelButtons.push(button);
+          levelTabs.appendChild(button);
+        });
+        experience.appendChild(levelTabs);
+        experience.appendChild(level);
+        hero.appendChild(experience);
+        workspace.appendChild(hero);
+
+        var boundary = el('aside', 'resolution-boundary');
+        boundary.appendChild(el('span', 'resolution-section-label', 'DIRECTION, NOT A READINESS CLAIM'));
+        var boundaryLink = el('a', 'resolution-boundary-link', words('NOTE.LINK') + ' ↗');
+        boundaryLink.href = 'docs/status.md';
+        boundary.appendChild(boundaryLink);
+        workspace.appendChild(boundary);
+        page.appendChild(workspace);
+        showLevel(0);
+
+        var footer = el('nav', 'resolution-next');
+        footer.setAttribute('aria-label', 'More resolutions');
+        var previousLink = routeLink('← ' + short(previous), 'resolutions/' + previous.slug, 'resolution-next-link resolution-next-previous');
+        previousLink.appendChild(el('span', '', 'Previous'));
+        var nextLink = routeLink(short(next) + ' →', 'resolutions/' + next.slug, 'resolution-next-link resolution-next-forward');
+        nextLink.appendChild(el('span', '', 'Next'));
+        footer.appendChild(previousLink);
+        footer.appendChild(routeLink('All 20', 'resolutions', 'resolution-next-all'));
+        footer.appendChild(nextLink);
+        page.appendChild(footer);
+        return page;
+      }
+
+      var slug = String(pageKey || '').indexOf('resolutions/') === 0 ? String(pageKey).slice('resolutions/'.length) : '';
+      var item = slug ? ArkResolutions.find(slug) : null;
+      var page = item ? mountDetail(item) : mountIndex();
       host.appendChild(page);
       return page;
     }

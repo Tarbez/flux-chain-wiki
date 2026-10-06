@@ -54,7 +54,8 @@ For each record below, `pending` means no verification artifact was established,
 
 | ID | Claim | Status | Evidence |
 | --- | --- | --- | --- |
-| BENCH-001 | Public performance or scale measurements | Unverified | No complete, reproducible benchmark artifact registered. |
+| BENCH-001 | Mesh value-object registry and agreement-fabric throughput | Partial | [Verification record](bench-001-verification.md) — real numbers for both systems, local and real-fleet; a 10,000-transfer real-fleet run of the directory registry did not complete (stalled, killed) and a fix was implemented and verified for the bulk-write path only, not the transfer-cycle path. |
+| BENCH-002 | FXN registry speed audit: ranked, measured levers toward a 20-100x throughput target | Partial | [Speed audit](fxn-speed-audit-v0.md) — real 7,000-transfer fleet numbers (fleet-only and fleet+local-machine), isolated writer-count contention measurement (8.3x cost going from 2 to 6 concurrent writers), log-size scaling ruled out, crypto/JSON cost ruled out, real inter-node WireGuard RTT measured (2-84ms). The gap between the isolated writer-contention model and the real fleet's multi-second p50 is not yet fully explained; re-measurement against the shipped batching fix has not yet run. |
 
 ## Promotion rule
 
