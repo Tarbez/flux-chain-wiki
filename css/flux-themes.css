@@ -1,9 +1,63 @@
-/* DEFXN: four core hues, each with a dark and light palette. SDK semantic token contract. */
-:root[data-theme="clay"] { --canvas:20 5% 8%; --depth:20 5% 16%; --surface:20 5% 11%; --raised:20 5% 14%; --nested:20 5% 16%; --overlay:20 5% 11%; --text-strong:20 4% 90%; --text:20 3% 76%; --text-muted:20 2% 63%; --text-faint:20 2% 63%; --text-inverse:220 4% 8%; --primary:2 60% 72%; --complement:214 60% 73%; --reference:145 44% 67%; --accent:2 60% 72%; --accent-strong:2 60% 72%; --accent-subtle:20 5% 16%; --trust:2 60% 72%; --live:2 60% 72%; --role:145 44% 67%; --badge:2 60% 72%; --drift:145 44% 67%; --warning:2 60% 72%; --danger:2 60% 72%; --hidden:20 2% 63%; --border-default:20 4% 90% / .14; --border-strong:20 4% 90% / .25; --border-subtle:20 4% 90% / .07; --canvas-glow-primary:2 60% 72% / .025; --canvas-glow-secondary:214 60% 73% / .02; --canvas-glow-edge:145 44% 67% / .015; color-scheme:dark; }
-:root[data-theme="ochre"] { --canvas:145 5% 8%; --depth:145 5% 16%; --surface:145 5% 11%; --raised:145 5% 14%; --nested:145 5% 16%; --overlay:145 5% 11%; --text-strong:145 4% 90%; --text:145 3% 76%; --text-muted:145 2% 63%; --text-faint:145 2% 63%; --text-inverse:220 4% 8%; --primary:145 44% 67%; --complement:214 60% 73%; --reference:48 60% 70%; --accent:145 44% 67%; --accent-strong:145 44% 67%; --accent-subtle:145 5% 16%; --trust:145 44% 67%; --live:145 44% 67%; --role:48 60% 70%; --badge:145 44% 67%; --drift:48 60% 70%; --warning:145 44% 67%; --danger:2 60% 72%; --hidden:145 2% 63%; --border-default:145 4% 90% / .14; --border-strong:145 4% 90% / .25; --border-subtle:145 4% 90% / .07; --canvas-glow-primary:145 44% 67% / .025; --canvas-glow-secondary:214 60% 73% / .02; --canvas-glow-edge:48 60% 70% / .015; color-scheme:dark; }
-:root[data-theme="ghost"] { --canvas:214 5% 8%; --depth:214 5% 16%; --surface:214 5% 11%; --raised:214 5% 14%; --nested:214 5% 16%; --overlay:214 5% 11%; --text-strong:214 4% 90%; --text:214 3% 76%; --text-muted:214 2% 63%; --text-faint:214 2% 63%; --text-inverse:220 4% 8%; --primary:214 60% 73%; --complement:145 44% 67%; --reference:48 60% 70%; --accent:214 60% 73%; --accent-strong:214 60% 73%; --accent-subtle:214 5% 16%; --trust:214 60% 73%; --live:214 60% 73%; --role:48 60% 70%; --badge:214 60% 73%; --drift:48 60% 70%; --warning:214 60% 73%; --danger:2 60% 72%; --hidden:214 2% 63%; --border-default:214 4% 90% / .14; --border-strong:214 4% 90% / .25; --border-subtle:214 4% 90% / .07; --canvas-glow-primary:214 60% 73% / .025; --canvas-glow-secondary:145 44% 67% / .02; --canvas-glow-edge:48 60% 70% / .015; color-scheme:dark; }
-:root[data-theme="marine"] { --canvas:48 5% 8%; --depth:48 5% 16%; --surface:48 5% 11%; --raised:48 5% 14%; --nested:48 5% 16%; --overlay:48 5% 11%; --text-strong:48 4% 90%; --text:48 3% 76%; --text-muted:48 2% 63%; --text-faint:48 2% 63%; --text-inverse:220 4% 8%; --primary:48 60% 70%; --complement:214 60% 73%; --reference:145 44% 67%; --accent:48 60% 70%; --accent-strong:48 60% 70%; --accent-subtle:48 5% 16%; --trust:48 60% 70%; --live:48 60% 70%; --role:145 44% 67%; --badge:48 60% 70%; --drift:145 44% 67%; --warning:48 60% 70%; --danger:2 60% 72%; --hidden:48 2% 63%; --border-default:48 4% 90% / .14; --border-strong:48 4% 90% / .25; --border-subtle:48 4% 90% / .07; --canvas-glow-primary:48 60% 70% / .025; --canvas-glow-secondary:214 60% 73% / .02; --canvas-glow-edge:145 44% 67% / .015; color-scheme:dark; }
-:root[data-theme="grove"] { --canvas:20 3% 93%; --depth:20 3% 88%; --surface:20 3% 97%; --raised:20 3% 99%; --nested:20 3% 88%; --overlay:20 3% 97%; --text-strong:20 4% 14%; --text:20 3% 27%; --text-muted:20 2% 42%; --text-faint:20 2% 42%; --text-inverse:220 4% 97%; --primary:2 60% 37%; --complement:214 60% 35%; --reference:145 44% 27%; --accent:2 60% 37%; --accent-strong:2 60% 37%; --accent-subtle:20 3% 88%; --trust:2 60% 37%; --live:2 60% 37%; --role:145 44% 27%; --badge:2 60% 37%; --drift:145 44% 27%; --warning:2 60% 37%; --danger:2 60% 37%; --hidden:20 2% 42%; --border-default:20 4% 14% / .14; --border-strong:20 4% 14% / .25; --border-subtle:20 4% 14% / .07; --canvas-glow-primary:2 60% 37% / .025; --canvas-glow-secondary:214 60% 35% / .02; --canvas-glow-edge:145 44% 27% / .015; color-scheme:light; }
-:root[data-theme="moss"] { --canvas:145 3% 93%; --depth:145 3% 88%; --surface:145 3% 97%; --raised:145 3% 99%; --nested:145 3% 88%; --overlay:145 3% 97%; --text-strong:145 4% 14%; --text:145 3% 27%; --text-muted:145 2% 42%; --text-faint:145 2% 42%; --text-inverse:220 4% 97%; --primary:145 44% 27%; --complement:214 60% 35%; --reference:48 60% 27%; --accent:145 44% 27%; --accent-strong:145 44% 27%; --accent-subtle:145 3% 88%; --trust:145 44% 27%; --live:145 44% 27%; --role:48 60% 27%; --badge:145 44% 27%; --drift:48 60% 27%; --warning:145 44% 27%; --danger:2 60% 37%; --hidden:145 2% 42%; --border-default:145 4% 14% / .14; --border-strong:145 4% 14% / .25; --border-subtle:145 4% 14% / .07; --canvas-glow-primary:145 44% 27% / .025; --canvas-glow-secondary:214 60% 35% / .02; --canvas-glow-edge:48 60% 27% / .015; color-scheme:light; }
-:root[data-theme="glacier"] { --canvas:214 3% 93%; --depth:214 3% 88%; --surface:214 3% 97%; --raised:214 3% 99%; --nested:214 3% 88%; --overlay:214 3% 97%; --text-strong:214 4% 14%; --text:214 3% 27%; --text-muted:214 2% 42%; --text-faint:214 2% 42%; --text-inverse:220 4% 97%; --primary:214 60% 35%; --complement:145 44% 27%; --reference:48 60% 27%; --accent:214 60% 35%; --accent-strong:214 60% 35%; --accent-subtle:214 3% 88%; --trust:214 60% 35%; --live:214 60% 35%; --role:48 60% 27%; --badge:214 60% 35%; --drift:48 60% 27%; --warning:214 60% 35%; --danger:2 60% 37%; --hidden:214 2% 42%; --border-default:214 4% 14% / .14; --border-strong:214 4% 14% / .25; --border-subtle:214 4% 14% / .07; --canvas-glow-primary:214 60% 35% / .025; --canvas-glow-secondary:145 44% 27% / .02; --canvas-glow-edge:48 60% 27% / .015; color-scheme:light; }
-:root[data-theme="bone"] { --canvas:48 3% 93%; --depth:48 3% 88%; --surface:48 3% 97%; --raised:48 3% 99%; --nested:48 3% 88%; --overlay:48 3% 97%; --text-strong:48 4% 14%; --text:48 3% 27%; --text-muted:48 2% 42%; --text-faint:48 2% 42%; --text-inverse:220 4% 97%; --primary:48 60% 27%; --complement:214 60% 35%; --reference:145 44% 27%; --accent:48 60% 27%; --accent-strong:48 60% 27%; --accent-subtle:48 3% 88%; --trust:48 60% 27%; --live:48 60% 27%; --role:145 44% 27%; --badge:48 60% 27%; --drift:145 44% 27%; --warning:48 60% 27%; --danger:2 60% 37%; --hidden:48 2% 42%; --border-default:48 4% 14% / .14; --border-strong:48 4% 14% / .25; --border-subtle:48 4% 14% / .07; --canvas-glow-primary:48 60% 27% / .025; --canvas-glow-secondary:214 60% 35% / .02; --canvas-glow-edge:145 44% 27% / .015; color-scheme:light; }
+/* DEFXN palette — the single authority for color.
+   css/themes.css is generated by the SDK and still loads first for fonts and
+   sizes, but every color token it declares is redeclared here (enforced by
+   tests/theme-color-contrast.cjs), so the cascade can never pick the palette.
+
+   Roles:
+   --signal     the one DEFXN color. Invariant in hue across themes. Brand marks,
+                critical information and every primary action.
+   --action     what a primary CTA is filled or outlined with. Always the signal.
+   --reference  navigation, evidence links, pickers, disclosure. Quieter than action.
+   --success / --warning / --danger
+                state only; never decoration, never the brand.
+   Surfaces climb canvas -> surface -> raised -> nested; text descends
+   strong -> text -> muted -> faint, each step a distinct level.
+
+   One dark and one light palette. The older theme keys stay valid aliases so
+   saved preferences keep working: clay/ochre/ghost/marine are dark,
+   grove/moss/glacier/bone are light. Legacy SDK names at the bottom of each
+   block derive from the core tokens instead of carrying their own values. */
+
+:root,
+:root[data-theme="ghost"],:root[data-theme="clay"],:root[data-theme="ochre"],:root[data-theme="marine"] {
+ --canvas:222 11% 4.5%; --depth:222 11% 7.5%; --surface:222 10% 10.5%; --raised:222 9% 16.5%; --nested:222 8% 23%; --overlay:222 10% 9%;
+ --text-strong:220 12% 93%; --text:220 8% 80%; --text-muted:220 6% 66%; --text-faint:220 5% 55%; --text-inverse:222 14% 7%;
+ --border-subtle:220 15% 85% / .1; --border-default:220 15% 85% / .22; --border-strong:220 15% 85% / .36;
+ --signal:20 85% 63%; --reference:208 62% 74%; --success:150 46% 60%; --warning:46 86% 62%; --danger:348 78% 72%;
+ --theme-shadow:222 40% 2% / .6; --theme-shadow-color:222 40% 2%; --theme-shadow-alpha:.6;
+ color-scheme:dark;
+}
+:root[data-theme="glacier"],:root[data-theme="grove"],:root[data-theme="moss"],:root[data-theme="bone"] {
+ --canvas:220 14% 93%; --depth:220 12% 87%; --surface:220 18% 98%; --raised:0 0% 100%; --nested:220 12% 87%; --overlay:220 18% 97%;
+ --text-strong:222 22% 11%; --text:222 12% 26%; --text-muted:222 8% 36%; --text-faint:222 6% 42%; --text-inverse:0 0% 100%;
+ --border-subtle:222 22% 11% / .1; --border-default:222 22% 11% / .24; --border-strong:222 22% 11% / .38;
+ --signal:20 84% 38%; --reference:212 64% 36%; --success:152 56% 26%; --warning:42 94% 26%; --danger:346 66% 42%;
+ --theme-shadow:222 30% 20% / .14; --theme-shadow-color:222 30% 20%; --theme-shadow-alpha:.14;
+ color-scheme:light;
+}
+
+/* Role mapping and legacy names, shared by both palettes. */
+:root,
+:root[data-theme="ghost"],:root[data-theme="clay"],:root[data-theme="ochre"],:root[data-theme="marine"],
+:root[data-theme="glacier"],:root[data-theme="grove"],:root[data-theme="moss"],:root[data-theme="bone"] {
+ --action:var(--signal); --action-ink:var(--text-inverse);
+ --primary:var(--signal); --complement:var(--action);
+ --accent:var(--signal); --accent-strong:var(--signal); --accent-subtle:var(--raised);
+ --trust:var(--success); --live:var(--success); --role:var(--reference); --badge:var(--signal);
+ --drift:var(--warning); --hidden:var(--text-faint); --info:var(--reference);
+ --border:var(--border-default); --border-soft:var(--border-subtle);
+ --canvas-glow-primary:var(--signal) / .035; --canvas-glow-secondary:var(--reference) / .025; --canvas-glow-edge:var(--signal) / .02;
+ --dak-canvas:var(--canvas); --dak-surface-1:var(--surface); --dak-surface-2:var(--raised); --dak-surface-3:var(--nested);
+ --dak-text-strong:var(--text-strong); --dak-text:var(--text); --dak-text-muted:var(--text-muted); --dak-text-faint:var(--text-faint); --dak-text-inverse:var(--text-inverse);
+ --dak-accent:var(--signal); --dak-accent-subtle:var(--raised); --dak-accent-strong:var(--signal);
+ --dak-border-subtle:var(--border-subtle); --dak-border-default:var(--border-default); --dak-border-strong:var(--border-strong);
+ --surface-canvas:var(--canvas); --surface-1:var(--surface); --surface-2:var(--raised); --surface-3:var(--nested); --surface-overlay:var(--overlay);
+ --surface-01:var(--surface); --surface-02:var(--raised); --surface-03:var(--nested);
+ --foreground-strong:var(--text-strong); --foreground-default:var(--text); --foreground-muted:var(--text-muted); --foreground-faint:var(--text-faint); --foreground-inverse:var(--text-inverse);
+ --action-bg:var(--action); --action-fg:var(--action-ink); --action-border:var(--action); --action-hover-bg:var(--action);
+ --action-muted-bg:var(--raised); --action-muted-fg:var(--text);
+ --page-background:var(--canvas); --background-depth:var(--depth); --surface-base:var(--surface); --surface-raised:var(--raised);
+ --overlay-soft:var(--nested); --overlay-strong:var(--overlay); --divider-soft:var(--border-subtle); --divider-strong:var(--border-strong);
+ --theme-glow:var(--signal); --primary-light:var(--text-strong); --primary-standard:var(--signal); --primary-bold:var(--signal); --accent-medium:var(--signal);
+ --success-standard:var(--success); --warning-standard:var(--warning); --error-standard:var(--danger); --danger-bold:var(--danger); --info-standard:var(--reference);
+}

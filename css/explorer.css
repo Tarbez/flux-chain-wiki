@@ -7,8 +7,8 @@
 #scene .mesh-explorer-status { display:flex; align-items:center; flex-wrap:wrap; gap:8px 13px; color:hsl(var(--text)); font:400 14px/1.4 "Albert Sans",sans-serif; }
 #scene .mesh-explorer-status strong { color:hsl(var(--text-strong)); font-weight:600; }
 #scene .mesh-explorer-status-dot { width:7px; height:7px; border-radius:50%; background:hsl(var(--text-muted)); box-shadow:0 0 0 4px hsl(var(--text-muted) / .14); }
-#scene .mesh-explorer-page[data-connection="live"] .mesh-explorer-status-dot { background:hsl(var(--accent)); box-shadow:0 0 0 4px hsl(var(--accent) / .14); }
-#scene .mesh-explorer-page[data-connection="error"] .mesh-explorer-status-dot { background:#d97866; box-shadow:0 0 0 4px #d9786622; }
+#scene .mesh-explorer-page[data-connection="live"] .mesh-explorer-status-dot { background:hsl(var(--success)); box-shadow:0 0 0 4px hsl(var(--success) / .14); }
+#scene .mesh-explorer-page[data-connection="error"] .mesh-explorer-status-dot { background:hsl(var(--danger)); box-shadow:0 0 0 4px hsl(var(--danger) / .14); }
 #scene .mesh-explorer-connect { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,440px); gap:30px; align-items:end; padding:24px 0; border-top:1px solid hsl(var(--border-default)); }
 #scene .mesh-explorer-kicker { margin:0 0 8px; color:hsl(var(--accent)); font:600 10px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.09em; }
 #scene .mesh-explorer-connect h2,#scene .mesh-explorer-section-head h2 { margin:0 0 8px; color:hsl(var(--text-strong)); font:500 clamp(25px,3vw,38px)/1.1 "Albert Sans",sans-serif; letter-spacing:-.04em; }

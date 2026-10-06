@@ -1,6 +1,6 @@
 .hero-alive {
-  --field-accent: #7fb5bd;
-  --field-muted: rgba(154,154,166,.5);
+  --field-accent: hsl(var(--signal));
+  --field-muted: hsl(var(--text-faint));
 }
 
 /* Removed: the grid (css/lattice.css) is the site's one background layer.
@@ -50,7 +50,7 @@
 .ark-hero-title {
   max-width: 8em;
   margin: 0 0 12px;
-  color: #fff;
+  color: hsl(var(--text-strong));
   font: 300 clamp(36px,4.2cqw,76px)/.91 var(--ark-font);
   letter-spacing: -.055em;
   text-wrap: balance;
@@ -58,7 +58,7 @@
 .ark-hero-copy {
   max-width: 41em;
   margin: 0;
-  color: rgba(235,239,238,.64);
+  color: hsl(var(--text-muted));
   font: 300 clamp(12px,1.02cqw,16px)/1.62 var(--ark-font);
   text-wrap: balance;
 }
@@ -73,14 +73,14 @@
   padding: 10px 4px;
   border: 0;
   background: transparent;
-  color: rgba(226,239,235,.68);
+  color: hsl(var(--text-muted));
   font: 500 9px var(--ark-font);
   letter-spacing: .12em;
   text-transform: uppercase;
   cursor: pointer;
   transition: color 220ms ease, letter-spacing 420ms cubic-bezier(.2,.7,.2,1);
 }
-.hero-motion-toggle span { margin-right: 8px; color: rgba(255,255,255,.3); font-size: .78em; }
+.hero-motion-toggle span { margin-right: 8px; color: hsl(var(--text-faint)); font-size: .78em; }
 .hero-motion-toggle:hover { color: var(--field-accent); letter-spacing: .16em; }
 .hero-motion-toggle[hidden] { display: none; }
 
@@ -91,7 +91,7 @@
   top: 25%;
   z-index: 4;
   width: min(520px, 41cqw);
-  color: #eef7f4;
+  color: hsl(var(--text-strong));
   opacity: 1;
 }
 
@@ -100,11 +100,11 @@
   align-items: center;
   gap: 14px;
   margin: 0 0 clamp(28px,4cqh,52px);
-  color: rgba(228,241,237,.5);
+  color: hsl(var(--text-faint));
   font: 500 9px/1 var(--ark-font);
   letter-spacing: .18em;
 }
-.hero-experiment-kicker::after { content: ""; width: 64px; height: 1px; background: rgba(215,237,231,.24); }
+.hero-experiment-kicker::after { content: ""; width: 64px; height: 1px; background: hsl(var(--border-default)); }
 .hero-experiment-kicker b { order: 3; color: var(--field-accent); font: inherit; }
 .hero-experiment-index { margin: 0 0 12px; color: var(--field-accent); font: 500 9px/1 var(--ark-font); letter-spacing: .18em; }
 .hero-experiment-copy h1 {
@@ -115,17 +115,17 @@
 .hero-experiment-question {
   max-width: 18em;
   margin: 0 0 12px;
-  color: rgba(242,248,246,.9);
+  color: hsl(var(--text-strong));
   font: 300 clamp(18px,1.65cqw,27px)/1.16 var(--ark-font);
   letter-spacing: -.025em;
 }
-.hero-experiment-note { max-width: 39em; margin: 0 0 28px; color: rgba(226,236,233,.54); font: 300 12px/1.6 var(--ark-font); }
+.hero-experiment-note { max-width: 39em; margin: 0 0 28px; color: hsl(var(--text-muted)); font: 300 12px/1.6 var(--ark-font); }
 .hero-experiment-copy a {
   display: inline-flex;
   gap: 11px;
   padding: 11px 0;
-  border-bottom: 1px solid rgba(214,236,230,.42);
-  color: #eaf4f1;
+  border-bottom: 1px solid hsl(var(--border-strong));
+  color: hsl(var(--text-strong));
   font: 500 9px/1 var(--ark-font);
   letter-spacing: .16em;
   text-decoration: none;
@@ -141,7 +141,7 @@
   align-items: center;
   gap: 12px;
   width: 12cqw;
-  color: rgba(225,237,233,.35);
+  color: hsl(var(--text-faint));
   font: 500 8px/1 var(--ark-font);
   letter-spacing: .14em;
   white-space: nowrap;

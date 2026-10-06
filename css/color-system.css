@@ -1,12 +1,13 @@
-/* Three brand roles, with neutral reading surfaces. Semantic error states
-   remain explicit; no additional decorative rainbow palette. */
+/* One signal (brand + action), one reference ink, and distinct state colors.
+   Values live in css/flux-themes.css; these are shorthand paint values. */
 :root {
- --signal-primary:hsl(var(--primary));
- --signal-complement:hsl(var(--complement));
+ --signal-primary:hsl(var(--signal));
+ --signal-complement:hsl(var(--action));
  --signal-reference:hsl(var(--reference));
  --signal-accent:var(--signal-primary);
- --signal-trust:var(--signal-primary);
- --signal-warning:var(--signal-primary);
+ --signal-trust:hsl(var(--success));
+ --signal-warning:hsl(var(--warning));
+ --signal-danger:hsl(var(--danger));
 }
 /* Records are information. Navigation between records is a reference action. */
 :is([data-stage],[data-record]) {--record-color:var(--signal-primary);}
@@ -16,17 +17,19 @@
 #scene :is(.story-heading,.account-hero h1,.mesh-explorer-header h1,.reference-hero h1,.article-header h1) {color:var(--signal-primary);}
 #scene :is(.story-result,.reference-provenance,.article-evidence) {border-left-color:var(--signal-primary);}
 #scene .story-result {color:var(--signal-primary);}
-#scene .home-window-label,#scene .home-status-item strong {color:var(--signal-primary);}
+#scene .home-window-label {color:var(--signal-primary);}
+/* Status values are states, not brand: neutral text, warning-colored marker. */
+#scene .home-status-item strong {color:hsl(var(--text-strong));}
+#scene .home-status-item strong::before {background:var(--signal-warning);}
 #scene .home-record .home-record-node {stroke:hsl(var(--border-strong));fill:hsl(var(--surface));stroke-width:1;}
 #scene .home-record .home-record-number {fill:var(--signal-primary);}
 #scene .home-record-incoming {stroke:hsl(var(--border-strong));}
 #scene :is(.story-kicker,.learning-eyebrow,.account-kicker,.reference-kicker,.article-eyebrow,.hero-experiment-kicker,.home-lifecycle-caption) {color:hsl(var(--text-muted));}
 
-/* Calls to action use complementary ink. The home hero's principal CTA is the
-   exception: it is filled with the primary ink its headline already carries,
-   so the hero holds two accents (primary + reference) instead of three. */
-#scene .home-primary-cta {background:linear-gradient(110deg,var(--signal-primary),color-mix(in srgb,var(--signal-primary) 82%,white));border-color:transparent;color:hsl(var(--text-inverse)) !important;}
-#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-primary) 90%,white),var(--signal-primary));border-color:transparent;}
+/* Every primary action uses the one action token (the DEFXN signal); the
+   principal CTA is filled, the rest are outlined. */
+#scene .home-primary-cta {background:linear-gradient(110deg,var(--signal-complement),color-mix(in srgb,var(--signal-complement) 82%,white));border-color:transparent;color:hsl(var(--action-ink)) !important;}
+#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-complement) 90%,white),var(--signal-complement));border-color:transparent;}
 #scene .home-primary-cta .native-icon {color:hsl(var(--text-inverse));}
 #scene :is(.story-primary,.resolver-primary-cta,.economy-primary,.mechanism-next,.account-page button[data-kind="primary"],.account-page [data-account-mesh-check],.mesh-explorer-page [data-explorer-connect]) {
  border-color:var(--signal-complement);background:hsl(var(--complement) / .08);color:var(--signal-complement) !important;
@@ -52,7 +55,7 @@
 #scene .account-state dt {color:hsl(var(--text-muted));}
 #scene [data-session="verified-local"] .account-status,#scene .header-account-link[data-signed-in="true"] .header-account-status {color:var(--signal-primary);}
 #scene .account-state>p:last-child {color:var(--signal-primary);}
-#scene .mesh-explorer-page[data-connection="live"] .mesh-explorer-status-dot {background:var(--signal-primary);}
+#scene .mesh-explorer-page[data-connection="live"] .mesh-explorer-status-dot {background:var(--signal-trust);}
 #scene .mesh-explorer-page[data-connection="error"] .mesh-explorer-status {color:hsl(var(--danger));}
 #scene .account-storage-notice {color:hsl(var(--danger));}
 #scene .lifecycle-page .lifecycle-boundary {border-left-color:var(--signal-primary);background:hsl(var(--surface));}

@@ -109,12 +109,12 @@
 .resolver-story-actions a { display:inline-flex; align-items:center; justify-content:center; min-height:46px; text-decoration:none; }
 .resolver-story-primary {
   padding:0 18px;
-  border:1px solid hsl(var(--primary));
+  border:1px solid hsl(var(--action));
   border-radius:5px;
-  background:hsl(var(--primary));
-  color:hsl(var(--canvas));
+  background:hsl(var(--action));
+  color:hsl(var(--action-ink));
   font:600 13px/1 var(--font-sans,"Albert Sans",sans-serif);
-  box-shadow:0 10px 34px hsl(var(--primary) / .13);
+  box-shadow:0 10px 34px hsl(var(--action) / .13);
 }
 .resolver-story-primary:hover { filter:brightness(1.08); transform:translateY(-1px); }
 .resolver-story-source { color:hsl(var(--text-muted)); font:500 12px/1 var(--mono-font,monospace); }
