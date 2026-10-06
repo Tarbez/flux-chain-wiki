@@ -24,7 +24,7 @@
 
 /* solid --------------------------------------------------------------------- */
 #scene :is(
-  .palette-solid,.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,
+  .palette-solid,.resolver-lab-next,.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,
   .story-primary,.lifecycle-next a.story-primary,.mechanism-next,.how-simple-next,.how-chapter-footer .how-chapter-next,
   .economy-primary,.mesh-explorer-page [data-explorer-connect],.account-page button[data-kind="primary"],
   .account-page [data-account-mesh-check],.ark-auth-actions button[data-kind="primary"]
@@ -34,7 +34,7 @@
   box-shadow:0 6px 18px hsl(var(--secondary-300)) !important;text-decoration:none !important;
 }
 #scene :is(
-  .palette-solid,.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,
+  .palette-solid,.resolver-lab-next,.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,
   .story-primary,.lifecycle-next a.story-primary,.mechanism-next,.how-simple-next,.how-chapter-footer .how-chapter-next,
   .economy-primary,.mesh-explorer-page [data-explorer-connect],.account-page button[data-kind="primary"],
   .account-page [data-account-mesh-check],.ark-auth-actions button[data-kind="primary"]
@@ -54,7 +54,7 @@
 
 /* quiet --------------------------------------------------------------------- */
 #scene :is(
-  .palette-quiet,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
+  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
   .source-step-controls button:not(.mechanism-next),.deploy-workflow-all,.deploy-copy,
   .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
 ) {
@@ -62,7 +62,7 @@
   border:1px solid hsl(var(--reference-300)) !important;color:hsl(var(--reference-700)) !important;box-shadow:none !important;text-decoration:none !important;
 }
 #scene :is(
-  .palette-quiet,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
+  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
   .source-step-controls button:not(.mechanism-next),.deploy-workflow-all,.deploy-copy,
   .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
 ):is(:hover,:focus-visible) {background:hsl(var(--reference-200)) !important;border-color:hsl(var(--reference-400)) !important;}
@@ -71,17 +71,17 @@
 
 /* choice -------------------------------------------------------------------- */
 #scene :is(
-  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .resolver-lab-step,.resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ) {
   background:transparent !important;background-image:none !important;border-color:hsl(var(--border-default)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
 }
 #scene :is(
-  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .resolver-lab-step,.resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--reference-300)) !important;}
 #scene :is(
-  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .resolver-lab-step,.resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
   background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-400)) !important;color:hsl(var(--reference-700)) !important;
@@ -96,9 +96,9 @@
 
 /* link ---------------------------------------------------------------------- */
 /* Actions that sit in a row of text links read as links, not boxes. */
-#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link) {background:transparent !important;background-image:none !important;border-color:transparent !important;box-shadow:none !important;
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link,.resolver-lab-prev,.resolver-lab-spec) {background:transparent !important;background-image:none !important;border-color:transparent !important;box-shadow:none !important;
   color:hsl(var(--reference)) !important;text-decoration:underline !important;text-decoration-color:hsl(var(--reference-300)) !important;text-underline-offset:4px;}
-#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link):is(:hover,:focus-visible) {color:hsl(var(--reference-700)) !important;text-decoration-color:hsl(var(--reference-400)) !important;}
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link,.resolver-lab-prev,.resolver-lab-spec):is(:hover,:focus-visible) {color:hsl(var(--reference-700)) !important;text-decoration-color:hsl(var(--reference-400)) !important;}
 #scene :is(.about-secondary-action,.theory-cta,.resolver-back-link) .native-icon {color:inherit !important;}
 #scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.article-evidence-link,.reference-orientation a,.resolver-guide-links a,.account-next a,.account-cms a,.story-reference) {
   color:hsl(var(--reference)) !important;text-decoration-color:hsl(var(--reference-300)) !important;border-color:hsl(var(--reference-300)) !important;

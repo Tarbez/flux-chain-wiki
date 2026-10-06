@@ -31,7 +31,7 @@ ArkManifest.define({
       "label": "Display introduction",
       "kind": "text",
       "section": "Page",
-      "value": "A resolver is named logic with nowhere to hide: give it a defined input and anyone can inspect how it reached the result."
+      "value": "A resolver is named, deterministic logic: give it a defined input and anyone can run the same logic and get the same claim."
     },
     "BODY1": {
       "label": "First paragraph",
@@ -91,7 +91,7 @@ ArkManifest.define({
       "label": "Claim description",
       "kind": "line",
       "section": "Flow",
-      "value": "Receive a claim with a trail."
+      "value": "Receive a signed claim."
     },
     "WHY.LABEL": {
       "label": "Why label",
@@ -134,6 +134,84 @@ ArkManifest.define({
       "kind": "line",
       "section": "Links",
       "value": "← Home"
+    },
+    "ASK.BODY": {
+      "label": "Ask step text",
+      "kind": "text",
+      "section": "Flow",
+      "value": "A resolver only accepts input in its defined shape. This one takes a document identifier and checks it against a named size policy."
+    },
+    "RESOLVE.BODY": {
+      "label": "Resolve step text",
+      "kind": "text",
+      "section": "Flow",
+      "value": "The address names one exact rule. Run it on the same input as often as you like: the claim does not change."
+    },
+    "CHECK.BODY": {
+      "label": "Check step text",
+      "kind": "text",
+      "section": "Flow",
+      "value": "The provider signs the claim. The signature shows who produced it and that it was not altered; a checker and the authority rules decide whether it is accepted."
+    },
+    "LAWS": {
+      "label": "Laws step title",
+      "kind": "line",
+      "section": "Laws",
+      "value": "Laws"
+    },
+    "LAWS.BODY": {
+      "label": "Laws step text",
+      "kind": "text",
+      "section": "Laws",
+      "value": "Four rules every resolver follows, as the specification states them."
+    },
+    "LAW1": {
+      "label": "Law 1",
+      "kind": "line",
+      "section": "Laws",
+      "value": "Same address, same input, same claim."
+    },
+    "LAW1.TEXT": {
+      "label": "Law 1 detail",
+      "kind": "text",
+      "section": "Laws",
+      "value": "A resolver is addressed, deterministic logic: it accepts defined input and produces a claim."
+    },
+    "LAW2": {
+      "label": "Law 2",
+      "kind": "line",
+      "section": "Laws",
+      "value": "The address names the exact logic."
+    },
+    "LAW2.TEXT": {
+      "label": "Law 2 detail",
+      "kind": "text",
+      "section": "Laws",
+      "value": "Its address lets participants refer to the exact logic under evaluation."
+    },
+    "LAW3": {
+      "label": "Law 3",
+      "kind": "line",
+      "section": "Laws",
+      "value": "Published is not deployed."
+    },
+    "LAW3.TEXT": {
+      "label": "Law 3 detail",
+      "kind": "text",
+      "section": "Laws",
+      "value": "Publishing makes a resolver addressable. It is deployed only when an admitted active provider reports fresh capacity for it."
+    },
+    "LAW4": {
+      "label": "Law 4",
+      "kind": "line",
+      "section": "Laws",
+      "value": "A signature is not a verdict."
+    },
+    "LAW4.TEXT": {
+      "label": "Law 4 detail",
+      "kind": "text",
+      "section": "Laws",
+      "value": "A signature identifies the signer and protects the output from unnoticed alteration. Acceptance comes from the checker, authority cell, agreement and governance rules."
     }
   }
 });

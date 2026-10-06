@@ -15,7 +15,7 @@ ArkUI.lifecycleStages = [
 ];
 ArkUI.pageCatalog = {
   zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home-flow.js', 'js/pages/home.js'] },
-  resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
+  resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-lab.js', 'js/pages/resolver-guide.js'] },
   references: { path: '/start-from-something-real', title: arkSeoTitle('references', 'Start from something real'), seoId: 'references', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
   deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How Flux works'), seoId: 'deployment', module: 'deployment', scripts: ['js/pages/deployment.js'] },
   explorer: { path: '/explore', title: arkSeoTitle('explorer', 'Mesh Explorer'), seoId: 'explorer', module: 'explorer', scripts: ['js/pages/explorer.js'] },
