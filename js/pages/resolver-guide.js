@@ -7,7 +7,7 @@ ArkUI.pageModules.resolverGuide = {
     function link(label,key,cls){var a=ArkUI.el('a',cls||'',label);a.href='#'+ArkUI.pageCatalog[key].path;a.dataset.sceneLink=key;return a;}
     if(page==='resolver'){
       var resolver=ArkUI.el('section','ark-page guided-page resolver-story');resolver.dataset.arkPage=page;resolver.setAttribute('aria-labelledby','resolver-story-title');
-      var resolverPath=ArkUI.el('nav','resolver-story-path');resolverPath.setAttribute('aria-label','Your place');resolverPath.appendChild(link(words('BACK'),'zero'));resolverPath.appendChild(ArkUI.el('span','','Protocol / Resolver'));resolver.appendChild(resolverPath);
+      var resolverPath=ArkUI.el('nav','content-layer-path resolver-story-path');resolverPath.setAttribute('aria-label','Your place');resolverPath.appendChild(link(words('BACK'),'zero'));var resolverCurrent=ArkUI.el('span','','Resolver');resolverCurrent.setAttribute('aria-current','page');resolverPath.appendChild(resolverCurrent);resolver.appendChild(resolverPath);
 
       var resolverCopy=ArkUI.el('div','resolver-story-copy');
       resolverCopy.appendChild(ArkUI.el('p','resolver-story-kicker',words('EYEBROW')));
@@ -30,7 +30,7 @@ ArkUI.pageModules.resolverGuide = {
       host.appendChild(resolver);return resolver;
     }
     var el=ArkUI.el('section','ark-page guided-page');el.dataset.arkPage=page;
-    var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Home','zero'));path.appendChild(ArkUI.el('span','','Explanation / '+manifest.title));el.appendChild(path);
+    var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Home','zero'));var currentPage=ArkUI.el('span','',manifest.title);currentPage.setAttribute('aria-current','page');path.appendChild(currentPage);el.appendChild(path);
     el.appendChild(ArkUI.el('p','story-kicker',words('EYEBROW')));
     var title=ArkUI.el('h1','',words('TITLE'));title.id=page+'-title';el.setAttribute('aria-labelledby',title.id);el.appendChild(title);
     var depths=ArkUI.el('nav','story-depth');depths.setAttribute('aria-label','Explanation depth');var buttons=[];

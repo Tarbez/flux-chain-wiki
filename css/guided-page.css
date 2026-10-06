@@ -81,17 +81,8 @@
 #scene [data-page="resolver"] .hero-motion-toggle { display:none; }
 .resolver-story-path {
   grid-column:1/-1;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  min-height:24px;
-  font:500 10px/1.2 var(--mono-font,monospace);
-  letter-spacing:.11em;
-  text-transform:uppercase;
-  color:hsl(var(--text-faint));
+  margin:0;
 }
-.resolver-story-path a { color:hsl(var(--primary)); text-decoration:none; }
-.resolver-story-path span::before { content:"/"; margin-right:12px; color:hsl(var(--border-strong)); }
 .resolver-story-copy { grid-column:1; align-self:center; max-width:670px; padding:28px 0 34px; }
 .resolver-story-kicker {
   margin:0 0 20px;
@@ -205,7 +196,7 @@
 }
 @media(max-width:470px){
   #scene .guided-page[data-ark-page="resolver"] { padding-inline:18px; }
-  .resolver-story-path span { display:none; }
+  .resolver-story-path span { max-width:120px; }
   .resolver-story-actions { align-items:stretch; flex-direction:column; }
   .resolver-story-actions a { width:100%; box-sizing:border-box; }
   .resolver-signal-track { height:92px; }
