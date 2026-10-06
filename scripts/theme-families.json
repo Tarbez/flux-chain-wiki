@@ -3,40 +3,135 @@
   "name": "Ember",
   "dark": "ghost",
   "light": "glacier",
-  "primary": 18,
-  "secondary": 168,
-  "reference": 214
+  "rule": "split-complementary",
+  "primary": 45,
+  "secondary": 192,
+  "reference": 250,
+  "states": {
+   "dark": {
+    "primary": 45,
+    "secondary": 192,
+    "reference": 250,
+    "danger": 10,
+    "warning": 100,
+    "success": 144
+   },
+   "light": {
+    "primary": 45,
+    "secondary": 192,
+    "reference": 250,
+    "danger": 10,
+    "warning": 100,
+    "success": 144
+   }
+  }
  },
  {
   "name": "Tide",
   "dark": "clay",
   "light": "grove",
-  "primary": 200,
-  "secondary": 28,
-  "reference": 236
+  "rule": "analogous",
+  "primary": 232,
+  "secondary": 282,
+  "reference": 190,
+  "states": {
+   "dark": {
+    "primary": 232,
+    "secondary": 282,
+    "reference": 190,
+    "danger": 30,
+    "warning": 100,
+    "success": 142
+   },
+   "light": {
+    "primary": 232,
+    "secondary": 282,
+    "reference": 190,
+    "danger": 30,
+    "warning": 100,
+    "success": 142
+   }
+  }
  },
  {
   "name": "Moss",
   "dark": "ochre",
   "light": "moss",
-  "primary": 95,
-  "secondary": 22,
-  "reference": 205
+  "rule": "earth analogous",
+  "primary": 132,
+  "secondary": 46,
+  "reference": 236,
+  "states": {
+   "dark": {
+    "primary": 132,
+    "secondary": 46,
+    "reference": 236,
+    "danger": 10,
+    "warning": 89,
+    "success": 168
+   },
+   "light": {
+    "primary": 132,
+    "secondary": 46,
+    "reference": 236,
+    "danger": 10,
+    "warning": 89,
+    "success": 168
+   }
+  }
  },
  {
   "name": "Dune",
   "dark": "marine",
   "light": "bone",
-  "primary": 38,
-  "secondary": 176,
-  "reference": 222
+  "rule": "complementary",
+  "primary": 66,
+  "secondary": 248,
+  "reference": 318,
+  "states": {
+   "dark": {
+    "primary": 66,
+    "secondary": 248,
+    "reference": 318,
+    "danger": 12,
+    "warning": 100,
+    "success": 168
+   },
+   "light": {
+    "primary": 66,
+    "secondary": 248,
+    "reference": 318,
+    "danger": 12,
+    "warning": 100,
+    "success": 168
+   }
+  }
  },
  {
   "name": "Dusk",
   "dark": "dusk",
   "light": "dawn",
-  "primary": 255,
-  "secondary": 32,
-  "reference": 188
+  "rule": "analogous",
+  "primary": 300,
+  "secondary": 350,
+  "reference": 228,
+  "states": {
+   "dark": {
+    "primary": 300,
+    "secondary": 350,
+    "reference": 228,
+    "danger": 30,
+    "warning": 100,
+    "success": 159
+   },
+   "light": {
+    "primary": 300,
+    "secondary": 350,
+    "reference": 228,
+    "danger": 30,
+    "warning": 100,
+    "success": 160
+   }
+  }
  }
 ]

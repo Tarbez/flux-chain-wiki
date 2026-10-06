@@ -15,5 +15,5 @@
 .settings-range:disabled,.settings-action:disabled{opacity:.35;cursor:default;}
 
 :root[data-motif="none"] #scene .lattice-field,:root[data-motif="none"] #scene .lattice-activity{display:none!important;}
-.settings-choice[aria-checked="true"]{background:hsl(var(--reference) / .16);color:hsl(var(--reference));}
+.settings-choice[aria-checked="true"]{background:hsl(var(--reference-200));color:hsl(var(--reference));}
 :root[data-motif="none"] .defxn-brand-field{display:none;}

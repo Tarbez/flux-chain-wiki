@@ -3,7 +3,7 @@
    phone width (Zero Scroll's "16px gutter, no horizontal page scroll"
    rule), hence the dedicated .stats-table-wrap scroll container. */
 #scene .task-page.stats-page {
-  --account-accent:var(--primary);
+  --account-accent:var(--reference);
   --account-rule:hsl(var(--text-strong) / .16);
   --account-muted:hsl(var(--text-muted));
   width:100%;

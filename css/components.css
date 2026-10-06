@@ -1,0 +1,112 @@
+/* DEFXN interactive components: the one place interactive color is decided.
+
+   Loaded last. Page stylesheets own layout, size and type; this file owns the
+   paint of every action, link and selection, so a CTA looks the same on every
+   route and in every theme. Legacy page rules set some of these colors with
+   !important, which is why the paint properties here carry it too.
+
+   Variants (shade steps from css/flux-themes.css):
+     solid        main call to action, once per view
+                  secondary-500 fill, -600 hover, -ink text
+     soft         repeated main action (Run DEFXN in the header)
+                  secondary-100 fill, -300 border, -700 text; -200/-400 on hover
+     quiet        secondary actions and utilities
+                  reference-100 fill, -300 border, -700 text; -200/-400 on hover
+     choice       tabs, pickers, toggles: neutral at rest, reference when selected
+                  reference-100 fill, -400 border, -700 text
+     link         text links: reference ink, -300 underline, -700 on hover
+   Focus is always a 2px reference ring. */
+
+/* Base link ink. Zero specificity, so every component below wins; without it
+   unstyled anchors fell back to the browser's own periwinkle link color. */
+:where(#scene) :where(a) {color:hsl(var(--reference));}
+#scene .resolution-entry {color:hsl(var(--text));}
+
+/* solid --------------------------------------------------------------------- */
+#scene :is(
+  .palette-solid,.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,
+  .story-primary,.lifecycle-next a.story-primary,.mechanism-next,.how-simple-next,.how-chapter-footer .how-chapter-next,
+  .economy-primary,.mesh-explorer-page [data-explorer-connect],.account-page button[data-kind="primary"],
+  .account-page [data-account-mesh-check],.ark-auth-actions button[data-kind="primary"]
+) {
+  background:hsl(var(--secondary)) !important;background-image:none !important;
+  border:1px solid hsl(var(--secondary)) !important;color:hsl(var(--secondary-ink)) !important;
+  box-shadow:0 6px 18px hsl(var(--secondary-300)) !important;text-decoration:none !important;
+}
+#scene :is(
+  .palette-solid,.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,
+  .story-primary,.lifecycle-next a.story-primary,.mechanism-next,.how-simple-next,.how-chapter-footer .how-chapter-next,
+  .economy-primary,.mesh-explorer-page [data-explorer-connect],.account-page button[data-kind="primary"],
+  .account-page [data-account-mesh-check],.ark-auth-actions button[data-kind="primary"]
+):is(:hover,:focus-visible) {background:hsl(var(--secondary-600)) !important;border-color:hsl(var(--secondary-600)) !important;color:hsl(var(--secondary-ink)) !important;}
+#scene :is(.home-primary-cta,.resolver-story-primary,.resolver-primary-cta,.about-primary-action,.resolution-primary-action,.story-primary,.mechanism-next,.how-simple-next,.economy-primary):active {box-shadow:none !important;transform:translateY(1px);}
+#scene :is(.home-primary-cta,.story-primary,.mechanism-next,.economy-primary,.mesh-explorer-page [data-explorer-connect],.ark-auth-actions button[data-kind="primary"]) .native-icon {color:hsl(var(--secondary-ink)) !important;border-color:hsl(var(--secondary-ink) / .3) !important;}
+#scene .home-primary-cta::before {background:hsl(var(--secondary-600)) !important;}
+
+/* soft ---------------------------------------------------------------------- */
+#scene :is(.palette-soft,.ark-header .header-core-links a.header-run-link,.ark-header a.products-mega-all) {
+  background:hsl(var(--secondary-100)) !important;background-image:none !important;
+  border:1px solid hsl(var(--secondary-300)) !important;color:hsl(var(--secondary-700)) !important;box-shadow:none !important;
+}
+#scene :is(.palette-soft,.ark-header .header-core-links a.header-run-link,.ark-header a.products-mega-all):is(:hover,:focus-visible) {background:hsl(var(--secondary-200)) !important;border-color:hsl(var(--secondary-400)) !important;}
+#scene .ark-header .header-core-links a.header-run-link[aria-current="page"] {color:hsl(var(--secondary-700)) !important;box-shadow:inset 0 -2px hsl(var(--secondary-400)) !important;}
+#scene .ark-header .header-core-links a.header-run-link .native-icon {color:hsl(var(--secondary-700)) !important;}
+
+/* quiet --------------------------------------------------------------------- */
+#scene :is(
+  .palette-quiet,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
+  .source-step-controls button:not(.mechanism-next),.deploy-workflow-all,.deploy-copy,
+  .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
+) {
+  background:hsl(var(--reference-100)) !important;background-image:none !important;
+  border:1px solid hsl(var(--reference-300)) !important;color:hsl(var(--reference-700)) !important;box-shadow:none !important;text-decoration:none !important;
+}
+#scene :is(
+  .palette-quiet,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
+  .source-step-controls button:not(.mechanism-next),.deploy-workflow-all,.deploy-copy,
+  .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
+):is(:hover,:focus-visible) {background:hsl(var(--reference-200)) !important;border-color:hsl(var(--reference-400)) !important;}
+#scene :is(.home-ghost-cta,.content-layer-path a) .native-icon {color:hsl(var(--reference-700)) !important;border-color:hsl(var(--reference-300)) !important;}
+#scene .home-ghost-cta::before {background:hsl(var(--reference-400)) !important;box-shadow:none !important;}
+
+/* choice -------------------------------------------------------------------- */
+#scene :is(
+  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
+) {
+  background:transparent !important;background-image:none !important;border-color:hsl(var(--border-default)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
+}
+#scene :is(
+  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
+):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--reference-300)) !important;}
+#scene :is(
+  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
+):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
+  background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-400)) !important;color:hsl(var(--reference-700)) !important;
+}
+#scene :is(.about-layer,.resolutions-domain-tab,.lifecycle-trail-item,.source-step-choice,.deploy-step-choice) :is(span,b,strong,small,em,.story-index) {color:inherit !important;}
+
+/* Header navigation: the current page is a selection, not the brand. */
+#scene .ark-header .header-core-links a:not(.header-run-link):not(.header-account-link)[aria-current="page"] {
+  background:hsl(var(--reference-100)) !important;color:hsl(var(--reference-700)) !important;box-shadow:inset 0 -2px hsl(var(--reference-400)) !important;
+}
+#scene .ark-header .header-core-links a:not(.header-run-link):is(:hover,:focus-visible) {background:hsl(var(--nested)) !important;color:hsl(var(--text-strong)) !important;}
+
+/* link ---------------------------------------------------------------------- */
+/* Actions that sit in a row of text links read as links, not boxes. */
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link) {background:transparent !important;background-image:none !important;border-color:transparent !important;box-shadow:none !important;
+  color:hsl(var(--reference)) !important;text-decoration:underline !important;text-decoration-color:hsl(var(--reference-300)) !important;text-underline-offset:4px;}
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link):is(:hover,:focus-visible) {color:hsl(var(--reference-700)) !important;text-decoration-color:hsl(var(--reference-400)) !important;}
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link) .native-icon {color:inherit !important;}
+#scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.article-evidence-link,.reference-orientation a,.resolver-guide-links a,.account-next a,.account-cms a,.story-reference) {
+  color:hsl(var(--reference)) !important;text-decoration-color:hsl(var(--reference-300)) !important;border-color:hsl(var(--reference-300)) !important;
+}
+#scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.article-evidence-link,.reference-orientation a,.resolver-guide-links a,.account-next a,.account-cms a,.story-reference):is(:hover,:focus-visible) {
+  color:hsl(var(--reference-700)) !important;border-color:hsl(var(--reference-400)) !important;
+}
+#scene :is(.home-lifecycle-all,.home-question-links a) .native-icon {color:inherit !important;}
+
+/* focus --------------------------------------------------------------------- */
+#scene :is(a,button,summary,[role="tab"]):focus-visible {outline:2px solid hsl(var(--reference)) !important;outline-offset:3px;}

@@ -1,0 +1,28 @@
+/* /palette: the design-system reference page (js/pages/palette.js). */
+#scene .task-page.palette-page {width:100%;max-width:none;overflow:auto;padding:0;color:hsl(var(--text));}
+#scene .palette-shell {width:min(100%,1040px);margin:auto;padding:clamp(28px,5vw,56px) clamp(16px,5vw,60px) 72px;box-sizing:border-box;}
+#scene .palette-head h1 {margin:8px 0 6px;font:600 clamp(28px,5vw,40px)/1.08 var(--font-sans,sans-serif);color:hsl(var(--text-strong));}
+#scene .palette-family {margin:0 0 10px;font:500 13px var(--mono-font,monospace);color:hsl(var(--text-muted));}
+#scene .palette-lede {max-width:66ch;line-height:1.55;color:hsl(var(--text-muted));}
+#scene .palette-section {margin-top:36px;padding-top:24px;border-top:1px solid hsl(var(--border-subtle));}
+#scene .palette-section h2 {margin:0 0 6px;font:600 20px/1.2 var(--font-sans,sans-serif);color:hsl(var(--text-strong));}
+#scene .palette-section h2 code {margin-left:6px;font:500 12px var(--mono-font,monospace);color:hsl(var(--text-faint));}
+#scene .palette-note,#scene .palette-sub {margin:0 0 14px;font-size:13px;color:hsl(var(--text-muted));}
+#scene .palette-sub {margin:16px 0 8px;font:500 11px var(--mono-font,monospace);text-transform:uppercase;letter-spacing:.04em;color:hsl(var(--text-faint));}
+#scene .palette-shades,#scene .palette-tones {display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;}
+#scene .palette-tones {grid-template-columns:repeat(11,minmax(0,1fr));gap:4px;}
+#scene .palette-swatch {display:grid;gap:4px;min-width:0;}
+#scene .palette-chip {display:block;height:56px;border-radius:8px;border:1px solid hsl(var(--border-subtle));}
+#scene .palette-tones .palette-chip {height:36px;border-radius:4px;}
+#scene .palette-swatch b {font:600 11px var(--mono-font,monospace);color:hsl(var(--text-strong));}
+#scene .palette-swatch small {font-size:11px;line-height:1.3;color:hsl(var(--text-faint));}
+#scene .palette-components {display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:12px;}
+#scene .palette-component {display:grid;gap:10px;align-content:start;margin:0;padding:16px;border:1px solid hsl(var(--border-subtle));border-radius:10px;background:hsl(var(--surface));}
+#scene .palette-component figcaption {font:500 11px var(--mono-font,monospace);color:hsl(var(--text-faint));}
+#scene .palette-demo {justify-self:start;min-height:40px;padding:0 16px;border-radius:6px;font:600 13px var(--font-sans,sans-serif);cursor:pointer;}
+#scene .palette-choices {display:flex;flex-wrap:wrap;gap:6px;}
+#scene .palette-choices button {min-height:34px;padding:0 12px;border:1px solid;border-radius:6px;font:500 12px var(--font-sans,sans-serif);cursor:pointer;}
+@media(max-width:700px){
+ #scene .palette-shades {grid-template-columns:repeat(4,minmax(0,1fr));}
+ #scene .palette-tones {grid-template-columns:repeat(6,minmax(0,1fr));}
+}

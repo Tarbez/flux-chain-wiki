@@ -42,6 +42,14 @@ const over=(input,bg)=>{const {a}=hsl(input);return rgb(input).map((v,i)=>v*a+bg
 function luminance(c) { return c.map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0); }
 function contrast(a,b) { const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05); }
 const hueGap=(a,b)=>{const d=Math.abs(a-b)%360;return Math.min(d,360-d);};
+// sRGB -> OKLab / OKLCH: perceptual lightness, chroma and hue.
+function oklab(c) {
+  const [r,g,b]=c.map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);
+  const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b), m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b), s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+  return [.2104542553*l+.7936177850*m-.0040720468*s, 1.9779984951*l-2.4285922050*m+.4505937099*s, .0259040371*l+.7827717662*m-.8086757660*s];
+}
+const okDistance=(a,b)=>{const x=oklab(a),y=oklab(b);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2]);};
+const okLCH=c=>{const [L,a,b]=oklab(c);return {L,C:Math.hypot(a,b),h:(Math.atan2(b,a)*180/Math.PI+360)%360};};
 
 const ctx=vm.createContext({});for(const file of ['js/tokens.js','js/content/theme.js','js/content/theme-data.js'])vm.runInContext(fs.readFileSync(file,'utf8'),ctx);
 assert.deepEqual(JSON.parse(JSON.stringify(ctx.ArkTheme.get().themes)),{},'the shipped palette must not silently override the curated colors');
@@ -60,11 +68,18 @@ for (const name of names) {
 
   const roles = ['primary','secondary','reference','success','warning','danger'];
   for (let i=0;i<roles.length;i++) for (let j=i+1;j<roles.length;j++) {
-    const a=get(roles[i]), b=get(roles[j]);
-    assert(hueGap(hsl(a).h,hsl(b).h)>=20, `${name} ${roles[i]}/${roles[j]} hues must differ`);
-    const distance=Math.sqrt(rgb(a).reduce((sum,v,k)=>sum+(v-rgb(b)[k])**2,0));
-    assert(distance>.12, `${name} ${roles[i]}/${roles[j]} must not collapse into one color`);
+    const distance=okDistance(rgb(get(roles[i])),rgb(get(roles[j])));
+    assert(distance>=.06, `${name} ${roles[i]}/${roles[j]} are ${distance.toFixed(3)} apart (OKLab); they must read as different colors`);
   }
+
+  // Harmony: the three roles share one lightness band and a relaxed chroma, and
+  // the neutrals carry the primary hue.
+  const lch=['primary','secondary','reference'].map(r=>okLCH(rgb(get(r))));
+  const Ls=lch.map(x=>x.L);
+  assert(Math.max(...Ls)-Math.min(...Ls)<=.08, `${name} role lightness must be balanced (spread ${(Math.max(...Ls)-Math.min(...Ls)).toFixed(3)})`);
+  lch.forEach((x,i)=>assert(x.C<=.13, `${name} ${['primary','secondary','reference'][i]} chroma ${x.C.toFixed(3)} is not relaxed`));
+  const canvasLCH=okLCH(canvas);
+  assert(canvasLCH.C>.004 && hueGap(canvasLCH.h,lch[0].h)<=30, `${name} canvas must be tinted toward the primary hue`);
 
   // Shades: a full ladder per role, each step a real step, base = the bare token.
   for (const role of roles) {
@@ -80,8 +95,13 @@ for (const name of names) {
     }
   }
 
-  // Relaxed: role inks stay dimmed, not neon.
-  for (const role of ['primary','secondary','reference']) assert(hsl(get(role)).s<=50, `${name} ${role} must stay relaxed (saturation <= 50%)`);
+  // Soft components put -700 text on a -100 fill; it must read.
+  for (const role of roles) assert(contrast(rgb(get(role+'-700')),rgb(get(role+'-100')))>=4.5, `${name} ${role}-700 on ${role}-100 must be readable`);
+  // The tonal scale runs light to dark in even perceptual steps.
+  for (const role of ['primary','secondary','reference']) {
+    const tones=[50,100,200,300,400,500,600,700,800,900,950].map(t=>okLCH(rgb(get(`${role}-tone-${t}`))).L);
+    for (let i=1;i<tones.length;i++) assert(tones[i]<tones[i-1], `${name} ${role} tone scale must darken step by step`);
+  }
 
   for (const key of ['text-strong','text','text-muted','text-faint']) for (const [where, bg] of [['canvas',canvas],['surface',surface]]) {
     const ratio=contrast(rgb(get(key)),bg);
@@ -95,19 +115,20 @@ for (const name of names) {
   steps.forEach(([a,b],i)=>assert(contrast(a,b)>=1.12, `${name} surface step ${i} measures ${contrast(a,b).toFixed(2)}:1`));
   assert(contrast(over(get('border-default'),canvas),canvas)>=1.6, `${name} default border must be visible on canvas`);
   assert(contrast(over(get('border-default'),surface),surface)>=1.6, `${name} default border must be visible on surfaces`);
-  families[name]=['primary','secondary','reference'].map(role=>Math.round(hsl(get(role)).h));
+  families[name]=['primary','secondary','reference'].map(role=>okLCH(rgb(get(role))).h);
 }
 
 // Five families per appearance, none repeating another's colors; each family
 // keeps its hues across its dark and light palettes.
 for (const keys of [darkKeys, lightKeys]) {
-  assert.equal(new Set(keys.map(k=>families[k].join())).size, 5, 'five distinct families per appearance');
-  assert.equal(new Set(keys.map(k=>families[k][0])).size, 5, 'no two families share a primary hue');
+  for (let i=0;i<keys.length;i++) for (let j=i+1;j<keys.length;j++)
+  { assert(hueGap(families[keys[i]][0],families[keys[j]][0])>=15, `${keys[i]}/${keys[j]} must not share a primary hue`);
+    assert(hueGap(families[keys[i]][1],families[keys[j]][1])>=25, `${keys[i]}/${keys[j]} must not repeat the main-CTA hue`); }
 }
-darkKeys.forEach((key,i)=>assert.deepEqual(families[key], families[lightKeys[i]], `${key}/${lightKeys[i]} are one family`));
+darkKeys.forEach((key,i)=>families[key].forEach((h,r)=>assert(hueGap(h,families[lightKeys[i]][r])<=8, `${key}/${lightKeys[i]} are one family (role ${r} hue)`)));
 
 // Component styles take color from tokens, not literals.
 for (const file of ['css/hero-motion.css','css/fallback.css','css/studio.css','css/color-system.css','css/home-drafting.css','css/guided-page.css','css/explorer.css'])
   assert(!/#[0-9a-f]{3,8}\b(?![^(]*mask)|rgba?\(\s*\d/i.test(fs.readFileSync(file,'utf8').replace(/mask-image:[^;]+;/g,'')), `${file} must not hard-code colors`);
 
-console.log('PASS: one authoritative source; five relaxed families in dark and light; secondary owns the main CTA; distinct roles with full shade ladders; readable inks, a four-step text ladder and separated surfaces in all ten palettes.');
+console.log('PASS: one authoritative source; five harmonious families (balanced lightness, relaxed chroma, tinted neutrals) in dark and light; secondary owns the main CTA; perceptually distinct roles with semantic shades and tonal scales; readable inks, soft-button text, a four-step text ladder and separated surfaces in all ten palettes.');

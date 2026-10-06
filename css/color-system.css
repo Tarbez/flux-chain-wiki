@@ -35,27 +35,7 @@
 #scene .story-result {color:hsl(var(--text-strong));}
 #scene :is(.story-kicker,.learning-eyebrow,.account-kicker,.reference-kicker,.article-eyebrow,.hero-experiment-kicker,.home-lifecycle-caption) {color:hsl(var(--text-muted));}
 
-/* Secondary: the main CTA. Filled with the -500 base, -600 on hover, -700 pressed. */
-#scene .home-primary-cta {background:hsl(var(--secondary));border-color:transparent;color:hsl(var(--secondary-ink)) !important;box-shadow:0 10px 30px hsl(var(--secondary) / .12);}
-#scene .home-primary-cta::before {background:hsl(var(--secondary-ink) / .2);}
-#scene .home-primary-cta:is(:hover,:focus-visible) {background:hsl(var(--secondary-600));border-color:transparent;box-shadow:0 14px 34px hsl(var(--secondary) / .18);}
-#scene .home-primary-cta:active {background:hsl(var(--secondary-700));}
-#scene .home-primary-cta .native-icon,#scene .home-primary-cta:is(:hover,:focus-visible) .native-icon {color:hsl(var(--secondary-ink));border-color:hsl(var(--secondary-ink) / .3);}
-#scene :is(.resolver-story-primary,.resolver-primary-cta) {background:hsl(var(--secondary));border-color:hsl(var(--secondary));color:hsl(var(--secondary-ink));}
-#scene :is(.resolver-story-primary,.resolver-primary-cta):is(:hover,:focus-visible) {background:hsl(var(--secondary-600));border-color:hsl(var(--secondary-600));color:hsl(var(--secondary-ink));filter:none;}
-/* Repeated main actions are outlined in secondary shades, not filled. */
-#scene :is(.story-primary,.economy-primary,.mechanism-next,.account-page button[data-kind="primary"],.account-page [data-account-mesh-check],.mesh-explorer-page [data-explorer-connect]) {
- border-color:hsl(var(--secondary-300));background:hsl(var(--secondary-100));color:var(--signal-complement) !important;
-}
-#scene .ark-header .header-core-links .header-run-link {border-color:hsl(var(--secondary-300));background:hsl(var(--secondary-100));color:var(--signal-complement) !important;}
-#scene .ark-header .header-core-links .header-run-link:is(:hover,:focus-visible) {background:hsl(var(--secondary-200));border-color:hsl(var(--secondary));}
-
-/* Reference: secondary actions and links. */
-#scene .home-ghost-cta {border-color:hsl(var(--reference-300));background:hsl(var(--reference-100));color:var(--signal-reference) !important;}
-#scene .home-ghost-cta::before {background:hsl(var(--reference-400));box-shadow:none;}
-#scene .home-ghost-cta .native-icon {color:var(--signal-reference);border-color:hsl(var(--reference-300));}
-#scene .home-ghost-cta:is(:hover,:focus-visible) {background:hsl(var(--reference-200));border-color:hsl(var(--reference-400));}
-#scene .account-cms a {color:var(--signal-reference);}
+/* Buttons, links and selection states: css/components.css. */
 
 /* Reference is the low-level interaction color: links, pickers and disclosure. */
 #scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.story-reference,.article-evidence-link,.reference-orientation a,.resolver-back-link,.resolver-guide-links a,.lifecycle-trail-item,.source-step-choice,.deploy-step-choice,.guided-step-picker button,.story-depth button,.account-page summary,.mesh-explorer-page summary) {color:var(--signal-reference);}
@@ -82,7 +62,6 @@
 #scene .lifecycle-page .story-kicker {color:hsl(var(--text-muted));}
 #scene .lifecycle-page .story-depth button,#scene .lifecycle-facts button {color:var(--signal-reference);}
 #scene .lifecycle-page .story-depth button:is(:hover,[aria-pressed="true"]),#scene .lifecycle-facts button:is(:hover,[aria-pressed="true"]) {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}
-#scene .task-page :is(.mechanism-next,[data-explorer-connect],.ark-auth-actions button[data-kind="primary"],.economy-primary) {border-color:hsl(var(--secondary-300));background:hsl(var(--secondary-100));color:var(--signal-complement) !important;}
 #scene .task-page :is(.source-step-choice,.deploy-step-choice)[aria-pressed="true"] {border-color:var(--signal-reference);background:hsl(var(--reference-100));color:var(--signal-reference);}
 #scene .content-layer-path a,#scene .account-next a {color:var(--signal-reference);}
 #scene .account-page :is(button,input,a,summary):focus-visible {outline-color:var(--signal-reference);}
@@ -97,6 +76,5 @@
 #scene .settings-panel .settings-range {accent-color:var(--signal-reference);}
 #scene .how-simple h1,#scene .how-chapter h1 {color:hsl(var(--text-strong));}
 #scene .how-simple .story-kicker,#scene .how-chapter .story-kicker {color:hsl(var(--text-muted));}
-#scene .how-simple-next,#scene .how-chapter-footer .how-chapter-next {color:var(--signal-complement);border-color:hsl(var(--secondary-300));background:hsl(var(--secondary-100));}
 #scene .how-chapter-choice,#scene .how-check-row,#scene .how-check-row span {color:var(--signal-reference);}
 #scene .how-chapter-choice[aria-pressed="true"],#scene .how-check-row[aria-pressed="true"] {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}
