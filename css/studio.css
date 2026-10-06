@@ -1,7 +1,7 @@
 /* Additions below the original Ark scene. The zero, veil, logo and poster
    composition continue to use their original resolvers and tokens. */
 html { scroll-behavior: smooth; scroll-padding-top: 24px; }
-.skip { position: fixed; top: -100px; left: 20px; z-index: 100; padding: 14px 20px; background: #fff; color: #000; font: 14px "Albert Sans", sans-serif; }
+.skip { position: fixed; top: -100px; left: 20px; z-index: 100; padding: 14px 20px; background: hsl(var(--text-strong)); color: hsl(var(--canvas)); font: 14px "Albert Sans", sans-serif; }
 .skip:focus { top: 16px; }
 .expansion {
   --text: hsl(var(--text-strong));

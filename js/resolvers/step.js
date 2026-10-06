@@ -35,7 +35,7 @@ ArkUI.register('RSTEP_V1', {
     border: '0',
     borderRadius: '0',
     background: 'transparent',
-    color: 'rgba(255,255,255,0.7)',
+    color: 'hsl(var(--text-muted))',
     fontSize: 'max(10px, ' + Tokens.u(0.92) + ')',
     fontWeight: '500',
     lineHeight: '1',

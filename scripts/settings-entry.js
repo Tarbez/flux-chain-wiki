@@ -16,6 +16,8 @@ const root=document.documentElement;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
 const save=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
 let theme=read('flux-chain-theme','ghost'),renderer,frame=0;
+// One dark and one light palette; earlier palette keys migrate to them.
+theme={clay:'ghost',ochre:'ghost',marine:'ghost',grove:'glacier',moss:'glacier',bone:'glacier'}[theme]||theme;
 if(!themes.includes(theme))theme='ghost';
 let saved={};try{saved=JSON.parse(read('defxn-pattern-config-v1','{}'))||{};}catch{}
 let values={};
@@ -27,8 +29,8 @@ document.querySelector('[data-ark-layer="persistent"]').prepend(backgroundHost);
 const brandField=document.createElement('div');brandField.className='defxn-brand-field';brandField.setAttribute('aria-hidden','true');document.querySelector('.hero-alive').append(brandField);
 const meshCanvas=document.createElement('canvas');meshCanvas.className='defxn-brand-mesh';brandField.append(meshCanvas);
 const meshPattern=ArkUI.createMeshFabric(meshCanvas,{background:true});
-const themeNames={clay:'Red',grove:'Red',ochre:'Green',moss:'Green',ghost:'Blue',glacier:'Blue',marine:'Yellow',bone:'Yellow'};
-const darkThemes=['clay','ochre','ghost','marine'],lightThemes=['grove','moss','glacier','bone'];
+const themeNames={ghost:'Night',glacier:'Day'};
+const darkThemes=['ghost'],lightThemes=['glacier'];
 const motifs=['blocks','traces','layers','nodes','routes','tiles','frames','none'];
 const motifMigration={wave:'traces',weave:'traces',rosette:'blocks',arches:'layers',survey:'traces'};
 let motif=read('defxn-motif-v1','blocks');motif=motifMigration[motif]||motif;if(!motifs.includes(motif))motif='blocks';
