@@ -159,18 +159,17 @@ for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
     page.arkDispose();
   }
   if (key === 'download') {
-    const rows = page.querySelector('.concept-principles').children;
-    const choices = page.querySelector('.source-step-picker').children;
-    const controls = page.querySelector('.source-step-controls').children;
-    assert.equal(rows.filter(row => !row.hidden).length, 1, 'source guide starts with one step');
-    controls[1].listeners.click();
+    const rows = page.querySelector('.download-steps').children.map(item => item.children[1]);
+    const choices = page.querySelector('.download-steps').children.map(item => item.children[0]);
+    const next = page.querySelector('.download-next');
+    assert.equal(rows.filter(row => !row.hidden).length, 1, 'source guide starts with one step open');
+    next.listeners.click();
     assert(rows[0].hidden && rows[0].inert && !rows[1].hidden, 'source guide advances one step');
     choices[4].listeners.click();
-    assert(!rows[4].hidden && controls[1].hidden, 'final source step has no next action');
-    controls[2].listeners.click();
-    assert(rows.every(row => !row.hidden && !row.inert), 'source guide review reveals all steps');
-    controls[2].listeners.click();
-    assert(!rows[4].hidden && rows[0].hidden, 'source guide restores the selected step');
+    assert(!rows[4].hidden && next.hidden, 'final source step has no next step');
+    assert(!page.querySelector('.download-onward').hidden, 'final source step hands on to the network page');
+    page.querySelector('.download-previous').listeners.click();
+    assert(!rows[3].hidden && rows[4].hidden, 'previous step works');
   }
   if (key === 'deploy') {
     const rows = page.querySelector('.deploy-steps').children;

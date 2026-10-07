@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "download",
-  "title": "Run Flux from source",
+  "title": "Run DEFXN from source",
   "route": "/download",
   "group": "page",
   "meta": {
@@ -12,7 +12,7 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "OPERATE FLUX / SOURCE PATH"
+      "value": "RUN DEFXN / FROM SOURCE"
     },
     "TITLE": {
       "label": "Heading",
@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so obtain an owner-approved checkout before running these commands."
+      "value": "The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so start from an owner-approved checkout."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -36,7 +36,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Use Node.js 22 or newer. Confirm npm is available and the configured storage directory and status port are writable and free."
+      "value": "Use Node.js 22 or newer with npm. The storage directory must be writable and the status port free."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -48,7 +48,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "From ark-miner-cli, run npm install, copy .env.example to .env, review the configuration, then run npm start. The package exposes flux-miner; ark-miner is a legacy alias."
+      "value": "In ark-miner-cli, install, copy .env.example to .env, review it, then start. The package exposes flux-miner; ark-miner is a legacy alias."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -60,7 +60,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Confirm the daemon remains running and its status endpoint responds on the configured listener. The documented default is 127.0.0.1:8766. Record the source revision, package version, configuration, and observation time."
+      "value": "The daemon should stay running and answer on its status listener. Write down the source revision, package version, configuration and when you looked."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -72,7 +72,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "A successful local start proves local startup. It does not prove public-network membership, deployed resolver capacity, independent-host readiness, or production activation."
+      "value": "A clean local start proves your miner starts. It says nothing yet about the public network, resolver capacity or production."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -84,7 +84,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Once the miner and flux-network CLI are installed, create or select a network ID and start the miner against it. Named networks partition presence only today."
+      "value": "With the miner and flux-network CLI installed, pick or create a network ID and start the miner against it."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
