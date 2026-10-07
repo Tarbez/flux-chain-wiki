@@ -98,15 +98,33 @@ real things were found and fixed, in order (full account in
    flight at once. Setting `FABRIC_THREADS=256` and keeping the simple
    OLD multi-round-trip path (not the new hop-reduced one) took durable
    finality from ~269-351/s to a reproducible **~676-827/s** (5 audit
-   runs, zero failures). `close-transfer-durable` is kept in the codebase,
-   correct and tested, as a real option for a future quorum with
-   meaningful cross-region RTT — this fleet's inter-node ping is
-   sub-millisecond, too low for hop-collapse to beat well-parallelized
-   independent connections, so it isn't adopted as the default here.
+   runs, zero failures) on this fleet's own low-RTT nodes.
+4. **The hop-reduction theory turned out to be correct after all — on a
+   topology that actually tests it.** A rented GPU box came online the
+   same day with a genuine ~71ms RTT to the fleet, the first real
+   geographic distance available to test against (this fleet's own nodes
+   measure sub-millisecond apart). Two real infrastructure quirks had to
+   be worked around first (hairpin NAT on the box's own public IP, and a
+   rental-platform port-forwarding limit that only exposes SSH — fixed by
+   making the GPU box the primary so all peer-relay traffic runs outbound
+   from it, not inbound to it; full account in
+   `docs/evidence/bench-003-rust-fleet-ceiling.md` §9). With that fixed, a
+   clean 5-run audit showed `close-transfer-durable` beating the old path
+   by a consistent **~1.9-2x** (247-259/s vs 125-128/s), zero failures on
+   the new path across every run, both ceilings confirmed real via the
+   same flat-throughput/rising-latency saturation check used throughout
+   this investigation. Conclusion: hop-count reduction is real and
+   correct, conditioned on the deployment having actual round-trip cost
+   to amortize — it should be a per-deployment tuning decision
+   (`FABRIC_DIRECT_PRIMARY`, set from a real measured RTT), not a single
+   hardcoded default, and it's exactly the lever a genuinely geographically
+   distributed validator set (the realistic shape of a decentralized
+   mainnet, not an artifact of this project's current single-provider
+   fleet) would need.
 
-Current real number: **~676-827/s** against accepted finality's
-~3,003/s — a ~3.6-4.4x gap, close to the plan's stated ~3x target
-(~1,000+/s), not yet fully there. Not yet done: bake `FABRIC_THREADS`
+Current real number: **~676-827/s** on this fleet's own low-RTT nodes,
+against accepted finality's ~3,003/s — a ~3.6-4.4x gap, close to the
+plan's stated ~3x target (~1,000+/s), not yet fully there. Not yet done: bake `FABRIC_THREADS`
 sizing into a standing deploy configuration (currently a manual
 process-launch override, not systemd-managed — see gap #7) and check
 whether quorums B and C have the same thread-starvation gap (never

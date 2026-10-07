@@ -48,6 +48,8 @@
 #scene .stats-hero p:not(.stats-kicker):not(.stats-chips) { max-width:52ch; font-size:15px; line-height:1.55; color:var(--bento-muted); }
 #scene .stats-chips { display:flex; flex-wrap:wrap; gap:6px; }
 #scene .stats-chips span { padding:5px 9px; border-radius:999px; background:var(--bento-track); font:500 11px/1 var(--mono-font,ui-monospace,monospace); color:hsl(var(--text)); }
+#scene .stats-live-chip[data-state="ok"] { background:hsl(var(--success, var(--primary)) / .16); color:hsl(var(--success, var(--primary))); }
+#scene .stats-live-chip[data-state="warn"] { background:hsl(var(--warning) / .16); color:hsl(var(--warning)); }
 #scene .stats-monitor-link { align-self:flex-start; display:inline-flex; gap:8px; align-items:center; margin-top:4px; padding:9px 14px; border-radius:10px;
   background:hsl(var(--reference-100)); color:hsl(var(--reference-700)); font:600 13px/1.2 var(--font-sans,sans-serif); text-decoration:none; transition:background-color .18s; }
 #scene .stats-monitor-link:is(:hover,:focus-visible) { background:hsl(var(--reference-200)); }

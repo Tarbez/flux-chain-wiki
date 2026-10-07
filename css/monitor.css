@@ -1,92 +1,43 @@
-/* /monitor: the simulated live dashboard. Builds on the bento tiles in
+/* /monitor: the real live health dashboard. Builds on the bento tiles in
    css/stats.css (.stats-bento, .stats-tile, .stats-kpi); only what is new
-   to a live view lives here. No borders: fill, gap and radius only. */
-#scene .monitor-hero { min-height:240px; }
+   lives here. No borders: fill, gap and radius only. */
+#scene .monitor-hero { min-height:200px; }
 #scene .monitor-hero-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-#scene .monitor-sim { padding:5px 10px; border-radius:999px; background:hsl(var(--warning) / .16); color:hsl(var(--warning)); font:600 10.5px/1 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .monitor-live-chip { padding:5px 10px; border-radius:999px; background:hsl(var(--success, var(--primary)) / .16); color:hsl(var(--success, var(--primary))); font:600 10.5px/1 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .monitor-live-chip.is-stale { background:hsl(var(--warning) / .16); color:hsl(var(--warning)); }
 #scene .monitor-live { display:inline-flex; align-items:center; gap:8px; font:500 12px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-muted); font-variant-numeric:tabular-nums; }
 #scene .monitor-live i { width:8px; height:8px; border-radius:50%; background:hsl(var(--success, var(--primary))); box-shadow:0 0 0 0 hsl(var(--success, var(--primary)) / .5); animation:monitor-pulse 2s ease-out infinite; }
-#scene .monitor-page.is-paused .monitor-live i { background:var(--bento-faint); animation:none; }
 @keyframes monitor-pulse { 0% { box-shadow:0 0 0 0 hsl(var(--success, var(--primary)) / .5); } 70%,100% { box-shadow:0 0 0 8px hsl(var(--success, var(--primary)) / 0); } }
 #scene .monitor-actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 #scene .monitor-actions .stats-monitor-link { margin:0; min-height:40px; box-sizing:border-box; }
-#scene .monitor-page .monitor-pause { min-height:40px; padding:0 14px; border:0; border-radius:10px; background:var(--bento-track); color:var(--bento-ink); font:600 13px/1 var(--font-sans,sans-serif); cursor:pointer; }
-#scene .monitor-page .monitor-pause:is(:hover,:focus-visible) { background:hsl(var(--text-strong) / .12); }
 
-#scene .monitor-spark { width:100%; height:56px; overflow:visible; }
-#scene .monitor-spark path { fill:none; stroke:hsl(var(--primary)); stroke-width:2; vector-effect:non-scaling-stroke; stroke-linejoin:round; stroke-linecap:round; }
 #scene .stats-kpi.is-warn { background:hsl(var(--warning) / .1); }
-
-/* Throughput chart: area + 2px line, crosshair and tooltip on hover/arrow keys */
-#scene .monitor-chart { position:relative; height:220px; margin-top:4px; border-radius:10px; outline:none; touch-action:pan-y; }
-#scene .monitor-chart:focus-visible { box-shadow:0 0 0 2px hsl(var(--reference)); }
-#scene .monitor-chart svg { display:block; width:100%; height:100%; overflow:visible; }
-#scene .monitor-area { fill:hsl(var(--primary-100)); }
-#scene .monitor-line { fill:none; stroke:hsl(var(--primary)); stroke-width:2; vector-effect:non-scaling-stroke; stroke-linejoin:round; }
-#scene .monitor-axis { position:absolute; left:8px; font:500 10px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); pointer-events:none; }
-#scene .monitor-axis-top { top:6px; }
-#scene .monitor-axis-bottom { bottom:6px; }
-#scene :is(.monitor-cross,.monitor-dot,.monitor-tip) { position:absolute; opacity:0; pointer-events:none; transition:opacity .12s; }
-#scene .monitor-chart.is-hover :is(.monitor-cross,.monitor-dot,.monitor-tip) { opacity:1; }
-#scene .monitor-cross { top:0; bottom:0; width:0; outline:1px dashed hsl(var(--text-strong) / .25); }
-#scene .monitor-dot { width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:hsl(var(--primary)); box-shadow:0 0 0 2px hsl(var(--surface)); }
-#scene .monitor-tip { top:-6px; transform:translate(-50%,-100%); padding:6px 9px; border-radius:8px; background:hsl(var(--overlay, var(--canvas))); box-shadow:0 10px 30px hsl(var(--canvas) / .5); font:500 11.5px/1.3 var(--font-sans,sans-serif); color:var(--bento-ink); white-space:nowrap; font-variant-numeric:tabular-nums; }
-#scene .monitor-chart-foot { padding:0; }
 
 /* Quorums */
 #scene .monitor-quorums { list-style:none; margin:4px 0 0; padding:0; display:grid; gap:14px; }
-#scene .monitor-q-head { display:flex; justify-content:space-between; align-items:baseline; margin:0 0 6px; }
+#scene .monitor-quorums li.is-down { background:hsl(var(--warning) / .1); border-radius:12px; padding:8px; margin:-8px; }
+#scene .monitor-q-head { display:flex; justify-content:space-between; align-items:baseline; margin:0 0 4px; }
 #scene .monitor-q-name { display:flex; align-items:baseline; gap:8px; }
 #scene .monitor-q-name b { font:600 15px/1 var(--font-sans,sans-serif); color:var(--bento-ink); }
 #scene .monitor-q-name small { font:500 11px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); }
 #scene .monitor-q-val { font:600 13px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-ink); font-variant-numeric:tabular-nums; }
-#scene .monitor-q-track { display:block; height:10px; border-radius:5px; background:var(--bento-track); overflow:hidden; }
-#scene .monitor-q-bar { display:block; height:100%; width:0; border-radius:0 5px 5px 0; background:hsl(var(--primary)); transition:width .8s cubic-bezier(.22,1,.36,1); }
+#scene .monitor-q-detail { font:500 11.5px/1.4 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); }
 
 /* Nodes */
 #scene .monitor-nodes { list-style:none; margin:4px 0 0; padding:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
 #scene .monitor-nodes li { display:flex; flex-direction:column; gap:6px; padding:12px; border-radius:12px; background:var(--bento-track); transition:background-color .3s; }
-#scene .monitor-nodes li.is-hot { background:hsl(var(--warning) / .12); }
+#scene .monitor-nodes li.is-down { background:hsl(var(--warning) / .14); }
 #scene .monitor-node-head { display:flex; align-items:center; gap:7px; margin:0; }
 #scene .monitor-node-head b { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; font:600 12.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-ink); }
 #scene .monitor-node-state { width:7px; height:7px; border-radius:50%; background:hsl(var(--success, var(--primary))); }
+#scene .monitor-nodes li.is-down .monitor-node-state { background:hsl(var(--warning)); }
 #scene .monitor-node-pct { font:500 11.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-muted); font-variant-numeric:tabular-nums; }
 #scene .monitor-nodes small { font-size:11px; line-height:1.3; color:var(--bento-faint); }
-#scene .monitor-meter { display:block; height:6px; border-radius:3px; background:hsl(var(--text-strong) / .08); overflow:hidden; }
-#scene .monitor-meter span { display:block; height:100%; width:0; border-radius:0 3px 3px 0; background:hsl(var(--primary)); transition:width .8s cubic-bezier(.22,1,.36,1); }
-#scene .monitor-nodes li.is-hot .monitor-meter span { background:hsl(var(--warning)); }
 
-/* Latency histogram */
-#scene .monitor-hist { list-style:none; margin:auto 0 0; padding:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; align-items:end; }
-#scene .monitor-hist li { display:flex; flex-direction:column; gap:6px; text-align:center; }
-#scene .monitor-hist-col { display:flex; align-items:flex-end; height:150px; border-radius:8px; background:var(--bento-track); overflow:hidden; }
-#scene .monitor-hist-col span { display:block; width:100%; height:0; border-radius:6px 6px 0 0; background:hsl(var(--primary)); transition:height .8s cubic-bezier(.22,1,.36,1); }
-#scene .monitor-hist small { font:500 10px/1.2 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); }
-
-/* Certificate feed */
-#scene .monitor-feed { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-#scene .monitor-feed li { display:grid; grid-template-columns:auto 1fr auto; grid-template-rows:auto auto; column-gap:10px; row-gap:4px; align-items:center; padding:10px 12px; border-radius:10px; background:var(--bento-track); animation:monitor-in .5s ease-out both; }
-#scene .monitor-feed li:not(:first-child) { animation:none; }
-@keyframes monitor-in { from { background:hsl(var(--primary-100)); } to { background:var(--bento-track); } }
-#scene .monitor-feed-q { grid-row:span 2; display:grid; place-items:center; width:28px; height:28px; border-radius:8px; background:hsl(var(--primary-100)); font:700 12px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-ink); }
-#scene .monitor-feed code { font:500 12px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-ink); background:none; padding:0; }
-#scene .monitor-feed-kind { font:500 10.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); text-transform:uppercase; letter-spacing:.04em; }
-#scene .monitor-feed-ms { grid-column:3; grid-row:1; font:600 12px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-muted); text-align:right; font-variant-numeric:tabular-nums; }
-#scene .monitor-feed time { grid-column:3; grid-row:2; font:500 10.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); text-align:right; }
-
-#scene .monitor-reduced :is(.monitor-q-bar,.monitor-meter span,.monitor-hist-col span) { transition:none; }
-#scene .monitor-reduced :is(.monitor-live i,.monitor-feed li) { animation:none; }
 @media (prefers-reduced-motion: reduce) {
-  #scene .monitor-page :is(.monitor-q-bar,.monitor-meter span,.monitor-hist-col span) { transition:none; }
-  #scene .monitor-page :is(.monitor-live i,.monitor-feed li) { animation:none; }
+  #scene .monitor-page .monitor-live i { animation:none; }
 }
 
 @media (max-width:1020px) {
   #scene .monitor-nodes { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  #scene .monitor-feed { grid-template-columns:repeat(2,minmax(0,1fr)); }
-}
-@media (max-width:640px) {
-  #scene .monitor-chart { height:180px; }
-  #scene .monitor-feed { grid-template-columns:1fr; }
-  #scene .monitor-hist-col { height:110px; }
 }

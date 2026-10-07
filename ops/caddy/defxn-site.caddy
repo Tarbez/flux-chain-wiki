@@ -1,0 +1,106 @@
+# defxn.com: the public marketing/explorer site (defxn repo root), served as
+# plain static files -- no build step, matching the project's own convention.
+# Root points at a copy of the repo's public files only (deployed by
+# ops/deploy-defxn-site.sh / install-defxn-site.sh's rsync, which excludes the
+# admin surface at the source -- see that script's --exclude list). The
+# @private matcher below is a second, defense-in-depth refusal in case an
+# excluded file is ever present on disk anyway; it mirrors
+# scripts/serve-site.mjs's PRIVATE regex.
+#
+# @adminProxy (added 2026-10-04): the admin itself, proxied to a local
+# publish-host.mjs process (ops/install-defxn-admin-host.sh) running
+# alongside this node's own miner -- `--control-socket` lets it reach that
+# miner's name-record routes, which the public TCP status port refuses (F-14
+# control-plane separation). header_up forces Host to the bare apex
+# regardless of which of defxn.com/www.defxn.com the visitor used, since
+# publish-host.mjs's origin/cookie matching needs exactly one value -- always
+# use https://defxn.com/admin, not the www form.
+#
+# The @assetUnderRoute rewrite reproduces serve-site.mjs's `assetPath()`:
+# a hard refresh on a client-routed deep path (e.g. /learnings/some-slug)
+# requests root-relative-looking asset URLs resolved against that deep path
+# by the browser (/learnings/some-slug/js/x.js); this rewrites any such
+# "<anything>/(js|css|assets|docs|legacy)/<rest>" request down to
+# "/(js|css|assets|docs|legacy)/<rest>" before file_server looks it up. This
+# is applied unconditionally (not "try the deep path first, then fall back"
+# the way serve-site.mjs's fileFor-then-assetPath order does) because the
+# site has no real files at those deep paths to shadow -- behaviorally
+# equivalent for this project's actual layout, documented here since it is a
+# deliberate simplification of the Node reference implementation, not a
+# faithful line-for-line port of it.
+defxn.com, www.defxn.com {
+	tls {
+		issuer acme {
+			disable_tlsalpn_challenge
+		}
+	}
+	root * /srv/defxn-site
+	encode zstd gzip
+
+	# These three live under js/admin/ (where the build scripts emit them) but
+	# are public, shared primitives, not CMS-editor code: the Auth Kit (used by
+	# the public /account page) and the <flux-authorization-dialog> bundle +
+	# its view-model (used by /account and the identity broker, broker.html).
+	# Must be matched -- and therefore served from this node's own static
+	# root -- before @adminProxy below, which otherwise proxies everything
+	# under js/admin/ to the admin host unconditionally, including these.
+	# ops/deploy-defxn-site.sh's rsync carries the same split; keep both in sync.
+	@adminPublic path /js/admin/auth.js /js/admin/authorization-view.js /js/admin/vendor/*
+	handle @adminPublic {
+		file_server
+	}
+
+	# @fleetStatus (added 2026-10-07): the /monitor page's live health feed
+	# (ops/fleet-status-api.mjs). Read-only, polls each quorum's own
+	# "members" command on an interval -- health/membership only, never a
+	# synthetic throughput run. Matched and handled BEFORE @adminProxy below
+	# so it isn't swallowed by that block's broader /api/* catch-all; the
+	# rewrite maps the public path to the service's one real route.
+	@fleetStatus path /api/fleet-status
+	handle @fleetStatus {
+		rewrite * /fleet-status
+		reverse_proxy 127.0.0.1:8767
+	}
+
+	@adminProxy path /admin /admin.html /admin-app.html /api/* /js/admin/*
+	handle @adminProxy {
+		reverse_proxy 127.0.0.1:3437 {
+			header_up Host defxn.com
+		}
+	}
+
+	@private {
+		path /README.md /scripts/* /tests/* /.git/* /.vercel/* /node_modules/*
+		path "/Flux Chain Admin.command"
+	}
+	handle @private {
+		respond "Not found" 404
+	}
+
+	@assetUnderRoute path_regexp assetUnderRoute ^/.+/((?:js|css|assets|docs|legacy)/.*)$
+	handle @assetUnderRoute {
+		rewrite * /{re.assetUnderRoute.1}
+		file_server
+	}
+
+	handle {
+		try_files {path} {path}/ /index.html
+		file_server
+	}
+}
+
+http://defxn.com, http://www.defxn.com {
+	@peerChallenge {
+		path /.well-known/acme-challenge/*
+		not header X-Acme-Forwarded *
+	}
+	handle @peerChallenge {
+		reverse_proxy {$FLUX_PEER}:80 {
+			header_up Host {host}
+			header_up X-Acme-Forwarded 1
+		}
+	}
+	handle {
+		redir https://{host}{uri} 308
+	}
+}
