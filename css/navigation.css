@@ -5,10 +5,8 @@
  gap:12px;height:76px;min-height:0;padding:14px max(20px,3.2cqw);z-index:20;
  border:0;background:transparent !important;box-sizing:border-box;pointer-events:none;
 }
-.ark-header::after {
- content:"";position:absolute;left:max(20px,3.2cqw);right:max(20px,3.2cqw);bottom:0;
- height:1px;background:linear-gradient(90deg,hsl(var(--primary-300)),hsl(var(--border-subtle)) 24%,hsl(var(--border-subtle)) 76%,transparent);
-}
+/* No hairline under the header: the chrome separates by space and fill, not rules. */
+.ark-header::after {content:none;}
 .ark-studio-identity {
  display:inline-flex;align-items:center;justify-content:flex-start;gap:12px;
  width:auto;height:48px;flex:0 0 auto;margin-right:auto;padding:0 4px;text-decoration:none;
@@ -20,7 +18,7 @@
 .ark-brand-descriptor {font:500 8px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.15em;color:hsl(var(--text-muted));}
 .header-core-links {
  display:flex;align-items:center;gap:3px;padding:4px;height:46px;box-sizing:border-box;
- border:1px solid hsl(var(--border-subtle));border-radius:9px;background:hsl(var(--canvas) / .65);pointer-events:auto;
+ border:0;border-radius:11px;background:hsl(var(--surface) / .72);pointer-events:auto;
 }
 #scene .ark-header .header-core-links a {
  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;
@@ -35,13 +33,13 @@
 #scene .ark-header .header-core-links a[aria-current="page"] {box-shadow:inset 0 -2px hsl(var(--reference-400)) !important;}
 #scene .nav-toggle {
  display:inline-flex; align-items:center; justify-content:center; gap:9px; width:auto; min-width:74px; height:40px; padding:0 11px;
- border:1px solid hsl(var(--border-default)); border-radius:var(--size-card-radius,8px);
- background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); cursor:pointer;
+ border:0; border-radius:var(--size-card-radius,8px);
+ background:hsl(var(--surface) / .72); color:hsl(var(--text-strong)); cursor:pointer;
  pointer-events:auto; transition:background-color 180ms ease,border-color 180ms ease;
 }
 .nav-toggle-label {font:600 9px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.09em;text-transform:uppercase;}
 #scene .nav-toggle:hover,
-#scene .ark-header.nav-open .nav-toggle { background:hsl(var(--surface)); border-color:hsl(var(--text-strong) / .36); }
+#scene .ark-header.nav-open .nav-toggle { background:hsl(var(--raised)); }
 #scene .ark-header #primary-navigation {
  display:none; position:absolute; top:75px; right:max(20px,3.2cqw);
  width:min(620px,calc(100vw - 40px)); height:min(540px,calc(100dvh - 96px));
@@ -77,7 +75,7 @@
 @media(max-width:1040px) {
  #scene .ark-header .header-core-links {display:flex;min-width:0;height:40px;flex:0 1 auto;margin-left:auto;padding:0;border:0;background:transparent;}
  #scene .ark-header .header-core-links > a:not(.header-account-link) {display:none;}
- #scene .ark-header .header-core-links .header-account-link {display:flex;min-width:0;max-width:154px;height:40px;padding-inline:12px;border:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .68);}
+ #scene .ark-header .header-core-links .header-account-link {display:flex;min-width:0;max-width:154px;height:40px;padding-inline:12px;border:0;background:hsl(var(--surface) / .72);}
  #scene .ark-header .ark-studio-identity {min-width:0;flex:0 1 auto;margin-right:0;}
  #scene .ark-header .ark-brand-lockup,#scene .ark-header .header-account-label {min-width:0;}
  #scene .ark-header :is(.ark-brand-wordmark,.ark-brand-descriptor,.header-account-name,.header-account-status) {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -296,7 +294,7 @@
 @media(max-width:560px){
  #scene .ark-header .header-core-links{display:flex;border:0;background:transparent;padding:0;margin-left:auto}
  #scene .ark-header .header-core-links a:not(.header-account-link){display:none}
- #scene .ark-header .header-core-links .header-account-link{display:flex;min-width:0;max-width:112px;padding-inline:10px;font-size:12px;border:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .65)}
+ #scene .ark-header .header-core-links .header-account-link{display:flex;min-width:0;max-width:112px;padding-inline:10px;font-size:12px;border:0;background:hsl(var(--surface) / .72)}
  #scene .ark-header .ark-studio-identity{min-width:0;flex:0 1 auto;margin-right:0}
  #scene .ark-header .ark-brand-lockup{min-width:0}
  #scene .ark-header .ark-brand-wordmark,#scene .ark-header .ark-brand-descriptor{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
