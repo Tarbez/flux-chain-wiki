@@ -428,6 +428,69 @@ processes, not baked into a deploy script or systemd unit — see gap #7,
 quorums B and C, which were never profiled for this specific starvation
 pattern and may show the same gap.
 
+## 9. Close-transfer-durable, re-tested on a real ~71ms link: the hop-count
+## theory was right all along (2026-10-07)
+
+§8 concluded hop-count reduction lost to the simpler multi-round-trip path
+because this fleet's inter-node RTT is sub-millisecond — too low for
+collapsing hops to beat well-parallelized independent connections. That
+conclusion got a real test the same day: a rented GPU box (8 cgroup-limited
+cores, Hostinger, Santa Clara) came online with a genuine **~71ms RTT** to
+every existing fleet node (confirmed via `ping`, not assumed) — the first
+topology this investigation has had with real geographic distance.
+
+**Two real infrastructure issues had to be found and worked around before
+any number meant anything**, both honestly non-obvious:
+
+1. **Hairpin NAT**: the GPU box cannot reach its own public IP from inside
+   itself — a bench client running locally on it has to address that box's
+   own node via `127.0.0.1`, not its advertised public endpoint, or every
+   call fails with `No route to host`.
+2. **One-way port exposure**: this rental platform only port-forwards the
+   SSH port; a listener on any other port (the fabric server's own 19401)
+   is reachable OUTBOUND from the box but not INBOUND to it from outside.
+   This silently broke `close-transfer-durable` specifically, not the old
+   path — the old path only ever needs the CLIENT (co-located on the GPU
+   box) to call out to both nodes, but `close-transfer-durable` requires
+   the PRIMARY to relay to its peer server-to-server, and with the
+   alphabetically-first member (on the normal fleet host) as primary, that
+   meant calls INTO the unreachable GPU box, hanging for a flat 30s before
+   failing outright — total failure, not degradation, even at concurrency
+   10. Fixed by renaming members so the GPU box's ID sorts first
+   (`0gx`/`1bx`), making it the primary — every relay call then runs
+   OUTBOUND from the GPU box (proven reachable), and nothing external ever
+   needs to dial back into it.
+
+**With that fixed, a clean 5-run audit at the same settings both paths
+were already tested at (count=2,000, concurrency=150, 4s cooldown between
+runs to avoid the same TCP TIME_WAIT noise documented in §8):**
+
+| Path | 5 runs | Zero-fail? |
+| --- | --- | --- |
+| Old (4 sequential round trips) | 128.29, 124.77, 127.61, 127.30, 127.30/s | 1 transient failure (1/2,000) |
+| New (`close-transfer-durable`, 1 round trip) | 247.20, 243.69, 255.54, 258.88, 258.14/s | Yes, all 5 |
+
+**A consistent, real ~1.9-2x improvement** — the opposite of §8's result
+on this fleet's own low-RTT nodes, and exactly what the original hop-count
+hypothesis predicted once real round-trip cost exists to amortize away.
+Both ceilings confirmed as real, not under-tested: old path's latency
+roughly tripled (405ms → 1,160ms) between concurrency 50 and 150 while
+throughput stayed flat at ~127/s (textbook saturation signature); new
+path showed the same flat-throughput/rising-latency signature between
+concurrency 150 and 400 (253-260/s, latency 558ms → 1,504ms).
+
+**Conclusion, stated precisely**: hop-count reduction is a real, correct,
+validated lever — conditioned on the deployment having real round-trip
+cost to amortize. On this project's current fleet (same or adjacent
+datacenters, sub-millisecond RTT) it loses to simpler parallel fan-out.
+On a geographically distributed quorum — which is the realistic shape of
+an actual decentralized validator set, not an artifact of this fleet's
+current InterServer-only footprint — it wins by roughly 2x. Neither
+result is more "true" than the other; they're both real, measured, on
+different topologies, and the honest takeaway is that `FABRIC_DIRECT_PRIMARY`
+should be a per-deployment tuning decision made from a real RTT
+measurement, not a single hardcoded default.
+
 ## Current live configuration
 
 Four real, concurrently-running quorums on the production fleet:

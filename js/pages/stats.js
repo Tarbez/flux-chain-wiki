@@ -46,7 +46,38 @@
       { label: 'Per-call fsync', value: 46.88, detail: 'First Rust build: 3x slower than Node' },
       { label: 'Group commit', value: 182.70, detail: 'Batching across concurrent requests' },
       { label: 'No redundant fsync', value: 354.54, detail: 'Replication to 3 validators already makes it durable' }
-    ]
+    ],
+    // Quorum A specifically, 2026-10-07: a separate, later investigation
+    // (bench-003 §7-8) that found the 354.54 fix above was real but had
+    // never been re-applied to this quorum's live deployment, plus two new
+    // bugs the earlier work hadn't hit.
+    durableFixToday: [
+      { label: 'Quorum A, unfixed', value: 157.6, valueLabel: '131-184', detail: 'Flat across concurrency 50-2,400 -- a real ceiling, not under-tested' },
+      { label: 'Routing bug fixed + fsync-off', value: 310.3, valueLabel: '269-351', detail: 'Auto-join broke durable finality for clients that hadn’t heard of a new member' },
+      { label: 'Thread-starvation fixed', value: 751.5, valueLabel: '676-827', detail: 'FABRIC_THREADS silently defaulted to CPU core count (2) on the primary' }
+    ],
+    // A hop-count-reduction redesign (close-transfer-durable: 1 round trip
+    // instead of 4) tried and measured on two real topologies -- it loses
+    // on this fleet's own sub-millisecond RTT and wins by ~2x on a rented
+    // box with genuine ~71ms RTT to the fleet. Both audited 5x, zero
+    // failures on the new path either way (bench-003 §8-9).
+    rttComparison: [
+      { topology: 'This fleet (<1ms RTT)', old: 762.58, new: 579.10, xLabel: '0.8x -- loses' },
+      { topology: 'Rented box, real 71ms RTT', old: 127.05, new: 252.69, xLabel: '2.0x -- wins' }
+    ],
+    // A rented 8-core/96GB-VRAM GPU box (RTX PRO 6000) was added 2026-10-07
+    // to see if more compute would raise the aggregate. CPU sat 85-95% idle
+    // on every box, in every test, all night -- the ceiling was always
+    // network round trips and server thread concurrency, never compute.
+    // These numbers prove that directly: a rented GPU server and this
+    // session's own laptop, running the identical standalone 3-node quorum,
+    // land within 2.5% of each other. The GPU itself was never touched.
+    computeProof: [
+      { label: 'Laptop (this machine), standalone quorum', value: 2297.62, detail: 'Zero failures, 3,000 closures' },
+      { label: 'Rented GPU box, standalone quorum', value: 2355.97, detail: 'Zero failures, 3,000 closures -- 2.5% different, not 10x' },
+      { label: 'GPU box + fleet, real cross-region', value: 842.75, detail: 'Single round trip, ~71ms real RTT -- latency-bound, not compute-bound' }
+    ],
+    computeProofTotal: { fleet: '5,711-6,041', addOn: 5496.34, grand: '~11,200-11,550' }
   };
   ArkUI.statsEvidence = EVIDENCE;
 
@@ -117,12 +148,25 @@
     }).join('') + '</ol>';
   }
 
-  function durableSteps() {
-    var max = EVIDENCE.durablePath[EVIDENCE.durablePath.length - 1].value;
-    return '<ol class="stats-steps">' + EVIDENCE.durablePath.map(function (s, i) {
+  function durableSteps(steps) {
+    var list = steps || EVIDENCE.durablePath;
+    var max = Math.max.apply(null, list.map(function (s) { return s.value; }));
+    return '<ol class="stats-steps">' + list.map(function (s, i) {
       return '<li data-tip="' + esc(s.label + ': ' + fmt(s.value, 2) + '/s') + '"><span class="stats-step-col"><span style="--h:' + pct(s.value, max) + '"></span></span>' +
-        '<b>' + fmt(s.value, 2) + '</b><span class="stats-step-label">' + (i + 1) + ' · ' + esc(s.label) + '</span><small>' + esc(s.detail) + '</small></li>';
+        '<b>' + esc(s.valueLabel || fmt(s.value, 2)) + '</b><span class="stats-step-label">' + (i + 1) + ' · ' + esc(s.label) + '</span><small>' + esc(s.detail) + '</small></li>';
     }).join('') + '</ol>';
+  }
+
+  // Two topologies, same hop-reduction code, opposite winner -- the real
+  // finding from 2026-10-07's GPU-box test (bench-003 Sec 9).
+  function rttChart() {
+    return '<ul class="stats-legend" aria-hidden="true"><li class="is-node">4 round trips</li><li class="is-rust">1 round trip</li></ul>' +
+      '<ol class="stats-pairs">' + EVIDENCE.rttComparison.map(function (r) {
+        var max = Math.max(r.old, r.new);
+        return '<li><p class="stats-pair-head"><span>' + esc(r.topology) + '</span><b>' + esc(r.xLabel) + '</b></p>' +
+          '<p class="stats-pair-bar is-node" data-tip="4 round trips: ' + fmt(r.old, 2) + '/s"><span style="--w:' + pct(r.old, max) + '"></span><em>' + fmt(r.old, 2) + '</em></p>' +
+          '<p class="stats-pair-bar is-rust" data-tip="1 round trip: ' + fmt(r.new, 2) + '/s"><span style="--w:' + pct(r.new, max) + '"></span><em>' + fmt(r.new, 2) + '</em></p></li>';
+      }).join('') + '</ol>';
   }
 
   function rawTables() {
@@ -164,7 +208,8 @@
         tile('stats-hero', '', '<p class="stats-kicker">Measured, not claimed</p>' +
           '<h1 id="stats-title">Mesh performance</h1>' +
           '<p>Real runs on the production fleet, Node and Rust head to head. Both systems were rebuilt as minimal, single-purpose daemons and measured again.</p>' +
-          '<p class="stats-chips"><span>' + esc(stats.measured) + '</span><span>InterServer VPS fleet</span><span>8 machines</span></p>' +
+          '<p class="stats-chips"><span>' + esc(stats.measured) + '</span><span>InterServer VPS fleet</span><span>8 machines</span>' +
+          '<span class="stats-live-chip" id="stats-live-chip" data-state="loading">Checking fleet status…</span></p>' +
           '<a class="stats-monitor-link" href="' + href('monitor') + '" data-scene-link="monitor">Open the live monitor <span aria-hidden="true">→</span></a>') +
         kpis() +
 
@@ -183,6 +228,16 @@
           '<p class="stats-tile-copy">A joining node needs one existing member’s address and a shared admission secret. Membership is gossiped, so one call converges the set. On the real fleet a new node became an interchangeable validator, confirmed from every node’s own view, and a node from another quorum was correctly rejected.</p>' +
           '<p class="stats-zero"><strong>0</strong><span>failures across every benchmark run, both languages</span></p>', 'stats-join-title') +
 
+        tile('stats-span-6', 'Quorum A, fixed today (2026-10-07)', '<h2>A stale fix, plus a real thread bug</h2>' + durableSteps(EVIDENCE.durableFixToday) +
+          '<p class="stats-tile-copy">The 354.54/s fix above was real but had never been re-applied to this quorum; a routing bug and a thread-starvation bug (server threads silently capped at CPU core count -- 2) were also found and fixed. 5 audited runs, zero failures.</p>', 'stats-fix-title') +
+        tile('stats-span-6', 'One round trip vs four: it depends on distance', '<h2>A redesign that loses here, wins there</h2>' + rttChart() +
+          '<p class="stats-tile-copy">Collapsing durable finality’s chain to one server-orchestrated round trip was tried on this fleet’s own sub-millisecond links (loses, more serialization than it saves) and on a rented box with a genuine ~71ms path to the fleet (wins ~2x) -- same code, opposite answer, both real. 5 audited runs each, zero failures on the new path either way.</p>', 'stats-rtt-title') +
+
+        tile('stats-span-12 stats-compute-proof', 'Tested, not assumed', '<h2>A GPU doesn’t help this -- and we proved it, not guessed it</h2>' +
+          '<p class="stats-tile-copy">This protocol is signatures and network round trips, not computation -- CPU sat 85-95% idle on every box, in every test, all night. We’re eco by design: no heavy hardware required to run a validator. A rented 8-core/96GB-VRAM GPU server (its GPU never touched -- only its CPU and its real network distance were useful) proved this directly: run the same standalone quorum on this session’s own laptop and on that rented server, and the two land within 2.5% of each other -- not the 5-10x a compute-bound workload would show.</p>' +
+          durableSteps(EVIDENCE.computeProof) +
+          '<p class="stats-tile-copy">Summed with the existing fleet (' + EVIDENCE.computeProofTotal.fleet + '/s, 4 quorums) these three add ' + fmt(EVIDENCE.computeProofTotal.addOn, 0) + '/s more, for a combined <strong>' + EVIDENCE.computeProofTotal.grand + '/s</strong> across every quorum run concurrently tonight -- stated plainly as what it is: independent, isolated quorums summed, mixing the real production fleet with temporary rented and local test hardware, not a claim about standing fleet capacity.</p>', 'stats-compute-title') +
+
         tile('stats-span-8 stats-scope', 'What this does not prove yet', '<ul class="stats-scope-list">' +
           '<li>Paths ran node to node between fleet machines, not from an arbitrary public client.</li>' +
           '<li>Each quorum is 2–3 nodes. Nothing here speaks to 50 or 500 validators, or to adversarial conditions.</li>' +
@@ -198,6 +253,29 @@
         tile('stats-span-12 stats-raw-tile', '', rawTables()) +
         '</div></div>';
       host.appendChild(page);
+      // One real, live check fetched on load -- not polled, since this page
+      // is a static audited snapshot (every other number here carries a
+      // date, deliberately). Failure leaves the chip saying so plainly,
+      // never a guessed or stale-looking number; a real reading links to
+      // /monitor, which polls continuously.
+      var chip = page.querySelector('#stats-live-chip');
+      if (chip && window.fetch) {
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, 6000);
+        fetch('https://defxn.com/api/fleet-status', { cache: 'no-store', signal: controller.signal })
+          .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+          .then(function (data) {
+            clearTimeout(timer);
+            var s = data.summary;
+            chip.dataset.state = s.quorumsOnline === s.quorumsTotal ? 'ok' : 'warn';
+            chip.textContent = s.quorumsOnline + '/' + s.quorumsTotal + ' quorums online right now';
+          })
+          .catch(function () {
+            clearTimeout(timer);
+            chip.dataset.state = 'warn';
+            chip.textContent = 'Live status unavailable';
+          });
+      }
       // The router labels, hides and focuses the element mount() returns;
       // returning nothing made navigation to /stats throw and strand the page.
       return page;

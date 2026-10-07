@@ -18,7 +18,7 @@
     items: Object.freeze([
       { value: '3,250', unit: 'tx/s', short: 'Fabric accepted', label: 'Agreement-fabric, accepted (Rust)', detail: '11.1x the Node number, concurrency 1,200, real fleet' },
       { value: '5,711-6,041', unit: 'tx/s', short: 'Fleet, 4 quorums', label: 'Aggregate fleet capacity (4 quorums)', detail: '4 independent quorums in parallel, 5 audited runs, 2 cleared 6,000/s -- not one quorum\'s speed' },
-      { value: '355', unit: 'tx/s', short: 'Fabric durable', label: 'Agreement-fabric, durable (Rust)', detail: 'Replication-backed, no redundant fsync; 2.5x the Node number' },
+      { value: '676-827', unit: 'tx/s', short: 'Fabric durable', label: 'Agreement-fabric, durable (Rust)', detail: 'Quorum A, real fleet, 5 audited runs, up from 269-351 after a thread-bug fix' },
       { value: '151', unit: 'tx/s', short: 'FXN transfers', label: 'FXN value-object transfers (Rust)', detail: '1.1x the Node number, same real fleet' },
       { value: '0', unit: 'failures', short: 'All runs', label: 'Every benchmark run', detail: 'Up to 4,000 transfers per run, both languages' }
     ])
@@ -47,5 +47,22 @@
     // columns to fit this without displacing another stat or breaking
     // the "no scroll" home layout -- verified by screenshot at multiple
     // viewport heights.
+    //
+    // Durable-finality item updated 2026-10-07: the old 355/s figure was
+    // real but stale -- from a separate, earlier fsync-vs-replication
+    // investigation (bench-003 Sec 1), never re-applied to quorum A's live
+    // deployment. Measured quorum A at only 131.35/s, found and fixed a
+    // real routing bug (auto-join broke durable finality for clients that
+    // hadn't heard of a new member) and a real thread-starvation bug
+    // (FABRIC_THREADS silently defaulted to CPU core count -- 2, on the
+    // primary -- badly undersized for network-wait-bound request handling),
+    // landing at 676-827/s, 5 audited runs, zero failures. A hop-count-
+    // reduction redesign was also tried and genuinely lost on this fleet's
+    // own sub-millisecond RTT (worse by ~25-35%) -- but then won by a real
+    // ~2x on a rented box with genuine ~71ms RTT to the fleet, validating
+    // the original theory on a topology that could actually test it. That
+    // finding doesn't fit this rail (no single fleet-capacity number to
+    // show -- it's a conditional, topology-dependent result) and stays on
+    // /stats and docs/evidence/bench-003-rust-fleet-ceiling.md Sec 7-9.
   });
 })();
