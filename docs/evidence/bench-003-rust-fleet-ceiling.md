@@ -1,0 +1,308 @@
+# BENCH-003: Rust daemon rebuild, fleet throughput ceiling, auto-join
+
+Full investigation log behind the headline numbers on `/stats`. The live page
+shows only the current, verified state; this document is the record of how
+it was reached — every dead end, bug, and reversed conclusion included,
+because a wrong theory that was later corrected is itself useful evidence
+that the final number wasn't cherry-picked.
+
+Observation dates: 2026-10-05 through 2026-10-07. Environment: real
+InterServer VPS production fleet (`flx-bk2`, `flx-mk2`, `flx-bk1`, `flx-mk1`,
+`flx-ms1`, `flx-mist1`, `flx-ms3`, `flx-ms2`) plus the local development
+machine where noted. All throughput numbers are `agreement-fabric-rs`
+accepted-finality closures/second unless stated otherwise.
+
+## 1. Rust port and fsync-vs-replication (2026-10-05)
+
+Both `defxn-defi` and `agreement-fabric`'s certifier role exist as real
+from-scratch Rust ports (`defxn-defi-rs`, `agreement-fabric-rs`) — full
+protocol ports (deterministic cell assignment, attestation, certificate
+aggregation, durable commit, successor routing, signed availability
+receipts), not just the crypto. A real bug was caught in review, not
+shipped: the first Rust durable path used per-call fsync with no batching
+and measured 3x *slower* than Node (46.88/s) despite being 8x faster on
+accepted finality (2,328/s) on the same build — that split was the signal.
+Group-commit batching (same fix `defxn-defi-rs` already needed) took durable
+finality from 46.88/s to 182.70/s.
+
+Fsync-vs-replication was then tested directly rather than assumed:
+
+- `agreement-fabric-rs`: replication to 3 real validators was already
+  happening via commit-certificate, so dropping local fsync was pure
+  redundancy removed — 182.70/s → 354.54/s, a free 1.94x.
+- `defxn-defi-rs`: had no replication at all. Built a real 2-of-2 quorum
+  replicator from scratch to test the same idea — 151.37/s (fsync) → 75.08/s
+  (replicated, genuinely durable), a 0.5x loss. Two real network round trips
+  cost more than one local disk flush on this hardware.
+
+Honest rule: dropping fsync for replication is free when replication is
+already happening for another reason; building new replication specifically
+to replace a flush is not automatically a win.
+
+## 2. Chasing a single quorum's ceiling (2026-10-05 – 10-06)
+
+Starting point: the bench client called all 3 validators' attestation step
+sequentially, paying the sum of every round trip. Fixed (reused thread pool,
+not raw spawns — raw `std::thread::scope` per call measured worse under
+load from creation overhead): 2,076/s → ~2,170/s.
+
+Per-process `top` readings found the primary validator's own server process
+AND the bench client process each independently at 275-335% CPU on a 7-core
+box — genuine compute on both sides. A fresh Ed25519 keypair was being
+generated for both parties on *every* transfer; reusing one sender/recipient
+identity across a run (matching `defxn-defi-rs`'s own bench client) pushed
+throughput to ~2,390/s.
+
+Three alternative client placements were tested and all measured worse: a
+different validator as client turns the primary's local aggregate step into
+a second real network hop (1,307/s); a weak 1-vCPU non-validator box can't
+drive the client's per-transfer crypto fast enough (480/s); this machine
+over SSH tunnels to all three validators was worse again (130/s).
+
+Topology change: a 2-of-2 quorum on just mk2 + bk1, bk2's own validator
+stopped so the client has the whole 7-core box — 2,627/s. Found and fixed: a
+TCP connection-pool bug (4,191 connections stuck in TIME_WAIT from rapid
+repeated testing, `ureq`'s default idle-per-host limit too small) — fixed by
+raising the limit and enabling `tcp_tw_reuse` — 3,089/s. A naive "more
+threads will help" guess measured *worse* (765/s, bk1 only has 2 real
+cores, the work is CPU-bound not I/O-wait-bound); reverting to default
+thread count (matched to cores) restored the gain. Also fixed: the bench
+client had no request timeout, and one stuck connection hung an entire run
+indefinitely.
+
+Re-confirmed at 2x scale (30,000 transfers, concurrency 300 and 1,200, zero
+failures both). Pushing concurrency further than previously tested found
+real headroom: 3,293.77/s and 3,251.52/s at concurrency 1,200 (two clean
+runs), 3,099.27/s at 1,800, 3,050.83/s at 2,400.
+
+**Ceiling found, not assumed**: `top` during a concurrency-1,500 run caught
+bk1 (the pair's weaker member, 2 vCPUs) at 0% idle, fully CPU-saturated.
+Swapping bk1 for the strongest available machine (bk2, 7 vCPUs) measured
+*worse* (1,574.37/s, a failure) — bk2 then had to run validator and client
+duty at once, reproducing the exact contention already fixed once. A fourth
+dedicated-client machine was tried two ways: this Mac directly (no tunnel)
+against bk2+mk2 — home-internet latency dominated (114.86/s, p50 1.2s); a
+real idle fleet VPS (ms1) as dedicated client — ms1 itself maxed out at
+100% CPU and started swapping (load average 12.84), only ~1,250-1,400/s.
+Conclusion at the time: every one of the fleet's 8 real machines is either
+one of the 2 strong boxes or too weak to add capacity in any role for this
+workload — **~2,900-3,300/s is this one quorum's real ceiling.**
+
+A topology using bk2 + mk2 (both strong) as validators with ms2 as a
+dedicated client was also tried and found a flat, reproducible ~420/s, far
+below expectations — neither validator CPU-saturated, primary-swap made no
+difference. Reported at the time as a genuine unresolved mystery (see §6 —
+it wasn't one).
+
+## 3. Close-transfer, round 1 (2026-10-06)
+
+The real Node protocol has a single-round-trip "close-transfer" mode (the
+primary does its own attest fan-out server-to-server) that this Rust port
+never had. Built it. At low-moderate concurrency, measured a real 1.49x
+locally (2,602/s → 3,889/s, zero failures). Did not hold up at the
+concurrency this investigation's other numbers used.
+
+Chased rather than abandoned: the primary's own fan-out first repeated the
+exact raw-thread-spawn mistake already fixed on the client (fixed);
+diagnostic logging pinned failures to the primary's outbound call timing out
+after 10s waiting on its peer; the peer was isolated and proven healthy
+alone (2,000 requests, 268ms, zero stalls); a shared-agent lock-contention
+theory was tested with a 16-agent pool — no change.
+
+One real root cause found: the server accepted and parsed every incoming
+connection on a single thread before handing off to a worker pool,
+serializing the step that matters most under a connection burst.
+`tiny_http`'s `Server` is `Send + Sync` specifically for multiple threads to
+each call `.recv()` directly — switching to that measured a real 1.33x
+locally (2,602/s → 3,461/s). On the real fleet the ceiling didn't move
+materially (~2,700-3,060/s) — informative: confirms the real fleet's
+ceiling is network-round-trip-bound, not accept-loop-bound, while the fix
+was real and worth keeping regardless.
+
+Close-transfer's own ceiling was resolved far enough for a real conclusion:
+raising the outbound agent pool (16 → 64, matched to real RTT) eliminated a
+flat ~200/s ceiling and most failures, reaching 733.61/s zero-failure at
+concurrency 150 — but swapping primary (mk2, 5 vCPU, vs bk1, 2) made it
+*worse* (386.92/s, failures returned), ruling out "primary is just weak."
+Real conclusion: a server thread is held for the ENTIRE peer round trip
+under blocking I/O, something the shipped two-phase approach never does.
+That's a limit of synchronous blocking I/O, not a tunable — a proper fix
+needs an async rewrite (tokio), out of scope at the time. Close-transfer's
+best confirmed config (733.61/s) stayed below the shipped path's
+~2,900-3,100/s.
+
+A server-side "batch" command (bundle N operations into one HTTP call,
+confirmed in the extracted Node source) was also ported. Measured honestly:
+did NOT help — flat ~1,100/s regardless of concurrency 150-1,200, because
+the batch window becomes a new fixed-latency floor once real RTT is already
+comparable to it, and a single queue-writer thread per endpoint became its
+own bottleneck. Kept in the codebase, opt-in, not a win here.
+
+## 4. Aggregate fleet capacity: sharding (2026-10-06)
+
+Every number to this point is one quorum's throughput, tuned as far as
+hardware allows. The untried lever: stand up more independent quorums on
+the fleet's remaining machines and run them concurrently, summing real
+results rather than one quorum's speed. Reported as its own metric, never
+folded into the single-quorum number.
+
+Two more 2-of-2 quorums were built (fresh Rust toolchain install, key
+generation, deployment — not a resize of the existing one):
+
+- Quorum B (mk1 + ms1, 1-vCPU boxes): flat, reproducible ~390-435/s
+  regardless of concurrency 50-600, checked three times.
+- Quorum C (mist1 + ms3, also nominal 1-vCPU): a real, reproducible
+  ~760-1,060/s — noticeably faster than quorum B despite the same nominal
+  spec. Checked for an obvious cause (comparable background load on both
+  pairs) and none was found — reported as a genuine measured difference
+  between nominally-identical VPS instances, not explained away.
+
+The dedicated client for quorum C was tried from this Mac directly first
+(74-91/s, flat — the same home-internet-latency finding) and moved to a
+fleet VPS (ms2) instead, which fixed it.
+
+All three quorums run concurrently, real results summed (not estimated from
+separate runs): **2,948.31 + 387.19 + 790.61 = 4,126.11/s** (run 1, zero
+failures); **3,021.25 + 401.72 + 758.35 = 4,181.32/s** (run 2, zero
+failures). This fleet can process over 4,000/s in total across three
+independent quorums — a real, reproducible number, but NOT any single
+quorum crossing 4,000/s.
+
+A fourth quorum adding this Mac as a validator was tried via reverse SSH
+tunnel (it isn't on the fleet's network). Flat ~15-19/s with occasional
+timeouts — the same home-internet latency, now hitting a validator role
+instead of a client role. Excluded from the aggregate for that reason.
+
+## 5. Auto-join (2026-10-06 – 10-07)
+
+Every quorum above was hand-assembled: generate every member's keypair up
+front, write the whole list into every node's config, start them all
+already knowing each other. Built instead: a `join` command a new node
+calls on ONE existing member it has the address of. That member adds the
+newcomer to its own live membership (now a lock behind the process, not a
+fixed startup list) and gossips the join to every other member it knows,
+marked so forwards don't loop.
+
+Deployed to the real fleet: `validator-mk2` and `validator-bk1` upgraded to
+the join-capable binary in place, same keys — re-verified unchanged first
+(3,217.50/s, zero failures). A third real machine, `flx-ms2`, started with
+**no membership list at all** — only mk2's address and its own — and
+joined on the first attempt. Queried independently on all three machines
+afterward: `mk2`, `bk1`, and `ms2` all returned the identical 3-member
+registry, including `bk1`, which never spoke to `ms2` directly — it only
+learned via mk2's gossip.
+
+Proven as a genuine interchangeable validator, not just a registry entry: a
+real transfer against `mk2 + ms2` (bk1 excluded) completed 500/500, zero
+failures, 739.63/s; against `bk1 + ms2` (mk2 excluded), 498/500 (2 transient
+timeouts, the same connection-warmup noise documented elsewhere). A negative
+control: a real fleet node from a DIFFERENT quorum (never joined to this
+one) was correctly rejected every time with `CERTIFICATE_SIGNATURE_INVALID`.
+
+Hardened: `FABRIC_JOIN_SECRET`, set once out of band on every member, now
+gates every join (original call and every gossiped forward), compared
+byte-for-byte in constant time. Verified both directions — wrong/missing
+secret refused with `JOIN_SECRET_MISMATCH` before touching membership; right
+secret works exactly as demonstrated. Still no vote, no stake — a real but
+modest hardening, not a BFT admission protocol. Threshold does not
+auto-adjust when membership grows.
+
+One limitation found by hitting it: membership learned via `join` lives
+only in memory. Restarting a member resets it to whatever
+`FABRIC_MEMBERS_JSON` it started with. Happened for real during this
+investigation's own testing (`ms2` dropped out after an unrelated restart,
+rejoined with one more call). Persisting membership is understood but not
+built.
+
+## 6. Round-trip reduction, audited, and the real cause of the "mystery" (2026-10-07)
+
+Close-transfer was revisited rather than left closed. The earlier "more
+threads make it worse" verdict predated the agent-pool fix and the two were
+confounded — retested clean: default threads (matched to cores) gives
+689/s on quorum A; 128 threads gives a reproducible 1,237-1,391/s across 5
+consecutive zero-failure runs, a real 1.8x.
+
+That gain does not generalize evenly. On quorum B, close-transfer at 128
+threads beat shipped by ~2x (771-857/s vs 429/s) — round-trip reduction
+matters more where latency is a bigger fraction of cost. On quorum C,
+close-transfer measured *worse* than shipped (711-769/s vs 869/s). The real
+trap: raising `FABRIC_THREADS` for close-transfer also changes how the same
+process handles its ordinary shipped-path traffic — on a single-core box,
+128 threads doing CPU-bound signature work reintroduces the "more threads,
+worse" case through a different door. Measured directly: running all three
+quorums together with quorum B on close-transfer gave 3,726-4,059/s
+combined — *worse* than the all-shipped aggregate — because quorum A's own
+number dropped too, from thread-count contention quietly left at 128 on
+bk1.
+
+Reverted every primary's thread count to match its real core count, re-ran
+the three-quorum aggregate 5 times: **4,250.07, 4,358.12, 4,398.36,
+4,308.28, 4,111.39/s**, all zero failures — a real but modest 2-5% gain
+over the 4,126-4,181 baseline.
+
+One more lever checked before concluding: `top` during quorum A's run
+showed real idle capacity on bk2 (57.8% idle) and mk2 (46.3% idle) — bk1
+confirmed as the actual limit (92.6% busy). That idle capacity can only be
+spent as a separate quorum — which is exactly the bk2+mk2 pairing from §2
+that measured a flat, unexplained ~420/s.
+
+**It was not a mystery.** Revisited a third time with `ss` run on the
+client mid-request instead of only `top` on the validators — every
+connection to one specific member sat in `SYN-SENT`, never completing a
+handshake. The firewall rule opening that port had only ever been added on
+ONE of the two validator boxes, not both, for every earlier test of this
+exact pairing. A plain missed `ufw allow`, not a protocol or architecture
+problem — it had been silently capping or outright stalling this pairing
+the entire time. Fixed on both boxes, both directions, retested clean: a
+genuinely independent quorum (bk2 + mk2) now runs at a real, reproducible
+**~2,000-2,900/s** on its own.
+
+Added as a fourth quorum. Client placement tuned empirically: bk2 driving
+two client processes at once saturated it (98.9% busy, load average 11.95);
+moving this quorum's client to mk2 (which had headroom) fixed it. Five
+fresh audit attempts, all four quorums concurrent, each checked for real:
+
+| Attempt | A | B | C | F (bk2+mk2) | Sum |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 2,556.24 | 406.74 | 672.55 | 1,969.26 | 5,604.79 |
+| 2 | 2,423.63 | 429.60 | 787.79 | 1,956.16 | 5,597.18 |
+| 3 | 2,245.71 | 420.34 | 743.05 | 1,816.37 | 5,225.47 |
+
+(preliminary run before client-placement tuning; superseded by the table
+below)
+
+| Final audit | A | B | C | F | Sum |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 2,270.74 | 424.01 | 706.96 | 2,629.84 | **6,031.55** |
+| 2 | 2,509.97 | 414.49 | 706.64 | 2,410.21 | **6,041.31** |
+| 3 | 2,476.24 | 416.49 | 744.85 | 2,282.15 | 5,919.73 |
+| 4 | 2,413.09 | 377.58¹ | 807.75 | 2,112.97 | 5,711.39 |
+| 5 | 2,449.26 | 423.54 | 827.77 | 2,172.21 | 5,872.78 |
+
+¹ one transient timeout out of 4,000 on quorum B, the same connection
+warm-up pattern documented throughout this fleet's testing, not a new bug.
+
+**Final result: ~5,700-6,050/s, two of five runs clearing 6,000/s
+outright.** The honest caveat: this jump came from finding and fixing a
+firewall misconfiguration, not a deeper algorithmic insight — worth
+recording for exactly that reason. The generalizable lesson: when a
+benchmark result makes no sense given everything else measured, check the
+layer below the application (`ss`, not just `top`) before writing up a
+plausible-sounding theory.
+
+## Current live configuration
+
+Four real, concurrently-running quorums on the production fleet:
+
+- **Quorum A** — mk2 + bk1, client on bk2. ~2,900-3,300/s standalone, this
+  page's reported single-quorum number. `ms2` is also an auto-joined,
+  gossip-verified third member (demonstrates §5; not required for A's
+  throughput).
+- **Quorum B** — mk1 + ms1, client on ms2. ~390-435/s standalone.
+- **Quorum C** — mist1 + ms3, client on ms2. ~760-1,060/s standalone.
+- **Quorum F** — bk2 + mk2 (reusing their idle capacity from quorum A/B
+  duty), client on mk2. ~2,000-2,900/s standalone.
+
+Production (`agreement-fabric-rs.service`, port 18993, 3-of-3 on bk2/mk2/
+bk1) is untouched by any of this — separate port, separate process,
+separate registry, verified `active` on all three nodes throughout.
