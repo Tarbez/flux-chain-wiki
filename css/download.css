@@ -6,7 +6,7 @@
 .download-terminal {gap:0;}
 .download-terminal-top {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px;}
 #scene .download-copy {min-height:28px;padding:4px 10px;border:1px solid hsl(var(--primary-300));border-radius:5px;background:transparent;font:500 11px var(--mono-font,monospace);color:hsl(var(--primary));cursor:pointer;}
-#scene .download-copy:is(:hover,:focus-visible) {background:hsl(var(--primary-200));color:hsl(var(--text-strong));}
+#scene .download-copy:is(:hover,:focus-visible) {background:hsl(var(--reference-100));border-color:hsl(var(--reference-400));color:hsl(var(--text-strong));}
 .download-screen {flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;}
 #scene .download-code {display:flex;flex-direction:column;gap:9px;margin:18px 0 0;padding:18px 20px;border-radius:7px;background:hsl(var(--canvas) / .72);border:1px solid hsl(var(--primary-200));white-space:pre-wrap;overflow-wrap:anywhere;}
 #scene .download-code code {font:500 14px/1.45 var(--mono-font,monospace);color:hsl(var(--text-strong));}
