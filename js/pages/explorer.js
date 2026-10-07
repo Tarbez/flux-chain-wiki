@@ -70,18 +70,23 @@
   };
   var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'miners', publications: 'publications', documents: 'documents' };
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
+  /* One screen, no page scroll. Everything else is a state that takes the same place:
+     the three steps swap inside one stage, a kind opens over the tiles, a record over its list,
+     and the raw observatory over the whole page. On a phone the two halves are panes. */
   function story() {
-    return '<div class="explore-story">' +
-      '<header class="explore-hero"><p class="explore-kicker">MESH EXPLORER</p><h1 id="mesh-explorer-title">Your idea, live on the mesh.</h1>' +
-      '<p>DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.</p>' +
-      '<a class="explore-cta" href="' + href('resolutions') + '">See what you can build</a></header>' +
-      '<ol class="explore-steps" aria-label="How it works">' + STEPS.map(function (step, i) {
-        return '<li class="explore-step"><div class="explore-art">' + step[2] + '</div><span class="explore-step-n">' + (i + 1) + '</span><h2>' + step[0] + '</h2><p>' + step[1] + '</p></li>';
-      }).join('') + '</ol>' +
+    return '<div class="explore-home" data-explore-home data-pane="how">' +
+      '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
+      '<section class="explore-intro" aria-labelledby="mesh-explorer-title"><p class="explore-kicker">MESH EXPLORER</p><h1 id="mesh-explorer-title">Your idea, live on the mesh.</h1>' +
+      '<p class="explore-deck">DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.</p>' +
+      '<div class="explore-how" aria-label="How it works"><div class="explore-how-tabs" role="tablist" aria-label="How it works">' + STEPS.map(function (step, i) {
+        return '<button type="button" role="tab" id="explore-step-tab-' + i + '" aria-controls="explore-step-stage" aria-selected="' + (i === 0) + '" data-explore-step="' + i + '"><span>' + (i + 1) + '</span>' + step[0] + '</button>';
+      }).join('') + '</div>' +
+      '<div class="explore-how-stage" id="explore-step-stage" role="tabpanel" aria-labelledby="explore-step-tab-0" data-explore-stage><div class="explore-art">' + STEPS[0][2] + '</div><p>' + STEPS[0][1] + '</p></div></div>' +
+      '<nav class="explore-more" aria-label="Learn more"><a class="explore-cta" href="' + href('resolutions') + '">See what you can build</a><a href="' + href('resolver') + '">What is a resolver?</a></nav></section>' +
       '<section class="explore-live" aria-labelledby="explore-live-title"><div class="explore-live-head"><h2 id="explore-live-title">Running on the mesh now</h2>' +
       '<div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><div><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></div></div>' +
-      '<div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div><p class="explore-private" data-explore-private hidden></p></section>' +
-      '<nav class="explore-more" aria-label="Learn more"><a href="' + href('resolver') + '">What is a resolver?</a><a href="' + href('deployment') + '">How it works, step by step</a></nav>' +
+      '<div class="explore-live-body" data-explore-body data-state="kinds"><div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div></div>' +
+      '<div class="explore-live-foot"><p class="explore-private" data-explore-private hidden></p><button type="button" class="explore-raw-open" data-explore-raw-open>Raw records</button></div></section>' +
       '</div>';
   }
 
@@ -90,8 +95,9 @@
       var page = node('section', 'ark-page task-page mesh-explorer-page explore-page');
       page.dataset.arkPage = 'explorer';
       page.setAttribute('aria-labelledby', 'mesh-explorer-title');
+      page.dataset.view = 'home';
       page.innerHTML = story() +
-        '<details class="explore-raw" data-explore-raw><summary><span>Browse the raw records</span><small>Every source, record and node, read live</small></summary><div class="mesh-explorer-shell">' +
+        '<div class="explore-raw" data-explore-raw hidden><button type="button" class="explore-raw-back" data-explore-raw-back>← Back to the overview</button><div class="mesh-explorer-shell">' +
         '<header class="mesh-explorer-header">' +
         '<aside class="mesh-explorer-live-panel" aria-label="Current observation">' +
         '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside>' +
@@ -112,7 +118,7 @@
         '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-secondary"><summary><span>05</span> Observation details</summary><div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="docs/operators/verification.md">How to verify an observation ↗</a> · <a href="docs/evidence/registry.md">Evidence registry ↗</a></p></div></details></nav>' +
-        '</div></details>';
+        '</div></div>';
       host.appendChild(page);
       if (page.querySelector('[data-explorer-connect]')) setup(page);
       return page;
@@ -142,6 +148,42 @@
     var glance = $('.mesh-observatory');
     var browseBox = $('[data-explore-browse]'), browsing = { category: null, source: null, token: 0 };
     var kindsBox = $('[data-explore-kinds]'), privateLine = $('[data-explore-private]'), raw = $('[data-explore-raw]'), liveCounts = {};
+    var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stage = $('[data-explore-stage]'), stepTimer = 0, step = 0;
+    function showStep(index, focus) {
+      step = (index + STEPS.length) % STEPS.length;
+      Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
+        var on = Number(tab.dataset.exploreStep) === step; tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1;
+        if (on && focus) tab.focus();
+      });
+      stage.setAttribute('aria-labelledby', 'explore-step-tab-' + step);
+      stage.innerHTML = '<div class="explore-art">' + STEPS[step][2] + '</div><p>' + STEPS[step][1] + '</p>';
+    }
+    /* The steps play once through on their own, and stop for good the moment someone picks one. */
+    function stopSteps() { window.clearInterval(stepTimer); stepTimer = 0; }
+    Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
+      tab.addEventListener('click', function () { stopSteps(); showStep(Number(tab.dataset.exploreStep)); });
+      tab.addEventListener('keydown', function (event) {
+        var move = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+        if (!move) return; event.preventDefault(); stopSteps(); showStep(step + move, true);
+      });
+    });
+    if (!(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) stepTimer = window.setInterval(function () {
+      if (step === STEPS.length - 1 || !page.isConnected) { stopSteps(); return; }
+      if (document.visibilityState !== 'hidden') showStep(step + 1);
+    }, 5200);
+    Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (button) {
+      button.addEventListener('click', function () {
+        home.dataset.pane = button.dataset.explorePane;
+        Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (other) { other.setAttribute('aria-pressed', String(other === button)); });
+      });
+    });
+    function showView(view) {
+      page.dataset.view = view; raw.hidden = view !== 'raw'; home.hidden = view === 'raw';
+      if (view === 'raw') $('[data-explore-raw-back]').focus({ preventScroll: true });
+      else $('[data-explore-raw-open]').focus({ preventScroll: true });
+    }
+    $('[data-explore-raw-open]').addEventListener('click', function () { showView('raw'); });
+    $('[data-explore-raw-back]').addEventListener('click', function () { showView('home'); });
     function base() { return originSelect.value === 'local' ? LOCAL_MINER : PUBLIC_BASE; }
     function originName() { return originSelect.value === 'local' ? 'local Miner' : 'public mesh'; }
     var source = $('#mesh-source');
@@ -526,7 +568,7 @@
     }
     function closeBrowse() {
       browsing.category = null; browsing.source = null; browsing.token += 1;
-      browseBox.hidden = true; browseBox.replaceChildren();
+      browseBox.hidden = true; browseBox.replaceChildren(); liveBody.dataset.state = 'kinds';
       Array.from(kindsBox.children || []).forEach(function (tile) { tile.setAttribute('aria-pressed', 'false'); });
     }
     function browseKind(category, sourceId) {
@@ -536,12 +578,12 @@
       browsing.category = category; browsing.source = pick.id; var token = ++browsing.token;
       Array.from(kindsBox.children || []).forEach(function (tile) { tile.setAttribute('aria-pressed', String(tile.dataset.category === category)); });
       var kind = KINDS[category] || [humanField(category), CATEGORY_NOTES[category] || ''];
-      browseBox.id = 'explore-browse'; browseBox.hidden = false; browseBox.replaceChildren();
+      browseBox.id = 'explore-browse'; browseBox.hidden = false; browseBox.replaceChildren(); liveBody.dataset.state = 'browse';
       var head = node('div', 'explore-browse-head'), icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
       var title = node('div', 'explore-browse-title'); title.appendChild(node('h3', '', kind[0])); title.appendChild(node('p', '', kind[1]));
-      var close = node('button', 'explore-browse-close', '×'); close.type = 'button'; close.setAttribute('aria-label', 'Close ' + kind[0]);
-      close.addEventListener('click', closeBrowse);
-      head.appendChild(icon); head.appendChild(title); head.appendChild(close); browseBox.appendChild(head);
+      var close = node('button', 'explore-browse-close', '← All kinds'); close.type = 'button';
+      close.addEventListener('click', function () { var c = browsing.category; closeBrowse(); var tile = kindsBox.querySelector && kindsBox.querySelector('[data-category="' + c + '"]'); if (tile) tile.focus(); });
+      head.appendChild(close); head.appendChild(icon); head.appendChild(title); browseBox.appendChild(head);
       if (list.length > 1) {
         var tabs = node('div', 'explore-browse-tabs'); tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', kind[0] + ' sources');
         list.forEach(function (item) {
@@ -554,9 +596,6 @@
       }
       var body = node('div', 'explore-records', ''); body.appendChild(node('p', 'explore-browse-note', 'Reading the latest ' + humanField(pick.label || pick.id).toLowerCase() + '…'));
       browseBox.appendChild(body);
-      var foot = node('div', 'explore-browse-foot'), rawLink = node('button', 'explore-browse-raw', 'See every field in the raw records'); rawLink.type = 'button';
-      rawLink.addEventListener('click', function () { openKind(category); });
-      foot.appendChild(rawLink); browseBox.appendChild(foot);
       loadBrowse(pick, body, token);
     }
     async function loadBrowse(item, body, token) {
@@ -587,13 +626,16 @@
       var top = node('div', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state)); top.appendChild(node('span', '', ago(record.updatedAt)));
       card.appendChild(top); card.appendChild(node('h4', '', recordTitle(record))); card.appendChild(node('p', 'explore-record-id', safeString(record.id)));
       var facts = node('dl', 'explore-record-facts'); facts.appendChild(node('p', 'explore-browse-note', 'Opening…')); card.appendChild(facts);
-      body.replaceChildren(back, card); body.dataset.view = 'record';
+      var rawLink = node('button', 'explore-browse-raw', 'Every field'); rawLink.type = 'button';
+      rawLink.addEventListener('click', function () { openKind(browsing.category); });
+      var bar = node('div', 'explore-record-bar'); bar.appendChild(back); bar.appendChild(rawLink);
+      body.replaceChildren(bar, card); body.dataset.view = 'record';
       try {
         var payload = await request('/explorer/v1/record', { sourceId: item.id, recordId: record.id, scope: recordScopes[record.id] });
         if (token !== browsing.token || !page.isConnected) return;
         var fields = payload.data.safeDetail || (payload.data.record && payload.data.record.fields) || record.fields || {};
         facts.replaceChildren();
-        Object.keys(fields).slice(0, 10).forEach(function (key) {
+        Object.keys(fields).slice(0, 8).forEach(function (key) {
           var value = safeString(fields[key]); var line = node('div');
           line.appendChild(node('dt', '', humanField(key))); line.appendChild(node('dd', '', value.length > 120 ? value.slice(0, 117) + '…' : value));
           facts.appendChild(line);
@@ -608,8 +650,7 @@
       renderFilters(); renderField();
       var first = sources.find(function (item) { return (item.category || 'other') === category && sourceAllowsQuery(item); });
       if (first) chooseSource(first.id, true);
-      raw.open = true;
-      if (raw.scrollIntoView) raw.scrollIntoView({ block: 'start', behavior: ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion() ? 'auto' : 'smooth' });
+      showView('raw');
     }
     filterSearch.addEventListener('input', function () { filters.query = filterSearch.value; renderField(); });
     function row(label, value) {
@@ -907,7 +948,7 @@
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });
     source.addEventListener('change', function () { chooseSource(source.value, true); });
     lookup.addEventListener('submit', function (event) { event.preventDefault(); inspect(recordId.value.trim()); });
-    page._explorerCleanup = function () { clearLive(); key.value = ''; };
+    page._explorerCleanup = function () { clearLive(); stopSteps(); key.value = ''; };
     /* Start reading as soon as the page is on screen; no button press needed for the public mesh. */
     window.setTimeout(function () { if (page.isConnected && !connected && !busy) start(); }, 0);
   }
