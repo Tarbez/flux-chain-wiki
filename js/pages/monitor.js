@@ -61,32 +61,35 @@
       actions.appendChild(statsLink); hero.appendChild(actions);
       bento.appendChild(hero);
 
-      // Lead KPI: quorums online
+      // Lead KPI: quorums online. The "of N" unit and the two headings below
+      // are filled from the first real poll, not hardcoded -- the fleet's
+      // quorum/machine count has already changed once (4->5 quorums,
+      // 7->9 machines, 2026-10-07) and will again.
       var lead = tile('stats-kpi stats-kpi-lead monitor-lead', 'Quorums online');
-      var leadValue = el('p', 'stats-kpi-value'); var leadNum = el('strong', null, '–'); leadValue.appendChild(leadNum); leadValue.appendChild(el('span', null, 'of 4'));
+      var leadValue = el('p', 'stats-kpi-value'); var leadNum = el('strong', null, '–'); var leadUnit = el('span', null, ''); leadValue.appendChild(leadNum); leadValue.appendChild(leadUnit);
       lead.appendChild(leadValue);
       var leadDetail = el('p', 'stats-kpi-detail', 'Waiting for first poll…'); lead.appendChild(leadDetail);
       bento.appendChild(lead);
 
       function kpi(label, unit) {
         var t = tile('stats-kpi', label), v = el('p', 'stats-kpi-value'), n = el('strong', null, '–');
-        v.appendChild(n); if (unit) v.appendChild(el('span', null, unit)); t.appendChild(v);
+        var u = el('span', null, unit || ''); v.appendChild(n); v.appendChild(u); t.appendChild(v);
         var d = el('p', 'stats-kpi-detail'); t.appendChild(d); bento.appendChild(t);
-        return { num: n, detail: d, tile: t };
+        return { num: n, unit: u, detail: d, tile: t };
       }
-      var kMachines = kpi('Machines up', 'of 7');
+      var kMachines = kpi('Machines up', '');
       var kLatency = kpi('Health-check latency', 'ms');
       var kErrors = kpi('Poll errors', 'this session');
 
       // Quorums
       var qTile = tile('stats-span-6', 'Quorums');
-      qTile.appendChild(el('h2', null, 'Four independent pools'));
+      var qHeading = el('h2', null, 'Independent pools'); qTile.appendChild(qHeading);
       var qList = el('ol', 'monitor-quorums');
       qTile.appendChild(qList); bento.appendChild(qTile);
 
       // Nodes
       var nTile = tile('stats-span-6', 'Fleet machines · reachability');
-      nTile.appendChild(el('h2', null, 'Seven machines, polled directly'));
+      var nHeading = el('h2', null, 'Machines, polled directly'); nTile.appendChild(nHeading);
       var nGrid = el('ul', 'monitor-nodes');
       nTile.appendChild(nGrid); bento.appendChild(nTile);
 
@@ -114,13 +117,18 @@
 
         var s = snapshot.summary;
         leadNum.textContent = fmt(s.quorumsOnline);
+        leadUnit.textContent = 'of ' + s.quorumsTotal;
         leadDetail.textContent = s.quorumsOnline === s.quorumsTotal
           ? 'All quorums reachable, just now'
           : (s.quorumsTotal - s.quorumsOnline) + ' of ' + s.quorumsTotal + ' quorums have an unreachable member';
 
         kMachines.num.textContent = fmt(s.machinesUp);
+        kMachines.unit.textContent = 'of ' + s.machinesTotal;
         kMachines.detail.textContent = s.machinesUp === s.machinesTotal ? 'All reachable' : (s.machinesTotal - s.machinesUp) + ' unreachable';
         kMachines.tile.classList.toggle('is-warn', s.machinesUp < s.machinesTotal);
+
+        qHeading.textContent = s.quorumsTotal + ' independent pool' + (s.quorumsTotal === 1 ? '' : 's');
+        nHeading.textContent = s.machinesTotal + ' machine' + (s.machinesTotal === 1 ? '' : 's') + ', polled directly';
 
         var allMembers = snapshot.quorums.reduce(function (acc, q) { return acc.concat(q.members); }, []);
         var reachable = allMembers.filter(function (m) { return m.reachable; });

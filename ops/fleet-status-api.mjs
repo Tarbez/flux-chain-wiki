@@ -46,6 +46,14 @@ const QUORUMS = [
     { id: 'validator-bk2', host: '162.35.26.46' },
     { id: 'validator-mk2', host: '162.35.27.39' },
   ] },
+  // Added 2026-10-07: a new provider, not InterServer -- real measured
+  // RTT to the rest of the fleet (~75-80ms to bk2, ~19ms between the pair
+  // themselves), the first non-InterServer quorum. ~195-196/s standalone,
+  // 5 audit runs, zero failures (bench-003 §10).
+  { id: 'G', port: 18994, members: [
+    { id: 'validator-eug2c', host: '187.7.68.137' },
+    { id: 'validator-eul4c', host: '191.215.44.220' },
+  ] },
 ];
 
 let snapshot = { generatedAt: null, quorums: [], summary: null, pollErrors: 0 };

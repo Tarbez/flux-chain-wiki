@@ -491,9 +491,36 @@ different topologies, and the honest takeaway is that `FABRIC_DIRECT_PRIMARY`
 should be a per-deployment tuning decision made from a real RTT
 measurement, not a single hardcoded default.
 
+## 10. A fifth quorum, a new provider (2026-10-07)
+
+Two new VPS nodes (`eug-2c`, `eul-4c`), not InterServer — the first
+non-InterServer hardware in the fleet. Set up as quorum G, applying every
+lesson learned tonight from the start rather than repeating them: binary
+copied from `bk2` (already-proven x86_64 build, no local cross-compile
+mistake), `FABRIC_THREADS=256` and `DEFXN_DEFI_RS_FSYNC=0` set from the
+first launch, a real `systemd` unit (not a throwaway `nohup`), and `ufw`
+rules scoped to exactly the peer and the two monitoring/client hosts
+(`bk2`, `mk2`) before the firewall was even enabled — SSH access confirmed
+reachable before and after, the same discipline used around every firewall
+change tonight.
+
+Real measured RTT (not assumed): ~80ms `bk2` → `eug-2c`, ~75ms `bk2` →
+`eul-4c`, ~19ms `eug-2c` → `eul-4c` — genuine distance, closer to the
+GPU-box topology (§9) than to the sub-millisecond InterServer cluster.
+Accepted finality, client on `bk2`, 3 audited runs with cooldown between
+each: **195.87, 196.25, 195.77/s**, zero failures. A modest number for a
+2-core/4-core pair with real latency to its client — not pushed further
+tonight, and not yet included in the 4-quorum aggregate above (adding a
+5th quorum to that number needs a fresh concurrent 5-way audit, not an
+arithmetic add-on; left honestly separate until that's actually run).
+
+Registered in `ops/fleet-status-api.mjs`'s `QUORUMS` list, so `/monitor`
+polls its real health alongside A/B/C/F.
+
 ## Current live configuration
 
-Four real, concurrently-running quorums on the production fleet:
+Five real, concurrently-running quorums on the fleet (A-F on InterServer,
+G on a different provider):
 
 - **Quorum A** — mk2 + bk1, client on bk2. ~2,900-3,300/s standalone, this
   page's reported single-quorum number. `ms2` is also an auto-joined,
@@ -503,6 +530,8 @@ Four real, concurrently-running quorums on the production fleet:
 - **Quorum C** — mist1 + ms3, client on ms2. ~760-1,060/s standalone.
 - **Quorum F** — bk2 + mk2 (reusing their idle capacity from quorum A/B
   duty), client on mk2. ~2,000-2,900/s standalone.
+- **Quorum G** — eug-2c + eul-4c, client on bk2, ~80ms real RTT. ~196/s
+  standalone (§10) — not yet in the aggregate total above.
 
 Production (`agreement-fabric-rs.service`, port 18993, 3-of-3 on bk2/mk2/
 bk1) is untouched by any of this — separate port, separate process,
