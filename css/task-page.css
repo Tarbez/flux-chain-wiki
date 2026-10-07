@@ -37,7 +37,7 @@
  #scene .task-page .mesh-explorer-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 
-#scene .task-page:not(.continuity-host > *) { width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px; border:1px solid hsl(var(--border-default)); border-radius:8px; background:hsl(var(--canvas) / .97); }
+#scene .task-page:not(.continuity-host > *) { width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px; border:0; border-radius:14px; background:hsl(var(--canvas) / .97); }
 #scene .task-page.economy-preview-page .economy-warning { border-left-color:hsl(var(--warning)); font-size:14px; padding-block:8px; }
 #scene .task-page.economy-preview-page :is(.economy-asset-tabs,.economy-deposit-form,.economy-movement-list,.economy-movement-detail,.economy-deposit-result) { margin-top:18px; }
 #scene .task-page.economy-preview-page .economy-asset-tabs button[aria-pressed="true"] { border-color:hsl(var(--reference)); }

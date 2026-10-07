@@ -52,6 +52,8 @@
   border:1px solid hsl(var(--secondary-300)) !important;color:hsl(var(--secondary-700)) !important;box-shadow:none !important;
 }
 #scene :is(.palette-soft,.ark-header .header-core-links a.header-run-link,.ark-header a.products-mega-all):is(:hover,:focus-visible) {background:hsl(var(--secondary-200)) !important;border-color:hsl(var(--secondary-400)) !important;}
+/* In the header the run action is a fill, not an outlined chip. */
+#scene .ark-header .header-core-links a.header-run-link {border-color:transparent !important;}
 #scene .ark-header .header-core-links a.header-run-link[aria-current="page"] {color:hsl(var(--secondary-700)) !important;box-shadow:inset 0 -2px hsl(var(--secondary-400)) !important;}
 #scene .ark-header .header-core-links a.header-run-link .native-icon {color:hsl(var(--secondary-700)) !important;}
 
