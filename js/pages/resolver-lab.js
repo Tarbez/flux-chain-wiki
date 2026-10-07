@@ -307,7 +307,7 @@
     var footer = el('nav', 'resolver-lab-footer'); footer.setAttribute('aria-label', 'Continue');
     var prev = el('button', 'resolver-lab-prev'); prev.type = 'button';
     var next = el('a', 'resolver-lab-next');
-    var spec = el('a', 'resolver-lab-spec', words('SOURCE') + ' ↗'); spec.href = 'docs/protocol/resolvers.md';
+    var spec = el('a', 'resolver-lab-spec', 'Spec ↗'); spec.href = 'docs/protocol/resolvers.md'; spec.setAttribute('aria-label', words('SOURCE'));
     footer.appendChild(prev); footer.appendChild(next); footer.appendChild(spec);
     copy.appendChild(footer);
     root.appendChild(copy);
@@ -406,6 +406,12 @@
       var input = current(), ok = evaluate(input);
       result.textContent = 'doc:' + input.id + ', ' + size(input.bytes) + ': ' + (ok ? 'satisfies' : 'does not satisfy') + ' ' + ADDRESS + '. Claim id ' + claimId(input, ok) + '.';
     }
+    // The Next action: its label, and an arrow that moves on hover.
+    function label(node, text) {
+      node.replaceChildren(el('span', 'resolver-lab-next-text', text), el('span', 'resolver-lab-next-arrow', '→'));
+      var arrow = node.lastChild; arrow.setAttribute('aria-hidden', 'true');
+      node.setAttribute('aria-label', text === words('NEXT') ? text : 'Next: ' + text);
+    }
     function paintStep() {
       var i = STEPS.indexOf(state.step), copyFor = STEP_COPY[state.step];
       root.dataset.step = state.step;
@@ -417,15 +423,15 @@
       captionBody.hidden = !copyFor[2];
       caption.classList.remove('is-entering'); void caption.offsetWidth; caption.classList.add('is-entering');
       prev.hidden = i === 0;
-      if (i > 0) { prev.textContent = '← ' + STEP_COPY[STEPS[i - 1]][0]; prev.onclick = function (event) { event.stopPropagation(); go(STEPS[i - 1], true); }; }
+      if (i > 0) { prev.textContent = '←'; prev.setAttribute('aria-label', 'Back to ' + STEP_COPY[STEPS[i - 1]][0]); prev.title = STEP_COPY[STEPS[i - 1]][0]; prev.onclick = function (event) { event.stopPropagation(); go(STEPS[i - 1], true); }; }
       if (i < STEPS.length - 1) {
-        next.textContent = 'Next: ' + STEP_COPY[STEPS[i + 1]][0] + ' →';
+        label(next, STEP_COPY[STEPS[i + 1]][0]);
         next.href = ArkUI.route.href(ArkUI.pageCatalog[page].path + '?step=' + STEPS[i + 1] + '&input=' + state.input);
         delete next.dataset.sceneLink;
         // Stop here: go() repaints this same link, and the router must not then follow it.
         next.onclick = function (event) { event.preventDefault(); event.stopPropagation(); go(STEPS[i + 1], true); };
       } else {
-        next.textContent = words('NEXT') + ' →';
+        label(next, words('NEXT'));
         next.href = ArkUI.route.href(ArkUI.pageCatalog.deployment.path);
         next.dataset.sceneLink = 'deployment';
         next.onclick = null;

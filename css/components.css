@@ -43,6 +43,9 @@
 #scene :is(.home-primary-cta,.story-primary,.mechanism-next,.economy-primary,.mesh-explorer-page [data-explorer-connect],.ark-auth-actions button[data-kind="primary"]) .native-icon {color:hsl(var(--secondary-ink)) !important;border-color:hsl(var(--secondary-ink) / .3) !important;}
 #scene .home-primary-cta::before {background:hsl(var(--secondary-600)) !important;}
 
+/* solid, flat: a compact main action inside a dense layout drops the lift shadow. */
+#scene .resolver-lab .resolver-lab-footer a.resolver-lab-next {box-shadow:none !important;border-radius:999px;}
+
 /* soft ---------------------------------------------------------------------- */
 #scene :is(.palette-soft,.ark-header .header-core-links a.header-run-link,.ark-header a.products-mega-all) {
   background:hsl(var(--secondary-100)) !important;background-image:none !important;
@@ -71,17 +74,17 @@
 
 /* choice -------------------------------------------------------------------- */
 #scene :is(
-  .resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ) {
   background:transparent !important;background-image:none !important;border-color:hsl(var(--border-default)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
 }
 #scene :is(
-  .resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--reference-300)) !important;}
 #scene :is(
-  .resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
   background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-400)) !important;color:hsl(var(--reference-700)) !important;
@@ -96,9 +99,9 @@
 
 /* link ---------------------------------------------------------------------- */
 /* Actions that sit in a row of text links read as links, not boxes. */
-#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link,.resolver-lab-prev,.resolver-lab-spec) {background:transparent !important;background-image:none !important;border-color:transparent !important;box-shadow:none !important;
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link) {background:transparent !important;background-image:none !important;border-color:transparent !important;box-shadow:none !important;
   color:hsl(var(--reference)) !important;text-decoration:underline !important;text-decoration-color:hsl(var(--reference-300)) !important;text-underline-offset:4px;}
-#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link,.resolver-lab-prev,.resolver-lab-spec):is(:hover,:focus-visible) {color:hsl(var(--reference-700)) !important;text-decoration-color:hsl(var(--reference-400)) !important;}
+#scene :is(.about-secondary-action,.theory-cta,.resolver-back-link):is(:hover,:focus-visible) {color:hsl(var(--reference-700)) !important;text-decoration-color:hsl(var(--reference-400)) !important;}
 #scene :is(.about-secondary-action,.theory-cta,.resolver-back-link) .native-icon {color:inherit !important;}
 #scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.article-evidence-link,.reference-orientation a,.resolver-guide-links a,.account-next a,.account-cms a,.story-reference) {
   color:hsl(var(--reference)) !important;text-decoration-color:hsl(var(--reference-300)) !important;border-color:hsl(var(--reference-300)) !important;
