@@ -63,11 +63,18 @@
   max-width:44ch; margin:18px 0 0;
   color:var(--account-muted); font:400 clamp(14px,1.2vw,16px)/1.5 var(--font-sans,"Albert Sans",sans-serif); text-wrap:pretty;
 }
-#scene .account-opens { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 28px; max-width:520px; margin:26px 0 0; padding:20px 0 0; border-top:1px solid var(--account-rule); list-style:none; }
-#scene .account-opens li { display:grid; gap:3px; min-width:0; }
-#scene .account-opens strong { display:flex; align-items:center; gap:8px; color:hsl(var(--text-strong)); font:600 14px/1.3 var(--font-sans,"Albert Sans",sans-serif); }
-#scene .account-opens strong::before { content:""; width:5px; height:5px; border-radius:50%; background:hsl(var(--primary)); }
-#scene .account-opens span { padding-left:13px; color:var(--account-muted); font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
+/* Signed out: no avatar to show yet, so the space goes to a three-step
+   picture of what signing in means, drawn like home's agreement nodes. */
+#scene .account-page[data-session="signed-out"] .account-avatar { display:none; }
+#scene .account-flow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 20px; max-width:560px; margin:34px 0 0; padding:0; list-style:none; }
+#scene .account-flow li { position:relative; display:grid; justify-items:start; gap:4px; min-width:0; }
+#scene .account-flow li:not(:last-child)::after { content:""; position:absolute; top:22px; left:56px; right:-8px; height:1px; background:linear-gradient(90deg,hsl(var(--border-strong)),hsl(var(--border-subtle))); }
+#scene .account-flow li:first-child::after { background:linear-gradient(90deg,hsl(var(--primary-400)),hsl(var(--border-subtle))); }
+#scene .account-flow-mark { display:grid; place-items:center; width:44px; height:44px; margin-bottom:10px; box-sizing:border-box; border:1px solid hsl(var(--border-default)); border-radius:50%; background:hsl(var(--surface)); color:hsl(var(--text-muted)); }
+#scene .account-flow li:first-child .account-flow-mark { border-color:hsl(var(--primary)); background:hsl(var(--primary-200)); color:hsl(var(--primary)); box-shadow:0 0 0 4px hsl(var(--primary-100)); }
+#scene .account-flow-mark svg { width:20px; height:20px; }
+#scene .account-flow strong { color:hsl(var(--text-strong)); font:600 14px/1.3 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-flow small { color:var(--account-muted); font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-state { max-width:560px; margin:22px 0 0; }
 #scene .account-state dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; }
 #scene .account-state dl>div { min-width:0; padding:10px 0; border-top:1px solid var(--account-rule); }
@@ -141,8 +148,14 @@
   border:1px solid hsl(var(--border-default)); border-radius:2px;
   background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 13px/1.4 var(--mono-font,ui-monospace,monospace);
 }
-#scene .account-create-toggle { margin:12px 0 0; color:var(--account-muted); font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
-#scene .account-create-toggle .link-button { min-height:32px; margin-left:6px; padding:4px 12px; }
+#scene .account-page .account-signin-tabs button[aria-pressed="true"] { border-color:hsl(var(--reference-400)); background:hsl(var(--reference-100)); color:hsl(var(--reference-700)); }
+#scene .account-page[data-session="signed-out"] .account-session-description { display:none; }
+#scene .account-page[data-session="signed-out"] .account-session-title { margin:4px 0 10px; font-size:clamp(26px,2.5vw,34px); }
+#scene .account-page[data-session="signed-out"] .account-status { display:none; }
+#scene .account-page[data-session="signed-out"] .account-auth { overflow:visible; }
+#scene .account-page[data-session="signed-out"] .account-auth .account-cms { margin-top:28px; }
+#scene .account-page[data-session="signed-out"] .account-card { padding:24px 26px; }
+#scene .account-page[data-session="signed-out"] [data-account-auth] button[data-kind="primary"] { width:100%; min-height:54px; justify-content:center; font-size:15px; }
 #scene .account-page [data-account-forget] { align-self:flex-start; margin-top:10px; min-height:30px; padding:4px 0; border:0; background:none; color:hsl(var(--text-muted)); font-weight:500; }
 #scene .account-page [data-account-forget]:hover { background:none; color:hsl(var(--danger)); }
 #scene .account-storage-notice { margin:10px 0 0; color:hsl(var(--warning)); font:400 12px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
@@ -244,7 +257,7 @@
 #scene [data-session="remembered"] .account-rail-item[data-needs-key] { display:none; }
 #scene .account-rail-item[data-attention] strong { color:hsl(var(--primary)); }
 #scene .account-rail-item:last-of-type strong { font-size:16px; letter-spacing:-.01em; }
-#scene .account-rail-link { display:grid; justify-items:end; gap:4px; font:500 12px/1.3 var(--mono-font,monospace); text-align:right; color:hsl(var(--reference)); text-decoration:none; }
+#scene .account-rail-link { grid-column:-2 / -1; display:grid; justify-items:end; gap:4px; font:500 12px/1.3 var(--mono-font,monospace); text-align:right; color:hsl(var(--reference)); text-decoration:none; }
 #scene .account-rail-link small { color:hsl(var(--text-faint)); font:400 11px/1.3 var(--font-sans,sans-serif); }
 
 /* ---- Short desktop windows --------------------------------------------- */
@@ -254,7 +267,7 @@
   #scene .account-hero h1 { font-size:clamp(40px,4.4vw,56px); }
   #scene .account-page:not([data-session="signed-out"]) .account-hero h1 { font-size:clamp(36px,3.8vw,48px); }
   #scene .account-intro { margin-top:12px; font-size:14px; }
-  #scene .account-opens { margin-top:18px; padding-top:16px; gap:12px 24px; }
+  #scene .account-flow { margin-top:24px; }
   #scene .account-state { margin-top:14px; }
   #scene .account-state dl>div { padding:8px 0; }
   #scene .account-card { padding:18px 20px; }
@@ -281,15 +294,18 @@
   #scene .account-status { font-size:10px; }
   #scene .account-intro { margin-top:10px; font-size:13px; }
   #scene .account-page:not([data-session="signed-out"]) .account-intro { display:none; }
-  #scene .account-opens { gap:10px 16px; margin-top:14px; padding-top:12px; }
-  #scene .account-opens strong { font-size:13px; }
-  #scene .account-opens span { font-size:12px; }
+  #scene .account-flow { gap:0 10px; margin-top:18px; }
+  #scene .account-flow li:not(:last-child)::after { top:18px; left:44px; right:-4px; }
+  #scene .account-flow-mark { width:36px; height:36px; margin-bottom:6px; }
+  #scene .account-flow-mark svg { width:17px; height:17px; }
+  #scene .account-flow strong { font-size:13px; }
+  #scene .account-flow small { font-size:11.5px; }
   #scene .account-state { margin-top:12px; }
   #scene .account-state dl>div { padding:6px 0; }
   #scene .account-state dd { display:block; white-space:nowrap; text-overflow:ellipsis; font-size:11px; }
   #scene .account-state>p { display:none; }
   #scene .account-card { flex:1 1 auto; height:auto; padding:14px 16px; }
-  #scene .account-page[data-session="signed-out"] .account-card { flex:0 1 auto; }
+  #scene .account-page[data-session="signed-out"] .account-card { flex:0 1 auto; align-self:stretch; padding:16px; }
   #scene .account-tabs { gap:4px; margin-bottom:12px; }
   #scene .account-page .account-tabs button { min-height:34px; padding:4px 6px; font-size:12px; }
   #scene .account-session-title { font-size:22px; }
@@ -308,7 +324,7 @@
   #scene .account-mesh-detail { grid-template-columns:1fr; }
 }
 @media(max-width:760px) {
-  #scene .account-page:has([data-account-create-view]:not([hidden])) :is(.account-opens,.account-intro) { display:none; }
+  #scene .account-page:has([data-account-create-view]:not([hidden])) :is(.account-flow,.account-intro) { display:none; }
   #scene .account-page:has(.account-wallet-form:not([hidden]),.account-contacts:not([hidden])) .account-state { display:none; }
 }
 /* Short phones: the card carries every number the rail shows, so the rail,
@@ -318,9 +334,8 @@
   #scene .account-promise,
   #scene .account-state,
   #scene .account-rail,
-  #scene .account-opens span,
+  #scene .account-flow small,
   #scene .account-balance span { display:none !important; }
-  #scene .account-opens { grid-template-columns:repeat(4,auto); justify-content:start; gap:8px 14px; }
   #scene .account-page [data-ark-auth="hint"] { display:none; }
   #scene .account-session-description { margin-bottom:8px; }
 }
