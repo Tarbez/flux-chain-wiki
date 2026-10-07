@@ -647,6 +647,47 @@ Not like-for-like with the quorum row: the quorum's 3,003/s used a client
 placed on a different host from the validators and an attest+aggregate chain
 with no on-disk write at all.
 
+## 13. Wire prototype: raw TCP + fixed-slot frames, whole fleet at once (2026-10-07)
+
+Prototype only (`defxn-defi-rs/src/wire*.rs`): the notebook's checks (owner
+signatures, live-and-unspent input, graph consistency, atomic spend lock)
+behind raw TCP and fixed-width binary frames instead of HTTP + JSON, sharded by
+input CID (no global order). The frame layout is a stand-in for the Flux
+pattern grammar, not the real grammar. Accepted finality only: no replica wait,
+no fsync, a dummy replica that is never contacted. Not crash-safe, not
+Byzantine-tolerant. Attack self-test (flipped signature, wrong signer, missing
+input, non-genesis issuer, wrong output/agreement, replayed fulfillment, second
+spend, two simultaneous spends) passed 3 of 3 runs.
+
+**One box, 4 pinned cores, client on 3 others, 300 concurrent, 3 runs each:**
+HTTP+JSON control 1,637 / 2,179 / 2,421; wire one-frame-per-trip 1 notebook
+6,355 / 6,131 / 5,804; wire 3-frames-in-one-write 1 notebook 6,647 / 6,582 /
+6,375; 4 notebooks 7,244-7,636 (3 trips) and 8,639-8,821 (1 write).
+perf of the HTTP server (4 cores, 33,188 samples): HTTP layer 40.3% of CPU
+(kernel TCP ~25%), ed25519 20.8%, JSON/Value 15.1%, store 11.1%.
+
+**Whole fleet, concurrent, 20 s fixed window, all six clients started within
+1 ms of each other (start epoch 1791381006.633-.634), zero failures, pipe mode
+(all three frames of a transfer in one write):**
+
+| Server (cores) | Client(s) | transfers/s | Server CPU busy |
+| --- | --- | --- | --- |
+| bk2 (7) | ms1 + ms2 + ms3 | 4,128 + 4,126 + 4,062 = 12,316 | 93.5% |
+| eul-4c (4) | eug-2c | 14,550 | 91.4% |
+| mk2 (5) | mist1 | 5,869 | 54.7% (client mist1 84% busy: client-bound) |
+| bk1 (2) | mk1 | 2,764 | 86.6% |
+| **Fleet total** | | **35,499** (712,062 transfers / 20.07 s) | |
+
+A first run with fewer seeds gave 36.2k/s summed over the first 6.4 s but two
+pairs exhausted their pre-seeded objects early, so it is not used. Against the
+fabric record (5,711-6,041/s four quorums at accepted finality, plus quorum G
+~1.55k standalone, never cleanly summed) that is ~5.9x the documented number.
+Not like for like: the fabric certifies every transfer with a threshold
+certificate across two validators, this prototype is a single-node notebook per
+server. `mk2` had ~45% idle CPU, so by extrapolation (not measured) a second
+client there would add roughly 4-5k/s. Production `agreement-fabric-rs` stayed
+active on bk2, mk2 and bk1 throughout; test processes ran at `nice 5`.
+
 ## Current live configuration
 
 Five real, concurrently-running quorums on the fleet (A-F on InterServer,
