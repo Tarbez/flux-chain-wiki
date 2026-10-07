@@ -101,7 +101,7 @@
 }
 
 /* Measured stats rail ----------------------------------------------------- */
-#scene .home-status-rail {display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;align-items:start;gap:0 28px;}
+#scene .home-status-rail {display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) auto;align-items:start;gap:0 28px;}
 #scene .home-status-item {display:grid;gap:3px;align-content:start;min-width:0;}
 #scene .home-status-item small {font:500 11px/1.3 var(--mono-font,monospace);letter-spacing:.03em;text-transform:uppercase;color:hsl(var(--text-muted));}
 #scene .home-status-item .home-status-value {display:block;font:600 24px/1.05 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.03em;color:hsl(var(--text-strong));}
@@ -114,7 +114,7 @@
 #scene .home-status-link::before {content:none;}
 
 @media(max-width:1150px) and (min-width:901px){
- #scene .home-status-rail {grid-template-columns:repeat(4,minmax(0,1fr));row-gap:6px;}
+ #scene .home-status-rail {grid-template-columns:repeat(5,minmax(0,1fr));row-gap:6px;}
  #scene .home-status-link {grid-column:1/-1;justify-items:start;min-height:30px;margin-top:8px;text-align:left;}
 }
 @media(max-width:900px){
@@ -126,11 +126,12 @@
  #scene .home-status-item .home-status-value {font-size:20px;}
  #scene .home-status-item small {font-size:9px;}
  #scene .home-status-detail {font-size:11px;}
- #scene .home-status-link {justify-items:start;text-align:left;padding:10px 12px;}
+ #scene .home-status-link {grid-column:1/-1;justify-items:start;text-align:left;padding:10px 12px;}
  #scene .home-status-scope {white-space:normal;}
 }
 @media(max-width:640px){
  #scene .home-status-rail {grid-template-columns:repeat(2,minmax(0,1fr));}
+ #scene .home-status-link {grid-column:1/-1;}
 }
 @media(max-width:480px){
  #scene .flow-steps .flow-step-name {font-size:10.5px;}
