@@ -145,7 +145,8 @@ for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
     assert(page.classList.contains('how-chapter-'+id));
     const steps=page.querySelector('.how-steps').children,choices=steps.map(step=>step.children[0]);
     assert.equal(steps.length,3,'each chapter teaches three steps');
-    assert.equal(page.querySelector('.how-why-grid').children.length,3,'each chapter explains why it works this way');
+    assert.equal(page.querySelector('.how-why').children.length,3,'each chapter explains why it works this way');
+    assert(!steps[1].children[1].hidden && steps[0].children[1].hidden,'only the chosen step opens its text in place');
     const canvas=page.querySelector('.how-chapter-mesh'),firstPattern=canvas.dataset.stage;
     choices[1].listeners.click();
     assert.notEqual(canvas.dataset.stage,firstPattern,'each chapter choice runs its own mesh pattern');

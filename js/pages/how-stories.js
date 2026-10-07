@@ -20,7 +20,7 @@ ArkUI.pageModules.howStory={mount:function(host,page){
  var card=ArkUI.el('section',['how-request-brief','how-common-record','how-returned-result'][index]+' how-record-card');
  card.appendChild(ArkUI.el('span','how-chapter-label',words('RECORD.LABEL')));card.appendChild(ArkUI.el('h2','',words(['JOB','JOIN','RESULT'][index])));card.appendChild(list);card.appendChild(canvas);card.appendChild(motion);
 
- /* Three steps, all readable at once; the selected one drives the record and the mesh. */
+ /* Three steps; the selected one opens its text in place and drives the record and the mesh. */
  var steps=ArkUI.el('ol','how-steps');steps.setAttribute('aria-label','How this part works');var choices=[];
  function step(n){
   var item=ArkUI.el('li','how-step'),b=ArkUI.el('button','how-step-button');b.type='button';b.setAttribute('aria-pressed',String(n===1));var pointer=false;
@@ -29,16 +29,18 @@ ArkUI.pageModules.howStory={mount:function(host,page){
   function preview(){fabric.select(patterns[n-1],true);light(n);}
   function reset(){if(!pointer&&document.activeElement!==b){fabric.select(pattern,true);light(patterns.indexOf(pattern)+1);}}
   b.addEventListener('pointerenter',function(){pointer=true;preview();});b.addEventListener('pointerleave',function(){pointer=false;reset();});b.addEventListener('focus',preview);b.addEventListener('blur',reset);
-  b.addEventListener('click',function(){pattern=patterns[n-1];choices.forEach(function(button,i){button.setAttribute('aria-pressed',String(i===n-1));button.parentNode.dataset.active=String(i===n-1);});fabric.select(pattern,true,true);light(n);});
-  item.dataset.active=String(n===1);item.appendChild(b);item.appendChild(text);choices.push(b);return item;
+  b.addEventListener('click',function(){pattern=patterns[n-1];choices.forEach(function(button,i){button.setAttribute('aria-pressed',String(i===n-1));button.parentNode.dataset.active=String(i===n-1);button.parentNode.children[1].hidden=i!==n-1;});fabric.select(pattern,true,true);light(n);});
+  item.dataset.active=String(n===1);text.hidden=n!==1;item.appendChild(b);item.appendChild(text);choices.push(b);return item;
  }
  for(var n=1;n<=3;n++)steps.appendChild(step(n));
- var body=ArkUI.el('div','how-chapter-body');body.appendChild(card);body.appendChild(steps);el.appendChild(body);
-
- var why=ArkUI.el('section','how-why');why.appendChild(ArkUI.el('h2','how-section-title','Why it works this way'));var grid=ArkUI.el('div','how-why-grid');
- for(var w=1;w<=3;w++){var point=ArkUI.el('article','how-why-point');point.appendChild(ArkUI.el('h3','',words('WHY'+w+'.TITLE')));point.appendChild(ArkUI.el('p','',words('WHY'+w+'.TEXT')));grid.appendChild(point);}
- why.appendChild(grid);el.appendChild(why);
- var truth=ArkUI.el('div','how-record-truth');[['TRUE AFTER THIS STEP','NOW'],['NOT YET TRUE','NOT']].forEach(function(pair){var row=ArkUI.el('p','how-record-'+pair[1].toLowerCase());row.appendChild(ArkUI.el('span','',pair[0]));row.appendChild(ArkUI.el('span','',words(pair[1])));truth.appendChild(row);});el.appendChild(truth);
+ /* The right side holds three views in one place: how it works, why it works this way, and what it proves. No view adds page height. */
+ var why=ArkUI.el('div','how-why');for(var w=1;w<=3;w++){var point=ArkUI.el('article','how-why-point');point.appendChild(ArkUI.el('h3','',words('WHY'+w+'.TITLE')));point.appendChild(ArkUI.el('p','',words('WHY'+w+'.TEXT')));why.appendChild(point);}
+ var truth=ArkUI.el('div','how-record-truth');[['TRUE AFTER THIS STEP','NOW'],['NOT YET TRUE','NOT']].forEach(function(pair){var row=ArkUI.el('p','how-record-'+pair[1].toLowerCase());row.appendChild(ArkUI.el('span','',pair[0]));row.appendChild(ArkUI.el('span','',words(pair[1])));truth.appendChild(row);});
+ var views=[['How it works',steps],['Why this way',why],['What it proves',truth]],tabs=ArkUI.el('nav','how-view-tabs');tabs.setAttribute('aria-label','Explain this part');
+ var side=ArkUI.el('section','how-chapter-side');side.appendChild(tabs);
+ views.forEach(function(view,i){var tab=ArkUI.el('button','how-view-tab',view[0]);tab.type='button';tab.setAttribute('aria-pressed',String(i===0));view[1].hidden=i!==0;view[1].className+=' how-view';
+  tab.addEventListener('click',function(){views.forEach(function(other,j){other[1].hidden=j!==i;tabs.children[j].setAttribute('aria-pressed',String(j===i));});});tabs.appendChild(tab);side.appendChild(view[1]);});
+ var body=ArkUI.el('div','how-chapter-body');body.appendChild(card);body.appendChild(side);el.appendChild(body);
  light(1);
 
  var footer=ArkUI.el('nav','how-chapter-footer');footer.setAttribute('aria-label','Continue this story');var records=['intent','agreement','receipt'];footer.appendChild(link('Explore the signed record','lifecycle/'+records[index],'how-deeper-link'));if(index>0)footer.appendChild(link('← Previous part','how/'+ids[index-1]));footer.appendChild(link(index<2?'Next: '+['','agree on the terms','verify the result'][index+1]+' →':'Back to the three parts →',index<2?'how/'+ids[index+1]:'deployment','how-chapter-next'));el.appendChild(footer);
