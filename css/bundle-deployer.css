@@ -19,7 +19,7 @@
 #scene .bundle-flow { padding:20px; margin-bottom:24px; border:1px solid var(--bundle-line); border-radius:6px; background:hsl(var(--surface) / .55); }
 #scene .bundle-flow figcaption { color:hsl(var(--text-muted)); font-size:13px; }
 #scene .bundle-flow-trail { display:flex; list-style:none; padding:0; gap:20px; margin-top:20px; }
-#scene .bundle-flow-node { position:relative; flex:1; min-width:0; padding-top:13px; border-top:1px solid hsl(var(--reference) / .55); font-size:13px; line-height:1.5; color:hsl(var(--text)); }
+#scene .bundle-flow-node { position:relative; flex:1; min-width:0; padding-top:13px; border-top:1px solid hsl(var(--reference-400)); font-size:13px; line-height:1.5; color:hsl(var(--text)); }
 #scene .bundle-flow-node:not(:last-child)::after { content:'→'; position:absolute; right:-16px; top:9px; color:hsl(var(--text-faint)); }
 #scene .bundle-flow-note { margin-top:18px; font:400 10px/1.5 var(--font-mono,monospace); color:hsl(var(--text-faint)); }
 #scene .bundle-boundary-table { width:100%; table-layout:fixed; border-collapse:collapse; margin-top:18px; font-size:13px; line-height:1.5; }

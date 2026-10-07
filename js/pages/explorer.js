@@ -35,16 +35,73 @@
     return payload;
   }
 
+  function href(key) {
+    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key];
+    return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key;
+  }
+  /* The three steps, each drawn on the shared mesh fabric the How it works cards use. */
+  var STEPS = [
+    ['Shape the idea', 'Write a resolver: the small set of rules that turns a question into an answer.', 'story-goal', 'Shape'],
+    ['Publish to the mesh', 'Many independent machines keep a copy and serve it. There is no single server to fail or rent.', 'story-request', 'Publish'],
+    ['People use it', 'Anyone can use what you made and check the answer is genuine, without trusting you or us.', 'story-check', 'Use']
+  ];
+  /* Record categories in everyday words. A category this map does not know keeps the Miner's own name. */
+  var KINDS = {
+    identity: ['People & names', 'Who someone is, and the names that point to them.', '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/>'],
+    network: ['Networks', 'The machines that keep the mesh running.', '<circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6 8l5 8M18 8l-5 8"/>'],
+    publication: ['Publications', 'Things people have published for anyone to read.', '<path d="M4 10v4h3l6 4V6l-6 4H4zM16 9a4 4 0 0 1 0 6"/>'],
+    document: ['Documents', 'Files and pages stored on the mesh.', '<path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6"/>'],
+    economy: ['Rewards', 'How value is shared with everyone who helps.', '<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v5c0 1.7 3.1 3 7 3s7-1.3 7-3V7M5 12v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5"/>'],
+    governance: ['Decisions', 'Who may approve what, and a record of each call.', '<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6zM9 12l2 2 4-4"/>'],
+    device: ['Devices', 'The phones and laptops trusted to sign for someone.', '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>'],
+    dm: ['Messages', 'Private conversations between their members.', '<path d="M4 5h16v11H9l-5 4z"/>'],
+    social: ['Connections', 'Who follows or works with whom.', '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c.8-3.5 3.2-5 6-5s5.2 1.5 6 5M15 14.5c2.6 0 4.6 1.3 5.4 4"/>'],
+    storage: ['Releases', 'Software versions and stored content.', '<path d="M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10"/>'],
+    presence: ['Presence', 'Who is online right now.', '<path d="M3 12h4l2-5 4 10 2-5h6"/>'],
+    runtime: ['Live state', 'How the machines are running right now.', '<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M8 20h8M12 16v4M7 11h3l2-3 2 5 1-2h2"/>'],
+    notification: ['Notifications', 'Alerts sent to people about what changed.', '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>'],
+    thread: ['Threads', 'Conversations kept together by topic.', '<path d="M4 6h16M4 12h10M4 18h13"/>']
+  };
+  var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'miners', publications: 'publications', documents: 'documents' };
+  function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
+  /* One screen, no page scroll, in the How it works layout: a path, a heading with its deck,
+     two cards and a footer line. More is a state that takes the same place: the steps swap inside
+     one card, a kind opens over its list, a record over its kind, the raw observatory over the page. */
+  function story() {
+    return '<div class="explore-home how-triptych" data-explore-home data-pane="how">' +
+      '<nav class="content-layer-path how-path" aria-label="Your place"><a href="' + href('zero') + '" data-scene-link="zero">← Home</a><span aria-current="page">Mesh Explorer</span></nav>' +
+      '<header class="how-triptych-intro"><div class="how-triptych-heading"><h1 id="mesh-explorer-title">Your idea, live on the mesh.</h1></div>' +
+      '<p class="how-simple-deck">DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.</p></header>' +
+      '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
+      '<div class="explore-cards">' +
+      '<article class="how-work-card explore-how-card" aria-labelledby="explore-step-title">' +
+      '<div class="how-work-card-top"><span class="how-work-number" data-explore-step-n>01 / 03</span><span class="how-work-signal">HOW IT WORKS</span></div>' +
+      '<h2 id="explore-step-title" data-explore-step-title>' + STEPS[0][0] + '</h2><p class="how-work-answer" data-explore-step-text>' + STEPS[0][1] + '</p>' +
+      '<div class="how-work-mesh-frame"><canvas class="how-work-mesh" data-explore-fabric aria-hidden="true"></canvas></div>' +
+      '<div class="explore-stepper" role="tablist" aria-label="How it works">' + STEPS.map(function (step, i) {
+        return '<button type="button" role="tab" aria-selected="' + (i === 0) + '" aria-controls="explore-step-title" data-explore-step="' + i + '"><span>0' + (i + 1) + '</span>' + step[3] + '</button>';
+      }).join('') + '</div></article>' +
+      '<section class="how-work-card explore-live-card" aria-labelledby="explore-live-title">' +
+      '<div class="how-work-card-top"><span class="how-work-number">LIVE</span><span class="how-work-signal">READ FROM THE PUBLIC MESH</span></div>' +
+      '<h2 id="explore-live-title">Running on the mesh now</h2>' +
+      '<div class="explore-live-body" data-explore-body data-state="kinds"><div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div></div>' +
+      '<p class="explore-private" data-explore-private hidden></p></section></div>' +
+      '<footer class="how-simple-footer"><div class="how-simple-boundary explore-status" role="status" aria-live="polite"><span class="how-boundary-label"><span class="mesh-explorer-status-dot" aria-hidden="true"></span>PUBLIC MESH</span>' +
+      '<strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div>' +
+      '<div class="explore-footer-actions"><a href="' + href('resolver') + '" data-scene-link="resolver">What is a resolver?</a><button type="button" class="how-simple-next" data-explore-raw-open>Browse the raw records →</button></div></footer>' +
+      '</div>';
+  }
+
   ArkUI.pageModules.explorer = {
     mount: function (host) {
-      var page = node('section', 'ark-page task-page mesh-explorer-page');
+      var page = node('section', 'ark-page task-page mesh-explorer-page explore-page');
       page.dataset.arkPage = 'explorer';
       page.setAttribute('aria-labelledby', 'mesh-explorer-title');
-      page.innerHTML = '<div class="mesh-explorer-shell">' +
-        '<header class="mesh-explorer-header"><div class="mesh-explorer-title-group"><p class="learning-eyebrow">DEFXN / MESH OBSERVATORY</p>' +
-        '<h1 id="mesh-explorer-title">Observe the mesh, one node at a time.</h1>' +
-        '<p class="mesh-explorer-deck">A read-only view of what the selected Miner reports now. Counts, availability, and records belong to this observation; they are not a global chain height or an authoritative membership list.</p></div>' +
-        '<aside class="mesh-explorer-live-panel" aria-label="Current observation"><div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><div><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></div>' +
+      page.dataset.view = 'home';
+      page.innerHTML = story() +
+        '<div class="explore-raw" data-explore-raw hidden><nav class="content-layer-path how-path" aria-label="Your place"><button type="button" class="explore-raw-back" data-explore-raw-back>\u2190 Mesh Explorer</button><span aria-current="page">Raw records</span></nav><div class="mesh-explorer-shell">' +
+        '<header class="mesh-explorer-header">' +
+        '<aside class="mesh-explorer-live-panel" aria-label="Current observation">' +
         '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside>' +
         '<details class="mesh-connect-popover"><summary aria-label="Observation controls"><span class="mesh-connect-dot" aria-hidden="true"></span><span data-explorer-origin-label>Public mesh</span></summary><section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
         '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
@@ -63,7 +120,7 @@
         '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-secondary"><summary><span>05</span> Observation details</summary><div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="docs/operators/verification.md">How to verify an observation ↗</a> · <a href="docs/evidence/registry.md">Evidence registry ↗</a></p></div></details></nav>' +
-        '</div>';
+        '</div></div>';
       host.appendChild(page);
       if (page.querySelector('[data-explorer-connect]')) setup(page);
       return page;
@@ -91,6 +148,49 @@
     var nodesBox = $('[data-explorer-nodes]');
     var glanceStamp = $('[data-explorer-glance-stamp]');
     var glance = $('.mesh-observatory');
+    var browseBox = $('[data-explore-browse]'), browsing = { category: null, source: null, token: 0 };
+    var kindsBox = $('[data-explore-kinds]'), privateLine = $('[data-explore-private]'), raw = $('[data-explore-raw]'), liveCounts = {};
+    var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stepTimer = 0, step = 0;
+    var fabricCanvas = $('[data-explore-fabric]');
+    var fabric = ArkUI.createMeshFabric && fabricCanvas.getContext ? ArkUI.createMeshFabric(fabricCanvas) : null;
+    function showStep(index, focus) {
+      step = (index + STEPS.length) % STEPS.length;
+      Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
+        var on = Number(tab.dataset.exploreStep) === step; tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1;
+        if (on && focus) tab.focus();
+      });
+      $('[data-explore-step-n]').textContent = '0' + (step + 1) + ' / 0' + STEPS.length;
+      $('[data-explore-step-title]').textContent = STEPS[step][0];
+      $('[data-explore-step-text]').textContent = STEPS[step][1];
+      if (fabric) fabric.select(STEPS[step][2], true, true);
+    }
+    window.setTimeout(function () { if (fabric && page.isConnected) fabric.select(STEPS[step][2], true, true); }, 60);
+    /* The steps play once through on their own, and stop for good the moment someone picks one. */
+    function stopSteps() { window.clearInterval(stepTimer); stepTimer = 0; }
+    Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
+      tab.addEventListener('click', function () { stopSteps(); showStep(Number(tab.dataset.exploreStep)); });
+      tab.addEventListener('keydown', function (event) {
+        var move = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+        if (!move) return; event.preventDefault(); stopSteps(); showStep(step + move, true);
+      });
+    });
+    if (!(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) stepTimer = window.setInterval(function () {
+      if (step === STEPS.length - 1 || !page.isConnected) { stopSteps(); return; }
+      if (document.visibilityState !== 'hidden') showStep(step + 1);
+    }, 5200);
+    Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (button) {
+      button.addEventListener('click', function () {
+        home.dataset.pane = button.dataset.explorePane;
+        Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (other) { other.setAttribute('aria-pressed', String(other === button)); });
+      });
+    });
+    function showView(view) {
+      page.dataset.view = view; raw.hidden = view !== 'raw'; home.hidden = view === 'raw';
+      if (view === 'raw') $('[data-explore-raw-back]').focus({ preventScroll: true });
+      else $('[data-explore-raw-open]').focus({ preventScroll: true });
+    }
+    $('[data-explore-raw-open]').addEventListener('click', function () { showView('raw'); });
+    $('[data-explore-raw-back]').addEventListener('click', function () { showView('home'); });
     function base() { return originSelect.value === 'local' ? LOCAL_MINER : PUBLIC_BASE; }
     function originName() { return originSelect.value === 'local' ? 'local Miner' : 'public mesh'; }
     var source = $('#mesh-source');
@@ -149,6 +249,7 @@
       refresh.hidden=kind!=='live';disconnect.hidden=kind!=='live';
       /* The glance panel appears once there is something true to show: live counts, or (when the node is down) which nodes do answer. */
       glance.hidden=!(kind==='live'||kind==='error');
+      kindsBox.hidden=kind!=='live';
       status.textContent = title;
       message.textContent = text;
       $('[data-explorer-connection]').textContent = kind === 'live' ? (originSelect.value === 'local' ? 'Local live' : 'Public live') : kind === 'loading' ? 'Connecting' : 'Offline';
@@ -163,7 +264,8 @@
       generation += 1; detailRequest+=1;restoreRecord(false,false);
       window.clearInterval(timer); timer = 0;
       controllers.forEach(function (controller) { controller.abort(); }); controllers.clear();
-      connected = false; sources = []; lastCursor = null;
+      connected = false; sources = []; lastCursor = null; liveCounts = {};
+      kindsBox.replaceChildren(); privateLine.hidden = true; closeBrowse();
       source.replaceChildren(node('option', '', 'Connect to load sources')); source.disabled = true;
       recordId.value = ''; recordId.disabled = true; showInspect(''); guide.replaceChildren();
       lookup.querySelector('button').disabled = true;
@@ -417,11 +519,145 @@
       });
       var first = sources.find(sourceAllowsQuery);
       selectedId = first ? first.id : null;
-      renderFilters(); renderField();
+      renderFilters(); renderField(); renderKinds();
       if (!first) { source.replaceChildren(node('option', '', 'No enumerable source available')); source.disabled = true; }
       else { source.value = first.id; source.disabled = false; inspectSource(first); }
       recordId.disabled = !sources.length;
       lookup.querySelector('button').disabled = !sources.length;
+    }
+    /* The plain-language view of the same catalog: one tile per kind of record anyone can read,
+       with the live count where the node gave one. Kinds with nothing public collapse to one line. */
+    function renderKinds() {
+      var groups = {}, closed = [];
+      sources.forEach(function (item) { var c = item.category || 'other'; (groups[c] = groups[c] || []).push(item); });
+      var open = Object.keys(groups).filter(function (c) {
+        if (groups[c].some(sourceAllowsQuery)) return true;
+        closed.push(KINDS[c] ? KINDS[c][0] : humanField(c)); return false;
+      });
+      function counted(c) {
+        return groups[c].filter(function (item) { return liveCounts[item.id]; }).map(function (item) {
+          var r = liveCounts[item.id]; return r.count + (r.capped ? '+' : '') + ' ' + (COUNT_WORDS[item.id] || item.id);
+        });
+      }
+      function weight(c) { return groups[c].reduce(function (sum, item) { return sum + (liveCounts[item.id] ? liveCounts[item.id].count : 0); }, 0); }
+      open.sort(function (a, b) { return weight(b) - weight(a) || a.localeCompare(b); });
+      kindsBox.replaceChildren.apply(kindsBox, open.map(function (c) {
+        var kind = KINDS[c] || [c.charAt(0).toUpperCase() + c.slice(1), CATEGORY_NOTES[c] || 'Records declared by this node.'];
+        var tile = node('button', 'explore-kind'); tile.type = 'button'; tile.dataset.category = c;
+        var icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
+        var figures = counted(c);
+        tile.appendChild(icon); tile.appendChild(node('strong', '', kind[0])); tile.appendChild(node('span', 'explore-kind-text', kind[1]));
+        tile.appendChild(node('small', '', figures.length ? figures.join(' · ') : 'Open to browse'));
+        tile.setAttribute('aria-pressed', String(browsing.category === c)); tile.setAttribute('aria-controls', 'explore-browse');
+        tile.addEventListener('click', function () { if (browsing.category === c) closeBrowse(); else browseKind(c); });
+        return tile;
+      }));
+      privateLine.hidden = !closed.length;
+      privateLine.textContent = closed.length ? 'Kept private: ' + closed.join(', ') + '.' : '';
+    }
+    /* Exploring in place: a kind opens below the tiles with its latest records as plain cards.
+       One card opens into its fields. The raw observatory stays one link away. */
+    function ago(value) {
+      var stamp = Date.parse(value || ''); if (!Number.isFinite(stamp)) return '';
+      var s = Math.max(0, (Date.now() - stamp) / 1000);
+      return s < 60 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : s < 86400 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' d ago';
+    }
+    function shortId(id) { id = safeString(id); return id.length > 26 ? id.slice(0, 12) + '…' + id.slice(-8) : id; }
+    function humanField(key) { var t = String(key).replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').toLowerCase(); return t.charAt(0).toUpperCase() + t.slice(1); }
+    function recordTitle(record) {
+      var f = record.fields || {};
+      var named = ['displayName', 'name', 'title', 'label', 'handle', 'networkId'].find(function (k) { return f[k] && typeof f[k] !== 'object'; });
+      return named ? String(f[named]) : shortId(record.id);
+    }
+    function verifiedChip(state) {
+      var chip = node('span', 'explore-chip', state === 'verified' ? 'Verified' : humanField(safeString(state, 'Unchecked')));
+      chip.dataset.state = state === 'verified' ? 'ok' : 'quiet'; return chip;
+    }
+    function closeBrowse() {
+      browsing.category = null; browsing.source = null; browsing.token += 1;
+      browseBox.hidden = true; browseBox.replaceChildren(); liveBody.dataset.state = 'kinds';
+      Array.from(kindsBox.children || []).forEach(function (tile) { tile.setAttribute('aria-pressed', 'false'); });
+    }
+    function browseKind(category, sourceId) {
+      var list = sources.filter(function (item) { return (item.category || 'other') === category && sourceAllowsQuery(item); });
+      if (!list.length) return;
+      var pick = list.find(function (item) { return item.id === sourceId; }) || list[0];
+      browsing.category = category; browsing.source = pick.id; var token = ++browsing.token;
+      Array.from(kindsBox.children || []).forEach(function (tile) { tile.setAttribute('aria-pressed', String(tile.dataset.category === category)); });
+      var kind = KINDS[category] || [humanField(category), CATEGORY_NOTES[category] || ''];
+      browseBox.id = 'explore-browse'; browseBox.hidden = false; browseBox.replaceChildren(); liveBody.dataset.state = 'browse';
+      var head = node('div', 'explore-browse-head'), icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
+      var title = node('div', 'explore-browse-title'); title.appendChild(node('h3', '', kind[0])); title.appendChild(node('p', '', kind[1]));
+      var close = node('button', 'explore-browse-close', '← All kinds'); close.type = 'button';
+      close.addEventListener('click', function () { var c = browsing.category; closeBrowse(); var tile = kindsBox.querySelector && kindsBox.querySelector('[data-category="' + c + '"]'); if (tile) tile.focus(); });
+      head.appendChild(close); head.appendChild(icon); head.appendChild(title); browseBox.appendChild(head);
+      if (list.length > 1) {
+        var tabs = node('div', 'explore-browse-tabs'); tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', kind[0] + ' sources');
+        list.forEach(function (item) {
+          var tab = node('button', '', humanField(item.label || item.id)); tab.type = 'button';
+          tab.setAttribute('aria-pressed', String(item.id === pick.id));
+          tab.addEventListener('click', function () { browseKind(category, item.id); });
+          tabs.appendChild(tab);
+        });
+        browseBox.appendChild(tabs);
+      }
+      var body = node('div', 'explore-records', ''); body.appendChild(node('p', 'explore-browse-note', 'Reading the latest ' + humanField(pick.label || pick.id).toLowerCase() + '…'));
+      browseBox.appendChild(body);
+      loadBrowse(pick, body, token);
+    }
+    async function loadBrowse(item, body, token) {
+      try {
+        var scopes = item.id === 'miners' ? await minerScopes() : [undefined], list = [];
+        for (var i = 0; i < scopes.length && list.length < 8; i++) {
+          var payload = await request('/explorer/v1/query', { sourceId: item.id, scope: scopes[i], limit: 8 });
+          if (token !== browsing.token || !page.isConnected) return;
+          (Array.isArray(payload.data.records) ? payload.data.records : []).forEach(function (record) { recordScopes[record.id] = scopes[i]; list.push(record); });
+        }
+        if (token !== browsing.token) return;
+        body.replaceChildren();
+        if (!list.length) { body.appendChild(node('p', 'explore-browse-note', 'Nothing here yet. Be the first to publish one.')); return; }
+        list.slice(0, 8).forEach(function (record) {
+          var card = node('button', 'explore-record'); card.type = 'button';
+          var top = node('span', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state));
+          top.appendChild(node('span', '', ago(record.updatedAt)));
+          card.appendChild(top); card.appendChild(node('strong', '', recordTitle(record))); card.appendChild(node('span', 'explore-record-id', shortId(record.id)));
+          card.addEventListener('click', function () { showBrowseRecord(item, record, body, token); });
+          body.appendChild(card);
+        });
+      } catch (error) { if (token === browsing.token) body.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
+    }
+    async function showBrowseRecord(item, record, body, token) {
+      var back = node('button', 'explore-record-back', '← All ' + humanField(item.label || item.id).toLowerCase()); back.type = 'button';
+      back.addEventListener('click', function () { browseKind(browsing.category, item.id); });
+      var card = node('article', 'explore-record-open');
+      var top = node('div', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state)); top.appendChild(node('span', '', ago(record.updatedAt)));
+      card.appendChild(top); card.appendChild(node('h4', '', recordTitle(record))); card.appendChild(node('p', 'explore-record-id', safeString(record.id)));
+      var facts = node('dl', 'explore-record-facts'); facts.appendChild(node('p', 'explore-browse-note', 'Opening…')); card.appendChild(facts);
+      var rawLink = node('button', 'explore-browse-raw', 'Every field'); rawLink.type = 'button';
+      rawLink.addEventListener('click', function () { openKind(browsing.category); });
+      var bar = node('div', 'explore-record-bar'); bar.appendChild(back); bar.appendChild(rawLink);
+      body.replaceChildren(bar, card); body.dataset.view = 'record';
+      try {
+        var payload = await request('/explorer/v1/record', { sourceId: item.id, recordId: record.id, scope: recordScopes[record.id] });
+        if (token !== browsing.token || !page.isConnected) return;
+        var fields = payload.data.safeDetail || (payload.data.record && payload.data.record.fields) || record.fields || {};
+        facts.replaceChildren();
+        Object.keys(fields).slice(0, 8).forEach(function (key) {
+          var value = safeString(fields[key]); var line = node('div');
+          line.appendChild(node('dt', '', humanField(key))); line.appendChild(node('dd', '', value.length > 120 ? value.slice(0, 117) + '…' : value));
+          facts.appendChild(line);
+        });
+        if (!facts.children.length) facts.appendChild(node('p', 'explore-browse-note', 'This record shares no public fields.'));
+        var links = Array.isArray(payload.data.links) ? payload.data.links.length : 0;
+        if (links) top.insertBefore(node('span', 'explore-record-links', 'Linked to ' + links + ' record' + (links === 1 ? '' : 's')), top.lastChild);
+      } catch (error) { if (token === browsing.token) facts.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
+    }
+    function openKind(category) {
+      filters.category = category; filters.access = 'all'; filters.query = '';
+      renderFilters(); renderField();
+      var first = sources.find(function (item) { return (item.category || 'other') === category && sourceAllowsQuery(item); });
+      if (first) chooseSource(first.id, true);
+      showView('raw');
     }
     filterSearch.addEventListener('input', function () { filters.query = filterSearch.value; renderField(); });
     function row(label, value) {
@@ -622,6 +858,7 @@
       counted.forEach(function (entry, index) {
         var result = results[index];
         if (result === null) return;
+        liveCounts[entry[0]] = result;
         var value = result ? String(result.count) + (result.capped ? '+' : '') : 'Unavailable';
         var note = result ? (result.capped ? 'first ' + cap + ' counted' : 'counted from the node') : 'this node could not be read';
         cards.push(statCard(entry[1], value, note));
@@ -638,7 +875,7 @@
       cards.push(statCard('Node health', safeString(lastHealth && lastHealth.data && lastHealth.data.status, 'Unknown'), 'API ' + API_VERSION));
       coreCards.push(statCard('Node health', safeString(lastHealth && lastHealth.data && lastHealth.data.status, 'Unknown'), 'reported by the node'));
       cards.push(statCard('Counted in', (Date.now() - started) + ' ms', 'live from ' + originName()));
-      stats.replaceChildren.apply(stats, cards); stats.hidden = false;
+      stats.replaceChildren.apply(stats, cards); stats.hidden = false; renderKinds();
       coreStats.replaceChildren.apply(coreStats, coreCards);
       glanceStamp.textContent = 'UPDATED ' + new Date().toLocaleTimeString();
       return health;
@@ -718,7 +955,7 @@
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });
     source.addEventListener('change', function () { chooseSource(source.value, true); });
     lookup.addEventListener('submit', function (event) { event.preventDefault(); inspect(recordId.value.trim()); });
-    page._explorerCleanup = function () { clearLive(); key.value = ''; };
+    page._explorerCleanup = function () { clearLive(); stopSteps(); if (fabric) fabric.dispose(); key.value = ''; };
     /* Start reading as soon as the page is on screen; no button press needed for the public mesh. */
     window.setTimeout(function () { if (page.isConnected && !connected && !busy) start(); }, 0);
   }

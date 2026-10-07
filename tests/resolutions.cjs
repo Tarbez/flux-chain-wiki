@@ -48,7 +48,24 @@ assert(!fs.readFileSync('js/resolvers/header.js','utf8').includes("'?r=' + entry
 assert(!fs.readFileSync('js/pages/about.js','utf8').includes("'r=' + item.slug"),'About links directly to inner resolution pages');
 assert(fs.readFileSync('js/ark/panel-continuity.js','utf8').includes("indexOf('resolutions/')"),'inner resolution pages stay in the framed panel');
 const resolutionPage=fs.readFileSync('js/pages/resolutions.js','utf8'),resolutionCss=fs.readFileSync('css/resolutions.css','utf8');
-assert(resolutionPage.includes("['Outcome', 'Shift', 'Path']"),'inner pages reveal one concise information level at a time');
-assert(resolutionPage.includes("level.replaceChildren()"),'changing levels replaces rather than accumulates information');
+assert(resolutionPage.includes("['Ready now',")&&resolutionPage.includes("['Product ideas',")&&resolutionPage.includes("['How it resolves',"),'inner pages reveal products, ideas and the path one level at a time');
+assert(resolutionPage.includes("view.replaceChildren()")&&resolutionPage.includes("detail.replaceChildren()"),'changing levels or ideas replaces content in place rather than accumulating it');
+
+// Every resolution names its audience, problem, ready products and three ideas built on real products.
+vm.runInContext(fs.readFileSync('js/content/resolution-products.js','utf8'),context);
+const ArkResolutionProducts=vm.runInContext('ArkResolutionProducts',context);
+for(const key of keys){
+  const shelf=ArkResolutionProducts.forResolution(key);
+  assert(shelf,key+' has products');
+  assert(shelf.audience.length>20&&shelf.problem.length>20,key+' names its audience and problem');
+  assert(shelf.ready.length>=2,key+' lists products that exist today');
+  assert.equal(shelf.ideas.length,3,key+' has three product ideas');
+  for(const idea of shelf.ideas){
+    assert(idea.name&&idea.audience&&idea.problem&&idea.product,key+' idea '+idea.name+' is complete');
+    assert(idea.builds.length>=2,key+' idea '+idea.name+' builds on existing products');
+  }
+  assert.equal(Object.values(ArkResolutionProducts.resolutions[key].ideas).flatMap(i=>i.builds).filter(b=>!ArkResolutionProducts.products[b]).length,0,key+' ideas only build on known products');
+}
+for(const [key,product] of Object.entries(ArkResolutionProducts.products)) assert(['ready','building'].includes(product.status),key+' has an honest status');
 assert(/#scene \.resolutions-page[\s\S]*?overflow:hidden/.test(resolutionCss),'resolution pages never introduce a scrolling page surface');
 console.log('resolutions ok');

@@ -2,7 +2,7 @@
    since this page has no signed-in/signed-out split -- verification works
    for anyone, signed in or not. */
 #scene .task-page.account-domains-page {
-  --account-accent:var(--primary);
+  --account-accent:var(--reference);
   --account-rule:hsl(var(--text-strong) / .16);
   --account-muted:hsl(var(--text-strong) / .66);
   width:100%;

@@ -1,7 +1,7 @@
 /* Batch 4: a quiet instrument field and deliberate, interactive reading depths. */
 .deploy-progress { display:flex; flex-wrap:wrap; gap:8px; margin:28px 0 20px; }
 .deploy-progress button,.deploy-workflow-controls button { min-height:44px; padding:10px 14px; border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-strong)); font:500 13px/1.4 "Albert Sans",sans-serif; cursor:pointer; }
-.deploy-progress button[aria-pressed="true"] { border-color:hsl(var(--accent)); background:hsl(var(--accent) / .08); }
+.deploy-progress button[aria-pressed="true"] { border-color:hsl(var(--reference)); background:hsl(var(--reference-100)); }
 .deploy-workflow-controls { display:flex; flex-wrap:wrap; gap:10px; }
 .deploy-workflow-controls .mechanism-next { background:hsl(var(--text-strong)); }
 #scene .deploy-step-body { min-width:0; }
@@ -13,14 +13,14 @@
 #scene .deploy-copy-feedback { display:block; min-height:1.5em; margin-top:8px; font:400 13px/1.5 "Albert Sans",sans-serif; color:hsl(var(--text-strong)); }
 #scene .deploy-expected { color:hsl(var(--text-strong) / .8) !important; }
 .deploy-position { font:400 13px/1.5 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
-.deploy-progress button:focus-visible,.deploy-workflow-controls button:focus-visible { outline:2px solid hsl(var(--accent)); outline-offset:3px; }
+.deploy-progress button:focus-visible,.deploy-workflow-controls button:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 .source-step-picker { display:flex; flex-wrap:wrap; gap:8px; margin:32px 0 12px; }
 .source-step-picker button,.source-step-controls button { min-height:44px; padding:10px 14px; border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-strong)); font:500 13px/1.4 "Albert Sans",sans-serif; cursor:pointer; }
-.source-step-picker button[aria-pressed="true"] { border-color:hsl(var(--accent)); background:hsl(var(--accent) / .08); }
+.source-step-picker button[aria-pressed="true"] { border-color:hsl(var(--reference)); background:hsl(var(--reference-100)); }
 .source-step-progress { font:400 13px/1.5 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
 .source-step-controls { display:flex; flex-wrap:wrap; gap:9px; margin:0 0 30px; }
 .source-step-controls .mechanism-next { background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); }
-.source-step-picker button:focus-visible,.source-step-controls button:focus-visible { outline:2px solid hsl(var(--accent)); outline-offset:3px; }
+.source-step-picker button:focus-visible,.source-step-controls button:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 #scene .learning-page [hidden] { display:none !important; }
 #scene .hero-alive .ark-layer-persistent::before,
 #scene .hero-alive .ark-layer-persistent::after {
@@ -31,8 +31,8 @@
  transform:rotate(-18deg); transition:transform 850ms cubic-bezier(.2,.7,.2,1),opacity 650ms;
 }
 #scene .hero-alive .ark-layer-persistent::after {
- width:28vw; right:7%; top:23%; border-radius:0; border-color:hsl(var(--accent) / .2);
- background:linear-gradient(135deg,hsl(var(--accent) / .035),transparent 60%);
+ width:28vw; right:7%; top:23%; border-radius:0; border-color:hsl(var(--primary-300));
+ background:linear-gradient(135deg,hsl(var(--primary-100)),transparent 60%);
  clip-path:polygon(0 0,16% 0,16% 1px,1px 1px,1px 16%,0 16%,0 0,100% 0,100% 16%,calc(100% - 1px) 16%,calc(100% - 1px) 1px,84% 1px,84% 0,100% 0,100% 100%,84% 100%,84% calc(100% - 1px),calc(100% - 1px) calc(100% - 1px),calc(100% - 1px) 84%,100% 84%,100% 100%,0 100%,0 84%,1px 84%,1px calc(100% - 1px),16% calc(100% - 1px),16% 100%,0 100%);
  transform:rotate(0); opacity:.7;
 }
@@ -45,7 +45,7 @@
 #scene .mechanism-explorer .concept-content { min-height:calc(100dvh - 130px); position:relative; }
 #scene .mechanism-explorer .concept-content::after { content:"+"; position:absolute; top:42px; right:4%; color:hsl(var(--text-muted)); font:300 30px/1 "Albert Sans",sans-serif; pointer-events:none; }
 #scene .mechanism-explorer .learning-heading { max-width:16ch; font-size:clamp(40px,5.4vw,76px); }
-#scene .mechanism-explorer .mechanism-status-summary { max-width:56ch; border:0; border-left:2px solid hsl(var(--accent) / .55); background:transparent; padding:0 0 0 16px; margin:28px 0; }
+#scene .mechanism-explorer .mechanism-status-summary { max-width:56ch; border:0; border-left:2px solid hsl(var(--primary-400)); background:transparent; padding:0 0 0 16px; margin:28px 0; }
 #scene .mechanism-explorer:not([data-reading-layer="focus"]) .mechanism-status-summary p { display:none; }
 #scene .mechanism-explorer:not([data-reading-layer="focus"]) .mechanism-status-summary { margin:18px 0; }
 .mechanism-depth { display:flex; gap:0; max-width:790px; border-block:1px solid hsl(var(--border-default)); margin:32px 0; }
@@ -61,7 +61,7 @@
 .mechanism-inner#dao-context { max-width:900px; }
 .mechanism-steps { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 26px; }
 .mechanism-step { border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-muted)); padding:12px; font:500 12px/1.4 "Albert Sans",sans-serif; cursor:pointer; text-align:left; }
-.mechanism-step[aria-pressed="true"] { border-color:hsl(var(--accent) / .6); color:hsl(var(--text-strong)); background:hsl(var(--accent) / .065); }
+.mechanism-step[aria-pressed="true"] { border-color:hsl(var(--reference-400)); color:hsl(var(--text-strong)); background:hsl(var(--reference-100)); }
 #scene .mechanism-inner .concept-principles { max-width:100%; min-height:180px; }
 #scene .mechanism-inner .concept-principles section { grid-template-columns:40px 1fr; padding:24px 0; border:0; animation:none; }
 #scene .mechanism-inner .concept-principles h2 { font:500 clamp(24px,3vw,36px)/1.2 "Albert Sans",sans-serif; letter-spacing:-.035em; margin-bottom:20px; }
@@ -82,7 +82,7 @@
 .concept-symbol { position:relative; height:115px; width:100%; display:grid; place-items:center; pointer-events:none; }
 .concept-symbol i { position:absolute; width:92px; height:92px; border:1px solid hsl(var(--text-strong) / .35); border-radius:50%; transition:transform 500ms cubic-bezier(.2,.7,.2,1),border-color 400ms; }
 .concept-symbol i:nth-child(1) { transform:translateX(-28px); }
-.concept-symbol i:nth-child(3) { transform:translateX(28px); border-color:hsl(var(--accent) / .55); }
+.concept-symbol i:nth-child(3) { transform:translateX(28px); border-color:hsl(var(--primary-400)); }
 .concept-symbol-depth i { border-radius:2px; height:68px; transform:rotate(-15deg); }
 .concept-symbol-depth i:nth-child(1) { transform:translate(-25px,10px) rotate(-15deg); }
 .concept-symbol-depth i:nth-child(3) { transform:translate(25px,-10px) rotate(-15deg); }

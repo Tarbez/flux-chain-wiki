@@ -9,7 +9,7 @@
 #scene .economy-asset-tabs { display:flex; gap:0; margin:38px 0 0; border-bottom:1px solid hsl(var(--border-default)); }
 #scene .economy-asset-tabs[hidden],#scene .economy-asset-line[hidden] { display:none !important; }
 #scene .economy-asset-tabs button { min-width:130px; padding:11px 18px; border:0; border-bottom:2px solid transparent; background:transparent; color:hsl(var(--text-muted)); font:600 13px/1.4 "Albert Sans",sans-serif; }
-#scene .economy-asset-tabs button[aria-pressed="true"] { color:hsl(var(--text-strong)); border-color:hsl(var(--accent)); }
+#scene .economy-asset-tabs button[aria-pressed="true"] { color:hsl(var(--text-strong)); border-color:hsl(var(--reference)); }
 #scene .economy-overview { display:block; max-width:720px; margin:0 0 18px; border-bottom:1px solid hsl(var(--border-default)); }
 #scene .economy-asset-line { min-width:0; padding:22px 0 25px; }
 #scene .economy-asset-code { display:block; margin-bottom:12px; color:hsl(var(--accent)); font:600 11px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.08em; }
@@ -19,7 +19,7 @@
 #scene .economy-primary { padding:11px 20px; border:1px solid hsl(var(--text-strong)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); font:600 13px/1.4 "Albert Sans",sans-serif; }
 #scene .economy-primary:hover { opacity:.83; }
 #scene .economy-return { display:block; margin:0 0 30px; padding:0; border:0; background:transparent; color:hsl(var(--text-strong)); font:600 13px/1.4 "Albert Sans",sans-serif; }
-#scene .economy-preview-page :is(button,input,select,a):focus-visible { outline:2px solid hsl(var(--accent)); outline-offset:4px; }
+#scene .economy-preview-page :is(button,input,select,a):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:4px; }
 #scene .economy-movement-list,#scene .economy-movement-detail,#scene .economy-deposit-result { margin-top:50px; border-top:1px solid hsl(var(--border-default)); padding-top:20px; }
 #scene .economy-movement-list[hidden],#scene .economy-movement-detail[hidden],#scene .economy-deposit-result[hidden],#scene .economy-deposit-form[hidden],#scene .economy-overview[hidden],#scene .economy-primary[hidden] { display:none !important; }
 #scene .economy-movement-list h2,#scene .economy-movement-detail h2,#scene .economy-deposit-result h2 { max-width:24ch; margin:0 0 26px; color:hsl(var(--text-strong)); font:500 clamp(28px,3.7vw,45px)/1.14 "Albert Sans",sans-serif; letter-spacing:-.04em; }

@@ -67,13 +67,10 @@
 .resolver-back-link { color:hsl(var(--text-muted)); }
 .resolver-primary-cta {
   padding:0 20px;
-  border:1px solid hsl(var(--primary));
-  background:hsl(var(--primary));
-  color:hsl(var(--canvas));
 }
-.resolver-guide-links a:hover { color:hsl(var(--accent)); }
-.resolver-primary-cta:hover { background:hsl(var(--accent)); border-color:hsl(var(--accent)); color:hsl(var(--canvas)); }
-.resolver-guide-links a:focus-visible { outline:2px solid hsl(var(--accent)); outline-offset:5px; }
+.resolver-guide-links a:hover { color:hsl(var(--reference)); }
+.resolver-primary-cta:hover { }
+.resolver-guide-links a:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:5px; }
 @keyframes resolver-guide-rise { from { opacity:0; transform:translateY(10px); } }
 .resolver-guide-page :is(.learning-eyebrow,.learning-heading,.resolver-guide-copy,.resolver-guide-links) {
   animation:resolver-guide-rise 520ms cubic-bezier(.2,.7,.2,1) both;

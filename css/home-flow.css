@@ -1,0 +1,217 @@
+/* Home: the agreement flow (js/pages/home-flow.js) and the measured stats rail.
+   Bento, not boxes-in-boxes: tiles are separated by fill and gap, never by
+   hairlines. Color restraint: the acting party and the record being written
+   carry the primary ink; finished records are neutral; only a verified trail
+   uses success. Records are step links, so they take reference on hover/focus. */
+
+#scene .home-lifecycle {border-color:transparent;}
+.flow {--flow-step:3.2s;position:relative;display:grid;gap:14px;margin-top:20px;}
+
+/* Now: the illustrated step, then its quote ------------------------------ */
+.flow-now {position:relative;display:grid;gap:12px;align-content:start;padding:14px 18px 18px;border-radius:14px;
+ background:radial-gradient(120% 90% at 0% 0%,hsl(var(--primary-100)),transparent 55%),hsl(var(--text-strong) / .04);}
+.flow-scene {display:block;width:100%;height:auto;overflow:visible;}
+.flow-says {display:block;min-height:2.7em;padding-right:40px;font:500 18px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
+.flow.flow-run .flow-says {animation:flow-caption 420ms ease-out both;}
+@keyframes flow-caption {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+
+.flow-weave path {stroke:hsl(var(--text-strong) / .05);stroke-width:1;}
+.flow-glow-in {stop-color:hsl(var(--primary));stop-opacity:.28;}
+.flow-glow-out {stop-color:hsl(var(--primary));stop-opacity:0;}
+
+/* Parties: dim until they act. */
+.flow-avatar-glow {opacity:0;transition:opacity 300ms;}
+.flow-avatar-ring {fill:none;stroke:hsl(var(--primary));stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center;}
+.flow-avatar-disc {fill:hsl(var(--text-strong) / .07);transition:fill 300ms;}
+.flow-avatar-glyph {stroke:hsl(var(--text-faint));stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:none;transition:stroke 300ms;}
+.flow-avatar-label {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;text-transform:uppercase;fill:hsl(var(--text-faint));transition:fill 300ms;}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"],
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"],
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] {--on:1;}
+.flow-avatar {--on:0;}
+.flow-avatar .flow-avatar-glow {opacity:var(--on);}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-disc,
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-disc,
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-disc {fill:hsl(var(--primary-200));}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-glyph,
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-glyph,
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-glyph {stroke:hsl(var(--primary));}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-label,
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-label,
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-label {fill:hsl(var(--text-strong));}
+.flow.flow-run[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-ring,
+.flow.flow-run[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-ring,
+.flow.flow-run[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-ring {animation:flow-ping 1.6s ease-out 2;}
+@keyframes flow-ping {from{opacity:.8;transform:scale(.85);}to{opacity:0;transform:scale(1.35);}}
+
+/* Beams: drawn from the acting party to the record, then a spark rides them. */
+.flow-beam {opacity:0;transition:opacity 300ms;}
+.flow-beam[data-on="true"] {opacity:1;}
+.flow-beam-line {stroke:hsl(var(--primary-400));stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:0;}
+.flow-beam-spark {stroke:hsl(var(--primary));stroke-width:3;stroke-linecap:round;stroke-dasharray:.06 .94;stroke-dashoffset:.06;opacity:0;}
+.flow-beam-end {fill:hsl(var(--primary));}
+.flow.flow-run .flow-beam[data-on="true"] .flow-beam-line {animation:flow-draw 700ms cubic-bezier(.22,1,.36,1) both;}
+.flow.flow-run .flow-beam[data-on="true"] .flow-beam-spark {opacity:1;animation:flow-spark 1.6s linear 500ms infinite;}
+.flow[data-playing="false"] .flow-beam-spark {animation:none !important;opacity:0 !important;}
+@keyframes flow-draw {from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
+@keyframes flow-spark {from{stroke-dashoffset:.06;}to{stroke-dashoffset:-.94;}}
+
+/* The trail behind the current record. */
+.flow-ghost {opacity:0;transition:opacity 400ms;}
+.flow-ghost[data-on="true"] {opacity:1;}
+.flow-ghost-box {fill:hsl(var(--raised));filter:drop-shadow(0 4px 6px hsl(var(--canvas) / .6));}
+.flow-ghost[data-depth="1"] .flow-ghost-box {opacity:.92;}
+.flow-ghost[data-depth="2"] .flow-ghost-box {opacity:.75;}
+.flow-ghost[data-depth="3"] .flow-ghost-box {opacity:.58;}
+.flow-ghost[data-depth="4"] .flow-ghost-box {opacity:.42;}
+.flow-ghost-label {font:600 7.5px var(--mono-font,ui-monospace,monospace);letter-spacing:.08em;fill:hsl(var(--text-faint));}
+.flow[data-complete="true"] .flow-ghost-label {fill:hsl(var(--success));}
+
+/* The record being written. */
+.flow-card-box {fill:hsl(var(--raised));filter:drop-shadow(0 12px 18px hsl(var(--canvas) / .55));}
+.flow-card-band {fill:hsl(var(--text-strong) / .05);}
+.flow-card-type {font:600 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.1em;fill:hsl(var(--text-muted));}
+.flow-card-count {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;fill:hsl(var(--text-faint));}
+.flow-card-hash {font:500 28px var(--mono-font,ui-monospace,monospace);letter-spacing:-.01em;fill:hsl(var(--primary));}
+.flow-card-prev {font:400 10.5px var(--mono-font,ui-monospace,monospace);fill:hsl(var(--text-faint));}
+.flow-card-signed {font:600 8.5px var(--mono-font,ui-monospace,monospace);letter-spacing:.12em;fill:hsl(var(--text-faint));}
+.flow-stamp-disc {fill:none;stroke:hsl(var(--text-strong) / .16);stroke-width:1.2;stroke-dasharray:2.5 2.5;transition:fill 300ms,stroke 300ms;}
+.flow-stamp-mark {font:600 10px var(--mono-font,ui-monospace,monospace);fill:hsl(var(--text-faint));transition:fill 300ms;}
+.flow-stamp[data-on="true"] .flow-stamp-disc {fill:hsl(var(--primary));stroke:hsl(var(--primary));stroke-dasharray:none;}
+.flow-stamp[data-on="true"] .flow-stamp-mark {fill:hsl(var(--text-inverse));}
+.flow.flow-run .flow-stamp[data-on="true"] {animation:flow-stamp 500ms cubic-bezier(.34,1.56,.64,1) 550ms both;transform-box:fill-box;transform-origin:center;}
+@keyframes flow-stamp {from{transform:scale(1.6);opacity:0;}to{transform:none;opacity:1;}}
+.flow.flow-run .flow-card {animation:flow-card 520ms cubic-bezier(.22,1,.36,1) both;}
+@keyframes flow-card {from{transform:translate(-6px,8px);opacity:.3;}to{transform:none;opacity:1;}}
+
+/* A finished trail: one success state, after the receipt is written. */
+.flow-seal {opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity 300ms;}
+.flow-seal-disc {fill:hsl(var(--success-100));stroke:hsl(var(--success));stroke-width:1.5;}
+.flow-seal-check {stroke:hsl(var(--success));stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.flow[data-complete="true"] .flow-seal {opacity:1;}
+.flow.flow-run[data-complete="true"] .flow-seal {animation:flow-stamp 500ms cubic-bezier(.34,1.56,.64,1) 900ms both;}
+.flow[data-complete="true"] .flow-card-hash {fill:hsl(var(--success));}
+
+/* Steps: five nodes on one track, the step links that drive the scene.
+   The segment into a step fills once it is reached; while playing, the
+   segment out of the current step fills over the step's duration. */
+#scene .flow-ledger {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:0;padding:0 0 2px;list-style:none;}
+#scene .flow-ledger li {position:relative;min-width:0;}
+#scene .flow-ledger li:not(:first-child)::before,
+#scene .flow-ledger li:not(:first-child)::after {content:"";position:absolute;top:19px;left:calc(-50% + 20px);right:calc(50% + 20px);height:2px;border-radius:2px;background:hsl(var(--text-strong) / .08);}
+#scene .flow-ledger li:not(:first-child)::after {background:hsl(var(--primary-400));transform:scaleX(0);transform-origin:left;transition:transform 300ms;}
+#scene .flow-ledger li:has(> [data-done],> [data-current])::after {transform:none;}
+#scene .flow[data-playing="true"]:not([data-held]).flow-run .flow-ledger li:has(> [data-current]) + li::after {animation:flow-progress var(--flow-step) linear both;}
+#scene .flow-ledger .flow-record {display:grid;justify-items:center;gap:8px;min-height:0;margin:0;padding:4px 0 2px;border:0;border-radius:10px;background:none;
+ text-align:center;text-decoration:none;color:hsl(var(--text-faint)) !important;transition:color 200ms;}
+#scene .flow-ledger .flow-record-num {display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:hsl(var(--text-strong) / .06);
+ font:600 10px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.02em;transition:background 240ms,color 240ms,box-shadow 240ms;}
+#scene .flow-ledger .flow-record-name {max-width:100%;font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.005em;white-space:nowrap;}
+#scene .flow-ledger .flow-record[data-done] {color:hsl(var(--text-muted)) !important;}
+#scene .flow-ledger .flow-record[data-done] .flow-record-num {font-size:0;background:hsl(var(--primary-200));color:hsl(var(--primary));}
+#scene .flow-ledger .flow-record[data-done] .flow-record-num::after {content:"✓";font-size:12px;}
+#scene .flow-ledger .flow-record[data-current] {color:hsl(var(--text-strong)) !important;}
+#scene .flow-ledger .flow-record[data-current] .flow-record-num {background:hsl(var(--primary));color:hsl(var(--text-inverse));box-shadow:0 0 0 5px hsl(var(--primary-200));}
+#scene .flow[data-complete="true"] .flow-ledger li::after {background:hsl(var(--success));}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record .flow-record-num {background:hsl(var(--success-100));color:hsl(var(--success));box-shadow:none;}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record[data-current] .flow-record-num {font-size:0;}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record[data-current] .flow-record-num::after {content:"✓";font-size:12px;}
+#scene .flow-ledger .flow-record:is(:hover,:focus-visible) {color:hsl(var(--reference)) !important;}
+#scene .flow-ledger .flow-record:is(:hover,:focus-visible) .flow-record-num {box-shadow:0 0 0 5px hsl(var(--reference-200));}
+#scene .flow-ledger .flow-record:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
+@keyframes flow-progress {from{transform:scaleX(0);}to{transform:scaleX(1);}}
+
+/* Play control: a quiet round button in the scene tile's bottom-right corner. */
+#scene .flow-toggle {position:absolute;right:14px;bottom:14px;z-index:1;display:grid;place-items:center;width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:50%;
+ background:hsl(var(--text-strong) / .07);color:hsl(var(--text-muted));cursor:pointer;transition:background 200ms,color 200ms;}
+#scene .flow-toggle svg {grid-area:1/1;width:11px;height:11px;fill:currentColor;}
+#scene .flow-toggle svg + svg,
+#scene .flow[data-playing="false"] .flow-toggle svg:first-child {display:none;}
+#scene .flow[data-playing="false"] .flow-toggle svg + svg {display:block;}
+#scene .flow-toggle:is(:hover,:focus-visible) {background:hsl(var(--reference-200));color:hsl(var(--reference));}
+#scene .flow-toggle:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
+
+/* Onward: one action tile, kicker over label, arrow in a disc. */
+#scene .home-lifecycle .home-lifecycle-all {display:flex;align-items:center;gap:14px;min-height:0;margin:14px 0 0;padding:14px 14px 14px 18px;border:0;border-radius:14px;
+ background:hsl(var(--text-strong) / .045);text-decoration:none;color:hsl(var(--text-strong));transition:background 200ms;}
+#scene .home-lifecycle-all-copy {display:grid;gap:3px;min-width:0;}
+#scene .home-lifecycle-all-copy small {font:500 10px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-faint));}
+#scene .home-lifecycle-all-copy span {font:500 15px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.01em;color:hsl(var(--text-strong));}
+#scene .home-lifecycle .home-lifecycle-all .native-icon {flex:0 0 36px;width:36px;height:36px;box-sizing:border-box;margin-left:auto;padding:9px;border-radius:50%;
+ background:hsl(var(--reference-100));color:hsl(var(--reference)) !important;}
+#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) {background:hsl(var(--reference-100));}
+#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) .home-lifecycle-all-copy span {color:hsl(var(--reference));}
+#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) .native-icon {background:hsl(var(--reference-200));}
+
+@media(prefers-reduced-motion:reduce){
+ .flow *,.flow.flow-run * {animation:none !important;transition:none !important;}
+ #scene .flow-toggle {display:none;}
+}
+
+/* Measured stats rail -----------------------------------------------------
+   One line per stat: a short label over the number. The full label and the
+   caption are the item's tooltip and screen-reader text (.home-status-detail
+   is visually hidden); /stats carries them in full. */
+#scene .home-status-rail {display:grid;grid-template-columns:repeat(5,auto) 1fr;align-items:end;gap:0 40px;}
+#scene .home-status-item {display:grid;gap:6px;align-content:start;min-width:0;cursor:help;}
+#scene .home-status-item small {font:500 10.5px/1.2 var(--mono-font,monospace);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:hsl(var(--text-muted));}
+#scene .home-status-item .home-status-value {display:block;font:600 24px/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.03em;white-space:nowrap;font-variant-numeric:tabular-nums;color:hsl(var(--text-strong));}
+#scene .home-status-item .home-status-value::before {content:none;}
+#scene .home-status-unit {margin-left:4px;font:500 11px var(--mono-font,monospace);letter-spacing:0;color:hsl(var(--text-faint));}
+#scene .home-status-detail {position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+#scene .home-status-link {display:grid;justify-items:end;align-content:end;gap:4px;font:500 12px/1.3 var(--mono-font,monospace);text-align:right;color:hsl(var(--reference));text-decoration:none;}
+#scene .home-status-link::after {content:none;}
+#scene .home-status-scope {font:400 11px/1.3 var(--font-sans,sans-serif);color:hsl(var(--text-faint));white-space:nowrap;}
+#scene .home-status-link::before {content:none;}
+
+@media(max-width:1150px) and (min-width:901px){
+ #scene .home-status-rail {grid-template-columns:repeat(5,auto);justify-content:space-between;gap:0 24px;}
+ #scene .home-status-link {grid-column:1/-1;grid-auto-flow:column;justify-content:start;gap:12px;margin-top:10px;text-align:left;}
+}
+@media(max-width:900px){
+ #scene .home-lifecycle {display:block;padding:18px 16px 14px;}
+ #scene .home-lifecycle .home-cycle-title {font-size:22px;}
+ .flow-says {font-size:16px;}
+ /* Narrow: a compact list, label left and number right, one row per stat. */
+ #scene .home-status-rail {grid-template-columns:1fr;}
+ #scene .home-status-rail .home-status-item {display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 12px;border-right:0;border-bottom:1px solid hsl(var(--border-subtle));}
+ #scene .home-status-item small {font-size:9.5px;overflow:hidden;text-overflow:ellipsis;}
+ #scene .home-status-item .home-status-value {font-size:17px;}
+ #scene .home-status-link {grid-column:1/-1;grid-auto-flow:column;justify-content:space-between;align-items:center;min-height:40px;padding:0 12px;border-top:0;text-align:left;font-size:11px;}
+ #scene .home-status-scope {white-space:normal;}
+}
+@media(max-width:480px){
+ #scene .flow-ledger .flow-record-name {font-size:10.5px;letter-spacing:-.01em;}
+ #scene .flow-ledger .flow-record-num {width:28px;height:28px;}
+ #scene .flow-ledger li:not(:first-child)::before,
+ #scene .flow-ledger li:not(:first-child)::after {top:18px;left:calc(-50% + 19px);right:calc(50% + 19px);}
+ #scene .home-lifecycle .home-lifecycle-all {padding:12px 12px 12px 16px;}
+ #scene .home-lifecycle-all-copy span {font-size:14px;}
+}
+@media(max-width:380px){
+ #scene .home-lifecycle-all-copy span {font-size:13px;}
+  .flow-now {padding:10px 12px 14px;}
+}
+
+/* The panel clips its corners (overflow:hidden), which makes grid treat its
+   minimum height as zero: on short viewports its row collapsed and the panel
+   spilled over the hero (mobile) or the stats rail (desktop). Content rows are
+   sized max-content, and the home layer scrolls instead of clipping when the
+   content is genuinely taller than the screen. */
+@media(min-width:901px){
+ #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:minmax(0,1fr) max-content minmax(0,1fr) max-content;overflow-x:hidden;overflow-y:auto;}
+}
+@media(min-width:901px) and (max-height:880px){
+ #scene .home-lifecycle {padding:18px 22px;}
+ #scene .home-lifecycle .home-lifecycle-caption {margin-bottom:10px;}
+ #scene .home-lifecycle .home-cycle-title {font-size:26px;}
+ .flow {margin-top:14px;}
+ .flow-now {gap:8px;padding:10px 16px 14px;}
+ .flow-says {font-size:16px;}
+ .flow {gap:10px;}
+ #scene .home-lifecycle .home-lifecycle-all {margin-top:10px;padding:10px 12px 10px 16px;}
+}
+@media(max-width:900px){
+ #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:max-content max-content max-content;}
+ #scene .hero-alive[data-page="zero"] .home-lifecycle {align-self:start;}
+}

@@ -42,7 +42,7 @@ ArkUI.register('RCTA_V1', {
     minHeight: 'max(' + Tokens.u(5.2) + ', 48px)',
     padding: '0 3px',
     border: '0',
-    borderBottom: '1px solid rgba(255,255,255,0.38)',
+    borderBottom: '1px solid hsl(var(--border-strong))',
     borderRadius: '0',
     background: 'transparent',
     color: Tokens.v('ink'),

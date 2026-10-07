@@ -14,12 +14,14 @@ ArkUI.lifecycleStages = [
   { id: 'receipt', title: 'Receipt' }
 ];
 ArkUI.pageCatalog = {
-  zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home.js'] },
-  resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
+  zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home-flow.js', 'js/pages/home.js'] },
+  resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-lab.js', 'js/pages/resolver-guide.js'] },
   references: { path: '/start-from-something-real', title: arkSeoTitle('references', 'Start from something real'), seoId: 'references', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
   deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How Flux works'), seoId: 'deployment', module: 'deployment', scripts: ['js/pages/deployment.js'] },
   explorer: { path: '/explore', title: arkSeoTitle('explorer', 'Mesh Explorer'), seoId: 'explorer', module: 'explorer', scripts: ['js/pages/explorer.js'] },
+  palette: { path: '/palette', title: arkSeoTitle('palette', 'Palette — DEFXN'), seoId: 'palette', module: 'palette', scripts: ['js/pages/palette.js'] },
   stats: { path: '/stats', title: arkSeoTitle('stats', 'Mesh performance — DEFXN'), seoId: 'stats', module: 'stats', scripts: ['js/pages/stats.js'] },
+  monitor: { path: '/monitor', title: arkSeoTitle('monitor', 'Mesh monitor — DEFXN'), seoId: 'monitor', module: 'monitor', scripts: ['js/pages/monitor.js'] },
   account: { path: '/account', title: arkSeoTitle('account', 'Your account'), seoId: 'account', module: 'account', scripts: ['js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/fabric-transfer-browser.js', 'js/ark/value-registries-client.js', 'js/pages/account.js'] },
   'account/domains': { path: '/account/domains', title: 'Your domains — DEFXN', seoId: 'account/domains', module: 'accountDomains', scripts: ['js/ark/local-domains.js', 'js/pages/account-domains.js'] },
   treasury: { path: '/treasury', title: arkSeoTitle('treasury', 'Treasury preview'), seoId: 'treasury', module: 'economyPreview', scripts: ['js/pages/economy-preview.js'] },
@@ -42,11 +44,11 @@ if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function
     seoId: 'resolutions/' + item.slug,
     module: 'resolutions',
     nestedNavigation: true,
-    scripts: ['js/pages/resolutions.js']
+    scripts: ['js/content/resolution-products.js', 'js/pages/resolutions.js']
   };
 });
 ['ask','work','check'].forEach(function(id,i){
-  ArkUI.pageCatalog['how/'+id]={path:'/how-deployment-works/'+id,title:['Ask for help','Agree and do the work','Check the result'][i]+' — DEFXN',module:'howStory',hiddenFromNavigation:true,scripts:['js/pages/how-stories.js']};
+  ArkUI.pageCatalog['how/'+id]={path:'/how-deployment-works/'+id,title:['State the request','Agree on the terms','Verify the result'][i]+' — DEFXN',module:'howStory',hiddenFromNavigation:true,scripts:['js/pages/how-stories.js']};
 });
 ArkUI.pageCatalog.lifecycle = {
   path: '/lifecycle', title: arkSeoTitle('lifecycle', 'Agreement lifecycle'), seoId: 'lifecycle',

@@ -1,0 +1,93 @@
+/* /monitor: the real live health dashboard. Builds on the bento tiles in
+   css/stats.css (.stats-bento, .stats-tile, .stats-kpi); only what is new
+   lives here. No borders: fill, gap and radius only.
+
+   Three tiers of color, in reading order:
+     primary     the health counts (quorums, machines): the identity accent.
+     complement  latency and session history: the info hue (the secondary
+                 hue is reserved for calls to action).
+     reference   labels, units, times, member names: faint neutrals; the one
+                 link takes the reference hue.
+   Success and warning appear only as state (dots, pips, warn fills). */
+#scene .monitor-page {
+  --mon-primary:hsl(var(--primary));
+  --mon-complement:hsl(var(--info, var(--reference)));
+  --mon-ok:hsl(var(--success, var(--primary)));
+  --mon-warn:hsl(var(--warning));
+}
+
+/* Hero */
+#scene .monitor-hero { min-height:0; gap:10px; }
+#scene .monitor-hero h1 { font-size:clamp(30px,3.6vw,44px); }
+#scene .monitor-hero p { margin:0; font-size:14px !important; }
+#scene .monitor-hero-top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:auto; }
+#scene .monitor-live-chip { padding:5px 10px; border-radius:999px; background:hsl(var(--success, var(--primary)) / .16); color:var(--mon-ok); font:600 10.5px/1 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .monitor-live-chip.is-stale { background:hsl(var(--warning) / .16); color:var(--mon-warn); }
+#scene .monitor-live { display:inline-flex; align-items:center; gap:8px; font:500 12px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); font-variant-numeric:tabular-nums; }
+#scene .monitor-live i { width:7px; height:7px; border-radius:50%; background:var(--mon-ok); box-shadow:0 0 0 0 hsl(var(--success, var(--primary)) / .5); animation:monitor-pulse 2s ease-out infinite; }
+#scene .monitor-live.is-stale i { background:var(--mon-warn); animation:none; }
+@keyframes monitor-pulse { 0% { box-shadow:0 0 0 0 hsl(var(--success, var(--primary)) / .5); } 70%,100% { box-shadow:0 0 0 8px hsl(var(--success, var(--primary)) / 0); } }
+#scene .monitor-hero .stats-monitor-link { margin:2px 0 0; padding:0; background:none; color:hsl(var(--reference)); font-size:13px; }
+#scene .monitor-hero .stats-monitor-link:is(:hover,:focus-visible) { background:none; text-decoration:underline; text-underline-offset:3px; }
+
+/* Tier colors on KPI figures; units stay reference-faint */
+#scene .monitor-page .stats-kpi-value span { color:var(--bento-faint); }
+#scene .monitor-page .monitor-primary strong { color:var(--mon-primary); }
+#scene .monitor-page .monitor-complement strong { color:var(--mon-complement); }
+#scene .monitor-page .monitor-neutral strong { color:var(--bento-ink); }
+#scene .monitor-page .stats-kpi { min-height:132px; gap:8px; }
+#scene .monitor-page .stats-kpi.is-warn { background:hsl(var(--warning) / .1); }
+#scene .monitor-page .stats-kpi.is-warn .stats-kpi-value strong { color:var(--mon-warn); }
+#scene .monitor-page .stats-kpi.is-warn .stats-kpi-detail { color:var(--mon-warn); }
+
+/* Lead: one pip per quorum */
+#scene .monitor-lead { justify-content:space-between; gap:12px; }
+#scene .monitor-pips { display:flex; gap:6px; list-style:none; margin:0; padding:0; }
+#scene .monitor-pips li { flex:1; padding:7px 0 0; border-top:3px solid var(--mon-ok); font:600 10.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); letter-spacing:.06em; }
+#scene .monitor-pips li.is-down { border-top-color:var(--mon-warn); color:var(--mon-warn); }
+
+/* Sparklines: complement hue */
+#scene .monitor-spark { display:block; width:100%; height:24px; overflow:visible; }
+#scene .monitor-spark path { fill:none; stroke:var(--mon-complement); stroke-width:1.5; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
+#scene .monitor-spark.is-wide { height:28px; }
+
+/* Quorums */
+#scene .monitor-quorums { flex:1; list-style:none; margin:2px 0 0; padding:0; display:grid; grid-auto-rows:1fr; gap:6px; }
+#scene .monitor-quorums li { display:grid; grid-template-columns:28px 1fr auto auto; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; background:var(--bento-track); }
+#scene .monitor-quorums li.is-down { background:hsl(var(--warning) / .12); }
+#scene .monitor-q-id { font:600 16px/1 var(--font-sans,sans-serif); color:var(--bento-ink); }
+#scene .monitor-q-members { display:flex; flex-wrap:wrap; gap:12px; font:500 12px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-muted); }
+#scene .monitor-q-members span { display:inline-flex; align-items:center; gap:6px; }
+#scene .monitor-q-members i { width:6px; height:6px; border-radius:50%; background:var(--mon-ok); }
+#scene .monitor-q-members .is-down { color:var(--mon-warn); }
+#scene .monitor-q-members .is-down i { background:var(--mon-warn); }
+#scene .monitor-q-view { font:500 11px/1 var(--mono-font,ui-monospace,monospace); color:var(--mon-warn); }
+#scene .monitor-q-val { grid-column:4; font:600 13px/1 var(--mono-font,ui-monospace,monospace); color:var(--mon-primary); font-variant-numeric:tabular-nums; }
+#scene .monitor-quorums li.is-down .monitor-q-val { color:var(--mon-warn); }
+
+/* Machines: name, quorums served, real trend, latency now */
+#scene .monitor-nodes { list-style:none; margin:2px 0 0; padding:0; display:grid; gap:2px; }
+#scene .monitor-nodes li { display:grid; grid-template-columns:8px 92px 44px 1fr 72px; align-items:center; gap:14px; padding:8px 10px; border-radius:8px; transition:background-color .3s; }
+#scene .monitor-nodes li:nth-child(odd) { background:hsl(var(--text-strong) / .03); }
+#scene .monitor-nodes li.is-down { background:hsl(var(--warning) / .12); }
+#scene .monitor-dot { width:7px; height:7px; border-radius:50%; background:var(--mon-ok); }
+#scene .monitor-nodes li.is-down .monitor-dot { background:var(--mon-warn); }
+#scene .monitor-nodes b { font:600 12.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-ink); white-space:nowrap; }
+#scene .monitor-serves { font:500 11px/1 var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); letter-spacing:.04em; white-space:nowrap; }
+#scene .monitor-nodes .monitor-spark { height:18px; }
+#scene .monitor-node-ms { text-align:right; font:600 12.5px/1 var(--mono-font,ui-monospace,monospace); color:var(--mon-complement); font-variant-numeric:tabular-nums; white-space:nowrap; }
+#scene .monitor-nodes li.is-down .monitor-node-ms { color:var(--mon-warn); }
+
+@media (prefers-reduced-motion: reduce) {
+  #scene .monitor-page .monitor-live i { animation:none; }
+}
+
+@media (max-width:640px) {
+  #scene .monitor-page .stats-kpi { grid-column:span 6; min-height:0; }
+  #scene .monitor-page .stats-kpi-lead { grid-column:1 / -1; }
+  #scene .monitor-nodes li { grid-template-columns:8px 72px 34px 1fr 60px; gap:8px; padding:8px 6px; }
+  #scene .monitor-nodes b { font-size:12px; }
+  #scene .monitor-quorums li { grid-template-columns:22px 1fr auto; }
+  #scene .monitor-q-view { grid-column:2 / -1; grid-row:2; }
+  #scene .monitor-q-val { grid-column:3; grid-row:1; }
+}

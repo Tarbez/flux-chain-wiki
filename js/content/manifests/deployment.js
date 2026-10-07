@@ -200,7 +200,7 @@ ArkManifest.define({
       "label": "Ask Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A clear request gives someone a job they can understand."
+      "value": "Every job on DEFXN starts as a signed request, called an intent: the fixed point every later record refers back to."
     },
     "CHAPTER.ASK.JOB": {
       "label": "Ask Job",
@@ -209,40 +209,40 @@ ArkManifest.define({
       "value": "Make a copy of these files."
     },
     "CHAPTER.ASK.CHOICE1": {
-      "label": "Ask Choice1",
+      "label": "Ask step 1 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The job"
+      "value": "Name the exact thing"
     },
     "CHAPTER.ASK.CHOICE2": {
-      "label": "Ask Choice2",
+      "label": "Ask step 2 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A good result"
+      "value": "Say what done looks like"
     },
     "CHAPTER.ASK.CHOICE3": {
-      "label": "Ask Choice3",
+      "label": "Ask step 3 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The limits"
+      "value": "Set the limits and sign"
     },
     "CHAPTER.ASK.DETAIL1": {
-      "label": "Ask Detail1",
+      "label": "Ask step 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Say which saved version of the files should be copied. That keeps everyone talking about the same job."
+      "value": "Point at the files by their content ID: a fingerprint computed from the bytes themselves. Change one byte and the ID changes, so nobody can quietly swap in a different version."
     },
     "CHAPTER.ASK.DETAIL2": {
-      "label": "Ask Detail2",
+      "label": "Ask step 2 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Explain what the finished copy should contain, so the result can be checked later."
+      "value": "Describe a result someone else can check. For a copy, that can be as simple as \"the copy has the same content ID\". If done cannot be checked, it cannot be verified later."
     },
     "CHAPTER.ASK.DETAIL3": {
-      "label": "Ask Detail3",
+      "label": "Ask step 3 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Include any conditions the work must follow. A request is only the starting point; nobody has agreed to help yet."
+      "value": "Attach the rules that apply and sign the request with your key. The signed intent gets its own content ID, and every later step cites it."
     },
     "CHAPTER.WORK.TITLE": {
       "label": "Work Title",
@@ -254,31 +254,31 @@ ArkManifest.define({
       "label": "Work Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "An offer is a suggestion. An agreement means you both accept the same terms."
+      "value": "A provider answers with an offer. When you both sign the same terms, it becomes an agreement: one record everyone can point to."
     },
     "CHAPTER.WORK.CHOICE1": {
-      "label": "Work Choice1",
+      "label": "Work step 1 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Your request"
+      "value": "Your request stays fixed"
     },
     "CHAPTER.WORK.CHOICE2": {
-      "label": "Work Choice2",
+      "label": "Work step 2 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Their offer"
+      "value": "The provider proposes terms"
     },
     "CHAPTER.WORK.DETAIL1": {
-      "label": "Work Detail1",
+      "label": "Work step 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Your request says what you want and which conditions matter."
+      "value": "The provider never edits your intent. Their offer cites its content ID, so the offer is always attached to exactly what you asked for."
     },
     "CHAPTER.WORK.DETAIL2": {
-      "label": "Work Detail2",
+      "label": "Work step 2 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The helper proposes the terms. Once you both accept the match, the work and its evidence must follow those terms."
+      "value": "The offer says what they will do, on what terms, and what evidence they will hand back. It is signed, so it is attributable, but it is still only a proposal, not proof they have the capacity."
     },
     "CHAPTER.WORK.JOIN": {
       "label": "Work Join",
@@ -296,43 +296,241 @@ ArkManifest.define({
       "label": "Check Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Finishing the job and checking it are two different steps."
+      "value": "Finishing the job and checking it are separate steps: the provider returns a result with evidence, then a named checker decides if it meets the agreement."
     },
     "CHAPTER.CHECK.CHOICE1": {
-      "label": "Check Choice1",
+      "label": "Check step 1 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The promise"
+      "value": "Start from the agreement"
     },
     "CHAPTER.CHECK.CHOICE2": {
-      "label": "Check Choice2",
+      "label": "Check step 2 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The result"
+      "value": "The provider submits a fulfillment"
     },
     "CHAPTER.CHECK.CHOICE3": {
-      "label": "Check Choice3",
+      "label": "Check step 3 title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The decision"
+      "value": "A checker and authority decide"
     },
     "CHAPTER.CHECK.DETAIL1": {
-      "label": "Check Detail1",
+      "label": "Check step 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Start with the rules everyone agreed to. They say what the result should be checked against."
+      "value": "The result is compared with the accepted terms, not with the provider's own description of what they did."
     },
     "CHAPTER.CHECK.DETAIL2": {
-      "label": "Check Detail2",
+      "label": "Check step 2 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The helper shares what they produced and the supporting evidence required by the agreement. Sharing a result does not mean it has passed."
+      "value": "This signed record cites the agreement, what went in and what came out. The signature proves who submitted it and that it is unaltered, not that it is correct."
     },
     "CHAPTER.CHECK.DETAIL3": {
-      "label": "Check Detail3",
+      "label": "Check step 3 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The checking participant records an outcome under the identified rules. That decision can be followed back to the work and the original request."
+      "value": "A checker evaluates the result, and approvers chosen by the active policy for this one decision sign off once a threshold is met. The outcome is recorded as a receipt citing the fulfillment."
+    },
+    "CHAPTER.ASK.RECORD.LABEL": {
+      "label": "Ask record label",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "THE SIGNED INTENT / EXAMPLE"
+    },
+    "CHAPTER.ASK.RECORD": {
+      "label": "Ask record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "[1] Snapshot: The exact files, by content ID\n[2] Outcome: What the finished copy must match\n[3] Policy: The rules and limits that apply\n[3] Signed by: You, the client\n[3] Produces: An intent ID that offers must cite"
+    },
+    "CHAPTER.ASK.NOW": {
+      "label": "Ask true now",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "One signed, addressable request exists."
+    },
+    "CHAPTER.ASK.NOT": {
+      "label": "Ask not yet true",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "No provider has committed and no work has happened."
+    },
+    "CHAPTER.WORK.RECORD.LABEL": {
+      "label": "Work record label",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "THE AGREEMENT / A REAL FXN TRANSFER RECORD"
+    },
+    "CHAPTER.WORK.RECORD": {
+      "label": "Work record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "kind: agreement, flux.fabric-transfer.v1\n[1] inputCid: What you asked to move\n[2] recipientId: Who receives it\n[2] asset, amount: The terms on offer\n[3] nextSequence: The input's next version\n[3] cid: SHA-256 of the signed record"
+    },
+    "CHAPTER.WORK.NOW": {
+      "label": "Work true now",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Both sides hold one inspectable set of terms."
+    },
+    "CHAPTER.WORK.NOT": {
+      "label": "Work not yet true",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Accepted terms do not prove the work happened."
+    },
+    "CHAPTER.CHECK.RECORD.LABEL": {
+      "label": "Check record label",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "THE FULFILLMENT / A REAL FXN TRANSFER RECORD"
+    },
+    "CHAPTER.CHECK.RECORD": {
+      "label": "Check record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "kind: fulfillment, flux.fabric-transfer.v1\n[1] agreementCid: The terms it is checked against\n[2] inputCid, outputCid: What went in and what came out\n[2] signatureB64: The provider's Ed25519 signature\n[3] cid: What the receipt points back to"
+    },
+    "CHAPTER.CHECK.NOW": {
+      "label": "Check true now",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "One rule-bound outcome, traceable back to the request."
+    },
+    "CHAPTER.CHECK.NOT": {
+      "label": "Check not yet true",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "A receipt is not universal truth, legal finality, or settlement."
+    },
+    "CHAPTER.CHECK.RESULT": {
+      "label": "Check heading",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "A result, with its evidence."
+    },
+    "CHAPTER.ASK.WHY1.TITLE": {
+      "label": "Ask why 1 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Addresses, not locations"
+    },
+    "CHAPTER.ASK.WHY1.TEXT": {
+      "label": "Ask why 1 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "DEFXN refers to data by what it is, not where it is stored. A server link can change or disappear; a content ID always means the same bytes."
+    },
+    "CHAPTER.ASK.WHY2.TITLE": {
+      "label": "Ask why 2 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Nobody is committed yet"
+    },
+    "CHAPTER.ASK.WHY2.TEXT": {
+      "label": "Ask why 2 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "An intent is an open request. No provider has promised anything and no work has happened. That changes only when you accept an offer."
+    },
+    "CHAPTER.ASK.WHY3.TITLE": {
+      "label": "Ask why 3 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Your request travels with the work"
+    },
+    "CHAPTER.ASK.WHY3.TEXT": {
+      "label": "Ask why 3 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "The offer, the agreement, the result and the receipt all cite this intent, so anyone can follow the trail back to what you actually asked for."
+    },
+    "CHAPTER.WORK.CHOICE3": {
+      "label": "Work step 3 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Both sides sign one agreement"
+    },
+    "CHAPTER.WORK.DETAIL3": {
+      "label": "Work step 3 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Accepting turns the matching request and offer into an agreement record. Its ID is a hash of the exact signed terms, so changing any term later makes it a different agreement."
+    },
+    "CHAPTER.WORK.WHY1.TITLE": {
+      "label": "Work why 1 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Every agreement runs in its own lane"
+    },
+    "CHAPTER.WORK.WHY1.TEXT": {
+      "label": "Work why 1 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "There is no single global queue. Each agreement is its own linked trail, so unrelated work never waits behind yours, unlike a blockchain where every transaction shares one block order."
+    },
+    "CHAPTER.WORK.WHY2.TITLE": {
+      "label": "Work why 2 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Terms that cannot drift"
+    },
+    "CHAPTER.WORK.WHY2.TEXT": {
+      "label": "Work why 2 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Because records are addressed by their content, \"the agreement\" always means these exact signed bytes. Both sides, and any checker, start from the same document."
+    },
+    "CHAPTER.WORK.WHY3.TITLE": {
+      "label": "Work why 3 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Agreed is not done"
+    },
+    "CHAPTER.WORK.WHY3.TEXT": {
+      "label": "Work why 3 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "An agreement fixes what the result will be checked against. It does not prove the work happened or that anyone has been paid; that is the next step."
+    },
+    "CHAPTER.CHECK.WHY1.TITLE": {
+      "label": "Check why 1 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Signed does not mean true"
+    },
+    "CHAPTER.CHECK.WHY1.TEXT": {
+      "label": "Check why 1 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "A signature answers \"who said this?\". Whether to accept it is answered by the checker and the authority rules. DEFXN keeps those two questions apart."
+    },
+    "CHAPTER.CHECK.WHY2.TITLE": {
+      "label": "Check why 2 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Authority for one decision only"
+    },
+    "CHAPTER.CHECK.WHY2.TEXT": {
+      "label": "Check why 2 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "The approvers are selected for this one object and step. They can certify only that step, publish the evidence, and then their mandate ends."
+    },
+    "CHAPTER.CHECK.WHY3.TITLE": {
+      "label": "Check why 3 title",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "Accepted, then durable"
+    },
+    "CHAPTER.CHECK.WHY3.TEXT": {
+      "label": "Check why 3 text",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "A result is accepted once the quorum signs it, and durable after three attestations and a commit certificate. Locally that full path closed about 375 times a second."
     }
   }
 });
