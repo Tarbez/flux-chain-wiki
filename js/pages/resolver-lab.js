@@ -43,8 +43,9 @@
   function createScene(canvas, overlay) {
     var reduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
     var CW = 16, CH = 12, GAP = 1, OX = 0, OY = 0, cols = 0, rows = 0, width = 0, height = 0, scale = 1, colors = {}, frame = 0, revision = 0, disposed = false;
-    var view = { stage: 'ask', p: 1, input: INPUTS[0], ghost: null, same: false };
+    var view = { stage: 'ask', p: 1, input: INPUTS[0], ghost: null, same: false, preview: null, pointer: null };
     var labels = {};
+    var narration = document.createElement('p'); narration.className = 'resolver-mesh-narration'; overlay.appendChild(narration);
     ['doc', 'rule', 'claim', 'sign', 'accept'].forEach(function (k) { var n = document.createElement('span'); n.className = 'resolver-mesh-label resolver-mesh-label-' + k; overlay.appendChild(n); labels[k] = n; });
 
     function ink(style, name, a) { return 'hsl(' + style.getPropertyValue('--' + name).trim() + ' / ' + a + ')'; }
@@ -79,7 +80,11 @@
       return { midRow: midRow, gate: gate, w: w, h: h, top: midRow - Math.floor(h / 2), startCol: startCol, endCol: endCol, fits: fits,
         openTop: midRow - Math.floor(GATE_ROWS / 2), openBottom: midRow - Math.floor(GATE_ROWS / 2) + GATE_ROWS - 1, fpCol: fpCol, fpRow: fpRow };
     }
-    function cell(ctx, c, r, fill) { ctx.fillStyle = fill; ctx.fillRect(OX + c * CW + GAP, OY + r * CH + GAP, CW - GAP * 2, CH - GAP * 2); }
+    function cell(ctx, c, r, fill, grow) {
+      var g = grow == null ? 1 : grow, w = (CW - GAP * 2) * g, h = (CH - GAP * 2) * g;
+      ctx.fillStyle = fill; ctx.fillRect(OX + c * CW + CW / 2 - w / 2, OY + r * CH + CH / 2 - h / 2, w, h);
+    }
+    var easeBack = function (t) { var k = 1.4; return 1 + (k + 1) * Math.pow(t - 1, 3) + k * Math.pow(t - 1, 2); };
     // A well-mixed integer hash, so the fabric's stronger blocks scatter without stripes.
     function scatter(c, r) { var h = Math.imul(c + 11, 374761393) + Math.imul(r + 5, 668265263); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) % 97; }
     function hsla(triplet, a) { return 'hsl(' + triplet + ' / ' + a + ')'; }
@@ -91,6 +96,10 @@
       // Base fabric: quiet cells and hairlines, a few stronger blocks.
       for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) {
         cell(ctx, c, r, scatter(c, r) < 4 ? colors.block : colors.quiet);
+        if (view.pointer) {
+          var d = Math.hypot(c - view.pointer[0], (r - view.pointer[1]) * .75);
+          if (d < 3.2) cell(ctx, c, r, hsla(colors.doc, .07 * (1 - d / 3.2)));
+        }
         ctx.strokeStyle = colors.line; ctx.strokeRect(OX + c * CW + .5, OY + r * CH + .5, CW, CH);
       }
       var after = function (s) { return STEPS.indexOf(stage) > STEPS.indexOf(s) || stage === 'laws'; };
@@ -121,7 +130,14 @@
         var fresh = stage === 'ask' && order > askP * 1.15 - .2;
         var near = L.fits && cc === L.gate ? .45 : 1; // dissolving into the opening
         var a = blocked ? (rr < L.openTop || rr > L.openBottom ? .12 : .3) : .62 * near;
-        cell(ctx, cc, rr, front || fresh ? hsla(colors.primary, .85 * dim * near) : hsla(colors.doc, a * dim));
+        var grow = stage === 'ask' && p < 1 ? .35 + .65 * clamp((askP * 1.15 - order) / .2) : 1;
+        cell(ctx, cc, rr, front || fresh ? hsla(colors.primary, .85 * dim * near) : hsla(colors.doc, a * dim), grow);
+      }
+      // Hovering a document chip previews its footprint where the input waits.
+      if (view.preview && view.preview !== view.input) {
+        var P = layout(view.preview);
+        ctx.save(); ctx.setLineDash([2, 3]); ctx.strokeStyle = hsla(colors.primary, .75);
+        ctx.strokeRect(OX + P.startCol * CW + .5, OY + P.top * CH + .5, P.w * CW, P.h * CH); ctx.restore();
       }
       // The logic at work: the opening lights as the document passes, then settles.
       if (L.fits && resolveP > .45) {
@@ -146,8 +162,13 @@
         }
         var fill = clamp(checkP / .62);
         fp.forEach(function (bit, k) {
-          if (k / 36 > fill) return;
-          cell(ctx, L.fpCol + k % 6, L.fpRow + Math.floor(k / 6), bit ? hsla(colors.primary, .82 * dim) : hsla(colors.doc, .1 * dim));
+          var age = fill * 36 - k;                      // how long ago this cell was written, in cells
+          if (age < 0) return;
+          var flash = stage === 'check' && p < 1 ? clamp(1 - age / 4) : 0;
+          var grow = stage === 'check' && p < 1 ? .4 + .6 * clamp(age / 2) : 1;
+          var c0 = L.fpCol + k % 6, r0 = L.fpRow + Math.floor(k / 6);
+          cell(ctx, c0, r0, bit ? hsla(colors.primary, .82 * dim) : hsla(colors.doc, .1 * dim), grow);
+          if (flash) cell(ctx, c0, r0, hsla(colors.doc, .55 * flash), grow);
         });
         // Signature: a mark beside the claim.
         if (checkP > .7) { cell(ctx, L.fpCol + 6, L.fpRow + 6, hsla(colors.primary, dim)); cell(ctx, L.fpCol + 7, L.fpRow + 6, hsla(colors.primary, .55 * dim)); }
@@ -162,6 +183,17 @@
         }
       }
       placeLabels(L, ok, id, askP, resolveP, checkP);
+      narrate(L, ok, id);
+    }
+    // One plain sentence for what the scene is doing right now.
+    function narrate(L, ok, id) {
+      var input = view.input, stage = view.stage, p = view.p, text = '';
+      if (stage === 'ask') text = p < 1 ? 'Assembling doc:' + input.id + ' (' + size(input.bytes) + ')…' : 'doc:' + input.id + ' is ready. The rule waits at the gate.';
+      else if (stage === 'resolve') text = p < .6 ? 'Sending doc:' + input.id + ' to ' + ADDRESS + '…' : p < 1 ? 'Evaluating size ≤ 5 MB…' : (ok ? 'It fits: the rule returns true.' : 'Too large: the rails hold, the rule returns false.');
+      else if (stage === 'check') text = p < .65 ? 'Writing the claim, cell by cell…' : p < 1 ? 'Signing it…' : view.same ? 'Same input, same claim: #' + id + ' again.' : 'Signed claim #' + id + '. A checker decides acceptance.';
+      if (narration.textContent !== text) narration.textContent = text;
+      narration.dataset.show = String(stage !== 'laws');
+      narration.dataset.done = String(p >= 1);
     }
     function at(node, c, r, show, dy) { node.style.left = (OX + c * CW) + 'px'; node.style.top = (OY + r * CH + (dy || 0)) + 'px'; node.dataset.show = String(!!show); }
     function placeLabels(L, ok, id, askP, resolveP, checkP) {
@@ -203,10 +235,19 @@
       frame = requestAnimationFrame(tick);
     }
     function refresh() { if (frame) return; if (measure()) paint(); }
+    var pointerFrame = 0;
+    function idlePaint() { if (frame || pointerFrame) return; pointerFrame = requestAnimationFrame(function () { pointerFrame = 0; if (!frame && width) paint(); }); }
+    canvas.addEventListener('pointermove', function (event) {
+      if (reduce.matches) return;
+      var box = canvas.getBoundingClientRect();
+      view.pointer = [(event.clientX - box.left - OX) / CW - .5, (event.clientY - box.top - OY) / CH - .5]; idlePaint();
+    });
+    canvas.addEventListener('pointerleave', function () { view.pointer = null; idlePaint(); });
+    function preview(input) { view.preview = input; idlePaint(); }
     var resize = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(refresh) : null; if (resize) resize.observe(canvas);
     var theme = typeof MutationObserver !== 'undefined' ? new MutationObserver(function () { if (measure()) paint(); }) : null;
     if (theme) theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    return { play: play, dispose: function () { disposed = true; stop(); if (resize) resize.disconnect(); if (theme) theme.disconnect(); } };
+    return { play: play, preview: preview, dispose: function () { disposed = true; stop(); if (resize) resize.disconnect(); if (theme) theme.disconnect(); } };
   }
 
   /* ---- the page ----------------------------------------------------------- */
@@ -249,6 +290,13 @@
       b.addEventListener('click', function () { go(id, true); });
       track.appendChild(b); return b;
     });
+    // Arrow keys move along the track, like a tab list.
+    track.addEventListener('keydown', function (event) {
+      var i = STEPS.indexOf(state.step), to = event.key === 'ArrowRight' ? i + 1 : event.key === 'ArrowLeft' ? i - 1 : event.key === 'Home' ? 0 : event.key === 'End' ? STEPS.length - 1 : -2;
+      if (to === -2) return;
+      event.preventDefault(); to = Math.max(0, Math.min(STEPS.length - 1, to));
+      go(STEPS[to], true); tabButtons[to].focus();
+    });
     copy.appendChild(track);
 
     var caption = el('div', 'resolver-lab-caption'); caption.setAttribute('aria-live', 'polite');
@@ -287,6 +335,10 @@
       b.appendChild(el('small', '', size(input.bytes)));
       b.setAttribute('aria-label', input.name + ', ' + size(input.bytes) + ', doc:' + input.id);
       b.addEventListener('click', function () { choose(input.id, true); });
+      b.addEventListener('pointerenter', function () { mesh && mesh.preview(input); });
+      b.addEventListener('focus', function () { mesh && mesh.preview(input); });
+      b.addEventListener('pointerleave', function () { mesh && mesh.preview(null); });
+      b.addEventListener('blur', function () { mesh && mesh.preview(null); });
       inputs.appendChild(b); return b;
     });
     var again = el('button', 'resolver-lab-again'); again.type = 'button';
@@ -316,6 +368,17 @@
       item.appendChild(top);
       var detail = el('p', '', words('LAW' + n + '.TEXT')); detail.id = 'resolver-law-' + n;
       item.appendChild(detail);
+      // Laws you can watch happen link back to the moment in the illustration.
+      var SEE = { 1: ['Watch it repeat', 'check', true], 2: ['See the address', 'resolve', false], 4: ['See the signature', 'check', false] };
+      if (SEE[n]) {
+        var see = el('button', 'resolver-lab-law-see', SEE[n][0] + ' →'); see.type = 'button';
+        see.addEventListener('click', function (event) {
+          event.stopPropagation();
+          var input = current();
+          go(SEE[n][1], true, SEE[n][2] ? claimId(input, evaluate(input)) : null);
+        });
+        detail.appendChild(document.createTextNode(' ')); detail.appendChild(see);
+      }
       // On phones each law opens on its own; on wider screens all details show.
       var toggle = el('button', 'resolver-lab-law-toggle'); toggle.type = 'button';
       toggle.setAttribute('aria-controls', detail.id); toggle.setAttribute('aria-label', 'Show detail: ' + words('LAW' + n));
@@ -327,10 +390,10 @@
       laws.appendChild(item);
     });
     var lawsSource = el('p', 'resolver-lab-laws-source');
-    var specLink = el('a', '', 'docs/protocol/resolvers.md'); specLink.href = 'docs/protocol/resolvers.md';
-    var statusLink = el('a', '', 'docs/status.md'); statusLink.href = 'docs/status.md';
-    lawsSource.appendChild(document.createTextNode('Wording from ')); lawsSource.appendChild(specLink);
-    lawsSource.appendChild(document.createTextNode(' · status from ')); lawsSource.appendChild(statusLink);
+    var specLink = el('a', '', 'resolver spec'); specLink.href = 'docs/protocol/resolvers.md';
+    var statusLink = el('a', '', 'status page'); statusLink.href = 'docs/status.md';
+    lawsSource.appendChild(document.createTextNode('Wording from the ')); lawsSource.appendChild(specLink);
+    lawsSource.appendChild(document.createTextNode(' · status from the ')); lawsSource.appendChild(statusLink);
     scene.appendChild(laws); scene.appendChild(lawsSource);
     root.appendChild(scene);
 
@@ -347,7 +410,8 @@
       var i = STEPS.indexOf(state.step), copyFor = STEP_COPY[state.step];
       root.dataset.step = state.step;
       track.style.setProperty('--progress', (i / (STEPS.length - 1) * 100) + '%');
-      tabButtons.forEach(function (b, k) { b.setAttribute('aria-pressed', String(k === i)); b.dataset.done = String(k < i); });
+      tabButtons.forEach(function (b, k) { b.setAttribute('aria-pressed', String(k === i)); b.dataset.done = String(k < i); b.tabIndex = k === i ? 0 : -1; });
+      track.classList.remove('is-arriving'); void track.offsetWidth; track.classList.add('is-arriving');
       captionTitle.textContent = copyFor[1];
       captionBody.textContent = copyFor[2];
       captionBody.hidden = !copyFor[2];
@@ -372,7 +436,10 @@
     function visible() { return root.isConnected && !(root.closest && root.closest('[hidden]')) && root.getBoundingClientRect().width > 0; }
     function show(animate, ghost) {
       describe();
-      mesh.play(state.step, current(), { animate: animate && visible(), ghost: ghost });
+      next.classList.remove('is-ready');
+      mesh.play(state.step, current(), { animate: animate && visible(), ghost: ghost, done: function () {
+        if (state.step !== 'laws') { void next.offsetWidth; next.classList.add('is-ready'); }
+      } });
       played = played || (animate && visible());
     }
     function rerun() {
