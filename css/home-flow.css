@@ -10,54 +10,108 @@
  font:500 10px/1.5 var(--mono-font,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-faint));}
 .flow {--flow-step:3.2s;display:grid;gap:6px;margin-top:20px;}
 
-/* Now ------------------------------------------------------------------- */
-.flow-now {display:grid;gap:14px;align-content:start;min-height:156px;padding:16px 18px 16px;border-radius:12px;background:hsl(var(--text-strong) / .045);}
-.flow-now-head {display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:26px;}
-.flow-parties {display:flex;flex-wrap:wrap;gap:4px;}
-.flow-party {display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 8px;border-radius:999px;background:hsl(var(--text-strong) / .04);
- font:500 11px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.03em;color:hsl(var(--text-faint));transition:background 240ms,color 240ms;}
-.flow-party-dot {width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6;transition:background 240ms,opacity 240ms,box-shadow 240ms;}
-.flow[data-actors~="requester"] .flow-party[data-actor="requester"],
-.flow[data-actors~="provider"] .flow-party[data-actor="provider"],
-.flow[data-actors~="verifier"] .flow-party[data-actor="verifier"] {background:hsl(var(--primary-200));color:hsl(var(--text-strong));}
-.flow[data-actors~="requester"] .flow-party[data-actor="requester"] .flow-party-dot,
-.flow[data-actors~="provider"] .flow-party[data-actor="provider"] .flow-party-dot,
-.flow[data-actors~="verifier"] .flow-party[data-actor="verifier"] .flow-party-dot {background:hsl(var(--primary));opacity:1;box-shadow:0 0 0 3px hsl(var(--primary-300));}
-
-.flow-says {display:block;font:500 18px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
-.flow-meta {display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;font:400 12px/1.4 var(--mono-font,ui-monospace,monospace);color:hsl(var(--text-faint));}
-.flow-writes {color:hsl(var(--text-muted));}
-.flow-writes b {font-weight:600;color:hsl(var(--primary));}
-.flow.flow-run .flow-now :is(.flow-says,.flow-meta) {animation:flow-caption 420ms ease-out both;}
-.flow.flow-run .flow-meta {animation-delay:240ms;}
+/* Now: the illustrated step, then its quote ------------------------------ */
+.flow-now {display:grid;gap:12px;align-content:start;padding:14px 18px 18px;border-radius:14px;
+ background:radial-gradient(120% 90% at 0% 0%,hsl(var(--primary-100)),transparent 55%),hsl(var(--text-strong) / .04);}
+.flow-scene {display:block;width:100%;height:auto;overflow:visible;}
+.flow-says {display:block;min-height:2.7em;font:500 18px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
+.flow.flow-run .flow-says {animation:flow-caption 420ms ease-out both;}
 @keyframes flow-caption {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
 
+.flow-weave path {stroke:hsl(var(--text-strong) / .05);stroke-width:1;}
+.flow-glow-in {stop-color:hsl(var(--primary));stop-opacity:.28;}
+.flow-glow-out {stop-color:hsl(var(--primary));stop-opacity:0;}
+
+/* Parties: dim until they act. */
+.flow-avatar-glow {opacity:0;transition:opacity 300ms;}
+.flow-avatar-ring {fill:none;stroke:hsl(var(--primary));stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center;}
+.flow-avatar-disc {fill:hsl(var(--text-strong) / .07);transition:fill 300ms;}
+.flow-avatar-glyph {stroke:hsl(var(--text-faint));stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:none;transition:stroke 300ms;}
+.flow-avatar-label {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;text-transform:uppercase;fill:hsl(var(--text-faint));transition:fill 300ms;}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"],
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"],
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] {--on:1;}
+.flow-avatar {--on:0;}
+.flow-avatar .flow-avatar-glow {opacity:var(--on);}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-disc,
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-disc,
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-disc {fill:hsl(var(--primary-200));}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-glyph,
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-glyph,
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-glyph {stroke:hsl(var(--primary));}
+.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-label,
+.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-label,
+.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-label {fill:hsl(var(--text-strong));}
+.flow.flow-run[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-ring,
+.flow.flow-run[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-ring,
+.flow.flow-run[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-ring {animation:flow-ping 1.6s ease-out 2;}
+@keyframes flow-ping {from{opacity:.8;transform:scale(.85);}to{opacity:0;transform:scale(1.35);}}
+
+/* Beams: drawn from the acting party to the record, then a spark rides them. */
+.flow-beam {opacity:0;transition:opacity 300ms;}
+.flow-beam[data-on="true"] {opacity:1;}
+.flow-beam-line {stroke:hsl(var(--primary-400));stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:0;}
+.flow-beam-spark {stroke:hsl(var(--primary));stroke-width:3;stroke-linecap:round;stroke-dasharray:.06 .94;stroke-dashoffset:.06;opacity:0;}
+.flow-beam-end {fill:hsl(var(--primary));}
+.flow.flow-run .flow-beam[data-on="true"] .flow-beam-line {animation:flow-draw 700ms cubic-bezier(.22,1,.36,1) both;}
+.flow.flow-run .flow-beam[data-on="true"] .flow-beam-spark {opacity:1;animation:flow-spark 1.6s linear 500ms infinite;}
+.flow[data-playing="false"] .flow-beam-spark {animation:none !important;opacity:0 !important;}
+@keyframes flow-draw {from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
+@keyframes flow-spark {from{stroke-dashoffset:.06;}to{stroke-dashoffset:-.94;}}
+
+/* The trail behind the current record. */
+.flow-ghost {opacity:0;transition:opacity 400ms;}
+.flow-ghost[data-on="true"] {opacity:1;}
+.flow-ghost-box {fill:hsl(var(--raised));filter:drop-shadow(0 4px 6px hsl(var(--canvas) / .6));}
+.flow-ghost[data-depth="1"] .flow-ghost-box {opacity:.92;}
+.flow-ghost[data-depth="2"] .flow-ghost-box {opacity:.75;}
+.flow-ghost[data-depth="3"] .flow-ghost-box {opacity:.58;}
+.flow-ghost[data-depth="4"] .flow-ghost-box {opacity:.42;}
+.flow-ghost-label {font:600 7.5px var(--mono-font,ui-monospace,monospace);letter-spacing:.08em;fill:hsl(var(--text-faint));}
+.flow[data-complete="true"] .flow-ghost-label {fill:hsl(var(--success));}
+
+/* The record being written. */
+.flow-card-box {fill:hsl(var(--raised));filter:drop-shadow(0 12px 18px hsl(var(--canvas) / .55));}
+.flow-card-band {fill:hsl(var(--text-strong) / .05);}
+.flow-card-type {font:600 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.1em;fill:hsl(var(--text-muted));}
+.flow-card-count {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;fill:hsl(var(--text-faint));}
+.flow-card-hash {font:500 28px var(--mono-font,ui-monospace,monospace);letter-spacing:-.01em;fill:hsl(var(--primary));}
+.flow-card-prev {font:400 10.5px var(--mono-font,ui-monospace,monospace);fill:hsl(var(--text-faint));}
+.flow-card-signed {font:600 8.5px var(--mono-font,ui-monospace,monospace);letter-spacing:.12em;fill:hsl(var(--text-faint));}
+.flow-stamp-disc {fill:none;stroke:hsl(var(--text-strong) / .16);stroke-width:1.2;stroke-dasharray:2.5 2.5;transition:fill 300ms,stroke 300ms;}
+.flow-stamp-mark {font:600 10px var(--mono-font,ui-monospace,monospace);fill:hsl(var(--text-faint));transition:fill 300ms;}
+.flow-stamp[data-on="true"] .flow-stamp-disc {fill:hsl(var(--primary));stroke:hsl(var(--primary));stroke-dasharray:none;}
+.flow-stamp[data-on="true"] .flow-stamp-mark {fill:hsl(var(--text-inverse));}
+.flow.flow-run .flow-stamp[data-on="true"] {animation:flow-stamp 500ms cubic-bezier(.34,1.56,.64,1) 550ms both;transform-box:fill-box;transform-origin:center;}
+@keyframes flow-stamp {from{transform:scale(1.6);opacity:0;}to{transform:none;opacity:1;}}
+.flow.flow-run .flow-card {animation:flow-card 520ms cubic-bezier(.22,1,.36,1) both;}
+@keyframes flow-card {from{transform:translate(-6px,8px);opacity:.3;}to{transform:none;opacity:1;}}
+
 /* A finished trail: one success state, after the receipt is written. */
-.flow-meta > .flow-verified {display:none;padding:1px 8px;border-radius:999px;background:hsl(var(--success-100));font-weight:600;color:hsl(var(--success));}
-.flow-meta > .flow-verified::before {content:"✓";margin-right:5px;opacity:1;}
-.flow[data-complete="true"] .flow-meta > .flow-verified {display:inline-block;}
-.flow[data-complete="true"] .flow-signs {display:none;}
+.flow-seal {opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity 300ms;}
+.flow-seal-disc {fill:hsl(var(--success-100));stroke:hsl(var(--success));stroke-width:1.5;}
+.flow-seal-check {stroke:hsl(var(--success));stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.flow[data-complete="true"] .flow-seal {opacity:1;}
+.flow.flow-run[data-complete="true"] .flow-seal {animation:flow-stamp 500ms cubic-bezier(.34,1.56,.64,1) 900ms both;}
+.flow[data-complete="true"] .flow-card-hash {fill:hsl(var(--success));}
 
 /* Ledger: five record tiles, which are also the step links. A future record
    is an empty slot; the current one fills as the step plays; a written one
    keeps its hash. */
 #scene .flow-ledger {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none;}
 #scene .flow-ledger li {min-width:0;text-align:left;}
-#scene .flow-ledger .flow-record {position:relative;display:grid;gap:2px;min-height:74px;margin:0;padding:10px 11px 12px;border:0;border-radius:10px;overflow:hidden;
+#scene .flow-ledger .flow-record {position:relative;display:grid;gap:2px;min-height:58px;margin:0;padding:10px 11px 12px;border:0;border-radius:10px;overflow:hidden;
  background:hsl(var(--text-strong) / .025);text-decoration:none;color:hsl(var(--text-faint)) !important;transition:background 240ms,color 240ms;}
 #scene .flow-ledger .flow-record-num {font:500 10px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;opacity:.8;}
 #scene .flow-ledger .flow-record-name {overflow:hidden;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);text-overflow:ellipsis;white-space:nowrap;}
-#scene .flow-ledger .flow-record-hash {margin-top:auto;font:500 11px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.04em;}
-#scene .flow-ledger .flow-record-hash::before {content:"····";opacity:.5;}
-#scene .flow-ledger .flow-record:is([data-done],[data-current]) .flow-record-hash::before {content:attr(data-hash);opacity:1;}
 #scene .flow-ledger .flow-record-bar {position:absolute;left:0;right:0;bottom:0;height:3px;background:transparent;}
 #scene .flow-ledger .flow-record-bar::after {content:"";position:absolute;inset:0;background:hsl(var(--primary));transform:scaleX(0);transform-origin:left;}
+#scene .flow-ledger .flow-record[data-done] .flow-record-num::after {content:" ✓";}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record .flow-record-num {color:hsl(var(--success));}
 #scene .flow-ledger .flow-record[data-done] {background:hsl(var(--text-strong) / .055);color:hsl(var(--text-muted)) !important;}
 #scene .flow-ledger .flow-record[data-current] {background:hsl(var(--text-strong) / .09);color:hsl(var(--text-strong)) !important;}
-#scene .flow-ledger .flow-record[data-current] .flow-record-hash {color:hsl(var(--primary));}
 #scene .flow-ledger .flow-record[data-current] .flow-record-bar::after {transform:none;}
 #scene .flow[data-playing="true"].flow-run .flow-record[data-current] .flow-record-bar::after {animation:flow-progress var(--flow-step) linear both;}
-#scene .flow[data-complete="true"] .flow-record .flow-record-hash {color:hsl(var(--success));}
 #scene .flow-ledger .flow-record:is(:hover,:focus-visible) {background:hsl(var(--reference-100));color:hsl(var(--reference)) !important;}
 #scene .flow-ledger .flow-record:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
 @keyframes flow-progress {from{transform:scaleX(0);}to{transform:scaleX(1);}}
@@ -114,13 +168,9 @@
 }
 @media(max-width:480px){
  #scene .flow-ledger {gap:4px;}
- #scene .flow-ledger .flow-record {min-height:66px;padding:8px 7px 10px;border-radius:8px;}
+ #scene .flow-ledger .flow-record {min-height:54px;padding:8px 7px 10px;border-radius:8px;}
  #scene .flow-ledger .flow-record-name {font-size:11px;}
- #scene .flow-ledger .flow-record-hash {font-size:10px;}
- .flow-now {min-height:178px;padding:14px;}
- .flow-parties {gap:3px;}
- .flow-party {gap:5px;padding:3px 8px 3px 6px;font-size:10px;}
- .flow-meta {font-size:11px;gap:4px 12px;}
+  .flow-now {padding:10px 12px 14px;}
 }
 
 /* The panel clips its corners (overflow:hidden), which makes grid treat its
@@ -136,9 +186,9 @@
  #scene .home-lifecycle .home-lifecycle-caption {margin-bottom:10px;}
  #scene .home-lifecycle .home-cycle-title {font-size:26px;}
  .flow {margin-top:14px;}
- .flow-now {min-height:136px;gap:10px;padding:14px 16px;}
+ .flow-now {gap:8px;padding:10px 16px 14px;}
  .flow-says {font-size:16px;}
- #scene .flow-ledger .flow-record {min-height:64px;padding:8px 10px 10px;}
+ #scene .flow-ledger .flow-record {min-height:52px;padding:8px 10px 10px;}
  #scene .home-lifecycle-foot {margin-top:4px;}
  #scene .home-lifecycle .home-lifecycle-foot .home-lifecycle-all {min-height:40px;}
 }
