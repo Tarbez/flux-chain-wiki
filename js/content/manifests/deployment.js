@@ -200,7 +200,7 @@ ArkManifest.define({
       "label": "Ask Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Every piece of work on DEFXN starts as a signed request, called an intent. It is the fixed point that everything after it refers back to."
+      "value": "Every job on DEFXN starts as a signed request, called an intent: the fixed point every later record refers back to."
     },
     "CHAPTER.ASK.JOB": {
       "label": "Ask Job",
@@ -254,7 +254,7 @@ ArkManifest.define({
       "label": "Work Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A provider answers your request with an offer. When you both sign the same terms, the offer becomes an agreement: one record you, the provider, and anyone checking later can point to."
+      "value": "A provider answers with an offer. When you both sign the same terms, it becomes an agreement: one record everyone can point to."
     },
     "CHAPTER.WORK.CHOICE1": {
       "label": "Work step 1 title",
@@ -296,7 +296,7 @@ ArkManifest.define({
       "label": "Check Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Finishing the job and checking it are separate steps. The provider hands back a result with its evidence, then an identified checker decides, under rules set in advance, whether it meets the agreement."
+      "value": "Finishing the job and checking it are separate steps: the provider returns a result with evidence, then a named checker decides if it meets the agreement."
     },
     "CHAPTER.CHECK.CHOICE1": {
       "label": "Check step 1 title",
