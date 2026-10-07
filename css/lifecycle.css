@@ -156,12 +156,12 @@
 .how-request-choices {display:flex;flex-wrap:wrap;gap:6px;}
 #scene .how-chapter-choice {border:1px solid hsl(var(--border-default));border-radius:6px;padding:9px 12px;min-height:38px;background:transparent;font:500 12px var(--font-sans,sans-serif);color:hsl(var(--text-muted));cursor:pointer;}
 #scene .how-chapter button[aria-pressed="true"] {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));color:hsl(var(--text-strong));}
-.how-chapter-work .how-chapter-body {grid-template-columns:1.35fr .8fr;}
+.how-chapter-work .how-chapter-body {grid-template-columns:1.05fr 1fr;}
 .how-shared-promise {display:flex;flex-direction:column;min-height:0;}
 .how-promise-parties {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
 #scene .how-promise-party {padding:22px 16px;min-height:70px;border:1px solid hsl(var(--border-default));border-radius:9px;background:transparent;color:hsl(var(--text));font:500 20px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
 #scene .how-common-promise {margin:16px 0;padding-top:16px;border-top:1px solid hsl(var(--primary-400));text-align:center;font-size:24px;}
-.how-promise-note {align-self:center;padding:20px 0 20px 20px;border-left:1px solid hsl(var(--primary-300));}
+.how-promise-note {align-self:center;padding:4px 0 4px 20px;border-left:1px solid hsl(var(--primary-300));}
 .how-returned-result {display:flex;flex-direction:column;padding:26px;border:1px solid hsl(var(--border-default));border-radius:9px;background:hsl(var(--nested) / .1);}
 #scene .how-returned-result p {margin:0 0 20px;font:400 14px/1.4 var(--font-sans,sans-serif);color:hsl(var(--text-muted));}
 .how-check-ledger {align-self:center;}
@@ -174,7 +174,7 @@
 #scene .how-chapter-footer .how-chapter-next {padding:10px 12px;border:1px solid hsl(var(--primary-400));border-radius:6px;color:hsl(var(--primary));}
 #scene .how-chapter :is(a,button):focus-visible {outline:2px solid hsl(var(--reference));outline-offset:3px;}
 .hero-alive[data-page^="how/"] .lattice-activity {opacity:0;pointer-events:none;}.hero-alive[data-page^="how/"] .lattice-field {opacity:.16;}
-@media(min-width:901px) and (max-height:780px){#scene .how-chapter {padding:20px 24px;gap:16px;}#scene .how-chapter-header h1 {font-size:38px;}#scene .how-chapter-header p {font-size:14px;margin-top:9px;}#scene .how-chapter-detail {font-size:16px;margin-top:12px;}#scene .how-chapter-body h2 {font-size:25px;}.how-request-brief,.how-returned-result {padding:20px;}.how-chapter-mesh {height:70px;flex-basis:70px;}.how-promise-parties {margin-top:12px;}#scene .how-promise-party {padding:16px 12px;min-height:55px;font-size:18px;}#scene .how-common-promise {font-size:20px;margin:12px 0;padding-top:12px;}}
+@media(min-width:901px) and (max-height:780px){#scene .how-chapter {padding:20px 24px;gap:16px;}#scene .how-chapter-header h1 {font-size:38px;}#scene .how-chapter-header p {font-size:14px;margin-top:9px;}#scene .how-chapter-detail {font-size:15px;margin-top:12px;}#scene .how-chapter-body h2 {font-size:25px;}.how-request-brief,.how-returned-result {padding:20px;}.how-chapter-mesh {height:70px;flex-basis:70px;}.how-promise-parties {margin-top:12px;}#scene .how-promise-party {padding:16px 12px;min-height:55px;font-size:18px;}#scene .how-common-promise {font-size:20px;margin:12px 0;padding-top:12px;}}
 @media(max-width:900px){#scene .how-chapter {overflow:auto;padding:18px;}.how-chapter-body,.how-chapter-work .how-chapter-body {grid-template-columns:1fr;flex:none;}.how-request-brief,.how-returned-result {min-height:240px;}.how-chapter-footer {flex-wrap:wrap;}#scene .how-chapter-header h1 {font-size:32px;}}
 
 .stage-scene {box-sizing:border-box;opacity:1;}
@@ -182,3 +182,15 @@
 
 /* Plain-language action cues stay with the mesh, including reduced-motion endpoints. */
 #scene .mesh-story-cue {font-size:11px;line-height:1.4;color:hsl(var(--text-muted));margin:0;min-height:2.8em;flex:none;max-width:48ch;}
+/* What each chapter's record actually carries: field names from the real signed records, plus what is and is not established. */
+.how-record {margin-top:22px;padding-top:14px;border-top:1px solid hsl(var(--border-subtle));}
+.how-record-fields {display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:10px 0 0;}
+#scene .how-record-fields dt {font:500 11px/1.45 var(--mono-font,monospace);color:hsl(var(--reference));}
+#scene .how-record-fields dd {margin:0;font:400 13px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text));}
+.how-record-truth {display:grid;gap:4px;margin-top:12px;}
+#scene .how-record-truth p {display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;margin:0;font:400 13px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text-muted));}
+#scene .how-record-truth span:first-child {font:500 9px/1.45 var(--mono-font,monospace);letter-spacing:.04em;padding-top:2px;color:hsl(var(--text-muted));}
+#scene .how-record-now span:last-child {color:hsl(var(--text));}
+@media(min-width:901px){.how-check-choices {flex-direction:row;gap:6px;}#scene .how-check-row {flex:1 1 0;gap:10px;}}
+@media(min-width:901px) and (max-height:780px){#scene .how-check-row {padding:8px 10px;min-height:34px;font-size:13px;}.how-record {margin-top:14px;padding-top:10px;}.how-record-fields {gap:3px 14px;margin-top:7px;}#scene .how-record-fields dd,#scene .how-record-truth p {font-size:12px;}.how-record-truth {margin-top:8px;}}
+@media(max-width:560px){.how-record-fields {grid-template-columns:1fr;gap:0;}#scene .how-record-fields dd {margin-bottom:6px;}}

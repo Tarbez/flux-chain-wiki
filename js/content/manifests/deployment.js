@@ -200,7 +200,7 @@ ArkManifest.define({
       "label": "Ask Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A clear request gives someone a job they can understand."
+      "value": "A clear request gives a provider a job they can understand, and gives every later record one fixed thing to point back to."
     },
     "CHAPTER.ASK.JOB": {
       "label": "Ask Job",
@@ -230,19 +230,19 @@ ArkManifest.define({
       "label": "Ask Detail1",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Say which saved version of the files should be copied. That keeps everyone talking about the same job."
+      "value": "Name the exact snapshot by its content address (CID), a SHA-256 digest of its bytes. Everyone then means the same files, not a folder that might change."
     },
     "CHAPTER.ASK.DETAIL2": {
       "label": "Ask Detail2",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Explain what the finished copy should contain, so the result can be checked later."
+      "value": "Say what the finished copy must contain and what evidence will show it. The checker compares against this later, so a vague goal becomes an uncheckable one."
     },
     "CHAPTER.ASK.DETAIL3": {
       "label": "Ask Detail3",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Include any conditions the work must follow. A request is only the starting point; nobody has agreed to help yet."
+      "value": "Add the conditions the work must follow, including the request policy that applies. Offers, the agreement, and the receipt all cite this request, so its limits travel with them."
     },
     "CHAPTER.WORK.TITLE": {
       "label": "Work Title",
@@ -254,7 +254,7 @@ ArkManifest.define({
       "label": "Work Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "An offer is a suggestion. An agreement means you both accept the same terms."
+      "value": "An offer is a suggestion. An agreement is one signed record both sides accept, and its CID changes if any term does."
     },
     "CHAPTER.WORK.CHOICE1": {
       "label": "Work Choice1",
@@ -272,13 +272,13 @@ ArkManifest.define({
       "label": "Work Detail1",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Your request says what you want and which conditions matter."
+      "value": "Your intent stays fixed. The offer and the agreement both cite its CID, so the terms cannot drift from your request."
     },
     "CHAPTER.WORK.DETAIL2": {
       "label": "Work Detail2",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The helper proposes the terms. Once you both accept the match, the work and its evidence must follow those terms."
+      "value": "The provider signs an offer citing your intent, with terms, capability, and the evidence they will supply. An offer is a proposal, not proof of capacity."
     },
     "CHAPTER.WORK.JOIN": {
       "label": "Work Join",
@@ -320,19 +320,91 @@ ArkManifest.define({
       "label": "Check Detail1",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Start with the rules everyone agreed to. They say what the result should be checked against."
+      "value": "Checking starts from the agreement CID. The accepted terms, not the provider's description, define what passes."
     },
     "CHAPTER.CHECK.DETAIL2": {
       "label": "Check Detail2",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The helper shares what they produced and the supporting evidence required by the agreement. Sharing a result does not mean it has passed."
+      "value": "The provider signs a fulfillment that cites the agreement and the input and output CIDs. Submitting a result does not mean it passed."
     },
     "CHAPTER.CHECK.DETAIL3": {
       "label": "Check Detail3",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "The checking participant records an outcome under the identified rules. That decision can be followed back to the work and the original request."
+      "value": "The identified checker and authority record the outcome. Accepted means quorum-signed; durable adds three attestations and a commit certificate."
+    },
+    "CHAPTER.ASK.RECORD.LABEL": {
+      "label": "Ask record label",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "THE SIGNED INTENT"
+    },
+    "CHAPTER.ASK.RECORD": {
+      "label": "Ask record rows (one \"name: meaning\" per line)",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Signed by: You, the client\nCites: The snapshot CID and request policy\nProduces: An intent CID\nNext: A provider signs an offer citing that CID"
+    },
+    "CHAPTER.ASK.NOW": {
+      "label": "Ask true now",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "One signed, addressable request exists."
+    },
+    "CHAPTER.ASK.NOT": {
+      "label": "Ask not yet true",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "No provider has committed and no work has happened."
+    },
+    "CHAPTER.WORK.RECORD.LABEL": {
+      "label": "Work record label",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "A REAL AGREEMENT RECORD / FXN TRANSFER"
+    },
+    "CHAPTER.WORK.RECORD": {
+      "label": "Work record rows (one \"name: meaning\" per line)",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "kind: agreement, flux.fabric-transfer.v1\ninputCid: What is being transferred\nrecipientId: Who receives it\nasset, amount: The accepted terms\nnextSequence: The input's next version\ncid: SHA-256 of the signed record"
+    },
+    "CHAPTER.WORK.NOW": {
+      "label": "Work true now",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Both sides hold one inspectable set of terms."
+    },
+    "CHAPTER.WORK.NOT": {
+      "label": "Work not yet true",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "Accepted terms do not prove the work happened."
+    },
+    "CHAPTER.CHECK.RECORD.LABEL": {
+      "label": "Check record label",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "A REAL FULFILLMENT RECORD / FXN TRANSFER"
+    },
+    "CHAPTER.CHECK.RECORD": {
+      "label": "Check record rows (one \"name: meaning\" per line)",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "kind: fulfillment, flux.fabric-transfer.v1\nagreementCid: The terms it answers\ninputCid, outputCid: What went in and what came out\nsignatureB64: The provider's Ed25519 signature\nInspect: GET /agreement-fabric/agreements/:cid/evidence"
+    },
+    "CHAPTER.CHECK.NOW": {
+      "label": "Check true now",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "One rule-bound outcome, traceable back to the request."
+    },
+    "CHAPTER.CHECK.NOT": {
+      "label": "Check not yet true",
+      "kind": "text",
+      "section": "How it works chapters",
+      "value": "A receipt is not universal truth, legal finality, or settlement."
     }
   }
 });

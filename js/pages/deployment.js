@@ -16,7 +16,7 @@
       var chapters = [
         { key: 'ASK', route: 'how/ask', pattern: 'story-ask', signal: 'REQUEST' },
         { key: 'WORK', route: 'how/work', pattern: 'story-work', signal: 'PROMISE' },
-        { key: 'CHECK', route: 'how/check', pattern: 'story-check', signal: 'PROOF' }
+        { key: 'CHECK', route: 'how/check', pattern: 'story-check', signal: 'RECEIPT' }
       ];
       var fabrics = [];
       var el = ArkUI.el('section', 'ark-page how-simple how-triptych');
@@ -32,7 +32,6 @@
 
       var heading = ArkUI.el('header', 'how-triptych-intro');
       var headingCopy = ArkUI.el('div', 'how-triptych-heading');
-      headingCopy.appendChild(ArkUI.el('p', 'story-kicker', 'DEFXN / HOW IT WORKS'));
       var title = ArkUI.el('h1', '', words('TITLE'));
       title.id = 'deployment-title';
       el.setAttribute('aria-labelledby', title.id);
@@ -57,7 +56,6 @@
         card.appendChild(ArkUI.el('p', 'how-work-answer', words(chapter.key + '.TEXT')));
 
         var meshFrame = ArkUI.el('div', 'how-work-mesh-frame');
-        meshFrame.appendChild(ArkUI.el('span', 'how-work-mesh-label', chapter.signal + ' / MESH RECORD'));
         var mesh = ArkUI.el('canvas', 'how-work-mesh');
         mesh.setAttribute('aria-hidden', 'true');
         meshFrame.appendChild(mesh);

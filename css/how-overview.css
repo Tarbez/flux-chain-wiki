@@ -130,7 +130,7 @@
 .how-work-mesh-frame {
   min-height:96px;
   display:grid;
-  grid-template-rows:auto minmax(72px,1fr);
+  grid-template-rows:minmax(72px,1fr);
   gap:7px;
   margin-top:3px;
   padding:10px;
@@ -196,7 +196,7 @@
   #scene .how-work-card {padding:16px;gap:9px;grid-template-rows:auto auto auto minmax(76px,1fr) auto;}
   #scene .how-work-card h2 {font-size:23px;}
   #scene .how-work-card .how-work-answer {font-size:12px;}
-  .how-work-mesh-frame {min-height:76px;grid-template-rows:auto minmax(54px,1fr);padding:8px;}
+  .how-work-mesh-frame {min-height:76px;grid-template-rows:minmax(54px,1fr);padding:8px;}
   .how-work-mesh {min-height:54px;}
   .how-simple-footer {padding-top:9px;}
 }
