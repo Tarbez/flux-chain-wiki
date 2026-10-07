@@ -11,12 +11,16 @@
   window.ArkStatsHighlights = Object.freeze({
     measured: '2026-10-06',
     scope: 'Real production fleet (InterServer VPS), Node and Rust head to head',
+    // The home rail's one-line scope; the long form above stays on /stats.
+    scopeShort: 'Rust · real fleet',
+    // short: the home rail's label. label + detail stay on /stats and become
+    // the rail item's tooltip and screen-reader text.
     items: Object.freeze([
-      { value: '3,250', unit: 'tx/s', label: 'Agreement-fabric, accepted (Rust)', detail: '11.1x the Node number, concurrency 1,200, real fleet' },
-      { value: '5,711-6,041', unit: 'tx/s', label: 'Aggregate fleet capacity (4 quorums)', detail: '4 independent quorums in parallel, 5 audited runs, 2 cleared 6,000/s -- not one quorum\'s speed' },
-      { value: '676-827', unit: 'tx/s', label: 'Agreement-fabric, durable (Rust)', detail: 'Quorum A, real fleet, 5 audited runs, up from 269-351 after a thread-bug fix' },
-      { value: '151', unit: 'tx/s', label: 'FXN value-object transfers (Rust)', detail: '1.1x the Node number, same real fleet' },
-      { value: '0', unit: 'failures', label: 'Every benchmark run', detail: 'Up to 4,000 transfers per run, both languages' }
+      { value: '3,250', unit: 'tx/s', short: 'Fabric accepted', label: 'Agreement-fabric, accepted (Rust)', detail: '11.1x the Node number, concurrency 1,200, real fleet' },
+      { value: '5,711-6,041', unit: 'tx/s', short: 'Fleet, 4 quorums', label: 'Aggregate fleet capacity (4 quorums)', detail: '4 independent quorums in parallel, 5 audited runs, 2 cleared 6,000/s -- not one quorum\'s speed' },
+      { value: '676-827', unit: 'tx/s', short: 'Fabric durable', label: 'Agreement-fabric, durable (Rust)', detail: 'Quorum A, real fleet, 5 audited runs, up from 269-351 after a thread-bug fix' },
+      { value: '151', unit: 'tx/s', short: 'FXN transfers', label: 'FXN value-object transfers (Rust)', detail: '1.1x the Node number, same real fleet' },
+      { value: '0', unit: 'failures', short: 'All runs', label: 'Every benchmark run', detail: 'Up to 4,000 transfers per run, both languages' }
     ])
     // The fsync-vs-replication finding doesn't fit this rail's shape
     // (no unit, longer prose than a stat card) and the home hero is a

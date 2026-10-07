@@ -84,13 +84,16 @@ ArkUI.pageModules.zero = {
     status.className = 'home-status-rail';
     status.setAttribute('aria-label', 'Measured mesh performance');
     stats.items.forEach(function (stat) {
+      // Short label and the number only; the full label and caption live on
+      // /stats and here as the tooltip and screen-reader text.
       var readout = document.createElement('div'); readout.className = 'home-status-item';
-      var label = document.createElement('small'); label.textContent = stat.label;
+      readout.title = stat.label + ': ' + stat.detail;
+      var label = document.createElement('small'); label.textContent = stat.short || stat.label;
       var value = document.createElement('strong'); value.className = 'home-status-value';
-      value.textContent = stat.value;
+      value.textContent = stat.value.replace('-', '–');
       var unit = document.createElement('span'); unit.className = 'home-status-unit'; unit.textContent = stat.unit;
       value.appendChild(unit);
-      var detail = document.createElement('span'); detail.className = 'home-status-detail'; detail.textContent = stat.detail;
+      var detail = document.createElement('span'); detail.className = 'home-status-detail'; detail.textContent = stat.label + '. ' + stat.detail;
       readout.appendChild(label); readout.appendChild(value); readout.appendChild(detail);
       status.appendChild(readout);
     });
@@ -98,7 +101,7 @@ ArkUI.pageModules.zero = {
     statusLink.className = 'home-status-link';
     statusLink.href = pageHref('stats'); statusLink.dataset.sceneLink = 'stats';
     var scope = document.createElement('small'); scope.className = 'home-status-scope';
-    scope.textContent = 'Measured ' + stats.measured + ' · ' + stats.scope;
+    scope.textContent = (stats.scopeShort || stats.scope) + ' · ' + stats.measured;
     statusLink.appendChild(scope); statusLink.appendChild(document.createTextNode('All measurements →'));
     statusLink.setAttribute('aria-label', 'All measurements. Measured ' + stats.measured + ', ' + stats.scope);
     status.appendChild(statusLink);
