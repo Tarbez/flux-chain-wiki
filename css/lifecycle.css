@@ -182,15 +182,21 @@
 
 /* Plain-language action cues stay with the mesh, including reduced-motion endpoints. */
 #scene .mesh-story-cue {font-size:11px;line-height:1.4;color:hsl(var(--text-muted));margin:0;min-height:2.8em;flex:none;max-width:48ch;}
-/* What each chapter's record actually carries: field names from the real signed records, plus what is and is not established. */
-.how-record {margin-top:22px;padding-top:14px;border-top:1px solid hsl(var(--border-subtle));}
-.how-record-fields {display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:10px 0 0;}
-#scene .how-record-fields dt {font:500 11px/1.45 var(--mono-font,monospace);color:hsl(var(--reference));}
-#scene .how-record-fields dd {margin:0;font:400 13px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text));}
-.how-record-truth {display:grid;gap:4px;margin-top:12px;}
+/* The record each chapter produces: real field names where a real record exists. Choices light the rows they explain. */
+.how-record-fields {display:grid;grid-template-columns:max-content minmax(0,1fr);gap:5px 16px;margin:14px 0 16px;}
+#scene .how-record-fields dt {font:500 11px/1.45 var(--mono-font,monospace);color:hsl(var(--reference));transition:opacity .2s;}
+#scene .how-record-fields dd {margin:0;font:400 13px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text));transition:opacity .2s;}
+#scene .how-record-fields [data-lit="false"] {opacity:.32;}
+.how-common-record {display:flex;flex-direction:column;flex:1 1 0;min-height:0;margin-top:14px;padding:20px 22px;border:1px solid hsl(var(--primary-300));border-radius:9px;background:hsl(var(--nested) / .1);}
+#scene .how-common-record .how-common-promise {margin:10px 0 0;padding:0;border:0;text-align:left;font-size:22px;}
+.how-record-truth {display:grid;gap:4px;margin-top:20px;padding-top:14px;border-top:1px solid hsl(var(--border-subtle));}
 #scene .how-record-truth p {display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;margin:0;font:400 13px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text-muted));}
 #scene .how-record-truth span:first-child {font:500 9px/1.45 var(--mono-font,monospace);letter-spacing:.04em;padding-top:2px;color:hsl(var(--text-muted));}
 #scene .how-record-now span:last-child {color:hsl(var(--text));}
 @media(min-width:901px){.how-check-choices {flex-direction:row;gap:6px;}#scene .how-check-row {flex:1 1 0;gap:10px;}}
-@media(min-width:901px) and (max-height:780px){#scene .how-check-row {padding:8px 10px;min-height:34px;font-size:13px;}.how-record {margin-top:14px;padding-top:10px;}.how-record-fields {gap:3px 14px;margin-top:7px;}#scene .how-record-fields dd,#scene .how-record-truth p {font-size:12px;}.how-record-truth {margin-top:8px;}}
+@media(min-width:901px) and (max-height:780px){#scene .how-check-row {padding:8px 10px;min-height:34px;font-size:13px;}.how-record-fields {gap:2px 14px;margin:8px 0 10px;}#scene .how-record-fields dd,#scene .how-record-truth p {font-size:12px;}.how-record-truth {margin-top:12px;padding-top:10px;}.how-common-record {padding:14px 16px;margin-top:10px;}#scene .how-common-record .how-common-promise {font-size:19px;margin-bottom:4px;}}
 @media(max-width:560px){.how-record-fields {grid-template-columns:1fr;gap:0;}#scene .how-record-fields dd {margin-bottom:6px;}}
+#scene .how-chapter-work .how-promise-party {padding:14px 12px;min-height:52px;font-size:18px;}
+.how-common-record .how-chapter-mesh {min-height:64px;}
+@media(min-width:901px) and (max-height:780px){#scene .how-chapter-work .how-promise-party {padding:10px;min-height:42px;font-size:16px;}.how-common-record .how-chapter-mesh,.how-common-record .mesh-story-cue {display:none;}.how-common-record .how-record-fields {margin:6px 0 8px;}}
+@media(min-width:901px) and (max-height:780px){.how-request-brief .how-chapter-mesh,.how-returned-result .how-chapter-mesh {height:auto;flex:1 1 36px;min-height:36px;}#scene .how-request-brief h2,#scene .how-returned-result h2 {margin:10px 0 0;}}

@@ -14,9 +14,9 @@
       }
 
       var chapters = [
-        { key: 'ASK', route: 'how/ask', pattern: 'story-ask', signal: 'REQUEST' },
-        { key: 'WORK', route: 'how/work', pattern: 'story-work', signal: 'PROMISE' },
-        { key: 'CHECK', route: 'how/check', pattern: 'story-check', signal: 'RECEIPT' }
+        { key: 'ASK', route: 'how/ask', pattern: 'story-ask', signal: 'INTENT' },
+        { key: 'WORK', route: 'how/work', pattern: 'story-work', signal: 'OFFER \u00b7 AGREEMENT' },
+        { key: 'CHECK', route: 'how/check', pattern: 'story-check', signal: 'FULFILLMENT \u00b7 RECEIPT' }
       ];
       var fabrics = [];
       var el = ArkUI.el('section', 'ark-page how-simple how-triptych');

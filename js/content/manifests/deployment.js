@@ -341,10 +341,10 @@ ArkManifest.define({
       "value": "THE SIGNED INTENT"
     },
     "CHAPTER.ASK.RECORD": {
-      "label": "Ask record rows (one \"name: meaning\" per line)",
+      "label": "Ask record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Signed by: You, the client\nCites: The snapshot CID and request policy\nProduces: An intent CID\nNext: A provider signs an offer citing that CID"
+      "value": "[1] Snapshot: The exact files, by content ID\n[2] Outcome: What the finished copy must contain\n[3] Policy: The request policy and its limits\nSigned by: You, the client\nProduces: An intent CID that offers must cite"
     },
     "CHAPTER.ASK.NOW": {
       "label": "Ask true now",
@@ -362,13 +362,13 @@ ArkManifest.define({
       "label": "Work record label",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "A REAL AGREEMENT RECORD / FXN TRANSFER"
+      "value": "THE AGREEMENT / A REAL FXN TRANSFER RECORD"
     },
     "CHAPTER.WORK.RECORD": {
-      "label": "Work record rows (one \"name: meaning\" per line)",
+      "label": "Work record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "kind: agreement, flux.fabric-transfer.v1\ninputCid: What is being transferred\nrecipientId: Who receives it\nasset, amount: The accepted terms\nnextSequence: The input's next version\ncid: SHA-256 of the signed record"
+      "value": "kind: agreement, flux.fabric-transfer.v1\n[1] inputCid: What you asked to move\n[1] recipientId: Who receives it\n[2] asset, amount: The terms on offer\nnextSequence: The input's next version\ncid: SHA-256 of the signed record"
     },
     "CHAPTER.WORK.NOW": {
       "label": "Work true now",
@@ -386,13 +386,13 @@ ArkManifest.define({
       "label": "Check record label",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "A REAL FULFILLMENT RECORD / FXN TRANSFER"
+      "value": "THE FULFILLMENT / A REAL FXN TRANSFER RECORD"
     },
     "CHAPTER.CHECK.RECORD": {
-      "label": "Check record rows (one \"name: meaning\" per line)",
+      "label": "Check record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "kind: fulfillment, flux.fabric-transfer.v1\nagreementCid: The terms it answers\ninputCid, outputCid: What went in and what came out\nsignatureB64: The provider's Ed25519 signature\nInspect: GET /agreement-fabric/agreements/:cid/evidence"
+      "value": "kind: fulfillment, flux.fabric-transfer.v1\n[1] agreementCid: The terms it is checked against\n[2] inputCid, outputCid: What went in and what came out\n[2] signatureB64: The provider's Ed25519 signature\n[3] cid: What the receipt points back to"
     },
     "CHAPTER.CHECK.NOW": {
       "label": "Check true now",
@@ -405,6 +405,12 @@ ArkManifest.define({
       "kind": "text",
       "section": "How it works chapters",
       "value": "A receipt is not universal truth, legal finality, or settlement."
+    },
+    "CHAPTER.CHECK.RESULT": {
+      "label": "Check heading",
+      "kind": "line",
+      "section": "How it works chapters",
+      "value": "A result, with its evidence."
     }
   }
 });
