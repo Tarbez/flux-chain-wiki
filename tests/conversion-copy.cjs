@@ -32,7 +32,7 @@ assert.equal(how.title, 'How DEFXN works');
 assert.equal(how.meta.next, 'download');
 for (let i = 1; i <= 5; i++) assert(how.fields['BODY' + i], 'How DEFXN works includes movement ' + i);
 
-assert.equal(manifest('download').title, 'Run Flux from source');
+assert.equal(manifest('download').title, 'Run DEFXN from source');
 assert(value('download', 'DECK').includes('Public repository URLs and packaged downloads are not yet verified'));
 assert.equal(manifest('deploy').title, 'Create or join a network');
 assert(value('deploy', 'DECK').includes('miner presence only'));
