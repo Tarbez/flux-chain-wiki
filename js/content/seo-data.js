@@ -207,7 +207,7 @@ ArkSEO.define({
       "canonical": ""
     },
     "download": {
-      "title": "Run Flux from source — DEFXN",
+      "title": "Run from source — DEFXN",
       "description": "Start a local miner from an owner-approved source checkout. Follow prerequisites and verification steps; public binaries remain unverified.",
       "ogImage": "",
       "canonical": ""

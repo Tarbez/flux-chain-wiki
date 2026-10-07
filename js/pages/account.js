@@ -26,40 +26,56 @@
       var page = document.createElement('section');
       page.className = 'ark-page task-page account-page';
       page.setAttribute('aria-labelledby', 'account-title');
-      page.innerHTML = '<div class="account-shell"><header class="account-hero"><p class="account-kicker">// YOUR IDENTITY / YOUR RULES</p>' +
+      /* Home's shape: the identity on the left, one card on the right whose
+         views (session, wallet, contacts, mesh) swap in place, and a rail of
+         live numbers along the bottom that opens the matching view. */
+      page.innerHTML = '<div class="account-shell"><header class="account-hero"><p class="account-promise">Your identity · your keys</p>' +
         '<div class="account-profile"><div class="account-avatar" data-account-avatar aria-hidden="true">↗</div><div class="account-heading"><h1 id="account-title">Own your identity.</h1><span class="account-status" data-account-status>Signed out</span></div></div>' +
-        '<p data-account-intro>One portable recovery file. No custodial account. Your root key stays yours.</p></header>' +
-        '<div class="account-layout"><section class="account-auth" aria-label="Account session"><p class="account-kicker">01 / LOCAL SESSION</p><h2 class="account-session-title" data-account-session-title>Open your Auth Kit.</h2><p class="account-session-description" data-account-session-description>Choose the recovery file on this device to continue.</p><div data-account-auth></div><p class="account-create-toggle" data-account-create-toggle-row>No kit yet? <button type="button" class="link-button" data-account-create-toggle>Create a new identity</button></p><div data-account-create hidden></div><div class="account-cms"><a href="/bundle-deployer" data-scene-link="bundledeployer">Deploy a bundle →</a><span>Local-first publishing</span><a href="/account/domains" data-scene-link="account/domains">Your domains →</a><a hidden href="/admin" target="_blank" rel="opener" data-account-cms-open>Open CMS ↗</a><span hidden data-account-cms-local>Local editor available</span><span data-account-cms-status role="status"></span></div><button type="button" data-account-forget hidden>Sign out</button><p class="account-storage-notice" data-account-storage-notice role="status" hidden></p><details class="account-session-note"><summary>Nothing secret is stored here</summary><p>This browser remembers only your name and public identity details. Your Auth Kit, PIN, password, and signing key remain on your device. Select the kit again when a future session needs to sign.</p></details></section>' +
-        '<aside class="account-welcome"><p class="account-kicker">02 / SELF-CUSTODY</p><h2>Bring one file.<br>Keep every key.</h2><ol><li><strong>Portable</strong><p>Your recovery file moves with you.</p></li><li><strong>Local</strong><p>Unlocking happens on this device.</p></li><li><strong>Verifiable</strong><p>Check the identity against the mesh.</p></li></ol></aside>' +
-        '<nav class="account-tabs" role="tablist" aria-label="Account sections" hidden>' +
-        '<button type="button" role="tab" data-account-tab="identity" aria-selected="true"><span>Overview</span><small>Identity</small></button>' +
-        '<button type="button" role="tab" data-account-tab="defi" aria-selected="false"><span>DeFi</span><small>Mesh state</small></button>' +
-        '<button type="button" role="tab" data-account-tab="contacts" aria-selected="false"><span>Contacts</span><small data-account-contact-count>0 connected</small></button>' +
+        '<p class="account-intro" data-account-intro>One portable recovery file. No custodial account. Your root key stays yours.</p>' +
+        '<ul class="account-opens" data-account-opens aria-label="What one identity opens"><li><strong>Wallet</strong><span>Hold, send and receive FXN.</span></li><li><strong>Credits</strong><span>Pay resolvers for the work they do.</span></li><li><strong>Contacts</strong><span>Invite people by identity.</span></li><li><strong>Publishing</strong><span>Deploy bundles and track names.</span></li></ul>' +
+        '<section class="account-state" aria-label="Identity details" hidden><dl><div><dt>Identity ID</dt><dd data-account-id>—</dd></div><div><dt>Root key</dt><dd data-account-root>—</dd></div>' +
+        '<div><dt>Wallet address</dt><dd data-account-wallet>—</dd></div><div><dt>Security</dt><dd data-account-security>—</dd></div></dl>' +
+        '<p data-account-verification>Unlock a kit to verify its root against its recovery phrase.</p></section></header>' +
+        '<section class="account-card" aria-label="Account">' +
+        '<nav class="account-tabs" role="tablist" aria-label="Account views" hidden>' +
+        '<button type="button" role="tab" data-account-tab="session" aria-selected="true">Session</button>' +
+        '<button type="button" role="tab" data-account-tab="defi" aria-selected="false">Wallet</button>' +
+        '<button type="button" role="tab" data-account-tab="contacts" aria-selected="false">Contacts</button>' +
+        '<button type="button" role="tab" data-account-tab="mesh" aria-selected="false">Mesh</button>' +
         '</nav>' +
-        '<section class="account-state" data-account-panel="identity" aria-live="polite" hidden><div class="account-panel-heading"><div><p class="account-kicker">01 / DASHBOARD</p><h2 data-account-heading>Your identity</h2></div><span>Public details / local authority</span></div>' +
-        '<div class="account-overview-strip"><button type="button" data-account-go="identity"><small>Session</small><strong data-account-overview-session>Remembered</strong><span>Identity available</span></button><button type="button" data-account-go="defi"><small>Mesh</small><strong data-account-overview-mesh>Not checked</strong><span>Inspect standing</span></button><button type="button" data-account-go="contacts"><small>Contacts</small><strong data-account-overview-contacts>0</strong><span>Open directory</span></button></div>' +
-        '<dl><div><dt>Identity ID</dt><dd data-account-id>—</dd></div><div><dt>Root key</dt><dd data-account-root>—</dd></div>' +
-        '<div><dt>Wallet address in Auth Kit</dt><dd data-account-wallet>—</dd></div><div><dt>Security profile</dt><dd data-account-security>—</dd></div></dl>' +
-        '<p data-account-verification>Unlock a kit to verify its root against its recovery phrase.</p></section></div>' +
-        '<section class="account-live" data-account-panel="defi" aria-labelledby="account-live-title" hidden><div class="account-panel-heading"><div><p class="account-kicker">02 / DEFI &amp; MESH</p><h2 id="account-live-title">Financial state</h2></div><span>Verified sources only</span></div>' +
-        '<div class="account-defi-grid"><article class="account-mesh-check" aria-live="polite"><div><small>Identity binding</small><strong data-account-mesh-status>Not checked</strong><p data-account-mesh-message>Check this identity against the configured Miner by exact ID.</p></div><button type="button" data-account-mesh-check disabled>Check Miner</button></article>' +
-        '<article class="account-defi-metric" data-account-fxn><small>FXN holdings</small><strong data-account-fxn-balance>—</strong><span data-account-fxn-message>Sign in to check</span></article><article class="account-defi-metric" data-account-credits><small>Credits</small><strong data-account-credits-balance>—</strong><span data-account-credits-message>Sign in to check</span></article><article class="account-defi-metric"><small>Mesh standing</small><strong data-account-standing>Not linked</strong><span data-account-standing-message>Requires an exact signed binding</span></article></div>' +
-        '<details class="account-mesh-detail" data-account-mesh-detail hidden><summary>Identity record details</summary><dl><div><dt>Record</dt><dd data-account-mesh-record>—</dd></div><div><dt>Verification</dt><dd data-account-mesh-verification>—</dd></div><div><dt>Updated</dt><dd data-account-mesh-updated>—</dd></div><div><dt>Provenance</dt><dd data-account-mesh-provenance>—</dd></div></dl></details>' +
-        '<details class="account-mesh-detail" data-account-fxn-detail><summary>FXN transfers</summary>' +
-        '<div data-account-fxn-pending><p class="account-contacts-empty">No pending transfers to you.</p></div>' +
-        '<form data-account-fxn-send-form class="account-contacts-form"><label for="fxnSendRecipient">Send FXN · recipient public key</label><input id="fxnSendRecipient" type="text" autocomplete="off" data-account-fxn-send-recipient placeholder="Recipient public key" /><label for="fxnSendAmount">Amount (nano-FXN)</label><input id="fxnSendAmount" type="text" autocomplete="off" data-account-fxn-send-amount placeholder="1000000000" /><button type="submit" data-account-fxn-send-submit disabled>Send</button></form>' +
-        '<p data-account-fxn-send-status role="status" aria-live="polite"></p>' +
-        '<button type="button" data-account-fxn-refresh>Refresh</button></details>' +
-        '<details class="account-mesh-detail" data-account-credits-detail><summary>Spend credits</summary>' +
-        '<form data-account-credits-request-form class="account-contacts-form"><label for="creditsResolver">Resolver public key</label><input id="creditsResolver" type="text" autocomplete="off" data-account-credits-resolver placeholder="Resolver public key" /><label for="creditsAmount">Amount</label><input id="creditsAmount" type="text" autocomplete="off" data-account-credits-amount placeholder="200" /><label for="creditsService">What for (optional)</label><input id="creditsService" type="text" autocomplete="off" data-account-credits-service /><button type="submit" data-account-credits-submit>Authorize</button></form>' +
-        '<p data-account-credits-status role="status" aria-live="polite"></p></details>' +
-        '<p class="account-next">FXN/Credits balances are read from the live mesh registry, never estimated. Inspect raw records in the <a href="/explore" data-scene-link="explorer">Mesh Explorer</a>.</p></section>' +
-        '<section class="account-contacts" data-account-panel="contacts" aria-labelledby="account-contacts-title" hidden><div data-contacts-view="list"><div class="account-panel-heading"><div><p class="account-kicker">03 / CONTACTS</p><h2 id="account-contacts-title">Your network</h2></div><button type="button" data-contacts-refresh>Refresh</button></div>' +
-        '<div class="account-contact-stats"><div><strong data-contacts-accepted-count>0</strong><span>Contacts</span></div><div><strong data-contacts-incoming-count>0</strong><span>Incoming</span></div><div><strong data-contacts-outgoing-count>0</strong><span>Sent</span></div></div>' +
+        '<section class="account-auth" data-account-panel="session" aria-label="Account session"><p class="account-card-caption">Sign in on this device</p><div data-account-session-main><h2 class="account-session-title" data-account-session-title>Open your Auth Kit.</h2><p class="account-session-description" data-account-session-description>Choose the recovery file on this device to continue.</p><div data-account-auth></div>' +
+        '<p class="account-create-toggle" data-account-create-toggle-row>No kit yet? <button type="button" class="link-button" data-account-create-toggle>Create a new identity</button></p>' +
+        '<button type="button" data-account-forget hidden>Sign out</button><p class="account-storage-notice" data-account-storage-notice role="status" hidden></p>' +
+        '<div class="account-cms"><a href="/bundle-deployer" data-scene-link="bundledeployer">Deploy a bundle →</a><a href="/account/domains" data-scene-link="account/domains">Your domains →</a><a hidden href="/admin" target="_blank" rel="opener" data-account-cms-open>Open CMS ↗</a><span hidden data-account-cms-local>Local editor available</span><span data-account-cms-status role="status"></span></div>' +
+        '<p class="account-session-note">Nothing secret is stored here. This browser keeps only your name and public details; the kit, PIN and key stay on your device.</p></div>' +
+        '<div class="account-create" data-account-create-view hidden><button type="button" class="account-back" data-account-create-back>← Back to sign in</button><div data-account-create></div></div></section>' +
+        '<section class="account-live" data-account-panel="defi" aria-labelledby="account-live-title" hidden><h2 class="account-visually-hidden" id="account-live-title">Wallet</h2>' +
+        '<div class="account-wallet" data-account-wallet-view="home"><div class="account-balances"><article class="account-balance" data-account-fxn><small>FXN</small><strong data-account-fxn-balance>—</strong><span data-account-fxn-message>Sign in to check</span></article>' +
+        '<article class="account-balance" data-account-credits><small>Credits</small><strong data-account-credits-balance>—</strong><span data-account-credits-message>Sign in to check</span></article></div>' +
+        '<div class="account-transfers"><h3>Incoming FXN</h3><div data-account-fxn-pending><p class="account-contacts-empty">No pending transfers to you.</p></div>' +
+        '<div data-account-fxn-sent-block hidden><h3>Sent from this tab</h3><div data-account-fxn-sent></div></div></div>' +
+        '<div class="account-wallet-actions"><button type="button" class="palette-solid" data-account-wallet-open="send" disabled>Send FXN</button><button type="button" data-account-wallet-open="spend">Authorize Credits</button><button type="button" class="account-quiet" data-account-fxn-refresh>Refresh</button></div></div>' +
+        '<form data-account-wallet-view="send" data-account-fxn-send-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Send FXN</h3><p>The recipient accepts it, then you complete it here.</p><label for="fxnSendRecipient">Recipient public key</label><input id="fxnSendRecipient" type="text" autocomplete="off" data-account-fxn-send-recipient placeholder="Recipient public key" /><label for="fxnSendAmount">Amount (nano-FXN)</label><input id="fxnSendAmount" type="text" autocomplete="off" data-account-fxn-send-amount placeholder="1000000000" /><button type="submit" class="palette-solid" data-account-fxn-send-submit disabled>Propose transfer</button></form>' +
+        '<form data-account-wallet-view="spend" data-account-credits-request-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Authorize Credits</h3><p>Nothing moves until that resolver redeems it.</p><label for="creditsResolver">Resolver public key</label><input id="creditsResolver" type="text" autocomplete="off" data-account-credits-resolver placeholder="Resolver public key" /><label for="creditsAmount">Amount</label><input id="creditsAmount" type="text" autocomplete="off" data-account-credits-amount placeholder="200" /><label for="creditsService">What for (optional)</label><input id="creditsService" type="text" autocomplete="off" data-account-credits-service /><button type="submit" class="palette-solid" data-account-credits-submit>Authorize</button></form>' +
+        '<p class="account-line" data-account-fxn-send-status role="status" aria-live="polite"></p><p class="account-line" data-account-credits-status role="status" aria-live="polite"></p>' +
+        '<p class="account-next">Read live from the mesh registry, never estimated. Raw records in the <a href="/explore" data-scene-link="explorer">Mesh Explorer</a>.</p></section>' +
+        '<section class="account-contacts" data-account-panel="contacts" aria-labelledby="account-contacts-title" hidden><div data-contacts-view="list"><h2 class="account-visually-hidden" id="account-contacts-title">Contacts</h2>' +
         '<form data-contacts-search-form class="account-contacts-form"><label for="contactsSearchQuery">Find an identity</label><input id="contactsSearchQuery" type="text" autocomplete="off" placeholder="Name or identity ID" /><button type="submit">Search</button></form>' +
-        '<ul data-contacts-results class="account-contacts-list account-contacts-results" hidden></ul><p data-contacts-status role="status" aria-live="polite"></p>' +
-        '<div class="account-contacts-lists"><div class="account-contacts-connected"><h3>Contacts</h3><ul data-contacts-accepted class="account-contacts-list"><li class="account-contacts-empty">No accepted contacts yet.</li></ul></div><div><h3>Invites to you</h3><ul data-contacts-incoming class="account-contacts-list"><li class="account-contacts-empty">None pending.</li></ul></div><div><h3>Sent invites</h3><ul data-contacts-outgoing class="account-contacts-list"><li class="account-contacts-empty">None pending.</li></ul></div></div></div>' +
-        '<article class="account-contact-detail" data-contacts-view="detail" hidden><button type="button" data-contact-back>← All contacts</button><header><div class="account-contact-avatar" data-contact-avatar aria-hidden="true">ID</div><div><p class="account-kicker">CONTACT / MESH IDENTITY</p><h2 data-contact-name>Identity</h2><span data-contact-state>Connection</span></div></header><dl><div><dt>Identity ID</dt><dd data-contact-id>—</dd></div><div><dt>Public ID</dt><dd data-contact-public-id>—</dd></div><div><dt>Visibility</dt><dd data-contact-visibility>—</dd></div><div><dt>Updated</dt><dd data-contact-updated>—</dd></div></dl><p data-contact-bio>No public profile details are available for this identity.</p><a href="/explore" data-scene-link="explorer">Inspect mesh records →</a></article></section></div>';
+        '<p class="account-line" data-contacts-status role="status" aria-live="polite"></p><ul data-contacts-results class="account-contacts-list account-contacts-results" hidden></ul>' +
+        '<div class="account-contacts-lists"><div><h3>Invites to you <b data-contacts-incoming-count>0</b></h3><ul data-contacts-incoming class="account-contacts-list"><li class="account-contacts-empty">None pending.</li></ul></div><div class="account-contacts-connected"><h3>Contacts <b data-contacts-accepted-count>0</b></h3><ul data-contacts-accepted class="account-contacts-list"><li class="account-contacts-empty">No accepted contacts yet.</li></ul></div><div><h3>Sent <b data-contacts-outgoing-count>0</b></h3><ul data-contacts-outgoing class="account-contacts-list"><li class="account-contacts-empty">None pending.</li></ul></div></div>' +
+        '<button type="button" class="account-quiet" data-contacts-refresh>Refresh</button></div>' +
+        '<article class="account-contact-detail" data-contacts-view="detail" hidden><button type="button" class="account-back" data-contact-back>← All contacts</button><header><div class="account-contact-avatar" data-contact-avatar aria-hidden="true">ID</div><div><h2 data-contact-name>Identity</h2><span data-contact-state>Connection</span></div></header><dl><div><dt>Identity ID</dt><dd data-contact-id>—</dd></div><div><dt>Public ID</dt><dd data-contact-public-id>—</dd></div><div><dt>Visibility</dt><dd data-contact-visibility>—</dd></div><div><dt>Updated</dt><dd data-contact-updated>—</dd></div></dl><p data-contact-bio>No public profile details are available for this identity.</p><a href="/explore" data-scene-link="explorer">Inspect mesh records →</a></article></section>' +
+        '<section class="account-mesh" data-account-panel="mesh" aria-label="Mesh standing" hidden><div class="account-mesh-check" aria-live="polite"><small>Identity binding</small><strong data-account-mesh-status>Not checked</strong><p data-account-mesh-message>Check this identity against the configured Miner by exact ID.</p><button type="button" data-account-mesh-check disabled>Check Miner</button></div>' +
+        '<div class="account-standing"><small>Mesh standing</small><strong data-account-standing>Not linked</strong><span data-account-standing-message>Requires an exact signed binding</span></div>' +
+        '<dl class="account-mesh-detail" data-account-mesh-detail hidden><div><dt>Record</dt><dd data-account-mesh-record>—</dd></div><div><dt>Verification</dt><dd data-account-mesh-verification>—</dd></div><div><dt>Updated</dt><dd data-account-mesh-updated>—</dd></div><div><dt>Provenance</dt><dd data-account-mesh-provenance>—</dd></div></dl></section></section>' +
+        '<aside class="account-rail" aria-label="Your account at a glance" hidden>' +
+        '<button type="button" class="account-rail-item" data-needs-key data-account-go="defi"><small>FXN</small><strong data-account-rail-fxn>—</strong></button>' +
+        '<button type="button" class="account-rail-item" data-needs-key data-account-go="defi"><small>Credits</small><strong data-account-rail-credits>—</strong></button>' +
+        '<button type="button" class="account-rail-item" data-needs-key data-account-go="contacts"><small>Contacts</small><strong data-account-overview-contacts>—</strong></button>' +
+        '<button type="button" class="account-rail-item" data-needs-key data-account-go="contacts"><small>Invites</small><strong data-account-rail-invites>—</strong></button>' +
+        '<a class="account-rail-item" href="/account/domains" data-scene-link="account/domains"><small>Domains</small><strong data-account-rail-domains>0</strong></a>' +
+        '<button type="button" class="account-rail-item" data-account-go="mesh"><small>Standing</small><strong data-account-overview-mesh>Not checked</strong></button>' +
+        '<a class="account-rail-link" href="/explore" data-scene-link="explorer"><small>Exact-ID reads only</small>Mesh Explorer →</a></aside></div>';
       host.appendChild(page);
       var fields = {
         heading: page.querySelector('[data-account-heading]'),
@@ -94,42 +110,43 @@
         creditsAmount: page.querySelector('[data-account-credits-amount]'),
         creditsService: page.querySelector('[data-account-credits-service]'),
         creditsStatus: page.querySelector('[data-account-credits-status]'),
-        overviewSession: page.querySelector('[data-account-overview-session]'),
+        sendOpen: page.querySelector('[data-account-wallet-open="send"]'),
+        fxnSent: page.querySelector('[data-account-fxn-sent]'),
+        fxnSentBlock: page.querySelector('[data-account-fxn-sent-block]'),
+        railFxn: page.querySelector('[data-account-rail-fxn]'),
+        railCredits: page.querySelector('[data-account-rail-credits]'),
+        railInvites: page.querySelector('[data-account-rail-invites]'),
+        railDomains: page.querySelector('[data-account-rail-domains]'),
         overviewMesh: page.querySelector('[data-account-overview-mesh]'),
-        overviewContacts: page.querySelector('[data-account-overview-contacts]'),
-        contactCount: page.querySelector('[data-account-contact-count]')
+        overviewContacts: page.querySelector('[data-account-overview-contacts]')
       };
-      /* Zero-scroll: the hero (identity + one status + one connect action)
-         fits one viewport on its own; everything past sign-in is real but
-         secondary, so it lives one tab at a time instead of stacked in a
-         long scroll -- the "Complement/Context" depth, not the "Primary"
-         one. See docs/ux-storytelling-redesign-audit.md. */
+      /* Zero-scroll: the card shows one view at a time (session, wallet,
+         contacts, mesh) and each view's forms and details replace it in
+         place, so nothing past the identity adds height. */
       var tabNav = page.querySelector('.account-tabs');
       var tabButtons = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-tab]')) : [];
       var panels = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-panel]')) : [];
-      var activeTab = 'identity';
+      var activeTab = 'session';
+      var lastSessionState = '';
       function panelAvailable(name) {
-        if (name === 'identity' || name === 'defi') return !!identity;
+        if (name === 'session') return true;
+        if (name === 'defi' || name === 'mesh') return !!identity;
         if (name === 'contacts') return !!(identity && ArkUI.accountSession.isUnlocked());
         return false;
       }
       function applyTabs() {
         if (!tabButtons.length) {
-          page.querySelector('.account-state').hidden = !identity;
           page.querySelector('.account-live').hidden = !identity;
           return;
         }
-        var anyAvailable = tabButtons.some(function (button) { return panelAvailable(button.getAttribute('data-account-tab')); });
-        tabNav.hidden = !anyAvailable;
-        if (anyAvailable && !panelAvailable(activeTab)) {
-          var firstAvailable = tabButtons.map(function (b) { return b.getAttribute('data-account-tab'); }).filter(panelAvailable)[0];
-          if (firstAvailable) activeTab = firstAvailable;
-        }
+        var available = tabButtons.filter(function (button) { return panelAvailable(button.getAttribute('data-account-tab')); });
+        tabNav.hidden = available.length < 2;
+        if (!panelAvailable(activeTab)) activeTab = 'session';
         tabButtons.forEach(function (button) {
           var name = button.getAttribute('data-account-tab');
-          var available = panelAvailable(name);
-          button.hidden = !available;
-          button.setAttribute('aria-selected', String(available && name === activeTab));
+          var open = panelAvailable(name);
+          button.hidden = !open;
+          button.setAttribute('aria-selected', String(open && name === activeTab));
         });
         panels.forEach(function (panel) {
           var name = panel.getAttribute('data-account-panel');
@@ -137,7 +154,7 @@
         });
       }
       function openTab(name) {
-        if (!panelAvailable(name)) return;
+        if (!panelAvailable(name)) name = 'session';
         activeTab = name;
         applyTabs();
       }
@@ -147,6 +164,29 @@
       Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-go]') : [], function (button) {
         button.addEventListener('click', function () { openTab(button.getAttribute('data-account-go')); });
       });
+      /* Wallet sub-views: the send and authorize forms take the wallet's place. */
+      var walletViews = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-wallet-view]')) : [];
+      function showWallet(name) {
+        walletViews.forEach(function (view) { view.hidden = view.getAttribute('data-account-wallet-view') !== name; });
+        var first = name === 'home' ? null : page.querySelector('[data-account-wallet-view="' + name + '"] input');
+        if (first && first.focus) first.focus();
+      }
+      Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-wallet-open]') : [], function (button) {
+        button.addEventListener('click', function () { showWallet(button.getAttribute('data-account-wallet-open')); });
+      });
+      Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-wallet-back]') : [], function (button) {
+        button.addEventListener('click', function () { showWallet('home'); });
+      });
+      function setSendable(enabled) {
+        fields.fxnSendSubmit.disabled = !enabled;
+        if (fields.sendOpen) fields.sendOpen.disabled = !enabled;
+      }
+      function syncRail() {
+        if (fields.railFxn) fields.railFxn.textContent = fields.fxnBalance.textContent;
+        if (fields.railCredits) fields.railCredits.textContent = fields.creditsBalance.textContent;
+        var standing = fields.standing.textContent, mesh = fields.meshStatus.textContent;
+        if (fields.overviewMesh) fields.overviewMesh.textContent = standing !== 'Not linked' ? standing : (mesh === 'Reported by local Miner' ? 'Not linked' : mesh.replace(/ local Miner…$/, '…'));
+      }
 
       var contactsFields = {
         section: page.querySelector('.account-contacts'),
@@ -189,11 +229,11 @@
         fields.meshStatus.textContent = 'Not checked';
         fields.meshMessage.textContent = message || 'After sign-in, check this identity against the local Miner by exact ID.';
         fields.meshDetail.hidden = true;
-        fields.meshDetail.open = false;
         fields.meshRecord.textContent = '—'; fields.meshVerification.textContent = '—';
         fields.meshUpdated.textContent = '—'; fields.meshProvenance.textContent = '—';
         fields.standing.textContent = 'Not linked';
         fields.standingMessage.textContent = 'The Miner exposes standing only through an exact, signed account binding.';
+        syncRail();
       }
 
       async function checkMesh() {
@@ -207,6 +247,7 @@
         fields.meshDetail.hidden = true;
         fields.meshStatus.textContent = 'Checking local Miner…';
         fields.meshMessage.textContent = 'Reading one exact identity record; no account list or balance query is performed.';
+        syncRail();
         try {
           var response = await fetch(LOCAL_MINER + '/explorer/v1/record', {
             method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/json' },
@@ -244,10 +285,12 @@
           fields.standing.textContent = account ? (standing ? text(standing) : 'Verified account · no status') : 'Not linked';
           fields.standingMessage.textContent = account ? ('Exact account ' + accountId + ' · ' + (standing ? 'signed standing returned by the Miner.' : 'record returned without a standing field.')) : 'The identity record has no signed account binding.';
           fields.meshDetail.hidden = false;
+          syncRail();
         } catch (error) {
           if (token !== generation || !page.isConnected || !identity || identity.identityId !== id) return;
           fields.meshStatus.textContent = error && error.name === 'AbortError' ? 'Check timed out' : 'Not connected';
           fields.meshMessage.textContent = error && error.name === 'AbortError' ? 'The local Miner did not respond within 10 seconds.' : error instanceof TypeError ? 'Cannot reach the local Miner. Check that it is running and allows this site origin.' : text(error && error.message, 'The local Miner could not verify this identity.');
+          syncRail();
         } finally {
           window.clearTimeout(timeout);
           if (token === generation && page.isConnected) { controller = null; fields.check.disabled = !identity; }
@@ -263,6 +306,11 @@
          rather than implying a balance exists. */
       var valueRegistriesGeneration = 0;
       var ownValueObjects = [];
+      /* Transfers this tab proposed. The registry has no "my outgoing
+         agreements" read, so these live only in memory: once the recipient
+         publishes their output, Complete sends the fulfillment that moves
+         the value (valueRegistries.fulfillFxnTransfer). */
+      var sentTransfers = [];
 
       function resetValueRegistries(message) {
         valueRegistriesGeneration += 1;
@@ -271,15 +319,36 @@
         fields.creditsBalance.textContent = '—';
         fields.creditsMessage.textContent = message || 'Sign in to check';
         fields.fxnPending.innerHTML = '<p class="account-contacts-empty">No pending transfers to you.</p>';
-        fields.fxnSendSubmit.disabled = true;
+        setSendable(false);
         ownValueObjects = [];
+        sentTransfers = [];
+        renderFxnSent();
+        syncRail();
       }
 
       function renderFxnPending(pending) {
         if (!pending.length) { fields.fxnPending.innerHTML = '<p class="account-contacts-empty">No pending transfers to you.</p>'; return; }
         fields.fxnPending.innerHTML = pending.map(function (agreement) {
-          return '<p>' + escapeHtml(agreement.amount) + ' ' + escapeHtml(agreement.asset) + ' incoming — <button type="button" data-account-fxn-accept="' + escapeHtml(agreement.cid) + '">Accept</button></p>';
+          return '<p class="account-transfer"><span><strong>' + escapeHtml(agreement.amount) + ' ' + escapeHtml(agreement.asset) + '</strong><small>' + escapeHtml(String(agreement.cid).slice(0, 12)) + '…</small></span><button type="button" data-account-fxn-accept="' + escapeHtml(agreement.cid) + '">Accept</button></p>';
         }).join('');
+      }
+
+      function renderFxnSent() {
+        if (!fields.fxnSent) return;
+        if (fields.fxnSentBlock) fields.fxnSentBlock.hidden = !sentTransfers.length;
+        fields.fxnSent.innerHTML = sentTransfers.map(function (item) {
+          var agreement = item.agreement;
+          var action = item.output ? '<button type="button" data-account-fxn-complete="' + escapeHtml(agreement.cid) + '">Complete</button>' : '<em>Waiting for the recipient</em>';
+          return '<p class="account-transfer"><span><strong>' + escapeHtml(agreement.amount) + ' ' + escapeHtml(agreement.asset) + '</strong><small>' + escapeHtml(String(agreement.cid).slice(0, 12)) + '…</small></span>' + action + '</p>';
+        }).join('');
+      }
+
+      async function checkSentTransfers(who, token) {
+        await Promise.all(sentTransfers.map(async function (item) {
+          if (item.output) return;
+          try { item.output = await window.ArkUI.valueRegistries.pollForFulfillableOutput(who, undefined, item.agreement); } catch (_error) {}
+        }));
+        if (token === valueRegistriesGeneration && page.isConnected) renderFxnSent();
       }
 
       async function loadValueRegistries() {
@@ -294,11 +363,13 @@
           ownValueObjects = fxn.records;
           var fxnKeys = Object.keys(fxn.balancesByAsset);
           fields.fxnBalance.textContent = fxnKeys.length ? fxnKeys.map(function (asset) { return fxn.balancesByAsset[asset] + ' ' + asset; }).join(', ') : '0';
-          fields.fxnMessage.textContent = fxnKeys.length ? 'Sum of live, unspent value objects owned by this identity.' : 'No FXN has been issued to this identity yet.';
-          fields.fxnSendSubmit.disabled = !fxnKeys.length;
+          fields.fxnMessage.textContent = fxnKeys.length ? 'Unspent value objects you own: ' + fxn.records.length + '.' : 'No FXN has been issued to this identity yet.';
+          setSendable(!!fxnKeys.length);
+          syncRail();
           var pending = await window.ArkUI.valueRegistries.listIncomingFxnTransfers(who);
           if (token !== valueRegistriesGeneration || !page.isConnected) return;
           renderFxnPending(pending);
+          await checkSentTransfers(who, token);
         } catch (error) {
           if (token !== valueRegistriesGeneration || !page.isConnected) return;
           fields.fxnMessage.textContent = text(error && error.message, 'Could not reach the mesh value-object registry.');
@@ -307,7 +378,8 @@
           var credits = await window.ArkUI.valueRegistries.getCreditsBalance(who);
           if (token !== valueRegistriesGeneration || !page.isConnected) return;
           fields.creditsBalance.textContent = credits.balance;
-          fields.creditsMessage.textContent = credits.balance === '0' ? 'No credits have been granted to this identity yet.' : 'Non-revoked grants minus everything a resolver has redeemed.';
+          fields.creditsMessage.textContent = credits.balance === '0' && !credits.grants.length ? 'No credits have been granted to this identity yet.' : credits.grants.length + (credits.grants.length === 1 ? ' grant' : ' grants') + ', ' + credits.consumed.length + ' redeemed by resolvers.';
+          syncRail();
         } catch (error) {
           if (token !== valueRegistriesGeneration || !page.isConnected) return;
           fields.creditsMessage.textContent = text(error && error.message, 'Could not reach the mesh Credits registry.');
@@ -328,11 +400,30 @@
           if (!agreement) throw new Error('That transfer is no longer pending.');
           return window.ArkUI.valueRegistries.acceptFxnTransfer(who, undefined, agreement);
         }).then(function () {
-          fields.fxnSendStatus.textContent = 'Output published. Waiting for the sender to complete the transfer.';
+          fields.fxnSendStatus.textContent = 'Accepted. The sender completes the transfer from their side.';
           loadValueRegistries();
         }).catch(function (error) {
           target.disabled = false;
           fields.fxnSendStatus.textContent = text(error && error.message, 'Could not accept that transfer.');
+        });
+      });
+
+      if (fields.fxnSent) fields.fxnSent.addEventListener('click', function (event) {
+        var target = event.target.closest && event.target.closest('[data-account-fxn-complete]');
+        if (!target) return;
+        var who = ArkUI.accountSession.current();
+        var cid = target.getAttribute('data-account-fxn-complete');
+        var item = sentTransfers.filter(function (entry) { return entry.agreement.cid === cid; })[0];
+        if (!who || !item || !item.output) return;
+        target.disabled = true;
+        fields.fxnSendStatus.textContent = 'Completing the transfer…';
+        window.ArkUI.valueRegistries.fulfillFxnTransfer(who, undefined, item.agreement, item.output).then(function () {
+          sentTransfers = sentTransfers.filter(function (entry) { return entry !== item; });
+          fields.fxnSendStatus.textContent = 'Transfer completed.';
+          loadValueRegistries();
+        }).catch(function (error) {
+          target.disabled = false;
+          fields.fxnSendStatus.textContent = text(error && error.message, 'Could not complete that transfer.');
         });
       });
 
@@ -342,14 +433,17 @@
         var recipient = (fields.fxnSendRecipient.value || '').trim();
         var amount = (fields.fxnSendAmount.value || '').trim();
         if (!who || !recipient || !amount || !ownValueObjects.length) return;
-        fields.fxnSendSubmit.disabled = true;
+        setSendable(false);
         fields.fxnSendStatus.textContent = 'Proposing the transfer…';
         window.ArkUI.valueRegistries.proposeFxnTransfer(who, undefined, ownValueObjects[0], recipient, amount).then(function (agreement) {
-          fields.fxnSendStatus.textContent = 'Transfer proposed (' + agreement.cid.slice(0, 12) + '…). Waiting for the recipient to accept, then this page must complete it from the Refresh button.';
+          sentTransfers.push({ agreement: agreement, output: null });
+          renderFxnSent();
+          fields.fxnSendStatus.textContent = 'Transfer proposed. Once the recipient accepts, complete it under Sent.';
           fields.fxnSendForm.reset();
+          showWallet('home');
         }).catch(function (error) {
           fields.fxnSendStatus.textContent = text(error && error.message, 'Could not propose that transfer.');
-        }).finally(function () { fields.fxnSendSubmit.disabled = !ownValueObjects.length; });
+        }).finally(function () { setSendable(!!ownValueObjects.length); });
       });
 
       if (fields.creditsRequestForm) fields.creditsRequestForm.addEventListener('submit', function (event) {
@@ -363,6 +457,7 @@
         window.ArkUI.valueRegistries.requestCreditsConsumption(who, undefined, resolver, amount, service).then(function () {
           fields.creditsStatus.textContent = 'Consumption request signed and published. It becomes a real debit only once that resolver redeems it.';
           fields.creditsRequestForm.reset();
+          showWallet('home');
         }).catch(function (error) {
           fields.creditsStatus.textContent = text(error && error.message, 'Could not publish that consumption request.');
         });
@@ -389,8 +484,10 @@
         if (contactsFields.acceptedCount) contactsFields.acceptedCount.textContent = String(accepted);
         if (contactsFields.incomingCount) contactsFields.incomingCount.textContent = String(incoming);
         if (contactsFields.outgoingCount) contactsFields.outgoingCount.textContent = String(outgoing);
-        if (fields.overviewContacts) fields.overviewContacts.textContent = String(accepted);
-        if (fields.contactCount) fields.contactCount.textContent = accepted + (accepted === 1 ? ' connected' : ' connected');
+        var unlocked = !!(identity && ArkUI.accountSession.isUnlocked());
+        if (fields.overviewContacts) fields.overviewContacts.textContent = unlocked ? String(accepted) : '—';
+        if (fields.railInvites) fields.railInvites.textContent = unlocked ? String(incoming) : '—';
+        if (fields.railInvites && fields.railInvites.parentNode && fields.railInvites.parentNode.toggleAttribute) fields.railInvites.parentNode.toggleAttribute('data-attention', unlocked && incoming > 0);
       }
 
       function renderContactsList(listEl, records, kind) {
@@ -578,7 +675,17 @@
         var unlocked = identity && ArkUI.accountSession.isUnlocked();
         var authenticated = identity && ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(identity.publicKeyB64);
         page.dataset.session = identity ? (unlocked ? 'verified-local' : 'remembered') : 'signed-out';
-        page.querySelector('.account-auth .account-kicker').textContent = identity ? '02 / SESSION' : '01 / SESSION';
+        // A new session state picks its natural view: the wallet once the key
+        // is unlocked, the sign-in card otherwise. Later renders keep the
+        // view the person chose.
+        if (page.dataset.session !== lastSessionState) {
+          lastSessionState = page.dataset.session;
+          activeTab = unlocked ? 'defi' : 'session';
+        }
+        page.querySelector('.account-state').hidden = !identity;
+        page.querySelector('.account-rail').hidden = !identity;
+        page.querySelector('[data-account-opens]').hidden = !!identity;
+        page.querySelector('[data-account-create-toggle-row]').hidden = !!identity;
         applyTabs();
         if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
         else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
@@ -588,7 +695,7 @@
         page.querySelector('#account-title').textContent = name;
         page.querySelector('[data-account-avatar]').textContent = identity ? name.slice(0, 2).toUpperCase() : '↗';
         page.querySelector('[data-account-status]').textContent = identity ? (unlocked ? (authenticated ? 'Session active · key unlocked' : 'Signing key verified locally') : (authenticated ? 'Session active · key locked' : 'Identity details saved · not signed in')) : 'Signed out';
-        page.querySelector('[data-account-intro]').textContent = identity ? (unlocked ? 'Your identity is verified and ready for this session.' : 'Your name and public identity details are saved here. Your Auth Kit is not saved.') : 'One portable recovery file. No custodial account. Your root key stays yours.';
+        page.querySelector('[data-account-intro]').textContent = identity ? (unlocked ? 'Your identity is verified and ready for this session.' : 'Your name and public details are saved here. Your Auth Kit is not saved.') : 'One portable recovery file. No custodial account. Your root key stays yours.';
         page.querySelector('[data-account-session-title]').textContent = identity ? (authenticated ? 'Session active.' : (unlocked ? 'Your key is unlocked.' : 'Select your Auth Kit again')) : 'Open your Auth Kit.';
         page.querySelector('[data-account-session-description]').textContent = identity ? (authenticated ? 'Publishing access is active. Reopen your Auth Kit only when you need to sign locally.' : unlocked ? 'Your key is available for this browser session.' : 'Choose the .auth.flx file on this device to restore signing access.') : 'Choose the recovery file on this device to continue.';
         var localEditor = ArkUI.cmsSession && ArkUI.cmsSession.isLocalDevelopment && ArkUI.cmsSession.isLocalDevelopment();
@@ -604,7 +711,7 @@
         fields.root.textContent = identity && identity.publicKeyB64 || '—';
         fields.wallet.textContent = identity && identity.walletAddress || 'Not recorded in this kit';
         fields.security.textContent = identity && identity.securityProfile || '—';
-        fields.verification.textContent = identity ? (unlocked ? 'Root key verified against your recovery phrase on this device.' : 'Saved public details only. Select and unlock your Auth Kit to verify this identity for the current session.') : 'Unlock a kit to verify its root against its recovery phrase.';
+        fields.verification.textContent = identity ? (unlocked ? 'Root key verified against your recovery phrase on this device.' : 'Saved public details only. Unlock your Auth Kit to verify them and open your wallet.') : 'Unlock a kit to verify its root against its recovery phrase.';
         page.querySelector('[data-account-forget]').hidden = !identity || unlocked;
         page.querySelector('[data-account-forget]').textContent = 'Forget saved identity details';
         var storageNotice = page.querySelector('[data-account-storage-notice]');
@@ -651,26 +758,33 @@
       page.querySelector('[data-account-auth]').appendChild(session.container);
       // "Create a new identity" -- the same shared wizard defxn-dao's sign-in
       // modal uses (js/ark/auth-kit-create-panel.js), not a second copy of it.
+      // It replaces the sign-in view in place rather than growing the card.
       var createPanelEl = page.querySelector('[data-account-create]');
-      var createToggleRow = page.querySelector('[data-account-create-toggle-row]');
+      var createView = page.querySelector('[data-account-create-view]');
+      var sessionMain = page.querySelector('[data-account-session-main]');
       var createPanelHandle = null;
+      function showCreate(open) {
+        createView.hidden = !open;
+        sessionMain.hidden = open;
+      }
       page.querySelector('[data-account-create-toggle]').addEventListener('click', function () {
-        var showing = !createPanelEl.hidden;
-        createPanelEl.hidden = showing;
-        createToggleRow.hidden = !showing;
-        if (!showing) {
-          if (!createPanelHandle && window.ArkAuthKitCreatePanel) {
-            createPanelHandle = window.ArkAuthKitCreatePanel.mount(createPanelEl, {
-              actionClass: '', formClass: 'account-contacts-form',
-              onDownloaded: function () { createPanelEl.hidden = true; createToggleRow.hidden = false; if (createPanelHandle) createPanelHandle.reset(); },
-            });
-          } else if (createPanelHandle) { createPanelHandle.reset(); }
-        }
+        showCreate(true);
+        if (!createPanelHandle && window.ArkAuthKitCreatePanel) {
+          createPanelHandle = window.ArkAuthKitCreatePanel.mount(createPanelEl, {
+            actionClass: '', formClass: 'account-contacts-form',
+            onDownloaded: function () { showCreate(false); if (createPanelHandle) createPanelHandle.reset(); },
+          });
+        } else if (createPanelHandle) { createPanelHandle.reset(); }
       });
+      page.querySelector('[data-account-create-back]').addEventListener('click', function () { showCreate(false); });
+      var unsubscribeDomains = ArkUI.localDomains ? ArkUI.localDomains.subscribe(function (names) {
+        if (fields.railDomains) fields.railDomains.textContent = String(names.length);
+      }) : function () {};
       var unsubscribe = ArkUI.localIdentity.subscribe(renderIdentity);
       page.querySelector('[data-account-cms-open]').addEventListener('click', function (event) {
         if ((ArkUI.cmsSession && ArkUI.cmsSession.isLocalDevelopment && ArkUI.cmsSession.isLocalDevelopment()) || session.isUnlocked() || (ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(identity && identity.publicKeyB64))) return;
         event.preventDefault();
+        openTab('session');
         page.querySelector('[data-account-cms-status]').textContent = identity
           ? 'Only your identity details are saved. Select your .auth.flx file again and enter its PIN and password if you set one before opening the CMS.'
           : 'Sign in with your Auth Kit here before opening the CMS.';
@@ -682,7 +796,7 @@
       });
       page.querySelector('[data-account-forget]').addEventListener('click', session.signOut);
       if (fields.check) fields.check.addEventListener('click', checkMesh);
-      page.arkDispose = function () { generation += 1; contactsGeneration += 1; stopContactsPolling(); if (controller) controller.abort(); unsubscribe(); session.container.remove(); };
+      page.arkDispose = function () { generation += 1; contactsGeneration += 1; stopContactsPolling(); if (controller) controller.abort(); unsubscribe(); unsubscribeDomains(); session.container.remove(); };
       return page;
     }
   };
