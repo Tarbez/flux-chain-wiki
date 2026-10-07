@@ -48,7 +48,7 @@ if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function
   };
 });
 ['ask','work','check'].forEach(function(id,i){
-  ArkUI.pageCatalog['how/'+id]={path:'/how-deployment-works/'+id,title:['Ask for help','Agree and do the work','Check the result'][i]+' — DEFXN',module:'howStory',hiddenFromNavigation:true,scripts:['js/pages/how-stories.js']};
+  ArkUI.pageCatalog['how/'+id]={path:'/how-deployment-works/'+id,title:['State the request','Agree on the terms','Verify the result'][i]+' — DEFXN',module:'howStory',hiddenFromNavigation:true,scripts:['js/pages/how-stories.js']};
 });
 ArkUI.pageCatalog.lifecycle = {
   path: '/lifecycle', title: arkSeoTitle('lifecycle', 'Agreement lifecycle'), seoId: 'lifecycle',

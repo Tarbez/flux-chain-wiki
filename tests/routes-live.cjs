@@ -143,14 +143,17 @@ for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
   if (key.startsWith('how/')) {
     const id=key.split('/')[1];
     assert(page.classList.contains('how-chapter-'+id));
-    const choices=page.querySelector(id==='ask'?'.how-request-choices':id==='work'?'.how-promise-parties':'.how-check-choices').children;
+    const steps=page.querySelector('.how-steps').children,choices=steps.map(step=>step.children[0]);
+    assert.equal(steps.length,3,'each chapter teaches three steps');
+    assert.equal(page.querySelector('.how-why-grid').children.length,3,'each chapter explains why it works this way');
     const canvas=page.querySelector('.how-chapter-mesh'),firstPattern=canvas.dataset.stage;
     choices[1].listeners.click();
     assert.notEqual(canvas.dataset.stage,firstPattern,'each chapter choice runs its own mesh pattern');
     const selectedPattern=canvas.dataset.stage;
     choices[0].listeners.pointerenter();assert.equal(canvas.dataset.stage,firstPattern);
     choices[0].listeners.pointerleave();assert.equal(canvas.dataset.stage,selectedPattern,'preview exit restores the selected explanation');
-    assert.equal(page.querySelector('.how-chapter-detail').textContent,context.ArkCopy.text('DEPLOYMENT.CHAPTER.'+id.toUpperCase()+'.DETAIL2'));
+    assert.equal(steps[1].children[1].textContent,context.ArkCopy.text('DEPLOYMENT.CHAPTER.'+id.toUpperCase()+'.DETAIL2'));
+    assert.equal(steps[1].dataset.active,'true','the chosen step is marked active');
     assert.equal(choices[1].attributes['aria-pressed'],'true');
     page.arkDispose();
   }
