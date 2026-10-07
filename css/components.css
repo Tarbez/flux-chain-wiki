@@ -57,7 +57,7 @@
 
 /* quiet --------------------------------------------------------------------- */
 #scene :is(
-  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
+  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.content-layer-path a,.link-button,
   .source-step-controls button:not(.mechanism-next),.deploy-workflow-all,.deploy-copy,
   .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
 ) {
@@ -65,7 +65,7 @@
   border:1px solid hsl(var(--reference-300)) !important;color:hsl(var(--reference-700)) !important;box-shadow:none !important;text-decoration:none !important;
 }
 #scene :is(
-  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.flow-toggle,.content-layer-path a,.link-button,
+  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.content-layer-path a,.link-button,
   .source-step-controls button:not(.mechanism-next),.deploy-workflow-all,.deploy-copy,
   .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
 ):is(:hover,:focus-visible) {background:hsl(var(--reference-200)) !important;border-color:hsl(var(--reference-400)) !important;}

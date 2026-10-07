@@ -62,15 +62,18 @@ ArkUI.pageModules.zero = {
     lifecycle.className = 'home-lifecycle';
     lifecycle.setAttribute('aria-label', 'The agreement lifecycle');
     var caption = document.createElement('p'); caption.className = 'home-lifecycle-caption';
-    caption.textContent = '01 / The agreement fabric'; lifecycle.appendChild(caption);
+    caption.textContent = '01 / The agreement fabric';
+    var illustrative = document.createElement('span'); illustrative.textContent = 'Illustrative';
+    caption.appendChild(illustrative); lifecycle.appendChild(caption);
     var title = document.createElement('strong'); title.className = 'home-cycle-title';
     title.textContent = 'Every step leaves a trace.'; lifecycle.appendChild(title);
-    var description=document.createElement('p');description.className='home-cycle-description';description.textContent='Watch one agreement happen: who acts at each step, and the record it leaves.';lifecycle.appendChild(description);
     var flow=ArkUI.buildAgreementFlow({stages:ArkUI.lifecycleStages,hrefFor:function(id){return pageHref('lifecycle/'+id);}});
     lifecycle.appendChild(flow.element);
     var open = document.createElement('a'); open.className = 'home-lifecycle-all';
     open.href = pageHref('lifecycle'); open.dataset.sceneLink = 'lifecycle';open.dataset.icon='arrow-right';
-    open.textContent = 'Trace one agreement, end to end →'; lifecycle.appendChild(open);
+    open.textContent = 'Trace one agreement, end to end →';
+    var foot = document.createElement('div'); foot.className = 'home-lifecycle-foot';
+    foot.appendChild(open); if (flow.toggle) foot.appendChild(flow.toggle); lifecycle.appendChild(foot);
     el.appendChild(lifecycle);
 
     // Measured numbers, shared with /stats (js/content/stats-highlights.js).
