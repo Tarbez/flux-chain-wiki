@@ -71,17 +71,17 @@
 
 /* choice -------------------------------------------------------------------- */
 #scene :is(
-  .resolver-lab-step,.resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ) {
   background:transparent !important;background-image:none !important;border-color:hsl(var(--border-default)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
 }
 #scene :is(
-  .resolver-lab-step,.resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--reference-300)) !important;}
 #scene :is(
-  .resolver-lab-step,.resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
+  .resolver-lab-doc,.story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
 ):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
   background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-400)) !important;color:hsl(var(--reference-700)) !important;

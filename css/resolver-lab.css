@@ -1,156 +1,148 @@
-/* /what-is-a-resolver (js/pages/resolver-lab.js): four steps beside one
-   working illustration, fitted to the viewport with no page scroll on desktop.
-   Buttons and selection states are painted by css/components.css; this file
-   owns layout, type and the run animation. Primary marks only the moving
-   packet and the tile being written; success marks a repeated identical claim. */
+/* /what-is-a-resolver (js/pages/resolver-lab.js): four steps on a signal track
+   beside a block-cell mesh scene, fitted to the viewport with no page scroll.
+   Buttons are painted by css/components.css; this file owns layout, type and
+   motion. Primary is the travelling signal and the claim; nothing loops. */
 
 #scene .resolver-lab {
   position:relative;box-sizing:border-box;height:100%;min-height:0;overflow:hidden;
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.92fr);column-gap:clamp(32px,5vw,72px);
-  align-items:center;padding:clamp(20px,3.4vh,36px) clamp(24px,4.5vw,64px);
-  color:hsl(var(--text));
+  display:grid;grid-template-columns:minmax(0,.95fr) minmax(380px,1fr);column-gap:clamp(32px,5vw,72px);
+  align-items:center;padding:clamp(18px,3.2vh,34px) clamp(24px,4.5vw,64px);color:hsl(var(--text));
+  background:radial-gradient(circle at 78% 50%,hsl(var(--primary-100)),transparent 46%);
 }
 #scene [data-page="resolver"] .hero-motion-toggle {display:none;}
 
-/* Left column ------------------------------------------------------------- */
-.resolver-lab-copy {display:flex;flex-direction:column;gap:clamp(10px,1.8vh,16px);min-width:0;max-width:620px;}
-#scene .resolver-lab .content-layer-path {align-self:flex-start;margin-bottom:clamp(2px,1vh,10px);}
+/* Left ---------------------------------------------------------------------- */
+.resolver-lab-copy {display:flex;flex-direction:column;gap:clamp(10px,1.9vh,18px);min-width:0;max-width:600px;}
+#scene .resolver-lab .content-layer-path {align-self:flex-start;}
 .resolver-lab-kicker {margin:0;font:500 11px/1.4 var(--mono-font,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-muted));}
-#scene .resolver-lab h1 {margin:0;font:600 clamp(32px,4.1vw,54px)/1.02 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.045em;color:hsl(var(--text-strong));text-wrap:balance;}
-.resolver-lab-lede {margin:0;max-width:52ch;font:400 clamp(15px,1.2vw,17px)/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+#scene .resolver-lab h1 {margin:0;font:600 clamp(34px,4.3vw,58px)/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.05em;color:hsl(var(--text-strong));text-wrap:balance;}
+.resolver-lab-lede {margin:0;max-width:50ch;font:400 clamp(15px,1.2vw,17px)/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 
-.resolver-lab-steps {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:clamp(2px,1vh,8px);}
-#scene .resolver-lab-step {display:grid;gap:2px;justify-items:start;min-height:52px;padding:8px 10px;border:1px solid;border-radius:8px;
-  font:500 13px/1.25 var(--font-sans,"Albert Sans",sans-serif);text-align:left;cursor:pointer;transition:background-color 160ms,border-color 160ms,color 160ms;}
-.resolver-lab-step-num {font:500 10px var(--mono-font,monospace);letter-spacing:.06em;opacity:.8;}
+/* The signal track: the old resolver motif, now the stepper. */
+.resolver-track {position:relative;height:74px;margin:clamp(4px,1.4vh,14px) 14px 0;}
+.resolver-track-line,.resolver-track-progress {position:absolute;left:0;top:17px;height:1px;}
+.resolver-track-line {right:0;background:hsl(var(--border-strong));}
+.resolver-track-progress {width:var(--progress,0%);background:linear-gradient(90deg,hsl(var(--primary-300)),hsl(var(--primary)));transition:width 720ms cubic-bezier(.65,0,.35,1);}
+.resolver-track-glow {position:absolute;top:14px;left:var(--progress,0%);width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:hsl(var(--primary));
+  box-shadow:0 0 0 5px hsl(var(--primary-200)),0 0 22px hsl(var(--primary));transition:left 720ms cubic-bezier(.65,0,.35,1);pointer-events:none;z-index:2;}
+#scene .resolver-track-node {position:absolute;left:var(--at);top:0;transform:translateX(-50%);display:grid;justify-items:center;gap:10px;
+  padding:4px 6px;border:0;background:none;color:hsl(var(--text-muted));cursor:pointer;font:500 13px/1.2 var(--font-sans,"Albert Sans",sans-serif);}
+#scene .resolver-track-node:first-of-type {transform:translateX(-14px);justify-items:start;}
+#scene .resolver-track-node:last-of-type {transform:translateX(calc(-100% + 14px));justify-items:end;}
+.resolver-track-mark {display:block;width:16px;height:16px;margin-top:2px;box-sizing:border-box;border:1px solid hsl(var(--border-strong));background:hsl(var(--canvas));transform:rotate(45deg);
+  transition:background-color 260ms,border-color 260ms,box-shadow 260ms,transform 260ms;}
+.resolver-track-node[data-step="check"] .resolver-track-mark {border-radius:50%;transform:none;}
+.resolver-track-node[data-step="laws"] .resolver-track-mark {transform:none;border-radius:3px;}
+.resolver-track-label {display:grid;justify-items:inherit;gap:1px;white-space:nowrap;}
+.resolver-track-label small {font:500 9.5px var(--mono-font,monospace);letter-spacing:.06em;color:hsl(var(--text-faint));}
+#scene .resolver-track-node[data-done="true"] .resolver-track-mark {border-color:hsl(var(--text-muted));background:hsl(var(--nested));}
+#scene .resolver-track-node[aria-pressed="true"] {color:hsl(var(--text-strong));}
+#scene .resolver-track-node[aria-pressed="true"] .resolver-track-mark {border-color:hsl(var(--text-strong));background:hsl(var(--text-strong));box-shadow:0 0 0 4px hsl(var(--nested));}
+#scene .resolver-track-node:is(:hover,:focus-visible) {color:hsl(var(--reference-700));}
+#scene .resolver-track-node:is(:hover,:focus-visible) .resolver-track-mark {border-color:hsl(var(--reference-400));}
 
-.resolver-lab-panel {min-height:clamp(84px,13vh,112px);padding:14px 16px;border:1px solid hsl(var(--border-subtle));border-radius:10px;background:hsl(var(--surface));}
-.resolver-lab-panel h2 {margin:0 0 6px;font:600 17px/1.3 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
-.resolver-lab-panel p {margin:0;font:400 14px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-.resolver-lab-panel > * {animation:resolver-lab-in 260ms ease-out both;}
+/* The step, in words: editorial, not boxed. */
+.resolver-lab-caption {min-height:clamp(78px,12vh,104px);padding-left:16px;border-left:2px solid hsl(var(--primary-300));}
+.resolver-lab-caption h2 {margin:0 0 6px;font:600 clamp(18px,1.6vw,22px)/1.25 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.02em;color:hsl(var(--text-strong));}
+.resolver-lab-caption p {margin:0;max-width:52ch;font:400 15px/1.55 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+.resolver-lab-caption.is-entering > * {animation:resolver-lab-in 420ms cubic-bezier(.22,1,.36,1) both;}
+.resolver-lab-caption.is-entering > p {animation-delay:70ms;}
 
 .resolver-lab-footer {display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;}
-#scene .resolver-lab-next {display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;font:600 14px/1 var(--font-sans,"Albert Sans",sans-serif);}
+#scene .resolver-lab-next {display:inline-flex;align-items:center;min-height:46px;padding:0 20px;border-radius:9px;font:600 14px/1 var(--font-sans,"Albert Sans",sans-serif);transition:transform 180ms,background-color 180ms;}
+#scene .resolver-lab-next:hover {transform:translateY(-2px);}
 #scene .resolver-lab-prev {min-height:44px;padding:0 4px;border:0;background:none;font:500 13px var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;}
 #scene .resolver-lab-prev[hidden] {display:none;}
-#scene .resolver-lab-spec {margin-left:auto;font:500 12px var(--mono-font,monospace);}
+#scene .resolver-lab-spec {margin-left:auto;font:500 12px var(--mono-font,monospace);white-space:nowrap;}
+/* On Laws the panel already links its sources. */
+.resolver-lab[data-step="laws"] .resolver-lab-spec {display:none;}
 
-/* Right column: the illustration ----------------------------------------- */
-.resolver-lab-scene {display:flex;flex-direction:column;gap:12px;min-width:0;max-height:100%;margin:0;padding:16px;box-sizing:border-box;
-  border:1px solid hsl(var(--border-default));border-radius:12px;background:hsl(var(--surface));box-shadow:0 18px 40px hsl(var(--theme-shadow-color) / .18);}
+/* Right: the mesh scene ----------------------------------------------------- */
+.resolver-lab-scene {display:flex;flex-direction:column;gap:12px;min-width:0;height:min(100%,560px);margin:0;padding:16px;box-sizing:border-box;
+  border:1px solid hsl(var(--border-default));border-radius:14px;background:hsl(var(--surface));box-shadow:0 24px 60px hsl(var(--theme-shadow-color) / .22);}
 .resolver-lab-scene-head {display:flex;align-items:center;justify-content:space-between;gap:12px;font:500 11px var(--mono-font,monospace);letter-spacing:.04em;color:hsl(var(--text-faint));}
-.resolver-lab-scene-head span {min-width:0;}
-.resolver-lab-scene-head code {flex:none;white-space:nowrap;padding:3px 8px;border:1px solid hsl(var(--border-default));border-radius:999px;font:500 11px var(--mono-font,monospace);color:hsl(var(--text));}
+.resolver-lab-address {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.resolver-lab-address code {padding:3px 9px;border:1px solid hsl(var(--border-default));border-radius:999px;font:500 11px var(--mono-font,monospace);color:hsl(var(--text));}
 
-.resolver-lab-stage {display:flex;flex-direction:column;}
-.resolver-lab-tile {padding:12px 14px;border:1px solid hsl(var(--border-default));border-radius:9px;background:hsl(var(--canvas));transition:border-color 240ms,background-color 240ms,opacity 240ms;}
-.resolver-lab-tile h3 {margin:0 0 8px;font:500 10.5px var(--mono-font,monospace);letter-spacing:.05em;text-transform:uppercase;color:hsl(var(--text-faint));}
+.resolver-lab-stage {position:relative;flex:1;min-height:200px;border-radius:10px;overflow:hidden;background:hsl(var(--canvas));border:1px solid hsl(var(--border-subtle));}
+.resolver-mesh {display:block;width:100%;height:100%;}
+.resolver-mesh-labels {position:absolute;inset:0;pointer-events:none;}
+.resolver-mesh-label {position:absolute;padding:2px 7px;border-radius:5px;background:hsl(var(--canvas) / .92);white-space:nowrap;
+  font:500 11px/1.3 var(--mono-font,monospace);color:hsl(var(--text));opacity:0;transform:translateY(3px);transition:opacity 260ms,transform 260ms,left 60ms linear;}
+.resolver-mesh-label[data-show="true"] {opacity:1;transform:none;}
+/* The rule sits centred over the gate; the claim's labels centre on the fingerprint. */
+.resolver-mesh-label:is(.resolver-mesh-label-rule,.resolver-mesh-label-claim,.resolver-mesh-label-sign,.resolver-mesh-label-accept) {translate:-50% 0;}
+.resolver-mesh-label-rule {color:hsl(var(--text-strong));}
+.resolver-mesh-label-rule[data-result="true"],.resolver-mesh-label-rule[data-result="false"] {font-weight:700;}
+.resolver-mesh-label-claim {color:hsl(var(--text-strong));}
+.resolver-mesh-label-sign,.resolver-mesh-label-accept {color:hsl(var(--text-muted));}
+.resolver-mesh-label-accept[data-same="true"] {color:hsl(var(--success-700));background:hsl(var(--success-100));border:1px solid hsl(var(--success-300));}
 
-.resolver-lab-inputs {display:grid;gap:5px;}
-#scene .resolver-lab-doc {display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;min-height:36px;padding:0 10px;border:1px solid;border-radius:7px;font:500 13px var(--font-sans,"Albert Sans",sans-serif);text-align:left;cursor:pointer;}
-#scene .resolver-lab-doc code {font:500 11px var(--mono-font,monospace);}
-#scene .resolver-lab-doc small {font:500 11px var(--mono-font,monospace);opacity:.85;}
-
-.resolver-lab-rule {margin:0 0 6px;font:500 14px var(--mono-font,monospace);color:hsl(var(--text-strong));}
-.resolver-lab-eval {display:flex;align-items:center;gap:10px;min-height:22px;margin:0;font:500 13px var(--mono-font,monospace);color:hsl(var(--text-muted));}
-.resolver-lab-eval b {font-weight:700;color:hsl(var(--text-strong));}
-.resolver-lab-arrow {color:hsl(var(--text-faint));}
-
-.resolver-lab-claim-line {margin:0 0 8px;font:500 13.5px/1.45 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
-.resolver-lab-claim-line code {font:500 12px var(--mono-font,monospace);color:hsl(var(--text));}
-.resolver-lab-claim-meta {display:grid;grid-template-columns:auto auto 1fr;gap:4px 16px;margin:0;}
-.resolver-lab-claim-meta > div {display:grid;gap:1px;min-width:0;}
-.resolver-lab-claim-meta dt {font:500 10px var(--mono-font,monospace);letter-spacing:.04em;text-transform:uppercase;color:hsl(var(--text-faint));}
-.resolver-lab-claim-meta dd {margin:0;font:500 12px/1.35 var(--mono-font,monospace);color:hsl(var(--text));}
-
-/* Wires between tiles, with the packet that travels them. */
-.resolver-lab-wire {position:relative;height:22px;margin-left:28px;border-left:1px dashed hsl(var(--border-strong));}
-.resolver-lab-packet {position:absolute;left:-4px;top:-4px;width:7px;height:7px;border-radius:50%;background:hsl(var(--primary));opacity:0;}
-
-/* The run: send → resolve → sign → signed, once. */
-.resolver-lab[data-phase="send"] .resolver-lab-wire-in .resolver-lab-packet {animation:resolver-lab-travel 520ms cubic-bezier(.4,0,.2,1) both;}
-.resolver-lab[data-phase="sign"] .resolver-lab-wire-out .resolver-lab-packet {animation:resolver-lab-travel 420ms cubic-bezier(.4,0,.2,1) both;}
-.resolver-lab[data-phase="send"] .resolver-lab-wire-in,.resolver-lab[data-phase="sign"] .resolver-lab-wire-out {border-left-style:solid;border-left-color:hsl(var(--primary-400));}
-.resolver-lab:is([data-phase="idle"],[data-phase="send"]) .resolver-lab-eval {opacity:0;}
-.resolver-lab[data-phase="resolve"] .resolver-lab-logic {border-color:hsl(var(--primary-400));box-shadow:inset 3px 0 hsl(var(--primary));}
-.resolver-lab[data-phase="resolve"] .resolver-lab-eval {animation:resolver-lab-reveal 560ms steps(14,end) both;}
-.resolver-lab:is([data-phase="idle"],[data-phase="send"],[data-phase="resolve"]) .resolver-lab-claim {border-style:dashed;}
-.resolver-lab:is([data-phase="idle"],[data-phase="send"],[data-phase="resolve"]) .resolver-lab-claim :is(.resolver-lab-claim-line,.resolver-lab-claim-meta) {opacity:.18;filter:blur(1.5px);}
-.resolver-lab :is(.resolver-lab-claim-line,.resolver-lab-claim-meta) {transition:opacity 300ms,filter 300ms;}
-.resolver-lab[data-phase="sign"] .resolver-lab-claim {border-color:hsl(var(--primary-400));box-shadow:inset 3px 0 hsl(var(--primary));}
-@keyframes resolver-lab-travel {0%{opacity:1;transform:translateY(0);}90%{opacity:1;}100%{opacity:0;transform:translateY(26px);}}
-@keyframes resolver-lab-reveal {from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
-@keyframes resolver-lab-in {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
-
-/* Each step points at its part of the illustration. */
-.resolver-lab[data-step="ask"] :is(.resolver-lab-logic,.resolver-lab-claim),
-.resolver-lab[data-step="resolve"] :is(.resolver-lab-input,.resolver-lab-claim),
-.resolver-lab[data-step="check"] :is(.resolver-lab-input,.resolver-lab-logic) {opacity:.62;}
-.resolver-lab[data-step="ask"] .resolver-lab-input,.resolver-lab[data-step="resolve"] .resolver-lab-logic,.resolver-lab[data-step="check"] .resolver-lab-claim {background:hsl(var(--raised));border-color:hsl(var(--border-strong));}
-
-/* Run log and Run again. */
-.resolver-lab-scene-foot {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;min-height:52px;}
-.resolver-lab-log {display:grid;gap:3px;margin:0;padding:0;list-style:none;font:500 11px/1.35 var(--mono-font,monospace);color:hsl(var(--text-muted));}
-.resolver-lab-log li {display:flex;align-items:center;gap:8px;}
-.resolver-lab-log li:first-child {color:hsl(var(--text-strong));animation:resolver-lab-in 260ms ease-out both;}
-.resolver-lab-log-n {min-width:44px;color:hsl(var(--text-faint));}
-.resolver-lab-same {padding:1px 7px;border:1px solid hsl(var(--success-300));border-radius:999px;background:hsl(var(--success-100));color:hsl(var(--success-700));font-size:10px;}
-#scene .resolver-lab-again {flex:none;min-height:36px;padding:0 14px;border:1px solid;border-radius:7px;font:500 12px var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;}
+.resolver-lab-controls {display:flex;align-items:center;gap:10px;}
+.resolver-lab-inputs {display:flex;flex-wrap:wrap;gap:6px;}
+#scene .resolver-lab-doc {display:inline-flex;align-items:baseline;gap:6px;min-height:32px;padding:0 11px;border:1px solid;border-radius:999px;font:500 12.5px var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;transition:background-color 160ms,border-color 160ms,color 160ms;}
+#scene .resolver-lab-doc small {font:500 10.5px var(--mono-font,monospace);opacity:.8;}
+#scene .resolver-lab-again {flex:none;display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 12px;border:1px solid;border-radius:999px;font:500 12.5px var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;}
+#scene .resolver-lab-again[hidden] {display:none;}
+.resolver-lab-again-icon {display:inline-block;font-size:14px;transition:transform 420ms cubic-bezier(.22,1,.36,1);}
+#scene .resolver-lab-again:hover .resolver-lab-again-icon {transform:rotate(-200deg);}
+.resolver-lab-sr {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
 /* Laws: in place of the stage on the Laws step. */
 .resolver-lab-laws {display:none;margin:0;padding:0;list-style:none;}
 .resolver-lab-laws-source {display:none;margin:0;font:400 11px/1.4 var(--mono-font,monospace);color:hsl(var(--text-faint));}
-.resolver-lab[data-step="laws"] :is(.resolver-lab-stage,.resolver-lab-scene-foot) {display:none;}
-.resolver-lab[data-step="laws"] .resolver-lab-laws {display:grid;gap:8px;}
+.resolver-lab[data-step="laws"] :is(.resolver-lab-stage,.resolver-lab-controls) {display:none;}
+.resolver-lab[data-step="laws"] .resolver-lab-laws {display:grid;gap:8px;align-content:start;flex:1;}
 .resolver-lab[data-step="laws"] .resolver-lab-laws-source {display:block;}
-.resolver-lab-law {position:relative;padding:11px 14px;border:1px solid hsl(var(--border-default));border-radius:9px;background:hsl(var(--canvas));animation:resolver-lab-in 280ms ease-out both;}
-.resolver-lab-law:nth-child(2){animation-delay:50ms;}.resolver-lab-law:nth-child(3){animation-delay:100ms;}.resolver-lab-law:nth-child(4){animation-delay:150ms;}
+.resolver-lab-law {position:relative;padding:12px 14px 12px 16px;border:1px solid hsl(var(--border-default));border-radius:10px;background:hsl(var(--canvas));
+  animation:resolver-lab-rise 520ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i,0) * 90ms);}
+.resolver-lab-law::before {content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:2px;background:hsl(var(--primary-300));}
 .resolver-lab-law-top {display:flex;align-items:center;gap:10px;}
 .resolver-lab-law-num {font:500 10px var(--mono-font,monospace);color:hsl(var(--text-faint));}
-.resolver-lab-law strong {flex:1;font:600 14.5px/1.3 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
-.resolver-lab-law p {margin:5px 0 0 26px;font:400 13px/1.45 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+.resolver-lab-law strong {flex:1;font:600 15px/1.3 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
+.resolver-lab-law p {margin:5px 0 0 26px;font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 .resolver-lab-law-status {padding:2px 8px;border:1px solid;border-radius:999px;font:600 10px var(--mono-font,monospace);letter-spacing:.04em;text-transform:uppercase;}
 .resolver-lab-law-status[data-status="live"] {border-color:hsl(var(--success-300));background:hsl(var(--success-100));color:hsl(var(--success-700));}
 .resolver-lab-law-status[data-status="spec"] {border-color:hsl(var(--border-default));color:hsl(var(--text-muted));}
 .resolver-lab-law-status[data-status="partial"] {border-color:hsl(var(--warning-300));background:hsl(var(--warning-100));color:hsl(var(--warning-700));}
-
-/* The accordion control only exists on phones. */
 .resolver-lab-law-toggle {display:none;}
+
+@keyframes resolver-lab-in {from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes resolver-lab-rise {from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:none;}}
 
 /* Shorter screens: tighten before anything scrolls. */
 @media(min-width:901px) and (max-height:760px){
   #scene .resolver-lab {padding-block:8px;}
-  .resolver-lab-copy {gap:9px;}
-  .resolver-lab-law {padding:8px 12px;}
+  .resolver-lab-lede {display:none;}
+  .resolver-lab-copy {gap:10px;}
+  .resolver-track {height:66px;}
+  .resolver-lab-caption {min-height:70px;}
+  .resolver-lab-scene {padding:12px;gap:9px;}
+  .resolver-lab-law {padding:8px 12px 8px 14px;}
   .resolver-lab-law p {font-size:12.5px;}
-  .resolver-lab-lede {display:none;}
-  .resolver-lab-panel {min-height:72px;padding:11px 14px;}
-  .resolver-lab-scene {padding:12px;gap:8px;}
-  .resolver-lab-tile {padding:9px 12px;}
-  #scene .resolver-lab-doc {min-height:28px;}
-  .resolver-lab-wire {height:12px;}
-  .resolver-lab-tile h3 {margin-bottom:5px;}
-  .resolver-lab-scene-foot {min-height:44px;}
-  .resolver-lab-claim-meta {grid-template-columns:auto auto;}
 }
-/* Tablet and phone: one column; the illustration follows the step. */
+/* Tablet and phone: one column, the scene beneath the step. */
 @media(max-width:900px){
-  #scene .resolver-lab {grid-template-columns:minmax(0,1fr);align-items:start;align-content:start;row-gap:16px;overflow-y:auto;padding:16px;}
-  .resolver-lab-copy {max-width:none;}
-  .resolver-lab-lede {display:none;}
-  .resolver-lab-steps {grid-template-columns:repeat(4,minmax(0,1fr));}
-  #scene .resolver-lab-step {min-height:44px;padding:6px 8px;font-size:12px;}
-  .resolver-lab-panel {min-height:0;}
-  .resolver-lab-scene {padding:12px;}
-  .resolver-lab-claim-meta {grid-template-columns:1fr 1fr;}
+  #scene .resolver-lab {grid-template-columns:minmax(0,1fr);align-items:start;align-content:start;row-gap:14px;overflow-y:auto;padding:14px 16px;}
+  .resolver-lab-copy {max-width:none;gap:10px;}
+  .resolver-lab-lede,.resolver-lab-kicker {display:none;}
+  #scene .resolver-lab h1 {font-size:27px;}
+  .resolver-track {height:58px;margin-inline:10px;}
+  #scene .resolver-track-node {font-size:12px;gap:8px;}
+  .resolver-lab-caption {min-height:0;}
+  .resolver-lab-caption h2 {font-size:16px;}
+  .resolver-lab-caption p {font-size:13.5px;}
+  .resolver-lab-footer {gap:8px 14px;}
+  .resolver-lab-scene {height:auto;padding:10px;}
+  .resolver-lab-stage {flex:none;height:176px;}
+  #scene .resolver-lab-doc {min-height:28px;padding:0 9px;font-size:12px;}
+  .resolver-lab-inputs {flex-wrap:nowrap;}
+  .resolver-mesh-label {font-size:9.5px;padding:1px 5px;}
+  .resolver-lab-scene-head {display:flex;}
+  .resolver-lab-address {display:none;}
+  .resolver-lab-scene-head {position:absolute;right:20px;margin-top:6px;z-index:2;}
+  .resolver-lab-scene {position:relative;}
   #scene .resolver-lab-spec {margin-left:0;}
-  /* Each step is its own small page: show only its tile. */
-  .resolver-lab[data-step="ask"] :is(.resolver-lab-logic,.resolver-lab-claim,.resolver-lab-wire),
-  .resolver-lab[data-step="resolve"] :is(.resolver-lab-input,.resolver-lab-claim,.resolver-lab-wire-out),
-  .resolver-lab[data-step="check"] :is(.resolver-lab-input,.resolver-lab-logic,.resolver-lab-wire) {display:none;}
-  .resolver-lab[data-step="resolve"] .resolver-lab-wire-in {margin-top:-4px;}
-  .resolver-lab-kicker {display:none;}
-  #scene .resolver-lab h1 {font-size:30px;}
   .resolver-lab-law p {display:none;margin-left:0;}
   .resolver-lab[data-step="laws"] .resolver-lab-laws {gap:6px;}
   .resolver-lab-law {padding:8px 12px;}
@@ -158,15 +150,6 @@
   .resolver-lab-law[data-open="true"] p {display:block;}
   .resolver-lab-law-toggle {display:block;position:absolute;inset:0;width:100%;border:0;background:none;cursor:pointer;}
   .resolver-lab-law[data-open="true"] {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));}
-  .resolver-lab-scene-head {display:none;}
-  .resolver-lab-log li:not(:first-child) {display:none;}
-  .resolver-lab-scene-foot {min-height:0;}
-  .resolver-lab-panel {padding:10px 12px;}
-  .resolver-lab-panel h2 {font-size:15px;}
-  .resolver-lab-panel p {font-size:13px;}
-  #scene .resolver-lab h1 {font-size:27px;}
-  .resolver-lab-copy {gap:10px;}
-  #scene .resolver-lab .content-layer-path {margin-bottom:0;}
 }
 @media(prefers-reduced-motion:reduce){
   .resolver-lab *,.resolver-lab *::before {animation:none !important;transition:none !important;}
