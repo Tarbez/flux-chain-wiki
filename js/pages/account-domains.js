@@ -19,20 +19,19 @@
       var page = document.createElement('section');
       page.className = 'ark-page task-page account-page account-domains-page';
       page.setAttribute('aria-labelledby', 'account-domains-title');
+      // Same shape as /account: the ask on the left, one card on the right.
       page.innerHTML =
         '<div class="account-shell account-domains-shell">' +
-        '<header class="account-hero"><a class="account-domains-back" href="/account" data-scene-link="account">← Your account</a><p class="account-kicker">// NAMES YOU TRACK</p>' +
+        '<header class="account-hero"><a class="account-domains-back" href="/account" data-scene-link="account">← Your account</a><p class="account-promise">Names you track</p>' +
         '<h1 id="account-domains-title">Your domains.</h1>' +
-        '<p>Each name below is re-checked against the mesh every time you open this page. This browser only remembers which names to check -- the mesh itself has no index of "every name I own," only exact-name lookup, so this list is a bookmark, not a source of truth.</p></header>' +
-        '<div class="account-domains-layout">' +
-        '<section class="account-domains-add" aria-label="Track a domain"><p class="account-kicker">01 / TRACK A NAME</p><h2>Check an exact name</h2>' +
-        '<form data-domains-form><label for="domainsNameInput">Name</label><input id="domainsNameInput" type="text" autocomplete="off" placeholder="yourname.fxn" /><button type="submit">Track &amp; verify</button></form>' +
+        '<p class="account-intro">Each name is checked live against the mesh. This browser only keeps the list of names to check.</p>' +
+        '<form data-domains-form aria-label="Track a domain"><label for="domainsNameInput">Track an exact name</label><input id="domainsNameInput" type="text" autocomplete="off" placeholder="yourname.fxn" /><button type="submit" class="palette-solid">Track &amp; verify</button></form>' +
         '<p data-domains-add-status role="status" aria-live="polite"></p>' +
-        '<p class="account-domains-note">Don\'t own one yet? Claiming a name happens from the <a href="/account" data-scene-link="account">CMS at /account</a>, not here -- this page only tracks and verifies names that already exist.</p></section>' +
-        '<section class="account-domains-list" aria-label="Tracked domains"><p class="account-kicker">02 / TRACKED</p><h2>Tracked names <span data-domains-count>(0)</span></h2>' +
+        '<p class="account-domains-note">Claim a new name from the CMS on <a href="/account" data-scene-link="account">your account</a>.</p></header>' +
+        '<section class="account-card account-domains-list" aria-label="Tracked domains"><p class="account-card-caption">Tracked names <span data-domains-count>(0)</span></p>' +
         '<ul data-domains-items></ul>' +
-        '<p class="account-domains-empty" data-domains-empty hidden>No names tracked yet. Add one above.</p></section>' +
-        '</div></div>';
+        '<p class="account-domains-empty" data-domains-empty hidden>No names tracked yet. Add one to see its owner and target.</p></section>' +
+        '</div>';
       host.appendChild(page);
 
       var form = page.querySelector('[data-domains-form]');
