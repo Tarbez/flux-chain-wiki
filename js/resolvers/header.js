@@ -7,8 +7,24 @@
 
    Its padding follows the smaller screen dimension, with a 20px floor.
    ===================================================================== */
-/* The Products megamenu: every resolution, grouped, one click from any page.
-   The trigger sits first in the core links; the panel hangs under the whole header. */
+/* The Products megamenu: every resolution, one click from any page, in three weights.
+   Primary: the resolutions people can use today, drawn large with the products that already
+   do the work. Complementary: every other resolver, grouped, as compact names. Reference:
+   one peek line that describes whichever name is under the pointer, plus the page links.
+   The trigger sits first in the core links; the panel hangs under the header. */
+var FEATURED_RESOLUTIONS = [
+  /* `ready` mirrors the released products on each inner page's "Ready now" list. */
+  { key: 'WEBSITE', art: 'site', ready: ['Code manager', '.fxn names', 'Site gateway'] },
+  { key: 'DEPLOYMENTS', art: 'bundle', ready: ['Mesh packages', 'Resolvers', 'Mesh monitor'] },
+  { key: 'NETWORK', art: 'mesh', ready: ['Named networks', 'Mesh Explorer'] }
+];
+var RESOLUTION_ART = {
+  site: '<rect x="5" y="6" width="54" height="36" rx="4"/><path d="M5 14h54"/><rect class="art-hot" x="18" y="8.5" width="28" height="3" rx="1.5"/><path d="M12 21h20M12 27h26M12 33h16"/><circle class="art-hot art-pop" cx="47" cy="31" r="6"/><path class="art-hot art-pop" d="m44.2 31 2 2 3.6-3.8"/>',
+  bundle: '<path class="art-hot art-lift" d="m32 5 20 9-20 9-20-9 20-9Z"/><path d="m12 22 20 9 20-9"/><path d="m12 30 20 9 20-9"/><path class="art-faint" d="M32 23v20"/>',
+  mesh: '<path d="M32 24 12 10M32 24l20-14M32 24 12 38M32 24l20 14M12 10h40M12 38h40"/><circle class="art-hot" cx="32" cy="24" r="5"/><circle class="art-node" cx="12" cy="10" r="3.2"/><circle class="art-node" cx="52" cy="10" r="3.2"/><circle class="art-node" cx="12" cy="38" r="3.2"/><circle class="art-node" cx="52" cy="38" r="3.2"/>'
+};
+var RESOLUTION_GROUP_ICONS = { BUILD: 'layers', VALUE: 'cycle', PEOPLE: 'account', INTELLIGENCE: 'model', OPERATIONS: 'network' };
+
 function buildProducts(header, core) {
   function make(tag, className, text) {
     var item = document.createElement(tag);
@@ -16,7 +32,11 @@ function buildProducts(header, core) {
     if (text) item.textContent = text;
     return item;
   }
-  var path = ArkUI.pageCatalog.resolutions.path;
+  function routeTo(link, target) {
+    link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
+    link.dataset.sceneLink = target;
+    return link;
+  }
   var shortName = ArkResolutions.shortName;
   var wrap = make('div', 'header-products');
   var trigger = make('button', 'header-products-toggle');
@@ -37,68 +57,99 @@ function buildProducts(header, core) {
   mega.hidden = true;
   mega.setAttribute('role', 'region');
   mega.setAttribute('aria-labelledby', 'products-trigger');
-  var head = make('div', 'products-mega-head');
-  var intro = make('div', 'products-mega-intro');
-  intro.appendChild(make('p', 'products-mega-kicker', ArkCopy.text('RESOLUTIONS.EYEBROW')));
-  intro.appendChild(make('h2', 'products-mega-title', ArkCopy.text('RESOLUTIONS.MEGA.TITLE')));
-  intro.appendChild(make('p', 'products-mega-text', ArkCopy.text('RESOLUTIONS.MEGA.TEXT')));
-  intro.appendChild(make('p', 'products-mega-promise', ArkCopy.text('RESOLUTIONS.PROMISE')));
-  var introActions = make('div', 'products-mega-actions');
-  var all = make('a', 'products-mega-all', ArkCopy.text('RESOLUTIONS.MEGA.ALL') + ' →');
-  all.href = ArkUI.route.href(path);
-  all.dataset.sceneLink = 'resolutions';
-  introActions.appendChild(all);
-  var how = make('a', 'products-mega-how', ArkCopy.text('RESOLUTIONS.MEGA.HOW') + ' ↗');
-  how.href = ArkUI.route.href(ArkUI.pageCatalog.resolver.path);
-  how.dataset.sceneLink = 'resolver';
-  introActions.appendChild(how);
-  intro.appendChild(introActions);
-  head.appendChild(intro);
-  var guide = make('section', 'products-mega-guide');
-  guide.appendChild(make('h3', '', ArkCopy.text('RESOLUTIONS.MEGA.GUIDE')));
-  var guideList = make('div', 'products-mega-guide-list');
-  [['WEBSITE', 'Publish something'], ['PAYMENTS', 'Move value'], ['NETWORK', 'Create a network']].forEach(function (choice, index) {
-    var entry = ArkResolutions.find(choice[0].toLowerCase());
-    var link = make('a', 'products-mega-guide-link');
-    var target = 'resolutions/' + entry.slug;
-    link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
-    link.dataset.sceneLink = target;
-    link.appendChild(make('small', '', '0' + (index + 1) + ' / ' + choice[1]));
-    link.appendChild(make('strong', '', shortName(entry.title)));
-    link.appendChild(make('span', '', entry.text));
-    guideList.appendChild(link);
+  var body = make('div', 'products-mega-body');
+
+  /* Primary */
+  var primary = make('section', 'products-mega-primary');
+  primary.appendChild(make('h3', 'products-mega-heading', ArkCopy.text('RESOLUTIONS.MEGA.READY')));
+  var featuredKeys = {};
+  FEATURED_RESOLUTIONS.forEach(function (feature) {
+    var entry = ArkResolutions.find(feature.key.toLowerCase());
+    featuredKeys[feature.key] = true;
+    var card = routeTo(make('a', 'products-mega-feature'), 'resolutions/' + entry.slug);
+    card.dataset.resolution = entry.slug;
+    var art = make('span', 'products-mega-art');
+    art.setAttribute('aria-hidden', 'true');
+    art.innerHTML = '<svg viewBox="0 0 64 48" focusable="false">' + RESOLUTION_ART[feature.art] + '</svg>';
+    card.appendChild(art);
+    var words = make('span', 'products-mega-feature-words');
+    words.appendChild(make('strong', '', shortName(entry.title)));
+    words.appendChild(make('span', 'products-mega-feature-line', entry.text));
+    var ready = make('span', 'products-mega-ready');
+    feature.ready.forEach(function (name) { ready.appendChild(make('span', '', name)); });
+    words.appendChild(ready);
+    card.appendChild(words);
+    primary.appendChild(card);
   });
-  guide.appendChild(guideList);
-  head.appendChild(guide);
-  mega.appendChild(head);
-  var browser = make('section', 'products-mega-browser');
-  var browserHead = make('div', 'products-mega-browser-head');
-  browserHead.appendChild(make('h3', '', ArkCopy.text('RESOLUTIONS.MEGA.RESOLVERS')));
-  browserHead.appendChild(make('span', '', ArkResolutions.all().length + ' named resolvers'));
-  browser.appendChild(browserHead);
-  var columns = make('div', 'products-mega-groups');
+  body.appendChild(primary);
+
+  /* Complementary */
+  var more = make('section', 'products-mega-more');
+  var moreHead = make('div', 'products-mega-more-head');
+  moreHead.appendChild(make('h3', 'products-mega-heading', ArkCopy.text('RESOLUTIONS.MEGA.MORE')));
+  var rows = make('div', 'products-mega-rows');
+  var moreCount = 0;
   ArkResolutions.list().forEach(function (group) {
-    var column = make('section', 'products-mega-group');
-    column.appendChild(make('h3', '', group.title));
-    var list = make('ul');
-    group.items.forEach(function (entry) {
-      var row = make('li');
-      var link = make('a', 'products-mega-link');
-      var target = 'resolutions/' + entry.slug;
-      link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
-      link.dataset.sceneLink = target;
+    var items = group.items.filter(function (entry) { return !featuredKeys[entry.key]; });
+    if (!items.length) return;
+    var row = make('div', 'products-mega-row');
+    row.dataset.group = group.key;
+    var label = make('span', 'products-mega-row-label');
+    var icon = ArkUI.icon && ArkUI.icon(RESOLUTION_GROUP_ICONS[group.key]);
+    if (icon) label.appendChild(icon);
+    label.appendChild(make('span', '', group.title));
+    row.appendChild(label);
+    var list = make('ul', 'products-mega-chips');
+    items.forEach(function (entry) {
+      var item = make('li');
+      var link = routeTo(make('a', 'products-mega-link', shortName(entry.title)), 'resolutions/' + entry.slug);
       link.dataset.resolution = entry.slug;
-      link.appendChild(make('span', 'products-mega-name', shortName(entry.title)));
-      link.appendChild(make('span', 'products-mega-line', entry.text));
-      row.appendChild(link);
-      list.appendChild(row);
+      link.dataset.line = entry.text;
+      item.appendChild(link);
+      list.appendChild(item);
+      moreCount += 1;
     });
-    column.appendChild(list);
-    columns.appendChild(column);
+    row.appendChild(list);
+    rows.appendChild(row);
   });
-  browser.appendChild(columns);
-  mega.appendChild(browser);
-  mega.appendChild(make('p', 'products-mega-coin', ArkCopy.text('RESOLUTIONS.MEGA.COIN')));
+  moreHead.appendChild(make('span', 'products-mega-count', String(moreCount)));
+  more.appendChild(moreHead);
+  more.appendChild(rows);
+
+  /* Reference: the footer's peek line swaps in place for whichever resolver is pointed at. */
+  var peek = make('p', 'products-mega-peek');
+  peek.setAttribute('aria-live', 'polite');
+  var peekName = make('strong');
+  var peekLine = make('span', '', ArkCopy.text('RESOLUTIONS.MEGA.TEXT'));
+  peek.appendChild(peekName);
+  peek.appendChild(peekLine);
+  function showPeek(link) {
+    rows.querySelectorAll('.is-peeked').forEach(function (row) { row.classList.remove('is-peeked'); });
+    if (!link) {
+      peek.classList.remove('is-active');
+      peekName.textContent = '';
+      peekLine.textContent = ArkCopy.text('RESOLUTIONS.MEGA.TEXT');
+      return;
+    }
+    link.closest('.products-mega-row').classList.add('is-peeked');
+    peek.classList.add('is-active');
+    peekName.textContent = link.textContent;
+    peekLine.textContent = link.dataset.line;
+  }
+  rows.addEventListener('pointerover', function (event) { var link = event.target.closest('.products-mega-link'); if (link) showPeek(link); });
+  rows.addEventListener('pointerleave', function () { showPeek(null); });
+  rows.addEventListener('focusin', function (event) { var link = event.target.closest('.products-mega-link'); if (link) showPeek(link); });
+  rows.addEventListener('focusout', function (event) { if (!rows.contains(event.relatedTarget)) showPeek(null); });
+  body.appendChild(more);
+  mega.appendChild(body);
+
+  var foot = make('div', 'products-mega-foot');
+  foot.appendChild(peek);
+  var how = routeTo(make('a', 'products-mega-how', ArkCopy.text('RESOLUTIONS.MEGA.HOW') + ' ↗'), 'resolver');
+  foot.appendChild(how);
+  var all = routeTo(make('a', 'products-mega-all', ArkCopy.text('RESOLUTIONS.MEGA.ALL') + ' →'), 'resolutions');
+  foot.appendChild(all);
+  mega.appendChild(foot);
   header.appendChild(mega);
 
   var closeTimer = 0, openedAt = 0;
@@ -110,6 +161,7 @@ function buildProducts(header, core) {
     if (open) openedAt = Date.now();
     trigger.setAttribute('aria-expanded', String(open));
     header.classList.toggle('products-open', open);
+    if (!open) showPeek(null);
     if (!open && focusTrigger) trigger.focus();
   }
   trigger.addEventListener('click', function () {
