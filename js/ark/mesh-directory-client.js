@@ -62,6 +62,13 @@
     return 'identity-profile:' + JSON.stringify(payload);
   }
 
+  // Before this, publishing signed immediately with no confirmation step --
+  // the one real gap this file's own header comment doesn't cover, since
+  // identity publishing isn't a "write once you already hold a wallet/draft"
+  // action the way fabric-transfer-browser.js's signedRecord() is. Mirrors
+  // that same pattern: the real scoped-authorization dialog
+  // (js/ark/authorization-dialog.js), shown before signing, not a
+  // per-call-site copy.
   async function publishIdentityProfile(who, base) {
     var canonical = {
       identityId: who.identityId || who.publicKeyB64,
@@ -79,7 +86,34 @@
       updatedAt: new Date().toISOString(),
       version: 1,
     };
-    var signature = await who.sign(identityProfileSigningMessage(canonical));
+    var message = identityProfileSigningMessage(canonical);
+    if (window.ArkUI.authorizationDialog && window.ArkAuthorizationView) {
+      var messageDigest = await window.ArkUI.ed25519Pem.sha256HexOfText(message);
+      var view = window.ArkAuthorizationView.scopedAuthorizationView({
+        title: 'Publish identity to the mesh',
+        description: 'Review exactly what this publishes to the public mesh identity directory before approving. Nothing is sent until you approve.',
+        requester: who.displayName || who.identityId || who.publicKeyB64 || 'This identity',
+        network: window.ArkUI.directoryTransport.NETWORK_ID,
+        authority: 'flux mesh identity directory',
+        configuration: 'identity-profile/v1',
+        scope: 'identity.directory.publish',
+        action: 'identity.directory.publish',
+        manifestDigest: messageDigest,
+        claimStack: [
+          'primary authorize identity.directory.publish for exact manifest ' + messageDigest,
+          'constraint owner ' + (who.publicKeyB64 || who.identityId || ''),
+          'failure reject altered or replayed bytes',
+          'trust zero',
+        ].join('\n'),
+        manifest: canonical,
+        authorizationBytes: message,
+        actionPayloadBytes: message,
+        facts: [{ label: 'Visibility', value: canonical.visibility }],
+      });
+      var approved = await window.ArkUI.authorizationDialog.confirm(view, { action: 'identity.directory.publish', capability: 'identity-profile' });
+      if (!approved) throw new Error('Publishing cancelled. No identity record was sent to the mesh.');
+    }
+    var signature = await who.sign(message);
     var record = Object.assign({}, canonical, { proof: { alg: 'Ed25519', sig: signature, signerPubkey: who.publicKeyB64 } });
     return call(who, base, 'POST', '/identity/publish', { record: record });
   }

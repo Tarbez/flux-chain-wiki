@@ -688,6 +688,229 @@ server. `mk2` had ~45% idle CPU, so by extrapolation (not measured) a second
 client there would add roughly 4-5k/s. Production `agreement-fabric-rs` stayed
 active on bk2, mk2 and bk1 throughout; test processes ran at `nice 5`.
 
+## 14. The real FLX grammar, whole fleet at once (2026-10-07)
+
+§13 used a private fixed-slot frame as a stand-in. This section replaces it with
+the REGISTERED grammar: `flux-core` (git rev `abeb4b9`, the same pin every
+other consumer uses), its tokenizer, its role resolvers, its `ManifestBuilder`
+and its signature-prefix rule, in an isolated crate (`defxn-defi-rs/dense-wire`)
+so no live binary changed. A transfer is the five registered lifecycle stages:
+`INTENT 0G`, `OFFER 0H`, `AGREEMENT 0I` (two chained `S` blocks, sender then
+recipient), a successor `VALUEOBJECT 0L`, `FULFILLMENT 0J`; issuance is `0L`
+with `I0`. Required roles, `C` ordering and minimum counts come from
+`registry/manifest-types.json` and `flux-patterns`' lifecycle contract. A CID is
+sha256 over the whole raw text; a signature covers the raw text before its own
+`S`; nothing is ever re-rendered. Policy, resolver and constraint documents and
+the per-transfer plan and expected-output documents are addressed texts the
+server recomputes from facts already in the manifests (so a wrong `C` is
+refused); none is stored or sent. Records are content-addressed and sharded by
+CID; the only ordered operation is the atomic spend marker for an input.
+
+Transport is raw TCP, one manifest per line (`\n` cannot occur in the
+grammar's alphabet), replies `K` / `E<code>`. No HTTP, no JSON on the request
+path. 6 ed25519 signatures per transfer (the AGREEMENT carries two), 2,489 bytes
+of text per transfer (JSON was 1,559; the fixed-slot frames 483).
+
+**Does the parser cost anything?** (one AGREEMENT, 674 bytes, 11 blocks;
+`bk2` Xeon Gold 6230R, one core)
+
+| Step | ns/op |
+| --- | --- |
+| Dumb parser: charset check + split on `-` | 1,515 |
+| + each block's own resolver (`resolve_dense_block`) | 2,888 |
+| `admit()`: split + resolvers + role law + required roles + `C` count | 5,028 |
+| flux-core `parse_manifest` (eager field tree + index map) | 13,279 |
+| Two ed25519 signatures over the raw prefixes | 113,432 |
+| sha256 of the raw text | 4,640 |
+
+Admission is 4.2% of parse + verify; the bare split is 1.3%. `parse_manifest`
+costs 2.6x `admit()`: decoding every block into a tree up front is the part
+worth not doing. Under load (perf, frame pointers, 31,028 samples, server on 4
+cores) the grammar layer (split, every resolver, role law) is **2.1%** of server
+CPU. Where the rest goes: ed25519 verification 54.7%, admission logic over
+stored records 13.8%, store 20.3% (caller side 8.5, group-commit writer 7.3,
+reads 4.5), connection loop 5.0%, sha256 3.5%.
+
+**One box, same conditions as §12-13** (server pinned to 4 cores, client on 3
+others, accepted finality, 300 concurrent, 6,000 transfers, 3 runs, 0 failures):
+
+| Path | transfers/s |
+| --- | --- |
+| HTTP + JSON, 3 requests | 1,718 / 2,082 / 1,978 |
+| Real grammar, 5 manifests, one per round trip | 4,271 / 4,145 / 4,060 |
+| Real grammar, 5 manifests in one write | 5,381 / 4,714 / 5,133 |
+| Fixed-slot stand-in, 3 records in one write (fewer records, half the signatures) | 7,934 / 7,424 / 6,377 |
+
+**Attack suite, 32 checks, passed on all 3 runs (once locally, twice on `bk2`):** flipped
+signature digit; duplicated non-repeatable role; reserved/unregistered role
+letter; punctuation outside the alphabet; empty block; unregistered type code;
+prose that starts with a registered letter; missing required role; non-genesis
+issuer; non-holder intent; nonexistent input; expired intent; wrong constraint
+document; offer for an absent intent; agreement with one signature, with a
+stranger's countersignature, with a different policy; successor of a different
+amount, signed by a stranger; fulfillment by the wrong party, naming an absent
+successor; replayed fulfillment; second intent on a spent input; a successor
+spent as the next hop; an unfulfilled successor refused as a head; two
+simultaneous spends of one input (exactly one closes).
+
+**Whole fleet, concurrent, 20 s fixed window, all six clients started at the
+same wall-clock instant (start epoch 1791384120.522), 0 failures, 425,729
+transfers, five lifecycle manifests each:**
+
+| Server (cores) | Client(s) | transfers/s | Server CPU busy |
+| --- | --- | --- | --- |
+| eul-4c (4) | eug-2c | 9,815 | 95.9% |
+| bk2 (7) | ms1 + ms2 + ms3 | 1,742 + 2,362 + 2,367 = 6,471 | 94.3% |
+| mk2 (5) | mist1 | 3,138 | 53.0% (client mist1 100% busy: client-bound) |
+| bk1 (2) | mk1 | 1,775 | 94.5% |
+| **Fleet total** | | **21,199** | |
+
+Three of four servers sat at 94-96% CPU, so those pairs are server-bound;
+`mk2` was client-bound, with ~47% of its CPU idle (by extrapolation, not
+measured, a second client there would add ~2.5-3k/s).
+
+Two things went wrong on the way and are recorded rather than hidden:
+1. The first fleet attempt lost two clients (`eug`, `mk1`) to connection
+   resets. Cause, from the kernel's own counters (`ListenOverflows` 3,404 on
+   `eul`): the bench opened its timed-phase connections in the same instant the
+   window began, a few hundred simultaneous connects against a listen backlog
+   of 128 (Rust std's default). Fixed on both sides: clients connect before the
+   start instant, the server re-issues `listen(8192)`. The two pairs that
+   survived that attempt (`bk2` 7,342/s, `mk2` 3,079/s) are not used.
+2. A one-off harness assumption: `pkill -x` silently matches nothing on names
+   over 15 characters, so a stale server survived into the next attempt until
+   it was killed by an anchored path match.
+
+How to read 21,199/s against the fabric record (5,711-6,041/s, four quorums,
+accepted finality; the 1.55k/s quorum G was never summed with them): that is
+~3.5x. It is NOT like for like. The fabric certifies each closure with a
+threshold certificate across two validators. This is a single-node notebook per
+server with bilateral signatures and no certificate: no Byzantine tolerance,
+accepted finality only (no replica wait, no fsync, a dummy replica that is
+never contacted), and client-to-server links of very different lengths. They
+were not all short. The monitor's health checks (taken from bk2/mk2, and about
+two round trips each because they include opening the connection) read bk2, mk2
+and bk1 at 4-9 ms, ms1 at 10 ms, mist1 and ms3 near 77 ms, mk1 at 130 ms, and
+the two second-provider machines at 163 ms; the two second-provider machines are
+19 ms apart. So `ms1` to `bk2` was a short link, `mist1` to `mk2` and `ms3` to
+`bk2` roughly 40 ms, and `mk1` to `bk1` roughly 65 ms (estimated from those
+readings, not measured pair to pair). Pipelining five transfers per write and 150
+to 600 concurrent connections is what kept the longer pairs busy; they were
+latency-bound at the client, which is part of why per-write latency is in the
+hundreds of milliseconds. All test processes ran at
+`nice 5`, and production `agreement-fabric-rs` stayed active on bk2, mk2 and
+bk1 throughout.
+
+What it does not do yet: no durable path over the wire (replica-confirmed ack
+would cost roughly the 2.5x measured in §11-12); INTENT and OFFER are signed
+fresh for every transfer, whereas the spec also allows standing ones (that
+would remove two of the six signatures; not done, because it is a protocol
+choice, not a tuning); no batch signature verification (verification is 55% of
+server CPU, so that is the largest single lever left); storage is still the
+JSON-line log from `store.rs`.
+
+## 15. Batch signature verification (2026-10-07)
+
+§14 put signature verification at 54.7% of server CPU, so it was the largest
+single lever. ed25519 batch verification checks many signatures with one
+multi-scalar multiplication. It is not free at small sizes, so first the cost
+curve, measured on `bk2`'s Xeon Gold 6230R (one core, 674-byte messages,
+distinct signers, `ed25519-dalek` `verify_batch`):
+
+| Batch size | one at a time | batch | speedup |
+| --- | --- | --- | --- |
+| 1 | 51,890 ns | 68,657 ns | 0.76x (slower) |
+| 2 | 67,471 | 58,186 | 1.16x |
+| 6 (one transfer) | 67,513 | 46,270 | 1.46x |
+| 12 | 61,319 | 28,438 | 2.16x |
+| 30 (five transfers) | 53,067 | 29,917 | 1.77x |
+| 96 | 56,501 | 26,597 | 2.12x |
+| 192 | 53,002 | 23,601 | 2.25x |
+
+Batching only pays when the batch is big, so the question is how to make it
+big without making anyone wait. Three server modes, one env var
+(`DENSE_VERIFY`), same attack suite in all of them:
+
+* `off`: one signature at a time (§14).
+* `burst`: the signatures of every manifest already buffered on one
+  connection are checked together. A client that sends whole transfers in one
+  write hands over six signatures per transfer.
+* `pool`: two verifier threads drain a shared queue, so signatures from many
+  connections are checked together. Nothing waits on a timer; a verifier takes
+  whatever is queued now, so at low load the batch is 1 and latency is
+  unchanged, and under load batches form on their own (the same shape as the
+  store's group commit). `pool` with one thread was a regression (see below).
+
+**One box, same conditions as §12-14** (server on 4 pinned cores, client on 3
+others, accepted finality, 300 concurrent, 12,000 transfers, 3 runs, 0
+failures; `tpw` = transfers per write):
+
+| Mode | transfers/s (3 runs) | mean | average batch |
+| --- | --- | --- | --- |
+| off, tpw 1 | 4,748 / 4,691 / 4,706 | 4,715 | n/a |
+| off, tpw 5 | 4,725 / 4,989 / 4,820 | 4,845 | n/a |
+| burst, tpw 1 | 5,478 / 5,537 / 5,124 | 5,379 | 6.0 |
+| burst, tpw 5 | 5,994 / 5,632 / 5,397 | 5,674 | 30.0 |
+| pool, 1 thread, tpw 1 | 4,567 / 4,582 / 4,735 | 4,628 | 108.4 |
+| pool, 2 threads, tpw 1 | 5,518 / 5,807 / 5,169 | 5,498 | 31.9 |
+| pool, 2 threads, tpw 5 | 6,081 / 5,793 / 5,800 | 5,891 | 28.1 |
+
+Reading it: the comparison that isolates verification is `off tpw 5` against
+`burst tpw 5` (the client does the same thing in both): 4,845 to 5,674, +17%.
+The best configuration, `pool` with two threads and tpw 5, is +22% over `off`.
+`burst tpw 5` and `pool` overlap within run-to-run spread, so this record does
+not say one beats the other. One verifier thread was a regression because the
+batches grew past 100 and a single thread became the bottleneck. A 2x faster
+verification step of a ~55% cost can give at most 1/(1 - 0.27), about 1.37x;
++17-22% measured sits inside that ceiling.
+
+**Whole fleet, concurrent, 20 s window, same start instant, `DENSE_VERIFY=burst`,
+5 transfers per write, 0 failures, 503,225 transfers:**
+
+| Server (cores) | Client(s) | transfers/s | before (§14) | Server CPU |
+| --- | --- | --- | --- | --- |
+| eul-4c (4) | eug-2c | 11,358 | 9,815 | 92.4% |
+| bk2 (7) | ms1 + ms2 + ms3 | 1,827 + 2,958 + 3,038 = 7,823 | 6,471 | 86.5% |
+| mk2 (5) | mist1 | 3,439 | 3,138 | 43.4% (client-bound, mist1 at 100%) |
+| bk1 (2) | mk1 | 2,288 | 1,775 | 91.4% |
+| **Fleet total** | | **24,908** | **21,199** | |
+
++17.5% over §14, which matches the single-box result. The fleet run also
+changed the client (five transfers per write is required for `burst` to have a
+batch to work with), so the single-box table above is the cleaner measure of
+batching alone. Per-write latency rose (p50 262-633 ms) because each write now
+carries 25 manifests that are verified together before the reply; this is a
+throughput configuration, not a latency one.
+
+**Correctness.** A bad signature inside a big batch must fail only itself. The
+batch check fails, the server falls back to checking each signature on its own,
+and each item gets its own verdict (unit tests: a 64-item batch with every
+seventh signature corrupted returns exactly the right 64 verdicts; 48 threads
+through the pool each get their own answer). The attack suite grew to 36 checks
+and passes in all three modes, including a pipelined burst of three whole
+transfers where the middle one carries a stranger's countersignature: the
+transfer before and after close normally, the forged agreement is refused with
+the signature code, and what depended on it is refused as a missing reference.
+
+**One caveat that must travel with this number.** ed25519 batch verification is
+*cofactored*. For adversarially crafted points (small-order components in `R`
+or in the key) it can accept a signature that one-at-a-time `verify` rejects.
+Falling back on failure never blames a good signature, but a signer can choose
+its own signatures to land in that gap. For a single notebook that only hurts
+its author. If replicas or validators must agree on whether a record is valid,
+every one of them has to run the same mode, or the gap has to be closed first
+(reject small-order keys, or run `verify_strict` on whatever the batch accepts).
+This is recorded in the source next to the code, and it blocks any claim that
+batch mode is safe for a multi-party deployment.
+
+What did not change and is not claimed: still accepted finality only, still no
+durable path over the wire, still INTENT and OFFER signed fresh for every
+transfer, still no certificate and no Byzantine tolerance. One more inefficiency
+this work made visible: the holder (`H`) block is the hex of the holder's key
+text, which is the grammar's rule for holder ids, so a 64-character key costs
+128 characters in every value object. A digest holder would shrink the largest
+record; not done, because it is a spec question, not a tuning one.
+
 ## Current live configuration
 
 Five real, concurrently-running quorums on the fleet (A-F on InterServer,

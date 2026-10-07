@@ -5,12 +5,31 @@
    Updated 2026-10-06: both systems rebuilt as minimal, single-purpose
    daemons (stripped out of the old do-everything miner process), ported
    to Rust, and re-measured for real on the production fleet -- see
-   /stats for the full before/after and methodology. */
+   /stats for the full before/after and methodology.
+   Updated 2026-10-07 (evening): the stale 151/s FXN-transfers item is
+   replaced by the whole-fleet run on the REGISTERED FLX grammar
+   (bench-003 section 14). It is a prototype, accepted finality only, and
+   not like for like with the certified fabric rows beside it -- the detail
+   string says so, on purpose. */
 (function () {
   'use strict';
+  // The one place the whole-fleet real-grammar run's headline figures live. /stats
+  // and /monitor both read it (bench-003 section 14); neither carries its own copy.
+  // Single source for the whole-fleet real-grammar run (bench-003 sections 14-15). /stats and
+  // /monitor both read it. `before` = same fleet without batch signature checks (section 14).
+  var FLEET_RUN = Object.freeze({
+    total: 24908, before: 21199, transfers: 503225, window: '20 s', servers: 4, clients: 6, date: '2026-10-07',
+    perServer: Object.freeze([
+      Object.freeze({ name: 'eul-4c', machine: 'eul4c', cores: 4, clients: 'eug-2c', now: 11358, before: 9815, busy: 92.4, note: 'Other provider, 19 ms between its two machines' }),
+      Object.freeze({ name: 'bk2', machine: 'bk2', cores: 7, clients: 'ms1 + ms2 + ms3', now: 7823, before: 6471, busy: 86.5, note: 'Production runs on this machine too' }),
+      Object.freeze({ name: 'mk2', machine: 'mk2', cores: 5, clients: 'mist1', now: 3439, before: 3138, busy: 43.4, note: 'Client-bound: its one-core client was at 100%' }),
+      Object.freeze({ name: 'bk1', machine: 'bk1', cores: 2, clients: 'mk1', now: 2288, before: 1775, busy: 91.4, note: 'Two cores, the smallest server' })
+    ])
+  });
   window.ArkStatsHighlights = Object.freeze({
-    measured: '2026-10-06',
-    scope: 'Real production fleet (InterServer VPS), Node and Rust head to head',
+    fleetRun: FLEET_RUN,
+    measured: '2026-10-07',
+    scope: 'Real production fleet (InterServer VPS plus two nodes on another provider), Node and Rust',
     // The home rail's one-line scope; the long form above stays on /stats.
     scopeShort: 'Rust · real fleet',
     // short: the home rail's label. label + detail stay on /stats and become
@@ -19,7 +38,7 @@
       { value: '3,250', unit: 'tx/s', short: 'Fabric accepted', label: 'Agreement-fabric, accepted (Rust)', detail: '11.1x the Node number, concurrency 1,200, real fleet' },
       { value: '5,711-6,041', unit: 'tx/s', short: 'Fleet, 4 quorums', label: 'Aggregate fleet capacity (4 quorums)', detail: '4 independent quorums in parallel, 5 audited runs, 2 cleared 6,000/s -- not one quorum\'s speed' },
       { value: '676-827', unit: 'tx/s', short: 'Fabric durable', label: 'Agreement-fabric, durable (Rust)', detail: 'Quorum A, real fleet, 5 audited runs, up from 269-351 after a thread-bug fix' },
-      { value: '151', unit: 'tx/s', short: 'FXN transfers', label: 'FXN value-object transfers (Rust)', detail: '1.1x the Node number, same real fleet' },
+      { value: FLEET_RUN.total.toLocaleString('en-US'), unit: 'tx/s', short: 'Real grammar, fleet', label: 'Whole fleet on the registered FLX grammar (prototype)', detail: '10 machines, 4 servers at once, 5 signed manifests per transfer, 20 s window, accepted finality only, no certificate -- not like for like with the certified rows' },
       { value: '0', unit: 'failures', short: 'All runs', label: 'Every benchmark run', detail: 'Up to 4,000 transfers per run, both languages' }
     ])
     // The fsync-vs-replication finding doesn't fit this rail's shape

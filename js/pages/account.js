@@ -45,6 +45,7 @@
         '</nav>' +
         '<section class="account-auth" data-account-panel="session" aria-label="Account session"><nav class="account-tabs account-signin-tabs" data-account-create-toggle-row aria-label="Sign in or create"><button type="button" aria-pressed="true" data-account-create-back>Sign in</button><button type="button" aria-pressed="false" data-account-create-toggle>New identity</button></nav><div data-account-session-main><h2 class="account-session-title" data-account-session-title>Open your Auth Kit.</h2><p class="account-session-description" data-account-session-description>Choose the recovery file on this device to continue.</p><div data-account-auth></div>' +
         '<button type="button" data-account-forget hidden>Sign out</button><p class="account-storage-notice" data-account-storage-notice role="status" hidden></p>' +
+        '<p class="account-storage-notice" data-account-mesh-auth-notice role="status" hidden></p>' +
         '<div class="account-cms"><a href="/bundle-deployer" data-scene-link="bundledeployer">Deploy a bundle →</a><a href="/account/domains" data-scene-link="account/domains">Your domains →</a><a hidden href="/admin" target="_blank" rel="opener" data-account-cms-open>Open CMS ↗</a><span hidden data-account-cms-local>Local editor available</span><span data-account-cms-status role="status"></span></div>' +
         '<p class="account-session-note">Nothing secret is stored here. This browser keeps only your name and public details; the kit, PIN and key stay on your device.</p></div>' +
         '<div class="account-create" data-account-create-view hidden><div data-account-create></div></div></section>' +
@@ -717,6 +718,13 @@
         var storageNotice = page.querySelector('[data-account-storage-notice]');
         storageNotice.textContent = ArkUI.localIdentity.storageError();
         storageNotice.hidden = !storageNotice.textContent;
+        // Set by the mesh-authentication step below (onChange), not by this
+        // render itself -- ArkUI.accountSession outlives any one mount(), so
+        // the message is read fresh here on every render instead of being
+        // written through a closure that may be querying a detached page.
+        var meshAuthNotice = page.querySelector('[data-account-mesh-auth-notice]');
+        meshAuthNotice.textContent = (ArkUI.accountSession && ArkUI.accountSession.meshAuthMessage) || '';
+        meshAuthNotice.hidden = !meshAuthNotice.textContent;
         fields.check.disabled = !identity;
         resetMesh(identity ? undefined : 'Sign in to check the verified identity against the local Miner.');
       }
@@ -727,7 +735,25 @@
         var preservingIdentity = false;
         var auth = ArkAdminAuth.create({ container: container, product: 'DEFXN', onChange: function (next) {
           if (!preservingIdentity) {
-            if (next) { ArkUI.localIdentity.set(next); if (ArkUI.cmsSession) ArkUI.cmsSession.connect(next).then(function () { ArkUI.localIdentity.refresh(); }); }
+            if (next) {
+              ArkUI.localIdentity.set(next);
+              if (ArkUI.cmsSession) ArkUI.cmsSession.connect(next).then(function () { ArkUI.localIdentity.refresh(); });
+              // Unlocking proves the key locally; this is the step that
+              // authenticates the identity to the mesh fleet itself --
+              // publishing it to the directory (skipped if already
+              // published) shows the real scoped-claim authorization
+              // modal before anything is signed. Fire-and-forget: a
+              // cancelled or failed publish must not block sign-in.
+              if (window.ArkUI.meshDirectory) {
+                window.ArkUI.meshDirectory.ensurePublished(next).then(function () {
+                  ArkUI.accountSession.meshAuthMessage = '';
+                  ArkUI.localIdentity.refresh();
+                }).catch(function (error) {
+                  ArkUI.accountSession.meshAuthMessage = (error && error.message) || 'Could not authenticate this identity to the mesh.';
+                  ArkUI.localIdentity.refresh();
+                });
+              }
+            }
             else { ArkUI.localIdentity.clear(); if (ArkUI.cmsSession) ArkUI.cmsSession.revoke(); }
           }
           ArkUI.localIdentity.refresh();

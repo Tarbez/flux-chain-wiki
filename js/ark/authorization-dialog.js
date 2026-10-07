@@ -43,6 +43,17 @@
   // optional { action, capability } pair the <flux-authorization-dialog>
   // element itself records as attributes. Resolves true on approve, false on
   // cancel/Escape/backdrop click -- never throws, never signs.
+  //
+  // Layout: `rows` is one flat list (Requester/Network/DAO authority/
+  // Configuration/Scope/Action/Expires/facts), equally weighted in the old
+  // design -- a holder had to read every row to find the one that actually
+  // matters, THIS Scope and Action. Those two are pulled out into a lead
+  // card right under the description; everything else stays in the
+  // secondary context grid, demoted but not hidden. The four raw
+  // disclosures (claim stack, manifest, auth bytes, action bytes) are real
+  // proof a holder may want, but reading JSON/hex is not the default
+  // reading path -- grouped under one "Technical proof" summary instead of
+  // four separate top-level <details>.
   function confirm(view, meta) {
     return new Promise(function (resolve) {
       var titleId = 'arkAuthTitle-' + Date.now(), descId = 'arkAuthDesc-' + Date.now();
@@ -53,18 +64,35 @@
       dialog.setAttribute('aria-describedby', descId);
       var backdrop = h('div', { class: 'admin-auth-backdrop' });
       var panel = h('section', { class: 'admin-auth-panel' });
-      var title = h('div', { class: 'admin-auth-title' }, h('span', { class: 'kicker', text: 'Scoped authorization' }), h('h2', { id: titleId, text: view.heading }));
+      var title = h('div', { class: 'admin-auth-title' },
+        h('span', { class: 'kicker' }, h('i', { class: 'admin-auth-mark', 'aria-hidden': 'true' }), h('span', { text: 'Review before you sign' })),
+        h('h2', { id: titleId, text: view.heading }));
       var close = h('button', { type: 'button', class: 'admin-auth-close', 'aria-label': 'Cancel authorization', text: '×' });
       panel.appendChild(h('header', {}, title, close));
       panel.appendChild(h('p', { id: descId, class: 'admin-auth-description', text: view.description }));
+
+      var leadLabels = { Scope: true, Action: true };
+      var leadRows = view.rows.filter(function (row) { return leadLabels[row.label]; });
+      var restRows = view.rows.filter(function (row) { return !leadLabels[row.label]; });
+      if (leadRows.length) {
+        var lead = h('div', { class: 'admin-auth-lead' });
+        leadRows.forEach(function (row) { lead.appendChild(h('div', { class: 'admin-auth-lead-item' }, h('small', { text: row.label }), h('strong', { text: row.value }))); });
+        panel.appendChild(lead);
+      }
       var context = h('dl', { class: 'admin-auth-context' });
-      view.rows.forEach(function (row) { context.appendChild(h('div', {}, h('dt', { text: row.label }), h('dd', { text: row.value }))); });
+      restRows.forEach(function (row) { context.appendChild(h('div', {}, h('dt', { text: row.label }), h('dd', { text: row.value }))); });
       panel.appendChild(context);
       panel.appendChild(h('div', { class: 'admin-auth-digest' }, h('small', { text: 'Exact manifest digest · SHA-256' }), h('code', { text: view.digest })));
-      view.disclosures.forEach(function (item) {
-        var details = document.createElement('details'); details.appendChild(h('summary', { text: item.label }));
-        var pre = document.createElement('pre'); pre.textContent = item.text; details.appendChild(pre); panel.appendChild(details);
-      });
+      if (view.disclosures.length) {
+        var proof = document.createElement('details'); proof.className = 'admin-auth-proof';
+        proof.appendChild(h('summary', { text: 'Technical proof (' + view.disclosures.length + ')' }));
+        var proofBody = h('div', { class: 'admin-auth-proof-body' });
+        view.disclosures.forEach(function (item) {
+          var details = document.createElement('details'); details.appendChild(h('summary', { text: item.label }));
+          var pre = document.createElement('pre'); pre.textContent = item.text; details.appendChild(pre); proofBody.appendChild(details);
+        });
+        proof.appendChild(proofBody); panel.appendChild(proof);
+      }
       panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety }));
       var footer = h('footer', {}, h('button', { type: 'button', class: 'btn', text: 'Cancel' }), h('button', { type: 'button', class: 'btn primary', 'data-autofocus': true, text: 'Approve scopes & sign' }));
       panel.appendChild(footer);

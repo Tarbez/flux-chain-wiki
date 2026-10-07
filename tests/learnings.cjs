@@ -21,8 +21,8 @@ const pages = patterns.map(pattern => {
   const props = {}; for (const key in parsed.props) props[(manifest.schema || {})[key] || key] = parsed.props[key];
   const el = new Element(manifest.tag); Object.assign(el.attrs, manifest.attrs(props)); manifest.decorate(el, props); return el;
 });
-assert.equal(pages.length, 4);
-assert.equal(descendants(pages[0]).filter(el => el.dataset.sceneLink).length, 3);
+assert.equal(pages.length, context.LearningContent.articles.length + 1);
+assert.equal(descendants(pages[0]).filter(el => el.dataset.sceneLink).length, context.LearningContent.articles.length);
 pages.slice(1).forEach((page, index) => {
   const all = descendants(page), article = context.LearningContent.articles[index];
   assert.equal(all.find(el => el.tagName === 'h1').textContent, article.title);

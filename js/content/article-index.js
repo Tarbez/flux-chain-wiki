@@ -20,5 +20,19 @@ LearningContent.define([
     "category": "AUTHORITY / 003",
     "minutes": "6 MIN READ",
     "summary": "The documented distinction between ephemeral authority cells, substrate policy, and a network DAO—with production activation still unverified."
+  },
+  {
+    "slug": "how-we-got-fast-and-what-we-got-wrong",
+    "title": "How we got fast, and everything we got wrong",
+    "category": "BENCHMARKS / 004",
+    "minutes": "9 MIN READ",
+    "summary": "From under 7 transfers a second to about 25,000 across ten machines in one working session: every step, every dead end, and what the final number does and does not mean."
+  },
+  {
+    "slug": "the-grammar-does-almost-no-work",
+    "title": "The grammar does almost no work",
+    "category": "GRAMMAR / 005",
+    "minutes": "6 MIN READ",
+    "summary": "What a DEFXN transfer looks like on the wire, how a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else."
   }
 ]);

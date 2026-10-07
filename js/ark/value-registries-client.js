@@ -161,7 +161,7 @@
         title: 'Authorize Credits consumption',
         description: 'This authorizes the named resolver to consume up to this amount of Credits for the stated purpose. It does not move anything by itself -- only a matching resolver-signed receipt does. Review before approving.',
         requester: who.publicKeyB64,
-        network: 'flux-mainnet',
+        network: window.ArkUI.directoryTransport.NETWORK_ID,
         authority: 'flux mesh Credits registry',
         configuration: 'credits-consumption-request/v' + canonical.version,
         scope: 'credits-consumption-request',

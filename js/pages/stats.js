@@ -1,88 +1,146 @@
-/* Real, measured mesh performance numbers -- not projections, not marketing
-   round numbers. Every figure here is from an actual run against the real
-   production fleet (InterServer VPS nodes) or this machine, on the dates
-   stated, and every one is carried by docs/evidence/bench-003-rust-fleet-ceiling.md
-   (or bench-001 for the older bundled-daemon rows).
+/* /stats: how fast the protocol is, why, and how we found out. Written to teach.
 
-   Redesigned 2026-10-07 as a bento grid. The audit that drove it:
-   - the page was a long editorial column of prose with tables bolted on;
-     the headline numbers were the only thing above the fold;
-   - the five headline figures sat in a 4-column grid, orphaning the fifth;
-   - the headline durable figure (355/s) and the Rust table (182.70/s)
-     disagreed -- the table still showed the superseded group-commit run;
-   - section numbers ran 01, 02, 03, 03.5, 04; every block was fenced by
-     hairline rules;
-   - nothing was drawn: every comparison had to be read digit by digit.
-   Now every number lives once in EVIDENCE below, tiles and charts read from
-   it, and the raw tables stay available under "All measurements". Change a
-   number here and in js/content/stats-highlights.js together -- never show
-   one that the evidence doc doesn't also carry. */
+   Redesigned 2026-10-07 (evening). The earlier page was a record of the Node-versus-Rust
+   rebuild; that history is now told in one place, the trail at the bottom and the article
+   it links to, and nothing stale is shown as a headline. The page now follows the order a
+   reader needs:
+     1. a REAL transfer, taken apart block by block (js/content/stats-sample.js: the exact
+        bytes a server admits, not an illustration);
+     2. where a server's time actually goes, before and after;
+     3. the ladder of gains on the same four cores;
+     4. what batch signature checking can and cannot do;
+     5. the whole fleet, per machine, before and after;
+     6. the trail of wrong turns, with numbers;
+     7. what none of it proves.
+
+   Every number lives once, in EVIDENCE below, and is carried by
+   docs/evidence/bench-003-rust-fleet-ceiling.md (sections 11-15). Nothing here is
+   projected: ranges are the min and max of the runs, shown as ranges. The fleet headline
+   lives in js/content/stats-highlights.js (`fleetRun`), shared with the home page and
+   /monitor. Change a number in the evidence doc first, then here. */
 (function () {
   'use strict';
 
+  var RUN = (window.ArkStatsHighlights && window.ArkStatsHighlights.fleetRun) || { total: 24908, before: 21199, transfers: 503225, window: '20 s', perServer: [] };
+  var ARTICLE_STORY = 'article/how-we-got-fast-and-what-we-got-wrong';
+  var ARTICLE_GRAMMAR = 'article/the-grammar-does-almost-no-work';
+
   var EVIDENCE = {
-    // Final five-run audit of four concurrent quorums (bench-003 §4).
-    audits: [
-      { run: 1, quorums: { A: 2270.74, B: 424.01, C: 706.96, F: 2629.84 }, sum: 6031.55 },
-      { run: 2, quorums: { A: 2509.97, B: 414.49, C: 706.64, F: 2410.21 }, sum: 6041.31 },
-      { run: 3, quorums: { A: 2476.24, B: 416.49, C: 744.85, F: 2282.15 }, sum: 5919.73 },
-      { run: 4, quorums: { A: 2413.09, B: 377.58, C: 807.75, F: 2112.97 }, sum: 5711.39, note: '1 transient timeout of 4,000 on quorum B' },
-      { run: 5, quorums: { A: 2449.26, B: 423.54, C: 827.77, F: 2172.21 }, sum: 5872.78 }
+    // Whole fleet, concurrent, 20 s window, one shared start instant, 0 failures (bench-003 s14-15).
+    fleet: {
+      total: RUN.total, before: RUN.before, transfers: RUN.transfers, window: RUN.window,
+      servers: RUN.perServer
+    },
+    // Same four cores, accepted finality, 300 concurrent, 3 runs each (bench-003 s14-15).
+    ladder: [
+      { label: 'HTTP + JSON, 3 requests', value: 1926, range: '1,718-2,082', note: 'The old way: HTTP, JSON trees, three round trips' },
+      { label: 'Registered grammar, one record per trip', value: 4158, range: '4,060-4,271', note: 'Same checks, raw TCP, five records per transfer' },
+      { label: 'Whole transfer in one write', value: 4845, range: '4,725-4,989', note: 'Five records and six signatures sent together' },
+      { label: '+ batch signature checks (burst)', value: 5674, range: '5,397-5,994', note: 'Signatures from one write verified together' },
+      { label: '+ batch signature checks (pool, 2 threads)', value: 5891, range: '5,793-6,081', note: 'Signatures from many connections verified together', strong: true }
     ],
-    // Node vs Rust on the same real fleet, closures or transfers per second.
-    languages: [
-      { system: 'Agreement-fabric, accepted', node: 291.79, rust: 3251.52, rustLabel: '~3,250' },
-      { system: 'Agreement-fabric, durable', node: 139.47, rust: 354.54, rustLabel: '354.54' },
-      { system: 'FXN value-object transfers', node: 137.25, rust: 151.37, rustLabel: '151.37' }
+    // perf with call stacks, server pinned to 4 cores, shares of SERVER CPU (bench-003 s7 and s14).
+    cpuBefore: {
+      title: 'HTTP + JSON server', samples: '33,188 samples',
+      parts: [
+        { k: 'http', label: 'HTTP layer and kernel network calls', v: 40.3 },
+        { k: 'crypto', label: 'Signatures and hashing', v: 20.8 },
+        { k: 'json', label: 'Building, sorting and writing JSON', v: 15.1 },
+        { k: 'store', label: 'Storage', v: 11.1 },
+        { k: 'other', label: 'Everything else', v: 12.7 }
+      ]
+    },
+    cpuAfter: {
+      title: 'Registered-grammar server', samples: '31,028 samples',
+      parts: [
+        { k: 'crypto', label: 'Signature checks (6 per transfer)', v: 54.7 },
+        { k: 'store', label: 'Storage: writer, queue, reads', v: 20.3 },
+        { k: 'admit', label: 'Admission logic over stored records', v: 13.8 },
+        { k: 'http', label: 'Connection loop', v: 5.0 },
+        { k: 'hash', label: 'sha256 of records', v: 3.5 },
+        { k: 'grammar', label: 'The grammar itself: split and resolvers', v: 2.1 },
+        { k: 'other', label: 'Everything else', v: 0.6 }
+      ]
+    },
+    // ed25519-dalek verify_batch on bk2's Xeon, one core (bench-003 s15).
+    batchCurve: [
+      { n: 1, x: 0.76 }, { n: 2, x: 1.16 }, { n: 6, x: 1.46, note: 'one transfer' }, { n: 12, x: 2.16 },
+      { n: 30, x: 1.77, note: 'five transfers' }, { n: 60, x: 1.93 }, { n: 96, x: 2.12 }, { n: 192, x: 2.25 }
     ],
-    // Bundled miner daemon vs minimal single-purpose daemon (Node, real fleet).
-    rebuild: [
-      { system: 'FXN transfers', before: 6.82, after: 137.25 },
-      { system: 'Fabric, accepted', before: 121.29, after: 291.79 },
-      { system: 'Fabric, durable', before: 68.22, after: 139.47 }
+    batchModes: [
+      { label: 'One at a time', value: 4845, range: '4,725-4,989' },
+      { label: 'Burst: one write, together', value: 5674, range: '5,397-5,994' },
+      { label: 'Pool, 1 verifier thread', value: 4628, range: '4,567-4,735', note: 'Slower: batches passed 100 and one thread became the bottleneck' },
+      { label: 'Pool, 2 verifier threads', value: 5891, range: '5,793-6,081', strong: true }
     ],
-    // How the Rust durable path got to its current number (bench-003 §1).
-    durablePath: [
-      { label: 'Per-call fsync', value: 46.88, detail: 'First Rust build: 3x slower than Node' },
-      { label: 'Group commit', value: 182.70, detail: 'Batching across concurrent requests' },
-      { label: 'No redundant fsync', value: 354.54, detail: 'Replication to 3 validators already makes it durable' }
+    // Micro-benchmark on bk2, one core, one real 674-byte AGREEMENT of 11 blocks (bench-003 s14).
+    parseCost: [
+      { label: 'Split on the dash', ns: 1515 },
+      { label: '+ each block\'s resolver', ns: 2888 },
+      { label: 'Full admission checks', ns: 5028 },
+      { label: 'Decode every field into a tree', ns: 13279, note: '2.6x the door check: the part we avoid' },
+      { label: 'Two signature checks', ns: 113432, note: 'Where the time is', strong: true }
     ],
-    // Quorum A specifically, 2026-10-07: a separate, later investigation
-    // (bench-003 §7-8) that found the 354.54 fix above was real but had
-    // never been re-applied to this quorum's live deployment, plus two new
-    // bugs the earlier work hadn't hit.
-    durableFixToday: [
-      { label: 'Quorum A, unfixed', value: 157.6, valueLabel: '131-184', detail: 'Flat across concurrency 50-2,400 -- a real ceiling, not under-tested' },
-      { label: 'Routing bug fixed + fsync-off', value: 310.3, valueLabel: '269-351', detail: 'Auto-join broke durable finality for clients that hadn’t heard of a new member' },
-      { label: 'Thread-starvation fixed', value: 751.5, valueLabel: '676-827', detail: 'FABRIC_THREADS silently defaulted to CPU core count (2) on the primary' }
-    ],
-    // A hop-count-reduction redesign (close-transfer-durable: 1 round trip
-    // instead of 4) tried and measured on two real topologies -- it loses
-    // on this fleet's own sub-millisecond RTT and wins by ~2x on a rented
-    // box with genuine ~71ms RTT to the fleet. Both audited 5x, zero
-    // failures on the new path either way (bench-003 §8-9).
-    rttComparison: [
-      { topology: 'This fleet (<1ms RTT)', old: 762.58, new: 579.10, xLabel: '0.8x -- loses' },
-      { topology: 'Rented box, real 71ms RTT', old: 127.05, new: 252.69, xLabel: '2.0x -- wins' }
-    ],
-    // A rented 8-core/96GB-VRAM GPU box (RTX PRO 6000) was added 2026-10-07
-    // to see if more compute would raise the aggregate. CPU sat 85-95% idle
-    // on every box, in every test, all night -- the ceiling was always
-    // network round trips and server thread concurrency, never compute.
-    // These numbers prove that directly: a rented GPU server and this
-    // session's own laptop, running the identical standalone 3-node quorum,
-    // land within 2.5% of each other. The GPU itself was never touched.
-    computeProof: [
-      { label: 'Laptop (this machine), standalone quorum', value: 2297.62, detail: 'Zero failures, 3,000 closures' },
-      { label: 'Rented GPU box, standalone quorum', value: 2355.97, detail: 'Zero failures, 3,000 closures -- 2.5% different, not 10x' },
-      { label: 'GPU box + fleet, real cross-region', value: 842.75, detail: 'Single round trip, ~71ms real RTT -- latency-bound, not compute-bound' }
-    ],
-    computeProofTotal: { fleet: '5,711-6,041', addOn: 5496.34, grand: '~11,200-11,550' }
+    // The honest like-for-like table.
+    compare: {
+      cols: ['', 'Certified fabric', 'Grammar prototype'],
+      rows: [
+        ['What it measured', '4 quorums, 2 validators each, side by side', '4 servers, 6 clients, one notebook per server'],
+        ['Signed records per transfer', 'Attestations and a threshold certificate', '5 manifests, 6 signatures'],
+        ['Certificate / Byzantine tolerance', 'Yes', 'No: bilateral signatures only'],
+        ['Finality measured', 'Accepted (certificate); durable measured separately', 'Accepted only: not replicated, not flushed'],
+        ['Throughput', '5,711-6,041 /s accepted; 676-827 /s durable per quorum', RUN.total.toLocaleString('en-US') + ' /s accepted'],
+        ['Status', 'Deployed on the fleet', 'Prototype, not a service']
+      ]
+    },
+    // The trail: wrong turns included. Each line is in bench-003.
+    trail: [
+      { kind: 'win', tag: 'Win', title: 'Take the transfer out of the do-everything miner', from: '6.82', to: '137.25', unit: '/s', body: 'Same machines, same network. The miner was relaying, storing and pinning too. 20x from deleting work.' },
+      { kind: 'win', tag: 'Win', title: 'Group commit, then drop the redundant flush', from: '46.88', to: '354.54', unit: '/s durable', body: 'Rust started 3x slower than Node. Batching flushes, then noticing three validators already hold a copy.' },
+      { kind: 'win', tag: 'Win, three bugs', title: 'One quorum\'s durable finality', from: '131-184', to: '676-827', unit: '/s', body: 'A routing bug, a redundant flush, and server threads capped at the CPU core count (2) while requests mostly waited.' },
+      { kind: 'lost', tag: 'Lost, then won', title: 'Four round trips collapsed into one', from: '763', to: '579', unit: '/s, short link', body: 'Slower on the quorum measured, whose two machines are under 1 ms apart; 2x faster over a 71 ms link. Right idea, wrong map.' },
+      { kind: 'wrong', tag: 'Wrong conclusion', title: 'The GPU, and "it is not compute-bound"', from: '2,298', to: '2,356', unit: '/s laptop vs GPU', body: 'The GPU did nothing, correctly. But idle CPUs were starved threads, not proof. Fixed, the servers ran at 90-95% CPU.' },
+      { kind: 'refuted', tag: 'Refuted', title: 'Pipelined replication', from: '877-954', to: '841-911', unit: '/s durable', body: 'Expected near accepted speed. Measured against a control: no gain. Left off.' },
+      { kind: 'wrong', tag: 'Wrong test', title: 'Benchmarked the wrong codec', from: '', to: '', unit: '', body: 'The learning library\'s vocabulary codec cannot encode a transfer. The grammar meant is the registered one in flux-core, and it had not been tested. The owner caught it.' },
+      { kind: 'win', tag: 'Win', title: 'The registered grammar on a raw socket', from: '1,926', to: '5,076', unit: '/s, same 4 cores', body: 'Then the whole fleet: 21,199 /s. A simpler stand-in showed 35,499 but carried half the signatures, so it is not the number.' },
+      { kind: 'mixed', tag: 'Smaller than hoped', title: 'Batch signature checks', from: '2x', to: '+17-22%', unit: 'measured', body: 'The micro-benchmark said about twice as fast; it can only shrink a share of the cost. One verifier thread made it worse. Fleet: 21,199 to 24,908.' },
+      { kind: 'wrong', tag: 'Harness bugs', title: 'Mistakes that cost hours, none in the protocol', from: '', to: '', unit: '', body: 'A missing firewall rule posed as an architecture ceiling; a kill scoped too broadly took production down 19 minutes; a 128-slot listen queue dropped two clients; pkill -x ignores names over 15 characters.' }
+    ]
   };
   ArkUI.statsEvidence = EVIDENCE;
 
+  // ---- the real transfer, taken apart ---------------------------------------------------
+  var ROLE = {
+    G: { name: 'Signer', note: 'The signer\'s public key, in hex. Its resolver only requires an unbroken run of at least 32 letters or digits.' },
+    Y: { name: 'Kind', note: 'A compact registered code: 0G intent, 0H offer, 0I agreement, 0J fulfillment, 0L value object. A code nobody registered is refused at the door.' },
+    V: { name: 'Version', note: 'Digits only.' },
+    M: { name: 'Moment', note: 'When it was made, in unix seconds. Digits only.' },
+    D: { name: 'Deadline', note: 'When it stops being valid, in unix seconds. The server refuses an expired one.' },
+    I: { name: 'Sequence', note: 'How many hands this object has passed through. 0 means it was issued, not transferred.' },
+    R: { name: 'Object', note: 'The identity of this value object. The grammar gives it no internal structure.' },
+    H: { name: 'Holder', note: 'Who holds it now, written as the hex of the holder\'s key text, which is the grammar\'s rule for holder ids. That doubles its length.' },
+    T: { name: 'Amount', note: 'A whole number then its unit. There are no decimals, so there is no punctuation to escape.' },
+    C: { name: 'Reference', note: 'The SHA-256 identifier of another record: a pointer by content. Order is meaningful.' },
+    S: { name: 'Signature', note: 'An ed25519 signature over the exact text before this block, as written, never re-rendered. A second signature therefore covers the first.' }
+  };
+  var CREF = {
+    INTENT: ['the constraint document (standing terms)', 'the input being spent'],
+    OFFER: ['the intent it answers', 'the offer contract (standing terms)', 'the input being spent'],
+    AGREEMENT: ['the intent', 'the offer', 'the authority policy', 'the resolver', 'the expected output'],
+    VALUEOBJECT: ['the asset policy', 'the predecessor it replaces', 'the agreement it came from', 'the fulfillment plan'],
+    FULFILLMENT: ['the agreement', 'the fulfillment plan', 'the successor it creates']
+  };
+  var STAGE = {
+    INTENT: { by: 'the sender', does: 'Says what is on offer. The server checks the signer really holds the input and that the input is unspent.' },
+    OFFER: { by: 'the recipient', does: 'Says the recipient will take it. The server checks it answers a real intent for the same input.' },
+    AGREEMENT: { by: 'the sender, then the recipient', does: 'Names both. Two signatures in one chain: the recipient\'s covers the sender\'s. The server checks the policy is the registered one.' },
+    VALUEOBJECT: { by: 'the recipient', does: 'The new holding. The server checks its amount and sequence match what the agreement promised.' },
+    FULFILLMENT: { by: 'the sender', does: 'Closes it. This is the one step that needs an order: a second spend of the same input is refused.' }
+  };
+  var STAGE_ORDER = ['INTENT', 'OFFER', 'AGREEMENT', 'VALUEOBJECT', 'FULFILLMENT'];
+
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function fmt(n, digits) { return n.toLocaleString('en-US', { minimumFractionDigits: digits || 0, maximumFractionDigits: digits || 0 }); }
+  function fmt(n, digits) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: digits || 0, maximumFractionDigits: digits || 0 }); }
   function pct(v, max) { return Math.max(1.5, v / max * 100).toFixed(2) + '%'; }
   function href(key) { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key; }
   function row(cells) { return '<tr>' + cells.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>'; }
@@ -91,110 +149,149 @@
     return '<article class="stats-tile ' + cls + '"' + (id ? ' aria-labelledby="' + id + '"' : '') + '>' +
       (label ? '<p class="stats-tile-label"' + (id ? ' id="' + id + '"' : '') + '>' + label + '</p>' : '') + body + '</article>';
   }
+  function shorten(v) { return v.length > 20 ? v.slice(0, 8) + '…' + v.slice(-4) : v; }
 
-  function kpis() {
-    var stats = window.ArkStatsHighlights;
-    if (!stats) return '';
-    return stats.items.map(function (s, i) {
-      return tile('stats-kpi' + (i === 0 ? ' stats-kpi-lead' : ''), esc(s.label),
-        '<p class="stats-kpi-value"><strong>' + esc(s.value) + '</strong><span>' + esc(s.unit) + '</span></p>' +
-        '<p class="stats-kpi-detail">' + esc(s.detail) + '</p>');
-    }).join('');
-  }
-
-  // Five audit runs: the sum of four concurrent quorums, one bar per run.
-  function auditChart() {
-    var max = 6500;
-    var bars = EVIDENCE.audits.map(function (a) {
-      var tip = 'Run ' + a.run + ': ' + fmt(a.sum, 2) + '/s — A ' + fmt(a.quorums.A, 0) + ', F ' + fmt(a.quorums.F, 0) + ', C ' + fmt(a.quorums.C, 0) + ', B ' + fmt(a.quorums.B, 0) + (a.note ? ' (' + a.note + ')' : '');
-      return '<li class="stats-bar-row" tabindex="0" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' +
-        '<span class="stats-bar-key">Run ' + a.run + '</span>' +
-        '<span class="stats-bar-track"><span class="stats-bar' + (a.sum >= 6000 ? ' is-strong' : '') + '" style="--w:' + pct(a.sum, max) + '"></span></span>' +
-        '<span class="stats-bar-value">' + fmt(a.sum, 0) + '</span></li>';
-    }).join('');
-    return '<ol class="stats-bars" aria-label="Aggregate closures per second, five audit runs">' + bars + '</ol>' +
-      '<p class="stats-chart-foot"><span>0</span><span>6,500 /s</span></p>';
-  }
-
-  // Average contribution of each quorum across the five audits.
-  function quorumShare() {
-    var names = ['A', 'F', 'C', 'B'];
-    var avg = names.map(function (q) {
-      return { q: q, v: EVIDENCE.audits.reduce(function (t, a) { return t + a.quorums[q]; }, 0) / EVIDENCE.audits.length };
+  function parseBlocks(record) {
+    var seenC = 0, seenS = 0;
+    return record.text.split('-').map(function (raw) {
+      var letter = raw.charAt(0), value = raw.slice(1), label = (ROLE[letter] || {}).name || letter, ctx = '';
+      if (letter === 'C') { ctx = (CREF[record.name] || [])[seenC] || ''; seenC += 1; label = 'Reference ' + seenC; }
+      if (letter === 'S') { seenS += 1; label = seenS > 1 ? 'Signature 2' : 'Signature'; }
+      return { letter: letter, value: value, label: label, ctx: ctx, pos: seenC };
     });
-    var total = avg.reduce(function (t, x) { return t + x.v; }, 0);
-    return '<div class="stats-share" role="img" aria-label="' + esc(avg.map(function (x) { return 'Quorum ' + x.q + ' ' + fmt(x.v, 0) + '/s'; }).join(', ')) + '">' +
-      avg.map(function (x) { return '<span class="stats-share-seg" style="--w:' + (x.v / total * 100).toFixed(2) + '%" data-tip="Quorum ' + x.q + ': ' + fmt(x.v, 0) + '/s average"><b>' + x.q + '</b></span>'; }).join('') +
-      '</div><dl class="stats-share-legend">' +
-      avg.map(function (x) { return '<div><dt>Quorum ' + x.q + '</dt><dd>' + fmt(x.v, 0) + '<small>/s avg</small></dd></div>'; }).join('') + '</dl>';
   }
 
-  // Node vs Rust, each row scaled to its own maximum (the rows differ 20x in size).
-  function languageChart() {
-    return '<ul class="stats-legend" aria-hidden="true"><li class="is-node">Node</li><li class="is-rust">Rust</li></ul>' +
-      '<ol class="stats-pairs">' + EVIDENCE.languages.map(function (l) {
-        var max = Math.max(l.node, l.rust), x = l.rust / l.node;
-        return '<li><p class="stats-pair-head"><span>' + esc(l.system) + '</span><b>' + x.toFixed(1) + '×</b></p>' +
-          '<p class="stats-pair-bar is-node" data-tip="Node: ' + fmt(l.node, 2) + '/s"><span style="--w:' + pct(l.node, max) + '"></span><em>' + fmt(l.node, 2) + '</em></p>' +
-          '<p class="stats-pair-bar is-rust" data-tip="Rust: ' + esc(l.rustLabel) + '/s"><span style="--w:' + pct(l.rust, max) + '"></span><em>' + esc(l.rustLabel) + '</em></p></li>';
-      }).join('') + '</ol>';
+  function transferTile() {
+    var sample = window.ArkStatsSample;
+    if (!sample) return '';
+    var byName = {}; sample.records.forEach(function (r) { byName[r.name] = r; });
+    var tabs = STAGE_ORDER.map(function (name, i) {
+      return '<button type="button" class="stats-stage-tab" role="tab" data-stage="' + name + '" aria-selected="' + (i === 2 ? 'true' : 'false') + '" tabindex="' + (i === 2 ? '0' : '-1') + '">' +
+        '<b>' + (i + 1) + '</b>' + esc(name.charAt(0) + name.slice(1).toLowerCase()) + '</button>';
+    }).join('');
+    return tile('stats-span-12 stats-transfer', 'The whole idea · a real transfer', '<h2>A transfer is five short lines of text</h2>' +
+      '<p class="stats-tile-copy">These are the exact bytes a server admits, generated from fixed keys, with real signatures and real identifiers. Pick a record, then pick any block. The parser\'s only job is to split on the dash; each block\'s own resolver decides what it means, and only when it is reached.</p>' +
+      '<div class="stats-stage-tabs" role="tablist" aria-label="The five records of one transfer">' + tabs + '</div>' +
+      '<div class="stats-stage-body" id="stats-stage-body"></div>' +
+      '<p class="stats-tile-copy"><a class="stats-inline-link" href="' + href(ARTICLE_GRAMMAR) + '" data-scene-link="' + ARTICLE_GRAMMAR + '">Read the short explainer</a> on why this grammar does almost no work.</p>', 'stats-transfer-title');
   }
 
-  function rebuildList() {
-    return '<ol class="stats-rebuild">' + EVIDENCE.rebuild.map(function (r) {
-      return '<li><span class="stats-rebuild-x">' + (r.after / r.before).toFixed(1) + '×</span>' +
-        '<span class="stats-rebuild-name">' + esc(r.system) + '</span>' +
-        '<span class="stats-rebuild-delta">' + fmt(r.before, 2) + ' → <b>' + fmt(r.after, 2) + '</b>/s</span></li>';
+  function renderStage(host, name) {
+    var sample = window.ArkStatsSample, rec = sample.records.filter(function (r) { return r.name === name; })[0];
+    var blocks = parseBlocks(rec), sig = blocks.filter(function (b) { return b.letter === 'S'; }).length, info = STAGE[name];
+    var chips = blocks.map(function (b, i) {
+      var cls = 'stats-block is-' + (b.letter === 'S' ? 'sig' : b.letter === 'C' ? 'ref' : (b.letter === 'G' || b.letter === 'H') ? 'who' : 'plain');
+      return '<button type="button" class="' + cls + '" data-block="' + i + '" aria-pressed="' + (i === 0 ? 'true' : 'false') + '"><i>' + esc(b.letter) + '</i><span>' + esc(shorten(b.value)) + '</span></button>';
+    }).join('<em aria-hidden="true">-</em>');
+    host.innerHTML =
+      '<div class="stats-stage-meta"><p><strong>' + esc(name.charAt(0) + name.slice(1).toLowerCase()) + '</strong> · signed by ' + esc(info.by) + '</p><p>' + esc(info.does) + '</p></div>' +
+      '<div class="stats-block-flow" role="group" aria-label="The blocks of this record, in order">' + chips + '</div>' +
+      '<div class="stats-block-detail" aria-live="polite"></div>' +
+      '<ul class="stats-stage-facts"><li><b>' + rec.text.length + '</b> characters</li><li><b>' + blocks.length + '</b> blocks</li><li><b>' + sig + '</b> signature' + (sig > 1 ? 's' : '') + '</li><li><b>' + blocks.filter(function (b) { return b.letter === 'C'; }).length + '</b> references</li></ul>';
+    function show(i) {
+      var b = blocks[i], r = ROLE[b.letter] || { name: b.letter, note: '' }, d = host.querySelector('.stats-block-detail');
+      [].forEach.call(host.querySelectorAll('.stats-block'), function (el, k) { el.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+      d.innerHTML = '<p class="stats-detail-head"><span class="stats-detail-letter">' + esc(b.letter) + '</span><strong>' + esc(b.label) + '</strong>' + (b.ctx ? ' · points at ' + esc(b.ctx) : '') + '</p>' +
+        '<p>' + esc(r.note) + '</p><p class="stats-detail-value" tabindex="0" aria-label="Full value">' + esc(b.value) + '</p>';
+    }
+    [].forEach.call(host.querySelectorAll('.stats-block'), function (el) {
+      el.addEventListener('click', function () { show(Number(el.getAttribute('data-block'))); });
+    });
+    show(0);
+  }
+
+  // ---- charts ---------------------------------------------------------------------------
+  function stack(model) {
+    var legend = model.parts.map(function (p) {
+      return '<li><i class="seg seg-' + p.k + '" aria-hidden="true"></i><span>' + esc(p.label) + '</span><b>' + p.v.toFixed(1) + '%</b></li>';
+    }).join('');
+    var bar = model.parts.map(function (p) {
+      return '<span class="seg seg-' + p.k + '" style="--w:' + p.v + '%" data-tip="' + esc(p.label + ': ' + p.v.toFixed(1) + '% of server CPU') + '" tabindex="0"></span>';
+    }).join('');
+    return '<div class="stats-stack"><p class="stats-stack-title"><b>' + esc(model.title) + '</b><span>' + esc(model.samples) + '</span></p>' +
+      '<div class="stats-stack-bar" role="img" aria-label="' + esc(model.title + ': ' + model.parts.map(function (p) { return p.label + ' ' + p.v + '%'; }).join(', ')) + '">' + bar + '</div>' +
+      '<ul class="stats-stack-legend">' + legend + '</ul></div>';
+  }
+
+  function wideBars(items, max, suffix, label) {
+    return '<ol class="stats-bars stats-bars-wide" aria-label="' + esc(label) + '">' + items.map(function (it) {
+      var shown = it.range || it.shown || fmt(it.value);
+      var tip = it.label + ': ' + shown + suffix + (it.note ? '. ' + it.note : '');
+      return '<li class="stats-bar-row" tabindex="0" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' +
+        '<span class="stats-bar-key">' + esc(it.label) + '</span>' +
+        '<span class="stats-bar-track"><span class="stats-bar' + (it.strong ? ' is-strong' : '') + '" style="--w:' + pct(it.value, max) + '"></span></span>' +
+        '<span class="stats-bar-value">' + esc(shown) + '</span></li>';
     }).join('') + '</ol>';
   }
 
-  function durableSteps(steps) {
-    var list = steps || EVIDENCE.durablePath;
-    var max = Math.max.apply(null, list.map(function (s) { return s.value; }));
-    return '<ol class="stats-steps">' + list.map(function (s, i) {
-      return '<li data-tip="' + esc(s.label + ': ' + fmt(s.value, 2) + '/s') + '"><span class="stats-step-col"><span style="--h:' + pct(s.value, max) + '"></span></span>' +
-        '<b>' + esc(s.valueLabel || fmt(s.value, 2)) + '</b><span class="stats-step-label">' + (i + 1) + ' · ' + esc(s.label) + '</span><small>' + esc(s.detail) + '</small></li>';
+  function batchCurve() {
+    var max = 2.5;
+    return '<ol class="stats-curve" aria-label="Speedup of batch signature checking by batch size">' + EVIDENCE.batchCurve.map(function (p) {
+      var tip = 'Batch of ' + p.n + ': ' + p.x.toFixed(2) + 'x one-at-a-time' + (p.note ? ' (' + p.note + ')' : '');
+      return '<li data-tip="' + esc(tip) + '" tabindex="0" aria-label="' + esc(tip) + '"><span class="stats-curve-col"><span class="' + (p.x < 1 ? 'is-slower' : '') + '" style="--h:' + pct(p.x, max) + '"></span></span><b>' + p.x.toFixed(2) + 'x</b><small>' + p.n + '</small></li>';
+    }).join('') + '</ol><p class="stats-chart-foot"><span>signatures checked together →</span><span>1.00x = no gain</span></p>';
+  }
+
+  function parseCost() {
+    var max = Math.log(120000);
+    return '<ol class="stats-bars stats-bars-wide" aria-label="Cost of parsing against signature checking, one record">' + EVIDENCE.parseCost.map(function (c) {
+      var w = (Math.log(c.ns) / max * 100).toFixed(2) + '%', shown = c.ns >= 10000 ? fmt(c.ns / 1000, 1) + ' µs' : fmt(c.ns / 1000, 2) + ' µs';
+      var tip = c.label + ': ' + shown + (c.note ? '. ' + c.note : '');
+      return '<li class="stats-bar-row" tabindex="0" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '"><span class="stats-bar-key">' + esc(c.label) + '</span>' +
+        '<span class="stats-bar-track"><span class="stats-bar' + (c.strong ? ' is-strong' : '') + '" style="--w:' + w + '"></span></span><span class="stats-bar-value">' + shown + '</span></li>';
+    }).join('') + '</ol><p class="stats-chart-foot"><span>log scale, one 674-byte agreement</span><span></span></p>';
+  }
+
+  function serverCards() {
+    return '<ul class="stats-servers">' + EVIDENCE.fleet.servers.map(function (s) {
+      var gain = ((s.now / s.before - 1) * 100).toFixed(0);
+      var tip = s.name + ': ' + fmt(s.now) + '/s now, ' + fmt(s.before) + '/s before batch checks, CPU ' + s.busy + '% busy';
+      return '<li class="stats-server" tabindex="0" data-tip="' + esc(tip) + '"><p class="stats-server-head"><b>' + esc(s.name) + '</b><span>' + s.cores + ' cores</span></p>' +
+        '<p class="stats-server-rate"><strong>' + fmt(s.now) + '</strong><span>/s</span><em>+' + gain + '%</em></p>' +
+        '<p class="stats-server-was">was ' + fmt(s.before) + '/s · client' + (s.clients.indexOf('+') > -1 ? 's ' : ' ') + esc(s.clients) + '</p>' +
+        '<div class="stats-meter" role="img" aria-label="CPU ' + s.busy + ' percent busy"><span style="--w:' + s.busy + '%"></span></div>' +
+        '<p class="stats-server-note">' + s.busy.toFixed(1) + '% CPU · ' + esc(s.note) + '</p></li>';
+    }).join('') + '</ul>';
+  }
+
+  function fleetLadder() {
+    var items = [
+      { label: 'Certified fabric, 4 quorums', value: 6041, shown: '5,711-6,041', note: 'Threshold certificates, accepted finality. Deployed.' },
+      { label: 'Grammar prototype, one record per trip', value: RUN.before, shown: fmt(RUN.before), note: 'Whole fleet, 20 s window' },
+      { label: 'Grammar prototype + batch signature checks', value: RUN.total, shown: fmt(RUN.total), note: RUN.transfers.toLocaleString('en-US') + ' transfers, 0 failures', strong: true }
+    ];
+    return wideBars(items, 26000, '/s', 'Whole-fleet transfers per second');
+  }
+
+  function trail() {
+    return '<ol class="stats-trail">' + EVIDENCE.trail.map(function (t) {
+      var num = t.from ? '<p class="stats-trail-num"><span>' + esc(t.from) + '</span><i aria-hidden="true">→</i><b>' + esc(t.to) + '</b><small>' + esc(t.unit) + '</small></p>' : '';
+      return '<li class="stats-trail-item is-' + t.kind + '"><p class="stats-trail-tag">' + esc(t.tag) + '</p><h3>' + esc(t.title) + '</h3>' + num + '<p>' + esc(t.body) + '</p></li>';
     }).join('') + '</ol>';
   }
 
-  // Two topologies, same hop-reduction code, opposite winner -- the real
-  // finding from 2026-10-07's GPU-box test (bench-003 Sec 9).
-  function rttChart() {
-    return '<ul class="stats-legend" aria-hidden="true"><li class="is-node">4 round trips</li><li class="is-rust">1 round trip</li></ul>' +
-      '<ol class="stats-pairs">' + EVIDENCE.rttComparison.map(function (r) {
-        var max = Math.max(r.old, r.new);
-        return '<li><p class="stats-pair-head"><span>' + esc(r.topology) + '</span><b>' + esc(r.xLabel) + '</b></p>' +
-          '<p class="stats-pair-bar is-node" data-tip="4 round trips: ' + fmt(r.old, 2) + '/s"><span style="--w:' + pct(r.old, max) + '"></span><em>' + fmt(r.old, 2) + '</em></p>' +
-          '<p class="stats-pair-bar is-rust" data-tip="1 round trip: ' + fmt(r.new, 2) + '/s"><span style="--w:' + pct(r.new, max) + '"></span><em>' + fmt(r.new, 2) + '</em></p></li>';
-      }).join('') + '</ol>';
+  function compareTable() {
+    var c = EVIDENCE.compare;
+    return '<div class="stats-table-wrap"><table class="stats-table stats-table-wrapped"><thead>' + headRow(c.cols) + '</thead><tbody>' +
+      c.rows.map(function (r) { return row([esc(r[0]), esc(r[1]), esc(r[2])]); }).join('') + '</tbody></table></div>';
   }
 
   function rawTables() {
-    return '<details class="stats-raw"><summary>All measurements, as tables</summary>' +
-      '<h3>FXN value-object registry (defxn-defi)</h3><p>Each transfer is 3 real signed HTTP round trips (agreement, recipient-signed output, fulfillment) against a live deployed node.</p>' +
-      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['Path', 'Count', 'Concurrency', 'Throughput', 'p50', 'Failures']) + '</thead><tbody>' +
-      row(['Full daemon (old, bundled, pre-fix)', '1,000', '20', '6.82/s', '2885 ms', '0']) +
-      row(['defxn-defi, real fleet (flx-mk2)', '2,000', '150', '<strong>137.25/s</strong>', '1057 ms', '0']) +
-      row(['defxn-defi, local (this machine)', '1,000', '100', '476/s', '207 ms', '0']) +
-      '</tbody></table></div>' +
-      '<h3>Agreement-fabric, minimal certifier daemon</h3><p>3-of-3 attesting committee. Accepted finality stops at the quorum-signed certificate; durable finality also waits for all three validators to commit it and the successor to be registered.</p>' +
-      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['Finality', 'Count', 'Concurrency', 'Old (bundled daemon)', 'New (minimal daemon)', 'Improvement']) + '</thead><tbody>' +
-      row(['Accepted', '4,000', '150', '121.29/s', '<strong>291.79/s</strong>', '2.4x']) +
-      row(['Durable', '4,000', '150', '68.22/s', '<strong>139.47/s</strong>', '2.0x']) +
-      '</tbody></table></div>' +
-      '<h3>Rust on the real fleet</h3>' +
-      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['System', 'Count/Concurrency', 'Node (real fleet)', 'Rust (real fleet)', 'Result']) + '</thead><tbody>' +
-      row(['FXN value-object transfers', '2,000/150', '137.25/s', '<strong>151.37/s</strong>', '1.1x']) +
-      row(['Agreement-fabric, accepted', '8,000-24,000/150-2,400', '291.79/s', '<strong>~3,000-3,300/s</strong>', '11.3x']) +
-      row(['Agreement-fabric, durable (group commit)', '4,000/150', '139.47/s', '182.70/s', '1.3x']) +
-      row(['Agreement-fabric, durable (no redundant fsync)', '—', '139.47/s', '<strong>354.54/s</strong>', '2.5x']) +
-      '</tbody></table></div>' +
-      '<p class="stats-note">The FXN Rust row ran client and server on the same box; the Node row used a real two-node path. Not perfectly matched yet.</p>' +
-      '<h3>Fleet ceiling</h3>' +
-      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['Configuration', 'Throughput', 'Audit runs', 'Failures']) + '</thead><tbody>' +
-      row(['One 2-of-2 quorum (shipped, two-phase path)', '<strong>~2,900-3,300/s</strong>', 'Repeated sweeps, concurrency 150-2,400', '0']) +
-      row(['Aggregate: 4 independent quorums, concurrent', '<strong>5,711-6,041/s</strong>', '5 consecutive runs', '1 transient timeout / 24,000 closures']) +
-      '</tbody></table></div></details>';
+    var f = EVIDENCE.fleet;
+    return '<details class="stats-raw"><summary>Every measurement, as tables</summary>' +
+      '<h3>Whole fleet, concurrent (bench-003 §15)</h3><p>Four servers and six clients started from one wall-clock instant; ' + fmt(f.transfers) + ' transfers in a ' + f.window + ' window, zero failures. Batch checking on, five transfers per write.</p>' +
+      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['Server', 'Cores', 'Client(s)', 'Transfers/s', 'Before batch', 'Server CPU']) + '</thead><tbody>' +
+      f.servers.map(function (s) { return row([esc(s.name), s.cores, esc(s.clients), '<strong>' + fmt(s.now) + '</strong>', fmt(s.before), s.busy + '%']); }).join('') +
+      row(['<strong>Fleet</strong>', '18', '6 clients', '<strong>' + fmt(f.total) + '</strong>', fmt(f.before), '']) + '</tbody></table></div>' +
+      '<h3>One box, same four cores (bench-003 §14-15)</h3><p>Server pinned to 4 cores, client on 3 others, accepted finality, 300 concurrent, three runs each.</p>' +
+      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['Path', 'Runs (transfers/s)', 'Mean']) + '</thead><tbody>' +
+      EVIDENCE.ladder.map(function (l) { return row([esc(l.label), esc(l.range), fmt(l.value)]); }).join('') +
+      row(['Pool, 1 verifier thread', '4,567-4,735', '4,628']) + '</tbody></table></div>' +
+      '<h3>Certified fabric, for reference (BENCH-003 §1-8)</h3><p>Threshold-certificate path, deployed. Quote these with their finality label.</p>' +
+      '<div class="stats-table-wrap"><table class="stats-table"><thead>' + headRow(['Configuration', 'Throughput', 'Evidence']) + '</thead><tbody>' +
+      row(['One quorum, accepted', '~2,900-3,300/s', 'Concurrency sweeps 150-2,400, 0 failures']) +
+      row(['Four quorums side by side, accepted', '<strong>5,711-6,041/s</strong>', '5 consecutive runs; 1 transient timeout in 24,000']) +
+      row(['One quorum, durable (replicated and registered)', '<strong>676-827/s</strong>', '5 audited runs, 0 failures']) + '</tbody></table></div></details>';
   }
 
   ArkUI.pageModules.stats = {
@@ -203,61 +300,84 @@
       page.className = 'ark-page task-page stats-page';
       page.setAttribute('aria-labelledby', 'stats-title');
       var stats = window.ArkStatsHighlights || { measured: '', scope: '' };
-      page.innerHTML =
-        '<div class="stats-shell"><div class="stats-bento">' +
-        tile('stats-hero', '', '<p class="stats-kicker">Measured, not claimed</p>' +
-          '<h1 id="stats-title">Mesh performance</h1>' +
-          '<p>Real runs on the production fleet, Node and Rust head to head. Both systems were rebuilt as minimal, single-purpose daemons and measured again.</p>' +
-          '<p class="stats-chips"><span>' + esc(stats.measured) + '</span><span>InterServer VPS fleet</span><span>8 machines</span>' +
-          '<span class="stats-live-chip" id="stats-live-chip" data-state="loading">Checking fleet status…</span></p>' +
-          '<a class="stats-monitor-link" href="' + href('monitor') + '" data-scene-link="monitor">Open the live monitor <span aria-hidden="true">→</span></a>') +
-        kpis() +
+      var kpis = [
+        { v: fmt(RUN.total), u: 'transfers/s', l: 'Whole fleet · registered grammar', d: 'Ten machines, four servers at once, ' + RUN.window + ', ' + fmt(RUN.transfers) + ' transfers, 0 failures. Prototype, accepted finality.', lead: true },
+        { v: '~3x', u: 'per core', l: 'Same four cores', d: 'About 1,900 transfers/s over HTTP + JSON, about 5,700-5,900 on the grammar with batch checks.' },
+        { v: '2%', u: 'of server CPU', l: 'The grammar itself', d: 'Signature checks are 55%. The parser is not the cost.' },
+        { v: '0', u: 'failures', l: 'Every run on this page', d: RUN.transfers.toLocaleString('en-US') + ' transfers in the fleet run alone.' }
+      ];
+      page.innerHTML = '<div class="stats-shell"><div class="stats-bento">' +
+        tile('stats-hero', '', '<p class="stats-kicker">Measured, not claimed</p><h1 id="stats-title">How fast, and why</h1>' +
+          '<p>A transfer is five short lines of text. Parsing them is about 2% of a server\'s work. Below: the real bytes, where the time goes, what each step bought, every wrong turn on the way, and what none of it proves.</p>' +
+          '<p class="stats-chips"><span>' + esc(stats.measured) + '</span><span>10 machines, 2 providers</span><span class="stats-live-chip" id="stats-live-chip" data-state="loading">Checking fleet status…</span></p>' +
+          '<div class="stats-cta"><a class="stats-monitor-link" href="' + href(ARTICLE_STORY) + '" data-scene-link="' + ARTICLE_STORY + '">Read the whole story <span aria-hidden="true">→</span></a>' +
+          '<a class="stats-monitor-link is-quiet" href="' + href('monitor') + '" data-scene-link="monitor">Live monitor <span aria-hidden="true">→</span></a></div>') +
+        kpis.map(function (k) {
+          return tile('stats-kpi' + (k.lead ? ' stats-kpi-lead' : ''), esc(k.l), '<p class="stats-kpi-value"><strong>' + esc(k.v) + '</strong><span>' + esc(k.u) + '</span></p><p class="stats-kpi-detail">' + esc(k.d) + '</p>');
+        }).join('') +
 
-        tile('stats-span-7', 'Fleet capacity · five audits', '<h2>Four quorums side by side clear 6,000/s</h2>' +
-          '<p class="stats-tile-copy">Each run sums four independent quorums, each with its own pool. Two of five runs cleared 6,000/s.</p>' + auditChart(), 'stats-audit-title') +
-        tile('stats-span-5', 'Where it comes from', '<h2>Two strong quorums carry the load</h2>' +
-          '<p class="stats-tile-copy">Average share per quorum across the five audits. A single quorum peaks around 2,900–3,300/s when its weaker validator saturates its 2 vCPUs.</p>' + quorumShare(), 'stats-share-title') +
+        transferTile() +
 
-        tile('stats-span-7', 'Node vs Rust · same fleet', '<h2>Rust wins every row measured</h2>' + languageChart() +
-          '<p class="stats-tile-copy">The widest gap is on accepted finality, the CPU- and dispatch-bound path. Rust builds are new and still run beside the Node originals.</p>', 'stats-lang-title') +
-        tile('stats-span-5', 'Bundled → minimal daemon', '<h2>Taking each system out of the do-everything miner</h2>' + rebuildList() +
-          '<p class="stats-tile-copy">Same hardware, same network path, Node in both columns.</p>', 'stats-rebuild-title') +
+        tile('stats-span-7', 'Where a server\'s time goes', '<h2>Before and after: the shape changed</h2>' +
+          stack(EVIDENCE.cpuBefore) + stack(EVIDENCE.cpuAfter) +
+          '<p class="stats-tile-copy">Shares of each server\'s own CPU under load, from call-stack profiles. The two servers run at different speeds, so compare the shapes, not the areas: HTTP and JSON were over half of the old one; signature checks are over half of the new one.</p>', 'stats-cpu-title') +
+        tile('stats-span-5', 'Parsing against checking', '<h2>The parser is the cheap part</h2>' + parseCost() +
+          '<p class="stats-tile-copy">One real agreement of 11 blocks. Splitting and resolving it costs about 3 µs; two signatures cost 113 µs. Decoding every field into a tree first costs more than the whole door check, so the server slices stored records instead.</p>', 'stats-parse-title') +
 
-        tile('stats-span-6', 'Rust durable path', '<h2>From 3x slower to 2.5x faster</h2>' + durableSteps(), 'stats-durable-title') +
-        tile('stats-span-6 stats-joins', 'Auto-join', '<h2>A node joins with one address</h2>' +
-          '<p class="stats-tile-copy">A joining node needs one existing member’s address and a shared admission secret. Membership is gossiped, so one call converges the set. On the real fleet a new node became an interchangeable validator, confirmed from every node’s own view, and a node from another quorum was correctly rejected.</p>' +
-          '<p class="stats-zero"><strong>0</strong><span>failures across every benchmark run, both languages</span></p>', 'stats-join-title') +
+        tile('stats-span-7', 'The ladder · same four cores', '<h2>What each step bought</h2>' + wideBars(EVIDENCE.ladder, 6500, ' transfers/s', 'Transfers per second on the same four cores') +
+          '<p class="stats-tile-copy">Accepted finality, 300 concurrent, three runs each; ranges are the lowest and highest run. Dropping HTTP and tree-building took most of it. Sending the whole transfer in one write and checking signatures in batches took the rest.</p>', 'stats-ladder-title') +
+        tile('stats-span-5', 'Batch signature checks', '<h2>Batching pays only when the batch is big</h2>' + batchCurve() +
+          '<p class="stats-tile-copy">Checking one signature in a batch is slower than checking it alone. From about a dozen up it is twice as fast. A server can only get a big batch by pooling signatures, so it measured two ways to do that.</p>' +
+          wideBars(EVIDENCE.batchModes, 6500, ' transfers/s', 'Transfers per second by verification mode') +
+          '<p class="stats-tile-copy">One caution travels with this: batch checking can accept a signature that checking one at a time would reject, if the signer crafts it. Safe for a single notebook; every party that must agree on validity has to run the same mode.</p>', 'stats-batch-title') +
 
-        tile('stats-span-6', 'Quorum A, fixed today (2026-10-07)', '<h2>A stale fix, plus a real thread bug</h2>' + durableSteps(EVIDENCE.durableFixToday) +
-          '<p class="stats-tile-copy">The 354.54/s fix above was real but had never been re-applied to this quorum; a routing bug and a thread-starvation bug (server threads silently capped at CPU core count -- 2) were also found and fixed. 5 audited runs, zero failures.</p>', 'stats-fix-title') +
-        tile('stats-span-6', 'One round trip vs four: it depends on distance', '<h2>A redesign that loses here, wins there</h2>' + rttChart() +
-          '<p class="stats-tile-copy">Collapsing durable finality’s chain to one server-orchestrated round trip was tried on this fleet’s own sub-millisecond links (loses, more serialization than it saves) and on a rented box with a genuine ~71ms path to the fleet (wins ~2x) -- same code, opposite answer, both real. 5 audited runs each, zero failures on the new path either way.</p>', 'stats-rtt-title') +
+        tile('stats-span-12', 'The whole fleet · one run, six clients at once', '<h2>' + fmt(RUN.total) + ' transfers a second, machine by machine</h2>' + serverCards() +
+          '<p class="stats-tile-copy">Same start instant, ' + RUN.window + ' window, zero failures. Three of the four servers were 86-92% busy, so those pairs are server-bound; <strong>mk2</strong> was waiting on its one-core client. The percentage is the gain over the same fleet without batch checks.</p>' + fleetLadder(), 'stats-fleet-title') +
 
-        tile('stats-span-12 stats-compute-proof', 'Tested, not assumed', '<h2>A GPU doesn’t help this -- and we proved it, not guessed it</h2>' +
-          '<p class="stats-tile-copy">This protocol is signatures and network round trips, not computation -- CPU sat 85-95% idle on every box, in every test, all night. We’re eco by design: no heavy hardware required to run a validator. A rented 8-core/96GB-VRAM GPU server (its GPU never touched -- only its CPU and its real network distance were useful) proved this directly: run the same standalone quorum on this session’s own laptop and on that rented server, and the two land within 2.5% of each other -- not the 5-10x a compute-bound workload would show.</p>' +
-          durableSteps(EVIDENCE.computeProof) +
-          '<p class="stats-tile-copy">Summed with the existing fleet (' + EVIDENCE.computeProofTotal.fleet + '/s, 4 quorums) these three add ' + fmt(EVIDENCE.computeProofTotal.addOn, 0) + '/s more, for a combined <strong>' + EVIDENCE.computeProofTotal.grand + '/s</strong> across every quorum run concurrently tonight -- stated plainly as what it is: independent, isolated quorums summed, mixing the real production fleet with temporary rented and local test hardware, not a claim about standing fleet capacity.</p>', 'stats-compute-title') +
+        tile('stats-span-7', 'Not like for like', '<h2>Faster is not the same as comparable</h2>' + compareTable() +
+          '<p class="stats-tile-copy">The certified fabric does more per transfer. The prototype is faster partly because it does less. Both numbers are real; neither should be quoted without its label.</p>', 'stats-compare-title') +
+        tile('stats-span-5 stats-scope', 'What none of this proves', '<ul class="stats-scope-list is-single">' +
+          '<li>Accepted finality only: nothing is replicated or flushed, so a crash loses it. A durable path over the wire does not exist yet.</li>' +
+          '<li>No threshold certificate, so no Byzantine tolerance on this path.</li>' +
+          '<li>Clients were fleet machines, not the public. It is a prototype, not a deployed service.</li>' +
+          '<li>Batch checking is cofactored; unsafe where several parties must agree on validity until they share one mode.</li>' +
+          '<li>No independent security review has looked at any of this.</li></ul>', 'stats-scope-title') +
 
-        tile('stats-span-8 stats-scope', 'What this does not prove yet', '<ul class="stats-scope-list">' +
-          '<li>Paths ran node to node between fleet machines, not from an arbitrary public client.</li>' +
-          '<li>Each quorum is 2–3 nodes. Nothing here speaks to 50 or 500 validators, or to adversarial conditions.</li>' +
-          '<li>Auto-join has no vote or stake, and membership does not yet survive a validator restart.</li>' +
-          '<li>No independent security audit has reviewed any of this.</li>' +
-          '<li>FXN is pre-genesis. These are protocol-throughput numbers, not a live economy.</li>' +
-          '</ul>', 'stats-scope-title') +
-        tile('stats-span-4 stats-evidence', 'Evidence', '<ul class="stats-links">' +
-          '<li><a href="/docs/evidence/bench-003-rust-fleet-ceiling.md">BENCH-003 · Rust, fleet ceiling, auto-join</a></li>' +
-          '<li><a href="/docs/evidence/bench-001-verification.md">BENCH-001 · First verification record</a></li>' +
-          '</ul>', 'stats-evidence-title') +
+        tile('stats-span-12 stats-trail-tile', 'The trail · including the wrong turns', '<h2>How we got here, and what we got wrong</h2>' +
+          '<p class="stats-tile-copy">One working session, ten steps. Four were wins, one lost before it won, four were wrong, refuted or harness bugs, and one was smaller than hoped. Each is in the evidence log with its numbers.</p>' + trail() +
+          '<p class="stats-tile-copy"><a class="stats-inline-link" href="' + href(ARTICLE_STORY) + '" data-scene-link="' + ARTICLE_STORY + '">Read the full story</a> in plain language.</p>', 'stats-trail-title') +
+
+        tile('stats-span-12 stats-evidence', 'Read and verify', '<ul class="stats-links">' +
+          '<li><a href="' + href(ARTICLE_STORY) + '" data-scene-link="' + ARTICLE_STORY + '">Article · How we got fast, and everything we got wrong</a></li>' +
+          '<li><a href="' + href(ARTICLE_GRAMMAR) + '" data-scene-link="' + ARTICLE_GRAMMAR + '">Article · The grammar does almost no work</a></li>' +
+          '<li><a href="/docs/evidence/bench-003-rust-fleet-ceiling.md">BENCH-003 · The full investigation log, sections 1-15</a></li>' +
+          '<li><a href="/docs/mainnet-readiness.md">Mainnet readiness · what the prototype does and does not change</a></li>' +
+          '<li><a href="/docs/evidence/bench-001-verification.md">BENCH-001 · First verification record</a></li></ul>', 'stats-evidence-title') +
 
         tile('stats-span-12 stats-raw-tile', '', rawTables()) +
         '</div></div>';
       host.appendChild(page);
-      // One real, live check fetched on load -- not polled, since this page
-      // is a static audited snapshot (every other number here carries a
-      // date, deliberately). Failure leaves the chip saying so plainly,
-      // never a guessed or stale-looking number; a real reading links to
-      // /monitor, which polls continuously.
+
+      // Record picker for the real transfer.
+      var body = page.querySelector('#stats-stage-body');
+      if (body && window.ArkStatsSample) {
+        var tabs = [].slice.call(page.querySelectorAll('.stats-stage-tab'));
+        var select = function (name) {
+          tabs.forEach(function (t) { var on = t.getAttribute('data-stage') === name; t.setAttribute('aria-selected', on ? 'true' : 'false'); t.tabIndex = on ? 0 : -1; });
+          renderStage(body, name);
+        };
+        tabs.forEach(function (t, i) {
+          t.addEventListener('click', function () { select(t.getAttribute('data-stage')); });
+          t.addEventListener('keydown', function (e) {
+            var k = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+            if (!k) return;
+            var next = tabs[(i + k + tabs.length) % tabs.length]; next.focus(); select(next.getAttribute('data-stage')); e.preventDefault();
+          });
+        });
+        select('AGREEMENT');
+      }
+
+      // One real, live check fetched on load, not polled. Failure says so plainly.
       var chip = page.querySelector('#stats-live-chip');
       if (chip && window.fetch) {
         var controller = new AbortController();
@@ -270,15 +390,9 @@
             chip.dataset.state = s.quorumsOnline === s.quorumsTotal ? 'ok' : 'warn';
             chip.textContent = s.quorumsOnline + '/' + s.quorumsTotal + ' quorums online right now';
           })
-          .catch(function () {
-            clearTimeout(timer);
-            chip.dataset.state = 'warn';
-            chip.textContent = 'Live status unavailable';
-          });
+          .catch(function () { clearTimeout(timer); chip.dataset.state = 'warn'; chip.textContent = 'Live status unavailable'; });
       }
-      // The router labels, hides and focuses the element mount() returns;
-      // returning nothing made navigation to /stats throw and strand the page.
       return page;
-    },
+    }
   };
 })();

@@ -16,6 +16,11 @@
 
   var PROTOCOL = 'ark-identity-http-v1';
   var DEFAULT_BASE = 'https://cd1.defxn.com';
+  // The real ARK_MINER_NETWORK this fleet's miners run as (confirmed live
+  // against /opt/flux-miner/defxn/node.env on flx-bk2/flx-mk2) -- shown in
+  // every scoped-authorization claim's "Network" row. "flux-mainnet" was a
+  // placeholder label that never matched what's actually deployed here.
+  var NETWORK_ID = 'defxn';
 
   function toBase64Url(bytes) {
     var binary = '';
@@ -69,6 +74,7 @@
 
   window.ArkUI.directoryTransport = {
     DEFAULT_BASE: DEFAULT_BASE,
+    NETWORK_ID: NETWORK_ID,
     call: call,
   };
 })();

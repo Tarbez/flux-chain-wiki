@@ -6,6 +6,10 @@ announcement — it is the list of what stands between tonight's benchmark
 state and something safe to call mainnet, organized so sequencing decisions
 can be made deliberately rather than discovered one incident at a time.
 
+Updated 2026-10-07 (evening): a second front opened the same night, the
+registered-grammar wire prototype. It changes what the *throughput* gaps mean
+but closes none of the blocking ones; see "The wire prototype" below.
+
 Status vocabulary matches `docs/status.md`: `Live` (implemented and
 verified), `Partial` (implemented with a named missing boundary), `Not
 built` (no capability exists), `Unverified` (not established either way).
@@ -133,6 +137,11 @@ finality guarantee a number describes either way — "6,000 tx/s" and
 "~700-800 tx/s per quorum, durably" are both true and very different
 claims.
 
+Superseded for throughput planning, not for the durability gap itself: the
+2026-10-07 wire prototype (below) moved the accepted-finality ceiling a long
+way on the same hardware, and it has no durable path yet. The ~700-800/s
+durable number above is still the only durable number there is.
+
 ### 4. Nothing survives a restart
 
 **Status: Not built.** Confirmed by hitting it twice tonight: auto-joined
@@ -212,6 +221,40 @@ transfer proposals for free today; the cost of a proposal is currently
 zero. FXN is pre-genesis (no real token, unchanged from the existing
 `/stats` scope statement), so this has not mattered yet — it will the
 moment real value is at stake.
+
+## The wire prototype: faster, and what that does not buy
+
+`defxn-defi-rs/dense-wire` runs the same value-transfer idea on the registered
+FLX agreement-lifecycle grammar (`flux-core`) over raw TCP instead of HTTP and
+JSON. Measured on this fleet (BENCH-003 §14-15): **24,908 transfers/s across
+ten machines, 0 failures**, against 5,711-6,041/s for four certified quorums.
+On the same four cores: ~1.9k/s over HTTP + JSON, ~4.8k/s on the grammar, and
+~5.7-5.9k/s with batch signature verification. Where a server's time goes: the
+grammar layer is ~2%, signature verification ~55%, so the next gains are
+cryptographic (standing intents/offers, a digest holder), not parsing.
+
+Status, in this document's vocabulary:
+
+| Capability | Status | Named boundary |
+| --- | --- | --- |
+| Registered-grammar admission (flux-core resolvers, role law, required roles, `C` order) | Live in the prototype | Not deployed as a service; no systemd unit, no TLS (see #5, #7) |
+| Accepted finality at fleet scale | Live in the prototype | Measured with fleet machines as clients, not public ones |
+| Durable (replica-confirmed) finality over the wire | **Not built** | Would cost roughly the 2.5x measured in BENCH-003 §11-12 |
+| Threshold certificate / Byzantine tolerance on this path | **Not built** | Bilateral signatures only; the certified fabric remains the only path with a certificate |
+| Batch signature verification | Partial | Cofactored: can accept a signature one-at-a-time `verify` rejects. Safe for one notebook; unsafe for any deployment where several parties must agree on validity, until they all run one mode or the gap is closed |
+| Persistence | Partial | Uses the existing JSON-line log; membership/state survives only as far as that log does |
+
+Three consequences for the plan above:
+
+1. **A mainnet number must say which path it describes.** "24,908/s",
+   "5,711-6,041/s" and "~700-800/s durably" are all true, are three different
+   protocols' guarantees, and must never be quoted without the label.
+2. **Gap #3 (durable finality) is now the thing standing between the fast path
+   and being comparable.** Until a replica-confirmed wire path exists, the
+   prototype's speed is an accepted-finality speed.
+3. **Gaps #1, #2, #4, #5, #6 apply to the prototype unchanged.** It is faster,
+   not safer: same fleet shared with production, no admission policy beyond the
+   notebook's own rules, no TLS, no independent review.
 
 ## What is NOT a gap (already real, worth stating plainly)
 

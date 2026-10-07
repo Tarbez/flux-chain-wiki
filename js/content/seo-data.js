@@ -272,6 +272,18 @@ ArkSEO.define({
       "ogImage": "",
       "canonical": ""
     },
+    "stats": {
+      "title": "",
+      "description": "How fast the protocol is, why, and how we found out: a real transfer taken apart block by block, where server time goes, and every wrong turn on the way.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "monitor": {
+      "title": "",
+      "description": "Live health of the DEFXN fleet: which machines answer, how fast, and whether quorum members agree on membership. Audited throughput is labelled as not live.",
+      "ogImage": "",
+      "canonical": ""
+    },
     "lifecycle": {
       "title": "Agreement lifecycle — DEFXN",
       "description": "Follow an illustrative request through intent, offer, agreement, fulfillment, and receipt. Inspect what each signed record establishes—and what it does not.",
@@ -325,6 +337,18 @@ ArkSEO.define({
     "governance-without-a-validator-set": {
       "title": "",
       "description": "Explore ephemeral authority cells and the distinction between shared mesh-operations governance and an individual network DAO's roster.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "how-we-got-fast-and-what-we-got-wrong": {
+      "title": "",
+      "description": "The full trail from under 7 transfers a second to about 25,000 across ten machines, including every wrong turn, and what the final number does and does not prove.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "the-grammar-does-almost-no-work": {
+      "title": "",
+      "description": "What a DEFXN transfer looks like on the wire, why a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else.",
       "ogImage": "",
       "canonical": ""
     }
