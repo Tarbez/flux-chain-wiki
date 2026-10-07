@@ -31,8 +31,8 @@
          live numbers along the bottom that opens the matching view. */
       page.innerHTML = '<div class="account-shell"><header class="account-hero"><p class="account-promise">Your identity · your keys</p>' +
         '<div class="account-profile"><div class="account-avatar" data-account-avatar aria-hidden="true">↗</div><div class="account-heading"><h1 id="account-title">Own your identity.</h1><span class="account-status" data-account-status>Signed out</span></div></div>' +
-        '<p class="account-intro" data-account-intro>One portable recovery file. No custodial account. Your root key stays yours.</p>' +
-        '<ul class="account-opens" data-account-opens aria-label="What one identity opens"><li><strong>Wallet</strong><span>Hold, send and receive FXN.</span></li><li><strong>Credits</strong><span>Pay resolvers for the work they do.</span></li><li><strong>Contacts</strong><span>Invite people by identity.</span></li><li><strong>Publishing</strong><span>Deploy bundles and track names.</span></li></ul>' +
+        '<p class="account-intro" data-account-intro>No custodial account and no password reset. One file holds your keys, and only you hold the file.</p>' +
+        '<ol class="account-flow" data-account-opens aria-label="How signing in works"><li><span class="account-flow-mark" data-account-icon="document"></span><strong>Your Auth Kit</strong><small>One .auth.flx file on your device</small></li><li><span class="account-flow-mark" data-account-icon="authority"></span><strong>Unlocked here</strong><small>Your PIN never leaves this browser</small></li><li><span class="account-flow-mark" data-account-icon="layers"></span><strong>Everything opens</strong><small>Wallet, contacts and publishing</small></li></ol>' +
         '<section class="account-state" aria-label="Identity details" hidden><dl><div><dt>Identity ID</dt><dd data-account-id>—</dd></div><div><dt>Root key</dt><dd data-account-root>—</dd></div>' +
         '<div><dt>Wallet address</dt><dd data-account-wallet>—</dd></div><div><dt>Security</dt><dd data-account-security>—</dd></div></dl>' +
         '<p data-account-verification>Unlock a kit to verify its root against its recovery phrase.</p></section></header>' +
@@ -43,12 +43,11 @@
         '<button type="button" role="tab" data-account-tab="contacts" aria-selected="false">Contacts</button>' +
         '<button type="button" role="tab" data-account-tab="mesh" aria-selected="false">Mesh</button>' +
         '</nav>' +
-        '<section class="account-auth" data-account-panel="session" aria-label="Account session"><p class="account-card-caption">Sign in on this device</p><div data-account-session-main><h2 class="account-session-title" data-account-session-title>Open your Auth Kit.</h2><p class="account-session-description" data-account-session-description>Choose the recovery file on this device to continue.</p><div data-account-auth></div>' +
-        '<p class="account-create-toggle" data-account-create-toggle-row>No kit yet? <button type="button" class="link-button" data-account-create-toggle>Create a new identity</button></p>' +
+        '<section class="account-auth" data-account-panel="session" aria-label="Account session"><nav class="account-tabs account-signin-tabs" data-account-create-toggle-row aria-label="Sign in or create"><button type="button" aria-pressed="true" data-account-create-back>Sign in</button><button type="button" aria-pressed="false" data-account-create-toggle>New identity</button></nav><div data-account-session-main><h2 class="account-session-title" data-account-session-title>Open your Auth Kit.</h2><p class="account-session-description" data-account-session-description>Choose the recovery file on this device to continue.</p><div data-account-auth></div>' +
         '<button type="button" data-account-forget hidden>Sign out</button><p class="account-storage-notice" data-account-storage-notice role="status" hidden></p>' +
         '<div class="account-cms"><a href="/bundle-deployer" data-scene-link="bundledeployer">Deploy a bundle →</a><a href="/account/domains" data-scene-link="account/domains">Your domains →</a><a hidden href="/admin" target="_blank" rel="opener" data-account-cms-open>Open CMS ↗</a><span hidden data-account-cms-local>Local editor available</span><span data-account-cms-status role="status"></span></div>' +
         '<p class="account-session-note">Nothing secret is stored here. This browser keeps only your name and public details; the kit, PIN and key stay on your device.</p></div>' +
-        '<div class="account-create" data-account-create-view hidden><button type="button" class="account-back" data-account-create-back>← Back to sign in</button><div data-account-create></div></div></section>' +
+        '<div class="account-create" data-account-create-view hidden><div data-account-create></div></div></section>' +
         '<section class="account-live" data-account-panel="defi" aria-labelledby="account-live-title" hidden><h2 class="account-visually-hidden" id="account-live-title">Wallet</h2>' +
         '<div class="account-wallet" data-account-wallet-view="home"><div class="account-balances"><article class="account-balance" data-account-fxn><small>FXN</small><strong data-account-fxn-balance>—</strong><span data-account-fxn-message>Sign in to check</span></article>' +
         '<article class="account-balance" data-account-credits><small>Credits</small><strong data-account-credits-balance>—</strong><span data-account-credits-message>Sign in to check</span></article></div>' +
@@ -686,6 +685,7 @@
         page.querySelector('.account-rail').hidden = !identity;
         page.querySelector('[data-account-opens]').hidden = !!identity;
         page.querySelector('[data-account-create-toggle-row]').hidden = !!identity;
+        if (identity && createView && !createView.hidden) showCreate(false);
         applyTabs();
         if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
         else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
@@ -695,7 +695,7 @@
         page.querySelector('#account-title').textContent = name;
         page.querySelector('[data-account-avatar]').textContent = identity ? name.slice(0, 2).toUpperCase() : '↗';
         page.querySelector('[data-account-status]').textContent = identity ? (unlocked ? (authenticated ? 'Session active · key unlocked' : 'Signing key verified locally') : (authenticated ? 'Session active · key locked' : 'Identity details saved · not signed in')) : 'Signed out';
-        page.querySelector('[data-account-intro]').textContent = identity ? (unlocked ? 'Your identity is verified and ready for this session.' : 'Your name and public details are saved here. Your Auth Kit is not saved.') : 'One portable recovery file. No custodial account. Your root key stays yours.';
+        page.querySelector('[data-account-intro]').textContent = identity ? (unlocked ? 'Your identity is verified and ready for this session.' : 'Your name and public details are saved here. Your Auth Kit is not saved.') : 'No custodial account and no password reset. One file holds your keys, and only you hold the file.';
         page.querySelector('[data-account-session-title]').textContent = identity ? (authenticated ? 'Session active.' : (unlocked ? 'Your key is unlocked.' : 'Select your Auth Kit again')) : 'Open your Auth Kit.';
         page.querySelector('[data-account-session-description]').textContent = identity ? (authenticated ? 'Publishing access is active. Reopen your Auth Kit only when you need to sign locally.' : unlocked ? 'Your key is available for this browser session.' : 'Choose the .auth.flx file on this device to restore signing access.') : 'Choose the recovery file on this device to continue.';
         var localEditor = ArkUI.cmsSession && ArkUI.cmsSession.isLocalDevelopment && ArkUI.cmsSession.isLocalDevelopment();
@@ -763,20 +763,29 @@
       var createView = page.querySelector('[data-account-create-view]');
       var sessionMain = page.querySelector('[data-account-session-main]');
       var createPanelHandle = null;
+      var createTab = page.querySelector('[data-account-create-toggle]');
+      var signInTab = page.querySelector('[data-account-create-back]');
       function showCreate(open) {
         createView.hidden = !open;
         sessionMain.hidden = open;
+        createTab.setAttribute('aria-pressed', String(open));
+        signInTab.setAttribute('aria-pressed', String(!open));
       }
-      page.querySelector('[data-account-create-toggle]').addEventListener('click', function () {
+      createTab.addEventListener('click', function () {
+        if (!createView.hidden) return;
         showCreate(true);
         if (!createPanelHandle && window.ArkAuthKitCreatePanel) {
           createPanelHandle = window.ArkAuthKitCreatePanel.mount(createPanelEl, {
-            actionClass: '', formClass: 'account-contacts-form',
+            actionClass: 'palette-solid', formClass: 'account-contacts-form',
             onDownloaded: function () { showCreate(false); if (createPanelHandle) createPanelHandle.reset(); },
           });
         } else if (createPanelHandle) { createPanelHandle.reset(); }
       });
-      page.querySelector('[data-account-create-back]').addEventListener('click', function () { showCreate(false); });
+      signInTab.addEventListener('click', function () { showCreate(false); });
+      // Line icons for the sign-in flow, from the shared set (js/ark/icons.js).
+      if (ArkUI.icon && page.querySelectorAll) Array.prototype.forEach.call(page.querySelectorAll('[data-account-icon]'), function (mark) {
+        mark.appendChild(ArkUI.icon(mark.getAttribute('data-account-icon')));
+      });
       var unsubscribeDomains = ArkUI.localDomains ? ArkUI.localDomains.subscribe(function (names) {
         if (fields.railDomains) fields.railDomains.textContent = String(names.length);
       }) : function () {};
