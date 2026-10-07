@@ -5,16 +5,13 @@
    uses success. Records are step links, so they take reference on hover/focus. */
 
 #scene .home-lifecycle {border-color:transparent;}
-#scene .home-lifecycle .home-lifecycle-caption {display:flex;align-items:center;justify-content:space-between;gap:12px;}
-#scene .home-lifecycle .home-lifecycle-caption span {padding:2px 8px;border-radius:999px;background:hsl(var(--text-strong) / .06);
- font:500 10px/1.5 var(--mono-font,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-faint));}
-.flow {--flow-step:3.2s;display:grid;gap:6px;margin-top:20px;}
+.flow {--flow-step:3.2s;position:relative;display:grid;gap:14px;margin-top:20px;}
 
 /* Now: the illustrated step, then its quote ------------------------------ */
-.flow-now {display:grid;gap:12px;align-content:start;padding:14px 18px 18px;border-radius:14px;
+.flow-now {position:relative;display:grid;gap:12px;align-content:start;padding:14px 18px 18px;border-radius:14px;
  background:radial-gradient(120% 90% at 0% 0%,hsl(var(--primary-100)),transparent 55%),hsl(var(--text-strong) / .04);}
 .flow-scene {display:block;width:100%;height:auto;overflow:visible;}
-.flow-says {display:block;min-height:2.7em;font:500 18px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
+.flow-says {display:block;min-height:2.7em;padding-right:40px;font:500 18px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
 .flow.flow-run .flow-says {animation:flow-caption 420ms ease-out both;}
 @keyframes flow-caption {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
 
@@ -95,38 +92,56 @@
 .flow.flow-run[data-complete="true"] .flow-seal {animation:flow-stamp 500ms cubic-bezier(.34,1.56,.64,1) 900ms both;}
 .flow[data-complete="true"] .flow-card-hash {fill:hsl(var(--success));}
 
-/* Ledger: five record tiles, which are also the step links. A future record
-   is an empty slot; the current one fills as the step plays; a written one
-   keeps its hash. */
-#scene .flow-ledger {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none;}
-#scene .flow-ledger li {min-width:0;text-align:left;}
-#scene .flow-ledger .flow-record {position:relative;display:grid;gap:2px;min-height:58px;margin:0;padding:10px 11px 12px;border:0;border-radius:10px;overflow:hidden;
- background:hsl(var(--text-strong) / .025);text-decoration:none;color:hsl(var(--text-faint)) !important;transition:background 240ms,color 240ms;}
-#scene .flow-ledger .flow-record-num {font:500 10px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;opacity:.8;}
-#scene .flow-ledger .flow-record-name {overflow:hidden;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);text-overflow:ellipsis;white-space:nowrap;}
-#scene .flow-ledger .flow-record-bar {position:absolute;left:0;right:0;bottom:0;height:3px;background:transparent;}
-#scene .flow-ledger .flow-record-bar::after {content:"";position:absolute;inset:0;background:hsl(var(--primary));transform:scaleX(0);transform-origin:left;}
-#scene .flow-ledger .flow-record[data-done] .flow-record-num::after {content:" ✓";}
-#scene .flow[data-complete="true"] .flow-ledger .flow-record .flow-record-num {color:hsl(var(--success));}
-#scene .flow-ledger .flow-record[data-done] {background:hsl(var(--text-strong) / .055);color:hsl(var(--text-muted)) !important;}
-#scene .flow-ledger .flow-record[data-current] {background:hsl(var(--text-strong) / .09);color:hsl(var(--text-strong)) !important;}
-#scene .flow-ledger .flow-record[data-current] .flow-record-bar::after {transform:none;}
-#scene .flow[data-playing="true"].flow-run .flow-record[data-current] .flow-record-bar::after {animation:flow-progress var(--flow-step) linear both;}
-#scene .flow-ledger .flow-record:is(:hover,:focus-visible) {background:hsl(var(--reference-100));color:hsl(var(--reference)) !important;}
+/* Steps: five nodes on one track, the step links that drive the scene.
+   The segment into a step fills once it is reached; while playing, the
+   segment out of the current step fills over the step's duration. */
+#scene .flow-ledger {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:0;padding:0 0 2px;list-style:none;}
+#scene .flow-ledger li {position:relative;min-width:0;}
+#scene .flow-ledger li:not(:first-child)::before,
+#scene .flow-ledger li:not(:first-child)::after {content:"";position:absolute;top:19px;left:calc(-50% + 20px);right:calc(50% + 20px);height:2px;border-radius:2px;background:hsl(var(--text-strong) / .08);}
+#scene .flow-ledger li:not(:first-child)::after {background:hsl(var(--primary-400));transform:scaleX(0);transform-origin:left;transition:transform 300ms;}
+#scene .flow-ledger li:has(> [data-done],> [data-current])::after {transform:none;}
+#scene .flow[data-playing="true"]:not([data-held]).flow-run .flow-ledger li:has(> [data-current]) + li::after {animation:flow-progress var(--flow-step) linear both;}
+#scene .flow-ledger .flow-record {display:grid;justify-items:center;gap:8px;min-height:0;margin:0;padding:4px 0 2px;border:0;border-radius:10px;background:none;
+ text-align:center;text-decoration:none;color:hsl(var(--text-faint)) !important;transition:color 200ms;}
+#scene .flow-ledger .flow-record-num {display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:hsl(var(--text-strong) / .06);
+ font:600 10px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.02em;transition:background 240ms,color 240ms,box-shadow 240ms;}
+#scene .flow-ledger .flow-record-name {max-width:100%;font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.005em;white-space:nowrap;}
+#scene .flow-ledger .flow-record[data-done] {color:hsl(var(--text-muted)) !important;}
+#scene .flow-ledger .flow-record[data-done] .flow-record-num {font-size:0;background:hsl(var(--primary-200));color:hsl(var(--primary));}
+#scene .flow-ledger .flow-record[data-done] .flow-record-num::after {content:"✓";font-size:12px;}
+#scene .flow-ledger .flow-record[data-current] {color:hsl(var(--text-strong)) !important;}
+#scene .flow-ledger .flow-record[data-current] .flow-record-num {background:hsl(var(--primary));color:hsl(var(--text-inverse));box-shadow:0 0 0 5px hsl(var(--primary-200));}
+#scene .flow[data-complete="true"] .flow-ledger li::after {background:hsl(var(--success));}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record .flow-record-num {background:hsl(var(--success-100));color:hsl(var(--success));box-shadow:none;}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record[data-current] .flow-record-num {font-size:0;}
+#scene .flow[data-complete="true"] .flow-ledger .flow-record[data-current] .flow-record-num::after {content:"✓";font-size:12px;}
+#scene .flow-ledger .flow-record:is(:hover,:focus-visible) {color:hsl(var(--reference)) !important;}
+#scene .flow-ledger .flow-record:is(:hover,:focus-visible) .flow-record-num {box-shadow:0 0 0 5px hsl(var(--reference-200));}
 #scene .flow-ledger .flow-record:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
 @keyframes flow-progress {from{transform:scaleX(0);}to{transform:scaleX(1);}}
 
-/* Foot: the one way onward, and the play control beside it. */
-#scene .home-lifecycle-foot {display:flex;align-items:center;gap:12px;margin-top:10px;}
-#scene .home-lifecycle .home-lifecycle-foot .home-lifecycle-all {flex:1;min-width:0;min-height:48px;margin:0;border:0;}
-#scene .flow-toggle {flex:none;display:grid;place-items:center;width:36px;height:36px;min-height:0;padding:0;border:0;border-radius:50%;
- background:hsl(var(--text-strong) / .06);color:hsl(var(--text-muted));cursor:pointer;transition:background 200ms,color 200ms;}
-#scene .flow-toggle svg {grid-area:1/1;width:12px;height:12px;fill:currentColor;}
+/* Play control: a quiet round button in the scene tile's bottom-right corner. */
+#scene .flow-toggle {position:absolute;right:14px;bottom:14px;z-index:1;display:grid;place-items:center;width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:50%;
+ background:hsl(var(--text-strong) / .07);color:hsl(var(--text-muted));cursor:pointer;transition:background 200ms,color 200ms;}
+#scene .flow-toggle svg {grid-area:1/1;width:11px;height:11px;fill:currentColor;}
 #scene .flow-toggle svg + svg,
-#scene .flow[data-playing="false"] + .home-lifecycle-foot .flow-toggle svg:first-child {display:none;}
-#scene .flow[data-playing="false"] + .home-lifecycle-foot .flow-toggle svg + svg {display:block;}
+#scene .flow[data-playing="false"] .flow-toggle svg:first-child {display:none;}
+#scene .flow[data-playing="false"] .flow-toggle svg + svg {display:block;}
 #scene .flow-toggle:is(:hover,:focus-visible) {background:hsl(var(--reference-200));color:hsl(var(--reference));}
 #scene .flow-toggle:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
+
+/* Onward: one action tile, kicker over label, arrow in a disc. */
+#scene .home-lifecycle .home-lifecycle-all {display:flex;align-items:center;gap:14px;min-height:0;margin:14px 0 0;padding:14px 14px 14px 18px;border:0;border-radius:14px;
+ background:hsl(var(--text-strong) / .045);text-decoration:none;color:hsl(var(--text-strong));transition:background 200ms;}
+#scene .home-lifecycle-all-copy {display:grid;gap:3px;min-width:0;}
+#scene .home-lifecycle-all-copy small {font:500 10px/1.3 var(--mono-font,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-faint));}
+#scene .home-lifecycle-all-copy span {font:500 15px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.01em;color:hsl(var(--text-strong));}
+#scene .home-lifecycle .home-lifecycle-all .native-icon {flex:0 0 36px;width:36px;height:36px;box-sizing:border-box;margin-left:auto;padding:9px;border-radius:50%;
+ background:hsl(var(--reference-100));color:hsl(var(--reference)) !important;}
+#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) {background:hsl(var(--reference-100));}
+#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) .home-lifecycle-all-copy span {color:hsl(var(--reference));}
+#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) .native-icon {background:hsl(var(--reference-200));}
 
 @media(prefers-reduced-motion:reduce){
  .flow *,.flow.flow-run * {animation:none !important;transition:none !important;}
@@ -167,9 +182,15 @@
  #scene .home-status-link {grid-column:1/-1;}
 }
 @media(max-width:480px){
- #scene .flow-ledger {gap:4px;}
- #scene .flow-ledger .flow-record {min-height:54px;padding:8px 7px 10px;border-radius:8px;}
- #scene .flow-ledger .flow-record-name {font-size:11px;}
+ #scene .flow-ledger .flow-record-name {font-size:10.5px;letter-spacing:-.01em;}
+ #scene .flow-ledger .flow-record-num {width:28px;height:28px;}
+ #scene .flow-ledger li:not(:first-child)::before,
+ #scene .flow-ledger li:not(:first-child)::after {top:18px;left:calc(-50% + 19px);right:calc(50% + 19px);}
+ #scene .home-lifecycle .home-lifecycle-all {padding:12px 12px 12px 16px;}
+ #scene .home-lifecycle-all-copy span {font-size:14px;}
+}
+@media(max-width:380px){
+ #scene .home-lifecycle-all-copy span {font-size:13px;}
   .flow-now {padding:10px 12px 14px;}
 }
 
@@ -188,9 +209,8 @@
  .flow {margin-top:14px;}
  .flow-now {gap:8px;padding:10px 16px 14px;}
  .flow-says {font-size:16px;}
- #scene .flow-ledger .flow-record {min-height:52px;padding:8px 10px 10px;}
- #scene .home-lifecycle-foot {margin-top:4px;}
- #scene .home-lifecycle .home-lifecycle-foot .home-lifecycle-all {min-height:40px;}
+ .flow {gap:10px;}
+ #scene .home-lifecycle .home-lifecycle-all {margin-top:10px;padding:10px 12px 10px 16px;}
 }
 @media(max-width:900px){
  #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:max-content max-content max-content;}

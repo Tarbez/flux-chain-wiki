@@ -62,18 +62,20 @@ ArkUI.pageModules.zero = {
     lifecycle.className = 'home-lifecycle';
     lifecycle.setAttribute('aria-label', 'The agreement lifecycle');
     var caption = document.createElement('p'); caption.className = 'home-lifecycle-caption';
-    caption.textContent = '01 / The agreement fabric';
-    var illustrative = document.createElement('span'); illustrative.textContent = 'Illustrative';
-    caption.appendChild(illustrative); lifecycle.appendChild(caption);
+    caption.textContent = 'The agreement fabric'; lifecycle.appendChild(caption);
     var title = document.createElement('strong'); title.className = 'home-cycle-title';
     title.textContent = 'Every step leaves a trace.'; lifecycle.appendChild(title);
     var flow=ArkUI.buildAgreementFlow({stages:ArkUI.lifecycleStages,hrefFor:function(id){return pageHref('lifecycle/'+id);}});
     lifecycle.appendChild(flow.element);
+    // One onward action, styled as a tile: what it is, then where it goes.
     var open = document.createElement('a'); open.className = 'home-lifecycle-all';
     open.href = pageHref('lifecycle'); open.dataset.sceneLink = 'lifecycle';open.dataset.icon='arrow-right';
-    open.textContent = 'Trace one agreement, end to end →';
-    var foot = document.createElement('div'); foot.className = 'home-lifecycle-foot';
-    foot.appendChild(open); if (flow.toggle) foot.appendChild(flow.toggle); lifecycle.appendChild(foot);
+    open.setAttribute('aria-label', 'Trace one agreement, end to end');
+    var openCopy = document.createElement('span'); openCopy.className = 'home-lifecycle-all-copy';
+    var openKicker = document.createElement('small'); openKicker.textContent = 'Full walkthrough';
+    var openLabel = document.createElement('span'); openLabel.textContent = 'Trace one agreement, end to end';
+    openCopy.appendChild(openKicker); openCopy.appendChild(openLabel); open.appendChild(openCopy);
+    lifecycle.appendChild(open);
     el.appendChild(lifecycle);
 
     // Measured numbers, shared with /stats (js/content/stats-highlights.js).

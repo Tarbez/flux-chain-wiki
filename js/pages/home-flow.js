@@ -167,10 +167,11 @@
     // Now: an illustration of the step (who signs which record, stacked on
     // the trail so far), then what they say.
     var now = el('div', 'flow-now');
-    now.setAttribute('aria-hidden', 'true');
     var scene = drawScene();
+    scene.svg.setAttribute('aria-hidden', 'true');
     now.appendChild(scene.svg);
     var says = el('strong', 'flow-says');
+    says.setAttribute('aria-hidden', 'true');
     now.appendChild(says);
     root.appendChild(now);
 
@@ -182,8 +183,6 @@
       link.href = hrefFor(s.id); link.dataset.sceneLink = 'lifecycle/' + s.id;
       link.appendChild(el('span', 'flow-record-num', String(i + 1).padStart(2, '0')));
       link.appendChild(el('span', 'flow-record-name', s.title));
-      var bar = el('span', 'flow-record-bar'); bar.setAttribute('aria-hidden', 'true');
-      link.appendChild(bar);
       link.setAttribute('aria-label', s.title + ': ' + STEPS[i].who + ' — ' + STEPS[i].says + ' Records ' + STEPS[i].records + ' #' + STEPS[i].hash + ', ' + backRef(i) + '. Illustrative example. Open this step.');
       item.appendChild(link); rail.appendChild(item);
       return link;
@@ -194,7 +193,8 @@
     toggle.type = 'button';
     toggle.appendChild(icon('M3 2h2v8H3zM7 2h2v8H7z'));
     toggle.appendChild(icon('M3 1.5v9l7.5-4.5z'));
-    root.appendChild(toggle);
+    // Sits in the scene tile's bottom-right corner, beside the quote.
+    now.appendChild(toggle);
 
     var reduce = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
     var current = 0, held = -1, userPaused = false, timer = 0, disposed = false;
@@ -232,8 +232,8 @@
         schedule();
       }, last ? RESTART_MS : STEP_MS);
     }
-    function hold(i) { held = i; show(i, i === STEPS.length - 1); clearTimeout(timer); timer = 0; }
-    function release() { if (held < 0) return; current = held; held = -1; schedule(); }
+    function hold(i) { held = i; root.dataset.held = 'true'; show(i, i === STEPS.length - 1); clearTimeout(timer); timer = 0; }
+    function release() { if (held < 0) return; current = held; held = -1; delete root.dataset.held; schedule(); }
 
     links.forEach(function (link, i) {
       link.addEventListener('pointerenter', function () { hold(i); });
@@ -254,7 +254,6 @@
 
     return {
       element: root,
-      toggle: toggle,
       restore: schedule,
       dispose: function () {
         disposed = true; clearTimeout(timer);
