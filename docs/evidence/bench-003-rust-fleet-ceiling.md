@@ -611,6 +611,42 @@ Not done: the live registry on `bk2:18890` (7 threads, replicas on `mk2` and
 carries the same starvation; applying the fix there means restarting a live
 service, left for a decision rather than done silently.
 
+## 12. Notebook acked from the local log, before replication (2026-10-07)
+
+§11 measured the notebook with a synchronous replica confirm, so it was the
+durable-equivalent number. The accepted-equivalent is the same server acking
+as soon as its own log has the write. That mode already exists:
+`DEFXN_DEFI_RS_QUORUM=0` makes `replicate_and_confirm` return immediately
+without contacting the replica (store.rs), and `FSYNC=0` skips the local
+fsync. The write is in the log file / page cache only: not crash-safe, not
+replicated. It is the analogue of agreement-fabric's *accepted* finality.
+
+Setup: fresh instance on `bk2:18892`, fresh genesis key, 256 threads,
+`QUORUM=0`, `FSYNC=0`, client `defxn-bench-rs` on `bk2` itself (localhost),
+concurrency 300, full 3-call transfer cycle. Same client placement as §11.
+
+| Mode | transfers/s | p50 | Failures |
+| --- | --- | --- | --- |
+| Notebook, replica-confirmed (§11, durable-equivalent) | 865-937 | ~312-343ms | 0 |
+| Notebook, local-log ack only (this section, accepted-equivalent) | 2,153.48 / 2,155.56 / 2,321.36 (3 runs of 3,000); 2,292.54 / 2,317.50 (6,000) | 121-133ms | 0 |
+| agreement-fabric quorum A accepted (§ earlier) | ~3,003 | | 0 |
+| agreement-fabric quorum A durable (§8) | 676-827 | | 0 |
+
+So the replica wait is ~2.5x of the notebook's cost (900 → 2,200-2,300/s).
+
+Is the single group-commit writer the limit? Not shown. During the run `bk2`
+was 34-52% idle with disk near zero, but the client's signing shares those 7
+cores. Two clients at once against the one server totalled 1,000.32 +
+1,002.85 = ~2,003/s: no gain over one client, so more offered load did not
+raise the ceiling. That points at the box's CPU (client + server on 7 cores)
+or the server's own request path, not at the writer. It does NOT yet justify
+building a multi-writer log; separating the client onto a different host is
+the test that would tell them apart. Not done.
+
+Not like-for-like with the quorum row: the quorum's 3,003/s used a client
+placed on a different host from the validators and an attest+aggregate chain
+with no on-disk write at all.
+
 ## Current live configuration
 
 Five real, concurrently-running quorums on the fleet (A-F on InterServer,
