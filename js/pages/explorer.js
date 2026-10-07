@@ -39,20 +39,11 @@
     var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key];
     return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key;
   }
-  /* Small line drawings in the site's ink: .ex-ln is quiet structure, .ex-ac the accent, .ex-ok a checked answer. */
+  /* The three steps, each drawn on the shared mesh fabric the How it works cards use. */
   var STEPS = [
-    ['Shape the idea', 'Write a resolver: the small set of rules that turns a question into an answer.',
-      '<svg viewBox="0 0 240 140" aria-hidden="true"><circle class="ex-ac ex-glow" cx="58" cy="60" r="24"/><path class="ex-ac" d="M50 84h16v8H50zM52 98h12M50 62q8-12 16 0"/>' +
-      '<path class="ex-ln" d="M58 22v-8M30 34l-6-6M86 34l6-6M22 60h-8M94 60h8"/><path class="ex-ln ex-flow" d="M106 70h28"/><path class="ex-ln" d="M128 64l6 6-6 6"/>' +
-      '<rect class="ex-ac ex-fill" x="146" y="32" width="80" height="76" rx="9"/><path class="ex-ac" d="M158 52h10"/><path class="ex-ln" d="M174 52h38M158 70h44M158 88h22"/><path class="ex-ac" d="M186 88h10m-4-4l4 4-4 4"/></svg>'],
-    ['Publish to the mesh', 'Many independent machines keep a copy and serve it. There is no single server to fail or rent.',
-      '<svg viewBox="0 0 240 140" aria-hidden="true"><path class="ex-ln" d="M40 40L100 24L170 36L210 82L150 112L80 108L30 92ZM40 40L120 70L170 36M100 24L120 70L210 82M150 112L120 70L80 108M30 92L120 70"/>' +
-      '<circle class="ex-dot ex-pulse" cx="120" cy="70" r="9"/><rect class="ex-ac ex-fill" x="93" y="17" width="14" height="14" rx="3"/><rect class="ex-ac ex-fill" x="203" y="75" width="14" height="14" rx="3"/><rect class="ex-ac ex-fill" x="73" y="101" width="14" height="14" rx="3"/>' +
-      '<circle class="ex-node" cx="40" cy="40" r="5"/><circle class="ex-node" cx="170" cy="36" r="5"/><circle class="ex-node" cx="150" cy="112" r="5"/><circle class="ex-node" cx="30" cy="92" r="5"/></svg>'],
-    ['People use it', 'Anyone can use what you made and check the answer is genuine, without trusting you or us.',
-      '<svg viewBox="0 0 240 140" aria-hidden="true"><circle class="ex-ln" cx="70" cy="62" r="13"/><path class="ex-ln" d="M46 106q24-34 48 0"/><circle class="ex-ac" cx="120" cy="52" r="15"/><path class="ex-ac" d="M92 106q28-40 56 0"/>' +
-      '<circle class="ex-ln" cx="170" cy="62" r="13"/><path class="ex-ln" d="M146 106q24-34 48 0"/><circle class="ex-ok-fill" cx="140" cy="32" r="10"/><path class="ex-ok" d="M135 32l4 4 6-7"/>' +
-      '<circle class="ex-ok-fill ex-quiet" cx="186" cy="46" r="7"/><path class="ex-ok" d="M183 46l2.5 2.5 4-4.5"/><circle class="ex-ok-fill ex-quiet" cx="86" cy="46" r="7"/><path class="ex-ok" d="M83 46l2.5 2.5 4-4.5"/></svg>']
+    ['Shape the idea', 'Write a resolver: the small set of rules that turns a question into an answer.', 'story-goal', 'Shape'],
+    ['Publish to the mesh', 'Many independent machines keep a copy and serve it. There is no single server to fail or rent.', 'story-request', 'Publish'],
+    ['People use it', 'Anyone can use what you made and check the answer is genuine, without trusting you or us.', 'story-check', 'Use']
   ];
   /* Record categories in everyday words. A category this map does not know keeps the Miner's own name. */
   var KINDS = {
@@ -66,27 +57,38 @@
     dm: ['Messages', 'Private conversations between their members.', '<path d="M4 5h16v11H9l-5 4z"/>'],
     social: ['Connections', 'Who follows or works with whom.', '<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c.8-3.5 3.2-5 6-5s5.2 1.5 6 5M15 14.5c2.6 0 4.6 1.3 5.4 4"/>'],
     storage: ['Releases', 'Software versions and stored content.', '<path d="M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10"/>'],
-    presence: ['Presence', 'Who is online right now.', '<path d="M3 12h4l2-5 4 10 2-5h6"/>']
+    presence: ['Presence', 'Who is online right now.', '<path d="M3 12h4l2-5 4 10 2-5h6"/>'],
+    runtime: ['Live state', 'How the machines are running right now.', '<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M8 20h8M12 16v4M7 11h3l2-3 2 5 1-2h2"/>'],
+    notification: ['Notifications', 'Alerts sent to people about what changed.', '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>'],
+    thread: ['Threads', 'Conversations kept together by topic.', '<path d="M4 6h16M4 12h10M4 18h13"/>']
   };
   var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'miners', publications: 'publications', documents: 'documents' };
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
-  /* One screen, no page scroll. Everything else is a state that takes the same place:
-     the three steps swap inside one stage, a kind opens over the tiles, a record over its list,
-     and the raw observatory over the whole page. On a phone the two halves are panes. */
+  /* One screen, no page scroll, in the How it works layout: a path, a heading with its deck,
+     two cards and a footer line. More is a state that takes the same place: the steps swap inside
+     one card, a kind opens over its list, a record over its kind, the raw observatory over the page. */
   function story() {
-    return '<div class="explore-home" data-explore-home data-pane="how">' +
+    return '<div class="explore-home how-triptych" data-explore-home data-pane="how">' +
+      '<nav class="content-layer-path how-path" aria-label="Your place"><a href="' + href('zero') + '" data-scene-link="zero">← Home</a><span aria-current="page">Mesh Explorer</span></nav>' +
+      '<header class="how-triptych-intro"><div class="how-triptych-heading"><h1 id="mesh-explorer-title">Your idea, live on the mesh.</h1></div>' +
+      '<p class="how-simple-deck">DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.</p></header>' +
       '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
-      '<section class="explore-intro" aria-labelledby="mesh-explorer-title"><p class="explore-kicker">MESH EXPLORER</p><h1 id="mesh-explorer-title">Your idea, live on the mesh.</h1>' +
-      '<p class="explore-deck">DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.</p>' +
-      '<div class="explore-how" aria-label="How it works"><div class="explore-how-tabs" role="tablist" aria-label="How it works">' + STEPS.map(function (step, i) {
-        return '<button type="button" role="tab" id="explore-step-tab-' + i + '" aria-controls="explore-step-stage" aria-selected="' + (i === 0) + '" data-explore-step="' + i + '"><span>' + (i + 1) + '</span>' + step[0] + '</button>';
-      }).join('') + '</div>' +
-      '<div class="explore-how-stage" id="explore-step-stage" role="tabpanel" aria-labelledby="explore-step-tab-0" data-explore-stage><div class="explore-art">' + STEPS[0][2] + '</div><p>' + STEPS[0][1] + '</p></div></div>' +
-      '<nav class="explore-more" aria-label="Learn more"><a class="explore-cta" href="' + href('resolutions') + '">See what you can build</a><a href="' + href('resolver') + '">What is a resolver?</a></nav></section>' +
-      '<section class="explore-live" aria-labelledby="explore-live-title"><div class="explore-live-head"><h2 id="explore-live-title">Running on the mesh now</h2>' +
-      '<div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><div><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></div></div>' +
+      '<div class="explore-cards">' +
+      '<article class="how-work-card explore-how-card" aria-labelledby="explore-step-title">' +
+      '<div class="how-work-card-top"><span class="how-work-number" data-explore-step-n>01 / 03</span><span class="how-work-signal">HOW IT WORKS</span></div>' +
+      '<h2 id="explore-step-title" data-explore-step-title>' + STEPS[0][0] + '</h2><p class="how-work-answer" data-explore-step-text>' + STEPS[0][1] + '</p>' +
+      '<div class="how-work-mesh-frame"><canvas class="how-work-mesh" data-explore-fabric aria-hidden="true"></canvas></div>' +
+      '<div class="explore-stepper" role="tablist" aria-label="How it works">' + STEPS.map(function (step, i) {
+        return '<button type="button" role="tab" aria-selected="' + (i === 0) + '" aria-controls="explore-step-title" data-explore-step="' + i + '"><span>0' + (i + 1) + '</span>' + step[3] + '</button>';
+      }).join('') + '</div></article>' +
+      '<section class="how-work-card explore-live-card" aria-labelledby="explore-live-title">' +
+      '<div class="how-work-card-top"><span class="how-work-number">LIVE</span><span class="how-work-signal">READ FROM THE PUBLIC MESH</span></div>' +
+      '<h2 id="explore-live-title">Running on the mesh now</h2>' +
       '<div class="explore-live-body" data-explore-body data-state="kinds"><div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div></div>' +
-      '<div class="explore-live-foot"><p class="explore-private" data-explore-private hidden></p><button type="button" class="explore-raw-open" data-explore-raw-open>Raw records</button></div></section>' +
+      '<p class="explore-private" data-explore-private hidden></p></section></div>' +
+      '<footer class="how-simple-footer"><div class="how-simple-boundary explore-status" role="status" aria-live="polite"><span class="how-boundary-label"><span class="mesh-explorer-status-dot" aria-hidden="true"></span>PUBLIC MESH</span>' +
+      '<strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div>' +
+      '<div class="explore-footer-actions"><a href="' + href('resolver') + '" data-scene-link="resolver">What is a resolver?</a><button type="button" class="how-simple-next" data-explore-raw-open>Browse the raw records →</button></div></footer>' +
       '</div>';
   }
 
@@ -97,7 +99,7 @@
       page.setAttribute('aria-labelledby', 'mesh-explorer-title');
       page.dataset.view = 'home';
       page.innerHTML = story() +
-        '<div class="explore-raw" data-explore-raw hidden><button type="button" class="explore-raw-back" data-explore-raw-back>← Back to the overview</button><div class="mesh-explorer-shell">' +
+        '<div class="explore-raw" data-explore-raw hidden><nav class="content-layer-path how-path" aria-label="Your place"><button type="button" class="explore-raw-back" data-explore-raw-back>\u2190 Mesh Explorer</button><span aria-current="page">Raw records</span></nav><div class="mesh-explorer-shell">' +
         '<header class="mesh-explorer-header">' +
         '<aside class="mesh-explorer-live-panel" aria-label="Current observation">' +
         '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside>' +
@@ -148,16 +150,21 @@
     var glance = $('.mesh-observatory');
     var browseBox = $('[data-explore-browse]'), browsing = { category: null, source: null, token: 0 };
     var kindsBox = $('[data-explore-kinds]'), privateLine = $('[data-explore-private]'), raw = $('[data-explore-raw]'), liveCounts = {};
-    var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stage = $('[data-explore-stage]'), stepTimer = 0, step = 0;
+    var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stepTimer = 0, step = 0;
+    var fabricCanvas = $('[data-explore-fabric]');
+    var fabric = ArkUI.createMeshFabric && fabricCanvas.getContext ? ArkUI.createMeshFabric(fabricCanvas) : null;
     function showStep(index, focus) {
       step = (index + STEPS.length) % STEPS.length;
       Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
         var on = Number(tab.dataset.exploreStep) === step; tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1;
         if (on && focus) tab.focus();
       });
-      stage.setAttribute('aria-labelledby', 'explore-step-tab-' + step);
-      stage.innerHTML = '<div class="explore-art">' + STEPS[step][2] + '</div><p>' + STEPS[step][1] + '</p>';
+      $('[data-explore-step-n]').textContent = '0' + (step + 1) + ' / 0' + STEPS.length;
+      $('[data-explore-step-title]').textContent = STEPS[step][0];
+      $('[data-explore-step-text]').textContent = STEPS[step][1];
+      if (fabric) fabric.select(STEPS[step][2], true, true);
     }
+    window.setTimeout(function () { if (fabric && page.isConnected) fabric.select(STEPS[step][2], true, true); }, 60);
     /* The steps play once through on their own, and stop for good the moment someone picks one. */
     function stopSteps() { window.clearInterval(stepTimer); stepTimer = 0; }
     Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
@@ -525,7 +532,7 @@
       sources.forEach(function (item) { var c = item.category || 'other'; (groups[c] = groups[c] || []).push(item); });
       var open = Object.keys(groups).filter(function (c) {
         if (groups[c].some(sourceAllowsQuery)) return true;
-        closed.push(KINDS[c] ? KINDS[c][0] : c); return false;
+        closed.push(KINDS[c] ? KINDS[c][0] : humanField(c)); return false;
       });
       function counted(c) {
         return groups[c].filter(function (item) { return liveCounts[item.id]; }).map(function (item) {
@@ -642,7 +649,7 @@
         });
         if (!facts.children.length) facts.appendChild(node('p', 'explore-browse-note', 'This record shares no public fields.'));
         var links = Array.isArray(payload.data.links) ? payload.data.links.length : 0;
-        if (links) card.appendChild(node('p', 'explore-browse-note', 'Linked to ' + links + ' other record' + (links === 1 ? '' : 's') + '.'));
+        if (links) top.insertBefore(node('span', 'explore-record-links', 'Linked to ' + links + ' record' + (links === 1 ? '' : 's')), top.lastChild);
       } catch (error) { if (token === browsing.token) facts.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
     }
     function openKind(category) {
@@ -948,7 +955,7 @@
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });
     source.addEventListener('change', function () { chooseSource(source.value, true); });
     lookup.addEventListener('submit', function (event) { event.preventDefault(); inspect(recordId.value.trim()); });
-    page._explorerCleanup = function () { clearLive(); stopSteps(); key.value = ''; };
+    page._explorerCleanup = function () { clearLive(); stopSteps(); if (fabric) fabric.dispose(); key.value = ''; };
     /* Start reading as soon as the page is on screen; no button press needed for the public mesh. */
     window.setTimeout(function () { if (page.isConnected && !connected && !busy) start(); }, 0);
   }
