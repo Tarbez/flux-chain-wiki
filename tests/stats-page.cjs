@@ -2,15 +2,16 @@
    so the router threw on `el.dataset` and the page stayed stranded below home;
    the home page's headline figures must never drift from the measured
    evidence they summarize (the 355/s durable headline once disagreed with a
-   stale 182.70/s table row); and /monitor must stay registered, labelled as
-   simulated, and stop its timer when the router removes it. */
+   stale 182.70/s table row); and /monitor must stay registered, read the real
+   fleet feed rather than simulate one, and stop its timer when the router
+   removes it. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
 function node(tag) {
   return { tagName: tag, className: '', innerHTML: '', dataset: {}, attrs: {}, children: [],
-    setAttribute(k, v) { this.attrs[k] = v; }, appendChild(c) { this.children.push(c); return c; } };
+    setAttribute(k, v) { this.attrs[k] = v; }, querySelector() { return null; }, appendChild(c) { this.children.push(c); return c; } };
 }
 const context = vm.createContext({ window: {}, document: { createElement: node }, ArkUI: { pageModules: {} } });
 context.window = context;
@@ -44,12 +45,13 @@ assert.equal(ev.durablePath.at(-1).value, lang('durable').rust, 'the durable sto
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
 assert(home.includes('window.ArkStatsHighlights') && !home.includes("ArkCopy.text('HOME.STATUS'"), 'home reads the shared measurements, not separate copy');
 
-// /monitor: registered like every route, honest about being simulated, disposes its timer.
+// /monitor: registered like every route, reads the real feed, disposes its timer.
 const catalog = fs.readFileSync('js/pages/catalog.js', 'utf8');
 assert(/monitor:\s*\{\s*path:\s*'\/monitor'[^}]*module:\s*'monitor'[^}]*scripts:\s*\['js\/pages\/monitor\.js'\]/.test(catalog), '/monitor is in the page catalog');
 assert(fs.readFileSync('index.html', 'utf8').includes('css/monitor.css'), 'monitor styles are linked');
 const monitor = fs.readFileSync('js/pages/monitor.js', 'utf8');
-assert(monitor.includes("'Simulated feed'"), '/monitor labels its data as simulated');
-assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(timer\)/.test(monitor), '/monitor stops its timer on unmount');
+assert(monitor.includes("'https://defxn.com/api/fleet-status'"), '/monitor polls the real fleet-status feed');
+assert(!/Math\.random/.test(monitor), '/monitor generates no numbers of its own');
+assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(pollTimer\)/.test(monitor), '/monitor stops its timer on unmount');
 
-console.log('PASS: /stats mounts as a bento grid with headline figures that match its evidence; /monitor is registered, labelled simulated, and disposes cleanly.');
+console.log('PASS: /stats mounts as a bento grid with headline figures that match its evidence; /monitor is registered, reads the real feed, and disposes cleanly.');
