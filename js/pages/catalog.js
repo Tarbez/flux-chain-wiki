@@ -44,7 +44,7 @@ if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function
     seoId: 'resolutions/' + item.slug,
     module: 'resolutions',
     nestedNavigation: true,
-    scripts: ['js/pages/resolutions.js']
+    scripts: ['js/content/resolution-products.js', 'js/pages/resolutions.js']
   };
 });
 ['ask','work','check'].forEach(function(id,i){
