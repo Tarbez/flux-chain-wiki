@@ -15,7 +15,7 @@ const { ArkManifest, LearningContent, ArkResolutions, ArkSEO } = vm.runInContext
 // pageEntries(): every non-'site'-group manifest, plus the three manifest-less pages, and never 'nav'.
 const pageIds = ArkSEO.pageIds();
 assert(pageIds.indexOf('nav') < 0, 'group "site" (shared chrome, e.g. nav) is not a route and is excluded');
-const extraIds = ['proximity', 'lab', 'learnings', 'explorer', 'account', 'treasury', 'deposits', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
+const extraIds = ['proximity', 'lab', 'learnings', 'explorer', 'account', 'treasury', 'deposits', 'stats', 'monitor', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
 assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site').map((m) => m.id).concat(extraIds).sort()), 'pageIds includes manifest-less lifecycle and nested resolution pages');
 assert.equal(JSON.stringify(ArkSEO.articleSlugs()), JSON.stringify(LearningContent.articles.map((a) => a.slug)), 'articleSlugs is every article, in order');
 
