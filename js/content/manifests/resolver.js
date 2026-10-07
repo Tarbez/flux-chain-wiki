@@ -151,7 +151,7 @@ ArkManifest.define({
       "label": "Check step text",
       "kind": "text",
       "section": "Flow",
-      "value": "The provider signs the claim. The signature shows who produced it and that it was not altered; a checker and the authority rules decide whether it is accepted."
+      "value": "The provider signs the claim, showing who produced it and that it is unaltered. Whether it is accepted is up to a checker and the authority rules."
     },
     "LAWS": {
       "label": "Laws step title",
