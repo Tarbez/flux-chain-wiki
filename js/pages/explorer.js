@@ -80,7 +80,7 @@
       }).join('') + '</ol>' +
       '<section class="explore-live" aria-labelledby="explore-live-title"><div class="explore-live-head"><h2 id="explore-live-title">Running on the mesh now</h2>' +
       '<div class="mesh-explorer-status" role="status" aria-live="polite"><span class="mesh-explorer-status-dot" aria-hidden="true"></span><div><strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div></div></div>' +
-      '<div class="explore-kinds" data-explore-kinds></div><p class="explore-private" data-explore-private hidden></p></section>' +
+      '<div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div><p class="explore-private" data-explore-private hidden></p></section>' +
       '<nav class="explore-more" aria-label="Learn more"><a href="' + href('resolver') + '">What is a resolver?</a><a href="' + href('deployment') + '">How it works, step by step</a></nav>' +
       '</div>';
   }
@@ -140,6 +140,7 @@
     var nodesBox = $('[data-explorer-nodes]');
     var glanceStamp = $('[data-explorer-glance-stamp]');
     var glance = $('.mesh-observatory');
+    var browseBox = $('[data-explore-browse]'), browsing = { category: null, source: null, token: 0 };
     var kindsBox = $('[data-explore-kinds]'), privateLine = $('[data-explore-private]'), raw = $('[data-explore-raw]'), liveCounts = {};
     function base() { return originSelect.value === 'local' ? LOCAL_MINER : PUBLIC_BASE; }
     function originName() { return originSelect.value === 'local' ? 'local Miner' : 'public mesh'; }
@@ -215,7 +216,7 @@
       window.clearInterval(timer); timer = 0;
       controllers.forEach(function (controller) { controller.abort(); }); controllers.clear();
       connected = false; sources = []; lastCursor = null; liveCounts = {};
-      kindsBox.replaceChildren(); privateLine.hidden = true;
+      kindsBox.replaceChildren(); privateLine.hidden = true; closeBrowse();
       source.replaceChildren(node('option', '', 'Connect to load sources')); source.disabled = true;
       recordId.value = ''; recordId.disabled = true; showInspect(''); guide.replaceChildren();
       lookup.querySelector('button').disabled = true;
@@ -498,11 +499,109 @@
         var figures = counted(c);
         tile.appendChild(icon); tile.appendChild(node('strong', '', kind[0])); tile.appendChild(node('span', 'explore-kind-text', kind[1]));
         tile.appendChild(node('small', '', figures.length ? figures.join(' · ') : 'Open to browse'));
-        tile.addEventListener('click', function () { openKind(c); });
+        tile.setAttribute('aria-pressed', String(browsing.category === c)); tile.setAttribute('aria-controls', 'explore-browse');
+        tile.addEventListener('click', function () { if (browsing.category === c) closeBrowse(); else browseKind(c); });
         return tile;
       }));
       privateLine.hidden = !closed.length;
       privateLine.textContent = closed.length ? 'Kept private: ' + closed.join(', ') + '.' : '';
+    }
+    /* Exploring in place: a kind opens below the tiles with its latest records as plain cards.
+       One card opens into its fields. The raw observatory stays one link away. */
+    function ago(value) {
+      var stamp = Date.parse(value || ''); if (!Number.isFinite(stamp)) return '';
+      var s = Math.max(0, (Date.now() - stamp) / 1000);
+      return s < 60 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : s < 86400 ? Math.round(s / 3600) + ' h ago' : Math.round(s / 86400) + ' d ago';
+    }
+    function shortId(id) { id = safeString(id); return id.length > 26 ? id.slice(0, 12) + '…' + id.slice(-8) : id; }
+    function humanField(key) { var t = String(key).replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').toLowerCase(); return t.charAt(0).toUpperCase() + t.slice(1); }
+    function recordTitle(record) {
+      var f = record.fields || {};
+      var named = ['displayName', 'name', 'title', 'label', 'handle', 'networkId'].find(function (k) { return f[k] && typeof f[k] !== 'object'; });
+      return named ? String(f[named]) : shortId(record.id);
+    }
+    function verifiedChip(state) {
+      var chip = node('span', 'explore-chip', state === 'verified' ? 'Verified' : humanField(safeString(state, 'Unchecked')));
+      chip.dataset.state = state === 'verified' ? 'ok' : 'quiet'; return chip;
+    }
+    function closeBrowse() {
+      browsing.category = null; browsing.source = null; browsing.token += 1;
+      browseBox.hidden = true; browseBox.replaceChildren();
+      Array.from(kindsBox.children || []).forEach(function (tile) { tile.setAttribute('aria-pressed', 'false'); });
+    }
+    function browseKind(category, sourceId) {
+      var list = sources.filter(function (item) { return (item.category || 'other') === category && sourceAllowsQuery(item); });
+      if (!list.length) return;
+      var pick = list.find(function (item) { return item.id === sourceId; }) || list[0];
+      browsing.category = category; browsing.source = pick.id; var token = ++browsing.token;
+      Array.from(kindsBox.children || []).forEach(function (tile) { tile.setAttribute('aria-pressed', String(tile.dataset.category === category)); });
+      var kind = KINDS[category] || [humanField(category), CATEGORY_NOTES[category] || ''];
+      browseBox.id = 'explore-browse'; browseBox.hidden = false; browseBox.replaceChildren();
+      var head = node('div', 'explore-browse-head'), icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
+      var title = node('div', 'explore-browse-title'); title.appendChild(node('h3', '', kind[0])); title.appendChild(node('p', '', kind[1]));
+      var close = node('button', 'explore-browse-close', '×'); close.type = 'button'; close.setAttribute('aria-label', 'Close ' + kind[0]);
+      close.addEventListener('click', closeBrowse);
+      head.appendChild(icon); head.appendChild(title); head.appendChild(close); browseBox.appendChild(head);
+      if (list.length > 1) {
+        var tabs = node('div', 'explore-browse-tabs'); tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', kind[0] + ' sources');
+        list.forEach(function (item) {
+          var tab = node('button', '', humanField(item.label || item.id)); tab.type = 'button';
+          tab.setAttribute('aria-pressed', String(item.id === pick.id));
+          tab.addEventListener('click', function () { browseKind(category, item.id); });
+          tabs.appendChild(tab);
+        });
+        browseBox.appendChild(tabs);
+      }
+      var body = node('div', 'explore-records', ''); body.appendChild(node('p', 'explore-browse-note', 'Reading the latest ' + humanField(pick.label || pick.id).toLowerCase() + '…'));
+      browseBox.appendChild(body);
+      var foot = node('div', 'explore-browse-foot'), rawLink = node('button', 'explore-browse-raw', 'See every field in the raw records'); rawLink.type = 'button';
+      rawLink.addEventListener('click', function () { openKind(category); });
+      foot.appendChild(rawLink); browseBox.appendChild(foot);
+      loadBrowse(pick, body, token);
+    }
+    async function loadBrowse(item, body, token) {
+      try {
+        var scopes = item.id === 'miners' ? await minerScopes() : [undefined], list = [];
+        for (var i = 0; i < scopes.length && list.length < 8; i++) {
+          var payload = await request('/explorer/v1/query', { sourceId: item.id, scope: scopes[i], limit: 8 });
+          if (token !== browsing.token || !page.isConnected) return;
+          (Array.isArray(payload.data.records) ? payload.data.records : []).forEach(function (record) { recordScopes[record.id] = scopes[i]; list.push(record); });
+        }
+        if (token !== browsing.token) return;
+        body.replaceChildren();
+        if (!list.length) { body.appendChild(node('p', 'explore-browse-note', 'Nothing here yet. Be the first to publish one.')); return; }
+        list.slice(0, 8).forEach(function (record) {
+          var card = node('button', 'explore-record'); card.type = 'button';
+          var top = node('span', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state));
+          top.appendChild(node('span', '', ago(record.updatedAt)));
+          card.appendChild(top); card.appendChild(node('strong', '', recordTitle(record))); card.appendChild(node('span', 'explore-record-id', shortId(record.id)));
+          card.addEventListener('click', function () { showBrowseRecord(item, record, body, token); });
+          body.appendChild(card);
+        });
+      } catch (error) { if (token === browsing.token) body.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
+    }
+    async function showBrowseRecord(item, record, body, token) {
+      var back = node('button', 'explore-record-back', '← All ' + humanField(item.label || item.id).toLowerCase()); back.type = 'button';
+      back.addEventListener('click', function () { browseKind(browsing.category, item.id); });
+      var card = node('article', 'explore-record-open');
+      var top = node('div', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state)); top.appendChild(node('span', '', ago(record.updatedAt)));
+      card.appendChild(top); card.appendChild(node('h4', '', recordTitle(record))); card.appendChild(node('p', 'explore-record-id', safeString(record.id)));
+      var facts = node('dl', 'explore-record-facts'); facts.appendChild(node('p', 'explore-browse-note', 'Opening…')); card.appendChild(facts);
+      body.replaceChildren(back, card); body.dataset.view = 'record';
+      try {
+        var payload = await request('/explorer/v1/record', { sourceId: item.id, recordId: record.id, scope: recordScopes[record.id] });
+        if (token !== browsing.token || !page.isConnected) return;
+        var fields = payload.data.safeDetail || (payload.data.record && payload.data.record.fields) || record.fields || {};
+        facts.replaceChildren();
+        Object.keys(fields).slice(0, 10).forEach(function (key) {
+          var value = safeString(fields[key]); var line = node('div');
+          line.appendChild(node('dt', '', humanField(key))); line.appendChild(node('dd', '', value.length > 120 ? value.slice(0, 117) + '…' : value));
+          facts.appendChild(line);
+        });
+        if (!facts.children.length) facts.appendChild(node('p', 'explore-browse-note', 'This record shares no public fields.'));
+        var links = Array.isArray(payload.data.links) ? payload.data.links.length : 0;
+        if (links) card.appendChild(node('p', 'explore-browse-note', 'Linked to ' + links + ' other record' + (links === 1 ? '' : 's') + '.'));
+      } catch (error) { if (token === browsing.token) facts.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
     }
     function openKind(category) {
       filters.category = category; filters.access = 'all'; filters.query = '';
