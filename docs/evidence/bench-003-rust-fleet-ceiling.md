@@ -559,6 +559,58 @@ adding G. A clean concurrent-5 number needs either staggering A/F's
 runs or accepting that real-world concurrent load across quorums
 sharing a validator will cost something; not resolved here.
 
+## 11. The "notebook is the only lock" design, measured (2026-10-07)
+
+Question asked: if the BFT quorum is dropped and a single node's append-only
+log is the only lock, is that the fastest path? The design already exists —
+`defxn-defi-rs` (`main.rs`/`store.rs`), the FXN value-object registry. Its
+double-spend check is one atomic `put_if_absent("value-object-spent:<cid>")`
+on one node's log; every signature is verified locally by whichever node is
+called; there is no attest/aggregate/certificate chain. That is the
+observer-relative path, already built. What had never happened is a fair
+measurement of it: the published 151.37/s predates its replication setup.
+
+**Constraint found in the code, not assumed**: with no replicas configured,
+`store.rs` forces fsync on whatever `DEFXN_DEFI_RS_FSYNC` says
+(`no_other_durability_source`, store.rs:199). fsync-off is only legitimate
+when a real replica holds the copy. So "single node, no durability at all"
+is not a mode the code allows; "single node + one lightweight replica" is.
+That replica is crash-safety, not Byzantine tolerance: it trusts the replica
+to be honest. That is the stated trade (strangers running miners would need
+the quorum rebuilt).
+
+Test pair: primary on `bk2`, replica on `mk2`, fresh ports, a genesis key
+generated for the test (isolated from the live registry on :18890),
+`QUORUM=1`, `FSYNC=0`. Full transfer cycle = 3 signed HTTP calls.
+
+| Step | transfers/s | p50 | What it showed |
+| --- | --- | --- | --- |
+| First run, defaults | 86.10 | 1,732ms | Hung entirely on the first attempt: `mk2`'s ufw had no rule for the new port, so replication calls failed silently |
+| `replicate_and_confirm` reuses one `ureq::Agent` (was building a fresh one per WAL batch = new TCP handshake every ~2ms) | 93.53 | 1,604ms | A real bug, fixed, but not the dominant cost |
+| `DEFXN_DEFI_RS_THREADS` 7 → 256 | **820.99** | 178ms | The dominant cost. CPU was 97% idle, disk near zero: pure thread starvation |
+| Concurrency 300, 3 runs | 929.85, 937.29, 864.94 | ~312-343ms | Zero failures |
+| Concurrency 600 | 911.20 | 645ms | Flat throughput, latency doubled: real ceiling |
+
+**~865-937 transfers/s, zero failures** against the 151.37/s on /stats (~6x),
+and in the same range as agreement-fabric durable on quorum A (676-827/s).
+It is not "entire speed": each transfer is 3 round trips plus a synchronous
+replica confirm, and the replica's own write still has to land before the
+primary acks. Removing the quorum removed the multi-party signature step; it
+did not make the network free.
+
+Two more findings the run produced:
+- A 1024-file-descriptor shell limit killed the server's accept loop silently
+  at concurrency 600 (tiny_http ends its iterator on the accept error; no
+  panic, no log line). High-concurrency deployments need `LimitNOFILE`.
+- The thread default was wrong in BOTH servers. `main.rs` and
+  `agreement_fabric_server.rs` now default to 256 threads instead of the CPU
+  core count, with the measurement in a comment beside each.
+
+Not done: the live registry on `bk2:18890` (7 threads, replicas on `mk2` and
+`bk1`, fsync off) is still running the old default and almost certainly
+carries the same starvation; applying the fix there means restarting a live
+service, left for a decision rather than done silently.
+
 ## Current live configuration
 
 Five real, concurrently-running quorums on the fleet (A-F on InterServer,

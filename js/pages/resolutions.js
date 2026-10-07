@@ -147,12 +147,16 @@
         return page;
       }
 
+      /* One resolution: who it is for and the problem it removes on the left; on the right,
+         one panel that changes state in place (ready products, product ideas, how it resolves)
+         so the page never scrolls. */
       function mountDetail(item) {
         var all = ArkResolutions.all();
         var position = all.findIndex(function (candidate) { return candidate.slug === item.slug; });
         var group = ArkResolutions.groupFor(item.group);
         var previous = all[(position - 1 + all.length) % all.length];
         var next = all[(position + 1) % all.length];
+        var shelf = typeof ArkResolutionProducts !== 'undefined' ? ArkResolutionProducts.forResolution(item.key) : null;
         var page = el('article', 'ark-page resolutions-page resolution-detail');
         page.dataset.arkPage = pageKey;
         page.dataset.resolutionGroup = item.group.toLowerCase();
@@ -160,110 +164,174 @@
         breadcrumb(page, item);
 
         var workspace = el('div', 'resolution-detail-workspace');
-        var hero = el('header', 'resolution-detail-hero');
-        var intro = el('div', 'resolution-detail-intro');
+        var intro = el('header', 'resolution-detail-intro');
         intro.appendChild(el('p', 'resolution-detail-index', String(position + 1).padStart(2, '0') + ' / ' + String(all.length).padStart(2, '0') + ' · ' + group.title));
         var title = el('h1', '', item.title);
         title.id = 'resolution-title-' + item.slug;
         intro.appendChild(title);
         intro.appendChild(el('p', 'resolution-detail-deck', item.text));
+        if (shelf) {
+          var brief = el('dl', 'resolution-brief');
+          [['For', shelf.audience], ['Problem', shelf.problem]].forEach(function (row) {
+            var line = el('div');
+            line.appendChild(el('dt', '', row[0]));
+            line.appendChild(el('dd', '', row[1]));
+            brief.appendChild(line);
+          });
+          intro.appendChild(brief);
+        }
         var actions = el('div', 'resolution-detail-actions');
         if (item.start && ArkUI.pageCatalog[item.start]) actions.appendChild(routeLink(words('START') + ' →', item.start, 'resolution-primary-action'));
         else actions.appendChild(routeLink('How resolvers work →', 'resolver', 'resolution-primary-action'));
-        actions.appendChild(routeLink('Browse all', 'resolutions', 'resolution-secondary-action'));
         intro.appendChild(actions);
-        hero.appendChild(intro);
+        workspace.appendChild(intro);
 
-        var experience = el('section', 'resolution-experience');
-        experience.setAttribute('aria-label', 'Explore this resolution');
-        var levelTabs = el('div', 'resolution-level-tabs');
-        levelTabs.setAttribute('role', 'tablist');
-        levelTabs.setAttribute('aria-label', 'Resolution information levels');
-        var level = el('div', 'resolution-level');
-        level.id = 'resolution-level-' + item.slug;
-        level.setAttribute('role', 'tabpanel');
-        level.tabIndex = 0;
-        var levelButtons = [];
+        var panel = el('section', 'resolution-shelf');
+        panel.setAttribute('aria-label', short(item) + ' products');
+        var tabs = el('div', 'resolution-level-tabs');
+        tabs.setAttribute('role', 'tablist');
+        tabs.setAttribute('aria-label', 'Products, ideas and how it works');
+        var view = el('div', 'resolution-level');
+        view.id = 'resolution-level-' + item.slug;
+        view.setAttribute('role', 'tabpanel');
+        view.tabIndex = 0;
+        var tabButtons = [];
+        var selectedIdea = 0;
 
+        function statusMark(product) {
+          var mark = el('span', 'resolution-status resolution-status-' + product.status, product.status === 'ready' ? 'Ready' : 'Building');
+          return mark;
+        }
+        function productTile(product) {
+          var target = product.page && ArkUI.pageCatalog[product.page] ? product.page : null;
+          var tile = target ? routeLink('', target, 'resolution-product') : el('div', 'resolution-product');
+          var head = el('span', 'resolution-product-head');
+          head.appendChild(el('strong', '', product.name));
+          head.appendChild(statusMark(product));
+          tile.appendChild(head);
+          tile.appendChild(el('span', 'resolution-product-line', product.line));
+          if (target) tile.appendChild(el('span', 'resolution-product-open', 'Open →'));
+          return tile;
+        }
+        function showReady() {
+          var grid = el('div', 'resolution-products');
+          shelf.ready.forEach(function (product) { grid.appendChild(productTile(product)); });
+          view.appendChild(grid);
+        }
+        function showIdeas() {
+          var ideas = el('div', 'resolution-ideas');
+          var rail = el('div', 'resolution-idea-rail');
+          rail.setAttribute('role', 'group');
+          rail.setAttribute('aria-label', 'Product ideas');
+          var detail = el('div', 'resolution-idea');
+          detail.setAttribute('aria-live', 'polite');
+          var picks = [];
+          function pick(index) {
+            selectedIdea = index;
+            picks.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
+            var idea = shelf.ideas[index];
+            detail.replaceChildren();
+            var head = el('div', 'resolution-idea-head');
+            head.appendChild(el('span', 'resolution-section-label', 'Idea ' + String(index + 1).padStart(2, '0') + ' · not built yet'));
+            head.appendChild(el('h2', '', idea.name));
+            head.appendChild(el('p', 'resolution-idea-audience', 'For ' + idea.audience.charAt(0).toLowerCase() + idea.audience.slice(1)));
+            detail.appendChild(head);
+            var body = el('dl', 'resolution-idea-body');
+            [['Problem', idea.problem], ['Product', idea.product]].forEach(function (row) {
+              var line = el('div');
+              line.appendChild(el('dt', '', row[0]));
+              line.appendChild(el('dd', '', row[1]));
+              body.appendChild(line);
+            });
+            detail.appendChild(body);
+            var builds = el('div', 'resolution-idea-builds');
+            builds.appendChild(el('span', 'resolution-section-label', 'Builds on'));
+            var chips = el('ul', '');
+            idea.builds.forEach(function (product) {
+              var chip = el('li', 'resolution-chip resolution-chip-' + product.status, product.name);
+              chip.title = product.line + (product.status === 'ready' ? '' : ' (building)');
+              chips.appendChild(chip);
+            });
+            builds.appendChild(chips);
+            detail.appendChild(builds);
+          }
+          shelf.ideas.forEach(function (idea, index) {
+            var button = el('button', 'resolution-idea-pick');
+            button.type = 'button';
+            button.appendChild(el('span', '', String(index + 1).padStart(2, '0')));
+            button.appendChild(el('strong', '', idea.name));
+            button.addEventListener('click', function () { pick(index); });
+            picks.push(button);
+            rail.appendChild(button);
+          });
+          ideas.appendChild(rail);
+          ideas.appendChild(detail);
+          view.appendChild(ideas);
+          pick(selectedIdea);
+        }
+        function showHow() {
+          var how = el('div', 'resolution-how');
+          var shift = el('div', 'resolution-how-shift');
+          shift.appendChild(el('span', 'resolution-section-label', 'The shift'));
+          shift.appendChild(el('h2', '', item.shift));
+          shift.appendChild(el('p', '', 'Instead of ' + item.old.charAt(0).toLowerCase() + item.old.slice(1)));
+          how.appendChild(shift);
+          var steps = el('ol', 'resolution-steps');
+          item.steps.forEach(function (step, index) {
+            var row = el('li', 'resolution-step');
+            row.appendChild(el('span', 'resolution-step-number', String(index + 1).padStart(2, '0')));
+            row.appendChild(el('strong', '', ['Define', 'Publish', 'Resolve'][index]));
+            row.appendChild(el('p', '', step));
+            steps.appendChild(row);
+          });
+          how.appendChild(steps);
+          view.appendChild(how);
+        }
+
+        var levels = shelf
+          ? [['Ready now', shelf.ready.length, showReady], ['Product ideas', shelf.ideas.length, showIdeas], ['How it resolves', 0, showHow]]
+          : [['How it resolves', 0, showHow]];
         function showLevel(selected) {
-          levelButtons.forEach(function (button, index) {
+          tabButtons.forEach(function (button, index) {
             var active = index === selected;
             button.setAttribute('aria-selected', String(active));
             button.tabIndex = active ? 0 : -1;
           });
-          level.setAttribute('aria-labelledby', 'resolution-level-tab-' + item.slug + '-' + selected);
-          level.replaceChildren();
-          if (selected === 0) {
-            var overview = el('div', 'resolution-level-overview');
-            var overviewCopy = el('div');
-            overviewCopy.appendChild(el('p', 'resolution-section-label', 'THE OUTCOME'));
-            overviewCopy.appendChild(el('h2', '', item.shift));
-            overview.appendChild(overviewCopy);
-            var signal = el('div', 'resolution-signal');
-            signal.setAttribute('aria-label', 'The resolution path: define, publish, resolve');
-            signal.appendChild(el('span', 'resolution-signal-core', short(item)));
-            ['Define', 'Publish', 'Resolve'].forEach(function (label, index) {
-              signal.appendChild(el('span', 'resolution-signal-node resolution-signal-node-' + (index + 1), label));
-            });
-            overview.appendChild(signal);
-            level.appendChild(overview);
-          } else if (selected === 1) {
-            var comparison = el('div', 'resolution-comparison');
-            var oldStack = el('div', 'resolution-comparison-old');
-            oldStack.appendChild(el('span', '', 'WITHOUT DEFXN'));
-            oldStack.appendChild(el('p', '', item.old));
-            var direction = el('span', 'resolution-comparison-arrow', '→');
-            direction.setAttribute('aria-hidden', 'true');
-            var mesh = el('div', 'resolution-comparison-new');
-            mesh.appendChild(el('span', '', 'ON THE MESH'));
-            mesh.appendChild(el('p', '', item.text));
-            comparison.appendChild(oldStack);
-            comparison.appendChild(direction);
-            comparison.appendChild(mesh);
-            level.appendChild(comparison);
-          } else {
-            var steps = el('ol', 'resolution-steps');
-            item.steps.forEach(function (step, index) {
-              var row = el('li', 'resolution-step');
-              row.appendChild(el('span', 'resolution-step-number', String(index + 1).padStart(2, '0')));
-              row.appendChild(el('strong', '', ['Define', 'Publish', 'Resolve'][index]));
-              row.appendChild(el('p', '', step));
-              steps.appendChild(row);
-            });
-            level.appendChild(steps);
-          }
+          view.setAttribute('aria-labelledby', 'resolution-level-tab-' + item.slug + '-' + selected);
+          view.dataset.level = String(selected);
+          view.replaceChildren();
+          levels[selected][2]();
         }
-
-        ['Outcome', 'Shift', 'Path'].forEach(function (label, index) {
+        levels.forEach(function (level, index) {
           var button = el('button', 'resolution-level-tab');
           button.type = 'button';
           button.id = 'resolution-level-tab-' + item.slug + '-' + index;
           button.setAttribute('role', 'tab');
-          button.setAttribute('aria-controls', level.id);
-          button.appendChild(el('span', '', String(index + 1).padStart(2, '0')));
-          button.appendChild(document.createTextNode(label));
+          button.setAttribute('aria-controls', view.id);
+          button.appendChild(document.createTextNode(level[0]));
+          if (level[1]) button.appendChild(el('span', '', String(level[1])));
           button.addEventListener('click', function () { showLevel(index); });
           button.addEventListener('keydown', function (event) {
             if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
             event.preventDefault();
-            var nextLevel = (index + (event.key === 'ArrowRight' ? 1 : -1) + levelButtons.length) % levelButtons.length;
+            var nextLevel = (index + (event.key === 'ArrowRight' ? 1 : -1) + tabButtons.length) % tabButtons.length;
             showLevel(nextLevel);
-            levelButtons[nextLevel].focus();
+            tabButtons[nextLevel].focus();
           });
-          levelButtons.push(button);
-          levelTabs.appendChild(button);
+          tabButtons.push(button);
+          tabs.appendChild(button);
         });
-        experience.appendChild(levelTabs);
-        experience.appendChild(level);
-        hero.appendChild(experience);
-        workspace.appendChild(hero);
-
-        var boundary = el('aside', 'resolution-boundary');
-        boundary.appendChild(el('span', 'resolution-section-label', 'DIRECTION, NOT A READINESS CLAIM'));
-        var boundaryLink = el('a', 'resolution-boundary-link', words('NOTE.LINK') + ' ↗');
-        boundaryLink.href = 'docs/status.md';
-        boundary.appendChild(boundaryLink);
-        workspace.appendChild(boundary);
+        panel.appendChild(tabs);
+        panel.appendChild(view);
+        var legend = el('p', 'resolution-legend');
+        legend.appendChild(el('span', 'resolution-legend-ready', 'Ready: usable today'));
+        legend.appendChild(el('span', 'resolution-legend-building', 'Building: in source, not released'));
+        legend.appendChild(el('span', 'resolution-legend-idea', 'Ideas: proposed, not built'));
+        var statusLink = el('a', 'resolution-boundary-link', words('NOTE.LINK') + ' ↗');
+        statusLink.href = 'docs/status.md';
+        legend.appendChild(statusLink);
+        panel.appendChild(legend);
+        workspace.appendChild(panel);
         page.appendChild(workspace);
         showLevel(0);
 

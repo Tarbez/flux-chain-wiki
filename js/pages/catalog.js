@@ -32,7 +32,7 @@ ArkUI.pageCatalog = {
   about: { path: '/about', title: arkSeoTitle('about', 'Protocol overview'), seoId: 'about', module: 'about', scripts: ['js/pages/about.js'] },
   resolutions: { path: '/resolutions', title: arkSeoTitle('resolutions', 'Resolutions'), seoId: 'resolutions', module: 'resolutions', scripts: ['js/pages/resolutions.js'] },
   concept: { path: '/concept', title: arkSeoTitle('concept', 'The Flux spec'), seoId: 'concept', module: 'concept', scripts: ['js/pages/concept.js'] },
-  download: { path: '/download', title: arkSeoTitle('download', 'Run Flux from source'), seoId: 'download', module: 'download', scripts: ['js/ark/procedure-state.js', 'js/pages/sheet.js', 'js/pages/download.js'] },
+  download: { path: '/download', title: arkSeoTitle('download', 'Run DEFXN from source'), seoId: 'download', module: 'download', scripts: ['js/ark/procedure-state.js', 'js/pages/download.js'] },
   bundledeployer: { path: '/bundle-deployer', title: arkSeoTitle('bundledeployer', 'FXN Bundle Deployer'), seoId: 'bundledeployer', module: 'bundledeployer', scripts: ['js/pages/bundle-deployer.js'] },
   deploy: { path: '/deploy', title: arkSeoTitle('deploy', 'Create or join a network'), seoId: 'deploy', module: 'deploy', scripts: ['js/ark/procedure-state.js', 'js/pages/deploy.js'] },
   dao: { path: '/dao', title: arkSeoTitle('dao', 'Governance'), seoId: 'dao', module: 'dao', scripts: ['js/pages/sheet.js', 'js/pages/dao.js'] }
@@ -44,7 +44,7 @@ if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function
     seoId: 'resolutions/' + item.slug,
     module: 'resolutions',
     nestedNavigation: true,
-    scripts: ['js/pages/resolutions.js']
+    scripts: ['js/content/resolution-products.js', 'js/pages/resolutions.js']
   };
 });
 ['ask','work','check'].forEach(function(id,i){
