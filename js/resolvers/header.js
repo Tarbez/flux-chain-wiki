@@ -12,11 +12,12 @@
    do the work. Complementary: every other resolver, grouped, as compact names. Reference:
    one peek line that describes whichever name is under the pointer, plus the page links.
    The trigger sits first in the core links; the panel hangs under the header. */
+/* Primary picks are editorial: the outcomes people can already reach with released products.
+   Their product names come from js/content/resolution-products.js (each inner page's "Ready now"). */
 var FEATURED_RESOLUTIONS = [
-  /* `ready` mirrors the released products on each inner page's "Ready now" list. */
-  { key: 'WEBSITE', art: 'site', ready: ['Code manager', '.fxn names', 'Site gateway'] },
-  { key: 'DEPLOYMENTS', art: 'bundle', ready: ['Mesh packages', 'Resolvers', 'Mesh monitor'] },
-  { key: 'NETWORK', art: 'mesh', ready: ['Named networks', 'Mesh Explorer'] }
+  { key: 'WEBSITE', art: 'site' },
+  { key: 'DEPLOYMENTS', art: 'bundle' },
+  { key: 'NETWORK', art: 'mesh' }
 ];
 var RESOLUTION_ART = {
   site: '<rect x="5" y="6" width="54" height="36" rx="4"/><path d="M5 14h54"/><rect class="art-hot" x="18" y="8.5" width="28" height="3" rx="1.5"/><path d="M12 21h20M12 27h26M12 33h16"/><circle class="art-hot art-pop" cx="47" cy="31" r="6"/><path class="art-hot art-pop" d="m44.2 31 2 2 3.6-3.8"/>',
@@ -62,7 +63,7 @@ function buildProducts(header, core) {
   /* Primary */
   var primary = make('section', 'products-mega-primary');
   primary.appendChild(make('h3', 'products-mega-heading', ArkCopy.text('RESOLUTIONS.MEGA.READY')));
-  var featuredKeys = {};
+  var featuredKeys = {}, shownProducts = {};
   FEATURED_RESOLUTIONS.forEach(function (feature) {
     var entry = ArkResolutions.find(feature.key.toLowerCase());
     featuredKeys[feature.key] = true;
@@ -75,9 +76,16 @@ function buildProducts(header, core) {
     var words = make('span', 'products-mega-feature-words');
     words.appendChild(make('strong', '', shortName(entry.title)));
     words.appendChild(make('span', 'products-mega-feature-line', entry.text));
+    /* Up to three released products per card, none repeated from the card above. */
     var ready = make('span', 'products-mega-ready');
-    feature.ready.forEach(function (name) { ready.appendChild(make('span', '', name)); });
-    words.appendChild(ready);
+    var shelf = typeof ArkResolutionProducts !== 'undefined' && ArkResolutionProducts.forResolution(feature.key);
+    (shelf ? shelf.ready : []).filter(function (product) {
+      return product.status === 'ready' && !shownProducts[product.key];
+    }).slice(0, 3).forEach(function (product) {
+      shownProducts[product.key] = true;
+      ready.appendChild(make('span', '', product.name));
+    });
+    if (ready.childNodes.length) words.appendChild(ready);
     card.appendChild(words);
     primary.appendChild(card);
   });
