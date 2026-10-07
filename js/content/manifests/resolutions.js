@@ -38,11 +38,17 @@ ArkManifest.define({
       "section": "Page",
       "value": "Start here"
     },
-    "MEGA.TITLE": {
-      "label": "Menu heading",
+    "MEGA.READY": {
+      "label": "Menu heading over the resolutions you can use today",
       "kind": "line",
       "section": "Products menu",
-      "value": "Start with the outcome."
+      "value": "Ready to use today"
+    },
+    "MEGA.MORE": {
+      "label": "Menu heading over every other resolver",
+      "kind": "line",
+      "section": "Products menu",
+      "value": "More resolvers"
     },
     "MEGA.TEXT": {
       "label": "Menu intro",
@@ -55,24 +61,6 @@ ArkManifest.define({
       "kind": "line",
       "section": "Products menu",
       "value": "Browse all resolutions"
-    },
-    "MEGA.COIN": {
-      "label": "Menu coin line",
-      "kind": "line",
-      "section": "Products menu",
-      "value": "Powered by FXN, the DEFXN coin"
-    },
-    "MEGA.GUIDE": {
-      "label": "Guided paths heading",
-      "kind": "line",
-      "section": "Products menu",
-      "value": "Choose a starting point"
-    },
-    "MEGA.RESOLVERS": {
-      "label": "Resolver list heading",
-      "kind": "line",
-      "section": "Products menu",
-      "value": "Or choose a resolver"
     },
     "MEGA.HOW": {
       "label": "Resolver explainer link",
