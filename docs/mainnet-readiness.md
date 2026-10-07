@@ -59,28 +59,61 @@ flat static `signedRegistry` instead. Before mainnet: either activate that
 real ceremony for agreement-fabric membership changes, or consciously
 decide the shared-secret model is the launch policy and say so publicly.
 
-### 3. Durable finality is ~23x slower than accepted, and a client that
-doesn't know the full membership silently breaks it
+### 3. Durable finality: three real fixes landed, now ~3.6-4.4x off accepted, close to the plan's ~3x target
 
-**Status: Partial, with a confirmed bug.** Measured fresh tonight on the
-real fleet, same quorum, back to back: accepted finality 3,003.03/s,
-durable finality 131.35/s. Every public number so far (including the
-5,711-6,041/s headline) is accepted finality. Durable finality — the
-guarantee that actually matters for "my transfer cannot be lost" — is
-roughly 4% of that. Whatever mainnet promises publicly needs to say which
-guarantee the number describes; "6,000 tx/s" and "~130-260 tx/s per quorum,
-durably" are both true and very different claims.
+**Status: Partial, real progress, close to target.** Originally measured at
+~131.35/s against accepted finality's ~3,003.03/s (~23x) — challenged
+directly rather than accepted as "that's what replication costs," since a
+5-hop vs 2-hop chain cannot honestly explain a 23x gap on its own. Three
+real things were found and fixed, in order (full account in
+`docs/evidence/bench-003-rust-fleet-ceiling.md` §7-8):
 
-Separately: route-object's successor selection considers every member in
-the registry, not just the attest threshold. Once a node auto-joins, any
-client whose own endpoint list wasn't updated to include the new member
-gets `unknown successor member` on every durable call — accepted finality
-never surfaces this because it only contacts the members it explicitly
-addresses. This is a real correctness gap between auto-join and durable
-finality, found by running the comparison, not by inspection — it needs a
-fix (route-object should route among `attest`-capable members actually
-addressed by the request, not silently expand to the full registry) before
-auto-join and durable finality can be trusted together.
+1. **A real correctness bug**, not just a performance gap: `route-object`'s
+   successor selection scored the full live registry instead of the
+   members who actually attested the request, so any client that hadn't
+   updated its own endpoint list after a node auto-joined got
+   `unknown successor member` on every durable call. Fixed — `route-object`
+   now scopes to the aggregate certificate's own `memberIds`.
+2. **An existing, already-built fix that was never turned on**:
+   `DEFXN_DEFI_RS_FSYNC=0` relies on cross-validator replication (already
+   happening via commit-certificate) instead of a local disk fsync.
+   Instrumented first to confirm fsync really was the cost (real numbers:
+   ~3ms/fsync, batch sizes of 2-5), then turned on. Result: ~269-351/s —
+   a genuine ~1.6-2x, not the full gap.
+3. **The real dominant cost, found by building the hop-reduction fix and
+   then honestly measuring that it DIDN'T win**: a `close-transfer-durable`
+   command was built (primary self-orchestrates the whole durable chain
+   server-to-server, client pays one round trip instead of four) on the
+   working theory that hop count was the remaining cost. It wasn't. `top`
+   during a live run of the NEW path showed neither CPU nor disk
+   saturated, same as before, and a careful audited comparison (5 cooled-
+   down runs each path, identical settings) showed the new path
+   consistently ~25-35% SLOWER than the old one, with much worse tail
+   latency. The real cause: `FABRIC_THREADS` silently defaults to CPU core
+   count (2 on the primary, `bk1`), badly under-sized for request handling
+   that's mostly network-wait, not CPU work — each old-path call is brief
+   and independent so 2 threads cycling fast wasn't visibly a problem, but
+   the new path holds one thread for an entire closure including a
+   synchronous peer round trip, so only 2 closures could really be in
+   flight at once. Setting `FABRIC_THREADS=256` and keeping the simple
+   OLD multi-round-trip path (not the new hop-reduced one) took durable
+   finality from ~269-351/s to a reproducible **~676-827/s** (5 audit
+   runs, zero failures). `close-transfer-durable` is kept in the codebase,
+   correct and tested, as a real option for a future quorum with
+   meaningful cross-region RTT — this fleet's inter-node ping is
+   sub-millisecond, too low for hop-collapse to beat well-parallelized
+   independent connections, so it isn't adopted as the default here.
+
+Current real number: **~676-827/s** against accepted finality's
+~3,003/s — a ~3.6-4.4x gap, close to the plan's stated ~3x target
+(~1,000+/s), not yet fully there. Not yet done: bake `FABRIC_THREADS`
+sizing into a standing deploy configuration (currently a manual
+process-launch override, not systemd-managed — see gap #7) and check
+whether quorums B and C have the same thread-starvation gap (never
+profiled for it). Whatever mainnet promises publicly needs to say which
+finality guarantee a number describes either way — "6,000 tx/s" and
+"~700-800 tx/s per quorum, durably" are both true and very different
+claims.
 
 ### 4. Nothing survives a restart
 

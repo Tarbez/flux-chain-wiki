@@ -290,6 +290,144 @@ benchmark result makes no sense given everything else measured, check the
 layer below the application (`ss`, not just `top`) before writing up a
 plausible-sounding theory.
 
+## 7. Durable finality: fixing the real gap instead of accepting it (2026-10-07)
+
+Reported honestly in this document and on `/stats` as a ~17-18x gap to
+accepted finality (131.35/s vs 3,003.03/s, same quorum). Challenged
+directly rather than filed away as "replication is just expensive": durable
+finality does 5 sequential network hops (attest → aggregate →
+commit-certificate → route-object → register-object) against accepted's 2
+— a 2.5x hop-count increase cannot honestly explain a 17-18x throughput
+loss on its own, so the extra cost had to be somewhere specific.
+
+**A real correctness bug was found and fixed, not just a performance gap.**
+`route-object`'s successor selection scored the FULL live registry, not
+the members who actually attested the request — so once a node auto-joined
+(§5), every durable call from a client that hadn't updated its own
+endpoint list failed with `unknown successor member`, even though nothing
+about that specific transfer involved the new member. Fixed by threading
+the aggregate certificate's own `memberIds` through to `route-object`
+(`agreement_fabric_client.rs`'s durable path now passes
+`certificate.memberIds`; `assign_cell` in `agreement_fabric_server.rs`
+takes that candidate pool explicitly instead of reading the live registry
+itself). Verified locally: a client that only knows 2 of 3 live members
+now completes durable finality cleanly against a quorum a 3rd node had
+auto-joined, where before every call failed.
+
+**Instrumented before changing anything else**, per the mainnet-readiness
+plan's own discipline: added sampled timing around the WAL writer's batch
+size and fsync duration (`FABRIC_WAL_DIAG=1`, gated, silent by default).
+Real numbers, not inferred from `iostat`: batch sizes of 2-5 writes per
+fsync (the 2ms group-commit window wasn't amortizing much under this
+specific call pattern), each fsync taking ~1.2-4.8ms. That directly
+predicts a ceiling near `(1 / avg_fsync_time) / writes_per_closure` —
+arithmetic that lands almost exactly on the measured ~171-200/s ceiling
+seen both locally and on the real fleet. Confirmed, not guessed.
+
+**The fix already in the codebase and never turned on**: `writer_loop`
+already supports `DEFXN_DEFI_RS_FSYNC=0`, the same toggle
+`defxn-defi-rs`'s own store uses, relying on cross-validator replication
+(commit-certificate already goes to every validator) as the durability
+source instead of a local disk flush — this is the real mechanism behind
+the 354.54/s figure from the original fsync-vs-replication investigation
+(§1), which was real but never re-applied to quorum A's live deployment
+after that. Turned on for quorum A (`mk2` + `bk1`) and measured for real:
+
+| Configuration | Throughput | Note |
+| --- | --- | --- |
+| Durable, fsync on (original) | 131.35-184/s | Flat across concurrency 50-2,400, confirmed real ceiling, not under-tested |
+| Durable, fsync off, local (loopback) | **1,289.14/s**, zero failures | No real network RTT; isolates the fsync cost alone |
+| Durable, fsync off, real fleet (5 audit runs) | **269.56, 296.00, 299.60, 338.62, 350.89/s** | A few transient failures (1-3/3,000 per run), same connection-warmup pattern documented throughout this fleet's testing |
+
+A real, reproducible ~1.6-2x improvement on the real fleet (171-184/s →
+~270-351/s) — honest progress, not the full fix. `top` during the fleet
+run confirmed neither validator is CPU-saturated anymore (mk2 90.4% idle,
+bk1 31.8% idle) and the local loopback result (1,289/s, no network RTT)
+shows the disk/fsync cost really was removed — what's left on the real
+fleet is the 5 sequential cross-datacenter round trips themselves, each
+now paying real network latency with nothing hidden behind a disk wait.
+That's exactly the next lever the mainnet-readiness plan's workstream 1
+already names: extend close-transfer's single-round-trip,
+server-orchestrated pattern (§3) to the durable chain, so the client pays
+one round trip instead of three sequential ones after aggregate. Not done
+yet — this section reports the fsync fix as a real, separate, already-
+landed improvement, not a stand-in for the hop-count work still ahead.
+
+## 8. The hop-count lever built, measured, and honestly not adopted — thread
+## starvation was the real bottleneck (2026-10-07)
+
+Built `close-transfer-durable`: the primary now self-orchestrates
+attest-fanout + aggregate + commit-certificate + route-object +
+register-object entirely server-to-server (`agreement_fabric_server.rs`),
+so the client pays one round trip for the whole durable chain instead of
+four sequential ones. Self-work and peer-relay work run concurrently via
+`std::thread::scope` (a real bug caught before shipping: a first version
+ran self-commit, then peers, serializing a wait that used to be free —
+fixed to spawn both and join).
+
+**First real-fleet run was WORSE, not better**: 190.71/s against the old
+path's 302.78/s at the same settings. Profiled instead of assumed: `top`
+on the primary (`bk1`) during a live run showed neither CPU nor disk
+saturated, so the regression wasn't resource exhaustion — it was
+`FABRIC_THREADS` defaulting to `available_parallelism()`, which is 2 on
+`bk1` (a 2-core box). The old path's calls are brief and independent, so
+2 threads cycling fast wasn't visibly a bottleneck; the new path holds
+ONE thread for an entire closure's duration, including a synchronous wait
+on the peer's network round trip — with only 2 threads, only 2 full
+closures can really be in flight on the primary at once.
+
+Set `FABRIC_THREADS=256` on both nodes and re-measured both paths at
+identical settings (count=3,000, concurrency=200, 5 audit runs each,
+5-second cooldown between runs — a shorter cooldown produced wide,
+spurious variance from TCP TIME_WAIT/ephemeral-port exhaustion on the
+client host, the same pattern already documented in
+`agreement_fabric_client.rs`'s own comments; this is a client-side
+artifact of running benchmarks back-to-back, not a server limitation):
+
+| Path | 5 runs | Zero-fail? |
+| --- | --- | --- |
+| Old (4 sequential client round trips, parallel fan-out each phase) | 827.08, 763.54, 770.58, 676.46, 775.24/s | Yes, all 5 |
+| New (`close-transfer-durable`, 1 round trip) | 574.90, 602.70, 592.29, 519.07, 606.52/s | Yes, all 5 |
+
+**Honest result: the old path wins, consistently, by ~25-35%, with much
+tighter tail latency** (old p99 ~310-400ms vs new p99 ~820-1,530ms — the
+new path's single primary-held thread, synchronously relaying three
+separate network round trips to the peer inside one client-visible call,
+produces worse tail behavior than spreading those same three phases
+across many independent, highly-parallel client-driven connections to
+both nodes). Also tried raising the primary's outbound `FABRIC_AGENT_POOL_SIZE`
+from 16 to 128 to rule out agent-pool contention on the relay side — that
+made the new path slower still (289-294/s), not faster, so pool size
+wasn't the limiter either; reverted.
+
+**The real lever was thread count, not hop count.** The
+previously-reported 269-351/s ceiling (§7) was never purely a replication
+cost — `bk1` was starved to 2 server threads the entire time, a
+mis-sized default for I/O-wait-dominated request handling that nobody
+had tuned because nothing before this pointed at it. Fixing just that,
+with the existing simple multi-round-trip path otherwise unchanged,
+takes durable finality on quorum A from ~269-351/s to a reproducible
+**~676-827/s** — a real ~2-2.4x improvement on top of the fsync fix, and
+against accepted finality's ~3,003/s that's a ~3.6-4.4x gap, landing
+almost exactly on the mainnet-readiness plan's stated ~3x target. The
+`close-transfer-durable` code is correct, tested (zero failures across
+every run), and kept in the codebase as available infrastructure — it is
+a genuine win on a topology with real meaningful cross-node RTT, but
+`ping` between this fleet's nodes measures sub-millisecond (likely same
+or adjacent datacenters), so there isn't enough round-trip cost here for
+collapsing hops to beat well-parallelized independent connections.
+`FABRIC_DIRECT_PRIMARY` stays off by default for durable finality on this
+deployment; the honest recommendation is to re-evaluate it specifically
+on any future quorum with real cross-region latency, not to adopt it here
+on the strength of the theory alone.
+
+**Not yet done**: apply `FABRIC_THREADS` tuning as a standing
+configuration change (currently a manual `env` override on the running
+processes, not baked into a deploy script or systemd unit — see gap #7,
+`mainnet-readiness.md`), and re-run the same thread-count check against
+quorums B and C, which were never profiled for this specific starvation
+pattern and may show the same gap.
+
 ## Current live configuration
 
 Four real, concurrently-running quorums on the production fleet:
