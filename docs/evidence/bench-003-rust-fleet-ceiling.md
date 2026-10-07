@@ -507,15 +507,57 @@ change tonight.
 Real measured RTT (not assumed): ~80ms `bk2` → `eug-2c`, ~75ms `bk2` →
 `eul-4c`, ~19ms `eug-2c` → `eul-4c` — genuine distance, closer to the
 GPU-box topology (§9) than to the sub-millisecond InterServer cluster.
-Accepted finality, client on `bk2`, 3 audited runs with cooldown between
-each: **195.87, 196.25, 195.77/s**, zero failures. A modest number for a
-2-core/4-core pair with real latency to its client — not pushed further
-tonight, and not yet included in the 4-quorum aggregate above (adding a
-5th quorum to that number needs a fresh concurrent 5-way audit, not an
-arithmetic add-on; left honestly separate until that's actually run).
+
+**First measurement, client on `bk2`** (the same host used to drive quorum
+A, out of convenience, not matching the methodology used for every other
+standalone quorum number on this page): 195.87, 196.25, 195.77/s. This
+badly understated G's real capacity — every other quorum's standalone
+number (A/B/C/F) was measured with the client placed LOCAL to that quorum,
+not 80ms away. Same mistake pattern this page has already caught twice
+tonight (§8's thread default, §9's hairpin NAT) — a client-placement
+footgun, not a protocol limit.
+
+**Corrected: client moved onto `eug-2c` itself** (~19ms to its peer
+instead of ~80ms). 5 audited runs, concurrency 150, zero failures:
+**1,551.88, 1,548.17, 1,547.48, 1,545.43, 1,548.23/s** — a genuine
+**~7.9x** jump from fixing client placement alone, confirmed as a real
+ceiling (not under-tested: concurrency 400 lands at 1,571/s, essentially
+flat, the same saturation signature used throughout this investigation).
+This is quorum G's real standalone number: **~1,545-1,572/s**. Not yet
+included in the 4-quorum aggregate above (adding a 5th quorum to that
+number needs a fresh concurrent 5-way audit, not an arithmetic add-on;
+left honestly separate until that's actually run).
 
 Registered in `ops/fleet-status-api.mjs`'s `QUORUMS` list, so `/monitor`
 polls its real health alongside A/B/C/F.
+
+**Newer CPU tested directly, not assumed not to matter**: `eug-2c`/`eul-4c`
+run a newer AMD EPYC 9355P (AVX-512+VNNI) than the rest of the fleet's
+older Xeons/EPYC 7552 — worth checking whether that headroom actually
+raises the ceiling. Pushed `FABRIC_THREADS` 256→1024 on both and client
+concurrency 150→1,000 (count up to 15,000): throughput stayed flat at
+~1,540-1,582/s regardless, latency climbing sharply past concurrency
+~400-600 (p50 642ms, max 6.2s at concurrency 1,000 — the same
+flat-throughput/rising-latency saturation signature used all night).
+`top` during the concurrency-1,000 run showed both boxes **95-100% idle**
+the entire time. Conclusively not compute-bound, same as every other
+quorum tonight — reverted `FABRIC_THREADS` back to 256 (1024 bought
+nothing, just complexity). Quorum G's real ceiling is ~1,545-1,582/s,
+set by the real ~19ms RTT between the pair and the protocol's round-trip
+count, not by CPU generation.
+
+**Concurrent 5-quorum run, real contention found**: running A+B+C+F+G
+all at once (not yet re-done cleanly) landed at 2,836.04/s combined --
+well below the ~7,595-9,270/s sum of their standalone numbers. Cause,
+confirmed directly (`top` on both boxes immediately after showed them
+fully idle, ruling out a lingering resource leak): `mk2` is a validator
+in BOTH quorum A and quorum F, and both were benchmarked at the same
+instant, so it had to serve two quorums' real traffic at once (A's max
+latency spiked to 5.2s, F's to 3.9s during that run). This is real,
+architectural shared capacity -- not a regression, and not fixed by
+adding G. A clean concurrent-5 number needs either staggering A/F's
+runs or accepting that real-world concurrent load across quorums
+sharing a validator will cost something; not resolved here.
 
 ## Current live configuration
 
@@ -530,8 +572,9 @@ G on a different provider):
 - **Quorum C** — mist1 + ms3, client on ms2. ~760-1,060/s standalone.
 - **Quorum F** — bk2 + mk2 (reusing their idle capacity from quorum A/B
   duty), client on mk2. ~2,000-2,900/s standalone.
-- **Quorum G** — eug-2c + eul-4c, client on bk2, ~80ms real RTT. ~196/s
-  standalone (§10) — not yet in the aggregate total above.
+- **Quorum G** — eug-2c + eul-4c, client on eug-2c itself. ~1,545-1,572/s
+  standalone (§10, corrected after an initial badly-placed-client
+  measurement) — not yet in the aggregate total above.
 
 Production (`agreement-fabric-rs.service`, port 18993, 3-of-3 on bk2/mk2/
 bk1) is untouched by any of this — separate port, separate process,
