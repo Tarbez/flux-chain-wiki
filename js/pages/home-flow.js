@@ -1,28 +1,35 @@
-/* Home: one agreement, played step by step.
+/* Home: one record joins the FXN chain, played step by step (docs/WHITEPAPER.md §1-2).
 
-   The "now" tile illustrates the step: the acting party signs the record it
-   writes, which lands on the stack of records already written (each pointing
-   to the one before it); the quote says what they agreed. Under it, the five
-   stages are listed once, as the step links that drive the scene. The scene auto-advances, pauses on
+   The "now" tile illustrates the step: the holder signs a record that extends
+   their own chain; the chain checks only grammar, signature, head and
+   position, then copies it to K-of-N peers; a resolver reads what it means.
+   The records stacked behind are the holder's earlier positions, each
+   pointing to the one before. Under it, the five steps are listed once, as
+   the step links that drive the scene. The scene auto-advances, pauses on
    hover/focus or with its own button, and stops when the page is hidden.
-   Reduced motion, or a paused scene, shows the finished trail with the steps
-   still selectable. The example is illustrative. */
+   Reduced motion, or a paused scene, shows the finished record with the
+   steps still selectable. The example is illustrative. */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
   var STEP_MS = 3200, RESTART_MS = 4200;
 
   var ACTORS = [
-    { id: 'requester', label: 'Requester' },
-    { id: 'provider', label: 'Provider' },
-    { id: 'verifier', label: 'Verifier' }
+    { id: 'holder', label: 'Holder' },
+    { id: 'chain', label: 'Chain' },
+    { id: 'resolver', label: 'Resolver' }
   ];
+  // The record being admitted, and the holder's chain behind it.
+  var RECORD = { type: 'LEDGERENTRY · Y1A', hash: 'e058', pos: 42, prev: '2b9d' };
+  var TRAIL = [{ pos: 41, hash: '2b9d' }, { pos: 40, hash: 'c41e' }, { pos: 39, hash: '7f3a' }, { pos: 38, hash: '91c6' }];
+  // Checks on the record's band, lit once passed: Grammar, Signature, Chain head, K-of-N peers.
+  var CHECKS = ['G', 'S', 'C', 'K'];
   var STEPS = [
-    { actors: ['requester'], who: 'Requester', says: 'Translate this 2,000-word brief into Spanish by Friday.', records: 'intent', hash: '7f3a' },
-    { actors: ['provider'], who: 'Provider', says: 'I can deliver Thursday, for 36 FXN.', records: 'offer', hash: 'c41e' },
-    { actors: ['requester', 'provider'], who: 'Requester + Provider', says: 'Agreed: Thursday, 36 FXN, checked on delivery.', records: 'agreement', hash: '2b9d' },
-    { actors: ['provider'], who: 'Provider', says: 'Delivered es-brief.pdf, content hash 4d10.', records: 'fulfillment', hash: 'e058' },
-    { actors: ['verifier'], who: 'Verifier', says: 'The delivery matches the agreed terms.', records: 'receipt', hash: '91c6' }
+    { id: 'sign', title: 'Sign', page: 'account', actors: ['holder'], checks: 0, says: 'The holder signs one record that extends their own chain, at position 42.' },
+    { id: 'check', title: 'Check', page: 'stats', actors: ['chain'], checks: 2, says: 'Grammar parses and the signature verifies. Meaning is not checked.' },
+    { id: 'extend', title: 'Extend', page: 'explorer', actors: ['chain'], checks: 3, says: 'It points to the current head, #2b9d, and position 42 is still free.' },
+    { id: 'replicate', title: 'Replicate', page: 'monitor', actors: ['chain'], checks: 4, says: 'Copied to 3 of 4 peers, then stored. No other chain had to wait.' },
+    { id: 'resolve', title: 'Resolve', page: 'resolver', actors: ['resolver'], checks: 4, says: 'The DeFi resolver reads the payload: 36 FXN to studio.fxn.' }
   ];
 
   function el(tag, className, text) {
@@ -38,10 +45,6 @@
     root.appendChild(path);
     return root;
   }
-  // "points to offer #c41e", or "opens the trail" for the first record.
-  function backRef(i) {
-    return i === 0 ? 'opens the trail' : 'points to ' + STEPS[i - 1].records + ' #' + STEPS[i - 1].hash;
-  }
 
   function svg(tag, attrs, text) {
     var node = document.createElementNS(NS, tag);
@@ -52,18 +55,18 @@
 
   // Party glyphs, drawn in a 24-unit box centred on the avatar.
   var GLYPHS = {
-    requester: 'M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5.5 19.5c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5',
-    provider: 'M4.5 8.5 12 4.5l7.5 4v7L12 19.5l-7.5-4zM4.5 8.5 12 12.5l7.5-4M12 12.5v7',
-    verifier: 'M12 3.5 18.5 6v5.5c0 4-2.8 6.9-6.5 8.5-3.7-1.6-6.5-4.5-6.5-8.5V6zM9 11.8l2.2 2.2 4-4.2'
+    holder: 'M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM5.5 19.5c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5',
+    resolver: 'M4.5 8.5 12 4.5l7.5 4v7L12 19.5l-7.5-4zM4.5 8.5 12 12.5l7.5-4M12 12.5v7',
+    chain: 'M12 3.5 18.5 6v5.5c0 4-2.8 6.9-6.5 8.5-3.7-1.6-6.5-4.5-6.5-8.5V6zM9 11.8l2.2 2.2 4-4.2'
   };
   var AV_X = 54, AV_Y = [44, 112, 180], AV_R = 21;
   var CARD = { x: 222, y: 64, w: 248, h: 142 };
-  var STAMP_X = [CARD.x + 92, CARD.x + 128, CARD.x + 164], STAMP_Y = CARD.y + CARD.h - 24;
+  var STAMP_X = [CARD.x + 86, CARD.x + 116, CARD.x + 146, CARD.x + 176], STAMP_Y = CARD.y + CARD.h - 24;
   var GHOSTS = 4, GHOST_DX = 9, GHOST_DY = 11;
 
-  /* The scene: three parties on the left; on the right the record being
-     written, with the records already written stacked behind it. A beam runs
-     from each acting party to its signature on the record. */
+  /* The scene: holder, chain and resolver on the left; on the right the
+     record being admitted, with the holder's earlier records stacked behind
+     it. A beam runs from whoever acts on the record at this step. */
   function drawScene() {
     var root = svg('svg', { viewBox: '0 0 520 222', class: 'flow-scene', fill: 'none' });
     var defs = svg('defs', {});
@@ -72,7 +75,7 @@
     glow.appendChild(svg('stop', { offset: '1', class: 'flow-glow-out' }));
     defs.appendChild(glow); root.appendChild(defs);
 
-    // Woven backdrop: the "fabric" the trail is written into.
+    // Backdrop: the mesh the record travels across.
     var weave = svg('g', { class: 'flow-weave' });
     for (var w = 0; w < 7; w++) {
       var y = 24 + w * 30;
@@ -80,7 +83,7 @@
     }
     root.appendChild(weave);
 
-    // Records already written, stacked behind the current one.
+    // The holder's earlier records, stacked behind the current one.
     var ghosts = [];
     for (var g = GHOSTS; g >= 1; g--) {
       var gx = CARD.x + g * GHOST_DX, gy = CARD.y - g * GHOST_DY;
@@ -105,7 +108,7 @@
       return group;
     });
 
-    // Parties.
+    // Who acts.
     ACTORS.forEach(function (actor, k) {
       var cy = AV_Y[k];
       var g = svg('g', { class: 'flow-avatar', 'data-actor': actor.id });
@@ -117,7 +120,7 @@
       root.appendChild(g);
     });
 
-    // The record being written.
+    // The record being admitted.
     var card = svg('g', { class: 'flow-card' });
     card.appendChild(svg('rect', { x: CARD.x, y: CARD.y, width: CARD.w, height: CARD.h, rx: 12, class: 'flow-card-box' }));
     card.appendChild(svg('path', { d: 'M' + CARD.x + ' ' + (CARD.y + CARD.h - 48) + 'h' + CARD.w + 'v36a12 12 0 0 1-12 12h-' + (CARD.w - 24) + 'a12 12 0 0 1-12-12z', class: 'flow-card-band' }));
@@ -126,11 +129,11 @@
     var hash = svg('text', { x: CARD.x + 18, y: CARD.y + 58, class: 'flow-card-hash' });
     var prev = svg('text', { x: CARD.x + 18, y: CARD.y + 80, class: 'flow-card-prev' });
     card.appendChild(type); card.appendChild(count); card.appendChild(hash); card.appendChild(prev);
-    card.appendChild(svg('text', { x: CARD.x + 18, y: STAMP_Y + 4, class: 'flow-card-signed' }, 'SIGNED'));
-    var stamps = ACTORS.map(function (actor, k) {
-      var st = svg('g', { class: 'flow-stamp', 'data-actor': actor.id });
+    card.appendChild(svg('text', { x: CARD.x + 18, y: STAMP_Y + 4, class: 'flow-card-signed' }, 'CHECKS'));
+    var stamps = CHECKS.map(function (mark, k) {
+      var st = svg('g', { class: 'flow-stamp', 'data-check': mark });
       st.appendChild(svg('circle', { cx: STAMP_X[k], cy: STAMP_Y, r: 12, class: 'flow-stamp-disc' }));
-      st.appendChild(svg('text', { x: STAMP_X[k], y: STAMP_Y + 4, 'text-anchor': 'middle', class: 'flow-stamp-mark' }, actor.label.charAt(0)));
+      st.appendChild(svg('text', { x: STAMP_X[k], y: STAMP_Y + 4, 'text-anchor': 'middle', class: 'flow-stamp-mark' }, mark));
       card.appendChild(st);
       return st;
     });
@@ -144,28 +147,27 @@
       svg: root,
       paint: function (i) {
         var step = STEPS[i];
-        type.textContent = step.records.toUpperCase();
+        type.textContent = RECORD.type;
         count.textContent = String(i + 1).padStart(2, '0') + ' / 05';
-        hash.textContent = '#' + step.hash;
-        prev.textContent = i === 0 ? 'genesis · opens the trail' : '↳ points to #' + STEPS[i - 1].hash;
+        hash.textContent = '#' + RECORD.hash;
+        prev.textContent = '↳ J ' + RECORD.pos + ' · extends #' + RECORD.prev;
         for (var d = 1; d <= GHOSTS; d++) {
-          var k = i - d;
-          ghosts[d].setAttribute('data-on', k >= 0 ? 'true' : 'false');
-          ghosts[d].label.textContent = k >= 0 ? STEPS[k].records.toUpperCase() + '  #' + STEPS[k].hash : '';
+          ghosts[d].setAttribute('data-on', 'true');
+          ghosts[d].label.textContent = 'J ' + TRAIL[d - 1].pos + '  #' + TRAIL[d - 1].hash;
         }
         beams.forEach(function (b, k) { b.setAttribute('data-on', step.actors.indexOf(ACTORS[k].id) >= 0 ? 'true' : 'false'); });
-        stamps.forEach(function (st, k) { st.setAttribute('data-on', step.actors.indexOf(ACTORS[k].id) >= 0 ? 'true' : 'false'); });
+        stamps.forEach(function (st, k) { st.setAttribute('data-on', k < step.checks ? 'true' : 'false'); });
       }
     };
   }
 
-  ArkUI.buildAgreementFlow = function (options) {
-    var stages = options.stages, hrefFor = options.hrefFor;
+  ArkUI.buildChainFlow = function (options) {
+    var hrefFor = options.hrefFor;
     var root = el('div', 'flow');
     root.dataset.step = '0';
 
-    // Now: an illustration of the step (who signs which record, stacked on
-    // the trail so far), then what they say.
+    // Now: an illustration of the step (who acts on the record, stacked on
+    // the holder's chain so far), then what happens.
     var now = el('div', 'flow-now');
     var scene = drawScene();
     scene.svg.setAttribute('aria-hidden', 'true');
@@ -175,15 +177,16 @@
     now.appendChild(says);
     root.appendChild(now);
 
-    // Ledger: the records are the step links (the real, accessible content).
+    // Steps: the step links (the real, accessible content), each to the page
+    // that shows that part for real.
     var rail = el('ol', 'home-cycle-records flow-ledger');
-    var links = stages.map(function (s, i) {
+    var links = STEPS.map(function (s, i) {
       var item = el('li'), link = el('a', 'home-cycle-step flow-record');
       link.dataset.stage = s.id; link.dataset.i = String(i);
-      link.href = hrefFor(s.id); link.dataset.sceneLink = 'lifecycle/' + s.id;
+      link.href = hrefFor(s.page); link.dataset.sceneLink = s.page;
       link.appendChild(el('span', 'flow-record-num', String(i + 1).padStart(2, '0')));
       link.appendChild(el('span', 'flow-record-name', s.title));
-      link.setAttribute('aria-label', s.title + ': ' + STEPS[i].who + ' — ' + STEPS[i].says + ' Records ' + STEPS[i].records + ' #' + STEPS[i].hash + ', ' + backRef(i) + '. Illustrative example. Open this step.');
+      link.setAttribute('aria-label', s.title + ': ' + s.says + ' Illustrative example. Open the related page.');
       item.appendChild(link); rail.appendChild(item);
       return link;
     });
@@ -217,7 +220,7 @@
     }
     function paintToggle() {
       var playing = !reduce.matches && !userPaused;
-      toggle.setAttribute('aria-label', playing ? 'Pause the agreement animation' : 'Play the agreement animation');
+      toggle.setAttribute('aria-label', playing ? 'Pause the chain animation' : 'Play the chain animation');
       toggle.title = playing ? 'Pause' : 'Play';
       root.dataset.playing = playing ? 'true' : 'false';
     }

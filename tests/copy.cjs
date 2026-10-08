@@ -18,7 +18,7 @@ for(const file of ['js/content/learnings.js','js/content/article-index.js','js/p
 // Home's other page scripts, as the catalog loads them: shared stats data and the
 // flow builder (stubbed: it draws an illustration and names no copy keys).
 vm.runInContext(fs.readFileSync('js/content/stats-highlights.js','utf8'),context);
-ArkUI.buildAgreementFlow=()=>({element:node(),restore(){},dispose(){}});
+ArkUI.buildChainFlow=()=>({element:node(),restore(){},dispose(){}});
 vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
 context.ArkUI.pageModules.zero.mount({appendChild(){}});
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);

@@ -1,7 +1,7 @@
-/* Home: the agreement flow (js/pages/home-flow.js) and the measured stats rail.
+/* Home: the chain flow (js/pages/home-flow.js) and the measured stats rail.
    Bento, not boxes-in-boxes: tiles are separated by fill and gap, never by
-   hairlines. Color restraint: the acting party and the record being written
-   carry the primary ink; finished records are neutral; only a verified trail
+   hairlines. Color restraint: whoever acts and the record being admitted
+   carry the primary ink; earlier records are neutral; only a resolved record
    uses success. Records are step links, so they take reference on hover/focus. */
 
 #scene .home-lifecycle {border-color:transparent;}
@@ -25,23 +25,23 @@
 .flow-avatar-disc {fill:hsl(var(--text-strong) / .07);transition:fill 300ms;}
 .flow-avatar-glyph {stroke:hsl(var(--text-faint));stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;fill:none;transition:stroke 300ms;}
 .flow-avatar-label {font:500 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.06em;text-transform:uppercase;fill:hsl(var(--text-faint));transition:fill 300ms;}
-.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"],
-.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"],
-.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] {--on:1;}
+.flow[data-actors~="holder"] .flow-avatar[data-actor="holder"],
+.flow[data-actors~="chain"] .flow-avatar[data-actor="chain"],
+.flow[data-actors~="resolver"] .flow-avatar[data-actor="resolver"] {--on:1;}
 .flow-avatar {--on:0;}
 .flow-avatar .flow-avatar-glow {opacity:var(--on);}
-.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-disc,
-.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-disc,
-.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-disc {fill:hsl(var(--primary-200));}
-.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-glyph,
-.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-glyph,
-.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-glyph {stroke:hsl(var(--primary));}
-.flow[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-label,
-.flow[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-label,
-.flow[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-label {fill:hsl(var(--text-strong));}
-.flow.flow-run[data-actors~="requester"] .flow-avatar[data-actor="requester"] .flow-avatar-ring,
-.flow.flow-run[data-actors~="provider"] .flow-avatar[data-actor="provider"] .flow-avatar-ring,
-.flow.flow-run[data-actors~="verifier"] .flow-avatar[data-actor="verifier"] .flow-avatar-ring {animation:flow-ping 1.6s ease-out 2;}
+.flow[data-actors~="holder"] .flow-avatar[data-actor="holder"] .flow-avatar-disc,
+.flow[data-actors~="chain"] .flow-avatar[data-actor="chain"] .flow-avatar-disc,
+.flow[data-actors~="resolver"] .flow-avatar[data-actor="resolver"] .flow-avatar-disc {fill:hsl(var(--primary-200));}
+.flow[data-actors~="holder"] .flow-avatar[data-actor="holder"] .flow-avatar-glyph,
+.flow[data-actors~="chain"] .flow-avatar[data-actor="chain"] .flow-avatar-glyph,
+.flow[data-actors~="resolver"] .flow-avatar[data-actor="resolver"] .flow-avatar-glyph {stroke:hsl(var(--primary));}
+.flow[data-actors~="holder"] .flow-avatar[data-actor="holder"] .flow-avatar-label,
+.flow[data-actors~="chain"] .flow-avatar[data-actor="chain"] .flow-avatar-label,
+.flow[data-actors~="resolver"] .flow-avatar[data-actor="resolver"] .flow-avatar-label {fill:hsl(var(--text-strong));}
+.flow.flow-run[data-actors~="holder"] .flow-avatar[data-actor="holder"] .flow-avatar-ring,
+.flow.flow-run[data-actors~="chain"] .flow-avatar[data-actor="chain"] .flow-avatar-ring,
+.flow.flow-run[data-actors~="resolver"] .flow-avatar[data-actor="resolver"] .flow-avatar-ring {animation:flow-ping 1.6s ease-out 2;}
 @keyframes flow-ping {from{opacity:.8;transform:scale(.85);}to{opacity:0;transform:scale(1.35);}}
 
 /* Beams: drawn from the acting party to the record, then a spark rides them. */
@@ -56,7 +56,7 @@
 @keyframes flow-draw {from{stroke-dashoffset:1;}to{stroke-dashoffset:0;}}
 @keyframes flow-spark {from{stroke-dashoffset:.06;}to{stroke-dashoffset:-.94;}}
 
-/* The trail behind the current record. */
+/* The holder's earlier records, behind the current one. */
 .flow-ghost {opacity:0;transition:opacity 400ms;}
 .flow-ghost[data-on="true"] {opacity:1;}
 .flow-ghost-box {fill:hsl(var(--raised));filter:drop-shadow(0 4px 6px hsl(var(--canvas) / .6));}
@@ -67,7 +67,7 @@
 .flow-ghost-label {font:600 7.5px var(--mono-font,ui-monospace,monospace);letter-spacing:.08em;fill:hsl(var(--text-faint));}
 .flow[data-complete="true"] .flow-ghost-label {fill:hsl(var(--success));}
 
-/* The record being written. */
+/* The record being admitted. */
 .flow-card-box {fill:hsl(var(--raised));filter:drop-shadow(0 12px 18px hsl(var(--canvas) / .55));}
 .flow-card-band {fill:hsl(var(--text-strong) / .05);}
 .flow-card-type {font:600 10px var(--mono-font,ui-monospace,monospace);letter-spacing:.1em;fill:hsl(var(--text-muted));}
@@ -84,7 +84,7 @@
 .flow.flow-run .flow-card {animation:flow-card 520ms cubic-bezier(.22,1,.36,1) both;}
 @keyframes flow-card {from{transform:translate(-6px,8px);opacity:.3;}to{transform:none;opacity:1;}}
 
-/* A finished trail: one success state, after the receipt is written. */
+/* One success state, once a resolver has read the record. */
 .flow-seal {opacity:0;transform-box:fill-box;transform-origin:center;transition:opacity 300ms;}
 .flow-seal-disc {fill:hsl(var(--success-100));stroke:hsl(var(--success));stroke-width:1.5;}
 .flow-seal-check {stroke:hsl(var(--success));stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;fill:none;}
