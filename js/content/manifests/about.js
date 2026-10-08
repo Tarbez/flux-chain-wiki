@@ -36,13 +36,13 @@ ArkManifest.define({
       "label": "Model label",
       "kind": "line",
       "section": "Page",
-      "value": "ONE FABRIC / THREE BOUNDED LAYERS"
+      "value": "ONE CHAIN PER IDENTITY / THREE BOUNDED LAYERS"
     },
     "MODEL.TEXT": {
       "label": "Model summary",
       "kind": "line",
       "section": "Page",
-      "value": "Discovery finds the network. Agreements close the work. Authority stays bounded."
+      "value": "Discovery finds the network. The chain admits signed records. Authority stays bounded."
     },
     "ACTION": {
       "label": "Primary action",
@@ -78,13 +78,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "Agreement fabric: close a verifiable path."
+      "value": "FXN chain: one signed chain per identity."
     },
     "POINT2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "DEFXN carries work through intent, offer, agreement, fulfillment, and receipt. Each signed stage keeps the request, terms, result, and verification linked without a global block order."
+      "value": "Every identity writes to its own append-only chain. The chain admits a record only if its grammar is well-formed, its signature verifies, and it extends that holder’s current head; resolvers for transfers, agreements, books and governance decide what it means. No record waits in one global queue."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -108,7 +108,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "The DEFXN miner, network CLI, resolver model, and complete agreement lifecycle are implemented in source. Automated provider activation remains partial; packaged releases, independent production activation, and benchmark artifacts remain unverified."
+      "value": "The DEFXN miner, network CLI, resolver model, the FXN chain prototype, and the agreements resolver are implemented in source. Fleet benchmarks are recorded on the stats page. Automated provider activation remains partial; packaged releases and independent production activation remain unverified."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -120,7 +120,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Run DEFXN from a trusted source revision, record the miner status response, then inspect the linked agreement evidence. A successful local run proves that environment only; it does not establish production readiness."
+      "value": "Run DEFXN from a trusted source revision, record the miner status response, then inspect the signed records on each holder’s chain. A successful local run proves that environment only; it does not establish production readiness."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",

@@ -1,4 +1,4 @@
-# DEFXN / Agreement fabric
+# DEFXN / Brand foundation
 
 The block mesh is the brand foundation. Backgrounds, lifecycle illustrations and “How it works” share one cell renderer: `ArkUI.createMeshFabric`. The brand system develops that existing structure rather than introducing a separate ornamental language.
 

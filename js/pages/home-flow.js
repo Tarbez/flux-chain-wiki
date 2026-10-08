@@ -1,4 +1,4 @@
-/* Home: one record joins the FXN chain, played step by step (docs/WHITEPAPER.md §1-2).
+/* Home: one record joins the FXN chain, played step by step (docs/whitepaper.md §1-2).
 
    The "now" tile illustrates the step: the holder signs a record that extends
    their own chain; the chain checks only grammar, signature, head and

@@ -116,13 +116,14 @@ The primary conversion is not an account signup. It is a qualified visitor reach
 | Resolver | The deployable definition of a network or protocol surface | Resolver page |
 | Manifest | The signed document that declares the object and its rules | Resolver and lifecycle docs |
 | Mesh | The peers that discover and process Flux objects | Protocol overview |
-| Agreement fabric | The mechanism that closes signed agreements without a global block order | Lifecycle overview |
+| FXN chain | One signed, append-only chain per identity; it checks grammar, signature and position, nothing else | Home, protocol overview, `docs/whitepaper.md` |
+| Agreements resolver | Reads intent, offer, agreement, fulfillment and receipt records across the participants' chains | Lifecycle overview |
 | Authority cell | A short-lived signer group derived for one object and transition | Authority page |
 | Network | An independently addressable Flux tenant; currently a presence boundary | Networks page |
 | Mesh operations | Governance of the shared Flux substrate | Governance page |
 | Network DAO | Governance belonging to one registered network | Governance page |
 
-Do not use `chain` as a synonym for Flux Protocol. Use it only for historical comparison, external chains, or the retired block/validator implementation.
+`Chain` means the FXN chain: one per identity, never one global chain. Call the earlier design `the retired block/validator chain`, and never describe resolver meaning (transfers, agreements) as something the chain itself checks. (Updated 2026-10-08 for the whitepaper direction; the earlier rule banned `chain` outright.)
 
 ## 6. Information architecture
 
@@ -167,8 +168,8 @@ Required structure:
 Approved copy direction:
 
 - Eyebrow: `Protocol infrastructure for independent networks`
-- Heading: `Run your own network without inheriting someone else's chain.`
-- Intro: `Flux Protocol lets teams register a network, define its governance, and complete signed agreements without a global block order. The daemon, network directory, and agreement fabric work today; public binaries and full network-scoped identity and account isolation are still in progress.`
+- Heading: `What if every identity had its own chain?`
+- Intro: `DEFXN gives every identity its own signed, append-only chain. The chain checks only grammar, signature and position; resolvers for transfers, books, markets and governance decide what a record means. Chains never wait on each other, so capacity grows as nodes join.`
 - Primary CTA: `See how Flux works`
 - Secondary CTA: `Run Flux from source`
 
@@ -188,7 +189,7 @@ Rename the visitor-facing label to `Protocol overview`. Do not use the SEO fallb
 Required sections:
 
 1. What problem Flux addresses.
-2. The three-part model: directory, agreement fabric, governance.
+2. The three-part model: directory, FXN chain (one per identity, resolvers on top), governance.
 3. What is live.
 4. What is not yet a boundary.
 5. How to verify the claims.

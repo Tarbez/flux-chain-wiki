@@ -34,7 +34,7 @@ for (const e of context.ArkChainSample.entries) {
   assert(/^G[0-9a-f]{64}-YLEDGERENTRY-/.test(e.text), 'entry starts with G<key>-YLEDGERENTRY-: '+e.pos);
 }
 // stats.js references stats/ledger
-assert(fs.readFileSync('js/pages/stats.js', 'utf8').includes("href('stats/ledger')"), '/stats links to /stats/ledger');
+assert(fs.readFileSync('js/pages/stats.js', 'utf8').includes("'stats/ledger'"), '/stats links to /stats/ledger');
 // catalog registers the route and loads the sample first
 const cat = fs.readFileSync('js/pages/catalog.js', 'utf8');
 assert(/stats\/ledger[^}]+scripts:\s*\['js\/content\/chain-sample\.js'/.test(cat), '/stats/ledger loads chain-sample.js first');

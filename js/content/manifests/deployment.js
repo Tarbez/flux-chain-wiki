@@ -44,7 +44,7 @@ ArkManifest.define({
       "label": "Fourth paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "4. Accept the offer, execute the resolver, and submit fulfillment evidence through the signed agreement path."
+      "value": "4. Accept the offer, execute the resolver, and submit fulfillment evidence as signed records on your own chain; the agreements resolver links them."
     },
     "BODY5": {
       "label": "Fifth paragraph",
@@ -68,7 +68,7 @@ ArkManifest.define({
       "label": "Primary answer",
       "kind": "text",
       "section": "Story",
-      "value": "DEFXN runs work through addressed logic and signed agreements. Register a named network, choose a resolver, agree on terms, submit work evidence, and verify the receipt under the applicable rules."
+      "value": "DEFXN runs work as signed records on each party’s own chain, read by addressed resolvers. Register a named network, choose a resolver, agree on terms, submit work evidence, and verify the receipt under the applicable rules."
     },
     "BOUNDARY": {
       "label": "Essential boundary",
@@ -98,7 +98,7 @@ ArkManifest.define({
       "label": "Fulfillment fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "Signed evidence joins the agreement trail."
+      "value": "Signed evidence lands on the provider’s chain, citing the agreement."
     },
     "FABRIC.RECEIPT": {
       "label": "Receipt fabric explanation",
@@ -464,13 +464,13 @@ ArkManifest.define({
       "label": "Work why 1 title",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "Every agreement runs in its own lane"
+      "value": "Every chain runs in its own lane"
     },
     "CHAPTER.WORK.WHY1.TEXT": {
       "label": "Work why 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "There is no single global queue. Each agreement is its own linked trail, so unrelated work never waits behind yours, unlike a blockchain where every transaction shares one block order."
+      "value": "There is no single global queue. Each party writes to its own chain, so unrelated work never waits behind yours, unlike a blockchain where every transaction shares one block order."
     },
     "CHAPTER.WORK.WHY2.TITLE": {
       "label": "Work why 2 title",
