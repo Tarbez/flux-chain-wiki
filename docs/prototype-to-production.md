@@ -14,6 +14,16 @@ How each item is known, so none is mistaken for a result:
   the item is a suspicion.
 * **DECISION** needs an owner call, not engineering.
 
+## 0a. The design that changes most of this list
+
+See **`docs/finance-ledger-design.md`** (2026-10-07). It proposes a new
+registered-grammar extension (`LEDGERENTRY` manifest type + `J` role letter
+for chain-position) that makes double-spend unrepresentable rather than
+prevented, removes the MEV surface by construction, and closes items §1.1
+and §1.3's `RECEIPT` gap. The items below that it closes carry a
+*design-ledger* marker. Owner decision owed in that doc §12 before the
+first implementation step.
+
 ## 0. Decisions that change the list (answer these first)
 
 1. **What does "prod" mean for it?** A new path next to the certified fabric, a
@@ -36,12 +46,27 @@ How each item is known, so none is mistaken for a result:
 
 ### 1.1 Durability and recovery
 
-* **No replica path over the wire.** *Not built.* A write is acked from memory plus an
-  un-synced append. Kill the process and recent transfers vanish; if a spend marker is
-  lost, **the same input can be spent again after restart**. The recovery test (kill -9
-  mid-load, restart, compare state) has never been run on this server. *READ, PEN-TEST*
-* **Log replay correctness is untested** for torn last lines, partial batches, and a
-  restart racing a replica. *READ, PEN-TEST*
+* **No replica path over the wire** (TRANSFER path). *Not built.* A write is acked from
+  memory plus an un-synced append. Kill the process and recent transfers vanish; if a
+  spend marker is lost, **the same input can be spent again after restart**. *READ, PEN-TEST*
+* **CHAIN path durability is CLOSED (2026-10-08).** `chain::Ledger` carries a
+  `Replication` policy — `None`, `LocalCache` (cold-start convenience), or
+  `Peers { require, among }` (K-of-N peer acks on content-addressed CIDs).
+  Admit returns Ok only after replication succeeds; if fewer than K acks come
+  back, admit returns `ChainErr::Replication { got_acks, need }` and nothing
+  in memory changes. On cold-start, fast replay re-verifies the HEAD
+  signature per chain and uses the hash chain to establish the tail —
+  measured ~10x faster than strict replay for the same guarantee. 15 chain
+  tests + 3 TCP tests pass. *MEASURED, see /stats/ledger*
+* **The TRANSFER path still writes to a local log without peer replication.**
+  Same shape as the chain's old gap; the fix is the same (K-of-N peer acks on
+  CIDs). Still owed. *READ, PEN-TEST*
+* **Chain replay correctness** covered by `cache_reopen_preserves_the_committed_entries`,
+  `durable_tampered_head_is_refused_at_replay` (fast + strict),
+  `durable_tampered_middle_is_caught_by_hash_chain`,
+  `durable_tampered_first_sig_caught_only_by_strict`, and
+  `durable_burst_round_trip`. TRANSFER path replay is still untested.
+  *MEASURED (chain), PEN-TEST (transfer)*
 * **State only grows.** The notebook keeps every record in an in-memory `BTreeMap`
   forever; there is no compaction, archive or eviction. Capacity per machine is
   RAM-bound and unmeasured past about 500,000 transfers. *READ*
@@ -64,8 +89,19 @@ How each item is known, so none is mistaken for a result:
   certified fabric) verifies the same records, they must run one mode, or small-order
   keys must be rejected / `verify_strict` run on accepts. Default the production mode
   to `off` until this is closed. *MEASURED, PEN-TEST (concrete exploit requested)*
-* **Independent security review.** The pen-test agent is a first pass on a scratch
-  copy; it is not an audit. *Not built*
+* **Independent security review.** *Not built.* A first automated pen-test pass was
+  started on an isolated scratch copy (127.0.0.1 only) on 2026-10-07 but **did not
+  finish** — it stopped on an account rate limit before writing findings, so it
+  produced nothing usable. The scope it was given, kept here as the test plan for the
+  next attempt: listener DoS (unbounded `read_line`, connection flood, slowloris, pool
+  queue growth, memory growth under valid-but-useless records); authorization/logic
+  (spend-not-owned, double-spend sequential and concurrent, cross-record and
+  cross-agreement confusion, amount overflow, issuance by non-genesis, replay, check-then-act
+  races, make-a-successor-live-twice); grammar differentials vs `flux-core::parse_manifest`
+  and CID malleability; ed25519 non-strict vs strict and a concrete cofactored-batch exploit;
+  crash/recovery (lost spend marker after kill -9, torn log line, reachable `unwrap()` panics);
+  error-code oracles. None of this has been attempted yet. A human review is still required
+  on top.
 
 ### 1.3 Conformance with the registry
 
@@ -144,7 +180,7 @@ How each item is known, so none is mistaken for a result:
 
 | Item | Closed by |
 | --- | --- |
-| Lost spend marker after crash | replica path + fsync policy + recovery test (§1.1) |
+| Lost spend marker after crash | K-of-N peer replication of the marker CID + head gossip (§1.1) |
 | Network observer / MITM | TLS or noise channel, or private network + gateway (§1.2) |
 | Memory and connection exhaustion | line cap, connection cap, idle timeout, rate limits (§1.2) |
 | "Registered grammar" claim | vector conformance + registered documents (§1.3) |

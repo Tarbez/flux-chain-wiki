@@ -280,3 +280,28 @@
   #scene .stats-bars-wide .stats-bar-row { grid-template-columns:1fr 108px; row-gap:6px; }
   #scene .stats-bars-wide .stats-bar-key { grid-column:1 / -1; }
 }
+
+/* /stats/ledger — chain-of-5 sample viewer and the kind pills. */
+#scene .stats-chain-list { list-style:none; padding:0; margin:16px 0 0; display:grid; gap:14px; }
+#scene .stats-chain-entry { background:hsl(var(--surface)); border-radius:14px; padding:14px 18px; display:grid; gap:10px; }
+#scene .stats-chain-head { display:flex; align-items:center; gap:12px; margin:0; }
+#scene .stats-chain-pos { font:600 11px/1 var(--ark-mono); letter-spacing:0.08em; text-transform:uppercase; color:hsl(var(--text-muted)); padding:4px 8px; background:hsl(var(--raised)); border-radius:999px; }
+#scene .stats-chain-kind { font:600 12px/1 var(--ark-sans); letter-spacing:0.02em; color:hsl(var(--text-strong)); }
+#scene .stats-chain-cid { display:flex; align-items:center; gap:10px; margin:0; font:11px/1 var(--ark-mono); color:hsl(var(--text-muted)); }
+#scene .stats-chain-cid span { font-weight:600; }
+#scene .stats-chain-cid code { color:hsl(var(--text)); }
+#scene .stats-chain-text { margin:0; padding:10px 12px; background:hsl(var(--canvas)); border-radius:8px; overflow:auto; font:11px/1.4 var(--ark-mono); color:hsl(var(--text)); max-height:72px; }
+#scene .stats-chain-text code { white-space:pre-wrap; word-break:break-all; }
+@media (max-width:640px) {
+  #scene .stats-chain-cid { flex-wrap:wrap; }
+}
+
+/* "Chosen path" emphasis: a subtle live accent on the row representing the
+   grammar prototype's chain resolver — the direction this project is shipping.
+   Uses the --live token (sanctioned by the SDK for "selected / live" state). */
+#scene .stats-chosen-table tr.is-chosen td { background:hsl(var(--live) / 0.08); border-left:3px solid hsl(var(--live)); }
+#scene .stats-chosen-table tr.is-chosen strong { color:hsl(var(--live)); font-weight:700; }
+#scene .stats-chosen-table tr.is-chosen em { color:hsl(var(--text-strong)); font-style:normal; font-weight:600; }
+#scene .stats-chosen h2 { color:hsl(var(--text-strong)); }
+/* Pull the heading into the live hue so the eye lands here first. */
+#scene .stats-chosen .stats-tile-label { color:hsl(var(--live)); letter-spacing:0.04em; }

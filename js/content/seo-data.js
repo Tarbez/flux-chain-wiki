@@ -351,6 +351,12 @@ ArkSEO.define({
       "description": "What a DEFXN transfer looks like on the wire, why a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else.",
       "ogImage": "",
       "canonical": ""
+    },
+    "a-resolver-by-construction": {
+      "title": "",
+      "description": "The next finance resolver does not try to prevent double-spend. It makes it unrepresentable. One new registered letter, a chain per identity, six resolver steps, 25,232 entries a second measured on one Mac core.",
+      "ogImage": "",
+      "canonical": ""
     }
   }
 });

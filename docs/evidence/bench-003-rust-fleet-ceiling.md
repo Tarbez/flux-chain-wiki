@@ -911,6 +911,78 @@ text, which is the grammar's rule for holder ids, so a 64-character key costs
 128 characters in every value object. A digest holder would shrink the largest
 record; not done, because it is a spec question, not a tuning one.
 
+## 16. The grammar on the GPU box, and what the GPU actually does (2026-10-07)
+
+§9 tested the *certified fabric* on a rented box that happens to carry an RTX
+PRO 6000, and the writeup there muddled two things: it read idle CPU as proof
+the protocol is not compute-bound, when the idle was really thread starvation
+(fixed in §11). This section re-runs the question with the *registered-grammar
+prototype*, on the same hardware, cleanly, and corrects the record.
+
+### What uses the GPU: nothing
+
+Checked directly on the box while the prototype ran at full tilt: `nvidia-smi
+--query-compute-apps` lists **zero** compute contexts for our processes; the
+binaries link no CUDA/cuBLAS/nvrtc (`ldd` count 0); no process of ours holds a
+`/dev/nvidia*` handle. The 99%-utilisation / 550 W readings seen in an earlier
+run were **other tenants** on a shared GPU host (its `nvidia-smi` is a
+`haishare` multi-tenant shim, and the box carries a constant background load of
+~11-13 and a non-zero cgroup throttle count even when we are idle). So the
+honest statement is stronger than "a GPU does not help": **this protocol never
+addresses the GPU at all.** It is ed25519 and sha256 on the CPU.
+
+### Why the GPU box is nonetheless fast: its CPU
+
+Per-core comparison, identical code and the same pinned `flux-core`, each with
+**2 server cores + 2 client cores**, accepted finality, 300 concurrent, 3 runs
+(min-max). The point is to compare silicon, not core counts:
+
+| Machine | CPU | 1 sig verify (n=1) | agreement verify (2 sigs) | grammar, 1/write | grammar + burst batch |
+| --- | --- | --- | --- | --- | --- |
+| bk2 | Intel Xeon Gold 6230R @2.1GHz | 51,549 ns | 137,802 ns | 2,311-2,488 | 2,961-3,240 |
+| eul-4c | AMD EPYC 9355P (dedicated) | 25,812 ns | 57,015 ns | 5,619-6,125 | 7,606-8,117 |
+| GPU box | AMD EPYC 9355 (shared, 8-core cgroup, load ~11) | 24,564 ns | 55,134 ns | 7,018-7,607 | 10,011-10,776 |
+
+The EPYC machines verify a signature in ~half the time of the Xeon, and since
+verification is ~55% of a server's work (§14), that alone carries most of the
+gap. `eul-4c` is the clean read: a *dedicated* EPYC 9355P, ~2.5-2.6x the Xeon's
+grammar throughput per core. The GPU box's raw numbers run a little higher
+still, but it is a **contended, cgroup-limited, multi-tenant host** (load ~11
+from neighbours throughout), so treat its figures as noisy and `eul-4c` as the
+trustworthy "fast modern CPU" data point. The batch-verify curve is also
+sharper on EPYC (n=6 ~1.9x, n=192 ~2.7x) than on the Xeon (~1.4x / ~2.1x),
+because batching trades many small multiplies for one big one and the EPYC's
+wider vector units win more from that.
+
+### WAN: the grammar over the real internet
+
+The GPU box also gave the first genuine wide-area client. Real measured RTT
+from it: **71.2 ms to bk2, 143.4 ms to eul-4c** (`ping`, 4 samples, mdev <0.1).
+Client on the GPU box, server a single `bk2`/`eul-4c` dense-wire process,
+burst mode, accepted finality, 0 failures:
+
+| Path (RTT) | 1 transfer/write | 5 transfers/write |
+| --- | --- | --- |
+| GPU → bk2 (71 ms) | 2,600-2,701 | 4,928-5,057 |
+| GPU → eul-4c (143 ms) | 1,750-1,805 | 5,168-5,247 |
+
+One transfer per write is latency-bound: at 71 ms it caps near 2,700/s, at
+143 ms near 1,800/s, exactly as round-trip cost predicts. Sending five
+transfers per write amortises the trip and recovers ~5,000/s on *both* paths —
+the same pipelining lesson as §8-9, now over a real intercontinental link and
+with the registered grammar. One run at concurrency 1,200 / 5-per-write to bk2
+piled up connections and stalled (the client opened 1,200 sockets across a
+71 ms path faster than the server's accept loop drained them); aborted, not
+counted, and a note for production that a WAN client needs a bounded connect
+rate (same class of bug as §13's listen-backlog fix, on the client side).
+
+### Correction applied
+
+The `/stats` "a GPU doesn't help, and we proved it" framing (from §9, certified
+fabric) is replaced by the cleaner finding here and on the new `/stats/gpu`
+sub-page: the protocol uses no GPU at all, and CPU choice (EPYC vs Xeon) is
+worth ~2.5x per core. No GPU-derived throughput number stands.
+
 ## Current live configuration
 
 Five real, concurrently-running quorums on the fleet (A-F on InterServer,

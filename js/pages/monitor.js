@@ -47,13 +47,17 @@
   function mean(xs) { return xs.length ? Math.round(xs.reduce(function (t, x) { return t + x; }, 0) / xs.length) : null; }
   function radius(id) { return 18 + (MACHINES[id] ? MACHINES[id].cores : 1) * 3; }
 
+  var FABRIC_RETIRED = Symbol('fabric-retired');
   async function fetchStatus() {
     var controller = new AbortController();
     var timer = setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS);
     try {
       var res = await fetch(API, { cache: 'no-store', signal: controller.signal });
+      if (res.status === 404) return FABRIC_RETIRED;
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      return await res.json();
+      var body = await res.json();
+      if (body && body.ok === false && body.error === 'NOT_FOUND') return FABRIC_RETIRED;
+      return body;
     } finally {
       clearTimeout(timer);
     }
@@ -136,96 +140,171 @@
       var shell = el('div', 'stats-shell'), bento = el('div', 'stats-bento');
       shell.appendChild(bento); page.appendChild(shell);
 
-      // Hero
+      // Hero — chain-prototype first. No dependency on the retired fabric
+      // fleet-status feed; the live surface below is the chain-fleet pulse.
       var hero = tile('stats-hero monitor-hero');
-      var top = el('div', 'monitor-hero-top');
-      var chip = el('span', 'monitor-live-chip', 'Connecting');
-      var live = el('span', 'monitor-live'); live.appendChild(el('i')); var clock = el('span', 'monitor-clock', '–'); live.appendChild(clock);
-      top.appendChild(chip); top.appendChild(live); hero.appendChild(top);
-      var h1 = el('h1', null, 'Mesh monitor'); h1.id = 'monitor-title'; hero.appendChild(h1);
-      hero.appendChild(el('p', null, 'Which machines answer, how fast, and whether every quorum member agrees on who is in it. Read from the fleet every ' + (POLL_MS / 1000) + ' seconds. Throughput is audited, not live, and is labelled that way below.'));
+      var liveChip = el('span', 'monitor-live-chip', 'Connecting…');
+      hero.appendChild(liveChip);
+      var h1 = el('h1', null, 'Chain fleet monitor'); h1.id = 'monitor-title'; hero.appendChild(h1);
+      hero.appendChild(el('p', null, 'The chain-prototype fleet, measured right now. The pulse polls each chain-server directly every 60 seconds and shows the current entries-per-second per node, the aggregate across the fleet, and this tab\'s session history. If a node is up it answers; if the pulse endpoint is down the panel says so plainly.'));
       var links = el('div', 'stats-cta');
-      var statsLink = el('a', 'stats-monitor-link', 'How fast, and why →'); statsLink.href = href('stats'); statsLink.dataset.sceneLink = 'stats';
+      var refreshBtn = el('button', 'stats-monitor-link', 'Refresh now ↻'); refreshBtn.type = 'button';
+      links.appendChild(refreshBtn);
+      var statsLink = el('a', 'stats-monitor-link is-quiet', 'How fast, and why →'); statsLink.href = href('stats'); statsLink.dataset.sceneLink = 'stats';
       links.appendChild(statsLink); hero.appendChild(links);
       bento.appendChild(hero);
 
-      // Lead: quorums online, one pip per quorum; the "of N" is filled from the first real poll.
-      var lead = tile('stats-kpi stats-kpi-lead monitor-lead', 'Quorums online');
-      var leadValue = el('p', 'stats-kpi-value monitor-primary'); var leadNum = el('strong', null, '–'); var leadOf = el('span', null, '');
-      leadValue.appendChild(leadNum); leadValue.appendChild(leadOf); lead.appendChild(leadValue);
-      var pips = el('ol', 'monitor-pips'); pips.setAttribute('aria-hidden', 'true'); lead.appendChild(pips);
-      var leadDetail = el('p', 'stats-kpi-detail', 'Waiting for first poll…'); lead.appendChild(leadDetail);
-      bento.appendChild(lead);
-
-      function kpi(label, unit, tier) {
-        var t = tile('stats-kpi', label), v = el('p', 'stats-kpi-value ' + tier), n = el('strong', null, '–'), u = el('span', null, unit || '');
+      // KPI strip — big live numbers from the latest pulse
+      function kpi(label) {
+        var t = tile('stats-kpi monitor-kpi', label);
+        var v = el('p', 'stats-kpi-value'); var n = el('strong', null, '–'); var u = el('span', 'stats-kpi-unit', '');
         v.appendChild(n); v.appendChild(u); t.appendChild(v);
-        var d = el('p', 'stats-kpi-detail'); t.appendChild(d); bento.appendChild(t);
+        var d = el('p', 'stats-kpi-detail', '…'); t.appendChild(d);
+        bento.appendChild(t);
         return { num: n, unit: u, detail: d, tile: t };
       }
-      var kMachines = kpi('Machines up', '', 'monitor-primary');
-      var kLatency = kpi('Health-check latency', 'ms avg', 'monitor-complement');
-      var latencySpark = spark('is-wide'); kLatency.tile.insertBefore(latencySpark, kLatency.detail);
-      var kSession = kpi('Polls answered', '%', 'monitor-complement');
-      var kErrors = kpi('Backend poll errors', 'since start', 'monitor-neutral');
+      var kNodes = kpi('Chain-servers live');
+      var kAgg = kpi('Fleet aggregate');
+      var kEntries = kpi('Entries this pulse');
+      var kErrors = kpi('Pulse errors');
 
-      // Topology map
-      var mTile = tile('stats-span-12 monitor-map-tile', 'Live topology · specs are static, state is live');
-      mTile.appendChild(el('h2', null, 'Nine machines, two providers, five quorums'));
-      mTile.appendChild(el('p', 'stats-tile-copy', 'Each circle is a machine, sized by its cores. A line is a quorum; the letter names it. mk2 sits in two quorums (A and F). Green means the last health check answered, amber means it did not. The number under each circle is the whole check, including opening the connection, so it is roughly two round trips: 160 ms means about 80 ms away. Within the InterServer group the machines sit at different sites, which is why mk1, mist1 and ms3 read higher than bk2, mk2 and bk1.'));
-      var map = buildMap(); mTile.appendChild(map.wrap);
-      bento.appendChild(mTile);
+      // Live chain-fleet pulse — polls bk2's /pulse.json every 60s and
+      // shows the real current fleet speed. The endpoint is configurable via
+      // window.ArkPulseEndpoint so the user can point /monitor at a local
+      // pulse they run themselves.
+      var PULSE_URL = (window.ArkPulseEndpoint || 'http://162.35.26.46:19502/pulse.json');
+      var pTile = tile('stats-span-12 monitor-pulse-tile stats-chosen', 'Live fleet pulse · current chain-server speed');
+      pTile.appendChild(el('h2', null, 'What the fleet is doing right now'));
+      pTile.appendChild(el('p', 'stats-tile-copy', 'The chain-prototype fleet runs a self-bench every hour from flx-bk2 and publishes the result as JSON. Each row shows what a client on bk2 observed when it fanned 16 chains × 50 entries at that node in parallel with the others. The aggregate scales linearly as nodes join. Point /monitor at a local pulse by setting window.ArkPulseEndpoint before load.'));
+      var pMeta = el('p', 'stats-tile-copy monitor-pulse-meta', 'Loading live pulse from ' + PULSE_URL + ' …');
+      pTile.appendChild(pMeta);
+      var pTable = el('div', 'stats-table-wrap');
+      pTile.appendChild(pTable);
+      var pSession = el('ol', 'monitor-pulse-history');
+      pTile.appendChild(el('h3', 'stats-sub-head', 'This tab\'s session history'));
+      pTile.appendChild(pSession);
+      bento.appendChild(pTile);
 
-      // Quorums
-      var qTile = tile('stats-span-5 monitor-quorum-tile', 'Quorums · membership');
-      var qList = el('ol', 'monitor-quorums');
-      qTile.appendChild(qList); bento.appendChild(qTile);
-
-      // Machines
-      var nTile = tile('stats-span-7 monitor-node-tile', 'Machines · latency this session');
-      var nList = el('ul', 'monitor-nodes');
-      nTile.appendChild(nList); bento.appendChild(nTile);
-
-      // Session latency histogram
-      var hTile = tile('stats-span-5 monitor-hist-tile', 'Session · every reading since you opened this page');
-      hTile.appendChild(el('h2', null, 'How long a health check takes'));
-      var hist = el('ol', 'monitor-hist'); hTile.appendChild(hist);
-      var histNote = el('p', 'stats-tile-copy', 'Waiting for readings…'); hTile.appendChild(histNote);
-      bento.appendChild(hTile);
-
-      // Audited capacity: static, labelled, linked back to the map
-      var run = window.ArkStatsHighlights && window.ArkStatsHighlights.fleetRun;
-      if (run) {
-        var aTile = tile('stats-span-7 monitor-audited-tile', 'Last audited run · ' + run.date + ' · not live');
-        aTile.appendChild(el('h2', null, fmt(run.total) + ' transfers/s across four servers'));
-        aTile.appendChild(el('p', 'stats-tile-copy', 'Registered FLX grammar, ' + run.servers + ' servers and ' + run.clients + ' clients together for ' + run.window + ', ' + fmt(run.transfers) + ' transfers, 0 failures. A prototype (accepted finality only) that is not deployed as a service, so nothing on this page can measure it live. Hover a row to find its machine on the map.'));
-        var maxRate = Math.max.apply(null, run.perServer.map(function (s) { return s.now; }));
-        var rows = el('ol', 'monitor-audit');
-        run.perServer.forEach(function (s) {
-          var li = el('li'); li.tabIndex = 0;
-          li.appendChild(el('b', null, s.name));
-          var track = el('span', 'monitor-audit-track'); var bar = el('span'); bar.style.setProperty('--w', Math.max(2, s.now / maxRate * 100).toFixed(1) + '%'); track.appendChild(bar); li.appendChild(track);
-          li.appendChild(el('strong', null, fmt(s.now) + '/s'));
-          li.appendChild(el('small', null, s.busy.toFixed(0) + '% CPU · ' + s.cores + ' cores · clients ' + s.clients));
-          var focus = function (on) { var n = map.nodes[s.machine]; if (n) n.g.classList.toggle('is-focus', on); };
-          li.addEventListener('mouseenter', function () { focus(true); }); li.addEventListener('mouseleave', function () { focus(false); });
-          li.addEventListener('focus', function () { focus(true); }); li.addEventListener('blur', function () { focus(false); });
-          rows.appendChild(li);
-        });
-        aTile.appendChild(rows);
-        var aLink = el('a', 'stats-monitor-link', 'Open the measurements →'); aLink.href = href('stats'); aLink.dataset.sceneLink = 'stats';
-        aTile.appendChild(aLink);
-        bento.appendChild(aTile);
+      var pulseHistory = [];
+      function setKpi(k, value, unit, detail) { k.num.textContent = value; k.unit.textContent = unit || ''; k.detail.textContent = detail || ''; }
+      function paintPulse(data, note) {
+        if (!data || !data.nodes) {
+          pMeta.textContent = note || 'Pulse not reachable yet. The feed updates hourly from bk2.';
+          pTable.innerHTML = '';
+          liveChip.textContent = 'Pulse offline'; liveChip.dataset.state = 'warn';
+          setKpi(kNodes, '–', '', 'waiting for pulse');
+          setKpi(kAgg, '–', 'entries/s', 'waiting for pulse');
+          setKpi(kEntries, '–', '', 'waiting for pulse');
+          setKpi(kErrors, '–', '', 'waiting for pulse');
+          return;
+        }
+        var when = new Date(data.measured_at_ms);
+        var ageMin = Math.max(0, Math.round((Date.now() - data.measured_at_ms) / 60000));
+        var ageLabel = ageMin < 1 ? 'just now' : ageMin === 1 ? '1 min ago' : ageMin + ' min ago';
+        var alive = data.nodes.filter(function (n) { return !n.error && n.qps > 0; }).length;
+        var total = data.nodes.length;
+        liveChip.textContent = alive + '/' + total + ' nodes · ' + ageLabel;
+        liveChip.dataset.state = alive === total ? 'ok' : 'warn';
+        setKpi(kNodes, alive + '/' + total, 'nodes', ageLabel);
+        setKpi(kAgg, Math.round(data.aggregate_qps || 0).toLocaleString('en-US'), 'entries/s', 'parallel across ' + alive + ' nodes');
+        setKpi(kEntries, (data.total_entries || 0).toLocaleString('en-US'), 'this pulse', 'ingested in ' + (data.longest_ms || 0) + ' ms wall-clock');
+        setKpi(kErrors, data.errors || 0, 'since this pulse', data.errors ? 'see per-node rows below' : 'zero refusals');
+        pMeta.textContent = 'Measured ' + when.toLocaleString() + ' · ' + ageLabel + ' · pulling from ' + PULSE_URL;
+        var sorted = data.nodes.slice().sort(function (a, b) { return (b.qps || 0) - (a.qps || 0); });
+        var maxQps = Math.max.apply(null, sorted.map(function (n) { return n.qps || 0; }).concat([1]));
+        var rows = sorted.map(function (n) {
+          if (n.error) {
+            return '<tr class="is-warn"><td>' + n.name + '</td><td>' + n.addr + '</td>' +
+              '<td colspan="3">error: ' + String(n.error).replace(/[&<>]/g, '') + '</td></tr>';
+          }
+          var w = Math.max(2, (n.qps / maxQps) * 100).toFixed(1);
+          return '<tr><td>' + n.name + '</td><td>' + n.addr + '</td>' +
+            '<td><div class="monitor-bar-wrap"><span class="monitor-bar" style="--w:' + w + '%"></span><strong>' + Math.round(n.qps).toLocaleString('en-US') + '</strong></div></td>' +
+            '<td>' + n.ok + '/' + n.total + '</td>' +
+            '<td>' + n.elapsed_ms + ' ms</td></tr>';
+        }).join('');
+        pTable.innerHTML = '<table class="stats-table stats-table-wrapped monitor-pulse-table"><thead>' +
+          '<tr><th>Node</th><th>Addr</th><th>Entries / s</th><th>ok / total</th><th>Elapsed</th></tr></thead>' +
+          '<tbody>' + rows + '<tr class="is-chosen"><td colspan="2"><strong>Fleet aggregate</strong></td>' +
+          '<td><strong>' + Math.round(data.aggregate_qps).toLocaleString('en-US') + '</strong> entries/s</td>' +
+          '<td>' + (data.total_entries || 0).toLocaleString('en-US') + '</td>' +
+          '<td>' + (data.longest_ms || 0) + ' ms</td></tr></tbody></table>';
       }
+      refreshBtn.addEventListener('click', function () { liveChip.textContent = 'Refreshing…'; tickPulse(); });
+      function pushSessionRow(data) {
+        if (!data || !data.measured_at_ms) return;
+        if (pulseHistory.some(function (h) { return h.measured_at_ms === data.measured_at_ms; })) return;
+        pulseHistory.unshift({ measured_at_ms: data.measured_at_ms, aggregate_qps: data.aggregate_qps, nodes: data.nodes.length, errors: data.errors });
+        pulseHistory = pulseHistory.slice(0, 12);
+        pSession.innerHTML = pulseHistory.map(function (h) {
+          return '<li><code>' + new Date(h.measured_at_ms).toLocaleTimeString() + '</code> · ' +
+            h.nodes + ' nodes · <strong>' + Math.round(h.aggregate_qps).toLocaleString('en-US') + '</strong> entries/s · ' +
+            h.errors + ' err</li>';
+        }).join('');
+      }
+      function tickPulse() {
+        liveChip.textContent = 'Fetching pulse…'; liveChip.dataset.state = '';
+        var started = Date.now();
+        fetch(PULSE_URL, { cache: 'no-store', mode: 'cors' })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status + ' from ' + PULSE_URL)); })
+          .then(function (d) { paintPulse(d); pushSessionRow(d); })
+          .catch(function (e) {
+            var ms = Date.now() - started;
+            var msg = 'Pulse endpoint unreachable (' + ms + ' ms). ' + e.message +
+              '. URL: ' + PULSE_URL +
+              '. Check that your browser can reach it (open ' + PULSE_URL + ' in a new tab).' +
+              ' Override with window.ArkPulseEndpoint = "http://your-host:19502/pulse.json" before load.';
+            paintPulse(null, msg);
+            liveChip.textContent = 'Pulse offline · ' + e.message; liveChip.dataset.state = 'warn';
+            console.error('[monitor] pulse fetch failed:', e, 'URL:', PULSE_URL);
+          });
+      }
+      tickPulse();
+      var pulseTimer = setInterval(tickPulse, 60000);
+      page.arkDispose = function () { clearInterval(pulseTimer); };
+
+      // Chain model panel — resolver shape + live fleet state
+      var cTile = tile('stats-span-12 monitor-chain-tile stats-chosen', 'Chain model · the chosen direction');
+      cTile.appendChild(el('h2', null, 'Per-identity chains, K-of-N peer replication, cross-WAN measured'));
+      cTile.appendChild(el('p', 'stats-tile-copy', 'The finance surface. Each identity owns its own append-only chain of value moves. Durability is K-of-N peer replication of content-addressed CIDs. A second entry at the same (G, pos) is self-signed equivocation; the chain is frozen from that position by any node that holds the pair. Six-node fleet measured 2026-10-08 across 3 regions and 2 providers: 79,654 entries/s aggregate ingestion, zero errors.'));
+      var cStats = el('ol', 'monitor-chain-stats');
+      [
+        ['Fleet aggregate', '79,654 entries/s (6 nodes, parallel)', 'bk2, mk2, bk1, mist1, eug-2c, eul-4c; 38,400 entries in 868 ms wall-clock'],
+        ['Per-pair peak', '22,559 entries/s (bk2 → mk2, 128 chains)', '64,000 entries, 2,836 ms, server-side burst batching'],
+        ['Recovery slack', '~12x live admission', 'replay 279,149 vs hot write 22,559 — a lagging peer catches up faster than it falls behind'],
+        ['Fork gossip', 'cross-WAN propagation Ok', 'bk2 → mk2 Ok("fork") verified in same run'],
+        ['Replication', 'K-of-N peer acks', 'Replication::Peers { require, among, push, cache }'],
+        ['Replay default', 'head-only sig + hash chain', '~10x strict (279,149 vs 27,268 entries/s)'],
+        ['TCP ingress', 'line-framed, <TAG>\\t<MANIFEST>\\n', 'chain_server::serve(addr), persistent-conn aware'],
+        ['Equivocation', 'self-signed fork evidence', 'receive_fork_evidence(a, b)'],
+        ['Auto broadcaster', 'push-on-detect to peer list', 'Broadcaster + on_fraud callback'],
+        ['Issuance policy', 'roster of allowed signers', 'IssuancePolicy::Roster { allowed }'],
+        ['Compaction', 'snapshot + prune_before', 'Payload::Snapshot, prune_before(g, pos)'],
+        ['IPFS pin sidecar', 'best-effort, 500 ms timeout', 'CHAIN_SERVER_PIN_URL opt-in; pin failure never rolls back admit'],
+        ['Receiver timeout', 'Refund by sender after D expires', 'Payload::Refund, M ≥ D enforced'],
+        ['Fraud count', 'frozen chains known to this node', 'ledger.fraud_count()'],
+        ['Chain heads', '(G, head_cid, length)', 'ledger.chain_heads()']
+      ].forEach(function (p) {
+        var li = el('li');
+        li.appendChild(el('b', null, p[0]));
+        li.appendChild(el('span', null, p[1]));
+        li.appendChild(el('code', null, p[2]));
+        cStats.appendChild(li);
+      });
+      cTile.appendChild(cStats);
+      cTile.appendChild(el('p', 'stats-tile-copy', 'Two chain-servers run on flx-bk2 and flx-mk2 (:19501). The audited fleet number above is live measurement, not simulation; the fleet-run binary is in dense-wire/target/release/fleet-run. A live /chain-heads endpoint is next; it will fill the "Chain heads" row from each node\'s own ledger.'));
+      var cLink = el('a', 'stats-monitor-link', 'Open the design + measurements →'); cLink.href = href('stats/ledger'); cLink.dataset.sceneLink = 'stats/ledger';
+      cTile.appendChild(cLink);
+      bento.appendChild(cTile);
 
       // How to read this page
       var rTile = tile('stats-span-12 monitor-read-tile', 'Reading this page');
       rTile.appendChild(el('h2', null, 'What is live, what is session, what is audited'));
       var legend = el('ul', 'monitor-legend');
-      [['Live', 'Reachable, latency and each member\'s view of its quorum, fetched just now. A failed fetch leaves the last real snapshot with a staleness note; it never fills a gap.'],
-       ['Session', 'The trend lines and the histogram are real readings this page received since it opened. Close the tab and they are gone.'],
-       ['Audited', 'Throughput and CPU figures are from one dated benchmark run. They describe that run, not now.'],
-       ['Not measured', 'Whether a quorum would agree under attack, how a validator behaves after a restart, or what a public client would see. Nothing here speaks to those.']
+      [['Live', 'The fleet-pulse panel polls bk2 every 60s for the current per-node and aggregate chain-server throughput. A failed poll leaves the last real sample with a staleness note; it never fills a gap.'],
+       ['Session', 'The pulse session history, trend lines and the histogram are real readings this tab received since it opened. Close the tab and they are gone.'],
+       ['Audited', 'The chain-model panel\'s per-pair, aggregate and replay figures are from the 2026-10-08 fleet runs. They describe those runs, not now — the live pulse above is what\'s current.'],
+       ['Not yet reviewed', 'No independent security audit has looked at the chain prototype. Behavior under adversarial partitions, long-running soak, and public-client traffic is not what this page measures.']
       ].forEach(function (p) { var li = el('li'); li.appendChild(el('b', null, p[0])); li.appendChild(el('span', null, p[1])); legend.appendChild(li); });
       rTile.appendChild(legend);
       var story = el('a', 'stats-monitor-link is-quiet', 'Read how we got here →'); story.href = href('article/how-we-got-fast-and-what-we-got-wrong'); story.dataset.sceneLink = 'article/how-we-got-fast-and-what-we-got-wrong';
@@ -234,163 +313,6 @@
 
       host.appendChild(page);
 
-      var pollTimer = null, lastGoodAt = null, polls = 0, answered = 0;
-      var avgHistory = [], nodeHistory = {}, nodeRows = {};
-      var counts = BUCKETS.map(function () { return 0; }), readings = 0;
-
-      function push(arr, v) { arr.push(v); if (arr.length > HISTORY) arr.shift(); }
-
-      function renderSession() {
-        kSession.num.textContent = polls ? fmt(Math.round(answered / polls * 100)) : '–';
-        kSession.detail.textContent = answered + ' of ' + polls + ' since this page opened';
-        kSession.tile.classList.toggle('is-warn', answered < polls);
-      }
-
-      function renderHist() {
-        hist.textContent = '';
-        var max = Math.max.apply(null, counts.concat([1]));
-        BUCKETS.forEach(function (b, i) {
-          var li = el('li'); li.dataset.tip = b.label + ': ' + counts[i] + ' of ' + readings + ' readings';
-          li.appendChild(el('span', 'monitor-hist-key', b.label));
-          var track = el('span', 'monitor-hist-track'), bar = el('span'); bar.style.setProperty('--w', (counts[i] / max * 100).toFixed(1) + '%'); track.appendChild(bar); li.appendChild(track);
-          li.appendChild(el('b', null, String(counts[i])));
-          hist.appendChild(li);
-        });
-        histNote.textContent = readings + ' real readings so far. A check includes opening the connection, so about two round trips: the spread is geography (some machines share a site with the checker, others are 40 to 80 ms away), not trouble.';
-      }
-
-      function nodeRow(id) {
-        if (nodeRows[id]) return nodeRows[id];
-        var li = el('li');
-        var dot = el('span', 'monitor-dot'); dot.setAttribute('aria-hidden', 'true');
-        var name = el('b', null, 'flx-' + short(id));
-        var serves = el('small', 'monitor-serves');
-        var line = spark();
-        var val = el('span', 'monitor-node-ms');
-        li.appendChild(dot); li.appendChild(name); li.appendChild(serves); li.appendChild(line); li.appendChild(val);
-        nList.appendChild(li);
-        return (nodeRows[id] = { li: li, serves: serves, line: line, val: val });
-      }
-
-      var linksDrawn = false;
-
-      function render(snapshot, failed) {
-        polls += 1;
-        if (failed) {
-          renderSession();
-          leadDetail.textContent = lastGoodAt
-            ? 'Feed unreachable · last real poll ' + time(lastGoodAt)
-            : 'Feed unreachable · no successful poll yet';
-          chip.textContent = 'Stale'; chip.classList.add('is-stale'); live.classList.add('is-stale');
-          return;
-        }
-        answered += 1;
-        renderSession();
-        lastGoodAt = new Date(snapshot.generatedAt);
-        chip.textContent = 'Live'; chip.classList.remove('is-stale'); live.classList.remove('is-stale');
-        clock.textContent = time(lastGoodAt);
-
-        var s = snapshot.summary;
-        leadNum.textContent = fmt(s.quorumsOnline);
-        leadOf.textContent = 'of ' + s.quorumsTotal;
-        lead.classList.toggle('is-warn', s.quorumsOnline < s.quorumsTotal);
-        leadDetail.textContent = s.quorumsOnline === s.quorumsTotal
-          ? 'Every member of every quorum answered'
-          : (s.quorumsTotal - s.quorumsOnline) + ' of ' + s.quorumsTotal + ' have an unreachable member';
-        pips.textContent = '';
-        snapshot.quorums.forEach(function (q) {
-          var p = el('li', q.online ? null : 'is-down', q.id); pips.appendChild(p);
-        });
-
-        kMachines.num.textContent = fmt(s.machinesUp);
-        kMachines.unit.textContent = 'of ' + s.machinesTotal;
-        kMachines.detail.textContent = s.machinesUp === s.machinesTotal ? 'All reachable' : (s.machinesTotal - s.machinesUp) + ' unreachable';
-        kMachines.tile.classList.toggle('is-warn', s.machinesUp < s.machinesTotal);
-
-        // One row per machine; a machine in two quorums is pinged on both ports.
-        var machines = {}, order = [];
-        snapshot.quorums.forEach(function (q) {
-          q.members.forEach(function (m) {
-            if (!machines[m.id]) { machines[m.id] = { id: m.id, quorums: [], pings: [], seen: [], down: false, error: null }; order.push(m.id); }
-            var mc = machines[m.id]; mc.quorums.push(q.id);
-            mc.seen.push(q.id + ' ' + (m.reachable ? m.latencyMs + ' ms' : (m.error || 'unreachable')));
-            if (m.reachable) {
-              mc.pings.push(m.latencyMs);
-              readings += 1;
-              for (var b = 0; b < BUCKETS.length; b += 1) { if (m.latencyMs < BUCKETS[b].max) { counts[b] += 1; break; } }
-            } else { mc.down = true; mc.error = m.error; }
-          });
-        });
-        renderHist();
-
-        var reachable = [];
-        order.forEach(function (id) { reachable = reachable.concat(machines[id].pings); });
-        var avg = mean(reachable);
-        push(avgHistory, avg);
-        latencySpark.draw(avgHistory);
-        kLatency.num.textContent = fmt(avg);
-        kLatency.detail.textContent = reachable.length
-          ? 'Range ' + Math.min.apply(null, reachable) + '–' + Math.max.apply(null, reachable) + ' ms this poll'
-          : 'No member answered this poll';
-
-        kErrors.num.textContent = fmt(snapshot.pollErrors);
-        kErrors.detail.textContent = snapshot.pollErrors ? 'Fleet sweeps that failed' : 'No failed fleet sweeps';
-        kErrors.tile.classList.toggle('is-warn', snapshot.pollErrors > 0);
-
-        qList.textContent = '';
-        snapshot.quorums.forEach(function (q) {
-          var li = el('li'); li.classList.toggle('is-down', !q.online);
-          li.appendChild(el('b', 'monitor-q-id', q.id));
-          var members = el('span', 'monitor-q-members');
-          q.members.forEach(function (m) {
-            var tag = el('span', m.reachable ? null : 'is-down');
-            var dot = el('i'); dot.setAttribute('aria-hidden', 'true'); tag.appendChild(dot);
-            tag.appendChild(document.createTextNode(short(m.id)));
-            members.appendChild(tag);
-          });
-          li.appendChild(members);
-          // Each member reports how many members it sees; flag any disagreement.
-          var views = q.members.filter(function (m) { return m.reachable && m.memberCount != null && m.memberCount !== q.totalCount; });
-          if (views.length) li.appendChild(el('small', 'monitor-q-view', views.map(function (m) { return short(m.id) + ' sees ' + m.memberCount; }).join(' · ')));
-          li.appendChild(el('span', 'monitor-q-val', q.onlineCount + '/' + q.totalCount));
-          qList.appendChild(li);
-        });
-
-        // The map: links once (membership rarely changes), then state on every poll.
-        if (!linksDrawn) { drawLinks(map, snapshot.quorums); linksDrawn = true; }
-        snapshot.quorums.forEach(function (q) { var l = map.links[q.id]; if (l) l.classList.toggle('is-down', !q.online); });
-
-        order.forEach(function (id) {
-          var mc = machines[id], row = nodeRow(id), now = mc.down ? null : mean(mc.pings);
-          var series = nodeHistory[id] || (nodeHistory[id] = []);
-          push(series, now);
-          row.li.classList.toggle('is-down', mc.down);
-          row.serves.textContent = mc.quorums.join('·');
-          row.line.draw(series);
-          row.val.textContent = mc.down ? (mc.error || 'unreachable') : now + ' ms';
-          row.val.title = mc.seen.length > 1 ? mc.seen.join(', ') : '';
-          var n = map.nodes[short(id)];
-          if (n) {
-            n.g.classList.toggle('is-down', mc.down);
-            n.ms.textContent = mc.down ? 'down' : now + ' ms';
-            n.title.textContent = 'flx-' + short(id) + ' · serves ' + mc.quorums.join(', ') + ' · ' + (mc.down ? (mc.error || 'unreachable') : mc.seen.join(', '));
-          }
-        });
-      }
-
-      async function tick() {
-        try {
-          var snapshot = await fetchStatus();
-          render(snapshot, false);
-        } catch (err) {
-          render(null, true);
-        }
-      }
-
-      renderHist();
-      tick();
-      pollTimer = setInterval(tick, POLL_MS);
-      page.arkDispose = function () { clearInterval(pollTimer); };
       return page;
     }
   };

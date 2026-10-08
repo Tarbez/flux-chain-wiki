@@ -34,5 +34,19 @@ LearningContent.define([
     "category": "GRAMMAR / 005",
     "minutes": "6 MIN READ",
     "summary": "What a DEFXN transfer looks like on the wire, how a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else."
+  },
+  {
+    "slug": "a-resolver-by-construction",
+    "title": "A finance resolver by construction",
+    "category": "DESIGN / 006",
+    "minutes": "7 MIN READ",
+    "summary": "The next finance resolver does not try to prevent double-spend — it makes it unrepresentable. Each identity owns an append-only chain of value moves; a second entry at the same position is self-signed equivocation. One new letter, six resolver steps, 25,232 entries a second on the author's Mac."
+  },
+  {
+    "slug": "the-chain-prototype-is-the-chosen-path",
+    "title": "The chain prototype is the chosen path",
+    "category": "BENCHMARKS / 007",
+    "minutes": "8 MIN READ",
+    "summary": "Six nodes, three regions, two providers, zero errors: 79,654 entries a second on the real fleet. Replay runs at 279,149/s — twelve times live admission, so recovery outruns ingestion. A live /pulse endpoint lets the monitor page show the fleet's current speed as it grows."
   }
 ]);
