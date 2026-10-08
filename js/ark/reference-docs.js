@@ -2,10 +2,15 @@
 ArkUI.referenceDocs = Object.freeze([
   "docs/evidence/bench-001-verification.md",
   "docs/evidence/bench-003-rust-fleet-ceiling.md",
+  "docs/evidence/bench-004-chain-fleet-soak.md",
+  "docs/evidence/bench-005-million-ops-audit.md",
+  "docs/evidence/bench-006-certified-segment-and-binary-transport.md",
+  "docs/evidence/bench-007-nine-node-certified-resolver.md",
   "docs/evidence/cap-004-verification.md",
   "docs/evidence/fxn-speed-audit-v0.md",
   "docs/evidence/public-claim-inventory.md",
   "docs/evidence/registry.md",
+  "docs/finance-ledger-design.md",
   "docs/mainnet-readiness.md",
   "docs/operators/networks.md",
   "docs/operators/prerequisites.md",
@@ -17,5 +22,6 @@ ArkUI.referenceDocs = Object.freeze([
   "docs/protocol/benchmarks.md",
   "docs/protocol/governance.md",
   "docs/protocol/resolvers.md",
+  "docs/prototype-to-production.md",
   "docs/status.md"
 ]);

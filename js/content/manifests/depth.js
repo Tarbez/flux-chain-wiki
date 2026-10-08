@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "One signed trail records what was requested, offered, accepted, produced, and checked. Each stage references the relevant prior record so an auditor can inspect the path without relying on a global block order."
+      "value": "One signed trail records what was requested, offered, accepted, produced, and checked. Each record sits on its writer’s own FXN chain and cites the relevant prior record by CID, so an auditor can follow the path across the participants’ chains."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "The participating peers sign the accepted terms. Unrelated work does not wait behind this agreement in one global transaction lane."
+      "value": "The participating peers sign the accepted terms on their own chains. Unrelated work never waits behind this agreement in one global lane."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -105,7 +105,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "The intent-to-receipt lifecycle and agreement-fabric inspection contract are implemented in source. A complete public production run is not registered here."
+      "value": "The intent-to-receipt lifecycle and the agreements resolver’s inspection contract are implemented in source. A complete public production run is not registered here."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
