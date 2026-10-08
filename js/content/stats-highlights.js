@@ -4,11 +4,11 @@
    record does not also carry.
 
    Updated 2026-10-08: the chain prototype — per-identity append-only
-   chains, K-of-N peer replication, LEDGERENTRY (Y=1A) — scaled to a
-   real 6-node fleet across 3 regions and 2 providers. Aggregate real
-   ingestion is 79,654 entries/s with zero errors on 38,400 entries in
-   868 ms wall-clock. Per-pair peak is 22,559/s (bk2 → mk2, 128 chains
-   interleaved, server-side burst batching). Replay fast-path is
+   chains, K-of-N peer replication, LEDGERENTRY (Y=1A) — sustained
+   12,403 accepted ops/s across a real 6-node fleet for 303 seconds:
+   3,760,000 accepted, zero failures. The earlier 79,654/s result is a
+   short 868 ms burst, retained only as dated peak evidence. Per-pair
+   peak is 22,559/s (bk2 → mk2, 128 chains interleaved). Replay fast-path is
    279,149/s — ~12x live admission, so a peer that fell behind catches
    up far faster than live traffic flows in. This is the chosen path.
 
@@ -16,6 +16,43 @@
    path, kept for comparison; the chain prototype is now the headline. */
 (function () {
   'use strict';
+
+  // The three honest numbers from the design doc §1. Measured in-process on
+  // one M-series Mac core on 2026-10-08 with `transfer-bench`
+  // (dense-wire/src/bin/transfer_bench.rs): 10 s sustained window, 8 holder
+  // shards, 4 replicas-per-shard assumed for the replica number, 87% of
+  // transfers were cross-shard. Every finalized transfer completed the full
+  // 4-step PREPARE/ACCEPT/COMMIT/FINALIZE dance; errors = 0.
+  //
+  // This is the first measurement that separates `finalized transfers/s`
+  // from `logical operations/s` from `replica applications/s`, as the
+  // design doc §1 and §7 require. Only `finalized_tps` counts toward the
+  // headline. The chain-fleet rows below are the earlier admit-path
+  // measurements (counted as logical operations, since each admit is one
+  // op), kept for context.
+  var HONEST_TRANSFERS = Object.freeze({
+    date: '2026-10-08',
+    source: 'in-process · M-series Mac · 10 s sustained window',
+    shards: 8,
+    replicasPerShard: 4,
+    windowSeconds: 10,
+    submitted: 24000,
+    finalized: 24000,
+    sameShard: 3014,
+    crossShard: 20986,
+    logicalOps: 96000,
+    errors: 0,
+    // The three design-doc §1 numbers:
+    finalizedTps: 3768,
+    logicalOpsPerSecond: 15073,
+    replicaAppsPerSecond: 60292,
+    // Burst variants (1,000 transfers, single run):
+    burst: Object.freeze({
+      mixed:       Object.freeze({ finalizedTps: 4237, logicalOpsPerSecond: 16949 }),
+      crossShard:  Object.freeze({ finalizedTps: 4132, logicalOpsPerSecond: 16529 }),
+      sameShard:   Object.freeze({ finalizedTps: 3472, logicalOpsPerSecond: 13889 })
+    })
+  });
 
   // The chain prototype's six-node fleet pulse, 2026-10-08. Each entry is
   // one chain-server; `qps` is what a client on bk2 observed when it fanned
@@ -44,6 +81,69 @@
     ])
   });
 
+  // Five-minute public-client soak, 2026-10-08. One local arm64 client ran
+  // fleet-many concurrently against all six public :19501 nodes. Each batch
+  // held 32 chains × 500 entries. This measures sustained accepted writes
+  // from one origin under shared client/network contention; it is neither a
+  // cumulative fleet counter nor the hourly pulse's short capacity sample.
+  var CHAIN_FLEET_SOAK = Object.freeze({
+    durationSeconds: 303.152,
+    accepted: 3760000,
+    failures: 0,
+    averageQps: 12403,
+    perNode: Object.freeze([
+      Object.freeze({ name: 'bk2', accepted: 592000, batches: 37 }),
+      Object.freeze({ name: 'mk2', accepted: 576000, batches: 36 }),
+      Object.freeze({ name: 'bk1', accepted: 592000, batches: 37 }),
+      Object.freeze({ name: 'mist1', accepted: 528000, batches: 33 }),
+      Object.freeze({ name: 'eug-2c', accepted: 720000, batches: 45 }),
+      Object.freeze({ name: 'eul-4c', accepted: 752000, batches: 47 })
+    ])
+  });
+
+  // Local resolver measurements from the current holder-sharded, certified
+  // segment and binary transport implementation. These are deliberately not
+  // multiplied into a fleet projection.
+  var LOCAL_RESOLVERS = Object.freeze({
+    hotAdmission: 51065,
+    certifiedApply: 279269,
+    certifiedGain: 5.47,
+    compactTransport: 812268,
+    compactBytesPerOp: 150.9,
+    wireReduction: 6.47,
+    segmentOperations: 1024,
+    holderShards: 8
+  });
+
+  // BENCH-007: the same deterministic 20,000-operation segment and 3-of-4
+  // certificate were applied concurrently by eight VPS replicas plus the
+  // local arm64 replica. Every node reported this exact root. `combined` is
+  // summed replica work; `allReplicaLogical` is bounded by the slowest node
+  // when all nine must finish the same logical segment.
+  var CERTIFIED_FLEET = Object.freeze({
+    date: '2026-10-08',
+    nodes: 9,
+    operationsPerNode: 20000,
+    replicaApplications: 180000,
+    quorum: '3-of-4',
+    root: '1399e3219df2ec37e1b0c5d1e4fb37d420418a7ed9b8e799d01f7c9902731575',
+    combined: 1712006,
+    synchronized: 552583,
+    allReplicaLogical: 61398,
+    errors: 0,
+    perNode: Object.freeze([
+      Object.freeze({ name: 'bk2', qps: 126808.4, shards: 7 }),
+      Object.freeze({ name: 'mk2', qps: 236893.1, shards: 5 }),
+      Object.freeze({ name: 'bk1', qps: 78957.3, shards: 2 }),
+      Object.freeze({ name: 'mist1', qps: 61398.1, shards: 1 }),
+      Object.freeze({ name: 'eug-2c', qps: 348464.4, shards: 2 }),
+      Object.freeze({ name: 'eul-4c', qps: 398441.2, shards: 4 }),
+      Object.freeze({ name: 'mk1', qps: 120502.3, shards: 1 }),
+      Object.freeze({ name: 'ms3', qps: 64146.6, shards: 1 }),
+      Object.freeze({ name: 'local', qps: 276394.8, shards: 8 })
+    ])
+  });
+
   // The old certified-fabric fleet run (2026-10-07, bench-003 §14-15). Kept
   // for context so the ladder is honest: this is a different system with
   // Byzantine-tolerant finality, not the chain prototype.
@@ -59,19 +159,23 @@
 
   window.ArkStatsHighlights = Object.freeze({
     chainFleet: CHAIN_FLEET,
+    chainFleetSoak: CHAIN_FLEET_SOAK,
+    localResolvers: LOCAL_RESOLVERS,
+    certifiedFleet: CERTIFIED_FLEET,
     fleetRun: FLEET_RUN,
     measured: '2026-10-08',
-    scope: 'Chain prototype — real 6-node fleet across 3 regions and 2 providers',
-    scopeShort: 'Chain prototype · 6-node fleet',
+    scope: 'Current certified resolver measurements across 8 VPS replicas plus the local node',
+    scopeShort: '9-node certified resolver fleet',
     // `items` powers the home-page status rail. First four rows are the
     // CHOSEN direction (the chain prototype); the fabric row remains for
     // the certified-finality production comparison.
     items: Object.freeze([
-      { value: '79,654', unit: 'entries/s', short: '6-node chain, aggregate', label: 'Chain prototype · 6-node fleet, parallel ingestion', detail: '2026-10-08: bk2+mk2+bk1+mist1+eug-2c+eul-4c, 38,400 entries in 868 ms wall-clock, zero errors. Each chain lives on one node; no cross-node coordination needed. Add nodes, the number adds linearly.' },
-      { value: '22,559', unit: 'entries/s', short: 'Per-pair peak',           label: 'Chain prototype · single-pair, 128 chains interleaved',    detail: '2026-10-08: bk2 → mk2 cross-WAN, 64,000 entries in 2,836 ms, server-side burst batching across chains, zero errors. The per-pair component of the aggregate above.' },
-      { value: '279,149', unit: 'entries/s', short: 'Replay (recovery)',       label: 'Chain prototype · replay fast-path',                          detail: 'Cold-start replay with head-only sig verify + hash chain. ~12x hot-write ceiling: a lagging peer catches up far faster than live traffic flows in. This is the real durability story.' },
-      { value: '7/7',     unit: 'refused',    short: 'Attack suite',           label: 'Chain prototype · attack suite',                              detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 24 chain tests + 3 TCP tests pass.' },
-      { value: '0',       unit: 'failures',   short: 'All runs',               label: 'Every chain-prototype run',                                   detail: '38,400 entries across 6 nodes, 64,000 on the per-pair burst, 32,000 on the Mac core. Zero failures end-to-end.' }
+      { value: '1,712,006', unit: 'ops/s', short: 'Combined certified capacity', label: 'Nine replicas · summed certified resolver work', detail: 'Eight VPS nodes plus local concurrently applied the same 20,000-operation segment root with a 3-of-4 certificate: 180,000/180,000 replica applications, zero errors.' },
+      { value: '61,398', unit: 'ops/s', short: 'All-replica logical rate', label: 'Same segment committed by all nine replicas', detail: 'Logical replicated throughput is bounded by the slowest required replica; summed compute is not multiplied into logical operations.' },
+      { value: '812,268', unit: 'ops/s', short: 'Compact P2P segment', label: 'Content transport · two real local peers', detail: 'One 1,024-operation binary segment over TCP + Noise + Yamux in 1.26 ms. Transport/reconstruction rate, not accepted chain operations.' },
+      { value: '150.9', unit: 'bytes/op', short: 'Binary segment wire', label: 'No JSON and no outer hex wrapper', detail: 'Real-shaped 488-byte operations compact to 150.9 bytes/op: 6.47× below the former 976-byte W<hex> payload.' },
+      { value: '12,403', unit: 'ops/s', short: '6-node sustained', label: 'Latest measured public-fleet soak', detail: 'Historical production baseline: six public nodes for 303 seconds, 3,760,000 accepted and zero failures. It predates certified binary segment replication.' },
+      { value: '7/7',     unit: 'refused',    short: 'Attack suite',           label: 'Chain prototype · attack suite',                              detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 24 chain tests + 3 TCP tests pass.' }
     ])
   });
 })();

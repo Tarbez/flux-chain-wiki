@@ -14,16 +14,16 @@ ArkUI.lifecycleStages = [
   { id: 'receipt', title: 'Receipt' }
 ];
 ArkUI.pageCatalog = {
-  zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home-flow.js', 'js/pages/home.js'] },
+  zero: { path: '/', title: arkSeoTitle('home', ''), seoId: 'home', module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js'] },
   resolver: { path: '/what-is-a-resolver', title: arkSeoTitle('resolver', 'What is a resolver?'), seoId: 'resolver', module: 'resolverGuide', scripts: ['js/pages/resolver-lab.js', 'js/pages/resolver-guide.js'] },
   references: { path: '/start-from-something-real', title: arkSeoTitle('references', 'Start from something real'), seoId: 'references', module: 'resolverGuide', scripts: ['js/pages/resolver-guide.js'] },
   deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How Flux works'), seoId: 'deployment', module: 'deployment', scripts: ['js/pages/deployment.js'] },
   explorer: { path: '/explore', title: arkSeoTitle('explorer', 'Mesh Explorer'), seoId: 'explorer', module: 'explorer', scripts: ['js/pages/explorer.js'] },
   palette: { path: '/palette', title: arkSeoTitle('palette', 'Palette — DEFXN'), seoId: 'palette', module: 'palette', scripts: ['js/pages/palette.js'] },
-  stats: { path: '/stats', title: arkSeoTitle('stats', 'Mesh performance — DEFXN'), seoId: 'stats', module: 'stats', scripts: ['js/content/stats-sample.js', 'js/pages/stats.js'] },
+  stats: { path: '/stats', title: arkSeoTitle('stats', 'Mesh performance — DEFXN'), seoId: 'stats', module: 'stats', scripts: ['js/content/stats-sample.js', 'js/ark/pulse-client.js', 'js/pages/stats.js'] },
   'stats/gpu': { path: '/stats/gpu', title: 'The GPU does nothing here — DEFXN', module: 'statsGpu', hiddenFromNavigation: true, scripts: ['js/pages/stats-gpu.js'] },
   'stats/ledger': { path: '/stats/ledger', title: 'A finance resolver by construction — DEFXN', module: 'statsLedger', hiddenFromNavigation: true, scripts: ['js/content/chain-sample.js', 'js/pages/stats-ledger.js'] },
-  monitor: { path: '/monitor', title: arkSeoTitle('monitor', 'Mesh monitor — DEFXN'), seoId: 'monitor', module: 'monitor', scripts: ['js/pages/monitor.js'] },
+  monitor: { path: '/monitor', title: arkSeoTitle('monitor', 'Mesh monitor — DEFXN'), seoId: 'monitor', module: 'monitor', scripts: ['js/ark/pulse-client.js', 'js/pages/monitor.js'] },
   account: { path: '/account', title: arkSeoTitle('account', 'Your account'), seoId: 'account', module: 'account', scripts: ['js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/fabric-transfer-browser.js', 'js/ark/value-registries-client.js', 'js/ark/local-domains.js', 'js/pages/account.js'] },
   'account/domains': { path: '/account/domains', title: 'Your domains — DEFXN', seoId: 'account/domains', module: 'accountDomains', scripts: ['js/ark/local-domains.js', 'js/pages/account-domains.js'] },
   treasury: { path: '/treasury', title: arkSeoTitle('treasury', 'Treasury preview'), seoId: 'treasury', module: 'economyPreview', scripts: ['js/pages/economy-preview.js'] },

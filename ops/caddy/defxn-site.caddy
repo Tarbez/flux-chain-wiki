@@ -62,6 +62,15 @@ defxn.com, www.defxn.com {
 		reverse_proxy 127.0.0.1:8767
 	}
 
+	# Browser-safe chain-fleet throughput pulse. The pulse process intentionally
+	# remains plain HTTP on its node; browsers consume it through this same-origin
+	# TLS boundary so neither mixed-content policy nor CSP can block the reading.
+	@fleetPulse path /api/fleet-pulse
+	handle @fleetPulse {
+		rewrite * /pulse.json
+		reverse_proxy 162.35.26.46:19502
+	}
+
 	@adminProxy path /admin /admin.html /admin-app.html /api/* /js/admin/*
 	handle @adminProxy {
 		reverse_proxy 127.0.0.1:3437 {

@@ -39,9 +39,21 @@ assert.equal(run.perServer.reduce((t, s) => t + s.now, 0), run.total, 'per-serve
 assert.equal(run.perServer.reduce((t, s) => t + s.before, 0), run.before, 'per-server "before" rates add up to the earlier fleet total');
 assert.equal(ev.fleet.total, run.total, '/stats reads the same fleet record as the home page and /monitor');
 assert(page.innerHTML.includes(run.total.toLocaleString('en-US')), 'the fleet total appears on the page');
-const fleetItem = context.ArkStatsHighlights.items.find((i) => i.label.includes('Whole fleet'));
-assert(fleetItem && Number(fleetItem.value.replace(/,/g, '')) === run.total, 'the home rail shows the same fleet total');
-assert(/not like for like/.test(fleetItem.detail), 'the home rail never shows the prototype number without saying it is not comparable');
+const soak = context.ArkStatsHighlights.chainFleetSoak;
+assert.equal(soak.perNode.reduce((total, node) => total + node.accepted, 0), soak.accepted, 'the five-minute soak total is derivable from its six node rows');
+assert.equal(soak.failures, 0, 'the fleet soak records zero failures');
+const fleetItem = context.ArkStatsHighlights.items.find((i) => i.label.includes('public-fleet soak'));
+assert(fleetItem && Number(fleetItem.value.replace(/,/g, '')) === soak.averageQps, 'the home rail retains the latest sustained fleet rate as a separately labeled baseline');
+assert(/zero failures/.test(fleetItem.detail), 'the home rail carries the measured failure count with the sustained rate');
+const local = context.ArkStatsHighlights.localResolvers;
+const certifiedFleet = context.ArkStatsHighlights.certifiedFleet;
+assert.equal(local.certifiedApply, 279269, 'shared evidence exposes certified sharded application');
+assert.equal(local.compactTransport, 812268, 'shared evidence exposes compact segment transport separately');
+assert.equal(Math.round(certifiedFleet.perNode.reduce((total, node) => total + node.qps, 0)), certifiedFleet.combined, 'nine-node combined capacity is derived from its node rows');
+assert.equal(certifiedFleet.allReplicaLogical, Math.round(Math.min(...certifiedFleet.perNode.map((node) => node.qps))), 'all-replica logical rate is bounded by the slowest replica');
+assert.equal(certifiedFleet.replicaApplications, certifiedFleet.nodes * certifiedFleet.operationsPerNode, 'replica application count is derived');
+assert(page.innerHTML.includes('one certified segment root'), '/stats names the verify-once boundary');
+assert(page.innerHTML.includes(soak.accepted.toLocaleString('en-US')), 'the five-minute fleet soak appears on /stats');
 assert(run.perServer.every((s) => s.busy > 0 && s.busy <= 100 && s.now > s.before), 'every server is faster than before and its CPU share is a percentage');
 
 // ---- every breakdown adds up -------------------------------------------------------------------
@@ -85,18 +97,32 @@ for (const [, doc] of statsSource.matchAll(/href="(\/docs\/[a-z0-9/_-]+\.md)"/g)
 // ---- the home page reads the shared record -----------------------------------------------------
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
 assert(home.includes('window.ArkStatsHighlights') && !home.includes("ArkCopy.text('HOME.STATUS'"), 'home reads the shared measurements, not separate copy');
+const performanceCopy = [
+  'js/content/stats-highlights.js',
+  'js/content/article-index.js',
+  'js/content/seo-data.js',
+  'js/content/articles/a-resolver-by-construction.js',
+  'js/content/articles/the-chain-prototype-is-the-chosen-path.js',
+  'js/pages/home.js',
+  'js/pages/monitor.js',
+  'js/pages/stats.js',
+  'js/pages/stats-ledger.js'
+].map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+assert(!/\b(?:entry|entries)\s*(?:\/|per |a )\s*s(?:econd)?\b/i.test(performanceCopy), 'public performance rates use ops/s or operations a second, never entry/entries');
+assert(!/\bbenchmark entries\b|\bentries accepted\b|\baccepted entries\b|\bentries this pulse\b/i.test(performanceCopy), 'public benchmark counts are branded as operations');
+assert(performanceCopy.includes('ops/s'), 'public performance copy exposes the ops/s unit');
+assert(fs.existsSync('docs/evidence/bench-005-million-ops-audit.md'), 'the million-ops target has an inspectable audit record');
+assert(fs.existsSync('docs/evidence/bench-006-certified-segment-and-binary-transport.md'), 'the current certified and binary results have an inspectable evidence record');
 
 // ---- /monitor ----------------------------------------------------------------------------------
 const catalog = fs.readFileSync('js/pages/catalog.js', 'utf8');
-assert(/monitor:\s*\{\s*path:\s*'\/monitor'[^}]*module:\s*'monitor'[^}]*scripts:\s*\['js\/pages\/monitor\.js'\]/.test(catalog), '/monitor is in the page catalog');
-assert(/stats:\s*\{\s*path:\s*'\/stats'[^}]*scripts:\s*\['js\/content\/stats-sample\.js',\s*'js\/pages\/stats\.js'\]/.test(catalog), '/stats loads its sample data before the page');
+assert(/monitor:\s*\{\s*path:\s*'\/monitor'[^}]*module:\s*'monitor'[^}]*scripts:\s*\['js\/ark\/pulse-client\.js',\s*'js\/pages\/monitor\.js'\]/.test(catalog), '/monitor is in the page catalog with the shared pulse client');
+assert(/stats:\s*\{\s*path:\s*'\/stats'[^}]*scripts:\s*\['js\/content\/stats-sample\.js',\s*'js\/ark\/pulse-client\.js',\s*'js\/pages\/stats\.js'\]/.test(catalog), '/stats loads its sample and shared pulse client before the page');
 assert(fs.readFileSync('index.html', 'utf8').includes('css/monitor.css'), 'monitor styles are linked');
 const monitor = fs.readFileSync('js/pages/monitor.js', 'utf8');
-assert(monitor.includes("'https://defxn.com/api/fleet-status'"), '/monitor polls the real fleet-status feed');
+assert(monitor.includes('ArkPulse.get()'), '/monitor polls through the shared same-origin pulse client');
 assert(!/Math\.random/.test(monitor), '/monitor generates no numbers of its own');
-assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(pollTimer\)/.test(monitor), '/monitor stops its timer on unmount');
-assert(monitor.includes('window.ArkStatsHighlights.fleetRun'), '/monitor reads the same fleet record as /stats');
-assert(/not live/.test(monitor) && /Audited/.test(monitor), '/monitor labels the audited figures as not live');
-for (const machine of Object.keys(context.ArkStatsHighlights.fleetRun.perServer.reduce((o, s) => (o[s.machine] = 1, o), {}))) assert(new RegExp('\\b' + machine + ':\\s*\\{\\s*cores:').test(monitor), machine + ' (an audited server) is drawn on the monitor map');
+assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(pulseTimer\)/.test(monitor), '/monitor stops its timer on unmount');
+assert(/not now/.test(monitor) && /Audited/i.test(monitor), '/monitor labels the audited figures as dated rather than live');
 
 console.log('PASS: /stats mounts as a bento grid; every figure is derivable from its evidence; the sample transfer is real grammar; links resolve; /monitor is registered, reads the real feed, labels audited figures as not live, and disposes cleanly.');

@@ -40,13 +40,13 @@ LearningContent.define([
     "title": "A finance resolver by construction",
     "category": "DESIGN / 006",
     "minutes": "7 MIN READ",
-    "summary": "The next finance resolver does not try to prevent double-spend — it makes it unrepresentable. Each identity owns an append-only chain of value moves; a second entry at the same position is self-signed equivocation. One new letter, six resolver steps, 25,232 entries a second on the author's Mac."
+    "summary": "The next finance resolver does not try to prevent double-spend — it makes it unrepresentable. Each identity owns an append-only chain of value moves; a second record at the same position is self-signed equivocation. One new letter, six resolver steps, 25,232 ops/s on the author's Mac."
   },
   {
     "slug": "the-chain-prototype-is-the-chosen-path",
     "title": "The chain prototype is the chosen path",
     "category": "BENCHMARKS / 007",
     "minutes": "8 MIN READ",
-    "summary": "Six nodes, three regions, two providers, zero errors: 79,654 entries a second on the real fleet. Replay runs at 279,149/s — twelve times live admission, so recovery outruns ingestion. A live /pulse endpoint lets the monitor page show the fleet's current speed as it grows."
+    "summary": "Six public nodes sustained 12,403 accepted operations a second for five minutes: 3.76 million accepted, zero failures. The older 79,654 ops/s figure is a short-burst peak; the live monitor shows the latest hourly capacity sample."
   }
 ]);

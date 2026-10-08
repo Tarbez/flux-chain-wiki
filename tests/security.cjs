@@ -18,7 +18,7 @@ vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
  assert(html.includes("script-src 'self' file:;"));
  assert(html.includes("base-uri 'none'"));
  const connect = (html.match(/connect-src ([^;]+);/) || [])[1] || '';
- assert(connect.split(' ').every(origin => origin === "'self'" || /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9])\.defxn\.com)$/.test(origin)), 'Account/CMS may contact its own host; Explorer is limited to local Miner and named public/storage hosts: ' + connect);
+ assert(connect.split(' ').every(origin => origin === "'self'" || /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9]|cd1)\.defxn\.com)$/.test(origin)), 'Account/CMS may contact its own host; Explorer is limited to local Miner and named public/storage hosts: ' + connect);
  assert(!connect.includes('*'), 'connect-src must never use a wildcard');
  assert(!html.includes('js/resolvers/logo.js'));
  // A CTA may send a visitor only within this site. Reason: `window.location.assign(p.href)` took whatever copy said, so a

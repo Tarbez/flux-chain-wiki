@@ -354,7 +354,7 @@ ArkSEO.define({
     },
     "a-resolver-by-construction": {
       "title": "",
-      "description": "The next finance resolver does not try to prevent double-spend. It makes it unrepresentable. One new registered letter, a chain per identity, six resolver steps, 25,232 entries a second measured on one Mac core.",
+      "description": "The next finance resolver does not try to prevent double-spend. It makes it unrepresentable. One new registered letter, a chain per identity, six resolver steps, 25,232 ops/s measured on one Mac core.",
       "ogImage": "",
       "canonical": ""
     }

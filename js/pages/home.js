@@ -83,6 +83,12 @@ ArkUI.pageModules.zero = {
     var status = document.createElement('aside');
     status.className = 'home-status-rail';
     status.setAttribute('aria-label', 'Measured mesh performance');
+    var liveReadout = document.createElement('div'); liveReadout.className = 'home-status-item'; liveReadout.dataset.state = 'loading';
+    var liveLabel = document.createElement('small'); liveLabel.textContent = 'Live fleet pulse';
+    var liveValue = document.createElement('strong'); liveValue.className = 'home-status-value'; liveValue.textContent = '–';
+    var liveUnit = document.createElement('span'); liveUnit.className = 'home-status-unit'; liveUnit.textContent = 'ops/s'; liveValue.appendChild(liveUnit);
+    var liveDetail = document.createElement('span'); liveDetail.className = 'home-status-detail'; liveDetail.textContent = 'Loading the measured public-fleet pulse; resolver cards below are labeled local or fleet.';
+    liveReadout.appendChild(liveLabel); liveReadout.appendChild(liveValue); liveReadout.appendChild(liveDetail); status.appendChild(liveReadout);
     stats.items.forEach(function (stat) {
       // Short label and the number only; the full label and caption live on
       // /stats and here as the tooltip and screen-reader text.
@@ -106,6 +112,19 @@ ArkUI.pageModules.zero = {
     statusLink.setAttribute('aria-label', 'All measurements. Measured ' + stats.measured + ', ' + stats.scope);
     status.appendChild(statusLink);
     el.insertBefore(status, lifecycle);
+
+    if (window.ArkPulse) ArkPulse.get().then(function (result) {
+      var data = result.data;
+      var alive = data.nodes.filter(function (n) { return !n.error && n.qps > 0; }).length;
+      liveValue.firstChild.nodeValue = Math.round(data.aggregate_qps).toLocaleString('en-US');
+      liveLabel.textContent = 'Live capacity · ' + alive + '/' + data.nodes.length + ' nodes';
+      liveDetail.textContent = 'Hourly synthetic benchmark measured ' + new Date(data.measured_at_ms).toLocaleString() + '; ' + data.total_entries.toLocaleString('en-US') + ' benchmark operations, ' + data.errors + ' errors. This is capacity, not cumulative ledger growth.';
+      liveReadout.dataset.state = data.errors ? 'warn' : 'ok';
+    }).catch(function () {
+      liveLabel.textContent = 'Live fleet pulse unavailable';
+      liveDetail.textContent = 'Audited measurements below remain dated evidence; no live value has been substituted.';
+      liveReadout.dataset.state = 'warn';
+    });
 
     el.arkRestore=flow.restore;
     el.arkDispose=flow.dispose;

@@ -105,8 +105,8 @@
       { kind: 'win', tag: 'Win', title: 'The registered grammar on a raw socket', from: '1,926', to: '5,076', unit: '/s, same 4 cores', body: 'Then the whole fleet: 21,199 /s. A simpler stand-in showed 35,499 but carried half the signatures, so it is not the number.' },
       { kind: 'mixed', tag: 'Smaller than hoped', title: 'Batch signature checks', from: '2x', to: '+17-22%', unit: 'measured', body: 'The micro-benchmark said about twice as fast; it can only shrink a share of the cost. One verifier thread made it worse. Fleet: 21,199 to 24,908.' },
       { kind: 'wrong', tag: 'Harness bugs', title: 'Mistakes that cost hours, none in the protocol', from: '', to: '', unit: '', body: 'A missing firewall rule posed as an architecture ceiling; a kill scoped too broadly took production down 19 minutes; a 128-slot listen queue dropped two clients; pkill -x ignores names over 15 characters.' },
-      { kind: 'win', tag: 'Design + measurement', title: 'A finance resolver by construction (LEDGERENTRY)', from: '24,700', to: '41,762', unit: '/s, one core (Mac)', body: 'Each identity owns an append-only chain; a second entry at (G, pos) is self-signed equivocation. Registered as Y=1A in flux-spec 0.4.2; six-step resolver in dense-wire::chain; seven of seven attacks refused. Burst batch verify across 32 chains lifted the per-core number from 24,700 to 41,762/s (+69%).' },
-      { kind: 'win', tag: 'Durability + transport + gossip', title: 'Replication, replay fast path, fork gossip, TCP ingress', from: 'disk-sync', to: 'K-of-N peer acks', unit: 'content-addressed CIDs', body: 'Durability moved from a disk-sync primitive to K-of-N peer replication of CIDs + head gossip — the fleet is the backing store. Fast cold-start replay verifies each chain\'s head signature and uses the hash chain to establish the tail: ~10x the throughput of strict replay for the same guarantee. A third observer can accept fork evidence via gossip (receive_fork_evidence) and freeze the holder\'s chain. A line-framed TCP endpoint ships entries between machines today (hypercore + IPFS pin + GUN discovery is the production transport, not HTTP). 15 chain tests + 3 TCP tests pass.' },
+      { kind: 'win', tag: 'Historical step', title: 'A finance resolver by construction (LEDGERENTRY)', from: '24,700', to: '41,762', unit: 'ops/s, one core (Mac)', body: 'This was the first measured batch-verification step. The current matched local measurements are 51,065 ops/s hot admission and 279,269 ops/s certified holder-sharded application; see BENCH-006.' },
+      { kind: 'win', tag: 'Durability + transport + gossip', title: 'Replication, replay fast path, fork gossip, TCP ingress', from: 'disk-sync', to: 'K-of-N peer acks', unit: 'content-addressed CIDs', body: 'Durability moved from a disk-sync primitive to K-of-N peer replication of CIDs + head gossip — the fleet is the backing store. Fast cold-start replay verifies each chain\'s head signature and uses the hash chain to establish the tail: ~10x the throughput of strict replay for the same guarantee. A third observer can accept fork evidence via gossip (receive_fork_evidence) and freeze the holder\'s chain. A line-framed TCP endpoint ships operations between machines today (hypercore + IPFS pin + GUN discovery is the production transport, not HTTP). 15 chain tests + 3 TCP tests pass.' },
       { kind: 'win', tag: 'Cross-WAN fleet run', title: 'The chain, measured across machines, 64 chains interleaved, zero errors', from: '14,963', to: '22,559', unit: '/s cross-WAN', body: 'On 2026-10-08: chain-server deployed on flx-bk2 (Xeon) and flx-mk2 (EPYC), server-side burst batching enabled (admit_burst drains up to 64 pipelined lines per window, verify_batch once). From bk2 a client submitted 64,000 LedgerEntry records across 128 interleaved holders to mk2 over one persistent connection: 2,836 ms wall-clock, zero refusals, head CID agrees on both sides for every holder. Fork detected at bk2 and GOSSIPed to mk2 in the same run — the third-observer cross-WAN propagation works. Automatic broadcaster, issuance roster, compaction, and Refund-after-deadline are all wired and tested on the same build.' }
     ]
   };
@@ -304,16 +304,21 @@
       page.setAttribute('aria-labelledby', 'stats-title');
       var stats = window.ArkStatsHighlights || { measured: '', scope: '' };
       var CHAIN = stats.chainFleet || {};
+      var SOAK = stats.chainFleetSoak || {};
+      var LOCAL = stats.localResolvers || {};
+      var CERTIFIED_FLEET = stats.certifiedFleet || {};
       var kpis = [
-        { v: fmt(CHAIN.aggregate || 79654), u: 'entries/s', l: 'Chain prototype · 6-node fleet, parallel ingestion', d: 'bk2, mk2, bk1, mist1, eug-2c, eul-4c across 3 regions and 2 providers. 38,400 entries in 868 ms wall-clock, zero errors. Add a seventh node and the number grows linearly.', lead: true },
-        { v: fmt(CHAIN.perPair || 22559), u: 'entries/s', l: 'Per-pair peak', d: 'bk2 → mk2 cross-WAN, 64,000 entries, 128 chains interleaved, server-side burst batching, zero errors. The per-pair component of the fleet number.' },
-        { v: fmt(CHAIN.replayFast || 279149), u: 'entries/s', l: 'Replay (recovery)', d: 'Cold-start replay with head-only sig verify + hash chain for the tail. ~12x live admission — a lagging peer catches up far faster than live traffic flows in.' },
-        { v: '0', u: 'failures', l: 'Every chain-prototype run on this page', d: '38,400 entries across 6 nodes, 64,000 on the per-pair burst, 32,000 on the Mac core. All zero failures end-to-end.' }
+        { v: fmt(CERTIFIED_FLEET.combined || 1712006), u: 'replica-apps/s', l: 'Combined certified capacity · 9 nodes', d: 'Eight VPS replicas plus local applied the same 20,000-operation root with one 3-of-4 certificate. Summed resolver work; not logical replicated throughput.', lead: true },
+        { v: fmt(CERTIFIED_FLEET.allReplicaLogical || 61398), u: 'ops/s', l: 'All-replica logical rate', d: 'Same certified segment on all nine replicas, bounded by the slowest required replica.' },
+        { v: fmt(LOCAL.compactTransport || 812268), u: 'ops/s', l: 'Compact segment transport · two peers', d: '1,024 operations transported and reconstructed in one binary envelope. This is transport throughput, not accepted chain throughput.' },
+        { v: String(LOCAL.compactBytesPerOp || 150.9), u: 'bytes/op', l: 'Binary segment wire', d: '6.47× below the former 976-byte outer-hex payload; exact operation bytes reconstruct.' },
+        { v: fmt(LOCAL.hotAdmission || 51065), u: 'ops/s', l: 'Hot chain admission · local', d: 'Full per-operation verification on the same 20,000-operation corpus used for the certified comparison.' },
+        { v: fmt(SOAK.averageQps || 12403), u: 'ops/s', l: 'Latest sustained public fleet · 6 nodes', d: '303-second historical baseline: 3,760,000 accepted, zero failures. It predates the new certified binary path.' }
       ];
       page.innerHTML = '<div class="stats-shell"><div class="stats-bento">' +
-        tile('stats-hero', '', '<p class="stats-kicker">Measured, not claimed · chain prototype</p><h1 id="stats-title">What the fleet does today</h1>' +
-          '<p>Each identity owns an append-only chain of value moves. Durability is K-of-N peer replication of content-addressed CIDs; there is no global order to compete for, so the fleet number is literally the sum of per-node admissions. Six real machines, three regions, two providers, zero errors — and a live pulse on /monitor lets you watch it grow.</p>' +
-          '<p class="stats-chips"><span>' + esc(stats.measured) + '</span><span>6 chain-server nodes · 2 providers</span><span class="stats-live-chip" id="stats-live-chip" data-state="loading">Checking fleet status…</span></p>' +
+        tile('stats-hero', '', '<p class="stats-kicker">Measured, not claimed · chain prototype</p><h1 id="stats-title">What the fleet measurements show</h1>' +
+          '<p>The current certified resolver fleet measures 1,712,006 summed replica-applications/s across eight VPS nodes plus local. Each replica verifies one certified segment root and 3-of-4 quorum once. Applying the same segment on every replica yields 61,398 logical ops/s at the all-node barrier. Compact two-peer transport remains separately measured at 812,268 effective ops/s.</p>' +
+          '<p class="stats-chips"><span>' + esc(stats.measured) + '</span><span>9-node certified resolver evidence</span><span class="stats-live-chip" id="stats-live-chip" data-state="loading">Checking fleet status…</span></p>' +
           '<div class="stats-cta"><a class="stats-monitor-link" href="' + href(ARTICLE_STORY) + '" data-scene-link="' + ARTICLE_STORY + '">Read the whole story <span aria-hidden="true">→</span></a>' +
           '<a class="stats-monitor-link is-quiet" href="' + href('monitor') + '" data-scene-link="monitor">Live monitor <span aria-hidden="true">→</span></a></div>') +
         kpis.map(function (k) {
@@ -326,7 +331,7 @@
           stack(EVIDENCE.cpuBefore) + stack(EVIDENCE.cpuAfter) +
           '<p class="stats-tile-copy">Shares of each server\'s own CPU under load, from call-stack profiles. The two servers run at different speeds, so compare the shapes, not the areas: HTTP and JSON were over half of the old one; signature checks are over half of the new one.</p>', 'stats-cpu-title') +
         tile('stats-span-5', 'Parsing against checking', '<h2>The parser is the cheap part</h2>' + parseCost() +
-          '<p class="stats-tile-copy">One real agreement of 11 blocks. Splitting and resolving it costs about 3 µs; two signatures cost 113 µs. Decoding every field into a tree first costs more than the whole door check, so the server slices stored records instead.</p>', 'stats-parse-title') +
+          '<p class="stats-tile-copy">One real agreement of 11 blocks. Splitting and resolving it costs about 3 µs; two signatures cost 113 µs. Canonical parsing measured 306,665 ops/s on one M2 core. Current matched chain measurements are <strong>51,065 ops/s hot admission</strong> and <strong>279,269 ops/s certified sharded application</strong>. Neither is an eight-node fleet result.</p>', 'stats-parse-title') +
 
         tile('stats-span-7', 'The ladder · same four cores', '<h2>What each step bought</h2>' + wideBars(EVIDENCE.ladder, 6500, ' transfers/s', 'Transfers per second on the same four cores') +
           '<p class="stats-tile-copy">Accepted finality, 300 concurrent, three runs each; ranges are the lowest and highest run. Dropping HTTP and tree-building took most of it. Sending the whole transfer in one write and checking signatures in batches took the rest.</p>', 'stats-ladder-title') +
@@ -336,28 +341,37 @@
           '<p class="stats-tile-copy">One caution travels with this: batch checking can accept a signature that checking one at a time would reject, if the signer crafts it. Safe for a single notebook; every party that must agree on validity has to run the same mode.</p>', 'stats-batch-title') +
 
         tile('stats-span-12', 'Context · the old fabric fleet run', '<h2>' + fmt(RUN.total) + ' transfers a second on the certified-fabric path</h2>' + serverCards() +
-          '<p class="stats-tile-copy">Kept here as context, not as the chosen direction. This is the earlier agreement-fabric path on four servers, six clients, ' + RUN.window + ' window, zero failures. The chain-prototype fleet above (' + fmt(CHAIN.aggregate || 79654) + ' entries/s across 6 nodes) is a different shape: per-identity chains, no global order, aggregate scales linearly with the fleet.</p>' + fleetLadder(), 'stats-fleet-title') +
+          '<p class="stats-tile-copy">Kept here as context, not as the chosen direction. This is the earlier agreement-fabric path on four servers, six clients, ' + RUN.window + ' window, zero failures. The chain-prototype peak above (' + fmt(CHAIN.aggregate || 79654) + ' ops/s across 6 nodes) is a different short benchmark; sustained throughput must be measured under shared client and network contention, as the five-minute soak does.</p>' + fleetLadder(), 'stats-fleet-title') +
 
         tile('stats-span-12 stats-chosen', 'The chosen path · the chain prototype on the real fleet', '<h2>The numbers that describe where we are shipping</h2>' +
-          '<p class="stats-tile-copy">Every row below is the chain prototype on real hardware: the per-identity chain, the content-addressed records, the K-of-N peer replication, the hypercore-first transport. Each row describes a different window on the same system — fleet aggregate, per-pair peak, Mac baseline, cold-start recovery. None of them is a projection.</p>' +
-          '<div class="stats-table-wrap"><table class="stats-table stats-table-wrapped stats-chosen-table"><thead>' + headRow(['Measurement', 'Entries / s', 'What it is', 'What it is not']) + '</thead><tbody>' +
+          '<p class="stats-tile-copy">Every row below is the chain prototype on real hardware: per-identity chains and content-addressed records over the current line-framed TCP ingress. The public soak used each node\'s local cold-start cache; K-of-N peer replication and hypercore transport are separate implementation stages and are not included in the 12,403 ops/s result. Each row describes a different measurement window. None is a projection.</p>' +
+          '<div class="stats-table-wrap"><table class="stats-table stats-table-wrapped stats-chosen-table"><thead>' + headRow(['Measurement', 'Ops / s', 'What it is', 'What it is not']) + '</thead><tbody>' +
           '<tr class="is-chosen"><td>Chain resolver, batch, local core</td><td><strong>41,762</strong></td><td>Per-identity chain, burst batch verify across 32 chains, one M-series Mac core. The baseline shape.</td><td>Mac silicon.</td></tr>' +
-          '<tr class="is-chosen"><td>Chain resolver, 6-node fleet, parallel ingestion</td><td><strong>79,654</strong></td><td>bk2, mk2, bk1, mist1, eug-2c, eul-4c (3 regions, 2 providers). 38,400 entries in parallel streams, zero errors, 868 ms wall-clock. <em>The direction we are shipping, scaled to a real multi-node fleet.</em></td><td>Each chain lives on one node; no cross-node coordination needed. Add nodes and the fleet number adds linearly.</td></tr>' +
-          '<tr class="is-chosen"><td>Chain resolver, single pair, 128 chains interleaved</td><td><strong>22,559</strong></td><td>bk2 → mk2 cross-WAN, 64,000 entries, server-side burst batching, zero errors. The per-pair component of the fleet number above.</td><td>Not a soak run; chain-server runs with LocalCache replication.</td></tr>' +
+          '<tr class="is-chosen"><td>Chain resolver, hot admission, local node</td><td><strong>51,065</strong></td><td>20,000 independent holders with full per-operation verification.</td><td>Local memory-state measurement, not fleet throughput.</td></tr>' +
+          '<tr class="is-chosen"><td>Certified segment application, nine-node combined capacity</td><td><strong>1,712,006 replica-applications/s</strong></td><td>Eight VPS replicas plus local concurrently applied the same 20,000-operation root with one 3-of-4 certificate; 180,000/180,000 applications succeeded.</td><td>Summed resolver work. All-replica logical rate is 61,398 ops/s; network broadcast and durable segment commit are excluded.</td></tr>' +
+          '<tr class="is-chosen"><td>Compact segment transport, two local peers</td><td><strong>812,268</strong></td><td>1,024 operations in one binary signed envelope over TCP + Noise + Yamux.</td><td>Transport/reconstruction, not accepted chain operations.</td></tr>' +
+          '<tr class="is-chosen"><td>Chain resolver, 6-node short parallel benchmark</td><td><strong>79,654</strong></td><td>bk2, mk2, bk1, mist1, eug-2c, eul-4c (3 regions, 2 providers). 38,400 operations in parallel streams, zero errors, 868 ms wall-clock.</td><td>A short capacity sample, not cumulative growth and not a sustained-load forecast.</td></tr>' +
+          '<tr class="is-chosen"><td>Six-node sustained public-client soak</td><td><strong>12,403</strong></td><td>3,760,000 operations accepted over 303 seconds while one local arm64 client drove all six public nodes concurrently; zero failures.</td><td>Not six times the single-node run, not replica-certified durability, and not a cumulative counter.</td></tr>' +
+          '<tr class="is-chosen"><td>Chain resolver, single pair, 128 chains interleaved</td><td><strong>22,559</strong></td><td>bk2 → mk2 cross-WAN, 64,000 operations, server-side burst batching, zero errors. The per-pair component of the fleet number above.</td><td>Not a soak run; chain-server runs with LocalCache replication.</td></tr>' +
           '<tr><td>Chain resolver, replay (fast)</td><td><strong>279,149</strong></td><td>Cold-start replay with head-only sig verify + hash chain for the tail. Same guarantee as strict replay for 10x the throughput — about 12x faster than live admission, so a peer recovers faster than it falls behind.</td><td>A replay number, not a hot-write number.</td></tr>' +
           '<tr><td>GPU box CPU, per core, batch</td><td><strong>10,476</strong></td><td>EPYC 9355 shared with other tenants, 2+2 cores, batch verify on. Compared to the fleet Xeon (3,107/s), ~3.4x per core.</td><td>The GPU itself is never touched; this is CPU only (see /stats/gpu).</td></tr>' +
           '</tbody></table></div>' +
           '<p class="stats-tile-copy">The chosen row is highlighted because it is where this project is heading, not because it is the biggest number. The 279,149/s replay figure is bigger, but it describes cold-start recovery, not production throughput — and that recovery-faster-than-ingestion gap (about 12x) is the real durability story: a lagging peer catches up far faster than live traffic flows in.</p>', 'stats-chosen-title') +
 
         tile('stats-span-12 stats-scope', 'What none of this proves', '<ul class="stats-scope-list is-single">' +
-          '<li>Durability on the chain path is K-of-N peer replication of content-addressed CIDs; six nodes agreed on every head CID in the fleet run above. No independent third party has stress-tested a partition.</li>' +
+          '<li>The 12,403 ops/s soak measured signed admission into each node\'s local cold-start cache. It did not exercise K-of-N peer replication, hypercore transport, or a partition.</li>' +
           '<li>Clients were fleet machines, not the public. It is a prototype on a real multi-provider fleet, not yet a public service.</li>' +
           '<li>Batch checking is cofactored; safe within a single notebook, but every party that must agree on validity has to run the same mode.</li>' +
           '<li>No independent security review has looked at any of this.</li></ul>', 'stats-scope-title') +
 
+        tile('stats-span-12', 'One-million-ops audit · target, not result', '<h2>The parser can scale there; accepted operations do not yet</h2>' +
+          '<p class="stats-tile-copy">The chain hot path uses dense FLX text with no JSON wrapper and no per-operation <code>fsync</code>. The matched current run measured 51,065 ops/s for full hot admission and 279,269 ops/s for certified application on eight holder shards. Binary segment transport measured 812,268 effective ops/s between two local peers.</p>' +
+          '<p class="stats-tile-copy">The global ledger mutex, repeated operation verification, per-operation broadcast and outer hex wrapper have been removed from the new path. The remaining proof is production integration: authorized validator keys and quorum roster, group-commit-to-segment wiring, eight-node deployment, then a sustained replicated fleet rerun. One million accepted durable ops/s remains unverified.</p>' +
+          '<p class="stats-tile-copy"><a class="stats-inline-link" href="/docs/evidence/bench-005-million-ops-audit.md">Read BENCH-005 · measurements, boundary, and exact implementation scope →</a></p>', 'stats-million-title') +
+
         tile('stats-span-12', 'A finance resolver by construction', '<h2>Make double-spend unrepresentable, not prevented</h2>' +
           '<p class="stats-tile-copy">The next design does not try to lock the spend marker harder. It removes the thing that needs locking. Each identity owns an append-only chain of value moves; a spend is one entry on the holder\'s own chain, signed by their own key, at a position their own previous entry determined. Position <code>n</code> can hold exactly one record — a second one is self-signed equivocation under the holder\'s own signature, and the chain is burned from there. There is no global order, no mempool, no fork choice.</p>' +
-          '<p class="stats-tile-copy">The grammar extension is one letter (<code>J</code>, decimal chain position) under a new registered type (<code>LEDGERENTRY</code>, code <code>1A</code> in <code>flux-spec</code> 0.4.2). The resolver — <code>dense-wire::chain</code> — is six steps, one of which is ordered, and only per-holder, never globally. Measured today, one M-series core: <strong>24,700 entries/s</strong> per-item, <strong>41,762 entries/s</strong> with burst batch verify across 32 chains (+69%, same cofactored caveat as the transfer path). Seven of seven attacks are refused by the test suite (<code>cargo test chain::</code>); the full table and the real signed chain are on the sub-page.</p>' +
+          '<p class="stats-tile-copy">The grammar extension is one letter (<code>J</code>, decimal chain position) under registered type <code>LEDGERENTRY</code>. The current matched local run measures <strong>51,065 ops/s</strong> with full verification and <strong>279,269 ops/s</strong> after one certified root/quorum check across eight holder shards. Seven core attacks plus segment tampering, missing quorum and sequence replay are refused by tests.</p>' +
           '<p class="stats-tile-copy"><a class="stats-inline-link" href="' + href('stats/ledger') + '" data-scene-link="stats/ledger">Open /stats/ledger →</a> for the sample, the attack suite, the measurement, and the open items.</p>', 'stats-ledger-title') +
 
         tile('stats-span-12 stats-trail-tile', 'The trail · including the wrong turns', '<h2>How we got here, and what we got wrong</h2>' +
@@ -371,6 +385,8 @@
           '<li><a href="' + href('stats/ledger') + '" data-scene-link="stats/ledger">The finance ledger · a resolver that makes double-spend unrepresentable</a></li>' +
           '<li><a href="/docs/finance-ledger-design.md">The design document · LEDGERENTRY grammar + 6-step resolver</a></li>' +
           '<li><a href="/docs/evidence/bench-003-rust-fleet-ceiling.md">BENCH-003 · The full investigation log, sections 1-16</a></li>' +
+          '<li><a href="/docs/evidence/bench-004-chain-fleet-soak.md">BENCH-004 · Five-minute six-node soak</a></li>' +
+          '<li><a href="/docs/evidence/bench-005-million-ops-audit.md">BENCH-005 · Path to one million accepted operations a second</a></li>' +
           '<li><a href="/docs/mainnet-readiness.md">Mainnet readiness · what the prototype does and does not change</a></li>' +
           '<li><a href="/docs/evidence/bench-001-verification.md">BENCH-001 · First verification record</a></li></ul>', 'stats-evidence-title') +
 
@@ -397,24 +413,19 @@
         select('AGREEMENT');
       }
 
-      // One real, live check fetched on load, not polled. Points at the
-      // chain-prototype pulse (bk2:19502) by default; override with
-      // window.ArkPulseEndpoint. Failure says so plainly.
+      // One real, live check fetched on load, not polled. Production uses
+      // ArkPulse's same-origin HTTPS route; local operators may override it.
       var chip = page.querySelector('#stats-live-chip');
-      if (chip && window.fetch) {
-        var controller = new AbortController();
-        var timer = setTimeout(function () { controller.abort(); }, 6000);
-        var pulseUrl = window.ArkPulseEndpoint || 'http://162.35.26.46:19502/pulse.json';
-        fetch(pulseUrl, { cache: 'no-store', signal: controller.signal })
-          .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-          .then(function (data) {
-            clearTimeout(timer);
+      if (chip && window.ArkPulse) {
+        ArkPulse.get()
+          .then(function (result) {
+            var data = result.data;
             var alive = (data.nodes || []).filter(function (n) { return !n.error; }).length;
             var total = (data.nodes || []).length;
             chip.dataset.state = alive === total ? 'ok' : 'warn';
-            chip.textContent = alive + '/' + total + ' chain-servers live · ' + Math.round(data.aggregate_qps || 0).toLocaleString('en-US') + ' entries/s';
+            chip.textContent = 'Live capacity · ' + alive + '/' + total + ' nodes · ' + Math.round(data.aggregate_qps || 0).toLocaleString('en-US') + ' ops/s · ' + new Date(data.measured_at_ms).toLocaleTimeString();
           })
-          .catch(function () { clearTimeout(timer); chip.dataset.state = 'warn'; chip.textContent = 'Pulse unreachable'; });
+          .catch(function () { chip.dataset.state = 'warn'; chip.textContent = 'Pulse unreachable'; });
       }
       return page;
     }

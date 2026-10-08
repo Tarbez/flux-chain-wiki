@@ -33,6 +33,7 @@ import { clearedSessionCookie, createSessions, readSessionToken, SessionRefusal,
 import { PublishRefusal, publisherFromArgs } from './lib/publisher.mjs';
 import { defaultProjectRoot } from './lib/site-bundle.mjs';
 import { verifyPublishedResolution } from './lib/resolve-check.mjs';
+import { proxyFleetPulse } from './lib/fleet-pulse-proxy.mjs';
 
 const DEFAULT_RESOLVER_BASE = 'https://gateway.deadark.com';
 
@@ -129,6 +130,13 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       const token = readSessionToken(req.headers.cookie);
       const session = sessions.get(token);
       if (!url.pathname.startsWith('/api/')) return req.method === 'GET' ? await serveFile(res, url.pathname, session, localAccess) : send(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
+
+      // Public read-only fleet telemetry. Keeping this on the same origin makes
+      // the production Caddy route and both local site hosts behave identically.
+      if (url.pathname === '/api/fleet-pulse') {
+        if (req.method !== 'GET') return send(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
+        return proxyFleetPulse(res);
+      }
 
       if (req.method === 'POST') {
         const origin = req.headers.origin;

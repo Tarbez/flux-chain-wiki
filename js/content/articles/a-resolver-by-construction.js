@@ -1,6 +1,6 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("a-resolver-by-construction", {
-  "core": "The next finance resolver does not try to prevent double-spend. It makes it unrepresentable. Each identity owns an append-only chain of value moves; a second record at the same position on your chain is self-signed equivocation. The grammar extension is one letter under a new registered type; the resolver is six steps, one of which is ordered, and only per-holder. Measured today, one Mac core: 24,700 entries a second per-item, 41,762 with burst batch verify across 32 chains.",
+  "core": "The finance resolver makes double-spend self-incriminating: each identity owns an append-only chain and a second record at the same position is signed equivocation. Current local measurements are 51,065 ops/s for full hot admission and 279,269 ops/s when one certified segment root is verified before eight holder-sharded workers apply the segment—a measured 5.47× gain.",
   "relevance": "Read this to understand why the finance surface is going from 'a notebook that logs transfers' to 'a chain per identity, and the chain decides.'",
   "reviewed": "2026-10-07",
   "evidenceLabel": "The design document — LEDGERENTRY, J, and the resolver's six steps",
@@ -45,7 +45,7 @@ LearningContent.load("a-resolver-by-construction", {
     [
       "Durability is replication, not disk",
       "An entry is durable when K of N peers hold its content-addressed CID. The chain head is gossiped so peers always know what to pull. A node that cold-starts can rebuild its chains by walking back from each chain's known head CID — the local on-disk cache is just a convenience that lets a reopened node skip the re-pull.",
-      "Replay has two modes. Fast replay verifies each chain's head signature and uses the hash chain to establish every earlier entry — because once G is pinned, the only way to construct an entry whose C[0] matches the hash of a specific predecessor is for that predecessor to be the bytes the writer actually signed. Strict replay re-verifies every signature. Measured on 16 chains × 1,000 entries: fast replay is 279,149 entries/s, strict is 27,268 — about ten times faster for the same end state."
+      "Replay has two modes. Fast replay verifies each chain's head signature and uses the hash chain to establish every earlier record — because once G is pinned, the only way to construct a record whose C[0] matches the hash of a specific predecessor is for that predecessor to be the bytes the writer actually signed. Strict replay re-verifies every signature. Measured on 16 chains × 1,000 operations: fast replay is 279,149 ops/s, strict is 27,268 — about ten times faster for the same end state."
     ],
     [
       "Equivocation is caught by the holder's own key",
@@ -53,7 +53,7 @@ LearningContent.load("a-resolver-by-construction", {
     ],
     [
       "Transport, honestly",
-      "The resolver has a line-framed TCP endpoint for machine-to-machine ingress. Each request is <TAG>\\t<MANIFEST>\\n; replies are OK\\t<CID> or ERR\\t<code>\\t<reason>. A GOSSIP tag submits fork evidence. The production transport is hypercore per chain (replication) + IPFS pin (CID catalog) + GUN discovery, not HTTP — because HTTP was the bottleneck in the previous generation. The TCP endpoint is for ops ingress and direct testing today."
+      "The resolver retains line-framed TCP ingress for compatibility and now has a binary libp2p segment path for replication. Traffic v2 signs one raw segment envelope over TCP + Noise + Yamux, avoiding per-operation messages and the outer W<hex> expansion. A 1,024-operation local two-peer test measured 812,268 effective transport/reconstruction ops/s; this is not accepted chain throughput."
     ],
     [
       "Equivocation is fraud by their own key",
@@ -69,9 +69,9 @@ LearningContent.load("a-resolver-by-construction", {
     ],
     [
       "Measured",
-      "The resolver is implemented in dense-wire::chain. Release build, one M-series Mac core, 32 holders × 1,000 entries interleaved by round. Per-item verify: 40,486 nanoseconds per entry, which is 24,700 entries a second. Signature verification is still the whole mountain at 94.5%, so batching across chains is where the real win lives.",
-      "Burst batch verify (one verify_batch call across 64 interleaved entries from different chains): 23,945 nanoseconds per entry, 41,762 entries a second — about 69 percent faster than per-item, same cofactored caveat as the transfer path. A single chain is strictly sequential, so the burst has to span many holders to pay. In production this is the natural shape.",
-      "The attack suite: double-spend sequential, double-spend concurrent, cross-chain confusion, chain-break on wrong prev, equivocation, replay of same bytes, tampered signature. Seven of seven refused. Zero accepted. The fleet run and the IPFS-gossip test for equivocation are the next steps."
+      "The current matched release run used 20,000 independently signed holder operations. Full per-operation admission reached 51,065 ops/s; certified application verified one segment root and quorum, then preserved per-holder order across eight workers at 279,269 ops/s, a 5.47× gain.",
+      "A separate two-peer release test transported and reconstructed one 1,024-operation compact binary segment at 812,268 effective ops/s. Real-shaped 488-byte operations measured 150.9 bytes/op versus the former 976-byte outer-hex payload, a 6.47× wire reduction. Both are local measurements, not eight-node projections.",
+      "The attack suite still refuses replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev forks, tampered signatures and equivocation. Segment tests additionally refuse root tampering, missing quorum and replayed sequence numbers."
     ]
   ],
   "numbers": true

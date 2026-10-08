@@ -13,9 +13,12 @@ for (const file of ['js/content/chain-sample.js', 'js/pages/stats-ledger.js']) {
 }
 const page = context.ArkUI.pageModules.statsLedger.mount(node('main'));
 assert(page.innerHTML.includes('A finance resolver by construction'), 'hero present');
-assert(page.innerHTML.includes('41,762 entries a second'), 'measured headline present');
+assert(page.innerHTML.includes('279,269 certified'), 'measured headline exposes certified holder-sharded application');
+assert(page.innerHTML.includes('1,712,006 combined replica-applications/s'), 'nine-node certified capacity is the newest fleet result');
+assert(page.innerHTML.includes('61,398 all-replica logical ops/s'), 'replicated logical rate is kept distinct from summed work');
+assert(page.innerHTML.includes('812,268 transport'), 'transport throughput is separately labeled');
 assert(page.innerHTML.includes('K-of-N peer replication'), 'durability framed as replication, not disk-sync');
-assert(!/fsync/i.test(page.innerHTML), '/stats/ledger must not mention fsync');
+assert(page.innerHTML.includes('outer <code>W&lt;hex&gt;</code> expansion'), '/stats/ledger states that the new transport removes outer hex wrapping');
 assert(page.innerHTML.includes('Fork gossip'), 'equivocation gossip tile present');
 assert(page.innerHTML.includes('TCP server'), 'chain server tile present');
 assert(page.innerHTML.includes('Head-only sig') || page.innerHTML.includes('head-only sig') || page.innerHTML.includes('head') && page.innerHTML.includes('hash chain'), 'head-only replay story present');

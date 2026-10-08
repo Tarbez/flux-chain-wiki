@@ -13,6 +13,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { proxyFleetPulse } from './lib/fleet-pulse-proxy.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const PORT = Number(process.env.PORT || 3438);
@@ -43,6 +44,10 @@ createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://x');
     let pathname = url.pathname;
+    if (pathname === '/api/fleet-pulse') {
+      if (req.method !== 'GET') { res.writeHead(405).end('Method not allowed'); return; }
+      await proxyFleetPulse(res); return;
+    }
     if (PRIVATE.test(pathname)) { res.writeHead(404).end('Not found'); return; }
     let file = pathname === '/' ? join(ROOT, 'index.html') : await fileFor(pathname);
     if (!file) file = await fileFor(assetPath(pathname));
