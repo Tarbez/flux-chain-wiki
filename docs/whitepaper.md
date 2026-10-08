@@ -157,6 +157,24 @@ amortise signatures across a bigger batch is the right one. That is
 why segmented application (one cert per 1,024 ops) is the production
 shape.
 
+**What hardware matters.** Because signature checks dominate, the CPU
+core is the whole speed story. One Ed25519 verify takes about 25 µs on
+an AMD EPYC core and about 52 µs on the fleet's Intel Xeons, which is
+why the EPYC nodes lead every per-node table. The protocol links no GPU
+library and opens no GPU device: a rented RTX PRO 6000 box sat idle
+throughout its benchmark (BENCH-003 §16). A validator needs plain CPU
+cores, not an accelerator.
+
+**Batching needs many chains.** One chain is strictly sequential:
+position `n` cannot be checked until `n-1` is appended. A burst only
+pays when it spans many holders, which is the natural production shape
+(many identities, each short and sequential). With server-side burst
+batching (`admit_burst` drains up to 64 pipelined records and runs one
+`verify_batch`), one bk2 → mk2 connection carrying 128 interleaved
+holders reached **22,559 admitted ops/s**, zero errors, with both sides
+agreeing on every holder's head afterwards. The same link managed
+14,963/s on a single chain before batching.
+
 ## 5. The three numbers (and why we always publish all three)
 
 Design doc §1 insists on reporting these three together. We follow
@@ -250,6 +268,54 @@ with: the holder's own signatures prove the attempt. Attack suite
 (29 chain tests + 5 cross-shard tests + 3 TCP tests + 3 stream
 resolver tests) is 7-of-7 refused.
 
+### 8.1 The attack suite, case by case
+
+| Attack | What the chain does | Why |
+|---|---|---|
+| Replay: the same bytes twice | Idempotent: no second entry, no equivocation | Same bytes, same CID; the second call returns the first CID |
+| Double-spend of one input | Refused by the payload check, which walks the holder's chain back to the input | Undoing an earlier spend would mean signing a fork |
+| Two appends racing for one position | Exactly one wins; the other becomes `(G, pos) → (cidA, cidB)` fraud evidence | The per-holder lock serialises the race |
+| Cross-chain confusion: B extends A's chain | Refused as `ChainBreak` on B's own chain | Chains are keyed by `G`, so a record always routes to its signer's chain |
+| Wrong `prev`: forking from an older head | Refused as `ChainBreak`, naming the expected position and head | The head is the single source of truth |
+| Tampered signature | Refused as `BadSignature` | Ed25519 under `G`; batch mode is not used on this path |
+| Equivocation: two records at one `(G, pos)` | Second refused; the pair is kept as fraud evidence | Both carry the holder's own signature |
+
+The one ordered operation in the system is `put_if_absent` on
+`(G, pos)`, and it is ordered **per holder**: one lock per chain, no
+cross-holder lock, nothing global to wait on.
+
+### 8.2 No pending pool, so nothing to front-run
+
+Front-running and sandwiching need a public queue of pending
+transactions that someone can reorder before they settle. There is no
+such queue here. A transfer is a conversation between two holders, each
+appending to their own chain; the records become visible only after both
+appends exist. MEV is not prevented by a rule; there is nothing for it
+to act on.
+
+The same structure limits who sees what. A holder's chain is visible to
+the holder, to their counterparties, and to the watchers they publish
+their head to, not to the whole network. There is no global tape to
+index.
+
+### 8.3 What a ledger entry can say
+
+`LEDGERENTRY` (type code `1A`) carries one new letter, `J`, the chain
+position. Its meaning comes from what `C[1+]` references, using types
+the grammar already registers:
+
+| Entry | References | Rule the resolver adds |
+|---|---|---|
+| Spend | a `CONSUMEDMARKER` | the holder's chain must prove it owns the input, with no earlier spend |
+| Receive | the counterparty's `AGREEMENT` | its second signature must cover this entry's position (the join between two chains) |
+| Issue | a `VALUEOBJECT` at sequence `I0` | `G` must be in the current issuance roster |
+| Freeze | a `CELLEQUIVOCATION` built from two conflicting entries | both conflicting signatures must verify; that chain is frozen from that position |
+
+A receive entry is also the receipt step the agreement lifecycle long
+lacked; it now has a natural home on the payee's chain. The full design
+is `docs/finance-ledger-design.md`; /stats/ledger shows a real five-entry
+chain with valid signatures.
+
 ## 9. The resolver surface we expose to builders
 
 A new resolver author declares three things:
@@ -293,6 +359,53 @@ Honesty requires calling this out:
   conflate them even though the quoted peer numbers often do. If a
   future reader of this paper quotes 1.7 M as a tps, they are quoting
   wrong.
+
+## 11. Decisions still owed
+
+The prototype implements the mechanisms below; what remains is policy,
+and each is a choice for the owners rather than an engineering task.
+
+- **Who may issue.** Issue entries are checked against an issuance
+  roster (`IssuancePolicy::Roster`). Who is on it at genesis, and how it
+  changes, is a monetary decision: a single genesis key, a fixed roster,
+  or the registered authority-policy ceremony.
+- **When a holder publishes their head.** A fork is only caught by
+  someone who sees both halves. Heads and fork evidence are gossiped
+  (`receive_fork_evidence`, the automatic broadcaster), but the rule for
+  *when* a holder must publish is not fixed. The minimum useful rule:
+  publish the head after every receive, so no counterparty can be shown
+  a stale head.
+- **How counterparties find each other.** Out of scope for the chain;
+  the intent mesh is the existing answer.
+- **Whether chains replace authority cells.** Cells and per-holder
+  chains solve the same ordering problem. The recommendation on record
+  is that chains subsume cells, so the registry carries one mechanism,
+  not two.
+
+Already built and tested in the prototype: refund by the sender after a
+receiver misses its deadline (`Payload::Refund`, `M ≥ D` enforced),
+chain compaction by snapshot and prune, the issuance roster, and the
+fork broadcaster.
+
+## 12. Before mainnet
+
+These gaps come from `docs/mainnet-readiness.md`. That inventory was
+written for the earlier fabric deployment, but the operational gaps
+apply to the chain unchanged:
+
+| Gap | State |
+|---|---|
+| A devnet on separate hosts, keys and domain, so experiments never share machines with production | Not built. A benchmark once took production down for 19 minutes. |
+| Membership admission and removal beyond a shared secret | Partial. The 7-member authority ceremony exists in code but is not wired in. |
+| Membership that survives a restart | Not built |
+| TLS between clients and nodes, and between nodes | Not built. Records are signed, so tampering shows, but traffic is readable. |
+| Every role under systemd, with restart and log capture | Partial |
+| Monitoring and alerting | Partial. /monitor shows the hourly pulse; nothing alerts. |
+| A deployment pipeline with rollback | Not built |
+| Adversarial and chaos testing: partitions, crashes mid-append, conflicting signers | Not built beyond the attack suite in §8.1 |
+| A spam and economic model; proposals cost nothing today | Not built |
+| K-of-N replication measured under fleet load | Planned as BENCH-009 |
+| Independent security review | Not started |
 
 ## Appendix A — How to re-run every number
 
@@ -411,6 +524,21 @@ root; zero errors.
   replica, because all nine must finish the same segment.
 - **Synchronized replica work: 552,583/s**, the 180,000 applications
   divided by the slowest completion time.
+
+How the certified path works: each replica verifies the segment root
+and its K-of-N certificate **once**, then splits the operations by
+holder across its long-lived shard workers. Order within each holder is
+preserved, and a segment that is replayed, skips a sequence number, or
+names the wrong parent segment is refused.
+
+**Not inside the timed interval:** broadcasting the segment, peer
+discovery, network receipt, and durable commit of the segment. The
+figure is certificate verification plus state application, nothing
+more.
+
+Segments travel in a signed binary envelope (traffic protocol v2),
+signed directly rather than wrapped in JSON or hex. Version-1 frames
+remain readable.
 
 Local measurements from the same implementation (BENCH-006), never
 multiplied into a fleet projection:
