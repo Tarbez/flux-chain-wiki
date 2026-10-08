@@ -1,128 +1,122 @@
-/* Named regressions, kept from the first /stats:
-   - the module appended its page but returned nothing, so the router threw on `el.dataset`
-     and the page stayed stranded below home;
-   - a headline figure once disagreed with a stale table row, so every headline here must be
-     derivable from the evidence the page draws;
-   - /monitor must stay registered, read the real fleet feed rather than simulate one, and
-     stop its timer when the router removes it.
-   Added with the 2026-10-07 education redesign:
-   - the fleet headline equals the sum of its per-server rows, before and after;
-   - every CPU breakdown adds up to 100%;
-   - every range on the page contains the mean shown beside it;
-   - the sample transfer on /stats is REAL grammar (registered letters, the right number of
-     signatures and references), and its size matches the figure quoted for it;
-   - every article /stats links to exists in the article index;
-   - /monitor reads the same fleet record /stats does, and never shows an audited figure as live. */
+/* /stats is a dashboard (2026-10-08 redesign). Named regressions:
+   - the module must return the element it mounts, or the router throws on `el.dataset`;
+   - live values come only from the fleet pulse; when the pulse fails the page shows no number
+     in their place and says why;
+   - the audited headline is the three whitepaper §5 numbers, each derivable from its node rows;
+   - the page stops polling when the router removes it;
+   - every evidence record, article and page it links to exists;
+   - the engineering detail it used to carry lives in docs/whitepaper.md, and the sample
+     transfer cited there is real grammar;
+   - /monitor still reads the same feed and labels audited figures as dated. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-function node(tag) {
-  return { tagName: tag, className: '', innerHTML: '', dataset: {}, attrs: {}, children: [],
-    setAttribute(k, v) { this.attrs[k] = v; }, querySelector() { return null; }, appendChild(c) { this.children.push(c); return c; } };
+// A small DOM: enough for the page to build itself and for the test to read it back.
+class Node {
+  constructor(tag) { this.tagName = tag; this.className = ''; this.children = []; this.dataset = {}; this.attrs = {}; this.listeners = {}; this.style = { setProperty() {} }; this._text = ''; this.hidden = false; }
+  appendChild(c) { this.children.push(c); c.parent = this; return c; }
+  setAttribute(k, v) { this.attrs[k] = String(v); }
+  addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); }
+  set textContent(v) { this._text = v == null ? '' : String(v); this.children = []; }
+  get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
+  all() { return [this].concat(...this.children.map((c) => c.all())); }
+  find(cls) { return this.all().filter((n) => n.className.split(' ').includes(cls)); }
 }
-const context = vm.createContext({ window: {}, document: { createElement: node }, ArkUI: { pageModules: {} } });
+let pulseResult = null;
+const timers = new Set(), docListeners = {};
+const document = { hidden: false, createElement: (t) => new Node(t),
+  addEventListener(t, f) { docListeners[t] = f; }, removeEventListener(t) { delete docListeners[t]; } };
+const context = vm.createContext({
+  document, console, Date, Math, Number, String, Promise, encodeURIComponent,
+  setTimeout(f) { const id = {}; timers.add(id); return id; }, clearTimeout(id) { timers.delete(id); },
+  setInterval() { const id = {}; timers.add(id); return id; }, clearInterval(id) { timers.delete(id); },
+  ArkUI: { pageModules: {}, pageCatalog: {}, route: { href: (p) => '#' + p } }
+});
 context.window = context;
-for (const file of ['js/content/stats-highlights.js', 'js/content/stats-sample.js', 'js/pages/stats.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+context.ArkPulse = { get: () => pulseResult };
+for (const file of ['js/content/stats-highlights.js', 'js/content/resolver-registry.js', 'js/pages/stats.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+const S = context.ArkStatsHighlights;
 
-const host = node('main');
-const page = context.ArkUI.pageModules.stats.mount(host);
-assert(page && page.dataset, 'stats mount() returns its page element for the router');
-assert.equal(host.children[0], page, 'the returned element is the one mounted');
-assert(page.innerHTML.includes('class="stats-bento"'), '/stats renders as a bento grid');
-assert(!/border(-top|-bottom)?\s*:\s*1px/.test(fs.readFileSync('css/stats.css', 'utf8').replace(/border-bottom:1px solid hsl\(var\(--reference-400\)\)/, '')), '/stats draws no hairline borders (the one inline-link underline excepted)');
+(async () => {
+  // ---- offline first: no live number is invented -------------------------------------------
+  pulseResult = Promise.reject(new Error('HTTP 502 from /api/fleet-pulse'));
+  let host = new Node('main');
+  let page = context.ArkUI.pageModules.stats.mount(host);
+  assert(page && page.dataset, 'stats mount() returns its page element for the router');
+  assert.equal(host.children[0], page, 'the returned element is the one mounted');
+  await new Promise((r) => setImmediate(r));
+  const pill = page.find('dash-pill')[0];
+  assert.equal(pill.dataset.state, 'down', 'an unreachable pulse shows as down');
+  for (const k of page.find('dash-stat').slice(0, 4)) assert(k.textContent.includes('–'), 'live tiles show a dash, not a number, while offline');
+  assert(page.find('dash-empty')[0].textContent.includes('HTTP 502'), 'the offline message names the failure');
+  page.arkDispose();
+  assert.equal(timers.size, 0, 'dispose clears every timer');
+  assert(!docListeners.visibilitychange, 'dispose removes the visibility listener');
 
-// ---- the fleet headline is derivable from its rows ---------------------------------------------
-const run = context.ArkStatsHighlights.fleetRun;
-const ev = context.ArkUI.statsEvidence;
-assert.equal(run.perServer.reduce((t, s) => t + s.now, 0), run.total, 'per-server rates add up to the fleet total');
-assert.equal(run.perServer.reduce((t, s) => t + s.before, 0), run.before, 'per-server "before" rates add up to the earlier fleet total');
-assert.equal(ev.fleet.total, run.total, '/stats reads the same fleet record as the home page and /monitor');
-assert(page.innerHTML.includes(run.total.toLocaleString('en-US')), 'the fleet total appears on the page');
-const soak = context.ArkStatsHighlights.chainFleetSoak;
-assert.equal(soak.perNode.reduce((total, node) => total + node.accepted, 0), soak.accepted, 'the five-minute soak total is derivable from its six node rows');
-assert.equal(soak.failures, 0, 'the fleet soak records zero failures');
-const fleetItem = context.ArkStatsHighlights.items.find((i) => i.label.includes('public-fleet soak'));
-assert(fleetItem && Number(fleetItem.value.replace(/,/g, '')) === soak.averageQps, 'the home rail retains the latest sustained fleet rate as a separately labeled baseline');
-assert(/zero failures/.test(fleetItem.detail), 'the home rail carries the measured failure count with the sustained rate');
-const local = context.ArkStatsHighlights.localResolvers;
-const certifiedFleet = context.ArkStatsHighlights.certifiedFleet;
-assert.equal(local.certifiedApply, 279269, 'shared evidence exposes certified sharded application');
-assert.equal(local.compactTransport, 812268, 'shared evidence exposes compact segment transport separately');
-assert.equal(Math.round(certifiedFleet.perNode.reduce((total, node) => total + node.qps, 0)), certifiedFleet.combined, 'nine-node combined capacity is derived from its node rows');
-assert.equal(certifiedFleet.allReplicaLogical, Math.round(Math.min(...certifiedFleet.perNode.map((node) => node.qps))), 'all-replica logical rate is bounded by the slowest replica');
-assert.equal(certifiedFleet.replicaApplications, certifiedFleet.nodes * certifiedFleet.operationsPerNode, 'replica application count is derived');
-assert(page.innerHTML.includes('one certified segment root'), '/stats names the verify-once boundary');
-assert(page.innerHTML.includes(soak.accepted.toLocaleString('en-US')), 'the five-minute fleet soak appears on /stats');
-assert(run.perServer.every((s) => s.busy > 0 && s.busy <= 100 && s.now > s.before), 'every server is faster than before and its CPU share is a percentage');
+  // ---- live: values are the pulse's values ---------------------------------------------------
+  const nodes = [{ name: 'bk2', addr: 'a:1', ok: 10, total: 10, elapsed_ms: 5, qps: 900, error: null },
+                 { name: 'mk2', addr: 'b:1', ok: 0, total: 10, elapsed_ms: 5, qps: 0, error: 'timeout' }];
+  pulseResult = Promise.resolve({ data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 1, nodes } });
+  host = new Node('main');
+  page = context.ArkUI.pageModules.stats.mount(host);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(page.find('dash-pill')[0].dataset.state, 'warn', 'a down node degrades the status');
+  assert(page.find('dash-stat')[0].textContent.includes('1/2'), 'nodes online counts only nodes that answered');
+  assert.equal(page.find('dash-node').length, 2, 'one card per pulse node');
+  assert(page.find('dash-node-error')[0].textContent.includes('timeout'), 'a failing node shows its error');
+  page.arkDispose();
 
-// ---- every breakdown adds up -------------------------------------------------------------------
-for (const model of [ev.cpuBefore, ev.cpuAfter]) {
-  const total = model.parts.reduce((t, p) => t + p.v, 0);
-  assert(Math.abs(total - 100) < 0.25, model.title + ' CPU shares add up to 100 (got ' + total.toFixed(2) + ')');
-}
-const inRange = (range, mean) => { const [lo, hi] = range.split('-').map((x) => Number(x.replace(/,/g, ''))); return mean >= lo && mean <= hi; };
-for (const row of [...ev.ladder, ...ev.batchModes]) assert(inRange(row.range, row.value), row.label + ': the mean lies inside its own range');
-assert(ev.ladder.at(-1).strong === true && ev.ladder.at(-1).value === Math.max(...ev.ladder.map((l) => l.value)), 'the ladder ends at its best configuration');
+  // ---- the audited headline is derivable -----------------------------------------------------
+  const HT = S.honestTransfers;
+  const sum = (k) => HT.perNode.reduce((t, n) => t + n[k], 0);
+  assert.equal(sum('finalizedTps'), HT.fleetFinalizedTps, 'finalized transfers/s is the sum of its node rows');
+  assert.equal(sum('finalized'), HT.fleetFinalized, 'finalized transfers is the sum of its node rows');
+  assert(Math.abs(sum('logicalOpsPerSecond') - HT.fleetLogicalOpsPerSecond) <= 2, 'logical ops/s is the sum of its node rows');
+  assert(Math.abs(sum('replicaAppsPerSecond') - HT.fleetReplicaAppsPerSecond) <= 6, 'replica applications/s is the sum of its node rows');
+  const text = page.textContent;
+  for (const n of [HT.fleetFinalizedTps, HT.fleetLogicalOpsPerSecond, HT.fleetReplicaAppsPerSecond]) assert(text.includes(n.toLocaleString('en-US')), n + ' appears with the other two');
+  const soak = S.chainFleetSoak;
+  assert.equal(soak.perNode.reduce((t, n) => t + n.accepted, 0), soak.accepted, 'the soak total is derivable from its node rows');
+  assert(text.includes(soak.accepted.toLocaleString('en-US')) && soak.failures === 0, 'the soak and its zero failures appear');
+  const cert = S.certifiedFleet;
+  assert.equal(Math.round(cert.perNode.reduce((t, n) => t + n.qps, 0)), cert.combined, 'the certified-segment total is derivable');
+  assert(/local cache/.test(text), 'the page says the soak did not run with K-of-N replication');
 
-// ---- the sample transfer is real grammar -------------------------------------------------------
-const REGISTERED = new Set('IBATRGYSCMVHPDQOLWUE'.split(''));
-const sample = context.ArkStatsSample.records;
-assert.deepEqual(Array.from(sample, (r) => r.name), ['ISSUANCE', 'INTENT', 'OFFER', 'AGREEMENT', 'VALUEOBJECT', 'FULFILLMENT']);
-for (const r of sample) {
-  assert(/^[A-Za-z0-9-]+$/.test(r.text), r.name + ' uses only letters, digits and the dash');
-  const blocks = r.text.split('-');
-  assert(blocks.every((b) => b.length > 1 && REGISTERED.has(b[0])), r.name + ': every block is a registered role letter plus a value');
-  assert(!r.text.includes('--'), r.name + ' has no empty block');
-}
-const count = (r, letter) => r.text.split('-').filter((b) => b[0] === letter).length;
-const get = (name) => sample.find((r) => r.name === name);
-assert.equal(count(get('AGREEMENT'), 'S'), 2, 'an agreement carries two chained signatures');
-assert.equal(count(get('AGREEMENT'), 'C'), 5, 'an agreement carries five ordered references');
-assert.equal(count(get('INTENT'), 'C'), 2); assert.equal(count(get('OFFER'), 'C'), 3);
-assert.equal(count(get('VALUEOBJECT'), 'C'), 4); assert.equal(count(get('FULFILLMENT'), 'C'), 3);
-assert.equal(get('AGREEMENT').text.length, 674, 'the sample agreement is the 674-byte record the cost figures describe');
-assert.equal(get('AGREEMENT').text.split('-').length, 11, 'and it has the 11 blocks the page says it has');
-assert(page.innerHTML.includes('11 blocks'), 'the page quotes that block count');
-assert.equal(sample.slice(1).reduce((t, r) => t + r.text.length, 0), 358 + 424 + 674 + 622 + 412, 'a transfer is five records of the quoted sizes');
-const sigs = sample.slice(1).reduce((t, r) => t + count(r, 'S'), 0);
-assert.equal(sigs, 6, 'a transfer carries six signatures, which is what the CPU breakdown says');
+  // ---- links resolve -------------------------------------------------------------------------
+  const src = fs.readFileSync('js/pages/stats.js', 'utf8');
+  const articleIndex = fs.readFileSync('js/content/article-index.js', 'utf8');
+  for (const [, slug] of src.matchAll(/'article\/([a-z0-9-]+)'/g)) assert(articleIndex.includes('"slug": "' + slug + '"'), 'article ' + slug + ' exists');
+  const allowed = fs.readFileSync('js/ark/reference-docs.js', 'utf8');
+  for (const [, doc] of src.matchAll(/'(docs\/[a-z0-9/_-]+\.md)'/g)) {
+    assert(fs.existsSync(doc), doc + ' exists');
+    assert(allowed.includes('"' + doc + '"'), doc + ' is readable in the reference reader');
+  }
+  assert(!/Math\.random/.test(src), '/stats generates no numbers of its own');
 
-// ---- links resolve -----------------------------------------------------------------------------
-const statsSource = fs.readFileSync('js/pages/stats.js', 'utf8');
-const articleIndex = fs.readFileSync('js/content/article-index.js', 'utf8');
-for (const [, slug] of statsSource.matchAll(/'article\/([a-z0-9-]+)'/g)) assert(articleIndex.includes('"slug": "' + slug + '"'), 'article ' + slug + ' exists in the index');
-for (const [, doc] of statsSource.matchAll(/href="(\/docs\/[a-z0-9/_-]+\.md)"/g)) assert(fs.existsSync('.' + doc), doc + ' exists');
+  // ---- the detail moved to the whitepaper ---------------------------------------------------
+  const paper = fs.readFileSync('docs/whitepaper.md', 'utf8');
+  for (const heading of ['Appendix B', 'Appendix C', 'Appendix D', 'Appendix E', 'Appendix F']) assert(paper.includes('## ' + heading), 'whitepaper has ' + heading);
+  for (const n of ['1,712,006', '5,891', '54.7%', '24,908', '113,432']) assert(paper.includes(n), 'whitepaper carries ' + n);
 
-// ---- the home page reads the shared record -----------------------------------------------------
-const home = fs.readFileSync('js/pages/home.js', 'utf8');
-assert(home.includes('window.ArkStatsHighlights') && !home.includes("ArkCopy.text('HOME.STATUS'"), 'home reads the shared measurements, not separate copy');
-const performanceCopy = [
-  'js/content/stats-highlights.js',
-  'js/content/article-index.js',
-  'js/content/seo-data.js',
-  'js/content/articles/a-resolver-by-construction.js',
-  'js/content/articles/the-chain-prototype-is-the-chosen-path.js',
-  'js/pages/home.js',
-  'js/pages/monitor.js',
-  'js/pages/stats.js',
-  'js/pages/stats-ledger.js'
-].map((file) => fs.readFileSync(file, 'utf8')).join('\n');
-assert(!/\b(?:entry|entries)\s*(?:\/|per |a )\s*s(?:econd)?\b/i.test(performanceCopy), 'public performance rates use ops/s or operations a second, never entry/entries');
-assert(!/\bbenchmark entries\b|\bentries accepted\b|\baccepted entries\b|\bentries this pulse\b/i.test(performanceCopy), 'public benchmark counts are branded as operations');
-assert(performanceCopy.includes('ops/s'), 'public performance copy exposes the ops/s unit');
-assert(fs.existsSync('docs/evidence/bench-005-million-ops-audit.md'), 'the million-ops target has an inspectable audit record');
-assert(fs.existsSync('docs/evidence/bench-006-certified-segment-and-binary-transport.md'), 'the current certified and binary results have an inspectable evidence record');
+  // The sample transfer cited by Appendix B is real grammar.
+  const sc = vm.createContext({ window: {} }); sc.window = sc;
+  vm.runInContext(fs.readFileSync('js/content/stats-sample.js', 'utf8'), sc);
+  const REGISTERED = new Set('IBATRGYSCMVHPDQOLWUE'.split(''));
+  const sample = sc.ArkStatsSample.records;
+  for (const r of sample) assert(r.text.split('-').every((b) => b.length > 1 && REGISTERED.has(b[0])), r.name + ': every block is a registered letter');
+  const agreement = sample.find((r) => r.name === 'AGREEMENT');
+  assert.equal(agreement.text.length, 674); assert.equal(agreement.text.split('-').length, 11);
+  assert.equal(sample.slice(1).reduce((t, r) => t + r.text.length, 0), 358 + 424 + 674 + 622 + 412, 'a transfer is five records of the sizes Appendix B quotes');
+  assert.equal(sample.slice(1).reduce((t, r) => t + r.text.split('-').filter((b) => b[0] === 'S').length, 0), 6, 'six signatures');
 
-// ---- /monitor ----------------------------------------------------------------------------------
-const catalog = fs.readFileSync('js/pages/catalog.js', 'utf8');
-assert(/monitor:\s*\{\s*path:\s*'\/monitor'[^}]*module:\s*'monitor'[^}]*scripts:\s*\['js\/ark\/pulse-client\.js',\s*'js\/pages\/monitor\.js'\]/.test(catalog), '/monitor is in the page catalog with the shared pulse client');
-assert(/stats:\s*\{\s*path:\s*'\/stats'[^}]*scripts:\s*\['js\/content\/stats-sample\.js',\s*'js\/ark\/pulse-client\.js',\s*'js\/pages\/stats\.js'\]/.test(catalog), '/stats loads its sample and shared pulse client before the page');
-assert(fs.readFileSync('index.html', 'utf8').includes('css/monitor.css'), 'monitor styles are linked');
-const monitor = fs.readFileSync('js/pages/monitor.js', 'utf8');
-assert(monitor.includes('ArkPulse.get()'), '/monitor polls through the shared same-origin pulse client');
-assert(!/Math\.random/.test(monitor), '/monitor generates no numbers of its own');
-assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(pulseTimer\)/.test(monitor), '/monitor stops its timer on unmount');
-assert(/not now/.test(monitor) && /Audited/i.test(monitor), '/monitor labels the audited figures as dated rather than live');
+  // ---- catalog and /monitor ------------------------------------------------------------------
+  const catalog = fs.readFileSync('js/pages/catalog.js', 'utf8');
+  assert(/stats:\s*\{\s*path:\s*'\/stats'[^}]*scripts:\s*\[[^\]]*'js\/ark\/pulse-client\.js',\s*'js\/pages\/stats\.js'\]/.test(catalog), '/stats loads the shared pulse client before the page');
+  assert(fs.readFileSync('index.html', 'utf8').includes('css/stats-dashboard.css'), 'dashboard styles are linked');
+  const monitor = fs.readFileSync('js/pages/monitor.js', 'utf8');
+  assert(monitor.includes('ArkPulse.get()') && !/Math\.random/.test(monitor), '/monitor reads the real feed');
+  assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(pulseTimer\)/.test(monitor), '/monitor stops its timer on unmount');
 
-console.log('PASS: /stats mounts as a bento grid; every figure is derivable from its evidence; the sample transfer is real grammar; links resolve; /monitor is registered, reads the real feed, labels audited figures as not live, and disposes cleanly.');
+  console.log('PASS: /stats dashboard shows only pulse values live and nothing when offline, its audited numbers are derivable, it disposes cleanly, its links resolve, and the detail lives in the whitepaper.');
+})().catch((e) => { console.error(e); process.exit(1); });

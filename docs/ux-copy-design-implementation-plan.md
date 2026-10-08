@@ -116,7 +116,7 @@ The primary conversion is not an account signup. It is a qualified visitor reach
 | Resolver | The deployable definition of a network or protocol surface | Resolver page |
 | Manifest | The signed document that declares the object and its rules | Resolver and lifecycle docs |
 | Mesh | The peers that discover and process Flux objects | Protocol overview |
-| FXN chain | One signed, append-only chain per identity; it checks grammar, signature and position, nothing else | Home, protocol overview, `docs/WHITEPAPER.md` |
+| FXN chain | One signed, append-only chain per identity; it checks grammar, signature and position, nothing else | Home, protocol overview, `docs/whitepaper.md` |
 | Agreements resolver | Reads intent, offer, agreement, fulfillment and receipt records across the participants' chains | Lifecycle overview |
 | Authority cell | A short-lived signer group derived for one object and transition | Authority page |
 | Network | An independently addressable Flux tenant; currently a presence boundary | Networks page |

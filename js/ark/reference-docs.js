@@ -23,5 +23,6 @@ ArkUI.referenceDocs = Object.freeze([
   "docs/protocol/governance.md",
   "docs/protocol/resolvers.md",
   "docs/prototype-to-production.md",
-  "docs/status.md"
+  "docs/status.md",
+  "docs/whitepaper.md"
 ]);

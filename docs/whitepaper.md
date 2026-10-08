@@ -281,6 +281,14 @@ Honesty requires calling this out:
 - **The DeFi resolver is a prototype.** No bridge to a public token
   economy; no production-grade issuance roster. See the DeFi row on
   `defxn.com/resolvers` for the open items.
+- **Replication under load is not yet measured on the fleet.** §7
+  describes K-of-N peer replication, and it is implemented and tested.
+  The 303-second fleet soak (12,403 ops/s) ran with the local cache, not
+  K-of-N acknowledgement; that run still has to be repeated with
+  replication on.
+- **The soak is five minutes.** No 30-minute or longer soak has run
+  across the full mesh, and every client so far was operator-driven,
+  not public traffic.
 - **Replica applications are not finalized transfers.** We refuse to
   conflate them even though the quoted peer numbers often do. If a
   future reader of this paper quotes 1.7 M as a tps, they are quoting
@@ -311,3 +319,147 @@ For the grammar-only chain throughput, run
 Every row above is reproducible from these commands; dates on
 `defxn.com/stats` name when each result was recorded. If a row
 changes, re-run the command and re-record the date.
+
+## Appendix B — One real record, block by block
+
+Every record is one line of text: blocks separated by `-`, each
+starting with a registered letter. The sample transfer the cost
+figures in §3 describe is five records (358 + 424 + 674 + 622 + 412
+bytes, six signatures). Its AGREEMENT is 674 bytes in 11 blocks.
+
+| Letter | Role | What its resolver checks |
+|---|---|---|
+| `G` | Signer | The signer's public key in hex; an unbroken run of at least 32 letters or digits. |
+| `Y` | Kind | A registered code (`0G` intent, `0H` offer, `0I` agreement, `0J` fulfillment, `0L` value object, `1A` LEDGERENTRY). An unregistered code is refused at the door. |
+| `V` | Version | Digits only. |
+| `M` | Moment | When it was made, in unix seconds. |
+| `D` | Deadline | When it stops being valid; an expired record is refused. |
+| `I` | Sequence | How many hands this object has passed through; 0 means issued. |
+| `R` | Object | The identity of this value object; no internal structure. |
+| `H` | Holder | The hex of the holder's key text. |
+| `J` | Position | The record's position on its holder's chain (LEDGERENTRY). |
+| `T` | Amount | A whole number then its unit; no decimals, nothing to escape. |
+| `C` | Reference | The SHA-256 id of another record. Order is meaningful. |
+| `S` | Signature | Ed25519 over the exact text before this block; a second signature covers the first. |
+
+The sample records live in `js/content/stats-sample.js`, and
+`tests/stats-page.cjs` checks that every block uses a registered
+letter and that the sizes and signature counts above hold.
+
+## Appendix C — What made it fast
+
+Measured on bk2's Xeon Gold 6230R, server pinned to four cores, client
+on three others, accepted finality, 300 concurrent, three runs each
+(BENCH-003 §14-15). Ranges are the lowest and highest run.
+
+| Path | Runs (transfers/s) | Mean |
+|---|---:|---:|
+| HTTP + JSON, three requests | 1,718-2,082 | 1,926 |
+| Registered grammar, one record per trip | 4,060-4,271 | 4,158 |
+| Whole transfer in one write | 4,725-4,989 | 4,845 |
+| + batch signature checks (burst) | 5,397-5,994 | 5,674 |
+| + batch signature checks (pool, 1 thread) | 4,567-4,735 | 4,628 |
+| **+ batch signature checks (pool, 2 threads)** | **5,793-6,081** | **5,891** |
+
+Dropping HTTP and tree-building bought most of it. One verifier thread
+made batching slower: batches passed 100 and that thread became the
+bottleneck.
+
+Where a server's CPU went, before and after (call-stack profiles):
+
+| HTTP + JSON server | Share | Registered-grammar server | Share |
+|---|---:|---|---:|
+| HTTP layer and kernel network calls | 40.3% | Signature checks (6 per transfer) | 54.7% |
+| Signatures and hashing | 20.8% | Storage: writer, queue, reads | 20.3% |
+| Building, sorting and writing JSON | 15.1% | Admission logic over stored records | 13.8% |
+| Storage | 11.1% | Connection loop | 5.0% |
+| Everything else | 12.7% | sha256 of records | 3.5% |
+| | | The grammar itself | 2.1% |
+| | | Everything else | 0.6% |
+
+Parse cost of one 674-byte AGREEMENT on one bk2 core: split on the dash
+1,515 ns; with each block's resolver 2,888 ns; full admission checks
+5,028 ns; decoding every field into a tree 13,279 ns; two signature
+checks 113,432 ns. The signatures are the cost; the grammar is not.
+
+**A caution that travels with batch checking.** Batch verification is
+cofactored: it can accept a signature that checking one at a time
+would reject, if the signer crafts it. That is safe within one chain,
+but every party that must agree on validity has to run the same mode.
+
+## Appendix D — The certified-segment run and compact transport
+
+BENCH-007, 2026-10-08. One deterministic 20,000-operation segment with
+one 3-of-4 certificate (root `1399e321…31575`) was applied concurrently
+by eight VPS replicas plus one local node. Every node reported the same
+root; zero errors.
+
+| Node | Holder shards | Replica applications/s |
+|---|---:|---:|
+| eul-4c | 4 | 398,441 |
+| eug-2c | 2 | 348,464 |
+| local | 8 | 276,395 |
+| mk2 | 5 | 236,893 |
+| bk2 | 7 | 126,808 |
+| mk1 | 1 | 120,502 |
+| bk1 | 2 | 78,957 |
+| ms3 | 1 | 64,147 |
+| mist1 | 1 | 61,398 |
+| **Summed** | | **1,712,006** |
+
+- **All-replica logical rate: 61,398 ops/s**, bounded by the slowest
+  replica, because all nine must finish the same segment.
+- **Synchronized replica work: 552,583/s**, the 180,000 applications
+  divided by the slowest completion time.
+
+Local measurements from the same implementation (BENCH-006), never
+multiplied into a fleet projection:
+
+| Measurement | Result |
+|---|---:|
+| Hot chain admission, full per-operation verification | 51,065 ops/s |
+| Certified holder-sharded application (8 shards) | 279,269 ops/s (5.47×) |
+| Compact segment transport, two peers, 1,024 ops per envelope | 812,268 ops/s |
+| Binary segment wire size | 150.9 bytes/op (6.47× below 976) |
+
+Transport throughput is not admission throughput, and summed replica
+work is not finalized transfers; see §5.
+
+## Appendix E — Every number and its source
+
+| Number | Value | Run | Date |
+|---|---:|---|---|
+| Finalized transfers/s, 6-node mesh | 42,637 | `/tmp/fleet-tx-bench.sh`, 10 s, cross-shard segmented, 6 nodes concurrent | 2026-10-08 |
+| Logical operations/s, 6-node mesh | 170,553 | Same run; four records per transfer | 2026-10-08 |
+| Replica applications/s, 6-node mesh | 682,213 | Same run; logical × 4 replicas per shard | 2026-10-08 |
+| Finalized transfers/s, one Mac (M-series, 10 cores) | 15,947 | `transfer-bench`, same settings | 2026-10-08 |
+| Sustained accepted records/s, 6 nodes, 303 s | 12,403 | Five-minute soak, one client, 3,760,000 accepted, 0 failures (BENCH-004) | 2026-10-08 |
+| Grammar-only admit path, one Mac core | 83,225 ops/s | `cargo test bench_chain_throughput` | 2026-10-08 |
+| Certified-segment replica applications, 9 nodes | 1,712,006 | `certified-node-bench` (BENCH-007) | 2026-10-08 |
+| Fast replay | 279,149 ops/s | `dense-wire::chain::bench_replay` | 2026-10-08 |
+| Attack suite | 7 of 7 refused | 29 chain + 5 cross-shard + 3 TCP + 3 stream tests | 2026-10-08 |
+| PVA resolver, Stream resolver | not measured | No published benchmark yet | — |
+
+## Appendix F — Retired paths, kept for history
+
+Before the per-identity chain, the same fleet ran the **certified
+agreement fabric**: quorums of validators issuing threshold
+certificates. It is no longer the chosen path, and its numbers are not
+comparable with the chain's.
+
+| | Certified fabric | Grammar prototype (pre-chain) |
+|---|---|---|
+| What it measured | 4 quorums, 2 validators each | 4 servers, 6 clients |
+| Finality | Accepted (certificate); durable measured separately | Accepted only |
+| Throughput | 5,711-6,041/s accepted; 676-827/s durable per quorum | 24,908/s accepted (21,199 before batch checks) |
+| Date | 2026-10-07 | 2026-10-07 |
+
+The grammar-prototype fleet run moved 503,225 transfers in 20 s with
+zero failures: eul-4c 11,358/s, bk2 7,823/s, mk2 3,439/s, bk1 2,288/s.
+
+The full account of how the numbers moved, including the wrong turns
+(a GPU detour, a refuted pipelining idea, a benchmark of the wrong
+codec, and harness bugs that once took production down for 19
+minutes), is in BENCH-003 and the site article *How we got fast, and
+what we got wrong*.
+
