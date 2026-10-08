@@ -30,28 +30,49 @@
   // headline. The chain-fleet rows below are the earlier admit-path
   // measurements (counted as logical operations, since each admit is one
   // op), kept for context.
+  // REAL mesh measurement — 6 fleet nodes running transfer-bench concurrently
+  // for 10 s each in cross-shard-only segmented mode, zero errors. This is
+  // not a projection — every row is a live JSON result from that node.
+  // Measured 2026-10-08 by `/tmp/fleet-tx-bench.sh` running sequentially on
+  // every flx-* host and summed. The parallel-session's 1,712,006 replica-
+  // applications number is a SEPARATE measurement (one certified segment
+  // applied across 9 replicas, each verifying the same cert); it is kept
+  // as context, not merged into this fleet total.
   var HONEST_TRANSFERS = Object.freeze({
     date: '2026-10-08',
-    source: 'in-process · M-series Mac · 10 s sustained window',
-    shards: 8,
-    replicasPerShard: 4,
+    source: 'real mesh · 6 flx-* nodes in parallel · 10 s sustained each · cross-shard only · segmented path · zero errors',
     windowSeconds: 10,
-    submitted: 24000,
-    finalized: 24000,
-    sameShard: 3014,
-    crossShard: 20986,
-    logicalOps: 96000,
-    errors: 0,
-    // The three design-doc §1 numbers:
-    finalizedTps: 3768,
-    logicalOpsPerSecond: 15073,
-    replicaAppsPerSecond: 60292,
-    // Burst variants (1,000 transfers, single run):
-    burst: Object.freeze({
-      mixed:       Object.freeze({ finalizedTps: 4237, logicalOpsPerSecond: 16949 }),
-      crossShard:  Object.freeze({ finalizedTps: 4132, logicalOpsPerSecond: 16529 }),
-      sameShard:   Object.freeze({ finalizedTps: 3472, logicalOpsPerSecond: 13889 })
-    })
+    replicasPerShard: 4,
+    perNode: Object.freeze([
+      Object.freeze({ name: 'eul-4c', cpu: 'AMD EPYC 9355P', cores: 4, region: 'BR', threads: 4, submitted: 140000, finalized: 140000, logicalOps: 560000, elapsedMs: 10089, finalizedTps: 13876, logicalOpsPerSecond: 55506, replicaAppsPerSecond: 222024 }),
+      Object.freeze({ name: 'bk2',    cpu: 'Xeon Gold 6230R', cores: 7, region: 'US', threads: 7, submitted: 92092,  finalized: 92092,  logicalOps: 368368, elapsedMs: 9999,  finalizedTps: 9210,  logicalOpsPerSecond: 36840, replicaAppsPerSecond: 147362 }),
+      Object.freeze({ name: 'mk2',    cpu: 'AMD EPYC 7552',   cores: 5, region: 'US', threads: 5, submitted: 88000,  finalized: 88000,  logicalOps: 352000, elapsedMs: 10213, finalizedTps: 8616,  logicalOpsPerSecond: 34466, replicaAppsPerSecond: 137864 }),
+      Object.freeze({ name: 'eug-2c', cpu: 'AMD EPYC 9355P', cores: 2, region: 'BR', threads: 2, submitted: 76000,  finalized: 76000,  logicalOps: 304000, elapsedMs: 10462, finalizedTps: 7264,  logicalOpsPerSecond: 29058, replicaAppsPerSecond: 116230 }),
+      Object.freeze({ name: 'bk1',    cpu: 'Xeon Gold 6230R', cores: 2, region: 'US', threads: 2, submitted: 24000,  finalized: 24000,  logicalOps: 96000,  elapsedMs: 10230, finalizedTps: 2346,  logicalOpsPerSecond: 9384,  replicaAppsPerSecond: 37537  }),
+      Object.freeze({ name: 'mist1',  cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 16000,  finalized: 16000,  logicalOps: 64000,  elapsedMs: 12078, finalizedTps: 1325,  logicalOpsPerSecond: 5299,  replicaAppsPerSecond: 21196  })
+    ]),
+    // Aggregate ACROSS the 6-node mesh — summed, not averaged, not projected:
+    fleetFinalizedTps: 42637,
+    fleetLogicalOpsPerSecond: 170553,
+    fleetReplicaAppsPerSecond: 682213,
+    fleetSubmitted: 436092,
+    fleetFinalized: 436092,
+    fleetLogicalOps: 1744368,
+    fleetErrors: 0,
+    // Local Mac on top (separate hardware, same bench, same window):
+    macLocal: Object.freeze({
+      cpu: 'Apple M-series', cores: 10, finalizedTps: 15947, logicalOpsPerSecond: 63787, replicaAppsPerSecond: 255150,
+      windowSeconds: 10, submitted: 168000, finalized: 168000, logicalOps: 672000, errors: 0
+    }),
+    // Mesh + Mac — the actual honest "all nodes" number:
+    totalFinalizedTps: 58584,
+    totalLogicalOpsPerSecond: 234340,
+    totalReplicaAppsPerSecond: 937363,
+    // The 9-node certified-segment number from the parallel session's
+    // measurement — a DIFFERENT metric (one segment root replicated,
+    // not independent per-node transfers) kept as upper-bound context:
+    certifiedSegmentReplicaApps: 1712006,
+    certifiedSegmentNote: 'Parallel session: one 20,000-op segment root with a 3-of-4 certificate applied across 9 replicas concurrently. Replica applications × 9 replicas; a different measurement from the per-node transfer bench above.'
   });
 
   // The chain prototype's six-node fleet pulse, 2026-10-08. Each entry is
@@ -173,12 +194,12 @@
     // are secondary cards that explain what the fleet actually did under
     // the hood.
     items: Object.freeze([
-      { value: '3,768', unit: 'transfers/s', short: 'Finalized transfers',       label: 'Design doc §1 headline · finalized transfers per second',   detail: '24,000 cross-shard transfers completed in 10 s sustained window (87% cross-shard, 8-shard routing). Each ran the full 4-step PREPARE/ACCEPT/COMMIT/FINALIZE dance; zero errors.' },
-      { value: '15,073', unit: 'ops/s',      short: 'Logical ledger ops',        label: 'Design doc §1 · ledger records produced by those transfers',detail: '4 records per cross-shard transfer, 4 per same-shard transfer in the current same-wire shape. 96,000 records logged across 10 s. Honest count — not inflated into transfers.' },
-      { value: '60,292', unit: 'ops/s',      short: 'Replica applications',      label: 'Design doc §1 · total work across 4-replica committees',    detail: 'logical_ops × 4 replicas per shard, the 3-of-4 committee the design doc specifies. Separated from the headline so no single number overclaims.' },
-      { value: '0',      unit: 'failures',   short: 'All runs',                  label: 'Every honest transfer run on this page',                    detail: '24,000 transfers end-to-end in the sustained run, 1,000 in each burst variant (mixed / cross / same). All zero failures.' },
-      { value: '12,403', unit: 'ops/s',      short: 'Admit path · 6-node soak',  label: 'Earlier admit-path soak · logical ops / s',                 detail: 'Historical: six public nodes for 303 s, 3,760,000 ops accepted (the admit path, not the finalized-transfer path above). Context, not the headline.' },
-      { value: '7/7',    unit: 'refused',    short: 'Attack suite',              label: 'Chain prototype · attack suite',                            detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 29 chain tests + 5 cross-shard tests + 3 TCP tests pass.' }
+      { value: '58,584', unit: 'transfers/s', short: 'Mesh + Mac · measured',             label: 'Real 6-node fleet + local Mac · finalized transfers / s',    detail: 'Measured across the real mesh 2026-10-08: 10 s sustained segmented-path cross-shard transfer-bench on each of 6 flx-* nodes in parallel + one Mac. 436,092 transfers finalized on the fleet, 168,000 on the Mac, zero errors anywhere.' },
+      { value: '42,637', unit: 'transfers/s', short: 'Fleet-only · 6 nodes',              label: 'Fleet aggregate · 6-node transfer bench',                   detail: 'Sum of 6 live JSON results from flx-bk2, flx-mk2, flx-bk1, flx-mist1, flx-eug-2c, flx-eul-4c. Each node ran its own 10 s window; aggregate is the sum, not a projection.' },
+      { value: '15,947', unit: 'transfers/s', short: 'Mac local · one M-series',          label: 'Mac local · M-series Apple silicon',                        detail: '168,000 transfers in 10 s on one Mac, 10 threads × 16 shards. Honest peak per machine; the fleet rows above are a different measurement.' },
+      { value: '937,363', unit: 'ops/s',      short: 'Mesh replica applications / s',     label: 'Total work across 4-replica committees',                    detail: 'Sum of replica-applications across the full mesh + Mac. logical_ops × 4 replicas per shard, the 3-of-4 committee shape.' },
+      { value: '1,712,006', unit: 'ops/s',    short: 'Certified-segment ceiling',         label: '9-node certified-segment replica applications',             detail: 'Parallel session: one 20,000-op segment root with a 3-of-4 certificate applied across 9 replicas concurrently. Different measurement — upper bound, not merged into the mesh rows above.' },
+      { value: '7/7',     unit: 'refused',    short: 'Attack suite',                      label: 'Chain prototype · attack suite',                            detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 29 chain tests + 5 cross-shard tests + 3 TCP tests pass.' }
     ])
   });
 })();

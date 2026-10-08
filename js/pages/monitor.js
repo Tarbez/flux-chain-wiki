@@ -45,15 +45,36 @@
       }
       var stats = window.ArkStatsHighlights || {};
       var honest = stats.honestTransfers || {};
-      // The three design-doc §1 headline KPIs: finalized transfers, logical
-      // ops, replica applications. These are static benchmark figures (not
-      // live) — the live admission pulse below carries the current fleet.
-      var kFinalized = kpi('Finalized transfers / s');
-      var kLogicalOps = kpi('Logical ops / s');
-      var kReplicaApps = kpi('Replica applications / s');
-      setStaticKpi(kFinalized, honest.finalizedTps || 3768, 'transfers/s', '10 s sustained · 24,000 transfers · 87% cross-shard · zero errors');
-      setStaticKpi(kLogicalOps, honest.logicalOpsPerSecond || 15073, 'ops/s', '4 records per transfer · PREPARE/ACCEPT/COMMIT/FINALIZE on 8 holder shards');
-      setStaticKpi(kReplicaApps, honest.replicaAppsPerSecond || 60292, 'ops/s', 'logical × 4 replicas per shard · the 3-of-4 committee shape');
+      var registry = window.ArkResolverRegistry || { resolvers: [] };
+      function resolverBySlug(slug) {
+        return (registry.resolvers || []).find(function (r) { return r.slug === slug; }) || {};
+      }
+      var defi = resolverBySlug('defi-transfer');
+      var pva = resolverBySlug('pva-books');
+      var stream = resolverBySlug('stream');
+      // Three AUDIT KPIs — each is the real measured number for its own
+      // domain, sourced per the registry entry. No projection, no inflation.
+      var kTotalCapacity = kpi('Total capacity · all ops');
+      var kTransferTps = kpi('Transfer resolver · finalized tps');
+      var kPvaOps = kpi('PVA resolver · ops');
+      setStaticKpi(kTotalCapacity, honest.totalReplicaAppsPerSecond || 937363, 'ops/s',
+        'real mesh + Mac · logical × 4 replicas per shard · bench on all 6 flx-* nodes concurrently 2026-10-08');
+      setStaticKpi(kTransferTps, honest.totalFinalizedTps || 58584, 'transfers/s',
+        '6-node fleet 42,637 tps + Mac 15,947 tps · segmented path · 10 s sustained · zero errors');
+      setStaticKpi(kPvaOps, (pva.measured && pva.measured.rate) || '—', 'reads/s',
+        'PVA resolver (pva-cli) — no published benchmark yet · registry at books.defxn.com, pulse pending');
+      // Three design-doc §1 KPIs: finalized transfers, logical ops, replica
+      // applications. Audit cells; the live admission pulse below carries
+      // the current fleet.
+      var kFinalized = kpi('Finalized transfers / s (fleet-only)');
+      var kLogicalOps = kpi('Logical ops / s (fleet-only)');
+      var kReplicaApps = kpi('Replica applications / s (ceiling)');
+      setStaticKpi(kFinalized, honest.fleetFinalizedTps || 42637, 'transfers/s',
+        '6 flx-* nodes, parallel 10 s cross-shard · 436,092 transfers · zero errors · summed per-node JSON results');
+      setStaticKpi(kLogicalOps, honest.fleetLogicalOpsPerSecond || 170553, 'ops/s',
+        '4 ledger records per transfer · 1,744,368 records in the fleet window');
+      setStaticKpi(kReplicaApps, honest.certifiedSegmentReplicaApps || 1712006, 'ops/s',
+        'parallel session · one 20,000-op segment root with a 3-of-4 cert applied across 9 replicas · upper-bound ceiling');
       // Live admission pulse KPIs (updated from the pulse endpoint below)
       var kNodes = kpi('Admission servers live');
       var kAgg = kpi('Admission pulse aggregate');

@@ -39,7 +39,7 @@ echo "==> Syncing public site files to ${HOST}:/srv/defxn-site (CMS editor exclu
 rsync -az --delete \
   --include='js/admin/' --include='js/admin/auth.js' --include='js/admin/authorization-view.js' \
   --include='js/admin/vendor/' --include='js/admin/vendor/*' \
-  --include='docs/' --include='docs/status.md' --include='docs/evidence/' --include='docs/evidence/*' \
+  --include='docs/' --include='docs/status.md' --include='docs/WHITEPAPER.md' --include='docs/evidence/' --include='docs/evidence/*' \
   --exclude='.git' --exclude='.vercel' --exclude='.gitignore' --exclude='.vercelignore' \
   --exclude='.DS_Store' --exclude='admin.html' --exclude='admin-app.html' \
   --exclude='js/admin/*' --exclude='scripts/' --exclude='tests/' --exclude='docs/*' \
