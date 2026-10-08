@@ -15,9 +15,9 @@ ArkUI.pageModules.zero = {
       heading.textContent = '';
       var mainLine = document.createElement('span');
       mainLine.className = 'home-headline-main';
-      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='What if agreement';
-      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent="didn't need";
-      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='a global chain?';
+      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='What if every identity';
+      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent='had';
+      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='its own chain?';
       mainLine.appendChild(lead);mainLine.appendChild(pivot);mainLine.appendChild(reveal);
       heading.appendChild(mainLine);
       heading.setAttribute('aria-label', headline);
@@ -60,20 +60,20 @@ ArkUI.pageModules.zero = {
 
     var lifecycle = document.createElement('nav');
     lifecycle.className = 'home-lifecycle';
-    lifecycle.setAttribute('aria-label', 'The agreement lifecycle');
+    lifecycle.setAttribute('aria-label', 'How one record joins the chain');
     var caption = document.createElement('p'); caption.className = 'home-lifecycle-caption';
-    caption.textContent = 'The agreement fabric'; lifecycle.appendChild(caption);
+    caption.textContent = 'The FXN chain'; lifecycle.appendChild(caption);
     var title = document.createElement('strong'); title.className = 'home-cycle-title';
-    title.textContent = 'Every step leaves a trace.'; lifecycle.appendChild(title);
-    var flow=ArkUI.buildAgreementFlow({stages:ArkUI.lifecycleStages,hrefFor:function(id){return pageHref('lifecycle/'+id);}});
+    title.textContent = 'Every record extends its own chain.'; lifecycle.appendChild(title);
+    var flow=ArkUI.buildChainFlow({hrefFor:pageHref});
     lifecycle.appendChild(flow.element);
     // One onward action, styled as a tile: what it is, then where it goes.
     var open = document.createElement('a'); open.className = 'home-lifecycle-all';
-    open.href = pageHref('lifecycle'); open.dataset.sceneLink = 'lifecycle';open.dataset.icon='arrow-right';
-    open.setAttribute('aria-label', 'Trace one agreement, end to end');
+    open.href = pageHref('resolvers'); open.dataset.sceneLink = 'resolvers';open.dataset.icon='arrow-right';
+    open.setAttribute('aria-label', 'See what each resolver reads from the chain');
     var openCopy = document.createElement('span'); openCopy.className = 'home-lifecycle-all-copy';
-    var openKicker = document.createElement('small'); openKicker.textContent = 'Full walkthrough';
-    var openLabel = document.createElement('span'); openLabel.textContent = 'Trace one agreement, end to end';
+    var openKicker = document.createElement('small'); openKicker.textContent = 'Resolvers';
+    var openLabel = document.createElement('span'); openLabel.textContent = 'See what each resolver reads from the chain';
     openCopy.appendChild(openKicker); openCopy.appendChild(openLabel); open.appendChild(openCopy);
     lifecycle.appendChild(open);
     el.appendChild(lifecycle);

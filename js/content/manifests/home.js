@@ -10,7 +10,7 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "Peer-to-peer agreement, all the way down"
+      "value": "One chain per identity, resolvers on top"
     },
     "EYEBROW": {
       "label": "Eyebrow",
@@ -22,13 +22,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "What if agreement didn't need a global chain?"
+      "value": "What if every identity had its own chain?"
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "DEFXN turns intent, terms, fulfillment, and receipts into one verifiable trail — without forcing every network into the same block order."
+      "value": "DEFXN gives every identity its own signed, append-only chain. The chain checks only grammar, signature and position; resolvers for transfers, books, markets and governance decide what a record means. Chains never wait on each other, so capacity grows as nodes join."
     },
     "STEP": {
       "label": "Label on the ring pill",

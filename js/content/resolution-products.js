@@ -20,7 +20,7 @@ var ArkResolutionProducts = (function () {
     authkit: { name: 'Auth Kit', status: 'ready', page: 'account', line: 'Your keys and recovery phrase, held by you. No password on a server.' },
     broker: { name: 'Identity broker', status: 'ready', page: null, line: 'Unlock once; every defxn site can ask that one identity to sign.' },
     wallet: { name: 'FXN and credits', status: 'building', page: 'account', line: 'Signed value transfers and usage credits. Balances start at genesis.' },
-    agreements: { name: 'Agreement fabric', status: 'ready', page: 'lifecycle', line: 'Partners agree terms, the work runs, both keep a signed receipt.' },
+    agreements: { name: 'Agreements resolver', status: 'ready', page: 'lifecycle', line: 'Each side signs terms, work and receipt on its own chain; the resolver links them.' },
     resolvers: { name: 'Resolvers', status: 'ready', page: 'resolver', line: 'Publish logic at an address so anyone can run it and get the same claim.' },
     explorer: { name: 'Mesh Explorer', status: 'ready', page: 'explorer', line: 'Read any public record on the mesh and check who signed it.' },
     networks: { name: 'Named networks', status: 'ready', page: 'deploy', line: 'Create or join a network by name; it grows as nodes join.' },

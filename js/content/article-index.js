@@ -2,10 +2,10 @@
 LearningContent.define([
   {
     "slug": "why-the-chain-was-retired",
-    "title": "Why the chain was retired",
+    "title": "From one chain to one per identity",
     "category": "BENCHMARKS / 001",
     "minutes": "7 MIN READ",
-    "summary": "Why project material describes replacing a block/validator design with the agreement fabric—and why the performance comparison remains unverified here."
+    "summary": "How the block chain gave way to the agreement fabric, and then to one grammar chain per identity, with the measurements behind the current design."
   },
   {
     "slug": "one-substrate-many-networks",

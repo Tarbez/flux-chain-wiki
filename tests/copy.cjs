@@ -18,7 +18,7 @@ for(const file of ['js/content/learnings.js','js/content/article-index.js','js/p
 // Home's other page scripts, as the catalog loads them: shared stats data and the
 // flow builder (stubbed: it draws an illustration and names no copy keys).
 vm.runInContext(fs.readFileSync('js/content/stats-highlights.js','utf8'),context);
-ArkUI.buildAgreementFlow=()=>({element:node(),restore(){},dispose(){}});
+ArkUI.buildChainFlow=()=>({element:node(),restore(){},dispose(){}});
 vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
 context.ArkUI.pageModules.zero.mount({appendChild(){}});
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);
@@ -56,7 +56,7 @@ assert.throws(()=>ArkCopy.resolve('DESIGN WITH DEPTH','RBODY_V1','eyebrow'),e=>/
 assert.throws(()=>ArkCopy.resolve('HOME.NOPE','RBODY_V1','text'),e=>/HOME\.NOPE.*no entry/.test(e.message)&&/manifests\/home\.js/.test(e.message));
 assert.throws(()=>ArkCopy.text('NOAREA.TITLE'),/no entry/);
 for(const words of ['Theory','HOME','home.title','DESIGN WITH DEPTH']) assert(!ArkCopy.isKey(words),words+' is words, not a key');
-assert.equal(ArkCopy.text('HOME.TITLE'),"What if agreement didn't need a global chain?");
+assert.equal(ArkCopy.text('HOME.TITLE'),"What if every identity had its own chain?");
 assert.throws(()=>ArkManifest.define({id:'Bad',title:'x',route:'/',group:'page',fields:{}}),/id must be/);
 assert.throws(()=>ArkManifest.define({id:'ok',title:'x',route:'/',group:'page',fields:{lower:{label:'l',kind:'line',value:'v'}}}),/capitals/);
 // The runtime is the one place patterns swap keys for words; every resolver that shows copy declares it.
