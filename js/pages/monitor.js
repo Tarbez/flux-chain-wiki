@@ -44,11 +44,17 @@
         return { num: n, unit: u, detail: d, tile: t };
       }
       var stats = window.ArkStatsHighlights || {};
-      var certifiedFleet = stats.certifiedFleet || {};
-      var kCertified = kpi('Combined certified capacity');
-      var kLogical = kpi('All-replica logical rate');
-      setStaticKpi(kCertified, certifiedFleet.combined || 1712006, 'replica-apps/s', '8 VPS replicas + local · same root · 3-of-4 certificate');
-      setStaticKpi(kLogical, certifiedFleet.allReplicaLogical || 61398, 'ops/s', 'bounded by the slowest of all 9 required replicas');
+      var honest = stats.honestTransfers || {};
+      // The three design-doc §1 headline KPIs: finalized transfers, logical
+      // ops, replica applications. These are static benchmark figures (not
+      // live) — the live admission pulse below carries the current fleet.
+      var kFinalized = kpi('Finalized transfers / s');
+      var kLogicalOps = kpi('Logical ops / s');
+      var kReplicaApps = kpi('Replica applications / s');
+      setStaticKpi(kFinalized, honest.finalizedTps || 3768, 'transfers/s', '10 s sustained · 24,000 transfers · 87% cross-shard · zero errors');
+      setStaticKpi(kLogicalOps, honest.logicalOpsPerSecond || 15073, 'ops/s', '4 records per transfer · PREPARE/ACCEPT/COMMIT/FINALIZE on 8 holder shards');
+      setStaticKpi(kReplicaApps, honest.replicaAppsPerSecond || 60292, 'ops/s', 'logical × 4 replicas per shard · the 3-of-4 committee shape');
+      // Live admission pulse KPIs (updated from the pulse endpoint below)
       var kNodes = kpi('Admission servers live');
       var kAgg = kpi('Admission pulse aggregate');
       var kEntries = kpi('Benchmark operations');

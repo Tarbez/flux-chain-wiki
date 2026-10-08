@@ -158,24 +158,27 @@
   });
 
   window.ArkStatsHighlights = Object.freeze({
+    honestTransfers: HONEST_TRANSFERS,
     chainFleet: CHAIN_FLEET,
     chainFleetSoak: CHAIN_FLEET_SOAK,
     localResolvers: LOCAL_RESOLVERS,
     certifiedFleet: CERTIFIED_FLEET,
     fleetRun: FLEET_RUN,
     measured: '2026-10-08',
-    scope: 'Current certified resolver measurements across 8 VPS replicas plus the local node',
-    scopeShort: '9-node certified resolver fleet',
-    // `items` powers the home-page status rail. First four rows are the
-    // CHOSEN direction (the chain prototype); the fabric row remains for
-    // the certified-finality production comparison.
+    scope: 'Three honest numbers (design doc §1): finalized transfers, logical ops, replica applications',
+    scopeShort: 'Finalized transfers · the headline',
+    // `items` powers the home-page status rail. The headline now follows
+    // the design doc's three-numbers rule: only `finalized transfers/s` is
+    // claimed as the user-visible rate. Logical ops/s and replica-apps/s
+    // are secondary cards that explain what the fleet actually did under
+    // the hood.
     items: Object.freeze([
-      { value: '1,712,006', unit: 'ops/s', short: 'Combined certified capacity', label: 'Nine replicas · summed certified resolver work', detail: 'Eight VPS nodes plus local concurrently applied the same 20,000-operation segment root with a 3-of-4 certificate: 180,000/180,000 replica applications, zero errors.' },
-      { value: '61,398', unit: 'ops/s', short: 'All-replica logical rate', label: 'Same segment committed by all nine replicas', detail: 'Logical replicated throughput is bounded by the slowest required replica; summed compute is not multiplied into logical operations.' },
-      { value: '812,268', unit: 'ops/s', short: 'Compact P2P segment', label: 'Content transport · two real local peers', detail: 'One 1,024-operation binary segment over TCP + Noise + Yamux in 1.26 ms. Transport/reconstruction rate, not accepted chain operations.' },
-      { value: '150.9', unit: 'bytes/op', short: 'Binary segment wire', label: 'No JSON and no outer hex wrapper', detail: 'Real-shaped 488-byte operations compact to 150.9 bytes/op: 6.47× below the former 976-byte W<hex> payload.' },
-      { value: '12,403', unit: 'ops/s', short: '6-node sustained', label: 'Latest measured public-fleet soak', detail: 'Historical production baseline: six public nodes for 303 seconds, 3,760,000 accepted and zero failures. It predates certified binary segment replication.' },
-      { value: '7/7',     unit: 'refused',    short: 'Attack suite',           label: 'Chain prototype · attack suite',                              detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 24 chain tests + 3 TCP tests pass.' }
+      { value: '3,768', unit: 'transfers/s', short: 'Finalized transfers',       label: 'Design doc §1 headline · finalized transfers per second',   detail: '24,000 cross-shard transfers completed in 10 s sustained window (87% cross-shard, 8-shard routing). Each ran the full 4-step PREPARE/ACCEPT/COMMIT/FINALIZE dance; zero errors.' },
+      { value: '15,073', unit: 'ops/s',      short: 'Logical ledger ops',        label: 'Design doc §1 · ledger records produced by those transfers',detail: '4 records per cross-shard transfer, 4 per same-shard transfer in the current same-wire shape. 96,000 records logged across 10 s. Honest count — not inflated into transfers.' },
+      { value: '60,292', unit: 'ops/s',      short: 'Replica applications',      label: 'Design doc §1 · total work across 4-replica committees',    detail: 'logical_ops × 4 replicas per shard, the 3-of-4 committee the design doc specifies. Separated from the headline so no single number overclaims.' },
+      { value: '0',      unit: 'failures',   short: 'All runs',                  label: 'Every honest transfer run on this page',                    detail: '24,000 transfers end-to-end in the sustained run, 1,000 in each burst variant (mixed / cross / same). All zero failures.' },
+      { value: '12,403', unit: 'ops/s',      short: 'Admit path · 6-node soak',  label: 'Earlier admit-path soak · logical ops / s',                 detail: 'Historical: six public nodes for 303 s, 3,760,000 ops accepted (the admit path, not the finalized-transfer path above). Context, not the headline.' },
+      { value: '7/7',    unit: 'refused',    short: 'Attack suite',              label: 'Chain prototype · attack suite',                            detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 29 chain tests + 5 cross-shard tests + 3 TCP tests pass.' }
     ])
   });
 })();
