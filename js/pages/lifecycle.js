@@ -6,7 +6,7 @@
     intent: {
       lead: 'Example: you ask someone to copy one named snapshot of a dataset.',
       heading: 'Say what you need.',
-      body: 'The client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. Later records can now refer to this request by CID instead of relying on a conversation or global queue position.',
+      body: 'The client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. It lands on the client’s own chain, admitted like any record, and later records can refer to it by CID instead of relying on a conversation or a shared queue.',
       note: 'What is still not true: no provider has committed, no work has occurred, and no result has been checked.',
       facts: [
         ['Who writes it', 'The client requesting replication.'],
@@ -54,7 +54,7 @@
     receipt: {
       lead: 'The checking participant records the outcome under the identified rules and authority.',
       heading: 'Read the checking decision.',
-      body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification without reconstructing a global block order.',
+      body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification across the participants’ own chains; the agreements resolver reads the links.',
       note: 'What is still not true: a receipt is not universal truth, legal finality, treasury settlement, or production-readiness evidence.',
       facts: [
         ['Who writes it', 'The participant responsible for the verification outcome.'],
@@ -118,7 +118,7 @@
       var illustration = ArkUI.el('figure', 'lifecycle-object');
       illustration.setAttribute('aria-label', 'Illustrative reference fabric, not a live agreement');
       var figureTop=ArkUI.el('div','lifecycle-fabric-top');
-      figureTop.appendChild(ArkUI.el('span','', 'AGREEMENT FABRIC'));
+      figureTop.appendChild(ArkUI.el('span','', 'AGREEMENTS RESOLVER'));
       figureTop.appendChild(ArkUI.el('span','', 'ILLUSTRATION'));
       illustration.appendChild(figureTop);
       var count=ArkUI.el('strong','lifecycle-fabric-count',id?String(index+1).padStart(2,'0'):'05');illustration.appendChild(count);
@@ -156,10 +156,10 @@
         el.dataset.depth = ['focus', 'context', 'reference'][depth];
         view.replaceChildren();
         if (depth === 0) {
-          view.appendChild(ArkUI.el('p', 'lifecycle-scenario', id ? copy.lead : 'A client asks a provider to replicate one named dataset snapshot. Signed records connect the request, terms, work, and policy-bound verification. Each stage answers a different question.'));
+          view.appendChild(ArkUI.el('p', 'lifecycle-scenario', id ? copy.lead : 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification. Each stage answers a different question.'));
           if (id) view.appendChild(ArkUI.el('p', 'story-result', copy.facts[2][1]));
         } else if (depth === 1) {
-          if(!id)view.appendChild(ArkUI.el('p', '', 'Each record refers to the preceding request or result by CID. You can follow this one agreement without reconstructing a global block order. Choose a stage to inspect what becomes true and what remains unproven.'));
+          if(!id)view.appendChild(ArkUI.el('p', '', 'Each record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.'));
           if (id) {
             var facts = ArkUI.el('div', 'lifecycle-facts'), choices = ArkUI.el('nav', ''); choices.setAttribute('aria-label', 'Inspect ' + stage.title);
             var factAnswer = ArkUI.el('p', '', copy.body); factAnswer.setAttribute('aria-live', 'polite');

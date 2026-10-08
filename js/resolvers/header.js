@@ -231,7 +231,7 @@ ArkUI.register('RHEADER_V1', {
     wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');
     var descriptor = document.createElement('span');
     descriptor.className = 'ark-brand-descriptor';
-    descriptor.textContent = 'AGREEMENT FABRIC';
+    descriptor.textContent = 'FXN CHAIN';
     descriptor.setAttribute('aria-hidden', 'true');
     lockup.appendChild(wordmark);
     lockup.appendChild(descriptor);

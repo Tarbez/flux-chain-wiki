@@ -56,7 +56,7 @@ assert.throws(()=>ArkCopy.resolve('DESIGN WITH DEPTH','RBODY_V1','eyebrow'),e=>/
 assert.throws(()=>ArkCopy.resolve('HOME.NOPE','RBODY_V1','text'),e=>/HOME\.NOPE.*no entry/.test(e.message)&&/manifests\/home\.js/.test(e.message));
 assert.throws(()=>ArkCopy.text('NOAREA.TITLE'),/no entry/);
 for(const words of ['Theory','HOME','home.title','DESIGN WITH DEPTH']) assert(!ArkCopy.isKey(words),words+' is words, not a key');
-assert.equal(ArkCopy.text('HOME.TITLE'),"What if agreement didn't need a global chain?");
+assert.equal(ArkCopy.text('HOME.TITLE'),"What if every identity had its own chain?");
 assert.throws(()=>ArkManifest.define({id:'Bad',title:'x',route:'/',group:'page',fields:{}}),/id must be/);
 assert.throws(()=>ArkManifest.define({id:'ok',title:'x',route:'/',group:'page',fields:{lower:{label:'l',kind:'line',value:'v'}}}),/capitals/);
 // The runtime is the one place patterns swap keys for words; every resolver that shows copy declares it.

@@ -5,12 +5,12 @@ ArkSEO.define({
   "site": {
     "name": "DEFXN",
     "baseUrl": "",
-    "defaultDescription": "See how DEFXN turns intent, terms, fulfillment, and receipts into one verifiable trail without forcing every network into the same block order."
+    "defaultDescription": "See how DEFXN gives every identity its own signed chain, checks only grammar and signatures, and lets resolvers give each record its meaning."
   },
   "pages": {
     "home": {
-      "title": "Agreement without a global chain — DEFXN",
-      "description": "See how DEFXN turns intent, terms, fulfillment, and receipts into one verifiable trail without forcing every network into the same block order.",
+      "title": "Every identity, its own chain — DEFXN",
+      "description": "See how DEFXN gives every identity its own signed chain, checks only grammar and signatures, and lets resolvers give each record its meaning.",
       "ogImage": "",
       "canonical": ""
     },
@@ -178,7 +178,7 @@ ArkSEO.define({
     },
     "depth": {
       "title": "Verifiable agreements — DEFXN",
-      "description": "Trace a signed agreement from intent to receipt without a global block order. Inspect the record links and the limits of current production evidence.",
+      "description": "Trace a signed agreement from intent to receipt across each party's own chain. Inspect the record links and the limits of current production evidence.",
       "ogImage": "",
       "canonical": ""
     },
@@ -324,7 +324,7 @@ ArkSEO.define({
   "articles": {
     "why-the-chain-was-retired": {
       "title": "",
-      "description": "Read the historical account of the move from a block chain to agreement execution. Treat performance claims as unverified without reproducible benchmark artifacts.",
+      "description": "How DEFXN went from one block chain, through the agreement fabric, to one grammar chain per identity, and which measurements back the current design.",
       "ogImage": "",
       "canonical": ""
     },

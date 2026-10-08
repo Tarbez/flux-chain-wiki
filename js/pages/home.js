@@ -15,9 +15,9 @@ ArkUI.pageModules.zero = {
       heading.textContent = '';
       var mainLine = document.createElement('span');
       mainLine.className = 'home-headline-main';
-      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='What if agreement';
-      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent="didn't need";
-      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='a global chain?';
+      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='What if every identity';
+      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent='had';
+      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='its own chain?';
       mainLine.appendChild(lead);mainLine.appendChild(pivot);mainLine.appendChild(reveal);
       heading.appendChild(mainLine);
       heading.setAttribute('aria-label', headline);
