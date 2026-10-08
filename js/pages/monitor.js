@@ -1,252 +1,205 @@
-/* /monitor: the real chain-fleet pulse. Production reads the raw HTTP pulse
-   through /api/fleet-pulse, the site's same-origin TLS boundary. LIVE values
-   come from the latest hourly self-bench, SESSION is this tab's received
-   history, and AUDITED values remain explicitly dated static evidence. */
+/* /monitor: the live fleet pulse, and nothing else.
+
+   Production reads the hourly self-bench through /api/fleet-pulse, the site's
+   same-origin TLS boundary (window.ArkPulseEndpoint may override it locally).
+   LIVE values come from the latest pulse; SESSION is what this tab has received
+   since it opened. Audited measurements are not repeated here: they are dated
+   evidence, not now, and live on /stats with their records. Shares the
+   dashboard styles in css/stats-dashboard.css. */
 (function () {
   'use strict';
-  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function href(key) { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key; }
+  var POLL_MS = 60000;
+  var STALE_MS = 2 * 60 * 60 * 1000;
 
-  function tile(cls, label) {
-    var t = el('article', 'stats-tile monitor-tile ' + (cls || ''));
-    if (label) t.appendChild(el('p', 'stats-tile-label', label));
-    return t;
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+  function href(key) { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key; }
+  function ago(ms) {
+    var min = Math.max(0, Math.round(ms / 60000));
+    if (min < 1) return 'just now';
+    if (min < 60) return min + ' min ago';
+    var h = Math.floor(min / 60), m = min % 60;
+    return h + ' h' + (m ? ' ' + m + ' min' : '') + ' ago';
+  }
+  function bar(share, cls) {
+    var track = el('span', 'dash-bar' + (cls ? ' ' + cls : '')), fill = el('span', 'dash-bar-fill');
+    fill.style.setProperty('--w', Math.max(2, Math.min(100, share * 100)).toFixed(1) + '%');
+    track.appendChild(fill); return track;
+  }
+  function stat(label) {
+    var t = el('article', 'dash-stat dash-span-3');
+    t.appendChild(el('p', 'dash-label', label));
+    var v = el('p', 'dash-stat-value'), n = el('strong', null, '–'), u = el('span', 'dash-unit', '');
+    v.appendChild(n); v.appendChild(u); t.appendChild(v);
+    var d = el('p', 'dash-stat-detail', 'waiting for pulse'); t.appendChild(d);
+    return { tile: t, num: n, unit: u, detail: d };
+  }
+  function section(title, note) {
+    var h = el('div', 'dash-section');
+    h.appendChild(el('h2', 'dash-section-title', title));
+    if (note) h.appendChild(el('p', 'dash-section-note', note));
+    return h;
   }
 
   ArkUI.pageModules.monitor = {
     mount: function (host) {
-      var page = el('section', 'ark-page task-page stats-page monitor-page');
+      var page = el('section', 'ark-page task-page stats-page stats-dash monitor-page');
       page.setAttribute('aria-labelledby', 'monitor-title');
-      var shell = el('div', 'stats-shell'), bento = el('div', 'stats-bento');
-      shell.appendChild(bento); page.appendChild(shell);
+      var shell = el('div', 'stats-shell dash-shell');
+      page.appendChild(shell);
 
-      // Hero — chain-prototype first. No dependency on the retired fabric
-      // fleet-status feed; the live surface below is the chain-fleet pulse.
-      var hero = tile('stats-hero monitor-hero');
-      var liveChip = el('span', 'monitor-live-chip', 'Connecting…');
-      hero.appendChild(liveChip);
-      var h1 = el('h1', null, 'Chain fleet monitor'); h1.id = 'monitor-title'; hero.appendChild(h1);
-      hero.appendChild(el('p', null, 'Certified resolver capacity across eight VPS replicas plus the local node, alongside the separate live admission pulse. Certified application and admission are different measured boundaries and remain labeled separately.'));
-      var links = el('div', 'stats-cta');
-      var refreshBtn = el('button', 'stats-monitor-link', 'Refresh now ↻'); refreshBtn.type = 'button';
-      links.appendChild(refreshBtn);
-      var statsLink = el('a', 'stats-monitor-link is-quiet', 'How fast, and why →'); statsLink.href = href('stats'); statsLink.dataset.sceneLink = 'stats';
-      links.appendChild(statsLink); hero.appendChild(links);
-      bento.appendChild(hero);
+      // Header ----------------------------------------------------------------------------------
+      var head = el('header', 'dash-head');
+      var copy = el('div', 'dash-head-copy');
+      copy.appendChild(el('p', 'dash-kicker', 'DEFXN · Live'));
+      var h1 = el('h1', 'dash-h1', 'Fleet monitor'); h1.id = 'monitor-title'; copy.appendChild(h1);
+      copy.appendChild(el('p', 'dash-lede', 'What every node in the roster did in the latest hourly self-bench, checked again every minute while this tab is open.'));
+      var toStats = el('a', 'dash-link', 'Audited measurements and production readiness →');
+      toStats.href = href('stats'); toStats.dataset.sceneLink = 'stats';
+      copy.appendChild(toStats);
+      head.appendChild(copy);
+      var status = el('div', 'dash-status'); status.setAttribute('role', 'status');
+      var pill = el('p', 'dash-pill', 'Checking fleet'); pill.dataset.state = 'loading';
+      var updated = el('p', 'dash-status-line', 'Waiting for the first pulse');
+      var next = el('p', 'dash-status-line is-quiet', '');
+      var refreshBtn = el('button', 'dash-refresh', 'Refresh'); refreshBtn.type = 'button';
+      status.appendChild(pill); status.appendChild(updated); status.appendChild(next); status.appendChild(refreshBtn);
+      head.appendChild(status);
+      shell.appendChild(head);
 
-      // KPI strip — big live numbers from the latest pulse
-      function kpi(label) {
-        var t = tile('stats-kpi monitor-kpi', label);
-        var v = el('p', 'stats-kpi-value'); var n = el('strong', null, '–'); var u = el('span', 'stats-kpi-unit', '');
-        v.appendChild(n); v.appendChild(u); t.appendChild(v);
-        var d = el('p', 'stats-kpi-detail', '…'); t.appendChild(d);
-        bento.appendChild(t);
-        return { num: n, unit: u, detail: d, tile: t };
-      }
-      var stats = window.ArkStatsHighlights || {};
-      var honest = stats.honestTransfers || {};
-      var registry = window.ArkResolverRegistry || { resolvers: [] };
-      function resolverBySlug(slug) {
-        return (registry.resolvers || []).find(function (r) { return r.slug === slug; }) || {};
-      }
-      var defi = resolverBySlug('defi-transfer');
-      var pva = resolverBySlug('pva-books');
-      var stream = resolverBySlug('stream');
-      // Three AUDIT KPIs — each is the real measured number for its own
-      // domain, sourced per the registry entry. No projection, no inflation.
-      var kTotalCapacity = kpi('Total capacity · all ops');
-      var kTransferTps = kpi('Transfer resolver · finalized tps');
-      var kPvaOps = kpi('PVA resolver · ops');
-      setStaticKpi(kTotalCapacity, honest.totalReplicaAppsPerSecond || 937363, 'ops/s',
-        'real mesh + Mac · logical × 4 replicas per shard · bench on all 6 flx-* nodes concurrently 2026-10-08');
-      setStaticKpi(kTransferTps, honest.totalFinalizedTps || 58584, 'transfers/s',
-        '6-node fleet 42,637 tps + Mac 15,947 tps · segmented path · 10 s sustained · zero errors');
-      setStaticKpi(kPvaOps, (pva.measured && pva.measured.rate) || '—', 'reads/s',
-        'PVA resolver (pva-cli) — no published benchmark yet · registry at books.defxn.com, pulse pending');
-      // Three design-doc §1 KPIs: finalized transfers, logical ops, replica
-      // applications. Audit cells; the live admission pulse below carries
-      // the current fleet.
-      var kFinalized = kpi('Finalized transfers / s (fleet-only)');
-      var kLogicalOps = kpi('Logical ops / s (fleet-only)');
-      var kReplicaApps = kpi('Replica applications / s (ceiling)');
-      setStaticKpi(kFinalized, honest.fleetFinalizedTps || 42637, 'transfers/s',
-        '6 flx-* nodes, parallel 10 s cross-shard · 436,092 transfers · zero errors · summed per-node JSON results');
-      setStaticKpi(kLogicalOps, honest.fleetLogicalOpsPerSecond || 170553, 'ops/s',
-        '4 ledger records per transfer · 1,744,368 records in the fleet window');
-      setStaticKpi(kReplicaApps, honest.certifiedSegmentReplicaApps || 1712006, 'ops/s',
-        'parallel session · one 20,000-op segment root with a 3-of-4 cert applied across 9 replicas · upper-bound ceiling');
-      // Live admission pulse KPIs (updated from the pulse endpoint below)
-      var kNodes = kpi('Admission servers live');
-      var kAgg = kpi('Admission pulse aggregate');
-      var kEntries = kpi('Benchmark operations');
-      var kErrors = kpi('Pulse errors');
+      // Live ------------------------------------------------------------------------------------
+      shell.appendChild(section('Latest pulse', 'Capacity from a short synthetic bench, not cumulative traffic.'));
+      var grid = el('div', 'dash-grid');
+      var kNodes = stat('Nodes online'), kRate = stat('Capacity now'), kOps = stat('Operations in bench'), kErr = stat('Errors');
+      kRate.tile.className += ' is-lead';
+      [kNodes, kRate, kOps, kErr].forEach(function (k) { grid.appendChild(k.tile); });
+      shell.appendChild(grid);
 
-      function setStaticKpi(k, value, unit, detail) {
-        k.num.textContent = Number(value).toLocaleString('en-US');
-        k.unit.textContent = unit;
-        k.detail.textContent = detail;
-      }
+      var nodesPanel = el('section', 'dash-panel dash-runs');
+      nodesPanel.appendChild(el('p', 'dash-label', 'Per node'));
+      var tableWrap = el('div', 'dash-table-wrap');
+      var empty = el('p', 'dash-empty', 'Loading the latest pulse…');
+      nodesPanel.appendChild(tableWrap); nodesPanel.appendChild(empty);
+      shell.appendChild(nodesPanel);
 
-      // Live chain-fleet pulse — polls bk2's /pulse.json every 60s and
-      // shows the real current fleet speed. The endpoint is configurable via
-      // window.ArkPulseEndpoint so the user can point /monitor at a local
-      // pulse they run themselves.
-      var PULSE_URL = window.ArkPulseEndpoint || ArkPulse.endpoint;
-      var pTile = tile('stats-span-12 monitor-pulse-tile', 'Live admission pulse · compatibility ingress');
-      pTile.appendChild(el('h2', null, 'What the configured admission roster is doing right now'));
-      pTile.appendChild(el('p', 'stats-tile-copy', 'The chain-prototype fleet runs a self-bench every hour from flx-bk2 and publishes the result through the monitor endpoint. Each row shows what that benchmark client observed while it fanned 16 chains × 50 operations at every node in parallel. The result is a fresh capacity sample, not a cumulative operation total. Local development uses the same /api/fleet-pulse route as production.'));
-      var pMeta = el('p', 'stats-tile-copy monitor-pulse-meta', 'Loading live pulse from ' + PULSE_URL + ' …');
-      pTile.appendChild(pMeta);
-      var pTable = el('div', 'stats-table-wrap');
-      pTile.appendChild(pTable);
-      var pSession = el('ol', 'monitor-pulse-history');
-      pTile.appendChild(el('h3', 'stats-sub-head', 'This tab\'s session history'));
-      pTile.appendChild(pSession);
-      bento.appendChild(pTile);
+      // Session -----------------------------------------------------------------------------------
+      shell.appendChild(section('This session', 'Every distinct pulse this tab has received. Close the tab and it is gone.'));
+      var sessionPanel = el('section', 'dash-panel');
+      var sessionList = el('ol', 'dash-bars monitor-session');
+      var sessionEmpty = el('p', 'dash-empty', 'No pulse received yet.');
+      sessionPanel.appendChild(sessionList); sessionPanel.appendChild(sessionEmpty);
+      shell.appendChild(sessionPanel);
 
-      var pulseHistory = [];
-      function setKpi(k, value, unit, detail) { k.num.textContent = value; k.unit.textContent = unit || ''; k.detail.textContent = detail || ''; }
-      function paintPulse(data, note) {
-        if (!data || !data.nodes) {
-          pMeta.textContent = note || 'Pulse not reachable yet. The feed updates hourly from bk2.';
-          pTable.innerHTML = '';
-          liveChip.textContent = 'Pulse offline'; liveChip.dataset.state = 'warn';
-          setKpi(kNodes, '–', '', 'waiting for pulse');
-          setKpi(kAgg, '–', 'ops/s', 'waiting for pulse');
-          setKpi(kEntries, '–', '', 'waiting for pulse');
-          setKpi(kErrors, '–', '', 'waiting for pulse');
-          return;
+      // Reading this page ---------------------------------------------------------------------------
+      shell.appendChild(section('Reading this page'));
+      var legend = el('ul', 'dash-ready-list');
+      [
+        ['Live', 'done', 'flx-bk2 benches every node in the configured roster each hour. Rows come from that data, so a registered node appears without a site release; nodes are not discovered automatically yet.'],
+        ['Session', 'partial', 'The history above is only what this tab received. The pulse changes hourly, so most sessions see one or two readings.'],
+        ['Audited', 'todo', 'Dated fleet runs (BENCH-004, -007, -008) describe those runs, not now. They are on /stats with their records, not here.']
+      ].forEach(function (r) {
+        var li = el('li', 'dash-ready-item'); li.dataset.state = r[1];
+        li.appendChild(el('span', 'dash-badge', r[0]));
+        var c = el('div'); c.appendChild(el('p', null, r[2])); li.appendChild(c);
+        legend.appendChild(li);
+      });
+      var legendPanel = el('section', 'dash-panel'); legendPanel.appendChild(legend);
+      shell.appendChild(legendPanel);
+
+      // Wiring ----------------------------------------------------------------------------------------
+      var history = [], lastPulse = null, nextAt = 0, timer = 0, inFlight = false, disposed = false;
+      function setStat(k, v, u, d) { k.num.textContent = v; k.unit.textContent = u || ''; k.detail.textContent = d || ''; }
+      function paintAge() {
+        if (lastPulse) updated.textContent = 'Measured ' + ago(Date.now() - lastPulse.measured_at_ms) + ' · ' + new Date(lastPulse.measured_at_ms).toLocaleTimeString();
+        if (nextAt) {
+          var s = Math.max(0, Math.round((nextAt - Date.now()) / 1000));
+          next.textContent = document.hidden ? 'Paused while this tab is hidden' : 'Next check in ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
         }
-        var when = new Date(data.measured_at_ms);
-        var ageMin = Math.max(0, Math.round((Date.now() - data.measured_at_ms) / 60000));
-        var ageLabel = ageMin < 1 ? 'just now' : ageMin === 1 ? '1 min ago' : ageMin + ' min ago';
-        var alive = data.nodes.filter(function (n) { return !n.error && n.qps > 0; }).length;
-        var total = data.nodes.length;
-        liveChip.textContent = alive + '/' + total + ' nodes · ' + ageLabel;
-        liveChip.dataset.state = alive === total ? 'ok' : 'warn';
-        setKpi(kNodes, alive + '/' + total, 'nodes', ageLabel);
-        setKpi(kAgg, Math.round(data.aggregate_qps || 0).toLocaleString('en-US'), 'ops/s', 'parallel across ' + alive + ' nodes');
-        setKpi(kEntries, (data.total_entries || 0).toLocaleString('en-US'), 'synthetic writes', 'benchmark completed in ' + (data.longest_ms || 0) + ' ms wall-clock');
-        setKpi(kErrors, data.errors || 0, 'since this pulse', data.errors ? 'see per-node rows below' : 'zero refusals');
-        pMeta.textContent = 'Measured ' + when.toLocaleString() + ' · ' + ageLabel + ' · pulling from ' + PULSE_URL;
+      }
+      function paintTable(data) {
         var sorted = data.nodes.slice().sort(function (a, b) { return (b.qps || 0) - (a.qps || 0); });
-        var maxQps = Math.max.apply(null, sorted.map(function (n) { return n.qps || 0; }).concat([1]));
-        var table = el('table', 'stats-table stats-table-wrapped monitor-pulse-table');
-        var head = el('thead'), headRow = el('tr');
-        ['Node', 'Addr', 'Ops / s', 'ok / total', 'Elapsed'].forEach(function (label) { headRow.appendChild(el('th', null, label)); });
-        head.appendChild(headRow); table.appendChild(head);
+        var max = Math.max.apply(null, sorted.map(function (n) { return n.qps || 0; }).concat([1]));
+        var table = el('table', 'dash-table monitor-table'), thead = el('thead'), hr = el('tr');
+        ['Node', 'Address', 'Ops/s', '', 'OK / total', 'Elapsed'].forEach(function (c) { var th = el('th', null, c); th.scope = 'col'; hr.appendChild(th); });
+        thead.appendChild(hr); table.appendChild(thead);
         var body = el('tbody');
         sorted.forEach(function (n) {
-          var row = el('tr', n.error ? 'is-warn' : null);
-          row.appendChild(el('td', null, n.name));
-          row.appendChild(el('td', null, n.addr));
-          if (n.error) {
-            var errorCell = el('td', null, 'error: ' + n.error); errorCell.colSpan = 3; row.appendChild(errorCell);
-            body.appendChild(row); return;
-          }
-          var w = Math.max(2, (n.qps / maxQps) * 100).toFixed(1);
-          var rateCell = el('td'), barWrap = el('div', 'monitor-bar-wrap'), bar = el('span', 'monitor-bar');
-          bar.style.setProperty('--w', w + '%'); barWrap.appendChild(bar); barWrap.appendChild(el('strong', null, Math.round(n.qps).toLocaleString('en-US'))); rateCell.appendChild(barWrap); row.appendChild(rateCell);
-          row.appendChild(el('td', null, n.ok + '/' + n.total)); row.appendChild(el('td', null, n.elapsed_ms + ' ms')); body.appendChild(row);
+          var tr = el('tr'); tr.dataset.state = n.error || !(n.qps > 0) ? 'down' : 'up';
+          var name = el('td'); var nh = el('span', 'dash-node-head'); nh.appendChild(el('span', 'dash-dot')); nh.appendChild(el('b', null, n.name)); name.appendChild(nh); tr.appendChild(name);
+          tr.appendChild(el('td', 'monitor-addr', n.addr));
+          if (n.error) { var e = el('td', 'dash-node-error', n.error); e.colSpan = 4; tr.appendChild(e); body.appendChild(tr); return; }
+          tr.appendChild(el('td', 'is-num', fmt(n.qps)));
+          var b = el('td', 'monitor-bar-cell'); b.appendChild(bar(n.qps / max, 'is-thin')); tr.appendChild(b);
+          tr.appendChild(el('td', null, fmt(n.ok) + ' / ' + fmt(n.total)));
+          tr.appendChild(el('td', null, fmt(n.elapsed_ms) + ' ms'));
+          body.appendChild(tr);
         });
-        var totalRow = el('tr', 'is-chosen'), totalLabel = el('td'); totalLabel.colSpan = 2; totalLabel.appendChild(el('strong', null, 'Fleet aggregate')); totalRow.appendChild(totalLabel);
-        var totalRate = el('td'); totalRate.appendChild(el('strong', null, Math.round(data.aggregate_qps).toLocaleString('en-US'))); totalRate.appendChild(document.createTextNode(' ops/s')); totalRow.appendChild(totalRate);
-        totalRow.appendChild(el('td', null, data.total_entries.toLocaleString('en-US'))); totalRow.appendChild(el('td', null, data.longest_ms + ' ms')); body.appendChild(totalRow);
-        table.appendChild(body); pTable.textContent = ''; pTable.appendChild(table);
+        table.appendChild(body);
+        tableWrap.textContent = ''; tableWrap.appendChild(table); empty.hidden = true;
       }
-      refreshBtn.addEventListener('click', function () { liveChip.textContent = 'Refreshing…'; tickPulse(); });
-      function pushSessionRow(data) {
-        if (!data || !data.measured_at_ms) return;
-        if (pulseHistory.some(function (h) { return h.measured_at_ms === data.measured_at_ms; })) return;
-        pulseHistory.unshift({ measured_at_ms: data.measured_at_ms, aggregate_qps: data.aggregate_qps, nodes: data.nodes.length, errors: data.errors });
-        pulseHistory = pulseHistory.slice(0, 12);
-        pSession.innerHTML = pulseHistory.map(function (h) {
-          return '<li><code>' + new Date(h.measured_at_ms).toLocaleTimeString() + '</code> · ' +
-            h.nodes + ' nodes · <strong>' + Math.round(h.aggregate_qps).toLocaleString('en-US') + '</strong> ops/s · ' +
-            h.errors + ' err</li>';
-        }).join('');
+      function paintSession() {
+        sessionList.textContent = '';
+        var max = Math.max.apply(null, history.map(function (h) { return h.aggregate_qps; }).concat([1]));
+        history.forEach(function (h) {
+          var li = el('li', 'dash-bars-row');
+          var name = el('p', 'dash-bars-name');
+          name.appendChild(el('b', null, new Date(h.measured_at_ms).toLocaleTimeString()));
+          name.appendChild(el('span', null, h.up + '/' + h.nodes + ' nodes · ' + h.errors + (h.errors === 1 ? ' error' : ' errors')));
+          li.appendChild(name); li.appendChild(bar(h.aggregate_qps / max)); li.appendChild(el('strong', 'dash-bars-value', fmt(h.aggregate_qps)));
+          sessionList.appendChild(li);
+        });
+        sessionEmpty.hidden = history.length > 0;
+      }
+      function paint(data) {
+        lastPulse = data;
+        var up = data.nodes.filter(function (n) { return !n.error && n.qps > 0; }).length, count = data.nodes.length;
+        var stale = Date.now() - data.measured_at_ms > STALE_MS;
+        var healthy = up === count && !data.errors && !stale;
+        pill.dataset.state = healthy ? 'ok' : 'warn';
+        pill.textContent = healthy ? 'All systems normal' : stale ? 'Pulse is stale' : up < count ? (count - up) + ' of ' + count + ' nodes down' : 'Errors in last bench';
+        setStat(kNodes, up + '/' + count, 'nodes', up === count ? 'every node in the roster answered' : (count - up) + ' did not answer');
+        setStat(kRate, fmt(data.aggregate_qps), 'ops/s', 'all nodes, ' + fmt(data.longest_ms) + ' ms wall clock');
+        setStat(kOps, fmt(data.total_entries), 'ops', 'synthetic writes in this bench');
+        setStat(kErr, fmt(data.errors), '', data.errors ? 'see the rows below' : 'zero refusals');
+        kErr.tile.dataset.state = data.errors ? 'warn' : 'ok';
+        paintTable(data);
+        if (!history.some(function (h) { return h.measured_at_ms === data.measured_at_ms; })) {
+          history.unshift({ measured_at_ms: data.measured_at_ms, aggregate_qps: data.aggregate_qps, nodes: count, up: up, errors: data.errors });
+          history = history.slice(0, 12);
+          paintSession();
+        }
+        paintAge();
+      }
+      function paintOffline(message) {
+        pill.dataset.state = 'down'; pill.textContent = 'Pulse unreachable';
+        if (lastPulse) { updated.textContent = 'Last good pulse ' + ago(Date.now() - lastPulse.measured_at_ms) + ' · latest check failed'; return; }
+        updated.textContent = 'No pulse received yet';
+        [kNodes, kRate, kOps, kErr].forEach(function (k) { setStat(k, '–', k.unit.textContent, 'no live value; nothing substituted'); });
+        tableWrap.textContent = ''; empty.hidden = false;
+        empty.textContent = 'The fleet pulse could not be reached (' + message + '). Nothing has been put in its place.';
+      }
+      function schedule() {
+        clearTimeout(timer); timer = 0;
+        if (disposed || document.hidden) { nextAt = 0; paintAge(); return; }
+        nextAt = Date.now() + POLL_MS; timer = setTimeout(tickPulse, POLL_MS);
       }
       function tickPulse() {
-        liveChip.textContent = 'Fetching pulse…'; liveChip.dataset.state = '';
-        var started = Date.now();
+        if (disposed || inFlight) return;
+        inFlight = true; refreshBtn.disabled = true;
         ArkPulse.get()
-          .then(function (result) { PULSE_URL = result.endpoint; paintPulse(result.data); pushSessionRow(result.data); })
-          .catch(function (e) {
-            var ms = Date.now() - started;
-            var msg = 'Pulse endpoint unreachable (' + ms + ' ms). ' + e.message +
-              '. URL: ' + PULSE_URL +
-              '. Public clients use the same-origin HTTPS proxy at ' + ArkPulse.endpoint + '.' +
-              ' Local operators may override window.ArkPulseEndpoint before load.';
-            paintPulse(null, msg);
-            liveChip.textContent = 'Pulse offline · ' + e.message; liveChip.dataset.state = 'warn';
-            console.error('[monitor] pulse fetch failed:', e, 'URL:', PULSE_URL);
-          });
+          .then(function (result) { if (!disposed) paint(result.data); })
+          .catch(function (e) { if (!disposed) paintOffline(e && e.message ? e.message : 'unknown error'); })
+          .then(function () { inFlight = false; refreshBtn.disabled = false; schedule(); });
       }
+      function onVisibility() { if (!document.hidden && !timer) tickPulse(); else paintAge(); }
+
+      refreshBtn.addEventListener('click', function () { clearTimeout(timer); timer = 0; tickPulse(); });
+      document.addEventListener('visibilitychange', onVisibility);
+      var pulseTimer = setInterval(paintAge, 1000);
       tickPulse();
-      var pulseTimer = setInterval(tickPulse, 60000);
-      page.arkDispose = function () { clearInterval(pulseTimer); };
 
-      // Chain model panel — resolver shape + live fleet state
-      var cTile = tile('stats-span-12 monitor-chain-tile stats-chosen', 'Chain model · the chosen direction');
-      cTile.appendChild(el('h2', null, 'Per-identity chains, certified segments, binary P2P'));
-      cTile.appendChild(el('p', 'stats-tile-copy', 'The current certified-resolver run applied one identical 20,000-operation segment on eight VPS replicas plus the local node. Every replica verified the same 3-of-4 certificate and root once, partitioned by holder, and applied in parallel: 180,000/180,000 replica applications with zero errors.'));
-      var cStats = el('ol', 'monitor-chain-stats');
-      [
-        ['Combined certified capacity', '1,712,006 replica-applications/s · 9 nodes', 'sum of measured resolver work across eight VPS nodes plus local'],
-        ['All-replica logical rate', '61,398 ops/s', 'same segment on every replica; bounded by the slowest required node'],
-        ['Synchronized replica work', '552,583 replica-applications/s', '180,000 applications divided by the slowest completion time'],
-        ['Certified segment identity', 'root 1399e321…31575 · 3-of-4', 'the exact same segment and certificate on every node'],
-        ['Sustained fleet rate', '12,403 ops/s · 6 nodes', '303 seconds under simultaneous load from one client'],
-        ['Hot chain admission', '51,065 ops/s · one local node', '20,000 independent holders; full operation verification'],
-        ['Certified chain apply', '276,395 ops/s · local node in fleet run', 'one root/quorum verification, then 8 holder shards'],
-        ['Compact P2P segment', '812,268 effective ops/s · two local peers', '1,024 operations in one binary signed envelope; transport/reconstruction, not admission'],
-        ['Compact wire size', '150.9 bytes/op', '6.47× below the former 976-byte W<hex> payload'],
-        ['5-minute accepted', '3,760,000 / 3,760,000', '235 batches across bk2, mk2, bk1, mist1, eug-2c and eul-4c; zero failures'],
-        ['Historical short peak', '79,654 ops/s', '38,400 operations in an 868 ms burst; dated evidence, not the sustained headline'],
-        ['Per-pair peak', '22,559 ops/s (bk2 → mk2, 128 chains)', '64,000 operations, 2,836 ms, server-side burst batching'],
-        ['Recovery slack', '~12x live admission', 'replay 279,149 vs hot write 22,559 — a lagging peer catches up faster than it falls behind'],
-        ['Fork gossip', 'cross-WAN propagation Ok', 'bk2 → mk2 Ok("fork") verified in same run'],
-        ['Replication mode', 'implemented, not in the public soak', 'the 12,403 ops/s run used LocalCache; K-of-N needs its own fleet rerun'],
-        ['One-million compute target', 'verified as summed resolver work', '1.712M replica-applications/s; broadcast and durable segment commit remain outside this measurement'],
-        ['Replay default', 'head-only signature + hash chain', '~10x strict (279,149 vs 27,268 ops/s)'],
-        ['TCP ingress', 'line-framed, <TAG>\\t<MANIFEST>\\n', 'chain_server::serve(addr), persistent-conn aware'],
-        ['Equivocation', 'self-signed fork evidence', 'receive_fork_evidence(a, b)'],
-        ['Auto broadcaster', 'push-on-detect to peer list', 'Broadcaster + on_fraud callback'],
-        ['Issuance policy', 'roster of allowed signers', 'IssuancePolicy::Roster { allowed }'],
-        ['Compaction', 'snapshot + prune_before', 'Payload::Snapshot, prune_before(g, pos)'],
-        ['IPFS pin sidecar', 'best-effort, 500 ms timeout', 'CHAIN_SERVER_PIN_URL opt-in; pin failure never rolls back admit'],
-        ['Receiver timeout', 'Refund by sender after D expires', 'Payload::Refund, M ≥ D enforced'],
-        ['Fraud count', 'frozen chains known to this node', 'ledger.fraud_count()'],
-        ['Chain heads', '(G, head_cid, length)', 'ledger.chain_heads()']
-      ].forEach(function (p) {
-        var li = el('li');
-        li.appendChild(el('b', null, p[0]));
-        li.appendChild(el('span', null, p[1]));
-        li.appendChild(el('code', null, p[2]));
-        cStats.appendChild(li);
-      });
-      cTile.appendChild(cStats);
-      cTile.appendChild(el('p', 'stats-tile-copy', 'The certified resolver fleet contains eight VPS replicas plus the local node. The live admission pulse still reads a configured roster; it does not yet discover arbitrary CLI nodes. A new node must publish a signed, reachable presence record before it can safely auto-join the monitor.'));
-      var cLink = el('a', 'stats-monitor-link', 'Open the design + measurements →'); cLink.href = href('stats/ledger'); cLink.dataset.sceneLink = 'stats/ledger';
-      cTile.appendChild(cLink);
-      bento.appendChild(cTile);
-
-      // How to read this page
-      var rTile = tile('stats-span-12 monitor-read-tile', 'Reading this page');
-      rTile.appendChild(el('h2', null, 'What is live, what is session, what is audited'));
-      var legend = el('ul', 'monitor-legend');
-      [['Live', 'The page checks bk2 every 60 seconds for the latest per-node roster and capacity sample. Rows are data-driven, so registered nodes appear without a UI release. A failed check leaves the last real sample with a staleness note.'],
-       ['Session', 'The pulse session history, trend lines and the histogram are real readings this tab received since it opened. Close the tab and they are gone.'],
-       ['Audited', 'The chain-model panel\'s per-pair, aggregate and replay figures are from the 2026-10-08 fleet runs. They describe those runs, not now — the live pulse above is what\'s current.'],
-       ['Not yet reviewed', 'No independent security audit has looked at the chain prototype. Behavior under adversarial partitions, long-running soak, and public-client traffic is not what this page measures.']
-      ].forEach(function (p) { var li = el('li'); li.appendChild(el('b', null, p[0])); li.appendChild(el('span', null, p[1])); legend.appendChild(li); });
-      rTile.appendChild(legend);
-      var story = el('a', 'stats-monitor-link is-quiet', 'Read how we got here →'); story.href = href('article/how-we-got-fast-and-what-we-got-wrong'); story.dataset.sceneLink = 'article/how-we-got-fast-and-what-we-got-wrong';
-      rTile.appendChild(story);
-      bento.appendChild(rTile);
-
+      page.arkDispose = function () { clearInterval(pulseTimer); clearTimeout(timer); disposed = true; document.removeEventListener('visibilitychange', onVisibility); };
       host.appendChild(page);
-
       return page;
     }
   };

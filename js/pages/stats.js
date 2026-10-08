@@ -85,9 +85,9 @@
     { state: 'partial', badge: 'Partial', title: 'Sustained load', text: 'A 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.' },
     { state: 'partial', badge: 'Partial', title: 'More than six nodes', text: 'Nine replicas applied one certified segment; the transfer benchmark has not run beyond six nodes.' },
     { state: 'partial', badge: 'Partial', title: 'Live node discovery', text: 'The pulse reads a configured roster; nodes that join are not discovered automatically yet.' },
-    { state: 'todo', badge: 'Not yet', title: 'K-of-N replication under load', text: 'Implemented and tested, but the fleet soak ran on the local cache. It has to be repeated with replication on.' },
+    { state: 'partial', badge: 'Partial', title: 'Evidence record for the headline run', text: 'Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.' },
+    { state: 'todo', badge: 'Not yet', title: 'K-of-N replication under load', text: 'Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
     { state: 'todo', badge: 'Not yet', title: 'Public client traffic', text: 'Every client so far was operator-driven.' },
-    { state: 'todo', badge: 'Not yet', title: 'Evidence record for the headline run', text: 'The 6-node transfer bench is summarized in the whitepaper, but its raw per-node output is not yet filed as a BENCH record.' },
     { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the chain prototype.' }
   ];
 
@@ -151,7 +151,7 @@
 
       var perNode = (HT.perNode || []).slice().sort(function (a, b) { return b.finalizedTps - a.finalizedTps; });
       var maxTps = Math.max.apply(null, perNode.map(function (n) { return n.finalizedTps; }).concat([1]));
-      var nodesRun = panel('dash-span-8', 'Per node · ' + (HT.windowSeconds || 10) + ' s window, all nodes at once', 'Finalized transfers per second');
+      var nodesRun = panel('dash-span-8', 'Per node · each node’s own ' + (HT.windowSeconds || 10) + ' s window', 'Finalized transfers per second');
       var runList = el('ol', 'dash-bars');
       perNode.forEach(function (n) {
         var li = el('li', 'dash-bars-row');
@@ -205,8 +205,9 @@
       thead.appendChild(hr); table.appendChild(thead);
       var tbody = el('tbody');
       [
-        ['Transfer bench', '6 nodes, cross-shard', fmt(HT.fleetFinalizedTps) + ' transfers/s', (HT.windowSeconds || 10) + ' s', fmt(HT.fleetErrors || 0), 'Whitepaper §5', WHITEPAPER],
+        ['Transfer bench', '6 nodes, cross-shard', fmt(HT.fleetFinalizedTps) + ' transfers/s', (HT.windowSeconds || 10) + ' s', fmt(HT.fleetErrors || 0), 'BENCH-008', 'docs/evidence/bench-008-six-node-transfer-bench.md'],
         ['Fleet soak', '6 nodes, one client', fmt(SOAK.averageQps || 12403) + ' records/s', Math.round(SOAK.durationSeconds || 303) + ' s', fmt(SOAK.failures || 0), 'BENCH-004', 'docs/evidence/bench-004-chain-fleet-soak.md'],
+        ['Replicated soak', '6 nodes, K-of-N on', 'planned', '≥ 300 s', '—', 'BENCH-009', 'docs/evidence/bench-009-replicated-fleet-soak.md'],
         ['Certified segment', (CERT.nodes || 9) + ' replicas, one ' + (CERT.quorum || '3-of-4') + ' certificate', fmt(CERT.combined || 1712006) + ' replica apps/s', fmt(CERT.operationsPerNode || 20000) + ' ops each', fmt(CERT.errors || 0), 'BENCH-007', 'docs/evidence/bench-007-nine-node-certified-resolver.md'],
         ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '—', 'Whitepaper §2', WHITEPAPER]
       ].forEach(function (r) {

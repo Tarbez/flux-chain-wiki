@@ -15,8 +15,8 @@ and the headline tps of each resolver is the resolver's number, not
 the chain's number.
 
 Our six-node public mesh, running the DeFi transfer resolver, measured
-**42,637 finalized cross-shard transfers per second** sustained for ten
-seconds across all nodes concurrently, zero errors. Adding one Mac
+**42,637 finalized cross-shard transfers per second**, each node
+sustaining a ten-second window, zero errors (BENCH-008). Adding one Mac
 locally pushes the total to **58,584 tps**. On a nine-node parallel
 measurement with certified-segment application, the mesh delivered
 **1,712,006 replica applications per second** against one 3-of-4
@@ -285,7 +285,7 @@ Honesty requires calling this out:
   describes K-of-N peer replication, and it is implemented and tested.
   The 303-second fleet soak (12,403 ops/s) ran with the local cache, not
   K-of-N acknowledgement; that run still has to be repeated with
-  replication on.
+  replication on (planned as BENCH-009).
 - **The soak is five minutes.** No 30-minute or longer soak has run
   across the full mesh, and every client so far was operator-driven,
   not public traffic.
@@ -307,8 +307,8 @@ TRANSFER_BENCH_MODE=segmented TRANSFER_BENCH_WINDOW_MS=10000 \
 ```
 
 For the fleet number, SSH to any flx-* node and run
-`/tmp/fleet-tx-bench.sh` which fans the same bench at all six nodes
-concurrently and sums.
+`/tmp/fleet-tx-bench.sh`, which runs the same bench on all six nodes and
+sums their results (BENCH-008 records the per-node output).
 
 For the certified-segment ceiling, run the `certified-node-bench`
 binary against the nine-node parallel-session configuration.
@@ -429,7 +429,7 @@ work is not finalized transfers; see §5.
 
 | Number | Value | Run | Date |
 |---|---:|---|---|
-| Finalized transfers/s, 6-node mesh | 42,637 | `/tmp/fleet-tx-bench.sh`, 10 s, cross-shard segmented, 6 nodes concurrent | 2026-10-08 |
+| Finalized transfers/s, 6-node mesh | 42,637 | `/tmp/fleet-tx-bench.sh`, 10 s per node, cross-shard segmented (BENCH-008) | 2026-10-08 |
 | Logical operations/s, 6-node mesh | 170,553 | Same run; four records per transfer | 2026-10-08 |
 | Replica applications/s, 6-node mesh | 682,213 | Same run; logical × 4 replicas per shard | 2026-10-08 |
 | Finalized transfers/s, one Mac (M-series, 10 cores) | 15,947 | `transfer-bench`, same settings | 2026-10-08 |

@@ -148,3 +148,12 @@
 @media (prefers-reduced-motion:reduce) {
   #scene .stats-dash * { animation:none !important; transition:none !important; }
 }
+
+/* /monitor (js/pages/monitor.js) reuses the dashboard; only its node table differs. */
+#scene .stats-dash .dash-head-copy .dash-link { justify-self:start; font-size:13px; }
+#scene .stats-dash .monitor-table td { vertical-align:middle; }
+#scene .stats-dash .monitor-table .dash-node-head { display:inline-flex; }
+#scene .stats-dash .monitor-table tr[data-state="down"] .dash-dot { background:hsl(var(--danger)); box-shadow:0 0 0 3px hsl(var(--danger-100)); }
+#scene .stats-dash .monitor-addr { font:500 11.5px var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); }
+#scene .stats-dash .monitor-bar-cell { width:28%; min-width:120px; }
+#scene .stats-dash .monitor-table td.dash-node-error { color:hsl(var(--danger)); }

@@ -187,15 +187,15 @@
     fleetRun: FLEET_RUN,
     measured: '2026-10-08',
     scope: 'Three honest numbers (design doc §1): finalized transfers, logical ops, replica applications',
-    scopeShort: 'Finalized transfers · the headline',
+    scopeShort: 'Six-node mesh · finalized transfers',
     // `items` powers the home-page status rail. The headline now follows
     // the design doc's three-numbers rule: only `finalized transfers/s` is
     // claimed as the user-visible rate. Logical ops/s and replica-apps/s
     // are secondary cards that explain what the fleet actually did under
     // the hood.
     items: Object.freeze([
-      { value: '58,584', unit: 'transfers/s', short: 'Mesh + Mac · measured',             label: 'Real 6-node fleet + local Mac · finalized transfers / s',    detail: 'Measured across the real mesh 2026-10-08: 10 s sustained segmented-path cross-shard transfer-bench on each of 6 flx-* nodes in parallel + one Mac. 436,092 transfers finalized on the fleet, 168,000 on the Mac, zero errors anywhere.' },
-      { value: '937,363', unit: 'ops/s',      short: 'Mesh replica applications / s',     label: 'Total work across 4-replica committees',                    detail: 'Sum of replica-applications across the full mesh + Mac. logical_ops × 4 replicas per shard, the 3-of-4 committee shape.' },
+      { value: '42,637', unit: 'transfers/s', short: 'Finalized transfers · 6-node mesh', label: 'Six-node public mesh · finalized transfers / s',          detail: 'BENCH-008, 2026-10-08: each of 6 flx-* nodes ran a 10 s segmented cross-shard transfer-bench window. 436,092 transfers finalized, zero errors. The fleet figure is the sum of the six node results.' },
+      { value: '682,213', unit: 'ops/s',      short: 'Replica applications / s',          label: 'Six-node mesh · replica applications / s',                  detail: 'Same run: 170,553 logical operations/s × 4 replicas per shard, the 3-of-4 committee shape. Total committee work, not transfers.' },
       { value: '1,712,006', unit: 'ops/s',    short: 'Certified-segment ceiling',         label: '9-node certified-segment replica applications',             detail: 'Parallel session: one 20,000-op segment root with a 3-of-4 certificate applied across 9 replicas concurrently. Different measurement — upper bound, not merged into the mesh rows above.' },
       { value: '7/7',     unit: 'refused',    short: 'Attack suite',                      label: 'Chain prototype · attack suite',                            detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 29 chain tests + 5 cross-shard tests + 3 TCP tests pass.' }
     ])

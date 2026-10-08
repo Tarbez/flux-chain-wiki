@@ -46,14 +46,14 @@
         shortSummary: 'Interprets the 4-step cross-shard atomic transfer: PREPARE reserves an input on the source chain, ACCEPT binds the output on the destination chain, COMMIT consumes the input, FINALIZE makes the output spendable. Timeouts clear reservations via Refund.',
         implementation: 'dense-wire::cross_shard',
         measured: Object.freeze({
-          label: 'Finalized transfers per second · real mesh + Mac local',
-          rate: 58584,
+          label: 'Finalized transfers per second · 6-node public mesh',
+          rate: 42637,
           unit: 'transfers/s',
-          source: 'Mesh: 6 flx-* nodes (bk2, mk2, bk1, mist1, eug-2c, eul-4c) each ran 10 s cross-shard segmented sustained window concurrently and summed = 42,637 tps. Mac local added 15,947 tps. Zero errors anywhere.',
+          source: 'BENCH-008: 6 flx-* nodes (bk2, mk2, bk1, mist1, eug-2c, eul-4c), each a 10 s cross-shard segmented window, summed = 42,637 finalized transfers/s. Zero errors.',
           secondary: Object.freeze([
-            { label: 'Mesh-only (6 nodes)', rate: 42637, unit: 'transfers/s' },
-            { label: 'Mesh + Mac · logical ops / s', rate: 234340, unit: 'ops/s' },
-            { label: 'Mesh + Mac · replica applications / s', rate: 937363, unit: 'ops/s' },
+            { label: 'Logical ops / s (6-node mesh)', rate: 170553, unit: 'ops/s' },
+            { label: 'Replica applications / s (6-node mesh)', rate: 682213, unit: 'ops/s' },
+            { label: 'One Mac, same bench (not fleet hardware)', rate: 15947, unit: 'transfers/s' },
             { label: 'Certified-segment ceiling (9-node parallel session)', rate: 1712006, unit: 'replica apps/s' }
           ])
         }),

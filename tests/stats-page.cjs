@@ -118,5 +118,16 @@ const S = context.ArkStatsHighlights;
   assert(monitor.includes('ArkPulse.get()') && !/Math\.random/.test(monitor), '/monitor reads the real feed');
   assert(/arkDispose\s*=\s*function\s*\(\)\s*\{\s*clearInterval\(pulseTimer\)/.test(monitor), '/monitor stops its timer on unmount');
 
+  vm.runInContext(fs.readFileSync('js/pages/monitor.js', 'utf8'), context);
+  pulseResult = Promise.reject(new Error('HTTP 502'));
+  host = new Node('main');
+  const mon = context.ArkUI.pageModules.monitor.mount(host);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(mon.find('dash-pill')[0].dataset.state, 'down', '/monitor shows an unreachable pulse as down');
+  for (const k of mon.find('dash-stat')) assert(k.textContent.includes('–'), '/monitor shows no number while offline');
+  assert(!/42,637|170,553|682,213/.test(mon.textContent), '/monitor repeats no audited figure as if it were live');
+  mon.arkDispose();
+  assert.equal(timers.size, 0, '/monitor clears its timers on unmount');
+
   console.log('PASS: /stats dashboard shows only pulse values live and nothing when offline, its audited numbers are derivable, it disposes cleanly, its links resolve, and the detail lives in the whitepaper.');
 })().catch((e) => { console.error(e); process.exit(1); });
