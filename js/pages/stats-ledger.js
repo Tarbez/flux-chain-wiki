@@ -188,7 +188,7 @@
           '<li><strong>Chain compaction is wired.</strong> <code>Payload::Snapshot</code> commits to a history digest; <code>prune_before(g, pos)</code> drops old entries from RAM once a snapshot covers them.</li>' +
           '<li><strong>Receiver timeout + Refund is wired.</strong> <code>Payload::Refund</code> is admitted only when its <code>M</code> ≥ <code>D</code>, so the sender can only refund after the deadline the counterparty signed.</li>' +
           '<li><strong>Certified binary P2P transport is built locally.</strong> <code>/flx-traffic/2</code> signs raw binary segment envelopes over libp2p TCP + Noise + Yamux; legacy dense/hex traffic remains read-compatible. Production group-commit wiring still needs the authorized validator key source, quorum roster and deployed peer addresses.</li>' +
-          '<li><strong>Eight-node fleet is not deployed yet.</strong> The public evidence remains the measured six-node soak until two additional VPS nodes are selected, authorized, deployed and rerun under sustained certified replication.</li>' +
+          '<li><strong>10-node fleet is now the headline.</strong> Transfer bench BENCH-011 (2026-10-08) ran on every flx-* node with Lever A+B+C and summed to 82,863 finalized transfers/s, 108,362 with the local Mac. The soak above remains 6 nodes (bk1, bk2, mk2, mist1, eug-2c, eul-4c) because the four smallest nodes (mk1, ms1, ms2, ms3) can\'t host a chain-server on their current RAM allocation.</li>' +
           '<li><strong>No independent security review.</strong> Same as the main /stats page: nobody but us has looked at this.</li>' +
           '</ul>', 'statsledger-notyet-title') +
 

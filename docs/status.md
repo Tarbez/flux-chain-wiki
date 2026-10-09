@@ -1,6 +1,10 @@
 # Capability status
 
-Observed: 2026-09-30. This matrix describes what the documentation audit could establish from the local source repositories. It is not a release announcement.
+Observed: 2026-10-08. This matrix describes what the documentation audit could establish from the local source repositories plus the running fleet. It is not a release announcement.
+
+## Current direction (2026-10-08)
+
+The agreement-fabric certified-finality production path has been **retired** as the headline path. The headline is now the **per-identity signed chain** (`LEDGERENTRY`, Y=1A) with K-of-N peer replication of certified segments, measured at **82,863 finalized transfers/s** across the 10 flx-* mesh nodes (BENCH-011; Levers A+B+C: TransferAtomic for same-shard, TransferSend/Receive for cross-shard, hot-path cleanup). Combined with one local Mac: **108,362 finalized tps**. The agreement-fabric status rows below describe surfaces that are kept for compatibility but are no longer the direction.
 
 ## Status vocabulary
 
@@ -21,11 +25,12 @@ Missing evidence is `Unverified`, not `Not built`.
 | Resolver publication | Partial | Addressable publication exists; publication does not prove deployed capacity. | CAP-004 |
 | Resolver deployment | Partial | Requires an admitted active provider with fresh capacity; host installation remains manual. | CAP-005 |
 | Agreement lifecycle | Partial | Intent through receipt is implemented; full production automation is not established. | CAP-006 |
-| Agreement-fabric inspection endpoints | Partial | Fixed endpoints are defined; public availability is unverified. | CAP-006 |
+| Agreement-fabric inspection endpoints | Retired | The agreement-fabric certified-finality path is no longer the headline direction; the per-identity signed chain replaces it. The old endpoints are kept read-only for compatibility. | CAP-006 |
+| Per-identity signed chain + certified-segment replication | Live | 82,863 finalized tps across 10 flx-* nodes, 108,362 tps including Mac; zero errors across 852,152 transfers (BENCH-011, 2026-10-08). | BENCH-011 |
 | Authority policy | Partial | Policy structure and thresholds exist; production activation is separate and unverified. | CAP-007 |
 | Independent production activation | Unverified | Required readiness, hostile-matrix, and signed-soak artifacts are not registered here. | CAP-008 |
 | Public repository URLs and packaged downloads | Unverified | No durable canonical public location was established in this audit. | CAP-009 |
-| Public benchmark results | Partial | Real local and real-fleet numbers exist for both the mesh value-object registry and the agreement-fabric quorum protocol; the registry's bulk-write path (10,000 transfers on the real fleet) did not complete and required a fix, verified only for writes, not transfers. | BENCH-001 |
+| Public benchmark results | Live | Three-numbers rule applied (finalized / logical / replica apps). Fleet BENCH-011 2026-10-08: 82,863 finalized transfers/s across all 10 flx-* nodes under Lever A+B+C, zero errors over 852,152 finalized transfers, 160,532 logical ops/s, 642,128 replica applications/s. Reproducible via `transfer-bench TRANSFER_BENCH_MODE=segmented-v3`. | BENCH-011 |
 
 Evidence record details are in the [registry](evidence/registry.md). Change a status only when that record is updated with a reproducible source or artifact.
 

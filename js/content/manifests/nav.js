@@ -48,6 +48,12 @@ ArkManifest.define({
       "section": "Header links",
       "value": "Stats"
     },
+    "MONITOR": {
+      "label": "Header link: live fleet monitor",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Monitor"
+    },
     "RESOLVER": {
       "label": "Header link: what is a resolver",
       "kind": "line",

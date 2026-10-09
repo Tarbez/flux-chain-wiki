@@ -1,14 +1,22 @@
 # Mainnet readiness: gap inventory
 
-Observed: 2026-10-07. Written after BENCH-003 (real fleet throughput ceiling,
-auto-join) closed with a real, audited number. This is not a release
-announcement — it is the list of what stands between tonight's benchmark
-state and something safe to call mainnet, organized so sequencing decisions
-can be made deliberately rather than discovered one incident at a time.
+Observed: 2026-10-07, substantively updated 2026-10-08. Written after
+BENCH-003 (real fleet throughput ceiling, auto-join) closed with a real,
+audited number. This is not a release announcement — it is the list of
+what stands between the current benchmark state and something safe to
+call mainnet, organized so sequencing decisions can be made deliberately.
 
 Updated 2026-10-07 (evening): a second front opened the same night, the
 registered-grammar wire prototype. It changes what the *throughput* gaps mean
 but closes none of the blocking ones; see "The wire prototype" below.
+
+Updated 2026-10-08: the wire prototype is now **the headline direction**,
+not a side front. BENCH-011 measured **82,863 finalized transfers/s** on
+the 10-node mesh (108,362 with Mac) under Lever A+B+C. The agreement-fabric
+certified-finality path mentioned below is retained read-only for
+compatibility but is no longer the throughput story. Where "fabric" or
+"certified fabric" appears below, it describes a retired production
+surface, not the current direction.
 
 Status vocabulary matches `docs/status.md`: `Live` (implemented and
 verified), `Partial` (implemented with a named missing boundary), `Not

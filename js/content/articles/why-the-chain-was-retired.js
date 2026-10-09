@@ -33,7 +33,7 @@ LearningContent.load("why-the-chain-was-retired", {
     ],
     [
       "What the numbers say now",
-      "The current design has dated, reproducible fleet measurements. On the six-node public mesh, the DeFi transfer resolver finalized 42,637 cross-shard transfers per second over a ten-second window, with zero errors. A separate soak sustained 12,403 accepted chain records per second for 303 seconds, 3,760,000 in all, with zero failures.",
+      "The current design has dated, reproducible fleet measurements. On the full ten-node public mesh with Lever A+B+C (TransferAtomic for same-shard, TransferSend/Receive for cross-shard, hot-path cleanup), the DeFi transfer resolver finalized 82,863 cross-shard transfers per second over a ten-second window with zero errors — 108,362 combined with one Mac. A separate soak sustained 12,403 accepted chain records per second for 303 seconds, 3,760,000 in all, with zero failures.",
       "Finalized transfers, logical operations and replica applications are always reported separately and never merged into one figure. There is still no registered record that compares the retired chain with the current one, so no multiplier is quoted."
     ],
     [

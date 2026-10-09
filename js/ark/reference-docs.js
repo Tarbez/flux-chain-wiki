@@ -8,6 +8,7 @@ ArkUI.referenceDocs = Object.freeze([
   "docs/evidence/bench-007-nine-node-certified-resolver.md",
   "docs/evidence/bench-008-six-node-transfer-bench.md",
   "docs/evidence/bench-009-replicated-fleet-soak.md",
+  "docs/evidence/bench-011-ten-node-lever-abc.md",
   "docs/evidence/cap-004-verification.md",
   "docs/evidence/fxn-speed-audit-v0.md",
   "docs/evidence/public-claim-inventory.md",

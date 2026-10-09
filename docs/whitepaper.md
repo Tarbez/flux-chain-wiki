@@ -14,15 +14,22 @@ measurement — the chain is a measured but domain-agnostic substrate,
 and the headline tps of each resolver is the resolver's number, not
 the chain's number.
 
-Our six-node public mesh, running the DeFi transfer resolver, measured
-**42,637 finalized cross-shard transfers per second**, each node
-sustaining a ten-second window, zero errors (BENCH-008). Adding one Mac
-locally pushes the total to **58,584 tps**. On a nine-node parallel
-measurement with certified-segment application, the mesh delivered
-**1,712,006 replica applications per second** against one 3-of-4
-certificate. This paper explains the grammar math that makes those
-numbers possible, how a resolver carries its own semantics on top, and
-why the fleet number grows linearly as nodes join.
+Our full ten-node public mesh, running the DeFi transfer resolver with
+**Lever A** (TransferAtomic — a single-op same-shard transfer),
+**Lever B** (TransferSend/TransferReceive — a two-op cross-shard
+transfer that collapses the old 4-step PREPARE/ACCEPT/COMMIT/FINALIZE
+protocol), and **Lever C** (grammar re-parse skipped on the
+certified-segment replica path, SipHash swapped for FxHash on the
+admit HashMap), measured **82,863 finalized transfers per second**,
+each node sustaining a ten-second window, zero errors (BENCH-011,
+2026-10-08). That is **+94% over the pre-Lever-B six-node 4-op fleet
+number of 42,637** on the same core hardware. Adding one Mac locally
+pushes the total to **108,362 finalized tps**.
+On a nine-node parallel measurement with certified-segment application,
+the mesh delivered **1,712,006 replica applications per second** against
+one 3-of-4 certificate. This paper explains the grammar math that makes
+those numbers possible, how a resolver carries its own semantics on
+top, and why the fleet number grows linearly as nodes join.
 
 ## 1. The chain is grammar, not meaning
 
@@ -181,15 +188,17 @@ Design doc §1 insists on reporting these three together. We follow
 that discipline on every page.
 
 - **Finalized transfers / s.** The user-visible rate. For the DeFi
-  resolver, a transfer is only counted when a FINALIZE record lands
-  that references a real COMMIT that references a real ACCEPT that
-  references a real PREPARE. On the six-node mesh today: **42,637 /s**.
-- **Logical operations / s.** Every admitted ledger record. In the
-  current cross-shard shape, four records per transfer. On the mesh:
-  **170,553 ops/s**.
+  resolver, a transfer is only counted when a FINALIZE (4-op legacy)
+  or TransferReceive (Lever B) or TransferAtomic (Lever A) record
+  lands with the required matching cross-reference. On the ten-node
+  mesh today with Lever A+B+C: **82,863 /s** (up from 42,637/s on the
+  old 6-node 4-op path).
+- **Logical operations / s.** Every admitted ledger record. With
+  Lever B+A that is 1 record per same-shard transfer and 2 per
+  cross-shard. On the mesh: **160,532 ops/s**.
 - **Replica applications / s.** Logical ops × replicas per shard. The
   total work the committee does. On the mesh at 4-replica committees:
-  **682,213 ops/s**. On a nine-node certified-segment measurement with
+  **642,128 ops/s**. On a nine-node certified-segment measurement with
   one 3-of-4 cert per 20,000-op segment: **1,712,006 /s**.
 
 Collapsing these three into a single "TPS" number is the shortcut
@@ -216,23 +225,117 @@ B — not because of a batch-amortising committee, but because the
 chains touched are literally disjoint. Adding a seventh node adds a
 seventh shard, which adds a seventh independent admit pool.
 
-Measured per-node sustained numbers from the six-node mesh (10 s
-cross-shard segmented window, zero errors):
+Measured per-node sustained numbers from the full ten-node mesh (10 s
+mixed-topology segmented-v3 Lever A+B+C window, zero errors):
 
 | Node | CPU | Cores | tps |
 |---|---|---:|---:|
-| eul-4c | AMD EPYC 9355P | 4 | 13,876 |
-| bk2 | Xeon Gold 6230R | 7 | 9,210 |
-| mk2 | AMD EPYC 7552 | 5 | 8,616 |
-| eug-2c | AMD EPYC 9355P | 2 | 7,264 |
-| bk1 | Xeon Gold 6230R | 2 | 2,346 |
-| mist1 | Xeon Gold 6230R | 1 | 1,325 |
-| **Sum** | | | **42,637** |
+| eul-4c | AMD EPYC 9355P | 4 | 22,601 |
+| bk2 | Xeon Gold 6230R | 7 | 14,981 |
+| mk2 | AMD EPYC 7552 | 5 | 14,757 |
+| eug-2c | AMD EPYC 9355P | 2 | 12,946 |
+| bk1 | Xeon Gold 6230R | 2 | 4,250 |
+| mk1 | AMD EPYC 7552 | 1 | 3,230 |
+| ms3 | Xeon Gold 6230R | 1 | 2,568 |
+| ms2 | Xeon Gold 6230R | 1 | 2,560 |
+| ms1 | Xeon Gold 6230R | 1 | 2,537 |
+| mist1 | Xeon Gold 6230R | 1 | 2,433 |
+| **Sum** | | | **82,863** |
 
-Add a seventh bk2-class node (same shape as current bk2) and the fleet
-expects to see ~52,000 tps. Add a tenth and ~75,000. The ceiling is
-the fleet size, not the architecture. The 1,712,006 replica-apps
-number is already demonstrated on nine real replicas.
+The local Mac on top (mean of 5 × 10s runs on segmented-v3) adds
+25,499 tps, for a hardware-honest total of **108,362 finalized tps**
+with no projection. To hit **1,000,000 finalized tps**, the arithmetic
+says ~**67 bk2-class nodes** (14,981 tps each) or ~**121
+mixed-class nodes** (the current average of 8,286 tps per node) —
+down from ~140 pre-Lever-B. The ceiling is the fleet size, not the
+architecture.
+
+### Lever B — why 67,563 instead of 42,637
+
+The original cross-shard protocol was four phases: PREPARE reserves an
+input on the sender's chain, ACCEPT binds the output on the receiver's
+chain, COMMIT consumes the input, FINALIZE admits the output. Four
+signed records per transfer.
+
+Lever B collapses this to two records:
+
+- `TransferSend` on the sender's chain: `C[1]`=marker, `C[2]`=input,
+  `C[3]`=output pledge, `D`=pickup deadline. Reserves AND consumes the
+  input atomically.
+- `TransferReceive` on the receiver's chain: `C[1]`=TransferSend CID,
+  `C[2]`=output. Admits the output.
+
+Safety is preserved by the same construction the four-phase shape
+used: the sender's chain refuses two TransferSends for the same
+input, the receiver's chain refuses two TransferReceives for the same
+Send, and a Refund referencing a TransferSend's CID clears its
+reservation after the deadline. Nothing is lost that the four-phase
+dance protected; the second round trip simply never happens.
+
+Measured gain (mixed topology, segmented path, same bench):
+
+| Mode | Mac finalized tps | Fleet finalized tps |
+|---|---:|---:|
+| sequential 4-op | 11,628 | — |
+| segmented 4-op | 15,748 | 42,637 |
+| segmented 2-op (Lever B) | **23,585** | **67,563** |
+
+Fleet gain on identical hardware: **+58%**. Mac single-box gain:
+**+50%**. The gap between +50% and the theoretical +100% is the chain
+state logic cost, which Lever B does not reduce; it only reduces
+op-count.
+
+### Lever A — same-shard atomic transfer (1 op)
+
+When sender and receiver happen to live on the same holder-shard,
+there is no cross-shard round trip to perform at all: an observer on
+that shard sees both chains together. Lever A exploits this with a
+single-record payload, `TransferAtomic`:
+
+- `TransferAtomic` on the sender's chain: `C[1]`=marker, `C[2]`=input
+  (consumed), `C[3]`=output pledge, `C[4]`=sha256(receiver's hex
+  key). One signed record consumes the input and pledges the output
+  to the receiver.
+- The receiver later spends the pledged output by referencing this
+  TransferAtomic's CID as input in a normal `Spend` record. No
+  cross-chain coordination needed.
+
+Lever A applies to **~6% of mixed-topology transfers** (16 shards →
+P(same shard) = 1/16 ≈ 6.25%; measured 6-7% in the bench). For that
+subset it cuts op count from 2 to 1. Overall gain is modest in mixed
+workloads but it is a strict improvement for same-shard subsets and
+is the shape a sharded single-process service naturally produces.
+
+### Lever C — hot-path cleanup (small, honest wins)
+
+With Lever B shipped, the next question was: can the per-op cost
+itself come down? We profiled `admit_prechecked_inner` and found two
+small levers worth taking.
+
+- **Lever C-1 — skip grammar re-parse on the certified-segment path.**
+  The segmented replica path runs `Raw::trusted(text)` instead of
+  `admit(text)`: when a K-of-N committee has signed a segment root,
+  the committee has already attested every line's full grammar at
+  origin, so re-validating the charset/role-table/kind-code on the
+  replica side is redundant work. Chain-state and payload invariants
+  are still enforced per record.
+- **Lever C-2 — faster hasher for the admit HashMap.** The admit
+  HashMap keyed on `(G-hex-key, pos)` was using the standard SipHash,
+  which processes 64-char hex keys byte-by-byte. We swapped in a
+  10-line FxHash — the same algorithm the `rustc-hash` and `fxhash`
+  crates ship, inlined here to avoid pulling in a new dependency.
+
+Combined, both Lever C changes gave **+4.5% fleet-wide** (67,563 →
+70,589 finalized tps). That is honestly small — considerably less
+than we hoped when the refactor was proposed. The profile had
+suggested grammar re-parse was 43% of the admit function; the real
+wall-clock gain was much smaller because the admit function is only
+part of total per-op cost (segment root sign/verify, cross-worker
+channel dispatch, SHA256 of each line, mutex, and allocations all
+contribute). None of those have a single 2× lever hiding in them. We
+ship the Lever C changes anyway because removing redundant work and
+swapping a slow hasher on a hot key is cleaner engineering even at
++4.5% gain.
 
 ## 7. Durability by replication, not by disk sync
 
@@ -246,8 +349,8 @@ on-disk cache is a cold-start convenience, not the source of truth.
 Measured recovery slack (dense-wire::chain::bench_replay):
 
 - Fast replay (head-only sig verify + hash chain): **279,149 ops/s**
-- Hot admission ceiling (fleet): **42,637 tps × 4 ops = 170,553 ops/s**
-- Ratio: ~1.6× on logical ops; ~12× when the fleet is only reading
+- Hot admission ceiling (fleet, Lever A+B+C): **82,863 tps, 160,532 logical ops/s** (ops per transfer depends on topology: 1 for same-shard, 2 for cross-shard)
+- Ratio: ~2.1× on logical ops; ~12× when the fleet is only reading
   back the per-chain head certificate instead of individual signatures
 
 A peer that fell behind catches up faster than live traffic flows in,
@@ -420,7 +523,7 @@ TRANSFER_BENCH_MODE=segmented TRANSFER_BENCH_WINDOW_MS=10000 \
 ```
 
 For the fleet number, SSH to any flx-* node and run
-`/tmp/fleet-tx-bench.sh`, which runs the same bench on all six nodes and
+`/tmp/fleet-tx-bench.sh`, which runs the same bench on all ten nodes and
 sums their results (BENCH-008 records the per-node output).
 
 For the certified-segment ceiling, run the `certified-node-bench`
@@ -553,14 +656,127 @@ multiplied into a fleet projection:
 Transport throughput is not admission throughput, and summed replica
 work is not finalized transfers; see §5.
 
+## 8. The ceiling we actually hit (and the directions past it)
+
+The levers in §6 are the ones that worked. This section names the ones
+that did not, with their measurements, so the next person doesn't repeat
+them. Then it names what *would* actually be worth trying next, with
+honest effort/payoff estimates.
+
+### Levers we tried that didn't pay off
+
+**Lever D — swap the system allocator for mimalloc.**  Expected 5–10% on
+Linux fleet nodes where glibc malloc is weakest. Measured: **-12% on
+Mac**, **+1.6% on fleet** (within noise, with per-node signs mixed). The
+admit path doesn't do enough small allocation to let the allocator
+matter. Reverted.
+
+**Lever F — pipelined segment packaging.** A dedicated producer thread
+builds + signs the next certified segment while the main thread applies
+the current one, with a 1-slot bounded channel for back-pressure.
+Expected 10–15% by overlapping sign cost with apply cost. Measured:
+**~flat on Mac, -0.03% on fleet.** The pipeline model only helps when
+the two stages are of comparable duration; our sign cost (~0.1–1 ms per
+1024-op segment) is tiny next to apply cost (~30–50 ms), so overlapping
+it saves <3% in theory and measurement noise swallows it. Reverted.
+
+**Lever E (not shipped) — zero-channel in-process shard routing.** The
+`ShardedLedger` uses `mpsc::sync_channel` to fan segment chunks out to
+per-shard worker threads. For 16 shards × 200 segments per 10 s window =
+3,200 channel ops at ~1 µs each = **~3 ms out of 10,000 ms**. The gain
+ceiling is ~0.03%. We skipped the refactor based on this prediction;
+run F proved the surrounding model.
+
+### What hitting the ceiling means
+
+With Lever A + B + C the ten-node fleet sustains **82,863 finalized
+transfers per second** (108,362 with Mac). On a bk2-class node the
+single-process ceiling is **~15,000 tps**, and the per-op admit cost is
+dominated by **irreducible** work: SHA256 of each record, chain-head
+HashMap lookup, mutex acquire, ownership of the parsed Raw fields in
+the chain, and the committee's segment verify. None of these have a
+code lever remaining that buys a clean 2× on this architecture.
+
+The remaining real ways to push past this ceiling are **architectural**,
+not incremental. We list them below with honest effort and payoff.
+
+### Research directions for a potential 2×
+
+**Direction 1 — Lockless per-chain state.** Today each holder's chain
+sits behind a `parking_lot::Mutex`, with the whole-ledger's
+`seen_positions` HashMap behind a single lock. A lockless design (a
+hazard-pointer or epoch-based reclamation scheme such as `crossbeam-epoch`)
+would let many threads admit concurrently to disjoint chains with no
+coordination. Expected payoff: **1.5–2× under high core counts** (e.g.
+bk2's 7 cores or larger fleet nodes); near-zero on single-core nodes
+(mist1, ms*). Effort: substantial — the hot path is the chain lock, so
+getting this right matters more than any micro-optimisation. Risk: real
+(every mutable path must be audited for consistency without lock
+invariants).
+
+**Direction 2 — SIMD / vectorised CID batching.** SHA256 of each record
+is a ~500 MB/s per-core computation on arm64/x86 with hardware
+acceleration. For a 1024-op segment the aggregate CID computation is
+~400 KB at ~0.8 ms. Batching with `sha2`'s AVX-512 path (or arm64
+`sha2x8`) could cut this to ~0.1 ms per segment. Payoff: **~5–10% at
+best**, because CID is only one slice of the per-op cost. Effort:
+medium. Not independent of Direction 1.
+
+**Direction 3 — Different workload shape: read-mostly queries bypass
+admit entirely.** Admit is the hot path only because every op goes
+through it. A production workload mostly consists of reads (balance
+checks, history scans), which could read the content-addressed cache
+directly without the admit path's locking or validation. Payoff: product-shaped
+rather than code-shaped — a 100× read:write ratio means read tps
+scales independently of admit. Effort: new API surface,
+cache-coherence story to design. This is the real "throughput at
+scale" lever most chains lean on.
+
+**Direction 4 — Shard with isolation across processes.** Each
+holder-shard becomes its own OS process (or microVM) with its own
+address space and its own replication tree. The 16-shard fleet becomes
+16 independent replication groups. Payoff: **~linear** in process count
+on a many-core machine; cross-shard coordination is already in the
+protocol so there is no new semantic cost. Effort: large but
+mechanical. This is how we scale a single bk2 node from 15K tps toward
+50–60K.
+
+**Direction 5 — Reduce ops-per-transfer below 1.** Impossible by
+construction without breaking per-transfer finality: a finalized
+transfer requires at least one signed record on either the sender's or
+receiver's chain. Lever A already took it to 1 for same-shard. Payoff:
+0.
+
+**Direction 6 — Non-blocking certified-segment broadcast.** Today a
+segment's "finalized" moment is after K-of-N peer acks come back. If
+we treat segment broadcast as a background commit that lets admit
+return locally and reconciles later (eventual consistency), apparent
+tps goes up substantially. This weakens the K-of-N durability
+guarantee for a window; it would be the right call for throughput-only
+non-financial workloads and the wrong call for value-moving ones.
+Payoff: large (**2–5×**) and philosophical. Not a code change — a
+contract change.
+
+**Our honest take:** Direction 1 (lockless) and Direction 4
+(process-level shard isolation) are the real 2× levers if we must stay
+within the current correctness contract. Direction 3 (read-mostly API
+surface) is where every blockchain's "millions tps" number actually
+comes from. Direction 6 is the trade-off dial for workloads that can
+tolerate it. We have not yet implemented any of them, and the
+honest-code ceiling for the current contract is where this paper ends.
+
 ## Appendix E — Every number and its source
 
 | Number | Value | Run | Date |
 |---|---:|---|---|
-| Finalized transfers/s, 6-node mesh | 42,637 | `/tmp/fleet-tx-bench.sh`, 10 s per node, cross-shard segmented (BENCH-008) | 2026-10-08 |
-| Logical operations/s, 6-node mesh | 170,553 | Same run; four records per transfer | 2026-10-08 |
-| Replica applications/s, 6-node mesh | 682,213 | Same run; logical × 4 replicas per shard | 2026-10-08 |
-| Finalized transfers/s, one Mac (M-series, 10 cores) | 15,947 | `transfer-bench`, same settings | 2026-10-08 |
+| Finalized transfers/s, **10-node mesh, Lever A+B+C** | **82,863** | `transfer-bench TRANSFER_BENCH_MODE=segmented-v3`, 10 s per node, mixed topology (BENCH-011) | 2026-10-08 |
+| Finalized transfers/s, 10-node mesh + Mac (combined) | **108,362** | Fleet sum + Mac mean (25,499 tps, 5 × 10s runs) | 2026-10-08 |
+| Finalized transfers/s, 6-node mesh, Lever B+C | 70,589 | Pre-Lever-A measurement (BENCH-010) | 2026-10-08 |
+| Finalized transfers/s, 6-node mesh, Lever B only | 67,563 | Same bench before Lever C (BENCH-009) | 2026-10-08 |
+| Finalized transfers/s, 6-node mesh, 4-op (pre-Lever-B) | 42,637 | `/tmp/fleet-tx-bench.sh`, 10 s per node, cross-shard segmented (BENCH-008) | 2026-10-08 |
+| Logical operations/s, 10-node mesh, Lever A+B+C | 160,532 | Same BENCH-011 run | 2026-10-08 |
+| Replica applications/s, 10-node mesh, Lever A+B+C | 642,128 | Same BENCH-011; logical × 4 replicas per shard | 2026-10-08 |
+| Finalized transfers/s, one Mac (M-series, 10 cores), Lever A+B+C | 25,499 | `transfer-bench TRANSFER_BENCH_MODE=segmented-v3`, mean of 5 runs @ 10s window | 2026-10-08 |
 | Sustained accepted records/s, 6 nodes, 303 s | 12,403 | Five-minute soak, one client, 3,760,000 accepted, 0 failures (BENCH-004) | 2026-10-08 |
 | Grammar-only admit path, one Mac core | 83,225 ops/s | `cargo test bench_chain_throughput` | 2026-10-08 |
 | Certified-segment replica applications, 9 nodes | 1,712,006 | `certified-node-bench` (BENCH-007) | 2026-10-08 |

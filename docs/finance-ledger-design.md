@@ -241,7 +241,7 @@ Each line below answers an item in `prototype-to-production.md`:
   `LEDGERENTRY` of type receive on the payee's chain. The spec letter is
   no longer load-bearing.
 - **§2.3 "A compatibility story for the live HTTP/JSON FXN registry"** —
-  unchanged. The chain is a new path next to the certified fabric; it
+  unchanged. The chain is now the headline path; the retired certified fabric is kept read-only for compatibility and it
   does not pretend to be a drop-in.
 
 ## 12. One decision owed from the owner before step 1

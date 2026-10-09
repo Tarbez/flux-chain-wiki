@@ -14,7 +14,7 @@ That separation makes a signed claim inspectable. A signature establishes who si
 
 ## What exists
 
-Source inspection establishes a miner daemon, a network CLI, identity and record commands, an agreement lifecycle, resolver definitions, and fixed agreement-fabric inspection endpoints. Some deployment and admission paths still require manual host installation, and independent production activation has not been established by this documentation audit.
+Source inspection establishes a miner daemon, a network CLI, identity and record commands, an agreement lifecycle, resolver definitions, and the per-identity signed chain (`LEDGERENTRY`, Y=1A) with K-of-N peer replication of certified segments. The chain path is the current direction; the earlier agreement-fabric certified-finality endpoints are retained read-only for compatibility. Measured fleet throughput at this writing: **82,863 finalized transfers/s across 10 flx-* nodes** (BENCH-011, 2026-10-08). Some deployment and admission paths still require manual host installation, and independent production activation has not been established by this documentation audit.
 
 See the dated [status matrix](status.md) for the exact boundary. See the [evidence registry](evidence/registry.md) for the source behind each statement.
 

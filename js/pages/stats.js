@@ -80,15 +80,15 @@
 
   // Readiness: each line names its state and the evidence behind it.
   var READINESS = [
-    { state: 'done', badge: 'Measured', title: 'Throughput on the public mesh', text: '42,637 finalized transfers/s across 6 nodes for 10 s, zero errors.' },
+    { state: 'done', badge: 'Code-path ceiling', title: 'Admit-path throughput (synthetic, not production)', text: '82,863 finalized transfers/s across all 10 flx-* nodes for 10 s with Lever A+B+C (TransferAtomic for same-shard, TransferSend/Receive for cross, hot-path cleanup); 108,362 tps combined with the local Mac. Each node benchmarks itself in-process — no network between nodes, no K-of-N replication latency, no external clients. The honest CPU ceiling of the admit code path, NOT real-user prod traffic. Zero errors.' },
     { state: 'done', badge: 'Passing', title: 'Attack suite', text: '7 of 7 attacks refused: replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation.' },
     { state: 'partial', badge: 'Partial', title: 'Sustained load', text: 'A 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.' },
-    { state: 'partial', badge: 'Partial', title: 'More than six nodes', text: 'Nine replicas applied one certified segment; the transfer benchmark has not run beyond six nodes.' },
+    { state: 'done', badge: 'Measured', title: 'Full 10-node transfer bench', text: 'BENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 finalized transfers.' },
     { state: 'partial', badge: 'Partial', title: 'Live node discovery', text: 'The pulse reads a configured roster; nodes that join are not discovered automatically yet.' },
     { state: 'partial', badge: 'Partial', title: 'Evidence record for the headline run', text: 'Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.' },
     { state: 'todo', badge: 'Not yet', title: 'K-of-N replication under load', text: 'Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
     { state: 'todo', badge: 'Not yet', title: 'Public client traffic', text: 'Every client so far was operator-driven.' },
-    { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the chain prototype.' }
+    { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain + certified-segment path.' }
   ];
 
   ArkUI.pageModules.stats = {
@@ -141,7 +141,7 @@
       shell.appendChild(live);
 
       // ---- audited baseline ---------------------------------------------------------------------
-      shell.appendChild(sectionHead('Audited baseline · ' + (HT.date || '2026-10-08'), 'The 6-node mesh run, reported as the three numbers the whitepaper requires together. Not live; re-run to update.'));
+      shell.appendChild(sectionHead('Audited baseline · ' + (HT.date || '2026-10-08'), 'The 10-node mesh run (BENCH-011, Lever A+B+C), reported as the three numbers the whitepaper requires together. Not live; re-run to update.'));
       var audited = el('div', 'dash-grid');
       [
         ['dash-span-4 is-lead', 'Finalized transfers / s', HT.fleetFinalizedTps, 'transfers/s', 'What users get. A transfer counts only once its FINALIZE lands on a real COMMIT, ACCEPT and PREPARE.'],
@@ -191,7 +191,7 @@
         soakList.appendChild(li);
       });
       soak.appendChild(soakList);
-      soak.appendChild(el('p', 'dash-note', 'One client, six nodes under shared load. Ran on the local cache, not K-of-N replication.'));
+      soak.appendChild(el('p', 'dash-note', 'One client, six nodes under shared load (2026-10-08 soak; the full 10-node bench is BENCH-011). Ran on the local cache, not K-of-N replication.'));
       audited.appendChild(soak);
       shell.appendChild(audited);
 
@@ -205,7 +205,7 @@
       thead.appendChild(hr); table.appendChild(thead);
       var tbody = el('tbody');
       [
-        ['Transfer bench', '6 nodes, cross-shard', fmt(HT.fleetFinalizedTps) + ' transfers/s', (HT.windowSeconds || 10) + ' s', fmt(HT.fleetErrors || 0), 'BENCH-008', 'docs/evidence/bench-008-six-node-transfer-bench.md'],
+        ['Transfer bench', '10 nodes, Lever A+B+C', fmt(HT.fleetFinalizedTps) + ' transfers/s', (HT.windowSeconds || 10) + ' s', fmt(HT.fleetErrors || 0), 'BENCH-011', 'docs/evidence/bench-011-ten-node-lever-abc.md'],
         ['Fleet soak', '6 nodes, one client', fmt(SOAK.averageQps || 12403) + ' records/s', Math.round(SOAK.durationSeconds || 303) + ' s', fmt(SOAK.failures || 0), 'BENCH-004', 'docs/evidence/bench-004-chain-fleet-soak.md'],
         ['Replicated soak', '6 nodes, K-of-N on', 'planned', '≥ 300 s', '—', 'BENCH-009', 'docs/evidence/bench-009-replicated-fleet-soak.md'],
         ['Certified segment', (CERT.nodes || 9) + ' replicas, one ' + (CERT.quorum || '3-of-4') + ' certificate', fmt(CERT.combined || 1712006) + ' replica apps/s', fmt(CERT.operationsPerNode || 20000) + ' ops each', fmt(CERT.errors || 0), 'BENCH-007', 'docs/evidence/bench-007-nine-node-certified-resolver.md'],

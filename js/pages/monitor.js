@@ -51,9 +51,26 @@
       // Header ----------------------------------------------------------------------------------
       var head = el('header', 'dash-head');
       var copy = el('div', 'dash-head-copy');
-      copy.appendChild(el('p', 'dash-kicker', 'DEFXN · Live'));
+      copy.appendChild(el('p', 'dash-kicker', 'DEFXN · Pre-production · Measured, not production'));
       var h1 = el('h1', 'dash-h1', 'Fleet monitor'); h1.id = 'monitor-title'; copy.appendChild(h1);
-      copy.appendChild(el('p', 'dash-lede', 'What every node in the roster did in the latest hourly self-bench, checked again every minute while this tab is open.'));
+      copy.appendChild(el('p', 'dash-lede', 'Two things on this page: the current audited CPU-ceiling bench (BENCH-011, 2026-10-08) across the full 10-node fleet with Lever A+B+C, and the live hourly self-bench of the 6 serving chain-server nodes. Both are synthetic. There is no production traffic on the chain-servers today beyond the hourly 4,800-op pulse, no independent security review, and no fiat value in motion. See the honest-status panel below.'));
+      // Honest "what this is / what it isn't" panel ---------------------------------------------
+      var honest = el('aside', 'dash-panel');
+      honest.setAttribute('aria-label', 'What these numbers are and are not');
+      honest.appendChild(el('p', 'dash-label', 'Is this production?'));
+      var hUl = el('ul', 'dash-ready-list');
+      [
+        ['No', 'warn', 'BENCH-011 is a per-node CPU ceiling. Each flx-* node ran transfer-bench in-process against its own CertifiedShardLedger for 10 s. The bench thread builds a signed record, hands it to the admit path, gets a CID back, counts it finalized. No network between nodes within the timed window.'],
+        ['No', 'warn', 'There are no external clients and no fiat value in motion. The deployed chain-servers currently accept only the hourly 4,800-op synthetic pulse — they are effectively idle. Real K-of-N peer-replication latency is not inside the 82,863 tps number.'],
+        ['Yes', 'done', 'The code paths exercised are real: Lever A/B record builders, grammar check, chain-state check, segment root hash + two Ed25519 signs, segmented replica apply. 44/44 lib tests pass. The ceiling is a reproducible, honest number for exactly what the bench measures.'],
+        ['Not yet', 'todo', 'Independent security review has not happened. The mainnet gate has not opened. See /mainnet-readiness for the inventory of what stands between this and something safe to call production.']
+      ].forEach(function (r) {
+        var li = el('li', 'dash-ready-item'); li.dataset.state = r[1];
+        li.appendChild(el('span', 'dash-badge', r[0]));
+        var c = el('div'); c.appendChild(el('p', null, r[2])); li.appendChild(c);
+        hUl.appendChild(li);
+      });
+      honest.appendChild(hUl);
       var toStats = el('a', 'dash-link', 'Audited measurements and production readiness →');
       toStats.href = href('stats'); toStats.dataset.sceneLink = 'stats';
       copy.appendChild(toStats);
@@ -66,11 +83,52 @@
       status.appendChild(pill); status.appendChild(updated); status.appendChild(next); status.appendChild(refreshBtn);
       head.appendChild(status);
       shell.appendChild(head);
+      shell.appendChild(honest);
+
+      // Current ceiling (audited BENCH-011) ------------------------------------------------------
+      var HT = (window.ArkStatsHighlights && window.ArkStatsHighlights.honestTransfers) || {};
+      shell.appendChild(section('Code-path ceiling · BENCH-011 · ' + (HT.date || '2026-10-08'), 'The audited CPU-ceiling of the current code path. Each flx-* node ran transfer-bench against its own in-process CertifiedShardLedger for 10 s; results summed. NOT production traffic, NOT a real-user-serving number, NOT K-of-N network-replication latency. The honest ceiling of this code path under ideal conditions.'));
+      var ceilGrid = el('div', 'dash-grid');
+      function ceilTile(label, value, unit, detail, lead) {
+        var t = el('article', 'dash-stat dash-span-3' + (lead ? ' is-lead' : ''));
+        t.appendChild(el('p', 'dash-label', label));
+        var v = el('p', 'dash-stat-value');
+        v.appendChild(el('strong', null, value));
+        v.appendChild(el('span', 'dash-unit', unit));
+        t.appendChild(v);
+        t.appendChild(el('p', 'dash-stat-detail', detail));
+        return t;
+      }
+      ceilGrid.appendChild(ceilTile('Fleet finalized transfers', fmt(HT.fleetFinalizedTps || 82863), 'tps', '10 flx-* nodes, segmented-v3 (TransferAtomic + TransferSend/Receive), zero errors across ' + fmt(HT.fleetFinalized || 852152) + ' finalized transfers.', true));
+      ceilGrid.appendChild(ceilTile('Fleet + Mac combined', fmt(HT.totalFinalizedTps || 108362), 'tps', 'Local Mac mean (' + fmt((HT.macLocal && HT.macLocal.finalizedTps) || 25499) + ' tps, 5 × 10s runs) added to the fleet sum. Hardware-honest, not a projection.'));
+      ceilGrid.appendChild(ceilTile('Logical operations / s', fmt(HT.fleetLogicalOpsPerSecond || 160532), 'ops/s', 'Every admitted ledger record. Lever A: 1 op per same-shard transfer. Lever B: 2 ops per cross-shard transfer.'));
+      ceilGrid.appendChild(ceilTile('Replica applications / s', fmt(HT.fleetReplicaAppsPerSecond || 642128), 'ops/s', 'Logical ops × 4 replicas per shard (the 3-of-4 committee shape). Total committee work, not transfers.'));
+      shell.appendChild(ceilGrid);
+
+      // Lever history mini-bar ----------------------------------------------------------
+      var leverPanel = el('section', 'dash-panel');
+      leverPanel.appendChild(el('p', 'dash-label', 'Lever history on this same fleet'));
+      var leverList = el('ul', 'dash-bars');
+      [
+        ['Pre-Lever-B · 4-op cross-shard', HT.previousFleetFinalizedTps || 42637, 6, 'BENCH-008'],
+        ['Lever B · 2-op TransferSend/Receive', HT.leverBFleetTps || 67563, 6, 'BENCH-009'],
+        ['Lever B+C · + hot-path cleanup', HT.leverCFleetTps || 70589, 6, 'BENCH-010'],
+        ['Lever A+B+C · + TransferAtomic + 4 new nodes', HT.leverABCFleetTps || 82863, 10, 'BENCH-011']
+      ].forEach(function (row) {
+        var max = HT.leverABCFleetTps || 82863;
+        var li = el('li', 'dash-bar-row');
+        var lab = el('span', 'dash-bar-label', row[0] + ' · ' + row[2] + ' nodes · ' + row[3]);
+        var num = el('span', 'dash-bar-num', fmt(row[1]) + ' tps');
+        li.appendChild(lab); li.appendChild(bar(row[1] / max)); li.appendChild(num);
+        leverList.appendChild(li);
+      });
+      leverPanel.appendChild(leverList);
+      shell.appendChild(leverPanel);
 
       // Live ------------------------------------------------------------------------------------
-      shell.appendChild(section('Latest pulse', 'Capacity from a short synthetic bench, not cumulative traffic.'));
+      shell.appendChild(section('Latest hourly pulse · 6 serving chain-servers', 'Hourly self-bench of the 6 chain-server nodes (bk1, bk2, mk2, mist1, eug-2c, eul-4c). This is HTTP write capacity, a different metric than the BENCH-011 finalized-transfers headline above. 4,800 synthetic ops per bench.'));
       var grid = el('div', 'dash-grid');
-      var kNodes = stat('Nodes online'), kRate = stat('Capacity now'), kOps = stat('Operations in bench'), kErr = stat('Errors');
+      var kNodes = stat('Serving nodes online'), kRate = stat('Pulse capacity'), kOps = stat('Operations in bench'), kErr = stat('Errors');
       kRate.tile.className += ' is-lead';
       [kNodes, kRate, kOps, kErr].forEach(function (k) { grid.appendChild(k.tile); });
       shell.appendChild(grid);
@@ -94,9 +152,9 @@
       shell.appendChild(section('Reading this page'));
       var legend = el('ul', 'dash-ready-list');
       [
-        ['Live', 'done', 'flx-bk2 benches every node in the configured roster each hour. Rows come from that data, so a registered node appears without a site release; nodes are not discovered automatically yet.'],
+        ['Live', 'done', 'flx-bk2 benches every node in the configured serving roster each hour. Rows come from that data. Today the serving roster is 6 chain-server nodes (bk1, bk2, mk2, mist1, eug-2c, eul-4c). The four smaller fleet nodes (mk1, ms1, ms2, ms3) ran the full BENCH-011 locally but do not host a chain-server yet — see /stats.'],
         ['Session', 'partial', 'The history above is only what this tab received. The pulse changes hourly, so most sessions see one or two readings.'],
-        ['Audited', 'todo', 'Dated fleet runs (BENCH-004, -007, -008) describe those runs, not now. They are on /stats with their records, not here.']
+        ['Audited', 'todo', 'Dated fleet runs (BENCH-004, -007, -011) describe those runs, not now. They are on /stats with their records, not here.']
       ].forEach(function (r) {
         var li = el('li', 'dash-ready-item'); li.dataset.state = r[1];
         li.appendChild(el('span', 'dash-badge', r[0]));

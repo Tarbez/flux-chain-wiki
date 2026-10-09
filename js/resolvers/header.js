@@ -246,6 +246,7 @@ ArkUI.register('RHEADER_V1', {
       ['NAV.HOW', 'deployment'],
       ['NAV.MESH', 'explorer'],
       ['NAV.STATS', 'stats'],
+      ['NAV.MONITOR', 'monitor'],
       ['NAV.ACCOUNT', 'account'],
       ['NAV.RUN', 'download']
     ].forEach(function (item) {
@@ -267,7 +268,7 @@ ArkUI.register('RHEADER_V1', {
         link.appendChild(accountLabel);
       }
       if (item[1] === 'download') link.classList.add('header-run-link');
-      if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',stats:'evidence',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
+      if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',stats:'evidence',monitor:'pulse',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
     });
     el.appendChild(core);
     function paintAccount(link) {

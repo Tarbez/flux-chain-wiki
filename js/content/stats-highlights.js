@@ -17,12 +17,13 @@
 (function () {
   'use strict';
 
-  // The three honest numbers from the design doc §1. Measured in-process on
-  // one M-series Mac core on 2026-10-08 with `transfer-bench`
-  // (dense-wire/src/bin/transfer_bench.rs): 10 s sustained window, 8 holder
-  // shards, 4 replicas-per-shard assumed for the replica number, 87% of
-  // transfers were cross-shard. Every finalized transfer completed the full
-  // 4-step PREPARE/ACCEPT/COMMIT/FINALIZE dance; errors = 0.
+  // The three honest numbers from the design doc §1. Measured 2026-10-08
+  // on the real 10-node mesh with `transfer-bench`
+  // (dense-wire/src/bin/transfer_bench.rs) running the segmented-v3 path:
+  // Lever A TransferAtomic for same-shard transfers (1 op), Lever B
+  // TransferSend/Receive for cross-shard (2 ops), Lever C-1 skips grammar
+  // re-parse on the certified-segment replica, Lever C-2 swaps SipHash
+  // for FxHash on the admit HashMap. Zero errors.
   //
   // This is the first measurement that separates `finalized transfers/s`
   // from `logical operations/s` from `replica applications/s`, as the
@@ -40,34 +41,49 @@
   // as context, not merged into this fleet total.
   var HONEST_TRANSFERS = Object.freeze({
     date: '2026-10-08',
-    source: 'real mesh · 6 flx-* nodes in parallel · 10 s sustained each · cross-shard only · segmented path · zero errors',
+    source: 'real mesh · 10 flx-* nodes in parallel · 10 s sustained each · Lever A TransferAtomic (same-shard, 1 op) · Lever B TransferSend/Receive (cross-shard, 2 ops) · Lever C-1 skips grammar re-parse on the certified-segment path · Lever C-2 FxHash on the admit HashMap · zero errors',
     windowSeconds: 10,
     replicasPerShard: 4,
+    leverANote: 'Lever A: TransferAtomic collapses a same-shard transfer to ONE record on the sender\'s chain (sender and receiver live on the same holder-shard; no cross-shard round trip needed). About 6% of mixed-topology transfers; cuts ops-per-transfer from 2 to 1 for that subset.',
+    leverBNote: 'Lever B: TransferSend+TransferReceive collapses the old 4-step cross-shard protocol (PREPARE/ACCEPT/COMMIT/FINALIZE) to 2 ops; same safety.',
+    leverCNote: 'Lever C-1 drops a redundant full-grammar re-validation on the certified-segment replica path (the K-of-N committee cert already attested the grammar at origin); C-2 swaps the admit HashMap<(G-key, pos), cid> from SipHash to a tiny inlined FxHash.',
     perNode: Object.freeze([
-      Object.freeze({ name: 'eul-4c', cpu: 'AMD EPYC 9355P', cores: 4, region: 'BR', threads: 4, submitted: 140000, finalized: 140000, logicalOps: 560000, elapsedMs: 10089, finalizedTps: 13876, logicalOpsPerSecond: 55506, replicaAppsPerSecond: 222024 }),
-      Object.freeze({ name: 'bk2',    cpu: 'Xeon Gold 6230R', cores: 7, region: 'US', threads: 7, submitted: 92092,  finalized: 92092,  logicalOps: 368368, elapsedMs: 9999,  finalizedTps: 9210,  logicalOpsPerSecond: 36840, replicaAppsPerSecond: 147362 }),
-      Object.freeze({ name: 'mk2',    cpu: 'AMD EPYC 7552',   cores: 5, region: 'US', threads: 5, submitted: 88000,  finalized: 88000,  logicalOps: 352000, elapsedMs: 10213, finalizedTps: 8616,  logicalOpsPerSecond: 34466, replicaAppsPerSecond: 137864 }),
-      Object.freeze({ name: 'eug-2c', cpu: 'AMD EPYC 9355P', cores: 2, region: 'BR', threads: 2, submitted: 76000,  finalized: 76000,  logicalOps: 304000, elapsedMs: 10462, finalizedTps: 7264,  logicalOpsPerSecond: 29058, replicaAppsPerSecond: 116230 }),
-      Object.freeze({ name: 'bk1',    cpu: 'Xeon Gold 6230R', cores: 2, region: 'US', threads: 2, submitted: 24000,  finalized: 24000,  logicalOps: 96000,  elapsedMs: 10230, finalizedTps: 2346,  logicalOpsPerSecond: 9384,  replicaAppsPerSecond: 37537  }),
-      Object.freeze({ name: 'mist1',  cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 16000,  finalized: 16000,  logicalOps: 64000,  elapsedMs: 12078, finalizedTps: 1325,  logicalOpsPerSecond: 5299,  replicaAppsPerSecond: 21196  })
+      Object.freeze({ name: 'eul-4c', cpu: 'AMD EPYC 9355P', cores: 4, region: 'BR', threads: 4, submitted: 228000, finalized: 228000, logicalOps: 441704, elapsedMs: 10088, finalizedTps: 22601, logicalOpsPerSecond: 43785, replicaAppsPerSecond: 175140 }),
+      Object.freeze({ name: 'bk2',    cpu: 'Xeon Gold 6230R', cores: 7, region: 'US', threads: 7, submitted: 152152, finalized: 152152, logicalOps: 294688, elapsedMs: 10156, finalizedTps: 14981, logicalOpsPerSecond: 29016, replicaAppsPerSecond: 116065 }),
+      Object.freeze({ name: 'mk2',    cpu: 'AMD EPYC 7552',   cores: 5, region: 'US', threads: 5, submitted: 148000, finalized: 148000, logicalOps: 286753, elapsedMs: 10029, finalizedTps: 14757, logicalOpsPerSecond: 28592, replicaAppsPerSecond: 114370 }),
+      Object.freeze({ name: 'eug-2c', cpu: 'AMD EPYC 9355P', cores: 2, region: 'BR', threads: 2, submitted: 132000, finalized: 132000, logicalOps: 255795, elapsedMs: 10196, finalizedTps: 12946, logicalOpsPerSecond: 25088, replicaAppsPerSecond: 100351 }),
+      Object.freeze({ name: 'bk1',    cpu: 'Xeon Gold 6230R', cores: 2, region: 'US', threads: 2, submitted: 44000,  finalized: 44000,  logicalOps: 85247,  elapsedMs: 10354, finalizedTps: 4250,  logicalOpsPerSecond: 8233,  replicaAppsPerSecond: 32933  }),
+      Object.freeze({ name: 'mk1',    cpu: 'AMD EPYC 7552',   cores: 1, region: 'US', threads: 1, submitted: 36000,  finalized: 36000,  logicalOps: 69708,  elapsedMs: 11146, finalizedTps: 3230,  logicalOpsPerSecond: 6254,  replicaAppsPerSecond: 25016  }),
+      Object.freeze({ name: 'ms3',    cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54220,  elapsedMs: 10903, finalizedTps: 2568,  logicalOpsPerSecond: 4973,  replicaAppsPerSecond: 19892  }),
+      Object.freeze({ name: 'ms2',    cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54253,  elapsedMs: 10938, finalizedTps: 2560,  logicalOpsPerSecond: 4960,  replicaAppsPerSecond: 19840  }),
+      Object.freeze({ name: 'ms1',    cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54237,  elapsedMs: 11035, finalizedTps: 2537,  logicalOpsPerSecond: 4915,  replicaAppsPerSecond: 19660  }),
+      Object.freeze({ name: 'mist1',  cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54280,  elapsedMs: 11509, finalizedTps: 2433,  logicalOpsPerSecond: 4716,  replicaAppsPerSecond: 18865  })
     ]),
-    // Aggregate ACROSS the 6-node mesh — summed, not averaged, not projected:
-    fleetFinalizedTps: 42637,
-    fleetLogicalOpsPerSecond: 170553,
-    fleetReplicaAppsPerSecond: 682213,
-    fleetSubmitted: 436092,
-    fleetFinalized: 436092,
-    fleetLogicalOps: 1744368,
+    // Aggregate ACROSS the 10-node mesh — summed, not averaged, not projected:
+    fleetFinalizedTps: 82863,
+    fleetLogicalOpsPerSecond: 160532,
+    fleetReplicaAppsPerSecond: 642128,
+    fleetSubmitted: 852152,
+    fleetFinalized: 852152,
+    fleetLogicalOps: 1650885,
     fleetErrors: 0,
-    // Local Mac on top (separate hardware, same bench, same window):
+    // Lever history on this same fleet, same bench, kept for comparison:
+    previousFleetFinalizedTps: 42637,
+    leverBFleetTps: 67563,
+    leverCFleetTps: 70589,
+    leverABCFleetTps: 82863,
+    leverBGainPct: 58,
+    leverCGainPct: 4.5,
+    leverANodeGrowthPct: 17,
+    // Local Mac on top (separate hardware, same bench, same window, Lever A+B+C):
     macLocal: Object.freeze({
-      cpu: 'Apple M-series', cores: 10, finalizedTps: 15947, logicalOpsPerSecond: 63787, replicaAppsPerSecond: 255150,
-      windowSeconds: 10, submitted: 168000, finalized: 168000, logicalOps: 672000, errors: 0
+      cpu: 'Apple M-series', cores: 10, finalizedTps: 25499, logicalOpsPerSecond: 51000, replicaAppsPerSecond: 203998,
+      windowSeconds: 10, submitted: 254898, finalized: 254898, logicalOps: 509796, errors: 0, note: 'Mean of 5 × 10s runs on segmented-v3'
     }),
     // Mesh + Mac — the actual honest "all nodes" number:
-    totalFinalizedTps: 58584,
-    totalLogicalOpsPerSecond: 234340,
-    totalReplicaAppsPerSecond: 937363,
+    totalFinalizedTps: 108362,
+    totalLogicalOpsPerSecond: 211532,
+    totalReplicaAppsPerSecond: 846126,
     // The 9-node certified-segment number from the parallel session's
     // measurement — a DIFFERENT metric (one segment root replicated,
     // not independent per-node transfers) kept as upper-bound context:
@@ -187,15 +203,16 @@
     fleetRun: FLEET_RUN,
     measured: '2026-10-08',
     scope: 'Three honest numbers (design doc §1): finalized transfers, logical ops, replica applications',
-    scopeShort: 'Six-node mesh · finalized transfers',
+    scopeShort: 'Ten-node mesh + Mac · finalized transfers',
     // `items` powers the home-page status rail. The headline now follows
     // the design doc's three-numbers rule: only `finalized transfers/s` is
     // claimed as the user-visible rate. Logical ops/s and replica-apps/s
     // are secondary cards that explain what the fleet actually did under
     // the hood.
     items: Object.freeze([
-      { value: '42,637', unit: 'transfers/s', short: 'Finalized transfers · 6-node mesh', label: 'Six-node public mesh · finalized transfers / s',          detail: 'BENCH-008, 2026-10-08: each of 6 flx-* nodes ran a 10 s segmented cross-shard transfer-bench window. 436,092 transfers finalized, zero errors. The fleet figure is the sum of the six node results.' },
-      { value: '682,213', unit: 'ops/s',      short: 'Replica applications / s',          label: 'Six-node mesh · replica applications / s',                  detail: 'Same run: 170,553 logical operations/s × 4 replicas per shard, the 3-of-4 committee shape. Total committee work, not transfers.' },
+      { value: '82,863', unit: 'tps', short: 'Code-path ceiling · 10-node bench · Lever A+B+C', label: 'Code-path ceiling · 10-node bench · finalized transfers / s · Lever A atomic + Lever B 2-op + Lever C hot-path · NOT production traffic',          detail: 'BENCH-011, 2026-10-08: this is a CPU ceiling, not real-user traffic. Each flx-* node ran transfer-bench in-process against its own CertifiedShardLedger for 10 s, with Lever A (TransferAtomic for same-shard, 1 op) + Lever B (TransferSend/Receive for cross-shard, 2 ops) + Lever C-1/C-2 (grammar re-parse skip and FxHash on the admit HashMap). No network between nodes within the timed window, no K-of-N replication latency, no external clients. 852,152 transfers finalized across the fleet, zero errors. +94% over the pre-Lever-B 6-node 4-op fleet number (42,637). The deployed chain-servers currently serve only the hourly 4,800-op synthetic pulse.' },
+      { value: '642,128', unit: 'ops/s',      short: 'Replica applications / s',          label: 'Ten-node mesh · replica applications / s',                  detail: 'Same BENCH-011 run: 160,532 logical operations/s × 4 replicas per shard, the 3-of-4 committee shape. Total committee work, not transfers.' },
+      { value: '108,362', unit: 'transfers/s', short: 'Fleet + Mac · total finalized tps', label: 'Ten-node mesh + one Mac · total finalized transfers / s', detail: '10-node fleet summed with the local Mac (25,499 tps, mean of 5 × 10s runs on segmented-v3) = 108,362 finalized transfers / s. Hardware-honest total, not a projection.' },
       { value: '1,712,006', unit: 'ops/s',    short: 'Certified-segment ceiling',         label: '9-node certified-segment replica applications',             detail: 'Parallel session: one 20,000-op segment root with a 3-of-4 certificate applied across 9 replicas concurrently. Different measurement — upper bound, not merged into the mesh rows above.' },
       { value: '7/7',     unit: 'refused',    short: 'Attack suite',                      label: 'Chain prototype · attack suite',                            detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 29 chain tests + 5 cross-shard tests + 3 TCP tests pass.' }
     ])

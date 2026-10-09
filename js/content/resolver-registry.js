@@ -40,20 +40,23 @@
         name: 'DeFi · cross-shard transfer resolver',
         role: 'resolver',
         domain: 'finance',
-        yCodes: ['1A w/ Payload=TransferPrepare/Accept/Commit/Finalize'],
+        yCodes: ['1A w/ Payload=TransferSend/Receive (Lever B), TransferAtomic (Lever A, same-shard), Prepare/Accept/Commit/Finalize (legacy 4-op)'],
         status: 'deployed',
         author: 'defxn.com',
-        shortSummary: 'Interprets the 4-step cross-shard atomic transfer: PREPARE reserves an input on the source chain, ACCEPT binds the output on the destination chain, COMMIT consumes the input, FINALIZE makes the output spendable. Timeouts clear reservations via Refund.',
+        shortSummary: 'Interprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-shard, 2 ops; the production path), and the legacy 4-op PREPARE/ACCEPT/COMMIT/FINALIZE (still accepted). Timeouts clear reservations via Refund.',
         implementation: 'dense-wire::cross_shard',
         measured: Object.freeze({
-          label: 'Finalized transfers per second · 6-node public mesh',
-          rate: 42637,
+          label: 'Finalized transfers per second · 10-node public mesh · Lever A+B+C',
+          rate: 82863,
           unit: 'transfers/s',
-          source: 'BENCH-008: 6 flx-* nodes (bk2, mk2, bk1, mist1, eug-2c, eul-4c), each a 10 s cross-shard segmented window, summed = 42,637 finalized transfers/s. Zero errors.',
+          source: 'BENCH-011 (2026-10-08): Lever A (TransferAtomic collapses same-shard transfers to 1 op) + Lever B (TransferSend/Receive collapses the old 4-step cross-shard protocol to 2 ops) + Lever C-1 (skip grammar re-parse on the certified-segment replica path) + Lever C-2 (FxHash on the admit HashMap). All 10 flx-* nodes (bk2, mk2, bk1, mist1, eug-2c, eul-4c, mk1, ms1, ms2, ms3) each ran a 10 s mixed-topology segmented-v3 window; summed = 82,863 finalized transfers/s. Zero errors. +94% over the pre-Lever-B 6-node 4-op path (42,637).',
           secondary: Object.freeze([
-            { label: 'Logical ops / s (6-node mesh)', rate: 170553, unit: 'ops/s' },
-            { label: 'Replica applications / s (6-node mesh)', rate: 682213, unit: 'ops/s' },
-            { label: 'One Mac, same bench (not fleet hardware)', rate: 15947, unit: 'transfers/s' },
+            { label: 'Logical ops / s (10-node mesh)', rate: 160532, unit: 'ops/s' },
+            { label: 'Replica applications / s (10-node mesh)', rate: 642128, unit: 'ops/s' },
+            { label: 'Fleet + Mac combined', rate: 108362, unit: 'transfers/s' },
+            { label: 'Lever B+C 6-node (prev measurement)', rate: 70589, unit: 'transfers/s' },
+            { label: 'Pre-Lever-B 6-node 4-op path', rate: 42637, unit: 'transfers/s' },
+            { label: 'One Mac, same bench (not fleet hardware)', rate: 25499, unit: 'transfers/s' },
             { label: 'Certified-segment ceiling (9-node parallel session)', rate: 1712006, unit: 'replica apps/s' }
           ])
         }),
@@ -125,9 +128,9 @@
         implementation: 'stream-cli (Node, @deadark/stream-cli · 3/3 tests passing)',
         measured: Object.freeze({
           label: 'Metadata path (chain-backed open/invite/close)',
-          rate: 42637,
+          rate: 82863,
           unit: 'records/s (bounded by chain)',
-          source: 'Resolver semantics tests pass (3/3). Metadata throughput is bounded by the chain layer\'s finalized-record admit path — 42,637 finalized records/s today on the real 6-node mesh. Packet transport over Reticulum/RNS not yet wired.'
+          source: 'Resolver semantics tests pass (3/3). Metadata throughput is bounded by the chain layer\'s finalized-record admit path — 82,863 finalized records/s today on the real 10-node mesh with Lever A + Lever B + Lever C. Packet transport over Reticulum/RNS not yet wired.'
         }),
         openIssues: [
           'Reticulum/RNS packet transport not yet integrated — HTTP fallback only',
