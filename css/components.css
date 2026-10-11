@@ -77,17 +77,17 @@
 /* choice -------------------------------------------------------------------- */
 #scene :is(
   .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
-  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
+  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row,.chain-case
 ) {
   background:transparent !important;background-image:none !important;border-color:hsl(var(--border-default)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
 }
 #scene :is(
   .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
-  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
+  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row,.chain-case
 ):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--reference-300)) !important;}
 #scene :is(
   .story-depth button,.about-layer,.resolutions-domain-tab,.source-step-choice,.deploy-step-choice,
-  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row
+  .stage-scene-choices button,.guided-step-picker button,.lifecycle-trail-item,.how-chapter-choice,.how-check-row,.chain-case
 ):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
   background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-400)) !important;color:hsl(var(--reference-700)) !important;
 }

@@ -26,7 +26,7 @@ These terms are canonical for public copy and operator documentation.
 
 **Replication receipt** — evidence that identified data or work was replicated under stated conditions.
 
-**Relational finality** — acceptance under identified relationships and rules; not universal truth.
+**Relational acceptance** — acceptance under identified relationships and rules; not universal truth. (Renamed 2026-10-10; the earlier term used retired vocabulary. Nothing accumulates toward acceptance here — a resolver shard signs, and the signature is the result.)
 
 **Named network** — currently a miner-presence namespace. It is not a security boundary, account namespace, identity namespace, DAO namespace, or authoritative membership list.
 

@@ -7,6 +7,11 @@
 #scene .stats-dash .dash-grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:12px; }
 #scene .stats-dash .dash-span-3 { grid-column:span 3; }
 #scene .stats-dash .dash-span-4 { grid-column:span 4; }
+/* A span with no rule here silently becomes ONE column of twelve and the panel
+   renders one word per line. Added 2026-10-10 when /resolver-math did exactly
+   that; tests/components.cjs now fails on any span a page uses and this file
+   does not define. */
+#scene .stats-dash .dash-span-6 { grid-column:span 6; }
 #scene .stats-dash .dash-span-8 { grid-column:span 8; }
 #scene .stats-dash .dash-span-12 { grid-column:1 / -1; }
 
@@ -132,7 +137,7 @@
 /* Responsive ----------------------------------------------------------------- */
 @media (max-width:1050px) {
   #scene .stats-dash .dash-span-3 { grid-column:span 6; }
-  #scene .stats-dash .dash-span-8, #scene .stats-dash .dash-span-4.dash-soak, #scene .stats-dash .dash-span-4.dash-deeper { grid-column:1 / -1; }
+  #scene .stats-dash .dash-span-8, #scene .stats-dash .dash-span-6, #scene .stats-dash .dash-span-4.dash-soak, #scene .stats-dash .dash-span-4.dash-deeper { grid-column:1 / -1; }
 }
 @media (max-width:720px) {
   #scene .stats-dash .dash-span-4 { grid-column:1 / -1; }
@@ -157,3 +162,13 @@
 #scene .stats-dash .monitor-addr { font:500 11.5px var(--mono-font,ui-monospace,monospace); color:var(--bento-faint); }
 #scene .stats-dash .monitor-bar-cell { width:28%; min-width:120px; }
 #scene .stats-dash .monitor-table td.dash-node-error { color:hsl(var(--danger)); }
+
+/* The AUDITED fleet headline strip, directly under Live. Visually distinct
+   from a live tile on purpose: these numbers are one dated fleet-wide run,
+   not re-measured on a timer, and must never look interchangeable with the
+   live admission figure above them. Reference ladder (not --primary, which
+   the live tile already owns) is this codebase's colour for "measured and
+   closed", established on /resolver-math. */
+#scene .stats-dash .dash-stat-audited { border-top:3px solid hsl(var(--reference-400)); }
+#scene .stats-dash .dash-stat-audited.is-lead { background:radial-gradient(120% 120% at 100% 100%,hsl(var(--reference-100)),transparent 65%),var(--bento-tile-raised); }
+#scene .stats-dash .dash-stat-audited.is-lead .dash-stat-value strong { color:hsl(var(--reference-700)); }

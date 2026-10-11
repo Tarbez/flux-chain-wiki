@@ -29,10 +29,12 @@ first implementation step.
 1. **What does "prod" mean for it?** A new path next to the certified fabric, a
    replacement for the live FXN registry on `bk2:18890`, or a private service for
    one product? Everything below changes with the answer. *DECISION*
-2. **Which finality does it promise?** Today it acks after one in-memory write:
-   accepted, not replicated, not flushed (a crash loses it). If it must be durable,
-   the replica path is a build item (§1.1), and the roughly 2.5x cost measured in
-   §11-12 returns. *DECISION*
+2. **What does it promise when it acks?** Today it acks after one in-memory
+   write: not replicated, not written anywhere (a crash loses it). Under the
+   current model the promise is simple — **a resolver shard signs the result and
+   that signature is the truth** — but a signed result nothing else holds is a
+   signed result one machine holds. Getting it onto replicas is a build item
+   (§1.1). *DECISION*
 3. **Who may issue value?** One genesis key signs every issuance, so one key is the
    whole monetary policy. Single key, a roster, or the existing ceremony code? *DECISION*
 4. **Does it stand beside the certified fabric or replace it?** The certified path has a
@@ -140,7 +142,7 @@ first implementation step.
   metrics, no alerting, no log rotation. The fleet monitor can poll a health route once
   one exists. *Not built*
 * **Shares machines with production.** `bk2`, `mk2`, `bk1` also run the certified
-  quorum. The prototype will take 90%+ of the CPU it is given, so it needs its own
+  path. The prototype will take 90%+ of the CPU it is given, so it needs its own
   cores or its own machines (the readiness doc's gap #1: no devnet). *READ*
 * **Deploy and rollback.** A scripted build on the target architecture (the Mac builds
   arm64; the fleet is x86_64), a previous-binary-by-path rollback, and a data
@@ -150,9 +152,11 @@ first implementation step.
 
 ### 2.2 Performance claims that must not travel
 
-* **24,908 transfers/s is accepted finality, on a prototype, with fleet machines as
-  clients.** It must never be quoted without that label next to 5,711-6,041/s
-  (certified, accepted) and 676-827/s (certified, durable). *MEASURED*
+* **24,908 transfers/s was measured on a prototype, with fleet machines as
+  clients, and nothing replicated.** It is a historical figure from the retired
+  direction and should not be quoted as a current capability at all. The current
+  measurement is BENCH-012: 256 swaps per batch auction, 8.920 ms batch latency,
+  180 bytes per signed result. *HISTORICAL*
 * Per-write latency under batching is hundreds of milliseconds (it is a throughput
   configuration). A latency target needs its own measurement. *MEASURED*
 * The numbers were taken with a dummy replica that is never contacted. A durable

@@ -23,20 +23,42 @@
 #scene .hero-alive[data-page="zero"] .home-promise::after {content:"";width:clamp(28px,4vw,62px);height:1px;background:linear-gradient(90deg,hsl(var(--primary-400)),transparent);}
 #scene .hero-alive[data-page="zero"] .ark-hero-eyebrow {display:none;}
 #scene .hero-alive[data-page="zero"] .ark-hero-title {max-width:none;margin:0 0 25px;color:hsl(var(--text-strong));font-weight:600;}
-#scene .hero-alive[data-page="zero"] .home-headline-main {display:block;font:600 clamp(62px,5.8vw,90px)/.9 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.065em;white-space:normal;}
-.home-headline-lead,.home-headline-pivot,.home-headline-network {display:block;width:fit-content;}
-.home-headline-lead {color:hsl(var(--text-strong));}
-.home-headline-pivot {color:hsl(var(--text));}
-.home-headline-network {position:relative;margin-top:10px;padding:2px 10px 8px 0;color:hsl(var(--primary));text-shadow:0 0 32px hsl(var(--primary-200));}
-.home-headline-network::before {content:"";position:absolute;z-index:-1;left:-18px;right:-12px;top:8%;bottom:2%;background:linear-gradient(90deg,hsl(var(--primary-100)),transparent 82%);border-left:2px solid hsl(var(--primary));}
-.home-headline-network::after {content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,hsl(var(--primary)),hsl(var(--primary-100)));transform-origin:left;animation:home-query-scan 3.8s cubic-bezier(.22,1,.36,1) both;}
+/* Three lines, three jobs, not one flat weight repeated three times: a
+   quiet setup, the full-strength statement, then a gradient-filled
+   payoff line that is visibly the biggest thing on the page instead of a
+   same-size line in a flat-colored box. Each line rises in on load so the
+   headline arrives instead of just appearing. */
+#scene .hero-alive[data-page="zero"] .home-headline-main {display:block;font:600 clamp(62px,5.8vw,90px)/.94 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.065em;white-space:normal;}
+.home-headline-lead,.home-headline-pivot,.home-headline-network {display:block;width:fit-content;opacity:0;animation:home-headline-in 680ms cubic-bezier(.22,.72,.22,1) both;}
+.home-headline-lead {font-size:.62em;font-weight:500;letter-spacing:-.03em;color:hsl(var(--text-muted));animation-delay:40ms;}
+.home-headline-pivot {margin-top:2px;color:hsl(var(--text-strong));animation-delay:140ms;}
+.home-headline-network {
+ position:relative;margin-top:14px;padding-bottom:10px;font-size:1.06em;animation-delay:260ms;
+ background:linear-gradient(100deg,hsl(var(--primary)) 10%,hsl(var(--primary-600)) 45%,hsl(var(--accent,var(--primary-400))) 75%,hsl(var(--primary)) 100%);
+ background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 0 28px hsl(var(--primary-200) / .6));
+ animation:home-headline-in 680ms cubic-bezier(.22,.72,.22,1) both,home-headline-sheen 7s ease-in-out 900ms infinite;
+}
+.home-headline-network::after {content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:linear-gradient(90deg,hsl(var(--primary)),hsl(var(--primary-100)));transform-origin:left;transform:scaleX(0);animation:home-query-scan 620ms cubic-bezier(.22,1,.36,1) 520ms both;}
 @keyframes home-query-scan {from{transform:scaleX(0);opacity:0;}to{transform:scaleX(1);opacity:1;}}
+@keyframes home-headline-in {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes home-headline-sheen {0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+@media(prefers-reduced-motion:reduce){
+ .home-headline-lead,.home-headline-pivot,.home-headline-network {opacity:1;animation:none;}
+ .home-headline-network::after {transform:scaleX(1);}
+}
 #scene .hero-alive[data-page="zero"] .home-headline-detail {display:block;max-width:26ch;margin-top:25px;font:400 clamp(23px,2.15vw,32px)/1.16 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.03em;color:hsl(var(--text));}
 #scene .hero-alive[data-page="zero"] .ark-hero-copy {max-width:55ch;margin:0;font:400 16px/1.58 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));text-wrap:pretty;}
-#scene .home-hero-actions {display:grid;grid-template-columns:repeat(2,minmax(210px,1fr));gap:10px;max-width:580px;margin-top:25px;}
-#scene :is(.home-primary-cta,.home-ghost-cta) {position:relative;display:flex;align-items:center;justify-content:flex-start;gap:16px;min-height:70px;padding:11px 14px 11px 17px;border:1px solid var(--home-rule);border-radius:2px;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;text-decoration:none;color:hsl(var(--text-strong));overflow:hidden;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s;}
+/* One dominant action, not a row competing for the same weight. Explore and
+   pressure-test are real audiences, not afterthoughts, but they read as the
+   secondary text links below -- css/components.css's "link" variant,
+   already shared with .home-status-link -- not a second and third CTA box. */
+#scene .home-hero-actions {display:flex;margin-top:25px;}
+/* A pill, not a sharp-cornered box: the teaser card, case tabs and micro
+   cards are all rounded now, and this was the one hard-edged rectangle
+   left on the page. */
+#scene :is(.home-primary-cta,.home-ghost-cta) {position:relative;display:flex;align-items:center;justify-content:flex-start;gap:16px;min-height:70px;padding:11px 26px 11px 28px;border:1px solid var(--home-rule);border-radius:999px;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;text-decoration:none;color:hsl(var(--text-strong));overflow:hidden;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s;}
 #scene .home-primary-cta {border-color:transparent;background:linear-gradient(110deg,var(--signal-primary),color-mix(in srgb,var(--signal-primary) 82%,white));color:hsl(var(--text-inverse)) !important;box-shadow:0 10px 34px hsl(var(--primary-200));}
-#scene .home-primary-cta::before {content:"";position:absolute;inset:0 auto 0 0;width:3px;background:hsl(var(--text-inverse) / .32);}
 #scene .home-primary-cta:hover {transform:translateY(-3px);box-shadow:0 16px 40px hsl(var(--primary-300));}
 #scene .home-ghost-cta {border-color:var(--signal-reference);background:linear-gradient(120deg,hsl(var(--reference-200)),hsl(var(--canvas) / .76));color:var(--signal-reference) !important;}
 #scene .home-ghost-cta::before {content:"";position:absolute;inset:9px auto 9px 0;width:1px;background:var(--signal-reference);box-shadow:0 0 14px hsl(var(--reference-400));}
@@ -48,8 +70,12 @@
 #scene :is(.home-primary-cta,.home-ghost-cta) .native-icon {order:2;flex:0 0 34px;width:34px;height:34px;box-sizing:border-box;margin-left:auto;padding:8px;border:1px solid currentColor;border-radius:50%;overflow:visible;}
 #scene .home-primary-cta .native-icon {color:hsl(var(--text-inverse));border-color:hsl(var(--text-inverse) / .28);}
 #scene .home-ghost-cta .native-icon {color:var(--signal-reference);border-color:hsl(var(--reference-400));}
-#scene .home-question-links {grid-column:1/-1;margin-top:1px;}
-#scene .home-question-links a {min-height:40px;font:500 11px/1.4 var(--mono-font,monospace);text-transform:uppercase;letter-spacing:.03em;color:hsl(var(--reference));}
+/* .ark-hero-body disables pointer-events by default (css/hero-motion.css)
+   and only re-enables it for specific descendants -- .home-hero-actions was
+   on that list, this sibling row was not, so the links rendered but every
+   click fell through to the page behind them. */
+#scene .home-question-links {display:flex;flex-wrap:wrap;gap:8px 26px;margin-top:16px;pointer-events:auto;}
+#scene .home-question-links a {display:inline-flex;align-items:center;gap:6px;min-height:32px;font:500 11px/1.4 var(--mono-font,monospace);text-transform:uppercase;letter-spacing:.03em;color:hsl(var(--reference));}
 #scene .home-lifecycle {
  position:relative;grid-column:2;grid-row:1;align-self:center;z-index:2;margin:0;padding:24px;
  border:1px solid hsl(var(--border-default));border-radius:9px;overflow:hidden;
@@ -65,7 +91,19 @@
 .home-cycle-records li {display:block;text-align:center;font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 #scene .home-lifecycle-all {position:static;display:flex;align-items:center;justify-content:flex-start;min-height:56px;margin-top:12px;padding:0;border-top:1px solid hsl(var(--border-subtle));font:500 14px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;color:hsl(var(--text-strong));}
 #scene .home-lifecycle-all .native-icon {margin-left:auto;order:1;}
-#scene .home-status-rail {grid-column:1/-1;grid-row:2;z-index:2;display:flex;gap:32px;padding-top:20px;margin:0;justify-content:space-between;border-top:1px solid hsl(var(--border-subtle));background:none;}
+/* A flex row with space-between silently overlapped its own labels once
+   the measured set grew past four items. A wrapping grid with a minimum
+   column and truncation cannot collide at any item count, which is the
+   fix — the home rail also shows only the leading few, because the rest
+   belong on /stats. */
+#scene .home-status-rail {grid-column:1/-1;grid-row:2;z-index:2;display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:14px 28px;padding-top:20px;margin:0;
+ border-top:1px solid hsl(var(--border-subtle));background:none;}
+#scene .home-status-item {min-width:0;}
+/* The label may truncate; the number never may. A measurement shown as
+   "643,632…" is not a measurement. */
+#scene .home-status-item small {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#scene .home-status-item strong {white-space:nowrap;}
 #scene .home-status-item {display:flex;flex-direction:column;align-items:start;gap:7px;}
 #scene .home-status-item small {font:500 11px/1.3 var(--mono-font,monospace);color:hsl(var(--text));letter-spacing:.03em;}
 #scene .home-status-item strong {font:600 12px/1.3 var(--mono-font,monospace);color:hsl(var(--text));letter-spacing:.02em;}
@@ -151,9 +189,7 @@
  #scene .hero-alive[data-page="zero"] .home-promise::after {display:none;}
  #scene .hero-alive[data-page="zero"] .home-headline-main {font-size:clamp(39px,11vw,52px);}
  #scene .hero-alive[data-page="zero"] .ark-hero-copy {font-size:14px;line-height:1.52;}
- #scene .home-hero-actions {grid-template-columns:minmax(0,1fr);max-width:none;}
- #scene .home-question-links {grid-column:1;}
- #scene :is(.home-primary-cta,.home-ghost-cta) {width:100%;box-sizing:border-box;}
+ #scene .home-primary-cta {width:100%;box-sizing:border-box;}
  #scene .home-lifecycle {padding:14px 15px 13px;}
  #scene .home-lifecycle-all {font-size:15px;}
 }
@@ -186,10 +222,97 @@
 #scene .home-lifecycle-all::after {content:none;}
 
 
-/* Desktop: the hero copy and the fabric panel share one top edge, and the pair
-   stays vertically centered between the header and the status rail. */
+/* The chain walkthrough now has its own page; Home keeps only a small
+   fraction of it (the compact origin the panel expands from) and no longer
+   needs a half-width column for it. The hero column centers instead. */
+#scene .hero-alive[data-page="zero"] .home-centered {text-align:center;}
+#scene .hero-alive[data-page="zero"] .home-centered .home-promise {justify-content:center;}
+#scene .hero-alive[data-page="zero"] .home-centered :is(.home-headline-lead,.home-headline-pivot,.home-headline-network) {margin-left:auto;margin-right:auto;}
+#scene .hero-alive[data-page="zero"] .home-centered .ark-hero-copy {margin-left:auto;margin-right:auto;}
+#scene .hero-alive[data-page="zero"] .home-centered .home-hero-actions {justify-content:center;}
+#scene .hero-alive[data-page="zero"] .home-centered .home-question-links {justify-content:center;}
+
+/* The teaser strip: five quiet dots, a tenth-scale hint of the real scene on
+   /chain. It is not the live animation; it only needs to be recognizable
+   before the panel expands and the full record-join sequence assembles on
+   arrival. */
+#scene .home-chain-teaser-strip {display:flex;gap:7px;margin:12px 0 0;}
+#scene .home-chain-teaser-strip span {width:7px;height:7px;border-radius:50%;background:hsl(var(--primary-300));box-shadow:0 0 0 3px hsl(var(--primary-100));}
+#scene .home-chain-teaser-strip span:last-child {background:hsl(var(--primary));box-shadow:0 0 0 3px hsl(var(--primary-200)),0 0 14px hsl(var(--primary-300));}
+
 @media(min-width:901px){
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:minmax(0,1fr) auto minmax(0,1fr) auto;row-gap:0;}
- #scene .hero-alive[data-page="zero"] :is(.ark-hero-body,.home-lifecycle) {grid-row:2;align-self:start;}
- #scene .hero-alive[data-page="zero"] .home-status-rail {grid-row:4;margin-top:18px;}
+ /* Three real grid columns, the two outer ones the same width, so the
+    center column is genuinely centered in the viewport -- not eyeballed
+    with position:absolute, which only looked right by accident and
+    overlapped the title as soon as content length changed. */
+ #scene .hero-alive[data-page="zero"] .ark-layer-zero {
+  grid-template-columns:minmax(180px,280px) minmax(0,660px) minmax(180px,280px);
+  grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);row-gap:0;justify-content:center;
+ }
+ #scene .hero-alive[data-page="zero"] .ark-hero-body {grid-column:2;grid-row:2;padding-left:0;align-items:center;}
+ /* The measured numbers: a vertical rail in the right column, top-aligned
+    with the headline and the left column instead of pushed down by a
+    leftover offset -- all three columns now share one top edge. */
+ /* css/home-flow.css's base rule sets align-items:end (right-aligned,
+    meant for its horizontal grid layout at other widths); this override
+    never re-declared it, so it silently won for any child that doesn't
+    force its own width:100% -- which is exactly what shifted the new
+    scope label to the right. Declaring it here is the actual fix. */
+ #scene .hero-alive[data-page="zero"] .home-status-rail {
+  grid-column:3;grid-row:2;align-self:start;z-index:3;
+  display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+  padding:0;border-top:0;border-right:0;
+ }
+ /* The scope stated once, plainly, instead of repeated in every row below. */
+ #scene .hero-alive[data-page="zero"] .home-status-scope-label {
+  margin:0 0 2px;font:500 10px/1.3 var(--mono-font,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-faint));
+ }
+ /* Flat rows, not micro cards: a hairline below each fact instead of a
+    bordered box around it. Minimal reads as fewer edges, not more of
+    them. A flex column's items default to min-width:auto (refuse to
+    shrink below their nowrap label's full width), which silently
+    overflowed the 240px column to the right -- straight into the hero
+    title -- so min-width:0 stays load-bearing here. */
+ #scene .hero-alive[data-page="zero"] .home-status-rail .home-status-item {
+  min-width:0;width:100%;box-sizing:border-box;gap:3px;
+  padding:0 0 11px;border-bottom:1px solid hsl(var(--border-subtle));
+ }
+ /* Five stacked numbers ran taller than the hero text beside them. Three
+    reads as one pitch; the rest stay one click away on /stats. */
+ #scene .hero-alive[data-page="zero"] .home-status-rail .home-status-item:nth-child(n+6) {display:none;}
+ #scene .hero-alive[data-page="zero"] .home-status-rail .home-status-item small {white-space:normal;}
+ #scene .hero-alive[data-page="zero"] .home-status-link {
+  display:block;border-top:0;min-width:0;width:100%;box-sizing:border-box;height:auto;min-height:0;
+  text-align:left;line-height:1.5;padding:3px 0 0;border:0;
+ }
+ /* The left column: the matching column opposite the numbers, top-aligned
+    beside the headline rather than centered against the whole (taller)
+    hero row. The teaser card and the core-page icon grid stack inside it. */
+ #scene .hero-alive[data-page="zero"] .home-left-column {
+  grid-column:1;grid-row:2;align-self:start;z-index:3;display:flex;flex-direction:column;gap:10px;
+ }
+ #scene .hero-alive[data-page="zero"] .home-chain-teaser {margin:0;padding:0;border:0;background:none;box-shadow:none;}
+ #scene .hero-alive[data-page="zero"] .home-chain-teaser .home-cycle-title {font-size:17px;line-height:1.25;}
+ #scene .hero-alive[data-page="zero"] .home-chain-teaser .home-lifecycle-caption {margin-bottom:6px;}
+ #scene .hero-alive[data-page="zero"] .home-chain-teaser .home-lifecycle-all {min-height:36px;margin-top:0;padding:11px 0;font-size:12px;}
 }
+
+/* The core-page icon grid: six quiet references, two rows of three -- an
+   icon and a label, no card around either. */
+#scene .home-core-links {display:grid;grid-template-columns:repeat(3,1fr);gap:14px 6px;}
+#scene .home-core-link {
+ display:flex;flex-direction:column;align-items:center;gap:6px;
+ color:hsl(var(--text-muted));text-decoration:none;transition:color 160ms;
+}
+#scene .home-core-link .native-icon {width:16px;height:16px;}
+/* Same viewBox and stroke-width, but not the same optical weight: layers
+   and evidence are dense multi-shape glyphs that read bolder than the
+   single-stroke account/terminal marks at identical pixel size. A small
+   per-icon scale evens that out instead of leaving the row looking like
+   six different icon sets. */
+#scene .home-core-link .native-icon-layers,
+#scene .home-core-link .native-icon-evidence {transform:scale(.82);}
+#scene .home-core-link .native-icon-account {transform:scale(1.08);}
+#scene .home-core-link span {font:500 9.5px/1.2 var(--mono-font,monospace);letter-spacing:.02em;white-space:nowrap;}
+#scene .home-core-link:is(:hover,:focus-visible) {color:hsl(var(--reference));}
+#scene .home-core-link:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:4px;border-radius:4px;}

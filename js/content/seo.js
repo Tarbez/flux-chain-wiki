@@ -43,7 +43,6 @@ var ArkSEO = (function () {
     { id: 'treasury', label: 'Treasury preview' },
     { id: 'deposits', label: 'Deposit preview' },
     { id: 'stats', label: 'Mesh performance' },
-    { id: 'monitor', label: 'Mesh monitor' },
     { id: 'lifecycle', label: 'Agreement lifecycle' },
     { id: 'lifecycle/intent', label: 'Intent / Agreement lifecycle' },
     { id: 'lifecycle/offer', label: 'Offer / Agreement lifecycle' },
@@ -158,7 +157,7 @@ var ArkSEO = (function () {
      every resolution, theory page, and article -- exactly what js/pages/catalog.js
      registers, without needing it loaded (site-bundle.mjs runs headless). */
   function routes(manifests, articles) {
-    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explore' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/stats' }, { path: '/monitor' }, { path: '/about' }, { path: '/concept' }];
+    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explore' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/stats' }, { path: '/about' }, { path: '/concept' }];
     EXTRA_PAGES.filter(function (page) { return page.id.indexOf('lifecycle') === 0; }).forEach(function (page) { out.push({ path: '/' + page.id }); });
     (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
       if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route });

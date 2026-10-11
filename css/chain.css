@@ -1,0 +1,59 @@
+/* /chain: the illustration and nothing else. No dashboard card, no title
+   block, no reading column -- just a small back control and the record-join
+   scene, as large as the viewport allows. The shared dashboard chrome
+   (css/lifecycle.css's .continuity-host) is right for every other
+   panel-hosted page; this one is the hero show-piece. */
+#scene .continuity-host[data-panel-page="chain"] {
+ border:0; border-radius:0; background:transparent; box-shadow:none;
+}
+/* Without the card's opaque fill, the generic ambient background shapes and
+   the live lattice canvas (normally hidden behind every page's card) show
+   through as stray rotated outlines -- not atmospheric, just leftover
+   chrome meant for a page that has its own opaque panel. Home disables the
+   same layers for the same reason; chain does too. */
+#scene .hero-alive[data-page="chain"] .ark-background-host,
+#scene .hero-alive[data-page="chain"] .defxn-brand-field,
+#scene .hero-alive[data-page="chain"] :is(.lattice-field,.lattice-activity) {display:none !important;}
+
+#scene .chain-page {
+ /* css/page-layout.css caps every .learning-page at --page-width and
+    centers it; this page is not a .learning-page and runs edge to edge. */
+ position:relative; inset:auto;
+ width:100%; height:100%; box-sizing:border-box; margin:0; padding:18px clamp(20px,4vw,56px);
+ display:flex; flex-direction:column; color:hsl(var(--text)); overflow:auto;
+ background:hsl(var(--canvas));
+}
+#scene .chain-page .visually-hidden {position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+#scene .chain-page .chain-back {
+ flex:0 0 auto;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;
+ min-height:32px;margin-bottom:12px;font:500 11px/1.4 var(--mono-font,monospace);
+ text-transform:uppercase;letter-spacing:.03em;color:hsl(var(--reference));
+}
+#scene .chain-page .chain-back .native-icon {width:16px;height:16px;flex:0 0 16px;padding:3px;}
+
+/* Same mechanism, different meaning: a small tab row picks which resolver
+   example plays. Painted by css/components.css's "choice" variant
+   (.chain-case is registered there), so selection follows the one shared
+   interaction-color rule instead of a page-local accent. */
+#scene .chain-page .chain-cases {flex:0 0 auto;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+#scene .chain-page .chain-case {min-height:36px;padding:8px 14px;border:1px solid hsl(var(--border-subtle));border-radius:999px;font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;transition:background 160ms,border-color 160ms,color 160ms;}
+
+/* Narrow viewports: width is what's scarce, not height, and there is
+   already ample vertical room to scroll naturally -- so the scene stays
+   the simple width:100%/height:auto it already was, top-aligned. */
+#scene .chain-page .chain-flow {flex:1 1 auto;min-height:0;width:100%;margin:0;}
+
+@media(min-width:901px){
+ /* Wide viewports: sizing the scene by width let its height (fixed by the
+    SVG's own aspect ratio) run past the viewport and forced a scrollbar,
+    which is worse than small. Size by the dimension that is actually
+    scarce here -- height -- and let width follow the aspect ratio instead;
+    whatever is left over centers it instead of stretching it. */
+ #scene .chain-page .chain-flow {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+ }
+ #scene .chain-page .chain-flow .flow-now {flex:0 1 auto;min-height:0;width:auto;max-width:100%;box-sizing:border-box;}
+ #scene .chain-page .chain-flow .flow-scene {width:auto;height:min(40vh,380px);max-width:100%;}
+ #scene .chain-page .chain-flow .flow-ledger {flex:0 0 auto;width:min(100%,860px);}
+}

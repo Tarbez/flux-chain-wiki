@@ -3,7 +3,11 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const values = new Map();
-const KEY = 'defxn-local-identity-v1';
+// Was 'defxn-local-identity-v1' (the old hand-written IIFE's own key) until
+// js/ark/local-identity.js was rebuilt from the canonical
+// @deadark/ark-ui/flux-auth-session module (scripts/local-identity-entry.js),
+// which keys storage as `ark-local-identity.<scope>.v1`.
+const KEY = 'ark-local-identity.defxn.v1';
 const html = fs.readFileSync('index.html', 'utf8');
 assert(html.indexOf('js/ark/local-identity.js') < html.indexOf('js/resolvers/header.js'), 'public identity restore must load before navigation renders');
 class Element {

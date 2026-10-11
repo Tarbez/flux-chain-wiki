@@ -4,7 +4,7 @@ Flux Protocol is a resolver-based system for publishing patterns, operating prov
 
 ## Choose a path
 
-- **Understand the protocol:** read the [overview](overview.md), then the protocol guides for [resolvers](protocol/resolvers.md), [agreements](protocol/agreements.md), [authority](protocol/authority.md), and [governance](protocol/governance.md).
+- **Understand the protocol:** start with [resolver math](resolver-math.md) — what a record is, where meaning comes from, and which dimensions of the grammar are closed. Then the [overview](overview.md) and the protocol guides for [resolvers](protocol/resolvers.md), [agreements](protocol/agreements.md), [authority](protocol/authority.md), and [governance](protocol/governance.md).
 - **Run the software:** follow the [quickstart](quickstart.md), check the [prerequisites](operators/prerequisites.md), and use the complete [run-from-source procedure](operators/run-from-source.md).
 - **Operate a named network:** read [networks](operators/networks.md) before creating one. A named network currently partitions miner-presence records; it is not a security boundary.
 - **Evaluate readiness:** inspect [current status](status.md), [verification](operators/verification.md), the [evidence registry](evidence/registry.md), the [public claim inventory](evidence/public-claim-inventory.md), and the [mainnet readiness gap inventory](mainnet-readiness.md) (devnet/mainnet separation, governance, durability, ops).

@@ -71,7 +71,22 @@ defxn.com, www.defxn.com {
 		reverse_proxy 162.35.26.46:19502
 	}
 
-	@adminProxy path /admin /admin.html /admin-app.html /api/* /js/admin/*
+	# Dense-wire chain pulse (ops/chain-pulse-api.mjs, added 2026-10-10): the
+	# NEWER chain-server mesh behind nodes.defxn.com (SEG_SUB/segments), a
+	# separate system from the ark-miner-cli quorums above. Read-only; reports
+	# the currently-pending segment's real have/need, or null fields it is
+	# honest about not having built yet -- see that file's header.
+	@chainPulse path /api/chain-pulse
+	handle @chainPulse {
+		rewrite * /chain-pulse
+		reverse_proxy 127.0.0.1:8770
+	}
+
+	# /admin-app is listed alongside /admin-app.html because the final handle
+	# block below now resolves an extension-less path to <path>.html. Without
+	# it, /admin-app would resolve to admin-app.html out of this node's static
+	# root and bypass the admin host entirely.
+	@adminProxy path /admin /admin.html /admin-app /admin-app.html /api/* /js/admin/*
 	handle @adminProxy {
 		reverse_proxy 127.0.0.1:3437 {
 			header_up Host defxn.com
@@ -92,8 +107,20 @@ defxn.com, www.defxn.com {
 		file_server
 	}
 
+	# {path}.html is what makes a standalone page answer on its clean path
+	# (/broker -> broker.html), matching serve-site.mjs. It must come before
+	# /index.html, or the app shell is served instead and the page looks like
+	# it does not load. Private pages never reach here: @adminProxy and
+	# @private are matched first.
+	#
+	# The defect that produced this rule was found on /resolver-math, which
+	# was a standalone page at the time and has since become a route
+	# (js/pages/resolver-math.js). The rule is not about that page: it is
+	# about every standalone .html at the site root, which tests/
+	# clean-path-standalone-pages.cjs enumerates from the directory rather
+	# than from a list, so a new one is covered the day it is added.
 	handle {
-		try_files {path} {path}/ /index.html
+		try_files {path} {path}.html {path}/ /index.html
 		file_server
 	}
 }

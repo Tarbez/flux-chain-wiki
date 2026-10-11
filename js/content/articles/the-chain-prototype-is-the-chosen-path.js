@@ -6,8 +6,8 @@ LearningContent.load("the-chain-prototype-is-the-chosen-path", {
   "evidenceLabel": "The live fleet pulse — see for yourself",
   "evidenceHref": "/api/fleet-pulse",
   "relatedPage": "stats/ledger",
-  "actionLabel": "Open /monitor",
-  "actionPage": "monitor",
+  "actionLabel": "Open /stats",
+  "actionPage": "stats",
   "questions": [
     "What exactly moved?",
     "What does the five-minute fleet result describe?",
@@ -41,13 +41,13 @@ LearningContent.load("the-chain-prototype-is-the-chosen-path", {
     ],
     [
       "A live pulse endpoint so anyone can watch",
-      "A new binary, fleet-pulse, runs a short self-bench against each configured chain-server every hour from flx-bk2 and publishes the current result through the monitor endpoint. Public browsers read it through the same-origin HTTPS route /api/fleet-pulse; the raw pulse service remains an operator endpoint. The /monitor page polls it every sixty seconds, draws a per-node table of current ops/s, and keeps a small session history so you can watch the number move while the tab is open.",
-      "When a seventh node joins, the pulse adds a row. When a node drops, the pulse records the error against that address and the aggregate adjusts. This is the growth signal we wanted — share the /monitor link with a friend, add a chain-server on their machine, and the pulse will show it."
+      "A new binary, fleet-pulse, runs a short self-bench against each configured chain-server every hour from flx-bk2 and publishes the current result through the pulse endpoint. Public browsers read it through the same-origin HTTPS route /api/fleet-pulse; the raw pulse service remains an operator endpoint. The /stats page polls it every sixty seconds, draws a per-node table of current ops/s, and keeps the fleet-wide swap, transfer, store and stake totals live too.",
+      "When a seventh node joins, the pulse adds a row. When a node drops, the pulse records the error against that address and the aggregate adjusts. This is the growth signal we wanted — share the /stats link with a friend, add a chain-server on their machine, and the pulse will show it."
     ],
     [
       "Run the pulse against your own nodes",
       "The pulse endpoint on bk2 is one example; the binary is portable. Clone defxn-defi-rs, build the dense-wire crate (cargo build --release --bin fleet-pulse), and run it with PULSE_NODES set to the chain-servers you want to measure. One-shot writes JSON to PULSE_OUT and exits; set PULSE_INTERVAL_SEC and the binary loops forever, serving the latest sample at PULSE_HTTP_ADDR with permissive CORS.",
-      "On /monitor, setting window.ArkPulseEndpoint before the page loads points the live-pulse panel at your endpoint instead of bk2's. That is how you run it locally and watch /monitor pick up the change. The purpose of this plumbing is simple: the fleet exists for other people to join, and the pulse is how joining shows up."
+      "On /stats, setting window.ArkPulseEndpoint before the page loads points the live-pulse panel at your endpoint instead of bk2's. That is how you run it locally and watch /stats pick up the change. The purpose of this plumbing is simple: the fleet exists for other people to join, and the pulse is how joining shows up."
     ],
     [
       "What is still open",

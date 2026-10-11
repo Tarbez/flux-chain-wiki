@@ -5,7 +5,7 @@ work in `defxn-defi-rs/dense-wire`; it names the grammar extension and the
 resolver rules before any code is written.
 
 **Problem it solves:** double-spend, MEV, and transaction privacy — not by
-consensus mechanisms, but by making the bad states unrepresentable.
+agreement protocols, but by making the bad states unrepresentable.
 
 **Problem it does not solve:** issuance policy (who may originate value) and
 counterparty discovery (how A finds B to transact with). Both stay explicit

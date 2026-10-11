@@ -14,6 +14,18 @@ ArkSEO.define({
       "ogImage": "",
       "canonical": ""
     },
+    "chain": {
+      "title": "Every identity, its own chain — DEFXN",
+      "description": "Walk the record that joins a chain: signed, checked for grammar and signature only, replicated to peers, then read by a resolver. The chain of chains, end to end.",
+      "ogImage": "",
+      "canonical": ""
+    },
+    "resolvermath": {
+      "title": "Resolver Math — DEFXN",
+      "description": "A record is a tuple of symbols and meaning is symbol x position x observer. See which dimensions of the FLX grammar are closed, which are unbounded, and resolve a dense block yourself.",
+      "ogImage": "",
+      "canonical": ""
+    },
     "resolver": {
       "title": "What is a resolver? — DEFXN",
       "description": "Understand how resolver logic turns inputs into checkable claims, where verification applies, and which evidence to inspect before running Flux.",
@@ -275,12 +287,6 @@ ArkSEO.define({
     "stats": {
       "title": "",
       "description": "How fast the protocol is, why, and how we found out: a real transfer taken apart block by block, where server time goes, and every wrong turn on the way.",
-      "ogImage": "",
-      "canonical": ""
-    },
-    "monitor": {
-      "title": "",
-      "description": "Live health of the DEFXN fleet: which machines answer, how fast, and whether quorum members agree on membership. Audited throughput is labelled as not live.",
       "ogImage": "",
       "canonical": ""
     },

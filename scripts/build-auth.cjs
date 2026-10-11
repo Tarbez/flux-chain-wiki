@@ -27,3 +27,12 @@ execFileSync(designRoot + '/deadark-sdk/node_modules/.bin/esbuild', [
   '--alias:@deadark/ark-a11y/element-style=' + designRoot + '/ark-a11y/src/element-style.js',
   '--outfile=js/admin/vendor/flux-elements.js',
 ], { stdio: 'inherit' });
+// The public "who was last signed in" pointer (js/ark/local-identity.js) --
+// now built from the one canonical session module instead of its own
+// hand-written copy. Public window.ArkUI.localIdentity API is unchanged;
+// see scripts/local-identity-entry.js's own header for what did change.
+execFileSync(designRoot + '/deadark-sdk/node_modules/.bin/esbuild', [
+  'scripts/local-identity-entry.js', '--bundle', '--format=iife', '--global-name=ArkLocalIdentityBuild', '--minify', '--legal-comments=none',
+  '--alias:@deadark/ark-ui/flux-auth-session=' + designRoot + '/ark-ui/dist/ark-ui.flux-auth-session.js',
+  '--outfile=js/ark/local-identity.js',
+], { stdio: 'inherit' });

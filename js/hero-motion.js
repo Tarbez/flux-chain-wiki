@@ -64,6 +64,15 @@
 
   var settings = make('div', 'site-settings');
   scene.appendChild(settings);
+  // Persistent footer chrome: who runs this, and the standing rights line.
+  // Both sit beside the settings gear, the one other thing that is always
+  // on screen regardless of route.
+  var credit = make('p', 'site-credit');
+  credit.textContent = 'Powered, deployed and made by FLX';
+  scene.appendChild(credit);
+  var rights = make('p', 'site-copyright');
+  rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
+  scene.appendChild(rights);
   var paths = make('nav', 'corner-navigation');
   paths.setAttribute('aria-label', 'Explore Flux Protocol');
   [['HOME.CORNER.USECASES', 'concept'], ['HOME.CORNER.TUTORIALS', 'learnings'], ['HOME.CORNER.EXPERIMENTS', 'proximity']].forEach(function (item) {

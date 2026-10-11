@@ -8,7 +8,8 @@
 .defxn-brand-mesh {display:block;width:100%;height:100%;}
 #scene .home-headline-network {letter-spacing:-.065em;}
 #scene .home-lifecycle {border:1px solid hsl(var(--border-default));border-radius:2px;background:hsl(var(--surface) / .8);box-shadow:none;}
-#scene .home-primary-cta,#scene .home-ghost-cta {border-radius:2px;}
+/* The CTA is a pill now (css/home-drafting.css) -- the sharp 2px brand
+   corner stays for the teaser card and settings panel below, not this. */
 .settings-panel,.settings-panel .settings-choice {border-radius:2px;}
 @media(max-width:760px) {.defxn-brand-field {opacity:calc(var(--pattern-visibility,.6) * .7);}}
 

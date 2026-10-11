@@ -4,6 +4,23 @@
  'use strict';
  var NS='http://www.w3.org/2000/svg';
  function el(tag,attrs,text){var n=document.createElementNS(NS,tag);Object.keys(attrs||{}).forEach(function(k){n.setAttribute(k,attrs[k]);});if(text)n.textContent=text;return n;}
+ /* The drafting primitives, exported so a page can compose a figure of its
+    own in the same hand instead of starting a second SVG vocabulary. Same
+    stroke classes, same mono labels, same restraint: geometry explains a
+    relationship and nothing moves for decoration. */
+ ArkUI.drafting={
+  svg:function(viewBox,cls){return el('svg',{viewBox:viewBox,class:'story-drawing'+(cls?' '+cls:''),'aria-hidden':'true',focusable:'false'});},
+  node:el,
+  into:function(parent){
+   return {
+    path:function(d,c){return parent.appendChild(el('path',{d:d,class:c||'drawing-line'}));},
+    box:function(x,y,w,h,c){return parent.appendChild(el('rect',{x:x,y:y,width:w,height:h,rx:5,class:c||'drawing-line'}));},
+    dot:function(x,y,r,c){return parent.appendChild(el('circle',{cx:x,cy:y,r:r||3,class:c||'drawing-point'}));},
+    word:function(x,y,t,c){return parent.appendChild(el('text',{x:x,y:y,class:c||'drawing-label'},t));}
+   };
+  }
+ };
+
  ArkUI.createStoryDiagram=function(kind,options){
   options=options||{};
   var svg=el('svg',{viewBox:'0 0 360 218',class:'story-drawing','aria-hidden':'true',focusable:'false'}),motion=[];

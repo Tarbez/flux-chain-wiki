@@ -16,5 +16,5 @@ Agreement-fabric status, agreement data, and evidence are exposed through the fi
 
 ## Interpretation
 
-A receipt records a verification outcome under identified rules. It should not be described as universal truth or legal finality. See [authority](authority.md) for the acceptance boundary.
+A receipt records a verification outcome under identified rules. It should not be described as universal truth or as legally binding settlement. See [authority](authority.md) for the acceptance boundary.
 

@@ -1,220 +1,152 @@
-/* Headline mesh measurements, shared by the home page and /stats.
-   Every value is copied from a row of the fleet table in js/pages/stats.js.
-   Change all three together; never show a number here that the evidence
-   record does not also carry.
+/* The measurements the site shows, and nothing else.
 
-   Updated 2026-10-08: the chain prototype — per-identity append-only
-   chains, K-of-N peer replication, LEDGERENTRY (Y=1A) — sustained
-   12,403 accepted ops/s across a real 6-node fleet for 303 seconds:
-   3,760,000 accepted, zero failures. The earlier 79,654/s result is a
-   short 868 ms burst, retained only as dated peak evidence. Per-pair
-   peak is 22,559/s (bk2 → mk2, 128 chains interleaved). Replay fast-path is
-   279,149/s — ~12x live admission, so a peer that fell behind catches
-   up far faster than live traffic flows in. This is the chosen path.
+   FLX is measured as SIGNED RESOLUTION, not as a chain: two parties sign
+   their intent, a resolver shard resolves a batch and signs the result —
+   that signature is the truth — replicas store it without re-verifying,
+   and anyone audits by walking the signature chain.
 
-   The fabric rows below are the old certified-finality production
-   path, kept for comparison; the chain prototype is now the headline. */
+   Retired 2026-10-10 and deliberately absent from this file: rates per
+   second of admissions or transactions, "replica applications" (a replica
+   stores; it applies nothing), signing-roster topology, and every
+   comparison to a chain. The ledger of retired vocabulary, with the
+   measured consequences that justified each retirement, is
+   docs/deprecated.md. Their numbers survive in the frozen BENCH records
+   and docs/whitepaper-chain-era.md; nothing here restates them.
+
+   Change a value here only when a BENCH record carries it. */
 (function () {
   'use strict';
-
-  // The three honest numbers from the design doc §1. Measured 2026-10-08
-  // on the real 10-node mesh with `transfer-bench`
-  // (dense-wire/src/bin/transfer_bench.rs) running the segmented-v3 path:
-  // Lever A TransferAtomic for same-shard transfers (1 op), Lever B
-  // TransferSend/Receive for cross-shard (2 ops), Lever C-1 skips grammar
-  // re-parse on the certified-segment replica, Lever C-2 swaps SipHash
-  // for FxHash on the admit HashMap. Zero errors.
+  // FLX DeFi, measured as SIGNED RESOLUTION. Not a chain.
   //
-  // This is the first measurement that separates `finalized transfers/s`
-  // from `logical operations/s` from `replica applications/s`, as the
-  // design doc §1 and §7 require. Only `finalized_tps` counts toward the
-  // headline. The chain-fleet rows below are the earlier admit-path
-  // measurements (counted as logical operations, since each admit is one
-  // op), kept for context.
-  // REAL mesh measurement — 6 fleet nodes running transfer-bench concurrently
-  // for 10 s each in cross-shard-only segmented mode, zero errors. This is
-  // not a projection — every row is a live JSON result from that node.
-  // Measured 2026-10-08 by `/tmp/fleet-tx-bench.sh` running sequentially on
-  // every flx-* host and summed. The parallel-session's 1,712,006 replica-
-  // applications number is a SEPARATE measurement (one certified segment
-  // applied across 9 replicas, each verifying the same cert); it is kept
-  // as context, not merged into this fleet total.
-  var HONEST_TRANSFERS = Object.freeze({
-    date: '2026-10-08',
-    source: 'real mesh · 10 flx-* nodes in parallel · 10 s sustained each · Lever A TransferAtomic (same-shard, 1 op) · Lever B TransferSend/Receive (cross-shard, 2 ops) · Lever C-1 skips grammar re-parse on the certified-segment path · Lever C-2 FxHash on the admit HashMap · zero errors',
-    windowSeconds: 10,
-    replicasPerShard: 4,
-    leverANote: 'Lever A: TransferAtomic collapses a same-shard transfer to ONE record on the sender\'s chain (sender and receiver live on the same holder-shard; no cross-shard round trip needed). About 6% of mixed-topology transfers; cuts ops-per-transfer from 2 to 1 for that subset.',
-    leverBNote: 'Lever B: TransferSend+TransferReceive collapses the old 4-step cross-shard protocol (PREPARE/ACCEPT/COMMIT/FINALIZE) to 2 ops; same safety.',
-    leverCNote: 'Lever C-1 drops a redundant full-grammar re-validation on the certified-segment replica path (the K-of-N committee cert already attested the grammar at origin); C-2 swaps the admit HashMap<(G-key, pos), cid> from SipHash to a tiny inlined FxHash.',
-    perNode: Object.freeze([
-      Object.freeze({ name: 'eul-4c', cpu: 'AMD EPYC 9355P', cores: 4, region: 'BR', threads: 4, submitted: 228000, finalized: 228000, logicalOps: 441704, elapsedMs: 10088, finalizedTps: 22601, logicalOpsPerSecond: 43785, replicaAppsPerSecond: 175140 }),
-      Object.freeze({ name: 'bk2',    cpu: 'Xeon Gold 6230R', cores: 7, region: 'US', threads: 7, submitted: 152152, finalized: 152152, logicalOps: 294688, elapsedMs: 10156, finalizedTps: 14981, logicalOpsPerSecond: 29016, replicaAppsPerSecond: 116065 }),
-      Object.freeze({ name: 'mk2',    cpu: 'AMD EPYC 7552',   cores: 5, region: 'US', threads: 5, submitted: 148000, finalized: 148000, logicalOps: 286753, elapsedMs: 10029, finalizedTps: 14757, logicalOpsPerSecond: 28592, replicaAppsPerSecond: 114370 }),
-      Object.freeze({ name: 'eug-2c', cpu: 'AMD EPYC 9355P', cores: 2, region: 'BR', threads: 2, submitted: 132000, finalized: 132000, logicalOps: 255795, elapsedMs: 10196, finalizedTps: 12946, logicalOpsPerSecond: 25088, replicaAppsPerSecond: 100351 }),
-      Object.freeze({ name: 'bk1',    cpu: 'Xeon Gold 6230R', cores: 2, region: 'US', threads: 2, submitted: 44000,  finalized: 44000,  logicalOps: 85247,  elapsedMs: 10354, finalizedTps: 4250,  logicalOpsPerSecond: 8233,  replicaAppsPerSecond: 32933  }),
-      Object.freeze({ name: 'mk1',    cpu: 'AMD EPYC 7552',   cores: 1, region: 'US', threads: 1, submitted: 36000,  finalized: 36000,  logicalOps: 69708,  elapsedMs: 11146, finalizedTps: 3230,  logicalOpsPerSecond: 6254,  replicaAppsPerSecond: 25016  }),
-      Object.freeze({ name: 'ms3',    cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54220,  elapsedMs: 10903, finalizedTps: 2568,  logicalOpsPerSecond: 4973,  replicaAppsPerSecond: 19892  }),
-      Object.freeze({ name: 'ms2',    cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54253,  elapsedMs: 10938, finalizedTps: 2560,  logicalOpsPerSecond: 4960,  replicaAppsPerSecond: 19840  }),
-      Object.freeze({ name: 'ms1',    cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54237,  elapsedMs: 11035, finalizedTps: 2537,  logicalOpsPerSecond: 4915,  replicaAppsPerSecond: 19660  }),
-      Object.freeze({ name: 'mist1',  cpu: 'Xeon Gold 6230R', cores: 1, region: 'US', threads: 1, submitted: 28000,  finalized: 28000,  logicalOps: 54280,  elapsedMs: 11509, finalizedTps: 2433,  logicalOpsPerSecond: 4716,  replicaAppsPerSecond: 18865  })
+  // Two parties sign intents; a shard resolves a BATCH (batched Ed25519
+  // verify, nonce screen, uniform-price auction, AMM on the residual) and
+  // SIGNS the result -- that signature is the truth. Replicas store it
+  // without re-verifying. Anyone audits by walking the signature chain.
+  //
+  // These are the only correct DeFi metrics. accepted/s, TPS, replica
+  // applications/s and comparisons to any chain are RETIRED for DeFi: a
+  // swap is not a transaction competing for block space, and a replica
+  // does not apply anything -- it stores one signed result per batch.
+  var DEFI_SHARD = Object.freeze({
+    date: '2026-10-10',
+    record: 'BENCH-012',
+    swapsResolved: 15360,
+    batches: 60,
+    swapsPerBatch: 256,
+    batchLatencyMs: 13.874,
+    verifyLatencyMsBatched: 10.403,
+    auctionLatencyMs: 2.173,
+    signLatencyMs: 0.0403,
+    broadcastLatencyMs: 449.229,
+    signedResultBytes: 180,
+    signedResultBytesRaw: 580,
+    lzma2RunRatio: 3.22,
+    peersReached: 10,
+    replicationCostBytes: 1801,
+    auditEd25519Verifies: 3,
+    auditsPassed: 60,
+    matchedInternallyPct: 100,
+    // Shard-only, no broadcast in the loop.
+    batchesPerSecond: 153.7,
+    swapsPerSecondResolved: 39349,
+    note: '15,360 swaps in 60 batches of 256, broadcast to 10 live replicas, 60/60 audits passed. Batched signature verification is 75% of a batch; the shard signing the result -- the thing that makes it true -- is 0.3%. 100% of swaps matched internally at ONE clearing price and paid zero curve slippage, so position inside a batch cannot change what anyone pays. 1,801 bytes replicates 256 swaps to 10 replicas (~0.7 bytes/swap/replica). LIMITS: broadcast is unpipelined and dominates end-to-end (449 ms vs 13.9 ms to resolve, ~2.2 batches/s serialised); pool held constant; custody, cross-pool routing and intent transport excluded; the shard is trusted within a batch and no slashing is wired.'
+  });
+
+  // Every operation in ITS OWN unit (BENCH-013, 2026-10-10).
+  //
+  // Transfers, swaps, staking and replica storage are different
+  // operations doing different amounts of work. One headline figure hides
+  // which one is slow, so each carries its own unit and they are never
+  // ranked against each other. A transfer is one or two records; a swap is
+  // verify + auction + AMM + signature.
+  //
+  // `transfers/s` is the correct unit for a transfer and always was.
+  var OPERATIONS = Object.freeze({
+    date: '2026-10-10',
+    record: 'BENCH-013',
+    rows: Object.freeze([
+      Object.freeze({ op: 'Transfer, same-shard atomic', rate: 13476, unit: 'transfers/s', note: 'One record per transfer.' }),
+      Object.freeze({ op: 'Transfer, cross-shard', rate: 6799, unit: 'transfers/s', note: 'Two records (send + receive), so about half the atomic rate. The ratio is the record count.' }),
+      Object.freeze({ op: 'Transfer, batched (1,024/root)', rate: 362776, unit: 'records/s', note: '27x the unbatched rate: one signature verified per 1,024 records instead of per record. Note the unit changes \u2014 a batch is not a transfer.' }),
+      Object.freeze({ op: 'Stake lock', rate: 13492, unit: 'stakes/s', note: 'One signed record per position, signature verified individually.' }),
+      Object.freeze({ op: 'Swap, one per batch', rate: 15738, unit: 'swaps/s', note: 'One verify and one shard signature per swap, and it pays full curve slippage with no counterparty.' }),
+      Object.freeze({ op: 'Swap, batched auction', rate: 46178, unit: 'swaps/s', note: '2.9x faster, and every intent clears at one price so matched flow pays zero curve slippage.' }),
+      Object.freeze({ op: 'Replica store, per replica', rate: 496278, unit: 'signed results/s', note: 'The fastest operation in the system, because a replica stores and does not verify, execute or re-decide.' }),
+      Object.freeze({ op: 'Swap, 8 shards in parallel', rate: 195643, unit: 'swaps/s', note: '4.5x one shard, MEASURED by running eight shards rather than multiplying one. Pools are independent so verification parallelises \u2014 this is the lever, and batch size is not.' })
     ]),
-    // Aggregate ACROSS the 10-node mesh — summed, not averaged, not projected:
-    fleetFinalizedTps: 82863,
-    fleetLogicalOpsPerSecond: 160532,
-    fleetReplicaAppsPerSecond: 642128,
-    fleetSubmitted: 852152,
-    fleetFinalized: 852152,
-    fleetLogicalOps: 1650885,
-    fleetErrors: 0,
-    // Lever history on this same fleet, same bench, kept for comparison:
-    previousFleetFinalizedTps: 42637,
-    leverBFleetTps: 67563,
-    leverCFleetTps: 70589,
-    leverABCFleetTps: 82863,
-    leverBGainPct: 58,
-    leverCGainPct: 4.5,
-    leverANodeGrowthPct: 17,
-    // Local Mac on top (separate hardware, same bench, same window, Lever A+B+C):
-    macLocal: Object.freeze({
-      cpu: 'Apple M-series', cores: 10, finalizedTps: 25499, logicalOpsPerSecond: 51000, replicaAppsPerSecond: 203998,
-      windowSeconds: 10, submitted: 254898, finalized: 254898, logicalOps: 509796, errors: 0, note: 'Mean of 5 × 10s runs on segmented-v3'
+    // Swap batch-size sweep: the lever that ISN'T there.
+    // 64 -> 39,023 | 256 -> 38,747 | 1,024 -> 49,268 | 4,096 -> 50,615 swaps/s,
+    // with signature verification at 71-77% of a batch throughout. A 64x
+    // increase in batch size bought 1.3x. Batched Ed25519 is near-linear in
+    // signature count, so there is little left to amortise.
+    batchSizeSweep: Object.freeze([
+      Object.freeze({ batch: 64, swapsPerSecond: 39023, verifySharePct: 75.5 }),
+      Object.freeze({ batch: 256, swapsPerSecond: 38747, verifySharePct: 77.1 }),
+      Object.freeze({ batch: 1024, swapsPerSecond: 49268, verifySharePct: 71.3 }),
+      Object.freeze({ batch: 4096, swapsPerSecond: 50615, verifySharePct: 71.2 })
+    ]),
+    // Shard scaling curve, each point RUN rather than multiplied. The
+    // knee is the performance-core count, not the logical-core count.
+    shardScaling: Object.freeze([
+      Object.freeze({ shards: 1, swapsPerSecond: 43665, efficiencyPct: 100 }),
+      Object.freeze({ shards: 2, swapsPerSecond: 81611, efficiencyPct: 93 }),
+      Object.freeze({ shards: 4, swapsPerSecond: 157206, efficiencyPct: 90 }),
+      Object.freeze({ shards: 8, swapsPerSecond: 197355, efficiencyPct: 56 })
+    ]),
+    // The fleet, measured: every node ran at the SAME TIME with shards set
+    // to its own core count. A sum of concurrent measurements, never one
+    // node's figure multiplied by ten.
+    fleet: Object.freeze({
+      nodes: 10,
+      cores: 37,
+      parallelSwapsPerSecond: 643632,
+      oneShardSwapsPerSecond: 274840,
+      transfersPerSecond: 69895,
+      storesPerSecond: 6044992,
+      parallelGain: 2.34,
+      swapsPerCore: 17395,
+      perNode: Object.freeze([
+        Object.freeze({ node: 'eul-4c', cores: 4, swapsPerSecond: 127960 }),
+        Object.freeze({ node: 'eug-2c', cores: 2, swapsPerSecond: 109197 }),
+        Object.freeze({ node: 'bk2', cores: 7, swapsPerSecond: 94673 }),
+        Object.freeze({ node: 'hel1', cores: 8, swapsPerSecond: 88482 }),
+        Object.freeze({ node: 'mk2', cores: 5, swapsPerSecond: 82517 }),
+        Object.freeze({ node: 'ash1', cores: 2, swapsPerSecond: 44851 }),
+        Object.freeze({ node: 'hel2', cores: 4, swapsPerSecond: 44231 }),
+        Object.freeze({ node: 'sg1', cores: 2, swapsPerSecond: 26404 }),
+        Object.freeze({ node: 'bk1', cores: 2, swapsPerSecond: 15829 }),
+        Object.freeze({ node: 'mist1', cores: 1, swapsPerSecond: 9488 })
+      ]),
+      note: 'All ten nodes ran concurrently with shards set to each node\u2019s core count; the total is a sum of concurrent measurements, never one node multiplied by ten. CORE COUNT DOES NOT PREDICT THE RESULT: hel1 has 8 cores and reached 88,482 while eul-4c has 4 and reached 127,960, and eug-2c with 2 cores beat bk2 with 7. Verifying Ed25519 is single-core-speed work, so a few fast cores beat many slow ones. LIMITS: no network inside the timed window (each node drove its own shards in-process), so this is resolution capacity and not an end-to-end rate \u2014 getting results out is still 449 ms per batch unpipelined.'
     }),
-    // Mesh + Mac — the actual honest "all nodes" number:
-    totalFinalizedTps: 108362,
-    totalLogicalOpsPerSecond: 211532,
-    totalReplicaAppsPerSecond: 846126,
-    // The 9-node certified-segment number from the parallel session's
-    // measurement — a DIFFERENT metric (one segment root replicated,
-    // not independent per-node transfers) kept as upper-bound context:
-    certifiedSegmentReplicaApps: 1712006,
-    certifiedSegmentNote: 'Parallel session: one 20,000-op segment root with a 3-of-4 certificate applied across 9 replicas concurrently. Replica applications × 9 replicas; a different measurement from the per-node transfer bench above.'
-  });
-
-  // The chain prototype's six-node fleet pulse, 2026-10-08. Each entry is
-  // one chain-server; `qps` is what a client on bk2 observed when it fanned
-  // 32 chains × 200 entries (6,400 records) at that server concurrently
-  // with the other five. See /stats/ledger "Measured on the real fleet"
-  // for the full table and dense-wire::bin::fleet_many for the harness.
-  // `qps` here is per-node, measured in parallel so each number pays
-  // real contention and real RTT.
-  var CHAIN_FLEET = Object.freeze({
-    date: '2026-10-08',
-    nodes: 6,
-    aggregate: 79654,
-    perPair: 22559,
-    replayFast: 279149,
-    recoverySlackX: 12.4,
-    totalEntries: 38400,
-    windowMs: 868,
-    errors: 0,
-    perNode: Object.freeze([
-      Object.freeze({ name: 'mk2',    cpu: 'AMD EPYC 7552',       region: 'US', provider: 'InterServer', qps: 21128 }),
-      Object.freeze({ name: 'bk1',    cpu: 'Xeon Gold 6230R',     region: 'US', provider: 'InterServer', qps: 16221 }),
-      Object.freeze({ name: 'bk2',    cpu: 'Xeon Gold 6230R',     region: 'US', provider: 'InterServer', qps: 15683 }),
-      Object.freeze({ name: 'mist1',  cpu: 'Xeon Gold 6230R',     region: 'US', provider: 'InterServer', qps: 11192 }),
-      Object.freeze({ name: 'eug-2c', cpu: 'AMD EPYC 9355P',      region: 'BR', provider: 'other',       qps: 8059  }),
-      Object.freeze({ name: 'eul-4c', cpu: 'AMD EPYC 9355P',      region: 'BR', provider: 'other',       qps: 7371  })
-    ])
-  });
-
-  // Five-minute public-client soak, 2026-10-08. One local arm64 client ran
-  // fleet-many concurrently against all six public :19501 nodes. Each batch
-  // held 32 chains × 500 entries. This measures sustained accepted writes
-  // from one origin under shared client/network contention; it is neither a
-  // cumulative fleet counter nor the hourly pulse's short capacity sample.
-  var CHAIN_FLEET_SOAK = Object.freeze({
-    durationSeconds: 303.152,
-    accepted: 3760000,
-    failures: 0,
-    averageQps: 12403,
-    perNode: Object.freeze([
-      Object.freeze({ name: 'bk2', accepted: 592000, batches: 37 }),
-      Object.freeze({ name: 'mk2', accepted: 576000, batches: 36 }),
-      Object.freeze({ name: 'bk1', accepted: 592000, batches: 37 }),
-      Object.freeze({ name: 'mist1', accepted: 528000, batches: 33 }),
-      Object.freeze({ name: 'eug-2c', accepted: 720000, batches: 45 }),
-      Object.freeze({ name: 'eul-4c', accepted: 752000, batches: 47 })
-    ])
-  });
-
-  // Local resolver measurements from the current holder-sharded, certified
-  // segment and binary transport implementation. These are deliberately not
-  // multiplied into a fleet projection.
-  var LOCAL_RESOLVERS = Object.freeze({
-    hotAdmission: 51065,
-    certifiedApply: 279269,
-    certifiedGain: 5.47,
-    compactTransport: 812268,
-    compactBytesPerOp: 150.9,
-    wireReduction: 6.47,
-    segmentOperations: 1024,
-    holderShards: 8
-  });
-
-  // BENCH-007: the same deterministic 20,000-operation segment and 3-of-4
-  // certificate were applied concurrently by eight VPS replicas plus the
-  // local arm64 replica. Every node reported this exact root. `combined` is
-  // summed replica work; `allReplicaLogical` is bounded by the slowest node
-  // when all nine must finish the same logical segment.
-  var CERTIFIED_FLEET = Object.freeze({
-    date: '2026-10-08',
-    nodes: 9,
-    operationsPerNode: 20000,
-    replicaApplications: 180000,
-    quorum: '3-of-4',
-    root: '1399e3219df2ec37e1b0c5d1e4fb37d420418a7ed9b8e799d01f7c9902731575',
-    combined: 1712006,
-    synchronized: 552583,
-    allReplicaLogical: 61398,
-    errors: 0,
-    perNode: Object.freeze([
-      Object.freeze({ name: 'bk2', qps: 126808.4, shards: 7 }),
-      Object.freeze({ name: 'mk2', qps: 236893.1, shards: 5 }),
-      Object.freeze({ name: 'bk1', qps: 78957.3, shards: 2 }),
-      Object.freeze({ name: 'mist1', qps: 61398.1, shards: 1 }),
-      Object.freeze({ name: 'eug-2c', qps: 348464.4, shards: 2 }),
-      Object.freeze({ name: 'eul-4c', qps: 398441.2, shards: 4 }),
-      Object.freeze({ name: 'mk1', qps: 120502.3, shards: 1 }),
-      Object.freeze({ name: 'ms3', qps: 64146.6, shards: 1 }),
-      Object.freeze({ name: 'local', qps: 276394.8, shards: 8 })
-    ])
-  });
-
-  // The old certified-fabric fleet run (2026-10-07, bench-003 §14-15). Kept
-  // for context so the ladder is honest: this is a different system with
-  // Byzantine-tolerant finality, not the chain prototype.
-  var FLEET_RUN = Object.freeze({
-    total: 24908, before: 21199, transfers: 503225, window: '20 s', servers: 4, clients: 6, date: '2026-10-07',
-    perServer: Object.freeze([
-      Object.freeze({ name: 'eul-4c', machine: 'eul4c', cores: 4, clients: 'eug-2c',          now: 11358, before: 9815, busy: 92.4, note: 'Other provider, 19 ms between its two machines' }),
-      Object.freeze({ name: 'bk2',    machine: 'bk2',   cores: 7, clients: 'ms1 + ms2 + ms3', now: 7823,  before: 6471, busy: 86.5, note: 'Production runs on this machine too' }),
-      Object.freeze({ name: 'mk2',    machine: 'mk2',   cores: 5, clients: 'mist1',           now: 3439,  before: 3138, busy: 43.4, note: 'Client-bound: its one-core client was at 100%' }),
-      Object.freeze({ name: 'bk1',    machine: 'bk1',   cores: 2, clients: 'mk1',             now: 2288,  before: 1775, busy: 91.4, note: 'Two cores, the smallest server' })
-    ])
+    route: 'Fast cores first, shard to the PERFORMANCE-core count, then add nodes. Run ONE resolver shard per PERFORMANCE core, and scale past that by adding nodes, not shards. Scaling is near-linear to 4 shards (90% of linear) and falls to 56% at 8, because this machine has 4 performance cores plus 4 efficiency cores and the knee sits at the performance-core count. A shard beyond that count buys about half what the one before it did. No fleet figure is published: per-node scaling is measured, and summing it across ten nodes would be a multiplication nobody ran.',
+    verdict: 'A swap is VERIFICATION-BOUND and, unlike a transfer, its verification cannot be skipped: a replica may skip it because the shard already attested, but the shard cannot, because checking the parties IS its job. Batch size therefore buys little (1.3x across a 64x size increase). Parallel shards buy 4.5x on eight cores, measured by running them.',
+    notBuilt: Object.freeze(['Split payment', 'Batched split payment', 'Lending position', 'Liquidation']),
+    note: 'Each operation in its own unit, median of 5 reps, warm-up discarded. No network in any row, and no row is multiplied by a node or replica count. Rows are NOT comparable across units: a transfer rate and a swap rate count different work.'
   });
 
   window.ArkStatsHighlights = Object.freeze({
-    honestTransfers: HONEST_TRANSFERS,
-    chainFleet: CHAIN_FLEET,
-    chainFleetSoak: CHAIN_FLEET_SOAK,
-    localResolvers: LOCAL_RESOLVERS,
-    certifiedFleet: CERTIFIED_FLEET,
-    fleetRun: FLEET_RUN,
-    measured: '2026-10-08',
-    scope: 'Three honest numbers (design doc §1): finalized transfers, logical ops, replica applications',
-    scopeShort: 'Ten-node mesh + Mac · finalized transfers',
-    // `items` powers the home-page status rail. The headline now follows
-    // the design doc's three-numbers rule: only `finalized transfers/s` is
-    // claimed as the user-visible rate. Logical ops/s and replica-apps/s
-    // are secondary cards that explain what the fleet actually did under
-    // the hood.
+    defiShard: DEFI_SHARD,
+    operations: OPERATIONS,
+    measured: '2026-10-10',
+    scope: 'Signed resolution: two parties sign, a resolver shard resolves and signs, replicas store, anyone audits',
+    scopeShort: 'Swaps per batch auction \u00b7 batch latency \u00b7 bytes per signed result',
+    // The home-page status rail. Every item is a figure a BENCH record
+    // carries. Rates per second of admissions or transactions, "replica
+    // applications", and signing-roster topology were removed 2026-10-10 —
+    // see docs/deprecated.md.
     items: Object.freeze([
-      { value: '82,863', unit: 'tps', short: 'Code-path ceiling · 10-node bench · Lever A+B+C', label: 'Code-path ceiling · 10-node bench · finalized transfers / s · Lever A atomic + Lever B 2-op + Lever C hot-path · NOT production traffic',          detail: 'BENCH-011, 2026-10-08: this is a CPU ceiling, not real-user traffic. Each flx-* node ran transfer-bench in-process against its own CertifiedShardLedger for 10 s, with Lever A (TransferAtomic for same-shard, 1 op) + Lever B (TransferSend/Receive for cross-shard, 2 ops) + Lever C-1/C-2 (grammar re-parse skip and FxHash on the admit HashMap). No network between nodes within the timed window, no K-of-N replication latency, no external clients. 852,152 transfers finalized across the fleet, zero errors. +94% over the pre-Lever-B 6-node 4-op fleet number (42,637). The deployed chain-servers currently serve only the hourly 4,800-op synthetic pulse.' },
-      { value: '642,128', unit: 'ops/s',      short: 'Replica applications / s',          label: 'Ten-node mesh · replica applications / s',                  detail: 'Same BENCH-011 run: 160,532 logical operations/s × 4 replicas per shard, the 3-of-4 committee shape. Total committee work, not transfers.' },
-      { value: '108,362', unit: 'transfers/s', short: 'Fleet + Mac · total finalized tps', label: 'Ten-node mesh + one Mac · total finalized transfers / s', detail: '10-node fleet summed with the local Mac (25,499 tps, mean of 5 × 10s runs on segmented-v3) = 108,362 finalized transfers / s. Hardware-honest total, not a projection.' },
-      { value: '1,712,006', unit: 'ops/s',    short: 'Certified-segment ceiling',         label: '9-node certified-segment replica applications',             detail: 'Parallel session: one 20,000-op segment root with a 3-of-4 certificate applied across 9 replicas concurrently. Different measurement — upper bound, not merged into the mesh rows above.' },
-      { value: '7/7',     unit: 'refused',    short: 'Attack suite',                      label: 'Chain prototype · attack suite',                            detail: 'Replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation. 29 chain tests + 5 cross-shard tests + 3 TCP tests pass.' }
+      { value: '643,632', unit: 'swaps/s', short: 'The fleet \u00b7 all 10 nodes at once', label: 'Fleet swaps resolved per second \u00b7 ten nodes, 37 cores, measured concurrently', detail: 'BENCH-013, 2026-10-10: all ten nodes ran at the same time with shards set to each node\u2019s core count. 643,632 swaps/s against 274,840 with one shard per node \u2014 a 2.34x gain from parallelism alone, 17,395 swaps/s per core. A SUM OF CONCURRENT MEASUREMENTS, never one node multiplied by ten. The same run measured 69,895 transfers/s and 6,044,992 signed-result stores/s fleet-wide. Core count does not predict the result: hel1 has 8 cores and reached 88,482 while eul-4c has 4 and reached 127,960, because verifying Ed25519 is single-core-speed work. LIMIT: no network inside the timed window, so this is resolution capacity, not an end-to-end rate \u2014 getting results out is still 449 ms per batch unpipelined.' },
+      { value: '69,895', unit: 'transfers/s', short: 'The fleet \u00b7 transfers, all 10 nodes', label: 'Fleet transfers resolved per second \u00b7 ten nodes, measured concurrently', detail: 'BENCH-013, 2026-10-10: the same ten-node concurrent run that measured 643,632 swaps/s also measured 69,895 transfers/s fleet-wide \u2014 a sum of concurrent measurements, never one node multiplied by ten. A single shard alone resolves 13,476 transfers/s; this is all ten nodes running at once. LIMIT: no network inside the timed window, so this is resolution capacity, not an end-to-end rate.' },
+      { value: '6,044,992', unit: 'records/s', short: 'The fleet \u00b7 records stored, all 10 nodes', label: 'Fleet signed-result stores per second \u00b7 ten nodes, measured concurrently', detail: 'BENCH-013, 2026-10-10: the same ten-node concurrent run measured 6,044,992 signed results stored per second fleet-wide \u2014 a sum of concurrent measurements, never one node multiplied by ten. A single replica alone stores 496,278/s; this is all ten nodes running at once. Storing is the fastest operation in the system because a replica stores and does not verify, execute or re-decide.' },
+      { value: '195,643', unit: 'swaps/s', short: 'Parallel shards \u00b7 the route forward', label: 'Swaps resolved per second across 8 parallel resolver shards', detail: 'BENCH-013, 2026-10-10: eight resolver shards run concurrently reached 195,643 swaps/s, 4.5x one shard \u2014 measured by running the eight, never by multiplying one. This is THE lever: a swap is verification-bound and, unlike a transfer, its verification cannot be skipped, so batch size buys almost nothing (a 64x size increase bought 1.3x). Pools are independent, so verification parallelises. Scaling is near-linear to 4 shards (90% of linear) and falls to 56% at 8, because the knee is the PERFORMANCE-core count, not the logical-core count. The route: one shard per performance core, then add nodes rather than shards.' },
+      { value: '39,349', unit: 'swaps/s', short: 'DeFi \u00b7 swaps resolved per second', label: 'FLX DeFi \u00b7 swaps resolved per second \u00b7 one resolver shard', detail: 'BENCH-012, 2026-10-10: 153.7 batch auctions per second x 256 swaps per batch = 39,349 swaps resolved per second, on ONE resolver shard. Resolution only \u2014 the broadcast to replicas is 449 ms unpipelined and is reported separately; never add the two. With the broadcast in the loop the same run measured 18,452 swaps/s. This is the headline throughput figure under the current model: swaps resolved, not transactions admitted.' },
+      { value: '256', unit: 'swaps/batch', short: 'DeFi \u00b7 swaps per batch auction', label: 'FLX DeFi \u00b7 swaps resolved per batch auction', detail: 'BENCH-012, 2026-10-10: 15,360 swaps in 60 batches of 256, broadcast to 10 live replicas, 60/60 audits passed. Two parties sign their intent; a resolver shard resolves the batch and SIGNS the result \u2014 that signature is the truth. Replicas store it without re-verifying. 100% of swaps matched internally at ONE clearing price and paid zero curve slippage, so position inside a batch cannot change what anyone pays.' },
+      { value: '13.9', unit: 'ms/batch', short: 'DeFi \u00b7 batch resolution latency', label: 'FLX DeFi \u00b7 batch resolution latency', detail: 'Batched Ed25519 verification is 10.403 ms (75% of the batch); the uniform-price auction plus AMM residual is 2.173 ms (15.7%); the shard signing the result \u2014 the thing that makes it true \u2014 is 0.040 ms (0.3%). Shard-only: 153.7 batches/s, 39,349 swaps/s resolved. Broadcast is NOT in this figure: it is 449 ms unpipelined for 10 peers and is the binding constraint on everything.' },
+      { value: '180', unit: 'bytes', short: 'DeFi \u00b7 replication per signed result', label: 'FLX DeFi \u00b7 bytes to replicate one signed batch result', detail: '580 bytes of dense FLX, 180 after LZMA2 in a run (3.22x). A single result barely compresses \u2014 it is mostly unique hex \u2014 so LZMA2 pays only across a feed. 1,801 bytes replicates 256 swaps to 10 replicas: about 0.7 bytes per swap per replica. Audit cost is 3 x Ed25519_verify.' },
+      { value: '496,278', unit: 'stores/s', short: 'Replica store \u00b7 per replica \u00b7 measured', label: 'Replica store \u00b7 signed results stored per second, per replica', detail: 'BENCH-013, 2026-10-10: 496,278 signed results stored per second by ONE replica, measured. This replaces a previously published 642,128 "replica applications/s" figure that was arithmetic \u2014 logical operations x 4 replicas \u2014 with nothing run. Storing is the fastest operation in the system because a replica stores and does not verify, execute or re-decide. It means one replica can absorb the output of many resolver shards, and read-side services (explorers, indexers, audits) need no re-verification. No row is multiplied by a replica count: a fleet of N does N times the work, but no pipeline moves N x rate.' },  // ALLOW-DEPRECATED-TERM: names the fabricated figure in order to retire it; the line asserts the opposite of the retired concept.
+      { value: '20', unit: 'resolvers', short: 'Resolver registry \u00b7 6 measured', label: 'Resolver registry \u00b7 20 resolvers, 6 measured, 14 not built', detail: 'Every resolver publishes a signed audit manifest, or it is not registered. Not built is recorded as NOT_BUILT, never as zero: zero would mean measured and scored nothing, so reporting absence as zero would make missing work read as slow work. Each unbuilt resolver is a region of intent that cannot be made real yet. See docs/resolver-audit.md.' },
+      { value: '7/7', unit: 'refused', short: 'Attack suite', label: 'Attack suite', detail: 'A forged intent fails the WHOLE batch \u2014 deliberately, since hunting the culprit would let one forgery impose N verifications. A replayed nonce is refused by name. An unmeetable min_out is refused rather than filled badly. A reordered batch fails the audit even though every signature in it is genuine. Plus replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature and equivocation on the record path.' }
     ])
   });
 })();

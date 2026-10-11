@@ -6,7 +6,7 @@ const pulse = caddy.indexOf('@fleetPulse path /api/fleet-pulse');
 const admin = caddy.indexOf('@adminProxy path');
 assert(pulse > 0 && pulse < admin, 'the pulse handler must precede the broad /api/* admin proxy');
 assert(/handle @fleetPulse\s*\{[\s\S]*rewrite \* \/pulse\.json[\s\S]*reverse_proxy 162\.35\.26\.46:19502[\s\S]*\}/.test(caddy), 'the public route proxies only the pulse resource');
-for (const file of ['js/pages/monitor.js', 'js/pages/stats.js']) {
+for (const file of ['js/pages/stats.js']) {
   const source = fs.readFileSync(file, 'utf8');
   assert(!source.includes('http://162.35.26.46:19502'), file + ' must not fetch the raw HTTP endpoint');
   assert(source.includes('ArkPulse.get()'), file + ' must use the shared pulse client');

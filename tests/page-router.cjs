@@ -67,6 +67,8 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
 // Clean paths (served over http) resolve exactly like the old #/ forms, and the explorer moved from /explorer to /explore.
 assert.equal(router.resolve('/explore'),'explorer');assert.equal(router.resolve('/explore/'),'explorer','a trailing slash is the same route');assert.equal(router.resolve('/explorer'),'explorer','the old explorer address still lands on the explorer');assert.equal(router.resolve('#/explorer'),'explorer');
 assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.resolve('/'),'zero');assert.equal(router.resolve('/no-such-page'),'zero');
+// /monitor was retired 2026-10-10; a bookmarked link must land on /stats, not silently redirect to home.
+assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link lands on stats, which carries the live pulse now');assert.equal(router.resolve('#/monitor'),'stats');
  assert.equal(writes.at(-1)[1],'none');
  await router.navigate('about');assert.equal(router.active,'about');assert.equal(context.ArkUI.sceneState.get().page,'about');
  assert.equal(description.value,'About-specific description');

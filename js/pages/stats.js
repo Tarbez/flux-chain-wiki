@@ -17,7 +17,7 @@
    CPU profiles, the ladder, batch checks, the certified-segment run, the
    retired fabric numbers) moved to docs/whitepaper.md, appendices B-F.
    Every figure is read from js/content/stats-highlights.js, shared with the
-   home page and /monitor. Change a number in its evidence record first. */
+   home page. Change a number in its evidence record first. */
 (function () {
   'use strict';
 
@@ -26,20 +26,16 @@
   var WHITEPAPER = 'docs/whitepaper.md';
   var ARTICLE_STORY = 'article/how-we-got-fast-and-what-we-got-wrong';
 
-  function el(tag, cls, text) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
-  }
-  function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
-  function href(key) { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key; }
-  function docHref(doc) {
-    var query = 'doc=' + encodeURIComponent(doc) + '&from=' + encodeURIComponent('/stats');
-    return ArkUI.route ? ArkUI.route.href('/reference?' + query) : '#/reference?' + query;
-  }
-  function pageLink(label, key, cls) { var a = el('a', cls, label); a.href = href(key); a.dataset.sceneLink = key; return a; }
-  function docLink(label, doc, cls) { var a = el('a', cls, label); a.href = docHref(doc); a.dataset.sceneLink = 'reference'; return a; }
+  /* The dashboard builders live in js/ark/dash-kit.js, shared with
+     /resolver-math so both pages are literally the same layout system
+     rather than two copies that drift. Bound to local names here so the
+     rest of this file reads as it did. */
+  var D = ArkUI.dash;
+  var el = D.el, fmt = D.fmt, bar = D.bar, panel = D.panel, sectionHead = D.sectionHead, stat = D.stat;
+  function href(key) { return D.href(key); }
+  function docHref(doc) { return D.docHref(doc, '/stats'); }
+  function pageLink(label, key, cls) { return D.pageLink(label, key, cls); }
+  function docLink(label, doc, cls) { return D.docLink(label, doc, '/stats', cls); }
   function ago(ms) {
     var min = Math.max(0, Math.round(ms / 60000));
     if (min < 1) return 'just now';
@@ -47,46 +43,16 @@
     var h = Math.floor(min / 60), m = min % 60;
     return h + ' h' + (m ? ' ' + m + ' min' : '') + ' ago';
   }
-  function bar(share, cls) {
-    var track = el('span', 'dash-bar' + (cls ? ' ' + cls : ''));
-    var fill = el('span', 'dash-bar-fill');
-    fill.style.setProperty('--w', Math.max(2, Math.min(100, share * 100)).toFixed(1) + '%');
-    track.appendChild(fill);
-    return track;
-  }
-  function panel(cls, label, title) {
-    var p = el('section', 'dash-panel ' + (cls || ''));
-    if (label) p.appendChild(el('p', 'dash-label', label));
-    if (title) p.appendChild(el('h2', 'dash-title', title));
-    return p;
-  }
-  function sectionHead(label, note) {
-    var h = el('div', 'dash-section');
-    h.appendChild(el('h2', 'dash-section-title', label));
-    if (note) h.appendChild(el('p', 'dash-section-note', note));
-    return h;
-  }
-  function stat(cls, label, value, unit, detail) {
-    var t = el('article', 'dash-stat ' + (cls || ''));
-    t.appendChild(el('p', 'dash-label', label));
-    var v = el('p', 'dash-stat-value');
-    var n = el('strong', null, value);
-    var u = el('span', 'dash-unit', unit || '');
-    v.appendChild(n); v.appendChild(u); t.appendChild(v);
-    var d = el('p', 'dash-stat-detail', detail || '');
-    t.appendChild(d);
-    return { tile: t, num: n, unit: u, detail: d };
-  }
 
   // Readiness: each line names its state and the evidence behind it.
   var READINESS = [
-    { state: 'done', badge: 'Code-path ceiling', title: 'Admit-path throughput (synthetic, not production)', text: '82,863 finalized transfers/s across all 10 flx-* nodes for 10 s with Lever A+B+C (TransferAtomic for same-shard, TransferSend/Receive for cross, hot-path cleanup); 108,362 tps combined with the local Mac. Each node benchmarks itself in-process — no network between nodes, no K-of-N replication latency, no external clients. The honest CPU ceiling of the admit code path, NOT real-user prod traffic. Zero errors.' },
+    { state: 'done', badge: 'Measured', title: 'Resolver throughput (synthetic, not production)', text: '256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live replicas, 60/60 audits passed (BENCH-012). Not production: no external users, and the party-to-shard transport is excluded. Earlier generations were measured in units this project no longer reports \u2014 see docs/deprecated.md. Earlier generations of this measurement are in the frozen BENCH records and docs/whitepaper-chain-era.md; they are not restated here.' },
     { state: 'done', badge: 'Passing', title: 'Attack suite', text: '7 of 7 attacks refused: replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation.' },
     { state: 'partial', badge: 'Partial', title: 'Sustained load', text: 'A 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.' },
     { state: 'done', badge: 'Measured', title: 'Full 10-node transfer bench', text: 'BENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 finalized transfers.' },
     { state: 'partial', badge: 'Partial', title: 'Live node discovery', text: 'The pulse reads a configured roster; nodes that join are not discovered automatically yet.' },
     { state: 'partial', badge: 'Partial', title: 'Evidence record for the headline run', text: 'Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.' },
-    { state: 'todo', badge: 'Not yet', title: 'K-of-N replication under load', text: 'Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
+    { state: 'todo', badge: 'Not yet', title: 'Pipelined broadcast to replicas', text: 'A signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the fleet near 2.2 batches/s and is the binding constraint on everything. The intended shape is one feed per pool. Historical: Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
     { state: 'todo', badge: 'Not yet', title: 'Public client traffic', text: 'Every client so far was operator-driven.' },
     { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain + certified-segment path.' }
   ];
@@ -94,9 +60,8 @@
   ArkUI.pageModules.stats = {
     mount: function (host) {
       var stats = window.ArkStatsHighlights || {};
-      var HT = stats.honestTransfers || {};
-      var SOAK = stats.chainFleetSoak || {};
-      var CERT = stats.certifiedFleet || {};
+      var DS = stats.defiShard || {};
+      var OPS = stats.operations || {};
       var registry = window.ArkResolverRegistry || {};
       var grammarOnly = (registry.chain && registry.chain.measured && registry.chain.measured.rate) || 83225;
 
@@ -125,75 +90,244 @@
       shell.appendChild(head);
 
       // ---- live ---------------------------------------------------------------------------------
-      shell.appendChild(sectionHead('Live', 'Hourly self-bench from flx-bk2 against every node in the roster. Capacity, not cumulative traffic.'));
-      var live = el('div', 'dash-grid');
+      // Every tile here is re-measured by the fleet itself — the admission
+      // bench hourly from flx-bk2, and swaps/transfers/stores hourly on
+      // EACH node's own hardware via its own ops-pulse daemon, summed here
+      // when fleet-pulse polls them. Nothing on this page is a live number
+      // standing in for a dated one, or a dated one standing in for live.
+      shell.appendChild(sectionHead('Live', 'Hourly self-bench, fleet-wide. Record admission from flx-bk2 against every node; swaps, transfers, stores and stakes from each node’s own hardware, summed here.'));
+      var live = el('div', 'dash-grid live-fleet-grid');
       var kNodes = stat('dash-span-3', 'Nodes online', '–', '', 'waiting for pulse');
-      var kRate = stat('dash-span-3 is-lead', 'Capacity now', '–', 'ops/s', 'waiting for pulse');
+      var kRate = stat('dash-span-3', 'Record admission now', '–', 'records/s', 'waiting for pulse');
       var kOps = stat('dash-span-3', 'Operations in last bench', '–', '', 'waiting for pulse');
       var kErr = stat('dash-span-3', 'Errors in last bench', '–', '', 'waiting for pulse');
-      [kNodes, kRate, kOps, kErr].forEach(function (k) { live.appendChild(k.tile); });
+      var kSwaps = stat('dash-span-3 is-lead', 'Swaps / s, fleet-wide', '–', 'swaps/s', 'waiting for pulse');
+      var kTransfers = stat('dash-span-3', 'Transfers / s, fleet-wide', '–', 'transfers/s', 'waiting for pulse');
+      var kStores = stat('dash-span-3', 'Stores / s, fleet-wide', '–', 'results/s', 'waiting for pulse');
+      var kStakes = stat('dash-span-3', 'Stakes / s, fleet-wide', '–', 'stakes/s', 'waiting for pulse');
+      var kPerCore = stat('dash-span-3', 'Swaps per core', '–', 'swaps/s', 'waiting for pulse');
+      [kNodes, kRate, kOps, kErr, kSwaps, kTransfers, kStores, kStakes, kPerCore].forEach(function (k) { live.appendChild(k.tile); });
       var nodesPanel = panel('dash-span-12', 'Nodes', null);
       var nodeList = el('ul', 'dash-nodes');
       nodeList.setAttribute('aria-label', 'Per-node results of the last pulse');
       var nodeEmpty = el('p', 'dash-empty', 'Loading the latest pulse…');
       nodesPanel.appendChild(nodeList); nodesPanel.appendChild(nodeEmpty);
       live.appendChild(nodesPanel);
+
+      // Per-node swaps/transfers/stores/stakes — the one breakdown the
+      // retired /monitor page carried that the fleet-wide tiles above do
+      // not: which node is contributing what, not just the sum.
+      var opsPanel = panel('dash-span-12', 'Nodes · swaps, transfers, stores, stakes', null);
+      var opsTableWrap = el('div', 'dash-table-wrap');
+      var opsEmpty = el('p', 'dash-empty', 'Waiting for each node\u2019s own ops-pulse…');
+      opsPanel.appendChild(opsTableWrap); opsPanel.appendChild(opsEmpty);
+      live.appendChild(opsPanel);
       shell.appendChild(live);
 
+      // ---- chain (dense-wire) ---------------------------------------------------------------------
+      // A SEPARATE mesh from the ark-miner-cli quorums above: the chain-server
+      // behind nodes.defxn.com (SEG_SUB/segments), the one the chat app will
+      // actually write to. Two numbers here are real today: the live
+      // WebSocket peer count (added 2026-10-11, confirmed end-to-end with
+      // the native fxn-browser app -- opening it moves this number, closing
+      // it moves it back) and the currently pending segment's signer-vote
+      // fraction. Live provider/supporter roster counts use a separate
+      // heartbeat-scoped wire read; committee liveness remains explicitly
+      // unavailable rather than guessed or reported as 0.
+      shell.appendChild(sectionHead('Chain · dense-wire', 'nodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to. Live where the wire protocol allows it; named as not-yet-available where it doesn’t.'));
+      var chain = el('div', 'dash-grid');
+      var cStatus = stat('dash-span-3', 'Chain reachable', '–', '', 'waiting for pulse');
+      var cPeers = stat('dash-span-3 is-lead', 'Peers connected now', '–', 'live', 'waiting for pulse');
+      var cSeg = stat('dash-span-3', 'Pending segment votes', '–', 'have/need', 'waiting for pulse');
+      var cLines = stat('dash-span-3', 'Lines in pending segment', '–', '', 'waiting for pulse');
+      var cSupporters = stat('dash-span-3', 'Live supporters', '–', '', 'waiting for roster status');
+      var cProviders = stat('dash-span-3', 'Live providers', '–', '', 'waiting for roster status');
+      [cStatus, cPeers, cSeg, cLines, cSupporters, cProviders].forEach(function (k) { chain.appendChild(k.tile); });
+      var chainNotes = panel('dash-span-12', 'Not yet available', 'Named, not guessed');
+      chainNotes.appendChild(el('p', 'dash-note', 'Signer liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command exposing per-signer vote identity, only the aggregate have/need count above.'));
+      chainNotes.appendChild(el('p', 'dash-note', 'Supporters and providers above are distinct live roster identities whose heartbeat has not expired; they are not WebSocket connection counts and are not earning balances.'));
+      chain.appendChild(chainNotes);
+      shell.appendChild(chain);
+
+      // ---- sovereign chains · compute credited (Track 24, added 2026-10-11) ---------------------
+      // Each launched chain stakes FXN on the base chain above, then runs
+      // its OWN committee and mints its OWN native token (1B units: <=30%
+      // distributed, the derived >=70% remainder reserved for compute
+      // work). `computeCredited` is read fresh every poll from two real
+      // balances (`computeRewardSupply - computeReserveRemaining`), never
+      // a stored counter — see ops/chain-pulse-api.mjs's `readSovereignChains`.
+      // An empty list is the honest, currently-true answer: no sovereign
+      // chain has launched on production yet, so there is nothing here to
+      // show, not a failure to measure.
+      shell.appendChild(sectionHead('Sovereign chains · compute credited', 'Chains launched on top of the base chain above, each with its own 1B-unit native token and its own compute-reward reserve. A number here means a real supporter-witness round trip actually moved real units out of that chain’s reserve.'));
+      var sovereignPanel = panel('dash-span-12', null, null);
+      var sovereignWrap = el('div', 'dash-table-wrap');
+      var sovereignEmpty = el('p', 'dash-empty', 'Waiting for the chain pulse…');
+      sovereignPanel.appendChild(sovereignWrap);
+      sovereignPanel.appendChild(sovereignEmpty);
+      shell.appendChild(sovereignPanel);
+
       // ---- audited baseline ---------------------------------------------------------------------
-      shell.appendChild(sectionHead('Audited baseline · ' + (HT.date || '2026-10-08'), 'The 10-node mesh run (BENCH-011, Lever A+B+C), reported as the three numbers the whitepaper requires together. Not live; re-run to update.'));
+      shell.appendChild(sectionHead('Measured resolver \u00b7 ' + (DS.date || '2026-10-10'), 'BENCH-012. Two parties sign their intent; a resolver shard resolves a batch and signs the result \u2014 that signature is the truth; replicas store it without re-verifying. Not live; re-run to update.'));
       var audited = el('div', 'dash-grid');
       [
-        ['dash-span-4 is-lead', 'Finalized transfers / s', HT.fleetFinalizedTps, 'transfers/s', 'What users get. A transfer counts only once its FINALIZE lands on a real COMMIT, ACCEPT and PREPARE.'],
-        ['dash-span-4', 'Logical operations / s', HT.fleetLogicalOpsPerSecond, 'ops/s', 'Every admitted ledger record: four per cross-shard transfer.'],
-        ['dash-span-4', 'Replica applications / s', HT.fleetReplicaAppsPerSecond, 'ops/s', 'Logical operations × 4 replicas per shard: the total work the committees did.']
-      ].forEach(function (s) { audited.appendChild(stat(s[0], s[1], fmt(s[2]), s[3], s[4]).tile); });
+        ['dash-span-4 is-lead', 'Swaps resolved / s', DS.swapsPerSecondResolved, 'swaps/s', (DS.batchesPerSecond || 153.7) + ' batch auctions per second x ' + (DS.swapsPerBatch || 256) + ' swaps per batch, on one resolver shard. Resolution only \u2014 never add the broadcast to this.'],
+        ['dash-span-4', 'Swaps per batch auction', DS.swapsPerBatch, 'swaps', 'Every intent in a batch clears at one price, so position inside the batch cannot change what anyone pays. ' + (DS.matchedInternallyPct || 100) + '% matched internally with zero curve slippage.'],
+        ['dash-span-4', 'Batch latency', DS.batchLatencyMs, 'ms', 'Batched signature verification is ' + (DS.verifyLatencyMsBatched || 10.403) + ' ms of it; the shard signing the result \u2014 the thing that makes it true \u2014 is ' + (DS.signLatencyMs || 0.0403) + ' ms.'],
+        ['dash-span-4', 'Bytes per signed result', DS.signedResultBytes, 'bytes', (DS.signedResultBytesRaw || 580) + ' bytes of dense FLX, ' + (DS.lzma2RunRatio || 3.22) + 'x smaller after LZMA2 across a run. Audit cost: ' + (DS.auditEd25519Verifies || 3) + ' Ed25519 verifications.']
+      ].forEach(function (s) { audited.appendChild(stat(s[0], s[1], s[2], s[3], s[4]).tile); });
 
-      var perNode = (HT.perNode || []).slice().sort(function (a, b) { return b.finalizedTps - a.finalizedTps; });
-      var maxTps = Math.max.apply(null, perNode.map(function (n) { return n.finalizedTps; }).concat([1]));
-      var nodesRun = panel('dash-span-8', 'Per node · each node’s own ' + (HT.windowSeconds || 10) + ' s window', 'Finalized transfers per second');
-      var runList = el('ol', 'dash-bars');
-      perNode.forEach(function (n) {
+      // The per-node transfer bars and the sustained-soak panel are RETIRED:
+      // both rendered rates per second of transfers or records, the unit this
+      // project no longer reports (docs/deprecated.md). Their numbers survive
+      // in the frozen BENCH records.
+      var registry = panel('dash-span-8', 'Resolver registry \u00b7 20 resolvers', 'What can be made real today');
+      var regList = el('ol', 'dash-bars');
+      [
+        ['DeFi-Swap-AMM', '2 signers \u00b7 batch auction + AMM residual', 'measured'],
+        ['Identity-Name-Ownership', '1 signer \u00b7 store and index ownership', 'measured'],
+        ['Device-Enrollment', '1 signer \u00b7 roster update', 'measured'],
+        ['Grammar-Admission-Floor', 'shape only \u00b7 no signature', 'measured'],
+        ['Stake-Position', '1 signer \u00b7 verifies its own signature', 'measured'],
+        ['15 further resolvers', 'lending, governance, vault, search, AI/TLM and more', 'not built']
+      ].forEach(function (r) {
         var li = el('li', 'dash-bars-row');
         var name = el('p', 'dash-bars-name');
-        name.appendChild(el('b', null, n.name));
-        name.appendChild(el('span', null, n.cpu + ' · ' + n.cores + ' cores · ' + n.region));
+        name.appendChild(el('b', null, r[0]));
+        name.appendChild(el('span', null, r[1]));
         li.appendChild(name);
-        li.appendChild(bar(n.finalizedTps / maxTps));
-        li.appendChild(el('strong', 'dash-bars-value', fmt(n.finalizedTps)));
-        runList.appendChild(li);
+        li.appendChild(el('span', 'dash-bar is-spacer'));
+        li.appendChild(el('strong', 'dash-bars-value', r[2]));
+        regList.appendChild(li);
       });
-      var total = el('li', 'dash-bars-row is-total');
-      var totalName = el('p', 'dash-bars-name'); totalName.appendChild(el('b', null, 'Fleet')); totalName.appendChild(el('span', null, fmt(HT.fleetFinalized) + ' transfers · ' + (HT.fleetErrors || 0) + ' errors'));
-      total.appendChild(totalName); total.appendChild(el('span', 'dash-bar is-spacer')); total.appendChild(el('strong', 'dash-bars-value', fmt(HT.fleetFinalizedTps)));
-      runList.appendChild(total);
-      nodesRun.appendChild(runList);
-      nodesRun.appendChild(el('p', 'dash-note', 'The total is the sum of each node’s own result: not an average, not a projection.'));
-      audited.appendChild(nodesRun);
+      registry.appendChild(regList);
+      registry.appendChild(el('p', 'dash-note', 'Not built is recorded as not built, never as zero: zero would mean measured and scored nothing. Each unbuilt resolver is a region of intent that cannot be made real yet. Full table and signed audit manifests: docs/resolver-audit.md.'));
+      audited.appendChild(registry);
 
-      var soak = panel('dash-span-4 dash-soak', 'Sustained · ' + Math.round(SOAK.durationSeconds || 303) + ' s soak', null);
-      var soakValue = el('p', 'dash-stat-value');
-      soakValue.appendChild(el('strong', null, fmt(SOAK.averageQps || 12403)));
-      soakValue.appendChild(el('span', 'dash-unit', 'records/s'));
-      soak.appendChild(soakValue);
-      var soakFacts = el('dl', 'dash-facts');
-      [['Accepted', fmt(SOAK.accepted || 0)], ['Failures', fmt(SOAK.failures || 0)], ['Nodes', String((SOAK.perNode || []).length)]].forEach(function (f) {
-        var row = el('div'); row.appendChild(el('dt', null, f[0])); row.appendChild(el('dd', null, f[1])); soakFacts.appendChild(row);
+      var constraint = panel('dash-span-4 dash-soak', 'The binding constraint', 'Broadcast is not pipelined');
+      var cValue = el('p', 'dash-stat-value');
+      cValue.appendChild(el('strong', null, String(DS.broadcastLatencyMs || 449)));
+      cValue.appendChild(el('span', 'dash-unit', 'ms to 10 replicas'));
+      constraint.appendChild(cValue);
+      var cFacts = el('dl', 'dash-facts');
+      [['To resolve', (DS.batchLatencyMs || 13.874) + ' ms'], ['To broadcast', (DS.broadcastLatencyMs || 449) + ' ms'], ['Replicas reached', String(DS.peersReached || 10)], ['Audits passed', (DS.auditsPassed || 60) + '/' + (DS.batches || 60)]].forEach(function (f) {
+        var row = el('div'); row.appendChild(el('dt', null, f[0])); row.appendChild(el('dd', null, f[1])); cFacts.appendChild(row);
       });
-      soak.appendChild(soakFacts);
-      var soakMax = Math.max.apply(null, (SOAK.perNode || []).map(function (n) { return n.accepted; }).concat([1]));
-      var soakList = el('ol', 'dash-mini');
-      (SOAK.perNode || []).forEach(function (n) {
-        var li = el('li');
-        li.appendChild(el('span', 'dash-mini-name', n.name));
-        li.appendChild(bar(n.accepted / soakMax, 'is-thin'));
-        li.appendChild(el('span', 'dash-mini-value', fmt(n.accepted)));
-        soakList.appendChild(li);
-      });
-      soak.appendChild(soakList);
-      soak.appendChild(el('p', 'dash-note', 'One client, six nodes under shared load (2026-10-08 soak; the full 10-node bench is BENCH-011). Ran on the local cache, not K-of-N replication.'));
-      audited.appendChild(soak);
+      constraint.appendChild(cFacts);
+      constraint.appendChild(el('p', 'dash-note', 'Serialised, this caps the fleet near 2.2 batches/s no matter how fast the resolver gets. The resolution figures above are resolution-only \u2014 never add the broadcast to them. The intended shape is one feed per pool.'));
+      audited.appendChild(constraint);
       shell.appendChild(audited);
+
+      // ---- every operation in its own unit (BENCH-013) -------------------------------------------
+      // Each operation carries its OWN unit. Rows are deliberately NOT
+      // ranked against each other: a transfer is one or two records, a
+      // swap is verify + auction + AMM + signature, and a replica store
+      // decides nothing. Comparing the numbers directly is the mistake
+      // this table exists to prevent.
+      shell.appendChild(sectionHead('Every operation in its own unit \u00b7 ' + (OPS.date || '2026-10-10'),
+        'BENCH-013. Transfers, swaps, staking and replica storage do different amounts of work, so each is measured in its own unit. One headline figure hid which operation was slow.'));
+      var opsPanel = el('section', 'dash-panel dash-span-12');
+      var opsWrap = el('div', 'dash-table-wrap');
+      var opsTable = el('table', 'dash-table');
+      var oHead = el('thead'), oHr = el('tr');
+      ['Operation', 'Rate', 'Unit', 'What it means'].forEach(function (c) {
+        var th = el('th', null, c); th.scope = 'col'; oHr.appendChild(th);
+      });
+      oHead.appendChild(oHr); opsTable.appendChild(oHead);
+      var oBody = el('tbody');
+      (OPS.rows || []).forEach(function (r) {
+        var tr = el('tr');
+        tr.appendChild(el('td', null, r.op));
+        tr.appendChild(el('td', 'is-num', fmt(r.rate)));
+        tr.appendChild(el('td', null, r.unit));
+        tr.appendChild(el('td', null, r.note));
+        oBody.appendChild(tr);
+      });
+      opsTable.appendChild(oBody); opsWrap.appendChild(opsTable); opsPanel.appendChild(opsWrap);
+      if ((OPS.notBuilt || []).length) {
+        opsPanel.appendChild(el('p', 'dash-note', 'Not built, named rather than reported as zero: ' + OPS.notBuilt.join(', ') + '. Zero would mean measured and scored nothing, which is a different and much stronger claim.'));
+      }
+      if (OPS.verdict) opsPanel.appendChild(el('p', 'dash-note', OPS.verdict));
+      opsPanel.appendChild(el('p', 'dash-note', 'No row is multiplied by a node or replica count, and rows are not comparable across units \u2014 do not rank them against each other.'));
+      shell.appendChild(opsPanel);
+
+      // ---- the fleet, measured concurrently -----------------------------------------------------
+      // A sum of concurrent measurements: every node ran at the same time
+      // with shards set to its own core count. Never one node's figure
+      // multiplied by ten — that multiplication is what this whole table
+      // exists to avoid.
+      if (OPS.fleet && (OPS.fleet.perNode || []).length) {
+        var FL = OPS.fleet;
+        shell.appendChild(sectionHead('The fleet, measured \u00b7 all ' + FL.nodes + ' nodes at once',
+          FL.parallelSwapsPerSecond.toLocaleString('en-US') + ' swaps/s across ' + FL.cores + ' cores, against ' + FL.oneShardSwapsPerSecond.toLocaleString('en-US') + ' with one shard per node \u2014 a ' + FL.parallelGain + 'x gain from parallelism alone.'));
+        var fleetGrid = el('div', 'dash-grid');
+        [
+          ['dash-span-3 is-lead', 'Fleet swaps / s', FL.parallelSwapsPerSecond, 'swaps/s'],
+          ['dash-span-3', 'Fleet transfers / s', FL.transfersPerSecond, 'transfers/s'],
+          ['dash-span-3', 'Fleet stores / s', FL.storesPerSecond, 'results/s'],
+          ['dash-span-3', 'Per core', FL.swapsPerCore, 'swaps/s']
+        ].forEach(function (t) {
+          fleetGrid.appendChild(stat(t[0] + ' dash-stat-audited', t[1], fmt(t[2]), t[3], '').tile);
+        });
+        shell.appendChild(fleetGrid);
+
+        var fleetPanel = panel('dash-span-12', 'Per node \u00b7 shards set to each node\u2019s core count', 'Core count does NOT predict the result');
+        var fleetList = el('ol', 'dash-bars');
+        var fMax = Math.max.apply(null, FL.perNode.map(function (n) { return n.swapsPerSecond; }).concat([1]));
+        FL.perNode.forEach(function (n) {
+          var li = el('li', 'dash-bars-row');
+          var nm = el('p', 'dash-bars-name');
+          nm.appendChild(el('b', null, n.node));
+          nm.appendChild(el('span', null, n.cores + (n.cores === 1 ? ' core' : ' cores')));
+          li.appendChild(nm);
+          li.appendChild(bar(n.swapsPerSecond / fMax));
+          li.appendChild(el('strong', 'dash-bars-value', fmt(n.swapsPerSecond)));
+          fleetList.appendChild(li);
+        });
+        fleetPanel.appendChild(fleetList);
+        fleetPanel.appendChild(el('p', 'dash-note', FL.note));
+        shell.appendChild(fleetPanel);
+      }
+
+      // ---- the route forward: one shard per performance core ------------------------------------
+      if ((OPS.shardScaling || []).length) {
+        var scale = panel('dash-span-12', 'The route forward \u00b7 parallel resolver shards', 'Each point RUN, never multiplied');
+        var scaleList = el('ol', 'dash-bars');
+        var scaleMax = Math.max.apply(null, OPS.shardScaling.map(function (p3) { return p3.swapsPerSecond; }).concat([1]));
+        OPS.shardScaling.forEach(function (p3) {
+          var li = el('li', 'dash-bars-row');
+          var nm = el('p', 'dash-bars-name');
+          nm.appendChild(el('b', null, p3.shards + (p3.shards === 1 ? ' shard' : ' shards')));
+          nm.appendChild(el('span', null, p3.efficiencyPct + '% of linear'));
+          li.appendChild(nm);
+          li.appendChild(bar(p3.swapsPerSecond / scaleMax));
+          li.appendChild(el('strong', 'dash-bars-value', fmt(p3.swapsPerSecond)));
+          scaleList.appendChild(li);
+        });
+        scale.appendChild(scaleList);
+        if (OPS.route) scale.appendChild(el('p', 'dash-note', OPS.route));
+        shell.appendChild(scale);
+      }
+
+      // ---- the swap lever that is not there -----------------------------------------------------
+      if ((OPS.batchSizeSweep || []).length) {
+        var sweep = panel('dash-span-12', 'Swap batch size \u00b7 the lever that is not there', 'A 64x increase in batch size bought 1.3x');
+        var sweepList = el('ol', 'dash-bars');
+        var sweepMax = Math.max.apply(null, OPS.batchSizeSweep.map(function (p2) { return p2.swapsPerSecond; }).concat([1]));
+        OPS.batchSizeSweep.forEach(function (p2) {
+          var li = el('li', 'dash-bars-row');
+          var nm = el('p', 'dash-bars-name');
+          nm.appendChild(el('b', null, fmt(p2.batch) + ' swaps/batch'));
+          nm.appendChild(el('span', null, 'signature verification ' + p2.verifySharePct + '% of the batch'));
+          li.appendChild(nm);
+          li.appendChild(bar(p2.swapsPerSecond / sweepMax));
+          li.appendChild(el('strong', 'dash-bars-value', fmt(p2.swapsPerSecond)));
+          sweepList.appendChild(li);
+        });
+        sweep.appendChild(sweepList);
+        sweep.appendChild(el('p', 'dash-note', 'Verification stays at 71-77% of a batch at every size, because batched Ed25519 is near-linear in signature count. Parallel shards buy 4.5x instead, measured by running eight of them.'));
+        shell.appendChild(sweep);
+      }
 
       // ---- benchmark runs -----------------------------------------------------------------------
       shell.appendChild(sectionHead('Benchmark runs', 'Every number above, and the other dated runs, with the record that holds its method and raw output.'));
@@ -205,11 +339,10 @@
       thead.appendChild(hr); table.appendChild(thead);
       var tbody = el('tbody');
       [
-        ['Transfer bench', '10 nodes, Lever A+B+C', fmt(HT.fleetFinalizedTps) + ' transfers/s', (HT.windowSeconds || 10) + ' s', fmt(HT.fleetErrors || 0), 'BENCH-011', 'docs/evidence/bench-011-ten-node-lever-abc.md'],
-        ['Fleet soak', '6 nodes, one client', fmt(SOAK.averageQps || 12403) + ' records/s', Math.round(SOAK.durationSeconds || 303) + ' s', fmt(SOAK.failures || 0), 'BENCH-004', 'docs/evidence/bench-004-chain-fleet-soak.md'],
-        ['Replicated soak', '6 nodes, K-of-N on', 'planned', '≥ 300 s', '—', 'BENCH-009', 'docs/evidence/bench-009-replicated-fleet-soak.md'],
-        ['Certified segment', (CERT.nodes || 9) + ' replicas, one ' + (CERT.quorum || '3-of-4') + ' certificate', fmt(CERT.combined || 1712006) + ' replica apps/s', fmt(CERT.operationsPerNode || 20000) + ' ops each', fmt(CERT.errors || 0), 'BENCH-007', 'docs/evidence/bench-007-nine-node-certified-resolver.md'],
-        ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '—', 'Whitepaper §2', WHITEPAPER]
+        ['Resolver batch', '256 signed intents, one shard', (DS.swapsPerBatch || 256) + ' swaps/batch', (DS.batchLatencyMs || 13.874) + ' ms', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
+        ['Signed-result broadcast', (DS.peersReached || 10) + ' replicas, store only', fmt(DS.replicationCostBytes || 1801) + ' bytes/batch', 'not pipelined', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
+        ['Resolver registry', '20 resolvers audited', '6 measured, 14 not built', 'audit', '\u2014', 'Resolver audit', 'docs/resolver-audit.md'],
+        ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '\u2014', 'Whitepaper \u00a73', WHITEPAPER]
       ].forEach(function (r) {
         var tr = el('tr');
         r.slice(0, 5).forEach(function (c, i) { tr.appendChild(el('td', i === 2 ? 'is-num' : null, c)); });
@@ -217,7 +350,7 @@
         tbody.appendChild(tr);
       });
       table.appendChild(tbody); wrap.appendChild(table); runs.appendChild(wrap);
-      runs.appendChild(el('p', 'dash-note', 'Each run measures something different. Do not add rows together, and do not quote replica applications as transfers.'));
+      runs.appendChild(el('p', 'dash-note', 'Each run measures something different. Do not add rows together, and never add the broadcast to the resolution latency.'));
       shell.appendChild(runs);
 
       // ---- readiness + deeper -------------------------------------------------------------------
@@ -248,7 +381,6 @@
       var links = el('ul', 'dash-links');
       [
         docLink('Whitepaper · how it works, what made it fast, every number’s source', WHITEPAPER),
-        pageLink('Live monitor · per-node pulse and session history', 'monitor'),
         pageLink('Resolvers · each one’s own measured throughput', 'resolvers'),
         pageLink('Finance ledger · double-spend by construction', 'stats/ledger'),
         pageLink('How we got fast, and what we got wrong', ARTICLE_STORY),
@@ -257,6 +389,100 @@
       deeper.appendChild(links);
       bottom.appendChild(deeper);
       shell.appendChild(bottom);
+
+      // ---- chain pulse wiring (separate endpoint, own short poll loop) --------------------------
+      var chainPollTimer = 0, chainDisposed = false, chainInFlight = false;
+      function paintChain(data) {
+        cStatus.tile.dataset.state = data.reachable ? 'ok' : 'down';
+        setStat(cStatus, data.reachable ? 'yes' : 'no', '', data.reachable ? '' : (data.lastError || 'chain-server unreachable'));
+        if (!data.reachable) {
+          setStat(cPeers, '–', 'live', 'no live value; nothing substituted');
+          setStat(cSeg, '–', 'have/need', 'no live value; nothing substituted');
+          setStat(cLines, '–', '', 'no live value; nothing substituted');
+          setStat(cSupporters, '–', '', 'no live roster value; nothing substituted');
+          setStat(cProviders, '–', '', 'no live roster value; nothing substituted');
+          paintSovereignChains(null);
+          return;
+        }
+        // Real-time WebSocket connections to the one node nodes.defxn.com
+        // resolves to -- rises the instant an app (the fxn-browser app, the
+        // nodes.defxn.com page itself, anything) opens a connection, falls
+        // the instant it closes. Not a chain record and not a fleet-wide
+        // sum -- see ops/chain-pulse-api.mjs's header for both reasons.
+        if (data.peerCount != null) {
+          cPeers.tile.dataset.state = 'ok';
+          setStat(cPeers, fmt(data.peerCount), 'of ' + fmt(data.peerCountMax), 'live on ' + (data.peerCountNode || 'the node nodes.defxn.com resolves to') + ' — rises/falls as apps open and close, right now');
+        } else {
+          setStat(cPeers, '–', 'live', 'no live value; nothing substituted');
+        }
+        if (data.segment) {
+          cSeg.tile.dataset.state = 'ok';
+          setStat(cSeg, data.segment.have + '/' + data.segment.need, 'have/need', 'root ' + data.segment.root.slice(0, 10) + '… · seq ' + data.segment.seq);
+          setStat(cLines, fmt(data.segment.linesCount), 'lines', 'in the currently pending segment');
+        } else {
+          cSeg.tile.dataset.state = 'ok';
+          setStat(cSeg, 'idle', 'have/need', 'real, measured state: nothing pending to sign right now, not a probe failure');
+          setStat(cLines, '0', 'lines', 'nothing pending');
+        }
+        if (data.supporterCount != null) {
+          cSupporters.tile.dataset.state = 'ok';
+          setStat(cSupporters, fmt(data.supporterCount), 'live', 'heartbeat-scoped identities on ' + (data.rosterChainId || 'defxn'));
+        } else {
+          setStat(cSupporters, '–', '', 'ROSTER_STATUS is not deployed or unreachable; nothing substituted');
+        }
+        if (data.providerCount != null) {
+          cProviders.tile.dataset.state = 'ok';
+          setStat(cProviders, fmt(data.providerCount), 'live', 'voting-role roster identities; separate from signer liveness');
+        } else {
+          setStat(cProviders, '–', '', 'ROSTER_STATUS is not deployed or unreachable; nothing substituted');
+        }
+        paintSovereignChains(data.sovereignChains);
+      }
+      function paintSovereignChains(chains) {
+        if (chains == null) {
+          sovereignWrap.textContent = '';
+          sovereignEmpty.hidden = false;
+          sovereignEmpty.textContent = 'CHAIN_LIST is not deployed on this node, or it is unreachable — no live value substituted.';
+          return;
+        }
+        if (!chains.length) {
+          sovereignWrap.textContent = '';
+          sovereignEmpty.hidden = false;
+          sovereignEmpty.textContent = 'Zero sovereign chains launched on this node right now — a real, measured zero, not a missing capability.';
+          return;
+        }
+        var table = el('table', 'dash-table'), thead = el('thead'), hr = el('tr');
+        ['Chain', 'Token', 'Compute credited', 'Reserve remaining', 'Treasury'].forEach(function (c) {
+          var th = el('th', null, c); th.scope = 'col'; hr.appendChild(th);
+        });
+        thead.appendChild(hr); table.appendChild(thead);
+        var body = el('tbody');
+        chains.forEach(function (c) {
+          var tr = el('tr');
+          tr.appendChild(el('td', null, c.chainId));
+          tr.appendChild(el('td', null, c.tokenSymbol));
+          tr.appendChild(el('td', 'is-num', c.computeCredited == null ? '–' : fmt(c.computeCredited) + ' / ' + fmt(c.computeRewardSupply)));
+          tr.appendChild(el('td', 'is-num', c.computeReserveRemaining == null ? '–' : fmt(c.computeReserveRemaining)));
+          tr.appendChild(el('td', 'is-num', c.treasuryBalance == null ? '–' : fmt(c.treasuryBalance) + ' / ' + fmt(c.distributedSupply)));
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
+        sovereignWrap.textContent = ''; sovereignWrap.appendChild(table); sovereignEmpty.hidden = true;
+      }
+      function checkChain() {
+        if (chainDisposed || chainInFlight) return;
+        if (!window.ArkChainPulse) { paintChain({ reachable: false, lastError: 'chain pulse client not loaded' }); return; }
+        chainInFlight = true;
+        window.ArkChainPulse.get().then(function (result) {
+          if (!chainDisposed) paintChain(result.data);
+        }).catch(function (e) {
+          if (!chainDisposed) paintChain({ reachable: false, lastError: e && e.message ? e.message : 'unknown error' });
+        }).then(function () {
+          chainInFlight = false;
+          if (!chainDisposed) chainPollTimer = setTimeout(checkChain, POLL_MS);
+        });
+      }
+      checkChain();
 
       // ---- live wiring --------------------------------------------------------------------------
       var lastPulse = null, nextAt = 0, pollTimer = 0, clockTimer = 0, disposed = false, inFlight = false;
@@ -288,6 +514,30 @@
         });
         nodeEmpty.hidden = true;
       }
+      function paintOpsTable(ops) {
+        if (!ops || !(ops.per_node || []).length) {
+          opsTableWrap.textContent = ''; opsEmpty.hidden = false;
+          opsEmpty.textContent = 'Not reporting yet \u2014 no live value substituted.';
+          return;
+        }
+        var sorted = ops.per_node.slice().sort(function (a, b) { return (b.swaps_per_second || 0) - (a.swaps_per_second || 0); });
+        var table = el('table', 'dash-table'), thead = el('thead'), hr = el('tr');
+        ['Node', 'Swaps/s', 'Transfers/s', 'Stores/s', 'Stakes/s', 'Cores'].forEach(function (c) { var th = el('th', null, c); th.scope = 'col'; hr.appendChild(th); });
+        thead.appendChild(hr); table.appendChild(thead);
+        var body = el('tbody');
+        sorted.forEach(function (n) {
+          var tr = el('tr');
+          var name = el('td'); var nh = el('span', 'dash-node-head'); nh.appendChild(el('span', 'dash-dot')); nh.appendChild(el('b', null, n.node)); name.appendChild(nh); tr.appendChild(name);
+          tr.appendChild(el('td', 'is-num', fmt(n.swaps_per_second)));
+          tr.appendChild(el('td', 'is-num', fmt(n.transfers_per_second)));
+          tr.appendChild(el('td', 'is-num', fmt(n.stores_per_second)));
+          tr.appendChild(el('td', 'is-num', fmt(n.stakes_per_second || 0)));
+          tr.appendChild(el('td', 'is-num', String(n.cores)));
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
+        opsTableWrap.textContent = ''; opsTableWrap.appendChild(table); opsEmpty.hidden = true;
+      }
       function paintAge() {
         if (lastPulse) {
           var age = Date.now() - lastPulse.measured_at_ms;
@@ -307,11 +557,29 @@
         pill.dataset.state = healthy ? 'ok' : 'warn';
         pill.textContent = healthy ? 'All systems normal' : stale ? 'Pulse is stale' : up < count ? (count - up) + ' of ' + count + ' nodes down' : 'Errors in last bench';
         setStat(kNodes, up + '/' + count, 'nodes', up === count ? 'every node in the roster answered' : (count - up) + ' did not answer');
-        setStat(kRate, fmt(data.aggregate_qps), 'ops/s', 'all nodes in parallel, ' + fmt(data.longest_ms) + ' ms wall clock');
+        setStat(kRate, fmt(data.aggregate_qps), 'records/s', 'genesis + receive admission, all nodes in parallel, ' + fmt(data.longest_ms) + ' ms wall clock — not a swap or store bench; see the tiles below');
         setStat(kOps, fmt(data.total_entries), 'ops', 'synthetic writes in the last self-bench');
         setStat(kErr, fmt(data.errors), '', data.errors ? 'see the nodes below' : 'zero refusals');
         kErr.tile.dataset.state = data.errors ? 'warn' : 'ok';
+        var ops = data.operations;
+        if (ops) {
+          var partial = ops.nodes_reporting < ops.nodes_total;
+          var reportingNote = partial
+            ? ops.nodes_reporting + ' of ' + ops.nodes_total + ' nodes reporting — the rest have not completed their first hourly self-bench yet, so this is a real PARTIAL sum, not a full fleet total'
+            : 'all ' + ops.nodes_total + ' nodes reporting, measured on each node’s own hardware';
+          setStat(kSwaps, fmt(ops.parallel_swaps_per_second), 'swaps/s', reportingNote);
+          setStat(kTransfers, fmt(ops.transfers_per_second), 'transfers/s', reportingNote);
+          setStat(kStores, fmt(ops.stores_per_second), 'results/s', reportingNote);
+          setStat(kStakes, fmt(ops.stakes_per_second), 'stakes/s', reportingNote);
+          setStat(kPerCore, fmt(ops.swaps_per_core), 'swaps/s', ops.cores + ' cores total — derived from the fleet swap total, never typed separately');
+          [kSwaps, kTransfers, kStores, kStakes, kPerCore].forEach(function (k) { k.tile.dataset.state = partial ? 'warn' : 'ok'; });
+        } else {
+          [kSwaps, kTransfers, kStores, kStakes, kPerCore].forEach(function (k) {
+            setStat(k, '–', k.unit.textContent, 'not reporting yet — no live value substituted');
+          });
+        }
         paintNodes(data);
+        paintOpsTable(ops);
         paintAge();
       }
       function paintOffline(message) {
@@ -319,10 +587,13 @@
         pill.textContent = 'Pulse unreachable';
         if (!lastPulse) {
           updated.textContent = 'No pulse received yet';
-          [kNodes, kRate, kOps, kErr].forEach(function (k) { setStat(k, '–', k.unit.textContent, 'no live value; nothing substituted'); });
+          [kNodes, kRate, kOps, kErr, kSwaps, kTransfers, kStores, kStakes, kPerCore].forEach(function (k) { setStat(k, '–', k.unit.textContent, 'no live value; nothing substituted'); });
           nodeList.textContent = '';
           nodeEmpty.hidden = false;
-          nodeEmpty.textContent = 'The fleet pulse could not be reached (' + message + '). The audited figures below are dated evidence and still stand; no live number has been put in their place.';
+          nodeEmpty.textContent = 'The fleet pulse could not be reached (' + message + '). The dated evidence records further down still stand; no live number has been put in their place.';
+          opsTableWrap.textContent = '';
+          opsEmpty.hidden = false;
+          opsEmpty.textContent = 'The fleet pulse could not be reached (' + message + ').';
         } else {
           updated.textContent = 'Last good pulse ' + ago(Date.now() - lastPulse.measured_at_ms) + ' · latest check failed';
         }
@@ -357,7 +628,8 @@
 
       page.arkDispose = function () {
         disposed = true;
-        clearTimeout(pollTimer); clearInterval(clockTimer);
+        chainDisposed = true;
+        clearTimeout(pollTimer); clearInterval(clockTimer); clearTimeout(chainPollTimer);
         document.removeEventListener('visibilitychange', onVisibility);
       };
       host.appendChild(page);

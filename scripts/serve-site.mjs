@@ -51,6 +51,15 @@ createServer(async (req, res) => {
     if (PRIVATE.test(pathname)) { res.writeHead(404).end('Not found'); return; }
     let file = pathname === '/' ? join(ROOT, 'index.html') : await fileFor(pathname);
     if (!file) file = await fileFor(assetPath(pathname));
+    /* A standalone page (resolver-math.html, broker.html) must answer on its
+       clean path too, BEFORE the index.html fallback — otherwise /resolver-math
+       silently serves the app shell, which looks like a page that does not load.
+       The private check is re-applied to the candidate: without it, /admin would
+       newly resolve to admin.html and bypass PRIVATE entirely. */
+    if (!file && !extname(pathname)) {
+      const candidate = pathname.replace(/\/+$/, '') + '.html';
+      if (!PRIVATE.test(candidate)) file = await fileFor(candidate);
+    }
     if (!file && !extname(pathname)) file = join(ROOT, 'index.html');
     if (!file) { res.writeHead(404, { 'content-type': 'text/plain' }).end('Not found'); return; }
     const body = await readFile(file);

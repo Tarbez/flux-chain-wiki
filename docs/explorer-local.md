@@ -1,6 +1,6 @@
 # Local Mesh Explorer contract
 
-The public-site route `#/explorer` is a read-only observer of one local Flux Miner. It is not a global block explorer, consensus height, proof of network membership, or production monitoring service. The owner selected **local Miner only for now**; the endpoint is fixed to `http://127.0.0.1:8766`. No public URL or fallback data is configured.
+The public-site route `#/explorer` is a read-only observer of one local Flux Miner. It is not a global index, a network-wide height, proof of network membership, or production monitoring service. The owner selected **local Miner only for now**; the endpoint is fixed to `http://127.0.0.1:8766`. No public URL or fallback data is configured.
 
 ## Connection and data boundary
 

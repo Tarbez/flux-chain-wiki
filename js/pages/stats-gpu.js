@@ -54,7 +54,7 @@
       page.innerHTML = '<div class="stats-shell"><div class="stats-bento">' +
         tile('stats-hero', '', '<p class="stats-kicker">Measured, not claimed</p><h1 id="statsgpu-title">The GPU does nothing here</h1>' +
           '<p>We rented a box with an RTX PRO 6000 to see whether more hardware would help. It did not, and this time we can say exactly why: the protocol never addresses the GPU at all. It is signatures and hashing on the CPU. The box is fast because of its <em>CPU</em>, and that is worth measuring.</p>' +
-          '<p class="stats-chips"><span>2026-10-07</span><span>registered grammar</span><span>accepted finality</span></p>' +
+          '<p class="stats-chips"><span>2026-10-07</span><span>registered grammar</span><span>measured, not production</span></p>' +
           '<a class="stats-monitor-link" href="' + href('stats') + '" data-scene-link="stats"><span aria-hidden="true">←</span> Back to the measurements</a>') +
 
         tile('stats-span-7', 'What touches the GPU', '<h2>Nothing of ours, checked four ways</h2>' +
@@ -65,12 +65,12 @@
         tile('stats-span-5 stats-scope', 'So why was it fast?', '<ul class="stats-scope-list is-single">' +
           '<li><strong>The CPU.</strong> A modern AMD EPYC verifies an ed25519 signature in about half the time of the fleet’s Intel Xeons, and verification is ~55% of a server’s work.</li>' +
           '<li><strong>Not the GPU.</strong> It sat idle for us throughout; its power draw was other tenants’ work.</li>' +
-          '<li><strong>Eco by consequence.</strong> A validator needs a plain CPU core, not an accelerator.</li></ul>', 'statsgpu-why-title') +
+          '<li><strong>Eco by consequence.</strong> A resolver shard needs a plain CPU core, not an accelerator.</li></ul>', 'statsgpu-why-title') +
 
         tile('stats-span-6', 'Per core: one signature verify', '<h2>Half the time on EPYC</h2>' + bars(CPUS, maxSig, '', 'sig', 'Single ed25519 verify') +
           '<p class="stats-tile-copy">One ed25519 verify, one core. The whole speed story is here: EPYC does it in ~25 µs, the Xeon in ~52 µs.</p>', 'statsgpu-sig-title') +
         tile('stats-span-6', 'Per core: grammar throughput', '<h2>~2.5x the Xeon, same code</h2>' + bars(CPUS, maxGrammar, ' /s', 'batch', 'Grammar throughput with batch verification') +
-          '<p class="stats-tile-copy">2 server + 2 client cores, burst batch verification, accepted finality. eul-4c is a dedicated EPYC and the trustworthy read; the GPU box runs a little higher but is a shared, contended host, so treat it as noisy.</p>', 'statsgpu-grammar-title') +
+          '<p class="stats-tile-copy">2 server + 2 client cores, burst batch verification, measured on a prototype. eul-4c is a dedicated EPYC and the trustworthy read; the GPU box runs a little higher but is a shared, contended host, so treat it as noisy.</p>', 'statsgpu-grammar-title') +
 
         tile('stats-span-12', 'Over the real internet', '<h2>Batching beats distance</h2>' +
           '<p class="stats-tile-copy">The GPU box gave the first genuine wide-area client. Real round trips: 71 ms to bk2, 143 ms to eul-4c. One transfer per write is capped by the round trip; five per write amortise it and recover about 5,000/s on both paths — the pipelining lesson, now over a real intercontinental link.</p>' +

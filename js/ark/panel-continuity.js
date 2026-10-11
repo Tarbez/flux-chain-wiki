@@ -4,8 +4,8 @@
   'use strict';
   ArkUI.createPanelContinuity = function (scene) {
     var host = null, animation = null, revision = 0, sourceKey = null, sourcePage = null, sourceQuery = null, sourceClass = null, destination = null;
-    function family(page) { return String(page).indexOf('how/')===0 || ['reference', 'resolver', 'references', 'deployment'].indexOf(page) >= 0 || page === 'lifecycle' || String(page).indexOf('lifecycle/') === 0 || String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || String(page).indexOf('resolutions/') === 0 || ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0; }
-    function group(page) { return page === 'reference' ? 'reference' : (String(page).indexOf('how/')===0 || ['resolver', 'references', 'deployment'].indexOf(page) >= 0) ? 'guide' : String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || String(page).indexOf('resolutions/') === 0 ? 'mechanism' : ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0 ? 'task' : 'lifecycle'; }
+    function family(page) { return page === 'chain' || String(page).indexOf('how/')===0 || ['reference', 'resolver', 'references', 'deployment'].indexOf(page) >= 0 || page === 'lifecycle' || String(page).indexOf('lifecycle/') === 0 || String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || String(page).indexOf('resolutions/') === 0 || ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0; }
+    function group(page) { return page === 'reference' ? 'reference' : page === 'chain' ? 'chain' : (String(page).indexOf('how/')===0 || ['resolver', 'references', 'deployment'].indexOf(page) >= 0) ? 'guide' : String(page).indexOf('concept/') === 0 || page === 'dao' || page === 'about' || page === 'resolutions' || String(page).indexOf('resolutions/') === 0 ? 'mechanism' : ['download','deploy','explorer','account','treasury','deposits','proximity','lab'].indexOf(page)>=0 || String(page).indexOf('article/')===0 ? 'task' : 'lifecycle'; }
     function bounds(el) {
       var box = el.getBoundingClientRect(), base = scene.getBoundingClientRect();
       return { left: box.left - base.left, top: box.top - base.top, width: box.width, height: box.height };
@@ -24,6 +24,10 @@
       var box = scene.getBoundingClientRect();
       var panelPage = page || host && host.dataset.panelPage;
       if (panelPage === 'account') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-148) };
+      /* top:84 matches every other full-bleed target (account) below --
+         64 sat close enough to the 64px header that the box visibly
+         crossed through the nav items while animating open or closed. */
+      if (panelPage === 'chain') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-148) };
       var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
       var resolutionDetail = String(panelPage).indexOf('resolutions/') === 0;
       var maxWidth = panelPage === 'about' ? 1920 : panelPage === 'resolutions' ? 1480 : resolutionDetail ? 1280 : panelPage === 'deployment' || panelPage === 'explorer' || panelPage === 'account' ? 1600 : 1080;
@@ -82,9 +86,9 @@
       begin: function (outgoing, incoming, pages, source, immediate) {
         if (!family(incoming) && !host) return null;
         stop();
-        var ticket = ++revision, returning = !!host && (incoming === sourcePage || incoming === 'zero' && host.dataset.panelHost === 'lifecycle');
+        var ticket = ++revision, returning = !!host && (incoming === sourcePage || incoming === 'zero' && (host.dataset.panelHost === 'lifecycle' || host.dataset.panelHost === 'chain'));
         var origin = source && source.closest ? source.closest('[data-continuity-card]') : null;
-        if (!origin && group(incoming) === 'lifecycle' && pages[outgoing]) origin = pages[outgoing].querySelector('.home-lifecycle');
+        if (!origin && (group(incoming) === 'lifecycle' || group(incoming) === 'chain') && pages[outgoing]) origin = pages[outgoing].querySelector('.home-lifecycle');
         var expanding = family(incoming) && !host && origin;
         if (expanding) {
           var initial = bounds(origin),originPadding=typeof getComputedStyle==='function'?getComputedStyle(origin).padding:'18px';
@@ -127,9 +131,10 @@
                 compactContents.remove();
                 compact.parentNode.replaceChild(host, compact);
                 host.classList.remove('continuity-host');
+                var returnedKind = host.dataset.panelHost;
                 delete host.dataset.panelHost; delete host.dataset.panelMode; delete host.dataset.panelPage;
                 host.removeAttribute('style'); host.inert = false;
-                if (sourcePage && sourcePage !== 'zero') host.removeAttribute('aria-label'); else host.setAttribute('aria-label', 'The agreement lifecycle');
+                if (sourcePage && sourcePage !== 'zero') host.removeAttribute('aria-label'); else host.setAttribute('aria-label', returnedKind === 'chain' ? 'The chain of chains' : 'The agreement lifecycle');
                 var focus = sourceKey && host.querySelector('[data-scene-link="' + sourceKey + '"]') || host.querySelector('.home-lifecycle-all');
                 if (focus) focus.focus({ preventScroll: true });
                 host = null; sourceKey = null; sourcePage = null; sourceClass = null;
@@ -140,7 +145,7 @@
               return Promise.resolve();
             }
             host.replaceChildren(el);
-            host.setAttribute('aria-label', incoming === 'reference' ? 'Canonical reference dashboard' : group(incoming) === 'guide' ? 'DEFXN explanation dashboard' : group(incoming) === 'mechanism' ? 'Mechanism dashboard' : group(incoming) === 'task' ? 'Task dashboard' : 'Agreement lifecycle dashboard');
+            host.setAttribute('aria-label', incoming === 'reference' ? 'Canonical reference dashboard' : group(incoming) === 'guide' ? 'DEFXN explanation dashboard' : group(incoming) === 'mechanism' ? 'Mechanism dashboard' : group(incoming) === 'task' ? 'Task dashboard' : group(incoming) === 'chain' ? 'The chain of chains dashboard' : 'Agreement lifecycle dashboard');
             host.dataset.panelMode = 'dashboard';
             host.inert = false;
             if(opening && !immediate){

@@ -24,6 +24,16 @@
 .ark-background-host { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 :root[data-background]:not([data-background="original"]) .hero-atmosphere { display:none; }
 .site-settings { position:absolute; left:20px; bottom:14px; z-index:15; }
+/* Persistent footer chrome, always on screen like the gear beside it: who
+   runs this (left) and the standing rights line (right). Quiet enough to
+   never compete with route content, never hidden behind it either. */
+.site-credit,.site-copyright { position:absolute; z-index:14; margin:0; font:500 10px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.04em; color:hsl(var(--text-faint)); pointer-events:none; white-space:nowrap; }
+.site-credit { left:62px; bottom:28px; }
+/* The "← Back home" control (css/navigation.css) sits in this same corner
+   on inner pages at bottom:14px, ~44px tall -- the copyright has to clear
+   it, not sit under it. */
+.site-copyright { right:20px; bottom:68px; }
+@media(max-width:760px){ .site-credit,.site-copyright { display:none; } }
 .site-settings,.settings-root { width:44px; background:none; border:0; box-shadow:none; }
 .settings-root { display:block; }
 .settings-trigger { display:grid; place-items:center; width:44px; height:44px; padding:0; border:0; border-radius:50%; background:transparent; color:hsl(var(--text-muted)); font-size:19px; cursor:pointer; transition:color 180ms,background 180ms; }

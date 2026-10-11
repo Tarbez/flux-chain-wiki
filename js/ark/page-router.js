@@ -81,6 +81,8 @@
       if (path === 'work' || path === '/work') return 'lab';
       if (path === 'proximity') return 'proximity';
       if (path === 'concept') return 'concept';
+      /* /monitor was retired 2026-10-10; /stats carries the same live pulse now, plus the dated evidence the old page never had. */
+      if (path === '/monitor') return 'stats';
       if (Object.prototype.hasOwnProperty.call(catalog, path)) return path;
       return Object.keys(catalog).find(function (key) { return catalog[key].path === path; }) || 'zero';
     }

@@ -5,7 +5,7 @@
 
    Scope is deliberately narrow: HEALTH AND MEMBERSHIP ONLY, not live throughput.
    Polling each quorum's own "members" command is cheap and safe -- it touches no
-   write path and adds no load beyond what /monitor's dashboard already implies.
+   write path and adds no load beyond what a dashboard read already implies.
    Measuring real tx/s live would mean running synthetic transfer bursts against
    production-adjacent quorums on a schedule; that's a different, heavier decision
    (own load profile, own risk of repeating this project's earlier production
@@ -28,7 +28,7 @@ const REQUEST_TIMEOUT_MS = 3000;
 
 // The real, currently-running quorums (bench-003 §4/§8/§9's "Current live
 // configuration"), kept here as the one place this list is authored -- update
-// here, not in monitor.js, if a quorum's membership or port ever changes.
+// here, not duplicated elsewhere, if a quorum's membership or port ever changes.
 const QUORUMS = [
   { id: 'A', port: 18994, members: [
     { id: 'validator-mk2', host: '162.35.27.39' },

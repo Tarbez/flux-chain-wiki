@@ -19,11 +19,10 @@ assert.equal(manifests[1].meta.next, 'deployment');
 assert.equal(manifests[2].meta.next, 'download');
 
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
-assert(home.includes("primary.dataset.sceneLink = 'deployment'"));
-assert(home.includes("secondary.dataset.sceneLink = 'download'"));
-assert(home.includes("['HOME.QUESTION.RESOLVER', 'resolver']"));
+assert(home.includes("learn.dataset.sceneLink = 'deployment'"), 'the Learn CTA opens the interactive walkthrough');
+assert(home.includes("pressureTest.dataset.sceneLink = 'resolver'"), 'the Pressure-test link opens the resolver guide');
 assert(fs.readFileSync('js/resolvers/header.js', 'utf8').includes("['NAV.OVERVIEW', 'about']"), 'overview remains reachable in shared navigation');
-assert(home.includes("lifecycle.className = 'home-lifecycle'"), 'the right-side agreement lifecycle remains on the home page');
+assert(home.includes("lifecycle.className = 'home-lifecycle home-chain-teaser'"), 'a compact chain teaser remains on the home page, the one path to /chain');
 assert(!home.includes("signal.className = 'home-signal-map'"), 'the decorative signal diagram no longer competes with the decision path');
 
 const catalogSource = fs.readFileSync('js/pages/catalog.js', 'utf8');

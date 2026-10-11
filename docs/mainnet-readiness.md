@@ -1,5 +1,29 @@
 # Mainnet readiness: gap inventory
 
+> **SUPERSEDED 2026-10-10 — HISTORICAL RECORD.**
+>
+> This document is a readiness assessment of a direction that has been
+> **retired**: agreement-fabric quorums, a distributed signer set,
+> durable-vs-accepted thresholds, and throughput measured as transactions
+> per second. It is preserved intact because it is the evidence for why
+> that direction was retired, and because its operational gaps (custody,
+> runbooks, rollback, monitoring) remain real under any model.
+>
+> It uses vocabulary this project no longer uses. Read it as history, not
+> as the current plan. Rewriting its sentences into the current model
+> would describe a system this document never assessed.
+>
+> **The current model** is signed resolution: two parties sign → a
+> resolver shard resolves → the shard signs the result → replicas store →
+> anyone audits. See [deprecated.md](deprecated.md),
+> [resolver math](resolver-math.md), [resolver audit](resolver-audit.md),
+> and [FLEET-PLAN](fleet-plan-2026-10-10.md).
+>
+> **Still live from this document, under any model:** seed and key
+> custody, a runbook, deploy and rollback, monitoring and alerting, a
+> devnet separate from production machines, and independent review. Those
+> carry forward into the fleet plan.
+
 Observed: 2026-10-07, substantively updated 2026-10-08. Written after
 BENCH-003 (real fleet throughput ceiling, auto-join) closed with a real,
 audited number. This is not a release announcement — it is the list of

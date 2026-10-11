@@ -9,15 +9,16 @@ ArkUI.pageModules.zero = {
     ].join('\n'), host);
     el.classList.add('ark-page'); el.dataset.arkPage = 'zero';
     var body = el.querySelector('.ark-hero-body');
+    body.classList.add('home-centered');
     var heading = body.querySelector('.ark-hero-title');
     var headline = ArkCopy.text('HOME.TITLE');
     if (heading) {
       heading.textContent = '';
       var mainLine = document.createElement('span');
       mainLine.className = 'home-headline-main';
-      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='What if every identity';
-      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent='had';
-      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='its own chain?';
+      var lead=document.createElement('span');lead.className='home-headline-lead';lead.textContent='Every identity has';
+      var pivot=document.createElement('span');pivot.className='home-headline-pivot';pivot.textContent='its own chain,';
+      var reveal=document.createElement('span');reveal.className='home-headline-network';reveal.textContent='bound into a chain of chains.';
       mainLine.appendChild(lead);mainLine.appendChild(pivot);mainLine.appendChild(reveal);
       heading.appendChild(mainLine);
       heading.setAttribute('aria-label', headline);
@@ -34,49 +35,94 @@ ArkUI.pageModules.zero = {
       var text = document.createElement('strong'); text.className = 'home-cta-label'; text.textContent = label;
       copy.appendChild(meta); copy.appendChild(text); link.appendChild(copy);
     }
-    var primary = document.createElement('a');
-    primary.className = 'home-primary-cta';
-    primary.href = pageHref('deployment'); primary.dataset.sceneLink = 'deployment';
-    primary.setAttribute('aria-label', ArkCopy.text('HOME.CTA'));
-    actionCopy(primary, 'Interactive walkthrough', ArkCopy.text('HOME.CTA'));
-    actions.appendChild(primary);
-    var secondary = document.createElement('a');
-    secondary.className = 'home-ghost-cta';
-    secondary.href = pageHref('download'); secondary.dataset.sceneLink = 'download';
-    secondary.setAttribute('aria-label', ArkCopy.text('HOME.SECONDARY'));
-    actionCopy(secondary, 'Build it yourself', ArkCopy.text('HOME.SECONDARY'));
-    actions.appendChild(secondary);
-    var questions = document.createElement('nav');
-    questions.className = 'home-question-links';
-    questions.setAttribute('aria-label', 'Learn about DEFXN');
-    [['HOME.QUESTION.RESOLVER', 'resolver']].forEach(function (item) {
-      var link = document.createElement('a');
-      link.href = pageHref(item[1]); link.dataset.sceneLink = item[1];
-      link.textContent = ArkCopy.text(item[0]);
-      questions.appendChild(link);
-    });
-    actions.appendChild(questions);
+    // One dominant action -- learn the model -- so the hero has a single
+    // answer to "what do I click." Explore and pressure-test are real,
+    // named paths but read as secondary, not three boxes of equal weight.
+    var learn = document.createElement('a');
+    learn.className = 'home-primary-cta';
+    learn.href = pageHref('deployment'); learn.dataset.sceneLink = 'deployment';
+    learn.setAttribute('aria-label', ArkCopy.text('HOME.CTA'));
+    actionCopy(learn, 'Learn', ArkCopy.text('HOME.CTA'));
+    actions.appendChild(learn);
     body.appendChild(actions);
 
+    var questions = document.createElement('nav');
+    questions.className = 'home-question-links';
+    questions.setAttribute('aria-label', 'Pressure-test a claim yourself');
+    var pressureTest = document.createElement('a');
+    pressureTest.href = pageHref('resolver'); pressureTest.dataset.sceneLink = 'resolver';
+    pressureTest.textContent = ArkCopy.text('HOME.PRESSURETEST');
+    questions.appendChild(pressureTest);
+    body.appendChild(questions);
+
+    // The left column: the chain teaser, then a compact grid of icon
+    // references to the core pages below it. One wrapper so both share the
+    // same grid cell and stack by normal document flow inside it.
+    var leftColumn = document.createElement('div');
+    leftColumn.className = 'home-left-column';
+
+    // Compact teaser for the full chain-of-chains walkthrough: a small
+    // fraction of the real scene, enough to recognize it, before the panel
+    // expands into /chain and reassembles itself there.
     var lifecycle = document.createElement('nav');
-    lifecycle.className = 'home-lifecycle';
+    lifecycle.className = 'home-lifecycle home-chain-teaser';
     lifecycle.setAttribute('aria-label', 'How one record joins the chain');
     var caption = document.createElement('p'); caption.className = 'home-lifecycle-caption';
-    caption.textContent = 'The FXN chain'; lifecycle.appendChild(caption);
+    caption.textContent = 'The chain of chains'; lifecycle.appendChild(caption);
     var title = document.createElement('strong'); title.className = 'home-cycle-title';
     title.textContent = 'Every record extends its own chain.'; lifecycle.appendChild(title);
-    var flow=ArkUI.buildChainFlow({hrefFor:pageHref});
-    lifecycle.appendChild(flow.element);
-    // One onward action, styled as a tile: what it is, then where it goes.
-    var open = document.createElement('a'); open.className = 'home-lifecycle-all';
-    open.href = pageHref('resolvers'); open.dataset.sceneLink = 'resolvers';open.dataset.icon='arrow-right';
-    open.setAttribute('aria-label', 'See what each resolver reads from the chain');
-    var openCopy = document.createElement('span'); openCopy.className = 'home-lifecycle-all-copy';
-    var openKicker = document.createElement('small'); openKicker.textContent = 'Resolvers';
-    var openLabel = document.createElement('span'); openLabel.textContent = 'See what each resolver reads from the chain';
-    openCopy.appendChild(openKicker); openCopy.appendChild(openLabel); open.appendChild(openCopy);
-    lifecycle.appendChild(open);
-    el.appendChild(lifecycle);
+    var preview = document.createElement('div'); preview.className = 'home-chain-teaser-strip';
+    preview.setAttribute('aria-hidden', 'true');
+    for (var dot = 0; dot < 5; dot++) preview.appendChild(document.createElement('span'));
+    lifecycle.appendChild(preview);
+    // Three onward actions, not one: the same walkthrough, from three real
+    // cases, so a visitor picks the one that matches what they came for
+    // instead of getting a single generic "watch a record" link. Each opens
+    // /chain with that case preselected (js/pages/home-flow.js's CASES).
+    // Short, parallel phrasing (not "watch a swaps record join the chain")
+    // so the three rows wrap the same way instead of one fitting on a
+    // single line while its neighbors ragged onto two.
+    var walkthroughLabels = { swaps: 'Watch a swap join the chain', staking: 'Watch a stake join the chain', governance: 'Watch a vote join the chain' };
+    var walkthroughCases = ['swaps', 'staking', 'governance'];
+    var allCases = ArkUI.chainCases || [];
+    walkthroughCases.forEach(function (id) {
+      var found = allCases.filter(function (c) { return c.id === id; });
+      var kase = found[0];
+      if (!kase) return;
+      var open = document.createElement('a'); open.className = 'home-lifecycle-all';
+      open.href = pageHref('chain'); open.dataset.sceneLink = 'chain'; open.dataset.routeQuery = 'case=' + id; open.dataset.icon = 'arrow-right';
+      var label = walkthroughLabels[id] || ('Watch a ' + kase.label.toLowerCase() + ' join the chain');
+      open.setAttribute('aria-label', label);
+      var openCopy = document.createElement('span'); openCopy.className = 'home-lifecycle-all-copy';
+      var openKicker = document.createElement('small'); openKicker.textContent = kase.label;
+      var openLabel = document.createElement('span'); openLabel.textContent = label;
+      openCopy.appendChild(openKicker); openCopy.appendChild(openLabel); open.appendChild(openCopy);
+      lifecycle.appendChild(open);
+    });
+    leftColumn.appendChild(lifecycle);
+
+    // A compact grid of icon references to the core pages -- the protocol
+    // in six destinations, not a sentence explaining each one.
+    var coreLinks = document.createElement('nav');
+    coreLinks.className = 'home-core-links';
+    coreLinks.setAttribute('aria-label', 'Core pages');
+    [
+      ['network', 'explorer', 'Explorer'],
+      ['account', 'account', 'Account'],
+      ['layers', 'resolvers', 'Resolvers'],
+      ['evidence', 'stats', 'Stats'],
+      ['terminal', 'deploy', 'Deploy'],
+      ['authority', 'dao', 'Governance']
+    ].forEach(function (item) {
+      var link = document.createElement('a'); link.className = 'home-core-link';
+      link.href = pageHref(item[1]); link.dataset.sceneLink = item[1]; link.dataset.icon = item[0];
+      link.setAttribute('aria-label', item[2]);
+      var label = document.createElement('span'); label.textContent = item[2];
+      link.appendChild(label);
+      coreLinks.appendChild(link);
+    });
+    leftColumn.appendChild(coreLinks);
+    el.appendChild(leftColumn);
 
     // Measured numbers, shared with /stats (js/content/stats-highlights.js).
     var stats = window.ArkStatsHighlights;
@@ -89,29 +135,34 @@ ArkUI.pageModules.zero = {
     var liveUnit = document.createElement('span'); liveUnit.className = 'home-status-unit'; liveUnit.textContent = 'ops/s'; liveValue.appendChild(liveUnit);
     var liveDetail = document.createElement('span'); liveDetail.className = 'home-status-detail'; liveDetail.textContent = 'Loading the measured public-fleet pulse; resolver cards below are labeled local or fleet.';
     liveReadout.appendChild(liveLabel); liveReadout.appendChild(liveValue); liveReadout.appendChild(liveDetail); status.appendChild(liveReadout);
-    stats.items.forEach(function (stat) {
-      // Short label and the number only; the full label and caption live on
-      // /stats and here as the tooltip and screen-reader text.
+    /* One line, once, instead of "the fleet, all 10 nodes" repeated in
+       every row: the scope is stated here, each stat below just names
+       the operation. The long BENCH note still rides along as the title
+       tooltip for anyone who hovers -- the full paragraph lives on
+       /stats, not crammed into every row's screen-reader text here. */
+    var statusScope = document.createElement('small'); statusScope.className = 'home-status-scope-label';
+    statusScope.textContent = 'Fleet-wide · 10 nodes · ' + stats.operations.record;
+    status.appendChild(statusScope);
+    var shortNames = { '643,632': 'Swaps', '69,895': 'Transfers', '6,044,992': 'Records' };
+    stats.items.slice(0, 3).forEach(function (stat) {
       var readout = document.createElement('div'); readout.className = 'home-status-item';
       readout.title = stat.label + ': ' + stat.detail;
-      var label = document.createElement('small'); label.textContent = stat.short || stat.label;
+      var label = document.createElement('small'); label.textContent = shortNames[stat.value] || stat.short || stat.label;
       var value = document.createElement('strong'); value.className = 'home-status-value';
       value.textContent = stat.value.replace('-', '–');
       var unit = document.createElement('span'); unit.className = 'home-status-unit'; unit.textContent = stat.unit;
       value.appendChild(unit);
-      var detail = document.createElement('span'); detail.className = 'home-status-detail'; detail.textContent = stat.label + '. ' + stat.detail;
+      var detail = document.createElement('span'); detail.className = 'home-status-detail'; detail.textContent = stat.label + ', measured concurrently across the fleet.';
       readout.appendChild(label); readout.appendChild(value); readout.appendChild(detail);
       status.appendChild(readout);
     });
     var statusLink = document.createElement('a');
     statusLink.className = 'home-status-link';
     statusLink.href = pageHref('stats'); statusLink.dataset.sceneLink = 'stats';
-    var scope = document.createElement('small'); scope.className = 'home-status-scope';
-    scope.textContent = (stats.scopeShort || stats.scope) + ' · ' + stats.measured;
-    statusLink.appendChild(scope); statusLink.appendChild(document.createTextNode('All measurements →'));
+    statusLink.textContent = 'All measurements →';
     statusLink.setAttribute('aria-label', 'All measurements. Measured ' + stats.measured + ', ' + stats.scope);
     status.appendChild(statusLink);
-    el.insertBefore(status, lifecycle);
+    el.insertBefore(status, leftColumn);
 
     if (window.ArkPulse) ArkPulse.get().then(function (result) {
       var data = result.data;
@@ -126,8 +177,6 @@ ArkUI.pageModules.zero = {
       liveReadout.dataset.state = 'warn';
     });
 
-    el.arkRestore=flow.restore;
-    el.arkDispose=flow.dispose;
     return el;
   }
 };

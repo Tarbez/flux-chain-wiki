@@ -32,4 +32,23 @@ for (const file of pageSheets) {
     assert(!/var\(--(primary|accent)(-\d00|-subtle|-strong)?\)/.test(body), `${file}: "${sel.trim().slice(0, 70)}" paints an interaction state with the identity color`);
   }
 }
+/* A grid span with no CSS rule silently becomes one column of twelve, and the
+   panel renders one word per line. It looks like a broken page and passes every
+   test that only checks the DOM, because the markup is correct. /resolver-math
+   shipped exactly that on 2026-10-10 with dash-span-6 undefined. Every span a
+   page asks for must exist in the sheet that owns the grid. */
+const dashCss = fs.readFileSync('css/stats-dashboard.css', 'utf8');
+const definedSpans = new Set([...dashCss.matchAll(/\.dash-span-(\d+)\s*\{/g)].map(m => m[1]));
+const usingFiles = fs.readdirSync('js/pages').map(f => 'js/pages/' + f)
+  .concat(fs.readdirSync('js/ark').map(f => 'js/ark/' + f))
+  .filter(f => f.endsWith('.js'));
+for (const file of usingFiles) {
+  const used = new Set([...fs.readFileSync(file, 'utf8').matchAll(/dash-span-(\d+)/g)].map(m => m[1]));
+  for (const span of used)
+    assert(definedSpans.has(span),
+      `${file} uses dash-span-${span}, which css/stats-dashboard.css does not define. ` +
+      `It will occupy one column of twelve and the panel will render one word per line. ` +
+      `Defined: ${[...definedSpans].sort((a, b) => a - b).join(', ')}.`);
+}
+
 console.log('PASS: one component layer paints every action and state; pages use shade tokens; interaction never borrows the identity color.');

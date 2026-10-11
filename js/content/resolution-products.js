@@ -25,7 +25,7 @@ var ArkResolutionProducts = (function () {
     explorer: { name: 'Mesh Explorer', status: 'ready', page: 'explorer', line: 'Read any public record on the mesh and check who signed it.' },
     networks: { name: 'Named networks', status: 'ready', page: 'deploy', line: 'Create or join a network by name; it grows as nodes join.' },
     dao: { name: 'Network DAO', status: 'building', page: 'dao', line: 'A roster, a threshold and signed decisions for one network.' },
-    monitor: { name: 'Mesh monitor', status: 'ready', page: 'monitor', line: 'Live health, latency and throughput of the nodes you rely on.' },
+    monitor: { name: 'Mesh monitor', status: 'ready', page: 'stats', line: 'Live health, latency and throughput of the nodes you rely on.' },
     treasury: { name: 'Treasury', status: 'building', page: 'treasury', line: 'Shared funds that move only under the group’s agreed rules.' }
   };
 

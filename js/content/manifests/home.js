@@ -10,7 +10,7 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "One chain per identity, resolvers on top"
+      "value": "Identity chains, bound into one chain of chains"
     },
     "EYEBROW": {
       "label": "Eyebrow",
@@ -22,13 +22,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Hero",
-      "value": "What if every identity had its own chain?"
+      "value": "Every identity has its own chain, bound into a chain of chains."
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "DEFXN gives every identity its own signed, append-only chain. The chain checks only grammar, signature and position; resolvers for transfers, books, markets and governance decide what a record means. Chains never wait on each other, so capacity grows as nodes join."
+      "value": "You get your own chain. It only checks it's really you — never what you say. Smart helpers called resolvers read the rest. More chains bring more helpers and apps, so everything gets even faster."
     },
     "STEP": {
       "label": "Label on the ring pill",
@@ -37,13 +37,25 @@ ArkManifest.define({
       "value": "SOURCE / PARTIAL"
     },
     "CTA": {
-      "label": "Main button",
+      "label": "Learn pill",
       "kind": "line",
       "section": "Hero",
       "value": "See the protocol in motion"
     },
+    "EXPLORE": {
+      "label": "Explore pill",
+      "kind": "line",
+      "section": "Hero",
+      "value": "Walk the chain of chains"
+    },
+    "PRESSURETEST": {
+      "label": "Pressure-test pill",
+      "kind": "line",
+      "section": "Hero",
+      "value": "Ask the mesh. Get a claim you can check."
+    },
     "SECONDARY": {
-      "label": "Secondary button",
+      "label": "Secondary button (unused on the current hero; kept for admin history)",
       "kind": "line",
       "section": "Hero",
       "value": "Read the source"

@@ -46,18 +46,18 @@
         shortSummary: 'Interprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-shard, 2 ops; the production path), and the legacy 4-op PREPARE/ACCEPT/COMMIT/FINALIZE (still accepted). Timeouts clear reservations via Refund.',
         implementation: 'dense-wire::cross_shard',
         measured: Object.freeze({
-          label: 'Finalized transfers per second · 10-node public mesh · Lever A+B+C',
-          rate: 82863,
-          unit: 'transfers/s',
-          source: 'BENCH-011 (2026-10-08): Lever A (TransferAtomic collapses same-shard transfers to 1 op) + Lever B (TransferSend/Receive collapses the old 4-step cross-shard protocol to 2 ops) + Lever C-1 (skip grammar re-parse on the certified-segment replica path) + Lever C-2 (FxHash on the admit HashMap). All 10 flx-* nodes (bk2, mk2, bk1, mist1, eug-2c, eul-4c, mk1, ms1, ms2, ms3) each ran a 10 s mixed-topology segmented-v3 window; summed = 82,863 finalized transfers/s. Zero errors. +94% over the pre-Lever-B 6-node 4-op path (42,637).',
+          label: 'Swaps per batch auction \u00b7 one resolver shard \u00b7 10 replicas',
+          rate: 256,
+          unit: 'swaps/batch',
+          source: 'BENCH-012 (2026-10-10): two parties sign their intent, the shard resolves a batch (batched Ed25519 verification, nonce screen, uniform-price auction, AMM math on the residual) and SIGNS the result \u2014 that signature is the truth. Replicas store it without re-verifying. 15,360 swaps across 60 batches, broadcast to 10 live replicas, 60/60 audits passed, zero refusals. 100% matched internally at one clearing price with zero curve slippage.',
           secondary: Object.freeze([
-            { label: 'Logical ops / s (10-node mesh)', rate: 160532, unit: 'ops/s' },
-            { label: 'Replica applications / s (10-node mesh)', rate: 642128, unit: 'ops/s' },
-            { label: 'Fleet + Mac combined', rate: 108362, unit: 'transfers/s' },
-            { label: 'Lever B+C 6-node (prev measurement)', rate: 70589, unit: 'transfers/s' },
-            { label: 'Pre-Lever-B 6-node 4-op path', rate: 42637, unit: 'transfers/s' },
-            { label: 'One Mac, same bench (not fleet hardware)', rate: 25499, unit: 'transfers/s' },
-            { label: 'Certified-segment ceiling (9-node parallel session)', rate: 1712006, unit: 'replica apps/s' }
+            { label: 'Batch latency', rate: 13.874, unit: 'ms' },
+            { label: 'Verify latency (batched Ed25519, 75% of a batch)', rate: 10.403, unit: 'ms' },
+            { label: 'Resolve latency (auction + AMM residual)', rate: 2.173, unit: 'ms' },
+            { label: 'Sign latency (the shard signing the result)', rate: 0.0403, unit: 'ms' },
+            { label: 'Bytes per signed result (LZMA2 across a run)', rate: 180, unit: 'bytes' },
+            { label: 'Replication cost to 10 replicas, per batch', rate: 1801, unit: 'bytes' },
+            { label: 'Audit cost', rate: 3, unit: 'x Ed25519 verify' }
           ])
         }),
         openIssues: ['No independent security review']

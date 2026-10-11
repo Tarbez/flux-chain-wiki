@@ -157,7 +157,7 @@ Use softly rounded object tiles (about 5–6px) inside panels (about 8px), thin 
 | Network scope | Several rounded tiles on one substrate; a labelled presence frame | Selecting a network frames presence only; unrelated account/DAO tiles stay outside |
 | Resolver | Input tile → addressed logic tile → claim tile | The reader supplies/chooses an illustrative input, then sees what the logic claims; acceptance is separately labelled |
 | Lifecycle | The same illustrative snapshot object with linked record tiles | Intent is referenced by Offer, accepted terms form Agreement, evidence forms Fulfillment, and a scoped outcome forms Receipt |
-| Authority | An object/transition tile and a bounded participant group | Show eligibility, threshold evidence, certificate, then dissolution; no implied standing validator set |
+| Authority | An object/transition tile and a bounded participant group | Show eligibility, signed evidence, the signature, then dissolution; no implied standing signer set |
 | Governance | Separate substrate and network frames | Selecting a change identifies the responsible roster without merging scopes |
 | Activation | Approval record beside an explicit readiness gate | Show the distinction between consent and applying a change; unverified activation remains labelled |
 | Evidence | Claim tile connected to a document/artifact | Reveal the source, date, and what it actually establishes |
@@ -187,7 +187,7 @@ All 31 existing routes are listed below. Destinations describe intended next mov
 | `/lifecycle/offer` | P1 / B3 | Keep proposal-versus-agreement distinction. Visually link the same request to provider terms; details secondary. Add real previous/next links to Intent and Agreement. |
 | `/lifecycle/agreement` | P1 / B3 | Keep accepted terms, not proof of performance. Merge matching request/offer into one terms tile. Next link opens Fulfillment; reference identity stays intact. |
 | `/lifecycle/fulfillment` | P1 / B3 | Keep submission-versus-acceptance distinction. Attach evidence to the same agreement; checker details on request. Next link opens Receipt. |
-| `/lifecycle/receipt` | P1 / B3 | Keep policy-bound verification and explicit non-finality/non-settlement limit. Close the visible references without claiming universal truth. Offer inspect evidence, then return to the full trail. |
+| `/lifecycle/receipt` | P1 / B3 | Keep policy-bound verification and the explicit not-settlement limit. Close the visible references without claiming universal truth. Offer inspect evidence, then return to the full trail. |
 | `/concept/purpose` | P2 / B4 | Keep three depths and presence-only answer. Replace repeated scope prose with labelled included/excluded objects. Choose inspect scope, then open the named-network procedure. |
 | `/concept/depth` | P2 / B4 | Keep signed-trail overview. Orient to why references make one path inspectable; avoid repeating `/lifecycle`. Choose to follow the concrete scenario. |
 | `/concept/practice` | P2 / B4 | Keep one-detail selection and bounded authority. Diagram one transition's participant selection and certificate; keep production limits visible at every depth. Continue to governance comparison. |
@@ -196,11 +196,11 @@ All 31 existing routes are listed below. Destinations describe intended next mov
 | `/concept/spec` | P1 / B4 | Keep no unsupported performance figures. Simplify long heading/first state; show “No verified benchmark” and one inspect-standard entry. Method/environment/raw artifacts belong in Reference. |
 | `/dao` | P2 / B4 | Keep separate authority scopes. Let the visitor choose a proposed change and see which roster is responsible. One complementary comparison at a time; no fake approval operation. |
 | `/experiments` | P3 / B5 | Keep illustrative label and model entry. Make the question the main heading rather than “THRESHOLD”; preview a clear cause/effect with the same shape language as Authority. |
-| `/experiments/lab` | P2 / B5 | Keep all three models and stored values. One question, one model, one control, one consequence explanation; canonical mechanism link per model. Treat spacing/percentage as an analogy, not a calculated quorum. |
+| `/experiments/lab` | P2 / B5 | Keep all three models and stored values. One question, one model, one control, one consequence explanation; canonical mechanism link per model. Treat spacing/percentage as an analogy, not a calculated threshold. |
 | `/learnings` | P3 / B5 | Keep three-item index. Add a short relevance cue to each title and use “Notes” consistently. Choose an architectural question rather than an estimated reading time. |
 | `/learnings/why-the-chain-was-retired` | P2 / B5 | Keep core, relevance, question routes, evidence disclosure. Preserve readable question labels in answer mode; a small history → agreement diagram supports the answer. Benchmark limits remain explicit. |
 | `/learnings/one-substrate-many-networks` | P2 / B5 | Keep scope distinctions and question navigation. Reuse the same substrate/presence diagram as Networks rather than inventing another motif. Evidence opens in-shell and returns to the selected question. |
-| `/learnings/governance-without-a-validator-set` | P2 / B5 | Keep authority/governance distinctions. Reuse bounded participant/scope shapes; keep current question named instead of number-only navigation. Link to Authority/Activation as an informed next step. |
+| `/learnings/governance-without-a-validator-set` <!-- ALLOW-DEPRECATED-TERM: live published slug; renaming breaks inbound links and seo-data.js. Owner decision. --> | P2 / B5 | Keep authority/governance distinctions. Reuse bounded participant/scope shapes; keep current question named instead of number-only navigation. Link to Authority/Activation as an informed next step. |
 | `/treasury` | P2 / B6 | Keep asset → movements → detail replacement and fictional labels. Reduce duplicated warnings to a persistent explicit preview boundary plus detail-specific notes. Fictional amount must remain labelled next to the number; no live/success cue. |
 | `/deposits` | P2 / B6 | Keep local draft → review → edit, no transaction action. One compact draft frame; asset restrictions in requested context, essential “preview only” boundary visible. No “complete” badge implying a deposit happened. |
 

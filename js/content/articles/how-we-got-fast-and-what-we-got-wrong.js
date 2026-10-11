@@ -7,7 +7,7 @@ LearningContent.load("how-we-got-fast-and-what-we-got-wrong", {
   "evidenceHref": "docs/evidence/bench-003-rust-fleet-ceiling.md",
   "relatedPage": "stats",
   "actionLabel": "Watch the fleet right now",
-  "actionPage": "monitor",
+  "actionPage": "stats",
   "questions": [
     "Where did it start?",
     "What did Rust change?",

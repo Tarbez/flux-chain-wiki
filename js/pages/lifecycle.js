@@ -55,7 +55,7 @@
       lead: 'The checking participant records the outcome under the identified rules and authority.',
       heading: 'Read the checking decision.',
       body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification across the participants’ own chains; the agreements resolver reads the links.',
-      note: 'What is still not true: a receipt is not universal truth, legal finality, treasury settlement, or production-readiness evidence.',
+      note: 'What is still not true: a receipt is not universal truth, legally binding settlement, treasury settlement, or production-readiness evidence.',
       facts: [
         ['Who writes it', 'The participant responsible for the verification outcome.'],
         ['References', 'The fulfillment and its linked agreement history.'],
