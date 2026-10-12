@@ -82,6 +82,18 @@ defxn.com, www.defxn.com {
 		reverse_proxy 127.0.0.1:8770
 	}
 
+	# Per-node capacity for the same dense-wire chain-server mesh
+	# (ops/chain-fleet-capacity-api.mjs, added 2026-10-11): not one node's
+	# segment state, but which of the 14 chain-server nodes are reachable
+	# right now, probed directly by IP. MUST run on this node (flx-bk2) or
+	# flx-hel1/flx-hel2 -- the 4 peer nodes' ufw only answers :19500 to
+	# those 3 bootstrap-source IPs; see that file's header.
+	@chainFleetCapacity path /api/chain-fleet-capacity
+	handle @chainFleetCapacity {
+		rewrite * /chain-fleet-capacity
+		reverse_proxy 127.0.0.1:8780
+	}
+
 	# /admin-app is listed alongside /admin-app.html because the final handle
 	# block below now resolves an extension-less path to <path>.html. Without
 	# it, /admin-app would resolve to admin-app.html out of this node's static

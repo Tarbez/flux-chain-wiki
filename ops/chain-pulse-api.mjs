@@ -61,6 +61,15 @@
        as of 2026-10-11), never `null` -- `CHAIN_LIST` itself answered,
        it just listed nothing.
 
+     - LIVE and real after Track 24's `CHAIN_LEADERBOARD` wire command,
+       added 2026-10-11: each entry in `sovereignChains[]` also carries a
+       `leaderboard` field -- the chain's real per-holder ranking, straight
+       from `native_ledger::leaderboard`, which already excludes the
+       chain's own treasury/compute-reserve custody rows server-side. Top
+       10 per chain. `null` when this node never minted that chain (same
+       honest-absence contract as `computeCredited`), never an empty array
+       standing in for "couldn't read it".
+
      - NOT built, and reported as such, never as 0 or guessed:
          committeeLiveness: null  -- needs a new wire command exposing
            SegmentVote.signer per pending root; does not exist yet.
@@ -240,25 +249,65 @@ function readChainList() {
   });
 }
 
+/** `CHAIN_LEADERBOARD\t<chainId>\t<limit>` -> the real per-holder ranking
+ *  for that chain (treasury/compute-reserve custody rows already excluded
+ *  server-side by `native_ledger::leaderboard`), or `null` if this node
+ *  never minted that chain -- see `chain_server.rs::chain_leaderboard_reply`
+ *  for the exact wire shape. Never a guess: an unreachable/unknown chain
+ *  reports `null`, not an empty list standing in for "no data". */
+function readChainLeaderboard(chainId, limit = 10) {
+  return new Promise((resolve, reject) => {
+    const sock = createConnection({ host: CHAIN_HOST, port: CHAIN_PORT });
+    const timer = setTimeout(() => { sock.destroy(); reject(new Error('timeout')); }, CONNECT_TIMEOUT_MS);
+    let buf = '';
+    sock.on('connect', () => sock.write(`CHAIN_LEADERBOARD\t${chainId}\t${limit}\n`));
+    sock.on('data', (chunk) => {
+      buf += chunk.toString('utf8');
+      if (buf.includes(`CHAIN_LEADERBOARD_UNKNOWN\t${chainId}\n`)) {
+        clearTimeout(timer);
+        sock.destroy();
+        resolve(null); // real, honest "never minted here" -- not an error
+        return;
+      }
+      if (!buf.includes('CHAIN_LEADERBOARD_END\n')) return;
+      clearTimeout(timer);
+      sock.destroy();
+      const lines = buf.split('\n').filter(Boolean);
+      const header = lines[0].split('\t');
+      if (header[0] !== 'CHAIN_LEADERBOARD') { reject(new Error(`unexpected CHAIN_LEADERBOARD reply: ${lines[0]}`)); return; }
+      const count = Number(header[2]);
+      const ranked = lines.slice(1, 1 + count).map((line) => {
+        const [, holder, amount] = line.split('\t');
+        return { holder, amount: Number(amount) };
+      });
+      resolve(ranked);
+    });
+    sock.on('error', (err) => { clearTimeout(timer); reject(err); });
+  });
+}
+
 /** Every launched chain, each with a live `computeCredited` number
  *  derived from two real reads (never a stored/cached counter) -- see
  *  the file header's "LIVE and real after Track 24" note. One chain's
  *  balance read failing (e.g. this node never minted it, despite
  *  CHAIN_LIST listing it from a different replica's view) reports that
  *  one chain's `computeCredited: null` rather than failing the whole
- *  response. */
+ *  response. `leaderboard` is the same real per-holder ranking the
+ *  CHAIN_LEADERBOARD wire command returns, read fresh every poll. */
 async function readSovereignChains() {
   const chains = await readChainList();
   return Promise.all(chains.map(async (chain) => {
-    const [treasuryBalance, reserveBalance] = await Promise.all([
+    const [treasuryBalance, reserveBalance, leaderboard] = await Promise.all([
       readNativeBalance(chain.chainId, chain.treasuryKey).catch(() => null),
       readNativeBalance(chain.chainId, `compute-reserve:${chain.chainId}`).catch(() => null),
+      readChainLeaderboard(chain.chainId, 10).catch(() => null),
     ]);
     return {
       ...chain,
       treasuryBalance,
       computeReserveRemaining: reserveBalance,
       computeCredited: reserveBalance === null ? null : chain.computeRewardSupply - reserveBalance,
+      leaderboard,
     };
   }));
 }

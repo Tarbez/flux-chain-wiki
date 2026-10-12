@@ -167,6 +167,40 @@
       sovereignPanel.appendChild(sovereignEmpty);
       shell.appendChild(sovereignPanel);
 
+      // ---- per-identity leaderboard (Track 24, CHAIN_LEADERBOARD) -----------------------------
+      // Who actually holds a sovereign chain's native token, ranked, real
+      // supporter/provider identities only (custody accounts excluded
+      // server-side). Read fresh every poll alongside sovereignChains above
+      // — see ops/chain-pulse-api.mjs's readChainLeaderboard.
+      shell.appendChild(sectionHead('Top contributors · per chain', 'Real per-identity holdings, ranked. The project’s own treasury and compute-reserve accounts are excluded server-side so this list is supporters and providers only, never the project itself.'));
+      var leaderboardPanel = panel('dash-span-12', null, null);
+      var leaderboardWrap = el('div', 'dash-leaderboard-wrap');
+      var leaderboardEmpty = el('p', 'dash-empty', 'Waiting for the chain pulse…');
+      leaderboardPanel.appendChild(leaderboardWrap);
+      leaderboardPanel.appendChild(leaderboardEmpty);
+      shell.appendChild(leaderboardPanel);
+
+      // ---- fleet capacity · dense-wire chain-server mesh (added 2026-10-11) ---------------------
+      // Not one node's segment state (the "Chain" section above) and not a
+      // chain record — which of the 14 chain-server nodes answer right now,
+      // probed directly by IP. 10 committee (quorum-bearing, 6-of-10 needed
+      // to finalize a segment) + 4 peers (bootstrap-only, never sign or
+      // propose — owner call 2026-10-11). See ops/chain-fleet-capacity-api.mjs.
+      shell.appendChild(sectionHead('Fleet capacity · chain-server mesh', 'Every dense-wire chain-server node, probed directly. Committee nodes can sign and propose segments; peer nodes bootstrap and serve but never sign — a real, live reachability check, not a roster that assumes everything it lists is up.'));
+      var capacityGrid = el('div', 'dash-grid');
+      var capCommitteeUp = stat('dash-span-3 is-lead', 'Committee up', '–', 'of 10', 'waiting for fleet capacity');
+      var capQuorum = stat('dash-span-3', 'Quorum', '–', 'needed: 6', 'waiting for fleet capacity');
+      var capPeersUp = stat('dash-span-3', 'Peers up', '–', 'of 4', 'waiting for fleet capacity');
+      var capGenerated = stat('dash-span-3', 'Last probe', '–', '', 'waiting for fleet capacity');
+      [capCommitteeUp, capQuorum, capPeersUp, capGenerated].forEach(function (k) { capacityGrid.appendChild(k.tile); });
+      shell.appendChild(capacityGrid);
+      var capacityPanel = panel('dash-span-12', null, null);
+      var capacityWrap = el('div', 'dash-table-wrap');
+      var capacityEmpty = el('p', 'dash-empty', 'Waiting for the fleet capacity probe…');
+      capacityPanel.appendChild(capacityWrap);
+      capacityPanel.appendChild(capacityEmpty);
+      shell.appendChild(capacityPanel);
+
       // ---- audited baseline ---------------------------------------------------------------------
       shell.appendChild(sectionHead('Measured resolver \u00b7 ' + (DS.date || '2026-10-10'), 'BENCH-012. Two parties sign their intent; a resolver shard resolves a batch and signs the result \u2014 that signature is the truth; replicas store it without re-verifying. Not live; re-run to update.'));
       var audited = el('div', 'dash-grid');
@@ -443,16 +477,22 @@
           sovereignWrap.textContent = '';
           sovereignEmpty.hidden = false;
           sovereignEmpty.textContent = 'CHAIN_LIST is not deployed on this node, or it is unreachable — no live value substituted.';
+          leaderboardWrap.textContent = '';
+          leaderboardEmpty.hidden = false;
+          leaderboardEmpty.textContent = 'CHAIN_LIST is not deployed on this node, or it is unreachable — no live value substituted.';
           return;
         }
         if (!chains.length) {
           sovereignWrap.textContent = '';
           sovereignEmpty.hidden = false;
           sovereignEmpty.textContent = 'Zero sovereign chains launched on this node right now — a real, measured zero, not a missing capability.';
+          leaderboardWrap.textContent = '';
+          leaderboardEmpty.hidden = false;
+          leaderboardEmpty.textContent = 'Zero sovereign chains launched on this node right now — nothing to rank.';
           return;
         }
         var table = el('table', 'dash-table'), thead = el('thead'), hr = el('tr');
-        ['Chain', 'Token', 'Compute credited', 'Reserve remaining', 'Treasury'].forEach(function (c) {
+        ['Chain', 'Token', 'Compute credited', 'Reserve remaining', 'Treasury', 'Top contributor'].forEach(function (c) {
           var th = el('th', null, c); th.scope = 'col'; hr.appendChild(th);
         });
         thead.appendChild(hr); table.appendChild(thead);
@@ -464,10 +504,58 @@
           tr.appendChild(el('td', 'is-num', c.computeCredited == null ? '–' : fmt(c.computeCredited) + ' / ' + fmt(c.computeRewardSupply)));
           tr.appendChild(el('td', 'is-num', c.computeReserveRemaining == null ? '–' : fmt(c.computeReserveRemaining)));
           tr.appendChild(el('td', 'is-num', c.treasuryBalance == null ? '–' : fmt(c.treasuryBalance) + ' / ' + fmt(c.distributedSupply)));
+          var topCell = el('td', 'is-num');
+          if (c.leaderboard == null) {
+            topCell.textContent = '–';
+          } else if (!c.leaderboard.length) {
+            topCell.textContent = 'none yet';
+          } else {
+            topCell.textContent = c.leaderboard[0].holder.slice(0, 10) + '… · ' + fmt(c.leaderboard[0].amount);
+          }
+          tr.appendChild(topCell);
           body.appendChild(tr);
         });
         table.appendChild(body);
         sovereignWrap.textContent = ''; sovereignWrap.appendChild(table); sovereignEmpty.hidden = true;
+        paintLeaderboards(chains);
+      }
+      // ---- per-identity leaderboard (Track 24, same CHAIN_LEADERBOARD read) ---------------------
+      // Full top-10 ranking per chain, same real data as the "Top contributor"
+      // column above (one holder, truncated) -- server-side exclusion of the
+      // chain's own treasury/compute-reserve custody accounts means this list
+      // is real supporters/providers only, never the project's own balances
+      // inflating its own leaderboard. A chain with leaderboard === null (never
+      // minted here) or an empty ranked list (minted, zero real holders yet)
+      // is rendered honestly rather than hidden.
+      function paintLeaderboards(chains) {
+        leaderboardWrap.textContent = '';
+        var ranked = chains.filter(function (c) { return c.leaderboard != null; });
+        if (!ranked.length) {
+          leaderboardEmpty.hidden = false;
+          leaderboardEmpty.textContent = chains.length
+            ? 'No chain on this node has a readable leaderboard right now — CHAIN_LEADERBOARD unreachable or not deployed.'
+            : 'Zero sovereign chains launched on this node right now — nothing to rank.';
+          return;
+        }
+        leaderboardEmpty.hidden = true;
+        ranked.forEach(function (c) {
+          var card = el('div', 'dash-leaderboard-card');
+          card.appendChild(el('h4', null, c.chainId + ' · ' + c.tokenSymbol));
+          if (!c.leaderboard.length) {
+            card.appendChild(el('p', 'dash-empty', 'Minted, but no real supporter/provider holds a balance yet.'));
+          } else {
+            var ol = el('ol', 'dash-leaderboard-list');
+            c.leaderboard.forEach(function (row, i) {
+              var li = el('li', 'dash-leaderboard-row');
+              li.appendChild(el('span', 'dash-leaderboard-rank', '#' + (i + 1)));
+              li.appendChild(el('span', 'dash-leaderboard-holder', row.holder.slice(0, 14) + '…'));
+              li.appendChild(el('strong', 'dash-leaderboard-amount', fmt(row.amount)));
+              ol.appendChild(li);
+            });
+            card.appendChild(ol);
+          }
+          leaderboardWrap.appendChild(card);
+        });
       }
       function checkChain() {
         if (chainDisposed || chainInFlight) return;
@@ -483,6 +571,60 @@
         });
       }
       checkChain();
+
+      // ---- fleet capacity wiring (separate endpoint, own short poll loop) ------------------------
+      var capacityPollTimer = 0, capacityDisposed = false, capacityInFlight = false;
+      function paintCapacity(data) {
+        if (!data || !Array.isArray(data.nodes)) {
+          setStat(capCommitteeUp, '–', 'of 10', 'no live value; nothing substituted');
+          setStat(capQuorum, '–', 'needed: 6', 'no live value; nothing substituted');
+          setStat(capPeersUp, '–', 'of 4', 'no live value; nothing substituted');
+          setStat(capGenerated, '–', '', data && data.lastError ? data.lastError : 'unreachable');
+          capacityWrap.textContent = '';
+          capacityEmpty.hidden = false;
+          capacityEmpty.textContent = 'The fleet capacity probe is unreachable — no live value substituted.';
+          return;
+        }
+        var s = data.summary || {};
+        capCommitteeUp.tile.dataset.state = s.committeeHasQuorum ? 'ok' : 'down';
+        setStat(capCommitteeUp, fmt(s.committeeUp), 'of ' + fmt(s.committeeTotal), 'quorum-bearing nodes, probed directly by IP right now');
+        setStat(capQuorum, s.committeeHasQuorum ? 'yes' : 'no', 'needed: ' + fmt(s.committeeQuorum), s.committeeHasQuorum ? 'enough committee nodes up to finalize a segment' : 'below the 6-of-10 finality floor right now');
+        capPeersUp.tile.dataset.state = s.peersUp === s.peersTotal ? 'ok' : 'down';
+        setStat(capPeersUp, fmt(s.peersUp), 'of ' + fmt(s.peersTotal), 'bootstrap-only — never sign or propose');
+        setStat(capGenerated, data.generatedAt ? ago(Date.now() - new Date(data.generatedAt).getTime()) : '–', '', data.generatedAt || '');
+
+        var table = el('table', 'dash-table'), thead = el('thead'), hr = el('tr');
+        ['Node', 'Role', 'Up', 'Latency', 'Peers connected'].forEach(function (c) {
+          var th = el('th', null, c); th.scope = 'col'; hr.appendChild(th);
+        });
+        thead.appendChild(hr); table.appendChild(thead);
+        var body = el('tbody');
+        data.nodes.forEach(function (n) {
+          var tr = el('tr');
+          tr.appendChild(el('td', null, n.id));
+          tr.appendChild(el('td', null, n.role));
+          tr.appendChild(el('td', 'is-num', n.reachable ? 'yes' : 'no'));
+          tr.appendChild(el('td', 'is-num', Number.isFinite(n.latencyMs) ? fmt(n.latencyMs) + ' ms' : '–'));
+          tr.appendChild(el('td', 'is-num', n.reachable ? fmt(n.peerCount) : (n.error || '–')));
+          body.appendChild(tr);
+        });
+        table.appendChild(body);
+        capacityWrap.textContent = ''; capacityWrap.appendChild(table); capacityEmpty.hidden = true;
+      }
+      function checkCapacity() {
+        if (capacityDisposed || capacityInFlight) return;
+        if (!window.ArkChainFleetCapacity) { paintCapacity(null); return; }
+        capacityInFlight = true;
+        window.ArkChainFleetCapacity.get().then(function (result) {
+          if (!capacityDisposed) paintCapacity(result.data);
+        }).catch(function (e) {
+          if (!capacityDisposed) paintCapacity({ lastError: e && e.message ? e.message : 'unknown error' });
+        }).then(function () {
+          capacityInFlight = false;
+          if (!capacityDisposed) capacityPollTimer = setTimeout(checkCapacity, POLL_MS);
+        });
+      }
+      checkCapacity();
 
       // ---- live wiring --------------------------------------------------------------------------
       var lastPulse = null, nextAt = 0, pollTimer = 0, clockTimer = 0, disposed = false, inFlight = false;
@@ -629,7 +771,8 @@
       page.arkDispose = function () {
         disposed = true;
         chainDisposed = true;
-        clearTimeout(pollTimer); clearInterval(clockTimer); clearTimeout(chainPollTimer);
+        capacityDisposed = true;
+        clearTimeout(pollTimer); clearInterval(clockTimer); clearTimeout(chainPollTimer); clearTimeout(capacityPollTimer);
         document.removeEventListener('visibilitychange', onVisibility);
       };
       host.appendChild(page);

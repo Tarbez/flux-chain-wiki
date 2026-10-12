@@ -43,6 +43,19 @@
         ['computeCredited', 'computeReserveRemaining', 'treasuryBalance'].forEach(function (f) {
           if (c[f] != null && typeof c[f] !== 'number') throw new Error('Malformed chain pulse: sovereignChains[' + i + '].' + f + ' must be a number or null');
         });
+        // leaderboard is allowed to be null (this replica never minted the
+        // chain) or an array (a real, measured ranking, possibly empty).
+        if (c.leaderboard != null) {
+          if (!Array.isArray(c.leaderboard)) throw new Error('Malformed chain pulse: sovereignChains[' + i + '].leaderboard must be an array or null');
+          c.leaderboard.forEach(function (row, j) {
+            if (!row || typeof row !== 'object' || typeof row.holder !== 'string' || !row.holder) {
+              throw new Error('Malformed chain pulse: sovereignChains[' + i + '].leaderboard[' + j + '].holder must be text');
+            }
+            if (typeof row.amount !== 'number' || !Number.isFinite(row.amount) || row.amount < 0) {
+              throw new Error('Malformed chain pulse: sovereignChains[' + i + '].leaderboard[' + j + '].amount must be a non-negative number');
+            }
+          });
+        }
       });
     }
     return data;

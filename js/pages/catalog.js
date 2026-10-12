@@ -21,7 +21,7 @@ ArkUI.pageCatalog = {
   deployment: { path: '/how-deployment-works', title: arkSeoTitle('deployment', 'How Flux works'), seoId: 'deployment', module: 'deployment', scripts: ['js/pages/deployment.js'] },
   explorer: { path: '/explore', title: arkSeoTitle('explorer', 'Mesh Explorer'), seoId: 'explorer', module: 'explorer', scripts: ['js/pages/explorer.js'] },
   palette: { path: '/palette', title: arkSeoTitle('palette', 'Palette — DEFXN'), seoId: 'palette', module: 'palette', scripts: ['js/pages/palette.js'] },
-  stats: { path: '/stats', title: arkSeoTitle('stats', 'Mesh performance — DEFXN'), seoId: 'stats', module: 'stats', scripts: ['js/ark/dash-kit.js', 'js/content/resolver-registry.js', 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/pages/stats.js'] },
+  stats: { path: '/stats', title: arkSeoTitle('stats', 'Mesh performance — DEFXN'), seoId: 'stats', module: 'stats', scripts: ['js/ark/dash-kit.js', 'js/content/resolver-registry.js', 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/pages/stats.js'] },
   'stats/gpu': { path: '/stats/gpu', title: 'The GPU does nothing here — DEFXN', module: 'statsGpu', hiddenFromNavigation: true, scripts: ['js/pages/stats-gpu.js'] },
   'stats/ledger': { path: '/stats/ledger', title: 'A finance resolver by construction — DEFXN', module: 'statsLedger', hiddenFromNavigation: true, scripts: ['js/content/chain-sample.js', 'js/pages/stats-ledger.js'] },
   'resolver-math': { path: '/resolver-math', title: arkSeoTitle('resolvermath', 'Resolver Math — DEFXN'), seoId: 'resolvermath', module: 'resolverMath', scripts: ['js/ark/dash-kit.js', 'js/content/resolver-algebra.js', 'js/content/resolver-block.js', 'js/pages/resolver-math.js'] },
