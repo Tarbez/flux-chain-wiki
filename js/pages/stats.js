@@ -54,7 +54,8 @@
     { state: 'partial', badge: 'Partial', title: 'Evidence record for the headline run', text: 'Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.' },
     { state: 'todo', badge: 'Not yet', title: 'Pipelined broadcast to replicas', text: 'A signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the fleet near 2.2 batches/s and is the binding constraint on everything. The intended shape is one feed per pool. Historical: Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
     { state: 'todo', badge: 'Not yet', title: 'Public client traffic', text: 'Every client so far was operator-driven.' },
-    { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain + certified-segment path.' }
+    { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain + certified-segment path.' },
+    { state: 'partial', badge: 'Partial', title: 'DAO treasury multisig', text: 'Real N-of-M quorum-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wire protocol and verified end to end against a real standalone chain-server (devnet dry run, 17/17 steps). Durable: 1174-1357 claims/s local 2-replica, 17 claims/s against two real fleet nodes over real WAN (quorum 2-of-2, bottlenecked on the farther node’s real network distance). Accepted finality: up to ~3017 claims/s local, ~1003 claims/s real WAN. 428 crate tests passing. Still not on production: no sovereign chain or DAO has launched there, and only 2 of 6 fleet nodes have been measured.' }
   ];
 
   ArkUI.pageModules.stats = {
@@ -446,7 +447,12 @@
         ['Signed-result broadcast', (DS.peersReached || 10) + ' replicas, store only', fmt(DS.replicationCostBytes || 1801) + ' bytes/batch', 'not pipelined', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
         ['Resolver registry', '20 resolvers audited', '6 measured, 14 not built', 'audit', '\u2014', 'Resolver audit', 'docs/resolver-audit.md'],
         ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '\u2014', 'Whitepaper \u00a73', WHITEPAPER],
-        ['Platform resolver audit', '6 non-chain systems', '3 measured, 3 absent by design', 'audit', '\u2014', INFRA.record || 'INFRA-001', 'docs/evidence/infra-001-platform-resolver-audit.md']
+        ['Platform resolver audit', '6 non-chain systems', '3 measured, 3 absent by design', 'audit', '\u2014', INFRA.record || 'INFRA-001', 'docs/evidence/infra-001-platform-resolver-audit.md'],
+        ['DAO treasury claim (durable)', 'local, 2 real replicas', '1174-1357 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
+        ['DAO treasury claim (accepted)', 'local, replication off critical path', '2882-3017 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
+        ['DAO treasury claim (durable, real WAN)', '2 real fleet nodes, quorum 2-of-2', '17 claims/s', '2 runs', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
+        ['DAO treasury claim (accepted, real WAN)', '2 real fleet nodes, replication off critical path', '~1003 claims/s', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
+        ['DAO/treasury devnet dry run', 'full wire sequence, real standalone chain-server', '17/17 steps passed', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-devnet-dao-treasury-dry-run.md']
       ].forEach(function (r) {
         var tr = el('tr');
         r.slice(0, 5).forEach(function (c, i) { tr.appendChild(el('td', i === 2 ? 'is-num' : null, c)); });

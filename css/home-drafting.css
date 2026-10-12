@@ -56,18 +56,20 @@
 #scene .home-hero-actions {display:flex;margin-top:25px;}
 /* A pill, not a sharp-cornered box: the teaser card, case tabs and micro
    cards are all rounded now, and this was the one hard-edged rectangle
-   left on the page. */
-#scene :is(.home-primary-cta,.home-ghost-cta) {position:relative;display:flex;align-items:center;justify-content:flex-start;gap:16px;min-height:70px;padding:11px 26px 11px 28px;border:1px solid var(--home-rule);border-radius:999px;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;text-decoration:none;color:hsl(var(--text-strong));overflow:hidden;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s;}
-#scene .home-primary-cta {border-color:transparent;background:linear-gradient(110deg,var(--signal-primary),color-mix(in srgb,var(--signal-primary) 82%,white));color:hsl(var(--text-inverse)) !important;box-shadow:0 10px 34px hsl(var(--primary-200));}
-#scene .home-primary-cta:hover {transform:translateY(-3px);box-shadow:0 16px 40px hsl(var(--primary-300));}
+   left on the page. Sized down from the original 70px/34px icon version --
+   next to the flat, hairline-divided rest of the redesigned page, that
+   size and glow read as the one loud leftover thing, not as emphasis. */
+#scene :is(.home-primary-cta,.home-ghost-cta) {position:relative;display:flex;align-items:center;justify-content:flex-start;gap:14px;min-height:56px;padding:9px 22px 9px 24px;border:1px solid var(--home-rule);border-radius:999px;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;text-decoration:none;color:hsl(var(--text-strong));overflow:hidden;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s;}
+#scene .home-primary-cta {border-color:transparent;background:linear-gradient(110deg,var(--signal-primary),color-mix(in srgb,var(--signal-primary) 82%,white));color:hsl(var(--text-inverse)) !important;box-shadow:0 6px 18px hsl(var(--primary-200) / .7);}
+#scene .home-primary-cta:hover {transform:translateY(-2px);box-shadow:0 10px 24px hsl(var(--primary-300) / .7);}
 #scene .home-ghost-cta {border-color:var(--signal-reference);background:linear-gradient(120deg,hsl(var(--reference-200)),hsl(var(--canvas) / .76));color:var(--signal-reference) !important;}
 #scene .home-ghost-cta::before {content:"";position:absolute;inset:9px auto 9px 0;width:1px;background:var(--signal-reference);box-shadow:0 0 14px hsl(var(--reference-400));}
 #scene .home-ghost-cta:hover {border-color:var(--signal-reference);background:hsl(var(--reference-200));transform:translateY(-3px);box-shadow:0 14px 34px hsl(var(--canvas) / .28);}
 #scene .home-primary-cta::after {content:none;}
-#scene .home-cta-copy {display:flex;flex:1;min-width:0;flex-direction:column;gap:5px;align-items:flex-start;}
+#scene .home-cta-copy {display:flex;flex:1;min-width:0;flex-direction:column;gap:3px;align-items:flex-start;}
 #scene .home-cta-kicker {font:600 9px/1.2 var(--mono-font,monospace);letter-spacing:.05em;text-transform:uppercase;opacity:.82;}
 #scene .home-cta-label {font:600 14px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.01em;white-space:normal;text-align:left;}
-#scene :is(.home-primary-cta,.home-ghost-cta) .native-icon {order:2;flex:0 0 34px;width:34px;height:34px;box-sizing:border-box;margin-left:auto;padding:8px;border:1px solid currentColor;border-radius:50%;overflow:visible;}
+#scene :is(.home-primary-cta,.home-ghost-cta) .native-icon {order:2;flex:0 0 28px;width:28px;height:28px;box-sizing:border-box;margin-left:auto;padding:7px;border:1px solid currentColor;border-radius:50%;overflow:visible;}
 #scene .home-primary-cta .native-icon {color:hsl(var(--text-inverse));border-color:hsl(var(--text-inverse) / .28);}
 #scene .home-ghost-cta .native-icon {color:var(--signal-reference);border-color:hsl(var(--reference-400));}
 /* .ark-hero-body disables pointer-events by default (css/hero-motion.css)
@@ -204,7 +206,7 @@
 #scene .home-primary-cta .native-icon,
 #scene .home-ghost-cta .native-icon,
 #scene .home-lifecycle-all .native-icon {transition:transform 180ms cubic-bezier(.22,1,.36,1),color 180ms;}
-#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-primary) 90%,white),var(--signal-primary));border-color:transparent;box-shadow:0 16px 40px hsl(var(--primary-300));}
+#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-primary) 90%,white),var(--signal-primary));border-color:transparent;box-shadow:0 10px 24px hsl(var(--primary-300) / .7);}
 #scene .home-primary-cta:is(:hover,:focus-visible) .native-icon {transform:translateX(3px);color:hsl(var(--text-inverse));}
 #scene .home-ghost-cta:is(:hover,:focus-visible) {background:hsl(var(--reference-200));border-color:var(--signal-reference);}
 #scene .home-ghost-cta:is(:hover,:focus-visible) .native-icon {color:hsl(var(--text-strong));transform:translateY(-1px);}
