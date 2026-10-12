@@ -52,7 +52,7 @@ const PUBLIC_ADMIN = new Set(['js/admin/auth.js', 'js/admin/gate.js']);
 const isLockedAsset = (relative) => (relative === 'admin-app.html' || relative.startsWith('js/admin/')) && !PUBLIC_ADMIN.has(relative);
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60;
 const SERVED_DIRS = ['css', 'js', 'assets'];
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };
 const MAX_BODY = 16 * 1024 * 1024;
 
 // kebab-case -> camelCase (e.g. --control-socket -> args.controlSocket) so a

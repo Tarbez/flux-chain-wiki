@@ -20,7 +20,7 @@ const PORT = Number(process.env.PORT || 3438);
 const HOST = process.env.HOST || '127.0.0.1';
 const PRIVATE = /^\/(admin\.html|admin-app\.html|scripts|tests|\.git|\.vercel|node_modules|Flux Chain Admin\.command|README\.md)(\/|$)/;
 const TYPES = {
-  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.txt': 'text/plain; charset=utf-8',
   '.md': 'text/markdown; charset=utf-8', '.ico': 'image/x-icon',

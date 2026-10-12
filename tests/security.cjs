@@ -18,7 +18,9 @@ vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
  assert(html.includes("script-src 'self' file:;"));
  assert(html.includes("base-uri 'none'"));
  const connect = (html.match(/connect-src ([^;]+);/) || [])[1] || '';
- assert(connect.split(' ').every(origin => origin === "'self'" || /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9]|cd1)\.defxn\.com)$/.test(origin)), 'Account/CMS may contact its own host; Explorer is limited to local Miner and named public/storage hosts: ' + connect);
+ // The account Wallet tab speaks dense-wire over a WebSocket (js/ark/dense-wire-wallet.mjs): the production chain-server
+ // endpoint, or a local chain-server on its default WS port (CHAIN_SERVER_WS_ADDR 127.0.0.1:19501) -- exact origins, never a port range.
+ assert(connect.split(' ').every(origin => origin === "'self'" || /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9]|cd1)\.defxn\.com|wss:\/\/nodes\.defxn\.com|ws:\/\/(127\.0\.0\.1|localhost):19501)$/.test(origin)), 'Account/CMS may contact its own host; Explorer is limited to local Miner and named public/storage hosts; the wallet to the dense-wire chain-server: ' + connect);
  assert(!connect.includes('*'), 'connect-src must never use a wildcard');
  assert(!html.includes('js/resolvers/logo.js'));
  // A CTA may send a visitor only within this site. Reason: `window.location.assign(p.href)` took whatever copy said, so a

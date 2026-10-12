@@ -50,15 +50,25 @@
         '<p class="account-session-note">Nothing secret is stored here. This browser keeps only your name and public details; the kit, PIN and key stay on your device.</p></div>' +
         '<div class="account-create" data-account-create-view hidden><div data-account-create></div></div></section>' +
         '<section class="account-live" data-account-panel="defi" aria-labelledby="account-live-title" hidden><h2 class="account-visually-hidden" id="account-live-title">Wallet</h2>' +
+        /* Wallet: FXN on dense-wire only (js/ark/dense-wire-wallet.mjs). A
+           transfer is five signed records between two holders and this page
+           holds one key, so the records travel between the two holders as a
+           transfer slip -- see that file's header for why, and what is not
+           built. Credits have no dense-wire ledger: shown as not built,
+           never as 0. */
         '<div class="account-wallet" data-account-wallet-view="home"><div class="account-balances"><article class="account-balance" data-account-fxn><small>FXN</small><strong data-account-fxn-balance>—</strong><span data-account-fxn-message>Sign in to check</span></article>' +
-        '<article class="account-balance" data-account-credits><small>Credits</small><strong data-account-credits-balance>—</strong><span data-account-credits-message>Sign in to check</span></article></div>' +
-        '<div class="account-transfers"><h3>Incoming FXN</h3><div data-account-fxn-pending><p class="account-contacts-empty">No pending transfers to you.</p></div>' +
-        '<div data-account-fxn-sent-block hidden><h3>Sent from this tab</h3><div data-account-fxn-sent></div></div></div>' +
-        '<div class="account-wallet-actions"><button type="button" class="palette-solid" data-account-wallet-open="send" disabled>Send FXN</button><button type="button" data-account-wallet-open="spend">Authorize Credits</button><button type="button" class="account-quiet" data-account-fxn-refresh>Refresh</button></div></div>' +
-        '<form data-account-wallet-view="send" data-account-fxn-send-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Send FXN</h3><p>The recipient accepts it, then you complete it here.</p><label for="fxnSendRecipient">Recipient public key</label><input id="fxnSendRecipient" type="text" autocomplete="off" data-account-fxn-send-recipient placeholder="Recipient public key" /><label for="fxnSendAmount">Amount (nano-FXN)</label><input id="fxnSendAmount" type="text" autocomplete="off" data-account-fxn-send-amount placeholder="1000000000" /><button type="submit" class="palette-solid" data-account-fxn-send-submit disabled>Propose transfer</button></form>' +
-        '<form data-account-wallet-view="spend" data-account-credits-request-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Authorize Credits</h3><p>Nothing moves until that resolver redeems it.</p><label for="creditsResolver">Resolver public key</label><input id="creditsResolver" type="text" autocomplete="off" data-account-credits-resolver placeholder="Resolver public key" /><label for="creditsAmount">Amount</label><input id="creditsAmount" type="text" autocomplete="off" data-account-credits-amount placeholder="200" /><label for="creditsService">What for (optional)</label><input id="creditsService" type="text" autocomplete="off" data-account-credits-service /><button type="submit" class="palette-solid" data-account-credits-submit>Authorize</button></form>' +
-        '<p class="account-line" data-account-fxn-send-status role="status" aria-live="polite"></p><p class="account-line" data-account-credits-status role="status" aria-live="polite"></p>' +
-        '<p class="account-next">Read live from the mesh registry, never estimated. Raw records in the <a href="/explore" data-scene-link="explorer">Mesh Explorer</a>.</p></section>' +
+        '<article class="account-balance" data-account-credits><small>Credits</small><strong data-account-credits-balance>Not built</strong><span data-account-credits-message>Credits have no dense-wire ledger yet. This is not a zero balance.</span></article></div>' +
+        '<div class="account-transfers"><h3>Your FXN key</h3><p class="account-transfer"><span><small data-account-fxn-key>—</small></span><button type="button" data-account-fxn-copy-key disabled>Copy</button></p>' +
+        '<p class="account-contacts-empty">Give this key to someone sending you FXN. A transfer takes turns: each holder signs only their own steps, passing a transfer slip back and forth.</p></div>' +
+        '<div class="account-wallet-actions"><button type="button" class="palette-solid" data-account-wallet-open="send" disabled>Send FXN</button><button type="button" data-account-wallet-open="slip" disabled>Continue a transfer</button><button type="button" class="account-quiet" data-account-fxn-refresh>Refresh</button></div></div>' +
+        '<form data-account-wallet-view="send" data-account-fxn-send-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Send FXN</h3><p>FXN moves as whole signed records: you send one record you hold, and its full amount goes. There is no partial send yet.</p>' +
+        '<div data-account-fxn-saved hidden></div><label for="fxnSendInput">Record you hold</label><textarea id="fxnSendInput" rows="3" autocomplete="off" spellcheck="false" data-account-fxn-send-input placeholder="The signed value record, starting G…"></textarea><p data-account-fxn-send-whole></p>' +
+        '<label for="fxnSendRecipient">Recipient key</label><input id="fxnSendRecipient" type="text" autocomplete="off" spellcheck="false" data-account-fxn-send-recipient placeholder="64-character hex key, or their base64 root key" /><button type="submit" class="palette-solid" data-account-fxn-send-submit disabled>Review &amp; sign step 1</button></form>' +
+        '<form data-account-wallet-view="slip" data-account-fxn-slip-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Transfer slip</h3><p>Paste the latest slip from the other holder. This page checks every record in it, then offers only the step that is yours to sign.</p>' +
+        '<label for="fxnSlip">Slip</label><textarea id="fxnSlip" rows="6" autocomplete="off" spellcheck="false" data-account-fxn-slip placeholder="FXN-SLIP 1"></textarea><ol class="account-fxn-stages" data-account-fxn-stages hidden></ol><p data-account-fxn-next></p>' +
+        '<div class="account-wallet-actions"><button type="submit" class="palette-solid" data-account-fxn-slip-submit disabled>Review &amp; sign my step</button><button type="button" data-account-fxn-slip-copy>Copy slip</button></div></form>' +
+        '<p class="account-line" data-account-fxn-send-status role="status" aria-live="polite"></p>' +
+        '<p class="account-next">Read live from dense-wire at <span data-account-fxn-wire>wss://nodes.defxn.com/ws</span>, never estimated.</p></section>' +
         '<section class="account-contacts" data-account-panel="contacts" aria-labelledby="account-contacts-title" hidden><div data-contacts-view="list"><h2 class="account-visually-hidden" id="account-contacts-title">Contacts</h2>' +
         '<form data-contacts-search-form class="account-contacts-form"><label for="contactsSearchQuery">Find an identity</label><input id="contactsSearchQuery" type="text" autocomplete="off" placeholder="Name or identity ID" /><button type="submit">Search</button></form>' +
         '<p class="account-line" data-contacts-status role="status" aria-live="polite"></p><ul data-contacts-results class="account-contacts-list account-contacts-results" hidden></ul>' +
@@ -96,23 +106,27 @@
         standingMessage: page.querySelector('[data-account-standing-message]'),
         fxnBalance: page.querySelector('[data-account-fxn-balance]'),
         fxnMessage: page.querySelector('[data-account-fxn-message]'),
-        fxnPending: page.querySelector('[data-account-fxn-pending]'),
+        fxnKey: page.querySelector('[data-account-fxn-key]'),
+        fxnCopyKey: page.querySelector('[data-account-fxn-copy-key]'),
+        fxnWire: page.querySelector('[data-account-fxn-wire]'),
         fxnSendForm: page.querySelector('[data-account-fxn-send-form]'),
+        fxnSendInput: page.querySelector('[data-account-fxn-send-input]'),
+        fxnSendWhole: page.querySelector('[data-account-fxn-send-whole]'),
+        fxnSaved: page.querySelector('[data-account-fxn-saved]'),
         fxnSendRecipient: page.querySelector('[data-account-fxn-send-recipient]'),
-        fxnSendAmount: page.querySelector('[data-account-fxn-send-amount]'),
         fxnSendSubmit: page.querySelector('[data-account-fxn-send-submit]'),
         fxnSendStatus: page.querySelector('[data-account-fxn-send-status]'),
         fxnRefresh: page.querySelector('[data-account-fxn-refresh]'),
+        fxnSlipForm: page.querySelector('[data-account-fxn-slip-form]'),
+        fxnSlip: page.querySelector('[data-account-fxn-slip]'),
+        fxnStages: page.querySelector('[data-account-fxn-stages]'),
+        fxnNext: page.querySelector('[data-account-fxn-next]'),
+        fxnSlipSubmit: page.querySelector('[data-account-fxn-slip-submit]'),
+        fxnSlipCopy: page.querySelector('[data-account-fxn-slip-copy]'),
         creditsBalance: page.querySelector('[data-account-credits-balance]'),
         creditsMessage: page.querySelector('[data-account-credits-message]'),
-        creditsRequestForm: page.querySelector('[data-account-credits-request-form]'),
-        creditsResolver: page.querySelector('[data-account-credits-resolver]'),
-        creditsAmount: page.querySelector('[data-account-credits-amount]'),
-        creditsService: page.querySelector('[data-account-credits-service]'),
-        creditsStatus: page.querySelector('[data-account-credits-status]'),
         sendOpen: page.querySelector('[data-account-wallet-open="send"]'),
-        fxnSent: page.querySelector('[data-account-fxn-sent]'),
-        fxnSentBlock: page.querySelector('[data-account-fxn-sent-block]'),
+        slipOpen: page.querySelector('[data-account-wallet-open="slip"]'),
         railFxn: page.querySelector('[data-account-rail-fxn]'),
         railCredits: page.querySelector('[data-account-rail-credits]'),
         railInvites: page.querySelector('[data-account-rail-invites]'),
@@ -168,8 +182,9 @@
       var walletViews = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-wallet-view]')) : [];
       function showWallet(name) {
         walletViews.forEach(function (view) { view.hidden = view.getAttribute('data-account-wallet-view') !== name; });
-        var first = name === 'home' ? null : page.querySelector('[data-account-wallet-view="' + name + '"] input');
+        var first = name === 'home' ? null : page.querySelector('[data-account-wallet-view="' + name + '"] :is(textarea,input)');
         if (first && first.focus) first.focus();
+        if (name === 'slip') inspectSlipField();
       }
       Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-wallet-open]') : [], function (button) {
         button.addEventListener('click', function () { showWallet(button.getAttribute('data-account-wallet-open')); });
@@ -180,6 +195,8 @@
       function setSendable(enabled) {
         fields.fxnSendSubmit.disabled = !enabled;
         if (fields.sendOpen) fields.sendOpen.disabled = !enabled;
+        if (fields.slipOpen) fields.slipOpen.disabled = !enabled;
+        if (fields.fxnCopyKey) fields.fxnCopyKey.disabled = !enabled;
       }
       function syncRail() {
         if (fields.railFxn) fields.railFxn.textContent = fields.fxnBalance.textContent;
@@ -299,169 +316,221 @@
 
       function escapeHtml(value) { return String(value).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
 
-      /* ---- FXN balance + mesh Credits (flx/flux-spec/spec/
-         mesh-value-registries-v1.md) -- real reads against the live
-         registry, never estimated. Pre-genesis/pre-issuer this is
-         honestly empty for every identity; the copy below says so
-         rather than implying a balance exists. */
-      var valueRegistriesGeneration = 0;
-      var ownValueObjects = [];
-      /* Transfers this tab proposed. The registry has no "my outgoing
-         agreements" read, so these live only in memory: once the recipient
-         publishes their output, Complete sends the fulfillment that moves
-         the value (valueRegistries.fulfillFxnTransfer). */
-      var sentTransfers = [];
+      /* ---- FXN on dense-wire ------------------------------------------
+         Everything that builds, checks, signs or sends lives in
+         js/ark/dense-wire-wallet.mjs (an ES module over the vendored
+         js/dense-wire/ client), loaded on first use with import() rather
+         than through the catalog's script list: page-loader.js loads
+         classic scripts only, and a wallet that cannot load (no module
+         support, a file: URL) must not take the Session, Contacts and
+         Mesh views down with it. Every signature goes through
+         ArkUI.authorizationDialog's full review first, inside that module.
+         The balance is read live (FXN_BALANCE), never estimated, and an
+         unanswerable read shows as unavailable, never as 0. */
+      var WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261012-densewire1';
+      var CREDITS_NOT_BUILT = 'Credits have no dense-wire ledger yet. This is not a zero balance.';
+      var walletModule = null;
+      var wire = null;
+      var walletGeneration = 0;
+      var walletBusy = false;
+      var savedList = [];
+      var slipGeneration = 0;
 
-      function resetValueRegistries(message) {
-        valueRegistriesGeneration += 1;
+      function loadWalletModule() {
+        if (!walletModule) {
+          walletModule = Promise.resolve().then(function () {
+            var path = (location.protocol === 'file:' ? '' : '/') + WALLET_MODULE;
+            return import(new URL(path, document.baseURI).href);
+          }).catch(function (error) {
+            walletModule = null;
+            throw new Error('The dense-wire wallet could not load (' + text(error && error.message, 'module error') + ').');
+          });
+        }
+        return walletModule;
+      }
+
+      function walletWire(dw) {
+        if (!wire) wire = new dw.WalletWire(dw.resolveWireUrl());
+        if (fields.fxnWire) fields.fxnWire.textContent = wire.url;
+        return wire;
+      }
+
+      function say(message) { fields.fxnSendStatus.textContent = message; }
+
+      function resetWallet(message) {
+        walletGeneration += 1;
         fields.fxnBalance.textContent = '—';
         fields.fxnMessage.textContent = message || 'Sign in to check';
-        fields.creditsBalance.textContent = '—';
-        fields.creditsMessage.textContent = message || 'Sign in to check';
-        fields.fxnPending.innerHTML = '<p class="account-contacts-empty">No pending transfers to you.</p>';
+        fields.creditsBalance.textContent = 'Not built';
+        fields.creditsMessage.textContent = CREDITS_NOT_BUILT;
+        if (fields.fxnKey) fields.fxnKey.textContent = '—';
+        savedList = [];
+        if (fields.fxnSaved) { fields.fxnSaved.innerHTML = ''; fields.fxnSaved.hidden = true; }
         setSendable(false);
-        ownValueObjects = [];
-        sentTransfers = [];
-        renderFxnSent();
         syncRail();
       }
 
-      function renderFxnPending(pending) {
-        if (!pending.length) { fields.fxnPending.innerHTML = '<p class="account-contacts-empty">No pending transfers to you.</p>'; return; }
-        fields.fxnPending.innerHTML = pending.map(function (agreement) {
-          return '<p class="account-transfer"><span><strong>' + escapeHtml(agreement.amount) + ' ' + escapeHtml(agreement.asset) + '</strong><small>' + escapeHtml(String(agreement.cid).slice(0, 12)) + '…</small></span><button type="button" data-account-fxn-accept="' + escapeHtml(agreement.cid) + '">Accept</button></p>';
-        }).join('');
+      async function loadWallet() {
+        var who = ArkUI.accountSession.current();
+        if (!who || !page.isConnected) return;
+        var token = ++walletGeneration;
+        fields.fxnMessage.textContent = 'Reading dense-wire…';
+        try {
+          var dw = await loadWalletModule();
+          if (token !== walletGeneration || !page.isConnected) return;
+          var link = walletWire(dw);
+          var key = dw.signerFor(who).pubHex;
+          if (fields.fxnKey) fields.fxnKey.textContent = key;
+          setSendable(!walletBusy);
+          renderSaved(dw, key);
+          var reply = await link.balance(key);
+          if (token !== walletGeneration || !page.isConnected) return;
+          if (reply.kind === 'balance') {
+            fields.fxnBalance.textContent = reply.amount;
+            fields.fxnMessage.textContent = reply.amount === '0' ? 'Measured: this key holds no live FXN records.' : 'Live FXN held by this key.';
+          } else if (reply.kind === 'unknown') {
+            fields.fxnBalance.textContent = 'Unavailable';
+            fields.fxnMessage.textContent = 'That chain-server has no FXN ledger to answer from (FXN_BALANCE_UNKNOWN). Absent, not zero.';
+          } else {
+            fields.fxnBalance.textContent = 'Unavailable';
+            fields.fxnMessage.textContent = 'Unexpected balance reply: ' + text(reply.raw);
+          }
+        } catch (error) {
+          if (token !== walletGeneration || !page.isConnected) return;
+          fields.fxnBalance.textContent = 'Unavailable';
+          fields.fxnMessage.textContent = text(error && error.message, 'Could not read the FXN balance from dense-wire.');
+        }
+        syncRail();
       }
 
-      function renderFxnSent() {
-        if (!fields.fxnSent) return;
-        if (fields.fxnSentBlock) fields.fxnSentBlock.hidden = !sentTransfers.length;
-        fields.fxnSent.innerHTML = sentTransfers.map(function (item) {
-          var agreement = item.agreement;
-          var action = item.output ? '<button type="button" data-account-fxn-complete="' + escapeHtml(agreement.cid) + '">Complete</button>' : '<em>Waiting for the recipient</em>';
-          return '<p class="account-transfer"><span><strong>' + escapeHtml(agreement.amount) + ' ' + escapeHtml(agreement.asset) + '</strong><small>' + escapeHtml(String(agreement.cid).slice(0, 12)) + '…</small></span>' + action + '</p>';
-        }).join('');
-      }
-
-      async function checkSentTransfers(who, token) {
-        await Promise.all(sentTransfers.map(async function (item) {
-          if (item.output) return;
-          try { item.output = await window.ArkUI.valueRegistries.pollForFulfillableOutput(who, undefined, item.agreement); } catch (_error) {}
+      /* Records this browser built for you (dense-wire-wallet.mjs's
+         savedRecords), offered as one-click inputs for Send. */
+      async function renderSaved(dw, key) {
+        if (!fields.fxnSaved) return;
+        savedList = dw.savedRecords(key);
+        var rows = await Promise.all(savedList.map(function (record, index) {
+          return dw.describeRecord(record).then(function (info) {
+            return '<p class="account-transfer"><span><strong>' + escapeHtml(info.amount) + ' FXN</strong><small>record ' + escapeHtml(info.cid.slice(0, 12)) + '… · saved in this browser</small></span><button type="button" data-account-fxn-use="' + index + '">Use</button></p>';
+          }, function () { return ''; });
         }));
-        if (token === valueRegistriesGeneration && page.isConnected) renderFxnSent();
+        fields.fxnSaved.innerHTML = rows.join('');
+        fields.fxnSaved.hidden = !rows.join('');
       }
 
-      async function loadValueRegistries() {
+      function shortKey(value) { return String(value || '').slice(0, 12) + '…'; }
+
+      function renderStages(state, problem) {
         var who = ArkUI.accountSession.current();
-        if (!who || !window.ArkUI.valueRegistries || !page.isConnected) return;
-        var token = ++valueRegistriesGeneration;
-        fields.fxnMessage.textContent = 'Checking the live registry…';
-        fields.creditsMessage.textContent = 'Checking the live registry…';
-        try {
-          var fxn = await window.ArkUI.valueRegistries.getFxnBalance(who);
-          if (token !== valueRegistriesGeneration || !page.isConnected) return;
-          ownValueObjects = fxn.records;
-          var fxnKeys = Object.keys(fxn.balancesByAsset);
-          fields.fxnBalance.textContent = fxnKeys.length ? fxnKeys.map(function (asset) { return fxn.balancesByAsset[asset] + ' ' + asset; }).join(', ') : '0';
-          fields.fxnMessage.textContent = fxnKeys.length ? 'Unspent value objects you own: ' + fxn.records.length + '.' : 'No FXN has been issued to this identity yet.';
-          setSendable(!!fxnKeys.length);
-          syncRail();
-          var pending = await window.ArkUI.valueRegistries.listIncomingFxnTransfers(who);
-          if (token !== valueRegistriesGeneration || !page.isConnected) return;
-          renderFxnPending(pending);
-          await checkSentTransfers(who, token);
-        } catch (error) {
-          if (token !== valueRegistriesGeneration || !page.isConnected) return;
-          fields.fxnMessage.textContent = text(error && error.message, 'Could not reach the mesh value-object registry.');
+        var mine = fields.fxnKey ? fields.fxnKey.textContent : '';
+        fields.fxnSlipSubmit.disabled = true;
+        if (problem || !state) {
+          fields.fxnStages.hidden = true;
+          fields.fxnNext.textContent = problem || '';
+          return;
         }
-        try {
-          var credits = await window.ArkUI.valueRegistries.getCreditsBalance(who);
-          if (token !== valueRegistriesGeneration || !page.isConnected) return;
-          fields.creditsBalance.textContent = credits.balance;
-          fields.creditsMessage.textContent = credits.balance === '0' && !credits.grants.length ? 'No credits have been granted to this identity yet.' : credits.grants.length + (credits.grants.length === 1 ? ' grant' : ' grants') + ', ' + credits.consumed.length + ' redeemed by resolvers.';
-          syncRail();
-        } catch (error) {
-          if (token !== valueRegistriesGeneration || !page.isConnected) return;
-          fields.creditsMessage.textContent = text(error && error.message, 'Could not reach the mesh Credits registry.');
+        fields.fxnStages.hidden = false;
+        fields.fxnStages.innerHTML = state.legs.map(function (leg) {
+          return '<li data-done="' + leg.done + '"><strong>' + escapeHtml(leg.label) + '</strong><small>' + escapeHtml(leg.by) + (leg.cid ? ' · ' + escapeHtml(leg.cid.slice(0, 12)) + '…' : ' · ' + escapeHtml(leg.note)) + '</small></li>';
+        }).join('');
+        var f = state.facts;
+        var summary = f.amount + ' FXN from ' + shortKey(f.sender) + ' to ' + shortKey(f.recipient) + '. ';
+        if (!state.next) { fields.fxnNext.textContent = summary + 'Complete: the value has moved.'; return; }
+        var turnKey = state.next.by === 'sender' ? f.sender : f.recipient;
+        if (who && turnKey === mine) {
+          fields.fxnNext.textContent = summary + 'Your turn: ' + state.next.label + '.';
+          fields.fxnSlipSubmit.disabled = walletBusy;
+        } else {
+          fields.fxnNext.textContent = summary + 'Waiting for the ' + state.next.by + ' (' + shortKey(turnKey) + ') to sign: ' + state.next.label + '. Send them this slip.';
         }
       }
 
-      if (fields.fxnRefresh) fields.fxnRefresh.addEventListener('click', loadValueRegistries);
+      async function inspectSlipField() {
+        if (!fields.fxnSlip || !fields.fxnStages) return;
+        var token = ++slipGeneration;
+        var value = (fields.fxnSlip.value || '').trim();
+        if (!value) { renderStages(null, ''); return; }
+        try {
+          var dw = await loadWalletModule();
+          var state = await dw.inspectSlip(dw.parseSlip(value));
+          if (token === slipGeneration) renderStages(state);
+        } catch (error) {
+          if (token === slipGeneration) renderStages(null, text(error && error.message, 'That slip could not be read.'));
+        }
+      }
 
-      if (fields.fxnPending) fields.fxnPending.addEventListener('click', function (event) {
-        var target = event.target.closest && event.target.closest('[data-account-fxn-accept]');
-        if (!target) return;
-        var who = ArkUI.accountSession.current();
-        if (!who) return;
-        var cid = target.getAttribute('data-account-fxn-accept');
-        target.disabled = true;
-        window.ArkUI.valueRegistries.listIncomingFxnTransfers(who).then(function (pending) {
-          var agreement = pending.filter(function (record) { return record.cid === cid; })[0];
-          if (!agreement) throw new Error('That transfer is no longer pending.');
-          return window.ArkUI.valueRegistries.acceptFxnTransfer(who, undefined, agreement);
-        }).then(function () {
-          fields.fxnSendStatus.textContent = 'Accepted. The sender completes the transfer from their side.';
-          loadValueRegistries();
-        }).catch(function (error) {
-          target.disabled = false;
-          fields.fxnSendStatus.textContent = text(error && error.message, 'Could not accept that transfer.');
-        });
-      });
+      function showSlip(dw, slip) {
+        fields.fxnSlip.value = dw.renderSlip(slip);
+        showWallet('slip');
+      }
 
-      if (fields.fxnSent) fields.fxnSent.addEventListener('click', function (event) {
-        var target = event.target.closest && event.target.closest('[data-account-fxn-complete]');
-        if (!target) return;
+      /* One signing flow at a time; each step's review modal is opened by
+         the module. After any attempt the balance is re-read, because a
+         leg may have been admitted even if a later one failed. */
+      async function runWallet(step) {
         var who = ArkUI.accountSession.current();
-        var cid = target.getAttribute('data-account-fxn-complete');
-        var item = sentTransfers.filter(function (entry) { return entry.agreement.cid === cid; })[0];
-        if (!who || !item || !item.output) return;
-        target.disabled = true;
-        fields.fxnSendStatus.textContent = 'Completing the transfer…';
-        window.ArkUI.valueRegistries.fulfillFxnTransfer(who, undefined, item.agreement, item.output).then(function () {
-          sentTransfers = sentTransfers.filter(function (entry) { return entry !== item; });
-          fields.fxnSendStatus.textContent = 'Transfer completed.';
-          loadValueRegistries();
-        }).catch(function (error) {
-          target.disabled = false;
-          fields.fxnSendStatus.textContent = text(error && error.message, 'Could not complete that transfer.');
-        });
-      });
+        if (!who || walletBusy) return;
+        walletBusy = true;
+        setSendable(false);
+        fields.fxnSlipSubmit.disabled = true;
+        var dw = null;
+        try {
+          dw = await loadWalletModule();
+          var result = await step(dw, who, walletWire(dw));
+          showSlip(dw, result.slip);
+        } catch (error) {
+          say(text(error && error.message, 'That step failed. Nothing further was sent.'));
+          if (dw && error && error.slip) showSlip(dw, error.slip);
+        } finally {
+          walletBusy = false;
+          loadWallet();
+          inspectSlipField();
+        }
+      }
+
+      if (fields.fxnRefresh) fields.fxnRefresh.addEventListener('click', loadWallet);
 
       if (fields.fxnSendForm) fields.fxnSendForm.addEventListener('submit', function (event) {
         event.preventDefault();
-        var who = ArkUI.accountSession.current();
-        var recipient = (fields.fxnSendRecipient.value || '').trim();
-        var amount = (fields.fxnSendAmount.value || '').trim();
-        if (!who || !recipient || !amount || !ownValueObjects.length) return;
-        setSendable(false);
-        fields.fxnSendStatus.textContent = 'Proposing the transfer…';
-        window.ArkUI.valueRegistries.proposeFxnTransfer(who, undefined, ownValueObjects[0], recipient, amount).then(function (agreement) {
-          sentTransfers.push({ agreement: agreement, output: null });
-          renderFxnSent();
-          fields.fxnSendStatus.textContent = 'Transfer proposed. Once the recipient accepts, complete it under Sent.';
-          fields.fxnSendForm.reset();
-          showWallet('home');
-        }).catch(function (error) {
-          fields.fxnSendStatus.textContent = text(error && error.message, 'Could not propose that transfer.');
-        }).finally(function () { setSendable(!!ownValueObjects.length); });
-      });
-
-      if (fields.creditsRequestForm) fields.creditsRequestForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        var who = ArkUI.accountSession.current();
-        var resolver = (fields.creditsResolver.value || '').trim();
-        var amount = (fields.creditsAmount.value || '').trim();
-        var service = (fields.creditsService.value || '').trim();
-        if (!who || !resolver || !amount) return;
-        fields.creditsStatus.textContent = 'Authorizing…';
-        window.ArkUI.valueRegistries.requestCreditsConsumption(who, undefined, resolver, amount, service).then(function () {
-          fields.creditsStatus.textContent = 'Consumption request signed and published. It becomes a real debit only once that resolver redeems it.';
-          fields.creditsRequestForm.reset();
-          showWallet('home');
-        }).catch(function (error) {
-          fields.creditsStatus.textContent = text(error && error.message, 'Could not publish that consumption request.');
+        var inputText = fields.fxnSendInput.value, recipient = fields.fxnSendRecipient.value;
+        runWallet(function (dw, who, link) {
+          return dw.startTransfer({ who: who, wire: link, inputText: inputText, recipient: recipient, report: say });
         });
       });
+
+      if (fields.fxnSendInput) fields.fxnSendInput.addEventListener('input', function () {
+        var value = (fields.fxnSendInput.value || '').trim();
+        if (!value) { fields.fxnSendWhole.textContent = ''; return; }
+        loadWalletModule().then(function (dw) { return dw.describeRecord(value); }).then(function (info) {
+          fields.fxnSendWhole.textContent = 'Sends the whole record: ' + info.amount + ' FXN.';
+        }, function () { fields.fxnSendWhole.textContent = 'Not a signed value record yet.'; });
+      });
+
+      if (fields.fxnSaved) fields.fxnSaved.addEventListener('click', function (event) {
+        var target = event.target.closest && event.target.closest('[data-account-fxn-use]');
+        if (!target) return;
+        var record = savedList[Number(target.getAttribute('data-account-fxn-use'))];
+        if (!record) return;
+        fields.fxnSendInput.value = record;
+        fields.fxnSendInput.dispatchEvent(new Event('input'));
+      });
+
+      if (fields.fxnSlip) fields.fxnSlip.addEventListener('input', inspectSlipField);
+
+      if (fields.fxnSlipForm) fields.fxnSlipForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var value = fields.fxnSlip.value;
+        runWallet(function (dw, who, link) {
+          return dw.advance({ who: who, wire: link, slip: dw.parseSlip(value), report: say });
+        });
+      });
+
+      function copyText(value, done) {
+        if (!value) return;
+        var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(value) : Promise.reject(new Error('no clipboard'));
+        clip.then(function () { say(done); }, function () { say('Copy is blocked in this browser. Select the text and copy it by hand.'); });
+      }
+      if (fields.fxnSlipCopy) fields.fxnSlipCopy.addEventListener('click', function () { copyText((fields.fxnSlip.value || '').trim(), 'Slip copied. Send it to the other holder.'); });
+      if (fields.fxnCopyKey) fields.fxnCopyKey.addEventListener('click', function () { copyText(fields.fxnKey.textContent, 'Key copied.'); });
 
       function resetContacts(message) {
         contactsGeneration += 1;
@@ -690,8 +759,8 @@
         applyTabs();
         if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
         else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
-        if (unlocked && window.ArkUI && window.ArkUI.valueRegistries) { loadValueRegistries(); }
-        else { resetValueRegistries(identity ? 'Unlock your Auth Kit to check FXN and Credits.' : undefined); }
+        if (unlocked) { loadWallet(); }
+        else { resetWallet(identity ? 'Unlock your Auth Kit to read your FXN balance.' : undefined); }
         var name = identity && identity.displayName || 'Own your identity.';
         page.querySelector('#account-title').textContent = name;
         page.querySelector('[data-account-avatar]').textContent = identity ? name.slice(0, 2).toUpperCase() : '↗';
@@ -831,7 +900,7 @@
       });
       page.querySelector('[data-account-forget]').addEventListener('click', session.signOut);
       if (fields.check) fields.check.addEventListener('click', checkMesh);
-      page.arkDispose = function () { generation += 1; contactsGeneration += 1; stopContactsPolling(); if (controller) controller.abort(); unsubscribe(); unsubscribeDomains(); session.container.remove(); };
+      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); };
       return page;
     }
   };
