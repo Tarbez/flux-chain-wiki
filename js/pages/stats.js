@@ -62,6 +62,7 @@
       var stats = window.ArkStatsHighlights || {};
       var DS = stats.defiShard || {};
       var OPS = stats.operations || {};
+      var INFRA = stats.infraResolvers || {};
       var registry = window.ArkResolverRegistry || {};
       var grammarOnly = (registry.chain && registry.chain.measured && registry.chain.measured.rate) || 83225;
 
@@ -363,6 +364,74 @@
         shell.appendChild(sweep);
       }
 
+      // ---- platform / infra resolvers (INFRA-001, added 2026-10-12) -----------------------------
+      // Deliberately separate from everything above: these are internal
+      // platform systems (the deployment/preview pipeline, repo storage,
+      // dev tooling), never the FLX DeFi chain, and never comparable to a
+      // swap/transfer/stake rate. Kept in its own section, own heading, own
+      // numbering track (INFRA-0XX, not BENCH-0XX) so nothing here is read
+      // as a chain metric. See js/content/stats-highlights.js's
+      // `infraResolvers` for the frozen source data.
+      shell.appendChild(sectionHead('Platform & infra resolvers · ' + (INFRA.date || '2026-10-12'),
+        INFRA.record + ': internal platform systems, not the FLX DeFi chain above — the deployment/preview pipeline, repo storage, and dev tooling, audited and benchmarked with the same discipline (a resolver turns admitted records into a decision; absent is named, never scored as zero).'));
+
+      var infraAudit = panel('dash-span-12', 'Resolver audit · six platform systems', 'Does a resolver exist, and if so how fast');
+      var infraAuditWrap = el('div', 'dash-table-wrap');
+      var infraAuditTable = el('table', 'dash-table');
+      var iaHead = el('thead'), iaHr = el('tr');
+      ['System', 'Resolver found?', 'Rate', 'Chain-deployable?'].forEach(function (c) {
+        var th = el('th', null, c); th.scope = 'col'; iaHr.appendChild(th);
+      });
+      iaHead.appendChild(iaHr); infraAuditTable.appendChild(iaHead);
+      var iaBody = el('tbody');
+      (INFRA.audit || []).forEach(function (r) {
+        var tr = el('tr');
+        tr.appendChild(el('td', null, r.system));
+        tr.appendChild(el('td', null, r.resolver));
+        tr.appendChild(el('td', 'is-num', r.rate));
+        tr.appendChild(el('td', null, r.deployable));
+        iaBody.appendChild(tr);
+      });
+      infraAuditTable.appendChild(iaBody); infraAuditWrap.appendChild(infraAuditTable); infraAudit.appendChild(infraAuditWrap);
+      infraAudit.appendChild(el('p', 'dash-note', 'bundle-deploy, flux-code-host and flx-blockstore have no resolver by design — reported as absent, never averaged in as a zero score.'));
+      shell.appendChild(infraAudit);
+
+      var infraGrid = el('div', 'dash-grid');
+      [
+        ['dash-span-3 is-lead', 'Manifest routing', '3,230,585', 'decisions/s'],
+        ['dash-span-3', 'Signature-verified fetch', '5,893', 'decisions/s'],
+        ['dash-span-3', 'Worker dispatch, sequential', '52,265', 'round-trips/s'],
+        ['dash-span-3', 'Worker dispatch, concurrent', '235,043', 'commands/s']
+      ].forEach(function (t) {
+        infraGrid.appendChild(stat(t[0], t[1], t[2], t[3], '').tile);
+      });
+      shell.appendChild(infraGrid);
+      var infraDispatchPanel = panel('dash-span-12', null, null);
+      infraDispatchPanel.appendChild(el('p', 'dash-note', 'Native resolver-deployment network (manifest routing + signature-verified admission, worker-isolated execution): routing is near-free; real ed25519 verification is the entire cost of the gap between it and the signature-verified path.'));
+      shell.appendChild(infraDispatchPanel);
+
+      var infraAuto = panel('dash-span-12', 'remote-env access decision · auto-switching verification', 'Matches fixed-inline at low concurrency, beats fixed-pooled above it');
+      var infraAutoWrap = el('div', 'dash-table-wrap');
+      var infraAutoTable = el('table', 'dash-table');
+      var iuHead = el('thead'), iuHr = el('tr');
+      ['Concurrency', 'Fixed inline', 'Fixed pooled', 'Auto-switch'].forEach(function (c) {
+        var th = el('th', null, c); th.scope = 'col'; iuHr.appendChild(th);
+      });
+      iuHead.appendChild(iuHr); infraAutoTable.appendChild(iuHead);
+      var iuBody = el('tbody');
+      (INFRA.autoSwitch || []).forEach(function (r) {
+        var tr = el('tr');
+        tr.appendChild(el('td', 'is-num', r.concurrency));
+        tr.appendChild(el('td', 'is-num', r.inline));
+        tr.appendChild(el('td', 'is-num', r.pooled));
+        tr.appendChild(el('td', 'is-num', r.autoSwitch));
+        iuBody.appendChild(tr);
+      });
+      infraAutoTable.appendChild(iuBody); infraAutoWrap.appendChild(infraAutoTable); infraAuto.appendChild(infraAutoWrap);
+      infraAuto.appendChild(el('p', 'dash-note', INFRA.note || ''));
+      infraAuto.appendChild(docLink('Full record · ' + INFRA.record, 'docs/evidence/infra-001-platform-resolver-audit.md', 'dash-link'));
+      shell.appendChild(infraAuto);
+
       // ---- benchmark runs -----------------------------------------------------------------------
       shell.appendChild(sectionHead('Benchmark runs', 'Every number above, and the other dated runs, with the record that holds its method and raw output.'));
       var runs = panel('dash-span-12 dash-runs', null, null);
@@ -376,7 +445,8 @@
         ['Resolver batch', '256 signed intents, one shard', (DS.swapsPerBatch || 256) + ' swaps/batch', (DS.batchLatencyMs || 13.874) + ' ms', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
         ['Signed-result broadcast', (DS.peersReached || 10) + ' replicas, store only', fmt(DS.replicationCostBytes || 1801) + ' bytes/batch', 'not pipelined', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
         ['Resolver registry', '20 resolvers audited', '6 measured, 14 not built', 'audit', '\u2014', 'Resolver audit', 'docs/resolver-audit.md'],
-        ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '\u2014', 'Whitepaper \u00a73', WHITEPAPER]
+        ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '\u2014', 'Whitepaper \u00a73', WHITEPAPER],
+        ['Platform resolver audit', '6 non-chain systems', '3 measured, 3 absent by design', 'audit', '\u2014', INFRA.record || 'INFRA-001', 'docs/evidence/infra-001-platform-resolver-audit.md']
       ].forEach(function (r) {
         var tr = el('tr');
         r.slice(0, 5).forEach(function (c, i) { tr.appendChild(el('td', i === 2 ? 'is-num' : null, c)); });

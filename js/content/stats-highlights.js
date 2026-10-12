@@ -125,9 +125,41 @@
     note: 'Each operation in its own unit, median of 5 reps, warm-up discarded. No network in any row, and no row is multiplied by a node or replica count. Rows are NOT comparable across units: a transfer rate and a swap rate count different work.'
   });
 
+  // Platform/infra resolvers (INFRA-001, 2026-10-12) — a SEPARATE numbering
+  // track from BENCH-0XX above. These are internal platform systems (the
+  // deployment/preview pipeline, repo storage, dev tooling), never the FLX
+  // DeFi chain, and never comparable to a swap/transfer/stake rate. See
+  // docs/evidence/infra-001-platform-resolver-audit.md for the full record.
+  var INFRA_RESOLVERS = Object.freeze({
+    date: '2026-10-12',
+    record: 'INFRA-001',
+    audit: Object.freeze([
+      Object.freeze({ system: 'flx-repo (repo storage)', resolver: 'yes — ref-chain accept/reject', rate: '116,192–118,973 lines/s', deployable: 'no — unauthenticated, no consensus' }),
+      Object.freeze({ system: 'remote-env (preview control plane)', resolver: 'yes — access decision', rate: '12,106 decisions/s', deployable: 'not yet — stated gate, non-production' }),
+      Object.freeze({ system: 'flx-db-studio (dev DB console)', resolver: 'yes — ACL evaluate', rate: '1.8M–3.4M queries/s', deployable: 'no — client-local only' }),
+      Object.freeze({ system: 'bundle-deploy', resolver: 'none', rate: '—', deployable: 'no — delegates to name-integrity' }),
+      Object.freeze({ system: 'flux-code-host', resolver: 'none of its own', rate: '—', deployable: 'no — holds no signing authority' }),
+      Object.freeze({ system: 'flx-blockstore', resolver: 'none', rate: '—', deployable: 'no — deliberately type-blind storage' })
+    ]),
+    dispatch: Object.freeze([
+      Object.freeze({ path: 'Manifest routing (no I/O, no crypto)', rate: '3,230,585 decisions/s', spread: '1.95×' }),
+      Object.freeze({ path: 'Signature-verified manifest fetch', rate: '5,893 decisions/s', spread: '2.72×' }),
+      Object.freeze({ path: 'Worker dispatch, sequential', rate: '52,265 round-trips/s', spread: '1.90×' }),
+      Object.freeze({ path: 'Worker dispatch, concurrent burst', rate: '235,043 commands/s', spread: '1.58×' })
+    ]),
+    autoSwitch: Object.freeze([
+      Object.freeze({ concurrency: '1', inline: '4,363–4,672/s', pooled: '3,810–3,871/s', autoSwitch: '4,491–4,510/s' }),
+      Object.freeze({ concurrency: '4', inline: '—', pooled: '8,671–9,194/s', autoSwitch: '10,447–10,801/s' }),
+      Object.freeze({ concurrency: '16', inline: '—', pooled: '12,279–13,302/s', autoSwitch: '14,485–18,238/s' }),
+      Object.freeze({ concurrency: '64', inline: '—', pooled: '13,762–15,014/s', autoSwitch: '14,780–17,536/s' })
+    ]),
+    note: 'Measured on a Mac mini (Apple M2, 8 GB RAM), Rust release build / Node v24.9.0, median of 5 timed reps with 2 warm-ups discarded. Absent is not zero: bundle-deploy, flux-code-host and flx-blockstore have no resolver by design, reported as absent rather than averaged in as a zero score. Excluded from every row: network transport, record/manifest construction before the timed region, the deployment network’s one-shot publish/install/activate pipeline, and the production economic layer, which stays gated closed pending its own authority ceremony and soak test. See docs/evidence/infra-001-platform-resolver-audit.md.'
+  });
+
   window.ArkStatsHighlights = Object.freeze({
     defiShard: DEFI_SHARD,
     operations: OPERATIONS,
+    infraResolvers: INFRA_RESOLVERS,
     measured: '2026-10-10',
     scope: 'Signed resolution: two parties sign, a resolver shard resolves and signs, replicas store, anyone audits',
     scopeShort: 'Swaps per batch auction \u00b7 batch latency \u00b7 bytes per signed result',
