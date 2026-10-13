@@ -32,9 +32,9 @@ have no resolver by design — reported as absent, never averaged in as a
 zero score. A missing resolver is a different, weaker claim than "measured
 and scored nothing."
 
-## Native resolver-deployment network: dispatch speed
+## Native FXN Compute Rent Resolver (CRR): dispatch speed
 
-The platform's own resolver-deployment protocol (manifest routing +
+The platform's own FXN Compute Rent Resolver (CRR) protocol (manifest routing +
 signature-verified admission, plus a worker-isolated execution runtime)
 was benchmarked at its two real per-request hot paths — not its one-shot
 publish/install/activate pipeline, which is administrative, not a
@@ -53,7 +53,7 @@ on this platform shows, chain or not.
 
 ## remote-env's access decision: concurrency-aware verification
 
-remote-env's own access resolver was rebuilt to auto-switch between
+remote-env's own FXN Access Control Resolver (ACR) was rebuilt to auto-switch between
 inline and worker-pooled signature verification based on real-time
 concurrent load, rather than forcing one fixed mode. Measured against
 continuous (non-bursty) concurrent traffic:
@@ -72,7 +72,7 @@ caller configuration required.
 ## Excluded from every row above
 
 Network transport, record/manifest construction prior to the timed
-region, and (for the deployment-network rows) the one-shot
+region, and (for the FXN Compute Rent Resolver (CRR) rows) the one-shot
 publish/install/activate pipeline and the production economic/funded-
 execution layer, which remains gated closed pending its own authority
 ceremony and soak test — not benchmarked here because it is not yet a

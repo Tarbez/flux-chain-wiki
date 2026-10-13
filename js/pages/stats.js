@@ -408,7 +408,7 @@
       });
       shell.appendChild(infraGrid);
       var infraDispatchPanel = panel('dash-span-12', null, null);
-      infraDispatchPanel.appendChild(el('p', 'dash-note', 'Native resolver-deployment network (manifest routing + signature-verified admission, worker-isolated execution): routing is near-free; real ed25519 verification is the entire cost of the gap between it and the signature-verified path.'));
+      infraDispatchPanel.appendChild(el('p', 'dash-note', 'Native FXN Compute Rent Resolver (CRR) dispatch (manifest routing + signature-verified admission, worker-isolated execution): routing is near-free; real ed25519 verification is the entire cost of the gap between it and the signature-verified path.'));
       shell.appendChild(infraDispatchPanel);
 
       var infraAuto = panel('dash-span-12', 'remote-env access decision · auto-switching verification', 'Matches fixed-inline at low concurrency, beats fixed-pooled above it');

@@ -153,7 +153,7 @@
       Object.freeze({ concurrency: '16', inline: '—', pooled: '12,279–13,302/s', autoSwitch: '14,485–18,238/s' }),
       Object.freeze({ concurrency: '64', inline: '—', pooled: '13,762–15,014/s', autoSwitch: '14,780–17,536/s' })
     ]),
-    note: 'Measured on a Mac mini (Apple M2, 8 GB RAM), Rust release build / Node v24.9.0, median of 5 timed reps with 2 warm-ups discarded. Absent is not zero: bundle-deploy, flux-code-host and flx-blockstore have no resolver by design, reported as absent rather than averaged in as a zero score. Excluded from every row: network transport, record/manifest construction before the timed region, the deployment network’s one-shot publish/install/activate pipeline, and the production economic layer, which stays gated closed pending its own authority ceremony and soak test. See docs/evidence/infra-001-platform-resolver-audit.md.'
+    note: 'Measured on a Mac mini (Apple M2, 8 GB RAM), Rust release build / Node v24.9.0, median of 5 timed reps with 2 warm-ups discarded. Absent is not zero: bundle-deploy, flux-code-host and flx-blockstore have no resolver by design, reported as absent rather than averaged in as a zero score. Excluded from every row: network transport, record/manifest construction before the timed region, the FXN Compute Rent Resolver (CRR)’s one-shot publish/install/activate pipeline, and the production economic layer, which stays gated closed pending its own authority ceremony and soak test. See docs/evidence/infra-001-platform-resolver-audit.md.'
   });
 
   window.ArkStatsHighlights = Object.freeze({
