@@ -79,6 +79,15 @@
 #scene .account-state dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; }
 #scene .account-state dl>div { min-width:0; padding:10px 0; border-top:1px solid var(--account-rule); }
 #scene .account-state dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+/* The one-line explanation inside each dt (identity/account/wallet) must
+   read as prose, not as more shouty uppercase label text -- added after a
+   real person pasted the wrong field into a security-critical config
+   because the bare one-word labels alone weren't enough (2026-10-13
+   identity-flow audit). */
+#scene .account-state dt small.account-field-hint {
+  display:block; margin-top:2px; color:var(--account-muted); font:400 11px/1.45 var(--font-sans,"Albert Sans",sans-serif);
+  text-transform:none; letter-spacing:normal;
+}
 #scene .account-state dd {
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
   margin:4px 0 0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 12px/1.45 var(--mono-font,monospace);
@@ -245,6 +254,9 @@
 #scene :is(.account-contact-detail,.account-mesh-detail) dd { margin:3px 0 0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 12px/1.45 var(--mono-font,monospace); }
 #scene .account-contact-detail>p { margin:0; color:var(--account-muted); font:400 13px/1.55 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-contact-detail>a { font:500 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
+
+/* Signing wallets (distinct from the dense-wire FXN "Wallet" tab) */
+#scene .account-keys { gap:16px; }
 
 /* Mesh view */
 #scene .account-mesh { gap:16px; }

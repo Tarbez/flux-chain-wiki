@@ -8,6 +8,12 @@ execFileSync(designRoot + '/deadark-sdk/node_modules/.bin/esbuild', [
   '--alias:@deadark/ark-ui/flux-auth=' + designRoot + '/ark-ui/dist/ark-ui.flux-auth.js',
   '--alias:@deadark/ark-ui/flux-auth-ui=' + designRoot + '/ark-ui/dist/ark-ui.flux-auth-ui.js',
   '--alias:flux-auth/root-from-mnemonic=' + fluxRoot + '/flux-auth/src/rootFromMnemonic.mjs',
+  '--alias:flux-auth/wallet-signing-handle=' + fluxRoot + '/flux-auth/src/walletSigningHandle.mjs',
+  '--alias:flux-auth/wallet-lifecycle=' + fluxRoot + '/flux-auth/src/walletLifecycle.mjs',
+  '--alias:flux-auth/wallet-delegation=' + fluxRoot + '/flux-auth/src/walletDelegation.mjs',
+  '--alias:flux-auth/wallet-registry=' + fluxRoot + '/flux-auth/src/walletRegistry.mjs',
+  '--alias:flux-auth/claim-scope-resolver=' + fluxRoot + '/flux-auth/src/claimScopeResolver.mjs',
+  '--alias:flux-auth-client/wallet-mesh=' + fluxRoot + '/flux-auth-client/src/wallet-mesh.mjs',
   '--alias:deadark-identity-core/root-signing-handle=' + fluxRoot + '/deadark-identity-core/dist/identity/root-signing-handle.js',
   '--outfile=js/admin/auth.js',
 ], { stdio: 'inherit' });

@@ -28,6 +28,15 @@
 
   var who = null;
   var queuedSignRequest = null; /* a {event, data} held while the person unlocks */
+  var queuedIdentityRequests = []; /* [event, ...] held while the person unlocks -- see
+    handleIdentityRequest's own comment for why this exists and isn't a single slot
+    the way queuedSignRequest is. */
+  var everReceivedRequest = false; /* has ANY *.defxn.com page ever actually asked
+    this tab for anything? Drives the "nothing to do here" notice below -- without
+    it, a tab opened by typing the URL directly (no site on the other end ever
+    waiting) looks IDENTICAL to one a site's sign-in button opened and is correctly
+    waiting to be asked: both just show "Signed in." and nothing else happens,
+    which is what actually confused a real person testing this page 2026-10-13. */
 
   function $(id) { return document.getElementById(id); }
   function h(tag, props) {
@@ -130,7 +139,42 @@
     });
   }
 
+  /* `getIdentity()` callers (js/ark/broker-client.js) send `request-identity`
+     the instant this tab's message listener answers a ping -- which only
+     means this page's JS has loaded, not that a person has picked their
+     .auth.flx file yet. Answering immediately with `identity: null`
+     whenever `who` isn't set yet was the real bug this queue fixes: the
+     calling site's one-shot promise resolved to null and gave up, and
+     nothing ever asked again even after the person finished unlocking
+     right here a moment later -- the unlock genuinely worked, but the
+     tab that asked for it never found out. Unlike `queuedSignRequest`
+     (one slot, "busy" on a second concurrent request -- a real signature
+     needs the person's undivided attention), multiple sites can
+     legitimately be waiting on "is anyone signed in yet" at once (e.g.
+     genesis.defxn.com and dao.defxn.com both open around the same time),
+     so this is a list, and every waiter gets the same answer once one
+     unlock happens -- no first-caller-wins, no silent drop. */
+  function handleIdentityRequest(event) {
+    everReceivedRequest = true;
+    if (who) {
+      reply(event, { type: 'flux-broker:identity', identity: publicFields(who) });
+      $('brokerStatus').textContent = event.origin + ' has your identity now -- switch back to that tab to continue.';
+      return;
+    }
+    queuedIdentityRequests.push(event);
+    $('brokerStatus').textContent = event.origin + ' is waiting for you to unlock an identity above to continue.';
+  }
+
+  function flushQueuedIdentityRequests() {
+    if (!queuedIdentityRequests.length) return;
+    var waiters = queuedIdentityRequests; queuedIdentityRequests = [];
+    waiters.forEach(function (waitingEvent) { reply(waitingEvent, { type: 'flux-broker:identity', identity: publicFields(who) }); });
+    var origins = waiters.map(function (waitingEvent) { return waitingEvent.origin; });
+    $('brokerStatus').textContent = origins.join(', ') + ' now has your identity -- switch back to that tab to continue.';
+  }
+
   function handleSignRequest(event, data) {
+    everReceivedRequest = true;
     if (!who) {
       /* Only one request queues at a time -- a second concurrent request
          while the first is still waiting on the person is told plainly,
@@ -148,7 +192,7 @@
     var data = event.data;
     if (!data || typeof data !== 'object') return;
     if (data.type === 'flux-broker:ping') { reply(event, { type: 'flux-broker:pong' }); return; }
-    if (data.type === 'flux-broker:request-identity') { reply(event, { type: 'flux-broker:identity', identity: who ? publicFields(who) : null }); return; }
+    if (data.type === 'flux-broker:request-identity') { handleIdentityRequest(event); return; }
     if (data.type === 'flux-broker:sign' && typeof data.requestId === 'string') { handleSignRequest(event, data); return; }
   });
 
@@ -159,11 +203,31 @@
     onChange: function (identity) {
       who = identity || null;
       renderStatus();
-      if (who && queuedSignRequest) {
-        var queued = queuedSignRequest; queuedSignRequest = null;
-        $('brokerStatus').textContent = '';
-        authorizeAndSign(queued.event, queued.data);
-      } else if (!who) {
+      if (who) {
+        var hadQueuedIdentity = queuedIdentityRequests.length > 0;
+        flushQueuedIdentityRequests();
+        if (queuedSignRequest) {
+          var queued = queuedSignRequest; queuedSignRequest = null;
+          $('brokerStatus').textContent = '';
+          authorizeAndSign(queued.event, queued.data);
+        } else if (!hadQueuedIdentity) {
+          /* Nothing was waiting at the moment of unlock. Say plainly
+             whether anything ever asked at all (see everReceivedRequest's
+             own comment) -- a tab opened by typing the URL directly, with
+             no site on the other end, looks IDENTICAL to one correctly
+             waiting to be asked unless this distinguishes them. */
+          $('brokerStatus').textContent = everReceivedRequest
+            ? ''
+            : (window.opener
+                ? 'No site has asked for your identity yet. If you came here through a defxn site’s sign-in button, switch back to that tab -- it should pick this up automatically now.'
+                : 'No site is waiting on this tab. This page only does something when a defxn site’s own sign-in button opens it -- opening this URL directly, or bookmarking it, has nothing to hand your identity to.');
+        }
+      } else {
+        /* Signed out (or never signed in): nothing left to flush a real
+           identity to. A queued identity request stays queued rather than
+           being answered with null here -- the person may still unlock a
+           DIFFERENT kit in the same tab, and that waiter should get THAT
+           answer, not a premature null for a state that was never final. */
         $('brokerStatus').textContent = '';
       }
     },

@@ -14,6 +14,26 @@
     return value == null || value === '' ? (fallback || '—') : String(value);
   }
 
+  /* The identity card's "Identity" field and the Wallet tab's own key
+     display (js/ark/dense-wire-wallet.mjs's `signerFor(who).pubHex`) must
+     show the exact same bytes in the exact same encoding -- showing base64
+     in one place and hex in another is what caused a real person to paste
+     the wrong value for a chain-server config key (2026-10-13 identity-flow
+     audit). Hex is the one dense-wire itself ever uses (wire protocol,
+     FXN_BALANCE, CHAIN_SERVER_GENESIS_KEY, ...), so this card shows hex,
+     computed locally rather than lazy-loading the whole dense-wire wallet
+     module just to format one string. */
+  function base64ToHex(b64) {
+    try {
+      var binary = atob(b64);
+      var out = '';
+      for (var i = 0; i < binary.length; i++) out += binary.charCodeAt(i).toString(16).padStart(2, '0');
+      return out;
+    } catch (_) {
+      return b64; // not valid base64 -- show it as-is rather than hide it
+    }
+  }
+
   function explorerRecord(payload, identityId) {
     if (!payload || payload.apiVersion !== EXPLORER_API || !payload.data || !payload.data.record || payload.data.record.id !== identityId) {
       throw new Error('The local Miner returned an incompatible identity record.');
@@ -33,13 +53,17 @@
         '<div class="account-profile"><div class="account-avatar" data-account-avatar aria-hidden="true">↗</div><div class="account-heading"><h1 id="account-title">Own your identity.</h1><span class="account-status" data-account-status>Signed out</span></div></div>' +
         '<p class="account-intro" data-account-intro>No custodial account and no password reset. One file holds your keys, and only you hold the file.</p>' +
         '<ol class="account-flow" data-account-opens aria-label="How signing in works"><li><span class="account-flow-mark" data-account-icon="document"></span><strong>Your Auth Kit</strong><small>One .auth.flx file on your device</small></li><li><span class="account-flow-mark" data-account-icon="authority"></span><strong>Unlocked here</strong><small>Your PIN never leaves this browser</small></li><li><span class="account-flow-mark" data-account-icon="layers"></span><strong>Everything opens</strong><small>Wallet, contacts and publishing</small></li></ol>' +
-        '<section class="account-state" aria-label="Identity details" hidden><dl><div><dt>Identity ID</dt><dd data-account-id>—</dd></div><div><dt>Root key</dt><dd data-account-root>—</dd></div>' +
-        '<div><dt>Wallet address</dt><dd data-account-wallet>—</dd></div><div><dt>Security</dt><dd data-account-security>—</dd></div></dl>' +
-        '<p data-account-verification>Unlock a kit to verify its root against its recovery phrase.</p></section></header>' +
+        '<section class="account-state" aria-label="Identity details" hidden><dl>' +
+        '<div><dt>Identity<small class="account-field-hint"> — your real signing key. Used everywhere: balances, transfers, and any config that needs your key.</small></dt><dd data-account-root>—</dd></div>' +
+        '<div><dt>Account<small class="account-field-hint"> — a stable, non-secret lookup label derived from your identity. Not a key; cannot be used to sign anything.</small></dt><dd data-account-id>—</dd></div>' +
+        '<div><dt>Wallet<small class="account-field-hint"> — a separate key you can rotate or revoke without touching your identity above. Used for receiving, not for signing as you.</small></dt><dd data-account-wallet>—</dd></div>' +
+        '<div><dt>Security</dt><dd data-account-security>—</dd></div></dl>' +
+        '<p data-account-verification>Unlock a kit to verify its identity against its recovery phrase.</p></section></header>' +
         '<section class="account-card" aria-label="Account">' +
         '<nav class="account-tabs" role="tablist" aria-label="Account views" hidden>' +
         '<button type="button" role="tab" data-account-tab="session" aria-selected="true">Session</button>' +
         '<button type="button" role="tab" data-account-tab="defi" aria-selected="false">Wallet</button>' +
+        '<button type="button" role="tab" data-account-tab="keys" aria-selected="false">Keys</button>' +
         '<button type="button" role="tab" data-account-tab="contacts" aria-selected="false">Contacts</button>' +
         '<button type="button" role="tab" data-account-tab="mesh" aria-selected="false">Mesh</button>' +
         '</nav>' +
@@ -58,8 +82,8 @@
            never as 0. */
         '<div class="account-wallet" data-account-wallet-view="home"><div class="account-balances"><article class="account-balance" data-account-fxn><small>FXN</small><strong data-account-fxn-balance>—</strong><span data-account-fxn-message>Sign in to check</span></article>' +
         '<article class="account-balance" data-account-credits><small>Credits</small><strong data-account-credits-balance>Not built</strong><span data-account-credits-message>Credits have no dense-wire ledger yet. This is not a zero balance.</span></article></div>' +
-        '<div class="account-transfers"><h3>Your FXN key</h3><p class="account-transfer"><span><small data-account-fxn-key>—</small></span><button type="button" data-account-fxn-copy-key disabled>Copy</button></p>' +
-        '<p class="account-contacts-empty">Give this key to someone sending you FXN. A transfer takes turns: each holder signs only their own steps, passing a transfer slip back and forth.</p></div>' +
+        '<div class="account-transfers"><h3>Your Identity key</h3><p class="account-transfer"><span><small data-account-fxn-key>—</small></span><button type="button" data-account-fxn-copy-key disabled>Copy</button></p>' +
+        '<p class="account-contacts-empty">Same key shown as "Identity" at the top of this page. Give it to someone sending you FXN. A transfer takes turns: each holder signs only their own steps, passing a transfer slip back and forth.</p></div>' +
         '<div class="account-wallet-actions"><button type="button" class="palette-solid" data-account-wallet-open="send" disabled>Send FXN</button><button type="button" data-account-wallet-open="slip" disabled>Continue a transfer</button><button type="button" class="account-quiet" data-account-fxn-refresh>Refresh</button></div></div>' +
         '<form data-account-wallet-view="send" data-account-fxn-send-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Send FXN</h3><p>FXN moves as whole signed records: you send one record you hold, and its full amount goes. There is no partial send yet.</p>' +
         '<div data-account-fxn-saved hidden></div><label for="fxnSendInput">Record you hold</label><textarea id="fxnSendInput" rows="3" autocomplete="off" spellcheck="false" data-account-fxn-send-input placeholder="The signed value record, starting G…"></textarea><p data-account-fxn-send-whole></p>' +
@@ -77,7 +101,11 @@
         '<article class="account-contact-detail" data-contacts-view="detail" hidden><button type="button" class="account-back" data-contact-back>← All contacts</button><header><div class="account-contact-avatar" data-contact-avatar aria-hidden="true">ID</div><div><h2 data-contact-name>Identity</h2><span data-contact-state>Connection</span></div></header><dl><div><dt>Identity ID</dt><dd data-contact-id>—</dd></div><div><dt>Public ID</dt><dd data-contact-public-id>—</dd></div><div><dt>Visibility</dt><dd data-contact-visibility>—</dd></div><div><dt>Updated</dt><dd data-contact-updated>—</dd></div></dl><p data-contact-bio>No public profile details are available for this identity.</p><a href="/explore" data-scene-link="explorer">Inspect mesh records →</a></article></section>' +
         '<section class="account-mesh" data-account-panel="mesh" aria-label="Mesh standing" hidden><div class="account-mesh-check" aria-live="polite"><small>Identity binding</small><strong data-account-mesh-status>Not checked</strong><p data-account-mesh-message>Check this identity against the configured Miner by exact ID.</p><button type="button" data-account-mesh-check disabled>Check Miner</button></div>' +
         '<div class="account-standing"><small>Mesh standing</small><strong data-account-standing>Not linked</strong><span data-account-standing-message>Requires an exact signed binding</span></div>' +
-        '<dl class="account-mesh-detail" data-account-mesh-detail hidden><div><dt>Record</dt><dd data-account-mesh-record>—</dd></div><div><dt>Verification</dt><dd data-account-mesh-verification>—</dd></div><div><dt>Updated</dt><dd data-account-mesh-updated>—</dd></div><div><dt>Provenance</dt><dd data-account-mesh-provenance>—</dd></div></dl></section></section>' +
+        '<dl class="account-mesh-detail" data-account-mesh-detail hidden><div><dt>Record</dt><dd data-account-mesh-record>—</dd></div><div><dt>Verification</dt><dd data-account-mesh-verification>—</dd></div><div><dt>Updated</dt><dd data-account-mesh-updated>—</dd></div><div><dt>Provenance</dt><dd data-account-mesh-provenance>—</dd></div></dl></section>' +
+        '<section class="account-keys" data-account-panel="keys" aria-label="Signing wallets" hidden><p class="account-field-hint">Separate keys this identity can mint, each independently signing, rotating or revoking without touching the identity above or any other signing wallet. (Distinct from the FXN balance key on the Wallet tab.)</p>' +
+        '<ul data-account-keys-list class="account-contacts-list"></ul>' +
+        '<form data-account-keys-add-form class="account-wallet-form"><h3>Add a signing wallet</h3><label>Label<input data-account-keys-add-label type="text" value="Default"></label><label>PIN<input data-account-keys-pin type="password" autocomplete="off"></label><label>Password (if set)<input data-account-keys-password type="password" autocomplete="off"></label><button type="submit" data-account-keys-add-submit>Add wallet</button><p data-account-keys-add-result class="inline-status"></p></form>' +
+        '<form data-account-keys-action-form class="account-wallet-form"><h3>Rotate, revoke or delegate</h3><label>Wallet address<input data-account-keys-address type="text" placeholder="Paste a wallet address from the list above"></label><label>New label (rotate only)<input data-account-keys-rotate-label type="text" value="Rotated"></label><div class="account-wallet-actions"><button type="button" data-account-keys-rotate>Rotate</button><button type="button" data-account-keys-revoke>Revoke</button><button type="button" data-account-keys-delegate>Delegate to identity</button><button type="button" data-account-keys-revoke-delegation>Revoke delegation</button></div><p data-account-keys-action-result class="inline-status"></p></form></section></section>' +
         '<aside class="account-rail" aria-label="Your account at a glance" hidden>' +
         '<button type="button" class="account-rail-item" data-needs-key data-account-go="defi"><small>FXN</small><strong data-account-rail-fxn>—</strong></button>' +
         '<button type="button" class="account-rail-item" data-needs-key data-account-go="defi"><small>Credits</small><strong data-account-rail-credits>—</strong></button>' +
@@ -145,7 +173,7 @@
       function panelAvailable(name) {
         if (name === 'session') return true;
         if (name === 'defi' || name === 'mesh') return !!identity;
-        if (name === 'contacts') return !!(identity && ArkUI.accountSession.isUnlocked());
+        if (name === 'contacts' || name === 'keys') return !!(identity && ArkUI.accountSession.isUnlocked());
         return false;
       }
       function applyTabs() {
@@ -229,6 +257,21 @@
         detailVisibility: page.querySelector('[data-contact-visibility]'),
         detailUpdated: page.querySelector('[data-contact-updated]'),
         detailBio: page.querySelector('[data-contact-bio]')
+      };
+      var keysFields = {
+        list: page.querySelector('[data-account-keys-list]'),
+        addForm: page.querySelector('[data-account-keys-add-form]'),
+        addLabel: page.querySelector('[data-account-keys-add-label]'),
+        pin: page.querySelector('[data-account-keys-pin]'),
+        password: page.querySelector('[data-account-keys-password]'),
+        addResult: page.querySelector('[data-account-keys-add-result]'),
+        address: page.querySelector('[data-account-keys-address]'),
+        rotateLabel: page.querySelector('[data-account-keys-rotate-label]'),
+        rotate: page.querySelector('[data-account-keys-rotate]'),
+        revoke: page.querySelector('[data-account-keys-revoke]'),
+        delegate: page.querySelector('[data-account-keys-delegate]'),
+        revokeDelegation: page.querySelector('[data-account-keys-revoke-delegation]'),
+        actionResult: page.querySelector('[data-account-keys-action-result]')
       };
       var identity = null;
       var generation = 0;
@@ -356,6 +399,91 @@
       }
 
       function say(message) { fields.fxnSendStatus.textContent = message; }
+
+      /* Signing wallets (docs/FLUX-WALLET-DELEGATION-SCOPE-VISION.md) --
+         distinct from the dense-wire FXN "Wallet" tab above: these are real
+         flux-auth/wallet-lifecycle wallet-link records stored on the Auth
+         Kit itself (`identity.walletAddresses`/`addWallet`/`rotateWallet`/
+         `revokeWallet`/`delegateWallet`, wired in scripts/auth-entry.js).
+         `identity.walletAddresses`/`walletDelegations` are live getters
+         (re-derived from the current vault on every read), not frozen
+         snapshots, so this list always reflects the latest mutation
+         without needing a fresh sign-in. */
+      function renderKeys() {
+        if (!keysFields.list) return;
+        var addresses = (identity && identity.walletAddresses) || [];
+        var delegations = (identity && identity.walletDelegations) || {};
+        if (!addresses.length) {
+          keysFields.list.innerHTML = '<li class="account-contacts-empty">No signing wallets yet.</li>';
+          return;
+        }
+        keysFields.list.innerHTML = addresses.map(function (address) {
+          var delegation = delegations[address];
+          var status = delegation ? (delegation.revoked ? ' · delegation revoked' : ' · delegated to identity') : '';
+          return '<li class="account-contact-item"><span>' + address + (address === identity.walletAddress ? ' (default)' : '') + status + '</span></li>';
+        }).join('');
+      }
+
+      keysFields.addForm && keysFields.addForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!identity || !identity.addWallet) return;
+        keysFields.addResult.textContent = 'Adding…';
+        identity.addWallet({ pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: keysFields.addLabel.value.trim() || 'Default' })
+          .then(function (result) {
+            keysFields.addResult.textContent = 'Added ' + result.walletAddress;
+            keysFields.pin.value = '';
+            renderKeys();
+          })
+          .catch(function (error) { keysFields.addResult.textContent = text(error && error.message, 'Could not add a wallet.'); });
+      });
+
+      keysFields.rotate && keysFields.rotate.addEventListener('click', function () {
+        if (!identity || !identity.rotateWallet) return;
+        var address = keysFields.address.value.trim();
+        keysFields.actionResult.textContent = 'Rotating…';
+        identity.rotateWallet({ walletAddress: address, pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: keysFields.rotateLabel.value.trim() || undefined })
+          .then(function (result) {
+            keysFields.actionResult.textContent = 'Rotated ' + address + ' → ' + result.walletAddress;
+            keysFields.pin.value = '';
+            renderKeys();
+          })
+          .catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not rotate this wallet.'); });
+      });
+
+      keysFields.revoke && keysFields.revoke.addEventListener('click', function () {
+        if (!identity || !identity.revokeWallet) return;
+        var address = keysFields.address.value.trim();
+        keysFields.actionResult.textContent = 'Revoking…';
+        identity.revokeWallet({ walletAddress: address }).then(function () {
+          keysFields.actionResult.textContent = 'Revoked ' + address;
+          renderKeys();
+        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this wallet.'); });
+      });
+
+      keysFields.delegate && keysFields.delegate.addEventListener('click', function () {
+        if (!identity || !identity.delegateWallet) return;
+        var address = keysFields.address.value.trim();
+        keysFields.actionResult.textContent = 'Delegating…';
+        // `spend` without a real `maxSpend` is refused at creation by
+        // `createWalletDelegation` itself (`WALLET_DELEGATION_SPEND_REQUIRES_CAP`)
+        // -- a real bug this exact button shipped with until a real click
+        // through it (not just a syntax check) surfaced it. A fixed,
+        // conservative default cap here, not an unbounded grant.
+        identity.delegateWallet({ walletAddress: address, rights: ['receive', 'spend'], maxSpend: { amount: 100, period: 'daily' } }).then(function (result) {
+          keysFields.actionResult.textContent = 'Delegated ' + result.delegatedRights.join('+') + ' to this identity';
+          renderKeys();
+        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not delegate this wallet.'); });
+      });
+
+      keysFields.revokeDelegation && keysFields.revokeDelegation.addEventListener('click', function () {
+        if (!identity || !identity.revokeWalletDelegation) return;
+        var address = keysFields.address.value.trim();
+        try {
+          identity.revokeWalletDelegation({ walletAddress: address });
+          keysFields.actionResult.textContent = 'Revoked the delegation for ' + address;
+          renderKeys();
+        } catch (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this delegation.'); }
+      });
 
       function resetWallet(message) {
         walletGeneration += 1;
@@ -759,8 +887,8 @@
         applyTabs();
         if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
         else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
-        if (unlocked) { loadWallet(); }
-        else { resetWallet(identity ? 'Unlock your Auth Kit to read your FXN balance.' : undefined); }
+        if (unlocked) { loadWallet(); renderKeys(); }
+        else { resetWallet(identity ? 'Unlock your Auth Kit to read your FXN balance.' : undefined); if (keysFields.list) keysFields.list.innerHTML = ''; }
         var name = identity && identity.displayName || 'Own your identity.';
         page.querySelector('#account-title').textContent = name;
         page.querySelector('[data-account-avatar]').textContent = identity ? name.slice(0, 2).toUpperCase() : '↗';
@@ -778,10 +906,10 @@
           chooseKit.setAttribute('aria-label', chooseKit.textContent);
         }
         fields.id.textContent = identity && identity.identityId || '—';
-        fields.root.textContent = identity && identity.publicKeyB64 || '—';
+        fields.root.textContent = identity && identity.publicKeyB64 ? base64ToHex(identity.publicKeyB64) : '—';
         fields.wallet.textContent = identity && identity.walletAddress || 'Not recorded in this kit';
         fields.security.textContent = identity && identity.securityProfile || '—';
-        fields.verification.textContent = identity ? (unlocked ? 'Root key verified against your recovery phrase on this device.' : 'Saved public details only. Unlock your Auth Kit to verify them and open your wallet.') : 'Unlock a kit to verify its root against its recovery phrase.';
+        fields.verification.textContent = identity ? (unlocked ? 'Identity verified against your recovery phrase on this device.' : 'Saved public details only. Unlock your Auth Kit to verify them and open your wallet.') : 'Unlock a kit to verify its identity against its recovery phrase.';
         page.querySelector('[data-account-forget]').hidden = !identity || unlocked;
         page.querySelector('[data-account-forget]').textContent = 'Forget saved identity details';
         var storageNotice = page.querySelector('[data-account-storage-notice]');
