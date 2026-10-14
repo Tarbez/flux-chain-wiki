@@ -73,7 +73,7 @@ against the curve, and requires the matched fill to be strictly larger.
 ## 2. Resolvers
 
 Full table: [resolver audit](resolver-audit.md). Signed manifests:
-[`registry/resolver-audit-manifests.flx`](registry/resolver-audit-manifests.flx).
+[`registry/resolver-audit-manifests.wire`](registry/resolver-audit-manifests.wire).
 
 **20 resolvers — 6 measured, 14 not built.** Not built is recorded as
 `NOT_BUILT`, never as zero, so missing work does not read as slow work.

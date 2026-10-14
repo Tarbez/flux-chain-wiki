@@ -4,7 +4,7 @@
 is derived from a measurement or marked as not built — no latency in this
 file was typed by hand.
 
-Signed manifests: [`registry/resolver-audit-manifests.flx`](registry/resolver-audit-manifests.flx).
+Signed manifests: [`registry/resolver-audit-manifests.wire`](registry/resolver-audit-manifests.wire).
 Each is signed by the registry key `2b2d9eb54c302444…` over fields 0–11,
 so a manifest can be re-verified later against the same identity.
 
