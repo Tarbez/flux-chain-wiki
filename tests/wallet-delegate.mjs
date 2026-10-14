@@ -52,13 +52,13 @@ async function mintWallet(vault, { label, rights }) {
 }
 
 // Replicates auth-entry.js's `identity.delegateWallet` body exactly.
-function delegateWallet(vault, secretsByAddress, { walletAddress, rights = ['receive', 'spend'], maxSpend = null, ttlMs }) {
+async function delegateWallet(vault, secretsByAddress, { walletAddress, rights = ['receive', 'spend'], maxSpend = null, ttlMs }) {
   const walletLinks = vault.wallets ?? (vault.wallet ? [vault.wallet] : []);
   const walletLink = walletLinks.find((w) => w.body.walletAddress === walletAddress);
   if (!walletLink) throw new Error('No such wallet on this identity.');
   const walletSecretKey = secretsByAddress[walletAddress];
   const grant = createWalletDelegation({ walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey: identityId, rights, maxSpend, ...(ttlMs ? { ttlMs } : {}) });
-  const signedDelegation = signWalletDelegation(grant, walletSecretKey);
+  const signedDelegation = await signWalletDelegation(grant, walletSecretKey);
   return { vault: addWalletDelegationToAuthKit(vault, walletAddress, signedDelegation), grant };
 }
 
@@ -73,7 +73,7 @@ async function signWithDelegatedRoot(vault, walletAddress, message, right, amoun
     rights: rightsDimension(registry),
     delegation: delegationDimension({ signedDelegation: entry.signedDelegation, now: Date.now(), isRevoked: (_wp, nonce) => Boolean(entry.revoked && entry.signedDelegation.grant.nonce === nonce) }),
   };
-  const decision = resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey: identityId, right, amount }, dimensions, ['rights', 'delegation']);
+  const decision = await resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey: identityId, right, amount }, dimensions, ['rights', 'delegation']);
   if (!decision.authorized) throw new Error(`Delegated action refused: ${decision.reason}`);
   return rawSign(new TextEncoder().encode(message));
 }
@@ -100,7 +100,7 @@ vault = delegatedWallet.vault;
 secretsByAddress[delegatedWallet.walletAddress] = delegatedWallet.walletSecretKey;
 
 // A grant signed by the wallet's own key, not root's.
-const { vault: afterDelegate, grant } = delegateWallet(vault, secretsByAddress, { walletAddress: delegatedWallet.walletAddress, rights: ['receive', 'spend'], maxSpend: { amount: 100, period: 'daily' } });
+const { vault: afterDelegate, grant } = await delegateWallet(vault, secretsByAddress, { walletAddress: delegatedWallet.walletAddress, rights: ['receive', 'spend'], maxSpend: { amount: 100, period: 'daily' } });
 vault = afterDelegate;
 assert.deepEqual(grant.rights, ['receive', 'spend']);
 
@@ -114,7 +114,7 @@ await assert.rejects(signWithDelegatedRoot(vault, delegatedWallet.walletAddress,
 const receiveOnly = await mintWallet(vault, { label: 'ReceiveOnly', rights: ['receive'] });
 vault = receiveOnly.vault;
 secretsByAddress[receiveOnly.walletAddress] = receiveOnly.walletSecretKey;
-const { vault: afterReceiveOnlyGrant } = delegateWallet(vault, secretsByAddress, { walletAddress: receiveOnly.walletAddress, rights: ['receive', 'spend'], maxSpend: { amount: 50, period: 'daily' } });
+const { vault: afterReceiveOnlyGrant } = await delegateWallet(vault, secretsByAddress, { walletAddress: receiveOnly.walletAddress, rights: ['receive', 'spend'], maxSpend: { amount: 50, period: 'daily' } });
 vault = afterReceiveOnlyGrant;
 await assert.rejects(signWithDelegatedRoot(vault, receiveOnly.walletAddress, 'spend 10', 'spend', 10), /WALLET_REGISTRY_RIGHT_NOT_HELD/);
 

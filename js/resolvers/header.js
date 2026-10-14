@@ -235,6 +235,10 @@ ArkUI.register('RHEADER_V1', {
     descriptor.setAttribute('aria-hidden', 'true');
     lockup.appendChild(wordmark);
     lockup.appendChild(descriptor);
+    var mark = document.createElement('span');
+    mark.className = 'brand-mark brand-mark-defxn ark-brand-mark';
+    mark.setAttribute('aria-hidden', 'true');
+    identity.appendChild(mark);
     identity.appendChild(lockup);
     el.appendChild(identity);
 

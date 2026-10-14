@@ -210,7 +210,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         sign: async (text) => toBase64(handle.sign(new TextEncoder().encode(text))),
         signWithWallet: async (text) => {
           if (!walletHandle) throw new Error('This identity has no wallet set up yet, so there is nothing to sign with -- create a wallet and complete its first-time setup first.');
-          return toBase64(walletHandle.sign(new TextEncoder().encode(text)));
+          return toBase64(await walletHandle.sign(new TextEncoder().encode(text)));
         },
         /**
          * Mints and persists a real additional wallet, signed by this
@@ -264,7 +264,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
             maxSpend,
             ...(ttlMs ? { ttlMs } : {}),
           });
-          const signedDelegation = signWalletDelegation(grant, walletSecretKey);
+          const signedDelegation = await signWalletDelegation(grant, walletSecretKey);
           const updatedVault = addWalletDelegationToAuthKit(active.vault, walletAddress, signedDelegation);
           active.vault = updatedVault;
           return { vault: updatedVault, walletAddress, delegatedRights: grant.rights, maxSpend: grant.maxSpend, expiresAt: grant.expiresAt };
@@ -302,7 +302,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
               isRevoked: (_walletPublicKey, nonce) => Boolean(entry.revoked && entry.signedDelegation.grant.nonce === nonce),
             }),
           };
-          const decision = resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey, right, amount }, dimensions, ['rights', 'delegation']);
+          const decision = await resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey, right, amount }, dimensions, ['rights', 'delegation']);
           if (!decision.authorized) throw new Error(`Delegated action refused: ${decision.reason}`);
           return toBase64(handle.sign(new TextEncoder().encode(message)));
         },

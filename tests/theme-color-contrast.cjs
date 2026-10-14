@@ -72,14 +72,14 @@ for (const name of names) {
     assert(distance>=.06, `${name} ${roles[i]}/${roles[j]} are ${distance.toFixed(3)} apart (OKLab); they must read as different colors`);
   }
 
-  // Harmony: the three roles share one lightness band and a relaxed chroma, and
-  // the neutrals carry the primary hue.
+  // Brighter accents share a lightness band; near-neutral surfaces keep
+  // the family hue from turning the whole page brown, purple or green.
   const lch=['primary','secondary','reference'].map(r=>okLCH(rgb(get(r))));
   const Ls=lch.map(x=>x.L);
   assert(Math.max(...Ls)-Math.min(...Ls)<=.08, `${name} role lightness must be balanced (spread ${(Math.max(...Ls)-Math.min(...Ls)).toFixed(3)})`);
-  lch.forEach((x,i)=>assert(x.C<=.13, `${name} ${['primary','secondary','reference'][i]} chroma ${x.C.toFixed(3)} is not relaxed`));
+  lch.forEach((x,i)=>assert(x.C>=.075 && x.C<=.18, `${name} ${['primary','secondary','reference'][i]} must be vivid without clipping`));
   const canvasLCH=okLCH(canvas);
-  assert(canvasLCH.C>.004 && hueGap(canvasLCH.h,lch[0].h)<=30, `${name} canvas must be tinted toward the primary hue`);
+  assert(canvasLCH.C<.004, `${name} canvas must remain visually neutral`);
 
   // Shades: a full ladder per role, each step a real step, base = the bare token.
   for (const role of roles) {
@@ -131,4 +131,4 @@ darkKeys.forEach((key,i)=>families[key].forEach((h,r)=>assert(hueGap(h,families[
 for (const file of ['css/hero-motion.css','css/fallback.css','css/studio.css','css/color-system.css','css/home-drafting.css','css/guided-page.css','css/explorer.css'])
   assert(!/#[0-9a-f]{3,8}\b(?![^(]*mask)|rgba?\(\s*\d/i.test(fs.readFileSync(file,'utf8').replace(/mask-image:[^;]+;/g,'')), `${file} must not hard-code colors`);
 
-console.log('PASS: one authoritative source; five harmonious families (balanced lightness, relaxed chroma, tinted neutrals) in dark and light; secondary owns the main CTA; perceptually distinct roles with semantic shades and tonal scales; readable inks, soft-button text, a four-step text ladder and separated surfaces in all ten palettes.');
+console.log('PASS: one authoritative source; five vivid families with balanced lightness and near-neutral surfaces in dark and light; secondary owns the main CTA; perceptually distinct roles with semantic shades and tonal scales; readable inks, soft-button text, a four-step text ladder and separated surfaces in all ten palettes.');

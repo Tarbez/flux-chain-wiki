@@ -41,7 +41,7 @@
     "reference": 190,
     "danger": 30,
     "warning": 100,
-    "success": 142
+    "success": 143
    },
    "light": {
     "primary": 232,
@@ -49,7 +49,7 @@
     "reference": 190,
     "danger": 30,
     "warning": 100,
-    "success": 142
+    "success": 143
    }
   }
  },
@@ -122,7 +122,7 @@
     "reference": 228,
     "danger": 30,
     "warning": 100,
-    "success": 159
+    "success": 161
    },
    "light": {
     "primary": 300,
@@ -130,7 +130,7 @@
     "reference": 228,
     "danger": 30,
     "warning": 100,
-    "success": 160
+    "success": 161
    }
   }
  }

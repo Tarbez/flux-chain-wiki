@@ -10,7 +10,7 @@ const outsidePointer = event => { if (event.target instanceof Node) ui.handleOut
 document.addEventListener('pointerdown', outsidePointer, true);
 const themes=themeOptions;
 const atmosphereFixed=Object.freeze({intensity:37,grain:90});
-const controls={structure:{label:'Structure',min:0,max:100,value:50},visibility:{label:'Visibility',min:0,max:100,value:60},scale:{label:'Scale',min:60,max:180,value:100},density:{label:'Density',min:20,max:100,value:60},softness:{label:'Softness',min:0,max:100,value:10},delay:{label:'Loop delay (seconds)',min:.3,max:10,value:.3}};
+const controls={structure:{label:'Structure',min:0,max:100,value:50},visibility:{label:'Visibility',min:0,max:100,value:72},scale:{label:'Scale',min:60,max:180,value:100},density:{label:'Density',min:20,max:100,value:60},softness:{label:'Softness',min:0,max:100,value:0},delay:{label:'Loop delay (seconds)',min:.3,max:10,value:1.2}};
 ui.register('ATMOSPHERERANGE|BUTTON',{tag:'input',attrs:{type:'range'}});
 const root=document.documentElement;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
@@ -19,7 +19,7 @@ let theme=read('flux-chain-theme','ghost'),renderer,frame=0;
 if(!themes.includes(theme))theme='ghost';
 let saved={};try{saved=JSON.parse(read('defxn-pattern-config-v1','{}'))||{};}catch{}
 let values={};
-function patternValues(name){const stored=saved[name]||{};const result={animated:stored.animated===true};for(const [key,c] of Object.entries(controls)){result[key]=typeof stored[key]==='number'&&Number.isFinite(stored[key])?Math.max(c.min,Math.min(c.max,stored[key])):c.value;}for(const [key,choices] of Object.entries({scale:[80,100,140],density:[35,60,90]}))result[key]=choices.reduce((a,b)=>Math.abs(a-result[key])<Math.abs(b-result[key])?a:b);return result;}
+function patternValues(name){const stored=saved[name]||{};const result={animated:stored.animated!==false};for(const [key,c] of Object.entries(controls)){result[key]=typeof stored[key]==='number'&&Number.isFinite(stored[key])?Math.max(c.min,Math.min(c.max,stored[key])):c.value;}for(const [key,choices] of Object.entries({scale:[80,100,140],density:[35,60,90]}))result[key]=choices.reduce((a,b)=>Math.abs(a-result[key])<Math.abs(b-result[key])?a:b);return result;}
 values=patternValues(read('defxn-motif-v1','blocks'));
 root.dataset.background='atmosphere';
 const backgroundHost=document.createElement('div');backgroundHost.className='ark-background-host';backgroundHost.setAttribute('aria-hidden','true');
@@ -55,7 +55,7 @@ const sliders=['structure','visibility','delay'].map(key=>{
  const ref='SZ'+key.toUpperCase();slots[key]={ref,pattern:'R-'+ref+'-M-ATMOSPHERERANGE-A-INPUT',state:{text:String(values[key])},config:{label:copy.label,attrs:{class:'settings-range',min:control.min,max:control.max,step:key==='delay'?.1:1,value:String(values[key])}}};
  return {slot:key+'Card',children:[{slot:key+'Header',children:[label,value]},slot(key+'Hint',copy.hint,false,'settings-slider-hint'),{slot:key},{slot:key+'Ends',children:[slot(key+'Min',copy.ends[0]),slot(key+'Max',copy.ends[1])]}]};
 });
-const contents=[slot('label','Your space',false,'settings-title'),slot('description','A few ways to make it yours.',false,'settings-description'),slot('themeLabel','Theme',false,'settings-label'),slot('darkLabel','Dark',false,'settings-control-label'),group('themesDark',darkThemes),slot('lightLabel','Light',false,'settings-control-label'),group('themesLight',lightThemes),slot('motifLabel','Pattern',false,'settings-label'),group('motifs',motifs),slot('backgroundLabel','Active pattern',false,'settings-label'),slot('sizeLabel','Cell size',false,'settings-control-label'),group('scale',Object.keys(presets.scale)),slot('spacingLabel','Cell spacing',false,'settings-control-label'),group('density',Object.keys(presets.density)),...sliders,slot('animate','Enable pattern animation',true,'settings-action'),slot('animationNote','A soft scan across the mesh, then a pause. Reduced motion is respected.',false,'settings-description'),slot('remove','Remove pattern',true,'settings-action'),slot('restore','Reset this pattern',true,'settings-action'),slot('motionLabel','Motion',false,'settings-label'),slot('pause','Pause motion',true,'settings-action'),slot('reset','Reset viewing angle',true,'settings-action')];
+const contents=[slot('label','Your space',false,'settings-title'),slot('description','A few ways to make it yours.',false,'settings-description'),slot('themeLabel','Theme',false,'settings-label'),slot('darkLabel','Dark',false,'settings-control-label'),group('themesDark',darkThemes),slot('lightLabel','Light',false,'settings-control-label'),group('themesLight',lightThemes),slot('motifLabel','Pattern',false,'settings-label'),group('motifs',motifs),slot('backgroundLabel','Active pattern',false,'settings-label'),slot('sizeLabel','Cell size',false,'settings-control-label'),group('scale',Object.keys(presets.scale)),slot('spacingLabel','Cell spacing',false,'settings-control-label'),group('density',Object.keys(presets.density)),...sliders,slot('animate','Enable pattern animation',true,'settings-action'),slot('animationNote','Visible waves follow the shape of each pattern. Pause anytime; reduced motion is respected.',false,'settings-description'),slot('remove','Remove pattern',true,'settings-action'),slot('restore','Reset this pattern',true,'settings-action'),slot('motionLabel','Motion',false,'settings-label'),slot('pause','Pause motion',true,'settings-action'),slot('reset','Reset viewing angle',true,'settings-action')];
 slots.root={ref:'SZROOT',pattern:'R-SZROOT-F-ROOT-D-COLUMN',config:{attrs:{class:'settings-root'}}};
 slots.trigger={ref:'SZTRIGGER',pattern:'R-SZTRIGGER-X-SECONDARY-M-SETTINGS-A-CLICK',state:{text:'⚙'},config:{label:'Open settings',attrs:{class:'settings-trigger'}}};
 slots.content={ref:'SZCONTENT',pattern:'R-SZCONTENT-F-POPOVER-D-COLUMN',state:{open:false,hidden:true},config:{attrs:{class:'settings-panel'}}};
@@ -76,12 +76,12 @@ function atmosphereConfig(){
  return {...base,canvas:'hsl(var(--canvas))',sub:{opacity:atmosphereFixed.intensity/100,blur:155},base:{...base.base,opacity:atmosphereFixed.intensity/340,blur:Math.min(320,155*1.6)},grain:{...base.grain,opacity:atmosphereFixed.grain/1000},complementary:{...base.complementary,color:'hsl(var(--text-muted))'},shapes:recolor(base.shapes),extras:recolor(base.extras)};
 }
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-let loopTimer=0,pulse=null,disposed=false;
-function stopPattern(){meshPattern.refresh();clearTimeout(loopTimer);loopTimer=0;if(pulse)pulse.cancel();pulse=null;}
+let loopTimer=0,disposed=false;
+function stopPattern(){meshPattern.refresh();clearTimeout(loopTimer);loopTimer=0;}
 function schedulePattern(){
  stopPattern();
  if(disposed||!values.animated||motif==='none'||document.hidden||reduced.matches||ArkUI.sceneState.get().paused)return;
- loopTimer=setTimeout(()=>{loopTimer=0;if(disposed)return;meshPattern.animate(); const opacity=Number(getComputedStyle(brandField).opacity)||.62;pulse=brandField.animate([{opacity},{opacity:opacity*.79},{opacity}],{duration:1800,easing:'ease-in-out'});pulse.onfinish=()=>{pulse=null;schedulePattern();};},values.delay*1000);
+ loopTimer=setTimeout(()=>{loopTimer=0;if(disposed)return;meshPattern.animate();loopTimer=setTimeout(schedulePattern,3200);},values.delay*1000);
 }
 function persistPattern(){saved[motif]={...values};save('defxn-pattern-config-v1',JSON.stringify(saved));}
 function restoreRangeValues(){for(const key of ['structure','visibility','delay']){const input=ui.getElement(component.getRef(key));if(!input)continue;input.value=String(values[key]);input.style.setProperty('--range-fill',((values[key]-controls[key].min)/(controls[key].max-controls[key].min)*100)+'%');input.setAttribute('aria-valuetext',rangeValue(key));const output=ui.getElement(component.getRef(key+'Value'));if(output&&output.textContent!==rangeValue(key))output.textContent=rangeValue(key);}}

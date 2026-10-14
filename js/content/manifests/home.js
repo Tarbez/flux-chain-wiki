@@ -16,19 +16,19 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "Protocol infrastructure for independent networks"
+      "value": "DEFXN / A chain of chains"
     },
     "TITLE": {
       "label": "Heading",
-      "kind": "line",
+      "kind": "text",
       "section": "Hero",
-      "value": "Every identity has its own chain, bound into a chain of chains."
+      "value": "Not one chain.\nA world\nof them."
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "You get your own chain. It only checks it's really you — never what you say. Smart helpers called resolvers read the rest. More chains bring more helpers and apps, so everything gets even faster."
+      "value": "Your own history. A network of possibilities. DEFXN connects independent identity chains through applications and signed results you can inspect."
     },
     "STEP": {
       "label": "Label on the ring pill",
@@ -40,7 +40,7 @@ ArkManifest.define({
       "label": "Learn pill",
       "kind": "line",
       "section": "Hero",
-      "value": "See the protocol in motion"
+      "value": "See how it works"
     },
     "EXPLORE": {
       "label": "Explore pill",

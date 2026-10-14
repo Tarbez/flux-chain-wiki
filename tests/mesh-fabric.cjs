@@ -4,8 +4,8 @@ let id=0,reads=0,paints=0,disconnections=0,subscriptions=0;
 const frames=new Map(),docListeners=new Map(),mediaListeners=new Map();
 const reduce={matches:false,addEventListener:(k,fn)=>mediaListeners.set(k,fn),removeEventListener:k=>mediaListeners.delete(k)};
 const document={hidden:false,documentElement:{},addEventListener:(k,fn)=>docListeners.set(k,fn),removeEventListener:k=>docListeners.delete(k)};
-let activeCells=[];
-const ctx={setTransform(){},clearRect(){paints++;activeCells=[];},fillRect(x,y){const alpha=Number((this.fillStyle.match(/\/ ([0-9.]+)/)||[])[1]);if(alpha>=.2)activeCells.push([x,y]);},strokeRect(){},fillText(){}};
+let activeCells=[],paintInks=[],labels=0;
+const ctx={setTransform(){},clearRect(){paints++;activeCells=[];paintInks=[];labels=0;},fillRect(x,y){const alpha=Number((this.fillStyle.match(/\/ ([0-9.]+)/)||[])[1]);paintInks.push(alpha);if(alpha>=.2)activeCells.push([x,y]);},strokeRect(){},fillText(){labels++;}};
 const canvas={dataset:{},getContext:()=>ctx,getBoundingClientRect(){reads++;return {width:420,height:140};}};
 let listener;const ArkUI={agreementCellLevel:(stage,p)=>stage==='intent'?p*.6:p*.3,sceneState:{subscribe(fn){listener=fn;subscriptions++;fn({paused:false});return()=>{listener=null;subscriptions--;};}}};
 class Observer{observe(){}disconnect(){disconnections++;}}
@@ -53,9 +53,25 @@ const arrangements=[];
 for(const stage of ['network','logic','story-check','mesh-nodes','mesh-routes','mesh-tiles','mesh-frames']){
  background.select(stage,false);arrangements.push(JSON.stringify(activeCells));
  assert.equal(frames.size,0,'background patterns are static');
+ assert.equal(labels,0,'decorative backgrounds contain no miniature pseudo-data');
+ const settled=JSON.stringify(paintInks);background.animate();
+ for(const time of [0,1280])for(const [key,fn] of [...frames]){frames.delete(key);fn(time);}
+ assert.notEqual(JSON.stringify(paintInks),settled,stage+' has a visible mid-wave change');
+ background.refresh();
+ assert.equal(JSON.stringify(paintInks),settled,'stopping restores the same pattern');
 }
 assert.equal(new Set(arrangements).size,7,'all seven backgrounds preserve distinct mesh arrangements');
 assert(!inks.includes('--primary')&&!inks.includes('--complement')&&!inks.includes('--reference'),'background must remain neutral');
-const motionPaints=paints;const motionReads=reads;background.animate();assert.equal(frames.size,1);for(let t=0;t<=2000;t+=1000/60){for(const [key,fn] of [...frames]){frames.delete(key);fn(t);}}assert.equal(frames.size,0,'micro scan settles between loops');assert(paints-motionPaints<=56,'micro scan limits painting to 30 fps');assert.equal(reads,motionReads+1,'micro scan measures once');background.animate();background.refresh();assert.equal(frames.size,0,'disable cancels micro scan');
+const motionPaints=paints;const motionReads=reads;background.animate();assert.equal(frames.size,1);for(let t=0;t<=3400;t+=1000/60){for(const [key,fn] of [...frames]){frames.delete(key);fn(t);}}assert.equal(frames.size,0,'wave settles between loops');assert(paints-motionPaints<=98,'wave limits painting to 30 fps');assert.equal(reads,motionReads+1,'wave measures once');background.animate();background.refresh();assert.equal(frames.size,0,'disable cancels wave');
 background.dispose();assert.equal(subscriptions,0);
+// The real browser uses cached Path2D batches; exercise that path as well.
+scope.Path2D=class {constructor(){this.rects=[];}rect(...args){this.rects.push(args);}};
+let batchDraws=0;
+ctx.fill=function(path){batchDraws++;path.rects.forEach(rect=>this.fillRect(...rect));};ctx.stroke=function(){batchDraws++;};
+const batched=ArkUI.createMeshFabric(canvas,{background:true});batched.select('mesh-nodes',false);
+assert(batchDraws<10,'static background is a handful of cached draws');
+const staticInk=JSON.stringify(paintInks);batched.animate();
+for(const time of [0,1280]){batchDraws=0;for(const [key,fn] of [...frames]){frames.delete(key);fn(time);}assert(batchDraws<34,'moving cells are batched into at most 32 alpha bands');}
+assert.notEqual(JSON.stringify(paintInks),staticInk);
+batched.dispose();assert.equal(frames.size,0);assert.equal(subscriptions,0);
 console.log(`PASS: shared mesh 10 distinct arrangements, ${painted} bounded paints, no frame layout reads, stale-frame cancellation, pause, reduced motion, visibility, and 100 disposal cycles.`);

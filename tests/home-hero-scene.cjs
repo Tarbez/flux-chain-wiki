@@ -195,6 +195,54 @@ toggle.listeners.click[0]();
 flow.dispose();
 assert.equal(pendingAfter(() => flow.restore()), 0, 'a disposed scene never schedules again');
 
+const rich=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:'transfers',inline:true,rich:true});
+const richRoot=rich.element,choices=richRoot.byClass('flow-record');
+assert.equal(richRoot.byClass('land-history').length,5,'your chain and four independent others');
+assert.equal(richRoot.byClass('land-record-main').length,7,'your chain carries the visual focus: J36..J42');
+assert.equal(richRoot.byClass('land-reference').length,4,'each other chain is tied to one of your records by a reference');
+/* Named regression (2026-10-14): every example drew the same picture, so
+   swapping Transfers for Governance changed nothing but a caption. Each
+   example now draws its own counterpart, and J42 carries its own mark. */
+const kinds=sandbox.ArkUI.chainCases.map(c=>{const f=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:c.id,inline:true,rich:true});const cp=f.element.byClass('land-counterpart')[0];f.dispose();return cp.getAttribute('data-kind');});
+assert.equal(new Set(kinds).size,kinds.length,'each example draws a different counterpart: '+kinds.join(', '));
+assert(choices.every(choice=>choice.tagName==='button'&&!choice.href),'hero exploration stays on the home page');
+choices[3].listeners.click[0]();
+assert.equal(choices[3].getAttribute('aria-pressed'),'true');
+assert.equal(richRoot.dataset.step,'3');
+assert(richRoot.byClass('flow-says')[0].getAttribute('aria-hidden')!=='true','the selected explanation remains accessible');
+/* Colour is data in the landscape: exactly one record carries the accent (the one
+   whose state the steps change), the head moves onto it only when the chain is
+   extended, and the reference its resolution creates appears only at resolve. */
+const accents=richRoot.byClass('land-accent');
+assert.equal(accents.length,1,'only the record in flight carries the identity colour');
+assert(richRoot.byClass('land-record-new')[0].all().includes(accents[0]),'and it is J42, the record the steps act on');
+const scene=richRoot.byClass('flow-landscape')[0],head=richRoot.byClass('land-head')[0];
+assert.equal(richRoot.byClass('land-legend')[0].byClass('land-meta').length,3,'the drawing says what each mark means');
+assert(richRoot.byClass('land-party-counterpart')[0].textContent.includes('alice.fxn'),'the counterparty is named from the example');
+choices[1].listeners.click[0]();
+assert.equal(scene.getAttribute('data-placed'),'false','before extend, J42 is not yet part of the chain');
+const headBefore=head.style.transform;
+assert(richRoot.byClass('land-check').every(c=>c.getAttribute('data-on')==='true'&&c.getAttribute('data-shown')==='true'),'the four checks pass together on the check step');
+choices[2].listeners.click[0]();
+assert.equal(scene.getAttribute('data-placed'),'true','extend places J42');
+assert.notEqual(head.style.transform,headBefore,'the head moves onto J42 when the chain is extended');
+assert.equal(richRoot.byClass('land-resolution')[0].getAttribute('data-shown'),'false','the resolution is not readable before it happens');
+choices[3].listeners.click[0]();
+const peersOn=richRoot.byClass('land-peer').filter(p=>p.getAttribute('data-on')==='true').length;
+assert(peersOn>0&&peersOn<richRoot.byClass('land-peer').length,'partial replication reads partial in the landscape too');
+choices[4].listeners.click[0]();
+assert.equal(richRoot.byClass('land-resolution')[0].getAttribute('data-shown'),'true','resolve shows the reference to the counterparty');
+rich.dispose();assert.equal(pendingAfter(()=>rich.restore()),0);
+
+/* The left of the hero: your chain among the chains it is connected to. The
+   example's counterparty is the line drawn in full ink, and it follows the example. */
+const world=sandbox.ArkUI.buildChainWorld({caseId:'transfers'});
+const lines=world.element.byClass('world-line');
+assert(world.element.byClass('world-mine').length===1,'your chain is one heavy line through the map');
+const selected=()=>lines.filter(l=>l.getAttribute('data-selected')==='true').map(l=>l.getAttribute('data-name'));
+assert.deepEqual(selected(),['alice.fxn'],'transfers highlights alice.fxn');
+world.select('staking');assert.deepEqual(selected(),['validator.fxn'],'staking highlights validator.fxn');
+assert.equal(world.element.byClass('world-interchange').length,5,'five chains cross yours at interchanges');
 console.log('PASS: hero scene — 7 real grammar blocks, one panel active per step, ' +
   'checks pass together, partial replication reads partial, the ending stays hidden ' +
   'until it happens, and the scene is still when paused, hidden or disposed.');

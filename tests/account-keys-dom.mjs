@@ -30,6 +30,25 @@ import { webcrypto } from 'node:crypto';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BUNDLE_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'auth.js'), 'utf8');
 const ACCOUNT_PAGE_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'pages', 'account.js'), 'utf8');
+// The real Scoped Claim Authorization dialog's own dependency chain, same
+// files and same order as js/pages/catalog.js's real `account` route
+// loads them (minus ml-dsa.js/auth-kit-create-panel.js/mesh-directory-
+// client.js/local-domains.js, unrelated to what this test exercises) --
+// closes a real gap the previous round of this test left open: every
+// Keys-tab action (add/rotate/revoke/delegate) is a signing surface that
+// now routes through `window.ArkUI.authorizationDialog.confirm(...)`
+// before signing (see js/pages/account.js's `confirmWalletAction`), but
+// this test's jsdom never loaded the dialog's own dependencies, so
+// `confirmWalletAction`'s own `if (!(window.ArkUI.authorizationDialog...))
+// return Promise.resolve(true)` fallback silently auto-approved every
+// action -- the suite passed 5/5 without the dialog ever existing, let
+// alone being clicked. Found by reading the account.js wiring itself
+// against what this test's jsdom actually had loaded, not guessed.
+const DIRECTORY_TRANSPORT_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'directory-transport.js'), 'utf8');
+const ED25519_PEM_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'ed25519-pem-browser.js'), 'utf8');
+const FLUX_ELEMENTS_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'vendor', 'flux-elements.js'), 'utf8');
+const AUTHORIZATION_VIEW_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'authorization-view.js'), 'utf8');
+const AUTHORIZATION_DIALOG_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'authorization-dialog.js'), 'utf8');
 const REAL_KIT_TEXT = fs.readFileSync('/Volumes/PortableSSD/flux/flux-launchpad/js/fixtures/real-auth-kit-v9.flx', 'utf8');
 const KIT_PIN = '13572468';
 const KIT_PASSWORD = 'launchpad-test';
@@ -75,7 +94,7 @@ function mountAccountPage() {
       storageError() { return ''; },
     },
   };
-  for (const source of [BUNDLE_SOURCE, ACCOUNT_PAGE_SOURCE]) {
+  for (const source of [BUNDLE_SOURCE, DIRECTORY_TRANSPORT_SOURCE, ED25519_PEM_SOURCE, FLUX_ELEMENTS_SOURCE, AUTHORIZATION_VIEW_SOURCE, AUTHORIZATION_DIALOG_SOURCE, ACCOUNT_PAGE_SOURCE]) {
     const script = dom.window.document.createElement('script');
     script.textContent = source;
     dom.window.document.body.appendChild(script);
@@ -83,6 +102,26 @@ function mountAccountPage() {
   const host = dom.window.document.getElementById('host');
   const page = dom.window.ArkUI.pageModules.account.mount(host);
   return { dom, host, page };
+}
+
+// Waits for the real `<flux-authorization-dialog>` to actually appear
+// (its view is built asynchronously -- `confirmWalletAction` awaits a
+// real `sha256HexOfText` digest first) and clicks its real "Approve
+// scopes & sign" button, matching the exact text this real component
+// renders (js/ark/authorization-dialog.js's `h('button', ..., text:
+// 'Approve scopes & sign')`) -- the same button a real browser test
+// (this session's flux-launchpad verification) already clicked by name.
+async function approveAuthorizationDialog(dom, { timeoutMs = 3000 } = {}) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const dialog = dom.window.document.querySelector('flux-authorization-dialog');
+    if (dialog) {
+      const approve = [...dialog.querySelectorAll('button')].find((b) => b.textContent === 'Approve scopes & sign');
+      if (approve) { approve.click(); return true; }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
 }
 
 async function selectKitFile(dom, container, text, filename = 'real.flx') {
@@ -128,6 +167,8 @@ test('clicking the real "Add wallet" button genuinely mints a new wallet and the
   setInputValue(dom.window, panel.querySelector('[data-account-keys-pin]'), KIT_PIN);
   setInputValue(dom.window, panel.querySelector('[data-account-keys-password]'), KIT_PASSWORD);
   panel.querySelector('[data-account-keys-add-form]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+  const approved = await approveAuthorizationDialog(dom);
+  assert.ok(approved, 'the real Scoped Claim Authorization dialog must appear before a wallet is minted -- every signing surface shows it, this one is no exception');
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   const result = panel.querySelector('[data-account-keys-add-result]').textContent;
@@ -157,6 +198,7 @@ test('clicking the real "Rotate" button genuinely supersedes the wallet with a n
   setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), DEFAULT_ADDRESS);
   setInputValue(dom.window, panel.querySelector('[data-account-keys-rotate-label]'), 'DOM Rotated');
   panel.querySelector('[data-account-keys-rotate]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before a wallet is rotated');
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   const result = panel.querySelector('[data-account-keys-action-result]').textContent;
@@ -190,11 +232,13 @@ test('clicking the real "Revoke" button genuinely retires a wallet, recorded in 
   setInputValue(dom.window, panel.querySelector('[data-account-keys-pin]'), KIT_PIN);
   setInputValue(dom.window, panel.querySelector('[data-account-keys-password]'), KIT_PASSWORD);
   panel.querySelector('[data-account-keys-add-form]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+  assert.ok(await approveAuthorizationDialog(dom), 'the setup add-wallet action must also show the real dialog');
   await new Promise((resolve) => setTimeout(resolve, 2000));
   const addedAddress = panel.querySelector('[data-account-keys-add-result]').textContent.replace('Added ', '').trim();
 
   setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), addedAddress);
   panel.querySelector('[data-account-keys-revoke]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before a wallet is revoked');
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   const result = panel.querySelector('[data-account-keys-action-result]').textContent;
@@ -202,8 +246,10 @@ test('clicking the real "Revoke" button genuinely retires a wallet, recorded in 
 
   // Re-revoking the same (now-dead) address is refused by the real
   // library -- clicking Revoke again must surface that failure, not
-  // silently "succeed" a second time.
+  // silently "succeed" a second time. The dialog still appears (approval
+  // gates the library call, which is the thing that then refuses it).
   panel.querySelector('[data-account-keys-revoke]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  assert.ok(await approveAuthorizationDialog(dom), 'the dialog must appear again for the second revoke attempt too');
   await new Promise((resolve) => setTimeout(resolve, 2000));
   assert.match(panel.querySelector('[data-account-keys-action-result]').textContent, /No such wallet on this identity/, 're-revoking an already-revoked wallet through the real UI must surface the real refusal, not silently succeed');
 });
@@ -216,6 +262,7 @@ test('clicking the real "Delegate to identity" then "Revoke delegation" buttons 
 
   setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), DEFAULT_ADDRESS);
   panel.querySelector('[data-account-keys-delegate]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before delegating a wallet');
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   let result = panel.querySelector('[data-account-keys-action-result]').textContent;
@@ -229,6 +276,7 @@ test('clicking the real "Delegate to identity" then "Revoke delegation" buttons 
   assert.match(delegatedLine.textContent, /delegated to identity/);
 
   panel.querySelector('[data-account-keys-revoke-delegation]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  assert.ok(await approveAuthorizationDialog(dom), 'the real dialog must appear before revoking the delegation too');
   await new Promise((resolve) => setTimeout(resolve, 100));
   result = panel.querySelector('[data-account-keys-action-result]').textContent;
   assert.match(result, new RegExp('^Revoked the delegation for ' + DEFAULT_ADDRESS));

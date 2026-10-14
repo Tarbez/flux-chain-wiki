@@ -424,37 +424,101 @@
         }).join('');
       }
 
+      /* Every signature site on this page (FXN sends, Credits requests)
+         shows ArkUI.authorizationDialog's full scoped-review dialog before
+         signing -- see js/ark/fabric-transfer-browser.js's own header on
+         why ("centralize, don't duplicate": one dialog, every signer).
+         These five wallet actions are signing surfaces too (addWallet/
+         rotateWallet mint and sign a new wallet-link record; delegateWallet
+         signs a capability grant) but shipped calling `identity.*` directly
+         with no review step at all -- found and reported directly, not
+         caught by any test, since neither the jsdom click-tests nor the
+         real-browser pass checked for the dialog's PRESENCE, only that the
+         underlying action succeeded.
+         `identity.addWallet` etc. are opaque (auth-entry.js builds AND
+         signs AND reseals in one call), unlike fabric-transfer-browser.js's
+         `signedRecord()` which controls message construction itself -- so
+         this cannot show the exact final signed bytes before approving,
+         only the real action and its real parameters. That is still the
+         substantive review the law asks for (what is this, for which
+         wallet, under what cap), short of the literal signed envelope. */
+      function confirmWalletAction(opts) {
+        if (!(window.ArkUI.authorizationDialog && window.ArkAuthorizationView && window.ArkUI.ed25519Pem && window.ArkUI.directoryTransport)) return Promise.resolve(true);
+        var messageText = JSON.stringify(opts.manifest);
+        return window.ArkUI.ed25519Pem.sha256HexOfText(messageText).then(function (digest) {
+          var view = window.ArkAuthorizationView.scopedAuthorizationView({
+            title: opts.title,
+            description: 'Review exactly what this authorizes before approving. Nothing changes until you approve.',
+            requester: (identity && (identity.displayName || identity.identityId || identity.publicKeyB64)) || 'This identity',
+            network: window.ArkUI.directoryTransport.NETWORK_ID,
+            authority: 'flux wallet lifecycle',
+            configuration: 'flux-wallet-delegation/v1',
+            scope: opts.scope,
+            action: opts.action,
+            manifestDigest: digest,
+            claimStack: [
+              'primary authorize ' + opts.action + ' for exact manifest ' + digest,
+              'constraint owner ' + ((identity && (identity.publicKeyB64 || identity.identityId)) || ''),
+              'failure reject altered or replayed bytes',
+              'trust zero',
+            ].join('\n'),
+            manifest: opts.manifest,
+            authorizationBytes: messageText,
+            actionPayloadBytes: messageText,
+            facts: opts.facts || [],
+          });
+          return window.ArkUI.authorizationDialog.confirm(view, { action: opts.action, capability: opts.scope });
+        });
+      }
+
       keysFields.addForm && keysFields.addForm.addEventListener('submit', function (event) {
         event.preventDefault();
         if (!identity || !identity.addWallet) return;
-        keysFields.addResult.textContent = 'Adding…';
-        identity.addWallet({ pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: keysFields.addLabel.value.trim() || 'Default' })
-          .then(function (result) {
-            keysFields.addResult.textContent = 'Added ' + result.walletAddress;
-            keysFields.pin.value = '';
-            renderKeys();
-          })
-          .catch(function (error) { keysFields.addResult.textContent = text(error && error.message, 'Could not add a wallet.'); });
+        var label = keysFields.addLabel.value.trim() || 'Default';
+        confirmWalletAction({
+          title: 'Add a signing wallet', scope: 'wallet.add', action: 'wallet.add.sign',
+          manifest: { label: label }, facts: [{ label: 'Label', value: label }],
+        }).then(function (approved) {
+          if (!approved) throw new Error('Cancelled. No wallet was added.');
+          keysFields.addResult.textContent = 'Adding…';
+          return identity.addWallet({ pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
+        }).then(function (result) {
+          keysFields.addResult.textContent = 'Added ' + result.walletAddress;
+          keysFields.pin.value = '';
+          renderKeys();
+        }).catch(function (error) { keysFields.addResult.textContent = text(error && error.message, 'Could not add a wallet.'); });
       });
 
       keysFields.rotate && keysFields.rotate.addEventListener('click', function () {
         if (!identity || !identity.rotateWallet) return;
         var address = keysFields.address.value.trim();
-        keysFields.actionResult.textContent = 'Rotating…';
-        identity.rotateWallet({ walletAddress: address, pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: keysFields.rotateLabel.value.trim() || undefined })
-          .then(function (result) {
-            keysFields.actionResult.textContent = 'Rotated ' + address + ' → ' + result.walletAddress;
-            keysFields.pin.value = '';
-            renderKeys();
-          })
-          .catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not rotate this wallet.'); });
+        var label = keysFields.rotateLabel.value.trim() || undefined;
+        confirmWalletAction({
+          title: 'Rotate wallet', scope: 'wallet.rotate', action: 'wallet.rotate.sign',
+          manifest: { walletAddress: address, label: label || null },
+          facts: [{ label: 'Wallet', value: address }],
+        }).then(function (approved) {
+          if (!approved) throw new Error('Cancelled. This wallet was not rotated.');
+          keysFields.actionResult.textContent = 'Rotating…';
+          return identity.rotateWallet({ walletAddress: address, pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
+        }).then(function (result) {
+          keysFields.actionResult.textContent = 'Rotated ' + address + ' → ' + result.walletAddress;
+          keysFields.pin.value = '';
+          renderKeys();
+        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not rotate this wallet.'); });
       });
 
       keysFields.revoke && keysFields.revoke.addEventListener('click', function () {
         if (!identity || !identity.revokeWallet) return;
         var address = keysFields.address.value.trim();
-        keysFields.actionResult.textContent = 'Revoking…';
-        identity.revokeWallet({ walletAddress: address }).then(function () {
+        confirmWalletAction({
+          title: 'Revoke wallet', scope: 'wallet.revoke', action: 'wallet.revoke.sign',
+          manifest: { walletAddress: address }, facts: [{ label: 'Wallet', value: address }],
+        }).then(function (approved) {
+          if (!approved) throw new Error('Cancelled. This wallet was not revoked.');
+          keysFields.actionResult.textContent = 'Revoking…';
+          return identity.revokeWallet({ walletAddress: address });
+        }).then(function () {
           keysFields.actionResult.textContent = 'Revoked ' + address;
           renderKeys();
         }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this wallet.'); });
@@ -463,13 +527,21 @@
       keysFields.delegate && keysFields.delegate.addEventListener('click', function () {
         if (!identity || !identity.delegateWallet) return;
         var address = keysFields.address.value.trim();
-        keysFields.actionResult.textContent = 'Delegating…';
         // `spend` without a real `maxSpend` is refused at creation by
         // `createWalletDelegation` itself (`WALLET_DELEGATION_SPEND_REQUIRES_CAP`)
         // -- a real bug this exact button shipped with until a real click
         // through it (not just a syntax check) surfaced it. A fixed,
         // conservative default cap here, not an unbounded grant.
-        identity.delegateWallet({ walletAddress: address, rights: ['receive', 'spend'], maxSpend: { amount: 100, period: 'daily' } }).then(function (result) {
+        var maxSpend = { amount: 100, period: 'daily' };
+        confirmWalletAction({
+          title: 'Delegate to this identity', scope: 'wallet.delegate', action: 'wallet.delegate.sign',
+          manifest: { walletAddress: address, rights: ['receive', 'spend'], maxSpend: maxSpend },
+          facts: [{ label: 'Wallet', value: address }, { label: 'Rights', value: 'receive+spend' }, { label: 'Max spend', value: maxSpend.amount + '/' + maxSpend.period }],
+        }).then(function (approved) {
+          if (!approved) throw new Error('Cancelled. This wallet was not delegated.');
+          keysFields.actionResult.textContent = 'Delegating…';
+          return identity.delegateWallet({ walletAddress: address, rights: ['receive', 'spend'], maxSpend: maxSpend });
+        }).then(function (result) {
           keysFields.actionResult.textContent = 'Delegated ' + result.delegatedRights.join('+') + ' to this identity';
           renderKeys();
         }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not delegate this wallet.'); });
@@ -478,11 +550,15 @@
       keysFields.revokeDelegation && keysFields.revokeDelegation.addEventListener('click', function () {
         if (!identity || !identity.revokeWalletDelegation) return;
         var address = keysFields.address.value.trim();
-        try {
+        confirmWalletAction({
+          title: 'Revoke delegation', scope: 'wallet.revoke-delegation', action: 'wallet.revoke-delegation.sign',
+          manifest: { walletAddress: address }, facts: [{ label: 'Wallet', value: address }],
+        }).then(function (approved) {
+          if (!approved) throw new Error('Cancelled. This delegation was not revoked.');
           identity.revokeWalletDelegation({ walletAddress: address });
           keysFields.actionResult.textContent = 'Revoked the delegation for ' + address;
           renderKeys();
-        } catch (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this delegation.'); }
+        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this delegation.'); });
       });
 
       function resetWallet(message) {

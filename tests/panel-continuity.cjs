@@ -44,6 +44,11 @@ function home(){const el=new Element();const box=el.appendChild(new Element('hom
  assert.equal(directHost.runs.length,0,'direct links render final geometry without inventing a source');
  const directHome=home();scene.appendChild(directHome.el);plan=direct.begin('lifecycle','zero',{lifecycle:final});await plan.commit(directHome.el,true);
  assert.equal(directHome.el.querySelector('.home-lifecycle'),directHost,'a direct-link host acquires the compact source layout on return');
+ const narrative=context.ArkUI.createPanelContinuity(scene);plan=narrative.begin(null,'chain',{});const chain=new Element('chain-page');await plan.commit(chain,true);
+ const obsoleteHost=narrative.host,launchHome=new Element('home-launch');scene.appendChild(launchHome);
+ plan=narrative.begin('chain','zero',{chain});await plan.commit(launchHome,true);
+ assert.equal(narrative.host,null,'return to a home without the old teaser releases the dashboard');
+ assert.equal(obsoleteHost.parentNode,null,'no stale dashboard can cover the redesigned home');
  const fast=context.ArkUI.createPanelContinuity(scene);const fastHome=home();scene.appendChild(fastHome.el);plan=fast.begin('zero','lifecycle',{zero:fastHome.el});const first=plan.commit(new Element('lifecycle-page'),false);
  fastHome.box.midpoint={left:480,top:200,width:600,height:450};plan=fast.begin('lifecycle','lifecycle/receipt',{});const last=plan.commit(new Element('lifecycle-page'),false);
  const rerouted=fastHome.box.runs.at(-1);assert.equal(rerouted.frames[0].width,'600px','interruption retargets from current geometry');rerouted.finish();await Promise.all([first,last]);assert.equal(fast.host,fastHome.box);

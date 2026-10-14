@@ -27,6 +27,7 @@
       /* top:84 matches every other full-bleed target (account) below --
          64 sat close enough to the 64px header that the box visibly
          crossed through the nav items while animating open or closed. */
+      if (panelPage === 'about') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-132) };
       if (panelPage === 'chain') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-148) };
       var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
       var resolutionDetail = String(panelPage).indexOf('resolutions/') === 0;
@@ -114,7 +115,12 @@
               // The router has committed Home's styles. Measure its real compact
               // destination without painting a duplicate border or controls.
               var compact = sourcePage && sourcePage !== 'zero' ? el.querySelector('[data-continuity-card="' + sourceKey + '"]') : el.querySelector('.home-lifecycle');
-              if (!compact) return Promise.resolve();
+              if (!compact) {
+                // A redesigned source may no longer have a compact origin.
+                // Release the dashboard rather than leaving an inert overlay.
+                host.remove(); host = null; sourceKey = null; sourcePage = null; sourceClass = null;
+                return Promise.resolve();
+              }
               el.hidden = false; el.inert = true;
               compact.style.visibility = 'hidden';
               var destination = bounds(compact),compactPadding=typeof getComputedStyle==='function'?getComputedStyle(compact).padding:'18px';

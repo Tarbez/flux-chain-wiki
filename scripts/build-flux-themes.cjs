@@ -9,10 +9,9 @@
    Harmony comes from three rules, not from picking pretty colors one by one:
    1. Each family states a hue relationship (analogous, split-complementary,
       complementary) between primary, secondary and reference.
-   2. The three roles share one lightness and one chroma per appearance, so
-      no role shouts over another; only hue tells them apart.
-   3. Neutrals (canvas, surfaces, text, borders) carry a trace of the primary
-      hue, so the whole page sits in the same light.
+   2. Vivid role colors share a balanced lightness band and readable inks.
+   3. Canvas, surfaces and text are near-neutral; color is concentrated in
+      identity and actions rather than tinting the entire environment.
 
    Roles and where they may appear (see docs/brand/DEFXN.md):
      primary    identity: the hero accent and a few small marks. Never a button.
@@ -71,14 +70,14 @@ const okDist=(a,b)=>{ // perceptual distance between two OKLCH specs
 /* ---- per-appearance targets ---------------------------------------------- */
 const MODE = {
   dark: {
-    neutral: { canvas:.16, depth:.19, surface:.228, raised:.28, nested:.335, overlay:.2, strong:.94, text:.85, muted:.73, faint:.645, tint:.012 },
-    role: { L:.74, C:.085, secondaryC:.1 },
+    neutral: { canvas:.14, depth:.18, surface:.228, raised:.28, nested:.335, overlay:.2, strong:.97, text:.85, muted:.73, faint:.645, tint:.002 },
+    role: { L:.76, C:.17, secondaryC:.16 },
     shade: { 100:[.24,.04], 200:[.285,.05], 300:[.39,.065], 400:[.53,.08], 700:[.87,.055] },
     hoverDL: +.055, solveDir: +1,
   },
   light: {
-    neutral: { canvas:.943, depth:.905, surface:.985, raised:1, nested:.89, overlay:.975, strong:.24, text:.365, muted:.465, faint:.515, tint:.01 },
-    role: { L:.53, C:.1, secondaryC:.11 },
+    neutral: { canvas:.943, depth:.905, surface:.985, raised:1, nested:.89, overlay:.975, strong:.24, text:.365, muted:.465, faint:.515, tint:.002 },
+    role: { L:.53, C:.17, secondaryC:.16 },
     shade: { 100:[.935,.025], 200:[.9,.04], 300:[.82,.065], 400:[.7,.085], 700:[.38,.085] },
     hoverDL: -.055, solveDir: -1,
   },
@@ -90,7 +89,7 @@ function palette(f, mode) {
   const neutral=(L,c=n.tint)=>oklch(L,L>=.999?0:c,hue);
   const out={
     canvas:neutral(n.canvas), depth:neutral(n.depth), surface:neutral(n.surface), raised:neutral(n.raised), nested:neutral(n.nested), overlay:neutral(n.overlay),
-    'text-strong':neutral(n.strong,.01), text:neutral(n.text,.012), 'text-muted':neutral(n.muted,.014), 'text-faint':neutral(n.faint,.014),
+    'text-strong':neutral(n.strong), text:neutral(n.text), 'text-muted':neutral(n.muted), 'text-faint':neutral(n.faint),
   };
   out['text-inverse']=dark?out.canvas:oklch(1,0,0);
   const bgs=[out.canvas,out.surface,out.raised];
@@ -137,6 +136,15 @@ function block(selectors,f,mode){
     lines.push(' '+[r,'100','200','300','400','500','600','700','ink'].map(s=>s===r?`--${r}:${fmt(p[r])};`:`--${r}-${s}:${fmt(p[`${r}-${s}`])};`).join(' '));
     lines.push(' '+TONES.map(([t])=>`--${r}-tone-${t}:${fmt(p[`${r}-tone-${t}`])};`).join(' '));
   }
+  /* Optical weight, derived rather than tuned per theme. A bright accent takes up
+     more of the eye than a dark one, so --{role}-scale shrinks an accent's area
+     as its relative luminance Y rises (1 at Y≈0.1, 0.72 at Y≈0.56).
+     --anchor is the heaviest neutral the appearance has: it grounds the base of
+     a layout. It has zero saturation in both appearances. */
+  const scale=Y=>Math.min(1,Math.max(.72,1.06-.6*Y)).toFixed(2);
+  const anchor=dark?[0,0,0]:oklch(.18,0,0);
+  lines.push(' '+['primary','secondary','reference'].map(r=>`--${r}-scale:${scale(lum(p[r]))};`).join(' ')+
+    ` --anchor:${fmt(anchor)}; --anchor-ink:${fmt(dark?p['text-strong']:oklch(1,0,0))};`);
   const sh=fmt(oklch(dark?.1:.3,.02,hue));
   lines.push(dark
     ? ` --theme-shadow:${sh} / .6; --theme-shadow-color:${sh}; --theme-shadow-alpha:.6; color-scheme:dark;`

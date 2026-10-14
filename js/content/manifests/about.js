@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "DEFXN is a self-scaling fractal network where everyone is our business partner. The mesh is the database, the host and the cloud, so what you build resolves on the mesh instead of on servers you rent."
+      "value": "The mesh is the database, the host and the cloud. What you build resolves on the mesh instead of on servers you rent."
     },
     "CONTEXT": {
       "label": "Supporting explanation disclosure",
@@ -36,7 +36,7 @@ ArkManifest.define({
       "label": "Model label",
       "kind": "line",
       "section": "Page",
-      "value": "ONE CHAIN PER IDENTITY / THREE BOUNDED LAYERS"
+      "value": "THREE BOUNDED LAYERS"
     },
     "MODEL.TEXT": {
       "label": "Model summary",
@@ -72,7 +72,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "DEFXN assigns each network a named ID for discovery. Today that boundary partitions miner presence; account, identity, record, and treasury isolation remain outside the current implementation."
+      "value": "Each network gets a named ID so it can be found. Today that partitions miner presence only; isolating accounts, records and treasury is not built yet."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -84,7 +84,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Every identity writes to its own append-only chain. The chain admits a record only if its grammar is well-formed, its signature verifies, and it extends that holder’s current head; resolvers for transfers, agreements, books and governance decide what it means. No record waits in one global queue."
+      "value": "Every identity writes to its own append-only chain. A record is admitted if its grammar is valid, its signature verifies and it extends that holder’s head. Resolvers decide what it means."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -96,7 +96,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Authority stays bound to a named scope and threshold. Network governance cannot silently take control of the shared mesh, and mesh policy cannot inherit control of a network."
+      "value": "Authority stays bound to a named scope and threshold. Network governance cannot silently take over the mesh, and mesh policy cannot take over a network."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -156,7 +156,7 @@ ArkManifest.define({
       "label": "Promise text",
       "kind": "text",
       "section": "Promise",
-      "value": "The mesh is the database, the host and the cloud. With encrypted peer-to-peer hosting we have replaced yearly renewals with permanence."
+      "value": "With encrypted peer-to-peer hosting, yearly renewals become permanence."
     },
     "NO1.TITLE": {
       "label": "Heading",
@@ -222,7 +222,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Pillars",
-      "value": "Every network can hold networks of its own. Each partner who joins adds capacity, so the mesh grows by repeating the same pattern at every scale."
+      "value": "Every network can hold networks of its own, so the mesh grows by repeating one pattern at every scale."
     },
     "PILLAR2.TITLE": {
       "label": "Heading",
@@ -234,19 +234,19 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Pillars",
-      "value": "Builders, miners and members take part in the same agreements. Value moves between partners instead of being taken by a platform in the middle."
+      "value": "Builders, miners and members take part in the same agreements. Value moves between partners, not through a platform."
     },
     "PILLAR3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Pillars",
-      "value": "DEFXN Coin — FXN"
+      "value": "The DEFXN coin: FXN"
     },
     "PILLAR3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Pillars",
-      "value": "FXN is the DEFXN coin: the unit partners use to settle agreements and reward the miners who keep the mesh running."
+      "value": "The unit partners use to settle agreements and reward the miners who keep the mesh running."
     },
     "RESOLVE.LABEL": {
       "label": "Resolutions label",
@@ -313,6 +313,24 @@ ArkManifest.define({
       "kind": "line",
       "section": "Flow",
       "value": "What is a resolver?"
+    },
+    "FLOW.TITLE": {
+      "label": "Heading: how a resolution works",
+      "kind": "line",
+      "section": "Page",
+      "value": "State it. Resolve it. Check it."
+    },
+    "PILLARS.TITLE": {
+      "label": "Heading: what DEFXN is",
+      "kind": "line",
+      "section": "Page",
+      "value": "A network of partners, not a platform."
+    },
+    "CLOSE.TITLE": {
+      "label": "Closing heading",
+      "kind": "line",
+      "section": "Page",
+      "value": "See what resolves on the mesh."
     }
   }
 });

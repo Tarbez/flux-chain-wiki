@@ -5,12 +5,12 @@ ArkSEO.define({
   "site": {
     "name": "DEFXN",
     "baseUrl": "",
-    "defaultDescription": "See how DEFXN gives every identity its own signed chain, checks only grammar and signatures, and lets resolvers give each record its meaning."
+    "defaultDescription": "Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network."
   },
   "pages": {
     "home": {
-      "title": "Every identity, its own chain — DEFXN",
-      "description": "See how DEFXN gives every identity its own signed chain, checks only grammar and signatures, and lets resolvers give each record its meaning.",
+      "title": "Not one chain. A world of them. — DEFXN",
+      "description": "Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network.",
       "ogImage": "",
       "canonical": ""
     },
