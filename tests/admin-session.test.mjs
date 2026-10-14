@@ -19,7 +19,7 @@ const PHRASES = {
 };
 const identity = async (name) => {
   const handle = await createFluxRootHandle(PHRASES[name]);
-  return { publicKeyB64: handle.publicKeyB64, sign: (text) => Buffer.from(handle.sign(new TextEncoder().encode(text))).toString('base64') };
+  return { publicKeyB64: handle.publicKeyB64, sign: async (text) => Buffer.from(await handle.sign(new TextEncoder().encode(text))).toString('base64') };
 };
 const owner = await identity('owner'), stranger = await identity('stranger');
 
@@ -69,7 +69,7 @@ function browser() {
 /* Steps 1+2 only: proves the identity and checks ownership. Returns the raw response (a ticket, or a refusal). */
 async function proveAndAuthorize(b, who) {
   const challenge = (await b.call('POST', '/api/session/challenge', {})).json;
-  return b.call('POST', '/api/session/login', { publicKeyB64: who.publicKeyB64, nonce: challenge.nonce, signature: who.sign(challenge.message), label: 'Test identity' });
+  return b.call('POST', '/api/session/login', { publicKeyB64: who.publicKeyB64, nonce: challenge.nonce, signature: await who.sign(challenge.message), label: 'Test identity' });
 }
 /* All three steps, first-time (enrolling) or returning (verifying), using the real host-printed setup code and a real TOTP code. */
 async function signIn(b, who) {

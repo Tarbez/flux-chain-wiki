@@ -207,7 +207,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         walletPublicKeyB64: walletHandle ? walletHandle.publicKeyB64 : null,
         securityProfile: opened.summary?.securityProfile || '',
         rootVerified: true,
-        sign: async (text) => toBase64(handle.sign(new TextEncoder().encode(text))),
+        sign: async (text) => toBase64(await handle.sign(new TextEncoder().encode(text))),
         signWithWallet: async (text) => {
           if (!walletHandle) throw new Error('This identity has no wallet set up yet, so there is nothing to sign with -- create a wallet and complete its first-time setup first.');
           return toBase64(await walletHandle.sign(new TextEncoder().encode(text)));
@@ -304,7 +304,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
           };
           const decision = await resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey, right, amount }, dimensions, ['rights', 'delegation']);
           if (!decision.authorized) throw new Error(`Delegated action refused: ${decision.reason}`);
-          return toBase64(handle.sign(new TextEncoder().encode(message)));
+          return toBase64(await handle.sign(new TextEncoder().encode(message)));
         },
         /**
          * Supersedes `walletAddress` with a brand-new wallet key in the

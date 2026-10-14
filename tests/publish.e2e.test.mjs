@@ -40,7 +40,7 @@ const PHRASES = {
 };
 async function identityFor(name) {
   const handle = await createFluxRootHandle(PHRASES[name]);
-  return { publicKeyB64: handle.publicKeyB64, displayName: name, sign: async (text) => Buffer.from(handle.sign(new TextEncoder().encode(text))).toString('base64') };
+  return { publicKeyB64: handle.publicKeyB64, displayName: name, sign: async (text) => Buffer.from(await handle.sign(new TextEncoder().encode(text))).toString('base64') };
 }
 const identityA = await identityFor('owner');
 // The real admin client file, run the way the page runs it. `who` is what the sign-in reports: an identity or null.

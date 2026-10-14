@@ -15,7 +15,7 @@ const PHRASES = {
 };
 const identity = async (name) => {
   const handle = await createFluxRootHandle(PHRASES[name]);
-  return { publicKeyB64: handle.publicKeyB64, sign: (text) => Buffer.from(handle.sign(new TextEncoder().encode(text))).toString('base64') };
+  return { publicKeyB64: handle.publicKeyB64, sign: async (text) => Buffer.from(await handle.sign(new TextEncoder().encode(text))).toString('base64') };
 };
 const owner = await identity('owner'), stranger = await identity('stranger');
 
