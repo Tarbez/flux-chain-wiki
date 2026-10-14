@@ -125,6 +125,38 @@
     note: 'Each operation in its own unit, median of 5 reps, warm-up discarded. No network in any row, and no row is multiplied by a node or replica count. Rows are NOT comparable across units: a transfer rate and a swap rate count different work.'
   });
 
+  // BENCH-015, 2026-10-15 -- CLIENT PATH: accepted swaps/s through the real WebSocket wire into ONE node, versus
+  // concurrent connections. A different quantity from `operations` above: that is in-process Rust resolution with no
+  // network; this is what clients actually get, loopback, one node, swaps pre-signed outside the timed window.
+  // UNBACKED: a curve swap moves no balance today (roadmap Track 27), so this is signed+verified+priced, not custodied.
+  // Points are medians of timed reps (5, warm-ups discarded); the first six are the mean of two identical runs.
+  var CLIENT_PATH = Object.freeze({
+    date: '2026-10-15',
+    record: 'BENCH-015',
+    metric: 'accepted swaps/s (CURVE_SWAP_OK replies / wall second)',
+    mode: 'one local release chain-server, pre-signed swaps, one signing key per connection, one curve, loopback',
+    quorum: 'store quorum 0 (zero replication cost)',
+    machine: 'Apple M2, 8 cores (4 performance + 4 efficiency), 8 GB',
+    byConnections: Object.freeze([
+      Object.freeze({ connections: 1, swapsPerSecond: 299 }),
+      Object.freeze({ connections: 2, swapsPerSecond: 610 }),
+      Object.freeze({ connections: 4, swapsPerSecond: 1170 }),
+      Object.freeze({ connections: 8, swapsPerSecond: 2140 }),
+      Object.freeze({ connections: 16, swapsPerSecond: 3230 }),
+      Object.freeze({ connections: 24, swapsPerSecond: 4100 }),
+      Object.freeze({ connections: 128, swapsPerSecond: 12151 }),
+      Object.freeze({ connections: 256, swapsPerSecond: 14990 }),
+      Object.freeze({ connections: 700, swapsPerSecond: 15382 }),
+      Object.freeze({ connections: 1000, swapsPerSecond: 15330 }),
+      Object.freeze({ connections: 1500, swapsPerSecond: 14907 })
+    ]),
+    ceilingSwapsPerSecond: 15382,
+    serverCoresAtCeiling: 1.0,
+    cores: 8,
+    verdict: 'Throughput scales almost linearly with concurrent connections to about 4 (one connection gets ~300/s because the server waits on its 2 ms store commit and 250 \u00b5s batching windows, not on signing or CPU), then flattens near 15,000 swaps/s from ~256 connections to 1,500. At the ceiling the server uses about one of eight cores: the swap coordinator is a single thread that verifies and resolves one batch at a time. More connections, a larger batch or a longer window do not move it; spreading the same swaps over more tokens made it slower (16 tokens: ~2,500/s), because each token adds a serial store write. Past ~15,000/s the lever is more resolver shards and more nodes, as BENCH-013 found, not more connections.',
+    caveats: 'Unbacked swaps (no balance is debited), loopback (no network latency), store quorum 0, one node, one client process. The production limiter (100 commands/s per connection) caps each connection near 100/s. Real custody will lower every figure. The connection cap of 512 is raised on the scratch node only (CHAIN_SERVER_MAX_WS_CONNECTIONS, default unchanged).'
+  });
+
   // Platform/infra resolvers (INFRA-001, 2026-10-12) — a SEPARATE numbering
   // track from BENCH-0XX above. These are internal platform systems (the
   // deployment/preview pipeline, repo storage, dev tooling), never the FLX
@@ -159,6 +191,7 @@
   window.ArkStatsHighlights = Object.freeze({
     defiShard: DEFI_SHARD,
     operations: OPERATIONS,
+    clientPath: CLIENT_PATH,
     infraResolvers: INFRA_RESOLVERS,
     measured: '2026-10-10',
     scope: 'Signed resolution: two parties sign, a resolver shard resolves and signs, replicas store, anyone audits',

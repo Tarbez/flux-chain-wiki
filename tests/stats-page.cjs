@@ -117,6 +117,21 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(biggest.swapsPerSecond / smallest.swapsPerSecond < 2, 'the sweep shows batch size is NOT the lever');
   for (const row of OPS.rows) assert(/\S/.test(row.note), row.op + ' says what its number means');
 
+  // ---- BENCH-015: the client path is its own quantity, derivable, and never mixed with the fleet figure ----
+  const CP = S.clientPath;
+  assert(CP && CP.byConnections.length >= 8, 'the client path keeps its measured points');
+  const cpFirst = CP.byConnections[0], cpPeak = Math.max(...CP.byConnections.map((x) => x.swapsPerSecond));
+  assert.equal(cpFirst.connections, 1, 'the curve starts at one connection');
+  assert.equal(CP.ceilingSwapsPerSecond, cpPeak, 'the stated ceiling is the highest measured point, not a separate claim');
+  assert(CP.ceilingSwapsPerSecond < OPS.fleet.parallelSwapsPerSecond, 'one client-path node is far below the fleet total; the two must not be conflated');
+  assert(CP.byConnections.every((x, i, a) => i === 0 || x.connections > a[i - 1].connections), 'points are in increasing connection order');
+  assert(/unbacked|moves no balance|no balance/i.test(CP.caveats), 'the client path says it is not custodied');
+  assert(/quorum 0/.test(CP.quorum), 'the zero-replication quorum is stated beside the number');
+  assert(/loopback/.test(CP.caveats) && /limiter/.test(CP.caveats), 'loopback and the production limiter are stated');
+  assert(CP.byConnections.some((x) => x.connections >= 1000), 'the sweep reaches 1,000 connections');
+  assert(text.includes(CP.record) && text.includes('Client path'), 'the client-path section renders');
+  assert(text.includes(fmt(CP.ceilingSwapsPerSecond)) || text.includes(String(CP.ceilingSwapsPerSecond)), 'the ceiling figure appears on the page');
+
   // ---- the fleet figure is a SUM of its rows, not a multiple ----------------------------------
   const FL = OPS.fleet;
   assert(FL && FL.perNode.length === FL.nodes, 'the fleet figure keeps one row per node');

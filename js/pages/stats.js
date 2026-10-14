@@ -63,6 +63,7 @@
       var stats = window.ArkStatsHighlights || {};
       var DS = stats.defiShard || {};
       var OPS = stats.operations || {};
+      var CP = stats.clientPath || {};
       var INFRA = stats.infraResolvers || {};
       var registry = window.ArkResolverRegistry || {};
       var grammarOnly = (registry.chain && registry.chain.measured && registry.chain.measured.rate) || 83225;
@@ -365,6 +366,30 @@
         shell.appendChild(sweep);
       }
 
+      // ---- client path: swaps over the real wire vs connections (BENCH-015) -----------------------
+      // Deliberately separate from the in-process resolver figures above: different quantity (what a client
+      // gets through the WebSocket into one node, not Rust resolution capacity), never added or ranked against them.
+      if ((CP.byConnections || []).length) {
+        var cpPanel = panel('dash-span-12', 'Client path \u00b7 swaps over the wire, by concurrent connections \u00b7 ' + (CP.date || '2026-10-15'),
+          CP.record + '. Accepted swaps/s into ONE node. Not the fleet figure above, and not custodied.');
+        var cpList = el('ol', 'dash-bars');
+        var cpMax = Math.max.apply(null, CP.byConnections.map(function (p5) { return p5.swapsPerSecond; }).concat([1]));
+        CP.byConnections.forEach(function (p5) {
+          var li = el('li', 'dash-bars-row');
+          var nm = el('p', 'dash-bars-name');
+          nm.appendChild(el('b', null, fmt(p5.connections) + (p5.connections === 1 ? ' connection' : ' connections')));
+          nm.appendChild(el('span', null, Math.round(p5.swapsPerSecond / CP.byConnections[0].swapsPerSecond * 10) / 10 + 'x one connection'));
+          li.appendChild(nm);
+          li.appendChild(bar(p5.swapsPerSecond / cpMax));
+          li.appendChild(el('strong', 'dash-bars-value', fmt(p5.swapsPerSecond)));
+          cpList.appendChild(li);
+        });
+        cpPanel.appendChild(cpList);
+        cpPanel.appendChild(el('p', 'dash-note', CP.verdict));
+        cpPanel.appendChild(el('p', 'dash-note', 'Metric: ' + CP.metric + '. Mode: ' + CP.mode + '. ' + CP.quorum + '. Machine: ' + CP.machine + '. ' + CP.caveats));
+        shell.appendChild(cpPanel);
+      }
+
       // ---- platform / infra resolvers (INFRA-001, added 2026-10-12) -----------------------------
       // Deliberately separate from everything above: these are internal
       // platform systems (the deployment/preview pipeline, repo storage,
@@ -452,7 +477,8 @@
         ['DAO treasury claim (accepted)', 'local, replication off critical path', '2882-3017 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
         ['DAO treasury claim (durable, real WAN)', '2 real fleet nodes, quorum 2-of-2', '17 claims/s', '2 runs', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
         ['DAO treasury claim (accepted, real WAN)', '2 real fleet nodes, replication off critical path', '~1003 claims/s', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
-        ['DAO/treasury devnet dry run', 'full wire sequence, real standalone chain-server', '17/17 steps passed', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-devnet-dao-treasury-dry-run.md']
+        ['DAO/treasury devnet dry run', 'full wire sequence, real standalone chain-server', '17/17 steps passed', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-devnet-dao-treasury-dry-run.md'],
+        ['Client-path swaps (unbacked)', 'one node, 256-1500 connections, pre-signed, loopback, quorum 0', '~15,000 swaps/s ceiling', '5 timed reps per point', '0', 'BENCH-015', 'docs/evidence/bench-015-client-path-swaps-by-connections.md']
       ].forEach(function (r) {
         var tr = el('tr');
         r.slice(0, 5).forEach(function (c, i) { tr.appendChild(el('td', i === 2 ? 'is-num' : null, c)); });

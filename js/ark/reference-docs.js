@@ -15,6 +15,7 @@ ArkUI.referenceDocs = Object.freeze([
   "docs/evidence/bench-012-defi-shard-signed-resolution.md",
   "docs/evidence/bench-013-operation-matrix.md",
   "docs/evidence/bench-014-dao-treasury-multisig-claim.md",
+  "docs/evidence/bench-015-client-path-swaps-by-connections.md",
   "docs/evidence/cap-004-verification.md",
   "docs/evidence/fxn-speed-audit-v0.md",
   "docs/evidence/infra-001-platform-resolver-audit.md",
