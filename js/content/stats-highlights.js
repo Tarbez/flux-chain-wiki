@@ -166,7 +166,17 @@
         Object.freeze({ connections: 64, perSecond: 15286 }),
         Object.freeze({ connections: 256, perSecond: 15447 })
       ]),
-      note: 'Sender-signed token transfers on the event-sourced ledger: signature, chain position, balance check and ledger event per transfer; an overdraft is refused by name before it uses a chain position. The ~15,000/s plateau is bounded by the single signing client (the server used ~1.4 of 8 cores). One node, loopback, store quorum 0. Not a swap, and swaps still move no balance.'
+      note: 'Sender-signed token transfers on the event-sourced ledger: signature, chain position, balance check and ledger event per transfer; an overdraft is refused by name before it uses a chain position. The ~15,000/s plateau is bounded by the single signing client (the server used ~1.4 of 8 cores). One node, loopback, store quorum 0. Not a swap, and swaps still move no balance.',
+      // 2026-10-15, after the ledger's mid-order insert was fixed (it replayed every later event under one lock). Same node, 64 connections, 256 senders x 100,
+      // median of 3 after a warm-up, client work split over K processes so one client is not the limit. Apple M2, 8 cores, load 4-12 (other apps/compiles running).
+      byClientProcesses: Object.freeze([
+        Object.freeze({ processes: 1, perSecond: 16049 }),
+        Object.freeze({ processes: 2, perSecond: 24508 }),
+        Object.freeze({ processes: 4, perSecond: 25523 }),
+        Object.freeze({ processes: 6, perSecond: 25844 })
+      ]),
+      serverFix: Object.freeze({ before: [22496, 23095], after: [26261, 26013], note: 'Same session, 4 client processes, run twice: server before the ledger fix vs after (+13-15%, ranges do not overlap).' }),
+      processesNote: 'With the client split over processes the server reaches ~25,000/s using ~2.9 of 8 cores; past 2 processes the clients and the server share one saturated machine, so ~25,000/s is that machine\u2019s limit, not necessarily the server\u2019s. Measured in-process (no network, pre-signed) the ledger fix took 8 concurrent callers from ~13-15k to ~25-26k/s; end to end the gain is smaller (+13-15%) because real clients arrive close to timestamp order.'
     }),
     previousBuild: Object.freeze({ note: 'Before the chain-position build the same node held ~300 swaps/s on one connection and ~15,000/s at 256-1,500 connections; a curve with 10,000 holders fell to ~1,350/s and 16 tokens to ~2,450/s.' }),
     ceilingSwapsPerSecond: 31009,

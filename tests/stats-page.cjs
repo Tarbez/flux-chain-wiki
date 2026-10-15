@@ -137,6 +137,10 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(CP.transfers.byConnections.every((x) => x.perSecond > 0) && /signed at send time|signing client/.test(CP.transfers.note + CP.transfers.metric), 'the transfer figure says who signs and when, so it is not read as a pure server ceiling');
   assert(/not a swap/i.test(CP.transfers.note) && /no balance/i.test(CP.transfers.note), 'transfers are not conflated with swaps, and swaps are still said to move no balance');
   assert(text.includes('Native-token transfers'), 'the transfers block renders');
+  assert(CP.transfers.byClientProcesses.length === 4 && CP.transfers.byClientProcesses.every((x) => x.perSecond > 0), 'the multi-process transfer points are kept');
+  assert(/machine/i.test(CP.transfers.processesNote) && /smaller|\+13-15%/.test(CP.transfers.processesNote), 'the multi-process note says the ~25k is the shared machine\u2019s limit and that the end-to-end gain is smaller than the in-process one');
+  assert(CP.transfers.serverFix.after[0] > CP.transfers.serverFix.before[1] && CP.transfers.serverFix.after[1] > CP.transfers.serverFix.before[1], 'the before/after ranges do not overlap, as the note claims');
+  assert(text.includes('client processes'), 'the multi-process block renders');
   assert(text.includes(CP.record) && text.includes('Client path'), 'the client-path section renders');
   assert(text.includes(fmt(CP.ceilingSwapsPerSecond)) || text.includes(String(CP.ceilingSwapsPerSecond)), 'the ceiling figure appears on the page');
 

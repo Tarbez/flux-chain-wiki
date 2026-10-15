@@ -81,3 +81,8 @@ applied and every balance checked every rep.
 The ~15,000/s plateau is bounded by the single signing client (server ~1.4 of 8 cores). It is not a swap and swaps still move no balance. Two defects in the first versions were found by this
 measurement and fixed (a ledger index that rebuilt on every out-of-order arrival, ~390/s; a benchmark that pre-assigned timestamps, making many connections ~10x slower than one); see
 `flux/flux-auth/docs/swaps-transfers-ed25519-measurements.md`. New `NATIVE_SEND` timestamps must be within +-10 s of the node's clock.
+
+## Transfers with the client split over processes (added 2026-10-15)
+`flux-auth/scripts/swaps-transfers/bench-native-transfer.mjs --procs K`: one node, real chain-server binary, 64 connections, 256 senders x 100 transfers, signed at send time, median of 3 after one warm-up, Apple M2 8 cores, load average 4-12 (other apps and compiles running).
+1 client process 16,049/s | 2: 24,508 | 4: 25,523 | 6: 25,844 (server ~2.9 of 8 cores). Server before vs after the ledger mid-order-insert fix, 4 client processes, run twice: 22,496 / 23,095 vs 26,261 / 26,013 (+13-15%, ranges do not overlap).
+Past 2 processes the clients and the server share one saturated machine, so ~25,000/s is that machine's limit, not necessarily the server's. In-process (no network, pre-signed) the same fix took 8 concurrent callers from ~13-15k to ~25-26k/s; end to end the gain is smaller because real clients arrive close to timestamp order. Raw: `flux-auth/docs/measurements/swaps-transfers/phase3/native-transfer-procs*`.

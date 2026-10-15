@@ -414,6 +414,22 @@
           });
           cpPanel.appendChild(xfList);
           cpPanel.appendChild(el('p', 'dash-note', CP.transfers.note));
+          if ((CP.transfers.byClientProcesses || []).length) {
+            cpPanel.appendChild(el('p', 'dash-note', 'The same transfers with the client split over several processes (64 connections, after the ledger fix)'));
+            var xpList = el('ol', 'dash-bars');
+            var xpMax = Math.max.apply(null, CP.transfers.byClientProcesses.map(function (p7) { return p7.perSecond; }).concat([1]));
+            CP.transfers.byClientProcesses.forEach(function (p7) {
+              var xpLi = el('li', 'dash-bars-row');
+              var xpNm = el('p', 'dash-bars-name');
+              xpNm.appendChild(el('b', null, fmt(p7.processes) + (p7.processes === 1 ? ' client process' : ' client processes')));
+              xpLi.appendChild(xpNm);
+              xpLi.appendChild(bar(p7.perSecond / xpMax));
+              xpLi.appendChild(el('strong', 'dash-bars-value', fmt(p7.perSecond)));
+              xpList.appendChild(xpLi);
+            });
+            cpPanel.appendChild(xpList);
+            cpPanel.appendChild(el('p', 'dash-note', CP.transfers.processesNote));
+          }
         }
         cpPanel.appendChild(el('p', 'dash-note', CP.verdict));
         if (CP.previousBuild) cpPanel.appendChild(el('p', 'dash-note', 'Previous build: ' + CP.previousBuild.note));
