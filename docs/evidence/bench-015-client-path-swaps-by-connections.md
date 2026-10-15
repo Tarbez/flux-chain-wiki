@@ -1,55 +1,83 @@
-# BENCH-015 — client-path swaps over the wire, by concurrent connections (2026-10-15)
+# BENCH-015 — client-path swaps over the wire, by concurrent connections (revised 2026-10-15)
 
 **What this is.** Accepted swaps per second a client population gets through the real WebSocket wire into **one**
 `chain-server`, as the number of concurrent connections grows. It is **not** the fleet figure on the stats page
 (BENCH-013: in-process Rust resolution, no network, summed over ten nodes) and the two must not be compared or added.
 
-**What it is not.** Swaps here are **unbacked**: a curve swap reads and debits no ledger (three filled buys left
-`FXN_BALANCE` at 0; roadmap Track 27, `dense-wire/docs/design/swap-custody-and-native-chain-ledgers.md`). Real custody will
-lower every number. Not finalized, not replicated (store quorum 0), loopback (no network latency), one node, one client IP.
+**What it is not.** Swaps here are **unbacked**: a curve swap reads and debits no ledger (roadmap Track 27;
+`dense-wire/docs/design/swap-custody-and-native-chain-ledgers.md`). Real custody will lower every number. Not finalized,
+not replicated (store quorum 0), loopback (no network latency), one node, one client IP.
+
+## What changed since the first version of this record
+
+The first version measured the build **before** two changes landed, and its conclusions no longer hold:
+
+1. **Every swap is now an entry on the signer's own chain** (`CurveSwapIntent` / `PoolSwapIntent` / `PoolPositionIntent` payloads: `J{pos}` must be the
+   chain length, `C{prev}` the previous record's CID). A client therefore costs one extra `HEAD` read per swap, and a key that signs from two places at once
+   is frozen by the node (see "Client position tracking").
+2. **Coordinator pipelined, verify parallel, one commit per cycle, commit immediately when idle, `Store` removed** (the chain log is the durability path).
+
+Previous build, for the record (superseded): 1 connection ~300/s; 256-1,500 connections ~15,000/s (flat, server ~1 core); a curve with
+10,000 holders ~1,350/s; 256 connections over 16 tokens ~2,450/s.
 
 ## Method (measurement law)
 
 | | |
 |---|---|
 | metric | accepted swaps/s = `CURVE_SWAP_OK` replies / wall seconds |
-| mode | swaps **pre-signed outside the timed window**; one signing key per connection (nonces are per party); all connections trade one curve (fresh token per rep); 1 swap in flight per connection; production limiter **off** (`CHAIN_SERVER_CMD_PER_SEC=0`); per-IP cap raised (`CHAIN_SERVER_MAX_CONN_PER_IP=4096`) and WebSocket cap raised (`CHAIN_SERVER_MAX_WS_CONNECTIONS`) on the **scratch node only** |
-| server | local release `chain-server`, ack finality `accepted`, no peers, store quorum 0, store file on the internal SSD (OS temp dir). Points up to 128 connections: binary built 2026-10-13; 256+ points: scratch build 2026-10-15 (sha256 in the JSON). Different binaries; each point's raw file names its own. |
+| mode | swaps **pre-signed outside the timed window**, each connection owning one key and its chain (position `i-1`, previous CID = sha256 of the previous record's text); all connections trade one curve (fresh token per rep) unless a row says otherwise; 1 swap in flight per connection; production limiter **off**; per-IP cap and WebSocket cap raised on the **scratch node only** (`CHAIN_SERVER_MAX_CONN_PER_IP=4096`, `CHAIN_SERVER_MAX_WS_CONNECTIONS=3000`) |
+| server | local release `chain-server` built from the working tree of 2026-10-15 (sha256 in `chain-position-build/binary.txt`), ack finality `accepted`, no peers, store quorum 0 |
 | machine | Apple M2, 8 cores (4 performance + 4 efficiency), 8 GB, macOS 25.0.0, Node v24.9.0 |
-| reps | 5 timed reps per point, 2 warm-ups discarded, points interleaved across reps; 1-24 connections: two identical runs, mean of run medians shown |
-| acceptance | every swap in every rep was `CURVE_SWAP_OK` (the run aborts otherwise); 20,000 swaps/rep for 128+ connections, 3,000 for 1-24 |
-| load | **not a quiet machine**: an unrelated Electron app held 1-2 cores; load average 4.5-7.9 at starts (see `load-*.txt`) |
-| date | 2026-10-14/15 |
+| reps | 5 timed reps per point, 2 warm-ups discarded, points interleaved across reps; 256 and 1,000 connections: three separate runs of the same binary |
+| acceptance | every swap in every rep was `CURVE_SWAP_OK` (the run aborts otherwise); 20,000 swaps/rep for 256+ connections, 6,000 for 1-128 |
+| load | **not a quiet machine**: other applications (a browser, an Electron app earlier in the session) used CPU; load average 3.8-10 across the runs |
+| date | 2026-10-15 |
 
-## Result (accepted swaps/s, median)
+## Result (accepted swaps/s, median of the timed reps)
 
-| connections | 1 | 2 | 4 | 8 | 16 | 24 | 128 | 256 | 700 | 1000 | 1500 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| swaps/s | 299 | 610 | 1,170 | 2,140 | 3,230 | 4,100 | 12,151 | 14,990 | 15,382 | 15,330 | 14,907 |
+| connections | 1 | 4 | 24 | 128 | 256 | 1,000 |
+|---|---|---|---|---|---|---|
+| swaps/s | 4,425 | 5,345 | 12,197 | 18,397 | 26,754 | 31,009 |
+| server cores busy | 0.7 | 0.8 | 1.7 | 2.4 | 3.3-4.2 | 3.9-4.6 |
 
-256-1500 connections: ranges 13,320-16,875 over the timed reps; server **~1.0 core of 8** busy, client ~0.45.
+256 connections, three runs: 24,985 / 26,754 / 33,981 (min..max over all reps 17,715-34,719). 1,000 connections: 28,612 / 31,009 / 34,104 (12,610-35,148).
+**The spread between runs of one binary is machine load, not code.** Other axes, same node: 256 connections over 16 tokens ~16,500/s;
+64 connections on a curve with 0 / 1,000 / 10,000 holders: ~23,400 / ~22,700 / ~20,000.
 
 ## Findings
 
-1. **Near-linear to ~4 connections; flat at ~15,000/s from ~256 to 1,500.** The connection cap (512 hard-coded before this record) was
-   not the limit: with it raised, 1,500 connections opened and ran.
-2. **One connection gets ~300/s because the server waits, not computes.** A lone pre-signed swap takes ~3.06 ms; a read command on
-   the same connection takes 0.07 ms; server CPU is ~0.2 ms. The rest is the store group-commit window (2 ms, `store.rs`
-   `BATCH_WINDOW`) plus the swap coordinator window (250 µs).
-3. **The ceiling is a single thread.** `swap_coord.rs` runs one coordinator thread; per cycle it groups up to 256 requests by chain,
-   and for each chain verifies the batch and writes the curve (a store write that waits on the 2 ms window). At the plateau the
-   server uses ~1.0 core, consistent with one thread doing ~65 µs of verify and bookkeeping per swap. This is read from the code and
-   the core counts; it was not profiled.
-4. **Knobs that did not help** (256 connections, one curve, one run each): `SWAP_COORD_MAX_BATCH` 64 -> ~7,300/s (worse), 256 (default) ->
-   ~13,400/s, 1024 -> ~8,500/s (machine noise suspected), `SWAP_COORD_WINDOW_US=0` -> ~400/s (no coalescing). Defaults sit at or near the best.
-   An earlier sweep of these was discarded: a shell bug passed unparseable values, so every setting ran at the default.
-5. **More tokens made it slower, not faster.** 256 connections over 1 / 4 / 16 curves: ~15,100 / ~8,200 / ~2,500 swaps/s, because each
-   chain in a cycle adds a serial store write.
-6. **Where more would come from:** parallel resolver shards and more nodes (BENCH-013: 1 shard 43,665 -> 4 shards 157,206 swaps/s
-   in-process), not more connections. Not built for the wire path; not measured here.
+1. **A lone client is 15x faster** (4,425 vs ~300): it no longer sits out two batching windows.
+2. **Holder count and token count no longer collapse throughput** (previously 10,000 holders -> ~1,350/s and 16 tokens -> ~2,450/s).
+3. **The ceiling moved from a thread to the machine.** At 1,000 connections the server uses about four of eight cores (and one in four of those are efficiency cores),
+   with a client process using ~0.9 core; the run-to-run drift tracks other applications' load. More headroom is more cores or more nodes.
+4. **Client position tracking costs a `HEAD` read per swap** (the safe default). It is free on loopback and a network round trip on a real network;
+   an opt-in cross-tab broadcast removes it for single-device use (see below), at the risk described there.
+
+## Client position tracking (`flux-launchpad/js/chain-heads.mjs`)
+
+A signed record at an already-occupied chain position is **equivocation evidence** and the node **freezes that key's whole chain**
+(`chain is frozen (fork evidence held)`), reproduced on the real node. So the launchpad's tracker reads `HEAD` fresh before every signature, takes a per-key
+lock that spans tabs (Web Locks), and never retries after equivocation. A refused swap still lands on the chain and consumes a position. Opt-in fast
+path: a `BroadcastChannel` shares each accepted head between tabs, with a validity window; it is unsafe if a second **device** writes the same key,
+so it is off by default. Verified live (`verify-launchpad-chain.mjs`, 17 checks incl. the real session-delegate module) and by 21 unit tests.
 
 ## Reproduce
 
-`flux/flux-auth/scripts/swaps-transfers/bench-swap-conns.mjs` (`--conns`, `--tokens`, `--max-conn-per-ip`, `--max-ws`; point
-`SWAPS_CHAIN_SERVER_BIN` at a build). Raw JSON/logs: `flux/flux-auth/docs/measurements/swaps-transfers/conns/`.
-Full report: `flux/flux-auth/docs/swaps-transfers-ed25519-measurements.md`.
+`flux/flux-auth/scripts/swaps-transfers/bench-swap-conns.mjs` (`--conns`, `--tokens`, `--max-conn-per-ip`, `--max-ws`; `SWAPS_CHAIN_SERVER_BIN` selects a build)
+and `bench-swap-holders.mjs`. Raw: `flux/flux-auth/docs/measurements/swaps-transfers/chain-position-build/`. Report:
+`flux/flux-auth/docs/swaps-transfers-ed25519-measurements.md`.
+
+## Native-token transfers (Phase 2, added 2026-10-15)
+
+Same node, machine and method; `NATIVE_SEND` accepted transfers/s, each transfer **signed at send time by one client process** (client signing is inside the timed window),
+256 senders x 100 transfers of 1 unit, every sender funded by a genuine operator-signed credit; 3 timed reps + 1 warm-up per point; three full runs of one binary; every transfer
+applied and every balance checked every rep.
+
+| connections | 1 | 8 | 64 | 256 |
+|---|---|---|---|---|
+| run medians | 5,888 / 6,704 / 5,851 | 12,992 / 15,747 / 15,193 | 13,282 / 15,286 / 15,787 | 14,877 / 15,846 / 15,447 |
+| server cores busy | 0.5 | 1.2-1.4 | 1.3-1.4 | 1.4-1.5 |
+
+The ~15,000/s plateau is bounded by the single signing client (server ~1.4 of 8 cores). It is not a swap and swaps still move no balance. Two defects in the first versions were found by this
+measurement and fixed (a ledger index that rebuilt on every out-of-order arrival, ~390/s; a benchmark that pre-assigned timestamps, making many connections ~10x slower than one); see
+`flux/flux-auth/docs/swaps-transfers-ed25519-measurements.md`. New `NATIVE_SEND` timestamps must be within +-10 s of the node's clock.

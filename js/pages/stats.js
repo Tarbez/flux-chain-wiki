@@ -371,7 +371,7 @@
       // gets through the WebSocket into one node, not Rust resolution capacity), never added or ranked against them.
       if ((CP.byConnections || []).length) {
         var cpPanel = panel('dash-span-12', 'Client path \u00b7 swaps over the wire, by concurrent connections \u00b7 ' + (CP.date || '2026-10-15'),
-          CP.record + '. Accepted swaps/s into ONE node. Not the fleet figure above, and not custodied.');
+          CP.record + ' (' + (CP.build || 'current build') + '). Accepted swaps/s into ONE node. Not the fleet figure above, and not custodied.');
         var cpList = el('ol', 'dash-bars');
         var cpMax = Math.max.apply(null, CP.byConnections.map(function (p5) { return p5.swapsPerSecond; }).concat([1]));
         CP.byConnections.forEach(function (p5) {
@@ -385,7 +385,38 @@
           cpList.appendChild(li);
         });
         cpPanel.appendChild(cpList);
+        if ((CP.otherAxes || []).length) {
+          cpPanel.appendChild(el('p', 'dash-note', 'Same node, other axes'));
+          var axList = el('ol', 'dash-bars');
+          CP.otherAxes.forEach(function (ax) {
+            var axLi = el('li', 'dash-bars-row');
+            var axNm = el('p', 'dash-bars-name');
+            axNm.appendChild(el('b', null, ax.label));
+            axLi.appendChild(axNm);
+            axLi.appendChild(bar(ax.swapsPerSecond / cpMax));
+            axLi.appendChild(el('strong', 'dash-bars-value', fmt(ax.swapsPerSecond)));
+            axList.appendChild(axLi);
+          });
+          cpPanel.appendChild(axList);
+        }
+        if (CP.transfers && (CP.transfers.byConnections || []).length) {
+          cpPanel.appendChild(el('p', 'dash-note', 'Native-token transfers on the same node'));
+          var xfList = el('ol', 'dash-bars');
+          var xfMax = Math.max.apply(null, CP.transfers.byConnections.map(function (p6) { return p6.perSecond; }).concat([1]));
+          CP.transfers.byConnections.forEach(function (p6) {
+            var xfLi = el('li', 'dash-bars-row');
+            var xfNm = el('p', 'dash-bars-name');
+            xfNm.appendChild(el('b', null, fmt(p6.connections) + (p6.connections === 1 ? ' connection' : ' connections')));
+            xfLi.appendChild(xfNm);
+            xfLi.appendChild(bar(p6.perSecond / xfMax));
+            xfLi.appendChild(el('strong', 'dash-bars-value', fmt(p6.perSecond)));
+            xfList.appendChild(xfLi);
+          });
+          cpPanel.appendChild(xfList);
+          cpPanel.appendChild(el('p', 'dash-note', CP.transfers.note));
+        }
         cpPanel.appendChild(el('p', 'dash-note', CP.verdict));
+        if (CP.previousBuild) cpPanel.appendChild(el('p', 'dash-note', 'Previous build: ' + CP.previousBuild.note));
         cpPanel.appendChild(el('p', 'dash-note', 'Metric: ' + CP.metric + '. Mode: ' + CP.mode + '. ' + CP.quorum + '. Machine: ' + CP.machine + '. ' + CP.caveats));
         shell.appendChild(cpPanel);
       }
@@ -478,7 +509,7 @@
         ['DAO treasury claim (durable, real WAN)', '2 real fleet nodes, quorum 2-of-2', '17 claims/s', '2 runs', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
         ['DAO treasury claim (accepted, real WAN)', '2 real fleet nodes, replication off critical path', '~1003 claims/s', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
         ['DAO/treasury devnet dry run', 'full wire sequence, real standalone chain-server', '17/17 steps passed', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-devnet-dao-treasury-dry-run.md'],
-        ['Client-path swaps (unbacked)', 'one node, 256-1500 connections, pre-signed, loopback, quorum 0', '~15,000 swaps/s ceiling', '5 timed reps per point', '0', 'BENCH-015', 'docs/evidence/bench-015-client-path-swaps-by-connections.md']
+        ['Client-path swaps (unbacked)', 'one node, 1-1,000 connections, chain-position build, pre-signed, loopback, quorum 0', '4,400 swaps/s at 1 connection, ~31,000 at 1,000', '5 timed reps per point; 3 runs at 256 and 1,000', '0', 'BENCH-015', 'docs/evidence/bench-015-client-path-swaps-by-connections.md']
       ].forEach(function (r) {
         var tr = el('tr');
         r.slice(0, 5).forEach(function (c, i) { tr.appendChild(el('td', i === 2 ? 'is-num' : null, c)); });

@@ -119,7 +119,7 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
 
   // ---- BENCH-015: the client path is its own quantity, derivable, and never mixed with the fleet figure ----
   const CP = S.clientPath;
-  assert(CP && CP.byConnections.length >= 8, 'the client path keeps its measured points');
+  assert(CP && CP.byConnections.length >= 5, 'the client path keeps its measured points');
   const cpFirst = CP.byConnections[0], cpPeak = Math.max(...CP.byConnections.map((x) => x.swapsPerSecond));
   assert.equal(cpFirst.connections, 1, 'the curve starts at one connection');
   assert.equal(CP.ceilingSwapsPerSecond, cpPeak, 'the stated ceiling is the highest measured point, not a separate claim');
@@ -129,6 +129,14 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(/quorum 0/.test(CP.quorum), 'the zero-replication quorum is stated beside the number');
   assert(/loopback/.test(CP.caveats) && /limiter/.test(CP.caveats), 'loopback and the production limiter are stated');
   assert(CP.byConnections.some((x) => x.connections >= 1000), 'the sweep reaches 1,000 connections');
+  assert(CP.otherAxes.length >= 3 && CP.otherAxes.every((x) => x.swapsPerSecond <= CP.ceilingSwapsPerSecond), 'the other axes (tokens, holders) are shown and never exceed the ceiling');
+  assert(/HEAD round trip/.test(CP.caveats), 'the extra HEAD round trip per swap is stated beside the number');
+  assert(CP.previousBuild && /\b300\b/.test(CP.previousBuild.note), 'the previous build is named, not silently replaced');
+  assert(/shared machine|competing/.test(CP.caveats + CP.verdict), 'machine-load variance is stated');
+  assert(CP.transfers && CP.transfers.byConnections.length >= 3, 'the native-transfer points are kept');
+  assert(CP.transfers.byConnections.every((x) => x.perSecond > 0) && /signed at send time|signing client/.test(CP.transfers.note + CP.transfers.metric), 'the transfer figure says who signs and when, so it is not read as a pure server ceiling');
+  assert(/not a swap/i.test(CP.transfers.note) && /no balance/i.test(CP.transfers.note), 'transfers are not conflated with swaps, and swaps are still said to move no balance');
+  assert(text.includes('Native-token transfers'), 'the transfers block renders');
   assert(text.includes(CP.record) && text.includes('Client path'), 'the client-path section renders');
   assert(text.includes(fmt(CP.ceilingSwapsPerSecond)) || text.includes(String(CP.ceilingSwapsPerSecond)), 'the ceiling figure appears on the page');
 

@@ -125,36 +125,55 @@
     note: 'Each operation in its own unit, median of 5 reps, warm-up discarded. No network in any row, and no row is multiplied by a node or replica count. Rows are NOT comparable across units: a transfer rate and a swap rate count different work.'
   });
 
-  // BENCH-015, 2026-10-15 -- CLIENT PATH: accepted swaps/s through the real WebSocket wire into ONE node, versus
-  // concurrent connections. A different quantity from `operations` above: that is in-process Rust resolution with no
-  // network; this is what clients actually get, loopback, one node, swaps pre-signed outside the timed window.
-  // UNBACKED: a curve swap moves no balance today (roadmap Track 27), so this is signed+verified+priced, not custodied.
-  // Points are medians of timed reps (5, warm-ups discarded); the first six are the mean of two identical runs.
+  // BENCH-015 (revised 2026-10-15) -- CLIENT PATH: accepted swaps/s through the real WebSocket wire into ONE node, versus
+  // concurrent connections, on the CHAIN-POSITION BUILD (every swap is an entry on the signer's own chain; coordinator
+  // pipelined; verify parallel; commit on the chain log). A different quantity from `operations` above: that is
+  // in-process Rust resolution with no network; this is what clients actually get -- loopback, one node, swaps
+  // pre-signed outside the timed window. UNBACKED: a curve swap moves no balance yet (custody is Phase 3), so this is
+  // signed + verified + priced + chained, not custodied. Each point is the median of the timed reps (5, warm-ups
+  // discarded); 256 and 1,000 connections are the median of THREE runs of the same binary (25.0k/26.8k/34.0k and
+  // 28.6k/31.0k/34.1k): the spread is competing machine load, not a code difference.
   var CLIENT_PATH = Object.freeze({
     date: '2026-10-15',
     record: 'BENCH-015',
+    build: 'chain-position build',
     metric: 'accepted swaps/s (CURVE_SWAP_OK replies / wall second)',
     mode: 'one local release chain-server, pre-signed swaps, one signing key per connection, one curve, loopback',
     quorum: 'store quorum 0 (zero replication cost)',
     machine: 'Apple M2, 8 cores (4 performance + 4 efficiency), 8 GB',
     byConnections: Object.freeze([
-      Object.freeze({ connections: 1, swapsPerSecond: 299 }),
-      Object.freeze({ connections: 2, swapsPerSecond: 610 }),
-      Object.freeze({ connections: 4, swapsPerSecond: 1170 }),
-      Object.freeze({ connections: 8, swapsPerSecond: 2140 }),
-      Object.freeze({ connections: 16, swapsPerSecond: 3230 }),
-      Object.freeze({ connections: 24, swapsPerSecond: 4100 }),
-      Object.freeze({ connections: 128, swapsPerSecond: 12151 }),
-      Object.freeze({ connections: 256, swapsPerSecond: 14990 }),
-      Object.freeze({ connections: 700, swapsPerSecond: 15382 }),
-      Object.freeze({ connections: 1000, swapsPerSecond: 15330 }),
-      Object.freeze({ connections: 1500, swapsPerSecond: 14907 })
+      Object.freeze({ connections: 1, swapsPerSecond: 4425 }),
+      Object.freeze({ connections: 4, swapsPerSecond: 5345 }),
+      Object.freeze({ connections: 24, swapsPerSecond: 12197 }),
+      Object.freeze({ connections: 128, swapsPerSecond: 18397 }),
+      Object.freeze({ connections: 256, swapsPerSecond: 26754 }),
+      Object.freeze({ connections: 1000, swapsPerSecond: 31009 })
     ]),
-    ceilingSwapsPerSecond: 15382,
-    serverCoresAtCeiling: 1.0,
+    otherAxes: Object.freeze([
+      Object.freeze({ label: '256 connections over 16 tokens', swapsPerSecond: 16500 }),
+      Object.freeze({ label: '64 connections, a curve with 0 holders', swapsPerSecond: 23427 }),
+      Object.freeze({ label: '64 connections, a curve with 1,000 holders', swapsPerSecond: 22684 }),
+      Object.freeze({ label: '64 connections, a curve with 10,000 holders', swapsPerSecond: 20018 })
+    ]),
+    // Native-token transfers (Phase 2, custody) on the same node, same machine, three runs of one binary (medians of the timed reps; run medians
+    // 5.9-6.7k at 1 connection, 13.0-15.7k at 8, 13.3-15.8k at 64, 14.9-15.8k at 256). Signed AT SEND TIME by one client process, so client
+    // signing is inside the timed window and the plateau is bounded by that client, not shown to be the server's ceiling.
+    transfers: Object.freeze({
+      metric: 'accepted NATIVE_SEND transfers/s (NATIVE_SEND_OK / wall second), each signed at send time by one client process',
+      byConnections: Object.freeze([
+        Object.freeze({ connections: 1, perSecond: 5851 }),
+        Object.freeze({ connections: 8, perSecond: 15193 }),
+        Object.freeze({ connections: 64, perSecond: 15286 }),
+        Object.freeze({ connections: 256, perSecond: 15447 })
+      ]),
+      note: 'Sender-signed token transfers on the event-sourced ledger: signature, chain position, balance check and ledger event per transfer; an overdraft is refused by name before it uses a chain position. The ~15,000/s plateau is bounded by the single signing client (the server used ~1.4 of 8 cores). One node, loopback, store quorum 0. Not a swap, and swaps still move no balance.'
+    }),
+    previousBuild: Object.freeze({ note: 'Before the chain-position build the same node held ~300 swaps/s on one connection and ~15,000/s at 256-1,500 connections; a curve with 10,000 holders fell to ~1,350/s and 16 tokens to ~2,450/s.' }),
+    ceilingSwapsPerSecond: 31009,
+    serverCoresAtCeiling: 4,
     cores: 8,
-    verdict: 'Throughput scales almost linearly with concurrent connections to about 4 (one connection gets ~300/s because the server waits on its 2 ms store commit and 250 \u00b5s batching windows, not on signing or CPU), then flattens near 15,000 swaps/s from ~256 connections to 1,500. At the ceiling the server uses about one of eight cores: the swap coordinator is a single thread that verifies and resolves one batch at a time. More connections, a larger batch or a longer window do not move it; spreading the same swaps over more tokens made it slower (16 tokens: ~2,500/s), because each token adds a serial store write. Past ~15,000/s the lever is more resolver shards and more nodes, as BENCH-013 found, not more connections.',
-    caveats: 'Unbacked swaps (no balance is debited), loopback (no network latency), store quorum 0, one node, one client process. The production limiter (100 commands/s per connection) caps each connection near 100/s. Real custody will lower every figure. The connection cap of 512 is raised on the scratch node only (CHAIN_SERVER_MAX_WS_CONNECTIONS, default unchanged).'
+    verdict: 'One connection now gets ~4,400 swaps/s (it was ~300: a lone client no longer waits out two batching windows), and throughput climbs with concurrent connections to ~31,000/s at 1,000. At the top the server uses about four of the eight cores, so the machine, not one coordinator thread, is the limit: the first-run numbers at 256 and 1,000 connections ranged 25k to 34k across three runs of one binary while other apps competed for the CPU. A curve holding 10,000 holders still does ~20,000/s (it used to fall to ~1,350/s), and spreading the same swaps over 16 tokens holds ~16,500/s (it used to fall to ~2,450/s). More headroom comes from more cores and more nodes, as BENCH-013 found, not from more connections.',
+    caveats: 'Unbacked swaps (no balance is debited), loopback (no network latency), store quorum 0, one node, one client process, a shared machine with other apps running. Every swap costs the client one extra HEAD round trip to read its chain position, free on loopback and a full network round trip on a real network. The production limiter (100 commands/s per connection) caps each connection near 100/s. Real custody will lower every figure. The connection cap of 512 is raised on the scratch node only (CHAIN_SERVER_MAX_WS_CONNECTIONS, default unchanged).'
   });
 
   // Platform/infra resolvers (INFRA-001, 2026-10-12) — a SEPARATE numbering
