@@ -42,3 +42,26 @@ execFileSync(designRoot + '/deadark-sdk/node_modules/.bin/esbuild', [
   '--alias:@deadark/ark-ui/flux-auth-session=' + designRoot + '/ark-ui/dist/ark-ui.flux-auth-session.js',
   '--outfile=js/ark/local-identity.js',
 ], { stdio: 'inherit' });
+// Every other site that carries this Auth Kit bundle gets the one just built. They used to be
+// hand copies (genesis/README: "no automated sync wired up yet"), and genesis, defxn-dao and
+// treasury all froze on an Oct 12 build whose reader accepted only `version: 1` -- every v9
+// kit failed there with "not a valid Auth Kit JSON or FLX envelope" (2026-10-16) while
+// defxn.com, rebuilt, read the same file fine. The consumer list is derived, not written
+// down: any sibling site with a js/admin/auth.js that is this bundle (`var ArkAdminAuth=`).
+{
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const built = fs.readFileSync('js/admin/auth.js');
+  const self = path.resolve('.');
+  for (const site of fs.readdirSync(fluxRoot)) {
+    // A static site carries it at js/admin/auth.js; ARK Browser in its renderer's vendor dir.
+    for (const rel of ['js/admin/auth.js', 'src/renderer/vendor/ark-admin-auth.js']) {
+      const target = path.join(fluxRoot, site, rel);
+      if (path.join(fluxRoot, site) === self || !fs.existsSync(target)) continue;
+      if (!fs.readFileSync(target, 'utf8').startsWith('var ArkAdminAuth=')) continue;
+      if (Buffer.compare(fs.readFileSync(target), built) === 0) continue;
+      fs.writeFileSync(target, built);
+      console.log('[build-auth] refreshed ' + path.relative(fluxRoot, target));
+    }
+  }
+}

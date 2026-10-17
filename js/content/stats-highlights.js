@@ -139,7 +139,7 @@
     build: 'chain-position build',
     metric: 'accepted swaps/s (CURVE_SWAP_OK replies / wall second)',
     mode: 'one local release chain-server, pre-signed swaps, one signing key per connection, one curve, loopback',
-    quorum: 'store quorum 0 (zero replication cost)',
+    replicationNote: 'store replica requirement 0 (zero replication cost)',
     machine: 'Apple M2, 8 cores (4 performance + 4 efficiency), 8 GB',
     byConnections: Object.freeze([
       Object.freeze({ connections: 1, swapsPerSecond: 4425 }),
@@ -166,7 +166,7 @@
         Object.freeze({ connections: 64, perSecond: 15286 }),
         Object.freeze({ connections: 256, perSecond: 15447 })
       ]),
-      note: 'Sender-signed token transfers on the event-sourced ledger: signature, chain position, balance check and ledger event per transfer; an overdraft is refused by name before it uses a chain position. The ~15,000/s plateau is bounded by the single signing client (the server used ~1.4 of 8 cores). One node, loopback, store quorum 0. Not a swap, and swaps still move no balance.',
+      note: 'Sender-signed token transfers on the event-sourced ledger: signature, chain position, balance check and ledger event per transfer; an overdraft is refused by name before it uses a chain position. The ~15,000/s plateau is bounded by the single signing client (the server used ~1.4 of 8 cores). One node, loopback, store replica requirement 0. Not a swap, and swaps still move no balance.',
       // 2026-10-15, after the ledger's mid-order insert was fixed (it replayed every later event under one lock). Same node, 64 connections, 256 senders x 100,
       // median of 3 after a warm-up, client work split over K processes so one client is not the limit. Apple M2, 8 cores, load 4-12 (other apps/compiles running).
       byClientProcesses: Object.freeze([
@@ -183,7 +183,7 @@
     serverCoresAtCeiling: 4,
     cores: 8,
     verdict: 'One connection now gets ~4,400 swaps/s (it was ~300: a lone client no longer waits out two batching windows), and throughput climbs with concurrent connections to ~31,000/s at 1,000. At the top the server uses about four of the eight cores, so the machine, not one coordinator thread, is the limit: the first-run numbers at 256 and 1,000 connections ranged 25k to 34k across three runs of one binary while other apps competed for the CPU. A curve holding 10,000 holders still does ~20,000/s (it used to fall to ~1,350/s), and spreading the same swaps over 16 tokens holds ~16,500/s (it used to fall to ~2,450/s). More headroom comes from more cores and more nodes, as BENCH-013 found, not from more connections.',
-    caveats: 'Unbacked swaps (no balance is debited), loopback (no network latency), store quorum 0, one node, one client process, a shared machine with other apps running. Every swap costs the client one extra HEAD round trip to read its chain position, free on loopback and a full network round trip on a real network. The production limiter (100 commands/s per connection) caps each connection near 100/s. Real custody will lower every figure. The connection cap of 512 is raised on the scratch node only (CHAIN_SERVER_MAX_WS_CONNECTIONS, default unchanged).'
+    caveats: 'Unbacked swaps (no balance is debited), loopback (no network latency), store replica requirement 0, one node, one client process, a shared machine with other apps running. Every swap costs the client one extra HEAD round trip to read its chain position, free on loopback and a full network round trip on a real network. The production limiter (100 commands/s per connection) caps each connection near 100/s. Real custody will lower every figure. The connection cap of 512 is raised on the scratch node only (CHAIN_SERVER_MAX_WS_CONNECTIONS, default unchanged).'
   });
 
   // Platform/infra resolvers (INFRA-001, 2026-10-12) — a SEPARATE numbering
@@ -195,7 +195,7 @@
     date: '2026-10-12',
     record: 'INFRA-001',
     audit: Object.freeze([
-      Object.freeze({ system: 'flx-repo (repo storage)', resolver: 'yes — ref-chain accept/reject', rate: '116,192–118,973 lines/s', deployable: 'no — unauthenticated, no consensus' }),
+      Object.freeze({ system: 'flx-repo (repo storage)', resolver: 'yes — ref-chain accept/reject', rate: '116,192–118,973 lines/s', deployable: 'no — unauthenticated, no verification step' }),
       Object.freeze({ system: 'remote-env (preview control plane)', resolver: 'yes — access decision', rate: '12,106 decisions/s', deployable: 'not yet — stated gate, non-production' }),
       Object.freeze({ system: 'flx-db-studio (dev DB console)', resolver: 'yes — ACL evaluate', rate: '1.8M–3.4M queries/s', deployable: 'no — client-local only' }),
       Object.freeze({ system: 'bundle-deploy', resolver: 'none', rate: '—', deployable: 'no — delegates to name-integrity' }),

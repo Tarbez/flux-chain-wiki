@@ -4,10 +4,10 @@ LearningContent.load("governance-without-a-validator-set", {
   "relevance": "Use this note to tell transition authority apart from substrate policy and a network's own DAO.",
   "reviewed": "2026-09-30",
   "evidenceLabel": "Authority model, thresholds, and current limits",
-  "evidenceHref": "docs/protocol/authority.md",
-  "relatedPage": "concept/practice",
+  "evidenceHref": "doc:docs/protocol/authority.md",
+  "relatedPage": "route:concept/practice",
   "actionLabel": "Inspect activation limits",
-  "actionPage": "concept/notes",
+  "actionPage": "route:concept/notes",
   "questions": [
     "Who approves a transition?",
     "How is a cell derived?",

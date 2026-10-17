@@ -10,9 +10,9 @@ ids.forEach((id) => vm.runInContext(fs.readFileSync('js/content/manifests/' + id
 const manifest = (id) => JSON.parse(JSON.stringify(vm.runInContext(`ArkManifest.get(${JSON.stringify(id)})`, context)));
 const value = (id, field) => manifest(id).fields[field].value;
 
-assert.equal(value('home', 'EYEBROW'), 'Protocol infrastructure for independent networks');
-assert.equal(value('home', 'CTA'), 'See how DEFXN works');
-assert.equal(value('home', 'SECONDARY'), 'Run DEFXN from source');
+assert.equal(value('home', 'EYEBROW'), 'DEFXN / A chain of chains');
+assert.equal(value('home', 'CTA'), 'See how it works');
+assert.equal(value('home', 'SECONDARY'), 'Read the source');
 assert.equal(value('home', 'STATUS1.VALUE'), 'PARTIAL');
 assert.equal(value('home', 'STATUS3.VALUE'), 'UNVERIFIED');
 assert(!value('home', 'TITLE').includes('Deploy parse resolve'));

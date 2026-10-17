@@ -18,7 +18,8 @@ import { proxyFleetPulse } from './lib/fleet-pulse-proxy.mjs';
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const PORT = Number(process.env.PORT || 3438);
 const HOST = process.env.HOST || '127.0.0.1';
-const PRIVATE = /^\/(admin\.html|admin-app\.html|scripts|tests|\.git|\.vercel|node_modules|Flux Chain Admin\.command|README\.md)(\/|$)/;
+const ADMIN_ORIGIN = process.env.DEFXN_ADMIN_ORIGIN || 'http://127.0.0.1:3437';
+const PRIVATE = /^\/(admin\.html|admin-app\.html|admin-studio\.html|scripts|tests|\.git|\.vercel|node_modules|Flux Chain Admin\.command|README\.md)(\/|$)/;
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
@@ -28,7 +29,7 @@ const TYPES = {
 
 /* Relative URLs in index.html (js/x.js, css/y.css) resolve against the current path, so a hard load of
    /learnings/some-slug asks for /learnings/js/x.js. Strip the route segments in front of a known asset folder. */
-function assetPath(pathname) {
+export function assetPath(pathname) {
   const m = pathname.match(/^\/.+?\/((?:js|css|assets|docs|legacy)\/.*)$/);
   return m ? '/' + m[1] : pathname;
 }
@@ -44,6 +45,14 @@ createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://x');
     let pathname = url.pathname;
+    /* The public preview and CMS intentionally use separate servers. Make the
+       obvious local /admin address useful instead of letting the SPA fallback
+       render Home. The admin host still applies its own session/ownership gate. */
+    if ((pathname === '/admin' || pathname === '/admin/') && req.method === 'GET') {
+      const target = new URL('/admin' + url.search, ADMIN_ORIGIN);
+      res.writeHead(307, { location: target.href, 'cache-control': 'no-store' }).end();
+      return;
+    }
     if (pathname === '/api/fleet-pulse') {
       if (req.method !== 'GET') { res.writeHead(405).end('Method not allowed'); return; }
       await proxyFleetPulse(res); return;

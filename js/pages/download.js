@@ -2,8 +2,18 @@
    beside the five steps, one screen, no scroll. Steps swap in place; the card follows the step. */
 ArkUI.pageModules.download = {
   mount: function (host) {
+    var manifest = ArkManifest.get('download');
     function words(key) { return ArkCopy.text('DOWNLOAD.' + key); }
-    function link(label, target, cls) { var a = ArkUI.el('a', cls || '', label); a.href = ArkUI.route.href(ArkUI.pageCatalog[target].path); a.dataset.sceneLink = target; return a; }
+    /* `target` is either a real pageCatalog/route key (meta.next, resolved
+       directly the same way admin.js's routeOptions() picker already edits
+       it), or a manifest field role of kind 'link' (js/content/manifest.js)
+       -- both go through the one shared resolver, js/ark/dash-kit.js's
+       linkEl, which replaces this page's own former direct pageCatalog
+       lookup. */
+    function link(label, target, cls) {
+      var value = /^[A-Z][A-Z0-9.]*$/.test(target) ? words(target) : 'route:' + target;
+      return ArkUI.dash.linkEl(label, value, manifest.route, cls);
+    }
     /* What each step looks like at the terminal. Commands and defaults come from docs/operators. */
     var terminal = [
       { lines: ['node --version', 'npm --version'], expect: 'v22 or newer, with npm on the path' },
@@ -18,7 +28,7 @@ ArkUI.pageModules.download = {
     var header = ArkUI.el('header', 'how-chapter-header');
     var kicker = ArkUI.el('div', 'download-kicker-row'); kicker.appendChild(ArkUI.el('p', 'download-kicker', words('EYEBROW')));
     /* Phones have no room in the footer, so the guide link moves up beside the kicker there. */
-    var guideTop = ArkUI.el('a', 'download-guide-top', 'Operator guide ↗'); guideTop.href = 'docs/operators/run-from-source.md'; kicker.appendChild(guideTop);
+    var guideTop = link('Operator guide ↗', 'GUIDE.HREF', 'download-guide-top'); kicker.appendChild(guideTop);
     header.appendChild(kicker);
     var title = ArkUI.el('h1', '', words('TITLE')); title.id = 'download-title'; el.setAttribute('aria-labelledby', title.id);
     header.appendChild(title); header.appendChild(ArkUI.el('p', '', words('DECK'))); el.appendChild(header);
@@ -78,9 +88,9 @@ ArkUI.pageModules.download = {
 
     /* Footer: reference links on the left, step navigation on the right; the last step hands on to /deploy. */
     var footer = ArkUI.el('nav', 'how-chapter-footer download-footer'); footer.setAttribute('aria-label', 'Continue');
-    var guide = ArkUI.el('a', 'how-deeper-link', words('GUIDE').charAt(0) + words('GUIDE').slice(1).toLowerCase() + ' ↗'); guide.href = 'docs/operators/run-from-source.md';
+    var guide = link(words('GUIDE').charAt(0) + words('GUIDE').slice(1).toLowerCase() + ' ↗', 'GUIDE.HREF', 'how-deeper-link');
     footer.appendChild(guide);
-    footer.appendChild(link('Deploy a site with the Bundle Deployer', 'bundledeployer', 'download-aside-link'));
+    footer.appendChild(link('Deploy a site with the Bundle Deployer', 'ASIDE.HREF', 'download-aside-link'));
     var progress = ArkUI.el('span', 'download-progress'); progress.setAttribute('role', 'status'); footer.appendChild(progress);
     var previous = ArkUI.el('button', 'download-previous', '← '); previous.type = 'button'; previous.setAttribute('aria-label', 'Previous step'); previous.appendChild(ArkUI.el('span', 'download-previous-word', 'Previous'));
     var next = ArkUI.el('button', 'how-chapter-next download-next', 'Next step →'); next.type = 'button';
@@ -103,6 +113,13 @@ ArkUI.pageModules.download = {
     }
     select(0, false);
     ArkUI.attachProcedureState(el, 'download', count, function (index) { select(index, false); });
+
+    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+       is centralized in js/main.js's onMount hook, not called here. */
+    var components = ArkUI.el('div', 'download-components');
+    components.setAttribute('data-ark-insert', 'main');
+    el.appendChild(components);
+
     host.appendChild(el); return el;
   }
 };

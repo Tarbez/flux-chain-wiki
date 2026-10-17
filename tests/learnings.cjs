@@ -10,11 +10,12 @@ class Element {
 }
 const registry = {};
 const context = vm.createContext({ document: { createElement: tag => new Element(tag) }, ArkUI: { register: (id, manifest) => registry[id] = manifest } });
-for (const file of ['js/ark/flux.js', 'js/content/learnings.js','js/content/article-index.js', 'js/ark/route.js', 'js/resolvers/learnings.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+for (const file of ['js/ark/flux.js', 'js/content/learnings.js','js/content/article-index.js', 'js/ark/route.js', 'js/ark/dash-kit.js', 'js/resolvers/learnings.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 function descendants(el) { return [el, ...el.children.flatMap(descendants)]; }
 assert(context.LearningContent.articles.every(article => !article.sections), 'Shared index must not load article bodies');
 context.LearningContent.articles.forEach(article => vm.runInContext(fs.readFileSync('js/content/articles/' + article.slug + '.js', 'utf8'), context));
-context.ArkUI.pageCatalog = Object.fromEntries(context.LearningContent.articles.flatMap(article => [article.relatedPage,article.actionPage]).map(key => [key,{path:'/'+key}]));
+// relatedPage/actionPage are now tagged route:<key> (js/ark/dash-kit.js's resolveLinkField), so the fake catalog is keyed by the bare key.
+context.ArkUI.pageCatalog = Object.fromEntries(context.LearningContent.articles.flatMap(article => [article.relatedPage,article.actionPage]).map(value => [value.replace(/^route:/,''),{path:'/'+value.replace(/^route:/,'')}]));
 const patterns = ['F-LEARNINGS-RLEARNINGS_V1', ...context.LearningContent.articles.map(article => 'F-ARTICLE-RARTICLE_V1\n-S-' + article.slug)];
 const pages = patterns.map(pattern => {
   const parsed = context.ArkFlux.parse(pattern), manifest = registry[parsed.resolver];
@@ -39,9 +40,13 @@ pages.slice(1).forEach((page, index) => {
   assert(all.some(el => el.className === 'article-relevance' && el.textContent === article.relevance), 'each article states its relevance');
   assert(all.some(el => el.className === 'article-sources'), 'each article has an evidence disclosure');
   assert(all.some(el => el.className === 'article-reviewed' && el.textContent.includes(article.reviewed)), 'each article shows its editorial review date');
-  assert(all.some(el => el.className === 'article-evidence-link' && el.href === article.evidenceHref), 'each article links to its evidence context');
-  assert(all.some(el => el.className === 'article-related' && el.dataset.sceneLink === article.relatedPage), 'each article links a related mechanism');
-  assert(all.some(el => el.className === 'article-action' && el.dataset.sceneLink === article.actionPage), 'each article offers a next action');
+  // evidenceHref/relatedPage/actionPage are tagged (doc:/route:); the rendered link resolves
+  // through js/ark/dash-kit.js's resolveLinkField, not the raw tagged string.
+  const fromPath = '/learnings/' + article.slug;
+  const expectedEvidenceHref = '#/reference?doc=' + encodeURIComponent(article.evidenceHref.slice(4)) + '&from=' + encodeURIComponent(fromPath);
+  assert(all.some(el => el.className === 'article-evidence-link' && el.href === expectedEvidenceHref), 'each article links to its evidence context');
+  assert(all.some(el => el.className === 'article-related' && el.dataset.sceneLink === article.relatedPage.slice(6)), 'each article links a related mechanism');
+  assert(all.some(el => el.className === 'article-action' && el.dataset.sceneLink === article.actionPage.slice(6)), 'each article offers a next action');
   assert.equal(panels.filter(el => !el.hidden).length, 0, 'no answer is exposed before a choice');
   assert.equal(all.find(el => el.className === 'article-reading').hidden, true, 'the answer region starts hidden');
   assert.equal(next.hidden, true, 'the next article waits until the final answer');

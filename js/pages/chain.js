@@ -16,18 +16,29 @@
       preparedCase = ArkUI.chainCases.some(function (c) { return c.id === requested; }) ? requested : null;
     },
     mount: function (host) {
-      function pageHref(key) { return '#' + ArkUI.pageCatalog[key].path; }
+      var manifest = ArkManifest.get('chain');
+      /* `key` is a real pageCatalog/route key -- the structural per-step
+         targets js/pages/home-flow.js's buildChainFlow draws from its own
+         CASES data (sign/check/extend/replicate/resolve), not an editorial
+         destination hardcoded in this page module. Resolved the one shared
+         way every retrofitted call site is -- js/ark/dash-kit.js's
+         resolveLinkField -- replacing the old direct pageCatalog lookup. */
+      function pageHref(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
 
       var el = ArkUI.el('section', 'ark-page chain-page');
       el.dataset.arkPage = 'chain';
       el.setAttribute('aria-labelledby', 'chain-title');
 
+      /* The back link reuses manifest.meta.back (ArkManifest.get('chain').meta.back),
+         the same existing route picker js/pages/resolver-guide.js and
+         js/pages/sheet.js already read for their own back links -- not a
+         hardcoded literal duplicating the same destination. */
       var back = ArkUI.el('a', 'chain-back');
-      back.href = pageHref('zero'); back.dataset.sceneLink = 'zero'; back.dataset.icon = 'arrow-left';
+      back.href = pageHref(manifest.meta.back); back.dataset.sceneLink = manifest.meta.back; back.dataset.icon = 'arrow-left';
       back.appendChild(ArkUI.el('span', '', 'Home'));
       el.appendChild(back);
 
-      var title = ArkUI.el('h1', 'visually-hidden', ArkManifest.get('chain').title);
+      var title = ArkUI.el('h1', 'visually-hidden', manifest.title);
       title.id = 'chain-title';
       el.appendChild(title);
 
@@ -65,6 +76,13 @@
       el.appendChild(tabs);
 
       select(current);
+
+      /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+         is centralized in js/main.js's onMount hook, not called here. */
+      var components = ArkUI.el('div', 'chain-components');
+      components.setAttribute('data-ark-insert', 'main');
+      el.appendChild(components);
+
       host.appendChild(el);
       return el;
     }

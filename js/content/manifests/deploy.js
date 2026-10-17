@@ -31,6 +31,18 @@ ArkManifest.define({
       "kind": "line",
       "section": "Links",
       "value": "RUN FLUX FROM SOURCE"
+    },
+    "BUNDLEDEPLOYER.HREF": {
+      "label": "Bundle Deployer link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:bundledeployer"
+    },
+    "GUIDE.HREF": {
+      "label": "Network scope guide link",
+      "kind": "link",
+      "section": "Links",
+      "value": "doc:docs/operators/networks.md"
     }
   }
 });

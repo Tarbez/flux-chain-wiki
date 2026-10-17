@@ -307,7 +307,9 @@
     var footer = el('nav', 'resolver-lab-footer'); footer.setAttribute('aria-label', 'Continue');
     var prev = el('button', 'resolver-lab-prev'); prev.type = 'button';
     var next = el('a', 'resolver-lab-next');
-    var spec = el('a', 'resolver-lab-spec', 'Spec ↗'); spec.href = 'docs/protocol/resolvers.md'; spec.setAttribute('aria-label', words('SOURCE'));
+    // Reuses the SOURCE.HREF field js/pages/resolver-guide.js's own "Read the canonical
+    // guide" link already reads, rather than a second hardcoded copy of the same doc path.
+    var spec = ArkUI.dash.linkEl('Spec ↗', words('SOURCE.HREF')); spec.className = 'resolver-lab-spec'; spec.setAttribute('aria-label', words('SOURCE'));
     footer.appendChild(prev); footer.appendChild(next); footer.appendChild(spec);
     copy.appendChild(footer);
     root.appendChild(copy);
@@ -390,8 +392,10 @@
       laws.appendChild(item);
     });
     var lawsSource = el('p', 'resolver-lab-laws-source');
-    var specLink = el('a', '', 'resolver spec'); specLink.href = 'docs/protocol/resolvers.md';
-    var statusLink = el('a', '', 'status page'); statusLink.href = 'docs/status.md';
+    // Reuses SOURCE.HREF/STATUS.HREF, the same fields the footer spec link (above) and
+    // js/pages/resolver-guide.js's own evidence link already read.
+    var specLink = ArkUI.dash.linkEl('resolver spec', words('SOURCE.HREF'));
+    var statusLink = ArkUI.dash.linkEl('status page', words('STATUS.HREF'));
     lawsSource.appendChild(document.createTextNode('Wording from the ')); lawsSource.appendChild(specLink);
     lawsSource.appendChild(document.createTextNode(' · status from the ')); lawsSource.appendChild(statusLink);
     scene.appendChild(laws); scene.appendChild(lawsSource);
@@ -432,8 +436,12 @@
         next.onclick = function (event) { event.preventDefault(); event.stopPropagation(); go(STEPS[i + 1], true); };
       } else {
         label(next, words('NEXT'));
-        next.href = ArkUI.route.href(ArkUI.pageCatalog.deployment.path);
-        next.dataset.sceneLink = 'deployment';
+        // Reuses manifest.meta.next (ArkManifest.get(page).meta.next), the same existing
+        // route picker admin.js's "Where it goes" panel already edits -- not a hardcoded
+        // literal duplicating the same destination.
+        var onward = ArkUI.dash.resolveLinkField('route:' + ArkManifest.get(page).meta.next);
+        next.href = onward.href;
+        next.dataset.sceneLink = onward.sceneLink;
         next.onclick = null;
       }
       again.hidden = state.step === 'ask' || state.step === 'laws';
@@ -498,6 +506,9 @@
     window.addEventListener('popstate', onPop);
     root.arkRestore = function () { restore(false); if (!played) whenVisible(0); };
     root.arkDispose = function () { disposed = true; clearTimeout(waitTimer); mesh.dispose(); window.removeEventListener('popstate', onPop); };
+    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+       is centralized in js/main.js's onMount hook, not called here. */
+    var components = el('div', 'resolver-lab-components'); components.setAttribute('data-ark-insert', 'main'); root.appendChild(components);
     return root;
   };
 })();

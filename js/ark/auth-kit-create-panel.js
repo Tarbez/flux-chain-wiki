@@ -39,12 +39,12 @@
         container.innerHTML =
           '<form class="' + formClass + '" data-auth-kit-create-form>' +
             '<label>Display name<input type="text" name="displayName" maxlength="80" required autofocus></label>' +
-            '<label>Recovery phrase length' +
-              '<select name="wordCount"><option value="24" selected>24 words (recommended)</option><option value="12">12 words (compact)</option></select>' +
+            '<label>Recovery phrase' +
+              '<select name="wordCount"><option value="24" selected>24 words</option><option value="12">12 words</option></select>' +
             '</label>' +
-            '<label>New PIN (6–12 digits; 8+ digits alone, or 6+ with a password)<input type="password" name="pin" inputmode="numeric" required></label>' +
+            '<label>PIN<input type="password" name="pin" inputmode="numeric" placeholder="6–12 digits" required></label>' +
             '<label>Optional password<input type="password" name="password"></label>' +
-            '<button class="' + actionClass + '" type="submit">Generate identity</button>' +
+            '<button class="' + actionClass + '" type="submit">Create identity</button>' +
           '</form><div class="' + resultClass + '" data-auth-kit-create-result hidden></div>';
         var form = container.querySelector('[data-auth-kit-create-form]');
         var result = container.querySelector('[data-auth-kit-create-result]');
@@ -58,7 +58,7 @@
             result.hidden = false; result.className = resultClass + ' error'; result.textContent = 'Use 8–12 PIN digits alone, or 6–12 digits with a password.'; return;
           }
           if (!displayName) return;
-          result.hidden = false; result.className = resultClass; result.textContent = 'Generating locally — this takes a moment (real key generation, not simulated)…';
+          result.hidden = false; result.className = resultClass; result.textContent = 'Creating your identity…';
           (window.ArkAuthKitCreate ? window.ArkAuthKitCreate.create({
             displayName: displayName, wordCount: Number(data.get('wordCount')) === 12 ? 12 : 24, pin: pin, password: password,
           }) : Promise.reject(new Error('js/admin/vendor/auth-kit-create.js did not load.'))).then(function (created) {
@@ -70,9 +70,9 @@
       } else if (stage === 'recovery') {
         var words = kit.mnemonic.split(' ');
         container.innerHTML =
-          '<p class="lead">Save these ' + words.length + ' words somewhere safe — this is the ONLY way to recover this identity. They are never sent anywhere and never shown again after you continue.</p>' +
+          '<p class="lead">Write down these ' + words.length + ' words and keep them safe. You will need them to recover your identity.</p>' +
           '<ol class="auth-word-grid">' + words.map(function (w, i) { return '<li><small>' + (i + 1) + '</small><strong></strong></li>'; }).join('') + '</ol>' +
-          '<button class="' + actionClass + '" type="button" data-auth-kit-create-download>Download my Auth Kit (.flx)</button>' +
+          '<button class="' + actionClass + '" type="button" data-auth-kit-create-download>Download Auth Kit</button>' +
           '<div class="' + resultClass + '" data-auth-kit-create-download-result hidden></div>';
         var items = container.querySelectorAll('.auth-word-grid li strong');
         words.forEach(function (w, i) { items[i].textContent = w; });
@@ -83,7 +83,7 @@
           var anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
           var result = container.querySelector('[data-auth-kit-create-download-result]');
           result.hidden = false; result.className = resultClass + ' ok';
-          result.textContent = 'Saved as ' + filename + '. Choose that file to sign in with it.';
+          result.textContent = 'Auth Kit saved. Use it to sign in.';
           stage = 'done'; kit = null;
           if (opts.onDownloaded) setTimeout(function () { opts.onDownloaded(filename); }, 2200);
         });

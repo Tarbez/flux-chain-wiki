@@ -35,6 +35,12 @@ ArkManifest.define({
       "kind": "line",
       "section": "Page",
       "value": "Continue exploring"
+    },
+    "BACK.HREF": {
+      "label": "Breadcrumb: Overview link",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:about"
     }
   }
 });

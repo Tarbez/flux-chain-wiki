@@ -41,7 +41,7 @@ const PAGES = fs
 
 /* The private ones must stay unreachable by any path. They are not
  * "pages with a clean path"; they are pages the public server refuses. */
-const PRIVATE_PAGES = ['admin', 'admin-app'];
+const PRIVATE_PAGES = ['admin', 'admin-app', 'admin-studio'];
 const PUBLIC_PAGES = PAGES.filter((p) => !PRIVATE_PAGES.includes(p));
 
 let checks = 0;
@@ -86,6 +86,13 @@ check(() => {
     'the <path>.html candidate is not re-checked against PRIVATE.\n' +
       '  consequence: /admin resolves to admin.html from the static root and the private ' +
       'check is bypassed. This is a worse bug than the one being fixed.'
+  );
+});
+
+check(() => {
+  assert.ok(
+    /pathname === '\/admin' \|\| pathname === '\/admin\/'/.test(SERVER) && /ADMIN_ORIGIN/.test(SERVER),
+    'the public preview /admin path must redirect to the separate protected CMS host instead of falling through to index.html'
   );
 });
 

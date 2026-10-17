@@ -31,7 +31,7 @@ try{
  assert.equal(minerCalls,0);
  assert.equal((await (await call('/api/session')).json()).authenticated,true);
  assert.equal((await (await call('/api/cms/access')).json()).authorized,false);
- for(const path of ['/admin-app.html','/js/admin/store.js','/api/status','/api/site'])assert.equal((await call(path)).status,403,`identity session alone must not open ${path}`);
+ for(const path of ['/admin-app.html','/admin-studio.html','/js/admin/store.js','/api/status','/api/site'])assert.equal((await call(path)).status,403,`identity session alone must not open ${path}`);
  assert.equal((await login(owner)).status,200);
  assert.equal((await (await call('/api/cms/access')).json()).authorized,true);
  assert.equal((await call('/admin-app.html')).status,200,'mesh owner can edit without local Miner');

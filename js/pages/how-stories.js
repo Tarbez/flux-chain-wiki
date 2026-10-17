@@ -4,7 +4,12 @@
 ArkUI.pageModules.howStory={mount:function(host,page){
  var id=page.split('/')[1],ids=['ask','work','check'],index=ids.indexOf(id);if(index<0)throw new Error('Unknown work story');
  function words(key){return ArkCopy.text('DEPLOYMENT.CHAPTER.'+id.toUpperCase()+'.'+key);}
- function link(label,target,cls){var a=ArkUI.el('a',cls||'',label);a.href=ArkUI.route.href(ArkUI.pageCatalog[target].path);a.dataset.sceneLink=target;return a;}
+ /* These targets are the chapter's own fixed structural navigation (breadcrumb back to the
+    three-chapter journey, sequential prev/next), not an independent editorial destination,
+    so they stay tagged literals in code -- resolved the one shared way every retrofitted
+    call site is, js/ark/dash-kit.js's linkEl, rather than this page's own former direct
+    pageCatalog lookup. */
+ function link(label,target,cls){return ArkUI.dash.linkEl(label,'route:'+target,undefined,cls);}
  var el=ArkUI.el('section','ark-page how-chapter how-chapter-'+id);el.dataset.arkPage=page;
  var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← How it works','deployment'));var current=ArkUI.el('span','',String(index+1).padStart(2,'0')+' / '+['State the request','Agree on the terms','Verify the result'][index]);current.setAttribute('aria-current','page');path.appendChild(current);el.appendChild(path);
  var header=ArkUI.el('header','how-chapter-header');var title=ArkUI.el('h1','',words('TITLE'));title.id='how-'+id+'-title';el.setAttribute('aria-labelledby',title.id);header.appendChild(title);header.appendChild(ArkUI.el('p','',words('INTRO')));el.appendChild(header);
@@ -44,5 +49,6 @@ ArkUI.pageModules.howStory={mount:function(host,page){
  light(1);
 
  var footer=ArkUI.el('nav','how-chapter-footer');footer.setAttribute('aria-label','Continue this story');var records=['intent','agreement','receipt'];footer.appendChild(link('Explore the signed record','lifecycle/'+records[index],'how-deeper-link'));if(index>0)footer.appendChild(link('← Previous part','how/'+ids[index-1]));footer.appendChild(link(index<2?'Next: '+['','agree on the terms','verify the result'][index+1]+' →':'Back to the three parts →',index<2?'how/'+ids[index+1]:'deployment','how-chapter-next'));el.appendChild(footer);
+ var components=ArkUI.el('div','how-components');components.setAttribute('data-ark-insert','main');el.appendChild(components);
  el.arkDispose=function(){fabric.dispose();};host.appendChild(el);fabric.select(pattern,false);return el;
 }};

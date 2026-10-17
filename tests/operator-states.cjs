@@ -2,12 +2,21 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 class Element{
  constructor(tag='div'){this.tagName=tag;this.children=[];this.dataset={};this.attrs={};this.listeners={};this.selectors={};this.isConnected=true;this.value='';this.hidden=false;}
- appendChild(el){this.children.push(el);return el;}replaceChildren(...els){this.children=els;}setAttribute(k,v){this.attrs[k]=v;}removeAttribute(k){delete this.attrs[k];}addEventListener(k,fn){this.listeners[k]=fn;}querySelector(s){return this.selectors[s]||(this.selectors[s]=new Element());}querySelectorAll(){return [];}focus(){this.focused=true;}blur(){}get textContent(){return this._text||'';}set textContent(v){this._text=v;this.children=[];}
+ appendChild(el){this.children.push(el);return el;}replaceChildren(...els){this.children=els;}setAttribute(k,v){this.attrs[k]=v;}removeAttribute(k){delete this.attrs[k];}addEventListener(k,fn){this.listeners[k]=fn;}querySelector(s){return this.selectors[s]||(this.selectors[s]=new Element());}querySelectorAll(){return [];}focus(){this.focused=true;}blur(){}remove(){}get textContent(){return this._text||'';}set textContent(v){this._text=v;this.children=[];}
 }
 const document={createElement:t=>new Element(t),visibilityState:'visible'};
-const window={setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){}};
+const windowListeners={};
+const window={setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){},addEventListener(k,fn){windowListeners[k]=fn;},removeEventListener(){}};
 const reads=[],pending=[];let authOptions,disposed=false,summaryCounts=null;
-const context={ArkUI:{pageModules:{}},document,window,console,AbortController,Date,TypeError,ArkAdminAuth:{create(opts){authOptions=opts;return {dispose(){disposed=true;}};}},fetch:async(url,options)=>{
+// A remembered-in-this-browser identity, separate from the live admin session
+// above. account.js writes through set()/clear() and reads back through
+// current()/subscribe(), same contract as js/ark/local-identity.js's real store.
+const localIdentitySubs=new Set();let localIdentityState=null;
+const localIdentityStub={current(){return localIdentityState;},storageError(){return '';},subscribe(fn){localIdentitySubs.add(fn);fn(localIdentityState);return()=>{localIdentitySubs.delete(fn);};},set(next){localIdentityState=next;},clear(){localIdentityState=null;},refresh(){localIdentitySubs.forEach(fn=>fn(localIdentityState));}};
+let authState=null;
+const ArkUIStub={pageModules:{},localIdentity:localIdentityStub};
+window.ArkUI=ArkUIStub; // account.js reaches mesh-auth publishing through window.ArkUI, same object as the bare global
+const context={ArkUI:ArkUIStub,document,window,console,AbortController,Date,TypeError,ArkAdminAuth:{create(opts){authOptions={...opts,onChange(next){authState=next;return opts.onChange(next);}};return {dispose(){disposed=true;},current(){return authState;},signOut(){authOptions.onChange(null);}};}},fetch:async(url,options)=>{
  reads.push({url,options});let data={};
  const src=(id,category)=>({id,label:id,category,state:'available',visibility:'public',enumeration:'enumerable',capabilities:['query']});
  if(url.endsWith('/catalog'))data={sources:[{id:'agreements',label:'Agreements',state:'available',visibility:'public',enumeration:'bounded',capabilities:['query']},src('identities','identity'),src('networks','network'),{id:'accounts',label:'accounts',category:'identity',state:'available',visibility:'exact_id_only',enumeration:'exact_id_only',capabilities:['query','record_detail']}]};
@@ -24,6 +33,7 @@ const context={ArkUI:{pageModules:{}},document,window,console,AbortController,Da
  if(url.endsWith('/record'))return new Promise(resolve=>pending.push({resolve,options}));
  return {ok:true,json:async()=>({apiVersion:'explorer-api-v1',generatedAt:'2026-10-02T00:00:00Z',data})};
 }};
+vm.runInNewContext(fs.readFileSync('js/ark/dash-kit.js','utf8'),context);
 vm.runInNewContext(fs.readFileSync('js/pages/explorer.js','utf8'),context);
 vm.runInNewContext(fs.readFileSync('js/pages/account.js','utf8'),context);
 async function flush(){for(let i=0;i<20;i++)await Promise.resolve();}
@@ -67,7 +77,7 @@ async function flush(){for(let i=0;i<20;i++)await Promise.resolve();}
  assert.equal(page.dataset.recordView,'list','an unexpected ID cannot open a misleading detail');assert(q('[data-explorer-result-message]').textContent.includes('different record or source'));
  page._explorerCleanup();
  const account=context.ArkUI.pageModules.account.mount(new Element());authOptions.onChange(null);assert(account.querySelector('.account-state').hidden);assert(account.querySelector('.account-live').hidden);const count=reads.length;await account.querySelector('[data-account-mesh-check]').listeners.click();assert.equal(reads.length,count,'signed-out state cannot query an identity');
- authOptions.onChange({identityId:'fixture-identity',publicKeyB64:'fixture-public-root',displayName:'Fixture'});assert(!account.querySelector('.account-state').hidden);assert(!account.querySelector('.account-live').hidden);assert(account.querySelector('[data-account-verification]').textContent.includes('No mesh account or balance has been verified'));
- authOptions.onChange(null);assert(account.querySelector('.account-live').hidden);account.arkDispose();assert(disposed,'unmount disposes the local signer');
+ authOptions.onChange({identityId:'fixture-identity',publicKeyB64:'fixture-public-root',displayName:'Fixture'});assert(!account.querySelector('.account-state').hidden);assert(!account.querySelector('.account-live').hidden);assert.equal(account.querySelector('[data-account-verification]').textContent,'Identity verified.');
+ authOptions.onChange(null);assert(account.querySelector('.account-live').hidden);account.arkDispose();assert(!disposed,'the signer is a shared singleton that outlives one route\'s mount, so route unmount alone must not dispose it');windowListeners.pagehide();assert(disposed,'closing the tab (pagehide) disposes the local signer');
  console.log('PASS: no read before the page starts, public-first with explicit local switch, cursor-walk counts with a cap, wallets never counted, node list, bounded query, retained record identity and reverse, exact-ID rejection, abort/stale-read isolation, local identity scope, and signer disposal.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

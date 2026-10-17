@@ -4,10 +4,10 @@ LearningContent.load("a-resolver-by-construction", {
   "relevance": "Read this to understand why the finance surface is going from 'a notebook that logs transfers' to 'a chain per identity, and the chain decides.'",
   "reviewed": "2026-10-07",
   "evidenceLabel": "The design document — LEDGERENTRY, J, and the resolver's six steps",
-  "evidenceHref": "docs/finance-ledger-design.md",
-  "relatedPage": "stats/ledger",
+  "evidenceHref": "doc:docs/finance-ledger-design.md",
+  "relatedPage": "route:stats/ledger",
   "actionLabel": "Open /stats/ledger",
-  "actionPage": "stats/ledger",
+  "actionPage": "route:stats/ledger",
   "questions": [
     "What is wrong with 'prevent double-spend'?",
     "What is a chain here, really?",

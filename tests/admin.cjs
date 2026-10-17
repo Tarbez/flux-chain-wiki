@@ -44,7 +44,7 @@ const {ArkManifest,ArkAdminStore,LearningContent}=vm.runInContext('({ArkManifest
  assert.equal(adirs.articles.files.get(list[0].slug+'.js').text,fs.readFileSync('js/content/articles/'+list[0].slug+'.js','utf8'));
  assert.equal(adirs.content.files.get('article-index.js').text,fs.readFileSync('js/content/article-index.js','utf8'));
  // A new article lands in the index and loads back as itself, quotes and dashes included.
- const fresh={slug:'a-new-note',title:'A "new" note — with a dash',category:'NOTES / 004',minutes:'2 MIN READ',summary:'Short.',core:'The primary idea.',questions:['What does this establish?'],relevance:'Why this matters.',reviewed:'2026-09-30',evidenceLabel:'Evidence',evidenceHref:'docs/status.md',relatedPage:'concept',actionLabel:'Inspect the model',actionPage:'concept',sections:[['Heading','One paragraph.','Two “curly” paragraphs.']],numbers:false};
+ const fresh={slug:'a-new-note',title:'A "new" note — with a dash',category:'NOTES / 004',minutes:'2 MIN READ',summary:'Short.',core:'The primary idea.',questions:['What does this establish?'],relevance:'Why this matters.',reviewed:'2026-09-30',evidenceLabel:'Evidence',evidenceHref:'doc:docs/status.md',relatedPage:'route:concept',actionLabel:'Inspect the model',actionPage:'route:concept',sections:[['Heading','One paragraph.','Two “curly” paragraphs.']],numbers:false};
  assert.deepEqual(JSON.parse(JSON.stringify(LearningContent.problems(fresh))),[]);
  await ArkAdminStore.saveArticle(adirs,fresh,[...list,fresh]);
  assert(adirs.content.files.get('article-index.js').text.includes('"a-new-note"'));
@@ -68,7 +68,7 @@ const {ArkManifest,ArkAdminStore,LearningContent}=vm.runInContext('({ArkManifest
  assert(LearningContent.problems({...fresh,reviewed:''}).some(p=>/YYYY-MM-DD/.test(p)),'article review date is required');
  assert(editorSource.includes("box.appendChild(questionField(a, si))"),'article editor exposes each inner-layer prompt');
  assert(editorSource.includes("articleField(a, 'core', 'Primary summary'"),'article editor exposes the primary layer');
- assert(editorSource.includes("articleField(a, 'evidenceHref', 'Evidence doc path'"),'article editor exposes the evidence link');
+ assert(editorSource.includes("articleLinkField(a, 'evidenceHref', 'Evidence doc path'"),'article editor exposes the evidence link');
  // Removing deletes the body and rewrites the index without it; removing twice is refused, not silent.
  await ArkAdminStore.removeArticle(adirs,'a-new-note',list);
  assert(!adirs.articles.files.has('a-new-note.js'));assert(!adirs.content.files.get('article-index.js').text.includes('a-new-note'));

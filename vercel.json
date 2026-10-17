@@ -1,0 +1,17 @@
+{
+  "rewrites": [
+    {
+      "source": "/(?:[^/]+/)+(js|css|assets|docs|legacy)/(.*)",
+      "destination": "/$1/$2"
+    },
+    {
+      "source": "/((?!css/|js/|assets/|docs/|legacy/|api/|[^/]+\\.[a-zA-Z0-9]+$).*)",
+      "destination": "/api/render"
+    }
+  ],
+  "functions": {
+    "api/render.mjs": {
+      "includeFiles": "{index.html,js/content/manifests/index.js}"
+    }
+  }
+}

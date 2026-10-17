@@ -35,10 +35,12 @@
     return payload;
   }
 
-  function href(key) {
-    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key];
-    return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key;
-  }
+  /* This standalone data page carries no ArkManifest of its own, so there is
+     no manifest field for a 'link' kind value to live in; the destination
+     stays a tagged literal in code, resolved the one shared way every
+     retrofitted call site is -- js/ark/dash-kit.js's resolveLinkField. */
+  function href(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
+  function docHref(doc) { return ArkUI.dash.resolveLinkField('doc:' + doc, '/explore').href; }
   /* The three steps, each drawn on the shared mesh fabric the How it works cards use. */
   var STEPS = [
     ['Shape the idea', 'Write a resolver: the small set of rules that turns a question into an answer.', 'story-goal', 'Shape'],
@@ -119,7 +121,12 @@
         '<p class="mesh-explorer-result-message" data-explorer-result-message>Records appear once the node answers. No sample data is substituted.</p>' +
         '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-secondary"><summary><span>05</span> Observation details</summary><div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div></details>' +
-        '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="docs/operators/verification.md">How to verify an observation ↗</a> · <a href="docs/evidence/registry.md">Evidence registry ↗</a></p></div></details></nav>' +
+        '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="' + docHref('docs/operators/verification.md') + '" data-scene-link="reference">How to verify an observation ↗</a> · <a href="' + docHref('docs/evidence/registry.md') + '" data-scene-link="reference">Evidence registry ↗</a></p></div></details></nav>' +
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into
+           it is centralized in js/main.js's onMount hook, not called here. Baked into the
+           HTML string itself, like the rest of this page, rather than a querySelector()
+           afterward, since this page module builds entirely from one innerHTML write. */
+        '<div data-ark-insert="main"></div>' +
         '</div></div>';
       host.appendChild(page);
       if (page.querySelector('[data-explorer-connect]')) setup(page);

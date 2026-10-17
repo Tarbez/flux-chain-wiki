@@ -4,10 +4,10 @@ LearningContent.load("one-substrate-many-networks", {
   "relevance": "Use this note to distinguish the shared protocol from a network using it before relying on network isolation.",
   "reviewed": "2026-09-30",
   "evidenceLabel": "Named-network command and boundary documentation",
-  "evidenceHref": "docs/operators/networks.md",
-  "relatedPage": "concept/purpose",
+  "evidenceHref": "doc:docs/operators/networks.md",
+  "relatedPage": "route:concept/purpose",
   "actionLabel": "Inspect network evidence",
-  "actionPage": "concept/studio",
+  "actionPage": "route:concept/studio",
   "questions": [
     "What is the substrate?",
     "What does create do today?",

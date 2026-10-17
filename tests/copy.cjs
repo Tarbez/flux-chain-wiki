@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'), fs=require('node:fs'), vm=require('n
 // Copy lives in page manifests and is referred to by key. This reads the real manifests, patterns, resolvers and pages,
 // so a pattern or page that names a key nobody defines, or a manifest nobody uses, fails here rather than on screen.
 const manifests={}, rendered=[];
-const node=()=>({classList:{add(){}},dataset:{},appendChild(){},insertBefore(){},setAttribute(){},querySelector:()=>node(),textContent:''});
+const node=()=>({classList:{add(){}},dataset:{},appendChild(){},insertBefore(){},setAttribute(){},addEventListener(){},replaceChildren(){},querySelector:()=>node(),textContent:''});
 const ArkUI={pageModules:{},register:(id,m)=>{manifests[id]=m;},alias(){},base(){},atomize(){},render:(src)=>{rendered.push(src);return node();}};
 const written=[];
 const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createElementNS:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{addEventListener(){}}});
@@ -19,6 +19,9 @@ for(const file of ['js/content/learnings.js','js/content/article-index.js','js/p
 // flow builder (stubbed: it draws an illustration and names no copy keys).
 vm.runInContext(fs.readFileSync('js/content/stats-highlights.js','utf8'),context);
 ArkUI.buildChainFlow=()=>({element:node(),restore(){},dispose(){}});
+// home-flow.js's own data (stubbed here for the same reason buildChainFlow is: it names no copy keys).
+ArkUI.chainCases=[{id:'swaps',label:'Swaps'},{id:'transfers',label:'Transfers'},{id:'staking',label:'Staking'},{id:'governance',label:'Governance'}];
+vm.runInContext(fs.readFileSync('js/ark/dash-kit.js','utf8'),context);
 vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
 context.ArkUI.pageModules.zero.mount({appendChild(){}});
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);
@@ -30,7 +33,9 @@ for(const id of ids){
   assert.equal(fs.readFileSync('js/content/manifests/'+id+'.js','utf8'),ArkManifest.serialize(m),id+' file matches its canonical serialization');
 }
 // Patterns hold keys, never words, and every key resolves.
-const patterns=[F_SCENE_RZERO_V0,...rendered]; assert.equal(patterns.length,2);
+// Home's hero illustration is JS-built (ArkUI.buildChainFlow/chainCases), not a parsed
+// Flux pattern, so F_SCENE_RZERO_V0 is the only pattern `rendered` should ever pick up.
+const patterns=[F_SCENE_RZERO_V0,...rendered]; assert.equal(patterns.length,1);
 const used=new Set();
 function walk(node,where){
   const m=manifests[node.resolver]; if(!m) return;
@@ -56,7 +61,7 @@ assert.throws(()=>ArkCopy.resolve('DESIGN WITH DEPTH','RBODY_V1','eyebrow'),e=>/
 assert.throws(()=>ArkCopy.resolve('HOME.NOPE','RBODY_V1','text'),e=>/HOME\.NOPE.*no entry/.test(e.message)&&/manifests\/home\.js/.test(e.message));
 assert.throws(()=>ArkCopy.text('NOAREA.TITLE'),/no entry/);
 for(const words of ['Theory','HOME','home.title','DESIGN WITH DEPTH']) assert(!ArkCopy.isKey(words),words+' is words, not a key');
-assert.equal(ArkCopy.text('HOME.TITLE'),"What if every identity had its own chain?");
+assert.equal(ArkCopy.text('HOME.TITLE'),"Not one chain.\nA world\nof them.");
 assert.throws(()=>ArkManifest.define({id:'Bad',title:'x',route:'/',group:'page',fields:{}}),/id must be/);
 assert.throws(()=>ArkManifest.define({id:'ok',title:'x',route:'/',group:'page',fields:{lower:{label:'l',kind:'line',value:'v'}}}),/capitals/);
 // The runtime is the one place patterns swap keys for words; every resolver that shows copy declares it.

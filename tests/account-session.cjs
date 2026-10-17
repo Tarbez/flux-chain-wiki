@@ -32,7 +32,7 @@ function browser(blocked = false) {
       created++; onChange = options.onChange;
       return {current: () => signer, signOut() { locks++; signer = null; onChange(null); }, dispose() { disposed++; signer = null; onChange(null); }};
     }}, console, AbortController});
-  for (const file of ['js/ark/local-identity.js', 'js/pages/account.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+  for (const file of ['js/ark/local-identity.js', 'js/ark/dash-kit.js', 'js/pages/account.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
   return {ArkUI, window, mount: () => ArkUI.pageModules.account.mount(new Element()),
     unlock(who) { signer = who; onChange(who); }, created: () => created, disposed: () => disposed, locks: () => locks};
 }

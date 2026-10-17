@@ -441,6 +441,27 @@ paragraphs, the values table toggle; add and delete). Save writes `js/content/ar
 Reading order is the index order: a new article is appended, and reordering is a hand edit of the index.
 Experiments are not manifest-driven yet.
 
+The protected **Studio** workspace is the CMS default and opens `admin-studio.html` as a full-viewport surface,
+so its canvas, rails and inspector retain the supplied interface's original proportions. **Content CMS** returns
+to the existing manifest/article/asset/encryption editor; its **Studio** sidebar button opens the visual workspace again.
+It adds the full visual-builder shell: canvas and live modes, desktop/tablet/phone previews, layers, pages and
+sitemap, authoritative content and design inspectors, SEO and AI metadata, undo/redo, version restore, and design
+checks. When embedded by the CMS, the canvas is not a visual approximation: it loads the real `index.html` route
+renderer with the production DEFXN HTML, CSS, page modules, shared components, mesh effects, and assets. Unsaved
+manifest, article, asset, theme, mesh, and SEO drafts are injected into that renderer in memory, so the canvas shows
+the exact result before Save or Publish. Clicking real rendered copy selects its typed manifest field in Studio;
+bound text and SEO edits flow back into the same drafts used by Content CMS. **Save DEFXN** writes those drafts with
+the existing `ArkAdminStore` serializers (or downloads the same files when no project folder is connected). The
+Pages/Sitemap view includes the complete live route catalog, including code-managed, nested resolution, lifecycle,
+and article routes. In connected mode the inspector and component library deliberately expose only authoritative
+DEFXN controls; prototype-only layout/component controls are hidden so they cannot imply a change to production
+code. Standalone visual projects retain the broader builder and still autosave to
+browser-local `defxn-studio-*` keys. **Save version** creates a restorable Studio snapshot; it is intentionally
+distinct from the CMS header's **Publish**, which remains the only action that signs and publishes the DEFXN
+content bundle to the mesh. The publish host treats `admin-studio.html` exactly like `admin-app.html`: it is
+available in direct loopback development and otherwise requires an authenticated current mesh owner. It is
+also excluded from the public static deployment.
+
 ## Publishing to the mesh
 
 The whole copy of the site (every page manifest and every article) is one `.flx` archive kept in an
@@ -458,6 +479,8 @@ public bundle and keep Auth Kits, signing keys, credentials and local configurat
 Double-click **`Flux Chain Admin.command`** (or run `node scripts/publish-host.mjs --open`). It starts the local
 publish host and opens the admin page in your browser; from then on everything is done in the page. Keep the
 window it opens running while you work (closing it stops the host); double-clicking again just reopens the page.
+When the public preview server is running on port 3438, its `/admin` path redirects to the CMS host at
+`http://127.0.0.1:3437/admin`; it never serves the private editor itself.
 Editing does not require a miner or sign-in. Publishing needs a reachable publishing connection, such as Ark Miner Desktop or `npm start` in `ark-miner-cli`. The host finds it by itself (Desktop
 on 8866/5102, CLI on 8766/5002, each with its own credential file) and picks it up if it starts later; the Mesh
 panel says which miner and network it is publishing through, or that none was found. Only for a miner elsewhere:

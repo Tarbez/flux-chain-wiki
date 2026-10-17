@@ -71,6 +71,10 @@
       var nrow = el('div', 'palette-shades'); NEUTRALS.forEach(function (n) { nrow.appendChild(swatch(n, n)); });
       neu.appendChild(nrow); shell.appendChild(neu);
 
+      // Anchor for reusable content blocks (js/content/components.js); rendering into it
+      // is centralized in js/main.js's onMount hook, not called here.
+      var components = el('div', ''); components.setAttribute('data-ark-insert', 'main'); shell.appendChild(components);
+
       function paintFamily() {
         var key = document.documentElement.dataset.theme || 'ghost';
         var names = { ghost: 'Ember dark', glacier: 'Ember light', clay: 'Tide dark', grove: 'Tide light', ochre: 'Moss dark', moss: 'Moss light', marine: 'Dune dark', bone: 'Dune light', dusk: 'Dusk dark', dawn: 'Dusk light' };

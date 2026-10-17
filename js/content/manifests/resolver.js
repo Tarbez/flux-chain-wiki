@@ -123,6 +123,30 @@ ArkManifest.define({
       "section": "Links",
       "value": "Read the resolver spec"
     },
+    "SOURCE.HREF": {
+      "label": "Source link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "doc:docs/protocol/resolvers.md"
+    },
+    "HOME.HREF": {
+      "label": "Breadcrumb: Home link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:zero"
+    },
+    "INSPECT.HREF": {
+      "label": "Inspect reference evidence link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:references"
+    },
+    "STATUS.HREF": {
+      "label": "Status page link",
+      "kind": "link",
+      "section": "Links",
+      "value": "doc:docs/status.md"
+    },
     "NEXT": {
       "label": "Onward link",
       "kind": "line",

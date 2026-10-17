@@ -49,6 +49,7 @@ const ED25519_PEM_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'e
 const FLUX_ELEMENTS_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'vendor', 'flux-elements.js'), 'utf8');
 const AUTHORIZATION_VIEW_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'authorization-view.js'), 'utf8');
 const AUTHORIZATION_DIALOG_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'authorization-dialog.js'), 'utf8');
+const DASH_KIT_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'dash-kit.js'), 'utf8');
 const REAL_KIT_TEXT = fs.readFileSync('/Volumes/PortableSSD/flux/flux-launchpad/js/fixtures/real-auth-kit-v9.flx', 'utf8');
 const KIT_PIN = '13572468';
 const KIT_PASSWORD = 'launchpad-test';
@@ -94,7 +95,7 @@ function mountAccountPage() {
       storageError() { return ''; },
     },
   };
-  for (const source of [BUNDLE_SOURCE, DIRECTORY_TRANSPORT_SOURCE, ED25519_PEM_SOURCE, FLUX_ELEMENTS_SOURCE, AUTHORIZATION_VIEW_SOURCE, AUTHORIZATION_DIALOG_SOURCE, ACCOUNT_PAGE_SOURCE]) {
+  for (const source of [BUNDLE_SOURCE, DIRECTORY_TRANSPORT_SOURCE, ED25519_PEM_SOURCE, FLUX_ELEMENTS_SOURCE, AUTHORIZATION_VIEW_SOURCE, AUTHORIZATION_DIALOG_SOURCE, DASH_KIT_SOURCE, ACCOUNT_PAGE_SOURCE]) {
     const script = dom.window.document.createElement('script');
     script.textContent = source;
     dom.window.document.body.appendChild(script);

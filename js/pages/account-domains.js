@@ -8,6 +8,14 @@
   var EXPLORER_API = 'explorer-api-v1';
 
   function text(value, fallback) { return value == null || value === '' ? (fallback || '—') : String(value); }
+  /* This page carries no ArkManifest of its own, so there is no manifest
+     field for a 'link' kind value to live in; the destination stays a
+     tagged literal in code, resolved the one shared way every retrofitted
+     call site is -- js/ark/dash-kit.js's resolveLinkField. (liveUrl()
+     below builds a per-domain external address, not an editorial CTA
+     destination, so it is left as-is, same as the infra endpoints this
+     retrofit does not touch.) */
+  function href(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
   function escapeHtml(value) { return String(value).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
   function liveUrl(name) {
     var label = name.replace(/\.fxn$/i, '');
@@ -22,15 +30,20 @@
       // Same shape as /account: the ask on the left, one card on the right.
       page.innerHTML =
         '<div class="account-shell account-domains-shell">' +
-        '<header class="account-hero"><a class="account-domains-back" href="/account" data-scene-link="account">← Your account</a><p class="account-promise">Names you track</p>' +
+        '<header class="account-hero"><a class="account-domains-back" href="' + href('account') + '" data-scene-link="account">← Your account</a><p class="account-promise">Names you track</p>' +
         '<h1 id="account-domains-title">Your domains.</h1>' +
         '<p class="account-intro">Each name is checked live against the mesh. This browser only keeps the list of names to check.</p>' +
         '<form data-domains-form aria-label="Track a domain"><label for="domainsNameInput">Track an exact name</label><input id="domainsNameInput" type="text" autocomplete="off" placeholder="yourname.fxn" /><button type="submit" class="palette-solid">Track &amp; verify</button></form>' +
         '<p data-domains-add-status role="status" aria-live="polite"></p>' +
-        '<p class="account-domains-note">Claim a new name from the CMS on <a href="/account" data-scene-link="account">your account</a>.</p></header>' +
+        '<p class="account-domains-note">Claim a new name from the CMS on <a href="' + href('account') + '" data-scene-link="account">your account</a>.</p></header>' +
         '<section class="account-card account-domains-list" aria-label="Tracked domains"><p class="account-card-caption">Tracked names <span data-domains-count>(0)</span></p>' +
         '<ul data-domains-items></ul>' +
         '<p class="account-domains-empty" data-domains-empty hidden>No names tracked yet. Add one to see its owner and target.</p></section>' +
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into
+           it is centralized in js/main.js's onMount hook, not called here. Baked into the
+           HTML string itself, like the rest of this page, rather than a querySelector()
+           afterward, since this page module builds entirely from one innerHTML write. */
+        '<div data-ark-insert="main"></div>' +
         '</div>';
       host.appendChild(page);
 

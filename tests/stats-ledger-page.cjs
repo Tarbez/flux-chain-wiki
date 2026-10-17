@@ -8,7 +8,7 @@ function node(tag) {
 }
 const context = vm.createContext({ window: {}, document: { createElement: node }, ArkUI: { pageModules: {}, pageCatalog: {} } });
 context.window = context;
-for (const file of ['js/content/chain-sample.js', 'js/pages/stats-ledger.js']) {
+for (const file of ['js/ark/dash-kit.js', 'js/content/chain-sample.js', 'js/pages/stats-ledger.js']) {
   vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 }
 const page = context.ArkUI.pageModules.statsLedger.mount(node('main'));

@@ -4,10 +4,10 @@ LearningContent.load("how-we-got-fast-and-what-we-got-wrong", {
   "relevance": "Read this before quoting any DEFXN speed. It says which number describes which protocol, how each was measured, and which earlier explanations turned out to be wrong.",
   "reviewed": "2026-10-07",
   "evidenceLabel": "BENCH-003: the full investigation log, sections 1 to 15",
-  "evidenceHref": "docs/evidence/bench-003-rust-fleet-ceiling.md",
-  "relatedPage": "stats",
+  "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
+  "relatedPage": "route:stats",
   "actionLabel": "Watch the fleet right now",
-  "actionPage": "stats",
+  "actionPage": "route:stats",
   "questions": [
     "Where did it start?",
     "What did Rust change?",

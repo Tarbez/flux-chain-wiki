@@ -61,12 +61,16 @@ var ArkUI = (function () {
     }
 
     /* props the resolver declares as copy hold a key; swap in the words */
-    var copy = m.copy || [];
+    var copy = m.copy || [], copyKeys = [];
     for (var cp = 0; cp < copy.length; cp++) {
-      if (p[copy[cp]] !== undefined) p[copy[cp]] = ArkCopy.resolve(p[copy[cp]], node.resolver, copy[cp]);
+      if (p[copy[cp]] !== undefined) {
+        if (ArkCopy.isKey && ArkCopy.isKey(p[copy[cp]])) copyKeys.push(p[copy[cp]]);
+        p[copy[cp]] = ArkCopy.resolve(p[copy[cp]], node.resolver, copy[cp]);
+      }
     }
 
     var el = document.createElement(m.tag || 'div');
+    if (copyKeys.length) el.setAttribute('data-ark-copy-keys', copyKeys.join(' '));
 
     var classes = [];
     if (m.base) classes.push(ArkAtomizer.atomize(m.base));
@@ -140,6 +144,13 @@ var ArkUI = (function () {
     register: register,
     alias: alias,
     render: render,
+    /* Exposed for js/content/components.js: a reusable-block instance is a plain
+       {resolver, props, children} node built fresh from its current master on every
+       render, never through lossy Flux source text (ArkFlux.parse's '-KEY-value' lines
+       convert underscores to spaces and cannot carry arbitrary admin-authored copy
+       byte-for-byte). `build` is the same mechanical resolver-tree walker every other
+       resolver already goes through -- reusing it, not a second builder. */
+    build: build,
     base: ArkAtomizer.base,
     atomize: ArkAtomizer.atomize,
     /* a DOM node with text set as text, so copy from a manifest can never be read as markup */

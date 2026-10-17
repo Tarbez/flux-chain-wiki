@@ -55,7 +55,7 @@
     { state: 'todo', badge: 'Not yet', title: 'Pipelined broadcast to replicas', text: 'A signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the fleet near 2.2 batches/s and is the binding constraint on everything. The intended shape is one feed per pool. Historical: Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
     { state: 'todo', badge: 'Not yet', title: 'Public client traffic', text: 'Every client so far was operator-driven.' },
     { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain + certified-segment path.' },
-    { state: 'partial', badge: 'Partial', title: 'DAO treasury multisig', text: 'Real N-of-M quorum-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wire protocol and verified end to end against a real standalone chain-server (devnet dry run, 17/17 steps). Durable: 1174-1357 claims/s local 2-replica, 17 claims/s against two real fleet nodes over real WAN (quorum 2-of-2, bottlenecked on the farther node’s real network distance). Accepted finality: up to ~3017 claims/s local, ~1003 claims/s real WAN. 428 crate tests passing. Still not on production: no sovereign chain or DAO has launched there, and only 2 of 6 fleet nodes have been measured.' }
+    { state: 'partial', badge: 'Partial', title: 'DAO treasury multisig', text: 'Real N-of-M threshold-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wire protocol and verified end to end against a real standalone chain-server (devnet dry run, 17/17 steps). Durable: 1174-1357 claims/s local 2-replica, 17 claims/s against two real fleet nodes over real WAN (2-of-2 signer threshold, bottlenecked on the farther node’s real network distance). Accepted, not yet durable: up to ~3017 claims/s local, ~1003 claims/s real WAN. 428 crate tests passing. Still not on production: no sovereign chain or DAO has launched there, and only 2 of 6 fleet nodes have been measured.' }
   ];
 
   ArkUI.pageModules.stats = {
@@ -186,16 +186,16 @@
       // ---- fleet capacity · dense-wire chain-server mesh (added 2026-10-11) ---------------------
       // Not one node's segment state (the "Chain" section above) and not a
       // chain record — which of the 14 chain-server nodes answer right now,
-      // probed directly by IP. 10 committee (quorum-bearing, 6-of-10 needed
-      // to finalize a segment) + 4 peers (bootstrap-only, never sign or
+      // probed directly by IP. 10 signer nodes (6-of-10 needed
+      // to certify a segment) + 4 peers (bootstrap-only, never sign or
       // propose — owner call 2026-10-11). See ops/chain-fleet-capacity-api.mjs.
-      shell.appendChild(sectionHead('Fleet capacity · chain-server mesh', 'Every dense-wire chain-server node, probed directly. Committee nodes can sign and propose segments; peer nodes bootstrap and serve but never sign — a real, live reachability check, not a roster that assumes everything it lists is up.'));
+      shell.appendChild(sectionHead('Fleet capacity · chain-server mesh', 'Every dense-wire chain-server node, probed directly. Signer nodes can sign and propose segments; peer nodes bootstrap and serve but never sign — a real, live reachability check, not a roster that assumes everything it lists is up.'));
       var capacityGrid = el('div', 'dash-grid');
-      var capCommitteeUp = stat('dash-span-3 is-lead', 'Committee up', '–', 'of 10', 'waiting for fleet capacity');
-      var capQuorum = stat('dash-span-3', 'Quorum', '–', 'needed: 6', 'waiting for fleet capacity');
+      var capSignersUp = stat('dash-span-3 is-lead', 'Signers up', '–', 'of 10', 'waiting for fleet capacity');
+      var capSignerFloor = stat('dash-span-3', 'Signer floor', '–', 'needed: 6', 'waiting for fleet capacity');
       var capPeersUp = stat('dash-span-3', 'Peers up', '–', 'of 4', 'waiting for fleet capacity');
       var capGenerated = stat('dash-span-3', 'Last probe', '–', '', 'waiting for fleet capacity');
-      [capCommitteeUp, capQuorum, capPeersUp, capGenerated].forEach(function (k) { capacityGrid.appendChild(k.tile); });
+      [capSignersUp, capSignerFloor, capPeersUp, capGenerated].forEach(function (k) { capacityGrid.appendChild(k.tile); });
       shell.appendChild(capacityGrid);
       var capacityPanel = panel('dash-span-12', null, null);
       var capacityWrap = el('div', 'dash-table-wrap');
@@ -433,7 +433,7 @@
         }
         cpPanel.appendChild(el('p', 'dash-note', CP.verdict));
         if (CP.previousBuild) cpPanel.appendChild(el('p', 'dash-note', 'Previous build: ' + CP.previousBuild.note));
-        cpPanel.appendChild(el('p', 'dash-note', 'Metric: ' + CP.metric + '. Mode: ' + CP.mode + '. ' + CP.quorum + '. Machine: ' + CP.machine + '. ' + CP.caveats));
+        cpPanel.appendChild(el('p', 'dash-note', 'Metric: ' + CP.metric + '. Mode: ' + CP.mode + '. ' + CP.replicationNote + '. Machine: ' + CP.machine + '. ' + CP.caveats));
         shell.appendChild(cpPanel);
       }
 
@@ -522,10 +522,10 @@
         ['Platform resolver audit', '6 non-chain systems', '3 measured, 3 absent by design', 'audit', '\u2014', INFRA.record || 'INFRA-001', 'docs/evidence/infra-001-platform-resolver-audit.md'],
         ['DAO treasury claim (durable)', 'local, 2 real replicas', '1174-1357 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
         ['DAO treasury claim (accepted)', 'local, replication off critical path', '2882-3017 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
-        ['DAO treasury claim (durable, real WAN)', '2 real fleet nodes, quorum 2-of-2', '17 claims/s', '2 runs', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
+        ['DAO treasury claim (durable, real WAN)', '2 real fleet nodes, 2-of-2 signer threshold', '17 claims/s', '2 runs', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
         ['DAO treasury claim (accepted, real WAN)', '2 real fleet nodes, replication off critical path', '~1003 claims/s', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-treasury-claim-bench-real-fleet-wan.md'],
         ['DAO/treasury devnet dry run', 'full wire sequence, real standalone chain-server', '17/17 steps passed', '1 run', '0', 'BENCH-014', 'docs/evidence/2026-10-12-devnet-dao-treasury-dry-run.md'],
-        ['Client-path swaps (unbacked)', 'one node, 1-1,000 connections, chain-position build, pre-signed, loopback, quorum 0', '4,400 swaps/s at 1 connection, ~31,000 at 1,000', '5 timed reps per point; 3 runs at 256 and 1,000', '0', 'BENCH-015', 'docs/evidence/bench-015-client-path-swaps-by-connections.md']
+        ['Client-path swaps (unbacked)', 'one node, 1-1,000 connections, chain-position build, pre-signed, loopback, store replica requirement 0', '4,400 swaps/s at 1 connection, ~31,000 at 1,000', '5 timed reps per point; 3 runs at 256 and 1,000', '0', 'BENCH-015', 'docs/evidence/bench-015-client-path-swaps-by-connections.md']
       ].forEach(function (r) {
         var tr = el('tr');
         r.slice(0, 5).forEach(function (c, i) { tr.appendChild(el('td', i === 2 ? 'is-num' : null, c)); });
@@ -725,8 +725,8 @@
       var capacityPollTimer = 0, capacityDisposed = false, capacityInFlight = false;
       function paintCapacity(data) {
         if (!data || !Array.isArray(data.nodes)) {
-          setStat(capCommitteeUp, '–', 'of 10', 'no live value; nothing substituted');
-          setStat(capQuorum, '–', 'needed: 6', 'no live value; nothing substituted');
+          setStat(capSignersUp, '–', 'of 10', 'no live value; nothing substituted');
+          setStat(capSignerFloor, '–', 'needed: 6', 'no live value; nothing substituted');
           setStat(capPeersUp, '–', 'of 4', 'no live value; nothing substituted');
           setStat(capGenerated, '–', '', data && data.lastError ? data.lastError : 'unreachable');
           capacityWrap.textContent = '';
@@ -734,10 +734,13 @@
           capacityEmpty.textContent = 'The fleet capacity probe is unreachable — no live value substituted.';
           return;
         }
+        // The live fleet-capacity wire fields below (ops/chain-fleet-capacity-api.mjs,
+        // deployed on flx-bk2/flx-mk2) still carry their original names;
+        // renaming them needs a coordinated server redeploy, out of scope here.
         var s = data.summary || {};
-        capCommitteeUp.tile.dataset.state = s.committeeHasQuorum ? 'ok' : 'down';
-        setStat(capCommitteeUp, fmt(s.committeeUp), 'of ' + fmt(s.committeeTotal), 'quorum-bearing nodes, probed directly by IP right now');
-        setStat(capQuorum, s.committeeHasQuorum ? 'yes' : 'no', 'needed: ' + fmt(s.committeeQuorum), s.committeeHasQuorum ? 'enough committee nodes up to finalize a segment' : 'below the 6-of-10 finality floor right now');
+        capSignersUp.tile.dataset.state = s.committeeHasQuorum ? 'ok' : 'down'; // ALLOW-DEPRECATED-TERM: live wire field
+        setStat(capSignersUp, fmt(s.committeeUp), 'of ' + fmt(s.committeeTotal), 'signer-eligible nodes, probed directly by IP right now'); // ALLOW-DEPRECATED-TERM: live wire field
+        setStat(capSignerFloor, s.committeeHasQuorum ? 'yes' : 'no', 'needed: ' + fmt(s.committeeQuorum), s.committeeHasQuorum ? 'enough signer nodes up to certify a segment' : 'below the 6-of-10 certification floor right now'); // ALLOW-DEPRECATED-TERM: live wire field
         capPeersUp.tile.dataset.state = s.peersUp === s.peersTotal ? 'ok' : 'down';
         setStat(capPeersUp, fmt(s.peersUp), 'of ' + fmt(s.peersTotal), 'bootstrap-only — never sign or propose');
         setStat(capGenerated, data.generatedAt ? ago(Date.now() - new Date(data.generatedAt).getTime()) : '–', '', data.generatedAt || '');
@@ -924,6 +927,9 @@
         clearTimeout(pollTimer); clearInterval(clockTimer); clearTimeout(chainPollTimer); clearTimeout(capacityPollTimer);
         document.removeEventListener('visibilitychange', onVisibility);
       };
+      // Anchor for reusable content blocks (js/content/components.js); rendering into it
+      // is centralized in js/main.js's onMount hook, not called here.
+      var components = el('div', 'stats-components'); components.setAttribute('data-ark-insert', 'main'); page.appendChild(components);
       host.appendChild(page);
       return page;
     }

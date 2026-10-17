@@ -40,10 +40,10 @@ function read(root, relative) { return fs.readFileSync(path.join(root, relative)
 /* The project's own content code, run in a sandbox with nothing but what it needs. */
 function loadContentCode(root) {
   const context = vm.createContext({ console, document: { write() {} } });
-  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js', 'js/tokens.js', 'js/ark/vendor/backgrounds.js', 'js/content/theme.js', 'js/content/mesh-settings.js', 'js/content/seo.js', 'js/admin/store.js']) {
+  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js', 'js/tokens.js', 'js/ark/vendor/backgrounds.js', 'js/content/theme.js', 'js/content/layout.js', 'js/content/mesh-settings.js', 'js/content/seo.js', 'js/admin/store.js']) {
     vm.runInContext(read(root, file), context, { filename: file });
   }
-  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkMeshSettings, ArkSEO, ArkAdminStore })', context);
+  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkLayout, ArkMeshSettings, ArkSEO, ArkAdminStore })', context);
 }
 
 /* the ids the manifest index lists, in display order */
@@ -111,6 +111,13 @@ function readTheme(root) {
   return JSON.parse(JSON.stringify(vm.runInContext('ArkTheme.get()', context)));
 }
 
+function readLayout(root) {
+  const context = vm.createContext({});
+  vm.runInContext(read(root, 'js/content/layout.js'), context, { filename: 'layout.js' });
+  vm.runInContext(read(root, 'js/content/layout-data.js'), context, { filename: 'layout-data.js' });
+  return JSON.parse(JSON.stringify(vm.runInContext('ArkLayout.get()', context)));
+}
+
 /* the SEO title/description overrides + base URL: a single object, not a list.
    Needs the real manifest ids and article slugs loaded first (ArkSEO.sanitize()
    keys its per-page/per-article maps off them), so this runs after both, unlike
@@ -134,6 +141,7 @@ export function readProject(root = defaultProjectRoot) {
   const secrets = JSON.parse(JSON.stringify(loadIndexedSecrets(root, secretIds(root))));
   const meshSettings = readMeshSettings(root);
   const theme = readTheme(root);
+  const layout = readLayout(root);
 
   const articleContext = vm.createContext({});
   vm.runInContext(read(root, 'js/content/learnings.js'), articleContext);
@@ -142,12 +150,12 @@ export function readProject(root = defaultProjectRoot) {
   for (const slug of slugs) vm.runInContext(read(root, `js/content/articles/${slug}.js`), articleContext, { filename: `articles/${slug}.js` });
   const articles = JSON.parse(JSON.stringify(vm.runInContext('LearningContent.articles', articleContext)));
   const seo = readSeo(root, ids);
-  return { manifests, articles, assets, secrets, meshSettings, theme, seo };
+  return { manifests, articles, assets, secrets, meshSettings, theme, layout, seo };
 }
 
 /* every reason a site is not publishable, from the project's own validators */
 export function siteProblems(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkMeshSettings, ArkSEO } = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkLayout, ArkMeshSettings, ArkSEO } = loadContentCode(root);
   const out = [];
   if (!site || !Array.isArray(site.manifests) || !Array.isArray(site.articles) || !Array.isArray(site.assets)) return ['a site has manifests, articles and assets'];
   const seen = new Set();
@@ -185,6 +193,7 @@ export function siteProblems(site, root = defaultProjectRoot) {
   if (site.meshSettings != null) for (const bad of ArkMeshSettings.problems(site.meshSettings)) out.push(`mesh settings: ${bad}`);
   // Older sites predate a theme override: absent means "use tokens.js's defaults", not a problem.
   if (site.theme != null) for (const bad of ArkTheme.problems(site.theme)) out.push(`theme: ${bad}`);
+  if (site.layout != null && (!site.layout || typeof site.layout !== 'object' || Array.isArray(site.layout))) out.push('layout: invalid responsive override data');
   // Older sites predate SEO overrides: absent means "derive every title/description", not a problem.
   if (site.seo != null) for (const bad of ArkSEO.problems(site.seo)) out.push(`seo: ${bad}`);
   return out;
@@ -200,13 +209,14 @@ export function encodeSite(site, root = defaultProjectRoot) {
     generatedBy: 'flux-chain/scripts/lib/site-bundle.mjs',
     sourceFormat: SITE_SCHEMA,
     routes: [
-      { routeId: 'site', path: '/', title: 'Flux Protocol', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null, theme: site.theme != null, seo: site.seo != null } },
+      { routeId: 'site', path: '/', title: 'Flux Protocol', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null, theme: site.theme != null, layout: site.layout != null, seo: site.seo != null } },
       ...site.manifests.map((m) => ({ routeId: `manifest.${m.id}`, path: `/manifest/${m.id}`, title: m.title, payload: m })),
       ...site.articles.map((a) => ({ routeId: `article.${a.slug}`, path: `/article/${a.slug}`, title: a.title, payload: a })),
       ...site.assets.map((a) => ({ routeId: `asset.${a.id}`, path: `/asset/${a.id}`, title: a.label, payload: a })),
       ...(site.secrets || []).map((s) => ({ routeId: `secret.${s.id}`, path: `/secret/${s.id}`, title: s.label, payload: s })),
       ...(site.meshSettings != null ? [{ routeId: 'meshSettings', path: '/mesh-settings', title: 'Mesh tuning', payload: site.meshSettings }] : []),
       ...(site.theme != null ? [{ routeId: 'theme', path: '/theme', title: 'Colour theme', payload: site.theme }] : []),
+      ...(site.layout != null ? [{ routeId: 'layout', path: '/layout', title: 'Responsive layout', payload: site.layout }] : []),
       ...(site.seo != null ? [{ routeId: 'seo', path: '/seo', title: 'SEO', payload: site.seo }] : []),
     ],
   });
@@ -233,6 +243,8 @@ export function decodeSite(bytes) {
     meshSettings: entry.payload.meshSettings ? need('meshSettings') : null,
     // Older archives predate a theme override: absent means "use tokens.js's defaults".
     theme: entry.payload.theme ? need('theme') : null,
+    // Older archives predate visual layout overrides.
+    layout: entry.payload.layout ? need('layout') : null,
     // Older archives predate SEO overrides: absent means "derive every title/description".
     seo: entry.payload.seo ? need('seo') : null,
   };
@@ -240,7 +252,7 @@ export function decodeSite(bytes) {
 
 /* The exact set of files a site occupies in the project, as {relativePath: text}. */
 export function projectFiles(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkMeshSettings, ArkSEO, ArkAdminStore } = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkLayout, ArkMeshSettings, ArkSEO, ArkAdminStore } = loadContentCode(root);
   const files = {};
   for (const manifest of site.manifests) files[`js/content/manifests/${manifest.id}.js`] = ArkManifest.serialize(manifest);
   files['js/content/manifests/index.js'] = ArkAdminStore.indexText(site.manifests.map((m) => m.id));
@@ -255,6 +267,7 @@ export function projectFiles(site, root = defaultProjectRoot) {
   files['js/content/mesh-settings-data.js'] = ArkMeshSettings.serialize(site.meshSettings || {});
   // A single file, not a per-id directory: there is only ever one theme.
   files['js/content/theme-data.js'] = ArkTheme.serialize(site.theme || {});
+  files['js/content/layout-data.js'] = ArkLayout.serialize(site.layout || {});
   // A single file, not a per-id directory: there is only ever one SEO settings object.
   // The registries loadContentCode() gives ArkSEO are never populated with this site's
   // actual manifests/articles, so pageIds()/articleSlugs() need them passed explicitly.
@@ -264,7 +277,13 @@ export function projectFiles(site, root = defaultProjectRoot) {
   // but robots.txt still ships (a bare "Allow: /" is harmless without one).
   const sitemap = ArkSEO.sitemap(seo, site.manifests, site.articles);
   if (sitemap) files['sitemap.xml'] = sitemap;
-  files['robots.txt'] = ArkSEO.robots(seo);
+  files['robots.txt'] = ArkSEO.robots(seo, site.manifests, site.articles);
+  // llms.txt needs manifests/articles too (it is not just a single-object serialization,
+  // same reason robots.txt above now takes them): both are per-page-aware, listing or
+  // disallowing individual routes by their own noindex/aiBlocked override. null means
+  // "turned off or no baseUrl yet" -- same never-a-guessed-host rule as sitemap.xml.
+  const llms = ArkSEO.llmsTxt(seo, site.manifests, site.articles);
+  if (llms) files['llms.txt'] = llms;
   return files;
 }
 

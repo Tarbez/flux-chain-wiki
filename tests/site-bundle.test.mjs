@@ -41,9 +41,12 @@ assert.deepEqual(Object.keys(projectFiles(site)).sort(), [
   ...site.assets.map(a=>`js/content/assets/${a.id}.js`),
   ...(site.secrets || []).map(s=>`js/content/secrets/${s.id}.js`),
   'js/content/manifests/index.js','js/content/article-index.js','js/content/assets/index.js',
-  'js/content/secrets/index.js','js/content/mesh-settings-data.js','js/content/theme-data.js',
+  'js/content/secrets/index.js','js/content/mesh-settings-data.js','js/content/theme-data.js','js/content/layout-data.js',
   'js/content/seo-data.js','robots.txt',
-  ...(site.seo?.site?.baseUrl ? ['sitemap.xml'] : [])
+  ...(site.seo?.site?.baseUrl ? ['sitemap.xml'] : []),
+  // llms.txt ships whenever it has something to say: real content once a baseUrl
+  // exists, or an explicit "turned off" note when site.llms===0 (ArkSEO.llmsTxt).
+  ...(site.seo?.site?.baseUrl || site.seo?.site?.llms === 0 ? ['llms.txt'] : [])
 ].sort(), 'bundle includes content, indexes, configuration and configured public metadata');
 
 // An asset round-trips through the archive and through the address the same way a manifest does.

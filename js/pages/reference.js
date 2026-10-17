@@ -66,6 +66,7 @@
     el.appendChild(ArkUI.el('h1','',title));
     el.appendChild(ArkUI.el('p','reference-provenance','This source provides the detailed contract. Opening it does not establish a live observation or verification result.'));
     el.appendChild(render(documents.get(current.doc),current));if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(el);
+    var components=ArkUI.el('div','');components.setAttribute('data-ark-insert','main');el.appendChild(components);
   }
   ArkUI.pageModules.reference = {
     prepare: async function (_page,settings) {

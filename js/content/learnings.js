@@ -34,9 +34,12 @@ var LearningContent = (function () {
         if (typeof a[key] !== 'string' || !a[key].trim()) out.push(key + ' is required for an article body');
       });
       if (typeof a.reviewed !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(a.reviewed) || Number.isNaN(Date.parse(a.reviewed))) out.push('reviewed needs a valid YYYY-MM-DD date');
-      if (a.evidenceHref && !/^docs\/[a-z0-9/_-]+\.md(?:#[a-z0-9_-]+)?$/.test(a.evidenceHref)) out.push('evidenceHref must be a local documentation link');
+      /* evidenceHref/relatedPage/actionPage are link data (js/ark/dash-kit.js's
+         resolveLinkField reads them), tagged the same way an ArkManifest
+         'link' field is: doc:<path> / route:<key>. */
+      if (a.evidenceHref && !/^doc:docs\/[a-z0-9/_-]+\.md(?:#[a-z0-9_-]+)?$/.test(a.evidenceHref)) out.push('evidenceHref must be doc:<a local documentation link>');
       ['relatedPage', 'actionPage'].forEach(function (key) {
-        if (a[key] && !/^[a-z][a-z0-9/-]*$/.test(a[key])) out.push(key + ' must name a page key');
+        if (a[key] && !/^route:[a-z][a-z0-9/-]*$/.test(a[key])) out.push(key + ' must be route:<a page key>');
       });
       if (!Array.isArray(a.sections) || !a.sections.length) out.push('an article needs at least one section');
       else a.sections.forEach(function (section, i) {

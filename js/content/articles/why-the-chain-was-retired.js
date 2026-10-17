@@ -4,10 +4,10 @@ LearningContent.load("why-the-chain-was-retired", {
   "relevance": "Use this note to see how the architecture got here, what each change kept, and which measurements back the current design.",
   "reviewed": "2026-10-08",
   "evidenceLabel": "BENCH-003: the measured fleet ceiling",
-  "evidenceHref": "docs/evidence/bench-003-rust-fleet-ceiling.md",
-  "relatedPage": "concept/depth",
+  "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
+  "relatedPage": "route:concept/depth",
   "actionLabel": "See every measurement",
-  "actionPage": "stats",
+  "actionPage": "route:stats",
   "questions": [
     "Was there a real chain?",
     "What did the agreement fabric change?",

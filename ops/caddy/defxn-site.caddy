@@ -98,7 +98,7 @@ defxn.com, www.defxn.com {
 	# block below now resolves an extension-less path to <path>.html. Without
 	# it, /admin-app would resolve to admin-app.html out of this node's static
 	# root and bypass the admin host entirely.
-	@adminProxy path /admin /admin.html /admin-app /admin-app.html /api/* /js/admin/*
+	@adminProxy path /admin /admin.html /admin-app /admin-app.html /admin-studio /admin-studio.html /api/* /js/admin/*
 	handle @adminProxy {
 		reverse_proxy 127.0.0.1:3437 {
 			header_up Host defxn.com

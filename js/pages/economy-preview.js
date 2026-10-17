@@ -13,11 +13,12 @@
     if (text != null) item.textContent = text;
     return item;
   }
+  /* This page carries no ArkManifest of its own, so there is no manifest
+     field for a 'link' kind value to live in; the destination stays a
+     tagged literal in code, resolved the one shared way every retrofitted
+     call site is -- js/ark/dash-kit.js's linkEl. */
   function link(page, label) {
-    var item = node('a', 'economy-next-link', label + ' ↗');
-    item.href = '#' + ArkUI.pageCatalog[page].path;
-    item.dataset.sceneLink = page;
-    return item;
+    return ArkUI.dash.linkEl(label + ' ↗', 'route:' + page, undefined, 'economy-next-link');
   }
   function buildBase(page, title, deck) {
     var root = node('section', 'ark-page task-page economy-preview-page ' + page + '-preview-page');
@@ -78,6 +79,11 @@
     shell.appendChild(detail);
     var aside = node('nav', 'economy-page-next'); aside.setAttribute('aria-label', 'Continue');
     aside.appendChild(link('deposits', 'Preview a deposit')); shell.appendChild(aside);
+    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+       is centralized in js/main.js's onMount hook, not called here. */
+    var components = node('div', 'economy-components');
+    components.setAttribute('data-ark-insert', 'main');
+    shell.appendChild(components);
     function selectAsset(selected) {
       var showFxn = selected === 'fxn';
       fxn.hidden = !showFxn; credits.hidden = showFxn;
@@ -139,6 +145,11 @@
     shell.appendChild(result);
     var aside = node('nav', 'economy-page-next'); aside.setAttribute('aria-label', 'Continue');
     aside.appendChild(link('treasury', 'Return to treasury preview')); shell.appendChild(aside);
+    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+       is centralized in js/main.js's onMount hook, not called here. */
+    var components = node('div', 'economy-components');
+    components.setAttribute('data-ark-insert', 'main');
+    shell.appendChild(components);
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       var value = Number(amount.value);

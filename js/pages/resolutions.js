@@ -12,13 +12,22 @@
 
   ArkUI.pageModules.resolutions = {
     mount: function (host, pageKey) {
+      var manifest = ArkManifest.get('resolutions');
       function words(role) { return ArkCopy.text('RESOLUTIONS.' + role); }
       function el(tag, className, text) { return ArkUI.el(tag, className || '', text); }
-      function routeLink(label, target, className) {
-        var link = el('a', className, label);
-        link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
-        link.dataset.sceneLink = target;
-        return link;
+      /* `key` is a real pageCatalog/route key (`resolutions/<slug>`, `item.start`,
+         `product.page`...), already produced by ArkResolutions/ArkResolutionProducts'
+         own structural correspondence (an item's own detail page, a product's page) --
+         not independently hardcoded here, so it is resolved, not stored as a separate
+         manifest field. `fieldLink` is for the handful of call sites that ARE a literal,
+         editorial destination hardcoded in this page module: those get a real manifest
+         field of kind 'link' (js/content/manifest.js) instead. Both go through the one
+         shared resolver, js/ark/dash-kit.js's linkEl. */
+      function routeLink(label, key, className) {
+        return ArkUI.dash.linkEl(label, 'route:' + key, manifest.route, className);
+      }
+      function fieldLink(label, hrefRole, className) {
+        return ArkUI.dash.linkEl(label, words(hrefRole), manifest.route, className);
       }
       function short(item) { return ArkResolutions.shortName(item.title); }
 
@@ -26,12 +35,12 @@
         var path = el('nav', 'content-layer-path resolutions-path');
         path.setAttribute('aria-label', 'Your place');
         if (item) {
-          path.appendChild(routeLink('← All resolutions', 'resolutions'));
+          path.appendChild(fieldLink('← All resolutions', 'INDEX.HREF'));
           var current = el('span', '', short(item));
           current.setAttribute('aria-current', 'page');
           path.appendChild(current);
         } else {
-          path.appendChild(routeLink('← Home', 'zero'));
+          path.appendChild(fieldLink('← Home', 'BACK.HOME.HREF'));
           var here = el('span', '', 'Resolutions');
           here.setAttribute('aria-current', 'page');
           path.appendChild(here);
@@ -140,8 +149,7 @@
 
         var note = el('aside', 'resolutions-note');
         note.appendChild(el('p', '', words('NOTE')));
-        var status = el('a', 'resolutions-note-link', words('NOTE.LINK') + ' ↗');
-        status.href = 'docs/status.md';
+        var status = fieldLink(words('NOTE.LINK') + ' ↗', 'NOTE.LINK.HREF', 'resolutions-note-link');
         note.appendChild(status);
         page.appendChild(note);
         return page;
@@ -182,7 +190,7 @@
         }
         var actions = el('div', 'resolution-detail-actions');
         if (item.start && ArkUI.pageCatalog[item.start]) actions.appendChild(routeLink(words('START') + ' →', item.start, 'resolution-primary-action'));
-        else actions.appendChild(routeLink('How resolvers work →', 'resolver', 'resolution-primary-action'));
+        else actions.appendChild(fieldLink('How resolvers work →', 'START.FALLBACK.HREF', 'resolution-primary-action'));
         intro.appendChild(actions);
         workspace.appendChild(intro);
 
@@ -327,8 +335,7 @@
         legend.appendChild(el('span', 'resolution-legend-ready', 'Ready: usable today'));
         legend.appendChild(el('span', 'resolution-legend-building', 'Building: in source, not released'));
         legend.appendChild(el('span', 'resolution-legend-idea', 'Ideas: proposed, not built'));
-        var statusLink = el('a', 'resolution-boundary-link', words('NOTE.LINK') + ' ↗');
-        statusLink.href = 'docs/status.md';
+        var statusLink = fieldLink(words('NOTE.LINK') + ' ↗', 'NOTE.LINK.HREF', 'resolution-boundary-link');
         legend.appendChild(statusLink);
         panel.appendChild(legend);
         workspace.appendChild(panel);
@@ -342,7 +349,7 @@
         var nextLink = routeLink(short(next) + ' →', 'resolutions/' + next.slug, 'resolution-next-link resolution-next-forward');
         nextLink.appendChild(el('span', '', 'Next'));
         footer.appendChild(previousLink);
-        footer.appendChild(routeLink('All 20', 'resolutions', 'resolution-next-all'));
+        footer.appendChild(fieldLink('All 20', 'INDEX.HREF', 'resolution-next-all'));
         footer.appendChild(nextLink);
         page.appendChild(footer);
         return page;
@@ -351,6 +358,11 @@
       var slug = String(pageKey || '').indexOf('resolutions/') === 0 ? String(pageKey).slice('resolutions/'.length) : '';
       var item = slug ? ArkResolutions.find(slug) : null;
       var page = item ? mountDetail(item) : mountIndex();
+      // Anchor for reusable content blocks (js/content/components.js); rendering into it
+      // is centralized in js/main.js's onMount hook, not called here. Added once here,
+      // after either mountIndex() or mountDetail() builds `page`, instead of duplicating
+      // the same three lines in both.
+      var components = el('div', 'resolutions-components'); components.setAttribute('data-ark-insert', 'main'); page.appendChild(components);
       host.appendChild(page);
       return page;
     }

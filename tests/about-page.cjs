@@ -21,6 +21,7 @@ class Element {
   addEventListener(k, fn) { this.listeners[k] = fn; }
   set textContent(v) { this._text = String(v); this.children = []; }
   get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
+  get childNodes() { return this.children; }
   all() { return [this, ...this.children.flatMap((c) => c.all())]; }
   byClass(name) { return this.all().filter((e) => String(e.className).split(' ').includes(name)); }
 }
@@ -31,12 +32,19 @@ for (const file of ['js/content/manifest.js', 'js/content/manifests/nav.js', 'js
   vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 vm.runInContext(`var ArkUI = { pageModules: {}, pageCatalog: {}, route: { href: function (p) { return '#' + p; } },
   el: function (tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; } };`, context);
-for (const route of ['zero', 'resolutions', 'deployment', 'resolver', 'concept', 'explorer', 'download']) vm.runInContext(`ArkUI.pageCatalog['${route}'] = { path: '/${route}' };`, context);
+for (const route of ['zero', 'resolutions', 'deployment', 'resolver', 'concept', 'explorer', 'download', 'reference']) vm.runInContext(`ArkUI.pageCatalog['${route}'] = { path: '/${route}' };`, context);
+// about.js resolves its 'link'-kind fields through js/ark/dash-kit.js's resolveLinkField/linkEl.
+vm.runInContext(fs.readFileSync('js/ark/dash-kit.js', 'utf8'), context);
 vm.runInContext(fs.readFileSync('js/pages/about.js', 'utf8'), context);
 
 const page = context.ArkUI.pageModules.about.mount(new Element('main'));
+// Law 18 ("one scroll, then it ends") collapsed the four content sections
+// (promise, flow, resolve, pillars) behind the hero's one "02 / More"
+// disclosure; they remain real nested sections, just not top-level ones.
 const sections = page.children.filter((c) => /hl-(hero|section)/.test(c.className));
-assert.equal(sections.length, 5, 'five sections: hero, promise, flow, resolve, pillars (the closing block is not a section)');
+assert.equal(sections.length, 2, 'two top-level sections: hero (layers drawn) and More (the closing block is not a section)');
+const morePartTitles = page.byClass('about-more-part');
+assert.equal(morePartTitles.length, 4, 'the four collapsed sections (promise, flow, resolve, pillars) survive inside the disclosure');
 assert(page.classList.contains('home-launch'), 'the page root is the home page\'s own container, so it inherits the home layout, type and colour');
 for (const part of ['hl-hero', 'hl-title', 'hl-intro', 'hl-button', 'hl-section-head', 'hl-principles', 'hl-closing']) assert(page.byClass(part).length > 0, `uses the shared ${part}`);
 assert(!page.all().some((e) => /about-(promise|pillar-grid|resolve-grid|flow-steps|map)\b/.test(e.className)), 'none of the old one-off layouts remain');
@@ -54,12 +62,17 @@ assert(page.byClass('about-layer-detail')[0].textContent.includes('Governance'),
 // Colour is data: exactly one accent record, on the FXN chain layer.
 assert.equal(page.byClass('about-slab-record-new').length, 1, 'one accent record in the whole figure');
 
-// Information budget.
+// Information budget. The hero is the only always-visible section (Law 18,
+// "one scroll, then it ends"), so IT stays tight; the four collapsed
+// sections add real words but they are not visible clutter, so the total
+// gets a looser cap that still catches a whole new section creeping in.
+const heroWords = (page.byClass('about-hero')[0].textContent.match(/\S+/g) || []).length;
+assert(heroWords <= 150, `the always-visible hero stays under 150 words (it has ${heroWords})`);
 const words = (page.textContent.match(/\S+/g) || []).length;
-assert(words <= 420, `the page stays under 420 words (it has ${words}); more means a section has crept back`);
+assert(words <= 550, `the page (hero + one disclosure) stays under 550 words (it has ${words}); more means a section has crept back`);
 assert.equal(page.byClass('about-group').length, 5, 'resolutions are five counted tiles, not a link per resolution');
 assert(page.all().filter((e) => e.tagName === 'a').length <= 22, 'a short page has a short list of links');
-assert.equal(page.all().filter((e) => e.tagName === 'details').length, 1, 'the only disclosure is the evidence one');
+assert.equal(page.all().filter((e) => e.tagName === 'details').length, 2, 'two disclosures: the collapsed "More" content and the evidence one');
 
 // Every route link resolves.
 for (const a of page.all().filter((e) => e.tagName === 'a' && e.dataset.sceneLink)) assert(context.ArkUI.pageCatalog[a.dataset.sceneLink], `${a.dataset.sceneLink} is a real route`);
@@ -69,4 +82,4 @@ const panel = fs.readFileSync('js/ark/panel-continuity.js', 'utf8');
 assert(/panelPage === 'about'\) return \{ left:0/.test(panel), 'about opens full-bleed, like home and chain');
 assert(/continuity-host\[data-panel-page="about"\][^}]*border:0/.test(fs.readFileSync('css/about.css', 'utf8')), 'and without the card border');
 
-console.log(`PASS: /about — five shared-part sections, three layers drawn and selectable, one accent, ${words} words, five resolution tiles, one disclosure.`);
+console.log(`PASS: /about — hero plus one collapsed "More" section (four shared-part sections inside), three layers drawn and selectable, one accent, ${words} words, five resolution tiles, two disclosures.`);

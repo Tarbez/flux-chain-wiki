@@ -38,6 +38,24 @@ ArkManifest.define({
       "section": "Page",
       "value": "Start here"
     },
+    "START.FALLBACK.HREF": {
+      "label": "Fallback card link, when a resolution has no start page of its own",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:resolver"
+    },
+    "BACK.HOME.HREF": {
+      "label": "Breadcrumb: Home link",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:zero"
+    },
+    "INDEX.HREF": {
+      "label": "Link back to the resolutions index (breadcrumb and footer)",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:resolutions"
+    },
     "MEGA.READY": {
       "label": "Menu heading over the resolutions you can use today",
       "kind": "line",
@@ -349,6 +367,12 @@ ArkManifest.define({
       "kind": "line",
       "section": "Page",
       "value": "Current status"
+    },
+    "NOTE.LINK.HREF": {
+      "label": "Status link target",
+      "kind": "link",
+      "section": "Page",
+      "value": "doc:docs/status.md"
     },
     "JUMP": {
       "label": "Group jump label",

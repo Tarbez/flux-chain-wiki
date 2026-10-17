@@ -1,6 +1,7 @@
 /* =====================================================================
    SEO (admin-editable page/article titles, descriptions, social images,
-   canonical URLs, and the site's base URL)
+   canonical URLs, structured data, search/AI visibility, and the site's
+   base URL, language, owner and AI-crawler policy)
    ---------------------------------------------------------------------
    Every route search engines and social previews see needs a <title> and
    a meta description; this module is the one place those live, editable
@@ -10,16 +11,34 @@
      site      name (used as the " — <name>" suffix and the sitemap's
                default host), baseUrl (an absolute origin, e.g.
                "https://flux-chain.example" -- required for sitemap.xml/
-               robots.txt to be generated at all; blank means "skip
-               them", never a guessed host), defaultDescription (used
-               when a page or article sets no override of its own).
+               llms.txt to be generated at all; blank means "skip them",
+               never a guessed host), defaultDescription (used when a
+               page or article sets no override of its own), lang (an
+               IETF tag like "en" or "en-US", for <html lang> and
+               og:locale-style use), org (schema.org type for the site's
+               publisher/owner node: Organization, LocalBusiness or
+               Person), handle (a social handle, e.g. "@yourstudio", for
+               twitter:site), bots (a map of AI crawler user-agent name
+               to "block", enforced in robots.txt -- absent/not "block"
+               means allowed), llms (0 turns llms.txt off entirely;
+               anything else, including unset, means "publish it").
      pages     per-page override, keyed by the SAME id ArkManifest uses
                for manifest-backed pages (home, about, concept, and every
                theory page), plus manifest-less experiment, notes, and
                lifecycle routes. Each entry: title, description,
                ogImage (an absolute URL or a path, made absolute with
-               baseUrl), canonical (same rule).
-     articles  per-article override, keyed by LearningContent's slug.
+               baseUrl), canonical (same rule), schemaType (a schema.org
+               @type for this page's JSON-LD; blank means "derive it from
+               the route kind"), noindex (true hides the page from
+               regular search, via a robots meta tag, and from
+               sitemap.xml/llms.txt), aiSummary (a short, quotable answer
+               for AI assistants -- goes into llms.txt and the page's
+               JSON-LD "abstract"; blank falls back to the description),
+               aiBlocked (true disallows this one page for the AI
+               crawlers that are otherwise allowed, in robots.txt, and
+               drops it from llms.txt).
+     articles  per-article override, same shape as pages, keyed by
+               LearningContent's slug.
 
    Blank title/description means "derive it" (js/pages/catalog.js's
    ArkSEO.pageTitle/resolvePage/resolveArticle do the deriving) -- this
@@ -32,23 +51,46 @@
 var ArkSEO = (function () {
   'use strict';
 
+  /* [user-agent, isTrainingBot] -- the AI crawlers a site owner can name in
+     robots.txt. isTrainingBot marks the ones that scrape to train a model
+     (as opposed to answering a live user request or indexing for search),
+     since "allow answers, block training" is a meaningfully different
+     policy from "block everything" or "allow everything". */
+  var AI_BOTS = [
+    ['GPTBot', 1], ['OAI-SearchBot', 0], ['ChatGPT-User', 0],
+    ['ClaudeBot', 1], ['Claude-SearchBot', 0], ['Claude-User', 0],
+    ['PerplexityBot', 0], ['Google-Extended', 1], ['Applebot-Extended', 1],
+    ['CCBot', 1], ['Bytespider', 1], ['meta-externalagent', 1]
+  ];
+  var SCHEMA_TYPES = ['WebPage', 'WebSite', 'Article', 'FAQPage', 'AboutPage', 'ContactPage', 'CollectionPage'];
+  var ORG_TYPES = ['Organization', 'LocalBusiness', 'Person'];
+
   /* Pages with no manifest of their own: their copy is not admin-editable
      text, but their SEO title/description still are. */
   var EXTRA_PAGES = [
-    { id: 'proximity', label: 'Interactive model' },
-    { id: 'lab', label: 'Interactive model' },
-    { id: 'learnings', label: 'Notes' },
-    { id: 'explorer', label: 'Mesh Explorer' },
-    { id: 'account', label: 'Your account' },
-    { id: 'treasury', label: 'Treasury preview' },
-    { id: 'deposits', label: 'Deposit preview' },
-    { id: 'stats', label: 'Mesh performance' },
-    { id: 'lifecycle', label: 'Agreement lifecycle' },
-    { id: 'lifecycle/intent', label: 'Intent / Agreement lifecycle' },
-    { id: 'lifecycle/offer', label: 'Offer / Agreement lifecycle' },
-    { id: 'lifecycle/agreement', label: 'Agreement / Agreement lifecycle' },
-    { id: 'lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle' },
-    { id: 'lifecycle/receipt', label: 'Receipt / Agreement lifecycle' }
+    { id: 'proximity', path: '/experiments', label: 'Interactive model' },
+    { id: 'lab', path: '/experiments/lab', label: 'Interactive model controls' },
+    { id: 'learnings', path: '/learnings', label: 'Notes' },
+    { id: 'explorer', path: '/explore', label: 'Mesh Explorer' },
+    { id: 'palette', path: '/palette', label: 'Palette' },
+    { id: 'resolvers', path: '/resolvers', label: 'FXN resolvers' },
+    { id: 'account', path: '/account', label: 'Your account' },
+    { id: 'account/domains', path: '/account/domains', label: 'Your domains' },
+    { id: 'treasury', path: '/treasury', label: 'Treasury preview' },
+    { id: 'deposits', path: '/deposits', label: 'Deposit preview' },
+    { id: 'stats', path: '/stats', label: 'Mesh performance' },
+    { id: 'stats/gpu', path: '/stats/gpu', label: 'GPU benchmark detail', sitemap: false },
+    { id: 'stats/ledger', path: '/stats/ledger', label: 'Ledger benchmark detail', sitemap: false },
+    { id: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', sitemap: false },
+    { id: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', sitemap: false },
+    { id: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', sitemap: false },
+    { id: 'reference', path: '/reference', label: 'Canonical reference', sitemap: false },
+    { id: 'lifecycle', path: '/lifecycle', label: 'Agreement lifecycle' },
+    { id: 'lifecycle/intent', path: '/lifecycle/intent', label: 'Intent / Agreement lifecycle' },
+    { id: 'lifecycle/offer', path: '/lifecycle/offer', label: 'Offer / Agreement lifecycle' },
+    { id: 'lifecycle/agreement', path: '/lifecycle/agreement', label: 'Agreement / Agreement lifecycle' },
+    { id: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle' },
+    { id: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle' }
   ];
 
   /* Every call here takes an optional explicit manifests/articles list, used where the
@@ -79,17 +121,28 @@ var ArkSEO = (function () {
 
   function sanitizeSite(s) {
     var baseUrl = s && typeof s.baseUrl === 'string' ? s.baseUrl.trim().replace(/\/+$/, '') : '';
+    var bots = {};
+    if (s && s.bots && typeof s.bots === 'object') AI_BOTS.forEach(function (bot) { if (s.bots[bot[0]] === 'block') bots[bot[0]] = 'block'; });
     return {
       name: (s && typeof s.name === 'string' && s.name) || 'DEFXN',
       baseUrl: /^https?:\/\/[^/]+$/.test(baseUrl) ? baseUrl : '',
-      defaultDescription: (s && typeof s.defaultDescription === 'string') ? s.defaultDescription : ''
+      defaultDescription: (s && typeof s.defaultDescription === 'string') ? s.defaultDescription : '',
+      lang: (s && typeof s.lang === 'string' && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$/.test(s.lang)) ? s.lang : 'en',
+      org: (s && ORG_TYPES.indexOf(s.org) >= 0) ? s.org : 'Organization',
+      handle: (s && typeof s.handle === 'string') ? s.handle.trim() : '',
+      bots: bots,
+      llms: (s && s.llms === 0) ? 0 : 1
     };
   }
   function sanitizeOverride(o) {
     return { title: (o && typeof o.title === 'string') ? o.title : '',
              description: (o && typeof o.description === 'string') ? o.description : '',
              ogImage: (o && typeof o.ogImage === 'string') ? o.ogImage.trim() : '',
-             canonical: (o && typeof o.canonical === 'string') ? o.canonical.trim() : '' };
+             canonical: (o && typeof o.canonical === 'string') ? o.canonical.trim() : '',
+             schemaType: (o && SCHEMA_TYPES.indexOf(o.schemaType) >= 0) ? o.schemaType : '',
+             noindex: !!(o && o.noindex),
+             aiSummary: (o && typeof o.aiSummary === 'string') ? o.aiSummary : '',
+             aiBlocked: !!(o && o.aiBlocked) };
   }
   function sanitizeMap(map, ids) {
     var out = {};
@@ -152,48 +205,114 @@ var ArkSEO = (function () {
     var whole = get() || defaults();
     return absoluteUrl(((whole[map] || {})[id] || {}).canonical || '');
   }
+  /* The remaining per-page overrides: a schema.org type for this page's JSON-LD (falling
+     back to whatever the caller already knows the route kind to be), whether it's hidden
+     from search/AI entirely, and the short answer an assistant can quote. */
+  function schemaType(map, id, fallback) {
+    var whole = get() || defaults(), override = ((whole[map] || {})[id] || {}).schemaType;
+    return override || fallback || 'WebPage';
+  }
+  function noindex(map, id) {
+    var whole = get() || defaults();
+    return !!((whole[map] || {})[id] || {}).noindex;
+  }
+  function aiBlocked(map, id) {
+    var whole = get() || defaults();
+    return !!((whole[map] || {})[id] || {}).aiBlocked;
+  }
+  function aiSummary(map, id, fallbackText) {
+    var whole = get() || defaults(), override = ((whole[map] || {})[id] || {}).aiSummary;
+    return override || fallbackText || whole.site.defaultDescription;
+  }
+  function site() { return (get() || defaults()).site; }
 
   /* Every route a search engine should be told about: the fixed pages,
      every resolution, theory page, and article -- exactly what js/pages/catalog.js
-     registers, without needing it loaded (site-bundle.mjs runs headless). */
+     registers, without needing it loaded (site-bundle.mjs runs headless). Each entry
+     carries the id/slug its SEO override is keyed by (besides 'path', the only field
+     the one other caller -- js/admin/admin.js's studioRoutes() -- reads), so sitemap()/
+     robots()/llmsTxt() can tell a noindex/AI-blocked route apart from a visible one. */
   function routes(manifests, articles) {
-    var out = [{ path: '/' }, { path: '/experiments' }, { path: '/experiments/lab' }, { path: '/learnings' }, { path: '/explore' }, { path: '/account' }, { path: '/treasury' }, { path: '/deposits' }, { path: '/stats' }, { path: '/about' }, { path: '/concept' }];
-    EXTRA_PAGES.filter(function (page) { return page.id.indexOf('lifecycle') === 0; }).forEach(function (page) { out.push({ path: '/' + page.id }); });
+    var out = [{ path: '/', id: 'home' }];
+    EXTRA_PAGES.filter(function (page) { return page.sitemap !== false; }).forEach(function (page) { if (!out.some(function (entry) { return entry.path === page.path; })) out.push({ path: page.path, id: page.id }); });
     (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
-      if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route });
+      if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route, id: m.id });
     });
     pageEntries(manifests).filter(function (page) { return page.id.indexOf('resolutions/') === 0; }).forEach(function (page) {
-      out.push({ path: '/' + page.id });
+      out.push({ path: '/' + page.id, id: page.id });
     });
-    (articles || []).forEach(function (a) { out.push({ path: '/learnings/' + a.slug }); });
+    (articles || []).forEach(function (a) { out.push({ path: '/learnings/' + a.slug, slug: a.slug, lastmod: a.reviewed }); });
     return out;
   }
+  function routeOverride(full, r) { return r.slug ? full.articles[r.slug] : (r.id ? full.pages[r.id] : null); }
 
-  /* sitemap.xml text, or null when no baseUrl is set -- never emit URLs
-     built from a guessed host. */
+  /* sitemap.xml text, or null when no baseUrl is set -- never emit URLs built from a
+     guessed host. A noindex route is left out: it should not be, since a sitemap is a
+     list of pages asking to be indexed. */
   function sitemap(whole, manifests, articles) {
     var site = sanitizeSite(whole && whole.site);
     if (!site.baseUrl) return null;
-    var urls = routes(manifests, articles).map(function (r) {
-      return '  <url><loc>' + site.baseUrl + r.path + '</loc></url>';
+    var full = sanitize(whole, manifests, articles);
+    var urls = routes(manifests, articles).filter(function (r) { var o = routeOverride(full, r); return !(o && o.noindex); }).map(function (r) {
+      return '  <url>\n    <loc>' + site.baseUrl + r.path + '</loc>' + (r.lastmod ? '\n    <lastmod>' + r.lastmod + '</lastmod>' : '') + '\n  </url>';
     }).join('\n');
     return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls + '\n</urlset>\n';
   }
 
-  function robots(whole) {
+  /* robots.txt: a site-wide "block" for a given AI crawler disallows it entirely; short of
+     that, a page marked aiBlocked is disallowed just for the crawlers that are otherwise
+     open. Noindex is not a robots.txt concern (Disallow stops a page being crawled at all,
+     which also hides the noindex meta tag the page would otherwise be crawled to see) --
+     it is handled as a <meta name="robots"> tag instead, by the page itself at render time. */
+  function robots(whole, manifests, articles) {
     var site = sanitizeSite(whole && whole.site);
-    return 'User-agent: *\nAllow: /\n' + (site.baseUrl ? '\nSitemap: ' + site.baseUrl + '/sitemap.xml\n' : '');
+    var full = sanitize(whole, manifests, articles);
+    var hidden = routes(manifests, articles).filter(function (r) { var o = routeOverride(full, r); return o && o.aiBlocked; }).map(function (r) { return r.path === '/' ? '/$' : r.path; });
+    var lines = [];
+    AI_BOTS.forEach(function (bot) {
+      var name = bot[0];
+      if (site.bots[name] === 'block') { lines.push('User-agent: ' + name, 'Disallow: /', ''); }
+      else if (hidden.length) { lines.push('User-agent: ' + name); hidden.forEach(function (h) { lines.push('Disallow: ' + h); }); lines.push('Allow: /', ''); }
+    });
+    lines.push('User-agent: *', 'Allow: /');
+    if (site.baseUrl) lines.push('', 'Sitemap: ' + site.baseUrl + '/sitemap.xml');
+    return lines.join('\n') + '\n';
+  }
+
+  /* llms.txt: a plain-text map of the site for AI assistants (llmstxt.org), one line per
+     visible page/article with its quotable summary. site.llms === 0 turns it off outright;
+     no baseUrl means no absolute links to publish, same rule as sitemap(). A noindex or
+     AI-blocked route is left out, consistent with sitemap.xml and robots.txt. */
+  function llmsTxt(whole, manifests, articles) {
+    var site = sanitizeSite(whole && whole.site);
+    if (site.llms === 0) return '# llms.txt is turned off for this site.\n';
+    if (!site.baseUrl) return null;
+    var full = sanitize(whole, manifests, articles);
+    var labelById = {}; pageEntries(manifests).forEach(function (p) { labelById[p.id] = p.label; });
+    var pageLines = [], articleLines = [];
+    routes(manifests, articles).forEach(function (r) {
+      var o = routeOverride(full, r);
+      if (o && (o.noindex || o.aiBlocked)) return;
+      var title = r.slug ? articleTitle(r.slug, r.slug) : pageTitle(r.id, labelById[r.id] || r.id);
+      var summary = (o && (o.aiSummary || o.description)) || site.defaultDescription;
+      var line = '- [' + title + '](' + site.baseUrl + r.path + ')' + (summary ? ': ' + summary : '');
+      (r.slug ? articleLines : pageLines).push(line);
+    });
+    return '# ' + site.name + '\n\n> ' + (site.defaultDescription || '') + '\n\n## Pages\n\n' + pageLines.join('\n') + '\n' +
+      (articleLines.length ? '\n## Articles\n\n' + articleLines.join('\n') + '\n' : '');
   }
 
   function serialize(whole, manifests, articles) {
-    return '/* Live-tunable page/article titles, descriptions, social images, canonical URLs and\n' +
-      '   the site\'s base URL (used to generate sitemap.xml/robots.txt). Edit these in\n' +
-      '   each page in admin.html; this file is not meant for hand editing. */\n' +
+    return '/* Live-tunable page/article titles, descriptions, social images, canonical URLs,\n' +
+      '   structured data, search/AI visibility, and the site\'s base URL, language, owner\n' +
+      '   and AI-crawler policy (used to generate sitemap.xml/robots.txt/llms.txt). Edit\n' +
+      '   these in each page in admin.html; this file is not meant for hand editing. */\n' +
       'ArkSEO.define(' + JSON.stringify(sanitize(whole, manifests, articles), null, 2) + ');\n';
   }
 
   return { pageEntries: pageEntries, pageIds: pageIds, articleSlugs: articleSlugs, defaults: defaults, sanitize: sanitize,
            problems: problems, define: define, get: get, pageTitle: pageTitle, articleTitle: articleTitle,
-           pageDescription: pageDescription, articleDescription: articleDescription, ogImage: ogImage, canonical: canonical, routes: routes, sitemap: sitemap,
-           robots: robots, serialize: serialize };
+           pageDescription: pageDescription, articleDescription: articleDescription, ogImage: ogImage, canonical: canonical,
+           schemaType: schemaType, noindex: noindex, aiBlocked: aiBlocked, aiSummary: aiSummary, site: site,
+           routes: routes, sitemap: sitemap, robots: robots, llmsTxt: llmsTxt, serialize: serialize };
 })();

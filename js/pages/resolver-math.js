@@ -788,6 +788,12 @@
       readGrid.appendChild(read);
       shell.appendChild(readGrid);
 
+      // Anchor for reusable content blocks (js/content/components.js); rendering into it
+      // is centralized in js/main.js's onMount hook, not called here.
+      var components = D.el('div', 'resolver-math-components');
+      components.setAttribute('data-ark-insert', 'main');
+      shell.appendChild(components);
+
       host.appendChild(built.page);
       return built.page;
     }

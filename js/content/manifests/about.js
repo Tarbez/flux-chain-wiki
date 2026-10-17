@@ -50,6 +50,12 @@ ArkManifest.define({
       "section": "Links",
       "value": "Explore resolutions"
     },
+    "ACTION.HREF": {
+      "label": "Primary action link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:resolutions"
+    },
     "BOUNDARY.TITLE": {
       "label": "Visible source boundary",
       "kind": "line",
@@ -134,11 +140,47 @@ ArkManifest.define({
       "section": "Links",
       "value": "READ DEFXN STATUS"
     },
+    "STATUS.HREF": {
+      "label": "Status documentation target",
+      "kind": "link",
+      "section": "Links",
+      "value": "doc:docs/status.md"
+    },
     "ACTION2": {
       "label": "Secondary action",
       "kind": "line",
       "section": "Links",
       "value": "See how DEFXN works"
+    },
+    "ACTION2.HREF": {
+      "label": "Secondary action link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:deployment"
+    },
+    "FOOTER.HOME.HREF": {
+      "label": "Footer: Home link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:zero"
+    },
+    "FOOTER.RESOLUTIONS.HREF": {
+      "label": "Footer: Resolutions link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:resolutions"
+    },
+    "FOOTER.EXPLORER.HREF": {
+      "label": "Footer: Explorer link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:explorer"
+    },
+    "FOOTER.DOWNLOAD.HREF": {
+      "label": "Footer: Run from source link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:download"
     },
     "PROMISE.LABEL": {
       "label": "Promise label",
@@ -266,6 +308,18 @@ ArkManifest.define({
       "section": "Resolutions",
       "value": "See every resolution"
     },
+    "RESOLVE.ALL.HREF": {
+      "label": "Link to all resolutions target",
+      "kind": "link",
+      "section": "Resolutions",
+      "value": "route:resolutions"
+    },
+    "RESOLVE.GROUP.HREF": {
+      "label": "Resolution group tile target",
+      "kind": "link",
+      "section": "Resolutions",
+      "value": "route:resolutions"
+    },
     "FLOW.LABEL": {
       "label": "Flow label",
       "kind": "line",
@@ -313,6 +367,12 @@ ArkManifest.define({
       "kind": "line",
       "section": "Flow",
       "value": "What is a resolver?"
+    },
+    "FLOW.LINK.HREF": {
+      "label": "Link to the resolver guide target",
+      "kind": "link",
+      "section": "Flow",
+      "value": "route:resolver"
     },
     "FLOW.TITLE": {
       "label": "Heading: how a resolution works",

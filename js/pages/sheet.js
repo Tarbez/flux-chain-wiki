@@ -5,9 +5,18 @@ ArkUI.sheet = function (id, page) {
   if (id === 'about' || manifest.fields['STATUS.TEXT']) return ArkUI.storySheet(id, page);
   var area = id.toUpperCase();
   function words(role) { return ArkCopy.text(area + '.' + role); }
+  /* `target` is a real pageCatalog/route key -- manifest.meta.next/meta.back
+     (the existing, already-working route pickers admin.js's routeOptions()
+     already edits) or a structural breadcrumb target. Resolved the one
+     shared way every retrofitted call site is -- js/ark/dash-kit.js's
+     resolveLinkField -- replacing the old direct pageCatalog lookup.
+     manifest.meta.docs (used elsewhere in this file) is left exactly as it
+     already was: a different, already-working mechanism this retrofit does
+     not touch. */
   function link(role, target, className) {
+    var r = ArkUI.dash.resolveLinkField('route:' + target);
     var a = ArkUI.el('a', className || 'article-back');
-    a.href = '#' + ArkUI.pageCatalog[target].path; a.dataset.sceneLink = target;
+    a.href = r.href; a.dataset.sceneLink = r.sceneLink;
     a.appendChild(document.createTextNode(words(role) + ' '));
     var arrow = ArkUI.el('span', 'cta-arrow', '↗'); arrow.setAttribute('aria-hidden', 'true');
     a.appendChild(arrow); return a;
@@ -18,8 +27,8 @@ ArkUI.sheet = function (id, page) {
   if (manifest.group === 'theory' || manifest.fields['STATUS.TEXT']) {
     var path = ArkUI.el('nav', 'content-layer-path');
     path.setAttribute('aria-label', 'Content depth');
-    var parent = ArkUI.el('a', '', '01 / Operating model');
-    parent.href = '#/concept'; parent.dataset.sceneLink = 'concept'; path.appendChild(parent);
+    var parent = ArkUI.dash.linkEl('01 / Operating model', 'route:concept');
+    path.appendChild(parent);
     var current = ArkUI.el('span', '', '02 / ' + manifest.title);
     current.setAttribute('aria-current', 'page'); path.appendChild(current);
     content.appendChild(path);
@@ -70,6 +79,13 @@ ArkUI.sheet = function (id, page) {
   if (manifest.meta.next) footer.appendChild(link('NEXT', manifest.meta.next, 'article-back theory-cta'));
   if (manifest.meta.back) footer.appendChild(link('BACK', manifest.meta.back));
   content.appendChild(footer);
+  /* Anchor for reusable content blocks (js/content/components.js); rendering into it is
+     centralized in js/main.js's onMount hook, not called here. Added once, in this shared
+     sheet builder, so every page module that calls ArkUI.sheet (dao.js, theory.js) gets it
+     for free instead of repeating the same three lines in each. */
+  var components = ArkUI.el('div', 'concept-components');
+  components.setAttribute('data-ark-insert', 'main');
+  content.appendChild(components);
   el.appendChild(content);
   return el;
 };
@@ -79,7 +95,9 @@ ArkUI.sheet = function (id, page) {
 ArkUI.storySheet = function(id,page) {
   var manifest=ArkManifest.get(id), area=id.toUpperCase();
   function words(role){return ArkCopy.text(area+'.'+role);}
-  function link(label,key,cls){var a=ArkUI.el('a',cls||'',label);a.href='#'+ArkUI.pageCatalog[key].path;a.dataset.sceneLink=key;return a;}
+  /* Same centralization as ArkUI.sheet's own link() above -- see its comment.
+     manifest.meta.docs (below, in select()) is left untouched. */
+  function link(label,key,cls){return ArkUI.dash.linkEl(label,'route:'+key,undefined,cls);}
   var el=ArkUI.el('section','ark-page guided-page mechanism-story '+id+'-page');el.dataset.arkPage=page;
   var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');var parentLink=link(id==='about'?'← Home':'← Operating model',id==='about'?'zero':'concept');if(manifest.meta.placement==='rail'){parentLink.dataset.routeQuery='view=more';parentLink.href+='?view=more';}path.appendChild(parentLink);var currentPage=ArkUI.el('span','',manifest.title);currentPage.setAttribute('aria-current','page');path.appendChild(currentPage);el.appendChild(path);
   var title=ArkUI.el('h1','',words('TITLE'));title.id=id+'-title';el.setAttribute('aria-labelledby',title.id);el.appendChild(title);
@@ -105,7 +123,12 @@ ArkUI.storySheet = function(id,page) {
       copy.appendChild(picker);var answer=ArkUI.el('section','mechanism-inner-answer');answer.appendChild(ArkUI.el('h2','',words('POINT'+(step+1)+'.TITLE')));answer.appendChild(ArkUI.el('p','',words('POINT'+(step+1)+'.TEXT')));copy.appendChild(answer);
     }else{
       if(manifest.fields['LIMIT.TEXT']){var limit=ArkUI.el('section','content-layer-reference');limit.appendChild(ArkUI.el('h2','',words('LIMIT.TITLE')));limit.appendChild(ArkUI.el('p','',words('LIMIT.TEXT')));copy.appendChild(limit);}
-      var doc=ArkUI.el('a','story-reference',id==='about'?words('STATUS')+' ↗':words('EVIDENCE')+' ↗');doc.href=id==='about'?'docs/status.md':manifest.meta.docs;copy.appendChild(doc);
+      // id==='about' never actually reaches here (about.js is its own page module; ArkUI.sheet's
+      // own 'about' dispatch above is unreachable through real routing) -- kept consistent anyway.
+      // manifest.meta.docs (the live, already-working branch) is left exactly as it was.
+      var doc=id==='about'?ArkUI.dash.linkEl(words('STATUS')+' ↗','doc:docs/status.md'):ArkUI.el('a','story-reference',words('EVIDENCE')+' ↗');
+      if(id==='about')doc.className='story-reference';else doc.href=manifest.meta.docs;
+      copy.appendChild(doc);
     }
     if(drafting)drafting.select(depth===1?step:0,write);
     diagram.querySelectorAll('.story-record').forEach(function(node,i){var selected=depth===1&&i===Math.min(step,labels.length-1);node.dataset.selected=String(selected);node.setAttribute('aria-pressed',String(selected));});
@@ -114,5 +137,7 @@ ArkUI.storySheet = function(id,page) {
   }
   function restore(){if(ArkUI.route.path()!==ArkUI.pageCatalog[page].path)return;var q=new URLSearchParams(ArkUI.route.search()),v=q.get('view'),step=Math.max(0,Math.min(count-1,Number(q.get('step'))||0));select(v==='context'?1:v==='reference'?2:0,step,false);}
   el.addEventListener('keydown',function(event){if(event.key==='Escape'&&selectedDepth){event.preventDefault();event.stopPropagation();select(0,0,true);buttons[0].focus();}});
-  select(0,0,false);restore();el.arkRestore=restore;window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);el.arkDispose=function(){if(drafting)drafting.dispose();window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};return el;
+  select(0,0,false);restore();el.arkRestore=restore;window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);el.arkDispose=function(){if(drafting)drafting.dispose();window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};
+  var components=ArkUI.el('div','concept-components');components.setAttribute('data-ark-insert','main');el.appendChild(components);
+  return el;
 };

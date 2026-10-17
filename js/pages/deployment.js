@@ -5,12 +5,13 @@
      expands from the exact surface the reader chose. */
   ArkUI.pageModules.deployment = {
     mount: function (host) {
+      var manifest = ArkManifest.get('deployment');
       function words(role) { return ArkCopy.text('DEPLOYMENT.SIMPLE.' + role); }
-      function routeLink(label, key, className) {
-        var link = ArkUI.el('a', className || '', label);
-        link.href = ArkUI.route.href(ArkUI.pageCatalog[key].path);
-        link.dataset.sceneLink = key;
-        return link;
+      /* `hrefRole`'s field is a manifest field of kind 'link'; js/ark/dash-kit.js's
+         linkEl is the one place that turns its tagged value into a real href --
+         replaces this page's own former routeLink(). */
+      function routeLink(label, hrefRole, className) {
+        return ArkUI.dash.linkEl(label, words(hrefRole), manifest.route, className || '');
       }
 
       var chapters = [
@@ -24,7 +25,7 @@
 
       var path = ArkUI.el('nav', 'content-layer-path how-path');
       path.setAttribute('aria-label', 'Your place');
-      path.appendChild(routeLink('\u2190 Home', 'zero'));
+      path.appendChild(routeLink('\u2190 Home', 'HOME.HREF'));
       var current = ArkUI.el('span', '', 'How it works');
       current.setAttribute('aria-current', 'page');
       path.appendChild(current);
@@ -44,7 +45,7 @@
       var cards = ArkUI.el('nav', 'how-work-cards');
       cards.setAttribute('aria-label', 'Three parts of a DEFXN agreement');
       chapters.forEach(function (chapter, index) {
-        var card = routeLink('', chapter.route, 'how-work-card how-work-card-' + chapter.key.toLowerCase());
+        var card = routeLink('', chapter.key + '.HREF', 'how-work-card how-work-card-' + chapter.key.toLowerCase());
         card.dataset.continuityCard = chapter.route;
         card.dataset.workStep = chapter.key.toLowerCase();
 
@@ -91,8 +92,14 @@
       boundary.appendChild(ArkUI.el('span', 'how-boundary-label', 'CURRENT IMPLEMENTATION'));
       boundary.appendChild(ArkUI.el('strong', '', words('BOUNDARY')));
       footer.appendChild(boundary);
-      footer.appendChild(routeLink('Trace the five-stage lifecycle \u2192', 'lifecycle', 'how-simple-next'));
+      footer.appendChild(routeLink('Trace the five-stage lifecycle \u2192', 'NEXT.HREF', 'how-simple-next'));
       el.appendChild(footer);
+
+      /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+         is centralized in js/main.js's onMount hook, not called here. */
+      var components = ArkUI.el('div', 'how-components');
+      components.setAttribute('data-ark-insert', 'main');
+      el.appendChild(components);
 
       el.arkDispose = function () {
         fabrics.forEach(function (entry) { entry.controller.dispose(); });

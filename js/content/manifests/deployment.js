@@ -136,6 +136,12 @@ ArkManifest.define({
       "section": "Simple story",
       "value": "Explore the request"
     },
+    "SIMPLE.ASK.HREF": {
+      "label": "Ask card target",
+      "kind": "link",
+      "section": "Simple story",
+      "value": "route:how/ask"
+    },
     "SIMPLE.WORK.TITLE": {
       "label": "Work Title",
       "kind": "line",
@@ -153,6 +159,12 @@ ArkManifest.define({
       "kind": "line",
       "section": "Simple story",
       "value": "Explore the agreement"
+    },
+    "SIMPLE.WORK.HREF": {
+      "label": "Work card target",
+      "kind": "link",
+      "section": "Simple story",
+      "value": "route:how/work"
     },
     "SIMPLE.CHECK.TITLE": {
       "label": "Check Title",
@@ -172,6 +184,12 @@ ArkManifest.define({
       "section": "Simple story",
       "value": "Explore verification"
     },
+    "SIMPLE.CHECK.HREF": {
+      "label": "Check card target",
+      "kind": "link",
+      "section": "Simple story",
+      "value": "route:how/check"
+    },
     "SIMPLE.BOUNDARY": {
       "label": "Boundary",
       "kind": "text",
@@ -189,6 +207,18 @@ ArkManifest.define({
       "kind": "text",
       "section": "Simple story",
       "value": "The full path records intent, offer, agreement, fulfillment, and receipt."
+    },
+    "SIMPLE.HOME.HREF": {
+      "label": "Breadcrumb home link",
+      "kind": "link",
+      "section": "Simple story",
+      "value": "route:zero"
+    },
+    "SIMPLE.NEXT.HREF": {
+      "label": "Footer onward link (trace the lifecycle)",
+      "kind": "link",
+      "section": "Simple story",
+      "value": "route:lifecycle"
     },
     "CHAPTER.ASK.TITLE": {
       "label": "Ask Title",

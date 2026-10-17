@@ -42,14 +42,15 @@ const DEFAULT_RESOLVER_BASE = 'https://gateway.deadark.com';
 // adding security. Flip this back to true once the extension can prompt for and submit a
 // TOTP code itself; nothing else about the OTP flow was removed, only unwired here.
 const OTP_ENABLED = false;
-/* robots.txt/sitemap.xml are generated at the project root (scripts/lib/site-bundle.mjs's
-   projectFiles(), from js/content/seo.js) the same way theme-data.js etc. are -- served
-   here so a real crawler can fetch them, same as it fetches index.html. */
-const SERVED = ['admin.html', 'admin-app.html', 'index.html', 'robots.txt', 'sitemap.xml'];
+/* robots.txt/sitemap.xml/llms.txt are generated at the project root
+   (scripts/lib/site-bundle.mjs's projectFiles(), from js/content/seo.js) the same way
+   theme-data.js etc. are -- served here so a real crawler or AI assistant can fetch them,
+   same as it fetches index.html. */
+const SERVED = ['admin.html', 'admin-app.html', 'admin-studio.html', 'index.html', 'robots.txt', 'sitemap.xml', 'llms.txt'];
 /* The admin surface is deny-by-default: the editor page and everything under js/admin/ needs a session, except the two files
    the locked page itself must load. A file added under js/admin/ later is locked without anyone remembering to lock it. */
 const PUBLIC_ADMIN = new Set(['js/admin/auth.js', 'js/admin/gate.js']);
-const isLockedAsset = (relative) => (relative === 'admin-app.html' || relative.startsWith('js/admin/')) && !PUBLIC_ADMIN.has(relative);
+const isLockedAsset = (relative) => (relative === 'admin-app.html' || relative === 'admin-studio.html' || relative.startsWith('js/admin/')) && !PUBLIC_ADMIN.has(relative);
 const SESSION_MAX_AGE_SECONDS = 12 * 60 * 60;
 const SERVED_DIRS = ['css', 'js', 'assets'];
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8' };

@@ -15,14 +15,14 @@ assert(sheet.includes("'story-depth'"), 'the same frame owns depth choices');
 assert(sheet.includes("copy.replaceChildren()"), 'requesting detail replaces the answer surface');
 assert(sheet.includes("'mechanism-status-summary'"), 'current status stays outside the replaceable surface');
 assert(sheet.includes("'?view='") && sheet.includes("'&step='"), 'mechanism depth and detail are addressable');
-assert(about.includes("'details', 'about-context'"), 'overview keeps the three-layer model behind requested context');
-assert(about.includes("'about-primary-action'"), 'overview exposes one dominant next movement');
+assert(about.includes("'hl-faq about-more'") && about.includes("node('details')"), 'overview keeps the three-layer model behind requested context');
+assert(about.includes("about-primary-action'"), 'overview exposes one dominant next movement');
 assert(about.includes("'details', 'about-reference'"), 'overview keeps evidence and verification behind a named disclosure');
-assert(about.includes("'about-boundary'"), 'overview keeps the essential source boundary visible before disclosure');
+assert(about.includes("about-boundary'"), 'overview keeps the essential source boundary visible before disclosure');
 assert(deployment.includes("'how-work-cards'"), 'how it works retains its own three-part journey composition');
 assert(deployment.includes("'how-work-mesh-frame'"), 'each how-it-works chapter owns a mesh illustration');
 assert(deployment.includes("'how-simple-footer'"), 'how it works keeps its implementation boundary visible');
-assert(continuity.includes("panelPage === 'deployment' || panelPage === 'explorer' ? 1600"), 'how it works and the mesh observatory receive a wider desktop canvas than detail pages');
+assert(continuity.includes("panelPage === 'deployment' || panelPage === 'explorer'") && continuity.includes('? 1600'), 'how it works and the mesh observatory receive a wider desktop canvas than detail pages');
 
 const explorer = fs.readFileSync('js/pages/explorer.js', 'utf8');
 assert(explorer.includes('mesh-observatory'), 'explorer renders a dedicated observatory surface');

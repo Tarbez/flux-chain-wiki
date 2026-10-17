@@ -4,14 +4,23 @@ ArkUI.pageModules.resolverGuide = {
   mount: function (host, page) {
     var manifest=ArkManifest.get(page), area=page.toUpperCase();
     function words(role){return ArkCopy.text(area+'.'+role);}
-    function link(label,key,cls){var a=ArkUI.el('a',cls||'',label);a.href='#'+ArkUI.pageCatalog[key].path;a.dataset.sceneLink=key;return a;}
+    /* `key` is either a real pageCatalog/route key (manifest.meta.back/next,
+       resolved directly the same way admin.js's routeOptions() picker
+       already edits them), or a manifest field role of kind 'link'
+       (js/content/manifest.js) -- both go through the one shared resolver,
+       js/ark/dash-kit.js's linkEl, replacing this page's own former direct
+       pageCatalog lookup. */
+    function link(label,key,cls){
+      var value=/^[A-Z][A-Z0-9.]*$/.test(key)?words(key):'route:'+key;
+      return ArkUI.dash.linkEl(label,value,manifest.route,cls);
+    }
     if(page==='resolver'){
       // Four addressable steps beside a working illustration: js/pages/resolver-lab.js.
       var lab=ArkUI.buildResolverLab({page:page,words:words,link:link});
       host.appendChild(lab);if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(lab);return lab;
     }
     var el=ArkUI.el('section','ark-page guided-page');el.dataset.arkPage=page;
-    var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Home','zero'));var currentPage=ArkUI.el('span','',manifest.title);currentPage.setAttribute('aria-current','page');path.appendChild(currentPage);el.appendChild(path);
+    var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Home','HOME.HREF'));var currentPage=ArkUI.el('span','',manifest.title);currentPage.setAttribute('aria-current','page');path.appendChild(currentPage);el.appendChild(path);
     el.appendChild(ArkUI.el('p','story-kicker',words('EYEBROW')));
     var title=ArkUI.el('h1','',words('TITLE'));title.id=page+'-title';el.setAttribute('aria-labelledby',title.id);el.appendChild(title);
     var depths=ArkUI.el('nav','story-depth');depths.setAttribute('aria-label','Explanation depth');var buttons=[];
@@ -36,9 +45,12 @@ ArkUI.pageModules.resolverGuide = {
           ['Network','Logic','Intent','Fulfillment','Receipt'].forEach(function(label,i){var b=ArkUI.el('button','',String(i+1)+' / '+label);b.type='button';b.setAttribute('aria-pressed',String(i===step));b.addEventListener('click',function(){select(1,i,true);});picker.appendChild(b);});copy.appendChild(picker);copy.appendChild(ArkUI.el('p','',words('BODY'+(step+1))));
         }else copy.appendChild(ArkUI.el('p','',words(page==='resolver'?'BODY2':'BODY3')));
       }else{
-        var doc=page==='resolver'?'docs/protocol/resolvers.md':page==='references'?'docs/evidence/registry.md':'docs/protocol/agreements.md';
-        var source=ArkUI.el('a','story-reference','Read the canonical '+(page==='references'?'evidence registry':'guide')+' ↗');source.href=doc;copy.appendChild(source);
-        if(page==='resolver')copy.appendChild(link('Inspect reference evidence →','references','story-reference'));
+        /* 'deployment' is not reached through real routing (catalog.js never maps a route to
+           this module with page==='deployment') -- its fallback stays a literal tagged value
+           since no SOURCE.HREF field exists for it, same as any page with no manifest at all. */
+        var docValue=page==='resolver'||page==='references'?words('SOURCE.HREF'):'doc:docs/protocol/agreements.md';
+        var source=ArkUI.dash.linkEl('Read the canonical '+(page==='references'?'evidence registry':'guide')+' ↗',docValue,manifest.route,'story-reference');copy.appendChild(source);
+        if(page==='resolver')copy.appendChild(link('Inspect reference evidence →','INSPECT.HREF','story-reference'));
         copy.appendChild(ArkUI.el('p','',page==='references'?words('BODY3'):'The source defines the contract. An illustration does not establish active capacity, accepted work, or production readiness.'));
       }
       if(drafting)drafting.select(depth===1?(page==='deployment'?[0,0,1,1,2][step]:step):0,write);
@@ -48,6 +60,7 @@ ArkUI.pageModules.resolverGuide = {
     }
     function restore(){if(ArkUI.route.path()!==ArkUI.pageCatalog[page].path)return;var q=new URLSearchParams(ArkUI.route.search()),value=q.get('view'),step=Math.max(0,Math.min(4,Number(q.get('step'))||0));select(value==='context'?1:value==='reference'?2:0,step,false);}
     select(0,0,false);restore();el.arkRestore=restore;window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);
+    var components=ArkUI.el('div','');components.setAttribute('data-ark-insert','main');el.appendChild(components);
     el.arkDispose=function(){if(drafting)drafting.dispose();window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};host.appendChild(el);return el;
   }
 };

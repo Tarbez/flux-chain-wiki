@@ -2,18 +2,24 @@
    Existing fabric, theme roles and scene lifecycle own the brand and motion. */
 ArkUI.pageModules.zero = {
   mount: function (host) {
-    var homeCopy = ArkManifest.get('home').fields;
+    var homeManifest = ArkManifest.get('home');
+    var homeCopy = homeManifest.fields;
     function node(tag, cls, text) {
       var e = document.createElement(tag);
       if (cls) e.className = cls;
       if (text != null) e.textContent = text;
       return e;
     }
+    /* `route` is either a real pageCatalog/route key -- the structural
+       per-item targets the `audiences` data array below and
+       js/pages/home-flow.js's buildChainFlow draw from their own code-level
+       data, not an editorial destination hardcoded in this page module --
+       or a manifest field role of kind 'link' (js/content/manifest.js).
+       Both go through the one shared resolver, js/ark/dash-kit.js's linkEl,
+       replacing this page's own former direct pageCatalog lookup. */
     function link(label, route, cls) {
-      var e = node('a', cls || 'hl-link', label);
-      e.href = '#' + ArkUI.pageCatalog[route].path;
-      e.dataset.sceneLink = route;
-      return e;
+      var value = /^[A-Z][A-Z0-9.]*$/.test(route) ? ArkCopy.text('HOME.' + route) : 'route:' + route;
+      return ArkUI.dash.linkEl(label, value, homeManifest.route, cls || 'hl-link');
     }
     // Icons come from the shared set (js/ark/icons.js); the label always carries the meaning.
     function iconize(e, name, after) {
@@ -22,6 +28,99 @@ ArkUI.pageModules.zero = {
       e.classList.add('has-native-icon');
       if (after) e.appendChild(svg); else e.insertBefore(svg, e.firstChild);
       return e;
+    }
+    function lineCta(kicker, action, route) {
+      var cta = link('', route, 'hl-line-cta');
+      cta.setAttribute('aria-label', kicker + '. ' + action);
+      var identity = node('span', 'hl-line-identity', 'you.fxn');
+      iconize(identity, 'account');
+      var track = node('span', 'hl-line-track');
+      for (var i = 0; i < 4; i += 1) track.appendChild(node('i', i === 3 ? 'is-terminal' : ''));
+      var words = node('span', 'hl-line-words');
+      words.appendChild(node('small', '', kicker));
+      words.appendChild(node('strong', '', action));
+      iconize(words, 'arrow-right', true);
+      cta.appendChild(identity); cta.appendChild(track); cta.appendChild(words);
+      return cta;
+    }
+    function svgNode(tag, attrs) {
+      var e = document.createElementNS ? document.createElementNS('http://www.w3.org/2000/svg', tag) : document.createElement(tag);
+      Object.keys(attrs || {}).forEach(function (key) { e.setAttribute(key, attrs[key]); });
+      return e;
+    }
+    function buildClosingArt() {
+      var svg = svgNode('svg', {
+        'class': 'hl-closing-art',
+        viewBox: '0 0 1440 800',
+        preserveAspectRatio: 'xMidYMid slice',
+        'aria-hidden': 'true',
+        focusable: 'false'
+      });
+      var field = svgNode('g', { 'class': 'hl-closing-field' });
+      [
+        'M-120 735 L720 312 L1560 735',
+        'M-40 800 L720 312 L1480 800',
+        'M110 800 L720 312 L1330 800',
+        'M260 800 L720 312 L1180 800',
+        'M410 800 L720 312 L1030 800',
+        'M560 800 L720 312 L880 800',
+        'M0 720 Q720 410 1440 720',
+        'M0 635 Q720 385 1440 635',
+        'M0 555 Q720 355 1440 555',
+        'M0 480 Q720 330 1440 480'
+      ].forEach(function (d) { field.appendChild(svgNode('path', { d: d })); });
+      svg.appendChild(field);
+
+      var halos = svgNode('g', { 'class': 'hl-closing-halos' });
+      [[1080,390,310],[1080,390,222],[1080,390,136],[750,420,420]].forEach(function (ring, i) {
+        halos.appendChild(svgNode('circle', { cx:ring[0], cy:ring[1], r:ring[2], 'class': i === 2 ? 'is-bright' : '' }));
+      });
+      svg.appendChild(halos);
+
+      var routes = svgNode('g', { 'class': 'hl-closing-routes' });
+      [
+        'M-60 590 C160 590 205 450 390 450 S610 605 790 505 S1040 245 1490 292',
+        'M120 720 C330 618 420 692 580 555 S815 310 1005 366 S1215 610 1480 515',
+        'M335 120 C470 248 545 222 665 330 S820 530 1000 466 S1260 160 1515 220',
+        'M610 820 C670 650 785 625 880 545 S1045 385 1160 410 S1325 610 1490 650'
+      ].forEach(function (d, i) { routes.appendChild(svgNode('path', { d:d, 'class': i === 1 ? 'is-reference' : '' })); });
+      svg.appendChild(routes);
+
+      var plates = svgNode('g', { 'class': 'hl-closing-plates' });
+      [
+        [665,455,.70,-4,0],[760,408,.82,2,0],[850,470,.76,-2,0],[936,414,.95,1,1],
+        [1038,348,.82,-4,0],[1130,420,.72,3,0],[1228,362,.64,-3,0],[1300,455,.82,2,0],
+        [785,568,.72,2,0],[902,585,.94,-2,0],[1015,535,.72,3,0],[1120,565,.88,-3,0],
+        [1218,525,.66,2,0],[1308,595,.78,-2,0],[1000,675,.68,3,0],[1160,690,.78,-3,0]
+      ].forEach(function (item) {
+        var g = svgNode('g', { transform:'translate('+item[0]+' '+item[1]+') scale('+item[2]+') rotate('+item[3]+')', 'class':item[4] ? 'hl-closing-plate is-key' : 'hl-closing-plate' });
+        g.appendChild(svgNode('polygon', { 'class':'plate-side plate-side-a', points:'-44,0 0,23 0,39 -44,16' }));
+        g.appendChild(svgNode('polygon', { 'class':'plate-side plate-side-b', points:'0,23 44,0 44,16 0,39' }));
+        g.appendChild(svgNode('polygon', { 'class':'plate-top', points:'0,-24 44,0 0,24 -44,0' }));
+        g.appendChild(svgNode('path', { 'class':'plate-record', d:'M-21 -1 L1 11 M-12 -8 L19 8 M1 -13 L25 0' }));
+        if (item[4]) {
+          g.appendChild(svgNode('circle', { 'class':'plate-core', cx:'0', cy:'0', r:'6' }));
+          g.appendChild(svgNode('circle', { 'class':'plate-pulse', cx:'0', cy:'0', r:'18' }));
+        }
+        plates.appendChild(g);
+      });
+      svg.appendChild(plates);
+
+      var nodes = svgNode('g', { 'class':'hl-closing-nodes' });
+      [[175,590,5],[290,525,4],[390,450,7],[505,485,4],[625,565,5],[790,505,7],[905,392,4],[1005,366,6],[1145,314,4],[1280,286,6],[1380,292,4],[335,120,5],[474,246,4],[665,330,6],[880,545,5],[1160,410,6],[1325,610,5]].forEach(function (item, i) {
+        var group = svgNode('g', { transform:'translate('+item[0]+' '+item[1]+')', 'class': i === 7 ? 'is-reference' : '' });
+        group.appendChild(svgNode('circle', { r:item[2]+8, 'class':'node-halo' }));
+        group.appendChild(svgNode('circle', { r:item[2], 'class':'node-core' }));
+        nodes.appendChild(group);
+      });
+      svg.appendChild(nodes);
+
+      var sparks = svgNode('g', { 'class':'hl-closing-sparks' });
+      [[575,244],[712,192],[824,260],[954,156],[1050,220],[1186,188],[1268,252],[1360,168],[518,650],[640,706],[744,652],[1350,710]].forEach(function (item, i) {
+        sparks.appendChild(svgNode(i % 3 ? 'circle' : 'rect', i % 3 ? { cx:item[0], cy:item[1], r:'2' } : { x:item[0]-3, y:item[1]-3, width:'6', height:'6', transform:'rotate(45 '+item[0]+' '+item[1]+')' }));
+      });
+      svg.appendChild(sparks);
+      return svg;
     }
     function label(text, iconName) { var e = node('p', 'hl-label', text); return iconName ? iconize(e, iconName) : e; }
     function section(index, title, intro, iconName) {
@@ -51,16 +150,14 @@ ArkUI.pageModules.zero = {
     var hero = node('section', 'hl-hero');
     var copy = node('div', 'hl-hero-copy');
     var world = ArkUI.buildChainWorld ? ArkUI.buildChainWorld({ caseId: 'transfers' }) : null;
-    if (world) copy.appendChild(world.element);
     copy.appendChild(label(homeCopy.EYEBROW.value, 'world'));
     var heading = node('h1', 'hl-title'); heading.id = 'hl-title';
     homeCopy.TITLE.value.split('\n').forEach(function (text, i) { heading.appendChild(node('span', i === 0 ? 'hl-title-negation' : '', text)); });
     copy.appendChild(heading);
     copy.appendChild(node('p', 'hl-intro', homeCopy.INTRO.value));
     var heroActions = node('div', 'hl-actions');
-    var learn = link(homeCopy.CTA.value, 'deployment', 'hl-button palette-solid');
-    learn.dataset.sceneLink = 'deployment';
-    iconize(learn, 'arrow-right', true); heroActions.appendChild(learn);
+    var learn = lineCta('Your history begins here', 'Follow the line', 'LEARN.HREF');
+    learn.dataset.sceneLink = 'deployment'; heroActions.appendChild(learn);
     copy.appendChild(heroActions); hero.appendChild(copy);
 
     var instrument = node('section', 'hl-instrument hl-chain-hero hl-instrument-quiet');
@@ -75,13 +172,19 @@ ArkUI.pageModules.zero = {
       button.addEventListener('click', function () { if (currentCase !== item.id) { currentCase = item.id; mountHeroFlow(); } });
       caseButtons.push(button); casePicker.appendChild(button);
     });
-    instrument.appendChild(casePicker);
+    var instrumentOverview = node('div', 'hl-instrument-overview');
+    if (world) instrumentOverview.appendChild(world.element);
+    var instrumentControls = node('div', 'hl-instrument-controls');
+    instrumentControls.appendChild(casePicker);
+    instrumentControls.appendChild(node('p', 'hl-demo-note', 'Illustrative / not live traffic'));
+    instrumentOverview.appendChild(instrumentControls);
+    instrument.appendChild(instrumentOverview);
     var flowHost = node('div', 'hl-flow-host'), heroFlow;
     instrument.appendChild(flowHost);
     function mountHeroFlow() {
       if(heroFlow)heroFlow.dispose();
       flowHost.replaceChildren();
-      heroFlow=ArkUI.buildChainFlow({hrefFor:function(key){return '#'+ArkUI.pageCatalog[key].path;},caseId:currentCase,inline:true,rich:true});
+      heroFlow=ArkUI.buildChainFlow({hrefFor:function(key){return ArkUI.dash.resolveLinkField('route:'+key).href;},caseId:currentCase,inline:true,rich:true});
       flowHost.appendChild(heroFlow.element);
       caseButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.case === currentCase)); });
       if (world) world.select(currentCase);
@@ -160,7 +263,7 @@ ArkUI.pageModules.zero = {
       card.appendChild(node('h3', '', item[1])); card.appendChild(node('p', '', item[2])); principleGrid.appendChild(card);
     });
     principles.appendChild(principleGrid);
-    var pressureTest = iconize(link('Go deeper into the resolver model', 'resolver'), 'open', true); pressureTest.dataset.sceneLink = 'resolver'; principles.appendChild(pressureTest); pageMoreBody.appendChild(principles);
+    var pressureTest = iconize(link('Go deeper into the resolver model', 'PRESSURETEST.HREF'), 'open', true); principles.appendChild(pressureTest); pageMoreBody.appendChild(principles);
 
     // RekIt law 16 ("no dashboard thinking") + law 14 ("silence is
     // functional"): a 3-up stat wall reads as a dashboard. One lead metric
@@ -199,7 +302,7 @@ ArkUI.pageModules.zero = {
       var operations = stats && stats.operations;
       var scope = operations ? operations.record + ' · ' + operations.fleet.nodes + ' nodes · ' + operations.fleet.cores + ' cores · ' + operations.date + '. ' : '';
       evidenceFoot.appendChild(node('p', '', scope + 'These are resolution and storage benchmarks, not end-to-end transaction rates.'));
-      evidenceFoot.appendChild(iconize(link('Read methodology & limits', 'stats'), 'open', true));
+      evidenceFoot.appendChild(iconize(link('Read methodology & limits', 'METHODOLOGY.HREF'), 'open', true));
       statsMoreBody.appendChild(evidenceFoot);
       statsMoreDetails.appendChild(statsMoreBody);
       statsMoreWrap.appendChild(statsMoreDetails);
@@ -213,7 +316,7 @@ ArkUI.pageModules.zero = {
     var pulse = node('span', 'hl-pulse', 'Fleet measurement loading');
     var pulseTime = node('span', 'hl-pulse-time', 'Hourly synthetic capacity test');
     signal.appendChild(label('A network you can inspect', 'network')); signal.appendChild(pulse); signal.appendChild(pulseTime);
-    signal.appendChild(iconize(link('Open the explorer', 'explorer'), 'open', true));
+    signal.appendChild(iconize(link('Open the explorer', 'OBSERVATORY.HREF'), 'open', true));
     pageMoreBody.appendChild(signal);
 
     var faq = node('section', 'about-more-part');
@@ -229,11 +332,16 @@ ArkUI.pageModules.zero = {
     el.appendChild(moreSection);
 
     var closing = node('footer', 'hl-closing');
-    closing.appendChild(label('DEFXN / Independent histories. Connected possibilities.', 'world'));
-    closing.appendChild(node('h2', '', 'Start with the idea.\nFollow the evidence.'));
-    closing.appendChild(iconize(link('Explore DEFXN', 'about', 'hl-button palette-solid'), 'arrow-right', true));
+    var closingIllustration = node('div', 'hl-closing-illustration');
+    closingIllustration.appendChild(buildClosingArt());
+    closing.appendChild(closingIllustration);
+    var closingCopy = node('div', 'hl-closing-copy');
+    closingCopy.appendChild(label('DEFXN / Independent histories. Connected possibilities.', 'world'));
+    closingCopy.appendChild(node('h2', '', 'Start with the idea.\nFollow the evidence.'));
+    closingCopy.appendChild(lineCta('Every possibility starts with a history', 'Explore DEFXN', 'CLOSING.HREF'));
+    closing.appendChild(closingCopy);
     var footerLinks = node('nav', 'hl-footer-links'); footerLinks.setAttribute('aria-label', 'More about DEFXN');
-    [['Protocol','about','overview'],['Resolvers','resolvers','resolver'],['Explorer','explorer','network'],['Run from source','download','terminal'],['Governance','dao','vote']].forEach(function (item) { footerLinks.appendChild(iconize(link(item[0], item[1]), item[2])); });
+    [['Protocol','FOOTER.PROTOCOL.HREF','overview'],['Resolvers','FOOTER.RESOLVERS.HREF','resolver'],['Explorer','FOOTER.EXPLORER.HREF','network'],['Run from source','FOOTER.DOWNLOAD.HREF','terminal'],['Governance','FOOTER.DAO.HREF','vote']].forEach(function (item) { footerLinks.appendChild(iconize(link(item[0], item[1]), item[2])); });
     closing.appendChild(footerLinks); el.appendChild(closing);
 
     var disposed = false;

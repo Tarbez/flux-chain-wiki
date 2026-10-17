@@ -99,6 +99,7 @@
   ArkUI.pageModules.about = {
     mount: function (host) {
       var area = 'ABOUT';
+      var manifest = ArkManifest.get('about');
       function words(role) { return ArkCopy.text(area + '.' + role); }
       function node(tag, cls, text) { return ArkUI.el(tag, cls || '', text); }
       function iconize(e, name, after) {
@@ -109,11 +110,11 @@
         return e;
       }
       function label(text, iconName) { var e = node('p', 'hl-label', text); return iconName ? iconize(e, iconName) : e; }
-      function routeLink(text, target, cls) {
-        var link = node('a', cls || 'hl-link', text);
-        link.href = ArkUI.route.href(ArkUI.pageCatalog[target].path);
-        link.dataset.sceneLink = target;
-        return link;
+      /* `hrefRole`'s field is a manifest field of kind 'link' (js/content/manifest.js);
+         js/ark/dash-kit.js's resolveLinkField/linkEl is the one place that turns its
+         tagged value into a real href -- replaces this page's own former routeLink(). */
+      function routeLink(text, hrefRole, cls) {
+        return ArkUI.dash.linkEl(text, words(hrefRole), manifest.route, cls || 'hl-link');
       }
       function section(index, title, deck, iconName) {
         var e = node('section', 'hl-section');
@@ -139,8 +140,8 @@
       copy.appendChild(title);
       copy.appendChild(node('p', 'hl-intro', words('DECK')));
       var actions = node('div', 'hl-actions');
-      actions.appendChild(iconize(routeLink(words('ACTION'), ArkUI.pageCatalog.resolutions ? 'resolutions' : 'deployment', 'hl-button palette-solid about-primary-action'), 'arrow-right', true));
-      actions.appendChild(iconize(routeLink(words('ACTION2'), 'deployment'), 'open', true));
+      actions.appendChild(iconize(routeLink(words('ACTION'), 'ACTION.HREF', 'hl-button palette-solid about-primary-action'), 'arrow-right', true));
+      actions.appendChild(iconize(routeLink(words('ACTION2'), 'ACTION2.HREF'), 'open', true));
       copy.appendChild(actions); hero.appendChild(copy);
 
       var points = [1, 2, 3].map(function (i) { return { title: words('POINT' + i + '.TITLE'), text: words('POINT' + i + '.TEXT') }; });
@@ -195,7 +196,7 @@
         steps.appendChild(card);
       });
       flowPart.appendChild(steps);
-      flowPart.appendChild(iconize(routeLink(words('FLOW.LINK'), 'resolver'), 'open', true));
+      flowPart.appendChild(iconize(routeLink(words('FLOW.LINK'), 'FLOW.LINK.HREF'), 'open', true));
       moreBody.appendChild(flowPart);
 
       var promisePart = node('section', 'about-more-part');
@@ -216,7 +217,7 @@
         resolvePart.appendChild(node('h3', '', words('RESOLVE.TITLE')));
         var groups = node('div', 'about-groups');
         ArkResolutions.list().forEach(function (group) {
-          var tile = routeLink('', 'resolutions', 'about-group');
+          var tile = routeLink('', 'RESOLVE.GROUP.HREF', 'about-group');
           tile.appendChild(label(group.items.length + ' resolutions', GROUP_ICONS[group.key]));
           tile.appendChild(node('h3', '', group.title));
           var names3 = group.items.slice(0, 3).map(function (item) { return ArkResolutions.shortName(item.title); });
@@ -224,7 +225,7 @@
           groups.appendChild(tile);
         });
         resolvePart.appendChild(groups);
-        resolvePart.appendChild(iconize(routeLink(words('RESOLVE.ALL'), 'resolutions'), 'open', true));
+        resolvePart.appendChild(iconize(routeLink(words('RESOLVE.ALL'), 'RESOLVE.ALL.HREF'), 'open', true));
         moreBody.appendChild(resolvePart);
       }
 
@@ -256,21 +257,33 @@
       var reference = node('details', 'about-reference');
       reference.appendChild(node('summary', '', words('REFERENCE')));
       var body = node('div', 'about-reference-body');
-      var status = node('a', 'hl-link', words('STATUS')); status.href = 'docs/status.md';
+      var status = routeLink(words('STATUS'), 'STATUS.HREF');
+      /* The onward link reuses manifest.meta.next (ArkManifest.get('about').meta.next), the
+         same existing route picker the admin editor's "Where it goes" panel already edits
+         (js/admin/admin.js's routeOptions()+selectEl at the manifest.meta.next field) --
+         not a second, parallel 'link' field duplicating the same destination. */
+      var next = iconize(ArkUI.dash.linkEl(words('NEXT'), 'route:' + manifest.meta.next, manifest.route, 'hl-link'), 'arrow-right', true);
       [[words('POINT4.TITLE'), words('POINT4.TEXT'), iconize(status, 'open', true)],
-       [words('POINT5.TITLE'), words('POINT5.TEXT'), iconize(routeLink(words('NEXT'), 'concept'), 'arrow-right', true)]].forEach(function (item) {
+       [words('POINT5.TITLE'), words('POINT5.TEXT'), next]].forEach(function (item) {
         var part = node('section', 'about-reference-item');
         part.appendChild(node('h3', '', item[0])); part.appendChild(node('p', '', item[1]));
         part.appendChild(item[2]); body.appendChild(part);
       });
       reference.appendChild(body); closing.appendChild(reference);
       var footerLinks = node('nav', 'hl-footer-links'); footerLinks.setAttribute('aria-label', 'More about DEFXN');
-      [['Home', 'zero', 'arrow-left'], ['Resolutions', 'resolutions', 'layers'], ['Explorer', 'explorer', 'network'], ['Run from source', 'download', 'terminal']].forEach(function (item) {
-        if (ArkUI.pageCatalog[item[1]]) footerLinks.appendChild(iconize(routeLink(item[0], item[1]), item[2]));
+      [['Home', 'FOOTER.HOME.HREF', 'arrow-left'], ['Resolutions', 'FOOTER.RESOLUTIONS.HREF', 'layers'], ['Explorer', 'FOOTER.EXPLORER.HREF', 'network'], ['Run from source', 'FOOTER.DOWNLOAD.HREF', 'terminal']].forEach(function (item) {
+        footerLinks.appendChild(iconize(routeLink(item[0], item[1]), item[2]));
       });
       closing.appendChild(footerLinks); el.appendChild(closing);
 
       selectLayer(1);
+
+      /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+         is centralized in js/main.js's onMount hook, not called here. */
+      var components = node('div', 'about-components');
+      components.setAttribute('data-ark-insert', 'main');
+      el.appendChild(components);
+
       el.arkDispose = function () {};
       host.appendChild(el);
       return el;

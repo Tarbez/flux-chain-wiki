@@ -208,6 +208,11 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         securityProfile: opened.summary?.securityProfile || '',
         rootVerified: true,
         sign: async (text) => toBase64(await handle.sign(new TextEncoder().encode(text))),
+        // Raw bytes, not text: dense-wire records are signed over their exact bytes. genesis's
+        // and defxn-dao's signers (js/dense-wire/flx-identity-bridge.mjs) and defxn-dao's DAO
+        // voting call this; it was in the earlier bundle and was lost when this entry was
+        // rewritten, so those sites could not sign once they picked up a current build.
+        signBytes: async (bytes) => toBase64(await handle.sign(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes))),
         signWithWallet: async (text) => {
           if (!walletHandle) throw new Error('This identity has no wallet set up yet, so there is nothing to sign with -- create a wallet and complete its first-time setup first.');
           return toBase64(await walletHandle.sign(new TextEncoder().encode(text)));

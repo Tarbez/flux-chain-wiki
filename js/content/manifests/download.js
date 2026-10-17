@@ -97,6 +97,18 @@ ArkManifest.define({
       "kind": "line",
       "section": "Links",
       "value": "OPEN THE FULL OPERATOR GUIDE"
+    },
+    "GUIDE.HREF": {
+      "label": "Operator documentation target",
+      "kind": "link",
+      "section": "Links",
+      "value": "doc:docs/operators/run-from-source.md"
+    },
+    "ASIDE.HREF": {
+      "label": "Bundle Deployer aside link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:bundledeployer"
     }
   }
 });

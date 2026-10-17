@@ -35,36 +35,22 @@ export const KIND_OFFER = "OFFER";
 export const KIND_AGREEMENT = "AGREEMENT";
 export const KIND_FULFILLMENT = "FULFILLMENT";
 export const KIND_VALUEOBJECT = "VALUEOBJECT";
-/** Pointer-graph MVP types (registry/manifest-types.json, provenance
- *  `taxonomy-document`/`grammar-migration`, specVersion 0.4.3). Added
- *  alongside the NAME/TITLE/KIND/CHAIN tokens -- no blockers, confirmed
- *  free of collision with any live manifest type. */
-export const KIND_GHOST = "GHOST";
-export const KIND_CONTENT = "CONTENT";
 
 /** Y-block payload -> kind name. Mirrors `Kind::from_code` (src/lib.rs
  *  ~61-74): LedgerEntry alone accepts two spellings (the registered short
  *  code `1A` and the long form `LEDGERENTRY` actually emitted on the wire
- *  today); every other kind has exactly one code, always the short form.
- *  GHOST/CONTENT use their registry `code` verbatim (manifest-types.json),
- *  the same convention every other entry here already follows -- an exact
- *  dictionary key, never a prefix, so "0" (GHOST) and "0G" (INTENT) cannot
- *  collide with each other regardless of how role tokens inside the
- *  manifest are resolved. */
+ *  today); every other kind has exactly one code, always the short form. */
 const CODE_TO_KIND = {
-  "0": KIND_GHOST,
   "0G": KIND_INTENT,
   "0H": KIND_OFFER,
   "0I": KIND_AGREEMENT,
   "0J": KIND_FULFILLMENT,
   "0L": KIND_VALUEOBJECT,
-  "1C": KIND_CONTENT,
   [KIND_LEDGERENTRY_SHORT]: KIND_LEDGERENTRY,
   [KIND_LEDGERENTRY]: KIND_LEDGERENTRY,
 };
 
-/** `Kind::required()`, src/lib.rs ~180-187. GHOST/CONTENT mirror
- *  manifest-types.json's own `requiredRoles` arrays exactly. */
+/** `Kind::required()`, src/lib.rs ~180-187. */
 const REQUIRED_ROLES = {
   [KIND_LEDGERENTRY]: ["G", "Y", "V", "M", "H", "J", "C", "S"],
   [KIND_INTENT]: ["G", "Y", "V", "C", "M", "D", "S"],
@@ -72,8 +58,6 @@ const REQUIRED_ROLES = {
   [KIND_AGREEMENT]: ["G", "Y", "V", "C", "M", "S"],
   [KIND_FULFILLMENT]: ["G", "Y", "V", "C", "M", "S"],
   [KIND_VALUEOBJECT]: ["G", "Y", "V", "I", "R", "H", "T", "C", "M", "S"],
-  [KIND_GHOST]: ["G", "Y", "NAME", "M", "S"],
-  [KIND_CONTENT]: ["G", "Y", "TITLE", "M", "S"],
 };
 
 /** `Kind::min_c(issuance)`, src/lib.rs ~188-205. ValueObject's minimum
@@ -131,23 +115,8 @@ const SHAPE = {
   C: (p) => p.length === 64 && isLowerHex(p),
   // S: 128-char lowercase hex (ed25519 sig hex).
   S: (p) => p.length === 128 && isLowerHex(p),
-  // KK: the REAL, PERMANENT on-wire form of a LedgerEntry sub-kind marker.
-  // Every one of dense-wire's 23 sub-kind constants (`chain.rs`'s
-  // DAO_KIND_FOUND="KDAO1", TREASURY_KIND_SPEND="KTSPEND1", ...) itself
-  // conventionally starts with `K`, so role `K` + marker renders on the wire
-  // as `K`+`KDAO1` = `KKDAO1`, never `KDAO1` alone. `KK` is registered
-  // (registry/role-letters.json, specVersion 0.4.3) to match that real shape
-  // exactly -- bare `K` alone stays `reservedInvalid` (the canonical example
-  // of the superseded wordy grammar) and still must never resolve; `KK` is a
-  // disjoint two-character token, not a reuse of it. Expand the registry to
-  // match a live wire format; never rewrite a live wire format (and the
-  // native Android dumb-parser, and the cross-language contract tests
-  // pinned to these exact bytes) to match a cleaner-looking registry.
-  KK: (p) => p.length > 0 && /^[A-Za-z0-9]+$/.test(p),
-  // KIND: an ADDITIONAL, OPTIONAL token for any NEW LedgerEntry sub-kind
-  // marker with no reason to match the legacy `KK` shape above. Not a
-  // migration target -- no existing `KK<marker>` producer needs to change.
-  KIND: (p) => p.length > 0 && /^[A-Za-z0-9]+$/.test(p),
+  // K: alphanumeric kind marker (KRSTR1, KEARN1S, ...).
+  K: (p) => p.length > 0 && /^[A-Za-z0-9]+$/.test(p),
   // W: hex-of-utf8 (matches flux-core's Wrapped resolver). The dense
   // charset forbids dots, so dotted addresses are hex-encoded by the
   // builders; signer-pubkey W blocks (used by EarnSigner) are already
@@ -155,29 +124,11 @@ const SHAPE = {
   W: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
   // D: digits (deadline, unix seconds).
   D: (p) => /^\d+$/.test(p),
-  // N: the REAL, PERMANENT on-wire form of a LedgerEntry's chain-of-chains
-  // scope (Phase B.1), e.g. `Ndefxn`. Mirrors `chain::is_chain_id_shape`:
-  // 3-32 lowercase alphanumeric. A deliberate, narrowly-scoped exception to
-  // `N`'s global `reservedTooling` status (manifest-types.json's
-  // LEDGERENTRY `letterExtensions.N`) -- the NOTIFY collision hazard
-  // `reservedTooling` guards against cannot occur here: a chain id is
-  // lowercase and 3-32 chars, NOTIFY's hazard shape is uppercase. `N` stays
-  // `reservedTooling` everywhere else in the grammar.
+  // N: chain-id scope (Phase B.1). Mirrors `chain::is_chain_id_shape`:
+  // 3-32 lowercase alphanumeric. Not in the original table because no
+  // pre-existing builder emitted an N block; the new DAO/treasury builders
+  // (Y=LEDGERENTRY, K=KDAO1/KDAOTREAS1/KTSPEND1) always do.
   N: (p) => /^[a-z0-9]{3,32}$/.test(p),
-  // CHAIN: an ADDITIONAL, OPTIONAL token for a future chain-scope use with
-  // no reason to match the legacy bare-`N` shape above. Not a migration
-  // target -- no existing `N<chain-id>` producer needs to change.
-  CHAIN: (p) => /^[a-z0-9]{3,32}$/.test(p),
-  // NAME: a GHOST manifest's human-readable lookup handle (registry/
-  // role-letters.json, specVersion 0.4.3) -- dash-free alphanumeric
-  // directly, same posture as G/S/C (a lookup handle is already a safe
-  // identifier by convention, not free-form prose needing hex-of-UTF-8).
-  NAME: (p) => p.length > 0 && /^[A-Za-z0-9]+$/.test(p),
-  // TITLE: a CONTENT manifest's title (registry/role-letters.json,
-  // specVersion 0.4.3) -- hex-of-UTF-8, same convention as H: real titles
-  // contain spaces and punctuation the dash-only alphabet cannot carry
-  // literally.
-  TITLE: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
   // I: role `primary`, ported from flux-core's `unpack_coded_fields`
   // (roles.rs ~130-192): a mandatory leading digit run (the sequence
   // number), then zero or more `<UPPERCASE letter><optional digits>`
@@ -209,96 +160,66 @@ const SHAPE = {
   },
 };
 
-/** Longest-registered-token-first, generated from `SHAPE`'s own keys so a
- *  new role never needs a second place updated. Role recognition is
- *  registry-lookup + longest-match (flux-spec/spec/dense-encoding-v4.md,
- *  specVersion 0.4.3 Rule 2) -- a block's role is whichever key here is the
- *  LONGEST prefix match, never just its first character. This is what makes
- *  `CHAIN...` and `C...` (or `TITLE...` and `T...`, `KIND...` and nothing,
- *  `NAME...` and nothing) resolve to the right role instead of the shorter
- *  one silently absorbing the longer token's blocks. */
-const ROLE_TOKENS_LONGEST_FIRST = Object.keys(SHAPE).sort((a, b) => b.length - a.length);
-
-/** Resolve one block to its exact role identity + payload. Every other
- *  function in this file that needs to know "is this block a C block" (the
- *  required-roles check, `cCount`, `isIssuance`, `Raw.payload`/`c`) MUST go
- *  through this -- never `block[0]` or `block.startsWith(letter)` -- because
- *  `CHAIN` is a real registered token that shares a prefix with `C`, and a
- *  `startsWith("C")` scan would wrongly count a `CHAIN...` block as a `C`
- *  block. Returns `null` for a block matching no registered token. */
-function resolveRole(block) {
-  for (const token of ROLE_TOKENS_LONGEST_FIRST) {
-    if (block.startsWith(token)) return { role: token, packed: block.slice(token.length) };
-  }
-  return null;
-}
-
 /** Parse-and-validate a manifest. Returns a `Raw` object or throws. */
 export function admit(text) {
   if (!text || text.length > MAX_MANIFEST_LEN) throw new ParseError(ErrGrammar, "size");
   if (!ALLOWED.test(text)) throw new ParseError(ErrGrammar, "charset");
   const blocks = text.split("-");
-  const resolved = blocks.map((block) => {
-    if (!block) throw new ParseError(ErrGrammar, "empty block");
-    const hit = resolveRole(block);
-    if (!hit) throw new ParseError(ErrGrammar, `unknown role in ${block}`);
-    return hit;
-  });
-  const yHit = resolved.find((r) => r.role === "Y");
-  if (!yHit) throw new ParseError(ErrGrammar, "no Y");
-  const yCode = yHit.packed;
+  const yBlock = blocks.find((b) => b.startsWith("Y"));
+  if (!yBlock) throw new ParseError(ErrGrammar, "no Y");
+  const yCode = yBlock.slice(1);
   const kind = CODE_TO_KIND[yCode] ?? null;
   if (!kind) throw new ParseError(ErrType, `unknown Y=${yCode}`);
 
   const seen = new Set();
-  for (const { role, packed } of resolved) {
+  for (const block of blocks) {
+    if (!block) throw new ParseError(ErrGrammar, "empty block");
+    const role = block[0];
+    const packed = block.slice(1);
     if (!isRepeatableRole(kind, role)) {
       if (seen.has(role)) throw new ParseError(ErrGrammar, `duplicate role ${role}`);
       seen.add(role);
     }
     const check = SHAPE[role];
+    if (!check) throw new ParseError(ErrGrammar, `unknown role ${role}`);
     if (!check(packed)) throw new ParseError(ErrGrammar, `bad ${role} shape`);
   }
 
   for (const r of REQUIRED_ROLES[kind]) {
-    if (!resolved.some((hit) => hit.role === r)) {
+    if (!blocks.some((b) => b.startsWith(r))) {
       throw new ParseError(ErrGrammar, `missing required role ${r}`);
     }
   }
   // `Kind::is_issuance` (src/lib.rs ~236-238): a ValueObject whose `I`
-  // payload is literally "0". Computed directly from the resolved blocks
-  // (not via `Raw`, which doesn't exist yet) the same way `Kind::min_c`
-  // needs it before `Raw` can be constructed on the Rust side too.
-  const iHit = resolved.find((r) => r.role === "I");
-  const isIssuance = kind === KIND_VALUEOBJECT && iHit?.packed === "0";
-  const cCount = resolved.filter((r) => r.role === "C").length;
+  // payload is literally "0". Computed directly from the blocks (not via
+  // `Raw`, which doesn't exist yet) the same way `Kind::min_c` needs it
+  // before `Raw` can be constructed on the Rust side too.
+  const iBlock = blocks.find((b) => b.startsWith("I"));
+  const isIssuance = kind === KIND_VALUEOBJECT && iBlock?.slice(1) === "0";
+  const cCount = blocks.filter((b) => b.startsWith("C")).length;
   if (cCount < minC(kind, isIssuance)) {
     throw new ParseError(ErrGrammar, "too few C refs");
   }
-  return new Raw(text, kind, resolved);
+  return new Raw(text, kind, blocks);
 }
 
 export class Raw {
-  /** `resolved` is an array of `{ role, packed }`, already longest-matched
-   *  by `admit()` -- never re-derive role identity from a raw block string
-   *  here (that is exactly the `C`/`CHAIN` collision `resolveRole` exists
-   *  to prevent). */
-  constructor(text, kind, resolved) {
+  constructor(text, kind, blocks) {
     this.text = text;
     this.kind = kind;
-    this.resolved = resolved;
+    this.blocks = blocks;
   }
   payload(role) {
-    const hit = this.resolved.find((r) => r.role === role);
-    return hit ? hit.packed : null;
+    const b = this.blocks.find((b) => b.startsWith(role));
+    return b ? b.slice(1) : null;
   }
   c(n) {
-    const cs = this.resolved.filter((r) => r.role === "C");
-    return cs[n] ? cs[n].packed : null;
+    const cs = this.blocks.filter((b) => b.startsWith("C"));
+    return cs[n] ? cs[n].slice(1) : null;
   }
   /** `Raw::c_count` (src/lib.rs ~230-232). */
   cCount() {
-    return this.resolved.filter((r) => r.role === "C").length;
+    return this.blocks.filter((b) => b.startsWith("C")).length;
   }
   /** `Raw::is_issuance` (src/lib.rs ~236-238). */
   isIssuance() {
@@ -336,4 +257,18 @@ export function hexOfUtf8(s) {
   let out = "";
   for (const b of enc) out += b.toString(16).padStart(2, "0");
   return out;
+}
+
+/** Inverse of `hexOfUtf8` — decode a lowercase hex string back to UTF-8
+ *  text. Mirrors the Rust `flux_core::roles::utf8_of_hex`. Used to read
+ *  back `W` blocks and inline C-block payloads (e.g. `KACLEV1`'s C[1]). */
+export function utf8OfHex(hex) {
+  if (!isLowerHex(hex) || hex.length % 2 !== 0) {
+    throw new Error(`utf8OfHex: not a well-formed lowercase hex string: ${JSON.stringify(hex)}`);
+  }
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
 }

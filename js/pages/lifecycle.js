@@ -72,8 +72,13 @@
       if (id && !ArkUI.lifecycleContent[id]) throw new Error('Unknown lifecycle stage: ' + id);
       var el = ArkUI.el('section', 'ark-page lifecycle-page');
       el.dataset.arkPage = page;
+      /* This page carries no ArkManifest of its own (ArkUI.lifecycleContent
+         above is a standalone content object, not a manifest), so there is
+         no manifest field for a 'link' kind value to live in; a destination
+         stays a tagged literal in code, resolved the one shared way every
+         retrofitted call site is -- js/ark/dash-kit.js's linkEl. */
       function link(label, key, cls) {
-        var a = ArkUI.el('a', cls || '', label); a.href = ArkUI.route.href(ArkUI.pageCatalog[key].path); a.dataset.sceneLink = key; return a;
+        return ArkUI.dash.linkEl(label, 'route:' + key, undefined, cls);
       }
       var path = ArkUI.el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Your place');
       path.appendChild(link('← Home', 'zero'));
@@ -172,7 +177,7 @@
           }
         } else {
           view.appendChild(ArkUI.el('p', '', id ? copy.facts[1][1] : 'The canonical agreement guide describes the record types and their reference chain. This is an illustrative walkthrough, not a live agreement or a verified production run.'));
-          var guide = ArkUI.el('a', 'story-reference', 'Read the agreement guide ↗'); guide.href = ArkUI.route.href('/reference?' + new URLSearchParams({doc:'docs/protocol/agreements.md',from:ArkUI.pageCatalog[page].path}).toString()); view.appendChild(guide);
+          var guide = ArkUI.dash.linkEl('Read the agreement guide ↗', 'doc:docs/protocol/agreements.md', ArkUI.pageCatalog[page].path, 'story-reference'); view.appendChild(guide);
           if (id) view.appendChild(ArkUI.el('p', '', 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.'));
         }
         if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(view);
@@ -190,6 +195,7 @@
       select(0, false); restore();
       window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
       el.arkDispose = function () { if(unique)unique.dispose();else fabric.dispose();window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
+      var components = ArkUI.el('div', 'lifecycle-components'); components.setAttribute('data-ark-insert', 'main'); el.appendChild(components);
       host.appendChild(el);if(unique)unique.start();else fabric.select(previewStage,false);return el;
     }
   };

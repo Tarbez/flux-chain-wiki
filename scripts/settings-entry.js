@@ -13,14 +13,18 @@ const atmosphereFixed=Object.freeze({intensity:37,grain:90});
 const controls={structure:{label:'Structure',min:0,max:100,value:50},visibility:{label:'Visibility',min:0,max:100,value:72},scale:{label:'Scale',min:60,max:180,value:100},density:{label:'Density',min:20,max:100,value:60},softness:{label:'Softness',min:0,max:100,value:0},delay:{label:'Loop delay (seconds)',min:.3,max:10,value:1.2}};
 ui.register('ATMOSPHERERANGE|BUTTON',{tag:'input',attrs:{type:'range'}});
 const root=document.documentElement;
+// Site-wide owner-set defaults (js/content/settings-defaults.js + -data.js), consulted only
+// as the fallback a real visitor's own localStorage choice is missing -- read(key,fallback)'s
+// own precedence (their choice wins) is unchanged, this only moves what the fallback IS.
+const SITE_DEFAULTS=(window.ArkSiteDefaults&&ArkSiteDefaults.get())||{};
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
 const save=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
-let theme=read('flux-chain-theme','ghost'),renderer,frame=0;
+let theme=read('flux-chain-theme',SITE_DEFAULTS.theme||'ghost'),renderer,frame=0;
 if(!themes.includes(theme))theme='ghost';
 let saved={};try{saved=JSON.parse(read('defxn-pattern-config-v1','{}'))||{};}catch{}
 let values={};
-function patternValues(name){const stored=saved[name]||{};const result={animated:stored.animated!==false};for(const [key,c] of Object.entries(controls)){result[key]=typeof stored[key]==='number'&&Number.isFinite(stored[key])?Math.max(c.min,Math.min(c.max,stored[key])):c.value;}for(const [key,choices] of Object.entries({scale:[80,100,140],density:[35,60,90]}))result[key]=choices.reduce((a,b)=>Math.abs(a-result[key])<Math.abs(b-result[key])?a:b);return result;}
-values=patternValues(read('defxn-motif-v1','blocks'));
+function patternValues(name){const stored=saved[name]||{};const siteDefault=(SITE_DEFAULTS.patternConfig&&SITE_DEFAULTS.patternConfig[name])||{};const result={animated:stored.animated!==undefined?stored.animated!==false:typeof siteDefault.animated==='boolean'?siteDefault.animated:true};for(const [key,c] of Object.entries(controls)){result[key]=typeof stored[key]==='number'&&Number.isFinite(stored[key])?Math.max(c.min,Math.min(c.max,stored[key])):typeof siteDefault[key]==='number'&&Number.isFinite(siteDefault[key])?Math.max(c.min,Math.min(c.max,siteDefault[key])):c.value;}for(const [key,choices] of Object.entries({scale:[80,100,140],density:[35,60,90]}))result[key]=choices.reduce((a,b)=>Math.abs(a-result[key])<Math.abs(b-result[key])?a:b);return result;}
+values=patternValues(read('defxn-motif-v1',SITE_DEFAULTS.motif||'blocks'));
 root.dataset.background='atmosphere';
 const backgroundHost=document.createElement('div');backgroundHost.className='ark-background-host';backgroundHost.setAttribute('aria-hidden','true');
 document.querySelector('[data-ark-layer="persistent"]').prepend(backgroundHost);
@@ -32,7 +36,7 @@ const themeNames={ghost:'Ember',clay:'Tide',ochre:'Moss',marine:'Dune',dusk:'Dus
 const darkThemes=['ghost','clay','ochre','marine','dusk'],lightThemes=['glacier','grove','moss','bone','dawn'];
 const motifs=['blocks','traces','layers','nodes','routes','tiles','frames','none'];
 const motifMigration={wave:'traces',weave:'traces',rosette:'blocks',arches:'layers',survey:'traces'};
-let motif=read('defxn-motif-v1','blocks');motif=motifMigration[motif]||motif;if(!motifs.includes(motif))motif='blocks';
+let motif=read('defxn-motif-v1',SITE_DEFAULTS.motif||'blocks');motif=motifMigration[motif]||motif;if(!motifs.includes(motif))motif='blocks';
 const title=value=>themeNames[value]||value[0].toUpperCase()+value.slice(1);
 const slots={};
 function slot(name,text,button=false,cls=''){

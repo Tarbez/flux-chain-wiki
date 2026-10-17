@@ -3,9 +3,27 @@
 (function () {
   'use strict';
 
-  /* Keep description, social tags and explicit canonical overrides in step with
-     the committed route. This is browser metadata, not server prerendering. */
+  /* Keep description, social tags, robots visibility, structured data, and explicit
+     canonical overrides in step with the committed route. This is browser metadata, not
+     server prerendering. A schema.org JSON-LD block is generated for the route kinds that
+     need no page-content introspection to build honestly (WebSite/Article/generic WebPage);
+     FAQPage and similar content-shaped types can be chosen as a schemaType override but are
+     emitted as a bare typed node with no auto-extracted Q&A -- real pages have no uniform
+     heading/paragraph structure to extract that from safely, so this never claims to. */
   var initialDescription;
+  function jsonLdFor(entry, map, id, text, canonical, image) {
+    var site = ArkSEO.site(), base = site.baseUrl || (typeof location !== 'undefined' ? location.origin : '');
+    var org = { '@type': site.org, name: site.name };
+    if (base) org.url = base + '/';
+    var fallback = entry.seoArticle ? 'Article' : (id === 'home' ? 'WebSite' : 'WebPage');
+    var typ = ArkSEO.schemaType(map, id, fallback), abstract = ArkSEO.aiSummary(map, id, text);
+    var node;
+    if (typ === 'WebSite') node = { '@type': 'WebSite', name: site.name, url: base ? base + '/' : undefined, description: text };
+    else if (typ === 'Article') node = { '@type': 'Article', headline: document.title, description: text, abstract: abstract, author: org, publisher: org, mainEntityOfPage: canonical || undefined, image: image || undefined };
+    else node = { '@type': typ, name: document.title, description: text, abstract: abstract, url: canonical || undefined };
+    node['@context'] = 'https://schema.org';
+    return node;
+  }
   function applyRouteMetadata(entry) {
     if (typeof ArkSEO === 'undefined' || !entry) return;
     var fallback = document.querySelector('meta[name="description"]');
@@ -29,6 +47,8 @@
     var id = entry.seoArticle || entry.seoId;
     var image = ArkSEO.ogImage(map, id);
     var canonical = ArkSEO.canonical(map, id);
+    var site = ArkSEO.site();
+    if (site.lang && document.documentElement.lang !== site.lang) document.documentElement.lang = site.lang;
     meta('property', 'og:title', document.title);
     meta('property', 'og:description', text);
     meta('property', 'og:type', entry.seoArticle ? 'article' : 'website');
@@ -38,12 +58,20 @@
     meta('name', 'twitter:title', document.title);
     meta('name', 'twitter:description', text);
     meta('name', 'twitter:image', image);
+    meta('name', 'twitter:site', site.handle);
+    var robotsParts = [];
+    if (ArkSEO.noindex(map, id)) robotsParts.push('noindex');
+    if (ArkSEO.aiBlocked(map, id)) robotsParts.push('noai', 'noimageai');
+    meta('name', 'robots', robotsParts.join(', '));
     var link = document.querySelector('link[rel="canonical"]');
     if (!canonical) { if (link) link.remove(); }
     else {
       if (!link) { link = document.createElement('link'); link.setAttribute('rel', 'canonical'); document.head.appendChild(link); }
       link.setAttribute('href', canonical);
     }
+    var ld = document.querySelector('script[data-ark-ld="1"]');
+    if (!ld) { ld = document.createElement('script'); ld.type = 'application/ld+json'; ld.setAttribute('data-ark-ld', '1'); document.head.appendChild(ld); }
+    ld.textContent = JSON.stringify(jsonLdFor(entry, map, id, text, canonical, image));
   }
 
   ArkUI.createPageRouter = function (options) {
@@ -70,6 +98,22 @@
         });
       });
       return Promise.all(runs.map(function (run) { return run.finished.catch(function () {}); }));
+    }
+    /* Background in/out transition (js/content/canvas-transitions.js): a small,
+       additive opacity (and, for 'fade-scale', transform) fade on the single
+       persistent lattice/atmosphere/brand-mesh layer -- never a second background
+       host, never touching js/lattice.js's own camera-pan logic or js/zero-webgl.js.
+       This runs on every real navigation for every real visitor, so it must never be
+       able to break one: a missing script, a missing persistent layer, or any other
+       unusual boot order degrades silently to "no background transition," never a
+       thrown error reaching navigate()'s own try/catch (which would otherwise treat
+       it the same as a genuinely failed page load). */
+    function fadeCanvas(phase) {
+      if (!window.ArkCanvasTransitions) return;
+      try {
+        var persistentEl = scene && scene.querySelector && scene.querySelector('[data-ark-layer="persistent"]');
+        if (persistentEl) window.ArkCanvasTransitions.apply(persistentEl, phase);
+      } catch (e) {}
     }
     function url(page) { return ArkUI.route.href(catalog[page].path); }
     function resolve(address) {
@@ -178,6 +222,7 @@
         }
         var immediate = state.get().paused || ArkUI.prefersReducedMotion();
         scene.dataset.transition = 'running';
+        fadeCanvas('out');
         var outgoing = active;
         var stageSwap = isLifecycleStage(outgoing) && isLifecycleStage(page);
         var panel = continuity && continuity.begin(outgoing, page, mounted, settings.source, immediate);
@@ -201,6 +246,7 @@
         if (typeof document !== 'undefined') {
           document.title = catalog[page].title;
           applyRouteMetadata(catalog[page]);
+          if (typeof window !== 'undefined') window.dispatchEvent(new Event('ark:route-ready'));
         }
         report('', false); outlet.setAttribute('aria-busy', 'false');
         var panelRun = panel ? panel.commit(mounted[page], immediate) : Promise.resolve();
@@ -219,6 +265,12 @@
         } else entering = presence.show(page, immediate).then(function () {
           if (stageRetention) stageRetention.activate(mounted[page]);
         });
+        // The background fade-in starts strictly after the incoming content's own
+        // entrance has already been kicked off above (presence.show/enter already
+        // called, synchronously starting its first animation frame even though
+        // `entering` itself is still a pending promise) -- never before it, so the two
+        // transitions are layered, not racing to start at the same instant.
+        fadeCanvas('in');
         // Reveal sets up its first animation frame synchronously. Restore scroll
         // now, before it paints, rather than jumping after the entry completes.
         restoreScroll(page);
@@ -248,6 +300,16 @@
       get panelHost() { return continuity && continuity.host; },
       onMount: function (hook) { hooks.push(hook); },
       onStatus: function (handler) { report = handler; },
+      /* Rebuild the current route from the live registries. The CMS preview uses
+         this after applying unsaved manifests/articles so the iframe renders the
+         exact public page module again, rather than a second visual approximation. */
+      refresh: function () {
+        var page = active || requested;
+        if (active && mounted[active]) remove(active);
+        active = null;
+        modules.delete(page);
+        return navigate(page, { history: 'none', query: ArkUI.route.search ? ArkUI.route.search() : '' });
+      },
       retry: function () { return navigate(requested, requestedSettings); }
     };
   };

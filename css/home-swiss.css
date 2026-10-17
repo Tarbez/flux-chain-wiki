@@ -88,7 +88,7 @@
    with the hero. */
 #scene .hl-signal-quiet {background:transparent;color:inherit;border-top:0;padding:0;margin-top:40px;}
 #scene .hl-signal-quiet .hl-label {color:hsl(var(--text-faint));}
-#scene .hl-signal-quiet .hl-link {color:hsl(var(--reference));text-decoration:underline;text-decoration-color:hsl(var(--reference) / .4);text-underline-offset:4px;}
+#scene .hl-signal-quiet .hl-link {color:hsl(var(--reference));text-decoration:underline;text-decoration-color:hsl(var(--reference-600));text-underline-offset:4px;}
 #scene .hl-signal-quiet[data-state="ok"] .hl-pulse::before {content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:hsl(var(--success));}
 #scene .hl-signal .hl-label {margin-right:auto;color:hsl(var(--anchor-ink) / .64);}
 #scene .hl-pulse {font-size:13px;color:hsl(var(--anchor-ink));font-variant-numeric:tabular-nums;}
@@ -213,6 +213,30 @@
 #scene .hl-case-picker {display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid hsl(var(--border-default));border-radius:8px;}
 #scene .hl-case {display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 10px;border:0;border-radius:4px;font:500 12px "Albert Sans",sans-serif;}
 #scene .hl-case .native-icon {width:15px;height:15px;flex-basis:15px;}
+
+/* The chain map and its example controls are one instrument in the right
+   column, rather than two competing objects split across the hero. */
+#scene .hl-instrument-overview {
+  position:relative;
+  display:grid;
+  gap:0;
+  width:100%;
+  margin-bottom:22px;
+  padding-bottom:26px;
+  border-bottom:1px solid hsl(var(--border-subtle));
+}
+#scene .hl-chain-hero .hl-instrument-overview .hl-world {
+  width:100%;
+  max-width:none;
+  margin:0;
+}
+#scene .hl-instrument-controls {
+  position:absolute;
+  inset:0 0 26px;
+  z-index:1;
+  margin:0;
+  pointer-events:none;
+}
 
 /* The landscape (js/pages/home-flow.js drawLandscape). Colour is data: every
    history is 0% saturation, and only the record whose state changes (J42),
@@ -374,3 +398,425 @@
   #scene .home-launch *,#scene .home-launch *::before,#scene .home-launch *::after {animation:none !important;transition:none !important;}
 }
 #scene .hero-still .home-launch * {animation:none !important;transition:none !important;}
+
+/* ---- The line is the interface -----------------------------------------
+   The hero map is no longer decoration beside a generic button. Its own
+   visual language becomes the action, the example selector and the five
+   stage walkthrough: identity, line, stations, destination. */
+#scene .hl-actions { width:100%; max-width:520px; margin-top:36px; }
+#scene .home-launch .hl-line-cta {
+  display:grid;
+  grid-template-columns:auto minmax(64px,1fr) auto;
+  align-items:center;
+  width:100%;
+  min-height:68px;
+  padding:10px 12px;
+  border:1px solid hsl(var(--text-strong));
+  border-radius:10px;
+  background:hsl(var(--text-strong));
+  color:hsl(var(--canvas));
+  box-shadow:0 10px 32px hsl(var(--canvas) / .18);
+  text-decoration:none;
+  transition:background-color 180ms,border-color 180ms,transform 220ms;
+}
+#scene .hl-line-identity {
+  position:relative;
+  z-index:1;
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:30px;
+  padding:6px 12px;
+  border:1px solid hsl(var(--canvas));
+  border-radius:999px;
+  background:hsl(var(--canvas));
+  color:hsl(var(--text-strong));
+  font:650 11px/16px var(--mono-font,ui-monospace,monospace);
+  white-space:nowrap;
+}
+#scene .hl-line-identity .native-icon { width:13px; height:13px; flex:0 0 13px; }
+#scene .hl-line-track {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-around;
+  height:30px;
+}
+#scene .hl-line-track::before {
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:50%;
+  height:2px;
+  background:hsl(var(--canvas));
+  transform:translateY(-50%);
+  transition:background-color 180ms,transform 240ms;
+}
+#scene .hl-line-track i {
+  position:relative;
+  z-index:1;
+  width:8px;
+  height:8px;
+  border:2px solid hsl(var(--canvas));
+  border-radius:2px;
+  background:hsl(var(--text-strong));
+  transform:rotate(45deg);
+  transition:background-color 180ms,transform 240ms;
+}
+#scene .hl-line-track i.is-terminal { background:hsl(var(--reference)); border-color:hsl(var(--reference)); }
+#scene .hl-line-words {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto;
+  gap:1px 16px;
+  min-width:160px;
+  padding-left:14px;
+}
+#scene .hl-line-words small {
+  grid-column:1;
+  color:hsl(var(--canvas) / .68);
+  font:500 10px/14px var(--mono-font,ui-monospace,monospace);
+  letter-spacing:.04em;
+}
+#scene .hl-line-words strong { grid-column:1; color:hsl(var(--canvas)); font:650 14px/20px var(--font-sans,"Albert Sans",sans-serif); }
+#scene .hl-line-words .native-icon { grid-column:2; grid-row:1/3; align-self:center; width:16px; height:16px; }
+#scene .hl-line-cta:hover { border-color:hsl(var(--reference)); background:hsl(var(--reference)); transform:translateY(-2px); }
+#scene .hl-line-cta:hover .hl-line-track::before { background:hsl(var(--canvas)); transform:translateY(-50%) scaleX(1.035); }
+#scene .hl-line-cta:hover .hl-line-track i { border-color:hsl(var(--canvas)); transform:rotate(45deg) scale(1.12); }
+#scene .hl-line-cta:hover .hl-line-identity { background:hsl(var(--canvas)); border-color:hsl(var(--canvas)); color:hsl(var(--reference)); }
+#scene .hl-line-cta:hover .hl-line-words strong { color:hsl(var(--canvas)); }
+
+/* Example families are stations on a shared route, not tabs in a box. */
+#scene .hero-alive[data-page="zero"] .hl-case-picker {
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(84px,1fr));
+  gap:8px;
+  width:100%;
+  padding:0;
+  overflow-x:auto;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  scrollbar-width:none;
+}
+#scene .hero-alive[data-page="zero"] .hl-case-picker::-webkit-scrollbar { display:none; }
+#scene .hl-demo-note {
+  margin:5px 10px 0 !important;
+  color:hsl(var(--text-faint));
+  font:500 9px/14px var(--mono-font,ui-monospace,monospace);
+  letter-spacing:.05em;
+  text-align:right;
+  text-transform:uppercase;
+}
+#scene .hero-alive[data-page="zero"] .hl-case-picker::before {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .home-launch .hl-case {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:7px;
+  min-height:44px;
+  padding:9px 12px;
+  border:1px solid hsl(var(--border-default));
+  border-radius:8px;
+  background:hsl(var(--surface) / .72) !important;
+  box-shadow:none !important;
+  color:hsl(var(--text-muted));
+  font-size:12px;
+  text-align:left;
+}
+#scene .hero-alive[data-page="zero"] .home-launch .hl-case::before {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .home-launch .hl-case[aria-pressed="true"] {
+  border-color:hsl(var(--reference));
+  background:hsl(var(--raised)) !important;
+  color:hsl(var(--text-strong));
+  box-shadow:inset 0 -2px hsl(var(--reference)) !important;
+}
+#scene .hero-alive[data-page="zero"] .home-launch .hl-case[aria-pressed="true"]::before {
+  border-color:hsl(var(--reference));
+  background:hsl(var(--reference));
+  transform:scale(1.2);
+}
+#scene .hero-alive[data-page="zero"] .home-launch .hl-case:hover::before { border-color:hsl(var(--text-strong)); }
+
+/* The route names are now the controls: the map itself is the selector.
+   Keep native buttons for keyboard and screen-reader behaviour, then place
+   them at the four branch terminals instead of in a detached tab row. */
+#scene .hl-instrument-overview .world-name { display:none; }
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case-picker {
+  position:absolute;
+  inset:0;
+  display:block;
+  width:auto;
+  overflow:visible;
+  pointer-events:none;
+}
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case {
+  position:absolute;
+  width:auto;
+  min-width:92px;
+  min-height:30px;
+  padding:5px 10px;
+  border-radius:999px;
+  background:hsl(var(--canvas) / .94) !important;
+  box-shadow:0 0 0 4px hsl(var(--canvas) / .72) !important;
+  pointer-events:auto;
+  font:600 10px/18px var(--mono-font,ui-monospace,monospace);
+}
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="swaps"] { top:0; left:0; }
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="transfers"] { top:0; left:39%; }
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="staking"] { top:8%; right:0; }
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="governance"] { right:2%; bottom:0; }
+#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[aria-pressed="true"] {
+  background:hsl(var(--raised)) !important;
+  box-shadow:0 0 0 4px hsl(var(--canvas) / .78),inset 0 -2px hsl(var(--reference)) !important;
+}
+#scene .hl-instrument-overview .hl-demo-note {
+  position:absolute;
+  right:0;
+  bottom:-22px;
+  margin:0 !important;
+  pointer-events:none;
+}
+
+/* Five clear, clickable stations. The former active-border treatment made
+   one continuous sequence read like five unrelated buttons. */
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger {
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  margin:24px 0 0;
+  padding:0;
+  overflow:visible;
+  border:0;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger::before {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger li::before,
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger li::after { display:none; }
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record {
+  position:relative;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  grid-template-rows:16px 20px;
+  align-content:start;
+  align-items:center;
+  justify-items:start;
+  gap:1px 5px;
+  width:100%;
+  min-height:60px;
+  padding:10px 9px;
+  border:1px solid hsl(var(--border-subtle));
+  border-radius:8px;
+  background:hsl(var(--surface) / .5);
+  color:hsl(var(--text-muted)) !important;
+  text-align:left;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record::before {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record-num,
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current] .flow-record-num,
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-done] .flow-record-num {
+  grid-column:1;
+  grid-row:1;
+  display:block;
+  width:auto;
+  height:auto;
+  border:0;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  color:hsl(var(--text-faint));
+  font:600 9px/14px var(--mono-font,ui-monospace,monospace);
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record-num::after { display:none; }
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record .native-icon {
+  grid-column:2;
+  grid-row:1;
+  justify-self:start;
+  width:12px;
+  height:12px;
+  color:hsl(var(--text-faint));
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record-name {
+  grid-column:1/-1;
+  grid-row:2;
+  color:hsl(var(--text-muted));
+  font-size:11px;
+  line-height:18px;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current]::before {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-done]::before {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current] {
+  border-color:hsl(var(--reference));
+  background:hsl(var(--raised));
+  box-shadow:inset 0 -2px hsl(var(--reference));
+}
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-done] { border-color:hsl(var(--border-default)); }
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current] .flow-record-name { color:hsl(var(--text-strong)); font-weight:650; }
+#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record:is(:hover,:focus-visible) .flow-record-name { color:hsl(var(--reference)); }
+
+/* Closing statement: one composed scene. The network is atmospheric and
+   text-free; the actual message and action sit above it with a protected
+   contrast field. */
+#scene .hl-closing {
+  position:relative;
+  isolation:isolate;
+  min-height:820px;
+  margin-top:112px;
+  padding:0;
+  overflow:hidden;
+  border-top:1px solid hsl(var(--border-strong));
+  border-radius:0;
+  background:hsl(var(--canvas));
+  color:hsl(var(--text-strong));
+}
+#scene .hl-closing::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,hsl(var(--canvas) / .98) 0%,hsl(var(--canvas) / .91) 34%,hsl(var(--canvas) / .48) 62%,transparent 88%),
+    linear-gradient(180deg,hsl(var(--canvas) / .32),transparent 44%,hsl(var(--canvas) / .72));
+}
+#scene .hl-closing-copy {
+  position:relative;
+  z-index:2;
+  max-width:940px;
+  padding:88px 64px 150px;
+}
+#scene .hl-closing .hl-label { color:hsl(var(--text-muted)); }
+#scene .hl-closing h2 {
+  max-width:850px;
+  margin:30px 0 42px;
+  font-size:clamp(52px,7vw,100px);
+  line-height:.92;
+  letter-spacing:-.065em;
+}
+#scene .hl-closing .hl-line-cta { max-width:580px; }
+#scene .hl-closing-illustration {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  width:100%;
+  margin:0;
+  padding:0;
+  border:0;
+}
+#scene .hl-closing-art {
+  display:block;
+  width:100%;
+  height:100%;
+  color:hsl(var(--text-muted));
+}
+#scene .hl-closing-field path {
+  fill:none;
+  stroke:hsl(var(--border-subtle) / .72);
+  stroke-width:1;
+  vector-effect:non-scaling-stroke;
+}
+#scene .hl-closing-halos circle {
+  fill:none;
+  stroke:hsl(var(--border-default) / .54);
+  stroke-width:1;
+  stroke-dasharray:2 8;
+  vector-effect:non-scaling-stroke;
+}
+#scene .hl-closing-halos circle.is-bright { stroke:hsl(var(--reference-700)); stroke-dasharray:1 6; }
+#scene .hl-closing-routes path {
+  fill:none;
+  stroke:hsl(var(--text-faint) / .66);
+  stroke-width:1.4;
+  vector-effect:non-scaling-stroke;
+}
+#scene .hl-closing-routes path.is-reference {
+  stroke:hsl(var(--reference-500));
+  stroke-width:1.8;
+}
+#scene .hl-closing-plate .plate-top {
+  fill:hsl(var(--raised) / .92);
+  stroke:hsl(var(--border-strong));
+  stroke-width:1.2;
+  vector-effect:non-scaling-stroke;
+}
+#scene .hl-closing-plate .plate-side {
+  fill:hsl(var(--surface) / .88);
+  stroke:hsl(var(--border-default));
+  stroke-width:1;
+  vector-effect:non-scaling-stroke;
+}
+#scene .hl-closing-plate .plate-side-b { fill:hsl(var(--canvas) / .92); }
+#scene .hl-closing-plate .plate-record {
+  fill:none;
+  stroke:hsl(var(--text-faint));
+  stroke-width:1.2;
+  vector-effect:non-scaling-stroke;
+}
+#scene .hl-closing-plate.is-key .plate-top { stroke:hsl(var(--reference)); fill:hsl(var(--raised)); }
+#scene .hl-closing-plate .plate-core { fill:hsl(var(--reference)); }
+#scene .hl-closing-plate .plate-pulse { fill:none; stroke:hsl(var(--reference-600)); stroke-width:1; }
+#scene .hl-closing-nodes .node-halo { fill:hsl(var(--canvas) / .72); stroke:hsl(var(--border-default)); stroke-width:1; }
+#scene .hl-closing-nodes .node-core { fill:hsl(var(--text-strong)); }
+#scene .hl-closing-nodes .is-reference .node-halo { stroke:hsl(var(--reference)); }
+#scene .hl-closing-nodes .is-reference .node-core { fill:hsl(var(--reference)); }
+#scene .hl-closing-sparks > * { fill:hsl(var(--text-faint) / .74); }
+#scene .hl-closing-sparks > *:nth-child(4n) { fill:hsl(var(--reference-500)); }
+#scene .hl-closing-plates,
+#scene .hl-closing-nodes { filter:drop-shadow(0 16px 28px hsl(var(--canvas) / .62)); }
+#scene .hl-closing .hl-footer-links {
+  position:absolute;
+  z-index:2;
+  right:64px;
+  bottom:30px;
+  left:64px;
+  margin:0;
+  padding-top:24px;
+  border-top:1px solid hsl(var(--border-subtle));
+}
+#scene .hl-closing .hl-footer-links .hl-link { color:hsl(var(--text-muted)); }
+#scene .hl-closing .hl-footer-links .hl-link:hover { color:hsl(var(--text-strong)); }
+
+@media(max-width:760px) {
+  #scene .home-launch .hl-line-cta { grid-template-columns:auto minmax(44px,1fr) auto; }
+  #scene .hl-line-track i:nth-child(even) { display:none; }
+  #scene .hl-line-words { min-width:142px; }
+  #scene .hero-alive[data-page="zero"] .hl-case-picker { grid-template-columns:repeat(4,minmax(88px,1fr)); }
+  #scene .hl-instrument-overview { margin-bottom:18px; padding-bottom:26px; }
+  #scene .hl-instrument-controls { inset:0 0 26px; margin:0; }
+  #scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case-picker { display:block; }
+  #scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case { min-width:78px; padding-inline:8px; }
+  #scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record .native-icon { display:block; }
+  #scene .hl-closing { min-height:790px; margin-top:72px; padding:0; }
+  #scene .hl-closing::after {
+    background:
+      linear-gradient(180deg,hsl(var(--canvas) / .98) 0%,hsl(var(--canvas) / .91) 42%,hsl(var(--canvas) / .36) 72%,hsl(var(--canvas) / .82) 100%),
+      linear-gradient(90deg,hsl(var(--canvas) / .76),transparent);
+  }
+  #scene .hl-closing-copy { padding:56px 24px 170px; }
+  #scene .hl-closing h2 { font-size:clamp(48px,12vw,72px); }
+  #scene .hl-closing-illustration { inset:180px -34% 0 -16%; width:auto; }
+  #scene .hl-closing .hl-footer-links { right:24px; bottom:24px; left:24px; gap:12px 20px; }
+}
+
+@media(max-width:440px) {
+  #scene .home-launch .hl-line-cta { grid-template-columns:auto minmax(28px,1fr) auto; }
+  #scene .hl-line-identity { padding-inline:9px; font-size:10px; }
+  #scene .hl-line-words { min-width:124px; padding-left:10px; }
+  #scene .hl-line-words small { display:none; }
+  #scene .hl-line-words strong { font-size:13px; }
+}

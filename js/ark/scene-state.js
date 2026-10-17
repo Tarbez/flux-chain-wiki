@@ -154,6 +154,27 @@
       '.lifecycle-page > h1,.lifecycle-scenario,.lifecycle-page > section,.lifecycle-evidence,' +
       '.guided-page > h1,.guided-body,.guided-page > .story-depth,.lifecycle-trail,.lifecycle-dashboard-body,.lifecycle-next';
 
+    /* Per-element animation overrides (js/content/element-motion.js, Part H of the
+       follow-up Studio plan): additive, never a replacement of the stagger above.
+       An item with no data-ark-layout-key, or one with a key but no stored route+key
+       entry, returns null here and keeps its exact existing computed delay/duration/
+       translate/easing untouched below -- this function's only job is to say
+       "is there an override for THIS item," never to compute a default itself.
+       Guarded the same defensive way js/ark/page-router.js's fadeCanvas() already is:
+       a missing script, a missing route, or any unexpected lookup failure degrades
+       silently to "no override," never a thrown error reaching a real navigation. */
+    function elementMotionOverride(pageEl, item) {
+      if (!window.ArkElementMotion || !item || typeof item.getAttribute !== 'function') return null;
+      try {
+        var key = item.getAttribute('data-ark-layout-key');
+        if (!key) return null;
+        var pageKey = pageEl && pageEl.dataset && pageEl.dataset.arkPage;
+        var catalogEntry = pageKey && ArkUI.pageCatalog && ArkUI.pageCatalog[pageKey];
+        var route = catalogEntry && catalogEntry.path;
+        if (!route) return null;
+        return window.ArkElementMotion.entryFor(window.ArkElementMotion.get(), route, key);
+      } catch (e) { return null; }
+    }
     function targets(el) {
       if (!el.querySelectorAll) return [];
       var matches = Array.from(el.querySelectorAll(el.dataset.arkPage === 'zero' ? homeItems : pageItems));
@@ -200,17 +221,34 @@
         var step = items.length > 1 ? maxDelay / (items.length - 1) : 0;
         var animations = items.map(function (item,index) {
           var base = getComputedStyle(item).transform;
-          var shifted = 'translate3d(0,' + (active ? 8 : -6) + 'px,0)' + (base === 'none' ? '' : ' ' + base);
-          var delay = step * (active ? index : items.length - index - 1);
-          var duration = timing && timing.quick
-            ? active ? timing.duration - maxDelay : (timing.duration * ArkUI.lifecycleTransition.overlap - delay) / ArkUI.lifecycleTransition.overlap
-            : active ? 260 : 160;
+          var override = elementMotionOverride(el, item);
+          var shifted, delay, duration, easing;
+          if (override) {
+            // A stored override replaces direction/distance/duration/delay/easing for
+            // THIS item only, computed from the SAME translate3d/base-transform shape
+            // the default path builds below -- never a parallel animator. The sign
+            // flips with `active` the same way the hardcoded 8/-6 default already does:
+            // entering starts FROM the offset point, exiting ends AT it, both moving in
+            // the one direction the override names.
+            var vec = window.ArkElementMotion.vectorFor(override.direction);
+            var sign = active ? 1 : -1;
+            var ox = vec[0] * override.distance * sign, oy = vec[1] * override.distance * sign;
+            shifted = 'translate3d(' + ox + 'px,' + oy + 'px,0)' + (base === 'none' ? '' : ' ' + base);
+            delay = override.delay; duration = override.duration; easing = override.easing;
+          } else {
+            shifted = 'translate3d(0,' + (active ? 8 : -6) + 'px,0)' + (base === 'none' ? '' : ' ' + base);
+            delay = step * (active ? index : items.length - index - 1);
+            duration = timing && timing.quick
+              ? active ? timing.duration - maxDelay : (timing.duration * ArkUI.lifecycleTransition.overlap - delay) / ArkUI.lifecycleTransition.overlap
+              : active ? 260 : 160;
+            easing = timing && timing.quick ? 'linear' : active ? 'cubic-bezier(.2,.65,.2,1)' : 'linear';
+          }
           return item.animate(active
             ? [{ opacity: 0, transform: shifted }, { opacity: 1, transform: base }]
             : [{ opacity: getComputedStyle(item).opacity, transform: base }, { opacity: 0, transform: shifted }], {
               duration: duration,
               delay: delay,
-              easing: timing && timing.quick ? 'linear' : active ? 'cubic-bezier(.2,.65,.2,1)' : 'linear',
+              easing: easing,
               fill: 'both'
             });
         });

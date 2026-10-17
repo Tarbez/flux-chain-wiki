@@ -128,6 +128,39 @@
     return a;
   }
 
+  /* The one place a manifest field of kind 'link' (js/content/manifest.js)
+     turns into a real href. `value` is the field's tagged string:
+       route:<pageCatalogKey>   -- an internal page, resolved like href(key)
+       doc:<referenceDocsPath>  -- the in-site reference reader, like docHref
+       url:<absoluteAddress>    -- passed through untouched, isExternal: true
+     `from` is the route a doc link should return to; callers already pass
+     this to docHref today (typically the current route), so it is threaded
+     through the same way here. Returns { href, isExternal, sceneLink } --
+     `sceneLink` is what a caller sets as `a.dataset.sceneLink` (the route
+     key for 'route:', 'reference' for 'doc:', omitted for 'url:' since an
+     external address is not one of this site's own routes). Centralizing
+     this is the point: every retrofitted call site uses this one function
+     instead of its own near-duplicate of href()/docHref(). */
+  function resolveLinkField(value, from) {
+    var m = /^(route|doc|url):(\S+)/.exec(value || '');
+    if (!m) return { href: '#', isExternal: false, sceneLink: null };
+    var tag = m[1], rest = m[2];
+    if (tag === 'route') return { href: href(rest), isExternal: false, sceneLink: rest };
+    if (tag === 'doc') return { href: docHref(rest, from), isExternal: false, sceneLink: 'reference' };
+    return { href: rest, isExternal: true, sceneLink: null };
+  }
+
+  /* An <a> built straight from a manifest 'link' field's value -- the one
+     call every retrofitted site/page helper reduces to. */
+  function linkEl(label, value, from, cls) {
+    var r = resolveLinkField(value, from);
+    var a = el('a', cls, label);
+    a.href = r.href;
+    if (r.sceneLink) a.dataset.sceneLink = r.sceneLink;
+    if (r.isExternal) { a.target = '_blank'; a.rel = 'noopener'; }
+    return a;
+  }
+
   /* The page shell every dashboard-shaped page opens with: breadcrumb,
      kicker, title, lede. Returns the parts so a caller can hang its own
      status block in the header. */
@@ -170,6 +203,6 @@
   ArkUI.dash = {
     el: el, fmt: fmt, panel: panel, sectionHead: sectionHead, stat: stat, bar: bar,
     table: table, href: href, docHref: docHref, pageLink: pageLink, docLink: docLink,
-    shell: shell
+    resolveLinkField: resolveLinkField, linkEl: linkEl, shell: shell
   };
 })();

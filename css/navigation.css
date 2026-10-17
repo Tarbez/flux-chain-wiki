@@ -32,6 +32,52 @@
  color:hsl(var(--text-strong)) !important;background:hsl(var(--nested));
 }
 #scene .ark-header .header-core-links a[aria-current="page"] {box-shadow:inset 0 -2px hsl(var(--reference-400)) !important;}
+/* Network/chain switcher, site-wide (directed 2026-10-16; corrected the
+   same day: the first pass lived inside the hamburger menu's own panel
+   and went unnoticed -- now its own standalone pill + popover, next to
+   the MENU button, visible at every header width, never nested inside
+   #primary-navigation). */
+#scene .ark-header .header-chain {position:relative;pointer-events:auto;}
+#scene .ark-header .header-chain-trigger {
+ display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 13px;
+ border:0;border-radius:var(--size-card-radius,8px);background:hsl(var(--surface) / .72);
+ color:hsl(var(--text-strong));cursor:pointer;transition:background-color 180ms ease;
+}
+#scene .ark-header .header-chain-trigger:hover,
+#scene .ark-header .header-chain-trigger[aria-expanded="true"] {background:hsl(var(--raised));}
+.header-chain-dot {width:7px;height:7px;border-radius:50%;background:hsl(var(--trust,var(--primary)));flex:0 0 auto;}
+.header-chain-trigger-label {
+ font:600 11px/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:.01em;white-space:nowrap;
+ max-width:96px;overflow:hidden;text-overflow:ellipsis;
+}
+#scene .ark-header .header-chain-popover {
+ position:absolute;top:48px;right:0;z-index:21;min-width:220px;padding:14px;
+ border:1px solid hsl(var(--border-strong));border-radius:var(--size-panel-radius,14px);
+ background:linear-gradient(145deg,hsl(var(--surface)),hsl(var(--canvas)));
+ box-shadow:0 20px 60px hsl(var(--canvas) / .6);
+ backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+.header-network-label {
+ display:block;margin-bottom:8px;font:600 9px/1 var(--mono-font,ui-monospace,monospace);
+ letter-spacing:.07em;text-transform:uppercase;color:hsl(var(--text-muted));white-space:nowrap;
+}
+/* The real network listbox (js/ark/dense-wire-wallet.mjs::mountNetworkSelect)
+   -- never a native <select>: its open state is unstyleable OS chrome,
+   confirmed live even inside this exact glass-panel popover. Shared by
+   every mount of this control (this popover, the account page's Wallet
+   tab) so there is one real styled option list, not a patched select. */
+.network-options {display:flex;flex-direction:column;gap:3px;}
+.network-option {
+ display:flex;align-items:center;gap:8px;width:100%;height:34px;padding:0 10px;
+ border:0;border-radius:6px;background:transparent;color:hsl(var(--text-muted));
+ font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);text-align:left;cursor:pointer;
+ transition:background-color 150ms ease,color 150ms ease;
+}
+.network-option::before {content:"";width:6px;height:6px;border-radius:50%;background:transparent;flex:0 0 auto;border:1px solid hsl(var(--text-faint));}
+.network-option:hover {background:hsl(var(--raised));color:hsl(var(--text-strong));}
+.network-option.is-selected {color:hsl(var(--text-strong));background:hsl(var(--nested));}
+.network-option.is-selected::before {background:hsl(var(--trust,var(--primary)));border-color:hsl(var(--trust,var(--primary)));}
+.network-option:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:-2px;}
 #scene .nav-toggle {
  display:inline-flex; align-items:center; justify-content:center; gap:9px; width:auto; min-width:74px; height:40px; padding:0 11px;
  border:0; border-radius:var(--size-card-radius,8px);
@@ -309,4 +355,82 @@
  #scene .ark-header .ark-brand-wordmark{font-size:20px;letter-spacing:.1em}
  #scene .ark-header .ark-brand-descriptor{font-size:7px;letter-spacing:.1em}
  #scene .ark-header .header-core-links .header-account-link{max-width:92px;padding-inline:8px}
+}
+
+/* Home chrome follows the hero's line-and-station language. The controls
+   remain global navigation, but lose the stack of unrelated dark pills. */
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links {
+  gap:8px;
+  height:40px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a,
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links .header-account-link {
+  position:relative;
+  justify-content:flex-start;
+  gap:7px;
+  height:40px;
+  max-width:none;
+  padding:0 12px;
+  border:1px solid hsl(var(--border-default)) !important;
+  border-radius:8px;
+  background:hsl(var(--surface) / .76) !important;
+  box-shadow:none !important;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a::after {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a:is(:hover,:focus-visible,[aria-current="page"]) {
+  color:hsl(var(--text-strong)) !important;
+  border-color:hsl(var(--border-strong)) !important;
+  background:hsl(var(--raised)) !important;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a:is(:hover,[aria-current="page"])::after {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a[aria-current="page"] { box-shadow:none !important; }
+#scene .hero-alive[data-page="zero"] .ark-header .header-account-label {
+  flex-direction:row;
+  align-items:center;
+  gap:7px;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-account-name { font-weight:600; }
+#scene .hero-alive[data-page="zero"] .ark-header .header-account-status {
+  gap:5px;
+  color:hsl(var(--text-faint));
+  font-size:8px;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-account-status::before { width:4px; height:4px; }
+#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger,
+#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle {
+  position:relative;
+  height:40px;
+  padding:0 12px;
+  border:1px solid hsl(var(--border-default));
+  border-radius:8px;
+  background:hsl(var(--surface) / .76);
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger::after,
+#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle::after {
+  content:none;
+}
+#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger:hover,
+#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger[aria-expanded="true"],
+#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle:hover,
+#scene .hero-alive[data-page="zero"] .ark-header.nav-open .nav-toggle { border-color:hsl(var(--border-strong)); background:hsl(var(--raised)); color:hsl(var(--text-strong)); }
+#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger:hover::after,
+#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle:hover::after {
+  border-color:hsl(var(--reference));
+  background:hsl(var(--reference));
+}
+
+@media(max-width:560px) {
+  #scene .hero-alive[data-page="zero"] .ark-header .header-core-links .header-account-link {
+    max-width:126px;
+    padding-inline:4px 10px;
+  }
+  #scene .hero-alive[data-page="zero"] .ark-header .header-account-status { display:none; }
 }

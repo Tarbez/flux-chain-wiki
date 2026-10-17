@@ -185,6 +185,66 @@ ArkManifest.define({
       "kind": "line",
       "section": "Corner links",
       "value": "Interactive model"
+    },
+    "LEARN.HREF": {
+      "label": "\"Follow the line\" link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:deployment"
+    },
+    "CLOSING.HREF": {
+      "label": "\"Explore DEFXN\" closing link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:about"
+    },
+    "PRESSURETEST.HREF": {
+      "label": "\"Go deeper into the resolver model\" link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:resolver"
+    },
+    "METHODOLOGY.HREF": {
+      "label": "\"Read methodology & limits\" link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:stats"
+    },
+    "OBSERVATORY.HREF": {
+      "label": "\"Open the explorer\" link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:explorer"
+    },
+    "FOOTER.PROTOCOL.HREF": {
+      "label": "Footer: Protocol link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:about"
+    },
+    "FOOTER.RESOLVERS.HREF": {
+      "label": "Footer: Resolvers link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:resolvers"
+    },
+    "FOOTER.EXPLORER.HREF": {
+      "label": "Footer: Explorer link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:explorer"
+    },
+    "FOOTER.DOWNLOAD.HREF": {
+      "label": "Footer: Run from source link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:download"
+    },
+    "FOOTER.DAO.HREF": {
+      "label": "Footer: Governance link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:dao"
     }
   }
 });

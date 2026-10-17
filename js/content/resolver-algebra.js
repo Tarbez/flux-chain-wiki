@@ -2,7 +2,7 @@
    Run: node scripts/gen-resolver-algebra.cjs --write
 
    Source: flux-spec/registry · role-letters.json, action-verbs.json, manifest-types.json
-   Spec version: 0.4.2
+   Spec version: 0.4.3
 
    This is the boundary /resolver-math argues about: which dimensions of
    the grammar are CLOSED (a position; adding one risks a silent
@@ -13,7 +13,7 @@
 (function () {
   'use strict';
   var DATA = {
-    "specVersion": "0.4.2",
+    "specVersion": "0.4.3",
     "source": "flux-spec/registry · role-letters.json, action-verbs.json, manifest-types.json",
     "roles": {
       "registered": [
@@ -222,6 +222,51 @@
           "evenLength": true,
           "repeatable": true,
           "example": "E6576"
+        },
+        {
+          "letter": "NAME",
+          "name": "Lookup name",
+          "group": "manifest-core",
+          "payload": "opaque-alphanumeric",
+          "profile": "dense-wire",
+          "minLength": 1,
+          "example": "NAMEalice"
+        },
+        {
+          "letter": "TITLE",
+          "name": "Title",
+          "group": "manifest-core",
+          "payload": "lowercase-hex",
+          "profile": "dense-wire",
+          "evenLength": true,
+          "example": "TITLE68656c6c6f"
+        },
+        {
+          "letter": "KK",
+          "name": "Kind marker (shipped form)",
+          "group": "dense-wire",
+          "payload": "opaque-alphanumeric",
+          "profile": "dense-wire",
+          "minLength": 1,
+          "example": "KKDAO1"
+        },
+        {
+          "letter": "KIND",
+          "name": "Kind marker (new form)",
+          "group": "dense-wire",
+          "payload": "opaque-alphanumeric",
+          "profile": "dense-wire",
+          "minLength": 1,
+          "example": "KINDDAO1"
+        },
+        {
+          "letter": "CHAIN",
+          "name": "Chain scope (new form)",
+          "group": "dense-wire",
+          "payload": "lowercase-alphanumeric",
+          "profile": "dense-wire",
+          "pattern": "^[a-z0-9]{3,32}$",
+          "example": "CHAINmychain1"
         }
       ],
       "reservedInvalid": [
@@ -310,7 +355,7 @@
       "unregisteredThrows": true
     },
     "manifestTypes": {
-      "count": 93,
+      "count": 95,
       "openSet": true,
       "openSetNote": "This is a catalog, not a gate. Nothing refuses a type outside it; products with domains the core has never heard of register their own at runtime. That is what keeps the list from freezing at whatever was known the day the file was written."
     },
@@ -385,6 +430,20 @@
           "code": "1A",
           "shape": "coded-fields",
           "definedIn": "defxn/docs/finance-ledger-design.md §5.1"
+        },
+        {
+          "letter": "N",
+          "type": "LEDGERENTRY",
+          "code": "1A",
+          "shape": "lowercase-alphanumeric, 3-32 characters",
+          "definedIn": "dense-wire/src/chain.rs::is_chain_id_shape (Phase B.1, chain-of-chains design)"
+        },
+        {
+          "letter": "K",
+          "type": "LEDGERENTRY",
+          "code": "1A",
+          "shape": "opaque-alphanumeric",
+          "definedIn": "dense-wire/src/chain.rs (23 sub-kind constants: DAO_KIND_FOUND, TREASURY_KIND_SPEND, STAKE_KIND_LOCK, SLASH_KIND_PROVIDER, ...)"
         }
       ],
       "note": "Most registered letters (`registry/role-letters.json`) have exactly one shape, decodable without knowing a manifest's `Y` type -- that is the fixed skeleton (G Y S C M V H P D, I B A T R, and the claim-profile letters) and this does not apply to it. Letters with no single global shape (currently only `J`, the sole free letter) may instead have their shape defined per `Y` type, recorded on that type's own entry below as a `letterExtensions` object keyed by letter. A type that does not declare an extension for a letter carries no defined meaning for it -- exactly as unregistered as a bare unregistered top-level letter is today. `Y` itself is always core/global, which is what makes reading it first, before interpreting a type-scoped letter, safe on every peer regardless of resolver access."

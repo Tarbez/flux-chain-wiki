@@ -1,6 +1,7 @@
 /* The deployment guide describes the planned local CLI, never a live deploy action. */
 ArkUI.pageModules.bundledeployer = {
   mount: function (host) {
+    var manifest = ArkManifest.get('bundledeployer');
     function words(key) { return ArkCopy.text('BUNDLEDEPLOYER.' + key); }
     function node(tag, cls, key) { return ArkUI.el(tag, cls, key ? words(key) : ''); }
     var page = node('section', 'ark-page task-page bundle-deployer-page');
@@ -62,8 +63,19 @@ ArkUI.pageModules.bundledeployer = {
     release.appendChild(node('p', '', 'POINT4.TEXT'));
     release.appendChild(node('p', 'bundle-release-note', 'RELEASE.NOTE'));
     var back = node('a', 'bundle-back', 'BACK');
-    back.href = ArkUI.route.href(ArkUI.pageCatalog.account.path); back.dataset.sceneLink = 'account';
+    // Reuses manifest.meta.back (ArkManifest.get('bundledeployer').meta.back), the same
+    // existing route picker other pages' back links already read -- not a hardcoded
+    // literal duplicating the same destination.
+    var backLink = ArkUI.dash.resolveLinkField('route:' + manifest.meta.back);
+    back.href = backLink.href; back.dataset.sceneLink = backLink.sceneLink;
     release.appendChild(back); page.appendChild(release);
+
+    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+       is centralized in js/main.js's onMount hook, not called here. */
+    var components = node('div', 'bundle-components');
+    components.setAttribute('data-ark-insert', 'main');
+    page.appendChild(components);
+
     host.appendChild(page);
     return page;
   }

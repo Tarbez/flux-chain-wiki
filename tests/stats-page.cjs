@@ -126,7 +126,7 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(CP.ceilingSwapsPerSecond < OPS.fleet.parallelSwapsPerSecond, 'one client-path node is far below the fleet total; the two must not be conflated');
   assert(CP.byConnections.every((x, i, a) => i === 0 || x.connections > a[i - 1].connections), 'points are in increasing connection order');
   assert(/unbacked|moves no balance|no balance/i.test(CP.caveats), 'the client path says it is not custodied');
-  assert(/quorum 0/.test(CP.quorum), 'the zero-replication quorum is stated beside the number');
+  assert(/replica requirement 0/.test(CP.replicationNote), 'the zero-replication setting is stated beside the number');
   assert(/loopback/.test(CP.caveats) && /limiter/.test(CP.caveats), 'loopback and the production limiter are stated');
   assert(CP.byConnections.some((x) => x.connections >= 1000), 'the sweep reaches 1,000 connections');
   assert(CP.otherAxes.length >= 3 && CP.otherAxes.every((x) => x.swapsPerSecond <= CP.ceilingSwapsPerSecond), 'the other axes (tokens, holders) are shown and never exceed the ceiling');

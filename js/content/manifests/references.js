@@ -50,6 +50,18 @@ ArkManifest.define({
       "kind": "line",
       "section": "Links",
       "value": "What is a resolver"
+    },
+    "SOURCE.HREF": {
+      "label": "Source link target",
+      "kind": "link",
+      "section": "Links",
+      "value": "doc:docs/evidence/registry.md"
+    },
+    "HOME.HREF": {
+      "label": "Breadcrumb: Home link",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:zero"
     }
   }
 });

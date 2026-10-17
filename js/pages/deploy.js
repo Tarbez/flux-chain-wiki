@@ -3,6 +3,7 @@
 ArkUI.pageModules.deploy = {
   mount: function (host) {
     var id = 'deploy';
+    var manifest = ArkManifest.get('deploy');
     function words(role) { return ArkCopy.text('DEPLOY.' + role); }
     var el = ArkUI.el('section', 'ark-page task-page theory-page deploy-page');
     el.dataset.arkPage = id;
@@ -16,7 +17,8 @@ ArkUI.pageModules.deploy = {
     content.appendChild(ArkUI.el('p', 'concept-deck', words('DECK')));
     var siteDeployment = ArkUI.el('p', 'concept-deck', 'Deploying a site? You will need the local FXN Bundle Deployer. ');
     var deployerLink = ArkUI.el('a', 'article-back', 'CLI status and public bundle guidance →');
-    deployerLink.href = ArkUI.route.href(ArkUI.pageCatalog.bundledeployer.path); deployerLink.dataset.sceneLink = 'bundledeployer';
+    var deployerHref = ArkUI.dash.resolveLinkField(words('BUNDLEDEPLOYER.HREF'));
+    deployerLink.href = deployerHref.href; deployerLink.dataset.sceneLink = deployerHref.sceneLink;
     siteDeployment.appendChild(deployerLink); content.appendChild(siteDeployment);
 
     var STEPS = [
@@ -140,18 +142,28 @@ ArkUI.pageModules.deploy = {
     ArkUI.attachProcedureState(el,'deploy',rows.length,function(index,all){showAll=all;selectStep(index,false);});
 
     var note = ArkUI.el('p', 'deploy-caveat', 'network create / network list are not a security boundary today. Presence is partitioned per network; accounts, identities, and DAOs are not yet network-scoped.');
-    var help=ArkUI.el('details','procedure-help');help.appendChild(ArkUI.el('summary','','Network scope and source guide'));help.appendChild(note);var guide=ArkUI.el('a','story-reference','Read the network guide');guide.href='docs/operators/networks.md';help.appendChild(guide);content.appendChild(help);
+    var help=ArkUI.el('details','procedure-help');help.appendChild(ArkUI.el('summary','','Network scope and source guide'));help.appendChild(note);var guide=ArkUI.dash.linkEl('Read the network guide',words('GUIDE.HREF'),manifest.route,'story-reference');help.appendChild(guide);content.appendChild(help);
 
     var footer = ArkUI.el('nav', 'theory-footer');
     footer.setAttribute('aria-label', 'Continue');
     var back = ArkUI.el('a', 'article-back');
-    back.href = '#' + ArkUI.pageCatalog.download.path; back.dataset.sceneLink = 'download';
+    // Reuses manifest.meta.back (ArkManifest.get('deploy').meta.back), the same existing
+    // route picker other pages' back links already read -- not a hardcoded literal
+    // duplicating the same destination.
+    var backHref = ArkUI.dash.resolveLinkField('route:' + manifest.meta.back);
+    back.href = backHref.href; back.dataset.sceneLink = backHref.sceneLink;
     back.appendChild(document.createTextNode(words('BACK') + ' '));
     var arrow = ArkUI.el('span', 'cta-arrow', '↗');
     arrow.setAttribute('aria-hidden', 'true');
     back.appendChild(arrow);
     footer.appendChild(back);
     content.appendChild(footer);
+
+    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
+       is centralized in js/main.js's onMount hook, not called here. */
+    var components = ArkUI.el('div', 'deploy-components');
+    components.setAttribute('data-ark-insert', 'main');
+    content.appendChild(components);
 
     el.appendChild(content);
     host.appendChild(el);

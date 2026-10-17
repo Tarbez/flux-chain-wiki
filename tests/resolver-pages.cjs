@@ -20,7 +20,10 @@ assert.equal(manifests[2].meta.next, 'download');
 
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
 assert(home.includes("learn.dataset.sceneLink = 'deployment'"), 'the Learn CTA opens the interactive walkthrough');
-assert(home.includes("pressureTest.dataset.sceneLink = 'resolver'"), 'the Pressure-test link opens the resolver guide');
+// The pressure-test link's destination is now a manifest field of kind 'link' (js/content/manifest.js),
+// resolved through js/ark/dash-kit.js's linkEl rather than a hardcoded literal/explicit dataset assignment.
+assert(home.includes("link('Go deeper into the resolver model', 'PRESSURETEST.HREF')"), 'the Pressure-test link opens the resolver guide');
+assert.equal(vm.runInContext("ArkManifest.get('home').fields['PRESSURETEST.HREF'].value", context), 'route:resolver');
 assert(fs.readFileSync('js/resolvers/header.js', 'utf8').includes("['NAV.OVERVIEW', 'about']"), 'overview remains reachable in shared navigation');
 assert(home.includes("['Walk the chain','chain']"), 'the chain walkthrough remains reachable in the Explore audience resources');
 assert(!home.includes("signal.className = 'home-signal-map'"), 'the decorative signal diagram no longer competes with the decision path');

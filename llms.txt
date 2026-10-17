@@ -1,0 +1,72 @@
+# DEFXN
+
+> Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network.
+
+## Pages
+
+- [DEFXN](https://defxn.com/): Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network.
+- [Interactive model — DEFXN](https://defxn.com/experiments): Explore an illustrative model of Flux interactions, then open the lab for hands-on controls. The model is not a live network or performance benchmark.
+- [Interactive model controls — DEFXN](https://defxn.com/experiments/lab): Adjust the illustrative model and inspect its behavior. Use the lab to explore concepts, not as evidence of live execution or measured performance.
+- [Notes — DEFXN](https://defxn.com/learnings): Read technical notes on agreement execution, named networks, and authority. Pair historical explanations with current source and evidence boundaries.
+- [Mesh Explorer — DEFXN](https://defxn.com/explore): Inspect live, bounded records and health from a local Flux Miner. Connection and operator access are explicit; no fixture data is shown as live evidence.
+- [Palette — DEFXN](https://defxn.com/palette): Inspect the shared DEFXN color, typography, spacing, control, and component treatments used to keep every public route visually consistent.
+- [FXN resolvers — DEFXN](https://defxn.com/resolvers): Browse the available resolver families, their inputs, outputs, evidence boundaries, and implementation status before choosing logic for a network.
+- [Your account — DEFXN](https://defxn.com/account): Verify an Auth Kit locally and inspect its identity facts. Live FXN holdings, Credits, and mesh standing are not linked until their read contracts are verified.
+- [Your domains — DEFXN](https://defxn.com/account/domains): Review the local domain names connected to your DEFXN identity and the exact ownership records required before a name can resolve on the mesh.
+- [Treasury preview — DEFXN](https://defxn.com/treasury): Explore a clearly labeled mock treasury view for FXN, the Tier 1 native token, and identity-bound, non-transferable Credits. No balances are live.
+- [Deposit preview — DEFXN](https://defxn.com/deposits): Try a reversible, local-only FXN deposit preview. It does not connect to a wallet, move funds, or create a network record.
+- [Mesh performance — DEFXN](https://defxn.com/stats): How fast the protocol is, why, and how we found out: a real transfer taken apart block by block, where server time goes, and every wrong turn on the way.
+- [Agreement lifecycle — DEFXN](https://defxn.com/lifecycle): Follow an illustrative request through intent, offer, agreement, fulfillment, and receipt. Inspect what each signed record establishes—and what it does not.
+- [Intent / Agreement lifecycle — DEFXN](https://defxn.com/lifecycle/intent): Start the agreement lifecycle with a signed request for an exact outcome. Inspect its references and why an intent is not a provider commitment.
+- [Offer / Agreement lifecycle — DEFXN](https://defxn.com/lifecycle/offer): See how a provider's signed offer answers an intent by CID. Inspect proposed terms and why an offer is not an agreement or proof of capacity.
+- [Agreement / Agreement lifecycle — DEFXN](https://defxn.com/lifecycle/agreement): Link the accepted intent and offer into inspectable shared terms. Understand why agreement alone does not prove fulfillment or settlement.
+- [Fulfillment / Agreement lifecycle — DEFXN](https://defxn.com/lifecycle/fulfillment): Connect submitted work and result evidence to its agreement. Understand why a signed fulfillment record still needs checking and acceptance.
+- [Receipt / Agreement lifecycle — DEFXN](https://defxn.com/lifecycle/receipt): Trace a policy-bound verification outcome back to fulfillment and intent. A receipt is not universal truth, settlement, or production-readiness evidence.
+- [Every identity, its own chain — DEFXN](https://defxn.com/chain): Walk the record that joins a chain: signed, checked for grammar and signature only, replicated to peers, then read by a resolver. The chain of chains, end to end.
+- [What is a resolver? — DEFXN](https://defxn.com/what-is-a-resolver): Understand how resolver logic turns inputs into checkable claims, where verification applies, and which evidence to inspect before running Flux.
+- [Resolver Math — DEFXN](https://defxn.com/resolver-math): A record is a tuple of symbols and meaning is symbol x position x observer. See which dimensions of the FLX grammar are closed, which are unbounded, and resolve a dense block yourself.
+- [Reference resolvers — DEFXN](https://defxn.com/start-from-something-real): Inspect source-backed reference evidence and its limits. Separate documented behavior from verified live operation before choosing an operator path.
+- [How DEFXN works — DEFXN](https://defxn.com/how-deployment-works): Follow network discovery, signed agreements, and verification from a network ID to a receipt. See the steps and their current evidence boundaries.
+- [The theory — DEFXN](https://defxn.com/concept): Explore networks, agreement execution, and authority. Start with the core idea, then open mechanics, current limits, and source evidence.
+- [DEFXN overview — DEFXN](https://defxn.com/about): DEFXN is a self-scaling fractal network where everyone is a business partner. The mesh is the database, the host and the cloud: no database, no hosting, no fees, no cloud.
+- [Resolutions (products) — DEFXN](https://defxn.com/resolutions): Resolve your website, payments, data, governance, communications and more on the DEFXN mesh, with encrypted peer-to-peer hosting and permanence instead of renewals.
+- [Networks — DEFXN](https://defxn.com/concept/purpose): Named networks currently isolate miner-presence discovery, not accounts, identities, or treasuries. Explore the supported commands and limits.
+- [Agreement lifecycle — DEFXN](https://defxn.com/concept/depth): Trace a signed agreement from intent to receipt across each party's own chain. Inspect the record links and the limits of current production evidence.
+- [Authority — DEFXN](https://defxn.com/concept/practice): See how a policy derives a bounded authority cell for one object and transition, with threshold evidence and explicit production limitations.
+- [Activation — DEFXN](https://defxn.com/concept/notes): Understand why approval is not activation. Explore the readiness and safety gates for applying a change, and the current evidence limitations.
+- [Network evidence — DEFXN](https://defxn.com/concept/studio): Check a network ID against command behavior, source revision, participants, observation time, and the current miner-presence isolation boundary.
+- [Benchmarks — DEFXN](https://defxn.com/concept/spec): No complete public benchmark artifact is registered here. Inspect the workload, environment, method, and raw evidence required to verify a result.
+- [Run DEFXN from source — DEFXN](https://defxn.com/download): Start a local miner from an owner-approved source checkout. Follow prerequisites and verification steps; public binaries remain unverified.
+- [FXN Bundle Deployer — DEFXN](https://defxn.com/bundle-deployer): Site deployment requires the FXN Bundle Deployer running locally. The CLI is in development. Review what becomes public and how mesh ownership controls maintainer access.
+- [Create or join a network — DEFXN](https://defxn.com/deploy): Use the current network CLI to choose a miner-presence namespace. Follow the source-backed procedure and understand what it does not isolate.
+- [Governance — DEFXN](https://defxn.com/dao): Compare shared-substrate governance with network DAO governance. Explore separate rosters, thresholds, activation rules, and evidence limits.
+- [Resolve your website — DEFXN](https://defxn.com/resolutions/website): Publish a signed website bundle to the DEFXN mesh without a database, hosting plan, cloud account, or yearly renewal.
+- [Resolve your content — DEFXN](https://defxn.com/resolutions/content): Publish named, signed content to the DEFXN mesh so it remains addressable, traceable to its origin, and independent of a platform.
+- [Resolve your files — DEFXN](https://defxn.com/resolutions/files): Encrypt, distribute, and retrieve verifiable files through peer storage while keeping access under keys you control.
+- [Resolve your deployments — DEFXN](https://defxn.com/resolutions/deployments): Package and sign an exact release, then publish its addressable bundle to the mesh instead of a rented deployment server.
+- [Resolve your payments — DEFXN](https://defxn.com/resolutions/payments): Describe direct partner settlement in an agreement and retain a signed receipt both sides can independently verify.
+- [Resolve your personal finance — DEFXN](https://defxn.com/resolutions/finance): Keep inspectable books and balances under your keys, reconciling changes from partner agreements and signed receipts.
+- [Resolve your community — DEFXN](https://defxn.com/resolutions/community): Build a community whose members retain identity and history while shared membership rules remain explicit and checkable.
+- [Resolve your communications — DEFXN](https://defxn.com/resolutions/communications): Establish encrypted peer channels and resolve shared conversation records without placing message custody in a platform.
+- [Resolve your collaborations — DEFXN](https://defxn.com/resolutions/collaborations): Coordinate shared work through signed changes and resolve the agreed state without a central application owner.
+- [Resolve your governance — DEFXN](https://defxn.com/resolutions/governance): Write decision rules before a vote, gather the required approvals, and activate an outcome with its evidence attached.
+- [Resolve your intelligence — DEFXN](https://defxn.com/resolutions/intelligence): Run agreed intelligence beside relevant mesh data and return a claim with evidence that participating partners can check.
+- [Resolve your data — DEFXN](https://defxn.com/resolutions/data): Write signed, addressed records, replicate them through peers, and query the mesh instead of maintaining a database server.
+- [Resolve your algorithms — DEFXN](https://defxn.com/resolutions/algorithms): Publish deterministic algorithms as named resolvers so anyone can run the logic and check the resulting claim.
+- [Resolve your information — DEFXN](https://defxn.com/resolutions/information): Give information a stable address and preserve its source trail so the current claim remains findable and inspectable.
+- [Resolve your rules and patterns — DEFXN](https://defxn.com/resolutions/rules): Express rules as deterministic resolver logic, agree on a named version, and apply it consistently with retained evidence.
+- [Resolve your network — DEFXN](https://defxn.com/resolutions/network): Create or join a named network, participate from a local node, and discover peers as the network grows.
+- [Resolve your encryptions — DEFXN](https://defxn.com/resolutions/encryptions): Choose who may read, encrypt before information enters the mesh, and keep decryption under the required partner keys.
+- [Resolve your automation — DEFXN](https://defxn.com/resolutions/automation): Define a permitted action, bind it to an agreement, and run it when verifiable evidence satisfies the rule.
+- [Resolve your productivity — DEFXN](https://defxn.com/resolutions/productivity): Build repeatable work around shared records and resolvers while keeping the resulting work under partner control.
+- [Resolve your logistics — DEFXN](https://defxn.com/resolutions/logistics): Name items and expected movements, sign each custody handoff, and resolve responsibility from a shared trail.
+
+## Articles
+
+- [why-the-chain-was-retired — DEFXN](https://defxn.com/learnings/why-the-chain-was-retired): How DEFXN went from one block chain, through the agreement fabric, to one grammar chain per identity, and which measurements back the current design.
+- [one-substrate-many-networks — DEFXN](https://defxn.com/learnings/one-substrate-many-networks): Learn what named networks isolate today, how the shared substrate differs from a network, and which named examples still need live evidence.
+- [governance-without-a-validator-set — DEFXN](https://defxn.com/learnings/governance-without-a-validator-set): Explore ephemeral authority cells and the distinction between shared mesh-operations governance and an individual network DAO's roster.
+- [how-we-got-fast-and-what-we-got-wrong — DEFXN](https://defxn.com/learnings/how-we-got-fast-and-what-we-got-wrong): The full trail from under 7 transfers a second to about 25,000 across ten machines, including every wrong turn, and what the final number does and does not prove.
+- [the-grammar-does-almost-no-work — DEFXN](https://defxn.com/learnings/the-grammar-does-almost-no-work): What a DEFXN transfer looks like on the wire, why a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else.
+- [a-resolver-by-construction — DEFXN](https://defxn.com/learnings/a-resolver-by-construction): See how a finance resolver makes double-spend unrepresentable using one registered letter, a chain per identity, six resolver steps, and a measured 25,232 ops/s result.
+- [the-chain-prototype-is-the-chosen-path — DEFXN](https://defxn.com/learnings/the-chain-prototype-is-the-chosen-path): Review the sustained six-node chain benchmark, its 12,403 accepted operations per second result, and the limits on what that run establishes.

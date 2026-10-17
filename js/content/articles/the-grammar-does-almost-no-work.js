@@ -4,10 +4,10 @@ LearningContent.load("the-grammar-does-almost-no-work", {
   "relevance": "Read this to understand what the registered grammar is, why it is built this way, and what it can and cannot make faster.",
   "reviewed": "2026-10-07",
   "evidenceLabel": "BENCH-003 section 14: the real grammar, measured",
-  "evidenceHref": "docs/evidence/bench-003-rust-fleet-ceiling.md",
-  "relatedPage": "stats",
+  "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
+  "relatedPage": "route:stats",
   "actionLabel": "Open the measurements",
-  "actionPage": "stats",
+  "actionPage": "route:stats",
   "questions": [
     "What is a transfer, concretely?",
     "What is a block?",

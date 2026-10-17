@@ -26,6 +26,126 @@ var RESOLUTION_ART = {
 };
 var RESOLUTION_GROUP_ICONS = { BUILD: 'layers', VALUE: 'cycle', PEOPLE: 'account', INTELLIGENCE: 'model', OPERATIONS: 'network' };
 
+/* Network switcher, site-wide (directed 2026-10-16: "the network chain
+   switch at the nav level inside defxn"; corrected the same day: "make
+   sure it is outside of the popover and right next to the menu icon
+   itself as the chain popover" -- the first pass buried it inside the
+   hamburger menu's own panel, where it went unnoticed). Reuses
+   js/ark/dense-wire-wallet.mjs's KNOWN_NETWORKS/resolveWireUrl/
+   rememberWireUrl -- the one place that already defines what networks
+   exist and remembers a holder's choice for the account page's Wallet
+   tab -- via its shared `mountNetworkSelect` helper (a real themed
+   listbox, never a native <select>: confirmed live that a native
+   select's OPEN state is unstyleable OS chrome even inside a custom
+   glass-panel popover), so this is a second place that WIRES a network
+   picker, never a second place that KNOWS how. Loaded on first use with
+   import(), same reasoning as
+   account.js: a page-loader classic script list cannot carry an ES
+   module, and a wallet module that fails to load (no module support, a
+   file: URL) must not take the rest of the header down with it -- a
+   mount that fails just hides its own control. */
+var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261016-listbox1';
+var headerWalletModulePromise = null;
+function loadHeaderWalletModule() {
+  if (!headerWalletModulePromise) {
+    headerWalletModulePromise = Promise.resolve().then(function () {
+      var path = (location.protocol === 'file:' ? '' : '/') + HEADER_WALLET_MODULE;
+      return import(new URL(path, document.baseURI).href);
+    }).catch(function (error) {
+      headerWalletModulePromise = null;
+      throw error;
+    });
+  }
+  return headerWalletModulePromise;
+}
+function shortNetworkLabel(url, knownNetworks) {
+  for (var i = 0; i < knownNetworks.length; i++) {
+    if (knownNetworks[i].url === url) return knownNetworks[i].label;
+  }
+  return 'Custom';
+}
+/** Builds the standalone chain/network pill that sits next to the MENU
+ *  button, own trigger + own popover -- never nested inside
+ *  `#primary-navigation`, so it is reachable and visible at every
+ *  header width, not just when the hamburger menu happens to be open.
+ *  The trigger's own label always shows the CURRENT network (e.g.
+ *  "Production"/"Local devnet"), kept in sync with every other mounted
+ *  network control on the page (the account page's Wallet tab included)
+ *  via `mountNetworkSelect`'s own cross-select `defxn-network-changed`
+ *  event -- switching here updates there and back, live, no reload. */
+function buildHeaderChainPopover(el) {
+  var wrap = document.createElement('div');
+  wrap.className = 'header-chain';
+
+  var trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.id = 'header-chain-trigger';
+  trigger.className = 'header-chain-trigger';
+  trigger.setAttribute('aria-haspopup', 'true');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-controls', 'header-chain-popover');
+  var dot = document.createElement('span');
+  dot.className = 'header-chain-dot';
+  dot.setAttribute('aria-hidden', 'true');
+  var triggerLabel = document.createElement('span');
+  triggerLabel.className = 'header-chain-trigger-label';
+  triggerLabel.textContent = 'Network';
+  trigger.appendChild(dot);
+  trigger.appendChild(triggerLabel);
+  wrap.appendChild(trigger);
+
+  var popover = document.createElement('div');
+  popover.id = 'header-chain-popover';
+  popover.className = 'header-chain-popover';
+  popover.hidden = true;
+  popover.setAttribute('role', 'region');
+  popover.setAttribute('aria-labelledby', 'header-chain-trigger');
+  var innerLabel = document.createElement('div');
+  innerLabel.className = 'header-network-label';
+  innerLabel.textContent = 'Network';
+  var list = document.createElement('div');
+  list.className = 'network-options';
+  popover.appendChild(innerLabel);
+  popover.appendChild(list);
+  wrap.appendChild(popover);
+  el.appendChild(wrap);
+
+  function setOpen(open) {
+    popover.hidden = !open;
+    trigger.setAttribute('aria-expanded', String(open));
+    if (open) { var first = list.querySelector('.network-option'); if (first) first.focus(); }
+  }
+  trigger.addEventListener('click', function () { setOpen(popover.hidden); });
+  document.addEventListener('click', function (event) {
+    if (!popover.hidden && !wrap.contains(event.target)) setOpen(false);
+  });
+  wrap.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !popover.hidden) { setOpen(false); trigger.focus(); }
+  });
+
+  loadHeaderWalletModule().then(function (dw) {
+    triggerLabel.textContent = shortNetworkLabel(dw.resolveWireUrl(), dw.KNOWN_NETWORKS);
+    dw.mountNetworkSelect(list, function () {
+      /* Convenience only: remembering the choice is enough for any page
+         that reads resolveWireUrl() fresh (account.js's loadWallet
+         already does) -- nothing in the header itself holds a live wire
+         connection to reset. Closing is this surface's own UX choice:
+         the popover's one job is picking a network, so a real choice
+         closes it, same as any other menu on this site. */
+      setOpen(false);
+      trigger.focus();
+    });
+    if (typeof window !== 'undefined') {
+      window.addEventListener('defxn-network-changed', function (event) {
+        var url = event.detail && event.detail.url;
+        if (url) triggerLabel.textContent = shortNetworkLabel(url, dw.KNOWN_NETWORKS);
+      });
+    }
+  }).catch(function () {
+    wrap.hidden = true;
+  });
+}
+
 function buildProducts(header, core) {
   function make(tag, className, text) {
     var item = document.createElement(tag);
@@ -320,6 +440,7 @@ ArkUI.register('RHEADER_V1', {
     toggle.setAttribute('title', 'All pages');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-controls', 'primary-navigation');
+    buildHeaderChainPopover(el);
     el.appendChild(toggle);
     if (ArkUI.pageCatalog.resolutions && typeof ArkResolutions !== 'undefined') buildProducts(el, core);
   },

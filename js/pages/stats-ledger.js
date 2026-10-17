@@ -51,7 +51,12 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   function pct(v, max) { return Math.max(1.5, v / max * 100).toFixed(2) + '%'; }
-  function href(key) { var e = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return e ? (ArkUI.route ? ArkUI.route.href(e.path) : '#' + e.path) : '#/' + key; }
+  /* This standalone data page carries no ArkManifest of its own, so there is
+     no manifest field for a 'link' kind value to live in; the destination
+     stays a tagged literal in code, resolved the one shared way every
+     retrofitted call site is -- js/ark/dash-kit.js's resolveLinkField. */
+  function href(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
+  function docHref(doc) { return ArkUI.dash.resolveLinkField('doc:' + doc, '/stats/ledger').href; }
   function tile(cls, label, body, id) {
     return '<article class="stats-tile ' + cls + '"' + (id ? ' aria-labelledby="' + id + '"' : '') + '>' +
       (label ? '<p class="stats-tile-label"' + (id ? ' id="' + id + '"' : '') + '>' + label + '</p>' : '') + body + '</article>';
@@ -155,7 +160,7 @@
         tile('stats-span-6', 'Current local resolver audit · Apple M2', '<h2>51,065 hot · 279,269 certified · 812,268 transport ops/s</h2>' +
           '<p class="stats-tile-copy">Matched release measurement: 20,000 independent-holder operations reached 51,065 ops/s with full per-operation verification and 279,269 ops/s when one signed root was verified once and the records stored across eight holder shards—a 5.47× gain. A separate two-peer test transported and reconstructed one 1,024-operation compact binary segment at 812,268 effective ops/s. That third number is transport, not accepted chain admission.</p>' +
           '<p class="stats-tile-copy">The new binary envelope removes the outer <code>W&lt;hex&gt;</code> expansion. Real-shaped 488-byte operations measure 150.9 bytes/op in a segment, 6.47× below the former 976-byte wrapped payload. Exact operation bytes reconstruct, and legacy v1 frames remain readable.</p>' +
-          '<p class="stats-tile-copy"><a class="stats-inline-link" href="/docs/evidence/bench-005-million-ops-audit.md">Read BENCH-005 →</a></p>', 'statsledger-million-title') +
+          '<p class="stats-tile-copy"><a class="stats-inline-link" href="' + docHref('docs/evidence/bench-005-million-ops-audit.md') + '" data-scene-link="reference">Read BENCH-005 →</a></p>', 'statsledger-million-title') +
         tile('stats-span-6', 'Attack suite · 7 of 7 refused', '<h2>What the resolver refuses, and why</h2>' +
           '<div class="stats-table-wrap"><table class="stats-table stats-table-wrapped"><thead>' + headRow(['Attack', 'Outcome', 'Why']) + '</thead><tbody>' +
           ATTACKS.map(function (a) { return row([esc(a[0]), '<strong>' + esc(a[1]) + '</strong>', esc(a[2])]); }).join('') +
@@ -193,9 +198,14 @@
           '</ul>', 'statsledger-notyet-title') +
 
         tile('stats-span-12 stats-evidence', 'Read and verify', '<ul class="stats-links">' +
-          '<li><a href="/docs/finance-ledger-design.md">The design document · why this is the way to prod</a></li>' +
-          '<li><a href="/docs/prototype-to-production.md">The pre-prod checklist · what the design closes, item by item</a></li>' +
+          '<li><a href="' + docHref('docs/finance-ledger-design.md') + '" data-scene-link="reference">The design document · why this is the way to prod</a></li>' +
+          '<li><a href="' + docHref('docs/prototype-to-production.md') + '" data-scene-link="reference">The pre-prod checklist · what the design closes, item by item</a></li>' +
           '<li><a href="' + href('stats') + '" data-scene-link="stats">Back to the main measurements</a></li></ul>', 'statsledger-ev-title') +
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into
+           it is centralized in js/main.js's onMount hook, not called here. Baked into the
+           HTML string itself, like the rest of this page, rather than a querySelector()
+           afterward, since this page module builds entirely from one innerHTML write. */
+        '<div data-ark-insert="main"></div>' +
         '</div></div>';
       host.appendChild(page);
       return page;

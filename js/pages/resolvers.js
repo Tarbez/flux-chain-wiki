@@ -99,6 +99,11 @@
           '</ul>' +
           '<p class="stats-tile-copy">A command-line deployer and the <code>resolve.defxn.com</code> landing surface are the next step. Today this page is read-only from <code>js/content/resolver-registry.js</code>.</p>', 'resolvers-deploy-title') +
 
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into
+           it is centralized in js/main.js's onMount hook, not called here. Baked into the
+           HTML string itself, like the rest of this page, rather than a querySelector()
+           afterward, since this page module builds entirely from one innerHTML write. */
+        '<div data-ark-insert="main"></div>' +
         '</div></div>';
       host.appendChild(page);
       return page;

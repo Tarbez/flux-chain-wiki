@@ -22,6 +22,7 @@ async function run(fail) {
   vm.createContext(context);
   for(const file of ['js/content/manifest.js','js/content/manifests/home.js','js/content/stats-highlights.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
   for(const route of ['deployment','explorer','about','chain','stats','resolver','resolvers','download','deploy','dao']) context.ArkUI.pageCatalog[route]={path:'/'+route};
+  vm.runInContext(fs.readFileSync('js/ark/dash-kit.js','utf8'),context);
   vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
   const host=new Element('main'),root=context.ArkUI.pageModules.zero.mount(host);
   const byClass=name=>root.all().filter(el=>(el.className||'').split(' ').includes(name));

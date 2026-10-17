@@ -155,14 +155,50 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'theme-data.js', ArkTheme.serialize(whole));
   }
 
+  /* the site-wide settings-gear defaults (theme/motif/pattern-config) are a single file
+     too, same as mesh settings and the theme. */
+  async function saveSettingsDefaults(contentDir, whole) {
+    await write(contentDir, 'settings-defaults-data.js', ArkSiteDefaults.serialize(whole));
+  }
+
   /* the SEO settings are a single file too, same as mesh settings and the theme. */
   async function saveSeo(contentDir, whole) {
     await write(contentDir, 'seo-data.js', ArkSEO.serialize(whole));
+  }
+
+  /* Responsive positioning and sizing authored in the visual Studio. */
+  async function saveLayout(contentDir, whole) {
+    await write(contentDir, 'layout-data.js', ArkLayout.serialize(whole));
+  }
+
+  /* Reusable component masters/instances/overrides authored in the visual Studio --
+     a single file too, same as layout. */
+  async function saveComponents(contentDir, whole) {
+    await write(contentDir, 'components-data.js', ArkComponents.serialize(whole));
+  }
+
+  /* Layered-state groups (click-to-cycle) authored in the visual Studio -- a single
+     file too, same as layout and components. */
+  async function saveStates(contentDir, whole) {
+    await write(contentDir, 'states-data.js', ArkStates.serialize(whole));
+  }
+
+  /* The site-wide background in/out transition (js/content/canvas-transitions.js) --
+     a single file too, same as mesh settings, the theme, and settings defaults: one
+     site-wide settings object, no per-route/per-id index to maintain. */
+  async function saveCanvasTransitions(contentDir, whole) {
+    await write(contentDir, 'canvas-transitions-data.js', ArkCanvasTransitions.serialize(whole));
+  }
+
+  /* Per-element in/out animation overrides (js/content/element-motion.js) -- a single
+     file too, same as canvas transitions. */
+  async function saveElementMotion(contentDir, whole) {
+    await write(contentDir, 'element-motion-data.js', ArkElementMotion.serialize(whole));
   }
 
   return { indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
            secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,
-           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSeo: saveSeo };
+           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSettingsDefaults: saveSettingsDefaults, saveSeo: saveSeo, saveLayout: saveLayout, saveComponents: saveComponents, saveStates: saveStates, saveCanvasTransitions: saveCanvasTransitions, saveElementMotion: saveElementMotion };
 })();

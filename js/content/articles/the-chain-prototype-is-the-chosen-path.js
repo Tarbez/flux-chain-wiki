@@ -4,10 +4,10 @@ LearningContent.load("the-chain-prototype-is-the-chosen-path", {
   "relevance": "Read this to distinguish hot admission, certified segment application, compact P2P transport, replay, short bursts and sustained fleet throughput. Local resolver rates are not multiplied into fleet claims.",
   "reviewed": "2026-10-08",
   "evidenceLabel": "The live fleet pulse — see for yourself",
-  "evidenceHref": "/api/fleet-pulse",
-  "relatedPage": "stats/ledger",
+  "evidenceHref": "doc:docs/protocol/resolvers.md",
+  "relatedPage": "route:stats/ledger",
   "actionLabel": "Open /stats",
-  "actionPage": "stats",
+  "actionPage": "route:stats",
   "questions": [
     "What exactly moved?",
     "What does the five-minute fleet result describe?",
@@ -59,5 +59,6 @@ LearningContent.load("the-chain-prototype-is-the-chosen-path", {
       "The newest sustained fleet number remains 12,403 accepted ops/s: 3,760,000 operations over 303 seconds across six public nodes, zero failures. Current local measurements are 51,065 hot admission, 279,269 certified sharded application and 812,268 effective compact-segment transport. The 79,654 ops/s number remains the historical 868 ms fleet burst. Each describes a different measured boundary; none is substituted for another.",
       "This is where the chain prototype stops being a direction and becomes the production path. The articles before this one explained how we got the certified fabric to 24,908 transfers a second across ten machines; that number is real, it is still true, and it is the ceiling of the old shape. The chain prototype's shape is different: no voting, no mempool, no global order to compete for. The number grows with the fleet."
     ]
-  ]
+  ],
+  "numbers": false
 });

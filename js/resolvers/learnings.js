@@ -12,12 +12,16 @@
     el.dataset.sceneLink = page;
     return el;
   }
-  function pageLink(label, page, className) {
-    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[page];
-    if (!entry) return null;
+  /* `value` is a LearningContent link field's tagged string (route:<key> or
+     doc:<path>; see LearningContent.problems()), resolved the one shared way
+     every retrofitted call site resolves one: js/ark/dash-kit.js's
+     resolveLinkField. `from` is the article's own path, so a doc link can
+     return to it. */
+  function resolvedLink(label, value, from, className) {
+    var r = ArkUI.dash.resolveLinkField(value, from);
     var el = node('a', className, label);
-    el.href = '#' + entry.path;
-    el.dataset.sceneLink = page;
+    el.href = r.href;
+    if (r.sceneLink) el.dataset.sceneLink = r.sceneLink;
     return el;
   }
   function attrs(page, label) {
@@ -139,11 +143,11 @@
       var sources = node('details', 'article-sources');
       sources.appendChild(node('summary', '', 'Evidence & editorial review'));
       sources.appendChild(node('p', 'article-reviewed', 'Editorial review: ' + article.reviewed + '. This is not live capability verification.'));
-      var evidenceLink = node('a', 'article-evidence-link', article.evidenceLabel);
-      evidenceLink.href = article.evidenceHref;
+      var fromPath = ArkUI.pageCatalog['article/' + article.slug] ? ArkUI.pageCatalog['article/' + article.slug].path : '/learnings/' + article.slug;
+      var evidenceLink = resolvedLink(article.evidenceLabel, article.evidenceHref, fromPath, 'article-evidence-link');
       sources.appendChild(evidenceLink);
-      var related = pageLink('Related mechanism ↗', article.relatedPage, 'article-related');
-      var action = pageLink(article.actionLabel + ' ↗', article.actionPage, 'article-action');
+      var related = resolvedLink('Related mechanism ↗', article.relatedPage, fromPath, 'article-related');
+      var action = resolvedLink(article.actionLabel + ' ↗', article.actionPage, fromPath, 'article-action');
       var exits=node('nav','article-related-actions');exits.setAttribute('aria-label','Continue from this note');
       if (related) exits.appendChild(related);
       if (action) exits.appendChild(action);body.appendChild(exits);

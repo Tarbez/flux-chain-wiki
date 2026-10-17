@@ -12,16 +12,24 @@ class Element {
 }
 const description={value:'Initial site description',getAttribute(){return this.value;},setAttribute(key,value){if(key==='content')this.value=value;}};
 const head=new Element();
-const document={head,createElement:()=>new Element(),querySelector:selector=>{
+const documentElement=new Element();
+const document={head,documentElement,createElement:()=>new Element(),querySelector:selector=>{
  if(selector==='meta[name="description"]')return description;
- const match=selector.match(/\[(name|property|rel)="([^"]+)"\]/);
+ // Broadened beyond name|property|rel so a script[data-ark-ld="1"]-style selector (the
+ // JSON-LD block's own identity, dedup-checked on every navigation) matches too -- the
+ // real DOM accepts any attribute name here, this stub previously only modeled three.
+ const match=selector.match(/\[([\w-]+)="([^"]+)"\]/);
  return match?head.children.find(el=>el.attrs[match[1]]===match[2])||null:null;
 },activeElement:null};
-const window={scrollY:0,scrollTo(x,y){this.scrollY=y;},matchMedia:()=>({matches:true})};
-const context=vm.createContext({console,document,window,getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
+const window={scrollY:0,scrollTo(x,y){this.scrollY=y;},matchMedia:()=>({matches:true}),dispatchEvent(){}};
+const context=vm.createContext({console,document,window,Event,getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
 for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/route.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific description':fallback,articleDescription:(id,fallback)=>fallback,
- ogImage:(map,id)=>id==='about'?'https://example.com/about.png':'',canonical:(map,id)=>id==='about'?'https://example.com/about':''};
+ ogImage:(map,id)=>id==='about'?'https://example.com/about.png':'',canonical:(map,id)=>id==='about'?'https://example.com/about':'',
+ site:()=>({name:'Test Site',baseUrl:'https://example.com',org:'Organization',lang:'en',handle:'@teststudio',defaultDescription:'Initial site description'}),
+ noindex:(map,id)=>id==='about',aiBlocked:(map,id)=>id==='about',
+ schemaType:(map,id,fallback)=>id==='about'?'AboutPage':fallback,
+ aiSummary:(map,id,fallback)=>fallback};
 (async()=>{
  const scene=new Element(),canvas=scene.appendChild(new Element()),header=scene.appendChild(new Element()),outlet=scene.appendChild(new Element());
  const loads={},mounts={},disposed={},writes=[];let resolveSlow,failConcept=true;
@@ -76,10 +84,20 @@ assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link land
  assert.equal(document.querySelector('meta[property="og:title"]').attrs.content,document.title);
  assert.equal(document.querySelector('meta[name="twitter:card"]').attrs.content,'summary_large_image');
  assert.equal(document.querySelector('link[rel="canonical"]').attrs.href,'https://example.com/about');
+ assert.equal(document.documentElement.lang,'en','site language is reflected onto <html lang>');
+ assert.equal(document.querySelector('meta[name="twitter:site"]').attrs.content,'@teststudio','the site-wide social handle is set regardless of route');
+ assert.equal(document.querySelector('meta[name="robots"]').attrs.content,'noindex, noai, noimageai','a page marked noindex+aiBlocked gets one combined robots directive');
+ const ld=JSON.parse(document.querySelector('script[data-ark-ld="1"]').textContent);
+ assert.equal(ld['@context'],'https://schema.org');
+ assert.equal(ld['@type'],'AboutPage','an explicit schemaType override wins over the derived WebPage/Article fallback');
+ assert.equal(ld.description,'About-specific description');
+ assert.equal(head.children.filter(el=>el.attrs['data-ark-ld']==='1').length,1,'the JSON-LD block is written once, not appended again on re-render');
  await router.navigate('lab');assert.equal(router.active,'lab');assert.equal(outlet.children.length,1);assert.equal(context.ArkUI.sceneState.get().page,'lab');
  assert.equal(description.value,'Initial site description','routes without overrides must not inherit the previous route description');
- for(const selector of ['link[rel="canonical"]','meta[property="og:url"]','meta[property="og:image"]','meta[name="twitter:image"]']) assert.equal(document.querySelector(selector),null,'stale optional metadata removed: '+selector);
+ for(const selector of ['link[rel="canonical"]','meta[property="og:url"]','meta[property="og:image"]','meta[name="twitter:image"]','meta[name="robots"]']) assert.equal(document.querySelector(selector),null,'stale optional metadata removed: '+selector);
  assert.equal(document.querySelector('meta[name="twitter:card"]').attrs.content,'summary');
+ const ldAfter=JSON.parse(document.querySelector('script[data-ark-ld="1"]').textContent);
+ assert.equal(ldAfter['@type'],'WebPage','a route with no schemaType override derives the generic WebPage type, not the previous route\'s AboutPage');
  assert.equal(head.children.filter(el=>el.attrs.property==='og:title').length,1,'navigation updates tags without duplicates');
  const savedAboutScene=context.ArkUI.sceneState.pages.about;
  delete context.ArkUI.sceneState.pages.about;
@@ -206,5 +224,53 @@ assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link land
  assert(lifecycleCss.includes('#scene .ark-page[hidden] { display:none !important; }'),'hidden home page cannot show early on zoom-out');
  const html=fs.readFileSync('index.html','utf8');assert(!html.includes('class="expansion"'));assert(!html.includes('js/content/articles/'));assert(!html.includes('src="js/studio.js"'));assert(!html.includes('src="js/resolvers/learnings.js"'));
  for(const definition of Object.values(context.ArkUI.pageCatalog)) for(const file of definition.scripts)assert(fs.existsSync(file),file);
- console.log('PASS: lazy home, module caching, outgoing DOM disposal, scroll restoration, last request wins, failure/retry, deep links/history, stable canvas/header/outlet identities, catalog assets.');
+
+ // Part G (follow-up plan): the background in/out transition (js/content/
+ // canvas-transitions.js), wired into navigate() itself. A real module instance, a
+ // real persistent-layer element, and the real fadeCanvas() call sites -- not a
+ // reimplementation of the sequencing to check against itself.
+ {
+  const canvasModuleContext=vm.createContext({window:{}});
+  vm.runInContext(fs.readFileSync('js/content/canvas-transitions.js','utf8'),canvasModuleContext);
+  const ArkCanvasTransitions=vm.runInContext('ArkCanvasTransitions',canvasModuleContext);
+  ArkCanvasTransitions.define({effect:'fade',outDuration:150,inDuration:180,easing:'ease'});
+  window.ArkCanvasTransitions=ArkCanvasTransitions; // bridge into page-router.js's own bare `window`
+
+  const canvasScene=new Element(),canvasOutlet=canvasScene.appendChild(new Element());
+  const persistentEl=new Element();
+  canvasScene.querySelector=(selector)=>selector==='[data-ark-layer="persistent"]'?persistentEl:null;
+  const canvasLog=[];
+  context.ArkUI.createPresence=()=>({
+   hide(page){canvasLog.push(['hide-called',page,persistentEl.style.opacity]);return Promise.resolve();},
+   show(page){canvasLog.push(['show-called',page,persistentEl.style.opacity]);return Promise.resolve();},
+   enter(page){canvasLog.push(['enter-called',page,persistentEl.style.opacity]);return Promise.resolve();}
+  });
+  const canvasState={get(){return {paused:false};},navigate(){}};
+  const canvasRouter=context.ArkUI.createPageRouter({scene:canvasScene,outlet:canvasOutlet,state:canvasState,
+   catalog:{zero:{path:'/',title:'Home'},about:{path:'/about',title:'About'}},
+   load:async()=>({mount(host){return host.appendChild(new Element());}}),writeHistory(){}
+  });
+  await canvasRouter.navigate('zero');
+  assert.equal(persistentEl.style.opacity,'1','the background has eased back in by the time the very first navigation settles');
+  canvasLog.length=0;
+  await canvasRouter.navigate('about');
+  assert.equal(canvasLog.length,2,'exactly one hide call and one show/enter call for a plain cross-page navigation');
+  assert.deepEqual([canvasLog[0][0],canvasLog[0][1]],['hide-called','zero']);
+  assert.equal(canvasLog[0][2],'0','the background has ALREADY faded out by the time the outgoing page is told to hide -- fadeCanvas(\'out\') runs strictly before presence.hide(), never after');
+  assert.deepEqual([canvasLog[1][0],canvasLog[1][1]],['show-called','about']);
+  assert.equal(canvasLog[1][2],'0','at the exact moment presence.show() is invoked for the incoming page, the background is still mid fade-out (not yet flipped to fading in) -- the fade-in call lands strictly AFTER presence.show()/enter() is called, so the two transitions are layered in sequence, never racing to start at the same instant');
+  assert.equal(persistentEl.style.opacity,'1','after presence.show() returns, the background fade-in call has already run and eased it back in');
+  assert.equal(persistentEl.style.transition,'opacity 180ms ease','the fade-in call used the configured inDuration/easing');
+
+  // This runs on every real navigation for every real visitor, so it must degrade
+  // silently -- never throw -- when the persistent layer is missing or the script
+  // itself did not load, exactly as js/ark/page-router.js's own fadeCanvas() guards.
+  canvasScene.querySelector=()=>null;
+  await assert.doesNotReject(canvasRouter.navigate('zero'),'navigation does not throw when the persistent layer is missing');
+  delete window.ArkCanvasTransitions;
+  canvasScene.querySelector=(selector)=>selector==='[data-ark-layer="persistent"]'?persistentEl:null;
+  await assert.doesNotReject(canvasRouter.navigate('about'),'navigation does not throw when ArkCanvasTransitions itself is unavailable');
+ }
+
+ console.log('PASS: lazy home, module caching, outgoing DOM disposal, scroll restoration, last request wins, failure/retry, deep links/history, stable canvas/header/outlet identities, catalog assets, background in/out transition sequencing.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

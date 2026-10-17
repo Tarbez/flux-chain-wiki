@@ -3,7 +3,11 @@ ArkUI.register('REXPERIMENT_V1', {
  tag:'section',attrs:function(){return {class:'ark-page guided-page','data-ark-page':'proximity','aria-labelledby':'model-entry-title',hidden:'',inert:'','aria-hidden':'true'};},
  decorate:function(el){
   el.classList.remove('learning-page');el.classList.add('guided-page');
-  function link(label,target,cls){var a=ArkUI.el('a',cls||'',label);a.href='#'+ArkUI.pageCatalog[target].path;a.dataset.sceneLink=target;return a;}
+  /* No manifest backs this resolver's own literal nav targets, so there is
+     no manifest field for a 'link' kind value to live in; each destination
+     stays a tagged literal in code, resolved the one shared way every
+     retrofitted call site is -- js/ark/dash-kit.js's linkEl. */
+  function link(label,target,cls){return ArkUI.dash.linkEl(label,'route:'+target,undefined,cls);}
   var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Home','zero'));el.appendChild(path);
   var title=ArkUI.el('h1','','How can threshold agreement be pictured?');title.id='model-entry-title';el.appendChild(title);
   var body=ArkUI.el('div','guided-body');body.appendChild(ArkUI.el('p','','Bring independent groups closer together to explore a visual analogy for threshold evidence. Then inspect the actual authority contract.'));

@@ -17,7 +17,10 @@
                dissolve: 0..1, depth: 0..1 }. It overrides the scene's
                built-in config for the page whose route matches. (SEO
                titles/descriptions live in js/content/seo.js, not here.)
-     fields    ROLE -> { label, kind: 'line' | 'text', section, value }
+     fields    ROLE -> { label, kind: 'line' | 'text' | 'link', section, value }
+               A 'link' field's value is a plain string tagged route:<key> /
+               doc:<path> / url:<address>; js/ark/dash-kit.js's
+               resolveLinkField(value) turns it into a real href.
 
    Pages, the shell and Flux patterns all read words through ArkCopy, so
    editing a manifest (by hand, or in admin.html) changes the site and there
@@ -34,8 +37,14 @@ var ArkManifest = (function () {
   var ID = /^[a-z][a-z0-9]*$/;
   var ROLE = /^[A-Z][A-Z0-9]*(\.[A-Z][A-Z0-9]*)*$/;
   var GROUPS = ['site', 'page', 'theory'];
-  var KINDS = ['line', 'text'];
+  var KINDS = ['line', 'text', 'link'];
   var SHAPE_KINDS = ['zero', 'orb', 'knot', 'proximity', 'word'];
+  /* A 'link' field's value is a plain string (every field's value is, by the
+     rule above) carrying one of three tags, so one string unambiguously means
+     one of three things. Checking the TARGET exists (a real pageCatalog key,
+     a real referenceDocs entry) is the admin UI's job: this module has no
+     access to either catalog. */
+  var LINK = /^(route|doc|url):\S+/;
   var pages = [];
 
   function problems(m) {
@@ -64,8 +73,9 @@ var ArkManifest = (function () {
       var f = m.fields[role];
       if (!ROLE.test(role)) out.push('field "' + role + '" must be capitals and digits joined by dots');
       else if (!f || typeof f.value !== 'string') out.push(role + ' has no value');
-      else if (KINDS.indexOf(f.kind) < 0) out.push(role + ' kind must be line or text');
+      else if (KINDS.indexOf(f.kind) < 0) out.push(role + ' kind must be line, text or link');
       else if (!f.label) out.push(role + ' needs a label');
+      else if (f.kind === 'link' && !LINK.test(f.value)) out.push(role + ' value must be route:<key>, doc:<path> or url:<address>');
     });
     return out;
   }

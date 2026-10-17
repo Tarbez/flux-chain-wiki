@@ -26,7 +26,14 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   function pct(v, max) { return Math.max(1.5, v / max * 100).toFixed(2) + '%'; }
-  function href(key) { var e = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return e ? (ArkUI.route ? ArkUI.route.href(e.path) : '#' + e.path) : '#/' + key; }
+  /* This standalone data page carries no ArkManifest of its own (no CMS copy
+     exists for it to begin with), so there is no manifest field for a 'link'
+     kind value to live in; the destination stays a tagged literal in code,
+     but resolved the one shared way every retrofitted call site is --
+     js/ark/dash-kit.js's resolveLinkField -- not a second copy of the old
+     pageCatalog-lookup formula. */
+  function href(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
+  function docHref(doc) { return ArkUI.dash.resolveLinkField('doc:' + doc, '/stats/gpu').href; }
   function tile(cls, label, body, id) {
     return '<article class="stats-tile ' + cls + '"' + (id ? ' aria-labelledby="' + id + '"' : '') + '>' +
       (label ? '<p class="stats-tile-label"' + (id ? ' id="' + id + '"' : '') + '>' + label + '</p>' : '') + body + '</article>';
@@ -79,8 +86,13 @@
           '</tbody></table></div>', 'statsgpu-wan-title') +
 
         tile('stats-span-12 stats-evidence', 'Read and verify', '<ul class="stats-links">' +
-          '<li><a href="/docs/evidence/bench-003-rust-fleet-ceiling.md">BENCH-003 §16 · the GPU box, measured and corrected</a></li>' +
+          '<li><a href="' + docHref('docs/evidence/bench-003-rust-fleet-ceiling.md') + '" data-scene-link="reference">BENCH-003 §16 · the GPU box, measured and corrected</a></li>' +
           '<li><a href="' + href('stats') + '" data-scene-link="stats">Back to the main measurements</a></li></ul>', 'statsgpu-ev-title') +
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into
+           it is centralized in js/main.js's onMount hook, not called here. Baked into the
+           HTML string itself, like the rest of this page, rather than a querySelector()
+           afterward, since this page module builds entirely from one innerHTML write. */
+        '<div data-ark-insert="main"></div>' +
         '</div></div>';
       host.appendChild(page);
       return page;
