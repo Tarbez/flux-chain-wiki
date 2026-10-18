@@ -11,7 +11,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const app = fs.readFileSync('admin-app.html', 'utf8');
 const context = vm.createContext({});
 vm.runInContext(fs.readFileSync('js/content/layout.js', 'utf8') + ';this.ArkLayout = ArkLayout;', context);

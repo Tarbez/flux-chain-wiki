@@ -11,7 +11,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = admin.indexOf('  var NOTHING_TO_SAVE =');
 const end = admin.indexOf('\n  }\n', admin.indexOf('function refuse(', start)) + 4;
 assert(start >= 0 && end > start, 'js/admin/admin.js defines NOTHING_TO_SAVE and refuse()');
@@ -52,7 +52,7 @@ for (const [name, site] of [['Reset overrides', /\bresetAll\.disabled\s*=/], ['+
 const reasons = {
   resetAll: /refuse\(resetAll, Object\.keys\(overrides\)\.length \? '' : '(Nothing to reset: [^']*?\\'[^']*)'\)/,
   addState: /refuse\(addState, group\.states\.length >= ArkStates\.MAX_STATES \? `([^`]+)` : ''\)/,
-  useThis: /refuse\(useThis, !cmsExactSelection\.key \? '([^']+)' : group\.trigger === cmsExactSelection\.key \? '([^']+)' : ''\)/,
+  useThis: /refuse\(useThis, !state\.cmsExactSelection\.key \? '([^']+)' : group\.trigger === state\.cmsExactSelection\.key \? '([^']+)' : ''\)/,
   publishHost: /var PUBLISH_NEEDS_HOST = '([^']+)';/,
   publishing: /var PUBLISHING_NOW = '([^']+)';/,
 };

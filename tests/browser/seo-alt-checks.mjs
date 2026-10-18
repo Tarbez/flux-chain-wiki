@@ -32,7 +32,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, openToolbarSection, toolbarKey, clickHeader, designView, openPageSeo, openSiteSeo } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, openToolbarSection, toolbarKey, clickHeader, designView, openPageSeo, openSiteSeo, until as untilFor, waitForPreviewReady, waitForRouteReady, openRoute as openRouteInPreview, statusCount, waitForSave, gotoEditor } from './harness.mjs';
 import { readProject, planWrite } from '../../scripts/lib/site-bundle.mjs';
 import { readIndexHtml, renderDocument, createLocalResources } from '../../api/lib/render-core.mjs';
 
@@ -40,8 +40,6 @@ const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'seo,alt,checks').split(',');
 const SHOTS = process.env.SHOTS || fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-shots-'));
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-site-'));
-const PORT = Number(process.env.PORT) || 3499;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
 fs.mkdirSync(SHOTS, { recursive: true });
 
 let failures = 0;
@@ -58,20 +56,14 @@ async function flow(name, run) {
   for (const file of ['robots.txt', 'llms.txt', 'sitemap.xml']) if (fs.existsSync(path.join(SITE, file))) fs.copyFileSync(path.join(SITE, file), path.join(WORK, file));
   try { await run(); } catch { /* reported by step() */ }
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 8000) {
-  const end = Date.now() + timeout; let last;
-  while (Date.now() < end) {
-    try { last = await probe(); } catch (error) { if (error instanceof StepFailure) throw error; last = null; }
-    if (last) return last; await wait(120);
-  }
-  throw new StepFailure(message);
-}
+/* the harness's until (budget x load factor); a StepFailure thrown by a probe is a verdict */
+const until = (probe, message, timeout = 8000) => untilFor(probe, message, timeout, { interval: 120, fail: (m) => new StepFailure(m), passThrough: (e) => e instanceof StepFailure });
 const readSaved = (name) => fs.readFileSync(path.join(WORK, 'js/content', name), 'utf8');
 function savedJson(name) { const text = readSaved(name); return JSON.parse(text.slice(text.indexOf('.define(') + 8, text.lastIndexOf(')'))); }
 
 copySite(WORK);
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
+const ORIGIN = server.origin;
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const context = await browser.newContext({ viewport: { width: 1500, height: 950 } });
 await fakeFolder(context, WORK);
@@ -82,26 +74,26 @@ context.on('page', (p) => p.on('pageerror', (e) => { if (!harnessNoise.test(e.me
 async function openEditor() {
   const page = await context.newPage();
   page.on('dialog', (d) => d.dismiss());
-  await page.goto(`${ORIGIN}/admin`);
+  await gotoEditor(page, ORIGIN);
   const app = await appFrame(page);
   await app.click('#modeDesignBtn');
   const pv = await previewFrame(app);
-  await wait(400);
+  await waitForPreviewReady(app);
   return { page, app, pv, shot: (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') }) };
 }
-const routeRow = (app, route) => app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route + '$') }) }).first();
+/* the preview's ready message for the route, not a sleep after it (harness openRoute) */
 async function openRoute(app, pv, route) {
-  await app.click('#tabPages');
-  await routeRow(app, route).click();
-  await until(() => pv.evaluate((r) => ArkUI.route.path() === r && !!document.querySelector('[data-ark-layout-key]'), route), `the preview never reached ${route}`, 15000);
-  await wait(500);
+  await openRouteInPreview(app, pv, route, 15000).catch((e) => { throw new StepFailure(e.message); });
 }
+/* returns the #status count before the click, for waitForSave() */
 async function save(app) {
   if (!(await app.evaluate(() => document.getElementById('connect').disabled))) {
     await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
   }
+  const since = await statusCount(app);
   await app.click('#save');
+  return since;
 }
 /* SEO's two homes since the one-header merge (2026-10-18; it was one right-panel SEO tab): this
    page's fields in the page picker's SEO popover (openPageSeo), the site-wide fields and the
@@ -134,8 +126,8 @@ const headOfHtml = (html) => {
 async function publicPage(route) {
   const pub = await context.newPage();
   await pub.goto(ORIGIN + route);
+  await waitForRouteReady(pub.mainFrame(), { path: route, timeout: 15000 }).catch((e) => { throw new StepFailure(e.message); });
   await until(() => pub.evaluate((r) => window.ArkUI && ArkUI.route && ArkUI.route.path() === r && !!document.querySelector('script[data-ark-ld="1"]'), route), 'the public page never finished routing to ' + route, 15000);
-  await wait(400);
   return pub;
 }
 async function serverRender(route) {
@@ -200,7 +192,7 @@ await flow('seo', async () => {
     await shot('seo-04-about-hidden');
   });
   await step('Save writes every field to seo-data.js', async () => {
-    await save(app);
+    const since = await save(app);
     const seo = await until(() => { try { const s = savedJson('seo-data.js'); return s.pages.home.title === HOME.title && s.pages.about.noindex && s; } catch { return null; } }, 'Save did not write the SEO edits');
     const home = seo.pages.home;
     check(home.ogImage === HOME.ogImage && home.canonical === HOME.canonical && home.schemaType === HOME.schemaType && home.aiSummary === HOME.aiSummary, 'home override saved wrong: ' + JSON.stringify(home));
@@ -209,7 +201,9 @@ await flow('seo', async () => {
     check(JSON.stringify(seo.site.bots) === JSON.stringify({ GPTBot: 'block', CCBot: 'block' }), 'bots saved wrong: ' + JSON.stringify(seo.site.bots));
     /* seo-data.js is not the last file a Save writes (the derived root files follow it): wait for
        the Save itself to finish before the next step closes this page under it */
-    await until(() => app.evaluate(() => /^Saved \d+ items? /.test(document.getElementById('status').textContent)), 'the Save never reported finishing', 30000);
+    /* read from the editor's status log, not the live #status text, which clears itself after 6 s */
+    const summary = await waitForSave(app, since).catch((e) => { throw new StepFailure(e.message); });
+    check(summary.tone === 'ok', 'the Save reported: ' + summary.text);
   });
   await step('reload: the page SEO popover and Theme & defaults show the saved values', async () => {
     await page.close();

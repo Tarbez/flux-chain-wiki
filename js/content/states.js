@@ -171,28 +171,36 @@ var ArkStates = (function () {
     if (!root || !root.querySelectorAll) return [];
     return Array.prototype.slice.call(root.querySelectorAll('[' + attr + ']'));
   }
-  /* The root itself counts (regression: tests/states-root-member.cjs): ArkLayout.annotate()
-     keys the root too, so the persistent scene (#scene, key 'id:scene') can be picked as a
-     state-0 member -- and a querySelectorAll() below the root never found it, so on the
-     public page that member was never hidden. */
-  function findByKey(root, key) {
+  /* The keyed elements of `route`'s scope, in document order. Through ArkLayout's own
+     annotate() whenever it is loaded, so a key means here exactly what it means there (ONE key
+     function, js/content/layout.js) and the page a route is replacing -- still mounted while it
+     leaves, with keys of the same shape -- never answers for this route. The root itself
+     counts (regression: tests/states-root-member.cjs): annotate() keys the root too, so the
+     persistent scene (#scene, key 'id:scene') can be picked as a state-0 member, and a
+     querySelectorAll() below the root never found it. */
+  function keyedIn(root, route) {
+    if (typeof ArkLayout !== 'undefined' && ArkLayout.annotate) return ArkLayout.annotate(root, route);
+    var list = elementsWithAttr(root, 'data-ark-layout-key');
+    if (root && root.getAttribute && root.getAttribute('data-ark-layout-key')) list.unshift(root);
+    return list;
+  }
+  /* `list` is keyedIn()'s; a key it misses may still name an element annotate() does not tag */
+  function findByKey(root, key, route, list) {
     if (!key) return null;
-    if (root && root.getAttribute && root.getAttribute('data-ark-layout-key') === key) return root;
-    var found = null;
-    elementsWithAttr(root, 'data-ark-layout-key').some(function (el) {
-      if (el.getAttribute('data-ark-layout-key') === key) { found = el; return true; }
-      return false;
-    });
-    return found;
+    list = list || keyedIn(root, route);
+    for (var i = 0; i < list.length; i++) if (list[i].getAttribute('data-ark-layout-key') === key) return list[i];
+    return typeof ArkLayout !== 'undefined' && ArkLayout.find ? ArkLayout.find(root, key, route) : null;
   }
   /* A state's anchor goes right after state 0's last member -- which, when that member is the
      root itself, is OUTSIDE the root. So a miss below the root also looks document-wide (state
      anchor ids are unique per group); otherwise every render created another anchor. */
-  function findAnchor(root, id) {
+  function findAnchor(root, id, route) {
     var found = null;
+    /* never the leaving page's anchor: it can carry the same id while two routes are mounted */
+    var mine = function (el) { return typeof ArkLayout === 'undefined' || !ArkLayout.inRoute || ArkLayout.inRoute(el, route); };
     function scan(scope) {
       elementsWithAttr(scope, 'data-ark-insert').some(function (el) {
-        if (el.getAttribute('data-ark-insert') === id) { found = el; return true; }
+        if (el.getAttribute('data-ark-insert') === id && mine(el)) { found = el; return true; }
         return false;
       });
     }
@@ -204,11 +212,9 @@ var ArkStates = (function () {
      a new state's anchor is inserted right after it, so it occupies state 0's own
      visual position (document order is render order for every flex/stack container
      this site uses, the same assumption ArkLayout's buildGroups() already relies on). */
-  function lastMemberElement(host, members) {
-    var last = host && host.getAttribute && members.indexOf(host.getAttribute('data-ark-layout-key')) >= 0 ? host : null;
-    elementsWithAttr(host, 'data-ark-layout-key').forEach(function (el) {
-      if (members.indexOf(el.getAttribute('data-ark-layout-key')) >= 0) last = el;
-    });
+  function lastMemberElement(list, members) {
+    var last = null;
+    list.forEach(function (el) { if (members.indexOf(el.getAttribute('data-ark-layout-key')) >= 0) last = el; });
     return last;
   }
   function createAnchor(host, afterEl, id) {
@@ -235,19 +241,20 @@ var ArkStates = (function () {
      inside it as the trigger) advanced once and then stranded the group on state 1
      forever: the only trigger was display:none, so nothing could ever be clicked to
      move on (regression: tests/states-trigger-strand.cjs). */
-  function selfTargets(host, group, groupId) {
-    if (group.current === 0) return group.states[0].members.map(function (key) { return findByKey(host, key); }).filter(Boolean);
-    var anchor = findAnchor(host, anchorId(groupId, group.current));
+  function selfTargets(host, route, group, groupId, list) {
+    if (group.current === 0) return group.states[0].members.map(function (key) { return findByKey(host, key, route, list); }).filter(Boolean);
+    var anchor = findAnchor(host, anchorId(groupId, group.current), route);
     return anchor ? [anchor] : [];
   }
   function triggerTargets(host, route, value, groupId) {
     var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
     if (!group) return [];
-    if (group.trigger === 'self') return selfTargets(host, group, groupId);
-    var el = findByKey(host, group.trigger);
+    var list = keyedIn(host, route);
+    if (group.trigger === 'self') return selfTargets(host, route, group, groupId, list);
+    var el = findByKey(host, group.trigger, route, list);
     if (group.current === 0) return el ? [el] : [];
-    var hiddenWithZero = !el || group.states[0].members.some(function (key) { var member = findByKey(host, key); return member && (member === el || (member.contains && member.contains(el))); });
-    return hiddenWithZero ? (el ? [el] : []).concat(selfTargets(host, group, groupId)) : [el];
+    var hiddenWithZero = !el || group.states[0].members.some(function (key) { var member = findByKey(host, key, route, list); return member && (member === el || (member.contains && member.contains(el))); });
+    return hiddenWithZero ? (el ? [el] : []).concat(selfTargets(host, route, group, groupId, list)) : [el];
   }
 
   /* Delegated-click resolution: which group (if any) does this click target belong
@@ -277,21 +284,21 @@ var ArkStates = (function () {
     if (!host) return;
     var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
     if (!group) return;
-    var activeIndex = group.current;
+    var activeIndex = group.current, list = keyedIn(host, route);
     /* Tagged with the group id (Studio's own selection reporting reads this back, the
        same way js/content/components.js tags an instance root with data-ark-component-
        key/anchor/master) so a click on any member or anchor resolves to "this is part
        of state group X" without a second, parallel lookup table. */
     group.states[0].members.forEach(function (key) {
-      var el = findByKey(host, key);
+      var el = findByKey(host, key, route, list);
       if (!el) return;
       if (el.setAttribute) el.setAttribute('data-ark-state-group', groupId);
       if (el.style) el.style.display = activeIndex === 0 ? '' : 'none';
     });
     for (var i = 1; i < group.states.length; i++) {
-      var id = anchorId(groupId, i), existing = findAnchor(host, id);
+      var id = anchorId(groupId, i), existing = findAnchor(host, id, route);
       if (i === activeIndex) {
-        var anchor = existing || createAnchor(host, lastMemberElement(host, group.states[0].members), id);
+        var anchor = existing || createAnchor(host, lastMemberElement(list, group.states[0].members), id);
         if (anchor) {
           if (anchor.setAttribute) { anchor.setAttribute('data-ark-state-group', groupId); anchor.setAttribute('data-ark-state-index', String(i)); }
           if (anchor.style) anchor.style.display = '';

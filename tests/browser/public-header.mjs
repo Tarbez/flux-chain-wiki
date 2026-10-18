@@ -43,27 +43,19 @@
    width on the home route.
    ===================================================================== */
 import fs from 'node:fs';
-import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { copySite, startHost } from './harness.mjs';
-import { settled } from './route-sweep.mjs';
+import { copySite, startHost, routeSettled, animationsSettled, scaled } from './harness.mjs';
+
+const settled = (page, id) => routeSettled(page, id, 20000);
 
 /* PUBLIC_HEADER_WIDTHS=320,600 probes other widths. */
 const WIDTHS = process.env.PUBLIC_HEADER_WIDTHS
   ? process.env.PUBLIC_HEADER_WIDTHS.split(',').map((w) => [Number(w), 844])
   : [[360, 780], [390, 844], [430, 932], [1024, 768], [1280, 800], [1440, 900], [1920, 1080]];
 const ROUTES = ['zero', 'about', 'explorer', 'account'];
-
-async function freePort() {
-  const probe = http.createServer();
-  await new Promise((resolve) => probe.listen(0, '127.0.0.1', resolve));
-  const { port } = probe.address();
-  await new Promise((resolve) => probe.close(resolve));
-  return port;
-}
 
 export function measureHeader(page) {
   /* after a few frames: the row re-fits in the frame after a ResizeObserver sees a width change */
@@ -148,9 +140,8 @@ async function main() {
   const shotDir = process.argv[2] || null;
   if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
   const root = copySite(fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-public-header-')));
-  const port = await freePort();
-  const server = await startHost(root, port);
-  const base = `http://127.0.0.1:${port}`;
+  const server = await startHost(root);
+  const base = server.origin;
   const browser = await chromium.launch();
   const failures = [];
   try {
@@ -161,14 +152,14 @@ async function main() {
         try {
           const routePath = id === 'zero' ? '/' : await (async () => {
             await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
-            await page.waitForFunction(() => window.ArkUI && ArkUI.pageCatalog, null, { timeout: 20000 });
+            await page.waitForFunction(() => window.ArkUI && ArkUI.pageCatalog, null, { timeout: scaled(20000) });
             return page.evaluate((key) => ArkUI.pageCatalog[key].path, id);
           })();
           await page.goto(base + routePath, { waitUntil: 'domcontentloaded' });
           await settled(page, id);
           await page.evaluate(() => document.fonts.ready);
           /* the network pill's label arrives from a lazily imported module */
-          await page.waitForFunction(() => { const l = document.querySelector('.header-chain-trigger-label'); return !l || l.textContent !== 'Network' || l.closest('[hidden]'); }, null, { timeout: 10000 }).catch(() => {});
+          await page.waitForFunction(() => { const l = document.querySelector('.header-chain-trigger-label'); return !l || l.textContent !== 'Network' || l.closest('[hidden]'); }, null, { timeout: scaled(10000) }).catch(() => {});
           const result = await measureHeader(page);
           const tag = `${width} ${routePath} (${id})`;
           if (result.problems.length) { failures.push(tag); console.log(`FAIL ${tag}\n  - ${result.problems.join('\n  - ')}`); }
@@ -177,7 +168,7 @@ async function main() {
             await page.screenshot({ path: path.join(shotDir, `after-public-${width}.png`), clip: { x: 0, y: 0, width, height: 160 } });
             await page.click('.nav-toggle');
             await page.waitForSelector('#primary-navigation', { state: 'visible' });
-            await page.waitForTimeout(250);
+            await animationsSettled(page);   /* the menu's open animation is over */
             await page.screenshot({ path: path.join(shotDir, `after-public-${width}-menu.png`) });
           }
           if (id === 'zero') {
@@ -186,13 +177,16 @@ async function main() {
                last pick stays remembered, so the inner routes after this run with it too. */
             await page.goto(base + routePath, { waitUntil: 'domcontentloaded' });
             await settled(page, id);
-            const options = await page.evaluate(async () => { document.querySelector('.header-chain-trigger').click(); await new Promise((r) => setTimeout(r, 100)); const labels = [...document.querySelectorAll('#header-chain-popover .network-option')].map((o) => o.textContent.trim()); document.querySelector('.header-chain-trigger').click(); return labels; });
+            /* open the popover, read its options once they are there (not after a fixed 100 ms), close it */
+            await page.evaluate(() => document.querySelector('.header-chain-trigger').click());
+            await page.waitForSelector('#header-chain-popover .network-option', { state: 'attached', timeout: scaled(5000) }).catch(() => {});
+            const options = await page.evaluate(() => { const labels = [...document.querySelectorAll('#header-chain-popover .network-option')].map((o) => o.textContent.trim()); document.querySelector('.header-chain-trigger').click(); return labels; });
             for (let i = 0; i < options.length; i++) {
               await page.click('.header-chain-trigger');
               await page.click(`#header-chain-popover .network-option >> nth=${i}`);
               /* picking the network already chosen leaves the popover open (a no-op choice) */
               if (await page.isVisible('#header-chain-popover')) await page.keyboard.press('Escape');
-              await page.waitForFunction((label) => document.querySelector('.header-chain-trigger-label').textContent === label, options[i], { timeout: 5000 }).catch(() => {});
+              await page.waitForFunction((label) => document.querySelector('.header-chain-trigger-label').textContent === label, options[i], { timeout: scaled(5000) }).catch(() => {});
               const picked = await measureHeader(page);
               const pickTag = `${width} ${routePath} (${id}, network "${options[i]}")`;
               if (picked.problems.length) { failures.push(pickTag); console.log(`FAIL ${pickTag}\n  - ${picked.problems.join('\n  - ')}`); }

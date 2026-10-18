@@ -24,6 +24,13 @@
 
    Listing reads only version records, a page at a time ("Show older"),
    never the draft bodies.
+
+   Forks: two editors that save into this folder at the same moment (a
+   second browser, another machine syncing it) each add a version on the
+   same base -- nothing is overwritten, so the history forks. Each side is
+   listed as its own branch (tag "branch A"/"branch B", in time order),
+   and the next Save records a version that joins them (tag "joins #n").
+   Nothing else about the panel changes.
    ===================================================================== */
 var ArkVersionsPanel = (function () {
   'use strict';
@@ -63,13 +70,16 @@ var ArkVersionsPanel = (function () {
 
     function seqOf(hash) { return bySeq[hash] ? '#' + bySeq[hash] : short(hash); }
 
+    function branchName(n) { return n < 26 ? String.fromCharCode(65 + n) : String(n + 1); }
     function row(entry) {
-      var rec = entry.record;
+      var rec = entry.record, joins = Array.isArray(rec.joins) ? rec.joins : [];
       var head = h('div', { class: 'version-head' },
         h('span', { class: 'version-seq', text: '#' + rec.seq }),
         h('span', { class: 'version-kind', 'data-kind': rec.kind, text: rec.kind }),
         rec.restoredFrom ? h('span', { class: 'version-kind', 'data-kind': 'restore', title: 'Supersedes: made by restoring ' + rec.restoredFrom, text: 'restores ' + seqOf(rec.restoredFrom) }) : null,
         rec.importedFrom ? h('span', { class: 'version-kind', 'data-kind': 'imported', title: 'Imported from the exported version ' + rec.importedFrom, text: 'from ' + short(rec.importedFrom) }) : null,
+        joins.length ? h('span', { class: 'version-kind', 'data-kind': 'joined', title: 'Joins the versions saved at the same time on another branch: ' + joins.join(', '), text: 'joins ' + joins.map(seqOf).join(', ') }) : null,
+        entry.forked ? h('span', { class: 'version-kind', 'data-kind': 'branch', title: 'Saved at the same time as a version on another branch; both are kept', text: 'branch ' + branchName(entry.branch) }) : null,
         h('time', { datetime: rec.at, text: when(rec.at) }));
       var summary = h('ul', { class: 'version-summary' });
       rec.summary.slice(0, 4).forEach(function (line) { summary.appendChild(h('li', { text: line })); });
@@ -89,10 +99,12 @@ var ArkVersionsPanel = (function () {
           h('dt', { text: 'Version' }), h('dd', { class: 'mono', text: entry.hash }),
           h('dt', { text: 'Content' }), h('dd', { class: 'mono', text: rec.content }),
           h('dt', { text: 'Previous' }), h('dd', { class: 'mono', text: rec.prev || 'none: the first version' }),
+          joins.length ? h('dt', { text: 'Joins' }) : null, joins.length ? h('dd', { class: 'mono', text: joins.join(' ') }) : null,
           rec.restoredFrom ? h('dt', { text: 'Restored from' }) : null, rec.restoredFrom ? h('dd', { class: 'mono', text: rec.restoredFrom }) : null,
           rec.importedFrom ? h('dt', { text: 'Imported from' }) : null, rec.importedFrom ? h('dd', { class: 'mono', text: rec.importedFrom }) : null,
           rec.published ? h('dt', { text: 'Published' }) : null, rec.published ? h('dd', { class: 'mono', text: 'version ' + rec.published.version + (rec.published.cid ? ' · ' + rec.published.cid : '') }) : null));
-      return h('li', { class: 'version' + (previewing === entry.hash ? ' is-previewing' : ''), 'data-hash': entry.hash, 'data-seq': String(rec.seq) },
+      return h('li', { class: 'version' + (previewing === entry.hash ? ' is-previewing' : ''), 'data-hash': entry.hash, 'data-seq': String(rec.seq),
+        'data-branch': entry.forked ? branchName(entry.branch) : null, 'data-joins': joins.length ? String(joins.length) : null },
         head, rec.label ? h('strong', { class: 'version-label', text: rec.label }) : null, summary, rest, actions, addresses);
     }
 
@@ -126,7 +138,13 @@ var ArkVersionsPanel = (function () {
         entries = older ? entries.concat(page.entries) : page.entries;
         next = page.next;
         entries.forEach(function (e) { bySeq[e.hash] = e.record.seq; });
-        note.textContent = entries.length ? '' : 'No versions yet. The next Save records the first one.';
+        if (!older) {
+          var notes = [];
+          if (!entries.length) notes.push('No versions yet. The next Save records the first one.');
+          if (page.heads && page.heads.length > 1) notes.push(page.heads.length + ' versions were saved at the same time by different editors of this folder. All are kept, listed as branches; the next Save joins them.');
+          if (page.missing && page.missing.length) notes.push('Version ' + page.missing.map(short).join(', ') + ' is named as a latest version but its record is not in cms-history/versions/ yet; a folder synced from another machine may still be copying it. It will be listed once it arrives.');
+          note.textContent = notes.join(' ');
+        }
       } catch (error) {
         note.textContent = error.message;
       }

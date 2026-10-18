@@ -20,9 +20,9 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
-const start = admin.indexOf('  const TB_IDENTITY = {'), end = admin.indexOf("  let libKey = '';", start);
-assert(start >= 0 && end > start, 'js/admin/admin.js still declares the toolbar shell (TB_IDENTITY ... renderSelToolbar ... its listeners) before libKey');
+const admin = require('./lib/admin-source.cjs').ADMIN;
+const start = admin.indexOf('  const TB_IDENTITY = {'), end = admin.indexOf('  A.provide({ placeToolbarPop', start);
+assert(start >= 0 && end > start, 'js/admin/toolbar.js still declares the toolbar shell (TB_IDENTITY ... renderSelToolbar ... its listeners) and nothing after it');
 const code = admin.slice(start, end);
 
 const BUILDERS = {
@@ -47,17 +47,17 @@ function setup() {
     window: w, document: doc, innerWidth: 1280, innerHeight: 900, setTimeout, Date,
     $: (id) => doc.getElementById(id),
     ic: (name) => `<svg class="ic"><use href="#i-${name}"/></svg>`,
-    CMS_TAG_ICON: { p: 'text', div: 'box', a: 'link' }, DEVICES: [['Desktop'], ['Tablet']], device: 0,
-    cmsExactSelection: null, cmsExactSelections: [], cmsContextMenuOpen: false, cmsConnected: true,
+    CMS_TAG_ICON: { p: 'text', div: 'box', a: 'link' }, DEVICES: [['Desktop'], ['Tablet']],
+    /* the shared state the toolbar reads and writes (js/admin/state.js) */
+    state: { device: 0, cmsExactSelection: null, cmsExactSelections: [], cmsContextMenuOpen: false, cmsConnected: true, live: false, tbOpen: '', tbOpenKey: '', tbAutoOpen: null },
     cmsPreview: doc.getElementById('cmsPreview'),
-    selToolbarVisible: () => !ctx.live && !ctx.cmsContextMenuOpen && !!(ctx.cmsExactSelection && ctx.cmsExactSelection.key),
+    selToolbarVisible: () => !ctx.state.live && !ctx.state.cmsContextMenuOpen && !!(ctx.state.cmsExactSelection && ctx.state.cmsExactSelection.key),
     selToolbarKind: (s) => s.key.indexOf('group:') === 0 ? 'group' : s.tag === 'p' || s.tag === 'a' ? 'text' : 'container',
-    cmsTreeRowForKey: () => ({ tag: ctx.cmsExactSelection.tag }),
+    cmsTreeRowForKey: () => ({ tag: ctx.state.cmsExactSelection.tag }),
     makeFrameCtx: () => ({ get: () => 0, set() {} }),
     placeSelToolbar: () => ctx.placeToolbarPop(),
     postCmsLayoutOperation: (op) => calls.push('layout:' + op),
     selectDesign: () => calls.push('design'),
-    live: false,
   };
   for (const [name, [key, title, icon]] of Object.entries(BUILDERS)) {
     ctx[name] = (pane) => {
@@ -67,9 +67,9 @@ function setup() {
     };
   }
   vm.createContext(ctx);
-  vm.runInContext(code + '\nthis.tb = () => ({ tbOpen, tbOpenKey, tbAutoOpen }); this.setAutoOpen = (v) => { tbAutoOpen = v; };', ctx);
+  vm.runInContext(code + '\nthis.tb = () => ({ tbOpen: state.tbOpen, tbOpenKey: state.tbOpenKey, tbAutoOpen: state.tbAutoOpen }); this.setAutoOpen = (v) => { state.tbAutoOpen = v; };', ctx);
   const bar = doc.getElementById('selToolbar'), pop = doc.getElementById('selToolbarPop');
-  const select = (sel) => { ctx.cmsExactSelection = sel; ctx.cmsExactSelections = sel ? [sel] : []; ctx.renderSelToolbar(); };
+  const select = (sel) => { ctx.state.cmsExactSelection = sel; ctx.state.cmsExactSelections = sel ? [sel] : []; ctx.renderSelToolbar(); };
   const button = (name) => bar.querySelector(`[data-name="${name}"]`);
   const names = () => [...bar.querySelectorAll('[data-section]')].map((b) => b.dataset.name);
   const actions = () => [...bar.querySelectorAll('[data-action]')].map((b) => b.getAttribute('aria-label'));
@@ -161,12 +161,12 @@ const P = { key: 'path:p:1', label: 'p', tag: 'p' };
   const t = setup();
   t.select(P);
   t.button('Spacing').click();
-  t.ctx.cmsContextMenuOpen = true; t.ctx.renderSelToolbar();
+  t.ctx.state.cmsContextMenuOpen = true; t.ctx.renderSelToolbar();
   assert(t.bar.hidden && t.pop.hidden, 'while the preview\'s menu is open neither the bar nor the popover covers it');
-  t.ctx.cmsContextMenuOpen = false; t.ctx.renderSelToolbar();
+  t.ctx.state.cmsContextMenuOpen = false; t.ctx.renderSelToolbar();
   assert(!t.pop.hidden && t.expanded()[0] === 'Spacing', 'the menu closing gives the popover back');
-  t.ctx.live = true; t.ctx.renderSelToolbar();
-  t.ctx.live = false; t.ctx.renderSelToolbar();
+  t.ctx.state.live = true; t.ctx.renderSelToolbar();
+  t.ctx.state.live = false; t.ctx.renderSelToolbar();
   assert(t.pop.hidden, 'leaving the editing view (Live) ends the popover instead of resurrecting it later');
   console.log('PASS: the right-click menu only hides the toolbar; Live closes the popover.');
 }

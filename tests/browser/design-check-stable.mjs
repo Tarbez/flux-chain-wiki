@@ -19,23 +19,22 @@
    settled, and to count the home page's one H1.
 
    Run:   node tests/browser/design-check-stable.mjs [--runs 6] [--headed]
-   Needs: Chromium from `npx playwright install chromium`. Uses its own port
-   (PORT, default 3489) and a scratch copy of the site; it never touches the
-   server on 3437. Not part of scripts/run-tests.mjs (that runner only reads
+   Needs: Chromium from `npx playwright install chromium`. Uses its own free
+   port (harness startHost; PORT overrides) and a scratch copy of the site; it
+   never touches the server on 3437. Not part of scripts/run-tests.mjs (that runner only reads
    tests/*.cjs|mjs at the top level) because it needs Chromium.
    ===================================================================== */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { copySite, startHost, fakeFolder, appFrame, previewFrame } from './harness.mjs';
+import { copySite, startHost, fakeFolder, appFrame, previewFrame, scaled, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const RUNS = args.includes('--runs') ? Number(args[args.indexOf('--runs') + 1]) : 6;
-const PORT = Number(process.env.PORT) || 3489;
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-design-check-'));
 copySite(WORK);
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 let failed = false;
 try {
@@ -44,9 +43,9 @@ try {
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto(`http://127.0.0.1:${PORT}/admin`);
+  await gotoEditor(page, server.origin);
   const app = await appFrame(page);
-  await app.waitForFunction(() => !!window.ArkAdminApp && typeof window.ArkAdminApp.designCheck === 'function');
+  await app.waitForFunction(() => !!window.ArkAdminApp && typeof window.ArkAdminApp.designCheck === 'function', null, { timeout: scaled(30000) });
   await app.click('#modeDesignBtn');
   const pv = await previewFrame(app);
 
@@ -63,7 +62,7 @@ try {
       await app.click('#tabPages');
       const row = (route) => app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route.replace(/[/]/g, '\\/') + '$') }) }).first();
       await row('/download').click();
-      await pv.waitForFunction(() => window.ArkUI && ArkUI.route.path() === '/download', null, { timeout: 15000 }).catch(() => {});
+      await pv.waitForFunction(() => window.ArkUI && ArkUI.route.path() === '/download', null, { timeout: scaled(15000) }).catch(() => {});
       await row('/').click();
     }
     readings.push({ when: ['', 'again, nothing changed', 'with the preview scrolled 900px', 'scrolled back', 'asked at once after reopening home from another route', 'once more'][i] || 'again', ...(await reading()) });

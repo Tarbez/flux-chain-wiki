@@ -13,7 +13,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = admin.indexOf('  function h(tag, props) {');
 const end = admin.indexOf('  function clone(value)', start);
 assert(start >= 0 && end > start, 'js/admin/admin.js still defines h() right before clone()');

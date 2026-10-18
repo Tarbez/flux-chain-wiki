@@ -444,7 +444,8 @@ Experiments are not manifest-driven yet.
 The protected **Studio** canvas is part of `admin-app.html` itself: the persistent header's **Content / Design**
 mode switch chooses between the manifest/article/asset/encryption editor (Content) and Design, whose
 **Canvas** sub-view shows Studio inside the same document (`#studioRoot`, styled by `css/studio-embed.css`,
-scripted by `js/admin/admin.js`) and whose **Theme & defaults** sub-view edits the theme and site-wide defaults.
+scripted by the editor's modules under `js/admin/` -- one file per concern, `js/admin/core.js` states
+the contract; see `docs/cms-architecture.md`) and whose **Theme & defaults** sub-view edits the theme and site-wide defaults.
 The header (mode switch, Design sub-switch, **Mesh**) stays reachable at every viewport width; Studio docks below
 it rather than covering it. Studio used to be a second document, `admin-studio.html`, loaded in an `<iframe>`;
 that file was merged in and then deleted (2026-10-18), and the publish host no longer serves the name at all.
@@ -458,7 +459,9 @@ no project folder is connected); it is distinct from the header's **Publish**, w
 signs and publishes the DEFXN content bundle to the mesh. The standalone (disconnected) prototype canvas and its
 dense-encoding "Versions"/export were deleted in the merge with no replacement. `admin-app.html` is available in
 direct loopback development and otherwise requires an authenticated current mesh owner; it is also excluded from
-the public static deployment.
+the public static deployment. How the editor is built -- the preview message protocol, the one draft list, the
+toolbar taxonomy, components, states, layout keys, versions, SEO generation, the Design check, its modules and its
+two test suites (`npm test`, `npm run test:browser`) -- is in [docs/cms-architecture.md](docs/cms-architecture.md).
 
 ## Publishing to the mesh
 

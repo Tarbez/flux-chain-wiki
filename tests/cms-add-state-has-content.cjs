@@ -20,7 +20,7 @@ const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 const { buildersSource } = require('./lib/admin-source.cjs');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = admin.indexOf('  function addStateContent(');
 const end = admin.indexOf('  /* Element animation (Part H', start);
 assert(start >= 0 && end > start, 'js/admin/admin.js still defines addStateContent + buildStateGroupSection before the element animation section');
@@ -33,9 +33,12 @@ function build(states) {
   let n = 0;
   const context = {
     document: doc,
-    cmsExactSelection: { route: '/', key: 'k-btn', stateGroup: { groupId: 'st1' } },
-    cmsStatesShowing: {},
-    cmsSourceSite: { states: { version: 1, routes: { '/': { st1: { trigger: 'self', current: 0, states } } } } },
+    /* what more than one editor file reads lives on the shared state object (js/admin/state.js) */
+    state: {
+      cmsExactSelection: { route: '/', key: 'k-btn', stateGroup: { groupId: 'st1' } },
+      cmsStatesShowing: {},
+      cmsSourceSite: { states: { version: 1, routes: { '/': { st1: { trigger: 'self', current: 0, states } } } } },
+    },
     CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading', 'body', 'align', 'size'] }, { resolver: 'RBLOCK_CTA_V1', label: 'Button / link', props: ['label', 'href', 'variant'] }],
     cmsNextComponentId: (prefix) => prefix + (++n),
     cmsBlockResolverLabel: (r) => (r === 'RBLOCK_CTA_V1' ? 'Button / link' : 'Text'),

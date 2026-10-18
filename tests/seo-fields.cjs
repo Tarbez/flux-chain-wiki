@@ -16,7 +16,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const seoSource = fs.readFileSync('js/content/seo.js', 'utf8');
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const context = vm.createContext({});
 vm.runInContext(seoSource + ';this.ArkSEO = ArkSEO;', context, { filename: 'seo.js' });
 const ArkSEO = context.ArkSEO;

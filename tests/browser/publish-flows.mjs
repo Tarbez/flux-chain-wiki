@@ -36,9 +36,8 @@ import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, appFrame } from './harness.mjs';
+import { SITE, copySite, startHost, appFrame, listen, until as untilFor, watchSignals, waitForRouteReady, nextFrames } from './harness.mjs';
 import { populatedDrafts, GROUP, BLOCK_TEXT } from './site-drafts-fixture.mjs';
-import { createHost } from '../../scripts/publish-host.mjs';
 import { createPublisher } from '../../scripts/lib/publisher.mjs';
 import { readProject, writeProject, siteDrafts } from '../../scripts/lib/site-bundle.mjs';
 import { cidForBytes } from '../../../../flx/flx-codec/src/blake3.js';
@@ -48,7 +47,6 @@ const args = process.argv.slice(2);
 const FIVE = ['settingsDefaults', 'components', 'states', 'canvasTransitions', 'elementMotion'];
 const EDITOR = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-publish-editor-'));
 const PULLED = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-publish-pulled-'));
-const PORT_EDITOR = 3510 + Math.floor(Math.random() * 40), PORT_PUBLISH = PORT_EDITOR + 50, PORT_PULLED = PORT_EDITOR + 100, PORT_MINER = PORT_EDITOR + 150;
 
 let failures = 0;
 class StepFailure extends Error {}
@@ -58,15 +56,12 @@ async function step(name, run) {
   catch (error) { failures += 1; console.log(`FAIL ${name}\n     ${error instanceof StepFailure ? error.message : error.stack}`); throw error; }
 }
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 15000) {
-  const end = Date.now() + timeout; let last;
-  while (Date.now() < end) { try { last = await probe(); } catch { last = null; } if (last) return last; await wait(150); }
-  throw new StepFailure(message);
-}
+/* the harness's until (budget x load factor) */
+const until = (probe, message, timeout = 15000) => untilFor(probe, message, timeout, { interval: 150, fail: (m) => new StepFailure(m) });
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 /* ---- the miner stub: the routes scripts/lib/publisher.mjs calls, nothing else ---- */
-function startMiner(port) {
+function startMiner() {
   const blobs = new Map(); let record = null;
   const body = (req) => new Promise((resolve) => { const chunks = []; req.on('data', (c) => chunks.push(c)); req.on('end', () => resolve(Buffer.concat(chunks))); });
   const server = http.createServer(async (req, res) => {
@@ -84,7 +79,7 @@ function startMiner(port) {
     if (url.pathname === '/api/v0/public-marker' && req.method === 'POST') { await body(req); return json(200, { ok: true }); }
     return json(404, { error: 'stub miner has no ' + url.pathname });
   });
-  return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(server)));
+  return listen(server);   /* any free port: .port / .origin */
 }
 
 /* ---- the real admin client (js/admin/publish.js), signed in the way admin.html's gate does ---- */
@@ -109,10 +104,13 @@ async function signedClient(origin) {
 /* what a visitor of `origin` sees of the five drafts */
 async function visitorView(browser, origin, memberKey) {
   const context = await browser.newContext({ viewport: { width: 1400, height: 900 } }); /* fresh: no visitor choice in localStorage */
+  await watchSignals(context);
   const page = await context.newPage();
   await page.goto(origin + '/');
   await until(() => page.evaluate(() => !!document.querySelector('[data-ark-layout-key]') && !!window.ArkStates), 'the public page never annotated its elements');
-  await wait(800);
+  /* the route is mounted, and the layout/states passes it queues in a rAF have run */
+  await waitForRouteReady(page.mainFrame(), { path: '/' });
+  await nextFrames(page.mainFrame());
   const view = await page.evaluate(({ group, key }) => {
     const shown = (el) => !!el && el.getClientRects().length > 0 && getComputedStyle(el).display !== 'none';
     const member = [...document.querySelectorAll('[data-ark-layout-key]')].find((e) => e.getAttribute('data-ark-layout-key') === key);
@@ -128,7 +126,7 @@ async function visitorView(browser, origin, memberKey) {
       theme: document.documentElement.dataset.theme || null,
     };
   }, { group: GROUP, key: memberKey });
-  if (args.includes('--headed')) await wait(1500);
+  if (args.includes('--headed')) await wait(1500);   /* a pause for a person watching --headed, not a readiness wait */
   await page.screenshot({ path: path.join(PULLED, `public-${origin.split(':').pop()}.png`) }).catch(() => {});
   await context.close();
   return view;
@@ -140,8 +138,8 @@ const errors = [];
 browser.on('disconnected', () => {});
 try {
   copySite(EDITOR); copySite(PULLED);
-  servers.push(await startHost(EDITOR, PORT_EDITOR));
-  const editorOrigin = `http://127.0.0.1:${PORT_EDITOR}`;
+  const editorHost = await startHost(EDITOR); servers.push(editorHost);
+  const editorOrigin = editorHost.origin;
 
   const memberKey = await step('find a real, visible element on / to build the state group on', async () => {
     const context = await browser.newContext(); const page = await context.newPage();
@@ -181,15 +179,16 @@ try {
     return site;
   });
 
-  servers.push(await startMiner(PORT_MINER));
-  const minerBase = `http://127.0.0.1:${PORT_MINER}`;
+  const miner = await startMiner(); servers.push(miner);
+  const minerBase = miner.origin;
   const publisher = createPublisher({ name: 'publish-flows.ark', statusBase: minerBase, pinBase: minerBase, key: 'stub-key', root: EDITOR });
-  const host = createHost({ root: EDITOR, publisher, port: PORT_PUBLISH, dataDir: path.join(EDITOR, '.admin-data'), onNotice: () => {},
+  /* the real host in its signed (not local-development) mode, on its own free port */
+  const host = await startHost(EDITOR, 0, { publisher, localDevelopment: false,
     permissions: async () => ({ authorized: true, source: 'publish-flows test' }), resolveCheck: async () => ({ skipped: 'publish-flows: no public gateway in this test' }) });
-  await new Promise((resolve) => host.listen(PORT_PUBLISH, '127.0.0.1', resolve)); servers.push(host);
+  servers.push(host);
 
   const published = await step('publish it: real client signs, real host + publisher put one archive on the miner and name it', async () => {
-    const client = await signedClient(`http://127.0.0.1:${PORT_PUBLISH}`);
+    const client = await signedClient(host.origin);
     const result = await client.publishSite(payload);
     check(result.published === 1 && result.confirmed, 'publish did not confirm version 1: ' + JSON.stringify(result));
     return result;
@@ -202,8 +201,8 @@ try {
     return site;
   });
 
-  servers.push(await startHost(PULLED, PORT_PULLED));
-  const pulledOrigin = `http://127.0.0.1:${PORT_PULLED}`;
+  const pulledHost = await startHost(PULLED); servers.push(pulledHost);
+  const pulledOrigin = pulledHost.origin;
 
   await step('control: the same copy BEFORE the pull shows none of the five (so the checks below can fail)', async () => {
     const v = await visitorView(browser, pulledOrigin, memberKey);

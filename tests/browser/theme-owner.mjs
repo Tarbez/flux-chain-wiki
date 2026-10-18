@@ -30,12 +30,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { copySite, startHost } from './harness.mjs';
+import { copySite, startHost, until as untilFor, watchSignals, waitForRouteReady, nextFrames } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-theme-'));
-const PORT = Number(process.env.PORT) || 3493;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
 
 let failures = 0;
 class StepFailure extends Error {}
@@ -44,12 +42,8 @@ async function step(name, run) {
   try { await run(); console.log(`ok   ${name}`); }
   catch (error) { failures += 1; console.log(`FAIL ${name}\n     ${error instanceof StepFailure ? error.message : error.stack}`); }
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 30000) {
-  const end = Date.now() + timeout; let last;
-  while (Date.now() < end) { try { last = await probe(); } catch { last = null; } if (last) return last; await wait(100); }
-  throw new StepFailure(message);
-}
+/* the harness's until (budget x load factor) */
+const until = (probe, message, timeout = 30000) => untilFor(probe, message, timeout, { fail: (m) => new StepFailure(m) });
 
 /* the two data files, edited the way a Save writes them (only the one key changes) */
 const DEFAULTS_FILE = path.join(WORK, 'js/content/settings-defaults-data.js');
@@ -60,9 +54,11 @@ function setActiveTheme(name) { fs.writeFileSync(THEME_FILE, fs.readFileSync(THE
 copySite(WORK);
 setActiveTheme('clay');     /* the editor was last editing Tide (dark) */
 setDefaultTheme('marine');  /* the owner's site-wide default is Dune (dark) */
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
+const ORIGIN = server.origin;
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+await watchSignals(context);
 /* every value <html data-theme> takes, from before the first script runs */
 /* (observes `document`, not documentElement: an init script can run before <html> exists; each
    record's NEW value is read from the next record's oldValue, so two writes inside one task --
@@ -80,7 +76,10 @@ const page = await context.newPage();
 async function load() {
   await page.goto(ORIGIN + '/');
   await until(() => page.evaluate(() => !!document.querySelector('.site-settings [data-theme-choice]')), 'the settings panel never mounted');
-  await wait(300);
+  /* boot has reached the mounted route (the router's ark:route-ready), then two painted frames:
+     the log is read after boot, not at a fixed 300 ms */
+  await waitForRouteReady(page.mainFrame()).catch((e) => { throw new StepFailure(e.message); });
+  await nextFrames(page.mainFrame());
   return page.evaluate(() => ({ now: document.documentElement.dataset.theme, log: window.__themeLog(), choice: localStorage.getItem('flux-chain-theme') }));
 }
 

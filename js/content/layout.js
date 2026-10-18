@@ -154,31 +154,204 @@ var ArkLayout = (function () {
     if (width <= 520) Object.assign(out, entry && entry.phone || {});
     return out;
   }
-  function pathKey(element, root) {
-    var parts = [], node = element;
-    while (node && node !== root && node.nodeType === 1) {
-      var tag = node.tagName.toLowerCase(), index = 1, sibling = node;
-      while ((sibling = sibling.previousElementSibling)) if (sibling.tagName === node.tagName) index++;
-      parts.unshift(tag + ':' + index); node = node.parentElement;
-    }
-    return 'path:' + parts.join('/');
+  /* ---- layout keys -------------------------------------------------------------------
+     Every saved per-element edit (layout frames, labels, alts, groups here; state members and
+     triggers in js/content/states.js; component spots in js/content/components.js; element
+     motion in js/content/element-motion.js) is stored under route -> key. So a key must name
+     the same AUTHORED element whatever else happens to be in the DOM when it is computed.
+
+     It used to be a path from #scene, computed once and then frozen on the element. Which
+     path depended on navigation history: the routed page sits in the outlet next to the page
+     it replaces while that one exits (/chain's section was section:1 on a direct load and
+     section:2 coming from Home), or inside the continuity host appended to the scene (div:7
+     instead of the outlet's div:2); and a stage illustration carried over from the previous
+     lifecycle stage (js/ark/stage-scenes.js moves the element itself) would keep that stage's
+     key (read from the code, not measured). Measured 2026-10-18 over every catalog route
+     (tests/browser/layout-key-stability.mjs): 875 of 1547 keys on / changed when arriving from
+     /learnings instead of loading directly; on /chain the same page mixed div:2 and div:7 keys.
+     A saved edit therefore attached to a different element, or to none, depending on how the
+     visitor got there. Now a key is a pure function of the element's place in its own scope:
+
+       page:/<path>               content of a routed page, from the page root ([data-ark-page])
+                                  -- 'page:/' is the page root itself
+       path:<path>                the persistent shell (header, nav, layers) from the root passed
+                                  in (#scene) -- the format these keys always had
+       copy:<copy key>            a runtime-built element carrying its manifest copy key
+       id:<id>                    an element with an authored id
+       component:<instance>[/<path>]  inside a component instance, from the instance root
+       insert:<anchor id>         an anchor the editor/runtime inserted (a state's or a spot's)
+       group:<id>                 a layout group wrapper (set when the group is built)
+
+     A <path> is tag:n segments, n counting same-tag siblings among the AUTHORED children only.
+     What the runtime and the editor insert is never counted and never adds a segment:
+       - data-ark-transient="hold" (the continuity host, a stage illustration held between two
+         routes): neither it nor anything in it is content of this scope;
+       - a layout group wrapper: transparent -- its members keep the keys they had before
+         grouping, the wrapper adds no segment;
+       - a state anchor / spot anchor ([data-ark-state-anchor], [data-ark-spot]) and a component
+         instance root: their own scope, not counted among the page's children;
+       - another routed page: its own scope.
+     The original a component instance replaces stays in the DOM (hidden) and keeps counting:
+     it is authored content. The structure decides, not a list of classes: every inserting
+     module marks what it inserts (js/ark/panel-continuity.js, js/ark/stage-scenes.js,
+     js/content/states.js, js/content/components.js).
+
+     copy:/id: keys are not unique by construction, so a repeat inside one route's scope (the
+     shell plus that route's page, in that order) is numbered: copy:X, copy:X#2, ... Inside a
+     component instance only the instance path is used: a captured instance repeats the ids and
+     copy of the originals it stands in for. The page root is always 'page:/' -- its id is
+     assigned late, by js/hero-motion.js. Regression: tests/layout-keys.cjs (the rules) and
+     tests/browser/layout-key-stability.mjs (every route, every history). */
+  var KEY_ATTR = 'data-ark-layout-key';
+  /* Tag list derived from actual usage across js/pages/*.js and js/ark/runtime.js (grep
+     counted span 48x, strong 13x, small/summary/details 6x each, dl/dt/dd, table parts --
+     all real content units a selection/grouping tool needs to see, not a guessed list. */
+  var KEY_TAGS = 'header,main,footer,section,article,nav,aside,div,h1,h2,h3,h4,p,a,button,img,canvas,svg,g,path,rect,circle,ellipse,line,polyline,polygon,text,figure,figcaption,picture,video,form,ul,ol,li,span,strong,small,summary,details,dl,dt,dd,table,thead,tbody,tr,th,td,label';
+  function hasAttr(node, name) { return !!(node && node.hasAttribute && node.hasAttribute(name)); }
+  function isHeld(node) { return !!(node && node.getAttribute && node.getAttribute('data-ark-transient') === 'hold'); }
+  function isPageRoot(node) { return hasAttr(node, 'data-ark-page'); }
+  function isGroupWrapper(node) { return hasAttr(node, 'data-ark-layout-group'); }
+  function isInsertedAnchor(node) { return hasAttr(node, 'data-ark-state-anchor') || hasAttr(node, 'data-ark-spot'); }
+  function isInstanceRoot(node) { return hasAttr(node, 'data-ark-component-key'); }
+  /* a node with a scope of its own, or none: never one of its parent's authored children */
+  function ownScope(node) { return isHeld(node) || isPageRoot(node) || isInsertedAnchor(node) || isInstanceRoot(node); }
+  /* the authored children of `parent`: group wrappers flattened, own-scope nodes left out */
+  function authoredChildren(parent, cache) {
+    var cached = cache && cache.get(parent); if (cached) return cached;
+    var out = [];
+    Array.prototype.forEach.call(parent.children || [], function (child) {
+      if (child.nodeType !== 1 || ownScope(child)) return;
+      if (isGroupWrapper(child)) out.push.apply(out, authoredChildren(child, cache)); else out.push(child);
+    });
+    if (cache) cache.set(parent, out);
+    return out;
   }
-  function keyFor(element, root) {
+  function segment(node, parent, cache) {
+    var tag = node.tagName, index = 0;
+    authoredChildren(parent, cache).some(function (child) { if (child.tagName === tag) index++; return child === node; });
+    return tag.toLowerCase() + ':' + index;
+  }
+  /* -> { kind: 'page'|'shell'|'component'|'insert', scope: node, path: 'tag:n/...' } or null
+     (inside a held node, or not under `root`) */
+  function placeOf(element, root, cache) {
+    var parts = [], node = element;
+    while (node && node.nodeType === 1) {
+      if (isHeld(node)) return null;
+      if (isPageRoot(node)) return { kind: 'page', scope: node, path: parts.join('/') };
+      if (node === root) return { kind: 'shell', scope: node, path: parts.join('/') };
+      if (isInstanceRoot(node)) return { kind: 'component', scope: node, path: parts.join('/') };
+      if (isInsertedAnchor(node)) return { kind: 'insert', scope: node, path: parts.join('/') };
+      var parent = node.parentNode;
+      while (parent && parent !== root && isGroupWrapper(parent)) parent = parent.parentNode;
+      if (!parent || parent.nodeType !== 1) return null;
+      if (!isGroupWrapper(node)) parts.unshift(segment(node, parent, cache));
+      node = parent;
+    }
+    return null;
+  }
+  /* the key before repeats are numbered ('' = this element is not keyed at all) */
+  function baseKey(element, root, cache) {
     if (!element || element.nodeType !== 1) return '';
-    var existing = element.getAttribute('data-ark-layout-key'); if (existing) return existing;
-    var copy = String(element.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean)[0];
+    if (isGroupWrapper(element)) return 'group:' + element.getAttribute('data-ark-layout-group');
+    var place = placeOf(element, root, cache);
+    if (!place) return '';
+    if (place.kind === 'component') return 'component:' + place.scope.getAttribute('data-ark-component-key') + (place.path ? '/' + place.path : '');
+    if (place.kind === 'insert') return 'insert:' + place.scope.getAttribute('data-ark-insert') + (place.path ? '/' + place.path : '');
+    if (place.kind === 'page' && !place.path) return 'page:/';
+    /* an editor-only text binding (js/main.js annotateCmsPreviewCopy marks it) is not a key:
+       the public page never has it, so a key from it would name nothing there */
+    var copy = hasAttr(element, 'data-ark-copy-preview') ? '' : String(element.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean)[0];
     if (copy) return 'copy:' + copy;
     if (element.id && !/^ark-r-/.test(element.id)) return 'id:' + element.id;
-    return pathKey(element, root);
+    return place.kind === 'page' ? 'page:/' + place.path : 'path:' + place.path;
   }
-  function annotate(root) {
+  function repeatable(base) { return base.indexOf('copy:') === 0 || base.indexOf('id:') === 0; }
+  function pageOf(element) {
+    for (var node = element; node && node.nodeType === 1; node = node.parentNode) if (isPageRoot(node)) return node;
+    return null;
+  }
+  /* The route a mounted page element renders -- the same catalog lookup js/ark/scene-state.js's
+     element-motion override uses. null when it cannot be told (no catalog: a unit test). */
+  function routeOfPage(page) {
+    var id = page && page.getAttribute('data-ark-page'), catalog = typeof ArkUI !== 'undefined' && ArkUI && ArkUI.pageCatalog;
+    return id && catalog && catalog[id] && catalog[id].path ? catalog[id].path : null;
+  }
+  /* Whether `element` belongs to `route`'s scope: the shell always, a page only if it is that
+     route's page. While one route replaces another both pages are mounted and both have a
+     'page:/' -- without this, the outgoing page (first in the outlet) took the incoming route's
+     edits. No route, or a page whose route cannot be told, is in scope. */
+  function inRoute(element, route) {
+    if (!route) return true;
+    var page = pageOf(element), pageRoute = page && routeOfPage(page);
+    return !page || !pageRoute || pageRoute === route;
+  }
+  /* Every element annotate() considers (plus `extra`, at its place in document order), with its
+     final key ('' = none). Repeats are numbered per route scope: the shell first, then each
+     page on its own -- so two pages mounted at once never number each other's keys, and where
+     the page sits relative to the header (outlet before it, continuity host after it) does not
+     change the numbering. */
+  function keyedList(root, route, extra) {
+    var cache = typeof Map === 'function' ? new Map() : null;
+    var all = [root].concat(Array.prototype.slice.call(root.querySelectorAll(KEY_TAGS)));
+    if (extra && all.indexOf(extra) < 0) {
+      var at = extra.compareDocumentPosition ? all.findIndex(function (element) { return element.compareDocumentPosition(extra) & 2; }) : -1;
+      all.splice(at < 0 ? all.length : at, 0, extra);
+    }
+    var items = all.map(function (element) { return { element: element, page: pageOf(element), base: baseKey(element, root, cache), key: '' }; });
+    var shellSeen = {}, pageSeen = new Map();
+    function number(item, seen) { if (!repeatable(item.base)) return item.base; var n = seen[item.base] = (seen[item.base] || 0) + 1; return n > 1 ? item.base + '#' + n : item.base; }
+    items.forEach(function (item) { if (item.base && !item.page) item.key = number(item, shellSeen); });
+    items.forEach(function (item) {
+      if (!item.base || !item.page) return;
+      var seen = pageSeen.get(item.page); if (!seen) { seen = Object.assign({}, shellSeen); pageSeen.set(item.page, seen); }
+      item.key = number(item, seen);
+    });
+    return route ? items.filter(function (item) { return inRoute(item.element, route); }) : items;
+  }
+  /* The key `element` has (or would have) under `root` -- the same value annotate() writes. */
+  function keyFor(element, root) {
+    if (!element || element.nodeType !== 1) return '';
+    var base = baseKey(element, root, null);
+    if (!base || !repeatable(base) || !root || !root.querySelectorAll) return base;
+    var mine = keyedList(root, null, element).filter(function (item) { return item.element === element; })[0];
+    return mine ? mine.key : base;
+  }
+  /* Writes every key in `route`'s scope (every scope when no route is given) and returns the
+     keyed elements in document order. A key is recomputed on every pass -- never kept from an
+     earlier one, which is how a key computed mid-transition used to stick -- and a node that
+     is no longer keyed (it became a held continuity host) loses the one it had. */
+  function annotate(root, route) {
     if (!root || !root.querySelectorAll) return [];
-    /* Tag list derived from actual usage across js/pages/*.js and js/ark/runtime.js (grep
-       counted span 48x, strong 13x, small/summary/details 6x each, dl/dt/dd, table parts --
-       all real content units a selection/grouping tool needs to see, not a guessed list. */
-    var elements = [root].concat(Array.prototype.slice.call(root.querySelectorAll('header,main,footer,section,article,nav,aside,div,h1,h2,h3,h4,p,a,button,img,canvas,svg,g,path,rect,circle,ellipse,line,polyline,polygon,text,figure,figcaption,picture,video,form,ul,ol,li,span,strong,small,summary,details,dl,dt,dd,table,thead,tbody,tr,th,td,label')));
-    elements.forEach(function (element) { var key = keyFor(element, root); if (key) element.setAttribute('data-ark-layout-key', key); });
-    return elements;
+    var out = [];
+    keyedList(root, route).forEach(function (item) {
+      if (item.key) { if (item.element.getAttribute(KEY_ATTR) !== item.key) item.element.setAttribute(KEY_ATTR, item.key); out.push(item.element); }
+      else if (item.element.removeAttribute && item.element.hasAttribute(KEY_ATTR)) item.element.removeAttribute(KEY_ATTR);
+    });
+    return out;
+  }
+  /* key -> element for `route`'s scope, from one annotate() pass (keys are unique in a scope) */
+  function index(root, route) {
+    var out = {};
+    annotate(root, route).forEach(function (element) { var key = element.getAttribute(KEY_ATTR); if (key && !out[key]) out[key] = element; });
+    return out;
+  }
+  /* The element `key` names in `route`'s scope, or null. Elements annotate() does not tag
+     (an <em> the editor promoted into a group) are found by computing their key directly, so
+     a key the editor wrote resolves on the public page too. */
+  function find(root, key, route) {
+    if (!root || !key) return null;
+    var listed = annotate(root, route);
+    for (var i = 0; i < listed.length; i++) if (listed[i].getAttribute(KEY_ATTR) === key) return listed[i];
+    if (!root.querySelectorAll) return null;
+    /* the cheap scope-local base key first; the full key (which numbers repeats) only on a match */
+    var base = key.replace(/#\d+$/, ''), seen = typeof Set === 'function' ? new Set(listed) : null, cache = typeof Map === 'function' ? new Map() : null;
+    var rest = root.querySelectorAll('*');
+    for (var j = 0; j < rest.length; j++) {
+      var element = rest[j];
+      if ((seen ? seen.has(element) : listed.indexOf(element) >= 0) || !inRoute(element, route)) continue;
+      if (baseKey(element, root, cache) === base && keyFor(element, root) === key) return element;
+    }
+    return null;
   }
   /* ArkLayout undoes only what ArkLayout wrote. resetElement() used to blank every `owned`
      property on EVERY annotated element under the host, on every apply() -- including inline
@@ -250,15 +423,20 @@ var ArkLayout = (function () {
     if (frame.wrap) element.style.flexWrap = frame.wrap === 'yes' ? 'wrap' : 'nowrap';
     element.setAttribute('data-ark-layout-applied', '');
   }
-  function unwrapGroups(root) {
+  /* only `route`'s own groups: the page it replaces may still be leaving, grouped as it was */
+  function unwrapGroups(root, route) {
     Array.prototype.slice.call(root.querySelectorAll('[data-ark-layout-group]')).reverse().forEach(function (group) {
-      var parent = group.parentNode; if (!parent) return;
+      var parent = group.parentNode; if (!parent || !inRoute(group, route)) return;
       while (group.firstChild) parent.insertBefore(group.firstChild, group);
       group.remove();
     });
   }
   function buildGroups(root, route, layout) {
-    var groups = layout.groups[route] || {}, elements = annotate(root), byKey = {};
+    var groups = layout.groups[route] || {};
+    /* no groups on this route: nothing to wrap, and a full key pass (10-15 ms on a 1,500-element
+       route) to find no members is skipped -- apply() annotates once right after this anyway */
+    if (!Object.keys(groups).length) return;
+    var elements = annotate(root, route), byKey = {};
     elements.forEach(function (element) { var key = element.getAttribute('data-ark-layout-key'); if (key && !byKey[key]) byKey[key] = element; });
     Object.keys(groups).forEach(function (id) {
       var members = groups[id].members.map(function (key) { return byKey[key]; }).filter(Boolean);
@@ -299,7 +477,7 @@ var ArkLayout = (function () {
   }
   function apply(root, route, width, value) {
     var layout = sanitize(value || current), nodes = layout.routes[route] || {}, elements, byKey = {};
-    unwrapGroups(root); buildGroups(root, route, layout); elements = annotate(root);
+    unwrapGroups(root, route); buildGroups(root, route, layout); elements = annotate(root, route);
     elements.forEach(function (element) { var key = element.getAttribute('data-ark-layout-key'); if (key && !byKey[key]) byKey[key] = element; resetElement(element); var before = ownedValues(element); applyGroupDefault(element); remember(element, before); });
     Object.keys(nodes).forEach(function (key) { if (byKey[key]) applyFrame(byKey[key], merged(nodes[key], width)); });
     applyAlts(root, route, layout, elements);
@@ -342,7 +520,7 @@ var ArkLayout = (function () {
   function applyAlts(root, route, value, elements) {
     if (!root || !root.querySelectorAll) return;
     var layout = sanitize(value || current), routeAlts = (layout.alts && layout.alts[route]) || {};
-    (elements || annotate(root)).forEach(function (element) {
+    (elements || annotate(root, route)).forEach(function (element) {
       var key = element.getAttribute('data-ark-layout-key');
       if (key && (routeAlts[key] || element.hasAttribute('data-ark-alt-base'))) applyAlt(element, routeAlts[key] || '');
     });
@@ -402,7 +580,7 @@ var ArkLayout = (function () {
     var nodes = layout.routes[route]; if (nodes) { delete nodes['group:' + id]; if (!Object.keys(nodes).length) delete layout.routes[route]; }
     return sanitize(layout);
   }
-  return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, apply: apply, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
+  return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, find: find, index: index, inRoute: inRoute, apply: apply, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
     setAlt: setAlt, altFor: altFor, applyAlt: applyAlt, applyAlts: applyAlts, altAttribute: altAttribute, altOwn: altOwn, ALT_MAX: ALT_MAX,
     TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS, RADIUS_CSS: RADIUS_CSS,
     DISPLAY_TOKENS: DISPLAY_TOKENS, ALIGN_ITEMS_TOKENS: ALIGN_ITEMS_TOKENS, JUSTIFY_TOKENS: JUSTIFY_TOKENS, LINE_HEIGHT_TOKENS: LINE_HEIGHT_TOKENS,

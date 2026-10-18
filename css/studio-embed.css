@@ -1,45 +1,50 @@
 /* =====================================================================
-   STUDIO EMBEDDED STYLES (Step 2 merge, 2026-10-17)
+   STUDIO (Design mode) STYLES (Step 2 merge, 2026-10-17)
    ---------------------------------------------------------------------
-   Ported verbatim from the old standalone admin-studio.html's <style>
-   block (its own design-token system, deliberately separate from the
-   SDK/@deadark theme tokens -- out of scope to reconcile here) and every
-   selector scoped under #studioRoot so this stylesheet can live inside
-   the same document as css/admin.css without any rule bleeding either
-   way. Two real collisions existed and are fixed here/in the markup:
-     - #studioRoot's own :root-style custom properties stay scoped to it
-       (were :root before, when this was its own document).
-     - the footer status bar's class is renamed .status -> .studio-statusbar
-       (admin.css already defines an unrelated .status for the header's
-       status span; the id is also renamed in admin-app.html, since two
-       elements named id="status" in one document is a real bug, not
-       just a style collision).
-     - .btn and .shell are also real class-NAME collisions with admin.css's
-       own unscoped rules for those names (a generic button and the Content
-       CMS's own 3-pane shell) -- every property BOTH rules set is already
-       decided correctly by specificity (#studioRoot .x beats admin.css's bare
-       .x), but a property admin.css's version sets that Studio's own rule does
-       not would otherwise leak through unopposed (admin.css's .btn forces a
-       34px min-height onto Studio's own compact buttons; its .shell adds a
-       3-column grid-template-columns to Studio's own shell). The two shields
-       below close exactly those gaps, nothing more. (Studio's own header bar,
-       and the .bar/.btn.icon shields it needed, went when its controls moved
-       into the one app header, 2026-10-18.)
-   #studioRoot itself is positioned as a fixed overlay, replacing the old .studio-frame
-   iframe's positioning (css/admin.css). Step 3 (Design/Content mode switch,
-   flickering-juggling-donut.md) narrowed this from a full-viewport overlay (inset: 0) to
-   leave the outer app header's own 58px (css/admin.css's .bar, height: 58px) uncovered --
-   that header holds the mode switch and every editor control (it is the only header since
-   2026-10-18), which must stay reachable while Studio's canvas is showing.
-   The offset is the header's MEASURED height, --app-bar-h, not a constant: at 760px and
-   below css/admin.css lets the header wrap (measured 2026-10-18 in Chromium: 193px tall at
-   760px, 253px at 390px), and a hardcoded 58px there left #studioRoot painted over the
-   mode switch -- on a phone there was no way back out of Design mode. js/admin/admin.js
-   (trackAppBarHeight) publishes the header's border-box height on <html> through a
-   ResizeObserver, so every wrap, font load or breakpoint change re-docks Studio; 58px is
-   only the pre-script fallback. Inside, the shell fills #studioRoot's own height (it is
-   pinned top and bottom), so no rule subtracts header heights by hand.
-   tests/browser/header-reach.mjs checks it in a real browser at 390/760/1280/1500px. */
+   Ported from the old standalone admin-studio.html's <style> block with every
+   selector scoped under #studioRoot, so this sheet can live in the same
+   document as css/admin.css without any rule bleeding either way.
+
+   ONE visual language (2026-10-18). This sheet used to carry a palette of
+   its own -- --bg/--panel/--sunk/--rule/--ink/--muted/--accent/--ok/--warn/
+   --danger/--override/--comp as hex, switched by prefers-color-scheme -- so
+   Design mode was a light app under a dark Content header. It now reads the
+   SDK semantic tokens and the editor's one alias block at the top of
+   css/admin.css (fonts, radii, shadows), and follows the palette on
+   html[data-theme] like every other surface. No colour literal is allowed
+   here (tests/admin-css-tokens.cjs). The mapping, so a reader of old Studio
+   code can translate:
+     --bg -> --canvas          --panel -> --surface (rail/status: --depth;
+     --sunk -> --nested (hover on glass) / --depth (recessed wells)
+                               floating glass: --overlay)
+     --rule -> --border-default (control edges) / --border-soft (dividers)
+     --ink -> --text (--text-strong for emphasis)   --muted -> --text-muted
+     --accent -> --accent      --accent-soft -> --accent-subtle
+     --accent-ink -> --text-inverse                 --ok -> --trust
+     --warn -> --warning       --danger -> --danger
+     --override, --comp -> --drift (both meant "overridden here")
+     --font-ui -> --sans       --font-data -> --mono
+   The file stays separate from css/admin.css because admin.css is also the
+   sign-in gate's (admin.html) and broker.html's sheet, which have no Studio.
+
+   Collisions with css/admin.css's unscoped rules, resolved here:
+     - the footer status bar is .studio-statusbar, not .status (admin.css's
+       .status is the header's status span; the id is renamed in
+       admin-app.html too, since two id="status" in one document is a bug).
+     - .btn and .shell are shared class NAMES. .btn is now deliberately ONE
+       button: admin.css paints it (border, surface, hover, primary, danger,
+       disabled) and this sheet only makes Studio's compact (smaller padding,
+       no 34px min-height, no transition). .shell keeps a shield against
+       admin.css's 3-column Content grid.
+   #studioRoot itself is a fixed overlay below the one app header. The offset
+   is the header's MEASURED height, --app-bar-h, not a constant: at 760px and
+   below css/admin.css lets the header wrap (measured 2026-10-18 in Chromium:
+   193px tall at 760px, 253px at 390px), and a hardcoded 58px there left
+   #studioRoot painted over the mode switch -- on a phone there was no way back
+   out of Design mode. js/admin/admin.js (trackAppBarHeight) publishes the
+   header's border-box height on <html> through a ResizeObserver; 58px is only
+   the pre-script fallback. Inside, the shell fills #studioRoot's own height.
+   tests/browser/header-reach.mjs checks it at 390/760/1280/1500px. */
 #studioRoot { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; z-index: 50; overflow: auto; overscroll-behavior: contain; }
 #studioRoot[hidden] { display: none; }
 #studioRoot .btn { min-height: 0; transition: none; }
@@ -48,60 +53,28 @@
 /* Layout: tool shell. Left rail (layers, pages, library; collapsible) · canvas (design or sitemap) · status bar.
    Its controls live in the one app header above #studioRoot (css/admin.css, "the one header").
    Volume is turned down everywhere except the one thing that matters: the canvas. */
-#studioRoot {
-  --bg: #eef0ec;
-  --panel: #fbfcfa;
-  --sunk: #e6e9e3;
-  --rule: #d6dbd2;
-  --ink: #161a15;
-  --muted: #5c6459;
-  --accent: #2448d8;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(36, 72, 216, 0.10);
-  --override: #b4520c;
-  --ok: #1d7a4a;
-  --warn: #a8640b;
-  --danger: #b8382a;
-  --comp: #7a3fd1;
-  --font-ui: "Albert Sans", "Segoe UI", system-ui, sans-serif;
-  --font-data: "JetBrains Mono", ui-monospace, Menlo, monospace;
-} 
-@media (prefers-color-scheme: dark) {
-  #studioRoot:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #111411; --panel: #171b17; --sunk: #0d100d; --rule: #283028; --ink: #e6ebe4; --muted: #949e91;
-    --accent: #7b93ff; --accent-ink: #0b0f1f; --accent-soft: rgba(123, 147, 255, 0.14); --override: #f0904a; --ok: #4cc58a; --warn: #e4a54a; --danger: #f07563; --comp: #b590ff;
-  } 
-} 
-#studioRoot[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #111411; --panel: #171b17; --sunk: #0d100d; --rule: #283028; --ink: #e6ebe4; --muted: #949e91;
-  --accent: #7b93ff; --accent-ink: #0b0f1f; --accent-soft: rgba(123, 147, 255, 0.14); --override: #f0904a; --ok: #4cc58a; --warn: #e4a54a; --danger: #f07563; --comp: #b590ff;
-} 
-#studioRoot, #studioRoot * { box-sizing: border-box; } 
-#studioRoot [hidden] { display: none !important; } 
-#studioRoot { background: var(--bg); color: var(--ink); } 
-#studioRoot { margin: 0; font: 400 13px/1.4 var(--font-ui); } 
-#studioRoot button, #studioRoot select, #studioRoot input, #studioRoot textarea { font: inherit; color: inherit; } 
-#studioRoot button { cursor: pointer; } 
-#studioRoot :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; } 
-#studioRoot .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } 
-#studioRoot .ic.sm { width: 13px; height: 13px; } 
+#studioRoot, #studioRoot * { box-sizing: border-box; }
+#studioRoot [hidden] { display: none !important; }
+#studioRoot { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font: 400 13px/1.4 var(--sans); }
+#studioRoot button, #studioRoot select, #studioRoot input, #studioRoot textarea { font: inherit; color: inherit; }
+#studioRoot button { cursor: pointer; }
+/* Studio keeps a visible focus ring (admin.css removes the UA one): its controls are 16-30px
+   icons with no background shift of their own to carry keyboard focus. */
+#studioRoot :focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 1px; }
+#studioRoot .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+#studioRoot .ic.sm { width: 13px; height: 13px; }
 
 /* #studioRoot is fixed between the header and the viewport bottom, so its shell fills that
    exact height and the rail and canvas scroll inside it -- no "100vh minus the bars" sums. */
 #studioRoot .shell { display: grid; grid-template-rows: minmax(0, 1fr) auto; height: 100%; }
-#studioRoot .spacer { flex: 1; } 
-#studioRoot .btn { border: 1px solid var(--rule); background: var(--panel); border-radius: 7px; padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; } 
-#studioRoot .btn:hover { border-color: var(--muted); } 
-#studioRoot .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); } 
-#studioRoot .btn.small { padding: 3px 8px; font-size: 12px; } 
-#studioRoot .btn.danger { color: var(--danger); } 
-#studioRoot .btn:disabled { opacity: .4; cursor: default; } 
+#studioRoot .spacer { flex: 1; }
+/* the compact form of admin.css's one .btn (which paints it) */
+#studioRoot .btn { border-radius: var(--radius-md); padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+#studioRoot .btn.small { padding: 3px 8px; font-size: 12px; }
 
 /* workspace: the rail and the canvas; .rail-closed (the header's #btnLeftRail) gives the
    canvas the full width */
-#studioRoot .work { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 0; } 
+#studioRoot .work { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 0; }
 #studioRoot .live .work, #studioRoot .mapview .work, #studioRoot .rail-closed .work { grid-template-columns: minmax(0, 1fr); }
 #studioRoot .live .left, #studioRoot .live .ov-toolbar, #studioRoot .mapview .left, #studioRoot .mapview .ov-toolbar, #studioRoot .rail-closed .left { display: none; }
 /* Step 4 (flickering-juggling-donut.md): restrictMode (and its .canvas-mode/.anim-mode
@@ -110,42 +83,44 @@
    element-motion folded into #selToolbar as one more accordion section, so there is no
    longer a narrowed mode that needs the left rail given up or the right rail repurposed.
    See the Step 4 comment in js/admin/admin.js for the fuller reasoning. */
-@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr); }  }
+@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr); } }
 /* Single column below 860px: the canvas first, then the rail stacked under it; #studioRoot
    scrolls as a whole. The rail keeps its own bounded scroll -- the real-site Layers tree is
    thousands of rows, and unbounded it pushed everything after it ~24,000px down a phone's
    #studioRoot scroll (measured at 390px, 2026-10-18). */
-@media (max-width: 860px) { #studioRoot .shell { height: auto; min-height: 100%; }  #studioRoot .work { grid-template-columns: minmax(0, 1fr); }  #studioRoot .left { border: 0 !important; border-top: 1px solid var(--rule) !important; max-height: min(60vh, 560px); }  #studioRoot .canvas-wrap { order: -1; max-height: calc(100vh - var(--app-bar-h, 58px) - 28px); }  }
-#studioRoot .left { background: var(--panel); min-width: 0; overflow: auto; border-right: 1px solid var(--rule); -webkit-user-select: none; user-select: none; } 
-#studioRoot .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--panel); z-index: 2; } 
-#studioRoot .tabs button { border: 0; background: transparent; padding: 8px 4px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; justify-content: center; } 
-#studioRoot .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); } 
-#studioRoot .list { list-style: none; margin: 0; padding: 6px; display: grid; } 
-#studioRoot .list li { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; white-space: nowrap; min-width: 0; color: var(--ink); } 
-#studioRoot .list li:hover { background: var(--sunk); } 
-#studioRoot .list li[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); } 
-#studioRoot .list li .ic { color: var(--muted); } 
-#studioRoot .list li[aria-selected="true"] .ic { color: var(--accent); } 
-#studioRoot .list li .nm { overflow: hidden; text-overflow: ellipsis; min-width: 0; } 
-#studioRoot .list li .sub { color: var(--muted); font: 500 11px/1 var(--font-data); margin-left: auto; overflow: hidden; text-overflow: ellipsis; } 
-#studioRoot .list li .tag { font: 600 9.5px/1 var(--font-ui); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border: 1px solid var(--rule); border-radius: 4px; padding: 2px 4px; } 
-#studioRoot .list li .row-act { margin-left: auto; opacity: 0; } 
-#studioRoot .list li:hover .row-act, #studioRoot .list li[aria-selected="true"] .row-act { opacity: 1; } 
-#studioRoot .list li .layer-toggle { width: 16px; height: 16px; padding: 0; border: 0; background: transparent; color: var(--muted); display: grid; place-items: center; flex: none; } 
-#studioRoot .list li .layer-toggle::before { content: '›'; font: 700 16px/1 var(--font-ui); transform: rotate(90deg); transition: transform .12s ease; } 
-#studioRoot .list li .layer-toggle[aria-expanded="false"]::before { transform: rotate(0); } 
-#studioRoot .list li .layer-spacer { width: 16px; flex: none; } 
+@media (max-width: 860px) { #studioRoot .shell { height: auto; min-height: 100%; } #studioRoot .work { grid-template-columns: minmax(0, 1fr); } #studioRoot .left { border: 0 !important; border-top: 1px solid hsl(var(--border-soft)) !important; max-height: min(60vh, 560px); } #studioRoot .canvas-wrap { order: -1; max-height: calc(100vh - var(--app-bar-h, 58px) - 28px); } }
+/* the rail is the same surface as Content mode's page list (css/admin.css .pages): --depth */
+#studioRoot .left { background: hsl(var(--depth)); min-width: 0; overflow: auto; border-right: 1px solid hsl(var(--border-soft)); -webkit-user-select: none; user-select: none; }
+#studioRoot .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-bottom: 1px solid hsl(var(--border-soft)); position: sticky; top: 0; background: hsl(var(--depth)); z-index: 2; }
+#studioRoot .tabs button { border: 0; background: transparent; padding: 8px 4px; font-weight: 600; color: hsl(var(--text-muted)); border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+#studioRoot .tabs button[aria-selected="true"] { color: hsl(var(--text-strong)); border-bottom-color: hsl(var(--accent)); }
+#studioRoot .list { list-style: none; margin: 0; padding: 6px; display: grid; }
+#studioRoot .list li { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: var(--radius-sm); cursor: pointer; border: 1px solid transparent; white-space: nowrap; min-width: 0; color: hsl(var(--text)); }
+#studioRoot .list li:hover { background: hsl(var(--raised)); }
+#studioRoot .list li[aria-selected="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); }
+#studioRoot .list li .ic { color: hsl(var(--text-muted)); }
+#studioRoot .list li[aria-selected="true"] .ic { color: hsl(var(--accent)); }
+#studioRoot .list li .nm { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#studioRoot .list li .sub { color: hsl(var(--text-muted)); font: 500 11px/1 var(--mono); margin-left: auto; overflow: hidden; text-overflow: ellipsis; }
+#studioRoot .list li .tag { font: 600 9.5px/1 var(--sans); text-transform: uppercase; letter-spacing: .06em; color: hsl(var(--text-muted)); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-xs); padding: 2px 4px; }
+#studioRoot .list li .row-act { margin-left: auto; opacity: 0; }
+#studioRoot .list li:hover .row-act, #studioRoot .list li[aria-selected="true"] .row-act { opacity: 1; }
+#studioRoot .list li .layer-toggle { width: 16px; height: 16px; padding: 0; border: 0; background: transparent; color: hsl(var(--text-muted)); display: grid; place-items: center; flex: none; }
+#studioRoot .list li .layer-toggle::before { content: '›'; font: 700 16px/1 var(--sans); transform: rotate(90deg); transition: transform .12s ease; }
+#studioRoot .list li .layer-toggle[aria-expanded="false"]::before { transform: rotate(0); }
+#studioRoot .list li .layer-spacer { width: 16px; flex: none; }
 
 /* canvas */
 #studioRoot .canvas-wrap { min-width: 0; min-height: 0; overflow: auto; position: relative; padding: 14px 16px 40px; }
-#studioRoot .shell:not(.live) .canvas-wrap { -webkit-user-select: none; user-select: none; } 
-#studioRoot .live .canvas-wrap { padding: 0; } 
-#studioRoot .stage { position: relative; margin: 0 auto; transform-origin: top left; } 
-#studioRoot .cms-preview { display: none; width: 100%; min-height: 720px; border: 0; background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 30px rgba(0,0,0,.08); border-radius: 6px; } 
-#studioRoot .cms-connected .cms-preview { display: block; } 
-#studioRoot .live .cms-preview { border-radius: 0; box-shadow: none; pointer-events: auto; } 
-#studioRoot .devlabel { font: 500 11px/1 var(--font-data); color: var(--muted); margin: 0 auto 8px; display: flex; justify-content: space-between; gap: 8px; } 
-#studioRoot .live .devlabel { display: none; } 
+#studioRoot .shell:not(.live) .canvas-wrap { -webkit-user-select: none; user-select: none; }
+#studioRoot .live .canvas-wrap { padding: 0; }
+#studioRoot .stage { position: relative; margin: 0 auto; transform-origin: top left; }
+/* the hairline ring keeps the page's edge visible on a dark palette, where a shadow cannot */
+#studioRoot .cms-preview { display: none; width: 100%; min-height: 720px; border: 0; background: hsl(var(--surface)); box-shadow: 0 0 0 1px hsl(var(--border-soft)), var(--shadow-float); border-radius: var(--radius-sm); }
+#studioRoot .cms-connected .cms-preview { display: block; }
+#studioRoot .live .cms-preview { border-radius: 0; box-shadow: none; pointer-events: auto; }
+#studioRoot .devlabel { font: 500 11px/1 var(--mono); color: hsl(var(--text-muted)); margin: 0 auto 8px; display: flex; justify-content: space-between; gap: 8px; }
+#studioRoot .live .devlabel { display: none; }
 /* Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar that
    replaces the fixed right-panel accordions, positioned by placeSelToolbar() (admin.js)
    using the exact same above/below-flip + viewport-clamp convention as .ov-tag below, just
@@ -158,136 +133,144 @@
    rows that covered the page. max-width is set by placeSelToolbar() (the stage's on-screen
    width); past it the bar wraps to a second row rather than scroll the page sideways.
    The popover opens on the side away from the selection (data-side); tooltips take that
-   side too, or the other one while a popover is open there (data-pop). */
-#studioRoot .ov-toolbar { position: absolute; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; width: max-content; padding: 3px; background: color-mix(in srgb, var(--panel) 90%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.14); transform-origin: top left; pointer-events: auto; -webkit-user-select: none; user-select: none; }
-#studioRoot .tb-chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; max-width: 168px; padding: 0 9px 0 8px; margin-right: 3px; border-radius: 7px; background: var(--accent-soft); color: var(--accent); font: 600 10.5px/1 var(--font-data); letter-spacing: .06em; text-transform: uppercase; }
+   side too, or the other one while a popover is open there (data-pop).
+   Floating glass (this bar, .tb-pop, .pop, admin.css's account menu) is one recipe:
+   --overlay at high alpha, blur, a --border-default edge, --shadow-pop/-float. */
+#studioRoot .ov-toolbar { position: absolute; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; width: max-content; padding: 3px; background: hsl(var(--overlay) / .9); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); box-shadow: var(--shadow-float); transform-origin: top left; pointer-events: auto; -webkit-user-select: none; user-select: none; }
+#studioRoot .tb-chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; max-width: 168px; padding: 0 9px 0 8px; margin-right: 3px; border-radius: var(--radius-md); background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); font: 600 10.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 #studioRoot .tb-chip-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#studioRoot .tb-bp { flex: none; padding-left: 6px; margin-left: 1px; border-left: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); color: var(--override); }
-#studioRoot .tb-btn { position: relative; flex: none; width: 30px; height: 28px; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--muted); }
-#studioRoot .tb-btn:hover:not(:disabled) { background: var(--sunk); color: var(--ink); }
-#studioRoot .tb-btn[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+/* the chip's words are --text-strong on --accent-subtle (accent-on-accent-subtle measured 4.46:1 on
+   bone, drift on it 4.48:1 on glacier); the breakpoint's override is marked by a drift edge */
+#studioRoot .tb-bp { flex: none; padding-left: 6px; margin-left: 1px; border-left: 2px solid hsl(var(--drift)); }
+#studioRoot .tb-btn { position: relative; flex: none; width: 30px; height: 28px; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius-md); background: transparent; color: hsl(var(--text-muted)); }
+#studioRoot .tb-btn:hover:not(:disabled) { background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
+/* pressed = the header's own .ibtn[aria-expanded] (css/admin.css): accent surface, strong text, accent edge */
+#studioRoot .tb-btn[aria-expanded="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); box-shadow: inset 0 0 0 1px hsl(var(--accent) / .35); }
 #studioRoot .tb-btn:disabled { opacity: .35; cursor: default; }
 #studioRoot .tb-btn:focus-visible { outline-offset: -2px; }
 /* identity sections (what the selection IS: a states group, a component instance) */
-#studioRoot .tb-btn.identity { color: var(--accent); }
-#studioRoot .tb-btn.identity::before { content: ""; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1.5px var(--panel); }
-#studioRoot .tb-count { position: absolute; right: 1px; bottom: 1px; min-width: 12px; height: 12px; padding: 0 3px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font: 700 8.5px/12px var(--font-data); text-align: center; }
+#studioRoot .tb-btn.identity { color: hsl(var(--accent)); }
+#studioRoot .tb-btn.identity::before { content: ""; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--accent)); box-shadow: 0 0 0 1.5px hsl(var(--overlay)); }
+#studioRoot .tb-count { position: absolute; right: 1px; bottom: 1px; min-width: 12px; height: 12px; padding: 0 3px; border-radius: var(--radius-sm); background: hsl(var(--accent)); color: hsl(var(--text-inverse)); font: 700 8.5px/12px var(--mono); text-align: center; }
 #studioRoot .tb-group { display: flex; align-items: center; gap: 2px; flex: none; }
 #studioRoot .tb-sections { position: relative; padding-right: 5px; margin-right: 3px; }
-#studioRoot .tb-sections::after { content: ""; position: absolute; right: 0; top: 6px; bottom: 6px; width: 1px; background: var(--rule); }
+#studioRoot .tb-sections::after { content: ""; position: absolute; right: 0; top: 6px; bottom: 6px; width: 1px; background: hsl(var(--border-default)); }
 #studioRoot .ov-toolbar.wrapped .tb-sections::after { background: transparent; }
-#studioRoot .tb-btn[data-tip]:hover::after, #studioRoot .tb-btn[data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); z-index: 2; padding: 5px 8px; border-radius: 6px; background: var(--ink); color: var(--panel); font: 500 11px/1.2 var(--font-ui); letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+#studioRoot .tb-btn[data-tip]:hover::after, #studioRoot .tb-btn[data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); z-index: 2; padding: 5px 8px; border-radius: var(--radius-sm); background: hsl(var(--text-strong)); color: hsl(var(--text-inverse)); font: 500 11px/1.2 var(--sans); letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none; box-shadow: var(--shadow-pop); }
 #studioRoot .ov-toolbar[data-side="above"]:not([data-pop]) .tb-btn[data-tip]:hover::after, #studioRoot .ov-toolbar[data-side="above"]:not([data-pop]) .tb-btn[data-tip]:focus-visible::after,
 #studioRoot .ov-toolbar[data-pop="down"] .tb-btn[data-tip]:hover::after, #studioRoot .ov-toolbar[data-pop="down"] .tb-btn[data-tip]:focus-visible::after { top: auto; bottom: calc(100% + 8px); }
 #studioRoot .tb-btn[aria-expanded="true"]::after { display: none !important; }
-#studioRoot .tb-pop { position: fixed; z-index: 35; display: flex; flex-direction: column; width: min(304px, calc(100vw - 16px)); max-height: min(70vh, 560px); background: color-mix(in srgb, var(--panel) 95%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,.06), 0 16px 40px rgba(0,0,0,.2); }
-#studioRoot .tb-pop-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 12px; border-bottom: 1px solid var(--rule); font: 600 10.5px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-#studioRoot .tb-pop-x { width: 24px; height: 24px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
-#studioRoot .tb-pop-x:hover { background: var(--sunk); color: var(--ink); }
+#studioRoot .tb-pop { position: fixed; z-index: 35; display: flex; flex-direction: column; width: min(304px, calc(100vw - 16px)); max-height: min(70vh, 560px); background: hsl(var(--overlay) / .96); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); }
+#studioRoot .tb-pop-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 12px; border-bottom: 1px solid hsl(var(--border-soft)); font: 600 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+#studioRoot .tb-pop-x { width: 24px; height: 24px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--text-muted)); }
+#studioRoot .tb-pop-x:hover { background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
 #studioRoot .tb-pop-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; display: grid; align-content: start; gap: 7px; padding: 10px 12px 12px; }
 /* "Groups on this page": a page-level browse/jump list (Part 1 bug fix's own cms-groups
    accordion), relocated here (the persistent Layers tab) rather than into #selToolbar,
    since it needs no current selection to make sense -- unlike every taxonomy section in
    the toolbar, which only exists because something is selected. */
-#studioRoot .groups-browse { padding: 8px; border-bottom: 1px solid var(--rule); display: grid; gap: 4px; }
-#studioRoot .groups-browse-head { font: 600 11px/1 var(--font-ui); letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
+#studioRoot .groups-browse { padding: 8px; border-bottom: 1px solid hsl(var(--border-soft)); display: grid; gap: 4px; }
+#studioRoot .groups-browse-head { font: 600 11px/1 var(--sans); letter-spacing: .04em; color: hsl(var(--text-muted)); text-transform: uppercase; }
 
 /* sitemap */
-#studioRoot .sitemap { position: relative; } 
-#studioRoot .smbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 14px; } 
-#studioRoot .smbar h2 { margin: 0; font-size: 16px; } 
-#studioRoot .smbar .sum { color: var(--muted); } 
-#studioRoot .smlegend { display: flex; gap: 12px; color: var(--muted); font-size: 12px; } 
-#studioRoot .smlegend i { display: inline-block; width: 18px; height: 2px; vertical-align: middle; margin-right: 5px; } 
-#studioRoot .smscroll { overflow: auto; padding-bottom: 20px; } 
-#studioRoot .smzoom { position: relative; margin: 0 auto; } 
-#studioRoot .smcanvas { position: absolute; left: 0; top: 0; } 
-#studioRoot .smcanvas > svg { position: absolute; inset: 0; overflow: visible; pointer-events: none; } 
-#studioRoot .smzoomctl { display: inline-flex; align-items: center; gap: 4px; } 
-#studioRoot .smzoomctl .smzoom-pct { min-width: 46px; text-align: center; } 
-#studioRoot .smcard { position: absolute; width: 196px; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 11px; display: grid; gap: 4px; cursor: pointer; text-align: left; box-shadow: 0 1px 2px rgba(0,0,0,.05); } 
-#studioRoot .smcard:hover { border-color: var(--muted); } 
-#studioRoot .smcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); } 
-#studioRoot .smcard.cur { outline: 2px solid var(--accent); outline-offset: 2px; } 
-#studioRoot .smcard .t { display: flex; align-items: center; gap: 6px; font-weight: 700; min-width: 0; } 
-#studioRoot .smcard .t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } 
-#studioRoot .smcard code { font: 500 11px/1.2 var(--font-data); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } 
-#studioRoot .smcard .st { font-size: 11.5px; color: var(--muted); } 
-#studioRoot .smcard .chips { display: flex; gap: 4px; flex-wrap: wrap; min-height: 0; } 
-#studioRoot .chip { font: 600 10px/1 var(--font-ui); padding: 3px 5px; border-radius: 4px; border: 1px solid currentColor; } 
-#studioRoot .chip.warn { color: var(--warn); }  #studioRoot .chip.bad { color: var(--danger); }  #studioRoot .chip.info { color: var(--muted); } 
-#studioRoot .smcard .open { justify-self: start; margin-top: 2px; } 
+#studioRoot .sitemap { position: relative; }
+#studioRoot .smbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 14px; }
+#studioRoot .smbar h2 { margin: 0; font-size: 16px; color: hsl(var(--text-strong)); }
+#studioRoot .smbar .sum { color: hsl(var(--text-muted)); }
+#studioRoot .smlegend { display: flex; gap: 12px; color: hsl(var(--text-muted)); font-size: 12px; }
+#studioRoot .smlegend i { display: inline-block; width: 18px; height: 2px; vertical-align: middle; margin-right: 5px; }
+#studioRoot .smscroll { overflow: auto; padding-bottom: 20px; }
+#studioRoot .smzoom { position: relative; margin: 0 auto; }
+#studioRoot .smcanvas { position: absolute; left: 0; top: 0; }
+#studioRoot .smcanvas > svg { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+#studioRoot .smzoomctl { display: inline-flex; align-items: center; gap: 4px; }
+#studioRoot .smzoomctl .smzoom-pct { min-width: 46px; text-align: center; }
+#studioRoot .smcard { position: absolute; width: 196px; background: hsl(var(--surface)); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); padding: 10px 11px; display: grid; gap: 4px; cursor: pointer; text-align: left; box-shadow: var(--shadow-lift); }
+#studioRoot .smcard:hover { border-color: hsl(var(--border-strong)); }
+#studioRoot .smcard[aria-pressed="true"] { border-color: hsl(var(--accent)); box-shadow: 0 0 0 2px hsl(var(--accent-subtle)); }
+#studioRoot .smcard.cur { outline: 2px solid hsl(var(--accent)); outline-offset: 2px; }
+#studioRoot .smcard .t { display: flex; align-items: center; gap: 6px; font-weight: 700; min-width: 0; color: hsl(var(--text-strong)); }
+#studioRoot .smcard .t span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#studioRoot .smcard code { font: 500 11px/1.2 var(--mono); color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#studioRoot .smcard .st { font-size: 11.5px; color: hsl(var(--text-muted)); }
+#studioRoot .smcard .chips { display: flex; gap: 4px; flex-wrap: wrap; min-height: 0; }
+#studioRoot .chip { font: 600 10px/1 var(--sans); padding: 3px 5px; border-radius: var(--radius-xs); border: 1px solid currentColor; }
+#studioRoot .chip.warn { color: hsl(var(--warning)); } #studioRoot .chip.bad { color: hsl(var(--danger)); } #studioRoot .chip.info { color: hsl(var(--text-muted)); }
+#studioRoot .smcard .open { justify-self: start; margin-top: 2px; }
 
 /* control rows (the toolbar's popovers, the SEO popover) */
-#studioRoot .row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 14px; align-items: center; gap: 6px; min-height: 26px; } 
-#studioRoot .row > label { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } 
-#studioRoot .row.set > label { color: var(--ink); font-weight: 600; } 
-#studioRoot .row.ovr > label { color: var(--comp); } 
-#studioRoot .libsec { padding: 8px 10px; display: grid; gap: 8px; } 
-#studioRoot .libsec h4 { margin: 4px 2px 0; font: 600 11px/1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; } 
-#studioRoot .myrow { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border: 1px solid var(--rule); border-radius: 7px; } 
-#studioRoot .myrow span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; } 
-#studioRoot .myrow small { color: var(--muted); } 
-#studioRoot .pop .field { display: grid; gap: 4px; margin-bottom: 8px; } 
-#studioRoot .pop .field input, #studioRoot .pop textarea { border: 1px solid var(--rule); border-radius: 7px; padding: 6px 8px; background: var(--panel); } 
-#studioRoot .pop textarea { width: 100%; min-height: 120px; font: 400 11px/1.4 var(--font-data); } 
-#studioRoot .ctl-seg { display: flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; min-width: 0; } 
-#studioRoot .ctl-seg button { flex: 1 1 auto; min-width: 0; border: 0; border-right: 1px solid var(--rule); background: var(--panel); padding: 4px 1px; font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; justify-content: center; align-items: center; gap: 3px; } 
-#studioRoot .ctl-seg button:last-child { border-right: 0; } 
-#studioRoot .ctl-seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; } 
-#studioRoot select.ctl, #studioRoot input.ctl, #studioRoot textarea.ctl { width: 100%; min-width: 0; border: 1px solid var(--rule); background: var(--panel); border-radius: 6px; padding: 4px 6px; } 
-#studioRoot textarea.ctl { resize: vertical; min-height: 54px; font-size: 12.5px; } 
-#studioRoot .swatches { display: flex; flex-wrap: wrap; gap: 4px; } 
-#studioRoot .swatches button { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--rule); padding: 0; } 
-#studioRoot .swatches button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent); } 
-#studioRoot .swatches button.none { background: linear-gradient(135deg, transparent 45%, var(--danger) 45%, var(--danger) 55%, transparent 55%), var(--panel); } 
-#studioRoot .boxm { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; align-items: center; justify-items: center; padding: 6px; border: 1px dashed var(--rule); border-radius: 7px; background: var(--sunk); } 
-#studioRoot .boxm .mid { grid-column: 2; grid-row: 2; width: 100%; height: 24px; border-radius: 4px; background: var(--panel); border: 1px solid var(--rule); display: grid; place-items: center; font: 500 10px/1 var(--font-data); color: var(--muted); } 
-#studioRoot .boxm select { width: 100%; max-width: 76px; border: 1px solid var(--rule); background: var(--panel); border-radius: 5px; padding: 2px 3px; font: 500 11px/1.2 var(--font-data); } 
-#studioRoot .boxm select.set { border-color: var(--accent); color: var(--accent); } 
-#studioRoot .boxm .t { grid-column: 2; grid-row: 1; }  #studioRoot .boxm .r { grid-column: 3; grid-row: 2; }  #studioRoot .boxm .b { grid-column: 2; grid-row: 3; }  #studioRoot .boxm .l { grid-column: 1; grid-row: 2; } 
-#studioRoot .anchor { display: grid; grid-template-columns: repeat(3, 16px); gap: 3px; padding: 4px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sunk); } 
-#studioRoot .anchor button { width: 16px; height: 16px; border-radius: 3px; border: 1px solid var(--rule); background: var(--panel); padding: 0; } 
-#studioRoot .anchor button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); } 
-#studioRoot .fields { display: grid; gap: 2px; margin: 8px 0; } 
-#studioRoot .hint { color: var(--muted); font-size: 12px; margin: 0; } 
-#studioRoot .hint b { color: var(--ink); } 
+#studioRoot .row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 14px; align-items: center; gap: 6px; min-height: 26px; }
+#studioRoot .row > label { color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#studioRoot .row.set > label { color: hsl(var(--text-strong)); font-weight: 600; }
+#studioRoot .row.ovr > label { color: hsl(var(--drift)); }
+#studioRoot .libsec { padding: 8px 10px; display: grid; gap: 8px; }
+#studioRoot .libsec h4 { margin: 4px 2px 0; font: 600 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); display: flex; justify-content: space-between; align-items: center; }
+#studioRoot .myrow { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-md); }
+#studioRoot .myrow span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+#studioRoot .myrow small { color: hsl(var(--text-muted)); }
+#studioRoot .pop .field { display: grid; gap: 4px; margin-bottom: 8px; }
+#studioRoot .pop .field input, #studioRoot .pop textarea { border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); padding: 6px 8px; background: hsl(var(--surface)); }
+#studioRoot .pop textarea { width: 100%; min-height: 120px; font: 400 11px/1.4 var(--mono); }
+/* segmented control: the same pressed state as every segmented control in the editor */
+#studioRoot .ctl-seg { display: flex; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-sm); overflow: hidden; min-width: 0; }
+#studioRoot .ctl-seg button { flex: 1 1 auto; min-width: 0; border: 0; border-right: 1px solid hsl(var(--border-soft)); background: hsl(var(--surface)); padding: 4px 1px; font-size: 11px; color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; justify-content: center; align-items: center; gap: 3px; }
+#studioRoot .ctl-seg button:last-child { border-right: 0; }
+#studioRoot .ctl-seg button[aria-pressed="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); font-weight: 600; }
+#studioRoot select.ctl, #studioRoot input.ctl, #studioRoot textarea.ctl { width: 100%; min-width: 0; border: 1px solid hsl(var(--border-default)); background: hsl(var(--surface)); border-radius: var(--radius-sm); padding: 4px 6px; }
+#studioRoot textarea.ctl { resize: vertical; min-height: 54px; font-size: 12.5px; }
+#studioRoot .swatches { display: flex; flex-wrap: wrap; gap: 4px; }
+#studioRoot .swatches button { width: 20px; height: 20px; border-radius: 50%; border: 1px solid hsl(var(--border-default)); padding: 0; }
+#studioRoot .swatches button[aria-pressed="true"] { box-shadow: 0 0 0 2px hsl(var(--overlay)), 0 0 0 4px hsl(var(--accent)); }
+#studioRoot .swatches button.none { background: linear-gradient(135deg, transparent 45%, hsl(var(--danger)) 45%, hsl(var(--danger)) 55%, transparent 55%), hsl(var(--surface)); }
+/* recessed wells (the box-model and anchor pickers) sit on --depth, below the popover */
+#studioRoot .boxm { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; align-items: center; justify-items: center; padding: 6px; border: 1px dashed hsl(var(--border-default)); border-radius: var(--radius-md); background: hsl(var(--depth)); }
+#studioRoot .boxm .mid { grid-column: 2; grid-row: 2; width: 100%; height: 24px; border-radius: var(--radius-xs); background: hsl(var(--surface)); border: 1px solid hsl(var(--border-default)); display: grid; place-items: center; font: 500 10px/1 var(--mono); color: hsl(var(--text-muted)); }
+#studioRoot .boxm select { width: 100%; max-width: 76px; border: 1px solid hsl(var(--border-default)); background: hsl(var(--surface)); border-radius: var(--radius-sm); padding: 2px 3px; font: 500 11px/1.2 var(--mono); }
+#studioRoot .boxm select.set { border-color: hsl(var(--accent)); color: hsl(var(--accent)); }
+#studioRoot .boxm .t { grid-column: 2; grid-row: 1; } #studioRoot .boxm .r { grid-column: 3; grid-row: 2; } #studioRoot .boxm .b { grid-column: 2; grid-row: 3; } #studioRoot .boxm .l { grid-column: 1; grid-row: 2; }
+#studioRoot .anchor { display: grid; grid-template-columns: repeat(3, 16px); gap: 3px; padding: 4px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-sm); background: hsl(var(--depth)); }
+#studioRoot .anchor button { width: 16px; height: 16px; border-radius: var(--radius-xs); border: 1px solid hsl(var(--border-default)); background: hsl(var(--surface)); padding: 0; }
+#studioRoot .anchor button[aria-pressed="true"] { background: hsl(var(--accent)); border-color: hsl(var(--accent)); }
+#studioRoot .fields { display: grid; gap: 2px; margin: 8px 0; }
+#studioRoot .hint { color: hsl(var(--text-muted)); font-size: 12px; margin: 0; }
+#studioRoot .hint b { color: hsl(var(--text-strong)); }
 
 /* popovers */
-#studioRoot .pop { position: fixed; z-index: 40; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 12px 36px rgba(0,0,0,.18); padding: 10px; max-height: min(78vh, 640px); overflow: auto; width: min(380px, calc(100vw - 16px)); } 
-#studioRoot .pop h4 { margin: 2px 2px 8px; font: 600 11px/1 var(--font-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); } 
-#studioRoot .pop .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 10px; } 
-#studioRoot .pop .menu { display: grid; gap: 2px; } 
-#studioRoot .pop .menu button { border: 0; background: transparent; text-align: left; padding: 7px 8px; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-weight: 500; } 
-#studioRoot .pop .menu button:hover { background: var(--sunk); } 
-#studioRoot .pop .menu button small { margin-left: auto; color: var(--muted); font: 500 11px/1 var(--font-data); } 
-#studioRoot .pop .menu .on { color: var(--accent); } 
-#studioRoot .pop .sep { height: 1px; background: var(--rule); margin: 5px 0; } 
-#studioRoot .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; } 
-#studioRoot .checks li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; padding: 7px 6px; border-radius: 7px; } 
-#studioRoot .checks li:hover { background: var(--sunk); } 
-#studioRoot .checks li .st { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: var(--accent-ink); } 
-#studioRoot .checks li .st .ic { width: 11px; height: 11px; stroke-width: 2.2; } 
-#studioRoot .checks li.notBuilt .st, #studioRoot .checks li.unmeasured .st { background: var(--muted); }  #studioRoot .checks li.pass .st { background: var(--ok); }  #studioRoot .checks li.warn .st { background: var(--warn); }  #studioRoot .checks li.fail .st { background: var(--danger); } 
-#studioRoot .checks li b { display: block; font-size: 12.5px; } 
-#studioRoot .seo-controls { display: grid; gap: 8px; } 
-#studioRoot .seo-controls .row { grid-template-columns: minmax(0, 1fr); gap: 3px; } 
-#studioRoot .seo-controls .row > label { white-space: normal; } 
-#studioRoot .seo-controls .row > span:empty { display: none; } 
-#studioRoot .seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) 112px; gap: 6px; } 
-#studioRoot .seo-controls .ctl-seg { justify-self: start; } 
-#studioRoot .seo-controls .ctl-seg button { padding: 4px 12px; } 
-#studioRoot .seo-pop { display: grid; gap: 8px; align-content: start; } 
-#studioRoot .seo-pop > .btn { justify-self: start; } 
-#studioRoot .seo-refusal { color: var(--warn); } 
-#studioRoot .checks li p { margin: 2px 0 0; color: var(--muted); font-size: 12px; } 
-#studioRoot .checks li .acts { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; } 
-#studioRoot .checkhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; } 
-#studioRoot .checkhead p { margin: 0; color: var(--muted); font-size: 12px; } 
+#studioRoot .pop { position: fixed; z-index: 40; background: hsl(var(--overlay) / .96); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); padding: 10px; max-height: min(78vh, 640px); overflow: auto; width: min(380px, calc(100vw - 16px)); }
+#studioRoot .pop h4 { margin: 2px 2px 8px; font: 600 11px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+#studioRoot .pop .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 10px; }
+#studioRoot .pop .menu { display: grid; gap: 2px; }
+#studioRoot .pop .menu button { border: 0; background: transparent; text-align: left; padding: 7px 8px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 8px; font-weight: 500; }
+#studioRoot .pop .menu button:hover { background: hsl(var(--nested)); }
+#studioRoot .pop .menu button small { margin-left: auto; color: hsl(var(--text-muted)); font: 500 11px/1 var(--mono); }
+#studioRoot .pop .menu .on { color: hsl(var(--accent)); }
+#studioRoot .pop .sep { height: 1px; background: hsl(var(--border-soft)); margin: 5px 0; }
+#studioRoot .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+#studioRoot .checks li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; padding: 7px 6px; border-radius: var(--radius-md); }
+#studioRoot .checks li:hover { background: hsl(var(--nested)); }
+#studioRoot .checks li .st { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: hsl(var(--text-inverse)); }
+#studioRoot .checks li .st .ic { width: 11px; height: 11px; stroke-width: 2.2; }
+/* a check with nothing built behind it is --hidden ("nothing here yet"), never a score */
+#studioRoot .checks li.notBuilt .st, #studioRoot .checks li.unmeasured .st { background: hsl(var(--hidden)); } #studioRoot .checks li.pass .st { background: hsl(var(--trust)); } #studioRoot .checks li.warn .st { background: hsl(var(--warning)); } #studioRoot .checks li.fail .st { background: hsl(var(--danger)); }
+#studioRoot .checks li b { display: block; font-size: 12.5px; color: hsl(var(--text-strong)); }
+#studioRoot .seo-controls { display: grid; gap: 8px; }
+#studioRoot .seo-controls .row { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+#studioRoot .seo-controls .row > label { white-space: normal; }
+#studioRoot .seo-controls .row > span:empty { display: none; }
+#studioRoot .seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) 112px; gap: 6px; }
+#studioRoot .seo-controls .ctl-seg { justify-self: start; }
+#studioRoot .seo-controls .ctl-seg button { padding: 4px 12px; }
+#studioRoot .seo-pop { display: grid; gap: 8px; align-content: start; }
+#studioRoot .seo-pop > .btn { justify-self: start; }
+#studioRoot .seo-refusal { color: hsl(var(--warning)); }
+#studioRoot .checks li p { margin: 2px 0 0; color: hsl(var(--text-muted)); font-size: 12px; }
+#studioRoot .checks li .acts { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+#studioRoot .checkhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+#studioRoot .checkhead p { margin: 0; color: hsl(var(--text-muted)); font-size: 12px; }
 
-/* status bar */
-#studioRoot .studio-statusbar { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 5px 14px; border-top: 1px solid var(--rule); background: var(--panel); font: 500 11px/1.3 var(--font-data); color: var(--muted); } 
-#studioRoot .studio-statusbar b { color: var(--ink); font-weight: 500; } 
-#studioRoot .toast { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; font-weight: 600; z-index: 50; box-shadow: 0 6px 24px rgba(0,0,0,.2); max-width: calc(100vw - 32px); } 
+/* status bar: the rail's surface, mono metadata */
+#studioRoot .studio-statusbar { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 5px 14px; border-top: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); font: 500 11px/1.3 var(--mono); color: hsl(var(--text-muted)); }
+#studioRoot .studio-statusbar b { color: hsl(var(--text-strong)); font-weight: 500; }
+#studioRoot .toast { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); background: hsl(var(--text-strong)); color: hsl(var(--text-inverse)); padding: 8px 14px; border-radius: var(--radius); font-weight: 600; z-index: 50; box-shadow: var(--shadow-pop); max-width: calc(100vw - 32px); }
 
-@media (prefers-reduced-motion: reduce) { #studioRoot, #studioRoot * { transition: none !important; }  }
+@media (prefers-reduced-motion: reduce) { #studioRoot, #studioRoot * { transition: none !important; } }

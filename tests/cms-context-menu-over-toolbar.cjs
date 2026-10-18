@@ -18,7 +18,7 @@ const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 
 const main = fs.readFileSync('js/main.js', 'utf8');
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 
 function extract(src, from, to, what) {
   const start = src.indexOf(from), end = src.indexOf(to, start + 1);
@@ -67,14 +67,16 @@ function extract(src, from, to, what) {
 
 /* the editor side: the toolbar is not shown while the menu is open */
 {
-  const code = extract(admin, '  let cmsContextMenuOpen = false;', '  function placeSelToolbar() {', 'cmsContextMenuOpen + selToolbarVisible');
-  const context = { live: false, view: 'design', cmsExactSelection: { key: 'k' } };
+  /* the flag is shared state (js/admin/state.js): the canvas reads it, the preview protocol writes it */
+  assert(admin.includes('  state.cmsContextMenuOpen = false;'), 'the menu starts closed');
+  const code = extract(admin, '  function selToolbarVisible() {', '  function placeSelToolbar() {', 'selToolbarVisible');
+  const context = { state: { live: false, view: 'design', cmsExactSelection: { key: 'k' }, cmsContextMenuOpen: false } };
   vm.createContext(context);
-  vm.runInContext(code + '\nthis.selToolbarVisible = selToolbarVisible; this.setOpen = (v) => { cmsContextMenuOpen = v; };', context);
+  vm.runInContext(code + '\nthis.selToolbarVisible = selToolbarVisible; this.setOpen = (v) => { state.cmsContextMenuOpen = v; };', context);
   assert.equal(context.selToolbarVisible(), true, 'a selection shows the toolbar');
   context.setOpen(true);
   assert.equal(context.selToolbarVisible(), false, 'while the preview\'s menu is open the toolbar is not drawn over it');
-  assert(/'defxn-cms-preview-context-menu'\) \{ cmsContextMenuOpen = !!event\.data\.open; renderSelToolbar\(\); \}/.test(admin), 'the editor tracks the menu state from the preview and repaints the toolbar');
-  assert(/cmsContextMenuOpen && cmsPreview\.contentWindow\) cmsPreview\.contentWindow\.postMessage\(\{ type: 'defxn-cms-preview-close-menu' \}/.test(admin), 'a click in the editor closes the preview\'s menu, so the toolbar comes back');
+  assert(/'defxn-cms-preview-context-menu'\) \{ state\.cmsContextMenuOpen = !!event\.data\.open; renderSelToolbar\(\); \}/.test(admin), 'the editor tracks the menu state from the preview and repaints the toolbar');
+  assert(/state\.cmsContextMenuOpen && cmsPreview\.contentWindow\) cmsPreview\.contentWindow\.postMessage\(\{ type: 'defxn-cms-preview-close-menu' \}/.test(admin), 'a click in the editor closes the preview\'s menu, so the toolbar comes back');
   console.log('PASS: the editor hides its toolbar for exactly as long as the preview\'s menu is open.');
 }

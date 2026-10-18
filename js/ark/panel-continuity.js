@@ -60,6 +60,11 @@
     }
     function activate(kind, page) {
       host.classList.add('continuity-host');
+      /* Not page content: the box a routed page travels in (and, while it opens from a Home
+         card, that card's content). Layout keys neither count it nor key anything in it -- the
+         page inside keys from its own root (js/content/layout.js); before this, which of the
+         scene's divs the host happened to be renumbered the page's saved edits. */
+      host.setAttribute('data-ark-transient', 'hold');
       host.dataset.panelHost = kind || 'lifecycle';
       host.dataset.panelPage = page || '';
       host.setAttribute('aria-label', 'Agreement lifecycle dashboard');
@@ -139,7 +144,7 @@
                 host.classList.remove('continuity-host');
                 var returnedKind = host.dataset.panelHost;
                 delete host.dataset.panelHost; delete host.dataset.panelMode; delete host.dataset.panelPage;
-                host.removeAttribute('style'); host.inert = false;
+                host.removeAttribute('style'); host.removeAttribute('data-ark-transient'); host.inert = false;
                 if (sourcePage && sourcePage !== 'zero') host.removeAttribute('aria-label'); else host.setAttribute('aria-label', returnedKind === 'chain' ? 'The chain of chains' : 'The agreement lifecycle');
                 var focus = sourceKey && host.querySelector('[data-scene-link="' + sourceKey + '"]') || host.querySelector('.home-lifecycle-all');
                 if (focus) focus.focus({ preventScroll: true });

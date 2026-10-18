@@ -42,7 +42,7 @@
 ArkUI.createStageRetention=function(shell){
  var held=null,slot=null;
  function cancel(){}
- function restore(){cancel();if(held&&slot&&slot.parentNode){slot.parentNode.replaceChild(held,slot);held.style.position='';held.style.left='';held.style.top='';held.style.width='';held.style.height='';held.style.zIndex='';held.style.pointerEvents='';held.inert=false;held.removeAttribute('aria-hidden');}else if(held)held.remove();held=null;slot=null;}
+ function restore(){cancel();if(held&&slot&&slot.parentNode){slot.parentNode.replaceChild(held,slot);held.style.position='';held.style.left='';held.style.top='';held.style.width='';held.style.height='';held.style.zIndex='';held.style.pointerEvents='';held.inert=false;held.removeAttribute('aria-hidden');held.removeAttribute('data-ark-transient');}else if(held)held.remove();held=null;slot=null;}
  return {
   hold:function(outgoing,incoming,immediate){
    if(!incoming||!incoming.querySelector('.stage-scene')){restore();return;}
@@ -51,6 +51,8 @@ ArkUI.createStageRetention=function(shell){
    var rect=surface.getBoundingClientRect(),base=shell.getBoundingClientRect();
    slot=document.createElement('div');slot.className='stage-scene-slot';slot.style.height=rect.height+'px';
    surface.parentNode.replaceChild(slot,surface);held=surface;held.inert=true;held.setAttribute('aria-hidden','true');
+   /* held in the shell between two routes: no route's content, so it keys nothing (js/content/layout.js) */
+   held.setAttribute('data-ark-transient','hold');
    Object.assign(held.style,{position:'absolute',left:(rect.left-base.left)+'px',top:(rect.top-base.top)+'px',width:rect.width+'px',height:rect.height+'px',zIndex:'6',pointerEvents:'none'});
    shell.appendChild(held);
   },
@@ -61,7 +63,7 @@ ArkUI.createStageRetention=function(shell){
    held.replaceChildren.apply(held,Array.from(replacement.children));replacement.parentNode.replaceChild(held,replacement);
    held.arkStageActivate=activate;
    ['position','left','top','width','height','zIndex','pointerEvents'].forEach(function(key){held.style[key]='';});
-   held.inert=false;held.removeAttribute('aria-hidden');held=null;slot=null;
+   held.inert=false;held.removeAttribute('aria-hidden');held.removeAttribute('data-ark-transient');held=null;slot=null;
   },
   activate:function(incoming){var surface=incoming&&incoming.querySelector('.stage-scene');if(surface&&typeof surface.arkStageActivate==='function')surface.arkStageActivate();},
   restore:restore

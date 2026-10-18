@@ -24,6 +24,7 @@ import { decodeArchive } from '../../../flx/flx-codec/src/index.js';
 import { cidForBytes } from '../../../flx/flx-codec/src/blake3.js';
 import { readProject, encodeSite, decodeSite, writeProject, siteProblems, siteDrafts, defaultProjectRoot } from '../scripts/lib/site-bundle.mjs';
 import { populatedDrafts } from './browser/site-drafts-fixture.mjs';
+import { createRequire } from 'node:module';
 
 const root = defaultProjectRoot;
 const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
@@ -43,11 +44,13 @@ for (const d of singles) {
   for (const rel of [...(d.needs || []), `js/content/${d.file}.js`, `js/content/${d.file}-data.js`]) assert(fs.existsSync(path.join(root, rel)), `${d.key}: ${rel} exists`);
 }
 
-// Save: admin.js reaches each single draft through singleDraftHandle(); its keys must be the list's, exactly.
-const admin = read('js/admin/admin.js');
+// Save: the editor (js/admin/*.js, joined by tests/lib/admin-source.cjs) reaches each single draft
+// through singleDraftHandle(); its keys must be the list's, exactly.
+const admin = createRequire(import.meta.url)('./lib/admin-source.cjs').ADMIN;
 const handleBody = admin.slice(admin.indexOf('function singleDraftHandle(key)'), admin.indexOf('async function saveEverything()'));
 assert(handleBody.length > 0 && handleBody.length < 20000, 'singleDraftHandle() sits directly above saveEverything()');
-const handles = [...handleBody.matchAll(/^ {6}(\w+): \{ draft: function \(\) \{ return (\w+); \}, set: function \(v\) \{ (\w+) = v; \}, saved: function \(\) \{ return (\w+); \}, dirty: (\w+), save:/gm)];
+/* a draft is a shared variable, state.<name> (js/admin/state.js) */
+const handles = [...handleBody.matchAll(/^ {6}(\w+): \{ draft: function \(\) \{ return ([\w.]+); \}, set: function \(v\) \{ ([\w.]+) = v; \}, saved: function \(\) \{ return ([\w.]+); \}, dirty: (\w+), save:/gm)];
 assert.deepEqual(handles.map((m) => m[1]).sort(), singles.map((d) => d.key).sort(), 'admin.js has editor handles for exactly the single drafts js/admin/store.js lists (no more, no fewer)');
 for (const [, key, draftVar, setVar, savedVar] of handles) {
   assert.equal(setVar, draftVar, `${key}: set() replaces the same variable draft() reads`);

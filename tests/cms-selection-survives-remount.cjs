@@ -21,7 +21,7 @@ const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 
 const main = fs.readFileSync('js/main.js', 'utf8');
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 function slice(src, from, to) {
   const a = src.indexOf(from), b = src.indexOf(to, a);
   assert(a >= 0 && b > a, `js/main.js still has ${from.trim()} followed by ${to.trim()}`);
@@ -35,9 +35,13 @@ const PAGE = '<section><h1 data-ark-layout-key="k-title">Title</h1><p data-ark-l
 const dom = new JSDOM(`<!doctype html><div id="host">${PAGE}</div>`);
 const { window } = dom;
 const host = window.document.getElementById('host');
-const context = vm.createContext({ window, host, cmsPreviewSelections: [], cmsPreviewSelected: null });
-/* annotate() is ArkLayout's; here the keys are already in the markup, so it only lists them */
-window.ArkLayout = { annotate: (root) => Array.from(root.querySelectorAll('[data-ark-layout-key]')) };
+const context = vm.createContext({ window, host, cmsPreviewSelections: [], cmsPreviewSelected: null, cmsRoutePath: () => '/' });
+/* annotate()/find() are ArkLayout's; here the keys are already in the markup, so they only list
+   and look them up */
+window.ArkLayout = {
+  annotate: (root) => Array.from(root.querySelectorAll('[data-ark-layout-key]')),
+  find: (root, key) => Array.from(root.querySelectorAll('[data-ark-layout-key]')).find((el) => el.getAttribute('data-ark-layout-key') === key) || null,
+};
 context.ArkLayout = window.ArkLayout;
 vm.runInContext(helpers, context);
 const run = (code) => vm.runInContext(code, context);
@@ -96,9 +100,10 @@ assert(refresh.indexOf('cmsRestoreSelection') < refresh.indexOf("type: 'defxn-cm
 assert(/ready\.selections = cmsSelectionPayload\(\)/.test(refresh), 'the ready report carries the selection as it is after the remount');
 const onReady = slice(admin, "if (event.data.type === 'defxn-cms-preview-ready') {", 'renderInspector();');
 assert(/Array\.isArray\(event\.data\.selections\)[\s\S]*cmsExactSelection = event\.data\.selection \|\| null/.test(onReady), 'Studio replaces its selection with the one the ready report carries');
-/* the restored element usually comes back under a NEW path key (the remount renumbers the
-   route's containers: path:div:1/div:2/... -> div:7, measured on /chain), so comparing keys
-   closed an open toolbar section under the cursor; the report says it is the same selection */
+/* the restored element used to come back under a NEW path key (the remount renumbered the
+   route's containers: path:div:1/div:2/... -> div:7, measured on /chain; keys are page-scoped
+   now, tests/layout-keys.cjs), and a draft the remount applied can still move it, so comparing
+   keys closed an open toolbar section under the cursor; the report says it is the same selection */
 assert(/ready\.sameSelection = cmsPreviewSelections\.length === keptRefs\.length/.test(refresh), 'the ready report says whether every selected element was found again');
 assert(/event\.data\.sameSelection[^\n]*tbOpenKey = event\.data\.selection\.key/.test(onReady), 'Studio keeps an open toolbar section open on the same selection under its new key');
 console.log('PASS: a selection survives the preview remount (instance root by key, content by layout key, removed ones drop out) and Studio adopts it from the ready report.');

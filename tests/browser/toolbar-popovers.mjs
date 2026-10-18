@@ -21,14 +21,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarButton, toolbarAction, toolbarPopover, toolbarSections, toolbarKey, toolbarSectionIsOpen, openToolbarSection } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarButton, toolbarAction, toolbarPopover, toolbarSections, toolbarKey, toolbarSectionIsOpen, openToolbarSection, until as untilFor, untilStable, waitForPreviewReady, nextFrames, animationsSettled, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'paragraph,container,image,instance,states,narrow').split(',');
 const SHOTS = process.env.SHOTS || fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-toolbar-shots-'));
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-toolbar-site-'));
-const PORT = Number(process.env.PORT) || 3472;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
 fs.mkdirSync(SHOTS, { recursive: true });
 
 let failures = 0;
@@ -44,18 +42,12 @@ async function flow(name, run) {
   fs.cpSync(path.join(SITE, 'js/content'), path.join(WORK, 'js/content'), { recursive: true });
   try { await run(); } catch { /* reported by step() */ }
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 6000) {
-  const end = Date.now() + timeout; let last;
-  while (Date.now() < end) {
-    try { last = await probe(); } catch (error) { if (error instanceof StepFailure) throw error; last = null; }
-    if (last) return last; await wait(100);
-  }
-  throw new StepFailure(message);
-}
+/* the harness's until (budget x load factor); a StepFailure thrown by a probe is a verdict */
+const until = (probe, message, timeout = 6000) => untilFor(probe, message, timeout, { fail: (m) => new StepFailure(m), passThrough: (e) => e instanceof StepFailure });
 
 copySite(WORK);
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
+const ORIGIN = server.origin;
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const errors = [];
 /* the fake folder handle holds functions, so the app's "remember this folder" IndexedDB put
@@ -69,16 +61,32 @@ async function openEditor(width = 1280, height = 900) {
   page.on('pageerror', (e) => { if (!harnessNoise.test(e.message)) errors.push(`${width}px pageerror: ${e.message}`); });
   page.on('console', (m) => { if (m.type() === 'error' && !harnessNoise.test(m.text())) errors.push(`${width}px console: ${m.text()}`); });
   page.on('dialog', (d) => d.dismiss());
-  await page.goto(`${ORIGIN}/admin`);
+  await gotoEditor(page, ORIGIN);
   const app = await appFrame(page);
   await app.click('#modeDesignBtn');
   const pv = await previewFrame(app);
-  await wait(500);
+  await waitForPreviewReady(app);
+  ({ P, DIV } = await heroKeys(pv));
   return { context, page, app, pv, shot: (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') }) };
+}
+/* The paragraph and container every flow edits, found by role -- Home's level-1 heading, the box
+   it sits in, and the paragraph that follows it -- and their layout keys read off the DOM, never
+   written here: a hard-coded key broke every flow when keys became page-scoped (js/content/
+   layout.js; path:div:1/div:2/section:1/section:1/div:1/p:2 is page:/section:1/div:1/p:2 now). */
+async function heroKeys(pv) {
+  const keys = await pv.evaluate(() => {
+    if (window.ArkLayout) ArkLayout.annotate(document.getElementById('scene'), ArkUI.route.path());
+    const h1 = document.querySelector('[data-ark-page] h1'), box = h1 && h1.parentElement;
+    let p = h1 && h1.nextElementSibling; while (p && p.tagName !== 'P') p = p.nextElementSibling;
+    return { P: p && p.getAttribute('data-ark-layout-key'), DIV: box && box.getAttribute('data-ark-layout-key') };
+  });
+  check(keys.P && keys.DIV, `Home has no heading box with a paragraph after its h1 to edit (found ${JSON.stringify(keys)})`);
+  return keys;
 }
 const byKey = (pv, key) => pv.locator(`[data-ark-layout-key="${key}"]`).first();
 const selectKey = (app, key) => app.evaluate((k) => document.getElementById('cmsPreview').contentWindow.postMessage({ type: 'defxn-cms-preview-select-group', key: k }, location.origin), key);
-async function selected(app, key) { await until(async () => (await toolbarKey(app)) === key, `the toolbar is not editing ${key} (it shows ${await toolbarKey(app)})`); await wait(150); }
+/* the bar is on `key` and has been painted there (it is placed in a rAF after it renders) */
+async function selected(app, key) { await until(async () => (await toolbarKey(app)) === key, `the toolbar is not editing ${key} (it shows ${await toolbarKey(app)})`); await nextFrames(app); }
 const computed = (pv, key, prop) => pv.evaluate(([k, p]) => { const el = document.querySelector(`[data-ark-layout-key="${CSS.escape(k)}"]`); return el ? getComputedStyle(el)[p] : null; }, [key, prop]);
 const ACTIONS = ['Make into component', 'Open in Content', 'Theme & defaults'];
 
@@ -126,8 +134,8 @@ async function checkClear(app, pv, key, what) {
 const TEXT = ['Typography', 'Fill and border', 'Spacing', 'Frame', 'In / out animation'];
 const CONTAINER = ['Layout', 'Fill and border', 'Spacing', 'Frame', 'Size', 'Effects', 'In / out animation'];
 const IMAGE = ['Frame', 'Fill and border', 'Alt text', 'In / out animation'];
-const P = 'path:div:1/div:2/section:1/section:1/div:1/p:2';
-const DIV = 'path:div:1/div:2/section:1/section:1/div:1';
+/* set by openEditor() from the DOM (heroKeys) */
+let P = null, DIV = null;
 
 /* ---------------------------------------------------------------- paragraph */
 await flow('paragraph', async () => {
@@ -148,7 +156,7 @@ await flow('paragraph', async () => {
     await until(async () => (await computed(pv, P, 'textAlign')) === 'center', 'the paragraph did not centre: ' + await computed(pv, P, 'textAlign'));
     check(await toolbarSectionIsOpen(app, 'Typography'), 'editing a control closed the popover');
     check(await body.locator('.row', { hasText: 'Align' }).locator('button[aria-pressed="true"]', { hasText: 'Center' }).count(), 'the re-rendered popover does not show Center pressed');
-    await wait(200); await shot('after-1280-paragraph-typography');
+    await animationsSettled(app); await shot('after-1280-paragraph-typography');
   });
   await step('opening another section closes the first: one popover at a time', async () => {
     await openToolbarSection(app, 'Spacing');
@@ -177,8 +185,11 @@ await flow('paragraph', async () => {
     const x = (await openToolbarSection(app, 'Frame')).locator('input[aria-label="X"]');
     await x.focus(); await x.fill('77');   /* typed, not committed: no change event yet */
     /* any preview message repaints the toolbar; this one changes nothing else */
+    const seen = await app.evaluate(() => (window.__arkSignals.up['cmsPreview:defxn-cms-preview-states-showing'] || { n: 0 }).n);
     await pv.evaluate(() => window.parent.postMessage({ type: 'defxn-cms-preview-states-showing' }, location.origin));
-    await wait(300);
+    /* the editor has handled it (its recorder counts it in the same dispatch), and repainted */
+    await until(() => app.evaluate((n) => (window.__arkSignals.up['cmsPreview:defxn-cms-preview-states-showing'] || { n: 0 }).n > n, seen), 'the editor never received the preview message');
+    await nextFrames(app);
     check(await toolbarSectionIsOpen(app, 'Frame'), 'the re-render closed the popover');
     const now = await app.evaluate(() => ({ label: document.activeElement && document.activeElement.getAttribute('aria-label'), value: document.activeElement && document.activeElement.value }));
     check(now.label === 'X' && now.value === '77', 'focus/value after re-render: ' + JSON.stringify(now));
@@ -214,8 +225,11 @@ await flow('paragraph', async () => {
     await openToolbarSection(app, 'Typography');
     const gapBefore = (await byKey(pv, P).boundingBox()).y - (await app.locator('#selToolbar').boundingBox()).y;
     await page.setViewportSize({ width: 1100, height: 860 });
-    await wait(500);
-    const el = await byKey(pv, P).boundingBox(), bar = await app.locator('#selToolbar').boundingBox();
+    /* the bar and the element have stopped moving (the preview re-lays out at the new zoom) */
+    /* the popover too: the stage re-centres the bar by CSS at once, and the popover (fixed, outside
+       the zoomed stage) follows one stage re-layout later -- a reading between the two compared a
+       moved bar with a popover not yet re-placed (load 11-37, 2026-10-18; it passed after a 500 ms sleep) */
+    const { el, bar } = await untilStable(async () => ({ el: await byKey(pv, P).boundingBox(), bar: await app.locator('#selToolbar').boundingBox(), pop: await app.locator('#selToolbarPop').boundingBox() }), 'the bar or its popover kept moving after the resize');
     check(bar.y < el.y && el.y - bar.y < gapBefore + 20, `the bar did not follow the selection: ${JSON.stringify({ el, bar, gapBefore })}`);
     await checkClear(app, pv, P, 'the paragraph after a resize');
     const pop = await app.locator('#selToolbarPop').boundingBox(), btn = await toolbarButton(app, 'Typography').boundingBox();
@@ -238,7 +252,7 @@ await flow('container', async () => {
   await step('Effects > Opacity 60% fades the container in the preview', async () => {
     await (await openToolbarSection(app, 'Effects')).locator('.row', { hasText: 'Opacity' }).locator('button', { hasText: '60%' }).click();
     await until(async () => (await computed(pv, DIV, 'opacity')) === '0.6', 'opacity is ' + await computed(pv, DIV, 'opacity'));
-    await wait(200); await shot('after-1280-container-effects');
+    await animationsSettled(app); await shot('after-1280-container-effects');
   });
   await page.context().close();
 });
@@ -259,7 +273,7 @@ await flow('image', async () => {
     await field.fill('Toolbar shell check');
     await field.evaluate((el) => el.dispatchEvent(new Event('change', { bubbles: true })));
     await until(() => pv.evaluate((k) => document.querySelector(`[data-ark-layout-key="${CSS.escape(k)}"]`).getAttribute('aria-label') === 'Toolbar shell check', key), 'the svg did not take the label');
-    await wait(200); await shot('after-1280-image-alt');
+    await animationsSettled(app); await shot('after-1280-image-alt');
   });
   await page.context().close();
 });
@@ -277,7 +291,7 @@ await flow('instance', async () => {
     check(await toolbarAction(app, 'Make into component').isDisabled(), 'Make into component is still enabled on an instance');
     const names = await toolbarSections(app);
     check(names.includes('Component instance') && names.includes('In / out animation'), 'instance sections: ' + names.join(', '));
-    await wait(200); await shot('after-1280-instance-autoopen');
+    await animationsSettled(app); await shot('after-1280-instance-autoopen');
   });
   await step('editing a prop changes the instance in the preview', async () => {
     const input = (await openToolbarSection(app, 'Component instance')).locator('.row input.ctl').first();
@@ -303,7 +317,7 @@ await flow('states', async () => {
     groupId = await until(() => pv.evaluate(() => { const g = (ArkStates.get().routes['/'] || {}); return Object.keys(g)[0]; }), 'no state group');
     await until(() => toolbarSectionIsOpen(app, 'States'), 'the States popover did not open by itself after Make into states');
     check(await app.evaluate(() => document.querySelector('#selToolbar [data-name="States"]').classList.contains('identity')), 'the States icon has no identity mark');
-    await wait(250); await shot('after-1280-states-autoopen');
+    await animationsSettled(app); await shot('after-1280-states-autoopen');
   });
   await step('+ Add state adds a state in the preview, popover still open', async () => {
     await (await openToolbarSection(app, 'States')).locator('button', { hasText: '+ Add state' }).click();
@@ -336,7 +350,7 @@ await flow('narrow', async () => {
     await openEach(app, page, TEXT);
     await openToolbarSection(app, 'Typography');
     await noSideScroll();
-    await wait(200); await shot('after-390-paragraph-typography');
+    await animationsSettled(app); await shot('after-390-paragraph-typography');
   });
   await step('390px: a container\'s longer bar wraps inside itself, never past the screen', async () => {
     await page.keyboard.press('Escape');

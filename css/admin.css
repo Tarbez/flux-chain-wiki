@@ -1,5 +1,62 @@
-/* Admin page. Uses the site's semantic tokens (css/themes.css); no palette of its own. */
-:root { --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; --sans: "Albert Sans", "Avenir Next", "Helvetica Neue", system-ui, sans-serif; --radius: 8px; }
+/* =====================================================================
+   THE EDITOR'S ONE TOKEN BLOCK (admin.html, admin-app.html, broker.html)
+   ---------------------------------------------------------------------
+   Every colour in this file and in css/studio-embed.css is an SDK semantic token
+   (@deadark/sdk/theme, as generated into css/themes.css and redeclared per palette by
+   css/flux-themes.css): --canvas/--depth/--surface/--raised/--nested/--overlay,
+   --text-strong/--text/--text-muted/--text-faint/--text-inverse, --border-*, --accent,
+   --accent-subtle, --trust, --warning, --danger, --drift, --reference, --hidden. They are HSL
+   channels, so they are always read as hsl(var(--x)) or hsl(var(--x) / alpha).
+   This block holds only what the SDK has no token for, each derived from SDK tokens. It is the
+   one place a value may be spelled out; tests/admin-css-tokens.cjs fails on a colour literal
+   anywhere else in either sheet.
+
+   Until 2026-10-18 the Studio half (css/studio-embed.css) carried a second palette of its own
+   (--bg/--panel/--sunk/--rule/--ink/--muted/--accent/--ok/--warn/--danger/--override/--comp,
+   as hex, switched by prefers-color-scheme), so one app drew two visual languages: a dark
+   Content header over a light Design canvas on a light-mode Mac. Light and dark now come from
+   the SDK's own mechanism only -- html[data-theme="<palette>"], each palette setting its own
+   color-scheme (applied before first paint by js/bootstrap.js, the same as every routed page). */
+:root {
+  /* three font slots. Albert Sans is the face the routed site renders (css/fonts.css self-hosts
+     it); the SDK's --font-sans stack is its fallback. Mono is the SDK's mono slot as-is. */
+  --sans: "Albert Sans", var(--font-sans, system-ui, sans-serif);
+  --mono: var(--font-mono, ui-monospace, Menlo, monospace);
+
+  /* radii: one scale, derived from the SDK's card radius (8px) */
+  --radius-xs: calc(var(--size-card-radius, 8px) / 2);     /* tags, badges, chips */
+  --radius-sm: calc(var(--size-card-radius, 8px) * .75);   /* controls inside a control */
+  --radius-md: calc(var(--size-card-radius, 8px) - 1px);   /* buttons, inputs */
+  --radius: var(--size-card-radius, 8px);                  /* cards, fieldsets */
+  --radius-lg: calc(var(--size-card-radius, 8px) * 1.25);  /* floating glass panels */
+  --radius-pill: var(--size-control-radius, 999px);
+
+  /* shadows: the SDK's shadow colour at the palette's own strength (--theme-shadow-alpha is
+     .6 on a dark palette, .14 on a light one), so a popover lifts the same in both */
+  --shadow-lift: 0 1px 2px hsl(var(--theme-shadow-color) / calc(var(--theme-shadow-alpha) * .4));
+  --shadow-float: var(--shadow-lift), 0 8px 24px hsl(var(--theme-shadow-color) / var(--theme-shadow-alpha));
+  --shadow-pop: 0 2px 4px hsl(var(--theme-shadow-color) / calc(var(--theme-shadow-alpha) * .4)), 0 16px 40px hsl(var(--theme-shadow-color) / calc(var(--theme-shadow-alpha) * 1.4));
+  --shadow-dock: -24px 0 60px -30px hsl(var(--theme-shadow));
+
+  /* COMPLETE colours (not channels) under the names js/admin/admin.js and admin-app.html write
+     straight into inline style="" and SVG fill/stroke attributes -- the sitemap's link colours
+     and legend, an orphan tag, the settings icon's knobs. CSS rules never read these: they read
+     the SDK token beside each. */
+  --panel: hsl(var(--surface));
+  --rule: hsl(var(--border-default));
+  --warn: hsl(var(--warning));
+  --override: hsl(var(--drift));
+  --cms-accent-color: hsl(var(--accent));
+  --cms-danger-color: hsl(var(--danger));
+}
+/* ...and the two such names that ARE SDK channel tokens: an element whose own inline style or
+   SVG attribute writes var(--accent)/var(--danger) as a colour gets the complete colour, so the
+   channel token keeps its meaning everywhere else (a swatch writing hsl(var(--accent)) is
+   excluded: it wants the channels). */
+[style*="var(--accent)"]:not([style*="(var(--accent))"]), [fill="var(--accent)"], [stroke="var(--accent)"] { --accent: var(--cms-accent-color); }
+[style*="var(--danger)"]:not([style*="(var(--danger))"]), [fill="var(--danger)"], [stroke="var(--danger)"] { --danger: var(--cms-danger-color); }
+
+/* Admin page. */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font: 400 14px/1.55 var(--sans); }
@@ -38,7 +95,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .bar-group[hidden] { display: none; }
 .ibtn {
   position: relative; display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; padding: 0;
-  border: 1px solid transparent; border-radius: 7px; background: transparent; color: hsl(var(--text-muted)); cursor: pointer;
+  border: 1px solid transparent; border-radius: var(--radius-md); background: transparent; color: hsl(var(--text-muted)); cursor: pointer;
   transition: background-color .12s, color .12s, border-color .12s;
 }
 .ibtn:hover:not(:disabled) { background: hsl(var(--raised)); color: hsl(var(--text-strong)); }
@@ -48,7 +105,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 /* the page picker: the canvas's one place to change page, name first, path in mono */
 .bar-page {
   display: inline-flex; align-items: center; gap: 7px; height: 32px; max-width: 170px; min-width: 0; padding: 0 8px 0 9px;
-  border: 1px solid hsl(var(--border-soft)); border-radius: 7px; background: hsl(var(--surface) / .5); color: hsl(var(--text-strong)); cursor: pointer; font-size: 13px;
+  border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-md); background: hsl(var(--surface) / .5); color: hsl(var(--text-strong)); cursor: pointer; font-size: 13px;
 }
 .bar-page:hover, .bar-page[aria-expanded="true"] { border-color: hsl(var(--border-strong)); background: hsl(var(--raised)); }
 .bar-page > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -56,18 +113,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 @media (max-width: 1599px) { .bar-page small { display: none; } }
 .bar-page .ic { color: hsl(var(--text-muted)); }
 /* segmented icon groups: breakpoints, Edit/Live */
-#appBar .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
-#appBar .seg button { display: inline-grid; place-items: center; width: 28px; height: 26px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text-muted)); cursor: pointer; }
+#appBar .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .5); }
+#appBar .seg button { display: inline-grid; place-items: center; width: 28px; height: 26px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--text-muted)); cursor: pointer; }
 #appBar .seg button:hover { color: hsl(var(--text-strong)); }
 #appBar .seg button[aria-pressed="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); }
 /* Design check: the shield and its score, coloured by meaning (trust / warning / danger) */
 .ibtn.score { width: auto; gap: 5px; grid-auto-flow: column; padding: 0 7px 0 8px; }
-.ibtn.score b { padding: 2px 6px; border-radius: 99px; font: 600 10.5px/1.2 var(--mono); background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
-.ibtn.score.good b { background: hsl(var(--trust)); color: hsl(var(--canvas)); }
-.ibtn.score.mid b { background: hsl(var(--warning)); color: hsl(var(--canvas)); }
-.ibtn.score.bad b { background: hsl(var(--danger)); color: hsl(var(--canvas)); }
-/* editing at tablet/phone size writes overrides for that size only: say so, calmly */
-.bp-note { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border-radius: 99px; background: hsl(var(--warning) / .12); color: hsl(var(--warning)); font: 500 11px/1 var(--mono); letter-spacing: .02em; white-space: nowrap; }
+.ibtn.score b { padding: 2px 6px; border-radius: var(--radius-pill); font: 600 10.5px/1.2 var(--mono); background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
+.ibtn.score.good b { background: hsl(var(--trust)); color: hsl(var(--text-inverse)); }
+.ibtn.score.mid b { background: hsl(var(--warning)); color: hsl(var(--text-inverse)); }
+.ibtn.score.bad b { background: hsl(var(--danger)); color: hsl(var(--text-inverse)); }
+/* editing at tablet/phone size writes overrides for that size only: say so, calmly. An override
+   is drift (worth a second look), the same token as the toolbar's breakpoint chip and an
+   overridden row's label in css/studio-embed.css. The drift tint and edge carry the meaning;
+   the words are --text-strong, because drift-on-drift-tint measured 3.6:1 on every light palette. */
+.bp-note { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border: 1px solid hsl(var(--drift) / .5); border-radius: var(--radius-pill); background: hsl(var(--drift) / .12); color: hsl(var(--text-strong)); font: 500 11px/1 var(--mono); letter-spacing: .02em; white-space: nowrap; }
 .bp-note[hidden] { display: none; }
 @media (max-width: 1599px) { .bp-note { width: 26px; padding: 0; justify-content: center; } .bp-note .bp-text { display: none; } }
 /* The actions take the rest of the row, and the status line takes whatever of that is left:
@@ -80,8 +140,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .account { position: relative; }
 .account-menu {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 70; display: grid; gap: 10px; width: 280px; padding: 12px;
-  border: 1px solid hsl(var(--border-soft)); border-radius: 10px; background: hsl(var(--surface) / .96);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 18px 40px -18px hsl(var(--canvas) / .8);
+  border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); background: hsl(var(--overlay) / .96);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: var(--shadow-pop);
 }
 .account-menu[hidden] { display: none; }
 .account-menu .btn { width: 100%; }
@@ -95,10 +155,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .status[data-tone="error"] { color: hsl(var(--danger)); }
 .status[data-tone="warn"] { color: hsl(var(--warning)); }
 
-.btn { min-height: 34px; padding: 7px 14px; border: 1px solid hsl(var(--border-default)); border-radius: 7px; background: hsl(var(--raised)); cursor: pointer; transition: background-color .15s, border-color .15s, transform .1s; }
+.btn { min-height: 34px; padding: 7px 14px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); background: hsl(var(--raised)); cursor: pointer; transition: background-color .15s, border-color .15s, transform .1s; }
 .btn:hover:not(:disabled) { border-color: hsl(var(--border-strong)); background: hsl(var(--nested)); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
-.btn.tiny { padding: 2px 8px; font-size: 11px; border-radius: 5px; }
+.btn.tiny { padding: 2px 8px; font-size: 11px; border-radius: var(--radius-sm); }
 .btn:disabled { opacity: .4; cursor: default; }
 .btn.primary { background: hsl(var(--secondary)); border-color: hsl(var(--secondary)); color: hsl(var(--secondary-ink)); font-weight: 500; box-shadow: 0 4px 14px -6px hsl(var(--secondary-300)); }
 .btn.primary:hover:not(:disabled) { background: hsl(var(--secondary-600)); border-color: hsl(var(--secondary-600)); }
@@ -138,7 +198,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
    Design views are icons with tooltips, so the header keeps to one row at 1280px even with
    every canvas control showing (measured: 89px to spare); the selected view adds its label
    from 1440px, and every view is labelled from 1800px. */
-.mode-switch { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
+.mode-switch { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .5); }
 .mode-switch[hidden] { display: none; }
 .mode-switch .ark-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 4px 11px; white-space: nowrap; }
 .mode-switch .ark-tab[aria-selected="true"], .mode-switch .ark-tab[aria-pressed="true"], .mode-switch .ark-tab[aria-expanded="true"] { color: hsl(var(--text-strong)); background: hsl(var(--accent-subtle)); }
@@ -146,7 +206,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: none; }
 @media (max-width: 1439px) { .sub-switch .ark-tab .lbl { display: none; } }
 @media (min-width: 1800px) { .sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: inline; } .sub-switch .ark-tab { padding: 4px 10px; } }
-.page-list button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 36px; padding: 8px 10px 8px 12px; border: 0; border-left: 2px solid transparent; border-radius: 0 7px 7px 0; background: none; text-align: left; cursor: pointer; color: hsl(var(--text)); font-size: 13px; transition: background-color .12s, border-color .12s; }
+.page-list button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 36px; padding: 8px 10px 8px 12px; border: 0; border-left: 2px solid transparent; border-radius: 0 var(--radius-md) var(--radius-md) 0; background: none; text-align: left; cursor: pointer; color: hsl(var(--text)); font-size: 13px; transition: background-color .12s, border-color .12s; }
 .page-list button:hover { background: hsl(var(--raised)); }
 .page-list button[aria-current="true"] { background: hsl(var(--reference-100)); border-left-color: hsl(var(--reference)); color: hsl(var(--text-strong)); font-weight: 500; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--accent)); flex: none; box-shadow: 0 0 0 3px hsl(var(--primary-200)); }
@@ -167,9 +227,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .new-form { padding: 0; border: 0; }
 .new-row { display: flex; gap: 8px; }
 .new-row input { flex: 1; min-width: 0; }
-.hint { margin: 8px 0 0; font-size: 12px; color: hsl(var(--text-faint)); }
+/* --text-muted, not --faint: hints are read, and faint measured 4.24:1 on the --depth rail of every
+   light palette (the palette contract guarantees 4.5:1 for faint on canvas and surface only) */
+.hint { margin: 8px 0 0; font-size: 12px; color: hsl(var(--text-muted)); }
 
-input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid hsl(var(--border-default)); border-radius: 7px; background: hsl(var(--surface)); }
+input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 8px 10px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); background: hsl(var(--surface)); }
 input[type="text"]:hover, input[type="password"]:hover, select:hover, textarea:hover { border-color: hsl(var(--border-strong)); }
 textarea { resize: vertical; min-height: 84px; line-height: 1.55; }
 
@@ -192,7 +254,7 @@ legend { padding: 0 4px; margin-left: -4px; }
 .field .count { margin-top: 4px; font-size: 11px; color: hsl(var(--text-faint)); text-align: right; }
 .field.empty input, .field.empty textarea { border-color: hsl(var(--warning) / .7); }
 .tools { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; }
-.asset-preview { display: block; max-width: 100%; max-height: 220px; margin: 0 0 16px; border-radius: 8px; border: 1px solid hsl(var(--border-soft)); background: hsl(var(--nested)); image-rendering: pixelated; }
+.asset-preview { display: block; max-width: 100%; max-height: 220px; margin: 0 0 16px; border-radius: var(--radius); border: 1px solid hsl(var(--border-soft)); background: hsl(var(--nested)); image-rendering: pixelated; }
 .new-asset-preview { max-height: 96px; margin: 8px 0; }
 .danger-zone { margin-top: 8px; padding: 16px 20px; border: 1px solid hsl(var(--danger) / .3); border-radius: var(--radius); background: hsl(var(--danger) / .05); }
 .empty-state { color: hsl(var(--text-muted)); padding: 60px 0; text-align: center; }
@@ -201,20 +263,20 @@ legend { padding: 0 4px; margin-left: -4px; }
 .seo-controls .row { display: grid; gap: 6px; min-width: 0; }
 .seo-controls .row > label { color: hsl(var(--text-strong)); font-size: 13px; }
 .seo-controls .row > span:empty { display: none; }
-.seo-controls .ctl-seg { display: inline-flex; justify-self: start; border: 1px solid hsl(var(--border-default)); border-radius: 6px; overflow: hidden; }
+.seo-controls .ctl-seg { display: inline-flex; justify-self: start; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-sm); overflow: hidden; }
 .seo-controls .ctl-seg button { border: 0; border-right: 1px solid hsl(var(--border-soft)); background: transparent; padding: 5px 12px; color: hsl(var(--text-muted)); font: inherit; font-size: 12px; cursor: pointer; }
 .seo-controls .ctl-seg button:last-child { border-right: 0; }
-.seo-controls .ctl-seg button[aria-pressed="true"] { background: hsl(var(--accent) / .16); color: hsl(var(--accent)); font-weight: 600; }
+.seo-controls .ctl-seg button[aria-pressed="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); font-weight: 600; }
 .seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
 .seo-refusal { color: hsl(var(--warning)); }
 
 /* ---- the preview pane: framed like a browser card, not a bare iframe ---- */
 .preview { display: flex; flex-direction: column; min-width: 0; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth) / .55); padding: 14px; gap: 0; }
-.preview-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid hsl(var(--border-soft)); border-bottom: 0; border-radius: 10px 10px 0 0; background: hsl(var(--surface)); }
+.preview-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid hsl(var(--border-soft)); border-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: hsl(var(--surface)); }
 .preview-path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 11px/1.4 var(--mono); color: hsl(var(--text-faint)); }
 .preview-actions { display: flex; gap: 14px; text-transform: none; letter-spacing: .04em; flex: none; }
 .preview-note { margin: 0; padding: 28px 18px; color: hsl(var(--text-muted)); text-align: center; }
-.preview-frame { flex: 1; min-height: 0; display: flex; border: 1px solid hsl(var(--border-soft)); border-radius: 0 0 10px 10px; overflow: hidden; background: hsl(var(--canvas)); box-shadow: 0 18px 40px -24px hsl(0 0% 0% / .5); }
+.preview-frame { flex: 1; min-height: 0; display: flex; border: 1px solid hsl(var(--border-soft)); border-radius: 0 0 var(--radius-lg) var(--radius-lg); overflow: hidden; background: hsl(var(--canvas)); box-shadow: var(--shadow-float); }
 .preview iframe[hidden], .preview-note[hidden] { display: none; }
 .preview iframe { flex: 1; width: 100%; border: 0; background: hsl(var(--canvas)); }
 
@@ -225,12 +287,12 @@ legend { padding: 0 4px; margin-left: -4px; }
   position: sticky; top: 55px; z-index: 1;
   display: flex; gap: 4px; padding: 5px;
   border: 1px solid hsl(var(--border-soft));
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: hsl(var(--surface) / .82);
   backdrop-filter: blur(12px);
 }
 .ark-tab {
-  min-height: 34px; padding: 7px 13px; border: 0; border-radius: 6px;
+  min-height: 34px; padding: 7px 13px; border: 0; border-radius: var(--radius-sm);
   background: transparent; color: hsl(var(--text-muted)); cursor: pointer;
   font: 500 12px/1.3 var(--sans); transition: color .12s, background-color .12s;
 }
@@ -241,7 +303,7 @@ legend { padding: 0 4px; margin-left: -4px; }
 .editor-tab-flow { display: grid; gap: 18px; }
 .editor-tab-flow > fieldset, .page-law-panel > fieldset { margin-bottom: 0; }
 .page-law-panel { display: grid; gap: 18px; }
-.ark-disclosure { border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .6); }
+.ark-disclosure { border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .6); }
 .ark-disclosure-trigger {
   width: 100%; min-height: 40px; padding: 10px 14px; border: 0; background: transparent;
   color: hsl(var(--text-strong)); text-align: left; cursor: pointer; font: 500 13px/1.4 var(--sans);
@@ -284,7 +346,7 @@ legend { padding: 0 4px; margin-left: -4px; }
 .relief-field:last-child { margin-bottom: 0; }
 .relief-field .relief-field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
 .relief-field label { font-size: 12px; color: hsl(var(--text-strong)); }
-.relief-field output { font: 500 11px/1.4 var(--mono); color: hsl(var(--text-faint)); }
+.relief-field output { font: 500 11px/1.4 var(--mono); color: hsl(var(--text-muted)); }
 .relief-field input[type="range"] { width: 100%; accent-color: hsl(var(--accent)); }
 fieldset.relief { background: hsl(var(--nested) / .5); }
 
@@ -295,14 +357,14 @@ fieldset.relief { background: hsl(var(--nested) / .5); }
 .theme-core .theme-select-row label { margin: 0; font-size: 12px; color: hsl(var(--text-strong)); }
 .theme-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
 .theme-field {
-  min-width: 0; padding: 10px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px;
+  min-width: 0; padding: 10px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius);
   background: hsl(var(--surface) / .55);
 }
 .theme-field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .theme-field label { margin: 0; font-size: 12px; color: hsl(var(--text-strong)); }
 .theme-color-row { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 8px; align-items: center; }
 .theme-color-row input[type="color"] {
-  width: 42px; height: 34px; padding: 0; border: 1px solid hsl(var(--border-soft)); border-radius: 6px;
+  width: 42px; height: 34px; padding: 0; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-sm);
   background: hsl(var(--canvas)); cursor: pointer;
 }
 .theme-color-row output {
@@ -317,11 +379,11 @@ fieldset.relief { background: hsl(var(--nested) / .5); }
 
 /* ---- Page design/layers: background style picker (js/ark/vendor/backgrounds.js) ---- */
 .bg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-.bg-card { display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; cursor: pointer; font-size: 11px; color: hsl(var(--text)); transition: border-color .12s, background-color .12s; }
+.bg-card { display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); cursor: pointer; font-size: 11px; color: hsl(var(--text)); transition: border-color .12s, background-color .12s; }
 .bg-card:hover { border-color: hsl(var(--border-strong)); }
 .bg-card.picked { border-color: hsl(var(--accent)); background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); }
 .bg-card input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-.bg-thumb { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 5px; overflow: hidden; background: hsl(var(--canvas, 0 0% 2%)); }
+.bg-thumb { position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: var(--radius-sm); overflow: hidden; background: hsl(var(--canvas)); }
 .bg-thumb-none { display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(45deg, hsl(var(--border-soft)) 0 6px, transparent 6px 12px); }
 .bg-thumb-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font: 10px var(--mono); color: hsl(var(--text-faint)); }
 
@@ -420,7 +482,7 @@ body.locked { overflow: auto; }
 /* the panel's own heading repeats what #gateHeading already says at this stage; keep the hint, drop the second headline */
 [data-ark-auth="heading"] { display: none; }
 [data-ark-auth="hint"] { margin: 0; max-width: 36em; font: 300 13px/1.65 var(--sans); color: hsl(var(--text-muted)); }
-[data-ark-auth="rows"] { display: grid; gap: 10px; margin: 0; padding: 16px 18px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface)); }
+[data-ark-auth="rows"] { display: grid; gap: 10px; margin: 0; padding: 16px 18px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface)); }
 [data-ark-auth="rows"] > div { display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: baseline; }
 [data-ark-auth="rows"] dt { margin: 0; font: 400 10px/1.5 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 [data-ark-auth="rows"] dd { margin: 0; font: 13px/1.5 var(--sans); color: hsl(var(--text)); word-break: break-word; }
@@ -454,12 +516,12 @@ body.locked { overflow: auto; }
 [data-ark-auth="actions"] button[data-kind="quiet"]::after { content: none; }
 
 /* authenticator enrollment: the setup key/URI and the host-window code */
-.otp-setup { display: grid; gap: 16px; padding: 18px 20px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface)); }
+.otp-setup { display: grid; gap: 16px; padding: 18px 20px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface)); }
 .otp-setup h2 { margin: 0; font: 400 13px/1.4 var(--sans); color: hsl(var(--text-strong)); }
 .otp-setup p { margin: 0; font: 300 12.5px/1.6 var(--sans); color: hsl(var(--text-muted)); }
 .otp-key { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .otp-key code { font: 14px/1.6 var(--mono); letter-spacing: .08em; color: hsl(var(--text-strong)); word-break: break-all; }
-.copy-btn { flex: none; padding: 5px 10px; border: 1px solid hsl(var(--border-default)); border-radius: 5px; background: hsl(var(--raised)); font: 400 10px/1.4 var(--sans); letter-spacing: .04em; color: hsl(var(--text-muted)); cursor: pointer; }
+.copy-btn { flex: none; padding: 5px 10px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-sm); background: hsl(var(--raised)); font: 400 10px/1.4 var(--sans); letter-spacing: .04em; color: hsl(var(--text-muted)); cursor: pointer; }
 .copy-btn:hover { border-color: hsl(var(--border-strong)); color: hsl(var(--text-strong)); }
 .copy-btn[data-copied="true"] { color: hsl(var(--trust)); border-color: hsl(var(--trust) / .5); }
 
@@ -497,7 +559,7 @@ body.locked { overflow: auto; }
    canvas on the left stays visible while a past version is previewed in it. SDK semantic
    tokens only; the kind badges carry meaning: a save is reference, a publish is trust (it
    reached the mesh), a restore is drift (it superseded later work, worth a second look). */
-.versions-panel { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; z-index: 60; width: min(420px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 24px; overflow: auto; overscroll-behavior: contain; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--overlay) / .96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: -24px 0 60px -30px hsl(var(--canvas)); }
+.versions-panel { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; z-index: 60; width: min(420px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 24px; overflow: auto; overscroll-behavior: contain; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--overlay) / .96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-dock); }
 .versions-panel[hidden] { display: none; }
 .versions-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .versions-head h2 { margin: 4px 0 0; font: 600 20px/1.15 var(--sans); letter-spacing: -.01em; color: hsl(var(--text-strong)); }
@@ -506,16 +568,16 @@ body.locked { overflow: auto; }
 .versions-lede, .versions-note { margin: 0; font-size: 12px; line-height: 1.5; color: hsl(var(--text-muted)); }
 .versions-note:empty { display: none; }
 .versions-checkpoint { display: flex; gap: 8px; }
-.versions-checkpoint input { flex: 1 1 auto; min-width: 0; padding: 6px 10px; border: 1px solid hsl(var(--border-default)); border-radius: 7px; background: hsl(var(--surface)); }
-.versions-preview { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid hsl(var(--drift) / .4); border-left: 2px solid hsl(var(--drift)); border-radius: 8px; background: hsl(var(--drift) / .08); font-size: 12px; color: hsl(var(--text-strong)); }
+.versions-checkpoint input { flex: 1 1 auto; min-width: 0; padding: 6px 10px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); background: hsl(var(--surface)); }
+.versions-preview { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid hsl(var(--drift) / .4); border-left: 2px solid hsl(var(--drift)); border-radius: var(--radius); background: hsl(var(--drift) / .08); font-size: 12px; color: hsl(var(--text-strong)); }
 .versions-preview[hidden] { display: none; }
 .versions-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.version { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid hsl(var(--border-soft)); border-radius: 9px; background: hsl(var(--surface)); }
+.version { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface)); }
 .version.is-previewing { border-color: hsl(var(--drift) / .55); }
 .version-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
 .version-head time { margin-left: auto; letter-spacing: .04em; text-transform: none; }
 .version-seq { font: 600 13px/1 var(--mono); color: hsl(var(--text-strong)); }
-.version-kind { padding: 2px 6px; border: 1px solid currentColor; border-radius: 4px; font: 600 9px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--reference)); }
+.version-kind { padding: 2px 6px; border: 1px solid currentColor; border-radius: var(--radius-xs); font: 600 9px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--reference)); }
 .version-kind[data-kind="publish"] { color: hsl(var(--trust)); }
 .version-kind[data-kind="restore"] { color: hsl(var(--drift)); }
 .version-kind[data-kind="checkpoint"] { color: hsl(var(--text-muted)); }
@@ -527,13 +589,13 @@ body.locked { overflow: auto; }
 .version-more summary, .version-addresses summary { cursor: pointer; }
 .versions-more { justify-self: start; }
 .versions-tools { display: flex; gap: 8px; }
-.versions-import-note { margin: 0; padding: 8px 10px; border: 1px solid hsl(var(--danger) / .35); border-left: 2px solid hsl(var(--danger)); border-radius: 8px; background: hsl(var(--danger) / .06); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
+.versions-import-note { margin: 0; padding: 8px 10px; border: 1px solid hsl(var(--danger) / .35); border-left: 2px solid hsl(var(--danger)); border-radius: var(--radius); background: hsl(var(--danger) / .06); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
 .versions-import-note:empty { display: none; }
-.versions-confirm { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid hsl(var(--drift) / .4); border-left: 2px solid hsl(var(--drift)); border-radius: 8px; background: hsl(var(--drift) / .08); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); }
+.versions-confirm { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid hsl(var(--drift) / .4); border-left: 2px solid hsl(var(--drift)); border-radius: var(--radius); background: hsl(var(--drift) / .08); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); }
 .versions-confirm[hidden] { display: none; }
 .versions-confirm p { margin: 0; color: hsl(var(--text)); }
 .versions-confirm-title { font: 600 13px/1.3 var(--sans); }
 .versions-removals { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
-.versions-removals li { display: grid; gap: 1px; padding: 5px 8px; border: 1px solid hsl(var(--border-soft)); border-radius: 6px; background: hsl(var(--surface)); }
+.versions-removals li { display: grid; gap: 1px; padding: 5px 8px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-sm); background: hsl(var(--surface)); }
 .versions-removals code { font: 10px/1.4 var(--mono); color: hsl(var(--text-muted)); overflow-wrap: anywhere; }
 .version-kind[data-kind="import"], .version-kind[data-kind="imported"] { color: hsl(var(--accent)); }

@@ -24,14 +24,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'states,single,component,hide,motion,makecomp,points,statesui').split(',');
 const SHOTS = process.env.SHOTS || fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-shots-'));
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-site-'));
-const PORT = Number(process.env.PORT) || 3498;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
 fs.mkdirSync(SHOTS, { recursive: true });
 
 let failures = 0;
@@ -48,21 +46,16 @@ async function flow(name, run) {
   fs.cpSync(path.join(SITE, 'js/content'), path.join(WORK, 'js/content'), { recursive: true });
   try { await run(); } catch { /* reported by step() */ }
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 5000) {
-  const end = Date.now() + timeout; let last;
-  while (Date.now() < end) {
-    try { last = await probe(); } catch (error) { if (error instanceof StepFailure) throw error; last = null; /* a frame mid-navigation */ }
-    if (last) return last; await wait(100);
-  }
-  throw new StepFailure(message);
-}
+/* the harness's until (budget x load factor); a probe that throws is a frame mid-navigation,
+   unless it threw a StepFailure, which is a verdict */
+const until = (probe, message, timeout = 5000) => untilFor(probe, message, timeout, { fail: (m) => new StepFailure(m), passThrough: (e) => e instanceof StepFailure });
 const readSaved = (name) => fs.readFileSync(path.join(WORK, 'js/content', name), 'utf8');
 /* the `ArkX.define({...});` JSON a Save wrote, parsed */
 function savedJson(name) { const text = readSaved(name); return JSON.parse(text.slice(text.indexOf('.define(') + 8, text.lastIndexOf(')'))); }
 
 copySite(WORK);
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
+const ORIGIN = server.origin;
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const context = await browser.newContext({ viewport: { width: 1500, height: 950 } });
 await fakeFolder(context, WORK);
@@ -75,11 +68,11 @@ context.on('page', (p) => p.on('pageerror', (e) => { if (!harnessNoise.test(e.me
 async function openEditor() {
   const page = await context.newPage();
   page.on('dialog', (d) => d.dismiss());
-  await page.goto(`${ORIGIN}/admin`);
+  await gotoEditor(page, ORIGIN);
   const app = await appFrame(page);
   await app.click('#modeDesignBtn');
   const pv = await previewFrame(app);
-  await wait(400);
+  await waitForPreviewReady(app);
   return { page, app, pv, shot: (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') }) };
 }
 const routeRow = (app, route) => app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route + '$') }) }).first();
@@ -110,7 +103,7 @@ async function clickMenuItem(page, app, pv, label) {
   const whatIsOnTop = () => app.evaluate(({ x, y }) => { const el = document.elementFromPoint(x, y); return el ? (el.id || el.tagName) + (el.closest('#selToolbar') ? ' inside #selToolbar' : '') : 'nothing'; }, at);
   /* a person takes longer than one message round trip to move to the item; allow the same */
   let onTop = await whatIsOnTop();
-  for (let i = 0; i < 5 && onTop !== 'cmsPreview'; i++) { await wait(60); onTop = await whatIsOnTop(); }
+  await until(async () => (onTop = await whatIsOnTop()) === 'cmsPreview', 'covered', 300).catch(() => {});
   check(onTop === 'cmsPreview', `"${label}" is covered in the editor by ${onTop}, so a real click never reaches it`);
   await item.click();
 }
@@ -189,7 +182,7 @@ await flow('states', async () => {
     await until(async () => { const v = await visible(pv, group.id); return v.members.every(Boolean) && !v.anchors.length; }, 'state 0 not shown from the toolbar');
   });
   await step('Live mode: clicking the trigger cycles 0 > 1 > 2 > 0 and never navigates', async () => {
-    await app.locator('#mode button[data-m="live"]').click(); await wait(400);
+    await setPreviewMode(app, pv, 'live');
     const route = () => pv.evaluate(() => ArkUI.route.path());
     await navLink(pv, 'How it works').click();
     await until(async () => { const v = await visible(pv, group.id); return v.anchors.length === 1 && v.anchors[0].index === 1; }, 'clicking the trigger did not show state 1');
@@ -199,7 +192,7 @@ await flow('states', async () => {
     await pv.locator('[data-ark-state-anchor] [data-ark-component-key]:visible').first().click();
     await until(async () => { const v = await visible(pv, group.id); return v.members.every(Boolean) && !v.anchors.length; }, 'clicking state 2 did not wrap back to state 0');
     await shot('states-04-live');
-    await app.locator('#mode button[data-m="edit"]').click(); await wait(300);
+    await setPreviewMode(app, pv, 'edit');
   });
   await step('Save (Ctrl+S) writes states-data.js and components-data.js', async () => {
     await clickHeader(app, 'connect');
@@ -241,7 +234,7 @@ await flow('states', async () => {
 /* ---------------------------------------------------------------- 2 */
 await flow('single', async () => {
   const { page, app, pv, shot } = await openEditor();
-  const NAV = 'path:div:1/header:1/nav:1';
+  const NAV = await layoutKeyOf(pv, 'header nav.header-core-links');
   let group;
   await step('click the empty gap inside the nav selects the whole container', async () => {
     const a = await navLink(pv, 'Overview').boundingBox(), b = await navLink(pv, 'How it works').boundingBox();
@@ -267,13 +260,13 @@ await flow('single', async () => {
     await (await section(app, 'States')).locator('button', { hasText: '+ Add state' }).click();
     await until(async () => { const g = onlyGroup(await statesIn(pv)); return g && g.states.length === 2; }, 'state 1 not added');
     await (await section(app, 'States')).locator('button', { hasText: 'Preview' }).first().click();
-    await app.locator('#mode button[data-m="live"]').click(); await wait(400);
+    await setPreviewMode(app, pv, 'live');
     await navLink(pv, 'Mesh Explorer').click();
     await until(async () => { const v = await visible(pv, group.id); return v.anchors.length === 1 && v.members.every((m) => !m); }, 'Mesh Explorer (trigger) did not show state 1');
     await shot('single-01-state1');
     await pv.locator('[data-ark-state-anchor] [data-ark-component-key]:visible').first().click();
     await until(async () => { const v = await visible(pv, group.id); return !v.anchors.length && v.members.every(Boolean); }, 'state 1 could not be clicked back to state 0 -- stranded');
-    await app.locator('#mode button[data-m="edit"]').click(); await wait(300);
+    await setPreviewMode(app, pv, 'edit');
   });
   await step('the menu explains a disabled item instead of only greying it out', async () => {
     await navLink(pv, 'Overview').click();
@@ -290,10 +283,10 @@ await flow('component', async () => {
   let master, instance;
   await step('open a route with an insertion point', async () => {
     await app.click('#tabPages');
-    const row = routeRow(app, '/download');
-    await row.click();
+    const since = await previewReadyCount(app);
+    await routeRow(app, '/download').click();
+    await waitForPreviewReady(app, { since, path: '/download' });
     await until(() => pv.evaluate(() => ArkUI.route.path() === '/download' && !!document.querySelector('[data-ark-insert]')), 'the preview did not open /download with an anchor');
-    await wait(500);
   });
   await step('Library > New block > Create block makes a master', async () => {
     await app.click('#tabLib');
@@ -317,7 +310,7 @@ await flow('component', async () => {
     const heading = sec.locator('input[aria-label="heading"]');
     await heading.fill('Overridden heading'); await heading.press('Enter'); await heading.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Overridden heading')), 'the preview did not show the override');
-    await wait(600); await shot('component-02-override');
+    await animationsSettled(pv); await shot('component-02-override');
   });
   await step('Reset overrides restores the master text', async () => {
     await (await section(app, 'Component instance')).locator('button', { hasText: 'Reset overrides' }).click();
@@ -361,7 +354,7 @@ await flow('component', async () => {
 /* ---------------------------------------------------------------- 4 */
 await flow('hide', async () => {
   const { page, app, pv, shot } = await openEditor();
-  const KEY = 'path:div:1/header:1/nav:1/a:3';            /* the Mesh Explorer link (Stats sits in the MENU at the preview's 1280px) */
+  const KEY = await layoutKeyOf(pv, 'header nav.header-core-links > a', 'Mesh Explorer');   /* (Stats sits in the MENU at the preview's 1280px) */
   const shown = () => pv.evaluate((key) => { const el = [...document.querySelectorAll('[data-ark-layout-key]')].find((e) => e.getAttribute('data-ark-layout-key') === key); return !!el && getComputedStyle(el).display !== 'none'; }, KEY);
   const eye = () => app.locator('#layers li[aria-selected="true"] .eye-toggle').first();
   await step('Layers eye hides the selected layer in the preview', async () => {
@@ -440,11 +433,9 @@ await flow('motion', async () => {
 
 /* ---------------------------------------------------------------- shared by 6-8 */
 async function gotoRoute(app, pv, route) {
-  await app.click('#tabPages');
-  await routeRow(app, route).click();
-  await until(() => pv.evaluate((r) => ArkUI.route.path() === r && !!document.querySelector('[data-ark-layout-key]'), route), 'the preview did not open ' + route, 40000)
+  /* the preview's ready message for the route, not a sleep after it (harness openRoute) */
+  await openRoute(app, pv, route, 40000)
     .catch(async (e) => { await app.page().screenshot({ path: path.join(SHOTS, 'FAILED-goto' + route.replace(/\W/g, '-') + '.png') }); throw new StepFailure(e.message + ' (preview is at ' + await pv.evaluate(() => location.href + ' route=' + (window.ArkUI && ArkUI.route.path())).catch(() => '?') + ')'); });
-  await wait(500);
 }
 async function connectAndSave(app) {
   if (!(await app.evaluate(() => document.getElementById('connect').disabled))) {
@@ -501,11 +492,11 @@ await flow('makecomp', async () => {
     check(hidden.every((d) => d === 'none'), 'the original elements are still showing: ' + hidden);
     const texts = await instanceTexts(pv);
     check(/Start a local miner/.test(texts[origin]) && /source packages/.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
-    await wait(400); await shot('makecomp-01-made');
+    await animationsSettled(pv); await shot('makecomp-01-made');
     const box = await instanceBox(pv, origin);
     check(box && Math.abs(box.y - before.y) < 4 && Math.abs(box.x - before.x) < 4, `the instance is not where the selection was: ${JSON.stringify(box)} vs ${JSON.stringify(before)} ` + JSON.stringify(c.spots) + JSON.stringify(master.tree).slice(0, 400));
     await section(app, 'Component instance');
-    await wait(400); await shot('makecomp-01-made');
+    await animationsSettled(pv); await shot('makecomp-01-made');
   });
   await step('the Library lists it; on /chain, Insert puts a second instance on another page', async () => {
     await libRow(app, master.label);
@@ -517,7 +508,7 @@ await flow('makecomp', async () => {
     other = await until(async () => { const t = await instanceTexts(pv); const k = Object.keys(t)[0]; return k && /Start a local miner/.test(t[k]) && k; }, 'no instance on /chain after Insert');
     const box = await instanceBox(pv, other);
     check(box && box.w > 100 && box.h > 20, 'the /chain instance is not visibly sized: ' + JSON.stringify(box));
-    await wait(400); await shot('makecomp-02-other-page');
+    await animationsSettled(pv); await shot('makecomp-02-other-page');
   });
   await step('editing the definition updates both instances', async () => {
     await setDefinition(app, master.label, 'heading', 'Run DEFXN from source');
@@ -541,12 +532,13 @@ await flow('makecomp', async () => {
     await until(async () => (await openToolbarSection(app, 'Component instance')).locator('p.hint', { hasText: 'Detached' }).count(), 'the toolbar does not say the instance is detached', 8000)
       .catch(async (e) => { throw new StepFailure(e.message + ': preview=' + JSON.stringify(await pv.evaluate(() => { const box = document.querySelector('.ark-studio-box'); return { instances: [...document.querySelectorAll('[data-ark-component-key]')].map((r) => r.getAttribute('data-ark-component-key') + '->' + r.getAttribute('data-ark-component-master')), outlined: !!box && !box.hidden }; })) + ' pop=' + JSON.stringify((await app.locator('#selToolbarPop').textContent()).slice(0, 400)) + ' bar=' + JSON.stringify(await toolbar(app).evaluate((b) => [...b.querySelectorAll('.tb-btn')].map((x) => x.dataset.name + ':' + x.getAttribute('aria-expanded'))))); });
     await setDefinition(app, master.label, 'heading', 'Third heading');
-    await wait(400);
+    /* the negative check below means something only once the edit has reached the preview */
+    await until(async () => (await componentsIn(pv)).masters[master.id].props.heading === 'Third heading', 'the definition edit never reached the preview');
     check(/Run DEFXN from source/.test((await instanceTexts(pv))[origin]), 'the detached instance followed a definition edit');
     await gotoRoute(app, pv, '/chain');
     await until(async () => { const t = (await instanceTexts(pv))[other]; return /Third heading/.test(t) && /Only on the chain page/.test(t); }, 'the attached instance lost the definition edit or its override', 15000)
       .catch(async (e) => { throw new StepFailure(e.message + ': ' + JSON.stringify(await instanceTexts(pv)) + ' ' + JSON.stringify((await componentsIn(pv)).masters[master.id].props)); });
-    await wait(400); await shot('makecomp-03-chain-after-detach');
+    await animationsSettled(pv); await shot('makecomp-03-chain-after-detach');
   });
   await step('Save writes the component, its spot and the detached copy', async () => {
     await connectAndSave(app);
@@ -569,11 +561,11 @@ await flow('makecomp', async () => {
     const main = pub.mainFrame();
     await until(async () => /Run DEFXN from source/.test(Object.values(await instanceTexts(main)).join()), 'public /download does not show the component');
     check(await main.evaluate((s) => getComputedStyle(document.querySelector(s)).display === 'none', H1), 'public /download still shows the original heading');
-    await wait(1500); /* past the route's entrance animation */
+    await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-04-public-download.png') });
     await pub.goto(`${ORIGIN}/chain`);
     await until(async () => /Third heading.*Only on the chain page/.test(Object.values(await instanceTexts(main)).join()), 'public /chain does not show the instance with its override');
-    await wait(1500); /* past the route's entrance animation */
+    await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-05-public-chain.png') });
     await pub.close();
   });
@@ -691,7 +683,7 @@ await flow('statesui', async () => {
     check(seeded.tags.join() === 'A', 'state 1 starter is not a single link: ' + seeded.tags);
     check(seeded.size === linkSize, `state 1 starter is ${seeded.size}, its neighbours ${linkSize}`);
     check(seeded.text === 'State 1', 'state 1 starter text: ' + seeded.text);
-    await wait(300); await shot('statesui-01-starter');
+    await animationsSettled(pv); await shot('statesui-01-starter');
   });
   await step('a selected state-0 link hidden by switching states: the outline follows to what is showing', async () => {
     await (await section(app, 'States')).locator('button', { hasText: 'Preview' }).first().click();     /* back to state 0 */
@@ -727,10 +719,10 @@ await flow('statesui', async () => {
     await pub.close();
   });
   await step('Live-mode clicks move the toolbar\'s "Showing" label with them', async () => {
-    await app.locator('#mode button[data-m="live"]').click(); await wait(400);
+    await setPreviewMode(app, pv, 'live');
     await pv.locator('[data-ark-state-anchor]:not([style*="none"]) a').first().click();               /* 1 -> 2 */
     await until(async () => { const v = await visible(pv, group.id); return v.anchors.length === 1 && v.anchors[0].index === 2; }, 'Live click did not advance to state 2');
-    await app.locator('#mode button[data-m="edit"]').click(); await wait(300);
+    await setPreviewMode(app, pv, 'edit');
     await pv.locator('[data-ark-state-anchor]:not([style*="none"]) a').first().click();
     const rows = (await section(app, 'States')).locator('.row');
     const showingRow = await until(async () => { const n = await rows.count(); for (let i = 0; i < n; i++) if (await rows.nth(i).locator('button', { hasText: 'Showing' }).count()) return (await rows.nth(i).locator('label').textContent()); return null; }, 'no row says Showing');

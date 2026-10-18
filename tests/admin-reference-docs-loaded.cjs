@@ -13,7 +13,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 const app = fs.readFileSync('admin-app.html', 'utf8');
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const loaded = [...app.matchAll(/<script src="([^"?]+)/g)].map((m) => m[1]);
 const sources = loaded.filter((src) => fs.existsSync(src)).map((src) => ({ src, text: fs.readFileSync(src, 'utf8') }));
 

@@ -23,7 +23,7 @@ const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 const { buildersSource } = require('./lib/admin-source.cjs');
 
-const main = fs.readFileSync('js/main.js', 'utf8'), admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const main = fs.readFileSync('js/main.js', 'utf8'), admin = require('./lib/admin-source.cjs').ADMIN;
 function cut(src, from, to, what) {
   const a = src.indexOf(from), b = src.indexOf(to, a + 1);
   assert(a >= 0 && b > a, 'still extractable: ' + what);
@@ -46,7 +46,10 @@ function preview({ edit = true } = {}) {
     window: { parent: { postMessage: (m) => posted.push(plain(m)) } },
     cmsPreviewQuery: true, cmsPreviewEdit: edit, cmsComponentsDraft: {}, cmsPreviewSelections: [], cmsPreviewSelected: null,
     cmsRoutePath: () => '/', cmsRealTree: () => [], cmsInsertionPoints: () => [], cmsGroupList: () => [],
-    cmsIsShown: shown, ArkLayout: { annotate() {} }, placed: 0,
+    cmsIsShown: shown, placed: 0,
+    /* ArkLayout as js/content/states.js uses it: the keys are already in the markup, so annotate()
+       only lists the keyed elements, in document order, as the real one returns them */
+    ArkLayout: { annotate: (root) => Array.from(root.querySelectorAll('[data-ark-layout-key]')) },
   };
   context.window.ArkStates = true;
   context.cmsSelectionList = () => context.cmsPreviewSelections.filter((el) => el && el.isConnected);
@@ -132,9 +135,12 @@ function preview({ edit = true } = {}) {
   const doc = dom.window.document, sent = [];
   const context = {
     document: doc,
-    cmsExactSelection: { route: '/', key: 'k-a', stateGroup: { groupId: 'st1' } },
-    cmsStatesShowing: { st1: 2 },
-    cmsSourceSite: { states: { version: 1, routes: { '/': { st1: { trigger: 'self', current: 0, states: [{ label: 'Default', members: ['k-a'] }, { label: 'State 1', members: [] }, { label: 'State 2', members: [] }] } } } } },
+    /* what more than one editor file reads lives on the shared state object (js/admin/state.js) */
+    state: {
+      cmsExactSelection: { route: '/', key: 'k-a', stateGroup: { groupId: 'st1' } },
+      cmsStatesShowing: { st1: 2 },
+      cmsSourceSite: { states: { version: 1, routes: { '/': { st1: { trigger: 'self', current: 0, states: [{ label: 'Default', members: ['k-a'] }, { label: 'State 1', members: [] }, { label: 'State 2', members: [] }] } } } } },
+    },
     CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading'] }],
     cmsNextComponentId: (prefix) => prefix + '1', cmsBlockResolverLabel: () => 'Text', cmsTreeRowForKey: () => null,
     accordion: (pane) => { const body = doc.createElement('div'); pane.appendChild(body); return body; },
@@ -159,6 +165,6 @@ function preview({ edit = true } = {}) {
   assert.equal(select.value, '0', 'showing the saved default, state 0');
   select.value = '2'; select.dispatchEvent(new dom.window.Event('change'));
   assert.deepEqual(sent.pop(), { action: 'set-default', groupId: 'st1', index: 2 });
-  assert(/if \(event\.data\.showing\) cmsStatesShowing = event\.data\.showing;/.test(admin) && /'defxn-cms-preview-states-showing'\) \{[\s\S]{0,200}renderInspector\(\)/.test(admin), 'the editor takes every "showing" report and repaints the toolbar');
+  assert(/if \(event\.data\.showing\) state\.cmsStatesShowing = event\.data\.showing;/.test(admin) && /'defxn-cms-preview-states-showing'\) \{[\s\S]{0,200}renderInspector\(\)/.test(admin), 'the editor takes every "showing" report and repaints the toolbar');
   console.log('PASS: the toolbar labels what is showing and keeps the default as its own control.');
 }

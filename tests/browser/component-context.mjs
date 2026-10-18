@@ -34,30 +34,16 @@
    ===================================================================== */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { copySite, startHost } from './harness.mjs';
+import { copySite, startHost, routeSettled } from './harness.mjs';
 
 const PROPS = ['font-size', 'font-weight', 'font-family', 'font-style', 'color', 'letter-spacing', 'line-height', 'text-transform', 'margin-top', 'margin-bottom'];
 
-async function freePort() {
-  const probe = http.createServer();
-  await new Promise((resolve) => probe.listen(0, '127.0.0.1', resolve));
-  const { port } = probe.address();
-  await new Promise((resolve) => probe.close(resolve));
-  return port;
-}
-async function settled(page, id) {
-  await page.waitForFunction((pageId) => {
-    const scene = document.querySelector('[data-transition]');
-    const el = document.querySelector(`[data-ark-page="${pageId}"]`);
-    return !!scene && scene.dataset.transition === 'idle' && scene.dataset.page === pageId && !!el && !el.hidden;
-  }, id, { timeout: 30000 });
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 250)))));
-}
+/* the router is idle on `id` (harness routeSettled; it ended in a fixed 250 ms here) */
+const settled = (page, id) => routeSettled(page, id, 30000);
 /* px values compare within half a pixel; everything else exactly */
 function differences(source, built) {
   const out = [];
@@ -104,9 +90,8 @@ async function main() {
   const root = copySite(fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-component-context-')));
   const dataFile = path.join(root, 'js/content/components-data.js');
   const originalData = fs.readFileSync(dataFile, 'utf8');
-  const port = await freePort();
-  const server = await startHost(root, port);
-  const base = `http://127.0.0.1:${port}`;
+  const server = await startHost(root);
+  const base = server.origin;
   const browser = await chromium.launch();
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });

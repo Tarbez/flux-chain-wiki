@@ -44,7 +44,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const ALL = ['content', 'design', 'toolbar', 'canvas', 'sweep'];
@@ -53,22 +53,14 @@ const only = args.includes('--only') ? args[args.indexOf('--only') + 1].split(',
 const pick = args.includes('--surface') ? args[args.indexOf('--surface') + 1] : '';
 const SHOTS = process.env.SHOTS || fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-audit-shots-'));
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-audit-site-'));
-const PORT = Number(process.env.PORT) || 3497;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
 fs.mkdirSync(SHOTS, { recursive: true });
 
 /* ---------------------------------------------------------------- harness */
 class StepFailure extends Error {}
 function check(condition, message) { if (!condition) throw new StepFailure(message); }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 10000) {
-  const end = Date.now() + timeout;
-  while (Date.now() < end) {
-    try { const value = await probe(); if (value) return value; } catch (error) { if (error instanceof StepFailure) throw error; /* a frame mid-navigation */ }
-    await wait(100);
-  }
-  throw new StepFailure(message);
-}
+/* the harness's until (budget x load factor); a probe that throws is a frame mid-navigation,
+   unless it threw a StepFailure, which is a verdict */
+const until = (probe, message, timeout = 10000) => untilFor(probe, message, timeout, { fail: (m) => new StepFailure(m), passThrough: (e) => e instanceof StepFailure });
 
 const matrix = [];          /* { group, surface, ok, why } */
 const noise = [];           /* { surface, kind, text } -- console errors, page errors, failed requests */
@@ -121,7 +113,8 @@ async function surface(group, name, run) {
 }
 
 copySite(WORK);
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
+const ORIGIN = server.origin;
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const context = await browser.newContext({ viewport: { width: 1500, height: 950 } });
 await fakeFolder(context, WORK);
@@ -149,7 +142,7 @@ function savedJson(rel) { const text = readSaved(rel); return JSON.parse(text.sl
 async function openEditor(opened, mode = 'design') {
   const page = await context.newPage();
   opened.push(page);
-  await page.goto(`${ORIGIN}/admin`);
+  await gotoEditor(page, ORIGIN);
   const app = await ready(await appFrame(page));
   const shot = (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') });
   if (mode === 'content') {
@@ -159,7 +152,7 @@ async function openEditor(opened, mode = 'design') {
   }
   await app.click('#modeDesignBtn');
   const pv = await previewFrame(app);
-  await wait(400);
+  await waitForPreviewReady(app);
   return { page, app, pv, shot };
 }
 /* appFrame() waits for the header markup, which exists before the deferred admin.js has wired
@@ -222,7 +215,7 @@ await surface('content', 'pages: edit, preview, Save button, reload, public page
   await app.click('#save');
   await until(() => readSaved('manifests/home.js').includes(marker), 'Save did not write js/content/manifests/home.js');
   await until(async () => (await app.locator('#pageList button[data-id="home"] .dot').count()) === 0, 'the sidebar dot stayed after Save');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await again.click('#modeContentBtn'); await again.click('#pageList button[data-id="home"]');
   await until(async () => (await again.locator('#' + field.id).inputValue()) === marker, 'after reload the field lost the saved value');
@@ -278,7 +271,7 @@ await surface('content', 'articles: edit, preview, Save, Ctrl+S, reload', async 
   await setValue(app.locator(`#a-${slug}-summary`), 'Audit summary via shortcut');
   await saveShortcut(app);
   await untilSaved(app, () => readSaved('article-index.js').includes('Audit summary via shortcut'), 'Ctrl/Cmd+S did not write the article summary');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await again.click('#modeContentBtn'); await again.click(`#pageList button[data-slug="${slug}"]`);
   await until(async () => (await again.locator(`#a-${slug}-title`).inputValue()) === 'Audit article marker', 'after reload the article lost its saved title');
@@ -324,7 +317,7 @@ await surface('content', 'images: label, replace file, preview, Save, reload', a
   await until(() => app.evaluate(() => (document.querySelector('#editor img.asset-preview') || {}).src.startsWith('data:image/png;base64,iVBOR')), 'the editor preview did not show the replacement image');
   await app.click('#save');
   await until(() => { const t = readSaved(`assets/${id}.js`); return t.includes('Audit image label') && t.includes('image/png'); }, `Save did not write the new label and image to assets/${id}.js`);
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await again.click('#modeContentBtn'); await again.click(`#pageList button[data-asset="${id}"]`);
   await until(async () => (await again.locator(`#as-${id}-label`).inputValue()) === 'Audit image label', 'after reload the image lost its saved label');
@@ -359,7 +352,7 @@ await surface('content', 'encrypted: create, encrypt, Save, reload, decrypt, del
   await until(async () => /Encrypted for 1 recipient/.test(await statusText(app)), 'Encrypt & lock did not report encrypting for 1 recipient: ' + await statusText(app));
   await app.click('#save');
   await until(() => savedExists('secrets/audit-secret.js') && readSaved('secrets/index.js').includes('audit-secret') && /ciphertextBase64":\s*"[A-Za-z0-9+/]{16}/.test(readSaved('secrets/audit-secret.js')) && !readSaved('secrets/audit-secret.js').includes('the audit plaintext'), 'Save did not write ciphertext (and only ciphertext) to secrets/audit-secret.js');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await again.click('#modeContentBtn'); await again.click('#pageList button[data-secret="audit-secret"]');
   await again.locator('#editor button', { hasText: 'Decrypt to check' }).click();
@@ -376,7 +369,8 @@ await surface('content', 'shapes: tuning reaches the preview, inline Save writes
   const id = await until(() => app.evaluate(() => { const b = document.querySelector('#pageList button[data-shape]'); return b && b.dataset.shape; }), 'no shape page in the sidebar');
   await app.click(`#pageList button[data-shape="${id}"]`);
   const frame = await until(async () => { const h = await app.$('#frame'); const f = h && await h.contentFrame(); return f && !(await app.evaluate(() => document.getElementById('frame').hidden)) && f; }, 'the shape page has no preview');
-  await wait(1500);
+  /* the listener below lives in this document: install it once the page has routed, not mid-load */
+  await waitForRouteReady(frame);
   await frame.evaluate(() => { window.__meshMsgs = []; window.addEventListener('message', (e) => { if (e.data && e.data.type === 'flux-chain-preview-mesh') window.__meshMsgs.push(e.data.settings); }); });
   const range = app.locator('#editor input[type="range"][id^="relief-"]').first();
   const key = (await range.getAttribute('id')).slice('relief-'.length);
@@ -407,11 +401,9 @@ const selectKey = (app, key) => app.evaluate((k) => document.getElementById('cms
    act on the controls inside it, so a new shell changes only that block. */
 const byKey = (frame, key, read) => frame.evaluate(([k, r]) => { const el = [...document.querySelectorAll('[data-ark-layout-key]')].find((e) => e.getAttribute('data-ark-layout-key') === k); return el ? new Function('el', 'return ' + r)(el) : undefined; }, [key, read]);
 async function saveCanvas(app) { await connect(app); await app.click('#save'); }
+/* the preview's ready message for the route, not a sleep after it (harness openRoute) */
 async function gotoRoute(app, pv, route) {
-  await app.click('#tabPages');
-  await app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route.replace(/[/]/g, '\\/') + '$') }) }).first().click();
-  await until(() => pv.evaluate((r) => ArkUI.route.path() === r && !!document.querySelector('[data-ark-layout-key]'), route), 'the preview did not open ' + route);
-  await wait(500);
+  await openRoute(app, pv, route).catch((e) => { throw new StepFailure(e.message); });
 }
 const navLink = (frame, text) => frame.locator('header nav.header-core-links > a', { hasText: text }).first();
 /* Playwright cannot see that the editor's toolbar covers a point in the preview, so a right-click
@@ -456,7 +448,7 @@ await surface('design', 'theme & defaults: a colour reaches the preview, Save, r
   await until(() => frame.evaluate((k) => getComputedStyle(document.documentElement).getPropertyValue('--' + k).trim(), key).then((v) => v === hsl), `the preview's --${key} never became ${hsl}`);
   await app.click('#save');
   await untilSaved(app, () => readSaved('theme-data.js').includes(hsl), 'Save did not write the colour to theme-data.js');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await again.click('#modeDesignBtn'); await again.click('#designThemeBtn');
   await until(async () => ((await again.locator(`#${id} + output`).textContent()) || '').trim() === hsl, 'after reload the colour is not the saved one');
@@ -505,15 +497,16 @@ await surface('design', 'background: transition edits reach the preview, Save, r
   await until(() => pv.evaluate(() => ArkCanvasTransitions.get().inDuration === 510), 'the preview did not take Fade in = 510');
   await saveCanvas(app);
   await untilSaved(app, () => savedJson('canvas-transitions-data.js').inDuration === 510, 'Save did not write canvas-transitions-data.js');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page)); await again.click('#modeDesignBtn');
   const pv2 = await previewFrame(again);
   check(await pv2.evaluate(() => ArkCanvasTransitions.get().inDuration === 510), 'after reload the transition is not the saved one');
 });
 
 await surface('design', 'design check: lists every rule, Show selects, Open SEO opens the page SEO', async (opened) => {
+  /* openEditor already waited for the preview's ready message; the check itself waits for the
+     page to settle before it measures (design-check-stable) */
   const { app, shot } = await openEditor(opened);
-  await wait(800);
   await app.click('#btnCheck');
   const items = app.locator('.pop ul.checks > li');
   await until(async () => (await items.count()) >= 13, 'the design check lists fewer than 13 rules');
@@ -551,7 +544,7 @@ async function controlPersists(opened, { route, key, select, sectionTitle, act, 
   await until(async () => (await byKey(pv, key, read)) === expect, `${sectionTitle}: the preview's ${read} for ${key} never became ${JSON.stringify(expect)} (is ${JSON.stringify(await byKey(pv, key, read))})`);
   await saveCanvas(app);
   await untilSaved(app, () => saved(savedJson('layout-data.js')), `${sectionTitle}: Save did not write ${key} to layout-data.js`);
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page)); await again.click('#modeDesignBtn');
   const pv2 = await previewFrame(again);
   if (route !== '/') await gotoRoute(again, pv2, route);
@@ -582,7 +575,10 @@ await surface('toolbar', 'paragraph <p> (real click): text sections; Fill radius
 });
 
 await surface('toolbar', 'link <a> (real click): text sections; Spacing padding persists', async (opened) => {
-  const KEY = 'path:div:1/header:1/nav:1/a:1';   /* the header's Overview link */
+  /* the header's Overview link, its key read off the DOM (harness layoutKeyOf) */
+  const probe = await openEditor(opened);
+  const KEY = await layoutKeyOf(probe.pv, 'header nav.header-core-links > a', 'Overview');
+  await probe.page.close(); opened.pop();
   await controlPersists(opened, { route: '/', key: KEY, sectionTitle: 'Spacing',
     select: async (app, pv) => { await navLink(pv, 'Overview').click(); await until(async () => (await toolbarKey(app)) === KEY, 'clicking the Overview link selected ' + await toolbarKey(app)); await expectSections(app, TEXT, 'an <a>'); },
     act: async (s) => { const t = s.locator('.boxm input.t'); await t.fill('12'); await t.evaluate((i) => i.dispatchEvent(new Event('change'))); },
@@ -628,7 +624,10 @@ await surface('toolbar', 'image <svg>: image sections; Alt text persists', async
 });
 
 await surface('toolbar', 'canvas element <canvas>: image sections; Frame scale persists', async (opened) => {
-  const KEY = 'path:div:1/div:1/canvas:1';
+  /* the scene's first background canvas, its key read off the DOM (harness layoutKeyOf) */
+  const probe = await openEditor(opened);
+  const KEY = await layoutKeyOf(probe.pv, '[data-ark-layer="persistent"] > canvas');
+  await probe.page.close(); opened.pop();
   await controlPersists(opened, { route: '/', key: KEY, sectionTitle: 'Frame',
     select: async (app) => { await selectKey(app, KEY); await expectSections(app, IMAGE, 'a <canvas>'); },
     act: (s) => setValue(s.locator('input[aria-label="Scale X"]'), '1.1'),
@@ -653,7 +652,7 @@ await surface('toolbar', 'layout group: Frame + Ungroup only; group X persists; 
   await shot('toolbar-group');
   await saveCanvas(app);
   await untilSaved(app, () => JSON.stringify(savedJson('layout-data.js').groups || {}).includes(key.slice(6)), 'Save did not write the group');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page)); await again.click('#modeDesignBtn');
   const pv2 = await previewFrame(again);
   await until(() => pv2.evaluate((id) => !!document.querySelector('[data-ark-layout-group="' + id + '"]'), key.slice(6)), 'after reload the group is gone');
@@ -686,7 +685,7 @@ await surface('toolbar', 'component instance: base sections + Component instance
   await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Audit override')), 'the override did not reach the preview');
   await saveCanvas(app);
   await untilSaved(app, () => readSaved('components-data.js').includes('Audit override'), 'Save did not write the override');
-  await page.reload();
+  await reloadEditor(page);
   const again = await ready(await appFrame(page)); await again.click('#modeDesignBtn');
   const pv2 = await previewFrame(again);
   await gotoRoute(again, pv2, '/download');
@@ -777,7 +776,7 @@ await surface('canvas', 'breakpoints: tablet and phone resize the canvas and edi
   await until(() => app.evaluate(() => !document.getElementById('bpNote').hidden), 'Tablet does not say it edits tablet overrides');
   const KEY = 'id:hl-title';
   /* the preview re-lays itself out at the new width; a selection sent mid-relayout is re-sent */
-  await until(async () => { if ((await toolbarKey(app)) === KEY) return true; await selectKey(app, KEY); await wait(500); return (await toolbarKey(app)) === KEY; }, 'the heading could not be selected on tablet');
+  await until(async () => { if ((await toolbarKey(app)) === KEY) return true; await selectKey(app, KEY); return until(async () => (await toolbarKey(app)) === KEY, 'not yet', 1000).catch(() => false); }, 'the heading could not be selected on tablet');
   await until(async () => /tablet/i.test(await app.evaluate(() => { const b = document.getElementById('selToolbar'); return b && !b.hidden ? b.textContent : ''; })), 'the toolbar does not say it is editing the tablet frame');
   await setValue((await openToolbarSection(app, 'Frame')).locator('input[aria-label="Y"]'), '24');
   await saveCanvas(app);
@@ -819,9 +818,9 @@ async function counters(page, app) {
   return { mut, msg, values, nav: navigations, req: requestsSeen, dialogs: dialogsSeen, pages: pagesOpened, downloads, fs: fsEvents, choosers };
 }
 async function quiet(app) {
-  /* wait until the editor's DOM stops changing (a toast fading, a debounced check) */
-  let last = -1;
-  for (let i = 0; i < 25; i++) { const now = await app.evaluate(() => window.__audit.mut).catch(() => -1); if (now === last) return; last = now; await wait(150); }
+  /* wait until the editor's DOM stops changing (a toast fading, a debounced check); a DOM that
+     never stops (an animation the editor drives) is not an error here, the sweep goes on */
+  await untilStable(() => app.evaluate(() => window.__audit.mut).catch(() => -1), 'the editor DOM never went quiet', 4000, { interval: 150 }).catch(() => {});
 }
 async function enumerate(app, scope) {
   return app.evaluate((sel) => {
@@ -862,10 +861,12 @@ async function sweep(name, scope, setup) {
       if (await target.isDisabled().catch(() => false)) continue;
       await quiet(env.app);
       const before = await counters(env.page, env.app);
-      const clicked = await target.click({ timeout: 10000 }).then(() => true, (error) => { unclickable.push({ surface: name, control: c.label, why: error.message.split('\n').filter((l) => /intercepts|outside|not visible|not stable/.test(l)).slice(-1)[0] || error.message.split('\n')[0] }); return false; });
+      const clicked = await target.click({ timeout: scaled(10000) }).then(() => true, (error) => { unclickable.push({ surface: name, control: c.label, why: error.message.split('\n').filter((l) => /intercepts|outside|not visible|not stable/.test(l)).slice(-1)[0] || error.message.split('\n')[0] }); return false; });
       if (!clicked) continue;
-      await wait(700);
-      const after = await counters(env.page, env.app);
+      /* the first observable change ends the wait; a control that changes nothing within the
+         (load-scaled) window is dead -- was a fixed 700 ms whatever happened */
+      const diff = (a) => Object.keys(before).some((k) => a[k] !== before[k]);
+      const after = await untilFor(async () => { const a = await counters(env.page, env.app); return diff(a) && a; }, 'nothing changed', 1000).catch(() => counters(env.page, env.app));
       const changed = Object.keys(before).filter((k) => after[k] !== before[k]);
       if (!changed.length) { dead.push({ surface: name, control: c.label, path: c.path }); deadHere += 1; }
       await env.app.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))).catch(() => {});
@@ -874,20 +875,22 @@ async function sweep(name, scope, setup) {
     check(!deadHere && !muteHere, `${deadHere} dead and ${muteHere} unexplained disabled control(s) -- listed below`);
   });
 }
-const toContent = async ({ app }) => { if (await app.evaluate(() => document.getElementById('cmsShell').hidden)) { await app.click('#modeContentBtn'); await wait(300); } };
-const openItem = (sel, tab) => async (env, again) => { await toContent(env); if (!again || !(await env.app.locator(sel + '[aria-current="true"]').count())) { await env.app.click(sel); await wait(600); } if (tab) { const t = env.app.locator('#editor [role="tab"]', { hasText: tab }).first(); if ((await t.getAttribute('aria-selected')) !== 'true') { await t.click(); await wait(200); } } };
+/* every setup waits on what its click produces (the shell shown, the item current, the tab
+   selected), never a fixed sleep */
+const toContent = async ({ app }) => { if (await app.evaluate(() => document.getElementById('cmsShell').hidden)) { await app.click('#modeContentBtn'); await until(() => app.evaluate(() => !document.getElementById('cmsShell').hidden), 'Content mode never showed its shell'); } };
+const openItem = (sel, tab) => async (env, again) => { await toContent(env); if (!again || !(await env.app.locator(sel + '[aria-current="true"]').count())) { await env.app.click(sel); await until(async () => (await env.app.locator(sel + '[aria-current="true"]').count()) > 0, sel + ' never became the current item'); } if (tab) { const t = env.app.locator('#editor [role="tab"]', { hasText: tab }).first(); if ((await t.getAttribute('aria-selected')) !== 'true') { await t.click(); await until(async () => (await t.getAttribute('aria-selected')) === 'true', 'the ' + tab + ' tab never opened'); } } };
 /* the structure rail folds away (#btnLeftRail, remembered per browser) -- and the header sweep
    clicks that toggle like every other button, so the canvas is entered with the rail open */
 const toCanvas = async ({ app }) => {
-  if (await app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('designView').hidden)) { await designView(app, 'canvas'); await wait(600); }
-  if (await app.evaluate(() => document.getElementById('shell').classList.contains('rail-closed'))) { await app.click('#btnLeftRail'); await wait(300); }
+  if (await app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('designView').hidden)) { await designView(app, 'canvas'); await previewFrame(app); await nextFrames(app); }
+  if (await app.evaluate(() => document.getElementById('shell').classList.contains('rail-closed'))) { await app.click('#btnLeftRail'); await until(() => app.evaluate(() => !document.getElementById('shell').classList.contains('rail-closed')), 'the structure rail did not open'); }
 };
 /* sections are opened for the enumeration only: a sweep click may legitimately change what the
    selection is (Make into component replaces it), and the re-run must not fail on that */
 const withSelection = (key, sections) => async (env, again) => { await toCanvas(env); if ((await toolbarKey(env.app)) !== key) { await selectKey(env.app, key); await until(async () => (await toolbarKey(env.app)) === key, 'could not select ' + key).catch((e) => { if (!again) throw e; }); } for (const s of sections || []) await openToolbarSection(env.app, s).catch((e) => { if (!again) throw e; }); };
 
 await sweep('app header (Content mode)', '#appBar', toContent);
-await sweep('account menu', '#accountMenu', async (env) => { if (await env.app.evaluate(() => document.getElementById('accountMenu').hidden)) { await env.app.click('#accountBtn'); await wait(200); } });
+await sweep('account menu', '#accountMenu', async (env) => { await openAccountMenu(env.app); });
 await sweep('page editor: Content tab', '#editor', openItem('#pageList button[data-id="home"]', 'Content'));
 await sweep('page editor: Shape tab', '#editor', openItem('#pageList button[data-id="home"]', 'Shape'));
 await sweep('page editor: SEO tab', '#editor', openItem('#pageList button[data-id="home"]', 'SEO'));
@@ -900,25 +903,26 @@ await sweep('encrypted editor', '#editor', async (env, again) => {
   await toContent(env);
   if (again) return;
   await env.app.locator('summary', { hasText: 'New encrypted content' }).click();
-  await env.app.fill('#newSecretId', 'sweep-secret'); await env.app.press('#newSecretId', 'Enter'); await wait(500);
+  await env.app.fill('#newSecretId', 'sweep-secret'); await env.app.press('#newSecretId', 'Enter');
+  await until(() => env.app.evaluate(() => !!document.querySelector('#sec-sweep-secret-label')), 'the new encrypted item did not open');
 });
-await sweep('mesh view', '#editor', async (env) => { await toContent(env); if (!(await env.app.evaluate(() => /Mesh/.test((document.querySelector('#editor h1') || {}).textContent || '')))) { await env.app.click('#meshNav'); await wait(600); } });
-await sweep('theme & defaults', '#editor', async (env) => { if (!(await env.app.evaluate(() => (document.querySelector('#editor h1') || {}).textContent === 'Theme & defaults' && !document.getElementById('cmsShell').hidden))) { await designView(env.app, 'theme'); await wait(600); } });
+await sweep('mesh view', '#editor', async (env) => { await toContent(env); if (!(await env.app.evaluate(() => /Mesh/.test((document.querySelector('#editor h1') || {}).textContent || '')))) { await env.app.click('#meshNav'); await until(() => env.app.evaluate(() => /Mesh/.test((document.querySelector('#editor h1') || {}).textContent || '')), 'Mesh did not open'); } });
+await sweep('theme & defaults', '#editor', async (env) => { if (!(await env.app.evaluate(() => (document.querySelector('#editor h1') || {}).textContent === 'Theme & defaults' && !document.getElementById('cmsShell').hidden))) { await designView(env.app, 'theme'); await until(() => env.app.evaluate(() => (document.querySelector('#editor h1') || {}).textContent === 'Theme & defaults' && !document.getElementById('cmsShell').hidden), 'Theme & defaults did not open'); } });
 /* the one header in Design -> Canvas: the Design views and every canvas-only control */
 await sweep('app header (Design -> Canvas)', '#appBar', withSelection('id:hl-title'));
 await sweep('canvas left: Layers + groups', '#studioRoot aside.left', withSelection('id:hl-title'));
 await sweep('canvas left: Pages', '#pagesPane', async (env) => { await toCanvas(env); await env.app.click('#tabPages'); });
-await sweep('canvas left: Library', '#libPane', async (env) => { await toCanvas(env); await env.app.click('#tabLib'); await wait(300); });
+await sweep('canvas left: Library', '#libPane', async (env) => { await toCanvas(env); await env.app.click('#tabLib'); await env.app.locator('#libPane').waitFor({ state: 'visible', timeout: scaled(5000) }); });
 /* one sweep per section: the redesigned toolbar shows one section's controls at a time */
 for (const sec of TEXT) await sweep('toolbar: heading / ' + sec, '#selToolbar, #selToolbarPop', withSelection('id:hl-title', [sec]));
 /* found once per sweep, after the preview has rendered: a sweep click may navigate it away */
 const firstSection = async (env) => env.sectionKey || (env.sectionKey = await until(() => env.pv.evaluate(() => { const s = [...document.querySelectorAll('section[data-ark-layout-key]')].find((x) => x.getBoundingClientRect().height > 80); return s && s.getAttribute('data-ark-layout-key'); }), 'the preview has no section to select'));
 for (const sec of CONTAINER.filter((x) => !TEXT.includes(x))) await sweep('toolbar: container / ' + sec, '#selToolbar, #selToolbarPop', async (env, again) => withSelection(await firstSection(env), [sec])(env, again));
-await sweep('sitemap', '#mapView', async (env) => { if (await env.app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('mapView').hidden)) { await designView(env.app, 'map'); await wait(400); } });
+await sweep('sitemap', '#mapView', async (env) => { if (await env.app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('mapView').hidden)) { await designView(env.app, 'map'); await until(() => env.app.evaluate(() => !document.getElementById('mapView').hidden && document.querySelectorAll('#mapView .smcard').length > 0), 'the sitemap did not draw'); } });
 for (const [name, button] of [['popover: Design check', '#btnCheck'], ['popover: page switcher', '#btnPage'], ['popover: page SEO', '#btnPageSeo'], ['popover: Background', '#designBackgroundBtn']]) {
-  await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { await env.app.click(button, { timeout: 15000 }); await wait(400); } });
+  await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { await env.app.click(button, { timeout: scaled(15000) }); await env.app.locator('.pop').first().waitFor({ state: 'visible', timeout: scaled(5000) }); } });
 }
-await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await env.app.click('#versionsNav'); await wait(600); } });
+await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await env.app.click('#versionsNav'); await until(() => env.app.evaluate(() => !document.getElementById('versionsPanel').hidden), 'the versions panel did not open'); } });
 
 /* ================================================================ REPORT (placeholder until the other groups land) */
 await browser.close(); server.close();

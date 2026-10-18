@@ -15,9 +15,22 @@
      so a "no visible change" regression shows up as a failed line, not a shrug.
    - Import refuses anything that does not prove itself and writes nothing when
      it refuses; an accepted file is a NEW record (importedFrom), never a rewrite.
-   - Two writers racing on head.flx are interleaved deterministically (gates on
-     the head file), because the defect -- a version on disk but out of the list
-     -- only appears in one ordering and passes every sequential test.
+   - Two writers that share no lock are run in EVERY ordering of their file
+     operations (3c), because the old defect -- a version on disk but out of the
+     list -- appeared in one ordering only and passed every sequential test. The
+     store has no mutable pointer any more; heads are derived (records no other
+     record names), so the worst any ordering can do is fork, and a fork is kept
+     and joined by the next Save.
+   - No file is ever overwritten: every write in this file goes through fsDir's
+     guard, which fails the writer on any second write to a path, except the one
+     documented case (identical bytes to a content-addressed file).
+   - Cost: 3c runs 1,151 orderings (+300 sampled unpruned ones) in memory. Measured
+     2026-10-18 on the shared 8-CPU dev Mac at load average 40-60: 24-45 s for the
+     whole file, so the default 120 s runner guard is too close --
+     run-tests-timeout-ms: 300000
+   - Migration (3d): a history the old script wrote (head.flx) lists unchanged,
+     is carried forward once, and head.flx is never written -- not even when an
+     editor still running the old script keeps rewriting it.
    ===================================================================== */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -28,6 +41,82 @@ const vm = require('node:vm');
 const FLX = require('../js/admin/vendor/flx-state-grammar.js');
 const ArkVersions = require('../js/admin/versions.js');
 
+/* ---- a File System Access-shaped folder over a real directory, instrumented ----
+   fsDir(abs, rel, io): the directory at `abs` (`rel` is its path inside the test root). Every
+   operation that OBSERVES or CHANGES the folder is one step: list (keys), read (getFile, or a
+   lookup that finds nothing), create (getFileHandle/getDirectoryHandle with create, on an absent
+   entry -- like Chrome, a file is created EMPTY and filled on close), write (createWritable()
+   .close()), delete (removeEntry). With `io`, each step first awaits io.step(desc) -- the
+   scheduler's gate in 3c -- and then happens against the folder as it is THEN. Opening an entry
+   that exists is not a step: it decides nothing a later step does not re-observe.
+
+   THE GUARD (always on): a write onto a file that already has bytes fails the writer, except the
+   one documented case -- a content-addressed file (bodies/, versions/, heads/, legacy/, whose
+   bytes are determined by their name) written again with the SAME bytes, which is what two
+   writers racing on one name do. head.flx, the legacy pointer, is never written at all. */
+const CONTENT_ADDRESSED = /(^|\/)cms-history\/(bodies|versions|heads|legacy)\/[0-9a-f]{64}\.flx$/;
+const guardLog = { identical: [] };
+const notFound = (name) => Object.assign(new Error(name + ' not found'), { name: 'NotFoundError' });
+function fsDir(abs, rel, io, F = fs) {
+  const join = (child) => (rel ? rel + '/' + child : child);
+  const step = async (desc) => { if (io) await io.step(desc); };
+  const fileHandle = (p, r, child) => ({
+    kind: 'file', name: child,
+    async getFile() {
+      await step({ kind: 'read', path: r });
+      if (!F.existsSync(p)) throw notFound(child);
+      const text = F.readFileSync(p, 'utf8');
+      return { text: async () => text };
+    },
+    async createWritable() {
+      let buf = '';
+      return {
+        async write(t) { buf += t; },
+        async close() {
+          await step({ kind: 'write', path: r });
+          if (/(^|\/)head\.flx$/.test(r)) throw new Error('GUARD: ' + r + ' was written; the legacy pointer is read-only');
+          const prior = F.existsSync(p) ? F.readFileSync(p, 'utf8') : '';
+          if (prior !== '') {
+            if (prior !== buf) throw new Error('GUARD: ' + r + ' was overwritten with different bytes');
+            if (!CONTENT_ADDRESSED.test(r)) throw new Error('GUARD: ' + r + ' was written twice and is not content-addressed');
+            guardLog.identical.push(r);
+          }
+          F.writeFileSync(p, buf);
+        },
+      };
+    },
+  });
+  return {
+    kind: 'directory', name: path.basename(abs),
+    async getDirectoryHandle(child, opts) {
+      const p = path.join(abs, child), r = join(child);
+      if (!F.existsSync(p)) {
+        if (opts && opts.create) { await step({ kind: 'create', path: r }); F.mkdirSync(p, { recursive: true }); }
+        else { await step({ kind: 'read', path: r }); if (!F.existsSync(p)) throw notFound(child); }
+      }
+      return fsDir(p, r, io, F);
+    },
+    async getFileHandle(child, opts) {
+      const p = path.join(abs, child), r = join(child);
+      if (!F.existsSync(p)) {
+        if (opts && opts.create) { await step({ kind: 'create', path: r }); if (!F.existsSync(p)) F.writeFileSync(p, ''); }
+        else { await step({ kind: 'read', path: r }); if (!F.existsSync(p)) throw notFound(child); }
+      }
+      return fileHandle(p, r, child);
+    },
+    async *keys() {
+      await step({ kind: 'list', path: rel });
+      for (const name of F.readdirSync(abs).sort()) yield name;
+    },
+    async removeEntry(child) {
+      const r = join(child);
+      await step({ kind: 'delete', path: r });
+      if (!F.existsSync(path.join(abs, child))) throw notFound(child);
+      F.rmSync(path.join(abs, child));
+    },
+  };
+}
+
 /* ---- 1. the vendored grammar is the canonical one, byte for byte ---- */
 const CANONICAL = path.resolve(__dirname, '..', '..', 'ark-browser', 'src', 'shared', 'flx-state-grammar.js');
 if (fs.existsSync(CANONICAL)) {
@@ -35,6 +124,29 @@ if (fs.existsSync(CANONICAL)) {
     'js/admin/vendor/flx-state-grammar.js has drifted from ' + CANONICAL + '. To fix: cp that file over the vendored copy (never edit the copy).');
 } else {
   console.log('note: canonical grammar not in this checkout (' + CANONICAL + '); the byte-identity check was not run');
+}
+
+/* The same folder in memory, for 3c-3e: a run there is CPU only, so every ordering can be run
+   even on a shared machine (on disk each ordering cost ~280 ms at load average 40). The paths
+   and the File System Access shape are the same; only the bytes live in a Map. */
+function memFs() {
+  const files = new Map(), dirs = new Set(['/mem']);
+  let serial = 0;
+  const F = {
+    existsSync: (p) => files.has(p) || dirs.has(p),
+    readFileSync: (p) => { if (!files.has(p)) throw Object.assign(new Error('ENOENT: ' + p), { code: 'ENOENT' }); return files.get(p); },
+    writeFileSync: (p, text) => { files.set(p, String(text)); },
+    mkdirSync: (p) => { for (let d = p; d !== '/' && !dirs.has(d); d = path.dirname(d)) dirs.add(d); },
+    readdirSync: (p) => [...new Set([...files.keys(), ...dirs].filter((x) => path.dirname(x) === p && x !== p).map((x) => path.basename(x)))],
+    rmSync: (p) => { for (const x of [...files.keys()]) if (x === p || x.startsWith(p + '/')) files.delete(x); for (const x of [...dirs]) if (x === p || x.startsWith(p + '/')) dirs.delete(x); },
+    isDir: (p) => dirs.has(p),
+    mkdtemp: (prefix) => { const p = '/mem/' + prefix + (serial++); F.mkdirSync(p); return p; },
+    cp: (from, to) => {
+      for (const d of [...dirs]) if (d === from || d.startsWith(from + '/')) dirs.add(to + d.slice(from.length));
+      for (const [x, text] of [...files]) if (x.startsWith(from + '/')) files.set(to + x.slice(from.length), text);
+    },
+  };
+  return F;
 }
 
 /* ---- 2. the 13 real drafts, loaded the way the site loads them ---- */
@@ -100,26 +212,9 @@ function single(file, global, extra) {
 
   /* ---- 3. the store, on a real folder, through a File System Access-shaped handle ---- */
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-versions-'));
-  const notFound = (name) => Object.assign(new Error(name + ' not found'), { name: 'NotFoundError' });
-  function dirHandle(dir) {
-    return {
-      kind: 'directory', name: path.basename(dir),
-      async getDirectoryHandle(child, opts) {
-        const p = path.join(dir, child);
-        if (!fs.existsSync(p)) { if (!opts || !opts.create) throw notFound(child); fs.mkdirSync(p); }
-        return dirHandle(p);
-      },
-      async getFileHandle(child, opts) {
-        const p = path.join(dir, child);
-        if (!fs.existsSync(p)) { if (!opts || !opts.create) throw notFound(child); fs.writeFileSync(p, ''); }
-        return {
-          kind: 'file', name: child,
-          async getFile() { const text = fs.readFileSync(p, 'utf8'); return { text: async () => text }; },
-          async createWritable() { let buf = ''; return { async write(t) { buf += t; }, async close() { fs.writeFileSync(p, buf); } }; },
-        };
-      },
-    };
-  }
+  /* A File System Access-shaped handle over a real folder (fsDir, below), with the guard every
+     write in this file goes through: no file is ever overwritten. */
+  const dirHandle = (dir) => fsDir(dir, '', null);
   const project_ = dirHandle(root);
   const dir = await ArkVersions.historyDir(project_);
   const historyPath = path.join(root, 'cms-history');
@@ -158,7 +253,9 @@ function single(file, global, extra) {
   // listing is newest first and pages through `prev`
   const first = await ArkVersions.list(dir, { limit: 2 });
   assert.deepEqual(first.entries.map((e) => e.record.seq), [3, 2]);
-  assert.equal(first.next, v1.hash);
+  assert.deepEqual(first.heads, [v3.hash], 'one head: the history has not forked');
+  assert(first.entries.every((e) => e.branch === 0 && !e.forked), 'a linear history is one branch');
+  assert.deepEqual(first.next.frontier.map((f) => f.hash), [v1.hash], 'the cursor continues at the version before the page');
   const rest = await ArkVersions.list(dir, { from: first.next, limit: 2 });
   assert.deepEqual(rest.entries.map((e) => e.record.seq), [1]); assert.equal(rest.next, null);
 
@@ -208,11 +305,11 @@ function single(file, global, extra) {
      must prove it (a damaged or edited file is refused, naming what is wrong and the remedy, and
      writes NOTHING), and an accepted file must add to the history, never replace any part of it. */
   const filesIn = (d) => Object.fromEntries(fs.readdirSync(d).map((f) => [f, fs.readFileSync(path.join(d, f))]));
-  const beforeImport = { versions: filesIn(versionsDir), bodies: filesIn(path.join(historyPath, 'bodies')), head: fs.readFileSync(path.join(historyPath, 'head.flx')) };
+  const beforeImport = { versions: filesIn(versionsDir), bodies: filesIn(path.join(historyPath, 'bodies')), heads: filesIn(path.join(historyPath, 'heads')) };
   const assertNothingWritten = (why) => {
     assert.deepEqual(Object.keys(filesIn(versionsDir)).sort(), Object.keys(beforeImport.versions).sort(), why + ': no version record was added');
     assert.deepEqual(Object.keys(filesIn(path.join(historyPath, 'bodies'))).sort(), Object.keys(beforeImport.bodies).sort(), why + ': no body was added');
-    assert(fs.readFileSync(path.join(historyPath, 'head.flx')).equals(beforeImport.head), why + ': the head did not move');
+    assert.deepEqual(filesIn(path.join(historyPath, 'heads')), beforeImport.heads, why + ': the head did not move');
   };
   const refusals = [
     ['not FLX at all', '{"format":"defxn-cms-version-export/1"}', /not readable as FLX[\s\S]*Missing:[\s\S]*To fix:/],
@@ -245,126 +342,348 @@ function single(file, global, extra) {
 
   fs.rmSync(root, { recursive: true, force: true });
 
-  /* ---- 3c. two writers, one folder: the head race, interleaved deterministically ----
-     Why: head.flx is the one file that is rewritten. Two tabs that both read head H and both
-     write a record on top of H used to leave one record on disk but out of the history -- the
-     list walks `prev` from the head and never reaches it. Each case below stops the writers at a
-     named point (a gate on head.flx) so the interleaving is the same on every run. The assertion
-     is on the payload: every writer's content is reachable from the head, in one unbroken chain. */
+  /* ---- 3c. writers that share NO lock: every interleaving of their file operations ----
+     Why: a file system has no atomic compare-and-swap. The old store kept one mutable pointer
+     (head.flx) and a compare-and-swap with read-back; a writer outside the Web Lock (a second
+     browser, another machine syncing the folder) could still overwrite the pointer after the
+     other's read-back and drop a record from the list -- in ONE ordering, which every sequential
+     test passes. The store now has no mutable pointer: each record adds its own head file and
+     heads are derived. The claim "nothing is ever lost or overwritten" is about every ordering,
+     so every ordering is run.
+
+     How: two independent module instances (separate require() loads, lockManager -> null) write
+     at once. Every folder operation is a step held at a gate (fsDir's io.step); a scheduler opens
+     one gate at a time, and a depth-first search over its choices enumerates the orderings.
+     Orderings that differ only by swapping adjacent INDEPENDENT steps (no shared entry, or both
+     reads) reach the same folder state, so only one representative of each is run: a choice of
+     A right after a step of B is skipped when A's step is independent of it (the swapped order,
+     A first, is run instead). That keeps the lexicographically least ordering of every
+     equivalence class, so no distinct ordering is skipped.
+
+     Asserted after every ordering, on the folder itself: the heads derived from heads/ equal
+     the heads derived from scanning every record; every record on disk is listed exactly once,
+     after every record that follows it; no file was overwritten (fsDir's guard); and a third
+     writer's Save joins every head into one, after which heads/ holds exactly that one file. */
+  const F = memFs(), memDir = (dir) => fsDir(dir, '', null, F);
+  /* SHA-256 on this thread: WebCrypto's digest runs on libuv's pool, and on a loaded machine
+     each call waited behind other processes' work (the legacy case took 84 s, at ~20% CPU).
+     Same algorithm, same bytes -- only the waiting is removed; restored after 3e. */
+  const subtleDigest = globalThis.crypto.subtle.digest;
+  Object.defineProperty(globalThis.crypto.subtle, 'digest', { configurable: true, writable: true, value: async (algorithm, data) => {
+    assert.equal(algorithm, 'SHA-256');
+    const out = require('node:crypto').createHash('sha256').update(Buffer.from(data.buffer, data.byteOffset, data.byteLength)).digest();
+    return out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength);
+  } });
   const loadInstance = () => { delete require.cache[require.resolve('../js/admin/versions.js')]; return require('../js/admin/versions.js'); };
-  function gated(dir, name, log, gate) {
-    const inner = dirHandle(dir);
-    return {
-      kind: 'directory', name: inner.name,
-      getDirectoryHandle: async (child, opts) => (child === 'cms-history' ? gated(path.join(dir, child), name, log, gate) : inner.getDirectoryHandle(child, opts)),
-      async getFileHandle(child, opts) {
-        const handle = await inner.getFileHandle(child, opts);
-        if (child !== 'head.flx') return handle;
-        return {
-          ...handle,
-          /* 'A:read#2' holds A's 2nd head read BEFORE it reads; 'A:read#2@after' holds it after the
-             bytes were read, so A carries on with what the head WAS (a stale read) */
-          async getFile() { log.push(name + ':read'); await gate(name, 'read', ''); const file = await handle.getFile(); await gate(name, 'read', '@after'); return file; },
-          async createWritable() { const out = await handle.createWritable(); return { write: (t) => out.write(t), async close() { await out.close(); log.push(name + ':write'); } }; },
-        };
-      },
-    };
+  /* small drafts of the real shapes (a page list, a single draft): the orderings depend on the
+     folder operations, not on the size of the bodies, and real bodies made 1,150 runs FLX-bound */
+  const tiny = { manifests: [{ id: 'home', fields: { EYEBROW: { value: 'Home' } } }], seo: { site: { baseUrl: 'https://defxn.com' } } };
+  const tinyWith = (baseUrl) => { const s = clone(tiny); s.seo.site.baseUrl = baseUrl; return s; };
+  const HISTORY = (root) => path.join(root, 'cms-history');
+  const headFiles = (root) => { try { return F.readdirSync(path.join(HISTORY(root), 'heads')).sort(); } catch { return []; } };
+
+  /* the heads, derived the slow way: every record in versions/, minus every record another names */
+  function scanHistory(root) {
+    const dir = path.join(HISTORY(root), 'versions'), records = {};
+    for (const file of F.readdirSync(dir)) records[file.slice(0, 64)] = FLX.decodeState(F.readFileSync(path.join(dir, file), 'utf8'));
+    const named = new Set(Object.values(records).flatMap((r) => ArkVersions.parentsOf(r)));
+    return { records, truth: Object.keys(records).filter((h) => !named.has(h)).sort() };
   }
-  /* counts each writer's head reads; a rule key holds that read until the test releases it */
-  function scenario(rules) {
-    const counts = {}, waiting = {}, releases = {};
-    const gate = async (name, op, phase) => {
-      const n = phase ? counts[name + op] : (counts[name + op] = (counts[name + op] || 0) + 1);
-      const key = `${name}:${op}#${n}${phase}`;
-      if (!rules.includes(key)) return;
-      await new Promise((resolve) => { releases[key] = resolve; (waiting[key] || (() => {}))(); });
-    };
-    const arrived = (key) => new Promise((resolve) => { if (releases[key]) resolve(); else waiting[key] = resolve; });
-    const release = (key) => releases[key]();
-    return { gate, arrived, release };
+
+  /* what the pre-2026-10-18 writer did: bodies, a /1 record on head.flx's head, head.flx rewritten.
+     Used to build legacy histories, and to play an editor still running the old script. */
+  async function legacyWrite(root, snapshot, at) {
+    const h = HISTORY(root);
+    for (const d of ['versions', 'bodies']) F.mkdirSync(path.join(h, d), { recursive: true });
+    const pointer = F.existsSync(path.join(h, 'head.flx')) ? FLX.decodeState(F.readFileSync(path.join(h, 'head.flx'), 'utf8')) : null;
+    const addressed = await ArkVersions.addressSnapshot(snapshot);
+    for (const [hash, body] of Object.entries(addressed.bodies)) F.writeFileSync(path.join(h, 'bodies', hash + '.flx'), FLX.encodeState(body));
+    const rec = { format: 'defxn-cms-version/1', kind: 'save', seq: pointer ? pointer.seq + 1 : 1, at, prev: pointer ? pointer.head : '', restoredFrom: '', importedFrom: '', label: '', published: null,
+      content: await ArkVersions.address(addressed.items), changed: Object.keys(addressed.items), summary: ['written by the old script'], items: addressed.items };
+    const hash = await ArkVersions.address(rec);
+    F.writeFileSync(path.join(h, 'versions', hash + '.flx'), FLX.encodeState(rec));
+    F.writeFileSync(path.join(h, 'head.flx'), FLX.encodeState({ head: hash, seq: rec.seq }));
+    return { hash, record: rec };
   }
-  async function race(label, rules, choreography, options = {}) {
-    const raceRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-race-'));
-    const base = await ArkVersions.record(await ArkVersions.historyDir(dirHandle(raceRoot)), snapshotA, { at: '2026-10-18T11:00:00.000Z' });
-    const tabA = loadInstance(), tabB = loadInstance();
-    if (!options.locks) tabA.lockManager = tabB.lockManager = () => null; /* writers that share no lock: the compare-and-swap alone must hold */
-    const log = [], s = scenario(rules);
-    const contentA = clone(snapshotA); contentA.seo.site.baseUrl = 'https://tab-a.example/';
-    const contentB = clone(snapshotA); contentB.seo.site.baseUrl = 'https://tab-b.example/';
-    const a = tabA.record(await tabA.historyDir(gated(raceRoot, 'A', log, s.gate)), contentA, { at: '2026-10-18T11:01:00.000Z' });
-    const b = tabB.record(await tabB.historyDir(gated(raceRoot, 'B', log, s.gate)), contentB, { at: '2026-10-18T11:01:00.000Z' });
-    await choreography(s, log);
-    const [ra, rb] = await Promise.all([a, b]);
-    const raceDir = await ArkVersions.historyDir(dirHandle(raceRoot));
-    const chain = (await ArkVersions.list(raceDir, { limit: 50 })).entries;
-    assert.deepEqual(chain.map((e) => e.record.seq), [3, 2, 1], `${label}: one unbroken chain of three versions`);
-    const contents = chain.map((e) => e.record.content);
-    assert(contents.includes(ra.record.content) && contents.includes(rb.record.content), `${label}: BOTH writers' versions are reachable from the head`);
-    assert.equal(chain[2].hash, base.hash);
-    for (const e of chain.slice(0, 2)) {
-      const before = chain.find((x) => x.hash === e.record.prev);
-      assert(before && before.record.seq === e.record.seq - 1, `${label}: each record names the version really before it`);
+
+  /* -- the scheduler -- */
+  function touches(desc) {
+    const parent = desc.path.includes('/') ? desc.path.slice(0, desc.path.lastIndexOf('/')) : '';
+    if (desc.kind === 'list') return [['names:' + desc.path, false]];
+    if (desc.kind === 'read') return [['entry:' + desc.path, false]];
+    if (desc.kind === 'write') return [['entry:' + desc.path, true]];
+    return [['names:' + parent, true], ['entry:' + desc.path, true]]; /* create, delete */
+  }
+  const independent = (x, y) => touches(x).every(([a, wa]) => touches(y).every(([b, wb]) => a !== b || (!wa && !wb)));
+  /* the folder after a run, as one string: what an ordering produced */
+  const folderState = (root) => { const out = []; (function walk(d) { for (const f of F.readdirSync(d).sort()) { const p = path.join(d, f); if (F.isDir(p)) { out.push(p.slice(root.length) + '/'); walk(p); } else out.push(p.slice(root.length) + '=' + F.readFileSync(p)); } })(root); return out.join('\n'); };
+  async function runSchedule(prefix, template, specs, choose = null) {
+    const root = F.mkdtemp('defxn-interleave-');
+    F.cp(template, root);
+    const trace = [];
+    const ws = specs.map((spec) => ({ ...spec, state: 'idle' }));
+    const arm = (w) => { w.changed = new Promise((r) => { w.wake = r; }); };
+    for (const w of ws) {
+      w.instance = loadInstance();
+      w.instance.lockManager = () => null;
+      w.dir = await w.instance.historyDir(fsDir(root, '', {
+        step: (desc) => new Promise((resolve) => { w.pending = { ...desc, writer: w.name }; w.go = resolve; w.state = 'waiting'; w.wake(); }),
+      }, F));
     }
-    const top = chain[0].record;
-    assert(top.summary.some((l) => /^seo: site\.baseUrl "https:\/\/tab-[ab]\.example\/" → "https:\/\/tab-[ab]\.example\/"$/.test(l)), `${label}: the re-parented record describes its change against its NEW prev: ${top.summary.join(' | ')}`);
-    fs.rmSync(raceRoot, { recursive: true, force: true });
-    return { ra, rb, log };
+    const advance = async (w) => {
+      arm(w);
+      if (w.state === 'idle') {
+        w.state = 'running';
+        w.instance.record(w.dir, w.content, w.meta).then((r) => { w.result = r; w.state = 'done'; w.wake(); }, (e) => { w.error = e; w.state = 'done'; w.wake(); });
+      } else {
+        trace.push(`${w.name}:${w.pending.kind} ${w.pending.path}`);
+        w.state = 'running'; w.go();
+      }
+      await w.changed;
+    };
+    for (const w of ws) await advance(w);
+    const decisions = [];
+    let last = null;
+    for (;;) {
+      const waiting = ws.filter((w) => w.state === 'waiting');
+      if (!waiting.length) break;
+      const allowed = !choose && last && waiting.length > 1 ? waiting.filter((w) => !(w.name < last.writer && independent(w.pending, last))) : waiting;
+      let chosen = allowed[0];
+      if (allowed.length > 1) {
+        const pick = decisions.length < prefix.length ? prefix[decisions.length] : choose ? choose(allowed).name : allowed[0].name;
+        chosen = allowed.find((w) => w.name === pick);
+        decisions.push({ chosen: pick, alternatives: allowed.map((w) => w.name).filter((n) => n !== pick) });
+      }
+      last = chosen.pending;
+      await advance(chosen);
+    }
+    for (const w of ws) if (w.error) { w.error.message = `writer ${w.name} failed in ordering [${trace.join(' | ')}]: ${w.error.message}`; throw w.error; }
+    return { root, trace, decisions, state: folderState(root), writers: Object.fromEntries(ws.map((w) => [w.name, w.result])) };
+  }
+  async function explore(label, template, specs, check) {
+    const stack = [[]], outcomes = {}, started = Date.now(), states = new Set();
+    let runs = 0;
+    while (stack.length) {
+      const prefix = stack.pop();
+      const run = await runSchedule(prefix, template, specs);
+      runs += 1;
+      states.add(run.state);
+      try { const outcome = await check(run); outcomes[outcome] = (outcomes[outcome] || 0) + 1; }
+      catch (error) { throw new Error(`${label}, ordering [${run.trace.join(' | ')}]: ${error.message}`, { cause: error }); }
+      for (let i = prefix.length; i < run.decisions.length; i++) {
+        for (const alt of run.decisions[i].alternatives) stack.push(run.decisions.slice(0, i).map((d) => d.chosen).concat(alt));
+      }
+      F.rmSync(run.root);
+    }
+    console.log(`versions: ${label}: ${runs} orderings in ${Date.now() - started} ms, ${Object.entries(outcomes).map(([k, v]) => `${v} ${k}`).join(', ')}`);
+    return { runs, outcomes, states };
   }
 
-  // (a) stale read: both read head H before either writes. B's compare-and-swap sees A's head and re-parents.
-  const settle = async (probe) => { for (let i = 0; i < 400 && !probe(); i++) await new Promise((r) => setTimeout(r, 5)); assert(probe(), 'the race choreography stalled'); };
-  const stale = await race('stale read', ['A:read#1@after', 'B:read#1@after'], async (s, log) => {
-    await s.arrived('A:read#1@after'); await s.arrived('B:read#1@after'); /* both have read head H */
-    s.release('A:read#1@after');
-    await settle(() => log.includes('A:write')); /* A's record is the head now; B still holds H */
-    s.release('B:read#1@after');
-  });
-  assert.equal(stale.ra.reparented, 0, 'A wrote on top of H as it read it');
-  assert.equal(stale.rb.reparented, 1, 'B\'s compare-and-swap saw the head move and re-parented onto A');
+  /* -- what must hold after every ordering -- */
+  async function checkSettled(run, label) {
+    const { root } = run;
+    const plain = await ArkVersions.historyDir(memDir(root));
+    const { records, truth } = scanHistory(root);
+    const view = await ArkVersions.readHeads(plain);
+    assert.deepEqual(view.heads.map((x) => x.hash).sort(), truth, 'the heads derived from heads/ are the heads derived from every record');
+    assert.deepEqual(view.missing, [], 'every head names a record that is on disk');
+    for (const hash of truth) assert(headFiles(root).includes(hash + '.flx'), `head ${hash.slice(0, 12)} has its head file: no head was trimmed before its successor existed`);
+    const listed = (await ArkVersions.list(plain, { limit: 1000 })).entries;
+    const order = listed.map((e) => e.hash);
+    assert.equal(new Set(order).size, order.length, 'no record is listed twice');
+    assert.deepEqual([...order].sort(), Object.keys(records).sort(), 'every record on disk is listed: nothing was lost');
+    for (const [name, result] of Object.entries(run.writers)) assert(result && !result.unchanged && order.includes(result.hash), `writer ${name}'s version is listed`);
+    listed.forEach((e, i) => ArkVersions.parentsOf(e.record).forEach((p) => { if (records[p]) assert(order.indexOf(p) > i, 'a record is listed above the records it follows'); }));
+    if (truth.length > 1) {
+      const sides = listed.filter((e) => Object.values(run.writers).some((r) => r.hash === e.hash));
+      assert(sides.every((e) => e.forked), 'a fork lists both sides as branches');
+      assert.equal(new Set(sides.map((e) => e.branch)).size, sides.length, 'each side of the fork is its own branch');
+    }
 
-  // (b) both pass the compare-and-swap, then both write head: A's read-back sees B's head without A in it, and re-parents.
-  //     (A's read-back is held until B has written: had A read back first, B's write would hide A and
-  //     no read-back could notice -- a file system has no atomic compare-and-swap. That residual
-  //     window is exactly what the Web Lock in case (c) closes for tabs of the same browser.)
-  const window_ = await race('check-then-write window', ['A:read#2@after', 'B:read#2@after', 'A:read#3'], async (s, log) => {
-    await s.arrived('A:read#2@after'); await s.arrived('B:read#2@after'); /* both compare-and-swap checks saw H */
-    s.release('A:read#2@after');
-    await s.arrived('A:read#3'); /* A wrote head and is about to read it back -- hold it there */
-    s.release('B:read#2@after');
-    await settle(() => log.includes('B:write'));
-    s.release('A:read#3');
-  });
-  assert(window_.ra.reparented >= 1, 'A found its record overwritten and re-parented onto B');
-  assert.equal(window_.rb.reparented, 0, 'B never had to move');
+    /* the next Save, by a third editor, joins every head and trims heads/ to its own file */
+    const third = loadInstance(); third.lockManager = () => null;
+    const joined = await third.record(await third.historyDir(memDir(root)), tinyWith('https://third.example/'), { at: '2026-10-18T11:30:00.000Z' });
+    assert.deepEqual(ArkVersions.parentsOf(joined.record).sort(), truth, 'the next record follows every head (prev + joins)');
+    assert.equal(joined.joined, truth.length - 1);
+    if (truth.length > 1) assert(/^joins #/.test(joined.record.summary[0]) && joined.record.summary.some((l) => /^vs #\d+ seo: site\.baseUrl /.test(l)), 'a join says what it joins and how its drafts differ from the joined branch: ' + joined.record.summary.join(' | '));
+    assert.deepEqual(scanHistory(root).truth, [joined.hash], 'after the join there is one head');
+    assert.deepEqual(headFiles(root), [joined.hash + '.flx'], 'every superseded head file was trimmed, and only those');
+    const after = (await ArkVersions.list(plain, { limit: 1000 })).entries;
+    assert.equal(after.length, order.length + 1, 'the join lists every record once more, under it');
+    if (truth.length > 1) assert(after[0].hash === joined.hash && !after[0].forked && after.slice(1).some((e) => e.forked), 'the join row is on one line; the branches it joined are listed under it');
+    return truth.length > 1 ? 'forked, then joined' : 'linear';
+  }
 
-  // (c) same-origin tabs share navigator.locks (Node 24 has it too): the second writer waits, so nothing interleaves
+  /* fresh: a history written by this store, one version; A and B save at once */
+  const freshTemplate = F.mkdtemp('defxn-template-fresh-');
+  const freshBase = await ArkVersions.record(await ArkVersions.historyDir(memDir(freshTemplate)), tiny, { at: '2026-10-18T11:00:00.000Z' });
+  const writersAB = [
+    { name: 'A', content: tinyWith('https://tab-a.example/'), meta: { at: '2026-10-18T11:01:00.000Z' } },
+    { name: 'B', content: tinyWith('https://tab-b.example/'), meta: { at: '2026-10-18T11:02:00.000Z' } },
+  ];
+  const fresh = await explore('two writers, no lock', freshTemplate, writersAB, async (run) => {
+    for (const result of Object.values(run.writers)) assert(ArkVersions.parentsOf(result.record).length >= 1, 'every new record follows something');
+    assert(Object.values(run.writers).every((r) => r.record.prev === freshBase.hash || Object.values(run.writers).some((o) => o.hash === r.record.prev)), 'each record follows the base or the other writer');
+    return checkSettled(run);
+  });
+  assert(fresh.outcomes['forked, then joined'] && fresh.outcomes.linear, 'the orderings include both outcomes: some fork, some see the other writer and follow it');
+  /* The reduction is checked, not trusted: orderings chosen at random with NO pruning (every
+     waiting writer may go next) must each end in a folder state the reduced search produced. The
+     full unpruned space is ~C(26,13) = 10 million orderings, so it is sampled, with a fixed seed. */
+  {
+    let seed = 20261018;
+    const random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    for (let i = 0; i < 300; i++) {
+      const run = await runSchedule([], freshTemplate, writersAB, (allowed) => allowed[Math.floor(random() * allowed.length)]);
+      assert(fresh.states.has(run.state), 'an unpruned ordering reached a folder state the reduced search never produced -- the independence relation is wrong: ' + run.trace.join(' | '));
+      F.rmSync(run.root);
+    }
+  }
+
+  /* legacy: a history the old script wrote (head.flx). Both writers carry it forward at once. */
+  const legacyTemplate = F.mkdtemp('defxn-template-legacy-');
+  const L1 = await legacyWrite(legacyTemplate, tiny, '2026-10-17T09:00:00.000Z');
+  const L2 = await legacyWrite(legacyTemplate, tinyWith('https://legacy.example/'), '2026-10-17T09:05:00.000Z');
+  const legacyPointer = F.readFileSync(path.join(HISTORY(legacyTemplate), 'head.flx'));
+  await explore('two writers carrying a legacy head.flx forward', legacyTemplate, writersAB, async (run) => {
+    assert(F.readFileSync(path.join(HISTORY(run.root), 'head.flx')) === (legacyPointer), 'head.flx is never written');
+    assert(F.existsSync(path.join(HISTORY(run.root), 'legacy', L2.hash + '.flx')), 'the carried legacy head is marked, once');
+    const firsts = Object.values(run.writers).filter((r) => r.record.prev === L2.hash);
+    assert(firsts.length >= 1 && firsts.every((r) => r.record.seq === 3), 'the first new records follow the legacy head and continue its seq');
+    return checkSettled(run);
+  });
+
+  /* fork: two machines each saved on the same base and the folders synced -- two heads. A and B
+     both save at once, so both write a join; the third writer joins the joins. */
+  const forkTemplate = F.mkdtemp('defxn-template-fork-');
+  F.cp(freshTemplate, forkTemplate);
+  const machine2 = F.mkdtemp('defxn-machine2-');
+  F.cp(freshTemplate, machine2);
+  const X = await loadInstance().record(await ArkVersions.historyDir(memDir(forkTemplate)), tinyWith('https://machine-1.example/'), { at: '2026-10-18T11:00:30.000Z' });
+  const Y = await loadInstance().record(await ArkVersions.historyDir(memDir(machine2)), tinyWith('https://machine-2.example/'), { at: '2026-10-18T11:00:40.000Z' });
+  for (const d of ['versions', 'bodies', 'heads']) for (const f of F.readdirSync(path.join(HISTORY(machine2), d))) {
+    const to = path.join(HISTORY(forkTemplate), d, f);
+    if (!F.existsSync(to)) F.writeFileSync(to, F.readFileSync(path.join(HISTORY(machine2), d, f))); /* the sync: files arrive, nothing is replaced */
+  }
+  F.rmSync(machine2);
+  assert.deepEqual(scanHistory(forkTemplate).truth, [X.hash, Y.hash].sort(), 'the synced folder has two heads');
+  const forkPage = await ArkVersions.list(await ArkVersions.historyDir(memDir(forkTemplate)), { limit: 10 });
+  assert.deepEqual(forkPage.entries.map((e) => [e.hash, e.forked]), [[Y.hash, true], [X.hash, true], [freshBase.hash, false]], 'an open fork lists both heads, newest first, as branches above their base');
+  assert.equal(forkPage.heads.length, 2);
+  await explore('two writers joining a synced fork at once', forkTemplate, writersAB, async (run) => {
+    for (const result of Object.values(run.writers)) assert(ArkVersions.parentsOf(result.record).length >= 2 || [X.hash, Y.hash].every((h) => scanHistory(run.root).records[h]), 'a writer that saw the fork joined it');
+    const sawFork = Object.values(run.writers).filter((r) => r.joined > 0);
+    assert(sawFork.length >= 1, 'whoever saved first joined the fork');
+    return checkSettled(run);
+  });
+  for (const t of [freshTemplate, legacyTemplate, forkTemplate]) F.rmSync(t);
+  assert(guardLog.identical.every((p) => CONTENT_ADDRESSED.test(p)), 'the only repeated writes were identical bytes to content-addressed files');
+
+  /* ---- 3d. migration, step by step: head.flx is read, carried forward once, never written ----
+     Why each step: an existing history must keep working (it is the owner's real history); an
+     editor still running the old script on the same folder keeps rewriting head.flx, and what it
+     records there must still reach the list; old exports must still import. */
+  {
+    const root = F.mkdtemp('defxn-migrate-');
+    const l1 = await legacyWrite(root, tiny, '2026-10-17T09:00:00.000Z');
+    const l2 = await legacyWrite(root, tinyWith('https://legacy.example/'), '2026-10-17T09:05:00.000Z');
+    const tree = () => { const out = []; (function walk(d, r) { for (const f of F.readdirSync(d).sort()) { const p = path.join(d, f); if (F.isDir(p)) walk(p, r + f + '/'); else out.push(r + f + ':' + F.readFileSync(p, 'utf8').length); } })(HISTORY(root), ''); return out; };
+    const pointer = F.readFileSync(path.join(HISTORY(root), 'head.flx'));
+    const dir = await ArkVersions.historyDir(memDir(root));
+    const untouched = tree();
+    const page = await ArkVersions.list(dir);
+    assert.deepEqual(page.entries.map((e) => e.hash), [l2.hash, l1.hash], 'a legacy history lists as it always did');
+    assert.deepEqual(page.heads, [l2.hash]);
+    assert.deepEqual(tree(), untouched, 'reading a legacy history writes nothing');
+
+    const migrator = loadInstance(); migrator.lockManager = () => null;
+    const r = await migrator.record(dir, tinyWith('https://new-script.example/'), { at: '2026-10-18T09:00:00.000Z' });
+    assert.equal(r.record.prev, l2.hash); assert.equal(r.record.seq, 3); assert.deepEqual(r.record.joins, []);
+    assert.equal(r.record.format, 'defxn-cms-version/2');
+    assert(F.readFileSync(path.join(HISTORY(root), 'head.flx')) === (pointer), 'head.flx is never written');
+    assert.deepEqual(headFiles(root), [r.hash + '.flx']);
+    assert(F.existsSync(path.join(HISTORY(root), 'legacy', l2.hash + '.flx')), 'the carried value is marked, so it is not a head again');
+    assert.deepEqual((await ArkVersions.readHeads(dir)).heads.map((x) => x.hash), [r.hash]);
+
+    /* an editor still running the old script writes on the old pointer */
+    const l3 = await legacyWrite(root, tinyWith('https://old-script.example/'), '2026-10-18T09:01:00.000Z');
+    assert.equal(l3.record.prev, l2.hash);
+    const forked = await ArkVersions.readHeads(dir);
+    assert.deepEqual(forked.heads.map((x) => x.hash), [l3.hash, r.hash], 'what the old script recorded is a head beside the new one');
+    assert.equal(forked.legacy, l3.hash);
+    const forkList = (await ArkVersions.list(dir)).entries;
+    assert.deepEqual(forkList.map((e) => e.hash), [l3.hash, r.hash, l2.hash, l1.hash]);
+    assert(forkList[0].forked && forkList[1].forked && forkList[0].branch !== forkList[1].branch && !forkList[2].forked);
+
+    const s = await migrator.record(dir, tinyWith('https://new-script.example/'), { at: '2026-10-18T09:02:00.000Z' });
+    assert.equal(s.record.prev, r.hash, 'a join is described against this editor\'s own branch');
+    assert.deepEqual(s.record.joins, [l3.hash]);
+    assert.equal(s.record.seq, 4, 'a join is one past the highest head it joins (both branches are #3)');
+    assert(/^joins #3 /.test(s.record.summary[0]) && s.record.summary.includes('vs #3 seo: site.baseUrl "https://old-script.example/" → "https://new-script.example/"'), 'the join names the old script\'s version and what differs from it: ' + s.record.summary.join(' | '));
+    assert.deepEqual((await ArkVersions.readHeads(dir)).heads.map((x) => x.hash), [s.hash]);
+    assert(F.existsSync(path.join(HISTORY(root), 'legacy', l3.hash + '.flx')));
+    assert.equal(FLX.decodeState(F.readFileSync(path.join(HISTORY(root), 'head.flx'))).head, l3.hash, 'head.flx still holds what the old script wrote; nothing here rewrote it');
+    const joinedList = (await ArkVersions.list(dir)).entries;
+    assert.deepEqual(joinedList.map((e) => e.hash), [s.hash, l3.hash, r.hash, l2.hash, l1.hash], 'the join lists both branches under it, in time order');
+    assert(!joinedList[0].forked && joinedList[1].forked && joinedList[2].forked && !joinedList[3].forked);
+
+    /* a head file a sync brings back after it was trimmed is stale: listed once, pruned, trimmed by the next Save */
+    F.writeFileSync(path.join(HISTORY(root), 'heads', r.hash + '.flx'), FLX.encodeState({ head: r.hash, seq: 3 }));
+    const resurrected = await ArkVersions.readHeads(dir);
+    assert.deepEqual(resurrected.heads.map((x) => x.hash), [s.hash]); assert.deepEqual(resurrected.stale, [r.hash]);
+    assert.equal((await ArkVersions.list(dir)).entries.length, 5, 'a stale head file adds no row');
+    const t = await migrator.record(dir, tinyWith('https://after-resurrection.example/'), { at: '2026-10-18T09:03:00.000Z' });
+    assert.deepEqual(t.record.joins, [], 'a stale head file is not a branch to join');
+    assert.deepEqual(headFiles(root), [t.hash + '.flx'], 'the stale head file was trimmed with the superseded one');
+
+    /* exports made from a legacy (/1) record by the old script still prove themselves and import */
+    const oldExport = await ArkVersions.exportVersion(dir, l1.hash);
+    const back = await ArkVersions.importVersion(dir, oldExport.text, { name: oldExport.name, at: '2026-10-18T09:04:00.000Z' });
+    assert.equal(back.record.importedFrom, l1.hash); assert.equal(back.record.content, l1.record.content); assert.equal(back.record.prev, t.hash);
+    assert.deepEqual(headFiles(root), [back.hash + '.flx'], 'an imported record is evidence, not a head');
+    F.rmSync(root);
+  }
+
+  /* ---- 3e. same-origin tabs share navigator.locks (Node 24 has it too): the cheap path ----
+     Not needed for correctness (3c), but it keeps two tabs of one browser from forking at all. */
   if (globalThis.navigator && globalThis.navigator.locks) {
-    /* A is held right after reading head, as in (a). Without a shared lock B reads head meanwhile
-       (the stale-read setup); with it, B cannot touch head.flx until A has finished. */
-    const locked = await race('Web Locks', ['A:read#1@after'], async (s, log) => {
-      await s.arrived('A:read#1@after');
-      for (let i = 0; i < 60 && !log.includes('B:read'); i++) await new Promise((r) => setTimeout(r, 5));
-      s.release('A:read#1@after');
-    }, { locks: true });
-    const firstB = locked.log.findIndex((x) => x.startsWith('B:')), lastA = locked.log.map((x) => x.startsWith('A:')).lastIndexOf(true);
-    const firstA = locked.log.findIndex((x) => x.startsWith('A:')), lastB = locked.log.map((x) => x.startsWith('B:')).lastIndexOf(true);
-    assert(lastA < firstB || lastB < firstA, 'under the lock one writer finishes before the other touches head.flx: ' + locked.log.join(' '));
-    assert.equal(locked.ra.reparented + locked.rb.reparented, 0, 'under the lock no writer ever has to re-parent');
+    const root = F.mkdtemp('defxn-locks-');
+    await ArkVersions.record(await ArkVersions.historyDir(memDir(root)), tiny, { at: '2026-10-18T11:00:00.000Z' });
+    const log = [];
+    let holdA, heldA = new Promise((r) => { holdA = r; }), arrivedA;
+    const arrived = new Promise((r) => { arrivedA = r; });
+    const tabs = ['A', 'B'].map((name) => {
+      const instance = loadInstance();
+      return { name, instance, io: { step: async (desc) => { log.push(name + ':' + desc.kind); if (name === 'A' && log.filter((x) => x.startsWith('A:')).length === 1) { arrivedA(); await heldA; } } } };
+    });
+    const dirs = await Promise.all(tabs.map(async (t) => t.instance.historyDir(fsDir(root, '', t.io, F))));
+    const a = tabs[0].instance.record(dirs[0], tinyWith('https://tab-a.example/'), { at: '2026-10-18T11:01:00.000Z' });
+    await arrived;
+    const b = tabs[1].instance.record(dirs[1], tinyWith('https://tab-b.example/'), { at: '2026-10-18T11:02:00.000Z' });
+    for (let i = 0; i < 40 && !log.some((x) => x.startsWith('B:')); i++) await new Promise((r) => setTimeout(r, 5));
+    holdA();
+    const [ra, rb] = await Promise.all([a, b]);
+    const firstB = log.findIndex((x) => x.startsWith('B:')), lastA = log.map((x) => x.startsWith('A:')).lastIndexOf(true);
+    assert(lastA < firstB, 'under the lock B touches the folder only after A has finished: ' + log.join(' '));
+    assert.equal(rb.record.prev, ra.hash, 'under the lock there is no fork');
+    assert.deepEqual(scanHistory(root).truth, [rb.hash]);
+    F.rmSync(root);
   } else console.log('note: this Node has no navigator.locks; the Web Locks case was not run');
+  globalThis.crypto.subtle.digest = subtleDigest;
 
   /* ---- 4. wiring: the app loads the grammar before the store, and Save/Publish/preview use it ---- */
   const html = fs.readFileSync('admin-app.html', 'utf8');
   const order = ['js/admin/vendor/flx-state-grammar.js', 'js/admin/versions.js', 'js/admin/versions-panel.js', 'js/admin/admin.js'].map((src) => html.indexOf(`<script src="${src}" defer>`));
   assert(order.every((i) => i > 0) && order.every((i, n) => !n || i > order[n - 1]), 'admin-app.html loads grammar -> store -> panel -> admin.js, in that order');
   assert(html.includes('id="versionsNav"') && html.includes('id="versionsPanel"'), 'the Versions button and panel are in the persistent header/document');
-  const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+  const admin = require('./lib/admin-source.cjs').ADMIN;
   const saveBody = admin.slice(admin.indexOf('async function saveEverything()'), admin.indexOf('\n  async function deleteCurrent()'));
   assert(saveBody.includes('message += await recordVersion(succeeded.length);'), 'every Save records a version of what it wrote');
   /* All 13: the 4 per-id lists by name, and every single draft through js/admin/store.js's one
      draft list and each handle's saved() (the *Saved string) -- tests/site-drafts.test.mjs proves
      every handle's saved() returns that draft's own *Saved variable. */
   assert(/function savedSnapshot\(\)[\s\S]{0,1200}ArkAdminStore\.drafts\('single'\)\.forEach\(function \(d\) \{ snapshot\[d\.key\] = one\(singleDraftHandle\(d\.key\)\.saved\(\)\); \}\)/.test(admin), 'a version records the SAVED drafts (the *Saved strings), all 13 of them');
-  assert(admin.includes("site: versionPreviewSite || cmsSourceSite"), 'a previewed version reaches the real preview through the existing defxn-cms-preview-state message');
+  assert(admin.includes("site: state.versionPreviewSite || state.cmsSourceSite"), 'a previewed version reaches the real preview through the existing defxn-cms-preview-state message');
   assert(admin.includes("recordVersion(1, { kind: 'publish'"), 'a publish is recorded as a forward record carrying the published address');
   assert(fs.readFileSync('.vercelignore', 'utf8').split('\n').includes('cms-history'), 'the history is never deployed with the public site');
 

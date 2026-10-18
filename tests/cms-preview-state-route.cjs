@@ -13,21 +13,20 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 function slice(from, to) {
   const start = admin.indexOf(from), end = admin.indexOf(to, start);
   assert(start >= 0 && end > start, 'js/admin/admin.js still has ' + from.trim());
   return admin.slice(start, end);
 }
-const code = slice('  function reloadPreview() {', '\n  /* Unsaved image edits') + '\n' + slice('  function notifyPreviewState() {', '  function themeDirty()');
+const code = slice('  function reloadPreview() {', '\n  /* Unsaved image edits') + '\n' + slice('  function notifyPreviewState() {', "  $('frame').addEventListener('load'");
 
 const posted = [];
 const el = () => ({ hidden: false, textContent: '', href: '', src: '' });
 const nodes = { frame: Object.assign(el(), { contentWindow: { postMessage: (msg) => posted.push(msg) } }), previewPath: el(), open: el(), previewNote: el() };
 const context = {
   $: (id) => nodes[id], window: { location: { origin: 'http://x' } }, Date,
-  state: { kind: 'article', aCurrent: 'kept', aSaved: { kept: '{}', gone: '{}' } },
-  articlesReady: true, siteFromState: () => ({ articles: ['kept'] }),
+  state: { kind: 'article', aCurrent: 'kept', aSaved: { kept: '{}', gone: '{}' }, articlesReady: true }, siteFromState: () => ({ articles: ['kept'] }),
   previewRoute: () => '/learnings/' + context.state.aCurrent, previewUrl: () => 'index.html',
 };
 vm.createContext(context);

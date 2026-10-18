@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 
 const app = fs.readFileSync('admin-app.html', 'utf8');
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const main = fs.readFileSync('js/main.js', 'utf8');
 const router = fs.readFileSync('js/ark/page-router.js', 'utf8');
 const runtime = fs.readFileSync('js/ark/runtime.js', 'utf8');
@@ -107,7 +107,7 @@ assert(admin.includes('function renderStudioEditor'), 'the merged app has one fu
 // changes here) is deleted outright and superseded by saveEverything() -- see the dedicated
 // Step 5 block far below for the full assertion set on the unified save model.
 assert(admin.includes('async function saveEverything()') && !admin.includes('async function saveStudioChanges'), 'Studio changes save through saveEverything() now, not a separate saveStudioChanges() function');
-assert(studio.includes('let cmsRoutes'), 'Studio keeps the real route list (studioRoutes()), now read directly by renderStudioEditor() instead of arriving in a defxn-studio-load/preview-state message, replacing the deleted dense pages()/curPage');
+assert(studio.includes('state.cmsRoutes = []'), 'Studio keeps the real route list (studioRoutes()), now read directly by renderStudioEditor() instead of arriving in a defxn-studio-load/preview-state message, replacing the deleted dense pages()/curPage');
 assert(studio.includes('69 real DEFXN routes') === false, 'the route total is data-driven, never hard-coded');
 assert(studio.includes('id="cmsPreview"'), 'Studio embeds the real DEFXN application as its canvas');
 assert(studio.includes('index.html?cms-preview=1#'), 'the exact preview opens the selected public route');
@@ -170,7 +170,7 @@ assert(studio.includes("ctlSegField(ctx, 'Font', 'font', CMS_FONT_TOKENS") && st
 // call site, and every control builder routes through ctx.set/ctx.get rather than posting
 // (or reading a draft) on its own.
 assert((admin.match(/postCmsLayoutCommand\(draft\)/g) || []).length === 1, 'postCmsLayoutCommand(draft) now has exactly one call site (makeFrameCtx()\'s ctx.set), not one per copy-pasted control closure');
-assert(admin.includes('function makeFrameCtx()') && /set: \(key, value\) => \{ draft\[key\] = value; cmsExactSelection\.frame = \{ \.\.\.draft \}; postCmsLayoutCommand\(draft\); renderSelToolbar\(\); \}/.test(admin), 'makeFrameCtx() is the one place a Frame/Layout/Spacing/Typography/Fill/Size/Effects edit patches the real layout and re-renders');
+assert(admin.includes('function makeFrameCtx()') && /set: \(key, value\) => \{ draft\[key\] = value; state\.cmsExactSelection\.frame = \{ \.\.\.draft \}; postCmsLayoutCommand\(draft\); renderSelToolbar\(\); \}/.test(admin), 'makeFrameCtx() is the one place a Frame/Layout/Spacing/Typography/Fill/Size/Effects edit patches the real layout and re-renders');
 assert(admin.includes('function ctlField(ctx, label, key, opts)') && admin.includes('function ctlSegField(ctx, label, key, options, labelOf)') && admin.includes('function ctlSelectField(ctx, label, key, options, labelOf, opts)') && admin.includes('function ctlSwatchField(ctx, label, key, tokens, allowNone)'), 'the 4 control-builder functions are declared once at module scope, parameterized by ctx, not redeclared per panel');
 assert((admin.match(/function ctlField\(/g) || []).length === 1 && (admin.match(/function ctlSegField\(/g) || []).length === 1 && (admin.match(/function ctlSelectField\(/g) || []).length === 1 && (admin.match(/function ctlSwatchField\(/g) || []).length === 1, 'each control-builder function is declared exactly once -- the 3 old copy-pasted closures (canvas-transitions pane, element-motion pane, the big per-element Frame block) are gone');
 // The 3 old closures themselves (the exact shapes this file's earlier assertions tested
@@ -190,7 +190,7 @@ assert(layout.includes('applyGroupDefault') && main.includes('cmsNearestCommonAn
 assert(main.includes('function cmsSnapshotLayout') && main.includes('function cmsUndoLayout') && main.includes('function cmsRedoLayout'), 'the preview iframe keeps a real undo/redo history for layout/style edits, not just content');
 assert(main.includes('cmsSnapshotLayout();') && (main.match(/cmsSnapshotLayout\(\);/g) || []).length >= 5, 'every layout mutation site (field commit, drag, align, distribute, group, ungroup, reset) snapshots before mutating');
 assert(studio.includes('function postCmsLayoutUndo') && studio.includes('function postCmsLayoutRedo'), 'Studio relays undo/redo requests into the preview iframe');
-assert(studio.includes('function undo() { if (cmsLayoutCanUndo) postCmsLayoutUndo(); }') && studio.includes('function redo() { if (cmsLayoutCanRedo) postCmsLayoutRedo(); }'), 'Step 1 simplified undo()/redo() to the real layout history alone -- the local dense-tree undoStack/redoStack fallback is deleted along with the rest of the standalone engine, since cmsConnected is always true going forward');
+assert(studio.includes('function undo() { if (state.cmsLayoutCanUndo) postCmsLayoutUndo(); }') && studio.includes('function redo() { if (state.cmsLayoutCanRedo) postCmsLayoutRedo(); }'), 'Step 1 simplified undo()/redo() to the real layout history alone -- the local dense-tree undoStack/redoStack fallback is deleted along with the rest of the standalone engine, since cmsConnected is always true going forward');
 // Step 2: the real preview iframe still reports 'defxn-cms-preview-layout-replace' (that
 // boundary is unchanged), but the old second hop -- Studio relaying it up to admin.js via
 // 'defxn-studio-layout-replace' -- is gone; the SAME handler calls applyStudioLayoutReplace
@@ -210,7 +210,7 @@ assert(host.includes("'llms.txt'"), 'the publish host serves the real llms.txt f
 // field definition (tests/seo-fields.cjs). admin.js's receiving side still accepts those
 // same fields from any sender.
 assert(admin.includes('ArkSEO.sanitize') && admin.includes('function seoFieldRows'), 'the SEO panels edit every field kind (bots is an object, noindex/aiBlocked/llms are 0/1) through seoFieldRows, reconciled by ArkSEO.sanitize at save time -- the old applyStudioPatches relay that also accepted them is deleted with the Studio document');
-assert(studio.includes('cmsPageSeo(cmsSourceSite'), 'Studio\'s remaining SEO surface (the honest redirect panel and the ported search/AI design-checks) reads real per-route SEO through the same pure cmsPageSeo()/cmsSeoValue() functions cmsSiteSpec used to, not a reinvented lookup');
+assert(studio.includes('cmsPageSeo(state.cmsSourceSite'), 'Studio\'s remaining SEO surface (the honest redirect panel and the ported search/AI design-checks) reads real per-route SEO through the same pure cmsPageSeo()/cmsSeoValue() functions cmsSiteSpec used to, not a reinvented lookup');
 
 // Bug fixes from direct user report:
 // 1) grouping must be reflected in the sidebar, not just on the canvas.
@@ -219,7 +219,7 @@ assert(main.includes('function cmsGroupList') && (main.match(/groups: cmsGroupLi
 // its own persistent block above the Layers tree (#groupsBrowse/renderGroupsBrowse()) --
 // it needs no current selection to make sense, unlike every #selToolbar taxonomy section.
 assert(app.includes('id="groupsBrowse"'), 'the Layers tab gained a persistent #groupsBrowse container, above the Layers tree');
-assert(admin.includes('function renderGroupsBrowse()') && admin.includes("head.textContent = `Groups on this page (${cmsGroups.length})`") && admin.includes('postCmsSelectGroup'), 'connected Studio shows a real, clickable list of the current page\'s groups, now rendered into #groupsBrowse');
+assert(admin.includes('function renderGroupsBrowse()') && admin.includes("head.textContent = `Groups on this page (${state.cmsGroups.length})`") && admin.includes('postCmsSelectGroup'), 'connected Studio shows a real, clickable list of the current page\'s groups, now rendered into #groupsBrowse');
 assert(/function renderLayersPane\(\) \{\s*renderGroupsBrowse\(\);\s*renderConnectedLayers\(\);\s*\}/.test(admin), 'renderLayersPane() paints renderGroupsBrowse() every time it repaints the Layers tree, so the group list never goes stale relative to it');
 assert(main.includes("data.type === 'defxn-cms-preview-select-group'"), 'the preview iframe can select a group by id on request from the sidebar list');
 // 2) dragging right after grouping must move the group, not reach into a member -- covered
@@ -287,7 +287,7 @@ assert(studio.includes("e.preventDefault(); postCmsRemoveSelection(); }") && !st
 assert(layout.includes('function setLabel') && layout.includes('function labelFor'), 'ArkLayout gained setLabel/labelFor for a real element\'s editable display name, mirroring group()/sanitize()\'s own style');
 assert(layout.includes('out.labels[route] = cleanLabels'), 'sanitize() produces a labels map alongside routes/groups, capped and cleaned the same way, not a separate unsanitized shape');
 assert(main.includes('function cmsRealTree'), 'the preview iframe gained one function that walks the real DOM into a layers tree, mirroring the standalone tree\'s own shape');
-assert(/function cmsRealTree[\s\S]{0,200}ArkLayout\.annotate\(host\)/.test(main), 'cmsRealTree re-annotates the host first, the same guarantee the click handler already relies on before resolving a pick');
+assert(/function cmsRealTree[\s\S]{0,200}ArkLayout\.annotate\(host(, route)?\)/.test(main), 'cmsRealTree re-annotates the host first, the same guarantee the click handler already relies on before resolving a pick');
 assert(/tag === 'svg' \? \[\] : walk\(element\)/.test(main), 'a whole <svg> is treated as one leaf row, never recursed into -- its internals stay reachable only through the existing "Enter illustration" escape hatch');
 assert(main.includes('function cmsElementForKey'), 'the hide toggle and rename resolve a tree row by its stable key, independent of whatever happens to be selected right now');
 assert(main.includes('function setCmsLayoutFrameForKey'), 'the hide toggle reuses setCmsElementFrame (the exact ArkLayout.set() mechanism every Frame/Fill control already uses), keyed to an explicit element instead of cmsPreviewSelected');
@@ -298,12 +298,12 @@ assert((main.match(/tree: cmsRealTree\(host, ?[^)]*\)/g) || []).length >= 8, 'th
 assert(studio.includes('function renderConnectedLayers'), 'Studio gained the connected-mode equivalent of renderLayers(), reusing the same row markup conventions (.layer-toggle, role=treeitem, aria-selected, collapsedLayers)');
 assert(studio.includes('function renderLayersPane') && studio.includes('renderLayersPane();'), 'the render loop goes through one renderLayersPane() dispatcher rather than calling renderConnectedLayers() directly at each call site');
 assert(/renderLayersPane\(\); renderPages\(\)/.test(studio), 'the main render loop now paints the connected-aware dispatcher, not renderLayers() unconditionally');
-assert(studio.includes('let cmsTree = []'), 'Studio tracks the iframe-reported real tree the same way it already tracks cmsGroups/cmsComponentAnchors');
+assert(studio.includes('state.cmsTree = []'), 'Studio tracks the iframe-reported real tree the same way it already tracks cmsGroups/cmsComponentAnchors');
 assert(studio.includes('function postCmsSelectKey'), 'a row click posts select-by-key, generalizing postCmsSelectGroup\'s existing message rather than a new one');
 assert(studio.includes('function postCmsSetLabel') && studio.includes("'defxn-cms-preview-set-label'"), 'a row rename posts through its own typed message, mirroring postCmsSelectGroup/postCmsRemoveSelection\'s own shape');
 assert(/function postCmsLayoutCommand\(frame, key\)/.test(studio), 'postCmsLayoutCommand gained an optional key parameter for the eye icon, so a hide toggle can target a row that is not the current selection -- every other caller omits it and is unaffected');
 assert(studio.includes("postCmsLayoutCommand({ display: row.hidden ? null : 'hide' }, row.key)"), 'the eye icon toggles through the exact same postCmsLayoutCommand path the Frame/Fill accordion\'s own Display control already uses, not a parallel mechanism');
-assert(admin.includes("patch.operation === 'set-label'") && admin.includes('ArkLayout.setLabel(layoutDraft'), 'Content CMS\'s authoritative layoutDraft gains the same set-label branch applyStudioLayoutPatch already dispatches group/ungroup/reset/frame-set through, so a rename actually persists on Save');
+assert(admin.includes("patch.operation === 'set-label'") && admin.includes('ArkLayout.setLabel(state.layoutDraft'), 'Content CMS\'s authoritative layoutDraft gains the same set-label branch applyStudioLayoutPatch already dispatches group/ungroup/reset/frame-set through, so a rename actually persists on Save');
 
 // Part F (earlier follow-up plan) built restrictMode as shared scaffolding for two
 // dedicated, narrowed Studio modes (canvas-only, anim-only). Step 4 (flickering-juggling-
@@ -327,7 +327,7 @@ assert(!admin.includes('function enterComp') && !admin.includes('function exitCo
 // Since the one header (2026-10-18) its button is the Background segment of Design's views.
 assert(app.includes('id="designBackgroundBtn"') && !app.includes('id="btnCanvasTransitions"'), 'the site-wide, selection-independent background-transition panel opens from the header\'s Background segment');
 assert(/function openCanvasTransitionsPopover\(\) \{[\s\S]{0,400}openPop\(anchor, renderCanvasTransitionsPopoverContent, 'left'\);/.test(admin), 'openCanvasTransitionsPopover() reuses openPop() directly rather than a second positioning system');
-assert(/function openCanvasTransitionsPopover\(\) \{\s*const anchor = \$\('designBackgroundBtn'\);[\s\S]{0,300}if \(state\.kind !== 'studio'\) selectStudio\(\);\s*if \(view !== 'design'\) setView\('design'\);/.test(admin), 'Background brings the canvas back first (it previews on the real page), from Theme & defaults or the sitemap');
+assert(/function openCanvasTransitionsPopover\(\) \{\s*const anchor = \$\('designBackgroundBtn'\);[\s\S]{0,300}if \(state\.kind !== 'studio'\) selectStudio\(\);\s*if \(state\.view !== 'design'\) setView\('design'\);/.test(admin), 'Background brings the canvas back first (it previews on the real page), from Theme & defaults or the sitemap');
 assert(admin.includes("$('designBackgroundBtn').addEventListener('click', openCanvasTransitionsPopover);"), 'the Background segment opens the popover anchored to itself');
 
 // Entry point: js/main.js posts the SAME unconditional mode-level action up to Studio
@@ -343,8 +343,8 @@ assert(admin.includes("else if (event.data.type === 'defxn-cms-preview-enter-can
 // silently reintroduces the term, or drops one of the OTHER terms in the same guard by
 // mistake while touching it, is caught.
 const liveGuardSites = [
-  "if (typing || live || view !== 'design') return;",
-  "bn.hidden = device === 0 || live || view !== 'design';",
+  "if (typing || state.live || state.view !== 'design') return;",
+  "bn.hidden = state.device === 0 || state.live || state.view !== 'design';",
 ];
 for (const site of liveGuardSites) assert(admin.includes(site), `restrictMode's removal left this live-guard site intact otherwise: ${JSON.stringify(site.slice(0, 70))}`);
 const deletedGuardSites = [
@@ -352,7 +352,7 @@ const deletedGuardSites = [
   "setInterval(() => { if (sel >= 0 && !live && !restrictMode",
 ];
 for (const site of deletedGuardSites) assert(!admin.includes(site), `the standalone-only guard site should stay gone: ${JSON.stringify(site.slice(0, 50))}`);
-assert(admin.includes("checkT = setTimeout(() => { if (view === 'design') measureChecks()"), 'queueCheck() drops the restrictMode guard along with restrictMode itself; drag.active/editingComp < 0 stay dropped from the earlier step');
+assert(admin.includes("checkT = setTimeout(() => { if (state.view === 'design') measureChecks()"), 'queueCheck() drops the restrictMode guard along with restrictMode itself; drag.active/editingComp < 0 stay dropped from the earlier step');
 
 // Part G (earlier follow-up plan): canvas-transitions' real panel/content module (Step 4
 // retired the restrictMode branch it used to be dispatched from -- see above -- but the
@@ -404,9 +404,9 @@ assert(/ArkCanvasTransitions\.apply\(persistentEl, 'out'\)[\s\S]{0,200}setTimeou
 // which only covered 8 of the 13 real drafts and aborted the whole batch on one draft's
 // error; see the dedicated Step 5 block far below), mirroring
 // statesDraft/applyStudioStatesReplace/ArkAdminStore.saveStates precisely.
-assert(admin.includes('var canvasTransitionsDraft') && admin.includes('function canvasTransitionsDirty()'), 'admin.js keeps a canvasTransitionsDraft + dirty-check, the same shape as statesDraft/statesDirty');
+assert(admin.includes('state.canvasTransitionsDraft = ') && admin.includes('function canvasTransitionsDirty()'), 'admin.js keeps a canvasTransitionsDraft + dirty-check, the same shape as statesDraft/statesDirty');
 assert(admin.includes('function applyStudioCanvasTransitionsReplace(whole)') && admin.includes('applyStudioCanvasTransitionsReplace(event.data.canvasTransitions)'), 'admin.js applies the replace via a direct call from the merged cmsPreview-message handler, the same way it does for applyStudioStatesReplace');
-assert(admin.includes("canvasTransitions: { draft: function () { return canvasTransitionsDraft; }") && admin.includes('dirty: canvasTransitionsDirty, save:') && fs.readFileSync('js/admin/store.js', 'utf8').includes("{ key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Canvas transitions'") && admin.includes('ArkAdminStore.saveCanvasTransitions(state.cdirs.content, canvasTransitionsDraft)') && admin.includes("download('canvas-transitions-data.js', ArkCanvasTransitions.serialize(canvasTransitionsDraft))"), 'saveEverything() writes canvas-transitions-data.js on an explicit Save, the same connected-project-or-download branch every other draft already uses');
+assert(admin.includes("canvasTransitions: { draft: function () { return state.canvasTransitionsDraft; }") && admin.includes('dirty: canvasTransitionsDirty, save:') && fs.readFileSync('js/admin/store.js', 'utf8').includes("{ key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Canvas transitions'") && admin.includes('ArkAdminStore.saveCanvasTransitions(state.cdirs.content, state.canvasTransitionsDraft)') && admin.includes("download('canvas-transitions-data.js', ArkCanvasTransitions.serialize(state.canvasTransitionsDraft))"), 'saveEverything() writes canvas-transitions-data.js on an explicit Save, the same connected-project-or-download branch every other draft already uses');
 assert(/function siteFromState\(\) \{[\s\S]{0,1200}ArkAdminStore\.drafts\(\)\.forEach[\s\S]{0,900}else if \(d\.kind === 'single'\) site\[d\.key\] = window\[d\.global\] \? clone\(singleDraftHandle\(d\.key\)\.draft\(\)\) : null;/.test(admin), 'siteFromState() includes canvasTransitions (every single draft js/admin/store.js lists; tests/site-drafts.test.mjs checks the list), so Studio and the connected preview receive it with every site snapshot');
 const store = fs.readFileSync('js/admin/store.js', 'utf8');
 assert(store.includes('async function saveCanvasTransitions(contentDir, whole)') && store.includes("write(contentDir, 'canvas-transitions-data.js', ArkCanvasTransitions.serialize(whole))") && store.includes('saveCanvasTransitions: saveCanvasTransitions'), 'ArkAdminStore gains saveCanvasTransitions, a single-file write exactly like saveMeshSettings/saveTheme/saveSettingsDefaults/saveStates');
@@ -450,7 +450,7 @@ assert(!/\.anim-mode \.left/.test(studioCss) && !/\.canvas-mode \.left/.test(stu
 // out an exception for it): the Layers tree's own click-to-select handler (postCmsSelectKey)
 // and its receiving end in js/main.js were never gated on restrictMode, and still aren't.
 assert(/li\.addEventListener\('click', \(event\) => \{ if \(event\.target\.closest\('\.layer-toggle'\)[\s\S]{0,140}postCmsSelectKey\(row\.key\); \}\);/.test(studio), "renderConnectedLayers()'s row click handler calls postCmsSelectKey() unconditionally");
-assert(studio.includes('function postCmsSelectKey(key) { if (!cmsConnected || !cmsPreview.contentWindow) return;'), 'postCmsSelectKey() is gated only on cmsConnected');
+assert(studio.includes('function postCmsSelectKey(key) { if (!state.cmsConnected || !cmsPreview.contentWindow) return;'), 'postCmsSelectKey() is gated only on cmsConnected');
 assert(main.includes("data.type === 'defxn-cms-preview-select-group'"), "js/main.js's receiving handler for a Layers-row click is unchanged");
 
 // Element-motion: folded into #selToolbar as one more accordion section
@@ -459,13 +459,13 @@ assert(main.includes("data.type === 'defxn-cms-preview-select-group'"), "js/main
 // not gated behind a separate "pick something first" hint, since the WHOLE toolbar (per
 // selToolbarVisible()) already does not render at all with nothing selected.
 assert(admin.includes('function buildElementMotionSection(pane)'), 'the element-motion panel is a toolbar SECTION builder now, not a restrictMode-dispatched pane');
-assert(/if \(cmsExactSelection\.component\) buildComponentInstanceSection\(box\);\s*if \(cmsExactSelection\.stateGroup\) buildStateGroupSection\(box\);\s*buildElementMotionSection\(box\);/.test(admin), 'renderSelToolbar() always calls buildElementMotionSection() for a real element selection (the kind !== \'group\' branch), unconditionally -- it is one more section, not a mode');
+assert(/if \(state\.cmsExactSelection\.component\) buildComponentInstanceSection\(box\);\s*if \(state\.cmsExactSelection\.stateGroup\) buildStateGroupSection\(box\);\s*buildElementMotionSection\(box\);/.test(admin), 'renderSelToolbar() always calls buildElementMotionSection() for a real element selection (the kind !== \'group\' branch), unconditionally -- it is one more section, not a mode');
 assert(!admin.includes("'Select an element in the Layers panel to animate it.'"), 'the old "pick something first" hint is gone -- renderSelToolbar()\'s own selToolbarVisible() guard already keeps the whole toolbar (animation section included) from rendering with nothing selected, so the hint text is now dead code, not a safety net');
 assert(admin.includes('const CMS_ELEMENT_MOTION_DIRECTIONS = ArkElementMotion.directions();'), 'the direction enum is read from js/content/element-motion.js, the module that validates it');
 assert(/ctlSegField\(ctx, 'Easing', 'easing', CMS_ELEMENT_MOTION_EASINGS\)/.test(admin) && admin.includes('const CMS_ELEMENT_MOTION_EASINGS = ArkElementMotion.easings();'), 'the element-animation easing picker offers what ArkElementMotion.sanitize() keeps -- its own easings(), not the canvas-transitions list it happens to equal today');
 assert(admin.includes('function postCmsElementMotionCommand(patch)') && admin.includes("type: 'defxn-cms-preview-element-motion-command'"), 'field edits post a typed command into the connected preview iframe, mirroring postCmsCanvasTransitionsCommand\'s own shape');
 assert(admin.includes('function postCmsElementMotionPreview(key)') && admin.includes("type: 'defxn-cms-preview-element-motion-preview'"), '"Preview" posts its own one-shot message, never reusing the field-edit command type');
-assert(admin.includes("postCmsElementMotionPreview(cmsExactSelection.key)"), 'the section\'s Preview button targets the currently selected element\'s key');
+assert(admin.includes("postCmsElementMotionPreview(state.cmsExactSelection.key)"), 'the section\'s Preview button targets the currently selected element\'s key');
 // Step 2: same one-hop collapse as canvas-transitions above.
 assert(studio.includes("'defxn-cms-preview-element-motion-replace'") && studio.includes('cmsSourceSite.elementMotion = event.data.elementMotion') && !admin.includes("'defxn-studio-element-motion-replace'"), 'element-motion reaches admin.js in one hop (the real iframe message), not via a second relayed message');
 
@@ -482,9 +482,9 @@ assert(main.includes('ArkElementMotion.vectorFor(entry.direction)') && main.incl
 // draft/saved/dirty + saveEverything() pipeline (Step 5 -- see the matching
 // canvasTransitions comment above), mirroring canvasTransitionsDraft/
 // applyStudioCanvasTransitionsReplace/ArkAdminStore.saveCanvasTransitions precisely.
-assert(admin.includes('var elementMotionDraft') && admin.includes('function elementMotionDirty()'), 'admin.js keeps an elementMotionDraft + dirty-check, the same shape as canvasTransitionsDraft/canvasTransitionsDirty');
+assert(admin.includes('state.elementMotionDraft = ') && admin.includes('function elementMotionDirty()'), 'admin.js keeps an elementMotionDraft + dirty-check, the same shape as canvasTransitionsDraft/canvasTransitionsDirty');
 assert(admin.includes('function applyStudioElementMotionReplace(whole)') && admin.includes('applyStudioElementMotionReplace(event.data.elementMotion)'), 'admin.js applies the replace via a direct call from the merged cmsPreview-message handler, the same way it does for applyStudioCanvasTransitionsReplace');
-assert(admin.includes("elementMotion: { draft: function () { return elementMotionDraft; }") && admin.includes('dirty: elementMotionDirty, save:') && fs.readFileSync('js/admin/store.js', 'utf8').includes("{ key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation'") && admin.includes('ArkAdminStore.saveElementMotion(state.cdirs.content, elementMotionDraft)') && admin.includes("download('element-motion-data.js', ArkElementMotion.serialize(elementMotionDraft))"), 'saveEverything() writes element-motion-data.js on an explicit Save, the same connected-project-or-download branch every other draft already uses');
+assert(admin.includes("elementMotion: { draft: function () { return state.elementMotionDraft; }") && admin.includes('dirty: elementMotionDirty, save:') && fs.readFileSync('js/admin/store.js', 'utf8').includes("{ key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation'") && admin.includes('ArkAdminStore.saveElementMotion(state.cdirs.content, state.elementMotionDraft)') && admin.includes("download('element-motion-data.js', ArkElementMotion.serialize(state.elementMotionDraft))"), 'saveEverything() writes element-motion-data.js on an explicit Save, the same connected-project-or-download branch every other draft already uses');
 assert(/function siteFromState\(\) \{[\s\S]{0,1200}ArkAdminStore\.drafts\(\)\.forEach[\s\S]{0,900}else if \(d\.kind === 'single'\) site\[d\.key\] = window\[d\.global\] \? clone\(singleDraftHandle\(d\.key\)\.draft\(\)\) : null;/.test(admin), 'siteFromState() includes elementMotion (every single draft js/admin/store.js lists; tests/site-drafts.test.mjs checks the list), so Studio and the connected preview receive it with every site snapshot');
 assert(store.includes('async function saveElementMotion(contentDir, whole)') && store.includes("write(contentDir, 'element-motion-data.js', ArkElementMotion.serialize(whole))") && store.includes('saveElementMotion: saveElementMotion'), 'ArkAdminStore gains saveElementMotion, a single-file write exactly like saveCanvasTransitions/saveStates');
 
@@ -551,12 +551,12 @@ for (const site of taxonomyDispatch) assert(admin.includes(site), `renderSelTool
 assert(admin.includes('buildLayoutSection(box, ctx); buildFillSection(box, ctx); buildSpacingSection(box, ctx); buildFrameSection(box, ctx, false); buildSizeSection(box, ctx); buildEffectsSection(box, ctx);'), 'the container branch (the taxonomy\'s default/fallback kind) shows Layout + Fill + Spacing + Frame + Size + Effects (Size was ported and never called: tests/cms-toolbar-taxonomy.cjs)');
 assert(/if \(kind === 'group'\) \{\s*buildFrameSection\(box, ctx, true\);\s*\} else \{/.test(admin), 'a layout-group selection shows ONLY Frame + Ungroup (buildFrameSection\'s isGroup=true branch) -- no Typography/Layout/Fill/Size/Effects, since a group key has no real tag of its own for those to style');
 assert(admin.includes('function buildComponentInstanceSection(pane)') && admin.includes('function buildStateGroupSection(pane)'), 'component-instance and state-group each get their own section builder');
-assert(/if \(cmsExactSelection\.component\) buildComponentInstanceSection\(box\);/.test(admin) && !/if \(kind === 'group'\)[\s\S]{0,50}if \(cmsExactSelection\.component\)/.test(admin.slice(admin.indexOf('function renderSelToolbar'))), 'component-instance/state-group sections render ALONGSIDE whichever taxonomy section applies (never for the group kind, which has no .component/.stateGroup of its own) -- preserving the old accordion\'s "alongside, not instead of" behavior');
+assert(/if \(state\.cmsExactSelection\.component\) buildComponentInstanceSection\(box\);/.test(admin) && !/if \(kind === 'group'\)[\s\S]{0,50}if \(state\.cmsExactSelection\.component\)/.test(admin.slice(admin.indexOf('function renderSelToolbar'))), 'component-instance/state-group sections render ALONGSIDE whichever taxonomy section applies (never for the group kind, which has no .component/.stateGroup of its own) -- preserving the old accordion\'s "alongside, not instead of" behavior');
 // Superseded 2026-10-18: Image's alt-text section was an honest "edited elsewhere" note; it is
 // now a real control. It posts js/main.js's 'defxn-cms-preview-set-alt' and the edit lands in
 // ArkLayout.alts (tests/layout-alt.cjs covers the store and apply; tests/browser/seo-alt-checks.mjs
 // the full edit -> Save -> public page round trip).
-assert(admin.includes('function buildAltTextSection(pane)') && admin.includes('postCmsSetAlt(cmsExactSelection.key, value)') && main.includes("data.type === 'defxn-cms-preview-set-alt'"), 'Image\'s alt-text section edits the alt through the preview protocol, not an "edited elsewhere" note');
+assert(admin.includes('function buildAltTextSection(pane)') && admin.includes('postCmsSetAlt(state.cmsExactSelection.key, value)') && main.includes("data.type === 'defxn-cms-preview-set-alt'"), 'Image\'s alt-text section edits the alt through the preview protocol, not an "edited elsewhere" note');
 
 // Step 5 (flickering-juggling-donut.md, the final step): the two confirmed save/dirty
 // coordination bugs this step fixes, plus the "one save model" it builds on top of them.

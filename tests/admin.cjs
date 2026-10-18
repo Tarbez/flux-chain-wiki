@@ -52,7 +52,7 @@ const {ArkManifest,ArkAdminStore,LearningContent}=vm.runInContext('({ArkManifest
  vm.runInContext(adirs.content.files.get('article-index.js').text,back);vm.runInContext(adirs.articles.files.get('a-new-note.js').text,back);
  assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.find('a-new-note'))),fresh);
  assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.put(fresh))),fresh,'registry updates preserve reading-layer fields');
- const editorSource=fs.readFileSync('js/admin/admin.js','utf8');
+ const editorSource=require('./lib/admin-source.cjs').ADMIN;
  const copyStart=editorSource.indexOf('  function articleCopy(a) {');
  const copyEnd=editorSource.indexOf('  function adoptArticles()',copyStart);
  const editorCopy=vm.runInNewContext(editorSource.slice(copyStart,copyEnd)+'\narticleCopy;', {clone:value=>JSON.parse(JSON.stringify(value))});

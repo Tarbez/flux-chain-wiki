@@ -14,7 +14,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const src = fs.readFileSync('js/admin/admin.js', 'utf8');
+const src = require('./lib/admin-source.cjs').ADMIN;
 const start = src.indexOf('  function syncCmsPreview(force) {');
 const end = src.indexOf("  cmsPreview.addEventListener('load'", start);
 assert(start >= 0 && end > start, 'js/admin/admin.js still defines syncCmsPreview before the preview load listener');
@@ -23,12 +23,13 @@ function run(route, previous) {
   const nodes = { selToolbar: { hidden: false }, selToolbarPop: { hidden: false } };
   const context = vm.createContext({
     $: (id) => nodes[id] || null,
-    cmsConnected: true, cmsCurrentRoute: route, cmsPreviewRoute: previous, cmsPreviewReady: true,
-    cmsExactSelection: { key: 'id:download-title' }, cmsExactSelections: [{ key: 'id:download-title' }],
+    /* the preview connection and selection are shared state (js/admin/state.js) */
+    state: { cmsConnected: true, cmsCurrentRoute: route, cmsPreviewRoute: previous, cmsPreviewReady: true,
+      cmsExactSelection: { key: 'id:download-title' }, cmsExactSelections: [{ key: 'id:download-title' }] },
     cmsPreview: { src: '', getAttribute: () => 'index.html?cms-preview=1#' + previous },
   });
   vm.runInContext(src.slice(start, end) + '\nsyncCmsPreview(false);', context);
-  return { nodes, selection: context.cmsExactSelection, src: context.cmsPreview.src };
+  return { nodes, selection: context.state.cmsExactSelection, src: context.cmsPreview.src };
 }
 
 {

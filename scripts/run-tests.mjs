@@ -3,6 +3,9 @@
 //
 //   node scripts/run-tests.mjs                    every test, one at a time
 //   node scripts/run-tests.mjs operator-states    only tests whose file name starts with a given word
+//
+// Only files directly in tests/ run here: tests/browser/ (Chromium drivers, minutes each) is
+// deliberately not read -- scripts/run-browser-tests.mjs (npm run test:browser) runs those.
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';

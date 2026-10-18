@@ -80,7 +80,14 @@
     var catalog = options.catalog || ArkUI.pageCatalog;
     var load = options.load || ArkUI.loadPage;
     var mounted = Object.create(null), modules = new Map(), positions = new Map();
-    var hooks = [], cleanups = new Map();
+    var hooks = [], settleHooks = [], cleanups = new Map();
+    /* After a navigation has fully landed: the page is in its final place (continuity host or
+       outlet), the page it replaced is gone, and the page module has had its entrance to
+       finish building. Work keyed to the page's content (js/main.js re-applies saved
+       per-element edits here) needs that DOM, not the one at mount time. */
+    function settle(page) {
+      settleHooks.forEach(function (hook) { try { hook(mounted[page], page); } catch (error) { if (window.console) console.error('[ark] settle hook failed', error); } });
+    }
     var presence = ArkUI.createPresence(mounted);
     var continuity = ArkUI.createPanelContinuity && scene.getBoundingClientRect ? ArkUI.createPanelContinuity(scene) : null;
     var stageRetention=ArkUI.createStageRetention&&scene.getBoundingClientRect?ArkUI.createStageRetention(scene):null;
@@ -183,6 +190,7 @@
         scene.dataset.transition = 'idle';
         scene.classList.remove('is-lifecycle-transition');
         state.lifecycleRun = null;
+        settle(page);
         outlet.setAttribute('aria-busy', 'false'); report('', false); writeHistory(page, settings.history, settings.query);
         return true;
       }
@@ -281,6 +289,7 @@
         scene.dataset.transition = 'idle';
         scene.classList.remove('is-lifecycle-transition');
         if (state.lifecycleRun === run) state.lifecycleRun = null;
+        settle(page);
 
         return true;
       } catch (error) {
@@ -299,6 +308,7 @@
       get active() { return active; },
       get panelHost() { return continuity && continuity.host; },
       onMount: function (hook) { hooks.push(hook); },
+      onSettle: function (hook) { settleHooks.push(hook); },
       onStatus: function (handler) { report = handler; },
       /* Rebuild the current route from the live registries. The CMS preview uses
          this after applying unsaved manifests/articles so the iframe renders the

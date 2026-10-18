@@ -11,7 +11,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const builders = [...admin.matchAll(/function (build\w+Section)\(/g)].map((m) => m[1]);
 assert(builders.includes('buildSizeSection') && builders.length >= 8, 'the toolbar is still built from build*Section functions: ' + builders.join(', '));
 for (const name of builders) {

@@ -22,12 +22,14 @@ assert(html.indexOf('js/admin/auth.js') > 0 && html.indexOf('js/admin/auth.js') 
 assert(/connect-src 'self'/.test(html) && !/connect-src[^;]*http/.test(html), 'the page may connect to its own host only');
 
 // 3b. The locked page must hold NO editor: not the editor script, not its markup. Otherwise "locked" is only a hidden div.
-for (const editorPiece of ['js/admin/admin.js', 'js/admin/store.js', 'js/admin/publish.js', 'id="editor"', 'id="pageList"', 'id="publish"']) assert(!html.includes(editorPiece), 'admin.html must not contain the editor: ' + editorPiece);
+/* EDITOR_FILES: every editor module admin-app.html loads (js/admin/core.js ... admin.js; tests/lib/admin-source.cjs) */
+const { EDITOR_FILES } = require('./lib/admin-source.cjs');
+for (const editorPiece of ['js/admin/admin.js', 'js/admin/store.js', 'js/admin/publish.js', ...EDITOR_FILES, 'id="editor"', 'id="pageList"', 'id="publish"']) assert(!html.includes(editorPiece), 'admin.html must not contain the editor: ' + editorPiece);
 // ...and the editor page must hold no key or sign-in of its own: it takes the identity from the gate, and is only ever shown to a session.
 const app = fs.readFileSync('admin-app.html', 'utf8');
 assert(!app.includes('js/admin/auth.js') && !app.includes('meshAuth'), 'the editor page carries no sign-in bundle');
 assert(app.includes('js/admin/admin.js') && app.includes('js/admin/publish.js'));
-assert(app.indexOf('js/admin/authorization-view.js') < app.indexOf('js/admin/admin.js'), 'admin editor loads the shared authorization view before its consumer');
+assert(EDITOR_FILES.every((rel) => app.indexOf('js/admin/authorization-view.js') < app.indexOf(rel)), 'admin editor loads the shared authorization view before its consumer (js/admin/mesh.js) and every other editor module');
 assert(fs.existsSync('js/admin/authorization-view.js'), 'shared authorization view bundle is missing');
 const authorizationEntry = fs.readFileSync('scripts/authorization-view-entry.js', 'utf8');
 assert(authorizationEntry.includes("'@deadark/ark-ui/flux-authorization-view'"), 'wiki authorization bridge must consume Ark UI shared view data');
@@ -42,7 +44,7 @@ assert.deepEqual(publicAdmin.sort(), loadedByGate.sort(), 'PUBLIC_ADMIN must be 
 //    Reintroducing it, even "as a fallback", would make every identity check bypassable.
 const publish = fs.readFileSync('js/admin/publish.js', 'utf8');
 for (const forbidden of [/indexedDB/i, /getRandomValues/, /importKey/, /exportSeed|importSeed|seedStore/, /pkcs8/i]) assert(!forbidden.test(publish), 'publish.js must not create, store or import a key: ' + forbidden);
-assert(!/meshExport|meshImport/.test(html + app + fs.readFileSync('js/admin/admin.js', 'utf8')), 'no export/import key controls');
+assert(!/meshExport|meshImport/.test(html + app + require('./lib/admin-source.cjs').ADMIN), 'no export/import key controls');
 // The gate signs only the host's login message, never arbitrary text handed to it.
 const gate = fs.readFileSync('js/admin/gate.js', 'utf8');
 assert(gate.indexOf('challenge.message.indexOf(LOGIN_PREFIX)') < gate.indexOf('who.sign('), 'the gate checks the message domain before signing it');

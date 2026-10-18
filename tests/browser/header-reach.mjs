@@ -37,12 +37,11 @@
    HEADER_REACH_WIDTHS=800,1024 probes other widths.
    ===================================================================== */
 import fs from 'node:fs';
-import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { appFrame, copySite, designView, openAccountMenu, startHost } from './harness.mjs';
+import { appFrame, copySite, designView, openAccountMenu, startHost, untilStable, scaled, gotoEditor } from './harness.mjs';
 
 const WIDTHS = process.env.HEADER_REACH_WIDTHS
   ? process.env.HEADER_REACH_WIDTHS.split(',').map((w) => [Number(w), 900])
@@ -54,14 +53,6 @@ const CANVAS_CONTROLS = ['#modeContentBtn', '#modeDesignBtn', '#designCanvasBtn'
 const ACCOUNT_CONTROLS = ['#connect', '#signOut'];
 const CANVAS_ONLY = ['#canvasNav', '#canvasTools'];
 const ONE_ROW_FROM = 1280;
-
-async function freePort() {
-  const probe = http.createServer();
-  await new Promise((resolve) => probe.listen(0, '127.0.0.1', resolve));
-  const { port } = probe.address();
-  await new Promise((resolve) => probe.close(resolve));
-  return port;
-}
 
 /* Measured inside the app frame (admin-app.html), in its own coordinates. */
 function measure(frame, selectors) {
@@ -95,8 +86,7 @@ async function main() {
   const shotDir = process.argv[2] || null;
   if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
   const root = copySite(fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-header-reach-')));
-  const port = await freePort();
-  const server = await startHost(root, port);
+  const server = await startHost(root);
   const browser = await chromium.launch();
   const failures = [];
   const fail = (width, message) => failures.push(`${width}px: ${message}`);
@@ -104,20 +94,21 @@ async function main() {
     for (const [width, height] of WIDTHS) {
       const context = await browser.newContext({ viewport: { width, height } });
       const page = await context.newPage();
-      await page.goto(`http://127.0.0.1:${port}/admin`);
-      const frame = await appFrame(page);
-      await frame.waitForFunction(() => !!window.ArkAdminApp, null, { timeout: 20000 });
+      await gotoEditor(page, server.origin);
+      const frame = await appFrame(page);   /* returns once window.ArkAdminApp is set */
 
       /* Real clicks: Playwright refuses to click an element another one is painted over
          ("... intercepts pointer events"), so a covered control fails here, not silently. */
-      const click = async (sel) => { try { await frame.click(sel, { timeout: 5000 }); return true; } catch (error) { fail(width, `real click on ${sel} failed: ${String(error.message).split('\n').find((l) => /intercepts/.test(l)) || error.message.split('\n')[0]}`); return false; } };
+      const click = async (sel) => { try { await frame.click(sel, { timeout: scaled(5000) }); return true; } catch (error) { fail(width, `real click on ${sel} failed: ${String(error.message).split('\n').find((l) => /intercepts/.test(l)) || error.message.split('\n')[0]}`); return false; } };
       await designView(frame, 'canvas');
-      await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: 15000 });
+      await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: scaled(15000) });
       /* the widest the header gets: the tablet-override note on, and a long status message */
       await click('#devices [data-d="1"]');
-      await frame.waitForSelector('#bpNote:not([hidden])', { timeout: 5000 }).catch(() => fail(width, 'Tablet did not show the overrides note'));
+      await frame.waitForSelector('#bpNote:not([hidden])', { timeout: scaled(5000) }).catch(() => fail(width, 'Tablet did not show the overrides note'));
       await frame.evaluate(() => { const s = document.getElementById('status'); s.textContent = 'Saved 4 items to the connected project: Page "home", Layout, Components, sitemap.xml / robots.txt / llms.txt.'; s.dataset.tone = 'ok'; });
-      await page.waitForTimeout(600); // let the header's own layout settle
+      /* the header's own layout has settled: its box and scroll width read the same twice in a row
+         (was a fixed 600 ms) */
+      await untilStable(() => frame.evaluate(() => { const r = document.getElementById('appBar').getBoundingClientRect(); return [r.width, r.height, document.documentElement.scrollWidth, getComputedStyle(document.documentElement).getPropertyValue('--app-bar-h')]; }), 'the header kept re-laying itself out', 5000);
       const design = await measure(frame, CANVAS_CONTROLS);
       if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-design.png`) });
 
@@ -163,7 +154,7 @@ async function main() {
       await designView(frame, 'canvas');
 
       if (await click('#modeContentBtn')) {
-        await frame.waitForSelector('#studioRoot', { state: 'hidden', timeout: 15000 });
+        await frame.waitForSelector('#studioRoot', { state: 'hidden', timeout: scaled(15000) });
         const content = await frame.evaluate(() => ({ shell: !document.getElementById('cmsShell').hidden, selected: document.getElementById('modeContentBtn').getAttribute('aria-selected') }));
         if (!content.shell || content.selected !== 'true') fail(width, `Design -> Content by click did not land in Content mode (${JSON.stringify(content)})`);
         const still = await hiddenNow(frame, [...CANVAS_ONLY, '#designSubSwitch']);
@@ -174,7 +165,7 @@ async function main() {
         if (cm.hScroll > 0) fail(width, `Content mode scrolls horizontally by ${cm.hScroll}px`);
         if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-content.png`) });
         if (await click('#modeDesignBtn')) {
-          await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: 15000 });
+          await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: scaled(15000) });
           const back = await frame.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected'));
           if (back !== 'true') fail(width, 'Content -> Design by click did not land back in Design mode');
         }

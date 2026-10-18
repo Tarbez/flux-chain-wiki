@@ -712,7 +712,11 @@ var ArkComponents = (function () {
      '/'), the same way js/content/states.js's findByKey does. */
   var REPLACED = 'data-ark-component-replaced';
   function elementsWithAttr(root, attr) { return root && root.querySelectorAll ? Array.prototype.slice.call(root.querySelectorAll('[' + attr + ']')) : []; }
-  function findByKey(root, key) {
+  /* Through ArkLayout.find() when it is loaded: one key function, and only `route`'s own page
+     answers (the page being replaced is still mounted while it leaves, with keys of the same
+     shape -- a spot used to be inserted into whichever came first). */
+  function findByKey(root, key, route) {
+    if (typeof ArkLayout !== 'undefined' && ArkLayout.find) return ArkLayout.find(root, key, route);
     var found = null;
     elementsWithAttr(root, 'data-ark-layout-key').some(function (el) { if (el.getAttribute('data-ark-layout-key') === key) { found = el; return true; } return false; });
     return found;
@@ -731,21 +735,24 @@ var ArkComponents = (function () {
      element (created on demand -- display:contents, so what it holds lays out as children
      of the original parent, exactly where the selection was), every replaced element is
      hidden, and anything left over from an earlier draft (a removed spot, another route's
-     spot in the persistent header) is taken back out. Keys are annotated BEFORE an anchor
-     is inserted, so inserting one never renumbers its siblings' path keys. */
+     spot in the persistent header) is taken back out. A spot anchor is marked data-ark-spot
+     before it is inserted, and js/content/layout.js never counts a marked anchor among its
+     siblings, so inserting one never renumbers anything (keys are recomputed on every pass;
+     they used to be frozen at first annotate, and this relied on annotating first). */
   function syncSpots(root, route, draft) {
     if (!root || !root.querySelectorAll) return;
     var spots = (draft.spots && draft.spots[route]) || {};
     var ids = Object.keys(spots), doc = root.ownerDocument || (typeof document !== 'undefined' ? document : null);
-    elementsWithAttr(root, 'data-ark-spot').forEach(function (el) { if (ids.indexOf(el.getAttribute('data-ark-insert')) < 0) el.remove(); });
+    /* the leaving page's spots and hidden originals are its own route's: left as they are */
+    var mine = function (el) { return typeof ArkLayout === 'undefined' || !ArkLayout.inRoute || ArkLayout.inRoute(el, route); };
+    elementsWithAttr(root, 'data-ark-spot').forEach(function (el) { if (mine(el) && ids.indexOf(el.getAttribute('data-ark-insert')) < 0) el.remove(); });
     var hidden = {};
     if (ids.length) {
       ensureReplacedRule(doc);
-      if (typeof ArkLayout !== 'undefined' && ArkLayout.annotate) ArkLayout.annotate(root);
       ids.forEach(function (id) {
-        var spot = spots[id], anchor = elementsWithAttr(root, 'data-ark-spot').find(function (el) { return el.getAttribute('data-ark-insert') === id; });
+        var spot = spots[id], anchor = elementsWithAttr(root, 'data-ark-spot').find(function (el) { return mine(el) && el.getAttribute('data-ark-insert') === id; });
         if (!anchor) {
-          var after = findByKey(root, spot.after);
+          var after = findByKey(root, spot.after, route);
           if (!after || !after.parentNode || !doc) return;                /* the page changed: render nothing, never throw */
           anchor = doc.createElement('div');
           anchor.setAttribute('data-ark-insert', id);
@@ -753,10 +760,10 @@ var ArkComponents = (function () {
           anchor.style.display = 'contents';
           after.parentNode.insertBefore(anchor, after.nextSibling);
         }
-        spot.replaces.forEach(function (key) { var el = findByKey(root, key); if (el) { el.setAttribute(REPLACED, id); hidden[key] = true; } });
+        spot.replaces.forEach(function (key) { var el = findByKey(root, key, route); if (el) { el.setAttribute(REPLACED, id); hidden[key] = true; } });
       });
     }
-    elementsWithAttr(root, REPLACED).forEach(function (el) { if (!hidden[el.getAttribute('data-ark-layout-key')]) el.removeAttribute(REPLACED); });
+    elementsWithAttr(root, REPLACED).forEach(function (el) { if (mine(el) && !hidden[el.getAttribute('data-ark-layout-key')]) el.removeAttribute(REPLACED); });
   }
 
   /* Every [data-ark-insert] anchor under root, rendered from `value` (or the
@@ -767,7 +774,8 @@ var ArkComponents = (function () {
     if (!root || !root.querySelectorAll) return [];
     var draft = sanitize(value !== undefined ? value : current);
     syncSpots(root, route, draft);
-    var anchors = Array.prototype.slice.call(root.querySelectorAll('[data-ark-insert]'));
+    /* only this route's anchors: the page being replaced keeps its own instances while it leaves */
+    var anchors = Array.prototype.slice.call(root.querySelectorAll('[data-ark-insert]')).filter(function (el) { return typeof ArkLayout === 'undefined' || !ArkLayout.inRoute || ArkLayout.inRoute(el, route); });
     anchors.forEach(function (el) { render(el, route, el.getAttribute('data-ark-insert'), draft); });
     return anchors.map(function (el) { return el.getAttribute('data-ark-insert'); });
   }

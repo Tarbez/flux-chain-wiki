@@ -16,7 +16,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = admin.indexOf('  const TB_IDENTITY = {');
 assert(start >= 0, 'js/admin/admin.js still names the identity sections (TB_IDENTITY)');
 const line = admin.slice(start, admin.indexOf('\n', start));
@@ -25,7 +25,7 @@ vm.createContext(context);
 vm.runInContext(line.replace('const TB_IDENTITY', 'this.TB_IDENTITY'), context);
 assert.deepEqual(JSON.parse(JSON.stringify(context.TB_IDENTITY)), { 'cms-states': 'stateGroup', 'cms-component': 'component' }, 'the identity sections are States and Component instance, each keyed to the selection field that says it applies');
 assert(/function buildStateGroupSection\(pane\) \{[\s\S]*?toolbarSection\(pane, 'cms-states',/.test(admin) && /function buildComponentInstanceSection\(pane\) \{[\s\S]*?toolbarSection\(pane, 'cms-component',/.test(admin), 'the two identity sections are built under exactly those keys');
-assert(/if \(event\.data\.created\) \{ tbAutoOpen = \{ key: 'cms-states', at: Date\.now\(\) \}; toast\(/.test(admin), 'a newly made state group opens States and tells the owner what happened');
-assert(/if \(event\.data\.created\) \{ tbAutoOpen = \{ key: 'cms-component', at: Date\.now\(\) \}; toast\(/.test(admin), 'a newly made component opens Component instance and tells the owner what happened');
+assert(/if \(event\.data\.created\) \{ state\.tbAutoOpen = \{ key: 'cms-states', at: Date\.now\(\) \}; toast\(/.test(admin), 'a newly made state group opens States and tells the owner what happened');
+assert(/if \(event\.data\.created\) \{ state\.tbAutoOpen = \{ key: 'cms-component', at: Date\.now\(\) \}; toast\(/.test(admin), 'a newly made component opens Component instance and tells the owner what happened');
 assert(/states-replace', states: cmsStatesDraft, (?:showing: [^,]+, )?route: route, groupId: groupId, created: true/.test(fs.readFileSync('js/main.js', 'utf8')), 'the preview flags a NEW group (Make into states) apart from every later edit to it');
 console.log('PASS: a just-made states group or component instance opens its own section, and the editor says so.');

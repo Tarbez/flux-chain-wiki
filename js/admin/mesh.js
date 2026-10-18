@@ -1,0 +1,261 @@
+/* =====================================================================
+   ADMIN EDITOR · MESH AND PUBLISH (js/admin/mesh.js)
+   ---------------------------------------------------------------------
+   Owns: the Mesh view (what is published, compared with this site) and Publish -- the
+   scoped authorization dialog, signing through ArkPublish, and the miner status line.
+   Must not: publish unsaved drafts (Save first), or hold the signing key: the locked
+   page's identity (ArkGate) signs.
+   ===================================================================== */
+(function () {
+  'use strict';
+  var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
+  var state = A.state, h = A.h, $ = A.$, dirty = A.dirty, dirtyA = A.dirtyA, dirtyI = A.dirtyI,
+      reliefDirty = A.reliefDirty, gate = A.gate, refuse = A.refuse, status = A.status,
+      anyDirty = A.anyDirty, siteFromState = A.siteFromState, selectMesh = A.selectMesh;
+  /* defined by files loaded after this one: resolved when called */
+  var recordVersion = A.later('recordVersion');
+
+  /* ---- mesh deployment view ------------------------------------------
+     A dedicated place to see the mesh the way it actually works: what is
+     published right now, how that differs from what is saved here, and --
+     the thing people otherwise assume wrong -- that none of it is
+     encrypted. Read-only: writing the published copy onto disk stays
+     scripts/pull-site.mjs's job, which already does that correctly with
+     real file semantics (added/changed/removed per file); reimplementing
+     a write path here would be a second place for the two to drift. */
+  function meshRow(label, value) {
+    return h('div', { class: 'mesh-row' }, h('span', { class: 'mesh-row-key', text: label }), h('span', { class: 'mesh-row-val mono', text: value || '—' }));
+  }
+  function buildMeshSecurityNote() {
+    var box = h('fieldset', { class: 'mesh-security' }, h('legend', { text: 'What’s actually protected' }));
+    box.appendChild(h('p', {}, h('strong', { text: 'Public: ' }),
+      document.createTextNode('every page, article and image published here is one content-addressed archive on the mesh, unencrypted. Anyone who has the address (or finds the name record) can fetch and read all of it, the same as a public IPFS file. Publishing is distribution, not privacy.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Encrypted content: ' }),
+      document.createTextNode('an item under Encrypted is published the same way — content-addressed, fetchable by anyone — but its body is AES-GCM ciphertext and the file key is only wrapped for the recipients you chose. Only someone holding a matching secret key can read it; everyone else fetches opaque bytes.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Signed, not secret: ' }),
+      document.createTextNode('the record pointing flux-chain.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Actually private: ' }),
+      document.createTextNode('only your signing key, and only in this browser tab’s memory (js/admin/auth.js). It is never sent to the publish host, the miner, or the mesh, and is dropped on reload or sign-out. The sign-in gate protects who can edit and publish — it does not make the content itself confidential.')));
+    box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
+    return box;
+  }
+  function renderMeshEditor() {
+    var root = $('editor'); root.textContent = '';
+    var routeLabel = h('div', { class: 'route', text: 'P2P deployment' });
+    root.appendChild(h('div', { class: 'editor-head' },
+      h('div', {}, h('h1', { text: 'Mesh' }), routeLabel),
+      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', text: 'Refresh', onclick: function () { load(); } }))));
+
+    var statusRows = h('div', { class: 'mesh-rows' });
+    var diffText = h('p', { class: 'hint' });
+    var liveSummary = h('p', { class: 'hint' });
+    var liveList = h('ul', { class: 'mesh-list' });
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'Deployment status' }), statusRows));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'Local vs. published' }), diffText));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'What’s live on the mesh right now' }), liveSummary, liveList));
+    root.appendChild(buildMeshSecurityNote());
+
+    function fill(rows) { statusRows.textContent = ''; rows.forEach(function (r) { statusRows.appendChild(meshRow(r[0], r[1])); }); }
+
+    async function load() {
+      if (!mesh) {
+        fill([['Publish host', 'Not reachable from this copy of the page']]);
+        diffText.textContent = 'Open this page through the publish host (node scripts/publish-host.mjs) to compare.';
+        liveSummary.textContent = ''; liveList.textContent = '';
+        return;
+      }
+      fill([['Status', 'Checking…']]);
+      diffText.textContent = 'Checking…';
+      liveSummary.textContent = 'Checking…'; liveList.textContent = '';
+      var info;
+      try { info = await mesh.status(); }
+      catch (error) { fill([['Status', error.message]]); diffText.textContent = ''; liveSummary.textContent = ''; return; }
+      routeLabel.textContent = info.name + ' — P2P deployment';
+      var rows = [['Reachable', info.reachable ? 'Yes' : 'No — ' + (info.detail || '')]];
+      if (info.miner) rows.push(['Through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
+      if (info.current) {
+        rows.push(['Version', String(info.current.version)]);
+        rows.push(['Address (CID)', info.current.cid]);
+        rows.push(['Owner key', info.current.ownerPublicKey]);
+        rows.push(['Updated', info.current.updatedAt]);
+      } else rows.push(['Published', 'Not yet — Publish creates version 1.']);
+      fill(rows);
+
+      if (!info.current) {
+        diffText.textContent = 'Nothing is published yet, so everything saved here is local-only.';
+        liveSummary.textContent = 'Nothing published yet.'; liveList.textContent = '';
+        return;
+      }
+      try {
+        var pulled = await mesh.pullSite(); // { record, cid, site }
+        var site = pulled.site;
+        liveSummary.textContent = site.manifests.length + ' page(s), ' + site.articles.length + ' article(s), ' + site.assets.length + ' image(s), ' + ((site.secrets || []).length) + ' encrypted item(s) (see below).';
+        liveList.textContent = '';
+        site.manifests.forEach(function (m) { liveList.appendChild(h('li', { text: (m.title || m.id) + ' — ' + (m.route || m.id) })); });
+        site.articles.forEach(function (a) { liveList.appendChild(h('li', { text: (a.title || a.slug) + ' (article)' })); });
+        site.assets.forEach(function (a) { liveList.appendChild(h('li', { text: (a.label || a.id) + ' (image)' })); });
+
+        var localPageIds = state.ids.filter(function (id) { return state.saved[id] !== null; });
+        var localArticleSlugs = state.slugs.filter(function (s) { return state.aSaved[s] !== null; });
+        var localAssetIds = state.assetIds.filter(function (id) { return state.assetSaved[id] !== null; });
+        var meshPageIds = site.manifests.map(function (m) { return m.id; });
+        var meshArticleSlugs = site.articles.map(function (a) { return a.slug; });
+        var meshAssetIds = site.assets.map(function (a) { return a.id; });
+        var notIn = function (list) { return function (x) { return list.indexOf(x) < 0; }; };
+        var added = localPageIds.filter(notIn(meshPageIds)).concat(localArticleSlugs.filter(notIn(meshArticleSlugs))).concat(localAssetIds.filter(notIn(meshAssetIds)));
+        var removed = meshPageIds.filter(notIn(localPageIds)).concat(meshArticleSlugs.filter(notIn(localArticleSlugs))).concat(meshAssetIds.filter(notIn(localAssetIds)));
+        var unsaved = state.ids.filter(dirty).length + state.slugs.filter(dirtyA).length + state.assetIds.filter(dirtyI).length + (reliefDirty() ? 1 : 0);
+        var parts = [];
+        if (added.length) parts.push(added.length + ' saved here but not on the mesh yet (' + added.join(', ') + ')');
+        if (removed.length) parts.push(removed.length + ' on the mesh but not here — Publish would remove these (' + removed.join(', ') + ')');
+        if (unsaved) parts.push(unsaved + ' unsaved edit(s) in this browser, not even written to the project folder yet');
+        diffText.textContent = parts.length ? parts.join('. ') + '.' : 'Every id saved here matches what is published. (This only compares which pages/articles/images exist, not their exact content — Publish always re-checks before it changes anything.)';
+      } catch (error) {
+        liveSummary.textContent = error.message; liveList.textContent = '';
+        diffText.textContent = 'Could not compare.';
+      }
+    }
+    load();
+  }
+
+  /* ---- the mesh ------------------------------------------------------ */
+  /* Only when this page is served by the publish host: from a file: URL there is no host to talk to. */
+  var publishing = false;   /* a refresh that finishes mid-publish must not re-enable the button */
+  function short(text) { return text ? text.slice(0, 8) + '…' + text.slice(-6) : ''; }
+  function authorizationDigest(text) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (bytes) {
+      return Array.from(new Uint8Array(bytes)).map(function (byte) { return byte.toString(16).padStart(2, '0'); }).join('');
+    });
+  }
+  /* Same inspect -> approve -> sign shape (and the same shared view-model,
+     ArkAuthorizationView.scopedAuthorizationView) as flux-dao-app's
+     ScopedAuthorizationDialog -- now the real <flux-authorization-dialog>
+     element too, instead of a hand-rolled lookalike. The element itself is
+     an ARIA/focus-trap/busy-state primitive with no visual template, so the
+     markup below mirrors ark-ui.flux-authorization-react.ts's exactly: a
+     dismissible backdrop over a panel, this page's own "admin-auth-*" CSS. */
+  function authorizePublish(input) {
+    var who = gate.identity();
+    if (!who) return Promise.resolve(false);
+    return authorizationDigest(input.signingMessage).then(function (digest) {
+      return new Promise(function (resolve) {
+        var titleId = 'authDialogTitle-' + Date.now(), descId = 'authDialogDesc-' + Date.now();
+        var dialog = document.createElement('flux-authorization-dialog');
+        dialog.action = 'flux.site.publish';
+        dialog.capability = 'site.publish';
+        dialog.setAttribute('aria-labelledby', titleId);
+        dialog.setAttribute('aria-describedby', descId);
+        var view = window.ArkAuthorizationView.scopedAuthorizationView({
+          title: input.title,
+          description: input.description,
+          requester: who.displayName || 'Signed-in identity',
+          network: 'Local publish host',
+          authority: who.publicKeyB64,
+          configuration: input.record.name || 'flux-chain.ark',
+          scope: 'site.publish',
+          action: 'flux.site.publish',
+          manifestDigest: digest,
+          claimStack: 'primary authorize flux.site.publish for exact name record ' + digest + '\nconstraint owner ' + who.publicKeyB64 + '\nfailure reject altered, expired or cross-site bytes\ntrust zero',
+          manifest: input.record,
+          authorizationBytes: input.signingMessage,
+          actionPayloadBytes: input.signingMessage,
+          facts: [{ label: 'Version', value: String(input.record.version || 'next') }, { label: 'Signing profile', value: who.securityProfile === 'hybrid-pq' ? 'Hybrid identity available; names/* record remains Ed25519' : 'Ed25519 name record' }]
+        });
+        var backdrop = h('div', { class: 'admin-auth-backdrop' });
+        var panel = h('section', { class: 'admin-auth-panel' });
+        var title = h('div', { class: 'admin-auth-title' }, h('span', { class: 'kicker', text: 'Scoped publish authorization' }), h('h2', { id: titleId, text: view.heading }));
+        var close = h('button', { type: 'button', class: 'admin-auth-close', 'aria-label': 'Cancel authorization', text: '×' });
+        panel.appendChild(h('header', {}, title, close));
+        panel.appendChild(h('p', { id: descId, class: 'admin-auth-description', text: view.description }));
+        var context = h('dl', { class: 'admin-auth-context' });
+        view.rows.forEach(function (row) { context.appendChild(h('div', {}, h('dt', { text: row.label }), h('dd', { text: row.value }))); });
+        panel.appendChild(context);
+        panel.appendChild(h('div', { class: 'admin-auth-digest' }, h('small', { text: 'Exact manifest digest · SHA-256' }), h('code', { text: view.digest })));
+        view.disclosures.forEach(function (item) {
+          var details = document.createElement('details'); details.appendChild(h('summary', { text: item.label }));
+          var pre = document.createElement('pre'); pre.textContent = item.text; details.appendChild(pre); panel.appendChild(details);
+        });
+        panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety + ' This publish action still signs the existing Ed25519 names/* record contract.' }));
+        var footer = h('footer', {}, h('button', { type: 'button', class: 'btn', text: 'Cancel' }), h('button', { type: 'button', class: 'btn primary', 'data-autofocus': true, text: 'Approve scopes & sign' })); panel.appendChild(footer);
+        backdrop.appendChild(panel); dialog.appendChild(backdrop); document.body.appendChild(dialog);
+        var cancelButton = footer.children[0], approveButton = footer.children[1], closed = false;
+        function finish(ok) { if (closed) return; closed = true; dialog.remove(); resolve(ok); }
+        function busy() { return dialog.state === 'signing'; }
+        close.addEventListener('click', function () { if (!busy()) finish(false); });
+        cancelButton.addEventListener('click', function () { if (!busy()) finish(false); });
+        approveButton.addEventListener('click', function () {
+          dialog.state = 'signing';
+          close.disabled = true; cancelButton.disabled = true; approveButton.disabled = true;
+          approveButton.textContent = 'Signing locally…';
+          finish(true);
+        });
+        backdrop.addEventListener('mousedown', function (event) { if (event.target === backdrop && !busy()) finish(false); });
+        /* Capture-phase so it runs before FluxDialogElement's own bubble-phase
+           Escape handler, which otherwise closes the dialog mid-sign. */
+        dialog.addEventListener('keydown', function (event) { if (busy() && event.key === 'Escape') event.stopPropagation(); }, true);
+        dialog.open = true;
+      });
+    });
+  }
+  var mesh = window.ArkPublish ? ArkPublish.create({ identity: function () { return gate.identity(); }, authorize: authorizePublish }) : null;
+
+  /* why Publish is unavailable (law: a refusal names what it needs; tests/admin-disabled-says-why.cjs) */
+  var PUBLISH_NEEDS_HOST = 'Cannot publish from this copy of the page: it reaches no miner. Open the copy the host serves (http://127.0.0.1:3437/admin.html) or double-click "Flux Chain Admin.command".';
+  var PUBLISHING_NOW = 'Publishing now: wait for this version to finish.';
+  async function refreshMesh() {
+    var line = $('meshState'), owner = $('meshOwner');
+    if (!mesh) {
+      /* opened from disk: this page cannot reach a miner, but a plain link to the host's copy of it can be followed */
+      line.textContent = 'This copy of the page cannot publish. Double-click "Flux Chain Admin.command" in the flux-chain folder, or use the copy served by the host: ';
+      line.appendChild(h('a', { href: 'http://127.0.0.1:3437/admin.html', text: 'http://127.0.0.1:3437/admin.html' }));
+      owner.textContent = ''; $('mesh').open = true;
+      refuse($('publish'), PUBLISH_NEEDS_HOST);
+      refuse($('meshRefresh'), PUBLISH_NEEDS_HOST);
+      return;
+    }
+    try {
+      var info = await mesh.status();
+      var who = mesh.identity();
+      var through = info.miner ? 'Publishing through ' + (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '') + '. ' : '';
+      if (!info.reachable) line.textContent = (info.detail || 'The miner is not reachable.');
+      else if (!info.current) line.textContent = through + info.name + ' is not published yet. Publish creates version 1.';
+      else line.textContent = through + info.name + ' is at version ' + info.current.version + ', address ' + short(info.current.cid) + ', updated ' + info.current.updatedAt + '.';
+      owner.textContent = who ? 'Signed in' + (who.displayName ? ' as ' + who.displayName : '') + '. Key ' + who.publicKeyB64 : 'Not signed in.';
+      var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'signed in') + ' · ' + short(who.publicKeyB64) : '';
+      if (info.current && who && info.current.ownerPublicKey !== who.publicKeyB64) {
+        line.textContent += ' This identity does not own the name: sign in with the identity that does.';
+      }
+      refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: the miner is not reachable (' + (info.detail || 'no answer') + '). Start the miner or check its address, then Refresh.');
+    } catch (error) { line.textContent = error.message; refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.'); }
+  }
+
+  $('publish').addEventListener('click', async function () {
+    if (!mesh) return;
+    if (!mesh.identity()) {
+      // A reload keeps the session but drops the signing key (js/admin/gate.js); get it back without losing this tab's edits.
+      status('Choose your recovery file to unlock signing, then publish again.', 'warn');
+      try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (error) { /* the button click above still told them what to do */ }
+      return;
+    }
+    if (anyDirty()) { status('Save your changes first, so the site files and the published copy match.', 'warn'); return; }
+    var button = $('publish'); refuse(button, PUBLISHING_NOW); publishing = true;
+    try {
+      var result = await mesh.publishSite(siteFromState(), function (message) { status(message, ''); }, function (removes) {
+        var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).concat(removes.secrets || []).join(', ') : 'possibly some pages, articles, images or encrypted items (the published version could not be compared)';
+        return window.confirm('This version removes what is published now: ' + what + '.\n\nThis page may be out of date, for example if its saves were only downloaded. Publish anyway?');
+      });
+      if (result.cancelled) status('Not published. Reload this page to pick up the project files, or run node scripts/pull-site.mjs to bring in the published copy.', 'warn');
+      else if (result.unchanged) status('Nothing new to publish: version ' + result.version + ' already holds this content.', 'ok');
+      else status('Published version ' + result.published + (result.confirmed ? ', confirmed by the miner reading it back.' : '. The miner has not read it back yet: refresh the Mesh panel.'), result.confirmed ? 'ok' : 'warn');
+      /* The name record keeps no link to the version before it, so this is the only place a
+         published address is remembered: a forward 'publish' record in the version history. */
+      if (result && result.published) recordVersion(1, { kind: 'publish', published: { version: result.published, cid: result.cid || '' } });
+    } catch (error) {
+      status(error.message + (error.detail && error.detail.remedy && error.message.indexOf(error.detail.remedy) < 0 ? ' To fix: ' + error.detail.remedy : ''), 'error');
+    }
+    publishing = false; refuse(button, ''); refreshMesh();
+  });
+  $('meshRefresh').addEventListener('click', refreshMesh);
+  $('meshNav').addEventListener('click', selectMesh);
+  A.provide({ refreshMesh: refreshMesh, renderMeshEditor: renderMeshEditor });
+})();

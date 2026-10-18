@@ -7,6 +7,10 @@
 <meta name="robots" content="noindex" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Flux Protocol content</title>
+<!-- The palette (html[data-theme], light or dark) before first paint: the same script and the
+     same saved choice as every routed page, so the editor follows the SDK's theme mechanism
+     instead of a stylesheet guessing from prefers-color-scheme. -->
+<script src="js/bootstrap.js"></script>
 <link rel="stylesheet" href="css/themes.css" />
 <link rel="stylesheet" href="css/flux-themes.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/fonts.css" />
@@ -15,8 +19,8 @@
 <!-- Step 2 merge (2026-10-17): the Studio workspace used to be a separate document
      (admin-studio.html, since deleted) embedded via <iframe>. It is now inline markup in this same
      document (#studioRoot below), shown/hidden by this page's own renderEditor()
-     instead of swapping iframes. Its own design-token stylesheet is scoped entirely
-     under #studioRoot so it cannot bleed into (or be bled into by) the rules above. -->
+     instead of swapping iframes. Its stylesheet is scoped entirely under #studioRoot and reads
+     the same SDK tokens as css/admin.css (whose top block is the editor's one token block). -->
 <link rel="stylesheet" href="css/studio-embed.css" />
 </head>
 <body>
@@ -339,6 +343,36 @@
 <script src="js/admin/vendor/flx-state-grammar.js" defer></script>
 <script src="js/admin/versions.js" defer></script>
 <script src="js/admin/versions-panel.js" defer></script>
+<!-- THE EDITOR, one file per concern (js/admin/core.js states the module contract;
+     js/admin/state.js holds the state they share). core.js first, admin.js -- which starts
+     the editor -- last; in between, a file imports what an earlier one provides directly
+     and anything later through ArkAdmin.later(). -->
+<script src="js/admin/core.js" defer></script>
+<script src="js/admin/state.js" defer></script>
+<script src="js/admin/controls.js" defer></script>
+<script src="js/admin/save.js" defer></script>
+<script src="js/admin/nav.js" defer></script>
+<script src="js/admin/editor.js" defer></script>
+<script src="js/admin/articles.js" defer></script>
+<script src="js/admin/assets.js" defer></script>
+<script src="js/admin/secrets.js" defer></script>
+<script src="js/admin/preview.js" defer></script>
+<script src="js/admin/design.js" defer></script>
+<script src="js/admin/seo.js" defer></script>
+<script src="js/admin/shapes.js" defer></script>
+<script src="js/admin/studio.js" defer></script>
+<script src="js/admin/bridge.js" defer></script>
+<script src="js/admin/canvas.js" defer></script>
+<script src="js/admin/header.js" defer></script>
+<script src="js/admin/rail.js" defer></script>
+<script src="js/admin/toolbar-sections.js" defer></script>
+<script src="js/admin/toolbar.js" defer></script>
+<script src="js/admin/library.js" defer></script>
+<script src="js/admin/sitemap.js" defer></script>
+<script src="js/admin/design-check.js" defer></script>
+<script src="js/admin/mesh.js" defer></script>
+<script src="js/admin/versions-glue.js" defer></script>
+<script src="js/admin/project.js" defer></script>
 <script src="js/admin/admin.js" defer></script>
 </body>
 </html>

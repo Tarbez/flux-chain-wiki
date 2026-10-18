@@ -166,13 +166,18 @@
     function elementMotionOverride(pageEl, item) {
       if (!window.ArkElementMotion || !item || typeof item.getAttribute !== 'function') return null;
       try {
-        var key = item.getAttribute('data-ark-layout-key');
-        if (!key) return null;
         var pageKey = pageEl && pageEl.dataset && pageEl.dataset.arkPage;
         var catalogEntry = pageKey && ArkUI.pageCatalog && ArkUI.pageCatalog[pageKey];
         var route = catalogEntry && catalogEntry.path;
         if (!route) return null;
-        return window.ArkElementMotion.entryFor(window.ArkElementMotion.get(), route, key);
+        var saved = window.ArkElementMotion.get();
+        if (!saved.routes || !saved.routes[route]) return null;
+        /* The key computed now, not read off the element: a page shown before ArkLayout's
+           deferred pass has run (a direct load) carries no key attribute yet, and the
+           override was silently skipped. Same function the editor saved it under. */
+        var key = window.ArkLayout && ArkLayout.keyFor ? ArkLayout.keyFor(item, document.getElementById('scene')) : item.getAttribute('data-ark-layout-key');
+        if (!key) return null;
+        return window.ArkElementMotion.entryFor(saved, route, key);
       } catch (e) { return null; }
     }
     function targets(el) {

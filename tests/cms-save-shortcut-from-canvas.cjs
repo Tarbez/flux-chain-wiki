@@ -11,7 +11,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const main = fs.readFileSync('js/main.js', 'utf8');
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = main.indexOf('  function cmsForwardSaveShortcut(event) {');
 const end = main.indexOf("  document.addEventListener('keydown'", start);
 assert(start >= 0 && end > start, 'js/main.js defines cmsForwardSaveShortcut right before its keydown listener');

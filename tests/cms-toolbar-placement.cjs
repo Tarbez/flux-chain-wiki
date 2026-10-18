@@ -18,7 +18,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = admin.indexOf('  function placeSelToolbar() {');
 const end = admin.indexOf('  new ResizeObserver', start);
 assert(start >= 0 && end > start, 'js/admin/admin.js still defines placeSelToolbar');
@@ -28,7 +28,7 @@ const SCALE = 0.72, STAGE = { offsetWidth: 1280, offsetHeight: 921 }, LABEL = 24
 function place(rect, size) {
   const box = { hidden: false, style: {}, dataset: {}, offsetWidth: size.w, offsetHeight: size.h, querySelector: () => null, classList: { toggle() {} } };
   let popPlaced = 0;
-  const context = { $: () => box, scale: SCALE, stage: STAGE, cmsExactSelection: { rect }, rectOfSelectionRect: (r) => ({ x: r.x, y: r.y, w: r.width, h: r.height }), placeToolbarPop: () => { popPlaced += 1; } };
+  const context = { $: () => box, scale: SCALE, stage: STAGE, state: { cmsExactSelection: { rect } } /* js/admin/state.js */, rectOfSelectionRect: (r) => ({ x: r.x, y: r.y, w: r.width, h: r.height }), placeToolbarPop: () => { popPlaced += 1; } };
   vm.createContext(context);
   vm.runInContext(code + '\nplaceSelToolbar();', context);
   return { x: parseFloat(box.style.left), y: parseFloat(box.style.top), w: size.w / SCALE, h: size.h / SCALE, side: box.dataset.side, maxWidth: parseFloat(box.style.maxWidth), popPlaced };

@@ -9,14 +9,14 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 
-const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = admin.indexOf('  function renderPages() {');
 const end = admin.indexOf('  function showLeft(', start);
 assert(start >= 0 && end > start, 'js/admin/admin.js still defines renderPages() before showLeft()');
 const { window } = new JSDOM('<!doctype html><div id="pagesPane"><ul id="pages"></ul></div>');
 const opened = [];
 const context = { document: window.document, $: (id) => window.document.getElementById(id), ic: () => '', realLinkIndex: () => [],
-  cmsRoutes: [{ path: '/', title: 'Home' }, { path: '/download', title: 'Download' }], cmsCurrentRoute: '/', openRoute: (p) => opened.push(p), Map };
+  state: { cmsRoutes: [{ path: '/', title: 'Home' }, { path: '/download', title: 'Download' }], cmsCurrentRoute: '/' }, /* shared state, js/admin/state.js */ openRoute: (p) => opened.push(p), Map };
 vm.createContext(context);
 vm.runInContext(admin.slice(start, end) + '\nrenderPages();', context);
 const rows = [...window.document.querySelectorAll('#pages li')];

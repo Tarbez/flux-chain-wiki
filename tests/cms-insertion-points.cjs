@@ -22,7 +22,7 @@ const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
 const { buildersSource } = require('./lib/admin-source.cjs');
 
-const main = fs.readFileSync('js/main.js', 'utf8'), admin = fs.readFileSync('js/admin/admin.js', 'utf8');
+const main = fs.readFileSync('js/main.js', 'utf8'), admin = require('./lib/admin-source.cjs').ADMIN;
 function cut(src, from, to, what) {
   const a = src.indexOf(from), b = src.indexOf(to, a + 1);
   assert(a >= 0 && b > a, 'still extractable: ' + what);
@@ -73,12 +73,14 @@ const plain = (x) => JSON.parse(JSON.stringify(x));
 
 /* ---- the editor side: Insert -- direct, picker, or disabled with a reason; never prompt() */
 function library(points, masters) {
-  const code = cut(admin, "  let libKey = '';", '     Search and AI. Edits the real seoDraft', 'renderLibrary');
+  /* the whole Library module body (js/admin/library.js), up to what it hands the other editor files */
+  const code = cut(admin, "  /* the Library's open definition editor", '  A.provide({ cmsOpenMasterInLibrary', 'renderLibrary');
   const dom = new JSDOM('<body><div id="libPane"></div><button id="btnContentCms"></button></body>');
   const doc = dom.window.document, sent = [], highlights = [];
   const context = {
     document: doc, $: (id) => doc.getElementById(id), ic: () => '', toast() {}, selectDesign() {}, showLeft() {}, openContentEditor() {},
-    cmsSourceSite: { components: { masters, routes: {} } }, cmsInsertPoints: points, cmsPreviewRoute: '/download', cmsConnected: true,
+    /* shared state (js/admin/state.js): the preview's report, and the Library's own repaint key */
+    state: { cmsSourceSite: { components: { masters, routes: {} } }, cmsInsertPoints: points, cmsPreviewRoute: '/download', cmsConnected: true, libKey: '' },
     cmsPreview: { contentWindow: { postMessage: (m) => highlights.push(m.id) } }, location: { origin: 'http://x' },
     CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading', 'body'] }], cmsBlockResolverLabel: () => 'Text', cmsBlockResolverProps: () => ['heading', 'body'],
     cmsMasterKind: () => 'Text', cmsMasterProps: (m) => Object.keys(m.props), cmsNextComponentId: (p) => p + 'X',

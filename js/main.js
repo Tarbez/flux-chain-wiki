@@ -109,6 +109,19 @@
         ArkStates.renderAll(host, statesRoute, cmsStatesView(statesRoute), cmsComponentsDraft);
       });
     });
+    /* The mount-time passes above run against the DOM as it is one frame after mount: the page
+       it replaces may still be leaving, and a page module may still be building (/stats replaces
+       its loading sections right after mount -- 29 of its keys named different elements at
+       ArkLayout.apply() time than once settled, measured 2026-10-18 by tests/browser/
+       layout-key-stability.mjs). Once the router has landed, the same passes run again on the
+       final DOM. Each is idempotent: ArkLayout undoes only what it wrote before re-applying,
+       ArkComponents re-renders an anchor's instance list, ArkStates re-shows the same state. */
+    ArkUI.pageRouter.onSettle(function (_pageElement, page) {
+      var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[page], route = entry && entry.path || ArkUI.route.path();
+      if (window.ArkComponents) ArkComponents.renderAll(host, route, cmsComponentsDraft);
+      if (window.ArkLayout) ArkLayout.apply(host, route, window.innerWidth, cmsLayoutDraft);
+      if (window.ArkStates) ArkStates.renderAll(host, route, cmsStatesView(route), cmsComponentsDraft);
+    });
     root.classList.add('ark-live');
     var fallback = document.getElementById('fallback');
     if (fallback) fallback.setAttribute('aria-hidden', 'true');
@@ -203,6 +216,10 @@
       var keys = byText.get(previewCopyText(element.textContent));
       if (!keys) return;
       var current = String(element.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean);
+      /* Editor-only: the public page never binds text this way, so a layout key taken from it
+         (copy:...) would name nothing there -- every edit saved on such an element was lost on
+         the public page. ArkLayout ignores copy keys an element has only from here. */
+      if (!current.length) element.setAttribute('data-ark-copy-preview', '');
       element.setAttribute('data-ark-copy-keys', Array.from(new Set(current.concat(keys))).join(' '));
     });
   }
@@ -224,10 +241,12 @@
      as a wall of cluttering tree rows. */
   function cmsRealTree(host, route) {
     if (!host || !window.ArkLayout) return [];
-    ArkLayout.annotate(host);
+    ArkLayout.annotate(host, route);
     function walk(parent) {
       var out = [];
       Array.prototype.forEach.call(parent.children || [], function (element) {
+        /* a page still leaving after a navigation is another route's: not a layer of this one */
+        if (ArkLayout.inRoute && !ArkLayout.inRoute(element, route)) return;
         var key = element.getAttribute && element.getAttribute('data-ark-layout-key'), tag = element.tagName ? element.tagName.toLowerCase() : '';
         /* an original a component instance now stands in for is hidden for as long as it does: not a layer you can see or pick */
         if (element.hasAttribute && element.hasAttribute('data-ark-component-replaced')) return;
@@ -246,9 +265,7 @@
      way setCmsLayoutFrame does would silently mutate the wrong element). */
   function cmsElementForKey(key) {
     if (!key || !window.ArkLayout) return null;
-    var elements = ArkLayout.annotate(host);
-    for (var i = 0; i < elements.length; i++) if (elements[i].getAttribute('data-ark-layout-key') === key) return elements[i];
-    return null;
+    return ArkLayout.find(host, key, cmsRoutePath());
   }
   /* The hide toggle's "other half" of setCmsLayoutFrame: same ArkLayout.set() mechanism
      (via setCmsElementFrame below, commit=false so it only does the draft-mutate-and-apply
@@ -600,9 +617,10 @@
   function cmsRestoreSelection(refs) {
     if (!refs.length) return false;
     if (window.ArkLayout) ArkLayout.annotate(host);
-    /* a layout key is a PATH for most page content, and a remount can renumber it (the route's
-       container went from div:2 to div:7 on /chain), so the element a key finds is only taken
-       if it is the same kind of element saying the same thing -- never a stranger at that path */
+    /* A remount used to renumber layout keys (the route's container went from div:2 to div:7 on
+       /chain); keys are now scoped to the page's own content and cannot (js/content/layout.js).
+       The element a key finds is still only taken if it is the same kind of element saying the
+       same thing: the remount rebuilt the page from a draft that may have changed it. */
     var same = function (found, was) { return !!found && found.tagName === was.tagName && found.textContent.trim() === was.textContent.trim(); };
     var byKey = function (ref) { var found = ref.key && cmsElementForKey(ref.key); return same(found, ref.element) ? found : null; };
     var next = refs.map(function (ref) { return (ref.component && cmsComponentRoot(ref.component)) || (ref.element.isConnected && ref.element) || byKey(ref) || null; })

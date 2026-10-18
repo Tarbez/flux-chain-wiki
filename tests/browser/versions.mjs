@@ -31,7 +31,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, clickHeader } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
 const FLX = require('../../js/admin/vendor/flx-state-grammar.js');
@@ -40,8 +40,6 @@ const ArkVersions = require('../../js/admin/versions.js');
 const args = process.argv.slice(2);
 const SHOTS = process.env.SHOTS || fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-shots-'));
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-site-'));
-const PORT = Number(process.env.PORT) || 3497;
-const ORIGIN = `http://127.0.0.1:${PORT}`;
 fs.mkdirSync(SHOTS, { recursive: true });
 
 let failures = 0;
@@ -51,25 +49,27 @@ async function step(name, run) {
   try { await run(); console.log(`ok   ${name}`); }
   catch (error) { failures += 1; console.log(`FAIL ${name}\n     ${error instanceof StepFailure ? error.message : error.stack}`); throw error; }
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-async function until(probe, message, timeout = 20000) { /* generous: the shared machine runs other suites (load average 40+ seen) */
-  const end = Date.now() + timeout; let last;
-  while (Date.now() < end) {
-    try { last = await probe(); } catch (error) { if (error instanceof StepFailure) throw error; last = null; }
-    if (last) return last; await wait(100);
-  }
-  throw new StepFailure(message);
-}
+/* the harness's until: the budget is multiplied by the measured load factor (load average 40+
+   was seen on the shared machine); a StepFailure thrown by a probe is a verdict */
+const until = (probe, message, timeout = 20000) => untilFor(probe, message, timeout, { fail: (m) => new StepFailure(m), passThrough: (e) => e instanceof StepFailure });
 
 const HISTORY = path.join(WORK, 'cms-history');
 const HOME = path.join(WORK, 'js/content/manifests/home.js');
-const head = () => { try { return FLX.decodeState(fs.readFileSync(path.join(HISTORY, 'head.flx'), 'utf8')); } catch { return null; } };
+/* There is no head pointer: each version adds cms-history/heads/<hash>.flx and the files it
+   supersedes are trimmed after it. Between those two writes both exist, so "the head" here is
+   the head file with the highest seq; headNames() is the index as it stands. */
+const headNames = () => { try { return fs.readdirSync(path.join(HISTORY, 'heads')).filter((n) => /^[0-9a-f]{64}\.flx$/.test(n)).map((n) => n.slice(0, 64)); } catch { return []; } };
+const head = () => {
+  try { return headNames().map((hash) => ({ head: hash, seq: record(hash).seq })).sort((a, b) => b.seq - a.seq)[0] || null; }
+  catch { return null; }
+};
 const versionFile = (hash) => path.join(HISTORY, 'versions', hash + '.flx');
 const record = (hash) => FLX.decodeState(fs.readFileSync(versionFile(hash), 'utf8'));
 const homeText = () => fs.readFileSync(HOME, 'utf8');
 
 copySite(WORK);
-const server = await startHost(WORK, PORT);
+const server = await startHost(WORK);
+const ORIGIN = server.origin;
 const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const context = await browser.newContext({ viewport: { width: 1500, height: 950 }, acceptDownloads: true });
 await fakeFolder(context, WORK);
@@ -80,7 +80,7 @@ context.on('page', (p) => p.on('pageerror', (e) => { if (!harnessNoise.test(e.me
 const page = await context.newPage();
 page.on('dialog', (d) => d.accept());
 const shot = (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') });
-await page.goto(`${ORIGIN}/admin`);
+await gotoEditor(page, ORIGIN);
 const app = await appFrame(page);
 const hashes = {};
 let homeAfterA = null, exportedFile = null;
@@ -105,7 +105,7 @@ try {
     await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect', 30000)
       .catch(async (error) => { throw new StepFailure(error.message + ' (status: ' + await app.evaluate(() => document.getElementById('status').textContent) + ')'); });
-    const h = await until(() => head(), 'cms-history/head.flx was never written');
+    const h = await until(() => head(), 'cms-history/heads/ was never written');
     check(h.seq === 1, 'the baseline should be version 1, got ' + h.seq);
     const rec = record(h.head);
     check(rec.kind === 'checkpoint' && rec.label === 'The project as first connected', 'the baseline is a labelled checkpoint: ' + JSON.stringify({ kind: rec.kind, label: rec.label }));
@@ -367,7 +367,7 @@ try {
     const ids = indexIds(); const i = ids.indexOf('chain'), j = ids.indexOf('resolver');
     [ids[i], ids[j]] = [ids[j], ids[i]];
     fs.writeFileSync(MANIFEST_INDEX, fs.readFileSync(MANIFEST_INDEX, 'utf8').replace(/var ArkManifestIds = \[[^;]*\];/, 'var ArkManifestIds = ' + JSON.stringify(ids) + ';'));
-    await page.goto(`${ORIGIN}/admin`);
+    await gotoEditor(page, ORIGIN);
     const app2 = await appFrame(page);
     await until(() => app2.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished starting after the reload', 30000);
     await clickHeader(app2, 'connect');
@@ -384,6 +384,108 @@ try {
     check(indexIds().join() === rec10.items.manifests.map((pair) => pair[0]).join(), 'the page index was not put back in #10\'s order: ' + indexIds().join());
     check(rec11.content === rec10.content && rec11.restoredFrom === hashes[10], 'version 11 is not an exact restore of #10: ' + rec11.summary.join(' | '));
   });
+
+  /* ---- Two browsers, one folder, no shared lock: both versions are kept ----
+     Why: Web Locks serialize the tabs of ONE browser profile only. A second browser on the same
+     folder (here a second Playwright context, which is a separate profile -- verified below, not
+     assumed) shares no lock, and a file system has no compare-and-swap: with the old head.flx
+     pointer one of two simultaneous Saves could vanish from the list. Both Saves are held at
+     their head-file write until BOTH browsers have listed cms-history/heads/, so both build on the
+     same base -- the fork, deterministically. Both versions must be listed (as branches), the
+     next Save must join them, and head.flx must never be written. */
+  await step('two browsers that share no lock save at once: both versions are listed as branches, and the next Save joins them', async () => {
+    /* the previous Save adds #11's head file first and trims #10's after it: wait for the trim */
+    await until(() => headNames().length === 1, 'expected one head before the two browsers save: ' + headNames().join());
+    const base = head();
+    await page.close(); /* the first editor is done; two more renderers on a loaded machine are enough */
+    const CLICK = { timeout: 120000 };
+    const listed = {};
+    let armed = false;
+    const hold = (who) => async (op, rel) => {
+      if (!armed) return;
+      if (op === 'list' && rel === 'cms-history/heads') listed[who] = true;
+      if (op === 'write' && rel.startsWith('cms-history/heads/')) await until(() => listed.A && listed.B, `browser ${who} reached its head file before both browsers had read cms-history/heads/`);
+    };
+    const extraBrowsers = [];
+    const open = async (who, inBrowser) => {
+      const ctx = await inBrowser.newContext({ viewport: { width: 1400, height: 900 } });
+      await fakeFolder(ctx, WORK, { before: hold(who) });
+      ctx.on('page', (p) => p.on('pageerror', (e) => { if (!harnessNoise.test(e.message)) errors.push(who + ': ' + e.message); }));
+      const pg = await ctx.newPage();
+      pg.on('dialog', (d) => d.accept());
+      await gotoEditor(pg, ORIGIN);
+      return { ctx, pg, frame: await appFrame(pg) };
+    };
+    /* does B get the lock while A holds it? then they do not share Web Locks */
+    const lockIsShared = async (A, B) => {
+      await A.frame.evaluate((name) => { navigator.locks.request(name, () => new Promise((r) => { window.__holdVersionsLock = r; })); }, ArkVersions.LOCK);
+      await until(() => A.frame.evaluate(() => typeof window.__holdVersionsLock === 'function'), 'browser A never took the Web Lock');
+      const got = await B.frame.evaluate((name) => navigator.locks.request(name, { ifAvailable: true }, (lock) => lock !== null), ArkVersions.LOCK);
+      await A.frame.evaluate(() => window.__holdVersionsLock());
+      return !got;
+    };
+    const A = await open('A', browser);
+    let B = await open('B', browser);
+    if (await lockIsShared(A, B)) {
+      /* not expected (each context is its own profile), but the step must not pass by sharing a lock */
+      await B.ctx.close();
+      const second = await chromium.launch({ headless: !args.includes('--headed') });
+      extraBrowsers.push(second);
+      B = await open('B', second);
+      check(!(await lockIsShared(A, B)), 'even two browser instances share the Web Lock; the no-lock case cannot be driven here');
+    }
+    const edit = async (X, text) => {
+      await X.frame.click('#modeContentBtn', CLICK);
+      await X.frame.click('#pageList button[data-id="home"]', CLICK);
+      const input = X.frame.locator('#f-home-EYEBROW');
+      await input.waitFor({ state: 'visible', ...CLICK });
+      await input.fill(text, CLICK);
+    };
+    const save = (X) => X.frame.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true, cancelable: true })));
+    for (const X of [A, B]) {
+      await until(() => X.frame.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished starting in a second browser', 30000);
+      await clickHeader(X.frame, 'connect');
+      await until(() => X.frame.evaluate(() => document.getElementById('connect').disabled), 'a second browser did not connect the folder', 30000);
+    }
+    const shots = async (name) => { for (const [who, X] of [['a', A], ['b', B]]) await X.pg.screenshot({ path: path.join(SHOTS, `${name}-${who}.png`) }).catch(() => {}); };
+    try {
+      await edit(A, 'Browser A eyebrow');
+      await edit(B, 'Browser B eyebrow');
+    } catch (error) { await shots('versions-12-edit-FAILED'); throw error; }
+    armed = true;
+    await Promise.all([save(A), save(B)]);
+    const tips = await until(() => { const names = headNames(); return names.length === 2 && names.every((h) => record(h).prev === base.head) && names; },
+      'the two Saves did not leave two versions on the same base (heads: ' + headNames().join(', ') + ')');
+    armed = false;
+    const recs = tips.map((hash) => record(hash));
+    check(recs.every((r) => r.seq === base.seq + 1 && r.joins.length === 0), 'both versions follow the base directly');
+    check(['Browser A eyebrow', 'Browser B eyebrow'].every((t) => recs.some((r) => r.summary.join(' ').includes(t))), 'one version per browser, each with its own edit: ' + recs.map((r) => r.summary.join(' | ')).join(' // '));
+    const view = await ArkVersions.readHeads(await ArkVersions.historyDir(nodeDir(WORK)));
+    check(view.heads.length === 2, 'the store does not derive two heads from the folder');
+
+    await A.frame.click('#versionsNav', CLICK);
+    await until(async () => (await A.frame.locator('#versionsList > li[data-branch]').count()) === 2, 'the panel does not list both versions as branches');
+    const branches = await A.frame.locator('#versionsList > li[data-branch]').evaluateAll((lis) => lis.map((li) => [li.dataset.hash, li.dataset.branch, li.querySelector('.version-kind[data-kind="branch"]').textContent]));
+    check(branches.map((b) => b[0]).sort().join() === [...tips].sort().join(), 'the branch rows are not the two versions: ' + JSON.stringify(branches));
+    check(branches[0][1] !== branches[1][1] && branches.every((b) => /^branch [A-Z]$/.test(b[2])), 'the two versions are not on two named branches: ' + JSON.stringify(branches));
+    check(/saved at the same time/.test(await A.frame.locator('#versionsNote').textContent()), 'the panel does not say two versions were saved at the same time');
+    await A.pg.screenshot({ path: path.join(SHOTS, 'versions-12-two-browsers-branches.png') });
+
+    await edit(A, 'Browser A joins');
+    await save(A);
+    const joined = await until(() => { const names = headNames(); return names.length === 1 && !tips.includes(names[0]) && names[0]; }, 'the next Save did not join the two branches into one head (heads: ' + headNames().join(', ') + ')');
+    const jr = record(joined);
+    check([jr.prev, ...jr.joins].sort().join() === [...tips].sort().join(), 'the join does not follow both branches: ' + JSON.stringify({ prev: jr.prev, joins: jr.joins }));
+    check(/^joins #/.test(jr.summary[0]), 'the join does not say what it joins: ' + jr.summary.join(' | '));
+    await until(async () => (await A.frame.locator(`#versionsList > li[data-hash="${joined}"][data-joins="1"]`).count()) === 1, 'the panel does not list the join with a "joins" marker');
+    check(/joins #\d+/.test(await A.frame.locator(`#versionsList > li[data-hash="${joined}"] .version-kind[data-kind="joined"]`).textContent()), 'the join row has no "joins #n" tag');
+    check((await A.frame.locator('#versionsList > li[data-branch]').count()) === 2, 'after the join the two branches are no longer listed under it');
+    check(await A.frame.locator('#versionsNote').textContent() === '', 'the panel still reports an open fork after the join');
+    await A.pg.screenshot({ path: path.join(SHOTS, 'versions-13-joined.png') });
+    check(!fs.existsSync(path.join(HISTORY, 'head.flx')), 'cms-history/head.flx was written: the store must not keep a mutable pointer');
+    for (const X of [A, B]) await X.ctx.close();
+    for (const extra of extraBrowsers) await extra.close();
+  });
 } catch { /* reported by step() */ }
 
 /* the Node side reads the same folder through a File System Access-shaped handle, so the
@@ -393,6 +495,7 @@ function nodeDir(dir) {
   return {
     async getDirectoryHandle(child, opts) { const p = path.join(dir, child); if (!fs.existsSync(p)) { if (!opts || !opts.create) throw notFound(child); fs.mkdirSync(p); } return nodeDir(p); },
     async getFileHandle(child) { const p = path.join(dir, child); if (!fs.existsSync(p)) throw notFound(child); return { async getFile() { return { text: async () => fs.readFileSync(p, 'utf8') }; } }; },
+    async *keys() { for (const name of fs.readdirSync(dir)) yield name; },
   };
 }
 

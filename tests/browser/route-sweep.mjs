@@ -33,34 +33,18 @@
    ROUTE_SWEEP_ONLY=about,chain limits it to some catalog ids.
    ===================================================================== */
 import fs from 'node:fs';
-import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { copySite, startHost } from './harness.mjs';
+import { copySite, startHost, routeSettled, scaled } from './harness.mjs';
 
 const WIDTHS = [[1280, 800], [390, 844]];
 const CONCURRENCY = 4;
 
-async function freePort() {
-  const probe = http.createServer();
-  await new Promise((resolve) => probe.listen(0, '127.0.0.1', resolve));
-  const { port } = probe.address();
-  await new Promise((resolve) => probe.close(resolve));
-  return port;
-}
-
-/* The router is idle on `id`: its page element is mounted and shown, the scene's
-   transition is over, and two frames have passed (ArkLayout.apply runs in a rAF after mount). */
-export async function settled(page, id) {
-  await page.waitForFunction((pageId) => {
-    const scene = document.querySelector('[data-transition]');
-    const el = document.querySelector(`[data-ark-page="${CSS.escape(pageId)}"]`);
-    return !!scene && scene.dataset.transition === 'idle' && scene.dataset.page === pageId && !!el && !el.hidden;
-  }, id, { timeout: 20000 });
-  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 250)))));
-}
+/* The router is idle on `id` (harness routeSettled: mounted, shown, transition over, finite
+   animations ended, two frames painted). Kept under this name for the drivers that import it. */
+export const settled = (page, id) => routeSettled(page, id, 20000);
 
 export function measure(page, id) {
   return page.evaluate((pageId) => {
@@ -116,16 +100,15 @@ async function main() {
   const shotDir = process.argv[2] || null;
   if (shotDir) fs.mkdirSync(shotDir, { recursive: true });
   const root = copySite(fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-route-sweep-')));
-  const port = await freePort();
-  const server = await startHost(root, port);
-  const base = `http://127.0.0.1:${port}`;
+  const server = await startHost(root);
+  const base = server.origin;
   const browser = await chromium.launch();
   const failures = [];
   try {
     /* the catalog as the live page builds it (articles, resolutions, theory sheets included) */
     const probe = await browser.newPage();
     await probe.goto(base + '/', { waitUntil: 'domcontentloaded' });
-    await probe.waitForFunction(() => window.ArkUI && ArkUI.pageCatalog && ArkUI.pageRouter, null, { timeout: 20000 });
+    await probe.waitForFunction(() => window.ArkUI && ArkUI.pageCatalog && ArkUI.pageRouter, null, { timeout: scaled(20000) });
     let routes = await probe.evaluate(() => Object.keys(ArkUI.pageCatalog).map((id) => ({ id, path: ArkUI.pageCatalog[id].path })));
     await probe.close();
     if (process.env.ROUTE_SWEEP_ONLY) { const only = process.env.ROUTE_SWEEP_ONLY.split(','); routes = routes.filter((r) => only.includes(r.id)); }
