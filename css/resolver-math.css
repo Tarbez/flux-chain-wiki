@@ -385,11 +385,14 @@
   stroke:none;
   transition:fill 260ms ease,opacity 200ms ease;
 }
+/* Term order follows the sum in js/pages/resolver-math.js: letters,
+   longer labels, verbs, record types, type-scoped shapes, resolvers. */
 .rm-cell[data-term="0"] {fill:hsl(var(--primary-400));}
-.rm-cell[data-term="1"] {fill:hsl(var(--success));}
-.rm-cell[data-term="2"] {fill:hsl(var(--reference-600));}
-.rm-cell[data-term="3"] {fill:hsl(var(--warning));}
-.rm-cell[data-term="4"] {fill:hsl(var(--primary));}
+.rm-cell[data-term="1"] {fill:hsl(var(--role));}
+.rm-cell[data-term="2"] {fill:hsl(var(--success));}
+.rm-cell[data-term="3"] {fill:hsl(var(--reference-600));}
+.rm-cell[data-term="4"] {fill:hsl(var(--warning));}
+.rm-cell[data-term="5"] {fill:hsl(var(--primary));}
 
 /* Defined, but nobody ever added it: same size, same place in the field,
    drawn as a hole rather than left out. Leaving them out entirely is how
@@ -407,7 +410,8 @@
 .rm-equation[data-only="1"] .rm-cell[data-term="1"],
 .rm-equation[data-only="2"] .rm-cell[data-term="2"],
 .rm-equation[data-only="3"] .rm-cell[data-term="3"],
-.rm-equation[data-only="4"] .rm-cell[data-term="4"] {opacity:1;}
+.rm-equation[data-only="4"] .rm-cell[data-term="4"],
+.rm-equation[data-only="5"] .rm-cell[data-term="5"] {opacity:1;}
 .rm-equation[data-only] .rm-cell-never {opacity:.3;}
 
 /* The play: cells land in the order of the sum, then it is still. */
@@ -434,7 +438,8 @@
   vertical-align:baseline;
 }
 .rm-eq-swatch[data-term="0"] {background:hsl(var(--primary-400));}
-.rm-eq-swatch[data-term="1"] {background:hsl(var(--success));}
-.rm-eq-swatch[data-term="2"] {background:hsl(var(--reference-600));}
-.rm-eq-swatch[data-term="3"] {background:hsl(var(--warning));}
-.rm-eq-swatch[data-term="4"] {background:hsl(var(--primary));}
+.rm-eq-swatch[data-term="1"] {background:hsl(var(--role));}
+.rm-eq-swatch[data-term="2"] {background:hsl(var(--success));}
+.rm-eq-swatch[data-term="3"] {background:hsl(var(--reference-600));}
+.rm-eq-swatch[data-term="4"] {background:hsl(var(--warning));}
+.rm-eq-swatch[data-term="5"] {background:hsl(var(--primary));}

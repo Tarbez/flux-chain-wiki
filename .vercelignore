@@ -1,11 +1,10 @@
-# This deploys the PUBLIC site only. admin.html/admin-app.html/admin-studio.html hold the door
+# This deploys the PUBLIC site only. admin.html/admin-app.html hold the door
 # to the signing flow (js/admin/publish.js) and are documented as
 # loopback-only, served only by scripts/publish-host.mjs on 127.0.0.1 -- they
 # must never be reachable at a public URL, so they are excluded here rather
 # than merely "not linked from the site".
 admin.html
 admin-app.html
-admin-studio.html
 js/admin
 SUBZERO Admin.command
 
@@ -17,3 +16,7 @@ legacy
 archive
 README.md
 .git
+
+# The admin's version history (js/admin/versions.js): every saved draft, including
+# encrypted items' ciphertext. Editor state, never part of the public site.
+cms-history

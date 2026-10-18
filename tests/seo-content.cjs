@@ -126,6 +126,21 @@ if (articles.length) assert(llms.includes('## Articles') && llms.includes('https
 const llmsHidden = ArkSEO.llmsTxt({ site: { baseUrl: 'https://example.com' }, pages: { about: { noindex: true } } }, manifests, articles);
 assert(!llmsHidden.includes('https://example.com/about'), 'a noindex page is left out of llms.txt too');
 
+// Regression (2026-10-18): llmsTxt(whole) took its titles from the REGISTERED settings
+// (define()) instead of `whole`, so the editor's Save (settings registered) and publish/pull
+// (scripts/lib/site-bundle.mjs, nothing registered) wrote two different llms.txt files from the
+// same settings -- the pull silently dropped every title override. The output must depend only
+// on its arguments, whatever is registered.
+const withTitles = { site: { baseUrl: 'https://example.com' }, pages: { home: { title: 'Home, by its owner' }, about: { title: 'About, by its owner' } } };
+ArkSEO.define({ pages: { home: { title: 'A registered title that must not leak' } } });
+const llmsRegistered = ArkSEO.llmsTxt(withTitles, manifests, articles);
+ArkSEO.define({});
+const llmsBlank = ArkSEO.llmsTxt(withTitles, manifests, articles);
+assert.equal(llmsRegistered, llmsBlank, 'llms.txt depends on its arguments only, not on what define() registered');
+assert(llmsBlank.includes('- [Home, by its owner](https://example.com/)') && llmsBlank.includes('- [About, by its owner](https://example.com/about)'), 'the title overrides passed in are the titles llms.txt lists');
+assert.deepEqual(Object.keys(ArkSEO.searchFiles(withTitles, manifests, articles)), ['sitemap.xml', 'robots.txt', 'llms.txt'], 'searchFiles() names the three derived root files');
+assert.equal(ArkSEO.searchFiles(withTitles, manifests, articles)['llms.txt'], llmsBlank, 'searchFiles() is llmsTxt()/robots()/sitemap(), not a second generator');
+
 // problems() never blocks a well-formed object; only rejects a non-object.
 assert.equal(ArkSEO.problems(partial).length, 0, 'a plain object has no problems');
 assert(ArkSEO.problems(null).length, 'null is refused');

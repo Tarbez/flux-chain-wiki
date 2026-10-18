@@ -24,8 +24,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .icon-seo { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='6.8' cy='6.8' r='4.3' fill='none' stroke='black' stroke-width='1.3'/><path d='M10 10l4 4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='6.8' cy='6.8' r='4.3' fill='none' stroke='black' stroke-width='1.3'/><path d='M10 10l4 4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); }
 .icon-add { width: 10px; height: 10px; -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 2.5v11M2.5 8h11' stroke='black' stroke-width='1.7' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 2.5v11M2.5 8h11' stroke='black' stroke-width='1.7' stroke-linecap='round'/></svg>"); }
 
+/* The header grows instead of clipping: below ~1200px its brand, mode switches and actions no
+   longer fit one 58px row, and a fixed height let them overflow under #studioRoot (and, at
+   761-1180px, above the viewport). It wraps to more rows; js/admin/admin.js publishes the
+   real height as --app-bar-h, which .shell below and #studioRoot (css/studio-embed.css) use. */
 .bar {
-  display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 58px; padding: 0 22px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; min-height: 58px; padding: 8px 22px;
   border-bottom: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth) / .9);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   position: sticky; top: 0; z-index: 5;
@@ -33,7 +37,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .bar-brand { display: flex; align-items: baseline; gap: 12px; }
 .bar-brand strong { font-weight: 400; letter-spacing: .18em; color: hsl(var(--text-strong)); }
 .bar-brand span, .preview-bar-label, .field-key, .side-group, legend { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.bar-actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.bar-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; min-width: 0; margin-left: auto; }
 .bar-actions::before { content: ""; width: 1px; align-self: stretch; margin: 10px 6px; background: hsl(var(--border-soft)); }
 .status { padding: 0 4px; font-size: 12px; color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
 .status[data-tone="ok"] { color: hsl(var(--trust)); }
@@ -51,11 +55,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .link { padding: 0; border: 0; background: none; color: hsl(var(--reference)); cursor: pointer; text-decoration: none; font: inherit; }
 .link:hover { color: hsl(var(--text-strong)); }
 
-.shell { display: grid; grid-template-columns: 272px minmax(0, 1fr) minmax(360px, .82fr); height: calc(100% - 58px); }
-.shell.studio-open { grid-template-columns: 272px minmax(0, 1fr); }
-.shell.studio-open .preview { display: none; }
-.shell.studio-open .editor { padding: 0; overflow: hidden; }
-.studio-frame { position: fixed; inset: 0; z-index: 50; display: block; width: 100%; height: 100%; border: 0; background: hsl(var(--canvas)); }
+.shell { display: grid; grid-template-columns: 272px minmax(0, 1fr) minmax(360px, .82fr); height: calc(100% - var(--app-bar-h, 58px)); }
+/* Step 2 merge (2026-10-17): Studio used to live in #editor (a child of #cmsShell) as a
+   fixed full-viewport <iframe class="studio-frame">, so .shell.studio-open only needed to
+   stop #cmsShell's OWN layout from fighting the iframe underneath (collapse to 2 columns,
+   hide the now-pointless preview aside) -- it never actually hid #cmsShell, because the
+   iframe's own position:fixed;inset:0;z-index:50 already visually covered it regardless.
+   Studio is now #studioRoot, a sibling of #cmsShell with that exact same fixed/inset/
+   z-index treatment (css/studio-embed.css) -- and renderEditor() toggles a real `hidden`
+   attribute on whichever of the two is not the active one. #cmsShell[hidden] needs its own
+   rule here because [hidden]'s UA-stylesheet `display: none` and .shell's own
+   `display: grid` above are equal specificity (0,1,0) -- without this, the later
+   (author) rule wins the tie and #cmsShell silently keeps its 3-column grid layout,
+   merely covered by #studioRoot's paint order rather than actually hidden (verified via a
+   real Playwright session: getComputedStyle still reported display:grid with hidden=true
+   until this rule was added). */
+#cmsShell[hidden] { display: none; }
 .pages { display: flex; flex-direction: column; gap: 2px; padding: 16px 12px 18px; border-right: 1px solid hsl(var(--border-soft)); overflow: auto; background: hsl(var(--depth) / .68); }
 .page-list { list-style: none; margin: 0 0 6px; padding: 0; }
 .side-group { display: flex; align-items: center; gap: 7px; margin: 18px 8px 8px; }
@@ -66,9 +81,19 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .side-group[data-icon="image"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='3' width='12' height='10' rx='1.4' fill='none' stroke='black' stroke-width='1.3'/><circle cx='6' cy='7' r='1.1' fill='black'/><path d='M3.5 12 8 8l2 2 2.5-2.5L14 11' fill='none' stroke='black' stroke-width='1.3'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='3' width='12' height='10' rx='1.4' fill='none' stroke='black' stroke-width='1.3'/><circle cx='6' cy='7' r='1.1' fill='black'/><path d='M3.5 12 8 8l2 2 2.5-2.5L14 11' fill='none' stroke='black' stroke-width='1.3'/></svg>"); }
 .side-group[data-icon="shape"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5 14 5v6L8 14.5 2 11V5z' fill='none' stroke='black' stroke-width='1.3'/><path d='M8 1.5V8m0 6.5V8M2 5l6 3 6-3' fill='none' stroke='black' stroke-width='1.1'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5 14 5v6L8 14.5 2 11V5z' fill='none' stroke='black' stroke-width='1.3'/><path d='M8 1.5V8m0 6.5V8M2 5l6 3 6-3' fill='none' stroke='black' stroke-width='1.1'/></svg>"); }
 .side-group[data-icon="lock"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3.5' y='7' width='9' height='7' rx='1.2' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 7V4.8a2.5 2.5 0 0 1 5 0V7' fill='none' stroke='black' stroke-width='1.3'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3.5' y='7' width='9' height='7' rx='1.2' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 7V4.8a2.5 2.5 0 0 1 5 0V7' fill='none' stroke='black' stroke-width='1.3'/></svg>"); }
-.mesh-nav-btn { display: flex; align-items: center; gap: 9px; width: 100%; margin: 4px 0 10px; padding: 10px 12px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--raised) / .6); color: hsl(var(--text)); font: 500 12px/1.3 var(--sans); letter-spacing: .01em; cursor: pointer; transition: background-color .12s, border-color .12s; }
-.mesh-nav-btn:hover { border-color: hsl(var(--border-strong)); background: hsl(var(--raised)); }
-.mesh-nav-btn[aria-current="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--reference-400)); color: hsl(var(--text-strong)); }
+/* ---- Step 3: Design/Content mode switch, in the persistent header (not the sidebar -- see
+   admin-app.html's own comment above #modeSwitch for why). Reuses .ark-tabs-list/.ark-tab's
+   exact visual language (border/radius/background/the active-tab highlight) via a thin
+   .mode-switch adaptation that drops the two properties that only make sense for an
+   in-editor sticky tab strip (position: sticky; top: 55px -- meaningless in a non-scrolling
+   header -- and its own backdrop-filter, redundant with .bar's). The tab buttons themselves
+   are literally .ark-tab, not a second button style. */
+.bar-modes { display: flex; align-items: center; gap: 8px 14px; flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
+.mode-switch { display: inline-flex; gap: 4px; padding: 3px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
+.mode-switch[hidden] { display: none; }
+.mode-switch .ark-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; white-space: nowrap; }
+#meshNav { display: inline-flex; align-items: center; gap: 7px; flex: none; }
+#meshNav[aria-current="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--reference-400)); color: hsl(var(--text-strong)); }
 .page-list button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 36px; padding: 8px 10px 8px 12px; border: 0; border-left: 2px solid transparent; border-radius: 0 7px 7px 0; background: none; text-align: left; cursor: pointer; color: hsl(var(--text)); font-size: 13px; transition: background-color .12s, border-color .12s; }
 .page-list button:hover { background: hsl(var(--raised)); }
 .page-list button[aria-current="true"] { background: hsl(var(--reference-100)); border-left-color: hsl(var(--reference)); color: hsl(var(--text-strong)); font-weight: 500; }
@@ -119,6 +144,17 @@ legend { padding: 0 4px; margin-left: -4px; }
 .new-asset-preview { max-height: 96px; margin: 8px 0; }
 .danger-zone { margin-top: 8px; padding: 16px 20px; border: 1px solid hsl(var(--danger) / .3); border-radius: var(--radius); background: hsl(var(--danger) / .05); }
 .empty-state { color: hsl(var(--text-muted)); padding: 60px 0; text-align: center; }
+/* SEO controls (js/admin/admin.js seoFieldRows): the shared ctl*Field rows, label over control */
+.seo-controls { display: grid; gap: 14px; }
+.seo-controls .row { display: grid; gap: 6px; min-width: 0; }
+.seo-controls .row > label { color: hsl(var(--text-strong)); font-size: 13px; }
+.seo-controls .row > span:empty { display: none; }
+.seo-controls .ctl-seg { display: inline-flex; justify-self: start; border: 1px solid hsl(var(--border-default)); border-radius: 6px; overflow: hidden; }
+.seo-controls .ctl-seg button { border: 0; border-right: 1px solid hsl(var(--border-soft)); background: transparent; padding: 5px 12px; color: hsl(var(--text-muted)); font: inherit; font-size: 12px; cursor: pointer; }
+.seo-controls .ctl-seg button:last-child { border-right: 0; }
+.seo-controls .ctl-seg button[aria-pressed="true"] { background: hsl(var(--accent) / .16); color: hsl(var(--accent)); font-weight: 600; }
+.seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.seo-refusal { color: hsl(var(--warning)); }
 
 /* ---- the preview pane: framed like a browser card, not a bare iframe ---- */
 .preview { display: flex; flex-direction: column; min-width: 0; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth) / .55); padding: 14px; gap: 0; }
@@ -168,7 +204,10 @@ legend { padding: 0 4px; margin-left: -4px; }
   .pages { border-right: 0; border-bottom: 1px solid hsl(var(--border-soft)); }
   .editor { padding: 20px 16px 50px; }
   .editor-head { position: static; flex-direction: column; }
-  .bar { height: auto; padding: 10px 16px; flex-wrap: wrap; position: static; }
+  .bar { padding: 8px 16px; position: static; }
+  .bar-actions::before { display: none; }
+  .bar .btn { min-height: 30px; padding: 5px 9px; font-size: 12px; }
+  .mode-switch .ark-tab { min-height: 26px; padding: 4px 9px; }
   body, html { height: auto; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -395,3 +434,51 @@ body.locked { overflow: auto; }
    below) instead of here, so the SAME dialog renders identically on the
    admin pages and on the real end-user pages (js/pages/account.js) that
    also sign through it -- see that file's own header comment. */
+
+/* ---- Versions panel (js/admin/versions-panel.js) ------------------------------------
+   Docked to the right, below the header, above #studioRoot (z-index 50), so the preview
+   canvas on the left stays visible while a past version is previewed in it. SDK semantic
+   tokens only; the kind badges carry meaning: a save is reference, a publish is trust (it
+   reached the mesh), a restore is drift (it superseded later work, worth a second look). */
+.icon-history { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2.5 8a5.5 5.5 0 1 0 1.6-3.9' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/><path d='M2 2.5v2.8h2.8' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 5v3.2l2.2 1.4' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2.5 8a5.5 5.5 0 1 0 1.6-3.9' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/><path d='M2 2.5v2.8h2.8' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 5v3.2l2.2 1.4' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>"); }
+#versionsNav[aria-expanded="true"] { border-color: hsl(var(--border-strong)); background: hsl(var(--nested)); }
+.versions-panel { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; z-index: 60; width: min(420px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 24px; overflow: auto; overscroll-behavior: contain; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--overlay) / .96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: -24px 0 60px -30px hsl(var(--canvas)); }
+.versions-panel[hidden] { display: none; }
+.versions-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.versions-head h2 { margin: 4px 0 0; font: 600 20px/1.15 var(--sans); letter-spacing: -.01em; color: hsl(var(--text-strong)); }
+.versions-kicker, .version-head time, .version-addresses dt, .version-more summary, .version-addresses summary { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.versions-close { width: 30px; height: 30px; flex: none; border: 1px solid hsl(var(--border-soft)); border-radius: 50%; background: hsl(var(--nested)); color: hsl(var(--text-strong)); font-size: 18px; line-height: 1; cursor: pointer; }
+.versions-lede, .versions-note { margin: 0; font-size: 12px; line-height: 1.5; color: hsl(var(--text-muted)); }
+.versions-note:empty { display: none; }
+.versions-checkpoint { display: flex; gap: 8px; }
+.versions-checkpoint input { flex: 1 1 auto; min-width: 0; padding: 6px 10px; border: 1px solid hsl(var(--border-default)); border-radius: 7px; background: hsl(var(--surface)); }
+.versions-preview { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid hsl(var(--drift) / .4); border-left: 2px solid hsl(var(--drift)); border-radius: 8px; background: hsl(var(--drift) / .08); font-size: 12px; color: hsl(var(--text-strong)); }
+.versions-preview[hidden] { display: none; }
+.versions-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.version { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid hsl(var(--border-soft)); border-radius: 9px; background: hsl(var(--surface)); }
+.version.is-previewing { border-color: hsl(var(--drift) / .55); }
+.version-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; }
+.version-head time { margin-left: auto; letter-spacing: .04em; text-transform: none; }
+.version-seq { font: 600 13px/1 var(--mono); color: hsl(var(--text-strong)); }
+.version-kind { padding: 2px 6px; border: 1px solid currentColor; border-radius: 4px; font: 600 9px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--reference)); }
+.version-kind[data-kind="publish"] { color: hsl(var(--trust)); }
+.version-kind[data-kind="restore"] { color: hsl(var(--drift)); }
+.version-kind[data-kind="checkpoint"] { color: hsl(var(--text-muted)); }
+.version-label { font-size: 13px; color: hsl(var(--text-strong)); }
+.version-summary { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font: 11px/1.45 var(--mono); color: hsl(var(--text)); overflow-wrap: anywhere; }
+.version-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.version-addresses dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 10px; margin: 6px 0 0; }
+.version-addresses dd { margin: 0; font-size: 10px; color: hsl(var(--text-muted)); }
+.version-more summary, .version-addresses summary { cursor: pointer; }
+.versions-more { justify-self: start; }
+.versions-tools { display: flex; gap: 8px; }
+.versions-import-note { margin: 0; padding: 8px 10px; border: 1px solid hsl(var(--danger) / .35); border-left: 2px solid hsl(var(--danger)); border-radius: 8px; background: hsl(var(--danger) / .06); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
+.versions-import-note:empty { display: none; }
+.versions-confirm { display: grid; gap: 8px; padding: 10px 12px; border: 1px solid hsl(var(--drift) / .4); border-left: 2px solid hsl(var(--drift)); border-radius: 8px; background: hsl(var(--drift) / .08); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); }
+.versions-confirm[hidden] { display: none; }
+.versions-confirm p { margin: 0; color: hsl(var(--text)); }
+.versions-confirm-title { font: 600 13px/1.3 var(--sans); }
+.versions-removals { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.versions-removals li { display: grid; gap: 1px; padding: 5px 8px; border: 1px solid hsl(var(--border-soft)); border-radius: 6px; background: hsl(var(--surface)); }
+.versions-removals code { font: 10px/1.4 var(--mono); color: hsl(var(--text-muted)); overflow-wrap: anywhere; }
+.version-kind[data-kind="import"], .version-kind[data-kind="imported"] { color: hsl(var(--accent)); }

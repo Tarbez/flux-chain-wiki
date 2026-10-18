@@ -139,7 +139,7 @@ var ArkStates = (function () {
     return sanitize(draft);
   }
 
-  /* Studio's own "preview this state" control -- see js/main.js/admin-studio.html for
+  /* Studio's own "preview this state" control -- see js/main.js and js/admin/admin.js for
      how a preview click is distinguished from an explicit Save (the module itself has
      no such concept: whatever is in the draft when the caller chooses to persist it
      is what gets saved, the same as every other Studio mutator in this codebase). */
@@ -171,8 +171,13 @@ var ArkStates = (function () {
     if (!root || !root.querySelectorAll) return [];
     return Array.prototype.slice.call(root.querySelectorAll('[' + attr + ']'));
   }
+  /* The root itself counts (regression: tests/states-root-member.cjs): ArkLayout.annotate()
+     keys the root too, so the persistent scene (#scene, key 'id:scene') can be picked as a
+     state-0 member -- and a querySelectorAll() below the root never found it, so on the
+     public page that member was never hidden. */
   function findByKey(root, key) {
     if (!key) return null;
+    if (root && root.getAttribute && root.getAttribute('data-ark-layout-key') === key) return root;
     var found = null;
     elementsWithAttr(root, 'data-ark-layout-key').some(function (el) {
       if (el.getAttribute('data-ark-layout-key') === key) { found = el; return true; }
@@ -180,12 +185,19 @@ var ArkStates = (function () {
     });
     return found;
   }
+  /* A state's anchor goes right after state 0's last member -- which, when that member is the
+     root itself, is OUTSIDE the root. So a miss below the root also looks document-wide (state
+     anchor ids are unique per group); otherwise every render created another anchor. */
   function findAnchor(root, id) {
     var found = null;
-    elementsWithAttr(root, 'data-ark-insert').some(function (el) {
-      if (el.getAttribute('data-ark-insert') === id) { found = el; return true; }
-      return false;
-    });
+    function scan(scope) {
+      elementsWithAttr(scope, 'data-ark-insert').some(function (el) {
+        if (el.getAttribute('data-ark-insert') === id) { found = el; return true; }
+        return false;
+      });
+    }
+    scan(root);
+    if (!found && root && root.ownerDocument && root.ownerDocument !== root) scan(root.ownerDocument);
     return found;
   }
   /* The real key-bearing element that sits LAST in document order among `members` --
@@ -193,7 +205,7 @@ var ArkStates = (function () {
      visual position (document order is render order for every flex/stack container
      this site uses, the same assumption ArkLayout's buildGroups() already relies on). */
   function lastMemberElement(host, members) {
-    var last = null;
+    var last = host && host.getAttribute && members.indexOf(host.getAttribute('data-ark-layout-key')) >= 0 ? host : null;
     elementsWithAttr(host, 'data-ark-layout-key').forEach(function (el) {
       if (members.indexOf(el.getAttribute('data-ark-layout-key')) >= 0) last = el;
     });
@@ -216,17 +228,26 @@ var ArkStates = (function () {
      otherwise -- never a wrapping container around state 0's members: once those
      members are hidden, a container holding nothing else could collapse to zero size
      and become unclickable, silently stranding the group on a non-zero state forever.
-     An explicit element key, by contrast, is always that one literal element -- a
-     known v1 limitation if that element happens to be one of state 0's own members
-     (it becomes unclickable once state 0 is hidden); documented, not fixed, per the
-     plan's "doesn't need to be fancy" scope for this control. */
-  function triggerTargets(host, route, value, groupId) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
-    if (!group) return [];
-    if (group.trigger !== 'self') { var el = findByKey(host, group.trigger); return el ? [el] : []; }
+     An explicit element key, by contrast, is that one literal element -- PLUS, while
+     that element is hidden because it sits inside state 0 and another state is
+     showing, the showing state's own content (the 'self' rule). Without that, the
+     owner's own worked example (make a container into states, then pick ONE button
+     inside it as the trigger) advanced once and then stranded the group on state 1
+     forever: the only trigger was display:none, so nothing could ever be clicked to
+     move on (regression: tests/states-trigger-strand.cjs). */
+  function selfTargets(host, group, groupId) {
     if (group.current === 0) return group.states[0].members.map(function (key) { return findByKey(host, key); }).filter(Boolean);
     var anchor = findAnchor(host, anchorId(groupId, group.current));
     return anchor ? [anchor] : [];
+  }
+  function triggerTargets(host, route, value, groupId) {
+    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    if (!group) return [];
+    if (group.trigger === 'self') return selfTargets(host, group, groupId);
+    var el = findByKey(host, group.trigger);
+    if (group.current === 0) return el ? [el] : [];
+    var hiddenWithZero = !el || group.states[0].members.some(function (key) { var member = findByKey(host, key); return member && (member === el || (member.contains && member.contains(el))); });
+    return hiddenWithZero ? (el ? [el] : []).concat(selfTargets(host, group, groupId)) : [el];
   }
 
   /* Delegated-click resolution: which group (if any) does this click target belong
@@ -274,6 +295,12 @@ var ArkStates = (function () {
         if (anchor) {
           if (anchor.setAttribute) { anchor.setAttribute('data-ark-state-group', groupId); anchor.setAttribute('data-ark-state-index', String(i)); }
           if (anchor.style) anchor.style.display = '';
+          /* A state's content IS a click target (the 'self' trigger, and the fallback when
+             an explicit trigger hid with state 0), but the anchor inherits its container's
+             pointer-events: made from a container inside the site header -- whose own CSS
+             is pointer-events:none, only its links opt back in -- state 1 rendered, could
+             not be clicked, and stranded the group (regression: tests/states-anchor-clickable.cjs). */
+          if (anchor.style) anchor.style.pointerEvents = 'auto';
           if (typeof ArkComponents !== 'undefined') ArkComponents.render(anchor, route, id, componentsValue);
         }
       } else if (existing && existing.style) {

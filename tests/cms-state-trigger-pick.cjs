@@ -35,6 +35,7 @@ function run(host) {
     cmsRoutePath: () => '/',
     cmsLayoutBreakpoint: () => 'desktop',
     cmsLayoutEntry: () => ({}),
+    cmsRectOf: (element) => element.getBoundingClientRect(),
   };
   vm.createContext(context);
   vm.runInContext(extracted, context);

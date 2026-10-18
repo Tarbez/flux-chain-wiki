@@ -22,7 +22,7 @@
    never hand-edit it; scripts/settings-entry.js imports it directly as an
    ES module, which this plain script cannot do, so the list is mirrored
    here as a literal -- the same mirrored-constant situation as
-   admin-studio.html's own CMS_FILL_TOKENS comment pointing back at
+   js/admin/admin.js's CMS_FILL_TOKENS, mirrored from
    js/content/layout.js). If scripts/theme-options.js's generated list
    ever changes, update THEME_OPTIONS here to match it.
    ===================================================================== */

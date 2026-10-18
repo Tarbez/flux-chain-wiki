@@ -11,15 +11,30 @@
    an instance is just a thin pointer -- { key, masterId, overrides } -- that
    gets rebuilt fresh from the CURRENT master every time its anchor renders.
    A master edit is visible everywhere on the very next render; there is no
-   separate resync step to get wrong, unlike the standalone canvas's deep-
-   copy-plus-resync design (admin-studio.html's own component/instance
-   system), which needs copies because its node graph is mutated in place.
+   separate resync step to get wrong, unlike the deleted standalone canvas's
+   deep-copy-plus-resync design (the old admin-studio.html's own component/
+   instance system), which needed copies because its node graph was mutated
+   in place.
 
-   Shape: { version, masters: { masterId: { resolver, props, label } },
-            routes: { route: { anchorId: [ { key, masterId, overrides } ] } } }
+   Shape: { version, masters: { masterId: { resolver, props, label, tree?, detached? } },
+            routes: { route: { anchorId: [ { key, masterId, overrides } ] } },
+            spots?: { route: { anchorId: { after: layoutKey, replaces: [layoutKey...] } } } }
    `route` is a path ('/about'), the same keying ArkLayout.routes already
    uses -- not a pageCatalog key -- so the two modules agree on what "this
-   route" means. */
+   route" means.
+
+   CAPTURED components ("Make into component", js/main.js): arbitrary page markup is not
+   any of the 6 typed blocks, so a selection is captured as a master whose resolver is
+   RBLOCK_CAPTURED_V1 and whose `tree` is the selection's own sanitized element structure.
+   Its props are not a fixed list: every non-blank text node and every <img> src/alt in the
+   tree is a slot, named from the element that holds it (propsOf), and the master's props
+   are the captured values -- so editing the definition is editing those slots, and an
+   instance override is the same per-slot override every typed block already has.
+   A SPOT is an anchor the page module never declared: created on render right after the
+   real element `after`, it is how an instance takes the place of the selection it was made
+   from (`replaces` is hidden while the spot has an instance) and how a block is inserted
+   after any element. A spot with no instance left is dropped by sanitize(), which is what
+   brings the replaced originals back when the last instance there is removed. */
 var ArkComponents = (function () {
   'use strict';
 
@@ -29,8 +44,10 @@ var ArkComponents = (function () {
      registered the same way as every other ArkUI resolver. A master naming
      anything else is dropped by sanitize() -- this is the whitelist Part 3's
      design calls for, so Studio can never write a master pointing at one of
-     the hero-scene's own %/u-space resolvers. */
-  var RESOLVERS = ['RBLOCK_TEXT_V1', 'RBLOCK_CTA_V1', 'RBLOCK_IMAGE_V1', 'RBLOCK_CARD_V1', 'RBLOCK_QUOTE_V1', 'RBLOCK_DIVIDER_V1'];
+     the hero-scene's own %/u-space resolvers. RBLOCK_CAPTURED_V1 (a captured
+     selection, see the header) is the 7th; its props come from its own tree. */
+  var CAPTURED = 'RBLOCK_CAPTURED_V1';
+  var RESOLVERS = ['RBLOCK_TEXT_V1', 'RBLOCK_CTA_V1', 'RBLOCK_IMAGE_V1', 'RBLOCK_CARD_V1', 'RBLOCK_QUOTE_V1', 'RBLOCK_DIVIDER_V1', CAPTURED];
 
   /* Each resolver's own real prop names -- not a separate formal schema
      object (these 6 resolver files just read p.xxx directly, no terse Flux
@@ -47,17 +64,124 @@ var ArkComponents = (function () {
     RBLOCK_DIVIDER_V1: []
   };
 
+  /* The one prop each resolver shows as visible text, so a block created with nothing
+     typed in yet still renders as SOMETHING (regression: tests/components-starter-props.cjs).
+     A Text block with props {} renders an empty <section> of zero size: added as a new
+     state's content it was invisible, and with a 'self' trigger it was also unclickable,
+     so the state group could never be clicked past it. A Divider has no text and needs
+     none (it renders an <hr>). */
+  var PRIMARY_TEXT_PROP = { RBLOCK_TEXT_V1: 'heading', RBLOCK_CTA_V1: 'label', RBLOCK_IMAGE_V1: 'caption', RBLOCK_CARD_V1: 'title', RBLOCK_QUOTE_V1: 'quote' };
+  function starterProps(resolver, text) {
+    var props = {}, key = PRIMARY_TEXT_PROP[resolver];
+    if (key && text) props[key] = String(text).slice(0, 4000);
+    return props;
+  }
+
   var ID = /^[a-z][a-z0-9_-]{0,79}$/i;
   var ROUTE = /^\/\S{0,299}$/;
 
   function isPlainObject(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
   function okValue(v) { return (typeof v === 'string' && v.length <= 4000) || (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean'; }
 
+  /* ---- captured trees ("Make into component"). A tree is an array of nodes:
+       ' '                         blank text kept between elements (collapsed to one space)
+       { p: 'heading' }            a text SLOT: rendered as the text of prop `heading`
+       { t, svg?, c?, s?, a?, ps?, k? }  an element: tag, SVG namespace flag, plain classes,
+                                   atom declarations (re-minted as classes on render),
+                                   attributes, attribute->prop slots (an <img>'s src/alt),
+                                   children.
+     Tags are an allowlist on purpose: this is a sanitizer, and an allowlist is the only
+     safe direction for one -- anything that runs, embeds or submits (script, iframe,
+     object, form controls) is never rebuilt, and neither is <canvas>, whose pixels are
+     painted by page code a capture cannot carry. */
+  var TAGS = /^(a|abbr|article|aside|b|blockquote|br|button|cite|code|dd|del|details|dfn|div|dl|dt|em|figcaption|figure|footer|h[1-6]|header|hr|i|img|ins|kbd|label|li|main|mark|nav|ol|p|picture|pre|q|s|section|small|source|span|strong|sub|summary|sup|table|tbody|td|tfoot|th|thead|time|tr|u|ul|svg|g|path|rect|circle|ellipse|line|polyline|polygon|text|tspan|use|defs|symbol|title|desc|lineargradient|radialgradient|stop|clippath|mask)$/i;
+  var ATTR = /^[a-z_:][-a-z0-9_:.]{0,63}$/i;
+  var URL_ATTR = /^(href|src|xlink:href|srcset|poster|action)$/i;
+  var BAD_URL = /^\s*(javascript|vbscript|data:text)/i;
+  var SLOT = /^[a-z][a-z0-9]{0,39}$/i;
+  var MAX_NODES = 600, MAX_DEPTH = 40;
+
+  /* Which attributes a captured element keeps is decided by what an attribute DOES, not
+     by a list of names: event handlers (on*) and runtime/editor bookkeeping (data-ark-*,
+     which the editor and the runtime re-derive on every render) never travel; `id` never
+     travels because a copy with the same id would collide with its original; a URL that
+     would run script is dropped; everything else -- aria-*, role, href, data-scene-link
+     (the router's own delegated hook, so a captured nav link still navigates), SVG
+     geometry -- is markup and is kept. */
+  function keepAttr(name, value) {
+    if (!ATTR.test(name) || /^on/i.test(name) || /^data-ark-/i.test(name) || /^(id|class|srcdoc|formaction|nonce)$/i.test(name)) return false;
+    if (typeof value !== 'string' || value.length > 2000) return false;
+    if (URL_ATTR.test(name) && BAD_URL.test(value)) return false;
+    if (/^style$/i.test(name) && /expression\s*\(|javascript:|behavior\s*:/i.test(value)) return false;
+    return true;
+  }
+
+  function cleanTree(raw) {
+    var budget = { n: 0 };
+    function cleanNode(node, depth) {
+      if (budget.n++ > MAX_NODES || depth > MAX_DEPTH) return null;
+      if (typeof node === 'string') return /^\s{1,20}$/.test(node) ? ' ' : null;
+      if (!isPlainObject(node)) return null;
+      if (typeof node.p === 'string') return SLOT.test(node.p) ? { p: node.p } : null;
+      if (typeof node.t !== 'string' || !TAGS.test(node.t)) return null;
+      var out = { t: node.t };
+      if (node.svg) out.svg = 1;
+      if (typeof node.c === 'string' && node.c.trim()) out.c = node.c.replace(/\s+/g, ' ').trim().slice(0, 1000);
+      if (Array.isArray(node.s)) {
+        var decls = node.s.filter(function (d) { return typeof d === 'string' && d.length > 0 && d.length <= 2000 && !/[{}<]/.test(d); }).slice(0, 40);
+        if (decls.length) out.s = decls;
+      }
+      /* `x`: the styling this element took from WHERE it was captured (see contextStyles) --
+         one declaration block, re-minted as a pinned atom on render. Absent on every node
+         captured before it existed, so those definitions keep their exact bytes. */
+      if (typeof node.x === 'string' && node.x.trim() && node.x.length <= 2000 && !/[{}<]/.test(node.x)) out.x = node.x;
+      if (isPlainObject(node.a)) {
+        var attrs = {};
+        Object.keys(node.a).slice(0, 40).forEach(function (name) { if (keepAttr(name, node.a[name])) attrs[name] = node.a[name]; });
+        if (Object.keys(attrs).length) out.a = attrs;
+      }
+      if (isPlainObject(node.ps)) {
+        var slots = {};
+        ['src', 'alt'].forEach(function (name) { if (typeof node.ps[name] === 'string' && SLOT.test(node.ps[name])) slots[name] = node.ps[name]; });
+        if (Object.keys(slots).length) out.ps = slots;
+      }
+      if (Array.isArray(node.k)) {
+        var kids = node.k.map(function (child) { return cleanNode(child, depth + 1); }).filter(function (child) { return child !== null; });
+        if (kids.length) out.k = kids;
+      }
+      return out;
+    }
+    if (!Array.isArray(raw)) return null;
+    var tree = raw.map(function (node) { return cleanNode(node, 0); }).filter(function (node) { return node !== null; });
+    return tree.some(function (node) { return typeof node !== 'string'; }) ? tree : null;
+  }
+
+  /* The slot names a tree declares, in document order: its editable props. */
+  function slotsOf(tree) {
+    var out = [];
+    (function walk(nodes) {
+      (nodes || []).forEach(function (node) {
+        if (!node || typeof node !== 'object') return;
+        if (node.p) { if (out.indexOf(node.p) < 0) out.push(node.p); return; }
+        if (node.ps) ['src', 'alt'].forEach(function (name) { if (node.ps[name] && out.indexOf(node.ps[name]) < 0) out.push(node.ps[name]); });
+        walk(node.k);
+      });
+    })(tree);
+    return out;
+  }
+  /* A master's editable props: a typed block's fixed list, a captured one's own slots. */
+  function propsOf(master) {
+    if (!master) return [];
+    if (master.resolver === CAPTURED) return slotsOf(master.tree);
+    return (RESOLVER_PROPS[master.resolver] || []).slice();
+  }
+
   /* Keeps only the keys a resolver actually declares, each with a value of
      a safe shape and size -- the same per-field discipline manifest.js's
-     problems() already applies to a page manifest's own fields. */
-  function cleanProps(resolver, raw) {
-    var allowed = RESOLVER_PROPS[resolver] || [], out = {};
+     problems() already applies to a page manifest's own fields. A captured
+     master declares its keys through its own tree (slotsOf). */
+  function cleanProps(resolver, raw, tree) {
+    var allowed = resolver === CAPTURED ? slotsOf(tree) : (RESOLVER_PROPS[resolver] || []), out = {};
     if (!isPlainObject(raw)) return out;
     allowed.forEach(function (key) { if (okValue(raw[key])) out[key] = raw[key]; });
     return out;
@@ -65,14 +189,26 @@ var ArkComponents = (function () {
 
   function cleanMaster(raw) {
     if (!isPlainObject(raw) || RESOLVERS.indexOf(raw.resolver) < 0) return null;
-    return { resolver: raw.resolver, props: cleanProps(raw.resolver, raw.props), label: String(raw.label || raw.resolver).slice(0, 120) };
+    var tree = null;
+    if (raw.resolver === CAPTURED) { tree = cleanTree(raw.tree); if (!tree) return null; }
+    var out = { resolver: raw.resolver, props: cleanProps(raw.resolver, raw.props, tree), label: String(raw.label || raw.resolver).slice(0, 120) };
+    if (tree) out.tree = tree;
+    if (raw.detached === true) out.detached = true;
+    return out;
   }
 
   function cleanInstance(raw, masters) {
     if (!isPlainObject(raw) || typeof raw.key !== 'string' || !ID.test(raw.key)) return null;
     var master = typeof raw.masterId === 'string' ? masters[raw.masterId] : null;
     if (!master) return null;
-    return { key: raw.key, masterId: raw.masterId, overrides: cleanProps(master.resolver, raw.overrides) };
+    return { key: raw.key, masterId: raw.masterId, overrides: cleanProps(master.resolver, raw.overrides, master.tree) };
+  }
+
+  function cleanKey(key) { return typeof key === 'string' && key.length > 0 && key.length <= 500 ? key : null; }
+  function cleanSpot(raw) {
+    if (!isPlainObject(raw) || !cleanKey(raw.after)) return null;
+    var replaces = Array.isArray(raw.replaces) ? Array.from(new Set(raw.replaces.map(cleanKey).filter(Boolean))).slice(0, 50) : [];
+    return { after: raw.after, replaces: replaces };
   }
 
   function sanitize(value) {
@@ -100,6 +236,27 @@ var ArkComponents = (function () {
       });
       if (Object.keys(cleanAnchors).length) out.routes[route] = cleanAnchors;
     });
+    /* A spot exists only while something is in it: one with no instance would hide the
+       content it replaced and show nothing in its place. */
+    var rawSpots = value && value.spots, spots = {};
+    if (isPlainObject(rawSpots)) Object.keys(rawSpots).slice(0, 500).forEach(function (route) {
+      if (!ROUTE.test(route) || !isPlainObject(rawSpots[route]) || !out.routes[route]) return;
+      var clean = {};
+      Object.keys(rawSpots[route]).slice(0, 50).forEach(function (anchorId) {
+        if (!ID.test(anchorId) || !out.routes[route][anchorId]) return;
+        var spot = cleanSpot(rawSpots[route][anchorId]);
+        if (spot) clean[anchorId] = spot;
+      });
+      if (Object.keys(clean).length) spots[route] = clean;
+    });
+    /* written only when there is one, so a site with no spots keeps the exact bytes its
+       components-data.js had before spots existed (tests/site-bundle.test.mjs) */
+    if (Object.keys(spots).length) out.spots = spots;
+    /* A detached copy belongs to the one instance that was detached into it; once nothing
+       points at it, it is gone -- it is never offered in the Library. */
+    var used = {};
+    Object.keys(out.routes).forEach(function (route) { Object.keys(out.routes[route]).forEach(function (anchorId) { out.routes[route][anchorId].forEach(function (item) { used[item.masterId] = true; }); }); });
+    Object.keys(out.masters).forEach(function (id) { if (out.masters[id].detached && !used[id]) delete out.masters[id]; });
     return out;
   }
 
@@ -117,10 +274,12 @@ var ArkComponents = (function () {
      Each id/key is supplied by the caller, the same way ArkLayout.group()
      takes a caller-generated group id rather than inventing one here. */
 
-  function createMaster(value, id, resolver, props, label) {
+  /* `tree` is only read for RBLOCK_CAPTURED_V1 (it IS that master's definition). */
+  function createMaster(value, id, resolver, props, label, tree) {
     var draft = sanitize(value);
     if (!ID.test(id || '') || RESOLVERS.indexOf(resolver) < 0) return draft;
-    draft.masters[id] = { resolver: resolver, props: cleanProps(resolver, props), label: String(label || resolver).slice(0, 120) };
+    var master = cleanMaster({ resolver: resolver, props: props, label: label, tree: tree });
+    if (master) draft.masters[id] = master;
     return sanitize(draft);
   }
 
@@ -128,7 +287,7 @@ var ArkComponents = (function () {
     var draft = sanitize(value), master = draft.masters[id];
     if (!master || !isPlainObject(patch)) return draft;
     if (typeof patch.label === 'string') master.label = patch.label.slice(0, 120);
-    if (patch.props !== undefined) master.props = cleanProps(master.resolver, patch.props);
+    if (patch.props !== undefined) master.props = cleanProps(master.resolver, patch.props, master.tree);
     return sanitize(draft);
   }
 
@@ -138,6 +297,18 @@ var ArkComponents = (function () {
     var anchors = draft.routes[route] || (draft.routes[route] = {});
     var list = anchors[anchorId] || (anchors[anchorId] = []);
     list.push({ key: key, masterId: masterId, overrides: {} });
+    return sanitize(draft);
+  }
+
+  /* An instance in a brand-new spot right after the real element `after`, optionally
+     standing in for the real elements `replaces` -- one call, because sanitize() drops a
+     spot that has no instance yet. */
+  function placeInstance(value, route, spotId, after, replaces, key, masterId) {
+    var draft = insertInstance(value, route, spotId, key, masterId);
+    var spot = cleanSpot({ after: after, replaces: replaces });
+    if (!spot || !draft.routes[route] || !draft.routes[route][spotId]) return sanitize(value);
+    var spots = draft.spots || (draft.spots = {});
+    (spots[route] || (spots[route] = {}))[spotId] = spot;
     return sanitize(draft);
   }
 
@@ -161,6 +332,316 @@ var ArkComponents = (function () {
     return sanitize(draft);
   }
 
+  /* Detach: the instance stops following its definition. It is re-pointed at a private
+     copy (`newId`) of what it shows right now -- the master's props with its own overrides
+     folded in -- so the page looks the same, and no later definition edit reaches it. The
+     copy is flagged `detached`: the Library never lists it, and sanitize() drops it once
+     its one instance is gone. */
+  function detachInstance(value, route, anchorId, key, newId) {
+    var draft = sanitize(value);
+    var list = draft.routes[route] && draft.routes[route][anchorId];
+    var instance = list && list.find(function (item) { return item.key === key; });
+    var master = instance && draft.masters[instance.masterId];
+    if (!master || !ID.test(newId || '') || draft.masters[newId]) return draft;
+    var copy = JSON.parse(JSON.stringify(master));
+    copy.props = Object.assign({}, master.props, instance.overrides);
+    copy.label = (master.label + ' (detached)').slice(0, 120);
+    copy.detached = true;
+    draft.masters[newId] = copy;
+    instance.masterId = newId; instance.overrides = {};
+    return sanitize(draft);
+  }
+
+  /* ---- capture: a real DOM selection -> { tree, props }, for "Make into component".
+     Runs where the selection lives (the preview iframe, js/main.js); pure apart from
+     READING the DOM, so it is tested in jsdom against real markup. `atomDecl(cls)` returns
+     the declaration block of a runtime atom class (ArkAtomizer.declaration), '' otherwise. */
+
+  /* A slot is named after the nearest element in the capture that gives its text a role
+     -- a link's text is `link`, a heading's is `heading` -- falling back to `text`; the
+     2nd of a name is `link2`. Naming only; nothing is decided by membership here. */
+  var SLOT_ROLE = { a: 'link', button: 'button', h1: 'heading', h2: 'heading', h3: 'heading', h4: 'heading', h5: 'heading', h6: 'heading', p: 'paragraph', li: 'item', label: 'label', figcaption: 'caption', blockquote: 'quote', q: 'quote', td: 'cell', th: 'cell', dt: 'term', dd: 'detail' };
+
+  function defaultAtomDecl(cls) {
+    var atomizer = typeof ArkAtomizer !== 'undefined' ? ArkAtomizer : null;
+    return atomizer && atomizer.declaration ? atomizer.declaration(cls) : '';
+  }
+  /* a pinned context atom (ArkAtomizer.pin) read back into `x`, so capturing an instance of a
+     captured component carries its context styling forward instead of losing it */
+  function defaultPinDecl(cls) {
+    var atomizer = typeof ArkAtomizer !== 'undefined' ? ArkAtomizer : null;
+    return atomizer && atomizer.pinDeclaration ? atomizer.pinDeclaration(cls) : '';
+  }
+
+  /* ---- context styling: what a captured element looked like BECAUSE OF WHERE IT WAS.
+     A capture keeps an element's own classes and atoms, but a rule that matches it only
+     through its ancestors (`.how-chapter-header h1` on /download) does not travel: the same
+     classes inserted on /chain fall back to the browser's default h1. So at capture time
+     the selection is rebuilt from its own cleaned tree in a NEUTRAL spot -- inside the
+     scene's host, outside the scene root that carries the route (data-page) and outside
+     every page container -- and each element's computed style there is compared with the
+     original's. Whatever differs is exactly what the context contributed, whatever the
+     selector shape (:has, :not, attribute or id ancestry, nesting): the browser has already
+     resolved the cascade, so nothing here re-implements selector matching or specificity.
+
+     Chosen over collecting and re-scoping the ancestor-dependent RULES because that needs
+     a selector parser, a specificity calculator and shorthand/var() longhand handling to
+     re-run the cascade honestly, and gets each wrong in its own way; the computed diff asks
+     the browser, which is the one cascade implementation that is right by definition. What
+     it gives up, stated rather than hidden: the pinned values are the RESTING state at the
+     capture's viewport -- a context rule's :hover variant, its @media variants and its
+     ::before/::after are not carried (the element's own classes still bring theirs).
+
+     Which properties: the look vocabulary the Studio itself styles (js/content/layout.js's
+     frame: type, colour, fill, border, radius, opacity, padding, vertical margin, flex
+     layout, max width) plus the typography text inherits, and SVG paint. Left out on
+     purpose: width/height/insets and horizontal margins, whose computed value is the USED
+     pixel size in the original container (a `margin: 0 auto` would freeze as a px offset).
+
+     Values are stored as design tokens where one reproduces the value (ArkLayout's own
+     token lists: hsl(var(--text-strong)), var(--font-display), var(--type-h1), the radius
+     sizes), line-height as a unitless ratio and letter-spacing in em -- so they keep
+     scaling with the font -- and a literal otherwise. Every value is checked by applying it
+     to the neutral rebuild and reading it back; one that does not reproduce the original is
+     not stored. A top-level element also pins the inherited typography it showed even when
+     the neutral spot already matches, because the DESTINATION's ancestors would otherwise
+     restyle it (a component must look the same wherever it is placed). */
+  var CONTEXT_PROPS = ['font-size', 'font-family', 'font-weight', 'font-style', 'line-height', 'letter-spacing', 'text-transform', 'text-align', 'text-decoration-line', 'color',
+    'background-color', 'opacity', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left', 'margin-top', 'margin-bottom',
+    'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width', 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style',
+    'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
+    'border-top-left-radius', 'border-top-right-radius', 'border-bottom-right-radius', 'border-bottom-left-radius',
+    'display', 'flex-direction', 'flex-wrap', 'align-items', 'justify-content', 'row-gap', 'column-gap', 'max-width', 'fill', 'stroke', 'stroke-width'];
+  var INHERITED_TYPE = { 'font-size': 1, 'font-family': 1, 'font-weight': 1, 'font-style': 1, 'line-height': 1, 'letter-spacing': 1, 'text-transform': 1, 'text-align': 1, color: 1 };
+  var PX = /^(-?\d*\.?\d+)px$/;
+  function sameValue(a, b) {
+    if (a === b) return true;
+    var pa = PX.exec(a), pb = PX.exec(b);
+    return !!(pa && pb && Math.abs(Number(pa[1]) - Number(pb[1])) < 0.05);
+  }
+  function roundNum(n, places) { var f = Math.pow(10, places); return String(Math.round(n * f) / f); }
+  /* the forms worth trying before the literal, best first */
+  function contextCandidates(prop, want, fontPx) {
+    var L = typeof ArkLayout !== 'undefined' ? ArkLayout : null, out = [];
+    if (L && /(^|-)color$|^fill$|^stroke$/.test(prop)) {
+      var m = /^rgba?\(([^)]*)\)$/.exec(want);
+      if (m) {
+        var parts = m[1].split(/[\s,/]+/).filter(Boolean), alpha = parts.length > 3 ? Number(parts[3]) : 1;
+        var lists = prop === 'color' ? [L.TEXT_TOKENS, L.FILL_TOKENS, L.BORDER_TOKENS] : prop === 'background-color' ? [L.FILL_TOKENS, L.TEXT_TOKENS, L.BORDER_TOKENS] : /^border/.test(prop) ? [L.BORDER_TOKENS, L.TEXT_TOKENS, L.FILL_TOKENS] : [L.TEXT_TOKENS, L.FILL_TOKENS, L.BORDER_TOKENS];
+        if (alpha > 0) lists.forEach(function (list) { (list || []).forEach(function (t) { var v = alpha < 1 ? 'hsl(var(--' + t + ') / ' + roundNum(alpha, 3) + ')' : 'hsl(var(--' + t + '))'; if (out.indexOf(v) < 0) out.push(v); }); });
+      }
+    } else if (L && prop === 'font-family') (L.FONT_TOKENS || []).forEach(function (t) { out.push('var(--font-' + t + ')'); });
+    else if (L && prop === 'font-size') (L.TYPE_SIZE_TOKENS || []).forEach(function (t) { out.push('var(--type-' + t + ')'); });
+    else if (L && /radius$/.test(prop) && L.RADIUS_CSS) (L.RADIUS_TOKENS || []).forEach(function (t) { if (t !== 'none' && L.RADIUS_CSS[t]) out.push(L.RADIUS_CSS[t]); });
+    else if (prop === 'line-height' && PX.test(want) && fontPx > 0) out.push(roundNum(Number(PX.exec(want)[1]) / fontPx, 3));
+    else if (prop === 'letter-spacing' && PX.test(want) && fontPx > 0) out.push(roundNum(Number(PX.exec(want)[1]) / fontPx, 4) + 'em');
+    out.push(want);
+    return out;
+  }
+  function contextStyles(elements, tree, options) {
+    var first = elements && elements[0], doc = first && first.ownerDocument, view = doc && doc.defaultView;
+    if (!view || typeof view.getComputedStyle !== 'function' || !first.isConnected) return;
+    var neutral = options.neutralHost;
+    if (!neutral) { var sceneRoot = first.closest && first.closest('[data-page]'); neutral = sceneRoot && sceneRoot.parentElement; }
+    if (!neutral) return;
+    /* The rebuild's container mirrors the original parent's layout type and content width,
+       so differences that come from layout (a flex item is blockified, a % padding resolves
+       against the parent) are not mistaken for context styling. */
+    var parent = first.parentElement, around = parent ? view.getComputedStyle(parent) : null;
+    var wrapper = doc.createElement('div');
+    wrapper.setAttribute('aria-hidden', 'true');
+    var width = parent ? parent.clientWidth - (parseFloat(around.paddingLeft) || 0) - (parseFloat(around.paddingRight) || 0) : 0;
+    wrapper.style.cssText = 'position:absolute;left:-100000px;top:0;visibility:hidden;pointer-events:none;margin:0;padding:0;border:0' +
+      (around && /flex|grid/.test(around.display) ? ';display:' + around.display.replace(/^inline-/, '') + ';flex-direction:' + around.flexDirection : ';display:block') +
+      (width > 0 ? ';width:' + width + 'px' : '');
+    tree.forEach(function (node) { var built = buildNode(node, options.props || {}, doc); if (built) wrapper.appendChild(built); });
+    neutral.appendChild(wrapper);
+    try {
+      var tagOf = function (el) { return el.namespaceURI === 'http://www.w3.org/2000/svg' ? el.tagName : el.tagName.toLowerCase(); };
+      var kept = function (list) { return Array.prototype.filter.call(list || [], function (el) { return el.nodeType === 1 && TAGS.test(tagOf(el)); }); };
+      var pairs = [];
+      (function pair(sources, nodes, probes, root) {
+        nodes = (nodes || []).filter(function (n) { return n && typeof n === 'object' && n.t; });
+        for (var i = 0; i < nodes.length; i++) {
+          var src = sources[i], probe = probes[i];
+          if (!src || !probe || tagOf(src) !== nodes[i].t || tagOf(probe) !== nodes[i].t) return; /* a capture cut short by its node budget: stop pairing, never mis-pair */
+          pairs.push({ src: src, probe: probe, node: nodes[i], root: root });
+          pair(kept(src.children), nodes[i].k, Array.prototype.slice.call(probe.children), false);
+        }
+      })(kept(elements), tree, Array.prototype.slice.call(wrapper.children), true);
+      /* top-down, applying each pin to the rebuild as it is decided, so a child is compared
+         against a parent that already looks like the original and pins only its own share */
+      pairs.forEach(function (p) {
+        var cs = view.getComputedStyle(p.src), cp = view.getComputedStyle(p.probe), decls = [];
+        CONTEXT_PROPS.forEach(function (prop) {
+          var want = cs.getPropertyValue(prop);
+          if (!want) return;
+          var side = /^border-(top|right|bottom|left)-color$/.exec(prop);
+          if (side && cs.getPropertyValue('border-' + side[1] + '-style') === 'none') return;
+          if (!(p.root && INHERITED_TYPE[prop]) && sameValue(want, cp.getPropertyValue(prop))) return;
+          var fontPx = parseFloat(cs.getPropertyValue('font-size')) || 0;
+          var chosen = contextCandidates(prop, want, fontPx).find(function (candidate) {
+            p.probe.style.setProperty(prop, candidate);
+            return sameValue(cp.getPropertyValue(prop), want);
+          });
+          if (chosen) decls.push(prop + ':' + chosen); else p.probe.style.removeProperty(prop);
+        });
+        if (!decls.length) return;
+        /* a re-capture keeps what an earlier capture pinned, with this pass's values winning */
+        var merged = p.node.x ? parseDecl(p.node.x) : {};
+        decls.forEach(function (d) { var at = d.indexOf(':'); merged[d.slice(0, at)] = d.slice(at + 1); });
+        var ordered = CONTEXT_PROPS.filter(function (prop) { return merged[prop] !== undefined; }).concat(Object.keys(merged).filter(function (prop) { return CONTEXT_PROPS.indexOf(prop) < 0; }).sort());
+        var x = ordered.map(function (prop) { return prop + ':' + merged[prop]; }).join(';');
+        if (x.length <= 2000) p.node.x = x;
+      });
+    } finally {
+      wrapper.remove();
+    }
+  }
+
+  function capture(elements, options) {
+    options = options || {};
+    var atomDecl = options.atomDecl || defaultAtomDecl, pinDecl = options.pinDecl || defaultPinDecl;
+    var props = {}, used = {}, count = { n: 0 };
+    function slotName(role) {
+      used[role] = (used[role] || 0) + 1;
+      return used[role] === 1 ? role : role + used[role];
+    }
+    function roleFor(textNode, stop) {
+      for (var node = textNode.parentNode; node; node = node.parentNode) {
+        var tag = node.tagName ? node.tagName.toLowerCase() : '';
+        if (SLOT_ROLE[tag]) return SLOT_ROLE[tag];
+        if (node === stop) break;
+      }
+      return 'text';
+    }
+    function walk(node, top) {
+      if (count.n++ > MAX_NODES) return null;
+      if (node.nodeType === 3) {
+        var text = node.nodeValue || '';
+        if (!text.trim()) return /\s/.test(text) ? ' ' : null;
+        var name = slotName(roleFor(node, top));
+        props[name] = text.replace(/\s+/g, ' ').slice(0, 4000);
+        return { p: name };
+      }
+      if (node.nodeType !== 1) return null;
+      var isSvg = node.namespaceURI === 'http://www.w3.org/2000/svg';
+      var tag = isSvg ? node.tagName : node.tagName.toLowerCase();
+      if (!TAGS.test(tag)) return null;
+      var out = { t: tag };
+      if (isSvg) out.svg = 1;
+      var plain = [], decls = [], pinned = '';
+      String(node.getAttribute('class') || '').split(/\s+/).filter(Boolean).forEach(function (cls) {
+        var pin = pinDecl(cls);
+        if (pin) { pinned = pin; return; }
+        var decl = atomDecl(cls);
+        if (decl) decls.push(decl); else plain.push(cls);
+      });
+      if (plain.length) out.c = plain.join(' ');
+      if (decls.length) out.s = decls;
+      if (pinned) out.x = pinned;
+      var attrs = {};
+      Array.prototype.forEach.call(node.attributes || [], function (attr) { if (keepAttr(attr.name, attr.value)) attrs[attr.name] = attr.value; });
+      if (tag === 'img') {
+        var slots = {};
+        if (attrs.src) { slots.src = slotName('image'); props[slots.src] = attrs.src.slice(0, 4000); delete attrs.src; }
+        if (attrs.alt !== undefined) { slots.alt = slotName('imageAlt'); props[slots.alt] = attrs.alt.slice(0, 4000); delete attrs.alt; }
+        if (Object.keys(slots).length) out.ps = slots;
+      }
+      if (Object.keys(attrs).length) out.a = attrs;
+      var kids = [];
+      Array.prototype.forEach.call(node.childNodes || [], function (child) { var built = walk(child, top); if (built !== null) kids.push(built); });
+      if (kids.length) out.k = kids;
+      return out;
+    }
+    var tree = [];
+    (elements || []).forEach(function (element) { var built = element && walk(element, element); if (built && typeof built === 'object') tree.push(built); });
+    var clean = cleanTree(tree);
+    if (!clean) return null;
+    var cleanedProps = cleanProps(CAPTURED, props, clean);
+    /* options.context === false skips it (a caller that wants structure only) */
+    if (options.context !== false) contextStyles(elements, clean, { neutralHost: options.neutralHost, props: cleanedProps });
+    return { tree: cleanTree(clean), props: cleanedProps };
+  }
+
+  /* The starter content for a NEW STATE, derived from the state-0 content it stands in for
+     (regression: tests/components-capture.cjs). A fixed big Text heading looked like a
+     page title dropped into a nav bar. The unit is found by structure: the first non-blank
+     text in state 0, widened to the largest element around it that holds no OTHER text --
+     for a nav of links that is one link (icon and all), for a heading the heading. That
+     unit is captured (so it keeps its own classes and look) with its first text slot set to
+     `text` and any other text slot emptied. Null when state 0 has no text at all (e.g. an
+     image), so the caller falls back to a typed block. */
+  function starterFrom(elements, text, options) {
+    var first = null;
+    function texts(node) {
+      var found = [];
+      (function walk(n) { if (n.nodeType === 3 && n.nodeValue.trim()) found.push(n); else Array.prototype.forEach.call(n.childNodes || [], walk); })(node);
+      return found;
+    }
+    (elements || []).some(function (element) { var t = element ? texts(element) : []; if (t.length) { first = { node: t[0], top: element }; return true; } return false; });
+    if (!first) return null;
+    var unit = first.node.parentNode;
+    while (unit !== first.top && unit.parentNode && texts(unit.parentNode).length === 1) unit = unit.parentNode;
+    var captured = capture([unit], options);
+    if (!captured) return null;
+    /* A starter borrows state 0's LOOK, not its behaviour: an HTML element keeps its classes
+       and atoms but none of its attributes (a copied nav link would otherwise still carry the
+       original's href and router hook, and open a page nobody chose); SVG keeps its geometry,
+       which is what draws it. */
+    (function strip(nodes) {
+      (nodes || []).forEach(function (node) {
+        if (!node || typeof node !== 'object' || node.p) return;
+        if (!node.svg && node.a) { var hidden = node.a['aria-hidden']; delete node.a; if (hidden) node.a = { 'aria-hidden': hidden }; }
+        strip(node.k);
+      });
+    })(captured.tree);
+    var slots = slotsOf(captured.tree).filter(function (name) { var role = name.replace(/\d+$/, ''); return role !== 'image' && role !== 'imageAlt'; });
+    slots.forEach(function (name, i) { captured.props[name] = i === 0 ? String(text || '').slice(0, 4000) : ''; });
+    return captured;
+  }
+
+  /* ---- build: one captured node -> real DOM, called by the RBLOCK_CAPTURED_V1 resolver
+     (js/resolvers/blocks/rblock-captured-v1.js). Text goes in as text, never markup; atom
+     declarations are re-minted through the same atomizer every resolver uses, so the class
+     names are byte-identical to the originals' and their rules exist on every page. */
+  function parseDecl(decl) {
+    var styles = {}, depth = 0, quote = '', start = 0, parts = [];
+    for (var i = 0; i <= decl.length; i++) {
+      var ch = decl.charAt(i);
+      if (i === decl.length || (ch === ';' && !depth && !quote)) { parts.push(decl.slice(start, i)); start = i + 1; continue; }
+      if (quote) { if (ch === quote) quote = ''; continue; }
+      if (ch === '"' || ch === "'") quote = ch;
+      else if (ch === '(') depth++;
+      else if (ch === ')') depth = Math.max(0, depth - 1);
+    }
+    parts.forEach(function (part) { var at = part.indexOf(':'); if (at > 0) styles[part.slice(0, at)] = part.slice(at + 1); });
+    return styles;
+  }
+  function buildNode(node, props, doc) {
+    doc = doc || document;
+    if (typeof node === 'string') return doc.createTextNode(' ');
+    if (!node || typeof node !== 'object') return null;
+    if (node.p) return doc.createTextNode(props && props[node.p] != null ? String(props[node.p]) : '');
+    var el = node.svg ? doc.createElementNS('http://www.w3.org/2000/svg', node.t) : doc.createElement(node.t);
+    var classes = [];
+    if (node.c) classes.push(node.c);
+    (node.s || []).forEach(function (decl) { var cls = typeof ArkUI !== 'undefined' && ArkUI.atomize ? ArkUI.atomize(parseDecl(decl)) : ''; if (cls) classes.push(cls); });
+    /* the context styling it was captured with, as one pinned atom (see contextStyles) */
+    if (node.x && typeof ArkAtomizer !== 'undefined' && ArkAtomizer.pin) { var pinCls = ArkAtomizer.pin(parseDecl(node.x)); if (pinCls) classes.push(pinCls); }
+    if (classes.length) el.setAttribute('class', classes.join(' '));
+    Object.keys(node.a || {}).forEach(function (name) {
+      try { if (name === 'xlink:href') el.setAttributeNS('http://www.w3.org/1999/xlink', name, node.a[name]); else el.setAttribute(name, node.a[name]); } catch (e) { /* a name the DOM refuses is skipped, never thrown */ }
+    });
+    Object.keys(node.ps || {}).forEach(function (name) {
+      var v = props && props[node.ps[name]];
+      if (v == null || (name === 'src' && BAD_URL.test(String(v)))) return;
+      el.setAttribute(name, String(v));
+    });
+    (node.k || []).forEach(function (child) { var built = buildNode(child, props, doc); if (built) el.appendChild(built); });
+    return el;
+  }
+
   /* ---- render: rebuilds one anchor's current instance list into real DOM,
      reusing ArkUI.build (js/ark/runtime.js) exactly as every other resolver
      tree does -- never a second, parallel builder. `host` is the anchor
@@ -181,8 +662,10 @@ var ArkComponents = (function () {
       if (!master) return;                        /* self-healing: a dangling pointer renders nothing, never throws */
       /* `from` is injected, never user data: the route a link-field CTA
          resolves a doc: link's return-to against (js/ark/dash-kit.js's
-         resolveLinkField/linkEl), always the instance's own current route. */
+         resolveLinkField/linkEl), always the instance's own current route.
+         `tree` likewise: a captured master's definition, read by its resolver. */
       var props = Object.assign({}, master.props, instance.overrides, { from: route });
+      if (master.tree) props.tree = master.tree;
       var node = { name: instance.key, resolver: master.resolver, props: props, children: [] };
       var el = ArkUI.build(node, ctx);
       if (el) {
@@ -211,22 +694,77 @@ var ArkComponents = (function () {
       .map(function (el) { return el.getAttribute('data-ark-insert'); });
   }
 
+  /* ---- spots in the real DOM. Keys are ArkLayout's own data-ark-layout-key values,
+     resolved by scanning rather than by an attribute-value selector (a key holds ':' and
+     '/'), the same way js/content/states.js's findByKey does. */
+  var REPLACED = 'data-ark-component-replaced';
+  function elementsWithAttr(root, attr) { return root && root.querySelectorAll ? Array.prototype.slice.call(root.querySelectorAll('[' + attr + ']')) : []; }
+  function findByKey(root, key) {
+    var found = null;
+    elementsWithAttr(root, 'data-ark-layout-key').some(function (el) { if (el.getAttribute('data-ark-layout-key') === key) { found = el; return true; } return false; });
+    return found;
+  }
+  /* A replaced element is hidden by an attribute rule, not an inline style: ArkLayout's
+     apply() resets inline styles on every pass, and an !important rule also wins over the
+     page's own display rules (a nav link is display:inline-flex by a class). */
+  function ensureReplacedRule(doc) {
+    if (!doc || !doc.head || doc.querySelector('style[data-ark-components]')) return;
+    var style = doc.createElement('style');
+    style.setAttribute('data-ark-components', '');
+    style.textContent = '[' + REPLACED + ']{display:none!important}[data-ark-spot]{display:contents}';
+    doc.head.appendChild(style);
+  }
+  /* Makes the DOM match the route's spots: every spot anchor exists right after its `after`
+     element (created on demand -- display:contents, so what it holds lays out as children
+     of the original parent, exactly where the selection was), every replaced element is
+     hidden, and anything left over from an earlier draft (a removed spot, another route's
+     spot in the persistent header) is taken back out. Keys are annotated BEFORE an anchor
+     is inserted, so inserting one never renumbers its siblings' path keys. */
+  function syncSpots(root, route, draft) {
+    if (!root || !root.querySelectorAll) return;
+    var spots = (draft.spots && draft.spots[route]) || {};
+    var ids = Object.keys(spots), doc = root.ownerDocument || (typeof document !== 'undefined' ? document : null);
+    elementsWithAttr(root, 'data-ark-spot').forEach(function (el) { if (ids.indexOf(el.getAttribute('data-ark-insert')) < 0) el.remove(); });
+    var hidden = {};
+    if (ids.length) {
+      ensureReplacedRule(doc);
+      if (typeof ArkLayout !== 'undefined' && ArkLayout.annotate) ArkLayout.annotate(root);
+      ids.forEach(function (id) {
+        var spot = spots[id], anchor = elementsWithAttr(root, 'data-ark-spot').find(function (el) { return el.getAttribute('data-ark-insert') === id; });
+        if (!anchor) {
+          var after = findByKey(root, spot.after);
+          if (!after || !after.parentNode || !doc) return;                /* the page changed: render nothing, never throw */
+          anchor = doc.createElement('div');
+          anchor.setAttribute('data-ark-insert', id);
+          anchor.setAttribute('data-ark-spot', '');
+          anchor.style.display = 'contents';
+          after.parentNode.insertBefore(anchor, after.nextSibling);
+        }
+        spot.replaces.forEach(function (key) { var el = findByKey(root, key); if (el) { el.setAttribute(REPLACED, id); hidden[key] = true; } });
+      });
+    }
+    elementsWithAttr(root, REPLACED).forEach(function (el) { if (!hidden[el.getAttribute('data-ark-layout-key')]) el.removeAttribute(REPLACED); });
+  }
+
   /* Every [data-ark-insert] anchor under root, rendered from `value` (or the
      module's own `current`). Returns the anchor ids found, so a caller (the
      real site's js/main.js) can both fill every anchor on a page in one call
      and report back to Studio which anchors this route actually has. */
   function renderAll(root, route, value) {
     if (!root || !root.querySelectorAll) return [];
+    var draft = sanitize(value !== undefined ? value : current);
+    syncSpots(root, route, draft);
     var anchors = Array.prototype.slice.call(root.querySelectorAll('[data-ark-insert]'));
-    anchors.forEach(function (el) { render(el, route, el.getAttribute('data-ark-insert'), value); });
+    anchors.forEach(function (el) { render(el, route, el.getAttribute('data-ark-insert'), draft); });
     return anchors.map(function (el) { return el.getAttribute('data-ark-insert'); });
   }
 
   return {
     define: define, get: get, sanitize: sanitize, serialize: serialize,
     createMaster: createMaster, updateMaster: updateMaster,
-    insertInstance: insertInstance, setOverride: setOverride, removeInstance: removeInstance,
+    insertInstance: insertInstance, placeInstance: placeInstance, setOverride: setOverride, removeInstance: removeInstance, detachInstance: detachInstance,
     render: render, renderAll: renderAll, anchorsIn: anchorsIn,
-    resolvers: RESOLVERS.slice(), resolverProps: RESOLVER_PROPS
+    capture: capture, starterFrom: starterFrom, buildNode: buildNode, propsOf: propsOf,
+    resolvers: RESOLVERS.slice(), resolverProps: RESOLVER_PROPS, starterProps: starterProps, CAPTURED: CAPTURED
   };
 })();

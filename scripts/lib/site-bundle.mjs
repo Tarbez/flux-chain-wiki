@@ -9,6 +9,11 @@
      site               the order of the manifests and of the articles
      manifest.<id>      one page manifest, exactly as ArkManifest defines it
      article.<slug>     one article: its index fields and its body
+     asset.<id>, secret.<id>   one image / one encrypted item
+     <draft key>        one single-object draft (theme, layout, components, states, ...):
+                        one route per 'single' entry of js/admin/store.js's draft list,
+                        the same list the admin's Save uses, so publish cannot carry
+                        fewer drafts than Save writes
 
    Nothing here knows any page's words or any article's shape. Validation and
    the exact file text come from the project's own js/content/manifest.js and
@@ -37,13 +42,39 @@ export const defaultProjectRoot = path.resolve(path.dirname(fileURLToPath(import
 
 function read(root, relative) { return fs.readFileSync(path.join(root, relative), 'utf8'); }
 
+/* The editor's one list of drafts (js/admin/store.js ArkAdminStore.drafts()), read from the
+   file itself -- never restated here. A 'single' draft needs nothing below to be named: its
+   archive route, its reader, its validation and its project file all follow from the entry.
+   An 'items' draft needs its own code (per-id files, an index), so one this file does not
+   handle is refused loudly instead of being left out of the archive silently, which is
+   exactly how 5 of the 13 drafts once went missing from every publish. */
+const ITEM_KEYS = ['manifests', 'articles', 'assets', 'secrets'];
+export function siteDrafts(root = defaultProjectRoot) {
+  const context = vm.createContext({});
+  vm.runInContext(read(root, 'js/admin/store.js'), context, { filename: 'js/admin/store.js' });
+  const list = JSON.parse(JSON.stringify(vm.runInContext('ArkAdminStore.drafts()', context)));
+  const unhandled = list.filter((d) => d.kind === 'items' && !ITEM_KEYS.includes(d.key)).map((d) => d.key);
+  if (unhandled.length) throw new Error(`js/admin/store.js lists the per-id draft(s) ${unhandled.join(', ')}, which scripts/lib/site-bundle.mjs cannot archive yet: add their encode/decode/projectFiles handling there, or they would never be published.`);
+  return list;
+}
+const singleDrafts = (root) => siteDrafts(root).filter((d) => d.kind === 'single');
+
 /* The project's own content code, run in a sandbox with nothing but what it needs. */
 function loadContentCode(root) {
   const context = vm.createContext({ console, document: { write() {} } });
-  for (const file of ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js', 'js/tokens.js', 'js/ark/vendor/backgrounds.js', 'js/content/theme.js', 'js/content/layout.js', 'js/content/mesh-settings.js', 'js/content/seo.js', 'js/admin/store.js']) {
-    vm.runInContext(read(root, file), context, { filename: file });
-  }
-  return vm.runInContext('({ ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkLayout, ArkMeshSettings, ArkSEO, ArkAdminStore })', context);
+  const files = ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js'];
+  for (const d of singleDrafts(root)) for (const file of [...(d.needs || []), `js/content/${d.file}.js`]) if (!files.includes(file)) files.push(file);
+  files.push('js/admin/store.js');
+  for (const file of files) vm.runInContext(read(root, file), context, { filename: file });
+  const globals = ['ArkManifest', 'LearningContent', 'ArkAsset', 'ArkSecret', 'ArkAdminStore', ...singleDrafts(root).map((d) => d.global)];
+  return vm.runInContext(`({ ${globals.join(', ')} })`, context);
+}
+
+/* One single-object draft as the site loads it: its prerequisites, its module, its data file. */
+function readSingle(root, d) {
+  const context = vm.createContext({});
+  for (const file of [...(d.needs || []), `js/content/${d.file}.js`, `js/content/${d.file}-data.js`]) vm.runInContext(read(root, file), context, { filename: file });
+  return JSON.parse(JSON.stringify(vm.runInContext(`${d.global}.get()`, context)));
 }
 
 /* the ids the manifest index lists, in display order */
@@ -93,35 +124,10 @@ function loadIndexedSecrets(root, ids) {
   return vm.runInContext('ArkSecret.all()', context);
 }
 
-/* the concept page's iceberg relief tuning: a single object, not a list. */
-function readMeshSettings(root) {
-  const context = vm.createContext({});
-  vm.runInContext(read(root, 'js/content/mesh-settings.js'), context, { filename: 'mesh-settings.js' });
-  vm.runInContext(read(root, 'js/content/mesh-settings-data.js'), context, { filename: 'mesh-settings-data.js' });
-  return JSON.parse(JSON.stringify(vm.runInContext('ArkMeshSettings.get()', context)));
-}
-
-/* the colour theme override: a single object, not a list. */
-function readTheme(root) {
-  const context = vm.createContext({});
-  vm.runInContext(read(root, 'js/tokens.js'), context, { filename: 'tokens.js' });
-  vm.runInContext(read(root, 'js/ark/vendor/backgrounds.js'), context, { filename: 'backgrounds.js' });
-  vm.runInContext(read(root, 'js/content/theme.js'), context, { filename: 'theme.js' });
-  vm.runInContext(read(root, 'js/content/theme-data.js'), context, { filename: 'theme-data.js' });
-  return JSON.parse(JSON.stringify(vm.runInContext('ArkTheme.get()', context)));
-}
-
-function readLayout(root) {
-  const context = vm.createContext({});
-  vm.runInContext(read(root, 'js/content/layout.js'), context, { filename: 'layout.js' });
-  vm.runInContext(read(root, 'js/content/layout-data.js'), context, { filename: 'layout-data.js' });
-  return JSON.parse(JSON.stringify(vm.runInContext('ArkLayout.get()', context)));
-}
-
 /* the SEO title/description overrides + base URL: a single object, not a list.
    Needs the real manifest ids and article slugs loaded first (ArkSEO.sanitize()
    keys its per-page/per-article maps off them), so this runs after both, unlike
-   readTheme/readMeshSettings which stand alone. */
+   every other single draft, which readSingle() reads standing alone. */
 function readSeo(root, ids) {
   const context = vm.createContext({});
   vm.runInContext(read(root, 'js/content/manifest.js'), context, { filename: 'manifest.js' });
@@ -139,9 +145,6 @@ export function readProject(root = defaultProjectRoot) {
   const manifests = JSON.parse(JSON.stringify(loadIndexed(root, ids)));
   const assets = JSON.parse(JSON.stringify(loadIndexedAssets(root, assetIds(root))));
   const secrets = JSON.parse(JSON.stringify(loadIndexedSecrets(root, secretIds(root))));
-  const meshSettings = readMeshSettings(root);
-  const theme = readTheme(root);
-  const layout = readLayout(root);
 
   const articleContext = vm.createContext({});
   vm.runInContext(read(root, 'js/content/learnings.js'), articleContext);
@@ -149,13 +152,18 @@ export function readProject(root = defaultProjectRoot) {
   const slugs = vm.runInContext('LearningContent.articles.map(function (a) { return a.slug; })', articleContext);
   for (const slug of slugs) vm.runInContext(read(root, `js/content/articles/${slug}.js`), articleContext, { filename: `articles/${slug}.js` });
   const articles = JSON.parse(JSON.stringify(vm.runInContext('LearningContent.articles', articleContext)));
-  const seo = readSeo(root, ids);
-  return { manifests, articles, assets, secrets, meshSettings, theme, layout, seo };
+  const items = { manifests, articles, assets, secrets };
+  // Keys in the draft list's order, the same order decodeSite() gives them back in, so the
+  // decoded site is byte-identical to this one under JSON.stringify, not only deep-equal.
+  const site = {};
+  for (const d of siteDrafts(root)) site[d.key] = d.kind === 'items' ? items[d.key] : d.key === 'seo' ? readSeo(root, ids) : readSingle(root, d);
+  return site;
 }
 
 /* every reason a site is not publishable, from the project's own validators */
 export function siteProblems(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkLayout, ArkMeshSettings, ArkSEO } = loadContentCode(root);
+  const code = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret } = code;
   const out = [];
   if (!site || !Array.isArray(site.manifests) || !Array.isArray(site.articles) || !Array.isArray(site.assets)) return ['a site has manifests, articles and assets'];
   const seen = new Set();
@@ -189,19 +197,27 @@ export function siteProblems(site, root = defaultProjectRoot) {
       }
     }
   }
-  // Older sites predate mesh tuning: absent means "use image-shape.js's defaults", not a problem.
-  if (site.meshSettings != null) for (const bad of ArkMeshSettings.problems(site.meshSettings)) out.push(`mesh settings: ${bad}`);
-  // Older sites predate a theme override: absent means "use tokens.js's defaults", not a problem.
-  if (site.theme != null) for (const bad of ArkTheme.problems(site.theme)) out.push(`theme: ${bad}`);
-  if (site.layout != null && (!site.layout || typeof site.layout !== 'object' || Array.isArray(site.layout))) out.push('layout: invalid responsive override data');
-  // Older sites predate SEO overrides: absent means "derive every title/description", not a problem.
-  if (site.seo != null) for (const bad of ArkSEO.problems(site.seo)) out.push(`seo: ${bad}`);
+  // Every single-object draft. Older sites predate most of them: absent means "use that
+  // module's defaults", not a problem. Present, it is an object, and the module's own
+  // problems() (where it has one) has the last word.
+  for (const d of singleDrafts(root)) {
+    const value = site[d.key];
+    if (value == null) continue;
+    const what = d.label.toLowerCase();
+    if (typeof value !== 'object' || Array.isArray(value)) { out.push(`${what}: must be a settings object, not ${Array.isArray(value) ? 'a list' : typeof value}`); continue; }
+    const api = code[d.global];
+    if (typeof api.problems === 'function') for (const bad of api.problems(value)) out.push(`${what}: ${bad}`);
+  }
   return out;
 }
 
 export function encodeSite(site, root = defaultProjectRoot) {
   const bad = siteProblems(site, root);
   if (bad.length) throw new Error(`Site is not publishable: ${bad.join('; ')}`);
+  const singles = singleDrafts(root);
+  const entry = { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id) };
+  // A flag per single draft says whether its route is present; a reader that predates a draft ignores the flag.
+  for (const d of singles) entry[d.key] = site[d.key] != null;
   return encodeArchive({
     archiveId: ARCHIVE_ID,
     createdAt: ARCHIVE_CREATED_AT,
@@ -209,20 +225,18 @@ export function encodeSite(site, root = defaultProjectRoot) {
     generatedBy: 'flux-chain/scripts/lib/site-bundle.mjs',
     sourceFormat: SITE_SCHEMA,
     routes: [
-      { routeId: 'site', path: '/', title: 'Flux Protocol', payload: { schema: SITE_SCHEMA, manifests: site.manifests.map((m) => m.id), articles: site.articles.map((a) => a.slug), assets: site.assets.map((a) => a.id), secrets: (site.secrets || []).map((s) => s.id), meshSettings: site.meshSettings != null, theme: site.theme != null, layout: site.layout != null, seo: site.seo != null } },
+      { routeId: 'site', path: '/', title: 'Flux Protocol', payload: entry },
       ...site.manifests.map((m) => ({ routeId: `manifest.${m.id}`, path: `/manifest/${m.id}`, title: m.title, payload: m })),
       ...site.articles.map((a) => ({ routeId: `article.${a.slug}`, path: `/article/${a.slug}`, title: a.title, payload: a })),
       ...site.assets.map((a) => ({ routeId: `asset.${a.id}`, path: `/asset/${a.id}`, title: a.label, payload: a })),
       ...(site.secrets || []).map((s) => ({ routeId: `secret.${s.id}`, path: `/secret/${s.id}`, title: s.label, payload: s })),
-      ...(site.meshSettings != null ? [{ routeId: 'meshSettings', path: '/mesh-settings', title: 'Mesh tuning', payload: site.meshSettings }] : []),
-      ...(site.theme != null ? [{ routeId: 'theme', path: '/theme', title: 'Colour theme', payload: site.theme }] : []),
-      ...(site.layout != null ? [{ routeId: 'layout', path: '/layout', title: 'Responsive layout', payload: site.layout }] : []),
-      ...(site.seo != null ? [{ routeId: 'seo', path: '/seo', title: 'SEO', payload: site.seo }] : []),
+      // routeId = the draft's key, path = its file stem: the same ids/paths the four older single routes always had.
+      ...singles.filter((d) => site[d.key] != null).map((d) => ({ routeId: d.key, path: `/${d.file}`, title: d.title, payload: site[d.key] })),
     ],
   });
 }
 
-export function decodeSite(bytes) {
+export function decodeSite(bytes, root = defaultProjectRoot) {
   const decoded = decodeArchive(bytes);
   const routes = new Map((decoded.routes || []).map((route) => [route.routeId, route]));
   const entry = routes.get('site');
@@ -232,27 +246,26 @@ export function decodeSite(bytes) {
     if (!route) throw new Error(`The archive lists ${routeId} but does not contain it.`);
     return route.payload;
   };
-  return {
+  const items = {
     manifests: entry.payload.manifests.map((id) => need(`manifest.${id}`)),
     articles: entry.payload.articles.map((slug) => need(`article.${slug}`)),
     // Older archives predate assets: an absent list means none, not a broken read.
     assets: (entry.payload.assets || []).map((id) => need(`asset.${id}`)),
     // Older archives predate encrypted content: an absent list means none, not a broken read.
     secrets: (entry.payload.secrets || []).map((id) => need(`secret.${id}`)),
-    // Older archives predate mesh tuning: absent means "use image-shape.js's defaults".
-    meshSettings: entry.payload.meshSettings ? need('meshSettings') : null,
-    // Older archives predate a theme override: absent means "use tokens.js's defaults".
-    theme: entry.payload.theme ? need('theme') : null,
-    // Older archives predate visual layout overrides.
-    layout: entry.payload.layout ? need('layout') : null,
-    // Older archives predate SEO overrides: absent means "derive every title/description".
-    seo: entry.payload.seo ? need('seo') : null,
   };
+  // Every draft, in the draft list's order. Older archives predate most single drafts (and
+  // until 2026-10-18 every archive lacked settingsDefaults/components/states/canvasTransitions/
+  // elementMotion): an absent flag means null, "use that module's defaults", not a broken read.
+  const site = {};
+  for (const d of siteDrafts(root)) site[d.key] = d.kind === 'items' ? items[d.key] : (entry.payload[d.key] ? need(d.key) : null);
+  return site;
 }
 
 /* The exact set of files a site occupies in the project, as {relativePath: text}. */
 export function projectFiles(site, root = defaultProjectRoot) {
-  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkTheme, ArkLayout, ArkMeshSettings, ArkSEO, ArkAdminStore } = loadContentCode(root);
+  const code = loadContentCode(root);
+  const { ArkManifest, LearningContent, ArkAsset, ArkSecret, ArkSEO, ArkAdminStore } = code;
   const files = {};
   for (const manifest of site.manifests) files[`js/content/manifests/${manifest.id}.js`] = ArkManifest.serialize(manifest);
   files['js/content/manifests/index.js'] = ArkAdminStore.indexText(site.manifests.map((m) => m.id));
@@ -263,27 +276,19 @@ export function projectFiles(site, root = defaultProjectRoot) {
   const secrets = site.secrets || [];
   for (const secret of secrets) files[`js/content/secrets/${secret.id}.js`] = ArkSecret.serialize(secret);
   files['js/content/secrets/index.js'] = ArkAdminStore.indexTextSecrets(secrets.map((s) => s.id));
-  // A single file, not a per-id directory: there is only ever one mesh tuning.
-  files['js/content/mesh-settings-data.js'] = ArkMeshSettings.serialize(site.meshSettings || {});
-  // A single file, not a per-id directory: there is only ever one theme.
-  files['js/content/theme-data.js'] = ArkTheme.serialize(site.theme || {});
-  files['js/content/layout-data.js'] = ArkLayout.serialize(site.layout || {});
+  // Each single draft is one file, not a per-id directory: the bytes its own serialize() writes,
+  // the same bytes an admin Save writes. Absent (an older archive) writes that module's defaults.
+  // SEO is written below: its serialization also needs the site's manifests and articles.
+  for (const d of singleDrafts(root)) if (d.key !== 'seo') files[`js/content/${d.file}-data.js`] = code[d.global].serialize(site[d.key] || {});
   // A single file, not a per-id directory: there is only ever one SEO settings object.
   // The registries loadContentCode() gives ArkSEO are never populated with this site's
   // actual manifests/articles, so pageIds()/articleSlugs() need them passed explicitly.
   const seo = ArkSEO.sanitize(site.seo || {}, site.manifests, site.articles);
   files['js/content/seo-data.js'] = ArkSEO.serialize(seo, site.manifests, site.articles);
-  // Derived from seo.site.baseUrl, never a guessed host: no baseUrl means no sitemap.xml,
-  // but robots.txt still ships (a bare "Allow: /" is harmless without one).
-  const sitemap = ArkSEO.sitemap(seo, site.manifests, site.articles);
-  if (sitemap) files['sitemap.xml'] = sitemap;
-  files['robots.txt'] = ArkSEO.robots(seo, site.manifests, site.articles);
-  // llms.txt needs manifests/articles too (it is not just a single-object serialization,
-  // same reason robots.txt above now takes them): both are per-page-aware, listing or
-  // disallowing individual routes by their own noindex/aiBlocked override. null means
-  // "turned off or no baseUrl yet" -- same never-a-guessed-host rule as sitemap.xml.
-  const llms = ArkSEO.llmsTxt(seo, site.manifests, site.articles);
-  if (llms) files['llms.txt'] = llms;
+  // sitemap.xml / robots.txt / llms.txt: ArkSEO.searchFiles() is the one place that says which
+  // root files a site has and their text (null = not written). The admin's Save writes the same
+  // set through js/admin/store.js saveSearchFiles(), so a Save and a pull cannot disagree.
+  for (const [name, text] of Object.entries(ArkSEO.searchFiles(seo, site.manifests, site.articles))) if (text != null) files[name] = text;
   return files;
 }
 
@@ -291,7 +296,7 @@ export function projectFiles(site, root = defaultProjectRoot) {
 export function staleFiles(site, root = defaultProjectRoot) {
   const keep = new Set(Object.keys(projectFiles(site, root)));
   const out = [];
-  for (const dir of ['js/content/manifests', 'js/content/articles', 'js/content/assets', 'js/content/secrets']) {
+  for (const dir of siteDrafts(root).filter((d) => d.kind === 'items').map((d) => `js/content/${d.dir}`)) {
     for (const name of fs.readdirSync(path.join(root, dir))) {
       const relative = `${dir}/${name}`;
       if (name.endsWith('.js') && !keep.has(relative)) out.push(relative);

@@ -100,6 +100,47 @@ check('every letter of the 26 is accounted for', () => {
   assert.equal(accounted.size, 26, 'the namespace is 26 letters; got ' + accounted.size);
 });
 
+/* REGRESSION, 2026-10-18. specVersion 0.4.3 put longer labels (NAME,
+ * TITLE, KK, KIND, CHAIN) into role-letters.json's `registered[]` beside the
+ * single letters. The census copied all of them into `roles.registered`,
+ * so the check above saw 31 "letters" and /resolver-math told readers the
+ * grammar had 25 role letters. A label is a token that OPENS with a letter
+ * of the namespace; it is not one. The split is by length — structure, not
+ * a list of known labels — and it is checked against the registry itself,
+ * so a label registered tomorrow is classified without anyone editing this. */
+check('a longer label is never counted as a letter of the namespace', () => {
+  const longIn = ALG.roles.registered.filter((r) => r.letter.length !== 1).map((r) => r.letter);
+  assert.deepEqual(
+    longIn, [],
+    'roles.registered carries tokens longer than one letter: ' + longIn.join(', ') + '. ' +
+      'They belong in roles.labels. Counted as letters they overflow the 26-letter namespace ' +
+      'and inflate the "role letters" figure on the page.'
+  );
+  assert.ok(Array.isArray(ALG.roles.labels), 'the census has no roles.labels list');
+  for (const l of ALG.roles.labels) {
+    assert.ok(l.label.length > 1, `${l.label} is in roles.labels but is a single letter`);
+    assert.ok(!('letter' in l), `${l.label} carries a "letter" field; a label is not a letter`);
+    assert.equal(
+      l.startsWith[0].token, l.label.charAt(0),
+      `${l.label} must record the letter it opens with first — that is the token longest ` +
+        'match reads it instead of'
+    );
+  }
+  if (gen.registryAvailable()) {
+    const reg = JSON.parse(fs.readFileSync(
+      path.resolve(ROOT, '..', 'flux-spec', 'registry', 'role-letters.json'), 'utf8'));
+    const longer = reg.registered.filter((e) => e.letter.length > 1).map((e) => e.letter);
+    assert.deepEqual(
+      ALG.roles.labels.map((l) => l.label), longer,
+      'roles.labels disagrees with the registry\'s own multi-character entries'
+    );
+    assert.equal(
+      ALG.roles.registered.length + ALG.roles.labels.length, reg.registered.length,
+      'letters plus labels must account for every registered entry, none dropped'
+    );
+  }
+});
+
 check('at least one role absorbs, or the page overstates the hazard', () => {
   const absorbing = ALG.roles.registered.filter((r) => r.absorbing);
   assert.ok(
@@ -197,6 +238,48 @@ const CASES = [
   }
 ];
 
+/* Longest match. These were all resolved by the FIRST CHARACTER until
+ * 2026-10-18, which is wrong for every one of them, and quietly wrong for
+ * the worst one: TITLE68656c6c6f "resolved" as an opaque Target, the exact
+ * silent collision the explorer exists to show, produced by the explorer. */
+CASES.push(
+  {
+    block: 'NAMEalice',
+    state: 'real',
+    label: 'NAME',
+    protects: 'NAME is a registered label; read by its first character it was refused as the ' +
+      'tooling letter N. A box takes the longest label it starts with.'
+  },
+  {
+    block: 'TITLE68656c6c6f',
+    state: 'real',
+    label: 'TITLE',
+    protects: 'read by its first character this SUCCEEDED as an opaque Target "ITLE68656c6c6f" — ' +
+      'a silent collision, the one failure the page says is worse than a refusal.'
+  },
+  {
+    block: 'TITLEfoo',
+    state: 'unreal',
+    label: 'TITLE',
+    protects: 'once TITLE wins the match, its payload rule (hex of UTF-8) applies; T\'s ' +
+      'absorbing rule must not quietly take the block back.'
+  },
+  {
+    block: 'KKDAO1',
+    state: 'real',
+    label: 'KK',
+    protects: 'the shipped sub-kind marker. K alone is reserved invalid; KK is a disjoint ' +
+      'two-letter label and must resolve, or every live LedgerEntry kind reads as refused.'
+  },
+  {
+    block: 'CHAINmychain1',
+    state: 'real',
+    label: 'CHAIN',
+    protects: 'CHAIN\'s payload kind (lowercase-alphanumeric) had no rule in the engine; a label ' +
+      'must be judged by its own rule, not reported as a gap.'
+  }
+);
+
 for (const c of CASES) {
   check('block ' + c.block, () => {
     const r = resolve(c.block);
@@ -207,8 +290,47 @@ for (const c of CASES) {
         `  protects: ${c.protects}\n` +
         `  got: ${r.head} ${JSON.stringify(r.lines[r.lines.length - 1] || [])}`
     );
+    if (c.label) {
+      const match = r.lines.find((l) => l[0] === 'Longest match');
+      assert.ok(
+        match && match[1].includes('Read as ' + c.label),
+        `resolve(${c.block}) does not say it was read as ${c.label}. A reader must see WHICH ` +
+          'label won, or a longest-match result is indistinguishable from a guess.'
+      );
+    }
   });
 }
+
+check('longest match names the payloads a label takes from a live letter', () => {
+  for (const l of ALG.roles.labels) {
+    const r = resolve(l.example);
+    const match = (r.lines.find((x) => x[0] === 'Longest match') || [])[1] || '';
+    const live = l.startsWith.filter((p) => p.status === 'registered' || p.status === 'label');
+    for (const p of live) {
+      assert.ok(
+        match.includes('"' + l.label.slice(p.token.length) + '"'),
+        `${l.label} opens with the registered ${p.token}, so no ${p.token} payload can begin ` +
+          `with "${l.label.slice(p.token.length)}" any more. The verdict must say so: that ` +
+          'trade is the collision audit, made visible.'
+      );
+    }
+    if (!live.length) {
+      assert.ok(/takes nothing away/.test(match),
+        `${l.label} opens with a letter that cannot resolve; the verdict must say it costs no live role`);
+    }
+  }
+});
+
+check('withholding a label sends its blocks back to the letter they open with', () => {
+  const noName = build(restrict(ALG, { letters: ['NAME'] }));
+  const r = noName.resolveBlock('NAMEalice');
+  assert.equal(
+    r.state, 'unreal',
+    'with NAME withheld, NAMEalice must fall back to N and be refused. If it still resolves, ' +
+      'restrict() is not restricting labels and the builder would show a sum it did not compute.'
+  );
+  assert.ok(/tooling/i.test(r.head), 'the fallback must be N\'s own refusal, by name');
+});
 
 /* -------------------------------------------------------------------- */
 /* 3a. The built form of S(s, i, O) — type-scoped letters                */
@@ -383,6 +505,8 @@ check('the page does not hand-type the registry counts', () => {
    * changes and the page follows; a literal here would not. */
   const typed = [
     String(ALG.roles.registered.length) + ' registered',
+    String(ALG.roles.labels.length) + ' longer labels',
+    String(ALG.roles.registered.length + ALG.roles.labels.length) + ' role letters',
     String(ALG.verbs.all.length) + ' verbs',
     String(ALG.manifestTypes.count) + ' catalogued'
   ];
@@ -843,22 +967,21 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
   const fieldCells = el.find('rm-cell').filter((c) => !String(c.className).includes('rm-cell-never'));
   const builtResolvers = (page.match(/built: true/g) || []).length;
   assert.ok(builtResolvers > 0, 'the page lists no built resolvers');
-  const summed = ALG.roles.registered.length + ALG.verbs.all.length +
-                 ALG.manifestTypes.count + ALG.typeScoped.entries.length + builtResolvers;
+  const perTerm = [ALG.roles.registered.length, ALG.roles.labels.length, ALG.verbs.all.length,
+                   ALG.manifestTypes.count, ALG.typeScoped.entries.length, builtResolvers];
+  const summed = perTerm.reduce((a, n) => a + n, 0);
   assert.equal(
     fieldCells.length, summed,
     `the field draws ${fieldCells.length} cells but the sum is ${summed}. Every cell is ` +
       'supposed to be one real registry entry; a field that does not match the sum is ' +
       'decoration pretending to be evidence.'
   );
-  for (let t = 0; t < 5; t += 1) {
+  for (let t = 0; t < perTerm.length; t += 1) {
     assert.ok(
       fieldCells.some((c) => c.dataset.term === String(t)),
       `term ${t} has no cells, so hovering it would light nothing`
     );
   }
-  const perTerm = [ALG.roles.registered.length, ALG.verbs.all.length, ALG.manifestTypes.count,
-                   ALG.typeScoped.entries.length, builtResolvers];
   perTerm.forEach((n, t) => {
     assert.equal(
       fieldCells.filter((c) => c.dataset.term === String(t)).length, n,
@@ -888,8 +1011,8 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
   const sumRows = el.find('rm-eq-row');
   assert.ok(sumRows.length >= 7, `the sum has only ${sumRows.length} rows; it needs its terms, ` +
     'a total, and the terms nobody ever defined');
-  for (const n of [ALG.roles.registered.length, ALG.verbs.all.length, ALG.manifestTypes.count,
-                   ALG.typeScoped.entries.length]) {
+  for (const n of [ALG.roles.registered.length, ALG.roles.labels.length, ALG.verbs.all.length,
+                   ALG.manifestTypes.count, ALG.typeScoped.entries.length]) {
     assert.ok(
       openingText.includes(String(n)),
       `the sum is missing the live term ${n}. Every term has to come from the generated ` +
@@ -919,6 +1042,25 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
     'the page still promises "eight sentences" somewhere, but the short version is gone — ' +
       'this is a dangling reference, not a feature'
   );
+
+  /* The record figure draws real boxes, so every label in it must be one the
+   * explorer on the same page resolves. It drew `K` until 2026-10-18 — a
+   * reserved-invalid letter the explorer refuses by name; the shipped
+   * sub-kind marker is the two-letter label KK. */
+  const known = new Set([
+    ...ALG.roles.registered.map((r) => r.letter),
+    ...ALG.roles.labels.map((l) => l.label)
+  ]);
+  const drawn = el.find('rm-fig-letter').map((n) => n.textContent.trim());
+  assert.ok(drawn.length > 0, 'the record figure draws no box labels');
+  for (const token of drawn) {
+    assert.ok(
+      known.has(token),
+      `the record figure draws a box labelled "${token}", which is not a registered letter or ` +
+        'label. The explorer below would refuse it; a figure may not show a record the page\'s ' +
+        'own resolver rejects.'
+    );
+  }
 
   /* The drawings. Two now, not four: the greedy-letter collision and the
    * two-readers case were cut 2026-10-10 because they duplicate content

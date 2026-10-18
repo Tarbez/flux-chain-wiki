@@ -10,7 +10,8 @@
  * So the boundary is read from the files that define it.
  *
  * Sources (shared/flux-spec is the source of truth):
- *   flux-spec/registry/role-letters.json    — the 26-letter namespace
+ *   flux-spec/registry/role-letters.json    — the 26-letter namespace, and
+ *                                             the longer labels beside it
  *   flux-spec/registry/action-verbs.json    — what `A` can say
  *   flux-spec/registry/manifest-types.json  — what `Y` can be
  *
@@ -78,20 +79,30 @@ function build() {
     for (const verb of list) verbs.push(verb);
   }
 
-  const registered = roles.registered.map((entry) => letterShape(entry, verbs));
+  /* Letters and longer labels, told apart by STRUCTURE — the length of the
+   * token — never by a list of known labels. Since specVersion 0.4.3 the
+   * registry's `registered[]` holds both: single letters (the 26-letter
+   * namespace) and longer labels such as NAME or KK, and a box takes the
+   * LONGEST label it starts with. Counting a label as a letter is the
+   * defect this split exists to prevent: it once made /resolver-math claim
+   * 25 role letters and made the 26-letter check see 31. */
+  const registered = roles.registered
+    .filter((entry) => entry.letter.length === 1)
+    .map((entry) => letterShape(entry, verbs));
 
   /* Every letter of the 26 is accounted for by construction in the
    * registry; assert it here rather than trusting it, because the
-   * page's argument is that an unaccounted letter is a latent bug. */
-  const accounted = new Set([
-    ...registered.map((r) => r.letter),
-    ...roles.reservedInvalid.map((r) => r.letter),
-    ...roles.reservedTooling.map((r) => r.letter),
-    ...roles.free
-  ]);
+   * page's argument is that an unaccounted letter is a latent bug. Single
+   * letters only: a longer label is not a letter of the namespace, it is
+   * a token that opens WITH one. */
+  const status = {};
+  for (const r of registered) status[r.letter] = 'registered';
+  for (const r of roles.reservedInvalid) status[r.letter] = 'reservedInvalid';
+  for (const r of roles.reservedTooling) status[r.letter] = 'reservedTooling';
+  for (const l of roles.free) status[l] = 'free';
   const missing = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     .split('')
-    .filter((l) => !accounted.has(l));
+    .filter((l) => !status[l]);
   if (missing.length) {
     throw new Error(
       'role-letters.json does not account for: ' + missing.join(', ') +
@@ -99,6 +110,36 @@ function build() {
       'latent silent-collision bug. Fix the registry, not this script.'
     );
   }
+
+  /* Each longer label records every shorter token it starts with, and
+   * what that token is. Longest-match reads the label first, so this is
+   * exactly what the label takes precedence over: under a reserved letter
+   * (NAME under N) it takes nothing from a live role; under a registered
+   * one (TITLE under T) every payload of that letter beginning with the
+   * rest of the label now belongs to the label instead. Derived here so
+   * the page states that trade from the registry rather than from prose. */
+  const longer = roles.registered.filter((entry) => entry.letter.length > 1);
+  const labelTokens = longer.map((entry) => entry.letter);
+  const labels = longer.map((entry) => {
+    const shape = letterShape(entry, verbs);
+    delete shape.letter;
+    const opener = entry.letter.charAt(0);
+    if (!status[opener]) {
+      throw new Error(
+        'role-letters.json registers the label ' + entry.letter + ', which opens with "' +
+        opener + '" — not a letter of the 26-letter namespace, so no reader that falls ' +
+        'back to the single letter can place it. Fix the registry, not this script.'
+      );
+    }
+    const startsWith = [{ token: opener, status: status[opener] }];
+    for (const other of labelTokens) {
+      if (other !== entry.letter && entry.letter.startsWith(other)) {
+        startsWith.push({ token: other, status: 'label' });
+      }
+    }
+    startsWith.sort((a, b) => a.token.length - b.token.length);
+    return Object.assign({ label: entry.letter }, shape, { startsWith });
+  });
 
   /* Type-scoped letter shapes. This is the one place the grammar really
    * is observer-relative in the strong sense: a letter with no single
@@ -125,6 +166,7 @@ function build() {
     source: 'flux-spec/registry · role-letters.json, action-verbs.json, manifest-types.json',
     roles: {
       registered,
+      labels,
       reservedInvalid: roles.reservedInvalid.map((r) => ({ letter: r.letter, reason: r.reason })),
       reservedTooling: roles.reservedTooling.map((r) => ({ letter: r.letter, reason: r.reason })),
       free: roles.free.slice(),

@@ -175,14 +175,17 @@
       ['G', 'who', 'signed it'],
       ['Y', 'what kind', 'of thing'],
       ['M', 'when', 'it was made'],
-      ['K', 'which', 'sub-kind'],
+      /* KK, not K: K alone is reserved invalid and the explorer below
+         refuses it. The shipped sub-kind marker is the two-letter label
+         KK, read by longest match — a box label is not always one letter. */
+      ['KK', 'which', 'sub-kind'],
       ['C', 'the', 'address'],
       ['S', 'the', 'signature']
     ];
     return figure(
-      'One record. Each box carries one letter and some packed text. The letter is a ' +
-      'label that points at a dictionary kept outside the record — so the record never ' +
-      'carries its own meaning around with it.',
+      'One record. Each box opens with a label — usually one letter, sometimes a few — and ' +
+      'then some packed text. The label points at a dictionary kept outside the record — ' +
+      'so the record never carries its own meaning around with it.',
       '0 0 520 186',
       function (d) {
         d.word(24, 16, 'ONE RECORD — SIX BOXES', 'drawing-title');
@@ -346,6 +349,12 @@
 
       var terms = [
         { n: ALG.roles.registered.length, term: 'role letters', gloss: 'what a box can be' },
+        /* Longer labels are counted apart from letters, by the census's own
+           split. Before that split this line counted every registered
+           token as a "role letter" and overstated the namespace's
+           registered letters by the number of longer labels. (No figure
+           here on purpose; the test forbids typed counts in this file.) */
+        { n: (ALG.roles.labels || []).length, term: 'longer labels', gloss: 'a box named by more than one letter' },
         { n: ALG.verbs.all.length, term: 'action verbs', gloss: 'what can be done' },
         { n: ALG.manifestTypes.count, term: 'record types', gloss: 'what a record is about' },
         { n: ALG.typeScoped.entries.length, term: 'type-scoped shapes', gloss: 'where meaning bends' },
@@ -641,7 +650,8 @@
         'refusals — they are the ones that say “resolved” and are wrong.', null));
       var expGrid = D.el('div', 'dash-grid');
       var exp = D.panel('dash-span-12 rm-explorer', null, null);
-      var label = D.el('label', 'rm-explorer-label', 'One role letter, then packed text');
+      var label = D.el('label', 'rm-explorer-label',
+        'One role label — usually a single letter — then packed text');
       label.setAttribute('for', 'rm-block');
       exp.appendChild(label);
       var input = D.el('input', 'rm-input');
@@ -668,7 +678,12 @@
         });
         verdict.appendChild(list);
       }
-      EXAMPLES.forEach(function (ex) {
+      /* The longer labels' own registry examples join the chips, read
+         from the census, so every label the grammar has can be tried —
+         TITLE68656c6c6f is the one that shows longest-match taking a
+         payload away from T. */
+      EXAMPLES.concat((ALG.roles.labels || []).map(function (l) { return l.example; })
+        .filter(Boolean)).forEach(function (ex) {
         var b = D.el('button', 'rm-chip', ex);
         b.type = 'button';
         b.addEventListener('click', function () { input.value = ex; renderBlock(); });

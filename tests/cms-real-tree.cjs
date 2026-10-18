@@ -1,7 +1,7 @@
 'use strict';
 /* Part B of the follow-up Studio plan: a real layers tree for connected mode.
    cmsRealTree (js/main.js) walks the actual rendered DOM, not the standalone dense-node
-   tree admin-studio.html's renderLayers() walks -- extracted verbatim (not reimplemented)
+   tree the deleted admin-studio.html's renderLayers() used to walk -- extracted verbatim (not reimplemented)
    and run against stubbed dependencies, same reasoning as tests/cms-group-selection.cjs and
    tests/cms-remove-selection.cjs: js/main.js touches `document`/`window` at its own top
    level and can't load whole in a DOM-free vm context. */

@@ -1,7 +1,7 @@
 /* The site as one archive must give back exactly what went in, on the real content, not a fixture.
    Each case names the defect it guards: a plausible simplification would reintroduce it and still look right. */
 import assert from 'node:assert/strict';
-import { readProject, encodeSite, decodeSite, projectFiles, planWrite, siteProblems } from '../scripts/lib/site-bundle.mjs';
+import { readProject, encodeSite, decodeSite, projectFiles, planWrite, siteProblems, siteDrafts } from '../scripts/lib/site-bundle.mjs';
 import { cidForBytes } from '../../../flx/flx-codec/src/blake3.js';
 
 const site = readProject();
@@ -41,8 +41,10 @@ assert.deepEqual(Object.keys(projectFiles(site)).sort(), [
   ...site.assets.map(a=>`js/content/assets/${a.id}.js`),
   ...(site.secrets || []).map(s=>`js/content/secrets/${s.id}.js`),
   'js/content/manifests/index.js','js/content/article-index.js','js/content/assets/index.js',
-  'js/content/secrets/index.js','js/content/mesh-settings-data.js','js/content/theme-data.js','js/content/layout-data.js',
-  'js/content/seo-data.js','robots.txt',
+  'js/content/secrets/index.js',
+  // one data file per single-object draft in js/admin/store.js's draft list (all 9, not the 4 this list once named by hand)
+  ...siteDrafts().filter((d) => d.kind === 'single').map((d) => `js/content/${d.file}-data.js`),
+  'robots.txt',
   ...(site.seo?.site?.baseUrl ? ['sitemap.xml'] : []),
   // llms.txt ships whenever it has something to say: real content once a baseUrl
   // exists, or an explicit "turned off" note when site.llms===0 (ArkSEO.llmsTxt).

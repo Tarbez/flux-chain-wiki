@@ -222,51 +222,83 @@
           "evenLength": true,
           "repeatable": true,
           "example": "E6576"
-        },
+        }
+      ],
+      "labels": [
         {
-          "letter": "NAME",
+          "label": "NAME",
           "name": "Lookup name",
           "group": "manifest-core",
           "payload": "opaque-alphanumeric",
           "profile": "dense-wire",
           "minLength": 1,
-          "example": "NAMEalice"
+          "example": "NAMEalice",
+          "startsWith": [
+            {
+              "token": "N",
+              "status": "reservedTooling"
+            }
+          ]
         },
         {
-          "letter": "TITLE",
+          "label": "TITLE",
           "name": "Title",
           "group": "manifest-core",
           "payload": "lowercase-hex",
           "profile": "dense-wire",
           "evenLength": true,
-          "example": "TITLE68656c6c6f"
+          "example": "TITLE68656c6c6f",
+          "startsWith": [
+            {
+              "token": "T",
+              "status": "registered"
+            }
+          ]
         },
         {
-          "letter": "KK",
+          "label": "KK",
           "name": "Kind marker (shipped form)",
           "group": "dense-wire",
           "payload": "opaque-alphanumeric",
           "profile": "dense-wire",
           "minLength": 1,
-          "example": "KKDAO1"
+          "example": "KKDAO1",
+          "startsWith": [
+            {
+              "token": "K",
+              "status": "reservedInvalid"
+            }
+          ]
         },
         {
-          "letter": "KIND",
+          "label": "KIND",
           "name": "Kind marker (new form)",
           "group": "dense-wire",
           "payload": "opaque-alphanumeric",
           "profile": "dense-wire",
           "minLength": 1,
-          "example": "KINDDAO1"
+          "example": "KINDDAO1",
+          "startsWith": [
+            {
+              "token": "K",
+              "status": "reservedInvalid"
+            }
+          ]
         },
         {
-          "letter": "CHAIN",
+          "label": "CHAIN",
           "name": "Chain scope (new form)",
           "group": "dense-wire",
           "payload": "lowercase-alphanumeric",
           "profile": "dense-wire",
           "pattern": "^[a-z0-9]{3,32}$",
-          "example": "CHAINmychain1"
+          "example": "CHAINmychain1",
+          "startsWith": [
+            {
+              "token": "C",
+              "status": "registered"
+            }
+          ]
         }
       ],
       "reservedInvalid": [

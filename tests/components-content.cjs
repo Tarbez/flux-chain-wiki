@@ -8,7 +8,7 @@ const ArkComponents = vm.runInContext('ArkComponents', context);
 
 /* ---- sanitize: whitelist/clamp, the same discipline ArkLayout.sanitize() applies ---- */
 let draft = ArkComponents.sanitize({ version: 1, masters: {}, routes: {} });
-assert.deepEqual(draft, { version: 1, masters: {}, routes: {} }, 'an empty draft sanitizes to the empty default shape');
+assert.deepEqual(draft, { version: 1, masters: {}, routes: {} }, 'an empty draft sanitizes to the empty default shape (no `spots` key until there is a spot: old files keep their bytes)');
 
 assert.deepEqual(
   ArkComponents.sanitize({ masters: { bad: { resolver: 'RBLOCK_NOT_REAL', props: {} } } }).masters,

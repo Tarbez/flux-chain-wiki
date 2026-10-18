@@ -16,7 +16,7 @@ for (const variant of ['solid', 'soft', 'quiet', 'choice', 'link'])
 for (const cls of ['.home-primary-cta', '.resolver-story-primary', '.about-primary-action', '.story-primary', '.mechanism-next', '.header-run-link', '.home-ghost-cta', '.resolutions-domain-tab'])
   assert(components.includes(cls), `${cls} is painted by the component layer`);
 
-const exempt = new Set(['css/flux-themes.css', 'css/themes.css', 'css/components.css', 'css/palette.css', 'css/admin.css']);
+const exempt = new Set(['css/flux-themes.css', 'css/themes.css', 'css/components.css', 'css/palette.css', 'css/admin.css', 'css/studio-embed.css']);
 const pageSheets = fs.readdirSync('css').map(f => 'css/' + f).filter(f => f.endsWith('.css') && !exempt.has(f));
 for (const file of pageSheets) {
   const css = fs.readFileSync(file, 'utf8');

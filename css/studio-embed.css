@@ -26,10 +26,24 @@
        its .icon turns Studio's icon-only buttons into a 13x13 mask glyph;
        its .bar pins a fixed 58px height/backdrop-filter onto Studio's own
        header). The four shields below close exactly those gaps, nothing more.
-   #studioRoot itself is positioned as a fixed full-viewport overlay,
-   replacing the old .studio-frame iframe's positioning (css/admin.css).
-   ===================================================================== */
-#studioRoot { position: fixed; inset: 0; z-index: 50; }
+   #studioRoot itself is positioned as a fixed overlay, replacing the old .studio-frame
+   iframe's positioning (css/admin.css). Step 3 (Design/Content mode switch,
+   flickering-juggling-donut.md) narrowed this from a full-viewport overlay (inset: 0) to
+   leave the outer app header's own 58px (css/admin.css's .bar, height: 58px) uncovered --
+   that header now holds the persistent mode switch and Mesh button, which must stay
+   reachable while Studio's canvas is showing, not just while #cmsShell is.
+   The offset is the header's MEASURED height, --app-bar-h, not a constant: at 760px and
+   below css/admin.css lets the header wrap (measured 2026-10-18 in Chromium: 193px tall at
+   760px, 253px at 390px), and a hardcoded 58px there left #studioRoot painted over the
+   mode switch -- on a phone there was no way back out of Design mode. js/admin/admin.js
+   (trackAppBarHeight) publishes the header's border-box height on <html> through a
+   ResizeObserver, so every wrap, font load or breakpoint change re-docks Studio; 58px is
+   only the pre-script fallback and equals the desktop header's fixed height. Every 100vh
+   measurement inside Studio's layout below (the .shell min-height, .left/.right/
+   .canvas-wrap's max-height) subtracts the same variable, so there is one source for the
+   header height, not one magic number per rule. tests/browser/header-reach.mjs checks it in
+   a real browser at 390/760/1280px. */
+#studioRoot { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; z-index: 50; overflow: auto; overscroll-behavior: contain; }
 #studioRoot[hidden] { display: none; }
 #studioRoot .bar { height: auto; position: static; top: auto; z-index: auto; backdrop-filter: none; -webkit-backdrop-filter: none; }
 #studioRoot .btn { min-height: 0; transition: none; }
@@ -78,7 +92,7 @@
 #studioRoot .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } 
 #studioRoot .ic.sm { width: 13px; height: 13px; } 
 
-#studioRoot .shell { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 100vh; } 
+#studioRoot .shell { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: calc(100vh - var(--app-bar-h, 58px)); }
 /* top bar */
 #studioRoot .bar { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; padding: 7px 12px; background: var(--panel); border-bottom: 1px solid var(--rule); -webkit-user-select: none; user-select: none; } 
 #studioRoot .logo { display: flex; align-items: center; gap: 7px; font: 700 14px/1 var(--font-ui); letter-spacing: -0.01em; margin-right: 4px; } 
@@ -107,21 +121,21 @@
 
 /* workspace */
 #studioRoot .work { display: grid; grid-template-columns: 248px minmax(0, 1fr) 300px; min-height: 0; } 
-#studioRoot .live .work, #studioRoot .mapview .work { grid-template-columns: minmax(0, 1fr); } 
-#studioRoot .live .left, #studioRoot .live .right, #studioRoot .mapview .left, #studioRoot .mapview .right { display: none; } 
-/* restrictMode (Part F): same layout-collapse mechanism as .live/.mapview, but only the
-   LEFT rail is given up -- the right rail is repurposed as the mode's own dedicated panel
-   (renderElementPane()'s restrictMode branch) instead of being hidden like .live does.
-   Canvas mode has nothing to do with individual elements, so it gives up the left rail
-   the same way .live does. Animation mode (Part H) is the opposite: picking WHICH element
-   to animate is the whole point, so it keeps the left rail's real Layers tree (Part B's
-   renderConnectedLayers(), wired through renderLayersPane() below) at the base .work
-   grid's normal 3-column layout -- never collapsed to 2 columns like canvas mode. */
-#studioRoot .canvas-mode .work { grid-template-columns: minmax(0, 1fr) 300px; } 
-#studioRoot .canvas-mode .left { display: none; } 
-@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr) 272px; }  } 
-@media (max-width: 860px) { #studioRoot .work { grid-template-columns: minmax(0, 1fr); }  #studioRoot .left, #studioRoot .right { border: 0 !important; border-top: 1px solid var(--rule) !important; max-height: none !important; }  #studioRoot .canvas-wrap { order: -1; }  } 
-#studioRoot .left, #studioRoot .right { background: var(--panel); min-width: 0; overflow: auto; max-height: calc(100vh - 82px); } 
+#studioRoot .live .work, #studioRoot .mapview .work { grid-template-columns: minmax(0, 1fr); }
+#studioRoot .live .left, #studioRoot .live .right, #studioRoot .live .ov-toolbar, #studioRoot .mapview .left, #studioRoot .mapview .right, #studioRoot .mapview .ov-toolbar { display: none; }
+/* Step 4 (flickering-juggling-donut.md): restrictMode (and its .canvas-mode/.anim-mode
+   layout-collapse classes) is retired outright -- canvas-transitions became a selection-
+   independent popover (reachable from #btnCanvasTransitions, above the canvas) and
+   element-motion folded into #selToolbar as one more accordion section, so there is no
+   longer a narrowed mode that needs the left rail given up or the right rail repurposed.
+   See the Step 4 comment in js/admin/admin.js for the fuller reasoning. */
+@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr) 272px; }  }
+/* Single column below 860px: the canvas first, then the rails stacked under it. Each rail
+   keeps its own bounded scroll (it used to be max-height: none) -- the real-site Layers tree
+   is thousands of rows, and unbounded it pushed the Theme/SEO rail ~24,000px down a phone's
+   #studioRoot scroll (measured at 390px, 2026-10-18). */
+@media (max-width: 860px) { #studioRoot .work { grid-template-columns: minmax(0, 1fr); }  #studioRoot .left, #studioRoot .right { border: 0 !important; border-top: 1px solid var(--rule) !important; max-height: min(60vh, 560px) !important; }  #studioRoot .canvas-wrap { order: -1; }  }
+#studioRoot .left, #studioRoot .right { background: var(--panel); min-width: 0; overflow: auto; max-height: calc(100vh - var(--app-bar-h, 58px) - 82px); }
 #studioRoot .left { border-right: 1px solid var(--rule); -webkit-user-select: none; user-select: none; } 
 #studioRoot .right { border-left: 1px solid var(--rule); } 
 #studioRoot .addbar { padding: 10px 10px 8px; } 
@@ -151,33 +165,60 @@
 #studioRoot .railfoot { display: flex; gap: 6px; padding: 4px 10px 12px; flex-wrap: wrap; } 
 
 /* canvas */
-#studioRoot .canvas-wrap { min-width: 0; overflow: auto; position: relative; padding: 14px 16px 40px; max-height: calc(100vh - 82px); } 
+#studioRoot .canvas-wrap { min-width: 0; overflow: auto; position: relative; padding: 14px 16px 40px; max-height: calc(100vh - var(--app-bar-h, 58px) - 82px); }
 #studioRoot .shell:not(.live) .canvas-wrap { -webkit-user-select: none; user-select: none; } 
 #studioRoot .live .canvas-wrap { padding: 0; } 
 #studioRoot .stage { position: relative; margin: 0 auto; transform-origin: top left; } 
-#studioRoot .frame { background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 30px rgba(0,0,0,.08); border-radius: 6px; overflow: hidden; } 
 #studioRoot .cms-preview { display: none; width: 100%; min-height: 720px; border: 0; background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 8px 30px rgba(0,0,0,.08); border-radius: 6px; } 
-#studioRoot .cms-connected .frame { display: none; } 
 #studioRoot .cms-connected .cms-preview { display: block; } 
-#studioRoot .cms-connected #btnAdd, #studioRoot .cms-connected #btnNewPage, #studioRoot .cms-connected #btnNewArticle { display: none; } 
-#studioRoot .cms-connected .ov-box, #studioRoot .cms-connected .ov-pad, #studioRoot .cms-connected .ov-tag, #studioRoot .cms-connected .drop-zone, #studioRoot .cms-connected .drop-line { display: none; } 
-#studioRoot .live .frame { border-radius: 0; box-shadow: none; } 
 #studioRoot .live .cms-preview { border-radius: 0; box-shadow: none; pointer-events: auto; } 
 #studioRoot .devlabel { font: 500 11px/1 var(--font-data); color: var(--muted); margin: 0 auto 8px; display: flex; justify-content: space-between; gap: 8px; } 
 #studioRoot .live .devlabel { display: none; } 
-#studioRoot .ov-box { position: absolute; pointer-events: none; border: 1px solid var(--accent); z-index: 3; } 
-#studioRoot .ov-box.hover { border-style: dashed; opacity: .8; } 
-#studioRoot .ov-box.multi { border-style: dashed; z-index: 3; } 
-#studioRoot .ov-pad { position: absolute; pointer-events: none; background: repeating-linear-gradient(45deg, var(--accent-soft), var(--accent-soft) 4px, transparent 4px, transparent 8px); z-index: 2; } 
-#studioRoot .ov-tag { position: absolute; pointer-events: auto; z-index: 4; display: flex; align-items: stretch; background: var(--accent); color: var(--accent-ink); border-radius: 5px; font: 600 11px/1 var(--font-ui); white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.15); transform-origin: left top; } 
-#studioRoot .ov-tag span { padding: 5px 7px; display: inline-flex; align-items: center; gap: 5px; } 
-#studioRoot .ov-tag button { border: 0; background: transparent; color: inherit; padding: 3px 5px; display: grid; place-items: center; border-left: 1px solid rgba(255,255,255,.25); } 
-#studioRoot .ov-tag button.grip { border-left: 0; border-right: 1px solid rgba(255,255,255,.25); cursor: grab; padding: 3px 6px; } 
-#studioRoot .ov-tag button.grip:active { cursor: grabbing; } 
-#studioRoot .live .ov-box, #studioRoot .live .ov-pad, #studioRoot .live .ov-tag { display: none; } 
-#studioRoot .drop-line { position: absolute; background: var(--accent); z-index: 6; pointer-events: none; border-radius: 3px; box-shadow: 0 0 0 1px var(--panel); } 
-#studioRoot .drop-zone { position: absolute; border: 2px dashed var(--accent); background: var(--accent-soft); z-index: 5; pointer-events: none; border-radius: 4px; } 
-#studioRoot .drag-ghost { position: absolute; z-index: 7; pointer-events: none; background: var(--ink); color: var(--bg); font: 600 11.5px/1 var(--font-ui); padding: 6px 9px; border-radius: 6px; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,.2); transform-origin: left top; } 
+/* Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar that
+   replaces the fixed right-panel accordions, positioned by placeSelToolbar() (admin.js)
+   using the exact same above/below-flip + viewport-clamp convention as .ov-tag below, just
+   with a measured size instead of a fixed 26px (its height/width vary with which taxonomy
+   sections are showing) and a right/bottom clamp added since it is wide enough to reach
+   the stage edge, which the thin .ov-tag never needed.
+   2026-10-18 (owner: "horizontal bar with icons and those become popovers"): a compact glass
+   bar -- element chip, one icon per section, a hairline separator, the actions -- with the
+   open section's controls in ONE popover (.tb-pop) instead of a 580px stack of accordion
+   rows that covered the page. max-width is set by placeSelToolbar() (the stage's on-screen
+   width); past it the bar wraps to a second row rather than scroll the page sideways.
+   The popover opens on the side away from the selection (data-side); tooltips take that
+   side too, or the other one while a popover is open there (data-pop). */
+#studioRoot .ov-toolbar { position: absolute; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; width: max-content; padding: 3px; background: color-mix(in srgb, var(--panel) 90%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3); border: 1px solid var(--rule); border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.14); transform-origin: top left; pointer-events: auto; -webkit-user-select: none; user-select: none; }
+#studioRoot .tb-chip { display: inline-flex; align-items: center; gap: 5px; height: 28px; max-width: 168px; padding: 0 9px 0 8px; margin-right: 3px; border-radius: 7px; background: var(--accent-soft); color: var(--accent); font: 600 10.5px/1 var(--font-data); letter-spacing: .06em; text-transform: uppercase; }
+#studioRoot .tb-chip-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#studioRoot .tb-bp { flex: none; padding-left: 6px; margin-left: 1px; border-left: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); color: var(--override); }
+#studioRoot .tb-btn { position: relative; flex: none; width: 30px; height: 28px; display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--muted); }
+#studioRoot .tb-btn:hover:not(:disabled) { background: var(--sunk); color: var(--ink); }
+#studioRoot .tb-btn[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+#studioRoot .tb-btn:disabled { opacity: .35; cursor: default; }
+#studioRoot .tb-btn:focus-visible { outline-offset: -2px; }
+/* identity sections (what the selection IS: a states group, a component instance) */
+#studioRoot .tb-btn.identity { color: var(--accent); }
+#studioRoot .tb-btn.identity::before { content: ""; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 1.5px var(--panel); }
+#studioRoot .tb-count { position: absolute; right: 1px; bottom: 1px; min-width: 12px; height: 12px; padding: 0 3px; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font: 700 8.5px/12px var(--font-data); text-align: center; }
+#studioRoot .tb-group { display: flex; align-items: center; gap: 2px; flex: none; }
+#studioRoot .tb-sections { position: relative; padding-right: 5px; margin-right: 3px; }
+#studioRoot .tb-sections::after { content: ""; position: absolute; right: 0; top: 6px; bottom: 6px; width: 1px; background: var(--rule); }
+#studioRoot .ov-toolbar.wrapped .tb-sections::after { background: transparent; }
+#studioRoot .tb-btn[data-tip]:hover::after, #studioRoot .tb-btn[data-tip]:focus-visible::after { content: attr(data-tip); position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); z-index: 2; padding: 5px 8px; border-radius: 6px; background: var(--ink); color: var(--panel); font: 500 11px/1.2 var(--font-ui); letter-spacing: 0; text-transform: none; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+#studioRoot .ov-toolbar[data-side="above"]:not([data-pop]) .tb-btn[data-tip]:hover::after, #studioRoot .ov-toolbar[data-side="above"]:not([data-pop]) .tb-btn[data-tip]:focus-visible::after,
+#studioRoot .ov-toolbar[data-pop="down"] .tb-btn[data-tip]:hover::after, #studioRoot .ov-toolbar[data-pop="down"] .tb-btn[data-tip]:focus-visible::after { top: auto; bottom: calc(100% + 8px); }
+#studioRoot .tb-btn[aria-expanded="true"]::after { display: none !important; }
+#studioRoot .tb-pop { position: fixed; z-index: 35; display: flex; flex-direction: column; width: min(304px, calc(100vw - 16px)); max-height: min(70vh, 560px); background: color-mix(in srgb, var(--panel) 95%, transparent); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,.06), 0 16px 40px rgba(0,0,0,.2); }
+#studioRoot .tb-pop-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 12px; border-bottom: 1px solid var(--rule); font: 600 10.5px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#studioRoot .tb-pop-x { width: 24px; height: 24px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--muted); }
+#studioRoot .tb-pop-x:hover { background: var(--sunk); color: var(--ink); }
+#studioRoot .tb-pop-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; display: grid; align-content: start; gap: 7px; padding: 10px 12px 12px; }
+/* "Groups on this page": a page-level browse/jump list (Part 1 bug fix's own cms-groups
+   accordion), relocated here (the persistent Layers tab) rather than into #selToolbar,
+   since it needs no current selection to make sense -- unlike every taxonomy section in
+   the toolbar, which only exists because something is selected. */
+#studioRoot .groups-browse { padding: 8px; border-bottom: 1px solid var(--rule); display: grid; gap: 4px; }
+#studioRoot .groups-browse-head { font: 600 11px/1 var(--font-ui); letter-spacing: .04em; color: var(--muted); text-transform: uppercase; }
 
 /* sitemap */
 #studioRoot .sitemap { position: relative; } 
@@ -206,11 +247,6 @@
 #studioRoot .smcard .open { justify-self: start; margin-top: 2px; } 
 
 /* inspector */
-#studioRoot .ins-head { padding: 10px 12px; border-bottom: 1px solid var(--rule); display: grid; gap: 6px; } 
-#studioRoot .elhead { display: flex; align-items: center; gap: 6px; } 
-#studioRoot .elhead .tyb { display: inline-flex; align-items: center; gap: 5px; font: 600 11px/1 var(--font-ui); padding: 4px 7px; border-radius: 5px; background: var(--accent-soft); color: var(--accent); } 
-#studioRoot .elhead input { flex: 1; min-width: 60px; border: 1px solid transparent; background: transparent; border-radius: 5px; padding: 4px 5px; font-weight: 600; } 
-#studioRoot .elhead input:hover, #studioRoot .elhead input:focus { border-color: var(--rule); background: var(--sunk); } 
 #studioRoot .acc { border-bottom: 1px solid var(--rule); } 
 #studioRoot .acc > summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; font-weight: 600; -webkit-user-select: none; user-select: none; } 
 #studioRoot .acc > summary::-webkit-details-marker { display: none; } 
@@ -232,9 +268,6 @@
 #studioRoot .row.ovr .rst::after { background: var(--comp) !important; } 
 #studioRoot .list li.inst .nm, #studioRoot .list li.inst .ic { color: var(--comp); } 
 #studioRoot .list li.inst-in .nm { color: var(--muted); } 
-#studioRoot .compbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 auto 10px; padding: 7px 10px; border-radius: 8px; background: var(--comp); color: #fff; font-weight: 600; } 
-#studioRoot .compbar .spacer { flex: 1; } 
-#studioRoot .compbar .btn { background: #fff; color: var(--comp); border-color: #fff; } 
 #studioRoot .compnote { display: grid; gap: 6px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--comp); background: color-mix(in srgb, var(--comp) 8%, transparent); } 
 #studioRoot .compnote p { margin: 0; font-size: 12px; } 
 #studioRoot .compnote .acts { display: flex; gap: 5px; flex-wrap: wrap; } 
@@ -365,8 +398,14 @@
 #studioRoot .checks li:hover { background: var(--sunk); } 
 #studioRoot .checks li .st { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; color: var(--accent-ink); } 
 #studioRoot .checks li .st .ic { width: 11px; height: 11px; stroke-width: 2.2; } 
-#studioRoot .checks li.pass .st { background: var(--ok); }  #studioRoot .checks li.warn .st { background: var(--warn); }  #studioRoot .checks li.fail .st { background: var(--danger); } 
+#studioRoot .checks li.notBuilt .st, #studioRoot .checks li.unmeasured .st { background: var(--muted); }  #studioRoot .checks li.pass .st { background: var(--ok); }  #studioRoot .checks li.warn .st { background: var(--warn); }  #studioRoot .checks li.fail .st { background: var(--danger); } 
 #studioRoot .checks li b { display: block; font-size: 12.5px; } 
+#studioRoot .seo-controls { display: grid; gap: 8px; } 
+#studioRoot .seo-controls .row { grid-template-columns: minmax(0, 1fr); gap: 3px; } 
+#studioRoot .seo-controls .row > label { white-space: normal; } 
+#studioRoot .seo-controls .row > span:empty { display: none; } 
+#studioRoot .seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) 112px; gap: 6px; } 
+#studioRoot .seo-refusal { color: var(--warn); } 
 #studioRoot .checks li p { margin: 2px 0 0; color: var(--muted); font-size: 12px; } 
 #studioRoot .checks li .acts { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; } 
 #studioRoot .ratio { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; border: 1px solid var(--rule); } 

@@ -24,6 +24,9 @@ const identity = async (name) => {
 const owner = await identity('owner'), stranger = await identity('stranger');
 
 // A project root with the admin surface, and a file added "later" under js/admin/ that nobody thought to list.
+// admin-studio.html is a RETIRED page (Studio merged into admin-app.html; the file was deleted 2026-10-18). A stale
+// copy is planted here on purpose: deleting a file from the repo does not delete it from a deployed root, so the
+// host must refuse the name itself, not rely on the file being absent.
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'flux-chain-lock-'));
 const put = (rel, text) => { fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fs.writeFileSync(path.join(root, rel), text); };
 for (const rel of ['admin.html', 'admin-app.html', 'admin-studio.html', 'index.html', 'js/admin/auth.js', 'js/admin/gate.js', 'js/admin/admin.js', 'js/admin/store.js', 'js/admin/publish.js', 'js/admin/later.js', 'js/content/home.js', 'css/admin.css']) put(rel, `/* ${rel} */`);
@@ -117,9 +120,11 @@ try {
   assert.equal(adminSlash.status, 308, 'trailing slash canonicalizes before relative assets load');
   assert.equal(adminSlash.location, '/admin?from=test');
   for (const rel of ['/js/admin/auth.js', '/js/admin/gate.js', '/js/content/home.js', '/css/admin.css']) assert.equal((await b.call('GET', rel)).status, 200, rel + ' is public');
-  for (const rel of ['/admin-app.html', '/admin-studio.html', '/js/admin/admin.js', '/js/admin/store.js', '/js/admin/publish.js']) {
+  for (const rel of ['/admin-app.html', '/js/admin/admin.js', '/js/admin/store.js', '/js/admin/publish.js']) {
     const r = await b.call('GET', rel); assert.equal(r.status, 401, rel + ' is locked'); assert(!r.text.includes('/* '), 'and its contents are not sent');
   }
+  const retiredLocked = await b.call('GET', '/admin-studio.html');
+  assert.equal(retiredLocked.status, 404, 'the retired admin-studio.html is not served at all, even with a stale copy on disk'); assert(!retiredLocked.text.includes('/* '));
   // Reason this case exists: a locked LIST goes stale. A file added under js/admin/ later must be locked without anyone remembering to.
   assert.equal((await b.call('GET', '/js/admin/later.js')).status, 401, 'a file nobody listed is locked by default');
   const viaTraversal = await b.call('GET', '/js/admin/..%2F..%2Fadmin-app.html');
@@ -155,7 +160,9 @@ try {
   assert.equal(done.status, 200); assert.match(done.set, /HttpOnly/); assert.match(done.set, /SameSite=Strict/); assert.match(done.set, /Path=\//);
   assert.equal(done.json.enrolled, true); assert.equal(done.json.lastSignIn, null, 'no earlier sign-in to report the first time');
   assert.equal((await b.call('GET', '/api/session')).json.publicKeyB64, owner.publicKeyB64);
-  for (const rel of ['/admin-app.html', '/admin-studio.html', '/js/admin/admin.js', '/js/admin/later.js']) assert.equal((await b.call('GET', rel)).status, 200, rel + ' opens for a session');
+  for (const rel of ['/admin-app.html', '/js/admin/admin.js', '/js/admin/later.js']) assert.equal((await b.call('GET', rel)).status, 200, rel + ' opens for a session');
+  const retiredOpen = await b.call('GET', '/admin-studio.html');
+  assert.equal(retiredOpen.status, 404, 'a session does not open the retired admin-studio.html either: the name is gone, not locked'); assert(!retiredOpen.text.includes('/* '));
   assert.equal((await b.call('GET', '/api/status')).status, 200);
   // The used ticket is dead: it cannot be spent a second time even with a fresh correct code.
   const reused = await b.call('POST', '/api/session/otp', { ticket: step1.json.ticket, code: totpFor(step1.json.otp.secret), hostCode: enrollNotice.hostCode });

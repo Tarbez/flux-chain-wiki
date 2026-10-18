@@ -6,7 +6,9 @@ document.documentElement.classList.add('js');
 (function () {
   var themes = ['ghost', 'glacier', 'clay', 'grove', 'ochre', 'moss', 'marine', 'bone', 'dusk', 'dawn'];
   try {
-    var saved = localStorage.getItem('flux-chain-theme');
+    // the visitor's own choice, else the site default as this browser last saw it (both written
+    // only by js/settings/panel.js, the one owner of data-theme -- see applyTheme there)
+    var saved = localStorage.getItem('flux-chain-theme') || localStorage.getItem('defxn-site-theme-default');
     if (saved && themes.indexOf(saved) >= 0) document.documentElement.dataset.theme = saved;
   } catch (e) { /* storage unavailable: the default palette applies */ }
 })();

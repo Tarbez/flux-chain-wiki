@@ -41,7 +41,18 @@ const PAGES = fs
 
 /* The private ones must stay unreachable by any path. They are not
  * "pages with a clean path"; they are pages the public server refuses. */
-const PRIVATE_PAGES = ['admin', 'admin-app', 'admin-studio'];
+const PRIVATE_PAGES = ['admin', 'admin-app'];
+/* Private pages that were deleted from the repo. Deleting a file here does not
+ * delete it from a node's static root, so Caddy must keep routing the retired
+ * name to the admin host (which no longer serves it) or a stale copy would be
+ * served publicly by the {path}.html rule. admin-studio merged into admin-app
+ * on 2026-10-18. */
+const RETIRED_PRIVATE_PAGES = ['admin-studio'];
+for (const page of RETIRED_PRIVATE_PAGES) {
+  /* PAGES is read from the directory, so a recreated retired page would be
+   * counted as PUBLIC below and served by serve-site.mjs's clean-path rule. */
+  assert.ok(!PAGES.includes(page), `${page}.html is retired but exists at the site root again; serve-site.mjs would serve it publicly`);
+}
 const PUBLIC_PAGES = PAGES.filter((p) => !PRIVATE_PAGES.includes(p));
 
 let checks = 0;
@@ -120,9 +131,9 @@ check(() => {
    * serves it from the static root. */
   const admin = CADDY.match(/@adminProxy path ([^\n]+)/);
   assert.ok(admin, 'no @adminProxy matcher in defxn-site.caddy');
-  for (const page of PRIVATE_PAGES) {
+  for (const page of [...PRIVATE_PAGES, ...RETIRED_PRIVATE_PAGES]) {
     assert.ok(
-      admin[1].split(/\s+/).includes('/' + page),
+      admin[1].split(/\s+/).includes('/' + page) && admin[1].split(/\s+/).includes('/' + page + '.html'),
       `@adminProxy does not match the clean path /${page}. With {path}.html in try_files, ` +
         `/${page} would be served from the static root instead of the admin host.`
     );
@@ -190,5 +201,6 @@ check(() => {
 console.log(
   `PASS: clean paths for ${PUBLIC_PAGES.length} standalone pages (${PUBLIC_PAGES.join(', ')}) ` +
     `are served by both serve-site.mjs and defxn-site.caddy; ${PRIVATE_PAGES.join(', ')} stay ` +
+    `private (retired: ${RETIRED_PRIVATE_PAGES.join(', ')}); ` +
     `private; ${checks} checks.`
 );

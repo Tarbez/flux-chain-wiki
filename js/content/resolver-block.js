@@ -16,7 +16,15 @@
  * this layer has passed.
  *
  * Data comes from js/content/resolver-algebra.js, generated out of
- * flux-spec/registry. Nothing here hardcodes a letter or a verb.
+ * flux-spec/registry. Nothing here hardcodes a letter, a label or a verb.
+ *
+ * A box opens with the LONGEST registered label it starts with. Most
+ * labels are one letter; since specVersion 0.4.3 a few are longer (NAME,
+ * KK, ...). This engine once read only the first character, so
+ * `NAMEalice` was refused as the tooling letter N and `TITLE68656c6c6f`
+ * resolved as an opaque Target "ITLE68656c6c6f" — the second is the
+ * silent collision this page warns about, produced by the page's own
+ * explorer. tests/resolver-algebra.cjs holds both as regression cases.
  */
 (function () {
   'use strict';
@@ -32,6 +40,36 @@
     ALG.roles.reservedTooling.forEach(function (r) { tooling[r.letter] = r.reason; });
     var free = {};
     ALG.roles.free.forEach(function (l) { free[l] = true; });
+
+    /* Longer labels, longest first, so the first one a block starts with
+       IS the longest match. A census generated before labels existed has
+       none, and the engine reads single letters exactly as before. */
+    var labels = (ALG.roles.labels || []).slice().sort(function (a, b) {
+      return b.label.length - a.label.length;
+    });
+    function longestLabel(block) {
+      for (var i = 0; i < labels.length; i += 1) {
+        if (block.indexOf(labels[i].label) === 0) return labels[i];
+      }
+      return null;
+    }
+
+    /* What a label was read INSTEAD of, in words. Derived from the
+       label's recorded prefixes: a registered prefix is a live role whose
+       payloads the label now takes; a reserved or free one is a letter
+       that would have refused anyway. */
+    var STATUS_WORDS = {
+      registered: 'a registered role',
+      reservedInvalid: 'reserved invalid',
+      reservedTooling: 'reserved for tooling',
+      free: 'free',
+      label: 'a shorter label'
+    };
+    function takesFrom(label) {
+      return (label.startsWith || []).filter(function (p) {
+        return p.status === 'registered' || p.status === 'label';
+      });
+    }
 
     /* Shape rules, one per payload kind the registry declares. These are
        the structural rejections the registry's own notes describe: QUERY
@@ -117,6 +155,11 @@
           return { ok: true, absorbed: true, as: 'an opaque Target string "' + payload + '"' };
         }
 
+        case 'lowercase-alphanumeric':
+          return new RegExp(role.pattern || '^[a-z0-9]+$').test(payload)
+            ? { ok: true, as: role.name }
+            : { ok: false, why: 'not ' + (role.pattern || 'lowercase alphanumeric') };
+
         case 'opaque':
         case 'opaque-alphanumeric':
           if (!/^[A-Za-z0-9]+$/.test(payload)) {
@@ -162,6 +205,25 @@
                    'contain. No `=`, `_`, `.`, `%`, `:`, `+`, `/` or whitespace. An ' +
                    'arbitrary string gets in as hex of its UTF-8 instead.']]
         };
+      }
+
+      var label = longestLabel(block);
+      if (label) {
+        var shorter = (label.startsWith || []).map(function (p) {
+          return p.token + ' (' + (STATUS_WORDS[p.status] || p.status) + ')';
+        });
+        var taken = takesFrom(label);
+        var matchLine = 'Read as ' + label.label + ', the longest label this block starts ' +
+          'with — not ' + shorter.join(' or ') + '.' +
+          (taken.length
+            ? ' So no ' + taken.map(function (p) { return p.token; }).join(' or ') +
+              ' payload can begin with ' + taken.map(function (p) {
+                return '"' + label.label.slice(p.token.length) + '"';
+              }).join(' or ') + ': that text now opens ' + label.label + ' instead.'
+            : ' That letter could not resolve a payload of its own, so this label takes ' +
+              'nothing away from a live role.');
+        return resolveRole(label, label.label, block.slice(label.label.length),
+                           [['Longest match', matchLine]]);
       }
 
       var letter = block.charAt(0);
@@ -245,12 +307,18 @@
                    'be accounted for.']]
         };
       }
+      return resolveRole(role, letter, payload, []);
+    }
 
-      var lines = [[
+    /* One role (a letter or a longer label) and its payload, judged by
+       the role's payload rule. Shared by both paths so a label is held to
+       exactly the rules a letter is. */
+    function resolveRole(role, letter, payload, preface) {
+      var lines = preface.concat([[
         'Position ' + letter,
         role.name + ' · ' + role.group + ' group · payload ' + role.payload +
           (role.profile ? ' · ' + role.profile + ' profile' : '')
-      ]];
+      ]]);
 
       var shape = checkPayload(role, payload);
 
@@ -311,17 +379,31 @@
       var absorbing = roles.registered
         .filter(function (r) { return r.absorbing; })
         .map(function (r) { return r.letter; });
+      var longer = roles.labels || [];
+      var taking = longer.filter(function (l) { return takesFrom(l).length; });
 
       return [
         {
-          dim: 'Positions — the role letter that opens a block',
+          dim: 'Positions — the role label that opens a block',
           kind: 'closed',
-          count: registered + ' registered of ' + namespace,
+          count: registered + ' registered of ' + namespace + ' letters' +
+                 (longer.length ? ' · ' + longer.length + ' longer label' +
+                   (longer.length === 1 ? '' : 's') : ''),
           why: 'Every letter of the namespace is accounted for as registered, ' +
                'reserved-invalid, reserved-tooling or free. An unaccounted letter is a ' +
                'latent silent-collision bug, because ' + absorbing.join(' and ') +
                ' absorb anything alphanumeric placed after them. ' +
-               roles.free.length + ' letter remains free: ' + roles.free.join(', ') + '.'
+               roles.free.length + ' letter remains free: ' + roles.free.join(', ') + '.' +
+               (longer.length
+                 ? ' Beside the letters sit longer labels (' +
+                   longer.map(function (l) { return l.label; }).join(', ') + '); a block ' +
+                   'takes the longest label it starts with. ' +
+                   (taking.length
+                     ? taking.map(function (l) { return l.label; }).join(' and ') +
+                       ' open with a registered letter and take payloads from it — ' +
+                       'the same collision audit, just over longer prefixes.'
+                     : 'Each opens with a letter that could not resolve on its own.')
+                 : '')
         },
         {
           dim: 'Verbs — what the Action role can say',
@@ -393,7 +475,9 @@
    * made it sayable is gone. Nothing is simulated.
    *
    * `off` names what to withhold: { verbGroups: [...], typeScoped: true,
-   * letters: [...] }. */
+   * letters: [...] }. `letters` takes longer labels too (e.g. 'NAME'):
+   * withholding one sends its blocks back to the single letter they open
+   * with, which is how a reader sees what longest-match was holding up. */
   function restrict(ALG, off) {
     off = off || {};
     var dropGroups = off.verbGroups || [];
@@ -406,6 +490,9 @@
       groups[name] = ALG.verbs.groups[name].slice();
       groups[name].forEach(function (v) { verbs.push(v); });
     });
+
+    var labels = (ALG.roles.labels || [])
+      .filter(function (l) { return dropLetters.indexOf(l.label) < 0; });
 
     var registered = ALG.roles.registered
       .filter(function (r) { return dropLetters.indexOf(r.letter) < 0; })
@@ -422,6 +509,7 @@
       source: ALG.source,
       roles: {
         registered: registered,
+        labels: labels,
         reservedInvalid: ALG.roles.reservedInvalid,
         reservedTooling: ALG.roles.reservedTooling,
         free: ALG.roles.free,

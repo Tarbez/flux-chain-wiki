@@ -20,13 +20,13 @@
    carries all five fields (defaulted by cleanEntry), since there is no
    breakpoint cascade here to merge against.
 
-   Edited from DEFXN Studio's animation-only mode (restrictMode === 'anim',
-   admin-studio.html) via a postMessage round trip into the connected preview
-   iframe, mirroring js/content/canvas-transitions.js's own command pipeline
-   exactly, substituting this module's per-route/per-key addressing for that
-   module's single global object: js/main.js holds the live draft and relays
-   whole-draft replaces up to admin-studio.html, which relays them on to
-   js/admin/admin.js, which persists via ArkAdminStore.saveElementMotion ->
+   Edited from DEFXN Studio (now part of js/admin/admin.js; it was the separate
+   admin-studio.html, deleted 2026-10-18) via a postMessage round trip into the
+   connected preview iframe, mirroring js/content/canvas-transitions.js's own
+   command pipeline exactly, substituting this module's per-route/per-key
+   addressing for that module's single global object: js/main.js holds the live
+   draft and relays whole-draft replaces up to js/admin/admin.js (one hop; the
+   old Studio-document middle hop is gone), which persists via ArkAdminStore.saveElementMotion ->
    this file's sibling element-motion-data.js. Studio's "Preview" button calls
    a one-shot animation built the same way createPresence's own show() would,
    against the connected preview's live DOM, with no real navigation. */

@@ -35,8 +35,13 @@ try {
   for (const pathname of ['/missing-page','/lifecycle/not-a-stage','/api/not-real','/js/pages/not-real.js','/scripts/publish-host.mjs','/lifecycle/scripts/publish-host.mjs','/lifecycle/js/../scripts/publish-host.mjs','/.git/config']) {
     const response=await get(pathname);assert([401,404].includes(response.status),'unknown/private URL stays denied: '+pathname);await response.text();
   }
-  for (const pathname of ['/admin-app.html','/admin-studio.html','/js/admin/admin.js','/lifecycle/js/admin/admin.js']) {
+  for (const pathname of ['/admin-app.html','/js/admin/admin.js','/lifecycle/js/admin/admin.js']) {
     const response=await get(pathname);assert.equal(response.status,401,'route rewriting must preserve the CMS gate');await response.text();
+  }
+  /* admin-studio.html was retired (merged into admin-app.html, deleted 2026-10-18): its name must not
+     come back as the SPA shell, as a 401 that implies it still exists, or from under a route prefix. */
+  for (const pathname of ['/admin-studio.html','/lifecycle/admin-studio.html']) {
+    const response=await get(pathname);assert.equal(response.status,404,'the retired Studio page is gone: '+pathname);await response.text();
   }
   const canonical=await get('/index.html?q=kept');assert.equal(canonical.status,308);assert.equal(canonical.headers.get('location'),'/?q=kept');
   console.log(`PASS: all ${routes.size} catalog routes hard-load and reload; ${assets.size} bootstrap asset URLs work; unknown URLs and private CMS assets stay denied.`);

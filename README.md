@@ -441,26 +441,24 @@ paragraphs, the values table toggle; add and delete). Save writes `js/content/ar
 Reading order is the index order: a new article is appended, and reordering is a hand edit of the index.
 Experiments are not manifest-driven yet.
 
-The protected **Studio** workspace is the CMS default and opens `admin-studio.html` as a full-viewport surface,
-so its canvas, rails and inspector retain the supplied interface's original proportions. **Content CMS** returns
-to the existing manifest/article/asset/encryption editor; its **Studio** sidebar button opens the visual workspace again.
-It adds the full visual-builder shell: canvas and live modes, desktop/tablet/phone previews, layers, pages and
-sitemap, authoritative content and design inspectors, SEO and AI metadata, undo/redo, version restore, and design
-checks. When embedded by the CMS, the canvas is not a visual approximation: it loads the real `index.html` route
-renderer with the production DEFXN HTML, CSS, page modules, shared components, mesh effects, and assets. Unsaved
-manifest, article, asset, theme, mesh, and SEO drafts are injected into that renderer in memory, so the canvas shows
-the exact result before Save or Publish. Clicking real rendered copy selects its typed manifest field in Studio;
-bound text and SEO edits flow back into the same drafts used by Content CMS. **Save DEFXN** writes those drafts with
-the existing `ArkAdminStore` serializers (or downloads the same files when no project folder is connected). The
-Pages/Sitemap view includes the complete live route catalog, including code-managed, nested resolution, lifecycle,
-and article routes. In connected mode the inspector and component library deliberately expose only authoritative
-DEFXN controls; prototype-only layout/component controls are hidden so they cannot imply a change to production
-code. Standalone visual projects retain the broader builder and still autosave to
-browser-local `defxn-studio-*` keys. **Save version** creates a restorable Studio snapshot; it is intentionally
-distinct from the CMS header's **Publish**, which remains the only action that signs and publishes the DEFXN
-content bundle to the mesh. The publish host treats `admin-studio.html` exactly like `admin-app.html`: it is
-available in direct loopback development and otherwise requires an authenticated current mesh owner. It is
-also excluded from the public static deployment.
+The protected **Studio** canvas is part of `admin-app.html` itself: the persistent header's **Content / Design**
+mode switch chooses between the manifest/article/asset/encryption editor (Content) and Design, whose
+**Canvas** sub-view shows Studio inside the same document (`#studioRoot`, styled by `css/studio-embed.css`,
+scripted by `js/admin/admin.js`) and whose **Theme & defaults** sub-view edits the theme and site-wide defaults.
+The header (mode switch, Design sub-switch, **Mesh**) stays reachable at every viewport width; Studio docks below
+it rather than covering it. Studio used to be a second document, `admin-studio.html`, loaded in an `<iframe>`;
+that file was merged in and then deleted (2026-10-18), and the publish host no longer serves the name at all.
+The canvas is not a visual approximation: it loads the real `index.html` route renderer with the production
+DEFXN HTML, CSS, page modules, shared components, mesh effects, and assets. Unsaved manifest, article, asset,
+theme, mesh, and SEO drafts are injected into that renderer in memory, so the canvas shows the exact result
+before Save or Publish. Clicking real rendered copy selects it in Studio; a contextual toolbar near the selection
+shows only the controls that apply to it, and edits flow back into the same drafts used by Content mode. One
+**Save** writes every dirty draft with the existing `ArkAdminStore` serializers (or downloads the same files when
+no project folder is connected); it is distinct from the header's **Publish**, which remains the only action that
+signs and publishes the DEFXN content bundle to the mesh. The standalone (disconnected) prototype canvas and its
+dense-encoding "Versions"/export were deleted in the merge with no replacement. `admin-app.html` is available in
+direct loopback development and otherwise requires an authenticated current mesh owner; it is also excluded from
+the public static deployment.
 
 ## Publishing to the mesh
 

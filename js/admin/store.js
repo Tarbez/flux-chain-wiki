@@ -12,6 +12,43 @@
 var ArkAdminStore = (function () {
   'use strict';
 
+  /* THE DRAFTS: the one list of everything the editor saves, in save order. Save
+     (admin.js saveEverything/anyDirty/siteFromState), Publish (scripts/lib/site-bundle.mjs:
+     the .flx archive's routes, its reader, and the project files a pull writes) and the
+     version history all derive their draft set from this list, so a new draft is either
+     here -- and then saved, published, pulled and versioned -- or nowhere.
+     Why it exists: Save wrote 13 drafts while the publish archive, built from its own hand
+     list, carried 8 of them; settings-defaults, components, states, canvas transitions and
+     element motion worked in the editor and on a local Save but never reached the mesh.
+       key     the site object's key (siteFromState(), readProject(), decodeSite())
+       kind    'items': one file per id under js/content/<dir>/ plus an index;
+               'single': one object in js/content/<file>-data.js, serialized by
+               <global>.serialize() and read back by <global>.get()
+       global  the content module that validates/serializes it
+       label   what a Save/validation message calls it
+       title   the archive route's title (single only; the four older titles are kept so an
+               unchanged older draft encodes to the same route as before)
+       needs   scripts the module needs loaded before it (single only) */
+  var DRAFTS = [
+    { key: 'manifests', kind: 'items', global: 'ArkManifest', label: 'Page', dir: 'manifests' },
+    { key: 'articles', kind: 'items', global: 'LearningContent', label: 'Article', dir: 'articles' },
+    { key: 'assets', kind: 'items', global: 'ArkAsset', label: 'Image', dir: 'assets' },
+    { key: 'secrets', kind: 'items', global: 'ArkSecret', label: 'Secret', dir: 'secrets' },
+    { key: 'meshSettings', kind: 'single', global: 'ArkMeshSettings', label: 'Mesh settings', file: 'mesh-settings', title: 'Mesh tuning' },
+    { key: 'theme', kind: 'single', global: 'ArkTheme', label: 'Theme', file: 'theme', title: 'Colour theme', needs: ['js/tokens.js', 'js/ark/vendor/backgrounds.js'] },
+    { key: 'settingsDefaults', kind: 'single', global: 'ArkSiteDefaults', label: 'Site-wide defaults', file: 'settings-defaults', title: 'Site-wide settings defaults' },
+    { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO' },
+    { key: 'layout', kind: 'single', global: 'ArkLayout', label: 'Layout', file: 'layout', title: 'Responsive layout' },
+    { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components' },
+    { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups' },
+    { key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Canvas transitions', file: 'canvas-transitions', title: 'Canvas transitions' },
+    { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation' }
+  ];
+  /* a copy, so no caller can edit the list for everyone else */
+  function drafts(kind) {
+    return DRAFTS.filter(function (d) { return !kind || d.kind === kind; }).map(function (d) { return JSON.parse(JSON.stringify(d)); });
+  }
+
   /* The list the site loads its manifests from, in display order. */
   function indexText(ids) {
     return '/* The page manifests, in display order. The admin editor (admin-app.html) rewrites this list; edit it by hand only to reorder.\n' +
@@ -42,7 +79,8 @@ var ArkAdminStore = (function () {
     try {
       await root.getFileHandle('index.html');
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
-      return { content: content, articles: await content.getDirectoryHandle('articles', { create: true }) };
+      /* root: the project folder itself, for the site-root files Save derives (saveSearchFiles) */
+      return { content: content, articles: await content.getDirectoryHandle('articles', { create: true }), root: root };
     } catch (e) {
       throw new Error('That folder is not the Flux Protocol project. Pick the folder that contains index.html and js/content.');
     }
@@ -123,6 +161,13 @@ var ArkAdminStore = (function () {
     await out.close();
   }
 
+  /* One index file alone (manifests/assets/secrets index.js, article-index.js), for a version
+     Restore whose only change to a list is its order: no item is rewritten, so no item save
+     would ever rewrite the index. `text` comes from the index writers above / LearningContent. */
+  async function writeIndex(dir, name, text) {
+    await write(dir, name, text);
+  }
+
   /* `ids` is the full display order, including a page that is being created */
   async function save(dir, manifest, ids) {
     await write(dir, manifest.id + '.js', ArkManifest.serialize(manifest));
@@ -166,6 +211,26 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'seo-data.js', ArkSEO.serialize(whole));
   }
 
+  /* sitemap.xml / robots.txt / llms.txt in the project folder's root, from ArkSEO.searchFiles()
+     (the same generator publish/pull uses). `files` is { name: text | null }; null is "do not
+     write it" (no baseUrl yet), and an existing file is then left alone, exactly as a pull does.
+     Writes only the files whose text changed; returns their names. */
+  async function saveSearchFiles(root, files) {
+    var written = [];
+    var names = Object.keys(files);
+    for (var i = 0; i < names.length; i++) {
+      var name = names[i], text = files[name];
+      if (text == null) continue;
+      var current = null;
+      try { current = await (await (await root.getFileHandle(name)).getFile()).text(); }
+      catch (error) { if (!error || error.name !== 'NotFoundError') throw error; }
+      if (current === text) continue;
+      await write(root, name, text);
+      written.push(name);
+    }
+    return written;
+  }
+
   /* Responsive positioning and sizing authored in the visual Studio. */
   async function saveLayout(contentDir, whole) {
     await write(contentDir, 'layout-data.js', ArkLayout.serialize(whole));
@@ -196,9 +261,9 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'element-motion-data.js', ArkElementMotion.serialize(whole));
   }
 
-  return { indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove,
+  return { drafts: drafts, indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove, writeIndex: writeIndex,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
            secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,
-           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSettingsDefaults: saveSettingsDefaults, saveSeo: saveSeo, saveLayout: saveLayout, saveComponents: saveComponents, saveStates: saveStates, saveCanvasTransitions: saveCanvasTransitions, saveElementMotion: saveElementMotion };
+           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSettingsDefaults: saveSettingsDefaults, saveSeo: saveSeo, saveSearchFiles: saveSearchFiles, saveLayout: saveLayout, saveComponents: saveComponents, saveStates: saveStates, saveCanvasTransitions: saveCanvasTransitions, saveElementMotion: saveElementMotion };
 })();

@@ -98,6 +98,11 @@ defxn.com, www.defxn.com {
 	# block below now resolves an extension-less path to <path>.html. Without
 	# it, /admin-app would resolve to admin-app.html out of this node's static
 	# root and bypass the admin host entirely.
+	# /admin-studio and /admin-studio.html name a RETIRED page: Studio merged into
+	# admin-app.html and the file was deleted from this repo (2026-10-18). They stay
+	# listed on purpose -- deleting a file here does not delete it from a node's
+	# static root, so a stale copy from an older deploy must still be routed to the
+	# admin host, which no longer serves that name at all (404).
 	@adminProxy path /admin /admin.html /admin-app /admin-app.html /admin-studio /admin-studio.html /api/* /js/admin/*
 	handle @adminProxy {
 		reverse_proxy 127.0.0.1:3437 {

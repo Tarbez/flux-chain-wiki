@@ -16,9 +16,11 @@ const root=document.documentElement;
 // Site-wide owner-set defaults (js/content/settings-defaults.js + -data.js), consulted only
 // as the fallback a real visitor's own localStorage choice is missing -- read(key,fallback)'s
 // own precedence (their choice wins) is unchanged, this only moves what the fallback IS.
-const SITE_DEFAULTS=(window.ArkSiteDefaults&&ArkSiteDefaults.get())||{};
+// `let`, and `previewOnly`: inside the editor's preview a new default can arrive later (see the
+// 'ark-site-defaults-preview' listener at the end), and from then on nothing is saved.
+let SITE_DEFAULTS=(window.ArkSiteDefaults&&ArkSiteDefaults.get())||{},previewOnly=false;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
-const save=(key,value)=>{try{localStorage.setItem(key,value);}catch{}};
+const save=(key,value)=>{if(previewOnly)return;try{localStorage.setItem(key,value);}catch{}};
 let theme=read('flux-chain-theme',SITE_DEFAULTS.theme||'ghost'),renderer,frame=0;
 if(!themes.includes(theme))theme='ghost';
 let saved={};try{saved=JSON.parse(read('defxn-pattern-config-v1','{}'))||{};}catch{}
@@ -69,9 +71,16 @@ const component=createArkHeadlessComponent(ui,defineArkHeadlessComponent({name:'
 component.render(host);component.mount();
 const bind=(name,fn)=>ui.onAction(component.getRef(name),(_,detail)=>{if(detail.action==='CLICK')fn();});
 function selected(group,values,current){values.forEach((value,i)=>{const ref=component.getRef(group+i);ui.configureRef(ref,{attrs:{'aria-pressed':String(value===current)}});ui.update(ref,{text:title(value)});});}
-function applyTheme(value){theme=value;root.dataset.theme=value;save('flux-chain-theme',value);selected('themesDark',darkThemes,value);selected('themesLight',lightThemes,value);}
-function applyMotif(value){motif=value;root.dataset.motif=value;save('defxn-motif-v1',value);selected('motifs',motifs,value);values=patternValues(value);meshPattern.select({blocks:'network',traces:'logic',layers:'story-check',nodes:'mesh-nodes',routes:'mesh-routes',tiles:'mesh-tiles',frames:'mesh-frames'}[value]||'quiet',false);if(ready)syncPattern();}
-motifs.forEach((value,i)=>bind('motifs'+i,()=>applyMotif(value)));
+// THE ONE OWNER of <html data-theme> on the public page (js/bootstrap.js only paints this
+// browser's last answer early; js/main.js no longer writes it -- the colour theme's activeTheme
+// is the theme the EDITOR is editing, not a visitor palette). `chosen` is true only for a click
+// in this panel: only a real choice is saved as the visitor's own. Until 2026-10-18 every page
+// load saved the current site default here as if chosen, so a visitor who never touched the
+// theme kept their first visit's default forever and never saw the owner change it
+// (regression: tests/browser/theme-owner.mjs). The same holds for the pattern (motif).
+function applyTheme(value,chosen){theme=value;root.dataset.theme=value;if(chosen)save('flux-chain-theme',value);selected('themesDark',darkThemes,value);selected('themesLight',lightThemes,value);}
+function applyMotif(value,chosen){motif=value;root.dataset.motif=value;if(chosen)save('defxn-motif-v1',value);selected('motifs',motifs,value);values=patternValues(value);meshPattern.select({blocks:'network',traces:'logic',layers:'story-check',nodes:'mesh-nodes',routes:'mesh-routes',tiles:'mesh-tiles',frames:'mesh-frames'}[value]||'quiet',false);if(ready)syncPattern();}
+motifs.forEach((value,i)=>bind('motifs'+i,()=>applyMotif(value,true)));
 let ready=false;applyMotif(motif);
 const base=createArkBackgroundConfig(ARK_BACKGROUND_PRESETS.quiet);
 function atmosphereConfig(){
@@ -110,15 +119,35 @@ for(const key of ['structure','visibility','delay']){const c=controls[key];
  ui.bindRefEvent(component.getRef(key),'input',(event,element)=>{const value=Number(element.value);if(!Number.isFinite(value))return;values[key]=Math.max(c.min,Math.min(c.max,value));syncPattern(true);persistPattern();});
 }
 for(const [key,options] of Object.entries(presets)){ui.configureRef(component.getRef(key),{attrs:{role:'radiogroup','aria-label':key==='scale'?'Cell size':'Cell spacing'}});Object.entries(options).forEach(([name,value],i)=>{bind(key+i,()=>{values[key]=value;persistPattern();syncPattern();});ui.bindRefEvent(component.getRef(key+i),'keydown',event=>{const keys=Object.keys(options);let next;if(['ArrowRight','ArrowDown'].includes(event.key))next=(i+1)%keys.length;else if(['ArrowLeft','ArrowUp'].includes(event.key))next=(i+keys.length-1)%keys.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=keys.length-1;else return;event.preventDefault();values[key]=options[keys[next]];persistPattern();syncPattern();ui.getElement(component.getRef(key+next))?.focus();});});}
-bind('remove',()=>applyMotif('none'));
+bind('remove',()=>applyMotif('none',true));
 bind('animate',()=>{values.animated=!values.animated;persistPattern();syncPattern();});
 bind('restore',()=>{delete saved[motif];values=patternValues(motif);persistPattern();syncPattern();});
 document.addEventListener('visibilitychange',schedulePattern);reduced.addEventListener('change',schedulePattern);
 const rangeObserver=new MutationObserver(restoreRangeValues);rangeObserver.observe(host,{childList:true,subtree:true});
 ready=true;syncPattern();
-for(const [groupName,items] of [['themesDark',darkThemes],['themesLight',lightThemes]])items.forEach((value,i)=>{ui.configureRef(component.getRef(groupName+i),{attrs:{'data-theme-choice':value,'aria-label':themeNames[value]+' '+(groupName==='themesDark'?'dark':'light')}});bind(groupName+i,()=>applyTheme(value));});
+for(const [groupName,items] of [['themesDark',darkThemes],['themesLight',lightThemes]])items.forEach((value,i)=>{ui.configureRef(component.getRef(groupName+i),{attrs:{'data-theme-choice':value,'aria-label':themeNames[value]+' '+(groupName==='themesDark'?'dark':'light')}});bind(groupName+i,()=>applyTheme(value,true));});
 bind('pause',()=>ArkUI.sceneState.pause(!ArkUI.sceneState.get().paused));bind('reset',()=>ArkUI.sceneState.orient(0,0));
 let paused;
 const unsubscribeMotion=ArkUI.sceneState.subscribe(state=>{if(state.paused===paused)return;paused=state.paused;const ref=component.getRef('pause');ui.configureRef(ref,{attrs:{'aria-pressed':String(paused)}});ui.update(ref,{text:paused?'Resume motion':'Pause motion'});restoreRangeValues();schedulePattern();});
 applyTheme(theme);renderer=mountArkBackground(backgroundHost,atmosphereConfig());restoreRangeValues();
+// What js/bootstrap.js paints before first paint for a visitor with no choice of their own: the
+// site default as this browser last saw it (a cache of the owner's setting, never the visitor's
+// choice). A changed default shows from the next load on with no flash.
+if(SITE_DEFAULTS.theme&&themes.includes(SITE_DEFAULTS.theme))save('defxn-site-theme-default',SITE_DEFAULTS.theme);
+// CMS preview hook. js/main.js fires this only inside the editor's preview iframe, after it
+// re-defines ArkSiteDefaults from an unsaved edit or from a past version (Versions panel). The
+// preview shows what an UNCONFIGURED visitor lands on, so the defaults apply over this browser's
+// own stored choices -- and nothing is written to localStorage from then on: the editor shares the
+// public site's origin, so a write here would become the owner's own visitor choice.
+// The theme is re-asserted every time (a full preview state re-applies the colour theme first);
+// the pattern is re-applied only when the defaults changed, so typing elsewhere does not restart it.
+let previewShown='';
+window.addEventListener('ark-site-defaults-preview',event=>{
+ const next=event.detail||{};previewOnly=true;
+ applyTheme(themes.includes(next.theme)?next.theme:'ghost');
+ const key=JSON.stringify(next);if(key===previewShown)return;previewShown=key;
+ SITE_DEFAULTS=next;saved={};
+ let nextMotif=motifMigration[next.motif]||next.motif;if(!motifs.includes(nextMotif))nextMotif='blocks';
+ applyMotif(nextMotif);
+});
 window.addEventListener('pagehide',()=>{disposed=true;rangeObserver.disconnect();stopPattern();unsubscribeMotion();document.removeEventListener('visibilitychange',schedulePattern);reduced.removeEventListener('change',schedulePattern);document.removeEventListener('pointerdown',outsidePointer,true);if(frame)cancelAnimationFrame(frame);if(renderer)renderer.destroy();meshPattern.dispose();},{once:true});

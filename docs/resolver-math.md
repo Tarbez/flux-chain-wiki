@@ -10,8 +10,8 @@
 ```
 
 That is the equation. Everything this system can do is the **sum of what
-somebody put in the dictionary** — the letters, the verbs, the record
-types, the rules, the resolvers. Nothing is in the result that was not
+somebody put in the dictionary** — the letters and longer labels, the
+verbs, the record types, the rules, the resolvers. Nothing is in the result that was not
 defined into it, and whatever was never defined is not slow. It does not
 exist.
 
@@ -20,6 +20,7 @@ Today, from the live registry:
 | | term | what it buys |
 |---:|---|---|
 | 20 | role letters | what a box can be |
+| 5 | longer labels | a box named by more than one letter |
 | 18 | action verbs | what can be done |
 | 93 | record types | what a record is about |
 | 10 | type-scoped shapes | where meaning bends |
@@ -96,7 +97,7 @@ not by taste.
 
 | Dimension | Status | Why |
 |---|---|---|
-| **Positions** — the role letter opening a block | **closed** | Every letter of the 26 is accounted for as registered, reserved-invalid, reserved-tooling or free. An unaccounted letter is a latent silent-collision bug. |
+| **Positions** — the role label opening a block | **closed** | Every letter of the 26 is accounted for as registered, reserved-invalid, reserved-tooling or free. An unaccounted letter is a latent silent-collision bug. Beside the letters sit longer labels, and a block takes the **longest** label it starts with; a label is not a letter of the namespace and is never counted as one. |
 | **Verbs** — what the Action role can say | **closed** | An unregistered verb throws rather than resolving to a default. The list must stay prefix-free, or a future `SENDER` misparses as `SEND` plus garbage. |
 | **Manifest types** — what a record is about | **open set** | A catalog, not a gate. Nothing refuses a type outside it; a product with a domain the core has never heard of registers its own at runtime. |
 | **Meaning per observer** — a letter whose shape depends on the record's type | **relative** | The one strongly observer-relative dimension, and deliberately tiny. See below. |
@@ -122,6 +123,21 @@ it free: a "deny" role would resolve `NOTIFY` to `{Denied:"OTIFY"}`.
 
 **A silent collision is worse than a refusal.** The refusal names what it
 needs; the collision signs something nobody meant.
+
+### Longer labels move the same hazard, they do not remove it
+
+Not every box opens with a single letter. The registry also holds longer
+labels — `NAME`, `TITLE`, `KK` and others — and a block takes the
+**longest** label it starts with, so `NAMEalice` is read as `NAME`, not
+as the tooling letter `N`. Where a label opens with a reserved letter
+(`NAME` under `N`, `KK` under `K`) it takes nothing from a live role.
+Where it opens with a registered one it takes payloads away from it:
+since `TITLE` exists, no `T` value can begin with `ITLE`, because that
+text now opens `TITLE` instead. Read by first character alone,
+`TITLE68656c6c6f` resolved *successfully* as an opaque Target — the
+`TYPEGHOST` collision again, one prefix longer. Which labels exist, and
+which letter each one takes from, is derived from the registry and
+rendered on [/resolver-math](/resolver-math); it is not listed here.
 
 ### Why a payload can be anything
 

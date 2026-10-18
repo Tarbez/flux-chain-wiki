@@ -207,23 +207,43 @@ function stubMatchMedia(window) {
    polling the DOM or guessing a fixed sleep. Rejects on timeout so the
    caller's fail-open path (api/render.mjs) or failure assertion (the test)
    can tell a stalled/broken route apart from a fast one. */
-export function waitForRouteReady(window, timeoutMs) {
+export function waitForRouteReady(window, timeoutMs, virtualConsole) {
   return new Promise((resolve, reject) => {
     let settled = false;
-    function onReady() {
+    function finish(error) {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
       window.removeEventListener('ark:route-ready', onReady);
-      resolve();
+      if (virtualConsole) virtualConsole.off('error', onConsoleError);
+      if (error) reject(error); else resolve();
+    }
+    function onReady() { finish(null); }
+    /* js/ark/page-router.js's navigate() catches a failed page load, reports it with
+       console.error('[ark] page failed to load:', page, error) and returns WITHOUT
+       dispatching ark:route-ready. Before this listener existed a route that genuinely
+       failed was indistinguishable from a slow one: both surfaced only as the timeout
+       below, after the full wait. Failing fast with the router's own error keeps
+       "this route is broken" and "this machine was busy" apart. */
+    function onConsoleError(first, page, error) {
+      if (first !== '[ark] page failed to load:') return;
+      finish(new Error('Route "' + page + '" failed to load inside the render: ' + (error && error.stack || error), { cause: error }));
+    }
+    /* On timeout, say how far the boot got, so a stall names its phase instead of
+       only its duration: still parsing/fetching scripts (readyState "loading"),
+       scripts done but no router yet, or a router that never committed a page. */
+    function bootPhase() {
+      try {
+        const router = window.ArkUI && window.ArkUI.pageRouter;
+        return 'document.readyState=' + window.document.readyState +
+          (router ? ', router active page=' + (router.active || 'none yet') : ', page router not created yet');
+      } catch (e) { return 'phase unreadable: ' + e.message; }
     }
     const timer = setTimeout(() => {
-      if (settled) return;
-      settled = true;
-      window.removeEventListener('ark:route-ready', onReady);
-      reject(new Error('Timed out after ' + timeoutMs + 'ms waiting for ark:route-ready'));
+      finish(new Error('Timed out after ' + timeoutMs + 'ms waiting for ark:route-ready (' + bootPhase() + ')'));
     }, timeoutMs);
     window.addEventListener('ark:route-ready', onReady);
+    if (virtualConsole) virtualConsole.on('error', onConsoleError);
   });
 }
 
@@ -301,8 +321,13 @@ async function bootDocument({ html, url, resources = 'usable', timeoutMs = 4500,
   stubAnimations(dom.window);
   const errors = [];
   dom.window.addEventListener('error', (event) => { errors.push(event.error || event.message); });
-  await waitForRouteReady(dom.window, timeoutMs);
-  if (errors.length) throw errors[0];
+  try {
+    await waitForRouteReady(dom.window, timeoutMs, dom.virtualConsole);
+    if (errors.length) throw errors[0];
+  } catch (error) {
+    dom.window.close(); // a failed boot must not leave its timers/rAF loops running
+    throw error;
+  }
   return dom;
 }
 
@@ -315,6 +340,11 @@ async function bootDocument({ html, url, resources = 'usable', timeoutMs = 4500,
 export async function renderDocument(options) {
   const dom = await bootDocument(options);
   try {
+    /* Page markup a component instance now stands in for ("Make into component",
+       js/content/components.js) is only hidden in the live DOM -- it has to stay there so
+       removing the instance can bring it back. A bot reading this HTML would read it twice
+       (the hidden original and the component), so the rendered document leaves it out. */
+    dom.window.document.querySelectorAll('[data-ark-component-replaced]').forEach((node) => node.remove());
     return dom.window.document.documentElement.outerHTML;
   } finally {
     // jsdom keeps timers/rAF loops alive (the site's own animation code);

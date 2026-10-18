@@ -8,8 +8,12 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
+/* A real CSSStyleDeclaration reads '' for any property nobody set. ArkLayout's reset now
+   restores only what it wrote (js/content/layout.js resetElement), so an untouched property
+   is no longer blanked to '' as a side effect -- the stub has to answer '' itself. */
+function cssDeclaration() { return new Proxy({}, { get: (target, name) => (name in target ? target[name] : typeof name === 'string' ? '' : undefined) }); }
 class FakeElement {
-  constructor(tagName) { this.tagName = tagName.toUpperCase(); this.nodeType = 1; this.namespaceURI = 'http://www.w3.org/1999/xhtml'; this.attrs = {}; this.children = []; this.parentNode = null; this.id = ''; this.style = {}; }
+  constructor(tagName) { this.tagName = tagName.toUpperCase(); this.nodeType = 1; this.namespaceURI = 'http://www.w3.org/1999/xhtml'; this.attrs = {}; this.children = []; this.parentNode = null; this.id = ''; this.style = cssDeclaration(); }
   setAttribute(name, value) { if (name === 'id') this.id = String(value); this.attrs[name] = String(value); }
   getAttribute(name) { return name === 'id' ? (this.id || null) : (Object.prototype.hasOwnProperty.call(this.attrs, name) ? this.attrs[name] : null); }
   hasAttribute(name) { return name === 'id' ? !!this.id : Object.prototype.hasOwnProperty.call(this.attrs, name); }

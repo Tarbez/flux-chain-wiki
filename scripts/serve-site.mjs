@@ -19,7 +19,7 @@ const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const PORT = Number(process.env.PORT || 3438);
 const HOST = process.env.HOST || '127.0.0.1';
 const ADMIN_ORIGIN = process.env.DEFXN_ADMIN_ORIGIN || 'http://127.0.0.1:3437';
-const PRIVATE = /^\/(admin\.html|admin-app\.html|admin-studio\.html|scripts|tests|\.git|\.vercel|node_modules|Flux Chain Admin\.command|README\.md)(\/|$)/;
+const PRIVATE = /^\/(admin\.html|admin-app\.html|scripts|tests|\.git|\.vercel|node_modules|Flux Chain Admin\.command|README\.md)(\/|$)/;
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',

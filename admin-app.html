@@ -13,8 +13,8 @@
 <link rel="stylesheet" href="css/admin.css" />
 <link rel="stylesheet" href="css/authorization-dialog.css" />
 <!-- Step 2 merge (2026-10-17): the Studio workspace used to be a separate document
-     (admin-studio.html) embedded via <iframe>. It is now inline markup in this same
-     document (#studioRoot below), shown/hidden by js/admin/admin.js's renderEditor()
+     (admin-studio.html, since deleted) embedded via <iframe>. It is now inline markup in this same
+     document (#studioRoot below), shown/hidden by this page's own renderEditor()
      instead of swapping iframes. Its own design-token stylesheet is scoped entirely
      under #studioRoot so it cannot bleed into (or be bled into by) the rules above. -->
 <link rel="stylesheet" href="css/studio-embed.css" />
@@ -22,6 +22,27 @@
 <body>
 <header class="bar">
   <div class="bar-brand"><strong>Flux Protocol</strong><span>CONTENT</span></div>
+  <!-- Step 3 (Design/Content mode switch, flickering-juggling-donut.md): this switch lives
+       in the persistent outer header, not inside #cmsShell's own sidebar, because #cmsShell
+       is itself hidden whenever Design mode's canvas sub-view (state.kind === 'studio') is
+       active (renderEditor()'s #cmsShell[hidden] toggle) -- a control placed inside it would
+       disappear exactly when it is needed to switch back out. Mesh moves here for the same
+       reason: it must stay reachable regardless of which mode/sub-view is showing, and this
+       header is the one element neither #cmsShell nor #studioRoot ever hides. -->
+  <div class="bar-modes">
+    <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="Mode">
+      <button type="button" class="ark-tab" id="modeContentBtn" role="tab" aria-selected="false" data-mode="content">Content</button>
+      <button type="button" class="ark-tab" id="modeDesignBtn" role="tab" aria-selected="false" data-mode="design">Design</button>
+    </div>
+    <div class="mode-switch" id="designSubSwitch" role="tablist" aria-label="Design view" hidden>
+      <button type="button" class="ark-tab" id="designCanvasBtn" role="tab" aria-selected="false" data-sub="studio">Canvas</button>
+      <button type="button" class="ark-tab" id="designThemeBtn" role="tab" aria-selected="false" data-sub="design">Theme &amp; defaults</button>
+    </div>
+    <button id="meshNav" type="button" class="btn" aria-current="false" title="Publish and deploy status, regardless of mode"><span class="icon icon-mesh"></span> Mesh</button>
+    <!-- Version history (js/admin/versions.js): header-level for the same reason as Mesh --
+         it spans every draft in both modes, so it must stay reachable from either. -->
+    <button id="versionsNav" type="button" class="btn" aria-expanded="false" aria-controls="versionsPanel" title="Every saved version of the site: preview, restore, export"><span class="icon icon-history"></span> Versions</button>
+  </div>
   <div class="bar-actions">
     <span id="status" class="status" role="status" aria-live="polite"></span>
     <button id="connect" type="button" class="btn">Connect project folder</button>
@@ -32,52 +53,56 @@
 </header>
 <main id="cmsShell" class="shell">
   <nav class="pages" aria-label="Pages">
-    <button id="meshNav" type="button" class="mesh-nav-btn" aria-current="false"><span class="icon icon-mesh"></span> Mesh</button>
-    <button id="designNav" type="button" class="mesh-nav-btn" aria-current="false"><span class="icon icon-design"></span> Design</button>
-    <button id="studioNav" type="button" class="mesh-nav-btn" aria-current="false"><span class="icon icon-studio"></span> Studio</button>
-    <ul id="pageList" class="page-list"></ul>
-    <details class="add-toggle">
-      <summary>New theory page</summary>
-      <form id="newForm" class="new-form" autocomplete="off" novalidate>
-        <div class="new-row">
-          <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="page-name" spellcheck="false" />
-          <button type="submit" class="btn">Add</button>
-        </div>
-        <p class="hint">Lowercase letters and digits. It gets its own route and a link on the theory page.</p>
-      </form>
-    </details>
-    <details class="add-toggle">
-      <summary>New article</summary>
-      <form id="newArticleForm" class="new-form" autocomplete="off" novalidate>
-        <div class="new-row">
-          <input id="newSlug" type="text" inputmode="latin" placeholder="article-name" spellcheck="false" />
-          <button type="submit" class="btn">Add</button>
-        </div>
-        <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
-      </form>
-    </details>
-    <details class="add-toggle">
-      <summary>New image</summary>
-      <form id="newAssetForm" class="new-form" autocomplete="off" novalidate>
-        <img id="newAssetPreview" class="asset-preview new-asset-preview" alt="" hidden />
-        <input id="newAssetFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
-        <div class="new-row">
-          <input id="newAssetId" type="text" inputmode="latin" placeholder="image-name" spellcheck="false" />
-          <button type="submit" class="btn">Add</button>
-        </div>
-        <p class="hint">Choose a file to preview it here. Lowercase words joined by hyphens, plus a PNG, JPEG, WebP or SVG file under 3MB.</p>
-      </form>
-    </details>
-    <details class="add-toggle">
-      <summary>New encrypted content</summary>
-      <form id="newSecretForm" class="new-form" autocomplete="off" novalidate>
-        <div class="new-row">
-          <input id="newSecretId" type="text" inputmode="latin" placeholder="content-name" spellcheck="false" />
-          <button type="submit" class="btn">Add</button>
-        </div>
-        <p class="hint">Lowercase words joined by hyphens. Write the content and its recipients on the next page, then encrypt it there &mdash; nothing here holds plaintext.</p>
-      </form>
-    </details>
+    <!-- Step 3: the content item list and its "New X" forms are Content mode's own surface
+         (today's unchanged behavior, just gated); #contentNav as a whole hides in Design
+         mode so this sidebar doesn't show an empty, pointless page list while the canvas or
+         theme panel is active. The Mesh status disclosure below stays outside this wrapper
+         and ungated -- it is a small always-available glance, independent of mode. -->
+    <div id="contentNav">
+      <ul id="pageList" class="page-list"></ul>
+      <details class="add-toggle">
+        <summary>New theory page</summary>
+        <form id="newForm" class="new-form" autocomplete="off" novalidate>
+          <div class="new-row">
+            <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="page-name" spellcheck="false" />
+            <button type="submit" class="btn">Add</button>
+          </div>
+          <p class="hint">Lowercase letters and digits. It gets its own route and a link on the theory page.</p>
+        </form>
+      </details>
+      <details class="add-toggle">
+        <summary>New article</summary>
+        <form id="newArticleForm" class="new-form" autocomplete="off" novalidate>
+          <div class="new-row">
+            <input id="newSlug" type="text" inputmode="latin" placeholder="article-name" spellcheck="false" />
+            <button type="submit" class="btn">Add</button>
+          </div>
+          <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
+        </form>
+      </details>
+      <details class="add-toggle">
+        <summary>New image</summary>
+        <form id="newAssetForm" class="new-form" autocomplete="off" novalidate>
+          <img id="newAssetPreview" class="asset-preview new-asset-preview" alt="" hidden />
+          <input id="newAssetFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+          <div class="new-row">
+            <input id="newAssetId" type="text" inputmode="latin" placeholder="image-name" spellcheck="false" />
+            <button type="submit" class="btn">Add</button>
+          </div>
+          <p class="hint">Choose a file to preview it here. Lowercase words joined by hyphens, plus a PNG, JPEG, WebP or SVG file under 3MB.</p>
+        </form>
+      </details>
+      <details class="add-toggle">
+        <summary>New encrypted content</summary>
+        <form id="newSecretForm" class="new-form" autocomplete="off" novalidate>
+          <div class="new-row">
+            <input id="newSecretId" type="text" inputmode="latin" placeholder="content-name" spellcheck="false" />
+            <button type="submit" class="btn">Add</button>
+          </div>
+          <p class="hint">Lowercase words joined by hyphens. Write the content and its recipients on the next page, then encrypt it there &mdash; nothing here holds plaintext.</p>
+        </form>
+      </details>
+    </div>
     <details id="mesh" class="add-toggle mesh">
       <summary>Mesh</summary>
       <p id="meshState" class="hint">Checking the publish host&hellip;</p>
@@ -176,6 +201,12 @@
       <button data-v="design" aria-pressed="true" title="Design the current page"><svg class="ic"><use href="#i-design"/></svg>Design</button>
       <button data-v="map" aria-pressed="false" title="See every page and how they link"><svg class="ic"><use href="#i-sitemap"/></svg>Sitemap</button>
     </div>
+    <!-- Step 4 (flickering-juggling-donut.md): site-wide, no selection involved, so it is not
+         part of the new per-element floating toolbar -- a small popover reachable from a
+         header button, reusing openPop()'s own positioning rather than a third system. Also
+         the landing spot for js/main.js's unconditional "Edit canvas" context-menu entry
+         (previously enterRestrictMode('canvas')), now that restrictMode is retired. -->
+    <button class="btn quiet" id="btnCanvasTransitions" type="button" title="Background transition between pages (site-wide, applies to every page)"><svg class="ic"><use href="#i-sparkle"/></svg>Background</button>
     <div class="spacer"></div>
     <span class="bp-note" id="bpNote" hidden></span>
     <div class="seg" id="devices" role="group" aria-label="Preview size">
@@ -191,7 +222,7 @@
       <button data-m="live" aria-pressed="false" title="Use the site like a visitor"><svg class="ic"><use href="#i-play"/></svg>Live</button>
     </div>
     <button class="btn icon quiet" id="btnMore" aria-haspopup="dialog" title="More" aria-label="More"><svg class="ic"><use href="#i-more"/></svg></button>
-    <button class="btn" id="btnCmsSave" title="Write changed manifests, articles, and SEO through the DEFXN CMS"><svg class="ic"><use href="#i-check"/></svg>Save DEFXN</button>
+    <button class="btn" id="btnCmsSave" title="Save every unsaved change, in both modes (Ctrl/Cmd+S)"><svg class="ic"><use href="#i-check"/></svg>Save DEFXN</button>
   </header>
 
   <div class="work">
@@ -201,6 +232,11 @@
         <button role="tab" id="tabPages" aria-selected="false"><svg class="ic"><use href="#i-page"/></svg>Pages</button>
         <button role="tab" id="tabLib" aria-selected="false"><svg class="ic"><use href="#i-comp"/></svg>Library</button>
       </div>
+      <!-- Step 4: "Groups on this page" is a page-level browse/jump list, not property
+           editing for a current selection -- it stays anchored here (the persistent Layers
+           tab), not inside the new selection-anchored floating toolbar, which only exists
+           when something is selected. -->
+      <div id="groupsBrowse" class="groups-browse" hidden></div>
       <ul class="list" id="layers" role="tree" aria-label="Page layers"></ul>
       <div id="libPane" hidden></div>
       <div id="pagesPane" hidden>
@@ -211,36 +247,36 @@
     <main class="canvas-wrap" id="canvasWrap">
       <div id="designView">
         <div class="devlabel"><span id="devName">Desktop · 1280 px</span><span id="devScale"></span></div>
-        <div class="compbar" id="compBar" hidden><svg class="ic"><use href="#i-comp"/></svg><span id="compBarText"></span><span class="spacer"></span><button class="btn small" id="compDone">Done</button></div>
-        <div class="compbar" id="restrictBar" hidden><svg class="ic"><use href="#i-comp"/></svg><span id="restrictBarText"></span><span class="spacer"></span><button class="btn small" id="restrictSwitch"></button><button class="btn small" id="restrictDone">Done</button></div>
         <div class="stage" id="stage">
-          <div class="frame" id="studioFrameBox"></div>
           <iframe class="cms-preview" id="cmsPreview" title="Exact DEFXN site preview"></iframe>
-          <div class="ov-pad" id="padT" hidden></div><div class="ov-pad" id="padR" hidden></div><div class="ov-pad" id="padB" hidden></div><div class="ov-pad" id="padL" hidden></div>
-          <div class="ov-box hover" id="hoverBox" hidden></div>
-          <div class="ov-box" id="selBox" hidden></div>
-          <div class="ov-tag" id="selTag" hidden>
-            <button id="tagGrip" class="grip" title="Drag to move" aria-label="Drag to move"><svg class="ic sm"><use href="#i-move"/></svg></button>
-            <span id="selName">Section</span>
-            <button id="tagUp" title="Move up (Alt+↑)" aria-label="Move up"><svg class="ic sm"><use href="#i-up"/></svg></button>
-            <button id="tagDown" title="Move down (Alt+↓)" aria-label="Move down"><svg class="ic sm"><use href="#i-down"/></svg></button>
-            <button id="tagParent" title="Select parent (Esc)" aria-label="Select parent"><svg class="ic sm"><use href="#i-parent"/></svg></button>
-            <button id="tagDup" title="Duplicate (Ctrl+D)" aria-label="Duplicate"><svg class="ic sm"><use href="#i-copy"/></svg></button>
-            <button id="tagDel" title="Delete (Del)" aria-label="Delete"><svg class="ic sm"><use href="#i-trash"/></svg></button>
-          </div>
+          <!-- Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar
+               that replaces the fixed #paneEl accordions -- a compact bar of section icons
+               (renderSelToolbar in admin.js). Positioned by placeSelToolbar(), reusing
+               rectOf()/the #selTag above/below-flip math -- see that function's own comment
+               for how a cross-document iframe selection rect is converted into this same
+               stage-local coordinate space. -->
+          <div class="ov-toolbar" id="selToolbar" role="toolbar" aria-label="Selection" hidden></div>
         </div>
       </div>
       <div class="sitemap" id="mapView" hidden></div>
+      <!-- the open toolbar section's controls: one popover, anchored to its bar button by
+           placeToolbarPop() (admin.js). Outside #stage on purpose: #stage is zoomed with a CSS
+           transform, which would shrink a popover inside it and trap position: fixed. -->
+      <div class="tb-pop" id="selToolbarPop" role="dialog" hidden></div>
     </main>
 
+    <!-- Step 4 (flickering-juggling-donut.md): the Element tab/#paneEl (the fixed
+         property-editing accordions -- Frame/Layout/Spacing/Typography/Fill/Size/Effects,
+         plus Groups/Component instance/States) is deleted outright; the new contextual
+         #selToolbar (above, floating over the canvas) is the only property-editing UI now.
+         Theme and SEO stay here -- neither is a per-element-selection concept, so neither
+         fits a floating-near-selection model; Theme is now the default-selected tab. -->
     <aside class="right" aria-label="Inspector">
       <div class="tabs" role="tablist">
-        <button role="tab" id="tabEl" aria-selected="true"><svg class="ic"><use href="#i-cursor"/></svg>Element</button>
-        <button role="tab" id="tabTheme" aria-selected="false"><svg class="ic"><use href="#i-palette"/></svg>Theme</button>
+        <button role="tab" id="tabTheme" aria-selected="true"><svg class="ic"><use href="#i-palette"/></svg>Theme</button>
         <button role="tab" id="tabSeo" aria-selected="false" title="Search engines and AI assistants"><svg class="ic"><use href="#i-search"/></svg>SEO</button>
       </div>
-      <div id="paneEl"></div>
-      <div id="paneTheme" hidden></div>
+      <div id="paneTheme"></div>
       <div id="paneSeo" hidden></div>
     </aside>
   </div>
@@ -250,6 +286,10 @@
 
 <div class="toast" id="toast" hidden role="status"></div>
 </div>
+
+<!-- Docked over the right side so the preview canvas stays visible while a version is previewed.
+     Its content is built by js/admin/versions-panel.js. -->
+<aside id="versionsPanel" class="versions-panel" aria-label="Versions" hidden></aside>
 
 <!-- The site's own manifest loader, so the admin edits exactly the files the site reads. -->
 <script src="js/content/manifest.js" defer></script>
@@ -283,6 +323,10 @@
 <script src="js/content/seo.js" defer></script>
 <script src="js/content/seo-data.js" defer></script>
 <script src="js/pages/catalog.js" defer></script>
+<!-- The approved reference docs a 'doc:' link may point at (linkPickerEl's "Reference doc" list).
+     Without it that list was empty, so an article's required evidence link could never be set
+     and a new article could never be saved (regression: tests/admin-reference-docs-loaded.cjs). -->
+<script src="js/ark/reference-docs.js" defer></script>
 <script src="js/admin/store.js" defer></script>
 <script src="js/admin/primitives.js" defer></script>
 <script src="js/admin/vendor/tweetnacl.js" defer></script>
@@ -290,6 +334,11 @@
 <script src="js/admin/publish.js" defer></script>
 <script src="js/admin/authorization-view.js" defer></script>
 <script src="js/admin/vendor/flux-elements.js" defer></script>
+<!-- ARK's structured-state FLX grammar, vendored byte-identical from
+     flux/ark-browser/src/shared/flx-state-grammar.js (tests/versions.cjs fails on drift). -->
+<script src="js/admin/vendor/flx-state-grammar.js" defer></script>
+<script src="js/admin/versions.js" defer></script>
+<script src="js/admin/versions-panel.js" defer></script>
 <script src="js/admin/admin.js" defer></script>
 </body>
 </html>

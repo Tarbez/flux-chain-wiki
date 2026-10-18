@@ -11,9 +11,9 @@ var ArkLayout = (function () {
 
   /* Real design tokens the live DEFXN site defines (css/themes.css's :root block) -- the
      visual-style controls bind to these instead of inventing a parallel palette or type
-     scale. Mirrored, not imported, in admin-studio.html: that file is a deliberately
-     dependency-free single document with no <script src>, so these small literal lists are
-     kept in sync by hand rather than shared by a module import. */
+     scale. This is the ONE copy: js/admin/admin.js reads them as ArkLayout.TEXT_TOKENS etc.
+     (it used to hand-mirror them as CMS_*_TOKENS, a holdover from the deleted admin-studio.html
+     document that could not load scripts; tests/admin-token-source.cjs keeps it from coming back). */
   var TEXT_TOKENS = ['text-strong', 'text', 'text-muted', 'text-faint', 'text-inverse'];
   var FILL_TOKENS = ['canvas', 'surface', 'raised', 'nested', 'overlay', 'primary', 'complement', 'accent', 'trust', 'live', 'warning', 'danger', 'hidden', 'reference'];
   var BORDER_TOKENS = ['border-subtle', 'border-default', 'border-strong'];
@@ -33,6 +33,22 @@ var ArkLayout = (function () {
   var ALIGN_ITEMS_CSS = { stretch: 'stretch', start: 'flex-start', center: 'center', end: 'flex-end' };
   var JUSTIFY_TOKENS = ['start', 'center', 'end', 'between'];
   var JUSTIFY_CSS = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between' };
+  /* Alt text: generous enough for a real description, short enough that it stays alt text. */
+  var ALT_MAX = 400;
+  /* Which attribute carries an element's text alternative: <img> has alt; the other media a
+     page draws (inline <svg>, <canvas>, <video>) take their accessible name from aria-label.
+     Anything else has no text alternative of its own to set. */
+  function altAttribute(element) {
+    var tag = element && element.tagName ? element.tagName.toLowerCase() : '';
+    return tag === 'img' ? 'alt' : (tag === 'svg' || tag === 'canvas' || tag === 'video') ? 'aria-label' : '';
+  }
+  /* Every attribute giving an element a text alternative can touch. Describing an <svg> or
+     <canvas> the page marked aria-hidden means it is no longer decorative, so it also gets
+     role="img" and loses aria-hidden -- a label on a hidden element is read by nobody. */
+  function altTouches(element) {
+    var attr = altAttribute(element);
+    return !attr ? [] : attr === 'alt' ? ['alt'] : element.tagName.toLowerCase() === 'video' ? ['aria-label', 'aria-hidden'] : ['aria-label', 'aria-hidden', 'role'];
+  }
 
   function finite(value, min, max) {
     value = Number(value);
@@ -107,6 +123,23 @@ var ArkLayout = (function () {
       });
       if (Object.keys(cleanLabels).length) out.labels[route] = cleanLabels;
     });
+    /* A plain image's alt text, keyed exactly like labels (route -> layout key). Plain
+       <img>s are page-module markup with no content record of their own -- the layout key
+       is the only stable identity they have, and it is the one every other per-element
+       edit is already stored under. Emitted only when something is set, so a layout with
+       no alt overrides serializes byte-for-byte as it did before this field existed. */
+    var alts = value && value.alts, cleanAlts = {};
+    if (alts && typeof alts === 'object') Object.keys(alts).slice(0, 500).forEach(function (route) {
+      if (route[0] !== '/' || route.length > 300 || !alts[route] || typeof alts[route] !== 'object') return;
+      var routeAlts = {};
+      Object.keys(alts[route]).slice(0, 3000).forEach(function (key) {
+        if (!key || key.length > 500 || typeof alts[route][key] !== 'string') return;
+        var text = alts[route][key].replace(/\s+/g, ' ').trim().slice(0, ALT_MAX);
+        if (text) routeAlts[key] = text;
+      });
+      if (Object.keys(routeAlts).length) cleanAlts[route] = routeAlts;
+    });
+    if (Object.keys(cleanAlts).length) out.alts = cleanAlts;
     return out;
   }
   function define(value) { current = sanitize(value); return get(); }
@@ -145,10 +178,39 @@ var ArkLayout = (function () {
     elements.forEach(function (element) { var key = keyFor(element, root); if (key) element.setAttribute('data-ark-layout-key', key); });
     return elements;
   }
-  function resetElement(element) { owned.forEach(function (name) { element.style[name] = ''; }); element.removeAttribute('data-ark-layout-applied'); }
+  /* ArkLayout undoes only what ArkLayout wrote. resetElement() used to blank every `owned`
+     property on EVERY annotated element under the host, on every apply() -- including inline
+     geometry the page runtime owns. The router's continuity host (js/ark/panel-continuity.js)
+     is sized by inline left/top/width/height and sits inside the same host, so one rAF after
+     each mount its width and height were wiped: /about, whose content is inset:0 inside that
+     host, rendered 0px wide at every viewport, and /download, /explore and /lifecycle (+ its
+     five stages) lost the host's height and collapsed to 250-320px, their panels overlapping
+     (measured 2026-10-18 at 1280x800; regression: tests/layout-reset-owns-only-its-
+     writes.cjs, tests/browser/route-sweep.mjs). Now each write pass records, per element, the
+     inline values it changed (before -> after); a reset puts back `before` only where the
+     value is still the one ArkLayout wrote, so a value someone else changed since is theirs. */
+  var written = typeof WeakMap === 'function' ? new WeakMap() : null;
+  function ownedValues(element) { var out = {}; owned.forEach(function (name) { out[name] = element.style[name] || ''; }); return out; }
+  function remember(element, before) {
+    if (!written) return;
+    var changed = {}, any = false;
+    owned.forEach(function (name) { var now = element.style[name] || ''; if (now !== before[name]) { changed[name] = { before: before[name], after: now }; any = true; } });
+    if (any) written.set(element, changed); else written.delete(element);
+  }
+  function resetElement(element) {
+    var changed = written && written.get(element);
+    if (changed) Object.keys(changed).forEach(function (name) { if ((element.style[name] || '') === changed[name].after) element.style[name] = changed[name].before; });
+    if (written) written.delete(element);
+    element.removeAttribute('data-ark-layout-applied');
+  }
   function applyFrame(element, frame) {
     resetElement(element);
+    var before = ownedValues(element);
     applyGroupDefault(element);
+    writeFrame(element, frame);
+    remember(element, before);
+  }
+  function writeFrame(element, frame) {
     if (!frame || !Object.keys(frame).length) return;
     element.style.translate = (frame.x || 0) + 'px ' + (frame.y || 0) + 'px';
     if (frame.width != null) { element.style.width = frame.width + 'px'; element.style.maxWidth = 'none'; element.style.minWidth = '0'; }
@@ -218,13 +280,80 @@ var ArkLayout = (function () {
   function applyGroupDefault(element) {
     if (!element.hasAttribute('data-ark-layout-group') || element.namespaceURI === 'http://www.w3.org/2000/svg') return;
     element.style.display = 'flex'; element.style.flexDirection = 'column'; element.style.minWidth = '0';
+    /* A group keeps its members laid out the way their parent laid them out. Grouping two links
+       of a header's flex ROW used to stack them in a column, 80px tall inside a 40px bar, so one
+       of them vanished from view (seen in tests/browser/full-audit.mjs's layout-group surface;
+       regression: tests/layout-group-follows-parent.cjs). Read from the parent's own computed
+       layout, not a list of tags. */
+    var parent = element.parentElement, view = element.ownerDocument && element.ownerDocument.defaultView;
+    if (!parent || !view || typeof view.getComputedStyle !== 'function') return;
+    var around = view.getComputedStyle(parent);
+    if (/flex$/.test(around.display) && /^row/.test(around.flexDirection || 'row')) {
+      element.style.flexDirection = 'row';
+      if (around.alignItems) element.style.alignItems = around.alignItems;
+      var gap = around.columnGap && around.columnGap !== 'normal' ? around.columnGap : around.gap;
+      if (gap && gap !== 'normal') element.style.gap = gap;
+    }
   }
   function apply(root, route, width, value) {
     var layout = sanitize(value || current), nodes = layout.routes[route] || {}, elements, byKey = {};
     unwrapGroups(root); buildGroups(root, route, layout); elements = annotate(root);
-    elements.forEach(function (element) { var key = element.getAttribute('data-ark-layout-key'); if (key && !byKey[key]) byKey[key] = element; resetElement(element); applyGroupDefault(element); });
+    elements.forEach(function (element) { var key = element.getAttribute('data-ark-layout-key'); if (key && !byKey[key]) byKey[key] = element; resetElement(element); var before = ownedValues(element); applyGroupDefault(element); remember(element, before); });
     Object.keys(nodes).forEach(function (key) { if (byKey[key]) applyFrame(byKey[key], merged(nodes[key], width)); });
+    applyAlts(root, route, layout, elements);
     return elements;
+  }
+  /* Sets each overridden element's alt (or aria-label, see altAttribute) and puts back the
+     markup's own value on any element whose override was removed -- the originals are kept on
+     the element itself (data-ark-alt-base, a JSON snapshot) the first time they are replaced,
+     so removing an override restores exactly what the page module wrote. Cheap and layout-
+     free, so js/main.js also runs it synchronously at mount: the server-rendered HTML
+     (api/lib/render-core.mjs serializes at ark:route-ready, before ArkLayout.apply()'s
+     requestAnimationFrame pass) then carries the alt text too. */
+  function altBase(element) {
+    try { return JSON.parse(element.getAttribute('data-ark-alt-base')); } catch (error) { return null; }
+  }
+  /* What the page module itself wrote for this element's text alternative (null: nothing),
+     whether or not an override is applied right now. */
+  function altOwn(element) {
+    var attr = altAttribute(element), base = element.hasAttribute('data-ark-alt-base') ? altBase(element) : null;
+    if (!attr) return null;
+    var hidden = base ? base['aria-hidden'] : element.getAttribute('aria-hidden');
+    return { attr: attr, own: base ? (base[attr] == null ? null : base[attr]) : element.getAttribute(attr), decorative: hidden === 'true' };
+  }
+  function applyAlt(element, text) {
+    var touches = altTouches(element); if (!touches.length) return;
+    var attr = touches[0];
+    if (text) {
+      if (!element.hasAttribute('data-ark-alt-base')) {
+        var base = {}; touches.forEach(function (name) { base[name] = element.hasAttribute(name) ? element.getAttribute(name) : null; });
+        element.setAttribute('data-ark-alt-base', JSON.stringify(base));
+      }
+      element.setAttribute(attr, text);
+      if (attr === 'aria-label') { element.removeAttribute('aria-hidden'); if (touches.indexOf('role') >= 0) element.setAttribute('role', 'img'); }
+    } else if (element.hasAttribute('data-ark-alt-base')) {
+      var saved = altBase(element) || {};
+      touches.forEach(function (name) { if (saved[name] == null) element.removeAttribute(name); else element.setAttribute(name, saved[name]); });
+      element.removeAttribute('data-ark-alt-base');
+    }
+  }
+  function applyAlts(root, route, value, elements) {
+    if (!root || !root.querySelectorAll) return;
+    var layout = sanitize(value || current), routeAlts = (layout.alts && layout.alts[route]) || {};
+    (elements || annotate(root)).forEach(function (element) {
+      var key = element.getAttribute('data-ark-layout-key');
+      if (key && (routeAlts[key] || element.hasAttribute('data-ark-alt-base'))) applyAlt(element, routeAlts[key] || '');
+    });
+  }
+  function setAlt(value, route, key, text) {
+    var layout = sanitize(value), alts = layout.alts || (layout.alts = {}), routeAlts = alts[route] || (alts[route] = {});
+    var clean = String(text == null ? '' : text).replace(/\s+/g, ' ').trim().slice(0, ALT_MAX);
+    if (clean) routeAlts[key] = clean; else delete routeAlts[key];
+    return sanitize(layout);
+  }
+  function altFor(value, route, key) {
+    var layout = sanitize(value);
+    return (layout.alts && layout.alts[route] && layout.alts[route][key]) || '';
   }
   function set(value, route, key, bp, patch) {
     var layout = sanitize(value), nodes = layout.routes[route] || (layout.routes[route] = {}), entry = nodes[key] || (nodes[key] = {});
@@ -272,5 +401,7 @@ var ArkLayout = (function () {
     return sanitize(layout);
   }
   return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, apply: apply, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
-    TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS };
+    setAlt: setAlt, altFor: altFor, applyAlt: applyAlt, applyAlts: applyAlts, altAttribute: altAttribute, altOwn: altOwn, ALT_MAX: ALT_MAX,
+    TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS, RADIUS_CSS: RADIUS_CSS,
+    DISPLAY_TOKENS: DISPLAY_TOKENS, ALIGN_ITEMS_TOKENS: ALIGN_ITEMS_TOKENS, JUSTIFY_TOKENS: JUSTIFY_TOKENS, LINE_HEIGHT_TOKENS: LINE_HEIGHT_TOKENS };
 })();

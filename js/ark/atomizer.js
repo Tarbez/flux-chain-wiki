@@ -86,5 +86,40 @@ var ArkAtomizer = (function () {
     return cls;
   }
 
-  return { atomize: atomize, base: base };
+  /* class name -> the declaration block it stands for, or '' for a class this atomizer
+     never minted. The inverse of atomize(): js/content/components.js's capture() reads a
+     selection's atom classes back into declarations so a captured component can re-mint the
+     SAME classes on any page -- an atom's rule only exists once something on the current
+     page has atomized it, so a bare class name copied to another page would style nothing. */
+  function declaration(cls) { return atomIndex[cls] || ''; }
+
+  /* A PINNED atom: the styling a captured component's element took from where it was
+     captured (an ancestor-dependent rule such as `.how-chapter-header h1`), carried with the
+     component so it looks the same on any page (js/content/components.js, contextStyles).
+     Same hashing and the same sheet as atomize(), but the rule must outrank the page rules it
+     stands in for -- `#scene h1` (1,0,1) on the destination would otherwise beat a bare
+     `.k…` (0,1,0) -- so the selector carries id-level weight through :is(), whose
+     specificity is its most specific argument even though only the class matches:
+     `.kp…:is(.kp…,#ark-pin#ark-pin)` is (2,1,0). Inline styles (a Studio layout override
+     on the instance) still win, as they should. */
+  var pinIndex = Object.create(null);
+  function pin(styles) {
+    if (!styles) return '';
+    var decl = '', keys = Object.keys(styles);
+    for (var i = 0; i < keys.length; i++) {
+      var val = styles[keys[i]];
+      if (val === null || val === undefined || val === '') continue;
+      decl += (decl ? ';' : '') + kebab(keys[i]) + ':' + val;
+    }
+    if (!decl) return '';
+    var cls = 'kp' + hashStr(decl);
+    if (!pinIndex[cls]) {
+      pinIndex[cls] = decl;
+      atomSheet().appendChild(document.createTextNode('.' + cls + ':is(.' + cls + ',#ark-pin#ark-pin){' + decl + '}'));
+    }
+    return cls;
+  }
+  function pinDeclaration(cls) { return pinIndex[cls] || ''; }
+
+  return { atomize: atomize, base: base, declaration: declaration, pin: pin, pinDeclaration: pinDeclaration };
 })();

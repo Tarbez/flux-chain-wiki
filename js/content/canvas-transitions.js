@@ -24,12 +24,12 @@
    calls out: defaulting to invisible would be "built but defaulted to
    not existing," not what was asked for.
 
-   Edited from DEFXN Studio's canvas-only mode (restrictMode === 'canvas',
-   admin-studio.html) via a postMessage round trip into the connected
-   preview iframe, mirroring js/content/states.js's own command pipeline:
-   js/main.js holds the live draft and relays whole-draft replaces up to
-   admin-studio.html, which relays them on to js/admin/admin.js, which
-   persists via ArkAdminStore.saveCanvasTransitions -> this file's sibling
+   Edited from DEFXN Studio (now part of js/admin/admin.js; it was the
+   separate admin-studio.html, deleted 2026-10-18) via a postMessage round
+   trip into the connected preview iframe, mirroring js/content/states.js's
+   own command pipeline: js/main.js holds the live draft and relays
+   whole-draft replaces up to js/admin/admin.js (one hop; the old Studio-
+   document middle hop is gone), which persists via ArkAdminStore.saveCanvasTransitions -> this file's sibling
    canvas-transitions-data.js. Studio's "Preview this transition" button
    calls apply() directly against the connected iframe's persistent layer,
    with no real navigation, reusing this exact apply() function. */

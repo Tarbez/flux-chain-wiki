@@ -54,6 +54,40 @@ const REAL_KIT_TEXT = fs.readFileSync('/Volumes/PortableSSD/flux/flux-launchpad/
 const KIT_PIN = '13572468';
 const KIT_PASSWORD = 'launchpad-test';
 
+/* Every wait in this file polls for the state the next step depends on; none
+   sleeps a fixed time and then reads whatever is there.
+
+   Why (regression, diagnosed 2026-10-18): this file used fixed sleeps --
+   2500 ms after sign-in, 2000 ms after each approval -- and then read the
+   result line. It failed intermittently with "Adding…"/"Rotating…" (the
+   action simply had not finished) and once with "No such wallet on this
+   identity" on the FIRST revoke. That second one was not a product race: the
+   revoke test copied its address out of the add result with
+   `.replace('Added ', '')`, so a still-running add handed the literal string
+   "Adding…" to Revoke, and the library correctly refused an address it does
+   not hold. Measured on the owner's Apple M2 Mac mini (8 cores, 8 GB, ~8.7 GB
+   swap in use), load average 25-28, 3 full runs: sign-in 0.6-3.4 s, add
+   0.35-2.4 s, rotate 0.3-1.2 s, revoke 26-122 ms -- so 3 of 27 waits overran
+   their fixed sleep. Polling makes the test wait exactly as long as the work
+   takes, and the add result is asserted to BE an address before anything uses
+   it, so a slow add can never again masquerade as a wrong refusal. The
+   deadline only separates "slow" from "never finishes". */
+const SETTLE_DEADLINE_MS = 30000;
+async function until(read, what, timeoutMs = SETTLE_DEADLINE_MS) {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const value = read();
+    if (value) return value;
+    if (Date.now() > deadline) throw new Error(`timed out after ${timeoutMs} ms waiting for ${what}`);
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+}
+// A result line is settled once it is non-empty and not a progress message
+// ("Adding…", "Rotating…", "Revoking…", "Delegating…" all end in an ellipsis).
+function settledText(node, what) {
+  return until(() => { const text = node.textContent; return text && !/…$/.test(text) ? text : null; }, what);
+}
+
 function setInputValue(window, input, value) {
   const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
   nativeSetter.call(input, value);
@@ -112,7 +146,7 @@ function mountAccountPage() {
 // renders (js/ark/authorization-dialog.js's `h('button', ..., text:
 // 'Approve scopes & sign')`) -- the same button a real browser test
 // (this session's flux-launchpad verification) already clicked by name.
-async function approveAuthorizationDialog(dom, { timeoutMs = 3000 } = {}) {
+async function approveAuthorizationDialog(dom, { timeoutMs = SETTLE_DEADLINE_MS } = {}) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const dialog = dom.window.document.querySelector('flux-authorization-dialog');
@@ -130,7 +164,8 @@ async function selectKitFile(dom, container, text, filename = 'real.flx') {
   const file = new dom.window.File([text], filename, { type: 'application/vnd.flux.auth-kit' });
   Object.defineProperty(fileInput, 'files', { value: [file], configurable: true });
   fileInput.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  // the kit is parsed asynchronously; its unlock form appears once it has been
+  await until(() => container.querySelector('[data-ark-auth="field-pin"]'), 'the Auth Kit unlock form after choosing the kit file');
 }
 
 async function signIn(dom, page) {
@@ -139,7 +174,9 @@ async function signIn(dom, page) {
   setInputValue(dom.window, authContainer.querySelector('[data-ark-auth="field-pin"]'), KIT_PIN);
   setInputValue(dom.window, authContainer.querySelector('[data-ark-auth="field-password"]'), KIT_PASSWORD);
   authContainer.querySelector('[data-ark-auth="form"]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
-  await new Promise((resolve) => setTimeout(resolve, 2500));
+  // account.js's renderIdentity() marks the page 'verified-local' once the
+  // identity is signed in AND unlocked -- the state the Keys tab requires.
+  await until(() => page.dataset.session === 'verified-local', 'the account page to reach the signed-in, unlocked state');
 }
 
 test('the real "Keys" tab becomes available after a real sign-in, and lists the real wallet already on the kit', async () => {
@@ -170,9 +207,8 @@ test('clicking the real "Add wallet" button genuinely mints a new wallet and the
   panel.querySelector('[data-account-keys-add-form]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   const approved = await approveAuthorizationDialog(dom);
   assert.ok(approved, 'the real Scoped Claim Authorization dialog must appear before a wallet is minted -- every signing surface shows it, this one is no exception');
-  await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const result = panel.querySelector('[data-account-keys-add-result]').textContent;
+  const result = await settledText(panel.querySelector('[data-account-keys-add-result]'), 'the add-wallet result');
   assert.match(result, /^Added /, `the real add-wallet result must show success, got: ${result}`);
   const newAddress = result.replace('Added ', '').trim();
   assert.notEqual(newAddress, 'd43kkms26scspdyq92r3fhgmf1kefxra7xcr5vqa62qghh7fdqsmcdczwnm0', 'the new wallet must be a genuinely different address from the one already on the kit');
@@ -200,9 +236,8 @@ test('clicking the real "Rotate" button genuinely supersedes the wallet with a n
   setInputValue(dom.window, panel.querySelector('[data-account-keys-rotate-label]'), 'DOM Rotated');
   panel.querySelector('[data-account-keys-rotate]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before a wallet is rotated');
-  await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const result = panel.querySelector('[data-account-keys-action-result]').textContent;
+  const result = await settledText(panel.querySelector('[data-account-keys-action-result]'), 'the rotate result');
   assert.match(result, /^Rotated /, `the real rotate result must show success, got: ${result}`);
   const newAddress = result.split('→')[1].trim();
   assert.notEqual(newAddress, DEFAULT_ADDRESS);
@@ -234,16 +269,20 @@ test('clicking the real "Revoke" button genuinely retires a wallet, recorded in 
   setInputValue(dom.window, panel.querySelector('[data-account-keys-password]'), KIT_PASSWORD);
   panel.querySelector('[data-account-keys-add-form]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the setup add-wallet action must also show the real dialog');
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  const addedAddress = panel.querySelector('[data-account-keys-add-result]').textContent.replace('Added ', '').trim();
+  const addResult = await settledText(panel.querySelector('[data-account-keys-add-result]'), 'the setup add-wallet result');
+  // Asserted BEFORE the address is used: an unfinished add once fed "Adding…"
+  // to Revoke here and surfaced as a misleading "No such wallet" (see top of file).
+  assert.match(addResult, /^Added \S+$/, `the setup add must have produced a real address before Revoke uses it, got: ${addResult}`);
+  const addedAddress = addResult.replace('Added ', '').trim();
 
+  const actionResult = panel.querySelector('[data-account-keys-action-result]');
   setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), addedAddress);
   panel.querySelector('[data-account-keys-revoke]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before a wallet is revoked');
-  await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  const result = panel.querySelector('[data-account-keys-action-result]').textContent;
+  const result = await settledText(actionResult, 'the revoke result');
   assert.match(result, new RegExp('^Revoked ' + addedAddress), `the real revoke result must show success, got: ${result}`);
+  actionResult.textContent = ''; // so the second attempt's own outcome is what gets read, not this one
 
   // Re-revoking the same (now-dead) address is refused by the real
   // library -- clicking Revoke again must surface that failure, not
@@ -251,8 +290,7 @@ test('clicking the real "Revoke" button genuinely retires a wallet, recorded in 
   // gates the library call, which is the thing that then refuses it).
   panel.querySelector('[data-account-keys-revoke]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the dialog must appear again for the second revoke attempt too');
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  assert.match(panel.querySelector('[data-account-keys-action-result]').textContent, /No such wallet on this identity/, 're-revoking an already-revoked wallet through the real UI must surface the real refusal, not silently succeed');
+  assert.match(await settledText(actionResult, 'the second revoke result'), /No such wallet on this identity/, 're-revoking an already-revoked wallet through the real UI must surface the real refusal, not silently succeed');
 });
 
 test('clicking the real "Delegate to identity" then "Revoke delegation" buttons genuinely create and revoke a real signed grant', async () => {
@@ -264,9 +302,9 @@ test('clicking the real "Delegate to identity" then "Revoke delegation" buttons 
   setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), DEFAULT_ADDRESS);
   panel.querySelector('[data-account-keys-delegate]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before delegating a wallet');
-  await new Promise((resolve) => setTimeout(resolve, 1500));
 
-  let result = panel.querySelector('[data-account-keys-action-result]').textContent;
+  const actionResult = panel.querySelector('[data-account-keys-action-result]');
+  let result = await settledText(actionResult, 'the delegate result');
   assert.match(result, /^Delegated receive\+spend to this identity$/, `the real delegate result must show success, got: ${result}`);
 
   // The real, signed delegation now appears in the live list via
@@ -276,10 +314,10 @@ test('clicking the real "Delegate to identity" then "Revoke delegation" buttons 
   const delegatedLine = [...list.querySelectorAll('li')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
   assert.match(delegatedLine.textContent, /delegated to identity/);
 
+  actionResult.textContent = ''; // read the revoke's own outcome, not the delegate line above
   panel.querySelector('[data-account-keys-revoke-delegation]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the real dialog must appear before revoking the delegation too');
-  await new Promise((resolve) => setTimeout(resolve, 100));
-  result = panel.querySelector('[data-account-keys-action-result]').textContent;
+  result = await settledText(actionResult, 'the revoke-delegation result');
   assert.match(result, new RegExp('^Revoked the delegation for ' + DEFAULT_ADDRESS));
 
   list = panel.querySelector('[data-account-keys-list]');
