@@ -110,9 +110,17 @@ const SHAPE = {
   H: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
   // J: digits (position).
   J: (p) => /^\d+$/.test(p),
-  // C: SHA-256-shaped content address. The genesis predecessor is the
-  // all-zero 64-char sentinel, so it follows the same shape.
-  C: (p) => p.length === 64 && isLowerHex(p),
+  // C: content address -- USUALLY a 64-char sha256 CID (the genesis
+  // predecessor is the all-zero 64-char sentinel, so it follows the same
+  // shape), but flux-core's own `content()` resolver (roles.rs) is
+  // `opaque` -- no length constraint beyond being a well-formed block --
+  // because a handful of real records (`domain_record_update`'s own
+  // C[2], hex-of-utf8 content, not a CID) put free-form hex content in a
+  // C block instead of W. Found porting `domainRecordUpdate` to JS: a
+  // strict `length === 64` here rejected that real, already-shipping
+  // Rust record shape. Even-length lowercase hex, non-empty -- same
+  // shape W/H already use, since a 64-hex CID trivially satisfies it too.
+  C: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
   // S: 128-char lowercase hex (ed25519 sig hex).
   S: (p) => p.length === 128 && isLowerHex(p),
   // K: alphanumeric kind marker (KRSTR1, KEARN1S, ...).

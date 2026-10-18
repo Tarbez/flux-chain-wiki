@@ -17,6 +17,8 @@ export const DOMAIN_KIND_BUY = "KDOMBUY1";
 export const RECORD_GENESIS_PREV = "0".repeat(64);
 export const RESOLVER_KIND_LAUNCH = "KRESOLV1";
 export const RESOLVER_KIND_UPGRADE = "KRESOLVUP1";
+export const CAPABILITY_KIND_LAUNCH = "KCAP1";
+export const CAPABILITY_KIND_UPGRADE = "KCAPUP1";
 export const PROVIDER_KIND_ANNOUNCE = "KPRV1";
 export const ACL_KIND_EVIDENCE = "KACLEV1";
 export const GENESIS_PREV = "0".repeat(64);
@@ -467,8 +469,14 @@ export async function buildDomainPurchase({
  *  is a real 64-lowercase-hex ed25519 pubkey if this resolver should
  *  ever be upgradable, or `GENESIS_PREV` if it should be immutable
  *  forever — see `docs/design/global-resolvers.md`. */
-export async function buildResolverLaunch({
-  privateKey,
+/** The unsigned `KRESOLV1` body only — for showing a holder exactly what
+ *  they are about to sign BEFORE they approve (the same "preview, then
+ *  sign separately" split `genesis-authorization.js`'s own
+ *  `previewMintBody` already uses), without duplicating this template a
+ *  third time. Never sign a different body than what was previewed —
+ *  both `buildResolverLaunch`/`buildResolverLaunchWithSigner` call this
+ *  exact function. */
+export function resolverLaunchBody({
   pubHex,
   pos,
   prevCid,
@@ -504,11 +512,30 @@ export async function buildResolverLaunch({
   }
   const h = hexOfUtf8(pubHex);
   const w = hexOfUtf8(newChainId);
-  const body =
+  return (
     `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-N${carrierChainId}-K${RESOLVER_KIND_LAUNCH}` +
     `-W${w}-J${pos}-C${prevCid}-C${providerSetCid}-C${speedParamsCid}` +
-    `-C${offerManifestCid}-C${grammarManifestCid}-C${controlKeyHex}`;
+    `-C${offerManifestCid}-C${grammarManifestCid}-C${controlKeyHex}`
+  );
+}
+
+export async function buildResolverLaunch({ privateKey, ...rest }) {
+  const body = resolverLaunchBody(rest);
   const sig = await signHex(privateKey, body);
+  return `${body}-S${sig}`;
+}
+
+/** Same record, same byte-for-byte body (`resolverLaunchBody` is shared,
+ *  never duplicated) — for a caller holding an Auth-Kit-shaped signer
+ *  (`{pubHex, signText}`, see `flx-identity-bridge.mjs`) instead of a
+ *  WebCrypto `CryptoKey`. `buildResolverLaunch` above stays untouched
+ *  and CryptoKey-only on purpose: a real production caller
+ *  (`flux-access-resolver/src/dense-wire-client.mjs`) already depends on
+ *  that exact signature. `pubHex` comes from `signer.pubHex`, matching
+ *  `flx-dao-builders.mjs`'s own convention for signer-shaped builders. */
+export async function buildResolverLaunchWithSigner({ signer, ...rest }) {
+  const body = resolverLaunchBody({ pubHex: signer.pubHex, ...rest });
+  const sig = await signer.signText(body);
   return `${body}-S${sig}`;
 }
 
@@ -532,8 +559,9 @@ export async function buildResolverLaunch({
  *  (pre-upgrade) authority is a DAO quorum, and omitted otherwise — a
  *  `SingleKey`-controlled resolver's own signature on this record is
  *  already its proof. */
-export async function buildResolverUpgrade({
-  privateKey,
+/** The unsigned `KRESOLVUP1` body only — see `resolverLaunchBody`'s own
+ *  doc comment for why this is exported (preview before sign). */
+export function resolverUpgradeBody({
   pubHex,
   pos,
   prevCid,
@@ -560,7 +588,179 @@ export async function buildResolverUpgrade({
   if (quorumVotesBlobCid) {
     body += `-C${quorumVotesBlobCid}`;
   }
+  return body;
+}
+
+export async function buildResolverUpgrade({ privateKey, ...rest }) {
+  const body = resolverUpgradeBody(rest);
   const sig = await signHex(privateKey, body);
+  return `${body}-S${sig}`;
+}
+
+/** Same record, same byte-for-byte body — the Auth-Kit-signer sibling of
+ *  `buildResolverUpgrade`, see `buildResolverLaunchWithSigner`'s own doc
+ *  comment for the full reasoning (shared body builder, untouched
+ *  CryptoKey-only original, `signer.pubHex`/`signer.signText`). */
+export async function buildResolverUpgradeWithSigner({ signer, ...rest }) {
+  const body = resolverUpgradeBody({ pubHex: signer.pubHex, ...rest });
+  const sig = await signer.signText(body);
+  return `${body}-S${sig}`;
+}
+
+/** The one capability-id rule — `[a-z0-9]{3,32}`, the same shape as a
+ *  chain-id (architecture.md §3: a capability is addressed by a short
+ *  lowercase name carried hex-of-UTF-8 in `W`, exactly like a resolver's
+ *  chain-id is). Validated here so a bad id is a local refusal with a
+ *  remedy, not a server-side grammar error that looks like a bad signature. */
+export function isCapabilityIdShape(value) {
+  return typeof value === "string" && /^[a-z0-9]{3,32}$/.test(value);
+}
+
+/** A capability's control field: a real 64-lowercase-hex ed25519 pubkey
+ *  (that key alone may upgrade) or the `GENESIS_PREV` sentinel (immutable
+ *  forever). Same rule the Rust `capability_registry` applies on admission. */
+function isCapabilityControlField(value) {
+  return value === GENESIS_PREV || (typeof value === "string" && /^[0-9a-f]{64}$/.test(value));
+}
+
+/** The unsigned `KCAP1` body only (architecture batch 1, B3 — capability
+ *  registry on chain). Mirrors the Rust `chain::capability_launch` byte
+ *  for byte; pinned on both sides by
+ *  `chain::tests::capability_launch_and_upgrade_bodies_are_pinned_for_js_parity`
+ *  and `web/test/builders.test.mjs`. Exported unsigned for the same
+ *  reason `resolverLaunchBody` is: the body a holder reviews and the body
+ *  they sign are ONE function call, never two templates.
+ *
+ *  `manifestCid` names an already-published blob (`BLOB_PUT`) holding a
+ *  `flx-capability-manifest/1` document (`schemas/flux.capability-
+ *  manifest.v1.schema.json`), derived — never hand-written — by
+ *  `scripts/derive-capability-manifest.mjs`. `controlField` is a
+ *  64-lowercase-hex key or `GENESIS_PREV` (immutable). */
+export function capabilityLaunchBody({
+  pubHex,
+  pos,
+  prevCid,
+  carrierChainId,
+  capabilityId,
+  manifestCid,
+  controlField,
+  nowSec,
+}) {
+  if (!isChainIdShape(carrierChainId)) {
+    throw new Error(
+      `That carrier chain-id is not addressable. ` +
+        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(carrierChainId)}). ` +
+        `To fix: pass the chain-id that actually carries this capability launch.`,
+    );
+  }
+  if (!isCapabilityIdShape(capabilityId)) {
+    throw new Error(
+      `That capability id is not addressable. ` +
+        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(capabilityId)}). ` +
+        `To fix: choose a capability id matching [a-z0-9]{3,32}, e.g. "multisig".`,
+    );
+  }
+  if (!/^[0-9a-f]{64}$/.test(manifestCid ?? "")) {
+    throw new Error(
+      `That capability manifest CID is not addressable. ` +
+        `Missing: 64 lowercase hex chars (got ${JSON.stringify(manifestCid)}). ` +
+        `To fix: BLOB_PUT the flx-capability-manifest/1 document first and pass the CID the node returned.`,
+    );
+  }
+  if (!isCapabilityControlField(controlField)) {
+    throw new Error(
+      `That capability control field is not addressable. ` +
+        `Missing: a 64-char lowercase hex ed25519 pubkey, or GENESIS_PREV for immutable (got ${JSON.stringify(controlField)}). ` +
+        `To fix: pass the controller's public key as hex, or GENESIS_PREV to lock the capability forever.`,
+    );
+  }
+  const h = hexOfUtf8(pubHex);
+  const w = hexOfUtf8(capabilityId);
+  return (
+    `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-N${carrierChainId}-K${CAPABILITY_KIND_LAUNCH}` +
+    `-W${w}-J${pos}-C${prevCid}-C${manifestCid}-C${controlField}`
+  );
+}
+
+/** Same record, same byte-for-byte body (`capabilityLaunchBody` is
+ *  shared, never duplicated) — for an Auth-Kit-shaped signer
+ *  (`{pubHex, signText}`, see `flx-identity-bridge.mjs`), the only signer
+ *  shape the browser panel holds. `pubHex` comes from `signer.pubHex`,
+ *  matching `buildResolverLaunchWithSigner`'s own convention. */
+export async function buildCapabilityLaunchWithSigner({ signer, ...rest }) {
+  const body = capabilityLaunchBody({ pubHex: signer.pubHex, ...rest });
+  const sig = await signer.signText(body);
+  return `${body}-S${sig}`;
+}
+
+/** The unsigned `KCAPUP1` body only — mirrors the Rust
+ *  `chain::capability_upgrade` byte for byte (same parity pin as
+ *  `capabilityLaunchBody`). `pubHex` must be the capability's CURRENT
+ *  control key (checked server-side by `CapabilityRegistry::
+ *  consider_upgrade`, never here); `supersedesCid` must name its current
+ *  declaration head exactly (the launch's own CID the first time, the
+ *  previous upgrade's CID thereafter — read it from `CAPABILITY_LIST`);
+ *  `newControlField` restates control going forward: a key, or
+ *  `GENESIS_PREV` to lock the capability immutable forever. */
+export function capabilityUpgradeBody({
+  pubHex,
+  pos,
+  prevCid,
+  carrierChainId,
+  capabilityId,
+  newManifestCid,
+  supersedesCid,
+  newControlField,
+  nowSec,
+}) {
+  if (!isChainIdShape(carrierChainId)) {
+    throw new Error(
+      `That carrier chain-id is not addressable. ` +
+        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(carrierChainId)}). ` +
+        `To fix: pass the chain-id that actually carries this capability upgrade.`,
+    );
+  }
+  if (!isCapabilityIdShape(capabilityId)) {
+    throw new Error(
+      `That capability id is not addressable. ` +
+        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(capabilityId)}). ` +
+        `To fix: pass the id of the capability being upgraded, exactly as CAPABILITY_LIST reports it.`,
+    );
+  }
+  if (!/^[0-9a-f]{64}$/.test(newManifestCid ?? "")) {
+    throw new Error(
+      `That new capability manifest CID is not addressable. ` +
+        `Missing: 64 lowercase hex chars (got ${JSON.stringify(newManifestCid)}). ` +
+        `To fix: BLOB_PUT the new flx-capability-manifest/1 document first and pass the CID the node returned.`,
+    );
+  }
+  if (!/^[0-9a-f]{64}$/.test(supersedesCid ?? "")) {
+    throw new Error(
+      `That supersedes CID is not addressable. ` +
+        `Missing: 64 lowercase hex chars (got ${JSON.stringify(supersedesCid)}). ` +
+        `To fix: read the capability's current declaration head from CAPABILITY_LIST and pass that CID.`,
+    );
+  }
+  if (!isCapabilityControlField(newControlField)) {
+    throw new Error(
+      `That new capability control field is not addressable. ` +
+        `Missing: a 64-char lowercase hex ed25519 pubkey, or GENESIS_PREV for immutable (got ${JSON.stringify(newControlField)}). ` +
+        `To fix: pass the next controller's public key as hex, or GENESIS_PREV to lock the capability forever.`,
+    );
+  }
+  const h = hexOfUtf8(pubHex);
+  const w = hexOfUtf8(capabilityId);
+  return (
+    `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-N${carrierChainId}-K${CAPABILITY_KIND_UPGRADE}` +
+    `-W${w}-J${pos}-C${prevCid}-C${newManifestCid}-C${supersedesCid}-C${newControlField}`
+  );
+}
+
+/** Auth-Kit-signer sibling of `capabilityUpgradeBody` — see
+ *  `buildCapabilityLaunchWithSigner`. */
+export async function buildCapabilityUpgradeWithSigner({ signer, ...rest }) {
+  const body = capabilityUpgradeBody({ pubHex: signer.pubHex, ...rest });
+  const sig = await signer.signText(body);
   return `${body}-S${sig}`;
 }
 

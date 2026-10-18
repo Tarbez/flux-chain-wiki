@@ -332,6 +332,71 @@ export class WireClient {
     return { kind: "list", daos };
   }
 
+  /** `RESOLVER_LIST<TAB>` — every resolver this node has activated, as one
+   *  WS frame (same "declared count + sentinel" discipline as `daoList`):
+   *    RESOLVER_LIST<TAB><count>\n
+   *    RESOLVER<TAB><chain_id><TAB><offer_manifest_cid><TAB><grammar_manifest_cid>
+   *      <TAB><control_key|-><TAB><declaration_head_cid><TAB><native|third-party>\n
+   *    ... (one per resolver) ...
+   *    RESOLVER_LIST_END
+   *  An empty list (count 0) is the honest answer when nothing has
+   *  launched here, not an error -- mirrors `chain_server.rs`'s own
+   *  `resolver_list_reply` doc comment. */
+  async resolverList() {
+    const reply = await this._send("RESOLVER_LIST\t");
+    const frames = reply.split("\n");
+    const head = (frames.shift() ?? "").split("\t");
+    if (head[0] !== "RESOLVER_LIST") return { kind: "error", raw: reply };
+    const declared = Number(head[1]);
+    const end = frames.lastIndexOf("RESOLVER_LIST_END");
+    if (end < 0) return { kind: "error", reason: "reply had no RESOLVER_LIST_END sentinel" };
+    const rows = frames.slice(0, end);
+    const resolvers = rows.map((line) => {
+      const [, chainId, offerManifestCid, grammarManifestCid, controlKey, declarationHeadCid, origin] = line.split("\t");
+      return {
+        chainId, offerManifestCid, grammarManifestCid,
+        controlKey: controlKey === "-" ? null : controlKey,
+        declarationHeadCid,
+        native: origin === "native",
+      };
+    });
+    if (!Number.isInteger(declared) || resolvers.length !== declared) {
+      return { kind: "error", reason: `declared ${head[1]} resolvers, received ${resolvers.length}` };
+    }
+    return { kind: "list", resolvers };
+  }
+
+  /** `CHAIN_PROVIDERS<TAB><chain-id>` — who is live for this chain-id
+   *  right now, and where to reach them (same sentinel discipline):
+   *    CHAIN_PROVIDERS<TAB><chain-id><TAB><count>\n
+   *    PROVIDER<TAB><signer-hex><TAB><reach-address><TAB><heartbeat-deadline>\n
+   *    ... (one per provider) ...
+   *    CHAIN_PROVIDERS_END
+   *  An empty list is the honest answer when nobody is currently
+   *  announcing for this chain-id, never an error -- it says nothing
+   *  about whether the chain-id itself is real (that is `resolverList`'s
+   *  job). `reachAddress` is whatever transport that resolver actually
+   *  listens on (a plain `host:port`, not necessarily a `ws://` URL this
+   *  browser could dial directly -- the caller checks before using it). */
+  async chainProviders(chainId) {
+    const reply = await this._send(`CHAIN_PROVIDERS\t${chainId}`);
+    const frames = reply.split("\n");
+    const head = (frames.shift() ?? "").split("\t");
+    if (head[0] !== "CHAIN_PROVIDERS") return { kind: "error", raw: reply };
+    const declared = Number(head[2]);
+    const end = frames.lastIndexOf("CHAIN_PROVIDERS_END");
+    if (end < 0) return { kind: "error", reason: "reply had no CHAIN_PROVIDERS_END sentinel" };
+    const rows = frames.slice(0, end);
+    const providers = rows.map((line) => {
+      const [, signerHex, reachAddress, heartbeatDeadline] = line.split("\t");
+      return { signerHex, reachAddress, heartbeatDeadline: Number(heartbeatDeadline) };
+    });
+    if (!Number.isInteger(declared) || providers.length !== declared) {
+      return { kind: "error", reason: `declared ${head[2]} providers, received ${providers.length}` };
+    }
+    return { kind: "providers", chainId: head[1], providers };
+  }
+
   /** `DAO_PROPOSE<TAB><dao_id><TAB><signers csv><TAB><quorum_threshold><TAB><registered_at>`.
    *    -> DAO_OPEN<TAB><dao_id><TAB><signers_blob_cid><TAB><have>/<need>
    *    -> DAO_ERR<TAB><reason> */
@@ -576,6 +641,123 @@ export class WireClient {
     if (reply === "BLOB_MISS") return { kind: "miss" };
     if (reply.startsWith("BLOB_FOUND\t")) return { kind: "found", text: reply.slice("BLOB_FOUND\t".length) };
     return { kind: "error", raw: reply };
+  }
+
+  /** `RESOLVER_RECORD_GET<TAB><cid>` — fetch any `ResolverLaunch`/
+   *  `ResolverUpgrade`/`ResolverRecord` this node holds by its own CID
+   *  (the cross-resolver fetch primitive, Phase 1 of global resolvers).
+   *  A miss means this node holds nothing at that address, never a
+   *  refusal of the CID itself — same contract `blobGet` already has.
+   *  The caller recomputes the CID over `text` and verifies the
+   *  record's own signature itself; this method does neither.
+   *    -> RESOLVER_RECORD_FOUND<TAB><chain-id><TAB><text>
+   *    -> RESOLVER_RECORD_MISS */
+  async resolverRecordGet(cid) {
+    const reply = await this._send(`RESOLVER_RECORD_GET\t${cid}`);
+    if (reply === "RESOLVER_RECORD_MISS") return { kind: "miss" };
+    if (reply.startsWith("RESOLVER_RECORD_FOUND\t")) {
+      const rest = reply.slice("RESOLVER_RECORD_FOUND\t".length);
+      const tab = rest.indexOf("\t");
+      if (tab < 0) return { kind: "error", raw: reply };
+      return { kind: "found", chainId: rest.slice(0, tab), text: rest.slice(tab + 1) };
+    }
+    return { kind: "error", raw: reply };
+  }
+
+  /** `RESOLVER_RECORDS<TAB><chain-id>` — one resolver chain's whole
+   *  admitted history (its launch, every upgrade, every record), oldest
+   *  first. The explorer's drill-down from a `RESOLVER_LIST` row. Every
+   *  row is `{cid, text}`; the caller re-verifies each text against its
+   *  cid and signature itself, as with `resolverRecordGet`. A chain this
+   *  node holds nothing for is an empty list, never an error.
+   *    -> RESOLVER_RECORDS<TAB><chain-id><TAB><count>
+   *       RECORD<TAB><cid><TAB><text> (repeated)
+   *       RESOLVER_RECORDS_END */
+  async resolverRecords(chainId) {
+    const reply = await this._send(`RESOLVER_RECORDS\t${chainId}`);
+    const frames = reply.split("\n");
+    if (!frames[0]?.startsWith("RESOLVER_RECORDS\t")) return { kind: "error", raw: reply };
+    const declared = Number(frames[0].split("\t")[2]);
+    const rows = [];
+    for (const frame of frames.slice(1)) {
+      if (!frame.startsWith("RECORD\t")) continue;
+      const rest = frame.slice("RECORD\t".length);
+      const tab = rest.indexOf("\t");
+      if (tab < 0) continue;
+      rows.push({ cid: rest.slice(0, tab), text: rest.slice(tab + 1) });
+    }
+    if (rows.length !== declared) return { kind: "error", reason: `declared ${declared} records, got ${rows.length}` };
+    return { kind: "records", chainId, rows };
+  }
+
+  /** `CAPABILITY_LIST<TAB>` (architecture batch 1, B3 — capability
+   *  registry on chain) — every capability launched on this node's
+   *  registry ledger, same "declared count + END sentinel" discipline as
+   *  `resolverList`:
+   *    CAPABILITY_LIST<TAB><count>\n
+   *    CAPABILITY<TAB><id><TAB><manifest_cid><TAB><control_key|->
+   *      <TAB><declaration_head_cid><TAB><version><TAB><vector_count><TAB><source_hash>\n
+   *    ... (one per capability) ...
+   *    CAPABILITY_LIST_END
+   *  `-` for control means immutable (the `GENESIS_PREV` sentinel at
+   *  launch) and is reported as `controlKey: null`, exactly as
+   *  `resolverList` does. `version`/`vectorCount`/`sourceHash` are what
+   *  the node decoded from the manifest it admitted (`flx-capability-
+   *  manifest/1`); the caller fetches the manifest by `manifestCid` and
+   *  hash-verifies it itself before trusting any of them further. An
+   *  empty list is the honest answer when nothing has launched here. */
+  async capabilityList() {
+    const reply = await this._send("CAPABILITY_LIST\t");
+    const frames = reply.split("\n");
+    const head = (frames.shift() ?? "").split("\t");
+    if (head[0] !== "CAPABILITY_LIST") return { kind: "error", raw: reply };
+    const declared = Number(head[1]);
+    const end = frames.lastIndexOf("CAPABILITY_LIST_END");
+    if (end < 0) return { kind: "error", reason: "reply had no CAPABILITY_LIST_END sentinel" };
+    const rows = frames.slice(0, end);
+    const capabilities = rows.map((line) => {
+      const [, id, manifestCid, controlKey, declarationHeadCid, version, vectorCount, sourceHash] = line.split("\t");
+      return {
+        id,
+        manifestCid,
+        controlKey: controlKey === "-" ? null : controlKey,
+        declarationHeadCid,
+        version,
+        vectorCount: Number(vectorCount),
+        sourceHash,
+      };
+    });
+    if (!Number.isInteger(declared) || capabilities.length !== declared) {
+      return { kind: "error", reason: `declared ${head[1]} capabilities, received ${capabilities.length}` };
+    }
+    return { kind: "list", capabilities };
+  }
+
+  /** `CAPABILITY_RECORDS<TAB><id>` (B3) — one capability's whole
+   *  declaration history (its launch, every upgrade), oldest first; the
+   *  explorer's drill-down from a `CAPABILITY_LIST` row, same row shape
+   *  and same caller-verifies contract as `resolverRecords`. A capability
+   *  this node holds nothing for is an empty list, never an error.
+   *    -> CAPABILITY_RECORDS<TAB><id><TAB><count>
+   *       RECORD<TAB><cid><TAB><text> (repeated)
+   *       CAPABILITY_RECORDS_END */
+  async capabilityRecords(id) {
+    const reply = await this._send(`CAPABILITY_RECORDS\t${id}`);
+    const frames = reply.split("\n");
+    if (!frames[0]?.startsWith("CAPABILITY_RECORDS\t")) return { kind: "error", raw: reply };
+    const declared = Number(frames[0].split("\t")[2]);
+    const end = frames.lastIndexOf("CAPABILITY_RECORDS_END");
+    if (end < 0) return { kind: "error", reason: "reply had no CAPABILITY_RECORDS_END sentinel" };
+    const rows = [];
+    for (const frame of frames.slice(1, end)) {
+      if (!frame.startsWith("RECORD\t")) continue;
+      const rest = frame.slice("RECORD\t".length);
+      const tab = rest.indexOf("\t");
+      if (tab < 0) continue;
+      rows.push({ cid: rest.slice(0, tab), text: rest.slice(tab + 1) });
+    }
+    if (rows.length !== declared) return { kind: "error", reason: `declared ${declared} records, got ${rows.length}` };
+    return { kind: "records", id, rows };
   }
 
   /** `HEAD<TAB><holder pubkey hex>` — this node's view of one holder's
