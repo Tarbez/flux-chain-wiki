@@ -50,7 +50,11 @@ assert.equal(ArkSEO.sanitize({ site: { baseUrl: 'ftp://x', llms: '0' } }).site.b
 assert.equal(ArkSEO.sanitize({ site: { llms: '0' } }).site.llms, 1, 'only the number 0 turns llms.txt off');
 
 // 4. The admin builds SEO controls from the definitions and keeps no copy of its own.
-assert.ok(/function renderSeoPane\([^)]*\) \{[\s\S]*?ArkSEO\.OVERRIDE_FIELDS[\s\S]*?ArkSEO\.SITE_FIELDS/.test(admin), 'the Design-mode SEO tab builds its rows from ArkSEO.OVERRIDE_FIELDS and SITE_FIELDS');
+/* Design mode's SEO is two homes since the fixed right panel went (2026-10-18): this page's
+   override in the page picker's popover, the site-wide fields in Theme & defaults. */
+assert.ok(/function renderPageSeoPop\([^)]*\) \{[\s\S]*?ArkSEO\.OVERRIDE_FIELDS/.test(admin), "the canvas's page-SEO popover builds its rows from ArkSEO.OVERRIDE_FIELDS");
+assert.ok(/function buildSiteSeoPanel\([^)]*\) \{[\s\S]*?ArkSEO\.SITE_FIELDS\.filter\(\(f\) => f\.group === 'site'\)[\s\S]*?ArkSEO\.SITE_FIELDS\.filter\(\(f\) => f\.group === 'ai'\)/.test(admin), 'Theme & defaults builds the site and AI-crawler rows from ArkSEO.SITE_FIELDS, both groups');
+assert.ok(/function renderDesignEditor\(\) \{[\s\S]*?buildSiteSeoPanel\(\)/.test(admin), 'Theme & defaults shows the site-wide SEO section');
 assert.ok(/function buildPageSeoPanel\([^)]*\) \{[\s\S]*?ArkSEO\.OVERRIDE_FIELDS/.test(admin), 'the Content-mode page SEO tab builds its rows from ArkSEO.OVERRIDE_FIELDS');
 assert.ok(!/const AI_BOTS\s*=/.test(admin), 'admin.js keeps no second AI-crawler list; it reads ArkSEO.AI_BOTS');
 for (const f of ArkSEO.OVERRIDE_FIELDS.concat(ArkSEO.SITE_FIELDS)) {
@@ -72,8 +76,8 @@ function extract(source, signature) {
   const win = dom.window;
   win.eval(seoSource + ';window.ArkSEO = ArkSEO;');
   const kinds = /const SEO_TEXT_KINDS = \{[^}]*\};/.exec(admin)[0];
-  win.eval([extract(admin, 'function h(tag, props)'), extract(admin, 'function ctlField(ctx, label, key, opts)'), extract(admin, 'function ctlSegField(ctx, label, key, options, labels)'),
-    extract(admin, 'function ctlSelectField(ctx, label, key, options)'), kinds, extract(admin, 'function seoFieldRows(fields, target, onEdited)'),
+  win.eval([extract(admin, 'function h(tag, props)'), extract(admin, 'function ctlLabel(value)'), extract(admin, 'function ctlField(ctx, label, key, opts)'), extract(admin, 'function ctlSegField(ctx, label, key, options, labelOf)'),
+    extract(admin, 'function ctlSelectField(ctx, label, key, options, labelOf, opts)'), kinds, extract(admin, 'function seoFieldRows(fields, target, onEdited)'),
     extract(admin, 'function seoFieldsPanel(fields, target, onEdited)'), 'window.seoFieldsPanel = seoFieldsPanel;'].join('\n'));
   const doc = win.document;
   const edited = [];

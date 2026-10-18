@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'states,single,component,hide,motion,makecomp,points,statesui').split(',');
@@ -202,7 +202,7 @@ await flow('states', async () => {
     await app.locator('#mode button[data-m="edit"]').click(); await wait(300);
   });
   await step('Save (Ctrl+S) writes states-data.js and components-data.js', async () => {
-    await app.click('#connect');
+    await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
     await navLink(pv, 'Stats').click();       /* focus is now inside the preview, as it is after any canvas click */
     await saveViaShortcut(pv);
@@ -326,9 +326,9 @@ await flow('component', async () => {
     const heading = (await section(app, 'Component instance')).locator('input[aria-label="heading"]');
     await heading.fill('Saved override'); await heading.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Saved override')), 'override not shown');
-    await app.click('#connect');
+    await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
-    await app.click('#btnCmsSave');
+    await app.click('#save');
     await until(() => { try { return JSON.stringify(savedJson('components-data.js')).includes('Saved override'); } catch { return false; } }, 'Save did not write the override to components-data.js');
     await page.close();
     const again = await openEditor();
@@ -348,8 +348,8 @@ await flow('component', async () => {
     await again.pv.locator('[data-ark-component-key]').first().click();
     await (await section(again.app, 'Component instance')).locator('button', { hasText: 'Remove instance' }).click();
     await until(() => again.pv.evaluate(() => !document.querySelector('[data-ark-component-key]')), 'instance still on the page after Remove instance');
-    await again.app.click('#connect'); await until(() => again.app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
-    await again.app.click('#btnCmsSave');
+    await clickHeader(again.app, 'connect'); await until(() => again.app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
+    await again.app.click('#save');
     await until(() => { try { return !JSON.stringify(savedJson('components-data.js').routes).includes('"main"'); } catch { return false; } }, 'Save after Remove instance still writes the instance');
     await again.page.close();
   });
@@ -377,8 +377,8 @@ await flow('hide', async () => {
   await step('hide, Save, reload: still hidden; show, Save, reload: visible', async () => {
     await eye().click();
     await until(async () => !(await shown()), 'not hidden');
-    await app.click('#connect'); await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
-    await app.click('#btnCmsSave');
+    await clickHeader(app, 'connect'); await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
+    await app.click('#save');
     await until(() => readSaved('layout-data.js').includes(KEY), 'Save did not write the hidden layer to layout-data.js');
     await page.close();
     let again = await openEditor();
@@ -389,8 +389,8 @@ await flow('hide', async () => {
     await until(async () => (await row.count()) > 0, 'no hidden row in Layers after reload');
     await row.locator('.eye-toggle').click();
     await until(() => again.pv.evaluate((key) => { const el = [...document.querySelectorAll('[data-ark-layout-key]')].find((e) => e.getAttribute('data-ark-layout-key') === key); return !!el && getComputedStyle(el).display !== 'none'; }, KEY), 'Show from Layers after reload did not bring it back');
-    await again.app.click('#connect'); await until(() => again.app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
-    await again.app.click('#btnCmsSave');
+    await clickHeader(again.app, 'connect'); await until(() => again.app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
+    await again.app.click('#save');
     await until(() => !/"display":\s*"hide"/.test(readSaved('layout-data.js')), 'Save after Show still records the layer as hidden');
     await again.page.close();
   });
@@ -400,13 +400,11 @@ await flow('hide', async () => {
 await flow('motion', async () => {
   const { page, app, pv, shot } = await openEditor();
   await step('Background transition popover: a changed value reaches the preview', async () => {
-    await app.click('#btnCanvasTransitions');
-    const pop = app.locator('h4', { hasText: 'Background transition' }).locator('xpath=..');
-    await until(async () => (await pop.count()) > 0, 'the Background popover did not open');
+    const pop = await openBackground(app);
     const out = pop.locator('input[aria-label="Fade out (ms)"]');
     await out.fill('640'); await out.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(() => pv.evaluate(() => ArkCanvasTransitions.get().outDuration === 640), 'the preview did not take Fade out = 640');
-    await pop.locator('button', { hasText: 'Fade + scale' }).click();
+    await pop.locator('button', { hasText: 'Fade scale' }).click();
     await until(() => pv.evaluate(() => ArkCanvasTransitions.get().effect !== 'fade'), 'the preview did not take the effect');
     await pop.locator('button', { hasText: 'Preview this transition' }).click();
     await until(() => pv.evaluate(() => { const el = document.querySelector('[data-ark-layer="persistent"]'); return !!el && el.style.opacity === '0' && el.style.transition.includes('640ms'); }), 'Preview this transition did not fade the background layer out over the edited 640 ms', 1500);
@@ -426,8 +424,8 @@ await flow('motion', async () => {
     await shot('motion-02-element');
   });
   await step('Save writes both, and a reload keeps them', async () => {
-    await app.click('#connect'); await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
-    await app.click('#btnCmsSave');
+    await clickHeader(app, 'connect'); await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'folder not connected');
+    await app.click('#save');
     await until(() => { try { return savedJson('canvas-transitions-data.js').outDuration === 640; } catch { return false; } }, 'canvas-transitions-data.js was not saved');
     await until(() => { try { return JSON.stringify(savedJson('element-motion-data.js')).includes('480'); } catch { return false; } }, 'element-motion-data.js was not saved');
     await page.close();
@@ -447,10 +445,10 @@ async function gotoRoute(app, pv, route) {
 }
 async function connectAndSave(app) {
   if (!(await app.evaluate(() => document.getElementById('connect').disabled))) {
-    await app.click('#connect');
+    await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
   }
-  await app.click('#btnCmsSave');
+  await app.click('#save');
 }
 const componentsIn = (frame) => frame.evaluate(() => ArkComponents.get());
 /* the text each instance on the page shows, keyed by instance key */

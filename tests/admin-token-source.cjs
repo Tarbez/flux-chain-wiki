@@ -35,4 +35,39 @@ for (const source of ['TEXT_TOKENS', 'FILL_TOKENS']) {
 }
 // The read only works because layout.js runs first.
 assert.ok(app.indexOf('src="js/content/layout.js"') >= 0 && app.indexOf('src="js/content/layout.js"') < app.indexOf('src="js/admin/admin.js"'), 'admin-app.html loads js/content/layout.js before js/admin/admin.js');
-console.log('PASS: admin.js reads every design-token and layout enum from ArkLayout and keeps no copy of its own.');
+
+/* The same law for the other content modules' lists. admin.js kept CMS_CANVAS_EFFECTS,
+   CMS_CANVAS_EASINGS, CMS_ELEMENT_MOTION_DIRECTIONS and CMS_BLOCK_RESOLVERS as hand copies, each
+   with a comment saying "this document has no <script src> for the content modules" -- untrue
+   since admin-app.html loads canvas-transitions.js, element-motion.js and components.js before
+   admin.js (found by tests/browser/full-audit.mjs). The block list even carried its own labels
+   and prop names, a third copy of components.js's RESOLVER_PROPS. Each is now one read. */
+const MODULE_READS = {
+  CMS_CANVAS_EFFECTS: ['js/content/canvas-transitions.js', 'ArkCanvasTransitions.effects()'],
+  CMS_CANVAS_EASINGS: ['js/content/canvas-transitions.js', 'ArkCanvasTransitions.easings()'],
+  CMS_CANVAS_TRANSITIONS_DEFAULT: ['js/content/canvas-transitions.js', 'ArkCanvasTransitions.defaults()'],
+  CMS_ELEMENT_MOTION_DIRECTIONS: ['js/content/element-motion.js', 'ArkElementMotion.directions()'],
+  CMS_ELEMENT_MOTION_EASINGS: ['js/content/element-motion.js', 'ArkElementMotion.easings()'],
+  CMS_ELEMENT_MOTION_DEFAULT_ENTRY: ['js/content/element-motion.js', 'ArkElementMotion.defaultEntry()'],
+  CMS_BLOCK_RESOLVERS: ['js/content/components.js', 'ArkComponents.blocks()'],
+};
+const modules = vm.createContext({});
+for (const [name, [file, read]] of Object.entries(MODULE_READS)) {
+  const defs = admin.match(new RegExp('\\b(?:const|let|var)\\s+' + name + '\\s*=\\s*([^;\\n]+)', 'g')) || [];
+  assert.equal(defs.length, 1, `${name} is defined exactly once in admin.js`);
+  assert.ok(defs[0].endsWith('= ' + read), `${name} reads ${read}, not a copy: ${defs[0]}`);
+  assert.ok(app.indexOf(`src="${file}"`) >= 0 && app.indexOf(`src="${file}"`) < app.indexOf('src="js/admin/admin.js"'), `admin-app.html loads ${file} before js/admin/admin.js`);
+  vm.runInContext(fs.readFileSync(file, 'utf8'), modules);
+  /* no literal copy of the list under another name: its values, quoted the way a copy would be */
+  const value = vm.runInContext(read, modules);
+  if (Array.isArray(value) && value.every((v) => typeof v === 'string')) {
+    const literal = '[' + value.map((t) => `'${t}'`).join(', ') + ']';
+    assert.ok(!admin.includes(literal), `admin.js does not spell out ${read} as a literal ${literal}`);
+  }
+}
+for (const resolver of vm.runInContext('ArkComponents.blocks()', modules)) {
+  assert.ok(!admin.includes(`'${resolver.resolver}'`), `admin.js names no block resolver itself (${resolver.resolver}): the list is ArkComponents.blocks()`);
+}
+/* quoting the old claim to say it was wrong is fine; making it is not */
+assert.ok(!/no <script src>/.test(admin.replace(/"because this document has no <script src>"/g, '')), 'no comment in admin.js still claims the editor document has no <script src> for the content modules');
+console.log('PASS: admin.js reads every design-token, layout, transition, animation and block list from its module and keeps no copy of its own.');

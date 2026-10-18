@@ -159,6 +159,25 @@ async function main() {
             await page.waitForTimeout(250);
             await page.screenshot({ path: path.join(shotDir, `after-public-${width}-menu.png`) });
           }
+          if (id === 'zero') {
+            /* The pill's width follows the chosen network's label, so pick each known network
+               by real clicks and re-measure; the list comes from the page, not from here. The
+               last pick stays remembered, so the inner routes after this run with it too. */
+            await page.goto(base + routePath, { waitUntil: 'domcontentloaded' });
+            await settled(page, id);
+            const options = await page.evaluate(async () => { document.querySelector('.header-chain-trigger').click(); await new Promise((r) => setTimeout(r, 100)); const labels = [...document.querySelectorAll('#header-chain-popover .network-option')].map((o) => o.textContent.trim()); document.querySelector('.header-chain-trigger').click(); return labels; });
+            for (let i = 0; i < options.length; i++) {
+              await page.click('.header-chain-trigger');
+              await page.click(`#header-chain-popover .network-option >> nth=${i}`);
+              /* picking the network already chosen leaves the popover open (a no-op choice) */
+              if (await page.isVisible('#header-chain-popover')) await page.keyboard.press('Escape');
+              await page.waitForFunction((label) => document.querySelector('.header-chain-trigger-label').textContent === label, options[i], { timeout: 5000 }).catch(() => {});
+              const picked = await measureHeader(page);
+              const pickTag = `${width} ${routePath} (${id}, network "${options[i]}")`;
+              if (picked.problems.length) { failures.push(pickTag); console.log(`FAIL ${pickTag}\n  - ${picked.problems.join('\n  - ')}`); }
+              else console.log(`ok   ${pickTag}: ${picked.controls.join(' | ')}`);
+            }
+          }
         } catch (error) {
           failures.push(`${width} ${id}`);
           console.log(`FAIL ${width} ${id}: ${String(error.message || error).split('\n')[0]}`);

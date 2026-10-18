@@ -20,6 +20,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
+const { buildersSource } = require('./lib/admin-source.cjs');
 
 const main = fs.readFileSync('js/main.js', 'utf8'), admin = fs.readFileSync('js/admin/admin.js', 'utf8');
 function cut(src, from, to, what) {
@@ -72,20 +73,21 @@ const plain = (x) => JSON.parse(JSON.stringify(x));
 
 /* ---- the editor side: Insert -- direct, picker, or disabled with a reason; never prompt() */
 function library(points, masters) {
-  const code = cut(admin, "  let libKey = '';", '     Theme pane: site and audience first', 'renderLibrary');
+  const code = cut(admin, "  let libKey = '';", '     Search and AI. Edits the real seoDraft', 'renderLibrary');
   const dom = new JSDOM('<body><div id="libPane"></div><button id="btnContentCms"></button></body>');
   const doc = dom.window.document, sent = [], highlights = [];
   const context = {
-    document: doc, $: (id) => doc.getElementById(id), ic: () => '', toast() {}, selectDesign() {}, showLeft() {},
+    document: doc, $: (id) => doc.getElementById(id), ic: () => '', toast() {}, selectDesign() {}, showLeft() {}, openContentEditor() {},
     cmsSourceSite: { components: { masters, routes: {} } }, cmsInsertPoints: points, cmsPreviewRoute: '/download', cmsConnected: true,
     cmsPreview: { contentWindow: { postMessage: (m) => highlights.push(m.id) } }, location: { origin: 'http://x' },
-    CMS_BLOCK_RESOLVERS: [['RBLOCK_TEXT_V1', 'Text', ['heading', 'body']]], cmsBlockResolverLabel: () => 'Text', cmsBlockResolverProps: () => ['heading', 'body'],
+    CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading', 'body'] }], cmsBlockResolverLabel: () => 'Text', cmsBlockResolverProps: () => ['heading', 'body'],
     cmsMasterKind: () => 'Text', cmsMasterProps: (m) => Object.keys(m.props), cmsNextComponentId: (p) => p + 'X',
     postCmsComponentsCommand: (m) => sent.push(plain(m)),
     prompt: () => { throw new Error('prompt() was called'); },
   };
   context.window = context;
   vm.createContext(context);
+  vm.runInContext(buildersSource(), context);
   vm.runInContext(code.replace(/\n  \/\* =+\s*$/, '') + '\nthis.render = renderLibrary;', context);
   context.render();
   const row = (label) => [...doc.querySelectorAll('#libPane .myrow')].find((r) => r.querySelector('span').textContent === label);

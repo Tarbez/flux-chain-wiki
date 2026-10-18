@@ -28,7 +28,14 @@ var ArkAdminStore = (function () {
        label   what a Save/validation message calls it
        title   the archive route's title (single only; the four older titles are kept so an
                unchanged older draft encodes to the same route as before)
-       needs   scripts the module needs loaded before it (single only) */
+       needs   scripts the module needs loaded before it (single only)
+       byItem  (single only) the maps in it keyed by a page id or article slug, by the items
+               draft that owns the key: { manifests: 'pages' } means value.pages[<page id>]
+       byRoute (single only) the maps in it keyed by a route path ('/concept', ...)
+     byItem/byRoute are what a Delete prunes (forgetItem below): a deleted page left its SEO
+     entry behind, so the SEO draft showed unsaved until the next Save and the entry outlived
+     the page on disk (regression: tests/delete-prunes-drafts.cjs). A draft that keys anything
+     by page or route says so HERE, and Delete reaches it with no list of its own. */
   var DRAFTS = [
     { key: 'manifests', kind: 'items', global: 'ArkManifest', label: 'Page', dir: 'manifests' },
     { key: 'articles', kind: 'items', global: 'LearningContent', label: 'Article', dir: 'articles' },
@@ -37,16 +44,33 @@ var ArkAdminStore = (function () {
     { key: 'meshSettings', kind: 'single', global: 'ArkMeshSettings', label: 'Mesh settings', file: 'mesh-settings', title: 'Mesh tuning' },
     { key: 'theme', kind: 'single', global: 'ArkTheme', label: 'Theme', file: 'theme', title: 'Colour theme', needs: ['js/tokens.js', 'js/ark/vendor/backgrounds.js'] },
     { key: 'settingsDefaults', kind: 'single', global: 'ArkSiteDefaults', label: 'Site-wide defaults', file: 'settings-defaults', title: 'Site-wide settings defaults' },
-    { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO' },
-    { key: 'layout', kind: 'single', global: 'ArkLayout', label: 'Layout', file: 'layout', title: 'Responsive layout' },
-    { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components' },
-    { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups' },
+    { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO', byItem: { manifests: 'pages', articles: 'articles' } },
+    { key: 'layout', kind: 'single', global: 'ArkLayout', label: 'Layout', file: 'layout', title: 'Responsive layout', byRoute: ['routes', 'groups', 'labels', 'alts'] },
+    { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components', byRoute: ['routes', 'spots'] },
+    { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups', byRoute: ['routes'] },
     { key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Canvas transitions', file: 'canvas-transitions', title: 'Canvas transitions' },
-    { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation' }
+    { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation', byRoute: ['routes'] }
   ];
   /* a copy, so no caller can edit the list for everyone else */
   function drafts(kind) {
     return DRAFTS.filter(function (d) { return !kind || d.kind === kind; }).map(function (d) { return JSON.parse(JSON.stringify(d)); });
+  }
+
+  /* A deleted item's entries in one single draft, per that draft's byItem/byRoute: `gone` is
+     { key: 'manifests' | 'articles', id, routes: [paths no longer on the site] }. Returns
+     { value, changed } -- a copy, the input untouched. A route the site still has keeps its
+     entries: only paths the delete actually took away are pruned. */
+  function forgetItem(draft, value, gone) {
+    var out = value ? JSON.parse(JSON.stringify(value)) : value, changed = false;
+    if (!out || typeof out !== 'object' || !gone) return { value: out, changed: false };
+    var map = draft.byItem && gone.key && draft.byItem[gone.key];
+    if (map && out[map] && Object.prototype.hasOwnProperty.call(out[map], gone.id)) { delete out[map][gone.id]; changed = true; }
+    (draft.byRoute || []).forEach(function (field) {
+      (gone.routes || []).forEach(function (route) {
+        if (out[field] && Object.prototype.hasOwnProperty.call(out[field], route)) { delete out[field][route]; changed = true; }
+      });
+    });
+    return { value: out, changed: changed };
   }
 
   /* The list the site loads its manifests from, in display order. */
@@ -261,7 +285,7 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'element-motion-data.js', ArkElementMotion.serialize(whole));
   }
 
-  return { drafts: drafts, indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove, writeIndex: writeIndex,
+  return { drafts: drafts, forgetItem: forgetItem, indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove, writeIndex: writeIndex,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
            secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,

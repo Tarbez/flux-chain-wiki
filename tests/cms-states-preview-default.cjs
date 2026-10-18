@@ -21,6 +21,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
+const { buildersSource } = require('./lib/admin-source.cjs');
 
 const main = fs.readFileSync('js/main.js', 'utf8'), admin = fs.readFileSync('js/admin/admin.js', 'utf8');
 function cut(src, from, to, what) {
@@ -134,7 +135,7 @@ function preview({ edit = true } = {}) {
     cmsExactSelection: { route: '/', key: 'k-a', stateGroup: { groupId: 'st1' } },
     cmsStatesShowing: { st1: 2 },
     cmsSourceSite: { states: { version: 1, routes: { '/': { st1: { trigger: 'self', current: 0, states: [{ label: 'Default', members: ['k-a'] }, { label: 'State 1', members: [] }, { label: 'State 2', members: [] }] } } } } },
-    CMS_BLOCK_RESOLVERS: [['RBLOCK_TEXT_V1', 'Text', ['heading']]],
+    CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading'] }],
     cmsNextComponentId: (prefix) => prefix + '1', cmsBlockResolverLabel: () => 'Text', cmsTreeRowForKey: () => null,
     accordion: (pane) => { const body = doc.createElement('div'); pane.appendChild(body); return body; },
     /* the toolbar shell's section builder (an accordion, now an icon-bar popover): the content goes in the body it returns */
@@ -143,6 +144,8 @@ function preview({ edit = true } = {}) {
   };
   context.window = context;
   vm.createContext(context);
+  vm.runInContext(fs.readFileSync('js/content/states.js', 'utf8'), context);
+  vm.runInContext(buildersSource(), context);
   vm.runInContext(admin.slice(start, end) + '\nthis.build = buildStateGroupSection;', context);
   const pane = doc.getElementById('pane');
   context.build(pane);

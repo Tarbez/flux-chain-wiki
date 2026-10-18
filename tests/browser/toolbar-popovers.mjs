@@ -80,7 +80,7 @@ const byKey = (pv, key) => pv.locator(`[data-ark-layout-key="${key}"]`).first();
 const selectKey = (app, key) => app.evaluate((k) => document.getElementById('cmsPreview').contentWindow.postMessage({ type: 'defxn-cms-preview-select-group', key: k }, location.origin), key);
 async function selected(app, key) { await until(async () => (await toolbarKey(app)) === key, `the toolbar is not editing ${key} (it shows ${await toolbarKey(app)})`); await wait(150); }
 const computed = (pv, key, prop) => pv.evaluate(([k, p]) => { const el = document.querySelector(`[data-ark-layout-key="${CSS.escape(k)}"]`); return el ? getComputedStyle(el)[p] : null; }, [key, prop]);
-const ACTIONS = ['Make into component', 'Open in Content CMS', 'Design controls'];
+const ACTIONS = ['Make into component', 'Open in Content', 'Theme & defaults'];
 
 /* the bar holds exactly these section icons in this order, then the actions; every icon has a
    name a screen reader reads and a tooltip a sighted user sees */
@@ -191,7 +191,7 @@ await flow('paragraph', async () => {
     await page.keyboard.press('ArrowRight');
     check(await app.evaluate(() => document.activeElement.dataset.name) === 'Fill and border', 'ArrowRight did not move to Fill and border');
     await page.keyboard.press('ArrowLeft'); await page.keyboard.press('ArrowLeft');
-    check(await app.evaluate(() => document.activeElement.getAttribute('aria-label')) === 'Design controls', 'ArrowLeft from the first icon did not wrap to the last');
+    check(await app.evaluate(() => document.activeElement.getAttribute('aria-label')) === 'Theme & defaults', 'ArrowLeft from the first icon did not wrap to the last');
     await page.keyboard.press('Home');
     check(await app.evaluate(() => document.activeElement.dataset.name) === 'Typography', 'Home did not go to the first icon');
     await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight');

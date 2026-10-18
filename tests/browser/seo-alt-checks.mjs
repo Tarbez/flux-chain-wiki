@@ -4,7 +4,9 @@
    - seo     every extended SEO field (structured-data type, AI summary,
              canonical, social image, noindex, AI-crawler block per page;
              site language, publisher type, handle, llms.txt, per-bot
-             policy) is edited in Design > SEO, previewed live, saved,
+             policy) is edited where Design keeps it -- this page's fields in
+             the page picker's SEO popover, the site's in Theme & defaults --
+             previewed live, saved,
              reloaded, and found in the REAL output: the public page's
              <head>, the server render, robots.txt and llms.txt.
    - alt     a plain image's alt text (here a real inline <svg>, the only
@@ -30,7 +32,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, openToolbarSection, toolbarKey } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, openToolbarSection, toolbarKey, clickHeader, designView, openPageSeo, openSiteSeo } from './harness.mjs';
 import { readProject, planWrite } from '../../scripts/lib/site-bundle.mjs';
 import { readIndexHtml, renderDocument, createLocalResources } from '../../api/lib/render-core.mjs';
 
@@ -96,27 +98,26 @@ async function openRoute(app, pv, route) {
 }
 async function save(app) {
   if (!(await app.evaluate(() => document.getElementById('connect').disabled))) {
-    await app.click('#connect');
+    await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
   }
-  await app.click('#btnCmsSave');
+  await app.click('#save');
 }
-/* the SEO tab's row for one field (data-seo-field is set by admin.js's seoFieldRows) */
-const seoRow = (app, key) => app.locator(`#paneSeo [data-seo-field="${key}"]:not([data-seo-bot])`).first();
-async function seoType(app, key, value) {
-  const input = seoRow(app, key).locator('input, textarea');
+/* SEO's two homes since the one-header merge (2026-10-18; it was one right-panel SEO tab): this
+   page's fields in the page picker's SEO popover (openPageSeo), the site-wide fields and the
+   crawler policy in Theme & defaults (openSiteSeo). `scope` is whichever of the two is open;
+   a row is found by data-seo-field, set by admin.js's seoFieldRows. */
+const seoRow = (scope, key) => scope.locator(`[data-seo-field="${key}"]:not([data-seo-bot])`).first();
+async function seoType(scope, key, value) {
+  const input = seoRow(scope, key).locator('input, textarea');
   await input.fill(value);
   await input.evaluate((el) => el.dispatchEvent(new Event('change', { bubbles: true })));
   await input.evaluate((el) => el.blur());
 }
-async function seoPress(app, key, label) { await seoRow(app, key).locator('button', { hasText: new RegExp('^' + label + '$') }).click(); }
-async function seoChoose(app, key, value) { await seoRow(app, key).locator('select').selectOption(value); }
-async function botPress(app, bot, label) { await app.locator(`#paneSeo [data-seo-bot="${bot}"] button`, { hasText: label }).click(); }
-const pressed = (app, selector) => app.locator(selector + ' [aria-pressed="true"]').first().textContent();
-async function openAccordion(app, title) {
-  const d = app.locator('#paneSeo details.acc', { has: app.locator('summary', { hasText: title }) }).first();
-  if (!(await d.evaluate((el) => el.open))) await d.locator('summary').click();
-}
+async function seoPress(scope, key, label) { await seoRow(scope, key).locator('button', { hasText: new RegExp('^' + label + '$') }).click(); }
+async function seoChoose(scope, key, value) { await seoRow(scope, key).locator('select').selectOption(value); }
+async function botPress(scope, bot, label) { await scope.locator(`[data-seo-bot="${bot}"] button`, { hasText: label }).click(); }
+const pressed = (scope, selector) => scope.locator(selector + ' [aria-pressed="true"]').first().textContent();
 /* what a crawler reads from a rendered <head> */
 const headOf = (frame) => frame.evaluate(() => {
   const meta = (attr, key) => { const el = document.querySelector(`meta[${attr}="${key}"]`); return el ? el.getAttribute('content') : null; };
@@ -147,26 +148,31 @@ async function serverRender(route) {
 const HOME = { title: 'DEFXN search title for the home page', ogImage: '/assets/share-wave.png', canonical: '/', schemaType: 'FAQPage', aiSummary: 'DEFXN lets each identity keep its own signed chain.' };
 await flow('seo', async () => {
   const { page, app, pv, shot } = await openEditor();
-  await step('the SEO tab has a control for every stored field', async () => {
-    await app.click('#tabSeo');
-    for (const title of ['This page', 'Site', 'AI assistants']) await openAccordion(app, title);
+  await step('the page SEO popover and Theme & defaults have a control for every stored field', async () => {
     const fields = await pv.evaluate(() => ({ page: ArkSEO.OVERRIDE_FIELDS.map((f) => f.key), site: ArkSEO.SITE_FIELDS.filter((f) => f.kind !== 'policy').map((f) => f.key), bots: ArkSEO.AI_BOTS.map((b) => b[0]) }));
-    for (const key of fields.page.concat(fields.site)) check(await seoRow(app, key).count(), `no control for the SEO field "${key}"`);
-    for (const bot of fields.bots) check(await app.locator(`#paneSeo [data-seo-bot="${bot}"]`).count(), `no allow/block control for ${bot}`);
-    await shot('seo-01-tab');
+    const pageSeo = await openPageSeo(app);
+    for (const key of fields.page) check(await seoRow(pageSeo, key).count(), `the page SEO popover has no control for "${key}"`);
+    await shot('seo-01-page-popover');
+    const site = await openSiteSeo(app);
+    for (const key of fields.site) check(await seoRow(site, key).count(), `Theme & defaults has no control for the site SEO field "${key}"`);
+    for (const bot of fields.bots) check(await site.locator(`[data-seo-bot="${bot}"]`).count(), `no allow/block control for ${bot}`);
+    await shot('seo-01-site-section');
   });
   await step('edit the home page\'s fields and the site fields; the preview <head> follows before Save', async () => {
-    await seoType(app, 'title', HOME.title);
-    await seoType(app, 'ogImage', HOME.ogImage);
-    await seoType(app, 'canonical', HOME.canonical);
-    await seoChoose(app, 'schemaType', HOME.schemaType);
-    await seoType(app, 'aiSummary', HOME.aiSummary);
-    await seoType(app, 'lang', 'en-GB');
-    await seoChoose(app, 'org', 'Person');
-    await seoType(app, 'handle', '@defxnwave');
-    await botPress(app, 'GPTBot', 'Block');
-    await botPress(app, 'CCBot', 'Block');
-    check((await pressed(app, '#paneSeo [data-seo-bot="GPTBot"]')) === 'Block', 'GPTBot does not show Block after the click');
+    const pageSeo = await openPageSeo(app);
+    await seoType(pageSeo, 'title', HOME.title);
+    await seoType(pageSeo, 'ogImage', HOME.ogImage);
+    await seoType(pageSeo, 'canonical', HOME.canonical);
+    await seoChoose(pageSeo, 'schemaType', HOME.schemaType);
+    await seoType(pageSeo, 'aiSummary', HOME.aiSummary);
+    const site = await openSiteSeo(app);
+    await seoType(site, 'lang', 'en-GB');
+    await seoChoose(site, 'org', 'Person');
+    await seoType(site, 'handle', '@defxnwave');
+    await botPress(site, 'GPTBot', 'Block');
+    await botPress(site, 'CCBot', 'Block');
+    check((await pressed(site, '[data-seo-bot="GPTBot"]')) === 'Block', 'GPTBot does not show Block after the click');
+    await designView(app, 'canvas');
     const head = await until(async () => { const h = await headOf(pv); return h.title === HOME.title && h.ld && h.ld['@type'] === 'FAQPage' && h.lang === 'en-GB' && h; }, 'the preview <head> did not take the unsaved SEO edits');
     check(head.ogImage === 'https://defxn.com' + HOME.ogImage, 'og:image ' + head.ogImage);
     check(head.canonical === 'https://defxn.com/', 'canonical ' + head.canonical);
@@ -177,17 +183,19 @@ await flow('seo', async () => {
     await shot('seo-02-home-edited');
   });
   await step('an unusable value says what it needs instead of storing a fallback', async () => {
-    await seoType(app, 'lang', 'English');
-    const refusal = await until(async () => { const t = await app.locator('#paneSeo .seo-refusal').allTextContents(); return t.find((x) => /language needs/.test(x)); }, 'no refusal for an invalid language tag');
+    const site = await openSiteSeo(app);
+    await seoType(site, 'lang', 'English');
+    const refusal = await until(async () => { const t = await site.locator('.seo-refusal').allTextContents(); return t.find((x) => /language needs/.test(x)); }, 'no refusal for an invalid language tag');
     check(/en or en-US/.test(refusal), 'the refusal does not name the remedy: ' + refusal);
     await shot('seo-03-refusal');
-    await seoType(app, 'lang', 'en-GB');
+    await seoType(site, 'lang', 'en-GB');
+    await designView(app, 'canvas');
   });
   await step('hide /about from search and from AI crawlers', async () => {
     await openRoute(app, pv, '/about');
-    await app.click('#tabSeo'); await openAccordion(app, 'This page');
-    await seoPress(app, 'noindex', 'Yes');
-    await seoPress(app, 'aiBlocked', 'Yes');
+    const pageSeo = await openPageSeo(app);
+    await seoPress(pageSeo, 'noindex', 'Yes');
+    await seoPress(pageSeo, 'aiBlocked', 'Yes');
     await until(async () => (await headOf(pv)).robots === 'noindex, noai, noimageai', 'the preview /about has no noindex/noai robots meta');
     await shot('seo-04-about-hidden');
   });
@@ -203,20 +211,20 @@ await flow('seo', async () => {
        the Save itself to finish before the next step closes this page under it */
     await until(() => app.evaluate(() => /^Saved \d+ items? /.test(document.getElementById('status').textContent)), 'the Save never reported finishing', 30000);
   });
-  await step('reload: the SEO tab shows the saved values', async () => {
+  await step('reload: the page SEO popover and Theme & defaults show the saved values', async () => {
     await page.close();
     const again = await openEditor();
-    await again.app.click('#tabSeo');
-    for (const title of ['This page', 'Site', 'AI assistants']) await openAccordion(again.app, title);
-    check((await seoRow(again.app, 'title').locator('input').inputValue()) === HOME.title, 'title not shown after reload');
-    check((await seoRow(again.app, 'schemaType').locator('select').inputValue()) === 'FAQPage', 'schemaType not shown after reload');
-    check((await seoRow(again.app, 'aiSummary').locator('textarea').inputValue()) === HOME.aiSummary, 'aiSummary not shown after reload');
-    check((await seoRow(again.app, 'lang').locator('input').inputValue()) === 'en-GB', 'lang not shown after reload');
-    check((await seoRow(again.app, 'org').locator('select').inputValue()) === 'Person', 'org not shown after reload');
-    check((await pressed(again.app, '#paneSeo [data-seo-bot="CCBot"]')) === 'Block', 'CCBot policy not shown after reload');
+    const pageSeo = await openPageSeo(again.app);
+    check((await seoRow(pageSeo, 'title').locator('input').inputValue()) === HOME.title, 'title not shown after reload');
+    check((await seoRow(pageSeo, 'schemaType').locator('select').inputValue()) === 'FAQPage', 'schemaType not shown after reload');
+    check((await seoRow(pageSeo, 'aiSummary').locator('textarea').inputValue()) === HOME.aiSummary, 'aiSummary not shown after reload');
+    const site = await openSiteSeo(again.app);
+    check((await seoRow(site, 'lang').locator('input').inputValue()) === 'en-GB', 'lang not shown after reload');
+    check((await seoRow(site, 'org').locator('select').inputValue()) === 'Person', 'org not shown after reload');
+    check((await pressed(site, '[data-seo-bot="CCBot"]')) === 'Block', 'CCBot policy not shown after reload');
+    await designView(again.app, 'canvas');
     await openRoute(again.app, again.pv, '/about');
-    await again.app.click('#tabSeo'); await openAccordion(again.app, 'This page');
-    check((await pressed(again.app, '#paneSeo [data-seo-field="noindex"]')) === 'Yes', 'about noindex not shown after reload');
+    check((await pressed(await openPageSeo(again.app), '[data-seo-field="noindex"]')) === 'Yes', 'about noindex not shown after reload');
     await again.shot('seo-05-reloaded-about');
     await again.page.close();
   });
@@ -271,8 +279,7 @@ await flow('seo', async () => {
   });
   await step('llms.txt can be turned off', async () => {
     const { app: a2, page: p2 } = await openEditor();
-    await a2.click('#tabSeo'); await openAccordion(a2, 'AI assistants');
-    await seoPress(a2, 'llms', 'Off');
+    await seoPress(await openSiteSeo(a2), 'llms', 'Off');
     await save(a2);
     await until(() => { try { return savedJson('seo-data.js').site.llms === 0; } catch { return false; } }, 'llms Off was not saved');
     /* no pull in between: the Save that turned it off rewrote llms.txt itself */

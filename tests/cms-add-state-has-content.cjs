@@ -18,6 +18,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { JSDOM } = require('jsdom');
+const { buildersSource } = require('./lib/admin-source.cjs');
 
 const admin = fs.readFileSync('js/admin/admin.js', 'utf8');
 const start = admin.indexOf('  function addStateContent(');
@@ -35,7 +36,7 @@ function build(states) {
     cmsExactSelection: { route: '/', key: 'k-btn', stateGroup: { groupId: 'st1' } },
     cmsStatesShowing: {},
     cmsSourceSite: { states: { version: 1, routes: { '/': { st1: { trigger: 'self', current: 0, states } } } } },
-    CMS_BLOCK_RESOLVERS: [['RBLOCK_TEXT_V1', 'Text', ['heading', 'body', 'align', 'size']], ['RBLOCK_CTA_V1', 'Button / link', ['label', 'href', 'variant']]],
+    CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading', 'body', 'align', 'size'] }, { resolver: 'RBLOCK_CTA_V1', label: 'Button / link', props: ['label', 'href', 'variant'] }],
     cmsNextComponentId: (prefix) => prefix + (++n),
     cmsBlockResolverLabel: (r) => (r === 'RBLOCK_CTA_V1' ? 'Button / link' : 'Text'),
     cmsTreeRowForKey: () => null,
@@ -49,6 +50,7 @@ function build(states) {
   vm.createContext(context);
   vm.runInContext(fs.readFileSync('js/content/states.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('js/content/components.js', 'utf8'), context);
+  vm.runInContext(buildersSource(), context);
   vm.runInContext(code + '\nthis.build = buildStateGroupSection;', context);
   const pane = doc.getElementById('pane');
   context.build(pane);

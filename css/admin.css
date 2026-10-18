@@ -28,13 +28,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
    One row from 1280px up: brand · mode · Design views | canvas page | canvas tools | actions.
    Secondary actions are 32px icon buttons with tooltips; text is spent only on the mode,
    the selected Design view, the page name, Save and Publish. Groups wrap whole below that. */
-#appBar { justify-content: flex-start; gap: 8px 10px; min-height: 52px; padding: 8px 14px; z-index: 55; }
+#appBar { justify-content: flex-start; gap: 8px; min-height: 52px; padding: 8px 14px; z-index: 55; }
 #appBar .bar-brand strong { font-size: 13px; letter-spacing: .16em; white-space: nowrap; }
+/* below 1440px the wordmark yields its ~115px to the controls (the tab title still names the app) */
+@media (max-width: 1439px) { #appBar .bar-brand { display: none; } }
 #appBar .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 #appBar .ic.sm { width: 13px; height: 13px; }
 .bar-nav, .bar-group { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .bar-group[hidden] { display: none; }
-.bar-tools { margin-left: auto; }
 .ibtn {
   position: relative; display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; padding: 0;
   border: 1px solid transparent; border-radius: 7px; background: transparent; color: hsl(var(--text-muted)); cursor: pointer;
@@ -46,12 +47,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 #btnLeftRail[aria-pressed="false"] { color: hsl(var(--text-faint)); }
 /* the page picker: the canvas's one place to change page, name first, path in mono */
 .bar-page {
-  display: inline-flex; align-items: center; gap: 7px; height: 32px; max-width: 220px; min-width: 0; padding: 0 8px 0 9px;
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; max-width: 170px; min-width: 0; padding: 0 8px 0 9px;
   border: 1px solid hsl(var(--border-soft)); border-radius: 7px; background: hsl(var(--surface) / .5); color: hsl(var(--text-strong)); cursor: pointer; font-size: 13px;
 }
 .bar-page:hover, .bar-page[aria-expanded="true"] { border-color: hsl(var(--border-strong)); background: hsl(var(--raised)); }
 .bar-page > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-page small { flex: none; font: 500 10.5px/1 var(--mono); color: hsl(var(--text-muted)); }
+@media (max-width: 1599px) { .bar-page small { display: none; } }
 .bar-page .ic { color: hsl(var(--text-muted)); }
 /* segmented icon groups: breakpoints, Edit/Live */
 #appBar .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
@@ -67,11 +69,13 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 /* editing at tablet/phone size writes overrides for that size only: say so, calmly */
 .bp-note { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border-radius: 99px; background: hsl(var(--warning) / .12); color: hsl(var(--warning)); font: 500 11px/1 var(--mono); letter-spacing: .02em; white-space: nowrap; }
 .bp-note[hidden] { display: none; }
-#appBar .status { max-width: 26ch; }
-#appBar .status:empty { display: none; }
-#appBar .bar-actions { gap: 6px; flex-wrap: nowrap; }
+@media (max-width: 1599px) { .bp-note { width: 26px; padding: 0; justify-content: center; } .bp-note .bp-text { display: none; } }
+/* The actions take the rest of the row, and the status line takes whatever of that is left:
+   width 0 + flex-grow means a long message can never push the row into a wrap -- it is
+   ellipsized (the full text is its title, and the canvas toast repeats it). */
+#appBar .bar-actions { flex: 1 1 auto; gap: 6px; flex-wrap: nowrap; margin-left: 0; }
+#appBar .status { flex: 1 1 0; width: 0; min-width: 0; max-width: none; text-align: right; order: -1; }  /* order: before the hairline (.bar-actions::before), which then sits right against the actions */
 #appBar .bar-actions .btn { min-height: 32px; padding: 5px 13px; }
-#appBar .bar-tools:not([hidden]) ~ .bar-actions { margin-left: 0; }
 /* account: identity, project folder, shortcuts, sign out -- one glass panel under one icon */
 .account { position: relative; }
 .account-menu {
@@ -131,15 +135,17 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 /* ---- Design/Content mode switch and Design's views, in the one header. Reuses .ark-tab's
    exact visual language via a thin .mode-switch adaptation; the selected tab/view is the one
    highlighted (it was not, before 2026-10-18: aria-selected carried no style at all). The
-   Design views collapse to their icon unless selected (the label is the tooltip), so the
-   header keeps to one row; at 1600px and up every label shows. */
+   Design views are icons with tooltips, so the header keeps to one row at 1280px even with
+   every canvas control showing (measured: 89px to spare); the selected view adds its label
+   from 1440px, and every view is labelled from 1800px. */
 .mode-switch { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
 .mode-switch[hidden] { display: none; }
 .mode-switch .ark-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 4px 11px; white-space: nowrap; }
 .mode-switch .ark-tab[aria-selected="true"], .mode-switch .ark-tab[aria-pressed="true"], .mode-switch .ark-tab[aria-expanded="true"] { color: hsl(var(--text-strong)); background: hsl(var(--accent-subtle)); }
 .sub-switch .ark-tab { padding: 4px 8px; }
 .sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: none; }
-@media (min-width: 1600px) { .sub-switch .ark-tab .lbl, .sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: inline; } .sub-switch .ark-tab { padding: 4px 10px; } }
+@media (max-width: 1439px) { .sub-switch .ark-tab .lbl { display: none; } }
+@media (min-width: 1800px) { .sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: inline; } .sub-switch .ark-tab { padding: 4px 10px; } }
 .page-list button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 36px; padding: 8px 10px 8px 12px; border: 0; border-left: 2px solid transparent; border-radius: 0 7px 7px 0; background: none; text-align: left; cursor: pointer; color: hsl(var(--text)); font-size: 13px; transition: background-color .12s, border-color .12s; }
 .page-list button:hover { background: hsl(var(--raised)); }
 .page-list button[aria-current="true"] { background: hsl(var(--reference-100)); border-left-color: hsl(var(--reference)); color: hsl(var(--text-strong)); font-weight: 500; }
@@ -252,7 +258,10 @@ legend { padding: 0 4px; margin-left: -4px; }
   .editor-head { position: static; flex-direction: column; }
   .bar { padding: 8px 16px; position: static; }
   .bar-actions::before { display: none; }
-  #appBar { padding: 8px 12px; }
+  /* in flow (it scrolls away with a tall Content page) but still stacked above #studioRoot (50):
+     its backdrop-filter makes it a stacking context, so a static header would trap the
+     account menu underneath the canvas */
+  #appBar { padding: 8px 12px; position: relative; }
   .bar-tools { margin-left: 0; }
   .bar .btn { min-height: 30px; padding: 5px 9px; font-size: 12px; }
   .mode-switch .ark-tab { min-height: 26px; padding: 4px 9px; }

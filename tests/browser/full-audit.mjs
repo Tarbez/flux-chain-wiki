@@ -44,7 +44,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const ALL = ['content', 'design', 'toolbar', 'canvas', 'sweep'];
@@ -168,7 +168,7 @@ async function openEditor(opened, mode = 'design') {
 async function ready(app) { await until(() => app.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished loading'); return app; }
 async function connect(app) {
   if (await app.evaluate(() => document.getElementById('connect').disabled)) return;
-  await app.click('#connect');
+  await clickHeader(app, 'connect');
   await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'the project folder did not connect');
 }
 /* Chromium's own Save Page dialog eats a real Ctrl/Cmd+S, so the shortcut is a synthetic keydown on
@@ -256,6 +256,10 @@ await surface('content', 'pages: create and delete a theory page', async (opened
   await app.locator('#editor button', { hasText: 'Delete this page' }).click();
   await until(() => !savedExists('manifests/auditpage.js') && !readSaved('manifests/index.js').includes('auditpage'), 'Delete did not remove the file and its index entry');
   check(await app.locator('#pageList button[data-id="auditpage"]').count() === 0, 'the deleted page is still in the sidebar');
+  /* the Delete takes the page's SEO entry with it, saved copy included: nothing is left unsaved,
+     and seo-data.js names no deleted page (regression: tests/delete-prunes-drafts.cjs) */
+  check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the Delete a draft shows unsaved: ' + await statusText(app));
+  check(!readSaved('seo-data.js').includes('"auditpage"'), 'seo-data.js still holds the deleted page\'s entry');
 });
 
 await surface('content', 'articles: edit, preview, Save, Ctrl+S, reload', async (opened) => {
@@ -306,6 +310,8 @@ await surface('content', 'articles: create and delete', async (opened) => {
   dialogPolicy = 'accept';
   await app.locator('#editor button', { hasText: 'Delete this article' }).click();
   await until(() => !savedExists('articles/audit-note.js') && !readSaved('article-index.js').includes('audit-note'), 'Delete did not remove the article file and its index entry');
+  check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the article Delete a draft shows unsaved: ' + await statusText(app));
+  check(!readSaved('seo-data.js').includes('"audit-note"'), 'seo-data.js still holds the deleted article\'s entry');
 });
 
 await surface('content', 'images: label, replace file, preview, Save, reload', async (opened) => {
@@ -376,8 +382,9 @@ await surface('content', 'shapes: tuning reaches the preview, inline Save writes
   const key = (await range.getAttribute('id')).slice('relief-'.length);
   const next = await range.evaluate((el) => { const v = Number(el.min) + (Number(el.max) - Number(el.min)) / 3; el.value = String(v); el.dispatchEvent(new Event('input', { bubbles: true })); return Number(el.value); });
   await until(() => frame.evaluate(([k, v]) => window.__meshMsgs.some((s) => s.tuning && s.tuning[k] === v), [key, next]), `the preview never received tuning ${key} = ${next}`);
-  await app.locator('#editor .relief button', { hasText: /^Save$/ }).click();
-  await until(() => savedJson('mesh-settings-data.js').tuning[key] === next, `the inline Save did not write tuning ${key} = ${next}`);
+  /* the panel has no Save of its own any more: the header's one Save writes the tuning too */
+  await app.click('#save');
+  await until(() => savedJson('mesh-settings-data.js').tuning[key] === next, `Save did not write tuning ${key} = ${next}`);
 });
 
 await surface('content', 'mesh: status view opens and refreshes', async (opened) => {
@@ -399,7 +406,7 @@ const selectKey = (app, key) => app.evaluate((k) => document.getElementById('cms
    openToolbarSection, toolbarAction) -- the surfaces below only name a section or an action and
    act on the controls inside it, so a new shell changes only that block. */
 const byKey = (frame, key, read) => frame.evaluate(([k, r]) => { const el = [...document.querySelectorAll('[data-ark-layout-key]')].find((e) => e.getAttribute('data-ark-layout-key') === k); return el ? new Function('el', 'return ' + r)(el) : undefined; }, [key, read]);
-async function saveCanvas(app) { await connect(app); await app.click('#btnCmsSave'); }
+async function saveCanvas(app) { await connect(app); await app.click('#save'); }
 async function gotoRoute(app, pv, route) {
   await app.click('#tabPages');
   await app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route.replace(/[/]/g, '\\/') + '$') }) }).first().click();
@@ -471,7 +478,7 @@ await surface('design', 'theme & defaults: settings-gear default reaches the pre
 
 await surface('design', 'sitemap: every route, zoom, focus, Open', async (opened) => {
   const { app, pv, shot } = await openEditor(opened);
-  await app.click('#view button[data-v="map"]');
+  await designView(app, 'map');
   await until(() => app.evaluate(() => !document.getElementById('mapView').hidden && document.querySelectorAll('#mapView .smcard').length > 20), 'the sitemap did not draw its page cards');
   const pct = () => app.locator('#mapView .smzoom-pct').textContent();
   await app.click('#mapView .smzoomctl button[aria-label="Zoom in"]');
@@ -493,9 +500,7 @@ await surface('design', 'sitemap: every route, zoom, focus, Open', async (opened
 
 await surface('design', 'background: transition edits reach the preview, Save, reload', async (opened) => {
   const { page, app, pv } = await openEditor(opened);
-  await app.click('#btnCanvasTransitions');
-  const pop = app.locator('.pop', { has: app.locator('h4', { hasText: 'Background transition' }) });
-  await until(async () => (await pop.count()) > 0, 'the Background popover did not open');
+  const pop = await openBackground(app);
   await setValue(pop.locator('input[aria-label="Fade in (ms)"]'), '510');
   await until(() => pv.evaluate(() => ArkCanvasTransitions.get().inDuration === 510), 'the preview did not take Fade in = 510');
   await saveCanvas(app);
@@ -506,7 +511,7 @@ await surface('design', 'background: transition edits reach the preview, Save, r
   check(await pv2.evaluate(() => ArkCanvasTransitions.get().inDuration === 510), 'after reload the transition is not the saved one');
 });
 
-await surface('design', 'design check: lists every rule, Show selects, Open SEO switches tab', async (opened) => {
+await surface('design', 'design check: lists every rule, Show selects, Open SEO opens the page SEO', async (opened) => {
   const { app, shot } = await openEditor(opened);
   await wait(800);
   await app.click('#btnCheck');
@@ -524,7 +529,7 @@ await surface('design', 'design check: lists every rule, Show selects, Open SEO 
   const seo = app.locator('.pop ul.checks .acts button', { hasText: 'Open SEO' }).first();
   if (await seo.count()) {
     await seo.click();
-    await until(() => app.evaluate(() => document.getElementById('tabSeo').getAttribute('aria-selected') === 'true' && !document.getElementById('paneSeo').hidden), 'Open SEO did not switch to the SEO tab');
+    await until(() => app.evaluate(() => document.getElementById('btnPageSeo').getAttribute('aria-expanded') === 'true' && !!document.querySelector('#studioRoot > .pop.seo-pop [data-seo-field="title"]')), 'Open SEO did not open this page\'s SEO popover');
   }
 });
 
@@ -870,12 +875,18 @@ async function sweep(name, scope, setup) {
 }
 const toContent = async ({ app }) => { if (await app.evaluate(() => document.getElementById('cmsShell').hidden)) { await app.click('#modeContentBtn'); await wait(300); } };
 const openItem = (sel, tab) => async (env, again) => { await toContent(env); if (!again || !(await env.app.locator(sel + '[aria-current="true"]').count())) { await env.app.click(sel); await wait(600); } if (tab) { const t = env.app.locator('#editor [role="tab"]', { hasText: tab }).first(); if ((await t.getAttribute('aria-selected')) !== 'true') { await t.click(); await wait(200); } } };
-const toCanvas = async ({ app }) => { if (await app.evaluate(() => document.getElementById('studioRoot').hidden)) { await app.click('#modeDesignBtn'); await app.click('#designCanvasBtn'); await wait(600); } if (await app.evaluate(() => document.getElementById('designView').hidden)) { await app.click('#view button[data-v="design"]'); await wait(300); } };
+/* the structure rail folds away (#btnLeftRail, remembered per browser) -- and the header sweep
+   clicks that toggle like every other button, so the canvas is entered with the rail open */
+const toCanvas = async ({ app }) => {
+  if (await app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('designView').hidden)) { await designView(app, 'canvas'); await wait(600); }
+  if (await app.evaluate(() => document.getElementById('shell').classList.contains('rail-closed'))) { await app.click('#btnLeftRail'); await wait(300); }
+};
 /* sections are opened for the enumeration only: a sweep click may legitimately change what the
    selection is (Make into component replaces it), and the re-run must not fail on that */
 const withSelection = (key, sections) => async (env, again) => { await toCanvas(env); if ((await toolbarKey(env.app)) !== key) { await selectKey(env.app, key); await until(async () => (await toolbarKey(env.app)) === key, 'could not select ' + key).catch((e) => { if (!again) throw e; }); } for (const s of sections || []) await openToolbarSection(env.app, s).catch((e) => { if (!again) throw e; }); };
 
-await sweep('app header (Content mode)', 'body > header.bar', toContent);
+await sweep('app header (Content mode)', '#appBar', toContent);
+await sweep('account menu', '#accountMenu', async (env) => { if (await env.app.evaluate(() => document.getElementById('accountMenu').hidden)) { await env.app.click('#accountBtn'); await wait(200); } });
 await sweep('page editor: Content tab', '#editor', openItem('#pageList button[data-id="home"]', 'Content'));
 await sweep('page editor: Shape tab', '#editor', openItem('#pageList button[data-id="home"]', 'Shape'));
 await sweep('page editor: SEO tab', '#editor', openItem('#pageList button[data-id="home"]', 'SEO'));
@@ -891,20 +902,19 @@ await sweep('encrypted editor', '#editor', async (env, again) => {
   await env.app.fill('#newSecretId', 'sweep-secret'); await env.app.press('#newSecretId', 'Enter'); await wait(500);
 });
 await sweep('mesh view', '#editor', async (env) => { await toContent(env); if (!(await env.app.evaluate(() => /Mesh/.test((document.querySelector('#editor h1') || {}).textContent || '')))) { await env.app.click('#meshNav'); await wait(600); } });
-await sweep('theme & defaults', '#editor', async (env) => { if (!(await env.app.evaluate(() => (document.querySelector('#editor h1') || {}).textContent === 'Design' && !document.getElementById('cmsShell').hidden))) { await env.app.click('#modeDesignBtn'); await env.app.click('#designThemeBtn'); await wait(600); } });
-await sweep('canvas header', '#studioRoot header.bar', withSelection('id:hl-title'));
+await sweep('theme & defaults', '#editor', async (env) => { if (!(await env.app.evaluate(() => (document.querySelector('#editor h1') || {}).textContent === 'Theme & defaults' && !document.getElementById('cmsShell').hidden))) { await designView(env.app, 'theme'); await wait(600); } });
+/* the one header in Design -> Canvas: the Design views and every canvas-only control */
+await sweep('app header (Design -> Canvas)', '#appBar', withSelection('id:hl-title'));
 await sweep('canvas left: Layers + groups', '#studioRoot aside.left', withSelection('id:hl-title'));
 await sweep('canvas left: Pages', '#pagesPane', async (env) => { await toCanvas(env); await env.app.click('#tabPages'); });
 await sweep('canvas left: Library', '#libPane', async (env) => { await toCanvas(env); await env.app.click('#tabLib'); await wait(300); });
-await sweep('canvas right: Theme + SEO tabs', '#studioRoot aside.right', toCanvas);
-await sweep('canvas right: SEO pane', '#paneSeo', async (env) => { await toCanvas(env); await env.app.click('#tabSeo'); });
 /* one sweep per section: the redesigned toolbar shows one section's controls at a time */
 for (const sec of TEXT) await sweep('toolbar: heading / ' + sec, '#selToolbar, #selToolbarPop', withSelection('id:hl-title', [sec]));
 /* found once per sweep, after the preview has rendered: a sweep click may navigate it away */
 const firstSection = async (env) => env.sectionKey || (env.sectionKey = await until(() => env.pv.evaluate(() => { const s = [...document.querySelectorAll('section[data-ark-layout-key]')].find((x) => x.getBoundingClientRect().height > 80); return s && s.getAttribute('data-ark-layout-key'); }), 'the preview has no section to select'));
 for (const sec of CONTAINER.filter((x) => !TEXT.includes(x))) await sweep('toolbar: container / ' + sec, '#selToolbar, #selToolbarPop', async (env, again) => withSelection(await firstSection(env), [sec])(env, again));
-await sweep('sitemap', '#mapView', async (env) => { await toCanvas(env); if (await env.app.evaluate(() => document.getElementById('mapView').hidden)) { await env.app.click('#view button[data-v="map"]'); await wait(400); } });
-for (const [name, button] of [['popover: More', '#btnMore'], ['popover: Design check', '#btnCheck'], ['popover: page switcher', '#btnPage'], ['popover: Background', '#btnCanvasTransitions']]) {
+await sweep('sitemap', '#mapView', async (env) => { if (await env.app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('mapView').hidden)) { await designView(env.app, 'map'); await wait(400); } });
+for (const [name, button] of [['popover: Design check', '#btnCheck'], ['popover: page switcher', '#btnPage'], ['popover: page SEO', '#btnPageSeo'], ['popover: Background', '#designBackgroundBtn']]) {
   await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { await env.app.click(button, { timeout: 15000 }); await wait(400); } });
 }
 await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await env.app.click('#versionsNav'); await wait(600); } });

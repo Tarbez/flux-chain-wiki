@@ -370,6 +370,10 @@
 #studioRoot .seo-controls .row > label { white-space: normal; } 
 #studioRoot .seo-controls .row > span:empty { display: none; } 
 #studioRoot .seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) 112px; gap: 6px; } 
+#studioRoot .seo-controls .ctl-seg { justify-self: start; } 
+#studioRoot .seo-controls .ctl-seg button { padding: 4px 12px; } 
+#studioRoot .seo-pop { display: grid; gap: 8px; align-content: start; } 
+#studioRoot .seo-pop > .btn { justify-self: start; } 
 #studioRoot .seo-refusal { color: var(--warn); } 
 #studioRoot .checks li p { margin: 2px 0 0; color: var(--muted); font-size: 12px; } 
 #studioRoot .checks li .acts { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; } 

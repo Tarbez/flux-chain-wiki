@@ -138,7 +138,9 @@
  #scene .ark-header .ark-link { min-height:44px; }
 }
 @media(max-width:560px) { .header-core-links { display:none; } }
-@media(max-width:420px) {
+/* Up to 440px (covers 430px phones) MENU is an icon square like Account: with its label the
+   row ran out of room once the network pill read "Local devnet". */
+@media(max-width:440px) {
  #scene .ark-header .nav-toggle {width:40px;min-width:40px;padding:0;}
  #scene .ark-header .nav-toggle-label {display:none;}
 }
@@ -354,8 +356,10 @@
  #scene .ark-header .nav-toggle{flex:0 0 40px}
  #scene .ark-header .header-chain-trigger{padding:0 12px}
 }
-/* Below 380px only the lockup shrinks; the 16px gutter stays so the brand lines up with the page text. */
-@media(max-width:380px){
+/* Below 390px the lockup shrinks and the gaps tighten; the 16px gutter stays so the brand
+   lines up with the page text. */
+@media(max-width:389.98px){
+ #scene .ark-header{gap:6px}
  #scene .ark-header .ark-studio-identity{gap:9px}
  #scene .ark-header .ark-brand-mark{width:30px;height:30px}
  #scene .ark-header .ark-brand-wordmark{font-size:20px;letter-spacing:.1em}
@@ -446,4 +450,13 @@
   }
   #scene .ark-header .header-core-links .header-account-link .native-icon { width:18px; height:18px; flex-basis:18px; opacity:.9; }
   #scene .ark-header .header-core-links .header-account-link[data-signed-in="true"] .native-icon { color:hsl(var(--trust,var(--primary))); opacity:1; }
+}
+/* Below 360px the labelled network pill no longer fits beside a full wordmark (MENU fell
+   off-screen at 320px), so it keeps only its status dot; js/resolvers/header.js mirrors the
+   network name into the trigger's aria-label and title. Last in the file so it outranks the
+   home pill padding above. */
+@media(max-width:359.98px) {
+  #scene .ark-header .header-chain-trigger,
+  #scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger { justify-content:center; width:40px; padding:0; }
+  #scene .ark-header .header-chain-trigger-label { display:none; }
 }

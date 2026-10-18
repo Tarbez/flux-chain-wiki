@@ -31,7 +31,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, clickHeader } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
 const FLX = require('../../js/admin/vendor/flx-state-grammar.js');
@@ -102,7 +102,7 @@ try {
   await step('connecting the project folder starts the history from the project as found', async () => {
     /* #modeDesignBtn (what appFrame waits for) is static HTML: wait until admin.js has wired the page */
     await until(() => app.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished starting', 30000);
-    await app.click('#connect');
+    await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect', 30000)
       .catch(async (error) => { throw new StepFailure(error.message + ' (status: ' + await app.evaluate(() => document.getElementById('status').textContent) + ')'); });
     const h = await until(() => head(), 'cms-history/head.flx was never written');
@@ -370,7 +370,7 @@ try {
     await page.goto(`${ORIGIN}/admin`);
     const app2 = await appFrame(page);
     await until(() => app2.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished starting after the reload', 30000);
-    await app2.click('#connect');
+    await clickHeader(app2, 'connect');
     await until(() => app2.evaluate(() => document.getElementById('connect').disabled), 'project folder did not reconnect', 30000);
     await app2.click('#versionsNav');
     const row2 = (seq) => app2.locator(`#versionsList li[data-seq="${seq}"]`);

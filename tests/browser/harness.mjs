@@ -145,6 +145,13 @@ export async function openToolbarSection(app, name, timeout = 5000) {
     if (Date.now() > end) throw new Error(`the toolbar has no "${name}" section (it offers: ${(await toolbarSections(app)).join(', ') || 'nothing'})`);
     await sleep(100);
   }
+  /* Already open is not proof it STAYS open: an identity section (States, Component instance)
+     auto-opens on the selection that created it, and a driver that has just clicked another
+     element may find it open a moment before that click's selection message lands -- which
+     closes it, by design (a new selection closes the popover). The driver then waited 30 s on
+     a popover that was gone (studio-flows "becomes the trigger", full-audit "state group").
+     So an already-open section is re-read after the preview has had time to report. */
+  if (await toolbarSectionIsOpen(app, name)) await sleep(400);
   if (!(await toolbarSectionIsOpen(app, name))) await button.click();
   const body = app.locator(`#selToolbarPop:not([hidden])[aria-label^="${name}"] .tb-pop-body`);
   await body.waitFor({ state: 'visible', timeout: Math.max(500, end - Date.now()) });
@@ -153,4 +160,63 @@ export async function openToolbarSection(app, name, timeout = 5000) {
 export async function closeToolbarSection(app) {
   const close = app.locator('#selToolbarPop:not([hidden]) .tb-pop-x');
   if (await close.count()) await close.click();
+}
+
+/* ---- the ONE header (admin-app.html #appBar, 2026-10-18) -----------------------------
+   Content and Design share one header; Studio's own second bar and the fixed right panel are
+   gone. Where each control now lives, so drivers name the control and not its position:
+   - Design's views are one segmented control: #designCanvasBtn, #designMapBtn (the sitemap,
+     was #view [data-v=map]), #designBackgroundBtn (the transition popover, was
+     #btnCanvasTransitions) and #designThemeBtn (Theme & defaults, which now also holds the
+     site-wide SEO as #siteSeo);
+   - the canvas-only controls -- #btnLeftRail, #btnPage, #btnPageSeo (this page's SEO
+     popover, was the right panel's SEO tab), #devices, #btnUndo/#btnRedo, #btnCheck, #mode --
+     show only in Design -> Canvas;
+   - ONE #save for every mode (was a Save per editor plus Studio's #btnCmsSave);
+   - #connect, #who and #signOut sit in #accountMenu behind #accountBtn (the More menu's
+     shortcuts hint too). */
+export const ACCOUNT_MENU_IDS = ['connect', 'who', 'signOut'];
+export async function openAccountMenu(app) {
+  if (await app.evaluate(() => document.getElementById('accountMenu').hidden)) await app.click('#accountBtn');
+  await app.locator('#accountMenu').waitFor({ state: 'visible', timeout: 5000 });
+}
+/* a real click on a header control, opening the account menu first when it lives there */
+export async function clickHeader(app, id, options) {
+  if (ACCOUNT_MENU_IDS.includes(id)) await openAccountMenu(app);
+  await app.click('#' + id, options);
+}
+/* Design -> 'canvas' | 'map' | 'theme', from wherever the editor is */
+export async function designView(app, view) {
+  if (await app.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected') !== 'true')) await app.click('#modeDesignBtn');
+  const id = { canvas: 'designCanvasBtn', map: 'designMapBtn', theme: 'designThemeBtn' }[view];
+  if (!id) throw new Error('no Design view named ' + view);
+  if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await app.click('#' + id);
+  await app.waitForFunction((b) => document.getElementById(b).getAttribute('aria-pressed') === 'true', id, { timeout: 15000 });
+}
+/* the popover a header button opened (Studio's openPop: one .pop at a time) */
+export const headerPopover = (app) => app.locator('#studioRoot > .pop');
+/* this page's SEO popover (opened from beside the page picker); returns it */
+export async function openPageSeo(app) {
+  await designView(app, 'canvas');
+  if ((await app.locator('#btnPageSeo').getAttribute('aria-expanded')) !== 'true') await app.click('#btnPageSeo');
+  const pop = app.locator('#studioRoot > .pop.seo-pop');
+  await pop.waitFor({ state: 'visible', timeout: 5000 });
+  return pop;
+}
+/* the site-wide SEO section of Theme & defaults; returns it */
+export async function openSiteSeo(app) {
+  await designView(app, 'theme');
+  const box = app.locator('#siteSeo');
+  await box.waitFor({ state: 'visible', timeout: 15000 });
+  return box;
+}
+/* the Background (page transition) popover; returns it */
+export async function openBackground(app) {
+  if ((await app.locator('#designBackgroundBtn').getAttribute('aria-expanded')) !== 'true') {
+    if (await app.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected') !== 'true')) await app.click('#modeDesignBtn');
+    await app.click('#designBackgroundBtn');
+  }
+  const pop = app.locator('#studioRoot > .pop', { has: app.locator('h4', { hasText: 'Background transition' }) });
+  await pop.waitFor({ state: 'visible', timeout: 5000 });
+  return pop;
 }

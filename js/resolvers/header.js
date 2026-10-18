@@ -89,6 +89,13 @@ function buildHeaderChainPopover(el) {
   dot.setAttribute('aria-hidden', 'true');
   var triggerLabel = document.createElement('span');
   triggerLabel.className = 'header-chain-trigger-label';
+  /* The name also goes on the trigger itself: below 360px the pill shows only its dot
+     (css/navigation.css), and the accessible name and tooltip must still say which network. */
+  function showNetwork(label) {
+    triggerLabel.textContent = label;
+    trigger.setAttribute('aria-label', 'Network: ' + label);
+    trigger.title = 'Network: ' + label;
+  }
   triggerLabel.textContent = 'Network';
   trigger.appendChild(dot);
   trigger.appendChild(triggerLabel);
@@ -124,7 +131,7 @@ function buildHeaderChainPopover(el) {
   });
 
   loadHeaderWalletModule().then(function (dw) {
-    triggerLabel.textContent = shortNetworkLabel(dw.resolveWireUrl(), dw.KNOWN_NETWORKS);
+    showNetwork(shortNetworkLabel(dw.resolveWireUrl(), dw.KNOWN_NETWORKS));
     dw.mountNetworkSelect(list, function () {
       /* Convenience only: remembering the choice is enough for any page
          that reads resolveWireUrl() fresh (account.js's loadWallet
@@ -138,7 +145,7 @@ function buildHeaderChainPopover(el) {
     if (typeof window !== 'undefined') {
       window.addEventListener('defxn-network-changed', function (event) {
         var url = event.detail && event.detail.url;
-        if (url) triggerLabel.textContent = shortNetworkLabel(url, dw.KNOWN_NETWORKS);
+        if (url) showNetwork(shortNetworkLabel(url, dw.KNOWN_NETWORKS));
       });
     }
   }).catch(function () {

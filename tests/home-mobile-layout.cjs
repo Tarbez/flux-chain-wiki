@@ -20,7 +20,11 @@ assert(home.includes('@media(max-width:640px)') && home.includes('grid-template-
 assert(mobile.includes('content:"MEASURED PERFORMANCE"'), 'the compact stats panel has a clear section label');
 assert(mobile.includes('home-lifecycle::before'), 'the compact lifecycle action retains a deliberate accent rail');
 assert(navigation.includes('env(safe-area-inset-top,0px)'), 'mobile chrome reserves the device safe area');
-assert(navigation.includes('.ark-studio-identity{min-width:0;flex:0 1 auto'), 'mobile identity can shrink instead of colliding with controls');
+/* Superseded 2026-10-18: letting the identity shrink (flex:0 1 auto + ellipsis) cut the
+   wordmark to "DE..." at 360-430px. The phone row now keeps the identity at full size and
+   makes room by drawing Account icon-only; tests/browser/public-header.mjs measures it. */
+assert(navigation.includes('.ark-studio-identity{flex:0 0 auto'), 'the phone identity never shrinks, so the wordmark is never cut');
+assert(navigation.includes('.header-account-label{display:none}'), 'phone Account is icon-only, making room for the full wordmark');
 assert(navigation.includes('@media(max-width:1040px)'), 'navigation enters its compact layout before labels can wrap');
 assert(navigation.includes('.header-core-links > a:not(.header-account-link) {display:none;}'), 'compact navigation keeps secondary routes inside the menu');
 assert(resolutions.includes('@media(max-width:1040px) { .header-products {display:none;} }'), 'the Products trigger yields to the complete menu at compact widths');

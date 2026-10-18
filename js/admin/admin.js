@@ -48,8 +48,6 @@
      `reason` empty enables the button (restoring its own tooltip); anything else disables it and
      becomes its tooltip. */
   var NOTHING_TO_SAVE = 'Nothing to save: every draft matches its saved copy.';
-  /* false until the Studio block's `let view`/popover state exist (syncHeader reads them) */
-  var headerReady = false;
   function refuse(button, reason) {
     if (!button) return;
     if (button.dataset.baseTitle === undefined) button.dataset.baseTitle = button.title || '';
@@ -236,6 +234,8 @@
     return h('div', { class: 'field field-link' }, label, typeSelect, body);
   }
 
+  /* false until the Studio block's `let view`/popover state exist (syncHeader reads them) */
+  var headerReady = false;
   /* ---- page list ---------------------------------------------------- */
   function renderList() {
     syncMode();
@@ -346,10 +346,11 @@
      setView(), the canvas/sitemap switch they drive. */
   /* The persistent header's real height, published once as --app-bar-h on <html>. #studioRoot
      (css/studio-embed.css) docks below it and sizes its 100vh-based panels by it, so the mode
-     switch above stays reachable at EVERY width: at 760px and below the header wraps (193px
-     at 760px, 253px at 390px, measured in Chromium), and the old hardcoded 58px offset left
-     Studio painted over the switch there. Observed, not computed once, because the wrap
-     changes with width, fonts, and the status text. */
+     switch above stays reachable at EVERY width: below 1280px the one header wraps (89px at
+     760px, 169px at 390px; one 52px row from 1280px -- measured in Chromium 2026-10-18,
+     tests/browser/header-reach.mjs), and the old hardcoded 58px offset once left Studio
+     painted over the switch. Observed, not computed once, because the wrap changes with
+     width, fonts, and which canvas controls are showing. */
   (function trackAppBarHeight() {
     var bar = document.querySelector('body > header.bar');
     if (!bar || typeof ResizeObserver !== 'function') return;
@@ -764,6 +765,37 @@
     catch (error) { note += ' sitemap.xml/robots.txt/llms.txt were not updated (' + error.message + '); the next Save writes them.'; }
     return note + await recordVersion(1, { restoredFrom: '' });
   }
+  /* A deleted page or article takes its entries in every other draft with it, in the same
+     Delete: its SEO override (keyed by id) and whatever layout, states, components or element
+     animation keyed by the route that went with it. Before this, the SEO draft still held the
+     deleted page's entry, showed unsaved until the next Save, and the saved seo-data.js kept an
+     orphan (regression: tests/delete-prunes-drafts.cjs). Which drafts key by page or route is
+     ArkAdminStore.drafts()' byItem/byRoute, not a list here. The draft loses the entries; the
+     SAVED copy is written without them only where it had them -- through the draft's own
+     save(), with the draft swapped for the pruned saved value for that one write, so an
+     unrelated unsaved edit in the same draft stays unsaved instead of being saved by a Delete.
+     `routesBefore` is every route before the removal: a route is gone only when the site no
+     longer has it. -> a sentence for the status line. */
+  async function forgetDeleted(itemsKey, id, routesBefore) {
+    var routesNow = studioRoutes().map(function (r) { return r.path; });
+    var gone = { key: itemsKey, id: id, routes: routesBefore.filter(function (path) { return routesNow.indexOf(path) < 0; }) };
+    var cleaned = [], failed = [];
+    var singles = ArkAdminStore.drafts('single').filter(function (d) { return d.byItem || d.byRoute; });
+    for (var i = 0; i < singles.length; i++) {
+      var d = singles[i], handle = singleDraftHandle(d.key);
+      if (!window[d.global]) continue;
+      var draft = ArkAdminStore.forgetItem(d, handle.draft(), gone).value;
+      var savedText = handle.saved(), saved = savedText ? ArkAdminStore.forgetItem(d, JSON.parse(savedText), gone) : { changed: false };
+      if (saved.changed) {
+        handle.set(saved.value);
+        try { await handle.save(); cleaned.push(d.file + '-data.js'); }
+        catch (error) { failed.push(d.file + '-data.js (' + (error && error.message ? error.message : error) + ')'); }
+      }
+      handle.set(draft);
+    }
+    return (cleaned.length ? ' Removed its entries from ' + cleaned.join(', ') + '.' : '') +
+      (failed.length ? ' Its entries are still in ' + failed.join(', ') + '; the next Save removes them.' : '');
+  }
 
   async function deleteCurrent() {
     if (state.kind === 'article') { await deleteArticle(); return; }
@@ -772,9 +804,11 @@
     var id = state.current, manifest = state.drafts[id];
     if (!state.dir && state.saved[id] !== null) { status('Connect the project folder to delete a page: this removes its file.', 'warn'); return; }
     if (!window.confirm('Delete "' + manifest.title + '"? This removes its file and its link on the theory page.')) return;
+    var routesBefore = studioRoutes().map(function (r) { return r.path; });
     try { await removeItemFile('page', id); }
     catch (error) { status(error.message, 'error'); return; }
-    state.current = state.ids[0]; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + manifest.title + '.' + await afterDelete(), 'ok');
+    var forgot = await forgetDeleted('manifests', id, routesBefore);
+    state.current = state.ids[0]; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + manifest.title + '.' + forgot + await afterDelete(), 'ok');
   }
 
   /* ---- articles ----------------------------------------------------- */
@@ -913,9 +947,11 @@
     if (state.slugs.length <= 1) { status('Keep at least one article: the site links each note to the next.', 'warn'); return; }
     if (!state.cdirs && state.aSaved[slug] !== null) { status('Connect the project folder to delete an article: this removes its file.', 'warn'); return; }
     if (!window.confirm('Delete "' + a.title + '"? This removes its file and its card on the Learnings page.')) return;
+    var routesBefore = studioRoutes().map(function (r) { return r.path; });
     try { await removeItemFile('article', slug); }
     catch (error) { status(error.message, 'error'); return; }
-    state.aCurrent = state.slugs[0]; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + a.title + '.' + await afterDelete(), 'ok');
+    var forgot = await forgetDeleted('articles', slug, routesBefore);
+    state.aCurrent = state.slugs[0]; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + a.title + '.' + forgot + await afterDelete(), 'ok');
   }
 
   function articleBlueprint(slug) {
@@ -1794,6 +1830,8 @@
      built locally. cmsCurrentRoute is a real path string ('/', '/journal', ...), not a
      dense id, and drives syncCmsPreview()'s iframe src and the Pages tab/sitemap below. */
   let cmsRoutes = [], cmsCurrentRoute = '/';
+  /* true once the preview has reported 'defxn-cms-preview-ready' for what it was last sent (the design checks wait for it) */
+  let cmsPreviewReady = false;
   /* The real DEFXN site's own design tokens and the layout enums the visual-style controls
      offer -- read straight from js/content/layout.js (ArkLayout, loaded by admin-app.html
      before this file), the one module that also validates and applies them. These used to be
@@ -1872,6 +1910,7 @@
     if (!cmsConnected || !cmsSourceSite || !cmsPreview.contentWindow) return;
     /* versionPreviewSite: a past version shown read-only from the Versions panel, which every
        reload of the frame keeps showing until "Back to current drafts" clears it */
+    cmsPreviewReady = false; /* the preview re-renders from this; the design checks wait for its ready */
     cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-state', site: versionPreviewSite || cmsSourceSite }, window.location.origin);
   }
   function postCmsPreviewMode() {
@@ -1996,7 +2035,7 @@
     const route = cmsCurrentRoute || '/';
     if (force || cmsPreviewRoute !== route || !cmsPreview.getAttribute('src')) {
       cmsExactSelection = null; cmsExactSelections = [];
-      cmsPreviewRoute = route;
+      cmsPreviewRoute = route; cmsPreviewReady = false;
       cmsPreview.src = 'index.html?cms-preview=1#' + route;
     }
   }
@@ -2039,7 +2078,7 @@
   }
   function rectOf(el) { const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: (r.left - s.left) / scale, y: (r.top - s.top) / scale, w: r.width / scale, h: r.height / scale }; }
   /* #selToolbar's positioning, on top of rectOf()'s scale-corrected stage coordinates (the
-     only overlay this document still places; the dense canvas's placeOverlays() is gone).
+     only overlay this document still places).
      cmsExactSelection.rect (reported by js/main.js's cmsSelectionInfo(), computed INSIDE the
      real-site preview iframe via that element's own getBoundingClientRect()) is already in
      the iframe's OWN internal CSS-pixel space -- i.e. the iframe's layout viewport at its
@@ -2925,7 +2964,7 @@
        cmsMakeComponent decides, and refuses with a reason, against the real selection) */
     const compRefusal = cmsExactSelections.some((sel) => sel.component || sel.stateGroup) ? 'Select page content, not an inserted block or a state group' : '';
     toolbarAction(actions, 'make-component', 'wand', 'Make into component', () => { if (cmsConnected && cmsPreview.contentWindow) cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-make-component' }, window.location.origin); }, compRefusal);
-    toolbarAction(actions, 'content-cms', 'article', 'Open in Content', openContentEditor);
+    toolbarAction(actions, 'content-cms', 'article', 'Open in Content', () => openContentEditor());
     toolbarAction(actions, 'design-controls', 'palette', 'Theme & defaults', () => selectDesign());
     /* one roving tab stop: Tab lands on the bar once, the arrow keys move along it */
     const buttons = [...box.querySelectorAll('button:not([disabled])')];
@@ -3331,13 +3370,65 @@
      would build it. A rule whose every candidate sits on an image/gradient (or a colour
      space this parser does not read) reports 'unmeasured' rather than a guess. Neither of
      those two states counts toward the score; the badge is passes / measured rules. */
-  let lastChecks = [];
+  /* WHAT the checks measure: the active route's own content, as the visitor is given it. The
+     score moved between runs on an unchanged home page (9/13, 6/13, 7/13, 8/13) and reported
+     "2 H1s": the second H1 was #fallback, the no-JS copy main.js keeps for screen readers but
+     marks aria-hidden and clips to 1px (css/fallback.css); and a run that landed mid-entrance
+     measured text still fading in (presence animations, opacity 0 -> 1). An element counts
+     only when nothing marks it as not-the-page -- `hidden`, `inert` (the router's outgoing or
+     not-yet-shown route), aria-hidden="true", the editor's own [data-ark-studio-ui] chrome --
+     it is not visibility:hidden, and no ancestor clips it to nothing (a box of 1px or less
+     that hides its overflow or clips its paint). Structure, not a list of ids: any visually-
+     hidden copy is left out the same way (regression: tests/design-check-measurable.cjs). */
+  function checkMeasurable(el) {
+    if (!el || !el.isConnected || !el.getClientRects().length) return false;
+    const win = el.ownerDocument.defaultView;
+    for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+      if (e.hidden || e.inert || e.getAttribute('aria-hidden') === 'true' || e.hasAttribute('data-ark-studio-ui')) return false;
+      const st = win.getComputedStyle(e);
+      if (st.visibility === 'hidden' || st.visibility === 'collapse') return false;
+      const clips = st.overflow !== 'visible' || (st.clipPath && st.clipPath !== 'none') || (st.clip && st.clip !== 'auto');
+      if (clips) { const r = e.getBoundingClientRect(); if (r.width <= 1 || r.height <= 1) return false; }
+    }
+    return true;
+  }
+  /* WHEN they measure: after the preview reported the route ready (cmsPreviewReady), its fonts
+     loaded, the router finished its transition (#scene's data-transition) and every finite
+     animation ended -- an infinite one (the hero's ambient motion) never ends and changes no
+     rule. Resolves false if the page is still moving after `budget` ms; the popover says so
+     rather than presenting a mid-animation reading as the page's. */
+  async function previewSettled(budget) {
+    const end = Date.now() + budget, pause = (ms) => new Promise((r) => setTimeout(r, ms));
+    while (Date.now() < end) {
+      const doc = (() => { try { return cmsPreview.contentDocument; } catch (e) { return null; } })();
+      if (cmsPreviewReady && doc && doc.readyState === 'complete' && doc.body) {
+        if (doc.fonts && doc.fonts.status !== 'loaded') { await Promise.race([doc.fonts.ready, pause(250)]); continue; }
+        const scene = doc.getElementById('scene');
+        const moving = (doc.getAnimations ? doc.getAnimations() : []).filter((a) => a.playState === 'running' && a.effect && Number.isFinite(a.effect.getComputedTiming().endTime));
+        if (!(scene && scene.dataset.transition === 'running') && !moving.length) return true;
+        if (moving.length) { await Promise.race([Promise.all(moving.map((a) => a.finished.catch(() => {}))), pause(250)]); continue; }
+      }
+      await pause(100);
+    }
+    return false;
+  }
+  let lastChecks = [], lastChecksSettled = true, checkRun = 0;
+  /* the one way the checks run: settle, then measure; an older run that finishes late is dropped */
+  async function measureChecks() {
+    const run = ++checkRun;
+    const settled = await previewSettled(6000);
+    if (run !== checkRun) return lastChecks;
+    lastChecksSettled = settled;
+    runChecks();
+    if (popAnchor === $('btnCheck')) refreshPop();
+    return lastChecks;
+  }
   function runChecks() {
     const out = [], add = (o) => out.push(o);
     const doc = (() => { try { return cmsPreview.contentDocument; } catch (e) { return null; } })();
     const route = cmsRoutes.find((r) => r.path === cmsCurrentRoute) || { path: cmsCurrentRoute };
     if (!doc || !doc.body) { lastChecks = out; return out; }
-    const rendered = (el) => el && el.isConnected && el.getClientRects().length;
+    const rendered = checkMeasurable;
     const fsz = (el) => parseFloat(getComputedStyle(el).fontSize);
     const words = (el) => (el.textContent || '').trim().split(/\s+/).filter(Boolean).length;
     const heads = [...doc.querySelectorAll('h1,h2,h3,h4')].filter(rendered);
@@ -3452,8 +3543,12 @@
     add({ law: 'Scanning', title: 'Easy to scan', status: longP.length || bare.length ? 'warn' : 'pass', detail: longP.length || bare.length ? `${longP.length ? `${longP.length} paragraph${longP.length > 1 ? 's' : ''} over 60 words. ` : ''}${bare.length ? `${bare.length} section${bare.length > 1 ? 's' : ''} with no heading.` : ''}` : 'Short paragraphs, and every section has a heading.' });
     // 9 lead with the point
     const actions = [...doc.querySelectorAll('a[href],button')].filter(rendered);
-    const firstActTop = actions.length ? Math.min(...actions.map((el) => el.getBoundingClientRect().top)) : Infinity;
-    const leadOk = h1s.length && h1s[0].getBoundingClientRect().top < 640 && (route.seoArticle || firstActTop < 760);
+    /* "the first screen" is a place on the PAGE, not in the window: measured from the top of the
+       document (scroll of the window and of any scrolled container undone), so the reading is
+       the same however far the preview happens to be scrolled */
+    const pageTop = (el) => { let t = el.getBoundingClientRect().top + win.scrollY; for (let e = el.parentElement; e; e = e.parentElement) t += e.scrollTop; return t; };
+    const firstActTop = actions.length ? Math.min(...actions.map(pageTop)) : Infinity;
+    const leadOk = h1s.length && pageTop(h1s[0]) < 640 && (route.seoArticle || firstActTop < 760);
     add({ law: 'Layout', title: 'Lead with the point', status: leadOk ? 'pass' : 'warn', detail: leadOk ? 'The H1 and a next step are visible without scrolling.' : 'Put the H1 and one clear call to action in the first screen.' });
     // 10 links work (site-wide, real manifest link fields)
     const li = realLinkIndex(), bad = li.filter((l) => !l.ok);
@@ -3484,16 +3579,18 @@
     return out;
   }
   let checkT = 0;
-  function queueCheck() { clearTimeout(checkT); checkT = setTimeout(() => { if (view === 'design') { runChecks(); if (popAnchor === $('btnCheck')) refreshPop(); renderStatus(); } }, 450); }
+  function queueCheck() { clearTimeout(checkT); checkT = setTimeout(() => { if (view === 'design') measureChecks().then(() => renderStatus()); }, 450); }
   function applyFix(c) {
     if (c.fix === 'seo') { closePop(); openPageSeo(); return; }
     if (c.fix === 'seo-site') { closePop(); openSiteSeo(); return; }
   }
-  $('btnCheck').addEventListener('click', (e) => { runChecks(); openPop(e.currentTarget, (p) => {
+  /* opens on the last reading at once, and repaints when the settled one lands (measureChecks) */
+  $('btnCheck').addEventListener('click', (e) => { const opening = popAnchor !== e.currentTarget; openPop(e.currentTarget, (p) => {
     const checks = lastChecks;
     const head = document.createElement('div'); head.className = 'checkhead';
     const measured = checks.filter((c) => c.status === 'pass' || c.status === 'warn' || c.status === 'fail'), unmeasured = checks.length - measured.length;
     head.innerHTML = `<div><b>Design check · ${esc(cmsCurrentRoute)}</b><p>${measured.filter((c) => c.status === 'pass').length} of ${measured.length} measured rules pass${unmeasured ? ` · ${unmeasured} not measured` : ''}</p></div>`;
+    if (!lastChecksSettled) head.firstChild.appendChild(h('p', { class: 'hint', text: 'Measured while the page was still moving: it had not finished loading fonts or animating after 6 seconds, so this reading can differ from the next. Check again once it is still.' }));
     p.appendChild(head);
     const ul = document.createElement('ul'); ul.className = 'checks';
     for (const c of checks) {
@@ -3512,7 +3609,7 @@
       ul.appendChild(li);
     }
     p.appendChild(ul);
-  }, 'right'); });
+  }, 'right'); if (opening) measureChecks(); });
 
   /* STEP 1 CLEANUP: the dense-encoding "Versions" feature (encodeDense/namedTree/base32/
      cidOf/publish, and the "History" tab/#paneVer that showed it) is deleted with no
@@ -3585,7 +3682,7 @@
     if (event.source !== cmsPreview.contentWindow) return;
     if (event.data.points) cmsInsertPoints = event.data.points;
     if (event.data.showing) cmsStatesShowing = event.data.showing;
-    if (event.data.type === 'defxn-cms-preview-ready') { if (event.data.groups) cmsGroups = event.data.groups; if (event.data.tree) cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); libKey = ''; renderLibrary(); queueCheck(); }
+    if (event.data.type === 'defxn-cms-preview-ready') { cmsPreviewReady = true; if (event.data.groups) cmsGroups = event.data.groups; if (event.data.tree) cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); libKey = ''; renderLibrary(); queueCheck(); }
     else if (event.data.type === 'defxn-cms-preview-error') toast('Preview update failed: ' + event.data.message);
     else if (event.data.type === 'defxn-cms-preview-select') {
       cmsExactSelection = event.data.selection || null;
@@ -4270,13 +4367,18 @@
      occasional actions, folded into one icon so the header keeps to one row. */
   function setAccountMenu(open) { $('accountMenu').hidden = !open; $('accountBtn').setAttribute('aria-expanded', String(open)); }
   $('accountBtn').addEventListener('click', function () { setAccountMenu($('accountMenu').hidden); });
+  /* a menu action (Connect, Sign out) closes the menu; its result shows in the status line */
+  $('accountMenu').addEventListener('click', function (event) { if (event.target.closest('button')) setAccountMenu(false); });
   document.addEventListener('pointerdown', function (event) { if (!$('accountMenu').hidden && !$('account').contains(event.target)) setAccountMenu(false); });
   $('account').addEventListener('keydown', function (event) { if (event.key === 'Escape' && !$('accountMenu').hidden) { setAccountMenu(false); $('accountBtn').focus(); } });
   /* the locked page asks before it signs out over unsaved work */
   /* `site` is read-only: exactly what Publish would send right now (a fresh copy). The
      publish round-trip browser test (tests/browser/publish-flows.mjs) takes the real
      editor's payload from it instead of rebuilding one the editor might not send. */
-  window.ArkAdminApp = { unsaved: function () { return anyDirty(); }, site: function () { return siteFromState(); } };
+  /* designCheck: the Design check's settled reading of the previewed page, the same run the
+     button makes (tests/browser/design-check-stable.mjs runs it repeatedly on one page) */
+  window.ArkAdminApp = { unsaved: function () { return anyDirty(); }, site: function () { return siteFromState(); },
+    designCheck: function () { return measureChecks().then(function (checks) { return { settled: lastChecksSettled, checks: clone(checks) }; }); } };
 
   /* ---- version history (js/admin/versions.js + js/admin/versions-panel.js) ------------
      The history is kept beside the site in cms-history/, through the same connected folder

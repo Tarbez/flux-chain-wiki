@@ -1,28 +1,40 @@
 /* =====================================================================
-   HEADER REACH -- the persistent app header must stay usable while
-   Studio's canvas (Design mode) is showing, at every viewport width.
+   HEADER REACH -- the editor's ONE header must stay usable over Studio's
+   canvas at every viewport width, and fit one row from 1280px up.
 
-   Why this exists: Step 3 of the Studio merge docked #studioRoot at a
-   hardcoded top: 58px (css/admin.css's .bar height) so the header's
-   Content/Design #modeSwitch, Design #designSubSwitch and Mesh button stay
-   reachable -- but below 760px the header wraps taller than 58px, so that
-   width kept the old full-viewport overlay and on a phone the mode switch
-   was painted over: there was no way back out of Design mode. Nothing in
-   the logic tests could see it; every assertion about the switch's markup
-   and handlers passed while it was unclickable. This drives the real page
-   at phone, breakpoint and desktop widths and checks, per width:
+   Why this exists, twice over:
+   - Step 3 of the Studio merge docked #studioRoot at a hardcoded top: 58px
+     so the header's mode switch stayed reachable -- but below 760px the
+     header wraps taller than 58px, and on a phone the mode switch was
+     painted over: there was no way back out of Design mode. Every logic
+     test about the switch's markup and handlers passed while it was
+     unclickable.
+   - 2026-10-18 (owner: "No more one cms for content and one cms for
+     design. Only one merged."): Design mode had TWO headers -- the app bar
+     and Studio's own bar with a second page/mode/Save system -- wrapping to
+     two rows at 1500px when "Editing tablet overrides" showed. They are one
+     header now, every concept once. This guards that it stays one row and
+     that every control in it can actually be clicked.
 
+   Per width (390, 760, 1280, 1500) it checks, in Design -> Canvas with
+   the tablet-override note AND a long status message showing (the widest
+   the header gets):
    - every header control's centre hit-tests to that control
-     (elementFromPoint), not to #studioRoot painted over it;
-   - #studioRoot starts at or below the header's bottom edge (no overlap)
-     and reaches the viewport bottom (no dead gap);
-   - the app document has no horizontal scroll;
+     (elementFromPoint), inside the viewport -- the account menu's controls
+     after opening it;
+   - at >= 1280px the header is ONE row: every visible control's vertical
+     centre lies within the first row's band;
+   - #studioRoot starts at the header's bottom edge (no overlap, no gap)
+     and reaches the viewport bottom;
+   - no horizontal scroll in the app document or #studioRoot;
+   - the canvas-only controls hide in Theme & defaults, Sitemap and Content;
    - Design -> Content -> Design works by real clicks (Playwright's own
      actionability check refuses a click on a covered element).
 
    Not part of scripts/run-tests.mjs (that runner only reads tests/*.cjs|mjs
    at the top level) because it needs Chromium. Run it by hand:
      node tests/browser/header-reach.mjs [screenshot-dir]
+   HEADER_REACH_WIDTHS=800,1024 probes other widths.
    ===================================================================== */
 import fs from 'node:fs';
 import http from 'node:http';
@@ -30,13 +42,18 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { appFrame, copySite, startHost } from './harness.mjs';
+import { appFrame, copySite, designView, openAccountMenu, startHost } from './harness.mjs';
 
-/* phone, css/admin.css's own 760px breakpoint, desktop. HEADER_REACH_WIDTHS=800,1024 probes others. */
 const WIDTHS = process.env.HEADER_REACH_WIDTHS
   ? process.env.HEADER_REACH_WIDTHS.split(',').map((w) => [Number(w), 900])
-  : [[390, 844], [760, 900], [1280, 800]];
-const HEADER_CONTROLS = ['#modeContentBtn', '#modeDesignBtn', '#designCanvasBtn', '#designThemeBtn', '#meshNav'];
+  : [[390, 844], [760, 900], [1280, 800], [1500, 900]];
+/* every control the header holds in Design -> Canvas (the account menu's are checked once it is open) */
+const CANVAS_CONTROLS = ['#modeContentBtn', '#modeDesignBtn', '#designCanvasBtn', '#designMapBtn', '#designBackgroundBtn', '#designThemeBtn',
+  '#btnLeftRail', '#btnPage', '#btnPageSeo', '#bpNote', '#devices [data-d="0"]', '#devices [data-d="1"]', '#devices [data-d="2"]', '#btnUndo', '#btnRedo', '#btnCheck',
+  '#mode [data-m="edit"]', '#mode [data-m="live"]', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn'];
+const ACCOUNT_CONTROLS = ['#connect', '#signOut'];
+const CANVAS_ONLY = ['#canvasNav', '#canvasTools'];
+const ONE_ROW_FROM = 1280;
 
 async function freePort() {
   const probe = http.createServer();
@@ -49,22 +66,22 @@ async function freePort() {
 /* Measured inside the app frame (admin-app.html), in its own coordinates. */
 function measure(frame, selectors) {
   return frame.evaluate((sels) => {
-    const bar = document.querySelector('body > header.bar');
+    const bar = document.getElementById('appBar');
     const studio = document.getElementById('studioRoot');
     const barRect = bar.getBoundingClientRect();
     const controls = sels.map((sel) => {
       const el = document.querySelector(sel);
-      if (!el || el.closest('[hidden]')) return { sel, shown: false };
+      if (!el || el.closest('[hidden]') || !el.getClientRects().length) return { sel, shown: false };
       const r = el.getBoundingClientRect();
       const x = r.left + r.width / 2, y = r.top + r.height / 2;
       const hit = document.elementFromPoint(x, y);
-      return { sel, shown: true, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hitsSelf: !!hit && (hit === el || el.contains(hit)), hit: hit ? (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + (hit.className ? '.' + String(hit.className).split(' ')[0] : '')) : null };
+      return { sel, shown: true, cy: y, top: r.top, bottom: r.bottom, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hitsSelf: !!hit && (hit === el || el.contains(hit)), hit: hit ? (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ')[0] : '')) : null };
     });
     const studioRect = studio && !studio.hidden ? studio.getBoundingClientRect() : null;
     return {
       viewport: { w: innerWidth, h: innerHeight },
-      barHeight: barRect.height, barBottom: barRect.bottom,
-      studio: studioRect ? { top: studioRect.top, bottom: studioRect.bottom, height: studioRect.height } : null,
+      barHeight: barRect.height, barTop: barRect.top, barBottom: barRect.bottom,
+      studio: studioRect ? { top: studioRect.top, bottom: studioRect.bottom } : null,
       barVar: getComputedStyle(document.documentElement).getPropertyValue('--app-bar-h').trim(),
       hScroll: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       studioHScroll: studio && !studio.hidden ? studio.scrollWidth - studio.clientWidth : 0,
@@ -72,6 +89,7 @@ function measure(frame, selectors) {
     };
   }, selectors);
 }
+const hiddenNow = (frame, sels) => frame.evaluate((s) => s.filter((sel) => { const el = document.querySelector(sel); return el && !el.hidden; }), sels);
 
 async function main() {
   const shotDir = process.argv[2] || null;
@@ -88,23 +106,32 @@ async function main() {
       const page = await context.newPage();
       await page.goto(`http://127.0.0.1:${port}/admin`);
       const frame = await appFrame(page);
+      await frame.waitForFunction(() => !!window.ArkAdminApp, null, { timeout: 20000 });
 
       /* Real clicks: Playwright refuses to click an element another one is painted over
-         ("... intercepts pointer events"), so a covered switch fails here, not silently. */
+         ("... intercepts pointer events"), so a covered control fails here, not silently. */
       const click = async (sel) => { try { await frame.click(sel, { timeout: 5000 }); return true; } catch (error) { fail(width, `real click on ${sel} failed: ${String(error.message).split('\n').find((l) => /intercepts/.test(l)) || error.message.split('\n')[0]}`); return false; } };
-      /* The editor may already open in Design mode (Studio is the default); only click when it does not. */
-      await frame.waitForFunction(() => ['modeContentBtn', 'modeDesignBtn'].some((id) => document.getElementById(id).getAttribute('aria-selected') === 'true'), null, { timeout: 15000 });
-      const startsInDesign = await frame.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected') === 'true');
-      if (!startsInDesign) await click('#modeDesignBtn');
+      await designView(frame, 'canvas');
       await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: 15000 });
-      await page.waitForTimeout(600); // let the header's own layout settle after the mode change
-      const design = await measure(frame, HEADER_CONTROLS);
+      /* the widest the header gets: the tablet-override note on, and a long status message */
+      await click('#devices [data-d="1"]');
+      await frame.waitForSelector('#bpNote:not([hidden])', { timeout: 5000 }).catch(() => fail(width, 'Tablet did not show the overrides note'));
+      await frame.evaluate(() => { const s = document.getElementById('status'); s.textContent = 'Saved 4 items to the connected project: Page "home", Layout, Components, sitemap.xml / robots.txt / llms.txt.'; s.dataset.tone = 'ok'; });
+      await page.waitForTimeout(600); // let the header's own layout settle
+      const design = await measure(frame, CANVAS_CONTROLS);
       if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-design.png`) });
 
       for (const c of design.controls) {
-        if (!c.shown) { fail(width, `${c.sel} is not shown in Design mode`); continue; }
+        if (!c.shown) { fail(width, `${c.sel} is not shown in Design -> Canvas`); continue; }
         if (!c.inView) fail(width, `${c.sel} is outside the viewport`);
         if (!c.hitsSelf) fail(width, `${c.sel}'s centre hit-tests to ${c.hit}, not the control -- something is painted over the header`);
+      }
+      const shown = design.controls.filter((c) => c.shown);
+      const rows = new Set(shown.map((c) => Math.round(c.cy / 8))).size;
+      if (width >= ONE_ROW_FROM) {
+        const first = Math.min(...shown.map((c) => c.top)), band = Math.max(...shown.filter((c) => c.top - first < 20).map((c) => c.bottom));
+        const below = shown.filter((c) => c.cy > band);
+        if (below.length) fail(width, `the header is not one row: ${below.map((c) => c.sel).join(', ')} wrapped below the first row (header ${design.barHeight}px)`);
       }
       if (!design.studio) fail(width, '#studioRoot is not showing in Design mode');
       else {
@@ -115,10 +142,36 @@ async function main() {
       if (design.hScroll > 0) fail(width, `the app document scrolls horizontally by ${design.hScroll}px`);
       if (design.studioHScroll > 0) fail(width, `#studioRoot scrolls horizontally by ${design.studioHScroll}px`);
 
+      /* the account menu: open it by a real click, then its controls must be reachable too */
+      try { await openAccountMenu(frame); } catch (error) { fail(width, 'the account menu did not open: ' + error.message.split('\n')[0]); }
+      const account = await measure(frame, ACCOUNT_CONTROLS);
+      for (const c of account.controls) {
+        if (!c.shown) { fail(width, `${c.sel} is not shown in the open account menu`); continue; }
+        if (!c.inView) fail(width, `${c.sel} (account menu) is outside the viewport`);
+        if (!c.hitsSelf) fail(width, `${c.sel} (account menu) hit-tests to ${c.hit} -- the menu is painted under something`);
+      }
+      if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-account.png`) });
+      await frame.press('#accountBtn', 'Escape');
+      if (!(await frame.evaluate(() => document.getElementById('accountMenu').hidden))) fail(width, 'Escape did not close the account menu');
+
+      /* the canvas-only groups belong to Design -> Canvas alone */
+      for (const [view, label] of [['map', 'Sitemap'], ['theme', 'Theme & defaults']]) {
+        await designView(frame, view);
+        const still = await hiddenNow(frame, CANVAS_ONLY);
+        if (still.length) fail(width, `${label} still shows the canvas-only ${still.join(', ')}`);
+      }
+      await designView(frame, 'canvas');
+
       if (await click('#modeContentBtn')) {
         await frame.waitForSelector('#studioRoot', { state: 'hidden', timeout: 15000 });
         const content = await frame.evaluate(() => ({ shell: !document.getElementById('cmsShell').hidden, selected: document.getElementById('modeContentBtn').getAttribute('aria-selected') }));
         if (!content.shell || content.selected !== 'true') fail(width, `Design -> Content by click did not land in Content mode (${JSON.stringify(content)})`);
+        const still = await hiddenNow(frame, [...CANVAS_ONLY, '#designSubSwitch']);
+        if (still.length) fail(width, `Content mode still shows ${still.join(', ')}`);
+        const cm = await measure(frame, ['#modeContentBtn', '#modeDesignBtn', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn']);
+        for (const c of cm.controls) if (!c.shown || !c.hitsSelf || !c.inView) fail(width, `Content mode: ${c.sel} is not reachable (${c.shown ? c.hit : 'hidden'})`);
+        if (width >= ONE_ROW_FROM && cm.barHeight > 60) fail(width, `Content mode's header is ${cm.barHeight}px tall, more than one row`);
+        if (cm.hScroll > 0) fail(width, `Content mode scrolls horizontally by ${cm.hScroll}px`);
         if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-content.png`) });
         if (await click('#modeDesignBtn')) {
           await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: 15000 });
@@ -127,7 +180,7 @@ async function main() {
         }
       }
 
-      console.log(`${width}px: header ${design.barHeight}px (--app-bar-h ${design.barVar || 'unset'}), studio top ${design.studio && design.studio.top}px, hScroll ${design.hScroll}/${design.studioHScroll}, controls ${design.controls.map((c) => c.sel + (c.hitsSelf ? ' ok' : ' COVERED by ' + c.hit)).join(', ')}`);
+      console.log(`${width}px: header ${design.barHeight}px in ${rows > 1 && width >= ONE_ROW_FROM ? 'MORE THAN ONE row' : width >= ONE_ROW_FROM ? 'one row' : 'wrapped rows'} (--app-bar-h ${design.barVar || 'unset'}), studio top ${design.studio && design.studio.top}px, hScroll ${design.hScroll}/${design.studioHScroll}, ${design.controls.filter((c) => c.shown && c.hitsSelf).length}/${CANVAS_CONTROLS.length} canvas controls + ${account.controls.filter((c) => c.shown && c.hitsSelf).length}/${ACCOUNT_CONTROLS.length} account controls clickable`);
       await context.close();
     }
   } finally {
@@ -138,7 +191,7 @@ async function main() {
   if (failures.length) {
     console.log('FAIL header-reach:\n  ' + failures.join('\n  '));
     process.exitCode = 1;
-  } else console.log(`PASS header-reach: header controls reachable and clickable over Studio at ${WIDTHS.map(([w]) => w + 'px').join(', ')}; Design/Content round trip by real clicks.`);
+  } else console.log(`PASS header-reach: every header control reachable and clickable over Studio at ${WIDTHS.map(([w]) => w + 'px').join(', ')}; one row from ${ONE_ROW_FROM}px with every canvas control, the tablet note and a long status showing; canvas-only controls hide elsewhere; Design/Content round trip by real clicks.`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) await main();
