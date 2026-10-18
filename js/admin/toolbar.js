@@ -122,11 +122,14 @@
     const popScroll = sameEdit && pop.querySelector('.tb-pop-body') ? pop.querySelector('.tb-pop-body').scrollTop : 0;
     box.hidden = false; box.textContent = '';
     box.dataset.key = key; box.dataset.kind = kind;
-    box.setAttribute('aria-label', 'Selection: ' + (state.cmsExactSelection.label || key));
     const row = cmsTreeRowForKey(key);
+    /* the selection is called what its Layers row is called (a stored name, else the one
+       ArkLayout.layerName derives), so the chip and the tree never name one element twice */
+    const selName = (row && row.label) || state.cmsExactSelection.label || key;
+    box.setAttribute('aria-label', 'Selection: ' + selName);
     const chip = document.createElement('span'); chip.className = 'tb-chip'; chip.title = key;
     chip.innerHTML = ic(kind === 'group' ? 'grid' : CMS_TAG_ICON[row ? row.tag : ''] || 'box', 'sm') + '<span class="tb-chip-name"></span>';
-    chip.querySelector('.tb-chip-name').textContent = state.cmsExactSelection.label || key;
+    chip.querySelector('.tb-chip-name').textContent = selName;
     if (state.device) { const bp = document.createElement('span'); bp.className = 'tb-bp'; bp.textContent = DEVICES[state.device][0] + ' ↓'; bp.title = `Changes apply to ${DEVICES[state.device][0].toLowerCase()} and smaller. Orange dots are overrides; click one to reset it.`; chip.appendChild(bp); }
     box.appendChild(chip);
     tbPopBody = document.createElement('div'); tbPopBody.className = 'tb-pop-body'; tbPopTitle = '';

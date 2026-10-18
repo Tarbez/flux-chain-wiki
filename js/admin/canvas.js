@@ -33,22 +33,49 @@
      the only overlay this document still positions is #selToolbar. */
   /* the breakpoint, Edit/Live and canvas/sitemap view are shared state (state.device/live/view,
      js/admin/state.js): the header sets them, this file sizes the stage by them */
-  const DEVICES = [['Desktop', 1280], ['Tablet', 820], ['Phone', 390]];
+  /* [name, width, ArkLayout's breakpoint name] -- the index is state.device */
+  const DEVICES = [['Desktop', 1280, 'desktop'], ['Tablet', 820, 'tablet'], ['Phone', 390, 'phone']];
+  /* The breakpoint the canvas opens on: the one chosen last in this browser (#devices, remembered
+     by rememberDevice() -- an explicit choice wins), else the one THIS screen is, by the site's
+     own thresholds (ArkLayout.breakpoint of the editor's width): on a phone the canvas opens on
+     the phone layout, at 100%, instead of the desktop page shrunk to 28% (measured 2026-10-18 at
+     390px) -- a phone edit should be made where it will be seen. Only the first choice: a resize
+     afterwards never switches the breakpoint under an edit. */
+  const DEVICE_KEY = 'defxn-cms-device';
+  function initialDevice() {
+    let saved = null;
+    try { saved = localStorage.getItem(DEVICE_KEY); } catch (e) { /* storage blocked: derived below */ }
+    const bp = saved || (window.ArkLayout && ArkLayout.breakpoint ? ArkLayout.breakpoint(window.innerWidth) : 'desktop');
+    return Math.max(0, DEVICES.findIndex((d) => d[2] === bp));
+  }
+  function rememberDevice(index) {
+    try { localStorage.setItem(DEVICE_KEY, DEVICES[index][2]); } catch (e) { /* a convenience only */ }
+  }
+  state.device = initialDevice();
   const stage = $('stage'), wrap = $('canvasWrap');
   let scale = 1;
+  /* The stage fills the canvas area: as wide as the breakpoint (zoomed down to fit when wider than
+     the area) and exactly as tall as the room under the size label, so the page scrolls inside the
+     canvas instead of leaving the area's lower half empty (it was a fixed max(720, 72% of the
+     width) tall: at 390px a desktop page at 28% left 400px blank below it). The padding is read,
+     not assumed: it changes at the narrow breakpoint (css/studio-embed.css). */
+  const MIN_STAGE_H = 320;
   function layoutStage() {
     if (state.view === 'map') return;   /* the canvas shows in the Canvas and Theme views */
-    const avail = wrap.clientWidth - (state.live ? 0 : 32);
+    const pad = getComputedStyle(wrap), padX = parseFloat(pad.paddingLeft) + parseFloat(pad.paddingRight), padY = parseFloat(pad.paddingTop) + parseFloat(pad.paddingBottom);
+    const label = $('devName').parentElement, labelH = label.offsetHeight ? label.offsetHeight + parseFloat(getComputedStyle(label).marginBottom) : 0;
+    const avail = wrap.clientWidth - padX;
     const w = state.live && state.device === 0 ? avail : DEVICES[state.device][1];
     scale = state.live && state.device === 0 ? 1 : Math.min(1, avail / w);
     cmsPreview.style.width = w + 'px'; stage.style.width = w + 'px';
-    cmsPreview.style.height = (state.live ? Math.max(600, wrap.clientHeight) : Math.max(720, Math.round(w * .72))) + 'px';
+    cmsPreview.style.height = Math.max(MIN_STAGE_H, Math.floor((wrap.clientHeight - padY - labelH) / scale)) + 'px';
     stage.style.transform = scale < 1 ? `scale(${scale})` : '';
     stage.style.marginLeft = scale < 1 ? '0' : 'auto';
     const h = cmsPreview.offsetHeight;
     stage.style.marginBottom = scale < 1 ? `${-(h - h * scale)}px` : '0';
     const routeTitle = (state.cmsRoutes.find((r) => r.path === state.cmsCurrentRoute) || {}).title || state.cmsCurrentRoute;
     $('devName').textContent = `${routeTitle} · ${DEVICES[state.device][0]} · ${w} px`;
+    $('devName').title = $('devName').textContent;
     $('devScale').textContent = scale < 1 ? `shown at ${Math.round(scale * 100)}%` : '';
     placeSelToolbar();
   }
@@ -192,6 +219,6 @@
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); postCmsRemoveSelection(); }
   });
   window.addEventListener('resize', layoutStage);
-  A.provide({ DEVICES: DEVICES, layoutStage: layoutStage, openRoute: openRoute,
+  A.provide({ DEVICES: DEVICES, layoutStage: layoutStage, openRoute: openRoute, rememberDevice: rememberDevice,
       placeSelToolbar: placeSelToolbar, renderStatus: renderStatus, selToolbarVisible: selToolbarVisible });
 })();

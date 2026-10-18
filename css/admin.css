@@ -288,16 +288,49 @@ legend { padding: 0 4px; margin-left: -4px; }
   #appBar { padding: 6px 8px; gap: 6px; position: relative; }
   .bar .btn { min-height: 30px; padding: 5px 9px; font-size: 12px; }
   .mode-switch .ark-tab { min-height: 26px; padding: 3px 8px; }
-  /* three short rows on a phone: the page (rail, picker, fields, SEO) beside the lens; the
-     views and the canvas tools; the actions */
-  #pageNav { flex: 1 1 auto; }
+  /* Two rows: the page (rail, picker, fields, SEO), the lens and the views; then the canvas
+     tools, the status and the actions. The rows are cut explicitly (#appBar::after, a zero-height
+     item a whole row wide, whose top margin is the gap between rows): left to wrap by itself, a
+     long page name sent the views onto the second row, and the actions took a third row of their
+     own with half of it empty (121px measured at 760px, 83px now). */
+  #appBar { row-gap: 0; }
+  #appBar::after { content: ""; flex: 0 0 100%; height: 0; margin-top: 6px; order: 3; }
+  #pageNav { flex: 1 1 0; }
   .bar-page { max-width: none; flex: 1 1 auto; }
   #appBar .bar-nav { display: contents; }
   #lensSwitch { order: 1; }
   #viewSwitch { order: 2; }
-  #canvasTools { order: 3; gap: 4px; }
-  #appBar .bar-actions { order: 4; flex: 1 1 100%; }
+  #canvasTools { order: 4; gap: 4px; }
+  #appBar .bar-actions { order: 5; flex: 1 1 auto; }
   #appBar .seg button { width: 26px; }
+}
+/* A phone: three rows, every control still one tap away (tests/browser/header-reach.mjs) --
+   the page beside Save and Publish; the lens and the views beside Versions and Mesh; the canvas
+   tools and the account. 159px tall in four rows before, 121px now (measured at 390px). Which
+   control shares a row is decided by width (390px holds 374px of controls a row): the canvas
+   tools with the tablet note take 314px, the lens and views 270px, so Save and Publish (128px)
+   fit only beside the page.
+   The status line has no room left in a row, so it takes the bottom strip of the screen (over
+   the workspace's own status bar) while it has something to say; position: fixed needs the
+   header to stop being a containing block, so it drops the blur it does not need here (it never
+   sits over anything on a phone: the workspace starts below it). */
+@media (max-width: 599px) {
+  #appBar { -webkit-backdrop-filter: none; backdrop-filter: none; background: hsl(var(--depth)); }
+  #appBar .bar-actions { display: contents; }
+  #appBar::before { content: ""; flex: 0 0 100%; height: 0; margin-top: 6px; order: 3; }
+  #save { order: 1; }
+  #publish { order: 2; }
+  #lensSwitch { order: 4; }
+  #viewSwitch { order: 5; }
+  #versionsNav { order: 6; margin-left: auto; }
+  #meshNav { order: 7; }
+  #appBar::after { order: 8; }
+  #canvasTools { order: 9; }
+  #account { order: 10; margin-left: auto; }
+  /* the picker shares its row with Save and Publish: its words get the room its kind icon took */
+  .bar-page > .ic:first-child { display: none; }
+  #appBar .status { position: fixed; z-index: 56; left: 0; right: 0; bottom: 0; width: auto; padding: 6px 14px; text-align: left; font-size: 11.5px; pointer-events: none; }
+  #appBar .status:not(:empty) { background: hsl(var(--depth)); border-top: 1px solid hsl(var(--border-soft)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 

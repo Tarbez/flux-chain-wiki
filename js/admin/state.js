@@ -145,7 +145,8 @@
      (the page as a visitor uses it) instead of Edit; view: 'design' (the canvas), 'map'
      (the sitemap) or 'theme' (Theme & defaults docked beside the canvas, which stays live).
      Set by the header's controls (js/admin/header.js) and setView()
-     (js/admin/sitemap.js). */
+     (js/admin/sitemap.js); the device the canvas opens on is chosen by js/admin/canvas.js
+     (initialDevice: the last explicit choice, else this screen's own breakpoint). */
   state.device = 0;
   state.live = false;
   state.view = 'design';

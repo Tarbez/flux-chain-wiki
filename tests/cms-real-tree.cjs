@@ -27,6 +27,8 @@ function makeContext(cmsLayoutDraft) {
   const context = {
     window: { ArkLayout: null, innerWidth: 1280 },
     cmsLayoutDraft: cmsLayoutDraft || { version: 2, routes: {}, groups: {}, labels: {} },
+    cmsComponentsDraft: { version: 1, masters: {}, routes: {} },
+    cmsStatesDraft: { version: 1, routes: {} },
   };
   /* annotate() is a no-op here: the fixtures below set data-ark-layout-key directly, the
      same way the real ArkLayout.annotate() would have, so this test exercises cmsRealTree's
@@ -42,6 +44,10 @@ function makeContext(cmsLayoutDraft) {
        per-breakpoint merge logic, which is covered on its own in tests/layout-content.cjs. */
     merged: (entry) => Object.assign({}, entry && entry.desktop),
     labelFor: (draft, route, key) => (draft.labels && draft.labels[route] && draft.labels[route][key]) || '',
+    /* the name an unrenamed row derives (the real one reads the DOM: tests/layer-names.cjs runs it
+       in jsdom); here the tag, so these cases stay about the walk itself */
+    layerName: (element) => ({ name: element.tagName.toLowerCase(), from: 'tag' }),
+    groupsFor: () => ({}),
     /* the route's own entry only: these fixtures have no shell scope (tests/layout-shell-scope.cjs has) */
     entryFor: (draft, route, key) => (draft.routes && draft.routes[route] && draft.routes[route][key]) || null,
   };
@@ -124,6 +130,8 @@ function makeContext(cmsLayoutDraft) {
   const { cmsRealTree } = makeContext(draft);
   const tree = cmsRealTree(host, '/');
   assert.equal(tree.find((r) => r.key === 'k-title').label, 'Hero heading', 'a stored label is used as the row label');
-  assert.equal(tree.find((r) => r.key === 'k-plain').label, 'p', 'an unlabeled row falls back to its own tag name');
-  console.log('PASS: a stored label wins over the tag-name fallback.');
+  assert.equal(tree.find((r) => r.key === 'k-plain').label, 'p', 'an unlabeled row takes the name ArkLayout.layerName derives (stubbed here to the tag)');
+  assert.equal(tree.find((r) => r.key === 'k-title').named, true, 'a stored label says so');
+  assert.equal(tree.find((r) => r.key === 'k-plain').named, false, 'a derived name says so');
+  console.log('PASS: a stored label wins over the derived name.');
 }

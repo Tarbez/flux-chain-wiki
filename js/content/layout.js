@@ -647,6 +647,125 @@ var ArkLayout = (function () {
     return sanitize(layout);
   }
   function labelFor(value, route, key, element) { return scopedValue(sanitize(value).labels, route, key, element); }
+
+  /* ---- LAYER NAMES -----------------------------------------------------------------------
+     The name the editor's Layers row shows for an element nobody has renamed (a stored label,
+     setLabel/labelFor above, always wins; the caller -- js/main.js cmsRealTree -- asks this only
+     when there is none). It used to be the bare tag, so a page read "div, div, section, canvas".
+     Derived from what the element IS on the page, in this order, never from a list of words:
+       1. identity the drafts give it: a group's name, a component instance's block label, a
+          state's label (ctx.groups, ctx.components, ctx.states -- the drafts the canvas shows);
+       2. the name the page itself gives it for assistive technology: aria-label, aria-labelledby,
+          an image's alt, an SVG's <title>, title, placeholder;
+       3. a landmark (header, nav, main, footer, aside, or a role attribute: the HTML/ARIA
+          landmark elements), with the class hint below to tell two navs apart;
+       4. the heading it owns: for sectioning content (section, article, aside, nav) the first
+          heading whose nearest sectioning ancestor is this element -- HTML's own rule for which
+          section a heading titles -- and for any other element a heading that is its direct child;
+       5. its words, when they are its own: a text node directly inside it, or every layer under
+          it is a leaf (a link of spans, a list of items) -- truncated;
+       6. a hint from its id or its first authored class ('hero-copy' -> 'Hero copy'), skipping the
+          runtime's atom classes (ArkAtomizer minted them: they name a declaration, not a thing);
+       7. the first words it holds (an <li> around a button, a bare wrapper);
+       8. its tag.
+     -> { name, from } (`from`: group | component | state | aria | landmark | role | heading | text
+     | hint | tag). `ctx.leafRows`: whether every layer row under the element is a leaf (true for a leaf).
+     Reads only the element and its subtree; a whole tree of ~1,500 layers names in a few ms
+     (tests/layer-names.cjs measures it). */
+  var NAME_MAX = 40;
+  var HEADING = 'h1,h2,h3,h4,h5,h6,[role="heading"]', SECTIONING = 'section,article,aside,nav';
+  var LANDMARK_TAG = /^(header|footer|main|nav|aside)$/;
+  function nameText(text) {
+    var t = String(text || '').replace(/\s+/g, ' ').trim();
+    return t.length > NAME_MAX ? t.slice(0, NAME_MAX - 1).replace(/\s+$/, '') + '…' : t;
+  }
+  function capital(text) { return text ? text.charAt(0).toUpperCase() + text.slice(1) : text; }
+  function attr(element, name) { var v = element.getAttribute && element.getAttribute(name); return v ? nameText(v) : ''; }
+  function isHeadingEl(element) { return /^h[1-6]$/i.test(element.tagName || '') || (element.getAttribute && element.getAttribute('role') === 'heading'); }
+  function ariaName(element) {
+    var own = attr(element, 'aria-label'); if (own) return own;
+    var by = element.getAttribute && element.getAttribute('aria-labelledby'), doc = element.ownerDocument;
+    if (by && doc) {
+      var words = by.split(/\s+/).map(function (id) { var target = doc.getElementById(id); return target ? wordsOf(target, '') : ''; }).join(' ');
+      if (nameText(words)) return nameText(words);
+    }
+    var alt = attr(element, 'alt'); if (alt) return alt;
+    if (/^svg$/i.test(element.tagName || '')) {
+      for (var c = element.firstElementChild; c; c = c.nextElementSibling) if (/^title$/i.test(c.tagName) && nameText(c.textContent)) return nameText(c.textContent);
+    }
+    return attr(element, 'title') || attr(element, 'placeholder');
+  }
+  function ownHeading(element) {
+    var tag = String(element.tagName || '').toLowerCase();
+    if (SECTIONING.split(',').indexOf(tag) >= 0 && element.querySelectorAll) {
+      var all = element.querySelectorAll(HEADING);
+      for (var i = 0; i < all.length; i++) if (all[i].closest(SECTIONING) === element && nameText(all[i].textContent)) return all[i];
+      return null;
+    }
+    for (var c = element.firstElementChild; c; c = c.nextElementSibling) if (isHeadingEl(c) && nameText(c.textContent)) return c;
+    return null;
+  }
+  /* an element's words, an element boundary read as a space (textContent glues "chain.<br>A" and
+     "<li>One</li><li>Two</li>"); stops once it has more than a name's worth */
+  function wordsOf(node, out) {
+    for (var n = node.firstChild; n && out.length <= NAME_MAX * 2; n = n.nextSibling) {
+      if (n.nodeType === 3) out += n.nodeValue;
+      else if (n.nodeType === 1 && !/^(script|style|template)$/i.test(n.tagName)) out = wordsOf(n, out + ' ') + ' ';
+    }
+    return out;
+  }
+  function ownWords(element) {
+    for (var n = element.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && /\S/.test(n.nodeValue)) return true;
+    return false;
+  }
+  function isAtomClass(cls) {
+    var atomizer = typeof ArkAtomizer !== 'undefined' ? ArkAtomizer : null;
+    return !!(atomizer && ((atomizer.declaration && atomizer.declaration(cls)) || (atomizer.pinDeclaration && atomizer.pinDeclaration(cls))));
+  }
+  /* 'hero-copy' / 'heroCopy' / 'hero_copy' -> 'hero copy'; '' when it carries no word (digits, a hash) */
+  function hintWords(token) {
+    var words = String(token || '').replace(/([a-z])([A-Z])/g, '$1 $2').split(/[-_\s]+/).filter(function (w) { return /[a-z]{2,}/i.test(w) && !/\d{3,}/.test(w); });
+    return words.length ? words.join(' ').toLowerCase().slice(0, 28) : '';
+  }
+  function classHint(element) {
+    var id = element.id && hintWords(element.id); if (id) return id;
+    var classes = String((element.getAttribute && element.getAttribute('class')) || '').split(/\s+/);
+    for (var i = 0; i < classes.length; i++) { if (!classes[i] || isAtomClass(classes[i])) continue; var h = hintWords(classes[i]); if (h) return h; }
+    return '';
+  }
+  function scopedGroup(map, route) { return (map && map[route]) || {}; }
+  function layerName(element, key, ctx) {
+    ctx = ctx || {};
+    var tag = String(element.tagName || '').toLowerCase(), route = ctx.route;
+    if (key && key.indexOf('group:') === 0) {
+      var groupId = key.slice(6), groups = ctx.groups || {}, g = groups[groupId];
+      if (g && g.label) return { name: nameText(g.label), from: 'group' };
+    }
+    var masterId = element.getAttribute && element.getAttribute('data-ark-component-master');
+    if (masterId) {
+      var master = ctx.components && ctx.components.masters && ctx.components.masters[masterId];
+      return { name: nameText((master && master.label) || masterId), from: 'component' };
+    }
+    var stateGroup = element.getAttribute && element.hasAttribute('data-ark-state-index') && element.getAttribute('data-ark-state-group');
+    if (stateGroup) {
+      var states = ctx.states && ctx.states.routes, group = scopedGroup(states, route)[stateGroup] || scopedGroup(states, SHELL)[stateGroup];
+      var state = group && group.states && group.states[Number(element.getAttribute('data-ark-state-index'))];
+      if (state && state.label) return { name: nameText(state.label), from: 'state' };
+    }
+    var aria = ariaName(element); if (aria) return { name: aria, from: 'aria' };
+    var role = element.getAttribute && element.getAttribute('role');
+    if (LANDMARK_TAG.test(tag) || (role && role !== 'presentation' && role !== 'none' && role !== 'heading')) {
+      var lhint = classHint(element);
+      return { name: capital(role || tag) + (lhint ? ' · ' + lhint : ''), from: role ? 'role' : 'landmark' };
+    }
+    var heading = ownHeading(element); if (heading) return { name: nameText(wordsOf(heading, '')), from: 'heading' };
+    if (ownWords(element) || ctx.leafRows) { var words = nameText(wordsOf(element, '')); if (words) return { name: words, from: 'text' }; }
+    var hint = classHint(element); if (hint) return { name: capital(hint), from: 'hint' };
+    /* nothing names it but what it holds (an <li> around a button, a bare wrapper): its first words
+       say where it is better than its tag does */
+    var held = nameText(wordsOf(element, '')); if (held) return { name: held, from: 'text' };
+    return { name: tag, from: 'tag' };
+  }
   function group(value, route, id, members, label) {
     var layout = sanitize(value), routes = layout.groups, groups = routes[route] || (routes[route] = {});
     groups[id] = { members: members, label: label || 'Group' }; return sanitize(layout);
@@ -662,7 +781,7 @@ var ArkLayout = (function () {
     return sanitize(layout);
   }
   return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, find: find, index: index, inRoute: inRoute, apply: apply,
-    SHELL: SHELL, isScope: isScope, scopeOf: scopeOf, scopeOfAll: scopeOfAll, entryFor: entryFor, groupsFor: groupsFor, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
+    SHELL: SHELL, isScope: isScope, scopeOf: scopeOf, scopeOfAll: scopeOfAll, entryFor: entryFor, groupsFor: groupsFor, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor, layerName: layerName,
     setAlt: setAlt, altFor: altFor, applyAlt: applyAlt, applyAlts: applyAlts, altAttribute: altAttribute, altOwn: altOwn, ALT_MAX: ALT_MAX,
     TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS, RADIUS_CSS: RADIUS_CSS,
     DISPLAY_TOKENS: DISPLAY_TOKENS, ALIGN_ITEMS_TOKENS: ALIGN_ITEMS_TOKENS, JUSTIFY_TOKENS: JUSTIFY_TOKENS, LINE_HEIGHT_TOKENS: LINE_HEIGHT_TOKENS,

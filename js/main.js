@@ -691,6 +691,7 @@
   function cmsRealTree(host, route) {
     if (!host || !window.ArkLayout) return [];
     ArkLayout.annotate(host, route);
+    var groups = ArkLayout.groupsFor(cmsLayoutDraft, route);
     function walk(parent) {
       var out = [];
       Array.prototype.forEach.call(parent.children || [], function (element) {
@@ -701,8 +702,12 @@
         if (element.hasAttribute && element.hasAttribute('data-ark-component-replaced')) return;
         if (!key) { out = out.concat(walk(element)); return; }
         var kids = tag === 'svg' ? [] : walk(element);
-        var label = ArkLayout.labelFor(cmsLayoutDraft, route, key, element) || tag;
-        out.push({ key: key, tag: tag, label: label, hidden: cmsFrameFor(route, key, element).display === 'hide', hasChildren: kids.length > 0, children: kids });
+        /* a stored name (Rename) wins; otherwise the name is derived from what the element is
+           (ArkLayout.layerName: its group/block/state, its accessible name, landmark, heading,
+           own words, class hint -- the tag last). `named` says which, `from` says where from. */
+        var stored = ArkLayout.labelFor(cmsLayoutDraft, route, key, element);
+        var derived = stored ? null : ArkLayout.layerName(element, key, { route: route, groups: groups, components: cmsComponentsDraft, states: cmsStatesDraft, leafRows: kids.every(function (k) { return !k.hasChildren; }) });
+        out.push({ key: key, tag: tag, label: stored || derived.name, named: !!stored, from: stored ? 'label' : derived.from, hidden: cmsFrameFor(route, key, element).display === 'hide', hasChildren: kids.length > 0, children: kids });
       });
       return out;
     }

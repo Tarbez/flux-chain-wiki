@@ -790,16 +790,25 @@ await surface('canvas', 'layers: select, rename, hide/show', async (opened) => {
   const row = app.locator('#layers li[aria-selected="true"]').first();
   await until(async () => (await row.count()) > 0, 'selecting the heading highlights no Layers row');
   await app.click('#tabPages'); await app.click('#tabLayers');
-  const h1row = app.locator('#layers li', { has: app.locator('input.nm-edit') }).filter({ has: app.locator('input[value="h1"]') }).first();
-  /* rows are named by their own <input>; find the h1's by its value */
-  const index = await app.evaluate(() => [...document.querySelectorAll('#layers li')].findIndex((li) => (li.querySelector('.nm-edit') || {}).value === 'h1'));
-  check(index >= 0, 'the Layers tree has no h1 row');
-  const target = app.locator('#layers li').nth(index);
+  /* A row is NAMED from what its element is (ArkLayout.layerName; tests/layer-names.cjs holds the
+     rules), with the tag beside it: the hero heading's row reads its own words, not "h1" -- the
+     tree used to read "div, div, section, canvas" and a heading was found by clicking rows. */
+  const target = app.locator('#layers li[data-key="id:hl-title"]');
+  await until(async () => (await target.count()) === 1, 'the Layers tree has no row for the hero heading (id:hl-title)');
+  const shown = await target.evaluate((li) => ({ name: li.querySelector('.nm-edit').value, tag: li.querySelector('.layer-tag').textContent, from: li.dataset.from }));
+  const letters = (text) => String(text || '').replace(/[\s…]+/g, '');
+  const words = letters(await byKey(pv, 'id:hl-title', 'el.textContent'));
+  check(shown.tag === 'h1', `the heading's row does not show its tag beside the name (shows "${shown.tag}")`);
+  check(shown.name !== 'h1' && shown.from === 'text' && letters(shown.name).length > 3 && words.startsWith(letters(shown.name)), `the heading's row is not named by its own words: "${shown.name}" (from ${shown.from}) for "${words}"`);
+  const named = await app.evaluate(() => { const n = {}; for (const li of document.querySelectorAll('#layers li[data-from]')) n[li.dataset.from] = (n[li.dataset.from] || 0) + 1; return n; });
+  console.log('  Layers names on / by source:', JSON.stringify(named));
   await target.click({ position: { x: 4, y: 8 } });
   await until(async () => (await toolbarKey(app)) === 'id:hl-title', 'clicking the h1 Layers row did not select the heading');
   const name = target.locator('.nm-edit');
   await setValue(name, 'Hero heading');
   await until(() => app.evaluate(() => [...document.querySelectorAll('#layers .nm-edit')].some((i) => i.value === 'Hero heading')), 'the rename did not stick in the Layers tree');
+  /* the typed words show at once; the row is redrawn from the preview's tree once the name is stored */
+  await until(async () => (await target.locator('.nm-edit').getAttribute('data-named')) === 'true' && (await target.locator('.nm-edit').inputValue()) === 'Hero heading', 'the renamed row does not say its name is a stored one (it overrides the derived name)');
   await target.locator('.eye-toggle').click();
   await until(async () => (await byKey(pv, 'id:hl-title', 'getComputedStyle(el).display')) === 'none', 'the eye did not hide the heading');
   await app.locator('#layers li .eye-toggle[aria-pressed="true"]').first().click();

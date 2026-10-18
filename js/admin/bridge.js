@@ -225,7 +225,7 @@
   }
   function postCmsLayoutReset() {
     if (!state.cmsConnected || !cmsPreview.contentWindow) return;
-    cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-layout-reset', breakpoint: ['desktop', 'tablet', 'phone'][state.device] }, window.location.origin);
+    cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-layout-reset', breakpoint: A.DEVICES[state.device][2] }, window.location.origin);
   }
   function postCmsLayoutUndo() { if (!state.cmsConnected || !cmsPreview.contentWindow) return; cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-layout-undo' }, window.location.origin); }
   function postCmsLayoutRedo() { if (!state.cmsConnected || !cmsPreview.contentWindow) return; cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-layout-redo' }, window.location.origin); }

@@ -34,6 +34,9 @@
      TYPE enum) -- a small, purely cosmetic lookup, not a structural decision, so an unlisted
      tag just falls back to the generic 'box' icon rather than needing every real tag covered. */
   const CMS_TAG_ICON = { header: 'section', main: 'page', footer: 'section', section: 'section', article: 'article', nav: 'row', aside: 'box', div: 'box', h1: 'heading', h2: 'heading', h3: 'heading', h4: 'heading', p: 'text', a: 'link', button: 'button', img: 'image', svg: 'image', canvas: 'spark', video: 'image', picture: 'image', figure: 'image', form: 'field', ul: 'list', ol: 'list', li: 'box', span: 'text', strong: 'text', small: 'text', table: 'list', label: 'field' };
+  /* where a derived layer name came from (ArkLayout.layerName's `from`), for the name's tooltip */
+  const LAYER_NAME_FROM = { group: 'group name', component: 'component block', state: 'state label', aria: 'accessible name (aria-label, alt or title)',
+    landmark: 'landmark and class', role: 'role and class', heading: 'heading', text: 'own words', hint: 'id or class', tag: 'tag' };
   /* Part B of the follow-up Studio plan: the connected-mode equivalent of renderLayers(),
      driven by cmsRealTree's payload (the real rendered DOM, reported by js/main.js) instead of
      the standalone dense-node tree. Deliberately NOT built by extending renderLayers() itself:
@@ -49,11 +52,18 @@
     const walk = (row, depth) => {
       const li = document.createElement('li');
       li.setAttribute('role', 'treeitem'); li.setAttribute('aria-selected', String(isSelectedKey(row.key)));
+      li.dataset.key = row.key; li.dataset.from = row.from || '';
       li.style.paddingLeft = 6 + depth * 12 + 'px';
       if (row.hidden) li.style.opacity = '.55';
-      li.innerHTML = `${row.hasChildren ? `<button class="layer-toggle" type="button" aria-label="${collapsedLayers.has(row.key) ? 'Expand' : 'Collapse'} ${esc(row.label)}" aria-expanded="${!collapsedLayers.has(row.key)}"></button>` : '<span class="layer-spacer"></span>'}${ic(CMS_TAG_ICON[row.tag] || 'box')}<input class="ctl nm-edit" aria-label="Layer name"><button class="btn icon quiet row-act eye-toggle" type="button" aria-pressed="${String(!!row.hidden)}" aria-label="${row.hidden ? 'Show' : 'Hide'} ${esc(row.label)}" title="${row.hidden ? 'Show this element' : 'Hide this element'}"></button>`;
+      /* the row's name: a stored one (Rename) or one derived from what the element is
+         (ArkLayout.layerName, in the preview); its tag stays beside it, small, so "Not one chain"
+         still reads as an h1. Typing a name stores it; clearing it goes back to the derived one. */
+      li.innerHTML = `${row.hasChildren ? `<button class="layer-toggle" type="button" aria-label="${collapsedLayers.has(row.key) ? 'Expand' : 'Collapse'} ${esc(row.label)}" aria-expanded="${!collapsedLayers.has(row.key)}"></button>` : '<span class="layer-spacer"></span>'}${ic(CMS_TAG_ICON[row.tag] || 'box')}<input class="ctl nm-edit" aria-label="Layer name"><span class="layer-tag" aria-hidden="true"></span><button class="btn icon quiet row-act eye-toggle" type="button" aria-pressed="${String(!!row.hidden)}" aria-label="${row.hidden ? 'Show' : 'Hide'} ${esc(row.label)}" title="${row.hidden ? 'Show this element' : 'Hide this element'}"></button>`;
       const nameInput = li.querySelector('.nm-edit');
-      nameInput.value = row.label; nameInput.style.flex = '1 1 auto'; nameInput.style.minWidth = '0'; nameInput.style.padding = '2px 5px';
+      nameInput.value = row.label;
+      nameInput.dataset.named = row.named ? 'true' : 'false';
+      nameInput.title = row.named ? `Your name for this ${row.tag}. Clear it to go back to the derived name.` : `Named from its ${LAYER_NAME_FROM[row.from] || 'tag'}. Type to rename it.`;
+      li.querySelector('.layer-tag').textContent = row.tag;
       nameInput.addEventListener('click', (event) => event.stopPropagation());
       nameInput.addEventListener('change', () => postCmsSetLabel(row.key, nameInput.value.trim()));
       const eyeBtn = li.querySelector('.eye-toggle');

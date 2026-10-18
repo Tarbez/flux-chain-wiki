@@ -40,12 +40,31 @@ All four are deleted. Exactly one site iframe exists in the document: `#cmsPrevi
   `#accountBtn` (folder connect, who is signed in, the publish host's status `#mesh`, sign out;
   `js/admin/project.js`, `mesh.js`).
 
+Below 760px the header is two rows (the page, lens and views; the canvas tools and actions) and
+below 600px three (the page with Save and Publish; the lens and views with Versions and Mesh;
+the canvas tools with the account), cut by explicit row breaks (`#appBar::before/::after`,
+`css/admin.css`); on a phone the status line takes the screen's bottom strip while it has
+something to say. Measured 2026-10-19: 121px at 390px (159px in four rows before), 83px at 760px
+(121px).
+
+**The canvas** (`js/admin/canvas.js`, `layoutStage()`): the stage is the breakpoint's width,
+zoomed down when the area is narrower, and exactly as tall as the area under its size label --
+the page scrolls inside the canvas, nothing is left blank below it. The breakpoint it opens on is
+the last one chosen in this browser (`defxn-cms-device`; a press on `#devices` is remembered),
+else the one the editor's own screen is by the site's thresholds (`ArkLayout.breakpoint`): a
+phone opens on the phone layout at 100%, a 760px window on tablet, a desktop on desktop. A resize
+afterwards never switches it.
+
 **Rail** (`#studioLeft`, `js/admin/rail.js`): tabs **Pages** (the one site tree -- Site chrome,
 Pages, Theory pages, Articles, then every other route; Content mode's page list and the old
 Studio's Pages tab merged into it. A row's button shows its page on the canvas, Fields opens its
 Page fields, Delete is offered for theory pages and articles; New theory page / New article sit
-under the tree), **Layers**, **Library** (`library.js`), **Media** and **Vault** (the forms'
-own panels). The Content lens opens on Pages and the Design lens on Layers; the last tab used in
+under the tree), **Layers** (the page's real element tree; each row is named by
+`ArkLayout.layerName` in `js/content/layout.js` -- the element's group, block or state name, its
+accessible name, landmark, the heading it owns, its own words, an id/class hint, its tag last --
+with the tag beside it as metadata; a name typed over it is stored and wins, and clearing it goes
+back to the derived one; the toolbar's chip uses the same name; `tests/layer-names.cjs`),
+**Library** (`library.js`), **Media** and **Vault** (the forms' own panels). The Content lens opens on Pages and the Design lens on Layers; the last tab used in
 each lens is remembered (`defxn-cms-rail-tab`). Below 860px the rail is a drawer over the canvas
 (`#railScrim`; Esc or choosing a page closes it).
 

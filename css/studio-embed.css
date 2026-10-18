@@ -70,7 +70,7 @@
   #studioRoot .drawer-open .left { transform: none; visibility: visible; transition: transform .18s ease; }
   #studioRoot .live .left { display: none; }
   #studioRoot .theme-dock { position: fixed; z-index: 44; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; border-left: 0; }
-  #studioRoot .canvas-wrap { padding: 10px 8px 32px; }
+  #studioRoot .canvas-wrap { padding: 10px 8px; }
 }
 #studioRoot .rail-scrim { position: fixed; z-index: 45; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; background: hsl(var(--canvas) / .55); }
 /* the rail is the editor's recessed surface: --depth */
@@ -97,6 +97,17 @@
 #studioRoot .list li .layer-toggle::before { content: '›'; font: 700 16px/1 var(--sans); transform: rotate(90deg); transition: transform .12s ease; }
 #studioRoot .list li .layer-toggle[aria-expanded="false"]::before { transform: rotate(0); }
 #studioRoot .list li .layer-spacer { width: 16px; flex: none; }
+/* a Layers row: its name (derived from what the element is, or the one typed over it) reads as
+   text until it is pointed at or edited; the element's tag stays beside it as mono metadata */
+#studioRoot #layers .nm-edit { flex: 1 1 auto; width: auto; min-width: 0; padding: 2px 5px; border-color: transparent; background: transparent; color: hsl(var(--text)); text-overflow: ellipsis; }
+#studioRoot #layers .nm-edit[data-named="true"] { color: hsl(var(--text-strong)); font-weight: 600; }
+#studioRoot #layers li:hover .nm-edit, #studioRoot #layers .nm-edit:focus { border-color: hsl(var(--border-default)); background: hsl(var(--surface)); }
+/* the eye floats over the tag's end while the row is pointed at (and stays on a hidden row), so
+   the name keeps the row's width instead of an invisible button's */
+#studioRoot #layers li { position: relative; }
+#studioRoot #layers li .eye-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin: 0; background: hsl(var(--raised)); }
+#studioRoot #layers li[aria-selected="true"] .eye-toggle { background: hsl(var(--accent-subtle)); }
+#studioRoot #layers .layer-tag { flex: none; margin-right: 2px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; font: 500 9.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 /* the Pages tab: the one site tree (js/admin/rail.js renderPages). A row is its open button
    (name, path), its marks (orphan, unsaved dot) and its actions (Fields, Delete). */
 #studioRoot .rail-pane { padding-bottom: 12px; }
@@ -160,15 +171,26 @@
 #studioRoot .left .panel-mount .cms-form-head { position: static; }
 
 /* canvas */
-#studioRoot .canvas-wrap { min-width: 0; min-height: 0; overflow: auto; position: relative; padding: 14px 16px 40px; }
+/* the stage fills the area below the size label (layoutStage() in js/admin/canvas.js reads this
+   padding): the page scrolls inside the canvas, so there is no room to leave below it */
+#studioRoot .canvas-wrap { min-width: 0; min-height: 0; overflow: auto; position: relative; padding: 14px 16px; }
 #studioRoot .shell:not(.live) .canvas-wrap { -webkit-user-select: none; user-select: none; }
 #studioRoot .live .canvas-wrap { padding: 0; }
 #studioRoot .stage { position: relative; margin: 0 auto; transform-origin: top left; }
 /* the hairline ring keeps the page's edge visible on a dark palette, where a shadow cannot */
-#studioRoot .cms-preview { display: none; width: 100%; min-height: 720px; border: 0; background: hsl(var(--surface)); box-shadow: 0 0 0 1px hsl(var(--border-soft)), var(--shadow-float); border-radius: var(--radius-sm); }
+#studioRoot .cms-preview { display: none; width: 100%; border: 0; background: hsl(var(--surface)); box-shadow: 0 0 0 1px hsl(var(--border-soft)), var(--shadow-float); border-radius: var(--radius-sm); }
 #studioRoot .cms-connected .cms-preview { display: block; }
 #studioRoot .live .cms-preview { border-radius: 0; box-shadow: none; pointer-events: auto; }
-#studioRoot .devlabel { font: 500 11px/1 var(--mono); color: hsl(var(--text-muted)); margin: 0 auto 8px; display: flex; justify-content: space-between; gap: 8px; }
+#studioRoot .devlabel { font: 500 11px/1 var(--mono); color: hsl(var(--text-muted)); margin: 0 auto 8px; display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
+/* one line at any width: a long page title is ellipsized (its whole text is the title), the zoom keeps its words */
+#studioRoot #devName { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#studioRoot #devScale { flex: none; }
+/* a phone: the phone breakpoint (the canvas's default here) is the screen's own width, so the
+   canvas takes the whole width and shows the page at 100% */
+@media (max-width: 599px) {
+  #studioRoot .canvas-wrap { padding: 6px 0 0; }
+  #studioRoot .devlabel { padding: 0 8px; margin-bottom: 6px; }
+}
 #studioRoot .live .devlabel { display: none; }
 /* Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar that
    replaces the fixed right-panel accordions, positioned by placeSelToolbar() (admin.js)
