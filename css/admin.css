@@ -11,23 +11,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: hsl(var(--reference-400)); }
 .btn:focus-visible, .link:focus-visible, .page-list button:focus-visible, .ark-tab:focus-visible { background: hsl(var(--raised)); }
 
-/* ---- inline icon set: mask-image so every glyph inherits currentColor and themes for free ---- */
-.icon { display: inline-block; width: 13px; height: 13px; flex: none; background-color: currentColor; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-position: center; mask-position: center; }
-.icon-page { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 1.5h5.5L12.5 4.5V14.5H4z' fill='none' stroke='black' stroke-width='1.3'/><path d='M6 7h4M6 9.5h4M6 12h2.5' stroke='black' stroke-width='1.3'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 1.5h5.5L12.5 4.5V14.5H4z' fill='none' stroke='black' stroke-width='1.3'/><path d='M6 7h4M6 9.5h4M6 12h2.5' stroke='black' stroke-width='1.3'/></svg>"); }
-.icon-article { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3h10M3 6.5h10M3 10h7M3 13h4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3h10M3 6.5h10M3 10h7M3 13h4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); }
-.icon-image { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='3' width='12' height='10' rx='1.4' fill='none' stroke='black' stroke-width='1.3'/><circle cx='6' cy='7' r='1.1' fill='black'/><path d='M3.5 12 8 8l2 2 2.5-2.5L14 11' fill='none' stroke='black' stroke-width='1.3'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='3' width='12' height='10' rx='1.4' fill='none' stroke='black' stroke-width='1.3'/><circle cx='6' cy='7' r='1.1' fill='black'/><path d='M3.5 12 8 8l2 2 2.5-2.5L14 11' fill='none' stroke='black' stroke-width='1.3'/></svg>"); }
-.icon-shape { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5 14 5v6L8 14.5 2 11V5z' fill='none' stroke='black' stroke-width='1.3'/><path d='M8 1.5V8m0 6.5V8M2 5l6 3 6-3' fill='none' stroke='black' stroke-width='1.1'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5 14 5v6L8 14.5 2 11V5z' fill='none' stroke='black' stroke-width='1.3'/><path d='M8 1.5V8m0 6.5V8M2 5l6 3 6-3' fill='none' stroke='black' stroke-width='1.1'/></svg>"); }
-.icon-lock { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3.5' y='7' width='9' height='7' rx='1.2' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 7V4.8a2.5 2.5 0 0 1 5 0V7' fill='none' stroke='black' stroke-width='1.3'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3.5' y='7' width='9' height='7' rx='1.2' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 7V4.8a2.5 2.5 0 0 1 5 0V7' fill='none' stroke='black' stroke-width='1.3'/></svg>"); }
-.icon-mesh { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='3' cy='4' r='1.6' fill='black'/><circle cx='13' cy='4' r='1.6' fill='black'/><circle cx='8' cy='12.5' r='1.6' fill='black'/><path d='M4.4 4.8 6.6 11M11.6 4.8 9.4 11M4.6 4h6.8' stroke='black' stroke-width='1.1'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='3' cy='4' r='1.6' fill='black'/><circle cx='13' cy='4' r='1.6' fill='black'/><circle cx='8' cy='12.5' r='1.6' fill='black'/><path d='M4.4 4.8 6.6 11M11.6 4.8 9.4 11M4.6 4h6.8' stroke='black' stroke-width='1.1'/></svg>"); }
-.icon-design { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5a6.5 6.5 0 1 0 0 13c.9 0 1.3-.7.8-1.4-.3-.4-.1-1 .4-1.1h1a2 2 0 0 0 2-2c0-3.8-1.9-8.5-4.2-8.5z' fill='none' stroke='black' stroke-width='1.2'/><circle cx='5.2' cy='6.4' r='.9' fill='black'/><circle cx='8.4' cy='4.6' r='.9' fill='black'/><circle cx='11.2' cy='7.4' r='.9' fill='black'/><circle cx='5.6' cy='10.4' r='.9' fill='black'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5a6.5 6.5 0 1 0 0 13c.9 0 1.3-.7.8-1.4-.3-.4-.1-1 .4-1.1h1a2 2 0 0 0 2-2c0-3.8-1.9-8.5-4.2-8.5z' fill='none' stroke='black' stroke-width='1.2'/><circle cx='5.2' cy='6.4' r='.9' fill='black'/><circle cx='8.4' cy='4.6' r='.9' fill='black'/><circle cx='11.2' cy='7.4' r='.9' fill='black'/><circle cx='5.6' cy='10.4' r='.9' fill='black'/></svg>"); }
-.icon-studio { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1.5' y='2' width='13' height='10.5' rx='1.5' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 14.5h5M8 12.5v2M4 5h3v3H4zM9 5h3M9 7.5h3M4 10h8' fill='none' stroke='black' stroke-width='1.2' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='1.5' y='2' width='13' height='10.5' rx='1.5' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 14.5h5M8 12.5v2M4 5h3v3H4zM9 5h3M9 7.5h3M4 10h8' fill='none' stroke='black' stroke-width='1.2' stroke-linecap='round'/></svg>"); }
-.icon-seo { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='6.8' cy='6.8' r='4.3' fill='none' stroke='black' stroke-width='1.3'/><path d='M10 10l4 4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='6.8' cy='6.8' r='4.3' fill='none' stroke='black' stroke-width='1.3'/><path d='M10 10l4 4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); }
-.icon-add { width: 10px; height: 10px; -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 2.5v11M2.5 8h11' stroke='black' stroke-width='1.7' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 2.5v11M2.5 8h11' stroke='black' stroke-width='1.7' stroke-linecap='round'/></svg>"); }
-
-/* The header grows instead of clipping: below ~1200px its brand, mode switches and actions no
-   longer fit one 58px row, and a fixed height let them overflow under #studioRoot (and, at
-   761-1180px, above the viewport). It wraps to more rows; js/admin/admin.js publishes the
-   real height as --app-bar-h, which .shell below and #studioRoot (css/studio-embed.css) use. */
+/* The header grows instead of clipping: when its groups no longer fit one row they wrap, and
+   a fixed height would let them overflow under #studioRoot. js/admin/admin.js publishes the
+   real height as --app-bar-h, which .shell below and #studioRoot (css/studio-embed.css) use.
+   z-index 55: its menus drop over #studioRoot (50) but stay under the Versions panel (60). */
 .bar {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; min-height: 58px; padding: 8px 22px;
   border-bottom: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth) / .9);
@@ -36,6 +23,66 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 }
 .bar-brand { display: flex; align-items: baseline; gap: 12px; }
 .bar-brand strong { font-weight: 400; letter-spacing: .18em; color: hsl(var(--text-strong)); }
+
+/* ---- the one editor header (admin-app.html #appBar, 2026-10-18) ---------------------------
+   One row from 1280px up: brand · mode · Design views | canvas page | canvas tools | actions.
+   Secondary actions are 32px icon buttons with tooltips; text is spent only on the mode,
+   the selected Design view, the page name, Save and Publish. Groups wrap whole below that. */
+#appBar { justify-content: flex-start; gap: 8px 10px; min-height: 52px; padding: 8px 14px; z-index: 55; }
+#appBar .bar-brand strong { font-size: 13px; letter-spacing: .16em; white-space: nowrap; }
+#appBar .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+#appBar .ic.sm { width: 13px; height: 13px; }
+.bar-nav, .bar-group { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.bar-group[hidden] { display: none; }
+.bar-tools { margin-left: auto; }
+.ibtn {
+  position: relative; display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none; padding: 0;
+  border: 1px solid transparent; border-radius: 7px; background: transparent; color: hsl(var(--text-muted)); cursor: pointer;
+  transition: background-color .12s, color .12s, border-color .12s;
+}
+.ibtn:hover:not(:disabled) { background: hsl(var(--raised)); color: hsl(var(--text-strong)); }
+.ibtn:disabled { opacity: .35; cursor: default; }
+.ibtn[aria-expanded="true"], .ibtn[aria-current="true"] { background: hsl(var(--accent-subtle)); border-color: hsl(var(--accent) / .35); color: hsl(var(--text-strong)); }
+#btnLeftRail[aria-pressed="false"] { color: hsl(var(--text-faint)); }
+/* the page picker: the canvas's one place to change page, name first, path in mono */
+.bar-page {
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; max-width: 220px; min-width: 0; padding: 0 8px 0 9px;
+  border: 1px solid hsl(var(--border-soft)); border-radius: 7px; background: hsl(var(--surface) / .5); color: hsl(var(--text-strong)); cursor: pointer; font-size: 13px;
+}
+.bar-page:hover, .bar-page[aria-expanded="true"] { border-color: hsl(var(--border-strong)); background: hsl(var(--raised)); }
+.bar-page > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-page small { flex: none; font: 500 10.5px/1 var(--mono); color: hsl(var(--text-muted)); }
+.bar-page .ic { color: hsl(var(--text-muted)); }
+/* segmented icon groups: breakpoints, Edit/Live */
+#appBar .seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
+#appBar .seg button { display: inline-grid; place-items: center; width: 28px; height: 26px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text-muted)); cursor: pointer; }
+#appBar .seg button:hover { color: hsl(var(--text-strong)); }
+#appBar .seg button[aria-pressed="true"] { background: hsl(var(--accent-subtle)); color: hsl(var(--text-strong)); }
+/* Design check: the shield and its score, coloured by meaning (trust / warning / danger) */
+.ibtn.score { width: auto; gap: 5px; grid-auto-flow: column; padding: 0 7px 0 8px; }
+.ibtn.score b { padding: 2px 6px; border-radius: 99px; font: 600 10.5px/1.2 var(--mono); background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
+.ibtn.score.good b { background: hsl(var(--trust)); color: hsl(var(--canvas)); }
+.ibtn.score.mid b { background: hsl(var(--warning)); color: hsl(var(--canvas)); }
+.ibtn.score.bad b { background: hsl(var(--danger)); color: hsl(var(--canvas)); }
+/* editing at tablet/phone size writes overrides for that size only: say so, calmly */
+.bp-note { display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 8px; border-radius: 99px; background: hsl(var(--warning) / .12); color: hsl(var(--warning)); font: 500 11px/1 var(--mono); letter-spacing: .02em; white-space: nowrap; }
+.bp-note[hidden] { display: none; }
+#appBar .status { max-width: 26ch; }
+#appBar .status:empty { display: none; }
+#appBar .bar-actions { gap: 6px; flex-wrap: nowrap; }
+#appBar .bar-actions .btn { min-height: 32px; padding: 5px 13px; }
+#appBar .bar-tools:not([hidden]) ~ .bar-actions { margin-left: 0; }
+/* account: identity, project folder, shortcuts, sign out -- one glass panel under one icon */
+.account { position: relative; }
+.account-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 70; display: grid; gap: 10px; width: 280px; padding: 12px;
+  border: 1px solid hsl(var(--border-soft)); border-radius: 10px; background: hsl(var(--surface) / .96);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 18px 40px -18px hsl(var(--canvas) / .8);
+}
+.account-menu[hidden] { display: none; }
+.account-menu .btn { width: 100%; }
+.account-menu .who { max-width: none; }
+.account-menu .hint { margin: 0; }
 .bar-brand span, .preview-bar-label, .field-key, .side-group, legend { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 .bar-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; min-width: 0; margin-left: auto; }
 .bar-actions::before { content: ""; width: 1px; align-self: stretch; margin: 10px 6px; background: hsl(var(--border-soft)); }
@@ -81,19 +128,18 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .side-group[data-icon="image"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='3' width='12' height='10' rx='1.4' fill='none' stroke='black' stroke-width='1.3'/><circle cx='6' cy='7' r='1.1' fill='black'/><path d='M3.5 12 8 8l2 2 2.5-2.5L14 11' fill='none' stroke='black' stroke-width='1.3'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='2' y='3' width='12' height='10' rx='1.4' fill='none' stroke='black' stroke-width='1.3'/><circle cx='6' cy='7' r='1.1' fill='black'/><path d='M3.5 12 8 8l2 2 2.5-2.5L14 11' fill='none' stroke='black' stroke-width='1.3'/></svg>"); }
 .side-group[data-icon="shape"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5 14 5v6L8 14.5 2 11V5z' fill='none' stroke='black' stroke-width='1.3'/><path d='M8 1.5V8m0 6.5V8M2 5l6 3 6-3' fill='none' stroke='black' stroke-width='1.1'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M8 1.5 14 5v6L8 14.5 2 11V5z' fill='none' stroke='black' stroke-width='1.3'/><path d='M8 1.5V8m0 6.5V8M2 5l6 3 6-3' fill='none' stroke='black' stroke-width='1.1'/></svg>"); }
 .side-group[data-icon="lock"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3.5' y='7' width='9' height='7' rx='1.2' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 7V4.8a2.5 2.5 0 0 1 5 0V7' fill='none' stroke='black' stroke-width='1.3'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect x='3.5' y='7' width='9' height='7' rx='1.2' fill='none' stroke='black' stroke-width='1.3'/><path d='M5.5 7V4.8a2.5 2.5 0 0 1 5 0V7' fill='none' stroke='black' stroke-width='1.3'/></svg>"); }
-/* ---- Step 3: Design/Content mode switch, in the persistent header (not the sidebar -- see
-   admin-app.html's own comment above #modeSwitch for why). Reuses .ark-tabs-list/.ark-tab's
-   exact visual language (border/radius/background/the active-tab highlight) via a thin
-   .mode-switch adaptation that drops the two properties that only make sense for an
-   in-editor sticky tab strip (position: sticky; top: 55px -- meaningless in a non-scrolling
-   header -- and its own backdrop-filter, redundant with .bar's). The tab buttons themselves
-   are literally .ark-tab, not a second button style. */
-.bar-modes { display: flex; align-items: center; gap: 8px 14px; flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
-.mode-switch { display: inline-flex; gap: 4px; padding: 3px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
+/* ---- Design/Content mode switch and Design's views, in the one header. Reuses .ark-tab's
+   exact visual language via a thin .mode-switch adaptation; the selected tab/view is the one
+   highlighted (it was not, before 2026-10-18: aria-selected carried no style at all). The
+   Design views collapse to their icon unless selected (the label is the tooltip), so the
+   header keeps to one row; at 1600px and up every label shows. */
+.mode-switch { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: 8px; background: hsl(var(--surface) / .5); }
 .mode-switch[hidden] { display: none; }
-.mode-switch .ark-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; white-space: nowrap; }
-#meshNav { display: inline-flex; align-items: center; gap: 7px; flex: none; }
-#meshNav[aria-current="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--reference-400)); color: hsl(var(--text-strong)); }
+.mode-switch .ark-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 4px 11px; white-space: nowrap; }
+.mode-switch .ark-tab[aria-selected="true"], .mode-switch .ark-tab[aria-pressed="true"], .mode-switch .ark-tab[aria-expanded="true"] { color: hsl(var(--text-strong)); background: hsl(var(--accent-subtle)); }
+.sub-switch .ark-tab { padding: 4px 8px; }
+.sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: none; }
+@media (min-width: 1600px) { .sub-switch .ark-tab .lbl, .sub-switch .ark-tab:not([aria-pressed="true"]) .lbl { display: inline; } .sub-switch .ark-tab { padding: 4px 10px; } }
 .page-list button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 36px; padding: 8px 10px 8px 12px; border: 0; border-left: 2px solid transparent; border-radius: 0 7px 7px 0; background: none; text-align: left; cursor: pointer; color: hsl(var(--text)); font-size: 13px; transition: background-color .12s, border-color .12s; }
 .page-list button:hover { background: hsl(var(--raised)); }
 .page-list button[aria-current="true"] { background: hsl(var(--reference-100)); border-left-color: hsl(var(--reference)); color: hsl(var(--text-strong)); font-weight: 500; }
@@ -206,6 +252,8 @@ legend { padding: 0 4px; margin-left: -4px; }
   .editor-head { position: static; flex-direction: column; }
   .bar { padding: 8px 16px; position: static; }
   .bar-actions::before { display: none; }
+  #appBar { padding: 8px 12px; }
+  .bar-tools { margin-left: 0; }
   .bar .btn { min-height: 30px; padding: 5px 9px; font-size: 12px; }
   .mode-switch .ark-tab { min-height: 26px; padding: 4px 9px; }
   body, html { height: auto; }
@@ -440,8 +488,6 @@ body.locked { overflow: auto; }
    canvas on the left stays visible while a past version is previewed in it. SDK semantic
    tokens only; the kind badges carry meaning: a save is reference, a publish is trust (it
    reached the mesh), a restore is drift (it superseded later work, worth a second look). */
-.icon-history { -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2.5 8a5.5 5.5 0 1 0 1.6-3.9' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/><path d='M2 2.5v2.8h2.8' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 5v3.2l2.2 1.4' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>"); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2.5 8a5.5 5.5 0 1 0 1.6-3.9' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/><path d='M2 2.5v2.8h2.8' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/><path d='M8 5v3.2l2.2 1.4' fill='none' stroke='black' stroke-width='1.3' stroke-linecap='round'/></svg>"); }
-#versionsNav[aria-expanded="true"] { border-color: hsl(var(--border-strong)); background: hsl(var(--nested)); }
 .versions-panel { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; z-index: 60; width: min(420px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 24px; overflow: auto; overscroll-behavior: contain; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--overlay) / .96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: -24px 0 60px -30px hsl(var(--canvas)); }
 .versions-panel[hidden] { display: none; }
 .versions-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }

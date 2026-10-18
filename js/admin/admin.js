@@ -48,6 +48,8 @@
      `reason` empty enables the button (restoring its own tooltip); anything else disables it and
      becomes its tooltip. */
   var NOTHING_TO_SAVE = 'Nothing to save: every draft matches its saved copy.';
+  /* false until the Studio block's `let view`/popover state exist (syncHeader reads them) */
+  var headerReady = false;
   function refuse(button, reason) {
     if (!button) return;
     if (button.dataset.baseTitle === undefined) button.dataset.baseTitle = button.title || '';
@@ -78,9 +80,8 @@
   function statesDirty() { return JSON.stringify(window.ArkStates ? ArkStates.sanitize(statesDraft) : statesDraft) !== statesSaved; }
   /* Canvas-only mode's background transition (Part G, follow-up plan) -- a single
      site-wide settings file, same draft/saved/dirty shape as layout/components/states
-     above. Its editing UI is Studio's canvas-transitions popover (#btnCanvasTransitions,
-     merged into this file from the deleted admin-studio.html) (not a separate Design-tab trip, unlike settingsDefaultsDraft's
-     own precedent), but the actual persistence still goes through this exact
+     above. Its editing UI is the canvas-transitions popover on the header's Background
+     segment (#designBackgroundBtn), previewed on the canvas, but the actual persistence still goes through this exact
      draft-replace-then-save-on-next-Save-click pipeline: applyStudioCanvasTransitionsReplace
      keeps this in sync with every field edit Studio relays up, and saveEverything() (Step 5,
      flickering-juggling-donut.md -- superseded the old saveStudioChanges()) writes it the
@@ -257,13 +258,14 @@
     }
     var designSubSwitch = $('designSubSwitch');
     if (designSubSwitch) designSubSwitch.hidden = state.mode !== 'design';
-    var designCanvasBtn = $('designCanvasBtn'), designThemeBtn = $('designThemeBtn');
-    if (designCanvasBtn) designCanvasBtn.setAttribute('aria-selected', String(state.designKind === 'studio'));
+    var designThemeBtn = $('designThemeBtn');
     if (designThemeBtn) {
-      designThemeBtn.setAttribute('aria-selected', String(state.designKind === 'design'));
       designThemeBtn.querySelector('.dot') && designThemeBtn.querySelector('.dot').remove();
       if (themeDirty() || settingsDefaultsDirty()) designThemeBtn.appendChild(h('span', { class: 'dot', title: 'Unsaved global design changes' }));
     }
+    /* which Design view is pressed, and the canvas-only header groups: syncHeader() (Studio
+       block below, next to the `view` it reads) */
+    syncHeader(); refreshSaveButton();
     /* Content mode's own item list (pages/articles/images/secrets/shapes) and its "New X"
        forms are irrelevant while Design mode is active -- hide the whole wrapper rather than
        leave an empty, confusing sidebar. The Mesh status disclosure (a sibling of #contentNav,
@@ -340,12 +342,8 @@
   }
   if ($('modeContentBtn')) $('modeContentBtn').addEventListener('click', function () { setMode('content'); });
   if ($('modeDesignBtn')) $('modeDesignBtn').addEventListener('click', function () { setMode('design'); });
-  /* Design mode's own two sub-views: these call the existing selectStudio()/selectDesign()
-     functions directly (defined further down this file; function declarations are hoisted,
-     so the reference here is valid regardless of textual order) -- no new selection
-     mechanism, just a second place that can trigger the same one. */
-  if ($('designCanvasBtn')) $('designCanvasBtn').addEventListener('click', function () { selectStudio(); });
-  if ($('designThemeBtn')) $('designThemeBtn').addEventListener('click', function () { selectDesign(); });
+  /* Design's sub-views (#designSubSwitch) are wired in the Studio block below, next to
+     setView(), the canvas/sitemap switch they drive. */
   /* The persistent header's real height, published once as --app-bar-h on <html>. #studioRoot
      (css/studio-embed.css) docks below it and sizes its 100vh-based panels by it, so the mode
      switch above stays reachable at EVERY width: at 760px and below the header wraps (193px
@@ -439,11 +437,10 @@
     var root = $('editor'); root.textContent = '';
     var id = state.current, manifest = state.drafts[id];
     if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
-    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: saveEverything });
     var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
     root.appendChild(h('div', { class: 'editor-head' },
       h('div', {}, h('h1', { text: manifest.title }), h('div', { class: 'route', text: manifest.route + '  ·  js/content/manifests/' + manifest.id + '.js' })),
-      h('div', { class: 'editor-actions' }, revert, save)));
+      h('div', { class: 'editor-actions' }, revert)));
 
     var contentPanel = h('div', { class: 'editor-tab-flow' });
     if (manifest.meta.next || manifest.meta.placement) {
@@ -479,17 +476,21 @@
     touch();
   }
 
+  /* THE Save button: one, in the header (#save), for every mode -- the per-editor Save buttons
+     and Studio's own "Save DEFXN" were duplicates of it (owner, 2026-10-18: one merged CMS). It
+     calls saveEverything() (every dirty draft, not just what is on screen), so it enables
+     whenever ANY of the drafts is dirty -- a dirty theme while looking at a clean page must not
+     leave the one save action looking disabled. */
+  function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }
+  $('save').addEventListener('click', function () { saveEverything(); });
+
   /* update everything that depends on "is it dirty" without rebuilding the form */
   function touch() {
     var article = state.kind === 'article', asset = state.kind === 'asset', secret = state.kind === 'secret', now = currentDirty();
-    var save = $('save'), revert = $('revert');
-    /* Step 5: the visible Save button now calls saveEverything() (every dirty draft, not
-       just whatever is on screen), so it must enable whenever ANYTHING among the 13 drafts
-       is dirty, not only when the current section is -- otherwise a dirty theme draft while
-       looking at a clean page would leave the one save action looking disabled. Revert stays
-       scoped to the current section only (it only ever reverts what's on screen), so it keeps
-       using currentDirty(). */
-    refuse(save, anyDirty() ? '' : NOTHING_TO_SAVE);
+    var revert = $('revert');
+    /* Revert stays scoped to the current section (it only ever reverts what is on screen), so
+       it uses currentDirty(); the header's one Save covers every draft (refreshSaveButton). */
+    refreshSaveButton();
     var neverSaved = (state.kind === 'design' ? themeSaved : article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : secret ? state.secretSaved[state.secretCurrent] : state.saved[state.current]) === null;
     refuse(revert, neverSaved ? 'Not saved yet: there is no saved version to revert to.' : now ? '' : 'Nothing to revert: this matches its saved copy.');
     if (state.kind === 'design') { renderList(); return; }
@@ -538,13 +539,11 @@
      canvas-transitions, element-motion) is checked and saved independently here: a thrown
      error for one draft is caught right where it happens, recorded against that draft by
      name, and never stops any of the others from being attempted and reported on their own
-     merits. This is now the ONE function every Save entry point in the app calls --
-     the generic page/article/asset/secret/design-panel Save button (still just called
-     "Save", still shown per-section per Step 3/4's own "keep the chrome, fix the
-     mechanism" precedent), the SEO panel's own Save button, Studio's own #btnCmsSave
-     button, and the global Ctrl/Cmd+S shortcut -- so none of them can under-save relative
-     to any other, and Ctrl+S always does the right thing regardless of which mode/kind is
-     active (the bug fix the plan calls for explicitly). */
+     merits. This is the ONE function every save calls -- the header's one Save button
+     (#save, refreshSaveButton(); the per-section Save buttons and Studio's own second Save
+     were folded into it), Ctrl/Cmd+S here, and Ctrl/Cmd+S forwarded from the canvas -- so
+     no entry point can under-save relative to another, and Ctrl+S always does the right
+     thing regardless of which mode/kind is active. */
 
   /* THE SINGLE-OBJECT DRAFTS, as this editor holds them. Which drafts exist is decided by ONE
      list, ArkAdminStore.drafts() in js/admin/store.js; this only says how the editor reaches
@@ -682,7 +681,7 @@
 
     renderList(); touch(); reloadPreview();
     /* Keep Studio's own derived state (cmsSourceSite/cmsRoutes) and its own repaint in sync
-       after ANY save, not only one reached through #btnCmsSave -- siteFromState() folds in
+       after ANY save, whichever mode it was pressed in -- siteFromState() folds in
        every draft this function just wrote, so Studio's canvas never shows stale content if
        the owner switches to it after saving from the Content side, or vice versa. */
     cmsSourceSite = siteFromState(); cmsRoutes = studioRoutes(); schedule();
@@ -841,11 +840,10 @@
     var root = $('editor'); root.textContent = '';
     var slug = state.aCurrent, a = state.aDrafts[slug];
     if (!a) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick an article on the left.' })); return; }
-    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: saveEverything });
     var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
     root.appendChild(h('div', { class: 'editor-head' },
       h('div', {}, h('h1', { text: a.title || slug }), h('div', { class: 'route', text: '/learnings/' + slug + '  ·  js/content/articles/' + slug + '.js' })),
-      h('div', { class: 'editor-actions' }, revert, save)));
+      h('div', { class: 'editor-actions' }, revert)));
 
     var card = h('fieldset', {}, h('legend', { text: 'Card' }));
     card.appendChild(articleField(a, 'title', 'Title', 'line'));
@@ -961,11 +959,10 @@
     var root = $('editor'); root.textContent = '';
     var id = state.assetCurrent, asset = state.assetDrafts[id];
     if (!asset) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick an image on the left.' })); return; }
-    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: saveEverything });
     var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
     root.appendChild(h('div', { class: 'editor-head' },
       h('div', {}, h('h1', { text: asset.label || id }), h('div', { class: 'route', text: 'js/content/assets/' + id + '.js' })),
-      h('div', { class: 'editor-actions' }, revert, save)));
+      h('div', { class: 'editor-actions' }, revert)));
 
     var box = h('fieldset', {}, h('legend', { text: 'Image' }));
     var preview = h('img', { src: 'data:' + asset.mime + ';base64,' + asset.dataBase64, alt: asset.label, class: 'asset-preview' });
@@ -1099,11 +1096,10 @@
     var root = $('editor'); root.textContent = '';
     var id = state.secretCurrent, secret = state.secretDrafts[id];
     if (!secret) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick an item on the left.' })); return; }
-    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: saveEverything });
     var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
     root.appendChild(h('div', { class: 'editor-head' },
       h('div', {}, h('h1', { text: secret.label || id }), h('div', { class: 'route', text: 'js/content/secrets/' + id + '.js' })),
-      h('div', { class: 'editor-actions' }, revert, save)));
+      h('div', { class: 'editor-actions' }, revert)));
 
     var about = h('fieldset', {}, h('legend', { text: 'Encrypted content' }),
       h('p', { class: 'hint' }, 'The body is AES-GCM ciphertext; the key is wrapped once per recipient with nacl box. Nothing on disk or on the mesh ever holds the plaintext — only what you encrypt here, in this browser, right now.'));
@@ -1623,15 +1619,14 @@
 
   function renderDesignEditor() {
     var root = $('editor'); root.textContent = '';
-    var save = h('button', { id: 'save', type: 'button', class: 'btn primary', text: 'Save', onclick: function () { saveEverything(); } });
     var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
-    refuse(save, anyDirty() ? '' : NOTHING_TO_SAVE);
     refuse(revert, themeDirty() || settingsDefaultsDirty() ? '' : 'Nothing to revert: the theme and settings-gear defaults match their saved copy.');
     root.appendChild(h('div', { class: 'editor-head' },
-      h('div', {}, h('h1', { text: 'Design' }), h('div', { class: 'route', text: 'Global config · js/content/theme-data.js' })),
-      h('div', { class: 'editor-actions' }, revert, save)));
+      h('div', {}, h('h1', { text: 'Theme & defaults' }), h('div', { class: 'route', text: 'Site-wide · theme-data.js · settings-defaults-data.js · seo-data.js' })),
+      h('div', { class: 'editor-actions' }, revert)));
     root.appendChild(buildDesignPanel());
     root.appendChild(buildSettingsDefaultsPanel());
+    root.appendChild(buildSiteSeoPanel());
   }
   /* Step 3: the old standalone #designNav button is gone -- selectDesign() is now reached
      through #designThemeBtn, Design mode's own sub-switch (wired above, near setMode()). */
@@ -1727,8 +1722,7 @@
      (pages/articles/assets/secrets/mesh-relief/theme/settings-defaults/seo) it never
      covered at all -- one function, all 13 drafts, each saved and reported independently. */
   function selectStudio() { state.kind = 'studio'; renderList(); renderEditor(); reloadPreview(); }
-  /* Step 3: the old standalone #studioNav button is gone -- selectStudio() is now reached
-     through #designCanvasBtn, Design mode's own sub-switch (wired above, near setMode()). */
+  /* reached through the header's #designSubSwitch (Canvas / Sitemap), wired next to setView() */
 
   /* =====================================================================
      Studio's own UI (Step 2 merge, 2026-10-17): ported from the old
@@ -1745,13 +1739,10 @@
      ===================================================================== */
 
   const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
-  $('btnContentCms').addEventListener('click', () => {
-    /* Step 2 merge: this used to postMessage up to admin.js (embedded) or navigate to a
-       separate document (opened standalone) -- Studio is never standalone or a separate
-       document any more, so this is just the same direct call admin.js's own listener used
-       to make on the Studio side's behalf. */
-    select(state.current);
-  });
+  /* Content mode on the current page's own editor. Studio's header used to carry a "Content
+     CMS" button for this, a duplicate of the header's mode switch; the toolbar and Library
+     actions that still jump there call this directly. */
+  function openContentEditor() { select(state.current); }
 
   /* =========================================================================
      STEP 1 CLEANUP (2026-10-17): the dense typed-array document engine (node
@@ -1787,7 +1778,7 @@
      toolbar, not a toolbar PLUS a separate restricted-mode system bolted on the side."
      Canvas-transitions (site-wide, no selection to point a floating toolbar at) becomes
      openCanvasTransitionsPopover() below, reusing openPop()'s own positioning against
-     #btnCanvasTransitions. Element-motion (per-element) folds into #selToolbar as one more
+     the header's Background segment. Element-motion (per-element) folds into #selToolbar as one more
      accordion section (buildElementMotionSection()) shown for any real element selection --
      it never needed a separate "mode" at all: .anim-mode had no CSS rule of its own (grep
      confirms it), and the only thing entering it ever did beyond swapping the panel was
@@ -1819,33 +1810,28 @@
   const CMS_ALIGN_TOKENS = ArkLayout.ALIGN_ITEMS_TOKENS;
   const CMS_JUSTIFY_TOKENS = ArkLayout.JUSTIFY_TOKENS;
   const CMS_LINE_HEIGHT_TOKENS = ArkLayout.LINE_HEIGHT_TOKENS;
-  /* Canvas-only mode (Part G): mirrors js/content/canvas-transitions.js's own EFFECTS/
-     EASINGS enums, same reasoning as the token lists above -- this document has no
-     <script src> for the content modules, so the small fixed option lists are
-     duplicated here as literals, kept in sync by hand. */
-  const CMS_CANVAS_EFFECTS = ['fade', 'fade-scale'];
-  const CMS_CANVAS_EASINGS = ['ease', 'ease-out', 'ease-in-out'];
-  const CMS_CANVAS_TRANSITIONS_DEFAULT = { version: 1, effect: 'fade', outDuration: 220, inDuration: 260, easing: 'ease' };
-  /* Animation-only mode (Part H): mirrors js/content/element-motion.js's own DIRECTIONS
-     enum/default entry, same reasoning as the token/enum lists above -- this document has
-     no <script src> for the content modules. CMS_CANVAS_EASINGS (above) is reused directly
-     for this panel's own easing picker rather than copied a second time, per the plan's own
-     "reuse Part G's easing list for consistency across the two new systems" instruction. */
-  const CMS_ELEMENT_MOTION_DIRECTIONS = ['up', 'down', 'left', 'right', 'none'];
-  const CMS_ELEMENT_MOTION_DEFAULT_ENTRY = { direction: 'up', distance: 8, duration: 260, delay: 0, easing: 'ease' };
-  /* The 6 generic block resolvers (js/resolvers/blocks/*.js) and their real prop names --
-     mirrored, not imported, same reasoning as the token lists above. Canonical copy:
-     js/content/components.js's RESOLVERS/RESOLVER_PROPS. */
-  const CMS_BLOCK_RESOLVERS = [
-    ['RBLOCK_TEXT_V1', 'Text', ['heading', 'body', 'align', 'size']],
-    ['RBLOCK_CTA_V1', 'Button / link', ['label', 'href', 'variant']],
-    ['RBLOCK_IMAGE_V1', 'Image', ['src', 'alt', 'caption']],
-    ['RBLOCK_CARD_V1', 'Card', ['icon', 'title', 'text']],
-    ['RBLOCK_QUOTE_V1', 'Quote', ['quote', 'attribution']],
-    ['RBLOCK_DIVIDER_V1', 'Divider', []],
-  ];
-  function cmsBlockResolverLabel(resolver) { const found = CMS_BLOCK_RESOLVERS.find((r) => r[0] === resolver); return found ? found[1] : resolver; }
-  function cmsBlockResolverProps(resolver) { const found = CMS_BLOCK_RESOLVERS.find((r) => r[0] === resolver); return found ? found[2] : []; }
+  const CMS_BORDER_VALUES = ArkLayout.BORDER_VALUES;
+  const CMS_WRAP_VALUES = ArkLayout.WRAP_VALUES;
+  const CMS_OPACITY_STEPS = ArkLayout.OPACITY_STEPS;
+  const CMS_OVERFLOW_VALUES = ArkLayout.OVERFLOW_VALUES;
+  const CMS_FONT_WEIGHT_STEPS = ArkLayout.FONT_WEIGHT_STEPS;
+  const CMS_TEXT_ALIGN_VALUES = ArkLayout.TEXT_ALIGN_VALUES;
+  /* The background-transition and element-animation option lists, and the typed blocks
+     the Library offers -- read from the modules that validate them (admin-app.html loads
+     canvas-transitions.js, element-motion.js and components.js before this file). These were
+     hand copies "because this document has no <script src>", true only of the deleted
+     admin-studio.html; a copy can only drift from what sanitize() keeps
+     (tests/admin-token-source.cjs fails if one comes back). */
+  const CMS_CANVAS_EFFECTS = ArkCanvasTransitions.effects();
+  const CMS_CANVAS_EASINGS = ArkCanvasTransitions.easings();
+  const CMS_CANVAS_TRANSITIONS_DEFAULT = ArkCanvasTransitions.defaults();
+  const CMS_ELEMENT_MOTION_DIRECTIONS = ArkElementMotion.directions();
+  const CMS_ELEMENT_MOTION_EASINGS = ArkElementMotion.easings();
+  const CMS_ELEMENT_MOTION_DEFAULT_ENTRY = ArkElementMotion.defaultEntry();
+  /* the typed blocks ({ resolver, label, props }), each resolver's name and props next to each other in js/content/components.js */
+  const CMS_BLOCK_RESOLVERS = ArkComponents.blocks();
+  function cmsBlockResolverLabel(resolver) { return ArkComponents.labelOf(resolver); }
+  function cmsBlockResolverProps(resolver) { const found = CMS_BLOCK_RESOLVERS.find((b) => b.resolver === resolver); return found ? found.props : []; }
   /* A master's editable props: a typed block's fixed list, or -- for a component made from a
      selection -- its own text/image slots, read from its tree by the one canonical
      ArkComponents.propsOf (admin-app.html loads js/content/components.js). */
@@ -1853,7 +1839,7 @@
     if (!master) return [];
     return window.ArkComponents && ArkComponents.propsOf ? ArkComponents.propsOf(master) : cmsBlockResolverProps(master.resolver);
   }
-  function cmsMasterKind(master) { return master && window.ArkComponents && master.resolver === ArkComponents.CAPTURED ? 'Made from a selection' : cmsBlockResolverLabel(master && master.resolver); }
+  function cmsMasterKind(master) { return cmsBlockResolverLabel(master && master.resolver); }
   function cmsSeoValue(value) {
     value = value || {};
     return { t: value.title || '', d: value.description || '', img: value.ogImage || '', can: value.canonical || '' };
@@ -1869,15 +1855,13 @@
      "Authoritative content" textarea keyed by bindingOf()) could edit manifest/article/SEO
      fields through a second, invisible projection of the real content -- the dense `.frame`
      those nodes rendered into is never shown once connected (`.cms-connected .frame{display:
-     none}`), and Content CMS (`btnContentCms`, one click away) already edits every one of
+     none}`), and Content mode (the header's mode switch) already edits every one of
      those same manifest/article/SEO fields directly and visibly. That whole bridge -- the
      dense translation, bindingOf(), and collectCmsPatches()'s per-field value walk -- is
      deleted with Step 1 rather than ported: it duplicated Content CMS's own editors instead
      of being Studio-specific capability. Flagged plainly, same as the Versions/export
      deletion below: if the owner wants Studio to edit manifest/article/SEO text directly
-     again, that is new work for a later step, not a port.
-     collectCmsPatches() stays as an empty stub so `$('btnCmsSave')`'s existing relay (below)
-     keeps working unchanged -- it simply has nothing dense-sourced left to report. */
+     again, that is new work for a later step, not a port. */
   /* Step 2 merge: collectCmsPatches()/queueCmsSync() are deleted outright. They existed only
      to relay the (Step 1-deleted) dense manifest/article/SEO patch list up through
      window.parent.postMessage -- collectCmsPatches() already returned [] unconditionally
@@ -1933,7 +1917,7 @@
   /* Part B of the follow-up Studio plan: a real layers tree for connected mode. The iframe
      reports the current route's real DOM tree (js/main.js's cmsRealTree) on every ready/
      select/layout-change/components-replace message, the same "iframe reports its own real
-     state" pattern cmsGroups/cmsComponentAnchors above already use -- never a separate poll. */
+     state" pattern cmsGroups above already uses -- never a separate poll. */
   let cmsTree = [];
   /* Select any annotated element by its stable key -- generalizes postCmsSelectGroup's
      existing message (select-by-group-id) rather than inventing a sibling message type, since
@@ -1952,10 +1936,6 @@
      knows the real selection (cmsPreviewSelected); this just asks it to act on it, the same
      "forward to the iframe" shape postCmsSelectGroup/postCmsLayoutOperation already use. */
   function postCmsRemoveSelection() { if (!cmsConnected || !cmsPreview.contentWindow) return; cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-remove-selection' }, window.location.origin); }
-  /* Reusable components (js/content/components.js): the current route's declared anchors,
-     reported by the preview iframe on every ready/select/components-replace message -- the
-     same "the iframe reports its own real state" pattern cmsGroups above already uses. */
-  let cmsComponentAnchors = [];
   /* Every place on the current page a Library block could be inserted, with whether a block
      there would be visible (js/main.js's cmsInsertionPoints) -- reported with every selection
      and components change, since "after the selection" depends on the selection. */
@@ -2058,8 +2038,8 @@
     placeSelToolbar();
   }
   function rectOf(el) { const r = el.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: (r.left - s.left) / scale, y: (r.top - s.top) / scale, w: r.width / scale, h: r.height / scale }; }
-  /* Step 4 (flickering-juggling-donut.md): #selToolbar's own positioning, built directly on
-     top of rectOf()/placeOverlays()'s exact math per the plan, not a reimplementation.
+  /* #selToolbar's positioning, on top of rectOf()'s scale-corrected stage coordinates (the
+     only overlay this document still places; the dense canvas's placeOverlays() is gone).
      cmsExactSelection.rect (reported by js/main.js's cmsSelectionInfo(), computed INSIDE the
      real-site preview iframe via that element's own getBoundingClientRect()) is already in
      the iframe's OWN internal CSS-pixel space -- i.e. the iframe's layout viewport at its
@@ -2092,12 +2072,10 @@
     const acts = box.querySelector('.tb-actions');
     box.classList.toggle('wrapped', !!acts && acts.offsetTop > acts.offsetHeight / 2);
     const r = rectOfSelectionRect(cmsExactSelection && cmsExactSelection.rect);
-    /* Mirrors #selTag's own `th`/`fh` above/below-flip convention exactly, just with a
-       MEASURED size (box.offsetWidth/offsetHeight -- a layout property, unaffected by the
-       counter-scale transform just applied above, so this is the toolbar's real on-screen
-       footprint) instead of a fixed 26px, since the toolbar's height varies with which
-       taxonomy sections are showing. Also clamps the right/bottom edge, which #selTag never
-       needed (it is thin enough that Math.max(0, r.x) alone was always enough). */
+    /* The bar's MEASURED size (box.offsetWidth/offsetHeight -- a layout property, unaffected
+       by the counter-scale transform just applied above, so this is its real on-screen
+       footprint; its height varies with which taxonomy sections are showing), clamped to the
+       stage on every edge. */
     const bw = scale < 1 ? box.offsetWidth / scale : box.offsetWidth, bh = scale < 1 ? box.offsetHeight / scale : box.offsetHeight;
     /* gap 28: the preview draws its own size/drag label (.ark-studio-label, js/main.js) 24px
        above the selection; a smaller gap parked the bar on that drag handle */
@@ -2143,7 +2121,12 @@
     let top = r.bottom + 6; if (top + ph > innerHeight - 8) top = Math.max(8, r.top - ph - 6);
     popEl.style.left = left + 'px'; popEl.style.top = top + 'px';
   }
-  function refreshPop() { if (popEl && popBuild) { const sc = popEl.scrollTop; popEl.textContent = ''; popBuild(popEl); popEl.scrollTop = sc; positionPop(); } }
+  function refreshPop() {
+    if (!popEl || !popBuild) return;
+    if (popBuild.holdWhileEditing && popEl.contains(document.activeElement) && document.activeElement.matches('input, textarea, select')) return;
+    const sc = popEl.scrollTop; popEl.textContent = ''; popBuild(popEl); popEl.scrollTop = sc; positionPop();
+  }
+  headerReady = true;
   document.addEventListener('pointerdown', (e) => { if (popEl && !popEl.contains(e.target) && !(popAnchor && popAnchor.contains(e.target))) closePop(); });
   window.addEventListener('resize', positionPop);
   function menu(box, items) {
@@ -2301,31 +2284,71 @@
     menu(p, [...sorted.map((route) => ({ icon: route.seoArticle ? 'article' : route.path === '/' ? 'home' : 'page', label: route.title || route.path, hint: route.path, on: route.path === cmsCurrentRoute, run: () => openRoute(route.path) })), '-', ...actions]);
   }));
 
-  /* =========================================================================
-     Inspector: collapsible groups so only what matters is open
-     ========================================================================= */
-  const openGroups = new Set(['component', 'data', 'access', 'seo', 'seo-site', 'seoai', 'seock', 'page', 'content', 'link', 'layout', 'spacing', 'type', 'fill', 'cms-canvas-transitions']);
-  try { const g = JSON.parse(localStorage.getItem('defxn-studio-groups') || 'null'); if (Array.isArray(g)) { openGroups.clear(); g.forEach((x) => openGroups.add(x)); openGroups.add('component'); openGroups.add('data'); } } catch (e) {}
-  const GROUP_KEYS = { layout: ['display', 'cols', 'gap', 'align', 'justify', 'wrap'], spacing: ['pt', 'pr', 'pb', 'pl', 'mt', 'mb'], size: ['w', 'h', 'maxw', 'minh', 'ar'], position: ['pos', 'anchor', 'x', 'y', 'inset', 'z'], type: ['font', 'fs', 'fw', 'lh', 'ls', 'ta', 'color'], fill: ['bg', 'radius', 'border', 'bc', 'shadow'], effects: ['op', 'rot', 'overflow', 'blend'] };
-  function accordion(pane, key, title, icon, id) {
-    const d = document.createElement('details'); d.className = 'acc'; d.open = openGroups.has(key);
-    const keys = GROUP_KEYS[key] || [];
-    const n = id >= 0 ? keys.filter((k) => cell(id, PI[k], device) !== -1).length : 0;
-    d.innerHTML = `<summary>${ic(icon)}<span></span>${n ? `<span class="cnt" title="${n} set at this size">${n}</span>` : ''}${ic('chev', 'chev')}</summary>`;
-    d.querySelector('summary span').textContent = title;
-    const body = document.createElement('div'); body.className = 'acc-body'; d.appendChild(body);
-    d.addEventListener('toggle', () => { if (d.open) openGroups.add(key); else openGroups.delete(key); try { localStorage.setItem('defxn-studio-groups', JSON.stringify([...openGroups])); } catch (e) {} });
-    pane.appendChild(d); return body;
-  }
-
   function renderInspector() {
     renderSelToolbar();
-    if (!$('paneTheme').hidden && themePaneStale) renderThemePane();
-    if (!$('paneSeo').hidden) renderSeoPane();
     refuse($('btnUndo'), cmsLayoutCanUndo ? '' : 'Nothing to undo: no layout or style edit on the canvas yet.');
     refuse($('btnRedo'), cmsLayoutCanRedo ? '' : 'Nothing to redo: undo an edit first.');
-    const bn = $('bpNote'); bn.hidden = device === 0 || live || view !== 'design'; bn.innerHTML = device ? `${ic('warn', 'sm')}Editing ${DEVICES[device][0].toLowerCase()} overrides` : '';
+    const bn = $('bpNote'); bn.hidden = device === 0 || live || view !== 'design';
+    bn.title = device ? `Editing ${DEVICES[device][0].toLowerCase()} overrides: changes apply at this size only` : '';
+    bn.innerHTML = device ? `${ic('warn', 'sm')}<span class="bp-text">${DEVICES[device][0]} overrides</span>` : '';
   }
+
+  /* The one header's state (admin-app.html's #appBar): which Design view is pressed, and the
+     canvas-only groups -- page picker, page SEO, rail toggle, breakpoints, undo/redo, Design
+     check, Edit/Live -- shown only in Design -> Canvas, where they act on something. Called
+     from renderList() (every kind change) and setView() (canvas <-> sitemap); `headerReady`
+     holds it off until this block's own `let view` exists. */
+  function syncHeader() {
+    if (!headerReady) return;
+    const studio = state.kind === 'studio', canvas = studio && view === 'design';
+    $('designCanvasBtn').setAttribute('aria-pressed', String(canvas));
+    $('designMapBtn').setAttribute('aria-pressed', String(studio && view === 'map'));
+    $('designThemeBtn').setAttribute('aria-pressed', String(state.kind === 'design'));
+    $('canvasNav').hidden = !canvas; $('canvasTools').hidden = !canvas;
+    if (!canvas && popEl && $('appBar').contains(popAnchor)) closePop();
+  }
+
+  /* This page's SEO, as a popover on the header's page picker: the fields that used to fill the
+     right panel's SEO tab, from the same ArkSEO definitions (seoFieldsPanel). Site-wide SEO is
+     not here -- it is site config, so it sits in Theme & defaults (buildSiteSeoPanel). */
+  function renderPageSeoPop(p) {
+    p.classList.add('seo-pop');
+    const route = cmsRoutes.find((r) => r.path === cmsCurrentRoute) || { path: cmsCurrentRoute };
+    const head = document.createElement('h4'); head.textContent = 'SEO \u00b7 ' + (route.title || route.path); p.appendChild(head);
+    if (!window.ArkSEO) { p.appendChild(h('p', { class: 'hint', text: 'SEO editing is unavailable: js/content/seo.js did not load into the editor. Reload; if it persists, check admin-app.html still includes it.' })); return; }
+    const map = route.seoArticle ? 'articles' : 'pages', id = route.seoArticle || route.seoId;
+    if (id && seoDraft[map] && (seoDraft[map][id] || ArkSEO[map === 'pages' ? 'pageIds' : 'articleSlugs']().indexOf(id) >= 0)) {
+      p.appendChild(h('p', { class: 'hint', text: (map === 'articles' ? 'Article ' : 'Page ') + id + ' \u00b7 ' + route.path + '. Blank fields derive from the page itself and the site defaults (Theme & defaults).' }));
+      p.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, () => seoOverrideTarget(map, id), seoEdited));
+    } else {
+      p.appendChild(h('p', { class: 'hint seo-refusal', text: 'No SEO entry for ' + route.path + ': this route has no page id or article slug in js/pages/catalog.js, so there is nothing to store an override under. Give its catalog entry a seoId (pages) or seoArticle (articles) and it gets these fields.' }));
+    }
+    const site = document.createElement('button'); site.type = 'button'; site.className = 'btn small'; site.textContent = 'Site-wide SEO and AI crawlers';
+    site.title = 'Theme & defaults holds the settings every page shares';
+    site.addEventListener('click', () => { closePop(); openSiteSeo(); });
+    p.appendChild(site);
+  }
+  /* a repaint (refreshPop, on every preview message) must not pull the caret out of a field */
+  renderPageSeoPop.holdWhileEditing = true;
+  function openPageSeo() { if (popAnchor !== $('btnPageSeo')) openPop($('btnPageSeo'), renderPageSeoPop, 'left'); }
+  $('btnPageSeo').addEventListener('click', (e) => openPop(e.currentTarget, renderPageSeoPop, 'left'));
+  /* Theme & defaults, scrolled to its site-wide SEO section */
+  function openSiteSeo() {
+    selectDesign();
+    const box = $('siteSeo'); if (box) box.scrollIntoView({ block: 'start' });
+  }
+
+  /* The structure rail (Layers / Pages / Library) folds away so the canvas can take the full
+     width; remembered per browser, a convenience only. */
+  function setLeftRail(open) {
+    $('shell').classList.toggle('rail-closed', !open);
+    const b = $('btnLeftRail'); b.setAttribute('aria-pressed', String(open));
+    b.title = open ? 'Hide the Layers / Pages / Library panel' : 'Show the Layers / Pages / Library panel';
+    try { localStorage.setItem('defxn-studio-rail', open ? 'open' : 'closed'); } catch (e) {}
+    layoutStage();
+  }
+  $('btnLeftRail').addEventListener('click', () => setLeftRail($('shell').classList.contains('rail-closed')));
+  try { if (localStorage.getItem('defxn-studio-rail') === 'closed') { $('shell').classList.add('rail-closed'); $('btnLeftRail').setAttribute('aria-pressed', 'false'); } } catch (e) {}
 
   /* =========================================================================
      Step 4 (flickering-juggling-donut.md): consolidated control-builder functions.
@@ -2363,26 +2386,42 @@
       input.spellcheck = opts.spellcheck !== false;
     }
     if (opts.name) input.name = opts.name;
-    input.value = String(ctx.get(key) ?? (textual ? '' : 0)); input.setAttribute('aria-label', label);
+    /* opts.ariaLabel: a name that says more than the visible label ("Definition heading");
+       opts.data: dataset entries a reader finds the field by (the new-block form's data-prop) */
+    Object.keys(opts.data || {}).forEach((k) => { input.dataset[k] = opts.data[k]; });
+    input.value = String(ctx.get(key) ?? (textual ? '' : 0)); input.setAttribute('aria-label', opts.ariaLabel || label);
     input.addEventListener('change', () => { if (textual) { ctx.set(key, input.value); return; } const v = Number(input.value); if (Number.isFinite(v)) ctx.set(key, v); });
     row.append(l, input, document.createElement('span')); return row;
   }
-  function ctlSegField(ctx, label, key, options, labels) {
+  /* What a choice is called, derived from the value it writes: 'text-muted' -> "Text muted",
+     'h1' -> "H1", 700 -> "700". Segmented and select controls take a label FUNCTION of the
+     value, never a list of labels parallel to the list of values: the parallel list drifted --
+     the Radius control's third button read "Pill" and wrote the `control` token -- and a
+     function of the value cannot point at a neighbour's (regression: tests/admin-control-labels.cjs). */
+  function ctlLabel(value) {
+    const text = String(value).replace(/-/g, ' ');
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+  function ctlSegField(ctx, label, key, options, labelOf) {
+    const name = labelOf || ctlLabel;
     const row = document.createElement('div'); row.className = 'row'; const l = document.createElement('label'); l.textContent = label;
     const seg = document.createElement('div'); seg.className = 'ctl-seg';
-    options.forEach((opt, i) => {
-      const b = document.createElement('button'); b.type = 'button'; b.textContent = (labels && labels[i]) || opt;
+    options.forEach((opt) => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = name(opt);
       b.setAttribute('aria-pressed', String(ctx.get(key) === opt));
       b.addEventListener('click', () => { if (ctx.get(key) !== opt) ctx.set(key, opt); });
       seg.appendChild(b);
     });
     row.append(l, seg, document.createElement('span')); return row;
   }
-  function ctlSelectField(ctx, label, key, options) {
+  /* opts.ariaLabel as in ctlField; the value is written as the option's string */
+  function ctlSelectField(ctx, label, key, options, labelOf, opts) {
+    const name = labelOf || ctlLabel;
+    opts = opts || {};
     const row = document.createElement('div'); row.className = 'row'; const l = document.createElement('label'); l.textContent = label;
-    const s = document.createElement('select'); s.className = 'ctl'; s.setAttribute('aria-label', label);
-    options.forEach(([v, text]) => { const o = document.createElement('option'); o.value = v; o.textContent = text; s.appendChild(o); });
-    s.value = ctx.get(key) || options[0][0];
+    const s = document.createElement('select'); s.className = 'ctl'; s.setAttribute('aria-label', opts.ariaLabel || label);
+    options.forEach((v) => { const o = document.createElement('option'); o.value = String(v); o.textContent = name(v); s.appendChild(o); });
+    s.value = String(ctx.get(key) ?? '') || String(options[0]);
     s.addEventListener('change', () => ctx.set(key, s.value));
     row.append(l, s, document.createElement('span')); return row;
   }
@@ -2396,8 +2435,8 @@
   }
 
   /* Canvas-transitions: site-wide, no selection involved, so it is reachable through a
-     small popover (#btnCanvasTransitions, above the canvas, and js/main.js's unconditional
-     "Edit canvas" context-menu entry) instead of living in #selToolbar -- reusing
+     small popover (the header's Background segment, #designBackgroundBtn, and js/main.js's
+     unconditional "Edit canvas" context-menu entry) instead of living in #selToolbar -- reusing
      openPop()'s own positioning rather than inventing a third system, per the plan's "your
      call on exact placement" for this one site-wide exception. No local re-render is wired
      into this ctx.set: the round trip (postCmsCanvasTransitionsCommand -> real iframe ->
@@ -2411,10 +2450,10 @@
     pane.appendChild(note);
     const cfg = Object.assign({}, CMS_CANVAS_TRANSITIONS_DEFAULT, (cmsSourceSite && cmsSourceSite.canvasTransitions) || {});
     const ctx = { get: (key) => cfg[key], set: (key, value) => postCmsCanvasTransitionsCommand({ [key]: value }) };
-    pane.appendChild(ctlSegField(ctx, 'Effect', 'effect', CMS_CANVAS_EFFECTS, ['Fade', 'Fade + scale']));
+    pane.appendChild(ctlSegField(ctx, 'Effect', 'effect', CMS_CANVAS_EFFECTS));
     pane.appendChild(ctlField(ctx, 'Fade out (ms)', 'outDuration', { min: 0, max: 1200, step: 10 }));
     pane.appendChild(ctlField(ctx, 'Fade in (ms)', 'inDuration', { min: 0, max: 1200, step: 10 }));
-    pane.appendChild(ctlSegField(ctx, 'Easing', 'easing', CMS_CANVAS_EASINGS, ['Ease', 'Ease out', 'Ease in-out']));
+    pane.appendChild(ctlSegField(ctx, 'Easing', 'easing', CMS_CANVAS_EASINGS));
     const preview = document.createElement('button'); preview.className = 'btn small primary'; preview.type = 'button';
     preview.textContent = 'Preview this transition'; preview.style.marginTop = '8px';
     preview.addEventListener('click', postCmsCanvasTransitionPreview);
@@ -2423,8 +2462,16 @@
     hint.textContent = 'Previews instantly in the connected site above -- no page navigation. Save still writes it to the project like every other Studio edit.';
     pane.appendChild(hint);
   }
-  function openCanvasTransitionsPopover(anchor) { openPop(anchor || $('btnCanvasTransitions'), renderCanvasTransitionsPopoverContent, 'left'); }
-  $('btnCanvasTransitions').addEventListener('click', (e) => openCanvasTransitionsPopover(e.currentTarget));
+  /* It previews on the real page, so it opens over the canvas: from Theme & defaults or the
+     sitemap, Background first brings the canvas back. A second press closes it. */
+  function openCanvasTransitionsPopover() {
+    const anchor = $('designBackgroundBtn');
+    if (popAnchor === anchor) { closePop(); return; }
+    if (state.kind !== 'studio') selectStudio();
+    if (view !== 'design') setView('design');
+    openPop(anchor, renderCanvasTransitionsPopoverContent, 'left');
+  }
+  $('designBackgroundBtn').addEventListener('click', openCanvasTransitionsPopover);
   /* =========================================================================
      Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar.
      Replaces renderElementPane()'s fixed accordion list with a type-dispatch that shows
@@ -2500,15 +2547,15 @@
   }
   function buildLayoutSection(pane, ctx) {
     const body = toolbarSection(pane, 'cms-layout', 'Layout', 'grid');
-    body.appendChild(ctlSegField(ctx, 'Display', 'display', CMS_DISPLAY_TOKENS, ['Stack', 'Row', 'Grid', 'Block', 'Hide']));
+    body.appendChild(ctlSegField(ctx, 'Display', 'display', CMS_DISPLAY_TOKENS));
     const display = ctx.get('display');
     if (display === 'row' || display === 'grid' || display === 'stack' || !display) {
       body.appendChild(ctlField(ctx, 'Gap', 'gap'));
-      body.appendChild(ctlSegField(ctx, 'Align', 'align', CMS_ALIGN_TOKENS, ['Fill', 'Start', 'Mid', 'End']));
+      body.appendChild(ctlSegField(ctx, 'Align', 'align', CMS_ALIGN_TOKENS));
     }
     if (display === 'row' || !display) {
-      body.appendChild(ctlSegField(ctx, 'Justify', 'justify', CMS_JUSTIFY_TOKENS, ['Start', 'Mid', 'End', 'Apart']));
-      body.appendChild(ctlSegField(ctx, 'Wrap', 'wrap', ['no', 'yes'], ['No', 'Yes']));
+      body.appendChild(ctlSegField(ctx, 'Justify', 'justify', CMS_JUSTIFY_TOKENS));
+      body.appendChild(ctlSegField(ctx, 'Wrap', 'wrap', CMS_WRAP_VALUES));
     }
   }
   function buildSpacingSection(pane, ctx) {
@@ -2524,18 +2571,18 @@
   }
   function buildTypographySection(pane, ctx) {
     const body = toolbarSection(pane, 'cms-type', 'Typography', 'type');
-    body.appendChild(ctlSegField(ctx, 'Font', 'font', CMS_FONT_TOKENS, ['Display', 'Sans', 'Mono']));
-    body.appendChild(ctlSelectField(ctx, 'Size', 'textSize', CMS_TYPE_SIZE_TOKENS.map((t) => [t, t.charAt(0).toUpperCase() + t.slice(1)])));
-    body.appendChild(ctlSegField(ctx, 'Weight', 'fw', [400, 500, 600, 700, 800], ['400', '500', '600', '700', '800']));
-    body.appendChild(ctlSegField(ctx, 'Line height', 'lh', CMS_LINE_HEIGHT_TOKENS, ['Tight', 'Snug', 'Normal', 'Loose']));
-    body.appendChild(ctlSegField(ctx, 'Align', 'ta', ['left', 'center', 'right'], ['Left', 'Center', 'Right']));
+    body.appendChild(ctlSegField(ctx, 'Font', 'font', CMS_FONT_TOKENS));
+    body.appendChild(ctlSelectField(ctx, 'Size', 'textSize', CMS_TYPE_SIZE_TOKENS));
+    body.appendChild(ctlSegField(ctx, 'Weight', 'fw', CMS_FONT_WEIGHT_STEPS));
+    body.appendChild(ctlSegField(ctx, 'Line height', 'lh', CMS_LINE_HEIGHT_TOKENS));
+    body.appendChild(ctlSegField(ctx, 'Align', 'ta', CMS_TEXT_ALIGN_VALUES));
     body.appendChild(ctlSwatchField(ctx, 'Color', 'color', CMS_TEXT_TOKENS, false));
   }
   function buildFillSection(pane, ctx) {
     const body = toolbarSection(pane, 'cms-fill', 'Fill and border', 'fill');
     body.appendChild(ctlSwatchField(ctx, 'Background', 'bg', CMS_FILL_TOKENS, true));
-    body.appendChild(ctlSegField(ctx, 'Radius', 'radius', CMS_RADIUS_TOKENS, ['None', 'Card', 'Pill', 'Panel']));
-    body.appendChild(ctlSegField(ctx, 'Border', 'border', ['none', 'thin', 'thick'], ['None', 'Thin', 'Thick']));
+    body.appendChild(ctlSegField(ctx, 'Radius', 'radius', CMS_RADIUS_TOKENS));
+    body.appendChild(ctlSegField(ctx, 'Border', 'border', CMS_BORDER_VALUES));
     body.appendChild(ctlSwatchField(ctx, 'Border color', 'borderColor', CMS_BORDER_TOKENS, false));
   }
   function buildSizeSection(pane, ctx) {
@@ -2546,8 +2593,8 @@
   }
   function buildEffectsSection(pane, ctx) {
     const body = toolbarSection(pane, 'cms-effects', 'Effects', 'sparkle');
-    body.appendChild(ctlSegField(ctx, 'Opacity', 'op', [100, 80, 60, 40], ['100%', '80%', '60%', '40%']));
-    body.appendChild(ctlSegField(ctx, 'Overflow', 'overflow', ['visible', 'hidden', 'scroll'], ['Visible', 'Hidden', 'Scroll']));
+    body.appendChild(ctlSegField(ctx, 'Opacity', 'op', CMS_OPACITY_STEPS, (v) => v + '%'));
+    body.appendChild(ctlSegField(ctx, 'Overflow', 'overflow', CMS_OVERFLOW_VALUES));
   }
   /* Image's 3rd taxonomy field: alt text. Stored in ArkLayout.alts (js/content/layout.js) --
      a plain <img> is page-module markup with no manifest/article field behind it, so the
@@ -2595,19 +2642,17 @@
     const scope = document.createElement('p'); scope.className = 'hint';
     scope.textContent = master && master.detached ? 'Detached: this copy no longer follows any definition.' : 'Fields here override this instance only. Edit definition changes every instance.';
     body.appendChild(scope);
+    /* one text field per prop (the shared ctlField): it shows the override, else the definition's value */
+    const overrideCtx = { get: (prop) => (overrides[prop] !== undefined ? overrides[prop] : ((master && master.props[prop]) || '')),
+      set: (prop, value) => postCmsComponentsCommand({ action: 'set-override', route: cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value }) };
     cmsMasterProps(master).forEach((prop) => {
-      const row = document.createElement('div'); row.className = 'row';
-      const l = document.createElement('label'); l.textContent = prop;
-      const input = document.createElement('input'); input.className = 'ctl'; input.setAttribute('aria-label', prop);
-      input.value = overrides[prop] !== undefined ? overrides[prop] : ((master && master.props[prop]) || '');
-      input.placeholder = (master && master.props[prop]) || '';
-      if (overrides[prop] !== undefined) input.style.borderColor = 'hsl(var(--accent))';
-      input.addEventListener('change', () => postCmsComponentsCommand({ action: 'set-override', route: cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: input.value }));
-      row.append(l, input, document.createElement('span')); body.appendChild(row);
+      const row = ctlField(overrideCtx, prop, prop, { type: 'text', placeholder: (master && master.props[prop]) || '' });
+      if (overrides[prop] !== undefined) row.classList.add('ovr');
+      body.appendChild(row);
     });
     const actions = document.createElement('div'); actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.marginTop = '6px';
     const resetAll = document.createElement('button'); resetAll.className = 'btn small'; resetAll.type = 'button'; resetAll.textContent = 'Reset overrides';
-    resetAll.disabled = !Object.keys(overrides).length;
+    refuse(resetAll, Object.keys(overrides).length ? '' : 'Nothing to reset: this instance overrides none of its definition\'s fields. Edit a field above to override it here.');
     resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route: cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
     const removeInst = document.createElement('button'); removeInst.className = 'btn small danger'; removeInst.type = 'button'; removeInst.textContent = 'Remove instance';
     removeInst.addEventListener('click', () => {
@@ -2619,10 +2664,10 @@
        (definition + its overrides) as its own private copy and stops following the
        definition (ArkComponents.detachInstance). */
     const editDef = document.createElement('button'); editDef.className = 'btn small'; editDef.type = 'button'; editDef.textContent = 'Edit definition';
-    editDef.disabled = !master || !!master.detached; if (editDef.disabled) editDef.title = master ? 'A detached copy has no shared definition' : 'This instance\'s definition is missing';
+    refuse(editDef, !master ? 'No definition to edit: this instance\'s master ' + comp.masterId + ' is missing from the components draft.' : master.detached ? 'No shared definition: a detached copy follows none. Edit its fields above instead.' : '');
     editDef.addEventListener('click', () => cmsOpenMasterInLibrary(comp.masterId));
     const detach = document.createElement('button'); detach.className = 'btn small'; detach.type = 'button'; detach.textContent = 'Detach';
-    detach.disabled = !master || !!master.detached; if (detach.disabled) detach.title = 'Already detached';
+    refuse(detach, !master ? 'Cannot detach: this instance\'s master ' + comp.masterId + ' is missing, so there is no content to copy.' : master.detached ? 'Already detached: this copy follows no definition.' : '');
     detach.addEventListener('click', () => {
       postCmsComponentsCommand({ action: 'detach-instance', route: cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
       toast('Detached: this instance keeps its content and no longer follows the definition.');
@@ -2667,8 +2712,8 @@
       const row = document.createElement('div'); row.className = 'row';
       const l = document.createElement('label'); l.textContent = (i === 0 ? '0 · ' : i + ' · ') + (st.label || (i === 0 ? 'Default' : 'New state'));
       const preview = document.createElement('button'); preview.type = 'button'; preview.className = 'btn small'; preview.textContent = showing === i ? 'Showing' : 'Preview';
-      preview.disabled = showing === i;
       preview.title = 'Show this state here in the editor only -- visitors still see the default state';
+      refuse(preview, showing === i ? 'Showing now: this state is the one in the preview. Preview another state to switch.' : '');
       preview.addEventListener('click', () => postCmsStatesCommand({ action: 'preview', groupId, index: i }));
       /* Preview and Remove share the control column: the row's third column is the narrow
          override-dot slot, and a Remove button put there was clipped to "Re". */
@@ -2685,7 +2730,7 @@
            wanted the exact word "Text" silently did nothing for "text block" or Cancel. */
         const addRow = document.createElement('div'); addRow.className = 'state-add-block'; Object.assign(addRow.style, { display: 'flex', gap: '6px', margin: '0 0 6px 20px' });
         const kind = document.createElement('select'); kind.className = 'ctl'; kind.setAttribute('aria-label', 'Block type for state ' + i);
-        [[CMS_LIKE_STATE_0, 'Like state 0']].concat(CMS_BLOCK_RESOLVERS).forEach(([res, resLabel]) => { const o = document.createElement('option'); o.value = res; o.textContent = resLabel; kind.appendChild(o); });
+        [{ resolver: CMS_LIKE_STATE_0, label: 'Like state 0' }].concat(CMS_BLOCK_RESOLVERS).forEach((block) => { const o = document.createElement('option'); o.value = block.resolver; o.textContent = block.label; kind.appendChild(o); });
         const add = document.createElement('button'); add.type = 'button'; add.className = 'btn small'; add.textContent = '+ Add content block';
         add.addEventListener('click', () => { addStateContent(groupId, i, kind.value, st.label || ('State ' + i)); postCmsStatesCommand({ action: 'preview', groupId, index: i }); });
         addRow.append(kind, add); body.appendChild(addRow);
@@ -2693,21 +2738,17 @@
     });
     /* The explicit, saved choice of which state visitors see first. Only this writes the
        group's `current`; Preview above never does. */
-    const defaultRow = document.createElement('div'); defaultRow.className = 'row';
-    const defaultLabel = document.createElement('label'); defaultLabel.textContent = 'Default state';
-    const defaultSelect = document.createElement('select'); defaultSelect.className = 'ctl'; defaultSelect.setAttribute('aria-label', 'Default state');
-    group.states.forEach((st, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = i + ' · ' + (st.label || (i === 0 ? 'Default' : 'New state')); defaultSelect.appendChild(o); });
-    defaultSelect.value = String(group.current);
-    defaultSelect.title = 'The state visitors see first. Saved with the page.';
-    defaultSelect.addEventListener('change', () => postCmsStatesCommand({ action: 'set-default', groupId, index: Number(defaultSelect.value) }));
-    defaultRow.append(defaultLabel, defaultSelect, document.createElement('span')); body.appendChild(defaultRow);
+    const defaultCtx = { get: () => group.current, set: (_key, value) => postCmsStatesCommand({ action: 'set-default', groupId, index: Number(value) }) };
+    const defaultRow = ctlSelectField(defaultCtx, 'Default state', 'current', group.states.map((_st, i) => i), (i) => i + ' · ' + (group.states[i].label || (i === 0 ? 'Default' : 'New state')));
+    defaultRow.querySelector('select').title = 'The state visitors see first. Saved with the page.';
+    body.appendChild(defaultRow);
     /* + Add state creates the state WITH visible content and shows it, instead of an empty
        state that renders nothing (regression: tests/cms-add-state-has-content.cjs): an empty
        state was invisible in the preview, and with the default 'self' trigger it was also
        unclickable, so the group stranded on it. The content is derived from state 0's own
        markup (regression: tests/components-capture.cjs), not a fixed big heading. */
     const addState = document.createElement('button'); addState.type = 'button'; addState.className = 'btn small primary'; addState.style.marginTop = '6px'; addState.textContent = '+ Add state';
-    addState.disabled = group.states.length >= 20;
+    refuse(addState, group.states.length >= ArkStates.MAX_STATES ? `At the limit: a state group holds at most ${ArkStates.MAX_STATES} states. Remove one above to add another.` : '');
     addState.addEventListener('click', () => {
       const index = group.states.length, label = 'State ' + index;
       postCmsStatesCommand({ action: 'add-state', groupId, label });
@@ -2720,10 +2761,11 @@
     triggerNote.textContent = group.trigger === 'self' ? 'Click trigger: the state-zero selection itself.' : 'Click trigger: ' + (triggerRow0 ? '"' + triggerRow0.label + '"' : 'a specific element') + ' (' + group.trigger + '). While another state shows and that element is hidden with state 0, clicking the showing state moves on.';
     body.appendChild(triggerNote);
     const triggerRow = document.createElement('div'); triggerRow.style.display = 'flex'; triggerRow.style.gap = '6px'; triggerRow.style.flexWrap = 'wrap';
-    const useSelf = document.createElement('button'); useSelf.type = 'button'; useSelf.className = 'btn small'; useSelf.textContent = 'Use state-zero selection as trigger'; useSelf.disabled = group.trigger === 'self';
+    const useSelf = document.createElement('button'); useSelf.type = 'button'; useSelf.className = 'btn small'; useSelf.textContent = 'Use state-zero selection as trigger';
+    refuse(useSelf, group.trigger === 'self' ? 'Already the trigger: a click on the state-zero selection moves this group on.' : '');
     useSelf.addEventListener('click', () => postCmsStatesCommand({ action: 'set-trigger', groupId, trigger: 'self' }));
     const useThis = document.createElement('button'); useThis.type = 'button'; useThis.className = 'btn small'; useThis.textContent = 'Use this element as trigger';
-    useThis.disabled = !cmsExactSelection.key || group.trigger === cmsExactSelection.key;
+    refuse(useThis, !cmsExactSelection.key ? 'Select an element on the page first: the selected element becomes the trigger.' : group.trigger === cmsExactSelection.key ? 'Already the trigger: this element is what a click moves this group on with. Select another element to use it instead.' : '');
     useThis.addEventListener('click', () => postCmsStatesCommand({ action: 'set-trigger', groupId, trigger: cmsExactSelection.key }));
     triggerRow.append(useSelf, useThis); body.appendChild(triggerRow);
     const removeGroup = document.createElement('button'); removeGroup.type = 'button'; removeGroup.className = 'btn small danger'; removeGroup.style.marginTop = '8px'; removeGroup.textContent = 'Remove this states group';
@@ -2744,11 +2786,11 @@
     const note = document.createElement('p'); note.className = 'hint';
     note.textContent = `How "${cmsExactSelection.label || cmsExactSelection.key}" enters and leaves on route change. Overrides the default stagger for this element only; every other element keeps today's behavior.`;
     body.appendChild(note);
-    body.appendChild(ctlSegField(ctx, 'Direction', 'direction', CMS_ELEMENT_MOTION_DIRECTIONS, ['Up', 'Down', 'Left', 'Right', 'None']));
+    body.appendChild(ctlSegField(ctx, 'Direction', 'direction', CMS_ELEMENT_MOTION_DIRECTIONS));
     body.appendChild(ctlField(ctx, 'Distance (px)', 'distance', { min: 0, max: 60, step: 1 }));
     body.appendChild(ctlField(ctx, 'Duration (ms)', 'duration', { min: 0, max: 1200, step: 10 }));
     body.appendChild(ctlField(ctx, 'Delay (ms)', 'delay', { min: 0, max: 1200, step: 10 }));
-    body.appendChild(ctlSegField(ctx, 'Easing', 'easing', CMS_CANVAS_EASINGS, ['Ease', 'Ease out', 'Ease in-out']));
+    body.appendChild(ctlSegField(ctx, 'Easing', 'easing', CMS_ELEMENT_MOTION_EASINGS));
     const preview = document.createElement('button'); preview.className = 'btn small primary'; preview.type = 'button';
     preview.textContent = 'Preview'; preview.style.marginTop = '8px';
     preview.addEventListener('click', () => postCmsElementMotionPreview(cmsExactSelection.key));
@@ -2883,8 +2925,8 @@
        cmsMakeComponent decides, and refuses with a reason, against the real selection) */
     const compRefusal = cmsExactSelections.some((sel) => sel.component || sel.stateGroup) ? 'Select page content, not an inserted block or a state group' : '';
     toolbarAction(actions, 'make-component', 'wand', 'Make into component', () => { if (cmsConnected && cmsPreview.contentWindow) cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-make-component' }, window.location.origin); }, compRefusal);
-    toolbarAction(actions, 'content-cms', 'article', 'Open in Content CMS', () => $('btnContentCms').click());
-    toolbarAction(actions, 'design-controls', 'palette', 'Design controls', () => selectDesign());
+    toolbarAction(actions, 'content-cms', 'article', 'Open in Content', openContentEditor);
+    toolbarAction(actions, 'design-controls', 'palette', 'Theme & defaults', () => selectDesign());
     /* one roving tab stop: Tab lands on the bar once, the arrow keys move along it */
     const buttons = [...box.querySelectorAll('button:not([disabled])')];
     const stop = buttons.find((b) => b.dataset.tb === (barFocus || tbRoving)) || buttons.find((b) => b.dataset.tb === tbOpen) || buttons[0];
@@ -3058,15 +3100,11 @@
           /* the definition itself: label and every prop (a captured component's are its own
              text/image slots) -- update-master, so every instance re-renders from it */
           const form = document.createElement('div'); form.className = 'lib-definition'; form.style.margin = '2px 0 8px 22px';
-          const field = (label, value, onChange) => {
-            const r = document.createElement('div'); r.className = 'row';
-            const l = document.createElement('label'); l.textContent = label;
-            const input = document.createElement('input'); input.className = 'ctl'; input.type = 'text'; input.value = value == null ? '' : String(value); input.setAttribute('aria-label', 'Definition ' + label);
-            input.addEventListener('change', () => onChange(input.value));
-            r.append(l, input, document.createElement('span')); form.appendChild(r);
-          };
-          field('label', master.label, (v) => postCmsComponentsCommand({ action: 'update-master', id, patch: { label: v } }));
-          cmsMasterProps(master).forEach((prop) => field(prop, master.props[prop], (v) => postCmsComponentsCommand({ action: 'update-master', id, patch: { props: Object.assign({}, master.props, { [prop]: v }) } })));
+          /* the shared ctlField, with two ctx objects: a CTA block has a prop named `label` too */
+          const labelCtx = { get: () => master.label, set: (_key, v) => postCmsComponentsCommand({ action: 'update-master', id, patch: { label: v } }) };
+          const propsCtx = { get: (prop) => master.props[prop], set: (prop, v) => postCmsComponentsCommand({ action: 'update-master', id, patch: { props: Object.assign({}, master.props, { [prop]: v }) } }) };
+          form.appendChild(ctlField(labelCtx, 'label', 'label', { type: 'text', ariaLabel: 'Definition label' }));
+          cmsMasterProps(master).forEach((prop) => form.appendChild(ctlField(propsCtx, prop, prop, { type: 'text', ariaLabel: 'Definition ' + prop })));
           const uses = Object.keys(components.routes || {}).reduce((n, route) => n + Object.keys(components.routes[route]).reduce((m, a) => m + components.routes[route][a].filter((it) => it.masterId === id).length, 0), 0);
           const hint = document.createElement('p'); hint.className = 'hint'; hint.textContent = `Used ${uses} time${uses === 1 ? '' : 's'} across the site; every one follows these fields unless it overrides one.`;
           form.appendChild(hint); site.appendChild(form);
@@ -3076,76 +3114,50 @@
 
       const form = document.createElement('div'); form.className = 'libsec';
       const fh = document.createElement('h4'); fh.innerHTML = '<span>New block</span>'; form.appendChild(fh);
-      const typeRow = document.createElement('div'); typeRow.className = 'row';
-      const typeLabel = document.createElement('label'); typeLabel.textContent = 'Block type';
-      const typeSelect = document.createElement('select'); typeSelect.className = 'ctl';
-      CMS_BLOCK_RESOLVERS.forEach(([res, resLabel]) => { const o = document.createElement('option'); o.value = res; o.textContent = resLabel; typeSelect.appendChild(o); });
-      typeRow.append(typeLabel, typeSelect, document.createElement('span')); form.appendChild(typeRow);
-      const nameRow = document.createElement('div'); nameRow.className = 'row';
-      const nameLabel = document.createElement('label'); nameLabel.textContent = 'Label';
-      const nameInput = document.createElement('input'); nameInput.className = 'ctl'; nameInput.type = 'text'; nameInput.value = cmsBlockResolverLabel(typeSelect.value) + ' block';
-      nameRow.append(nameLabel, nameInput, document.createElement('span')); form.appendChild(nameRow);
-      const propsHost = document.createElement('div');
-      function renderBlockPropsForm() {
-        propsHost.textContent = '';
-        cmsBlockResolverProps(typeSelect.value).forEach((prop) => {
-          const row = document.createElement('div'); row.className = 'row';
-          const l = document.createElement('label'); l.textContent = prop;
-          const input = document.createElement('input'); input.className = 'ctl'; input.type = 'text'; input.dataset.prop = prop;
-          row.append(l, input, document.createElement('span')); propsHost.appendChild(row);
-        });
+      /* The new block being described, edited through the shared ctl*Field builders. Choosing
+         another type starts its label and props over (they belong to the type). */
+      const fresh = { resolver: CMS_BLOCK_RESOLVERS[0].resolver, label: '', props: {} };
+      const startType = (resolver) => { fresh.resolver = resolver; fresh.label = cmsBlockResolverLabel(resolver) + ' block'; fresh.props = {}; };
+      startType(fresh.resolver);
+      const freshHost = document.createElement('div');
+      const typeCtx = { get: () => fresh.resolver, set: (_key, resolver) => { startType(resolver); renderNewBlockFields(); } };
+      const nameCtx = { get: () => fresh.label, set: (_key, v) => { fresh.label = v; } };
+      const freshPropsCtx = { get: (prop) => fresh.props[prop], set: (prop, v) => { if (v) fresh.props[prop] = v; else delete fresh.props[prop]; } };
+      function renderNewBlockFields() {
+        freshHost.textContent = '';
+        freshHost.append(ctlSelectField(typeCtx, 'Block type', 'resolver', CMS_BLOCK_RESOLVERS.map((b) => b.resolver), cmsBlockResolverLabel),
+          ctlField(nameCtx, 'Label', 'label', { type: 'text' }),
+          ...cmsBlockResolverProps(fresh.resolver).map((prop) => ctlField(freshPropsCtx, prop, prop, { type: 'text', data: { prop } })));
       }
-      renderBlockPropsForm();
-      typeSelect.addEventListener('change', () => { nameInput.value = cmsBlockResolverLabel(typeSelect.value) + ' block'; renderBlockPropsForm(); });
-      form.appendChild(propsHost);
+      renderNewBlockFields();
+      form.appendChild(freshHost);
       const create = document.createElement('button'); create.className = 'btn small primary'; create.type = 'button'; create.textContent = 'Create block';
       create.addEventListener('click', () => {
-        const props = {};
-        propsHost.querySelectorAll('input').forEach((input) => { if (input.value) props[input.dataset.prop] = input.value; });
-        const label = nameInput.value.trim() || cmsBlockResolverLabel(typeSelect.value);
-        postCmsComponentsCommand({ action: 'create-master', id: cmsNextComponentId('m'), resolver: typeSelect.value, props, label });
+        const props = Object.assign({}, fresh.props);
+        const label = fresh.label.trim() || cmsBlockResolverLabel(fresh.resolver);
+        postCmsComponentsCommand({ action: 'create-master', id: cmsNextComponentId('m'), resolver: fresh.resolver, props, label });
         toast(`Created ${label}. Find it above to insert it on any route.`);
       });
       form.appendChild(create);
       box.appendChild(form);
 
       const actions = document.createElement('div'); actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.flexWrap = 'wrap'; actions.style.marginTop = '8px';
-      const content = document.createElement('button'); content.className = 'btn small'; content.type = 'button'; content.textContent = 'Open Content CMS'; content.addEventListener('click', () => $('btnContentCms').click());
-      const design = document.createElement('button'); design.className = 'btn small'; design.type = 'button'; design.textContent = 'Open Design'; design.addEventListener('click', () => selectDesign());
+      const content = document.createElement('button'); content.className = 'btn small'; content.type = 'button'; content.textContent = 'Open in Content'; content.addEventListener('click', openContentEditor);
+      const design = document.createElement('button'); design.className = 'btn small'; design.type = 'button'; design.textContent = 'Theme & defaults'; design.addEventListener('click', () => selectDesign());
       actions.append(content, design); box.appendChild(actions); return;
     }
   }
 
   /* =========================================================================
-     Theme pane: site and audience first, then the 60-30-10 palette with live
-     contrast checks, font pairs and the global scale
-     ========================================================================= */
-  let themePaneStale = true;
-  function renderThemePane() {
-    themePaneStale = false;
-    const pane = $('paneTheme'); pane.textContent = '';
-    const exact = document.createElement('div'); exact.className = 'sect';
-    const title = document.createElement('h3'); title.textContent = 'DEFXN design system';
-    const note = document.createElement('p'); note.className = 'hint'; note.textContent = 'The canvas is rendering the real DEFXN CSS and components. Use the authoritative Design controls for palettes, semantic colors, backgrounds, and theme overrides; changes appear here before Save.';
-    const open = document.createElement('button'); open.type = 'button'; open.className = 'btn primary'; open.textContent = 'Open DEFXN Design controls';
-    open.addEventListener('click', () => selectDesign());
-    exact.append(title, note, open); pane.appendChild(exact);
-  }
-  function showTab(which, quiet) {
-    for (const [t, p] of [['tabTheme', 'paneTheme'], ['tabSeo', 'paneSeo']]) { $(t).setAttribute('aria-selected', String(t === which)); $(p).hidden = t !== which; }
-    themePaneStale = true; if (!quiet) renderInspector();
-  }
-  $('tabTheme').addEventListener('click', () => showTab('tabTheme'));
-  $('tabSeo').addEventListener('click', () => showTab('tabSeo'));
-
-  /* =========================================================================
-     Search and AI: the SEO tab. Edits the real seoDraft (js/content/seo.js, saved to
-     seo-data.js by saveEverything() like every other draft): the current route's own
-     override, then the site-wide fields, then the AI-crawler policy -- every row derived
-     from ArkSEO's field definitions by seoFieldRows() (see there). Each edit is folded
-     into cmsSourceSite and re-sent to the preview, whose router re-emits the page's
-     <title>/meta/robots/canonical/JSON-LD (js/ark/page-router.js) from it, so the real
-     output can be inspected before Save; the design checks re-run on it too.
+     Search and AI. Edits the real seoDraft (js/content/seo.js, saved to seo-data.js by
+     saveEverything() like every other draft), every row derived from ArkSEO's field
+     definitions by seoFieldRows() (see there). Two homes, by scope: the current route's own
+     override is a popover on the header's page picker (renderPageSeoPop), and the site-wide
+     fields plus the AI-crawler policy are a section of Theme & defaults (buildSiteSeoPanel) --
+     they used to share a fixed right-hand SEO tab that took the canvas's width full time.
+     Each edit is folded into cmsSourceSite and re-sent to the preview, whose router re-emits
+     the page's <title>/meta/robots/canonical/JSON-LD (js/ark/page-router.js) from it, so the
+     real output can be inspected before Save; the design checks re-run on it too.
      The AI-crawler list is ArkSEO.AI_BOTS -- the same list robots.txt is written from. */
   let seoPreviewT = 0;
   function seoEdited() {
@@ -3156,26 +3168,16 @@
        the design checks re-run when the preview reports ready, never mid-remount */
     clearTimeout(seoPreviewT); seoPreviewT = setTimeout(postCmsPreviewState, 250);
   }
-  function renderSeoPane(force) {
-    const pane = $('paneSeo');
-    /* renderInspector() repaints this on every selection/preview message; never pull the
-       caret out of a field the owner is typing in. */
-    if (!force && pane.contains(document.activeElement) && document.activeElement !== pane) return;
-    pane.textContent = '';
-    if (!window.ArkSEO) { pane.appendChild(h('p', { class: 'hint', text: 'SEO editing is unavailable: js/content/seo.js did not load into the editor. Reload; if it persists, check admin-app.html still includes it.' })); return; }
-    const route = cmsRoutes.find((r) => r.path === cmsCurrentRoute) || { path: cmsCurrentRoute };
-    const map = route.seoArticle ? 'articles' : 'pages', id = route.seoArticle || route.seoId;
-    const page = accordion(pane, 'seo', 'This page \u00b7 ' + (route.title || route.path), 'search', -1);
-    if (id && seoDraft[map] && (seoDraft[map][id] || ArkSEO[map === 'pages' ? 'pageIds' : 'articleSlugs']().indexOf(id) >= 0)) {
-      page.appendChild(h('p', { class: 'hint', text: (map === 'articles' ? 'Article ' : 'Page ') + id + ' \u00b7 ' + route.path + '. Blank fields derive from the page itself and the site defaults below.' }));
-      page.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, () => seoOverrideTarget(map, id), seoEdited));
-    } else {
-      page.appendChild(h('p', { class: 'hint seo-refusal', text: 'No SEO entry for ' + route.path + ': this route has no page id or article slug in js/pages/catalog.js, so there is nothing to store an override under. Give its catalog entry a seoId (pages) or seoArticle (articles) and it gets these fields.' }));
-    }
-    const site = accordion(pane, 'seo-site', 'Site', 'home', -1);
+  function buildSiteSeoPanel() {
+    const wrap = h('div', { class: 'page-law-panel', id: 'siteSeo' });
+    if (!window.ArkSEO) { wrap.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable: js/content/seo.js did not load into the editor. Reload; if it persists, check admin-app.html still includes it.' })); return wrap; }
+    const site = h('fieldset', {}, h('legend', { text: 'Search · whole site' }),
+      h('p', { class: 'hint', text: 'What every page falls back to: a page’s own SEO (Canvas → the search icon beside the page picker) overrides these.' }));
     site.appendChild(seoFieldsPanel(ArkSEO.SITE_FIELDS.filter((f) => f.group === 'site'), () => seoDraft.site, seoEdited));
-    const ai = accordion(pane, 'seoai', 'AI assistants and crawlers', 'sparkle', -1);
+    const ai = h('fieldset', {}, h('legend', { text: 'AI assistants and crawlers' }));
     ai.appendChild(seoFieldsPanel(ArkSEO.SITE_FIELDS.filter((f) => f.group === 'ai'), () => seoDraft.site, seoEdited));
+    wrap.append(site, ai);
+    return wrap;
   }
 
   /* =========================================================================
@@ -3289,12 +3291,18 @@
     applyMapZoom();
   }
   function setView(v) {
-    view = v; for (const b of $('view').children) b.setAttribute('aria-pressed', String(b.dataset.v === v));
+    view = v;
     $('shell').classList.toggle('mapview', v === 'map'); $('designView').hidden = v !== 'design'; $('mapView').hidden = v !== 'map';
     if (v === 'map') { mapFocus = cmsCurrentRoute; mapZoom = 1; renderSitemap(); } else layoutStage();
-    schedule();
+    syncHeader(); schedule();
   }
-  $('view').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); });
+  /* The header's Design views: Canvas and Sitemap are this canvas's two views (entering Studio
+     first when Theme & defaults is showing); Theme & defaults is the site-wide config editor.
+     Background is wired next to its popover (openCanvasTransitionsPopover). */
+  function showDesignView(v) { if (state.kind !== 'studio') selectStudio(); setView(v); }
+  $('designCanvasBtn').addEventListener('click', () => showDesignView('design'));
+  $('designMapBtn').addEventListener('click', () => showDesignView('map'));
+  $('designThemeBtn').addEventListener('click', () => selectDesign());
 
   /* =========================================================================
      Design check: the layout, color, typography and conversion rules as
@@ -3463,7 +3471,7 @@
     const siteSeo = (cmsSourceSite && cmsSourceSite.seo && cmsSourceSite.seo.site) || {};
     const bots = siteSeo.bots || {};
     const answerBotsOpen = ArkSEO.AI_BOTS.filter(([b, train]) => !train && (bots[b] || 'allow') === 'allow').length, answerBotsTotal = ArkSEO.AI_BOTS.filter((b) => !b[1]).length;
-    add({ law: 'AI', title: 'Answer-ready for AI assistants', status: answerBotsOpen > 0 ? 'pass' : 'warn', detail: `${answerBotsOpen} of ${answerBotsTotal} answer/search bots allowed.`, fix: 'seo', fixLabel: 'Open SEO' });
+    add({ law: 'AI', title: 'Answer-ready for AI assistants', status: answerBotsOpen > 0 ? 'pass' : 'warn', detail: `${answerBotsOpen} of ${answerBotsTotal} answer/search bots allowed.`, fix: 'seo-site', fixLabel: 'Open site SEO' });
     // 14 designed for the visitor: needs a stated audience, which no real draft stores
     add({ law: 'Audience', title: 'Designed for the visitor', status: 'notBuilt',
       detail: 'Not built: this rule compares the design against who the site is for, and no saved draft stores that. The deleted canvas kept an audience note in its own theme; the real theme (js/content/theme.js) and SEO site settings have no such field. Add an audience field to one of them and this rule can be measured.' });
@@ -3478,7 +3486,8 @@
   let checkT = 0;
   function queueCheck() { clearTimeout(checkT); checkT = setTimeout(() => { if (view === 'design') { runChecks(); if (popAnchor === $('btnCheck')) refreshPop(); renderStatus(); } }, 450); }
   function applyFix(c) {
-    if (c.fix === 'seo') { closePop(); showTab('tabSeo'); return; }
+    if (c.fix === 'seo') { closePop(); openPageSeo(); return; }
+    if (c.fix === 'seo-site') { closePop(); openSiteSeo(); return; }
   }
   $('btnCheck').addEventListener('click', (e) => { runChecks(); openPop(e.currentTarget, (p) => {
     const checks = lastChecks;
@@ -3516,14 +3525,9 @@
   function esc(s) { return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
   /* STEP 1 CLEANUP: Export HTML / robots.txt-sitemap-llms.txt / Load sample / Start blank
      all operated on the deleted dense tree (exportHtml compiled it via compileNode(), which
-     is gone) -- deleted with no replacement, same as the Versions feature above. The
-     Shortcuts hint is trimmed to what still does something now that duplicate/group/ungroup/
-     nudge/double-click-to-edit (all standalone-canvas-only) are gone.
-  */
-  $('btnMore').addEventListener('click', (e) => openPop(e.currentTarget, (p) => {
-    const k = document.createElement('p'); k.className = 'hint'; k.style.padding = '6px 8px 2px'; k.innerHTML = '<b>Shortcuts</b> · Ctrl+Z undo · Ctrl+Shift+Z redo · Esc closes a menu';
-    p.appendChild(k);
-  }, 'right'));
+     is gone) -- deleted with no replacement, same as the Versions feature above. The "More"
+     menu that was left holding only the Shortcuts hint is gone too: that hint now sits in the
+     header's account menu (admin-app.html #accountMenu). */
 
   /* =========================================================================
      Status bar, autosave, toolbar, keyboard
@@ -3581,7 +3585,7 @@
     if (event.source !== cmsPreview.contentWindow) return;
     if (event.data.points) cmsInsertPoints = event.data.points;
     if (event.data.showing) cmsStatesShowing = event.data.showing;
-    if (event.data.type === 'defxn-cms-preview-ready') { if (event.data.groups) cmsGroups = event.data.groups; if (event.data.anchors) cmsComponentAnchors = event.data.anchors; if (event.data.tree) cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); libKey = ''; renderLibrary(); queueCheck(); }
+    if (event.data.type === 'defxn-cms-preview-ready') { if (event.data.groups) cmsGroups = event.data.groups; if (event.data.tree) cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); libKey = ''; renderLibrary(); queueCheck(); }
     else if (event.data.type === 'defxn-cms-preview-error') toast('Preview update failed: ' + event.data.message);
     else if (event.data.type === 'defxn-cms-preview-select') {
       cmsExactSelection = event.data.selection || null;
@@ -3593,7 +3597,7 @@
       renderLibrary();
     } else if (event.data.type === 'defxn-cms-preview-components-replace') {
       if (cmsSourceSite) cmsSourceSite.components = event.data.components;
-      if (event.data.anchors) cmsComponentAnchors = event.data.anchors;
+     
       if (event.data.tree) cmsTree = event.data.tree;
       applyStudioComponentsReplace(event.data.components);
       if (event.data.created) { tbAutoOpen = { key: 'cms-component', at: Date.now() }; toast('Made a component: it is in the Library to insert on any page, and this instance replaced the selection. Edit its definition from the Library or the toolbar.'); }
@@ -3603,7 +3607,7 @@
       renderInspector();
     } else if (event.data.type === 'defxn-cms-preview-states-replace') {
       if (cmsSourceSite) cmsSourceSite.states = event.data.states;
-      if (event.data.anchors) cmsComponentAnchors = event.data.anchors;
+     
       if (event.data.tree) cmsTree = event.data.tree;
       applyStudioStatesReplace(event.data.states);
       if (event.data.created) { tbAutoOpen = { key: 'cms-states', at: Date.now() }; toast('Made a state group: the selection is state 0. Use + Add state in the toolbar to add the next state.'); }
@@ -3633,7 +3637,7 @@
     /* Step 4: js/main.js's unconditional "Edit canvas" context-menu entry still posts this
        exact message (that protocol is untouched, per scope) -- it used to call
        enterRestrictMode('canvas'); now it opens the same selection-independent popover
-       the header's #btnCanvasTransitions button opens. */
+       the header's Background segment (#designBackgroundBtn) opens. */
     else if (event.data.type === 'defxn-cms-preview-enter-canvas-mode') openCanvasTransitionsPopover();
     /* Ctrl/Cmd+S pressed while focus is inside the canvas (js/main.js forwards it): the same
        gate and the same one save action as this document's own shortcut listener. */
@@ -3646,14 +3650,6 @@
   document.addEventListener('pointerdown', () => {
     if (cmsContextMenuOpen && cmsPreview.contentWindow) cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-close-menu' }, window.location.origin);
   }, true);
-  $('btnCmsSave').addEventListener('click', () => {
-    /* Step 5: calls the same saveEverything() every other Save entry point calls now (Step 2
-       merge already made this a direct call rather than a patches/'defxn-studio-save' round
-       trip to a second document; Step 5 replaces the target of that direct call with the one
-       function that covers all 13 drafts, not just the 8 saveStudioChanges() used to). */
-    toast('Saving changed DEFXN content…');
-    saveEverything();
-  });
 
   /* Step 2 merge: the standalone/embedded boot branches above (and the
      'defxn-studio-ready' handshake they used to end in) are deleted outright -- Studio is
@@ -3739,7 +3735,7 @@
           var name = bot[0];
           var botCtx = { get: function () { return ArkSEO.cleanField(f, draft()[f.key])[name] === 'block' ? 'block' : 'allow'; },
                          set: function (_key, value) { var next = Object.assign({}, ArkSEO.cleanField(f, draft()[f.key])); if (value === 'block') next[name] = 'block'; else delete next[name]; draft()[f.key] = next; onEdited(f); } };
-          var row = ctlSegField(botCtx, name, name, ['allow', 'block'], ['Allow', 'Block']);
+          var row = ctlSegField(botCtx, name, name, ArkSEO.BOT_POLICIES);
           row.classList.add('seo-bot'); row.dataset.seoField = f.key; row.dataset.seoBot = name;
           row.title = bot[2] + (bot[1] ? ' (training)' : ' (answers)');
           rows.push(row);
@@ -3747,9 +3743,9 @@
         return;
       }
       var row;
-      if (f.kind === 'enum') row = ctlSelectField(ctx, f.label, f.key, (f.fallback ? [] : [['', f.blankLabel || 'None']]).concat(f.options.map(function (o) { return [o, o]; })));
-      else if (f.kind === 'flag') row = ctlSegField(ctx, f.label, f.key, [false, true], ['No', 'Yes']);
-      else if (f.kind === 'onoff') row = ctlSegField(ctx, f.label, f.key, [1, 0], ['Publish', 'Off']);
+      if (f.kind === 'enum') row = ctlSelectField(ctx, f.label, f.key, (f.fallback ? [] : ['']).concat(f.options), function (o) { return o === '' ? (f.blankLabel || 'None') : o; });
+      else if (f.kind === 'flag') row = ctlSegField(ctx, f.label, f.key, [false, true], function (v) { return v ? 'Yes' : 'No'; });
+      else if (f.kind === 'onoff') row = ctlSegField(ctx, f.label, f.key, [1, 0], function (v) { return v ? 'Publish' : 'Off'; });
       else row = ctlField(ctx, f.label, f.key, { type: SEO_TEXT_KINDS[f.kind] || 'text', placeholder: f.placeholder, spellcheck: f.kind === 'text' || f.kind === 'longtext', name: 'seo-' + f.key });
       row.dataset.seoField = f.key;
       rows.push(row);
@@ -3781,7 +3777,7 @@
   function buildPageSeoPanel(pageId, label) {
     var box = h('fieldset', {}, h('legend', { text: 'SEO' }));
     if (!window.ArkSEO) { box.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable on this page: js/content/seo.js did not load. Reload the editor; if it persists, check that admin-app.html still includes it.' })); return box; }
-    box.appendChild(h('p', { class: 'hint', text: 'These values belong to this page (' + ArkSEO.pageTitle(pageId, label) + '). Blank title and description derive from the page text and site defaults. Site-wide settings (base URL, language, AI crawlers) are in Design \u2192 SEO.' }));
+    box.appendChild(h('p', { class: 'hint', text: 'These values belong to this page (' + ArkSEO.pageTitle(pageId, label) + '). Blank title and description derive from the page text and site defaults. Site-wide settings (base URL, language, AI crawlers) are in Design \u2192 Theme & defaults.' }));
     box.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, function () { return seoOverrideTarget('pages', pageId); }, function () { touch(); renderList(); }));
     return box;
   }
@@ -3920,7 +3916,6 @@
     if (!window.ArkMeshSettings) return box;
     box.appendChild(h('p', { class: 'hint', text: 'Contrast, depth and particle count -- shared by every page’s shape images, not just this one. Drag a slider to see it change in the preview on the right; nothing is written until Save.' }));
     var fields = h('div', { class: 'relief-fields' });
-    var save = h('button', { type: 'button', class: 'btn primary', text: 'Save' });
     var reset = h('button', { type: 'button', class: 'btn', text: 'Reset tuning to defaults' });
     function refreshInputs() {
       fields.textContent = '';
@@ -3930,24 +3925,21 @@
         var input = h('input', { id: id, type: 'range', min: f.min, max: f.max, step: f.step, oninput: function () {
           meshDraft.tuning[f.key] = Number(input.value);
           out.textContent = String(meshDraft.tuning[f.key]);
-          notifyPreviewMesh(); refuse(save, anyDirty() ? '' : NOTHING_TO_SAVE);
+          notifyPreviewMesh(); refreshSaveButton();
         } });
         input.value = meshDraft.tuning[f.key];
         fields.appendChild(h('div', { class: 'relief-field' },
           h('div', { class: 'relief-field-head' }, h('label', { for: id, text: f.label }), out),
           input));
       });
-      refuse(save, anyDirty() ? '' : NOTHING_TO_SAVE);
+      refreshSaveButton();
     }
     reset.addEventListener('click', function () { meshDraft.tuning = ArkMeshSettings.defaults().tuning; refreshInputs(); notifyPreviewMesh(); });
-    /* Step 5: this used to call saveMeshDraft(save) directly -- mesh/shape tuning only. It
-       now calls the one saveEverything() every other Save entry point calls, so a dirty
-       page/theme/canvas draft left over from another section is never silently skipped just
-       because the owner happened to Save from this inline panel. */
-    save.addEventListener('click', function () { saveEverything(); });
+    /* no Save of its own: the header's one Save (saveEverything) writes the tuning with every
+       other dirty draft, so nothing is skipped because Save was pressed from this panel */
     refreshInputs();
     box.appendChild(fields);
-    box.appendChild(h('div', { class: 'tools' }, save, reset));
+    box.appendChild(h('div', { class: 'tools' }, reset));
     return box;
   }
   /* Only for a shape page with no manifest of its own (Demo, Lab): everything else edits its
@@ -4214,14 +4206,18 @@
     return site;
   }
 
+  /* why Publish is unavailable (law: a refusal names what it needs; tests/admin-disabled-says-why.cjs) */
+  var PUBLISH_NEEDS_HOST = 'Cannot publish from this copy of the page: it reaches no miner. Open the copy the host serves (http://127.0.0.1:3437/admin.html) or double-click "Flux Chain Admin.command".';
+  var PUBLISHING_NOW = 'Publishing now: wait for this version to finish.';
   async function refreshMesh() {
     var line = $('meshState'), owner = $('meshOwner');
     if (!mesh) {
       /* opened from disk: this page cannot reach a miner, but a plain link to the host's copy of it can be followed */
       line.textContent = 'This copy of the page cannot publish. Double-click "Flux Chain Admin.command" in the flux-chain folder, or use the copy served by the host: ';
       line.appendChild(h('a', { href: 'http://127.0.0.1:3437/admin.html', text: 'http://127.0.0.1:3437/admin.html' }));
-      owner.textContent = ''; $('publish').disabled = true; $('mesh').open = true;
-      $('meshRefresh').disabled = true;
+      owner.textContent = ''; $('mesh').open = true;
+      refuse($('publish'), PUBLISH_NEEDS_HOST);
+      refuse($('meshRefresh'), PUBLISH_NEEDS_HOST);
       return;
     }
     try {
@@ -4236,8 +4232,8 @@
       if (info.current && who && info.current.ownerPublicKey !== who.publicKeyB64) {
         line.textContent += ' This identity does not own the name: sign in with the identity that does.';
       }
-      $('publish').disabled = publishing || !info.reachable;
-    } catch (error) { line.textContent = error.message; $('publish').disabled = true; }
+      refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: the miner is not reachable (' + (info.detail || 'no answer') + '). Start the miner or check its address, then Refresh.');
+    } catch (error) { line.textContent = error.message; refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.'); }
   }
 
   $('publish').addEventListener('click', async function () {
@@ -4249,7 +4245,7 @@
       return;
     }
     if (anyDirty()) { status('Save your changes first, so the site files and the published copy match.', 'warn'); return; }
-    var button = $('publish'); button.disabled = true; publishing = true;
+    var button = $('publish'); refuse(button, PUBLISHING_NOW); publishing = true;
     try {
       var result = await mesh.publishSite(siteFromState(), function (message) { status(message, ''); }, function (removes) {
         var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).concat(removes.secrets || []).join(', ') : 'possibly some pages, articles, images or encrypted items (the published version could not be compared)';
@@ -4264,12 +4260,18 @@
     } catch (error) {
       status(error.message + (error.detail && error.detail.remedy && error.message.indexOf(error.detail.remedy) < 0 ? ' To fix: ' + error.detail.remedy : ''), 'error');
     }
-    publishing = false; button.disabled = false; refreshMesh();
+    publishing = false; refuse(button, ''); refreshMesh();
   });
   $('meshRefresh').addEventListener('click', refreshMesh);
   $('meshNav').addEventListener('click', selectMesh);
   if (gate.localDevelopment && gate.localDevelopment()) { $('signOut').textContent = 'Sign out identity'; $('signOut').title = 'Drop the identity and signing key; local editing remains open.'; }
   $('signOut').addEventListener('click', function () { gate.signOut(); });
+  /* The header's account menu: who is signed in, the project folder, shortcuts, sign-out --
+     occasional actions, folded into one icon so the header keeps to one row. */
+  function setAccountMenu(open) { $('accountMenu').hidden = !open; $('accountBtn').setAttribute('aria-expanded', String(open)); }
+  $('accountBtn').addEventListener('click', function () { setAccountMenu($('accountMenu').hidden); });
+  document.addEventListener('pointerdown', function (event) { if (!$('accountMenu').hidden && !$('account').contains(event.target)) setAccountMenu(false); });
+  $('account').addEventListener('keydown', function (event) { if (event.key === 'Escape' && !$('accountMenu').hidden) { setAccountMenu(false); $('accountBtn').focus(); } });
   /* the locked page asks before it signs out over unsaved work */
   /* `site` is read-only: exactly what Publish would send right now (a fresh copy). The
      publish round-trip browser test (tests/browser/publish-flows.mjs) takes the real

@@ -324,6 +324,7 @@ var ArkStates = (function () {
     createStateGroup: createStateGroup, addState: addState, removeState: removeState, removeGroup: removeGroup,
     setTrigger: setTrigger, setCurrent: setCurrent, advance: advance,
     anchorId: anchorId, render: render, renderAll: renderAll,
-    triggerTargets: triggerTargets, findTriggerMatch: findTriggerMatch
+    triggerTargets: triggerTargets, findTriggerMatch: findTriggerMatch,
+    MAX_STATES: MAX_STATES
   };
 })();

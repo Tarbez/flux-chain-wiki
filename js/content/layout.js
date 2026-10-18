@@ -22,6 +22,8 @@ var ArkLayout = (function () {
   var RADIUS_TOKENS = ['none', 'card', 'control', 'panel'];
   var RADIUS_CSS = { none: '0', card: 'var(--size-card-radius)', control: 'var(--size-control-radius)', panel: 'var(--size-panel-radius)' };
   var BORDER_WIDTH_CSS = { thin: '1px', thick: '2px' };
+  var BORDER_VALUES = ['none'].concat(Object.keys(BORDER_WIDTH_CSS));
+  var WRAP_VALUES = ['no', 'yes'];
   var OPACITY_STEPS = [100, 80, 60, 40];
   var OVERFLOW_VALUES = ['visible', 'hidden', 'scroll'];
   var FONT_WEIGHT_STEPS = [400, 500, 600, 700, 800];
@@ -69,7 +71,7 @@ var ArkLayout = (function () {
     var color = oneOf(frame.color, TEXT_TOKENS); if (color) out.color = color;
     var bg = frame.bg === 'none' ? 'none' : oneOf(frame.bg, FILL_TOKENS); if (bg) out.bg = bg;
     var radius = oneOf(frame.radius, RADIUS_TOKENS); if (radius) out.radius = radius;
-    var border = oneOf(frame.border, ['none', 'thin', 'thick']); if (border) out.border = border;
+    var border = oneOf(frame.border, BORDER_VALUES); if (border) out.border = border;
     var borderColor = oneOf(frame.borderColor, BORDER_TOKENS); if (borderColor) out.borderColor = borderColor;
     var overflow = oneOf(frame.overflow, OVERFLOW_VALUES); if (overflow) out.overflow = overflow;
     var op = Number(frame.op); if (OPACITY_STEPS.indexOf(op) >= 0) out.op = op;
@@ -79,7 +81,7 @@ var ArkLayout = (function () {
     var display = oneOf(frame.display, DISPLAY_TOKENS); if (display) out.display = display;
     var align = oneOf(frame.align, ALIGN_ITEMS_TOKENS); if (align) out.align = align;
     var justify = oneOf(frame.justify, JUSTIFY_TOKENS); if (justify) out.justify = justify;
-    var wrap = oneOf(frame.wrap, ['no', 'yes']); if (wrap) out.wrap = wrap;
+    var wrap = oneOf(frame.wrap, WRAP_VALUES); if (wrap) out.wrap = wrap;
     return out;
   }
   function sanitize(value) {
@@ -403,5 +405,6 @@ var ArkLayout = (function () {
   return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, apply: apply, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
     setAlt: setAlt, altFor: altFor, applyAlt: applyAlt, applyAlts: applyAlts, altAttribute: altAttribute, altOwn: altOwn, ALT_MAX: ALT_MAX,
     TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS, RADIUS_CSS: RADIUS_CSS,
-    DISPLAY_TOKENS: DISPLAY_TOKENS, ALIGN_ITEMS_TOKENS: ALIGN_ITEMS_TOKENS, JUSTIFY_TOKENS: JUSTIFY_TOKENS, LINE_HEIGHT_TOKENS: LINE_HEIGHT_TOKENS };
+    DISPLAY_TOKENS: DISPLAY_TOKENS, ALIGN_ITEMS_TOKENS: ALIGN_ITEMS_TOKENS, JUSTIFY_TOKENS: JUSTIFY_TOKENS, LINE_HEIGHT_TOKENS: LINE_HEIGHT_TOKENS,
+    BORDER_VALUES: BORDER_VALUES, WRAP_VALUES: WRAP_VALUES, OPACITY_STEPS: OPACITY_STEPS, OVERFLOW_VALUES: OVERFLOW_VALUES, FONT_WEIGHT_STEPS: FONT_WEIGHT_STEPS, TEXT_ALIGN_VALUES: TEXT_ALIGN_VALUES };
 })();

@@ -20,35 +20,70 @@
 <link rel="stylesheet" href="css/studio-embed.css" />
 </head>
 <body>
-<header class="bar">
-  <div class="bar-brand"><strong>Flux Protocol</strong><span>CONTENT</span></div>
-  <!-- Step 3 (Design/Content mode switch, flickering-juggling-donut.md): this switch lives
-       in the persistent outer header, not inside #cmsShell's own sidebar, because #cmsShell
-       is itself hidden whenever Design mode's canvas sub-view (state.kind === 'studio') is
-       active (renderEditor()'s #cmsShell[hidden] toggle) -- a control placed inside it would
-       disappear exactly when it is needed to switch back out. Mesh moves here for the same
-       reason: it must stay reachable regardless of which mode/sub-view is showing, and this
-       header is the one element neither #cmsShell nor #studioRoot ever hides. -->
-  <div class="bar-modes">
+<!-- ONE header for the whole editor (2026-10-18, owner: "No more one cms for content and one
+     cms for design. Only one merged."). Studio used to draw a second bar of its own under this
+     one -- its own title, a "Content CMS" button duplicating the mode switch, a page picker,
+     Design/Sitemap, Background, breakpoints, undo/redo, Design check, Edit/Live and a second
+     Save -- so Design mode had two navigation systems and two Save buttons. Every one of those
+     concepts now appears here exactly once. It lives outside #cmsShell and #studioRoot because
+     renderEditor() hides one or the other: a control placed inside either would disappear
+     exactly when it is needed to switch back out. The canvas-only groups (#canvasNav,
+     #canvasTools) show only in Design -> Canvas (syncHeader() in js/admin/admin.js). -->
+<header class="bar" id="appBar">
+  <div class="bar-brand" title="Flux Protocol editor"><strong>Flux Protocol</strong></div>
+  <div class="bar-nav">
     <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="Mode">
       <button type="button" class="ark-tab" id="modeContentBtn" role="tab" aria-selected="false" data-mode="content">Content</button>
       <button type="button" class="ark-tab" id="modeDesignBtn" role="tab" aria-selected="false" data-mode="design">Design</button>
     </div>
-    <div class="mode-switch" id="designSubSwitch" role="tablist" aria-label="Design view" hidden>
-      <button type="button" class="ark-tab" id="designCanvasBtn" role="tab" aria-selected="false" data-sub="studio">Canvas</button>
-      <button type="button" class="ark-tab" id="designThemeBtn" role="tab" aria-selected="false" data-sub="design">Theme &amp; defaults</button>
+    <!-- Design's sub-views as ONE segmented control. Background is not a view of its own: it is
+         the site-wide page-transition popover (it needs the canvas to preview on), so it opens a
+         popover anchored here instead of switching what the screen shows. Unselected views
+         collapse to their icon (label in the tooltip) so the whole header fits one row. -->
+    <div class="mode-switch sub-switch" id="designSubSwitch" role="group" aria-label="Design view" hidden>
+      <button type="button" class="ark-tab" id="designCanvasBtn" aria-pressed="false" data-sub="canvas" title="Canvas: edit the real pages"><svg class="ic" aria-hidden="true"><use href="#i-design"/></svg><span class="lbl">Canvas</span></button>
+      <button type="button" class="ark-tab" id="designMapBtn" aria-pressed="false" data-sub="map" title="Sitemap: every page and how they link"><svg class="ic" aria-hidden="true"><use href="#i-sitemap"/></svg><span class="lbl">Sitemap</span></button>
+      <button type="button" class="ark-tab" id="designBackgroundBtn" aria-haspopup="dialog" aria-expanded="false" title="Background: the transition between pages (site-wide)"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg><span class="lbl">Background</span></button>
+      <button type="button" class="ark-tab" id="designThemeBtn" aria-pressed="false" data-sub="theme" title="Theme &amp; defaults: palette, fonts, settings defaults, site-wide SEO"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span class="lbl">Theme &amp; defaults</span></button>
     </div>
-    <button id="meshNav" type="button" class="btn" aria-current="false" title="Publish and deploy status, regardless of mode"><span class="icon icon-mesh"></span> Mesh</button>
-    <!-- Version history (js/admin/versions.js): header-level for the same reason as Mesh --
-         it spans every draft in both modes, so it must stay reachable from either. -->
-    <button id="versionsNav" type="button" class="btn" aria-expanded="false" aria-controls="versionsPanel" title="Every saved version of the site: preview, restore, export"><span class="icon icon-history"></span> Versions</button>
+  </div>
+  <div class="bar-group" id="canvasNav" hidden>
+    <button type="button" class="ibtn" id="btnLeftRail" aria-pressed="true" aria-controls="studioLeft" aria-label="Layers panel" title="Hide the Layers / Pages / Library panel"><svg class="ic" aria-hidden="true"><use href="#i-sidebar"/></svg></button>
+    <button type="button" class="bar-page" id="btnPage" aria-haspopup="dialog" aria-expanded="false" title="Switch page"></button>
+    <button type="button" class="ibtn" id="btnPageSeo" aria-haspopup="dialog" aria-expanded="false" aria-label="SEO for this page" title="Search and AI: this page's title, description and share preview"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+  </div>
+  <div class="bar-group bar-tools" id="canvasTools" hidden>
+    <span class="bp-note" id="bpNote" hidden></span>
+    <div class="seg" id="devices" role="group" aria-label="Preview size">
+      <button type="button" data-d="0" aria-pressed="true" title="Desktop · 1280 px" aria-label="Desktop"><svg class="ic" aria-hidden="true"><use href="#i-desktop"/></svg></button>
+      <button type="button" data-d="1" aria-pressed="false" title="Tablet · 820 px" aria-label="Tablet"><svg class="ic" aria-hidden="true"><use href="#i-tablet"/></svg></button>
+      <button type="button" data-d="2" aria-pressed="false" title="Phone · 390 px" aria-label="Phone"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></button>
+    </div>
+    <button type="button" class="ibtn" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></button>
+    <button type="button" class="ibtn" id="btnRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg class="ic" aria-hidden="true"><use href="#i-redo"/></svg></button>
+    <button type="button" class="ibtn score" id="btnCheck" aria-haspopup="dialog" aria-expanded="false" aria-label="Design check" title="Check this page against the design rules"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><b id="scoreBadge">–</b></button>
+    <div class="seg" id="mode" role="group" aria-label="Edit or use the site">
+      <button type="button" data-m="edit" aria-pressed="true" title="Edit: select and change elements" aria-label="Edit"><svg class="ic" aria-hidden="true"><use href="#i-cursor"/></svg></button>
+      <button type="button" data-m="live" aria-pressed="false" title="Live: use the site like a visitor" aria-label="Live"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></button>
+    </div>
   </div>
   <div class="bar-actions">
     <span id="status" class="status" role="status" aria-live="polite"></span>
-    <button id="connect" type="button" class="btn">Connect project folder</button>
-    <span id="who" class="who" title="The identity you are signed in as"></span>
+    <!-- Version history (js/admin/versions.js) and Mesh span every draft in both modes. -->
+    <button id="versionsNav" type="button" class="ibtn" aria-expanded="false" aria-controls="versionsPanel" aria-label="Versions" title="Versions: every saved version of the site -- preview, restore, export"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg></button>
+    <button id="meshNav" type="button" class="ibtn" aria-current="false" aria-label="Mesh" title="Mesh: publish and deploy status"><svg class="ic" aria-hidden="true"><use href="#i-mesh"/></svg></button>
+    <button id="save" type="button" class="btn" title="Save every unsaved change, in both modes (Ctrl/Cmd+S)">Save</button>
     <button id="publish" type="button" class="btn primary" title="Publish every page and article to the mesh">Publish</button>
-    <button id="signOut" type="button" class="btn" title="Lock the admin and drop the signing key">Sign out</button>
+    <!-- identity, project folder, shortcuts and sign-out: occasional, so one compact menu -->
+    <div class="account" id="account">
+      <button id="accountBtn" type="button" class="ibtn" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu" aria-label="Account and project folder" title="Account and project folder"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></button>
+      <div class="account-menu" id="accountMenu" hidden>
+        <span id="who" class="who" title="The identity you are signed in as"></span>
+        <button id="connect" type="button" class="btn">Connect project folder</button>
+        <p class="hint"><b>Shortcuts</b> · Ctrl/Cmd+S save · Ctrl+Z undo · Ctrl+Shift+Z redo · Esc closes a menu</p>
+        <button id="signOut" type="button" class="btn" title="Lock the admin and drop the signing key">Sign out</button>
+      </div>
+    </div>
   </div>
 </header>
 <main id="cmsShell" class="shell">
@@ -126,7 +161,8 @@
     </div>
   </aside>
 </main>
-<div id="studioRoot" hidden>
+<!-- The icon sprite sits at body level, not inside #studioRoot: the one header above uses it in
+     every mode, including Content mode, where #studioRoot is hidden. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
   <symbol id="i-layers" viewBox="0 0 16 16"><path d="M8 2 2 5l6 3 6-3zM2 8l6 3 6-3M2 11l6 3 6-3"/></symbol>
@@ -190,43 +226,21 @@
   <symbol id="i-bot" viewBox="0 0 16 16"><rect x="2.5" y="5" width="11" height="8.5" rx="2"/><path d="M8 5V2.5M6 9h.1M10 9h.1M5.5 11.5h5"/></symbol>
   <symbol id="i-mail" viewBox="0 0 16 16"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="m2 4.5 6 4.5 6-4.5"/></symbol>
   <symbol id="i-wand" viewBox="0 0 16 16"><path d="M2.5 13.5l8-8M9 4l1.5 1.5M12 2v2M13.5 3.5h-3M12.5 7.5v1.5M13.25 8.25h-1.5"/></symbol>
+  <symbol id="i-history" viewBox="0 0 16 16"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9"/><path d="M2 2.5v2.8h2.8M8 5v3.2l2 1.3"/></symbol>
+  <symbol id="i-mesh" viewBox="0 0 16 16"><circle cx="3.5" cy="4" r="1.6"/><circle cx="12.5" cy="4" r="1.6"/><circle cx="8" cy="12.5" r="1.6"/><path d="M4.6 5.3 7.2 11M11.4 5.3 8.8 11M5.1 4h5.8"/></symbol>
+  <symbol id="i-user" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.8"/><path d="M2.5 14c.6-2.8 2.9-4.3 5.5-4.3s4.9 1.5 5.5 4.3"/></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11M3.3 5.5h1M3.3 7.5h1"/></symbol>
 </svg>
 
+<div id="studioRoot" hidden>
 <div class="shell cms-connected" id="shell">
-  <header class="bar">
-    <div class="logo"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="1" y="1" width="18" height="18" rx="5" fill="var(--accent)"/><path d="M5.5 6h9M5.5 10h5.5M5.5 14h3" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round"/></svg>DEFXN Studio</div>
-    <button class="btn quiet" id="btnContentCms" type="button" title="Open the existing DEFXN content, assets, encryption, and mesh editor">Content CMS</button>
-    <button class="btn quiet pagebtn" id="btnPage" aria-haspopup="dialog" title="Switch page"></button>
-    <div class="seg" id="view" role="group" aria-label="View">
-      <button data-v="design" aria-pressed="true" title="Design the current page"><svg class="ic"><use href="#i-design"/></svg>Design</button>
-      <button data-v="map" aria-pressed="false" title="See every page and how they link"><svg class="ic"><use href="#i-sitemap"/></svg>Sitemap</button>
-    </div>
-    <!-- Step 4 (flickering-juggling-donut.md): site-wide, no selection involved, so it is not
-         part of the new per-element floating toolbar -- a small popover reachable from a
-         header button, reusing openPop()'s own positioning rather than a third system. Also
-         the landing spot for js/main.js's unconditional "Edit canvas" context-menu entry
-         (previously enterRestrictMode('canvas')), now that restrictMode is retired. -->
-    <button class="btn quiet" id="btnCanvasTransitions" type="button" title="Background transition between pages (site-wide, applies to every page)"><svg class="ic"><use href="#i-sparkle"/></svg>Background</button>
-    <div class="spacer"></div>
-    <span class="bp-note" id="bpNote" hidden></span>
-    <div class="seg" id="devices" role="group" aria-label="Preview size">
-      <button data-d="0" aria-pressed="true" title="Desktop · 1280 px" aria-label="Desktop"><svg class="ic"><use href="#i-desktop"/></svg></button>
-      <button data-d="1" aria-pressed="false" title="Tablet · 820 px" aria-label="Tablet"><svg class="ic"><use href="#i-tablet"/></svg></button>
-      <button data-d="2" aria-pressed="false" title="Phone · 390 px" aria-label="Phone"><svg class="ic"><use href="#i-phone"/></svg></button>
-    </div>
-    <button class="btn icon quiet" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="ic"><use href="#i-undo"/></svg></button>
-    <button class="btn icon quiet" id="btnRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg class="ic"><use href="#i-redo"/></svg></button>
-    <button class="btn quiet score" id="btnCheck" aria-haspopup="dialog" title="Check this page against the design rules"><svg class="ic"><use href="#i-shield"/></svg>Design check <b id="scoreBadge">–</b></button>
-    <div class="seg" id="mode" role="group" aria-label="Mode">
-      <button data-m="edit" aria-pressed="true" title="Edit"><svg class="ic"><use href="#i-cursor"/></svg>Edit</button>
-      <button data-m="live" aria-pressed="false" title="Use the site like a visitor"><svg class="ic"><use href="#i-play"/></svg>Live</button>
-    </div>
-    <button class="btn icon quiet" id="btnMore" aria-haspopup="dialog" title="More" aria-label="More"><svg class="ic"><use href="#i-more"/></svg></button>
-    <button class="btn" id="btnCmsSave" title="Save every unsaved change, in both modes (Ctrl/Cmd+S)"><svg class="ic"><use href="#i-check"/></svg>Save DEFXN</button>
-  </header>
-
+  <!-- Two columns only: the structure rail (collapsible, #btnLeftRail in the header) and the
+       canvas, which takes every other pixel. There is no fixed right inspector any more
+       (2026-10-18): element properties are the floating #selToolbar, this page's SEO is a
+       popover on the header's page picker (#btnPageSeo), and the site-wide SEO lives in
+       Design -> Theme & defaults with the rest of the site-wide config. -->
   <div class="work">
-    <aside class="left" aria-label="Structure">
+    <aside class="left" id="studioLeft" aria-label="Structure">
       <div class="tabs" role="tablist">
         <button role="tab" id="tabLayers" aria-selected="true"><svg class="ic"><use href="#i-layers"/></svg>Layers</button>
         <button role="tab" id="tabPages" aria-selected="false"><svg class="ic"><use href="#i-page"/></svg>Pages</button>
@@ -265,20 +279,6 @@
       <div class="tb-pop" id="selToolbarPop" role="dialog" hidden></div>
     </main>
 
-    <!-- Step 4 (flickering-juggling-donut.md): the Element tab/#paneEl (the fixed
-         property-editing accordions -- Frame/Layout/Spacing/Typography/Fill/Size/Effects,
-         plus Groups/Component instance/States) is deleted outright; the new contextual
-         #selToolbar (above, floating over the canvas) is the only property-editing UI now.
-         Theme and SEO stay here -- neither is a per-element-selection concept, so neither
-         fits a floating-near-selection model; Theme is now the default-selected tab. -->
-    <aside class="right" aria-label="Inspector">
-      <div class="tabs" role="tablist">
-        <button role="tab" id="tabTheme" aria-selected="true"><svg class="ic"><use href="#i-palette"/></svg>Theme</button>
-        <button role="tab" id="tabSeo" aria-selected="false" title="Search engines and AI assistants"><svg class="ic"><use href="#i-search"/></svg>SEO</button>
-      </div>
-      <div id="paneTheme"></div>
-      <div id="paneSeo" hidden></div>
-    </aside>
   </div>
 
   <footer class="studio-statusbar" id="studioStatus" aria-live="off"></footer>

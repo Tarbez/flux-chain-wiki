@@ -63,6 +63,19 @@ var ArkComponents = (function () {
     RBLOCK_QUOTE_V1: ['quote', 'attribution'],
     RBLOCK_DIVIDER_V1: []
   };
+  /* What the editor calls each resolver, kept next to its props so a new resolver gets its
+     name where it gets its schema. js/admin/admin.js reads these through blocks()/labelOf();
+     it used to keep its own copy of the list, labels and props, which could only drift. */
+  var RESOLVER_LABELS = {
+    RBLOCK_TEXT_V1: 'Text', RBLOCK_CTA_V1: 'Button / link', RBLOCK_IMAGE_V1: 'Image',
+    RBLOCK_CARD_V1: 'Card', RBLOCK_QUOTE_V1: 'Quote', RBLOCK_DIVIDER_V1: 'Divider'
+  };
+  RESOLVER_LABELS[CAPTURED] = 'Made from a selection';
+  function labelOf(resolver) { return RESOLVER_LABELS[resolver] || String(resolver || ''); }
+  /* the typed blocks a person can create from nothing: every resolver but a captured selection */
+  function blocks() {
+    return RESOLVERS.filter(function (r) { return r !== CAPTURED; }).map(function (r) { return { resolver: r, label: labelOf(r), props: (RESOLVER_PROPS[r] || []).slice() }; });
+  }
 
   /* The one prop each resolver shows as visible text, so a block created with nothing
      typed in yet still renders as SOMETHING (regression: tests/components-starter-props.cjs).
@@ -765,6 +778,7 @@ var ArkComponents = (function () {
     insertInstance: insertInstance, placeInstance: placeInstance, setOverride: setOverride, removeInstance: removeInstance, detachInstance: detachInstance,
     render: render, renderAll: renderAll, anchorsIn: anchorsIn,
     capture: capture, starterFrom: starterFrom, buildNode: buildNode, propsOf: propsOf,
-    resolvers: RESOLVERS.slice(), resolverProps: RESOLVER_PROPS, starterProps: starterProps, CAPTURED: CAPTURED
+    resolvers: RESOLVERS.slice(), resolverProps: RESOLVER_PROPS, starterProps: starterProps, CAPTURED: CAPTURED,
+    blocks: blocks, labelOf: labelOf
   };
 })();

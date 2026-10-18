@@ -114,8 +114,11 @@ var ArkSEO = (function () {
     flag: function (v) { return !!v; },
     onoff: function (v) { return v === 0 ? 0 : 1; },
     /* a map of bot name -> 'block'; absent means allowed, and only named AI_BOTS count */
-    policy: function (v) { var out = {}; if (v && typeof v === 'object') AI_BOTS.forEach(function (bot) { if (v[bot[0]] === 'block') out[bot[0]] = 'block'; }); return out; }
+    policy: function (v) { var out = {}; if (v && typeof v === 'object') AI_BOTS.forEach(function (bot) { if (v[bot[0]] === BOT_POLICIES[1]) out[bot[0]] = BOT_POLICIES[1]; }); return out; }
   };
+  /* the two decisions per crawler a policy field holds, in the order the editor offers them: the
+     first is the default (stored as absence), the second is the one written into the map */
+  var BOT_POLICIES = ['allow', 'block'];
   function cleanFields(fields, raw) {
     var out = {};
     fields.forEach(function (f) { out[f.key] = CLEAN[f.kind](raw ? raw[f.key] : undefined, f); });
@@ -369,7 +372,7 @@ var ArkSEO = (function () {
            schemaType: schemaType, noindex: noindex, aiBlocked: aiBlocked, aiSummary: aiSummary, site: site,
            routes: routes, sitemap: sitemap, robots: robots, llmsTxt: llmsTxt, searchFiles: searchFiles, serialize: serialize,
            /* the field definitions (read-only by convention) the admin builds its SEO controls from */
-           OVERRIDE_FIELDS: OVERRIDE_FIELDS, SITE_FIELDS: SITE_FIELDS, AI_BOTS: AI_BOTS, SCHEMA_TYPES: SCHEMA_TYPES, ORG_TYPES: ORG_TYPES,
+           OVERRIDE_FIELDS: OVERRIDE_FIELDS, SITE_FIELDS: SITE_FIELDS, AI_BOTS: AI_BOTS, BOT_POLICIES: BOT_POLICIES, SCHEMA_TYPES: SCHEMA_TYPES, ORG_TYPES: ORG_TYPES,
            /* what one field's raw value is stored as -- the same rule sanitize() applies */
            cleanField: function (field, value) { return CLEAN[field.kind](value, field); } };
 })();

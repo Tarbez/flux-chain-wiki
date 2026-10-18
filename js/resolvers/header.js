@@ -400,8 +400,12 @@ ArkUI.register('RHEADER_V1', {
       var unlocked = ArkUI.accountSession && ArkUI.accountSession.isUnlocked();
       var authenticated = who && ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(who.publicKeyB64);
       link.dataset.signedIn = authenticated ? 'true' : 'false';
-      link.querySelector('.header-account-name').textContent = who ? who.displayName || 'Your account' : 'Account';
-      link.querySelector('.header-account-status').textContent = who ? (authenticated ? 'Signed in' : (unlocked ? 'Key unlocked' : 'Details saved')) : 'Signed out';
+      var accountName = who ? who.displayName || 'Your account' : 'Account';
+      var accountStatus = who ? (authenticated ? 'Signed in' : (unlocked ? 'Key unlocked' : 'Details saved')) : 'Signed out';
+      link.querySelector('.header-account-name').textContent = accountName;
+      link.querySelector('.header-account-status').textContent = accountStatus;
+      // Phones show this link icon-only (css/navigation.css), so the tooltip carries the hidden label.
+      link.title = accountName + ' · ' + accountStatus;
       link.setAttribute('aria-label', who ? (who.displayName || 'Your account') + (authenticated ? ', signed in. Open account' : ', public identity details saved, not signed in. Select your Auth Kit to sign in') : 'Account, signed out. Sign in');
     }
     ArkUI.refreshAccountNav = function () {

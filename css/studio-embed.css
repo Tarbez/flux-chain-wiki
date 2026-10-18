@@ -14,44 +14,40 @@
        status span; the id is also renamed in admin-app.html, since two
        elements named id="status" in one document is a real bug, not
        just a style collision).
-     - .bar, .btn, .btn.icon and .shell are also real class-NAME collisions
-       with admin.css's own unscoped rules for those names (a header bar, a
-       generic button, an icon-mask utility, and the Content CMS's own 3-pane
-       shell) -- every property BOTH rules set is already decided correctly
-       by specificity (#studioRoot .x beats admin.css's bare .x), but a
-       property admin.css's version sets that Studio's own rule does not
-       would otherwise leak through unopposed (admin.css's .btn forces a
-       34px min-height onto Studio's own compact toolbar buttons; its .shell
-       adds a 3-column grid-template-columns to Studio's row-based shell;
-       its .icon turns Studio's icon-only buttons into a 13x13 mask glyph;
-       its .bar pins a fixed 58px height/backdrop-filter onto Studio's own
-       header). The four shields below close exactly those gaps, nothing more.
+     - .btn and .shell are also real class-NAME collisions with admin.css's
+       own unscoped rules for those names (a generic button and the Content
+       CMS's own 3-pane shell) -- every property BOTH rules set is already
+       decided correctly by specificity (#studioRoot .x beats admin.css's bare
+       .x), but a property admin.css's version sets that Studio's own rule does
+       not would otherwise leak through unopposed (admin.css's .btn forces a
+       34px min-height onto Studio's own compact buttons; its .shell adds a
+       3-column grid-template-columns to Studio's own shell). The two shields
+       below close exactly those gaps, nothing more. (Studio's own header bar,
+       and the .bar/.btn.icon shields it needed, went when its controls moved
+       into the one app header, 2026-10-18.)
    #studioRoot itself is positioned as a fixed overlay, replacing the old .studio-frame
    iframe's positioning (css/admin.css). Step 3 (Design/Content mode switch,
    flickering-juggling-donut.md) narrowed this from a full-viewport overlay (inset: 0) to
    leave the outer app header's own 58px (css/admin.css's .bar, height: 58px) uncovered --
-   that header now holds the persistent mode switch and Mesh button, which must stay
-   reachable while Studio's canvas is showing, not just while #cmsShell is.
+   that header holds the mode switch and every editor control (it is the only header since
+   2026-10-18), which must stay reachable while Studio's canvas is showing.
    The offset is the header's MEASURED height, --app-bar-h, not a constant: at 760px and
    below css/admin.css lets the header wrap (measured 2026-10-18 in Chromium: 193px tall at
    760px, 253px at 390px), and a hardcoded 58px there left #studioRoot painted over the
    mode switch -- on a phone there was no way back out of Design mode. js/admin/admin.js
    (trackAppBarHeight) publishes the header's border-box height on <html> through a
    ResizeObserver, so every wrap, font load or breakpoint change re-docks Studio; 58px is
-   only the pre-script fallback and equals the desktop header's fixed height. Every 100vh
-   measurement inside Studio's layout below (the .shell min-height, .left/.right/
-   .canvas-wrap's max-height) subtracts the same variable, so there is one source for the
-   header height, not one magic number per rule. tests/browser/header-reach.mjs checks it in
-   a real browser at 390/760/1280px. */
+   only the pre-script fallback. Inside, the shell fills #studioRoot's own height (it is
+   pinned top and bottom), so no rule subtracts header heights by hand.
+   tests/browser/header-reach.mjs checks it in a real browser at 390/760/1280/1500px. */
 #studioRoot { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; z-index: 50; overflow: auto; overscroll-behavior: contain; }
 #studioRoot[hidden] { display: none; }
-#studioRoot .bar { height: auto; position: static; top: auto; z-index: auto; backdrop-filter: none; -webkit-backdrop-filter: none; }
 #studioRoot .btn { min-height: 0; transition: none; }
-#studioRoot .btn.icon { display: inline-flex; width: auto; height: auto; background-color: transparent; -webkit-mask-image: none; mask-image: none; }
-#studioRoot .shell { height: auto; grid-template-columns: none; }
+#studioRoot .shell { grid-template-columns: none; }
 
-/* Layout: tool shell. Top bar · left rail (add, layers, pages) · canvas (design or sitemap) · right inspector (element, theme, history) · status bar.
-   Volume is turned down everywhere except the one thing that matters: the canvas and the primary action. */
+/* Layout: tool shell. Left rail (layers, pages, library; collapsible) · canvas (design or sitemap) · status bar.
+   Its controls live in the one app header above #studioRoot (css/admin.css, "the one header").
+   Volume is turned down everywhere except the one thing that matters: the canvas. */
 #studioRoot {
   --bg: #eef0ec;
   --panel: #fbfcfa;
@@ -92,54 +88,35 @@
 #studioRoot .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } 
 #studioRoot .ic.sm { width: 13px; height: 13px; } 
 
-#studioRoot .shell { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: calc(100vh - var(--app-bar-h, 58px)); }
-/* top bar */
-#studioRoot .bar { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; padding: 7px 12px; background: var(--panel); border-bottom: 1px solid var(--rule); -webkit-user-select: none; user-select: none; } 
-#studioRoot .logo { display: flex; align-items: center; gap: 7px; font: 700 14px/1 var(--font-ui); letter-spacing: -0.01em; margin-right: 4px; } 
-#studioRoot .logo svg { width: 20px; height: 20px; } 
+/* #studioRoot is fixed between the header and the viewport bottom, so its shell fills that
+   exact height and the rail and canvas scroll inside it -- no "100vh minus the bars" sums. */
+#studioRoot .shell { display: grid; grid-template-rows: minmax(0, 1fr) auto; height: 100%; }
 #studioRoot .spacer { flex: 1; } 
-#studioRoot .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 7px; overflow: hidden; background: var(--panel); } 
-#studioRoot .seg button { border: 0; border-right: 1px solid var(--rule); background: transparent; padding: 5px 9px; font-weight: 500; color: var(--muted); display: inline-flex; align-items: center; gap: 5px; } 
-#studioRoot .seg button:last-child { border-right: 0; } 
-#studioRoot .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); } 
 #studioRoot .btn { border: 1px solid var(--rule); background: var(--panel); border-radius: 7px; padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; } 
 #studioRoot .btn:hover { border-color: var(--muted); } 
 #studioRoot .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); } 
-#studioRoot .btn.quiet { border-color: transparent; background: transparent; color: var(--muted); } 
-#studioRoot .btn.quiet:hover { background: var(--sunk); color: var(--ink); } 
-#studioRoot .btn.icon { padding: 5px 6px; } 
 #studioRoot .btn.small { padding: 3px 8px; font-size: 12px; } 
 #studioRoot .btn.danger { color: var(--danger); } 
 #studioRoot .btn:disabled { opacity: .4; cursor: default; } 
-#studioRoot .pagebtn { max-width: 220px; } 
-#studioRoot .pagebtn span { overflow: hidden; text-overflow: ellipsis; } 
-#studioRoot .pagebtn small { color: var(--muted); font: 500 11px/1 var(--font-data); } 
-#studioRoot .score { font: 600 12px/1 var(--font-ui); } 
-#studioRoot .score b { font: 600 11.5px/1 var(--font-data); padding: 3px 6px; border-radius: 99px; color: var(--accent-ink); } 
-#studioRoot .score.good b { background: var(--ok); }  #studioRoot .score.mid b { background: var(--warn); }  #studioRoot .score.bad b { background: var(--danger); } 
-#studioRoot .bp-note { font: 500 11.5px/1 var(--font-ui); color: var(--override); display: inline-flex; align-items: center; gap: 4px; } 
 
-/* workspace */
-#studioRoot .work { display: grid; grid-template-columns: 248px minmax(0, 1fr) 300px; min-height: 0; } 
-#studioRoot .live .work, #studioRoot .mapview .work { grid-template-columns: minmax(0, 1fr); }
-#studioRoot .live .left, #studioRoot .live .right, #studioRoot .live .ov-toolbar, #studioRoot .mapview .left, #studioRoot .mapview .right, #studioRoot .mapview .ov-toolbar { display: none; }
+/* workspace: the rail and the canvas; .rail-closed (the header's #btnLeftRail) gives the
+   canvas the full width */
+#studioRoot .work { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 0; } 
+#studioRoot .live .work, #studioRoot .mapview .work, #studioRoot .rail-closed .work { grid-template-columns: minmax(0, 1fr); }
+#studioRoot .live .left, #studioRoot .live .ov-toolbar, #studioRoot .mapview .left, #studioRoot .mapview .ov-toolbar, #studioRoot .rail-closed .left { display: none; }
 /* Step 4 (flickering-juggling-donut.md): restrictMode (and its .canvas-mode/.anim-mode
    layout-collapse classes) is retired outright -- canvas-transitions became a selection-
    independent popover (reachable from #btnCanvasTransitions, above the canvas) and
    element-motion folded into #selToolbar as one more accordion section, so there is no
    longer a narrowed mode that needs the left rail given up or the right rail repurposed.
    See the Step 4 comment in js/admin/admin.js for the fuller reasoning. */
-@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr) 272px; }  }
-/* Single column below 860px: the canvas first, then the rails stacked under it. Each rail
-   keeps its own bounded scroll (it used to be max-height: none) -- the real-site Layers tree
-   is thousands of rows, and unbounded it pushed the Theme/SEO rail ~24,000px down a phone's
+@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr); }  }
+/* Single column below 860px: the canvas first, then the rail stacked under it; #studioRoot
+   scrolls as a whole. The rail keeps its own bounded scroll -- the real-site Layers tree is
+   thousands of rows, and unbounded it pushed everything after it ~24,000px down a phone's
    #studioRoot scroll (measured at 390px, 2026-10-18). */
-@media (max-width: 860px) { #studioRoot .work { grid-template-columns: minmax(0, 1fr); }  #studioRoot .left, #studioRoot .right { border: 0 !important; border-top: 1px solid var(--rule) !important; max-height: min(60vh, 560px) !important; }  #studioRoot .canvas-wrap { order: -1; }  }
-#studioRoot .left, #studioRoot .right { background: var(--panel); min-width: 0; overflow: auto; max-height: calc(100vh - var(--app-bar-h, 58px) - 82px); }
-#studioRoot .left { border-right: 1px solid var(--rule); -webkit-user-select: none; user-select: none; } 
-#studioRoot .right { border-left: 1px solid var(--rule); } 
-#studioRoot .addbar { padding: 10px 10px 8px; } 
-#studioRoot .addbar .btn { width: 100%; justify-content: center; padding: 8px; } 
+@media (max-width: 860px) { #studioRoot .shell { height: auto; min-height: 100%; }  #studioRoot .work { grid-template-columns: minmax(0, 1fr); }  #studioRoot .left { border: 0 !important; border-top: 1px solid var(--rule) !important; max-height: min(60vh, 560px); }  #studioRoot .canvas-wrap { order: -1; max-height: calc(100vh - var(--app-bar-h, 58px) - 28px); }  }
+#studioRoot .left { background: var(--panel); min-width: 0; overflow: auto; border-right: 1px solid var(--rule); -webkit-user-select: none; user-select: none; } 
 #studioRoot .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--panel); z-index: 2; } 
 #studioRoot .tabs button { border: 0; background: transparent; padding: 8px 4px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; justify-content: center; } 
 #studioRoot .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); } 
@@ -162,10 +139,9 @@
 #studioRoot .list li .layer-toggle::before { content: '›'; font: 700 16px/1 var(--font-ui); transform: rotate(90deg); transition: transform .12s ease; } 
 #studioRoot .list li .layer-toggle[aria-expanded="false"]::before { transform: rotate(0); } 
 #studioRoot .list li .layer-spacer { width: 16px; flex: none; } 
-#studioRoot .railfoot { display: flex; gap: 6px; padding: 4px 10px 12px; flex-wrap: wrap; } 
 
 /* canvas */
-#studioRoot .canvas-wrap { min-width: 0; overflow: auto; position: relative; padding: 14px 16px 40px; max-height: calc(100vh - var(--app-bar-h, 58px) - 82px); }
+#studioRoot .canvas-wrap { min-width: 0; min-height: 0; overflow: auto; position: relative; padding: 14px 16px 40px; }
 #studioRoot .shell:not(.live) .canvas-wrap { -webkit-user-select: none; user-select: none; } 
 #studioRoot .live .canvas-wrap { padding: 0; } 
 #studioRoot .stage { position: relative; margin: 0 auto; transform-origin: top left; } 
@@ -246,16 +222,7 @@
 #studioRoot .chip.warn { color: var(--warn); }  #studioRoot .chip.bad { color: var(--danger); }  #studioRoot .chip.info { color: var(--muted); } 
 #studioRoot .smcard .open { justify-self: start; margin-top: 2px; } 
 
-/* inspector */
-#studioRoot .acc { border-bottom: 1px solid var(--rule); } 
-#studioRoot .acc > summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; font-weight: 600; -webkit-user-select: none; user-select: none; } 
-#studioRoot .acc > summary::-webkit-details-marker { display: none; } 
-#studioRoot .acc > summary .ic { color: var(--muted); } 
-#studioRoot .acc > summary .cnt { font: 600 10.5px/1 var(--font-data); color: var(--accent); background: var(--accent-soft); border-radius: 99px; padding: 2px 6px; } 
-#studioRoot .acc > summary .chev { margin-left: auto; transition: transform .15s; } 
-#studioRoot .acc[open] > summary .chev { transform: rotate(180deg); } 
-#studioRoot .acc > summary:hover { background: var(--sunk); } 
-#studioRoot .acc-body { padding: 2px 12px 12px; display: grid; gap: 7px; } 
+/* control rows (the toolbar's popovers, the SEO popover) */
 #studioRoot .row { display: grid; grid-template-columns: 74px minmax(0, 1fr) 14px; align-items: center; gap: 6px; min-height: 26px; } 
 #studioRoot .row > label { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } 
 #studioRoot .row.set > label { color: var(--ink); font-weight: 600; } 
@@ -348,8 +315,6 @@
 #studioRoot .hint b { color: var(--ink); } 
 #studioRoot .linkpick { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--sunk); } 
 #studioRoot .linkpick .go { display: flex; gap: 6px; align-items: center; } 
-#studioRoot .sect { padding: 10px 12px; border-bottom: 1px solid var(--rule); display: grid; gap: 8px; } 
-#studioRoot .sect h3 { margin: 0; font: 600 11px/1 var(--font-ui); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 6px; } 
 #studioRoot .pal { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; } 
 #studioRoot .pal button { border: 1px solid var(--rule); background: var(--panel); border-radius: 7px; padding: 6px; text-align: left; display: grid; gap: 5px; } 
 #studioRoot .pal button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); } 

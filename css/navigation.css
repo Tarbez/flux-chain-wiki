@@ -338,25 +338,29 @@
 .header-account-status{display:flex;align-items:center;gap:4px;font:500 8px/1 var(--mono-font,monospace);color:hsl(var(--text-muted))}
 .header-account-status:before{content:"";height:4px;width:4px;border-radius:50%;background:currentColor}
 .header-account-link[data-signed-in="true"] .header-account-status{color:hsl(var(--trust,var(--primary)))}
+/* Phone row: brand, Account, network pill, MENU -- all at full size, none shrinking.
+   Letting the wordmark and the Account label shrink with an ellipsis cut them to "DE..."
+   and "Ac..." at 360-430px (tests/browser/public-header.mjs), so instead Account goes
+   icon-only (its aria-label and title still name it and its state; Account is also in
+   the MENU's Evaluate layer) and the row's gaps tighten. The network pill stays labelled:
+   the owner asked for it visible next to MENU at every width. */
 @media(max-width:560px){
- #scene .ark-header .header-core-links{display:flex;border:0;background:transparent;padding:0;margin-left:auto}
+ #scene .ark-header{gap:8px}
+ #scene .ark-header .header-core-links{display:flex;flex:0 0 auto;border:0;background:transparent;padding:0;margin-left:auto}
  #scene .ark-header .header-core-links a:not(.header-account-link){display:none}
- #scene .ark-header .header-core-links .header-account-link{display:flex;min-width:0;max-width:112px;padding-inline:10px;font-size:12px;border:0;background:hsl(var(--surface) / .72)}
- #scene .ark-header .ark-studio-identity{min-width:0;flex:0 1 auto;margin-right:0}
- #scene .ark-header .ark-brand-lockup{min-width:0}
- #scene .ark-header .ark-brand-wordmark,#scene .ark-header .ark-brand-descriptor{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
- #scene .ark-header .header-core-links{min-width:0;flex:0 1 auto}
- #scene .ark-header .header-account-label{min-width:0}
- #scene .ark-header :is(.header-account-name,.header-account-status){max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #scene .ark-header .ark-studio-identity{flex:0 0 auto;margin-right:0;padding:0}
+ #scene .ark-header :is(.ark-brand-wordmark,.ark-brand-descriptor){max-width:none;overflow:visible;text-overflow:clip;white-space:nowrap}
+ #scene .ark-header .header-account-label{display:none}
  #scene .ark-header .nav-toggle{flex:0 0 40px}
+ #scene .ark-header .header-chain-trigger{padding:0 12px}
 }
-@media(max-width:360px){
- #scene .ark-header{gap:7px;padding-right:max(12px,env(safe-area-inset-right,0px));padding-left:max(12px,env(safe-area-inset-left,0px))}
+/* Below 380px only the lockup shrinks; the 16px gutter stays so the brand lines up with the page text. */
+@media(max-width:380px){
+ #scene .ark-header .ark-studio-identity{gap:9px}
+ #scene .ark-header .ark-brand-mark{width:30px;height:30px}
  #scene .ark-header .ark-brand-wordmark{font-size:20px;letter-spacing:.1em}
  #scene .ark-header .ark-brand-descriptor{font-size:7px;letter-spacing:.1em}
- #scene .ark-header .header-core-links .header-account-link{max-width:92px;padding-inline:8px}
 }
-
 /* Home chrome follows the hero's line-and-station language. The controls
    remain global navigation, but lose the stack of unrelated dark pills. */
 #scene .hero-alive[data-page="zero"] .ark-header .header-core-links {
@@ -427,10 +431,19 @@
   background:hsl(var(--reference));
 }
 
+/* Icon-only Account on phones (see the phone-row note above). Both selectors, because the
+   home rules above outrank the shared one; a signed-in holder's icon takes the trust colour
+   so the state the hidden label carried still shows. */
 @media(max-width:560px) {
+  #scene .ark-header .header-core-links .header-account-link,
   #scene .hero-alive[data-page="zero"] .ark-header .header-core-links .header-account-link {
-    max-width:126px;
-    padding-inline:4px 10px;
+    justify-content:center;
+    width:40px;
+    min-width:40px;
+    max-width:none;
+    height:40px;
+    padding:0;
   }
-  #scene .hero-alive[data-page="zero"] .ark-header .header-account-status { display:none; }
+  #scene .ark-header .header-core-links .header-account-link .native-icon { width:18px; height:18px; flex-basis:18px; opacity:.9; }
+  #scene .ark-header .header-core-links .header-account-link[data-signed-in="true"] .native-icon { color:hsl(var(--trust,var(--primary))); opacity:1; }
 }

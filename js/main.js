@@ -574,7 +574,7 @@
     cmsComponentsDraft = ArkComponents.define(draft);
     ArkComponents.renderAll(host, route, cmsComponentsDraft);
     var reselected = selectedKeys.some(Boolean) && cmsReselectComponents(before, selectedKeys);
-    window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, anchors: ArkComponents.anchorsIn(host), points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
+    window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
     if (reselected) { placeCmsLayoutUi(); emitCmsLayoutSelection(); }
   }
   function cmsStamp() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
@@ -646,7 +646,7 @@
     ArkLayout.annotate(host);
     var root = cmsComponentRoot(key);
     cmsPreviewSelections = root ? [root] : []; cmsPreviewSelected = root;
-    window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, created: masterId, anchors: ArkComponents.anchorsIn(host), points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
+    window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, created: masterId, points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
     placeCmsLayoutUi(); emitCmsLayoutSelection();
   }
   /* ---- insertion points for the Library's Insert. Every place a block could go on this
@@ -800,7 +800,7 @@
     cmsStatesDraft = ArkStates.define(draft);
     if (data.groupId) ArkStates.render(host, route, data.groupId, cmsStatesView(route), cmsComponentsDraft);
     window.parent.postMessage({ type: 'defxn-cms-preview-states-replace', states: cmsStatesDraft, showing: cmsStatesShowingFor(route), route: route, groupId: data.groupId,
-      anchors: window.ArkComponents ? ArkComponents.anchorsIn(host) : [], points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
+      points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
     if (data.groupId) cmsReconcileSelection(route, data.groupId);
   }
   /* Canvas-only mode's field edits (effect/duration/easing, Part G): unlike layout/
@@ -1045,7 +1045,7 @@
         if (window.ArkComponents) ArkComponents.renderAll(host, cmsRoutePath(), cmsComponentsDraft);
         if (window.ArkStates) ArkStates.renderAll(host, cmsRoutePath(), cmsStatesView(cmsRoutePath()), cmsComponentsDraft);
         placeCmsLayoutUi();
-        window.parent.postMessage({ type: 'defxn-cms-preview-ready', path: ArkUI.route.path(), groups: cmsGroupList(), anchors: window.ArkComponents ? ArkComponents.anchorsIn(host) : [], points: cmsInsertionPoints(), showing: cmsStatesShowingFor(cmsRoutePath()), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
+        window.parent.postMessage({ type: 'defxn-cms-preview-ready', path: ArkUI.route.path(), groups: cmsGroupList(), points: cmsInsertionPoints(), showing: cmsStatesShowingFor(cmsRoutePath()), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
       }).catch(function (error) {
         window.parent.postMessage({ type: 'defxn-cms-preview-error', message: error.message }, location.origin);
         if (window.console) console.error('[ark] CMS preview refresh failed', error);
