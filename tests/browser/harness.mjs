@@ -72,6 +72,13 @@ export function announceLoad() {
   console.log(`[harness] load factor ${LOAD.factor} (1-min load ${LOAD.load1.toFixed(1)} on ${LOAD.cpus} CPUs, ${LOAD.source}): every wait budget is multiplied by it`);
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/* A capability the driver found missing: measured, and absent -- neither a pass nor a failure
+   (law: never report a capability that does not exist as 0, or as done). One line in a fixed
+   shape, which scripts/run-browser-tests.mjs reads to put NOT BUILT in its table instead of
+   pass; the driver still exits 0 when nothing failed. */
+export function reportNotBuilt(count, what) {
+  console.log(`[harness] NOT BUILT ${count}: ${what}`);
+}
 
 /* Poll `probe` until it returns something truthy, and return that. `timeout` is the UNLOADED
    budget in ms (scaled here, once). A probe that throws counts as "not yet" (a frame mid-
@@ -194,12 +201,14 @@ export async function saveAndWait(app, timeout) {
   await app.click('#save');
   return waitForSave(app, since, timeout);
 }
-/* Design -> Canvas's Pages tab: open `route` and return once the preview has re-rendered the
-   drafts on it (its ready message for that path) and annotated it. A route the preview already
-   shows is not reloaded (admin.js syncCmsPreview), so the ready it already sent counts. */
-export const routeRow = (app, route) => app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '$') }) }).first();
+/* The rail's Pages tab (the one site tree): open `route` and return once the preview has
+   re-rendered the drafts on it (its ready message for that path) and annotated it. A route the
+   preview already shows is not reloaded (js/admin/bridge.js syncCmsPreview), so the ready it
+   already sent counts. A row's open button carries its path (data-path); '/' is both the site
+   chrome's row and Home's, and either shows Home. */
+export const routeRow = (app, route) => app.locator(`#pages .tree-open[data-path="${route}"]`).first();
 export async function openRoute(app, pv, route, timeout = 20000) {
-  await app.click('#tabPages');
+  await openRailTab(app, 'pages');
   const already = await pv.evaluate((r) => !!window.ArkUI && ArkUI.route.path() === r, route).catch(() => false);
   const since = already ? 0 : await previewReadyCount(app);
   await routeRow(app, route).click();
@@ -363,13 +372,13 @@ export async function gotoEditor(page, origin) { await page.goto(`${origin}/admi
 export async function reloadEditor(page) { await page.reload({ timeout: scaled(EDITOR_LOAD_MS) }); return page; }
 
 /* the editor frame (admin-app.html inside admin.html's #app), once admin.js has wired it:
-   #modeDesignBtn is static markup that exists before the deferred admin.js has attached a single
+   #lensDesignBtn is static markup that exists before the deferred admin.js has attached a single
    listener, so a click in that window was silently lost; window.ArkAdminApp is set once every
    listener is attached (full-audit's ready(), now here for every driver) */
 export async function appFrame(page) {
   const handle = await page.waitForSelector('#app', { timeout: scaled(20000) });
   const frame = await handle.contentFrame();
-  await frame.waitForSelector('#modeDesignBtn', { timeout: scaled(20000) });
+  await frame.waitForSelector('#lensDesignBtn', { timeout: scaled(20000) });
   await frame.waitForFunction(() => !!window.ArkAdminApp, null, { timeout: scaled(30000) });
   return frame;
 }
@@ -419,19 +428,24 @@ export async function closeToolbarSection(app) {
   if (await close.count()) await close.click();
 }
 
-/* ---- the ONE header (admin-app.html #appBar, 2026-10-18) -----------------------------
-   Content and Design share one header; Studio's own second bar and the fixed right panel are
-   gone. Where each control now lives, so drivers name the control and not its position:
-   - Design's views are one segmented control: #designCanvasBtn, #designMapBtn (the sitemap,
-     was #view [data-v=map]), #designBackgroundBtn (the transition popover, was
-     #btnCanvasTransitions) and #designThemeBtn (Theme & defaults, which now also holds the
-     site-wide SEO as #siteSeo);
-   - the canvas-only controls -- #btnLeftRail, #btnPage, #btnPageSeo (this page's SEO
-     popover, was the right panel's SEO tab), #devices, #btnUndo/#btnRedo, #btnCheck, #mode --
-     show only in Design -> Canvas;
-   - ONE #save for every mode (was a Save per editor plus Studio's #btnCmsSave);
-   - #connect, #who and #signOut sit in #accountMenu behind #accountBtn (the More menu's
-     shortcuts hint too). */
+/* ---- the ONE workspace (admin-app.html, 2026-10-18) ------------------------------------
+   One header, one rail, one canvas. Content and Design are a LENS on the canvas (what a click
+   there edits), not two apps. Where each control lives, so drivers name the control and not
+   its position:
+   - the lens: #lensContentBtn / #lensDesignBtn (setLens below; was the Content | Design app
+     switch #modeContentBtn / #modeDesignBtn);
+   - the views of the one site, in either lens: #viewCanvasBtn, #viewMapBtn (the sitemap),
+     #viewThemeBtn (Theme & defaults, the site-wide SEO #siteSeo, mesh tuning and page shapes,
+     docked beside the live canvas) -- designView below; #backgroundBtn opens the page
+     transition popover;
+   - the page: #btnLeftRail, #btnPage (picker), #btnPageFields (the Page fields sheet: every
+     field of the page, was Content mode's #editor column), #btnPageSeo (its SEO popover), in
+     every view; the canvas tools #devices, #btnUndo/#btnRedo, #btnCheck, #mode show whenever a
+     canvas is on screen (Canvas and Theme);
+   - the rail's tabs: #tabPages (the site tree, was Content's #pageList sidebar and Studio's
+     Pages tab), #tabLayers, #tabLib, #tabMedia (images), #tabVault (encrypted items);
+   - ONE #save; #meshNav opens the Mesh status in the sheet; #connect, #who, #signOut and the
+     publish host's status (#mesh) sit in #accountMenu behind #accountBtn. */
 export const ACCOUNT_MENU_IDS = ['connect', 'who', 'signOut'];
 export async function openAccountMenu(app) {
   if (await app.evaluate(() => document.getElementById('accountMenu').hidden)) await app.click('#accountBtn');
@@ -442,19 +456,51 @@ export async function clickHeader(app, id, options) {
   if (ACCOUNT_MENU_IDS.includes(id)) await openAccountMenu(app);
   await app.click('#' + id, options);
 }
-/* Design -> 'canvas' | 'map' | 'theme', from wherever the editor is */
-export async function designView(app, view) {
-  if (await app.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected') !== 'true')) await app.click('#modeDesignBtn');
-  const id = { canvas: 'designCanvasBtn', map: 'designMapBtn', theme: 'designThemeBtn' }[view];
-  if (!id) throw new Error('no Design view named ' + view);
+/* the lens: 'content' | 'design' (what a click on the canvas edits) */
+export async function setLens(app, lens) {
+  const id = { content: 'lensContentBtn', design: 'lensDesignBtn' }[lens];
+  if (!id) throw new Error('no lens named ' + lens);
   if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await app.click('#' + id);
   await app.waitForFunction((b) => document.getElementById(b).getAttribute('aria-pressed') === 'true', id, { timeout: scaled(15000) });
 }
+/* the view: 'canvas' | 'map' | 'theme', from wherever the editor is (in either lens) */
+export async function designView(app, view) {
+  const id = { canvas: 'viewCanvasBtn', map: 'viewMapBtn', theme: 'viewThemeBtn' }[view];
+  if (!id) throw new Error('no view named ' + view);
+  if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await app.click('#' + id);
+  await app.waitForFunction((b) => document.getElementById(b).getAttribute('aria-pressed') === 'true', id, { timeout: scaled(15000) });
+}
+/* a rail tab: 'pages' | 'layers' | 'lib' | 'media' | 'vault'; returns its pane */
+export async function openRailTab(app, tab) {
+  const ids = { pages: ['tabPages', 'pagesPane'], layers: ['tabLayers', 'layersPane'], lib: ['tabLib', 'libPane'], media: ['tabMedia', 'mediaPane'], vault: ['tabVault', 'vaultPane'] }[tab];
+  if (!ids) throw new Error('no rail tab named ' + tab);
+  if (await app.evaluate(() => document.getElementById('btnLeftRail').getAttribute('aria-pressed') !== 'true')) await app.click('#btnLeftRail');
+  if ((await app.locator('#' + ids[0]).getAttribute('aria-selected')) !== 'true') await app.click('#' + ids[0]);
+  const pane = app.locator('#' + ids[1]);
+  await pane.waitFor({ state: 'visible', timeout: scaled(5000) });
+  return pane;
+}
+/* The Page fields sheet for a page ({ page: id }) or an article ({ article: slug }) -- from its
+   row's Fields button in the Pages tab, which also shows it on the canvas -- or, with no item,
+   for the page on the canvas (the header's #btnPageFields). Returns the sheet's body, where the
+   form is drawn (it was Content mode's #editor column). */
+export const sheetBody = (app) => app.locator('#sheet:not([hidden]) #sheetBody');
+/* a page's or an article's row in the Pages tab ({ page: id } | { article: slug }) */
+export const pageRow = (app, item) => app.locator('#pages li.tree-row', { has: app.locator(`.tree-open[data-item="${item.page ? 'page:' + item.page : 'article:' + item.article}"]`) }).first();
+export async function openPageFields(app, item) {
+  if (item && (item.page || item.article)) {
+    await openRailTab(app, 'pages');
+    await pageRow(app, item).locator('[aria-label^="Fields of "]').click();
+  } else if ((await app.locator('#btnPageFields').getAttribute('aria-expanded')) !== 'true') await app.click('#btnPageFields');
+  const body = sheetBody(app);
+  await body.waitFor({ state: 'visible', timeout: scaled(10000) });
+  return body;
+}
+export async function closeSheet(app) { if (await app.locator('#sheet:not([hidden])').count()) await app.click('#sheetClose'); }
 /* the popover a header button opened (Studio's openPop: one .pop at a time) */
 export const headerPopover = (app) => app.locator('#studioRoot > .pop');
 /* this page's SEO popover (opened from beside the page picker); returns it */
 export async function openPageSeo(app) {
-  await designView(app, 'canvas');
   if ((await app.locator('#btnPageSeo').getAttribute('aria-expanded')) !== 'true') await app.click('#btnPageSeo');
   const pop = app.locator('#studioRoot > .pop.seo-pop');
   await pop.waitFor({ state: 'visible', timeout: scaled(5000) });
@@ -469,10 +515,7 @@ export async function openSiteSeo(app) {
 }
 /* the Background (page transition) popover; returns it */
 export async function openBackground(app) {
-  if ((await app.locator('#designBackgroundBtn').getAttribute('aria-expanded')) !== 'true') {
-    if (await app.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected') !== 'true')) await app.click('#modeDesignBtn');
-    await app.click('#designBackgroundBtn');
-  }
+  if ((await app.locator('#backgroundBtn').getAttribute('aria-expanded')) !== 'true') await app.click('#backgroundBtn');
   const pop = app.locator('#studioRoot > .pop', { has: app.locator('h4', { hasText: 'Background transition' }) });
   await pop.waitFor({ state: 'visible', timeout: scaled(5000) });
   return pop;

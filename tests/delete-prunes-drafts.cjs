@@ -36,20 +36,20 @@ const WRITERS = {
     setLabel: (r) => `v = ArkLayout.setLabel(v, '${r}', 'k1', 'A label');`,
     setAlt: (r) => `v = ArkLayout.setAlt(v, '${r}', 'k1', 'Alt text');`,
     group: (r) => `v = ArkLayout.group(v, '${r}', 'g1', ['k1', 'k2'], 'Group');`,
-  }, readersAndRemovers: ['altFor', 'remove', 'labelFor', 'ungroup'] },
+  }, readersAndRemovers: ['altFor', 'remove', 'labelFor', 'ungroup', 'entryFor', 'groupsFor'] },
   'js/content/states.js': { global: 'ArkStates', draft: 'states', start: 'ArkStates.sanitize({})', calls: {
     createStateGroup: (r) => `v = ArkStates.createStateGroup(v, '${r}', 'st1', ['k1'], 'self');`,
     addState: (r) => `v = ArkStates.addState(v, '${r}', 'st1', 'Two');`,
     setTrigger: (r) => `v = ArkStates.setTrigger(v, '${r}', 'st1', 'k1');`,
     setCurrent: (r) => `v = ArkStates.setCurrent(v, '${r}', 'st1', 1);`,
     advance: (r) => `v = ArkStates.advance(v, '${r}', 'st1');`,
-  }, readersAndRemovers: ['removeState', 'removeGroup'] },
+  }, readersAndRemovers: ['removeState', 'removeGroup', 'scopeOfGroup', 'groupIn', 'groupFor', 'groupIdsOn'] },
   'js/content/components.js': { global: 'ArkComponents', draft: 'components', start: "ArkComponents.createMaster(ArkComponents.sanitize({}), 'm1', 'RBLOCK_TEXT_V1', { heading: 'Hi' }, 'Hello')", calls: {
     insertInstance: (r) => `v = ArkComponents.insertInstance(v, '${r}', 'main', 'i1', 'm1');`,
     placeInstance: (r) => `v = ArkComponents.placeInstance(v, '${r}', 'spot1', 'k1', [], 'i2', 'm1');`,
     setOverride: (r) => `v = ArkComponents.setOverride(v, '${r}', 'main', 'i1', 'heading', 'Over');`,
     detachInstance: (r) => `v = ArkComponents.detachInstance(v, '${r}', 'main', 'i1', 'm2');`,
-  }, readersAndRemovers: ['removeInstance'] },
+  }, readersAndRemovers: ['removeInstance', 'scopeHolding', 'instancesAt'] },
   'js/content/element-motion.js': { global: 'ArkElementMotion', draft: 'elementMotion', start: 'ArkElementMotion.sanitize({})', calls: {
     set: (r) => `v = ArkElementMotion.set(v, '${r}', 'k1', { direction: 'left' });`,
   }, readersAndRemovers: ['entryFor', 'remove'] },

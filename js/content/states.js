@@ -26,6 +26,11 @@ var ArkStates = (function () {
 
   var ID = /^[a-z][a-z0-9_-]{0,79}$/i;
   var ROUTE = /^\/\S{0,299}$/;
+  /* The persistent shell's scope -- a state group made of header elements works on every route
+     (js/content/layout.js, "scopes": ArkLayout.SHELL is the same '*'; repeated here so a draft
+     sanitizes without that file loaded, held equal by tests/layout-shell-scope.cjs). */
+  var SHELL = '*';
+  function isScope(route) { return route === SHELL || ROUTE.test(route || ''); }
   var MAX_STATES = 20;
   var MAX_MEMBERS = 50;
 
@@ -60,7 +65,7 @@ var ArkStates = (function () {
     var rawRoutes = value && value.routes;
     if (!isPlainObject(rawRoutes)) rawRoutes = {};
     Object.keys(rawRoutes).slice(0, 500).forEach(function (route) {
-      if (!ROUTE.test(route)) return;
+      if (!isScope(route)) return;
       var rawGroups = rawRoutes[route];
       if (!isPlainObject(rawGroups)) return;
       var cleanGroups = {};
@@ -94,9 +99,25 @@ var ArkStates = (function () {
      return value. `groupId` is supplied by the caller, the same way ArkLayout.group()
      takes a caller-generated group id rather than inventing one here. */
 
+  /* A group id is unique (a time stamp plus randomness), so the scope holding it is `route`'s
+     own or SHELL's: every caller names the route it shows, and finds a group stored for every
+     route too. null: no such group. */
+  function scopeOfGroup(draft, route, groupId) {
+    if (draft.routes[route] && draft.routes[route][groupId]) return route;
+    return draft.routes[SHELL] && draft.routes[SHELL][groupId] ? SHELL : null;
+  }
+  function groupIn(draft, route, groupId) { var scope = scopeOfGroup(draft, route, groupId); return scope ? draft.routes[scope][groupId] : null; }
+  function groupFor(value, route, groupId) { return groupIn(sanitize(value), route, groupId); }
+  /* every group id that applies on `route`: its own, then SHELL's */
+  function groupIdsOn(draft, route) {
+    var ids = Object.keys(draft.routes[route] || {});
+    if (route !== SHELL) Object.keys(draft.routes[SHELL] || {}).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+    return ids;
+  }
+
   function createStateGroup(value, route, groupId, memberKeys, trigger) {
     var draft = sanitize(value);
-    if (!ROUTE.test(route || '') || !ID.test(groupId || '')) return draft;
+    if (!isScope(route) || !ID.test(groupId || '')) return draft;
     var keys = Array.isArray(memberKeys) ? Array.from(new Set(memberKeys.map(cleanKey).filter(Boolean))).slice(0, MAX_MEMBERS) : [];
     if (!keys.length) return draft;
     var groups = draft.routes[route] || (draft.routes[route] = {});
@@ -105,7 +126,7 @@ var ArkStates = (function () {
   }
 
   function addState(value, route, groupId, label) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     if (!group || group.states.length >= MAX_STATES) return draft;
     group.states.push({ label: String(label || 'New state').slice(0, 120), members: [] });
     return sanitize(draft);
@@ -115,7 +136,7 @@ var ArkStates = (function () {
      concept of deleting it, only of cycling past it -- consistent with Part A's "real
      content is hidden, never destroyed" rule applied one level up (to whole states). */
   function removeState(value, route, groupId, index) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     index = Number(index);
     if (!group || !Number.isFinite(index) || index <= 0 || index >= group.states.length) return draft;
     group.states.splice(index, 1);
@@ -125,7 +146,9 @@ var ArkStates = (function () {
   }
 
   function removeGroup(value, route, groupId) {
-    var draft = sanitize(value), groups = draft.routes[route];
+    var draft = sanitize(value);
+    route = scopeOfGroup(draft, route, groupId) || route;
+    var groups = draft.routes[route];
     if (!groups || !groups[groupId]) return draft;
     delete groups[groupId];
     if (!Object.keys(groups).length) delete draft.routes[route];
@@ -133,7 +156,7 @@ var ArkStates = (function () {
   }
 
   function setTrigger(value, route, groupId, trigger) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     if (!group) return draft;
     group.trigger = trigger === 'self' ? 'self' : (cleanKey(trigger) || 'self');
     return sanitize(draft);
@@ -144,7 +167,7 @@ var ArkStates = (function () {
      no such concept: whatever is in the draft when the caller chooses to persist it
      is what gets saved, the same as every other Studio mutator in this codebase). */
   function setCurrent(value, route, groupId, index) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     if (!group) return draft;
     index = Number(index);
     if (!Number.isFinite(index) || index < 0) index = 0;
@@ -157,7 +180,7 @@ var ArkStates = (function () {
      0 after the last one. A group with nothing to cycle to (0 or 1 states) is a safe
      no-op, never throws and never divides by zero. */
   function advance(value, route, groupId) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     if (!group || group.states.length <= 1) return draft;
     group.current = (group.current + 1) % group.states.length;
     return sanitize(draft);
@@ -247,8 +270,10 @@ var ArkStates = (function () {
     return anchor ? [anchor] : [];
   }
   function triggerTargets(host, route, value, groupId) {
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     if (!group) return [];
+    /* a SHELL group's members and anchors are looked up in the shell alone */
+    route = scopeOfGroup(draft, route, groupId);
     var list = keyedIn(host, route);
     if (group.trigger === 'self') return selfTargets(host, route, group, groupId, list);
     var el = findByKey(host, group.trigger, route, list);
@@ -263,9 +288,9 @@ var ArkStates = (function () {
      listener. */
   function findTriggerMatch(host, route, value, target) {
     if (!host || !target) return null;
-    var draft = sanitize(value), groups = draft.routes[route] || {};
+    var draft = sanitize(value);
     var found = null;
-    Object.keys(groups).some(function (groupId) {
+    groupIdsOn(draft, route).some(function (groupId) {
       var hit = triggerTargets(host, route, draft, groupId).some(function (el) { return el === target || (el.contains && el.contains(target)); });
       if (hit) { found = groupId; return true; }
       return false;
@@ -282,8 +307,11 @@ var ArkStates = (function () {
      all of a new state's own content -- never a second content-insertion mechanism. */
   function render(host, route, groupId, value, componentsValue) {
     if (!host) return;
-    var draft = sanitize(value), group = draft.routes[route] && draft.routes[route][groupId];
+    var draft = sanitize(value), group = groupIn(draft, route, groupId);
     if (!group) return;
+    /* elements are looked up in the group's own scope (a SHELL group: the shell alone); its
+       states' content renders for the route shown (a link field's `from`) */
+    var page = route; route = scopeOfGroup(draft, route, groupId);
     var activeIndex = group.current, list = keyedIn(host, route);
     /* Tagged with the group id (Studio's own selection reporting reads this back, the
        same way js/content/components.js tags an instance root with data-ark-component-
@@ -308,7 +336,7 @@ var ArkStates = (function () {
              is pointer-events:none, only its links opt back in -- state 1 rendered, could
              not be clicked, and stranded the group (regression: tests/states-anchor-clickable.cjs). */
           if (anchor.style) anchor.style.pointerEvents = 'auto';
-          if (typeof ArkComponents !== 'undefined') ArkComponents.render(anchor, route, id, componentsValue);
+          if (typeof ArkComponents !== 'undefined') ArkComponents.render(anchor, page, id, componentsValue);
         }
       } else if (existing && existing.style) {
         existing.style.display = 'none';
@@ -320,8 +348,8 @@ var ArkStates = (function () {
      renderAll's own naming/shape, called as its sibling from the same js/main.js
      onMount hook. Returns the group ids found, for parity with renderAll/anchorsIn. */
   function renderAll(host, route, value, componentsValue) {
-    var draft = sanitize(value), groups = draft.routes[route] || {};
-    var ids = Object.keys(groups);
+    var draft = sanitize(value);
+    var ids = groupIdsOn(draft, route);
     ids.forEach(function (groupId) { render(host, route, groupId, draft, componentsValue); });
     return ids;
   }
@@ -330,7 +358,7 @@ var ArkStates = (function () {
     define: define, get: get, sanitize: sanitize, serialize: serialize,
     createStateGroup: createStateGroup, addState: addState, removeState: removeState, removeGroup: removeGroup,
     setTrigger: setTrigger, setCurrent: setCurrent, advance: advance,
-    anchorId: anchorId, render: render, renderAll: renderAll,
+    anchorId: anchorId, render: render, renderAll: renderAll, groupFor: groupFor, groupScope: function (value, route, groupId) { return scopeOfGroup(sanitize(value), route, groupId); }, groupIdsOn: function (value, route) { return groupIdsOn(sanitize(value), route); }, SHELL: SHELL,
     triggerTargets: triggerTargets, findTriggerMatch: findTriggerMatch,
     MAX_STATES: MAX_STATES
   };

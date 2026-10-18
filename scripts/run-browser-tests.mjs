@@ -37,6 +37,15 @@ const CPUS = (os.availableParallelism ? os.availableParallelism() : os.cpus().le
 /* a hang guard, not a speed budget: the longest driver (full-audit) takes minutes on an idle
    machine. Multiplied by the same load factor the harness uses, measured when the driver starts. */
 const GUARD_MS = 30 * 60 * 1000;
+/* A driver whose honest work is longer declares its own guard in its first 4 KB as
+   `browser-timeout-ms: <n>` (the unit runner's run-tests-timeout-ms, for the same reason):
+   layout-key-stability walks 69 routes x 9 histories plus two reference loads each and was
+   killed mid-run by the 30 min guard at load 14-24 (2026-10-18) after 553 passing histories. */
+function guardFor(name) {
+  const head = fs.readFileSync(path.join(DIR, name + '.mjs'), 'utf8').slice(0, 4096);
+  const declared = /browser-timeout-ms:\s*(\d+)/.exec(head);
+  return declared ? Number(declared[1]) : GUARD_MS;
+}
 const loadFactor = () => Math.min(6, Math.max(1, os.loadavg()[0] / CPUS));
 
 export function drivers() {
@@ -49,10 +58,10 @@ function runOne(name, logFile, verbose) {
   return new Promise((resolve) => {
     const env = { ...process.env };
     delete env.PORT;
-    const started = Date.now(), loadStart = os.loadavg()[0], guard = Math.round(GUARD_MS * loadFactor());
+    const started = Date.now(), loadStart = os.loadavg()[0], guard = Math.round(guardFor(name) * loadFactor());
     const log = fs.createWriteStream(logFile);
     const child = spawn(process.execPath, [path.join('tests', 'browser', name + '.mjs')], { cwd: SITE, env, stdio: ['ignore', 'pipe', 'pipe'] });
-    let tail = '', factor = null, killed = null;
+    let tail = '', factor = null, killed = null, notBuilt = 0;
     const take = (chunk) => {
       const text = chunk.toString();
       log.write(text);
@@ -60,12 +69,15 @@ function runOne(name, logFile, verbose) {
       tail = (tail + text).slice(-4000);
       const m = /\[harness\] load factor ([\d.]+)/.exec(text);
       if (m && factor === null) factor = Number(m[1]);
+      /* the driver measured a missing capability (harness reportNotBuilt): not a pass */
+      const nb = /\[harness\] NOT BUILT (\d+)/.exec(text);
+      if (nb) notBuilt += Number(nb[1]);
     };
     child.stdout.on('data', take); child.stderr.on('data', take);
     const timer = setTimeout(() => { killed = `killed after the ${Math.round(guard / 1000)} s hang guard`; child.kill('SIGTERM'); setTimeout(() => child.kill('SIGKILL'), 10000).unref(); }, guard);
     child.on('close', (code, signal) => {
       clearTimeout(timer); log.end();
-      resolve({ name, ok: code === 0 && !killed, code, signal, killed, ms: Date.now() - started, loadStart, loadEnd: os.loadavg()[0], factor, tail });
+      resolve({ name, ok: code === 0 && !killed, notBuilt, code, signal, killed, ms: Date.now() - started, loadStart, loadEnd: os.loadavg()[0], factor, tail });
     });
   });
 }
@@ -95,16 +107,17 @@ async function main() {
     process.stdout.write(`run  ${name} (load ${os.loadavg()[0].toFixed(1)}) ... `);
     const r = await runOne(name, path.join(logs, name + '.log'), args.includes('--verbose'));
     results.push(r);
-    console.log(`${r.ok ? 'ok' : 'FAIL'} in ${secs(r.ms)}`);
+    console.log(`${!r.ok ? 'FAIL' : r.notBuilt ? 'NOT BUILT (' + r.notBuilt + ')' : 'ok'} in ${secs(r.ms)}`);
     if (!r.ok) console.log(`---- last output of ${name}${r.killed ? ' (' + r.killed + ': the driver did not finish, it did not fail an assertion)' : ''}\n${r.tail.split('\n').slice(-40).join('\n')}\n----`);
   }
   const failed = results.filter((r) => !r.ok);
   console.log('\n' + [pad('driver', 22), pad('result', 7), pad('time', 9), pad('load start', 11), pad('load end', 9), 'factor'].join(' '));
   for (const r of results) {
-    const verdict = r.ok ? 'pass' : r.killed ? 'HUNG' : 'FAIL';
+    const verdict = !r.ok ? (r.killed ? 'HUNG' : 'FAIL') : r.notBuilt ? 'NOTBUILT' : 'pass';
     console.log([pad(r.name, 22), pad(verdict, 7), pad(secs(r.ms), 9), pad(r.loadStart.toFixed(1), 11), pad(r.loadEnd.toFixed(1), 9), r.factor === null ? '-' : r.factor].join(' '));
   }
-  console.log(`\n${results.length - failed.length} of ${results.length} passed; 1-min load averages on ${CPUS} CPUs; factor = the load multiplier the driver's harness applied to its waits. Logs: ${logs}`);
+  const notBuilt = results.filter((r) => r.ok && r.notBuilt);
+  console.log(`\n${results.length - failed.length - notBuilt.length} of ${results.length} passed${notBuilt.length ? `, ${notBuilt.length} NOT BUILT (a missing capability the driver measured: neither a pass nor a failure)` : ''}; 1-min load averages on ${CPUS} CPUs; factor = the load multiplier the driver's harness applied to its waits. Logs: ${logs}`);
   process.exit(failed.length ? 1 : 0);
 }
 

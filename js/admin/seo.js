@@ -11,7 +11,7 @@
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, h = A.h, $ = A.$, selectDesign = A.selectDesign, touch = A.touch,
-      renderList = A.renderList, clone = A.clone, status = A.status, download = A.download,
+      refreshList = A.refreshList, clone = A.clone, status = A.status, download = A.download,
       ctlSegField = A.ctlSegField, ctlSelectField = A.ctlSelectField, ctlField = A.ctlField;
   /* defined by files loaded after this one: resolved when called */
   var closePop = A.later('closePop'), openPop = A.later('openPop'),
@@ -40,7 +40,8 @@
   /* a repaint (refreshPop, on every preview message) must not pull the caret out of a field */
   renderPageSeoPop.holdWhileEditing = true;
   function openPageSeo() { if (state.popAnchor !== $('btnPageSeo')) openPop($('btnPageSeo'), renderPageSeoPop, 'left'); }
-  $('btnPageSeo').addEventListener('click', (e) => openPop(e.currentTarget, renderPageSeoPop, 'left'));
+  /* the header's page-SEO icon (js/admin/header.js draws the header; a panel test has none) */
+  if ($('btnPageSeo')) $('btnPageSeo').addEventListener('click', (e) => openPop(e.currentTarget, renderPageSeoPop, 'left'));
   /* Theme & defaults, scrolled to its site-wide SEO section */
   function openSiteSeo() {
     selectDesign();
@@ -60,7 +61,7 @@
      The AI-crawler list is ArkSEO.AI_BOTS -- the same list robots.txt is written from. */
   let seoPreviewT = 0;
   function seoEdited() {
-    touch(); renderList();
+    touch(); refreshList();
     if (!state.cmsSourceSite) return;
     state.cmsSourceSite.seo = clone(state.seoDraft);
     /* one remount for a burst of edits (tabbing through fields commits each on 'change');
@@ -98,7 +99,7 @@
     state.seoSaved = JSON.stringify(state.seoDraft);
     ArkSEO.define(state.seoDraft);
     if (button) button.disabled = true;
-    renderList();
+    refreshList();
   }
   /* ONE control per ArkSEO field definition (js/content/seo.js's OVERRIDE_FIELDS/SITE_FIELDS),
      built with the shared ctl*Field builders -- no SEO panel lists a field itself. The merge
@@ -167,7 +168,7 @@
     var box = h('fieldset', {}, h('legend', { text: 'SEO' }));
     if (!window.ArkSEO) { box.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable on this page: js/content/seo.js did not load. Reload the editor; if it persists, check that admin-app.html still includes it.' })); return box; }
     box.appendChild(h('p', { class: 'hint', text: 'These values belong to this page (' + ArkSEO.pageTitle(pageId, label) + '). Blank title and description derive from the page text and site defaults. Site-wide settings (base URL, language, AI crawlers) are in Design \u2192 Theme & defaults.' }));
-    box.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, function () { return seoOverrideTarget('pages', pageId); }, function () { touch(); renderList(); }));
+    box.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, function () { return seoOverrideTarget('pages', pageId); }, function () { touch(); refreshList(); }));
     return box;
   }
   A.provide({ buildPageSeoPanel: buildPageSeoPanel, buildSiteSeoPanel: buildSiteSeoPanel,

@@ -20,7 +20,7 @@
       buildSizeSection = A.buildSizeSection, buildEffectsSection = A.buildEffectsSection,
       buildComponentInstanceSection = A.buildComponentInstanceSection,
       buildStateGroupSection = A.buildStateGroupSection,
-      buildElementMotionSection = A.buildElementMotionSection,
+      buildElementMotionSection = A.buildElementMotionSection, buildContentSection = A.buildContentSection,
       postCmsLayoutOperation = A.postCmsLayoutOperation, cmsPreview = A.cmsPreview,
       openContentEditor = A.openContentEditor, selectDesign = A.selectDesign,
       placeSelToolbar = A.placeSelToolbar;
@@ -57,7 +57,7 @@
      bridge.js) sets them; the rest is this file's own. tbPopBody/tbPopTitle: the open section's
      popover body and title while renderSelToolbar() builds it. tbRoving: the bar button that
      holds the roving tab stop. */
-  let tbPopBody = null, tbPopTitle = '', tbRoving = '';
+  let tbPopBody = null, tbPopTitle = '', tbRoving = '', tbContentAutoKey = '';
   const TB_FOCUSABLE = 'button:not([disabled]), input, select, textarea';
   function toolbarSection(pane, key, title, icon) {
     const name = title.replace(/\s*\(\d+\)$/, ''), count = (/\((\d+)\)$/.exec(title) || [])[1];
@@ -108,6 +108,9 @@
     const key = state.cmsExactSelection.key, kind = selToolbarKind(state.cmsExactSelection);
     const sameEdit = !!state.tbOpen && state.tbOpenKey === key && !pop.hidden;
     if (state.tbOpenKey !== key) state.tbOpen = '';
+    /* Content lens: the Content section is the lens's toolbar, so it opens by itself -- once per
+       selection, so closing it stays closed until something else is selected */
+    if (state.lens === 'content' && kind !== 'group' && !state.tbOpen && tbContentAutoKey !== key) { state.tbOpen = 'cms-content'; state.tbOpenKey = key; tbContentAutoKey = key; }
     if (state.tbAutoOpen && Date.now() - state.tbAutoOpen.at > 5000) state.tbAutoOpen = null;
     if (state.tbAutoOpen && kind !== 'group' && state.cmsExactSelection[TB_IDENTITY[state.tbAutoOpen.key]]) { state.tbOpen = state.tbAutoOpen.key; state.tbOpenKey = key; state.tbAutoOpen = null; }
     const active = document.activeElement, barFocus = active && box.contains(active) ? active.dataset.tb : '';
@@ -128,7 +131,15 @@
     box.appendChild(chip);
     tbPopBody = document.createElement('div'); tbPopBody.className = 'tb-pop-body'; tbPopTitle = '';
     const ctx = makeFrameCtx();
-    if (kind === 'group') {
+    if (state.lens === 'content' && kind !== 'group') {
+      /* Content lens (js/admin/toolbar-sections.js buildContentSection): what the selection says,
+         never how it looks -- the style sections are the Design lens's. An image's alt text and a
+         component's or state's own fields are content too. */
+      buildContentSection(box);
+      if (kind === 'image') buildAltTextSection(box);
+      if (state.cmsExactSelection.component) buildComponentInstanceSection(box);
+      if (state.cmsExactSelection.stateGroup) buildStateGroupSection(box);
+    } else if (kind === 'group') {
       buildFrameSection(box, ctx, true);
     } else {
       if (kind === 'text') { buildTypographySection(box, ctx); buildFillSection(box, ctx); buildSpacingSection(box, ctx); buildFrameSection(box, ctx, false); }

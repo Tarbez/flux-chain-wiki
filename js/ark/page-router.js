@@ -93,6 +93,23 @@
     var stageRetention=ArkUI.createStageRetention&&scene.getBoundingClientRect?ArkUI.createStageRetention(scene):null;
     var lifecycleTiming = ArkUI.lifecycleTransition;
     var active = null, request = 0, commit = 0, requested = 'zero', requestedSettings = {};
+    /* refresh({ inPlace }): the page being rebuilt stays up, untouched, until its replacement is
+       mounted and shown in the same task (disposeHeld), so no frame is painted without a page. */
+    var held = null;
+    function disposeHeld() {
+      var h = held; held = null;
+      if (!h) return;
+      h.cleanups.forEach(function (cleanup) { cleanup(); });
+      if (typeof h.el.arkDispose === 'function') h.el.arkDispose();
+      h.el.getAnimations({ subtree: true }).forEach(function (animation) { animation.cancel(); });
+      h.el.remove();
+    }
+    /* a failed rebuild puts the page that was showing back, as it was */
+    function restoreHeld() {
+      var h = held; held = null;
+      if (!h || active) { if (h) { held = h; disposeHeld(); } return; }
+      mounted[h.page] = h.el; cleanups.set(h.page, h.cleanups); active = h.page;
+    }
     var report = function () {};
     function isLifecycle(page) { return page === 'lifecycle' || page.indexOf('lifecycle/') === 0; }
     function isLifecycleStage(page) { return String(page).indexOf('lifecycle/') === 0; }
@@ -228,9 +245,11 @@
           var control = scene.querySelector('.hero-motion-toggle');
           if (control) control.focus({ preventScroll: true });
         }
-        var immediate = state.get().paused || ArkUI.prefersReducedMotion();
-        scene.dataset.transition = 'running';
-        fadeCanvas('out');
+        /* inPlace (refresh): the same route rebuilt from new content, not a navigation -- no exit,
+           no entrance, no background fade, no transition state */
+        var inPlace = !!settings.inPlace;
+        var immediate = inPlace || state.get().paused || ArkUI.prefersReducedMotion();
+        if (!inPlace) { scene.dataset.transition = 'running'; fadeCanvas('out'); }
         var outgoing = active;
         var stageSwap = isLifecycleStage(outgoing) && isLifecycleStage(page);
         var panel = continuity && continuity.begin(outgoing, page, mounted, settings.source, immediate);
@@ -243,6 +262,8 @@
         if (ticket !== request) return false;
         // Discard interrupted exits as well: no third page may leak into this handoff.
         Object.keys(mounted).forEach(function (key) { if (key !== page) remove(key); });
+        // The page an in-place refresh held goes in the same task as its replacement appears.
+        disposeHeld();
         run = zoomTransition ? lifecycleTiming.createRun() : null;
         state.lifecycleRun = run;
         scene.classList.toggle('is-lifecycle-transition',!!zoomTransition);
@@ -278,7 +299,7 @@
         // called, synchronously starting its first animation frame even though
         // `entering` itself is still a pending promise) -- never before it, so the two
         // transitions are layered, not racing to start at the same instant.
-        fadeCanvas('in');
+        if (!inPlace) fadeCanvas('in');
         // Reveal sets up its first animation frame synchronously. Restore scroll
         // now, before it paints, rather than jumping after the entry completes.
         restoreScroll(page);
@@ -294,6 +315,7 @@
         return true;
       } catch (error) {
         if (ticket !== request) return false;
+        restoreHeld();
         if(stageRetention)stageRetention.restore();
         outlet.setAttribute('aria-busy', 'false');
         scene.classList.remove('is-lifecycle-transition');
@@ -313,8 +335,21 @@
       /* Rebuild the current route from the live registries. The CMS preview uses
          this after applying unsaved manifests/articles so the iframe renders the
          exact public page module again, rather than a second visual approximation. */
-      refresh: function () {
+      /* opts.inPlace: the same route with new content -- not a navigation. The page showing stays
+         until the rebuilt one replaces it in one task, with no exit/entrance animation, no
+         background fade and its scroll position kept (the editor's canvas re-renders a draft
+         this way: a route-change transition there flashed the page blank on every edit;
+         regression: tests/page-router-refresh-in-place.cjs). */
+      refresh: function (opts) {
         var page = active || requested;
+        if (opts && opts.inPlace && active && mounted[active]) {
+          positions.set(active, pageScroll(active));
+          disposeHeld();
+          held = { page: active, el: mounted[active], cleanups: cleanups.get(active) || [] };
+          delete mounted[active]; cleanups.delete(active); active = null;
+          modules.delete(page);
+          return navigate(page, { history: 'none', query: ArkUI.route.search ? ArkUI.route.search() : '', inPlace: true });
+        }
         if (active && mounted[active]) remove(active);
         active = null;
         modules.delete(page);

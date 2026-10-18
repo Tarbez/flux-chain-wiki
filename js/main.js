@@ -66,6 +66,13 @@
          as an unwanted soft atmospheric glow. The grid (css/lattice.css) is
          the one background. */
     }
+    /* Editor preview only: which copy keys code reads BY NAME (ArkCopy.text) while it renders --
+       the Content lens's evidence for which of two fields with the same words a piece of text
+       shows (cmsPickBinding). The public page never wraps it. */
+    if (/[?&](cms-)?preview(=|&|$)/.test(location.search) && window.ArkCopy && ArkCopy.text) {
+      var arkCopyText = ArkCopy.text;
+      ArkCopy.text = function (key) { (cmsCopyRead || (cmsCopyRead = Object.create(null)))[key] = true; return arkCopyText(key); };
+    }
     var scene = ArkUI.render(F_SCENE_RZERO_V0, host);
     ArkUI.pageRouter = ArkUI.createPageRouter({ scene: scene, state: ArkUI.sceneState });
     /* Reusable content blocks (js/content/components.js) fill every [data-ark-insert]
@@ -155,20 +162,24 @@
      tests/cms-states-preview-default.cjs). A visitor's click advances this too, so the
      public site still cycles exactly as before. */
   var cmsStatesShowing = {};
-  function cmsStatesShowKey(route, groupId) { return route + '\n' + groupId; }
+  /* a group id is unique across every scope, so what a group shows is keyed by its id alone */
+  function cmsStatesShowKey(_route, groupId) { return groupId; }
   /* the draft as it should be DRAWN: every group's current replaced by what it is showing */
   function cmsStatesView(route) {
-    var view = window.ArkStates ? ArkStates.sanitize(cmsStatesDraft) : { version: 1, routes: {} }, groups = view.routes[route] || {};
-    Object.keys(groups).forEach(function (groupId) {
-      var at = cmsStatesShowing[cmsStatesShowKey(route, groupId)];
-      if (typeof at === 'number' && at >= 0 && at < groups[groupId].states.length) groups[groupId].current = at;
+    var view = window.ArkStates ? ArkStates.sanitize(cmsStatesDraft) : { version: 1, routes: {} };
+    if (!window.ArkStates) return view;
+    ArkStates.groupIdsOn(view, route).forEach(function (groupId) {
+      var group = ArkStates.groupFor(view, route, groupId), at = cmsStatesShowing[cmsStatesShowKey(route, groupId)];
+      /* groupFor() returns a copy: write through the scope that holds it */
+      var scope = ArkStates.groupScope(view, route, groupId);
+      if (typeof at === 'number' && at >= 0 && at < group.states.length) view.routes[scope][groupId].current = at;
     });
     return view;
   }
   /* { groupId: showing index } for one route, for the editor's "Showing" label */
   function cmsStatesShowingFor(route) {
-    var view = cmsStatesView(route), groups = view.routes[route] || {}, out = {};
-    Object.keys(groups).forEach(function (groupId) { out[groupId] = groups[groupId].current; });
+    var view = cmsStatesView(route), out = {};
+    if (window.ArkStates) ArkStates.groupIdsOn(view, route).forEach(function (groupId) { out[groupId] = ArkStates.groupFor(view, route, groupId).current; });
     return out;
   }
   /* Canvas-only mode (Part G, follow-up plan): the site-wide background in/out
@@ -223,13 +234,451 @@
       element.setAttribute('data-ark-copy-keys', Array.from(new Set(current.concat(keys))).join(' '));
     });
   }
+  /* =====================================================================
+     CONTENT LENS -- edit the site's text in place (preview side)
+     ---------------------------------------------------------------------
+     The editor's lens ('content' | 'design', message 'defxn-cms-preview-lens') decides what a
+     click on the canvas does. Design: select and style (everything below this block). Content:
+     the clicked text, when it is the value of exactly one source field, becomes editable where
+     it stands, and every keystroke posts 'defxn-cms-preview-copy-edit' { route, key, field,
+     value, final } to the editor, which writes the draft through the same setter its forms use.
+
+     Which field a piece of text is bound to is DERIVED, never listed: an element is bound to a
+     field when its rendered text equals that field's value (whitespace ignored, the same rule
+     annotateCmsPreviewCopy above uses), searched over every source the preview holds --
+       - inside a component instance (a block, or a state >= 1): that instance's props
+         (definition + overrides), edited as the instance's override (cmsComponentsCommand);
+       - a manifest field (ArkManifest: pages and Site chrome), addressed by its copy key
+         AREA.ROLE (HOME.TITLE, NAV.HOW);
+       - an article field (LearningContent), addressed article:<slug>/<path> where <path> is
+         the field's place in the article's own shape (title, summary, sections.0.1, questions.2).
+     Several equal values are narrowed by structure: a runtime copy key on the element itself
+     (js/ark/runtime.js wrote it from the pattern, so it is authoritative), then the source
+     that owns where the element sits (Site chrome for the shell, the page's own manifest or
+     article for page content). Still more than one is refused, naming every candidate.
+     Text no field holds is refused with the code that writes it (cmsTextSource): a refusal
+     names what it needs. Regression: tests/cms-content-lens.cjs (derivation) and
+     tests/browser/inline-content.mjs (the round trip to the public page). */
+  var cmsPreviewLens = 'design', cmsInline = null, cmsHoverBox = null, cmsHoverFrame = 0;
+  /* copy keys code read by name (ArkCopy.text, wrapped at boot in the preview); declared with var,
+     so the wrapper at the top of this file can write it before this line runs */
+  var cmsCopyRead = cmsCopyRead || Object.create(null);
+  /* what js/main.js renders the persistent shell from (the ArkUI.render call at the top) */
+  var CMS_SHELL_SOURCE = 'the site shell: the pattern F_SCENE_RZERO_V0 (js/scene.flux.js) and the resolvers it renders (js/resolvers/)';
+  var CMS_LINK_VALUE = /^(route|doc|url):\S+/;
+  var CMS_PARAGRAPH_TAGS = /^(p|blockquote|li|dd|figcaption|pre)$/;
+  /* every [path, value] string an article holds, from its own shape: strings, arrays of strings
+     (questions.i) and arrays of arrays of strings (sections.i.j); link values are targets, not text */
+  function cmsArticleStrings(article) {
+    var out = [];
+    Object.keys(article || {}).forEach(function (prop) {
+      var value = article[prop];
+      if (prop === 'slug') return;
+      if (typeof value === 'string') { if (!CMS_LINK_VALUE.test(value)) out.push([prop, value]); return; }
+      if (!Array.isArray(value)) return;
+      value.forEach(function (item, i) {
+        if (typeof item === 'string') out.push([prop + '.' + i, item]);
+        else if (Array.isArray(item)) item.forEach(function (part, j) { if (typeof part === 'string') out.push([prop + '.' + i + '.' + j, part]); });
+      });
+    });
+    return out;
+  }
+  function cmsArticleFieldLabel(path) {
+    var parts = path.split('.');
+    if (parts[0] === 'sections') return 'Section ' + (Number(parts[1]) + 1) + (parts[2] === '0' ? ' heading' : ', paragraph ' + parts[2]);
+    if (parts[0] === 'questions') return 'Question ' + (Number(parts[1]) + 1);
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).replace(/([A-Z])/g, ' $1').toLowerCase();
+  }
+  function cmsArticleRoute(slug) {
+    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog['article/' + slug];
+    return entry ? entry.path : '/learnings/' + slug;
+  }
+  /* every field whose value is exactly this element's text */
+  function cmsCopyCandidates(element) {
+    var text = previewCopyText(element && element.textContent);
+    if (!text || text.length < 2) return [];
+    var out = [], comp = cmsComponentRootOf(element);
+    if (comp) {
+      var anchorId = comp.getAttribute('data-ark-component-anchor'), instanceKey = comp.getAttribute('data-ark-component-key');
+      var instance = window.ArkComponents ? ArkComponents.instancesAt(cmsComponentsDraft, cmsRoutePath(), anchorId).filter(function (item) { return item.key === instanceKey; })[0] : null;
+      var master = instance && cmsComponentsDraft.masters && cmsComponentsDraft.masters[instance.masterId];
+      if (!master) return out;
+      var props = Object.assign({}, master.props, instance.overrides);
+      Object.keys(props).forEach(function (prop) {
+        if (typeof props[prop] !== 'string' || previewCopyText(props[prop]) !== text) return;
+        out.push({ kind: 'component', id: anchorId + '/' + instanceKey, field: prop, address: 'component:' + anchorId + '/' + instanceKey + '/' + prop,
+          label: (master.label || instance.masterId) + ': ' + prop, value: props[prop], anchorId: anchorId, instanceKey: instanceKey,
+          override: Object.prototype.hasOwnProperty.call(instance.overrides || {}, prop) ? instance.overrides[prop] : null,
+          file: 'js/content/components-data.js' });
+      });
+      return out;   /* an instance's text comes from the instance, never from a page field that happens to read the same */
+    }
+    var runtimeKeys = element.hasAttribute('data-ark-copy-preview') ? [] : String(element.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean);
+    (cmsCopyIndex().get(text) || []).forEach(function (c) { out.push(Object.assign({ runtime: runtimeKeys.indexOf(c.address) >= 0 }, c)); });
+    return out;
+  }
+  /* every manifest and article field by its normalized words, built once per site the editor
+     sends (cmsOnMessage marks it stale) -- the hover affordance asks on every pointer frame */
+  var cmsCopyIndexCache = null;
+  function cmsCopyIndex() {
+    if (cmsCopyIndexCache) return cmsCopyIndexCache;
+    var index = new Map();
+    function add(text, c) { if (!text || text.length < 2) return; var list = index.get(text) || []; list.push(c); index.set(text, list); }
+    if (window.ArkManifest) ArkManifest.all().forEach(function (manifest) {
+      Object.keys(manifest.fields || {}).forEach(function (role) {
+        var field = manifest.fields[role];
+        if (!field || field.kind === 'link') return;
+        add(previewCopyText(field.value), { kind: 'page', id: manifest.id, field: role, address: manifest.id.toUpperCase() + '.' + role, label: field.label, value: field.value, fieldKind: field.kind,
+          owner: manifest.group === 'site' ? 'shell' : manifest.route, file: 'js/content/manifests/' + manifest.id + '.js' });
+      });
+    });
+    if (window.LearningContent) LearningContent.articles.forEach(function (article) {
+      cmsArticleStrings(article).forEach(function (pair) {
+        add(previewCopyText(pair[1]), { kind: 'article', id: article.slug, field: pair[0], address: 'article:' + article.slug + '/' + pair[0], label: (article.title || article.slug) + ': ' + cmsArticleFieldLabel(pair[0]),
+          value: pair[1], owner: cmsArticleRoute(article.slug), file: 'js/content/articles/' + article.slug + '.js' });
+      });
+    });
+    return (cmsCopyIndexCache = index);
+  }
+  /* one binding, or none and the candidates that made it ambiguous */
+  function cmsPickBinding(element, list) {
+    var runtime = list.some(function (c) { return c.runtime; });
+    if (list.length > 1 && runtime) list = list.filter(function (c) { return c.runtime; });
+    if (list.length > 1) {
+      var owner = window.ArkLayout && ArkLayout.SHELL && cmsScopeOf(element) === ArkLayout.SHELL ? 'shell' : cmsRoutePath();
+      var here = list.filter(function (c) { return c.owner === owner; });
+      if (here.length) list = here;
+    }
+    /* text with no runtime key was written by code: of two equal fields, the one code read by name
+       (the header's links read NAV.OVERVIEW; the equal NAV.ABOUT is the pattern's, on another element) */
+    if (list.length > 1 && !runtime) {
+      var read = list.filter(function (c) { return cmsCopyRead[c.address]; });
+      if (read.length) list = read;
+    }
+    return list.length === 1 ? { binding: list[0], among: list } : { binding: null, among: list };
+  }
+  /* the code that writes this element, for a refusal: a component, the shell, or a page module */
+  function cmsTextSource(element) {
+    var comp = cmsComponentRootOf(element);
+    if (comp) {
+      var master = cmsComponentsDraft.masters && cmsComponentsDraft.masters[comp.getAttribute('data-ark-component-master')];
+      return 'the component "' + (master ? master.label : comp.getAttribute('data-ark-component-master')) + '" (js/content/components-data.js)';
+    }
+    if (window.ArkLayout && ArkLayout.SHELL && cmsScopeOf(element) === ArkLayout.SHELL) return CMS_SHELL_SOURCE;
+    var page = element.closest && element.closest('[data-ark-page]'), id = page && page.getAttribute('data-ark-page');
+    var entry = id && ArkUI.pageCatalog && ArkUI.pageCatalog[id];
+    if (!entry) return 'the page shown at ' + cmsRoutePath();
+    var file = (entry.scripts || []).filter(function (src) { return /^js\/pages\//.test(src); }).pop();
+    return 'the page module "' + (entry.module || id) + '"' + (file ? ' (' + file + ')' : '');
+  }
+  function cmsSameHref(a, b) {
+    try { return new URL(a, location.href).href === new URL(b, location.href).href; } catch (e) { return a === b; }
+  }
+  /* A link's TARGET is a separate 'link' field in the same source: the one whose resolved href is
+     this link's href; two of them, the one sharing the label's prefix (CLOSING.LABEL -> CLOSING.HREF). */
+  function cmsLinkInfo(link, binding) {
+    var href = link.getAttribute('href') || '', resolve = ArkUI.dash && ArkUI.dash.resolveLinkField;
+    var hits = [];
+    if (resolve && binding.kind === 'page' && window.ArkManifest && ArkManifest.get(binding.id)) {
+      var manifest = ArkManifest.get(binding.id);
+      Object.keys(manifest.fields).forEach(function (role) {
+        var field = manifest.fields[role];
+        if (field.kind !== 'link') return;
+        var r = null; try { r = resolve(field.value, cmsRoutePath()); } catch (e) { r = null; }
+        if (r && r.href && cmsSameHref(r.href, href)) hits.push({ field: manifest.id.toUpperCase() + '.' + role, fieldKey: role, label: field.label, value: field.value });
+      });
+    } else if (resolve && binding.kind === 'article' && window.LearningContent) {
+      var article = LearningContent.find(binding.id) || {};
+      Object.keys(article).forEach(function (prop) {
+        if (typeof article[prop] !== 'string' || !CMS_LINK_VALUE.test(article[prop])) return;
+        var r = null; try { r = resolve(article[prop], cmsRoutePath()); } catch (e) { r = null; }
+        if (r && r.href && cmsSameHref(r.href, href)) hits.push({ field: 'article:' + binding.id + '/' + prop, fieldKey: prop, label: cmsArticleFieldLabel(prop), value: article[prop] });
+      });
+    }
+    if (hits.length > 1) {
+      var prefix = String(binding.field).replace(/\.[^.]*$/, '');
+      var same = hits.filter(function (hit) { return hit.fieldKey.replace(/\.[^.]*$/, '') === prefix; });
+      if (same.length) hits = same;
+    }
+    if (hits.length === 1) return Object.assign({ href: href }, hits[0]);
+    return { href: href, refusal: hits.length ? 'This link opens ' + href + ', the target of ' + hits.length + ' link fields (' + hits.map(function (hit) { return hit.field; }).join(', ') + '): change the one you mean in Page fields.'
+      : 'This link opens ' + href + ', which no link field holds: the target is written by ' + cmsTextSource(link) + '. To edit it here, move it into a link field (route:<page>, doc:<path> or url:<address>) of the page\'s manifest.' };
+  }
+  /* What the Content lens knows about an element: its binding, or why it has none. Reported to
+     the editor with every selection (`content`) for the toolbar's Content section. */
+  function cmsContentInfo(element) {
+    if (!element || element.nodeType !== 1) return null;
+    var key = element.getAttribute('data-ark-layout-key') || '', tag = element.tagName.toLowerCase();
+    var pick = cmsPickBinding(element, cmsCopyCandidates(element)), b = pick.binding;
+    if (b) {
+      var info = { key: key, bound: true, kind: b.kind, id: b.id, field: b.address, fieldKey: b.field, label: b.label, value: b.value, file: b.file,
+        multiline: b.kind === 'page' ? b.fieldKind === 'text' : (/\n/.test(b.value) || CMS_PARAGRAPH_TAGS.test(tag)) };
+      if (b.kind === 'component') { info.anchorId = b.anchorId; info.instanceKey = b.instanceKey; info.override = b.override; }
+      var link = element.closest('a');
+      if (link && host.contains(link)) info.link = cmsLinkInfo(link, b);
+      return info;
+    }
+    var text = String(element.textContent || '').trim(), own = Array.prototype.filter.call(element.children || [], function (child) { return String(child.textContent || '').trim(); });
+    var source = cmsTextSource(element), refusal = { key: key, bound: false, source: source };
+    if (pick.among.length > 1) {
+      refusal.reason = 'This text is the value of ' + pick.among.length + ' fields (' + pick.among.map(function (c) { return c.address; }).join(', ') + '), so a change here could not say which one it means.';
+      refusal.remedy = 'Change the one you mean in Page fields.';
+    } else if (!text) {
+      refusal.reason = 'This ' + tag + ' has no text of its own.';
+      refusal.remedy = 'Click a heading, paragraph, link or label to edit its words; switch to Design to style this.';
+    } else if (own.length > 1) {
+      refusal.reason = 'This ' + tag + ' holds ' + own.length + ' separate pieces of text.';
+      refusal.remedy = 'Click the piece of text you want to change.';
+    } else if (cmsComponentRootOf(element)) {
+      refusal.reason = 'This text is not one of the fields of ' + source + ' -- it is part of the block\'s markup.';
+      refusal.remedy = 'Edit the definition from the Library (Component instance -> Edit definition).';
+    } else {
+      refusal.reason = 'This text is not read from any field: it is written by ' + source + '.';
+      refusal.remedy = 'To edit it here, give it a field in the page\'s manifest (js/content/manifests/) and have the code read it with ArkCopy.text(\'AREA.ROLE\').';
+    }
+    return refusal;
+  }
+  /* The element a content-lens click means: the innermost layout-keyed element under the
+     pointer whose text binds, climbing while nothing binds; else the innermost one (to explain). */
+  function cmsContentPick(target) {
+    var first = null;
+    for (var node = target && target.nodeType === 1 ? target : target && target.parentElement; node && node !== host && node.nodeType === 1; node = node.parentElement) {
+      if (node.closest('[data-ark-studio-ui]')) return null;
+      if (!node.hasAttribute('data-ark-layout-key') || node.hasAttribute('data-ark-layout-group')) continue;
+      if (String(node.textContent || '').length > 4000) break;
+      var info = cmsContentInfo(node);
+      if (!first) first = { element: node, info: info };
+      if (info.bound) return { element: node, info: info };
+    }
+    return first;
+  }
+  /* the element's words as the field stores them: text as written, a <br> or a child laid out as
+     its own line (a block: the home heading draws each line of its value as a block span; a <div>
+     the browser inserts on Enter) as a line break -- decided by layout, not by tag; never
+     innerText, which applies text-transform */
+  function cmsEditableText(element) {
+    var out = '', after = false;   /* after: a block just ended, so what follows starts a line */
+    function lineBreak() { if (out && !/\n$/.test(out)) out += '\n'; after = false; }
+    (function walk(node) {
+      Array.prototype.forEach.call(node.childNodes, function (child) {
+        if (child.nodeType === 3) { if (after && !child.data.trim()) return; if (after) lineBreak(); out += child.data; }
+        else if (child.nodeName === 'BR') { out += '\n'; after = false; }
+        else if (child.nodeType === 1) {
+          var display = getComputedStyle(child).display || '', block = display !== 'contents' && display.indexOf('inline') !== 0;
+          if (display === 'none') return;
+          if (block || after) lineBreak();
+          walk(child);
+          if (block) after = true;
+        }
+      });
+    })(element);
+    return out;
+  }
+  function cmsInlineValue(c) {
+    var text = cmsEditableText(c.element);
+    if (!c.info.multiline) text = text.replace(/\s*\n\s*/g, ' ');
+    /* unchanged words keep the field's exact value (its own spacing and line breaks) */
+    return previewCopyText(text) === previewCopyText(c.info.value) ? c.info.value : text;
+  }
+  /* stale: a site the editor sent while the words were being typed was held here and is out of
+     date (it carries half-typed words), so the editor must send the current one */
+  function cmsPostCopyEdit(info, value, final, history, stale) {
+    window.parent.postMessage({ type: 'defxn-cms-preview-copy-edit', route: cmsRoutePath(), key: info.key, field: info.field, value: value, final: !!final, history: history || '', stale: !!stale }, location.origin);
+  }
+  function cmsInlineInput() {
+    var c = cmsInline; if (!c) return;
+    var value = cmsInlineValue(c);
+    if (value === c.last) return;
+    c.last = value; c.sent = true;
+    placeCmsLayoutUi();   /* the outline follows the text as it grows or wraps */
+    /* every keystroke, like a form field's input event: Save pressed right after typing must see it */
+    cmsPostCopyEdit(c.info, value, false);
+  }
+  function cmsInlineKey(event) {
+    var c = cmsInline; if (!c) return;
+    if (event.key === 'Escape') {
+      event.preventDefault(); event.stopPropagation();
+      c.element.textContent = c.beforeText; c.last = c.info.value;
+      cmsEndInline(false);
+      /* a held site with half-typed words is never applied: the editor sends the current one */
+      if (c.sent) cmsPostCopyEdit(c.info, c.info.value, true, 'revert', !!c.pending);
+      else if (c.pending) cmsOnMessage(c.pending);
+      return;
+    }
+    if (event.key === 'Enter' && (!c.info.multiline || event.metaKey || event.ctrlKey)) { event.preventDefault(); c.element.blur(); }
+  }
+  function cmsInlineBlur() { cmsEndInline(true); }
+  function cmsBeginInline(element, info, event) {
+    if (cmsInline && cmsInline.element === element) return;
+    cmsEndInline(true);
+    var c = cmsInline = { element: element, info: info, beforeText: element.textContent, last: info.value, sent: false, pending: null };
+    if (!document.querySelector('style[data-ark-inline-style]')) {
+      var style = document.createElement('style'); style.setAttribute('data-ark-inline-style', ''); style.setAttribute('data-ark-studio-ui', '');
+      style.textContent = '[data-ark-inline-editing]{outline:2px solid #5d8df6!important;outline-offset:3px;cursor:text;caret-color:#5d8df6}';
+      document.head.appendChild(style);
+    }
+    element.setAttribute('data-ark-inline-editing', '');
+    try { element.contentEditable = 'plaintext-only'; } catch (e) { /* not supported: below */ }
+    if (element.contentEditable !== 'plaintext-only') element.contentEditable = 'true';
+    element.spellcheck = true;
+    element.addEventListener('input', cmsInlineInput);
+    element.addEventListener('keydown', cmsInlineKey);
+    element.addEventListener('blur', cmsInlineBlur);
+    element.focus({ preventScroll: true });
+    /* the caret where the click landed, else at the end */
+    var range = null, sel = window.getSelection && window.getSelection();
+    if (event && document.caretRangeFromPoint) range = document.caretRangeFromPoint(event.clientX, event.clientY);
+    if (!range || !element.contains(range.startContainer)) { range = document.createRange(); range.selectNodeContents(element); range.collapse(false); }
+    if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+    return c;
+  }
+  /* commit: the final value (once), an undo entry beside the layout history, then any preview
+     state that arrived while typing (it would have rebuilt the element under the caret) */
+  function cmsEndInline(commit) {
+    var c = cmsInline; if (!c) return;
+    cmsInline = null;
+    c.element.removeEventListener('input', cmsInlineInput);
+    c.element.removeEventListener('keydown', cmsInlineKey);
+    c.element.removeEventListener('blur', cmsInlineBlur);
+    c.element.removeAttribute('contenteditable'); c.element.removeAttribute('data-ark-inline-editing');
+    if (!commit) return;
+    var value = cmsInlineValue(c), changed = value !== c.info.value;
+    /* A site the editor sent while the words were typed was held (c.pending). It carries
+       half-typed words, so it is never applied once anything was typed: the final edit says it
+       is stale and the editor sends the current site -- with every other edit made meanwhile (a
+       Page fields keystroke) -- re-rendered in place. Untouched words: it is applied as it is. */
+    var stale = !!c.pending && (c.sent || changed);
+    if (changed) {
+      var entry = { kind: c.info.kind, id: c.info.id, key: c.info.key, field: c.info.field, before: c.info.kind === 'component' ? c.info.override : c.info.value, after: value, anchorId: c.info.anchorId, instanceKey: c.info.instanceKey, fieldKey: c.info.fieldKey };
+      cmsLayoutUndo.push({ cmsCopy: entry }); if (cmsLayoutUndo.length > 100) cmsLayoutUndo.shift();
+      cmsLayoutRedo.length = 0; cmsReportLayoutHistory();
+      /* the canvas already shows these words: the editor takes them without re-sending the site
+         (no rebuild, no flash). Every other element on the page showing the same field takes them
+         now too (cmsSyncCopies, decided against the source as it was), then this document's own
+         copy of the source holds them, or the next click would not find the field they came from. */
+      if (entry.kind !== 'component') { cmsSyncCopies(entry, c.info.value, value, c.element); cmsAdoptCopyValue(entry, value); }
+      cmsApplyCopyEntry(entry, 'after', '', stale);
+    } else if (c.sent) cmsPostCopyEdit(c.info, c.info.value, true, '', stale);
+    else if (c.pending) cmsOnMessage(c.pending);
+  }
+  /* Every element on the page bound to the same field as the one just edited -- found the way a
+     click finds a binding (same words, cmsContentInfo names the same field), innermost only --
+     shows the committed words at once, without a re-render. Returns how many it changed. */
+  function cmsSyncCopies(entry, before, after, edited) {
+    var text = previewCopyText(before);
+    if (!text || !host) return 0;
+    var matches = Array.prototype.filter.call(host.querySelectorAll('[data-ark-layout-key]'), function (el) {
+      if (el === edited || el.contains(edited) || edited.contains(el) || el.closest('[data-ark-studio-ui]')) return false;
+      if (previewCopyText(el.textContent) !== text) return false;
+      var info = cmsContentInfo(el);
+      return !!info && info.bound && info.field === entry.field;
+    });
+    matches = matches.filter(function (el) { return !matches.some(function (other) { return other !== el && el.contains(other); }); });
+    matches.forEach(function (el) { cmsWriteText(el, after); });
+    return matches.length;
+  }
+  /* the words into an element as the page drew them: one line per block child when it draws its
+     lines that way (the home heading), into its one text node when it has other children (an
+     icon beside a label), else as its whole text */
+  function cmsWriteText(el, value) {
+    var kids = Array.prototype.slice.call(el.children || []), lines = String(value).split('\n');
+    var texts = Array.prototype.filter.call(el.childNodes, function (n) { return n.nodeType === 3 && n.data.trim(); });
+    /* its words are all in its children, one line each */
+    if (kids.length && !texts.length && kids.length === lines.length && kids.every(function (k) { return !k.children.length && k.textContent.trim(); })) { kids.forEach(function (k, i) { k.textContent = lines[i]; }); return; }
+    if (kids.length && texts.length === 1) { texts[0].data = value; return; }
+    el.textContent = value;
+  }
+  function cmsAdoptCopyValue(entry, value) {
+    if (entry.kind === 'page' && window.ArkManifest) {
+      var manifest = ArkManifest.get(entry.id);
+      if (manifest && manifest.fields[entry.fieldKey]) manifest.fields[entry.fieldKey].value = value;
+    } else if (entry.kind === 'article' && window.LearningContent) {
+      var article = LearningContent.find(entry.id), path = String(entry.fieldKey).split('.');
+      if (!article) return;
+      /* the first question written fills the rest from the section headings (setItemField does the same) */
+      if (path[0] === 'questions' && !article.questions && article.sections) article.questions = article.sections.map(function (section) { return section[0]; });
+      var at = article;
+      for (var i = 0; i < path.length - 1 && at; i++) at = at[path[i]];
+      if (at) at[path[path.length - 1]] = value;
+    }
+    cmsCopyIndexCache = null;
+  }
+  /* one side of an inline edit, re-applied: a component's override inside this preview (its
+     draft lives here), any other field through the editor's draft */
+  function cmsApplyCopyEntry(entry, side, history, stale) {
+    var value = entry[side];
+    if (entry.kind === 'component') {
+      cmsComponentsCommand({ action: 'set-override', route: cmsRoutePath(), anchorId: entry.anchorId, key: entry.instanceKey, propPath: entry.fieldKey, value: value == null ? null : value });
+      if (stale) cmsPostCopyEdit(entry, value == null ? '' : value, true, history || '', true);
+    } else cmsPostCopyEdit(entry, value, true, history || '', stale);
+  }
+  function cmsSetLens(lens) {
+    var next = lens === 'content' ? 'content' : 'design';
+    if (next === cmsPreviewLens) return;
+    cmsEndInline(true); cmsPreviewLens = next; cmsHover(null);
+    document.documentElement.setAttribute('data-ark-lens', next);
+    placeCmsLayoutUi(); emitCmsLayoutSelection();
+  }
+  /* the quiet affordance: dashed where a click edits, dotted grey where it explains why not */
+  function cmsHover(target) {
+    if (!cmsHoverBox) {
+      if (!target) return;
+      cmsHoverBox = document.createElement('div'); cmsHoverBox.setAttribute('data-ark-studio-ui', ''); cmsHoverBox.className = 'ark-studio-hover';
+      cmsHoverBox.style.cssText = 'position:fixed;z-index:2147483644;pointer-events:none;box-sizing:border-box;border-radius:3px';
+      document.body.appendChild(cmsHoverBox);
+    }
+    var picked = target && cmsPreviewLens === 'content' && cmsPreviewEdit && !cmsInline ? cmsContentPick(target) : null;
+    if (!picked || cmsPreviewSelections.indexOf(picked.element) >= 0) { cmsHoverBox.hidden = true; return; }
+    var r = cmsRectOf(picked.element);
+    cmsHoverBox.hidden = false;
+    cmsHoverBox.dataset.bound = picked.info.bound ? 'yes' : 'no';
+    cmsHoverBox.title = '';
+    Object.assign(cmsHoverBox.style, { left: (r.left - 2) + 'px', top: (r.top - 2) + 'px', width: (r.width + 4) + 'px', height: (r.height + 4) + 'px',
+      border: picked.info.bound ? '1px dashed #5d8df6' : '1px dotted rgba(140,146,160,.7)', background: picked.info.bound ? 'rgba(93,141,246,.06)' : 'transparent' });
+  }
+  /* Content lens: a click inside the text being edited moves the caret (and never follows a
+     link); a click elsewhere picks the text it lands on (cmsContentPick) and, when that text is
+     bound to a field, makes it editable right there. Returns false to fall back to the design pick. */
+  function cmsContentClick(event) {
+    if (cmsInline && cmsInline.element.contains(event.target)) { event.preventDefault(); event.stopPropagation(); return true; }
+    var picked = cmsContentPick(event.target);
+    if (!picked) return false;
+    event.preventDefault(); event.stopPropagation();
+    cmsHover(null);
+    cmsPreviewSelected = picked.element; cmsPreviewSelections = [picked.element];
+    placeCmsLayoutUi(); emitCmsLayoutSelection(picked.info);
+    if (picked.info.bound) cmsBeginInline(picked.element, picked.info, event);
+    return true;
+  }
+  /* the hover affordance's listeners; installed once, beside the preview's message listener */
+  function cmsInstallContentLens() {
+    if (!cmsPreviewQuery || window.parent === window) return;
+    document.addEventListener('mousemove', function (event) {
+      if (cmsPreviewLens !== 'content') return;
+      var target = event.target;
+      if (cmsHoverFrame) return;
+      cmsHoverFrame = requestAnimationFrame(function () { cmsHoverFrame = 0; cmsHover(target); });
+    }, true);
+    document.addEventListener('mouseleave', function () { cmsHover(null); });
+    /* the words being typed are part of what Ctrl/Cmd+S saves: commit them before the save is
+       forwarded (on the window, capture phase: before the document's keydown listener that forwards
+       it, cmsForwardSaveShortcut; the two messages reach the editor in order) */
+    window.addEventListener('keydown', function (event) {
+      if (cmsInline && (event.metaKey || event.ctrlKey) && String(event.key).toLowerCase() === 's') cmsEndInline(true);
+    }, true);
+  }
+  /* ===================================================================== end CONTENT LENS */
   function cmsRoutePath() { return ArkUI.route && ArkUI.route.path ? ArkUI.route.path() : location.pathname; }
   function cmsLayoutBreakpoint() { return window.ArkLayout ? ArkLayout.breakpoint(window.innerWidth) : 'desktop'; }
-  function cmsFrameFor(route, key) {
-    var nodes = cmsLayoutDraft.routes && cmsLayoutDraft.routes[route], entry = nodes && nodes[key];
-    return window.ArkLayout ? ArkLayout.merged(entry || {}, window.innerWidth) : {};
+  /* the frame that applies to `element` (`key`) on `route`: its route's entry, SHELL's for a shell element */
+  function cmsFrameFor(route, key, element) {
+    return window.ArkLayout ? ArkLayout.merged(ArkLayout.entryFor(cmsLayoutDraft, route, key, element) || {}, window.innerWidth) : {};
   }
-  function cmsLayoutEntry(key) { return cmsFrameFor(cmsRoutePath(), key); }
+  function cmsLayoutEntry(key, element) { return cmsFrameFor(cmsRoutePath(), key, element); }
+  /* Where `element`'s edits are stored: its route, or ArkLayout.SHELL for the persistent shell
+     (js/content/layout.js, "scopes") -- a header edit shows on every route */
+  function cmsScopeOf(element) { return window.ArkLayout && ArkLayout.scopeOf ? ArkLayout.scopeOf(element, cmsRoutePath()) : cmsRoutePath(); }
+  function cmsScopeOfAll(elements) { return window.ArkLayout && ArkLayout.scopeOfAll ? ArkLayout.scopeOfAll(elements, cmsRoutePath()) : cmsRoutePath(); }
   /* The editor's Layers tree (js/admin/admin.js renderConnectedLayers) is this: the actual
      rendered DOM of the previewed route, reported with every ready/select/change message. Walks depth-first from host's own
      children, including only elements ArkLayout.annotate() already tagged with a stable
@@ -252,8 +701,8 @@
         if (element.hasAttribute && element.hasAttribute('data-ark-component-replaced')) return;
         if (!key) { out = out.concat(walk(element)); return; }
         var kids = tag === 'svg' ? [] : walk(element);
-        var label = ArkLayout.labelFor(cmsLayoutDraft, route, key) || tag;
-        out.push({ key: key, tag: tag, label: label, hidden: cmsFrameFor(route, key).display === 'hide', hasChildren: kids.length > 0, children: kids });
+        var label = ArkLayout.labelFor(cmsLayoutDraft, route, key, element) || tag;
+        out.push({ key: key, tag: tag, label: label, hidden: cmsFrameFor(route, key, element).display === 'hide', hasChildren: kids.length > 0, children: kids });
       });
       return out;
     }
@@ -300,7 +749,7 @@
      replaced original, a hidden layer) */
   function cmsIsShown(element) { return !!element && element.isConnected && (getComputedStyle(element).display === 'contents' ? cmsRectOf(element).width > 0 || cmsRectOf(element).height > 0 : element.getClientRects().length > 0); }
   function cmsSelectionInfo(element) {
-    var rect = cmsRectOf(element), key = element.getAttribute('data-ark-layout-key') || '', frame = cmsLayoutEntry(key);
+    var rect = cmsRectOf(element), key = element.getAttribute('data-ark-layout-key') || '', frame = cmsLayoutEntry(key, element);
     /* A selected element that is itself a reusable-component instance root (js/content/
        components.js tags it with these three attributes on every render) reports which
        instance it is, so Studio's inspector can offer override editing for it -- reusing
@@ -330,7 +779,9 @@
        page module itself wrote there (before any saved override), so the toolbar's Alt text
        field can show the override and the markup's own value as its fallback. */
     var alt = typeof ArkLayout !== 'undefined' && ArkLayout.altOwn ? ArkLayout.altOwn(element) : null;
-    return { key: key, route: cmsRoutePath(), breakpoint: cmsLayoutBreakpoint(), label: element.getAttribute('aria-label') || element.id || element.tagName.toLowerCase(),
+    /* route: the SCOPE the element's edits are stored under (its route, or SHELL for the header);
+       page: the route the preview shows */
+    return { key: key, route: cmsScopeOf(element), page: cmsRoutePath(), breakpoint: cmsLayoutBreakpoint(), label: element.getAttribute('aria-label') || element.id || element.tagName.toLowerCase(),
       rect: { x: Math.round(rect.left), y: Math.round(rect.top), width: Math.round(rect.width), height: Math.round(rect.height) }, frame: frame, component: component, stateGroup: stateGroup, alt: alt };
   }
   function cmsSelectionList() { return cmsPreviewSelections.filter(function (element) { return element && element.isConnected; }); }
@@ -374,6 +825,8 @@
     Object.assign(cmsLayoutLabel.style, { left: Math.max(2, r.left) + 'px', top: Math.max(2, r.top - 24) + 'px' }); cmsLayoutLabel.hidden = false;
     var points = [[r.left, r.top], [r.right, r.top], [r.right, r.bottom], [r.left, r.bottom]];
     cmsLayoutHandles.forEach(function (handle, i) { handle.hidden = false; handle.style.left = (points[i][0] - 5) + 'px'; handle.style.top = (points[i][1] - 5) + 'px'; });
+    /* the Content lens edits words, not geometry: no resize handles, no drag label */
+    if (cmsPreviewLens === 'content') { cmsLayoutLabel.hidden = true; cmsLayoutHandles.forEach(function (h) { h.hidden = true; }); }
   }
   /* Grouping lives entirely in ArkLayout (the real DOM + cmsLayoutDraft), a different tree
      than the CMS content structure the sidebar's own Layers tab walks (manifest/article
@@ -381,12 +834,13 @@
      wired. Rather than force those two different trees into one view, report the current
      route's real groups directly so Studio can show them as their own small list. */
   function cmsGroupList() {
-    var groups = (cmsLayoutDraft.groups && cmsLayoutDraft.groups[cmsRoutePath()]) || {};
+    var groups = ArkLayout.groupsFor(cmsLayoutDraft, cmsRoutePath());
     return Object.keys(groups).map(function (id) { return { id: id, label: groups[id].label || 'Group', members: (groups[id].members || []).length }; });
   }
-  function emitCmsLayoutSelection() {
+  function emitCmsLayoutSelection(content) {
     if (!cmsPreviewSelected) return;
-    window.parent.postMessage({ type: 'defxn-cms-preview-select', keys: String(cmsPreviewSelected.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean), selection: cmsSelectionInfo(cmsPreviewSelected), selections: cmsSelectionPayload(), groups: cmsGroupList(), points: cmsInsertionPoints(), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
+    /* content: the selection's Content-lens binding or refusal (cmsContentInfo), for the toolbar's Content section */
+    window.parent.postMessage({ type: 'defxn-cms-preview-select', keys: String(cmsPreviewSelected.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean), content: content || cmsContentInfo(cmsPreviewSelected), selection: cmsSelectionInfo(cmsPreviewSelected), selections: cmsSelectionPayload(), groups: cmsGroupList(), points: cmsInsertionPoints(), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
   }
   function setCmsElementFrame(element, frame, commit) {
     if (!element || !window.ArkLayout) return;
@@ -398,8 +852,7 @@
        [key] off it directly used to throw and abort before applyFrame ever ran, leaving the
        element visually stuck in its old state even though the draft itself was already
        correct. Read defensively instead of assuming the path still exists. */
-    var routeNodes = cmsLayoutDraft.routes && cmsLayoutDraft.routes[patch.route];
-    ArkLayout.applyFrame(element, ArkLayout.merged(routeNodes && routeNodes[patch.key], window.innerWidth));
+    ArkLayout.applyFrame(element, cmsFrameFor(cmsRoutePath(), patch.key, element));
     if (commit) window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: patch, selection: cmsSelectionInfo(element), selections: cmsSelectionPayload(), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
   }
   function setCmsLayoutFrame(frame, commit) {
@@ -419,8 +872,10 @@
     window.parent.postMessage({ type: 'defxn-cms-preview-layout-replace', layout: cmsLayoutDraft, tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
     cmsReportLayoutHistory();
   }
-  function cmsUndoLayout() { if (!cmsLayoutUndo.length) return; cmsLayoutRedo.push(JSON.parse(JSON.stringify(cmsLayoutDraft))); cmsRestoreLayout(cmsLayoutUndo.pop()); }
-  function cmsRedoLayout() { if (!cmsLayoutRedo.length) return; cmsLayoutUndo.push(JSON.parse(JSON.stringify(cmsLayoutDraft))); cmsRestoreLayout(cmsLayoutRedo.pop()); }
+  /* An inline text edit (Content lens) sits in the same history as layout edits: one undo stack
+     for everything done on the canvas, in the order it was done (cmsEndInline pushes it). */
+  function cmsUndoLayout() { var top = cmsLayoutUndo[cmsLayoutUndo.length - 1]; if (top && top.cmsCopy) { cmsLayoutRedo.push(cmsLayoutUndo.pop()); cmsReportLayoutHistory(); cmsApplyCopyEntry(top.cmsCopy, 'before', 'undo'); return; } if (!cmsLayoutUndo.length) return; cmsLayoutRedo.push(JSON.parse(JSON.stringify(cmsLayoutDraft))); cmsRestoreLayout(cmsLayoutUndo.pop()); }
+  function cmsRedoLayout() { var top = cmsLayoutRedo[cmsLayoutRedo.length - 1]; if (top && top.cmsCopy) { cmsLayoutUndo.push(cmsLayoutRedo.pop()); cmsReportLayoutHistory(); cmsApplyCopyEntry(top.cmsCopy, 'after', 'redo'); return; } if (!cmsLayoutRedo.length) return; cmsLayoutUndo.push(JSON.parse(JSON.stringify(cmsLayoutDraft))); cmsRestoreLayout(cmsLayoutRedo.pop()); }
   function beginCmsLayoutAction(event, dir) {
     if (!cmsPreviewSelected || !cmsPreviewEdit || event.button !== 0) return;
     var r = cmsPreviewSelected.getBoundingClientRect(), current = cmsLayoutEntry(cmsPreviewSelected.getAttribute('data-ark-layout-key'));
@@ -493,9 +948,10 @@
     cmsSnapshotLayout();
     promoted.forEach(function (element) { if (!element.getAttribute('data-ark-layout-key')) element.setAttribute('data-ark-layout-key', ArkLayout.keyFor(element, host)); });
     var id = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), members = promoted.map(function (element) { return element.getAttribute('data-ark-layout-key'); });
-    cmsLayoutDraft = ArkLayout.group(cmsLayoutDraft, cmsRoutePath(), id, members, 'Group'); ArkLayout.apply(host, cmsRoutePath(), window.innerWidth, cmsLayoutDraft);
+    var groupScope = cmsScopeOfAll(promoted);
+    cmsLayoutDraft = ArkLayout.group(cmsLayoutDraft, groupScope, id, members, 'Group'); ArkLayout.apply(host, cmsRoutePath(), window.innerWidth, cmsLayoutDraft);
     cmsPreviewSelected = host.querySelector('[data-ark-layout-group="' + id + '"]'); cmsPreviewSelections = cmsPreviewSelected ? [cmsPreviewSelected] : [];
-    window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: { operation: 'group', route: cmsRoutePath(), id: id, members: members, label: 'Group' }, selection: cmsPreviewSelected && cmsSelectionInfo(cmsPreviewSelected), selections: cmsSelectionPayload(), groups: cmsGroupList(), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
+    window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: { operation: 'group', route: groupScope, id: id, members: members, label: 'Group' }, selection: cmsPreviewSelected && cmsSelectionInfo(cmsPreviewSelected), selections: cmsSelectionPayload(), groups: cmsGroupList(), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
     placeCmsLayoutUi(); emitCmsLayoutSelection();
   }
   function cmsUngroupSelection() {
@@ -574,7 +1030,11 @@
      same mutation being recomputed independently in two places. */
   function cmsComponentsCommand(data) {
     if (!window.ArkComponents || !cmsPreviewQuery) return;
-    var route = (data && data.route) || cmsRoutePath(), draft = cmsComponentsDraft;
+    /* `route` is the scope a new instance is stored under -- the place it goes decides it (an
+       instance after a header link is the header's, on every route); the mutators below find an
+       existing instance in its own scope from the route shown. Rendering is always for `page`. */
+    var page = cmsRoutePath(), route = (data && data.route) || page, draft = cmsComponentsDraft;
+    if (data.action === 'insert-instance') route = cmsScopeOf(data.after ? cmsElementForKey(data.after) : cmsInsertAnchor(data.anchorId));
     if (data.action === 'create-master') draft = ArkComponents.createMaster(draft, data.id, data.resolver, data.props, data.label);
     else if (data.action === 'update-master') draft = ArkComponents.updateMaster(draft, data.id, data.patch);
     /* `after` (a layout key) instead of an anchor: insert right after that element, in a new
@@ -584,15 +1044,19 @@
     else if (data.action === 'set-override') draft = ArkComponents.setOverride(draft, route, data.anchorId, data.key, data.propPath, data.value);
     else if (data.action === 'remove-instance') draft = ArkComponents.removeInstance(draft, route, data.anchorId, data.key);
     else if (data.action === 'detach-instance') draft = ArkComponents.detachInstance(draft, route, data.anchorId, data.key, data.id);
-    else if (data.action === 'seed-state') draft = cmsSeedState(draft, route, data);
+    else if (data.action === 'seed-state') draft = cmsSeedState(draft, page, data);
     else return;
     /* a selected instance is rebuilt by the render below; keep it selected by its key */
     var refs = cmsSelectionRefs();
     cmsComponentsDraft = ArkComponents.define(draft);
-    ArkComponents.renderAll(host, route, cmsComponentsDraft);
+    ArkComponents.renderAll(host, page, cmsComponentsDraft);
     var reselected = refs.some(function (ref) { return ref.component; }) && cmsRestoreSelection(refs);
-    window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
+    window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, points: cmsInsertionPoints(), tree: cmsRealTree(host, page) }, location.origin);
     if (reselected) { placeCmsLayoutUi(); emitCmsLayoutSelection(); }
+  }
+  /* the [data-ark-insert] anchor `id` names on the route shown (the leaving page's never answers) */
+  function cmsInsertAnchor(id) {
+    return Array.prototype.find.call(host.querySelectorAll('[data-ark-insert]'), function (el) { return el.getAttribute('data-ark-insert') === id && (!window.ArkLayout || ArkLayout.inRoute(el, cmsRoutePath())); }) || null;
   }
   function cmsStamp() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
   function cmsComponentRoot(key) {
@@ -612,7 +1076,9 @@
   function cmsSelectionRefs() {
     /* every selected element, connected or not: a removed node still carries the attributes
        that identify it, so this also finds again what a remount already replaced */
-    return cmsPreviewSelections.filter(Boolean).map(function (element) { return { element: element, component: element.getAttribute('data-ark-component-key'), key: element.getAttribute('data-ark-layout-key') }; });
+    /* what the element says is read NOW, before the rebuild: a rebuild can empty the very node
+       (an unwrapped group wrapper reads '' afterwards) and then nothing would ever match it */
+    return cmsPreviewSelections.filter(Boolean).map(function (element) { return { element: element, component: element.getAttribute('data-ark-component-key'), key: element.getAttribute('data-ark-layout-key'), tag: element.tagName, text: element.textContent.trim() }; });
   }
   function cmsRestoreSelection(refs) {
     if (!refs.length) return false;
@@ -621,8 +1087,8 @@
        /chain); keys are now scoped to the page's own content and cannot (js/content/layout.js).
        The element a key finds is still only taken if it is the same kind of element saying the
        same thing: the remount rebuilt the page from a draft that may have changed it. */
-    var same = function (found, was) { return !!found && found.tagName === was.tagName && found.textContent.trim() === was.textContent.trim(); };
-    var byKey = function (ref) { var found = ref.key && cmsElementForKey(ref.key); return same(found, ref.element) ? found : null; };
+    var same = function (found, ref) { return !!found && found.tagName === ref.tag && found.textContent.trim() === ref.text; };
+    var byKey = function (ref) { var found = ref.key && cmsElementForKey(ref.key); return same(found, ref) ? found : null; };
     var next = refs.map(function (ref) { return (ref.component && cmsComponentRoot(ref.component)) || (ref.element.isConnected && ref.element) || byKey(ref) || null; })
       .filter(function (element, i, all) { return element && element.isConnected && all.indexOf(element) === i; });
     cmsPreviewSelections = next; cmsPreviewSelected = next[next.length - 1] || null;
@@ -635,14 +1101,15 @@
      Only when state 0 has no text at all (an image) does it fall back to a typed Text block. */
   function cmsSeedState(draft, route, data) {
     if (!window.ArkStates || !data.groupId || !data.id || !data.key) return draft;
-    var group = cmsStatesDraft.routes[route] && cmsStatesDraft.routes[route][data.groupId];
+    var group = ArkStates.groupFor(cmsStatesDraft, route, data.groupId);
     var members = group ? group.states[0].members.map(cmsElementForKey).filter(Boolean) : [];
     var label = String(data.label || 'New state'), anchorId = ArkStates.anchorId(data.groupId, data.index);
     var starter = ArkComponents.starterFrom(members, label);
     draft = starter
       ? ArkComponents.createMaster(draft, data.id, ArkComponents.CAPTURED, starter.props, label + ' · like state 0', starter.tree)
       : ArkComponents.createMaster(draft, data.id, 'RBLOCK_TEXT_V1', ArkComponents.starterProps('RBLOCK_TEXT_V1', label), label + ' · Text');
-    return ArkComponents.insertInstance(draft, route, anchorId, data.key, data.id);
+    /* the state's content lives where its group does: a header group's states show on every route */
+    return ArkComponents.insertInstance(draft, ArkStates.groupScope(cmsStatesDraft, route, data.groupId) || route, anchorId, data.key, data.id);
   }
   /* Why the current selection cannot become a component, or '' when it can -- every
      refusal says what to select instead. Content the runtime builds (an inserted block, a
@@ -674,14 +1141,14 @@
     elements.forEach(function (element) { if (!element.getAttribute('data-ark-layout-key')) element.setAttribute('data-ark-layout-key', ArkLayout.keyFor(element, host)); });
     var captured = ArkComponents.capture(elements);
     if (!captured) { window.parent.postMessage({ type: 'defxn-cms-preview-notice', message: 'Nothing in this selection can be rebuilt as a component: select text, links, images or the boxes around them (a canvas is painted by page code and cannot be captured).' }, location.origin); return; }
-    var route = cmsRoutePath(), stamp = cmsStamp(), masterId = 'm' + stamp, spotId = 'spot-' + stamp, key = 'i' + stamp;
+    var route = cmsRoutePath(), scope = cmsScopeOfAll(elements), stamp = cmsStamp(), masterId = 'm' + stamp, spotId = 'spot-' + stamp, key = 'i' + stamp;
     var keys = elements.map(function (element) { return element.getAttribute('data-ark-layout-key'); });
     var firstSlot = ArkComponents.propsOf({ resolver: ArkComponents.CAPTURED, tree: captured.tree })[0];
     var label = (firstSlot && String(captured.props[firstSlot] || '').trim().slice(0, 40)) || elements[0].tagName.toLowerCase();
     if (elements.length > 1) label += ' + ' + (elements.length - 1) + ' more';
     var draft = ArkComponents.createMaster(cmsComponentsDraft, masterId, ArkComponents.CAPTURED, captured.props, label, captured.tree);
-    draft = ArkComponents.placeInstance(draft, route, spotId, keys[keys.length - 1], keys, key, masterId);
-    if (!draft.spots || !draft.spots[route] || !draft.spots[route][spotId]) { window.parent.postMessage({ type: 'defxn-cms-preview-notice', message: 'Could not place the component on this page.' }, location.origin); return; }
+    draft = ArkComponents.placeInstance(draft, scope, spotId, keys[keys.length - 1], keys, key, masterId);
+    if (!draft.spots || !draft.spots[scope] || !draft.spots[scope][spotId]) { window.parent.postMessage({ type: 'defxn-cms-preview-notice', message: 'Could not place the component on this page.' }, location.origin); return; }
     cmsComponentsDraft = ArkComponents.define(draft);
     ArkComponents.renderAll(host, route, cmsComponentsDraft);
     ArkLayout.annotate(host);
@@ -771,7 +1238,8 @@
     elements.forEach(function (element) { if (!element.getAttribute('data-ark-layout-key')) element.setAttribute('data-ark-layout-key', ArkLayout.keyFor(element, host)); });
     var route = cmsRoutePath(), groupId = 'st' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
     var keys = elements.map(function (element) { return element.getAttribute('data-ark-layout-key'); });
-    cmsStatesDraft = ArkStates.define(ArkStates.createStateGroup(cmsStatesDraft, route, groupId, keys, 'self'));
+    /* stored in its members' scope: a state group of header elements works on every route */
+    cmsStatesDraft = ArkStates.define(ArkStates.createStateGroup(cmsStatesDraft, cmsScopeOfAll(elements), groupId, keys, 'self'));
     ArkStates.render(host, route, groupId, cmsStatesView(route), cmsComponentsDraft);
     window.parent.postMessage({ type: 'defxn-cms-preview-states-replace', states: cmsStatesDraft, showing: cmsStatesShowingFor(route), route: route, groupId: groupId, created: true, tree: cmsRealTree(host, route) }, location.origin);
     emitCmsLayoutSelection();
@@ -784,7 +1252,7 @@
   function cmsReconcileSelection(route, groupId) {
     var selected = cmsSelectionList();
     if (!selected.length || selected.every(cmsIsShown)) return false;
-    var group = cmsStatesView(route).routes[route] && cmsStatesView(route).routes[route][groupId];
+    var group = ArkStates.groupFor(cmsStatesView(route), route, groupId);
     var inGroup = function (element) { for (var node = element; node && node !== host; node = node.parentNode) if (node.getAttribute && node.getAttribute('data-ark-state-group') === groupId) return true; return false; };
     var kept = selected.filter(cmsIsShown);
     if (group && selected.some(function (element) { return !cmsIsShown(element) && inGroup(element); })) {
@@ -817,7 +1285,8 @@
      -- the model's `current` IS the default); it also shows that state. */
   function cmsStatesCommand(data) {
     if (!window.ArkStates || !cmsPreviewQuery || !data) return;
-    var route = (data && data.route) || cmsRoutePath(), draft = cmsStatesDraft, showKey = cmsStatesShowKey(route, data.groupId);
+    /* always the route shown: the mutators find a group in its own scope (the route's or SHELL's) */
+    var route = cmsRoutePath(), draft = cmsStatesDraft, showKey = cmsStatesShowKey(route, data.groupId);
     if (data.action === 'preview') {
       cmsShowState(route, data.groupId, data.index);
       cmsReconcileSelection(route, data.groupId);
@@ -911,7 +1380,7 @@
     if (!element) return;
     var resolvedKey = key || element.getAttribute('data-ark-layout-key');
     if (!resolvedKey) return;
-    var entry = ArkElementMotion.entryFor(cmsElementMotionDraft, cmsRoutePath(), resolvedKey) || ArkElementMotion.defaultEntry();
+    var entry = ArkElementMotion.entryFor(cmsElementMotionDraft, cmsScopeOf(element), resolvedKey) || ArkElementMotion.defaultEntry();
     var vec = ArkElementMotion.vectorFor(entry.direction);
     var base = getComputedStyle(element).transform;
     function offsetTransform(sign) {
@@ -942,10 +1411,16 @@
     try { window.dispatchEvent(new CustomEvent('ark-site-defaults-preview', { detail: ArkSiteDefaults.get() })); }
     catch (error) { if (window.console) console.error('[ark] settings defaults preview failed', error); }
   }
-  window.addEventListener('message', function (event) {
+  /* named so a state held back during an inline edit can be applied once it ends (cmsEndInline) */
+  function cmsOnMessage(event) {
     if (event.origin !== location.origin) return;
     var data = event.data;
     if (!data || typeof data !== 'object') return;
+    /* A new site while words are being typed would rebuild the element under the caret: hold the
+       latest one until the edit ends. The editor answers the final edit with a newer state anyway. */
+    if (data.type === 'defxn-cms-preview-state' && cmsInline && event.source === window.parent && cmsPreviewQuery) { cmsInline.pending = event; return; }
+    if (data.type === 'defxn-cms-preview-state') cmsCopyIndexCache = null;   /* new drafts: new words to bind */
+    if (data.type === 'defxn-cms-preview-lens' && event.source === window.parent && cmsPreviewQuery) { cmsSetLens(data.lens); return; }
     if (data.type === 'defxn-cms-preview-site-defaults' && event.source === window.parent && cmsPreviewQuery) { cmsPreviewSiteDefaults(data.settingsDefaults); return; }
     if (data.type === 'flux-chain-preview-theme' && data.theme) {
       if (!window.ArkTheme) return;
@@ -958,7 +1433,7 @@
     }
     if (data.type === 'defxn-cms-preview-mode' && event.source === window.parent && cmsPreviewQuery) {
       cmsPreviewEdit = data.mode !== 'live';
-      if (!cmsPreviewEdit) { cmsPreviewSelected = null; cmsPreviewSelections = []; } placeCmsLayoutUi();
+      if (!cmsPreviewEdit) { cmsEndInline(true); cmsHover(null); cmsPreviewSelected = null; cmsPreviewSelections = []; } placeCmsLayoutUi();
       return;
     }
     /* The Layers panel's eye icon targets a tree row, which is usually not whatever is
@@ -1011,7 +1486,7 @@
        the updated tree right away -- a label edit must feel instant, not wait for the next
        unrelated selection change to refresh the panel. */
     if (data.type === 'defxn-cms-preview-set-label' && event.source === window.parent && cmsPreviewQuery && data.key != null && window.ArkLayout) {
-      var labelRoute = data.route || cmsRoutePath();
+      var labelElement = cmsElementForKey(data.key), labelRoute = labelElement ? cmsScopeOf(labelElement) : (data.route || cmsRoutePath());
       cmsSnapshotLayout();
       cmsLayoutDraft = ArkLayout.setLabel(cmsLayoutDraft, labelRoute, data.key, data.label);
       window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: { route: labelRoute, key: data.key, operation: 'set-label', label: data.label },
@@ -1022,11 +1497,10 @@
        set-label above, plus the attribute applied to the live element at once, so the
        preview's DOM is what the public page will render after Save. */
     if (data.type === 'defxn-cms-preview-set-alt' && event.source === window.parent && cmsPreviewQuery && data.key != null && window.ArkLayout) {
-      var altRoute = data.route || cmsRoutePath();
+      var altElement = cmsElementForKey(data.key), altRoute = altElement ? cmsScopeOf(altElement) : (data.route || cmsRoutePath());
       cmsSnapshotLayout();
       cmsLayoutDraft = ArkLayout.setAlt(cmsLayoutDraft, altRoute, data.key, data.alt);
-      var altElement = cmsElementForKey(data.key);
-      if (altElement) ArkLayout.applyAlt(altElement, ArkLayout.altFor(cmsLayoutDraft, altRoute, data.key));
+      if (altElement) ArkLayout.applyAlt(altElement, ArkLayout.altFor(cmsLayoutDraft, cmsRoutePath(), data.key, altElement));
       window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: { route: altRoute, key: data.key, operation: 'set-alt', alt: data.alt },
         selection: cmsPreviewSelected && cmsSelectionInfo(cmsPreviewSelected), selections: cmsSelectionPayload(), groups: cmsGroupList(), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
       return;
@@ -1034,8 +1508,8 @@
     if (data.type === 'defxn-cms-preview-layout-reset' && event.source === window.parent && cmsPreviewQuery && cmsPreviewSelected && window.ArkLayout) {
       var resetInfo = cmsSelectionInfo(cmsPreviewSelected), reset = { route: resetInfo.route, key: resetInfo.key, breakpoint: data.breakpoint || resetInfo.breakpoint, reset: true };
       cmsSnapshotLayout();
-      cmsLayoutDraft = ArkLayout.remove(cmsLayoutDraft, reset.route, reset.key, reset.breakpoint); ArkLayout.apply(host, reset.route, window.innerWidth, cmsLayoutDraft); placeCmsLayoutUi();
-      window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: reset, selection: cmsSelectionInfo(cmsPreviewSelected), tree: cmsRealTree(host, reset.route) }, location.origin); return;
+      cmsLayoutDraft = ArkLayout.remove(cmsLayoutDraft, reset.route, reset.key, reset.breakpoint); ArkLayout.apply(host, cmsRoutePath(), window.innerWidth, cmsLayoutDraft); placeCmsLayoutUi();
+      window.parent.postMessage({ type: 'defxn-cms-preview-layout-change', patch: reset, selection: cmsSelectionInfo(cmsPreviewSelected), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin); return;
     }
     /* The complete CMS preview is deliberately accepted only inside an iframe
        opened with a preview query. It replaces the in-memory registries with
@@ -1079,20 +1553,25 @@
           entry.title = ArkSEO.pageTitle(entry.seoId, manifest ? manifest.title : entry.cmsFallbackTitle);
         }
       });
-      var refreshed = ArkUI.pageRouter && ArkUI.pageRouter.refresh ? ArkUI.pageRouter.refresh() : Promise.resolve();
+      /* the selection as it is BEFORE the remount rebuilds it (cmsSelectionRefs) */
+      var keptRefs = cmsSelectionRefs();
+      /* in place: a draft re-sent for the route this document shows is not a navigation (a route
+         change loads a new document), so it never plays the route-change transition -- that
+         flashed the canvas blank on every edit (regression: tests/page-router-refresh-in-place.cjs) */
+      var refreshed = ArkUI.pageRouter && ArkUI.pageRouter.refresh ? ArkUI.pageRouter.refresh({ inPlace: true }) : Promise.resolve();
       Promise.resolve(refreshed).then(function () {
         annotateCmsPreviewCopy(site.manifests);
         if (window.ArkLayout) ArkLayout.apply(host, cmsRoutePath(), window.innerWidth, cmsLayoutDraft);
         if (window.ArkComponents) ArkComponents.renderAll(host, cmsRoutePath(), cmsComponentsDraft);
         if (window.ArkStates) ArkStates.renderAll(host, cmsRoutePath(), cmsStatesView(cmsRoutePath()), cmsComponentsDraft);
-        var keptRefs = cmsSelectionRefs(), reselected = cmsRestoreSelection(keptRefs);
+        var reselected = cmsRestoreSelection(keptRefs);
         placeCmsLayoutUi();
         var ready = { type: 'defxn-cms-preview-ready', path: ArkUI.route.path(), groups: cmsGroupList(), points: cmsInsertionPoints(), showing: cmsStatesShowingFor(cmsRoutePath()), tree: cmsRealTree(host, cmsRoutePath()) };
         /* the selection as it is AFTER the remount (possibly none), so Studio's toolbar never edits a destroyed one */
         /* sameSelection: every selected element was found again. Its layout key can still differ
            (a remount renumbers the route's containers: path:div:1/div:2/... became div:7), so
            Studio is told it is the same selection rather than left to compare keys */
-        if (reselected) { ready.selection = cmsPreviewSelected && cmsSelectionInfo(cmsPreviewSelected); ready.selections = cmsSelectionPayload(); ready.sameSelection = cmsPreviewSelections.length === keptRefs.length; }
+        if (reselected) { ready.selection = cmsPreviewSelected && cmsSelectionInfo(cmsPreviewSelected); ready.selections = cmsSelectionPayload(); ready.sameSelection = cmsPreviewSelections.length === keptRefs.length; ready.content = cmsPreviewSelected ? cmsContentInfo(cmsPreviewSelected) : null; }
         window.parent.postMessage(ready, location.origin);
       }).catch(function (error) {
         window.parent.postMessage({ type: 'defxn-cms-preview-error', message: error.message }, location.origin);
@@ -1102,7 +1581,9 @@
       window.parent.postMessage({ type: 'defxn-cms-preview-error', message: error.message }, location.origin);
       if (window.console) console.error('[ark] CMS preview state failed', error);
     }
-  });
+  }
+  window.addEventListener('message', cmsOnMessage);
+  cmsInstallContentLens();
   /* In edit mode the exact public DOM remains visible and scrollable, but a
      click selects the manifest-backed element instead of following its link.
      Live mode removes this interception and behaves exactly like the site. */
@@ -1166,6 +1647,7 @@
     if (!cmsPreviewQuery || !cmsPreviewEdit || window.parent === window) return;
     if (event.target && event.target.closest && event.target.closest('[data-ark-studio-ui]')) return;
     if (window.ArkLayout) ArkLayout.annotate(host);
+    if (cmsPreviewLens === 'content' && !event.shiftKey && !event.metaKey && !event.ctrlKey && cmsContentClick(event)) return;
     var graphic = event.target && event.target.closest && event.target.closest('path,rect,circle,ellipse,line,polyline,polygon,svg,canvas,img,figure,picture,video');
     /* The last fallback, [data-ark-component-key], catches a click on a leaf that
        ArkLayout.annotate() never tags (RBLOCK_QUOTE_V1's <cite>, RBLOCK_DIVIDER_V1's bare
@@ -1209,7 +1691,7 @@
     /* advances what the group SHOWS, never the draft's saved default -- and tells the editor,
        whose "Showing" label otherwise kept naming the state from before the clicks
        (regression: tests/cms-states-preview-default.cjs) */
-    cmsShowState(route, groupId, ArkStates.advance(view, route, groupId).routes[route][groupId].current);
+    cmsShowState(route, groupId, ArkStates.groupFor(ArkStates.advance(view, route, groupId), route, groupId).current);
   }, true);
   document.addEventListener('contextmenu', function (event) {
     if (!cmsPreviewQuery || !cmsPreviewEdit || window.parent === window) return;
@@ -1223,7 +1705,7 @@
   }, true);
   document.addEventListener('pointerdown', function (event) { if (cmsContextMenu && !(event.target && event.target.closest && event.target.closest('.ark-studio-menu'))) setCmsContextMenuOpen(false); }, true);
   document.addEventListener('pointerdown', function (event) {
-    if (!cmsPreviewQuery || !cmsPreviewEdit || !cmsPreviewSelected) return;
+    if (!cmsPreviewQuery || !cmsPreviewEdit || !cmsPreviewSelected || cmsPreviewLens === 'content') return;
     var handle = event.target && event.target.closest && event.target.closest('.ark-studio-handle');
     if (handle) { beginCmsLayoutAction(event, handle.dataset.dir); return; }
     if (event.target && event.target.closest && event.target.closest('.ark-studio-label')) { beginCmsLayoutAction(event, 'move'); return; }
@@ -1282,12 +1764,21 @@
     if (!(event.metaKey || event.ctrlKey) || String(event.key).toLowerCase() !== 's' || window.parent === window) return false;
     event.preventDefault(); window.parent.postMessage({ type: 'defxn-cms-preview-save' }, location.origin); return true;
   }
+  /* Ctrl/Cmd+Z (Shift: redo) with focus in the canvas -- after an inline edit it always is: the
+     canvas history, the same one the header's undo/redo buttons drive. While typing, the
+     browser's own undo (the keydown listener below asks only when nothing is being typed). */
+  function cmsCanvasUndoKey(event) {
+    if (!(event.metaKey || event.ctrlKey) || String(event.key).toLowerCase() !== 'z') return false;
+    event.preventDefault(); if (event.shiftKey) cmsRedoLayout(); else cmsUndoLayout(); return true;
+  }
   document.addEventListener('keydown', function (event) {
     if (!cmsPreviewQuery || cmsForwardSaveShortcut(event)) return;
     if (!cmsPreviewEdit) return;
-    if (event.key !== 'Delete' && event.key !== 'Backspace') return;
     var active = document.activeElement, tag = (active && active.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select' || (active && active.isContentEditable)) return;
+    var typing = tag === 'input' || tag === 'textarea' || tag === 'select' || (active && active.isContentEditable);
+    if (!typing && cmsCanvasUndoKey(event)) return;
+    if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+    if (typing) return;
     if (!cmsPreviewSelected) return;
     event.preventDefault();
     cmsRemoveSelection();

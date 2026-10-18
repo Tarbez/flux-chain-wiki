@@ -12,9 +12,11 @@
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, ITEM_KINDS = A.ITEM_KINDS, singleDraftHandle = A.singleDraftHandle,
       status = A.status, selectStudio = A.selectStudio, $ = A.$, syncCmsPreview = A.syncCmsPreview,
-      renderList = A.renderList, renderEditor = A.renderEditor, reloadPreview = A.reloadPreview,
+      renderList = A.renderList, reloadPreview = A.reloadPreview,
       anyDirty = A.anyDirty, removeItemFile = A.removeItemFile, siteFromState = A.siteFromState,
       studioRoutes = A.studioRoutes, touch = A.touch, h = A.h, download = A.download;
+  /* the mounted form panels re-draw from the restored drafts (js/admin/panels.js) */
+  var refreshPanels = A.later('refreshPanels');
 
   /* STEP 1 CLEANUP: the dense-encoding "Versions" feature (encodeDense/namedTree/base32/
      cidOf/publish, and the "History" tab/#paneVer that showed it) is deleted with no
@@ -119,7 +121,7 @@
     state.versionPreviewSite = null; versionPreviewReturn = null;
     if (back && !back.live && state.live) $('mode').querySelector('[data-m="edit"]').click();
     syncCmsPreview(true);
-    if (back && back.kind !== state.kind) { state.kind = back.kind; renderList(); renderEditor(); reloadPreview(); }
+    if (back && back.kind !== state.kind) { state.kind = back.kind; renderList(); refreshPanels(); reloadPreview(); }
   }
   /* Restore = load the version as the current UNSAVED drafts. Nothing is written here; the next
      Save writes the files and records a new version naming this one (restoredFrom).
@@ -217,7 +219,7 @@
     if (state.secretIds.indexOf(state.secretCurrent) < 0) state.secretCurrent = state.secretIds[0] || null;
     pendingRestore = entry.hash;
     state.cmsSourceSite = siteFromState(); state.cmsRoutes = studioRoutes();
-    renderList(); renderEditor(); reloadPreview(); touch();
+    renderList(); refreshPanels(); reloadPreview(); touch();
     var message = 'Loaded version #' + entry.record.seq + ' as unsaved drafts. Save to make it current: it is recorded as a new version, and every version stays in the history.';
     if (removing.length) message += ' Save also removes ' + removing.length + ' file' + (removing.length === 1 ? '' : 's') + ' #' + entry.record.seq + ' never had (the history keeps them): ' + removing.join(', ') + '.';
     if (kept.length) message += ' Kept, as you chose (not in #' + entry.record.seq + '): ' + kept.join(', ') + '.';

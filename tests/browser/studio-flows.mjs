@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor } from './harness.mjs';
+import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'states,single,component,hide,motion,makecomp,points,statesui').split(',');
@@ -70,18 +70,22 @@ async function openEditor() {
   page.on('dialog', (d) => d.dismiss());
   await gotoEditor(page, ORIGIN);
   const app = await appFrame(page);
-  await app.click('#modeDesignBtn');
+  await setLens(app, 'design');   /* the Design lens: a canvas click selects and styles */
   const pv = await previewFrame(app);
   await waitForPreviewReady(app);
   return { page, app, pv, shot: (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') }) };
 }
-const routeRow = (app, route) => app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route + '$') }) }).first();
+/* a Pages-tree row's open button carries its path (js/admin/rail.js renderPages) */
+const routeRow = (app, route) => app.locator(`#pages .tree-open[data-path="${route}"]`).first();
 const toolbar = (app) => app.locator('#selToolbar');
 /* how a toolbar section is drawn (an icon in #selToolbar, its controls in the one popover
    #selToolbarPop) is known only to the shell helpers in ./harness.mjs; flows name a section */
 const section = openToolbarSection;
 const statesIn = (pv) => pv.evaluate(() => ArkStates.get());
-const onlyGroup = (states, route = '/') => { const groups = (states.routes[route]) || {}; const ids = Object.keys(groups); return ids.length === 1 ? Object.assign({ id: ids[0] }, groups[ids[0]]) : null; };
+/* every state group here is made of header elements, so it is stored under the persistent shell's
+   scope ('*', ArkLayout.SHELL: it works on every route; tests/layout-shell-scope.cjs) */
+const SHELL = '*';
+const onlyGroup = (states, route = SHELL) => { const groups = (states.routes[route]) || {}; const ids = Object.keys(groups); return ids.length === 1 ? Object.assign({ id: ids[0] }, groups[ids[0]]) : null; };
 const navLink = (frame, text) => frame.locator('header nav.header-core-links > a', { hasText: text }).first();
 /* what a visitor sees for one group: which state-0 members are displayed, which state anchors are */
 const visible = (frame, groupId) => frame.evaluate((id) => {
@@ -202,7 +206,7 @@ await flow('states', async () => {
     const saved = await until(() => { try { return onlyGroup(savedJson('states-data.js')); } catch { return null; } }, 'Ctrl+S with focus in the canvas did not write states-data.js');
     check(saved.states.length === 3 && /nav:1\/a:2$/.test(saved.trigger), 'saved group is wrong: ' + JSON.stringify(saved));
     const comps = savedJson('components-data.js');
-    check(Object.keys(comps.routes['/'] || {}).filter((a) => a.startsWith('state-' + saved.id)).length === 2, 'saved components lack the 2 state anchors');
+    check(Object.keys(comps.routes[SHELL] || {}).filter((a) => a.startsWith('state-' + saved.id)).length === 2, 'saved components lack the 2 state anchors (stored with their header group, under the shell scope)');
   });
   await step('reload: the editor preview still has the group', async () => {
     await page.close();

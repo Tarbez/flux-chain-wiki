@@ -33,6 +33,7 @@ function run(host) {
   const context = {
     host,
     cmsRoutePath: () => '/',
+    cmsScopeOf: () => '/',
     cmsLayoutBreakpoint: () => 'desktop',
     cmsLayoutEntry: () => ({}),
     cmsRectOf: (element) => element.getBoundingClientRect(),

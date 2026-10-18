@@ -2,7 +2,7 @@
    ADMIN EDITOR · SHARED STATE (js/admin/state.js)
    ---------------------------------------------------------------------
    Owns: `state`, the ONE object holding everything more than one editor file reads or
-   writes: which mode/kind/item is on screen, every draft and its saved JSON (the per-id
+   writes: the lens, the view and which item a form edits, every draft and its saved JSON (the per-id
    lists AND the single-object drafts: theme, settings defaults, SEO, mesh, layout,
    components, states, canvas transitions, element motion), the canvas preview's
    connection and selection, the open popover and toolbar section. And the dirty checks
@@ -26,14 +26,11 @@
      Each list holds ids; drafts[id] is the edited copy, saved[id] the JSON of the saved one
      (null: never saved). */
   var state = { ids: ArkManifestIds.slice(), drafts: {}, saved: {}, current: null, dir: null,
-                /* Step 3 (Design/Content mode switch, flickering-juggling-donut.md): mode is
-                   one level ABOVE kind. contentKind/designKind remember which kind to land on
-                   when re-entering each mode (so switching modes and back never loses a
-                   selection or an in-progress draft -- nothing is torn down, kind's own state
-                   -- state.current/aCurrent/etc. -- is untouched by a mode switch). mode starts
-                   'design' to match kind's own existing default ('studio'); see kindMode(). */
-                mode: 'design', contentKind: 'page', designKind: 'studio',
-                kind: 'studio', slugs: [], aDrafts: {}, aSaved: {}, aCurrent: null, cdirs: null,
+                /* kind: which item the open form edits (page | article | asset | secret | shape) --
+                   the Page fields sheet, the Media and Vault tabs, touch()/Revert/Delete all read
+                   it. It is not a screen: the canvas is always there (state.view picks Canvas /
+                   Sitemap / Theme, state.lens what a click on it edits). */
+                kind: 'page', slugs: [], aDrafts: {}, aSaved: {}, aCurrent: null, cdirs: null,
                 assetIds: ArkAssetIds.slice(), assetDrafts: {}, assetSaved: {}, assetCurrent: null, assetDir: null,
                 secretIds: ArkSecretIds.slice(), secretDrafts: {}, secretSaved: {}, secretCurrent: null, secretDir: null, secretPlaintext: {}, secretRecipientsText: {}, secretDecrypted: {},
                 shapeIds: [], shapeLabels: {}, shapeCurrent: null };
@@ -55,7 +52,7 @@
   /* Canvas-only mode's background transition (Part G, follow-up plan) -- a single
      site-wide settings file, same draft/saved/dirty shape as layout/components/states
      above. Its editing UI is the canvas-transitions popover on the header's Background
-     segment (#designBackgroundBtn), previewed on the canvas, but the actual persistence still goes through this exact
+     segment (#backgroundBtn), previewed on the canvas, but the actual persistence still goes through this exact
      draft-replace-then-save-on-next-Save-click pipeline: applyStudioCanvasTransitionsReplace
      keeps this in sync with every field edit Studio relays up, and saveEverything() (Step 5,
      flickering-juggling-donut.md -- superseded the old saveStudioChanges()) writes it the
@@ -96,6 +93,10 @@
   state.cmsSourceSite = null;
   /* the route the preview iframe was last pointed at (syncCmsPreview) */
   state.cmsPreviewRoute = '';
+  /* a route the canvas was asked for and could not open yet (an unsaved new page or article:
+     the router learns addresses from the saved files) -- opened by itself after the next Save
+     (js/admin/bridge.js routeRefused / reloadPreview) */
+  state.cmsWantedRoute = '';
   /* the preview's selection (js/main.js's cmsSelectionInfo()): the primary one, and all of them */
   state.cmsExactSelection = null;
   state.cmsExactSelections = [];
@@ -141,12 +142,25 @@
 
   /* ---- the canvas view ------------------------------------------------------------------
      device: the breakpoint edited (an index into DEVICES, js/admin/canvas.js); live: Live
-     (the page as a visitor uses it) instead of Edit; view: 'design' (the canvas) or 'map'
-     (the sitemap). Set by the header's controls (js/admin/header.js) and setView()
+     (the page as a visitor uses it) instead of Edit; view: 'design' (the canvas), 'map'
+     (the sitemap) or 'theme' (Theme & defaults docked beside the canvas, which stays live).
+     Set by the header's controls (js/admin/header.js) and setView()
      (js/admin/sitemap.js). */
   state.device = 0;
   state.live = false;
   state.view = 'design';
+
+  /* ---- the lens: what a click on the canvas edits --------------------------------------
+     'content' (the default when the editor opens: most edits are text) -- clicking text edits
+     the manifest/article field it is bound to, the toolbar shows the Content section; 'design'
+     -- the style toolbar, layers, groups, states, components. One canvas either way: the lens
+     is posted to the preview as defxn-cms-preview-lens (js/admin/bridge.js) and decides which
+     rail tab opens (railTab: the last tab used in each lens). Remembered per browser, a
+     convenience only (js/admin/nav.js setLens writes it). */
+  state.lens = 'content';
+  try { if (localStorage.getItem('defxn-cms-lens') === 'design') state.lens = 'design'; } catch (e) { /* storage blocked: the default */ }
+  state.railTab = { content: 'pages', design: 'layers' };
+  try { var savedTabs = JSON.parse(localStorage.getItem('defxn-cms-rail-tab') || 'null'); if (savedTabs && typeof savedTabs === 'object') Object.keys(state.railTab).forEach(function (lens) { if (typeof savedTabs[lens] === 'string') state.railTab[lens] = savedTabs[lens]; }); } catch (e) { /* storage blocked or garbled: the defaults */ }
 
   /* ---- what one file opens and another closes or reads ----------------------------------
      popEl/popAnchor: the open header popover and the control it hangs from (openPop/closePop,
@@ -198,27 +212,6 @@
     state.secretDrafts[id] = clone(secret); state.secretSaved[id] = JSON.stringify(secret);
   });
 
-  /* Step 3: which top-level mode a given state.kind belongs to. 'studio' (the visual canvas)
-     and 'design' (theme/settings-defaults) are Design mode's two sub-views; 'mesh' belongs to
-     NEITHER mode -- it is a persistent header-level action (publish/deploy status), never
-     editing, so visiting it must never change state.mode or state.contentKind/designKind.
-     Every other kind is Content mode. */
-  function kindMode(kind) { return kind === 'studio' || kind === 'design' ? 'design' : kind === 'mesh' ? null : 'content'; }
-  /* Keeps state.mode and the contentKind/designKind "what to land on when this mode is
-     re-entered" memory in sync with whatever state.kind actually is. Called from the top of
-     renderList() -- which every select()/selectArticle()/selectDesign()/selectStudio()/
-     setMode()/revert*()/delete*() call site already calls whenever state.kind changes -- so
-     this one spot covers all of them without touching any of those existing functions, and
-     runs before the nav re-renders so the mode switch and sub-switch below reflect the kind
-     that was just set, not the previous render's mode. 'mesh' updates neither (see
-     kindMode()): pressing Mesh must not silently change which mode you were in. */
-  function syncMode() {
-    var modeNow = kindMode(state.kind);
-    if (modeNow === 'content') state.contentKind = state.kind;
-    else if (modeNow === 'design') state.designKind = state.kind;
-    if (modeNow) state.mode = modeNow;
-  }
-
   function dirty(id) { return state.saved[id] === null || JSON.stringify(state.drafts[id]) !== state.saved[id] || (hasShape(id) && reliefDirty()); }
   function dirtyA(slug) { return state.aSaved[slug] === null || JSON.stringify(state.aDrafts[slug]) !== state.aSaved[slug]; }
   function dirtyI(id) { return state.assetSaved[id] === null || JSON.stringify(state.assetDrafts[id]) !== state.assetSaved[id]; }
@@ -242,5 +235,5 @@
       componentsDirty: componentsDirty, currentDirty: currentDirty, dirty: dirty, dirtyA: dirtyA,
       dirtyI: dirtyI, dirtyS: dirtyS, elementMotionDirty: elementMotionDirty, hasShape: hasShape,
       layoutDirty: layoutDirty, orphanShapeIds: orphanShapeIds, shapePageId: shapePageId, state: state,
-      statesDirty: statesDirty, syncMode: syncMode });
+      statesDirty: statesDirty });
 })();

@@ -1,11 +1,15 @@
 /* =====================================================================
    ADMIN EDITOR · LEFT RAIL (js/admin/rail.js)
    ---------------------------------------------------------------------
-   Owns: the structure rail beside the canvas -- the real Layers tree (from the
-   preview's cmsRealTree report), "Groups on this page", the Pages list with its
-   orphan flags (realLinkIndex), the Layers/Pages/Library tabs, and folding the rail.
-   Must not: walk anything but what the preview reported (state.cmsTree/cmsGroups) --
-   there is no second document tree here.
+   Owns: the one rail beside the canvas and its tabs -- Pages (the site tree: every page,
+   theory page, article and other route, with dirty dots, orphan flags from realLinkIndex,
+   and each row's Fields / Delete), Layers (the real tree from the preview's cmsRealTree
+   report, and "Groups on this page"), Library (js/admin/library.js draws it), Media and
+   Vault (mounted by js/admin/panels.js) -- which tab each lens opens, and folding the rail
+   (a drawer on a phone).
+   The Pages tab is where Content mode's sidebar list and the old Studio's Pages tab merged
+   (2026-10-18): one list of the site, and selecting a row shows that page on the canvas.
+   Must not: walk any element tree but what the preview reported (state.cmsTree/cmsGroups).
    ===================================================================== */
 (function () {
   'use strict';
@@ -13,7 +17,10 @@
   var state = A.state, $ = A.$, esc = A.esc, ic = A.ic, postCmsSetLabel = A.postCmsSetLabel,
       postCmsLayoutCommand = A.postCmsLayoutCommand, postCmsSelectKey = A.postCmsSelectKey,
       postCmsSelectGroup = A.postCmsSelectGroup, openRoute = A.openRoute, schedule = A.schedule,
-      layoutStage = A.layoutStage;
+      layoutStage = A.layoutStage, h = A.h, dirty = A.dirty, dirtyA = A.dirtyA, hasShape = A.hasShape;
+  /* defined by files loaded after this one: resolved when called */
+  var mountRailPane = A.later('mountRailPane'), openPageFields = A.later('openPageFields'),
+      select = A.later('select'), selectArticle = A.later('selectArticle'), deleteItem = A.later('deleteItem');
 
   /* =========================================================================
      Left rail: layers and pages
@@ -37,7 +44,7 @@
      indentation via paddingLeft, the collapsedLayers Set -- which already tolerates the real
      string keys used here just as well as the standalone numeric ids it was written for). */
   function renderConnectedLayers() {
-    const ul = $('layers'); if (ul.hidden) return; ul.textContent = '';
+    const ul = $('layers'); if ($('layersPane').hidden) return; ul.textContent = '';
     const isSelectedKey = (key) => (state.cmsExactSelection && state.cmsExactSelection.key === key) || state.cmsExactSelections.some((s) => s && s.key === key);
     const walk = (row, depth) => {
       const li = document.createElement('li');
@@ -113,40 +120,135 @@
     }
     return out;
   }
+  /* ---- Pages: the one site tree -------------------------------------------------------------
+     Groups derived from the drafts, in the manifests' own group order (ArkManifest.groups: the
+     site chrome, the pages, the theory pages), then the articles, then every other route the
+     site serves (a page module with no manifest: its words are in code, so it has no fields).
+     A row's main button shows its page on the canvas; Fields opens its whole form in the Page
+     fields sheet; Delete is offered where deleting is possible (theory pages, articles). */
+  const GROUP_NAMES = { site: 'Site chrome', page: 'Pages', theory: 'Theory pages' };
   function renderPages() {
-    const ul = $('pages'); if ($('pagesPane').hidden) return; ul.textContent = '';
+    const ul = $('pages'); if ($('pagesPane').hidden) return;
+    const keepFocus = ul.contains(document.activeElement) ? document.activeElement.dataset.row : null;
+    ul.textContent = '';
     const inbound = new Map(); for (const l of realLinkIndex()) if (l.ok && l.tgt !== l.src) inbound.set(l.tgt, (inbound.get(l.tgt) || 0) + 1);
-    const sorted = state.cmsRoutes.slice().sort((a, b) => a.path.localeCompare(b.path));
-    for (const route of sorted) {
-      const depth = Math.max(0, route.path.split('/').filter(Boolean).length - 1);
-      const li = document.createElement('li'); li.setAttribute('aria-selected', String(route.path === state.cmsCurrentRoute)); li.style.paddingLeft = 6 + depth * 14 + 'px';
-      const orphan = route.path !== '/' && !inbound.get(route.path);
-      li.innerHTML = `${ic(route.seoArticle ? 'article' : route.path === '/' ? 'home' : 'page')}<span class="nm"></span>${orphan ? '<span class="tag" style="color:var(--warn);border-color:currentColor" title="No page links here">orphan</span>' : ''}<span class="sub"></span>`;
-      li.querySelector('.nm').textContent = route.title || route.path; li.querySelector('.sub').textContent = route.path;
-      /* a row that opens a page is a button to the keyboard and to assistive tech too -- it was a
-         bare clickable <li>, unreachable by Tab (regression: tests/cms-pages-rows-are-buttons.cjs) */
-      li.setAttribute('role', 'button'); li.tabIndex = 0; li.title = 'Open ' + route.path + ' on the canvas';
-      li.addEventListener('click', () => openRoute(route.path));
-      li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRoute(route.path); } });
+    const covered = new Set();
+    const groupHead = (text, icon) => { const li = h('li', { class: 'side-group', 'data-icon': icon, role: 'presentation', text }); ul.appendChild(li); };
+    const row = (r) => {
+      covered.add(r.path);
+      const li = h('li', { class: 'tree-row', 'aria-selected': String(r.on) });
+      const open = h('button', { type: 'button', class: 'tree-open', 'data-row': r.key, 'data-item': r.fields ? r.fields.kind + ':' + r.fields.id : null, 'data-path': r.path, title: 'Open ' + r.path + ' on the canvas' });
+      open.innerHTML = `${ic(r.icon)}<span class="nm"></span><span class="sub"></span>`;
+      open.querySelector('.nm').textContent = r.title; open.querySelector('.sub').textContent = r.path;
+      open.addEventListener('click', r.onOpen);
+      li.appendChild(open);
+      if (r.orphan) li.appendChild(h('span', { class: 'tag orphan', role: 'img', 'aria-label': 'Orphan: no page links here', title: 'Orphan: no page links here', text: 'orphan' }));
+      if (r.dirty) li.appendChild(h('span', { class: 'dot', title: r.dirtyTitle || 'Unsaved changes' }));
+      const acts = h('span', { class: 'row-acts' });
+      if (r.fields) {
+        const f = h('button', { type: 'button', class: 'btn icon quiet row-act', 'aria-label': 'Fields of ' + r.title, title: 'Page fields: every field of ' + r.title });
+        f.innerHTML = ic('list', 'sm');
+        f.addEventListener('click', () => { r.onOpen(); openPageFields({ kind: r.fields.kind, id: r.fields.id, anchor: f }); });
+        acts.appendChild(f);
+      }
+      if (r.del) {
+        const d = h('button', { type: 'button', class: 'btn icon quiet row-act danger', 'aria-label': 'Delete ' + r.title, title: 'Delete ' + r.title + ' (asks first)' });
+        d.innerHTML = ic('trash', 'sm');
+        d.addEventListener('click', () => deleteItem(r.del.kind, r.del.id));
+        acts.appendChild(d);
+      }
+      li.appendChild(acts);
       ul.appendChild(li);
+    };
+    const orphanOf = (path) => path !== '/' && !inbound.get(path);
+    const groups = (window.ArkManifest && window.ArkManifest.groups) || ['site', 'page', 'theory'];
+    groups.forEach((group) => {
+      const ids = state.ids.filter((id) => state.drafts[id] && state.drafts[id].group === group);
+      if (!ids.length) return;
+      groupHead(GROUP_NAMES[group] || group, 'page');
+      ids.forEach((id) => {
+        const m = state.drafts[id];
+        row({ key: 'page:' + id, path: m.route || '/', title: m.title || id, icon: group === 'site' ? 'section' : m.route === '/' ? 'home' : 'page',
+          on: state.kind === 'page' && state.current === id && m.route === state.cmsCurrentRoute,
+          dirty: dirty(id), dirtyTitle: hasShape(id) ? 'Unsaved changes, including its images or shared shape tuning' : 'Unsaved changes',
+          orphan: group !== 'site' && orphanOf(m.route), fields: { kind: 'page', id }, del: group === 'theory' ? { kind: 'page', id } : null,
+          onOpen: () => { closeDrawer(); select(id); } });
+      });
+    });
+    if (state.slugs.length) groupHead('Articles', 'article');
+    state.slugs.forEach((slug) => {
+      const a = state.aDrafts[slug] || {}, path = '/learnings/' + slug;
+      row({ key: 'article:' + slug, path, title: a.title || slug, icon: 'article',
+        on: state.kind === 'article' && state.aCurrent === slug && path === state.cmsCurrentRoute,
+        dirty: dirtyA(slug), orphan: orphanOf(path), fields: { kind: 'article', id: slug }, del: { kind: 'article', id: slug },
+        onOpen: () => { closeDrawer(); selectArticle(slug); } });
+    });
+    const others = state.cmsRoutes.filter((r) => !covered.has(r.path)).sort((a, b) => a.path.localeCompare(b.path));
+    if (others.length) groupHead('Other pages', 'page');
+    for (const route of others) {
+      row({ key: 'route:' + route.path, path: route.path, title: route.title || route.path, icon: route.seoArticle ? 'article' : 'page',
+        on: route.path === state.cmsCurrentRoute, orphan: orphanOf(route.path),
+        onOpen: () => { closeDrawer(); openRoute(route.path); } });
     }
+    /* a row repainted under the keyboard keeps the focus (a dirty dot appearing re-draws the tree) */
+    if (keepFocus) { const again = ul.querySelector(`[data-row="${CSS.escape(keepFocus)}"]`); if (again) again.focus({ preventScroll: true }); }
   }
-  function showLeft(which) { $('tabLayers').setAttribute('aria-selected', String(which === 'layers')); $('tabPages').setAttribute('aria-selected', String(which === 'pages')); $('tabLib').setAttribute('aria-selected', String(which === 'lib')); $('layers').hidden = which !== 'layers'; $('pagesPane').hidden = which !== 'pages'; $('libPane').hidden = which !== 'lib'; schedule(); }
-  $('tabLib').addEventListener('click', () => showLeft('lib'));
-  $('tabLayers').addEventListener('click', () => showLeft('layers'));
-  $('tabPages').addEventListener('click', () => showLeft('pages'));
+  /* an edit anywhere changes a dirty dot: repaint the tree once per frame (js/admin/editor.js
+     announces every draft edit as `ark-cms-drafts`) */
+  let pagesQueued = false;
+  document.addEventListener('ark-cms-drafts', () => { if (pagesQueued) return; pagesQueued = true; requestAnimationFrame(() => { pagesQueued = false; renderPages(); }); });
 
-  /* The structure rail (Layers / Pages / Library) folds away so the canvas can take the full
-     width; remembered per browser, a convenience only. */
-  function setLeftRail(open) {
-    $('shell').classList.toggle('rail-closed', !open);
-    const b = $('btnLeftRail'); b.setAttribute('aria-pressed', String(open));
-    b.title = open ? 'Hide the Layers / Pages / Library panel' : 'Show the Layers / Pages / Library panel';
-    try { localStorage.setItem('defxn-studio-rail', open ? 'open' : 'closed'); } catch (e) {}
-    layoutStage();
+  /* ---- the tabs ---------------------------------------------------------------------------
+     Which tab each lens opens is remembered (state.railTab, per browser): Pages in the Content
+     lens and Layers in the Design lens until changed. */
+  const TABS = { pages: ['tabPages', 'pagesPane'], layers: ['tabLayers', 'layersPane'], lib: ['tabLib', 'libPane'], media: ['tabMedia', 'mediaPane'], vault: ['tabVault', 'vaultPane'] };
+  function showLeft(which, opts) {
+    if (!TABS[which]) which = 'pages';
+    for (const [key, ids] of Object.entries(TABS)) { $(ids[0]).setAttribute('aria-selected', String(key === which)); $(ids[0]).tabIndex = key === which ? 0 : -1; $(ids[1]).hidden = key !== which; }
+    if (!opts || opts.remember !== false) {
+      state.railTab[state.lens] = which;
+      try { localStorage.setItem('defxn-cms-rail-tab', JSON.stringify(state.railTab)); } catch (e) { /* a convenience only */ }
+    }
+    if (which === 'media' || which === 'vault') mountRailPane(which);
+    if (which === 'pages') renderPages();
+    schedule();
   }
-  $('btnLeftRail').addEventListener('click', () => setLeftRail($('shell').classList.contains('rail-closed')));
-  try { if (localStorage.getItem('defxn-studio-rail') === 'closed') { $('shell').classList.add('rail-closed'); $('btnLeftRail').setAttribute('aria-pressed', 'false'); } } catch (e) {}
+  for (const [key, ids] of Object.entries(TABS)) $(ids[0]).addEventListener('click', () => showLeft(key));
+  /* arrow keys move between the tabs (one tab stop) */
+  $('studioLeft').querySelector('.tabs').addEventListener('keydown', (e) => {
+    const keys = Object.keys(TABS), i = keys.findIndex((k) => $(TABS[k][0]) === document.activeElement);
+    if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+    e.preventDefault();
+    const next = keys[(i + (e.key === 'ArrowRight' ? 1 : keys.length - 1)) % keys.length];
+    showLeft(next); $(TABS[next][0]).focus();
+  });
+
+  /* ---- folding the rail -------------------------------------------------------------------
+     Wide: the rail folds away so the canvas takes the full width (remembered per browser, a
+     convenience only). Narrow (a phone, <= 860px): the rail is a drawer over the canvas, closed
+     until asked for, and closed again once a page is chosen. */
+  const narrow = window.matchMedia('(max-width: 860px)');
+  function syncRailButton() {
+    const open = narrow.matches ? $('shell').classList.contains('drawer-open') : !$('shell').classList.contains('rail-closed');
+    const b = $('btnLeftRail'); b.setAttribute('aria-pressed', String(open));
+    b.title = (open ? 'Hide' : 'Show') + ' the Pages / Layers / Library / Media / Vault panel';
+    $('railScrim').hidden = !(narrow.matches && open);
+  }
+  function setLeftRail(open) {
+    if (narrow.matches) $('shell').classList.toggle('drawer-open', open);
+    else {
+      $('shell').classList.toggle('rail-closed', !open);
+      try { localStorage.setItem('defxn-studio-rail', open ? 'open' : 'closed'); } catch (e) {}
+    }
+    syncRailButton(); layoutStage(); schedule();
+  }
+  function closeDrawer() { if (narrow.matches && $('shell').classList.contains('drawer-open')) setLeftRail(false); }
+  $('btnLeftRail').addEventListener('click', () => setLeftRail(narrow.matches ? !$('shell').classList.contains('drawer-open') : $('shell').classList.contains('rail-closed')));
+  $('railScrim').addEventListener('click', () => setLeftRail(false));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && narrow.matches && $('shell').classList.contains('drawer-open') && !state.popEl) setLeftRail(false); });
+  narrow.addEventListener('change', () => { $('shell').classList.remove('drawer-open'); syncRailButton(); layoutStage(); });
+  try { if (localStorage.getItem('defxn-studio-rail') === 'closed') $('shell').classList.add('rail-closed'); } catch (e) {}
+  syncRailButton();
   A.provide({ CMS_TAG_ICON: CMS_TAG_ICON, realLinkIndex: realLinkIndex, renderLayersPane: renderLayersPane,
-      renderPages: renderPages, showLeft: showLeft });
+      renderPages: renderPages, setLeftRail: setLeftRail, showLeft: showLeft });
 })();

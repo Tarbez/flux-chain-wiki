@@ -28,7 +28,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { copySite, startHost, fakeFolder, appFrame, previewFrame, scaled, gotoEditor } from './harness.mjs';
+import { openRailTab, routeRow, setLens, copySite, startHost, fakeFolder, appFrame, previewFrame, scaled, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const RUNS = args.includes('--runs') ? Number(args[args.indexOf('--runs') + 1]) : 6;
@@ -46,7 +46,7 @@ try {
   await gotoEditor(page, server.origin);
   const app = await appFrame(page);
   await app.waitForFunction(() => !!window.ArkAdminApp && typeof window.ArkAdminApp.designCheck === 'function', null, { timeout: scaled(30000) });
-  await app.click('#modeDesignBtn');
+  await setLens(app, 'design');   /* the Design lens: a canvas click selects and styles */
   const pv = await previewFrame(app);
 
   const reading = () => app.evaluate(() => window.ArkAdminApp.designCheck());
@@ -59,8 +59,8 @@ try {
     /* away to another route and straight back through the Pages tab: the preview reloads home and
        makes its entrance again, and the reading is asked for at once, before it is ready */
     if (i === 4) {
-      await app.click('#tabPages');
-      const row = (route) => app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route.replace(/[/]/g, '\\/') + '$') }) }).first();
+      await openRailTab(app, 'pages');
+      const row = (route) => routeRow(app, route);
       await row('/download').click();
       await pv.waitForFunction(() => window.ArkUI && ArkUI.route.path() === '/download', null, { timeout: scaled(15000) }).catch(() => {});
       await row('/').click();

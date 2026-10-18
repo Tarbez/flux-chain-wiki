@@ -1,6 +1,8 @@
 /* =====================================================================
    LAYOUT KEY STABILITY -- a saved per-element edit must land on the same
    element whatever the visitor did before arriving.
+   browser-timeout-ms: 5400000 (90 min before the load factor: every catalog route, every
+   history, two reference loads each, then the editor; scripts/run-browser-tests.mjs)
 
    Why this exists: every per-element edit the editor saves (ArkLayout frames,
    labels, alts and groups; ArkStates members and triggers; ArkComponents spots;
@@ -60,7 +62,11 @@
    saved edits to content a page rebuilds later (/stats re-renders its live
    tables) or reorders (/stats sorts its node list by live queries per second:
    a positional key names "the 4th row", whichever node that is). That is a
-   missing capability, not a key defect -- and not a pass.
+   missing capability, not a key defect -- and not a pass. Which content live
+   data places is derived, not listed: every route is loaded directly TWICE
+   with identical code, and an element whose key or surrounding order differs
+   between those two loads is placed by live data; a key it has elsewhere is
+   NOT BUILT too.
 
    Run by hand (needs Chromium; not part of scripts/run-tests.mjs):
      node tests/browser/layout-key-stability.mjs [--report] [--no-editor] [--keep]
@@ -74,7 +80,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { copySite, startHost, fakeFolder, appFrame, previewFrame, scaled, gotoEditor } from './harness.mjs';
+import { setLens, copySite, startHost, fakeFolder, appFrame, previewFrame, scaled, gotoEditor, reportNotBuilt } from './harness.mjs';
 import { settled } from './route-sweep.mjs';
 
 const CONCURRENCY = 4;
@@ -245,7 +251,7 @@ function compare(name, ref, got, target, report, failures) {
      still loading): counted, reported, not compared. */
   const sizes = (map) => { const out = new Map(); for (const [id] of map) { const sig = id.replace(/ #\d+$/, ''); out.set(sig, (out.get(sig) || 0) + 1); } return out; };
   const comparable = (a, b) => { const sa = sizes(a), sb = sizes(b); return (id) => { const sig = id.replace(/ #\d+$/, ''); return sa.get(sig) === sb.get(sig); }; };
-  const refByIdent = new Map(ref.map), refOrder = new Map(ref.map.map(([id, , order]) => [id, order])), differ = [], reordered = [], same = comparable(ref.map, got.map), liveIds = new Set(ref.liveIds || []);
+  const refByIdent = new Map(ref.map), refOrder = new Map(ref.map.map(([id, , order]) => [id, order])), differ = [], reordered = [], liveOrdered = [], same = comparable(ref.map, got.map), liveIds = new Set(ref.liveIds || []), liveOrder = new Set(ref.liveOrderIds || []);
   const liveSig = new Set([...liveIds].map((id) => id.replace(/ #\d+$/, '')));
   let seen = 0, live = 0;
   for (const [id, key, order] of got.map) {
@@ -253,7 +259,8 @@ function compare(name, ref, got, target, report, failures) {
     seen++;
     if (!same(id) || liveSig.has(id.replace(/ #\d+$/, ''))) { live++; continue; }
     if (refByIdent.get(id) === key) continue;
-    if (refOrder.get(id) !== order) reordered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
+    if (liveOrder.has(id)) liveOrdered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
+    else if (refOrder.get(id) !== order) reordered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
     else differ.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
   }
   if (differ.length) problems.push(`${differ.length} keys differ from the direct load:\n        ` + differ.slice(0, report ? differ.length : 3).join('\n        '));
@@ -267,6 +274,7 @@ function compare(name, ref, got, target, report, failures) {
      later. Reported on its own line with the evidence; never counted as ok. */
   const notBuilt = [];
   if (reordered.length) notBuilt.push(`${reordered.length} keys moved with content the page itself reordered (sibling order differs from the direct load), e.g. ${reordered[0]}`);
+  if (liveOrdered.length) notBuilt.push(`${liveOrdered.length} keys moved with content placed by live data (its place already differed between two direct loads with identical code; a positional key names the place, not the item), e.g. ${liveOrdered[0]}`);
   if (target) {
     /* Missing: a target element (by identity) without its override. Extra: an override on an element
        whose KEY was never saved -- judged by key, not identity, because an element's own text can be
@@ -292,6 +300,8 @@ function compare(name, ref, got, target, report, failures) {
   console.log(`${problems.length ? 'FAIL' : notBuilt.length ? 'NOT BUILT' : 'ok  '} ${name}  (${got.map.length} keyed, ${seen} matched${live ? `, ${live} in live groups` : ''})${problems.length || notBuilt.length ? '\n     ' + problems.concat(notBuilt).join('\n     ') : ''}`);
 }
 const notBuiltSeen = [];
+/* the verdict alone, for tests/layout-key-live-order.mjs */
+export { compare, notBuiltSeen };
 
 async function main() {
   const args = process.argv.slice(2), report = args.includes('--report');
@@ -313,6 +323,7 @@ async function main() {
 
     /* ---- phase 1: reference maps and targets, from direct loads */
     const refs = {}, targets = {};
+    const context2Page = async (route) => { const p = await wide.newPage(); await p.goto(base + route.path, { waitUntil: 'domcontentloaded' }); await settled(p, route.id); return p; };
     await pool(routes, CONCURRENCY, async (route) => {
       const page = await wide.newPage();
       try {
@@ -332,6 +343,17 @@ async function main() {
           for (const r of window.__lkFirst) if (now.get(r.el) !== r.id) { live.add(r.id); if (now.has(r.el)) live.add(now.get(r.el)); }
           return [...live];
         }, route.path);
+        /* Live ORDER: a second direct load of the same route, same code, same history. An
+           identity whose key (or surrounding order) differs between the two was put in that place
+           by live data, not by the code -- /stats sorts its nodes by live traffic, so "the 4th
+           row" is whichever node is 4th at load time (2 keys differed between a reference and a
+           history on 2026-10-18, reported as a key defect). Derived from the two loads, never
+           from a list of routes; such keys are NOT BUILT in every history, not failures. */
+        const again = await context2Page(route);
+        try {
+          const second = await reading(again, route.path), first = new Map(refs[route.path].map.map(([id, key, order]) => [id, key + '\n' + order]));
+          refs[route.path].liveOrderIds = second.map.filter(([id, key, order]) => first.has(id) && first.get(id) !== key + '\n' + order).map(([id]) => id);
+        } finally { await again.close(); }
       } catch (error) {
         failures.push({ name: `reference ${route.path}`, problems: [String(error.message).split('\n')[0]] });
         console.log(`FAIL reference ${route.path} (no histories run for it): ${String(error.message).split('\n')[0]}`);
@@ -403,12 +425,12 @@ async function main() {
       page.on('dialog', (d) => d.dismiss());
       await gotoEditor(page, base);
       const app = await appFrame(page);
-      await app.click('#modeDesignBtn');
+      await setLens(app, 'design');   /* the Design lens: a canvas click selects and styles */
       const pv = await previewFrame(app);
       await app.evaluate(() => { window.__lkReady = []; window.addEventListener('message', (e) => { if (e.data && e.data.type === 'defxn-cms-preview-ready') window.__lkReady.push(e.data.path); }); });
       await app.click('#tabPages');
       await app.waitForFunction(() => document.querySelectorAll('#pages li').length >= 20, null, { timeout: scaled(15000) });
-      const listed = new Set(await app.evaluate(() => [...document.querySelectorAll('#pages li .sub')].map((s) => s.textContent.trim())));
+      const listed = new Set(await app.evaluate(() => [...document.querySelectorAll('#pages .tree-open')].map((b) => b.dataset.path)));
       /* the preview opens on /, and picking the route it already shows reloads nothing: visit it last */
       const startPath = await pv.evaluate(() => ArkUI.route.path());
       for (const route of [...routes.filter((r) => r.path !== startPath), ...routes.filter((r) => r.path === startPath)]) {
@@ -416,7 +438,7 @@ async function main() {
         if (!listed.has(route.path)) { console.log(`skip ${name} (not in the Pages tab)`); continue; }
         try {
           await app.evaluate(() => { window.__lkReady.length = 0; });
-          await app.locator('#pages li').filter({ has: app.locator('.sub', { hasText: new RegExp('^' + route.path.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '$') }) }).first().click();
+          await app.locator(`#pages .tree-open[data-path="${route.path}"]`).first().click();
           await app.waitForFunction((p) => window.__lkReady.includes(p), route.path, { timeout: scaled(30000) });
           await settled(pv, route.id);
           compare(name, refs[route.path], await reading(pv, route.path), targets[route.path], report, failures);
@@ -431,9 +453,11 @@ async function main() {
     if (args.includes('--keep')) console.log(`kept the scratch site (with the probes' saved data) at ${root}`);
     else fs.rmSync(root, { recursive: true, force: true });
   }
-  if (notBuiltSeen.length) console.log(`\nNOT BUILT in ${notBuiltSeen.length} histories (${[...new Set(notBuiltSeen.map((n) => n.name.split('  ')[0]))].join(', ')}): saved edits do not follow content a page module rebuilds or reorders after the route settles. Not a key defect, and not a pass.`);
+  if (notBuiltSeen.length) reportNotBuilt(notBuiltSeen.length, `histories (${[...new Set(notBuiltSeen.map((n) => n.name.split('  ')[0]))].join(', ')}): saved edits do not follow content a page module rebuilds, reorders, or places by live data after the route settles. Not a key defect, and not a pass.`);
   if (failures.length) { console.log(`\n${failures.length} failing histories`); process.exit(1); }
-  console.log('\nPASS: every route keeps every layout key, and every saved edit lands on the element it was saved against, in every history.');
+  console.log(notBuiltSeen.length
+    ? '\nNo key defect: every other history keeps every layout key and lands every saved edit on its element; the NOT BUILT histories above are not passes.'
+    : '\nPASS: every route keeps every layout key, and every saved edit lands on the element it was saved against, in every history.');
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((error) => { console.error(error); process.exit(1); });

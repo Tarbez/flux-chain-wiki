@@ -87,6 +87,27 @@ function remount(markup) { host.innerHTML = markup; }
   assert.equal(run('cmsPreviewSelected'), null, 'a different element at the old key is not taken for the selection');
 }
 {
+  /* What identifies a selected element is read when the selection is remembered, BEFORE the
+     rebuild -- not after. A rebuild can empty the very node: ArkLayout.apply() used to unwrap
+     every group wrapper and build a new one, so a selected group in the never-remounted header
+     was an empty, detached <div> when the restore compared it (text '') with the rebuilt
+     wrapper (text 'Overview How it works'), and the selection was dropped -- the toolbar hid
+     under the Ungroup button (tests/browser/full-audit.mjs "layout group", 2026-10-18). */
+  remount('<nav><div data-ark-layout-key="group:g1"><a>Overview</a><a>How it works</a></div></nav>');
+  const wrapper = host.querySelector('[data-ark-layout-key="group:g1"]');
+  select(wrapper);
+  const refs = run('cmsSelectionRefs()');
+  /* the rebuild: the old wrapper is emptied and removed, a new one holds the same members */
+  const nav = wrapper.parentNode, links = Array.from(wrapper.children);
+  links.forEach((a) => nav.insertBefore(a, wrapper)); wrapper.remove();
+  const rebuilt = window.document.createElement('div'); rebuilt.setAttribute('data-ark-layout-key', 'group:g1');
+  nav.insertBefore(rebuilt, links[0]); links.forEach((a) => rebuilt.appendChild(a));
+  context.keptRefs = refs;
+  run('cmsRestoreSelection(keptRefs)');
+  assert.equal(run('cmsPreviewSelected'), rebuilt, 'the rebuilt group is selected again: its identity was read before the old wrapper was emptied');
+  remount(PAGE);
+}
+{
   /* no selection: nothing to report, so the ready message does not overwrite Studio's (empty) one */
   select();
   assert.equal(run('cmsRestoreSelection(cmsSelectionRefs())'), false);
@@ -94,8 +115,10 @@ function remount(markup) { host.innerHTML = markup; }
 
 /* wiring: the remount path restores before it reports, the report carries the selection, and
    Studio adopts it -- the end-to-end case is tests/browser/studio-flows.mjs `makecomp` */
+const remountPath = slice(main, 'var keptRefs = cmsSelectionRefs();', '}).catch(');
+assert(remountPath.indexOf('var keptRefs = cmsSelectionRefs();') < remountPath.indexOf('ArkUI.pageRouter.refresh'), 'the selection is remembered before the remount rebuilds it');
 const refresh = slice(main, "if (window.ArkStates) ArkStates.renderAll(host, cmsRoutePath(), cmsStatesView(cmsRoutePath()), cmsComponentsDraft);", '}).catch(');
-assert(/keptRefs = cmsSelectionRefs\(\), reselected = cmsRestoreSelection\(keptRefs\)/.test(refresh), 'the preview-state remount re-finds the selection');
+assert(/reselected = cmsRestoreSelection\(keptRefs\)/.test(refresh), 'the preview-state remount re-finds the selection');
 assert(refresh.indexOf('cmsRestoreSelection') < refresh.indexOf("type: 'defxn-cms-preview-ready'"), 'it is restored before the ready report is built (points depend on it)');
 assert(/ready\.selections = cmsSelectionPayload\(\)/.test(refresh), 'the ready report carries the selection as it is after the remount');
 const onReady = slice(admin, "if (event.data.type === 'defxn-cms-preview-ready') {", 'renderInspector();');

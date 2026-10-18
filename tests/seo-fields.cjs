@@ -54,7 +54,7 @@ assert.equal(ArkSEO.sanitize({ site: { llms: '0' } }).site.llms, 1, 'only the nu
    override in the page picker's popover, the site-wide fields in Theme & defaults. */
 assert.ok(/function renderPageSeoPop\([^)]*\) \{[\s\S]*?ArkSEO\.OVERRIDE_FIELDS/.test(admin), "the canvas's page-SEO popover builds its rows from ArkSEO.OVERRIDE_FIELDS");
 assert.ok(/function buildSiteSeoPanel\([^)]*\) \{[\s\S]*?ArkSEO\.SITE_FIELDS\.filter\(\(f\) => f\.group === 'site'\)[\s\S]*?ArkSEO\.SITE_FIELDS\.filter\(\(f\) => f\.group === 'ai'\)/.test(admin), 'Theme & defaults builds the site and AI-crawler rows from ArkSEO.SITE_FIELDS, both groups');
-assert.ok(/function renderDesignEditor\(\) \{[\s\S]*?buildSiteSeoPanel\(\)/.test(admin), 'Theme & defaults shows the site-wide SEO section');
+assert.ok(/function renderDesignEditor\(container\) \{[\s\S]*?buildSiteSeoPanel\(\)/.test(admin), 'Theme & defaults shows the site-wide SEO section');
 assert.ok(/function buildPageSeoPanel\([^)]*\) \{[\s\S]*?ArkSEO\.OVERRIDE_FIELDS/.test(admin), 'the Content-mode page SEO tab builds its rows from ArkSEO.OVERRIDE_FIELDS');
 assert.ok(!/const AI_BOTS\s*=/.test(admin), 'admin.js keeps no second AI-crawler list; it reads ArkSEO.AI_BOTS');
 for (const f of ArkSEO.OVERRIDE_FIELDS.concat(ArkSEO.SITE_FIELDS)) {

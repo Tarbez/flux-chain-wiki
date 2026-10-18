@@ -32,7 +32,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, openToolbarSection, toolbarKey, clickHeader, designView, openPageSeo, openSiteSeo, until as untilFor, waitForPreviewReady, waitForRouteReady, openRoute as openRouteInPreview, statusCount, waitForSave, gotoEditor } from './harness.mjs';
+import { openPageFields, setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, openToolbarSection, toolbarKey, clickHeader, designView, openPageSeo, openSiteSeo, until as untilFor, waitForPreviewReady, waitForRouteReady, openRoute as openRouteInPreview, statusCount, waitForSave, gotoEditor } from './harness.mjs';
 import { readProject, planWrite } from '../../scripts/lib/site-bundle.mjs';
 import { readIndexHtml, renderDocument, createLocalResources } from '../../api/lib/render-core.mjs';
 
@@ -76,7 +76,7 @@ async function openEditor() {
   page.on('dialog', (d) => d.dismiss());
   await gotoEditor(page, ORIGIN);
   const app = await appFrame(page);
-  await app.click('#modeDesignBtn');
+  await setLens(app, 'design');   /* the Design lens: a canvas click selects and styles */
   const pv = await previewFrame(app);
   await waitForPreviewReady(app);
   return { page, app, pv, shot: (name) => page.screenshot({ path: path.join(SHOTS, name + '.png') }) };
@@ -260,14 +260,13 @@ await flow('seo', async () => {
     check(!llms.includes('https://defxn.com/about)'), 'llms.txt still lists the hidden /about page');
     fs.writeFileSync(path.join(SHOTS, 'seo-robots.txt'), robots); fs.writeFileSync(path.join(SHOTS, 'seo-llms.txt'), llms);
   });
-  await step('Content mode: a page\'s own SEO tab has every per-page field, showing the saved values', async () => {
+  await step('Page fields: a page\'s own SEO tab has every per-page field, showing the saved values', async () => {
     const { app: a3, page: p3 } = await openEditor();
-    await a3.click('#modeContentBtn');
-    await a3.locator('#pageList button[data-id="about"]').click();
-    await a3.locator('[role="tab"]', { hasText: /^SEO$/ }).first().click();
+    const fieldsSheet = await openPageFields(a3, { page: 'about' });
+    await fieldsSheet.locator('[role="tab"]', { hasText: /^SEO$/ }).first().click();
     const fields = await a3.evaluate(() => ArkSEO.OVERRIDE_FIELDS.map((f) => f.key));
-    for (const key of fields) check(await a3.locator(`.seo-controls [data-seo-field="${key}"]`).count(), `the Content-mode page SEO tab has no control for ${key}`);
-    check((await pressed(a3, '.seo-controls [data-seo-field="noindex"]')) === 'Yes', 'the Content-mode SEO tab does not show the saved noindex for /about');
+    for (const key of fields) check(await a3.locator(`.seo-controls [data-seo-field="${key}"]`).count(), `the Page fields SEO tab has no control for ${key}`);
+    check((await pressed(a3, '.seo-controls [data-seo-field="noindex"]')) === 'Yes', 'the Page fields SEO tab does not show the saved noindex for /about');
     await p3.screenshot({ path: path.join(SHOTS, 'seo-07-content-mode-about.png') });
     await p3.close();
   });

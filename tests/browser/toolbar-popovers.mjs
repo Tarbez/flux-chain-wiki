@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarButton, toolbarAction, toolbarPopover, toolbarSections, toolbarKey, toolbarSectionIsOpen, openToolbarSection, until as untilFor, untilStable, waitForPreviewReady, nextFrames, animationsSettled, gotoEditor } from './harness.mjs';
+import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarButton, toolbarAction, toolbarPopover, toolbarSections, toolbarKey, toolbarSectionIsOpen, openToolbarSection, until as untilFor, untilStable, waitForPreviewReady, nextFrames, animationsSettled, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'paragraph,container,image,instance,states,narrow').split(',');
@@ -63,7 +63,7 @@ async function openEditor(width = 1280, height = 900) {
   page.on('dialog', (d) => d.dismiss());
   await gotoEditor(page, ORIGIN);
   const app = await appFrame(page);
-  await app.click('#modeDesignBtn');
+  await setLens(app, 'design');   /* the Design lens: a canvas click selects and styles */
   const pv = await previewFrame(app);
   await waitForPreviewReady(app);
   ({ P, DIV } = await heroKeys(pv));
@@ -221,14 +221,45 @@ await flow('paragraph', async () => {
     await app.click('#devName');
     await until(() => app.evaluate(() => !document.getElementById('selToolbar').hidden), 'the bar did not come back after the menu closed');
   });
+  await step('the popover follows its bar when the canvas moves on screen with nothing resized or scrolled', async () => {
+    /* The bar moves with the stage by CSS; the popover is position:fixed and placed from the bar's
+       on-screen box, so any move of the stage must re-place it. It used to be re-placed only on a
+       window resize, a canvas resize or a canvas scroll: after a 1280 -> 1100 px resize the stage
+       moved 40.7 px one frame later (the header's new height reaching the canvas) and the popover
+       followed only because the canvas also happened to shrink (measured 2026-10-18; this driver
+       passed only behind a fixed 500 ms sleep). Here the line above the stage grows, which moves
+       the stage and changes neither the canvas's size nor its scroll. */
+    await openToolbarSection(app, 'Typography');
+    const at = () => app.evaluate(() => {
+      const btn = document.querySelector('#selToolbar [data-section][aria-expanded="true"]').getBoundingClientRect(), pop = document.getElementById('selToolbarPop').getBoundingClientRect(), bar = document.getElementById('selToolbar').getBoundingClientRect(), wrap = document.getElementById('canvasWrap');
+      /* where the popover hangs off its button: the same offset across and the same gap to the bar */
+      return { dx: Math.round(pop.left - btn.left), gap: Math.round(pop.bottom <= bar.top + 1 ? bar.top - pop.bottom : pop.top - bar.bottom), barTop: Math.round(bar.top), canvas: [wrap.clientWidth, wrap.clientHeight, wrap.scrollTop, wrap.scrollLeft].join(',') };
+    });
+    const before = await at();
+    await app.evaluate(() => { document.querySelector('#designView .devlabel').style.paddingTop = '40px'; });
+    try {
+      /* re-placed in the frame the bar moved: read after frames have been drawn, never between a
+         style change and the next frame (under load a frame took ~180 ms, and two readings 120 ms
+         apart both came before it -- "stable", and stale) */
+      await nextFrames(app, 2);
+      const after = await untilStable(at, 'the bar or its popover kept moving after the stage moved');
+      check(after.canvas === before.canvas, `the canvas was resized or scrolled (${before.canvas} -> ${after.canvas}): this step must move the stage with neither`);
+      check(Math.abs(after.barTop - before.barTop - 40) <= 1, `the bar did not move with the stage: ${JSON.stringify({ before, after })}`);
+      check(after.dx === before.dx && after.gap === before.gap, `the popover stayed where the bar was: ${JSON.stringify({ before, after })}`);
+    } finally {
+      await app.evaluate(() => { document.querySelector('#designView .devlabel').style.paddingTop = ''; });
+      await page.keyboard.press('Escape');
+    }
+  });
   await step('a resize (new zoom) re-places the bar and its open popover beside the selection', async () => {
     await openToolbarSection(app, 'Typography');
     const gapBefore = (await byKey(pv, P).boundingBox()).y - (await app.locator('#selToolbar').boundingBox()).y;
     await page.setViewportSize({ width: 1100, height: 860 });
-    /* the bar and the element have stopped moving (the preview re-lays out at the new zoom) */
-    /* the popover too: the stage re-centres the bar by CSS at once, and the popover (fixed, outside
-       the zoomed stage) follows one stage re-layout later -- a reading between the two compared a
-       moved bar with a popover not yet re-placed (load 11-37, 2026-10-18; it passed after a 500 ms sleep) */
+    await nextFrames(app, 3);   /* the resize frame, the header's re-layout one frame later, and one drawn after it */
+    /* the bar, the element and the popover have stopped moving: the resize re-lays out the stage at
+       the new zoom, and one frame later the header's new height moves the stage down (40.7 px,
+       measured 2026-10-18); the popover follows the bar's own box (js/admin/canvas.js followBox,
+       the step above), so the last reading is after the final layout -- no sleep */
     const { el, bar } = await untilStable(async () => ({ el: await byKey(pv, P).boundingBox(), bar: await app.locator('#selToolbar').boundingBox(), pop: await app.locator('#selToolbarPop').boundingBox() }), 'the bar or its popover kept moving after the resize');
     check(bar.y < el.y && el.y - bar.y < gapBefore + 20, `the bar did not follow the selection: ${JSON.stringify({ el, bar, gapBefore })}`);
     await checkClear(app, pv, P, 'the paragraph after a resize');
@@ -314,14 +345,15 @@ await flow('states', async () => {
     await link('Overview').click({ button: 'right' });
     await pv.locator('.ark-studio-menu').waitFor({ state: 'visible' });
     await pv.locator('.ark-studio-menu button', { hasText: 'Make into states' }).first().click();
-    groupId = await until(() => pv.evaluate(() => { const g = (ArkStates.get().routes['/'] || {}); return Object.keys(g)[0]; }), 'no state group');
+    /* header links: the group is stored under the persistent shell's scope ('*', ArkLayout.SHELL) */
+    groupId = await until(() => pv.evaluate(() => { const g = (ArkStates.get().routes[ArkLayout.SHELL] || {}); return Object.keys(g)[0]; }), 'no state group');
     await until(() => toolbarSectionIsOpen(app, 'States'), 'the States popover did not open by itself after Make into states');
     check(await app.evaluate(() => document.querySelector('#selToolbar [data-name="States"]').classList.contains('identity')), 'the States icon has no identity mark');
     await animationsSettled(app); await shot('after-1280-states-autoopen');
   });
   await step('+ Add state adds a state in the preview, popover still open', async () => {
     await (await openToolbarSection(app, 'States')).locator('button', { hasText: '+ Add state' }).click();
-    await until(() => pv.evaluate((id) => ArkStates.get().routes['/'][id].states.length === 2, groupId), 'state 1 was not added');
+    await until(() => pv.evaluate((id) => ArkStates.get().routes[ArkLayout.SHELL][id].states.length === 2, groupId), 'state 1 was not added');
     await until(() => pv.evaluate(() => [...document.querySelectorAll('[data-ark-state-anchor]')].some((a) => a.getClientRects().length)), 'state 1 shows nothing');
     check(await toolbarButton(app, 'States').count(), 'the States icon is gone');
     await until(async () => /\(2\)/.test(await toolbarButton(app, 'States').getAttribute('aria-label')), 'the States icon does not count 2 states');

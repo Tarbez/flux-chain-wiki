@@ -1,57 +1,35 @@
 /* =====================================================================
-   STUDIO (Design mode) STYLES (Step 2 merge, 2026-10-17)
+   THE WORKSPACE (admin-app.html #studioRoot): rail, canvas, toolbar, sheet
    ---------------------------------------------------------------------
-   Ported from the old standalone admin-studio.html's <style> block with every
-   selector scoped under #studioRoot, so this sheet can live in the same
-   document as css/admin.css without any rule bleeding either way.
+   One workspace below the one header (2026-10-18, owner: "I only want to see ONE CMS,
+   unified."): the rail (Pages / Layers / Library / Media / Vault), the canvas (the only site
+   iframe), the Theme view's dock while that view is chosen, and the sheet -- one form panel
+   at a time, on demand, over the canvas's right edge. The id is the old Studio's, which was
+   Design mode's half of a two-app editor; every rule here is scoped under it so this sheet
+   can share the document with css/admin.css (also the sign-in gate's and broker.html's
+   sheet, which have no workspace).
 
-   ONE visual language (2026-10-18). This sheet used to carry a palette of
-   its own -- --bg/--panel/--sunk/--rule/--ink/--muted/--accent/--ok/--warn/
-   --danger/--override/--comp as hex, switched by prefers-color-scheme -- so
-   Design mode was a light app under a dark Content header. It now reads the
-   SDK semantic tokens and the editor's one alias block at the top of
-   css/admin.css (fonts, radii, shadows), and follows the palette on
-   html[data-theme] like every other surface. No colour literal is allowed
-   here (tests/admin-css-tokens.cjs). The mapping, so a reader of old Studio
-   code can translate:
-     --bg -> --canvas          --panel -> --surface (rail/status: --depth;
+   ONE visual language: every colour is an SDK semantic token read through the editor's one
+   alias block at the top of css/admin.css (fonts, radii, shadows); light and dark follow
+   html[data-theme] like every other surface. No colour literal is allowed here
+   (tests/admin-css-tokens.cjs). Names old Studio code used, for a reader translating it:
+     --bg -> --canvas   --panel -> --surface (rail/status: --depth; floating glass: --overlay)
      --sunk -> --nested (hover on glass) / --depth (recessed wells)
-                               floating glass: --overlay)
-     --rule -> --border-default (control edges) / --border-soft (dividers)
-     --ink -> --text (--text-strong for emphasis)   --muted -> --text-muted
-     --accent -> --accent      --accent-soft -> --accent-subtle
-     --accent-ink -> --text-inverse                 --ok -> --trust
-     --warn -> --warning       --danger -> --danger
-     --override, --comp -> --drift (both meant "overridden here")
-     --font-ui -> --sans       --font-data -> --mono
-   The file stays separate from css/admin.css because admin.css is also the
-   sign-in gate's (admin.html) and broker.html's sheet, which have no Studio.
-
-   Collisions with css/admin.css's unscoped rules, resolved here:
-     - the footer status bar is .studio-statusbar, not .status (admin.css's
-       .status is the header's status span; the id is renamed in
-       admin-app.html too, since two id="status" in one document is a bug).
-     - .btn and .shell are shared class NAMES. .btn is now deliberately ONE
-       button: admin.css paints it (border, surface, hover, primary, danger,
-       disabled) and this sheet only makes Studio's compact (smaller padding,
-       no 34px min-height, no transition). .shell keeps a shield against
-       admin.css's 3-column Content grid.
-   #studioRoot itself is a fixed overlay below the one app header. The offset
-   is the header's MEASURED height, --app-bar-h, not a constant: at 760px and
-   below css/admin.css lets the header wrap (measured 2026-10-18 in Chromium:
-   193px tall at 760px, 253px at 390px), and a hardcoded 58px there left
-   #studioRoot painted over the mode switch -- on a phone there was no way back
-   out of Design mode. js/admin/admin.js (trackAppBarHeight) publishes the
-   header's border-box height on <html> through a ResizeObserver; 58px is only
-   the pre-script fallback. Inside, the shell fills #studioRoot's own height.
-   tests/browser/header-reach.mjs checks it at 390/760/1280/1500px. */
+     --rule -> --border-default / --border-soft   --ink -> --text   --muted -> --text-muted
+     --ok -> --trust   --warn -> --warning   --override, --comp -> --drift
+     --font-ui -> --sans   --font-data -> --mono
+   Collisions with css/admin.css's unscoped rules, resolved here: the footer status bar is
+   .studio-statusbar (admin.css's .status is the header's status span), and .btn is ONE
+   button: admin.css paints it and this sheet only makes it compact.
+   #studioRoot is fixed below the one header. The offset is the header's MEASURED height,
+   --app-bar-h (js/admin/nav.js publishes it through a ResizeObserver): the header wraps below
+   ~1300px and a hardcoded offset once left the workspace painted over its controls. 58px is
+   only the pre-script fallback. tests/browser/header-reach.mjs checks it at 390/760/1280/1500px. */
 #studioRoot { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; z-index: 50; overflow: auto; overscroll-behavior: contain; }
-#studioRoot[hidden] { display: none; }
 #studioRoot .btn { min-height: 0; transition: none; }
-#studioRoot .shell { grid-template-columns: none; }
 
-/* Layout: tool shell. Left rail (layers, pages, library; collapsible) · canvas (design or sitemap) · status bar.
-   Its controls live in the one app header above #studioRoot (css/admin.css, "the one header").
+/* Layout: the rail (collapsible; a drawer on a phone) · the canvas (or the sitemap) · the Theme
+   dock while that view is chosen · the status bar. Its controls live in the one app header.
    Volume is turned down everywhere except the one thing that matters: the canvas. */
 #studioRoot, #studioRoot * { box-sizing: border-box; }
 #studioRoot [hidden] { display: none !important; }
@@ -72,27 +50,37 @@
 #studioRoot .btn { border-radius: var(--radius-md); padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 #studioRoot .btn.small { padding: 3px 8px; font-size: 12px; }
 
-/* workspace: the rail and the canvas; .rail-closed (the header's #btnLeftRail) gives the
-   canvas the full width */
-#studioRoot .work { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 0; }
-#studioRoot .live .work, #studioRoot .mapview .work, #studioRoot .rail-closed .work { grid-template-columns: minmax(0, 1fr); }
-#studioRoot .live .left, #studioRoot .live .ov-toolbar, #studioRoot .mapview .left, #studioRoot .mapview .ov-toolbar, #studioRoot .rail-closed .left { display: none; }
-/* Step 4 (flickering-juggling-donut.md): restrictMode (and its .canvas-mode/.anim-mode
-   layout-collapse classes) is retired outright -- canvas-transitions became a selection-
-   independent popover (reachable from #btnCanvasTransitions, above the canvas) and
-   element-motion folded into #selToolbar as one more accordion section, so there is no
-   longer a narrowed mode that needs the left rail given up or the right rail repurposed.
-   See the Step 4 comment in js/admin/admin.js for the fuller reasoning. */
-@media (max-width: 1100px) { #studioRoot .work { grid-template-columns: 216px minmax(0, 1fr); } }
-/* Single column below 860px: the canvas first, then the rail stacked under it; #studioRoot
-   scrolls as a whole. The rail keeps its own bounded scroll -- the real-site Layers tree is
-   thousands of rows, and unbounded it pushed everything after it ~24,000px down a phone's
-   #studioRoot scroll (measured at 390px, 2026-10-18). */
-@media (max-width: 860px) { #studioRoot .shell { height: auto; min-height: 100%; } #studioRoot .work { grid-template-columns: minmax(0, 1fr); } #studioRoot .left { border: 0 !important; border-top: 1px solid hsl(var(--border-soft)) !important; max-height: min(60vh, 560px); } #studioRoot .canvas-wrap { order: -1; max-height: calc(100vh - var(--app-bar-h, 58px) - 28px); } }
-/* the rail is the same surface as Content mode's page list (css/admin.css .pages): --depth */
-#studioRoot .left { background: hsl(var(--depth)); min-width: 0; overflow: auto; border-right: 1px solid hsl(var(--border-soft)); -webkit-user-select: none; user-select: none; }
+/* the rail and the canvas; .rail-closed (the header's #btnLeftRail) gives the canvas the full
+   width; the Theme view adds its dock as a third column, so the canvas beside it stays live */
+#studioRoot .work { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 0; }
+#studioRoot .themeview .work { grid-template-columns: 264px minmax(0, 1fr) minmax(340px, 440px); }
+#studioRoot .rail-closed .work, #studioRoot .live .work { grid-template-columns: minmax(0, 1fr); }
+#studioRoot .rail-closed.themeview .work, #studioRoot .live.themeview .work { grid-template-columns: minmax(0, 1fr) minmax(340px, 440px); }
+#studioRoot .live .left, #studioRoot .live .ov-toolbar, #studioRoot .mapview .ov-toolbar, #studioRoot .rail-closed .left { display: none; }
+@media (max-width: 1100px) {
+  #studioRoot .work { grid-template-columns: 228px minmax(0, 1fr); }
+  #studioRoot .themeview .work { grid-template-columns: 228px minmax(0, 1fr) minmax(300px, 380px); }
+}
+/* a phone (<= 860px): the canvas takes the whole width; the rail is a drawer over it, opened
+   from the header's rail button and closed by its scrim, Esc, or choosing a page; the Theme
+   dock covers the canvas while that view is chosen */
+@media (max-width: 860px) {
+  #studioRoot .work, #studioRoot .themeview .work, #studioRoot .rail-closed .work { grid-template-columns: minmax(0, 1fr); }
+  #studioRoot .left, #studioRoot .rail-closed .left { display: block; position: fixed; z-index: 46; top: var(--app-bar-h, 58px); bottom: 0; left: 0; width: min(320px, 86vw); border-right: 1px solid hsl(var(--border-default)); box-shadow: var(--shadow-pop); transform: translateX(-102%); visibility: hidden; transition: transform .18s ease, visibility 0s linear .18s; }
+  #studioRoot .drawer-open .left { transform: none; visibility: visible; transition: transform .18s ease; }
+  #studioRoot .live .left { display: none; }
+  #studioRoot .theme-dock { position: fixed; z-index: 44; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; border-left: 0; }
+  #studioRoot .canvas-wrap { padding: 10px 8px 32px; }
+}
+#studioRoot .rail-scrim { position: fixed; z-index: 45; top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; background: hsl(var(--canvas) / .55); }
+/* the rail is the editor's recessed surface: --depth */
+#studioRoot .left { background: hsl(var(--depth)); min-width: 0; overflow: auto; overscroll-behavior: contain; border-right: 1px solid hsl(var(--border-soft)); -webkit-user-select: none; user-select: none; }
+#studioRoot .left input, #studioRoot .left textarea { -webkit-user-select: text; user-select: text; }
 #studioRoot .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-bottom: 1px solid hsl(var(--border-soft)); position: sticky; top: 0; background: hsl(var(--depth)); z-index: 2; }
-#studioRoot .tabs button { border: 0; background: transparent; padding: 8px 4px; font-weight: 600; color: hsl(var(--text-muted)); border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; justify-content: center; }
+/* five tabs in a 228-264px rail: icon over a small label */
+#studioRoot .tabs button { border: 0; background: transparent; padding: 7px 2px 6px; font: 600 10.5px/1 var(--sans); letter-spacing: .01em; color: hsl(var(--text-muted)); border-bottom: 2px solid transparent; display: inline-flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; min-width: 0; }
+#studioRoot .tabs button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#studioRoot .tabs button:hover { color: hsl(var(--text-strong)); }
 #studioRoot .tabs button[aria-selected="true"] { color: hsl(var(--text-strong)); border-bottom-color: hsl(var(--accent)); }
 #studioRoot .list { list-style: none; margin: 0; padding: 6px; display: grid; }
 #studioRoot .list li { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: var(--radius-sm); cursor: pointer; border: 1px solid transparent; white-space: nowrap; min-width: 0; color: hsl(var(--text)); }
@@ -109,6 +97,67 @@
 #studioRoot .list li .layer-toggle::before { content: '›'; font: 700 16px/1 var(--sans); transform: rotate(90deg); transition: transform .12s ease; }
 #studioRoot .list li .layer-toggle[aria-expanded="false"]::before { transform: rotate(0); }
 #studioRoot .list li .layer-spacer { width: 16px; flex: none; }
+/* the Pages tab: the one site tree (js/admin/rail.js renderPages). A row is its open button
+   (name, path), its marks (orphan, unsaved dot) and its actions (Fields, Delete). */
+#studioRoot .rail-pane { padding-bottom: 12px; }
+#studioRoot .site-tree { gap: 1px; }
+#studioRoot .site-tree .side-group { padding: 0; cursor: default; }
+#studioRoot .site-tree .side-group:hover { background: transparent; }
+#studioRoot .site-tree .tree-row { padding: 0 4px 0 0; gap: 4px; }
+#studioRoot .tree-open { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 7px; padding: 6px 4px 6px 6px; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; text-align: left; }
+/* the name carries the row; the path (also the button's tooltip) shows on the selected row only */
+#studioRoot .tree-open .sub { display: none; max-width: 48%; }
+#studioRoot .tree-row[aria-selected="true"] .tree-open .sub { display: block; }
+#studioRoot .tree-row .dot { margin: 0 2px; }
+#studioRoot .tree-row .row-acts { display: inline-flex; gap: 1px; flex: none; }
+#studioRoot .tree-row .row-act { opacity: 0; width: 24px; height: 24px; padding: 0; display: inline-grid; place-items: center; border: 0; background: transparent; color: hsl(var(--text-muted)); }
+#studioRoot .tree-row .row-act:hover { background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
+#studioRoot .tree-row .row-act.danger:hover { color: hsl(var(--danger)); }
+#studioRoot .tree-row:hover .row-act, #studioRoot .tree-row:focus-within .row-act, #studioRoot .tree-row[aria-selected="true"] .row-act { opacity: 1; }
+@media (hover: none) { #studioRoot .tree-row .row-act { opacity: 1; } }
+/* "nothing links here": a quiet warning ring, its words in the title -- a list of loud tags
+   on half the theory pages read as errors */
+#studioRoot .tree-row .tag.orphan { flex: none; width: 8px; height: 8px; padding: 0; border: 1.5px solid hsl(var(--warning)); border-radius: 50%; font-size: 0; }
+/* a "New ..." disclosure under a list (css/admin.css .add-toggle), at the rail's size */
+#studioRoot .rail-pane > .add-toggle { margin: 6px 8px 0; }
+#studioRoot .rail-pane > .add-toggle summary { padding: 10px 2px; }
+#studioRoot .rail-pane > .add-toggle .new-form { padding: 0 2px 12px; }
+#studioRoot .rail-pane .new-row input { min-width: 0; padding: 6px 8px; }
+#studioRoot .panel-mount { padding: 10px; min-width: 0; }
+#studioRoot .panel-pending { padding: 4px 2px; }
+
+/* the Theme view's dock (#themeView): site-wide settings beside the live canvas */
+#studioRoot .theme-dock { min-width: 0; overflow: auto; overscroll-behavior: contain; background: hsl(var(--depth)); border-left: 1px solid hsl(var(--border-soft)); -webkit-user-select: text; user-select: text; }
+#studioRoot .theme-dock .panel-mount { padding: 16px 18px; }
+#studioRoot .theme-dock .panel-mount + .panel-mount { padding-top: 0; }
+
+/* THE sheet (#sheet): one form panel on demand -- a page's every field, or the Mesh status. It
+   overlays the canvas's right edge (the canvas keeps its width) as floating glass, below the
+   header, and is never open unless asked for (js/admin/panels.js). */
+#studioRoot .sheet { position: fixed; z-index: 30; top: calc(var(--app-bar-h, 58px) + 8px); right: 8px; bottom: 8px; width: min(480px, calc(100vw - 16px)); display: flex; flex-direction: column; background: hsl(var(--overlay) / .97); -webkit-backdrop-filter: blur(18px) saturate(1.2); backdrop-filter: blur(18px) saturate(1.2); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); -webkit-user-select: text; user-select: text; }
+#studioRoot .sheet-head { flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 12px 10px 10px 16px; border-bottom: 1px solid hsl(var(--border-soft)); }
+#studioRoot .sheet-titles { min-width: 0; display: grid; gap: 3px; }
+#studioRoot .sheet-kicker { font: 500 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+#studioRoot .sheet-head h2 { margin: 0; font: 600 15px/1.3 var(--sans); color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
+#studioRoot .sheet-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 14px 16px 24px; font-size: 13.5px; }
+/* the Versions panel (css/admin.css .versions-panel, min(420px, 100vw)) docks on the same edge:
+   the sheet sits to its left while it is open (on a phone, opening one closes the other) */
+@media (min-width: 861px) { body:has(#versionsPanel:not([hidden])) #studioRoot .sheet { right: calc(min(420px, 100vw) + 8px); } }
+@media (max-width: 860px) { #studioRoot .sheet { top: var(--app-bar-h, 58px); right: 0; bottom: 0; width: 100vw; border-radius: 0; border-width: 1px 0 0; } }
+/* the forms drawn in the rail, the dock and the sheet: compact cards; a form's sticky head
+   takes its container's own surface */
+#studioRoot .panel-mount fieldset, #studioRoot .sheet-body fieldset { padding: 14px 14px 16px; margin-bottom: 14px; }
+/* the form's head (its file path and Revert) stays at the sheet's top while its fields scroll:
+   flush with the scroll box's top edge (the body's own padding is above it) and opaque */
+#studioRoot .sheet-body .cms-form-head { top: -14px; margin-top: -14px; padding-top: 14px; background: hsl(var(--overlay)); }
+/* one sticky band is enough: the form's tabs scroll with the form (they were pinned 55px down,
+   under a head of another height, and fields showed through the gap) */
+#studioRoot .sheet-body .ark-tabs-list, #studioRoot .panel-mount .ark-tabs-list { position: static; }
+/* the sheet's own head already names the page: the form's head keeps its file path and Revert */
+#studioRoot .sheet-body .cms-form-head h2 { display: none; }
+#studioRoot .panel-mount .cms-form-head { background: hsl(var(--depth)); }
+/* in the rail the tab bar is the sticky band; a panel's head scrolls with it */
+#studioRoot .left .panel-mount .cms-form-head { position: static; }
 
 /* canvas */
 #studioRoot .canvas-wrap { min-width: 0; min-height: 0; overflow: auto; position: relative; padding: 14px 16px 40px; }

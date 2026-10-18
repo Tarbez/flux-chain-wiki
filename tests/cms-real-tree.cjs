@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const src = fs.readFileSync('js/main.js', 'utf8');
-const start = src.indexOf('  function cmsFrameFor(route, key) {');
+const start = src.indexOf('  function cmsFrameFor(route, key, element) {');
 const end = src.indexOf('  function cmsSelectionInfo(element) {');
 assert(start >= 0 && end > start, 'js/main.js still defines cmsFrameFor..setCmsLayoutFrameForKey together, right before cmsSelectionInfo');
 const extracted = src.slice(start, end);
@@ -42,6 +42,8 @@ function makeContext(cmsLayoutDraft) {
        per-breakpoint merge logic, which is covered on its own in tests/layout-content.cjs. */
     merged: (entry) => Object.assign({}, entry && entry.desktop),
     labelFor: (draft, route, key) => (draft.labels && draft.labels[route] && draft.labels[route][key]) || '',
+    /* the route's own entry only: these fixtures have no shell scope (tests/layout-shell-scope.cjs has) */
+    entryFor: (draft, route, key) => (draft.routes && draft.routes[route] && draft.routes[route][key]) || null,
   };
   vm.createContext(context);
   vm.runInContext(extracted, context);

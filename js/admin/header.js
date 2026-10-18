@@ -2,7 +2,7 @@
    ADMIN EDITOR · HEADER AND POPOVERS (js/admin/header.js)
    ---------------------------------------------------------------------
    Owns: the one app header's canvas controls -- page picker, breakpoints, Edit/Live,
-   undo/redo, the Design views (Canvas / Sitemap / Theme & defaults / Background) --
+   undo/redo, the views (Canvas / Sitemap / Theme, and the Background popover) --
    syncHeader() (which of them show), renderInspector() (the selection repaint: toolbar,
    undo/redo state, breakpoint note), and the one header popover (openPop/closePop/
    refreshPop/menu) every header control opens, including the background-transition
@@ -18,8 +18,8 @@
       postCmsCanvasTransitionsCommand = A.postCmsCanvasTransitionsCommand, ctlSegField = A.ctlSegField,
       CMS_CANVAS_EFFECTS = A.CMS_CANVAS_EFFECTS, ctlField = A.ctlField,
       CMS_CANVAS_EASINGS = A.CMS_CANVAS_EASINGS,
-      postCmsCanvasTransitionPreview = A.postCmsCanvasTransitionPreview, selectStudio = A.selectStudio,
-      selectDesign = A.selectDesign, layoutStage = A.layoutStage, schedule = A.schedule,
+      postCmsCanvasTransitionPreview = A.postCmsCanvasTransitionPreview,
+      layoutStage = A.layoutStage, schedule = A.schedule,
       postCmsPreviewMode = A.postCmsPreviewMode, undo = A.undo, redo = A.redo;
   /* defined by files loaded after this one: resolved when called */
   var setView = A.later('setView'), renderSelToolbar = A.later('renderSelToolbar');
@@ -77,7 +77,10 @@
   $('btnPage').addEventListener('click', (e) => openPop(e.currentTarget, (p) => {
     const h = document.createElement('h4'); h.textContent = 'Pages'; p.appendChild(h);
     const sorted = state.cmsRoutes.slice().sort((a, b) => a.path.localeCompare(b.path));
-    const actions = [{ icon: 'sitemap', label: 'Open the sitemap', run: () => setView('map') }];
+    /* "Open in a new tab" was Content mode's preview pane's "Open" link: the page as a visitor
+       loads it from the project (saved files, not these drafts) */
+    const actions = [{ icon: 'sitemap', label: 'Open the sitemap', run: () => setView('map') },
+      { icon: 'ext', label: 'Open this page in a new tab', hint: 'saved', run: () => window.open('index.html#' + state.cmsCurrentRoute, '_blank', 'noopener') }];
     menu(p, [...sorted.map((route) => ({ icon: route.seoArticle ? 'article' : route.path === '/' ? 'home' : 'page', label: route.title || route.path, hint: route.path, on: route.path === state.cmsCurrentRoute, run: () => openRoute(route.path) })), '-', ...actions]);
   }));
 
@@ -85,28 +88,25 @@
     renderSelToolbar();
     refuse($('btnUndo'), state.cmsLayoutCanUndo ? '' : 'Nothing to undo: no layout or style edit on the canvas yet.');
     refuse($('btnRedo'), state.cmsLayoutCanRedo ? '' : 'Nothing to redo: undo an edit first.');
-    const bn = $('bpNote'); bn.hidden = state.device === 0 || state.live || state.view !== 'design';
+    const bn = $('bpNote'); bn.hidden = state.device === 0 || state.live || state.view === 'map';
     bn.title = state.device ? `Editing ${DEVICES[state.device][0].toLowerCase()} overrides: changes apply at this size only` : '';
     bn.innerHTML = state.device ? `${ic('warn', 'sm')}<span class="bp-text">${DEVICES[state.device][0]} overrides</span>` : '';
   }
 
-  /* The one header's state (admin-app.html's #appBar): which Design view is pressed, and the
-     canvas-only groups -- page picker, page SEO, rail toggle, breakpoints, undo/redo, Design
-     check, Edit/Live -- shown only in Design -> Canvas, where they act on something. Called
-     from renderList() (every kind change) and setView() (canvas <-> sitemap); `headerReady`
-     holds it off until this block's own `let view` exists. */
+  /* The one header's state (admin-app.html's #appBar): which view is pressed, and the canvas
+     tools (breakpoints, undo/redo, Design check, Edit/Live), which show whenever a canvas is on
+     screen -- the Canvas view, and the Theme view, where the canvas stays live beside the
+     settings. The page picker, its fields and its SEO show in every view. Called from
+     renderList() (every draft change) and setView(). */
   function syncHeader() {
     if (!headerReady) return;
-    const studio = state.kind === 'studio', canvas = studio && state.view === 'design';
-    $('designCanvasBtn').setAttribute('aria-pressed', String(canvas));
-    $('designMapBtn').setAttribute('aria-pressed', String(studio && state.view === 'map'));
-    $('designThemeBtn').setAttribute('aria-pressed', String(state.kind === 'design'));
-    $('canvasNav').hidden = !canvas; $('canvasTools').hidden = !canvas;
-    if (!canvas && state.popEl && $('appBar').contains(state.popAnchor)) closePop();
+    for (const b of $('viewSwitch').querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === state.view));
+    $('canvasTools').hidden = state.view === 'map';
+    if (state.view === 'map' && state.popEl && $('canvasTools').contains(state.popAnchor)) closePop();
   }
 
   /* Canvas-transitions: site-wide, no selection involved, so it is reachable through a
-     small popover (the header's Background segment, #designBackgroundBtn, and js/main.js's
+     small popover (the header's Background segment, #backgroundBtn, and js/main.js's
      unconditional "Edit canvas" context-menu entry) instead of living in #selToolbar -- reusing
      openPop()'s own positioning rather than inventing a third system, per the plan's "your
      call on exact placement" for this one site-wide exception. No local re-render is wired
@@ -133,31 +133,26 @@
     hint.textContent = 'Previews instantly in the connected site above -- no page navigation. Save still writes it to the project like every other Studio edit.';
     pane.appendChild(hint);
   }
-  /* It previews on the real page, so it opens over the canvas: from Theme & defaults or the
-     sitemap, Background first brings the canvas back. A second press closes it. */
+  /* It previews on the real page, so it needs a canvas on screen: from the sitemap, Background
+     first brings the canvas back. A second press closes it. */
   function openCanvasTransitionsPopover() {
-    const anchor = $('designBackgroundBtn');
+    const anchor = $('backgroundBtn');
     if (state.popAnchor === anchor) { closePop(); return; }
-    if (state.kind !== 'studio') selectStudio();
-    if (state.view !== 'design') setView('design');
+    if (state.view === 'map') setView('design');
     openPop(anchor, renderCanvasTransitionsPopoverContent, 'left');
   }
-  $('designBackgroundBtn').addEventListener('click', openCanvasTransitionsPopover);
-  /* The header's Design views: Canvas and Sitemap are this canvas's two views (entering Studio
-     first when Theme & defaults is showing); Theme & defaults is the site-wide config editor.
-     Background is wired next to its popover (openCanvasTransitionsPopover). */
-  function showDesignView(v) { if (state.kind !== 'studio') selectStudio(); setView(v); }
-  $('designCanvasBtn').addEventListener('click', () => showDesignView('design'));
-  $('designMapBtn').addEventListener('click', () => showDesignView('map'));
-  $('designThemeBtn').addEventListener('click', () => selectDesign());
+  $('backgroundBtn').addEventListener('click', openCanvasTransitionsPopover);
+  /* The views of the one site: Canvas, Sitemap, Theme (setView, js/admin/sitemap.js). Background
+     is wired next to its popover (openCanvasTransitionsPopover). */
+  for (const b of $('viewSwitch').querySelectorAll('[data-view]')) b.addEventListener('click', () => setView(b.dataset.view));
 
-  $('devices').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; state.device = +b.dataset.d; for (const x of $('devices').children) x.setAttribute('aria-pressed', String(x === b)); if (state.view !== 'design') setView('design'); layoutStage(); schedule(); });
+  $('devices').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; state.device = +b.dataset.d; for (const x of $('devices').children) x.setAttribute('aria-pressed', String(x === b)); if (state.view === 'map') setView('design'); layoutStage(); schedule(); });
   $('mode').addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
     state.live = b.dataset.m === 'live'; for (const x of $('mode').children) x.setAttribute('aria-pressed', String(x === b));
     $('shell').classList.toggle('live', state.live); closePop();
     postCmsPreviewMode();
-    if (state.live && state.view !== 'design') setView('design');
+    if (state.live && state.view === 'map') setView('design');
     layoutStage(); schedule();
   });
   $('btnUndo').addEventListener('click', undo);

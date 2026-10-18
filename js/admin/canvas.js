@@ -14,7 +14,7 @@
       undo = A.undo, postCmsRemoveSelection = A.postCmsRemoveSelection;
   /* defined by files loaded after this one: resolved when called */
   var placeToolbarPop = A.later('placeToolbarPop'), setView = A.later('setView'),
-      closePop = A.later('closePop');
+      closePop = A.later('closePop'), pageFieldsFollow = A.later('pageFieldsFollow');
 
   /* =========================================================================
      Whole-document load / snapshot
@@ -37,7 +37,7 @@
   const stage = $('stage'), wrap = $('canvasWrap');
   let scale = 1;
   function layoutStage() {
-    if (state.kind !== 'studio' || state.view !== 'design') return;
+    if (state.view === 'map') return;   /* the canvas shows in the Canvas and Theme views */
     const avail = wrap.clientWidth - (state.live ? 0 : 32);
     const w = state.live && state.device === 0 ? avail : DEVICES[state.device][1];
     scale = state.live && state.device === 0 ? 1 : Math.min(1, avail / w);
@@ -70,7 +70,7 @@
     const base = rectOf(cmsPreview), r = infoRect || { x: 0, y: 0, width: 0, height: 0 };
     return { x: base.x + r.x, y: base.y + r.y, w: r.width, h: r.height };
   }
-  function selToolbarVisible() { return !state.live && state.view === 'design' && !state.cmsContextMenuOpen && !!(state.cmsExactSelection && state.cmsExactSelection.key); }
+  function selToolbarVisible() { return !state.live && state.view !== 'map' && !state.cmsContextMenuOpen && !!(state.cmsExactSelection && state.cmsExactSelection.key); }
   function placeSelToolbar() {
     const box = $('selToolbar');
     if (box.hidden) return;
@@ -110,17 +110,60 @@
     /* which side of the selection the bar took: its popover and tooltips open on the far side */
     box.dataset.side = top + bh <= r.y ? 'above' : 'below';
     placeToolbarPop();
+    followPopAnchor();
   }
   new ResizeObserver(() => layoutStage()).observe(wrap);
   wrap.addEventListener('scroll', () => placeSelToolbar(), { passive: true });
+  /* The bar sits in the stage's own coordinates and moves with it by CSS; its popover is
+     position:fixed (outside the zoomed stage, so it is never clipped by the canvas) and is
+     placed in VIEWPORT coordinates from the bar's on-screen box -- so it is only right for as
+     long as the bar stays where it was when the popover was placed. That box moves for reasons
+     no handler above sees. Measured 2026-10-18 at a 1280 -> 1100 px resize: the resize handler
+     placed both while #studioRoot still sat at the old header height; one frame later the
+     header's wrapped height reached it (js/admin/nav.js publishes --app-bar-h from its own
+     ResizeObserver) and the stage moved 40.7 px down. The popover followed only because the
+     canvas also happened to shrink, firing the observer above; a move that resizes nothing
+     (an ancestor scrolling, the line above the stage wrapping) left it 40 px behind its
+     button, and the toolbar-popovers driver passed only behind a fixed 500 ms sleep.
+     So while a popover is open, each frame compares the bar's on-screen box with the one the
+     popover was placed from, and re-places it in that same frame when it moved, whatever moved
+     it -- a rAF callback runs before the frame paints, so the popover is never drawn away from
+     its bar (an IntersectionObserver's notification is a task queued after the frame, one
+     frame late at best). It runs only while a popover is open (one getBoundingClientRect of
+     the bar, free while layout is clean) and stops when it closes.
+     Regression: tests/browser/toolbar-popovers.mjs "the popover follows its bar". */
+  let popWatch = 0, popPlacedFrom = '';
+  const barBox = () => { const r = $('selToolbar').getBoundingClientRect(); return [r.left, r.top, r.width, r.height].join(','); };
+  function watchPopAnchor() {
+    popWatch = 0;
+    if ($('selToolbarPop').hidden || $('selToolbar').hidden) { popPlacedFrom = ''; return; }
+    const now = barBox();
+    if (popPlacedFrom && now !== popPlacedFrom) placeToolbarPop();
+    popPlacedFrom = now;
+    popWatch = requestAnimationFrame(watchPopAnchor);
+  }
+  /* called after every placement: the popover was just placed from the bar as it is now */
+  function followPopAnchor() {
+    if ($('selToolbarPop').hidden || $('selToolbar').hidden) return;
+    popPlacedFrom = barBox();
+    if (!popWatch) popWatch = requestAnimationFrame(watchPopAnchor);
+  }
+  /* the bar is placed from its measured size: a new size places it again */
+  new ResizeObserver(() => placeSelToolbar()).observe($('selToolbar'));
 
   /* STEP 1 CLEANUP: the #btnAdd popover (sections/elements/live-data tiles) only ever
      inserted into the dense tree -- deleted with it. #btnAdd is already CSS-hidden when
      connected (.cms-connected #btnAdd{display:none}), so this leaves no dead button. */
+  /* Show a page on the canvas (the Theme view keeps its settings beside it; the sitemap gives way
+     to the canvas). The Page fields sheet follows the page (pageFieldsFollow, js/admin/panels.js). */
   function openRoute(path) {
-    if (!path || path === state.cmsCurrentRoute) { if (state.view !== 'design') setView('design'); return; }
+    if (state.view === 'map') setView('design');
+    if (!path || path === state.cmsCurrentRoute) return;
     state.cmsCurrentRoute = path;
-    if (state.view !== 'design') setView('design');
+    /* the canvas is about to show another page: a Design check asked for now waits for that
+       page's ready, not the one still on screen (the iframe is re-pointed on the next frame) */
+    state.cmsPreviewReady = false;
+    pageFieldsFollow(path);
     schedule();
   }
   /* STEP 1 CLEANUP: Export HTML / robots.txt-sitemap-llms.txt / Load sample / Start blank
@@ -138,13 +181,14 @@
     $('studioStatus').innerHTML = `<span><b>${state.cmsRoutes.length}</b> routes</span><span>${state.cmsCurrentRoute}</span><span>${state.cmsLayoutCanUndo ? 'undo available' : 'no undo'}</span>`;
   }
   document.addEventListener('keydown', (e) => {
-    if (state.kind !== 'studio') return;
     if (e.key === 'Escape' && state.popEl) { const a = state.popAnchor; closePop(); if (a) a.focus(); return; }
     const tag = (e.target.tagName || '').toLowerCase(), typing = tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable;
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
     if (mod && e.key.toLowerCase() === 'y' && !typing) { e.preventDefault(); redo(); return; }
-    if (typing || state.live || state.view !== 'design') return;
+    if (typing || state.live || state.view === 'map') return;
+    /* a key pressed in a form panel (the sheet, the Theme view, Media, Vault) is not about the canvas selection */
+    if (e.target.closest && e.target.closest('#sheet, #themeView, #mediaPane, #vaultPane, #pagesPane')) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); postCmsRemoveSelection(); }
   });
   window.addEventListener('resize', layoutStage);

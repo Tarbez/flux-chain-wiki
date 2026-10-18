@@ -31,7 +31,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor } from './harness.mjs';
+import { openPageFields, openRailTab, designView, SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
 const FLX = require('../../js/admin/vendor/flx-state-grammar.js');
@@ -86,8 +86,7 @@ const hashes = {};
 let homeAfterA = null, exportedFile = null;
 
 async function editEyebrow(text) {
-  await app.click('#modeContentBtn');
-  await app.click('#pageList button[data-id="home"]');
+  await openPageFields(app, { page: 'home' });
   const input = app.locator('#f-home-EYEBROW');
   await input.waitFor({ state: 'visible' });
   await input.fill(text);
@@ -100,7 +99,7 @@ const previewText = async () => {
 
 try {
   await step('connecting the project folder starts the history from the project as found', async () => {
-    /* #modeDesignBtn (what appFrame waits for) is static HTML: wait until admin.js has wired the page */
+    /* #lensDesignBtn (what appFrame waits for) is static HTML: wait until admin.js has wired the page */
     await until(() => app.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished starting', 30000);
     await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect', 30000)
@@ -207,7 +206,7 @@ try {
   const PNG = path.join(WORK, 'version-test.png'); /* 1x1 transparent PNG */
   fs.writeFileSync(PNG, Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64'));
   await step('a new page and a new image, saved, are version 5', async () => {
-    await app.click('#modeContentBtn');
+    await openRailTab(app, 'media');   /* the New image form is the Media panel's own */
     /* the app's own "New theory page" / "New image" forms (selecting the new page re-renders the nav, so each is submitted directly).
        Not an article: a new article's blueprint is refused by Save until its evidence/action fields are filled in. */
     await app.evaluate(() => { document.getElementById('newId').value = 'versiontest'; document.getElementById('newForm').requestSubmit(); });
@@ -286,10 +285,9 @@ try {
   /* ---- Preview shows site-wide settings-defaults, live and per version ---- */
   const docState = (frame) => frame.evaluate(() => ({ theme: document.documentElement.dataset.theme, motif: document.documentElement.dataset.motif, stored: localStorage.getItem('flux-chain-theme'), marker: window.__versionsMarker === 1 }));
   await step('an unsaved settings-defaults edit previews live, without a reload and without touching the visitor\'s own choice', async () => {
-    await app.click('#modeDesignBtn');
-    await app.click('#designThemeBtn');
+    await designView(app, 'theme');
     await app.locator('#defaults-theme').waitFor({ state: 'visible' });
-    const frame = await until(async () => { const f = await (await app.$('#frame')).contentFrame(); return f && await f.evaluate(() => !!document.querySelector('.site-settings')).catch(() => false) && f; }, 'the design preview never loaded');
+    const frame = await until(async () => { const f = await (await app.$('#cmsPreview')).contentFrame(); return f && await f.evaluate(() => !!document.querySelector('.site-settings')).catch(() => false) && f; }, 'the design preview never loaded');
     await until(async () => (await docState(frame)).theme === 'ghost', 'the design preview does not start on the saved default theme');
     await frame.evaluate(() => { window.__versionsMarker = 1; });
     const storedBefore = (await docState(frame)).stored;
@@ -330,8 +328,7 @@ try {
     hashes[8] = head().head;
     check(indexIds().indexOf('depth') > 0 && indexIds().indexOf('depth') < indexIds().length - 1, 'the fixture assumes "depth" sits mid-list: ' + indexIds().join());
     check(/concept\/depth/.test(rootFile('sitemap.xml')) && /concept\/depth/.test(rootFile('llms.txt')), 'the fixture assumes sitemap.xml and llms.txt list /concept/depth');
-    await app.click('#modeContentBtn');
-    await app.click('#pageList button[data-id="depth"]');
+    await openPageFields(app, { page: 'depth' });
     await app.locator('button', { hasText: /^Delete this page$/ }).click();
     const h = await until(() => { const x = head(); return x && x.seq === 9 && x; }, 'Delete did not record version 9 by itself (no Save was pressed)');
     check(!fs.existsSync(DEPTH) && !indexIds().includes('depth'), 'the page file or its index entry is still there');
@@ -435,8 +432,7 @@ try {
       check(!(await lockIsShared(A, B)), 'even two browser instances share the Web Lock; the no-lock case cannot be driven here');
     }
     const edit = async (X, text) => {
-      await X.frame.click('#modeContentBtn', CLICK);
-      await X.frame.click('#pageList button[data-id="home"]', CLICK);
+      await openPageFields(X.frame, { page: 'home' });
       const input = X.frame.locator('#f-home-EYEBROW');
       await input.waitFor({ state: 'visible', ...CLICK });
       await input.fill(text, CLICK);

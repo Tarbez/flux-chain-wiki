@@ -92,6 +92,21 @@ var ArkComponents = (function () {
 
   var ID = /^[a-z][a-z0-9_-]{0,79}$/i;
   var ROUTE = /^\/\S{0,299}$/;
+  /* The persistent shell's scope -- an instance placed in the header shows on every route
+     (js/content/layout.js, "scopes": ArkLayout.SHELL is the same '*'; repeated here so a draft
+     sanitizes without that file loaded, held equal by tests/layout-shell-scope.cjs). */
+  var SHELL = '*';
+  function isScope(route) { return route === SHELL || ROUTE.test(route || ''); }
+  /* An anchor id is unique, so the scope that holds it is the route's own or SHELL's: a caller
+     that names the route it shows finds an instance stored for every route too. */
+  function scopeHolding(draft, route, anchorId) {
+    if (draft.routes[route] && draft.routes[route][anchorId]) return route;
+    return draft.routes[SHELL] && draft.routes[SHELL][anchorId] ? SHELL : route;
+  }
+  function instancesAt(value, route, anchorId) {
+    var draft = sanitize(value), scope = scopeHolding(draft, route, anchorId);
+    return (draft.routes[scope] && draft.routes[scope][anchorId]) || [];
+  }
 
   function isPlainObject(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
   function okValue(v) { return (typeof v === 'string' && v.length <= 4000) || (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean'; }
@@ -234,7 +249,7 @@ var ArkComponents = (function () {
     });
     var rawRoutes = value && value.routes;
     if (isPlainObject(rawRoutes)) Object.keys(rawRoutes).slice(0, 500).forEach(function (route) {
-      if (!ROUTE.test(route)) return;
+      if (!isScope(route)) return;
       var rawAnchors = rawRoutes[route];
       if (!isPlainObject(rawAnchors)) return;
       var cleanAnchors = {};
@@ -253,7 +268,7 @@ var ArkComponents = (function () {
        content it replaced and show nothing in its place. */
     var rawSpots = value && value.spots, spots = {};
     if (isPlainObject(rawSpots)) Object.keys(rawSpots).slice(0, 500).forEach(function (route) {
-      if (!ROUTE.test(route) || !isPlainObject(rawSpots[route]) || !out.routes[route]) return;
+      if (!isScope(route) || !isPlainObject(rawSpots[route]) || !out.routes[route]) return;
       var clean = {};
       Object.keys(rawSpots[route]).slice(0, 50).forEach(function (anchorId) {
         if (!ID.test(anchorId) || !out.routes[route][anchorId]) return;
@@ -306,7 +321,7 @@ var ArkComponents = (function () {
 
   function insertInstance(value, route, anchorId, key, masterId) {
     var draft = sanitize(value);
-    if (!ROUTE.test(route || '') || !ID.test(anchorId || '') || !ID.test(key || '') || !draft.masters[masterId]) return draft;
+    if (!isScope(route) || !ID.test(anchorId || '') || !ID.test(key || '') || !draft.masters[masterId]) return draft;
     var anchors = draft.routes[route] || (draft.routes[route] = {});
     var list = anchors[anchorId] || (anchors[anchorId] = []);
     list.push({ key: key, masterId: masterId, overrides: {} });
@@ -327,6 +342,7 @@ var ArkComponents = (function () {
 
   function setOverride(value, route, anchorId, key, propPath, propValue) {
     var draft = sanitize(value);
+    route = scopeHolding(draft, route, anchorId);
     var list = draft.routes[route] && draft.routes[route][anchorId];
     var instance = list && list.find(function (item) { return item.key === key; });
     if (!instance) return draft;
@@ -337,6 +353,7 @@ var ArkComponents = (function () {
 
   function removeInstance(value, route, anchorId, key) {
     var draft = sanitize(value);
+    route = scopeHolding(draft, route, anchorId);
     var anchors = draft.routes[route], list = anchors && anchors[anchorId];
     if (!list) return draft;
     var kept = list.filter(function (item) { return item.key !== key; });
@@ -352,6 +369,7 @@ var ArkComponents = (function () {
      its one instance is gone. */
   function detachInstance(value, route, anchorId, key, newId) {
     var draft = sanitize(value);
+    route = scopeHolding(draft, route, anchorId);
     var list = draft.routes[route] && draft.routes[route][anchorId];
     var instance = list && list.find(function (item) { return item.key === key; });
     var master = instance && draft.masters[instance.masterId];
@@ -668,7 +686,7 @@ var ArkComponents = (function () {
     if (!host) return [];
     while (host.firstChild) host.firstChild.remove();
     var draft = sanitize(value !== undefined ? value : current);
-    var list = (draft.routes[route] && draft.routes[route][anchorId]) || [];
+    var list = (draft.routes[route] && draft.routes[route][anchorId]) || (draft.routes[SHELL] && draft.routes[SHELL][anchorId]) || [];
     var ctx = { mounts: [], emerge: [] }, built = [];
     list.forEach(function (instance) {
       var master = draft.masters[instance.masterId];
@@ -741,7 +759,13 @@ var ArkComponents = (function () {
      they used to be frozen at first annotate, and this relied on annotating first). */
   function syncSpots(root, route, draft) {
     if (!root || !root.querySelectorAll) return;
-    var spots = (draft.spots && draft.spots[route]) || {};
+    /* the route's own spots and SHELL's (spot ids are unique); a SHELL spot is placed only after
+       a shell element: ArkLayout.find() with SHELL as the route answers for the shell alone */
+    var spots = {}, scopeOfSpot = {};
+    [route, SHELL].forEach(function (scope) {
+      var own = (draft.spots && draft.spots[scope]) || {};
+      Object.keys(own).forEach(function (id) { if (!spots[id]) { spots[id] = own[id]; scopeOfSpot[id] = scope; } });
+    });
     var ids = Object.keys(spots), doc = root.ownerDocument || (typeof document !== 'undefined' ? document : null);
     /* the leaving page's spots and hidden originals are its own route's: left as they are */
     var mine = function (el) { return typeof ArkLayout === 'undefined' || !ArkLayout.inRoute || ArkLayout.inRoute(el, route); };
@@ -752,7 +776,7 @@ var ArkComponents = (function () {
       ids.forEach(function (id) {
         var spot = spots[id], anchor = elementsWithAttr(root, 'data-ark-spot').find(function (el) { return mine(el) && el.getAttribute('data-ark-insert') === id; });
         if (!anchor) {
-          var after = findByKey(root, spot.after, route);
+          var after = findByKey(root, spot.after, scopeOfSpot[id]);
           if (!after || !after.parentNode || !doc) return;                /* the page changed: render nothing, never throw */
           anchor = doc.createElement('div');
           anchor.setAttribute('data-ark-insert', id);
@@ -760,7 +784,7 @@ var ArkComponents = (function () {
           anchor.style.display = 'contents';
           after.parentNode.insertBefore(anchor, after.nextSibling);
         }
-        spot.replaces.forEach(function (key) { var el = findByKey(root, key, route); if (el) { el.setAttribute(REPLACED, id); hidden[key] = true; } });
+        spot.replaces.forEach(function (key) { var el = findByKey(root, key, scopeOfSpot[id]); if (el) { el.setAttribute(REPLACED, id); hidden[key] = true; } });
       });
     }
     elementsWithAttr(root, REPLACED).forEach(function (el) { if (mine(el) && !hidden[el.getAttribute('data-ark-layout-key')]) el.removeAttribute(REPLACED); });
@@ -784,7 +808,7 @@ var ArkComponents = (function () {
     define: define, get: get, sanitize: sanitize, serialize: serialize,
     createMaster: createMaster, updateMaster: updateMaster,
     insertInstance: insertInstance, placeInstance: placeInstance, setOverride: setOverride, removeInstance: removeInstance, detachInstance: detachInstance,
-    render: render, renderAll: renderAll, anchorsIn: anchorsIn,
+    render: render, renderAll: renderAll, anchorsIn: anchorsIn, instancesAt: instancesAt, SHELL: SHELL,
     capture: capture, starterFrom: starterFrom, buildNode: buildNode, propsOf: propsOf,
     resolvers: RESOLVERS.slice(), resolverProps: RESOLVER_PROPS, starterProps: starterProps, CAPTURED: CAPTURED,
     blocks: blocks, labelOf: labelOf

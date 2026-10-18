@@ -1,8 +1,8 @@
 /* =====================================================================
    ADMIN EDITOR · STUDIO ENTRY AND DRAFT RELAY (js/admin/studio.js)
    ---------------------------------------------------------------------
-   Owns: entering the visual canvas (selectStudio, renderStudioEditor), the real route
-   list it shows (studioRoutes), and the applyStudio*() receivers that fold an edit the
+   Owns: connecting the one canvas at startup (connectCanvas), the real route list it shows
+   (studioRoutes), and the applyStudio*() receivers that fold an edit the
    canvas preview computed (layout, components, states, canvas transitions, element
    motion) back into the drafts Save writes.
    Must not: compute an edit itself -- js/main.js inside the preview computes each one
@@ -11,11 +11,12 @@
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
-  var state = A.state, touch = A.touch, renderList = A.renderList, renderEditor = A.renderEditor,
-      reloadPreview = A.reloadPreview, select = A.select, siteFromState = A.siteFromState, toast = A.toast;
+  var state = A.state, touch = A.touch, siteFromState = A.siteFromState, toast = A.toast;
   /* defined by files loaded after this one: resolved when called */
   var schedule = A.later('schedule'), syncCmsPreview = A.later('syncCmsPreview'),
-      postCmsPreviewState = A.later('postCmsPreviewState'), layoutStage = A.later('layoutStage');
+      layoutStage = A.later('layoutStage'), setView = A.later('setView'),
+      setLens = A.later('setLens'), openPageFields = A.later('openPageFields'),
+      pageFieldsFollow = A.later('pageFieldsFollow');
 
   function studioRoutes() {
     var seen = Object.create(null), out = [];
@@ -105,63 +106,35 @@
      their own) now lives inside saveEverything() (js/admin/save.js), alongside the other 8 drafts
      (pages/articles/assets/secrets/mesh-relief/theme/settings-defaults/seo) it never
      covered at all -- one function, all 13 drafts, each saved and reported independently. */
-  function selectStudio() { state.kind = 'studio'; renderList(); renderEditor(); reloadPreview(); }
-  /* reached through the header's #designSubSwitch (Canvas / Sitemap), wired next to setView() */
+  /* The canvas is never torn down or re-entered: it is the workspace. These two names stay
+     because the Versions panel, the toolbar and the Library call them: "show the canvas" and
+     "edit this page's content". */
+  function selectStudio() { setView('design'); }
+  /* The toolbar's and the Library's "Open in Content": the Content lens, and this page's every
+     field in the Page fields sheet -- transient, so it closes when the canvas moves to another
+     page. (It used to switch to a second app, the Content CMS, and its own preview.) */
+  function openContentEditor() { setLens('content'); openPageFields({ transient: true }); }
 
-  /* =====================================================================
-     Studio's own UI (Step 2 merge, 2026-10-17): ported from the old
-     standalone admin-studio.html into this document's own scope -- since
-     2026-10-18 split by concern across js/admin/ (this file, bridge.js,
-     canvas.js, header.js, rail.js, toolbar-sections.js, toolbar.js,
-     library.js, sitemap.js, design-check.js). Every postCmsX function
-     (js/admin/bridge.js) still posts directly into the one real postMessage
-     boundary that stays (cmsPreview, the real-site preview iframe) -- only
-     the former Studio-document <-> editor hop is gone, replaced by direct
-     calls into applyStudioLayoutPatch/applyStudioComponentsReplace/etc. above.
-     ===================================================================== */
-  /* Content mode on the current page's own editor. Studio's header used to carry a "Content
-     CMS" button for this, a duplicate of the header's mode switch; the toolbar and Library
-     actions that still jump there call this directly. */
-  function openContentEditor() { select(state.current); }
-
-  /* Step 2 merge: the standalone/embedded boot branches above (and the
-     'defxn-studio-ready' handshake they used to end in) are deleted outright -- Studio is
-     now rendered in-process by renderStudioEditor() (below), which does the equivalent first-entry setup (cmsConnected/cmsSourceSite/
-     cmsRoutes/cmsCurrentRoute + the first layoutStage()/renderLayersPane()/renderInspector()/
-     renderPageBtn()/renderStatus() paint) the moment state.kind actually becomes 'studio',
-     instead of unconditionally at script-load time when there is nothing real to show yet
-     (loadBodies() has not necessarily resolved articles/manifests at that point). */
-
-  /* renderEditor()'s 'studio' branch (js/admin/editor.js): this used to inject a brand-new
-     <iframe src="admin-studio.html">, so every Studio-internal state (cmsSourceSite,
-     selection, device, view, etc.) reset on every visit and the real
-     connection only happened once that iframe announced itself ready
-     ('defxn-studio-load'/'defxn-studio-preview-state'). #studioRoot is now a static
-     part of this document instead, so Studio's own state persists across visits (a
-     side effect of removing the reload, not a regression); this function's only job
-     is to refresh cmsSourceSite/cmsRoutes from the latest drafts on every entry, and to
-     do the one-time first-connect setup (cmsCurrentRoute/undo-redo flags/the real
-     preview iframe's first load) exactly once. */
-  function renderStudioEditor() {
+  /* Connect the one canvas, once, when the drafts have loaded (js/admin/admin.js): the site
+     the preview renders (cmsSourceSite), the real routes, Home, and the first load of
+     #cmsPreview. Every later draft change reaches it through notifyPreviewState() /
+     reloadPreview() (js/admin/bridge.js). */
+  function connectCanvas() {
     state.cmsSourceSite = siteFromState();
     state.cmsRoutes = studioRoutes();
-    if (!state.cmsConnected) {
-      state.cmsConnected = true;
-      state.cmsCurrentRoute = (state.cmsRoutes.find(function (r) { return r.path === '/'; }) || state.cmsRoutes[0] || { path: '/' }).path;
-      state.cmsLayoutCanUndo = state.cmsLayoutCanRedo = false;
-      schedule();
-      syncCmsPreview(true);
-      toast(state.cmsRoutes.length + ' real DEFXN routes loaded.');
-    } else {
-      schedule();
-      postCmsPreviewState();
-    }
+    if (state.cmsConnected) return;
+    state.cmsConnected = true;
+    state.cmsCurrentRoute = (state.cmsRoutes.find(function (r) { return r.path === '/'; }) || state.cmsRoutes[0] || { path: '/' }).path;
+    state.cmsLayoutCanUndo = state.cmsLayoutCanRedo = false;
+    pageFieldsFollow(state.cmsCurrentRoute);   /* Home, not the site chrome that shares its route, is the page a form edits */
+    schedule();
+    syncCmsPreview(true);
     layoutStage();
   }
   A.provide({ applyStudioCanvasTransitionsReplace: applyStudioCanvasTransitionsReplace,
       applyStudioComponentsReplace: applyStudioComponentsReplace,
       applyStudioElementMotionReplace: applyStudioElementMotionReplace,
       applyStudioLayoutPatch: applyStudioLayoutPatch, applyStudioLayoutReplace: applyStudioLayoutReplace,
-      applyStudioStatesReplace: applyStudioStatesReplace, openContentEditor: openContentEditor,
-      renderStudioEditor: renderStudioEditor, selectStudio: selectStudio, studioRoutes: studioRoutes });
+      applyStudioStatesReplace: applyStudioStatesReplace, connectCanvas: connectCanvas,
+      openContentEditor: openContentEditor, selectStudio: selectStudio, studioRoutes: studioRoutes });
 })();

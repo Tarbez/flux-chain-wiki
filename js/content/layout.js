@@ -52,6 +52,22 @@ var ArkLayout = (function () {
     return !attr ? [] : attr === 'alt' ? ['alt'] : element.tagName.toLowerCase() === 'video' ? ['aria-label', 'aria-hidden'] : ['aria-label', 'aria-hidden', 'role'];
   }
 
+  /* ---- scopes: where a per-element edit is stored -------------------------------------
+     Every map below (routes, groups, labels, alts; and ArkStates.routes, ArkComponents.routes /
+     spots, ArkElementMotion.routes) is keyed by a SCOPE, then by layout key. A scope is a route
+     ('/about') for the content of that route's page, or SHELL for the persistent shell (header,
+     nav, background layers) that every route shows. An edit to a header link used to be stored
+     under whichever route the editor happened to be on, so it showed on that route only and the
+     header looked different on every other page. Which scope an element belongs to is decided by
+     structure (scopeOf: inside a page root or not), never by a list of selectors.
+     Data saved before SHELL existed keeps the route it was saved under and still applies there
+     (future law: a stored record is never rewritten); where both exist, SHELL wins field by field.
+     SHELL is '*' in every module that keys by scope (states.js, components.js, element-motion.js
+     repeat the one character so that sanitizing a draft never needs this file loaded; regression:
+     tests/layout-shell-scope.cjs holds them equal). */
+  var SHELL = '*';
+  function isScope(route) { return route === SHELL || (typeof route === 'string' && route[0] === '/' && route.length <= 300); }
+
   function finite(value, min, max) {
     value = Number(value);
     return Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : null;
@@ -88,7 +104,7 @@ var ArkLayout = (function () {
     var out = { version: 2, routes: {}, groups: {}, labels: {} }, routes = value && value.routes;
     if (!routes || typeof routes !== 'object') routes = {};
     Object.keys(routes).slice(0, 500).forEach(function (route) {
-      if (route[0] !== '/' || route.length > 300) return;
+      if (!isScope(route)) return;
       var nodes = routes[route]; if (!nodes || typeof nodes !== 'object') return;
       var cleanNodes = {};
       Object.keys(nodes).slice(0, 3000).forEach(function (key) {
@@ -101,7 +117,7 @@ var ArkLayout = (function () {
     });
     var groups = value && value.groups;
     if (groups && typeof groups === 'object') Object.keys(groups).slice(0, 500).forEach(function (route) {
-      if (route[0] !== '/' || route.length > 300 || !groups[route] || typeof groups[route] !== 'object') return;
+      if (!isScope(route) || !groups[route] || typeof groups[route] !== 'object') return;
       var cleanGroups = {};
       Object.keys(groups[route]).slice(0, 1000).forEach(function (id) {
         var raw = groups[route][id], members = raw && Array.isArray(raw.members) ? raw.members.filter(function (key) { return typeof key === 'string' && key && key.length <= 500; }).slice(0, 200) : [];
@@ -116,7 +132,7 @@ var ArkLayout = (function () {
        and the 120-char cap mirrors group()'s own label field below. */
     var labels = value && value.labels;
     if (labels && typeof labels === 'object') Object.keys(labels).slice(0, 500).forEach(function (route) {
-      if (route[0] !== '/' || route.length > 300 || !labels[route] || typeof labels[route] !== 'object') return;
+      if (!isScope(route) || !labels[route] || typeof labels[route] !== 'object') return;
       var cleanLabels = {};
       Object.keys(labels[route]).slice(0, 3000).forEach(function (key) {
         if (!key || key.length > 500 || typeof labels[route][key] !== 'string') return;
@@ -132,7 +148,7 @@ var ArkLayout = (function () {
        no alt overrides serializes byte-for-byte as it did before this field existed. */
     var alts = value && value.alts, cleanAlts = {};
     if (alts && typeof alts === 'object') Object.keys(alts).slice(0, 500).forEach(function (route) {
-      if (route[0] !== '/' || route.length > 300 || !alts[route] || typeof alts[route] !== 'object') return;
+      if (!isScope(route) || !alts[route] || typeof alts[route] !== 'object') return;
       var routeAlts = {};
       Object.keys(alts[route]).slice(0, 3000).forEach(function (key) {
         if (!key || key.length > 500 || typeof alts[route][key] !== 'string') return;
@@ -285,6 +301,41 @@ var ArkLayout = (function () {
     var page = pageOf(element), pageRoute = page && routeOfPage(page);
     return !page || !pageRoute || pageRoute === route;
   }
+  /* The scope an element's edits are stored under: its route when it is page content, SHELL
+     when it is part of the persistent shell. A set (a group's or a state group's members, a
+     captured selection) is SHELL only when every member is shell: anything that names page
+     content exists on that route alone. */
+  function scopeOf(element, route) { return !element || pageOf(element) ? route : SHELL; }
+  function scopeOfAll(elements, route) { return elements && elements.length && elements.every(function (element) { return !pageOf(element); }) ? SHELL : route; }
+  /* `route`'s value for `key` in one scope-keyed map (labels, alts): SHELL's when there is one
+     and the element is not page content, else the route's own. */
+  function scopedValue(map, route, key, element) {
+    var every = route !== SHELL && map && map[SHELL] && map[SHELL][key];
+    if (every && !(element && pageOf(element))) return every;
+    return (map && map[route] && map[route][key]) || '';
+  }
+  /* The stored entry (per breakpoint) that applies to `key` on `route`: the route's own, with
+     SHELL's fields over it for a shell element -- or null. */
+  function entryOf(layout, route, key, element) {
+    var own = layout.routes[route] && layout.routes[route][key];
+    var every = route !== SHELL && !(element && pageOf(element)) && layout.routes[SHELL] && layout.routes[SHELL][key];
+    if (!every) return own || null;
+    if (!own) return every;
+    var out = {};
+    ['desktop', 'tablet', 'phone'].forEach(function (bp) { if (own[bp] || every[bp]) out[bp] = Object.assign({}, own[bp], every[bp]); });
+    return out;
+  }
+  function entryFor(value, route, key, element) { return entryOf(sanitize(value), route, key, element); }
+  /* Every group that applies on `route`: its own and SHELL's ({ id: { members, label, scope } }) */
+  function groupsOf(layout, route) {
+    var out = {};
+    [route, SHELL].forEach(function (scope) {
+      var groups = layout.groups[scope] || {};
+      Object.keys(groups).forEach(function (id) { if (!out[id]) out[id] = { members: groups[id].members, label: groups[id].label, scope: scope }; });
+    });
+    return out;
+  }
+  function groupsFor(value, route) { return groupsOf(sanitize(value), route); }
   /* Every element annotate() considers (plus `extra`, at its place in document order), with its
      final key ('' = none). Repeats are numbered per route scope: the shell first, then each
      page on its own -- so two pages mounted at once never number each other's keys, and where
@@ -423,33 +474,58 @@ var ArkLayout = (function () {
     if (frame.wrap) element.style.flexWrap = frame.wrap === 'yes' ? 'wrap' : 'nowrap';
     element.setAttribute('data-ark-layout-applied', '');
   }
-  /* only `route`'s own groups: the page it replaces may still be leaving, grouped as it was */
-  function unwrapGroups(root, route) {
-    Array.prototype.slice.call(root.querySelectorAll('[data-ark-layout-group]')).reverse().forEach(function (group) {
-      var parent = group.parentNode; if (!parent || !inRoute(group, route)) return;
-      while (group.firstChild) parent.insertBefore(group.firstChild, group);
-      group.remove();
-    });
+  /* Makes the DOM's group wrappers match the groups that apply on `route` (its own and SHELL's).
+     A wrapper that already holds exactly its group's members is KEPT, not rebuilt: apply() runs
+     on every remount, every settle and every edit, and it used to unwrap every group and wrap it
+     again in a new element each time. The persistent header is never remounted, so a selected
+     header group was an emptied, detached wrapper after the next pass -- the editor's selection
+     restore compared the new wrapper's text with the old one's (now '') and dropped the
+     selection, hiding the toolbar under the Ungroup button (tests/browser/full-audit.mjs
+     "layout group"; regression: tests/layout-shell-scope.cjs). Only `route`'s wrappers are
+     touched: the page it replaces may still be leaving, grouped as it was. */
+  function unwrap(group) {
+    var parent = group.parentNode; if (!parent) return;
+    while (group.firstChild) parent.insertBefore(group.firstChild, group);
+    group.remove();
   }
-  function buildGroups(root, route, layout) {
-    var groups = layout.groups[route] || {};
-    /* no groups on this route: nothing to wrap, and a full key pass (10-15 ms on a 1,500-element
-       route) to find no members is skipped -- apply() annotates once right after this anyway */
-    if (!Object.keys(groups).length) return;
+  function syncGroups(root, route, layout) {
+    var groups = groupsOf(layout, route), ids = Object.keys(groups);
+    var wrappers = Array.prototype.slice.call(root.querySelectorAll('[data-ark-layout-group]')).filter(function (group) { return inRoute(group, route); });
+    /* nothing to wrap and nothing wrapped: a full key pass (10-15 ms on a 1,500-element route)
+       to find no members is skipped -- apply() annotates once right after this anyway */
+    if (!ids.length && !wrappers.length) return;
     var elements = annotate(root, route), byKey = {};
-    elements.forEach(function (element) { var key = element.getAttribute('data-ark-layout-key'); if (key && !byKey[key]) byKey[key] = element; });
-    Object.keys(groups).forEach(function (id) {
-      var members = groups[id].members.map(function (key) { return byKey[key]; }).filter(Boolean);
+    elements.forEach(function (element) { var key = element.getAttribute(KEY_ATTR); if (key && !byKey[key]) byKey[key] = element; });
+    /* a group's members as elements, in document order -- `members` is recorded in selection
+       (click) order, and grouping must nest elements without ever reordering them; a SHELL
+       group takes shell elements only */
+    function membersOf(id) {
+      var group = groups[id];
+      return group.members.map(function (key) { return byKey[key]; })
+        .filter(function (element) { return element && (group.scope !== SHELL || !pageOf(element)); })
+        .sort(function (a, b) { return elements.indexOf(a) - elements.indexOf(b); });
+    }
+    var kept = {};
+    wrappers.slice().reverse().forEach(function (wrapper) {
+      var id = wrapper.getAttribute('data-ark-layout-group'), want = groups[id] && !kept[id] ? membersOf(id) : null;
+      var holds = Array.prototype.filter.call(wrapper.children, function (child) { return !ownScope(child); });
+      if (want && want.length > 1 && holds.length === want.length && holds.every(function (child, i) { return child === want[i]; })) {
+        kept[id] = true; wrapper.setAttribute('aria-label', groups[id].label || 'Group'); return;
+      }
+      unwrap(wrapper);
+    });
+    ids.forEach(function (id) {
+      if (kept[id]) return;
+      var members = membersOf(id);
       if (members.length < 2) return;
-      /* `members` is recorded in selection (click) order, not document order -- grouping must
-         nest elements without ever reordering them, so sort back to where they already sit. */
-      members.sort(function (a, b) { return elements.indexOf(a) - elements.indexOf(b); });
       var parent = members[0].parentNode; if (!parent || !members.every(function (element) { return element.parentNode === parent; })) return;
       var svg = parent.namespaceURI === 'http://www.w3.org/2000/svg';
       var wrapper = document.createElementNS(svg ? parent.namespaceURI : 'http://www.w3.org/1999/xhtml', svg ? 'g' : 'div');
-      wrapper.setAttribute('data-ark-layout-group', id); wrapper.setAttribute('data-ark-layout-key', 'group:' + id); wrapper.setAttribute('aria-label', groups[id].label || 'Group');
+      wrapper.setAttribute('data-ark-layout-group', id); wrapper.setAttribute(KEY_ATTR, 'group:' + id); wrapper.setAttribute('aria-label', groups[id].label || 'Group');
       if (!svg) wrapper.style.position = 'relative';
       parent.insertBefore(wrapper, members[0]); members.forEach(function (element) { wrapper.appendChild(element); });
+      /* a later group can hold this one */
+      byKey['group:' + id] = wrapper; elements.splice(elements.indexOf(members[0]), 0, wrapper);
     });
   }
   /* A group wrapper needs a sensible container default (flex column) even when nobody has
@@ -476,10 +552,14 @@ var ArkLayout = (function () {
     }
   }
   function apply(root, route, width, value) {
-    var layout = sanitize(value || current), nodes = layout.routes[route] || {}, elements, byKey = {};
-    unwrapGroups(root, route); buildGroups(root, route, layout); elements = annotate(root, route);
+    var layout = sanitize(value || current), elements, byKey = {};
+    syncGroups(root, route, layout); elements = annotate(root, route);
     elements.forEach(function (element) { var key = element.getAttribute('data-ark-layout-key'); if (key && !byKey[key]) byKey[key] = element; resetElement(element); var before = ownedValues(element); applyGroupDefault(element); remember(element, before); });
-    Object.keys(nodes).forEach(function (key) { if (byKey[key]) applyFrame(byKey[key], merged(nodes[key], width)); });
+    /* the route's own entries and SHELL's (a header edit shows on every route) */
+    Object.keys(Object.assign({}, layout.routes[route], layout.routes[SHELL])).forEach(function (key) {
+      var element = byKey[key], entry = element && entryOf(layout, route, key, element);
+      if (entry) applyFrame(element, merged(entry, width));
+    });
     applyAlts(root, route, layout, elements);
     return elements;
   }
@@ -519,10 +599,10 @@ var ArkLayout = (function () {
   }
   function applyAlts(root, route, value, elements) {
     if (!root || !root.querySelectorAll) return;
-    var layout = sanitize(value || current), routeAlts = (layout.alts && layout.alts[route]) || {};
+    var layout = sanitize(value || current);
     (elements || annotate(root, route)).forEach(function (element) {
-      var key = element.getAttribute('data-ark-layout-key');
-      if (key && (routeAlts[key] || element.hasAttribute('data-ark-alt-base'))) applyAlt(element, routeAlts[key] || '');
+      var key = element.getAttribute('data-ark-layout-key'), text = key ? scopedValue(layout.alts, route, key, element) : '';
+      if (key && (text || element.hasAttribute('data-ark-alt-base'))) applyAlt(element, text);
     });
   }
   function setAlt(value, route, key, text) {
@@ -531,10 +611,9 @@ var ArkLayout = (function () {
     if (clean) routeAlts[key] = clean; else delete routeAlts[key];
     return sanitize(layout);
   }
-  function altFor(value, route, key) {
-    var layout = sanitize(value);
-    return (layout.alts && layout.alts[route] && layout.alts[route][key]) || '';
-  }
+  /* the alt text that applies to `key` on `route` (SHELL's for a shell element); `element`,
+     when known, rules SHELL out for page content */
+  function altFor(value, route, key, element) { return scopedValue(sanitize(value).alts, route, key, element); }
   function set(value, route, key, bp, patch) {
     var layout = sanitize(value), nodes = layout.routes[route] || (layout.routes[route] = {}), entry = nodes[key] || (nodes[key] = {});
     var base = Object.assign({}, entry[bp] || {});
@@ -567,20 +646,23 @@ var ArkLayout = (function () {
     if (!Object.keys(routeLabels).length) delete labels[route];
     return sanitize(layout);
   }
-  function labelFor(value, route, key) {
-    var layout = sanitize(value), routeLabels = layout.labels[route];
-    return (routeLabels && routeLabels[key]) || '';
-  }
+  function labelFor(value, route, key, element) { return scopedValue(sanitize(value).labels, route, key, element); }
   function group(value, route, id, members, label) {
     var layout = sanitize(value), routes = layout.groups, groups = routes[route] || (routes[route] = {});
     groups[id] = { members: members, label: label || 'Group' }; return sanitize(layout);
   }
+  /* A group id is unique (a time stamp plus randomness), so ungrouping removes it from whichever
+     scope holds it -- `route` or SHELL -- and the caller need not know which. */
   function ungroup(value, route, id) {
-    var layout = sanitize(value), groups = layout.groups[route]; if (groups) { delete groups[id]; if (!Object.keys(groups).length) delete layout.groups[route]; }
-    var nodes = layout.routes[route]; if (nodes) { delete nodes['group:' + id]; if (!Object.keys(nodes).length) delete layout.routes[route]; }
+    var layout = sanitize(value);
+    [route, SHELL].forEach(function (scope) {
+      var groups = layout.groups[scope]; if (groups) { delete groups[id]; if (!Object.keys(groups).length) delete layout.groups[scope]; }
+      var nodes = layout.routes[scope]; if (nodes) { delete nodes['group:' + id]; if (!Object.keys(nodes).length) delete layout.routes[scope]; }
+    });
     return sanitize(layout);
   }
-  return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, find: find, index: index, inRoute: inRoute, apply: apply, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
+  return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, find: find, index: index, inRoute: inRoute, apply: apply,
+    SHELL: SHELL, isScope: isScope, scopeOf: scopeOf, scopeOfAll: scopeOfAll, entryFor: entryFor, groupsFor: groupsFor, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor,
     setAlt: setAlt, altFor: altFor, applyAlt: applyAlt, applyAlts: applyAlts, altAttribute: altAttribute, altOwn: altOwn, ALT_MAX: ALT_MAX,
     TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS, RADIUS_CSS: RADIUS_CSS,
     DISPLAY_TOKENS: DISPLAY_TOKENS, ALIGN_ITEMS_TOKENS: ALIGN_ITEMS_TOKENS, JUSTIFY_TOKENS: JUSTIFY_TOKENS, LINE_HEIGHT_TOKENS: LINE_HEIGHT_TOKENS,

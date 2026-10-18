@@ -26,11 +26,11 @@ const studioCss = fs.readFileSync('css/studio-embed.css', 'utf8');
    nothing still serves, ignores, or links to the name. */
 const studio = app + '\n' + admin;
 
-// Step 3 (Design/Content mode switch, flickering-juggling-donut.md): the old standalone
-// #studioNav/#designNav sidebar buttons are gone, folded into Design mode's own
-// #designCanvasBtn/#designThemeBtn sub-switch (see the dedicated Step 3 block far below).
-assert(!app.includes('id="studioNav"') && !app.includes('id="designNav"'), 'Step 3: the old separate Studio/Design nav buttons are gone, folded into one Design mode');
-assert(app.includes('id="designCanvasBtn"'), 'Design mode exposes Studio\'s canvas as a sub-view, not a standalone nav button');
+// The old standalone #studioNav/#designNav sidebar buttons are gone; since the one workspace
+// (2026-10-18) the canvas is not a mode to enter at all: it is always there, and Canvas /
+// Sitemap / Theme are views of it (#viewSwitch, see the dedicated block far below).
+assert(!app.includes('id="studioNav"') && !app.includes('id="designNav"'), 'the old separate Studio/Design nav buttons stay gone');
+assert(app.includes('id="viewCanvasBtn"'), 'the canvas is a view of the one workspace, not a standalone nav button');
 // The one header (2026-10-18, owner: "No more one cms for content and one cms for design. Only
 // one merged."): Studio's own second header bar is gone -- its controls live in the app header,
 // each exactly once, and there is no fixed right panel. These fail if a second bar, a second
@@ -42,18 +42,18 @@ assert(!app.includes('class="right"') && !app.includes('id="tabTheme"') && !app.
 assert(!app.includes('id="btnMore"') && !app.includes('id="view"'), 'the More menu (only a shortcuts hint, now in #accountMenu) and the separate Design/Sitemap toggle (now the Design views) are gone');
 {
   const header = app.slice(app.indexOf('<header class="bar" id="appBar">'), app.indexOf('</header>'));
-  for (const id of ['modeContentBtn', 'modeDesignBtn', 'designCanvasBtn', 'designMapBtn', 'designBackgroundBtn', 'designThemeBtn', 'btnLeftRail', 'btnPage', 'btnPageSeo', 'bpNote', 'devices', 'btnUndo', 'btnRedo', 'btnCheck', 'mode', 'versionsNav', 'meshNav', 'save', 'publish', 'accountBtn', 'connect', 'signOut', 'who', 'status']) {
+  for (const id of ['lensContentBtn', 'lensDesignBtn', 'viewCanvasBtn', 'viewMapBtn', 'backgroundBtn', 'viewThemeBtn', 'btnLeftRail', 'btnPage', 'btnPageFields', 'btnPageSeo', 'bpNote', 'devices', 'btnUndo', 'btnRedo', 'btnCheck', 'mode', 'versionsNav', 'meshNav', 'save', 'publish', 'accountBtn', 'connect', 'signOut', 'who', 'status']) {
     assert.equal((app.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, '#' + id + ' exists once');
     assert(header.includes('id="' + id + '"'), '#' + id + ' lives in the one header');
   }
 }
-assert(/function syncHeader\(\) \{[\s\S]*?\$\('canvasNav'\)\.hidden = !canvas; \$\('canvasTools'\)\.hidden = !canvas;/.test(admin), 'the canvas-only header groups show only in Design -> Canvas');
+assert(/function syncHeader\(\) \{[\s\S]*?\$\('canvasTools'\)\.hidden = state\.view === 'map';/.test(admin) && !app.includes('id="canvasNav"'), 'the canvas tools show whenever a canvas is on screen (Canvas and Theme views); the page picker, its fields and its SEO show in every view');
 assert(/function renderList\(\) \{[\s\S]*?syncHeader\(\); refreshSaveButton\(\);/.test(admin) && /function setView\(v\) \{[\s\S]*?syncHeader\(\)/.test(admin), 'the header re-syncs on every kind change and every canvas/sitemap switch');
-assert(admin.includes("state.kind = 'studio'"), 'Studio is a real CMS editor state');
+assert(!admin.includes("state.kind = 'studio'") && admin.includes('function connectCanvas()'), 'the canvas is not an editor state to enter: it is connected once, at startup (connectCanvas), and always shown');
 assert(!admin.includes("src: 'admin-studio.html'"), 'Step 2: Studio is no longer a separate document loaded into an <iframe> -- renderStudioEditor() builds it directly into #studioRoot, in this same document');
-assert(app.includes('id="studioRoot"') && admin.includes("$('studioRoot')"), 'Studio\'s UI lives in a shared container toggled by renderEditor(), not a second document');
+assert(app.includes('id="studioRoot"') && !app.includes('id="studioRoot" hidden') && admin.includes("$('studioRoot')"), 'the workspace lives in one always-shown container in this document, not a second document and not a mode to toggle');
 assert(!admin.includes("type === 'defxn-cms-open-content'"), 'Step 2: there is no more postMessage for "open Content CMS" -- Studio\'s own button now calls select(state.current) directly, in the same scope');
-assert(admin.includes('select(state.current);'), 'Studio\'s "Content CMS" button still lands on the current page, now via a direct call');
+assert(admin.includes("function openContentEditor() { setLens('content'); openPageFields({ transient: true }); }"), '"Open in Content" lands on the current page: the Content lens and its every field, by a direct call');
 assert(!fs.existsSync('admin-studio.html'), 'admin-studio.html was deleted once Studio merged into admin-app.html; nothing may recreate it as a second editor document');
 // The publish host serves root files from an allowlist, so dropping the name there is what
 // makes /admin-studio.html a 404 even if a stale copy is left in a deployed root
@@ -75,7 +75,7 @@ assert(!/(?:src|href)=["'][^"']*admin-studio/.test(app + index), 'no page links 
 // standalone-only internals are removed, not left failing; assertions about real connected-
 // mode mechanisms (js/main.js, admin.js, js/content/*.js -- none of which this step
 // touched) are unchanged.
-for (const id of ['tabLayers', 'tabPages', 'tabLib', 'designView', 'mapView', 'devices', 'mode', 'btnUndo', 'btnRedo', 'btnCheck', 'save']) {
+for (const id of ['tabLayers', 'tabPages', 'tabLib', 'tabMedia', 'tabVault', 'designView', 'mapView', 'devices', 'mode', 'btnUndo', 'btnRedo', 'btnCheck', 'save']) {
   assert(studio.includes(`id="${id}"`), `Studio keeps the ${id} feature surface`);
 }
 // Step 4 (flickering-juggling-donut.md): the Element tab/#paneEl (the fixed property-
@@ -94,7 +94,7 @@ for (const id of ['selBox', 'hoverBox', 'selTag', 'padT', 'tagGrip', 'compBar', 
 }
 assert(!/\b(?:multiSel|elOf|editingComp|placeMultiOverlays|renderCompBar|studioDenseBox|applyStudioPatches)\b/.test(admin.replace(/\/\*[\s\S]*?\*\//g, '')), 'no executable reference to the dense-canvas selection leftovers remains (comments may name them)');
 assert(!/<link[^>]+fonts\.googleapis\.com/.test(studio), 'the Studio shell uses local fonts under the CMS content policy');
-assert(admin.includes('function openContentEditor() { select(state.current); }'), 'the canvas still reaches the current page\'s Content editor (toolbar/Library "Open in Content"), by a direct call instead of a duplicate header button');
+assert(admin.includes('function openContentEditor()') && !app.includes('id="btnContentCms"'), 'the canvas still reaches the current page\'s fields (toolbar/Library "Open in Content"), by a direct call instead of a duplicate header button');
 // Step 2: 'defxn-studio-load'/'defxn-studio-patch' (and collectCmsPatches()/queueCmsSync(),
 // the dead stub that fed the latter) are deleted outright -- there is no more document
 // boundary for them to cross. renderStudioEditor() (admin.js) reads siteFromState()/
@@ -102,7 +102,7 @@ assert(admin.includes('function openContentEditor() { select(state.current); }')
 // message, and Studio's own edits call applyStudioPatches's sibling functions directly.
 assert(!admin.includes("type: 'defxn-studio-load'"), 'Step 2: no more message carries the site model across a document boundary -- renderStudioEditor() reads siteFromState() directly');
 assert(!admin.includes("type === 'defxn-studio-patch'") && !admin.includes('function collectCmsPatches') && !admin.includes('function queueCmsSync'), 'Step 2: the dead collectCmsPatches()/queueCmsSync() stub and its message type are deleted, not carried forward (a code comment may still name them, explaining why)');
-assert(admin.includes('function renderStudioEditor'), 'the merged app has one function that enters/refreshes Studio in place of the old iframe injection');
+assert(admin.includes('function connectCanvas') && !admin.includes('function renderStudioEditor'), 'the merged app has one function that connects the canvas, in place of the old iframe injection and the later "enter Studio" refresh');
 // Step 5 (flickering-juggling-donut.md): saveStudioChanges() (which used to cover Studio
 // changes here) is deleted outright and superseded by saveEverything() -- see the dedicated
 // Step 5 block far below for the full assertion set on the unified save model.
@@ -119,12 +119,15 @@ assert(studio.includes('defxn-cms-preview-mode'), 'Edit and Live modes are forwa
 // already was. Dropped, not silently -- Content CMS and the SEO tab are unaffected and
 // still reachable exactly as before (#btnContentCms, #tabSeo).
 assert(!admin.includes('Content, SEO, and routing for this page are edited through the authoritative CMS controls'), 'Step 4: the redirect note that used to sit above the (now-deleted) accordions is gone with them, not orphaned');
-assert(app.includes('id="modeContentBtn"') && app.includes('id="btnPageSeo"') && admin.includes('function buildSiteSeoPanel'), 'Content mode (the header switch) and SEO (page: #btnPageSeo popover; site: Theme & defaults) stay reachable -- only the redundant redirect note pointing at them is gone');
+assert(app.includes('id="lensContentBtn"') && app.includes('id="btnPageFields"') && app.includes('id="btnPageSeo"') && admin.includes('function buildSiteSeoPanel'), 'the Content lens, a page\'s every field (#btnPageFields sheet) and SEO (page: #btnPageSeo popover; site: the Theme view) stay reachable -- only the redundant redirect note pointing at them is gone');
 assert(studio.includes("'DEFXN reusable components'"), 'connected Studio library describes the real runtime component system');
-assert(admin.includes('notifyPreviewState'), 'Content CMS sends unsaved drafts to its real-page preview');
+assert(admin.includes('function notifyPreviewState()') && !app.includes('id="frame"') && (app.match(/<iframe\b/g) || []).length === 1, 'every unsaved content draft reaches the ONE canvas (js/admin/bridge.js notifyPreviewState); Content mode\'s second preview iframe (#frame) is gone');
 assert(!admin.includes("type: 'defxn-studio-preview-state'"), "Step 2: there is no more 'defxn-studio-preview-state' message -- renderStudioEditor() re-reads siteFromState() directly on every entry instead of being pushed a copy");
 assert(main.includes("data.type !== 'defxn-cms-preview-state'"), 'the public runtime accepts full preview state only in preview mode');
-assert(main.includes('ArkUI.pageRouter.refresh()'), 'preview state remounts the real active route');
+/* The re-render is IN PLACE since 2026-10-18 (a same-route draft re-send is not a navigation: the
+   route-change transition flashed the canvas blank on every edit). It still rebuilds the active
+   route from the new registries -- tests/page-router-refresh-in-place.cjs proves the rebuild. */
+assert(main.includes('ArkUI.pageRouter.refresh({ inPlace: true })'), 'preview state re-renders the real active route, in place');
 assert(router.includes('refresh: function'), 'the router exposes a preview remount without deployment');
 assert(runtime.includes("data-ark-copy-keys"), 'real rendered components retain their authoritative copy keys for click-to-edit');
 assert(main.includes('annotateCmsPreviewCopy(site.manifests)'), 'hand-authored page-module copy is also bound to its authoritative manifest field');
@@ -324,11 +327,11 @@ assert(!/\brestrictMode\b/.test(admin.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, ''))
 assert(!admin.includes('function enterComp') && !admin.includes('function exitComp'), 'enterComp/exitComp remain deleted; editingComp still stays -1 forever');
 
 // Canvas-transitions: a small popover (reusing openPop()'s own positioning), not a mode.
-// Since the one header (2026-10-18) its button is the Background segment of Design's views.
-assert(app.includes('id="designBackgroundBtn"') && !app.includes('id="btnCanvasTransitions"'), 'the site-wide, selection-independent background-transition panel opens from the header\'s Background segment');
+// Since the one header (2026-10-18) its button is the Background segment of the views.
+assert(app.includes('id="backgroundBtn"') && !app.includes('id="btnCanvasTransitions"'), 'the site-wide, selection-independent background-transition panel opens from the header\'s Background segment');
 assert(/function openCanvasTransitionsPopover\(\) \{[\s\S]{0,400}openPop\(anchor, renderCanvasTransitionsPopoverContent, 'left'\);/.test(admin), 'openCanvasTransitionsPopover() reuses openPop() directly rather than a second positioning system');
-assert(/function openCanvasTransitionsPopover\(\) \{\s*const anchor = \$\('designBackgroundBtn'\);[\s\S]{0,300}if \(state\.kind !== 'studio'\) selectStudio\(\);\s*if \(state\.view !== 'design'\) setView\('design'\);/.test(admin), 'Background brings the canvas back first (it previews on the real page), from Theme & defaults or the sitemap');
-assert(admin.includes("$('designBackgroundBtn').addEventListener('click', openCanvasTransitionsPopover);"), 'the Background segment opens the popover anchored to itself');
+assert(/function openCanvasTransitionsPopover\(\) \{\s*const anchor = \$\('backgroundBtn'\);[\s\S]{0,200}if \(state\.view === 'map'\) setView\('design'\);/.test(admin), 'Background brings the canvas back first from the sitemap (it previews on the real page; the Theme view already shows the canvas)');
+assert(admin.includes("$('backgroundBtn').addEventListener('click', openCanvasTransitionsPopover);"), 'the Background segment opens the popover anchored to itself');
 
 // Entry point: js/main.js posts the SAME unconditional mode-level action up to Studio
 // (that protocol boundary is untouched, per this step's scope) -- only the receiving side
@@ -343,8 +346,8 @@ assert(admin.includes("else if (event.data.type === 'defxn-cms-preview-enter-can
 // silently reintroduces the term, or drops one of the OTHER terms in the same guard by
 // mistake while touching it, is caught.
 const liveGuardSites = [
-  "if (typing || state.live || state.view !== 'design') return;",
-  "bn.hidden = state.device === 0 || state.live || state.view !== 'design';",
+  "if (typing || state.live || state.view === 'map') return;",
+  "bn.hidden = state.device === 0 || state.live || state.view === 'map';",
 ];
 for (const site of liveGuardSites) assert(admin.includes(site), `restrictMode's removal left this live-guard site intact otherwise: ${JSON.stringify(site.slice(0, 70))}`);
 const deletedGuardSites = [
@@ -370,8 +373,10 @@ assert(index.indexOf('src="js/content/canvas-transitions-data.js"') < index.inde
 // fadeCanvas() helper at the two sequencing points the plan specifies, never touching
 // js/lattice.js's camera-pan code or js/zero-webgl.js (neither file is referenced here).
 assert(router.includes('function fadeCanvas(phase)') && router.includes("if (!window.ArkCanvasTransitions) return;") && router.includes("scene.querySelector('[data-ark-layer=\"persistent\"]')"), 'page-router.js gains a small, defensively-guarded fadeCanvas() helper against the same persistent-layer element js/lattice.js/js/hero-motion.js already append into');
-assert(/scene\.dataset\.transition = 'running';\s*fadeCanvas\('out'\);\s*var outgoing = active;/.test(router), "fadeCanvas('out') runs at the same point scene.dataset.transition is set to 'running', strictly before presence.hide(outgoing, ...) is awaited");
-assert(/\} else entering = presence\.show\(page, immediate\)\.then\(function \(\) \{\s*if \(stageRetention\) stageRetention\.activate\(mounted\[page\]\);\s*\}\);\s*\/\/ The background fade-in starts strictly after[\s\S]{0,400}fadeCanvas\('in'\);/.test(router), "fadeCanvas('in') runs strictly after presence.show()/enter() has already been invoked for the incoming page, never before");
+/* both fades are skipped by an in-place refresh (the same route re-rendered, not a navigation:
+   tests/page-router-refresh-in-place.cjs); for a navigation the order is unchanged */
+assert(/if \(!inPlace\) \{ scene\.dataset\.transition = 'running'; fadeCanvas\('out'\); \}\s*var outgoing = active;/.test(router), "fadeCanvas('out') runs at the same point scene.dataset.transition is set to 'running', strictly before presence.hide(outgoing, ...) is awaited");
+assert(/\} else entering = presence\.show\(page, immediate\)\.then\(function \(\) \{\s*if \(stageRetention\) stageRetention\.activate\(mounted\[page\]\);\s*\}\);\s*\/\/ The background fade-in starts strictly after[\s\S]{0,400}if \(!inPlace\) fadeCanvas\('in'\);/.test(router), "fadeCanvas('in') runs strictly after presence.show()/enter() has already been invoked for the incoming page, never before");
 
 // Studio's canvas-transitions panel: real controls, reading cmsSourceSite.canvasTransitions
 // and writing through postCmsCanvasTransitionsCommand/postCmsCanvasTransitionPreview --
@@ -488,42 +493,30 @@ assert(admin.includes("elementMotion: { draft: function () { return state.elemen
 assert(/function siteFromState\(\) \{[\s\S]{0,1200}ArkAdminStore\.drafts\(\)\.forEach[\s\S]{0,900}else if \(d\.kind === 'single'\) site\[d\.key\] = window\[d\.global\] \? clone\(singleDraftHandle\(d\.key\)\.draft\(\)\) : null;/.test(admin), 'siteFromState() includes elementMotion (every single draft js/admin/store.js lists; tests/site-drafts.test.mjs checks the list), so Studio and the connected preview receive it with every site snapshot');
 assert(store.includes('async function saveElementMotion(contentDir, whole)') && store.includes("write(contentDir, 'element-motion-data.js', ArkElementMotion.serialize(whole))") && store.includes('saveElementMotion: saveElementMotion'), 'ArkAdminStore gains saveElementMotion, a single-file write exactly like saveCanvasTransitions/saveStates');
 
-// Step 3 (Design/Content mode switch, flickering-juggling-donut.md): state.mode is one
-// level ABOVE state.kind. Default mode ('design') matches kind's own existing default
-// ('studio') -- the app has always opened on the visual canvas; Step 3 only names that as
-// a mode, it doesn't change the landing kind.
-assert(admin.includes("mode: 'design', contentKind: 'page', designKind: 'studio',"), 'state.mode starts in sync with the existing default kind (studio -> design), with sensible per-mode landing kinds');
-assert(admin.includes('function kindMode(kind)'), 'one function decides which mode a kind belongs to, not an inline check repeated at each call site');
-assert(/function kindMode\(kind\) \{ return kind === 'studio' \|\| kind === 'design' \? 'design' : kind === 'mesh' \? null : 'content'; \}/.test(admin), "kindMode groups 'studio' and 'design' into one Design mode, excludes 'mesh' from both (Mesh is a persistent header action, not a mode -- see below), and treats every other kind as Content");
-assert(admin.includes('function syncMode()') && admin.includes('syncMode();'), 'state.mode/contentKind/designKind are kept in sync from one function, not duplicated per call site');
+// One workspace (2026-10-18, owner: "I only want to see ONE CMS, unified."): the Content |
+// Design switch used to change APPS (state.mode over state.kind: a page list + form + its own
+// preview frame, or the canvas). It is now a LENS on the one canvas -- what a click there edits
+// -- and nothing is torn down or swapped when it changes.
+assert(!/\bstate\.mode\b/.test(admin) && !admin.includes('function kindMode') && !admin.includes('function syncMode') && !admin.includes('function setMode'), 'no app mode is left: no state.mode, kindMode(), syncMode() or setMode()');
+assert(/state\.lens = 'content';/.test(admin) && admin.includes("localStorage.getItem('defxn-cms-lens')"), "the lens opens on 'content' (most edits are text) and is remembered per browser");
+assert(admin.includes('function setLens(lens)') && admin.includes("$('lensContentBtn').addEventListener('click', function () { setLens('content'); });") && admin.includes("$('lensDesignBtn').addEventListener('click', function () { setLens('design'); });"), 'both lens buttons are wired to setLens()');
+assert(/function setLens\(lens\) \{[\s\S]*?postCmsPreviewLens\(\)/.test(admin) && admin.includes("type: 'defxn-cms-preview-lens', lens: state.lens"), 'a lens change is posted to the canvas (defxn-cms-preview-lens)');
+assert(/addEventListener\('load', \(\) => \{[^}]*postCmsPreviewLens\(\)/.test(admin) && /'defxn-cms-preview-ready'\) \{[\s\S]{0,900}postCmsPreviewLens\(\);/.test(admin), 'the lens is re-sent on every canvas load and after every ready, like Edit/Live');
+assert(app.includes('id="lensSwitch"') && app.includes('id="viewSwitch"') && !app.includes('id="modeSwitch"') && !app.includes('id="designSubSwitch"'), 'the header has a lens switch and a view switch, not a mode switch and a Design-only sub-switch');
+assert(app.includes('id="viewCanvasBtn"') && app.includes('id="viewMapBtn"') && app.includes('id="viewThemeBtn"') && app.includes('id="backgroundBtn"'), 'the views of the one site -- Canvas, Sitemap, Theme -- and the Background popover are ONE segmented control, in either lens');
+assert((app.match(/class="ark-tab"/g) || []).length >= 6, 'the lens and view buttons reuse the existing .ark-tab tab-trigger style already used for in-editor tabs, not a new button convention');
+assert(/for \(const b of \$\('viewSwitch'\)\.querySelectorAll\('\[data-view\]'\)\) b\.addEventListener\('click', \(\) => setView\(b\.dataset\.view\)\);/.test(admin) && /function setView\(v\) \{[\s\S]*?\$\('themeView'\)\.hidden = v !== 'theme';/.test(admin), 'every view button calls the one setView(), which also shows the Theme dock beside the live canvas');
+// One rail and one site list: Content's sidebar list (#pageList, #contentNav) and Studio's
+// Pages tab merged into the rail's Pages tab; images and encrypted items are its Media / Vault.
+assert(!app.includes('id="contentNav"') && !app.includes('id="pageList"') && !app.includes('id="cmsShell"') && !app.includes('id="editor"'), 'the old Content layout (#cmsShell, its #pageList sidebar and #editor column) is gone');
+assert(app.includes('id="mediaPanel"') && app.includes('id="vaultPanel"') && admin.includes("mountPanel($('mediaPanel'), 'renderMediaPanel'") && admin.includes("mountPanel($('vaultPanel'), 'renderVaultPanel'") && /id="pagesPane"[\s\S]*?id="newForm"[\s\S]*?id="newArticleForm"/.test(app), 'New page / New article live in the Pages tab; Media and Vault mount their forms\' own panels (each with its New form)');
+// The page's every field: a sheet on demand, never a fixed right column (owner: "remove the right bar").
+assert(/<aside class="sheet" id="sheet"[^>]* hidden>/.test(app) && admin.includes('function openPageFields(opts)') && admin.includes("$('btnPageFields').addEventListener('click', togglePageFields);"), 'Page fields is a sheet that starts closed and opens from the page picker\'s icon');
 
-// renderList()'s content item list (Pages/Articles/Images/Secrets/Shapes) -- confirmed this
-// session to render unconditionally regardless of nav selection -- is now gated to Content
-// mode, both structurally (its build is skipped) and visually (its container is hidden).
-assert(/function renderList\(\) \{\s*syncMode\(\);/.test(admin), 'renderList() re-syncs state.mode before touching the DOM, so the mode switch reflects whatever kind was just selected, not a stale prior mode');
-assert(/if \(state\.mode === 'content'\) \{\s*ArkManifest\.groups\.forEach/.test(admin), "renderList()'s whole item-list build (pages/articles/images/secrets/shapes) is gated on state.mode === 'content', not merely hidden after being built");
-assert(admin.includes("if (contentNav) contentNav.hidden = state.mode !== 'content';"), '#contentNav (the page list plus every "New X" form) is hidden outright in Design mode');
-assert(app.includes('id="contentNav"') && app.includes('id="pageList"'), 'the page list and its "New X" forms are wrapped in one Content-mode container the app can hide as a unit');
-
-// The mode-switch control itself: two tabs in the persistent header (never inside #cmsShell,
-// which Design mode's own canvas sub-view hides outright -- see admin-app.html's own comment
-// above #modeSwitch), reusing the existing .ark-tab tab-trigger style rather than inventing one.
-assert(app.includes('id="modeSwitch"') && app.includes('id="modeContentBtn"') && app.includes('id="modeDesignBtn"'), 'the header exposes a two-tab Content/Design mode switch');
-assert(app.includes('id="designSubSwitch"') && app.includes('id="designCanvasBtn"') && app.includes('id="designMapBtn"') && app.includes('id="designBackgroundBtn"') && app.includes('id="designThemeBtn"'), "Design mode's views are ONE segmented control -- Canvas, Sitemap, Background, Theme & defaults -- not standalone nav buttons or a second toggle inside the canvas");
-assert((app.match(/class="ark-tab"/g) || []).length >= 4, 'the mode switch and sub-switch buttons reuse the existing .ark-tab tab-trigger style already used for in-editor tabs, not a new button convention');
-assert(admin.includes('function setMode(mode)') && admin.includes('if (mode === state.mode) return;'), 'setMode() is a no-op when already in that mode, so clicking the active tab never re-triggers a render or a preview reload');
-assert(admin.includes("state.kind = mode === 'design' ? (state.designKind || 'studio') : (state.contentKind || 'page');"), "switching modes lands on whatever kind that mode's own memory holds (defaulting to Studio's canvas for Design, the first real page for Content) -- state.current/aCurrent/assetCurrent/secretCurrent/shapeCurrent and every draft are never touched, which is what keeps an unsaved edit alive across the switch");
-assert(admin.includes("$('modeContentBtn').addEventListener('click', function () { setMode('content'); });") && admin.includes("$('modeDesignBtn').addEventListener('click', function () { setMode('design'); });"), 'both top-level mode tabs are wired to setMode()');
-assert(admin.includes("function showDesignView(v) { if (state.kind !== 'studio') selectStudio(); setView(v); }") && admin.includes("$('designCanvasBtn').addEventListener('click', () => showDesignView('design'));") && admin.includes("$('designMapBtn').addEventListener('click', () => showDesignView('map'));") && admin.includes("$('designThemeBtn').addEventListener('click', () => selectDesign());"), "Design's views call the EXISTING selectStudio()/setView()/selectDesign() directly -- no second selection mechanism");
-
-// Mesh: explicitly not a mode (kindMode returns null for it, so visiting it never flips
-// state.mode or overwrites contentKind/designKind), and repositioned to the persistent
-// header so it stays reachable even while #cmsShell is hidden (Design mode's canvas
-// sub-view, state.kind === 'studio', hides #cmsShell -- and the sidebar nav along with it).
-assert(!/<nav class="pages"[\s\S]{0,400}id="meshNav"/.test(app), 'the Mesh button is no longer inside the sidebar nav, which Design mode\'s canvas sub-view hides along with the rest of #cmsShell');
-assert(/<header class="bar" id="appBar">[\s\S]*?id="meshNav"[\s\S]*?<\/header>/.test(app), 'Mesh is reachable from the persistent outer header instead, which neither #cmsShell nor #studioRoot ever hides');
-assert(admin.includes("$('meshNav').addEventListener('click', selectMesh);"), 'the relocated Mesh button still opens the existing full Mesh editor view (renderMeshEditor), unchanged');
-assert(admin.includes('function renderMeshEditor()'), 'Mesh\'s own editor view (deployment status, local-vs-published diff, live list, security note) is untouched by the mode restructuring');
+// Mesh: not a mode or a view, a header action -- its deploy status opens in the sheet on demand.
+assert(/<header class="bar" id="appBar">[\s\S]*?id="meshNav"[\s\S]*?<\/header>/.test(app), 'Mesh is reachable from the one header, which no part of the workspace hides');
+assert(admin.includes("$('meshNav').addEventListener('click', selectMesh);") && admin.includes('function selectMesh() { openMeshSheet(); }'), 'the Mesh button opens the Mesh view (renderMeshEditor) in the sheet');
+assert(admin.includes('function renderMeshEditor(root)') && /function openMeshSheet\(\) \{[\s\S]*?name: 'renderMeshEditor'/.test(admin), 'Mesh\'s own view (deployment status, local-vs-published diff, live list, security note) draws into the sheet the Mesh button opens');
 
 // Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar itself --
 // its DOM container, its positioning (reusing rectOf()/placeOverlays()'s exact math per
@@ -624,7 +617,9 @@ assert(!/saveThemeDraft[\s\S]{0,400}catch \(error\) \{ status\(error\.message, '
 // saves every dirty draft, so the button must enable for a dirty draft anywhere, not only
 // for whatever section happens to be on screen); Revert stays scoped to the current section
 // (it only ever reverts what's on screen), so it keeps using currentDirty().
-assert(admin.includes("function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }") && /function touch\(\) \{[\s\S]{0,600}refreshSaveButton\(\);/.test(admin), "the Save button's disabled state uses the fixed anyDirty(), not currentDirty() -- a dirty theme/canvas draft must not leave the Save button looking disabled just because the page on screen is clean");
-assert(/refuse\(revert, neverSaved \? '[^']+' : now \? '' : /.test(admin), "Revert's disabled state still uses currentDirty() (\"now\") -- Revert is still scoped to the current section only, unlike the unified Save button");
+assert(admin.includes("function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }") && /function touch\([^)]*\) \{[\s\S]{0,600}refreshSaveButton\(\);/.test(admin), "the Save button's disabled state uses the fixed anyDirty(), not currentDirty() -- a dirty theme/canvas draft must not leave the Save button looking disabled just because the page on screen is clean");
+// Since the one-workspace unification each form panel carries its own Revert (data-revert="kind:id"),
+// so "scoped to the current section" now means scoped to that panel's item: itemDirty(kind, id).
+assert(/refuse\(revert, neverSaved\(kind, id\) \? '[^']+' : itemDirty\(kind, id\) \? '' : /.test(admin), "Revert's disabled state is scoped to its own item (itemDirty(kind, id)) -- Revert only reverts the item its panel edits, unlike the unified Save button");
 
 console.log('PASS: protected DEFXN Studio integration, feature surface, local persistence, publishing boundary, the Step 3 Design/Content mode switch, Step 4\'s contextual floating toolbar, and Step 5\'s save/dirty bug fixes (anyDirty()\'s 3 missing checks, Ctrl+S\'s Studio blind spot) plus the one unified saveEverything() save model covering all 13 real drafts with per-draft success/failure reporting.');

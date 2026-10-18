@@ -11,12 +11,12 @@
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
-  var state = A.state, status = A.status, download = A.download, renderList = A.renderList, $ = A.$,
-      notifyPreviewTheme = A.notifyPreviewTheme, reloadPreview = A.reloadPreview,
-      renderEditor = A.renderEditor, h = A.h, refuse = A.refuse, touch = A.touch,
-      revertCurrent = A.revertCurrent;
-  /* defined by files loaded after this one: resolved when called */
-  var buildSiteSeoPanel = A.later('buildSiteSeoPanel');
+  var state = A.state, status = A.status, download = A.download, refreshList = A.refreshList, $ = A.$,
+      h = A.h, refuse = A.refuse, touch = A.touch, paintInto = A.paintInto, repaintPanels = A.repaintPanels;
+  /* defined by files loaded after this one: resolved when called (the canvas feed is the
+     bridge's, js/admin/bridge.js, which loads after this file) */
+  var buildSiteSeoPanel = A.later('buildSiteSeoPanel'), notifyPreviewTheme = A.later('notifyPreviewTheme'),
+      reloadPreview = A.later('reloadPreview'), setView = A.later('setView');
 
   function themeDirty() { return !window.ArkTheme || JSON.stringify(ArkTheme.sanitize(state.themeDraft)) !== state.themeSaved; }
   async function saveThemeDraft(button) {
@@ -36,7 +36,7 @@
     state.themeSaved = JSON.stringify(state.themeDraft);
     ArkTheme.define(state.themeDraft);
     if (button) button.disabled = true;
-    renderList();
+    refreshList();
   }
   /* Same idea again, for the settings-gear's site-wide defaults (js/content/
      settings-defaults.js; the draft is state.settingsDefaultsDraft): what a first-time visitor sees before they ever touch the
@@ -54,10 +54,9 @@
   function notifyPreviewSettingsDefaults() {
     if (!window.ArkSiteDefaults || state.versionPreviewSite) return; /* a previewed version keeps showing its own defaults */
     var message = { type: 'defxn-cms-preview-site-defaults', settingsDefaults: ArkSiteDefaults.sanitize(state.settingsDefaultsDraft) };
-    [$('frame'), $('cmsPreview')].forEach(function (frame) {
-      var win = frame && !frame.hidden && frame.contentWindow;
-      if (win) try { win.postMessage(message, window.location.origin); } catch (error) { /* between routes; the frame's load handler sends the full state */ }
-    });
+    /* the one canvas (Content mode's own #frame is gone) */
+    var win = $('cmsPreview') && $('cmsPreview').contentWindow;
+    if (win) try { win.postMessage(message, window.location.origin); } catch (error) { /* between routes; the frame's load handler sends the full state */ }
   }
   async function saveSettingsDefaultsDraft(button) {
     try {
@@ -75,7 +74,7 @@
     state.settingsDefaultsSaved = JSON.stringify(state.settingsDefaultsDraft);
     ArkSiteDefaults.define(state.settingsDefaultsDraft);
     if (button) button.disabled = true;
-    renderList();
+    refreshList();
   }
   function revertDesign() {
     state.themeDraft = (window.ArkTheme && (ArkTheme.get() || ArkTheme.defaults())) || {};
@@ -83,11 +82,12 @@
     notifyPreviewTheme();
     clearTimeout(settingsDefaultsReloadTimer);
     reloadPreview();
-    renderDesignEditor();
-    renderList();
+    repaintPanels('design');
+    touch();
     status('Reverted global design config.', '');
   }
-  function selectDesign() { state.kind = 'design'; renderList(); renderEditor(); reloadPreview(); }
+  /* Theme & defaults is the Theme view, docked beside the live canvas (js/admin/sitemap.js setView) */
+  function selectDesign() { setView('theme'); }
   /* A small live thumbnail of a background style, mounted right in the admin (not just the
      iframe): design/ark-ui's generators are pure DOM/SVG/canvas, so this is the same
      ArkBackgrounds.<key>.mount() the public site uses, just in a small fixed box. */
@@ -297,18 +297,25 @@
     return wrap;
   }
 
-  function renderDesignEditor() {
-    var root = $('editor'); root.textContent = '';
-    var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
-    refuse(revert, themeDirty() || settingsDefaultsDirty() ? '' : 'Nothing to revert: the theme and settings-gear defaults match their saved copy.');
-    root.appendChild(h('div', { class: 'editor-head' },
-      h('div', {}, h('h1', { text: 'Theme & defaults' }), h('div', { class: 'route', text: 'Site-wide · theme-data.js · settings-defaults-data.js · seo-data.js' })),
-      h('div', { class: 'editor-actions' }, revert)));
-    root.appendChild(buildDesignPanel());
-    root.appendChild(buildSettingsDefaultsPanel());
-    root.appendChild(buildSiteSeoPanel());
+  /* renderDesignEditor(container) -- also provided as renderThemePanel: Theme & defaults (the
+     colour theme, the background, the settings-gear defaults, the site-wide SEO), drawn into
+     whatever container the shell's Theme view gives it, with its Revert. A revert or a reset
+     redraws every mounted copy (repaintPanels('design')). Returns the container. */
+  function renderDesignEditor(container) {
+    var record = { kind: 'design', repaint: function () { renderDesignEditor(container); } };
+    paintInto(container, record, function (root) {
+      root.classList.add('cms-form', 'cms-theme');
+      var revert = h('button', { type: 'button', class: 'btn', text: 'Revert', 'data-revert': 'design:', onclick: revertDesign });
+      root.appendChild(h('div', { class: 'cms-form-head' },
+        h('div', {}, h('h2', { text: 'Theme & defaults' }), h('div', { class: 'route', text: 'Site-wide · theme-data.js · settings-defaults-data.js · seo-data.js' })),
+        h('div', { class: 'editor-actions' }, revert)));
+      root.appendChild(buildDesignPanel());
+      root.appendChild(buildSettingsDefaultsPanel());
+      root.appendChild(buildSiteSeoPanel());
+    });
+    return container;
   }
-  A.provide({ renderDesignEditor: renderDesignEditor, revertDesign: revertDesign,
+  A.provide({ renderDesignEditor: renderDesignEditor, renderThemePanel: renderDesignEditor, revertDesign: revertDesign,
       saveSettingsDefaultsDraft: saveSettingsDefaultsDraft, saveThemeDraft: saveThemeDraft,
       selectDesign: selectDesign, settingsDefaultsDirty: settingsDefaultsDirty, themeDirty: themeDirty });
 })();

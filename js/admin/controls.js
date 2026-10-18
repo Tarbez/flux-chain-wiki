@@ -81,11 +81,20 @@
   /* opts.type 'text' or 'textarea' makes this a free-text field (the SEO panels' titles,
      URLs and summaries) -- same row, same ctx contract, the value passed through as a
      string instead of a Number; the default is the original numeric field. */
+  /* The content forms (js/admin/editor.js, articles.js, assets.js, secrets.js) draw their rows
+     here too, with four more options: opts.id names the control (and the label points at it --
+     browser drivers and the canvas's inline edits find a field by it), opts.live writes on every
+     keystroke ('input') instead of on 'change' (a page field shows on the canvas while it is
+     typed), opts.rows sizes a textarea, opts.note is the row's trailing hint (a manifest key such
+     as NAV.PRODUCTS), and opts.readOnly shows a value that is not edited here. */
   function ctlField(ctx, label, key, opts) {
     opts = opts || {};
     const row = document.createElement('div'); row.className = 'row'; const l = document.createElement('label'); l.textContent = label;
     const textual = opts.type === 'text' || opts.type === 'textarea';
     const input = document.createElement(opts.type === 'textarea' ? 'textarea' : 'input'); input.className = 'ctl';
+    if (opts.id) { input.id = opts.id; l.htmlFor = opts.id; }
+    if (opts.rows) input.rows = opts.rows;
+    if (opts.readOnly) input.readOnly = true;
     if (!textual) {
       input.type = 'number';
       input.step = opts.step != null ? String(opts.step) : '1';
@@ -101,8 +110,9 @@
        opts.data: dataset entries a reader finds the field by (the new-block form's data-prop) */
     Object.keys(opts.data || {}).forEach((k) => { input.dataset[k] = opts.data[k]; });
     input.value = String(ctx.get(key) ?? (textual ? '' : 0)); input.setAttribute('aria-label', opts.ariaLabel || label);
-    input.addEventListener('change', () => { if (textual) { ctx.set(key, input.value); return; } const v = Number(input.value); if (Number.isFinite(v)) ctx.set(key, v); });
-    row.append(l, input, document.createElement('span')); return row;
+    input.addEventListener(opts.live && textual ? 'input' : 'change', () => { if (textual) { ctx.set(key, input.value); return; } const v = Number(input.value); if (Number.isFinite(v)) ctx.set(key, v); });
+    const note = document.createElement('span'); if (opts.note) { note.className = 'field-key'; note.textContent = opts.note; }
+    row.append(l, input, note); return row;
   }
   /* What a choice is called, derived from the value it writes: 'text-muted' -> "Text muted",
      'h1' -> "H1", 700 -> "700". Segmented and select controls take a label FUNCTION of the
@@ -131,6 +141,7 @@
     opts = opts || {};
     const row = document.createElement('div'); row.className = 'row'; const l = document.createElement('label'); l.textContent = label;
     const s = document.createElement('select'); s.className = 'ctl'; s.setAttribute('aria-label', opts.ariaLabel || label);
+    if (opts.id) { s.id = opts.id; l.htmlFor = opts.id; }   /* as in ctlField */
     options.forEach((v) => { const o = document.createElement('option'); o.value = String(v); o.textContent = name(v); s.appendChild(o); });
     s.value = String(ctx.get(key) ?? '') || String(options[0]);
     s.addEventListener('change', () => ctx.set(key, s.value));

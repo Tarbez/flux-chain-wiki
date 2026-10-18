@@ -62,6 +62,11 @@ var ArkElementMotion = (function () {
      limits) -- reused, not re-derived, for the law this file's own header
      states: addressing one real element the same way everywhere. */
   var ROUTE_CAP = 500, KEY_CAP = 3000, ROUTE_LEN = 300, KEY_LEN = 500;
+  /* The persistent shell's scope (js/content/layout.js, "scopes": ArkLayout.SHELL is the same
+     '*'; held equal by tests/layout-shell-scope.cjs). The editor stores a header element's
+     entry here so it is not silently dropped -- but createPresence (js/ark/scene-state.js)
+     animates a routed page's own items only, so nothing in the shell plays one yet. */
+  var SHELL = '*';
 
   function clamp(value, min, max, fallback) {
     /* Number(null) is 0, a finite number -- without this explicit check a
@@ -89,7 +94,7 @@ var ArkElementMotion = (function () {
     var out = { version: 1, routes: {} }, routes = whole && whole.routes;
     if (!routes || typeof routes !== 'object') routes = {};
     Object.keys(routes).slice(0, ROUTE_CAP).forEach(function (route) {
-      if (route[0] !== '/' || route.length > ROUTE_LEN) return;
+      if (route !== SHELL && (route[0] !== '/' || route.length > ROUTE_LEN)) return;
       var nodes = routes[route]; if (!nodes || typeof nodes !== 'object') return;
       var cleanNodes = {};
       Object.keys(nodes).slice(0, KEY_CAP).forEach(function (key) {
@@ -146,7 +151,7 @@ var ArkElementMotion = (function () {
     easings: function () { return EASINGS.slice(); },
     vectorFor: function (direction) { return (VECTORS[direction] || VECTORS[DEFAULT_DIRECTION]).slice(); },
     sanitize: sanitize, defaults: defaults, defaultEntry: defaultEntry,
-    define: define, get: get, entryFor: entryFor, set: set, remove: remove, serialize: serialize,
+    define: define, get: get, entryFor: entryFor, set: set, remove: remove, serialize: serialize, SHELL: SHELL,
     MIN_DISTANCE: MIN_DISTANCE, MAX_DISTANCE: MAX_DISTANCE, MIN_MS: MIN_MS, MAX_MS: MAX_MS
   };
 })();

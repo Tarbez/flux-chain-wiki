@@ -14,7 +14,10 @@ const src = fs.readFileSync('js/main.js', 'utf8');
 const start = src.indexOf('  function setCmsElementFrame(element, frame, commit) {');
 const end = src.indexOf('  function setCmsLayoutFrame(frame, commit) {');
 assert(start >= 0 && end > start, 'js/main.js still defines setCmsElementFrame right before setCmsLayoutFrame');
-const extracted = src.slice(start, end);
+/* setCmsElementFrame applies the frame that applies to the element (cmsFrameFor, right above it) */
+const frameFor = src.slice(src.indexOf('  function cmsFrameFor(route, key, element) {'), src.indexOf('  function cmsLayoutEntry('));
+assert(frameFor.length > 0, 'js/main.js still defines cmsFrameFor right before cmsLayoutEntry');
+const extracted = frameFor + src.slice(start, end);
 
 class FakeElement {
   constructor(key) { this.tagName = 'DIV'; this.nodeType = 1; this.namespaceURI = 'http://www.w3.org/1999/xhtml'; this.attrs = { 'data-ark-layout-key': key }; this.children = []; this.parentNode = null; this.id = ''; this.style = {}; }
@@ -30,6 +33,7 @@ function run() {
   const context = {
     window: { innerWidth: 1280 },
     cmsLayoutDraft: null,
+    cmsRoutePath: () => '/',
     cmsSelectionInfo: (element) => ({ route: '/', key: element.getAttribute('data-ark-layout-key'), breakpoint: 'desktop' }),
   };
   vm.createContext(context);

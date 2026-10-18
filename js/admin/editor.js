@@ -1,32 +1,45 @@
 /* =====================================================================
-   ADMIN EDITOR · PAGE EDITOR AND DISPATCH (js/admin/editor.js)
+   ADMIN EDITOR · PAGE FIELDS AND THE CONTENT FORMS' COMMON PATH (js/admin/editor.js)
    ---------------------------------------------------------------------
-   Owns: renderEditor(), the one dispatcher that draws whatever state.kind is on screen
-   (delegating to the article/image/encrypted/shape/mesh/design/Studio editors), the
-   page (manifest) editor itself -- fields, link pickers, points, its Content and Code tabs
-   (the Shape tab is js/admin/shapes.js's, the SEO tab js/admin/seo.js's) -- touch() (refresh everything that depends on "is it dirty"), Revert, the
-   header's Save button state, and the New page form.
-   Must not: save (js/admin/save.js) or post to a preview frame directly
-   (js/admin/preview.js does, from touch()).
+   Owns: renderPageFields(container, id) -- a page's (manifest's) whole form: every field,
+   link pickers, points, its Content / Shape / SEO / Code tabs (the Shape tab's pieces are
+   js/admin/shapes.js's, the SEO tab js/admin/seo.js's) -- drawn into WHATEVER container the
+   shell hands it (the Page fields sheet, a test's detached div); and the path every content
+   form shares: setItemField() (THE single-field draft write -- form inputs and the canvas's
+   inline edits both call it), touch() (refresh everything that depends on "is it dirty"
+   without rebuilding a form), revertItem(), createPage(), deleteItem(), the header's Save
+   button state, and the panel registry that repaints a form in place keeping focus and caret.
+   There is no centre-column dispatcher any more: the old renderEditor() drew whatever
+   state.kind named into the fixed #editor column of the Content layout, which is gone (one
+   workspace, 2026-10-18), and was deleted with it. The shell mounts each panel where it wants
+   (js/admin/panels.js) and re-draws them with refreshPanels().
+   Must not: save (js/admin/save.js) or post to a preview frame directly (the bridge,
+   js/admin/bridge.js, does -- touch() asks it with notifyPreviewState()).
    ===================================================================== */
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, h = A.h, $ = A.$, hasShape = A.hasShape, shapePageId = A.shapePageId,
-      deleteCurrent = A.deleteCurrent, refuse = A.refuse, anyDirty = A.anyDirty,
-      NOTHING_TO_SAVE = A.NOTHING_TO_SAVE, saveEverything = A.saveEverything,
-      currentDirty = A.currentDirty, renderList = A.renderList, status = A.status, select = A.select;
+      refuse = A.refuse, anyDirty = A.anyDirty, NOTHING_TO_SAVE = A.NOTHING_TO_SAVE,
+      saveEverything = A.saveEverything, status = A.status, ITEM_KINDS = A.ITEM_KINDS,
+      dirty = A.dirty, dirtyA = A.dirtyA, dirtyI = A.dirtyI, dirtyS = A.dirtyS,
+      removeItemFile = A.removeItemFile, forgetDeleted = A.forgetDeleted, afterDelete = A.afterDelete,
+      ctlField = A.ctlField, ctlSelectField = A.ctlSelectField;
   /* defined by files loaded after this one: resolved when called */
-  var renderStudioEditor = A.later('renderStudioEditor'),
-      renderArticleEditor = A.later('renderArticleEditor'),
-      renderAssetEditor = A.later('renderAssetEditor'), renderSecretEditor = A.later('renderSecretEditor'),
-      renderShapeEditor = A.later('renderShapeEditor'), renderMeshEditor = A.later('renderMeshEditor'),
-      renderDesignEditor = A.later('renderDesignEditor'), buildShapePickers = A.later('buildShapePickers'),
-      buildPlacementPanel = A.later('buildPlacementPanel'),
-      buildPageSeoPanel = A.later('buildPageSeoPanel'), notifyPreviewState = A.later('notifyPreviewState'),
-      revertArticle = A.later('revertArticle'), revertAsset = A.later('revertAsset'),
-      revertSecret = A.later('revertSecret'), revertDesign = A.later('revertDesign'),
-      reloadPreview = A.later('reloadPreview');
+  var buildShapePickers = A.later('buildShapePickers'), buildPlacementPanel = A.later('buildPlacementPanel'),
+      buildPageSeoPanel = A.later('buildPageSeoPanel'), studioRoutes = A.later('studioRoutes'),
+      deleteArticle = A.later('deleteArticle'), deleteAsset = A.later('deleteAsset'),
+      deleteSecret = A.later('deleteSecret'), revertArticle = A.later('revertArticle'),
+      revertAsset = A.later('revertAsset'), revertSecret = A.later('revertSecret'),
+      revertDesign = A.later('revertDesign');
+  /* The shell's refresh points (js/admin/nav.js, rail.js, bridge.js). The content forms run
+     with or without a given surface on screen -- a test mounts one panel in a detached div, and
+     the shell's surfaces change under them -- so a refresh nobody provides is skipped, never an
+     error in the middle of an edit. Only refreshes go through here, never a draft write. */
+  function hook(name) { return function () { if (typeof A[name] === 'function') return A[name].apply(this, arguments); }; }
+  var renderList = hook('renderList'), refreshPanels = hook('refreshPanels'),
+      notifyPreviewState = hook('notifyPreviewState'), reloadPreview = hook('reloadPreview'),
+      syncCmsPreview = hook('syncCmsPreview');
 
   /* ---- route choices, from the site's own catalog ------------------- */
   function routeOptions() {
@@ -41,59 +54,228 @@
     return (ArkUI.referenceDocs || []).map(function (doc) { return { key: doc, label: doc }; });
   }
 
+  /* A select over the site's own data -- its routes, reference docs, shape pages -- takes its
+     values and its labels from ONE list of { key, label }, so a label cannot drift from the value
+     it writes (tests/admin-control-labels.cjs; these data-driven lists are checked by
+     tests/admin-content-panels.cjs). */
+  function contentChoices(options) { return options.map(function (o) { return o.key; }); }
+  function contentLabel(options) { var by = {}; options.forEach(function (o) { by[o.key] = o.label; }); return function (key) { return by[key] === undefined ? String(key) : by[key]; }; }
+
   /* ---- a 'link' field's tagged value, taken apart for the picker ----- */
   function parseLinkValue(value) {
     var m = /^(route|doc|url):([\s\S]*)$/.exec(value || '');
     return m ? { type: m[1], rest: m[2] } : { type: 'route', rest: '' };
   }
 
-  /* The picker for a field of kind 'link' (js/content/manifest.js), modeled
-     on the existing manifest.meta.next route picker (selectEl + routeOptions
-     above): a type toggle, then the one control that type needs, always
-     writing back the tagged string a 'link' field's value must be. `onchange`
-     receives the new tagged value; callers choose where it goes (a manifest
-     field's .value, or a LearningContent article's own string property), so
-     this one renderer serves both call sites (a page's fields here, an article's in
-     js/admin/articles.js). */
-  function linkPickerEl(labelText, keyHint, value, onchange) {
+  /* The picker for a field of kind 'link' (js/content/manifest.js): a type toggle, then the one
+     control that type needs, always writing back the tagged string a 'link' field's value must
+     be. `onchange` receives the new tagged value; callers choose where it goes (a manifest
+     field through setItemField, an article's own string property), so this one renderer serves
+     a page's fields here and an article's (js/admin/articles.js). The value select starts with
+     "Not set" because a link with only its type ('route:') is what the draft holds right after
+     the type changes -- a select showing its first page would claim a value the draft lacks.
+     `onchange` persists the value (through setItemField, which also runs touch()). `bind` is
+     the field's address (setItemField's kind:id:key), so an edit from elsewhere shows. */
+  var LINK_TYPES = [{ key: 'route', label: 'Internal page' }, { key: 'doc', label: 'Reference doc' }, { key: 'url', label: 'External URL' }];
+  function linkPickerEl(labelText, keyHint, value, onchange, note, bind) {
     var parsed = parseLinkValue(value);
     var typeId = 'lp-type-' + keyHint, valueId = 'lp-value-' + keyHint;
     var body = h('div', { class: 'field-link-value' });
+    var box = h('div', { class: 'field field-link' });
+    if (bind) box.dataset.cmsLink = bind;
     function renderValue() {
       body.textContent = '';
-      if (parsed.type === 'route') {
-        var routeSelect = h('select', { id: valueId });
-        routeOptions().forEach(function (o) { routeSelect.appendChild(h('option', { value: o.key, text: o.label })); });
-        routeSelect.value = parsed.rest;
-        routeSelect.addEventListener('change', function () { parsed.rest = routeSelect.value; onchange('route:' + parsed.rest); touch(); });
-        body.appendChild(routeSelect);
-      } else if (parsed.type === 'doc') {
-        var docSelect = h('select', { id: valueId });
-        docOptions().forEach(function (o) { docSelect.appendChild(h('option', { value: o.key, text: o.label })); });
-        docSelect.value = parsed.rest;
-        docSelect.addEventListener('change', function () { parsed.rest = docSelect.value; onchange('doc:' + parsed.rest); touch(); });
-        body.appendChild(docSelect);
-      } else {
-        var input = h('input', { id: valueId, type: 'url', value: parsed.rest });
-        input.addEventListener('input', function () { parsed.rest = input.value; onchange('url:' + parsed.rest); touch(); });
-        body.appendChild(input);
-      }
+      var ctx = { get: function () { return parsed.rest; }, set: function (_key, v) { parsed.rest = v; onchange(parsed.type + ':' + parsed.rest); } };
+      if (parsed.type === 'url') { body.appendChild(ctlField(ctx, 'Address', 'rest', { type: 'text', id: valueId, live: true, spellcheck: false })); return; }
+      var options = [{ key: '', label: 'Not set' }].concat(parsed.type === 'route' ? routeOptions() : docOptions());
+      body.appendChild(ctlSelectField(ctx, parsed.type === 'route' ? 'Page' : 'Document', 'rest', contentChoices(options), contentLabel(options), { id: valueId }));
     }
-    var typeSelect = h('select', { id: typeId },
-      h('option', { value: 'route', text: 'Internal page' }),
-      h('option', { value: 'doc', text: 'Reference doc' }),
-      h('option', { value: 'url', text: 'External URL' }));
-    typeSelect.value = parsed.type;
-    typeSelect.addEventListener('change', function () {
-      parsed = { type: typeSelect.value, rest: '' };
-      renderValue(); onchange(parsed.type + ':'); touch();
-    });
+    var typeCtx = { get: function () { return parsed.type; }, set: function (_key, v) { parsed = { type: v, rest: '' }; renderValue(); onchange(parsed.type + ':'); } };
+    var typeRow = ctlSelectField(typeCtx, labelText, 'type', contentChoices(LINK_TYPES), contentLabel(LINK_TYPES), { id: typeId });
+    box.appendChild(typeRow);
+    box.appendChild(body);
+    if (note) { typeRow.children[2].className = 'field-key'; typeRow.children[2].textContent = note; }
     renderValue();
-    var label = h('label', { for: typeId }, h('span', { text: labelText }));
-    return h('div', { class: 'field field-link' }, label, typeSelect, body);
+    /* an edit from elsewhere (the canvas, a Revert) re-reads the value; the picker that is being
+       used keeps its own state */
+    box.cmsSync = function (next) { if (box.contains(document.activeElement)) return; parsed = parseLinkValue(next); typeRow.children[1].value = parsed.type; renderValue(); };
+    return box;
   }
 
-  /* ---- editor ------------------------------------------------------- */
+  /* ---- the mounted panels -----------------------------------------------------------------
+     Every content form is drawn by paintInto(): it records the panel (so a structural edit can
+     repaint every form showing that item, attached or not), and a repaint keeps the focused
+     control, its caret and the scroll position -- a repaint while someone types must not pull
+     the caret out of the field (the canvas now remounts on every keystroke's draft, and the
+     shell's refreshes re-mount panels on preview messages). */
+  var mounted = [];
+  function paintInto(container, record, build) {
+    var active = document.activeElement, keep = null;
+    if (active && active !== document.body && container.contains(active) && active.id) {
+      keep = { id: active.id, start: null, end: null };
+      try { keep.start = active.selectionStart; keep.end = active.selectionEnd; } catch (e) { /* a control with no caret */ }
+    }
+    var scroll = container.scrollTop;
+    mounted = mounted.filter(function (r) { return r.container !== container && !(r.seen && !r.container.isConnected); });
+    record.container = container; record.seen = container.isConnected; mounted.push(record);
+    container.textContent = '';
+    build(container);
+    container.scrollTop = scroll;
+    if (keep) {
+      var again = Array.prototype.find.call(container.querySelectorAll('[id]'), function (el) { return el.id === keep.id; });
+      if (again) {
+        again.focus({ preventScroll: true });
+        if (keep.start != null) try { again.setSelectionRange(keep.start, keep.end); } catch (e) { /* a control with no caret */ }
+      }
+    }
+    refreshRevertButtons(container);
+  }
+  /* repaint every mounted panel that shows `kind` (and `id`, when given): a list panel
+     (Media, Vault) records kind + ':list' and repaints on any change to that kind */
+  function repaintPanels(kind, id) {
+    mounted.slice().forEach(function (r) {
+      if (r.kind === kind + ':list' || (r.kind === kind && (id === undefined || r.id === id)) || kind === '*') r.repaint();
+    });
+  }
+  /* the list of items changed (created, deleted, reverted): every form and the shell's lists */
+  function itemsChanged(kind, id) {
+    repaintPanels(kind, id);
+    renderList(); refreshPanels();
+    emit(kind, id, 'items');
+  }
+  /* One event for whoever lists items with dirty dots (the rail's Pages tab, the sitemap):
+     `ark-cms-drafts` on document, detail { kind, id, change: 'edit' | 'items' }. */
+  function emit(kind, id, change) {
+    try { document.dispatchEvent(new CustomEvent('ark-cms-drafts', { detail: { kind: kind, id: id, change: change } })); } catch (e) { /* no CustomEvent: nothing listens either */ }
+  }
+
+  /* ---- an item's dirty / saved state -------------------------------------------------------- */
+  var DIRTY = { page: dirty, article: dirtyA, asset: dirtyI, secret: dirtyS };
+  function itemExists(kind, id) { var k = ITEM_KINDS[kind]; return !!(k && state[k.drafts][id]); }
+  function itemDirty(kind, id) { return !!(DIRTY[kind] && itemExists(kind, id) && DIRTY[kind](id)); }
+  function neverSaved(kind, id) { var k = ITEM_KINDS[kind]; return !!k && state[k.saved][id] === null; }
+  /* A panel's Revert button carries data-revert="<kind>:<id>" and says why it is disabled. */
+  function refreshRevertButtons(root) {
+    Array.prototype.forEach.call((root || document).querySelectorAll('[data-revert]'), function (revert) {
+      var at = revert.dataset.revert.indexOf(':'), kind = revert.dataset.revert.slice(0, at), id = revert.dataset.revert.slice(at + 1);
+      if (kind === 'design') { refuse(revert, A.themeDirty() || A.settingsDefaultsDirty() ? '' : 'Nothing to revert: the theme and settings-gear defaults match their saved copy.'); return; }
+      refuse(revert, neverSaved(kind, id) ? 'Not saved yet: there is no saved version to revert to.' : itemDirty(kind, id) ? '' : 'Nothing to revert: this matches its saved copy.');
+    });
+  }
+  /* every list row that names an item -- data-cms-item="<kind>:<id>" -- gets or loses its dot */
+  function refreshDots(root) {
+    Array.prototype.forEach.call((root || document).querySelectorAll('[data-cms-item]'), function (row) {
+      var at = row.dataset.cmsItem.indexOf(':'), now = itemDirty(row.dataset.cmsItem.slice(0, at), row.dataset.cmsItem.slice(at + 1)), dot = row.querySelector('.dot');
+      if (now && !dot) row.appendChild(h('span', { class: 'dot', title: 'Unsaved changes' }));
+      if (!now && dot) dot.remove();
+    });
+  }
+  function panelHead(title, path, kind, id) {
+    var revert = h('button', { type: 'button', class: 'btn', text: 'Revert', 'data-revert': kind + ':' + id, onclick: function () { revertItem(kind, id); } });
+    return h('div', { class: 'cms-form-head' },
+      h('div', {}, h('h2', { text: title }), h('div', { class: 'route', text: path })),
+      h('div', { class: 'editor-actions' }, revert));
+  }
+
+  /* ---- THE single-field draft write --------------------------------------------------------
+     setItemField(kind, id, fieldKey, value, opts) -> { ok: true, changed } | { ok: false, refusal }
+     The one path a content edit takes into a draft: every page/article form input calls it, and
+     so does the canvas's inline editing (defxn-cms-preview-copy-edit, js/admin/bridge.js), so
+     Save, dirty dots, Revert and versions see one kind of edit.
+       kind 'page':    fieldKey is a manifest field role ('TITLE', 'NAV.PRODUCTS', 'POINT2.TEXT')
+                       -> drafts[id].fields[role].value; or 'meta.placement' / 'meta.next' where
+                       the page has them.
+       kind 'article': a card / editorial property ('title', 'summary', 'core', 'relevance',
+                       'evidenceHref', ...), 'sections.<i>.<j>' (j 0 = the heading),
+                       'questions.<i>', or 'numbers' (a boolean).
+     The value is a string (numbers: a boolean). Any other key is refused with what it needs --
+     an edit never invents a field. opts.canvas === false: the edit came FROM the canvas, which
+     already shows it -- the draft and the canvas's copy of the site are updated without
+     remounting the preview under the person typing in it. Every form control bound to the
+     field (data-cms-field="<kind>:<id>:<key>") shows the new value unless it has focus. */
+  var ARTICLE_TEXT_KEYS = ['title', 'category', 'minutes', 'summary', 'core', 'relevance', 'reviewed', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'];
+  function fieldTarget(kind, id, key) {
+    if (kind === 'page') {
+      var m = state.drafts[id];
+      if (!m) return { refusal: 'No page "' + id + '" to edit. Needs: an id from the Pages list (' + state.ids.join(', ') + ').' };
+      if (key === 'meta.placement' || key === 'meta.next') {
+        var meta = key.slice(5);
+        if (!m.meta || !m.meta[meta]) return { refusal: 'Page "' + id + '" has no ' + key + ' to set: only pages that already link onward or sit on the theory page have it (js/content/manifests/' + id + '.js).' };
+        return { get: function () { return m.meta[meta]; }, set: function (v) { m.meta[meta] = v; } };
+      }
+      var f = m.fields && m.fields[key];
+      if (!f) return { refusal: 'Page "' + id + '" has no field "' + key + '". Its fields are ' + Object.keys(m.fields || {}).join(', ') + '; a new field is added in js/content/manifests/' + id + '.js, not by an edit.' };
+      return { field: f, get: function () { return f.value; }, set: function (v) { f.value = v; } };
+    }
+    if (kind === 'article') {
+      var a = state.aDrafts[id];
+      if (!a) return { refusal: 'No article "' + id + '" to edit. Needs: a slug from the Articles list (' + state.slugs.join(', ') + ').' };
+      if (key === 'numbers') return { bool: true, get: function () { return a.numbers; }, set: function (v) { a.numbers = v; } };
+      if (ARTICLE_TEXT_KEYS.indexOf(key) >= 0) return { get: function () { return a[key] === undefined ? (key === 'core' ? a.summary : '') : a[key]; }, set: function (v) { a[key] = v; } };
+      var s = /^sections\.(\d+)\.(\d+)$/.exec(key), q = /^questions\.(\d+)$/.exec(key);
+      if (s && a.sections[+s[1]] && +s[2] < a.sections[+s[1]].length) return { get: function () { return a.sections[+s[1]][+s[2]]; }, set: function (v) { a.sections[+s[1]][+s[2]] = v; } };
+      if (q && a.sections[+q[1]]) return {
+        get: function () { return (a.questions || [])[+q[1]] || a.sections[+q[1]][0]; },
+        /* the first question written fills in the rest from the section headings, as before */
+        set: function (v) { if (!a.questions) a.questions = a.sections.map(function (section) { return section[0]; }); a.questions[+q[1]] = v; } };
+      return { refusal: 'Article "' + id + '" has no field "' + key + '". Editable: ' + ARTICLE_TEXT_KEYS.join(', ') + ', numbers, sections.<section>.<part> (0..' + (a.sections.length - 1) + '), questions.<section>.' };
+    }
+    return { refusal: 'setItemField edits pages and articles, not "' + kind + '". Needs: kind "page" or "article"; images and encrypted items are edited in the Media and Vault tabs.' };
+  }
+  function setItemField(kind, id, key, value, opts) {
+    opts = opts || {};
+    var t = fieldTarget(kind, id, key);
+    if (t.refusal) return { ok: false, refusal: t.refusal };
+    if (t.bool ? typeof value !== 'boolean' : typeof value !== 'string') return { ok: false, refusal: kind + ' "' + id + '" ' + key + ' takes ' + (t.bool ? 'true or false' : 'text') + ', not ' + (value === null ? 'null' : typeof value) + '.' };
+    var changed = t.get() !== value;
+    t.set(value);
+    if (opts.canvas === false && state.cmsSourceSite) foldIntoCanvasSite(kind, id, key);
+    syncControls(kind + ':' + id + ':' + key, value);
+    touch({ canvas: opts.canvas !== false, kind: kind, id: id });
+    return { ok: true, changed: changed };
+  }
+  /* the canvas's copy of the site (state.cmsSourceSite) takes the one edited item from its draft,
+     so the preview's next remount carries what was typed inline */
+  function foldIntoCanvasSite(kind, id) {
+    var site = state.cmsSourceSite, list = kind === 'page' ? site.manifests : site.articles, key = kind === 'page' ? 'id' : 'slug';
+    if (!Array.isArray(list)) return;
+    var at = list.findIndex(function (x) { return x && x[key] === id; });
+    var copy = kind === 'page' ? JSON.parse(JSON.stringify(state.drafts[id])) : A.articleCopy(state.aDrafts[id]);
+    if (at >= 0) list[at] = copy;
+  }
+  function syncControls(address, value) {
+    var seen = [];
+    var roots = [document].concat(mounted.map(function (r) { return r.container; }));
+    roots.forEach(function (root) {
+      Array.prototype.forEach.call(root.querySelectorAll('[data-cms-field], [data-cms-link]'), function (el) {
+        if (seen.indexOf(el) >= 0 || (el.dataset.cmsField || el.dataset.cmsLink) !== address) return;
+        seen.push(el);
+        if (el.dataset.cmsLink) { el.cmsSync && el.cmsSync(value); return; }
+        if (el !== document.activeElement) { if (el.type === 'checkbox') el.checked = !!value; else el.value = value; }
+        decorate(el, value);
+      });
+    });
+  }
+  /* a page field's row shows whether it is empty (data-mark-empty) and, for a text field, how long it is */
+  function decorate(control, value) {
+    var row = control.closest('.row');
+    if (!row || typeof value !== 'string') return;
+    if (row.dataset.markEmpty) row.classList.toggle('empty', !value);
+    var count = row.querySelector('.count');
+    if (count) count.textContent = value.length + ' characters';
+  }
+  /* a form row bound to one field: the shared ctlField, writing through setItemField */
+  function boundField(kind, id, key, label, opts) {
+    var t = fieldTarget(kind, id, key);
+    var row = ctlField({ get: function () { return t.get(); }, set: function (_k, v) { setItemField(kind, id, key, v); } }, label, key,
+      Object.assign({ type: 'text', live: true }, opts));
+    var control = row.children[1];
+    control.dataset.cmsField = kind + ':' + id + ':' + key;
+    row.classList.add('field');
+    return row;
+  }
+
+  /* ---- a page's form ------------------------------------------------------------------------ */
   function sections(fields) {
     var order = [], by = {};
     Object.keys(fields).forEach(function (role) {
@@ -105,37 +287,24 @@
   }
 
   function fieldEl(manifest, role) {
-    var field = manifest.fields[role], id = 'f-' + manifest.id + '-' + role.replace(/\./g, '-');
+    var field = manifest.fields[role], id = 'f-' + manifest.id + '-' + role.replace(/\./g, '-'), note = manifest.id.toUpperCase() + '.' + role;
     if (field.kind === 'link') {
-      var picker = linkPickerEl(field.label, id, field.value, function (v) { field.value = v; });
-      picker.querySelector('label').appendChild(h('span', { class: 'field-key', text: manifest.id.toUpperCase() + '.' + role }));
-      return picker;
+      return linkPickerEl(field.label, id, field.value, function (v) { setItemField('page', manifest.id, role, v); }, note, 'page:' + manifest.id + ':' + role);
     }
-    var control = field.kind === 'text'
-      ? h('textarea', { id: id, rows: 3, spellcheck: true })
-      : h('input', { id: id, type: 'text', spellcheck: true });
-    control.value = field.value;
-    var wrap = h('div', { class: 'field' + (field.value ? '' : ' empty') },
-      h('label', { for: id }, h('span', { text: field.label }), h('span', { class: 'field-key', text: manifest.id.toUpperCase() + '.' + role })),
-      control);
-    var count = field.kind === 'text' ? h('div', { class: 'count', text: field.value.length + ' characters' }) : null;
-    if (count) wrap.appendChild(count);
-    control.addEventListener('input', function () {
-      field.value = control.value;
-      wrap.classList.toggle('empty', !control.value);
-      if (count) count.textContent = control.value.length + ' characters';
-      touch();
-    });
-    return wrap;
+    var text = field.kind === 'text';
+    var row = boundField('page', manifest.id, role, field.label, { type: text ? 'textarea' : 'text', rows: 3, id: id, note: note });
+    row.dataset.markEmpty = '1';
+    if (!field.value) row.classList.add('empty');
+    if (text) row.appendChild(h('div', { class: 'count', text: field.value.length + ' characters' }));
+    return row;
   }
 
-  function selectEl(labelText, value, options, onchange) {
-    var id = 'm-' + labelText.replace(/\W+/g, '-').toLowerCase();
-    var select = h('select', { id: id });
-    options.forEach(function (o) { select.appendChild(h('option', { value: o.key, text: o.label })); });
-    select.value = value;
-    select.addEventListener('change', function () { onchange(select.value); touch(); });
-    return h('div', { class: 'field' }, h('label', { for: id, text: labelText }), select);
+  function metaSelect(manifest, key, labelText, options) {
+    var row = ctlSelectField({ get: function () { return manifest.meta[key.slice(5)]; }, set: function (_k, v) { setItemField('page', manifest.id, key, v); } },
+      labelText, key, contentChoices(options), contentLabel(options), { id: 'm-' + labelText.replace(/\W+/g, '-').toLowerCase() });
+    row.children[1].dataset.cmsField = 'page:' + manifest.id + ':' + key;
+    row.classList.add('field');
+    return row;
   }
 
   function addPoint(manifest) {
@@ -152,108 +321,109 @@
     delete manifest.fields['POINT' + n + '.TITLE']; delete manifest.fields['POINT' + n + '.TEXT'];
   }
 
-  function renderEditor() {
-    /* Step 2 merge: Studio used to be a second document (an <iframe src="admin-studio.html">
-       swapped into #editor), toggled by a '.studio-open' class on #cmsShell that hid the
-       Content-CMS preview aside/padded #editor around the iframe. Studio is now inline
-       markup in THIS document (#studioRoot, in admin-app.html, hidden by default) -- so
-       entering/leaving 'studio' is just toggling which of the two top-level containers is
-       hidden, same idea, no iframe to create or destroy. */
-    var studio = state.kind === 'studio';
-    if ($('cmsShell')) $('cmsShell').hidden = studio;
-    if ($('studioRoot')) $('studioRoot').hidden = !studio;
-    if (studio) { renderStudioEditor(); return; }
-    if (state.kind === 'article') { renderArticleEditor(); return; }
-    if (state.kind === 'asset') { renderAssetEditor(); return; }
-    if (state.kind === 'secret') { renderSecretEditor(); return; }
-    if (state.kind === 'shape') { renderShapeEditor(); return; }
-    if (state.kind === 'mesh') { renderMeshEditor(); return; }
-    if (state.kind === 'design') { renderDesignEditor(); return; }
-    var root = $('editor'); root.textContent = '';
-    var id = state.current, manifest = state.drafts[id];
-    if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
-    var revert = h('button', { id: 'revert', type: 'button', class: 'btn', text: 'Revert', onclick: revertCurrent });
-    root.appendChild(h('div', { class: 'editor-head' },
-      h('div', {}, h('h1', { text: manifest.title }), h('div', { class: 'route', text: manifest.route + '  ·  js/content/manifests/' + manifest.id + '.js' })),
-      h('div', { class: 'editor-actions' }, revert)));
+  /* renderPageFields(container, item, opts): every manifest field of one page (or the site
+     chrome, id 'nav'), in tabs Content / Shape (pages with a background shape) / SEO / Code,
+     with Revert and -- for a theory page -- Delete. `item` is the manifest id (or { id }).
+     opts.tab opens a tab ('content' | 'shape' | 'seo' | 'code'); the tab last used on that page
+     is kept across repaints. Works at popover width (~420px) and full-sheet width: one column,
+     every row a label over its control. Returns the container. */
+  var tabFor = {};
+  function renderPageFields(container, item, opts) {
+    var id = item && typeof item === 'object' ? item.id : item;
+    /* opts.tab opens that tab on MOUNT; a re-draw of the same page in the same container (the
+       shell re-mounts with the same arguments) keeps the tab the person moved to */
+    var prev = mounted.find(function (r) { return r.container === container; });
+    if (opts && opts.tab && !(prev && prev.kind === 'page' && prev.id === id)) tabFor['page:' + id] = opts.tab;
+    var record = { kind: 'page', id: id, repaint: function () { renderPageFields(container, id); } };
+    paintInto(container, record, function (root) {
+      root.classList.add('cms-form');
+      var manifest = state.drafts[id];
+      if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: id ? 'There is no page "' + id + '" any more (deleted, or never created). Pick a page in the Pages tab.' : 'Pick a page in the Pages tab.' })); return; }
+      root.appendChild(panelHead(manifest.title, manifest.route + '  ·  js/content/manifests/' + manifest.id + '.js', 'page', id));
 
-    var contentPanel = h('div', { class: 'editor-tab-flow' });
-    if (manifest.meta.next || manifest.meta.placement) {
-      var where = h('fieldset', {}, h('legend', { text: 'Where it goes' }));
-      if (manifest.meta.placement) where.appendChild(selectEl('Shown on the theory page as', manifest.meta.placement,
-        [{ key: 'row', label: 'A numbered row' }, { key: 'rail', label: 'A link beside the page' }], function (v) { manifest.meta.placement = v; }));
-      if (manifest.meta.next) where.appendChild(selectEl('The onward link opens', manifest.meta.next, routeOptions(), function (v) { manifest.meta.next = v; }));
-      contentPanel.appendChild(where);
-    }
-    sections(manifest.fields).forEach(function (section) {
-      var set = h('fieldset', {}, h('legend', { text: section.name }));
-      section.roles.forEach(function (role) { set.appendChild(fieldEl(manifest, role)); });
-      contentPanel.appendChild(set);
+      var contentPanel = h('div', { class: 'editor-tab-flow' });
+      if (manifest.meta.next || manifest.meta.placement) {
+        var where = h('fieldset', {}, h('legend', { text: 'Where it goes' }));
+        if (manifest.meta.placement) where.appendChild(metaSelect(manifest, 'meta.placement', 'Shown on the theory page as',
+          [{ key: 'row', label: 'A numbered row' }, { key: 'rail', label: 'A link beside the page' }]));
+        if (manifest.meta.next) where.appendChild(metaSelect(manifest, 'meta.next', 'The onward link opens', routeOptions()));
+        contentPanel.appendChild(where);
+      }
+      sections(manifest.fields).forEach(function (section) {
+        var set = h('fieldset', {}, h('legend', { text: section.name }));
+        section.roles.forEach(function (role) { set.appendChild(fieldEl(manifest, role)); });
+        contentPanel.appendChild(set);
+      });
+      if (manifest.fields['POINT1.TITLE']) {
+        contentPanel.appendChild(h('div', { class: 'tools' },
+          h('button', { type: 'button', class: 'btn', text: 'Add a point', onclick: function () { addPoint(manifest); touch(); repaintPanels('page', id); } }),
+          h('button', { type: 'button', class: 'btn', text: 'Remove the last point', disabled: ArkManifest.points(manifest) <= 1, onclick: function () { removePoint(manifest); touch(); repaintPanels('page', id); } })));
+      }
+      var tabItems = [{ id: 'content', label: 'Content', content: contentPanel }];
+      if (window.ArkMeshSettings && hasShape(id)) {
+        var spid = shapePageId(id);
+        tabItems.push({ id: 'shape', label: 'Shape', content: h('div', { class: 'editor-tab-flow' }, buildShapePickers(spid), buildPlacementPanel(spid)) });
+      }
+      tabItems.push({ id: 'seo', label: 'SEO', content: h('div', { class: 'editor-tab-flow' }, buildPageSeoPanel(id, manifest.title)) });
+      tabItems.push({ id: 'code', label: 'Code', content: buildCodePanel(id, manifest) });
+      var open = tabItems.some(function (t) { return t.id === tabFor['page:' + id]; }) ? tabFor['page:' + id] : 'content';
+      root.appendChild(ArkAdminPrimitives.tabs({ label: manifest.title + ' editor sections', items: tabItems, value: open, className: 'ark-tabs page-editor-tabs',
+        onChange: function (tab) { tabFor['page:' + id] = tab; } }));
+      if (manifest.group === 'theory') {
+        root.appendChild(h('div', { class: 'danger-zone' },
+          h('button', { type: 'button', class: 'btn danger', text: 'Delete this page', onclick: function () { deleteItem('page', id); } })));
+      }
     });
-    if (manifest.fields['POINT1.TITLE']) {
-      contentPanel.appendChild(h('div', { class: 'tools' },
-        h('button', { type: 'button', class: 'btn', text: 'Add a point', onclick: function () { addPoint(manifest); touch(); renderEditor(); } }),
-        h('button', { type: 'button', class: 'btn', text: 'Remove the last point', disabled: ArkManifest.points(manifest) <= 1, onclick: function () { removePoint(manifest); touch(); renderEditor(); } })));
-    }
-    var tabItems = [{ id: 'content', label: 'Content', content: contentPanel }];
-    if (window.ArkMeshSettings && hasShape(id)) {
-      var spid = shapePageId(id);
-      var shapePanel = h('div', { class: 'editor-tab-flow' }, buildShapePickers(spid), buildPlacementPanel(spid));
-      tabItems.push({ id: 'shape', label: 'Shape', content: shapePanel });
-    }
-    tabItems.push({ id: 'seo', label: 'SEO', content: h('div', { class: 'editor-tab-flow' }, buildPageSeoPanel(id, manifest.title)) });
-    tabItems.push({ id: 'code', label: 'Code', content: buildCodePanel(id, manifest) });
-    root.appendChild(ArkAdminPrimitives.tabs({ label: manifest.title + ' editor sections', items: tabItems, value: 'content', className: 'ark-tabs page-editor-tabs' }));
-    if (manifest.group === 'theory') {
-      root.appendChild(h('div', { class: 'danger-zone' },
-        h('button', { type: 'button', class: 'btn danger', text: 'Delete this page', onclick: deleteCurrent })));
-    }
-    touch();
-  }
-
-  /* THE Save button: one, in the header (#save), for every mode -- the per-editor Save buttons
-     and Studio's own "Save DEFXN" were duplicates of it (owner, 2026-10-18: one merged CMS). It
-     calls saveEverything() (every dirty draft, not just what is on screen), so it enables
-     whenever ANY of the drafts is dirty -- a dirty theme while looking at a clean page must not
-     leave the one save action looking disabled. */
-  function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }
-  $('save').addEventListener('click', function () { saveEverything(); });
-
-  /* update everything that depends on "is it dirty" without rebuilding the form */
-  function touch() {
-    var article = state.kind === 'article', asset = state.kind === 'asset', secret = state.kind === 'secret', now = currentDirty();
-    var revert = $('revert');
-    /* Revert stays scoped to the current section (it only ever reverts what is on screen), so
-       it uses currentDirty(); the header's one Save covers every draft (refreshSaveButton). */
     refreshSaveButton();
-    var neverSaved = (state.kind === 'design' ? state.themeSaved : article ? state.aSaved[state.aCurrent] : asset ? state.assetSaved[state.assetCurrent] : secret ? state.secretSaved[state.secretCurrent] : state.saved[state.current]) === null;
-    refuse(revert, neverSaved ? 'Not saved yet: there is no saved version to revert to.' : now ? '' : 'Nothing to revert: this matches its saved copy.');
-    if (state.kind === 'design') { renderList(); return; }
-    var selector = article ? '.page-list button[data-slug="' + state.aCurrent + '"]' : asset ? '.page-list button[data-asset="' + state.assetCurrent + '"]' : secret ? '.page-list button[data-secret="' + state.secretCurrent + '"]' : '.page-list button[data-id="' + state.current + '"]';
-    var button = document.querySelector(selector);
-    if (button) {
-      var dot = button.querySelector('.dot');
-      if (now && !dot) button.appendChild(h('span', { class: 'dot', title: 'Unsaved changes' }));
-      if (!now && dot) dot.remove();
-    }
-    notifyPreviewState();
+    return container;
   }
 
-  function revertCurrent() {
-    if (state.kind === 'article') { revertArticle(); return; }
-    if (state.kind === 'asset') { revertAsset(); return; }
-    if (state.kind === 'secret') { revertSecret(); return; }
-    if (state.kind === 'design') { revertDesign(); return; }
-    var id = state.current;
+  /* THE Save button: one, in the header (#save), for every view. It calls saveEverything()
+     (every dirty draft, not just what is on screen), so it enables whenever ANY of the drafts is
+     dirty -- a dirty theme while looking at a clean page must not leave the one save action
+     looking disabled. */
+  function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }
+  if ($('save')) $('save').addEventListener('click', function () { saveEverything(); });
+
+  /* touch(opts): update everything that depends on "is it dirty" without rebuilding any form --
+     the Save button, every panel's Revert, every list row's dot -- and send the drafts to the
+     canvas (unless opts.canvas === false: the edit came from the canvas). */
+  function touch(opts) {
+    opts = opts || {};
+    refreshSaveButton();
+    refreshRevertButtons(document);
+    mounted.forEach(function (r) { if (!r.container.isConnected) refreshRevertButtons(r.container); });
+    refreshDots(document);
+    emit(opts.kind || state.kind, opts.id, 'edit');
+    if (opts.canvas !== false) notifyPreviewState();
+  }
+
+  /* ---- Revert ------------------------------------------------------------------------------ */
+  /* revertItem(kind, id): the item's draft goes back to its saved copy. A page's Revert also
+     re-reads the mesh, theme, settings-defaults and SEO drafts from their loaded modules, as it
+     always has. */
+  function revertItem(kind, id) {
+    if (kind === 'article') { revertArticle(id); return; }
+    if (kind === 'asset') { revertAsset(id); return; }
+    if (kind === 'secret') { revertSecret(id); return; }
+    if (kind === 'design') { revertDesign(); return; }
+    if (kind !== 'page') return;
     if (window.ArkMeshSettings) state.meshDraft = ArkMeshSettings.get() || ArkMeshSettings.defaults();
     if (window.ArkTheme) state.themeDraft = ArkTheme.get() || ArkTheme.defaults();
     if (window.ArkSiteDefaults) state.settingsDefaultsDraft = ArkSiteDefaults.get() || ArkSiteDefaults.defaults();
     if (window.ArkSEO) state.seoDraft = ArkSEO.get() || ArkSEO.defaults();
-    if (state.saved[id] === null) return;
-    state.drafts[id] = JSON.parse(state.saved[id]); renderEditor(); renderList(); status('Reverted to the saved version.', '');
+    if (state.saved[id] === null || state.saved[id] === undefined) return;
+    state.drafts[id] = JSON.parse(state.saved[id]);
+    itemsChanged('page', id); touch({ kind: 'page', id: id }); status('Reverted to the saved version.', '');
   }
+  /* the item state.kind names (the form last opened) -- for callers that only know "current" */
+  function currentItem() {
+    return state.kind === 'article' ? ['article', state.aCurrent] : state.kind === 'asset' ? ['asset', state.assetCurrent]
+      : state.kind === 'secret' ? ['secret', state.secretCurrent] : state.kind === 'design' ? ['design', ''] : ['page', state.current];
+  }
+  function revertCurrent() { var c = currentItem(); revertItem(c[0], c[1]); }
 
-  /* ---- new page ----------------------------------------------------- */
+  /* ---- New page ----------------------------------------------------------------------------- */
   function blueprint(id) {
     function line(label, value, section) { return { label: label, kind: 'line', section: section, value: value }; }
     function text(label, value, section) { return { label: label, kind: 'text', section: section, value: value }; }
@@ -272,33 +442,85 @@
     return { id: id, title: 'Theory: ' + id.charAt(0).toUpperCase() + id.slice(1), route: '/concept/' + id, group: 'theory',
              meta: { placement: 'rail', next: 'learnings', back: 'concept' }, fields: fields };
   }
-
-  $('newForm').addEventListener('submit', function (event) {
-    event.preventDefault();
-    var input = $('newId'), id = input.value.trim();
-    if (!/^[a-z][a-z0-9]*$/.test(id)) { status('A page name is lowercase letters and digits, starting with a letter.', 'error'); return; }
-    if (state.drafts[id]) { status('There is already a page called ' + id + '.', 'error'); return; }
+  /* createPage(id) -> { ok, id } | { ok: false, refusal }: a new theory page draft (written by
+     the next Save), made current (state.kind 'page'); the status line says what happened. */
+  function createPage(id) {
+    id = String(id || '').trim();
+    if (!/^[a-z][a-z0-9]*$/.test(id)) return refused('A page name is lowercase letters and digits, starting with a letter.');
+    if (state.drafts[id]) return refused('There is already a page called ' + id + '.');
     state.ids.push(id); state.drafts[id] = blueprint(id); state.saved[id] = null;
-    input.value = ''; select(id); status('New page. Edit it, then Save to create it.', '');
+    state.kind = 'page'; state.current = id;
+    itemsChanged('page', id); touch({ kind: 'page', id: id });
+    status('New page. Edit it, then Save to create it.', '');
+    return { ok: true, id: id };
+  }
+  function refused(message) { status(message, 'error'); return { ok: false, refusal: message }; }
+  /* The New page / New article / New image / New encrypted item forms: wherever the shell (or a
+     panel) draws them, by id, a submit lands here -- delegated, so a form drawn after load works. */
+  var CREATE_FORMS = {
+    newForm: function () { var input = $('newId'), r = createPage(input.value); if (r.ok) { input.value = ''; hook('select')(r.id); } },
+    newArticleForm: function () { var input = $('newSlug'), r = A.createArticle(input.value); if (r.ok) { input.value = ''; hook('selectArticle')(r.id); } }
+  };
+  document.addEventListener('submit', function (event) {
+    var run = event.target && CREATE_FORMS[event.target.id];
+    if (!run) return;
+    event.preventDefault(); run(event);
   });
 
+  /* ---- Delete ------------------------------------------------------------------------------- */
+  /* deleteItem(kind, id): remove a page, article, image or encrypted item -- its file (with the
+     project folder connected), its index entry, its entries in every other draft, the derived
+     root files, and a version recording the removal. Asks first (window.confirm). */
+  async function deleteItem(kind, id) {
+    if (kind === 'article') return deleteArticle(id);
+    if (kind === 'asset') return deleteAsset(id);
+    if (kind === 'secret') return deleteSecret(id);
+    if (kind === 'page') return deletePage(id);
+    status('Nothing deleted: "' + kind + '" is not something Delete removes. Needs: page, article, asset or secret.', 'error');
+  }
+  async function deletePage(id) {
+    var manifest = state.drafts[id];
+    if (!manifest) { status('Nothing deleted: there is no page "' + id + '".', 'error'); return; }
+    if (!state.dir && state.saved[id] !== null) { status('Connect the project folder to delete a page: this removes its file.', 'warn'); return; }
+    if (!window.confirm('Delete "' + manifest.title + '"? This removes its file and its link on the theory page.')) return;
+    var routesBefore = studioRoutes().map(function (r) { return r.path; });
+    try { await removeItemFile('page', id); }
+    catch (error) { status(error.message, 'error'); return; }
+    var forgot = await forgetDeleted('manifests', id, routesBefore);
+    if (state.current === id) state.current = state.ids[0];
+    afterItemRemoved('page', id, manifest.route);
+    status('Deleted ' + manifest.title + '.' + forgot + await afterDelete(), 'ok');
+  }
+  /* After a removal: the forms and lists repaint, and the canvas -- if it was showing the route
+     that went -- moves to Home before anything is posted to it (a page sent a site without
+     itself remounts from nothing: tests/cms-preview-state-route.cjs). */
+  function afterItemRemoved(kind, id, route) {
+    if (route && state.cmsCurrentRoute === route) { state.cmsCurrentRoute = '/'; syncCmsPreview(); }
+    itemsChanged(kind, id); touch({ kind: kind, id: id }); reloadPreview();
+  }
+
+  /* ---- the Code tab -------------------------------------------------------------------------- */
   function buildCodePanel(id, manifest) {
     var box = h('div', { class: 'editor-tab-flow code-panel' });
     var inspector = h('fieldset', {}, h('legend', { text: 'Page structure' }));
     var view = h('textarea', { class: 'code-view', readonly: true });
+    /* a field is { label, kind, section, value }: its VALUE is what the outline shows (it showed
+       "[object Object]" for every field until 2026-10-18) */
     function manifestOutline() {
       var lines = ['page#' + id + ' "' + manifest.title + '"'];
       lines.push('  route: ' + (manifest.route || '/'));
       lines.push('  group: ' + (manifest.group || 'page'));
       Object.keys(manifest.fields || {}).forEach(function (key) {
-        var value = String(manifest.fields[key] || '').replace(/\s+/g, ' ').trim();
+        var value = String((manifest.fields[key] || {}).value || '').replace(/\s+/g, ' ').trim();
         lines.push('  field[' + key + '] ' + (value ? '"' + value.slice(0, 96) + (value.length > 96 ? '...' : '') + '"' : '(empty)'));
       });
       return lines.join('\n');
     }
+    /* the canvas's real DOM, when the canvas is showing this page */
     function domOutline() {
-      var frame = $('frame');
-      var doc = frame && frame.contentDocument;
+      var frame = $('cmsPreview');
+      if (!frame || state.cmsPreviewRoute !== manifest.route) return 'The canvas is not showing ' + manifest.route + ' -- open this page on the canvas to inspect its structure.\n\n' + manifestOutline();
+      var doc = null; try { doc = frame.contentDocument; } catch (e) { doc = null; }
       var start = doc && (doc.querySelector('[data-page], [data-ark-page], main, #scene') || doc.body);
       if (!start) return manifestOutline();
       var lines = [];
@@ -314,23 +536,34 @@
       walk(start, 0);
       return lines.join('\n') || manifestOutline();
     }
+    /* trims trailing spaces and runs of blank lines in every text field's value, through the one
+       field write (it compared each field OBJECT to a string, so it cleaned nothing until
+       2026-10-18; regression: tests/admin-content-panels.cjs) */
     function cleanTextFields() {
       Object.keys(manifest.fields || {}).forEach(function (key) {
-        if (typeof manifest.fields[key] === 'string') manifest.fields[key] = manifest.fields[key].replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+        var f = manifest.fields[key];
+        if (!f || typeof f.value !== 'string' || f.kind === 'link') return;
+        var clean = f.value.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+        if (clean !== f.value) setItemField('page', id, key, clean);
       });
       view.value = manifestOutline();
-      touch(); reloadPreview();
     }
     view.value = manifestOutline();
     inspector.appendChild(h('p', { class: 'hint', text: 'Inspect the generated page structure or the manifest fields. Cleaning trims empty whitespace without deleting real sections.' }));
     inspector.appendChild(view);
     inspector.appendChild(h('div', { class: 'tools' },
-      h('button', { type: 'button', class: 'btn', text: 'Inspect preview divs', onclick: function () { view.value = domOutline(); } }),
+      h('button', { type: 'button', class: 'btn', text: 'Inspect canvas divs', onclick: function () { view.value = domOutline(); } }),
       h('button', { type: 'button', class: 'btn', text: 'Show manifest fields', onclick: function () { view.value = manifestOutline(); } }),
       h('button', { type: 'button', class: 'btn', text: 'Clean text fields', onclick: cleanTextFields })));
     box.appendChild(inspector);
     return box;
   }
-  A.provide({ linkPickerEl: linkPickerEl, refreshSaveButton: refreshSaveButton, renderEditor: renderEditor,
-      revertCurrent: revertCurrent, touch: touch });
+
+
+  A.provide({ boundField: boundField, contentChoices: contentChoices, contentLabel: contentLabel, refreshList: renderList, createPage: createPage, deleteItem: deleteItem,
+      itemDirty: itemDirty, itemsChanged: itemsChanged, linkPickerEl: linkPickerEl,
+      paintInto: paintInto, panelHead: panelHead, refreshSaveButton: refreshSaveButton,
+      renderPageFields: renderPageFields, repaintPanels: repaintPanels,
+      revertCurrent: revertCurrent, revertItem: revertItem, setItemField: setItemField,
+      afterItemRemoved: afterItemRemoved, touch: touch });
 })();

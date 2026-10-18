@@ -1,6 +1,6 @@
 /* =====================================================================
-   HEADER REACH -- the editor's ONE header must stay usable over Studio's
-   canvas at every viewport width, and fit one row from 1280px up.
+   HEADER REACH -- the editor's ONE header must stay usable over the
+   workspace at every viewport width, and fit one row from 1280px up.
 
    Why this exists, twice over:
    - Step 3 of the Studio merge docked #studioRoot at a hardcoded top: 58px
@@ -15,8 +15,11 @@
      two rows at 1500px when "Editing tablet overrides" showed. They are one
      header now, every concept once. This guards that it stays one row and
      that every control in it can actually be clicked.
+   - 2026-10-18 again (owner: "I only want to see ONE CMS, unified."): the
+     Content | Design app switch became a LENS on the one canvas, the page
+     picker gained Page fields, and on a phone the rail became a drawer.
 
-   Per width (390, 760, 1280, 1500) it checks, in Design -> Canvas with
+   Per width (390, 760, 1280, 1500) it checks, in the Canvas view with
    the tablet-override note AND a long status message showing (the widest
    the header gets):
    - every header control's centre hit-tests to that control
@@ -27,9 +30,18 @@
    - #studioRoot starts at the header's bottom edge (no overlap, no gap)
      and reaches the viewport bottom;
    - no horizontal scroll in the app document or #studioRoot;
-   - the canvas-only controls hide in Theme & defaults, Sitemap and Content;
-   - Design -> Content -> Design works by real clicks (Playwright's own
-     actionability check refuses a click on a covered element).
+   - the canvas tools hide in the Sitemap (no canvas there) and stay in the
+     Theme view (the canvas stays live beside the settings);
+   - Design lens -> Content lens -> Design lens works by real clicks and
+     changes nothing but the lens: the same workspace, exactly one site
+     iframe (Playwright's own actionability check refuses a click on a
+     covered element);
+   - the Page fields sheet opens from the header and closes on Esc;
+   - with every panel mounted (five rail tabs, Theme view, Page fields) no id
+     is used twice; Home / End in the sheet's first field move its caret
+     (to the start / end) and leave the sheet where it was;
+   - below 860px the rail is a drawer: the rail button opens it with its five
+     tabs reachable, and Esc closes it.
 
    Not part of scripts/run-tests.mjs (that runner only reads tests/*.cjs|mjs
    at the top level) because it needs Chromium. Run it by hand:
@@ -41,17 +53,18 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
-import { appFrame, copySite, designView, openAccountMenu, startHost, untilStable, scaled, gotoEditor } from './harness.mjs';
+import { appFrame, copySite, designView, openAccountMenu, setLens, startHost, until, untilStable, scaled, gotoEditor } from './harness.mjs';
 
 const WIDTHS = process.env.HEADER_REACH_WIDTHS
   ? process.env.HEADER_REACH_WIDTHS.split(',').map((w) => [Number(w), 900])
   : [[390, 844], [760, 900], [1280, 800], [1500, 900]];
-/* every control the header holds in Design -> Canvas (the account menu's are checked once it is open) */
-const CANVAS_CONTROLS = ['#modeContentBtn', '#modeDesignBtn', '#designCanvasBtn', '#designMapBtn', '#designBackgroundBtn', '#designThemeBtn',
-  '#btnLeftRail', '#btnPage', '#btnPageSeo', '#bpNote', '#devices [data-d="0"]', '#devices [data-d="1"]', '#devices [data-d="2"]', '#btnUndo', '#btnRedo', '#btnCheck',
+/* every control the header holds in the Canvas view (the account menu's are checked once it is open) */
+const CANVAS_CONTROLS = ['#lensContentBtn', '#lensDesignBtn', '#viewCanvasBtn', '#viewMapBtn', '#backgroundBtn', '#viewThemeBtn',
+  '#btnLeftRail', '#btnPage', '#btnPageFields', '#btnPageSeo', '#bpNote', '#devices [data-d="0"]', '#devices [data-d="1"]', '#devices [data-d="2"]', '#btnUndo', '#btnRedo', '#btnCheck',
   '#mode [data-m="edit"]', '#mode [data-m="live"]', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn'];
 const ACCOUNT_CONTROLS = ['#connect', '#signOut'];
-const CANVAS_ONLY = ['#canvasNav', '#canvasTools'];
+const CANVAS_ONLY = ['#canvasTools'];
+const RAIL_TABS = ['#tabPages', '#tabLayers', '#tabLib', '#tabMedia', '#tabVault'];
 const ONE_ROW_FROM = 1280;
 
 /* Measured inside the app frame (admin-app.html), in its own coordinates. */
@@ -100,6 +113,7 @@ async function main() {
       /* Real clicks: Playwright refuses to click an element another one is painted over
          ("... intercepts pointer events"), so a covered control fails here, not silently. */
       const click = async (sel) => { try { await frame.click(sel, { timeout: scaled(5000) }); return true; } catch (error) { fail(width, `real click on ${sel} failed: ${String(error.message).split('\n').find((l) => /intercepts/.test(l)) || error.message.split('\n')[0]}`); return false; } };
+      await setLens(frame, 'design');
       await designView(frame, 'canvas');
       await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: scaled(15000) });
       /* the widest the header gets: the tablet-override note on, and a long status message */
@@ -113,7 +127,7 @@ async function main() {
       if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-design.png`) });
 
       for (const c of design.controls) {
-        if (!c.shown) { fail(width, `${c.sel} is not shown in Design -> Canvas`); continue; }
+        if (!c.shown) { fail(width, `${c.sel} is not shown in the Canvas view`); continue; }
         if (!c.inView) fail(width, `${c.sel} is outside the viewport`);
         if (!c.hitsSelf) fail(width, `${c.sel}'s centre hit-tests to ${c.hit}, not the control -- something is painted over the header`);
       }
@@ -124,7 +138,7 @@ async function main() {
         const below = shown.filter((c) => c.cy > band);
         if (below.length) fail(width, `the header is not one row: ${below.map((c) => c.sel).join(', ')} wrapped below the first row (header ${design.barHeight}px)`);
       }
-      if (!design.studio) fail(width, '#studioRoot is not showing in Design mode');
+      if (!design.studio) fail(width, '#studioRoot (the workspace) is not showing');
       else {
         if (design.studio.top < design.barBottom - 0.5) fail(width, `#studioRoot starts at ${design.studio.top}px, above the header's bottom edge (${design.barBottom}px)`);
         if (design.studio.top > design.barBottom + 1) fail(width, `#studioRoot starts at ${design.studio.top}px, leaving a gap below the header (${design.barBottom}px)`);
@@ -145,30 +159,81 @@ async function main() {
       await frame.press('#accountBtn', 'Escape');
       if (!(await frame.evaluate(() => document.getElementById('accountMenu').hidden))) fail(width, 'Escape did not close the account menu');
 
-      /* the canvas-only groups belong to Design -> Canvas alone */
-      for (const [view, label] of [['map', 'Sitemap'], ['theme', 'Theme & defaults']]) {
-        await designView(frame, view);
-        const still = await hiddenNow(frame, CANVAS_ONLY);
-        if (still.length) fail(width, `${label} still shows the canvas-only ${still.join(', ')}`);
-      }
+      /* the canvas tools need a canvas: hidden in the Sitemap, kept in the Theme view */
+      await designView(frame, 'map');
+      const stillMap = await hiddenNow(frame, CANVAS_ONLY);
+      if (stillMap.length) fail(width, `Sitemap still shows the canvas tools ${stillMap.join(', ')}`);
+      await designView(frame, 'theme');
+      if ((await hiddenNow(frame, CANVAS_ONLY)).length !== CANVAS_ONLY.length) fail(width, 'the Theme view hid the canvas tools, but its canvas stays live beside the settings');
       await designView(frame, 'canvas');
 
-      if (await click('#modeContentBtn')) {
-        await frame.waitForSelector('#studioRoot', { state: 'hidden', timeout: scaled(15000) });
-        const content = await frame.evaluate(() => ({ shell: !document.getElementById('cmsShell').hidden, selected: document.getElementById('modeContentBtn').getAttribute('aria-selected') }));
-        if (!content.shell || content.selected !== 'true') fail(width, `Design -> Content by click did not land in Content mode (${JSON.stringify(content)})`);
-        const still = await hiddenNow(frame, [...CANVAS_ONLY, '#designSubSwitch']);
-        if (still.length) fail(width, `Content mode still shows ${still.join(', ')}`);
-        const cm = await measure(frame, ['#modeContentBtn', '#modeDesignBtn', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn']);
-        for (const c of cm.controls) if (!c.shown || !c.hitsSelf || !c.inView) fail(width, `Content mode: ${c.sel} is not reachable (${c.shown ? c.hit : 'hidden'})`);
-        if (width >= ONE_ROW_FROM && cm.barHeight > 60) fail(width, `Content mode's header is ${cm.barHeight}px tall, more than one row`);
-        if (cm.hScroll > 0) fail(width, `Content mode scrolls horizontally by ${cm.hScroll}px`);
+      /* the lens changes what a canvas click edits -- and nothing else: same workspace, one site iframe */
+      if (await click('#lensContentBtn')) {
+        const content = await frame.evaluate(() => ({ workspace: !document.getElementById('studioRoot').hidden, iframes: document.querySelectorAll('iframe').length, pressed: document.getElementById('lensContentBtn').getAttribute('aria-pressed') }));
+        if (!content.workspace || content.iframes !== 1 || content.pressed !== 'true') fail(width, `Design -> Content lens by click did not keep the one workspace (${JSON.stringify(content)})`);
+        const cm = await measure(frame, ['#lensContentBtn', '#lensDesignBtn', '#btnPage', '#btnPageFields', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn']);
+        for (const c of cm.controls) if (!c.shown || !c.hitsSelf || !c.inView) fail(width, `Content lens: ${c.sel} is not reachable (${c.shown ? c.hit : 'hidden'})`);
+        if (width >= ONE_ROW_FROM && cm.barHeight > 60) fail(width, `the Content lens's header is ${cm.barHeight}px tall, more than one row`);
+        if (cm.hScroll > 0) fail(width, `the Content lens scrolls horizontally by ${cm.hScroll}px`);
         if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-content.png`) });
-        if (await click('#modeDesignBtn')) {
-          await frame.waitForSelector('#studioRoot:not([hidden])', { timeout: scaled(15000) });
-          const back = await frame.evaluate(() => document.getElementById('modeDesignBtn').getAttribute('aria-selected'));
-          if (back !== 'true') fail(width, 'Content -> Design by click did not land back in Design mode');
+        /* Page fields: on demand from the header, closed by Esc */
+        if (await click('#btnPageFields')) {
+          await frame.waitForSelector('#sheet:not([hidden]) #sheetBody', { timeout: scaled(10000) }).catch(() => fail(width, 'Page fields did not open its sheet'));
+          const sheet = await measure(frame, ['#sheetClose']);
+          if (!sheet.controls[0].shown || !sheet.controls[0].hitsSelf || !sheet.controls[0].inView) fail(width, `the Page fields sheet's close button is not reachable (${sheet.controls[0].hit})`);
+          if (sheet.hScroll > 0) fail(width, `the open sheet makes the page scroll horizontally by ${sheet.hScroll}px`);
+          if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-fields.png`) });
+          await frame.press('#sheetClose', 'Escape');
+          if (!(await frame.evaluate(() => document.getElementById('sheet').hidden))) fail(width, 'Escape did not close the Page fields sheet');
         }
+        if (await click('#lensDesignBtn')) {
+          const back = await frame.evaluate(() => document.getElementById('lensDesignBtn').getAttribute('aria-pressed'));
+          if (back !== 'true') fail(width, 'Content -> Design lens by click did not land back in the Design lens');
+        }
+      }
+
+      /* every id in the editor is unique once every panel has mounted: the rail's five tabs, the
+         Theme view, the Page fields sheet (a form panel drawing a second #newAssetForm next to
+         the page's static one once made every lookup by id hit the wrong copy) */
+      if (width >= ONE_ROW_FROM) {
+        for (const tab of RAIL_TABS) await click(tab);
+        await designView(frame, 'theme');
+        await click('#btnPageFields');
+        await frame.waitForSelector('#sheet:not([hidden]) #sheetBody *', { timeout: scaled(10000) }).catch(() => {});
+        const dupes = await frame.evaluate(() => { const seen = new Map(); for (const el of document.querySelectorAll('[id]')) seen.set(el.id, (seen.get(el.id) || 0) + 1); return [...seen].filter(([, n]) => n > 1).map(([id, n]) => `#${id} x${n}`); });
+        if (dupes.length) fail(width, 'ids used more than once with every panel mounted: ' + dupes.join(', '));
+        /* Home / End in a sheet field move its caret and never the sheet: on macOS they are scroll
+           keys, and End left the caret where it was and threw the sheet to its bottom under the
+           field being typed in. Checked twice: before and after a draft edit's events (dirty
+           dots, the coalesced canvas send and its ready) have run. */
+        const top = frame.locator('#sheetBody input[type="text"]').first();
+        if (await top.count()) {
+          for (const round of [1, 2]) {
+            await top.click({ position: { x: 6, y: 8 } }); await top.press('End');
+            const caret = await top.evaluate((el) => ({ at: el.selectionStart, len: el.value.length }));
+            if (caret.at !== caret.len) fail(width, `round ${round}: End left the sheet field's caret at ${caret.at} of ${caret.len}`);
+            await top.press('x'); await top.press('Home');
+            if (await top.evaluate((el) => el.selectionStart) !== 0) fail(width, `round ${round}: Home did not move the sheet field's caret to its start`);
+            await top.press('End'); await top.press('Backspace');
+            await untilStable(() => frame.evaluate(() => document.getElementById('sheetBody').scrollTop), 'the sheet kept scrolling', 3000).catch(() => {});
+            const after = await frame.evaluate(() => ({ top: document.getElementById('sheetBody').scrollTop, focus: !!document.activeElement && !!document.activeElement.closest('#sheetBody') }));
+            if (after.top !== 0 || !after.focus) fail(width, `round ${round}: typing in the sheet's first field moved the sheet to scrollTop ${after.top} (focus kept: ${after.focus})`);
+          }
+        }
+        await frame.press('#sheetClose', 'Escape');
+        await designView(frame, 'canvas');
+      }
+
+      /* a phone: the rail is a drawer over the canvas */
+      if (width <= 860 && await click('#btnLeftRail')) {
+        /* it slides in: measured once its box stopped moving */
+        await until(() => frame.evaluate(() => document.getElementById('studioLeft').getBoundingClientRect().left === 0), 'the rail drawer never slid fully in', 5000).catch((error) => fail(width, error.message));
+        const drawer = await measure(frame, RAIL_TABS);
+        for (const c of drawer.controls) if (!c.shown || !c.hitsSelf || !c.inView) fail(width, `the rail drawer's ${c.sel} is not reachable (${c.shown ? c.hit : 'hidden'})`);
+        if (drawer.hScroll > 0) fail(width, `the open drawer makes the page scroll horizontally by ${drawer.hScroll}px`);
+        if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-drawer.png`) });
+        await frame.press('#tabPages', 'Escape');
+        if (await frame.evaluate(() => document.getElementById('shell').classList.contains('drawer-open'))) fail(width, 'Escape did not close the rail drawer');
       }
 
       console.log(`${width}px: header ${design.barHeight}px in ${rows > 1 && width >= ONE_ROW_FROM ? 'MORE THAN ONE row' : width >= ONE_ROW_FROM ? 'one row' : 'wrapped rows'} (--app-bar-h ${design.barVar || 'unset'}), studio top ${design.studio && design.studio.top}px, hScroll ${design.hScroll}/${design.studioHScroll}, ${design.controls.filter((c) => c.shown && c.hitsSelf).length}/${CANVAS_CONTROLS.length} canvas controls + ${account.controls.filter((c) => c.shown && c.hitsSelf).length}/${ACCOUNT_CONTROLS.length} account controls clickable`);
@@ -182,7 +247,7 @@ async function main() {
   if (failures.length) {
     console.log('FAIL header-reach:\n  ' + failures.join('\n  '));
     process.exitCode = 1;
-  } else console.log(`PASS header-reach: every header control reachable and clickable over Studio at ${WIDTHS.map(([w]) => w + 'px').join(', ')}; one row from ${ONE_ROW_FROM}px with every canvas control, the tablet note and a long status showing; canvas-only controls hide elsewhere; Design/Content round trip by real clicks.`);
+  } else console.log(`PASS header-reach: every header control reachable and clickable over the workspace at ${WIDTHS.map(([w]) => w + 'px').join(', ')}; one row from ${ONE_ROW_FROM}px with every canvas control, the tablet note and a long status showing; the canvas tools hide in the Sitemap; Design/Content lens round trip by real clicks with one site iframe; Page fields opens and closes on Esc; the phone rail drawer opens and closes.`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) await main();

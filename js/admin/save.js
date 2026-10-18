@@ -29,8 +29,7 @@
       renderList = A.later('renderList'), touch = A.later('touch'),
       reloadPreview = A.later('reloadPreview'), studioRoutes = A.later('studioRoutes'),
       schedule = A.later('schedule'), recordVersion = A.later('recordVersion'),
-      deleteArticle = A.later('deleteArticle'), deleteAsset = A.later('deleteAsset'),
-      deleteSecret = A.later('deleteSecret'), renderEditor = A.later('renderEditor');
+      deleteItem = A.later('deleteItem');
 
   /* Step 5 (flickering-juggling-donut.md), the "one save model": saveEverything() replaces
      BOTH the old saveCurrent() (a per-state.kind dispatcher that only ever saved whichever
@@ -303,18 +302,12 @@
       (failed.length ? ' Its entries are still in ' + failed.join(', ') + '; the next Save removes them.' : '');
   }
 
+  /* Delete whatever item state.kind names (the form last opened) -- one removal path for every
+     kind: deleteItem() (js/admin/editor.js), which the content forms' Delete buttons call with
+     their own kind and id. */
   async function deleteCurrent() {
-    if (state.kind === 'article') { await deleteArticle(); return; }
-    if (state.kind === 'asset') { await deleteAsset(); return; }
-    if (state.kind === 'secret') { await deleteSecret(); return; }
-    var id = state.current, manifest = state.drafts[id];
-    if (!state.dir && state.saved[id] !== null) { status('Connect the project folder to delete a page: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + manifest.title + '"? This removes its file and its link on the theory page.')) return;
-    var routesBefore = studioRoutes().map(function (r) { return r.path; });
-    try { await removeItemFile('page', id); }
-    catch (error) { status(error.message, 'error'); return; }
-    var forgot = await forgetDeleted('manifests', id, routesBefore);
-    state.current = state.ids[0]; renderList(); renderEditor(); reloadPreview(); status('Deleted ' + manifest.title + '.' + forgot + await afterDelete(), 'ok');
+    var kind = state.kind === 'article' || state.kind === 'asset' || state.kind === 'secret' ? state.kind : 'page';
+    await deleteItem(kind, { article: state.aCurrent, asset: state.assetCurrent, secret: state.secretCurrent, page: state.current }[kind]);
   }
   /* The whole site as Publish sends it (and as Studio's preview reads it): every draft
      ArkAdminStore.drafts() lists, in its order -- the same list saveEverything() saves, so the

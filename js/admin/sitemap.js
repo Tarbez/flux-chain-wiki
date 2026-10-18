@@ -1,8 +1,8 @@
 /* =====================================================================
    ADMIN EDITOR · SITEMAP (js/admin/sitemap.js)
    ---------------------------------------------------------------------
-   Owns: Design mode's Sitemap view -- the page tree by address, links drawn on demand,
-   problems flagged, its zoom -- and setView(), the canvas/sitemap switch.
+   Owns: the Sitemap view -- the page tree by address, links drawn on demand, problems
+   flagged, its zoom -- and setView(), the switch between the Canvas, Sitemap and Theme views.
    Must not: read links from anywhere but realLinkIndex() (the real manifests).
    ===================================================================== */
 (function () {
@@ -10,6 +10,8 @@
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, $ = A.$, realLinkIndex = A.realLinkIndex, ic = A.ic, openRoute = A.openRoute,
       layoutStage = A.layoutStage, syncHeader = A.syncHeader, schedule = A.schedule;
+  /* defined by files loaded after this one: resolved when called */
+  var mountThemeView = A.later('mountThemeView');
 
   /* =========================================================================
      Sitemap: page tree by address, links on demand, problems flagged
@@ -121,10 +123,16 @@
     }, { passive: false });
     applyMapZoom();
   }
+  /* The three views of the one site: 'design' (the canvas), 'map' (this sitemap) and 'theme'
+     (the site-wide settings docked beside the canvas, which stays live so a colour or a font
+     shows on the real page as it is picked; js/admin/panels.js mounts them). */
   function setView(v) {
+    if (v !== 'design' && v !== 'map' && v !== 'theme') return;
     state.view = v;
-    $('shell').classList.toggle('mapview', v === 'map'); $('designView').hidden = v !== 'design'; $('mapView').hidden = v !== 'map';
+    $('shell').classList.toggle('mapview', v === 'map'); $('shell').classList.toggle('themeview', v === 'theme');
+    $('designView').hidden = v === 'map'; $('mapView').hidden = v !== 'map'; $('themeView').hidden = v !== 'theme';
     if (v === 'map') { mapFocus = state.cmsCurrentRoute; mapZoom = 1; renderSitemap(); } else layoutStage();
+    if (v === 'theme') mountThemeView();
     syncHeader(); schedule();
   }
   A.provide({ renderSitemap: renderSitemap, setView: setView });

@@ -1,7 +1,8 @@
 /* =====================================================================
    ADMIN EDITOR · MESH AND PUBLISH (js/admin/mesh.js)
    ---------------------------------------------------------------------
-   Owns: the Mesh view (what is published, compared with this site) and Publish -- the
+   Owns: the Mesh view (what is published, compared with this site; drawn into the sheet the
+   header's Mesh button opens) and Publish -- the
    scoped authorization dialog, signing through ArkPublish, and the miner status line.
    Must not: publish unsaved drafts (Save first), or hold the signing key: the locked
    page's identity (ArkGate) signs.
@@ -39,12 +40,15 @@
     box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
     return box;
   }
-  function renderMeshEditor() {
-    var root = $('editor'); root.textContent = '';
+  /* Drawn into the container the shell hands it: the Mesh sheet, opened on demand from the
+     header's Mesh button (openMeshSheet, js/admin/panels.js), whose own head says "Mesh". */
+  function renderMeshEditor(root) {
+    if (!root) return;
+    root.textContent = '';
     var routeLabel = h('div', { class: 'route', text: 'P2P deployment' });
-    root.appendChild(h('div', { class: 'editor-head' },
-      h('div', {}, h('h1', { text: 'Mesh' }), routeLabel),
-      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', text: 'Refresh', onclick: function () { load(); } }))));
+    root.appendChild(h('div', { class: 'cms-form-head' },
+      h('div', {}, routeLabel),
+      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', id: 'meshViewRefresh', text: 'Refresh', onclick: function () { load(); } }))));
 
     var statusRows = h('div', { class: 'mesh-rows' });
     var diffText = h('p', { class: 'hint' });

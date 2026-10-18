@@ -19,8 +19,8 @@
   var state = A.state, anyDirty = A.anyDirty, siteFromState = A.siteFromState,
       measureChecks = A.measureChecks, clone = A.clone, saveEverything = A.saveEverything,
       loadBodies = A.loadBodies, adoptArticles = A.adoptArticles, renderList = A.renderList,
-      renderEditor = A.renderEditor, reloadPreview = A.reloadPreview, refreshMesh = A.refreshMesh,
-      ensureVersionBaseline = A.ensureVersionBaseline;
+      refreshMesh = A.refreshMesh, ensureVersionBaseline = A.ensureVersionBaseline,
+      connectCanvas = A.connectCanvas, showLeft = A.showLeft, setLens = A.setLens;
 
   /* The editor's public surface, for the locked page and the browser tests. `unsaved`: the
      locked page asks before it signs out over unsaved work. */
@@ -46,9 +46,9 @@
   });
   window.addEventListener('beforeunload', function (event) { if (anyDirty()) { event.preventDefault(); event.returnValue = ''; } });
 
-  /* Step 2 merge: this used to also call sendStudioState() (now deleted) to push the
-     just-loaded site into the Studio iframe once articles were ready. renderEditor()
-     already covers that: if state.kind is still its default 'studio', it calls
-     renderStudioEditor() (js/admin/studio.js), which reads this same fresh state directly. */
-  loadBodies(function () { adoptArticles(); state.articlesReady = true; renderList(); renderEditor(); reloadPreview(); refreshMesh(); ensureVersionBaseline(); });
+  /* The first paint: the lens and its rail tab, then -- once every article body has loaded (a
+     site without its articles would be sent to the canvas otherwise) -- the one canvas. Nothing
+     else opens: no sheet, no form (the Page fields sheet opens only when asked for). */
+  setLens(state.lens); showLeft(state.railTab[state.lens] || (state.lens === 'content' ? 'pages' : 'layers'), { remember: false });
+  loadBodies(function () { adoptArticles(); state.articlesReady = true; connectCanvas(); renderList(); refreshMesh(); ensureVersionBaseline(); });
 })();

@@ -18,7 +18,7 @@
       applyStudioElementMotionReplace = A.applyStudioElementMotionReplace,
       applyStudioLayoutPatch = A.applyStudioLayoutPatch,
       applyStudioLayoutReplace = A.applyStudioLayoutReplace, anyDirty = A.anyDirty,
-      saveEverything = A.saveEverything;
+      saveEverything = A.saveEverything, siteFromState = A.siteFromState, studioRoutes = A.studioRoutes;
   /* defined by files loaded after this one: resolved when called */
   var renderLayersPane = A.later('renderLayersPane'), renderPages = A.later('renderPages'),
       renderLibrary = A.later('renderLibrary'), renderInspector = A.later('renderInspector'),
@@ -26,7 +26,8 @@
       renderStatus = A.later('renderStatus'), queueCheck = A.later('queueCheck'),
       refreshPop = A.later('refreshPop'), layoutStage = A.later('layoutStage'),
       openCanvasTransitionsPopover = A.later('openCanvasTransitionsPopover'),
-      renderSelToolbar = A.later('renderSelToolbar');
+      renderSelToolbar = A.later('renderSelToolbar'), openRoute = A.later('openRoute'),
+      itemForRoute = A.later('itemForRoute');
 
   /* =========================================================================
      STEP 1 CLEANUP (2026-10-17): the dense typed-array document engine (node
@@ -92,16 +93,126 @@
      (a stub), and queueCmsSync() had no caller left. There is no replacement because there
      is nothing left for either to do: a real manifest/article/SEO edit happens in Content
      CMS's own editors, which mutate state.drafts/state.seoDraft directly. */
+  /* While the iframe is being pointed at another route, the page still in it must not be sent
+     the drafts: after a delete it would receive a site without itself and remount from nothing
+     ("page failed to load", tests/cms-preview-state-route.cjs). The post waits for the new
+     route: its load handler sends it, or -- a fragment-only navigation fires no load -- the
+     next ready does. */
+  let navigating = false, postWaiting = false, arriving = '';
+  /* The canvas was asked for `asked` and opened `shown` instead: the site's router knows a page's
+     address from the SAVED files (the catalog, the article index), so a page or article that
+     exists only as an unsaved draft cannot be routed to yet and the router falls back. Say so,
+     with the remedy, and open it by itself after the next Save (reloadPreview). */
+  function routeRefused(asked, shown) {
+    state.cmsWantedRoute = asked;
+    state.cmsCurrentRoute = state.cmsPreviewRoute = shown;
+    A.status(asked + ' is not on the canvas yet: the site learns a new page\'s or article\'s address from the saved files, so it opens here once it is saved. Until then the canvas shows ' + shown + '; its words are in its Page fields.', 'warn');
+    schedule();
+  }
   function postCmsPreviewState() {
     if (!state.cmsConnected || !state.cmsSourceSite || !cmsPreview.contentWindow) return;
+    if (navigating || state.cmsPreviewRoute !== (state.cmsCurrentRoute || '/')) { postWaiting = true; return; }
+    postWaiting = false;
     /* versionPreviewSite: a past version shown read-only from the Versions panel, which every
        reload of the frame keeps showing until "Back to current drafts" clears it */
     state.cmsPreviewReady = false; /* the preview re-renders from this; the design checks wait for its ready */
+    if (!state.versionPreviewSite) sentSignature = contentSignature(state.cmsSourceSite);
     cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-state', site: state.versionPreviewSite || state.cmsSourceSite }, window.location.origin);
   }
+  /* ---- the drafts the canvas shows -----------------------------------------------------
+     Content mode used to feed a second site iframe of its own (#frame, js/admin/preview.js,
+     deleted 2026-10-18 with the two-app layout). Every content edit -- a form field, Media,
+     Vault, Theme, a new or deleted page -- now reaches the ONE canvas here.
+     Re-sent only when the CONTENT differs from what the canvas last received
+     (contentSignature): the canvas-owned drafts (layout, components, states, canvas
+     transitions, element motion) are computed inside the preview and relayed up through
+     touch(), and re-sending them would remount the page under the very edit that produced
+     them. Coalesced over 180 ms, so a typed word remounts the page once, not per key. The
+     whole site is rebuilt from the drafts (siteFromState()) when it is sent, so the canvas
+     never receives a stale copy of a draft another edit changed. */
+  const CANVAS_OWNED = new Set(['layout', 'components', 'states', 'canvasTransitions', 'elementMotion']);
+  let sentSignature = '', feedTimer = 0;
+  function contentSignature(site) {
+    const out = {};
+    Object.keys(site || {}).forEach((key) => {
+      if (CANVAS_OWNED.has(key)) return;
+      /* an image's bytes are compared by length and tail, not stringified whole on every key press */
+      out[key] = key === 'assets' ? (site.assets || []).map((a) => Object.assign({}, a, { dataBase64: a && a.dataBase64 ? a.dataBase64.length + ':' + a.dataBase64.slice(-48) : '' })) : site[key];
+    });
+    return JSON.stringify(out);
+  }
+  /* feedPending: a coalesced send is waiting (previewShowsDrafts must not swallow it) */
+  let feedPending = false;
+  function feedNow() {
+    clearTimeout(feedTimer); feedPending = false;
+    if (!state.cmsConnected || !state.articlesReady) return;
+    const site = siteFromState();
+    state.cmsRoutes = studioRoutes();
+    if (contentSignature(site) === sentSignature) return;
+    state.cmsSourceSite = site;
+    postCmsPreviewState(); schedule();
+  }
+  function notifyPreviewState() {
+    clearTimeout(feedTimer); feedPending = true;
+    feedTimer = setTimeout(feedNow, 180);
+  }
+  /* The canvas already shows the drafts as they are now -- an edit typed INTO it (the Content
+     lens's inline text): adopt them as sent, so the coalesced feed above does not remount the
+     page under the caret. Call it after the draft is updated (touch()). */
+  /* Another edit's send still waiting (a Page fields keystroke a moment before an inline commit)
+     is not the canvas's yet: it goes now, carrying this edit too (the canvas re-renders in place),
+     instead of being cancelled -- cancelling it lost that edit on the canvas (regression:
+     tests/cms-preview-feed.cjs). */
+  function previewShowsDrafts() {
+    if (feedPending) { feedNow(); return; }
+    clearTimeout(feedTimer);
+    if (!state.cmsConnected) return;
+    state.cmsSourceSite = siteFromState(); sentSignature = contentSignature(state.cmsSourceSite);
+  }
+  /* The site and routes the canvas will be sent, rebuilt from the drafts now -- before the canvas
+     is pointed at a page that may exist only as an unsaved draft (a new page or article): its
+     load handler sends this site. */
+  function refreshCanvasSite() {
+    clearTimeout(feedTimer); feedPending = false;
+    state.cmsSourceSite = siteFromState(); state.cmsRoutes = studioRoutes();
+  }
+  /* Drafts changed structurally (a page or article added, deleted or restored; a Revert): the
+     routes are re-derived and the canvas re-sent the site. If the page it shows no longer exists,
+     it goes Home. */
+  function reloadPreview() {
+    if (!state.cmsConnected) return;
+    clearTimeout(feedTimer); feedPending = false;
+    state.cmsSourceSite = siteFromState(); state.cmsRoutes = studioRoutes();
+    const wanted = state.cmsWantedRoute;
+    if (wanted && (state.cmsRoutes.some((r) => r.path === wanted) || itemForRoute(wanted))) { state.cmsWantedRoute = ''; openRoute(wanted); }
+    else if (!state.cmsRoutes.some((r) => r.path === state.cmsCurrentRoute)) openRoute('/');
+    else postCmsPreviewState();
+    schedule();
+  }
+  /* Live, without a remount: an image's new bytes (js/zero-webgl.js swaps the buffer for the
+     asset id it uses), the mesh tuning and page shapes (same file), the colour theme
+     (js/main.js). The coalesced full state above follows with the rest. */
+  function postToCanvas(message) {
+    if (!state.cmsConnected || !cmsPreview.contentWindow || state.versionPreviewSite) return;
+    try { cmsPreview.contentWindow.postMessage(message, window.location.origin); } catch (error) { /* between routes: its load handler sends the full state */ }
+  }
+  function notifyPreviewAssets() {
+    const assets = state.assetIds.map((id) => state.assetDrafts[id]).filter((a) => a && a.dataBase64);
+    if (assets.length) postToCanvas({ type: 'flux-chain-preview-assets', assets });
+  }
+  function notifyPreviewMesh() { postToCanvas({ type: 'flux-chain-preview-mesh', settings: state.meshDraft }); }
+  function notifyPreviewTheme() { postToCanvas({ type: 'flux-chain-preview-theme', theme: state.themeDraft }); }
   function postCmsPreviewMode() {
     if (!state.cmsConnected || !cmsPreview.contentWindow) return;
     cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-mode', mode: state.live ? 'live' : 'edit' }, window.location.origin);
+  }
+  /* The lens (state.lens; the header's #lensSwitch, js/admin/nav.js setLens): what a click on
+     the canvas edits. Sent like the Edit/Live mode -- on every change, on every load, and after
+     every ready (a remount rebuilds the page) -- so the canvas never acts in a lens the header
+     does not show. */
+  function postCmsPreviewLens() {
+    if (!state.cmsConnected || !cmsPreview.contentWindow) return;
+    cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-lens', lens: state.lens }, window.location.origin);
   }
   /* `key` is optional and only ever passed by the Layers panel's eye icon (Part B): it lets a
      hide toggle target a row that is not the current selection, reusing the exact same
@@ -203,10 +314,11 @@
       if (staleBar) staleBar.hidden = true;
       if (stalePop) stalePop.hidden = true;
       state.cmsPreviewRoute = route; state.cmsPreviewReady = false;
+      navigating = true; arriving = route;
       cmsPreview.src = 'index.html?cms-preview=1#' + route;
     }
   }
-  cmsPreview.addEventListener('load', () => { postCmsPreviewState(); postCmsPreviewMode(); layoutStage(); });
+  cmsPreview.addEventListener('load', () => { navigating = false; postCmsPreviewState(); postCmsPreviewMode(); postCmsPreviewLens(); layoutStage(); });
 
   /* Step 2 merge ("admin.js" below is the editor as it was then: one file): this used to be two listeners in two documents --
      admin-studio.html's own "window.addEventListener('message', ...)" (below, for messages
@@ -226,6 +338,45 @@
      to hand admin.js's state across the now-gone document boundary -- renderStudioEditor()
      (below) reads state.drafts / the various *Draft variables / siteFromState()
      directly instead. */
+  /* ---- the Content lens: text edited on the canvas (js/main.js, "CONTENT LENS") ------------
+     A copy-edit's `field` is the source field's address, derived in the preview:
+       AREA.ROLE                 a manifest field (the copy key: HOME.TITLE -> page home, TITLE)
+       article:<slug>/<path>     an article field (title, sections.0.1, questions.2)
+       component:<anchor>/<instance>/<prop>  a component instance's prop -- its draft lives in the
+                                 preview, which writes the override itself (set-override); here it
+                                 only updates what the toolbar shows
+     Pages and articles go through setItemField() (js/admin/editor.js), the one write every form
+     uses, so dirty dots, Save, Revert, versions and every open form see the same edit.
+     `canvasShows`: the canvas already shows this value -- typed into it, or Escape's revert,
+     which put the words back itself. Then the draft (and state.cmsSourceSite) take it with no
+     re-send, and previewShowsDrafts() records that the canvas has these drafts, so nothing
+     rebuilds the page under the person typing and an inline commit never flashes the canvas.
+     An undo/redo re-posted from the canvas history, and every edit from the toolbar's Content
+     section, are NOT on the canvas yet: the site is re-sent, and the preview re-renders the
+     route in place (page router refresh({ inPlace })). */
+  function cmsCopyAddress(field) {
+    const f = String(field || '');
+    let m = /^article:([a-z0-9-]+)\/(.+)$/.exec(f);
+    if (m) return { kind: 'article', id: m[1], key: m[2] };
+    m = /^component:([^/]+)\/([^/]+)\/(.+)$/.exec(f);
+    if (m) return { kind: 'component', anchorId: m[1], instanceKey: m[2], key: m[3] };
+    m = /^([A-Z][A-Z0-9]*)\.([A-Z][A-Z0-9]*(?:\.[A-Z][A-Z0-9]*)*)$/.exec(f);
+    if (m) return { kind: 'page', id: m[1].toLowerCase(), key: m[2] };
+    return null;
+  }
+  function applyCmsCopyEdit(edit) {
+    if (state.versionPreviewSite) { toast('A past version is showing: go back to the current drafts to edit text.'); return { ok: false }; }
+    const at = cmsCopyAddress(edit.field), value = String(edit.value == null ? '' : edit.value);
+    if (!at) { toast('Not edited: "' + edit.field + '" is not a field address (AREA.ROLE, article:<slug>/<field> or component:<anchor>/<instance>/<prop>).'); return { ok: false }; }
+    if (state.cmsContent && state.cmsContent.field === edit.field) state.cmsContent.value = value;
+    /* stale: the preview held a site sent while the words were typed and dropped it -- send the current one */
+    if (at.kind === 'component') { if (edit.stale) notifyPreviewState(); renderSelToolbar(); return { ok: true }; }
+    const result = A.setItemField(at.kind, at.id, at.key, value, { canvas: !edit.canvasShows });
+    if (!result.ok) toast(result.refusal);
+    else if (edit.canvasShows && edit.final) A.previewShowsDrafts();
+    renderSelToolbar();
+    return result;
+  }
   window.addEventListener('message', (event) => {
     if (event.origin !== window.location.origin || !event.data) return;
     if (event.source !== cmsPreview.contentWindow) return;
@@ -233,6 +384,10 @@
     if (event.data.showing) state.cmsStatesShowing = event.data.showing;
     if (event.data.type === 'defxn-cms-preview-ready') {
       state.cmsPreviewReady = true;
+      let reposted = false;
+      if (navigating) { navigating = false; if (postWaiting) { postCmsPreviewState(); reposted = true; } }
+      if (!reposted && arriving) { const asked = arriving; arriving = ''; if (event.data.path && event.data.path !== asked) routeRefused(asked, event.data.path); }
+      postCmsPreviewLens();
       /* the remount rebuilt the selected elements; the preview reports what is selected NOW
          (regression: tests/cms-selection-survives-remount.cjs) -- without it the toolbar kept
          editing a selection the page no longer had */
@@ -241,11 +396,14 @@
            open (it closed under the cursor ~1 s after a page opened -- studio-flows makecomp) */
         if (event.data.sameSelection && event.data.selection && state.tbOpen && state.cmsExactSelection && state.tbOpenKey === state.cmsExactSelection.key) state.tbOpenKey = event.data.selection.key;
         state.cmsExactSelection = event.data.selection || null; state.cmsExactSelections = event.data.selections;
+        state.cmsContent = event.data.content || null;
       }
-      if (event.data.groups) state.cmsGroups = event.data.groups; if (event.data.tree) state.cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); state.libKey = ''; renderLibrary(); queueCheck(); }
+      if (event.data.groups) state.cmsGroups = event.data.groups; if (event.data.tree) state.cmsTree = event.data.tree; renderInspector(); renderLayersPane(); state.libKey = ''; renderLibrary(); queueCheck(); }
     else if (event.data.type === 'defxn-cms-preview-error') toast('Preview update failed: ' + event.data.message);
+    else if (event.data.type === 'defxn-cms-preview-copy-edit') applyCmsCopyEdit(Object.assign({}, event.data, { canvasShows: !event.data.stale && (!event.data.history || event.data.history === 'revert') }));
     else if (event.data.type === 'defxn-cms-preview-select') {
       state.cmsExactSelection = event.data.selection || null;
+      state.cmsContent = event.data.content || null;
       state.cmsExactSelections = event.data.selections || (state.cmsExactSelection ? [state.cmsExactSelection] : []);
       if (event.data.groups) state.cmsGroups = event.data.groups;
       if (event.data.tree) state.cmsTree = event.data.tree;
@@ -294,7 +452,7 @@
     /* Step 4: js/main.js's unconditional "Edit canvas" context-menu entry still posts this
        exact message (that protocol is untouched, per scope) -- it used to call
        enterRestrictMode('canvas'); now it opens the same selection-independent popover
-       the header's Background segment (#designBackgroundBtn) opens. */
+       the header's Background segment (#backgroundBtn) opens. */
     else if (event.data.type === 'defxn-cms-preview-enter-canvas-mode') openCanvasTransitionsPopover();
     /* Ctrl/Cmd+S pressed while focus is inside the canvas (js/main.js forwards it): the same
        gate and the same one save action as this document's own shortcut listener. */
@@ -307,13 +465,18 @@
   document.addEventListener('pointerdown', () => {
     if (state.cmsContextMenuOpen && cmsPreview.contentWindow) cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-close-menu' }, window.location.origin);
   }, true);
-  A.provide({ cmsNextComponentId: cmsNextComponentId, cmsPreview: cmsPreview,
+  A.provide({ applyCmsCopyEdit: applyCmsCopyEdit, cmsCopyAddress: cmsCopyAddress,
+      cmsNextComponentId: cmsNextComponentId, cmsPreview: cmsPreview,
       postCmsCanvasTransitionPreview: postCmsCanvasTransitionPreview,
       postCmsCanvasTransitionsCommand: postCmsCanvasTransitionsCommand,
       postCmsComponentsCommand: postCmsComponentsCommand,
       postCmsElementMotionCommand: postCmsElementMotionCommand,
       postCmsElementMotionPreview: postCmsElementMotionPreview, postCmsLayoutCommand: postCmsLayoutCommand,
       postCmsLayoutOperation: postCmsLayoutOperation, postCmsLayoutReset: postCmsLayoutReset,
+      notifyPreviewAssets: notifyPreviewAssets, notifyPreviewMesh: notifyPreviewMesh,
+      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme,
+      postCmsPreviewLens: postCmsPreviewLens, previewShowsDrafts: previewShowsDrafts,
+      refreshCanvasSite: refreshCanvasSite, reloadPreview: reloadPreview,
       postCmsPreviewMode: postCmsPreviewMode, postCmsPreviewState: postCmsPreviewState,
       postCmsRemoveSelection: postCmsRemoveSelection, postCmsSelectGroup: postCmsSelectGroup,
       postCmsSelectKey: postCmsSelectKey, postCmsSetAlt: postCmsSetAlt, postCmsSetLabel: postCmsSetLabel,

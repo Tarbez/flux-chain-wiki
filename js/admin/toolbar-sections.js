@@ -176,7 +176,9 @@
       body.appendChild(h('p', { class: 'hint', text: 'This element has no text alternative of its own to set: alt text belongs on the <img> (or the <svg>, <canvas> or <video>) itself. Select the image inside it in Layers to describe it.' }));
       return;
     }
-    const saved = window.ArkLayout ? ArkLayout.altFor(state.layoutDraft, state.cmsExactSelection.route, state.cmsExactSelection.key) : '';
+    /* `page` is the route shown, `route` the scope the edit is stored under (SHELL for the
+       header): the value that applies on this page, from either (js/content/layout.js, "scopes") */
+    const saved = window.ArkLayout ? ArkLayout.altFor(state.layoutDraft, state.cmsExactSelection.page || state.cmsExactSelection.route, state.cmsExactSelection.key) : '';
     const ctx = { get: () => saved, set: (_key, value) => postCmsSetAlt(state.cmsExactSelection.key, value) };
     const row = ctlField(ctx, alt.attr === 'alt' ? 'Alt text' : 'Label', 'alt', { type: 'textarea', name: 'alt-text',
       placeholder: alt.own ? 'Page default: ' + alt.own : alt.own === '' || alt.decorative ? 'Page default: decorative (screen readers skip it)' : 'Describe what this image shows' });
@@ -197,7 +199,7 @@
     const comp = state.cmsExactSelection.component;
     const componentsState = (state.cmsSourceSite && state.cmsSourceSite.components) || { masters: {}, routes: {} };
     const master = componentsState.masters && componentsState.masters[comp.masterId];
-    const anchorList = (componentsState.routes && componentsState.routes[state.cmsExactSelection.route] && componentsState.routes[state.cmsExactSelection.route][comp.anchorId]) || [];
+    const anchorList = window.ArkComponents ? ArkComponents.instancesAt(componentsState, state.cmsExactSelection.page || state.cmsExactSelection.route, comp.anchorId) : [];
     const instance = anchorList.find((item) => item.key === comp.key);
     const overrides = (instance && instance.overrides) || {};
     const body = toolbarSection(pane, 'cms-component', 'Component instance', 'comp');
@@ -210,7 +212,7 @@
     body.appendChild(scope);
     /* one text field per prop (the shared ctlField): it shows the override, else the definition's value */
     const overrideCtx = { get: (prop) => (overrides[prop] !== undefined ? overrides[prop] : ((master && master.props[prop]) || '')),
-      set: (prop, value) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value }) };
+      set: (prop, value) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value }) };
     cmsMasterProps(master).forEach((prop) => {
       const row = ctlField(overrideCtx, prop, prop, { type: 'text', placeholder: (master && master.props[prop]) || '' });
       if (overrides[prop] !== undefined) row.classList.add('ovr');
@@ -219,10 +221,10 @@
     const actions = document.createElement('div'); actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.marginTop = '6px';
     const resetAll = document.createElement('button'); resetAll.className = 'btn small'; resetAll.type = 'button'; resetAll.textContent = 'Reset overrides';
     refuse(resetAll, Object.keys(overrides).length ? '' : 'Nothing to reset: this instance overrides none of its definition\'s fields. Edit a field above to override it here.');
-    resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
+    resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
     const removeInst = document.createElement('button'); removeInst.className = 'btn small danger'; removeInst.type = 'button'; removeInst.textContent = 'Remove instance';
     removeInst.addEventListener('click', () => {
-      postCmsComponentsCommand({ action: 'remove-instance', route: state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key });
+      postCmsComponentsCommand({ action: 'remove-instance', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key });
       state.cmsExactSelection = null; state.cmsExactSelections = []; renderInspector();
     });
     /* Edit definition: the master's own fields, in the Library -- one place, so an edit there
@@ -235,7 +237,7 @@
     const detach = document.createElement('button'); detach.className = 'btn small'; detach.type = 'button'; detach.textContent = 'Detach';
     refuse(detach, !master ? 'Cannot detach: this instance\'s master ' + comp.masterId + ' is missing, so there is no content to copy.' : master.detached ? 'Already detached: this copy follows no definition.' : '');
     detach.addEventListener('click', () => {
-      postCmsComponentsCommand({ action: 'detach-instance', route: state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
+      postCmsComponentsCommand({ action: 'detach-instance', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
       toast('Detached: this instance keeps its content and no longer follows the definition.');
     });
     actions.style.flexWrap = 'wrap';
@@ -263,7 +265,7 @@
   function buildStateGroupSection(pane) {
     const groupId = state.cmsExactSelection.stateGroup.groupId;
     const statesState = (state.cmsSourceSite && state.cmsSourceSite.states) || { routes: {} };
-    const group = (statesState.routes && statesState.routes[state.cmsExactSelection.route] && statesState.routes[state.cmsExactSelection.route][groupId]) || null;
+    const group = window.ArkStates ? ArkStates.groupFor(statesState, state.cmsExactSelection.page || state.cmsExactSelection.route, groupId) : null;
     const body = toolbarSection(pane, 'cms-states', 'States' + (group ? ` (${group.states.length})` : ''), 'repeat');
     if (!group) {
       const missing = document.createElement('p'); missing.className = 'hint'; missing.textContent = 'This group is not on the current page.'; body.appendChild(missing);
@@ -365,7 +367,54 @@
     hint.textContent = 'Previews instantly in the connected site above -- no page navigation. Save still writes it to the project like every other Studio edit.';
     body.appendChild(hint);
   }
-  A.provide({ buildAltTextSection: buildAltTextSection,
+  /* The Content lens's section: what the selected text IS in the content -- the field it shows
+     (label, address, file), its value (a paragraph field gets a textarea), and for a link the
+     link field that holds its target -- or, for text no field holds, why it cannot be edited and
+     what writes it. The binding is derived in the preview (js/main.js cmsContentInfo) and arrives
+     with the selection as state.cmsContent. Edits go through applyCmsCopyEdit (js/admin/bridge.js)
+     -> setItemField, the write the forms use; the value control carries the form's own
+     data-cms-field address, so an edit made anywhere else (the page form, the canvas) shows here. */
+  function buildContentSection(pane) {
+    /* a binding reported for another element (a message that moved the selection without one) is not this one's */
+    const content = state.cmsContent && (!state.cmsContent.key || state.cmsContent.key === state.cmsExactSelection.key) ? state.cmsContent : null;
+    const body = toolbarSection(pane, 'cms-content', 'Content', 'text');
+    const applyCmsCopyEdit = A.applyCmsCopyEdit;
+    const p = (cls, text) => { const el = document.createElement('p'); el.className = cls; el.textContent = text; return el; };
+    if (!content) { body.appendChild(p('hint', 'Nothing reported for this selection yet: click a piece of text on the canvas.')); return; }
+    if (content.bound) {
+      const info = document.createElement('p'); info.className = 'hint cms-content-field'; info.innerHTML = '<b></b><br><code></code>';
+      info.querySelector('b').textContent = content.label;
+      info.querySelector('code').textContent = content.field + '  ·  ' + (content.multiline ? 'paragraph' : 'one line') + '  ·  ' + content.file;
+      body.appendChild(info);
+      const component = content.kind === 'component';
+      const ctx = { get: () => content.value,
+        set: (_k, value) => {
+          if (!component) { applyCmsCopyEdit({ field: content.field, value, final: true }); return; }
+          content.value = value;
+          postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: content.anchorId, key: content.instanceKey, propPath: content.fieldKey, value });
+        } };
+      const data = component ? {} : { cmsField: content.kind + ':' + content.id + ':' + content.fieldKey };
+      body.appendChild(ctlField(ctx, 'Text', 'value',
+        { type: content.multiline ? 'textarea' : 'text', rows: content.multiline ? 4 : undefined, id: 'cmsContentValue', live: !component, data }));
+      if (component) body.appendChild(p('hint', 'This instance\'s override: the definition keeps its own value.'));
+      if (content.link && content.link.field) {
+        const at = A.cmsCopyAddress(content.link.field);
+        body.appendChild(A.linkPickerEl('Link target', 'cms-content-link', content.link.value,
+          (value) => { content.link.value = value; applyCmsCopyEdit({ field: content.link.field, value, final: true }); },
+          content.link.field, at ? at.kind + ':' + at.id + ':' + at.key : undefined));
+      } else if (content.link) body.appendChild(p('hint cms-content-refusal', content.link.refusal));
+    } else {
+      body.appendChild(p('hint cms-content-refusal', content.reason));
+      if (content.reason.indexOf(content.source) < 0) body.appendChild(p('hint', 'Source: ' + content.source + '.'));
+      body.appendChild(p('hint', content.remedy));
+    }
+    /* the whole form of the item this text belongs to (the page shown, when it belongs to none) */
+    const all = document.createElement('button'); all.type = 'button'; all.className = 'btn small'; all.dataset.action = 'open-page-fields'; all.textContent = 'Open all page fields';
+    refuse(all, typeof A.openPageFields === 'function' ? '' : 'Page fields are not available in this editor build: js/admin/ provides no openPageFields().');
+    all.addEventListener('click', () => A.openPageFields(content.bound && content.kind !== 'component' ? { kind: content.kind, id: content.id, field: content.fieldKey } : {}));
+    body.appendChild(all);
+  }
+  A.provide({ buildAltTextSection: buildAltTextSection, buildContentSection: buildContentSection,
       buildComponentInstanceSection: buildComponentInstanceSection,
       buildEffectsSection: buildEffectsSection, buildElementMotionSection: buildElementMotionSection,
       buildFillSection: buildFillSection, buildFrameSection: buildFrameSection,

@@ -2,21 +2,33 @@
    ADMIN EDITOR · PAGE SHAPES AND MESH TUNING (js/admin/shapes.js)
    ---------------------------------------------------------------------
    Owns: the shared relief tuning and each page's shape images (ArkMeshSettings) --
-   the Shape tab of a page's editor, the editor for shape pages with no manifest, adding
-   an image right beside a shape picker (quickAddAsset), and saveMeshDraft (called by Save).
+   renderShapesPanel(container, pageId?) (the Theme view's Shapes section), the pieces of a
+   page's Shape tab (buildShapePickers, buildPlacementPanel), adding an image right beside a
+   shape picker (quickAddAsset), and saveMeshDraft (called by Save).
+   Where it lives, decided by what it affects: the tuning is shared by every page's shape
+   images (site-wide), and a page's shapes are its WebGL background layer -- neither is the
+   page transition the Background popover edits. One home per control: the tuning is a section
+   of the Theme view; a page's shapes are its Page fields -> Shape tab; Demo and Lab, which have
+   no manifest and so no Page fields, are edited in the Theme view's section, which links every
+   other shape page to its Page fields. Nothing became unreachable, and nothing is drawn twice.
    Must not: hold the draft itself (state.meshDraft, js/admin/state.js).
    ===================================================================== */
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
-  var state = A.state, status = A.status, download = A.download, renderList = A.renderList,
+  var state = A.state, status = A.status, download = A.download, refreshList = A.refreshList,
       readFileAsAsset = A.readFileAsAsset, assetIdSlug = A.assetIdSlug, h = A.h,
-      notifyPreviewMesh = A.notifyPreviewMesh, renderEditor = A.renderEditor,
-      notifyPreviewAssets = A.notifyPreviewAssets, touch = A.touch,
-      refreshSaveButton = A.refreshSaveButton, $ = A.$;
+      touch = A.touch, refreshSaveButton = A.refreshSaveButton, paintInto = A.paintInto,
+      repaintPanels = A.repaintPanels, itemsChanged = A.itemsChanged, ctlSelectField = A.ctlSelectField,
+      contentChoices = A.contentChoices, contentLabel = A.contentLabel, shapePageId = A.shapePageId;
+  /* the canvas feed (js/admin/bridge.js) loads after this file: resolved when called */
+  var notifyPreviewMesh = A.later('notifyPreviewMesh'), notifyPreviewAssets = A.later('notifyPreviewAssets');
+  /* a shape mode or image changed: every form showing shapes is redrawn (a page's Shape tab,
+     the Theme view's Shapes section) and the dirty state refreshed */
+  function shapesChanged() { repaintPanels('page'); repaintPanels('shape'); touch(); }
 
   /* ---- mesh tuning + page shapes (js/content/mesh-settings.js) ------- */
-  /* Built straight into a page's own editor (renderEditor, for a page hasShape() names),
+  /* Built straight into a page's own form (renderPageFields, for a page hasShape() names),
      right where a person is already reading that page's fields, instead of a separate
      "Shapes" list to go find. meshDraft/meshSaved are shared module state so an edit on
      one page's screen and Save from another never disagree. */
@@ -37,7 +49,7 @@
     state.meshSaved = JSON.stringify(state.meshDraft);
     ArkMeshSettings.define(state.meshDraft);
     if (button) button.disabled = true;
-    renderList();
+    refreshList();
   }
   /* An image file picked right next to a shape's own select, so adding a new
      photo never means leaving this screen for the Images list first. Reuses
@@ -64,7 +76,7 @@
       page.hidden = hiddenBox.checked;
       if (hiddenBox.checked) { page.primaryMode = 'none'; page.surfaceMode = 'none'; }
       else { if (page.primaryMode === 'none') page.primaryMode = page.primary ? 'image' : 'built-in'; if (page.surfaceMode === 'none') page.surfaceMode = page.surface ? 'image' : 'built-in'; }
-      notifyPreviewMesh(); renderEditor(); renderList();
+      notifyPreviewMesh(); shapesChanged();
     });
     box.appendChild(h('div', { class: 'field field-inline' }, hiddenBox, h('label', { for: hiddenId, text: 'Hide both shapes for this page' })));
     box.appendChild(h('p', { class: 'hint', text: 'Shape 1 and Shape 2 can each use the built-in page shape, one of your images, or nothing.' }));
@@ -75,7 +87,7 @@
       var mode = h('select', { id: modeId, onchange: function () {
         page[modeKey] = mode.value;
         page.hidden = page.primaryMode === 'none' && page.surfaceMode === 'none';
-        notifyPreviewMesh(); renderEditor(); renderList();
+        notifyPreviewMesh(); shapesChanged();
       } });
       mode.appendChild(h('option', { value: 'built-in', text: 'Built-in shape' }));
       mode.appendChild(h('option', { value: 'image', text: 'Use image' }));
@@ -84,7 +96,7 @@
       var select = h('select', { id: id, onchange: function () {
         page[slot] = select.value || null;
         if (select.value) page[modeKey] = 'image';
-        notifyPreviewMesh(); renderEditor(); renderList();
+        notifyPreviewMesh(); shapesChanged();
       } });
       select.appendChild(h('option', { value: '', text: 'Choose an image' }));
       state.assetIds.forEach(function (assetId) {
@@ -99,7 +111,7 @@
           page[slot] = assetId;
           page[modeKey] = 'image';
           notifyPreviewAssets(); notifyPreviewMesh();
-          renderEditor(); renderList();
+          itemsChanged('asset', assetId); shapesChanged();
           status('Added "' + assetId + '" and set it as this page’s ' + slot + ' image. Save the image and Save this page’s shapes to keep it.', 'ok');
         });
       });
@@ -136,7 +148,7 @@
     box.appendChild(fields);
     var reset = h('button', { type: 'button', class: 'btn', text: 'Reset size and position', onclick: function () {
       ArkMeshSettings.placementFields().forEach(function (f) { state.meshDraft.pages[pageId][f.key] = f.def; });
-      notifyPreviewMesh(); renderEditor();
+      notifyPreviewMesh(); shapesChanged();
     } });
     box.appendChild(h('div', { class: 'tools' }, reset));
     return box;
@@ -144,7 +156,7 @@
   function buildMeshTuningPanel() {
     var box = h('fieldset', { class: 'relief' }, h('legend', { text: 'Shared shape tuning' }));
     if (!window.ArkMeshSettings) return box;
-    box.appendChild(h('p', { class: 'hint', text: 'Contrast, depth and particle count -- shared by every page’s shape images, not just this one. Drag a slider to see it change in the preview on the right; nothing is written until Save.' }));
+    box.appendChild(h('p', { class: 'hint', text: 'Contrast, depth and particle count -- shared by every page’s shape images, not just this one. Drag a slider to see it change on the canvas; nothing is written until Save.' }));
     var fields = h('div', { class: 'relief-fields' });
     var reset = h('button', { type: 'button', class: 'btn', text: 'Reset tuning to defaults' });
     function refreshInputs() {
@@ -172,18 +184,53 @@
     box.appendChild(h('div', { class: 'tools' }, reset));
     return box;
   }
-  /* Only for a shape page with no manifest of its own (Demo, Lab): everything else edits its
-     shapes inline on its real page (renderEditor, via hasShape/shapePageId above). */
-  function renderShapeEditor() {
-    var root = $('editor'); root.textContent = '';
-    var id = state.shapeCurrent;
-    if (!id || !window.ArkMeshSettings) { root.appendChild(h('p', { class: 'empty-state', text: 'Pick a page on the left.' })); return; }
-    root.appendChild(h('div', { class: 'editor-head' },
-      h('div', {}, h('h1', { text: state.shapeLabels[id] || id }), h('div', { class: 'route', text: 'js/content/mesh-settings-data.js' }))));
-    root.appendChild(buildShapePickers(id));
-    root.appendChild(buildPlacementPanel(id));
-    root.appendChild(buildMeshTuningPanel());
+  /* renderShapesPanel(container, pageId?): the Theme view's Shapes section -- the shared tuning
+     (site-wide, edited only here), then one shape page. One home per control: a shape page that
+     HAS a page (a manifest) is edited only in that page's Page fields -> Shape tab, so here it is
+     a link there; a shape page with none (Demo, Lab) is edited here, the only place it can be.
+     Which page: `pageId` when given, else the one last picked here, else the page on the canvas
+     when it has a shape, else the first. Ids stay unique with both surfaces open at once
+     (regression: tests/admin-content-panels.cjs mounts both). */
+  var shapesPick = null;
+  function canvasShapePage() {
+    var route = state.cmsCurrentRoute, found = null;
+    Object.keys((window.ArkUI && ArkUI.pageCatalog) || {}).forEach(function (key) { if (!found && ArkUI.pageCatalog[key].path === route && state.shapeIds.indexOf(key) >= 0) found = key; });
+    return found;
+  }
+  /* the page (manifest id) whose Page fields hold this shape page, or null (Demo, Lab) */
+  function shapeOwner(spid) { return state.ids.find(function (id) { return shapePageId(id) === spid; }) || null; }
+  function renderShapesPanel(container, pageId) {
+    var record = { kind: 'shape', id: pageId, repaint: function () { renderShapesPanel(container, pageId); } };
+    paintInto(container, record, function (root) {
+      root.classList.add('cms-form', 'cms-shapes');
+      if (!window.ArkMeshSettings || !state.shapeIds.length) { root.appendChild(h('p', { class: 'hint', text: 'Page shapes are unavailable: js/content/mesh-settings.js did not load into the editor. Reload; if it persists, check admin-app.html still includes it.' })); return; }
+      root.appendChild(buildMeshTuningPanel());
+      var id = pageId || (shapesPick && state.shapeIds.indexOf(shapesPick) >= 0 ? shapesPick : null) || canvasShapePage() || state.shapeIds[0];
+      var which = h('fieldset', { class: 'relief' }, h('legend', { text: 'Page shapes' }));
+      if (!pageId) {
+        var pages = state.shapeIds.map(function (k) { return { key: k, label: state.shapeLabels[k] || k }; });
+        var pick = ctlSelectField({ get: function () { return id; }, set: function (_k, v) { shapesPick = v; renderShapesPanel(container); } },
+          'Page', 'page', contentChoices(pages), contentLabel(pages), { id: 'shapes-page' });
+        pick.classList.add('field');
+        which.appendChild(pick);
+      }
+      var where = (window.ArkUI && ArkUI.pageCatalog[id] && ArkUI.pageCatalog[id].path) || id, owner = shapeOwner(id);
+      if (owner) {
+        which.appendChild(h('p', { class: 'hint', text: 'The shapes on ' + where + ' belong to that page: they are edited in its Page fields, Shape tab (with its words), not here.' }));
+        which.appendChild(h('div', { class: 'tools' }, h('button', { type: 'button', class: 'btn', text: 'Edit in Page fields', 'data-shape-owner': owner, onclick: function () {
+          if (typeof A.openPageFields === 'function') A.openPageFields({ kind: 'page', id: owner, tab: 'shape' });
+          else status('Page fields cannot open here: js/admin/panels.js (openPageFields) is not loaded. Open ' + where + ' on the canvas and use the Page fields button.', 'warn');
+        } })));
+        root.appendChild(which);
+        return;
+      }
+      which.appendChild(h('p', { class: 'hint', text: 'Shown on ' + where + ', which has no Page fields of its own. Saved in js/content/mesh-settings-data.js with the tuning above.' }));
+      root.appendChild(which);
+      root.appendChild(buildShapePickers(id));
+      root.appendChild(buildPlacementPanel(id));
+    });
+    return container;
   }
   A.provide({ buildPlacementPanel: buildPlacementPanel, buildShapePickers: buildShapePickers,
-      reliefDirty: reliefDirty, renderShapeEditor: renderShapeEditor, saveMeshDraft: saveMeshDraft });
+      reliefDirty: reliefDirty, renderShapesPanel: renderShapesPanel, saveMeshDraft: saveMeshDraft });
 })();

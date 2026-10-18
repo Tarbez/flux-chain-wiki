@@ -86,14 +86,18 @@ const ArkLayout = vm.runInContext('ArkLayout', context);
   assert.equal(parent.children[1], cardC, 'the ungrouped sibling is untouched and keeps its position');
   assert.equal(wrapper.style.display, 'flex', 'the HTML wrapper is a real flex container, not a transparent passthrough');
 
-  /* A second apply() (e.g. a resize or a re-render) must unwrap-then-rebuild identically,
-     never nest a second wrapper and never lose or reorder a member. */
+  /* A second apply() (e.g. a resize or a re-render) must leave the group exactly as it was,
+     never nest a second wrapper and never lose or reorder a member -- and it keeps the SAME
+     wrapper element. It used to unwrap and rebuild a new one on every pass, so a selected
+     group in the never-remounted header became an emptied, detached node after the next pass
+     and the editor dropped the selection (tests/browser/full-audit.mjs "layout group";
+     tests/layout-shell-scope.cjs). */
   ArkLayout.apply(root, '/', 1280, layout);
   assert.equal(parent.children.length, 2, 'reapplying the same layout is idempotent');
   const rewrapped = parent.children[0];
   assert.equal(rewrapped.getAttribute('data-ark-layout-group'), 'grp1');
-  assert.deepEqual(rewrapped.children, [cardA, cardB], 'members round-trip through unwrap+rebuild with no drift');
-  assert.notEqual(rewrapped, wrapper, 'the wrapper is rebuilt fresh each apply(), not reused by reference');
+  assert.deepEqual(rewrapped.children, [cardA, cardB], 'members stay in the wrapper with no drift');
+  assert.equal(rewrapped, wrapper, 'an unchanged group keeps its wrapper element across apply() passes');
 
   /* Ungroup must restore the exact original flat sibling order. */
   layout = ArkLayout.ungroup(layout, '/', 'grp1');
