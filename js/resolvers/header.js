@@ -167,6 +167,7 @@ function buildProducts(header, core) {
   }
   var shortName = ArkResolutions.shortName;
   var wrap = make('div', 'header-products');
+  wrap.dataset.headerItem = 'resolutions';
   var trigger = make('button', 'header-products-toggle');
   trigger.type = 'button';
   trigger.id = 'products-trigger';
@@ -330,6 +331,56 @@ function buildProducts(header, core) {
   if (toggle) toggle.addEventListener('click', function () { setOpen(false); });
 }
 
+/* One row, never squeezed (tests/browser/public-header.mjs, 1024-1920px). Above the compact
+   breakpoint every core link used to stay in the row and shrink to fit: at 1280px "How it
+   works", "Mesh Explorer" and "Run DEFXN" wrapped onto two lines and Account read "Acc...".
+   Instead, while the row's controls are wider than the header's content box, the next link in
+   HEADER_COLLAPSE_ORDER leaves the row (.header-collapsed); every one of them stays one click
+   away in the MENU panel, which lists every page. The order is the editorial priority, lowest
+   first: supporting reads go before orientation (Overview, Mesh Explorer, the Resolutions
+   menu), and the run action goes last. Account is never collapsed: it carries the visitor's
+   own state. Widths are MEASURED, not breakpoints, so a longer network name, a signed-in
+   display name or a copy change re-fits instead of silently wrapping again. */
+var HEADER_COLLAPSE_ORDER = ['stats', 'deployment', 'about', 'explorer', 'resolutions', 'download'];
+function headerRowOverflows(header) {
+  var box = header.getBoundingClientRect();
+  if (!box.width) return false;                      /* not laid out (server render, hidden) */
+  var cs = getComputedStyle(header), gap = parseFloat(cs.columnGap) || 0, used = 0, count = 0;
+  Array.prototype.forEach.call(header.children, function (child) {
+    var ccs = getComputedStyle(child);
+    if (ccs.display === 'none' || ccs.position === 'absolute' || ccs.position === 'fixed') return;
+    used += child.getBoundingClientRect().width; count += 1;
+  });
+  var room = box.width - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+  return used + gap * Math.max(0, count - 1) > room + 0.5;
+}
+function fitHeaderRow(header) {
+  function fit() {
+    if (!header.isConnected) return;
+    var items = HEADER_COLLAPSE_ORDER.map(function (key) { return header.querySelector('[data-header-item="' + key + '"]'); }).filter(Boolean);
+    var before = items.map(function (item) { return item.classList.contains('header-collapsed'); }).join();
+    items.forEach(function (item) { item.classList.remove('header-collapsed'); });
+    for (var i = 0; i < items.length && headerRowOverflows(header); i++) items[i].classList.add('header-collapsed');
+    /* a link leaving or rejoining the row moves its neighbours a frame after whatever changed
+       the row; anything drawn over them (the editor's selection outline, js/main.js) re-places */
+    if (items.map(function (item) { return item.classList.contains('header-collapsed'); }).join() !== before) header.dispatchEvent(new CustomEvent('ark-header-refit', { bubbles: true }));
+  }
+  if (typeof ResizeObserver === 'undefined') return;
+  /* Re-fit whenever anything in the row changes width: the header itself (the viewport), every
+     control (a network name, a signed-in name) and the link bar -- whose links are restyled by
+     a route change (home draws bordered pills, inner pages a tighter segmented bar), which no
+     single control's size reveals. Fitting changes the bar's own width, so the fit runs in the
+     next frame, outside the observer's delivery: fitting inside it would resize an observed
+     element mid-delivery ("ResizeObserver loop completed with undelivered notifications"). The
+     fit is idempotent, so the bar's re-measure after it settles in one more frame. */
+  var queued = 0;
+  function queue() { if (!queued) queued = requestAnimationFrame(function () { queued = 0; fit(); }); }
+  var observer = new ResizeObserver(queue);
+  observer.observe(header);
+  ['.ark-studio-identity', '.header-core-links', '.header-chain-trigger', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+}
+
 ArkUI.register('RHEADER_V1', {
   tag: 'header',
   base: {
@@ -398,6 +449,7 @@ ArkUI.register('RHEADER_V1', {
         link.appendChild(accountLabel);
       }
       if (item[1] === 'download') link.classList.add('header-run-link');
+      link.dataset.headerItem = item[1];
       if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',stats:'evidence',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
     });
     el.appendChild(core);
@@ -454,6 +506,7 @@ ArkUI.register('RHEADER_V1', {
     buildHeaderChainPopover(el);
     el.appendChild(toggle);
     if (ArkUI.pageCatalog.resolutions && typeof ArkResolutions !== 'undefined') buildProducts(el, core);
+    fitHeaderRow(el);
   },
   onMount: function (el) {
     var menu = el.querySelector('#primary-navigation');

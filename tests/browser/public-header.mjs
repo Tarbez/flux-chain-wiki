@@ -1,6 +1,6 @@
 /* =====================================================================
    PUBLIC HEADER -- the site header (js/resolvers/header.js, styled by
-   css/navigation.css) must fit one row at phone widths with nothing cut.
+   css/navigation.css) must fit one row, phone to desktop, with nothing cut.
 
    Why this exists: at 360-430px the row held the DEFXN wordmark, a text
    Account button, the network pill and the MENU button, and the
@@ -10,18 +10,30 @@
    label's own box against its text shows the cut. So this measures text,
    not presence.
 
-   Per width (360, 390, 430) and route (home + inner pages) it asserts:
+   The desktop row had the same defect another way: from 1041px up every
+   core link stayed in the row and shrank, so at 1280px "How it works",
+   "Mesh Explorer" and "Run DEFXN" wrapped onto two lines and Account read
+   "Acc..." -- and no check here looked at wrapping. The row now measures
+   itself and moves the lowest-priority links into the MENU instead
+   (fitHeaderRow in js/resolvers/header.js).
+
+   Per width (360, 390, 430, 1024, 1280, 1440, 1920) and route (home +
+   inner pages) it asserts:
    - every visible header control (the identity link, each shown core link,
      the network pill, the MENU button) and every text-bearing element
      inside it is not truncated: scrollWidth <= clientWidth + 1, and each
      text run's box lies inside the control and inside every clipping
      ancestor (so an ellipsis that is actually clipping is caught);
+   - no text run wraps: each one's line boxes share one line;
    - the wordmark renders its full text;
    - every control lies inside the viewport, and no two overlap;
-   - the controls share one row (a common vertical band) and the pill
-     controls share one height;
-   - every core link hidden at this width is still reachable from the
-     MENU panel (#primary-navigation holds a link to the same href);
+   - the controls share one row (a common vertical band); in the compact
+     layout (<=1040px), where each control is its own pill, they share one
+     height -- above it the inner pages group the links in one segmented
+     bar and Resolutions is a text trigger, by design, so heights differ;
+   - every core link hidden at this width, and the Resolutions menu when
+     it is hidden, is still reachable from the MENU panel
+     (#primary-navigation holds a link to the same page);
    - the document has no horizontal page scroll.
 
    Run by hand (needs Chromium; not part of scripts/run-tests.mjs):
@@ -42,7 +54,7 @@ import { settled } from './route-sweep.mjs';
 /* PUBLIC_HEADER_WIDTHS=320,600 probes other widths. */
 const WIDTHS = process.env.PUBLIC_HEADER_WIDTHS
   ? process.env.PUBLIC_HEADER_WIDTHS.split(',').map((w) => [Number(w), 844])
-  : [[360, 780], [390, 844], [430, 932]];
+  : [[360, 780], [390, 844], [430, 932], [1024, 768], [1280, 800], [1440, 900], [1920, 1080]];
 const ROUTES = ['zero', 'about', 'explorer', 'account'];
 
 async function freePort() {
@@ -54,7 +66,9 @@ async function freePort() {
 }
 
 export function measureHeader(page) {
-  return page.evaluate(() => {
+  /* after a few frames: the row re-fits in the frame after a ResizeObserver sees a width change */
+  return page.evaluate(async () => {
+    for (let i = 0; i < 4; i++) await new Promise((resolve) => requestAnimationFrame(resolve));
     const problems = [];
     const vw = document.documentElement.clientWidth;
     const header = document.querySelector('#scene .ark-header');
@@ -86,6 +100,9 @@ export function measureHeader(page) {
         if (!shown(t.parentElement)) continue;
         const range = document.createRange(); range.selectNodeContents(t);
         const b = range.getBoundingClientRect();
+        /* wrapped: the run's line boxes do not share one line */
+        const lines = [...range.getClientRects()].filter((r) => r.width > 0);
+        if (lines.length > 1 && Math.max(...lines.map((r) => r.top)) - Math.min(...lines.map((r) => r.top)) > 2) problems.push(`"${label}": text "${t.textContent.trim()}" wraps onto ${new Set(lines.map((r) => Math.round(r.top))).size} lines`);
         for (let a = t.parentElement; a && a !== header; a = a.parentElement) {
           const ov = getComputedStyle(a).overflowX;
           if (a !== el && ov === 'visible') continue;
@@ -102,8 +119,10 @@ export function measureHeader(page) {
     }
     const bandTop = Math.max(...rects.map((r) => r.top)), bandBottom = Math.min(...rects.map((r) => r.bottom));
     if (rects.length && bandTop >= bandBottom) problems.push('the header controls do not share one row');
+    /* the compact layout's breakpoint, the same 1040px css/navigation.css switches at */
+    const compact = matchMedia('(max-width:1040px)').matches;
     const pills = controls.filter((el) => !el.matches('.ark-studio-identity')).map((el) => Math.round(el.getBoundingClientRect().height));
-    if (pills.length && Math.max(...pills) - Math.min(...pills) > 1) problems.push(`control heights differ: ${pills.join(', ')}`);
+    if (compact && pills.length && Math.max(...pills) - Math.min(...pills) > 1) problems.push(`control heights differ: ${pills.join(', ')}`);
 
     const wordmark = header.querySelector('.ark-brand-wordmark');
     if (!shown(wordmark)) problems.push('the wordmark is not shown');
@@ -117,6 +136,8 @@ export function measureHeader(page) {
     header.querySelectorAll('.header-core-links > a').forEach((a) => {
       if (!shown(a) && !menuHrefs.has(a.getAttribute('href'))) problems.push(`"${name(a)}" is hidden from the row and missing from the MENU (${a.getAttribute('href')})`);
     });
+    const products = header.querySelector('.header-products-toggle');
+    if (products && !shown(products) && !(menu && menu.querySelector('[data-nav-route="resolutions"]'))) problems.push('the Resolutions menu is hidden from the row and Resolutions is missing from the MENU');
     const hScroll = document.documentElement.scrollWidth - document.documentElement.clientWidth;
     if (hScroll > 1) problems.push(`horizontal page scroll of ${hScroll}px`);
     return { problems, controls: controls.map((el, i) => `${name(el).slice(0, 24)} ${Math.round(rects[i].left)}-${Math.round(rects[i].right)}x${Math.round(rects[i].height)}`) };
@@ -191,7 +212,7 @@ async function main() {
     fs.rmSync(root, { recursive: true, force: true });
   }
   if (failures.length) { console.log(`\n${failures.length} failing header checks`); process.exit(1); }
-  console.log('\nPASS: the public header fits one row at 360-430px with nothing truncated, overlapping or unreachable.');
+  console.log(`\nPASS: the public header fits one row at ${WIDTHS.map(([w]) => w).join(', ')}px with nothing truncated, wrapped, overlapping or unreachable.`);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((error) => { console.error(error); process.exit(1); });

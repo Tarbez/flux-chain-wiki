@@ -570,10 +570,10 @@
     else if (data.action === 'seed-state') draft = cmsSeedState(draft, route, data);
     else return;
     /* a selected instance is rebuilt by the render below; keep it selected by its key */
-    var before = cmsSelectionList(), selectedKeys = before.map(function (element) { return element.getAttribute('data-ark-component-key'); });
+    var refs = cmsSelectionRefs();
     cmsComponentsDraft = ArkComponents.define(draft);
     ArkComponents.renderAll(host, route, cmsComponentsDraft);
-    var reselected = selectedKeys.some(Boolean) && cmsReselectComponents(before, selectedKeys);
+    var reselected = refs.some(function (ref) { return ref.component; }) && cmsRestoreSelection(refs);
     window.parent.postMessage({ type: 'defxn-cms-preview-components-replace', components: cmsComponentsDraft, points: cmsInsertionPoints(), tree: cmsRealTree(host, route) }, location.origin);
     if (reselected) { placeCmsLayoutUi(); emitCmsLayoutSelection(); }
   }
@@ -581,9 +581,32 @@
   function cmsComponentRoot(key) {
     return Array.prototype.find.call(host.querySelectorAll('[data-ark-component-key]'), function (el) { return el.getAttribute('data-ark-component-key') === key; }) || null;
   }
-  function cmsReselectComponents(before, keys) {
-    var next = before.map(function (element, i) { return (keys[i] && cmsComponentRoot(keys[i])) || element; }).filter(function (element) { return element && element.isConnected; });
+  /* A selection that survives a re-render which rebuilds what it points at (regression:
+     tests/cms-selection-survives-remount.cjs). Two re-renders rebuild selected elements: a
+     component command re-renders its instances, and a draft refresh ('defxn-cms-preview-state',
+     sent on every frame load and every Studio re-render) REMOUNTS the whole route ~1 s after the
+     page is already clickable. The remount used to drop the selection silently while Studio's
+     toolbar kept showing the destroyed one -- Detach then "did nothing" visible: the draft was
+     detached, but the toolbar still offered Detach on the old master (studio-flows makecomp).
+     So each selected element is remembered by what identifies it across a rebuild -- an
+     instance root by its instance key (rebuilt with a new node), else the very element while
+     it is still in the page, else its layout key -- and found again after the rebuild; one that no
+     longer exists drops out of the selection instead of lingering. */
+  function cmsSelectionRefs() {
+    /* every selected element, connected or not: a removed node still carries the attributes
+       that identify it, so this also finds again what a remount already replaced */
+    return cmsPreviewSelections.filter(Boolean).map(function (element) { return { element: element, component: element.getAttribute('data-ark-component-key'), key: element.getAttribute('data-ark-layout-key') }; });
+  }
+  function cmsRestoreSelection(refs) {
+    if (!refs.length) return false;
     if (window.ArkLayout) ArkLayout.annotate(host);
+    /* a layout key is a PATH for most page content, and a remount can renumber it (the route's
+       container went from div:2 to div:7 on /chain), so the element a key finds is only taken
+       if it is the same kind of element saying the same thing -- never a stranger at that path */
+    var same = function (found, was) { return !!found && found.tagName === was.tagName && found.textContent.trim() === was.textContent.trim(); };
+    var byKey = function (ref) { var found = ref.key && cmsElementForKey(ref.key); return same(found, ref.element) ? found : null; };
+    var next = refs.map(function (ref) { return (ref.component && cmsComponentRoot(ref.component)) || (ref.element.isConnected && ref.element) || byKey(ref) || null; })
+      .filter(function (element, i, all) { return element && element.isConnected && all.indexOf(element) === i; });
     cmsPreviewSelections = next; cmsPreviewSelected = next[next.length - 1] || null;
     return true;
   }
@@ -1044,8 +1067,15 @@
         if (window.ArkLayout) ArkLayout.apply(host, cmsRoutePath(), window.innerWidth, cmsLayoutDraft);
         if (window.ArkComponents) ArkComponents.renderAll(host, cmsRoutePath(), cmsComponentsDraft);
         if (window.ArkStates) ArkStates.renderAll(host, cmsRoutePath(), cmsStatesView(cmsRoutePath()), cmsComponentsDraft);
+        var keptRefs = cmsSelectionRefs(), reselected = cmsRestoreSelection(keptRefs);
         placeCmsLayoutUi();
-        window.parent.postMessage({ type: 'defxn-cms-preview-ready', path: ArkUI.route.path(), groups: cmsGroupList(), points: cmsInsertionPoints(), showing: cmsStatesShowingFor(cmsRoutePath()), tree: cmsRealTree(host, cmsRoutePath()) }, location.origin);
+        var ready = { type: 'defxn-cms-preview-ready', path: ArkUI.route.path(), groups: cmsGroupList(), points: cmsInsertionPoints(), showing: cmsStatesShowingFor(cmsRoutePath()), tree: cmsRealTree(host, cmsRoutePath()) };
+        /* the selection as it is AFTER the remount (possibly none), so Studio's toolbar never edits a destroyed one */
+        /* sameSelection: every selected element was found again. Its layout key can still differ
+           (a remount renumbers the route's containers: path:div:1/div:2/... became div:7), so
+           Studio is told it is the same selection rather than left to compare keys */
+        if (reselected) { ready.selection = cmsPreviewSelected && cmsSelectionInfo(cmsPreviewSelected); ready.selections = cmsSelectionPayload(); ready.sameSelection = cmsPreviewSelections.length === keptRefs.length; }
+        window.parent.postMessage(ready, location.origin);
       }).catch(function (error) {
         window.parent.postMessage({ type: 'defxn-cms-preview-error', message: error.message }, location.origin);
         if (window.console) console.error('[ark] CMS preview refresh failed', error);
@@ -1210,6 +1240,14 @@
     placeCmsLayoutUi();
   });
   document.addEventListener('scroll', placeCmsLayoutUi, true);
+  /* The header re-fits its row a frame after a change -- a state switch, a route's styles --
+     and moves the links beside the one that left or rejoined it (js/resolvers/header.js
+     fitHeaderRow). The outline and Studio's toolbar were placed before that move, so they were
+     left 88px off the selected link (studio-flows statesui). Re-place both. */
+  document.addEventListener('ark-header-refit', function () {
+    if (!cmsPreviewQuery || !cmsSelectionList().length) return;
+    placeCmsLayoutUi(); emitCmsLayoutSelection();
+  });
   /* Delete/Backspace for the canvas. A click inside this iframe (the document.addEventListener
      ('click', ...) handler above) moves keyboard focus into it, so THIS listener, not the
      parent's, is what normally receives the keystroke once a real element is selected; the

@@ -2035,6 +2035,14 @@
     const route = cmsCurrentRoute || '/';
     if (force || cmsPreviewRoute !== route || !cmsPreview.getAttribute('src')) {
       cmsExactSelection = null; cmsExactSelections = [];
+      /* The selection belonged to the old page, and so does the bar drawn for it: it goes now,
+         not at the new page's ready (~1 s later). Until then it stayed drawn, and clickable,
+         over the page being opened --
+         a click on the new page's Overview link landed on the old bar's "Theme & defaults" and
+         left Design mode (regression: tests/cms-route-change-hides-toolbar.cjs) */
+      const staleBar = $('selToolbar'), stalePop = $('selToolbarPop');
+      if (staleBar) staleBar.hidden = true;
+      if (stalePop) stalePop.hidden = true;
       cmsPreviewRoute = route; cmsPreviewReady = false;
       cmsPreview.src = 'index.html?cms-preview=1#' + route;
     }
@@ -3682,7 +3690,18 @@
     if (event.source !== cmsPreview.contentWindow) return;
     if (event.data.points) cmsInsertPoints = event.data.points;
     if (event.data.showing) cmsStatesShowing = event.data.showing;
-    if (event.data.type === 'defxn-cms-preview-ready') { cmsPreviewReady = true; if (event.data.groups) cmsGroups = event.data.groups; if (event.data.tree) cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); libKey = ''; renderLibrary(); queueCheck(); }
+    if (event.data.type === 'defxn-cms-preview-ready') {
+      cmsPreviewReady = true;
+      /* the remount rebuilt the selected elements; the preview reports what is selected NOW
+         (regression: tests/cms-selection-survives-remount.cjs) -- without it the toolbar kept
+         editing a selection the page no longer had */
+      if (Array.isArray(event.data.selections)) {
+        /* the same element found again, under a new path key: a toolbar section open on it stays
+           open (it closed under the cursor ~1 s after a page opened -- studio-flows makecomp) */
+        if (event.data.sameSelection && event.data.selection && tbOpen && cmsExactSelection && tbOpenKey === cmsExactSelection.key) tbOpenKey = event.data.selection.key;
+        cmsExactSelection = event.data.selection || null; cmsExactSelections = event.data.selections;
+      }
+      if (event.data.groups) cmsGroups = event.data.groups; if (event.data.tree) cmsTree = event.data.tree; toast('Exact DEFXN preview updated from unsaved CMS drafts.'); renderInspector(); renderLayersPane(); libKey = ''; renderLibrary(); queueCheck(); }
     else if (event.data.type === 'defxn-cms-preview-error') toast('Preview update failed: ' + event.data.message);
     else if (event.data.type === 'defxn-cms-preview-select') {
       cmsExactSelection = event.data.selection || null;

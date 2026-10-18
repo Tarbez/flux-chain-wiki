@@ -204,7 +204,7 @@ await flow('states', async () => {
   await step('Save (Ctrl+S) writes states-data.js and components-data.js', async () => {
     await clickHeader(app, 'connect');
     await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
-    await navLink(pv, 'Stats').click();       /* focus is now inside the preview, as it is after any canvas click */
+    await navLink(pv, 'Mesh Explorer').click();       /* focus is now inside the preview, as it is after any canvas click */
     await saveViaShortcut(pv);
     const saved = await until(() => { try { return onlyGroup(savedJson('states-data.js')); } catch { return null; } }, 'Ctrl+S with focus in the canvas did not write states-data.js');
     check(saved.states.length === 3 && /nav:1\/a:2$/.test(saved.trigger), 'saved group is wrong: ' + JSON.stringify(saved));
@@ -256,18 +256,20 @@ await flow('single', async () => {
     check(group.states[0].members.length === 1 && group.states[0].members[0] === NAV, 'state 0 should be the nav: ' + JSON.stringify(group.states[0]));
   });
   await step('a nested link inside the container still shows the States section, and becomes the trigger', async () => {
-    await navLink(pv, 'Stats').click();
+    /* not Stats: in the editor's 1280px preview the header moves Stats into the MENU (the row
+       fits by collapsing its lowest-priority link, js/resolvers/header.js fitHeaderRow) */
+    await navLink(pv, 'Mesh Explorer').click();
     const btn = (await section(app, 'States')).locator('button', { hasText: 'Use this element as trigger' });
     await btn.click();
-    group = await until(async () => { const g = onlyGroup(await statesIn(pv)); return g && /nav:1\/a:4$/.test(g.trigger) && g; }, 'trigger not set to the nested Stats link');
+    group = await until(async () => { const g = onlyGroup(await statesIn(pv)); return g && /nav:1\/a:3$/.test(g.trigger) && g; }, 'trigger not set to the nested Mesh Explorer link');
   });
   await step('+ Add state, then Live: trigger > state 1 > (trigger hidden) click state 1 > back to 0', async () => {
     await (await section(app, 'States')).locator('button', { hasText: '+ Add state' }).click();
     await until(async () => { const g = onlyGroup(await statesIn(pv)); return g && g.states.length === 2; }, 'state 1 not added');
     await (await section(app, 'States')).locator('button', { hasText: 'Preview' }).first().click();
     await app.locator('#mode button[data-m="live"]').click(); await wait(400);
-    await navLink(pv, 'Stats').click();
-    await until(async () => { const v = await visible(pv, group.id); return v.anchors.length === 1 && v.members.every((m) => !m); }, 'Stats (trigger) did not show state 1');
+    await navLink(pv, 'Mesh Explorer').click();
+    await until(async () => { const v = await visible(pv, group.id); return v.anchors.length === 1 && v.members.every((m) => !m); }, 'Mesh Explorer (trigger) did not show state 1');
     await shot('single-01-state1');
     await pv.locator('[data-ark-state-anchor] [data-ark-component-key]:visible').first().click();
     await until(async () => { const v = await visible(pv, group.id); return !v.anchors.length && v.members.every(Boolean); }, 'state 1 could not be clicked back to state 0 -- stranded');
@@ -342,9 +344,10 @@ await flow('component', async () => {
   });
   await step('Remove instance takes it off the page', async () => {
     const again = await openEditor();
-    await again.app.click('#tabPages');
-    await routeRow(again.app, '/download').click();
-    await until(() => again.pv.evaluate(() => !!document.querySelector('[data-ark-component-key]')), 'instance missing before remove');
+    /* the same route wait as every other flow (gotoRoute), then the instance, which arrives with
+       the preview's draft remount -- a bare 5 s wait failed on a shared machine (load ~21) */
+    await gotoRoute(again.app, again.pv, '/download');
+    await until(() => again.pv.evaluate(() => !!document.querySelector('[data-ark-component-key]')), 'instance missing before remove', 20000);
     await again.pv.locator('[data-ark-component-key]').first().click();
     await (await section(again.app, 'Component instance')).locator('button', { hasText: 'Remove instance' }).click();
     await until(() => again.pv.evaluate(() => !document.querySelector('[data-ark-component-key]')), 'instance still on the page after Remove instance');
@@ -358,21 +361,21 @@ await flow('component', async () => {
 /* ---------------------------------------------------------------- 4 */
 await flow('hide', async () => {
   const { page, app, pv, shot } = await openEditor();
-  const KEY = 'path:div:1/header:1/nav:1/a:4';            /* the Stats link */
+  const KEY = 'path:div:1/header:1/nav:1/a:3';            /* the Mesh Explorer link (Stats sits in the MENU at the preview's 1280px) */
   const shown = () => pv.evaluate((key) => { const el = [...document.querySelectorAll('[data-ark-layout-key]')].find((e) => e.getAttribute('data-ark-layout-key') === key); return !!el && getComputedStyle(el).display !== 'none'; }, KEY);
   const eye = () => app.locator('#layers li[aria-selected="true"] .eye-toggle').first();
   await step('Layers eye hides the selected layer in the preview', async () => {
     await app.click('#tabLayers');
-    await navLink(pv, 'Stats').click();
+    await navLink(pv, 'Mesh Explorer').click();
     await until(async () => (await eye().count()) > 0, 'the selected layer has no row in Layers');
     await eye().click();
-    await until(async () => !(await shown()), 'Stats is still visible after Hide');
+    await until(async () => !(await shown()), 'Mesh Explorer is still visible after Hide');
     await until(async () => (await eye().getAttribute('aria-pressed')) === 'true', 'the eye does not show the layer as hidden');
     await shot('hide-01-hidden');
   });
   await step('the same eye shows it again (not stuck hidden)', async () => {
     await eye().click();
-    await until(() => shown(), 'Stats stays hidden after Show -- stuck hidden');
+    await until(() => shown(), 'Mesh Explorer stays hidden after Show -- stuck hidden');
   });
   await step('hide, Save, reload: still hidden; show, Save, reload: visible', async () => {
     await eye().click();
@@ -536,7 +539,7 @@ await flow('makecomp', async () => {
     await (await section(app, 'Component instance')).locator('button', { hasText: 'Detach' }).click();
     await until(async () => { const c = await componentsIn(pv); const spot = Object.keys(c.spots['/download'])[0]; const m = c.masters[c.routes['/download'][spot][0].masterId]; return m && m.detached; }, 'the instance was not detached');
     await until(async () => (await openToolbarSection(app, 'Component instance')).locator('p.hint', { hasText: 'Detached' }).count(), 'the toolbar does not say the instance is detached', 8000)
-      .catch(async (e) => { throw new StepFailure(e.message + ': pop=' + JSON.stringify((await app.locator('#selToolbarPop').textContent()).slice(0, 400)) + ' bar=' + JSON.stringify(await toolbar(app).evaluate((b) => [...b.querySelectorAll('.tb-btn')].map((x) => x.dataset.name + ':' + x.getAttribute('aria-expanded'))))); });
+      .catch(async (e) => { throw new StepFailure(e.message + ': preview=' + JSON.stringify(await pv.evaluate(() => { const box = document.querySelector('.ark-studio-box'); return { instances: [...document.querySelectorAll('[data-ark-component-key]')].map((r) => r.getAttribute('data-ark-component-key') + '->' + r.getAttribute('data-ark-component-master')), outlined: !!box && !box.hidden }; })) + ' pop=' + JSON.stringify((await app.locator('#selToolbarPop').textContent()).slice(0, 400)) + ' bar=' + JSON.stringify(await toolbar(app).evaluate((b) => [...b.querySelectorAll('.tb-btn')].map((x) => x.dataset.name + ':' + x.getAttribute('aria-expanded'))))); });
     await setDefinition(app, master.label, 'heading', 'Third heading');
     await wait(400);
     check(/Run DEFXN from source/.test((await instanceTexts(pv))[origin]), 'the detached instance followed a definition edit');
@@ -590,26 +593,50 @@ await flow('points', async () => {
   const { page, app, pv, shot } = await openEditor();
   let dialogs = 0; page.on('dialog', () => { dialogs += 1; });
   const pointsNote = () => app.locator('#libPane .libsec').first().textContent();
-  await step('/about: its 0px-wide page slot is not offered, and says why', async () => {
+  /* FIXTURE, not a page defect. These two steps used to rely on /about really rendering 0px
+     wide: the router's continuity host lost its width to ArkLayout's reset, so /about's page
+     (position:absolute; inset:0 inside that host) collapsed. That defect is fixed
+     (tests/layout-reset-owns-only-its-writes.cjs), so /about now offers a 1152px slot and the
+     steps failed on a premise that no longer held -- while the refusal they cover still
+     matters. So the driver recreates exactly that geometry itself: one test-only stylesheet in
+     the preview zeroes the continuity host's width, as the defect did. It is a stylesheet in
+     the preview's document, so it survives the preview's draft remounts; the second step
+     removes it. Measured 2026-10-18 at 1500x950: no route's own slot is under 24px except
+     /explore's, which sits inside the hidden "Raw records" view (0px, refused correctly) --
+     a page module's choice that can change, so it is not what this rule is tested against. */
+  const collapsePage = (pv) => pv.evaluate(() => {
+    const style = document.createElement('style');
+    style.setAttribute('data-test-fixture', 'zero-width-page');
+    style.textContent = '.continuity-host{width:0!important;min-width:0!important}';
+    document.head.appendChild(style);
+    const slot = document.querySelector('[data-ark-insert="main"]');
+    return slot ? slot.getBoundingClientRect().width : null;
+  });
+  await step('/about collapsed to 0px (fixture): its page slot is not offered, and says why', async () => {
     await gotoRoute(app, pv, '/about');
+    const slotWidth = await collapsePage(pv);
+    check(slotWidth === 0, 'the fixture did not collapse /about\'s page slot to 0px: ' + slotWidth);
     await app.click('#tabLib');
     const lib = app.locator('#libPane');
     await lib.locator('select.ctl').first().selectOption('RBLOCK_TEXT_V1');
     await lib.locator('input[data-prop="heading"]').fill('Point test block');
+    /* the new block's components message re-measures the page's places */
     await lib.locator('button', { hasText: 'Create block' }).click();
     const row = await libRow(app, 'Text block');
     await until(async () => /Not offered: Page slot "main" \(0px wide/.test(await pointsNote()), 'the Library does not name the 0px slot and why: ' + await pointsNote());
     check(await row.locator('button', { hasText: 'Insert' }).isDisabled(), 'Insert is enabled with only an invisible place to put the block');
     check(/select an element/i.test(await row.locator('button', { hasText: 'Insert' }).getAttribute('title')), 'the disabled Insert does not say what it needs');
   });
-  await step('/about: a place after a selection inside the same 0px-wide layout is not offered either -- the rule is geometry, not a page list', async () => {
-    /* /about's whole page section is 0px wide at this size (its continuity host has no width), so
-       every element in it sits in a 0px column; the one readable word overflows it */
+  await step('/about collapsed: a place after a selection inside the same 0px-wide layout is not offered either -- the rule is geometry, not a page list', async () => {
+    /* every element in the collapsed page sits in a 0px column; the readable text overflows it */
     await pv.locator('section.ark-page :is(h1,h2,h3,p,span,a):visible').first().click();
     await until(async () => /Not offered:.*After the selection.*0px wide/.test(await pointsNote()), '"after the selection" inside a 0px column is offered: ' + await pointsNote());
     const row = await libRow(app, 'Text block');
-    check(await row.locator('button', { hasText: 'Insert' }).isDisabled(), 'Insert is enabled although every place on /about is invisible');
+    check(await row.locator('button', { hasText: 'Insert' }).isDisabled(), 'Insert is enabled although every place on the collapsed /about is invisible');
     await shot('points-01-about-not-offered');
+    /* taken out here, so no later step can run on a collapsed page whether or not the next
+       route change reloads the preview's document */
+    await pv.evaluate(() => document.querySelectorAll('style[data-test-fixture]').forEach((style) => style.remove()));
   });
   await step('/download: two places -> an in-panel picker, never prompt(); hovering a place outlines it in the preview', async () => {
     await gotoRoute(app, pv, '/download');

@@ -734,12 +734,13 @@ await surface('canvas', 'multi-select: shift-click 3, align and distribute act',
   const { app, pv } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
   await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
-  await navLink(pv, 'Stats').click({ modifiers: ['Shift'] });
+  /* not Stats: at the preview's 1280px the header keeps the row by moving Stats into the MENU */
+  await navLink(pv, 'Mesh Explorer').click({ modifiers: ['Shift'] });
   const frame = await openToolbarSection(app, 'Frame');
   for (const label of ['Left', 'Center X', 'Right', 'Top', 'Center Y', 'Bottom', 'Group selection', 'Distribute X', 'Distribute Y']) check(await frame.locator('button', { hasText: new RegExp('^' + label + '$') }).count() === 1, `3 selected layers offer no "${label}"`);
   await frame.locator('button', { hasText: /^Top$/ }).click();
   await until(() => app.locator('#btnUndo').isEnabled(), 'Align Top changed nothing (no undo step)');
-  const tops = await pv.evaluate(() => ['Overview', 'How it works', 'Stats'].map((t) => [...document.querySelectorAll('header nav.header-core-links > a')].find((a) => a.textContent.includes(t)).getBoundingClientRect().top));
+  const tops = await pv.evaluate(() => ['Overview', 'How it works', 'Mesh Explorer'].map((t) => [...document.querySelectorAll('header nav.header-core-links > a')].find((a) => a.textContent.includes(t)).getBoundingClientRect().top));
   check(Math.max(...tops) - Math.min(...tops) < 1.5, 'Align Top did not align the three tops: ' + tops.join(', '));
 });
 

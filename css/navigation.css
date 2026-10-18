@@ -28,6 +28,16 @@
  color:hsl(var(--text-muted)) !important;transition:color 180ms,background-color 180ms;
 }
 #scene .ark-header .header-core-links a::after {content:none;}
+/* Desktop row: nothing shrinks or wraps. A link that does not fit leaves the row instead
+   (js/resolvers/header.js fitHeaderRow measures and sets .header-collapsed; the MENU panel
+   still lists it) -- shrinking wrapped "How it works" onto two lines and cut Account to
+   "Acc..." at 1280px (tests/browser/public-header.mjs). The compact rules below 1040px keep
+   their own shrink behaviour. */
+@media(min-width:1040.02px) {
+ #scene .ark-header .header-core-links {flex:0 0 auto;}
+ #scene .ark-header .header-core-links > * {flex:0 0 auto;white-space:nowrap;}
+}
+#scene .ark-header .header-core-links .header-collapsed {display:none !important;}
 #scene .ark-header .header-core-links a:is(:hover,:focus-visible,[aria-current="page"]) {
  color:hsl(var(--text-strong)) !important;background:hsl(var(--nested));
 }
