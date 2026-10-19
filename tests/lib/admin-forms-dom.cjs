@@ -3,7 +3,7 @@
    way the shell itself now mounts them: a panel is handed a container and draws into it.
    Loads the real content modules the forms read (manifests, articles, images, encrypted items,
    SEO, mesh settings, theme, the page catalog, the reference docs) and the real editor files
-   core -> state -> controls -> save -> editor -> articles -> assets -> secrets -> design -> seo ->
+   core -> notice -> state -> controls -> save -> editor -> articles -> assets -> secrets -> design -> seo ->
    shapes, in admin-app.html's order. What the SHELL's files would provide (the canvas bridge,
    the rail, the header popovers, versions) is a stub that records its calls, so a test can see
    what a form asked the canvas to do.
@@ -47,6 +47,7 @@ function bootForms() {
   const calls = [];
   const record = (name) => function () { calls.push({ name, args: Array.from(arguments) }); };
   run('js/admin/core.js');
+  run('js/admin/notice.js');
   /* what the shell, the bridge and the versions glue provide: recorded, never drawn */
   window.ArkAdmin.provide({
     notifyPreviewState: record('notifyPreviewState'), notifyPreviewMesh: record('notifyPreviewMesh'),

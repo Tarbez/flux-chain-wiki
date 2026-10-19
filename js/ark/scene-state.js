@@ -27,9 +27,8 @@
     });
     /* Every routed page needs scene state. New content pages can inherit the
        neutral mesh unless they declare a more specific shape below. */
-    if (ArkUI.pageCatalog) Object.keys(ArkUI.pageCatalog).forEach(function (key) {
-      if (!pages[key]) pages[key] = { mesh: 'zero', dissolve: 0, depth: 0 };
-    });
+    function addPages(keys) { keys.forEach(function (key) { if (!pages[key]) pages[key] = { mesh: 'zero', dissolve: 0, depth: 0 }; }); }
+    if (ArkUI.pageCatalog) addPages(Object.keys(ArkUI.pageCatalog));
     /* A manifest's shape section overrides the built-in config for its page:
        the manifest route names the scene page ('/' is the home scene). */
     if (typeof ArkManifest !== 'undefined') ArkManifest.all().forEach(function (entry) {
@@ -46,6 +45,9 @@
     return {
       store: store,
       pages: pages,
+      /* routes the catalog gained after load (the editor's canvas routing a page that exists only
+         as a draft: js/main.js, ArkUI.catalogContentRoutes) get the same neutral scene state */
+      addPages: addPages,
       get: function () { return store.get('scene'); },
       subscribe: function (listener) {
         var dispose = store.subscribe('scene', listener);

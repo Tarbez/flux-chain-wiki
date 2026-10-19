@@ -11,10 +11,11 @@
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, h = A.h, $ = A.$, dirty = A.dirty, dirtyA = A.dirtyA, dirtyI = A.dirtyI,
-      reliefDirty = A.reliefDirty, gate = A.gate, refuse = A.refuse, status = A.status,
-      anyDirty = A.anyDirty, siteFromState = A.siteFromState, selectMesh = A.selectMesh;
+      reliefDirty = A.reliefDirty, gate = A.gate, refuse = A.refuse, status = A.status, notice = A.notice,
+      anyDirty = A.anyDirty, siteFromState = A.siteFromState, selectMesh = A.selectMesh,
+      saveEverything = A.saveEverything;
   /* defined by files loaded after this one: resolved when called */
-  var recordVersion = A.later('recordVersion');
+  var recordVersion = A.later('recordVersion'), openMeshSheet = A.later('openMeshSheet');
 
   /* ---- mesh deployment view ------------------------------------------
      A dedicated place to see the mesh the way it actually works: what is
@@ -27,8 +28,10 @@
   function meshRow(label, value) {
     return h('div', { class: 'mesh-row' }, h('span', { class: 'mesh-row-key', text: label }), h('span', { class: 'mesh-row-val mono', text: value || '—' }));
   }
+  /* the essay on what publishing protects: there for whoever asks, folded so it no longer stands
+     between the person and the reason they cannot publish (docs/ux-audit/cms.md P0-4) */
   function buildMeshSecurityNote() {
-    var box = h('fieldset', { class: 'mesh-security' }, h('legend', { text: 'What’s actually protected' }));
+    var box = h('details', { class: 'mesh-security' }, h('summary', { text: 'How publishing keeps things private (and what it does not)' }));
     box.appendChild(h('p', {}, h('strong', { text: 'Public: ' }),
       document.createTextNode('every page, article and image published here is one content-addressed archive on the mesh, unencrypted. Anyone who has the address (or finds the name record) can fetch and read all of it, the same as a public IPFS file. Publishing is distribution, not privacy.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Encrypted content: ' }),
@@ -48,7 +51,11 @@
     var routeLabel = h('div', { class: 'route', text: 'P2P deployment' });
     root.appendChild(h('div', { class: 'cms-form-head' },
       h('div', {}, routeLabel),
-      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', id: 'meshViewRefresh', text: 'Refresh', onclick: function () { load(); } }))));
+      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', id: 'meshViewRefresh', text: 'Refresh', onclick: function () { load(); refreshMesh(); } }))));
+    /* Can this site be published right now, and if not, what fixes it -- first, in words and with
+       its button, not in a tooltip on a greyed-out Publish (docs/ux-audit/cms.md P0-4). */
+    var readiness = h('div', { class: 'mesh-readiness', id: 'meshReadiness' });
+    root.appendChild(readiness);
 
     var statusRows = h('div', { class: 'mesh-rows' });
     var diffText = h('p', { class: 'hint' });
@@ -61,11 +68,21 @@
 
     function fill(rows) { statusRows.textContent = ''; rows.forEach(function (r) { statusRows.appendChild(meshRow(r[0], r[1])); }); }
 
+    function ready(info, error) {
+      readiness.textContent = '';
+      var blocked = publishBlocker(info, error);
+      if (blocked) notice({ tone: 'warning', into: readiness, key: 'mesh-blocker', title: blocked.title, body: blocked.body,
+        actions: blocked.actions.map(function (a) { return { label: a.label, run: async function () { await a.run(); load(); } }; })
+          .concat([{ label: 'Check again', run: function () { load(); refreshMesh(); } }]) });
+      else notice({ tone: 'success', into: readiness, key: 'mesh-blocker', title: 'Ready to publish', body: 'Every change is saved, you are signed in and the publishing service answers. Publish (top right) signs this version with your identity.' });
+    }
+
     async function load() {
       if (!mesh) {
         fill([['Publish host', 'Not reachable from this copy of the page']]);
         diffText.textContent = 'Open this page through the publish host (node scripts/publish-host.mjs) to compare.';
         liveSummary.textContent = ''; liveList.textContent = '';
+        ready(null, null);
         return;
       }
       fill([['Status', 'Checking…']]);
@@ -73,9 +90,12 @@
       liveSummary.textContent = 'Checking…'; liveList.textContent = '';
       var info;
       try { info = await mesh.status(); }
-      catch (error) { fill([['Status', error.message]]); diffText.textContent = ''; liveSummary.textContent = ''; return; }
-      routeLabel.textContent = info.name + ' — P2P deployment';
-      var rows = [['Reachable', info.reachable ? 'Yes' : 'No — ' + (info.detail || '')]];
+      catch (error) { fill([['Status', error.message]]); diffText.textContent = ''; liveSummary.textContent = ''; ready(null, error); return; }
+      ready(info, null);
+      /* the host's status may not name the site (a publisher that reports no name): never print
+         "undefined" -- the name is the host's, else plainly "This site" */
+      routeLabel.textContent = siteName(info) + ' — P2P deployment';
+      var rows = [['Reachable', info.reachable ? 'Yes' : 'No' + (info.detail ? ' — ' + info.detail : '')]];
       if (info.miner) rows.push(['Through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
       if (info.current) {
         rows.push(['Version', String(info.current.version)]);
@@ -206,6 +226,26 @@
   /* why Publish is unavailable (law: a refusal names what it needs; tests/admin-disabled-says-why.cjs) */
   var PUBLISH_NEEDS_HOST = 'Cannot publish from this copy of the page: it reaches no miner. Open the copy the host serves (http://127.0.0.1:3437/admin.html) or double-click "Flux Chain Admin.command".';
   var PUBLISHING_NOW = 'Publishing now: wait for this version to finish.';
+  /* How to start the one thing publishing needs that this page cannot start itself (README,
+     "Publishing"): the host finds a running miner by itself and picks it up when it starts later. */
+  var START_MINER = 'Publishing needs Ark Miner running on this computer: open the Ark Miner Desktop app, or run `npm start` in the ark-miner-cli folder. This editor finds it by itself; then press Check again.';
+  function siteName(info) { return (info && info.name) || 'This site'; }
+  /* What stops a publish now, in the order a person fixes it, with the button that fixes it -- or
+     null. `info` is the host's status (null: no status), `error` a status that could not be read. */
+  function publishBlocker(info, error) {
+    if (!mesh) return { title: 'This copy of the editor cannot publish', body: PUBLISH_NEEDS_HOST, actions: [] };
+    if (error) return { title: 'Cannot publish: the publishing service did not answer', body: error.message + ' ' + START_MINER, actions: [] };
+    if (info && !info.reachable) return { title: 'Cannot publish: Ark Miner is not running (or not reachable)', body: (info.detail ? 'The publish host says: ' + info.detail + ' ' : '') + START_MINER, actions: [] };
+    if (anyDirty()) return { title: 'Save first', body: 'Publishing sends what is saved in your project folder; there are unsaved changes, so the published site would not match what you see.', actions: [{ label: 'Save now', run: function () { return saveEverything(); } }] };
+    if (!mesh.identity()) return { title: 'Sign in to publish', body: 'Publishing is signed with your identity, and its key is not unlocked in this tab (a reload drops it). Choose your sign-in file (.auth.flx) to unlock it; your edits stay.', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
+    return null;
+  }
+  /* A click on Publish while it is refused: the sheet that says why, with the remedy and Check
+     again, instead of a click that did nothing (refuse(..., explain), js/admin/core.js). */
+  function explainPublish(reason) {
+    if (reason === PUBLISHING_NOW) { notice({ tone: 'info', title: 'Publishing now', body: reason }); return; }
+    if ($('sheet').hidden || $('sheet').dataset.sheet !== 'mesh') openMeshSheet();
+  }
   async function refreshMesh() {
     var line = $('meshState'), owner = $('meshOwner');
     if (!mesh) {
@@ -213,7 +253,7 @@
       line.textContent = 'This copy of the page cannot publish. Double-click "Flux Chain Admin.command" in the flux-chain folder, or use the copy served by the host: ';
       line.appendChild(h('a', { href: 'http://127.0.0.1:3437/admin.html', text: 'http://127.0.0.1:3437/admin.html' }));
       owner.textContent = ''; $('mesh').open = true;
-      refuse($('publish'), PUBLISH_NEEDS_HOST);
+      refuse($('publish'), PUBLISH_NEEDS_HOST, explainPublish);
       refuse($('meshRefresh'), PUBLISH_NEEDS_HOST);
       return;
     }
@@ -222,15 +262,15 @@
       var who = mesh.identity();
       var through = info.miner ? 'Publishing through ' + (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '') + '. ' : '';
       if (!info.reachable) line.textContent = (info.detail || 'The miner is not reachable.');
-      else if (!info.current) line.textContent = through + info.name + ' is not published yet. Publish creates version 1.';
-      else line.textContent = through + info.name + ' is at version ' + info.current.version + ', address ' + short(info.current.cid) + ', updated ' + info.current.updatedAt + '.';
+      else if (!info.current) line.textContent = through + siteName(info) + ' is not published yet. Publish creates version 1.';
+      else line.textContent = through + siteName(info) + ' is at version ' + info.current.version + ', address ' + short(info.current.cid) + ', updated ' + info.current.updatedAt + '.';
       owner.textContent = who ? 'Signed in' + (who.displayName ? ' as ' + who.displayName : '') + '. Key ' + who.publicKeyB64 : 'Not signed in.';
       var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'signed in') + ' · ' + short(who.publicKeyB64) : '';
       if (info.current && who && info.current.ownerPublicKey !== who.publicKeyB64) {
         line.textContent += ' This identity does not own the name: sign in with the identity that does.';
       }
-      refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: the miner is not reachable (' + (info.detail || 'no answer') + '). Start the miner or check its address, then Refresh.');
-    } catch (error) { line.textContent = error.message; refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.'); }
+      refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: the miner is not reachable (' + (info.detail || 'no answer') + '). Start the miner or check its address, then Refresh.', explainPublish);
+    } catch (error) { line.textContent = error.message; refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.', explainPublish); }
   }
 
   $('publish').addEventListener('click', async function () {
@@ -241,8 +281,12 @@
       try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (error) { /* the button click above still told them what to do */ }
       return;
     }
-    if (anyDirty()) { status('Save your changes first, so the site files and the published copy match.', 'warn'); return; }
-    var button = $('publish'); refuse(button, PUBLISHING_NOW); publishing = true;
+    if (anyDirty()) {
+      status('Save your changes first, so the site files and the published copy match.', 'warn');
+      notice({ tone: 'warning', key: 'publish-unsaved', title: 'Save first, then publish', body: 'Publishing sends what is saved in your project folder. There are unsaved changes, so the published site would not match what you see.', actions: [{ label: 'Save now', run: function () { saveEverything(); } }] });
+      return;
+    }
+    var button = $('publish'); refuse(button, PUBLISHING_NOW, explainPublish); publishing = true;
     try {
       var result = await mesh.publishSite(siteFromState(), function (message) { status(message, ''); }, function (removes) {
         var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).concat(removes.secrets || []).join(', ') : 'possibly some pages, articles, images or encrypted items (the published version could not be compared)';
@@ -257,7 +301,7 @@
     } catch (error) {
       status(error.message + (error.detail && error.detail.remedy && error.message.indexOf(error.detail.remedy) < 0 ? ' To fix: ' + error.detail.remedy : ''), 'error');
     }
-    publishing = false; refuse(button, ''); refreshMesh();
+    publishing = false; refuse(button, '', explainPublish); refreshMesh();
   });
   $('meshRefresh').addEventListener('click', refreshMesh);
   $('meshNav').addEventListener('click', selectMesh);

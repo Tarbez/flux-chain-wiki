@@ -20,7 +20,7 @@
    same as a storage clear — not a security change (the pointer was never a
    secret either way), just a one-time loss of the "remembered" convenience.
 
-   Build: node scripts/build-auth.cjs  ->  js/ark/local-identity.js (a classic script).
+   Build: node scripts/build-ark-vendor.cjs  ->  js/ark/local-identity.js (a classic script).
    ===================================================================== */
 import { createLocalIdentitySession } from '@deadark/ark-ui/flux-auth-session';
 

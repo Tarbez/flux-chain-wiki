@@ -15,7 +15,7 @@
    rendering is a legible fallback, not a second brand).
 
    Failure taxonomy loosely modeled on CMS-ARK's ArkOverlayFailureReason
-   (/Volumes/PortableSSD/deark/CMS-ARK/src/lib/mesh/overlay.ts) -- same idea
+   (the hub's deark/CMS-ARK/src/lib/mesh/overlay.ts) -- same idea
    (name a few distinct reasons an honest "nothing here" page can mean, never
    a blank page or a bare 404), reused rather than copied because that file's
    failure set is for a different content shape (dense-encoding-v4 CMS posts)

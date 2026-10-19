@@ -64,11 +64,14 @@
     if (state.view === 'map') return;   /* the canvas shows in the Canvas and Theme views */
     const pad = getComputedStyle(wrap), padX = parseFloat(pad.paddingLeft) + parseFloat(pad.paddingRight), padY = parseFloat(pad.paddingTop) + parseFloat(pad.paddingBottom);
     const label = $('devName').parentElement, labelH = label.offsetHeight ? label.offsetHeight + parseFloat(getComputedStyle(label).marginBottom) : 0;
+    /* the notice banners above the canvas (js/admin/notice.js: no project folder, a page not
+       saved yet) take their room from the stage, so the page still ends at the canvas's bottom */
+    const banners = $('noticeBanners'), bannersH = banners && banners.offsetHeight ? banners.offsetHeight + parseFloat(getComputedStyle(banners).marginBottom) : 0;
     const avail = wrap.clientWidth - padX;
     const w = state.live && state.device === 0 ? avail : DEVICES[state.device][1];
     scale = state.live && state.device === 0 ? 1 : Math.min(1, avail / w);
     cmsPreview.style.width = w + 'px'; stage.style.width = w + 'px';
-    cmsPreview.style.height = Math.max(MIN_STAGE_H, Math.floor((wrap.clientHeight - padY - labelH) / scale)) + 'px';
+    cmsPreview.style.height = Math.max(MIN_STAGE_H, Math.floor((wrap.clientHeight - padY - labelH - bannersH) / scale)) + 'px';
     stage.style.transform = scale < 1 ? `scale(${scale})` : '';
     stage.style.marginLeft = scale < 1 ? '0' : 'auto';
     const h = cmsPreview.offsetHeight;
@@ -140,6 +143,7 @@
     followPopAnchor();
   }
   new ResizeObserver(() => layoutStage()).observe(wrap);
+  if ($('noticeBanners')) new ResizeObserver(() => layoutStage()).observe($('noticeBanners'));
   wrap.addEventListener('scroll', () => placeSelToolbar(), { passive: true });
   /* The bar sits in the stage's own coordinates and moves with it by CSS; its popover is
      position:fixed (outside the zoomed stage, so it is never clipped by the canvas) and is

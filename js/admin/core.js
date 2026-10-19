@@ -54,12 +54,29 @@
      `reason` empty enables the button (restoring its own tooltip); anything else disables it and
      becomes its tooltip. */
   var NOTHING_TO_SAVE = 'Nothing to save: every draft matches its saved copy.';
-  function refuse(button, reason) {
+  /* `explain(reason)`, when given, keeps a refused button CLICKABLE: it is marked unavailable
+     (aria-disabled, the reason as its tooltip) and a click runs explain(reason) instead of the
+     button's own action. For a control whose reason needs more than a tooltip -- Publish, whose
+     remedy is starting another program: greyed out, its reason lived only in a hover, and a click
+     did nothing at all (docs/ux-audit/cms.md P0-4; regression: tests/cms-refusal-explains.cjs). */
+  var explainers = new WeakMap();
+  function refuse(button, reason, explain) {
     if (!button) return;
     if (button.dataset.baseTitle === undefined) button.dataset.baseTitle = button.title || '';
-    button.disabled = !!reason;
     button.title = reason || button.dataset.baseTitle;
+    if (typeof explain !== 'function') { button.disabled = !!reason; return; }
+    button.disabled = false;
+    explainers.set(button, explain);
+    if (reason) { button.setAttribute('aria-disabled', 'true'); button.dataset.refusal = reason; }
+    else { button.removeAttribute('aria-disabled'); delete button.dataset.refusal; }
   }
+  /* capture phase, so the explanation runs INSTEAD of the button's own click handlers */
+  document.addEventListener('click', function (event) {
+    var button = event.target && event.target.closest ? event.target.closest('[aria-disabled="true"][data-refusal]') : null;
+    if (!button || !explainers.has(button)) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    explainers.get(button)(button.dataset.refusal);
+  }, true);
 
   var statusTimer = 0;
   function status(message, tone) {
@@ -80,8 +97,10 @@
   const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
   /* text made safe to place inside markup */
   function esc(s) { return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]); }
-  /* a passing notice over the canvas (#toast) */
-  function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2600); }
+  /* A passing message: one toast of the editor's one notice component (js/admin/notice.js, which
+     loads right after this file). It was its own #toast element that vanished after 2.6 s, so a
+     refusal two sentences long could not be read before it went (docs/ux-audit/cms.md P1-16). */
+  function toast(msg) { if (typeof A.notice === 'function') A.notice({ tone: 'info', body: msg }); else status(msg, ''); }
 
   /* ---- the namespace every other editor file meets in (the contract: header above) ---- */
   var A = window.ArkAdmin = {

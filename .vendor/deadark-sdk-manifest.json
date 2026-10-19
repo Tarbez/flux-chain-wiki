@@ -1,0 +1,8 @@
+{
+  "package": "@deadark/sdk",
+  "version": "0.2.29",
+  "tarball": ".vendor/deadark-sdk-0.2.29.tgz",
+  "sha256": "057f0254b620e3e1873159f505c511e7bdc67b7bd91b6bd08e45345088a62ecc",
+  "sdkRoot": "../../design/deadark-sdk",
+  "updatedAt": "2026-10-19T00:53:40.124Z"
+}

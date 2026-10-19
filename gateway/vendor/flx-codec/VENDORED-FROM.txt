@@ -1,4 +1,4 @@
-These five files are verbatim copies of /Volumes/PortableSSD/flx/flx-codec/src/*.js
+These five files are verbatim copies of the hub's flx/flx-codec/src/*.js
 (the @deadark/flx-codec package), vendored here because this project has no build step
 and *.defxn.com's gateway shell (../app.js) needs to import decodeArchiveAsync as a
 real browser ES module served same-origin, with no bundler/npm install to resolve a

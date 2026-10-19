@@ -17,7 +17,7 @@
       componentsDirty = A.componentsDirty, statesDirty = A.statesDirty,
       canvasTransitionsDirty = A.canvasTransitionsDirty, elementMotionDirty = A.elementMotionDirty,
       dirty = A.dirty, clone = A.clone, dirtyA = A.dirtyA, dirtyI = A.dirtyI, dirtyS = A.dirtyS,
-      status = A.status, toast = A.toast;
+      status = A.status, toast = A.toast, notice = A.notice, anyDirty = A.anyDirty;
   /* defined by files loaded after this one: resolved when called */
   var reliefDirty = A.later('reliefDirty'), saveMeshDraft = A.later('saveMeshDraft'),
       themeDirty = A.later('themeDirty'), saveThemeDraft = A.later('saveThemeDraft'),
@@ -29,7 +29,8 @@
       renderList = A.later('renderList'), touch = A.later('touch'),
       reloadPreview = A.later('reloadPreview'), studioRoutes = A.later('studioRoutes'),
       schedule = A.later('schedule'), recordVersion = A.later('recordVersion'),
-      deleteItem = A.later('deleteItem');
+      deleteItem = A.later('deleteItem'), connectProject = A.later('connectProject'),
+      restoreRemovalsPending = A.later('restoreRemovalsPending');
 
   /* Step 5 (flickering-juggling-donut.md), the "one save model": saveEverything() replaces
      BOTH the old saveCurrent() (a per-state.kind dispatcher that only ever saved whichever
@@ -95,6 +96,25 @@
   }
 
   async function saveEverything() {
+    /* No project folder: nothing is written, and the person is told so, with the button that
+       fixes it. Save used to download every changed draft as a .js file and report "Saved 1 item
+       (downloaded)" -- a non-technical owner believed the site had changed; it had not
+       (docs/ux-audit/cms.md P0-3). Downloading is still there, as an explicit second choice
+       (downloadChanges below). Regression: tests/cms-save-unconnected.cjs. */
+    if (!projectConnected() && !downloading && (anyDirty() || restoreRemovalsPending())) {
+      var canConnect = typeof window.showDirectoryPicker === 'function';
+      var why = 'Not saved to your site: no project folder is connected, so Save has nowhere to write. Your edits are kept in this tab.';
+      var offerDownload = { label: 'Download changed files instead', run: function () { downloadChanges(); } };
+      status('Not saved: connect your project folder.', 'warn');
+      /* the same banner as "connect your project folder" (one condition, one banner), now saying
+         what just did not happen; it stays until a folder is connected */
+      notice({ tone: 'warning', persist: true, key: 'project-folder',
+        title: canConnect ? 'Not saved to your site — connect your project folder' : 'Not saved to your site — this browser cannot write into a folder',
+        body: 'No project folder is connected, so Save has nowhere to write; your edits are kept in this tab.' + (canConnect ? ' Connect the folder that holds the site (index.html and js/content/), then Save again. Or download the changed files and copy them into js/content/ yourself.'
+          : ' Open this editor in Chrome or Edge to save in place, or download the changed files and copy them into js/content/ yourself.'),
+        actions: canConnect ? [{ label: 'Connect project folder', run: async function (n) { if (await connectProject()) { n.close(); saveEverything(); } } }, offerDownload] : [offerDownload] });
+      return { succeeded: [], failed: [], refused: why };
+    }
     var results = [];
     function record(label, ok, message) { results.push({ label: label, ok: ok, message: message }); }
     async function attempt(label, dirtyNow, run) {
@@ -194,7 +214,7 @@
 
     var succeeded = results.filter(function (r) { return r.ok; });
     var failed = results.filter(function (r) { return !r.ok; });
-    var destination = (state.dir || state.cdirs || state.assetDir || state.secretDir) ? 'to the connected project' : '(downloaded)';
+    var destination = projectConnected() ? 'to the connected project' : '(downloaded)';
     var message;
     if (!results.length) message = 'Nothing to save: every draft already matches its saved copy.';
     else if (!failed.length) message = 'Saved ' + succeeded.length + ' item' + (succeeded.length === 1 ? '' : 's') + ' ' + destination + ': ' + succeeded.map(function (r) { return r.label; }).join(', ') + '.';
@@ -203,8 +223,20 @@
     /* Version history: what is now on disk becomes a version (js/admin/versions.js). */
     message += await recordVersion(succeeded.length);
     status(message, failed.length ? 'error' : (results.length ? 'ok' : ''));
-    toast(message);
+    if (!projectConnected() && succeeded.length) notice({ tone: 'warning', key: 'downloaded', title: 'Downloaded ' + succeeded.length + ' changed item' + (succeeded.length === 1 ? '' : 's') + ' — your site folder did not change',
+      body: 'Copy the downloaded files into js/content/ of the site (each one is named for the file it replaces)' + (typeof window.showDirectoryPicker === 'function' ? ', or connect the project folder so Save writes them in place.' : '.'),
+      actions: typeof window.showDirectoryPicker === 'function' ? [{ label: 'Connect project folder', run: connectProject }] : [] });
+    else toast(message);
     return { succeeded: succeeded, failed: failed };
+  }
+  /* Whether Save writes into the site: a project folder is connected (js/admin/project.js). */
+  function projectConnected() { return !!(state.dir || state.cdirs || state.assetDir || state.secretDir); }
+  /* The explicit second choice when no folder is connected: every changed draft downloaded as the
+     file it would replace. Only ever from a button that says so (Save's refusal). */
+  var downloading = false;
+  async function downloadChanges() {
+    downloading = true;
+    try { return await saveEverything(); } finally { downloading = false; }
   }
 
   /* ONE removal path for a page / article / image / encrypted item. Delete (below) and a
@@ -328,6 +360,7 @@
     return site;
   }
   A.provide({ ITEM_KINDS: ITEM_KINDS, afterDelete: afterDelete, deleteCurrent: deleteCurrent,
-      forgetDeleted: forgetDeleted, removeItemFile: removeItemFile, saveEverything: saveEverything,
+      downloadChanges: downloadChanges, forgetDeleted: forgetDeleted, projectConnected: projectConnected,
+      removeItemFile: removeItemFile, saveEverything: saveEverything,
       singleDraftHandle: singleDraftHandle, siteFromState: siteFromState });
 })();

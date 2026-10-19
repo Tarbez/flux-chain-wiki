@@ -342,6 +342,5 @@
 /* status bar: the rail's surface, mono metadata */
 #studioRoot .studio-statusbar { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 5px 14px; border-top: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); font: 500 11px/1.3 var(--mono); color: hsl(var(--text-muted)); }
 #studioRoot .studio-statusbar b { color: hsl(var(--text-strong)); font-weight: 500; }
-#studioRoot .toast { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); background: hsl(var(--text-strong)); color: hsl(var(--text-inverse)); padding: 8px 14px; border-radius: var(--radius); font-weight: 600; z-index: 50; box-shadow: var(--shadow-pop); max-width: calc(100vw - 32px); }
 
 @media (prefers-reduced-motion: reduce) { #studioRoot, #studioRoot * { transition: none !important; } }

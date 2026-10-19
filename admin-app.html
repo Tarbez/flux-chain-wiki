@@ -228,6 +228,10 @@
     </aside>
 
     <main class="canvas-wrap" id="canvasWrap">
+      <!-- Conditions that hold until they are fixed (no project folder, a page not saved yet):
+           the notice banners (notice(), loaded below), above the canvas, which gives them the room
+           (layoutStage). Toasts for passing events stack at the bottom. -->
+      <div id="noticeBanners" class="notice-region notice-banners" aria-label="Notices"></div>
       <div id="designView">
         <div class="devlabel"><span id="devName">Desktop · 1280 px</span><span id="devScale"></span></div>
         <div class="stage" id="stage">
@@ -268,7 +272,6 @@
 </aside>
 <div class="rail-scrim" id="railScrim" hidden></div>
 
-<div class="toast" id="toast" hidden role="status"></div>
 </div>
 
 <!-- Docked over the right side so the preview canvas stays visible while a version is previewed.
@@ -328,6 +331,7 @@
      the editor -- last; in between, a file imports what an earlier one provides directly
      and anything later through ArkAdmin.later(). -->
 <script src="js/admin/core.js" defer></script>
+<script src="js/admin/notice.js" defer></script>
 <script src="js/admin/state.js" defer></script>
 <script src="js/admin/controls.js" defer></script>
 <script src="js/admin/save.js" defer></script>

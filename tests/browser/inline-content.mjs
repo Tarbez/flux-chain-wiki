@@ -7,7 +7,10 @@
      home      content lens -> click the home H1 -> type -> the draft field changes as you type,
                the toolbar's Content section names the field and shows the value, the Page fields
                sheet shows the same value; Enter commits; Ctrl/Cmd+Z undoes it and redoes it
-     escape    typing then Escape puts the words and the draft back
+     escape    typing then Escape FINISHES the edit and keeps the words (it used to put them back
+               silently: docs/ux-audit/cms.md P0-2); plain Enter finishes the home heading and the
+               intro without a line break; "Revert to saved" in the Content section puts the saved
+               words back, with an Undo
      nav       a header link label (Site chrome, NAV.*) edits the same way
      refusal   text no field holds says why, and names the code that writes it
      article   an article's title, on its own route
@@ -25,7 +28,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { appFrame, SITE, copySite, startHost, fakeFolder, previewFrame, until as untilFor, waitForPreviewReady, previewReadyCount,
-  statusCount, waitForSave, gotoEditor, reloadEditor, clickHeader, waitForRouteReady, setLens as setLensButton, sheetBody, closeSheet, openPageFields } from './harness.mjs';
+  statusCount, waitForSave, gotoEditor, reloadEditor, clickHeader, waitForRouteReady, setLens as setLensButton, sheetBody, closeSheet, openPageFields, closeToolbarSection } from './harness.mjs';
 import { readIndexHtml, renderDocument, createLocalResources } from '../../api/lib/render-core.mjs';
 
 const args = process.argv.slice(2);
@@ -206,15 +209,49 @@ await step('home: Ctrl/Cmd+Z on the canvas undoes the inline edit, Shift redoes 
   await until(() => pv.evaluate((t) => { const h = document.querySelector('[data-ark-page] h1'); return h && h.textContent.replace(/\s+/g, '') === t.replace(/\s+/g, ''); }, original.title + NEW.title), 'the canvas does not show the redone heading');
 });
 
-await step('escape: typing then Escape puts the words and the draft back', async () => {
+await step('escape: typing then Escape finishes the edit and KEEPS the words', async () => {
   original.intro = await draft(app, 'page', 'home', 'INTRO');
   await clickText(pv, '[data-ark-page] p.hl-intro');
   const before = await editing(pv);
   await typeAtEnd(page, pv, ' zzz');
   await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'the intro draft did not follow the typing');
   await page.keyboard.press('Escape');
-  await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro, 'Escape left the intro draft changed');
-  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p.hl-intro').textContent)) === before, 'Escape left the canvas text changed');
+  await until(() => editing(pv).then((t) => t === null), 'Escape did not end the edit');
+  check((await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'Escape threw the typed words away: the draft is "' + await draft(app, 'page', 'home', 'INTRO') + '"');
+  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p.hl-intro').textContent)) === before + ' zzz', 'Escape changed the words on the canvas');
+  await shot(page, 'escape-kept');
+});
+
+await step('revert: "Revert to saved" puts the saved words back, and Undo brings the typing back', async () => {
+  await clickText(pv, '[data-ark-page] p.hl-intro');
+  const revert = app.locator('#selToolbarPop:not([hidden]) [data-action="revert-field"]');
+  await until(async () => (await revert.count()) && (await revert.isEnabled()), 'the Content section offers no enabled "Revert to saved"');
+  await revert.click();
+  await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro, 'Revert did not put the saved intro back');
+  const reverted = app.locator('[data-notice="field-reverted"]');
+  await until(() => reverted.count(), 'Revert said nothing');
+  await shot(page, 'revert-notice');
+  await reverted.locator('button', { hasText: 'Undo' }).click();
+  await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'the notice\'s Undo did not bring the typed words back');
+  await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] p.hl-intro').textContent === t, original.intro + ' zzz'), 'the canvas does not show the words Undo brought back', 10000);
+  original.intro += ' zzz';
+});
+
+await step('enter: plain Enter finishes the home heading and the intro -- no line break inside', async () => {
+  for (const [selector, field] of [['[data-ark-page] h1', 'TITLE'], ['[data-ark-page] p.hl-intro', 'INTRO']]) {
+    const was = await draft(app, 'page', 'home', field);
+    /* the previous field's Content popover opens over the text below it (docs/ux-audit/cms.md
+       P1-6, a later wave): close it, as a person would, so the click reaches the text */
+    await closeToolbarSection(app);
+    await clickText(pv, selector);
+    await until(() => editing(pv).then((t) => t !== null), field + ': the click did not start an edit');
+    const hint = await until(() => app.evaluate((f) => { const el = document.querySelector('#selToolbarPop:not([hidden]) .cms-content-keys'), code = document.querySelector('#selToolbarPop:not([hidden]) .cms-content-field code'); return el && code && code.textContent.includes('HOME.' + f) && el.textContent; }, field), field + ': the Content section does not say how to finish an edit');
+    check(/Enter or Esc to finish/.test(hint), field + ': the Content section says "' + hint + '"');
+    await page.keyboard.press('Enter');
+    await until(() => editing(pv).then((t) => t === null), field + ': Enter did not finish the edit');
+    check((await draft(app, 'page', 'home', field)) === was, field + ': Enter changed the words (a line break went in): "' + await draft(app, 'page', 'home', field) + '"');
+  }
+  await closeToolbarSection(app);
 });
 
 await step('copies: every element showing the edited field takes the words on commit, without a re-render', async () => {
@@ -330,7 +367,7 @@ await step('save: the files hold the new words; a reload of the editor reads the
   check(!/failed/.test(summary.text), 'Save reported: ' + summary.text);
   const home = fs.readFileSync(path.join(WORK, 'js/content/manifests/home.js'), 'utf8');
   check(home.includes(JSON.stringify(original.title + NEW.title)), 'manifests/home.js does not hold the new heading');
-  check(home.includes(JSON.stringify(original.introFinal)), 'manifests/home.js does not hold the intro as committed (Escape restored, then edited twice)');
+  check(home.includes(JSON.stringify(original.introFinal)), 'manifests/home.js does not hold the intro as committed (kept on Escape, reverted and undone, then edited twice)');
   const nav = fs.readFileSync(path.join(WORK, 'js/content/manifests/nav.js'), 'utf8');
   check(nav.includes(JSON.stringify(original.nav.text + NEW.nav)), 'manifests/nav.js does not hold the new label');
   const articleFiles = ['js/content/article-index.js', 'js/content/articles/' + slug + '.js'].map((f) => path.join(WORK, f)).filter((f) => fs.existsSync(f)).map((f) => fs.readFileSync(f, 'utf8')).join('\n');

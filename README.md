@@ -101,7 +101,7 @@ Particle title anchors keep their independent mesh morph. The legacy emergence
 delay is disabled inside the routed outlet so it cannot compete with presence.
 
 The engines live in `js/ark/vendor/engines.js`. Regenerate them with
-`node scripts/sync-ark.cjs [shared-directory]`; the bundle includes source hashes.
+`node scripts/build-ark-vendor.cjs` (see "Ark UI delivery" below); the bundle includes source hashes.
 To add a page, register its lazy module in the catalog, provide its mount function,
 and add its scene-state mesh definition. Scope transitions to page elements.
 
@@ -233,8 +233,8 @@ reuse the same controller at most once per frame. The v2 preference key starts
 existing visitors at the new defaults rather than restoring older values. Values are validated, and Reset atmosphere restores defaults.
 Atmosphere itself is static; pause controls the particle motion.
 
-Edit `scripts/settings-entry.js`, then run `node scripts/build-settings.cjs` to
-bundle the shared ARK runtime and primitive into the local classic script and
+Edit `scripts/settings-entry.js`, then run `node scripts/build-ark-vendor.cjs` to
+bundle the synced ARK runtime and primitive into the local classic script and
 regenerate theme CSS/options through the SDK CLI. Generated files are
 `js/settings/panel.js`, `css/themes.css`, and `scripts/theme-options.js`.
 The settings build aliases ARK element styling to `scripts/ark-style-bridge.js`,
@@ -243,6 +243,34 @@ style registry: duplicate dynamic IDs let popover visibility hide unrelated page
 text. `tests/style-isolation.cjs` guards this regression.
 No other repository is modified by this build. The popover smoke test mocks the
 runtime; live overlay positioning and theme visuals still require browser QA.
+
+## Ark UI delivery
+
+Ark UI reaches this site one way, and no file here names a hub path:
+
+1. `package.json` pins `@deadark/ark-ui` and `@deadark/sdk` as `file:.vendor/<pkg>-<version>.tgz`.
+2. `npm run sync:ark` (`deadark-theme sync-consumer . --no-build`) packs the SDK and the whole
+   Ark UI closure (ark-primitives, ark-elements, ark-a11y, ark-syntax, flux-state, flux-dom,
+   flux-algebra, flx-codec) from the hub sources the workspace manifest names, pins each in
+   `dependencies` + `overrides`, records its sha256 in `.vendor/<slug>-manifest.json`, and runs
+   `npm install`. Inside the hub the installed CLI finds the SDK source through
+   `.workspace/workspace-manifest.json`; outside it, pass `--manifest <url>` for a published release.
+   `node <hub>/design/deadark-sdk/bin/sync-shared-deps.mjs . --check` verifies the pins against the
+   hub without writing.
+3. `npm run build:ark` (`node scripts/build-ark-vendor.cjs`) builds every Ark output from
+   `node_modules/@deadark/*`: `css/themes.css`, `scripts/theme-options.js`,
+   `js/ark/vendor/{engines,backgrounds,ark-kit}.js`, `js/settings/panel.js`,
+   `js/admin/vendor/flux-elements.js`, `js/admin/authorization-view.js` and
+   `js/ark/local-identity.js`. It first proves `node_modules` holds exactly the pinned tarballs.
+   `npm run check:ark` (`--check`) writes nothing and fails on any drift; `tests/ark-vendor.cjs` runs it.
+   `css/ark-blocks.css` is reported as not built until the synced Ark UI ships `dist/ark-ui.blocks.css`.
+
+`js/admin/auth.js` stays with `scripts/build-auth.cjs`: its flux-auth parts are sibling `flux/`
+sources, not Ark UI packages, and are not delivered by sync-consumer yet.
+
+`npm run census` (`scripts/ux-component-census.mjs`) prints the hand-built UI pattern table from
+`docs/ux-audit/components.md` §2; `--check` fails if any count grows past
+`docs/ux-audit/component-census-baseline.tsv`.
 
 ## Validation
 

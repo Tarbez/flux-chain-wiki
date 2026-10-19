@@ -246,14 +246,15 @@ await surface('content', 'pages: create and delete a theory page', async (opened
   await app.fill('#newId', 'auditpage');
   await app.press('#newId', 'Enter');
   await until(async () => (await pageRow(app, { page: 'auditpage' }).count()) === 1, 'the new page is not in the Pages tab');
-  /* an unsaved page has no address the site's router knows yet: the canvas says so, naming the
-     remedy, instead of silently showing another page as if it were this one */
-  await until(async () => /\/concept\/auditpage is not on the canvas yet[\s\S]*saved/.test(await statusText(app)), 'opening the unsaved page did not say why the canvas cannot show it yet: ' + await statusText(app), 15000);
+  /* an unsaved page is ON the canvas, rendered from its draft (it used to fall back to Home while
+     the label named the new page: docs/ux-audit/cms.md P0-1), and its own Page fields are open */
+  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the unsaved new page is not on the canvas: ' + await statusText(app), 15000);
+  check(await app.evaluate(() => !!document.querySelector('#sheet:not([hidden]) [data-cms-field^="page:auditpage:"]')), 'creating the page did not open its own Page fields');
   await openPageFields(app, { page: 'auditpage' });
   await app.click('#save');
   await until(() => savedExists('manifests/auditpage.js') && readSaved('manifests/index.js').includes('auditpage'), 'Save did not create manifests/auditpage.js and list it in the index');
-  /* ...and once it is saved, it opens on the canvas by itself */
-  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the saved new page did not open on the canvas', 15000);
+  /* ...and once it is saved, it is still the page on the canvas */
+  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the saved new page is not on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this page' }).click();
   await until(() => !savedExists('manifests/auditpage.js') && !readSaved('manifests/index.js').includes('auditpage'), 'Delete did not remove the file and its index entry');
@@ -273,7 +274,8 @@ await surface('content', 'articles: edit, preview, Save, Ctrl+S, reload', async 
   const before = await app.locator(`#a-${slug}-title`).inputValue();
   await until(async () => (await frameText(await canvasPreview(app, '/learnings/' + slug))).includes(before), `the canvas does not show the article's own title "${before}"`, 15000);
   await setValue(app.locator(`#a-${slug}-title`), 'Audit article marker');
-  await until(async () => (await frameText(await canvasPreview(app, '/learnings/' + slug))).includes('Audit article marker'), 'the canvas never showed the edited title', 10000);
+  await until(async () => (await frameText(await canvasPreview(app, '/learnings/' + slug))).includes('Audit article marker'), 'the canvas never showed the edited title', 10000)
+    .catch(async (error) => { const pv = await canvasPreview(app, null); throw new StepFailure(error.message + ' -- the canvas is on ' + await pv.evaluate(() => ArkUI.route.path() + ' (' + ArkUI.pageRouter.active + '), its h1: ' + JSON.stringify((document.querySelector('[data-ark-page] h1') || {}).textContent)) + '; the draft title: ' + JSON.stringify(await app.evaluate((s) => window.ArkAdmin.state.aDrafts[s].title, slug))); });
   await app.click('#save');
   /* a card field (title/summary) lives in the index; the sections live in the body file */
   await untilSaved(app, () => readSaved('article-index.js').includes('Audit article marker'), 'Save did not write the edited title to article-index.js');
@@ -294,7 +296,8 @@ await surface('content', 'articles: create and delete', async (opened) => {
   await app.fill('#newSlug', 'audit-note');
   await app.press('#newSlug', 'Enter'); debug('submitted');
   await until(async () => (await pageRow(app, { article: 'audit-note' }).count()) === 1, 'the new article is not in the Pages tab');
-  await until(async () => /\/learnings\/audit-note is not on the canvas yet/.test(await statusText(app)), 'opening the unsaved article did not say why the canvas cannot show it yet: ' + await statusText(app), 15000);
+  /* named from what was typed ("audit-note" -> "Audit note", it was "New note") and on the canvas before Save */
+  await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('Audit note'), 'the unsaved new article is not on the canvas: ' + await statusText(app), 15000);
   await openPageFields(app, { article: 'audit-note' });
   await until(() => app.evaluate(() => !!document.querySelector('#a-audit-note-title')), 'the new article\'s fields did not open');
   /* the first Save is refused, and the refusal names every editorial field it needs
@@ -312,7 +315,7 @@ await surface('content', 'articles: create and delete', async (opened) => {
   await app.locator('#lp-value-a-audit-note-actionPage').selectOption({ index: 1 });
   await app.click('#save');
   await untilSaved(app, () => savedExists('articles/audit-note.js') && readSaved('article-index.js').includes('audit-note'), 'Save did not create articles/audit-note.js and index it');
-  await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('New note'), 'the saved new article does not render on the canvas', 15000);
+  await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('Audit note'), 'the saved new article does not render on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this article' }).click();
   await until(() => !savedExists('articles/audit-note.js') && !readSaved('article-index.js').includes('audit-note'), 'Delete did not remove the article file and its index entry');

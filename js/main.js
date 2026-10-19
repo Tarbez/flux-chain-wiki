@@ -19,8 +19,8 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
   /* A fixed, full-viewport layer behind everything else, for an optional admin-picked
-     background style (js/ark/vendor/backgrounds.js -- design/ark-ui's generators, see
-     scripts/sync-ark-backgrounds.cjs). Created once; style 'none' just leaves it empty,
+     background style (js/ark/vendor/backgrounds.js -- @deadark/ark-ui's generators, see
+     scripts/build-ark-vendor.cjs). Created once; style 'none' just leaves it empty,
      which is the site's original flat-canvas look, so this never runs when unused. */
   var backgroundHost = null, backgroundHandle = null;
   function backgroundElement() {
@@ -411,8 +411,9 @@
     var key = element.getAttribute('data-ark-layout-key') || '', tag = element.tagName.toLowerCase();
     var pick = cmsPickBinding(element, cmsCopyCandidates(element)), b = pick.binding;
     if (b) {
+      var multiline = b.kind === 'page' ? b.fieldKind === 'text' : (/\n/.test(b.value) || CMS_PARAGRAPH_TAGS.test(tag));
       var info = { key: key, bound: true, kind: b.kind, id: b.id, field: b.address, fieldKey: b.field, label: b.label, value: b.value, file: b.file,
-        multiline: b.kind === 'page' ? b.fieldKind === 'text' : (/\n/.test(b.value) || CMS_PARAGRAPH_TAGS.test(tag)) };
+        multiline: multiline, enterBreaks: cmsEnterBreaks(element, multiline, b.value) };
       if (b.kind === 'component') { info.anchorId = b.anchorId; info.instanceKey = b.instanceKey; info.override = b.override; }
       var link = element.closest('a');
       if (link && host.contains(link)) info.link = cmsLinkInfo(link, b);
@@ -480,6 +481,18 @@
     /* unchanged words keep the field's exact value (its own spacing and line breaks) */
     return previewCopyText(text) === previewCopyText(c.info.value) ? c.info.value : text;
   }
+  /* Does Enter start a new line here, or finish the edit? It finishes, unless the field is a
+     paragraph whose line breaks the page SHOWS: a paragraph-like element (CMS_PARAGRAPH_TAGS)
+     whose value already holds a break or whose white-space keeps one. A heading, a label, a link
+     or a paragraph that would collapse the break into a space: Enter is "done". Pressing Enter
+     to finish the home heading put a blank line inside it and slid it under the toolbar
+     (docs/ux-audit/cms.md P0-2). Shift+Enter still breaks a line wherever the field stores one. */
+  function cmsEnterBreaks(element, multiline, value) {
+    if (!multiline || !CMS_PARAGRAPH_TAGS.test(element.tagName.toLowerCase())) return false;
+    if (/\n/.test(String(value || ''))) return true;
+    var ws = ''; try { ws = getComputedStyle(element).whiteSpace || ''; } catch (e) { ws = ''; }
+    return /^(pre|pre-wrap|pre-line|break-spaces)$/.test(ws);
+  }
   /* stale: a site the editor sent while the words were being typed was held here and is out of
      date (it carries half-typed words), so the editor must send the current one */
   function cmsPostCopyEdit(info, value, final, history, stale) {
@@ -494,18 +507,24 @@
     /* every keystroke, like a form field's input event: Save pressed right after typing must see it */
     cmsPostCopyEdit(c.info, value, false);
   }
+  /* The keys that end an edit KEEP the words. Escape used to put them back with no message and
+     no undo -- most people press Escape to mean "done", and their typing was gone
+     (docs/ux-audit/cms.md P0-2). Now Escape finishes like a click elsewhere; a committed edit is
+     one entry in the canvas's undo history (Ctrl/Cmd+Z, the header's Undo), and the toolbar's
+     Content section offers "Revert to saved". Enter finishes too, unless the field is a paragraph
+     whose breaks the page shows (cmsEnterBreaks); Ctrl/Cmd+Enter always finishes; Shift+Enter
+     breaks a line only in a field that stores breaks. Regression: tests/cms-content-lens.cjs. */
+  function cmsFinishInline() {
+    var c = cmsInline; if (!c) return;
+    cmsEndInline(true);
+    try { c.element.blur(); } catch (e) { /* already gone */ }
+  }
   function cmsInlineKey(event) {
     var c = cmsInline; if (!c) return;
-    if (event.key === 'Escape') {
-      event.preventDefault(); event.stopPropagation();
-      c.element.textContent = c.beforeText; c.last = c.info.value;
-      cmsEndInline(false);
-      /* a held site with half-typed words is never applied: the editor sends the current one */
-      if (c.sent) cmsPostCopyEdit(c.info, c.info.value, true, 'revert', !!c.pending);
-      else if (c.pending) cmsOnMessage(c.pending);
-      return;
-    }
-    if (event.key === 'Enter' && (!c.info.multiline || event.metaKey || event.ctrlKey)) { event.preventDefault(); c.element.blur(); }
+    if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); cmsFinishInline(); return; }
+    if (event.key !== 'Enter') return;
+    var finish = event.metaKey || event.ctrlKey || (event.shiftKey ? !c.info.multiline : !c.info.enterBreaks);
+    if (finish) { event.preventDefault(); cmsFinishInline(); }
   }
   function cmsInlineBlur() { cmsEndInline(true); }
   function cmsBeginInline(element, info, event) {
@@ -1558,12 +1577,27 @@
           entry.title = ArkSEO.pageTitle(entry.seoId, manifest ? manifest.title : entry.cmsFallbackTitle);
         }
       });
+      /* A page or article that exists only as a draft has a route now: derived from the drafts
+         exactly as js/pages/catalog.js derives a saved one. Until 2026-10-19 the router knew only
+         the saved files' routes, so a new page fell back to Home on the canvas while the editor
+         named the new page (docs/ux-audit/cms.md P0-1; regression: tests/cms-draft-routes.cjs). */
+      var draftRoutes = ArkUI.catalogContentRoutes ? ArkUI.catalogContentRoutes(
+        (site.articles || []).filter(function (a) { return a && a.slug && !ArkUI.pageCatalog['article/' + a.slug]; }),
+        (site.manifests || []).filter(function (m) { return m && m.group === 'theory' && m.route && !ArkUI.pageCatalog['concept/' + m.id]; })) : [];
+      /* ...and the scene state every routed page needs (the router refuses a page without it) */
+      if (draftRoutes.length && ArkUI.sceneState && ArkUI.sceneState.addPages) ArkUI.sceneState.addPages(draftRoutes);
       /* the selection as it is BEFORE the remount rebuilds it (cmsSelectionRefs) */
       var keptRefs = cmsSelectionRefs();
+      /* The route the editor asked for (data.route) became routable with THIS message: this
+         document fell back from it at load, so it navigates there now. Only then -- any other
+         route is the editor's to change (it re-points the frame). */
+      var draftTarget = ArkUI.pageRouter && typeof data.route === 'string' ? ArkUI.pageRouter.resolve(data.route) : '';
+      var openDraft = draftTarget && draftRoutes.indexOf(draftTarget) >= 0 && draftTarget !== ArkUI.pageRouter.active;
       /* in place: a draft re-sent for the route this document shows is not a navigation (a route
          change loads a new document), so it never plays the route-change transition -- that
          flashed the canvas blank on every edit (regression: tests/page-router-refresh-in-place.cjs) */
-      var refreshed = ArkUI.pageRouter && ArkUI.pageRouter.refresh ? ArkUI.pageRouter.refresh({ inPlace: true }) : Promise.resolve();
+      var refreshed = openDraft ? ArkUI.pageRouter.navigate(draftTarget, { history: 'replace' })
+        : ArkUI.pageRouter && ArkUI.pageRouter.refresh ? ArkUI.pageRouter.refresh({ inPlace: true }) : Promise.resolve();
       Promise.resolve(refreshed).then(function () {
         annotateCmsPreviewCopy(site.manifests);
         if (window.ArkLayout) ArkLayout.apply(host, cmsRoutePath(), window.innerWidth, cmsLayoutDraft);

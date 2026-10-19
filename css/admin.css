@@ -398,9 +398,13 @@ fieldset.relief { background: hsl(var(--nested) / .5); }
 .mesh-row-val { font-size: 12px; color: hsl(var(--text-strong)); word-break: break-all; }
 .mesh-list { margin: 10px 0 0; padding: 0 0 0 18px; }
 .mesh-list li { margin: 0 0 6px; font-size: 13px; color: hsl(var(--text)); }
-fieldset.mesh-security { background: hsl(var(--accent-subtle) / .35); border-color: hsl(var(--primary-300)); }
-fieldset.mesh-security p { margin: 0 0 12px; font-size: 12.5px; line-height: 1.6; color: hsl(var(--text)); }
-fieldset.mesh-security p:last-child { margin-bottom: 0; }
+details.mesh-security { margin: 0 0 14px; padding: 10px 12px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius); }
+details.mesh-security summary { cursor: pointer; font-size: 12.5px; color: hsl(var(--text-muted)); }
+details.mesh-security[open] summary { margin-bottom: 10px; color: hsl(var(--text-strong)); }
+details.mesh-security p { margin: 0 0 12px; font-size: 12.5px; line-height: 1.6; color: hsl(var(--text)); }
+details.mesh-security p:last-child { margin-bottom: 0; }
+.mesh-readiness { margin: 0 0 14px; }
+.mesh-readiness:empty { display: none; }
 fieldset.mesh-security strong { color: hsl(var(--text-strong)); }
 
 /* =====================================================================
@@ -636,3 +640,40 @@ body.locked { overflow: auto; }
 .media-grid .media-item img { width: 100%; height: 84px; }
 .media-name, .vault-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
 .media-detail, .vault-detail { margin: 8px 0 4px; }
+
+/* ---- notices (js/admin/notice.js): the editor's one toast / banner -----------------------------
+   One shape for every message that is not a control's own answer: an icon, a title, a body, its
+   actions and a dismiss. Tone is a left rule and a faint wash of the SDK meaning token (trust,
+   warning, danger; primary for info -- accent is spent on the one thing to do) over a raised surface -- calm, but unmistakable. Banners sit
+   in #noticeBanners above the canvas; toasts stack at the bottom centre, above the canvas. */
+.notice-region { display: flex; flex-direction: column; gap: 8px; }
+.notice-region:empty { display: none; }
+#noticeBanners { margin: 0 0 10px; }
+.notice-floating { position: fixed; z-index: 55; top: calc(var(--app-bar-h, 56px) + 8px); left: 50%; transform: translateX(-50%); width: min(720px, calc(100vw - 32px)); }
+.notice-toasts { position: fixed; z-index: 60; left: 50%; bottom: 44px; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); pointer-events: none; }
+.notice-toasts .notice { pointer-events: auto; box-shadow: var(--shadow-pop); }
+.notice { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: start; padding: 10px 10px 10px 12px;
+  border: 1px solid hsl(var(--border-default)); border-left: 3px solid hsl(var(--primary)); border-radius: var(--radius);
+  background: linear-gradient(hsl(var(--primary) / .08), hsl(var(--primary) / .08)), hsl(var(--raised)); color: hsl(var(--text)); font: 13px/1.45 var(--sans); text-align: left; }
+.notice[data-tone="success"] { border-left-color: hsl(var(--trust)); background: linear-gradient(hsl(var(--trust) / .08), hsl(var(--trust) / .08)), hsl(var(--raised)); }
+.notice[data-tone="warning"] { border-left-color: hsl(var(--warning)); background: linear-gradient(hsl(var(--warning) / .1), hsl(var(--warning) / .1)), hsl(var(--raised)); }
+.notice[data-tone="danger"] { border-left-color: hsl(var(--danger)); background: linear-gradient(hsl(var(--danger) / .08), hsl(var(--danger) / .08)), hsl(var(--raised)); }
+.notice .ic { flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.notice-icon { color: hsl(var(--primary)); padding-top: 1px; }
+.notice[data-tone="success"] .notice-icon { color: hsl(var(--trust)); }
+.notice[data-tone="warning"] .notice-icon { color: hsl(var(--warning)); }
+.notice[data-tone="danger"] .notice-icon { color: hsl(var(--danger)); }
+.notice-icon .ic { width: 16px; height: 16px; }
+.notice-text { min-width: 0; }
+.notice-text p { margin: 0; overflow-wrap: anywhere; }
+.notice-title { font-weight: 600; color: hsl(var(--text-strong)); }
+.notice-title + .notice-body { margin-top: 2px; color: hsl(var(--text-muted)); }
+.notice-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.notice-actions .btn { min-height: 28px; padding: 4px 10px; font-size: 12px; }
+.notice-dismiss { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--text-muted)); cursor: pointer; }
+.notice-dismiss:hover, .notice-dismiss:focus-visible { background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
+.notice-dismiss .ic { width: 12px; height: 12px; }
+/* a control refused WITH an explanation (refuse(button, reason, explain), js/admin/core.js) stays
+   clickable -- a click opens the reason -- but reads as unavailable */
+.btn[aria-disabled="true"] { opacity: .55; cursor: help; }
+.btn.primary[aria-disabled="true"] { box-shadow: none; }

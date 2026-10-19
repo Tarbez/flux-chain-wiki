@@ -14,7 +14,8 @@
       status = A.status, removeItemFile = A.removeItemFile, forgetDeleted = A.forgetDeleted,
       afterDelete = A.afterDelete, setItemField = A.setItemField, boundField = A.boundField,
       paintInto = A.paintInto, panelHead = A.panelHead, repaintPanels = A.repaintPanels,
-      itemsChanged = A.itemsChanged, afterItemRemoved = A.afterItemRemoved, deleteItem = A.deleteItem;
+      itemsChanged = A.itemsChanged, afterItemRemoved = A.afterItemRemoved, deleteItem = A.deleteItem,
+      createdNotice = A.createdNotice;
   /* defined by files loaded after this one: resolved when called */
   var studioRoutes = A.later('studioRoutes');
 
@@ -160,8 +161,12 @@
     status('Deleted ' + a.title + '.' + forgot + await afterDelete(), 'ok');
   }
 
+  /* An article is named from what was typed ("hello-world" -> "Hello world"): it was "New note"
+     for every new article, so the rail, the canvas and Delete's confirm ("Delete "New note"?")
+     named a different thing than the one created (docs/ux-audit/cms.md P0-1). */
+  function titleFromSlug(slug) { var words = String(slug).replace(/-+/g, ' ').trim(); return words.charAt(0).toUpperCase() + words.slice(1); }
   function articleBlueprint(slug) {
-    return { slug: slug, title: 'New note', category: 'NOTES / ' + String(state.slugs.length + 1).padStart(3, '0'), minutes: '3 MIN READ',
+    return { slug: slug, title: titleFromSlug(slug), category: 'NOTES / ' + String(state.slugs.length + 1).padStart(3, '0'), minutes: '3 MIN READ',
              summary: 'Say what this note is about.', core: 'State the central idea clearly.', questions: ['What does this note explain?'],
              relevance: '', reviewed: '', evidenceLabel: '', evidenceHref: '', relatedPage: '', actionLabel: '', actionPage: '',
              sections: [['First heading', 'Write the first paragraph.']], numbers: false };
@@ -176,7 +181,7 @@
     state.slugs.push(slug); state.aDrafts[slug] = articleBlueprint(slug); state.aSaved[slug] = null;
     state.kind = 'article'; state.aCurrent = slug;
     itemsChanged('article', slug); touch({ kind: 'article', id: slug });
-    status('New article. Edit it, then Save to create it.', '');
+    createdNotice('article', slug);
     return { ok: true, id: slug };
   }
   A.provide({ adoptArticles: adoptArticles, articleCopy: articleCopy, articleList: articleList,

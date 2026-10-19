@@ -11,7 +11,7 @@
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
-  var state = A.state, $ = A.$, toast = A.toast,
+  var state = A.state, $ = A.$, toast = A.toast, notice = A.notice,
       applyStudioComponentsReplace = A.applyStudioComponentsReplace,
       applyStudioStatesReplace = A.applyStudioStatesReplace,
       applyStudioCanvasTransitionsReplace = A.applyStudioCanvasTransitionsReplace,
@@ -27,7 +27,7 @@
       refreshPop = A.later('refreshPop'), layoutStage = A.later('layoutStage'),
       openCanvasTransitionsPopover = A.later('openCanvasTransitionsPopover'),
       renderSelToolbar = A.later('renderSelToolbar'), openRoute = A.later('openRoute'),
-      itemForRoute = A.later('itemForRoute');
+      itemForRoute = A.later('itemForRoute'), openPageFields = A.later('openPageFields');
 
   /* =========================================================================
      STEP 1 CLEANUP (2026-10-17): the dense typed-array document engine (node
@@ -103,10 +103,18 @@
      address from the SAVED files (the catalog, the article index), so a page or article that
      exists only as an unsaved draft cannot be routed to yet and the router falls back. Say so,
      with the remedy, and open it by itself after the next Save (reloadPreview). */
+  /* Since 2026-10-19 the preview routes a draft-only page from the drafts it is sent (js/main.js,
+     catalogContentRoutes), so this is the fallback for a page it still could not render: a
+     banner over the canvas -- the status line cut it to "/concep..." -- with Save and the asked
+     item's own Page fields as buttons (docs/ux-audit/cms.md P0-1). */
   function routeRefused(asked, shown) {
     state.cmsWantedRoute = asked;
     state.cmsCurrentRoute = state.cmsPreviewRoute = shown;
+    const item = itemForRoute(asked);
     A.status(asked + ' is not on the canvas yet: the site learns a new page\'s or article\'s address from the saved files, so it opens here once it is saved. Until then the canvas shows ' + shown + '; its words are in its Page fields.', 'warn');
+    notice({ tone: 'warning', persist: true, key: 'route-refused', title: 'This page isn’t saved yet — Save to see it on the canvas',
+      body: asked + ' exists only as a draft, and the canvas could not show it from the draft, so it is showing ' + shown + '. Save writes its file; the canvas opens it by itself then. Until then its words are in its Page fields.',
+      actions: [{ label: 'Save now', run: () => saveEverything() }].concat(item ? [{ label: 'Open its Page fields', run: () => openPageFields({ kind: item.kind, id: item.id }) }] : []) });
     schedule();
   }
   function postCmsPreviewState() {
@@ -117,7 +125,9 @@
        reload of the frame keeps showing until "Back to current drafts" clears it */
     state.cmsPreviewReady = false; /* the preview re-renders from this; the design checks wait for its ready */
     if (!state.versionPreviewSite) sentSignature = contentSignature(state.cmsSourceSite);
-    cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-state', site: state.versionPreviewSite || state.cmsSourceSite }, window.location.origin);
+    /* route: the page the canvas should show -- a draft-only page becomes routable inside the
+       preview with this very message, which then opens it (js/main.js, catalogContentRoutes) */
+    cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-state', site: state.versionPreviewSite || state.cmsSourceSite, route: state.cmsCurrentRoute || '/' }, window.location.origin);
   }
   /* ---- the drafts the canvas shows -----------------------------------------------------
      Content mode used to feed a second site iframe of its own (#frame, js/admin/preview.js,
@@ -184,7 +194,7 @@
     clearTimeout(feedTimer); feedPending = false;
     state.cmsSourceSite = siteFromState(); state.cmsRoutes = studioRoutes();
     const wanted = state.cmsWantedRoute;
-    if (wanted && (state.cmsRoutes.some((r) => r.path === wanted) || itemForRoute(wanted))) { state.cmsWantedRoute = ''; openRoute(wanted); }
+    if (wanted && (state.cmsRoutes.some((r) => r.path === wanted) || itemForRoute(wanted))) { state.cmsWantedRoute = ''; if (notice) notice.close('route-refused'); openRoute(wanted); }
     else if (!state.cmsRoutes.some((r) => r.path === state.cmsCurrentRoute)) openRoute('/');
     else postCmsPreviewState();
     schedule();
@@ -387,6 +397,8 @@
       let reposted = false;
       if (navigating) { navigating = false; if (postWaiting) { postCmsPreviewState(); reposted = true; } }
       if (!reposted && arriving) { const asked = arriving; arriving = ''; if (event.data.path && event.data.path !== asked) routeRefused(asked, event.data.path); }
+      /* the canvas shows the page asked for: a "not saved yet" banner for it has nothing left to say */
+      if (notice && event.data.path && event.data.path === state.cmsCurrentRoute && !state.cmsWantedRoute) notice.close('route-refused');
       postCmsPreviewLens();
       /* the remount rebuilt the selected elements; the preview reports what is selected NOW
          (regression: tests/cms-selection-survives-remount.cjs) -- without it the toolbar kept

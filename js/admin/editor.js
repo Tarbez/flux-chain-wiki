@@ -21,7 +21,7 @@
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, h = A.h, $ = A.$, hasShape = A.hasShape, shapePageId = A.shapePageId,
       refuse = A.refuse, anyDirty = A.anyDirty, NOTHING_TO_SAVE = A.NOTHING_TO_SAVE,
-      saveEverything = A.saveEverything, status = A.status, ITEM_KINDS = A.ITEM_KINDS,
+      saveEverything = A.saveEverything, status = A.status, notice = A.notice, ITEM_KINDS = A.ITEM_KINDS,
       dirty = A.dirty, dirtyA = A.dirtyA, dirtyI = A.dirtyI, dirtyS = A.dirtyS,
       removeItemFile = A.removeItemFile, forgetDeleted = A.forgetDeleted, afterDelete = A.afterDelete,
       ctlField = A.ctlField, ctlSelectField = A.ctlSelectField;
@@ -194,9 +194,10 @@
      remounting the preview under the person typing in it. Every form control bound to the
      field (data-cms-field="<kind>:<id>:<key>") shows the new value unless it has focus. */
   var ARTICLE_TEXT_KEYS = ['title', 'category', 'minutes', 'summary', 'core', 'relevance', 'reviewed', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'];
-  function fieldTarget(kind, id, key) {
+  /* `item`: the copy to read or write (default: the draft; savedFieldValue passes the saved one) */
+  function fieldTarget(kind, id, key, item) {
     if (kind === 'page') {
-      var m = state.drafts[id];
+      var m = item || state.drafts[id];
       if (!m) return { refusal: 'No page "' + id + '" to edit. Needs: an id from the Pages list (' + state.ids.join(', ') + ').' };
       if (key === 'meta.placement' || key === 'meta.next') {
         var meta = key.slice(5);
@@ -208,7 +209,7 @@
       return { field: f, get: function () { return f.value; }, set: function (v) { f.value = v; } };
     }
     if (kind === 'article') {
-      var a = state.aDrafts[id];
+      var a = item || state.aDrafts[id];
       if (!a) return { refusal: 'No article "' + id + '" to edit. Needs: a slug from the Articles list (' + state.slugs.join(', ') + ').' };
       if (key === 'numbers') return { bool: true, get: function () { return a.numbers; }, set: function (v) { a.numbers = v; } };
       if (ARTICLE_TEXT_KEYS.indexOf(key) >= 0) return { get: function () { return a[key] === undefined ? (key === 'core' ? a.summary : '') : a[key]; }, set: function (v) { a[key] = v; } };
@@ -233,6 +234,19 @@
     syncControls(kind + ':' + id + ':' + key, value);
     touch({ canvas: opts.canvas !== false, kind: kind, id: id });
     return { ok: true, changed: changed };
+  }
+  /* A field's value as it is now in the draft, or -- saved: true -- in the item's SAVED copy;
+     undefined when there is none (an item never saved, a field it does not have). What the
+     toolbar's "Revert to saved" goes back to (js/admin/toolbar-sections.js). */
+  function fieldValue(kind, id, key, saved) {
+    var item = null;
+    if (saved) {
+      var text = kind === 'page' ? state.saved[id] : kind === 'article' ? state.aSaved[id] : null;
+      if (text == null) return undefined;
+      try { item = JSON.parse(text); } catch (e) { return undefined; }
+    }
+    var t = fieldTarget(kind, id, key, item);
+    return t.refusal ? undefined : t.get();
   }
   /* the canvas's copy of the site (state.cmsSourceSite) takes the one edited item from its draft,
      so the preview's next remount carries what was typed inline */
@@ -451,16 +465,33 @@
     state.ids.push(id); state.drafts[id] = blueprint(id); state.saved[id] = null;
     state.kind = 'page'; state.current = id;
     itemsChanged('page', id); touch({ kind: 'page', id: id });
-    status('New page. Edit it, then Save to create it.', '');
+    createdNotice('page', id);
     return { ok: true, id: id };
+  }
+  /* What a create says, in full and where it is read: the item by the name every surface shows,
+     that it is a draft until Save, and Save as its button. It was the header's status line, cut
+     to "New page. Edit it, th..." (docs/ux-audit/cms.md P0-1). */
+  function createdNotice(kind, id) {
+    var item = kind === 'page' ? state.drafts[id] : state.aDrafts[id], route = kind === 'page' ? item.route : '/learnings/' + id;
+    status((kind === 'page' ? 'New page ' : 'New article ') + route + ': not saved yet.', '');
+    notice({ tone: 'success', key: 'created', title: (kind === 'page' ? 'New page' : 'New article') + ' “' + item.title + '” (' + route + ')',
+      body: 'It is on the canvas and its fields are open. It is a draft until you Save: the site gets its file and its address then.',
+      actions: [{ label: 'Save now', run: function () { saveEverything(); } }] });
   }
   function refused(message) { status(message, 'error'); return { ok: false, refusal: message }; }
   /* The New page / New article / New image / New encrypted item forms: wherever the shell (or a
      panel) draws them, by id, a submit lands here -- delegated, so a form drawn after load works. */
   var CREATE_FORMS = {
-    newForm: function () { var input = $('newId'), r = createPage(input.value); if (r.ok) { input.value = ''; hook('select')(r.id); } },
-    newArticleForm: function () { var input = $('newSlug'), r = A.createArticle(input.value); if (r.ok) { input.value = ''; hook('selectArticle')(r.id); } }
+    newForm: function () { var input = $('newId'), r = createPage(input.value); if (r.ok) { input.value = ''; landOn('page', r.id); } },
+    newArticleForm: function () { var input = $('newSlug'), r = A.createArticle(input.value); if (r.ok) { input.value = ''; landOn('article', r.id); } }
   };
+  /* A created page or article is where the person lands: on the canvas (the preview renders it
+     from its draft, js/main.js) and in its own Page fields -- never Home's, which the header's
+     Page fields opened while the canvas fell back to Home (docs/ux-audit/cms.md P0-1). */
+  function landOn(kind, id) {
+    hook(kind === 'page' ? 'select' : 'selectArticle')(id);
+    hook('openPageFields')({ kind: kind, id: id });
+  }
   document.addEventListener('submit', function (event) {
     var run = event.target && CREATE_FORMS[event.target.id];
     if (!run) return;
@@ -560,7 +591,7 @@
   }
 
 
-  A.provide({ boundField: boundField, contentChoices: contentChoices, contentLabel: contentLabel, refreshList: renderList, createPage: createPage, deleteItem: deleteItem,
+  A.provide({ boundField: boundField, contentChoices: contentChoices, contentLabel: contentLabel, refreshList: renderList, createPage: createPage, createdNotice: createdNotice, deleteItem: deleteItem, fieldValue: fieldValue,
       itemDirty: itemDirty, itemsChanged: itemsChanged, linkPickerEl: linkPickerEl,
       paintInto: paintInto, panelHead: panelHead, refreshSaveButton: refreshSaveButton,
       renderPageFields: renderPageFields, repaintPanels: repaintPanels,

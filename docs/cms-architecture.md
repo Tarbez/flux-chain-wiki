@@ -2,7 +2,7 @@
 
 How the DEFXN content editor is built, as of 2026-10-18. Every statement here names the file
 that decides it; when this page and the code disagree, the code wins and this page is the
-defect. The editor, once one ~4,600-line `js/admin/admin.js`, is now 27 files under
+defect. The editor, once one ~4,600-line `js/admin/admin.js`, is now 28 files under
 `js/admin/`, one per concern ([modules](#modules)).
 
 ## One workspace
@@ -38,7 +38,13 @@ All four are deleted. Exactly one site iframe exists in the document: `#cmsPrevi
   `#devices`, undo/redo, Design check `#btnCheck`, Edit/Live `#mode`;
 - `#versionsNav`, `#meshNav`, the one `#save`, `#publish`, and `#accountMenu` behind
   `#accountBtn` (folder connect, who is signed in, the publish host's status `#mesh`, sign out;
-  `js/admin/project.js`, `mesh.js`).
+  `js/admin/project.js`, `mesh.js`). The menu closes on a press anywhere, the canvas included
+  (focus leaving the editor's window for the iframe; `tests/cms-account-menu-canvas-close.cjs`).
+  While no project folder is connected, a banner above the canvas says what connecting does,
+  with the button (`connectProject()`, the one connect flow behind every Connect button: the
+  menu, the banner, Save's refusal, Versions). `#publish` refused (no miner, a copy opened from
+  disk) stays clickable: a click opens the Publish sheet with the reason (`refuse(button, reason,
+  explain)`, `js/admin/core.js`; `tests/cms-refusal-explains.cjs`).
 
 Below 760px the header is two rows (the page, lens and views; the canvas tools and actions) and
 below 600px three (the page with Save and Publish; the lens and views with Versions and Mesh;
@@ -101,7 +107,7 @@ approximation. It is the only two-way message boundary in the editor. Both direc
 
 | type | carries | what the preview does |
 |---|---|---|
-| `defxn-cms-preview-state` | `site`: every draft (`siteFromState()`, or the version being previewed) | defines every content module from the drafts, re-renders the route IN PLACE (`pageRouter.refresh({ inPlace: true })`: no transition, no blank frame), annotates it, replies `ready` |
+| `defxn-cms-preview-state` | `site`: every draft (`siteFromState()`, or the version being previewed); `route`: the page the editor wants shown | defines every content module from the drafts, adds the routes only the drafts have (`ArkUI.catalogContentRoutes`), re-renders the route IN PLACE (`pageRouter.refresh({ inPlace: true })`: no transition, no blank frame) -- or, when this message made `route` routable, navigates there -- annotates it, replies `ready` |
 | `defxn-cms-preview-mode` | `mode`: `edit` / `live` | Edit: clicks select. Live: clicks behave as for a visitor |
 | `defxn-cms-preview-lens` | `lens`: `content` / `design` (sent on every change, load and ready) | what an Edit-mode click does: Content edits the text in place ([Content lens](#the-content-lens)), Design selects and styles |
 | `defxn-cms-preview-site-defaults` | `settingsDefaults` (`js/admin/design.js`) | applies the settings-gear defaults without a remount |
@@ -147,8 +153,13 @@ made them). `previewShowsDrafts()` adopts the drafts as sent (an edit typed into
 `reloadPreview()` re-derives the routes after a structural change (create, delete, Revert, Save).
 `notifyPreviewTheme` / `-Mesh` / `-Assets` post `flux-chain-preview-theme` (`js/main.js`) and
 `flux-chain-preview-mesh` / `-assets` (`js/zero-webgl.js`) to the canvas for an instant update
-without a remount. A page or article that exists only as an unsaved draft has no address the
-site's router knows yet (it reads the saved catalog and article index), so the canvas falls back;
+without a remount. A page or article that exists only as an unsaved draft is routed from the
+drafts: every `defxn-cms-preview-state` carries the `route` the editor wants, the preview derives
+the draft routes with the catalog's own function (`ArkUI.catalogContentRoutes`,
+`js/pages/catalog.js`), gives them scene state (`ArkUI.sceneState.addPages`) and navigates there
+when that message made the route routable (`tests/cms-draft-routes.cjs`). Creating a page or an
+article lands on it: the canvas, its own Page fields, a notice naming it. Should a draft still not
+render, the canvas falls back;
 the ready's `path` shows it, the status line says why and what fixes it, and the next Save opens
 the page on the canvas by itself (`routeRefused`, `state.cmsWantedRoute`).
 
@@ -275,8 +286,12 @@ make it editable. The hover affordance is dashed where a click edits, dotted gre
 explains.
 
 **The edit.** Every keystroke posts `copy-edit` (`final` false); Enter (a one-line field) or
-Ctrl/Cmd+Enter, or a click elsewhere, commits (`final` true); Escape restores the words and posts
-the original value. The value is the element's `textContent` with a `<br>` or a child laid out
+Ctrl/Cmd+Enter, Escape, or a click elsewhere, commits (`final` true) and KEEPS the words -- Escape
+used to restore them silently (docs/ux-audit/cms.md P0-2); the way back is Undo or the Content
+section's "Revert to saved" (`tests/cms-field-revert.cjs`). Plain Enter finishes unless the field
+is a paragraph whose breaks the page shows (`cmsEnterBreaks`); Shift+Enter breaks a line only in a
+field that stores breaks. (Before 2026-10-19 Escape restored the words and posted the original
+value.) The value is the element's `textContent` with a `<br>` or a child laid out
 as a block read as a line break -- never `innerText`, which applies `text-transform` -- and a
 one-line field never stores a break. A state the editor sends while words are being typed is held
 until the edit ends, so the element under the caret is not rebuilt. A commit is not re-sent at
@@ -466,7 +481,7 @@ links and reachability, search, AI, and audience.
 
 ## Modules
 
-The editor is 27 classic scripts loaded in order by `admin-app.html` (its `<script>` list is the exact order),
+The editor is 28 classic scripts loaded in order by `admin-app.html` (its `<script>` list is the exact order),
 no bundler; `admin.js` is now only the 54-line entry point. The contract is
 in `js/admin/core.js`: each file is an IIFE that takes what it uses from `window.ArkAdmin` at
 its top and hands back its exports with `A.provide()`; a function from a file that loads later
@@ -476,6 +491,7 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | file | owns |
 |---|---|
 | `core.js` | the `ArkAdmin` namespace and its vocabulary (`$`, `h`, `status`, `toast`, `refuse`, ...); refuses to run outside `admin.html` |
+| `notice.js` | `notice({ tone, title, body, actions, persist, key, into })`: the one toast / banner / inline alert (Ark UI's alert and toast-region shape, so a later wave swaps its internals); `toast()` is a notice; `tests/cms-notice.cjs` |
 | `state.js` | `A.state`: the lens and its rail tabs, the view, the item a form edits, every draft and its saved copy, dirty checks (`anyDirty`) |
 | `controls.js` | the control-row builders every panel draws with |
 | `save.js` | `saveEverything`, `singleDraftHandle`, `siteFromState`, the one removal path |

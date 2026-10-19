@@ -71,12 +71,27 @@ ArkUI.lifecycleStages.forEach(function (stage) {
     scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js']
   };
 });
-LearningContent.articles.forEach(function (article) {
-  ArkUI.pageCatalog['article/' + article.slug] = { path: '/learnings/' + article.slug, title: typeof ArkSEO !== 'undefined' ? ArkSEO.articleTitle(article.slug, article.title) : article.title, seoArticle: article.slug, module: 'article', scripts: ['js/ark/dash-kit.js', 'js/content/articles/' + article.slug + '.js', 'js/resolvers/learnings.js', 'js/pages/article.js'] };
-});
-if (typeof ArkManifest !== 'undefined') ArkManifest.group('theory').forEach(function (m) {
-  var label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
-  ArkUI.pageCatalog['concept/' + m.id] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, module: 'theory', scripts: ['js/ark/dash-kit.js', 'js/pages/sheet.js', 'js/pages/theory.js'] };
-});
+/* Articles and theory pages are routes DERIVED from the content registries, never listed: one
+   function, so the editor's canvas derives an unsaved page's route exactly as the site derives a
+   saved one (js/main.js, the CMS preview's 'defxn-cms-preview-state': a new page or article was
+   invisible on the canvas until Save, because its route existed only here, at load --
+   docs/ux-audit/cms.md P0-1; regression: tests/cms-draft-routes.cjs). Returns the keys it added.
+   An article whose body is already in LearningContent (a draft the editor sent) is not given its
+   body file, which does not exist until the draft is saved. */
+ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
+  var added = [];
+  (articles || []).forEach(function (article) {
+    var key = 'article/' + article.slug, body = article.sections ? [] : ['js/content/articles/' + article.slug + '.js'];
+    if (!ArkUI.pageCatalog[key]) added.push(key);
+    ArkUI.pageCatalog[key] = { path: '/learnings/' + article.slug, title: typeof ArkSEO !== 'undefined' ? ArkSEO.articleTitle(article.slug, article.title) : article.title, seoArticle: article.slug, module: 'article', scripts: ['js/ark/dash-kit.js'].concat(body, ['js/resolvers/learnings.js', 'js/pages/article.js']) };
+  });
+  (theoryManifests || []).forEach(function (m) {
+    var key = 'concept/' + m.id, label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
+    if (!ArkUI.pageCatalog[key]) added.push(key);
+    ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, module: 'theory', scripts: ['js/ark/dash-kit.js', 'js/pages/sheet.js', 'js/pages/theory.js'] };
+  });
+  return added;
+};
+ArkUI.catalogContentRoutes(LearningContent.articles, typeof ArkManifest !== 'undefined' ? ArkManifest.group('theory') : []);
 
 ArkUI.pageCatalog.reference = { path:'/reference', title:arkSeoTitle('reference', 'Canonical reference'), seoId:'reference', module:'reference', hiddenFromNavigation:true, scripts:['js/content/reference-text.js','js/pages/reference.js'] };

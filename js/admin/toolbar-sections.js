@@ -374,6 +374,23 @@
      with the selection as state.cmsContent. Edits go through applyCmsCopyEdit (js/admin/bridge.js)
      -> setItemField, the write the forms use; the value control carries the form's own
      data-cms-field address, so an edit made anywhere else (the page form, the canvas) shows here. */
+  /* "Revert to saved": this field back to the words in its saved file -- the explicit way back
+     that Escape used to be, now visible and undoable (the notice's Undo puts the words back). */
+  function revertFieldButton(content) {
+    const fieldValue = A.fieldValue, saved = fieldValue(content.kind, content.id, content.fieldKey, true);
+    const now = fieldValue(content.kind, content.id, content.fieldKey, false);
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'btn small'; button.dataset.action = 'revert-field'; button.textContent = 'Revert to saved';
+    refuse(button, saved === undefined ? 'Nothing saved to go back to: this ' + (content.kind === 'article' ? 'article' : 'page') + ' has not been saved yet. Save it first; Undo (Ctrl/Cmd+Z) takes back an edit until then.'
+      : saved === now ? 'Nothing to revert: these are the saved words.' : '');
+    button.addEventListener('click', () => {
+      const before = fieldValue(content.kind, content.id, content.fieldKey, false);
+      A.applyCmsCopyEdit({ field: content.field, value: saved, final: true });
+      A.notice({ tone: 'info', key: 'field-reverted', title: 'Reverted “' + content.label + '” to its saved words',
+        body: 'The canvas and Page fields show the saved words again. Undo puts back what you had typed.',
+        actions: [{ label: 'Undo', run: () => A.applyCmsCopyEdit({ field: content.field, value: before, final: true }) }] });
+    });
+    return button;
+  }
   function buildContentSection(pane) {
     /* a binding reported for another element (a message that moved the selection without one) is not this one's */
     const content = state.cmsContent && (!state.cmsContent.key || state.cmsContent.key === state.cmsExactSelection.key) ? state.cmsContent : null;
@@ -386,6 +403,13 @@
       info.querySelector('b').textContent = content.label;
       info.querySelector('code').textContent = content.field + '  ·  ' + (content.multiline ? 'paragraph' : 'one line') + '  ·  ' + content.file;
       body.appendChild(info);
+      /* How an edit on the canvas ends, said where the person is looking: nothing on screen did,
+         and Escape threw the typing away (docs/ux-audit/cms.md P0-2). The keys are js/main.js's
+         (cmsInlineKey): Escape and Enter keep the words; Enter is a new line only in a paragraph
+         whose breaks the page shows. */
+      body.appendChild(p('hint cms-content-keys', content.enterBreaks
+        ? 'Click the text to edit it. Enter starts a new line · Ctrl/Cmd+Enter or Esc to finish (your words are kept).'
+        : 'Click the text to edit it. Enter or Esc to finish (your words are kept)' + (content.multiline ? ' · Shift+Enter for a new line.' : '.')));
       const component = content.kind === 'component';
       const ctx = { get: () => content.value,
         set: (_k, value) => {
@@ -397,6 +421,7 @@
       body.appendChild(ctlField(ctx, 'Text', 'value',
         { type: content.multiline ? 'textarea' : 'text', rows: content.multiline ? 4 : undefined, id: 'cmsContentValue', live: !component, data }));
       if (component) body.appendChild(p('hint', 'This instance\'s override: the definition keeps its own value.'));
+      else body.appendChild(revertFieldButton(content));
       if (content.link && content.link.field) {
         const at = A.cmsCopyAddress(content.link.field);
         body.appendChild(A.linkPickerEl('Link target', 'cms-content-link', content.link.value,

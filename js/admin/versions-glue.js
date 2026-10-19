@@ -16,7 +16,7 @@
       anyDirty = A.anyDirty, removeItemFile = A.removeItemFile, siteFromState = A.siteFromState,
       studioRoutes = A.studioRoutes, touch = A.touch, h = A.h, download = A.download;
   /* the mounted form panels re-draw from the restored drafts (js/admin/panels.js) */
-  var refreshPanels = A.later('refreshPanels');
+  var refreshPanels = A.later('refreshPanels'), connectProject = A.later('connectProject');
 
   /* STEP 1 CLEANUP: the dense-encoding "Versions" feature (encodeDense/namedTree/base32/
      cidOf/publish, and the "History" tab/#paneVer that showed it) is deleted with no
@@ -229,7 +229,7 @@
   var versionsPanel = window.ArkVersionsPanel && $('versionsPanel') ? ArkVersionsPanel.create({
     h: h, root: $('versionsPanel'),
     dir: function () { return Promise.resolve(state.historyDir || null); },
-    savedSnapshot: savedSnapshot, anyDirty: anyDirty, status: status, download: download,
+    savedSnapshot: savedSnapshot, anyDirty: anyDirty, status: status, download: download, connect: connectProject,
     preview: previewVersion, exitPreview: exitVersionPreview, restore: restoreVersion, restorePlan: restorePlan,
     onToggle: function (open) { $('versionsNav').setAttribute('aria-expanded', String(open)); }
   }) : null;

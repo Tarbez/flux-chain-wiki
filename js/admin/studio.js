@@ -27,7 +27,11 @@
       out.push({ path: path, title: String(def.title || key).replace(/\s+[—-]\s+DEFXN.*$/, ''), seoId: def.seoId || '', seoArticle: def.seoArticle || '', key: key });
     });
     if (window.ArkSEO) ArkSEO.routes(state.ids.map(function (id) { return state.drafts[id]; }), state.slugs.map(function (slug) { return state.aDrafts[slug]; })).forEach(function (route) {
-      if (!seen[route.path]) { seen[route.path] = true; out.push({ path: route.path, title: route.path === '/' ? 'Home' : route.path.split('/').filter(Boolean).pop().replace(/-/g, ' '), seoId: route.id || '', seoArticle: route.slug || '', key: '' }); }
+      /* a route only the drafts have (a page or article not saved yet) is named by its draft's own
+         title -- the name the Pages rail and Page fields show -- not its slug: the canvas label said
+         "pricing" over a page the rail called "Theory: Pricing" (docs/ux-audit/cms.md P0-1) */
+      var draft = route.slug ? state.aDrafts[route.slug] : route.id ? state.drafts[route.id] : null;
+      if (!seen[route.path]) { seen[route.path] = true; out.push({ path: route.path, title: (draft && draft.title) || (route.path === '/' ? 'Home' : route.path.split('/').filter(Boolean).pop().replace(/-/g, ' ')), seoId: route.id || '', seoArticle: route.slug || '', key: '' }); }
     });
     return out.sort(function (a, b) { return a.path.localeCompare(b.path); });
   }

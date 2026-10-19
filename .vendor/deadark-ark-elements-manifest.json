@@ -1,0 +1,8 @@
+{
+  "package": "@deadark/ark-elements",
+  "version": "0.1.0",
+  "tarball": ".vendor/deadark-ark-elements-0.1.0.tgz",
+  "sha256": "5ab68a1adbe682b7bfc317a8fd5a673a3858c00d71241b95e055ff2b2e1550a1",
+  "sourceRoot": "../../../design/ark-elements",
+  "updatedAt": "2026-10-19T00:53:45.079Z"
+}

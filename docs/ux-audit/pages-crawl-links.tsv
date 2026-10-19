@@ -1,0 +1,544 @@
+from	region	to	kind	href	label	visible1440	note
+zero	page	deployment	route	/how-deployment-works	you.fxn Your history begins here Follow the line	true	
+zero	page	about	route	/about		true	
+zero	page	chain	route	/chain		true	
+zero	page	stats	route	/stats		true	
+zero	page	resolver	route	/what-is-a-resolver		true	
+zero	page	explorer	route	/explore		true	
+zero	page-footer	about	route	/about	you.fxn Every possibility starts with a history Explore DEFX	true	
+zero	page-footer	about	route	/about	Protocol	true	
+zero	page-footer	resolvers	route	/resolvers	Resolvers	true	
+zero	page-footer	explorer	route	/explore	Explorer	true	
+zero	page-footer	download	route	/download	Run from source	true	
+zero	page-footer	dao	route	/dao	Governance	true	
+zero	header	zero	route	/	DEFXN FXN CHAIN	true	
+zero	header	about	route	/about	Overview	true	
+zero	header	deployment	route	/how-deployment-works	How it works	true	
+zero	header	explorer	route	/explore	Mesh Explorer	true	
+zero	header	stats	route	/stats	Stats	true	
+zero	header	account	route	/account	Account Signed out	true	
+zero	header	download	route	/download	Run DEFXN	true	
+zero	mega	resolutions/website	route	/resolutions/website	WebsitePublish straight to the mesh: no database, no hosting	false	
+zero	mega	resolutions/deployments	route	/resolutions/deployments	DeploymentsShip signed bundles to the mesh instead of to a s	false	
+zero	mega	resolutions/network	route	/resolutions/network	NetworkCreate or join a named network that scales itself as 	false	
+zero	mega	resolutions/content	route	/resolutions/content	Content	false	
+zero	mega	resolutions/files	route	/resolutions/files	Files	false	
+zero	mega	resolutions/payments	route	/resolutions/payments	Payments	false	
+zero	mega	resolutions/finance	route	/resolutions/finance	Personal finance	false	
+zero	mega	resolutions/community	route	/resolutions/community	Community	false	
+zero	mega	resolutions/communications	route	/resolutions/communications	Communications	false	
+zero	mega	resolutions/collaborations	route	/resolutions/collaborations	Collaborations	false	
+zero	mega	resolutions/governance	route	/resolutions/governance	Governance	false	
+zero	mega	resolutions/intelligence	route	/resolutions/intelligence	Intelligence	false	
+zero	mega	resolutions/data	route	/resolutions/data	Data	false	
+zero	mega	resolutions/algorithms	route	/resolutions/algorithms	Algorithms	false	
+zero	mega	resolutions/information	route	/resolutions/information	Information	false	
+zero	mega	resolutions/rules	route	/resolutions/rules	Rules and patterns	false	
+zero	mega	resolutions/encryptions	route	/resolutions/encryptions	Encryptions	false	
+zero	mega	resolutions/automation	route	/resolutions/automation	Automation	false	
+zero	mega	resolutions/productivity	route	/resolutions/productivity	Productivity	false	
+zero	mega	resolutions/logistics	route	/resolutions/logistics	Logistics	false	
+zero	mega	resolver	route	/what-is-a-resolver	How resolvers work ↗	false	
+zero	mega	resolutions	route	/resolutions	Browse all resolutions →	false	
+zero	menu	zero	route	/	Home	false	
+zero	menu	about	route	/about	Overview	false	
+zero	menu	resolutions	route	/resolutions	Resolutions for the mesh	false	
+zero	menu	resolver	route	/what-is-a-resolver	Resolver	false	
+zero	menu	resolver-math	route	/resolver-math	Resolver Math	false	
+zero	menu	deployment	route	/how-deployment-works	How it works	false	
+zero	menu	explorer	route	/explore	Mesh Explorer	false	
+zero	menu	account	route	/account	Your account	false	
+zero	menu	treasury	route	/treasury	Treasury design preview	false	
+zero	menu	deposits	route	/deposits	Deposit design preview	false	
+zero	menu	references	route	/start-from-something-real	Reference resolvers	false	
+zero	menu	concept	route	/concept	Operating model	false	
+zero	menu	dao	route	/dao	DAO	false	
+zero	menu	chain	route	/chain	Every identity, its own chain	false	
+zero	menu	palette	route	/palette	Interface palette	false	
+zero	menu	stats	route	/stats	Mesh performance	false	
+zero	menu	resolvers	route	/resolvers	FXN resolvers	false	
+zero	menu	account/domains	route	/account/domains	Your domains	false	
+zero	menu	download	route	/download	Run DEFXN	false	
+zero	menu	bundledeployer	route	/bundle-deployer	FXN Bundle Deployer	false	
+zero	menu	deploy	route	/deploy	Create or join	false	
+zero	menu	learnings	route	/learnings	Notes	false	
+zero	menu	proximity	route	/experiments	Model	false	
+zero	menu	lab	route	/experiments/lab	Interactive model	false	
+zero	menu	lifecycle	route	/lifecycle	View the full lifecycle	false	
+zero	menu	lifecycle/intent	route	/lifecycle/intent	Intent	false	
+zero	menu	lifecycle/offer	route	/lifecycle/offer	Offer	false	
+zero	menu	lifecycle/agreement	route	/lifecycle/agreement	Agreement	false	
+zero	menu	lifecycle/fulfillment	route	/lifecycle/fulfillment	Fulfillment	false	
+zero	menu	lifecycle/receipt	route	/lifecycle/receipt	Receipt	false	
+zero	menu	concept/purpose	route	/concept/purpose	What does a Flux network isolate today?	false	
+zero	menu	concept/depth	route	/concept/depth	How does one agreement become verifiable?	false	
+zero	menu	concept/practice	route	/concept/practice	Who can approve this transition?	false	
+zero	menu	concept/notes	route	/concept/notes	When does an approved change become active?	false	
+zero	menu	concept/studio	route	/concept/studio	How do you verify a named network?	false	
+zero	menu	concept/spec	route	/concept/spec	What is actually measured?	false	
+zero	menu	article/why-the-chain-was-retired	route	/learnings/why-the-chain-was-retired	From one chain to one per identity	false	
+zero	menu	article/one-substrate-many-networks	route	/learnings/one-substrate-many-networks	One substrate, many networks	false	
+zero	menu	article/governance-without-a-validator-set	route	/learnings/governance-without-a-validator-set	Governance without a validator set	false	
+zero	menu	article/how-we-got-fast-and-what-we-got-wrong	route	/learnings/how-we-got-fast-and-what-we-got-wrong	How we got fast, and everything we got wrong	false	
+zero	menu	article/the-grammar-does-almost-no-work	route	/learnings/the-grammar-does-almost-no-work	The grammar does almost no work	false	
+zero	menu	article/a-resolver-by-construction	route	/learnings/a-resolver-by-construction	A finance resolver by construction	false	
+zero	menu	article/the-chain-prototype-is-the-chosen-path	route	/learnings/the-chain-prototype-is-the-chosen-path	The chain prototype is the chosen path	false	
+zero	other	concept	route	/concept	Spec ↗	false	
+zero	other	learnings	route	/learnings	Notes ↗	false	
+zero	other	proximity	route	/experiments	Interactive model ↗	false	
+zero	other	concept	route	/concept	One substrateMany networks, not one chain.See how networks a	false	
+zero	other	docs/quickstart.md	file	docs/quickstart.md	Read the source	true	
+zero	other	docs/protocol/resolvers.md	file	docs/protocol/resolvers.md	WHAT IS A RESOLVER?	true	
+zero	other	docs/overview.md	file	docs/overview.md	READ THE PROTOCOL OVERVIEW	true	
+chain	page	zero	route	/	HOME	true	
+chain	page	account	route	/account	01 Sign	true	
+chain	page	stats	route	/stats	02 Check	true	
+chain	page	explorer	route	/explore	03 Extend	true	
+chain	page	stats	route	/stats	04 Replicate	true	
+chain	page	resolver	route	/what-is-a-resolver	05 Resolve	true	
+resolver	page	zero	route	/	HOME	true	
+resolver	page	resolver	route	/what-is-a-resolver?step=resolve&input=7f3a	Resolve →	true	
+resolver	page	reference	route	/reference	Spec ↗	true	
+resolver	page	reference	route	/reference	resolver spec	false	
+resolver	page	reference	route	/reference	status page	false	
+references	page	zero	route	/	HOME	true	
+references	page	resolver	route	/what-is-a-resolver	What is a resolver	true	
+references	page	deployment	route	/how-deployment-works	See how Flux works	true	
+deployment	page	zero	route	/	HOME	true	
+deployment	page	how/ask	route	/how-deployment-works/ask	01 INTENT State the request Name the work, the result you ex	true	
+deployment	page	how/work	route	/how-deployment-works/work	02 OFFER · AGREEMENT Agree on the terms A provider proposes 	true	
+deployment	page	how/check	route	/how-deployment-works/check	03 FULFILLMENT · RECEIPT Verify the result Return the work w	true	
+deployment	page-footer	lifecycle	route	/lifecycle	Trace the five-stage lifecycle →	true	
+explorer	page	zero	route	/	HOME	true	
+explorer	page-footer	resolver	route	/what-is-a-resolver	What is a resolver?	true	
+explorer	page	reference	route	/reference	How to verify an observation ↗	false	
+explorer	page	reference	route	/reference	Evidence registry ↗	false	
+palette	page	palette	route	#palette-title	TEXT LINK	true	
+stats	page	reference	route	/reference	Full record · INFRA-001	true	
+stats	page	reference	route	/reference	BENCH-012	true	
+stats	page	reference	route	/reference	Resolver audit	true	
+stats	page	reference	route	/reference	Whitepaper §3	true	
+stats	page	reference	route	/reference	INFRA-001	true	
+stats	page	reference	route	/reference	BENCH-014	true	
+stats	page	reference	route	/reference	BENCH-015	true	
+stats	page	reference	route	/reference	Whitepaper · how it works, what made it fast, every number’s	true	
+stats	page	resolvers	route	/resolvers	Resolvers · each one’s own measured throughput	true	
+stats	page	stats/ledger	route	/stats/ledger	Finance ledger · double-spend by construction	true	
+stats	page	article/how-we-got-fast-and-what-we-got-wrong	route	/learnings/how-we-got-fast-and-what-we-got-wrong	How we got fast, and what we got wrong	true	
+stats	page	reference	route	/reference	Mainnet readiness	true	
+stats/gpu	page	stats	route	/stats	← Back to the measurements	true	
+stats/gpu	page	reference	route	/reference	BENCH-003 §16 · the GPU box, measured and corrected	true	
+stats/gpu	page	stats	route	/stats	Back to the main measurements	true	
+stats/ledger	page	stats	route	/stats	← Back to the measurements	true	
+stats/ledger	page	reference	route	/reference	Read BENCH-005 →	true	
+stats/ledger	page	reference	route	/reference	The design document · why this is the way to prod	true	
+stats/ledger	page	reference	route	/reference	The pre-prod checklist · what the design closes, item by ite	true	
+stats/ledger	page	stats	route	/stats	Back to the main measurements	true	
+resolver-math	page	zero	route	/	HOME	true	
+resolver-math	page	resolver	route	/what-is-a-resolver	WHAT IS A RESOLVER?	true	
+resolver-math	page	reference	route	/reference	Read the resolver audit	true	
+resolver-math	page	reference	route	/reference	Resolver math, in full	true	
+resolver-math	page	reference	route	/reference	Resolver audit	true	
+resolver-math	page	reference	route	/reference	Deprecation ledger	true	
+resolver-math	page	reference	route	/reference	BENCH-012	true	
+resolver-math	page	resolver	route	/what-is-a-resolver	What is a resolver?	true	
+resolver-math	page	stats	route	/stats	Fleet dashboard	true	
+account	page	bundledeployer	route	/bundle-deployer	Deploy a bundle →	false	
+account	page	account/domains	route	/account/domains	Your domains →	false	
+account	page		broken	/admin	Open publishing ↗	false	path /admin resolves to no catalog route (router silently shows Home)
+account	page	explorer	route	/explore	View network details →	false	
+account	page	account/domains	route	/account/domains	Domains0	false	
+account	page	explorer	route	/explore	Explore the networkMesh Explorer →	false	
+account/domains	page	account	route	/account	← Your account	true	
+account/domains	page	account	route	/account	your account	true	
+treasury	page	deposits	route	/deposits	Preview a deposit ↗	true	
+deposits	page	treasury	route	/treasury	Return to treasury preview ↗	true	
+proximity	page	zero	route	/	HOME	true	
+proximity	page	concept/practice	route	/concept/practice	Read the authority contract	true	
+proximity	page	lab	route	/experiments/lab	Explore the model	true	
+lab	page	concept/practice	route	#/concept/practice	Read the authority contract →	true	
+lab	page	reference	route	/reference	claim inventory	true	
+lab	page	reference	route	/reference	evidence registry	true	
+learnings	page	article/why-the-chain-was-retired	route	/learnings/why-the-chain-was-retired	01 From one chain to one per identity 7 MIN READ	true	
+learnings	page	article/one-substrate-many-networks	route	/learnings/one-substrate-many-networks	02 One substrate, many networks 6 MIN READ	true	
+learnings	page	article/governance-without-a-validator-set	route	/learnings/governance-without-a-validator-set	03 Governance without a validator set 6 MIN READ	true	
+learnings	page	article/how-we-got-fast-and-what-we-got-wrong	route	/learnings/how-we-got-fast-and-what-we-got-wrong	04 How we got fast, and everything we got wrong 9 MIN READ	true	
+learnings	page	article/the-grammar-does-almost-no-work	route	/learnings/the-grammar-does-almost-no-work	05 The grammar does almost no work 6 MIN READ	true	
+learnings	page	article/a-resolver-by-construction	route	/learnings/a-resolver-by-construction	06 A finance resolver by construction 7 MIN READ	true	
+learnings	page	article/the-chain-prototype-is-the-chosen-path	route	/learnings/the-chain-prototype-is-the-chosen-path	07 The chain prototype is the chosen path 8 MIN READ	true	
+about	page	resolutions	route	/resolutions	Explore resolutions	true	
+about	page	deployment	route	/how-deployment-works	See how DEFXN works	true	
+about	page	resolver	route	/what-is-a-resolver		true	
+about	page	resolutions	route	/resolutions		true	
+about	page-footer	reference	route	/reference		true	
+about	page-footer	concept	route	/concept		true	
+about	page-footer	zero	route	/	Home	true	
+about	page-footer	resolutions	route	/resolutions	Resolutions	true	
+about	page-footer	explorer	route	/explore	Explorer	true	
+about	page-footer	download	route	/download	Run from source	true	
+resolutions	page	zero	route	/	HOME	true	
+resolutions	page	resolutions/website	route	/resolutions/website	01 Website Publish straight to the mesh: no database, no hos	true	
+resolutions	page	resolutions/content	route	/resolutions/content	02 Content Publish once and keep it addressable and permanen	true	
+resolutions	page	resolutions/files	route	/resolutions/files	03 Files Store and share files through encrypted peer-to-pee	true	
+resolutions	page	resolutions/deployments	route	/resolutions/deployments	04 Deployments Ship signed bundles to the mesh instead of to	true	
+resolutions	page	reference	route	/reference	Current status ↗	true	
+concept	page	about	route	/about	OVERVIEW	true	
+concept	page	concept/purpose	route	/concept/purpose	What does a Flux network isolate today?	true	
+concept	page	concept/depth	route	/concept/depth	How does one agreement become verifiable?	true	
+concept	page	concept/practice	route	/concept/practice	Who can approve this transition?	true	
+download	page	reference	route	/reference	Operator guide ↗	false	
+download	page	reference	route	/reference	Open the full operator guide ↗	true	
+download	page	bundledeployer	route	/bundle-deployer	Deploy a site with the Bundle Deployer	true	
+download	page	deploy	route	/deploy	Create or join a network →	false	
+bundledeployer	page	account	route	/account	Back to your account	true	
+deploy	page	bundledeployer	route	/bundle-deployer	CLI status and public bundle guidance	true	
+deploy	page	reference	route	/reference		true	
+deploy	page	download	route	/download	RUN FLUX FROM SOURCE	true	
+dao	page	concept	route	/concept	OPERATING MODEL	true	
+dao	page	concept/notes	route	/concept/notes	Inspect activation gates	true	
+resolutions/website	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/website	page	bundledeployer	route	/bundle-deployer	Start here →	true	
+resolutions/website	page	account/domains	route	/account/domains	.fxn names READY A signed name like studio.fxn that points a	true	
+resolutions/website	page	bundledeployer	route	/bundle-deployer	Bundle Deployer BUILDING Review a site or app locally, then 	true	
+resolutions/website	page	reference	route	/reference	Current status ↗	true	
+resolutions/website	page	resolutions/logistics	route	/resolutions/logistics	← Logistics PREVIOUS	true	
+resolutions/website	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/website	page	resolutions/content	route	/resolutions/content	Content → NEXT	true	
+resolutions/content	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/content	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/content	page	account/domains	route	/account/domains	.fxn names READY A signed name like studio.fxn that points a	true	
+resolutions/content	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/content	page	reference	route	/reference	Current status ↗	true	
+resolutions/content	page	resolutions/website	route	/resolutions/website	← Website PREVIOUS	true	
+resolutions/content	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/content	page	resolutions/files	route	/resolutions/files	Files → NEXT	true	
+resolutions/files	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/files	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/files	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/files	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/files	page	reference	route	/reference	Current status ↗	true	
+resolutions/files	page	resolutions/content	route	/resolutions/content	← Content PREVIOUS	true	
+resolutions/files	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/files	page	resolutions/deployments	route	/resolutions/deployments	Deployments → NEXT	true	
+resolutions/deployments	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/deployments	page	bundledeployer	route	/bundle-deployer	Start here →	true	
+resolutions/deployments	page	bundledeployer	route	/bundle-deployer	Bundle Deployer BUILDING Review a site or app locally, then 	true	
+resolutions/deployments	page	resolver	route	/what-is-a-resolver	Resolvers READY Publish logic at an address so anyone can ru	true	
+resolutions/deployments	page	stats	route	/stats	Mesh monitor READY Live health, latency and throughput of th	true	
+resolutions/deployments	page	reference	route	/reference	Current status ↗	true	
+resolutions/deployments	page	resolutions/files	route	/resolutions/files	← Files PREVIOUS	true	
+resolutions/deployments	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/deployments	page	resolutions/payments	route	/resolutions/payments	Payments → NEXT	true	
+resolutions/payments	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/payments	page	treasury	route	/treasury	Start here →	true	
+resolutions/payments	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/payments	page	account	route	/account	FXN and credits BUILDING Signed value transfers and usage cr	true	
+resolutions/payments	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/payments	page	reference	route	/reference	Current status ↗	true	
+resolutions/payments	page	resolutions/deployments	route	/resolutions/deployments	← Deployments PREVIOUS	true	
+resolutions/payments	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/payments	page	resolutions/finance	route	/resolutions/finance	Personal finance → NEXT	true	
+resolutions/finance	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/finance	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/finance	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/finance	page	account	route	/account	FXN and credits BUILDING Signed value transfers and usage cr	true	
+resolutions/finance	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/finance	page	reference	route	/reference	Current status ↗	true	
+resolutions/finance	page	resolutions/payments	route	/resolutions/payments	← Payments PREVIOUS	true	
+resolutions/finance	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/finance	page	resolutions/community	route	/resolutions/community	Community → NEXT	true	
+resolutions/community	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/community	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/community	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/community	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/community	page	deploy	route	/deploy	Named networks READY Create or join a network by name; it gr	true	
+resolutions/community	page	reference	route	/reference	Current status ↗	true	
+resolutions/community	page	resolutions/finance	route	/resolutions/finance	← Personal finance PREVIOUS	true	
+resolutions/community	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/community	page	resolutions/communications	route	/resolutions/communications	Communications → NEXT	true	
+resolutions/communications	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/communications	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/communications	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/communications	page	account/domains	route	/account/domains	.fxn names READY A signed name like studio.fxn that points a	true	
+resolutions/communications	page	reference	route	/reference	Current status ↗	true	
+resolutions/communications	page	resolutions/community	route	/resolutions/community	← Community PREVIOUS	true	
+resolutions/communications	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/communications	page	resolutions/collaborations	route	/resolutions/collaborations	Collaborations → NEXT	true	
+resolutions/collaborations	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/collaborations	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/collaborations	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/collaborations	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/collaborations	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/collaborations	page	reference	route	/reference	Current status ↗	true	
+resolutions/collaborations	page	resolutions/communications	route	/resolutions/communications	← Communications PREVIOUS	true	
+resolutions/collaborations	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/collaborations	page	resolutions/governance	route	/resolutions/governance	Governance → NEXT	true	
+resolutions/governance	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/governance	page	dao	route	/dao	Start here →	true	
+resolutions/governance	page	dao	route	/dao	Network DAO BUILDING A roster, a threshold and signed decisi	true	
+resolutions/governance	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/governance	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/governance	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/governance	page	reference	route	/reference	Current status ↗	true	
+resolutions/governance	page	resolutions/collaborations	route	/resolutions/collaborations	← Collaborations PREVIOUS	true	
+resolutions/governance	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/governance	page	resolutions/intelligence	route	/resolutions/intelligence	Intelligence → NEXT	true	
+resolutions/intelligence	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/intelligence	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/intelligence	page	resolver	route	/what-is-a-resolver	Resolvers READY Publish logic at an address so anyone can ru	true	
+resolutions/intelligence	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/intelligence	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/intelligence	page	reference	route	/reference	Current status ↗	true	
+resolutions/intelligence	page	resolutions/governance	route	/resolutions/governance	← Governance PREVIOUS	true	
+resolutions/intelligence	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/intelligence	page	resolutions/data	route	/resolutions/data	Data → NEXT	true	
+resolutions/data	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/data	page	explorer	route	/explore	Start here →	true	
+resolutions/data	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/data	page	resolver	route	/what-is-a-resolver	Resolvers READY Publish logic at an address so anyone can ru	true	
+resolutions/data	page	deploy	route	/deploy	Named networks READY Create or join a network by name; it gr	true	
+resolutions/data	page	stats	route	/stats	Mesh monitor READY Live health, latency and throughput of th	true	
+resolutions/data	page	reference	route	/reference	Current status ↗	true	
+resolutions/data	page	resolutions/intelligence	route	/resolutions/intelligence	← Intelligence PREVIOUS	true	
+resolutions/data	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/data	page	resolutions/algorithms	route	/resolutions/algorithms	Algorithms → NEXT	true	
+resolutions/algorithms	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/algorithms	page	resolver	route	/what-is-a-resolver	Start here →	true	
+resolutions/algorithms	page	resolver	route	/what-is-a-resolver	Resolvers READY Publish logic at an address so anyone can ru	true	
+resolutions/algorithms	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/algorithms	page	reference	route	/reference	Current status ↗	true	
+resolutions/algorithms	page	resolutions/data	route	/resolutions/data	← Data PREVIOUS	true	
+resolutions/algorithms	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/algorithms	page	resolutions/information	route	/resolutions/information	Information → NEXT	true	
+resolutions/information	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/information	page	explorer	route	/explore	Start here →	true	
+resolutions/information	page	account/domains	route	/account/domains	.fxn names READY A signed name like studio.fxn that points a	true	
+resolutions/information	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/information	page	reference	route	/reference	Current status ↗	true	
+resolutions/information	page	resolutions/algorithms	route	/resolutions/algorithms	← Algorithms PREVIOUS	true	
+resolutions/information	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/information	page	resolutions/rules	route	/resolutions/rules	Rules and patterns → NEXT	true	
+resolutions/rules	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/rules	page	resolver	route	/what-is-a-resolver	Start here →	true	
+resolutions/rules	page	resolver	route	/what-is-a-resolver	Resolvers READY Publish logic at an address so anyone can ru	true	
+resolutions/rules	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/rules	page	dao	route	/dao	Network DAO BUILDING A roster, a threshold and signed decisi	true	
+resolutions/rules	page	reference	route	/reference	Current status ↗	true	
+resolutions/rules	page	resolutions/information	route	/resolutions/information	← Information PREVIOUS	true	
+resolutions/rules	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/rules	page	resolutions/network	route	/resolutions/network	Network → NEXT	true	
+resolutions/network	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/network	page	deploy	route	/deploy	Start here →	true	
+resolutions/network	page	deploy	route	/deploy	Named networks READY Create or join a network by name; it gr	true	
+resolutions/network	page	stats	route	/stats	Mesh monitor READY Live health, latency and throughput of th	true	
+resolutions/network	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/network	page	reference	route	/reference	Current status ↗	true	
+resolutions/network	page	resolutions/rules	route	/resolutions/rules	← Rules and patterns PREVIOUS	true	
+resolutions/network	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/network	page	resolutions/encryptions	route	/resolutions/encryptions	Encryptions → NEXT	true	
+resolutions/encryptions	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/encryptions	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/encryptions	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/encryptions	page	reference	route	/reference	Current status ↗	true	
+resolutions/encryptions	page	resolutions/network	route	/resolutions/network	← Network PREVIOUS	true	
+resolutions/encryptions	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/encryptions	page	resolutions/automation	route	/resolutions/automation	Automation → NEXT	true	
+resolutions/automation	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/automation	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/automation	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/automation	page	resolver	route	/what-is-a-resolver	Resolvers READY Publish logic at an address so anyone can ru	true	
+resolutions/automation	page	stats	route	/stats	Mesh monitor READY Live health, latency and throughput of th	true	
+resolutions/automation	page	reference	route	/reference	Current status ↗	true	
+resolutions/automation	page	resolutions/encryptions	route	/resolutions/encryptions	← Encryptions PREVIOUS	true	
+resolutions/automation	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/automation	page	resolutions/productivity	route	/resolutions/productivity	Productivity → NEXT	true	
+resolutions/productivity	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/productivity	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/productivity	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/productivity	page	reference	route	/reference	Current status ↗	true	
+resolutions/productivity	page	resolutions/automation	route	/resolutions/automation	← Automation PREVIOUS	true	
+resolutions/productivity	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/productivity	page	resolutions/logistics	route	/resolutions/logistics	Logistics → NEXT	true	
+resolutions/logistics	page	resolutions	route	/resolutions	ALL RESOLUTIONS	true	
+resolutions/logistics	page	resolver	route	/what-is-a-resolver	How resolvers work →	true	
+resolutions/logistics	page	lifecycle	route	/lifecycle	Agreements resolver READY Each side signs terms, work and re	true	
+resolutions/logistics	page	explorer	route	/explore	Mesh Explorer READY Read any public record on the mesh and c	true	
+resolutions/logistics	page	account	route	/account	Auth Kit READY Your keys and recovery phrase, held by you. N	true	
+resolutions/logistics	page	reference	route	/reference	Current status ↗	true	
+resolutions/logistics	page	resolutions/productivity	route	/resolutions/productivity	← Productivity PREVIOUS	true	
+resolutions/logistics	page	resolutions	route	/resolutions	ALL 20	true	
+resolutions/logistics	page	resolutions/website	route	/resolutions/website	Website → NEXT	true	
+how/ask	page	deployment	route	/how-deployment-works	HOW IT WORKS	true	
+how/ask	page	lifecycle/intent	route	/lifecycle/intent	Explore the signed record	true	
+how/ask	page	how/work	route	/how-deployment-works/work	Next: agree on the terms →	true	
+how/work	page	deployment	route	/how-deployment-works	HOW IT WORKS	true	
+how/work	page	lifecycle/agreement	route	/lifecycle/agreement	Explore the signed record	true	
+how/work	page	how/ask	route	/how-deployment-works/ask	← Previous part	true	
+how/work	page	how/check	route	/how-deployment-works/check	Next: verify the result →	true	
+how/check	page	deployment	route	/how-deployment-works	HOW IT WORKS	true	
+how/check	page	lifecycle/receipt	route	/lifecycle/receipt	Explore the signed record	true	
+how/check	page	how/work	route	/how-deployment-works/work	← Previous part	true	
+how/check	page	deployment	route	/how-deployment-works	Back to the three parts →	true	
+lifecycle	page	zero	route	/	HOME	true	
+lifecycle	page	lifecycle/intent	route	/lifecycle/intent	01 Intent	true	
+lifecycle	page	lifecycle/offer	route	/lifecycle/offer	02 Offer	true	
+lifecycle	page	lifecycle/agreement	route	/lifecycle/agreement	03 Agreement	true	
+lifecycle	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	04 Fulfillment	true	
+lifecycle	page	lifecycle/receipt	route	/lifecycle/receipt	05 Receipt	true	
+lifecycle	page	lifecycle/intent	route	/lifecycle/intent	Follow Intent	true	
+lifecycle/intent	page	zero	route	/	HOME	true	
+lifecycle/intent	page	lifecycle	route	/lifecycle	02 / AGREEMENT LIFECYCLE	true	
+lifecycle/intent	page	lifecycle/intent	route	/lifecycle/intent	01 Intent	true	
+lifecycle/intent	page	lifecycle/offer	route	/lifecycle/offer	02 Offer	true	
+lifecycle/intent	page	lifecycle/agreement	route	/lifecycle/agreement	03 Agreement	true	
+lifecycle/intent	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	04 Fulfillment	true	
+lifecycle/intent	page	lifecycle/receipt	route	/lifecycle/receipt	05 Receipt	true	
+lifecycle/intent	page	lifecycle/offer	route	/lifecycle/offer	Continue to Offer	true	
+lifecycle/offer	page	zero	route	/	HOME	true	
+lifecycle/offer	page	lifecycle	route	/lifecycle	02 / AGREEMENT LIFECYCLE	true	
+lifecycle/offer	page	lifecycle/intent	route	/lifecycle/intent	01 Intent	true	
+lifecycle/offer	page	lifecycle/offer	route	/lifecycle/offer	02 Offer	true	
+lifecycle/offer	page	lifecycle/agreement	route	/lifecycle/agreement	03 Agreement	true	
+lifecycle/offer	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	04 Fulfillment	true	
+lifecycle/offer	page	lifecycle/receipt	route	/lifecycle/receipt	05 Receipt	true	
+lifecycle/offer	page	lifecycle/intent	route	/lifecycle/intent	← Intent	true	
+lifecycle/offer	page	lifecycle/agreement	route	/lifecycle/agreement	Continue to Agreement	true	
+lifecycle/agreement	page	zero	route	/	HOME	true	
+lifecycle/agreement	page	lifecycle	route	/lifecycle	02 / AGREEMENT LIFECYCLE	true	
+lifecycle/agreement	page	lifecycle/intent	route	/lifecycle/intent	01 Intent	true	
+lifecycle/agreement	page	lifecycle/offer	route	/lifecycle/offer	02 Offer	true	
+lifecycle/agreement	page	lifecycle/agreement	route	/lifecycle/agreement	03 Agreement	true	
+lifecycle/agreement	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	04 Fulfillment	true	
+lifecycle/agreement	page	lifecycle/receipt	route	/lifecycle/receipt	05 Receipt	true	
+lifecycle/agreement	page	lifecycle/offer	route	/lifecycle/offer	← Offer	true	
+lifecycle/agreement	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	Continue to Fulfillment	true	
+lifecycle/fulfillment	page	zero	route	/	HOME	true	
+lifecycle/fulfillment	page	lifecycle	route	/lifecycle	02 / AGREEMENT LIFECYCLE	true	
+lifecycle/fulfillment	page	lifecycle/intent	route	/lifecycle/intent	01 Intent	true	
+lifecycle/fulfillment	page	lifecycle/offer	route	/lifecycle/offer	02 Offer	true	
+lifecycle/fulfillment	page	lifecycle/agreement	route	/lifecycle/agreement	03 Agreement	true	
+lifecycle/fulfillment	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	04 Fulfillment	true	
+lifecycle/fulfillment	page	lifecycle/receipt	route	/lifecycle/receipt	05 Receipt	true	
+lifecycle/fulfillment	page	lifecycle/agreement	route	/lifecycle/agreement	← Agreement	true	
+lifecycle/fulfillment	page	lifecycle/receipt	route	/lifecycle/receipt	Continue to Receipt	true	
+lifecycle/receipt	page	zero	route	/	HOME	true	
+lifecycle/receipt	page	lifecycle	route	/lifecycle	02 / AGREEMENT LIFECYCLE	true	
+lifecycle/receipt	page	lifecycle/intent	route	/lifecycle/intent	01 Intent	true	
+lifecycle/receipt	page	lifecycle/offer	route	/lifecycle/offer	02 Offer	true	
+lifecycle/receipt	page	lifecycle/agreement	route	/lifecycle/agreement	03 Agreement	true	
+lifecycle/receipt	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	04 Fulfillment	true	
+lifecycle/receipt	page	lifecycle/receipt	route	/lifecycle/receipt	05 Receipt	true	
+lifecycle/receipt	page	lifecycle/fulfillment	route	/lifecycle/fulfillment	← Fulfillment	true	
+lifecycle/receipt	page	lifecycle	route	/lifecycle	Return to the full trail	true	
+article/why-the-chain-was-retired	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/why-the-chain-was-retired	page	article/one-substrate-many-networks	route	/learnings/one-substrate-many-networks	NEXT NOTE / One substrate, many networks ↗	false	
+article/why-the-chain-was-retired	page	concept/depth	route	/concept/depth	Related mechanism ↗	true	
+article/why-the-chain-was-retired	page	stats	route	/stats	See every measurement ↗	true	
+article/why-the-chain-was-retired	page	reference	route	/reference		true	
+article/one-substrate-many-networks	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/one-substrate-many-networks	page	article/governance-without-a-validator-set	route	/learnings/governance-without-a-validator-set	NEXT NOTE / Governance without a validator set ↗	false	
+article/one-substrate-many-networks	page	concept/purpose	route	/concept/purpose	Related mechanism ↗	true	
+article/one-substrate-many-networks	page	concept/studio	route	/concept/studio	Inspect network evidence ↗	true	
+article/one-substrate-many-networks	page	reference	route	/reference		true	
+article/governance-without-a-validator-set	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/governance-without-a-validator-set	page	article/how-we-got-fast-and-what-we-got-wrong	route	/learnings/how-we-got-fast-and-what-we-got-wrong	NEXT NOTE / How we got fast, and everything we got wrong ↗	false	
+article/governance-without-a-validator-set	page	concept/practice	route	/concept/practice	Related mechanism ↗	true	
+article/governance-without-a-validator-set	page	concept/notes	route	/concept/notes	Inspect activation limits ↗	true	
+article/governance-without-a-validator-set	page	reference	route	/reference		true	
+article/how-we-got-fast-and-what-we-got-wrong	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/how-we-got-fast-and-what-we-got-wrong	page	article/the-grammar-does-almost-no-work	route	/learnings/the-grammar-does-almost-no-work	NEXT NOTE / The grammar does almost no work ↗	false	
+article/how-we-got-fast-and-what-we-got-wrong	page	stats	route	/stats	Related mechanism ↗	true	
+article/how-we-got-fast-and-what-we-got-wrong	page	stats	route	/stats	Watch the fleet right now ↗	true	
+article/how-we-got-fast-and-what-we-got-wrong	page	reference	route	/reference		true	
+article/the-grammar-does-almost-no-work	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/the-grammar-does-almost-no-work	page	article/a-resolver-by-construction	route	/learnings/a-resolver-by-construction	NEXT NOTE / A finance resolver by construction ↗	false	
+article/the-grammar-does-almost-no-work	page	stats	route	/stats	Related mechanism ↗	true	
+article/the-grammar-does-almost-no-work	page	stats	route	/stats	Open the measurements ↗	true	
+article/the-grammar-does-almost-no-work	page	reference	route	/reference		true	
+article/a-resolver-by-construction	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/a-resolver-by-construction	page	article/the-chain-prototype-is-the-chosen-path	route	/learnings/the-chain-prototype-is-the-chosen-path	NEXT NOTE / The chain prototype is the chosen path ↗	false	
+article/a-resolver-by-construction	page	stats/ledger	route	/stats/ledger	Related mechanism ↗	true	
+article/a-resolver-by-construction	page	stats/ledger	route	/stats/ledger	Open /stats/ledger ↗	true	
+article/a-resolver-by-construction	page	reference	route	/reference		true	
+article/the-chain-prototype-is-the-chosen-path	page	learnings	route	/learnings	ALL LEARNINGS	true	
+article/the-chain-prototype-is-the-chosen-path	page	article/why-the-chain-was-retired	route	/learnings/why-the-chain-was-retired	NEXT NOTE / From one chain to one per identity ↗	false	
+article/the-chain-prototype-is-the-chosen-path	page	stats/ledger	route	/stats/ledger	Related mechanism ↗	true	
+article/the-chain-prototype-is-the-chosen-path	page	stats	route	/stats	Open /stats ↗	true	
+article/the-chain-prototype-is-the-chosen-path	page	reference	route	/reference		true	
+concept/purpose	page	concept	route	/concept	OPERATING MODEL	true	
+concept/purpose	page	deploy	route	/deploy	CREATE OR JOIN A NETWORK	true	
+concept/depth	page	concept	route	/concept	OPERATING MODEL	true	
+concept/depth	page	lifecycle	route	/lifecycle	FOLLOW THE FIVE STAGES	true	
+concept/practice	page	concept	route	/concept	OPERATING MODEL	true	
+concept/practice	page	dao	route	/dao	COMPARE GOVERNANCE ROSTERS	true	
+concept/notes	page	concept	route	/concept?view=more	OPERATING MODEL	true	
+concept/notes	page	dao	route	/dao	COMPARE GOVERNANCE ROSTERS	true	
+concept/studio	page	concept	route	/concept?view=more	OPERATING MODEL	true	
+concept/studio	page	deploy	route	/deploy	CREATE OR JOIN A NETWORK	true	
+concept/spec	page	concept	route	/concept?view=more	OPERATING MODEL	true	
+concept/spec	page	download	route	/download	RUN FLUX FROM SOURCE	true	
+reference	page	reference	route	#/	Return to the explanation	true	doc=docs/protocol/agreements.md
+reference	page	docs/protocol/agreements.md	file	docs/protocol/agreements.md	Original Markdown	true	
+reference	page	reference	route	#/reference?doc=docs%2Foperators%2Fverification.md&from=%2F	verification	true	doc=docs/operators/verification.md
+reference	page	reference	route	#/reference?doc=docs%2Fprotocol%2Fauthority.md&from=%2F	authority	true	doc=docs/protocol/authority.md
+zero	page	about	route	/about	Explore the protocol	after-click:More: find your place, the architecture, measured 	
+zero	page	chain	route	/chain	Walk the chain	after-click:More: find your place, the architecture, measured 	
+zero	page	stats	route	/stats	Inspect the evidence	after-click:More: find your place, the architecture, measured 	
+zero	page	resolver	route	/what-is-a-resolver	Go deeper into the resolver model	after-click:More: find your place, the architecture, measured 	
+zero	page	explorer	route	/explore	Open the explorer	after-click:More: find your place, the architecture, measured 	
+zero	page	resolver	route	/what-is-a-resolver	Understand resolvers	after-click:	
+zero	page	resolvers	route	/resolvers	Browse resolvers	after-click:	
+zero	page	download	route	/download	Read the operator path	after-click:	
+zero	page	deploy	route	/deploy	Create or join a network	after-click:	
+zero	page	stats	route	/stats	Review fleet measurements	after-click:	
+zero	page	stats	route	/stats	Read methodology & limits	after-click:	
+references	page	reference	route	/reference?doc=docs%2Fevidence%2Fregistry.md&from=%2Fstart-from-something-real	Read the canonical evidence registry	after-click:Evidence	
+resolver	page	resolver	route	/what-is-a-resolver?step=check&input=7f3a	Check →	after-click:02 Resolve	
+resolver	page	resolver	route	/what-is-a-resolver?step=laws&input=7f3a	Laws →	after-click:03 Check	
+resolver	page	deployment	route	/how-deployment-works	Follow the resolver flow →	after-click:04 Laws	
+lab	page	lifecycle	route	#/lifecycle	Read the agreement trail →	after-click:02 Lifecycle	
+lab	page	concept/purpose	route	#/concept/purpose	Read the network boundary →	after-click:03 Networks	
+about	page	resolver	route	/what-is-a-resolver	What is a resolver?	after-click:See how it works, the promise, what you can resolv	
+about	page	resolutions	route	/resolutions	4 resolutions Build & publish Website, Content, Files and mo	after-click:See how it works, the promise, what you can resolv	
+about	page	resolutions	route	/resolutions	2 resolutions Value & finance Payments, Personal finance	after-click:See how it works, the promise, what you can resolv	
+about	page	resolutions	route	/resolutions	4 resolutions People & organisations Community, Communicatio	after-click:See how it works, the promise, what you can resolv	
+about	page	resolutions	route	/resolutions	5 resolutions Intelligence & data Intelligence, Data, Algori	after-click:See how it works, the promise, what you can resolv	
+about	page	resolutions	route	/resolutions	5 resolutions Infrastructure & operations Network, Encryptio	after-click:See how it works, the promise, what you can resolv	
+about	page	resolutions	route	/resolutions	See every resolution	after-click:See how it works, the promise, what you can resolv	
+resolutions	page	resolutions/payments	route	/resolutions/payments	01 Payments Settle value between partners in FXN, the DEFXN 	after-click:02 Value & finance 02	
+resolutions	page	resolutions/finance	route	/resolutions/finance	02 Personal finance Keep your own books and balances under y	after-click:02 Value & finance 02	
+about	page	reference	route	/reference	READ DEFXN STATUS	after-click:Evidence & verification	
+about	page	concept	route	/concept	EXPLORE THE DEFXN MODEL	after-click:Evidence & verification	
+resolutions	page	resolutions/community	route	/resolutions/community	01 Community Grow a community whose members are partners, no	after-click:03 People & organisations 04	
+resolutions	page	resolutions/communications	route	/resolutions/communications	02 Communications Talk over encrypted peer-to-peer channels 	after-click:03 People & organisations 04	
+resolutions	page	resolutions/collaborations	route	/resolutions/collaborations	03 Collaborations Work together on shared records that every	after-click:03 People & organisations 04	
+resolutions	page	resolutions/governance	route	/resolutions/governance	04 Governance Write your network’s rules and decide on them 	after-click:03 People & organisations 04	
+resolutions	page	resolutions/intelligence	route	/resolutions/intelligence	01 Intelligence Run intelligence next to your data, on the m	after-click:04 Intelligence & data 05	
+resolutions	page	resolutions/data	route	/resolutions/data	02 Data The mesh is the database: query it instead of hostin	after-click:04 Intelligence & data 05	
+resolutions	page	resolutions/algorithms	route	/resolutions/algorithms	03 Algorithms Publish algorithms as resolvers that anyone ca	after-click:04 Intelligence & data 05	
+resolutions	page	resolutions/information	route	/resolutions/information	04 Information Make information findable by name and traceab	after-click:04 Intelligence & data 05	
+resolutions	page	resolutions/rules	route	/resolutions/rules	05 Rules and patterns Encode rules and patterns once; every 	after-click:04 Intelligence & data 05	
+resolutions	page	resolutions/network	route	/resolutions/network	01 Network Create or join a named network that scales itself	after-click:05 Infrastructure & operations 05	
+resolutions	page	resolutions/encryptions	route	/resolutions/encryptions	02 Encryptions Keep the keys yourself; the mesh only carries	after-click:05 Infrastructure & operations 05	
+resolutions	page	resolutions/automation	route	/resolutions/automation	03 Automation Let agreements trigger work across the mesh on	after-click:05 Infrastructure & operations 05	
+resolutions	page	resolutions/productivity	route	/resolutions/productivity	04 Productivity Replace subscriptions with tools that live o	after-click:05 Infrastructure & operations 05	
+resolutions	page	resolutions/logistics	route	/resolutions/logistics	05 Logistics Track what moves, who holds it and what was agr	after-click:05 Infrastructure & operations 05	
+concept	page	concept/notes	route	/concept/notes	When does an approved change become active?	after-click:Inspect evidence & activation	
+concept	page	concept/studio	route	/concept/studio	How do you verify a named network?	after-click:Inspect evidence & activation	
+concept	page	concept/spec	route	/concept/spec	What is actually measured?	after-click:Inspect evidence & activation	
+deploy	page	reference	route	/reference	Read the network guide	after-click:Network scope and source guide	
+dao	page	docs/protocol/governance.md	file	docs/protocol/governance.md	READ THE GOVERNANCE GUIDE	after-click:Evidence & limits	
+lifecycle	page	reference	route	/reference?doc=docs%2Fprotocol%2Fagreements.md&from=%2Flifecycle	Read the agreement guide	after-click:Evidence	
+article/why-the-chain-was-retired	page	reference	route	/reference	BENCH-003: the measured fleet ceiling	after-click:Evidence & editorial review	
+article/one-substrate-many-networks	page	reference	route	/reference	Named-network command and boundary documentation	after-click:Evidence & editorial review	
+article/governance-without-a-validator-set	page	reference	route	/reference	Authority model, thresholds, and current limits	after-click:Evidence & editorial review	
+article/how-we-got-fast-and-what-we-got-wrong	page	reference	route	/reference	BENCH-003: the full investigation log, sections 1 to 15	after-click:Evidence & editorial review	
+article/the-grammar-does-almost-no-work	page	reference	route	/reference	BENCH-003 section 14: the real grammar, measured	after-click:Evidence & editorial review	
+article/the-chain-prototype-is-the-chosen-path	page	reference	route	/reference	The live fleet pulse — see for yourself	after-click:Evidence & editorial review	
+article/a-resolver-by-construction	page	reference	route	/reference	The design document — LEDGERENTRY, J, and the resolver's six	after-click:Evidence & editorial review	
+concept/purpose	page	docs/operators/networks.md	file	docs/operators/networks.md	READ THE NETWORK OPERATOR GUIDE	after-click:Evidence & limits	
+concept/depth	page	docs/protocol/agreements.md	file	docs/protocol/agreements.md	READ THE AGREEMENT GUIDE	after-click:Evidence & limits	
+concept/practice	page	docs/protocol/authority.md	file	docs/protocol/authority.md	READ THE AUTHORITY GUIDE	after-click:Evidence & limits	
+concept/notes	page	docs/protocol/governance.md	file	docs/protocol/governance.md	READ THE GOVERNANCE GUIDE	after-click:Evidence & limits	
+concept/studio	page	docs/evidence/registry.md	file	docs/evidence/registry.md	OPEN THE EVIDENCE REGISTRY	after-click:Evidence & limits	
+concept/spec	page	docs/protocol/benchmarks.md	file	docs/protocol/benchmarks.md	READ THE BENCHMARK STANDARD	after-click:Evidence & limits	

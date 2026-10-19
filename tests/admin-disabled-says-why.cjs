@@ -64,7 +64,10 @@ for (const [what, re] of Object.entries(reasons)) {
   }
 }
 assert(/refuse\(\$\('publish'\), publishing \? PUBLISHING_NOW : info\.reachable \? '' : 'Cannot publish: the miner is not reachable \(' \+ \(info\.detail/.test(admin), 'Publish names the unreachable miner\'s own detail and what to do');
-assert(/refuse\(\$\('publish'\), PUBLISH_NEEDS_HOST\)/.test(admin) && /refuse\(\$\('meshRefresh'\), PUBLISH_NEEDS_HOST\)/.test(admin), 'a copy opened from disk says how to reach a miner on both Publish and Refresh');
+/* Publish stays CLICKABLE while refused (P0-4, docs/ux-audit/cms.md): every refusal of it passes
+   explainPublish, so a click opens the reason and its remedy instead of doing nothing */
+for (const call of admin.matchAll(/refuse\(\$\('publish'\),[^;]*;/g)) assert(/, explainPublish\);$/.test(call[0]), 'Publish is refused without its click-to-explain: ' + call[0]);
+assert(/refuse\(\$\('publish'\), PUBLISH_NEEDS_HOST, explainPublish\)/.test(admin) && /refuse\(\$\('meshRefresh'\), PUBLISH_NEEDS_HOST\)/.test(admin), 'a copy opened from disk says how to reach a miner on both Publish and Refresh');
 /* the cap is read, and the reason a person sees names the real number */
 const states = vm.createContext({});
 vm.runInContext(fs.readFileSync('js/content/states.js', 'utf8') + ';this.S = ArkStates;', states);

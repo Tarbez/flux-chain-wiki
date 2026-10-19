@@ -15,7 +15,12 @@
      - the value written back is the element's TEXT (textContent, never innerText: text-transform
        would save an eyebrow in capitals), with <br> as a line break, and unchanged words keep the
        field's exact spacing (no spurious dirty draft from a click);
-     - Escape posts the original value back; a committed change is one undo entry. */
+     - Escape FINISHES the edit and keeps the words (it used to put them back silently -- typing
+       lost with no message and no undo, docs/ux-audit/cms.md P0-2); a committed change is one
+       undo entry;
+     - Enter finishes a heading or a label (it put a blank line inside the home heading), and
+       starts a new line only in a paragraph whose breaks the page shows; Ctrl/Cmd+Enter always
+       finishes; Shift+Enter breaks a line only where the field stores breaks. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -232,16 +237,20 @@ function setup(route) {
      document's own copy of the field takes the words, so the same element still binds next click */
   assert.equal(t.ctx.ArkManifest.get('home').fields.TITLE.value, 'Resolution, by construction.');
   assert.equal(t.info(h1).field, 'HOME.TITLE', 'the edited heading is still bound to its field');
-  /* Escape: the text goes back and the original value is posted as final */
+  /* Escape: the edit ends and the typed words STAY -- committed as final, one undo entry (the way
+     back is Undo, or the toolbar's "Revert to saved"). It used to restore the old words with no
+     message: the person's typing was simply gone (docs/ux-audit/cms.md P0-2). */
   const again = setup('/');
   const h = again.$('h1'); again.ctx.__el = h; again.ctx.__info = again.info(h);
   again.run('cmsBeginInline(__el, __info, null)');
   h.textContent = 'Something else'; again.run('cmsInlineInput()');
-  h.dispatchEvent(new again.ctx.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  assert.equal(h.textContent, 'Resolution,  not consensus.', 'Escape restores the words as they were rendered');
+  h.dispatchEvent(new again.ctx.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+  assert.equal(h.textContent, 'Something else', 'Escape keeps the typed words on the canvas');
+  assert.equal(again.run('cmsInline'), null, 'Escape ends the edit');
   const last = again.posted.filter((m) => m.type === 'defxn-cms-preview-copy-edit').pop();
-  assert.deepEqual([last.value, last.final, last.history], ['Resolution, not consensus.', true, 'revert']);
-  assert.equal(again.run('cmsLayoutUndo').length, 0, 'a reverted edit leaves nothing to undo');
+  assert.deepEqual([last.value, last.final, last.history], ['Something else', true, ''], 'Escape commits the typed words as the final value');
+  assert.equal(again.run('cmsLayoutUndo').length, 1, 'the kept edit is one undo entry');
+  assert.equal(h.hasAttribute('contenteditable'), false, 'the element is plain page markup again');
   /* a site the editor sent while the words were typed is held, and never applied once anything was
      typed: it carries half-typed words. The final edit says so (stale) and the editor re-sends. */
   const held = setup('/');
@@ -265,6 +274,60 @@ function setup(route) {
   comp.run('cmsBeginInline(__el, __info, null)'); h3.textContent = 'New heading'; comp.run('cmsEndInline(true)');
   const cmd = comp.posted.find((m) => m.via === 'components');
   assert.deepEqual([cmd.action, cmd.anchorId, cmd.key, cmd.propPath, cmd.value], ['set-override', 'home-after', 'i1', 'heading', 'New heading']);
+}
+{
+  /* Enter: what it does is decided by the field and the element, never by a list of pages.
+     key(el, init) dispatches a keydown and returns whether the default (a line break) survived. */
+  const key = (t, el, init) => el.dispatchEvent(new t.ctx.window.KeyboardEvent('keydown', Object.assign({ bubbles: true, cancelable: true }, init)));
+  const begin = (t, el) => { t.ctx.__el = el; t.ctx.__info = t.info(el); t.run('cmsBeginInline(__el, __info, null)'); return t.ctx.__info; };
+  const finals = (t) => t.posted.filter((m) => m.type === 'defxn-cms-preview-copy-edit' && m.final);
+
+  /* a one-line heading: Enter finishes, and no break is inserted */
+  const line = setup('/');
+  const h1 = line.$('h1');
+  assert.equal(begin(line, h1).enterBreaks, false);
+  h1.textContent = 'Resolution, by Enter.'; line.run('cmsInlineInput()');
+  assert.equal(key(line, h1, { key: 'Enter' }), false, 'Enter in a heading inserts no line break');
+  assert.equal(line.run('cmsInline'), null, 'Enter in a heading finishes the edit');
+  assert.equal(finals(line).pop().value, 'Resolution, by Enter.');
+
+  /* a heading whose field stores line breaks (the home heading draws each line as a block):
+     Enter still finishes -- it put a blank line inside the H1 -- and Shift+Enter breaks a line */
+  const tall = setup('/');
+  const title = tall.ctx.ArkManifest.get('home').fields.TITLE;
+  title.kind = 'text'; title.value = 'Resolution,\nnot consensus.';
+  const th = tall.$('h1'); th.innerHTML = 'Resolution,<br>not consensus.';
+  const thInfo = begin(tall, th);
+  assert.deepEqual([thInfo.multiline, thInfo.enterBreaks], [true, false], 'a multi-line heading: breaks are stored, Enter is not one');
+  assert.equal(key(tall, th, { key: 'Enter', shiftKey: true }), true, 'Shift+Enter breaks a line in a field that stores breaks');
+  assert.notEqual(tall.run('cmsInline'), null, 'Shift+Enter keeps editing');
+  assert.equal(key(tall, th, { key: 'Enter' }), false, 'Enter finishes the multi-line heading');
+  assert.equal(tall.run('cmsInline'), null);
+
+  /* a paragraph field whose page collapses breaks (white-space: normal, no break in its value):
+     a break typed there would show as a space, so Enter finishes */
+  const para = setup('/');
+  const p2 = para.$('[data-ark-layout-key="page:/p:2"]');
+  const p2Info = begin(para, p2);
+  assert.deepEqual([p2Info.multiline, p2Info.enterBreaks], [true, false]);
+  assert.equal(key(para, p2, { key: 'Enter' }), false, 'Enter finishes a paragraph whose page shows no breaks');
+  assert.equal(para.run('cmsInline'), null);
+  /* ...and a one-line field never takes a break, not even from Shift+Enter */
+  const eyebrow = setup('/');
+  const ep = eyebrow.$('[data-ark-layout-key="page:/p:4"]');
+  begin(eyebrow, ep);
+  assert.equal(key(eyebrow, ep, { key: 'Enter', shiftKey: true }), false, 'Shift+Enter in a one-line field inserts nothing');
+  assert.equal(eyebrow.run('cmsInline'), null, 'and finishes it');
+
+  /* a paragraph with breaks the page shows: Enter is a new line; Ctrl/Cmd+Enter finishes */
+  const broken = setup('/');
+  broken.ctx.ArkManifest.get('home').fields.SHARED.value = 'Same\nwords';
+  const bp = broken.$('[data-ark-layout-key="page:/p:2"]'); bp.innerHTML = 'Same<br>words';
+  assert.equal(begin(broken, bp).enterBreaks, true, 'a paragraph that already shows a break takes Enter as a line break');
+  assert.equal(key(broken, bp, { key: 'Enter' }), true, 'Enter is a new line there');
+  assert.notEqual(broken.run('cmsInline'), null, 'and the edit goes on');
+  assert.equal(key(broken, bp, { key: 'Enter', ctrlKey: true }), false, 'Ctrl+Enter finishes it');
+  assert.equal(broken.run('cmsInline'), null);
 }
 {
   /* the editor's parse of the same addresses (js/admin/bridge.js cmsCopyAddress) */

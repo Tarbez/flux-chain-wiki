@@ -45,6 +45,11 @@ var ArkVersionsPanel = (function () {
     var list = h('ol', { class: 'versions-list', id: 'versionsList' });
     var more = h('button', { type: 'button', class: 'btn versions-more', id: 'versionsMore', text: 'Show older versions', hidden: true, onclick: function () { load(true); } });
     var note = h('p', { class: 'versions-note', id: 'versionsNote' });
+    /* the remedy beside the refusal: "connect the folder" with no button left the person to find
+       it in the account menu (docs/ux-audit/cms.md P0-3). env.connect is the editor's one connect
+       flow (js/admin/project.js connectProject); the panel reloads once it has a folder. */
+    var connect = h('button', { type: 'button', class: 'btn primary', id: 'versionsConnect', text: 'Connect project folder', hidden: true,
+      onclick: function () { Promise.resolve(env.connect && env.connect()).then(function (ok) { if (ok) load(); }); } });
     var banner = h('div', { class: 'versions-preview', id: 'versionsPreview', role: 'status', hidden: true });
     var label = h('input', { type: 'text', id: 'versionsLabel', placeholder: 'Name this point (optional)', maxlength: '80', spellcheck: 'false' });
     var checkpoint = h('button', { type: 'submit', class: 'btn', id: 'versionsCheckpoint', text: 'Record checkpoint' });
@@ -65,6 +70,7 @@ var ArkVersionsPanel = (function () {
     root.appendChild(h('div', { class: 'versions-tools' }, importButton, importInput));
     root.appendChild(importNote);
     root.appendChild(note);
+    root.appendChild(connect);
     root.appendChild(list);
     root.appendChild(more);
 
@@ -127,6 +133,7 @@ var ArkVersionsPanel = (function () {
       if (loading) return;
       var dir = await env.dir();
       label.disabled = checkpoint.disabled = importButton.disabled = !dir;
+      connect.hidden = !!dir || !env.connect;
       if (!dir) {
         entries = []; next = null; paint();
         note.textContent = 'Connect the project folder to keep version history: versions are written beside the site, in cms-history/, the same way Save writes the site.';
