@@ -397,7 +397,7 @@ ArkManifest.define({
       "label": "Registry page: kicker",
       "kind": "line",
       "section": "Registry page",
-      "value": "Every resolver runs its own chain · built from shared capabilities"
+      "value": "A resolver runs its own chain · built from shared capabilities"
     },
     "REGISTRY.TITLE": {
       "label": "Registry page: heading",

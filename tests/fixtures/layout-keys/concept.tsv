@@ -1,0 +1,41 @@
+# key	tag	text -- layout keys of /concept before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	OverviewThe operating model.Choose what your network shares, how an agreement closes, or who may approve a change. Each question opens its explanation, limits, 
+page:/nav:1	nav	Overview
+page:/nav:1/a:1	a	Overview
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+id:concept-title	h1	The operating model.
+page:/p:1	p	Choose what your network shares, how an agreement closes, or who may approve a change. Each question opens its explanation, limits, and source evidence.
+page:/nav:2	nav	Start with a questionInspect evidence & activation
+page:/nav:2/button:1	button	Start with a question
+page:/nav:2/button:2	button	Inspect evidence & activation
+page:/div:1	div	01What does a Flux network isolate today?Networks / open explanation →02How does one agreement become verifiable?Agreement lifecycle / open explanation →03Who c
+page:/div:1/article:1	article	01What does a Flux network isolate today?Networks / open explanation →
+page:/div:1/article:1/svg:1	svg	
+page:/div:1/article:1/svg:1/path:1	path	
+page:/div:1/article:1/svg:1/path:2	path	
+page:/div:1/article:1/svg:1/path:3	path	
+page:/div:1/article:1/svg:1/path:4	path	
+page:/div:1/article:1/svg:1/path:5	path	
+page:/div:1/article:1/span:1	span	01
+page:/div:1/article:1/a:1	a	What does a Flux network isolate today?
+page:/div:1/article:1/span:2	span	Networks / open explanation →
+page:/div:1/article:2	article	02How does one agreement become verifiable?Agreement lifecycle / open explanation →
+page:/div:1/article:2/svg:1	svg	
+page:/div:1/article:2/svg:1/path:1	path	
+page:/div:1/article:2/svg:1/path:2	path	
+page:/div:1/article:2/svg:1/path:3	path	
+page:/div:1/article:2/svg:1/path:4	path	
+page:/div:1/article:2/span:1	span	02
+page:/div:1/article:2/a:1	a	How does one agreement become verifiable?
+page:/div:1/article:2/span:2	span	Agreement lifecycle / open explanation →
+page:/div:1/article:3	article	03Who can approve this transition?Authority / open explanation →
+page:/div:1/article:3/svg:1	svg	
+page:/div:1/article:3/svg:1/path:1	path	
+page:/div:1/article:3/svg:1/path:2	path	
+page:/div:1/article:3/svg:1/path:3	path	
+page:/div:1/article:3/span:1	span	03
+page:/div:1/article:3/a:1	a	Who can approve this transition?
+page:/div:1/article:3/span:2	span	Authority / open explanation →
+page:/div:2	div	

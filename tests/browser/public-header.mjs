@@ -17,6 +17,14 @@
    itself and moves the lowest-priority links into the MENU instead
    (fitHeaderRow in js/resolvers/header.js).
 
+   Since 2026-10-19 the header is the DEFXN family bar (the product kit's
+   .dx-bar, mounted in home mode by js/resolvers/header.js): brand, product
+   switcher, this site's nav (Resolutions + core links), then Account, Run
+   DEFXN, the network pill and MENU in the bar's actions. The same checks
+   hold for it; on a phone the brand is the kit's (the mark alone, named
+   "DEFXN -- home"), and the bar must stay ONE row (the kit's phone bar would
+   wrap its nav onto a second, pushing the page down).
+
    Per width (360, 390, 430, 1024, 1280, 1440, 1920) and route (home +
    inner pages) it asserts:
    - every visible header control (the identity link, each shown core link,
@@ -65,6 +73,7 @@ export function measureHeader(page) {
     const vw = document.documentElement.clientWidth;
     const header = document.querySelector('#scene .ark-header');
     if (!header) return { problems: ['no .ark-header'], controls: [] };
+    if (!header.classList.contains('dx-bar')) problems.push('the header is not the family bar (.dx-bar)');
     const shown = (el) => {
       if (!el || el.closest('[hidden]')) return false;
       const cs = getComputedStyle(el);
@@ -74,8 +83,8 @@ export function measureHeader(page) {
     };
     const name = (el) => el.getAttribute('aria-label') || el.textContent.trim().replace(/\s+/g, ' ') || el.className;
     /* the row's controls: popovers and the MENU panel are closed while measuring */
-    const candidates = [header.querySelector('.ark-studio-identity'),
-      ...header.querySelectorAll('.header-core-links > a, .header-products-toggle, .header-chain-trigger, .nav-toggle')];
+    const candidates = [header.querySelector('.dx-bar__brand'),
+      ...header.querySelectorAll('.dx-switch__trigger, .header-core-links > a, .header-products-toggle, .header-account-link, .header-run-link, .header-chain-trigger, .nav-toggle')];
     const controls = candidates.filter(shown);
     const rects = controls.map((el) => el.getBoundingClientRect());
 
@@ -113,19 +122,31 @@ export function measureHeader(page) {
     if (rects.length && bandTop >= bandBottom) problems.push('the header controls do not share one row');
     /* the compact layout's breakpoint, the same 1040px css/navigation.css switches at */
     const compact = matchMedia('(max-width:1040px)').matches;
-    const pills = controls.filter((el) => !el.matches('.ark-studio-identity')).map((el) => Math.round(el.getBoundingClientRect().height));
+    const pills = controls.filter((el) => !el.matches('.dx-bar__brand')).map((el) => Math.round(el.getBoundingClientRect().height));
     if (compact && pills.length && Math.max(...pills) - Math.min(...pills) > 1) problems.push(`control heights differ: ${pills.join(', ')}`);
 
-    const wordmark = header.querySelector('.ark-brand-wordmark');
-    if (!shown(wordmark)) problems.push('the wordmark is not shown');
-    else if (wordmark.scrollWidth > wordmark.clientWidth + 1) problems.push(`the wordmark "${wordmark.textContent}" is cut (${wordmark.scrollWidth} > ${wordmark.clientWidth})`);
+    /* the brand: the word in full above the kit's phone width, the named mark on a phone */
+    const phone = matchMedia('(max-width:640px)').matches;
+    const brand = header.querySelector('.dx-bar__brand');
+    const wordmark = header.querySelector('.dx-bar__brand-word');
+    const mark = header.querySelector('.dx-bar__brand .dx-mark');
+    if (!shown(mark)) problems.push('the DEFXN mark is not shown');
+    if (!brand || !/DEFXN/.test(brand.getAttribute('aria-label') || '')) problems.push('the brand link is not named DEFXN');
+    if (!phone && !shown(wordmark)) problems.push('the wordmark is not shown');
+    else if (shown(wordmark) && wordmark.scrollWidth > wordmark.clientWidth + 1) problems.push(`the wordmark "${wordmark.textContent}" is cut (${wordmark.scrollWidth} > ${wordmark.clientWidth})`);
+    if (!controls.some((el) => el.matches('.dx-switch__trigger'))) problems.push('the product switcher is not shown');
+    if (!controls.some((el) => el.matches('.header-account-link'))) problems.push('Account is not shown (it is never collapsed)');
     if (!controls.some((el) => el.matches('.header-chain-trigger')) && !header.querySelector('.header-chain[hidden]')) problems.push('the network pill is not shown');
     if (!controls.some((el) => el.matches('.nav-toggle'))) problems.push('the MENU button is not shown');
+    /* one row: the bar keeps the kit's height (the page below is placed for it) */
+    const barHeight = header.getBoundingClientRect().height - (parseFloat(getComputedStyle(header).paddingTop) || 0);
+    const expected = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dx-bar-h')) || 64;
+    if (Math.abs(barHeight - expected) > 1) problems.push(`the bar is ${Math.round(barHeight)}px tall, not one ${expected}px row`);
 
     /* reachability: a core link the row hides must be in the MENU panel */
     const menu = header.querySelector('#primary-navigation');
     const menuHrefs = new Set([...(menu ? menu.querySelectorAll('a[href]') : [])].map((a) => a.getAttribute('href')));
-    header.querySelectorAll('.header-core-links > a').forEach((a) => {
+    header.querySelectorAll('.header-core-links > a, .header-run-link').forEach((a) => {
       if (!shown(a) && !menuHrefs.has(a.getAttribute('href'))) problems.push(`"${name(a)}" is hidden from the row and missing from the MENU (${a.getAttribute('href')})`);
     });
     const products = header.querySelector('.header-products-toggle');

@@ -1,0 +1,57 @@
+# key	tag	text -- layout keys of /learnings before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	NOTES / 07Notes from the work.Choose a question. Open the core answer, then follow its evidence.How the block chain gave way to the agreement fabric, and then t
+page:/div:1	div	NOTES / 07Notes from the work.Choose a question. Open the core answer, then follow its evidence.How the block chain gave way to the agreement fabric, and then t
+page:/div:1/p:1	p	NOTES / 07
+page:/div:1/h1:1	h1	Notes from the work.
+page:/div:1/p:2	p	Choose a question. Open the core answer, then follow its evidence.
+page:/div:1/ol:1	ol	How the block chain gave way to the agreement fabric, and then to one grammar chain per identity, with the measurements behind the current design.01From one cha
+page:/div:1/ol:1/li:1	li	How the block chain gave way to the agreement fabric, and then to one grammar chain per identity, with the measurements behind the current design.01From one cha
+page:/div:1/ol:1/li:1/p:1	p	How the block chain gave way to the agreement fabric, and then to one grammar chain per identity, with the measurements behind the current design.
+page:/div:1/ol:1/li:1/a:1	a	01From one chain to one per identity7 MIN READ→
+page:/div:1/ol:1/li:1/a:1/span:1	span	01
+page:/div:1/ol:1/li:1/a:1/h2:1	h2	From one chain to one per identity
+page:/div:1/ol:1/li:1/a:1/span:2	span	7 MIN READ
+page:/div:1/ol:1/li:1/a:1/span:3	span	→
+page:/div:1/ol:1/li:2	li	What the network directory isolates today, how the shared substrate differs from a network, and which named examples still need live evidence.02One substrate, m
+page:/div:1/ol:1/li:2/p:1	p	What the network directory isolates today, how the shared substrate differs from a network, and which named examples still need live evidence.
+page:/div:1/ol:1/li:2/a:1	a	02One substrate, many networks6 MIN READ→
+page:/div:1/ol:1/li:2/a:1/span:1	span	02
+page:/div:1/ol:1/li:2/a:1/h2:1	h2	One substrate, many networks
+page:/div:1/ol:1/li:2/a:1/span:2	span	6 MIN READ
+page:/div:1/ol:1/li:2/a:1/span:3	span	→
+page:/div:1/ol:1/li:3	li	The documented distinction between ephemeral authority cells, substrate policy, and a network DAO—with production activation still unverified.03Governance witho
+page:/div:1/ol:1/li:3/p:1	p	The documented distinction between ephemeral authority cells, substrate policy, and a network DAO—with production activation still unverified.
+page:/div:1/ol:1/li:3/a:1	a	03Governance without a standing signer set6 MIN READ→
+page:/div:1/ol:1/li:3/a:1/span:1	span	03
+page:/div:1/ol:1/li:3/a:1/h2:1	h2	Governance without a standing signer set
+page:/div:1/ol:1/li:3/a:1/span:2	span	6 MIN READ
+page:/div:1/ol:1/li:3/a:1/span:3	span	→
+page:/div:1/ol:1/li:4	li	From under 7 transfers a second to about 25,000 across ten machines in one working session: every step, every dead end, and what the final number does and does 
+page:/div:1/ol:1/li:4/p:1	p	From under 7 transfers a second to about 25,000 across ten machines in one working session: every step, every dead end, and what the final number does and does 
+page:/div:1/ol:1/li:4/a:1	a	04How we got fast, and everything we got wrong9 MIN READ→
+page:/div:1/ol:1/li:4/a:1/span:1	span	04
+page:/div:1/ol:1/li:4/a:1/h2:1	h2	How we got fast, and everything we got wrong
+page:/div:1/ol:1/li:4/a:1/span:2	span	9 MIN READ
+page:/div:1/ol:1/li:4/a:1/span:3	span	→
+page:/div:1/ol:1/li:5	li	What a DEFXN transfer looks like on the wire, how a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else.05Th
+page:/div:1/ol:1/li:5/p:1	p	What a DEFXN transfer looks like on the wire, how a parser that only knows the dash can still reject bad input, and why the speed comes from somewhere else.
+page:/div:1/ol:1/li:5/a:1	a	05The grammar does almost no work6 MIN READ→
+page:/div:1/ol:1/li:5/a:1/span:1	span	05
+page:/div:1/ol:1/li:5/a:1/h2:1	h2	The grammar does almost no work
+page:/div:1/ol:1/li:5/a:1/span:2	span	6 MIN READ
+page:/div:1/ol:1/li:5/a:1/span:3	span	→
+page:/div:1/ol:1/li:6	li	The next finance resolver does not try to prevent double-spend — it makes it unrepresentable. Each identity owns an append-only chain of value moves; a second r
+page:/div:1/ol:1/li:6/p:1	p	The next finance resolver does not try to prevent double-spend — it makes it unrepresentable. Each identity owns an append-only chain of value moves; a second r
+page:/div:1/ol:1/li:6/a:1	a	06A finance resolver by construction7 MIN READ→
+page:/div:1/ol:1/li:6/a:1/span:1	span	06
+page:/div:1/ol:1/li:6/a:1/h2:1	h2	A finance resolver by construction
+page:/div:1/ol:1/li:6/a:1/span:2	span	7 MIN READ
+page:/div:1/ol:1/li:6/a:1/span:3	span	→
+page:/div:1/ol:1/li:7	li	Six public nodes ran 3.76 million signed operations in five minutes with zero failures (12,403 a second, a metric family since retired). The older 79,654 ops/s 
+page:/div:1/ol:1/li:7/p:1	p	Six public nodes ran 3.76 million signed operations in five minutes with zero failures (12,403 a second, a metric family since retired). The older 79,654 ops/s 
+page:/div:1/ol:1/li:7/a:1	a	07The chain prototype is the chosen path8 MIN READ→
+page:/div:1/ol:1/li:7/a:1/span:1	span	07
+page:/div:1/ol:1/li:7/a:1/h2:1	h2	The chain prototype is the chosen path
+page:/div:1/ol:1/li:7/a:1/span:2	span	8 MIN READ
+page:/div:1/ol:1/li:7/a:1/span:3	span	→
+page:/div:2	div	

@@ -1,0 +1,86 @@
+# key	tag	text -- layout keys of /deploy before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	OPERATE DEFXN / NAMED NETWORKSChoose a network for miner presence.Named networks partition miner presence only. They do not isolate accounts, identities, DAOs, 
+page:/div:1	div	OPERATE DEFXN / NAMED NETWORKSChoose a network for miner presence.Named networks partition miner presence only. They do not isolate accounts, identities, DAOs, 
+page:/div:1/p:1	p	OPERATE DEFXN / NAMED NETWORKS
+id:deploy-title	h1	Choose a network for miner presence.
+page:/div:1/p:2	p	Named networks partition miner presence only. They do not isolate accounts, identities, DAOs, records, or treasuries, and are not a security boundary.
+page:/div:1/p:3	p	Deploying a resolver is a different action. A named network scopes miner presence; a resolver gets its own chain. Deploy a resolver → Open Deploy↗
+page:/div:1/p:3/a:1	a	Deploy a resolver →
+page:/div:1/p:3/a:2	a	Open Deploy↗
+page:/div:1/p:3/a:2/span:1	span	↗
+page:/div:1/p:4	p	Deploying a site? You will need the local FXN Bundle Deployer. CLI status and public bundle guidance
+page:/div:1/p:4/a:1	a	CLI status and public bundle guidance
+page:/div:1/p:4/a:1/svg:1	svg	
+page:/div:1/p:4/a:1/svg:1/path:1	path	
+page:/div:1/p:4/a:1/svg:1/path:2	path	
+page:/div:1/nav:1	nav	01 / Check discovery02 / Create or select03 / Start the miner04 / Verify health05 / Inspect topology
+page:/div:1/nav:1/button:1	button	01 / Check discovery
+page:/div:1/nav:1/button:2	button	02 / Create or select
+page:/div:1/nav:1/button:3	button	03 / Start the miner
+page:/div:1/nav:1/button:4	button	04 / Verify health
+page:/div:1/nav:1/button:5	button	05 / Inspect topology
+page:/div:1/div:1	div	01Check discoveryConfirm the network CLI can reach its configured peers. This directory is best-effort discovery, not authoritative membership.flux-network netw
+id:deploy-step-01	section	01Check discoveryConfirm the network CLI can reach its configured peers. This directory is best-effort discovery, not authoritative membership.flux-network netw
+page:/div:1/div:1/section:1/span:1	span	01
+page:/div:1/div:1/section:1/div:1	div	Check discoveryConfirm the network CLI can reach its configured peers. This directory is best-effort discovery, not authoritative membership.flux-network networ
+page:/div:1/div:1/section:1/div:1/h2:1	h2	Check discovery
+page:/div:1/div:1/section:1/div:1/p:1	p	Confirm the network CLI can reach its configured peers. This directory is best-effort discovery, not authoritative membership.
+page:/div:1/div:1/section:1/div:1/pre:1/button:1	button	Copy
+page:/div:1/div:1/section:1/div:1/span:1	span	
+page:/div:1/div:1/section:1/div:1/p:2	p	Expected: a "Known networks" list followed by the best-effort discovery warning.
+id:deploy-step-02	section	02Create or selectPass a name as a positional argument. If that ID already exists, the CLI selects the existing network instead of creating another one.flux-net
+page:/div:1/div:1/section:2/span:1	span	02
+page:/div:1/div:1/section:2/div:1	div	Create or selectPass a name as a positional argument. If that ID already exists, the CLI selects the existing network instead of creating another one.flux-netwo
+page:/div:1/div:1/section:2/div:1/h2:1	h2	Create or select
+page:/div:1/div:1/section:2/div:1/p:1	p	Pass a name as a positional argument. If that ID already exists, the CLI selects the existing network instead of creating another one.
+page:/div:1/div:1/section:2/div:1/pre:1/button:1	button	Copy
+page:/div:1/div:1/section:2/div:1/span:1	span	
+page:/div:1/div:1/section:2/div:1/p:2	p	Expected: either Network "<network-id>" created, or a message that the network already exists.
+id:deploy-step-03	section	03Start the minerUse the returned network ID when starting the daemon. FLUX_MINER_NETWORK is the preferred name; ARK_MINER_NETWORK remains a legacy alias.FLUX_M
+page:/div:1/div:1/section:3/span:1	span	03
+page:/div:1/div:1/section:3/div:1	div	Start the minerUse the returned network ID when starting the daemon. FLUX_MINER_NETWORK is the preferred name; ARK_MINER_NETWORK remains a legacy alias.FLUX_MIN
+page:/div:1/div:1/section:3/div:1/h2:1	h2	Start the miner
+page:/div:1/div:1/section:3/div:1/p:1	p	Use the returned network ID when starting the daemon. FLUX_MINER_NETWORK is the preferred name; ARK_MINER_NETWORK remains a legacy alias.
+page:/div:1/div:1/section:3/div:1/pre:1/button:1	button	Copy
+page:/div:1/div:1/section:3/div:1/span:1	span	
+page:/div:1/div:1/section:3/div:1/p:2	p	Expected: the process remains running and exposes its configured status listener.
+id:deploy-step-04	section	04Verify healthQuery the local miner through the network CLI. Change the URL if the status listener uses a different host or port.flux-network health --miner ht
+page:/div:1/div:1/section:4/span:1	span	04
+page:/div:1/div:1/section:4/div:1	div	Verify healthQuery the local miner through the network CLI. Change the URL if the status listener uses a different host or port.flux-network health --miner http
+page:/div:1/div:1/section:4/div:1/h2:1	h2	Verify health
+page:/div:1/div:1/section:4/div:1/p:1	p	Query the local miner through the network CLI. Change the URL if the status listener uses a different host or port.
+page:/div:1/div:1/section:4/div:1/pre:1/button:1	button	Copy
+page:/div:1/div:1/section:4/div:1/span:1	span	
+page:/div:1/div:1/section:4/div:1/p:2	p	Expected: a JSON health response from the running miner.
+id:deploy-step-05	section	05Inspect topologyInspect the selected network while preserving the current boundary: topology and presence do not establish trusted membership or data isolatio
+page:/div:1/div:1/section:5/span:1	span	05
+page:/div:1/div:1/section:5/div:1	div	Inspect topologyInspect the selected network while preserving the current boundary: topology and presence do not establish trusted membership or data isolation.
+page:/div:1/div:1/section:5/div:1/h2:1	h2	Inspect topology
+page:/div:1/div:1/section:5/div:1/p:1	p	Inspect the selected network while preserving the current boundary: topology and presence do not establish trusted membership or data isolation.
+page:/div:1/div:1/section:5/div:1/pre:1/button:1	button	Copy
+page:/div:1/div:1/section:5/div:1/span:1	span	
+page:/div:1/div:1/section:5/div:1/p:2	p	Expected: topology JSON for the requested network ID.
+page:/div:1/p:5	p	Step 1 of 5 / Check discovery
+page:/div:1/div:2	div	Previous stepNext stepReview all steps
+page:/div:1/div:2/button:1	button	Previous step
+page:/div:1/div:2/button:2	button	Next step
+page:/div:1/div:2/button:2/svg:1	svg	
+page:/div:1/div:2/button:2/svg:1/path:1	path	
+page:/div:1/div:2/button:2/svg:1/path:2	path	
+page:/div:1/div:2/button:3	button	Review all steps
+page:/div:1/details:1	details	Network scope and source guidenetwork create / network list are not a security boundary today. Presence is partitioned per network; accounts, identities, and DA
+page:/div:1/details:1/summary:1	summary	Network scope and source guide
+page:/div:1/details:1/p:1	p	network create / network list are not a security boundary today. Presence is partitioned per network; accounts, identities, and DAOs are not yet network-scoped.
+page:/div:1/details:1/a:1	a	Read the network guide
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:1/nav:2	nav	RUN DEFXN FROM SOURCE
+page:/div:1/nav:2/a:1	a	RUN DEFXN FROM SOURCE
+page:/div:1/nav:2/a:1/svg:1	svg	
+page:/div:1/nav:2/a:1/svg:1/path:1	path	
+page:/div:1/nav:2/a:1/svg:1/path:2	path	
+page:/div:1/div:3	div	

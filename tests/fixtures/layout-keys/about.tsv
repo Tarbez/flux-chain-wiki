@@ -1,0 +1,331 @@
+# key	tag	text -- layout keys of /about before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	DEFXN / OVERVIEWOverview.The mesh is the database, the host and the cloud. What you build resolves on the mesh instead of on servers you rent.Explore resolution
+page:/section:1	section	DEFXN / OVERVIEWOverview.The mesh is the database, the host and the cloud. What you build resolves on the mesh instead of on servers you rent.Explore resolution
+page:/section:1/div:1	div	DEFXN / OVERVIEWOverview.The mesh is the database, the host and the cloud. What you build resolves on the mesh instead of on servers you rent.Explore resolution
+page:/section:1/div:1/p:1	p	DEFXN / OVERVIEW
+page:/section:1/div:1/p:1/svg:1	svg	
+page:/section:1/div:1/p:1/svg:1/path:1	path	
+page:/section:1/div:1/p:1/svg:1/path:2	path	
+page:/section:1/div:1/p:1/svg:1/path:3	path	
+page:/section:1/div:1/p:1/svg:1/path:4	path	
+id:about-title	h1	Overview.
+page:/section:1/div:1/p:2	p	The mesh is the database, the host and the cloud. What you build resolves on the mesh instead of on servers you rent.
+page:/section:1/div:1/div:1	div	Explore resolutionsSee how DEFXN works
+page:/section:1/div:1/div:1/a:1	a	Explore resolutions
+page:/section:1/div:1/div:1/a:1/svg:1	svg	
+page:/section:1/div:1/div:1/a:1/svg:1/path:1	path	
+page:/section:1/div:1/div:1/a:1/svg:1/path:2	path	
+page:/section:1/div:1/div:1/a:2	a	See how DEFXN works
+page:/section:1/div:1/div:1/a:2/svg:1	svg	
+page:/section:1/div:1/div:1/a:2/svg:1/path:1	path	
+page:/section:1/div:1/div:1/a:2/svg:1/path:2	path	
+page:/section:1/section:1	section	THREE BOUNDED LAYERSDirectoryFXN chainGovernanceDirectoryFXN chainGovernanceFXN chain: one signed chain per identity.Every identity writes to its own append-onl
+page:/section:1/section:1/div:1	div	THREE BOUNDED LAYERSDirectoryFXN chainGovernance
+page:/section:1/section:1/div:1/p:1	p	THREE BOUNDED LAYERS
+page:/section:1/section:1/div:1/p:1/svg:1	svg	
+page:/section:1/section:1/div:1/p:1/svg:1/path:1	path	
+page:/section:1/section:1/div:1/p:1/svg:1/path:2	path	
+page:/section:1/section:1/div:1/p:1/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1	div	DirectoryFXN chainGovernance
+page:/section:1/section:1/div:1/div:1/button:1	button	Directory
+page:/section:1/section:1/div:1/div:1/button:1/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/button:1/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/button:1/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1/button:1/svg:1/path:4	path	
+page:/section:1/section:1/div:1/div:1/button:2	button	FXN chain
+page:/section:1/section:1/div:1/div:1/button:2/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/button:2/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/button:2/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/button:2/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1/button:3	button	Governance
+page:/section:1/section:1/div:1/div:1/button:3/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/button:3/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/button:3/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/button:3/svg:1/path:3	path	
+page:/section:1/section:1/div:2	div	DirectoryFXN chainGovernance
+page:/section:1/section:1/div:2/svg:1	svg	DirectoryFXN chainGovernance
+page:/section:1/section:1/div:2/svg:1/g:1	g	
+page:/section:1/section:1/div:2/svg:1/g:1/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:1/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:1/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:1	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:2	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:3	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:4	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:5	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:6	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:7	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:8	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:9	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:10	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:11	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:12	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:13	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:14	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:15	circle	
+page:/section:1/section:1/div:2/svg:1/g:1/circle:16	circle	
+page:/section:1/section:1/div:2/svg:1/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2	g	
+page:/section:1/section:1/div:2/svg:1/g:2/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:2/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:1	g	
+page:/section:1/section:1/div:2/svg:1/g:2/g:1/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:1/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:1/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:2/path:4	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:2	g	
+page:/section:1/section:1/div:2/svg:1/g:2/g:2/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:2/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:2/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:2/path:5	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:3	g	
+page:/section:1/section:1/div:2/svg:1/g:2/g:3/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:3/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:3/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:2/path:6	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:4	g	
+page:/section:1/section:1/div:2/svg:1/g:2/g:4/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:4/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:4/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:2/path:7	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:5	g	
+page:/section:1/section:1/div:2/svg:1/g:2/g:5/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:5/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:2/g:5/path:3	path	
+page:/section:1/section:1/div:2/svg:1/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:3	g	
+page:/section:1/section:1/div:2/svg:1/g:3/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:4	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:5	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:6	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:7	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:8	path	
+page:/section:1/section:1/div:2/svg:1/g:3/path:9	path	
+page:/section:1/section:1/div:2/svg:1/g:4	g	DirectoryFXN chainGovernance
+page:/section:1/section:1/div:2/svg:1/g:4/g:1	g	Directory
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/rect:1	rect	
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/g:1	g	
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/g:1/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/g:1/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/g:1/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/g:1/path:4	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:1/text:1	text	Directory
+page:/section:1/section:1/div:2/svg:1/g:4/g:2	g	FXN chain
+page:/section:1/section:1/div:2/svg:1/g:4/g:2/rect:1	rect	
+page:/section:1/section:1/div:2/svg:1/g:4/g:2/g:1	g	
+page:/section:1/section:1/div:2/svg:1/g:4/g:2/g:1/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:2/g:1/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:2/g:1/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:2/text:1	text	FXN chain
+page:/section:1/section:1/div:2/svg:1/g:4/g:3	g	Governance
+page:/section:1/section:1/div:2/svg:1/g:4/g:3/rect:1	rect	
+page:/section:1/section:1/div:2/svg:1/g:4/g:3/g:1	g	
+page:/section:1/section:1/div:2/svg:1/g:4/g:3/g:1/path:1	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:3/g:1/path:2	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:3/g:1/path:3	path	
+page:/section:1/section:1/div:2/svg:1/g:4/g:3/text:1	text	Governance
+page:/section:1/section:1/div:3	div	FXN chain: one signed chain per identity.Every identity writes to its own append-only chain, and every resolver runs its own. A record is admitted if its signat
+page:/section:1/section:1/div:3/strong:1	strong	FXN chain: one signed chain per identity.
+page:/section:1/section:1/div:3/p:1	p	Every identity writes to its own append-only chain, and every resolver runs its own. A record is admitted if its signature verifies, it extends the signer’s hea
+page:/section:2	section	02 / MoreMore.See how it works, the promise, what you can resolve, and who DEFXN is forState it. Resolve it. Check it.01 / ResolveYou state what you need: a sit
+page:/section:2/div:1	div	02 / MoreMore.
+page:/section:2/div:1/p:1	p	02 / More
+page:/section:2/div:1/p:1/svg:1	svg	
+page:/section:2/div:1/p:1/svg:1/path:1	path	
+page:/section:2/div:1/p:1/svg:1/path:2	path	
+page:/section:2/div:1/div:1	div	More.
+page:/section:2/div:1/div:1/h2:1	h2	More.
+page:/section:2/div:2	div	See how it works, the promise, what you can resolve, and who DEFXN is forState it. Resolve it. Check it.01 / ResolveYou state what you need: a site, a payment, 
+page:/section:2/div:2/details:1	details	See how it works, the promise, what you can resolve, and who DEFXN is forState it. Resolve it. Check it.01 / ResolveYou state what you need: a site, a payment, 
+page:/section:2/div:2/details:1/summary:1	summary	See how it works, the promise, what you can resolve, and who DEFXN is for
+page:/section:2/div:2/details:1/div:1	div	State it. Resolve it. Check it.01 / ResolveYou state what you need: a site, a payment, a rule, a file.02 / ResolverA resolver applies its own published grammar 
+page:/section:2/div:2/details:1/div:1/section:1	section	State it. Resolve it. Check it.01 / ResolveYou state what you need: a site, a payment, a rule, a file.02 / ResolverA resolver applies its own published grammar 
+page:/section:2/div:2/details:1/div:1/section:1/h3:1	h3	State it. Resolve it. Check it.
+page:/section:2/div:2/details:1/div:1/section:1/div:1	div	01 / ResolveYou state what you need: a site, a payment, a rule, a file.02 / ResolverA resolver applies its own published grammar and capabilities to your reques
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1	article	01 / ResolveYou state what you need: a site, a payment, a rule, a file.
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:1	p	01 / Resolve
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:2	p	You state what you need: a site, a payment, a rule, a file.
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2	article	02 / ResolverA resolver applies its own published grammar and capabilities to your request and signs the result.
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1	p	02 / Resolver
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1/svg:1/path:4	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:2	p	A resolver applies its own published grammar and capabilities to your request and signs the result.
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3	article	03 / ResolutionThe signed result lands on the mesh, where every partner can find and check it.
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:1	p	03 / Resolution
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:2	p	The signed result lands on the mesh, where every partner can find and check it.
+page:/section:2/div:2/details:1/div:1/section:1/a:1	a	What is a resolver?
+page:/section:2/div:2/details:1/div:1/section:1/a:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:1/a:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:1/a:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:2	section	No database. No hosting. No fees. No cloud.With encrypted peer-to-peer hosting, yearly renewals become permanence.01No databaseRecords live on the mesh and are 
+page:/section:2/div:2/details:1/div:1/section:2/h3:1	h3	No database. No hosting. No fees. No cloud.
+page:/section:2/div:2/details:1/div:1/section:2/p:1	p	With encrypted peer-to-peer hosting, yearly renewals become permanence.
+page:/section:2/div:2/details:1/div:1/section:2/div:1	div	01No databaseRecords live on the mesh and are queried where they are.02No hostingEncrypted peer-to-peer hosting serves what you publish.03No feesNo server bills
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1	article	01No databaseRecords live on the mesh and are queried where they are.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:1	p	01
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/h3:1	h3	No database
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:2	p	Records live on the mesh and are queried where they are.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2	article	02No hostingEncrypted peer-to-peer hosting serves what you publish.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1	p	02
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:4	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:5	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/h3:1	h3	No hosting
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:2	p	Encrypted peer-to-peer hosting serves what you publish.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3	article	03No feesNo server bills or platform cuts between you and your partners.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:1	p	03
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/h3:1	h3	No fees
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:2	p	No server bills or platform cuts between you and your partners.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4	article	04No cloudNo rented region, account or vendor to lock you in.
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:1	p	04
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:1/svg:1/path:4	path	
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/h3:1	h3	No cloud
+page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:2	p	No rented region, account or vendor to lock you in.
+page:/section:2/div:2/details:1/div:1/section:3	section	One mesh. Every part of your work resolved on it.4 resolutionsBuild & publishWebsite, Content, Files and more2 resolutionsValue & financePayments, Personal fina
+page:/section:2/div:2/details:1/div:1/section:3/h3:1	h3	One mesh. Every part of your work resolved on it.
+page:/section:2/div:2/details:1/div:1/section:3/div:1	div	4 resolutionsBuild & publishWebsite, Content, Files and more2 resolutionsValue & financePayments, Personal finance4 resolutionsPeople & organisationsCommunity, 
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1	a	4 resolutionsBuild & publishWebsite, Content, Files and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:1	p	4 resolutions
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/h3:1	h3	Build & publish
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:2	p	Website, Content, Files and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2	a	2 resolutionsValue & financePayments, Personal finance
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:1	p	2 resolutions
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:1/svg:1/path:4	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/h3:1	h3	Value & finance
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:2	p	Payments, Personal finance
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3	a	4 resolutionsPeople & organisationsCommunity, Communications, Collaborations and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/p:1	p	4 resolutions
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/h3:1	h3	People & organisations
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/p:2	p	Community, Communications, Collaborations and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4	a	5 resolutionsIntelligence & dataIntelligence, Data, Algorithms and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/p:1	p	5 resolutions
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/h3:1	h3	Intelligence & data
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/p:2	p	Intelligence, Data, Algorithms and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5	a	5 resolutionsInfrastructure & operationsNetwork, Encryptions, Automation and more
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1	p	5 resolutions
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1/svg:1/path:4	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:1/svg:1/path:5	path	
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/h3:1	h3	Infrastructure & operations
+page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:2	p	Network, Encryptions, Automation and more
+page:/section:2/div:2/details:1/div:1/section:3/a:1	a	See every resolution
+page:/section:2/div:2/details:1/div:1/section:3/a:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:3/a:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:3/a:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:4	section	A network of partners, not a platform.01Self-scaling fractal networkEvery network can hold networks of its own, so the mesh grows by repeating one pattern at ev
+page:/section:2/div:2/details:1/div:1/section:4/h3:1	h3	A network of partners, not a platform.
+page:/section:2/div:2/details:1/div:1/section:4/div:1	div	01Self-scaling fractal networkEvery network can hold networks of its own, so the mesh grows by repeating one pattern at every scale.02Everyone is our business p
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1	article	01Self-scaling fractal networkEvery network can hold networks of its own, so the mesh grows by repeating one pattern at every scale.
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1	p	01
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1/svg:1/path:3	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1/svg:1/path:4	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:1/svg:1/path:5	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/h3:1	h3	Self-scaling fractal network
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:2	p	Every network can hold networks of its own, so the mesh grows by repeating one pattern at every scale.
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2	article	02Everyone is our business partnerBuilders, miners and members take part in the same agreements. Value moves between partners, not through a platform.
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:1	p	02
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:1/svg:1	svg	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:1/svg:1/path:1	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:1/svg:1/path:2	path	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/h3:1	h3	Everyone is our business partner
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:2	p	Builders, miners and members take part in the same agreements. Value moves between partners, not through a platform.
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3	article	03The DEFXN coin: FXNThe unit partners use to settle agreements and reward the miners who keep the mesh running.
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/p:1	p	03
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/p:1/span:1	span	
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/h3:1	h3	The DEFXN coin: FXN
+page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/p:2	p	The unit partners use to settle agreements and reward the miners who keep the mesh running.
+page:/footer:1	footer	CURRENT SOURCE BOUNDARYSee what resolves on the mesh.Core paths exist in source. Production activation and packaged releases remain unverified.Evidence & verifi
+page:/footer:1/p:1	p	CURRENT SOURCE BOUNDARY
+page:/footer:1/p:1/svg:1	svg	
+page:/footer:1/p:1/svg:1/path:1	path	
+page:/footer:1/p:1/svg:1/path:2	path	
+page:/footer:1/h2:1	h2	See what resolves on the mesh.
+page:/footer:1/p:2	p	Core paths exist in source. Production activation and packaged releases remain unverified.
+page:/footer:1/details:1	details	Evidence & verificationWhat the source establishes.The resolver model is implemented in source: launch and upgrade, shared capabilities with test vectors, gramm
+page:/footer:1/details:1/summary:1	summary	Evidence & verification
+page:/footer:1/details:1/div:1	div	What the source establishes.The resolver model is implemented in source: launch and upgrade, shared capabilities with test vectors, grammar checks, and provider
+page:/footer:1/details:1/div:1/section:1	section	What the source establishes.The resolver model is implemented in source: launch and upgrade, shared capabilities with test vectors, grammar checks, and provider
+page:/footer:1/details:1/div:1/section:1/h3:1	h3	What the source establishes.
+page:/footer:1/details:1/div:1/section:1/p:1	p	The resolver model is implemented in source: launch and upgrade, shared capabilities with test vectors, grammar checks, and provider proofs. It runs on the deve
+page:/footer:1/details:1/div:1/section:1/a:1	a	READ DEFXN STATUS
+page:/footer:1/details:1/div:1/section:1/a:1/svg:1	svg	
+page:/footer:1/details:1/div:1/section:1/a:1/svg:1/path:1	path	
+page:/footer:1/details:1/div:1/section:1/a:1/svg:1/path:2	path	
+page:/footer:1/details:1/div:1/section:2	section	How to verify it.Run DEFXN from a trusted source revision, record the miner status response, then inspect the signed records on each holder’s chain. A successfu
+page:/footer:1/details:1/div:1/section:2/h3:1	h3	How to verify it.
+page:/footer:1/details:1/div:1/section:2/p:1	p	Run DEFXN from a trusted source revision, record the miner status response, then inspect the signed records on each holder’s chain. A successful local run prove
+page:/footer:1/details:1/div:1/section:2/a:1	a	EXPLORE THE DEFXN MODEL
+page:/footer:1/details:1/div:1/section:2/a:1/svg:1	svg	
+page:/footer:1/details:1/div:1/section:2/a:1/svg:1/path:1	path	
+page:/footer:1/details:1/div:1/section:2/a:1/svg:1/path:2	path	
+page:/footer:1/nav:1	nav	HomeResolutionsExplorerRun from source
+page:/footer:1/nav:1/a:1	a	Home
+page:/footer:1/nav:1/a:1/svg:1	svg	
+page:/footer:1/nav:1/a:1/svg:1/path:1	path	
+page:/footer:1/nav:1/a:1/svg:1/path:2	path	
+page:/footer:1/nav:1/a:2	a	Resolutions
+page:/footer:1/nav:1/a:2/svg:1	svg	
+page:/footer:1/nav:1/a:2/svg:1/path:1	path	
+page:/footer:1/nav:1/a:2/svg:1/path:2	path	
+page:/footer:1/nav:1/a:2/svg:1/path:3	path	
+page:/footer:1/nav:1/a:3	a	Explorer
+page:/footer:1/nav:1/a:3/svg:1	svg	
+page:/footer:1/nav:1/a:3/svg:1/path:1	path	
+page:/footer:1/nav:1/a:3/svg:1/path:2	path	
+page:/footer:1/nav:1/a:3/svg:1/path:3	path	
+page:/footer:1/nav:1/a:3/svg:1/path:4	path	
+page:/footer:1/nav:1/a:3/svg:1/path:5	path	
+page:/footer:1/nav:1/a:4	a	Run from source
+page:/footer:1/nav:1/a:4/svg:1	svg	
+page:/footer:1/nav:1/a:4/svg:1/path:1	path	
+page:/footer:1/nav:1/a:4/svg:1/path:2	path	
+page:/footer:1/nav:1/a:4/svg:1/path:3	path	
+page:/div:1	div	

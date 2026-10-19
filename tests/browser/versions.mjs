@@ -192,7 +192,7 @@ try {
   await step('Export version 2 downloads one FLX document that proves itself', async () => {
     /* Export is a developer's: in the row's Developer details (docs/ux-audit/cms.md P1-15).
        Open it exactly once -- two agents each added this click, and the second closed it again. */
-    await row(2).locator('.ark-disclosure-trigger').click();
+    await row(2).locator('.dev-details > .ark-disclosure__trigger').last().click();
     const [download] = await Promise.all([page.waitForEvent('download'), row(2).locator('button[data-action="export"]').click()]);
     check(/^defxn-version-2-[0-9a-f]{12}\.flx$/.test(download.suggestedFilename()), 'export name: ' + download.suggestedFilename());
     const file = path.join(SHOTS, download.suggestedFilename());

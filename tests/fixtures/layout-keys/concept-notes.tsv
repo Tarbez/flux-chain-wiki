@@ -1,0 +1,68 @@
+# key	tag	text -- layout keys of /concept/notes before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Operating modelActivationWhen does an approved change become active?The core ideaHow it worksEvidence & limitsApproval records consent under a policy. Activatio
+page:/nav:1	nav	Operating modelActivation
+page:/nav:1/a:1	a	Operating model
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Activation
+id:notes-title	h1	When does an approved change become active?
+page:/nav:2	nav	The core ideaHow it worksEvidence & limits
+page:/nav:2/button:1	button	The core idea
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	How it works
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence & limits
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	Approval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed.
+page:/div:1/div:1	div	Approval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed.
+page:/div:1/div:1/div:1	div	Approval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed.
+page:/div:1/div:1/div:1/p:1	p	Approval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed.
+page:/div:1/div:1/aside:1	aside	Status / UnverifiedIndependent production activation is not established by the evidence registered in this repository.
+page:/div:1/div:1/aside:1/strong:1	strong	Status / Unverified
+page:/div:1/div:1/aside:1/p:1	p	Independent production activation is not established by the evidence registered in this repository.
+page:/div:1/figure:1	figure	Illustration / Activation relationshipsAPPROVALGATESSEPARATECONSENT / READINESS / ACTIVATIONApproval / signed consentReadiness + safety gatesActivation / separa
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / Activation relationships
+page:/div:1/figure:1/svg:1	svg	APPROVALGATESSEPARATECONSENT / READINESS / ACTIVATION
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/circle:2	circle	
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/path:9	path	
+page:/div:1/figure:1/svg:1/path:10	path	
+page:/div:1/figure:1/svg:1/text:1	text	APPROVAL
+page:/div:1/figure:1/svg:1/text:2	text	GATES
+page:/div:1/figure:1/svg:1/text:3	text	SEPARATE
+page:/div:1/figure:1/svg:1/text:4	text	CONSENT / READINESS / ACTIVATION
+page:/div:1/figure:1/svg:1/path:11	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/button:1	button	Approval / signed consent
+page:/div:1/figure:1/button:2	button	Readiness + safety gates
+page:/div:1/figure:1/button:3	button	Activation / separate evidence
+page:/nav:3	nav	COMPARE GOVERNANCE ROSTERS
+page:/nav:3/a:1	a	COMPARE GOVERNANCE ROSTERS
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

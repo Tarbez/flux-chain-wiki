@@ -1,0 +1,159 @@
+# key	tag	text -- layout keys of /learnings/a-resolver-by-construction before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	ALL NOTESDESIGN / 006 / 7 MIN READCOREA finance resolver by constructionTHE COREThe finance resolver makes double-spend self-incriminating: each identity owns a
+page:/header:1	header	ALL NOTESDESIGN / 006 / 7 MIN READCOREA finance resolver by constructionTHE COREThe finance resolver makes double-spend self-incriminating: each identity owns a
+page:/header:1/div:1	div	ALL NOTESDESIGN / 006 / 7 MIN READCORE
+page:/header:1/div:1/a:1	a	ALL NOTES
+page:/header:1/div:1/a:1/svg:1	svg	
+page:/header:1/div:1/a:1/svg:1/path:1	path	
+page:/header:1/div:1/a:1/svg:1/path:2	path	
+page:/header:1/div:1/span:1	span	DESIGN / 006 / 7 MIN READ
+page:/header:1/div:1/button:1	button	CORE
+page:/header:1/div:1/button:1/svg:1	svg	
+page:/header:1/div:1/button:1/svg:1/path:1	path	
+page:/header:1/div:1/button:1/svg:1/path:2	path	
+page:/header:1/h1:1	h1	A finance resolver by construction
+page:/header:1/div:2	div	THE COREThe finance resolver makes double-spend self-incriminating: each identity owns an append-only chain and a second record at the same position is signed e
+page:/header:1/div:2/span:1	span	THE CORE
+page:/header:1/div:2/p:1	p	The finance resolver makes double-spend self-incriminating: each identity owns an append-only chain and a second record at the same position is signed equivocat
+page:/header:1/div:2/p:2	p	Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolv
+page:/div:1	div	QUESTIONS / 110001What is wrong with 'prevent double-spend'?02What is a chain here, really?03What is the one new letter?04What are the six resolver steps?05What
+page:/div:1/nav:1	nav	QUESTIONS / 110001What is wrong with 'prevent double-spend'?02What is a chain here, really?03What is the one new letter?04What are the six resolver steps?05What
+page:/div:1/nav:1/p:1	p	QUESTIONS / 11
+page:/div:1/nav:1/button:1	button	00
+page:/div:1/nav:1/button:2	button	01What is wrong with 'prevent double-spend'?
+page:/div:1/nav:1/button:2/span:1	span	01
+page:/div:1/nav:1/button:2/span:2	span	What is wrong with 'prevent double-spend'?
+page:/div:1/nav:1/button:3	button	02What is a chain here, really?
+page:/div:1/nav:1/button:3/span:1	span	02
+page:/div:1/nav:1/button:3/span:2	span	What is a chain here, really?
+page:/div:1/nav:1/button:4	button	03What is the one new letter?
+page:/div:1/nav:1/button:4/span:1	span	03
+page:/div:1/nav:1/button:4/span:2	span	What is the one new letter?
+page:/div:1/nav:1/button:5	button	04What are the six resolver steps?
+page:/div:1/nav:1/button:5/span:1	span	04
+page:/div:1/nav:1/button:5/span:2	span	What are the six resolver steps?
+page:/div:1/nav:1/button:6	button	05What makes a record durable?
+page:/div:1/nav:1/button:6/span:1	span	05
+page:/div:1/nav:1/button:6/span:2	span	What makes a record durable?
+page:/div:1/nav:1/button:7	button	06How does equivocation become fraud?
+page:/div:1/nav:1/button:7/span:1	span	06
+page:/div:1/nav:1/button:7/span:2	span	How does equivocation become fraud?
+page:/div:1/nav:1/button:8	button	07What is the transport?
+page:/div:1/nav:1/button:8/span:1	span	07
+page:/div:1/nav:1/button:8/span:2	span	What is the transport?
+page:/div:1/nav:1/button:9	button	08What stops MEV?
+page:/div:1/nav:1/button:9/span:1	span	08
+page:/div:1/nav:1/button:9/span:2	span	What stops MEV?
+page:/div:1/nav:1/button:10	button	09What does this not solve?
+page:/div:1/nav:1/button:10/span:1	span	09
+page:/div:1/nav:1/button:10/span:2	span	What does this not solve?
+page:/div:1/nav:1/button:11	button	10How did measurement move?
+page:/div:1/nav:1/button:11/span:1	span	10
+page:/div:1/nav:1/button:11/span:2	span	How did measurement move?
+page:/div:1/nav:1/button:12	button	11What was measured?
+page:/div:1/nav:1/button:12/span:1	span	11
+page:/div:1/nav:1/button:12/span:2	span	What was measured?
+page:/div:1/div:1	div	Preventing is the wrong verbEvery chain built so far spends most of its design budget on preventing two users from spending the same input at the same time. Sta
+id:a-resolver-by-construction-section-0	section	Preventing is the wrong verbEvery chain built so far spends most of its design budget on preventing two users from spending the same input at the same time. Sta
+page:/div:1/div:1/section:1/span:1	span	
+page:/div:1/div:1/section:1/h2:1	h2	Preventing is the wrong verb
+page:/div:1/div:1/section:1/p:1	p	Every chain built so far spends most of its design budget on preventing two users from spending the same input at the same time. Standing approver sets, mempool
+page:/div:1/div:1/section:1/p:2	p	A simpler question: what if there is no race? What if the ledger is shaped so a double-spend attempt cannot even be rendered as a well-formed record?
+id:a-resolver-by-construction-section-1	section	A chain per identityGive every identity its own append-only chain. A spend becomes one entry on your own chain, signed by your own key, at a position your own p
+page:/div:1/div:1/section:2/span:1	span	
+page:/div:1/div:1/section:2/h2:1	h2	A chain per identity
+page:/div:1/div:1/section:2/p:1	p	Give every identity its own append-only chain. A spend becomes one entry on your own chain, signed by your own key, at a position your own previous entry determ
+page:/div:1/div:1/section:2/p:2	p	Only your key may sign at position n. The entry at n contains the hash of n-1. So position n can hold exactly one record — any other record claiming the same po
+id:a-resolver-by-construction-section-2	section	One new letterThe registered grammar already has fourteen core letters and the claim profile's seven more. There is exactly one free top-level letter: J. We reg
+page:/div:1/div:1/section:3/span:1	span	
+page:/div:1/div:1/section:3/h2:1	h2	One new letter
+page:/div:1/div:1/section:3/p:1	p	The registered grammar already has fourteen core letters and the claim profile's seven more. There is exactly one free top-level letter: J. We registered a new 
+page:/div:1/div:1/section:3/p:2	p	Everything else reuses what already exists. A spend references a CONSUMEDMARKER, a receive references an AGREEMENT, an issue references a VALUEOBJECT with I0, a
+id:a-resolver-by-construction-section-3	section	The resolver, six steps, one orderedFor each incoming LEDGERENTRY: run grammar admission (dumb split on dashes, each letter's resolver runs when it is reached).
+page:/div:1/div:1/section:4/span:1	span	
+page:/div:1/div:1/section:4/h2:1	h2	The resolver, six steps, one ordered
+page:/div:1/div:1/section:4/p:1	p	For each incoming LEDGERENTRY: run grammar admission (dumb split on dashes, each letter's resolver runs when it is reached). Verify the signature under G. Read 
+page:/div:1/div:1/section:4/p:2	p	The only ordered step is the last one: the atomic put_if_absent on (G, pos), per holder, not globally. If the required peer acks do not come back, the admit ret
+id:a-resolver-by-construction-section-4	section	Durability is replication, not diskAn entry is durable when K of N peers hold its content-addressed CID. The chain head is gossiped so peers always know what to
+page:/div:1/div:1/section:5/span:1	span	
+page:/div:1/div:1/section:5/h2:1	h2	Durability is replication, not disk
+page:/div:1/div:1/section:5/p:1	p	An entry is durable when K of N peers hold its content-addressed CID. The chain head is gossiped so peers always know what to pull. A node that cold-starts can 
+page:/div:1/div:1/section:5/p:2	p	Replay has two modes. Fast replay verifies each chain's head signature and uses the hash chain to establish every earlier record — because once G is pinned, the
+id:a-resolver-by-construction-section-5	section	Equivocation is caught by the holder's own keyA holder who signs two different entries at the same chain position has produced evidence under their own key. rec
+page:/div:1/div:1/section:6/span:1	span	
+page:/div:1/div:1/section:6/h2:1	h2	Equivocation is caught by the holder's own key
+page:/div:1/div:1/section:6/p:1	p	A holder who signs two different entries at the same chain position has produced evidence under their own key. receive_fork_evidence(a, b) checks that the pair 
+id:a-resolver-by-construction-section-6	section	Transport, honestlyThe resolver retains line-framed TCP ingress for compatibility and now has a binary libp2p segment path for replication. Traffic v2 signs one
+page:/div:1/div:1/section:7/span:1	span	
+page:/div:1/div:1/section:7/h2:1	h2	Transport, honestly
+page:/div:1/div:1/section:7/p:1	p	The resolver retains line-framed TCP ingress for compatibility and now has a binary libp2p segment path for replication. Traffic v2 signs one raw segment envelo
+id:a-resolver-by-construction-section-7	section	Equivocation is fraud by their own keyA holder who signs two different entries claiming the same position has produced evidence — two signed-by-them records wit
+page:/div:1/div:1/section:8/span:1	span	
+page:/div:1/div:1/section:8/h2:1	h2	Equivocation is fraud by their own key
+page:/div:1/div:1/section:8/p:1	p	A holder who signs two different entries claiming the same position has produced evidence — two signed-by-them records with the same prev CID, the same position
+id:a-resolver-by-construction-section-8	section	MEV disappears structurallyMEV needs three things: a public pending pool, a party that can reorder it before the result is signed, and extractable value from th
+page:/div:1/div:1/section:9/span:1	span	
+page:/div:1/div:1/section:9/h2:1	h2	MEV disappears structurally
+page:/div:1/div:1/section:9/p:1	p	MEV needs three things: a public pending pool, a party that can reorder it before the result is signed, and extractable value from the reorder. The chain-local 
+id:a-resolver-by-construction-section-9	section	What this does not solveIssuance policy, meaning who may originate value, is a monetary decision — one key, a roster, or a registered authority. Unchanged. Coun
+page:/div:1/div:1/section:10/span:1	span	
+page:/div:1/div:1/section:10/h2:1	h2	What this does not solve
+page:/div:1/div:1/section:10/p:1	p	Issuance policy, meaning who may originate value, is a monetary decision — one key, a roster, or a registered authority. Unchanged. Counterparty discovery, mean
+id:a-resolver-by-construction-section-10	section	MeasuredThe current matched release run used 20,000 independently signed holder operations. Full per-operation admission reached 51,065 ops/s; certified applica
+page:/div:1/div:1/section:11/span:1	span	
+page:/div:1/div:1/section:11/h2:1	h2	Measured
+page:/div:1/div:1/section:11/p:1	p	The current matched release run used 20,000 independently signed holder operations. Full per-operation admission reached 51,065 ops/s; certified application ver
+page:/div:1/div:1/section:11/p:2	p	A separate two-peer release test transported and reconstructed one 1,024-operation compact binary segment at 812,268 effective ops/s. Real-shaped 488-byte opera
+page:/div:1/div:1/section:11/p:3	p	The attack suite still refuses replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev forks, tampered signatures and equivocation. Se
+page:/div:1/div:1/section:11/div:1	div	The current starting valuesChoiceValueWhat it meansParticle budget6,000–24,000The number of sampled points, selected by screen size and hardware signal.Ribbons3
+page:/div:1/div:1/section:11/div:1/table:1	table	The current starting valuesChoiceValueWhat it meansParticle budget6,000–24,000The number of sampled points, selected by screen size and hardware signal.Ribbons3
+page:/div:1/div:1/section:11/div:1/table:1/caption:1	caption	The current starting values
+page:/div:1/div:1/section:11/div:1/table:1/thead:1	thead	ChoiceValueWhat it means
+page:/div:1/div:1/section:11/div:1/table:1/thead:1/tr:1	tr	ChoiceValueWhat it means
+page:/div:1/div:1/section:11/div:1/table:1/thead:1/tr:1/th:1	th	Choice
+page:/div:1/div:1/section:11/div:1/table:1/thead:1/tr:1/th:2	th	Value
+page:/div:1/div:1/section:11/div:1/table:1/thead:1/tr:1/th:3	th	What it means
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1	tbody	Particle budget6,000–24,000The number of sampled points, selected by screen size and hardware signal.Ribbons3 / 72 filamentsThree bands, each built from 24 cont
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:1	tr	Particle budget6,000–24,000The number of sampled points, selected by screen size and hardware signal.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:1	td	Particle budget
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:2	td	6,000–24,000
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:3	td	The number of sampled points, selected by screen size and hardware signal.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:2	tr	Ribbons3 / 72 filamentsThree bands, each built from 24 continuous paths.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:1	td	Ribbons
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:2	td	3 / 72 filaments
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:3	td	Three bands, each built from 24 continuous paths.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:3	tr	Dissolution0% → 50%Whole at home; partly dispersed in the experiment.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:1	td	Dissolution
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:2	td	0% → 50%
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:3	td	Whole at home; partly dispersed in the experiment.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:4	tr	Mesh transition1.8 secondsTime to travel to the new target shape.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:1	td	Mesh transition
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:2	td	1.8 seconds
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:3	td	Time to travel to the new target shape.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:5	tr	Turn / tilt±180° / ±90°Viewing angle around the form.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:5/td:1	td	Turn / tilt
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:5/td:2	td	±180° / ±90°
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:5/td:3	td	Viewing angle around the form.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:6	tr	Title previewUp to 72 charactersThe text used to generate the point addresses.
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:6/td:1	td	Title preview
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:6/td:2	td	Up to 72 characters
+page:/div:1/div:1/section:11/div:1/table:1/tbody:1/tr:6/td:3	td	The text used to generate the point addresses.
+page:/div:1/div:1/div:1	div	← THE CORENEXT QUESTION →
+page:/div:1/div:1/div:1/button:1	button	← THE CORE
+page:/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/button:2	button	NEXT QUESTION →
+page:/div:1/div:1/a:1	a	NEXT NOTE / The chain prototype is the chosen path →
+page:/div:1/nav:2	nav	Related mechanism →Open /stats/ledger →
+page:/div:1/nav:2/a:1	a	Related mechanism →
+page:/div:1/nav:2/a:2	a	Open /stats/ledger →
+page:/div:1/details:1	details	Evidence & editorial reviewEditorial review: 2026-10-07. This is not live capability verification.The design document — LEDGERENTRY, J, and the resolver's six s
+page:/div:1/details:1/summary:1	summary	Evidence & editorial review
+page:/div:1/details:1/p:1	p	Editorial review: 2026-10-07. This is not live capability verification.
+page:/div:1/details:1/a:1	a	The design document — LEDGERENTRY, J, and the resolver's six steps
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:2	div	

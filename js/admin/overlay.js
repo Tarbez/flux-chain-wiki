@@ -21,11 +21,13 @@
    toolbar popover its own, the sheet its own capture-phase Esc that had to know about all of the
    others, and Versions docked beside the sheet with neither knowing. Four close buttons: an svg
    in the sheet, .tb-pop-x, and a text x twice.
-   The shape mirrors Ark UI's popover / dismissable layer (design/ark-primitives/src/dialog.js:
-   data-part popover / popover-close, Esc and outside-press dismissal, anchor aria-expanded), so a
-   later wave swaps these internals for createArkPopover once ArkKit carries the runtime it needs
-   (createArkUI) -- js/ark/vendor/ark-kit.js exports the primitive factories but no runtime to
-   run them on, which is why this file exists instead of a call to ArkKit.createArkPopover.
+   Since 2026-10-19 (W2-LIBRARY) each POPOVER is run by Ark's own popover primitive,
+   ArkKit.createArkPopover on createArkDomHost(document) -- see arkPopover() below. It was blocked
+   until Ark's light-DOM host gained non-modal focus scopes and dismissable layers (ark-ui 0.2.2):
+   createArkUI() binds only elements it rendered from a Flux pattern, and the host refused them.
+   What stays here is the editor's POLICY, which no single Ark layer can hold: one per level, Esc
+   closes the topmost only, a press outside or on the canvas (another document) closes popovers.
+   Sheets (level 'sheet') are docked panels, not popovers, and keep their own markup.
    Must not: draw any overlay's content, position one (each surface places its own), or know a
    feature -- callers pass the element and what closing it means.
    ===================================================================== */
@@ -34,8 +36,60 @@
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var h = A.h, ic = A.ic;
 
+  /* ---- THE stacking order ------------------------------------------------------------------
+     Every layer that floats over the workspace, lowest first, published once as CSS custom
+     properties on the root element; css/admin.css and css/studio-embed.css read them
+     (z-index: var(--z-sheet)) and carry no z-index number of their own for these layers. Two
+     stacking contexts: inside the fixed workspace (#studioRoot, itself one layer at body level)
+     and at body level, where the header, its menu, Version history and the notices are.
+     Why here (docs/ux-audit/plan.md Wave 3, the W1 note): on a phone the Page settings sheet
+     (z 30, css/studio-embed.css) opened UNDER the Site style dock (z 44, the same file, another
+     rule) -- each surface chose its own number, and no file saw the order. The rule the numbers
+     encode: what was asked for later is on top. The dock is a view; a docked sheet is asked for
+     over it; the rail drawer and its scrim are asked for over both; a popover over whatever
+     opened it. (regression: tests/cms-overlay-z-ladder.cjs) */
+  var LAYERS = [
+    /* inside #studioRoot */
+    ['--z-theme-dock', 40],      /* Site style covering the canvas on a phone (css/studio-embed.css .theme-dock) */
+    ['--z-sheet', 44],           /* the docked sheet: Page settings, Publishing status (.sheet) */
+    ['--z-rail-scrim', 45],      /* the drawer's scrim (.rail-scrim) */
+    ['--z-rail-drawer', 46],     /* the rail as a drawer on a phone (.left) */
+    ['--z-popover', 48],         /* a header popover, the toolbar's section popover (.pop, .tb-pop) */
+    /* at body level */
+    ['--z-workspace', 50],       /* #studioRoot itself */
+    ['--z-notice-banner', 55],   /* a floating notice banner (.notice-floating) */
+    ['--z-status', 56],          /* a phone's bottom status strip (#appBar .status) */
+    ['--z-versions', 60],        /* Version history, docked beside the workspace (.versions-panel) */
+    ['--z-notice-toast', 60],    /* the toasts (.notice-toasts) */
+    ['--z-header', 65],          /* the app bar: its menus drop over everything docked (#appBar) */
+    ['--z-menu', 70]             /* the More menu (.account-menu) */
+  ];
+  LAYERS.forEach(function (layer) { document.documentElement.style.setProperty(layer[0], String(layer[1])); });
+
   var stack = [];   /* bottom -> top: { el, anchor, level, onClose, outside, canvas } */
   function indexOf(el) { for (var i = 0; i < stack.length; i++) if (stack[i].el === el) return i; return -1; }
+
+  /* Each popover-level element is run by Ark's popover primitive (ArkKit.createArkPopover on the
+     light-DOM host, js/ark/vendor/ark-kit.js), which owns its ARIA contract: the content's part,
+     aria-modal, data-state and presence (hidden + aria-hidden while closed); the anchor's
+     aria-haspopup, aria-controls and aria-expanded. CONTROLLED: Ark never opens or closes one by
+     itself (its own Esc and outside-press dismissal are off, and a press on the anchor only
+     reports) -- this stack decides, because the editor's policy spans levels and documents (one
+     per level, Esc closes the topmost only, a press on the canvas -- another document, which no
+     Ark layer can see -- closes popovers). Each element gets its own host, which holds no
+     document listener while closed, so a header popover removed on close takes its host with it.
+     Without ArkKit (a test that loads only this file) the stack writes aria-expanded itself. */
+  var arkPopovers = new WeakMap();   /* el -> { anchor, api } */
+  function arkPopover(el, anchor) {
+    var kit = window.ArkKit, known = arkPopovers.get(el);
+    if (known && known.anchor === anchor) return known.api;
+    if (!kit || typeof kit.createArkPopover !== 'function' || typeof kit.createArkDomHost !== 'function') return null;
+    var host = kit.createArkDomHost(document);
+    var api = kit.createArkPopover(host, { contentRef: host.bind(el, 'ov'), triggerRef: anchor ? host.bind(anchor, 'ov') : undefined,
+      controlled: true, keepMounted: true, closeOnOutsidePress: false, escapeKey: false, initialFocus: false, finalFocus: false });
+    arkPopovers.set(el, { anchor: anchor, api: api });
+    return api;
+  }
 
   function open(el, opts) {
     opts = opts || {};
@@ -50,13 +104,16 @@
     stack.push(entry);   /* the most recently opened is on top */
     el.setAttribute('data-overlay', level);
     if (!el.hasAttribute('data-part')) el.setAttribute('data-part', level === 'sheet' ? 'sheet' : 'popover');
-    if (entry.anchor) entry.anchor.setAttribute('aria-expanded', 'true');
+    entry.ark = level === 'popover' ? arkPopover(el, entry.anchor) : null;
+    if (entry.ark) entry.ark.open();
+    else if (entry.anchor) entry.anchor.setAttribute('aria-expanded', 'true');
     return entry;
   }
   function forget(el) {
     var i = indexOf(el); if (i < 0) return null;
     var entry = stack.splice(i, 1)[0];
-    if (entry.anchor && entry.anchor.isConnected) entry.anchor.setAttribute('aria-expanded', 'false');
+    if (entry.ark) entry.ark.close();
+    else if (entry.anchor && entry.anchor.isConnected) entry.anchor.setAttribute('aria-expanded', 'false');
     return entry;
   }
   function close(el, reason) {
@@ -110,5 +167,6 @@
     return b;
   }
 
-  A.provide({ overlay: { open: open, close: close, forget: forget, closeLevel: closeLevel, closeCanvas: closeCanvas, isOpen: isOpen, closeButton: closeButton } });
+  A.provide({ overlay: { open: open, close: close, forget: forget, closeLevel: closeLevel, closeCanvas: closeCanvas, isOpen: isOpen, closeButton: closeButton,
+      layers: LAYERS.map(function (layer) { return { token: layer[0], z: layer[1] }; }) } });
 })();

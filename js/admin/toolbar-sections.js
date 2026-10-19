@@ -36,7 +36,8 @@
       postCmsElementMotionPreview = A.postCmsElementMotionPreview;
   /* defined by files loaded after this one: resolved when called */
   var renderSelToolbar = A.later('renderSelToolbar'), toolbarSection = A.later('toolbarSection'),
-      cmsOpenMasterInLibrary = A.later('cmsOpenMasterInLibrary');
+      cmsOpenMasterInLibrary = A.later('cmsOpenMasterInLibrary'), cmsBlockFields = A.later('cmsBlockFields'),
+      cmsFieldsFor = A.later('cmsFieldsFor'), cmsBlockRefusals = A.later('cmsBlockRefusals'), cmsRefusalList = A.later('cmsRefusalList');
 
   /* =========================================================================
      Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar.
@@ -190,42 +191,53 @@
      components.js tags it; cmsSelectionInfo in js/main.js reports it as
      cmsExactSelection.component) gets its own override section, ALONGSIDE -- not instead
      of -- the taxonomy section(s) above, since an instance is both a positioned element and
-     a content block. Each field writes a real setOverride() inside the connected preview
-     iframe via postCmsComponentsCommand, the same draft-mutate-then-post shape every
-     ctl*Field() (js/admin/controls.js) uses, just with its own one-off patch function (no shared ctx needed:
-     there is exactly one control per resolver prop, not several reading/writing the same
-     draft object). */
+     a content block. Its fields are the block's own schema, drawn by THE schema-driven editor
+     (cmsBlockFields, js/admin/library.js) -- an Ark block's props from the SDK's editor fields
+     (lists, links through the link picker, choices as segmented controls, absent kept apart
+     from 0), a legacy block's and a captured component's from ArkComponents.fieldsOf. Each
+     change writes a real setOverride() inside the connected preview iframe via
+     postCmsComponentsCommand. What the instance SHOWS (definition + overrides) is checked as
+     Save will check it, and every refusal is listed under the fields. */
   function buildComponentInstanceSection(pane) {
     const comp = state.cmsExactSelection.component;
     const componentsState = (state.cmsSourceSite && state.cmsSourceSite.components) || { masters: {}, routes: {} };
     const master = componentsState.masters && componentsState.masters[comp.masterId];
-    const anchorList = window.ArkComponents ? ArkComponents.instancesAt(componentsState, state.cmsExactSelection.page || state.cmsExactSelection.route, comp.anchorId) : [];
+    const route = state.cmsExactSelection.page || state.cmsExactSelection.route;
+    const anchorList = window.ArkComponents ? ArkComponents.instancesAt(componentsState, route, comp.anchorId) : [];
     const instance = anchorList.find((item) => item.key === comp.key);
     const overrides = (instance && instance.overrides) || {};
     const body = toolbarSection(pane, 'cms-component', 'Component instance', 'comp');
     /* named for what it is, never by its ids ("spot-mveixci6q6trc"); the ids are Developer details */
     const info = document.createElement('p'); info.className = 'hint'; info.innerHTML = '<b></b>';
     info.querySelector('b').textContent = master ? (/^spot-|^m[a-z0-9]{6,}$/.test(master.label || '') ? 'Made from your selection' : master.label) : 'A component whose definition is missing';
+    if (master) info.appendChild(document.createTextNode(' · ' + cmsMasterKind(master)));
     body.appendChild(info);
     body.appendChild(devDetails([['Kind', master ? cmsMasterKind(master) : ''], ['Definition id', comp.masterId], ['Placed at', comp.anchorId], ['Instance', comp.key]]));
     const scope = document.createElement('p'); scope.className = 'hint';
     scope.textContent = master && master.detached ? 'Detached: this copy no longer follows any definition.' : 'Fields here override this instance only. Edit definition changes every instance.';
     body.appendChild(scope);
-    /* one text field per prop (the shared ctlField): it shows the override, else the definition's value */
-    const overrideCtx = { get: (prop) => (overrides[prop] !== undefined ? overrides[prop] : ((master && master.props[prop]) || '')),
-      set: (prop, value) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value }) };
-    cmsMasterProps(master).forEach((prop) => {
-      const row = ctlField(overrideCtx, prop, prop, { type: 'text', placeholder: (master && master.props[prop]) || '' });
-      if (overrides[prop] !== undefined) row.classList.add('ovr');
-      body.appendChild(row);
-    });
+    /* One field per prop: it shows the override, else the definition's value. A working copy of
+       the overrides, so a second field changed before the preview relays the first builds on it.
+       Emptying a field the definition fills overrides it with a blank (this instance shows
+       nothing there); Reset overrides goes back to the definition. */
+    const local = Object.assign({}, overrides);
+    const shown = () => Object.assign({}, (master && master.props) || {}, local);
+    const overrideCtx = { get: (prop) => (local[prop] !== undefined ? local[prop] : (master && master.props[prop])),
+      set: (prop, value) => {
+        let v = value;
+        if (v === undefined) v = master && master.props[prop] !== undefined ? '' : null;
+        if (v === null) delete local[prop]; else local[prop] = v;
+        postCmsComponentsCommand({ action: 'set-override', route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: v });
+      } };
+    body.appendChild(cmsBlockFields(cmsFieldsFor(master), overrideCtx, { id: 'cms-inst-' + comp.key, aria: '', all: shown, marked: (prop) => overrides[prop] !== undefined, glossary: !!master && ArkComponents.isArk(master.resolver) }));
+    if (master) body.appendChild(cmsRefusalList(cmsBlockRefusals(master.resolver, shown())));
     const actions = document.createElement('div'); actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.marginTop = '6px';
     const resetAll = document.createElement('button'); resetAll.className = 'btn small'; resetAll.type = 'button'; resetAll.textContent = 'Reset overrides';
     refuse(resetAll, Object.keys(overrides).length ? '' : 'Nothing to reset: this instance overrides none of its definition\'s fields. Edit a field above to override it here.');
-    resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
+    resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
     const removeInst = document.createElement('button'); removeInst.className = 'btn small danger'; removeInst.type = 'button'; removeInst.textContent = 'Remove instance';
     removeInst.addEventListener('click', () => {
-      postCmsComponentsCommand({ action: 'remove-instance', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key });
+      postCmsComponentsCommand({ action: 'remove-instance', route, anchorId: comp.anchorId, key: comp.key });
       state.cmsExactSelection = null; state.cmsExactSelections = []; renderInspector();
     });
     /* Edit definition: the master's own fields, in the Library -- one place, so an edit there
@@ -238,7 +250,7 @@
     const detach = document.createElement('button'); detach.className = 'btn small'; detach.type = 'button'; detach.textContent = 'Detach';
     refuse(detach, !master ? 'Cannot detach: this instance\'s master ' + comp.masterId + ' is missing, so there is no content to copy.' : master.detached ? 'Already detached: this copy follows no definition.' : '');
     detach.addEventListener('click', () => {
-      postCmsComponentsCommand({ action: 'detach-instance', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
+      postCmsComponentsCommand({ action: 'detach-instance', route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
       toast('Detached: this instance keeps its content and no longer follows the definition.');
     });
     actions.style.flexWrap = 'wrap';

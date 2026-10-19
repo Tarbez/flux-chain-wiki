@@ -12,7 +12,7 @@
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, h = A.h, $ = A.$, selectDesign = A.selectDesign, touch = A.touch,
       refreshList = A.refreshList, clone = A.clone, status = A.status, download = A.download,
-      ctlSegField = A.ctlSegField, ctlSelectField = A.ctlSelectField, ctlField = A.ctlField;
+      ctlSegField = A.ctlSegField, ctlSelectField = A.ctlSelectField, ctlField = A.ctlField, arkDisclosure = A.arkDisclosure;
   /* defined by files loaded after this one: resolved when called */
   var closePop = A.later('closePop'), openPop = A.later('openPop'),
       postCmsPreviewState = A.later('postCmsPreviewState');
@@ -166,9 +166,7 @@
       if (adv.length) {
         var advBox = h('div', { class: 'seo-controls' });
         seoFieldRows(adv, target, edited).forEach(function (row) { advBox.appendChild(row); });
-        var d = ArkAdminPrimitives.disclosure({ label: 'Advanced', content: advBox, className: 'ark-disclosure quiet', defaultOpen: advancedOpen });
-        d.querySelector('.ark-disclosure-trigger').addEventListener('click', function () { advancedOpen = !advancedOpen; });
-        box.appendChild(d);
+        box.appendChild(arkDisclosure({ label: 'Advanced', content: advBox, className: 'dev-details', defaultOpen: advancedOpen, onToggle: function (open) { advancedOpen = open; } }));
       }
     }
     paint();

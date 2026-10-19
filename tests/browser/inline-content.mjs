@@ -231,19 +231,19 @@ await step('home: Ctrl/Cmd+Z on the canvas walks back the sheet edit, then the i
 
 await step('escape: typing then Escape finishes the edit and KEEPS the words', async () => {
   original.intro = await draft(app, 'page', 'home', 'INTRO');
-  await clickText(pv, '[data-ark-page] p.hl-intro');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   const before = await editing(pv);
   await typeAtEnd(page, pv, ' zzz');
   await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'the intro draft did not follow the typing');
   await page.keyboard.press('Escape');
   await until(() => editing(pv).then((t) => t === null), 'Escape did not end the edit');
   check((await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'Escape threw the typed words away: the draft is "' + await draft(app, 'page', 'home', 'INTRO') + '"');
-  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p.hl-intro').textContent)) === before + ' zzz', 'Escape changed the words on the canvas');
+  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]').textContent)) === before + ' zzz', 'Escape changed the words on the canvas');
   await shot(page, 'escape-kept');
 });
 
 await step('revert: "Revert to saved" puts the saved words back, and Undo brings the typing back', async () => {
-  await clickText(pv, '[data-ark-page] p.hl-intro');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   await openToolbarSection(app, 'Content');
   const revert = app.locator('#selToolbarPop:not([hidden]) [data-action="revert-field"]');
   await until(async () => (await revert.count()) && (await revert.isEnabled()), 'the Content section offers no enabled "Revert to saved"');
@@ -254,12 +254,12 @@ await step('revert: "Revert to saved" puts the saved words back, and Undo brings
   await shot(page, 'revert-notice');
   await reverted.locator('button', { hasText: 'Undo' }).click();
   await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'the notice\'s Undo did not bring the typed words back');
-  await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] p.hl-intro').textContent === t, original.intro + ' zzz'), 'the canvas does not show the words Undo brought back', 10000);
+  await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]').textContent === t, original.intro + ' zzz'), 'the canvas does not show the words Undo brought back', 10000);
   original.intro += ' zzz';
 });
 
 await step('enter: plain Enter finishes the home heading and the intro -- no line break inside', async () => {
-  for (const [selector, field] of [['[data-ark-page] h1', 'TITLE'], ['[data-ark-page] p.hl-intro', 'INTRO']]) {
+  for (const [selector, field] of [['[data-ark-page] h1', 'TITLE'], ['[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]', 'INTRO']]) {
     const was = await draft(app, 'page', 'home', field);
     /* the previous field's Content popover opens over the text below it (docs/ux-audit/cms.md
        P1-6, a later wave): close it, as a person would, so the click reaches the text */
@@ -277,9 +277,9 @@ await step('enter: plain Enter finishes the home heading and the intro -- no lin
 
 await step('copies: every element showing the edited field takes the words on commit, without a re-render', async () => {
   /* a second copy of the intro on the page (a fixture: the same field drawn twice) */
-  await pv.evaluate(() => { const p = document.querySelector('[data-ark-page] p.hl-intro'); const copy = p.cloneNode(true); copy.classList.add('test-intro-copy'); p.after(copy); });
+  await pv.evaluate(() => { const p = document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]'); const copy = p.cloneNode(true); copy.classList.add('test-intro-copy'); p.after(copy); });
   const readyBefore = await previewReadyCount(app);
-  await clickText(pv, '[data-ark-page] p.hl-intro:not(.test-intro-copy)');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]:not(.test-intro-copy)');
   await typeAtEnd(page, pv, ' (twice)');
   await page.keyboard.press(MOD + '+Enter');
   await until(() => editing(pv).then((t) => t === null), 'the edit did not end');
@@ -299,7 +299,7 @@ await step('race: a Page fields edit just before an inline commit -- both reach 
   await page.keyboard.type(' (race)', { delay: 5 });
   /* straight to the canvas: the sheet's send is still waiting in its 180 ms window, or arrives
      while the words are typed -- either way it must not be lost */
-  await clickText(pv, '[data-ark-page] p.hl-intro:not(.test-intro-copy)');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]:not(.test-intro-copy)');
   await typeAtEnd(page, pv, '!');
   await page.keyboard.press(MOD + '+Enter');
   original.introFinal += '!';
@@ -361,7 +361,7 @@ await step('refusal: text no field holds says why and names its source', async (
 
 await step('design lens: the same click selects and styles, and never edits the words', async () => {
   await setLens(app, pv, 'design');
-  await clickText(pv, '[data-ark-page] p.hl-intro');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   await until(async () => { const names = await app.evaluate(() => [...document.querySelectorAll('#selToolbar:not([hidden]) [data-section]')].map((b) => b.dataset.name)); return names.includes('Typography') && !names.includes('Content'); }, 'the Design lens toolbar does not offer Typography (or still offers Content)');
   check((await editing(pv)) === null, 'a Design-lens click made text editable');
   check(await pv.evaluate(() => [...document.querySelectorAll('.ark-studio-handle')].some((h) => !h.hidden)), 'the Design lens shows no resize handles');

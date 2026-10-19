@@ -1,0 +1,81 @@
+# key	tag	text -- layout keys of /lifecycle/receipt before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeAgreement lifecycleReceipt05 / RECEIPTRead the checking decision.The checking participant records the outcome under the identified rules and authority.One p
+page:/nav:1	nav	HomeAgreement lifecycleReceipt
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/a:2	a	Agreement lifecycle
+page:/nav:1/a:2/svg:1	svg	
+page:/nav:1/a:2/svg:1/path:1	path	
+page:/nav:1/a:2/svg:1/path:2	path	
+page:/nav:1/span:1	span	Receipt
+page:/div:1	div	05 / RECEIPTRead the checking decision.The checking participant records the outcome under the identified rules and authority.One policy-bound verification outco
+page:/div:1/div:1	div	05 / RECEIPTRead the checking decision.The checking participant records the outcome under the identified rules and authority.One policy-bound verification outco
+page:/div:1/div:1/p:1	p	05 / RECEIPT
+page:/div:1/div:1/h1:1	h1	Read the checking decision.
+page:/div:1/div:1/div:1	div	The checking participant records the outcome under the identified rules and authority.One policy-bound verification outcome is recorded.
+page:/div:1/div:1/div:1/p:1	p	The checking participant records the outcome under the identified rules and authority.
+page:/div:1/div:1/div:1/p:2	p	One policy-bound verification outcome is recorded.
+page:/div:1/div:1/nav:1	nav	AnswerUnderstand whyEvidence
+page:/div:1/div:1/nav:1/button:1	button	Answer
+page:/div:1/div:1/nav:1/button:1/svg:1	svg	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:2	button	Understand why
+page:/div:1/div:1/nav:1/button:2/svg:1	svg	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3	button	Evidence
+page:/div:1/div:1/nav:1/button:3/svg:1	svg	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:5	path	
+page:/div:1/div:1/aside:1	aside	Not yet establisheda receipt is not universal truth, legally binding settlement, treasury settlement, or production-readiness evidence.
+page:/div:1/div:1/aside:1/strong:1	strong	Not yet established
+page:/div:1/div:1/aside:1/p:1	p	a receipt is not universal truth, legally binding settlement, treasury settlement, or production-readiness evidence.
+page:/div:1/button:1	button	Show the illustration
+page:/div:1/figure:1	figure	ILLUSTRATIONNOT A LIVE RECORDThe decision trailRESULTThe submitted work.RULESThe identified checker and authority.DECISIONThe recorded verification outcome.Who 
+page:/div:1/figure:1/div:1	div	ILLUSTRATIONNOT A LIVE RECORD
+page:/div:1/figure:1/div:1/span:1	span	ILLUSTRATION
+page:/div:1/figure:1/div:1/span:2	span	NOT A LIVE RECORD
+page:/div:1/figure:1/figcaption:1	figcaption	The decision trail
+page:/div:1/figure:1/div:2	div	RESULTThe submitted work.RULESThe identified checker and authority.DECISIONThe recorded verification outcome.
+page:/div:1/figure:1/div:2/div:1	div	RESULTThe submitted work.
+page:/div:1/figure:1/div:2/div:1/span:1	span	RESULT
+page:/div:1/figure:1/div:2/div:1/p:1	p	The submitted work.
+page:/div:1/figure:1/div:2/div:2	div	RULESThe identified checker and authority.
+page:/div:1/figure:1/div:2/div:2/span:1	span	RULES
+page:/div:1/figure:1/div:2/div:2/p:1	p	The identified checker and authority.
+page:/div:1/figure:1/div:2/div:3	div	DECISIONThe recorded verification outcome.
+page:/div:1/figure:1/div:2/div:3/span:1	span	DECISION
+page:/div:1/figure:1/div:2/div:3/p:1	p	The recorded verification outcome.
+page:/div:1/figure:1/canvas:1	canvas	
+page:/div:1/figure:1/p:1	p	
+page:/div:1/figure:1/nav:1	nav	Who checksThe trail
+page:/div:1/figure:1/nav:1/button:1	button	Who checks
+page:/div:1/figure:1/nav:1/button:2	button	The trail
+page:/div:1/figure:1/p:2	p	Choose a label to inspect this part.
+page:/nav:2	nav	01Intent02Offer03Agreement04Fulfillment05Receipt
+page:/nav:2/a:1	a	01Intent
+page:/nav:2/a:1/span:1	span	01
+page:/nav:2/a:2	a	02Offer
+page:/nav:2/a:2/span:1	span	02
+page:/nav:2/a:3	a	03Agreement
+page:/nav:2/a:3/span:1	span	03
+page:/nav:2/a:4	a	04Fulfillment
+page:/nav:2/a:4/span:1	span	04
+page:/nav:2/a:5	a	05Receipt
+page:/nav:2/a:5/span:1	span	05
+page:/nav:3	nav	← FulfillmentReturn to the full trail
+page:/nav:3/a:1	a	← Fulfillment
+page:/nav:3/a:2	a	Return to the full trail
+page:/nav:3/a:2/svg:1	svg	
+page:/nav:3/a:2/svg:1/path:1	path	
+page:/nav:3/a:2/svg:1/path:2	path	
+page:/div:2	div	

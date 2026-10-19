@@ -60,6 +60,41 @@ These terms are canonical for public copy and operator documentation.
 
 **Served** — launched, and a provider is announcing for its chain (with proofs for every capability it composes). Replaces **Deployed** (earlier: "backed by an admitted active provider with fresh execution capacity").
 
+## Measurements and records
+
+These are the words the evidence pages (/stats, /stats/ledger, /stats/gpu, /resolvers,
+/resolver-math) mark as glossary terms on first use.
+
+**Node** — one machine in the fleet. It runs a chain-server or a resolver shard, and each node is measured on its own hardware.
+
+**Fleet** — the machines this project runs the network on (the flx-* nodes). A fleet figure is a sum of measurements taken on each node, never one node's figure multiplied.
+
+**Shard** — one resolver process that resolves a batch of signed intents and signs the result. A resolver scales by running more shards, about one per performance core.
+
+**Replica** — a node that stores a signed result as it is, without re-verifying or changing it.
+
+**Ed25519** — the signature scheme every record and result here is signed with. Verifying these signatures is most of the work a resolver does.
+
+**CID** — content identifier: a record's address, derived from a hash of its bytes, so the same bytes always have the same address.
+
+**Equivocation** — signing two different records at the same position of one's own chain. Each of the two is evidence against the signer, and the chain is frozen.
+
+**K-of-N replication** — a record counts as durable once K of N peers hold it by its CID. The acknowledgement waits on those peers, never on a local disk write.
+
+**Batch auction** — a batch of swap intents cleared together at one price, so a place in the batch cannot change what anyone pays.
+
+**Soak** — a load run sustained for minutes, as opposed to a short burst.
+
+**Segment** — a block of chain lines that 6 of the 10 configured signers certify together.
+
+**Grammar** — the rules a record must follow to be admitted: which labelled boxes it holds and what each box may contain.
+
+**Box** — one field of a record: a label, usually one letter, followed by packed text.
+
+**Role letter** — the label that opens a box and says what the box is.
+
+**Type-scoped shape** — a letter whose meaning depends on the record's type: the type declares it, instead of one meaning fixed for every record.
+
 ## Prohibited conflations
 
 - Do not use `published` to mean `deployed`.

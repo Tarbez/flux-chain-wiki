@@ -39,11 +39,40 @@ fs.writeFileSync(path.join(fixture, 'js', 'pages', 'p.js'), [
   "find('.stage');",                   // selector: one use of .stage
   "el('div.card');",                   // tag.class: one use of .card
 ].join('\n'));
+// 6. Regression (2026-10-19, W2-ADAPTER): a site rule over an Ark block is a per-page VARIANT of
+//    a shared block, counted on its own (ark-overrides, ark-override-files) -- not a hand-built
+//    family member (it read as two new "accordion" classes), and never invisible. A spec's
+//    `block: 'tabs'` names a block, not a use of a .tabs class.
+fs.writeFileSync(path.join(fixture, 'css', 'ark-blocks.css'), '.ark-disclosure:where(.ark-block){display:grid}.ark-disclosure__panel{width:100%}\n');
+fs.writeFileSync(path.join(fixture, 'css', 'b.css'), '#x .ark-disclosure__panel{flex:1}#deck p{color:red}.tabs{display:grid}\n');
+fs.writeFileSync(path.join(fixture, 'js', 'pages', 'q.js'), "ArkUI.page([{ block: 'tabs', id: 'deck', props: {} }]);\n" +
+  // 7. Regression (2026-10-19, W3-STORY): a `was` map's refs name Ark parts, not classes.
+  "var WAS = { 'deck': { \"eyebrow\": \"page:/div:1/p:1\", 'tabs-list': { key: 'page:/nav:2', self: true } } };\nfind('.eyebrow');\n");
+fs.appendFileSync(path.join(fixture, 'css', 'a.css'), '.eyebrow{color:green}\n');
 import(path.resolve('scripts/ux-component-census.mjs')).then(({ census }) => {
   const rows = census(fixture);
   const value = (measure, family) => rows.find((r) => r[0] === measure && r[1] === family)[2];
   assert.equal(value('uses', 'step'), 1, 'stage.title is a property access, not a use of .stage');
   assert.equal(value('uses', 'card'), 1, "'div.card' still counts as a use of .card");
+  assert.equal(value('classes', 'accordion'), 0, 'an Ark class a site sheet adjusts is not a hand-built family member');
+  assert.equal(value('ark-overrides', 'css'), 2, 'it is an override: the Ark class rule, and the rule on a block spec\'s id');
+  assert.equal(value('ark-override-files', 'css'), 1);
+  assert.equal(value('uses', 'tabs'), 0, "block: 'tabs' names a block, not a use of .tabs");
+  assert.equal(value('uses', 'eyebrow'), 1, "a was ref (\"eyebrow\": \"page:/...\") names an Ark part, not a use of .eyebrow; find('.eyebrow') still counts");
+  // 8. Regression (2026-10-19): --ratchet rewrote the baseline header from a template and dropped the
+  //    hand-written notes that record WHY values were raised or are undercounted. Those notes are the
+  //    evidence the frozen numbers rest on; a ratchet may lower data rows but must keep every comment.
+  const { spawnSync: spawn } = require('node:child_process');
+  const base = path.join(fixture, 'docs', 'ux-audit');
+  fs.mkdirSync(base, { recursive: true });
+  const censusBefore = census(fixture);
+  const note = '# Raised by hand: a reason future readers must keep seeing.';
+  fs.writeFileSync(path.join(base, 'component-census-baseline.tsv'), '# header line one\n' + note + '\nmeasure\tfamily\tvalue\n' +
+    censusBefore.map(([m, f, v]) => m + '\t' + f + '\t' + (v === null ? '-' : (m === 'uses' && f === 'card' ? v + 1 : v))).join('\n') + '\n');
+  const ratchet = spawn(process.execPath, [path.resolve('scripts/ux-component-census.mjs'), '--ratchet', '--only=card', '--site=' + fixture], { encoding: 'utf8' });
+  const after = fs.readFileSync(path.join(base, 'component-census-baseline.tsv'), 'utf8');
+  assert.ok(after.includes(note), '--ratchet keeps the baseline\'s comment lines verbatim:\n' + ratchet.stdout + ratchet.stderr);
+  assert.match(after, /^uses\tcard\t1$/m, 'and still lowers the data row it was asked to (card uses 2 -> 1)');
   fs.rmSync(fixture, { recursive: true, force: true });
-  console.log('ux component census ok: every family measured, nothing above the baseline, property access is not a class use');
+  console.log('ux component census ok: every family measured, nothing above the baseline, property access is not a class use, Ark overrides counted apart');
 });

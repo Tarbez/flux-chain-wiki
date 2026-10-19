@@ -123,16 +123,36 @@
     const text = String(value).replace(/-/g, ' ');
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
+  /* A segmented control is Ark's toggle group (ArkKit.createArkToggleGroup on a light-DOM host,
+     docs/ux-audit/cms.md (c) "Segmented control / toggle group"): one choice pressed, roving
+     focus (one tab stop, arrows move between the choices, Enter or Space picks one), the pressed
+     state written by Ark. Each control gets its own host, which holds no document listener, so a
+     panel's re-render lets the old one go. Without ArkKit (a test that loads only these builders)
+     the same buttons work by click, with the same aria-pressed. */
   function ctlSegField(ctx, label, key, options, labelOf) {
     const name = labelOf || ctlLabel;
     const row = document.createElement('div'); row.className = 'row'; const l = document.createElement('label'); l.textContent = label;
     const seg = document.createElement('div'); seg.className = 'ctl-seg';
-    options.forEach((opt) => {
+    const buttons = options.map((opt) => {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = name(opt);
       b.setAttribute('aria-pressed', String(ctx.get(key) === opt));
-      b.addEventListener('click', () => { if (ctx.get(key) !== opt) ctx.set(key, opt); });
-      seg.appendChild(b);
+      seg.appendChild(b); return b;
     });
+    const kit = window.ArkKit;
+    if (kit && typeof kit.createArkToggleGroup === 'function' && typeof kit.createArkDomHost === 'function') {
+      const host = kit.createArkDomHost(document);
+      const refs = buttons.map((b) => host.bind(b, 'ctl-seg')), current = options.indexOf(ctx.get(key));
+      let ready = false;
+      kit.createArkToggleGroup(host, { rootRef: host.bind(seg, 'ctl-seg'), itemRefs: refs, selectedRefs: current >= 0 ? [refs[current]] : [],
+        onValueChange: (selected) => {
+          if (!ready) return;   /* Ark reports the starting selection once; that is not a choice */
+          const i = refs.indexOf(selected[0]);
+          if (i >= 0 && ctx.get(key) !== options[i]) ctx.set(key, options[i]);
+        } });
+      ready = true;
+    } else {
+      buttons.forEach((b, i) => b.addEventListener('click', () => { if (ctx.get(key) !== options[i]) ctx.set(key, options[i]); }));
+    }
     row.append(l, seg, document.createElement('span')); return row;
   }
   /* opts.ariaLabel as in ctlField; the value is written as the option's string */
@@ -171,8 +191,9 @@
     });
     if (dl.children.length) content.appendChild(dl);
     (extra || []).forEach((el) => { if (el) content.appendChild(el); });
-    /* the editor's one disclosure (js/admin/primitives.js, Ark's disclosure shape), quiet */
-    return ArkAdminPrimitives.disclosure({ label: 'Developer details', content, className: 'ark-disclosure quiet' });
+    /* Ark's disclosure (js/admin/ark-host.js arkDisclosure); .dev-details is the editor's quiet
+       dress for its list of names (css/admin.css) */
+    return A.arkDisclosure({ label: 'Developer details', content, className: 'dev-details' });
   }
   A.provide({ CMS_ALIGN_TOKENS: CMS_ALIGN_TOKENS, CMS_BLOCK_RESOLVERS: CMS_BLOCK_RESOLVERS,
       CMS_BORDER_TOKENS: CMS_BORDER_TOKENS, CMS_BORDER_VALUES: CMS_BORDER_VALUES,

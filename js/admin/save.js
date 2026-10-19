@@ -71,6 +71,11 @@
         state.layoutDraft = ArkLayout.sanitize(state.layoutDraft); state.layoutSaved = JSON.stringify(state.layoutDraft); ArkLayout.define(state.layoutDraft);
       } },
       components: { draft: function () { return state.componentsDraft; }, set: function (v) { state.componentsDraft = v; }, saved: function () { return state.componentsSaved; }, dirty: componentsDirty, save: async function () {
+        /* every Ark block, as saved and as each instance shows it, passes the SDK's strict
+           validateCmsArkBlock first -- refused, nothing is written, and each refusal says which
+           component, which field, what it needs (js/content/components.js problems()) */
+        var refused = ArkComponents.problems(state.componentsDraft);
+        if (refused.length) throw new Error('Not saved: ' + refused.length + ' thing' + (refused.length > 1 ? 's' : '') + ' to fix in your components (Library, or the toolbar\'s Component instance). ' + refused.map(function (p) { return p.sentence; }).join(' '));
         if (state.cdirs) await ArkAdminStore.saveComponents(state.cdirs.content, state.componentsDraft);
         else download('components-data.js', ArkComponents.serialize(state.componentsDraft));
         state.componentsDraft = ArkComponents.sanitize(state.componentsDraft); state.componentsSaved = JSON.stringify(state.componentsDraft); ArkComponents.define(state.componentsDraft);

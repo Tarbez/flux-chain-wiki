@@ -74,9 +74,9 @@ and chosen under an open Versions it showed as a 20px sliver (`setView()`, `js/a
 `tests/cms-site-style-not-under-sheet.cjs`). The page and the Site map leave them open. A closed
 Versions panel is not refreshed by a Save; opening it lists the history again. Esc closes the
 topmost only. One close button (`overlay.closeButton`, `.ov-close`). It
-mirrors Ark UI's popover / dismissable-layer shape; `js/ark/vendor/ark-kit.js` exports
-`createArkPopover` but not the `createArkUI` runtime it runs on, so that swap waits for the kit
-to carry the runtime.
+mirrors Ark UI's popover / dismissable-layer shape. `js/ark/vendor/ark-kit.js` now carries
+`createArkUI`, and `createArkDomHost` runs non-modal focus scopes and dismissable layers over
+existing elements (ark-ui 0.2.2), so `createArkPopover` can drive this markup on either host.
 
 **The canvas** (`js/admin/canvas.js`, `layoutStage()`): the stage is the breakpoint's width,
 zoomed down when the area is narrower, and exactly as tall as the area under its size label --
@@ -406,9 +406,26 @@ their DOM on every mount, so an instance is rebuilt from the current master each
 definition edit shows everywhere on the next render, with no copy to resync. Detach gives an
 instance its own master.
 
-- **Typed blocks**: six whitelisted resolvers (`RBLOCK_TEXT_V1`, `_CTA_`, `_IMAGE_`, `_CARD_`,
-  `_QUOTE_`, `_DIVIDER_V1`), each with its own prop names; anything else is dropped by
-  `sanitize()`. Created from the Library tab (`js/admin/library.js`).
+- **Ark blocks** (Wave 2, since 2026-10-19): resolver `ARK_BLOCK_<UPPER_SNAKE(name)>`, one per
+  block of `@deadark/ark-ui/blocks`, registered by `js/ark/blocks.js`. The Library
+  (`js/admin/library.js`) is DERIVED from the registry: `ArkComponents.blocks()` reads
+  `ArkKit.describeArkBlocks()`, groups each block by its structure (holds blocks: Layout; takes an
+  image or slot: Media; otherwise Ark's category, "content" read as Text), shows each as a live
+  mini-render of the real block, and draws its fields from the SDK's
+  `getCmsArkBlockEditorFields` (`js/admin/vendor/cms-blocks.js`, editor only: it bundles zod).
+  `sanitize()` keeps an Ark master by the SHAPE of its resolver and its props as plain data of
+  bounded size -- never by registry membership, so `components-data.js` loading before the kit,
+  or a block from a newer Ark, never loses a record. Save checks every Ark master, and every
+  instance as it shows (definition + overrides), with the SDK's `validateCmsArkBlock` in strict
+  mode (`ArkComponents.problems`, `js/admin/save.js`); a refusal names the component, the field
+  by its label path, what it needs and the remedy. Tests: `tests/components-library.cjs`.
+- **Legacy typed blocks**: `RBLOCK_TEXT_V1`, `_CTA_`, `_IMAGE_`, `_CARD_`, `_QUOTE_`, `_DIVIDER_V1`
+  -- the hand-built resolvers the Library offered before Ark had blocks. Read aliases, kept as-is
+  and never rewritten; their renders are pinned byte-for-byte by
+  `tests/components-legacy-continuity.cjs`. Each names its Ark successor (`actions`, `figure`,
+  `card`, `quote`; Ark has no prose `text` or `divider` block yet), and is offered for NEW
+  components only while the registry lacks that successor. Anything that is none of these three
+  kinds is dropped by `sanitize()`.
 - **Captured components** ("Make into component"): a selection is stored as a master with
   resolver `RBLOCK_CAPTURED_V1` and `tree`, the selection's sanitized element structure. Its
   props are derived: every non-blank text node and every image `src`/`alt` in the tree is a
@@ -466,6 +483,240 @@ history of a route -- direct load, arrival from another route, phone width, afte
 insertion, and in the editor's preview; `tests/browser/layout-key-stability.mjs` checks that.
 Layout keys were being reworked when this page was written; check `layout.js` before relying
 on the exact prefixes.
+
+**Pinned keys** (2026-10-19). A page converted to blocks ([Pages as data](#pages-as-data)) keeps
+the keys its old markup had: an element carrying `data-ark-layout-pin="<old key>"` is keyed by
+it, ahead of its copy key or id, and its subtree inherits `<old key>/<path below it>` -- one pin
+on a moved swatch grid keeps every swatch's key. `data-ark-layout-pin-scope="self"` pins the
+element alone (a section that became a tab panel, whose inside is new). A NEW element whose
+computed path equals a key the page pinned to another element is keyed `<path>@new`, so it never
+inherits an edit that was saved for something else (on /palette the old CMS anchor's path became
+the new tab list's). Pins are stamped by `js/ark/blocks.js` from a spec's `was`; saved records are
+never rewritten. A table's `caption` is keyed like any other element (`KEY_TAGS`, 2026-10-19), so
+the heading a conversion moved into a caption can carry its old key: the page tests that retired
+those keys "until captions become keyable" can pin them now (`'table-caption[#n]'`).
+
+## Pages as data
+
+Since 2026-10-19 (Wave 2) a page can be a list of Ark blocks instead of hand-built DOM. Wave 3
+converts the site page by page this way; `/palette` is the worked pilot (`js/pages/palette.js`,
+`tests/palette-blocks.cjs`).
+
+**Two runtimes, one adapter.** `ArkUI` is defxn's resolver engine (`js/ark/runtime.js`:
+`register`/`build`); `ArkKit` is Ark UI itself, built from the synced packages by
+`scripts/build-ark-vendor.cjs` from ONE export list (`scripts/ark-kit-entry.js`) into two files:
+
+| file | where | carries |
+|---|---|---|
+| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup` and `patchArkBlock` are refusals that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. 24.0 KB gz (26.9 before W3-BUDGET) |
+| `js/ark/vendor/ark-kit-live.js` | a page's first `ArkUI.blocks.update` (today / and /stats) | `patchArkBlock` alone (ark-ui 0.2.7's `blocks/patch`, `patchArkBlockIn(registry, …)`, bound to the loaded `ArkKit.ARK_BLOCKS`), global `ArkKitLive`. Loaded by the adapter, never listed by a route. 1.4 KB gz |
+| `js/ark/vendor/ark-kit.js` | the editor (`admin-app.html`), any page that needs an overlay | all of the above plus `createArkUI`, the examples, the help text and the morph. `ArkKit.PUBLIC_KIT` is `false`. 49.7 KB gz |
+
+**Live update** (`ArkUI.blocks.update(el, props, options)`): `el` is re-rendered through the
+adapter (copy keys, scene links) and patched in place with Ark's `patchArkBlock`, so a CMS edit, a
+pin or a style on it survives each refresh; invalid props replace it with the refusal callout. On
+public pages the morph is the live chunk above: the first update of a page loads it through
+`ArkUI.loadScript` (`js/ark/page-loader.js`), queues the refresh per element (the latest props
+win) and lands it when the chunk arrives, returning the same root at once; every later update is
+in place synchronously. Liveness is derived from behaviour, never declared: a page that updates
+is live, and a block route that never updates never pays the 1.4 KB. If the chunk cannot load
+(it failed, or the page has no `ArkUI.loadScript`), the queued readings still show, by
+replacement -- what hung on the old elements is lost -- the console names the failure, what is
+needed and the remedy, and the next update tries again: a live tile never breaks its page. The
+editor's full kit carries the morph itself and loads nothing.
+
+`js/ark/blocks.js` (served minified; source `scripts/ark-blocks-adapter.js`, built by
+`npm run build:ark`) joins them: every block in `ArkKit.ARK_BLOCK_NAMES` is registered as the
+resolver `ARK_BLOCK_<UPPER_SNAKE(name)>` (`hero` -> `ARK_BLOCK_HERO`, `section-header` ->
+`ARK_BLOCK_SECTION_HEADER`), by that rule and never by a list, so a block Ark adds is a resolver
+and a Library block the moment the kit is rebuilt. `ArkUI.build({ resolver, props, children })`
+returns the block's own root (the `create(p)` manifest hook in `runtime.js`); props go to the
+block as given, `from` is the return-to of `doc:` links, `tree` is ignored, and invalid props
+render Ark's refusal callout (`data-ark-block-refused`) -- a saved record never throws.
+
+**Loading** (`js/pages/catalog.js`, `js/ark/page-loader.js`). `ArkUI.blockScripts` = dash-kit
+(the link resolver), the public kit, the adapter: a page built from blocks lists them first
+(`scripts: ArkUI.blockScripts.concat(['js/pages/<page>.js'])`). The loader adds them by itself
+to a route holding a saved `ARK_BLOCK_*` instance (its own or the shell's) and to every route in
+the editor's canvas. `ArkUI.glossaryScript` (`js/content/glossary.js`, ~2 KB gz, generated from `docs/glossary.md` by
+`node scripts/build-glossary.cjs`; `--check` in `tests/ark-blocks-adapter.cjs`) is separate: a
+page whose words use `[[term]]` lists it; the loader adds it for saved term blocks or `[[` markup
+and in the canvas. Every other route loads none of it. Styling is `css/ark-blocks.css` (Ark's,
+static, linked on every route so the server render is styled; minified by the vendor build,
+7.3 KB gz) and `css/block-page.css` (the frame every block page sits in).
+
+**Budget** (components.md R2: +30 KB gz of added JS; CSS net-negative). Method, every number
+below: `gzip -9 -c <file> | wc -c` on the shipped file, 2026-10-19, this Mac (the same method as
+the earlier readings; esbuild's metafile gives the per-module shares). Wave 2 measured kit 25.9 +
+adapter 3.8 = 29.6 KB; Wave 3's page work (W3-ARK-FOLLOWUPS) took it to kit 26.9 + adapter 6.1
+= 33.0, 3.0 over. W3-BUDGET, same day: kit 24.0 + adapter 4.0 = **28.0 KB** on a route that
+renders blocks; +0 on a route with no block; +1.4 (the live chunk) where a page updates a block
+(29.5); +2.9 (`js/content/glossary.js`, which grows with `docs/glossary.md`) where words carry
+terms (30.9); /stats carries all three (32.3). What moved: the editor text stripped from the
+public kit's prop schemas (78 `help` + 21 `description` strings: -2.1 KB), the morph into the
+live chunk (-0.7 from the kit, paid only by live routes), the public banner cut to ark-ui's
+version and where the pins are (-0.2), and the adapter served minified (-2.4: its commented
+source is `scripts/ark-blocks-adapter.js`; build-ark-vendor writes `js/ark/blocks.js` from it,
+and `npm run check:ark` refuses a hand-edited copy). Measured and rejected: `charset: 'utf8'`
+(+0.02), `target` es2020/es2022 (0), stripping the definitions' `parts` arrays (~-0.4, but the
+`card-grid`/`stats` getters would throw a bare TypeError instead of refusing). The next lever,
+not taken (an Ark host redesign): the light-DOM host's focus-scope and dismissable-layer code,
+which only `createArkPopover` drives and the public kit refuses, ~0.8 KB gz inside `blocks/host`.
+A block route's bill also carries `js/ark/dash-kit.js` (3.9 KB, the link resolver blocks need),
+which existed at 5a1ac71 but loaded only on the stats family then.
+
+**CSS ledger** (same method, every stylesheet `index.html` links, 5a1ac71 vs now): 160.4 KB gz
+(51 files) -> 121.7 KB gz (47 files), **-38.7 KB gz net** (-155 KB raw). Added: ark-blocks 7.3,
+block-page 1.2, themes +2.6 (the SDK sheet grew). Deleted: brand-marks -12.6, stats -5.3, chain
+-1.7, bundle-deployer -1.3, resolvers -0.9, fonts -0.4; shrunk as pages became blocks: home-swiss
+-6.7, resolutions -3.0, stats-dashboard -2.7, home-drafting -2.4, about -1.8, resolver-lab -1.7,
+home -1.2, home-flow -1.1, resolver-math -1.1, lifecycle -1.0, and smaller cuts across 20 more.
+Without brand-marks (a token move, not block work) the ledger is still -26.1. `ark-overrides` in
+the census counts site rules over Ark blocks; nothing still used was deleted.
+
+**The spec.** A page module returns `ArkUI.page(spec, host, options)`:
+
+```js
+ArkUI.pageModules.palette = { mount: function (host) {
+  return ArkUI.page([
+    { block: 'breadcrumb', id: 'palette-crumbs', props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Interface palette' }] } },
+    { block: 'hero', id: 'palette-hero', props: { eyebrow: '// Design system', title: 'Palette', lede: 'copy:PALETTE.LEDE' } },
+    { block: 'tabs', id: 'palette-views', props: { label: 'Palette views', items: [
+      { value: 'neutrals', label: 'Neutrals', blocks: [{ block: 'figure', props: { kind: 'live', slot: 'neutrals', caption: '...' } }] } ] } },
+    { insert: 'main' },                                  // the CMS anchor (data-ark-insert)
+    { block: 'actions', id: 'palette-onward', props: { items: [{ label: 'Theme settings', action: 'open-theme-settings' }] } }
+  ], host, { page: 'palette', className: 'palette-page', titleId: 'palette-title',
+             slots: { neutrals: function () { return swatchGrid(); } },
+             actions: { 'open-theme-settings': function (detail, event) { /* ... */ } } });
+} };
+```
+
+- **Entries**: `{ block, id, props, was }` -- an Ark block (props per `design/ark-ui/BLOCKS.md`);
+  `id` is authored (never `ark-r-`) and becomes the root id, so its layout key is `id:<id>`. A
+  block nested in a tab or an accordion item (`blocks: [...]`) may carry its own `id` and `was`, its
+  refs relative to it, as `derive` prints them; a nested `was` without an `id` is refused.
+  `{ insert: '<anchor>', was }` -- a CMS insertion anchor (keep the old anchor id).
+  `{ block: 'custom', id, mount(ctx), was }` -- the escape hatch for a bespoke scene; `ctx` is
+  `{ document, from, render(spec) }`; it returns a node.
+- **Options**: `page` (catalog key; derives `from`), `className`, `titleId` (given to the first
+  h1, else h2, and named by the page's `aria-labelledby` -- keep the old page's heading id and its
+  layout key needs no pin), `labelledBy`, `from`, `slots`, `actions`, `tag`, `onInvalid`
+  (authored specs default to `'throw'`: a missing copy key is a code defect the router and the
+  tests report, not a box on the page), `onFigureVisibility(figure, visible)` (a figure scrolled
+  in or out of view: pause the drawing it holds), `terms: 'first-use'` (the first time a glossary
+  word appears in the page's prose -- a block prop of schema kind `text`, never a `line` such as a
+  title or a button -- it becomes Ark's glossary term; derived from `ArkGlossary`, never a word
+  list; the copy key is still stamped on the element, its tooltip excluded from its words). Only
+  whole words count, and a hyphen is part of a word: "HTTP-served" and "same-shard" are not
+  "served" and "shard"; a word joined to more letters by a dot is another token ("Node.js" is not
+  the fleet's "node", "studio.fxn" not a "studio" -- 2026-10-19, W3-GUIDE: /download's "Use
+  Node.js 22" had become a term for a fleet machine). An entry is glossed only in its own sense: `context: [words]` (the text
+  must also say one of them; an entry whose glossary term carries a qualifier takes its last word,
+  so "Signer (of a launch)" applies where "launch" is said and "signer rotations" stays plain) and
+  `except: [phrases]` (never inside them). `glossary` (option) replaces `ArkGlossary` for the page,
+  tooltips included.
+- **Values**: `copy:AREA.ROLE` resolves through `ArkCopy`, and the element that shows it gets
+  `data-ark-copy-keys` (its layout key becomes `copy:AREA.ROLE`, stable however the page is
+  restructured; the Content lens binds it). `route:<key>`, `doc:<path>`, `url:<address>` resolve
+  through dash-kit's `resolveLinkField`, and in-site links get `data-scene-link` so the router
+  follows them. Anything else is used as written. A page with no manifest keeps literal words:
+  adding a manifest would grow a JSON-in-JS store (components.md R12).
+- **Slots**: a `figure` or `disclosure` prop `slot: '<name>'` places `options.slots[name]` (a node
+  or a function returning one) -- the page's own live content (a swatch grid, a stage scene).
+  The node is stamped `data-ark-slot="<name>"`. In a figure, a drawing (svg, canvas, img) fills
+  the frame as media does; any other node takes the frame's width below the kind label.
+- **Frame**: `css/block-page.css` is the panel every block page sits in (the task-page panel:
+  below the header, canvas at .97) and its reading column; a converted page adds no frame CSS.
+- **Actions**: an `actions` item with `action` and no `href` is a button that dispatches
+  `ark:action`; `options.actions[name](detail, event)` handles it.
+- **Folding** (the fold rule): `tabs` and `accordion` for views and topics; `disclosure` for one
+  piece of content -- `preview: 1-3` keeps that many lines in view with "More" (offered only when
+  the clamp cuts), `foldBelow: 'tablet' | 'phone'` folds only at 900 / 600 px and narrower.
+  Closed content stays in the DOM (`hidden="until-found"` where it is fully folded). It replaced
+  the local `ArkUI.dash.foldToggle` on /resolutions and /lifecycle.
+- `ArkUI.blocks.render(spec, { from, slots, onInvalid })` renders one block into hand-built markup
+  (a page not yet converted); `spec.was` works there too.
+- `ArkUI.blocks.update(el, props, { from, slots, glossary, onInvalid, keep })` patches a block it
+  rendered IN PLACE with new props (Ark's `patchArkBlock`, `design/ark-ui/BLOCKS.md` "Updating a
+  live block"): an element whose shape did not change keeps its identity, so a saved CMS edit, a
+  pin and a style stay applied between a live page's polls; copy keys and scene links are stamped
+  again. Tabs, accordions and disclosures are refused (a primitive holds their open state): update
+  the blocks inside them. Invalid props replace the block with Ark's refusal, in place. `/stats`
+  refreshes its live tiles, bars and tables this way.
+- A `line` prop's `maxLength` is checked on the words a `copy:` key resolves to, not on the key,
+  so a tab label may be a copy key.
+
+**The story template** (`js/pages/story.js`, Wave 3). The guided pages -- the theory sheets
+(`/concept/*`, `/dao`), the agreement chapters (`/how-deployment-works/ask|work|check`), "Deploy a
+resolver" (`/how-deployment-works`), the agreement lifecycle (`/lifecycle` and its five stages), and
+the resolver guide (`/what-is-a-resolver`, whose live illustration is its figure, and
+`/start-from-something-real`) with `/download` (its terminal is the figure) -- are one template
+over `ArkUI.page`: breadcrumb (no ordinals) / hero (the eyebrow is the page's
+position in its sequence, `ArkUI.story.position('Agreement lifecycle', i, 5)` -> "Agreement
+lifecycle · 2 of 5"; the hero's actions are the page's hand-offs) / an optional notice / the body:
+ONE depth control -- Ark tabs, `variant: 'segmented'`, labels **The idea · How it works ·
+Evidence** on every page, values `focus | context | reference`, addressed `?view=context`,
+`?view=reference` (the idea has none) and restored from history -- with the page's boundary
+callout under it (in sight in every view; `boundaryFold: 'phone'` folds a long one behind "Show
+the status" at 600px and narrower), and beside it wider than 900px the page's figure (Ark's
+figure frame in Ark's disclosure, `foldBelow: 'tablet'`, "Show the illustration") and side
+blocks / the CMS anchor / the pager. A page module describes its page as data (`def`, documented
+at the top of `story.js`) and calls `ArkUI.story.mount(def, host)`; `ArkUI.story.bindTabs` binds
+any tabs block to the address the same way (`/concept`'s question groups). The idea holds the
+short answer -- the page's plain-language lede -- so every view stays inside the fold rule on a
+phone (measured: docs/ux-audit, W3-STORY). Route scripts: `ArkUI.storyScripts`. Layout: the
+story body's two columns in `css/block-page.css`; a story page adds no layout CSS of its own,
+only its drawing's insides (`css/lifecycle.css`, `css/story-diagrams.css`). Regression:
+`tests/story-blocks.cjs` (every word the old page showed is still on it, one depth control,
+continuity of every saved layout key, per route), `tests/story-ssr.cjs` (the server render, by
+`tests/lib/block-page-checks.cjs`), `tests/routes-live.cjs` (the behaviour in a real DOM).
+
+**The family home, /about and /chain** (Wave 3, W3-HOME). Each was a hero followed by one
+undivided "More" disclosure (or, on /chain, a scene with a visually hidden heading); each is now a
+hero and ONE Ark tabs control organised by the visitor's next question, every view inside the fold
+rule on its own (`js/pages/home.js`, `about.js`, `chain.js`). Their drawings stay the page's own,
+passed in as figure slots (`js/pages/home-flow.js`: the landscape and transit map; /chain's plain
+scene is HTML so its record stays >= 12px on a phone; the layer drawing in `about.js`), and the
+chain scene plays once and settles. The home page's benchmark tiles read the generated evidence
+registry (`js/content/evidence-registry.js`, `docs/content-sources.md`): a figure no verified
+record carries is absent, never a number. A tile that updates later (the live fleet signal) is
+patched with `ArkUI.blocks.update`. Regression: `tests/home-blocks.cjs`, `tests/about-page.cjs`,
+`tests/chain-blocks.cjs`, `tests/home-launch.cjs`, `tests/home-hero-scene.cjs`.
+
+**Layout-key continuity: required for every conversion.** Saved CMS edits are keyed by layout
+key, and most hand-built elements have path keys, so a conversion re-keys them. The workflow
+(`tests/lib/layout-continuity.cjs`):
+1. BEFORE touching the page: `node tests/lib/layout-continuity.cjs capture /route` freezes its key
+   census (`tests/fixtures/layout-keys/<route>.tsv`, TSV). It refuses to overwrite one: the old
+   page cannot re-derive it.
+2. Convert the page.
+3. `node tests/lib/layout-continuity.cjs derive /route` pins, on the converted page, each old key
+   whose words now sit elsewhere, and prints the `was` maps to paste, by spec entry id: refs are
+   `':root'`, `'<part>[#n]'` (the n-th element with that `data-ark-part` in the block),
+   `'[data-ark-slot="name"]'`, or a `:scope` path. A value is the old key, or
+   `{ key, self: true }` for the element alone. Words that are on no element any more are listed:
+   pin each by hand as **reshaped** (same content, new shape) or declare it **retired**, with the
+   reason, in the page's test.
+4. The page's test: `assertContinuity(census, await pageKeys(route), { reshaped, retired })`
+   (every old key still names an element with the same words; no two elements share a key) and
+   `await assertSavedEditsLand(route, census, { reshaped, retired })` (a real saved layout draft
+   with a frame on every old key, booted through the server render, lands on each one).
+   Examples: `tests/palette-blocks.cjs`, `tests/resolutions-blocks.cjs` (one template, 20 pages: the pins
+   derived in code from the structure the old pages were built from, the reasons as one rule table).
+   `tests/lib/converted-page.cjs` runs the whole check for one route from rule tables
+   (`[RegExp, reason]` for reshaped, retired and reworded keys) and adds two more: every leaf the old
+   page showed (its census) is in the new page's words, and no new element takes a retired key --
+   a new element whose computed path equals a retired key would inherit an edit saved for
+   something else, so such a key must be pinned (reshaped) instead (`tests/resolver-guide-blocks.cjs`,
+   `tests/task-pages-blocks.cjs`).
+
+**Server render.** Blocks render synchronously into light DOM before `ark:route-ready`, styled
+only by the static sheet: no style attributes, no injected rules (`tests/ssr-ark-blocks.cjs`).
+Generated ids (`ark-r-<scope>--<n>`) come from a counter that restarts in every document, so two
+server renders are byte-identical -- and a browser's ids differ from the server's by design.
+Nothing hydrates (people get `index.html` and the router mounts fresh; only crawlers get server
+HTML); if server nodes are ever reused in a browser, a block's whole subtree must be replaced,
+never patched.
 
 ## Versions
 
@@ -536,10 +787,11 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | file | owns |
 |---|---|
 | `core.js` | the `ArkAdmin` namespace and its vocabulary (`$`, `h`, `status`, `toast`, `refuse`, ...); refuses to run outside `admin.html` |
-| `overlay.js` | the one dismissable-layer stack (`overlay.open/close/forget/closeLevel/isOpen`) and the one close button |
+| `overlay.js` | the one dismissable-layer stack (`overlay.open/close/forget/closeLevel/isOpen`), the one close button, and the one stacking order: every floating layer's level, published as `--z-<layer>` custom properties that `css/admin.css` and `css/studio-embed.css` read (`overlay.layers`) |
 | `history.js` | the ONE undo history: canvas entries and form-field entries, in order; `undo()`, `redo()`, `historyState()` |
 | `notice.js` | `notice({ tone, title, body, actions, persist, key, into })`: the one toast / banner / inline alert (Ark UI's alert and toast-region shape, so a later wave swaps its internals); `toast()` is a notice; `tests/cms-notice.cjs` |
 | `state.js` | `A.state`: the lens and its rail tabs, the view, the item a form edits, every draft and its saved copy, dirty checks (`anyDirty`) |
+| `ark-host.js` | Ark's behaviour primitives on its light-DOM host (`ArkKit.createArkDomHost`) over elements the editor builds: `arkTabs` (Page settings, Site style), `arkDisclosure` (Developer details, SEO's Advanced, Unused fields, a version row's longer list), `arkSegGroup` (the lens, screen size, Edit / Preview, the new item's kind, Media's Grid / List), `arkAccordion` (the Library's groups). Ark writes the ARIA and the hidden state; the markup carries Ark's block classes so `css/ark-blocks.css` draws the tabs and the disclosure. Without ArkKit each works by click. Replaced `primitives.js` (W3-EDITOR, 2026-10-19), whose `.ark-tabs` / `.ark-disclosure` classes collided with Ark's own |
 | `controls.js` | the control-row builders every panel draws with, and `devDetails()` -- the one "Developer details" disclosure where keys, files, ids and raw values live |
 | `save.js` | `saveEverything`, `singleDraftHandle`, `siteFromState`, the one removal path |
 | `nav.js` | the lens (`setLens`), the `select*()` entry points (a page or article is also shown on the canvas), `renderList()` (the repaint after a draft change: header dots, Save, the Pages tree), `--app-bar-h` |
@@ -557,7 +809,7 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | `admin.js` | starts the editor: the save shortcut, the unsaved-work warning, `window.ArkAdminApp`, the first load |
 
 Loaded before them and not part of the split: `store.js` (`ArkAdminStore`), `versions.js`,
-`versions-panel.js`, `publish.js` (`ArkPublish`), `primitives.js`, `crypto.js`; and in
+`versions-panel.js`, `publish.js` (`ArkPublish`), `crypto.js`; and in
 `admin.html`, `auth.js` and `gate.js`.
 
 `window.ArkAdminApp` is the editor's public test surface: `unsaved()`, `site()` (what Publish

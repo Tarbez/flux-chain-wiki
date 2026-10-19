@@ -47,25 +47,6 @@
   color:hsl(var(--text));
 }
 
-.how-work-cards {
-  position:relative;
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;
-  flex:1 1 0;
-  min-height:330px;
-  counter-reset:work-step;
-}
-.how-work-cards::before {
-  content:"";
-  position:absolute;
-  left:5%;
-  right:5%;
-  top:50%;
-  height:1px;
-  background:linear-gradient(90deg,transparent,hsl(var(--reference-300)) 12%,hsl(var(--reference-300)) 88%,transparent);
-  pointer-events:none;
-}
 #scene .how-work-card {
   position:relative;
   z-index:1;
@@ -192,7 +173,7 @@
   .how-triptych-intro {grid-template-columns:minmax(480px,1.3fr) minmax(310px,.7fr);gap:34px;padding:0;}
   #scene .how-triptych h1 {font-size:38px;}
   #scene .how-triptych .how-simple-deck {font-size:13px;}
-  .how-work-cards {min-height:275px;}
+
   #scene .how-work-card {padding:16px;gap:9px;grid-template-rows:auto auto auto minmax(76px,1fr) auto;}
   #scene .how-work-card h2 {font-size:23px;}
   #scene .how-work-card .how-work-answer {font-size:12px;}
@@ -205,8 +186,8 @@
   .how-triptych-intro {grid-template-columns:1fr;gap:18px;align-items:start;}
   #scene .how-triptych h1 {font-size:clamp(35px,9vw,48px);}
   #scene .how-triptych .how-simple-deck {padding-left:16px;}
-  .how-work-cards {grid-template-columns:1fr;min-height:0;flex:none;}
-  .how-work-cards::before,#scene .how-work-card::after {display:none;}
+
+  #scene .how-work-card::after {display:none;}
   #scene .how-work-card {min-height:300px;}
   .how-simple-footer {grid-template-columns:1fr;align-items:start;gap:14px;}
   #scene .how-triptych .how-simple-boundary {align-items:flex-start;flex-direction:column;gap:6px;}
@@ -214,35 +195,4 @@
 }
 @media(prefers-reduced-motion:reduce) {
   #scene .how-work-card {transition:none;}
-}
-
-/* Deploy a resolver (2026-10-19, js/pages/deployment.js): each card lists its two of the six
-   steps; detail sits behind two disclosures; the footer hands off to Deploy and Explore. */
-#scene .how-work-card .how-work-pair {margin:0;padding-left:20px;display:grid;gap:8px;font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-#scene .how-work-card .how-work-pair li::marker {font:500 11px var(--font-mono,monospace);color:hsl(var(--primary));}
-#scene .how-work-card .how-work-pair strong {display:block;font-weight:600;color:hsl(var(--text-strong));}
-.how-deploy-detail {display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1.4fr);gap:10px 18px;align-items:start;flex:0 0 auto;}
-#scene .how-deploy-fold summary {cursor:pointer;font:600 12.5px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
-#scene .how-deploy-fold p,#scene .how-deploy-agreement p {margin:6px 0 0;max-width:56ch;font:400 12.5px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-#scene .how-deploy-hazard summary {color:hsl(var(--drift,var(--warning)));}
-#scene .how-deploy-agreement strong {font:600 12.5px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-faint));}
-#scene .how-deploy-chapters {display:flex;flex-wrap:wrap;gap:4px 14px;}
-#scene :is(.how-deploy-chapter,.how-deploy-handoff) {color:hsl(var(--reference));font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);text-decoration:none;border-bottom:1px solid hsl(var(--reference-300));}
-.how-deploy-handoffs {display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 16px;}
-@media(max-width:900px) {
-  .how-deploy-detail {grid-template-columns:1fr;}
-  .how-deploy-handoffs {justify-content:flex-start;}
-}
-/* The agreement chapters' "earlier path" banner (js/pages/how-stories.js). */
-#scene .how-chapter-banner {margin:0 0 10px;padding:8px 12px;border-left:2px solid hsl(var(--drift,var(--warning)));background:hsl(var(--surface) / .4);font:400 12.5px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-#scene .how-chapter-banner-link {color:hsl(var(--reference));text-decoration:none;border-bottom:1px solid hsl(var(--reference-300));}
-/* Deploy a resolver: the cards size to their two steps (they were clipped at a fixed row height
-   with overflow:hidden), and the decorative mesh is shorter so the six steps stay above the fold. */
-.how-deploy .how-work-cards {flex:0 0 auto;min-height:0;}
-#scene .how-deploy .how-work-card {grid-template-rows:auto auto auto 64px auto;align-content:start;overflow:visible;}
-.how-deploy .how-work-mesh-frame {min-height:64px;grid-template-rows:minmax(44px,1fr);}
-.how-deploy .how-work-mesh {min-height:44px;}
-@media(max-width:900px) {
-  #scene .how-deploy .how-work-card {min-height:0;grid-template-rows:auto auto auto auto;}
-  .how-deploy .how-work-mesh-frame {display:none;}
 }

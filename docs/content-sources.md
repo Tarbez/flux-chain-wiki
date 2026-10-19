@@ -16,6 +16,7 @@ Shared facts are authored once and referenced elsewhere. Public pages may summar
 | Agreement lifecycle | `docs/protocol/agreements.md` | Use the five canonical stages in order. |
 | Authority and governance | `docs/protocol/authority.md`, `docs/protocol/governance.md` | Separate policy definition from activation evidence. |
 | Benchmark method and result | `docs/protocol/benchmarks.md` plus a `BENCH-*` record | No unsupported numbers in manifests or marketing copy. |
+| Benchmark figures a page quotes | `js/content/evidence-registry.js`, generated from `docs/evidence/registry.md` by `scripts/build-evidence-registry.cjs` (`--check` in `tests/home-blocks.cjs`) | Show a figure only when a record the registry marks verified carries it, with that record's status; a figure no verified record carries is absent ("Not verified", with what would verify it), never a number. The home page's tiles read it this way (2026-10-19: they had shown ten-node figures under BENCH-013, whose row is one machine and carries none of them). |
 | Route-specific presentation copy | `js/content/manifests/*.js` | Summarize canonical facts; do not become their source of truth. |
 | Article-specific narrative | `js/content/articles/*.js` | Link evidence and avoid redefining status vocabulary. |
 

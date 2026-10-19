@@ -480,23 +480,14 @@ check('it sits in the same journey as "what is a resolver", not with the evidenc
   assert.notEqual(sitePages.journeyOf('resolver-math'), 'prove', 'and it is not filed with the evidence');
 });
 
-check('it uses the shared dashboard kit, not a private layout', () => {
-  assert.ok(
-    /ArkUI\.dash/.test(page),
-    'the page does not use ArkUI.dash. It would then carry its own panel, grid and table ' +
-      'builders, which is how two pages that should look identical drift apart.'
-  );
-  for (const shared of ['dash-shell', 'dash-grid', 'dash-panel', 'dash-section']) {
-    assert.ok(
-      page.includes(shared) || /D\.(shell|panel|sectionHead|table|stat)\(/.test(page),
-      `the page should compose the shared ${shared} vocabulary`
-    );
-  }
-  assert.ok(
-    /content-layer-path/.test(fs.readFileSync(path.join(ROOT, 'js', 'ark', 'dash-kit.js'), 'utf8')),
-    'the shared shell must render the breadcrumb; arriving with no way back is the ' +
-      'complaint this page was rebuilt to fix'
-  );
+check('it uses the shared block system, not a private layout', () => {
+  /* Since 2026-10-19 (W3-STATS) the page is a spec of Ark blocks (ArkUI.page): the shell, panels,
+     tables, tiles and breadcrumb are the same blocks every converted page uses, so two pages that
+     should look identical cannot drift apart. tests/resolver-math-blocks.cjs reads the rendered
+     page. */
+  assert.ok(/ArkUI\.page\(/.test(page), 'the page is not built by ArkUI.page. It would then carry its own shell, panels and tables, which is how two pages that should look identical drift apart.');
+  assert.ok(!/\bD\.(shell|panel|table|stat|sectionHead)\(/.test(page), 'the page still calls a dashboard layout builder instead of an Ark block');
+  assert.ok(/block: 'breadcrumb'/.test(page), 'the page must open with a breadcrumb; arriving with no way back is the complaint this page was rebuilt to fix');
 });
 
 check('the page does not hand-type the registry counts', () => {
@@ -601,6 +592,40 @@ check('a letter nobody defined is absent in both directions', () => {
   );
 });
 
+/* The page as a visitor gets it: the real module on the real Ark kit and blocks adapter in jsdom
+ * (since 2026-10-19 the page is a spec of Ark blocks: js/pages/resolver-math.js, W3-STATS). `find`
+ * and `all` read the rendered DOM the way the earlier small-DOM checks did, so every claim below is
+ * the same claim, made on the real page. Timers are recorded (eqScheduled), not run. */
+function mountMath(withData) {
+  const { JSDOM } = require('jsdom');
+  const dom = new JSDOM('<!doctype html><html><body><main id="scene"></main></body></html>', { runScripts: 'outside-only', pretendToBeVisual: true, url: 'https://defxn.com/resolver-math' });
+  const w = dom.window;
+  w.setTimeout = (fn, ms) => { eqScheduled.push({ fn, ms }); return eqScheduled.length; };
+  w.clearTimeout = () => {};
+  w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  w.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
+  const run = (file) => w.eval(fs.readFileSync(path.isAbsolute(file) ? file : path.join(ROOT, file), 'utf8'));
+  w.eval('var ArkCopy = { isKey: function () { return false; }, resolve: function (v) { return v; }, text: function (k) { return k; } };');
+  for (const file of ['js/ark/atomizer.js', 'js/ark/flux.js', 'js/ark/runtime.js', 'js/ark/vendor/engines.js']) run(file);
+  w.eval('ArkUI.pageCatalog = { zero: { path: "/" }, resolver: { path: "/what-is-a-resolver" }, resolvers: { path: "/resolvers" }, stats: { path: "/stats" }, reference: { path: "/reference" }, "resolver-math": { path: "/resolver-math" } }; ArkUI.blockScripts = []; ArkUI.pageModules = ArkUI.pageModules || {};');
+  for (const file of ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js', 'js/content/glossary.js', 'js/ark/story-diagrams.js']) run(file);
+  if (withData) for (const file of [DATA, 'js/content/resolver-block.js', 'js/content/registry-snapshot.js']) run(file);
+  run(PAGE);
+  const host = w.document.getElementById('scene');
+  const el = w.ArkUI.pageModules.resolverMath.mount(host);
+  const cls = (n) => String(n.getAttribute && n.getAttribute('class') || '').split(/\s+/);
+  el.all = () => [el, ...el.querySelectorAll('*')];
+  el.find = (name) => el.all().filter((n) => cls(n).includes(name));
+  el.host = host; el.window = w;
+  return el;
+}
+/* The rows of the table whose caption is `caption`. */
+function tableRows(el, caption) {
+  const table = [...el.querySelectorAll('table')].find((t) => t.querySelector('caption').textContent === caption);
+  assert.ok(table, 'no table captioned "' + caption + '" rendered');
+  return [...table.querySelectorAll('tbody tr')];
+}
+
 /* -------------------------------------------------------------------- */
 /* 5. The page RENDERS it — not just "the data is correct somewhere"     */
 /* -------------------------------------------------------------------- */
@@ -610,120 +635,40 @@ check('a letter nobody defined is absent in both directions', () => {
  * mount the real page module against a small DOM and assert on what a
  * visitor would actually read. */
 check('the page module mounts and renders every section', () => {
-  const vm = require('node:vm');
-
-  const scheduled = new Map();
-  let clockId = 0;
-
-  class Node {
-    constructor(tag) {
-      this.tagName = tag; this.className = ''; this.children = []; this.dataset = {};
-      this.attrs = {}; this.listeners = {}; this.style = { setProperty() {} };
-      this._text = ''; this.value = ''; this.type = ''; this.hidden = false;
-    }
-    get offsetWidth() { return 1; }
-    get classList() {
-      const self = this;
-      return {
-        add(...n) { self.className = (self.className + ' ' + n.join(' ')).trim(); },
-        remove(...n) { self.className = self.className.split(' ').filter((c) => !n.includes(c)).join(' '); },
-        contains(n) { return self.className.split(' ').includes(n); }
-      };
-    }
-    appendChild(c) { this.children.push(c); c.parent = this; return c; }
-    replaceChildren(...c) { this.children = c; }
-    /* SVG sets class and data-* through setAttribute, so mirror them the
-       way a real element does — otherwise every <rect> is invisible to a
-       class or dataset lookup and a check silently passes on nothing. */
-    setAttribute(k, v) {
-      this.attrs[k] = String(v);
-      if (k === 'class') this.className = String(v);
-      if (k.startsWith('data-')) {
-        this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v);
-      }
-    }
-    getAttribute(k) { return this.attrs[k]; }
-    addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); }
-    set textContent(v) { this._text = v == null ? '' : String(v); this.children = []; }
-    get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
-    all() { return [this].concat(...this.children.map((c) => c.all())); }
-    find(cls) { return this.all().filter((n) => String(n.className).split(' ').includes(cls)); }
-  }
-
-  const document = {
-    createElement: (t) => new Node(t),
-    createElementNS: (_ns, t) => new Node(t),
-    createTextNode: (t) => { const n = new Node('#text'); n.textContent = String(t); return n; }
-  };
-  const sandbox = {
-    document, console, Date, Math, Number, String, encodeURIComponent,
-    /* The equation plays on mount, so every sandbox needs a clock and a
-       motion query. A bounded, settling play is the house contract. */
-    setTimeout: (fn, ms) => { eqScheduled.push({ fn, ms }); return eqScheduled.length; },
-    clearTimeout: () => {},
-    matchMedia: () => ({ matches: false, addEventListener() {} }),
-    ArkUI: {
-      pageModules: {},
-      pageCatalog: {
-        zero: { path: '/' }, resolver: { path: '/what-is-a-resolver' },
-        stats: { path: '/stats' }, reference: { path: '/reference' },
-        'resolver-math': { path: '/resolver-math' }
-      },
-      route: { href: (p) => p }
-    }
-  };
-  sandbox.window = sandbox;
-  const ctx = vm.createContext(sandbox);
-
-  for (const file of [
-    path.join(ROOT, 'js', 'ark', 'dash-kit.js'),
-    path.join(ROOT, 'js', 'ark', 'story-diagrams.js'),
-    DATA,
-    path.join(ROOT, 'js', 'content', 'resolver-block.js'),
-    PAGE
-  ]) vm.runInContext(fs.readFileSync(file, 'utf8'), ctx);
-
-  const module = ctx.ArkUI.pageModules.resolverMath;
-  assert.ok(module, 'the page module did not register as ArkUI.pageModules.resolverMath');
-
-  const host = new Node('main');
-  const el = module.mount(host);
+  const el = mountMath(true);
   assert.ok(el && el.dataset, 'mount() must return its page element, or the router throws');
-  assert.equal(host.children[0], el, 'the returned element is the one mounted');
+  assert.equal(el.parentNode, el.host, 'the returned element is the one mounted');
 
-  /* Part of the site, not an island: breadcrumb, kicker, title, lede. */
-  const crumbs = el.find('content-layer-path');
+  /* Part of the site, not an island: breadcrumb, eyebrow, title, lede. */
+  const crumbs = el.querySelectorAll('[data-ark-block="breadcrumb"]');
   assert.equal(crumbs.length, 1, 'the page must render the site breadcrumb');
   assert.ok(
     crumbs[0].textContent.includes('Home'),
     'the breadcrumb must offer a way back; arriving with no way back is what made this page ' +
       'feel like it dropped out of nowhere'
   );
-  assert.equal(el.find('dash-shell').length, 1, 'the page must use the shared dashboard shell');
-  assert.ok(el.find('dash-kicker').length, 'the shared header kicker is missing');
-  assert.ok(el.find('dash-h1').length, 'the shared header title is missing');
-  assert.ok(el.find('dash-section-title').length >= 6, 'the page lost its section structure');
+  assert.ok(el.querySelector('[data-ark-block="hero"] [data-ark-part="eyebrow"]'), 'the shared header eyebrow is missing');
+  assert.ok(el.querySelector('[data-ark-block="hero"] h1'), 'the shared header title is missing');
+  assert.ok(el.querySelectorAll('#rm-views [role="tab"]').length >= 6, 'the page lost its section structure');
   assert.ok(el.find('rm-say').length >= 10, 'the builder lists what can be said; it is ' +
     'the page\'s one interactive proof that the result is a sum of definitions');
 
   /* The algebra, and every table that carries the argument. */
-  assert.equal(el.find('rm-equation-form').length, 3, 'the algebra renders three lines');
+  const algebra = [...el.querySelectorAll('[data-ark-block="facts"]')].find((f) => f.getAttribute('aria-label') === 'Written as algebra');
+  assert.ok(algebra, 'the algebra is gone');
+  assert.equal(algebra.querySelectorAll('[data-ark-part="fact"]').length, 3, 'the algebra renders three lines');
 
-  function rowsOf(cls) {
-    const t = el.find(cls)[0];
-    assert.ok(t, `no ${cls} table rendered`);
-    return t.all().filter((n) => n.tagName === 'tbody').flatMap((b) => b.children);
-  }
-
+  const LAYERS = 'Each layer was decided by a hazard somebody hit, not by taste.';
+  const LIMITS = 'Resolver families (audited): what each turns into a signed result, and its measured limit';
   const expectedLayers = engine.layers().length;
   assert.ok(expectedLayers >= 4, 'the census lost a dimension; it should have at least four');
   assert.equal(
-    rowsOf('rm-layers').length, expectedLayers,
+    tableRows(el, LAYERS).length, expectedLayers,
     `the census must render all ${expectedLayers} dimensions. An empty table reads as ` +
       '"nothing here".'
   );
   assert.equal(
-    rowsOf('rm-observers').length, engine.observerTable().length,
+    tableRows(el, 'One letter, ten real cases').length, engine.observerTable().length,
     'the observer table must render every type-scoped letter. This is the only place the ' +
       'page shows S(s, i, O) actually built, so a blank table turns a demonstration into an ' +
       'assertion.'
@@ -734,9 +679,8 @@ check('the page module mounts and renders every section', () => {
   const declaredCount = (page.match(/\{ name: '/g) || []).length;
   const unbuiltCount = (page.match(/built: false/g) || []).length;
   assert.ok(declaredCount >= 20, 'the resolver list shrank unexpectedly');
-  assert.ok(el.find('rm-limits')[0], 'the measured-limits table did not render');
 
-  const layerText = el.find('rm-layers')[0].textContent;
+  const layerText = tableRows(el, LAYERS).map((tr) => tr.textContent).join(' ');
   for (const needed of ['closed', 'open', 'unbounded', 'relative']) {
     assert.ok(
       layerText.includes(needed),
@@ -771,21 +715,19 @@ check('the page module mounts and renders every section', () => {
 
   /* Not built is listed by name, in the same table as the built ones, so
    * the absence is as visible as the presence. */
-  const limitRows = el.find('rm-limits')[0].all()
-    .filter((n) => n.tagName === 'tbody').flatMap((b) => b.children);
+  const limitRows = tableRows(el, LIMITS);
   assert.equal(
     limitRows.length, declaredCount,
     `the limits table must list every resolver, built or not; got ${limitRows.length} of ` +
       `${declaredCount}. Hiding the unbuilt ones is how "not built" quietly becomes "zero".`
   );
-  /* Scoped to the limits table: the gaps table lower down carries its own
-   * not-built tags and they are a different claim. */
-  const limitTags = el.find('rm-limits')[0].all()
-    .filter((n) => String(n.className).split(' ').includes('rm-tag') && n.dataset.kind === 'notbuilt');
+  /* Scoped to the limits table: the gaps table carries its own not-built states and they are a
+   * different claim. */
+  const notBuiltCells = limitRows.filter((tr) => tr.lastElementChild.textContent.trim() === 'not built');
   assert.equal(
-    limitTags.length, unbuiltCount,
-    `every unbuilt resolver must carry a "not built" tag rather than an empty cell; ` +
-      `${limitTags.length} of ${unbuiltCount} did`
+    notBuiltCells.length, unbuiltCount,
+    `every unbuilt resolver must say "not built" rather than leave an empty cell; ` +
+      `${notBuiltCells.length} of ${unbuiltCount} did`
   );
 
   assert.ok(
@@ -797,65 +739,13 @@ check('the page module mounts and renders every section', () => {
 /* A missing generated file must be said out loud on the page, not left as
  * empty tables that read as "there is nothing here". */
 check('the page refuses by name when the census did not load', () => {
-  const vm = require('node:vm');
-  class Node {
-    constructor(tag) {
-      this.tagName = tag; this.className = ''; this.children = []; this.dataset = {};
-      this.attrs = {}; this.listeners = {}; this.style = { setProperty() {} }; this._text = '';
-    }
-    get offsetWidth() { return 1; }
-    get classList() {
-      const self = this;
-      return {
-        add(...n) { self.className = (self.className + ' ' + n.join(' ')).trim(); },
-        remove(...n) { self.className = self.className.split(' ').filter((c) => !n.includes(c)).join(' '); },
-        contains(n) { return self.className.split(' ').includes(n); }
-      };
-    }
-    appendChild(c) { this.children.push(c); return c; }
-    replaceChildren(...c) { this.children = c; }
-    /* SVG sets class and data-* through setAttribute, so mirror them the
-       way a real element does — otherwise every <rect> is invisible to a
-       class or dataset lookup and a check silently passes on nothing. */
-    setAttribute(k, v) {
-      this.attrs[k] = String(v);
-      if (k === 'class') this.className = String(v);
-      if (k.startsWith('data-')) {
-        this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v);
-      }
-    }
-    addEventListener() {}
-    set textContent(v) { this._text = v == null ? '' : String(v); this.children = []; }
-    get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
-    all() { return [this].concat(...this.children.map((c) => c.all())); }
-    find(cls) { return this.all().filter((n) => String(n.className).split(' ').includes(cls)); }
-  }
-  const sandbox = {
-    document: {
-      createElement: (t) => new Node(t),
-      /* The figures are SVG, drawn with js/ark/story-diagrams.js's primitives. */
-      createElementNS: (_ns, t) => new Node(t),
-      createTextNode: (t) => { const n = new Node('#text'); n.textContent = String(t); return n; }
-    },
-    console, Date, Math, Number, String, encodeURIComponent,
-    setTimeout: () => 0, clearTimeout: () => {},
-    matchMedia: () => ({ matches: false, addEventListener() {} }),
-    ArkUI: { pageModules: {}, pageCatalog: { zero: { path: '/' }, resolver: { path: '/r' } }, route: { href: (p) => p } }
-  };
-  sandbox.window = sandbox;
-  const ctx = vm.createContext(sandbox);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'ark', 'dash-kit.js'), 'utf8'), ctx);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'ark', 'story-diagrams.js'), 'utf8'), ctx);
-  vm.runInContext(fs.readFileSync(PAGE, 'utf8'), ctx);   // no algebra, no engine
-
-  const host = new Node('main');
-  const el = ctx.ArkUI.pageModules.resolverMath.mount(host);
+  const el = mountMath(false);   // no algebra, no engine
   assert.ok(el, 'the page must still mount without its data, not throw');
   const text = el.textContent;
   assert.ok(/did not load/i.test(text), 'the page must state the failure');
   assert.ok(/resolver-algebra\.js/.test(text), 'the page must name the missing file');
   assert.ok(/gen-resolver-algebra/.test(text), 'the page must name the remedy');
-  assert.equal(el.find('rm-layers').length, 0, 'no empty census table is rendered instead');
+  assert.equal(el.querySelectorAll('table').length, 0, 'no empty census table is rendered instead');
 });
 
 /* -------------------------------------------------------------------- */
@@ -868,68 +758,9 @@ check('the page refuses by name when the census did not load', () => {
  * tidy-up that moves the algebra back to the top would look like an
  * improvement and undo the whole point. */
 check('the page opens on the sum of definitions, and no symbol opens it', () => {
-  const vm = require('node:vm');
-  class Node {
-    constructor(tag) {
-      this.tagName = tag; this.className = ''; this.children = []; this.dataset = {};
-      this.attrs = {}; this.listeners = {}; this.style = { setProperty() {} }; this._text = '';
-      this.value = ''; this.type = '';
-    }
-    get offsetWidth() { return 1; }
-    get classList() {
-      const self = this;
-      return {
-        add(...n) { self.className = (self.className + ' ' + n.join(' ')).trim(); },
-        remove(...n) { self.className = self.className.split(' ').filter((c) => !n.includes(c)).join(' '); },
-        contains(n) { return self.className.split(' ').includes(n); }
-      };
-    }
-    appendChild(c) { this.children.push(c); return c; }
-    replaceChildren(...c) { this.children = c; }
-    /* SVG sets class and data-* through setAttribute, so mirror them the
-       way a real element does — otherwise every <rect> is invisible to a
-       class or dataset lookup and a check silently passes on nothing. */
-    setAttribute(k, v) {
-      this.attrs[k] = String(v);
-      if (k === 'class') this.className = String(v);
-      if (k.startsWith('data-')) {
-        this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v);
-      }
-    }
-    addEventListener() {}
-    set textContent(v) { this._text = v == null ? '' : String(v); this.children = []; }
-    get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
-    all() { return [this].concat(...this.children.map((c) => c.all())); }
-    find(cls) { return this.all().filter((n) => String(n.className).split(' ').includes(cls)); }
-  }
-  const sandbox = {
-    document: {
-      createElement: (t) => new Node(t),
-      /* The figures are SVG, drawn with js/ark/story-diagrams.js's primitives. */
-      createElementNS: (_ns, t) => new Node(t),
-      createTextNode: (t) => { const n = new Node('#text'); n.textContent = String(t); return n; }
-    },
-    console, Date, Math, Number, String, encodeURIComponent,
-    setTimeout: (fn, ms) => { eqScheduled.push({ fn, ms }); return eqScheduled.length; },
-    clearTimeout: () => {},
-    matchMedia: () => ({ matches: false, addEventListener() {} }),
-    ArkUI: {
-      pageModules: {},
-      pageCatalog: { zero: { path: '/' }, resolver: { path: '/r' }, stats: { path: '/s' }, reference: { path: '/ref' } },
-      route: { href: (p) => p }
-    }
-  };
-  sandbox.window = sandbox;
-  const ctx = vm.createContext(sandbox);
-  for (const file of [
-    path.join(ROOT, 'js', 'ark', 'dash-kit.js'),
-    path.join(ROOT, 'js', 'ark', 'story-diagrams.js'), DATA,
-    path.join(ROOT, 'js', 'content', 'resolver-block.js'),
-    path.join(ROOT, 'js', 'content', 'registry-snapshot.js'), PAGE
-  ]) vm.runInContext(fs.readFileSync(file, 'utf8'), ctx);
-  const SNAP = ctx.ArkRegistrySnapshot;
-
-  const el = ctx.ArkUI.pageModules.resolverMath.mount(new Node('main'));
+  eqScheduled.length = 0; // this mount's play only
+  const el = mountMath(true);
+  const SNAP = el.window.ArkRegistrySnapshot;
   const flat = el.all();
 
   /* The equation is the first thing on the page and must be the SUM —
@@ -942,8 +773,8 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
    * is checked below (the section is gone, and nothing still points at
    * it); what survives here is just the ordering claim: the sum still
    * leads, and the symbolic form is still a side panel, not the opener. */
-  const firstEquation = flat.findIndex((n) => String(n.className).split(' ').includes('rm-equation'));
-  const firstAlgebra = flat.findIndex((n) => String(n.className).split(' ').includes('rm-algebra'));
+  const firstEquation = flat.findIndex((n) => String(n.getAttribute && n.getAttribute('class') || '').split(' ').includes('rm-equation'));
+  const firstAlgebra = flat.findIndex((n) => n.getAttribute && n.getAttribute('aria-label') === 'Written as algebra');
   assert.ok(firstEquation >= 0, 'the equation is gone');
   assert.ok(firstAlgebra >= 0, 'the symbolic form is gone; it belongs on the page, just not first');
   assert.ok(
@@ -965,7 +796,7 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
   /* The field: one cell per definition, counted — not a texture that
      merely looks dense. If it ever stops matching the sum, the page is
      showing a picture of an argument instead of the argument. */
-  const fieldCells = el.find('rm-cell').filter((c) => !String(c.className).includes('rm-cell-never'));
+  const fieldCells = el.find('rm-cell').filter((c) => !c.getAttribute('class').includes('rm-cell-never'));
   const builtResolvers = (page.match(/built: true/g) || []).length;
   assert.ok(builtResolvers > 0, 'the page lists no built resolvers');
   /* Since 2026-10-19 the resolver term of the sum is the resolver CHAINS (native + bridge) plus
@@ -1027,7 +858,7 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
     );
   }
   assert.ok(
-    /\b0\b/.test(el.find('rm-eq-zero')[0].textContent),
+    [...el.find('rm-eq-zero')[0].querySelectorAll('.rm-eq-n')].some((n) => n.textContent.trim() === '0'),
     'the sum must carry the terms nobody defined as 0 ALONGSIDE the rest. That is the only ' +
       'honest way to show that an undefined thing is absent rather than slow.'
   );
@@ -1079,7 +910,7 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
    * (the record shape, and signing) is content nothing else on the page
    * draws. Each must still carry a caption: a drawing nobody can read
    * aloud helps only the person who already understood. */
-  const figs = el.find('rm-fig');
+  const figs = [...el.querySelectorAll('[data-ark-block="figure"]')].filter((f) => f.querySelector('svg.story-drawing'));
   assert.equal(
     figs.length, 2,
     `${figs.length} figures render; the page should carry exactly the two that nothing else ` +
@@ -1087,7 +918,7 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
       'deliberately cut for duplicating the explorer and the observer table.'
   );
   for (const f of figs) {
-    const caption = f.all().filter((n) => String(n.className).split(' ').includes('rm-fig-caption'));
+    const caption = f.querySelectorAll('[data-ark-part="figure-caption"]');
     assert.equal(caption.length, 1, 'every figure needs exactly one caption');
     assert.ok(
       caption[0].textContent.trim().length > 60,
@@ -1101,8 +932,7 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
       'purpose — the table already shows every real case, not just one'
   );
   assert.ok(
-    !page.includes('TYPEGHOST') || figs.every((f) => !f.all().some((n) =>
-      String(n.className).split(' ').includes('rm-fig-letter') && n.textContent === 'T')),
+    !page.includes('TYPEGHOST') || figs.every((f) => ![...f.querySelectorAll('.rm-fig-letter')].some((n) => n.textContent === 'T')),
     'the greedy-letter figure is back; the explorer below already lets a reader try ' +
       'TYPEGHOST live, which is the stronger version of the same demonstration'
   );
@@ -1110,29 +940,26 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
   /* The boundary table and the observer table were merged into one
    * section 2026-10-10 — they are the same question ("what counts as
    * fixed?") asked twice, not two different questions, and each used to
-   * carry its own lede and note repeating the other's point. Checked by
-   * position: both tables must exist, and no section heading may fall
-   * between them, or the merge has quietly split back into two. */
-  const layersIdx = flat.findIndex((n) => String(n.className).split(' ').includes('rm-layers'));
-  const observersIdx = flat.findIndex((n) => String(n.className).split(' ').includes('rm-observers'));
-  assert.ok(layersIdx >= 0, 'the fixed-vs-open dimension table is gone');
-  assert.ok(observersIdx >= 0, 'the ten-case observer table is gone');
-  const headingBetween = flat
-    .slice(Math.min(layersIdx, observersIdx), Math.max(layersIdx, observersIdx))
-    .some((n) => String(n.className).split(' ').includes('dash-section-title'));
-  assert.ok(
-    !headingBetween,
-    'a section heading now sits between the dimension table and the observer table — they ' +
-      'were merged into one section on purpose, because they answer the same question twice'
-  );
+   * carry its own lede and note repeating the other's point. Since 2026-10-19 that section is one
+   * tab ("Fixed vs bends"): both tables must be in it, with no section heading between them. */
+  const layersTable = tableRows(el, 'Each layer was decided by a hazard somebody hit, not by taste.')[0].closest('table');
+  const observersTable = tableRows(el, 'One letter, ten real cases')[0].closest('table');
+  assert.equal(layersTable.closest('[role="tabpanel"]'), observersTable.closest('[role="tabpanel"]'),
+    'the dimension table and the observer table are in different views now — they were merged ' +
+      'into one section on purpose, because they answer the same question twice');
+  const between = flat.slice(flat.indexOf(layersTable), flat.indexOf(observersTable));
+  assert.ok(!between.some((n) => n.getAttribute && n.getAttribute('data-ark-part') === 'section-title'),
+    'a section heading now sits between the dimension table and the observer table');
 
   /* Every remaining section still opens in plain words — fewer sections
    * now, so fewer plain ledes, but the discipline itself (say it plainly,
    * then get precise) was not part of the overload and stays. */
+  const plain = ['Untick a definition.', 'You can define new things to say almost without limit.',
+    'watch what happens to it.', 'Definitions decide what can be said.', 'audited resolver families have a measured limit.'];
   assert.equal(
-    el.find('dash-section-plain').length, 5,
-    'the count of plain-opened sections changed. If a section was added or removed, update ' +
-      'this to match; if this drifted on its own, a section silently lost its plain lede.'
+    plain.filter((line) => el.textContent.includes(line)).length, 5,
+    'a section lost its plain opening line. If a section was added or removed, update this to ' +
+      'match; if this drifted on its own, a section silently lost its plain lede.'
   );
 });
 

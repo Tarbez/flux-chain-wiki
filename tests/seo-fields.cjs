@@ -76,8 +76,9 @@ function extract(source, signature) {
   const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'outside-only' });
   const win = dom.window;
   win.eval(seoSource + ';window.ArkSEO = ArkSEO;');
-  /* the editor's disclosure (canonical URL and structured data sit under "Advanced") */
-  win.eval(require('node:fs').readFileSync('js/admin/primitives.js', 'utf8') + ';window.ArkAdminPrimitives = ArkAdminPrimitives;');
+  /* the editor's disclosure (canonical URL and structured data sit under "Advanced"): Ark's, on the
+     light-DOM host (js/admin/ark-host.js); without ArkKit here it works by click */
+  win.eval(require('./lib/admin-source.cjs').arkHostSource());
   const kinds = /const SEO_TEXT_KINDS = \{[^}]*\};/.exec(admin)[0];
   win.eval([extract(admin, 'function h(tag, props)'), extract(admin, 'function ctlLabel(value)'), extract(admin, 'function ctlField(ctx, label, key, opts)'), extract(admin, 'function ctlSegField(ctx, label, key, options, labelOf)'),
     extract(admin, 'function ctlSelectField(ctx, label, key, options, labelOf, opts)'), kinds, extract(admin, 'function seoFieldRows(fields, target, onEdited)'),

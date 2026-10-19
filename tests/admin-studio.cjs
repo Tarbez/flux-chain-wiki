@@ -133,7 +133,7 @@ assert(studio.includes('defxn-cms-preview-mode'), 'Edit and Live modes are forwa
 // still reachable exactly as before (#btnContentCms, #tabSeo).
 assert(!admin.includes('Content, SEO, and routing for this page are edited through the authoritative CMS controls'), 'Step 4: the redirect note that used to sit above the (now-deleted) accordions is gone with them, not orphaned');
 assert(app.includes('id="lensContentBtn"') && app.includes('id="btnPageFields"') && app.includes('id="btnPageSeo"') && admin.includes('function buildSiteSeoPanel'), 'the Content lens, a page\'s every field (#btnPageFields sheet) and SEO (page: #btnPageSeo popover; site: the Theme view) stay reachable -- only the redundant redirect note pointing at them is gone');
-assert(studio.includes("'DEFXN reusable components'"), 'connected Studio library describes the real runtime component system');
+assert(studio.includes("h('h4', { text: 'Components' })") && studio.includes('ArkComponents.groups()'), 'connected Studio library lists the real runtime component system, grouped (tests/components-library.cjs covers it in depth)');
 assert(admin.includes('function notifyPreviewState()') && !app.includes('id="frame"') && (app.match(/<iframe\b/g) || []).length === 1, 'every unsaved content draft reaches the ONE canvas (js/admin/bridge.js notifyPreviewState); Content mode\'s second preview iframe (#frame) is gone');
 assert(!admin.includes("type: 'defxn-studio-preview-state'"), "Step 2: there is no more 'defxn-studio-preview-state' message -- renderStudioEditor() re-reads siteFromState() directly on every entry instead of being pushed a copy");
 assert(main.includes("data.type !== 'defxn-cms-preview-state'"), 'the public runtime accepts full preview state only in preview mode');
@@ -517,12 +517,16 @@ assert(store.includes('async function saveElementMotion(contentDir, whole)') && 
 // -- and nothing is torn down or swapped when it changes.
 assert(!/\bstate\.mode\b/.test(admin) && !admin.includes('function kindMode') && !admin.includes('function syncMode') && !admin.includes('function setMode'), 'no app mode is left: no state.mode, kindMode(), syncMode() or setMode()');
 assert(/state\.lens = 'content';/.test(admin) && admin.includes("localStorage.getItem('defxn-cms-lens')"), "the lens opens on 'content' (most edits are text) and is remembered per browser");
-assert(admin.includes('function setLens(lens)') && admin.includes("$('lensContentBtn').addEventListener('click', function () { setLens('content'); });") && admin.includes("$('lensDesignBtn').addEventListener('click', function () { setLens('design'); });"), 'both lens buttons are wired to setLens()');
+/* the lens is Ark's toggle group (js/admin/ark-host.js arkSegGroup) since W3-EDITOR: one pressed, one tab stop, a pick calls setLens */
+assert(admin.includes('function setLens(lens)') && /A\.arkSegGroup\(\$\('lensSwitch'\), \[\$\('lensContentBtn'\), \$\('lensDesignBtn'\)\],\s*\{ selected: LENSES\.indexOf\(state\.lens\), onPick: function \(i\) \{ setLens\(LENSES\[i\]\); \} \}\)/.test(admin), 'both lens buttons are one Ark toggle group whose pick calls setLens()');
 assert(/function setLens\(lens\) \{[\s\S]*?postCmsPreviewLens\(\)/.test(admin) && admin.includes("type: 'defxn-cms-preview-lens', lens: state.lens"), 'a lens change is posted to the canvas (defxn-cms-preview-lens)');
 assert(/addEventListener\('load', \(\) => \{[^}]*postCmsPreviewLens\(\)/.test(admin) && /'defxn-cms-preview-ready'\) \{[\s\S]{0,900}postCmsPreviewLens\(\);/.test(admin), 'the lens is re-sent on every canvas load and after every ready, like Edit/Live');
 assert(app.includes('id="lensSwitch"') && app.includes('id="viewSwitch"') && !app.includes('id="modeSwitch"') && !app.includes('id="designSubSwitch"'), 'the header has a lens switch and a view switch, not a mode switch and a Design-only sub-switch');
 assert(app.includes('id="viewCanvasBtn"') && app.includes('id="viewMapBtn"') && app.includes('id="viewThemeBtn"') && app.includes('id="backgroundBtn"'), 'the views of the one site -- Canvas, Sitemap, Theme -- and the Background popover are ONE segmented control, in either lens');
-assert((app.match(/class="ark-tab"/g) || []).length >= 2, 'the lens buttons reuse the existing .ark-tab tab-trigger style already used for in-editor tabs, not a new button convention (the views are More menu items since 2026-10-19)');
+/* one segmented-control convention: the lens is the same .seg as the canvas strip's screen size and
+   Edit / Preview groups (the editor's .ark-tab class collided with Ark's own tab classes and went
+   with js/admin/primitives.js, W3-EDITOR 2026-10-19) */
+assert(/<div class="seg seg-text lens-switch" id="lensSwitch"/.test(app) && !/class="ark-tab"/.test(app) && !/primitives\.js/.test(app) && !/ArkAdminPrimitives/.test(admin), 'the lens buttons are a .seg group like the strip\'s, and the editor neither loads nor calls local tabs/disclosure primitives');
 assert(/for \(const b of \$\('viewSwitch'\)\.querySelectorAll\('\[data-view\]'\)\) b\.addEventListener\('click', \(\) => setView\(b\.dataset\.view\)\);/.test(admin) && /function setView\(v\) \{[\s\S]*?\$\('themeView'\)\.hidden = v !== 'theme';/.test(admin), 'every view button calls the one setView(), which also shows the Theme dock beside the live canvas');
 // One rail and one site list: Content's sidebar list (#pageList, #contentNav) and Studio's
 // Pages tab merged into the rail's Pages tab; images and encrypted items are its Media / Vault.

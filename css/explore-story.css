@@ -1,9 +1,12 @@
-/* /explore in the How it works layout (how-overview.css): the path, the heading with its ruled
-   deck, bordered cards with the accent bar, the shared mesh fabric and the footer line.
-   One screen, no page scroll: more is a state that takes the same place. The raw observatory
-   (explorer-observatory.css, unchanged) replaces the page with a path back. */
-#scene .task-page.mesh-explorer-page.explore-page { overflow:hidden; padding:0; }
-#scene .explore-page .explore-home.how-triptych { height:100%; overflow:hidden; }
+/* /explore (js/pages/explorer.js): a page of Ark blocks since 2026-10-19 (W3-GUIDE) -- its crumbs,
+   heading and ways on are Ark's, in the shared block-page frame (css/block-page.css), which scrolls.
+   This file styles only the live parts between them: the bordered cards with the accent bar, the
+   shared mesh fabric, the live kinds and the status line. More is a state that takes the same
+   place; the raw observatory (explorer-observatory.css) replaces the home with a path back. */
+#scene .explore-page .explore-home { display:grid; gap:clamp(16px,2.4vw,24px); min-width:0; }
+/* the home and the raw observatory take turns, and a kind opens over its list: a view state (the
+   task frame's blanket [hidden] rule no longer applies to a block page) */
+#scene .explore-page :is(.explore-home,.explore-raw,.explore-browse)[hidden] { display:none; }
 #scene .explore-page .explore-raw { box-sizing:border-box; height:100%; padding:24px 30px 22px; display:grid; grid-template-rows:auto minmax(0,1fr); gap:14px; }
 #scene .explore-page .explore-raw > .mesh-explorer-shell { height:100%; min-height:0; padding:0; }
 #scene .explore-page .explore-raw .mesh-explorer-header { grid-template-columns:auto minmax(200px,280px); justify-content:space-between; }
@@ -16,7 +19,7 @@
 #scene .explore-page .explore-panes { display:none; }
 
 /* The two cards */
-#scene .explore-page .explore-cards { position:relative; display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:14px; flex:1 1 0; min-height:0; }
+#scene .explore-page .explore-cards { position:relative; display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:14px; min-height:0; }
 #scene .explore-page .explore-cards .how-work-card { cursor:default; }
 #scene .explore-page .explore-cards .how-work-card:hover {
   transform:none; border-color:hsl(var(--border-default)); background:linear-gradient(152deg,hsl(var(--surface) / .42),hsl(var(--canvas) / .92));
@@ -120,17 +123,13 @@
 #scene .explore-page .explore-record-facts dt { font:500 8.5px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-muted)); }
 #scene .explore-page .explore-record-facts dd { margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text)); }
 
-/* Footer line: where the data comes from, and the ways onward */
-#scene .explore-page .explore-status { min-width:0; }
+/* The status line: where the data comes from */
+#scene .explore-page .explore-status { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; min-width:0; }
 #scene .explore-page .explore-status .how-boundary-label { display:inline-flex; align-items:center; gap:8px; }
 #scene .explore-page .explore-status .mesh-explorer-status-dot { width:6px; height:6px; border-radius:1px; transform:rotate(45deg); background:hsl(var(--text-muted)); box-shadow:none; }
 #scene .explore-page[data-connection="live"] .explore-status .mesh-explorer-status-dot { background:var(--signal-trust,hsl(var(--success))); }
-#scene .explore-page .explore-status [data-explorer-message] { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 12px/1.45 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-faint)); }
+#scene .explore-page .explore-status [data-explorer-message] { min-width:0; font:400 13px/1.45 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-muted)); }
 #scene .explore-page[data-connection="live"] .explore-status [data-explorer-message] { display:none; }
-#scene .explore-page .explore-footer-actions { display:flex; align-items:center; gap:20px; }
-#scene .explore-page .explore-footer-actions a { font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--reference)); text-decoration:none; white-space:nowrap; }
-#scene .explore-page .explore-footer-actions a:is(:hover,:focus-visible) { text-decoration:underline; }
-#scene .explore-page .explore-footer-actions .how-simple-next { cursor:pointer; }
 
 @keyframes ex-in { from { transform:translateY(4px); } }
 
@@ -140,22 +139,13 @@
   #scene .explore-page .explore-kinds { grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); }
   #scene .explore-page .explore-kind strong { font-size:14px; }
   #scene .explore-page .explore-how-card .how-work-answer { min-height:3em; }
-  #scene .explore-page .explore-record-open .explore-record-id { display:none; }
   #scene .explore-page .explore-record-open { padding:12px 14px; }
   #scene .explore-page .explore-record-open::before { margin-top:-12px; }
   #scene .explore-page .explore-raw { padding:18px 24px; }
 }
-@media (min-width:901px) and (max-height:660px) {
-  #scene .explore-page .explore-browse-title p { display:none; }
-  #scene .explore-page .how-simple-deck { display:none; }
-}
 
 /* Phone and tablet: the two cards become panes in the same place */
 @media (max-width:900px) {
-  #scene .explore-page .explore-home.how-triptych { padding:14px 16px 16px; gap:12px; }
-  #scene .explore-page .explore-home .how-triptych-intro { gap:10px; }
-  #scene .explore-page .explore-home h1 { font-size:clamp(30px,8.4vw,38px); }
-  #scene .explore-page .explore-home .how-simple-deck { font-size:13.5px; padding-left:14px; }
   #scene .explore-page .explore-panes {
     display:grid; grid-template-columns:1fr 1fr; padding:3px; border:1px solid hsl(var(--border-subtle)); border-radius:5px; background:hsl(var(--surface) / .52);
   }
@@ -165,7 +155,6 @@
   }
   #scene .explore-page .explore-panes button[aria-pressed="true"] { background:hsl(var(--reference-100)); color:var(--signal-reference); }
   #scene .explore-page .explore-cards { grid-template-columns:1fr; }
-  #scene .explore-page .explore-home[data-pane="live"] .how-triptych-intro,
   #scene .explore-page .explore-home[data-pane="live"] .explore-live-card .how-work-card-top { display:none; }
   #scene .explore-page .explore-cards .how-work-card::after { display:none; }
   #scene .explore-page .explore-home[data-pane="how"] .explore-live-card,
@@ -178,32 +167,20 @@
   #scene .explore-page .explore-live-card:has([data-state="browse"]) :is(.how-work-card-top,h2,.explore-private) { display:none; }
   #scene .explore-page .explore-live-card:has([data-state="browse"]) { grid-template-rows:minmax(0,1fr); }
   #scene .explore-page .explore-browse-head { grid-template-columns:auto minmax(0,1fr); }
-  #scene .explore-page .explore-browse-head .explore-kind-icon,
-  #scene .explore-page .explore-browse-title p { display:none; }
+  #scene .explore-page .explore-browse-head .explore-kind-icon { display:none; }
   #scene .explore-page .explore-browse:has([data-view="record"]) .explore-browse-tabs { display:none; }
   #scene .explore-page .explore-browse-tabs { overflow-x:auto; scrollbar-width:none; }
   #scene .explore-page .explore-record { grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:9px 4px; }
-  #scene .explore-page .explore-record > .explore-record-id,
-  #scene .explore-page .explore-record .explore-record-top > span:last-child { display:none; }
   #scene .explore-page .explore-record-open { padding:12px; }
   #scene .explore-page .explore-record-open::before { margin-top:-12px; }
-  #scene .explore-page .explore-record-open .explore-record-id { display:none; }
   #scene .explore-page .explore-record-facts { grid-template-columns:1fr 1fr; column-gap:12px; }
-  #scene .explore-page .explore-record-facts > div:nth-child(n+7) { display:none; }
-  #scene .explore-page .how-simple-footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; padding-top:10px; }
-  #scene .explore-page .explore-status strong { display:none; }
-  #scene .explore-page .explore-footer-actions { gap:12px; }
-  #scene .explore-page .explore-footer-actions a { display:none; }
   #scene .explore-page .explore-raw { padding:14px 16px 16px; }
   #scene .explore-page .explore-raw .mesh-explorer-header { grid-template-columns:1fr; }
 }
 @media (max-width:900px) and (max-height:720px) {
-  #scene .explore-page .explore-home .how-simple-deck { display:none; }
-  #scene .explore-page .explore-home:is([data-pane="live"]) .how-path,
   #scene .explore-page .explore-home[data-pane="live"] :is(#explore-live-title,.explore-private) { display:none; }
   #scene .explore-page .explore-kind { padding:7px 9px; }
   #scene .explore-page .explore-record-open h4 { font-size:20px; }
-  #scene .explore-page .explore-record-facts > div:nth-child(n+5) { display:none; }
   #scene .explore-page .explore-how-card .how-work-answer { min-height:0; }
 }
 @media (prefers-reduced-motion:reduce) {

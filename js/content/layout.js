@@ -197,6 +197,8 @@ var ArkLayout = (function () {
        component:<instance>[/<path>]  inside a component instance, from the instance root
        insert:<anchor id>         an anchor the editor/runtime inserted (a state's or a spot's)
        group:<id>                 a layout group wrapper (set when the group is built)
+       <pinned key>[/<path>]      an element (and its subtree) a converted page pinned to the key
+                                  it had before conversion (data-ark-layout-pin; js/ark/blocks.js)
 
      A <path> is tag:n segments, n counting same-tag siblings among the AUTHORED children only.
      What the runtime and the editor insert is never counted and never adds a segment:
@@ -222,7 +224,12 @@ var ArkLayout = (function () {
   /* Tag list derived from actual usage across js/pages/*.js and js/ark/runtime.js (grep
      counted span 48x, strong 13x, small/summary/details 6x each, dl/dt/dd, table parts --
      all real content units a selection/grouping tool needs to see, not a guessed list. */
-  var KEY_TAGS = 'header,main,footer,section,article,nav,aside,div,h1,h2,h3,h4,p,a,button,img,canvas,svg,g,path,rect,circle,ellipse,line,polyline,polygon,text,figure,figcaption,picture,video,form,ul,ol,li,span,strong,small,summary,details,dl,dt,dd,table,thead,tbody,tr,th,td,label';
+  /* caption (2026-10-19, W3-ARK-FOLLOWUPS): a table's caption is the words that introduce it --
+     converted pages moved a panel heading into Ark's table caption, and with no key it could
+     carry neither an edit nor a pin. Adding a tag adds keys: path segments count siblings by tag,
+     so no path key moves (a caption showing a copy: key would take its place in that key's #n
+     numbering; no caption shows one, and each page's continuity test holds the census). */
+  var KEY_TAGS = 'header,main,footer,section,article,nav,aside,div,h1,h2,h3,h4,p,a,button,img,canvas,svg,g,path,rect,circle,ellipse,line,polyline,polygon,text,figure,figcaption,picture,video,form,ul,ol,li,span,strong,small,summary,details,dl,dt,dd,table,caption,thead,tbody,tr,th,td,label';
   function hasAttr(node, name) { return !!(node && node.hasAttribute && node.hasAttribute(name)); }
   function isHeld(node) { return !!(node && node.getAttribute && node.getAttribute('data-ark-transient') === 'hold'); }
   function isPageRoot(node) { return hasAttr(node, 'data-ark-page'); }
@@ -247,12 +254,13 @@ var ArkLayout = (function () {
     authoredChildren(parent, cache).some(function (child) { if (child.tagName === tag) index++; return child === node; });
     return tag.toLowerCase() + ':' + index;
   }
-  /* -> { kind: 'page'|'shell'|'component'|'insert', scope: node, path: 'tag:n/...' } or null
+  /* -> { kind: 'page'|'shell'|'component'|'insert'|'pinned', scope: node, path: 'tag:n/...' } or null
      (inside a held node, or not under `root`) */
   function placeOf(element, root, cache) {
     var parts = [], node = element;
     while (node && node.nodeType === 1) {
       if (isHeld(node)) return null;
+      if (node !== element && hasAttr(node, 'data-ark-layout-pin') && node.getAttribute('data-ark-layout-pin-scope') !== 'self') return { kind: 'pinned', scope: node, path: parts.join('/') };
       if (isPageRoot(node)) return { kind: 'page', scope: node, path: parts.join('/') };
       if (node === root) return { kind: 'shell', scope: node, path: parts.join('/') };
       if (isInstanceRoot(node)) return { kind: 'component', scope: node, path: parts.join('/') };
@@ -274,14 +282,42 @@ var ArkLayout = (function () {
     if (place.kind === 'component') return 'component:' + place.scope.getAttribute('data-ark-component-key') + (place.path ? '/' + place.path : '');
     if (place.kind === 'insert') return 'insert:' + place.scope.getAttribute('data-ark-insert') + (place.path ? '/' + place.path : '');
     if (place.kind === 'page' && !place.path) return 'page:/';
+    /* A pinned key: the key this element had before its page was converted to data
+       (js/ark/blocks.js stamps it from a block spec's `was`), so edits saved against the old
+       structure still land on the same content -- saved records are never rewritten
+       (docs/cms-architecture.md, "Layout keys"; tests/lib/layout-continuity.cjs). A pin anchors
+       its subtree: a descendant with no copy key or id of its own is keyed by the pin plus its
+       path below it, which is its old key wherever the moved subtree kept its inner structure
+       (a swatch grid moved into a tab keeps all 19 of its swatches' keys with one pin) -- unless
+       the pin is for itself only (data-ark-layout-pin-scope="self": a section that became a tab
+       panel, whose inside is new). */
+    var pin = isPinned(element) && element.getAttribute('data-ark-layout-pin');
+    if (pin) return pin;
     /* an editor-only text binding (js/main.js annotateCmsPreviewCopy marks it) is not a key:
        the public page never has it, so a key from it would name nothing there */
     var copy = hasAttr(element, 'data-ark-copy-preview') ? '' : String(element.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean)[0];
     if (copy) return 'copy:' + copy;
     if (element.id && !/^ark-r-/.test(element.id)) return 'id:' + element.id;
-    return place.kind === 'page' ? 'page:/' + place.path : 'path:' + place.path;
+    if (place.kind === 'pinned') return place.scope.getAttribute('data-ark-layout-pin') + '/' + place.path;
+    if (place.kind !== 'page') return 'path:' + place.path;
+    /* A new element whose path happens to be a key the page pinned to another element (the old
+       CMS anchor's path is now the tab list's) must not take that element's saved edits: it is
+       keyed apart, '@new'. Measured on /palette's conversion (tests/palette-blocks.cjs). */
+    var key = 'page:/' + place.path;
+    return pinsOf(place.scope, cache)[key] ? key + '@new' : key;
   }
   function repeatable(base) { return base.indexOf('copy:') === 0 || base.indexOf('id:') === 0; }
+  /* every key pinned inside a page, once per pass (`cache` is the pass's Map; null = no cache) */
+  function pinsOf(page, cache) {
+    var memo = cache && (cache.pins || (cache.pins = new Map()));
+    var known = memo && memo.get(page); if (known) return known;
+    var out = Object.create(null);
+    if (page.querySelectorAll) Array.prototype.forEach.call(page.querySelectorAll('[data-ark-layout-pin]'), function (el) { out[el.getAttribute('data-ark-layout-pin')] = true; });
+    if (memo) memo.set(page, out);
+    return out;
+  }
+  /* a pinned key is already the exact (numbered) key it had: never numbered again */
+  function isPinned(element) { return hasAttr(element, 'data-ark-layout-pin') && !!pageOf(element); }
   function pageOf(element) {
     for (var node = element; node && node.nodeType === 1; node = node.parentNode) if (isPageRoot(node)) return node;
     return null;
@@ -350,7 +386,7 @@ var ArkLayout = (function () {
     }
     var items = all.map(function (element) { return { element: element, page: pageOf(element), base: baseKey(element, root, cache), key: '' }; });
     var shellSeen = {}, pageSeen = new Map();
-    function number(item, seen) { if (!repeatable(item.base)) return item.base; var n = seen[item.base] = (seen[item.base] || 0) + 1; return n > 1 ? item.base + '#' + n : item.base; }
+    function number(item, seen) { if (!repeatable(item.base) || isPinned(item.element)) return item.base; var n = seen[item.base] = (seen[item.base] || 0) + 1; return n > 1 ? item.base + '#' + n : item.base; }
     items.forEach(function (item) { if (item.base && !item.page) item.key = number(item, shellSeen); });
     items.forEach(function (item) {
       if (!item.base || !item.page) return;
@@ -363,7 +399,7 @@ var ArkLayout = (function () {
   function keyFor(element, root) {
     if (!element || element.nodeType !== 1) return '';
     var base = baseKey(element, root, null);
-    if (!base || !repeatable(base) || !root || !root.querySelectorAll) return base;
+    if (!base || !repeatable(base) || isPinned(element) || !root || !root.querySelectorAll) return base;
     var mine = keyedList(root, null, element).filter(function (item) { return item.element === element; })[0];
     return mine ? mine.key : base;
   }
@@ -544,7 +580,12 @@ var ArkLayout = (function () {
     var parent = element.parentElement, view = element.ownerDocument && element.ownerDocument.defaultView;
     if (!parent || !view || typeof view.getComputedStyle !== 'function') return;
     var around = view.getComputedStyle(parent);
-    if (/flex$/.test(around.display) && /^row/.test(around.flexDirection || 'row')) {
+    /* A grid that places its children in columns (grid-auto-flow: column) lays them out in a row
+       too: the family bar's nav is one (assets/kit/defxn-components.css .dx-bar__nav, since
+       2026-10-19), and a group of two of its links stacked in one cell (full-audit layout-group
+       surface; regression: tests/layout-group-follows-parent.cjs). */
+    var gridRow = /grid$/.test(around.display) && /^column/.test(around.gridAutoFlow || '');
+    if (gridRow || (/flex$/.test(around.display) && /^row/.test(around.flexDirection || 'row'))) {
       element.style.flexDirection = 'row';
       if (around.alignItems) element.style.alignItems = around.alignItems;
       var gap = around.columnGap && around.columnGap !== 'normal' ? around.columnGap : around.gap;

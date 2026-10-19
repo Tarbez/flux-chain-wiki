@@ -1,0 +1,82 @@
+# key	tag	text -- layout keys of /how-deployment-works before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeDeploy a resolverFrom a grammar to a chain.You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities 
+page:/nav:1	nav	HomeDeploy a resolver
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Deploy a resolver
+page:/header:1	header	From a grammar to a chain.You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities it uses, and publishe
+page:/header:1/div:1	div	From a grammar to a chain.
+id:deployment-title	h1	From a grammar to a chain.
+page:/header:1/p:1	p	You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities it uses, and publishes the grammar every record
+page:/div:1	div	01GRAMMAR · CAPABILITIESWrite itYour records’ grammar, and the shared capabilities you build on.Write the grammarSay exactly what your records look like: their 
+page:/div:1/article:1	article	01GRAMMAR · CAPABILITIESWrite itYour records’ grammar, and the shared capabilities you build on.Write the grammarSay exactly what your records look like: their 
+page:/div:1/article:1/div:1	div	01GRAMMAR · CAPABILITIES
+page:/div:1/article:1/div:1/span:1	span	01
+page:/div:1/article:1/div:1/span:2	span	GRAMMAR · CAPABILITIES
+page:/div:1/article:1/h2:1	h2	Write it
+page:/div:1/article:1/p:1	p	Your records’ grammar, and the shared capabilities you build on.
+page:/div:1/article:1/div:2	div	
+page:/div:1/article:1/div:2/canvas:1	canvas	
+page:/div:1/article:1/ol:1	ol	Write the grammarSay exactly what your records look like: their kinds, their fields, and which fields every record carries. Derive it from real sample records, 
+page:/div:1/article:1/ol:1/li:1	li	Write the grammarSay exactly what your records look like: their kinds, their fields, and which fields every record carries. Derive it from real sample records, 
+page:/div:1/article:1/ol:1/li:1/strong:1	strong	Write the grammar
+page:/div:1/article:1/ol:1/li:1/span:1	span	Say exactly what your records look like: their kinds, their fields, and which fields every record carries. Derive it from real sample records, not by hand. The 
+page:/div:1/article:1/ol:1/li:2	li	Name your capabilitiesList the shared mechanisms your resolver uses: signatures, custody, a ledger, escrow. The network refuses a launch that names one it has n
+page:/div:1/article:1/ol:1/li:2/strong:1	strong	Name your capabilities
+page:/div:1/article:1/ol:1/li:2/span:1	span	List the shared mechanisms your resolver uses: signatures, custody, a ledger, escrow. The network refuses a launch that names one it has not launched.
+page:/div:1/article:2	article	02CONTROL · SIGNLaunch itChoose who can change it, then read and sign one record.Choose who can change itImmutable: nobody, ever, including you. Or one control 
+page:/div:1/article:2/div:1	div	02CONTROL · SIGN
+page:/div:1/article:2/div:1/span:1	span	02
+page:/div:1/article:2/div:1/span:2	span	CONTROL · SIGN
+page:/div:1/article:2/h2:1	h2	Launch it
+page:/div:1/article:2/p:1	p	Choose who can change it, then read and sign one record.
+page:/div:1/article:2/div:2	div	
+page:/div:1/article:2/div:2/canvas:1	canvas	
+page:/div:1/article:2/ol:1	ol	Choose who can change itImmutable: nobody, ever, including you. Or one control key: only that key can sign an upgrade, and every upgrade is a new record that si
+page:/div:1/article:2/ol:1/li:1	li	Choose who can change itImmutable: nobody, ever, including you. Or one control key: only that key can sign an upgrade, and every upgrade is a new record that si
+page:/div:1/article:2/ol:1/li:1/strong:1	strong	Choose who can change it
+page:/div:1/article:2/ol:1/li:1/span:1	span	Immutable: nobody, ever, including you. Or one control key: only that key can sign an upgrade, and every upgrade is a new record that sits beside the old one.
+page:/div:1/article:2/ol:1/li:2	li	Review and signThe deployer shows the exact unsigned record. You sign only after you have read it. The network answers with the record’s ID, or a refusal that s
+page:/div:1/article:2/ol:1/li:2/strong:1	strong	Review and sign
+page:/div:1/article:2/ol:1/li:2/span:1	span	The deployer shows the exact unsigned record. You sign only after you have read it. The network answers with the record’s ID, or a refusal that says what is mis
+page:/div:1/article:3	article	03PROVIDER · EXPLORERServe itA provider proves and announces it; every record it admits shows in the explorer.Serve itA provider announces an address for your c
+page:/div:1/article:3/div:1	div	03PROVIDER · EXPLORER
+page:/div:1/article:3/div:1/span:1	span	03
+page:/div:1/article:3/div:1/span:2	span	PROVIDER · EXPLORER
+page:/div:1/article:3/h2:1	h2	Serve it
+page:/div:1/article:3/p:1	p	A provider proves and announces it; every record it admits shows in the explorer.
+page:/div:1/article:3/div:2	div	
+page:/div:1/article:3/div:2/canvas:1	canvas	
+page:/div:1/article:3/ol:1	ol	Serve itA provider announces an address for your chain. If your resolver uses capabilities, the provider first proves it runs them by passing their test vectors
+page:/div:1/article:3/ol:1/li:1	li	Serve itA provider announces an address for your chain. If your resolver uses capabilities, the provider first proves it runs them by passing their test vectors
+page:/div:1/article:3/ol:1/li:1/strong:1	strong	Serve it
+page:/div:1/article:3/ol:1/li:1/span:1	span	A provider announces an address for your chain. If your resolver uses capabilities, the provider first proves it runs them by passing their test vectors.
+page:/div:1/article:3/ol:1/li:2	li	Watch itEvery record your resolver admits appears in the explorer, oldest first, re-checked in your browser.
+page:/div:1/article:3/ol:1/li:2/strong:1	strong	Watch it
+page:/div:1/article:3/ol:1/li:2/span:1	span	Every record your resolver admits appears in the explorer, oldest first, re-checked in your browser.
+page:/div:2	div	Before you signA launch uses a position on your own key’s chain. Signing two different records at the same position freezes that key for good. Launch once per k
+page:/div:2/details:1	details	Before you signA launch uses a position on your own key’s chain. Signing two different records at the same position freezes that key for good. Launch once per k
+page:/div:2/details:1/summary:1	summary	Before you sign
+page:/div:2/details:1/p:1	p	A launch uses a position on your own key’s chain. Signing two different records at the same position freezes that key for good. Launch once per key, or use a fr
+page:/div:2/details:2	details	What’s next · PlannedOne deployer for sites, apps, databases, packages, modules and code repositories, each as records on its own resolver chain. Audits and bou
+page:/div:2/details:2/summary:1	summary	What’s next · Planned
+page:/div:2/details:2/p:1	p	One deployer for sites, apps, databases, packages, modules and code repositories, each as records on its own resolver chain. Audits and bounties for capabilitie
+page:/div:2/nav:1	nav	The earlier agreement pathRequest, terms, result: how two parties connected work under the agreement path. It is no longer the direction, and is kept read-only 
+page:/div:2/nav:1/strong:1	strong	The earlier agreement path
+page:/div:2/nav:1/p:1	p	Request, terms, result: how two parties connected work under the agreement path. It is no longer the direction, and is kept read-only for reference.
+page:/div:2/nav:1/p:2	p	State the requestAgree on the termsVerify the resultAgreement lifecycle
+page:/div:2/nav:1/p:2/a:1	a	State the request
+page:/div:2/nav:1/p:2/a:2	a	Agree on the terms
+page:/div:2/nav:1/p:2/a:3	a	Verify the result
+page:/div:2/nav:1/p:2/a:4	a	Agreement lifecycle
+page:/footer:1	footer	CURRENT IMPLEMENTATIONLaunched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today; p
+page:/footer:1/div:1	div	CURRENT IMPLEMENTATIONLaunched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today; p
+page:/footer:1/div:1/span:1	span	CURRENT IMPLEMENTATION
+page:/footer:1/div:1/strong:1	strong	Launched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today; public hosting is not e
+page:/footer:1/div:2	div	Open Deploy ↗See launched resolvers in Explore ↗Every resolver and capability →
+page:/footer:1/div:2/a:1	a	Open Deploy ↗
+page:/footer:1/div:2/a:2	a	See launched resolvers in Explore ↗
+page:/footer:1/div:2/a:3	a	Every resolver and capability →
+page:/div:3	div	

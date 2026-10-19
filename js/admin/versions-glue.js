@@ -236,7 +236,7 @@
     preview: previewVersion, exitPreview: exitVersionPreview, restore: restoreVersion, restorePlan: restorePlan,
     /* one close button, and Versions shares the docked slot with the sheet: opening one closes
        the other (js/admin/overlay.js, level 'sheet'; docs/ux-audit/cms.md P1-12) */
-    closeButton: A.overlay.closeButton, devDetails: A.devDetails,
+    closeButton: A.overlay.closeButton, devDetails: A.devDetails, disclosure: A.arkDisclosure,
     itemName: function (draft, id) {
       if (draft === 'manifests') return state.drafts[id] && state.drafts[id].title ? state.drafts[id].title : '';
       if (draft === 'articles') return state.aDrafts[id] && state.aDrafts[id].title ? state.aDrafts[id].title : '';

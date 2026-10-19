@@ -85,7 +85,7 @@ for (const call of all) {
     ? seoFields.filter((f) => (literal ? (optionsArg === '[false, true]' ? f.kind === 'flag' : f.kind === 'onoff') : f.kind === 'enum'))
     : [null];
   if (literal) assert(perField, `${where} hand-types its option list ${optionsArg} -- read it from the module that validates it`);
-  if (/^(group|cmsMasterProps|CMS_BLOCK_RESOLVERS|contentChoices)\b/.test(optionsArg) || /group\.states/.test(optionsArg)) continue; /* data-driven lists (states, blocks; the content forms' routes, reference docs and shape pages, values and labels from one list): covered by their own tests (tests/admin-content-panels.cjs for contentChoices) */
+  if (/^(group|cmsMasterProps|CMS_BLOCK_RESOLVERS|contentChoices|schemaChoices|blockNames)\b/.test(optionsArg) || /group\.states/.test(optionsArg)) continue; /* data-driven lists (states, blocks; the content forms' routes, reference docs and shape pages, values and labels from one list; a block prop's choices, which are its schema's own values, and the Ark block names -- tests/components-library.cjs): covered by their own tests (tests/admin-content-panels.cjs for contentChoices) */
   for (const f of instances) {
     const scope = vm.createContext(Object.assign(Object.create(null), context, { f }));
     vm.runInContext('this.__opts = ' + optionsArg + '; this.__labelOf = ' + (labelArg || 'undefined') + ';', scope);

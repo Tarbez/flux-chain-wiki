@@ -233,20 +233,23 @@
      the More menu. Page transition is wired next to its popover (openCanvasTransitionsPopover). */
   for (const b of $('viewSwitch').querySelectorAll('[data-view]')) b.addEventListener('click', () => setView(b.dataset.view));
 
-  /* the breakpoint buttons show state.device, which canvas.js chose before the first paint (the
-     last choice, else this screen's own breakpoint); a press is an explicit choice: remembered */
-  function syncDevices() { for (const x of $('devices').children) x.setAttribute('aria-pressed', String(+x.dataset.d === state.device)); }
-  syncDevices();
-  $('devices').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; state.device = +b.dataset.d; rememberDevice(state.device); syncDevices(); if (state.view === 'map') setView('design'); layoutStage(); schedule(); });
-  $('mode').addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (!b) return;
-    state.live = b.dataset.m === 'live'; for (const x of $('mode').children) x.setAttribute('aria-pressed', String(x === b));
-    $('shell').classList.toggle('live', state.live); closePop();
-    syncHeader(); renderInspector();
-    postCmsPreviewMode();
-    if (state.live && state.view === 'map') setView('design');
-    layoutStage(); schedule();
-  });
+  /* The screen-size and Edit / Preview groups are Ark's toggle groups (js/admin/ark-host.js
+     arkSegGroup): one pressed, one tab stop, arrows between the choices. The breakpoint buttons
+     show state.device, which canvas.js chose before the first paint (the last choice, else this
+     screen's own breakpoint); a press is an explicit choice: remembered. */
+  const deviceButtons = [...$('devices').querySelectorAll('button')];
+  A.arkSegGroup($('devices'), deviceButtons, { selected: deviceButtons.findIndex((b) => +b.dataset.d === state.device),
+    onPick: (_i, b) => { state.device = +b.dataset.d; rememberDevice(state.device); if (state.view === 'map') setView('design'); layoutStage(); schedule(); } });
+  const modeButtons = [...$('mode').querySelectorAll('button')];
+  A.arkSegGroup($('mode'), modeButtons, { selected: modeButtons.findIndex((b) => (b.dataset.m === 'live') === !!state.live),
+    onPick: (_i, b) => {
+      state.live = b.dataset.m === 'live';
+      $('shell').classList.toggle('live', state.live); closePop();
+      syncHeader(); renderInspector();
+      postCmsPreviewMode();
+      if (state.live && state.view === 'map') setView('design');
+      layoutStage(); schedule();
+    } });
   $('btnUndo').addEventListener('click', () => undo());
   $('btnRedo').addEventListener('click', () => redo());
   A.provide({ closePop: closePop, openCanvasTransitionsPopover: openCanvasTransitionsPopover,

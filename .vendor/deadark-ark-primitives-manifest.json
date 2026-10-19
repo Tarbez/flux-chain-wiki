@@ -1,8 +1,8 @@
 {
   "package": "@deadark/ark-primitives",
-  "version": "0.2.0",
-  "tarball": ".vendor/deadark-ark-primitives-0.2.0.tgz",
-  "sha256": "9ca07fafd40cc42db9e32f3971d2796275ba49129463b6612adcca9fe2454c8b",
+  "version": "0.2.1",
+  "tarball": ".vendor/deadark-ark-primitives-0.2.1.tgz",
+  "sha256": "a75e4319783060923432297ec5d863585d64086cd17a74ddb987935fdda70a8b",
   "sourceRoot": "../../../design/ark-primitives",
-  "updatedAt": "2026-10-19T08:00:49.017Z"
+  "updatedAt": "2026-10-19T16:31:46.977Z"
 }

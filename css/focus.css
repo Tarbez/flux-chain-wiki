@@ -1,7 +1,10 @@
 /* Focus uses the sage field, never a browser-white ring. Selected and focused
    controls stay distinct: persistent selection is quieter than keyboard focus. */
 #scene :is(a,button,input,[tabindex]):focus { outline:none; }
-#scene :is(a,button,input):focus-visible {
+/* Not inside an Ark block: a block paints its own focus (a --reference ring, css/ark-blocks.css),
+   and this tint turned a focused primary button's fill grey -- an id-weight rule over the
+   block's class rule (docs/ux-audit/components.md risk R8). */
+#scene :is(a,button,input):not(.ark-block *):focus-visible {
   outline:none;
   color:hsl(var(--text-strong));
   background-color:hsl(var(--raised));
@@ -13,7 +16,6 @@
 #scene .study-tabs button:focus-visible { color:hsl(var(--text-strong)); background-color:hsl(var(--overlay)); }
 #scene .mesh-drag-target:focus-visible { background:hsl(var(--nested)); }
 #scene input[type="range"]:focus-visible { accent-color:hsl(var(--reference)); background-color:hsl(var(--overlay)); }
-#scene .learning-entry:focus-visible h2 { color:hsl(var(--text-strong)); }
 /* Anything made focusable with tabindex that is not a link, button or field -- a tabpanel, a
    region -- had no visible focus at all (the :focus rule above removes the outline and the tint
    below covers only a/button/input): the resolutions tabpanel took focus invisibly on 21 routes

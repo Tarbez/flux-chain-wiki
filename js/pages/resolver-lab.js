@@ -1,19 +1,31 @@
-/* /what-is-a-resolver: four small pages (Ask, Resolve, Check, Laws) beside one
-   illustration drawn in the site's block-cell mesh language (js/ark/mesh-fabric.js):
-   finite choreographies on the cells, never an idle loop.
+/* /what-is-a-resolver: the story template (js/pages/story.js) around one illustration drawn in
+   the site's block-cell mesh language (js/ark/mesh-fabric.js): finite choreographies on the
+   cells, never an idle loop.
 
-   The illustration is a real resolver run, locally:
+   The page (DEFXN polish Wave 3, W3-GUIDE): The idea is the definition and the three steps in
+   one line each; How it works is each step in full; Evidence is the four laws with their status,
+   what "verified on chain" means and the sources. The boundary (its signature is its result;
+   trust is decided before you send) stays in sight in every view. It used to be a hand-built
+   two-column screen that met the fold rule on phones with ~10 display:none rules -- the
+   definition, the kicker, the policy address, the law bodies, the breadcrumb, the spec link
+   (docs/ux-audit/pages-ux-b.md /what-is-a-resolver P1). Every one of them is on the page now.
+
+   The illustration is a real resolver run, locally, in Ark's figure frame (beside the views
+   wider than 900px; behind "Show the illustration" narrower -- a press away, never removed):
    Ask      the chosen document assembles as a block of cells sized by its file size.
    Resolve  it travels to a gate whose opening is the 5 MB rule. It passes or it stops.
    Check    the claim forms as a fingerprint drawn from its claim id, receives a
             signature mark, and an open frame shows that trust in the resolver was
             decided before anything was sent: its grammar, capabilities and control.
+   Laws     opens the Evidence view; the scene dims.
    Run again first outlines the previous fingerprint, then fills the new one into
    it: same address + input, same claim (the determinism law, shown).
 
-   The stepper is the page's signal track: a glow travels to the chosen step and
-   stops. Steps and input live in the address (?step=…&input=…).
-   Copy lives in js/content/manifests/resolver.js. */
+   The illustration's stepper is its signal track: a glow travels to the chosen step and stops.
+   Steps and input live in the address (?step=…&input=…, plus ?view= for a depth); every address
+   saved before still opens what it opened (?step=laws opens the laws, now in Evidence).
+   Copy lives in js/content/manifests/resolver.js. Regression: tests/resolver-lab.cjs,
+   tests/resolver-guide-blocks.cjs. */
 (function () {
   'use strict';
   var ADDRESS = 'policy.doc-size/v1';
@@ -254,12 +266,18 @@
   }
 
   /* ---- the page ----------------------------------------------------------- */
-  ArkUI.buildResolverLab = function (opts) {
-    var page = opts.page, words = opts.words, link = opts.link, el = ArkUI.el;
-    var root = el('section', 'ark-page guided-page resolver-lab');
-    root.dataset.arkPage = page;
-    root.setAttribute('aria-labelledby', 'resolver-lab-title');
+  /* Status rows from docs/status.md (observed 2026-10-19): law 1 and law 4 are resolver
+     launch and upgrade (Partial, CAP-010), law 2 the capability registry and composition
+     check (Partial, CAP-011), law 3 grammar enforcement (Partial, CAP-012). Partial, not
+     Live: built and running on the development network, production not established. */
+  var STATUS = [['Partial', 'CAP-010'], ['Partial', 'CAP-011'], ['Partial', 'CAP-012'], ['Partial', 'CAP-010']];
+  /* Laws you can watch happen open the moment in the illustration. */
+  var SEE = { 2: ['See it applied', 'resolve', false], 3: ['See the gate', 'resolve', false], 4: ['Watch it repeat', 'check', true] };
 
+  ArkUI.resolverLabDef = function (page) {
+    var manifest = ArkManifest.get(page), el = ArkUI.el;
+    function words(role) { return ArkCopy.text('RESOLVER.' + role); }
+    function copy(role) { return 'copy:RESOLVER.' + role; }
     var STEP_COPY = {
       ask: [words('INPUT'), words('INPUT.TEXT'), words('ASK.BODY')],
       resolve: [words('LOGIC'), words('LOGIC.TEXT'), words('RESOLVE.BODY')],
@@ -267,17 +285,22 @@
       laws: [words('LAWS'), words('LAWS.BODY'), '']
     };
 
-    /* Left: place, title, the signal-track stepper, the step, the way on. */
-    var copy = el('div', 'resolver-lab-copy');
-    var path = el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Your place');
-    path.appendChild(link(words('BACK'), 'zero'));
-    var here = el('span', '', 'Resolver'); here.setAttribute('aria-current', 'page'); path.appendChild(here);
-    copy.appendChild(path);
-    copy.appendChild(el('p', 'resolver-lab-kicker', words('EYEBROW')));
-    var title = el('h1', '', words('DISPLAY.TITLE')); title.id = 'resolver-lab-title'; copy.appendChild(title);
-    copy.appendChild(el('p', 'resolver-lab-lede', words('DISPLAY.LEDE')));
+    /* ---- the illustration (the figure's slot): its head, the track, the step, the stage, the
+       document picker and the way through -- the page's own live content, hand-built because it
+       IS the run (a canvas scene driven by its controls), framed by Ark's figure. */
+    var figure = el('div', 'resolver-lab-scene');
+    var head = el('div', 'resolver-lab-scene-head');
+    var address = el('span', 'resolver-lab-address');
+    address.appendChild(el('code', '', ADDRESS));
+    address.appendChild(document.createTextNode(' · runs in your browser'));
+    head.appendChild(address);
+    var again = el('button', 'resolver-lab-again'); again.type = 'button';
+    again.appendChild(el('span', 'resolver-lab-again-icon', '↻')); again.appendChild(document.createTextNode('Run again'));
+    again.addEventListener('click', function () { rerun(); });
+    head.appendChild(again);
+    figure.appendChild(head);
 
-    var track = el('nav', 'resolver-track'); track.setAttribute('aria-label', 'Resolver steps');
+    var track = el('div', 'resolver-track'); track.setAttribute('role', 'group'); track.setAttribute('aria-label', 'Resolver steps');
     var line = el('span', 'resolver-track-line'); line.setAttribute('aria-hidden', 'true');
     var glow = el('span', 'resolver-track-glow'); glow.setAttribute('aria-hidden', 'true');
     var progress = el('span', 'resolver-track-progress'); progress.setAttribute('aria-hidden', 'true');
@@ -293,68 +316,23 @@
       b.addEventListener('click', function () { go(id, true); });
       track.appendChild(b); return b;
     });
-    // Arrow keys move along the track, like a tab list.
+    // Arrow keys move along the track.
     track.addEventListener('keydown', function (event) {
       var i = STEPS.indexOf(state.step), to = event.key === 'ArrowRight' ? i + 1 : event.key === 'ArrowLeft' ? i - 1 : event.key === 'Home' ? 0 : event.key === 'End' ? STEPS.length - 1 : -2;
       if (to === -2) return;
       event.preventDefault(); to = Math.max(0, Math.min(STEPS.length - 1, to));
       go(STEPS[to], true); tabButtons[to].focus();
     });
-    copy.appendChild(track);
-
-    var caption = el('div', 'resolver-lab-caption'); caption.setAttribute('aria-live', 'polite');
-    var captionTitle = el('h2', ''), captionBody = el('p', '');
-    caption.appendChild(captionTitle); caption.appendChild(captionBody);
-    copy.appendChild(caption);
-
-    /* The hub (the resolver content audit, §5): what "verified on chain" means, behind a
-       disclosure so the page keeps its fold budget, and the ways on -- the registry snapshot,
-       the deploy walkthrough, and the Explore and Deploy products (explain + hand off). */
-    var onward = el('div', 'resolver-lab-onward');
-    var verified = el('details', 'resolver-lab-verified');
-    verified.appendChild(el('summary', '', words('VERIFIED.TITLE')));
-    var facts = el('ol', 'resolver-lab-facts');
-    [1, 2, 3].forEach(function (n) { facts.appendChild(el('li', '', words('VERIFIED.FACT' + n))); });
-    verified.appendChild(facts);
-    verified.appendChild(el('p', 'resolver-lab-planned', words('VERIFIED.PLANNED')));
-    onward.appendChild(verified);
-    var hubLinks = el('nav', 'resolver-lab-ways'); hubLinks.setAttribute('aria-label', 'Resolvers on the network');
-    [['REGISTRY', ' →'], ['DEPLOY', ' →'], ['EXPLORE', ' ↗'], ['DEPLOYER', ' ↗'], ['MATH', ' →']].forEach(function (pair) {
-      hubLinks.appendChild(ArkUI.dash.linkEl(words(pair[0] + '.LINK') + pair[1], words(pair[0] + '.HREF'), ArkManifest.get(page).route, 'resolver-lab-way'));
-    });
-    /* The manifest's INSPECT.HREF (-> /start-from-something-real, the reference resolvers) was
-       rendered only by js/pages/resolver-guide.js in a branch this page never reaches once it
-       moved onto this lab, which left that page with no inbound link at all
-       (docs/ux-audit/pages.md P2; regression: tests/site-exits.cjs). */
-    hubLinks.appendChild(ArkUI.dash.linkEl('Inspect reference evidence →', words('INSPECT.HREF'), ArkManifest.get(page).route, 'resolver-lab-way'));
-    onward.appendChild(hubLinks);
-    onward.appendChild(el('p', 'resolver-lab-hosting', words('PRODUCTS.NOTE')));
-
-    var footer = el('nav', 'resolver-lab-footer'); footer.setAttribute('aria-label', 'Continue');
-    var prev = el('button', 'resolver-lab-prev'); prev.type = 'button';
-    var next = el('a', 'resolver-lab-next');
-    // Reuses the SOURCE.HREF field js/pages/resolver-guide.js's own "Read the canonical
-    // guide" link already reads, rather than a second hardcoded copy of the same doc path.
-    var spec = ArkUI.dash.linkEl('Spec →', words('SOURCE.HREF')); spec.className = 'resolver-lab-spec'; spec.setAttribute('aria-label', words('SOURCE'));
-    footer.appendChild(prev); footer.appendChild(next); footer.appendChild(spec);
-    copy.appendChild(footer);
-    copy.appendChild(onward); // after the way on, so the step's own Next stays where the eye is
-    root.appendChild(copy);
-
-    /* Right: the mesh illustration, its inputs, and the laws. */
-    var scene = el('figure', 'resolver-lab-scene');
-    var head = el('figcaption', 'resolver-lab-scene-head');
-    var address = el('span', 'resolver-lab-address');
-    address.appendChild(el('code', '', ADDRESS));
-    address.appendChild(document.createTextNode(' · runs in your browser'));
-    head.appendChild(address);
-    scene.appendChild(head);
+    figure.appendChild(track);
+    // What this step does, in one line (the full step is How it works).
+    var caption = el('p', 'resolver-lab-caption'); caption.setAttribute('aria-live', 'polite');
+    figure.appendChild(caption);
 
     var stage = el('div', 'resolver-lab-stage');
     var canvas = el('canvas', 'resolver-mesh'); canvas.setAttribute('aria-hidden', 'true');
     var overlay = el('div', 'resolver-mesh-labels'); overlay.setAttribute('aria-hidden', 'true');
     stage.appendChild(canvas); stage.appendChild(overlay);
-    scene.appendChild(stage);
+    figure.appendChild(stage);
 
     var controls = el('div', 'resolver-lab-controls');
     var inputs = el('div', 'resolver-lab-inputs'); inputs.setAttribute('role', 'group'); inputs.setAttribute('aria-label', 'Choose a document');
@@ -370,112 +348,73 @@
       b.addEventListener('blur', function () { mesh && mesh.preview(null); });
       inputs.appendChild(b); return b;
     });
-    var again = el('button', 'resolver-lab-again'); again.type = 'button';
-    again.appendChild(el('span', 'resolver-lab-again-icon', '↻')); again.appendChild(document.createTextNode('Run again'));
-    again.addEventListener('click', function () { rerun(); });
-    controls.appendChild(inputs); head.appendChild(again);
-    scene.appendChild(controls);
-
+    controls.appendChild(inputs);
+    var prev = el('button', 'resolver-lab-prev'); prev.type = 'button';
+    var next = el('button', 'resolver-lab-next'); next.type = 'button';
+    controls.appendChild(prev); controls.appendChild(next);
+    figure.appendChild(controls);
     // The run, in words, for screen readers (the canvas is decorative).
-    var result = el('p', 'resolver-lab-sr'); result.setAttribute('aria-live', 'polite'); scene.appendChild(result);
-
-    // Laws, shown in place of the stage on the Laws step.
-    var laws = el('ol', 'resolver-lab-laws');
-    // Status rows from docs/status.md (observed 2026-10-19): law 1 and law 4 are resolver
-    // launch and upgrade (Partial, CAP-010), law 2 the capability registry and composition
-    // check (Partial, CAP-011), law 3 grammar enforcement (Partial, CAP-012). Partial, not
-    // Live: built and running on the development network, production not established.
-    var STATUS = [['Partial', 'CAP-010'], ['Partial', 'CAP-011'], ['Partial', 'CAP-012'], ['Partial', 'CAP-010']];
-    [1, 2, 3, 4].forEach(function (n, i) {
-      var item = el('li', 'resolver-lab-law');
-      item.style.setProperty('--i', i);
-      var top = el('div', 'resolver-lab-law-top');
-      top.appendChild(el('span', 'resolver-lab-law-num', String(n).padStart(2, '0')));
-      top.appendChild(el('strong', '', words('LAW' + n)));
-      var status = el('span', 'resolver-lab-law-status', STATUS[i][0]); status.dataset.status = STATUS[i][0].toLowerCase();
-      if (STATUS[i][1] !== 'spec') status.title = 'docs/status.md · ' + STATUS[i][1];
-      top.appendChild(status);
-      item.appendChild(top);
-      var detail = el('p', '', words('LAW' + n + '.TEXT')); detail.id = 'resolver-law-' + n;
-      item.appendChild(detail);
-      // Laws you can watch happen link back to the moment in the illustration.
-      var SEE = { 2: ['See it applied', 'resolve', false], 3: ['See the gate', 'resolve', false], 4: ['Watch it repeat', 'check', true] };
-      if (SEE[n]) {
-        var see = el('button', 'resolver-lab-law-see', SEE[n][0] + ' →'); see.type = 'button';
-        see.addEventListener('click', function (event) {
-          event.stopPropagation();
-          var input = current();
-          go(SEE[n][1], true, SEE[n][2] ? claimId(input, evaluate(input)) : null);
-        });
-        detail.appendChild(document.createTextNode(' ')); detail.appendChild(see);
-      }
-      // On phones each law opens on its own; on wider screens all details show.
-      var toggle = el('button', 'resolver-lab-law-toggle'); toggle.type = 'button';
-      toggle.setAttribute('aria-controls', detail.id); toggle.setAttribute('aria-label', 'Show detail: ' + words('LAW' + n));
-      item.dataset.open = String(i === 0); toggle.setAttribute('aria-expanded', String(i === 0));
-      toggle.addEventListener('click', function () {
-        laws.querySelectorAll('.resolver-lab-law').forEach(function (other) { var open = other === item; other.dataset.open = String(open); other.querySelector('.resolver-lab-law-toggle').setAttribute('aria-expanded', String(open)); });
-      });
-      item.appendChild(toggle);
-      laws.appendChild(item);
-    });
-    var lawsSource = el('p', 'resolver-lab-laws-source');
-    // Reuses SOURCE.HREF/STATUS.HREF, the same fields the footer spec link (above) and
-    // js/pages/resolver-guide.js's own evidence link already read.
-    var specLink = ArkUI.dash.linkEl('resolver spec', words('SOURCE.HREF'));
-    var statusLink = ArkUI.dash.linkEl('status page', words('STATUS.HREF'));
-    lawsSource.appendChild(document.createTextNode('Wording from the ')); lawsSource.appendChild(specLink);
-    lawsSource.appendChild(document.createTextNode(' · status from the ')); lawsSource.appendChild(statusLink);
-    scene.appendChild(laws); scene.appendChild(lawsSource);
-    root.appendChild(scene);
+    var result = el('p', 'resolver-lab-sr'); result.setAttribute('aria-live', 'polite'); figure.appendChild(result);
 
     var mesh = createScene(canvas, overlay);
 
-    /* State ----------------------------------------------------------------- */
-    var state = { step: 'ask', input: INPUTS[0].id }, disposed = false, played = false;
+    /* ---- the views, as blocks ---- */
+    var steps = ['ask', 'resolve', 'check'];
+    var laws = [1, 2, 3, 4].map(function (n, i) {
+      var item = { value: 'law-' + n, title: String(n).padStart(2, '0') + ' · ' + words('LAW' + n) + ' · ' + STATUS[i][0],
+        content: words('LAW' + n + '.TEXT') + '\n\nStatus: ' + STATUS[i][0] + ' (docs/status.md · ' + STATUS[i][1] + ').' };
+      if (SEE[n]) item.blocks = [{ block: 'actions', props: { label: words('LAW' + n), items: [{ label: SEE[n][0], action: 'see-law-' + n, tone: 'link' }] } }];
+      return item;
+    });
+    var handlers = {};
+    Object.keys(SEE).forEach(function (n) {
+      handlers['see-law-' + n] = function () {
+        var input = current();
+        if (root && root.story) root.story.select('context', { quiet: true });
+        // On a phone the illustration is folded behind "Show the illustration": open it.
+        var fold = root && root.querySelector('#resolver-figure');
+        var trigger = fold && fold.querySelector('[data-ark-part="disclosure-trigger"]');
+        if (fold && fold.getAttribute('data-state') === 'closed' && trigger && trigger.offsetParent) trigger.click();
+        go(SEE[n][1], false, SEE[n][2] ? claimId(input, evaluate(input)) : null);
+        write('push');
+      };
+    });
+
+    /* ---- state ---- */
+    var state = { step: 'ask', input: INPUTS[0].id }, disposed = false, played = false, root = null;
     function current() { return INPUTS.filter(function (x) { return x.id === state.input; })[0]; }
     function describe() {
       var input = current(), ok = evaluate(input);
       result.textContent = 'doc:' + input.id + ', ' + size(input.bytes) + ': ' + (ok ? 'satisfies' : 'does not satisfy') + ' ' + ADDRESS + '. Claim id ' + claimId(input, ok) + '.';
     }
-    // The Next action: its label, and an arrow that moves on hover.
-    function label(node, text) {
-      node.replaceChildren(el('span', 'resolver-lab-next-text', text), el('span', 'resolver-lab-next-arrow', '→'));
-      var arrow = node.lastChild; arrow.setAttribute('aria-hidden', 'true');
-      node.setAttribute('aria-label', text === words('NEXT') ? text : 'Next: ' + text);
+    function view(name) { if (root && root.story && root.story.view() !== name) root.story.select(name); }
+    function query(depth) {
+      var v = depth || (root && root.story ? root.story.view() : 'focus');
+      if (v === 'reference') return 'view=reference&step=laws&input=' + state.input;
+      return (v === 'context' ? 'view=context&' : '') + 'step=' + state.step + '&input=' + state.input;
     }
+    function write(mode) { if (root) ArkUI.route.write(ArkUI.pageCatalog[page].path, query(), mode); }
     function paintStep() {
       var i = STEPS.indexOf(state.step), copyFor = STEP_COPY[state.step];
-      root.dataset.step = state.step;
+      figure.dataset.step = state.step;
       track.style.setProperty('--progress', (i / (STEPS.length - 1) * 100) + '%');
       tabButtons.forEach(function (b, k) { b.setAttribute('aria-pressed', String(k === i)); b.dataset.done = String(k < i); b.tabIndex = k === i ? 0 : -1; });
       track.classList.remove('is-arriving'); void track.offsetWidth; track.classList.add('is-arriving');
-      captionTitle.textContent = copyFor[1];
-      captionBody.textContent = copyFor[2];
-      captionBody.hidden = !copyFor[2];
-      caption.classList.remove('is-entering'); void caption.offsetWidth; caption.classList.add('is-entering');
+      caption.textContent = copyFor[1];
       prev.hidden = i === 0;
       if (i > 0) { prev.textContent = '←'; prev.setAttribute('aria-label', 'Back to ' + STEP_COPY[STEPS[i - 1]][0]); prev.title = STEP_COPY[STEPS[i - 1]][0]; prev.onclick = function (event) { event.stopPropagation(); go(STEPS[i - 1], true); }; }
+      next.hidden = i === STEPS.length - 1;
       if (i < STEPS.length - 1) {
-        label(next, STEP_COPY[STEPS[i + 1]][0]);
-        next.href = ArkUI.route.href(ArkUI.pageCatalog[page].path + '?step=' + STEPS[i + 1] + '&input=' + state.input);
-        delete next.dataset.sceneLink;
-        // Stop here: go() repaints this same link, and the router must not then follow it.
-        next.onclick = function (event) { event.preventDefault(); event.stopPropagation(); go(STEPS[i + 1], true); };
-      } else {
-        label(next, words('NEXT'));
-        // Reuses manifest.meta.next (ArkManifest.get(page).meta.next), the same existing
-        // route picker admin.js's "Where it goes" panel already edits -- not a hardcoded
-        // literal duplicating the same destination.
-        var onward = ArkUI.dash.resolveLinkField('route:' + ArkManifest.get(page).meta.next);
-        next.href = onward.href;
-        next.dataset.sceneLink = onward.sceneLink;
-        next.onclick = null;
+        var to = STEP_COPY[STEPS[i + 1]][0];
+        next.replaceChildren(el('span', 'resolver-lab-next-text', to), el('span', 'resolver-lab-next-arrow', '→'));
+        next.lastChild.setAttribute('aria-hidden', 'true');
+        next.setAttribute('aria-label', 'Next: ' + to);
+        next.onclick = function (event) { event.stopPropagation(); go(STEPS[i + 1], true); };
       }
       again.hidden = state.step === 'ask' || state.step === 'laws';
     }
     function paintInput() { inputButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.input === state.input)); }); }
-    function visible() { return root.isConnected && !(root.closest && root.closest('[hidden]')) && root.getBoundingClientRect().width > 0; }
+    function visible() { return figure.isConnected && !(figure.closest && figure.closest('[hidden]')) && figure.getBoundingClientRect().width > 0; }
     function show(animate, ghost) {
       describe();
       next.classList.remove('is-ready');
@@ -491,13 +430,17 @@
       if (state.step === 'check') show(true, claimId(input, evaluate(input)));
       else mesh.play('resolve', input, { animate: true, done: function () { go('check', true, claimId(input, evaluate(input))); } });
     }
-
-    function write(mode) { ArkUI.route.write(ArkUI.pageCatalog[page].path, 'step=' + state.step + '&input=' + state.input, mode); }
+    /* Laws is the Evidence view: choosing it there opens the view; leaving the view leaves Laws. */
     function go(step, push, ghost) {
       if (STEPS.indexOf(step) < 0) step = 'ask';
       var changed = step !== state.step;
       state.step = step; paintStep();
-      if (push && changed) write('push');
+      // Choosing Laws opens Evidence (and leaving it leaves Evidence): the view change writes the
+      // address itself, so it is written once.
+      var depth = root && root.story ? root.story.view() : 'focus', switched = false;
+      if (step === 'laws' && depth !== 'reference') { view('reference'); switched = true; }
+      else if (step !== 'laws' && depth === 'reference') { view('focus'); switched = true; }
+      if (push && changed && !switched) write('push');
       if (changed || ghost) show(true, ghost);
     }
     function choose(id, push) {
@@ -507,18 +450,19 @@
       if (push && changed) write('replace');
       if (changed) { if (state.step === 'laws') { state.step = 'ask'; paintStep(); write('replace'); } show(true); }
     }
-    // Apply the address only when it differs from what is on screen. The router
-    // also calls this after our own pushState; replaying then restarted the run.
-    function restore(force) {
-      if (ArkUI.route.path() !== ArkUI.pageCatalog[page].path) return;
-      var q = new URLSearchParams(ArkUI.route.search());
-      var step = STEPS.indexOf(q.get('step')) >= 0 ? q.get('step') : 'ask';
-      var input = INPUTS.some(function (x) { return x.id === q.get('input'); }) ? q.get('input') : state.input;
+    // Apply the address only when it differs from what is on screen. The router also calls this
+    // after our own pushState; replaying then restarted the run.
+    function restore(params, force) {
+      if (!params) return;
+      var step = STEPS.indexOf(params.get('step')) >= 0 ? params.get('step') : 'ask';
+      var input = INPUTS.some(function (x) { return x.id === params.get('input'); }) ? params.get('input') : state.input;
+      if (params.get('view') === 'reference') step = 'laws';
       if (!force && step === state.step && input === state.input) return;
       state.step = step; state.input = input;
+      if (step === 'laws' && root.story.view() !== 'reference') root.story.select('reference', { quiet: true });
       paintStep(); paintInput(); show(true);
     }
-    // Play the scene once the page is actually on screen, so the visitor sees it happen.
+    // Play the scene once the illustration is actually on screen, so the visitor sees it happen.
     var waitTimer = 0;
     function whenVisible(tries) {
       clearTimeout(waitTimer);
@@ -526,17 +470,90 @@
       if (visible()) { waitTimer = setTimeout(function () { show(true); }, 220); return; }
       if ((tries || 0) < 60) waitTimer = setTimeout(function () { whenVisible((tries || 0) + 1); }, 200);
     }
-
     paintStep(); paintInput();
-    restore(true);
-    if (!played) whenVisible(0);
-    function onPop() { restore(false); }
-    window.addEventListener('popstate', onPop);
-    root.arkRestore = function () { restore(false); if (!played) whenVisible(0); };
-    root.arkDispose = function () { disposed = true; clearTimeout(waitTimer); mesh.dispose(); window.removeEventListener('popstate', onPop); };
-    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
-       is centralized in js/main.js's onMount hook, not called here. */
-    var components = el('div', 'resolver-lab-components'); components.setAttribute('data-ark-insert', 'main'); root.appendChild(components);
-    return root;
+
+    /* "Wording from the resolver spec · status from the status page": the laws' two sources (the spec link is also the old footer's "Read the resolver spec") */
+    var sources = [{ label: 'Wording from the resolver spec', href: words('SOURCE.HREF'), tone: 'link' }, { label: 'Status from the status page', href: words('STATUS.HREF'), tone: 'link' }];
+    /* what "verified on chain" means, what is planned, and where the two products run today */
+    var verified = [1, 2, 3].map(function (n) { return words('VERIFIED.FACT' + n); }).concat([words('VERIFIED.PLANNED'), words('PRODUCTS.NOTE')]).join('\n\n');
+    return {
+      page: page, id: 'resolver', className: 'resolver-lab', titleId: 'resolver-lab-title', was: WAS, insertWas: WAS.insert,
+      crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: 'Resolver' }],
+      eyebrow: copy('EYEBROW'), title: copy('DISPLAY.TITLE'),
+      depth: {
+        focus: { text: copy('DISPLAY.LEDE'), blocks: [{ block: 'steps', props: { label: 'One run', items: steps.map(function (id) { return { title: STEP_COPY[id][0], body: STEP_COPY[id][1] }; }) } }] },
+        /* one step open at a time, as the illustration plays one at a time */
+        context: { blocks: [{ block: 'accordion', props: { label: 'How a resolver answers', multiple: false, defaultOpen: ['ask'], headingLevel: 3, items: steps.map(function (id) { return { value: id, title: STEP_COPY[id][0] + ' · ' + STEP_COPY[id][1], content: STEP_COPY[id][2] }; }) } }] },
+        reference: { text: copy('LAWS.BODY'), blocks: [
+          { block: 'accordion', props: { label: words('LAWS'), multiple: true, headingLevel: 3, items: laws.concat([{ value: 'verified', title: words('VERIFIED.TITLE'), content: verified }]) } },
+          { block: 'actions', props: { label: 'Sources', items: sources } }
+        ] }
+      },
+      /* The trust boundary, in sight in every view; on a phone it folds behind "Show the status". */
+      boundary: { tone: 'reference', title: copy('BOUNDARY.LABEL'), body: copy('BOUNDARY') }, boundaryFold: 'phone',
+      figure: { slot: 'lab', kind: 'live', caption: 'A real resolver run, in your browser: ' + ADDRESS + ' applies its 5 MB rule to the document you choose.' },
+      slots: { lab: figure },
+      handlers: handlers,
+      pager: { label: 'Continue',
+        next: { label: copy('NEXT'), href: 'route:' + manifest.meta.next },
+        related: ['REGISTRY', 'MATH', 'EXPLORE', 'DEPLOYER'].map(function (k) { return { label: copy(k + '.LINK'), href: words(k + '.HREF') }; })
+          .concat([{ label: 'Inspect reference evidence', href: words('INSPECT.HREF') }]) },
+      query: function (depth) { return query(depth); },
+      onView: function (depth) {
+        if (!root) return;
+        if (depth === 'reference' && state.step !== 'laws') { state.step = 'laws'; paintStep(); show(false); }
+        else if (depth !== 'reference' && state.step === 'laws') { state.step = 'ask'; paintStep(); show(true); }
+      },
+      onRestore: function (params) { restore(params, false); },
+      onFigureVisibility: function (node, on) { if (on && !played) whenVisible(0); },
+      afterMount: function (el) {
+        root = el;
+        restore(el.story.params() || new URLSearchParams(''), true);
+        if (!played) whenVisible(0);
+        var prior = el.arkRestore;
+        el.arkRestore = function () { if (prior) prior(); if (!played) whenVisible(0); };
+      },
+      dispose: function () { disposed = true; clearTimeout(waitTimer); mesh.dispose(); }
+    };
   };
+  /* `was`: the key each element of the hand-built page had, so a CMS edit saved against it still
+     lands (docs/cms-architecture.md "Layout keys"). Started from tests/lib/layout-continuity.cjs's
+     derive against the frozen census (tests/fixtures/layout-keys/what-is-a-resolver.tsv) and
+     settled by hand where a word matched by chance (a "01" step number is not a law's "01");
+     tests/resolver-guide-blocks.cjs lists every reshaped and retired key with its reason. */
+  var LAW = function (i) { return ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(' + i + ') > div:nth-of-type(1) > div:nth-of-type(1)'; };
+  var VERIFIED = ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(';
+  var RELATED = function (n) { return ':scope > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(' + n + ') > a:nth-of-type(1)'; };
+  var WAS = {
+    'resolver-crumbs': { ':root': 'page:/div:1/nav:1', 'breadcrumb-item': 'page:/div:1/nav:1/a:1', 'breadcrumb-item#2': 'page:/div:1/nav:1/span:1' },
+    'resolver-hero': { eyebrow: 'page:/div:1/p:1', 'hero-title': 'id:resolver-lab-title' },
+    'resolver-depth': {
+      ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/div:1/p:2',
+      'accordion-item': { key: 'page:/div:1/div:1', self: true }, 'accordion-content': 'page:/div:1/div:1/p:1',
+      'accordion#2': { key: 'page:/figure:1/ol:1', self: true },
+      'accordion-item#4': { key: 'page:/figure:1/ol:1/li:1', self: true }, 'accordion-item#5': { key: 'page:/figure:1/ol:1/li:2', self: true },
+      'accordion-item#6': { key: 'page:/figure:1/ol:1/li:3', self: true }, 'accordion-item#7': { key: 'page:/figure:1/ol:1/li:4', self: true },
+      'accordion-trigger#4': { key: 'page:/figure:1/ol:1/li:1/div:1', self: true }, 'accordion-trigger#5': { key: 'page:/figure:1/ol:1/li:2/div:1', self: true },
+      'accordion-trigger#6': { key: 'page:/figure:1/ol:1/li:3/div:1', self: true }, 'accordion-trigger#7': { key: 'page:/figure:1/ol:1/li:4/div:1', self: true },
+      'button': 'page:/figure:1/ol:1/li:2/p:1/button:1', 'button#2': 'page:/figure:1/ol:1/li:3/p:1/button:1', 'button#3': 'page:/figure:1/ol:1/li:4/p:1/button:1',
+      'actions#4': 'page:/figure:1/p:2', 'button#4': 'page:/figure:1/p:2/a:1', 'button#5': 'page:/figure:1/p:2/a:2',
+      'accordion-item#8': { key: 'page:/div:1/div:2', self: true }, 'accordion-trigger#8': { key: 'page:/div:1/div:2/details:1/summary:1', self: true },
+      'accordion-content#8': { key: 'page:/div:1/div:2/details:1', self: true }
+    },
+    'resolver-figure': {
+      'figure': { key: 'page:/figure:1', self: true },
+      '.resolver-lab-scene-head': 'page:/figure:1/figcaption:1', '.resolver-track': 'page:/div:1/nav:2', '.resolver-lab-caption': 'page:/div:1/div:1/h2:1',
+      '.resolver-lab-stage': 'page:/figure:1/div:1', '.resolver-lab-controls': 'page:/figure:1/div:2', '.resolver-lab-sr': 'page:/figure:1/p:1',
+      '.resolver-lab-prev': 'page:/div:1/nav:3/button:1', '.resolver-lab-next': 'page:/div:1/nav:3/a:1'
+    },
+    'resolver-pager': {
+      ':scope > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2)': 'page:/div:1/div:2/nav:1/a:2', ':scope > div:nth-of-type(2) > ul:nth-of-type(1)': { key: 'page:/div:1/div:2/nav:1', self: true }
+    },
+    insert: 'page:/div:2'
+  };
+  [1, 2, 3, 4].forEach(function (n) { WAS['resolver-depth'][LAW(n) + ' > p:nth-of-type(1)'] = 'id:resolver-law-' + n; });
+  [1, 2, 3].forEach(function (n) { WAS['resolver-depth'][VERIFIED + n + ')'] = 'page:/div:1/div:2/details:1/ol:1/li:' + n; });
+  WAS['resolver-depth'][VERIFIED + '4)'] = 'page:/div:1/div:2/details:1/p:1';
+  WAS['resolver-depth'][VERIFIED + '5)'] = 'page:/div:1/div:2/p:1';
+  [[1, 1], [3, 3], [4, 4], [2, 5], [5, 6]].forEach(function (pair) { WAS['resolver-pager'][RELATED(pair[0])] = 'page:/div:1/div:2/nav:1/a:' + pair[1]; });
 })();

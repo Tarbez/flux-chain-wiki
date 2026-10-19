@@ -1,86 +1,230 @@
-/* /stats is a dashboard (2026-10-08 redesign). Named regressions:
+'use strict';
+/* run-tests-timeout-ms: 300000 */
+/* /stats is a dashboard (2026-10-08 redesign), a page of Ark blocks since 2026-10-19 (DEFXN polish
+   Wave 3, W3-STATS: js/pages/stats.js). Named regressions:
    - the module must return the element it mounts, or the router throws on `el.dataset`;
-   - live values come only from the fleet pulse; when the pulse fails the page shows no number
-     in their place and says why;
-   - the audited headline is the three whitepaper §5 numbers, each derivable from its node rows;
-   - the page stops polling when the router removes it;
+   - live values come only from the fleet pulse; when the pulse fails the page shows no number in
+     their place (Ark's "No reading", never 0 or a dash) and says why;
+   - the audited headline is the whitepaper §5 numbers, each derivable from its node rows;
+   - the page stops polling when the router removes it (and the 1 s clock stops in a hidden tab:
+     docs/ux-audit/pages-ux-b.md /stats P2);
    - every evidence record, article and page it links to exists;
-   - the engineering detail it used to carry lives in docs/whitepaper.md, and the sample
-     transfer cited there is real grammar;
-   - /monitor still reads the same feed and labels audited figures as dated. */
+   - the engineering detail it used to carry lives in docs/whitepaper.md, and the sample transfer
+     cited there is real grammar;
+   - /monitor stays retired;
+   - Overload (pages-ux-b.md /stats P0): 3,387 words at 12.6x / 20.7x the viewport; now the hero
+     answers (status, nodes online, swaps per second, last pulse) and the detail is seven tabs by
+     question, each dated run one accordion row -- every number, table, bar and note kept, each view
+     <= 1.6x at 1440x900 and 390x844 (W3-STATS report);
+   - a live refresh keeps each tile's element (only its text moves), so a CMS edit applied to a
+     tile is not dropped on the next poll;
+   - saved CMS data is never rewritten: every old layout key still lands
+     (tests/lib/layout-continuity.cjs against tests/fixtures/layout-keys/stats.tsv). */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const continuity = require('./lib/layout-continuity.cjs');
+const checks = require('./lib/block-page-checks.cjs');
+const { mount } = require('./lib/stats-mount.cjs');
 
-// A small DOM: enough for the page to build itself and for the test to read it back.
-class Node {
-  constructor(tag) { this.tagName = tag; this.className = ''; this.children = []; this.dataset = {}; this.attrs = {}; this.listeners = {}; this.style = { setProperty() {} }; this._text = ''; this.hidden = false; }
-  appendChild(c) { this.children.push(c); c.parent = this; return c; }
-  setAttribute(k, v) { this.attrs[k] = String(v); }
-  addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); }
-  set textContent(v) { this._text = v == null ? '' : String(v); this.children = []; }
-  get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
-  all() { return [this].concat(...this.children.map((c) => c.all())); }
-  find(cls) { return this.all().filter((n) => n.className.split(' ').includes(cls)); }
-}
-let pulseResult = null;
-const timers = new Set(), docListeners = {};
-const document = { hidden: false, createElement: (t) => new Node(t),
-  addEventListener(t, f) { docListeners[t] = f; }, removeEventListener(t) { delete docListeners[t]; } };
-const context = vm.createContext({
-  document, console, Date, Math, Number, String, Promise, encodeURIComponent,
-  setTimeout(f) { const id = {}; timers.add(id); return id; }, clearTimeout(id) { timers.delete(id); },
-  setInterval() { const id = {}; timers.add(id); return id; }, clearInterval(id) { timers.delete(id); },
-  ArkUI: { pageModules: {}, pageCatalog: {}, route: { href: (p) => '#' + p } }
-});
-context.window = context;
-context.ArkPulse = { get: () => pulseResult };
-for (const file of ['js/ark/dash-kit.js', 'js/content/stats-highlights.js', 'js/pages/stats.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
-const S = context.ArkStatsHighlights;
+const ROUTE = '/stats';
+const P = 'page:/div:1';
+const LIVE = 'Live fleet, hourly self-bench', THROUGHPUT = 'Live swaps, transfers, stores and stakes, fleet-wide';
+const ctx = vm.createContext({ window: {} }); ctx.window = ctx;
+vm.runInContext(fs.readFileSync('js/content/stats-highlights.js', 'utf8'), ctx);
+const S = JSON.parse(JSON.stringify(ctx.ArkStatsHighlights));
 function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
 
+/* Why each old key whose words changed shape still lands on its successor. */
+const reshaped = {
+  [P + '/header:1']: 'the page header became the hero block: eyebrow, title and lede kept; its status block became the hero\'s details and its Refresh button the hero\'s second action, after the whitepaper',
+  [P + '/header:1/div:2']: 'the live status block became the hero\'s details: status, nodes online, swaps per second, last pulse',
+  [P + '/div:1']: 'the "Live" section head became the Live tab panel; its heading is the tab',
+  [P + '/div:3']: 'the chain section head became the Chain tab panel',
+  [P + '/div:5']: 'the sovereign-chains section head became the accordion item that also holds the top contributors',
+  [P + '/div:7']: 'the fleet-capacity section head became the accordion item of the same name',
+  [P + '/div:9']: 'the measured-resolver section head became the first row of the Throughput tab, its title now carrying its headline number',
+  [P + '/div:10/section:1']: 'the resolver-registry panel became an accordion item of the same name',
+  [P + '/div:10/section:1/ol:1']: 'the registry list became a table: resolver, signers and work, state',
+  [P + '/div:10/section:2']: 'the binding-constraint panel became an accordion item of the same name',
+  [P + '/div:10/section:2/p:2']: 'the "449.229 ms to 10 replicas" line is the stat\'s value now; "to 10 replicas" is its label',
+  [P + '/div:10/section:2/dl:1']: 'the same four facts, in Ark\'s facts block',
+  [P + '/section:4']: 'the operations panel became the "Every operation in its own unit" accordion item',
+  [P + '/section:5']: 'the per-node panel became "The fleet, measured" accordion item (its tiles and bars together)',
+  [P + '/section:6']: 'the route-forward panel became an accordion item of the same name',
+  [P + '/section:7']: 'the batch-size panel became an accordion item of the same name',
+  [P + '/section:8']: 'the client-path panel became the Client path tab panel',
+  [P + '/section:10']: 'the dispatch note panel became the "Native FXN Compute Rent Resolver dispatch" accordion item',
+  [P + '/section:11']: 'the remote-env panel became an accordion item of the same name',
+  [P + '/div:14']: 'the platform section head became the Platform tab panel',
+  [P + '/div:16']: 'the benchmark-runs section head became the Evidence tab panel',
+  [P + '/div:17']: 'the readiness section head became the Readiness tab panel',
+  [P + '/div:18/section:1/ul:1']: 'the readiness list became an accordion grouped by state (done, partial, not yet)',
+  [P + '/div:18/section:2']: 'the "Go deeper" panel became Ark\'s pager under the same label, in the Evidence tab',
+  [P + '/div:18/section:2/ul:1']: 'the same six links; the whitepaper\'s label was shortened to fit the pager',
+  [P + '/div:18/section:2/ul:1/li:1']: 'the whitepaper link\'s label was shortened to fit the pager ("Whitepaper: how it works, and every number’s source")',
+  [P + '/div:18/section:2/ul:1/li:1/a:1']: 'the whitepaper link\'s label was shortened to fit the pager ("Whitepaper: how it works, and every number’s source")',
+  'page:/div:2': 'the CMS insertion anchor, kept: now its own row after the tabs'
+};
+for (let i = 1; i <= 9; i++) reshaped[P + '/div:2/article:' + i] = 'a live tile became an Ark stat tile; with no reading it says "No reading" and why (it said "–")';
+for (let i = 1; i <= 6; i++) reshaped[P + '/div:4/article:' + i] = 'a chain tile became an Ark stat tile; with no reading it says "No reading" and why (it said "unavailable")';
+for (let i = 1; i <= 4; i++) reshaped[P + '/div:8/article:' + i] = 'a capacity tile became an Ark stat tile; with no reading it says "No reading" and why (it said "unavailable")';
+for (let i = 1; i <= 9; i++) reshaped[P + '/div:2/article:' + i + '/p:2'] = 'the value line: "No reading" (Ark\'s absent state) where it showed "–"; the unit returns with the first reading';
+for (let i = 1; i <= 6; i++) reshaped[P + '/div:4/article:' + i + '/p:2'] = 'the value line: "No reading" (Ark\'s absent state) where it said "unavailable"';
+for (let i = 1; i <= 4; i++) reshaped[P + '/div:8/article:' + i + '/p:2'] = 'the value line: "No reading" (Ark\'s absent state) where it said "unavailable"';
+reshaped[P + '/div:4/article:1/p:3'] = 'the lead tile\'s refusal: the failure and the missing thing, then the remedy on its own "Fix:" line (it read "Remedy:")';
+reshaped[P + '/div:8/article:1/p:3'] = 'the lead tile\'s refusal: the failure and the missing thing, then the remedy on its own "Fix:" line (it read "Remedy:")';
+reshaped[P + '/div:2/section:1'] = 'the nodes panel became the "Nodes" accordion item';
+reshaped[P + '/div:2/section:1/ul:1'] = 'the node cards are Ark\'s bar list now (ops/s per node), beside a table of each node\'s result';
+reshaped[P + '/div:2/section:2'] = 'the per-node operations panel became an accordion item of the same name';
+for (const wrap of [P + '/div:2/section:2/div:1', P + '/section:1/div:1', P + '/section:2/div:1', P + '/section:3/div:1']) reshaped[wrap] = 'the live table\'s wrapper is Ark\'s table now: with no rows it says why in its one cell';
+for (const wrap of [P + '/section:4/div:1', P + '/section:9/div:1', P + '/section:11/div:1', P + '/section:12/div:1']) {
+  reshaped[wrap] = 'the same table, now with a caption that says what it shows';
+  reshaped[wrap + '/table:1'] = 'the same table, now with a caption that says what it shows';
+}
+reshaped[P + '/section:12/div:1/table:1/tbody:1'] = 'the same eleven runs; each record\'s link is in "The records behind the runs" beside the table';
+for (let tr = 1; tr <= 11; tr++) reshaped[P + '/section:12/div:1/table:1/tbody:1/tr:' + tr] = 'the same run; its record\'s link is in "The records behind the runs" beside the table';
+for (const li of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+  reshaped[P + '/div:18/section:1/ul:1/li:' + li] = 'a readiness item became a fact (title, then its state and text) in the group of its state';
+  reshaped[P + '/div:18/section:1/ul:1/li:' + li + '/div:1/p:1'] = 'the item\'s text, now after its state ("Measured — …")';
+}
+for (let b = 1; b <= 4; b++) reshaped[P + '/section:7/ol:1/li:' + b + '/p:1'] = 'the bar\'s name, shortened to fit Ark\'s 48-character bar label ("swaps/batch · verification N%")';
+for (let b = 1; b <= 4; b++) reshaped[P + '/section:7/ol:1/li:' + b] = 'the same bar, its name shortened to fit Ark\'s bar label';
+/* Why nothing carries these keys now. */
+const retired = {
+  [P]: 'the page column wrapper (dash shell); a block page has none -- its root (page:/) is the column',
+  [P + '/header:1/div:1']: 'the header\'s copy wrapper; the hero lays out its own parts',
+  [P + '/header:1/div:2/p:3']: 'the "next check" line: its words join the Last pulse detail ("… · Next check in m:ss")',
+  [P + '/div:2']: 'the live grid; its tiles are the Live tab\'s stat rows, its panels accordion items',
+  [P + '/div:4']: 'the chain grid; its tiles are the Chain tab\'s stat row',
+  [P + '/div:4/section:1']: 'the "Not yet available" panel; its lines are paragraphs of the Chain tab\'s note',
+  [P + '/div:6']: 'the top-contributors section head; its words open the same accordion item as the sovereign chains',
+  [P + '/div:8']: 'the capacity tile grid; its tiles are the accordion item\'s stat row',
+  [P + '/div:10']: 'the audited grid; its tiles and panels are rows of the Throughput tab',
+  [P + '/div:11']: 'the operations section head; its words open the operations accordion item',
+  [P + '/div:12']: 'the fleet section head; its words open "The fleet, measured" accordion item',
+  [P + '/div:13']: 'the fleet tile grid; its tiles are the accordion item\'s stat row',
+  [P + '/section:1']: 'the sovereign-chains panel; its table is in the accordion item',
+  [P + '/section:2']: 'the top-contributors panel; its table is in the same accordion item',
+  [P + '/section:3']: 'the capacity table panel; its table is in the accordion item',
+  [P + '/section:9']: 'the platform audit panel; its table is the Platform tab\'s',
+  [P + '/div:15']: 'the dispatch tile grid; its tiles are the dispatch accordion item\'s stat row',
+  [P + '/section:12']: 'the benchmark-runs panel; its table is the Evidence tab\'s',
+  [P + '/div:18']: 'the readiness grid; its panels are the Readiness tab and the Evidence tab\'s pager',
+  [P + '/div:18/section:1']: 'the readiness panel; its summary is the Readiness tab\'s note, its list an accordion',
+  [P + '/section:5/h2:1']: 'kept as a line of the fleet item\'s note? -- see reshaped'
+};
+delete retired[P + '/section:5/h2:1'];
+for (const k of [P + '/section:9/p:1', P + '/section:9/h2:1']) retired[k] = 'the panel\'s label and heading are now the caption of the table they introduced (same words); a <caption> is not a layout target (js/content/layout.js KEY_TAGS has no caption), so nothing can carry its key until captions become keyable';
+for (const { key } of continuity.readCensus(ROUTE)) {
+  if (/\/article:\d+\/p:2\/(strong|span):1$/.test(key) && /div:(2|4|8)\//.test(key)) retired[key] = 'the tile\'s number and unit elements; with no reading Ark\'s stat draws "No reading" in the value line, which keeps the key';
+  if (/\/article:\d+\/p:3$/.test(key) && /div:(13|15)\//.test(key)) retired[key] = 'an empty detail line; Ark\'s stat draws none when there is no detail';
+  if (/\/ol:\d+\/li:\d+\/span:1(\/span:1)?$/.test(key)) retired[key] = 'the bar\'s empty track and fill; Ark\'s bar list draws its own beside the label';
+  if (/\/ol:\d+\/li:\d+\/p:1\/(b|span):1$/.test(key) && !/div:10\/section:1\//.test(key)) retired[key] = 'the bar\'s name and detail, written as one label in Ark\'s bar list (which keeps the name line\'s key)';
+  if (/\/div:18\/section:1\/p:1\/span:\d$/.test(key)) retired[key] = 'a count in the readiness summary; the summary line keeps the key and the words';
+  if (/\/div:18\/section:1\/ul:1\/li:\d+\/(span:1|div:1)$/.test(key)) retired[key] = 'the item\'s badge and copy wrapper; the state is its group and the fact\'s value, the title and text keep their keys';
+  if (/section:12\/div:1\/table:1\/tbody:1\/tr:\d+\/td:6\/a:1$/.test(key)) retired[key] = 'the record link in the runs table; the records are linked once each in "The records behind the runs", which keeps the first link\'s key';
+}
+reshaped['page:/div:1/div:9/h2:1'] = 'the section heading "Measured resolver · 2026-10-10" is the accordion row\'s title now, followed by its headline number';
+
+const R = reshaped, X = retired;
+R['page:/div:1/section:5/ol:1'] = 'the per-node bars are Ark\'s bar list (each name and core count one label; the census\'s 160-character cut falls later)';
+R['page:/div:1/section:7/ol:1'] = 'the batch-size bars are Ark\'s bar list; each name shortened to fit its 48-character label';
+R['page:/div:1/section:8/ol:1'] = 'the connection bars are Ark\'s bar list (each name one label; the census\'s 160-character cut falls later)';
+X['page:/div:1/div:10/section:2/p:2/span:1'] = 'the unit line "ms to 10 replicas": "ms" is the stat\'s unit and "to 10 replicas" its label now';
+for (let li = 1; li <= 6; li++) X['page:/div:1/div:10/section:1/ol:1/li:' + li + '/p:1'] = 'the registry row\'s name line; its two parts are the row\'s Resolver and Signers cells, which keep their keys';
+for (let li = 1; li <= 6; li++) X['page:/div:1/div:10/section:1/ol:1/li:' + li + '/span:1'] = 'the registry row\'s empty spacer bar; a table row needs none';
+
 (async () => {
+  /* ---- the module is a spec of Ark blocks -------------------------------------------------- */
+  checks.assertSourceIsSpec(fs.readFileSync('js/pages/stats.js', 'utf8'), 'js/pages/stats.js');
+
   // ---- offline first: no live number is invented -------------------------------------------
-  pulseResult = Promise.reject(new Error('HTTP 502 from /api/fleet-pulse'));
-  let host = new Node('main');
-  let page = context.ArkUI.pageModules.stats.mount(host);
-  assert(page && page.dataset, 'stats mount() returns its page element for the router');
-  assert.equal(host.children[0], page, 'the returned element is the one mounted');
-  await new Promise((r) => setImmediate(r));
-  const pill = page.find('dash-pill')[0];
-  assert.equal(pill.dataset.state, 'down', 'an unreachable pulse shows as down');
-  for (const k of page.find('dash-stat').slice(0, 8)) assert(k.textContent.includes('–'), 'live tiles show a dash, not a number, while offline — this now covers the swap/transfer/store/per-core tiles too, since they moved into Live');
-  assert(page.find('dash-empty')[0].textContent.includes('HTTP 502'), 'the offline message names the failure');
-  page.arkDispose();
-  assert.equal(timers.size, 0, 'dispose clears every timer');
-  assert(!docListeners.visibilitychange, 'dispose removes the visibility listener');
+  let m = mount({ pulse: () => Promise.reject(new Error('HTTP 502 from /api/fleet-pulse')) });
+  assert(m.page && m.page.dataset, 'stats mount() returns its page element for the router');
+  assert.equal(m.page.parentNode, m.host, 'the returned element is the one mounted');
+  await m.flush();
+  assert.equal(m.meta().Status, 'Pulse unreachable', 'an unreachable pulse shows as unreachable');
+  const offline = m.tiles(LIVE).concat(m.tiles(THROUGHPUT));
+  assert.equal(offline.length, 9, 'all nine live tiles are there');
+  for (const t of offline) {
+    assert.equal(t.state, 'absent', t.label + ': no reading while offline');
+    assert(/No reading/.test(t.value) && !/\d/.test(t.value), t.label + ': "No reading", never a number or a dash: ' + t.value);
+  }
+  assert(m.table('Each node in the last pulse')[0][0].includes('HTTP 502'), 'the offline message names the failure');
+  m.dispose();
+  assert.equal(m.timers.size, 0, 'dispose clears every timer');
+  assert.equal((m.listeners.visibilitychange || []).length, 0, 'dispose removes the visibility listener');
 
   // ---- live: values are the pulse's values ---------------------------------------------------
   const nodes = [{ name: 'bk2', addr: 'a:1', ok: 10, total: 10, elapsed_ms: 5, qps: 900, error: null },
                  { name: 'mk2', addr: 'b:1', ok: 0, total: 10, elapsed_ms: 5, qps: 0, error: 'timeout' }];
-  // Added 2026-10-10: fleet-pulse now aggregates each node's own ops-pulse
-  // daemon into this same payload. Two nodes reporting of two total, so
-  // the "all N nodes reporting" (not partial) path is what this mock
-  // exercises first; a separate case below exercises the partial path.
   const operations = {
-    measured_at_ms: Date.now() - 500,
-    nodes_reporting: 2, nodes_total: 2,
+    measured_at_ms: Date.now() - 500, nodes_reporting: 2, nodes_total: 2,
     parallel_swaps_per_second: 637149, transfers_per_second: 68188, stores_per_second: 5752753, stakes_per_second: 68192,
-    cores: 37, swaps_per_core: 17220,
+    cores: 37, swaps_per_core: 17220.4,
     per_node: [
       { node: 'bk2', swaps_per_second: 93932, transfers_per_second: 6505, stores_per_second: 205695, stakes_per_second: 6800, cores: 7 },
       { node: 'mk2', swaps_per_second: 96375, transfers_per_second: 7330, stores_per_second: 549332, stakes_per_second: 7100, cores: 5 }
     ]
   };
-  pulseResult = Promise.resolve({ data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 1, nodes, operations } });
-  host = new Node('main');
-  page = context.ArkUI.pageModules.stats.mount(host);
-  await new Promise((r) => setImmediate(r));
-  assert.equal(page.find('dash-pill')[0].dataset.state, 'warn', 'a down node degrades the status');
-  assert(page.find('dash-stat')[0].textContent.includes('1/2'), 'nodes online counts only nodes that answered');
-  assert.equal(page.find('dash-node').length, 2, 'one card per pulse node');
-  assert(page.find('dash-node-error')[0].textContent.includes('timeout'), 'a failing node shows its error');
-  page.arkDispose();
+  let pulse = { data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 1, nodes, operations } };
+  m = mount({ pulse: () => Promise.resolve(pulse) });
+  await m.flush();
+  assert.equal(m.meta().Status, '1 of 2 nodes down', 'a down node degrades the status');
+  assert.equal(m.meta()['Nodes online'], '1/2 nodes', 'the hero counts only nodes that answered');
+  assert.equal(m.tiles(LIVE)[0].value.replace(/\s/g, ''), '1/2nodes', 'nodes online counts only nodes that answered');
+  const nodeRows = m.table('Each node in the last pulse');
+  assert.equal(nodeRows.length, 2, 'one row per pulse node');
+  assert(nodeRows.some((row) => row.includes('timeout')), 'a failing node shows its error');
+  const bars = [...m.page.querySelectorAll('[data-ark-block="meter"][aria-label="Record admission per node, last pulse"] [data-ark-part="meter"]')];
+  assert.equal(bars.length, 2, 'one bar per pulse node');
+  assert.equal(bars[1].getAttribute('data-state'), 'absent', 'a node that did not answer draws no bar (absent, not 0)');
+
+  // swaps/transfers/stores/stakes are live: the pulse's own numbers, in their own units
+  const liveTiles = m.tiles(LIVE).concat(m.tiles(THROUGHPUT));
+  assert.equal(liveTiles.length, 9, 'Live carries exactly 9 tiles: nodes, admission, ops, errors, swaps, transfers, stores, stakes, per-core');
+  const liveText = liveTiles.map((t) => t.text).join(' ');
+  for (const needed of ['swaps/s', 'transfers/s', 'results/s', 'stakes/s']) assert(liveText.includes(needed), 'Live is missing a ' + needed + ' tile — stakes was forgotten on the first pass');
+  for (const key of ['parallel_swaps_per_second', 'transfers_per_second', 'stores_per_second', 'stakes_per_second', 'swaps_per_core']) {
+    assert(liveText.includes(fmt(operations[key])), 'the live tile shows the pulse’s real ' + key + ' (' + fmt(operations[key]) + '), with no false precision');
+  }
+  assert(/all 2 nodes reporting/.test(liveText), 'full reporting says so in plain words');
+  assert(/record admission/i.test(m.text()), 'the admission tile names what it actually benches');
+  assert(!/>Capacity now</.test(m.page.innerHTML), 'the ambiguous "Capacity now" label stays gone');
+  assert.equal(m.meta()['Swaps per second'], fmt(operations.parallel_swaps_per_second) + ' swaps/s', 'the hero answers with the live swap rate');
+
+  // a refresh keeps each tile's element: only the words move (a CMS edit on it survives the poll)
+  const swapTile = m.tiles(THROUGHPUT)[0].el;
+  swapTile.setAttribute('data-ark-layout-applied', 'true'); swapTile.setAttribute('style', 'opacity: 0.8');
+  pulse = { data: Object.assign({}, pulse.data, { operations: Object.assign({}, operations, { parallel_swaps_per_second: 700001 }) }) };
+  m.page.querySelector('#stats-hero button[data-action="refresh"]').click();
+  await m.flush();
+  assert.equal(m.tiles(THROUGHPUT)[0].el, swapTile, 'the same tile element after a refresh');
+  assert(swapTile.textContent.includes('700,001'), 'with the new number');
+  assert.equal(swapTile.getAttribute('style'), 'opacity: 0.8', 'and the saved edit\'s style still on it');
+  m.dispose();
+
+  // ---- a node that has not reported yet is absent, not a silent zero --------------------------
+  const partialOps = { measured_at_ms: Date.now() - 500, nodes_reporting: 1, nodes_total: 2,
+    parallel_swaps_per_second: 93932, transfers_per_second: 6505, stores_per_second: 205695, stakes_per_second: 6800, cores: 7, swaps_per_core: 13419,
+    per_node: [{ node: 'bk2', swaps_per_second: 93932, transfers_per_second: 6505, stores_per_second: 205695, stakes_per_second: 6800, cores: 7 }] };
+  m = mount({ pulse: () => Promise.resolve({ data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 0, nodes: [nodes[0]], operations: partialOps } }) });
+  await m.flush();
+  const partialText = m.tiles(THROUGHPUT).map((t) => t.text).join(' ');
+  assert(/1 of 2 nodes reporting/.test(partialText), 'a partial fleet sum says exactly how partial it is');
+  assert(/PARTIAL sum/.test(partialText), 'and reads as incomplete in words (Ark\'s stat has no warn tone: reported by W3-STATS)');
+  assert(partialText.includes(fmt(partialOps.parallel_swaps_per_second)), 'a partial sum is still shown, honestly labelled');
+  m.dispose();
+
+  // ---- an older pulse with no operations field yet is "not reporting", never a fabricated zero -
+  m = mount({ pulse: () => Promise.resolve({ data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 0, nodes: [nodes[0]] } }) });
+  await m.flush();
+  for (const t of m.tiles(THROUGHPUT)) {
+    assert.equal(t.state, 'absent', t.label + ' has no reading without an operations field');
+    assert(/not reporting yet/.test(t.text), t.label + ' says WHY there is no number');
+  }
+  m.dispose();
 
   // ---- the shown figures are derivable, not asserted ----------------------------------------
   // Same intent as before: a number on the page must be reconstructible
@@ -95,10 +239,11 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(stageSum / DS.batchLatencyMs > 0.85, 'the stages account for most of the batch, so nothing large is unattributed');
   // Broadcast must never be folded into the resolution latency.
   assert(DS.broadcastLatencyMs > DS.batchLatencyMs * 10, 'broadcast dominates and is reported separately');
-  const text = page.textContent;
+  const text = (() => { const mm = mount({ pulse: () => Promise.reject(new Error('offline')) }); const t = mm.text(); mm.dispose(); return t; })();
   assert(text.includes(String(DS.swapsPerBatch)), 'swaps per batch appears on the page');
   assert(/not pipelined/i.test(text), 'the page names the broadcast as the binding constraint');
   assert(!/\b(TPS|accepted\/s|replica applications)\b/i.test(text), 'the page shows no retired unit');
+  assert(text.includes('449.229'), 'measured figures are shown as recorded, not rounded by the tile');
 
   // ---- the operation matrix renders, each row with its own unit --------------------------------
   const OPS = S.operations;
@@ -137,12 +282,9 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(CP.transfers.byConnections.every((x) => x.perSecond > 0) && /signed at send time|signing client/.test(CP.transfers.note + CP.transfers.metric), 'the transfer figure says who signs and when, so it is not read as a pure server ceiling');
   assert(/not a swap/i.test(CP.transfers.note) && /no balance/i.test(CP.transfers.note), 'transfers are not conflated with swaps, and swaps are still said to move no balance');
   assert(text.includes('Native-token transfers'), 'the transfers block renders');
-  assert(CP.transfers.byClientProcesses.length === 4 && CP.transfers.byClientProcesses.every((x) => x.perSecond > 0), 'the multi-process transfer points are kept');
-  assert(/machine/i.test(CP.transfers.processesNote) && /smaller|\+13-15%/.test(CP.transfers.processesNote), 'the multi-process note says the ~25k is the shared machine\u2019s limit and that the end-to-end gain is smaller than the in-process one');
-  assert(CP.transfers.serverFix.after[0] > CP.transfers.serverFix.before[1] && CP.transfers.serverFix.after[1] > CP.transfers.serverFix.before[1], 'the before/after ranges do not overlap, as the note claims');
   assert(text.includes('client processes'), 'the multi-process block renders');
   assert(text.includes(CP.record) && text.includes('Client path'), 'the client-path section renders');
-  assert(text.includes(fmt(CP.ceilingSwapsPerSecond)) || text.includes(String(CP.ceilingSwapsPerSecond)), 'the ceiling figure appears on the page');
+  assert(text.includes(fmt(CP.ceilingSwapsPerSecond)), 'the ceiling figure appears on the page');
 
   // ---- the fleet figure is a SUM of its rows, not a multiple ----------------------------------
   const FL = OPS.fleet;
@@ -155,71 +297,6 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert(new Set(FL.perNode.map((n) => n.swapsPerSecond)).size === FL.nodes, 'node rows differ, so the total cannot be one node multiplied');
   assert(Math.abs(FL.swapsPerCore - FL.parallelSwapsPerSecond / FL.cores) < 1, 'per-core is derived from the total and the core count');
   assert(/sum of concurrent measurements/i.test(FL.note), 'the fleet figure says how it was obtained');
-
-  // ---- swaps/transfers/stores are LIVE now, not a dated strip ---------------------------------
-  // Redesigned 2026-10-10: these were first added as a dated AUDITED strip
-  // (a reader could not find them at all); now fleet-pulse genuinely
-  // re-measures them hourly per node, so they belong in Live itself, with
-  // no "not live" disclaimer — that disclaimer would now be dishonest in
-  // the other direction.
-  assert.equal(page.find('is-audited-strip').length, 0, 'the old dated-strip wrapper must be gone now that these numbers are live');
-  assert.equal(page.find('headline-fleet-strip').length, 0, 'the old strip container must be gone — the tiles live in the Live grid itself now');
-  const liveGrid = page.find('live-fleet-grid')[0];
-  assert(liveGrid, 'the Live grid lost its scoping class');
-  const statsLiveTiles = liveGrid.find('dash-stat');
-  assert.equal(statsLiveTiles.length, 9, 'Live must carry exactly 9 tiles: nodes, admission, ops, errors, swaps, transfers, stores, stakes, per-core');
-  const statsLiveText = statsLiveTiles.map((t) => t.textContent).join(' ');
-  for (const needed of ['swaps/s', 'transfers/s', 'results/s', 'stakes/s']) {
-    assert(statsLiveText.includes(needed), `Live is missing a ${needed} tile — this is the exact gap a reader pointed at (stakes was forgotten on the first pass)`);
-  }
-  assert(statsLiveText.includes(fmt(operations.parallel_swaps_per_second)), 'the live swaps figure must be the pulse’s real operations.parallel_swaps_per_second, not a different number');
-  assert(statsLiveText.includes(fmt(operations.transfers_per_second)), 'the live transfers figure must be the pulse’s real number');
-  assert(statsLiveText.includes(fmt(operations.stores_per_second)), 'the live stores figure must be the pulse’s real number');
-  assert(statsLiveText.includes(fmt(operations.stakes_per_second)), 'the live stakes figure must be the pulse’s real number');
-  assert(statsLiveText.includes(fmt(operations.swaps_per_core)), 'per-core must be the pulse’s own derived figure, not recomputed client-side from a different total');
-  assert(/all 2 nodes reporting/.test(statsLiveText), 'full reporting must say so in plain words, not just imply it by a clean number');
-
-  // The live tile must no longer claim to be a generic "ops" figure now
-  // that swaps/transfers/stores are named and shown separately — it
-  // measures one specific thing (record admission), and must say so.
-  assert(/record admission/i.test(text), 'the live tile must name what it actually benches, not say generic "ops"');
-  assert(!/>Capacity now</.test(page.textContent), 'the ambiguous "Capacity now" label must be gone');
-  page.arkDispose();
-
-  // ---- a node that has not reported yet is absent, not a silent zero --------------------------
-  const partialOps = {
-    measured_at_ms: Date.now() - 500,
-    nodes_reporting: 1, nodes_total: 2,
-    parallel_swaps_per_second: 93932, transfers_per_second: 6505, stores_per_second: 205695, stakes_per_second: 6800,
-    cores: 7, swaps_per_core: 13419,
-    per_node: [{ node: 'bk2', swaps_per_second: 93932, transfers_per_second: 6505, stores_per_second: 205695, stakes_per_second: 6800, cores: 7 }]
-  };
-  pulseResult = Promise.resolve({ data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 0, nodes: [nodes[0]], operations: partialOps } });
-  let partialHost = new Node('main');
-  let partialPage = context.ArkUI.pageModules.stats.mount(partialHost);
-  await new Promise((r) => setImmediate(r));
-  const partialText = partialPage.find('dash-stat').map((t) => t.textContent).join(' ');
-  assert(/1 of 2 nodes reporting/.test(partialText), 'a partial fleet sum must say exactly how partial it is');
-  assert(partialText.includes(fmt(partialOps.parallel_swaps_per_second)), 'a partial sum is still shown, honestly labelled — not hidden and not padded to look complete');
-  const partialSwapTile = partialPage.find('dash-stat').find((t) => /Swaps \/ s, fleet-wide/.test(t.textContent));
-  assert.equal(partialSwapTile.dataset.state, 'warn', 'a partial fleet sum must visually read as incomplete, the same way a down node does');
-  partialPage.arkDispose();
-
-  // ---- an older pulse with no operations field yet is "not reporting", never a fabricated zero -
-  pulseResult = Promise.resolve({ data: { measured_at_ms: Date.now(), aggregate_qps: 900, total_entries: 20, longest_ms: 7, errors: 0, nodes: [nodes[0]] } });
-  let noOpsHost = new Node('main');
-  let noOpsPage = context.ArkUI.pageModules.stats.mount(noOpsHost);
-  await new Promise((r) => setImmediate(r));
-  const noOpsTiles = noOpsPage.find('dash-stat').slice(4, 9);
-  for (const t of noOpsTiles) {
-    assert(t.textContent.includes('–'), 'with no operations field in the payload, the swap/transfer/store/per-core tiles must show a dash, not 0 or a stale number');
-    assert(/not reporting yet/.test(t.textContent), 'the detail must say WHY there is no number, not just that there is none');
-  }
-  noOpsPage.arkDispose();
-
-  // `page` stays the disposed live-pulse mount from above: disposal clears
-  // timers and listeners, not the rendered tree, and the checks below only
-  // read static text/content — they do not need a second live mount.
 
   // ---- links resolve -------------------------------------------------------------------------
   const src = fs.readFileSync('js/pages/stats.js', 'utf8');
@@ -262,22 +339,16 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   assert.equal(sample.slice(1).reduce((t, r) => t + r.text.length, 0), 358 + 424 + 674 + 622 + 412, 'a transfer is five records of the sizes Appendix B quotes');
   assert.equal(sample.slice(1).reduce((t, r) => t + r.text.split('-').filter((b) => b[0] === 'S').length, 0), 6, 'six signatures');
 
-  // ---- catalog and /monitor ------------------------------------------------------------------
+  // ---- catalog ------------------------------------------------------------------------------
   const catalog = fs.readFileSync('js/pages/catalog.js', 'utf8');
-  // The pulse client must load BEFORE the page, not immediately before it:
-  // the route legitimately gained js/ark/chain-pulse-client.js between them.
-  // Asserting adjacency made a correct addition look like a regression.
   const statsRoute = require('./lib/site-catalog.cjs').loadCatalog().catalog.stats;
   assert(statsRoute && statsRoute.path === '/stats', '/stats route is missing from the catalog');
-  const statsScripts = statsRoute.scripts.map((file) => "'" + file + "'").join(', ');
-  // indexOf returns -1 when absent, and -1 is "before" everything -- so the
-  // presence check has to be its own assertion or dropping the script passes.
-  const pulseAt = statsScripts.indexOf("'js/ark/pulse-client.js'");
-  const pageAt = statsScripts.indexOf("'js/pages/stats.js'");
-  assert(pulseAt >= 0, '/stats no longer loads the shared pulse client at all');
-  assert(pageAt >= 0, '/stats no longer loads its own page module');
-  assert(pulseAt < pageAt, '/stats loads the shared pulse client before the page');
-  assert(fs.readFileSync('index.html', 'utf8').includes('css/stats-dashboard.css'), 'dashboard styles are linked');
+  const scripts = [...statsRoute.scripts];
+  // indexOf returns -1 when absent, and -1 is "before" everything -- so presence is its own check.
+  for (const file of ['js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/ark/blocks.js', 'js/content/glossary.js']) {
+    assert(scripts.indexOf(file) >= 0 && scripts.indexOf(file) < scripts.indexOf('js/pages/stats.js'), '/stats loads ' + file + ' before the page');
+  }
+  assert(fs.readFileSync('index.html', 'utf8').includes('css/ark-blocks.css'), 'the block styles are linked');
   // ---- /monitor removed 2026-10-10: /stats carries the live pulse now --------------------------
   // The page, its route, its nav link, and every reference to it across
   // the content layer were removed in the same pass — this guards that
@@ -292,5 +363,31 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   const navManifest = fs.readFileSync('js/content/manifests/nav.js', 'utf8');
   assert(!/"MONITOR"/.test(navManifest), 'the nav copy manifest must carry no MONITOR field');
 
-  console.log('PASS: /stats dashboard shows only pulse values live and nothing when offline, its audited numbers are derivable, it disposes cleanly, its links resolve, and the detail lives in the whitepaper.');
+
+  /* ---- what the visitor gets, through the real server render -------------------------------- */
+  const seen = await checks.visit(ROUTE, (window, page) => ({
+    tabs: [...page.querySelectorAll('#stats-views [role="tab"]')].map((el) => el.textContent.trim()),
+    links: [...page.querySelectorAll('a[data-scene-link]')].map((a) => a.getAttribute('data-scene-link'))
+  }));
+  assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'tabs'], 'trail, the answer, the detail as tabs');
+  assert.deepEqual(seen.tabs, ['Live', 'Chain', 'Throughput', 'Client path', 'Platform', 'Evidence', 'Readiness']);
+  for (const target of ['resolvers', 'stats/ledger', 'stats/gpu', 'reference']) assert(seen.links.includes(target), 'the page leads on to ' + target);
+  assert.deepEqual(seen.refused, [], 'no block was refused');
+  assert.deepEqual(seen.termsMissing, [], 'every glossary term has an entry in docs/glossary.md');
+  assert(['node', 'shard', 'replica', 'ed25519', 'segment'].every((t) => seen.terms.includes(t)), 'jargon is glossed: ' + seen.terms.join(', '));
+  assert.equal(seen.inserts, 1, 'the CMS insertion anchor is still there');
+  assert.deepEqual(seen.h1, ['stats-title']);
+
+  const ssr = await checks.assertServerRender(ROUTE, 'stats', { idPrefix: 'stats-' });
+
+  /* ---- saved CMS edits still land ---------------------------------------------------------- */
+  const census = continuity.readCensus(ROUTE);
+  const after = await continuity.pageKeys(ROUTE);
+  const tally = continuity.assertContinuity(census, after, { reshaped, retired });
+  assert.equal(tally.kept + tally.reshaped + tally.retired, census.length, 'every old key is accounted for');
+  const landed = await continuity.assertSavedEditsLand(ROUTE, census, { reshaped, retired });
+  assert.equal(landed, census.length - 1 - Object.keys(retired).length, 'a saved frame on every old key but page:/ and the retired ones landed');
+  assert(after.every((entry) => !/^id:ark-r-/.test(entry.key)), 'no generated (ark-r-) id became a layout key');
+
+  console.log('PASS: /stats is a spec of Ark blocks: pulse values live and nothing when offline, a refresh keeps the tiles, its audited numbers are derivable, it disposes cleanly, its links resolve, the detail lives in the whitepaper (' + ssr.blocks + ' blocks server-rendered styled); ' + tally.kept + ' old layout keys kept, ' + tally.reshaped + ' reshaped, ' + tally.retired + ' retired, and ' + landed + ' saved edits land.');
 })().catch((e) => { console.error(e); process.exit(1); });

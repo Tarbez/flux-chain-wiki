@@ -1,141 +1,235 @@
+/* =====================================================================
+   /how-deployment-works: "Deploy a resolver" (since 2026-10-19; the URL is kept, its inbound
+   links with it), on the story template (js/pages/story.js):
+
+     hero           what deploying is, and the hand-offs: Deploy, Explore, the registry
+     The idea       what deploying is, and the three stages -- write it, launch it, serve it
+     How it works   the six steps, numbered across the page, one open at a time
+     Evidence       the one hazard every deployer must hear before signing, what is planned
+                    (labelled so, never shown as live), and the earlier agreement path's three
+                    chapters, read-only (the resolver content audit, Q4)
+     boundary       launched is not served -- in sight in every view
+     figure         each stage keeps its own mesh; pointing at a stage runs its pattern
+
+   Words: js/content/manifests/deployment.js (W1-CONTENT's). Regression: tests/story-blocks.cjs;
+   behaviour in a real DOM: tests/routes-live.cjs. */
 (function () {
   'use strict';
+  var STAGES = [{ key: 'WRITE', pattern: 'story-ask' }, { key: 'LAUNCH', pattern: 'story-work' }, { key: 'SERVE', pattern: 'story-check' }];
+  var CHAPTERS = [['ASK', 'how/ask'], ['WORK', 'how/work'], ['CHECK', 'how/check']];
+  /* `was`: the layout keys of the hand-built page, by block id (tests/lib/layout-continuity.cjs,
+     census tests/fixtures/layout-keys/how-deployment-works.tsv); never typed. */
+  var WAS = {
+   "deploy-hero": {
+    "hero-title": "id:deployment-title",
+    ":root": {
+     "key": "page:/header:1",
+     "self": true
+    },
+    "actions": "page:/footer:1/div:2",
+    "button": "page:/footer:1/div:2/a:1",
+    "button#2": "page:/footer:1/div:2/a:2"
+   },
+   "deploy-crumbs": {
+    ":root": "page:/nav:1",
+    "breadcrumb-item": "page:/nav:1/a:1",
+    "breadcrumb-item#2": "page:/nav:1/span:1"
+   },
+   "deploy-depth": {
+    ":scope > div:nth-of-type(2) > p:nth-of-type(1)": "page:/header:1/p:1",
+    "step-title": "page:/div:1/article:1/h2:1",
+    "step-body": "page:/div:1/article:1/p:1",
+    "step-title#2": "page:/div:1/article:2/h2:1",
+    "step-body#2": "page:/div:1/article:2/p:1",
+    "step-title#3": "page:/div:1/article:3/h2:1",
+    "step-body#3": "page:/div:1/article:3/p:1",
+    "accordion-trigger#7": "page:/div:2/details:1/summary:1",
+    "accordion-content#7": "page:/div:2/details:1/p:1",
+    "accordion-trigger#8": "page:/div:2/details:2/summary:1",
+    "accordion-content#8": "page:/div:2/details:2/p:1",
+    "accordion-trigger#9": "page:/div:2/nav:1/strong:1",
+    ":scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)": "page:/div:2/nav:1/p:1",
+    "actions": "page:/div:2/nav:1/p:2",
+    "step-marker": "page:/div:1/article:1/div:1/span:1",
+    "step-marker#2": "page:/div:1/article:2/div:1/span:1",
+    "step-marker#3": "page:/div:1/article:3/div:1/span:1",
+    "accordion-content": "page:/div:1/article:1/ol:1/li:1/span:1",
+    "accordion-content#2": "page:/div:1/article:1/ol:1/li:2/span:1",
+    "accordion-content#3": "page:/div:1/article:2/ol:1/li:1/span:1",
+    "accordion-content#4": "page:/div:1/article:2/ol:1/li:2/span:1",
+    "accordion-content#5": "page:/div:1/article:3/ol:1/li:1/span:1",
+    "accordion-content#6": "page:/div:1/article:3/ol:1/li:2/span:1",
+    "tabs-content": {
+     "key": "page:/div:1",
+     "self": true
+    },
+    "accordion#2": {
+     "key": "page:/div:2",
+     "self": true
+    },
+    "accordion-item#7": {
+     "key": "page:/div:2/details:1",
+     "self": true
+    },
+    "accordion-item#8": {
+     "key": "page:/div:2/details:2",
+     "self": true
+    },
+    "accordion-item#9": {
+     "key": "page:/div:2/nav:1",
+     "self": true
+    },
+    "step#1": {
+     "key": "page:/div:1/article:1",
+     "self": true
+    },
+    "accordion-item#1": {
+     "key": "page:/div:1/article:1/ol:1/li:1",
+     "self": true
+    },
+    "accordion-trigger#1": "page:/div:1/article:1/ol:1/li:1/strong:1",
+    "accordion-item#2": {
+     "key": "page:/div:1/article:1/ol:1/li:2",
+     "self": true
+    },
+    "accordion-trigger#2": "page:/div:1/article:1/ol:1/li:2/strong:1",
+    "step#2": {
+     "key": "page:/div:1/article:2",
+     "self": true
+    },
+    "accordion-item#3": {
+     "key": "page:/div:1/article:2/ol:1/li:1",
+     "self": true
+    },
+    "accordion-trigger#3": "page:/div:1/article:2/ol:1/li:1/strong:1",
+    "accordion-item#4": {
+     "key": "page:/div:1/article:2/ol:1/li:2",
+     "self": true
+    },
+    "accordion-trigger#4": "page:/div:1/article:2/ol:1/li:2/strong:1",
+    "step#3": {
+     "key": "page:/div:1/article:3",
+     "self": true
+    },
+    "accordion-item#5": {
+     "key": "page:/div:1/article:3/ol:1/li:1",
+     "self": true
+    },
+    "accordion-trigger#5": "page:/div:1/article:3/ol:1/li:1/strong:1",
+    "accordion-item#6": {
+     "key": "page:/div:1/article:3/ol:1/li:2",
+     "self": true
+    },
+    "accordion-trigger#6": "page:/div:1/article:3/ol:1/li:2/strong:1"
+   },
+   "deploy-status": {
+    "alert-title": "page:/footer:1/div:1/span:1",
+    "alert-description": "page:/footer:1/div:1/strong:1",
+    "[data-ark-block=\"callout\"] > div": "page:/footer:1",
+    "[data-ark-block=\"callout\"]": {
+     "key": "page:/footer:1/div:1",
+     "self": true
+    }
+   },
+   "deploy-figure": {
+    ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)": "page:/div:1/article:1/div:1/span:2",
+    ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(2)": "page:/div:1/article:2/div:1/span:2",
+    ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(2)": "page:/div:1/article:3/div:1/span:2",
+    ".how-deploy-mesh:nth-of-type(1)": {
+     "key": "page:/div:1/article:1/div:2",
+     "self": true
+    },
+    ".how-deploy-mesh:nth-of-type(1) > canvas": "page:/div:1/article:1/div:2/canvas:1",
+    ".how-deploy-mesh:nth-of-type(2)": {
+     "key": "page:/div:1/article:2/div:2",
+     "self": true
+    },
+    ".how-deploy-mesh:nth-of-type(2) > canvas": "page:/div:1/article:2/div:2/canvas:1",
+    ".how-deploy-mesh:nth-of-type(3)": {
+     "key": "page:/div:1/article:3/div:2",
+     "self": true
+    },
+    ".how-deploy-mesh:nth-of-type(3) > canvas": "page:/div:1/article:3/div:2/canvas:1"
+   },
+   "insert": {
+    "key": "page:/div:3",
+    "self": true
+   }
+  };
 
-  /* /how-deployment-works: "Deploy a resolver" (since 2026-10-19; the URL is kept, its six
-     inbound links with it). Six steps in three cards -- write it, launch it, serve it -- each
-     card keeping its own mesh object. Detail sits behind two disclosures (the key-freeze
-     caution and what is planned), and the page hands off to the Deploy and Explore products.
-
-     The three agreement chapters (/how-deployment-works/ask, /work, /check) used to be this
-     page. They describe the earlier agreement path, which is no longer the direction; they stay
-     reachable from here, under their own heading, read-only (the resolver content audit,
-     Q4). Copy: js/content/manifests/deployment.js. */
   ArkUI.pageModules.deployment = {
     mount: function (host) {
       var manifest = ArkManifest.get('deployment');
+      function copy(role) { return 'copy:DEPLOYMENT.SIMPLE.' + role; }
+      function top(role) { return 'copy:DEPLOYMENT.' + role; }
+      /* A link field's value ('route:how/ask', 'url:https://...') is the href itself: the block
+         resolves route:/url:, never copy: (a copy: href was an address nobody could open). */
       function words(role) { return ArkCopy.text('DEPLOYMENT.SIMPLE.' + role); }
-      function top(role) { return ArkCopy.text('DEPLOYMENT.' + role); }
-      /* `hrefRole`'s field is a manifest field of kind 'link'; js/ark/dash-kit.js's
-         linkEl is the one place that turns its tagged value into a real href. */
-      function routeLink(label, hrefRole, className) {
-        return ArkUI.dash.linkEl(label, words(hrefRole), manifest.route, className || '');
-      }
 
-      var cards = [
-        { key: 'WRITE', steps: [1, 2], pattern: 'story-ask' },
-        { key: 'LAUNCH', steps: [3, 4], pattern: 'story-work' },
-        { key: 'SERVE', steps: [5, 6], pattern: 'story-check' }
-      ];
-      var fabrics = [];
-      var el = ArkUI.el('section', 'ark-page how-simple how-triptych how-deploy');
-      el.dataset.arkPage = 'deployment';
-
-      var path = ArkUI.el('nav', 'content-layer-path how-path');
-      path.setAttribute('aria-label', 'Your place');
-      path.appendChild(routeLink('← Home', 'HOME.HREF'));
-      var current = ArkUI.el('span', '', manifest.title);
-      current.setAttribute('aria-current', 'page');
-      path.appendChild(current);
-      el.appendChild(path);
-
-      var heading = ArkUI.el('header', 'how-triptych-intro');
-      var headingCopy = ArkUI.el('div', 'how-triptych-heading');
-      var title = ArkUI.el('h1', '', words('TITLE'));
-      title.id = 'deployment-title';
-      el.setAttribute('aria-labelledby', title.id);
-      headingCopy.appendChild(title);
-      heading.appendChild(headingCopy);
-      heading.appendChild(ArkUI.el('p', 'how-simple-deck', words('INTRO')));
-      el.appendChild(heading);
-
-      var list = ArkUI.el('div', 'how-work-cards');
-      list.setAttribute('role', 'list');
-      list.setAttribute('aria-label', 'Six steps to deploy a resolver');
-      cards.forEach(function (spec, index) {
-        var card = ArkUI.el('article', 'how-work-card how-work-card-' + spec.key.toLowerCase());
-        card.setAttribute('role', 'listitem');
-        card.dataset.workStep = spec.key.toLowerCase();
-
-        var head = ArkUI.el('div', 'how-work-card-top');
-        head.appendChild(ArkUI.el('span', 'how-work-number', String(index + 1).padStart(2, '0')));
-        head.appendChild(ArkUI.el('span', 'how-work-signal', words(spec.key + '.SIGNAL')));
-        card.appendChild(head);
-        card.appendChild(ArkUI.el('h2', '', words(spec.key + '.TITLE')));
-        card.appendChild(ArkUI.el('p', 'how-work-answer', words(spec.key + '.TEXT')));
-
-        var meshFrame = ArkUI.el('div', 'how-work-mesh-frame');
-        var mesh = ArkUI.el('canvas', 'how-work-mesh');
-        mesh.setAttribute('aria-hidden', 'true');
-        meshFrame.appendChild(mesh);
-        card.appendChild(meshFrame);
-
-        // The card's two steps, numbered across the whole page (1-6).
-        var steps = ArkUI.el('ol', 'how-work-pair');
-        steps.start = spec.steps[0];
-        spec.steps.forEach(function (n) {
-          var item = ArkUI.el('li', '');
-          item.appendChild(ArkUI.el('strong', '', top('STEP' + n)));
-          item.appendChild(ArkUI.el('span', '', top('BODY' + n)));
-          steps.appendChild(item);
-        });
-        card.appendChild(steps);
-
+      /* One mesh per stage, numbered as the stages are. */
+      var meshes = ArkUI.el('div', 'how-deploy-meshes'), fabrics = [];
+      STAGES.forEach(function (stage, i) {
+        var cell = ArkUI.el('div', 'how-deploy-mesh');
+        var canvas = ArkUI.el('canvas', 'how-work-mesh'); canvas.setAttribute('aria-hidden', 'true'); cell.appendChild(canvas);
+        var tag = ArkUI.el('span', 'how-deploy-mesh-name', String(i + 1).padStart(2, '0') + ' · ' + words(stage.key + '.TITLE')); cell.appendChild(tag);
+        var signal = ArkUI.el('span', 'how-deploy-mesh-signal', words(stage.key + '.SIGNAL')); cell.appendChild(signal);
         // clean: the fabric's story labels name the agreement path (YOUR REQUEST, THEIR OFFER); a deploy step is not that.
-        var fabric = ArkUI.createMeshFabric(mesh, { clean: true });
-        fabrics.push({ controller: fabric, pattern: spec.pattern });
-        card.addEventListener('pointerenter', function () { card.dataset.active = 'true'; fabric.select(spec.pattern, true, true); });
-        card.addEventListener('pointerleave', function () { card.dataset.active = 'false'; fabric.select(spec.pattern, false); });
-        list.appendChild(card);
+        fabrics.push({ controller: ArkUI.createMeshFabric(canvas, { clean: true }), pattern: stage.pattern, cell: cell });
+        meshes.appendChild(cell);
       });
-      el.appendChild(list);
+      var chapters = CHAPTERS.map(function (c) { return { label: copy(c[0] + '.TITLE'), href: words(c[0] + '.HREF') }; })
+        .concat([{ label: 'Agreement lifecycle', href: words('NEXT.HREF') }]);
 
-      /* Detail behind disclosures: the one hazard every deployer must hear before signing, and
-         what is planned (labelled so, never shown as live). Then the earlier agreement path. */
-      var notes = ArkUI.el('div', 'how-deploy-detail');
-      [['CAUTION.TITLE', 'CAUTION', 'how-deploy-hazard'], ['PLANNED.TITLE', 'PLANNED', 'how-deploy-planned']].forEach(function (pair) {
-        var box = ArkUI.el('details', 'how-deploy-fold ' + pair[2]);
-        box.appendChild(ArkUI.el('summary', '', words(pair[0])));
-        box.appendChild(ArkUI.el('p', '', words(pair[1])));
-        notes.appendChild(box);
-      });
-      var agreement = ArkUI.el('nav', 'how-deploy-agreement');
-      agreement.setAttribute('aria-label', words('AGREEMENT.TITLE'));
-      agreement.appendChild(ArkUI.el('strong', '', words('AGREEMENT.TITLE')));
-      agreement.appendChild(ArkUI.el('p', '', words('AGREEMENT.TEXT')));
-      var chapters = ArkUI.el('p', 'how-deploy-chapters');
-      ['ASK', 'WORK', 'CHECK'].forEach(function (key) {
-        var chapter = routeLink(words(key + '.TITLE'), key + '.HREF', 'how-deploy-chapter');
-        chapter.dataset.continuityCard = { ASK: 'how/ask', WORK: 'how/work', CHECK: 'how/check' }[key];
-        chapters.appendChild(chapter);
-      });
-      chapters.appendChild(routeLink('Agreement lifecycle', 'NEXT.HREF', 'how-deploy-chapter'));
-      agreement.appendChild(chapters);
-      notes.appendChild(agreement);
-      el.appendChild(notes);
-
-      var footer = ArkUI.el('footer', 'how-simple-footer');
-      var boundary = ArkUI.el('div', 'how-simple-boundary');
-      boundary.appendChild(ArkUI.el('span', 'how-boundary-label', 'CURRENT IMPLEMENTATION'));
-      boundary.appendChild(ArkUI.el('strong', '', words('BOUNDARY')));
-      footer.appendChild(boundary);
-      var actions = ArkUI.el('div', 'how-deploy-handoffs');
-      actions.appendChild(routeLink(words('DEPLOYER.LINK') + ' ↗', 'DEPLOYER.HREF', 'how-simple-next'));
-      actions.appendChild(routeLink(words('EXPLORE.LINK') + ' ↗', 'EXPLORE.HREF', 'how-deploy-handoff'));
-      actions.appendChild(routeLink(words('REGISTRY.LINK') + ' →', 'REGISTRY.HREF', 'how-deploy-handoff'));
-      footer.appendChild(actions);
-      el.appendChild(footer);
-
-      /* Anchor for reusable content blocks (js/content/components.js); rendering into it
-         is centralized in js/main.js's onMount hook, not called here. */
-      var components = ArkUI.el('div', 'how-components');
-      components.setAttribute('data-ark-insert', 'main');
-      el.appendChild(components);
-
-      el.arkDispose = function () {
-        fabrics.forEach(function (entry) { entry.controller.dispose(); });
+      var def = {
+        page: 'deployment', id: 'deploy', className: 'story-deploy', titleId: 'deployment-title', was: WAS, insertWas: WAS.insert,
+        crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
+        title: copy('TITLE'),
+        actions: [
+          { label: copy('DEPLOYER.LINK'), href: words('DEPLOYER.HREF'), tone: 'primary' },
+          { label: copy('EXPLORE.LINK'), href: words('EXPLORE.HREF'), tone: 'secondary' },
+          { label: copy('REGISTRY.LINK'), href: words('REGISTRY.HREF'), tone: 'link' }
+        ],
+        /* The idea is the short answer and the three stages; How it works opens the six steps one
+           at a time; Evidence holds what to hear before signing, what is planned, and the earlier
+           agreement path -- each closed until asked for, as they were behind disclosures before. */
+        depth: {
+          focus: { text: copy('INTRO'), blocks: [{ block: 'steps', props: { label: 'Three stages', items: STAGES.map(function (stage) {
+            return { title: copy(stage.key + '.TITLE'), body: copy(stage.key + '.TEXT') };
+          }) } }] },
+          context: { blocks: [
+            /* Six steps, numbered across the page, one open at a time: each body is a paragraph,
+               and all six open at once ran to 2.8 screens on a phone. */
+            { block: 'accordion', props: { label: 'Six steps to deploy a resolver', defaultOpen: ['step-1'], items: [1, 2, 3, 4, 5, 6].map(function (n) {
+              return { value: 'step-' + n, title: n + ' · ' + ArkCopy.text('DEPLOYMENT.STEP' + n), content: top('BODY' + n) };
+            }) } }
+          ] },
+          reference: { blocks: [
+            { block: 'accordion', props: { label: 'Before you deploy', items: [
+              { value: 'caution', title: copy('CAUTION.TITLE'), content: copy('CAUTION') },
+              { value: 'planned', title: copy('PLANNED.TITLE'), content: copy('PLANNED') },
+              { value: 'agreement', title: copy('AGREEMENT.TITLE'), content: copy('AGREEMENT.TEXT'),
+                blocks: [{ block: 'actions', props: { label: words('AGREEMENT.TITLE'), items: chapters.map(function (c) { return { label: c.label, href: c.href, tone: 'link' }; }) } }] }
+            ] } }
+          ] }
+        },
+        boundary: { tone: 'drift', title: 'Current implementation', body: copy('BOUNDARY') }, boundaryFold: 'phone',
+        figure: { slot: 'meshes', caption: words('WRITE.TITLE') + ' · ' + words('LAUNCH.TITLE') + ' · ' + words('SERVE.TITLE') + ': each stage on the mesh.', more: 'Show the three meshes', less: 'Hide the three meshes' },
+        slots: { meshes: meshes },
+        pager: { label: 'Continue', relatedLabel: copy('AGREEMENT.TITLE'), related: chapters },
+        onFigureVisibility: function (figure, visible) { fabrics.forEach(function (f) { f.controller.visible(visible); }); },
+        dispose: function () { fabrics.forEach(function (f) { f.controller.dispose(); }); }
       };
+      var el = ArkUI.story.mount(def, null);
+      /* A chapter link returns to its exact source (js/ark/panel-continuity.js). */
+      Array.prototype.forEach.call(el.querySelectorAll('a[data-scene-link^="how/"]'), function (a) { a.dataset.continuityCard = a.getAttribute('data-scene-link'); });
+      /* Pointing at a stage runs its pattern on its own mesh. */
+      Array.prototype.forEach.call(el.querySelectorAll('#deploy-depth [data-ark-part="step"]'), function (card, i) {
+        var f = fabrics[i]; if (!f) return;
+        card.addEventListener('pointerenter', function () { f.cell.dataset.active = 'true'; f.controller.select(f.pattern, true, true); });
+        card.addEventListener('pointerleave', function () { f.cell.dataset.active = 'false'; f.controller.select(f.pattern, false); });
+      });
       host.appendChild(el);
-      fabrics.forEach(function (entry) { entry.controller.select(entry.pattern, false); });
+      fabrics.forEach(function (f) { f.controller.select(f.pattern, false); });
       return el;
     }
   };

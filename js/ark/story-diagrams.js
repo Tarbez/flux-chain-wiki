@@ -28,7 +28,9 @@
   function path(d,cls){return add('path',{d:d,class:cls||'drawing-line'});}
   function box(x,y,w,h,cls){return add('rect',{x:x,y:y,width:w,height:h,rx:5,class:cls||'drawing-line'});}
   function dot(x,y,r,cls){return add('circle',{cx:x,cy:y,r:r||3,class:cls||'drawing-point'});}
-  function word(x,y,t,cls){return add('text',{x:x,y:y,class:cls||'drawing-label'},t);}
+  // data-ark-label: inside Ark's figure frame (js/pages/story.js) a label renders at 12px or more
+  // on screen whatever the drawing's scale (they were 6-8px).
+  function word(x,y,t,cls){return add('text',{x:x,y:y,class:cls||'drawing-label','data-ark-label':''},t);}
   // A bounded patch retains the dense mesh language without covering the text.
   var hatch='';for(var i=0;i<18;i++){var x=9+i*4;hatch+='M'+x+' 14l0 55 ';}path(hatch,'drawing-mesh');
   [[12,12],[348,12],[12,204],[348,204]].forEach(function(p){path('M'+(p[0]-4)+' '+p[1]+'h8M'+p[0]+' '+(p[1]-4)+'v8','drawing-register');});
@@ -81,12 +83,13 @@
    box(39,82,52,56);box(140,64,76,91,'drawing-boundary');dot(294,110,25,'drawing-boundary');
    for(var c=0;c<9;c++)path('M'+(148+c*7)+' 75v69','drawing-mesh');path('M280 110l10 10 20-22','drawing-thread');
   }
-  word(86,24,title,'drawing-title');
+  // The title is the figure's caption now (returned as `title`): at a legible size it no longer fit the drawing.
   var trace=route?path(route,'drawing-trace'):null;
   var marker=add('g',{class:'drawing-marker'});marker.appendChild(el('circle',{r:10,class:'drawing-selection'}));marker.appendChild(el('circle',{r:2,class:'drawing-point'}));
   function cancel(){motion.forEach(function(a){a.cancel();});motion=[];}
+  var offscreen=false;
   function select(index,animate){
-   var p=points[Math.max(0,Math.min(points.length-1,index))];if(!p)return;cancel();
+   var p=points[Math.max(0,Math.min(points.length-1,index))];if(!p)return;cancel();if(offscreen)animate=false;
    var previous=marker.style.transform||'translate('+p[0]+'px,'+p[1]+'px)';var next='translate('+p[0]+'px,'+p[1]+'px)';marker.style.transform=next;
    if(animate && marker.animate && !(ArkUI.prefersReducedMotion&&ArkUI.prefersReducedMotion()) && !(ArkUI.sceneState&&ArkUI.sceneState.get().paused)){
     motion.push(marker.animate([{transform:previous},{transform:next}],{duration:380,easing:'cubic-bezier(.22,1,.36,1)'}));
@@ -97,6 +100,8 @@
   function settlePreference(){if(media&&media.matches)cancel();}
   if(media&&media.addEventListener)media.addEventListener('change',settlePreference);
   var unsubscribe=ArkUI.sceneState&&ArkUI.sceneState.subscribe?ArkUI.sceneState.subscribe(function(state){if(state.paused)cancel();}):null;
-  select(options.selected||0,false);return {element:svg,select:select,dispose:function(){cancel();if(media&&media.removeEventListener)media.removeEventListener('change',settlePreference);if(typeof unsubscribe==='function')unsubscribe();}};
+  select(options.selected||0,false);return {element:svg,title:title,select:select,
+   /* visible(false): the figure scrolled away -- motion stops and none starts until it is back. */
+   visible:function(on){offscreen=!on;if(offscreen)cancel();},dispose:function(){cancel();if(media&&media.removeEventListener)media.removeEventListener('change',settlePreference);if(typeof unsubscribe==='function')unsubscribe();}};
  };
 })();

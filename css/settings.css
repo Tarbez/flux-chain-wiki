@@ -8,10 +8,9 @@
 :root[data-theme]:not([data-theme="original"]) body,
 :root[data-theme]:not([data-theme="original"]) #scene { background:hsl(var(--canvas)); }
 :root[data-theme]:not([data-theme="original"]) .hero-atmosphere { background:hsl(var(--canvas)); }
-:root[data-theme]:not([data-theme="original"]) :is(.learning-page,.expansion,.article-body,.article-playground) { color:hsl(var(--text)); }
+:root[data-theme]:not([data-theme="original"]) .expansion { color:hsl(var(--text)); }
 /* Route components own action, reference and caution colors. Theme switching
    supplies their semantic values rather than overriding every link/button. */
-:root[data-theme]:not([data-theme="original"]) #scene .learning-page :is(h1,h2,h3) { color:hsl(var(--text-strong)); }
 
 /* Atmosphere follows the same semantic palette as the page and settings. */
 :root:not([data-theme]),:root[data-theme="original"] {
@@ -19,7 +18,6 @@
  --primary:142 15% 64%; --complement:150 9% 48%; --text-strong:140 18% 89%; --text:140 12% 80%; --text-muted:140 9% 65%;
 }
 .ark-background-host { opacity:1; }
-.ark-header { justify-content:space-between !important; }
 .ark-studio-label { color:hsl(var(--text-muted)); font:400 8px var(--ark-font); letter-spacing:.12em; }
 .ark-background-host { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 :root[data-background]:not([data-background="original"]) .hero-atmosphere { display:none; }

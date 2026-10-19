@@ -1,0 +1,82 @@
+# key	tag	text -- layout keys of /learnings/why-the-chain-was-retired before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	ALL NOTESBENCHMARKS / 001 / 7 MIN READCOREFrom one chain to one per identityTHE COREThe first block-ordered chain was retired and the agreement fabric replaced 
+page:/header:1	header	ALL NOTESBENCHMARKS / 001 / 7 MIN READCOREFrom one chain to one per identityTHE COREThe first block-ordered chain was retired and the agreement fabric replaced 
+page:/header:1/div:1	div	ALL NOTESBENCHMARKS / 001 / 7 MIN READCORE
+page:/header:1/div:1/a:1	a	ALL NOTES
+page:/header:1/div:1/a:1/svg:1	svg	
+page:/header:1/div:1/a:1/svg:1/path:1	path	
+page:/header:1/div:1/a:1/svg:1/path:2	path	
+page:/header:1/div:1/span:1	span	BENCHMARKS / 001 / 7 MIN READ
+page:/header:1/div:1/button:1	button	CORE
+page:/header:1/div:1/button:1/svg:1	svg	
+page:/header:1/div:1/button:1/svg:1/path:1	path	
+page:/header:1/div:1/button:1/svg:1/path:2	path	
+page:/header:1/h1:1	h1	From one chain to one per identity
+page:/header:1/div:2	div	THE COREThe first block-ordered chain was retired and the agreement fabric replaced it. The current design keeps the fabric's lesson, that unrelated work should
+page:/header:1/div:2/span:1	span	THE CORE
+page:/header:1/div:2/p:1	p	The first block-ordered chain was retired and the agreement fabric replaced it. The current design keeps the fabric's lesson, that unrelated work should never w
+page:/header:1/div:2/p:2	p	Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolv
+page:/div:1	div	QUESTIONS / 050001Was there a real chain?02What did the agreement fabric change?03What is the chain now?04Which numbers can be quoted?05What remains unproven?Th
+page:/div:1/nav:1	nav	QUESTIONS / 050001Was there a real chain?02What did the agreement fabric change?03What is the chain now?04Which numbers can be quoted?05What remains unproven?
+page:/div:1/nav:1/p:1	p	QUESTIONS / 05
+page:/div:1/nav:1/button:1	button	00
+page:/div:1/nav:1/button:2	button	01Was there a real chain?
+page:/div:1/nav:1/button:2/span:1	span	01
+page:/div:1/nav:1/button:2/span:2	span	Was there a real chain?
+page:/div:1/nav:1/button:3	button	02What did the agreement fabric change?
+page:/div:1/nav:1/button:3/span:1	span	02
+page:/div:1/nav:1/button:3/span:2	span	What did the agreement fabric change?
+page:/div:1/nav:1/button:4	button	03What is the chain now?
+page:/div:1/nav:1/button:4/span:1	span	03
+page:/div:1/nav:1/button:4/span:2	span	What is the chain now?
+page:/div:1/nav:1/button:5	button	04Which numbers can be quoted?
+page:/div:1/nav:1/button:5/span:1	span	04
+page:/div:1/nav:1/button:5/span:2	span	Which numbers can be quoted?
+page:/div:1/nav:1/button:6	button	05What remains unproven?
+page:/div:1/nav:1/button:6/span:1	span	05
+page:/div:1/nav:1/button:6/span:2	span	What remains unproven?
+page:/div:1/div:1	div	The earlier architectureProject material describes an earlier block-ordered implementation called flxd-chain. Every transaction waited for one global block orde
+id:why-the-chain-was-retired-section-0	section	The earlier architectureProject material describes an earlier block-ordered implementation called flxd-chain. Every transaction waited for one global block orde
+page:/div:1/div:1/section:1/span:1	span	
+page:/div:1/div:1/section:1/h2:1	h2	The earlier architecture
+page:/div:1/div:1/section:1/p:1	p	Project material describes an earlier block-ordered implementation called flxd-chain. Every transaction waited for one global block order, so unrelated work que
+page:/div:1/div:1/section:1/p:2	p	Earlier copy gave throughput figures for local and network tests. Those figures are not repeated here because the evidence registry does not contain the workloa
+id:why-the-chain-was-retired-section-1	section	The agreement fabricThe agreement fabric replaced the block order with signed records linked by causal CID references. Each agreement became its own trail, so u
+page:/div:1/div:1/section:2/span:1	span	
+page:/div:1/div:1/section:2/h2:1	h2	The agreement fabric
+page:/div:1/div:1/section:2/p:1	p	The agreement fabric replaced the block order with signed records linked by causal CID references. Each agreement became its own trail, so unrelated work no lon
+page:/div:1/div:1/section:2/p:2	p	That idea survives. What changed is where the records live and who checks them.
+id:why-the-chain-was-retired-section-2	section	One chain per identityThe current design, described in the FXN whitepaper, brings the chain back in a smaller form: every identity has its own signed, append-on
+page:/div:1/div:1/section:3/span:1	span	
+page:/div:1/div:1/section:3/h2:1	h2	One chain per identity
+page:/div:1/div:1/section:3/p:1	p	The current design, described in the FXN whitepaper, brings the chain back in a smaller form: every identity has its own signed, append-only chain. The chain ad
+page:/div:1/div:1/section:3/p:2	p	The chain carries no payload meaning. Transfers, books, markets, streams, governance and agreements are resolvers that read records on top. Because chains are d
+id:why-the-chain-was-retired-section-3	section	What the numbers say nowThe current design has dated, reproducible fleet measurements. On the full ten-node public mesh with Lever A+B+C (TransferAtomic for sam
+page:/div:1/div:1/section:4/span:1	span	
+page:/div:1/div:1/section:4/h2:1	h2	What the numbers say now
+page:/div:1/div:1/section:4/p:1	p	The current design has dated, reproducible fleet measurements. On the full ten-node public mesh with Lever A+B+C (TransferAtomic for same-shard, TransferSend/Re
+page:/div:1/div:1/section:4/p:2	p	Completed transfers and logical operations were always reported separately and never merged into one figure; a per-replica figure once shown beside them was ari
+id:why-the-chain-was-retired-section-4	section	What remains unprovenIndependent-operator readiness, economic settlement, and production activation remain unverified in this site's evidence registry. A fleet 
+page:/div:1/div:1/section:5/span:1	span	
+page:/div:1/div:1/section:5/h2:1	h2	What remains unproven
+page:/div:1/div:1/section:5/p:1	p	Independent-operator readiness, economic settlement, and production activation remain unverified in this site's evidence registry. A fleet benchmark is not a pr
+page:/div:1/div:1/section:5/p:2	p	A cleaner headline cannot substitute for a reproducible measurement. Every number here links to the run that produced it.
+page:/div:1/div:1/div:1	div	← THE CORENEXT QUESTION →
+page:/div:1/div:1/div:1/button:1	button	← THE CORE
+page:/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/button:2	button	NEXT QUESTION →
+page:/div:1/div:1/a:1	a	NEXT NOTE / One substrate, many networks →
+page:/div:1/nav:2	nav	Related mechanism →See every measurement →
+page:/div:1/nav:2/a:1	a	Related mechanism →
+page:/div:1/nav:2/a:2	a	See every measurement →
+page:/div:1/details:1	details	Evidence & editorial reviewEditorial review: 2026-10-08. This is not live capability verification.BENCH-003: the measured fleet ceiling
+page:/div:1/details:1/summary:1	summary	Evidence & editorial review
+page:/div:1/details:1/p:1	p	Editorial review: 2026-10-08. This is not live capability verification.
+page:/div:1/details:1/a:1	a	BENCH-003: the measured fleet ceiling
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:2	div	

@@ -1,98 +1,88 @@
-/* Home: the chain flow (js/pages/home-flow.js) and the measured stats rail.
-   Bento, not boxes-in-boxes: tiles are separated by fill and gap, never by
-   hairlines. Color restraint: whoever acts and the record being admitted
-   carry the primary ink; earlier records are neutral; only a resolved record
-   uses success. Records are step links, so they take reference on hover/focus. */
+/* The chain flow (js/pages/home-flow.js): one record joins its holder's chain in five steps --
+   the home page's scene (the landscape, css/home-swiss.css) and /chain's plain scene below.
+   It sits in Ark's figure frame on both pages, which owns the frame, the kind label and the
+   caption; this file draws only the scene's insides. Colour restraint: whoever acts and the record
+   being admitted carry the primary ink; earlier records are neutral; only a stored or resolved
+   record uses success. Nothing here renders below 12px (the plain scene was SVG text at about 6px
+   on a phone: docs/ux-audit/pages-ux-a.md /chain). */
 
-#scene .home-lifecycle {border-color:transparent;}
-.flow {--flow-step:3.2s;position:relative;display:grid;gap:14px;margin-top:20px;align-content:start;}
+.flow {--flow-step:3.2s;position:relative;display:grid;gap:14px;align-content:start;min-width:0;}
 
 /* Now: the illustrated step, then its quote ------------------------------ */
-.flow-now {position:relative;display:grid;gap:10px;align-content:start;padding:14px 18px 18px;border-radius:14px;
+.flow-now {position:relative;display:grid;gap:10px;align-content:start;min-width:0;padding:14px 18px 18px;border-radius:12px;
  background:radial-gradient(120% 90% at 0% 0%,hsl(var(--primary-100)),transparent 55%),hsl(var(--text-strong) / .04);}
 .flow-scene {display:block;width:100%;height:auto;overflow:visible;}
-.flow-says {display:block;min-height:2.7em;padding-right:40px;font:500 18px/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
+.flow-says {display:block;min-height:2.7em;padding-right:40px;font:500 clamp(15px,1.4vw,18px)/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
 .flow.flow-run .flow-says {animation:flow-caption 420ms ease-out both;}
 @keyframes flow-caption {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
 
 /* ---------------------------------------------------------------------
-   The scene: one changing panel, not five stacked rows. Sign, check,
-   extend, replicate, resolve are five things that happen to the SAME
-   record, so only one is ever drawn; switching cross-fades. The step
-   tracker above (.flow-ledger, the real accessible links) is the "chain" —
-   five connected circles — and this panel is what the selected link means.
-
-   Colour is shade ladders only — the component layer owns interactive
-   paint, and tests/components.cjs fails on an opacity tint over a role
-   ink. Staggering uses --i, set per element in js/pages/home-flow.js.
+   The plain scene (/chain): one changing panel, not five stacked rows. Sign, check, extend,
+   replicate, resolve happen to the SAME record, so the panels share one grid cell and only the
+   current one is shown; switching cross-fades. HTML, so it wraps on a phone instead of shrinking.
+   Staggering uses --i, set per element in js/pages/home-flow.js.
    --------------------------------------------------------------------- */
-
-.flow-card {fill:hsl(var(--raised) / .5);stroke:hsl(var(--border-subtle));stroke-width:1;}
+.flow-plain {display:grid;min-width:0;}
+.flow-plain > .flow-panel {grid-area:1/1;display:grid;align-content:center;justify-items:center;gap:14px;min-width:0;padding:clamp(10px,2.4vw,26px) 0;}
 .flow-panel {opacity:0;transition:opacity 320ms ease;}
 .flow-panel-active {opacity:1;}
 
-/* SIGN — the record, block by block. The blocks are the real wire
-   grammar, so they get the most ink: a filled box, mono text, the
-   field's plain name underneath. */
-.flow-block-box {fill:hsl(var(--surface));stroke:hsl(var(--border-default));stroke-width:1;}
-.flow-block-text {font:600 11px var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;fill:hsl(var(--text-strong));}
-.flow-block-under {font:400 8px var(--font-mono,ui-monospace,monospace);letter-spacing:.07em;fill:hsl(var(--text-faint));}
-.flow-block-dash {stroke:hsl(var(--text-strong) / .3);stroke-width:1.2;stroke-linecap:round;}
-/* The signature block is what makes the rest true, so it is the one that
-   is drawn differently rather than just last. */
-.flow-block[data-i="6"] .flow-block-box {fill:hsl(var(--primary-100));stroke:hsl(var(--primary-400));}
-.flow-block[data-i="6"] .flow-block-text {fill:hsl(var(--primary));}
-.flow.flow-run .flow-panel-active .flow-block {animation:flow-block-in 460ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i) * 60ms);transform-box:fill-box;transform-origin:center;}
-@keyframes flow-block-in {from{opacity:0;transform:translateY(7px) scale(.94);}to{opacity:1;transform:none;}}
+/* SIGN -- the record, field by field: the real wire grammar, dash-separated as on the wire, each
+   field's plain name underneath. The signature is drawn differently: it covers everything before it. */
+.flow-record-format {display:flex;flex-wrap:wrap;justify-content:center;gap:12px 0;margin:0;padding:0;list-style:none;}
+.flow-record-format .flow-block {display:grid;grid-template-columns:auto auto;justify-items:center;column-gap:6px;row-gap:6px;}
+.flow-record-format .flow-block:not(:last-child)::after {content:"–";grid-column:2;grid-row:1;align-self:center;padding-right:6px;font:400 14px var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-faint));}
+.flow-block-text {grid-column:1;display:block;min-width:2.4em;padding:9px 11px;border:1px solid hsl(var(--border-default));border-radius:6px;background:hsl(var(--surface));
+ font:600 clamp(13px,1.5vw,17px)/1.15 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;text-align:center;color:hsl(var(--text-strong));}
+.flow-block-under {grid-column:1;font:400 12px/1.3 var(--font-mono,ui-monospace,monospace);letter-spacing:.05em;color:hsl(var(--text-muted));}
+.flow-block[data-i="6"] .flow-block-text {border-color:hsl(var(--primary-400));background:hsl(var(--primary-100));color:hsl(var(--primary));}
 
-/* CHECK — four lamps, lit together: grammar, signature, head, peers.
-   Meaning is never one of them, which the caption under the lamps says. */
-.flow-lamp-disc {fill:hsl(var(--primary));stroke:hsl(var(--primary));}
-.flow-lamp-mark {font:600 13px var(--font-mono,ui-monospace,monospace);fill:hsl(var(--text-inverse));}
-.flow-lamp-name {font:500 9px var(--font-mono,ui-monospace,monospace);letter-spacing:.04em;fill:hsl(var(--text-muted));}
-.flow.flow-run .flow-panel-active .flow-lamp {animation:flow-pop 420ms cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--i) * 90ms);transform-box:fill-box;transform-origin:center;}
-@keyframes flow-pop {from{transform:scale(1.5);opacity:0;}to{transform:none;opacity:1;}}
+/* CHECK -- four lamps, lit together: grammar, signature, head, peers. Meaning is never one of them. */
+.flow-lamps {display:flex;flex-wrap:wrap;justify-content:center;gap:12px clamp(16px,4vw,40px);}
+.flow-lamp {display:grid;justify-items:center;gap:7px;}
+.flow-lamp-mark {display:grid;place-items:center;width:44px;height:44px;border:1px solid hsl(var(--border-default));border-radius:50%;background:hsl(var(--surface));
+ font:600 15px var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-muted));}
+.flow-lamp[data-on="true"] .flow-lamp-mark {border-color:hsl(var(--primary));background:hsl(var(--primary));color:hsl(var(--text-inverse));}
+.flow-lamp-name {font:500 12px var(--font-mono,ui-monospace,monospace);letter-spacing:.04em;color:hsl(var(--text-muted));}
 
-/* EXTEND — the holder's own chain, which this record joins. The new
-   position arrives; the ones behind it were always there. */
-.flow-node-box {fill:hsl(var(--raised));stroke:hsl(var(--border-subtle));stroke-width:1;}
-.flow-node-text {font:600 11px var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;fill:hsl(var(--text-muted));}
-.flow-node[data-new="true"] .flow-node-box {fill:hsl(var(--primary-100));stroke:hsl(var(--primary));}
-.flow-node[data-new="true"] .flow-node-text {fill:hsl(var(--primary));}
-.flow-link {stroke:hsl(var(--text-strong) / .22);stroke-width:1.4;}
-.flow.flow-run .flow-panel-active .flow-node[data-new="true"] {animation:flow-node-in 520ms cubic-bezier(.22,1,.36,1) both;transform-box:fill-box;transform-origin:left center;}
-@keyframes flow-node-in {from{opacity:0;transform:translateX(16px) scale(.9);}to{opacity:1;transform:none;}}
+/* EXTEND -- the holder's own chain, which this record joins. The new position arrives; the ones
+   behind it were always there. */
+.flow-chain {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;row-gap:10px;}
+.flow-link {width:clamp(10px,3vw,30px);height:2px;background:hsl(var(--text-strong) / .22);}
+.flow-node-text {display:block;padding:9px 12px;border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--raised));
+ font:600 13px var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;color:hsl(var(--text-muted));}
+.flow-node[data-on="false"],.flow-link[data-on="false"] {visibility:hidden;}
+.flow-node[data-new="true"] .flow-node-text {border-color:hsl(var(--primary));background:hsl(var(--primary-100));color:hsl(var(--primary));}
 
-/* REPLICATE — peers. Each one that holds it fills; the rest stay
-   outlines, so a partial quorum reads as partial rather than full. */
-.flow-peer {fill:none;stroke:hsl(var(--text-strong) / .2);stroke-width:1.3;}
-.flow-peer[data-on="true"] {fill:hsl(var(--success));stroke:hsl(var(--success));}
-.flow.flow-run .flow-panel-active .flow-peer[data-on="true"] {animation:flow-pop 380ms cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--i) * 45ms);transform-box:fill-box;transform-origin:center;}
+/* REPLICATE -- peers. Each one that holds it fills; the rest stay outlines, so a partial quorum
+   reads as partial rather than full. */
+.flow-peers {display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:24rem;}
+.flow-peer {width:18px;height:18px;box-sizing:border-box;border:1.5px solid hsl(var(--text-strong) / .2);border-radius:50%;}
+.flow-peer[data-on="true"] {border-color:hsl(var(--success));background:hsl(var(--success));}
 
-/* RESOLVE — the meaning, which only a resolver decides. */
-.flow-meaning-box {fill:hsl(var(--success-100));stroke:hsl(var(--success));stroke-width:1;}
-.flow-meaning-text {font:600 15px var(--font-mono,ui-monospace,monospace);letter-spacing:.01em;fill:hsl(var(--success-700));}
-.flow-meaning-who {font:500 9.5px var(--font-mono,ui-monospace,monospace);letter-spacing:.1em;fill:hsl(var(--success-700));}
-.flow.flow-run .flow-panel-active .flow-meaning-box,
-.flow.flow-run .flow-panel-active .flow-meaning-text,
-.flow.flow-run .flow-panel-active .flow-meaning-who {animation:flow-meaning-in 480ms cubic-bezier(.22,1,.36,1) both;}
-@keyframes flow-meaning-in {from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+/* RESOLVE -- the meaning, which only a resolver decides. */
+.flow-meaning-box {display:grid;justify-items:center;gap:6px;max-width:100%;padding:14px 22px;border:1px solid hsl(var(--success));border-radius:12px;background:hsl(var(--success-100));}
+.flow-meaning-text {font:600 clamp(15px,1.8vw,20px)/1.25 var(--font-mono,ui-monospace,monospace);letter-spacing:.01em;text-align:center;color:hsl(var(--success-700));}
+.flow-meaning-who {font:500 12px var(--font-mono,ui-monospace,monospace);letter-spacing:.1em;text-transform:uppercase;color:hsl(var(--success-700));}
+.flow-band-sub {margin:0;font:400 12px/1.4 var(--font-mono,ui-monospace,monospace);letter-spacing:.03em;text-align:center;color:hsl(var(--text-muted));}
 
-.flow-scene-caption {font:400 8.5px var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;fill:hsl(var(--text-faint));}
-.flow-band-sub {font:400 9.5px var(--font-mono,ui-monospace,monospace);letter-spacing:.03em;fill:hsl(var(--text-faint));}
+/* The entrance of each panel: finite, restarted by toggling .flow-run (never a frame loop). */
+.flow.flow-run .flow-panel-active :is(.flow-block,.flow-node[data-new="true"],.flow-meaning-box) {animation:flow-in 460ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i, 0) * 60ms);}
+.flow.flow-run .flow-panel-active :is(.flow-lamp,.flow-peer[data-on="true"]) {animation:flow-pop 400ms cubic-bezier(.34,1.56,.64,1) both;animation-delay:calc(var(--i, 0) * 60ms);}
+@keyframes flow-in {from{opacity:0;transform:translateY(7px) scale(.96);}to{opacity:1;transform:none;}}
+@keyframes flow-pop {from{transform:scale(1.4);opacity:0;}to{transform:none;opacity:1;}}
 
-/* A paused scene, or reduced motion, is the finished picture holding
-   still — never a frozen half-drawn frame. */
+/* A paused or finished scene, or reduced motion, is one still frame -- never a frozen half-drawn one. */
 .flow[data-playing="false"] .flow-panel * {animation:none !important;}
 @media (prefers-reduced-motion: reduce) {
- .flow-panel {transition:none;}
- .flow-panel * {animation:none !important;transition:none !important;}
+ .flow *,.flow.flow-run * {animation:none !important;transition:none !important;}
+ #scene .flow-toggle {display:none;}
 }
 
-/* Steps: five nodes on one track, the step links that drive the scene —
-   this IS the chain, drawn once, reused as both tracker and accessible
-   content. The segment into a step fills once it is reached; while
-   playing, the segment out of the current step fills over its duration. */
+/* Steps: five nodes on one track, the step links (or, on home, buttons) that drive the scene --
+   this IS the chain, drawn once, reused as both tracker and accessible content. The segment into
+   a step fills once it is reached; while playing, the segment out of the current step fills over
+   its duration. */
 #scene .flow-ledger {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:0 0 4px;padding:0 0 2px;list-style:none;}
 #scene .flow-ledger li {position:relative;min-width:0;}
 #scene .flow-ledger li:not(:first-child)::before,
@@ -101,9 +91,9 @@
 #scene .flow-ledger li:has(> [data-done],> [data-current])::after {transform:none;}
 #scene .flow[data-playing="true"]:not([data-held]).flow-run .flow-ledger li:has(> [data-current]) + li::after {animation:flow-progress var(--flow-step) linear both;}
 #scene .flow-ledger .flow-record {display:grid;justify-items:center;gap:8px;min-height:0;margin:0;padding:4px 0 2px;border:0;border-radius:10px;background:none;
- text-align:center;text-decoration:none;color:hsl(var(--text-faint)) !important;transition:color 200ms;}
+ font:inherit;text-align:center;text-decoration:none;color:hsl(var(--text-faint)) !important;cursor:pointer;transition:color 200ms;}
 #scene .flow-ledger .flow-record-num {display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:hsl(var(--text-strong) / .06);
- font:600 10px/1 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;transition:background 240ms,color 240ms,box-shadow 240ms;}
+ font:600 12px/1 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;transition:background 240ms,color 240ms,box-shadow 240ms;}
 #scene .flow-ledger .flow-record-name {max-width:100%;font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.005em;white-space:nowrap;}
 #scene .flow-ledger .flow-record[data-done] {color:hsl(var(--text-muted)) !important;}
 #scene .flow-ledger .flow-record[data-done] .flow-record-num {font-size:0;background:hsl(var(--primary-200));color:hsl(var(--primary));}
@@ -129,88 +119,9 @@
 #scene .flow-toggle:is(:hover,:focus-visible) {background:hsl(var(--reference-200));color:hsl(var(--reference));}
 #scene .flow-toggle:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
 
-/* Onward: a flat row with a hairline below it, kicker over label, a plain
-   arrow that just shifts right on hover -- no card, no filled disc. */
-#scene .home-lifecycle .home-lifecycle-all {display:flex;align-items:center;gap:14px;min-height:0;margin:0;padding:14px 0;border:0;border-bottom:1px solid hsl(var(--border-subtle));border-radius:0;
- background:none;text-decoration:none;color:hsl(var(--text-strong));transition:color 200ms;}
-#scene .home-lifecycle-all-copy {display:grid;gap:3px;min-width:0;}
-#scene .home-lifecycle-all-copy small {font:500 10px/1.3 var(--font-mono,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-faint));}
-#scene .home-lifecycle-all-copy span {font:500 15px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.01em;color:hsl(var(--text-strong));}
-#scene .home-lifecycle .home-lifecycle-all .native-icon {flex:0 0 16px;width:16px;height:16px;box-sizing:border-box;margin-left:auto;padding:0;border-radius:0;
- background:none;color:hsl(var(--reference)) !important;}
-#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) {background:none;color:hsl(var(--reference));}
-#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) .home-lifecycle-all-copy span {color:hsl(var(--reference));}
-#scene .home-lifecycle .home-lifecycle-all:is(:hover,:focus-visible) .native-icon {background:none;}
-
-@media(prefers-reduced-motion:reduce){
- .flow *,.flow.flow-run * {animation:none !important;transition:none !important;}
- #scene .flow-toggle {display:none;}
-}
-
-/* Measured stats rail -----------------------------------------------------
-   One line per stat: a short label over the number. The full label and the
-   caption are the item's tooltip and screen-reader text (.home-status-detail
-   is visually hidden); /stats carries them in full. */
-#scene .home-status-rail {display:grid;grid-template-columns:repeat(5,auto) 1fr;align-items:end;gap:0 40px;}
-#scene .home-status-item {display:grid;gap:6px;align-content:start;min-width:0;cursor:help;}
-#scene .home-status-item small {font:500 10.5px/1.2 var(--font-mono,monospace);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:hsl(var(--text-muted));}
-#scene .home-status-item .home-status-value {display:block;font:600 24px/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.03em;white-space:nowrap;font-variant-numeric:tabular-nums;color:hsl(var(--text-strong));}
-#scene .home-status-item .home-status-value::before {content:none;}
-#scene .home-status-unit {margin-left:4px;font:500 11px var(--font-mono,monospace);letter-spacing:0;color:hsl(var(--text-faint));}
-#scene .home-status-detail {position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
-#scene .home-status-link {display:grid;justify-items:end;align-content:end;gap:4px;font:500 12px/1.3 var(--font-mono,monospace);text-align:right;color:hsl(var(--reference));text-decoration:none;}
-#scene .home-status-link::after {content:none;}
-#scene .home-status-scope {font:400 11px/1.3 var(--font-sans,sans-serif);color:hsl(var(--text-faint));white-space:nowrap;}
-#scene .home-status-link::before {content:none;}
-
-@media(max-width:1150px) and (min-width:901px){
- #scene .home-status-rail {grid-template-columns:repeat(5,auto);justify-content:space-between;gap:0 24px;}
- #scene .home-status-link {grid-column:1/-1;grid-auto-flow:column;justify-content:start;gap:12px;margin-top:10px;text-align:left;}
-}
-@media(max-width:900px){
- #scene .home-lifecycle {display:block;padding:18px 16px 14px;}
- #scene .home-lifecycle .home-cycle-title {font-size:22px;}
- .flow-says {font-size:16px;}
- /* Narrow: a compact list, label left and number right, one row per stat. */
- #scene .home-status-rail {grid-template-columns:1fr;}
- #scene .home-status-rail .home-status-item {display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;gap:12px;padding:9px 12px;border-right:0;border-bottom:1px solid hsl(var(--border-subtle));}
- #scene .home-status-item small {font-size:9.5px;overflow:hidden;text-overflow:ellipsis;}
- #scene .home-status-item .home-status-value {font-size:17px;}
- #scene .home-status-link {grid-column:1/-1;grid-auto-flow:column;justify-content:space-between;align-items:center;min-height:40px;padding:0 12px;border-top:0;text-align:left;font-size:11px;}
- #scene .home-status-scope {white-space:normal;}
-}
 @media(max-width:480px){
- #scene .flow-ledger .flow-record-name {font-size:10.5px;letter-spacing:-.01em;}
+ .flow-now {padding:10px 12px 14px;}
  #scene .flow-ledger .flow-record-num {width:28px;height:28px;}
  #scene .flow-ledger li:not(:first-child)::before,
  #scene .flow-ledger li:not(:first-child)::after {top:18px;left:calc(-50% + 19px);right:calc(50% + 19px);}
- #scene .home-lifecycle .home-lifecycle-all {padding:12px 12px 12px 16px;}
- #scene .home-lifecycle-all-copy span {font-size:14px;}
-}
-@media(max-width:380px){
- #scene .home-lifecycle-all-copy span {font-size:13px;}
-  .flow-now {padding:10px 12px 14px;}
-}
-
-/* The panel clips its corners (overflow:hidden), which makes grid treat its
-   minimum height as zero: on short viewports its row collapsed and the panel
-   spilled over the hero (mobile) or the stats rail (desktop). Content rows are
-   sized max-content, and the home layer scrolls instead of clipping when the
-   content is genuinely taller than the screen. */
-@media(min-width:901px){
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:minmax(0,1fr) max-content minmax(0,1fr) max-content;overflow-x:hidden;overflow-y:auto;}
-}
-@media(min-width:901px) and (max-height:880px){
- #scene .home-lifecycle {padding:18px 22px;}
- #scene .home-lifecycle .home-lifecycle-caption {margin-bottom:10px;}
- #scene .home-lifecycle .home-cycle-title {font-size:26px;}
- .flow {margin-top:14px;}
- .flow-now {gap:8px;padding:10px 16px 14px;}
- .flow-says {font-size:16px;}
- .flow {gap:10px;}
- #scene .home-lifecycle .home-lifecycle-all {margin-top:10px;padding:10px 12px 10px 16px;}
-}
-@media(max-width:900px){
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {grid-template-rows:max-content max-content max-content;}
- #scene .hero-alive[data-page="zero"] .home-lifecycle {align-self:start;}
 }

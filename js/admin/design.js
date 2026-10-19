@@ -316,7 +316,7 @@
       root.appendChild(h('div', { class: 'cms-form-head' },
         h('div', {}, h('h2', { text: 'Site style' }), h('div', { class: 'route', text: 'For every page' })),
         h('div', { class: 'editor-actions' }, revert, A.overlay.closeButton(function () { A.later('setView')('design'); }, 'Close Site style'))));
-      root.appendChild(ArkAdminPrimitives.tabs({ label: 'Site style sections', className: 'ark-tabs page-editor-tabs', value: siteStyleTab,
+      root.appendChild(A.arkTabs({ label: 'Site style sections', className: 'page-editor-tabs', value: siteStyleTab,
         onChange: function (tab) { siteStyleTab = tab; },
         items: [{ id: 'look', label: 'Colours & background', content: buildDesignPanel() },
           { id: 'visitors', label: 'Visitor defaults', content: buildSettingsDefaultsPanel() },
@@ -329,7 +329,7 @@
   var SITE_STYLE_TABS = ['look', 'visitors', 'search'];
   function showSiteStyleTab(tab) {
     siteStyleTab = tab;
-    var t = document.querySelectorAll('#themePanel .page-editor-tabs > .ark-tabs-list > [role="tab"]')[SITE_STYLE_TABS.indexOf(tab)];
+    var t = document.querySelectorAll('#themePanel .page-editor-tabs [role="tab"]')[SITE_STYLE_TABS.indexOf(tab)];
     if (t && t.getAttribute('aria-selected') !== 'true') t.click();
   }
   A.provide({ renderDesignEditor: renderDesignEditor, showSiteStyleTab: showSiteStyleTab, renderThemePanel: renderDesignEditor, revertDesign: revertDesign,

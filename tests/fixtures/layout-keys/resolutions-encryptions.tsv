@@ -1,0 +1,54 @@
+# key	tag	text -- layout keys of /resolutions/encryptions before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsEncryptions17 / 20 · Infrastructure & operationsResolve your encryptionsKeep the keys yourself; the mesh only carries what you encrypt.ForProfess
+page:/nav:1	nav	All resolutionsEncryptions
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Encryptions
+page:/div:1	div	17 / 20 · Infrastructure & operationsResolve your encryptionsKeep the keys yourself; the mesh only carries what you encrypt.ForProfessionals handling private in
+page:/div:1/header:1	header	17 / 20 · Infrastructure & operationsResolve your encryptionsKeep the keys yourself; the mesh only carries what you encrypt.ForProfessionals handling private in
+page:/div:1/header:1/p:1	p	17 / 20 · Infrastructure & operations
+id:resolution-title-encryptions	h1	Resolve your encryptions
+page:/div:1/header:1/p:2	p	Keep the keys yourself; the mesh only carries what you encrypt.
+page:/div:1/header:1/dl:1	dl	ForProfessionals handling private information, and anyone who wants their own keys.ProblemThe provider holds the keys, so privacy depends on its policy.
+page:/div:1/header:1/dl:1/div:1	div	ForProfessionals handling private information, and anyone who wants their own keys.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Professionals handling private information, and anyone who wants their own keys.
+page:/div:1/header:1/dl:1/div:2	div	ProblemThe provider holds the keys, so privacy depends on its policy.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	The provider holds the keys, so privacy depends on its policy.
+page:/div:1/header:1/div:1	div	How resolvers work →
+page:/div:1/header:1/div:1/a:1	a	How resolvers work →
+page:/div:1/section:1	section	Ready now2Product ideas3How it resolvesAuth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →Identity brokerReadyUnlock once; e
+page:/div:1/section:1/div:1	div	Ready now2Product ideas3How it resolves
+id:resolution-level-tab-encryptions-0	button	Ready now2
+page:/div:1/section:1/div:1/button:1/span:1	span	2
+id:resolution-level-tab-encryptions-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-encryptions-2	button	How it resolves
+id:resolution-level-encryptions	div	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →Identity brokerReadyUnlock once; every defxn site can ask that one identi
+page:/div:1/section:1/div:2/div:1	div	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →Identity brokerReadyUnlock once; every defxn site can ask that one identi
+page:/div:1/section:1/div:2/div:1/a:1	a	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	Auth KitReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Auth Kit
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Your keys and recovery phrase, held by you. No password on a server.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/div:1	div	Identity brokerReadyUnlock once; every defxn site can ask that one identity to sign.
+page:/div:1/section:1/div:2/div:1/div:1/span:1	span	Identity brokerReady
+page:/div:1/section:1/div:2/div:1/div:1/span:1/strong:1	strong	Identity broker
+page:/div:1/section:1/div:2/div:1/div:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:1/span:2	span	Unlock once; every defxn site can ask that one identity to sign.
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← NetworkPreviousAll 20Automation →Next
+page:/nav:2/a:1	a	← NetworkPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Automation →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

@@ -1,5 +1,5 @@
-/* The dashboard layout kit: the small set of builders that give /stats and
-   /resolver-math the same shell, grid, panels, tables and bars.
+/* The dashboard layout kit: the small set of builders that gave /stats and
+   /resolver-math the same shell and panels, plus the site's one link resolver.
 
    Extracted from js/pages/stats.js on 2026-10-10, when /resolver-math
    needed the same vocabulary. The alternative was a second copy of these
@@ -9,7 +9,12 @@
    neither page defines its own panel or grid.
 
    Every builder returns the element it made, so a caller composes rather
-   than configures. No builder reads global state. */
+   than configures. No builder reads global state.
+
+   stat, table, bar and sectionHead were deleted on 2026-10-19 (W3-ARK-FOLLOWUPS): every page
+   that called them is now Ark blocks (stat/stats, table, meter, section-header; js/ark/blocks.js),
+   and a grep of js/ found no caller left. tests/lib/block-page-checks.cjs refuses a converted page
+   that calls a layout builder again. */
 (function () {
   'use strict';
 
@@ -29,79 +34,6 @@
     if (label) p.appendChild(el('p', 'dash-label', label));
     if (title) p.appendChild(el('h2', 'dash-title', title));
     return p;
-  }
-
-  /* `plain` is an optional sentence in ordinary words, rendered between the
-     heading and the precise note. It exists because a section whose point
-     cannot be said plainly is usually a section that is confused, and
-     because a reader who bounces off the precise line still gets to keep
-     reading. */
-  function sectionHead(label, note, plain) {
-    var h = el('div', 'dash-section');
-    h.appendChild(el('h2', 'dash-section-title', label));
-    if (plain) h.appendChild(el('p', 'dash-section-plain', plain));
-    if (note) h.appendChild(el('p', 'dash-section-note', note));
-    return h;
-  }
-
-  /* A figure tile. Returns its parts as well as the tile, because a live
-     page updates the number in place rather than rebuilding the tile —
-     which is how the "no number when the feed is down" rule stays
-     possible. */
-  function stat(cls, label, value, unit, detail) {
-    var t = el('article', 'dash-stat ' + (cls || ''));
-    t.appendChild(el('p', 'dash-label', label));
-    var v = el('p', 'dash-stat-value');
-    var n = el('strong', null, value);
-    var u = el('span', 'dash-unit', unit || '');
-    v.appendChild(n); v.appendChild(u); t.appendChild(v);
-    var d = el('p', 'dash-stat-detail', detail || '');
-    t.appendChild(d);
-    return { tile: t, num: n, unit: u, detail: d };
-  }
-
-  /* A proportional bar. `share` is 0..1; the floor of 2% keeps a real but
-     tiny value visible instead of rendering as nothing, which would read
-     as a missing measurement rather than a small one. */
-  function bar(share, cls) {
-    var track = el('span', 'dash-bar' + (cls ? ' ' + cls : ''));
-    var fill = el('span', 'dash-bar-fill');
-    fill.style.setProperty('--w', Math.max(2, Math.min(100, share * 100)).toFixed(1) + '%');
-    track.appendChild(fill);
-    return track;
-  }
-
-  /* A table from headers plus rows of cells. A cell is a string, or
-     { text, cls, node } for a numeric column or an embedded element. */
-  function table(headers, rows, cls) {
-    var wrap = el('div', 'dash-table-wrap');
-    var t = el('table', 'dash-table' + (cls ? ' ' + cls : ''));
-    var thead = el('thead');
-    var hr = el('tr');
-    headers.forEach(function (h) {
-      var cell = el('th', h && h.cls ? h.cls : null, h && h.text != null ? h.text : h);
-      hr.appendChild(cell);
-    });
-    thead.appendChild(hr);
-    t.appendChild(thead);
-    var tbody = el('tbody');
-    rows.forEach(function (row) {
-      var tr = el('tr');
-      row.forEach(function (cell) {
-        if (cell && cell.node) {
-          var holder = el('td', cell.cls || null);
-          holder.appendChild(cell.node);
-          tr.appendChild(holder);
-          return;
-        }
-        tr.appendChild(el('td', cell && cell.cls ? cell.cls : null,
-          cell && cell.text != null ? cell.text : cell));
-      });
-      tbody.appendChild(tr);
-    });
-    t.appendChild(tbody);
-    wrap.appendChild(t);
-    return wrap;
   }
 
   /* Route and document links. A page never writes an href by hand: the
@@ -216,50 +148,41 @@
     return { page: page, body: body, head: head, headCopy: copy, title: h1 };
   }
 
+  /* productHandoff / productLink: where a page of this site overlaps a DEFXN product, it
+     explains the idea and hands the reader to that product (owner decision 2026-10-19,
+     docs/ux-audit/plan.md: "explain + hand off", no duplicated tooling). The block and the link
+     are the family kit's own ("Open <Product>", DefxnKit.productHandoff / productLink in
+     assets/kit/defxn-product.js): the product's name, lane and address come from its own
+     declaration, never from a URL written here, and the look is the kit's .dx-onward.
+     options.product  catalog id ('explore', 'dao', 'treasury', 'domains', 'bundles', ...)
+     options.text     the plain explanation (one or two sentences)
+     options.query    optional search params for the product URL ({ q: 'name.fxn' })
+     options.label    optional link label (default "Open <Product>")
+     Both return null when the family catalog is not loaded (a headless test harness), so a
+     page never breaks for want of it. */
+  function familyKit() { return typeof window !== 'undefined' && window.DefxnKit && window.DefxnKit.productHandoff ? window.DefxnKit : null; }
+  function productHandoff(options) {
+    var kit = familyKit();
+    var aside = kit ? kit.productHandoff(options.product, { text: options.text, query: options.query || null, label: options.label || null }) : null;
+    /* Derived from the catalog, not authored content: held out of the CMS layout keys, so the
+       page's own elements keep the keys they had before it was inserted (an existing
+       aside.bundle-release went from aside:1 to aside:2 without this; js/content/layout.js). */
+    if (aside) aside.setAttribute('data-ark-transient', 'hold');
+    return aside;
+  }
+  function productLink(options) {
+    var kit = familyKit();
+    return kit ? kit.productLink(options.product, { query: options.query || null, label: options.label || null }) : null;
+  }
+
   ArkUI.dash = {
-    el: el, fmt: fmt, panel: panel, sectionHead: sectionHead, stat: stat, bar: bar,
-    table: table, href: href, docHref: docHref, pageLink: pageLink, docLink: docLink,
-    resolveLinkField: resolveLinkField, linkEl: linkEl, linkIcon: linkIcon, shell: shell
+    el: el, fmt: fmt, panel: panel, href: href, docHref: docHref, pageLink: pageLink, docLink: docLink,
+    resolveLinkField: resolveLinkField, linkEl: linkEl, linkIcon: linkIcon, shell: shell,
+    productHandoff: productHandoff, productLink: productLink
   };
 
-  /* foldToggle: the one way a page keeps content off its first screen
-     without deleting it. Defect it replaces (UX audit 2026-10-19,
-     docs/ux-audit/pages-ux-b.md cross-page finding 2): the fold rule was being
-     met by `display:none` on phones and by line-clamps with no way to expand,
-     so the lifecycle illustration, the resolutions deck and footer note were
-     simply gone or cut off with "...". A page now keeps that content in the
-     DOM, marks its container `data-fold="open|closed"`, and lets its own CSS
-     decide what "closed" looks like at which width; this button is the only
-     thing that flips it, and says so to assistive tech (aria-expanded).
-
-     options.host     element whose data-fold this button owns (required)
-     options.more     label while closed   (default 'More')
-     options.less     label while open     (default 'Less')
-     options.controls id of the region it reveals (aria-controls)
-     options.clamp    a line-clamped element: while closed, the button hides
-                      itself when that element is not actually cut off (a wide
-                      screen fits the whole sentence), so it never offers a
-                      "More" that reveals nothing.
-     Site-side until Ark UI ships a Disclosure block (plan.md, Wave 2 adapter);
-     css/components.css paints .fold-toggle. */
-  ArkUI.dash.foldToggle = function (options) {
-    var host = options.host, clamp = options.clamp || null;
-    var button = el('button', 'fold-toggle' + (options.cls ? ' ' + options.cls : ''));
-    button.type = 'button';
-    if (options.controls) button.setAttribute('aria-controls', options.controls);
-    function set(open) {
-      host.dataset.fold = open ? 'open' : 'closed';
-      button.setAttribute('aria-expanded', String(open));
-      button.textContent = open ? (options.less || 'Less') : (options.more || 'More');
-    }
-    function fit() {
-      if (!clamp || host.dataset.fold === 'open' || !clamp.isConnected) return;
-      button.hidden = clamp.scrollHeight <= clamp.clientHeight + 1;
-    }
-    button.addEventListener('click', function () { set(host.dataset.fold !== 'open'); fit(); });
-    set(!!options.open);
-    if (clamp && typeof requestAnimationFrame === 'function') requestAnimationFrame(fit);
-    if (clamp && typeof ResizeObserver === 'function') new ResizeObserver(fit).observe(clamp);
-    return button;
-  };
+  /* foldToggle lived here (Wave 1's stand-in for a disclosure Ark did not yet ship). It is gone:
+     a page that keeps content off its first screen uses Ark's `disclosure` block
+     (ArkUI.blocks.render({ block: 'disclosure', ... }), js/ark/blocks.js) -- a clamp with "More",
+     or a fold below a width. Regression: tests/fold-no-hidden-content.cjs. */
 })();

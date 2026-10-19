@@ -116,10 +116,13 @@ var ArkVersionsPanel = (function () {
       rec.summary.slice(0, 4).forEach(function (line) { summary.appendChild(h('li', { text: line })); });
       var rest = null;
       if (rec.summary.length > 4) {
-        rest = h('details', { class: 'version-more' }, h('summary', { text: (rec.summary.length - 4) + ' more change' + (rec.summary.length - 4 === 1 ? '' : 's') }));
+        /* the rest of the list folds behind the editor's disclosure (Ark's, js/admin/ark-host.js)
+           when the editor passes it; a bare <details> otherwise */
+        var restLabel = (rec.summary.length - 4) + ' more change' + (rec.summary.length - 4 === 1 ? '' : 's');
         var restList = h('ul', { class: 'version-summary' });
         rec.summary.slice(4).forEach(function (line) { restList.appendChild(h('li', { text: line })); });
-        rest.appendChild(restList);
+        rest = env.disclosure ? env.disclosure({ label: restLabel, content: restList, className: 'dev-details' })
+          : h('details', { class: 'version-more' }, h('summary', { text: restLabel }), restList);
       }
       var actions = h('div', { class: 'version-actions' },
         h('button', { type: 'button', class: 'btn tiny', 'data-action': 'preview', text: previewing === entry.hash ? 'Showing on the canvas' : 'Look at it', title: 'Show this version on the canvas without changing anything', disabled: previewing === entry.hash, onclick: function () { preview(entry); } }),

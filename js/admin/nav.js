@@ -39,13 +39,14 @@
     syncHeader(); refreshSaveButton(); renderPages();
   }
 
-  /* ---- the lens ------------------------------------------------------------------------ */
-  function syncLensButtons() {
-    ['content', 'design'].forEach(function (lens) {
-      var b = $(lens === 'content' ? 'lensContentBtn' : 'lensDesignBtn');
-      if (b) b.setAttribute('aria-pressed', String(state.lens === lens));
-    });
-  }
+  /* ---- the lens ------------------------------------------------------------------------
+     #lensSwitch is Ark's toggle group (js/admin/ark-host.js arkSegGroup): one pressed, one tab
+     stop, arrows between Edit words and Edit style; a pick calls setLens, and a lens set by
+     another route (the saved choice at startup) moves the pressed state through select(). */
+  var LENSES = ['content', 'design'];
+  var lensGroup = A.arkSegGroup($('lensSwitch'), [$('lensContentBtn'), $('lensDesignBtn')],
+    { selected: LENSES.indexOf(state.lens), onPick: function (i) { setLens(LENSES[i]); } });
+  function syncLensButtons() { lensGroup.select(LENSES.indexOf(state.lens)); }
   /* Nothing is torn down: the selection, every draft and the open sheet stay. The canvas is told
      (defxn-cms-preview-lens, js/admin/bridge.js), the toolbar re-draws its sections for the lens
      (schedule()), and the rail opens the tab last used in this lens (Pages in Content, Layers in
@@ -61,8 +62,6 @@
     showLeft(state.railTab[lens] || (lens === 'content' ? 'pages' : 'layers'), { remember: false });
     postCmsPreviewLens(); schedule();
   }
-  $('lensContentBtn').addEventListener('click', function () { setLens('content'); });
-  $('lensDesignBtn').addEventListener('click', function () { setLens('design'); });
 
   /* ---- the item a form edits -------------------------------------------------------------
      A page or an article is also a place: selecting it shows it on the canvas. An image or an

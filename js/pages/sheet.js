@@ -1,147 +1,559 @@
-/* One page of headed points: the theory's detail pages and About are the same sheet with different words.
-   The words come from the page's manifest; the sheet has as many points as the manifest has POINT<n> fields. */
-ArkUI.sheet = function (id, page) {
-  var manifest = ArkManifest.get(id);
-  if (id === 'about' || manifest.fields['STATUS.TEXT']) return ArkUI.storySheet(id, page);
-  var area = id.toUpperCase();
-  function words(role) { return ArkCopy.text(area + '.' + role); }
-  /* `target` is a real pageCatalog/route key -- manifest.meta.next/meta.back
-     (the existing, already-working route pickers admin.js's routeOptions()
-     already edits) or a structural breadcrumb target. Resolved the one
-     shared way every retrofitted call site is -- js/ark/dash-kit.js's
-     resolveLinkField -- replacing the old direct pageCatalog lookup.
-     manifest.meta.docs (used elsewhere in this file) is left exactly as it
-     already was: a different, already-working mechanism this retrofit does
-     not touch. */
-  function link(role, target, className) {
-    var r = ArkUI.dash.resolveLinkField('route:' + target);
-    var a = ArkUI.el('a', className || 'article-back');
-    a.href = r.href; a.dataset.sceneLink = r.sceneLink;
-    a.appendChild(document.createTextNode(words(role) + ' '));
-    var arrow = ArkUI.el('span', 'cta-arrow', '→'); arrow.setAttribute('aria-hidden', 'true');
-    a.appendChild(arrow); return a;
-  }
-  var el = ArkUI.el('section', 'ark-page learning-page theory-page ' + id + '-page');
-  el.dataset.arkPage = page; el.setAttribute('aria-labelledby', id + '-title');
-  var content = ArkUI.el('div', 'concept-content');
-  if (manifest.group === 'theory' || manifest.fields['STATUS.TEXT']) {
-    var path = ArkUI.el('nav', 'content-layer-path');
-    path.setAttribute('aria-label', 'Content depth');
-    var parent = ArkUI.dash.linkEl('01 / Operating model', 'route:concept');
-    path.appendChild(parent);
-    var current = ArkUI.el('span', '', '02 / ' + manifest.title);
-    current.setAttribute('aria-current', 'page'); path.appendChild(current);
-    content.appendChild(path);
-  }
-  content.appendChild(ArkUI.el('p', 'learning-eyebrow', words('EYEBROW')));
-  var title = ArkUI.el('h1', 'learning-heading', words('TITLE')); title.id = id + '-title';
-  content.appendChild(title);
-  content.appendChild(ArkUI.el('p', 'concept-deck', words('DECK')));
-  var list = ArkUI.el('div', 'concept-principles');
-  for (var n = 1; n <= ArkManifest.points(manifest); n++) {
-    var row = ArkUI.el('section'), body = ArkUI.el('div');
-    row.appendChild(ArkUI.el('span', '', ('0' + n).slice(-2)));
-    body.appendChild(ArkUI.el('h2', '', words('POINT' + n + '.TITLE')));
-    body.appendChild(ArkUI.el('p', '', words('POINT' + n + '.TEXT')));
-    row.appendChild(body); list.appendChild(row);
-  }
-  if (manifest.group === 'theory' || manifest.fields['STATUS.TEXT']) {
-    var contextLayer = ArkUI.el('details', 'content-layer content-layer-context');
-    contextLayer.appendChild(ArkUI.el('summary', '', 'Context / inspect how it works'));
-    contextLayer.appendChild(list); content.appendChild(contextLayer);
-  } else content.appendChild(list);
-  if (manifest.fields['STATUS.TEXT']) {
-    var status = ArkUI.el('aside', 'mechanism-status-summary');
-    status.setAttribute('aria-label', 'Current status');
-    status.appendChild(ArkUI.el('h2', '', words('STATUS.TITLE')));
-    status.appendChild(ArkUI.el('p', '', words('STATUS.TEXT')));
-    content.appendChild(status);
-  }
-  if (manifest.fields['LIMIT.TEXT'] || (manifest.meta.docs && manifest.fields.EVIDENCE)) {
-    var referenceLayer = ArkUI.el('details', 'content-layer content-layer-reference');
-    referenceLayer.appendChild(ArkUI.el('summary', '', 'Reference / limits and evidence'));
-    if (manifest.fields['LIMIT.TEXT']) {
-      var limit = ArkUI.el('section', 'mechanism-limit');
-      limit.appendChild(ArkUI.el('h2', '', words('LIMIT.TITLE')));
-      limit.appendChild(ArkUI.el('p', '', words('LIMIT.TEXT')));
-      referenceLayer.appendChild(limit);
-    }
-    if (manifest.meta.docs && manifest.fields.EVIDENCE) {
-      var docs = ArkUI.el('a', 'article-back theory-evidence-link');
-      docs.href = manifest.meta.docs;
-      docs.appendChild(document.createTextNode(words('EVIDENCE') + ' '));
-      var docsArrow = ArkUI.el('span', 'cta-arrow', '→'); docsArrow.setAttribute('aria-hidden', 'true');
-      docs.appendChild(docsArrow); referenceLayer.appendChild(docs);
-    }
-    content.appendChild(referenceLayer);
-  }
-  var footer = ArkUI.el('nav', 'theory-footer'); footer.setAttribute('aria-label', 'Continue');
-  if (manifest.meta.next) footer.appendChild(link('NEXT', manifest.meta.next, 'article-back theory-cta'));
-  if (manifest.meta.back) footer.appendChild(link('BACK', manifest.meta.back));
-  content.appendChild(footer);
-  /* Anchor for reusable content blocks (js/content/components.js); rendering into it is
-     centralized in js/main.js's onMount hook, not called here. Added once, in this shared
-     sheet builder, so every page module that calls ArkUI.sheet (dao.js, theory.js) gets it
-     for free instead of repeating the same three lines in each. */
-  var components = ArkUI.el('div', 'concept-components');
-  components.setAttribute('data-ark-insert', 'main');
-  content.appendChild(components);
-  el.appendChild(content);
-  return el;
-};
+/* =====================================================================
+   THE THEORY SHEETS (/concept/<id>) and /dao: one question each, on the story template
+   (js/pages/story.js). The words are the page's manifest (js/content/manifests/<id>.js): its
+   title is the question, its deck the short answer (The idea), its numbered points the mechanism
+   (How it works, one point open at a time, each addressable as ?view=context&step=<n>), its limit
+   and evidence links the Evidence view, its status the boundary every view keeps in sight.
+   Theory pages are DERIVED routes (js/pages/catalog.js catalogContentRoutes): a page the editor
+   creates in the theory group renders here with no code change, with or without a status.
 
-/* A question keeps one answer surface, an essential boundary, and its return.
-   Diagram nodes express source relationships; they are never live telemetry. */
-ArkUI.storySheet = function(id,page) {
-  var manifest=ArkManifest.get(id), area=id.toUpperCase();
-  function words(role){return ArkCopy.text(area+'.'+role);}
-  /* Same centralization as ArkUI.sheet's own link() above -- see its comment.
-     manifest.meta.docs (below, in select()) is left untouched. */
-  function link(label,key,cls){return ArkUI.dash.linkEl(label,'route:'+key,undefined,cls);}
-  var el=ArkUI.el('section','ark-page guided-page mechanism-story '+id+'-page');el.dataset.arkPage=page;
-  var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');var parentLink=link(id==='about'?'← Home':'← Operating model',id==='about'?'zero':'concept');if(manifest.meta.placement==='rail'){parentLink.dataset.routeQuery='view=more';parentLink.href+='?view=more';}path.appendChild(parentLink);var currentPage=ArkUI.el('span','',manifest.title);currentPage.setAttribute('aria-current','page');path.appendChild(currentPage);el.appendChild(path);
-  var title=ArkUI.el('h1','',words('TITLE'));title.id=id+'-title';el.setAttribute('aria-labelledby',title.id);el.appendChild(title);
-  var controls=ArkUI.el('nav','story-depth');controls.setAttribute('aria-label','Explanation depth');var buttons=[];
-  ['The core idea','How it works','Evidence & limits'].forEach(function(label,i){var b=ArkUI.el('button','',label);b.type='button';b.dataset.icon=['overview','layers','evidence'][i];b.addEventListener('click',function(){select(i,0,true);});buttons.push(b);controls.appendChild(b);});el.appendChild(controls);
-  var body=ArkUI.el('div','guided-body'), copy=ArkUI.el('div','guided-answer');copy.setAttribute('aria-live','polite');var left=ArkUI.el('div','guided-left');left.appendChild(copy);body.appendChild(left);
-  var diagram=ArkUI.el('figure','guided-diagram mechanism-relationship');diagram.appendChild(ArkUI.el('figcaption','','Illustration / '+manifest.title+' relationships'));
-  var labels={about:['Directory / named presence','Fabric / linked agreements','Governance / bounded authority'],purpose:['Network A / miner presence','Network B / miner presence','Shared accounts / outside this isolation'],depth:['Intent','Offer','Agreement','Fulfillment','Receipt'],practice:['Object + applicable policy','Bounded authority cell','Threshold evidence','Cell dissolves'],dao:['Mesh policy / substrate','Network policy / own network','Approval ≠ activation'],notes:['Approval / signed consent','Readiness + safety gates','Activation / separate evidence'],studio:['Named network ID','Source revision','Dated observation','Evidence + isolation boundary'],spec:['Workload + method','Raw results / registered','Digest + conditions','Conclusion / per record']}[id]||[];
-  var drafting=ArkUI.createStoryDiagram&&ArkUI.createStoryDiagram(id);if(drafting)diagram.appendChild(drafting.element);
-  labels.forEach(function(label,i){var record=ArkUI.el('button','story-record',label);record.type='button';record.dataset.diagramNumber=String(i+1).padStart(2,'0');record.addEventListener('click',function(){select(1,Math.min(i,count-1),true);});diagram.appendChild(record);});body.appendChild(diagram);el.appendChild(body);
-  // Status remains readable in every depth; a code alone cannot state a limit.
-  var status=ArkUI.el('aside','lifecycle-boundary mechanism-status-summary');status.setAttribute('aria-label','Current status');status.appendChild(ArkUI.el('strong','',id==='about'?'Current source boundary':words('STATUS.TITLE')));status.appendChild(ArkUI.el('p','',id==='about'?words('POINT4.TEXT'):words('STATUS.TEXT')));left.appendChild(status);
-  var footer=ArkUI.el('nav','lifecycle-next');footer.setAttribute('aria-label','Continue');
-  if(manifest.meta.next)footer.appendChild(link(words('NEXT')+' →',manifest.meta.next,'story-primary'));else if(id==='dao')footer.appendChild(link('Inspect activation gates →','concept/notes','story-primary'));el.appendChild(footer);
-  var count=ArkManifest.points(manifest), selectedDepth=0,selectedStep=0;
-  function select(depth,step,write){
-    selectedDepth=depth;selectedStep=step;el.dataset.readingLayer=['focus','context','reference'][depth];
-    buttons.forEach(function(b,i){b.setAttribute('aria-pressed',String(i===depth));});copy.replaceChildren();
-    if(depth===0)copy.appendChild(ArkUI.el('p','guided-primary-answer',words('DECK')));
-    else if(depth===1){
-      var picker=ArkUI.el('nav','guided-step-picker');picker.setAttribute('aria-label',manifest.title+' questions');
-      for(var i=0;i<count;i++)(function(index){var b=ArkUI.el('button','',words('POINT'+(index+1)+'.TITLE'));b.type='button';b.setAttribute('aria-pressed',String(index===step));b.addEventListener('click',function(){select(1,index,true);});picker.appendChild(b);})(i);
-      copy.appendChild(picker);var answer=ArkUI.el('section','mechanism-inner-answer');answer.appendChild(ArkUI.el('h2','',words('POINT'+(step+1)+'.TITLE')));answer.appendChild(ArkUI.el('p','',words('POINT'+(step+1)+'.TEXT')));copy.appendChild(answer);
-    }else{
-      if(manifest.fields['LIMIT.TEXT']){var limit=ArkUI.el('section','content-layer-reference');limit.appendChild(ArkUI.el('h2','',words('LIMIT.TITLE')));limit.appendChild(ArkUI.el('p','',words('LIMIT.TEXT')));copy.appendChild(limit);}
-      // id==='about' never actually reaches here (about.js is its own page module; ArkUI.sheet's
-      // own 'about' dispatch above is unreachable through real routing) -- kept consistent anyway.
-      // manifest.meta.docs (the live, already-working branch) is left exactly as it was.
-      var doc=id==='about'?ArkUI.dash.linkEl(words('STATUS')+' →','doc:docs/status.md'):ArkUI.el('a','story-reference',words('EVIDENCE')+' →');
-      if(id==='about')doc.className='story-reference';else doc.href=manifest.meta.docs;
-      copy.appendChild(doc);
-      // Onward links are data: every 'link' field ROLE.HREF renders here, labelled by its ROLE field,
-      // so a sheet links to where its evidence is published (spec -> /stats, /stats/gpu,
-      // /stats/ledger) without code naming routes. Sheets with no link fields render nothing extra.
-      Object.keys(manifest.fields).forEach(function(role){var f=manifest.fields[role];if(f.kind!=='link'||!/\.HREF$/.test(role)||!manifest.fields[role.replace(/\.HREF$/,'')])return;var row=ArkUI.el('p','');row.appendChild(ArkUI.dash.linkEl(words(role.replace(/\.HREF$/,''))+' →',words(role),manifest.route,'story-reference'));copy.appendChild(row);});
+   The drawing (js/ark/story-diagrams.js) sits in Ark's figure frame with its numbered legend:
+   choosing a legend entry opens that point, and opening a point moves the drawing's marker.
+   Regression: tests/story-blocks.cjs; behaviour in a real DOM: tests/routes-live.cjs. */
+(function () {
+  'use strict';
+
+  /* The legend under each drawing: what its numbered places are (the drawing is aria-hidden). */
+  var LEGEND = {
+    purpose: ['Network A / miner presence', 'Network B / miner presence', 'Shared accounts / outside this isolation'],
+    depth: ['Intent', 'Offer', 'Agreement', 'Fulfillment', 'Receipt'],
+    practice: ['Object + applicable policy', 'Bounded authority cell', 'Threshold evidence', 'Cell dissolves'],
+    dao: ['Mesh policy / substrate', 'Network policy / own network', 'Approval ≠ activation'],
+    notes: ['Approval / signed consent', 'Readiness + safety gates', 'Activation / separate evidence'],
+    studio: ['Named network ID', 'Source revision', 'Dated observation', 'Evidence + isolation boundary'],
+    spec: ['Workload + method', 'Raw results / registered', 'Digest + conditions', 'Conclusion / per record']
+  };
+  /* `was`: the layout keys of the hand-built sheet, by block id (tests/lib/layout-continuity.cjs,
+     censuses tests/fixtures/layout-keys/concept-*.tsv and dao.tsv); never typed. */
+  var WAS = {
+   "concept/purpose": {
+    "purpose-hero": {
+     "hero-title": "id:purpose-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "purpose-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "purpose-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "purpose-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"PURPOSE.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "purpose-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "purpose-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
     }
-    if(drafting)drafting.select(depth===1?step:0,write);
-    diagram.querySelectorAll('.story-record').forEach(function(node,i){var selected=depth===1&&i===Math.min(step,labels.length-1);node.dataset.selected=String(selected);node.setAttribute('aria-pressed',String(selected));});
-    if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(copy);
-    if(write)ArkUI.route.write(ArkUI.pageCatalog[page].path,(depth?'?view='+['focus','context','reference'][depth]+(depth===1?'&step='+step:''):'').replace(/^\?/,''),'push');
-  }
-  function restore(){if(ArkUI.route.path()!==ArkUI.pageCatalog[page].path)return;var q=new URLSearchParams(ArkUI.route.search()),v=q.get('view'),step=Math.max(0,Math.min(count-1,Number(q.get('step'))||0));select(v==='context'?1:v==='reference'?2:0,step,false);}
-  el.addEventListener('keydown',function(event){if(event.key==='Escape'&&selectedDepth){event.preventDefault();event.stopPropagation();select(0,0,true);buttons[0].focus();}});
-  select(0,0,false);restore();el.arkRestore=restore;window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);el.arkDispose=function(){if(drafting)drafting.dispose();window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};
-  var components=ArkUI.el('div','concept-components');components.setAttribute('data-ark-insert','main');el.appendChild(components);
-  return el;
-};
+   },
+   "concept/depth": {
+    "depth-hero": {
+     "hero-title": "id:depth-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "depth-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "depth-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "depth-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"DEPTH.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "depth-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "depth-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3",
+     ".story-legend > button:nth-of-type(4)": "page:/div:1/figure:1/button:4",
+     ".story-legend > button:nth-of-type(5)": "page:/div:1/figure:1/button:5"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "concept/practice": {
+    "practice-hero": {
+     "hero-title": "id:practice-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "practice-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "practice-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "practice-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"PRACTICE.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "practice-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "practice-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3",
+     ".story-legend > button:nth-of-type(4)": "page:/div:1/figure:1/button:4"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "concept/notes": {
+    "notes-hero": {
+     "hero-title": "id:notes-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "notes-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "notes-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "notes-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"NOTES.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "notes-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "notes-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "concept/studio": {
+    "studio-hero": {
+     "hero-title": "id:studio-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "studio-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "studio-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "studio-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"STUDIO.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "studio-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "studio-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3",
+     ".story-legend > button:nth-of-type(4)": "page:/div:1/figure:1/button:4"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "concept/spec": {
+    "spec-hero": {
+     "hero-title": "id:spec-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "spec-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "spec-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "spec-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"SPEC.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "spec-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "spec-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3",
+     ".story-legend > button:nth-of-type(4)": "page:/div:1/figure:1/button:4"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "dao": {
+    "dao-hero": {
+     "hero-title": "id:dao-title",
+     "button": "page:/nav:3",
+     "actions": "page:/nav:3/a:1"
+    },
+    "dao-crumbs": {
+     "breadcrumb-item#2": "page:/nav:1/a:1",
+     "breadcrumb-item#3": "page:/nav:1/span:1",
+     ":root": {
+      "key": "page:/nav:1",
+      "self": true
+     }
+    },
+    "dao-status": {
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1",
+     "[data-ark-block=\"callout\"] > div": "page:/div:1/div:1/aside:1"
+    },
+    "dao-depth": {
+     "tabs-list": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     "tabs-trigger": "page:/nav:2/button:1",
+     "tabs-trigger#2": "page:/nav:2/button:2",
+     "tabs-trigger#3": "page:/nav:2/button:3",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "[data-ark-copy-keys=\"DAO.DECK\"]": "page:/div:1/div:1/div:1/p:1"
+    },
+    "dao-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "dao-figure": {
+     "figure": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     "svg.story-drawing": "page:/div:1/figure:1/svg:1",
+     ".story-legend > button:nth-of-type(1)": "page:/div:1/figure:1/button:1",
+     ".story-legend > button:nth-of-type(2)": "page:/div:1/figure:1/button:2",
+     ".story-legend > button:nth-of-type(3)": "page:/div:1/figure:1/button:3"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   }
+  };
+
+  function sentence(text) { return text.charAt(0) + text.slice(1).toLowerCase(); }
+
+  ArkUI.sheet = function (id, page) {
+    var manifest = ArkManifest.get(id), area = id.toUpperCase();
+    function copy(role) { return 'copy:' + area + '.' + role; }
+    function words(role) { return ArkCopy.text(area + '.' + role); }
+    function has(role) { return !!manifest.fields[role]; }
+    var count = ArkManifest.points(manifest), step = 0;
+    var theory = ArkManifest.group('theory'), index = theory.findIndex(function (m) { return m.id === id; });
+    var path = ArkUI.pageCatalog[page] && ArkUI.pageCatalog[page].path;
+
+    /* The figure: the drawing, then its legend -- each entry opens its point. */
+    var drawing = ArkUI.createStoryDiagram ? ArkUI.createStoryDiagram(id) : null;
+    var labels = LEGEND[id] || [];
+    var figure = ArkUI.el('div', 'story-plate');
+    if (drawing) figure.appendChild(drawing.element);
+    var legend = ArkUI.el('div', 'story-legend'), records = [];
+    labels.forEach(function (label, i) {
+      var record = ArkUI.el('button', 'story-record', label); record.type = 'button';
+      record.dataset.diagramNumber = String(i + 1).padStart(2, '0');
+      records.push(record); legend.appendChild(record);
+    });
+    if (records.length) figure.appendChild(legend);
+
+    /* Evidence: the limit, then every source the manifest names -- its docs, and each 'link'
+       field ROLE.HREF labelled by its ROLE field (spec -> /stats, /stats/gpu, /stats/ledger). */
+    var sources = [];
+    if (manifest.meta.docs && has('EVIDENCE')) sources.push({ label: copy('EVIDENCE'), href: 'doc:' + manifest.meta.docs, tone: 'link' });
+    Object.keys(manifest.fields).forEach(function (role) {
+      var f = manifest.fields[role];
+      if (f.kind !== 'link' || !/\.HREF$/.test(role) || !manifest.fields[role.replace(/\.HREF$/, '')]) return;
+      sources.push({ label: copy(role.replace(/\.HREF$/, '')), href: words(role), tone: 'link' });
+    });
+    /* The limit can be long (spec lists every benchmark still unverified): its first three lines
+       stay in view with "Read the whole limit" (Ark's disclosure, never cut; the button only
+       appears when the text is longer than that). */
+    var evidence = [];
+    if (has('LIMIT.TEXT')) {
+      if (has('LIMIT.TITLE')) evidence.push({ block: 'eyebrow', props: { text: copy('LIMIT.TITLE') } });
+      evidence.push({ block: 'disclosure', props: { content: copy('LIMIT.TEXT'), preview: 3, more: 'Read the whole limit', less: 'Show less' } });
+    }
+    for (var s = 0; s < sources.length; s += 4) evidence.push({ block: 'actions', props: { label: 'Sources', items: sources.slice(s, s + 4) } });
+
+    var points = [];
+    for (var n = 1; n <= count; n++) points.push({ value: 'step-' + (n - 1), title: copy('POINT' + n + '.TITLE'), content: copy('POINT' + n + '.TEXT') });
+    var parent = { label: 'Operating model', href: 'route:concept' };
+    var onward = manifest.meta.next ? { label: copy('NEXT'), href: 'route:' + manifest.meta.next }
+      : id === 'dao' ? { label: 'Inspect activation gates', href: 'route:concept/notes' } : null;
+
+    var def = {
+      page: page, id: id, className: 'story-question', titleId: id + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
+      crumbs: [{ label: 'Home', href: 'route:zero' }, parent, { label: manifest.title }],
+      eyebrow: index >= 0 ? ArkUI.story.position('Operating model', index, theory.length) : (has('EYEBROW') ? copy('EYEBROW') : undefined),
+      title: copy('TITLE'),
+      depth: {
+        focus: { text: copy('DECK') },
+        context: points.length ? { blocks: [{ block: 'accordion', props: { label: manifest.title + ' questions', items: points } }] } : { text: copy('DECK') },
+        reference: evidence.length ? { blocks: evidence } : { text: copy('DECK') }
+      },
+      boundary: has('STATUS.TEXT') ? { tone: 'drift', title: copy('STATUS.TITLE'), body: copy('STATUS.TEXT') } : undefined, boundaryFold: 'phone',
+      figure: drawing ? { slot: 'diagram', caption: manifest.title + ' relationships: ' + sentence(drawing.title) + '.' } : undefined,
+      slots: { diagram: figure },
+      /* Onward: the next step the manifest names (the old call to action) is the one action of the
+         hero (Ark: "the main next step"); every other question is one step up, on /concept. */
+      actions: onward ? [{ label: onward.label, href: onward.href, tone: 'primary' }] : undefined,
+      query: function (view) { return view === 'focus' ? '' : view === 'context' ? 'view=context&step=' + step : 'view=' + view; },
+      onView: function (view) { mark(view === 'context'); if (drawing) drawing.select(view === 'context' ? step : 0, false); },
+      onRestore: function (params) { open(Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)), true); },
+      onFigureVisibility: function (node, visible) { if (drawing) drawing.visible(visible); },
+      dispose: function () { if (drawing) drawing.dispose(); }
+    };
+    var el = ArkUI.story.mount(def, null);
+
+    /* Rail questions return to the evidence group of /concept (its ?view=more). */
+    if (manifest.meta.placement === 'rail') {
+      var back = el.querySelector('#' + id + '-crumbs a[data-scene-link="concept"]');
+      if (back) { back.dataset.routeQuery = 'view=more'; back.setAttribute('href', back.getAttribute('href') + '?view=more'); }
+    }
+    var accordion = el.story.panel('context') && el.story.panel('context').querySelector('[data-ark-block="accordion"]');
+    var triggers = accordion ? Array.prototype.slice.call(accordion.querySelectorAll('[data-ark-part="accordion-trigger"]')) : [];
+    function mark(on) {
+      records.forEach(function (record, i) { var selected = on && i === Math.min(step, records.length - 1); record.dataset.selected = String(selected); record.setAttribute('aria-pressed', String(selected)); });
+    }
+    /* Open point `i` (through the accordion, never by hand) and move the drawing to it. */
+    function open(i, quiet) {
+      step = i;
+      if (triggers[i] && triggers[i].getAttribute('aria-expanded') !== 'true') triggers[i].click();
+      if (drawing) drawing.select(el.story.view() === 'context' ? i : 0, !quiet);
+      mark(el.story.view() === 'context');
+    }
+    triggers.forEach(function (trigger, i) {
+      trigger.addEventListener('click', function () {
+        if (trigger.getAttribute('aria-expanded') !== 'true') return;
+        step = i; mark(true); if (drawing) drawing.select(i, true);
+        if (ArkUI.route && path) ArkUI.route.write(path, 'view=context&step=' + i, 'push');
+      });
+    });
+    records.forEach(function (record, i) {
+      record.addEventListener('click', function () {
+        var target = Math.min(i, count - 1);
+        el.story.select('context', { quiet: true });
+        open(target);
+        if (ArkUI.route && path) ArkUI.route.write(path, 'view=context&step=' + target, 'push');
+      });
+    });
+    var initial = el.story.params();
+    if (initial && initial.get('step')) open(Math.max(0, Math.min(count - 1, Number(initial.get('step')) || 0)), true);
+    else mark(el.story.view() === 'context');
+    return el;
+  };
+})();

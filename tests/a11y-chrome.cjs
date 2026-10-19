@@ -36,10 +36,15 @@ const focus = read('css/focus.css');
 assert(/#scene \[tabindex\]:not\(a,button,input,select,textarea,\[tabindex="-1"\]\):focus-visible \{ outline:2px solid/.test(focus), 'a focusable panel shows a ring');
 assert(/#scene :is\(button,\[role="tab"\],summary\):focus-visible \{ outline:2px solid/.test(focus), 'custom controls show a ring');
 
+/* Since 2026-10-19 (W3-STATS) both pages draw their bars with Ark's meter: rows are list items and
+   never Tab stops (the block's own law), and each row's detail is visible text -- the CPU in the
+   bar's label on /stats/gpu, the facts beside the bars on /stats/ledger
+   (tests/stats-gpu-blocks.cjs and tests/stats-ledger-page.cjs read the rendered rows). */
 for (const file of ['js/pages/stats-gpu.js', 'js/pages/stats-ledger.js']) {
   const src = read(file);
-  assert(!/stats-bar-row" tabindex="0"/.test(src), file + ': bar rows are not Tab stops');
-  assert(src.includes('<small class="stats-bar-detail">'), file + ': the tooltip\'s detail is visible text, so nothing is lost');
+  assert(/block: 'meter'/.test(src) && !/tabindex/.test(src), file + ': bars are Ark\'s meter, and nothing on the page sets a tabindex');
 }
+assert(/label: it\.name \+ ' · ' \+ it\.cpu/.test(read('js/pages/stats-gpu.js')), '/stats/gpu: each bar names its CPU in visible text, so the old tooltip\'s detail is not lost');
+assert(/term: p\.label, value: p\.note/.test(read('js/pages/stats-ledger.js')), '/stats/ledger: each CPU bar\'s note is a visible fact beside the bars');
 
 console.log('PASS: skip link, inert fallback with site links, inherited control font, visible focus rings, no dead Tab stops.');

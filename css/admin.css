@@ -67,13 +67,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
    matches that rather than the generic UA ring. */
 :focus-visible { outline: none; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: hsl(var(--reference-400)); }
-.btn:focus-visible, .link:focus-visible, .ark-tab:focus-visible { background: hsl(var(--raised)); }
+.btn:focus-visible, .link:focus-visible { background: hsl(var(--raised)); }
 
 /* The header grows instead of clipping: when its groups no longer fit one row they wrap, and
    a fixed height would let them overflow under #studioRoot. js/admin/nav.js publishes the
    real height as --app-bar-h, which #studioRoot (css/studio-embed.css) docks below.
-   z-index 65: its menus (More, the page switcher) drop over #studioRoot (50) AND over the docked
-   Versions panel (60), whose own toggle lives in More: under it, More could not close it. */
+   Its stacking level is --z-header: its menus (More, the page switcher) drop over the workspace
+   AND over the docked Versions panel, whose own toggle lives in More: under it, More could not
+   close it. Every --z-* here is published by js/admin/overlay.js, the ONE stacking order. */
 .bar {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; min-height: 58px; padding: 8px 22px;
   border-bottom: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth) / .9);
@@ -90,7 +91,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
    tooltip and aria-label. The canvas's own controls (screen size, Edit / Preview, Design tips)
    are on the canvas strip (#canvasTools below); everything occasional is in More. Two rows on a
    phone (the 599px block), every target 44px there. */
-#appBar { justify-content: flex-start; gap: 8px; min-height: 52px; padding: 8px 14px; z-index: 65; }
+#appBar { justify-content: flex-start; gap: 8px; min-height: 52px; padding: 8px 14px; z-index: var(--z-header); }
 #appBar .bar-brand strong { font-size: 13px; letter-spacing: .16em; white-space: nowrap; }
 /* below 1440px the wordmark yields its ~115px to the controls (the tab title still names the app) */
 @media (max-width: 1439px) { #appBar .bar-brand { display: none; } }
@@ -145,7 +146,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 /* More: the glass panel every header popover uses (the toolbar's, the page switcher's) */
 .account { position: relative; }
 .account-menu {
-  position: absolute; top: calc(100% + 8px); right: 0; z-index: 70; display: grid; gap: 4px; width: 300px; max-height: calc(100vh - var(--app-bar-h, 56px) - 16px); overflow: auto; padding: 6px;
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: var(--z-menu); display: grid; gap: 4px; width: 300px; max-height: calc(100vh - var(--app-bar-h, 56px) - 16px); overflow: auto; padding: 6px;
   border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-lg); background: hsl(var(--overlay) / .96);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: var(--shadow-pop);
 }
@@ -193,16 +194,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .side-group::before { content: ""; width: 12px; height: 12px; flex: none; background-color: hsl(var(--text-faint)); -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: contain; mask-size: contain; }
 .side-group[data-icon="page"]::before { -webkit-mask-image: var(--icon-page-uri, none); mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 1.5h5.5L12.5 4.5V14.5H4z' fill='none' stroke='black' stroke-width='1.3'/><path d='M6 7h4M6 9.5h4M6 12h2.5' stroke='black' stroke-width='1.3'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 1.5h5.5L12.5 4.5V14.5H4z' fill='none' stroke='black' stroke-width='1.3'/><path d='M6 7h4M6 9.5h4M6 12h2.5' stroke='black' stroke-width='1.3'/></svg>"); }
 .side-group[data-icon="article"]::before { mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3h10M3 6.5h10M3 10h7M3 13h4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3 3h10M3 6.5h10M3 10h7M3 13h4' stroke='black' stroke-width='1.4' stroke-linecap='round'/></svg>"); }
-/* ---- the lens (Edit words / Edit style), in the one header. Reuses .ark-tab's visual language
-   via a thin .mode-switch adaptation; the pressed one is highlighted. Always words: it is the one
-   choice that changes what a click on the canvas does. (The views -- the page, Site map, Site
-   style -- are the More menu's first group since 2026-10-19.) */
-.mode-switch { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .5); }
-.mode-switch[hidden] { display: none; }
-.mode-switch .ark-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 4px 11px; white-space: nowrap; }
-.mode-switch .ark-tab[aria-selected="true"], .mode-switch .ark-tab[aria-pressed="true"], .mode-switch .ark-tab[aria-expanded="true"] { color: hsl(var(--text-strong)); background: hsl(var(--reference-100)); }
-.lens-switch .ark-tab { font-weight: 600; }
-.mode-switch .ark-tab .dot { margin-left: 2px; }
+/* ---- the lens (Edit words / Edit style), in the one header: the same .seg as the canvas
+   strip's groups, in words and bold -- it is the one choice that changes what a click on the
+   canvas does. (The views -- the page, Site map, Site style -- are the More menu's first group
+   since 2026-10-19.) */
+.lens-switch button { font-weight: 600; white-space: nowrap; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--primary)); flex: none; box-shadow: 0 0 0 3px hsl(var(--primary-200)); }
 
 /* ---- "New X" as a tidy disclosure, not a permanent block of forms ---- */
@@ -263,37 +259,15 @@ legend { padding: 0 4px; margin-left: -4px; }
 .seo-controls .row.seo-bot { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
 .seo-refusal { color: hsl(var(--warning)); }
 
-/* ---- Ark admin primitives ---- */
+/* ---- Ark's tabs and disclosure (js/admin/ark-host.js) draw themselves from css/ark-blocks.css;
+   the editor styles only its own containers inside them, through its own data-ark-primitive
+   hook. The form behind a tab is a plain container (role="tabpanel" written by Ark), not Ark's
+   text panel. ---- */
 [data-ark-primitive] { min-width: 0; }
-.page-editor-tabs { display: grid; gap: 18px; }
-.ark-tabs-list {
-  position: sticky; top: 55px; z-index: 1;
-  display: flex; gap: 4px; padding: 5px;
-  border: 1px solid hsl(var(--border-soft));
-  border-radius: var(--radius);
-  background: hsl(var(--surface) / .82);
-  backdrop-filter: blur(12px);
-}
-.ark-tab {
-  min-height: 34px; padding: 7px 13px; border: 0; border-radius: var(--radius-sm);
-  background: transparent; color: hsl(var(--text-muted)); cursor: pointer;
-  font: 500 12px/1.3 var(--sans); transition: color .12s, background-color .12s;
-}
-.ark-tab:hover { color: hsl(var(--text-strong)); background: hsl(var(--raised) / .65); }
-.ark-tab[data-state="active"] { color: hsl(var(--text-strong)); background: hsl(var(--reference-100)); }
-.ark-tabs-panels { min-width: 0; }
-.ark-tab-panel[hidden] { display: none; }
+[data-ark-primitive="tabs"] > [role="tabpanel"] { min-width: 0; }
 .editor-tab-flow { display: grid; gap: 18px; }
 .editor-tab-flow > fieldset, .page-law-panel > fieldset { margin-bottom: 0; }
 .page-law-panel { display: grid; gap: 18px; }
-.ark-disclosure { border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .6); }
-.ark-disclosure-trigger {
-  width: 100%; min-height: 40px; padding: 10px 14px; border: 0; background: transparent;
-  color: hsl(var(--text-strong)); text-align: left; cursor: pointer; font: 500 13px/1.4 var(--sans);
-}
-.ark-disclosure-trigger::after { content: "+"; float: right; color: hsl(var(--text-muted)); }
-.ark-disclosure-trigger[data-state="open"]::after { content: "-"; }
-.ark-disclosure-content { padding: 0 14px 14px; }
 
 @media (max-width: 1099px) {
   /* the labelled quiet buttons keep their icon and tooltip; the words come back on a phone's own row */
@@ -307,7 +281,6 @@ legend { padding: 0 4px; margin-left: -4px; }
      context, so a static header would trap the More menu underneath the workspace */
   #appBar { padding: 6px 8px; gap: 6px; position: relative; }
   .bar .btn { padding: 5px 10px; }
-  .mode-switch .ark-tab { padding: 3px 9px; }
 }
 /* A phone: two rows, every target 44px (docs/ux-audit/cms.md P1-13; tests/browser/header-reach.mjs).
    Row 1 is where you are and what you finish with: the side panel, the page, Save, Publish, More.
@@ -331,10 +304,10 @@ legend { padding: 0 4px; margin-left: -4px; }
   #account { order: 4; }
   #btnPageFields { order: 6; }
   #lensSwitch { order: 7; flex: 1 1 auto; }
-  #lensSwitch .ark-tab { flex: 1 1 0; justify-content: center; min-height: 44px; }
+  #lensSwitch button { flex: 1 1 0; justify-content: center; min-height: 44px; height: 44px; }
   #historyTools { order: 8; gap: 2px; }
   .bar-page > .ic:first-child { display: none; }
-  #appBar .status { position: fixed; z-index: 56; left: 0; right: 0; bottom: 0; width: auto; padding: 6px 14px; text-align: left; font-size: 11.5px; pointer-events: none; }
+  #appBar .status { position: fixed; z-index: var(--z-status); left: 0; right: 0; bottom: 0; width: auto; padding: 6px 14px; text-align: left; font-size: 11.5px; pointer-events: none; }
   #appBar .status:not(:empty) { background: hsl(var(--depth)); border-top: 1px solid hsl(var(--border-soft)); }
   .account-menu { position: fixed; top: var(--app-bar-h, 100px); left: 8px; right: 8px; width: auto; }
   .menu-item { min-height: 44px; }
@@ -569,15 +542,16 @@ body.locked { overflow: auto; }
    also sign through it -- see that file's own header comment. */
 
 /* ---- Versions panel (js/admin/versions-panel.js) ------------------------------------
-   Docked to the right, below the header, above #studioRoot (z-index 50), so the preview
-   canvas on the left stays visible while a past version is previewed in it. SDK semantic
-   tokens only; the kind badges carry meaning: a save is reference, a publish is trust (it
-   reached the mesh), a restore is drift (it superseded later work, worth a second look). */
-.versions-panel { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; z-index: 60; width: min(420px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 24px; overflow: auto; overscroll-behavior: contain; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--overlay) / .96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-dock); }
+   Docked to the right, below the header, above the workspace (--z-versions over --z-workspace,
+   js/admin/overlay.js), so the preview canvas on the left stays visible while a past version is
+   previewed in it. SDK semantic tokens only; the kind badges carry meaning: a save is reference,
+   a publish is trust (it reached the mesh), a restore is drift (it superseded later work, worth
+   a second look). */
+.versions-panel { position: fixed; top: var(--app-bar-h, 58px); right: 0; bottom: 0; z-index: var(--z-versions); width: min(420px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 18px 20px 24px; overflow: auto; overscroll-behavior: contain; border-left: 1px solid hsl(var(--border-soft)); background: hsl(var(--overlay) / .96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: var(--shadow-dock); }
 .versions-panel[hidden] { display: none; }
 .versions-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .versions-head h2 { margin: 4px 0 0; font: 600 20px/1.15 var(--sans); letter-spacing: -.01em; color: hsl(var(--text-strong)); }
-.versions-kicker, .version-head time, .version-addresses dt, .version-more summary, .version-addresses summary { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.versions-kicker, .version-head time, .version-addresses dt { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 .versions-lede, .versions-note { margin: 0; font-size: 12px; line-height: 1.5; color: hsl(var(--text-muted)); }
 .versions-note:empty { display: none; }
 .versions-checkpoint { display: flex; gap: 8px; }
@@ -599,7 +573,6 @@ body.locked { overflow: auto; }
 .version-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .version-addresses dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 10px; margin: 6px 0 0; }
 .version-addresses dd { margin: 0; font-size: 10px; color: hsl(var(--text-muted)); }
-.version-more summary, .version-addresses summary { cursor: pointer; }
 .versions-more { justify-self: start; }
 .versions-tools { display: flex; gap: 8px; }
 .versions-import-note { margin: 0; padding: 8px 10px; border: 1px solid hsl(var(--danger) / .35); border-left: 2px solid hsl(var(--danger)); border-radius: var(--radius); background: hsl(var(--danger) / .06); font-size: 12px; line-height: 1.5; color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
@@ -655,8 +628,8 @@ body.locked { overflow: auto; }
 .notice-region { display: flex; flex-direction: column; gap: 8px; }
 .notice-region:empty { display: none; }
 #noticeBanners { margin: 0 0 10px; }
-.notice-floating { position: fixed; z-index: 55; top: calc(var(--app-bar-h, 56px) + 8px); left: 50%; transform: translateX(-50%); width: min(720px, calc(100vw - 32px)); }
-.notice-toasts { position: fixed; z-index: 60; left: 50%; bottom: 44px; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); pointer-events: none; }
+.notice-floating { position: fixed; z-index: var(--z-notice-banner); top: calc(var(--app-bar-h, 56px) + 8px); left: 50%; transform: translateX(-50%); width: min(720px, calc(100vw - 32px)); }
+.notice-toasts { position: fixed; z-index: var(--z-notice-toast); left: 50%; bottom: 44px; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); pointer-events: none; }
 .notice-toasts .notice { pointer-events: auto; box-shadow: var(--shadow-pop); }
 .notice { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: start; padding: 10px 10px 10px 12px;
   border: 1px solid hsl(var(--border-default)); border-left: 3px solid hsl(var(--primary)); border-radius: var(--radius);
@@ -695,13 +668,11 @@ body.locked { overflow: auto; }
 #studioRoot > .pop > h4:first-child { padding-right: 34px; }
 
 /* ---- Developer details: where internal names live (copy keys, file paths, layout keys, raw
-   values, diffs) -- js/admin/controls.js devDetails(), the editor's one disclosure (primitives.js)
-   in its quiet form. Every surface has one, closed; nothing is lost, nothing shouts. ---- */
-.ark-disclosure.quiet { margin-top: 8px; border: 0; border-top: 1px dashed hsl(var(--border-soft)); border-radius: 0; background: transparent; }
-.ark-disclosure.quiet > .ark-disclosure-trigger { min-height: 0; padding: 6px 0; font: 500 11.5px/1.3 var(--sans); color: hsl(var(--text-muted)); }
-.ark-disclosure.quiet > .ark-disclosure-trigger:hover { color: hsl(var(--text-strong)); }
-.ark-disclosure.quiet > .ark-disclosure-content { padding: 2px 0 6px; }
-.ark-disclosure.quiet code, .ark-disclosure.quiet .mono, .ark-disclosure.quiet dd { font: 500 11px/1.45 var(--mono); color: hsl(var(--text-muted)); overflow-wrap: anywhere; }
-.ark-disclosure.quiet dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; margin: 2px 0 0; font-size: 11.5px; }
-.ark-disclosure.quiet dt { color: hsl(var(--text-muted)); }
-.ark-disclosure.quiet dd { margin: 0; }
+   values, diffs) -- js/admin/controls.js devDetails(): Ark's disclosure (js/admin/ark-host.js,
+   drawn by css/ark-blocks.css) with the editor's quiet dress for the list inside: a dashed rule
+   above, mono names. Every surface has one, closed; nothing is lost, nothing shouts. ---- */
+.dev-details { margin-top: 8px; padding-top: 4px; border-top: 1px dashed hsl(var(--border-soft)); font-size: 11.5px; }
+.dev-details code, .dev-details .mono, .dev-details dd { font: 500 11px/1.45 var(--mono); color: hsl(var(--text-muted)); overflow-wrap: anywhere; }
+.dev-details dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; margin: 2px 0 0; font-size: 11.5px; }
+.dev-details dt { color: hsl(var(--text-muted)); }
+.dev-details dd { margin: 0; }

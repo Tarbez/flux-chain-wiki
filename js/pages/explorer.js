@@ -66,15 +66,11 @@
   };
   var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'miners', publications: 'publications', documents: 'documents' };
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
-  /* One screen, no page scroll, in the How it works layout: a path, a heading with its deck,
-     two cards and a footer line. More is a state that takes the same place: the steps swap inside
-     one card, a kind opens over its list, a record over its kind, the raw observatory over the page. */
-  function story() {
-    return '<div class="explore-home how-triptych" data-explore-home data-pane="how">' +
-      '<nav class="content-layer-path how-path" aria-label="Your place"><a href="' + href('zero') + '" data-scene-link="zero">← Home</a><span aria-current="page">Mesh Explorer</span></nav>' +
-      '<header class="how-triptych-intro"><div class="how-triptych-heading"><h1 id="mesh-explorer-title">Your idea, live on the mesh.</h1></div>' +
-      '<p class="how-simple-deck">DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.</p></header>' +
-      '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
+  /* The live parts of the home (the page's own, hand-built because they ARE the explorer: the
+     mesh fabric stepper and the live kinds read from the public mesh), and the phone's pane
+     switch between them. The page around them -- crumbs, heading, the ways on -- is Ark blocks. */
+  function cards() {
+    return '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
       '<div class="explore-cards">' +
       '<article class="how-work-card explore-how-card" aria-labelledby="explore-step-title">' +
       '<div class="how-work-card-top"><span class="how-work-number" data-explore-step-n>01 / 03</span><span class="how-work-signal">HOW IT WORKS</span></div>' +
@@ -88,27 +84,66 @@
       '<h2 id="explore-live-title">Running on the mesh now</h2>' +
       '<div class="explore-live-body" data-explore-body data-state="kinds"><div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div></div>' +
       '<p class="explore-private" data-explore-private hidden></p></section></div>' +
-      '<footer class="how-simple-footer"><div class="how-simple-boundary explore-status" role="status" aria-live="polite"><span class="how-boundary-label"><span class="mesh-explorer-status-dot" aria-hidden="true"></span>PUBLIC MESH</span>' +
-      '<strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div>' +
-      '<div class="explore-footer-actions"><a href="' + href('resolver') + '" data-scene-link="resolver">What is a resolver?</a><button type="button" class="how-simple-next" data-explore-raw-open>Browse the raw records →</button></div></footer>' +
-      '</div>';
+      '<div class="explore-status" role="status" aria-live="polite"><span class="how-boundary-label"><span class="mesh-explorer-status-dot" aria-hidden="true"></span>PUBLIC MESH</span>' +
+      '<strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div>';
   }
+  /* The family's "Every launched resolver, in Explore" (the Explore product), its address from the kit's catalog. */
+  function exploreProduct() {
+    var kit = typeof window !== 'undefined' && window.DefxnKit, product = kit && kit.productById && kit.productById('explore');
+    var to = product && kit.productHref(product);
+    return to ? { label: 'Every launched resolver, in Explore', href: /^https?:/.test(to) ? 'url:' + to : to, tone: 'link' } : null;
+  }
+  /* `was`: the key each element of the hand-built page had, by block id, so a CMS edit saved
+     against it still lands. The home and the raw view keep their old keys whole (one pin each:
+     their insides are the same markup); the blocks around the live parts are pinned one by one.
+     Started from tests/lib/layout-continuity.cjs's derive against the frozen census
+     (tests/fixtures/layout-keys/explore.tsv); reasons in tests/task-pages-blocks.cjs. */
+  var FOOT = 'page:/div:1/footer:1';
+  var WAS = {
+    'explore-home': { ':root': 'page:/div:1', '.explore-status': FOOT + '/div:1' },
+    'explore-crumbs': { ':root': 'page:/div:1/nav:1', 'breadcrumb-item': 'page:/div:1/nav:1/a:1', 'breadcrumb-item#2': 'page:/div:1/nav:1/span:1' },
+    'explore-hero': { ':root': { key: 'page:/div:1/header:1', self: true }, 'hero-lede': 'page:/div:1/header:1/p:1' },
+    'explore-raw-view': { ':root': 'page:/div:2' }
+  };
 
-  ArkUI.pageModules.explorer = {
-    mount: function (host) {
-      var page = node('section', 'ark-page task-page mesh-explorer-page explore-page');
-      page.dataset.arkPage = 'explorer';
-      page.setAttribute('aria-labelledby', 'mesh-explorer-title');
-      page.dataset.view = 'home';
-      page.innerHTML = story() +
-        '<div class="explore-raw" data-explore-raw hidden><nav class="content-layer-path how-path" aria-label="Your place"><button type="button" class="explore-raw-back" data-explore-raw-back>\u2190 Mesh Explorer</button><span aria-current="page">Raw records</span></nav><div class="mesh-explorer-shell">' +
+  /* /explore as a page of Ark blocks around the live explorer (DEFXN polish Wave 3, W3-GUIDE):
+     the path and the heading with its deck were one innerHTML template, and the ways on were
+     display:none on a phone (W2-SHELL; docs/ux-audit/pages-ux-a.md /explore). They are Ark's
+     breadcrumb, hero and actions now, on every width; the stepper, the live kinds, the status line
+     and the raw observatory are the page's own and work as before (setup() below). Explain + hand
+     off (owner decision 2026-10-19): this page reads the record catalog of the public machines,
+     which no public product does (Claims reads it on your own machine only), so it stays;
+     launched resolvers and their histories are Explore's -- the family's link is a way on. */
+  function spec() {
+    var product = exploreProduct();
+    var onward = [{ label: 'What is a resolver?', href: 'route:resolver', tone: 'link' }, { label: 'Browse the raw records', action: 'explore-raw', tone: 'secondary' }];
+    if (product) onward.splice(1, 0, product);
+    return [
+      { block: 'custom', id: 'explore-home', was: WAS['explore-home'], mount: function (ctx) {
+        var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', ''); home.dataset.pane = 'how';
+        home.appendChild(ctx.render({ block: 'breadcrumb', id: 'explore-crumbs', was: WAS['explore-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Mesh Explorer' }] } }));
+        home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Your idea, live on the mesh.', density: 'compact',
+          lede: 'DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.' } }));
+        var live = node('div'); live.innerHTML = cards();
+        while (live.firstChild) home.appendChild(live.firstChild);
+        /* the ways on keep the footer's keys: What is a resolver, the family's Explore link (when the kit names it), Browse the raw records */
+        var onwardWas = { ':root': { key: FOOT + '/div:2', self: true }, 'button': FOOT + '/div:2/a:1' };
+        if (product) onwardWas['button#2'] = { key: FOOT + '/div:2/a:2', self: true };
+        onwardWas['button#' + (product ? 3 : 2)] = FOOT + '/div:2/button:1';
+        home.appendChild(ctx.render({ block: 'actions', id: 'explore-onward', was: onwardWas, props: { label: 'Ways on', items: onward } }));
+        return home;
+      } },
+      { block: 'custom', id: 'explore-raw-view', was: WAS['explore-raw-view'], mount: function () { var box = node('div'); box.innerHTML = rawView(); return box.firstChild; } }
+    ];
+  }
+  function rawView() {
+    return '<div class="explore-raw" data-explore-raw hidden><nav class="content-layer-path how-path" aria-label="Your place"><button type="button" class="explore-raw-back" data-explore-raw-back>← Mesh Explorer</button><span aria-current="page">Raw records</span></nav><div class="mesh-explorer-shell">' +
         '<header class="mesh-explorer-header">' +
         '<aside class="mesh-explorer-live-panel" aria-label="Current observation">' +
         '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside>' +
         '<details class="mesh-connect-popover"><summary aria-label="Observation controls"><span class="mesh-connect-dot" aria-hidden="true"></span><span data-explorer-origin-label>Public mesh</span></summary><section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
         '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
         '<details class="mesh-operator-access"><summary>Operator access</summary><label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources"></details></div></section></details></header>' +
-        
         '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head mesh-source-head"><h2 id="mesh-glance-title"><span class="mesh-explorer-kicker">01</span>What this node exposes</h2>' +
         '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><span class="mesh-source-stamp" data-explorer-glance-stamp>—</span></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
         '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
@@ -122,13 +157,21 @@
         '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-secondary"><summary><span>05</span> Observation details</summary><div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div></details>' +
         '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="' + docHref('docs/operators/verification.md') + '" data-scene-link="reference">How to verify an observation →</a> · <a href="' + docHref('docs/evidence/registry.md') + '" data-scene-link="reference">Evidence registry →</a></p></div></details></nav>' +
-        /* Anchor for reusable content blocks (js/content/components.js); rendering into
-           it is centralized in js/main.js's onMount hook, not called here. Baked into the
-           HTML string itself, like the rest of this page, rather than a querySelector()
-           afterward, since this page module builds entirely from one innerHTML write. */
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into it is
+           centralized in js/main.js's onMount hook, not called here. It stays where it was (inside
+           the raw view), so components saved against it keep their place. */
         '<div data-ark-insert="main"></div>' +
         '</div></div>';
-      host.appendChild(page);
+  }
+
+  ArkUI.pageModules.explorer = {
+    spec: spec,
+    mount: function (host) {
+      var page = ArkUI.page(spec(), host, { page: 'explorer', className: 'mesh-explorer-page explore-page', titleId: 'mesh-explorer-title' });
+      page.dataset.view = 'home';
+      /* "Browse the raw records" is Ark's action button; setup() opens the raw view from it. */
+      var open = page.querySelector('#explore-onward [data-action="explore-raw"]');
+      if (open) open.setAttribute('data-explore-raw-open', '');
       if (page.querySelector('[data-explorer-connect]')) setup(page);
       return page;
     }

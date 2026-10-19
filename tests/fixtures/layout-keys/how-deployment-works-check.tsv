@@ -1,0 +1,73 @@
+# key	tag	text -- layout keys of /how-deployment-works/check before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Agreement lifecycle03 / Verify the resultLook at what came back.Finishing the job and checking it are separate steps: the provider returns a result with evidenc
+page:/nav:1	nav	Agreement lifecycle03 / Verify the result
+page:/nav:1/a:1	a	Agreement lifecycle
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	03 / Verify the result
+page:/header:1	header	Look at what came back.Finishing the job and checking it are separate steps: the provider returns a result with evidence, then a named checker decides if it mee
+id:how-check-title	h1	Look at what came back.
+page:/header:1/p:1	p	Finishing the job and checking it are separate steps: the provider returns a result with evidence, then a named checker decides if it meets the agreement.
+page:/p:1	p	Written for the earlier agreement path, which is no longer the direction. For resolvers today, read What is a resolver. What is a resolver →
+page:/p:1/a:1	a	What is a resolver →
+page:/div:1	div	THE FULFILLMENT / AN EARLIER-PATH TRANSFER RECORDA result, with its evidence.kindfulfillment, flux.fabric-transfer.v1agreementCidThe terms it is checked against
+page:/div:1/section:1	section	THE FULFILLMENT / AN EARLIER-PATH TRANSFER RECORDA result, with its evidence.kindfulfillment, flux.fabric-transfer.v1agreementCidThe terms it is checked against
+page:/div:1/section:1/span:1	span	THE FULFILLMENT / AN EARLIER-PATH TRANSFER RECORD
+page:/div:1/section:1/h2:1	h2	A result, with its evidence.
+page:/div:1/section:1/dl:1	dl	kindfulfillment, flux.fabric-transfer.v1agreementCidThe terms it is checked againstinputCid, outputCidWhat went in and what came outsignatureB64The provider's E
+page:/div:1/section:1/dl:1/dt:1	dt	kind
+page:/div:1/section:1/dl:1/dd:1	dd	fulfillment, flux.fabric-transfer.v1
+page:/div:1/section:1/dl:1/dt:2	dt	agreementCid
+page:/div:1/section:1/dl:1/dd:2	dd	The terms it is checked against
+page:/div:1/section:1/dl:1/dt:3	dt	inputCid, outputCid
+page:/div:1/section:1/dl:1/dd:3	dd	What went in and what came out
+page:/div:1/section:1/dl:1/dt:4	dt	signatureB64
+page:/div:1/section:1/dl:1/dd:4	dd	The provider's Ed25519 signature
+page:/div:1/section:1/dl:1/dt:5	dt	cid
+page:/div:1/section:1/dl:1/dd:5	dd	What the receipt points back to
+page:/div:1/section:1/canvas:1	canvas	
+page:/div:1/section:1/p:1	p	
+page:/div:1/section:2	section	How it worksWhy this wayWhat it proves01Start from the agreementThe result is compared with the accepted terms, not with the provider's own description of what 
+page:/div:1/section:2/nav:1	nav	How it worksWhy this wayWhat it proves
+page:/div:1/section:2/nav:1/button:1	button	How it works
+page:/div:1/section:2/nav:1/button:2	button	Why this way
+page:/div:1/section:2/nav:1/button:3	button	What it proves
+page:/div:1/section:2/ol:1	ol	01Start from the agreementThe result is compared with the accepted terms, not with the provider's own description of what they did.02The provider submits a fulf
+page:/div:1/section:2/ol:1/li:1	li	01Start from the agreementThe result is compared with the accepted terms, not with the provider's own description of what they did.
+page:/div:1/section:2/ol:1/li:1/button:1	button	01Start from the agreement
+page:/div:1/section:2/ol:1/li:1/button:1/span:1	span	01
+page:/div:1/section:2/ol:1/li:1/button:1/strong:1	strong	Start from the agreement
+page:/div:1/section:2/ol:1/li:1/p:1	p	The result is compared with the accepted terms, not with the provider's own description of what they did.
+page:/div:1/section:2/ol:1/li:2	li	02The provider submits a fulfillmentThis signed record cites the agreement, what went in and what came out. The signature proves who submitted it and that it is
+page:/div:1/section:2/ol:1/li:2/button:1	button	02The provider submits a fulfillment
+page:/div:1/section:2/ol:1/li:2/button:1/span:1	span	02
+page:/div:1/section:2/ol:1/li:2/button:1/strong:1	strong	The provider submits a fulfillment
+page:/div:1/section:2/ol:1/li:2/p:1	p	This signed record cites the agreement, what went in and what came out. The signature proves who submitted it and that it is unaltered, not that it is correct.
+page:/div:1/section:2/ol:1/li:3	li	03A checker and authority decideA checker evaluates the result, and approvers chosen by the active policy for this one decision sign off once a threshold is met
+page:/div:1/section:2/ol:1/li:3/button:1	button	03A checker and authority decide
+page:/div:1/section:2/ol:1/li:3/button:1/span:1	span	03
+page:/div:1/section:2/ol:1/li:3/button:1/strong:1	strong	A checker and authority decide
+page:/div:1/section:2/ol:1/li:3/p:1	p	A checker evaluates the result, and approvers chosen by the active policy for this one decision sign off once a threshold is met. The outcome is recorded as a r
+page:/div:1/section:2/div:1	div	Trust is decided beforeA signature answers “who said this?”, and for a resolver its signature is its result. Whether to rely on that resolver is decided before 
+page:/div:1/section:2/div:1/article:1	article	Trust is decided beforeA signature answers “who said this?”, and for a resolver its signature is its result. Whether to rely on that resolver is decided before 
+page:/div:1/section:2/div:1/article:1/h3:1	h3	Trust is decided before
+page:/div:1/section:2/div:1/article:1/p:1	p	A signature answers “who said this?”, and for a resolver its signature is its result. Whether to rely on that resolver is decided before you send anything: its 
+page:/div:1/section:2/div:1/article:2	article	Authority for one decision onlyThe approvers are selected for this one object and step. They can certify only that step, publish the evidence, and then their ma
+page:/div:1/section:2/div:1/article:2/h3:1	h3	Authority for one decision only
+page:/div:1/section:2/div:1/article:2/p:1	p	The approvers are selected for this one object and step. They can certify only that step, publish the evidence, and then their mandate ends.
+page:/div:1/section:2/div:1/article:3	article	Signed, then storedThe resolver signs the result. That signature is the result. Copies go to other peers, which store it without redoing the work. Anyone can ch
+page:/div:1/section:2/div:1/article:3/h3:1	h3	Signed, then stored
+page:/div:1/section:2/div:1/article:3/p:1	p	The resolver signs the result. That signature is the result. Copies go to other peers, which store it without redoing the work. Anyone can check it later by wal
+page:/div:1/section:2/div:2	div	TRUE AFTER THIS STEPOne rule-bound outcome, traceable back to the request.NOT YET TRUEA receipt is not universal truth, a legal settlement, or a payment.
+page:/div:1/section:2/div:2/p:1	p	TRUE AFTER THIS STEPOne rule-bound outcome, traceable back to the request.
+page:/div:1/section:2/div:2/p:1/span:1	span	TRUE AFTER THIS STEP
+page:/div:1/section:2/div:2/p:1/span:2	span	One rule-bound outcome, traceable back to the request.
+page:/div:1/section:2/div:2/p:2	p	NOT YET TRUEA receipt is not universal truth, a legal settlement, or a payment.
+page:/div:1/section:2/div:2/p:2/span:1	span	NOT YET TRUE
+page:/div:1/section:2/div:2/p:2/span:2	span	A receipt is not universal truth, a legal settlement, or a payment.
+page:/nav:2	nav	Explore the signed record← Previous partBack to the lifecycle →
+page:/nav:2/a:1	a	Explore the signed record
+page:/nav:2/a:2	a	← Previous part
+page:/nav:2/a:3	a	Back to the lifecycle →
+page:/div:2	div	

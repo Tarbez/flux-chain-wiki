@@ -382,7 +382,7 @@
       if (unusedRoles.length) {
         var unusedBody = h('div', {}, h('p', { class: 'hint', text: 'The page does not show these today. They are kept so nothing written in them is lost.' }));
         unusedRoles.forEach(function (role) { unusedBody.appendChild(fieldEl(manifest, role)); });
-        contentPanel.appendChild(ArkAdminPrimitives.disclosure({ label: 'Unused fields (' + unusedRoles.length + ')', content: unusedBody }));
+        contentPanel.appendChild(A.arkDisclosure({ label: 'Unused fields (' + unusedRoles.length + ')', content: unusedBody }));
       }
       contentPanel.appendChild(A.devDetails([['File', 'js/content/manifests/' + manifest.id + '.js'], ['Address', manifest.route]].concat(
         Object.keys(manifest.fields).map(function (role) { return [manifest.fields[role].label + (manifest.fields[role].section ? ' (' + manifest.fields[role].section + ')' : ''), manifest.id.toUpperCase() + '.' + role]; }))));
@@ -400,7 +400,7 @@
       tabItems.push({ id: 'seo', label: 'Search & sharing', content: h('div', { class: 'editor-tab-flow' }, buildPageSeoPanel(id, manifest.title)) });
       tabItems.push({ id: 'code', label: 'Advanced', content: buildCodePanel(id, manifest) });
       var open = tabItems.some(function (t) { return t.id === tabFor['page:' + id]; }) ? tabFor['page:' + id] : 'content';
-      root.appendChild(ArkAdminPrimitives.tabs({ label: manifest.title + ' editor sections', items: tabItems, value: open, className: 'ark-tabs page-editor-tabs',
+      root.appendChild(A.arkTabs({ label: manifest.title + ' editor sections', items: tabItems, value: open, className: 'page-editor-tabs',
         onChange: function (tab) { tabFor['page:' + id] = tab; } }));
       if (manifest.group === 'theory') {
         root.appendChild(h('div', { class: 'danger-zone' },

@@ -13,8 +13,16 @@ assert.equal(sheets[sheets.length - 1], 'css/components.css', 'components.css lo
 const components = fs.readFileSync('css/components.css', 'utf8');
 for (const variant of ['solid', 'soft', 'quiet', 'choice', 'link'])
   assert(components.includes(`/* ${variant} `), `components.css defines the ${variant} variant`);
-for (const cls of ['.home-primary-cta', '.resolver-story-primary', '.about-primary-action', '.story-primary', '.mechanism-next', '.header-run-link', '.home-ghost-cta', '.resolutions-domain-tab'])
+for (const cls of ['.home-primary-cta', '.resolver-story-primary', '.story-primary', '.mechanism-next', '.home-ghost-cta'])
+  /* (.resolutions-domain-tab left this list 2026-10-19: the domains are Ark's tabs, painted by css/ark-blocks.css;
+     .about-primary-action left it the same day: /about's main action is the Ark hero's primary button) */
   assert(components.includes(cls), `${cls} is painted by the component layer`);
+/* "Run DEFXN" is the family bar's soft action since 2026-10-19: its paint is the kit's component
+   layer (assets/kit/defxn-components.css .dx-btn--soft), one rule on every route, and no site
+   sheet repaints it per route. */
+assert(/run\.className = 'header-run-link dx-btn dx-btn--soft dx-btn--sm'/.test(fs.readFileSync('js/resolvers/header.js', 'utf8')), 'Run DEFXN wears the kit\'s soft action');
+assert(/\.dx-btn--soft \{/.test(fs.readFileSync('assets/kit/defxn-components.css', 'utf8')), 'the kit component layer paints the soft action');
+for (const sheet of fs.readdirSync('css').filter((f) => f.endsWith('.css'))) assert(!/data-page[^{]*\.header-run-link/.test(fs.readFileSync('css/' + sheet, 'utf8')), `css/${sheet} repaints Run DEFXN per route`);
 
 const exempt = new Set(['css/flux-themes.css', 'css/themes.css', 'css/components.css', 'css/palette.css', 'css/admin.css', 'css/studio-embed.css']);
 /* Ark UI's generated component sheets (npm run build:ark, e.g. css/ark-blocks.css) are a component

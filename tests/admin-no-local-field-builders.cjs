@@ -33,8 +33,13 @@ for (const shape of [/const \w+ = \((?:label|l)\b[^)]*\) => \{\s*const \w+ = doc
   const m = shape.exec(rest);
   assert(!m, 'a local field-builder closure is back: ' + (m && m[0]));
 }
-/* and the forms the audit named read through the builders */
-const library = functionSource('renderLibrary');
-assert(/ctlField\(labelCtx, 'label', 'label'/.test(library) && /ctlField\(propsCtx, prop, prop/.test(library), "renderLibrary's definition form uses ctlField");
-assert(/ctlSelectField\(typeCtx, 'Block type'/.test(library) && /ctlField\(freshPropsCtx, prop, prop, \{ type: 'text', data: \{ prop \} \}\)/.test(library), "renderLibrary's New block form uses ctlSelectField/ctlField");
+/* and the forms the audit named read through the builders. Since W2-LIBRARY every block prop
+   -- in the Library's definition editor, its New block form and the toolbar's Component
+   instance section -- is drawn by ONE schema-driven editor, cmsBlockFields() -> blockFieldEl(),
+   whose leaves are the shared builders (and the site's link picker for links). */
+const field = functionSource('blockFieldEl');
+for (const builder of ['ctlField(', 'ctlSegField(', 'ctlSelectField(', 'linkPickerEl(']) assert(field.includes(builder), 'blockFieldEl draws with ' + builder.slice(0, -1));
+assert(/ctlField\(labelCtx, 'Name', 'label'/.test(functionSource('definitionEditor')) && /cmsBlockFields\(fields, propsCtx,/.test(functionSource('definitionEditor')), "the Library's definition form uses ctlField and the schema editor");
+assert(/cmsBlockFields\(fields, ctx,/.test(functionSource('newBlockForm')), "the Library's New block form uses the schema editor");
+assert(/cmsBlockFields\(cmsFieldsFor\(master\), overrideCtx,/.test(functionSource('buildComponentInstanceSection')), "the Component instance section uses the schema editor");
 console.log('PASS: every field row in admin.js comes from the shared ctl*Field builders; no local field-builder closure is left.');

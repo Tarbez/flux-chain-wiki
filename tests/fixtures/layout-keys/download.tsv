@@ -1,0 +1,54 @@
+# key	tag	text -- layout keys of /download before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	RUN DEFXN / FROM SOURCEOperator guide →Start a local miner from a trusted checkout.The source packages define a runnable miner and network CLI. Public repositor
+page:/header:1	header	RUN DEFXN / FROM SOURCEOperator guide →Start a local miner from a trusted checkout.The source packages define a runnable miner and network CLI. Public repositor
+page:/header:1/div:1	div	RUN DEFXN / FROM SOURCEOperator guide →
+page:/header:1/div:1/p:1	p	RUN DEFXN / FROM SOURCE
+page:/header:1/div:1/a:1	a	Operator guide →
+id:download-title	h1	Start a local miner from a trusted checkout.
+page:/header:1/p:1	p	The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so start from an owner-app
+page:/div:1	div	TERMINAL · STEP 01 / 05CopyCheck the runtime$ node --version$ npm --versionv22 or newer, with npm on the path01Check the runtimeUse Node.js 22 or newer with npm
+page:/div:1/section:1	section	TERMINAL · STEP 01 / 05CopyCheck the runtime$ node --version$ npm --versionv22 or newer, with npm on the path
+page:/div:1/section:1/div:1	div	TERMINAL · STEP 01 / 05Copy
+page:/div:1/section:1/div:1/span:1	span	TERMINAL · STEP 01 / 05
+page:/div:1/section:1/div:1/button:1	button	Copy
+page:/div:1/section:1/h2:1	h2	Check the runtime
+page:/div:1/section:1/div:2	div	$ node --version$ npm --version
+page:/div:1/section:1/div:2/pre:1/code:1/span:1	span	$
+page:/div:1/section:1/div:2/pre:1/code:2/span:1	span	$
+page:/div:1/section:1/p:1	p	v22 or newer, with npm on the path
+page:/div:1/section:2	section	01Check the runtimeUse Node.js 22 or newer with npm. The storage directory must be writable and the status port free.02Install the trusted checkoutIn ark-miner-
+page:/div:1/section:2/ol:1	ol	01Check the runtimeUse Node.js 22 or newer with npm. The storage directory must be writable and the status port free.02Install the trusted checkoutIn ark-miner-
+page:/div:1/section:2/ol:1/li:1	li	01Check the runtimeUse Node.js 22 or newer with npm. The storage directory must be writable and the status port free.
+page:/div:1/section:2/ol:1/li:1/button:1	button	01Check the runtime
+page:/div:1/section:2/ol:1/li:1/button:1/span:1	span	01
+page:/div:1/section:2/ol:1/li:1/button:1/strong:1	strong	Check the runtime
+id:source-step-1	p	Use Node.js 22 or newer with npm. The storage directory must be writable and the status port free.
+page:/div:1/section:2/ol:1/li:2	li	02Install the trusted checkoutIn ark-miner-cli, install, copy .env.example to .env, review it, then start. The package exposes flux-miner; ark-miner is a legacy
+page:/div:1/section:2/ol:1/li:2/button:1	button	02Install the trusted checkout
+page:/div:1/section:2/ol:1/li:2/button:1/span:1	span	02
+page:/div:1/section:2/ol:1/li:2/button:1/strong:1	strong	Install the trusted checkout
+id:source-step-2	p	In ark-miner-cli, install, copy .env.example to .env, review it, then start. The package exposes flux-miner; ark-miner is a legacy alias.
+page:/div:1/section:2/ol:1/li:3	li	03Verify the processThe daemon should stay running and answer on its status listener. Write down the source revision, package version, configuration and when yo
+page:/div:1/section:2/ol:1/li:3/button:1	button	03Verify the process
+page:/div:1/section:2/ol:1/li:3/button:1/span:1	span	03
+page:/div:1/section:2/ol:1/li:3/button:1/strong:1	strong	Verify the process
+id:source-step-3	p	The daemon should stay running and answer on its status listener. Write down the source revision, package version, configuration and when you looked.
+page:/div:1/section:2/ol:1/li:4	li	04Know what success provesA clean local start proves your miner starts. It does not mean any resolver is served, and says nothing about the public network or pr
+page:/div:1/section:2/ol:1/li:4/button:1	button	04Know what success proves
+page:/div:1/section:2/ol:1/li:4/button:1/span:1	span	04
+page:/div:1/section:2/ol:1/li:4/button:1/strong:1	strong	Know what success proves
+id:source-step-4	p	A clean local start proves your miner starts. It does not mean any resolver is served, and says nothing about the public network or production.
+page:/div:1/section:2/ol:1/li:5	li	05Continue with a named networkWith the miner and flux-network CLI installed, pick or create a network ID and start the miner against it.
+page:/div:1/section:2/ol:1/li:5/button:1	button	05Continue with a named network
+page:/div:1/section:2/ol:1/li:5/button:1/span:1	span	05
+page:/div:1/section:2/ol:1/li:5/button:1/strong:1	strong	Continue with a named network
+id:source-step-5	p	With the miner and flux-network CLI installed, pick or create a network ID and start the miner against it.
+page:/nav:1	nav	Open the full operator guide →Deploy a site with the Bundle DeployerStep 1 of 5← PreviousNext step →Create or join a network →
+page:/nav:1/a:1	a	Open the full operator guide →
+page:/nav:1/a:2	a	Deploy a site with the Bundle Deployer
+page:/nav:1/span:1	span	Step 1 of 5
+page:/nav:1/button:1	button	← Previous
+page:/nav:1/button:1/span:1	span	Previous
+page:/nav:1/button:2	button	Next step →
+page:/nav:1/a:3	a	Create or join a network →
+page:/div:2	div	

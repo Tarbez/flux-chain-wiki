@@ -21,8 +21,10 @@
      <link rel="stylesheet" href="assets/kit/defxn-components.css">
      <script src="assets/kit/defxn-product.js"></script>
      <script>
-       DefxnKit.mountShell({ mode: 'home', nav: navElement, actions: [accountButton], menuAt: 'fit' });
+       DefxnKit.mountShell({ mode: 'home', bar: siteHeader, nav: navElement, actions: [accountButton] });
      </script>
+   (defxn.com keeps its own measured row fit, js/resolvers/header.js, so it
+   passes no menuAt; a home page without one may pass menuAt: 'fit'.)
    The same source builds both (scripts/build.mjs classicShell): the classic
    file puts every export on window.DefxnKit.
 
@@ -118,6 +120,54 @@ function productHref(product) {
   return url.href;
 }
 
+/* productHref plus search params a product reads (Domains: ?q=<name>). */
+function productUrl(product, query) {
+  const href = productHref(product);
+  if (!href || !query) return href;
+  try {
+    const url = new URL(href);
+    for (const [key, value] of Object.entries(query)) url.searchParams.set(key, String(value));
+    return url.href;
+  } catch { return href; }
+}
+
+/** "Open <Product>": a link to a sibling product's own site (its loopback
+    address when this page is itself local), with optional search params.
+    null when the product has no address from this page. */
+function productLink(productId, { query = null, label = null } = {}) {
+  const product = productById(productId);
+  const href = productUrl(product, query);
+  if (!href) return null;
+  return el('a', { class: 'dx-btn dx-btn--soft dx-btn--sm dx-onward__link', href }, [
+    label ?? `Open ${product.name}`,
+    el('span', { class: 'dx-onward__out', 'aria-hidden': 'true', text: '↗' }),
+  ]);
+}
+
+/** Where a page that EXPLAINS something hands the reader to the product that
+    DOES it (the family home's overlap pages: explain + hand off). Lane and
+    name, one plain sentence, and the product's own link; a product with no
+    address from here (it runs on one machine) is named with that fact
+    instead of a dead link. The words are the page's; the name, lane and
+    address are the product's own declaration. */
+function productHandoff(productId, { text = '', query = null, label = null } = {}) {
+  const product = productById(productId);
+  if (!product) return null;
+  const lane = laneById(product.lane);
+  const link = productLink(productId, { query, label });
+  const where = link
+    ? el('span', { class: 'dx-onward__where', text: new URL(link.href).host })
+    : el('span', { class: 'dx-onward__where', text: `${product.name} runs on your own machine; it has no public site yet.` });
+  return el('aside', { class: `dx-onward${link ? '' : ' dx-onward--local'}`, 'data-dx-product': product.id, 'aria-label': `${product.name}, the DEFXN product for this` }, [
+    el('div', { class: 'dx-onward__words' }, [
+      el('span', { class: 'dx-onward__lane', text: `${lane ? `${lane.name} · ` : ''}${product.name}` }),
+      text ? el('span', { class: 'dx-onward__text', text }) : null,
+    ]),
+    link,
+    where,
+  ]);
+}
+
 function whereLabel(product) {
   if (isLocalPage() && product.local) {
     try { return new URL(product.local).host; } catch { return product.local; }
@@ -172,7 +222,7 @@ function themeToggle() {
 
 /* Switcher --------------------------------------------------------------- */
 
-function productLink(product, currentId) {
+function switcherLink(product, currentId) {
   const href = productHref(product);
   const current = product.id === currentId;
   const top = el('span', { class: 'dx-product-link__top' }, [
@@ -234,7 +284,7 @@ function switcher(current) {
         el('span', { class: 'dx-lane__line', text: entry.line }),
       ]),
       el('ul', { class: 'dx-lane__list' },
-        PRODUCTS.filter((product) => product.lane === entry.id).map((product) => el('li', {}, [productLink(product, current?.id ?? null)]))),
+        PRODUCTS.filter((product) => product.lane === entry.id).map((product) => el('li', {}, [switcherLink(product, current?.id ?? null)]))),
     ])));
 
   const home = homeRow(!current);
@@ -254,7 +304,15 @@ function switcher(current) {
     panel.hidden = !open;
     trigger.setAttribute('aria-expanded', String(open));
   });
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(true); });
+  /* Escape closes an open panel and is consumed (preventDefault), so a page
+     that gives Escape its own meaning (defxn.com: "back to the previous
+     page") does not also act on the same key press. A closed panel leaves
+     the key alone. */
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || panel.hidden) return;
+    event.preventDefault();
+    close(true);
+  });
   document.addEventListener('click', (event) => { if (!wrap.contains(event.target)) close(false); });
   return wrap;
 }
@@ -342,6 +400,7 @@ function menuMode(bar, menu, toggle, menuAt) {
   });
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || menu.hidden || bar.getAttribute('data-dx-menu') !== 'folded') return;
+    event.preventDefault();
     menu.hidden = true; toggle.setAttribute('aria-expanded', 'false'); bar.removeAttribute('data-dx-menu-open'); toggle.focus();
   });
   decide();
@@ -378,6 +437,11 @@ function menuMode(bar, menu, toggle, menuAt) {
  *                   page owns its palette). Default: true in product mode,
  *                   false in home mode.
  * options.replace   an element to remove (the page's old header)
+ * options.bar       an existing element to BECOME the bar instead of a new
+ *                   <header> (a page whose header is rendered by its own
+ *                   runtime, e.g. defxn.com's CMS resolver). It gains the bar's
+ *                   class and parts, ahead of any children it already holds,
+ *                   and stays where it is in the document.
  * options.home      href for the brand mark (default: the family home's site)
  * options.status    initial [tone, text] for the status pill
  */
@@ -390,7 +454,10 @@ function mountShell(options = {}) {
   const themed = options.theme ?? !atHome;
   if (themed) initTheme();
   const root = options.root ?? document.body;
-  root.classList.add('dx-page');
+  /* The family home keeps its own page base (type, links, paragraph rhythm):
+     `.dx-page` would restyle every page of it. Its bar and footer carry the
+     kit base themselves (product.css: the .dx-bar / .dx-foot base rules). */
+  if (!atHome) root.classList.add('dx-page');
   /* Page stylesheets scope a product's own presentation under this attribute. */
   document.documentElement.setAttribute('data-dx-product', atHome ? (HOME?.id ?? 'home') : product.id);
 
@@ -423,7 +490,7 @@ function mountShell(options = {}) {
      contents, so the row lays out exactly as without it. */
   const menu = folds ? el('div', { class: 'dx-bar__menu', id: menuId }, [nav.childNodes.length ? nav : null, actionsBox]) : null;
 
-  const bar = el('header', { class: 'dx-bar', 'data-dx-shell': atHome ? (HOME?.id ?? 'home') : product.id, 'data-dx-mode': atHome ? 'home' : null }, folds ? [
+  const parts = (folds ? [
     brand,
     el('span', { class: 'dx-bar__sep', 'aria-hidden': 'true', text: '/' }),
     switcher(product),
@@ -435,11 +502,24 @@ function mountShell(options = {}) {
     switcher(product),
     nav.childNodes.length ? nav : null,
     actionsBox ? el('div', { class: 'dx-bar__end' }, [actionsBox, ...end.childNodes]) : end,
-  ]);
+  ]).filter(Boolean);
+  const shellId = atHome ? (HOME?.id ?? 'home') : product.id;
+  let bar;
+  if (options.bar) {
+    bar = options.bar;
+    bar.classList.add('dx-bar');
+    bar.setAttribute('data-dx-shell', shellId);
+    if (atHome) bar.setAttribute('data-dx-mode', 'home');
+    bar.prepend(...parts);
+  } else {
+    bar = el('header', { class: 'dx-bar', 'data-dx-shell': shellId, 'data-dx-mode': atHome ? 'home' : null }, parts);
+  }
 
   if (options.replace) options.replace.remove();
-  root.prepend(bar);
-  if (!document.title.includes('DEFXN')) document.title = `${document.title ? `${document.title} · ` : ''}DEFXN`;
+  if (!options.bar) root.prepend(bar);
+  /* A product page gains the family name in its title; the family home owns
+     its titles (its SEO data names every route). */
+  if (!atHome && !document.title.includes('DEFXN')) document.title = `${document.title ? `${document.title} · ` : ''}DEFXN`;
   const fold = folds ? menuMode(bar, menu, menuToggle, options.menuAt) : null;
 
   const api = {
@@ -523,29 +603,47 @@ function renderRefusal(target, { code, failure, missing, remedy, tone = null, ac
 
 /* Footer --------------------------------------------------------------------- */
 
-/** A quiet footer naming the product's lane and its public address. */
-function renderFooter(target, productId) {
-  if (target && HOME && productId === HOME.id) {
+/* A footer link is an element the page owns (moved, not cloned, so its
+   listeners keep working) or { label, href, title }. */
+function footLink(link) {
+  if (link instanceof Node) return link;
+  return el('a', { href: link.href, title: link.title ?? null, text: link.label });
+}
+
+/**
+ * A quiet footer naming the product's lane and its public address.
+ *
+ * options.links       the page's own section links, drawn as one row between
+ *                     the name and the address: elements (moved) or
+ *                     { label, href, title }. The row scrolls sideways when
+ *                     it is wider than the footer; it never wraps or clips.
+ * options.linksLabel  the accessible name of that row (default "Site sections")
+ * options.note        trailing text or elements (a credit, a rights line, a
+ *                     page control such as "Back"), after the address
+ */
+function renderFooter(target, productId, { links = null, linksLabel = 'Site sections', note = null } = {}) {
+  const atHome = HOME && productId === HOME.id;
+  const product = atHome ? null : productById(productId);
+  if (!target || (!atHome && !product)) return null;
+  const lane = product ? laneById(product.lane) : null;
+  const name = atHome
     /* the family home: name and address, no lane */
-    const foot = el('footer', { class: 'dx-foot' }, [
-      el('span', { text: `${HOME.name} · family home` }),
-      el('span', {}, [el('a', { href: HOME.site, text: new URL(HOME.site).host })]),
-    ]);
-    target.replaceChildren(foot);
-    return foot;
-  }
-  const product = productById(productId);
-  if (!target || !product) return null;
-  const lane = laneById(product.lane);
-  const foot = el('footer', { class: 'dx-foot' }, [
-    el('span', { text: `DEFXN · ${lane ? lane.name : ''} · ${product.name}` }),
-    el('span', {}, [
-      !product.site
-        ? el('span', { text: 'runs on this machine only' })
-        : product.status === 'planned'
-          ? el('span', { text: `${new URL(product.site).host} · planned` })
-          : el('a', { href: product.site, text: new URL(product.site).host }),
-    ]),
+    ? `${HOME.name} · family home`
+    : `DEFXN · ${lane ? lane.name : ''} · ${product.name}`;
+  /* the family home draws its own footer: its own address would be a link to itself */
+  const address = atHome
+    ? null
+    : !product.site
+      ? el('span', { text: 'runs on this machine only' })
+      : product.status === 'planned'
+        ? el('span', { text: `${new URL(product.site).host} · planned` })
+        : el('a', { href: product.site, text: new URL(product.site).host });
+  const row = links?.length ? el('nav', { class: 'dx-foot__links', 'aria-label': linksLabel }, links.map(footLink)) : null;
+  const notes = note === null || note === undefined ? [] : [].concat(note).map((part) => (part instanceof Node ? part : el('span', { class: 'dx-foot__note', text: String(part) })));
+  const foot = el('footer', { class: 'dx-foot', 'data-dx-mode': atHome ? 'home' : null }, [
+    el('span', { class: 'dx-foot__name', text: name }),
+    row,
+    el('span', { class: 'dx-foot__end' }, [address, ...notes]),
   ]);
   target.replaceChildren(foot);
   return foot;
@@ -571,5 +669,5 @@ function copyButton(getText, { label = 'Copy' } = {}) {
   return button;
 }
 
-root.DefxnKit = Object.freeze({ LANES, HOME, PRODUCTS, RESOLVERS, productById, productIcon, productHref, initTheme, mountShell, renderHandoff, renderRefusal, renderFooter, copyButton });
+root.DefxnKit = Object.freeze({ LANES, HOME, PRODUCTS, RESOLVERS, productById, productIcon, productHref, productLink, productHandoff, initTheme, mountShell, renderHandoff, renderRefusal, renderFooter, copyButton });
 })(typeof window !== 'undefined' ? window : globalThis);

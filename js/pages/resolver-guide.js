@@ -1,66 +1,90 @@
-/* Primary answer, requested explanation, and canonical evidence share a frame.
-   Editable facts remain in manifests; the view does not fork their wording. */
-ArkUI.pageModules.resolverGuide = {
-  mount: function (host, page) {
-    var manifest=ArkManifest.get(page), area=page.toUpperCase();
-    function words(role){return ArkCopy.text(area+'.'+role);}
-    /* `key` is either a real pageCatalog/route key (manifest.meta.back/next,
-       resolved directly the same way admin.js's routeOptions() picker
-       already edits them), or a manifest field role of kind 'link'
-       (js/content/manifest.js) -- both go through the one shared resolver,
-       js/ark/dash-kit.js's linkEl, replacing this page's own former direct
-       pageCatalog lookup. */
-    function link(label,key,cls){
-      var value=/^[A-Z][A-Z0-9.]*$/.test(key)?words(key):'route:'+key;
-      return ArkUI.dash.linkEl(label,value,manifest.route,cls);
+/* The resolver guide pages, on the story template (js/pages/story.js):
+     /what-is-a-resolver          (catalog 'resolver')    -> js/pages/resolver-lab.js builds its def
+     /start-from-something-real   (catalog 'references')  -> referencesDef below
+
+   Converted in DEFXN polish Wave 3 (W3-GUIDE). The guide was a fourth hand-built depth control
+   ("Answer / Understand why / Evidence", square Arial buttons: docs/ux-audit/pages-ux-b.md
+   /start-from-something-real P1) beside a figure that phones lost (display:none). It is the one
+   template now: the depth control is The idea / How it works / Evidence, the figure folds behind
+   "Show the illustration" below 900px, and the boundary stays in sight in every view. Words stay
+   in the manifests (copy: keys); the layout keys of the old page are pinned (`WAS`, derived by
+   tests/lib/layout-continuity.cjs from the frozen census). Regression: tests/resolver-guide-blocks.cjs. */
+(function () {
+  'use strict';
+
+  /* `was`: the key each element of the hand-built guide had, by block id (story.js names its blocks
+     '<page>-crumbs', '-hero', '-body', '-depth', '-boundary', '-figure', '-pager'), so a CMS edit
+     saved against it still lands. Started from tests/lib/layout-continuity.cjs's derive against
+     the frozen census (tests/fixtures/layout-keys/start-from-something-real.tsv); every reshaped
+     and retired key is listed with its reason in tests/resolver-guide-blocks.cjs. */
+  var WAS = { references: {
+    'references-crumbs': { ':root': 'page:/nav:1', 'breadcrumb-item': 'page:/nav:1/a:1', 'breadcrumb-item#2': 'page:/nav:1/span:1' },
+    'references-hero': { eyebrow: 'page:/p:1', 'hero-title': 'id:references-title' },
+    'references-body': { ':root': { key: 'page:/div:1', self: true }, ':scope > div:nth-of-type(1)': { key: 'page:/div:1/div:1', self: true } },
+    'references-depth': { 'tabs-list': { key: 'page:/nav:2', self: true }, 'tabs-trigger': 'page:/nav:2/button:1', 'tabs-trigger#2': 'page:/nav:2/button:2', 'tabs-trigger#3': 'page:/nav:2/button:3',
+      'tabs-content': { key: 'page:/div:1/div:1/div:1', self: true }, ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/div:1/div:1/div:1/p:1' },
+    'references-boundary': { ':root': 'page:/div:1/div:1/aside:1', 'alert-title': 'page:/div:1/div:1/aside:1/strong:1', 'alert-description': 'page:/div:1/div:1/aside:1/p:1' },
+    'references-figure': { 'figure': { key: 'page:/div:1/figure:1', self: true }, 'figure-caption': 'page:/div:1/figure:1/figcaption:1',
+      '.story-drawing': 'page:/div:1/figure:1/svg:1', '.story-record:nth-of-type(1)': 'page:/div:1/figure:1/div:1', '.story-record:nth-of-type(2)': 'page:/div:1/figure:1/div:2', '.story-record:nth-of-type(3)': 'page:/div:1/figure:1/div:3' },
+    'references-pager': { ':root': { key: 'page:/nav:3', self: true }, ':scope > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2)': 'page:/nav:3/a:1',
+      ':scope > div:nth-of-type(1) > a:nth-of-type(2) > span:nth-of-type(2)': 'page:/nav:3/a:2' },
+    insert: 'page:/div:2'
+  } };
+
+  function referencesDef(page) {
+    var manifest = ArkManifest.get(page), area = page.toUpperCase();
+    function copy(role) { return 'copy:' + area + '.' + role; }
+    function words(role) { return ArkCopy.text(area + '.' + role); }
+    var was = WAS[page] || {};
+
+    /* The figure: the drafting diagram and its three numbered records; How it works walks them. */
+    var drawing = ArkUI.createStoryDiagram ? ArkUI.createStoryDiagram(page) : null;
+    var plate = ArkUI.el('div', 'story-plate');
+    if (drawing) plate.appendChild(drawing.element);
+    var legend = ArkUI.el('div', 'story-legend'), records = [];
+    ['Reference name', 'Source artifact', 'Dated observation'].forEach(function (label, i) {
+      var record = ArkUI.el('div', 'story-record', label);
+      record.dataset.diagramNumber = String(i + 1).padStart(2, '0');
+      records.push(record); legend.appendChild(record);
+    });
+    plate.appendChild(legend);
+    function mark(view) {
+      var at = view === 'context' ? 1 : 0;
+      records.forEach(function (record, i) { record.dataset.selected = String(view === 'context' && i === at); });
+      if (drawing) drawing.select(at, false);
     }
-    if(page==='resolver'){
-      // Four addressable steps beside a working illustration: js/pages/resolver-lab.js.
-      var lab=ArkUI.buildResolverLab({page:page,words:words,link:link});
-      host.appendChild(lab);if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(lab);return lab;
-    }
-    var el=ArkUI.el('section','ark-page guided-page');el.dataset.arkPage=page;
-    var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Home','HOME.HREF'));var currentPage=ArkUI.el('span','',manifest.title);currentPage.setAttribute('aria-current','page');path.appendChild(currentPage);el.appendChild(path);
-    el.appendChild(ArkUI.el('p','story-kicker',words('EYEBROW')));
-    var title=ArkUI.el('h1','',words('TITLE'));title.id=page+'-title';el.setAttribute('aria-labelledby',title.id);el.appendChild(title);
-    var depths=ArkUI.el('nav','story-depth');depths.setAttribute('aria-label','Explanation depth');var buttons=[];
-    ['Answer','Understand why','Evidence'].forEach(function(label,i){var b=ArkUI.el('button','',label);b.type='button';b.dataset.icon=['overview','layers','evidence'][i];b.addEventListener('click',function(){select(i,0,true);});buttons.push(b);depths.appendChild(b);});el.appendChild(depths);
-    var body=ArkUI.el('div','guided-body'), copy=ArkUI.el('div','guided-answer');copy.setAttribute('aria-live','polite');var left=ArkUI.el('div','guided-left');left.appendChild(copy);body.appendChild(left);
-    var diagram=ArkUI.el('figure','guided-diagram');diagram.appendChild(ArkUI.el('figcaption','','Illustration / relationships, not live progress'));
-    var labels=page==='deployment'?['Network + resolver','Signed agreement trail','Policy-bound receipt']:page==='resolver'?['Defined input','Addressed logic','Defined claim']:['Reference name','Source artifact','Dated observation'];
-    var drafting=ArkUI.createStoryDiagram&&ArkUI.createStoryDiagram(page);if(drafting)diagram.appendChild(drafting.element);
-    labels.forEach(function(label,i){var record=ArkUI.el('div','story-record',label);record.dataset.diagramNumber=String(i+1).padStart(2,'0');diagram.appendChild(record);});body.appendChild(diagram);el.appendChild(body);
-    var boundary=ArkUI.el('aside','lifecycle-boundary');boundary.appendChild(ArkUI.el('strong','','Essential boundary'));
-    boundary.appendChild(ArkUI.el('p','',page==='resolver'?words('BODY3'):page==='references'?words('BODY2'):words('BOUNDARY')));left.appendChild(boundary);
-    var footer=ArkUI.el('nav','lifecycle-next');footer.setAttribute('aria-label','Continue');
-    if(manifest.meta.back)footer.appendChild(link(words('BACK'),manifest.meta.back));
-    if(manifest.meta.next)footer.appendChild(link(words('NEXT')+' →',manifest.meta.next,'story-primary'));el.appendChild(footer);
-    function select(depth,step,write){
-      buttons.forEach(function(b,i){b.setAttribute('aria-pressed',String(i===depth));});copy.replaceChildren();
-      el.dataset.depth=['focus','context','reference'][depth];
-      if(depth===0)copy.appendChild(ArkUI.el('p','guided-primary-answer',page==='deployment'?words('SUMMARY'):words('BODY1')));
-      else if(depth===1){
-        if(page==='deployment'){
-          var picker=ArkUI.el('nav','guided-step-picker');picker.setAttribute('aria-label','Protocol movement');
-          ['Network','Logic','Intent','Fulfillment','Receipt'].forEach(function(label,i){var b=ArkUI.el('button','',String(i+1)+' / '+label);b.type='button';b.setAttribute('aria-pressed',String(i===step));b.addEventListener('click',function(){select(1,i,true);});picker.appendChild(b);});copy.appendChild(picker);copy.appendChild(ArkUI.el('p','',words('BODY'+(step+1))));
-        }else copy.appendChild(ArkUI.el('p','',words(page==='resolver'?'BODY2':'BODY3')));
-      }else{
-        /* 'deployment' is not reached through real routing (catalog.js never maps a route to
-           this module with page==='deployment') -- its fallback stays a literal tagged value
-           since no SOURCE.HREF field exists for it, same as any page with no manifest at all. */
-        var docValue=page==='resolver'||page==='references'?words('SOURCE.HREF'):'doc:docs/protocol/agreements.md';
-        var source=ArkUI.dash.linkEl('Read the canonical '+(page==='references'?'evidence registry':'guide')+' →',docValue,manifest.route,'story-reference');copy.appendChild(source);
-        if(page==='resolver')copy.appendChild(link('Inspect reference evidence →','INSPECT.HREF','story-reference'));
-        copy.appendChild(ArkUI.el('p','',page==='references'?words('BODY3'):'The source defines the contract. An illustration does not establish active capacity, accepted work, or production readiness.'));
-      }
-      if(drafting)drafting.select(depth===1?(page==='deployment'?[0,0,1,1,2][step]:step):0,write);
-      diagram.querySelectorAll('.story-record').forEach(function(record,i){record.dataset.selected=String(depth===1&&i===(page==='deployment'?[0,0,1,1,2][step]:step));});
-      if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(copy);
-      if(write){var query=depth?'?view='+['focus','context','reference'][depth]+(page==='deployment'&&depth===1?'&step='+step:''):'';ArkUI.route.write(ArkUI.pageCatalog[page].path,query.replace(/^\?/,''),'push');}
-    }
-    function restore(){if(ArkUI.route.path()!==ArkUI.pageCatalog[page].path)return;var q=new URLSearchParams(ArkUI.route.search()),value=q.get('view'),step=Math.max(0,Math.min(4,Number(q.get('step'))||0));select(value==='context'?1:value==='reference'?2:0,step,false);}
-    select(0,0,false);restore();el.arkRestore=restore;window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);
-    var components=ArkUI.el('div','');components.setAttribute('data-ark-insert','main');el.appendChild(components);
-    el.arkDispose=function(){if(drafting)drafting.dispose();window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};host.appendChild(el);return el;
+
+    return {
+      page: page, id: page, titleId: page + '-title', was: was, insertWas: was.insert,
+      crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
+      eyebrow: copy('EYEBROW'), title: copy('TITLE'),
+      depth: {
+        focus: { text: copy('BODY1') },
+        context: { text: copy('BODY3') },
+        /* the evidence: the registry it is checked against (what a publishable reference needs) */
+        reference: { text: copy('BODY3'), blocks: [{ block: 'actions', props: { label: 'Evidence', items: [{ label: 'Read the canonical evidence registry', href: words('SOURCE.HREF'), tone: 'link' }] } }] }
+      },
+      /* A refusal names what it needs: the boundary says the evidence is pending, and the remedy
+         is the registry entry How it works lists. */
+      boundary: { tone: 'drift', title: 'Essential boundary', body: copy('BODY2') },
+      figure: drawing ? { slot: 'diagram', caption: 'Illustration / relationships, not live progress: ' + drawing.title.charAt(0) + drawing.title.slice(1).toLowerCase() + '.' } : undefined,
+      slots: { diagram: plate },
+      pager: { label: 'Continue',
+        prev: manifest.meta.back ? { label: copy('BACK'), href: 'route:' + manifest.meta.back } : undefined,
+        next: manifest.meta.next ? { label: copy('NEXT'), href: 'route:' + manifest.meta.next } : undefined },
+      onView: function (view) { mark(view); },
+      onFigureVisibility: function (node, visible) { if (drawing) drawing.visible(visible); },
+      dispose: function () { if (drawing) drawing.dispose(); }
+    };
   }
-};
+
+  ArkUI.pageModules.resolverGuide = {
+    referencesDef: referencesDef,
+    mount: function (host, page) {
+      var def = page === 'resolver' ? ArkUI.resolverLabDef(page) : referencesDef(page);
+      var el = ArkUI.story.mount(def, host);
+      if (def.afterMount) def.afterMount(el);
+      return el;
+    }
+  };
+})();

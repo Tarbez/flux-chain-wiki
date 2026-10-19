@@ -1,0 +1,76 @@
+# key	tag	text -- layout keys of /concept/depth before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Operating modelAgreement lifecycleHow does one agreement become verifiable?The core ideaHow it worksEvidence & limitsOne signed trail records what was requested
+page:/nav:1	nav	Operating modelAgreement lifecycle
+page:/nav:1/a:1	a	Operating model
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Agreement lifecycle
+id:depth-title	h1	How does one agreement become verifiable?
+page:/nav:2	nav	The core ideaHow it worksEvidence & limits
+page:/nav:2/button:1	button	The core idea
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	How it works
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence & limits
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	One signed trail records what was requested, offered, accepted, produced, and checked. Each record sits on its writer’s own FXN chain and cites the relevant pri
+page:/div:1/div:1	div	One signed trail records what was requested, offered, accepted, produced, and checked. Each record sits on its writer’s own FXN chain and cites the relevant pri
+page:/div:1/div:1/div:1	div	One signed trail records what was requested, offered, accepted, produced, and checked. Each record sits on its writer’s own FXN chain and cites the relevant pri
+page:/div:1/div:1/div:1/p:1	p	One signed trail records what was requested, offered, accepted, produced, and checked. Each record sits on its writer’s own FXN chain and cites the relevant pri
+page:/div:1/div:1/aside:1	aside	Status / PartialThe intent-to-receipt lifecycle and the agreements resolver’s inspection contract are implemented in source. A complete public production run is
+page:/div:1/div:1/aside:1/strong:1	strong	Status / Partial
+page:/div:1/div:1/aside:1/p:1	p	The intent-to-receipt lifecycle and the agreements resolver’s inspection contract are implemented in source. A complete public production run is not registered 
+page:/div:1/figure:1	figure	Illustration / Agreement lifecycle relationshipsDATA0102030405ONE SNAPSHOT / A GROWING REFERENCE TRAILIntentOfferAgreementFulfillmentReceipt
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / Agreement lifecycle relationships
+page:/div:1/figure:1/svg:1	svg	DATA0102030405ONE SNAPSHOT / A GROWING REFERENCE TRAIL
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/text:1	text	DATA
+page:/div:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/figure:1/svg:1/text:2	text	01
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/rect:3	rect	
+page:/div:1/figure:1/svg:1/text:3	text	02
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/rect:4	rect	
+page:/div:1/figure:1/svg:1/text:4	text	03
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/rect:5	rect	
+page:/div:1/figure:1/svg:1/text:5	text	04
+page:/div:1/figure:1/svg:1/path:9	path	
+page:/div:1/figure:1/svg:1/rect:6	rect	
+page:/div:1/figure:1/svg:1/text:6	text	05
+page:/div:1/figure:1/svg:1/path:10	path	
+page:/div:1/figure:1/svg:1/text:7	text	ONE SNAPSHOT / A GROWING REFERENCE TRAIL
+page:/div:1/figure:1/svg:1/path:11	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/button:1	button	Intent
+page:/div:1/figure:1/button:2	button	Offer
+page:/div:1/figure:1/button:3	button	Agreement
+page:/div:1/figure:1/button:4	button	Fulfillment
+page:/div:1/figure:1/button:5	button	Receipt
+page:/nav:3	nav	FOLLOW THE FIVE STAGES
+page:/nav:3/a:1	a	FOLLOW THE FIVE STAGES
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

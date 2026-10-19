@@ -28,8 +28,14 @@ const fs = require('node:fs');
 const SHEETS = ['css/admin.css', 'css/studio-embed.css'];
 const RETIRED = ['bg', 'sunk', 'ink', 'muted', 'accent-soft', 'accent-ink', 'ok', 'comp', 'font-ui', 'font-data'];
 const SCRIPT_COLOURS = ['panel', 'rule', 'warn', 'override', 'cms-reference-color', 'cms-danger-color'];
-/* custom properties a script sets at run time (js/admin/*: the header's measured height) */
-const SCRIPT_SET = ['app-bar-h'];
+/* custom properties a script sets at run time, DERIVED from the scripts: every '--name' literal in a
+   js/admin module that calls style.setProperty (nav.js publishes the header's measured height
+   --app-bar-h; overlay.js publishes the one stacking order, --z-*) */
+const path = require('node:path');
+const SCRIPT_SET = fs.readdirSync('js/admin').filter((f) => f.endsWith('.js')).map((f) => fs.readFileSync(path.join('js/admin', f), 'utf8'))
+  .filter((text) => /\.style\.setProperty\(/.test(text))
+  .flatMap((text) => [...text.matchAll(/'--([a-z][\w-]*)'/g)].map((m) => m[1]));
+assert(SCRIPT_SET.includes('app-bar-h') && SCRIPT_SET.includes('z-sheet'), 'the derivation finds the known script-set tokens (--app-bar-h from nav.js, --z-sheet from overlay.js)');
 
 const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
 const NAMED = /\b(black|white|red|green|blue|yellow|orange|purple|gray|grey|silver|navy|teal|maroon|olive|lime|aqua|fuchsia|pink)\b/i;

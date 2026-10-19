@@ -1,0 +1,74 @@
+# key	tag	text -- layout keys of /learnings/one-substrate-many-networks before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	ALL NOTESNETWORKS / 002 / 6 MIN READCOREOne substrate, many networksTHE COREFlux Protocol is the shared substrate; project material describes DAO Chain as a net
+page:/header:1	header	ALL NOTESNETWORKS / 002 / 6 MIN READCOREOne substrate, many networksTHE COREFlux Protocol is the shared substrate; project material describes DAO Chain as a net
+page:/header:1/div:1	div	ALL NOTESNETWORKS / 002 / 6 MIN READCORE
+page:/header:1/div:1/a:1	a	ALL NOTES
+page:/header:1/div:1/a:1/svg:1	svg	
+page:/header:1/div:1/a:1/svg:1/path:1	path	
+page:/header:1/div:1/a:1/svg:1/path:2	path	
+page:/header:1/div:1/span:1	span	NETWORKS / 002 / 6 MIN READ
+page:/header:1/div:1/button:1	button	CORE
+page:/header:1/div:1/button:1/svg:1	svg	
+page:/header:1/div:1/button:1/svg:1/path:1	path	
+page:/header:1/div:1/button:1/svg:1/path:2	path	
+page:/header:1/h1:1	h1	One substrate, many networks
+page:/header:1/div:2	div	THE COREFlux Protocol is the shared substrate; project material describes DAO Chain as a network on it. Network creation currently partitions miner presence, no
+page:/header:1/div:2/span:1	span	THE CORE
+page:/header:1/div:2/p:1	p	Flux Protocol is the shared substrate; project material describes DAO Chain as a network on it. Network creation currently partitions miner presence, not a comp
+page:/header:1/div:2/p:2	p	Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolv
+page:/div:1	div	QUESTIONS / 040001What is the substrate?02What does create do today?03Can networks govern each other?04Where is the authority boundary?The EVM comparison, and w
+page:/div:1/nav:1	nav	QUESTIONS / 040001What is the substrate?02What does create do today?03Can networks govern each other?04Where is the authority boundary?
+page:/div:1/nav:1/p:1	p	QUESTIONS / 04
+page:/div:1/nav:1/button:1	button	00
+page:/div:1/nav:1/button:2	button	01What is the substrate?
+page:/div:1/nav:1/button:2/span:1	span	01
+page:/div:1/nav:1/button:2/span:2	span	What is the substrate?
+page:/div:1/nav:1/button:3	button	02What does create do today?
+page:/div:1/nav:1/button:3/span:1	span	02
+page:/div:1/nav:1/button:3/span:2	span	What does create do today?
+page:/div:1/nav:1/button:4	button	03Can networks govern each other?
+page:/div:1/nav:1/button:4/span:1	span	03
+page:/div:1/nav:1/button:4/span:2	span	Can networks govern each other?
+page:/div:1/nav:1/button:5	button	04Where is the authority boundary?
+page:/div:1/nav:1/button:5/span:1	span	04
+page:/div:1/nav:1/button:5/span:2	span	Where is the authority boundary?
+page:/div:1/div:1	div	The EVM comparison, and where it holdsFlux Protocol isn't one chain with DeadArk's own data on it. It's a substrate: a network directory, agreement-fabric mecha
+id:one-substrate-many-networks-section-0	section	The EVM comparison, and where it holdsFlux Protocol isn't one chain with DeadArk's own data on it. It's a substrate: a network directory, agreement-fabric mecha
+page:/div:1/div:1/section:1/span:1	span	
+page:/div:1/div:1/section:1/h2:1	h2	The EVM comparison, and where it holds
+page:/div:1/div:1/section:1/p:1	p	Flux Protocol isn't one chain with DeadArk's own data on it. It's a substrate: a network directory, agreement-fabric mechanics, and its own mesh-operations gove
+page:/div:1/div:1/section:1/p:2	p	That comparison is this page's own framing, not a term the underlying specs use — worth saying plainly, since precision about naming is most of what this site i
+id:one-substrate-many-networks-section-1	section	What network create actually does todayThe network CLI defines a create command that returns a networkId. Pointing a miner at an existing networkId selects that
+page:/div:1/div:1/section:2/span:1	span	
+page:/div:1/div:1/section:2/h2:1	h2	What network create actually does today
+page:/div:1/div:1/section:2/p:1	p	The network CLI defines a create command that returns a networkId. Pointing a miner at an existing networkId selects that presence namespace. The command contra
+page:/div:1/div:1/section:2/p:2	p	It's also honestly scoped. Today it partitions presence only — the miner registry, not accounts, identities, or DAOs. The directory's own documentation says pla
+id:one-substrate-many-networks-section-2	section	Two networks, one substrate, no hierarchyProject material names DAO Chain and CR3TV as intended network examples. A dated public directory record, network ident
+page:/div:1/div:1/section:3/span:1	span	
+page:/div:1/div:1/section:3/h2:1	h2	Two networks, one substrate, no hierarchy
+page:/div:1/div:1/section:3/p:1	p	Project material names DAO Chain and CR3TV as intended network examples. A dated public directory record, network identifier, and independent live observation h
+page:/div:1/div:1/section:3/p:2	p	This matters because it's an easy conflation to make by accident: a network built on a substrate can start to sound like the substrate itself, especially once i
+id:one-substrate-many-networks-section-3	section	Where the boundary actually isUnder the documented policy model, a network DAO governs its own scope, while the separate mesh-operations roster governs substrat
+page:/div:1/div:1/section:4/span:1	span	
+page:/div:1/div:1/section:4/h2:1	h2	Where the boundary actually is
+page:/div:1/div:1/section:4/p:1	p	Under the documented policy model, a network DAO governs its own scope, while the separate mesh-operations roster governs substrate policy. Neither roster subst
+page:/div:1/div:1/section:4/p:2	p	If a claim about "the chain" doesn't say which of these two things it means, it isn't precise enough to act on yet.
+page:/div:1/div:1/div:1	div	← THE CORENEXT QUESTION →
+page:/div:1/div:1/div:1/button:1	button	← THE CORE
+page:/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/button:2	button	NEXT QUESTION →
+page:/div:1/div:1/a:1	a	NEXT NOTE / Governance without a standing signer set →
+page:/div:1/nav:2	nav	Related mechanism →Inspect network evidence →
+page:/div:1/nav:2/a:1	a	Related mechanism →
+page:/div:1/nav:2/a:2	a	Inspect network evidence →
+page:/div:1/details:1	details	Evidence & editorial reviewEditorial review: 2026-09-30. This is not live capability verification.Named-network command and boundary documentation
+page:/div:1/details:1/summary:1	summary	Evidence & editorial review
+page:/div:1/details:1/p:1	p	Editorial review: 2026-09-30. This is not live capability verification.
+page:/div:1/details:1/a:1	a	Named-network command and boundary documentation
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:2	div	

@@ -70,6 +70,13 @@
 }
 .dx-page ::selection { background: hsl(var(--reference-200)); color: hsl(var(--text-strong)); }
 .dx-sr { display: block !important; position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* The family home (defxn.com) keeps its own page base, so it carries no
+   .dx-page; the shell parts it mounts carry the same base themselves. On a
+   product these repeat what .dx-page already sets, so nothing changes there. */
+.dx-bar [hidden], .dx-foot [hidden] { display: none !important; }
+:where(.dx-bar, .dx-foot), :where(.dx-bar, .dx-foot) *, :where(.dx-bar, .dx-foot) *::before, :where(.dx-bar, .dx-foot) *::after { box-sizing: border-box; }
+:where(.dx-bar, .dx-foot) :where(button, input, select, textarea) { font-family: inherit; }
+:where(.dx-bar, .dx-foot) :where(a, button, summary, [tabindex]):focus-visible { outline: 2px solid hsl(var(--reference)); outline-offset: 3px; }
 
 /* Shell bar --------------------------------------------------------------- */
 .dx-bar {
@@ -240,6 +247,66 @@ a.dx-switch__home:hover { background: hsl(var(--nested)); }
 .dx-switch__home-name { font-weight: 600; font-size: 14px; color: hsl(var(--text-strong)); }
 .dx-switch__home[aria-current="page"] .dx-switch__home-name { color: hsl(var(--reference-700)); }
 .dx-switch__home-line { font-size: 12px; line-height: 1.4; color: hsl(var(--text-muted)); }
+
+/* Home mode (the family home, defxn.com: mountShell mode 'home') ------------
+   The home's bar sits in the home's own full-viewport stage and carries the
+   home's own nav and controls, so it differs from a product's bar in four
+   ways, each scoped to [data-dx-mode="home"] (no product renders it):
+   - the home MEASURES its row and moves links into its own all-pages menu
+     one at a time (defxn js/resolvers/header.js), so no bar part shrinks,
+     truncates or scrolls inside the bar;
+   - the switcher panel hangs from the bar, not the window: the stage is the
+     home's viewport, and a reading page scrolls the document under a fixed
+     bar, where a window-fixed panel would not follow it;
+   - from 1040px down the nav lives in that menu, and on a phone the bar
+     stays ONE row (a product's phone bar wraps its nav onto a second row,
+     which would push the home's pages down);
+   - below 1440px the sub-brand steps back and the nav's segments tighten, so
+     the row keeps Overview, How it works and Mesh Explorer at 1280px. */
+.dx-bar[data-dx-mode="home"] { flex-wrap: nowrap; }
+.dx-bar[data-dx-mode="home"] > :is(.dx-bar__brand, .dx-switch, .dx-bar__nav, .dx-bar__end) { flex: 0 0 auto; min-width: auto; }
+.dx-bar[data-dx-mode="home"] .dx-bar__nav { overflow: visible; }
+.dx-bar[data-dx-mode="home"] .dx-bar__actions > * { flex: 0 0 auto; }
+.dx-bar[data-dx-mode="home"] .dx-switch { position: static; }
+.dx-bar[data-dx-mode="home"] .dx-switch__panel {
+  position: absolute; top: calc(100% + 8px); left: var(--dx-gutter);
+  max-height: calc(100dvh - var(--dx-bar-h) - 24px);
+}
+@media (max-width: 1439.98px) {
+  .dx-bar[data-dx-mode="home"] .dx-bar__brand-sub { display: none; }
+  .dx-bar[data-dx-mode="home"] .dx-bar__nav :is(a, button) { padding: 0 8px; }
+}
+@media (max-width: 1040px) { .dx-bar[data-dx-mode="home"] .dx-bar__nav { display: none; } }
+
+/* The family home's footer: one row in the home's bottom band, which it
+   shares with the home's own settings control; the section links come first
+   and scroll sideways rather than wrap. */
+.dx-foot[data-dx-mode="home"] {
+  width: 100%; max-width: none; height: 44px; margin: 0; padding: 0; border: 0;
+  flex-wrap: nowrap; gap: 16px;
+}
+.dx-foot[data-dx-mode="home"] > * { flex: 0 0 auto; }
+.dx-foot[data-dx-mode="home"] .dx-foot__links { flex: 0 1 auto; height: 100%; margin-right: auto; }
+.dx-foot[data-dx-mode="home"] .dx-foot__links a { min-height: 44px; padding: 0 4px; }
+.dx-foot[data-dx-mode="home"] .dx-foot__end { flex-wrap: nowrap; white-space: nowrap; }
+@media (max-width: 1279.98px) { .dx-foot[data-dx-mode="home"] .dx-foot__name { display: none; } }
+
+/* Onward: a page that explains something hands the reader to the product
+   that does it (productHandoff / productLink). One plain sentence, the
+   product's lane and name, and its own link; the link leaves for the
+   product's site, so it carries the leave-the-site arrow. */
+.dx-onward {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 16px;
+  width: 100%; max-width: 720px; margin: 16px 0; padding: 12px 16px;
+  border: 1px solid hsl(var(--border-default)); border-radius: var(--dx-radius); background: hsl(var(--surface));
+}
+.dx-onward__words { grid-row: 1 / span 2; display: grid; gap: 4px; min-width: 0; }
+.dx-onward__lane { font: 600 11px/1.2 var(--dx-font-mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.dx-onward__text { display: block; max-width: 60ch; font: 400 14px/1.5 var(--dx-font-sans); color: hsl(var(--text)); }
+.dx-onward__link { grid-column: 2; justify-self: end; }
+.dx-onward__out { font-weight: 400; }
+.dx-onward__where { grid-column: 2; justify-self: end; font: 500 11px/1.2 var(--dx-font-mono); color: hsl(var(--text-faint)); }
+.dx-onward--local .dx-onward__where { grid-row: 1 / span 2; max-width: 24ch; text-align: right; }
 
 /* Resolvers band: below the lanes, spanning them. */
 .dx-resolvers { grid-column: 1 / -1; padding: 12px 12px 14px; border-top: 1px solid hsl(var(--border-default)); background: hsl(var(--surface)); }
@@ -609,6 +676,16 @@ a.dx-switch__home:hover { background: hsl(var(--nested)); }
 }
 .dx-foot a { color: hsl(var(--text-muted)); text-decoration: none; }
 .dx-foot a:hover { color: hsl(var(--reference-700)); }
+.dx-foot__end { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* The page's own section links (renderFooter options.links): one row that
+   scrolls sideways rather than wrapping or clipping a label. */
+.dx-foot__links {
+  display: flex; align-items: center; gap: 4px 16px; min-width: 0; flex: 0 1 auto;
+  overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+.dx-foot__links::-webkit-scrollbar { display: none; }
+.dx-foot__links a { display: inline-flex; align-items: center; min-height: 32px; white-space: nowrap; text-transform: uppercase; }
+.dx-foot__links a[aria-current="page"] { color: hsl(var(--text-strong)); }
 
 /* Responsive ---------------------------------------------------------------- */
 @media (max-width: 980px) {
@@ -660,127 +737,21 @@ a.dx-switch__home:hover { background: hsl(var(--nested)); }
   .dx-bar__brand-sub { display: none; }
   .dx-bar[data-dx-menu="folded"] .dx-bar__menu-toggle { height: 36px; padding: 0 12px; }
   .dx-bar[data-dx-menu="folded"] .dx-bar__menu { top: calc(var(--dx-bar-h) + 6px); left: 8px; right: 8px; width: auto; }
+  /* the family home: one row, its actions at the phone height */
+  .dx-bar[data-dx-mode="home"] { height: var(--dx-bar-h); flex-wrap: nowrap; padding-top: 0; }
+  .dx-bar[data-dx-mode="home"] .dx-bar__actions { gap: 8px; }
+  .dx-bar[data-dx-mode="home"] .dx-bar__actions > .dx-btn { height: 36px; min-height: 36px; }
+  .dx-bar[data-dx-mode="home"] .dx-switch__panel { left: 8px; right: 8px; width: auto; }
+  .dx-foot[data-dx-mode="home"], .dx-foot[data-dx-mode="home"] .dx-foot__links { gap: 4px 12px; }
+  /* phone: the sentence, then the link and its address on one row (fold budget) */
+  .dx-onward { grid-template-columns: auto minmax(0, 1fr); margin: 8px 0; padding: 8px 12px; gap: 4px 12px; }
+  .dx-onward__words { grid-row: auto; grid-column: 1 / -1; }
+  .dx-onward__link { grid-column: 1; justify-self: start; }
+  .dx-onward__where { grid-column: 2; justify-self: start; align-self: center; }
+  .dx-onward--local .dx-onward__where { grid-row: auto; grid-column: 1 / -1; max-width: none; text-align: left; }
 }
+@media (max-width: 399.98px) { .dx-bar[data-dx-mode="home"], .dx-bar[data-dx-mode="home"] .dx-bar__actions { gap: 4px; } }
 
 @media (prefers-reduced-motion: reduce) {
   .dx-page *, .dx-page *::before, .dx-page *::after { transition: none !important; animation: none !important; }
-}
-
-/* ==========================================================================
-   Shared signing dialogs. The DEFXN signing pages vendor the same dialog
-   markup (<flux-authorization-dialog>, the Auth Kit widget, #identityDialog);
-   the kit paints it once so the full Scoped Claim Authorization review looks
-   the same everywhere. Every rule targets that shared markup only.
-   ========================================================================== */
-/* Sign-in dialog and scoped-authorization dialog ------------------------------
-   The "admin-auth-*" classes are the shared <flux-authorization-dialog>
-   markup (js/ark/authorization-dialog.js, index.html's #identityDialog). The
-   review keeps every row it renders: requester, network, authority, scope,
-   action, expiry, the manifest digest, the claim stack and the exact bytes.
-   Only the paint changes here. One copy for every DEFXN signing page (Deploy,
-   Treasury, Genesis, DAO, Radio): lifted from the identical page-local copies
-   in flux/deploy and flux/treasury on 2026-10-18. */
-flux-authorization-dialog { position: fixed; inset: 0; z-index: 60; font: 400 15px/1.55 var(--dx-font-sans); color: hsl(var(--text)); }
-.admin-auth-backdrop { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; background: hsl(var(--canvas) / .9); }
-.admin-auth-panel { width: min(720px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 24px; border: 1px solid hsl(var(--border-default)); border-radius: var(--dx-radius); background: hsl(var(--overlay)); color: hsl(var(--text)); }
-.admin-auth-panel > header { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
-.admin-auth-title h2 { margin: 8px 0 0; color: hsl(var(--text-strong)); font: 600 24px/1.2 var(--dx-font-sans); letter-spacing: -.01em; }
-.admin-auth-title .kicker, flux-authorization-dialog .kicker { display: inline-flex; align-items: center; gap: 8px; font: 500 11px/1.2 var(--dx-font-mono); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.admin-auth-close { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid hsl(var(--border-default)); border-radius: 50%; background: transparent; color: hsl(var(--text-muted)); font: 400 20px/1 var(--dx-font-sans); cursor: pointer; }
-.admin-auth-close:hover { color: hsl(var(--text-strong)); border-color: hsl(var(--reference-300)); }
-.admin-auth-description { max-width: 62ch; margin: 12px 0 0; color: hsl(var(--text-muted)); line-height: 1.55; font-size: 14px; overflow-wrap: anywhere; }
-.admin-auth-context { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin: 20px 0; overflow: hidden; border: 1px solid hsl(var(--border-subtle)); border-radius: var(--dx-radius-sm); background: hsl(var(--border-subtle)); }
-.admin-auth-context > div { min-width: 0; padding: 12px; background: hsl(var(--surface)); }
-.admin-auth-context > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.admin-auth-context dt, .admin-auth-digest small { display: block; margin-bottom: 5px; color: hsl(var(--text-muted)); font: 500 10.5px/1.2 var(--dx-font-mono); letter-spacing: .1em; text-transform: uppercase; }
-.admin-auth-context dd { margin: 0; overflow-wrap: anywhere; color: hsl(var(--text-strong)); font: 500 12px/1.45 var(--dx-font-mono); }
-.admin-auth-digest { padding: 14px; border: 1px solid hsl(var(--border-subtle)); border-left: 3px solid hsl(var(--reference-400)); border-radius: var(--dx-radius-sm); background: hsl(var(--raised)); }
-.admin-auth-digest code { display: block; overflow-wrap: anywhere; color: hsl(var(--text-strong)); font: 12px/1.5 var(--dx-font-mono); }
-.admin-auth-panel details { margin-top: 12px; border: 1px solid hsl(var(--border-subtle)); border-radius: var(--dx-radius-sm); background: hsl(var(--surface)); }
-.admin-auth-panel summary { cursor: pointer; padding: 10px 12px; color: hsl(var(--text-strong)); font: 600 13px/1.3 var(--dx-font-sans); }
-.admin-auth-panel summary:hover { color: hsl(var(--reference-700)); }
-.admin-auth-panel pre { max-height: 220px; overflow: auto; margin: 0; padding: 0 12px 12px; white-space: pre-wrap; overflow-wrap: anywhere; color: hsl(var(--text)); font: 11.5px/1.5 var(--dx-font-mono); }
-.admin-auth-safety { margin-top: 14px; color: hsl(var(--text-faint)); font-size: 12.5px; line-height: 1.5; }
-.admin-auth-panel > footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-
-/* Buttons the shared dialog and Auth Kit widget render with their own class
-   names: "action" is the one main action of that view (approve and sign,
-   unlock), "action secondary" a quiet one (cancel). */
-flux-authorization-dialog button:not(.admin-auth-close):not(.link-button),
-flux-authorization-dialog input[type="submit"] {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 40px; padding: 0 16px; border-radius: 999px; cursor: pointer;
-  font: 600 14px/1 var(--dx-font-sans); white-space: nowrap;
-  border: 1px solid hsl(var(--reference-300)); background: hsl(var(--reference-100)); color: hsl(var(--reference-700));
-}
-flux-authorization-dialog button:not(.admin-auth-close):not(.link-button):hover { background: hsl(var(--reference-200)); border-color: hsl(var(--reference-400)); }
-flux-authorization-dialog button.action:not(.secondary) { background: hsl(var(--secondary)); border-color: hsl(var(--secondary)); color: hsl(var(--secondary-ink)); }
-flux-authorization-dialog button.action:not(.secondary):hover { background: hsl(var(--secondary-600)); border-color: hsl(var(--secondary-600)); }
-flux-authorization-dialog button.action.secondary { background: transparent; border-color: hsl(var(--border-default)); color: hsl(var(--text)); }
-flux-authorization-dialog button:disabled { opacity: .45; cursor: not-allowed; }
-/* In the sign-in dialog the defxn.com broker is one of two equal paths, so
-   it is a quiet action; the widget's own unlock is the main one. */
-#identityDialog .identity-broker-option.action { width: 100%; margin-top: 16px; border: 1px solid hsl(var(--reference-300)); background: hsl(var(--reference-100)); color: hsl(var(--reference-700)); }
-#identityDialog .identity-broker-option.action:hover { background: hsl(var(--reference-200)); border-color: hsl(var(--reference-400)); }
-flux-authorization-dialog input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
-flux-authorization-dialog select, flux-authorization-dialog textarea {
-  width: 100%; min-height: 42px; padding: 10px 12px; border-radius: var(--dx-radius-sm);
-  background: hsl(var(--depth)); border: 1px solid hsl(var(--border-default)); color: hsl(var(--text-strong));
-  font: 400 14px/1.4 var(--dx-font-sans);
-}
-flux-authorization-dialog input[type="file"] { padding: 8px; border-style: dashed; color: hsl(var(--text-muted)); }
-flux-authorization-dialog input:focus, flux-authorization-dialog select:focus, flux-authorization-dialog textarea:focus { outline: none; border-color: hsl(var(--reference-400)); box-shadow: 0 0 0 3px hsl(var(--reference-100)); }
-flux-authorization-dialog label { display: grid; gap: 6px; font: 500 12.5px/1.4 var(--dx-font-sans); color: hsl(var(--text-muted)); }
-flux-authorization-dialog form { display: grid; gap: 12px; margin: 0; }
-
-/* The Auth Kit widget (js/admin/auth.js, reused verbatim -- same one
-   defxn.com's CMS gate uses) dumps its own full identity state once signed
-   in: a heading, a paragraph, and a dl of Identity/Auth Kit/Identity id/
-   Wallet/Security. That duplicates #identityStatus and is tall enough to
-   push the page's content below the fold. defxn.com's own css/account.css
-   hides the identical dump at `[data-stage="ready"]` the same way. */
-#identityContainer { margin-top: 4px; }
-#identityContainer .ark-auth-panel[data-stage="ready"] [data-ark-auth="body"] > :is(h2, p, dl) { display: none; }
-/* The widget's own heading duplicates the dialog's title at every stage. */
-#identityContainer [data-ark-auth="heading"] { display: none; }
-#identityContainer .ark-auth-body, #identityContainer .ark-auth-form { display: grid; gap: 12px; }
-#identityContainer .ark-auth-hint, #identityContainer .ark-auth-notice { margin: 0; font-size: 12.5px; color: hsl(var(--text-faint)); }
-#identityContainer .ark-auth-rows { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 13px; }
-#identityContainer .ark-auth-rows dt { font: 500 10.5px/1.8 var(--dx-font-mono); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-#identityContainer .ark-auth-rows dd { margin: 0; font-family: var(--dx-font-mono); overflow-wrap: anywhere; }
-#identityContainer .ark-auth-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-#identityContainer .ark-auth-mono { font-family: var(--dx-font-mono); }
-#identityDialog .admin-auth-panel { width: min(480px, 100%); }
-.identity-broker-note { margin: 8px 0 0; font-size: 12.5px; color: hsl(var(--text-faint)); }
-.identity-modal-divider {
-  display: flex; align-items: center; gap: 12px; margin: 18px 0;
-  color: hsl(var(--text-faint)); font: 500 10.5px/1.2 var(--dx-font-mono); letter-spacing: .12em; text-transform: uppercase;
-}
-.identity-modal-divider::before, .identity-modal-divider::after { content: ''; flex: 1; height: 1px; background: hsl(var(--border-subtle)); }
-.identity-create-toggle { margin-top: 16px; font-size: 13px; color: hsl(var(--text-faint)); }
-.link-button { background: none; border: none; padding: 0; color: hsl(var(--reference)); font: inherit; cursor: pointer; text-decoration: underline; text-decoration-color: hsl(var(--reference-300)); text-underline-offset: 3px; }
-.link-button:hover { color: hsl(var(--reference-700)); }
-#identityCreatePanel { margin-top: 16px; padding-top: 16px; border-top: 1px solid hsl(var(--border-subtle)); display: grid; gap: 12px; }
-#identityCreatePanel .lead { margin: 0; font-size: 13.5px; color: hsl(var(--text)); }
-
-/* Before the element upgrades and opens, keep it out of the layout (the
-   element itself toggles [open] and [hidden]). */
-flux-authorization-dialog:not([open]) { display: none; }
-.admin-auth-title .kicker::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--primary)); }
-/* A review row can hold a whole manifest: keep its line breaks and scroll it
-   inside its cell instead of stretching the dialog. */
-.admin-auth-context dd { white-space: pre-wrap; max-height: 160px; overflow: auto; }
-#identityDialog .admin-auth-panel > header { margin-bottom: 16px; }
-/* The recovery-word grid in the create-identity panel (auth-kit-create-panel.js). */
-.auth-word-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; list-style: none; margin: 0; padding: 12px; border: 1px solid hsl(var(--border-default)); border-radius: var(--dx-radius-sm); background: hsl(var(--depth)); }
-.auth-word-grid li { display: flex; align-items: baseline; gap: 6px; font: 13px/1.4 var(--dx-font-mono); }
-.auth-word-grid li small { color: hsl(var(--text-faint)); min-width: 1.4em; }
-.auth-word-grid li strong { color: hsl(var(--text-strong)); }
-/* Phone: the review is the whole screen, one field per row, so 64-character
-   keys get the full width. */
-@media (max-width: 720px) {
-  .admin-auth-backdrop { padding: 0; }
-  .admin-auth-panel { width: 100%; height: 100vh; max-height: none; border-radius: 0; border: 0; padding: 18px 16px; }
-  .admin-auth-context { grid-template-columns: minmax(0, 1fr); }
-  .auth-word-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

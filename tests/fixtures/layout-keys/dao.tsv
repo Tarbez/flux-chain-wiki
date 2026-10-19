@@ -1,0 +1,70 @@
+# key	tag	text -- layout keys of /dao before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Operating modelGovernanceWho can change what?The core ideaHow it worksEvidence & limitsMesh operations governs the shared Flux substrate. A network DAO governs 
+page:/nav:1	nav	Operating modelGovernance
+page:/nav:1/a:1	a	Operating model
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Governance
+id:dao-title	h1	Who can change what?
+page:/nav:2	nav	The core ideaHow it worksEvidence & limits
+page:/nav:2/button:1	button	The core idea
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	How it works
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence & limits
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	Mesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are sep
+page:/div:1/div:1	div	Mesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are sep
+page:/div:1/div:1/div:1	div	Mesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are sep
+page:/div:1/div:1/div:1/p:1	p	Mesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are sep
+page:/div:1/div:1/aside:1	aside	Status / PartialThe substrate policy structure and threshold rules exist in source, and the DAO runs as a resolver chain on the development network. A public go
+page:/div:1/div:1/aside:1/strong:1	strong	Status / Partial
+page:/div:1/div:1/aside:1/p:1	p	The substrate policy structure and threshold rules exist in source, and the DAO runs as a resolver chain on the development network. A public governance interfa
+page:/div:1/figure:1	figure	Illustration / Governance relationshipsMESH POLICYNETWORK POLICYTWO SCOPES / TWO POLICY BOUNDARIESMesh policy / substrateNetwork policy / own networkApproval ≠ 
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / Governance relationships
+page:/div:1/figure:1/svg:1	svg	MESH POLICYNETWORK POLICYTWO SCOPES / TWO POLICY BOUNDARIES
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/figure:1/svg:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/circle:2	circle	
+page:/div:1/figure:1/svg:1/circle:3	circle	
+page:/div:1/figure:1/svg:1/circle:4	circle	
+page:/div:1/figure:1/svg:1/circle:5	circle	
+page:/div:1/figure:1/svg:1/circle:6	circle	
+page:/div:1/figure:1/svg:1/circle:7	circle	
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/text:1	text	MESH POLICY
+page:/div:1/figure:1/svg:1/text:2	text	NETWORK POLICY
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/text:3	text	TWO SCOPES / TWO POLICY BOUNDARIES
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/button:1	button	Mesh policy / substrate
+page:/div:1/figure:1/button:2	button	Network policy / own network
+page:/div:1/figure:1/button:3	button	Approval ≠ activation
+page:/nav:3	nav	Inspect activation gates
+page:/nav:3/a:1	a	Inspect activation gates
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

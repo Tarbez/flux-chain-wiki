@@ -75,13 +75,15 @@
     var record = { kind: 'asset:list', repaint: function () { renderMediaPanel(container); } };
     paintInto(container, record, function (root) {
       root.classList.add('cms-form', 'cms-media');
+      /* Grid / List is Ark's toggle group (js/admin/ark-host.js arkSegGroup), the same control as
+         every segmented row (one pressed, one tab stop) */
       var views = h('div', { class: 'ctl-seg media-views', role: 'group', 'aria-label': 'Show images as' });
-      ['grid', 'list'].forEach(function (v) {
-        views.appendChild(h('button', { type: 'button', text: v === 'grid' ? 'Grid' : 'List', 'aria-pressed': String(mediaView === v), onclick: function () {
-          mediaView = v; try { localStorage.setItem('defxn-cms-media-view', v); } catch (e) { /* a convenience only */ }
-          renderMediaPanel(container);
-        } }));
-      });
+      var VIEWS = ['grid', 'list'];
+      var viewButtons = VIEWS.map(function (v) { var b = h('button', { type: 'button', text: v === 'grid' ? 'Grid' : 'List' }); views.appendChild(b); return b; });
+      A.arkSegGroup(views, viewButtons, { selected: VIEWS.indexOf(mediaView), onPick: function (i) {
+        mediaView = VIEWS[i]; try { localStorage.setItem('defxn-cms-media-view', mediaView); } catch (e) { /* a convenience only */ }
+        renderMediaPanel(container);
+      } });
       root.appendChild(h('div', { class: 'media-head' }, h('span', { class: 'field-key', text: state.assetIds.length + ' image' + (state.assetIds.length === 1 ? '' : 's') }), views));
       root.appendChild(newAssetForm());
       if (!state.assetIds.length) { root.appendChild(h('p', { class: 'hint', text: 'No images yet. Add one above; Save writes it to js/content/assets/.' })); return; }

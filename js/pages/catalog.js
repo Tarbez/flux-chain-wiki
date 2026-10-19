@@ -6,55 +6,71 @@
    its SEO entry is too. */
 ArkUI.pageModules = Object.create(null);
 function arkSeoTitle(id, fallbackLabel) { return typeof ArkSEO !== 'undefined' ? ArkSEO.pageTitle(id, fallbackLabel) : fallbackLabel; }
+/* What a route needs before an Ark block can render (js/ark/blocks.js): the link resolver, the
+   public Ark kit (what no block uses left out -- scripts/ark-kit-entry.js), and the adapter that
+   registers every block as a resolver. A route whose page is built from blocks lists these
+   first; js/ark/page-loader.js adds them by itself to a route that has a saved Ark block
+   instance, and to every route in the editor's canvas (which can insert one anywhere). Kept off
+   the other routes: ~31 KB gz of JS they would not use (docs/ux-audit/components.md R2).
+   The glossary ([[term]] markup, the term block; ~2 KB gz) is separate: a page whose words use it
+   lists ArkUI.glossaryScript, and the loader adds it where saved blocks or the canvas need it. */
+ArkUI.blockScripts = ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js'];
+ArkUI.glossaryScript = 'js/content/glossary.js';
+/* The story template (js/pages/story.js): the theory sheets, the agreement chapters and the
+   agreement lifecycle are one guided page built from Ark blocks, whose prose defines its glossary
+   words in place -- so a story route loads the blocks, the glossary and the template. */
+ArkUI.storyScripts = ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/story.js']);
 /* Which module draws each page and the scripts it needs: the loader's half of a page. Its path,
    name and journey are the other half and live in js/content/site-pages.js (ArkSitePages), the
    one table the menu, footer strip, sitemap and not-found page also read. `aliases` are old or
    alternative addresses that open the page: js/ark/page-router.js resolve() and
    scripts/lib/site-routes.mjs both read them here, so a retired path is retired in one place. */
 var arkPageModules = {
-  zero: { module: 'zero', scripts: ['js/resolvers/step.js', 'js/pages/home-flow.js', 'js/ark/dash-kit.js', 'js/ark/pulse-client.js', 'js/pages/home.js'] },
-  chain: { module: 'chain', scripts: ['js/resolvers/step.js', 'js/pages/home-flow.js', 'js/ark/dash-kit.js', 'js/pages/chain.js'] },
-  resolver: { module: 'resolverGuide', scripts: ['js/ark/dash-kit.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js'] },
-  references: { module: 'resolverGuide', scripts: ['js/ark/dash-kit.js', 'js/pages/resolver-guide.js'] },
-  deployment: { module: 'deployment', scripts: ['js/ark/dash-kit.js', 'js/pages/deployment.js'] },
+  zero: { module: 'zero', scripts: ArkUI.blockScripts.concat(['js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
+  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/pages/chain.js']) },
+  /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
+  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
+  references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
+  deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/pages/deployment.js']) },
   /* the explorer used to live at /explorer; /explore is its address now */
-  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ['js/ark/dash-kit.js', 'js/pages/explorer.js'] },
-  palette: { module: 'palette', scripts: ['js/ark/dash-kit.js', 'js/pages/palette.js'] },
+  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat(['js/pages/explorer.js']) },
+  palette: { module: 'palette', scripts: ArkUI.blockScripts.concat(['js/pages/palette.js']) },
   /* /monitor was retired 2026-10-10; /stats carries the same live pulse now, plus the dated evidence the old page never had. */
-  stats: { module: 'stats', aliases: ['/monitor'], scripts: ['js/ark/dash-kit.js', 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/pages/stats.js'] },
-  'stats/gpu': { module: 'statsGpu', scripts: ['js/ark/dash-kit.js', 'js/pages/stats-gpu.js'] },
-  'stats/ledger': { module: 'statsLedger', scripts: ['js/content/chain-sample.js', 'js/ark/dash-kit.js', 'js/pages/stats-ledger.js'] },
-  'resolver-math': { module: 'resolverMath', scripts: ['js/ark/dash-kit.js', 'js/content/resolver-algebra.js', 'js/content/resolver-block.js', 'js/content/registry-snapshot.js', 'js/pages/resolver-math.js'] },
-  resolvers: { module: 'resolvers', scripts: ['js/ark/dash-kit.js', 'js/content/registry-snapshot.js', 'js/content/resolver-applications.js', 'js/pages/resolvers.js'] },
+  stats: { module: 'stats', aliases: ['/monitor'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/pages/stats.js']) },
+  'stats/gpu': { module: 'statsGpu', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/stats-gpu.js']) },
+  'stats/ledger': { module: 'statsLedger', scripts: ['js/content/chain-sample.js'].concat(ArkUI.blockScripts, [ArkUI.glossaryScript, 'js/pages/stats-ledger.js']) },
+  'resolver-math': { module: 'resolverMath', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/content/resolver-algebra.js', 'js/content/resolver-block.js', 'js/content/registry-snapshot.js', 'js/pages/resolver-math.js']) },
+  resolvers: { module: 'resolvers', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/content/registry-snapshot.js', 'js/content/resolver-applications.js', 'js/pages/resolvers.js']) },
   /* The Wallet tab's dense-wire modules (js/ark/dense-wire-wallet.mjs over
      js/dense-wire/*.mjs) are ES modules, which page-loader.js does not load:
      js/pages/account.js import()s them on first use instead. */
   account: { module: 'account', scripts: ['js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/ark/dash-kit.js', 'js/pages/account.js'] },
-  'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js', 'js/ark/dash-kit.js', 'js/pages/account-domains.js'] },
-  treasury: { module: 'economyPreview', scripts: ['js/ark/dash-kit.js', 'js/pages/economy-preview.js'] },
-  deposits: { module: 'economyPreview', scripts: ['js/ark/dash-kit.js', 'js/pages/economy-preview.js'] },
+  'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/pages/account-domains.js']) },
+  treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
+  deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
   /* /experiments and /experiments/lab were two pages for one interactive model, with the same
      h1 (docs/ux-audit/pages.md P3). They are one page now: the lab, introduced by the old entry
      page's lede and disclaimer (js/pages/lab.js). The old lab address and the retired Work page
      (`#work`, `#/work`) open it. */
-  proximity: { module: 'lab', aliases: ['/experiments/lab', '/work', 'work'], scripts: ['js/studio.js', 'js/ark/dash-kit.js', 'js/pages/lab.js'] },
-  learnings: { module: 'learnings', scripts: ['js/ark/dash-kit.js', 'js/resolvers/learnings.js', 'js/pages/learnings.js'] },
-  about: { module: 'about', scripts: ['js/ark/dash-kit.js', 'js/pages/about.js'] },
-  resolutions: { module: 'resolutions', scripts: ['js/ark/dash-kit.js', 'js/pages/resolutions.js'] },
-  concept: { module: 'concept', scripts: ['js/ark/dash-kit.js', 'js/pages/concept.js'] },
-  download: { module: 'download', scripts: ['js/ark/procedure-state.js', 'js/ark/dash-kit.js', 'js/pages/download.js'] },
-  bundledeployer: { module: 'bundledeployer', scripts: ['js/ark/dash-kit.js', 'js/pages/bundle-deployer.js'] },
-  deploy: { module: 'deploy', scripts: ['js/ark/procedure-state.js', 'js/ark/dash-kit.js', 'js/pages/deploy.js'] },
-  dao: { module: 'dao', scripts: ['js/ark/dash-kit.js', 'js/pages/sheet.js', 'js/pages/dao.js'] },
-  'how/ask': { module: 'howStory', scripts: ['js/ark/dash-kit.js', 'js/pages/how-stories.js'] },
-  'how/work': { module: 'howStory', scripts: ['js/ark/dash-kit.js', 'js/pages/how-stories.js'] },
-  'how/check': { module: 'howStory', scripts: ['js/ark/dash-kit.js', 'js/pages/how-stories.js'] },
-  lifecycle: { module: 'lifecycle', scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js'] },
-  'lifecycle/intent': { module: 'lifecycle', scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js'] },
-  'lifecycle/offer': { module: 'lifecycle', scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js'] },
-  'lifecycle/agreement': { module: 'lifecycle', scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js'] },
-  'lifecycle/fulfillment': { module: 'lifecycle', scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js'] },
-  'lifecycle/receipt': { module: 'lifecycle', scripts: ['js/ark/dash-kit.js', 'js/pages/lifecycle.js'] },
+  proximity: { module: 'lab', aliases: ['/experiments/lab', '/work', 'work'], scripts: ArkUI.blockScripts.concat(['js/studio.js', 'js/pages/lab.js']) },
+  /* the notes index and each note are pages of Ark blocks since 2026-10-19 (W3-LEARN); a note is on the story template */
+  learnings: { module: 'learnings', scripts: ArkUI.blockScripts.concat(['js/pages/learnings.js']) },
+  about: { module: 'about', scripts: ArkUI.blockScripts.concat(['js/pages/about.js']) },
+  resolutions: { module: 'resolutions', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/resolutions.js']) },
+  concept: { module: 'concept', scripts: ArkUI.storyScripts.concat(['js/pages/concept.js']) },
+  download: { module: 'download', scripts: ArkUI.storyScripts.concat(['js/pages/download.js']) },
+  bundledeployer: { module: 'bundledeployer', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/bundle-deployer.js']) },
+  deploy: { module: 'deploy', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/procedure-state.js', 'js/pages/deploy.js']) },
+  dao: { module: 'dao', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/dao.js']) },
+  'how/ask': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
+  'how/work': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
+  'how/check': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
+  lifecycle: { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
+  'lifecycle/intent': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
+  'lifecycle/offer': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
+  'lifecycle/agreement': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
+  'lifecycle/fulfillment': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
+  'lifecycle/receipt': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
   reference: { module: 'reference', scripts: ['js/content/reference-text.js', 'js/pages/reference.js'] }
 };
 ArkUI.pageCatalog = {};
@@ -77,7 +93,7 @@ ArkUI.lifecycleStages = ArkSitePages.pages().filter(function (row) { return row.
    showing Home (docs/ux-audit/pages.md P8): the page names the address it was asked for and
    offers the closest pages and every journey's way in (js/pages/not-found.js). noindex: it is
    never a page to list. */
-ArkUI.pageCatalog.notfound = { path: '/not-found', title: arkSeoTitle('notfound', 'Page not found'), journey: null, hiddenFromNavigation: true, noindex: true, module: 'notFound', scripts: ['js/ark/dash-kit.js', 'js/pages/not-found.js'] };
+ArkUI.pageCatalog.notfound = { path: '/not-found', title: arkSeoTitle('notfound', 'Page not found'), journey: null, hiddenFromNavigation: true, noindex: true, module: 'notFound', scripts: ArkUI.blockScripts.concat(['js/pages/not-found.js']) };
 if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function (item) {
   ArkUI.pageCatalog['resolutions/' + item.slug] = {
     path: '/resolutions/' + item.slug,
@@ -86,7 +102,8 @@ if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function
     module: 'resolutions',
     nestedNavigation: true,
     journey: ArkSitePages.journeyOf('resolutions/' + item.slug),
-    scripts: ['js/ark/dash-kit.js', 'js/content/resolution-products.js', 'js/pages/resolutions.js']
+    /* one template of Ark blocks for all 20 (js/pages/resolutions.js detailSpec) */
+    scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/content/resolution-products.js', 'js/pages/resolutions.js'])
   };
 });
 /* Articles and theory pages are routes DERIVED from the content registries, never listed: one
@@ -101,12 +118,12 @@ ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
   (articles || []).forEach(function (article) {
     var key = 'article/' + article.slug, body = article.sections ? [] : ['js/content/articles/' + article.slug + '.js'];
     if (!ArkUI.pageCatalog[key]) added.push(key);
-    ArkUI.pageCatalog[key] = { path: '/learnings/' + article.slug, title: typeof ArkSEO !== 'undefined' ? ArkSEO.articleTitle(article.slug, article.title) : article.title, seoArticle: article.slug, journey: ArkSitePages.journeyOf(key), module: 'article', scripts: ['js/ark/dash-kit.js'].concat(body, ['js/resolvers/learnings.js', 'js/pages/article.js']) };
+    ArkUI.pageCatalog[key] = { path: '/learnings/' + article.slug, title: typeof ArkSEO !== 'undefined' ? ArkSEO.articleTitle(article.slug, article.title) : article.title, seoArticle: article.slug, journey: ArkSitePages.journeyOf(key), module: 'article', scripts: ArkUI.storyScripts.concat(body, ['js/pages/article.js']) };
   });
   (theoryManifests || []).forEach(function (m) {
     var key = 'concept/' + m.id, label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
     if (!ArkUI.pageCatalog[key]) added.push(key);
-    ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, journey: ArkSitePages.journeyOf(key), module: 'theory', scripts: ['js/ark/dash-kit.js', 'js/pages/sheet.js', 'js/pages/theory.js'] };
+    ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, journey: ArkSitePages.journeyOf(key), module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js']) };
   });
   return added;
 };

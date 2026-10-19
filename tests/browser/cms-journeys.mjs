@@ -216,14 +216,14 @@ await step('inline: Enter finishes the home heading with no line break; Escape f
   /* the heading's Content popover opens below it, over the intro (docs/ux-audit/cms.md P1-6, a
      later wave): close it first, as a person would */
   await closeToolbarSection(E.app);
-  pv = await clickToEdit(E.app, '[data-ark-page] p.hl-intro');
+  pv = await clickToEdit(E.app, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   await caretToEnd(pv);
   await E.page.keyboard.type(' Kept.', { delay: 20 });
   await until(async () => (await draft(E.app, 'home', 'INTRO')) === intro + ' Kept.', 'typing in the intro did not reach its draft (it is ' + JSON.stringify(await draft(E.app, 'home', 'INTRO')) + ', canvas: ' + JSON.stringify(await editing(pv)) + ')');
   await E.page.keyboard.press('Escape');
   await until(() => editing(pv).then((t) => t === null), 'Escape did not finish the edit');
   await until(async () => (await draft(E.app, 'home', 'INTRO')) === intro + ' Kept.', 'Escape threw the typing away', 3000);
-  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p.hl-intro').textContent)).endsWith(' Kept.'), 'Escape put the old words back on the canvas');
+  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]').textContent)).endsWith(' Kept.'), 'Escape put the old words back on the canvas');
   await E.shot('inline-kept');
 });
 

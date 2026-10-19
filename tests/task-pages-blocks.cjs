@@ -1,0 +1,169 @@
+'use strict';
+/* run-tests-timeout-ms: 1200000 -- three jsdom boots and two server renders per route. */
+/* The task and product-overlap pages as pages of Ark blocks (DEFXN polish Wave 3, W3-GUIDE):
+   /bundle-deployer, /deploy and /explore. Run alone (owner test law);
+   `node tests/task-pages-blocks.cjs /deploy` checks one route.
+
+   Named regressions it holds:
+   - /bundle-deployer was 2.0x the viewport on a phone and its only way on was "Back to your
+     account" (docs/ux-audit/pages-ux-a.md): its three parts are tabs, its release status is in
+     sight (a press away on a phone, where the hero's status says it), and its pager leads on to
+     /download and /resolutions/deployments. The Bundles hand-off (W2-SHELL, the family kit) stays.
+   - /deploy set its deck in monospace, showed only "01-05" for its steps on a phone, and drew a
+     Copy unlike /download's (pages-ux-a.md /deploy): the steps are Ark tabs named on every width,
+     each with its command card; "Review all steps" is one table; the scope note folds as before.
+   - /explore's ways on were display:none on a phone (W2-SHELL): they are Ark's actions, on every
+     width; the live explorer (stepper, kinds, status, raw observatory) works as before.
+   - Every word of each old page is on the converted page (its frozen census), and every old
+     layout key still lands, or is reshaped / retired below with its reason
+     (tests/lib/converted-page.cjs). */
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const converted = require('./lib/converted-page.cjs');
+const checks = require('./lib/block-page-checks.cjs');
+
+const read = (file) => fs.readFileSync(path.join(checks.ROOT, file), 'utf8');
+const ROUTES = {
+  '/bundle-deployer': { page: 'bundledeployer', ids: ['bundledeployer-'],
+    reshaped: [
+      [/^page:\/header:1$/, 'the header became the hero, with the eyebrow and the status from the row above it'],
+      [/^page:\/div:2$/, 'the two-column layout is Ark tabs: the three steps, what becomes public, the flow'],
+      [/^page:\/div:2\/section:1$/, 'the workflow section is the first tab panel; its heading is the tab'],
+      [/^page:\/div:2\/section:2$/, 'the boundary section is the second tab panel; its heading is the tab'],
+      [/^page:\/div:2\/section:1\/ol:1$/, 'the numbered steps are an Ark accordion: each step\'s name opens its text'],
+      [/^page:\/div:2\/section:2\/figure:1$/, 'the flow figure is the third tab panel; its caption is the tab, its note the panel\'s first line'],
+      [/^page:\/div:2\/section:2\/figure:1\/ol:1$/, 'the flow trail is Ark\'s steps'],
+      [/^page:\/div:2\/section:2\/table:1$/, 'the same table, now captioned'],
+      [/^page:\/aside:1$/, 'the release aside is Ark\'s callout (in sight from 601px, a press away on a phone); its back link is the pager\'s previous page']
+    ],
+    retired: [
+      [/^page:\/div:1$/, 'the eyebrow and status row; both keep their keys in the hero'],
+      [/^page:\/div:2\/section:1\/ol:1\/li:\d$/, 'the numbered row; its words are the accordion row, which keeps the row\'s copy key'],
+      [/^page:\/div:2\/section:1\/ol:1\/li:\d\/span:1$/, 'the step number; an accordion row is numbered by its place']
+    ],
+    reworded: [] },
+  '/deploy': { page: 'deploy', ids: ['deploy-'],
+    reshaped: [
+      [/^page:\/div:1$/, 'the page\'s content column became the hero (eyebrow, heading, deck); the rest are blocks after it'],
+      [/^page:\/div:1\/p:3$/, 'the resolver note is the callout\'s first paragraph (in sight from 601px, behind "Deploying a resolver or a site instead?" on a phone); its links are the callout\'s actions'],
+      [/^page:\/div:1\/p:4$/, 'the site note is the callout\'s second paragraph; its link is the callout\'s second action'],
+      [/^page:\/div:1\/p:3\/a:2$/, 'the family\'s Open Deploy is Ark\'s link button (the product\'s address from the kit)'],
+      [/^page:\/div:1\/div:1$/, 'the step list is Ark tabs: one step at a time'],
+      [/^id:deploy-step-0\d$/, 'a step section is its tab panel: its text and its command card (the figure; the expected result is its caption); its heading is the tab'],
+      [/^page:\/div:1\/div:1\/section:\d\/div:1$/, 'the step body is the step\'s figure: the command card with Copy, the expected result as its caption'],
+      [/^page:\/div:1\/div:2$/, 'the controls: previous and next step stay; "Review all steps" is the review table\'s disclosure'],
+      [/^page:\/div:1\/details:1$/, 'the scope note is Ark\'s disclosure ("Network scope and source guide"), folded as before'],
+      [/^page:\/div:1\/nav:2$/, 'the footer is Ark\'s pager; "Run DEFXN from source" is its previous page']
+    ],
+    retired: [
+      [/^page:\/div:1\/p:3\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own'],
+      [/^page:\/div:1\/div:1\/section:\d\/span:1$/, 'the step number; the tab names the step ("01 / Check discovery")'],
+      [/^page:\/div:1\/div:1\/section:\d\/div:1\/h2:1$/, 'the step heading; the tab carries it ("01 / Check discovery")'],
+      [/^page:\/div:1\/p:5$/, 'the position line ("Step 1 of 5 / Check discovery"): the selected tab says which step is open']
+    ],
+    reworded: [[/^page:\/div:1\/p:5$/, 'the position is the selected tab']] },
+  '/explore': { page: 'explorer', ids: ['explore-', 'mesh-'],
+    reshaped: [
+      [/^page:\/div:1$/, 'the home: the same live parts, with Ark\'s crumbs, heading and ways on'],
+      [/^page:\/div:1\/footer:1\/div:2$/, 'the footer\'s ways on are Ark\'s actions, shown on every width (they were display:none on a phone)'],
+      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the family\'s Explore link is Ark\'s link button, which says it opens another site']
+    ],
+    retired: [
+      [/^page:\/div:1\/header:1\/div:1$/, 'the heading\'s wrapper; the h1 keeps its id key'],
+      [/^page:\/div:1\/footer:1$/, 'the footer row: its status line and its ways on keep their keys as parts of the home'],
+      [/^page:\/div:1\/footer:1\/div:2\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own']
+    ],
+    reworded: [] },
+  '/treasury': { page: 'treasury', ids: ['treasury-'],
+    reshaped: [
+      [/^page:\/div:1\/header:1$/, 'the header became the hero; its warning line is the callout after it'],
+      [/^page:\/div:1\/div:1$/, 'the asset picker (aria-pressed buttons styled as tabs) is Ark\'s tab list, with the sample movements as its third tab'],
+      [/^page:\/div:1\/section:1$/, 'the asset overview is Ark tabs'],
+      [/^page:\/div:1\/section:1\/div:[12]$/, 'an asset line is its tab panel: the line\'s text first, then the code and the amount as a fact'],
+      [/^page:\/div:1\/section:2$/, 'the movement list is the third tab panel: its heading, then each movement as an accordion row'],
+      [/^page:\/div:1\/nav:1$/, 'the way on is Ark\'s pager: Preview a deposit, and the related pages']
+    ],
+    retired: [
+      [/^page:\/div:1$/, 'the page shell; a block page stacks its blocks in its root'],
+      [/^page:\/div:1\/section:[23]\/button:1$/, 'the drill-down\'s back buttons: the movements are a tab, each an accordion row that opens in place'],
+      [/^page:\/div:1\/section:2\/button:\d\/(span|strong):\d$/, 'the movement\'s reference, name and amount are one row title now, which keeps the row\'s key'],
+      [/^page:\/div:1\/section:3(\/(h2|p:2|dl):?1?)?$/, 'the detail view, filled only once a movement was opened; each row now holds its own evidence (its eyebrow keeps the view\'s "03 / Evidence layer" key)']
+    ],
+    reworded: [[/^page:\/div:1\/section:[23]\/button:1$/, 'the back buttons of the old drill-down: nothing needs going back now']] },
+  '/deposits': { page: 'deposits', ids: ['deposits-'],
+    reshaped: [
+      [/^page:\/div:1$/, 'the page shell holds the draft now (the form and its local result, the page\'s own); its header is the hero and the callout'],
+      [/^page:\/div:1\/header:1$/, 'the header became the hero; its warning line is the callout after it'],
+      [/^page:\/div:1\/nav:1$/, 'the way back is Ark\'s pager: Return to treasury preview, and a related page']
+    ],
+    retired: [], reworded: [] },
+  '/experiments': { page: 'proximity', ids: ['lab-', 'work', 'experiments-title', 'study-', 'variable', 'range-'],
+    reshaped: [
+      [/^id:work$/, 'the model\'s section holds the model alone; its breadcrumb, heading and introduction are blocks before it'],
+      [/^page:\/div:1\/section:1\/div:1$/, 'the heading block became the hero (its status line a detail); its introduction is the disclosure after it'],
+      [/^page:\/div:1\/section:1\/div:2$/, 'the same model; only the whitespace between its parts changed (the census\'s 160-character cut falls later)'],
+      [/^page:\/div:1\/section:1\/p:1$/, 'the evidence line is the pager\'s related pages, under "↳ Evidence context"']
+    ],
+    retired: [
+      [/^page:\/div:1$/, 'the model\'s wrapper; a block page stacks its blocks in its root'],
+      [/^page:\/div:1\/section:1\/div:1\/div:1$/, 'the heading\'s inner column; the hero has none'],
+      [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the "↳" glyph is the related heading\'s ("↳ Evidence context")']
+    ],
+    reworded: [[/^page:\/div:1\/section:1\/p:1$/, '"Evidence context: claim inventory and evidence registry." reads as the two related links under "↳ Evidence context"']] },
+  '/account/domains': { page: 'account/domains', ids: ['account-domains-', 'domainsNameInput'],
+    reshaped: [[/^page:\/div:1\/header:1$/, 'the header became the hero (its back link is the breadcrumb\'s "Your account"); the form and the hand-off are the block after it']],
+    retired: [[/^page:\/div:1$/, 'the page shell; a block page stacks its blocks in its root']], reworded: [] },
+  '/not-found': { page: 'notfound', ids: ['not-found-'],
+    reshaped: [
+      [/^page:\/div:1\/header:1$/, 'the header became the hero: the address asked for is its detail, Home its action'],
+      [/^page:\/div:1\/section:1$/, 'the ways onward are a section header and the journeys\' cards (in sight from 601px, a press away on a phone)'],
+      [/^page:\/div:1\/section:1\/ul:1$/, 'the list is Ark\'s card grid; its first row, Home, is the hero\'s action'],
+      [/^page:\/div:1\/section:1\/ul:1\/li:\d$/, 'a journey\'s row is its card: the way in is the card\'s title link, the note its description']
+    ],
+    retired: [
+      [/^page:\/div:1$/, 'the dashboard shell\'s column; a block page stacks its blocks in its root'],
+      [/^page:\/div:1\/header:1\/div:1$/, 'the header\'s copy column; Ark\'s hero has none'],
+      [/^page:\/div:1\/section:1\/ul:1\/li:1$/, 'the Home row; Home is the hero\'s action, which keeps its link\'s key']
+    ],
+    reworded: [] }
+};
+
+(async () => {
+  for (const file of ['js/pages/bundle-deployer.js', 'js/pages/deploy.js']) checks.assertSourceIsSpec(read(file), file);
+  assert(/ArkUI\.page\(spec\(\), host, \{ page: 'explorer'/.test(read('js/pages/explorer.js')), '/explore is built by ArkUI.page around its live parts');
+  assert(!fs.existsSync(path.join(checks.ROOT, 'css/bundle-deployer.css')), 'the bundle deployer\'s page CSS is gone');
+
+  const lines = [];
+  for (const route of Object.keys(ROUTES).filter((r) => process.argv.length <= 2 || process.argv.slice(2).includes(r))) {
+    const spec = ROUTES[route];
+    const seen = await converted.check(route, { reshaped: spec.reshaped, retired: spec.retired, reworded: spec.reworded, inspect: (window, page) => ({
+      tabs: [...page.querySelectorAll('[data-ark-block="tabs"] [role="tab"]')].map((t) => t.textContent.trim()),
+      handoff: page.querySelectorAll('.dx-onward').length,
+      copies: page.querySelectorAll('.deploy-copy').length,
+      reviewRows: page.querySelectorAll('#deploy-review tbody tr').length,
+      pager: [...page.querySelectorAll('[data-ark-block="pager"] a')].map((a) => a.getAttribute('href')),
+      rawOpen: page.querySelectorAll('[data-explore-raw-open]').length,
+      onward: [...page.querySelectorAll('#explore-onward [data-ark-part="button"]')].map((b) => b.textContent.replace(/\s+/g, ' ').trim()),
+      liveParts: ['[data-explore-kinds]', '[data-explore-fabric]', '[data-explorer-status]', '[data-explore-raw]', '[data-explorer-connect]'].filter((sel) => page.querySelector(sel)).length
+    }) });
+    if (route === '/bundle-deployer') {
+      assert.equal(seen.tabs.length, 3, 'the three parts are tabs');
+      assert.equal(seen.handoff, 1, 'the Bundles hand-off (the family kit) stays');
+      for (const to of ['/account', '/download', '/resolutions/deployments']) assert(seen.pager.includes(to), '/bundle-deployer leads on to ' + to);
+    }
+    if (route === '/deploy') {
+      assert.deepEqual(seen.tabs, ['01 / Check discovery', '02 / Create or select', '03 / Start the miner', '04 / Verify health', '05 / Inspect topology'], 'every step is a named tab');
+      assert.equal(seen.copies, 5, 'every command keeps its Copy');
+      assert.equal(seen.reviewRows, 5, '"Review all steps" shows every command');
+    }
+    if (route === '/explore') {
+      assert.equal(seen.liveParts, 5, 'the live explorer is all there');
+      assert.equal(seen.rawOpen, 1, '"Browse the raw records" opens the raw view');
+      assert(seen.onward.some((label) => /What is a resolver/.test(label)), 'the ways on include What is a resolver');
+    }
+    const { blocks, panels } = await checks.assertServerRender(route, spec.page, { idPrefix: spec.ids });
+    lines.push(`${route} ${seen.tally.kept}/${seen.tally.reshaped}/${seen.tally.retired} (ssr ${blocks}/${panels})`);
+  }
+  console.log('PASS: the task pages are Ark blocks with every word kept; old layout keys kept/reshaped/retired: ' + lines.join(', ') + '.');
+})().catch((error) => { console.error(error); process.exit(1); });

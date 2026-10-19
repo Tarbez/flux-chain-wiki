@@ -9,6 +9,12 @@
  * back.
  *
  * Named regressions:
+ *   - the plain scene (/chain) drew the record as SVG text about 6px tall on
+ *     a phone (docs/ux-audit/pages-ux-a.md /chain): it is HTML now, the record
+ *     a real list a screen reader reads, and only steps not shown are hidden;
+ *   - the scene cycled forever, a frame loop on an idle page (the same audit):
+ *     it plays ONCE and settles on the finished record, scheduling nothing
+ *     more; the play button replays it;
  *   - only the current step's panel may be active (the ending was once
  *     visible from step one, because a dim panel still read);
  *   - the new chain position must be absent until it is extended;
@@ -36,6 +42,7 @@ class Node {
     if (k.startsWith('data-')) this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v);
   }
   getAttribute(k) { return this.attrs[k]; }
+  removeAttribute(k) { delete this.attrs[k]; }
   toggleAttribute(k, on) { if (on) this.setAttribute(k, ''); else delete this.attrs[k]; }
   addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); }
   removeEventListener() {}
@@ -176,7 +183,7 @@ assert(
 
 function pendingAfter(fn) { timers.clear(); fn(); return timers.size; }
 
-links[0].listeners.pointerleave[0]();            // release the hold
+goto(0); links[0].listeners.pointerleave[0]();  // release the hold on a step before the last
 assert(pendingAfter(() => flow.restore()) > 0, 'playing schedules the next step');
 
 doc.hidden = true;
@@ -194,6 +201,30 @@ toggle.listeners.click[0]();
 
 flow.dispose();
 assert.equal(pendingAfter(() => flow.restore()), 0, 'a disposed scene never schedules again');
+
+/* ---- the plain scene is HTML: the record is a list, never an SVG at 6px ---- */
+const format = root.byClass('flow-record-format')[0];
+assert(format && format.tagName === 'ol', 'the record is a real list of its fields');
+assert.equal(format.getAttribute('aria-label'), 'The record, field by field');
+assert(!root.all().some((n) => n.tagName === 'svg' && String(n.className).includes('flow-scene')), 'no SVG scene: text drawn in SVG shrinks with the drawing');
+
+/* ---- it plays once and settles ------------------------------------------------- */
+timers.clear();
+const once = sandbox.ArkUI.buildChainFlow({ hrefFor: (k) => '/' + k, caseId: 'transfers' });
+const run = () => { const [id, t] = [...timers.entries()][0]; timers.delete(id); t.fn(); };
+let fired = 0;
+while (timers.size && fired < 50) { run(); fired++; }
+assert.equal(fired, 4, 'four timed advances take the record from Sign to Resolve, and then the scene stops');
+assert.equal(once.element.dataset.step, '4', 'it settles on the finished record');
+assert.equal(once.element.dataset.complete, 'true');
+assert.equal(once.element.dataset.playing, 'false', 'a finished scene is not playing (its CSS motion stops: .flow[data-playing="false"])');
+assert.equal(pendingAfter(() => once.restore()), 0, 'returning to a finished scene does not restart it');
+const replay = once.element.byClass('flow-toggle')[0];
+assert.equal(replay.getAttribute('aria-label'), 'Play the chain animation again', 'the play button says it replays');
+timers.clear(); replay.listeners.click[0]();
+assert.equal(once.element.dataset.step, '0', 'replay starts from Sign');
+assert.equal(timers.size, 1, 'and schedules the next step');
+once.dispose();
 
 const rich=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:'transfers',inline:true,rich:true});
 const richRoot=rich.element,choices=richRoot.byClass('flow-record');
@@ -243,6 +274,6 @@ const selected=()=>lines.filter(l=>l.getAttribute('data-selected')==='true').map
 assert.deepEqual(selected(),['alice.fxn'],'transfers highlights alice.fxn');
 world.select('staking');assert.deepEqual(selected(),['provider.fxn'],'staking highlights provider.fxn (a provider stakes for its seat; "validator" is retired vocabulary, docs/deprecated.md)');
 assert.equal(world.element.byClass('world-interchange').length,5,'five chains cross yours at interchanges');
-console.log('PASS: hero scene — 7 real grammar blocks, one panel active per step, ' +
+console.log('PASS: hero scene — 7 real grammar blocks in an HTML list, one panel active per step, ' +
   'checks pass together, partial replication reads partial, the ending stays hidden ' +
-  'until it happens, and the scene is still when paused, hidden or disposed.');
+  'until it happens, it plays once and settles, and it is still when paused, hidden or disposed.');

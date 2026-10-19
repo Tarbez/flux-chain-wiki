@@ -1,26 +1,10 @@
 /* Home: one editorial anchor, one chosen object, one bounded substrate field. */
 #scene .hero-alive[data-page="zero"] {--home-rule:hsl(var(--border-default));}
-#scene .hero-alive[data-page="zero"] .page-iceberg {display:none !important;}
-#scene .hero-alive[data-page="zero"] .ark-layer-persistent::before,
-#scene .hero-alive[data-page="zero"] .ark-layer-persistent::after {content:none;}
-#scene .hero-alive[data-page="zero"] .ark-layer-zero {
- position:relative;isolation:isolate;box-sizing:border-box;height:100%;min-height:0;overflow:clip;
- display:grid;grid-template-columns:minmax(0,1.12fr) minmax(390px,1fr);grid-template-rows:minmax(0,1fr) auto;
- gap:22px 7%;padding:110px 6% 26px;
- background:
-  radial-gradient(circle at 18% 45%,hsl(var(--primary-200)),transparent 27%),
-  radial-gradient(hsl(var(--text-muted) / .28) .65px,transparent .8px) 0 0/48px 48px;
-}
 /* The drafting frame (header rule, footer rule, quarter-column guides) is gone: hairlines read as clutter. */
-#scene .hero-alive[data-page="zero"] .ark-layer-zero::before {content:none;}
-#scene .hero-alive[data-page="zero"] .ark-layer-zero::after {content:none;}
 #scene .hero-alive[data-page="zero"] .ark-hero-body {
  position:relative;grid-column:1;grid-row:1;align-self:center;min-width:0;min-height:0;z-index:2;max-width:none !important;padding:0 0 0 18px;background:none;
 }
 #scene .hero-alive[data-page="zero"] .ark-hero-body::before {content:none;}
-#scene .hero-alive[data-page="zero"] .home-promise {display:flex;align-items:center;gap:11px;margin:0 0 25px;font:500 11px/1.4 var(--font-mono,monospace);letter-spacing:.04em;text-transform:uppercase;color:hsl(var(--text));}
-#scene .hero-alive[data-page="zero"] .home-promise::before {content:"";width:7px;height:7px;border:1px solid hsl(var(--primary));border-radius:50%;background:hsl(var(--primary-300));box-shadow:0 0 0 4px hsl(var(--primary-100)),0 0 18px hsl(var(--primary-300));}
-#scene .hero-alive[data-page="zero"] .home-promise::after {content:"";width:clamp(28px,4vw,62px);height:1px;background:linear-gradient(90deg,hsl(var(--primary-400)),transparent);}
 #scene .hero-alive[data-page="zero"] .ark-hero-eyebrow {display:none;}
 #scene .hero-alive[data-page="zero"] .ark-hero-title {max-width:none;margin:0 0 25px;color:hsl(var(--text-strong));font-weight:600;}
 /* Three lines, three jobs, not one flat weight repeated three times: a
@@ -28,26 +12,9 @@
    payoff line that is visibly the biggest thing on the page instead of a
    same-size line in a flat-colored box. Each line rises in on load so the
    headline arrives instead of just appearing. */
-#scene .hero-alive[data-page="zero"] .home-headline-main {display:block;font:600 clamp(62px,5.8vw,90px)/.94 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.065em;white-space:normal;}
-.home-headline-lead,.home-headline-pivot,.home-headline-network {display:block;width:fit-content;opacity:0;animation:home-headline-in 680ms cubic-bezier(.22,.72,.22,1) both;}
-.home-headline-lead {font-size:.62em;font-weight:500;letter-spacing:-.03em;color:hsl(var(--text-muted));animation-delay:40ms;}
-.home-headline-pivot {margin-top:2px;color:hsl(var(--text-strong));animation-delay:140ms;}
-.home-headline-network {
- position:relative;margin-top:14px;padding-bottom:10px;font-size:1.06em;animation-delay:260ms;
- background:linear-gradient(100deg,hsl(var(--primary)) 10%,hsl(var(--primary-600)) 45%,hsl(var(--primary)) 75%,hsl(var(--primary)) 100%);
- background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
- filter:drop-shadow(0 0 28px hsl(var(--primary-200) / .6));
- animation:home-headline-in 680ms cubic-bezier(.22,.72,.22,1) both,home-headline-sheen 7s ease-in-out 900ms infinite;
-}
-.home-headline-network::after {content:"";position:absolute;left:0;right:0;bottom:0;height:2px;border-radius:2px;background:linear-gradient(90deg,hsl(var(--primary)),hsl(var(--primary-100)));transform-origin:left;transform:scaleX(0);animation:home-query-scan 620ms cubic-bezier(.22,1,.36,1) 520ms both;}
 @keyframes home-query-scan {from{transform:scaleX(0);opacity:0;}to{transform:scaleX(1);opacity:1;}}
 @keyframes home-headline-in {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 @keyframes home-headline-sheen {0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
-@media(prefers-reduced-motion:reduce){
- .home-headline-lead,.home-headline-pivot,.home-headline-network {opacity:1;animation:none;}
- .home-headline-network::after {transform:scaleX(1);}
-}
-#scene .hero-alive[data-page="zero"] .home-headline-detail {display:block;max-width:26ch;margin-top:25px;font:400 clamp(23px,2.15vw,32px)/1.16 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.03em;color:hsl(var(--text));}
 #scene .hero-alive[data-page="zero"] .ark-hero-copy {max-width:55ch;margin:0;font:400 16px/1.58 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));text-wrap:pretty;}
 /* One dominant action, not a row competing for the same weight. Explore and
    pressure-test are real audiences, not afterthoughts, but they read as the
@@ -66,9 +33,6 @@
 #scene .home-ghost-cta::before {content:"";position:absolute;inset:9px auto 9px 0;width:1px;background:var(--signal-reference);box-shadow:0 0 14px hsl(var(--reference-400));}
 #scene .home-ghost-cta:hover {border-color:var(--signal-reference);background:hsl(var(--reference-200));transform:translateY(-3px);box-shadow:0 14px 34px hsl(var(--canvas) / .28);}
 #scene .home-primary-cta::after {content:none;}
-#scene .home-cta-copy {display:flex;flex:1;min-width:0;flex-direction:column;gap:3px;align-items:flex-start;}
-#scene .home-cta-kicker {font:600 9px/1.2 var(--font-mono,monospace);letter-spacing:.05em;text-transform:uppercase;opacity:.82;}
-#scene .home-cta-label {font:600 14px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.01em;white-space:normal;text-align:left;}
 #scene :is(.home-primary-cta,.home-ghost-cta) .native-icon {order:2;flex:0 0 28px;width:28px;height:28px;box-sizing:border-box;margin-left:auto;padding:7px;border:1px solid currentColor;border-radius:50%;overflow:visible;}
 #scene .home-primary-cta .native-icon {color:hsl(var(--text-inverse));border-color:hsl(var(--text-inverse) / .28);}
 #scene .home-ghost-cta .native-icon {color:var(--signal-reference);border-color:hsl(var(--reference-400));}
@@ -87,8 +51,6 @@
 #scene .home-lifecycle::before {content:none;}
 #scene .home-lifecycle-caption {margin:0 0 17px;font:500 11px/1.4 var(--font-mono,monospace);letter-spacing:.02em;color:hsl(var(--primary));}
 #scene .home-lifecycle-caption::before {content:none;}
-.home-cycle-title {display:block;font:500 clamp(26px,2.4vw,36px)/1.12 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.04em;color:hsl(var(--text-strong));}
-.home-cycle-description {margin:12px 0 0;font:400 14px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 .home-cycle-records {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;list-style:none;margin:0;padding:0;}
 .home-cycle-records li {display:block;text-align:center;font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 #scene .home-lifecycle-all {position:static;display:flex;align-items:center;justify-content:flex-start;min-height:56px;margin-top:12px;padding:0;border-top:1px solid hsl(var(--border-subtle));font:500 14px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;color:hsl(var(--text-strong));}
@@ -98,29 +60,12 @@
    column and truncation cannot collide at any item count, which is the
    fix — the home rail also shows only the leading few, because the rest
    belong on /stats. */
-#scene .home-status-rail {grid-column:1/-1;grid-row:2;z-index:2;display:grid;
- grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:14px 28px;padding-top:20px;margin:0;
- border-top:1px solid hsl(var(--border-subtle));background:none;}
-#scene .home-status-item {min-width:0;}
 /* The label may truncate; the number never may. A measurement shown as
    "643,632…" is not a measurement. */
-#scene .home-status-item small {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-#scene .home-status-item strong {white-space:nowrap;}
-#scene .home-status-item {display:flex;flex-direction:column;align-items:start;gap:7px;}
-#scene .home-status-item small {font:500 11px/1.3 var(--font-mono,monospace);color:hsl(var(--text));letter-spacing:.03em;}
-#scene .home-status-item strong {font:600 12px/1.3 var(--font-mono,monospace);color:hsl(var(--text));letter-spacing:.02em;}
-#scene .home-status-item strong::before {background:hsl(var(--warning));box-shadow:none;border-radius:2px;}
-#scene .home-status-link {display:flex;align-items:center;min-height:44px;font:500 11px/1.4 var(--font-mono,monospace);color:hsl(var(--reference));}
 /* The agreement panel draws its own flow; the live lattice stays off the home page. */
-#scene .hero-alive[data-page="zero"] .ark-layer-persistent {z-index:0;pointer-events:none;}
 #scene .hero-alive[data-page="zero"] :is(.lattice-field,.lattice-activity) {display:none !important;}
 #scene .home-lifecycle:focus-within {outline:2px solid hsl(var(--reference));outline-offset:4px;}
-#scene :is(.home-primary-cta,.home-ghost-cta,.home-question-links a,.home-status-link):focus-visible {outline:2px solid hsl(var(--primary));outline-offset:4px;}
 @media(min-width:901px) and (max-height:740px){
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {padding-top:98px;gap:16px 7%;padding-bottom:18px;}
- #scene .hero-alive[data-page="zero"] .home-promise {margin-bottom:16px;}
- #scene .hero-alive[data-page="zero"] .home-headline-main {font-size:clamp(58px,5.6vw,80px);}
- #scene .hero-alive[data-page="zero"] .home-headline-detail {font-size:23px;margin-top:20px;}
  #scene .hero-alive[data-page="zero"] .ark-hero-title {margin-bottom:18px;}
  #scene .hero-alive[data-page="zero"] .ark-hero-copy {font-size:15px;line-height:1.45;}
  #scene .home-hero-actions {margin-top:18px;}
@@ -132,21 +77,10 @@
    header. Auto-sized rows plus an internal scroller keep the reading order
    intact at every viewport height. */
 @media(max-width:900px){
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {
-  grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;align-content:start;
-  height:100%;min-height:0;
-  padding:calc(96px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px));
-  gap:20px;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
- }
  #scene .hero-alive[data-page="zero"] .ark-hero-body {
   position:relative !important;inset:auto !important;align-self:start;
   width:100% !important;max-width:none !important;min-height:auto;padding-left:16px;
  }
- #scene .hero-alive[data-page="zero"] .home-headline-main {font-size:clamp(43px,9.25vw,68px);line-height:.92;white-space:normal;}
- .home-headline-lead,.home-headline-pivot,.home-headline-network {display:block;}
- .home-headline-network {margin-top:8px;padding-bottom:7px;}
- #scene .hero-alive[data-page="zero"] .home-headline-detail {font-size:23px;margin-top:12px;}
- #scene .hero-alive[data-page="zero"] .home-promise {font-size:9px;margin-bottom:18px;}
  #scene .hero-alive[data-page="zero"] .ark-hero-title {margin-bottom:16px;}
  #scene .home-lifecycle {
   position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:18px;
@@ -159,49 +93,16 @@
  #scene .home-lifecycle-caption {grid-column:1/-1;margin:0 0 4px;font-size:9px;letter-spacing:.09em;color:hsl(var(--text-muted));}
  #scene .home-lifecycle-all {grid-column:1/-1;min-height:38px;margin:0;border:0;padding:0;font-size:16px;line-height:1.25;color:hsl(var(--text-strong));}
  #scene .home-lifecycle-all .native-icon {width:20px;height:20px;flex-basis:20px;color:hsl(var(--primary));}
- #scene .home-status-rail {
-  grid-row:3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:0;padding:0;
-  border:1px solid hsl(var(--border-default));border-radius:8px;overflow:hidden;
-  background:hsl(var(--canvas) / .64);
- }
- #scene .home-status-rail::before {
-  content:"MEASURED PERFORMANCE";grid-column:1/-1;display:block;margin:0;padding:9px 12px;
-  border-bottom:1px solid hsl(var(--border-subtle));background:hsl(var(--surface) / .28);
-  font:500 8px/1.3 var(--font-mono,monospace);letter-spacing:.12em;color:hsl(var(--text-muted));
- }
- #scene .home-status-item {min-width:0;gap:5px;padding:11px 12px;border-right:1px solid hsl(var(--border-subtle));}
- #scene .home-status-item:nth-of-type(4) {border-right:0;}
- #scene .home-status-item small {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:8px;line-height:1.3;}
- #scene .home-status-item strong {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:1.3;}
- #scene .home-status-link {grid-column:1/-1;min-height:38px;padding:0 12px;border-top:1px solid hsl(var(--border-subtle));font-size:9px;}
-}
-@media(max-width:640px){
- #scene .home-status-rail {grid-template-columns:repeat(2,minmax(0,1fr));}
- #scene .home-status-item:nth-of-type(2n-1) {border-right:1px solid hsl(var(--border-subtle));}
- #scene .home-status-item:nth-of-type(2n) {border-right:0;}
- #scene .home-status-item:nth-of-type(-n+2) {border-bottom:1px solid hsl(var(--border-subtle));}
 }
 @media(max-width:480px){
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {
-  padding-top:calc(92px + env(safe-area-inset-top,0px));
-  padding-right:max(18px,env(safe-area-inset-right,0px));
-  padding-left:max(18px,env(safe-area-inset-left,0px));
- }
- #scene .hero-alive[data-page="zero"] .home-promise {line-height:1.5;}
- #scene .hero-alive[data-page="zero"] .home-promise::after {display:none;}
- #scene .hero-alive[data-page="zero"] .home-headline-main {font-size:clamp(39px,11vw,52px);}
  #scene .hero-alive[data-page="zero"] .ark-hero-copy {font-size:14px;line-height:1.52;}
  #scene .home-primary-cta {width:100%;box-sizing:border-box;}
  #scene .home-lifecycle {padding:14px 15px 13px;}
  #scene .home-lifecycle-all {font-size:15px;}
 }
-@media(prefers-reduced-motion:reduce){.home-record-trace,#scene .home-lifecycle {transition:none;}.home-headline-network::after{animation:none;}}
-#scene .hero-alive.hero-still[data-page="zero"] :is(.home-record-trace,.home-record-node,.home-lifecycle,.native-icon,.ark-layer-persistent) {transition:none;}
+@media(prefers-reduced-motion:reduce){#scene .home-lifecycle {transition:none;}}
 
 /* The mesh is inner material: let it yield with the compact copy while the box moves. */
-#scene .hero-alive[data-page="zero"] .ark-layer-persistent {opacity:1;transition:opacity 140ms ease;}
-#scene .hero-alive[data-page="zero"][data-transition="running"] .ark-layer-persistent {opacity:0;}
-@media(prefers-reduced-motion:reduce){#scene .hero-alive[data-page="zero"] .ark-layer-persistent {transition:none;}}
 /* Hover and keyboard focus share a visible invitation, with no layout movement. */
 #scene .home-primary-cta .native-icon,
 #scene .home-ghost-cta .native-icon,
@@ -210,11 +111,6 @@
 #scene .home-primary-cta:is(:hover,:focus-visible) .native-icon {transform:translateX(3px);color:hsl(var(--text-inverse));}
 #scene .home-ghost-cta:is(:hover,:focus-visible) {background:hsl(var(--reference-200));border-color:var(--signal-reference);}
 #scene .home-ghost-cta:is(:hover,:focus-visible) .native-icon {color:hsl(var(--text-strong));transform:translateY(-1px);}
-#scene :is(.home-question-links a,.home-status-link) {transition:color 160ms,border-color 160ms;}
-#scene :is(.home-question-links a,.home-status-link):is(:hover,:focus-visible) {color:hsl(var(--text-strong));border-color:hsl(var(--reference));}
-#scene .hero-alive[data-page="zero"] .header-core-links a {transition:color 160ms,background 160ms; border-radius:5px;}
-#scene .hero-alive[data-page="zero"] .header-core-links a:is(:hover,:focus-visible) {color:hsl(var(--text-strong));background:hsl(var(--reference-100));}
-@media(prefers-reduced-motion:reduce){#scene .hero-alive[data-page="zero"] :is(a,.native-icon,.home-record-node) {transition:none;} .home-cycle-insight [data-insight]{animation:none;} }
 
 /* Each record owns its invitation; the surrounding panel stays quiet. */
 #scene .home-lifecycle:focus-within {outline:none;}
@@ -223,34 +119,20 @@
 
 #scene .home-lifecycle-all::after {content:none;}
 
-
 /* The chain walkthrough now has its own page; Home keeps only a small
    fraction of it (the compact origin the panel expands from) and no longer
    needs a half-width column for it. The hero column centers instead. */
-#scene .hero-alive[data-page="zero"] .home-centered {text-align:center;}
-#scene .hero-alive[data-page="zero"] .home-centered .home-promise {justify-content:center;}
-#scene .hero-alive[data-page="zero"] .home-centered :is(.home-headline-lead,.home-headline-pivot,.home-headline-network) {margin-left:auto;margin-right:auto;}
-#scene .hero-alive[data-page="zero"] .home-centered .ark-hero-copy {margin-left:auto;margin-right:auto;}
-#scene .hero-alive[data-page="zero"] .home-centered .home-hero-actions {justify-content:center;}
-#scene .hero-alive[data-page="zero"] .home-centered .home-question-links {justify-content:center;}
 
 /* The teaser strip: five quiet dots, a tenth-scale hint of the real scene on
    /chain. It is not the live animation; it only needs to be recognizable
    before the panel expands and the full record-join sequence assembles on
    arrival. */
-#scene .home-chain-teaser-strip {display:flex;gap:7px;margin:12px 0 0;}
-#scene .home-chain-teaser-strip span {width:7px;height:7px;border-radius:50%;background:hsl(var(--primary-300));box-shadow:0 0 0 3px hsl(var(--primary-100));}
-#scene .home-chain-teaser-strip span:last-child {background:hsl(var(--primary));box-shadow:0 0 0 3px hsl(var(--primary-200)),0 0 14px hsl(var(--primary-300));}
 
 @media(min-width:901px){
  /* Three real grid columns, the two outer ones the same width, so the
     center column is genuinely centered in the viewport -- not eyeballed
     with position:absolute, which only looked right by accident and
     overlapped the title as soon as content length changed. */
- #scene .hero-alive[data-page="zero"] .ark-layer-zero {
-  grid-template-columns:minmax(180px,280px) minmax(0,660px) minmax(180px,280px);
-  grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);row-gap:0;justify-content:center;
- }
  #scene .hero-alive[data-page="zero"] .ark-hero-body {grid-column:2;grid-row:2;padding-left:0;align-items:center;}
  /* The measured numbers: a vertical rail in the right column, top-aligned
     with the headline and the left column instead of pushed down by a
@@ -260,61 +142,24 @@
     never re-declared it, so it silently won for any child that doesn't
     force its own width:100% -- which is exactly what shifted the new
     scope label to the right. Declaring it here is the actual fix. */
- #scene .hero-alive[data-page="zero"] .home-status-rail {
-  grid-column:3;grid-row:2;align-self:start;z-index:3;
-  display:flex;flex-direction:column;align-items:flex-start;gap:10px;
-  padding:0;border-top:0;border-right:0;
- }
  /* The scope stated once, plainly, instead of repeated in every row below. */
- #scene .hero-alive[data-page="zero"] .home-status-scope-label {
-  margin:0 0 2px;font:500 10px/1.3 var(--font-mono,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-faint));
- }
  /* Flat rows, not micro cards: a hairline below each fact instead of a
     bordered box around it. Minimal reads as fewer edges, not more of
     them. A flex column's items default to min-width:auto (refuse to
     shrink below their nowrap label's full width), which silently
     overflowed the 240px column to the right -- straight into the hero
     title -- so min-width:0 stays load-bearing here. */
- #scene .hero-alive[data-page="zero"] .home-status-rail .home-status-item {
-  min-width:0;width:100%;box-sizing:border-box;gap:3px;
-  padding:0 0 11px;border-bottom:1px solid hsl(var(--border-subtle));
- }
  /* Five stacked numbers ran taller than the hero text beside them. Three
     reads as one pitch; the rest stay one click away on /stats. */
- #scene .hero-alive[data-page="zero"] .home-status-rail .home-status-item:nth-child(n+6) {display:none;}
- #scene .hero-alive[data-page="zero"] .home-status-rail .home-status-item small {white-space:normal;}
- #scene .hero-alive[data-page="zero"] .home-status-link {
-  display:block;border-top:0;min-width:0;width:100%;box-sizing:border-box;height:auto;min-height:0;
-  text-align:left;line-height:1.5;padding:3px 0 0;border:0;
- }
  /* The left column: the matching column opposite the numbers, top-aligned
     beside the headline rather than centered against the whole (taller)
     hero row. The teaser card and the core-page icon grid stack inside it. */
- #scene .hero-alive[data-page="zero"] .home-left-column {
-  grid-column:1;grid-row:2;align-self:start;z-index:3;display:flex;flex-direction:column;gap:10px;
- }
- #scene .hero-alive[data-page="zero"] .home-chain-teaser {margin:0;padding:0;border:0;background:none;box-shadow:none;}
- #scene .hero-alive[data-page="zero"] .home-chain-teaser .home-cycle-title {font-size:17px;line-height:1.25;}
- #scene .hero-alive[data-page="zero"] .home-chain-teaser .home-lifecycle-caption {margin-bottom:6px;}
- #scene .hero-alive[data-page="zero"] .home-chain-teaser .home-lifecycle-all {min-height:36px;margin-top:0;padding:11px 0;font-size:12px;}
 }
 
 /* The core-page icon grid: six quiet references, two rows of three -- an
    icon and a label, no card around either. */
-#scene .home-core-links {display:grid;grid-template-columns:repeat(3,1fr);gap:14px 6px;}
-#scene .home-core-link {
- display:flex;flex-direction:column;align-items:center;gap:6px;
- color:hsl(var(--text-muted));text-decoration:none;transition:color 160ms;
-}
-#scene .home-core-link .native-icon {width:16px;height:16px;}
 /* Same viewBox and stroke-width, but not the same optical weight: layers
    and evidence are dense multi-shape glyphs that read bolder than the
    single-stroke account/terminal marks at identical pixel size. A small
    per-icon scale evens that out instead of leaving the row looking like
    six different icon sets. */
-#scene .home-core-link .native-icon-layers,
-#scene .home-core-link .native-icon-evidence {transform:scale(.82);}
-#scene .home-core-link .native-icon-account {transform:scale(1.08);}
-#scene .home-core-link span {font:500 9.5px/1.2 var(--font-mono,monospace);letter-spacing:.02em;white-space:nowrap;}
-#scene .home-core-link:is(:hover,:focus-visible) {color:hsl(var(--reference));}
-#scene .home-core-link:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:4px;border-radius:4px;}

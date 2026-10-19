@@ -10,11 +10,14 @@ assert(!/infinite/.test(css), 'no resolver animation loops forever');
 const js = fs.readFileSync('js/pages/resolver-lab.js', 'utf8');
 assert(!/setInterval/.test(js), 'the run is a finite sequence of timeouts, not an interval');
 assert(js.includes("['ask', 'resolve', 'check', 'laws']") && js.includes("'step=' + state.step + '&input=' + state.input"), 'each step and input is an addressable state');
+assert(js.includes("if (v === 'reference') return 'view=reference&step=laws&input=' + state.input;"), 'Laws is the Evidence view, and its old address (?step=laws) still opens it');
 assert(js.includes('event.stopPropagation(); go(STEPS[i + 1], true)'), 'stepping forward cannot be hijacked into leaving the page');
+// Since 2026-10-19 (W3-GUIDE) the page is the story template: the def, not hand-built page structure.
+assert(/ArkUI\.resolverLabDef = function/.test(js) && !/el\('(section|h1|nav|figure)'/.test(js), 'the page is a story def; only the illustration is hand-built');
 
 // The claim id is deterministic: same address + input + result, same id; different input, different id.
 const ctx = vm.createContext({ ArkUI: {}, matchMedia: () => ({ matches: true }) });
-vm.runInContext(js.replace("ArkUI.buildResolverLab = function", "ArkUI.claimId = claimId; ArkUI.evaluate = evaluate; ArkUI.INPUTS = INPUTS; ArkUI.buildResolverLab = function"), ctx);
+vm.runInContext(js.replace("ArkUI.resolverLabDef = function", "ArkUI.claimId = claimId; ArkUI.evaluate = evaluate; ArkUI.INPUTS = INPUTS; ArkUI.resolverLabDef = function"), ctx);
 const { claimId, evaluate, INPUTS } = ctx.ArkUI;
 const [report, video, logo] = INPUTS;
 assert.equal(claimId(report, evaluate(report)), claimId(report, evaluate(report)), 'same input, same claim id');

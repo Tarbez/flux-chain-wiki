@@ -493,7 +493,7 @@ export async function createItem(app, kind, title, address) {
   await app.click(`#newItemPanel [data-new-kind="${kind}"]`);
   await app.fill('#newTitle', title);
   if (address) {
-    const dev = app.locator('#newItemPanel .ark-disclosure-trigger');
+    const dev = app.locator('#newItemPanel .ark-disclosure__trigger');
     if ((await dev.getAttribute('aria-expanded')) !== 'true') await dev.click();
     await app.fill(kind === 'page' ? '#newId' : '#newSlug', address);
   }

@@ -12,40 +12,29 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { loadCatalog } = require('./lib/site-catalog.cjs');
 
-class Element {
-  constructor(tag) { this.tagName = tag; this.className = ''; this.children = []; this.dataset = {}; this.attrs = {}; this._text = ''; }
-  appendChild(child) { this.children.push(child); return child; }
-  setAttribute(k, v) { this.attrs[k] = String(v); }
-  getAttribute(k) { return this.attrs[k]; }
-  set textContent(v) { this._text = String(v); this.children = []; }
-  get textContent() { return this._text + this.children.map((c) => c.textContent).join(' '); }
-  all() { return [this, ...this.children.flatMap((c) => (c.all ? c.all() : [c]))]; }
-}
+const checks = require('./lib/block-page-checks.cjs');
 const { catalog, context } = loadCatalog();
 assert(catalog.notfound && catalog.notfound.noindex && !catalog.notfound.journey, 'the not-found page exists, is noindex and is in no list');
 
-function mountAt(path) {
-  const ctx = vm.createContext({
-    ArkSitePages: context.ArkSitePages,
-    ArkUI: { pageModules: {}, pageCatalog: catalog, route: { href: (p) => p, path: () => path, search: () => '' } },
-    document: { createElement: (t) => new Element(t), createTextNode: (t) => ({ textContent: t }) }
-  });
-  vm.runInContext(fs.readFileSync('js/ark/dash-kit.js', 'utf8'), ctx);
+/* Since 2026-10-19 (W3-GUIDE) the page is Ark blocks (js/pages/not-found.js): it is booted in the
+   real site (jsdom, api/lib/render-core.mjs), never a toy DOM -- blocks need the real DOM API. */
+(async () => {
+  const seen = await checks.visit('/stast', (window, page) => ({
+    text: page.textContent,
+    asked: (page.querySelector('[data-not-found-address]') || {}).textContent,
+    hrefs: [...page.querySelectorAll('a[href]')].map((a) => a.getAttribute('href'))
+  }));
+  assert.equal(seen.asked, '/stast', 'it names the address that was asked for, verbatim');
+  assert(/No page at this address/.test(seen.text), 'and says plainly that no page answers it');
+  assert(seen.hrefs.includes('/stats'), 'a one-letter typo offers the page that was meant');
+  assert(seen.hrefs.includes('/'), 'Home is always a way on');
+  const leads = context.ArkSitePages.pages().filter((r) => r.lead).map((r) => r.path);
+  for (const lead of leads) assert(seen.hrefs.includes(lead), 'every journey\'s way in is offered: ' + lead);
+  assert.deepEqual(seen.refused, [], 'no block was refused');
+  const ctx = vm.createContext({ ArkSitePages: context.ArkSitePages, ArkUI: { pageModules: {}, pageCatalog: catalog } });
   vm.runInContext(fs.readFileSync('js/pages/not-found.js', 'utf8'), ctx);
-  const page = ctx.ArkUI.pageModules.notFound.mount(new Element('main'));
-  return { page, notFound: ctx.ArkUI.pageModules.notFound };
-}
-
-const { page, notFound } = mountAt('/stast');
-const text = page.textContent;
-assert(text.includes('/stast'), 'it names the address that was asked for, verbatim');
-assert(/No page at this address/.test(text), 'and says plainly that no page answers it');
-const hrefs = page.all().filter((e) => e.tagName === 'a').map((e) => e.href);
-assert(hrefs.includes('/stats'), 'a one-letter typo offers the page that was meant');
-assert(hrefs.includes('/'), 'Home is always a way on');
-const leads = context.ArkSitePages.pages().filter((r) => r.lead).map((r) => r.path);
-for (const lead of leads) assert(hrefs.includes(lead), 'every journey\'s way in is offered: ' + lead);
-assert.deepEqual(Array.from(notFound.closest('/resolutions/finances', catalog)).slice(0, 1), ['resolutions/finance'], 'a near miss inside a family finds its page');
-assert.equal(notFound.closest('/zzzz-qqqq-xxxx', catalog).length, 0, 'an address near nothing offers no false "did you mean"');
-
-console.log('PASS: an unknown address gets a page that names it, offers the closest real pages and every journey\'s way in.');
+  const notFound = ctx.ArkUI.pageModules.notFound;
+  assert.deepEqual(Array.from(notFound.closest('/resolutions/finances', catalog)).slice(0, 1), ['resolutions/finance'], 'a near miss inside a family finds its page');
+  assert.equal(notFound.closest('/zzzz-qqqq-xxxx', catalog).length, 0, 'an address near nothing offers no false "did you mean"');
+  console.log('PASS: an unknown address gets a page that names it, offers the closest real pages and every journey\'s way in.');
+})().catch((error) => { console.error(error); process.exit(1); });

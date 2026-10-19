@@ -12,54 +12,32 @@
 .story-drawing .drawing-selection {fill:hsl(var(--primary-200));stroke:hsl(var(--primary));}
 .story-drawing text {fill:hsl(var(--text-muted));font:500 10px var(--font-mono,monospace);letter-spacing:.04em;}
 .story-drawing .drawing-title {font-size:8px;letter-spacing:.045em;}
-#scene :is(.guided-diagram,.lifecycle-object):has(.story-drawing) {background:linear-gradient(135deg,hsl(var(--surface) / .5),hsl(var(--canvas) / .3));border-color:hsl(var(--border-default));}
-#scene .guided-diagram:has(.story-drawing) .story-record {display:flex;gap:9px;padding:7px 0;border:0;border-radius:0;background:none;font-size:12px;line-height:1.35;}
-#scene .guided-diagram:has(.story-drawing) .story-record::before {position:static;content:attr(data-diagram-number);height:auto;border:0;color:hsl(var(--text-muted));font:500 10px/1.6 var(--font-mono,monospace);}
-#scene .guided-diagram:has(.story-drawing) .story-record[data-selected="true"] {color:hsl(var(--primary));}
-#scene .guided-diagram:has(.story-drawing) .story-record[data-selected="true"]::before {color:hsl(var(--primary));}
+/* The theory sheets' drawing and its numbered legend, inside Ark's figure frame (js/pages/sheet.js):
+   choosing a legend entry opens that point. Every label is 12px or more: the drawing keeps its full
+   width (no max-height, which letterboxed it and shrank its labels below the frame's 12px floor). */
+.story-plate {display:grid;gap:10px;}
+.story-legend {display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 14px;}
+.story-legend .story-record {display:flex;align-items:center;gap:9px;min-height:44px;padding:5px 0;border:0;background:none;color:hsl(var(--text-muted));font:500 13px/1.35 var(--font-sans,sans-serif);text-align:left;cursor:pointer;}
+.story-legend .story-record::before {content:attr(data-diagram-number);color:hsl(var(--text-muted));font:500 12px/1.6 var(--font-mono,monospace);}
+.story-legend .story-record:hover {color:hsl(var(--text-strong));}
+.story-legend .story-record[aria-pressed="true"],.story-legend .story-record[aria-pressed="true"]::before {color:hsl(var(--reference));}
 @media(min-width:901px){
  #scene .guided-page .guided-body {grid-template-columns:minmax(0,1.35fr) minmax(290px,.85fr);gap:40px;}
  #scene .guided-page .guided-diagram {padding:16px;}
  #scene .guided-page .guided-primary-answer {font-size:20px;line-height:1.5;max-width:43ch;margin-top:22px;}
  #scene .guided-page .guided-diagram figcaption {margin-bottom:8px;}
  #scene .guided-page .lifecycle-boundary {padding:10px 14px;}
- #scene .lifecycle-page {padding:30px;gap:12px;}
- #scene .lifecycle-page h1 {max-width:35ch;font-size:42px;}
- #scene .lifecycle-page .lifecycle-trail-item {flex-direction:row;align-items:center;padding:10px 12px;}
- #scene .lifecycle-page .lifecycle-object {padding:12px;}
- #scene .lifecycle-page .lifecycle-object figcaption {margin-bottom:8px;}
- #scene .lifecycle-page .lifecycle-object .story-snapshot {display:none;}
- #scene .lifecycle-page .lifecycle-object .story-record {padding:6px 8px;margin-top:5px;font-size:12px;}
- #scene .lifecycle-page .lifecycle-object .story-record::before {height:6px;top:-7px;}
- #scene .task-page .learning-list {grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
- #scene .task-page .learning-list .story-topic {min-height:260px;}
- #scene .task-page .learning-list .learning-entry-copy {display:flex;flex-direction:column;gap:12px;}
- #scene .task-page .learning-list .learning-entry-copy h2 {font-size:22px;}
+
  #scene .task-page.lab-page .lab-note {margin-top:12px;}
  #scene .task-page.lab-page .section-heading h1 {font-size:38px;}
  #scene .task-page.lab-page .model-canonical {margin-block:8px;}
 }
 
 @media(min-width:901px){
- #scene .task-page .learning-list .learning-entry {display:flex;flex-direction:column;align-items:start;gap:12px;}
- #scene .task-page .learning-list .learning-entry h2 {font-size:24px;margin:0;}
- #scene .task-page .learning-list .learning-arrow {display:none;}
- #scene .task-page .learning-list .story-topic-purpose {order:2;font-size:14px;line-height:1.5;}
  #scene .task-page.lab-page .lab-toolbar {padding-inline:16px;}
  #scene .task-page.lab-page .study-tabs button {padding-block:12px;}
  #scene .task-page.lab-page .lab-bottom {padding:12px 16px;}
  #scene .task-page.lab-page .control input {margin-block:8px;}
-}
-
-@media(min-width:901px){
- #scene .guided-diagram:has(.story-drawing) {display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;}
- #scene .guided-diagram:has(.story-drawing) > :is(figcaption,.story-drawing) {grid-column:1/-1;}
- #scene .guided-diagram .story-drawing {max-height:170px;margin-bottom:4px;}
- #scene .guided-diagram:has(.story-drawing) .story-record {margin:0;padding:5px 0;min-height:44px;align-items:center;text-align:left;}
- #scene .guided-diagram:has(.story-drawing) button.story-record {cursor:pointer;font-family:var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
- #scene .guided-diagram:has(.story-drawing) button.story-record:hover {color:hsl(var(--text-strong));}
- #scene .guided-diagram:has(.story-drawing) button.story-record[aria-pressed="true"] {color:hsl(var(--reference));}
- #scene .lifecycle-page .lifecycle-object .story-drawing {max-height:155px;}
 }
 
 @media(min-width:901px){
@@ -70,5 +48,4 @@
 @media(min-width:901px) and (max-height:780px){
  #scene .guided-page {padding:26px;gap:10px;}
  #scene .guided-page .guided-primary-answer {font-size:18px;}
- #scene .guided-page .guided-diagram .story-drawing {max-height:125px;}
 }

@@ -1,0 +1,40 @@
+# key	tag	text -- layout keys of /not-found before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomePage not foundNot foundNo page at this address.Nothing on this site answers the address you opened. It may be mistyped, or the page may have moved.You asked
+page:/nav:1	nav	HomePage not found
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Page not found
+page:/div:1	div	Not foundNo page at this address.Nothing on this site answers the address you opened. It may be mistyped, or the page may have moved.You asked for /not-found.Wa
+page:/div:1/header:1	header	Not foundNo page at this address.Nothing on this site answers the address you opened. It may be mistyped, or the page may have moved.You asked for /not-found.
+page:/div:1/header:1/div:1	div	Not foundNo page at this address.Nothing on this site answers the address you opened. It may be mistyped, or the page may have moved.You asked for /not-found.
+page:/div:1/header:1/div:1/p:1	p	Not found
+id:not-found-title	h1	No page at this address.
+page:/div:1/header:1/div:1/p:2	p	Nothing on this site answers the address you opened. It may be mistyped, or the page may have moved.
+page:/div:1/header:1/div:1/p:3	p	You asked for /not-found.
+page:/div:1/section:1	section	Ways onwardStart from one of the site’s journeys← HomeUnderstand: Overview →What DEFXN is: the overview, how it works, agreements and the operating modelBuild: 
+page:/div:1/section:1/p:1	p	Ways onward
+page:/div:1/section:1/h2:1	h2	Start from one of the site’s journeys
+page:/div:1/section:1/ul:1	ul	← HomeUnderstand: Overview →What DEFXN is: the overview, how it works, agreements and the operating modelBuild: Resolutions for the mesh →Resolve something: res
+page:/div:1/section:1/ul:1/li:1	li	← Home
+page:/div:1/section:1/ul:1/li:1/a:1	a	← Home
+page:/div:1/section:1/ul:1/li:2	li	Understand: Overview →What DEFXN is: the overview, how it works, agreements and the operating model
+page:/div:1/section:1/ul:1/li:2/a:1	a	Understand: Overview →
+page:/div:1/section:1/ul:1/li:2/span:1	span	What DEFXN is: the overview, how it works, agreements and the operating model
+page:/div:1/section:1/ul:1/li:3	li	Build: Resolutions for the mesh →Resolve something: resolutions, resolvers, your account and the tools that publish
+page:/div:1/section:1/ul:1/li:3/a:1	a	Build: Resolutions for the mesh →
+page:/div:1/section:1/ul:1/li:3/span:1	span	Resolve something: resolutions, resolvers, your account and the tools that publish
+page:/div:1/section:1/ul:1/li:4	li	Prove: Mesh performance →Measured evidence: benchmarks, the live mesh explorer and the evidence standard
+page:/div:1/section:1/ul:1/li:4/a:1	a	Prove: Mesh performance →
+page:/div:1/section:1/ul:1/li:4/span:1	span	Measured evidence: benchmarks, the live mesh explorer and the evidence standard
+page:/div:1/section:1/ul:1/li:5	li	Run: Run from source →Operate a node: run from source and join a named network
+page:/div:1/section:1/ul:1/li:5/a:1	a	Run: Run from source →
+page:/div:1/section:1/ul:1/li:5/span:1	span	Operate a node: run from source and join a named network
+page:/div:1/section:1/ul:1/li:6	li	Read: Protocol notes →Notes and articles from the work
+page:/div:1/section:1/ul:1/li:6/a:1	a	Read: Protocol notes →
+page:/div:1/section:1/ul:1/li:6/span:1	span	Notes and articles from the work
+page:/div:1/section:1/ul:1/li:7	li	Previews & lab: Interactive model →Design previews and illustrative models: not live data
+page:/div:1/section:1/ul:1/li:7/a:1	a	Previews & lab: Interactive model →
+page:/div:1/section:1/ul:1/li:7/span:1	span	Design previews and illustrative models: not live data
+page:/div:2	div	

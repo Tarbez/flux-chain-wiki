@@ -1,0 +1,119 @@
+# key	tag	text -- layout keys of /what-is-a-resolver before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeResolverFLUX PROTOCOL / RESOLVERSAsk the mesh. Get a claim you can check.A resolver is launched with one signed record. It gets its own chain, it is built f
+page:/div:1	div	HomeResolverFLUX PROTOCOL / RESOLVERSAsk the mesh. Get a claim you can check.A resolver is launched with one signed record. It gets its own chain, it is built f
+page:/div:1/nav:1	nav	HomeResolver
+page:/div:1/nav:1/a:1	a	Home
+page:/div:1/nav:1/a:1/svg:1	svg	
+page:/div:1/nav:1/a:1/svg:1/path:1	path	
+page:/div:1/nav:1/a:1/svg:1/path:2	path	
+page:/div:1/nav:1/span:1	span	Resolver
+page:/div:1/p:1	p	FLUX PROTOCOL / RESOLVERS
+id:resolver-lab-title	h1	Ask the mesh. Get a claim you can check.
+page:/div:1/p:2	p	A resolver is launched with one signed record. It gets its own chain, it is built from shared capabilities anyone can check, and it refuses any record that does
+page:/div:1/nav:2	nav	01Ask02Resolve03Check04Laws
+page:/div:1/nav:2/span:1	span	
+page:/div:1/nav:2/span:2	span	
+page:/div:1/nav:2/span:3	span	
+page:/div:1/nav:2/button:1	button	01Ask
+page:/div:1/nav:2/button:1/span:1	span	
+page:/div:1/nav:2/button:1/span:2	span	01Ask
+page:/div:1/nav:2/button:1/span:2/small:1	small	01
+page:/div:1/nav:2/button:2	button	02Resolve
+page:/div:1/nav:2/button:2/span:1	span	
+page:/div:1/nav:2/button:2/span:2	span	02Resolve
+page:/div:1/nav:2/button:2/span:2/small:1	small	02
+page:/div:1/nav:2/button:3	button	03Check
+page:/div:1/nav:2/button:3/span:1	span	
+page:/div:1/nav:2/button:3/span:2	span	03Check
+page:/div:1/nav:2/button:3/span:2/small:1	small	03
+page:/div:1/nav:2/button:4	button	04Laws
+page:/div:1/nav:2/button:4/span:1	span	
+page:/div:1/nav:2/button:4/span:2	span	04Laws
+page:/div:1/nav:2/button:4/span:2/small:1	small	04
+page:/div:1/div:1	div	Send a record in its grammar.A resolver only accepts records in its own grammar; anything else is refused before it reaches a peer. This example takes a documen
+page:/div:1/div:1/h2:1	h2	Send a record in its grammar.
+page:/div:1/div:1/p:1	p	A resolver only accepts records in its own grammar; anything else is refused before it reaches a peer. This example takes a document identifier and checks it ag
+page:/div:1/nav:3	nav	Resolve→Spec →
+page:/div:1/nav:3/button:1	button	
+page:/div:1/nav:3/a:1	a	Resolve→
+page:/div:1/nav:3/a:1/span:1	span	Resolve
+page:/div:1/nav:3/a:1/span:2	span	→
+page:/div:1/nav:3/a:2	a	Spec →
+page:/div:1/div:2	div	What “verified on chain” meansIts tests are its own. A capability’s test vectors come from its crate’s own test suite, with a hash of the exact source they ran 
+page:/div:1/div:2/details:1	details	What “verified on chain” meansIts tests are its own. A capability’s test vectors come from its crate’s own test suite, with a hash of the exact source they ran 
+page:/div:1/div:2/details:1/summary:1	summary	What “verified on chain” means
+page:/div:1/div:2/details:1/ol:1	ol	Its tests are its own. A capability’s test vectors come from its crate’s own test suite, with a hash of the exact source they ran against.Providers prove them. 
+page:/div:1/div:2/details:1/ol:1/li:1	li	Its tests are its own. A capability’s test vectors come from its crate’s own test suite, with a hash of the exact source they ran against.
+page:/div:1/div:2/details:1/ol:1/li:2	li	Providers prove them. A provider that serves a resolver built on a capability must pass that capability’s vectors first, and the provider list records the proof
+page:/div:1/div:2/details:1/ol:1/li:3	li	Launches are checked. A launch that names a capability that is not launched, or not the current version, is refused.
+page:/div:1/div:2/details:1/p:1	p	Planned, not built: audits by providers and reviewers, bounties for findings, and an option to require audited capabilities.
+page:/div:1/div:2/nav:1	nav	Every resolver and capability →Deploy a resolver →Open Explore ↗Open Deploy ↗Why your resolver’s limits are yours →Inspect reference evidence →
+page:/div:1/div:2/nav:1/a:1	a	Every resolver and capability →
+page:/div:1/div:2/nav:1/a:2	a	Deploy a resolver →
+page:/div:1/div:2/nav:1/a:3	a	Open Explore ↗
+page:/div:1/div:2/nav:1/a:4	a	Open Deploy ↗
+page:/div:1/div:2/nav:1/a:5	a	Why your resolver’s limits are yours →
+page:/div:1/div:2/nav:1/a:6	a	Inspect reference evidence →
+page:/div:1/div:2/p:1	p	Explore and Deploy run on the development network; public hosting is not established yet.
+page:/figure:1	figure	policy.doc-size/v1 · runs in your browser↻Run againReport3.2 MBVideo48 MBLogo12 KBdoc:7f3a, 3.2 MB: satisfies policy.doc-size/v1. Claim id 8d113416.01One launch
+page:/figure:1/figcaption:1	figcaption	policy.doc-size/v1 · runs in your browser↻Run again
+page:/figure:1/figcaption:1/span:1	span	policy.doc-size/v1 · runs in your browser
+page:/figure:1/figcaption:1/button:1	button	↻Run again
+page:/figure:1/figcaption:1/button:1/span:1	span	↻
+page:/figure:1/div:1	div	
+page:/figure:1/div:1/canvas:1	canvas	
+page:/figure:1/div:1/div:1	div	
+page:/figure:1/div:1/div:1/p:1	p	
+page:/figure:1/div:1/div:1/span:1	span	
+page:/figure:1/div:1/div:1/span:2	span	
+page:/figure:1/div:1/div:1/span:3	span	
+page:/figure:1/div:1/div:1/span:4	span	
+page:/figure:1/div:1/div:1/span:5	span	
+page:/figure:1/div:2	div	Report3.2 MBVideo48 MBLogo12 KB
+page:/figure:1/div:2/div:1	div	Report3.2 MBVideo48 MBLogo12 KB
+page:/figure:1/div:2/div:1/button:1	button	Report3.2 MB
+page:/figure:1/div:2/div:1/button:1/span:1	span	Report
+page:/figure:1/div:2/div:1/button:1/small:1	small	3.2 MB
+page:/figure:1/div:2/div:1/button:2	button	Video48 MB
+page:/figure:1/div:2/div:1/button:2/span:1	span	Video
+page:/figure:1/div:2/div:1/button:2/small:1	small	48 MB
+page:/figure:1/div:2/div:1/button:3	button	Logo12 KB
+page:/figure:1/div:2/div:1/button:3/span:1	span	Logo
+page:/figure:1/div:2/div:1/button:3/small:1	small	12 KB
+page:/figure:1/p:1	p	doc:7f3a, 3.2 MB: satisfies policy.doc-size/v1. Claim id 8d113416.
+page:/figure:1/ol:1	ol	01One launch, one chain.PartialA single signed record gives a resolver its chain id, its providers and its manifests. Its whole history is readable, oldest firs
+page:/figure:1/ol:1/li:1	li	01One launch, one chain.PartialA single signed record gives a resolver its chain id, its providers and its manifests. Its whole history is readable, oldest firs
+page:/figure:1/ol:1/li:1/div:1	div	01One launch, one chain.Partial
+page:/figure:1/ol:1/li:1/div:1/span:1	span	01
+page:/figure:1/ol:1/li:1/div:1/strong:1	strong	One launch, one chain.
+page:/figure:1/ol:1/li:1/div:1/span:2	span	Partial
+id:resolver-law-1	p	A single signed record gives a resolver its chain id, its providers and its manifests. Its whole history is readable, oldest first.
+page:/figure:1/ol:1/li:1/button:1	button	
+page:/figure:1/ol:1/li:2	li	02Built from checked parts.PartialA resolver names the capabilities it composes. The network refuses a launch that names a capability that is not launched, or n
+page:/figure:1/ol:1/li:2/div:1	div	02Built from checked parts.Partial
+page:/figure:1/ol:1/li:2/div:1/span:1	span	02
+page:/figure:1/ol:1/li:2/div:1/strong:1	strong	Built from checked parts.
+page:/figure:1/ol:1/li:2/div:1/span:2	span	Partial
+id:resolver-law-2	p	A resolver names the capabilities it composes. The network refuses a launch that names a capability that is not launched, or not the current version. See it app
+page:/figure:1/ol:1/li:2/p:1/button:1	button	See it applied →
+page:/figure:1/ol:1/li:2/button:1	button	
+page:/figure:1/ol:1/li:3	li	03Its grammar is the gate.PartialEvery record is checked against the grammar the resolver published at launch, before it reaches any peer. A record that does no
+page:/figure:1/ol:1/li:3/div:1	div	03Its grammar is the gate.Partial
+page:/figure:1/ol:1/li:3/div:1/span:1	span	03
+page:/figure:1/ol:1/li:3/div:1/strong:1	strong	Its grammar is the gate.
+page:/figure:1/ol:1/li:3/div:1/span:2	span	Partial
+id:resolver-law-3	p	Every record is checked against the grammar the resolver published at launch, before it reaches any peer. A record that does not fit is refused, with the reason
+page:/figure:1/ol:1/li:3/p:1/button:1	button	See the gate →
+page:/figure:1/ol:1/li:3/button:1	button	
+page:/figure:1/ol:1/li:4	li	04Fixed unless you said otherwise.PartialA resolver is immutable by default. Only the control key named at launch can upgrade it, and an upgrade adds a new decl
+page:/figure:1/ol:1/li:4/div:1	div	04Fixed unless you said otherwise.Partial
+page:/figure:1/ol:1/li:4/div:1/span:1	span	04
+page:/figure:1/ol:1/li:4/div:1/strong:1	strong	Fixed unless you said otherwise.
+page:/figure:1/ol:1/li:4/div:1/span:2	span	Partial
+id:resolver-law-4	p	A resolver is immutable by default. Only the control key named at launch can upgrade it, and an upgrade adds a new declaration; it never rewrites the old one. W
+page:/figure:1/ol:1/li:4/p:1/button:1	button	Watch it repeat →
+page:/figure:1/ol:1/li:4/button:1	button	
+page:/figure:1/p:2	p	Wording from the resolver spec · status from the status page
+page:/figure:1/p:2/a:1	a	resolver spec
+page:/figure:1/p:2/a:2	a	status page
+page:/div:2	div	

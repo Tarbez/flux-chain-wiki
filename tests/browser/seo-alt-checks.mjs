@@ -104,7 +104,7 @@ async function save(app) {
 async function reveal(scope, key) {
   const row = scope.locator(`[data-seo-field="${key}"]:not([data-seo-bot])`).first();
   if (!(await row.isVisible())) {
-    const trigger = row.locator('xpath=ancestor::*[@data-ark-primitive="disclosure"][1]/button[contains(@class,"ark-disclosure-trigger")]');
+    const trigger = row.locator('xpath=ancestor::*[@data-ark-primitive="disclosure"][1]/button[contains(@class,"ark-disclosure__trigger")]');
     if (await trigger.count() && (await trigger.getAttribute('aria-expanded')) !== 'true') await trigger.click();
   }
   return row;

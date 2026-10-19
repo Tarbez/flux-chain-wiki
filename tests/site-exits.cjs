@@ -15,13 +15,18 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const read = (f) => fs.readFileSync(f, 'utf8');
 
-assert(/pageLink\([^)]*'stats\/gpu'\)/.test(read('js/pages/stats.js')), '/stats links /stats/gpu');
-assert(/linkEl\('Inspect reference evidence →', words\('INSPECT\.HREF'\)/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver renders INSPECT.HREF (-> /start-from-something-real)');
+// /stats, /resolvers and /resolver-math are pages of Ark blocks since 2026-10-19 (W3-STATS): their
+// exits are route: links in the spec (tests/stats-page.cjs, tests/resolvers-blocks.cjs and
+// tests/resolver-math-blocks.cjs check they render as router links).
+assert(read('js/pages/stats.js').includes("href: 'route:stats/gpu'"), '/stats links /stats/gpu');
+// /what-is-a-resolver is the story template since 2026-10-19 (W3-GUIDE): the link is a related page in its pager.
+assert(/\{ label: 'Inspect reference evidence', href: words\('INSPECT\.HREF'\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver renders INSPECT.HREF (-> /start-from-something-real)');
 assert(/"INSPECT\.HREF"[\s\S]{0,200}"value": "route:references"/.test(read('js/content/manifests/resolver.js')), 'and INSPECT.HREF still points at the reference resolvers');
 const resolvers = read('js/pages/resolvers.js');
 for (const target of ['resolver', 'resolver-math', 'references', 'deploy']) assert(resolvers.includes("'route:" + target + "'"), '/resolvers leads on to ' + target);
-assert(/pageLink\('Browse resolvers →', 'resolvers'/.test(read('js/pages/resolver-math.js')), '/resolver-math leads on to /resolvers');
-assert(/linkEl\('The math behind a resolver','route:resolver-math'\)/.test(read('js/pages/concept.js')), '/concept\'s evidence group opens /resolver-math');
+assert(/\{ label: 'Browse resolvers', href: 'route:resolvers' \}/.test(read('js/pages/resolver-math.js')), '/resolver-math leads on to /resolvers');
+// /concept is a page of Ark blocks since 2026-10-19 (tests/story-blocks.cjs): the evidence group's last card.
+assert(/if \(group === 'more'\) items\.push\(\{ title: 'The math behind a resolver', description: 'Resolver math \/ open the page', href: 'route:resolver-math' \}\);/.test(read('js/pages/concept.js')), '/concept\'s evidence group opens /resolver-math');
 assert(read('js/content/articles/the-grammar-does-almost-no-work.js').includes('"relatedPage": "route:resolver-math"'), 'the grammar article leads to /resolver-math');
 assert(read('js/content/articles/how-we-got-fast-and-what-we-got-wrong.js').includes('"relatedPage": "route:stats/gpu"'), 'the speed article leads to /stats/gpu');
 {
@@ -32,7 +37,9 @@ assert(read('js/content/articles/how-we-got-fast-and-what-we-got-wrong.js').incl
   assert(/item\.also && ArkUI\.pageCatalog\[item\.also\]/.test(read('js/pages/resolutions.js')), 'and the detail page renders that link');
 }
 const palette = read('js/pages/palette.js');
-assert(palette.includes("linkEl('← Home', 'route:zero'") && palette.includes("'Theme settings →'") && palette.includes(".settings-trigger"), '/palette has a way home and to the theme settings');
+// /palette is a spec of Ark blocks since 2026-10-19: its way home is an actions item routed to
+// zero, and Theme settings an action the page opens (tests/palette-blocks.cjs renders both).
+assert(/\{ label: 'Home', href: 'route:zero'/.test(palette) && /label: 'Theme settings', action: 'open-theme-settings'/.test(palette) && palette.includes("'open-theme-settings': function") && palette.includes(".settings-trigger"), '/palette has a way home and to the theme settings');
 assert(/bind\('palette',\(\)=>\{const router=window\.ArkUI&&ArkUI\.pageRouter;[^}]*router\.navigate\('palette'\)/.test(read('scripts/settings-entry.js')), 'the theme settings panel links /palette');
 assert(read('js/settings/panel.js').includes('See the full palette'), 'and the built panel carries it (node scripts/build-ark-vendor.cjs)');
 

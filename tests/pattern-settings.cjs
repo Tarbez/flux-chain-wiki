@@ -7,8 +7,13 @@ const context={meshPattern:{refresh(){settled++;},animate(){scans++;}},values:{a
 vm.createContext(context);vm.runInContext(motion,context);
 context.schedulePattern();assert.equal(timer,null,'explicit static preference stays static');
 context.values.animated=true;context.schedulePattern();assert.equal(timer.ms,1200);
-timer.fn();assert.equal(scans,1);assert.equal(timer.ms,3200,'allow the complete wave before resting');
-timer.fn();assert.equal(timer.ms,1200,'pause starts after the wave');
+// One wave per real change, never a loop (memory defxn_animation_must_settle): until 2026-10-19
+// the wave re-armed itself 3200 ms after each scan, so a settled page requested ~20 frames/s
+// forever (tests/browser/idle-frames.mjs). The fabric's scan paints its own settled frame and
+// stops; nothing may be scheduled after it until schedulePattern() is called by a real change.
+{const fire=timer.fn;timer=null;fire();}assert.equal(scans,1);assert.equal(timer,null,'after the wave nothing is scheduled: the wave does not loop');
+assert.equal(context.loopTimer,0,'no timer handle survives the wave');
+context.schedulePattern();assert.equal(timer.ms,1200,'the next real change re-arms exactly one wave');
 context.values.delay=8;context.schedulePattern();assert.equal(timer.ms,8000);
 context.document.hidden=true;context.schedulePattern();assert.equal(timer,null);
 context.document.hidden=false;context.reduced.matches=true;context.schedulePattern();assert.equal(timer,null);
@@ -24,7 +29,7 @@ assert.equal(storage.patternValues('blocks').scale,140);assert.equal(storage.pat
 assert.equal(storage.patternValues('traces').animated,true,'new patterns move by default');
 assert.equal(storage.patternValues('nodes').animated,false,'saved opt-out is not overwritten');
 storage.saved.layers={scale:999,delay:NaN};assert.equal(storage.patternValues('layers').scale,140);assert.equal(storage.patternValues('layers').delay,1.2);
-console.log('PASS: independent saved settings, new motion defaults, finite waves, delayed loops, hidden/reduced/global pause, disable and disposal.');
+console.log('PASS: independent saved settings, new motion defaults, finite waves, one wave per change (no loop), hidden/reduced/global pause, disable and disposal.');
 
 /* ArkSiteDefaults (js/content/settings-defaults.js) fallback: patternValues()'s per-control
    fallback must check SITE_DEFAULTS.patternConfig[name][key] before falling back to the

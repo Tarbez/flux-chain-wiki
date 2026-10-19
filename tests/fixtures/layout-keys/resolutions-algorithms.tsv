@@ -1,0 +1,61 @@
+# key	tag	text -- layout keys of /resolutions/algorithms before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsAlgorithms13 / 20 · Intelligence & dataResolve your algorithmsPublish algorithms as resolvers that anyone can call and check.ForAlgorithm authors
+page:/nav:1	nav	All resolutionsAlgorithms
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Algorithms
+page:/div:1	div	13 / 20 · Intelligence & dataResolve your algorithmsPublish algorithms as resolvers that anyone can call and check.ForAlgorithm authors, scientists and API vend
+page:/div:1/header:1	header	13 / 20 · Intelligence & dataResolve your algorithmsPublish algorithms as resolvers that anyone can call and check.ForAlgorithm authors, scientists and API vend
+page:/div:1/header:1/p:1	p	13 / 20 · Intelligence & data
+id:resolution-title-algorithms	h1	Resolve your algorithms
+page:/div:1/header:1/p:2	p	Publish algorithms as resolvers that anyone can call and check.
+page:/div:1/header:1/dl:1	dl	ForAlgorithm authors, scientists and API vendors.ProblemOpaque APIs change silently and results cannot be reproduced.
+page:/div:1/header:1/dl:1/div:1	div	ForAlgorithm authors, scientists and API vendors.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Algorithm authors, scientists and API vendors.
+page:/div:1/header:1/dl:1/div:2	div	ProblemOpaque APIs change silently and results cannot be reproduced.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Opaque APIs change silently and results cannot be reproduced.
+page:/div:1/header:1/div:1	div	Start here →Resolver Math →
+page:/div:1/header:1/div:1/a:1	a	Start here →
+page:/div:1/header:1/div:1/a:2	a	Resolver Math →
+page:/div:1/section:1	section	Ready now3Product ideas3How it resolvesResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →Mesh packagesReadyPublish and
+page:/div:1/section:1/div:1	div	Ready now3Product ideas3How it resolves
+id:resolution-level-tab-algorithms-0	button	Ready now3
+page:/div:1/section:1/div:1/button:1/span:1	span	3
+id:resolution-level-tab-algorithms-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-algorithms-2	button	How it resolves
+id:resolution-level-algorithms	div	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →Mesh packagesReadyPublish and install signed packages from the mesh 
+page:/div:1/section:1/div:2/div:1	div	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →Mesh packagesReadyPublish and install signed packages from the mesh 
+page:/div:1/section:1/div:2/div:1/a:1	a	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	ResolversReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Resolvers
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Publish logic at an address so anyone can run it and get the same claim.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/div:1	div	Mesh packagesReadyPublish and install signed packages from the mesh instead of one registry.
+page:/div:1/section:1/div:2/div:1/div:1/span:1	span	Mesh packagesReady
+page:/div:1/section:1/div:2/div:1/div:1/span:1/strong:1	strong	Mesh packages
+page:/div:1/section:1/div:2/div:1/div:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:1/span:2	span	Publish and install signed packages from the mesh instead of one registry.
+page:/div:1/section:1/div:2/div:1/a:2	a	Mesh ExplorerReadyRead any public record on the mesh and check who signed it.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	Mesh ExplorerReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Mesh Explorer
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Read any public record on the mesh and check who signed it.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← DataPreviousAll 20Information →Next
+page:/nav:2/a:1	a	← DataPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Information →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

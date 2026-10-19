@@ -43,8 +43,10 @@ for (const phrase of ['one named dataset snapshot', 'Who writes it', 'References
 }
 
 const sheet = fs.readFileSync('js/pages/sheet.js', 'utf8');
-assert(sheet.includes('mechanism-status-summary'), 'shared sheet keeps the current status visible');
-assert(sheet.includes('content-layer-reference'), 'shared sheet places limitations and evidence in the reference layer');
+// The sheet is the story template since 2026-10-19 (js/pages/story.js): the status is its boundary,
+// beside the depth control in every view; limits and evidence are its Evidence view.
+assert(/boundary: has\('STATUS\.TEXT'\) \? \{ tone: 'drift', title: copy\('STATUS\.TITLE'\), body: copy\('STATUS\.TEXT'\) \}/.test(sheet), 'shared sheet keeps the current status visible');
+assert(/reference: evidence\.length \? \{ blocks: evidence \}/.test(sheet) && sheet.includes("copy('LIMIT.TEXT')"), 'shared sheet places limitations and evidence in the reference layer');
 assert(sheet.includes('manifest.meta.docs'), 'shared sheet renders canonical documentation links');
 
 const lab = fs.readFileSync('js/pages/lab.js', 'utf8');

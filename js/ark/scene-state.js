@@ -146,15 +146,17 @@
       '.ark-hero-copy,.home-hero-actions a,.home-lifecycle-caption,.home-lifecycle-all,' +
       '.home-stage-link,.home-tools a';
     var pageItems = '.learning-eyebrow,.learning-heading,.learning-intro,.concept-deck,' +
-      '.concept-principles > section,.concept-links > a,.theory-footer > a,.deploy-step,.deploy-caveat,' +
+      '.concept-links > a,.theory-footer > a,.deploy-step,.deploy-caveat,' +
       '.learning-list > li,.hero-experiment-kicker,.hero-experiment-index,.hero-experiment-copy h1,' +
       '.hero-experiment-question,.hero-experiment-note,.hero-experiment-copy a,' +
       '.section-heading > div,.section-heading > p,.lab-toolbar,.experiment-stage,.lab-bottom > *,.lab-note,' +
       '.article-topline,.article-title,.article-core,.article-contents,.article-reading > section,' +
       '.article-answer-controls,.article-next,.mechanism-depth,.mechanism-inner-title,' +
-      '.mechanism-inner,.mechanism-status-summary,.content-layer-path,' +
-      '.lifecycle-page > h1,.lifecycle-scenario,.lifecycle-page > section,.lifecycle-evidence,' +
-      '.guided-page > h1,.guided-body,.guided-page > .story-depth,.lifecycle-trail,.lifecycle-dashboard-body,.lifecycle-next';
+      '.mechanism-inner,.content-layer-path,' +
+      '.guided-page > h1,.guided-body,.guided-page > .story-depth,.lifecycle-next,' +
+      // the story template (js/pages/story.js): its blocks, and the depth column -- never the
+      // figure column as one slab (a retained stage illustration must not fade; see below)
+      '.story-page > [data-ark-block],.story-page .story-main';
 
     /* Per-element animation overrides (js/content/element-motion.js, Part H of the
        follow-up Studio plan): additive, never a replacement of the stagger above.
@@ -185,10 +187,9 @@
     function targets(el) {
       if (!el.querySelectorAll) return [];
       var matches = Array.from(el.querySelectorAll(el.dataset.arkPage === 'zero' ? homeItems : pageItems));
-      // A lifecycle illustration's border never belongs to a fading ancestor.
-      // Animate the answer and the illustration's contents as separate targets.
+      // A lifecycle illustration's frame never belongs to a fading ancestor: its contents are
+      // animated as separate targets.
       if(el.querySelector('.stage-scene')){
-        matches=matches.map(function(item){return item.classList.contains('lifecycle-dashboard-body')?item.querySelector('.lifecycle-answer'):item;}).filter(Boolean);
         matches=matches.concat(Array.from(el.querySelector('.stage-scene').children));
       }
       return matches.filter(function (item) {

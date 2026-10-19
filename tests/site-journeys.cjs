@@ -36,8 +36,12 @@ assert.equal(catalog.reference.journey, null, 'the reference reader is a utility
 // every journey has exactly one way in, and the footer strip and not-found page read it
 for (const id of journeyIds) assert.equal(rows.filter((r) => r.journey === id && r.lead).length, 1, id + ' has exactly one lead page');
 const hero = fs.readFileSync('js/hero-motion.js', 'utf8');
-assert(/make\('nav', 'site-footer-strip'\)/.test(hero) && /ArkSitePages\.journeys\(\)\.forEach/.test(hero) && /row\.lead/.test(hero), 'the footer strip is derived from the journeys\' lead pages');
+assert(/ArkSitePages\.journeys\(\)\.forEach/.test(hero) && /row\.lead/.test(hero) && /make\('a', 'site-footer-link'\)/.test(hero), 'the footer strip is derived from the journeys\' lead pages');
 assert(!/corner-navigation|theory-invitation|HOME\.CORNER/.test(hero), 'the invisible corner navigation is gone');
+// since 2026-10-19 the strip is the section-link row of the family footer (the kit's renderFooter),
+// drawn into a host that keeps the strip's class, so its aria-current sync and the browser driver
+// still find it
+assert(/make\('div', 'site-footer-strip'\)/.test(hero) && /kit\.renderFooter\(foot, kit\.HOME\.id, \{ links: /.test(hero), 'the footer strip is the family footer\'s section links');
 
 // the sitemap: home, then exactly the pages with a journey, the manifests, resolutions and articles
 const seoCtx = vm.createContext({});

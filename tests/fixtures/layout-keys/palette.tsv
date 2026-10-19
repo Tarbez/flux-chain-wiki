@@ -1,0 +1,301 @@
+# key	tag	text -- layout keys of /palette before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeInterface palette// DESIGN SYSTEMPaletteActive theme: Ember darkThree roles share one lightness and chroma, so only hue tells them apart. Neutrals carry a t
+page:/div:1	div	HomeInterface palette// DESIGN SYSTEMPaletteActive theme: Ember darkThree roles share one lightness and chroma, so only hue tells them apart. Neutrals carry a t
+page:/div:1/nav:1	nav	HomeInterface palette
+page:/div:1/nav:1/a:1	a	Home
+page:/div:1/nav:1/a:1/svg:1	svg	
+page:/div:1/nav:1/a:1/svg:1/path:1	path	
+page:/div:1/nav:1/a:1/svg:1/path:2	path	
+page:/div:1/nav:1/span:1	span	Interface palette
+page:/div:1/header:1	header	// DESIGN SYSTEMPaletteActive theme: Ember darkThree roles share one lightness and chroma, so only hue tells them apart. Neutrals carry a trace of the primary h
+page:/div:1/header:1/p:1	p	// DESIGN SYSTEM
+id:palette-title	h1	Palette
+page:/div:1/header:1/p:2	p	Active theme: Ember dark
+page:/div:1/header:1/p:3	p	Three roles share one lightness and chroma, so only hue tells them apart. Neutrals carry a trace of the primary hue. Every tint on the site is one of the shades
+page:/div:1/section:1	section	ComponentsMain actionsolid · main CTARun DEFXNsoft · repeated main actionSecondary actionquiet · secondary actionSelectedOptionOptionchoice · tabs and pickersTe
+page:/div:1/section:1/h2:1	h2	Components
+page:/div:1/section:1/div:1	div	Main actionsolid · main CTARun DEFXNsoft · repeated main actionSecondary actionquiet · secondary actionSelectedOptionOptionchoice · tabs and pickersText linklin
+page:/div:1/section:1/div:1/figure:1	figure	Main actionsolid · main CTA
+page:/div:1/section:1/div:1/figure:1/button:1	button	Main action
+page:/div:1/section:1/div:1/figure:1/figcaption:1	figcaption	solid · main CTA
+page:/div:1/section:1/div:1/figure:2	figure	Run DEFXNsoft · repeated main action
+page:/div:1/section:1/div:1/figure:2/button:1	button	Run DEFXN
+page:/div:1/section:1/div:1/figure:2/figcaption:1	figcaption	soft · repeated main action
+page:/div:1/section:1/div:1/figure:3	figure	Secondary actionquiet · secondary action
+page:/div:1/section:1/div:1/figure:3/button:1	button	Secondary action
+page:/div:1/section:1/div:1/figure:3/figcaption:1	figcaption	quiet · secondary action
+page:/div:1/section:1/div:1/figure:4	figure	SelectedOptionOptionchoice · tabs and pickers
+page:/div:1/section:1/div:1/figure:4/div:1	div	SelectedOptionOption
+page:/div:1/section:1/div:1/figure:4/div:1/button:1	button	Selected
+page:/div:1/section:1/div:1/figure:4/div:1/button:2	button	Option
+page:/div:1/section:1/div:1/figure:4/div:1/button:3	button	Option
+page:/div:1/section:1/div:1/figure:4/figcaption:1	figcaption	choice · tabs and pickers
+page:/div:1/section:1/div:1/figure:5	figure	Text linklink
+page:/div:1/section:1/div:1/figure:5/span:1	span	Text link
+page:/div:1/section:1/div:1/figure:5/span:1/a:1	a	Text link
+page:/div:1/section:1/div:1/figure:5/figcaption:1	figcaption	link
+page:/div:1/section:2	section	Primary --primaryIdentity: the hero accent and small brand marks. Never a button.100subtle fill200hover fill300border400strong border500base600hover on fill700t
+page:/div:1/section:2/h2:1	h2	Primary --primary
+page:/div:1/section:2/p:1	p	Identity: the hero accent and small brand marks. Never a button.
+page:/div:1/section:2/div:1	div	100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:2/div:1/div:1	div	100subtle fill
+page:/div:1/section:2/div:1/div:1/span:1	span	
+page:/div:1/section:2/div:1/div:1/small:1	small	subtle fill
+page:/div:1/section:2/div:1/div:2	div	200hover fill
+page:/div:1/section:2/div:1/div:2/span:1	span	
+page:/div:1/section:2/div:1/div:2/small:1	small	hover fill
+page:/div:1/section:2/div:1/div:3	div	300border
+page:/div:1/section:2/div:1/div:3/span:1	span	
+page:/div:1/section:2/div:1/div:3/small:1	small	border
+page:/div:1/section:2/div:1/div:4	div	400strong border
+page:/div:1/section:2/div:1/div:4/span:1	span	
+page:/div:1/section:2/div:1/div:4/small:1	small	strong border
+page:/div:1/section:2/div:1/div:5	div	500base
+page:/div:1/section:2/div:1/div:5/span:1	span	
+page:/div:1/section:2/div:1/div:5/small:1	small	base
+page:/div:1/section:2/div:1/div:6	div	600hover on fill
+page:/div:1/section:2/div:1/div:6/span:1	span	
+page:/div:1/section:2/div:1/div:6/small:1	small	hover on fill
+page:/div:1/section:2/div:1/div:7	div	700text on subtle
+page:/div:1/section:2/div:1/div:7/span:1	span	
+page:/div:1/section:2/div:1/div:7/small:1	small	text on subtle
+page:/div:1/section:2/div:1/div:8	div	inktext on base
+page:/div:1/section:2/div:1/div:8/span:1	span	
+page:/div:1/section:2/div:1/div:8/small:1	small	text on base
+page:/div:1/section:2/p:2	p	Tonal scale, for illustration
+page:/div:1/section:2/div:2	div	50100200300400500600700800900950
+page:/div:1/section:2/div:2/div:1	div	50
+page:/div:1/section:2/div:2/div:1/span:1	span	
+page:/div:1/section:2/div:2/div:2	div	100
+page:/div:1/section:2/div:2/div:2/span:1	span	
+page:/div:1/section:2/div:2/div:3	div	200
+page:/div:1/section:2/div:2/div:3/span:1	span	
+page:/div:1/section:2/div:2/div:4	div	300
+page:/div:1/section:2/div:2/div:4/span:1	span	
+page:/div:1/section:2/div:2/div:5	div	400
+page:/div:1/section:2/div:2/div:5/span:1	span	
+page:/div:1/section:2/div:2/div:6	div	500
+page:/div:1/section:2/div:2/div:6/span:1	span	
+page:/div:1/section:2/div:2/div:7	div	600
+page:/div:1/section:2/div:2/div:7/span:1	span	
+page:/div:1/section:2/div:2/div:8	div	700
+page:/div:1/section:2/div:2/div:8/span:1	span	
+page:/div:1/section:2/div:2/div:9	div	800
+page:/div:1/section:2/div:2/div:9/span:1	span	
+page:/div:1/section:2/div:2/div:10	div	900
+page:/div:1/section:2/div:2/div:10/span:1	span	
+page:/div:1/section:2/div:2/div:11	div	950
+page:/div:1/section:2/div:2/div:11/span:1	span	
+page:/div:1/section:3	section	Secondary --secondaryThe main call to action: solid once per view, soft when repeated.100subtle fill200hover fill300border400strong border500base600hover on fil
+page:/div:1/section:3/h2:1	h2	Secondary --secondary
+page:/div:1/section:3/p:1	p	The main call to action: solid once per view, soft when repeated.
+page:/div:1/section:3/div:1	div	100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:3/div:1/div:1	div	100subtle fill
+page:/div:1/section:3/div:1/div:1/span:1	span	
+page:/div:1/section:3/div:1/div:1/small:1	small	subtle fill
+page:/div:1/section:3/div:1/div:2	div	200hover fill
+page:/div:1/section:3/div:1/div:2/span:1	span	
+page:/div:1/section:3/div:1/div:2/small:1	small	hover fill
+page:/div:1/section:3/div:1/div:3	div	300border
+page:/div:1/section:3/div:1/div:3/span:1	span	
+page:/div:1/section:3/div:1/div:3/small:1	small	border
+page:/div:1/section:3/div:1/div:4	div	400strong border
+page:/div:1/section:3/div:1/div:4/span:1	span	
+page:/div:1/section:3/div:1/div:4/small:1	small	strong border
+page:/div:1/section:3/div:1/div:5	div	500base
+page:/div:1/section:3/div:1/div:5/span:1	span	
+page:/div:1/section:3/div:1/div:5/small:1	small	base
+page:/div:1/section:3/div:1/div:6	div	600hover on fill
+page:/div:1/section:3/div:1/div:6/span:1	span	
+page:/div:1/section:3/div:1/div:6/small:1	small	hover on fill
+page:/div:1/section:3/div:1/div:7	div	700text on subtle
+page:/div:1/section:3/div:1/div:7/span:1	span	
+page:/div:1/section:3/div:1/div:7/small:1	small	text on subtle
+page:/div:1/section:3/div:1/div:8	div	inktext on base
+page:/div:1/section:3/div:1/div:8/span:1	span	
+page:/div:1/section:3/div:1/div:8/small:1	small	text on base
+page:/div:1/section:3/p:2	p	Tonal scale, for illustration
+page:/div:1/section:3/div:2	div	50100200300400500600700800900950
+page:/div:1/section:3/div:2/div:1	div	50
+page:/div:1/section:3/div:2/div:1/span:1	span	
+page:/div:1/section:3/div:2/div:2	div	100
+page:/div:1/section:3/div:2/div:2/span:1	span	
+page:/div:1/section:3/div:2/div:3	div	200
+page:/div:1/section:3/div:2/div:3/span:1	span	
+page:/div:1/section:3/div:2/div:4	div	300
+page:/div:1/section:3/div:2/div:4/span:1	span	
+page:/div:1/section:3/div:2/div:5	div	400
+page:/div:1/section:3/div:2/div:5/span:1	span	
+page:/div:1/section:3/div:2/div:6	div	500
+page:/div:1/section:3/div:2/div:6/span:1	span	
+page:/div:1/section:3/div:2/div:7	div	600
+page:/div:1/section:3/div:2/div:7/span:1	span	
+page:/div:1/section:3/div:2/div:8	div	700
+page:/div:1/section:3/div:2/div:8/span:1	span	
+page:/div:1/section:3/div:2/div:9	div	800
+page:/div:1/section:3/div:2/div:9/span:1	span	
+page:/div:1/section:3/div:2/div:10	div	900
+page:/div:1/section:3/div:2/div:10/span:1	span	
+page:/div:1/section:3/div:2/div:11	div	950
+page:/div:1/section:3/div:2/div:11/span:1	span	
+page:/div:1/section:4	section	Reference --referenceSecondary actions, links and selected states.100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtlein
+page:/div:1/section:4/h2:1	h2	Reference --reference
+page:/div:1/section:4/p:1	p	Secondary actions, links and selected states.
+page:/div:1/section:4/div:1	div	100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:4/div:1/div:1	div	100subtle fill
+page:/div:1/section:4/div:1/div:1/span:1	span	
+page:/div:1/section:4/div:1/div:1/small:1	small	subtle fill
+page:/div:1/section:4/div:1/div:2	div	200hover fill
+page:/div:1/section:4/div:1/div:2/span:1	span	
+page:/div:1/section:4/div:1/div:2/small:1	small	hover fill
+page:/div:1/section:4/div:1/div:3	div	300border
+page:/div:1/section:4/div:1/div:3/span:1	span	
+page:/div:1/section:4/div:1/div:3/small:1	small	border
+page:/div:1/section:4/div:1/div:4	div	400strong border
+page:/div:1/section:4/div:1/div:4/span:1	span	
+page:/div:1/section:4/div:1/div:4/small:1	small	strong border
+page:/div:1/section:4/div:1/div:5	div	500base
+page:/div:1/section:4/div:1/div:5/span:1	span	
+page:/div:1/section:4/div:1/div:5/small:1	small	base
+page:/div:1/section:4/div:1/div:6	div	600hover on fill
+page:/div:1/section:4/div:1/div:6/span:1	span	
+page:/div:1/section:4/div:1/div:6/small:1	small	hover on fill
+page:/div:1/section:4/div:1/div:7	div	700text on subtle
+page:/div:1/section:4/div:1/div:7/span:1	span	
+page:/div:1/section:4/div:1/div:7/small:1	small	text on subtle
+page:/div:1/section:4/div:1/div:8	div	inktext on base
+page:/div:1/section:4/div:1/div:8/span:1	span	
+page:/div:1/section:4/div:1/div:8/small:1	small	text on base
+page:/div:1/section:4/p:2	p	Tonal scale, for illustration
+page:/div:1/section:4/div:2	div	50100200300400500600700800900950
+page:/div:1/section:4/div:2/div:1	div	50
+page:/div:1/section:4/div:2/div:1/span:1	span	
+page:/div:1/section:4/div:2/div:2	div	100
+page:/div:1/section:4/div:2/div:2/span:1	span	
+page:/div:1/section:4/div:2/div:3	div	200
+page:/div:1/section:4/div:2/div:3/span:1	span	
+page:/div:1/section:4/div:2/div:4	div	300
+page:/div:1/section:4/div:2/div:4/span:1	span	
+page:/div:1/section:4/div:2/div:5	div	400
+page:/div:1/section:4/div:2/div:5/span:1	span	
+page:/div:1/section:4/div:2/div:6	div	500
+page:/div:1/section:4/div:2/div:6/span:1	span	
+page:/div:1/section:4/div:2/div:7	div	600
+page:/div:1/section:4/div:2/div:7/span:1	span	
+page:/div:1/section:4/div:2/div:8	div	700
+page:/div:1/section:4/div:2/div:8/span:1	span	
+page:/div:1/section:4/div:2/div:9	div	800
+page:/div:1/section:4/div:2/div:9/span:1	span	
+page:/div:1/section:4/div:2/div:10	div	900
+page:/div:1/section:4/div:2/div:10/span:1	span	
+page:/div:1/section:4/div:2/div:11	div	950
+page:/div:1/section:4/div:2/div:11/span:1	span	
+page:/div:1/section:5	section	Success --successState only.100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:5/h2:1	h2	Success --success
+page:/div:1/section:5/p:1	p	State only.
+page:/div:1/section:5/div:1	div	100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:5/div:1/div:1	div	100subtle fill
+page:/div:1/section:5/div:1/div:1/span:1	span	
+page:/div:1/section:5/div:1/div:1/small:1	small	subtle fill
+page:/div:1/section:5/div:1/div:2	div	200hover fill
+page:/div:1/section:5/div:1/div:2/span:1	span	
+page:/div:1/section:5/div:1/div:2/small:1	small	hover fill
+page:/div:1/section:5/div:1/div:3	div	300border
+page:/div:1/section:5/div:1/div:3/span:1	span	
+page:/div:1/section:5/div:1/div:3/small:1	small	border
+page:/div:1/section:5/div:1/div:4	div	400strong border
+page:/div:1/section:5/div:1/div:4/span:1	span	
+page:/div:1/section:5/div:1/div:4/small:1	small	strong border
+page:/div:1/section:5/div:1/div:5	div	500base
+page:/div:1/section:5/div:1/div:5/span:1	span	
+page:/div:1/section:5/div:1/div:5/small:1	small	base
+page:/div:1/section:5/div:1/div:6	div	600hover on fill
+page:/div:1/section:5/div:1/div:6/span:1	span	
+page:/div:1/section:5/div:1/div:6/small:1	small	hover on fill
+page:/div:1/section:5/div:1/div:7	div	700text on subtle
+page:/div:1/section:5/div:1/div:7/span:1	span	
+page:/div:1/section:5/div:1/div:7/small:1	small	text on subtle
+page:/div:1/section:5/div:1/div:8	div	inktext on base
+page:/div:1/section:5/div:1/div:8/span:1	span	
+page:/div:1/section:5/div:1/div:8/small:1	small	text on base
+page:/div:1/section:6	section	Warning --warningState only.100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:6/h2:1	h2	Warning --warning
+page:/div:1/section:6/p:1	p	State only.
+page:/div:1/section:6/div:1	div	100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:6/div:1/div:1	div	100subtle fill
+page:/div:1/section:6/div:1/div:1/span:1	span	
+page:/div:1/section:6/div:1/div:1/small:1	small	subtle fill
+page:/div:1/section:6/div:1/div:2	div	200hover fill
+page:/div:1/section:6/div:1/div:2/span:1	span	
+page:/div:1/section:6/div:1/div:2/small:1	small	hover fill
+page:/div:1/section:6/div:1/div:3	div	300border
+page:/div:1/section:6/div:1/div:3/span:1	span	
+page:/div:1/section:6/div:1/div:3/small:1	small	border
+page:/div:1/section:6/div:1/div:4	div	400strong border
+page:/div:1/section:6/div:1/div:4/span:1	span	
+page:/div:1/section:6/div:1/div:4/small:1	small	strong border
+page:/div:1/section:6/div:1/div:5	div	500base
+page:/div:1/section:6/div:1/div:5/span:1	span	
+page:/div:1/section:6/div:1/div:5/small:1	small	base
+page:/div:1/section:6/div:1/div:6	div	600hover on fill
+page:/div:1/section:6/div:1/div:6/span:1	span	
+page:/div:1/section:6/div:1/div:6/small:1	small	hover on fill
+page:/div:1/section:6/div:1/div:7	div	700text on subtle
+page:/div:1/section:6/div:1/div:7/span:1	span	
+page:/div:1/section:6/div:1/div:7/small:1	small	text on subtle
+page:/div:1/section:6/div:1/div:8	div	inktext on base
+page:/div:1/section:6/div:1/div:8/span:1	span	
+page:/div:1/section:6/div:1/div:8/small:1	small	text on base
+page:/div:1/section:7	section	Danger --dangerState only.100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:7/h2:1	h2	Danger --danger
+page:/div:1/section:7/p:1	p	State only.
+page:/div:1/section:7/div:1	div	100subtle fill200hover fill300border400strong border500base600hover on fill700text on subtleinktext on base
+page:/div:1/section:7/div:1/div:1	div	100subtle fill
+page:/div:1/section:7/div:1/div:1/span:1	span	
+page:/div:1/section:7/div:1/div:1/small:1	small	subtle fill
+page:/div:1/section:7/div:1/div:2	div	200hover fill
+page:/div:1/section:7/div:1/div:2/span:1	span	
+page:/div:1/section:7/div:1/div:2/small:1	small	hover fill
+page:/div:1/section:7/div:1/div:3	div	300border
+page:/div:1/section:7/div:1/div:3/span:1	span	
+page:/div:1/section:7/div:1/div:3/small:1	small	border
+page:/div:1/section:7/div:1/div:4	div	400strong border
+page:/div:1/section:7/div:1/div:4/span:1	span	
+page:/div:1/section:7/div:1/div:4/small:1	small	strong border
+page:/div:1/section:7/div:1/div:5	div	500base
+page:/div:1/section:7/div:1/div:5/span:1	span	
+page:/div:1/section:7/div:1/div:5/small:1	small	base
+page:/div:1/section:7/div:1/div:6	div	600hover on fill
+page:/div:1/section:7/div:1/div:6/span:1	span	
+page:/div:1/section:7/div:1/div:6/small:1	small	hover on fill
+page:/div:1/section:7/div:1/div:7	div	700text on subtle
+page:/div:1/section:7/div:1/div:7/span:1	span	
+page:/div:1/section:7/div:1/div:7/small:1	small	text on subtle
+page:/div:1/section:7/div:1/div:8	div	inktext on base
+page:/div:1/section:7/div:1/div:8/span:1	span	
+page:/div:1/section:7/div:1/div:8/small:1	small	text on base
+page:/div:1/section:8	section	Neutralscanvasdepthsurfaceraisednestedtext-fainttext-mutedtexttext-strong
+page:/div:1/section:8/h2:1	h2	Neutrals
+page:/div:1/section:8/div:1	div	canvasdepthsurfaceraisednestedtext-fainttext-mutedtexttext-strong
+page:/div:1/section:8/div:1/div:1	div	canvas
+page:/div:1/section:8/div:1/div:1/span:1	span	
+page:/div:1/section:8/div:1/div:2	div	depth
+page:/div:1/section:8/div:1/div:2/span:1	span	
+page:/div:1/section:8/div:1/div:3	div	surface
+page:/div:1/section:8/div:1/div:3/span:1	span	
+page:/div:1/section:8/div:1/div:4	div	raised
+page:/div:1/section:8/div:1/div:4/span:1	span	
+page:/div:1/section:8/div:1/div:5	div	nested
+page:/div:1/section:8/div:1/div:5/span:1	span	
+page:/div:1/section:8/div:1/div:6	div	text-faint
+page:/div:1/section:8/div:1/div:6/span:1	span	
+page:/div:1/section:8/div:1/div:7	div	text-muted
+page:/div:1/section:8/div:1/div:7/span:1	span	
+page:/div:1/section:8/div:1/div:8	div	text
+page:/div:1/section:8/div:1/div:8/span:1	span	
+page:/div:1/section:8/div:1/div:9	div	text-strong
+page:/div:1/section:8/div:1/div:9/span:1	span	
+page:/div:1/div:1	div	
+page:/div:1/nav:2	nav	← HomeTheme settings →
+page:/div:1/nav:2/a:1	a	← Home
+page:/div:1/nav:2/button:1	button	Theme settings →

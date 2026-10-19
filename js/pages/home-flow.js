@@ -5,14 +5,16 @@
    position, then copies it to K-of-N peers; a resolver reads what it means.
    The records stacked behind are the holder's earlier positions, each
    pointing to the one before. Under it, the five steps are listed once, as
-   the step links that drive the scene. The scene auto-advances, pauses on
-   hover/focus or with its own button, and stops when the page is hidden.
-   Reduced motion, or a paused scene, shows the finished record with the
-   steps still selectable. The example is illustrative. */
+   the step links that drive the scene. The scene plays through once and
+   settles on the finished record (no idle loop: the play button replays it),
+   pauses on hover/focus or with its own button, and stops when the page is
+   hidden or the scene is out of view. Reduced motion, or a paused scene,
+   shows one still frame with the steps still selectable. The example is
+   illustrative. Regression: tests/home-hero-scene.cjs. */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
-  var STEP_MS = 3200, RESTART_MS = 4200;
+  var STEP_MS = 3200;
 
   var ACTORS = [
     { id: 'holder', label: 'Holder' },
@@ -80,13 +82,13 @@
      long fields are truncated to fit. The SHAPE is real. */
 
   var BLOCKS = [
-    { x: 16,  w: 26, text: 'G',            under: 'who' },
-    { x: 55,  w: 96, text: 'YLEDGERENTRY', under: 'what kind' },
-    { x: 164, w: 24, text: 'V3',           under: 'version' },
-    { x: 201, w: 78, text: 'M1760…',       under: 'when' },
-    { x: 292, w: 34, text: 'J42',          under: 'position' },
-    { x: 339, w: 60, text: 'C2b9d…',       under: 'extends' },
-    { x: 412, w: 52, text: 'S9f1…',        under: 'signature' }
+    { text: 'G',            under: 'who' },
+    { text: 'YLEDGERENTRY', under: 'what kind' },
+    { text: 'V3',           under: 'version' },
+    { text: 'M1760…',       under: 'when' },
+    { text: 'J42',          under: 'position' },
+    { text: 'C2b9d…',       under: 'extends' },
+    { text: 'S9f1…',        under: 'signature' }
   ];
   var LAMPS = [
     { mark: 'G', name: 'grammar' },
@@ -96,7 +98,6 @@
   ];
   var CHAIN = ['J38', 'J39', 'J40', 'J41', 'J42'];
   var PEERS = 12, PEERS_STORED = 9;
-  var W = 480, CY = 96;
 
   /* The hero landscape: your chain, and the world it is connected to.
 
@@ -325,118 +326,80 @@
     } };
   }
 
+  /* The plain scene (/chain): HTML, not SVG, so the record's wire grammar and every caption stay
+     at least 12px on a phone and wrap instead of shrinking (docs/ux-audit/pages-ux-a.md /chain: the
+     SVG drew the record at about 6px at 390px wide). One panel per step, stacked in one cell and
+     cross-faded; only the current one is shown, the others are aria-hidden. The rich scene (home)
+     is the landscape above. */
   function drawScene(payload, rich) {
-    if(rich)return drawLandscape(payload);
-    var root = svg('svg', { viewBox: '0 0 ' + W + (rich ? ' 320' : ' 192'), class: 'flow-scene', fill: 'none' });
-    if (rich) {
-      var histories=svg('g',{class:'flow-histories'});
-      [32,276].forEach(function(y,row){
-        for(var i=0;i<7;i++){
-          var x=40+i*60;
-          if(i<6)histories.appendChild(svg('path',{d:'M'+(x+28)+' '+(y+8)+'h32',class:'flow-history-link'}));
-          var block=svg('g',{class:'flow-history-block',style:'--i:'+(i+row*3)});
-          block.appendChild(svg('path',{d:'M'+x+' '+y+'l6 -6h28l-6 6z',class:'flow-history-top'}));
-          block.appendChild(svg('path',{d:'M'+(x+28)+' '+y+'l6 -6v20l-6 6z',class:'flow-history-side'}));
-          block.appendChild(svg('rect',{x:x,y:y,width:28,height:20,rx:3,class:'flow-history-face'}));
-          histories.appendChild(block);
-        }
-      });
-      histories.appendChild(svg('path',{d:'M240 52V72M100 254v22M380 254v22',class:'flow-history-reference'}));
-      histories.appendChild(svg('text',{x:40,y:14,class:'flow-history-label'},'Independent histories'));
-      histories.appendChild(svg('text',{x:40,y:316,class:'flow-history-label'},'Connected through references'));
-      root.appendChild(histories);
+    if (rich) return drawLandscape(payload);
+    var root = el('div', 'flow-scene flow-plain');
+    function panel(id, label) {
+      var p = el('div', 'flow-panel');
+      p.setAttribute('data-panel', id);
+      if (label) p.setAttribute('aria-label', label);
+      root.appendChild(p);
+      return p;
     }
-    var card = svg('rect', { x: 1, y: rich ? 65 : 1, width: W - 2, height: 190, rx: 16, class: 'flow-card' });
-    root.appendChild(card);
+    function staggered(node, i) { node.setAttribute('style', '--i:' + i); return node; }
 
-    function panel(id) {
-      var g = svg('g', { class: 'flow-panel', 'data-panel': id });
-      if(rich)g.setAttribute('transform','translate(0 64)');
-      root.appendChild(g);
-      return g;
-    }
-
-    /* SIGN — the record, block by block: the actual wire grammar, not a
-       stylised card. That is the part nothing else on the site shows. */
+    /* SIGN -- the record, field by field: the actual wire grammar, not a stylised card. That is
+       the part nothing else on the site shows, so it is a real list a screen reader reads too. */
     var pSign = panel('sign');
-    var blocks = BLOCKS.map(function (b, i) {
-      var g = svg('g', { class: 'flow-block', 'data-i': String(i) });
-      g.setAttribute('style', '--i:' + i);
-      g.appendChild(svg('rect', { x: b.x, y: CY - 18, width: b.w, height: 36, rx: 6, class: 'flow-block-box' }));
-      g.appendChild(svg('text', { x: b.x + b.w / 2, y: CY + 4, 'text-anchor': 'middle', class: 'flow-block-text' }, i === 1 ? payload.recordType : b.text));
-      g.appendChild(svg('text', { x: b.x + b.w / 2, y: CY + 34, 'text-anchor': 'middle', class: 'flow-block-under' }, b.under));
-      if (i < BLOCKS.length - 1) g.appendChild(svg('path', { d: 'M' + (b.x + b.w + 4) + ' ' + (CY - 1) + 'h5', class: 'flow-block-dash' }));
-      pSign.appendChild(g);
-      return g;
+    var format = el('ol', 'flow-record-format');
+    format.setAttribute('aria-label', 'The record, field by field');
+    BLOCKS.forEach(function (b, i) {
+      var item = staggered(el('li', 'flow-block'), i);
+      item.setAttribute('data-i', String(i));
+      item.appendChild(el('span', 'flow-block-text', i === 1 ? payload.recordType : b.text));
+      item.appendChild(el('span', 'flow-block-under', b.under));
+      format.appendChild(item);
     });
+    pSign.appendChild(format);
 
-    /* CHECK — four lamps, lit together: grammar, signature, head, peers.
-       Meaning is never one of them. */
+    /* CHECK -- four lamps, lit together: grammar, signature, head, peers. Meaning is never one of them. */
     var pCheck = panel('check');
-    var lampGap = 108, lampStart = W / 2 - (LAMPS.length - 1) * lampGap / 2;
+    var lampRow = el('div', 'flow-lamps');
     var lamps = LAMPS.map(function (l, i) {
-      var cx = lampStart + i * lampGap;
-      var g = svg('g', { class: 'flow-lamp', 'data-mark': l.mark });
-      g.setAttribute('style', '--i:' + i);
-      g.appendChild(svg('circle', { cx: cx, cy: CY - 10, r: 22, class: 'flow-lamp-disc' }));
-      g.appendChild(svg('text', { x: cx, y: CY - 2, 'text-anchor': 'middle', class: 'flow-lamp-mark' }, l.mark));
-      g.appendChild(svg('text', { x: cx, y: CY + 36, 'text-anchor': 'middle', class: 'flow-lamp-name' }, l.name));
-      pCheck.appendChild(g);
-      return g;
+      var lamp = staggered(el('span', 'flow-lamp'), i);
+      lamp.setAttribute('data-mark', l.mark);
+      lamp.appendChild(el('span', 'flow-lamp-mark', l.mark));
+      lamp.appendChild(el('span', 'flow-lamp-name', l.name));
+      lampRow.appendChild(lamp);
+      return lamp;
     });
-    pCheck.appendChild(svg('text', { x: W / 2, y: CY + 62, 'text-anchor': 'middle', class: 'flow-band-sub' }, 'meaning is never checked here'));
+    pCheck.appendChild(lampRow);
+    pCheck.appendChild(el('p', 'flow-band-sub', 'meaning is never checked here'));
 
-    /* EXTEND — the holder's own chain, which this record joins. */
+    /* EXTEND -- the holder's own chain, which this record joins. */
     var pExtend = panel('extend');
-    var nodeW = 68, nodeGap = 98, chainStart = W / 2 - ((CHAIN.length - 1) * nodeGap + nodeW) / 2;
+    var chainRow = el('div', 'flow-chain');
     var links = [];
     var nodes = CHAIN.map(function (name, i) {
-      var x = chainStart + i * nodeGap;
-      if (i > 0) {
-        var link = svg('path', { d: 'M' + (x - (nodeGap - nodeW)) + ' ' + CY + 'H' + x, class: 'flow-link' });
-        link.setAttribute('style', '--i:' + i);
-        pExtend.appendChild(link);
-        links.push(link);
-      }
-      var g = svg('g', { class: 'flow-node', 'data-i': String(i) });
-      g.setAttribute('style', '--i:' + i);
-      g.appendChild(svg('rect', { x: x, y: CY - 18, width: nodeW, height: 36, rx: 8, class: 'flow-node-box' }));
-      g.appendChild(svg('text', { x: x + nodeW / 2, y: CY + 5, 'text-anchor': 'middle', class: 'flow-node-text' }, name));
-      pExtend.appendChild(g);
-      return g;
+      if (i > 0) { var link = staggered(el('span', 'flow-link'), i); link.setAttribute('aria-hidden', 'true'); chainRow.appendChild(link); links.push(link); }
+      var node = staggered(el('span', 'flow-node'), i);
+      node.setAttribute('data-i', String(i));
+      node.appendChild(el('span', 'flow-node-text', name));
+      chainRow.appendChild(node);
+      return node;
     });
-    pExtend.appendChild(svg('text', { x: W / 2, y: CY + 48, 'text-anchor': 'middle', class: 'flow-band-sub' }, 'one chain per identity · nobody else had to wait'));
+    pExtend.appendChild(chainRow);
+    pExtend.appendChild(el('p', 'flow-band-sub', 'one chain per identity · nobody else had to wait'));
 
-    /* REPLICATE — peers filling in as they store it. */
+    /* REPLICATE -- peers filling in as they store it; a partial quorum reads as partial. */
     var pReplicate = panel('replicate');
-    var peerGap = 26, peerStart = W / 2 - (PEERS - 1) * peerGap / 2;
+    var peerRow = el('div', 'flow-peers');
     var peers = [];
-    for (var p = 0; p < PEERS; p++) {
-      var px=rich?W/2+Math.cos(p*Math.PI*2/PEERS)*176:peerStart+p*peerGap;
-      var py=rich?CY-16+Math.sin(p*Math.PI*2/PEERS)*56:CY-8;
-      if(rich)pReplicate.appendChild(svg('path',{d:'M240 80L'+px+' '+py,class:'flow-replica-wire',style:'--i:'+p}));
-      var dot = svg('circle', { cx: px, cy: py, r: 9, class: 'flow-peer' });
-      dot.setAttribute('style', '--i:' + p);
-      pReplicate.appendChild(dot);
-      peers.push(dot);
-    }
-    if(rich){
-      pReplicate.appendChild(svg('rect',{x:208,y:64,width:64,height:32,rx:8,class:'flow-block-box'}));
-      pReplicate.appendChild(svg('text',{x:240,y:84,'text-anchor':'middle',class:'flow-block-text'},'Record 42'));
-    }
-    var peerCount = svg('text', { x: W / 2, y: CY + (rich?62:32), 'text-anchor': 'middle', class: 'flow-band-sub' });
-    pReplicate.appendChild(peerCount);
+    for (var p = 0; p < PEERS; p++) peers.push(peerRow.appendChild(staggered(el('span', 'flow-peer'), p)));
+    pReplicate.appendChild(peerRow);
+    var peerCount = pReplicate.appendChild(el('p', 'flow-band-sub'));
 
-    /* RESOLVE — what it means, which only a resolver decides. */
+    /* RESOLVE -- what it means, which only a resolver decides. */
     var pResolve = panel('resolve');
-    pResolve.appendChild(svg('rect', { x: W / 2 - 190, y: CY - 28, width: 380, height: 58, rx: 12, class: 'flow-meaning-box' }));
-    pResolve.appendChild(svg('text', { x: W / 2, y: CY - 1, 'text-anchor': 'middle', class: 'flow-meaning-text' }, payload.amount));
-    pResolve.appendChild(svg('text', { x: W / 2, y: CY + 21, 'text-anchor': 'middle', class: 'flow-meaning-who' }, payload.resolverName));
-
-    /* Said once, in the picture rather than only in a tooltip: the values
-       are examples and the long fields are cut to fit. The shape is real. */
-    root.appendChild(svg('text', { x: W / 2, y: rich ? 242 : 178, 'text-anchor': 'middle', class: 'flow-scene-caption' },
-      'illustrative values · the record shape is the real wire grammar'));
+    var meaning = el('div', 'flow-meaning-box');
+    meaning.appendChild(el('strong', 'flow-meaning-text', payload.amount));
+    meaning.appendChild(el('span', 'flow-meaning-who', payload.resolverName));
+    pResolve.appendChild(meaning);
 
     var panels = { sign: pSign, check: pCheck, extend: pExtend, replicate: pReplicate, resolve: pResolve };
 
@@ -444,17 +407,15 @@
       svg: root,
       paint: function (i) {
         var step = BASE_STEPS[i];
-        Object.keys(panels).forEach(function (id) { panels[id].setAttribute('class', 'flow-panel' + (id === step.id ? ' flow-panel-active' : '')); });
-
-        if (step.id === 'check') lamps.forEach(function (l) { l.setAttribute('data-on', 'true'); });
-        if (step.id === 'extend') {
-          nodes.forEach(function (n, k) { n.setAttribute('data-on', 'true'); n.setAttribute('data-new', String(k === CHAIN.length - 1)); });
-          links.forEach(function (l) { l.setAttribute('data-on', 'true'); });
-        }
-        if (step.id === 'replicate') {
-          peers.forEach(function (d, k) { d.setAttribute('data-on', String(k < PEERS_STORED)); });
-          peerCount.textContent = PEERS_STORED + ' of ' + PEERS + ' peers hold it · the acknowledgement waited on them';
-        }
+        Object.keys(panels).forEach(function (id) {
+          panels[id].setAttribute('class', 'flow-panel' + (id === step.id ? ' flow-panel-active' : ''));
+          if (id === step.id) panels[id].removeAttribute('aria-hidden'); else panels[id].setAttribute('aria-hidden', 'true');
+        });
+        lamps.forEach(function (l) { l.setAttribute('data-on', String(i >= 1)); });
+        nodes.forEach(function (n, k) { n.setAttribute('data-on', String(i >= 2 || k < CHAIN.length - 1)); n.setAttribute('data-new', String(i >= 2 && k === CHAIN.length - 1)); });
+        links.forEach(function (l, k) { l.setAttribute('data-on', String(i >= 2 || k < links.length - 1)); });
+        peers.forEach(function (d, k) { d.setAttribute('data-on', String(i >= 3 && k < PEERS_STORED)); });
+        peerCount.textContent = PEERS_STORED + ' of ' + PEERS + ' peers hold it · the acknowledgement waited on them';
       }
     };
   }
@@ -525,7 +486,7 @@
     for (var key in BASE_STEPS[4]) resolveStep[key] = BASE_STEPS[4][key];
     resolveStep.says = payload.says;
     STEPS[4] = resolveStep;
-    var root = el('div', 'flow');
+    var root = el('div', options.rich ? 'flow flow-rich' : 'flow');
     root.dataset.step = '0';
     root.dataset.case = payload.id;
 
@@ -552,7 +513,8 @@
     // Now: the one panel that answers the selected step.
     var now = el('div', 'flow-now');
     var scene = drawScene(payload,options.rich);
-    scene.svg.setAttribute('aria-hidden', 'true');
+    // The landscape is a picture of the step the words say; the plain scene's record is real content.
+    if (options.rich) scene.svg.setAttribute('aria-hidden', 'true');
     now.appendChild(scene.svg);
     var says = el('strong', 'flow-says');
     if(!options.inline)says.setAttribute('aria-hidden', 'true');
@@ -567,7 +529,9 @@
     now.appendChild(toggle);
 
     var reduce = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
-    var current = 0, held = -1, userPaused = false, timer = 0, disposed = false, inView = true;
+    /* It plays ONCE and settles on the finished record (defxn motion law: no idle loop; the
+       audit measured /chain cycling forever). `ended` holds it there; the play button replays. */
+    var current = 0, held = -1, userPaused = false, timer = 0, disposed = false, inView = true, ended = false;
 
     function show(i, complete) {
       var step = STEPS[i];
@@ -580,27 +544,27 @@
       root.classList.remove('flow-run'); void root.offsetWidth; root.classList.add('flow-run');
     }
     function still() {
-      return reduce.matches || userPaused || held >= 0 || disposed || !inView ||
+      return reduce.matches || userPaused || ended || held >= 0 || disposed || !inView ||
         (typeof document !== 'undefined' && document.hidden) ||
         !!(root.closest && root.closest('[hidden]')) ||
         !!(ArkUI.sceneState && ArkUI.sceneState.get().paused);
     }
     function paintToggle() {
-      var playing = !reduce.matches && !userPaused && inView && !document.hidden && !(ArkUI.sceneState && ArkUI.sceneState.get().paused);
-      toggle.setAttribute('aria-label', playing ? 'Pause the chain animation' : 'Play the chain animation');
+      var playing = !reduce.matches && !userPaused && !ended && inView && !document.hidden && !(ArkUI.sceneState && ArkUI.sceneState.get().paused);
+      toggle.setAttribute('aria-label', playing ? 'Pause the chain animation' : ended ? 'Play the chain animation again' : 'Play the chain animation');
       toggle.title = playing ? 'Pause' : 'Play';
       root.dataset.playing = playing ? 'true' : 'false';
     }
     function schedule() {
       clearTimeout(timer); timer = 0;
-      if (still()) return;
-      var last = current === STEPS.length - 1;
+      if (still() || current >= STEPS.length - 1) return;
       timer = setTimeout(function () {
         if (still()) { schedule(); return; }
-        current = last ? 0 : current + 1;
+        current += 1;
+        if (current === STEPS.length - 1) { ended = true; paintToggle(); }
         show(current, current === STEPS.length - 1);
         schedule();
-      }, last ? RESTART_MS : STEP_MS);
+      }, STEP_MS);
     }
     function hold(i) { held = i; root.dataset.held = 'true'; show(i, i === STEPS.length - 1); clearTimeout(timer); timer = 0; }
     function release() { if (held < 0) return; current = held; held = -1; delete root.dataset.held; schedule(); }
@@ -612,17 +576,21 @@
       link.addEventListener('pointerleave', release);
       link.addEventListener('blur', release);
     });
-    toggle.addEventListener('click', function () { userPaused = !userPaused; paintToggle(); schedule(); });
+    toggle.addEventListener('click', function () {
+      if (ended) { ended = false; userPaused = false; current = 0; show(0, false); }
+      else userPaused = !userPaused;
+      paintToggle(); schedule();
+    });
     function wake() { paintToggle(); schedule(); }
     if (typeof document !== 'undefined') document.addEventListener('visibilitychange', wake);
     function reducedChanged() { paintToggle(); show(reduce.matches ? STEPS.length - 1 : current, reduce.matches); schedule(); }
     if (reduce.addEventListener) reduce.addEventListener('change', reducedChanged);
     var unsubscribe = ArkUI.sceneState && ArkUI.sceneState.subscribe ? ArkUI.sceneState.subscribe(wake) : null;
-    var visibility = options.inline && typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(function(entries){inView=entries[0].isIntersecting;wake();},{threshold:.1}) : null;
+    var visibility = typeof IntersectionObserver !== 'undefined' ? new IntersectionObserver(function(entries){inView=entries[0].isIntersecting;wake();},{threshold:.1}) : null;
     if(visibility)visibility.observe(root);
 
     paintToggle();
-    if (reduce.matches) { current = STEPS.length - 1; show(current, true); }
+    if (reduce.matches) { current = STEPS.length - 1; ended = true; show(current, true); }
     else show(0, false);
     schedule();
 

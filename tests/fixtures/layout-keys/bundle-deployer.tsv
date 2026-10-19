@@ -1,0 +1,59 @@
+# key	tag	text -- layout keys of /bundle-deployer before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	DEPLOYMENT / LOCAL CLICLI in developmentFXN Bundle DeployerDeploy from your own machine. Review what becomes public, then publish with your identity.Ship · Bund
+page:/div:1	div	DEPLOYMENT / LOCAL CLICLI in development
+page:/div:1/p:1	p	DEPLOYMENT / LOCAL CLI
+page:/div:1/span:1	span	CLI in development
+page:/header:1	header	FXN Bundle DeployerDeploy from your own machine. Review what becomes public, then publish with your identity.
+id:bundledeployer-title	h1	FXN Bundle Deployer
+page:/header:1/p:1	p	Deploy from your own machine. Review what becomes public, then publish with your identity.
+page:/div:2	div	Three steps. One local tool.Local CLI required01Prepare locally.Run the FXN Bundle Deployer on your machine when it is released. Your project and editing tools 
+page:/div:2/section:1	section	Three steps. One local tool.Local CLI required01Prepare locally.Run the FXN Bundle Deployer on your machine when it is released. Your project and editing tools 
+id:bundle-workflow-title	h2	Three steps. One local tool.
+page:/div:2/section:1/p:1	p	Local CLI required
+page:/div:2/section:1/ol:1	ol	01Prepare locally.Run the FXN Bundle Deployer on your machine when it is released. Your project and editing tools stay local.02Review what becomes public.Review
+page:/div:2/section:1/ol:1/li:1	li	01Prepare locally.Run the FXN Bundle Deployer on your machine when it is released. Your project and editing tools stay local.
+page:/div:2/section:1/ol:1/li:1/span:1	span	01
+page:/div:2/section:1/ol:1/li:1/div:1	div	Prepare locally.Run the FXN Bundle Deployer on your machine when it is released. Your project and editing tools stay local.
+page:/div:2/section:1/ol:1/li:1/div:1/h3:1	h3	Prepare locally.
+page:/div:2/section:1/ol:1/li:1/div:1/p:1	p	Run the FXN Bundle Deployer on your machine when it is released. Your project and editing tools stay local.
+page:/div:2/section:1/ol:1/li:2	li	02Review what becomes public.Review the content and assets you intend to share before sending your bundle to the mesh.
+page:/div:2/section:1/ol:1/li:2/span:1	span	02
+page:/div:2/section:1/ol:1/li:2/div:1	div	Review what becomes public.Review the content and assets you intend to share before sending your bundle to the mesh.
+page:/div:2/section:1/ol:1/li:2/div:1/h3:1	h3	Review what becomes public.
+page:/div:2/section:1/ol:1/li:2/div:1/p:1	p	Review the content and assets you intend to share before sending your bundle to the mesh.
+page:/div:2/section:1/ol:1/li:3	li	03Publish with your identity.Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access
+page:/div:2/section:1/ol:1/li:3/span:1	span	03
+page:/div:2/section:1/ol:1/li:3/div:1	div	Publish with your identity.Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access. 
+page:/div:2/section:1/ol:1/li:3/div:1/h3:1	h3	Publish with your identity.
+page:/div:2/section:1/ol:1/li:3/div:1/p:1	p	Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access. A bridge also writes bundle
+page:/div:2/section:2	section	From your machine to the meshYour projectReviewed bundlePublic meshPlanned workflow / CLI not releasedChoose what you share.Becomes publicStays on your machineS
+page:/div:2/section:2/figure:1	figure	From your machine to the meshYour projectReviewed bundlePublic meshPlanned workflow / CLI not released
+page:/div:2/section:2/figure:1/figcaption:1	figcaption	From your machine to the mesh
+page:/div:2/section:2/figure:1/ol:1	ol	Your projectReviewed bundlePublic mesh
+page:/div:2/section:2/figure:1/ol:1/li:1	li	Your project
+page:/div:2/section:2/figure:1/ol:1/li:2	li	Reviewed bundle
+page:/div:2/section:2/figure:1/ol:1/li:3	li	Public mesh
+page:/div:2/section:2/figure:1/p:1	p	Planned workflow / CLI not released
+id:bundle-boundary-title	h2	Choose what you share.
+page:/div:2/section:2/table:1	table	Becomes publicStays on your machineSite content and selected assetsAuth Kit and private signing keysSigned mesh ownership recordRecovery phrase, PIN and passwor
+page:/div:2/section:2/table:1/thead:1	thead	Becomes publicStays on your machine
+page:/div:2/section:2/table:1/thead:1/tr:1	tr	Becomes publicStays on your machine
+page:/div:2/section:2/table:1/thead:1/tr:1/th:1	th	Becomes public
+page:/div:2/section:2/table:1/thead:1/tr:1/th:2	th	Stays on your machine
+page:/div:2/section:2/table:1/tbody:1	tbody	Site content and selected assetsAuth Kit and private signing keysSigned mesh ownership recordRecovery phrase, PIN and passwordPublic maintainer identityAPI cred
+page:/div:2/section:2/table:1/tbody:1/tr:1	tr	Site content and selected assetsAuth Kit and private signing keys
+page:/div:2/section:2/table:1/tbody:1/tr:1/td:1	td	Site content and selected assets
+page:/div:2/section:2/table:1/tbody:1/tr:1/td:2	td	Auth Kit and private signing keys
+page:/div:2/section:2/table:1/tbody:1/tr:2	tr	Signed mesh ownership recordRecovery phrase, PIN and password
+page:/div:2/section:2/table:1/tbody:1/tr:2/td:1	td	Signed mesh ownership record
+page:/div:2/section:2/table:1/tbody:1/tr:2/td:2	td	Recovery phrase, PIN and password
+page:/div:2/section:2/table:1/tbody:1/tr:3	tr	Public maintainer identityAPI credentials and local configuration
+page:/div:2/section:2/table:1/tbody:1/tr:3/td:1	td	Public maintainer identity
+page:/div:2/section:2/table:1/tbody:1/tr:3/td:2	td	API credentials and local configuration
+page:/div:2/section:2/p:1	p	Review this boundary before publishing. A public bundle is intended to be shared.
+page:/aside:1	aside	The CLI is in development.The lightweight FXN Bundle Deployer is not available yet. Installation instructions and supported commands will appear here when it is
+page:/aside:1/h2:1	h2	The CLI is in development.
+page:/aside:1/p:1	p	The lightweight FXN Bundle Deployer is not available yet. Installation instructions and supported commands will appear here when it is released.
+page:/aside:1/p:2	p	Browsing this site or signing in does not deploy a bundle. Planned: sites and apps will deploy from deploy.defxn.com as signed records on the bundle resolver ch
+page:/aside:1/a:1	a	Back to your account
+page:/div:3	div	

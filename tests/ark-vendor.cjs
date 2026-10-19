@@ -12,13 +12,19 @@ const { spawnSync } = require('node:child_process');
 const check = spawnSync(process.execPath, ['scripts/build-ark-vendor.cjs', '--check'], { encoding: 'utf8' });
 assert.equal(check.status, 0, 'build-ark-vendor --check failed (run npm run sync:ark, then npm run build:ark):\n' + check.stdout + check.stderr);
 for (const out of ['css/themes.css', 'scripts/theme-options.js', 'js/ark/vendor/engines.js', 'js/ark/vendor/backgrounds.js', 'js/settings/panel.js',
-  'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/local-identity.js', 'js/ark/vendor/ark-kit.js', 'css/ark-blocks.css']) {
+  'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/local-identity.js', 'js/ark/vendor/ark-kit.js', 'css/ark-blocks.css',
+  'js/admin/vendor/cms-blocks.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/vendor/ark-kit-live.js', 'js/ark/blocks.js']) {
   assert(check.stdout.includes('ok ' + out), out + ' is not covered by build-ark-vendor --check');
 }
-// css/ark-blocks.css is Ark's static block stylesheet (@deadark/ark-ui >= 0.2.0), copied byte for
-// byte: server-rendered blocks are styled by it alone, so a hand-edited or stale copy would style
-// SSR pages differently from the package the client bundle came from.
-assert.deepEqual(fs.readFileSync('css/ark-blocks.css'), fs.readFileSync('node_modules/@deadark/ark-ui/dist/ark-ui.blocks.css'), 'css/ark-blocks.css is exactly the synced package stylesheet');
+// css/ark-blocks.css is Ark's static block stylesheet (@deadark/ark-ui >= 0.2.0): server-rendered
+// blocks are styled by it alone, so a hand-edited or stale copy would style the public site and
+// the crawler's HTML differently from Ark. It is the synced file, minified by the one transform
+// build-ark-vendor applies (esbuild's CSS minifier, since W3-BUDGET: 7.5 -> 7.2 KB gz on every
+// route): the test applies the same transform to the package file and compares bytes.
+const { minifyBlocksCss } = require('../scripts/build-ark-vendor.cjs');
+const arkUiVersion = JSON.parse(fs.readFileSync('node_modules/@deadark/ark-ui/package.json', 'utf8')).version;
+assert.equal(fs.readFileSync('css/ark-blocks.css', 'utf8'), minifyBlocksCss(fs.readFileSync('node_modules/@deadark/ark-ui/dist/ark-ui.blocks.css', 'utf8'), arkUiVersion), 'css/ark-blocks.css is exactly the synced package stylesheet, minified');
+assert(fs.readFileSync('css/ark-blocks.css', 'utf8').includes('.ark-hero__title'), 'the minified sheet still carries the block part classes');
 
 // 2. Ark UI is pinned, not borrowed. Until 2026-10-19 defxn depended on no @deadark package and
 //    its bundles imported /Volumes/PortableSSD/design/... directly, so two consumers could build
@@ -79,5 +85,29 @@ for (const name of ['ARK_BLOCKS', 'ARK_BLOCK_NAMES', 'renderArkBlock', 'renderAr
   assert(name in sandbox.__kit, 'ArkKit exports ' + name);
 }
 assert(sandbox.__kit.ARK_BLOCK_NAMES.includes('hero') && sandbox.__kit.ARK_BLOCK_NAMES.includes('stat'), 'ArkKit.ARK_BLOCKS holds the Ark blocks');
+assert.equal(sandbox.__kit.PUBLIC_KIT, false, 'the full kit says which build it is');
+assert.equal(typeof sandbox.__kit.patchArkBlock, 'function', 'the full kit carries the morph');
+// 7. The public kit (W3-BUDGET): the morph is its own chunk, loaded by js/ark/blocks.js on a page's
+//    first live update, so a block route with no live block never pays for it; the kit's own
+//    patchArkBlock is a refusal that names the chunk, and the editor help is stripped from the
+//    prop schemas while the validation shape (kind, required, maxLength, labels) stays.
+const publicKit = fs.readFileSync('js/ark/vendor/ark-kit-public.js', 'utf8');
+const pub = { window: {}, document: undefined, ArkEngines: sandbox.ArkEngines };
+pub.globalThis = pub;
+vm.runInNewContext(publicKit + '\n;globalThis.__kit = ArkKit;', pub);
+assert.equal(pub.__kit.PUBLIC_KIT, true, 'the public kit says which build it is');
+assert.throws(() => pub.__kit.patchArkBlock(), /patchArkBlock refused.*Needs: the live chunk js\/ark\/vendor\/ark-kit-live\.js.*Remedy/, 'the public kit refuses patchArkBlock naming the live chunk');
+assert(!/cannot become a/.test(publicKit), 'the morph is not in the public kit');
+assert.equal(pub.__kit.ARK_BLOCKS.stat.props.unit.help, undefined, 'editor help is stripped from the public kit');
+assert.equal(pub.__kit.ARK_BLOCKS.stat.description, undefined, 'block descriptions are stripped from the public kit');
+assert.equal(pub.__kit.ARK_BLOCKS.stat.props.unit.maxLength, 16, 'the validation shape stays');
+assert.equal(pub.__kit.ARK_BLOCKS.stat.props.label.label, 'Label', 'prop labels (a refusal\'s words) stay');
+assert.equal(pub.__kit.ARK_BLOCKS.card.props.description.kind, 'text', 'a prop NAMED description is untouched');
+assert.equal(sandbox.__kit.ARK_BLOCKS.stat.props.unit.help, 'e.g. ms, ops/s, %', 'the full kit keeps the help');
+const live = fs.readFileSync('js/ark/vendor/ark-kit-live.js', 'utf8');
+pub.ArkKit = pub.__kit;
+vm.runInNewContext(live + '\n;globalThis.__live = ArkKitLive;', pub);
+assert.equal(typeof pub.__live.patchArkBlock, 'function', 'the live chunk carries patchArkBlock');
+assert(/cannot become a/.test(live) && !/ARK_BLOCK_NAMES/.test(live), 'the live chunk carries the morph and no copy of the registry');
 
 console.log('ark vendor ok: outputs match the synced packages; Ark UI is pinned with sha256; no hub paths in site files');

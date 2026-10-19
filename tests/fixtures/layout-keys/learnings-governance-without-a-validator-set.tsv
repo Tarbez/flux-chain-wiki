@@ -1,0 +1,73 @@
+# key	tag	text -- layout keys of /learnings/governance-without-a-validator-set before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	ALL NOTESAUTHORITY / 003 / 6 MIN READCOREGovernance without a standing signer setTHE COREThe protocol model derives a short-lived authority cell for each contes
+page:/header:1	header	ALL NOTESAUTHORITY / 003 / 6 MIN READCOREGovernance without a standing signer setTHE COREThe protocol model derives a short-lived authority cell for each contes
+page:/header:1/div:1	div	ALL NOTESAUTHORITY / 003 / 6 MIN READCORE
+page:/header:1/div:1/a:1	a	ALL NOTES
+page:/header:1/div:1/a:1/svg:1	svg	
+page:/header:1/div:1/a:1/svg:1/path:1	path	
+page:/header:1/div:1/a:1/svg:1/path:2	path	
+page:/header:1/div:1/span:1	span	AUTHORITY / 003 / 6 MIN READ
+page:/header:1/div:1/button:1	button	CORE
+page:/header:1/div:1/button:1/svg:1	svg	
+page:/header:1/div:1/button:1/svg:1/path:1	path	
+page:/header:1/div:1/button:1/svg:1/path:2	path	
+page:/header:1/h1:1	h1	Governance without a standing signer set
+page:/header:1/div:2	div	THE COREThe protocol model derives a short-lived authority cell for each contested transition instead of using a standing signer set. A separate mesh-operations
+page:/header:1/div:2/span:1	span	THE CORE
+page:/header:1/div:2/p:1	p	The protocol model derives a short-lived authority cell for each contested transition instead of using a standing signer set. A separate mesh-operations policy 
+page:/header:1/div:2/p:2	p	Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolv
+page:/div:1	div	QUESTIONS / 040001Who approves a transition?02How is a cell derived?03Who governs mesh operations?04Can either roster overrule the other?No standing rosterMost 
+page:/div:1/nav:1	nav	QUESTIONS / 040001Who approves a transition?02How is a cell derived?03Who governs mesh operations?04Can either roster overrule the other?
+page:/div:1/nav:1/p:1	p	QUESTIONS / 04
+page:/div:1/nav:1/button:1	button	00
+page:/div:1/nav:1/button:2	button	01Who approves a transition?
+page:/div:1/nav:1/button:2/span:1	span	01
+page:/div:1/nav:1/button:2/span:2	span	Who approves a transition?
+page:/div:1/nav:1/button:3	button	02How is a cell derived?
+page:/div:1/nav:1/button:3/span:1	span	02
+page:/div:1/nav:1/button:3/span:2	span	How is a cell derived?
+page:/div:1/nav:1/button:4	button	03Who governs mesh operations?
+page:/div:1/nav:1/button:4/span:1	span	03
+page:/div:1/nav:1/button:4/span:2	span	Who governs mesh operations?
+page:/div:1/nav:1/button:5	button	04Can either roster overrule the other?
+page:/div:1/nav:1/button:5/span:1	span	04
+page:/div:1/nav:1/button:5/span:2	span	Can either roster overrule the other?
+page:/div:1/div:1	div	No standing rosterMost chains answer "who can approve this" with a fixed list: a standing signer set, elected or staked, that stays the same until the next elec
+id:governance-without-a-validator-set-section-0	section	No standing rosterMost chains answer "who can approve this" with a fixed list: a standing signer set, elected or staked, that stays the same until the next elec
+page:/div:1/div:1/section:1/span:1	span	
+page:/div:1/div:1/section:1/h2:1	h2	No standing roster
+page:/div:1/div:1/section:1/p:1	p	Most chains answer "who can approve this" with a fixed list: a standing signer set, elected or staked, that stays the same until the next election. Flux Protoco
+id:governance-without-a-validator-set-section-1	section	How a cell is derivedAn ephemeral authority cell is computed deterministically from four inputs: the object's own CID, its next sequence number, the authority r
+page:/div:1/div:1/section:2/span:1	span	
+page:/div:1/div:1/section:2/h2:1	h2	How a cell is derived
+page:/div:1/div:1/section:2/p:1	p	An ephemeral authority cell is computed deterministically from four inputs: the object's own CID, its next sequence number, the authority registry root, and the
+page:/div:1/div:1/section:2/p:2	p	Its job is narrow on purpose: verify one manifest transition, publish threshold evidence, persist its markers, and dissolve. Not proof-of-authority in the usual
+id:governance-without-a-validator-set-section-2	section	The other roster: mesh operationsThe mesh-operations policy describes a separate seven-operator roster for substrate changes, not network transactions. Its docu
+page:/div:1/div:1/section:3/span:1	span	
+page:/div:1/div:1/section:3/h2:1	h2	The other roster: mesh operations
+page:/div:1/div:1/section:3/p:1	p	The mesh-operations policy describes a separate seven-operator roster for substrate changes, not network transactions. Its documented thresholds are 4-of-7 for 
+page:/div:1/div:1/section:3/p:2	p	Even a fully signed result from that ceremony stays closed until separate network-proof and staged-activation gates open it. A completed signature ceremony is e
+id:governance-without-a-validator-set-section-3	section	Why the two never substitute for each otherIn the documented design, the mesh-operations roster has no authority over a network DAO's decisions, and a network D
+page:/div:1/div:1/section:4/span:1	span	
+page:/div:1/div:1/section:4/h2:1	h2	Why the two never substitute for each other
+page:/div:1/div:1/section:4/p:1	p	In the documented design, the mesh-operations roster has no authority over a network DAO's decisions, and a network DAO has no authority over mesh operations. A
+page:/div:1/div:1/section:4/p:2	p	Two authority sets, doing two different jobs, neither one a stand-in for the other. If something reads as governance on Flux Protocol, the first question worth 
+page:/div:1/div:1/div:1	div	← THE CORENEXT QUESTION →
+page:/div:1/div:1/div:1/button:1	button	← THE CORE
+page:/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/button:2	button	NEXT QUESTION →
+page:/div:1/div:1/a:1	a	NEXT NOTE / How we got fast, and everything we got wrong →
+page:/div:1/nav:2	nav	Related mechanism →Inspect activation limits →
+page:/div:1/nav:2/a:1	a	Related mechanism →
+page:/div:1/nav:2/a:2	a	Inspect activation limits →
+page:/div:1/details:1	details	Evidence & editorial reviewEditorial review: 2026-09-30. This is not live capability verification.Authority model, thresholds, and current limits
+page:/div:1/details:1/summary:1	summary	Evidence & editorial review
+page:/div:1/details:1/p:1	p	Editorial review: 2026-09-30. This is not live capability verification.
+page:/div:1/details:1/a:1	a	Authority model, thresholds, and current limits
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:2	div	

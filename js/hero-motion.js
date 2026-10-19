@@ -64,23 +64,17 @@
 
   var settings = make('div', 'site-settings');
   scene.appendChild(settings);
-  // Persistent footer chrome: who runs this, and the standing rights line.
-  // Both sit beside the settings gear, the one other thing that is always
-  // on screen regardless of route.
-  var credit = make('p', 'site-credit');
-  credit.textContent = 'Powered, deployed and made by FLX';
-  scene.appendChild(credit);
-  var rights = make('p', 'site-copyright');
-  rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
-  scene.appendChild(rights);
-  /* The footer strip: one link per journey, to the page where that journey starts, derived from
-     js/content/site-pages.js (the same table the "All pages" menu and the sitemap read), on every
-     route. It replaces the scene's corner navigation (Spec / Notes / Interactive model) and the
-     theory invitation, which were built on all 69 routes and visible on none (display:none in
-     css/site-direction.css), yet were the only link to /experiments (docs/ux-audit/pages.md
-     "Footer strip"; regression: tests/site-journeys.cjs, tests/browser/site-fixes.mjs). Kept
-     minimal on purpose: the brand pass restyles the site footer later. */
-  var paths = make('nav', 'site-footer-strip');
+  /* The footer: the family footer (DefxnKit.renderFooter, the same one every DEFXN product
+     draws), holding this site's section links, the standing credit and rights line, and the
+     "Back" control, in the bottom chrome band beside the settings gear on every route.
+     The section links are one per journey, to the page where that journey starts, derived from
+     js/content/site-pages.js (the same table the "All pages" menu and the sitemap read). They
+     replaced the scene's corner navigation and theory invitation, which were built on all 69
+     routes and visible on none, yet were the only link to /experiments (docs/ux-audit/pages.md
+     "Footer strip"; regression: tests/site-journeys.cjs, tests/browser/site-fixes.mjs). The
+     Back control sits IN the footer row, after the credit: positioned on its own in the same
+     corner it overlapped the strip's last link on a phone (2026-10-19, "MESH PI ← BACK HOME"). */
+  var paths = make('nav');
   paths.setAttribute('aria-label', 'Site sections');
   if (typeof ArkSitePages !== 'undefined') ArkSitePages.journeys().forEach(function (journey) {
     var lead = ArkSitePages.pages().find(function (row) { return row.journey === journey.id && row.lead && ArkUI.pageCatalog[row.key]; });
@@ -90,7 +84,20 @@
     link.title = journey.title + ': ' + journey.note;
     link.textContent = lead.label; paths.appendChild(link);
   });
-  scene.appendChild(paths);
+  /* the footer's host keeps the strip's name: the aria-current sync below, the drivers and
+     css/navigation.css (its place in the scene) read it */
+  var foot = make('div', 'site-footer-strip');
+  scene.appendChild(foot);
+  var kit = window.DefxnKit;
+  if (kit && typeof kit.renderFooter === 'function' && kit.HOME) {
+    var credit = make('span', 'site-credit'); credit.textContent = 'Powered, deployed and made by FLX';
+    var rights = make('span', 'site-copyright'); rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
+    kit.renderFooter(foot, kit.HOME.id, { links: Array.prototype.slice.call(paths.childNodes), note: [credit, rights, toggle] });
+  } else {
+    /* no kit (it failed to load): the links and the Back control still reach the page */
+    foot.appendChild(paths);
+    foot.appendChild(toggle);
+  }
 
   /* A scene link's query is read by ArkUI.route.linkQuery (js/ark/route.js): its
      data-route-query, else the query already in its href -- both for the href rewrite on mount
@@ -172,7 +179,8 @@
   function sync() {
     var current = state.get();
     var isTheory = current.page.indexOf('concept/') === 0;
-    scene.querySelectorAll('.ark-header a, .site-footer-strip a').forEach(function (link) {
+    scene.querySelectorAll('.ark-header a, .site-footer-strip nav a').forEach(function (link) {
+      if (link.closest('.dx-switch')) return;   /* product switcher: other sites, its own current */
       if (router.resolve(link.getAttribute('href')) === current.page) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
@@ -229,7 +237,10 @@
   window.addEventListener('popstate', restoreRoute);
   window.addEventListener('hashchange', restoreRoute);
   document.addEventListener('ark:enter', function () { navigate('proximity'); });
+  /* this site's own header links route in place; the product switcher's links leave for the
+     products' own sites, so they are left to the browser */
   scene.querySelectorAll('.ark-header a').forEach(function (link) {
+    if (link.closest('.dx-switch')) return;
     link.addEventListener('click', function (event) { event.preventDefault(); navigate(router.resolve(link.getAttribute('href'))); });
   });
   /* Skip link (index.html, the first thing Tab reaches): past the header's ~10 controls to the

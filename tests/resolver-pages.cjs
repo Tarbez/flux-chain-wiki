@@ -19,13 +19,16 @@ assert.equal(manifests[1].meta.next, 'deployment');
 assert.equal(manifests[2].meta.next, 'download');
 
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
-assert(home.includes("learn.dataset.sceneLink = 'deployment'"), 'the Learn CTA opens the interactive walkthrough');
+/* Since 2026-10-19 home is a page of Ark blocks (js/pages/home.js, tests/home-blocks.cjs): the Learn
+   CTA is the hero's primary action, its target the manifest's LEARN.HREF. */
+assert(home.includes("{ label: 'Follow the line', href: link('LEARN.HREF'), tone: 'primary' }"), 'the Learn CTA is the hero\'s primary action');
+assert.equal(vm.runInContext("ArkManifest.get('home').fields['LEARN.HREF'].value", context), 'route:deployment', 'the Learn CTA opens the interactive walkthrough');
 // The pressure-test link's destination is now a manifest field of kind 'link' (js/content/manifest.js),
 // resolved through js/ark/dash-kit.js's linkEl rather than a hardcoded literal/explicit dataset assignment.
-assert(home.includes("link('Go deeper into the resolver model', 'PRESSURETEST.HREF')"), 'the Pressure-test link opens the resolver guide');
+assert(home.includes("{ label: 'Go deeper into the resolver model', href: link('PRESSURETEST.HREF')"), 'the Pressure-test link opens the resolver guide');
 assert.equal(vm.runInContext("ArkManifest.get('home').fields['PRESSURETEST.HREF'].value", context), 'route:resolver');
 assert(fs.readFileSync('js/resolvers/header.js', 'utf8').includes("['NAV.OVERVIEW', 'about']"), 'overview remains reachable in shared navigation');
-assert(home.includes("['Walk the chain','chain']"), 'the chain walkthrough remains reachable in the Explore audience resources');
+assert(/\['Walk the chain', ?'chain'\]/.test(home), 'the chain walkthrough remains reachable in the Explore audience resources');
 assert(!home.includes("signal.className = 'home-signal-map'"), 'the decorative signal diagram no longer competes with the decision path');
 
 const catalogSource = fs.readFileSync('js/pages/catalog.js', 'utf8');

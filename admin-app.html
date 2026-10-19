@@ -19,6 +19,7 @@
 <!-- The workspace's stylesheet (rail, canvas, toolbar, sheet), scoped under #studioRoot. It reads
      the same SDK tokens as css/admin.css, whose top block is the editor's one token block. -->
 <link rel="stylesheet" href="css/studio-embed.css" />
+<link rel="stylesheet" href="css/ark-blocks.css" />
 </head>
 <body>
 <!-- ONE workspace (2026-10-18, owner: "I only want to see ONE CMS, unified."). There used to be
@@ -46,9 +47,12 @@
   </div>
   <!-- what a click on the canvas edits: the words, or how they look. Same canvas, same selection. -->
   <div class="bar-nav">
-    <div class="mode-switch lens-switch" id="lensSwitch" role="group" aria-label="What a click on the page edits">
-      <button type="button" class="ark-tab" id="lensContentBtn" aria-pressed="true" data-lens="content" title="Edit words: click any text on the page to change it">Edit words</button>
-      <button type="button" class="ark-tab" id="lensDesignBtn" aria-pressed="false" data-lens="design" title="Edit style: click anything on the page to change its look, size and layout">Edit style</button>
+    <!-- one segmented control (.seg) for every group of one-pressed choices: this lens, the
+         canvas strip's screen size and Edit / Preview, the new item's kind; each is Ark's toggle
+         group (js/admin/ark-host.js arkSegGroup) -->
+    <div class="seg seg-text lens-switch" id="lensSwitch" role="group" aria-label="What a click on the page edits">
+      <button type="button" id="lensContentBtn" aria-pressed="true" data-lens="content" title="Edit words: click any text on the page to change it">Edit words</button>
+      <button type="button" id="lensDesignBtn" aria-pressed="false" data-lens="design" title="Edit style: click anything on the page to change its look, size and layout">Edit style</button>
     </div>
   </div>
   <!-- ONE history: text, style and layout edits, in the order they were made (the history module, loaded below) -->
@@ -324,6 +328,14 @@
 <script src="js/content/settings-defaults-data.js" defer></script>
 <script src="js/content/layout.js" defer></script>
 <script src="js/content/layout-data.js" defer></script>
+<!-- The CMS Library's blocks are the Ark block registry (W2-LIBRARY): ArkKit (the full kit, with the
+     createArkUI runtime the editor's overlays run on; it binds to engines.js's style registry at load),
+     the glossary its [[term]] previews read, and the SDK's block check -- all before
+     components.js, whose blocks() the editor reads at load (js/admin/controls.js). -->
+<script src="js/ark/vendor/engines.js" defer></script>
+<script src="js/ark/vendor/ark-kit.js" defer></script>
+<script src="js/content/glossary.js" defer></script>
+<script src="js/admin/vendor/cms-blocks.js" defer></script>
 <script src="js/content/components.js" defer></script>
 <script src="js/content/components-data.js" defer></script>
 <script src="js/content/states.js" defer></script>
@@ -346,7 +358,6 @@
      and a new article could never be saved (regression: tests/admin-reference-docs-loaded.cjs). -->
 <script src="js/ark/reference-docs.js" defer></script>
 <script src="js/admin/store.js" defer></script>
-<script src="js/admin/primitives.js" defer></script>
 <script src="js/admin/vendor/tweetnacl.js" defer></script>
 <script src="js/admin/crypto.js" defer></script>
 <script src="js/admin/publish.js" defer></script>
@@ -364,6 +375,8 @@
 <script src="js/admin/core.js" defer></script>
 <script src="js/admin/notice.js" defer></script>
 <script src="js/admin/overlay.js" defer></script>
+<!-- Ark's tabs, disclosure and toggle group on the light-DOM host, for every module after it -->
+<script src="js/admin/ark-host.js" defer></script>
 <script src="js/admin/state.js" defer></script>
 <script src="js/admin/controls.js" defer></script>
 <script src="js/admin/save.js" defer></script>

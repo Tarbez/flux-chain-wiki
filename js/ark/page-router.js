@@ -115,7 +115,7 @@
     function isLifecycleStage(page) { return String(page).indexOf('lifecycle/') === 0; }
     function animateLifecycleInformation(el, immediate) {
       if (immediate || !el || !el.querySelectorAll) return Promise.resolve();
-      var targets = Array.from(el.querySelectorAll('.story-kicker,.lifecycle-answer h1,.lifecycle-view,.lifecycle-boundary,.lifecycle-next'));
+      var targets = Array.from(el.querySelectorAll('.story-lifecycle > [data-ark-block="hero"],.story-lifecycle .story-main,.story-lifecycle > [data-ark-block="pager"]'));
       var runs = targets.filter(function (item) { return typeof item.animate === 'function'; }).map(function (item) {
         return item.animate([{ transform:'translate3d(0,4px,0)' }, { transform:'translate3d(0,0,0)' }], {
           duration:180, easing:'cubic-bezier(.2,.65,.2,1)'

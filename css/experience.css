@@ -1,19 +1,4 @@
 /* Batch 4: a quiet instrument field and deliberate, interactive reading depths. */
-.deploy-progress { display:flex; flex-wrap:wrap; gap:8px; margin:28px 0 20px; }
-.deploy-progress button,.deploy-workflow-controls button { min-height:44px; padding:10px 14px; border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-strong)); font:500 13px/1.4 "Albert Sans",sans-serif; cursor:pointer; }
-.deploy-progress button[aria-pressed="true"] { border-color:hsl(var(--reference)); background:hsl(var(--reference-100)); }
-.deploy-workflow-controls { display:flex; flex-wrap:wrap; gap:10px; }
-.deploy-workflow-controls .mechanism-next { background:hsl(var(--text-strong)); }
-#scene .deploy-step-body { min-width:0; }
-#scene .deploy-step { scroll-margin-top:90px; }
-#scene .deploy-step-body p { font:400 16px/1.65 "Albert Sans",sans-serif; }
-#scene .deploy-command { padding-top:60px; }
-#scene .deploy-command::before { top:24px; }
-#scene .deploy-copy { min-width:64px; min-height:44px; font-size:11px; }
-#scene .deploy-copy-feedback { display:block; min-height:1.5em; margin-top:8px; font:400 13px/1.5 "Albert Sans",sans-serif; color:hsl(var(--text-strong)); }
-#scene .deploy-expected { color:hsl(var(--text-strong) / .8) !important; }
-.deploy-position { font:400 13px/1.5 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
-.deploy-progress button:focus-visible,.deploy-workflow-controls button:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 .source-step-picker { display:flex; flex-wrap:wrap; gap:8px; margin:32px 0 12px; }
 .source-step-picker button,.source-step-controls button { min-height:44px; padding:10px 14px; border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-strong)); font:500 13px/1.4 "Albert Sans",sans-serif; cursor:pointer; }
 .source-step-picker button[aria-pressed="true"] { border-color:hsl(var(--reference)); background:hsl(var(--reference-100)); }
@@ -21,7 +6,6 @@
 .source-step-controls { display:flex; flex-wrap:wrap; gap:9px; margin:0 0 30px; }
 .source-step-controls .mechanism-next { background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); }
 .source-step-picker button:focus-visible,.source-step-controls button:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
-#scene .learning-page [hidden] { display:none !important; }
 #scene .hero-alive .ark-layer-persistent::before,
 #scene .hero-alive .ark-layer-persistent::after {
  content:""; position:absolute; pointer-events:none; border-radius:50%;
@@ -39,15 +23,10 @@
 #scene .hero-alive[data-transition="running"] .ark-layer-persistent::before { transform:rotate(24deg) scale(1.16); opacity:.45; }
 #scene .hero-alive[data-transition="running"] .ark-layer-persistent::after { transform:rotate(90deg) scale(.85); opacity:1; }
 #scene .hero-alive .lattice-field { mask-image:linear-gradient(90deg,rgba(0,0,0,.24),rgba(0,0,0,.45) 52%,#000); }
-#scene .learning-page :is(.concept-deck,.learning-intro) { font:400 clamp(16px,1.4vw,19px)/1.65 "Albert Sans",sans-serif; color:hsl(var(--text)); max-width:52ch; }
-#scene .hero-alive .learning-page :is(.learning-heading,.concept-content h1) { text-transform:none; letter-spacing:-.055em; font-weight:600; max-width:17ch; }
 #scene .theory-page .concept-content { max-width:1100px; }
 #scene .mechanism-explorer .concept-content { min-height:calc(100dvh - 130px); position:relative; }
 #scene .mechanism-explorer .concept-content::after { content:"+"; position:absolute; top:42px; right:4%; color:hsl(var(--text-muted)); font:300 30px/1 "Albert Sans",sans-serif; pointer-events:none; }
-#scene .mechanism-explorer .learning-heading { max-width:16ch; font-size:clamp(40px,5.4vw,76px); }
-#scene .mechanism-explorer .mechanism-status-summary { max-width:56ch; border:0; border-left:2px solid hsl(var(--primary-400)); background:transparent; padding:0 0 0 16px; margin:28px 0; }
-#scene .mechanism-explorer:not([data-reading-layer="focus"]) .mechanism-status-summary p { display:none; }
-#scene .mechanism-explorer:not([data-reading-layer="focus"]) .mechanism-status-summary { margin:18px 0; }
+
 .mechanism-depth { display:flex; gap:0; max-width:790px; border-block:1px solid hsl(var(--border-default)); margin:32px 0; }
 .mechanism-depth-button { position:relative; flex:1; display:flex; align-items:center; gap:14px; border:0; border-right:1px solid hsl(var(--border-subtle)); background:transparent; color:hsl(var(--text-muted)); padding:20px 16px; text-align:left; cursor:pointer; font:500 14px/1.4 "Albert Sans",sans-serif; transition:background 180ms,color 180ms; }
 .mechanism-depth-button:last-child { border-right:0; }
@@ -55,30 +34,20 @@
 .mechanism-depth-button[aria-pressed="true"] { color:hsl(var(--text-strong)); background:linear-gradient(180deg,hsl(var(--text-strong) / .045),transparent); }
 .mechanism-depth-button[aria-pressed="true"]::after { transform:scaleX(1); }
 .mechanism-depth-number { font:500 10px/1.3 ui-monospace,monospace; color:hsl(var(--primary)); }
-.mechanism-depth-button:hover,.mechanism-step:hover { background:hsl(var(--text-strong) / .045); color:hsl(var(--text-strong)); }
+.mechanism-depth-button:hover{ background:hsl(var(--text-strong) / .045); color:hsl(var(--text-strong)); }
 #scene .mechanism-inner-title { max-width:22ch; margin:35px 0 0; font:500 clamp(32px,4vw,56px)/1.08 "Albert Sans",sans-serif; letter-spacing:-.04em; color:hsl(var(--text-strong)); }
 .mechanism-inner { max-width:790px; }
 .mechanism-inner#dao-context { max-width:900px; }
 .mechanism-steps { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 26px; }
-.mechanism-step { border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-muted)); padding:12px; font:500 12px/1.4 "Albert Sans",sans-serif; cursor:pointer; text-align:left; }
-.mechanism-step[aria-pressed="true"] { border-color:hsl(var(--reference-400)); color:hsl(var(--text-strong)); background:hsl(var(--reference-100)); }
-#scene .mechanism-inner .concept-principles { max-width:100%; min-height:180px; }
-#scene .mechanism-inner .concept-principles section { grid-template-columns:40px 1fr; padding:24px 0; border:0; animation:none; }
-#scene .mechanism-inner .concept-principles h2 { font:500 clamp(24px,3vw,36px)/1.2 "Albert Sans",sans-serif; letter-spacing:-.035em; margin-bottom:20px; }
-#scene .mechanism-inner :is(p,.concept-principles p) { font:400 17px/1.7 "Albert Sans",sans-serif; color:hsl(var(--text)); max-width:55ch; }
+
+#scene .mechanism-inner p { font:400 17px/1.7 "Albert Sans",sans-serif; color:hsl(var(--text)); max-width:55ch; }
 #scene .mechanism-inner .mechanism-progress { font:500 10px/1.5 ui-monospace,monospace; letter-spacing:.12em; color:hsl(var(--text-muted)); }
-.mechanism-inner .mechanism-limit h2 { font:500 28px/1.25 "Albert Sans",sans-serif; color:hsl(var(--text-strong)); }
+
 .mechanism-next { min-height:44px; padding:10px 18px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--canvas)); font:500 13px/1.3 "Albert Sans",sans-serif; cursor:pointer; }
-#scene .hero-alive .learning-page .mechanism-next { color:hsl(var(--canvas)); }
 .mechanism-explorer .theory-footer { margin-top:36px; }
 .mechanism-explorer :is(button,a):focus-visible { outline:2px solid hsl(var(--text-strong)); outline-offset:4px; }
 #scene .concept-page .concept-content { width:100%; padding:var(--page-top) var(--page-gutter) 60px; }
-#scene .concept-page .concept-principles { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); max-width:none; gap:16px; margin-top:42px; }
-#scene .concept-page .concept-principles section { display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:20px; min-height:310px; padding:24px; border:1px solid hsl(var(--border-default)); background:linear-gradient(155deg,hsl(var(--text-strong) / .025),transparent); }
-#scene .concept-page .concept-principles h2 { font:500 23px/1.2 "Albert Sans",sans-serif; letter-spacing:-.025em; transform:none; }
-#scene .concept-page .concept-principles .article-back { font-size:9px; }
-#scene .concept-page .concept-principles section::before { content:none; }
-#scene .concept-page .concept-principles section:focus-within { outline:2px solid hsl(var(--text-strong)); outline-offset:3px; }
+
 .concept-symbol { position:relative; height:115px; width:100%; display:grid; place-items:center; pointer-events:none; }
 .concept-symbol i { position:absolute; width:92px; height:92px; border:1px solid hsl(var(--text-strong) / .35); border-radius:50%; transition:transform 500ms cubic-bezier(.2,.7,.2,1),border-color 400ms; }
 .concept-symbol i:nth-child(1) { transform:translateX(-28px); }
@@ -109,14 +78,10 @@
 #scene .home-primary-cta { background:hsl(var(--text-strong)); color:hsl(var(--canvas)); border-color:transparent; min-height:46px; padding:0 20px; transition:transform 180ms,box-shadow 180ms; }
 #scene .home-primary-cta:hover { transform:translateY(-2px); box-shadow:0 8px 30px hsl(var(--text-strong) / .08); }
 #scene .home-ghost-cta { min-height:44px; }
-#scene .hero-alive[data-page="zero"] .ark-hero-copy,#scene .mechanism-inner :is(p,.concept-principles p),#scene .learning-page .concept-deck { color:hsl(var(--text-strong) / .78); }
+#scene .hero-alive[data-page="zero"] .ark-hero-copy,#scene .mechanism-inner p { color:hsl(var(--text-strong) / .78); }
 #scene .hero-alive:has(.mechanism-explorer[data-reading-layer="context"]) .ark-layer-persistent::before { transform:translateX(-4%) rotate(35deg) scale(.9); }
 #scene .hero-alive:has(.mechanism-explorer[data-reading-layer="reference"]) .ark-layer-persistent::before { transform:translateY(6%) rotate(-35deg) scale(1.12); }
-#scene .hero-alive:has(.mechanism-step:hover) .ark-layer-persistent::after { transform:rotate(45deg) scale(1.06); }
-#scene .lifecycle-page .lifecycle-facts { grid-column:2; padding:20px 0; }
-#scene .lifecycle-page .lifecycle-facts nav { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
-#scene .lifecycle-page .lifecycle-facts p { min-height:3.5em; color:hsl(var(--text-strong)); font-size:17px; }
-@media(max-width:620px) { #scene .lifecycle-page .lifecycle-facts { grid-column:1; } }
+
 @media(max-width:900px) {
  #scene .hero-alive[data-page="zero"] .ark-layer-zero { display:flex; flex-direction:column; gap:34px; padding:112px 24px 60px; }
  #scene .hero-alive[data-page="zero"] .ark-hero-body { min-height:calc(100dvh - 112px); }
@@ -127,15 +92,12 @@
  .source-step-picker { flex-wrap:nowrap; }
  .source-step-picker button { flex:1; min-width:0; padding:10px 4px; text-align:center; font-size:0; }
  .source-step-picker button::before { content:attr(data-step-number); font:600 12px/1.4 ui-monospace,monospace; }
- #scene .concept-page .concept-principles { grid-template-columns:1fr; gap:12px; }
- #scene .concept-page .concept-principles section { min-height:240px; }
+
  #scene .concept-page .concept-content { padding-top:36px; }
  #scene .hero-alive[data-page="zero"] .ark-hero-title { font-size:clamp(39px,8.8vw,62px); }
  .mechanism-depth-button { display:grid; gap:7px; padding:14px 9px; font-size:12px; }
  .mechanism-depth { margin-block:24px; }
- .mechanism-step { flex:1 1 44%; }
- #scene .mechanism-inner .concept-principles section { grid-template-columns:25px 1fr; gap:10px; }
- #scene .mechanism-inner .concept-principles { min-height:230px; }
+
  #scene .hero-alive .ark-layer-persistent::before { width:90vw; right:-45%; top:20%; }
 }
 @media(prefers-reduced-motion:reduce) {

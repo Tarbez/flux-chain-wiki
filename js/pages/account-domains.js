@@ -1,51 +1,70 @@
-/* Your domains: the names/* records this browser has chosen to track, each
-   re-verified live against the mesh on every view (see js/ark/local-domains.js
-   for why there is no server-side "list my names" query to read instead). */
+/* Your domains: the names this browser has chosen to follow (see js/ark/local-domains.js for
+   why there is no server-side "list my names" query to read instead), each one click from the
+   Domains product.
+
+   Explain + hand off (owner decision 2026-10-19, docs/ux-audit/plan.md). Until then each card
+   looked its name up here, in the Miner's `names` source -- the GUN names/* registry, which the
+   one-name-system law retired (docs/DEFXN-NAMES-ONE-SYSTEM.md: names resolve ONLY through
+   dense-wire's signed KDOM records, checked with the one shared verifier) -- and trusted one
+   node's answer. Domains looks a name up the lawful way (owner, target, claim, transfer), so
+   the lookup is Domains' and this page keeps only what Domains has no place for: the list
+   itself (localStorage `defxn-local-domains-v1`, unchanged), the count on /account, and each
+   name's live-site link. */
 (function () {
   'use strict';
-  var HOSTNAME = typeof location !== 'undefined' && location.hostname || 'localhost';
-  var LOCAL_MINER = /^(127\.0\.0\.1|localhost)$/.test(HOSTNAME) ? 'http://127.0.0.1:8766' : 'https://cd1.defxn.com';
-  var EXPLORER_API = 'explorer-api-v1';
 
   function text(value, fallback) { return value == null || value === '' ? (fallback || '—') : String(value); }
-  /* This page carries no ArkManifest of its own, so there is no manifest
-     field for a 'link' kind value to live in; the destination stays a
-     tagged literal in code, resolved the one shared way every retrofitted
-     call site is -- js/ark/dash-kit.js's resolveLinkField. (liveUrl()
-     below builds a per-domain external address, not an editorial CTA
-     destination, so it is left as-is, same as the infra endpoints this
-     retrofit does not touch.) */
-  function href(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
+  /* liveUrl() builds a per-domain external address (a name's live site), not an editorial link. */
   function escapeHtml(value) { return String(value).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
   function liveUrl(name) {
     var label = name.replace(/\.fxn$/i, '');
     return label === name ? null : 'https://' + label + '.defxn.com';
   }
 
+  /* `was`: the key each element of the hand-built page had (tests/lib/layout-continuity.cjs against
+     tests/fixtures/layout-keys/account-domains.tsv); reasons in tests/task-pages-blocks.cjs. */
+  var H = 'page:/div:1/header:1';
+  var WAS = {
+    'account-domains-crumbs': { 'breadcrumb-item#2': H + '/a:1' },
+    'account-domains-hero': { ':root': { key: H, self: true }, eyebrow: H + '/p:1', 'hero-lede': H + '/p:2' },
+    'account-domains-track': { 'form': H + '/form:1', '[data-domains-add-status]': H + '/p:3', '[data-domains-handoff]': H + '/div:1' },
+    'account-domains-list': { ':root': 'page:/div:1/section:1' },
+    insert: 'page:/div:1/div:1'
+  };
+
+  /* The page as Ark blocks around its two live parts (DEFXN polish Wave 3, W3-GUIDE): the form that
+     tracks a name, with the family's Domains hand-off, and the list of tracked names -- the
+     page's own, hand-built because they ARE the page (they read and write this browser's list).
+     The crumbs (the old "← Your account" link is the trail's middle step), the heading and the
+     ways on are Ark's. */
+  function spec() {
+    return [
+      { block: 'breadcrumb', id: 'account-domains-crumbs', was: WAS['account-domains-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Your account', href: 'route:account' }, { label: 'Your domains' }] } },
+      { block: 'hero', id: 'account-domains-hero', was: WAS['account-domains-hero'], props: { eyebrow: 'Names you track', title: 'Your domains.', density: 'compact',
+        lede: 'This browser keeps the list of names you follow. Who owns each one and where it points is checked in Domains, against the name\u2019s signed records.' } },
+      { block: 'custom', id: 'account-domains-track', was: WAS['account-domains-track'], mount: function () {
+        var box = document.createElement('div'); box.className = 'account-domains-track';
+        box.innerHTML = '<form data-domains-form aria-label="Track a domain"><label for="domainsNameInput">Track an exact name</label><input id="domainsNameInput" type="text" autocomplete="off" placeholder="yourname.fxn" /><button type="submit" class="palette-solid">Track</button></form>' +
+          '<p data-domains-add-status role="status" aria-live="polite"></p><div data-domains-handoff></div>';
+        return box;
+      } },
+      { block: 'custom', id: 'account-domains-list', was: WAS['account-domains-list'], mount: function () {
+        var box = document.createElement('div');
+        box.innerHTML = '<section class="account-domains-list" aria-label="Tracked domains"><p class="account-card-caption">Tracked names <span data-domains-count>(0)</span></p>' +
+          '<ul data-domains-items></ul>' +
+          '<p class="account-domains-empty" data-domains-empty hidden>No names tracked yet. Add one to keep it one step from Domains.</p></section>';
+        return box.firstChild;
+      } },
+      { insert: 'main', was: WAS.insert },
+      { block: 'pager', id: 'account-domains-pager', props: { label: 'Continue', prev: { label: 'Your account', href: 'route:account' },
+        related: [{ label: 'Resolve your website', href: 'route:resolutions/website' }, { label: 'FXN Bundle Deployer', href: 'route:bundledeployer' }] } }
+    ];
+  }
+
   ArkUI.pageModules.accountDomains = {
+    spec: spec,
     mount: function (host) {
-      var page = document.createElement('section');
-      page.className = 'ark-page task-page account-page account-domains-page';
-      page.setAttribute('aria-labelledby', 'account-domains-title');
-      // Same shape as /account: the ask on the left, one card on the right.
-      page.innerHTML =
-        '<div class="account-shell account-domains-shell">' +
-        '<header class="account-hero"><a class="account-domains-back" href="' + href('account') + '" data-scene-link="account">← Your account</a><p class="account-promise">Names you track</p>' +
-        '<h1 id="account-domains-title">Your domains.</h1>' +
-        '<p class="account-intro">Each name is checked live against the mesh. This browser only keeps the list of names to check.</p>' +
-        '<form data-domains-form aria-label="Track a domain"><label for="domainsNameInput">Track an exact name</label><input id="domainsNameInput" type="text" autocomplete="off" placeholder="yourname.fxn" /><button type="submit" class="palette-solid">Track &amp; verify</button></form>' +
-        '<p data-domains-add-status role="status" aria-live="polite"></p>' +
-        '<p class="account-domains-note">Claim a new name from the CMS on <a href="' + href('account') + '" data-scene-link="account">your account</a>.</p></header>' +
-        '<section class="account-card account-domains-list" aria-label="Tracked domains"><p class="account-card-caption">Tracked names <span data-domains-count>(0)</span></p>' +
-        '<ul data-domains-items></ul>' +
-        '<p class="account-domains-empty" data-domains-empty hidden>No names tracked yet. Add one to see its owner and target.</p></section>' +
-        /* Anchor for reusable content blocks (js/content/components.js); rendering into
-           it is centralized in js/main.js's onMount hook, not called here. Baked into the
-           HTML string itself, like the rest of this page, rather than a querySelector()
-           afterward, since this page module builds entirely from one innerHTML write. */
-        '<div data-ark-insert="main"></div>' +
-        '</div>';
-      host.appendChild(page);
+      var page = ArkUI.page(spec(), host, { page: 'account/domains', className: 'account-domains-page', titleId: 'account-domains-title' });
 
       var form = page.querySelector('[data-domains-form]');
       var input = page.querySelector('#domainsNameInput');
@@ -53,75 +72,27 @@
       var itemsEl = page.querySelector('[data-domains-items]');
       var countEl = page.querySelector('[data-domains-count]');
       var emptyEl = page.querySelector('[data-domains-empty]');
-      var generation = 0;
-      var controllers = Object.create(null);
+      var handoff = ArkUI.dash.productHandoff && ArkUI.dash.productHandoff({ product: 'domains', text: 'A .fxn name points people to your site or app. Looking a name up, claiming it and pointing it happen in Domains, where every answer is checked.' });
+      var handoffHost = page.querySelector('[data-domains-handoff]');
+      if (handoff && handoffHost) handoffHost.appendChild(handoff);
 
-      function explorerRecord(payload, name) {
-        if (!payload || payload.apiVersion !== EXPLORER_API || !payload.data || !payload.data.record || payload.data.record.id !== name) return null;
-        return payload.data.record;
-      }
-
-      async function verifyName(name, token, cardFields) {
-        cardFields.status.textContent = 'Checking the mesh…';
-        cardFields.card.dataset.state = 'checking';
-        if (controllers[name]) controllers[name].abort();
-        var controller = new AbortController();
-        controllers[name] = controller;
-        var timeout = window.setTimeout(function () { controller.abort(); }, 10000);
-        try {
-          var response = await fetch(LOCAL_MINER + '/explorer/v1/record', {
-            method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/json' },
-            body: JSON.stringify({ sourceId: 'names', recordId: name, scope: { name: name } }),
-            signal: controller.signal, cache: 'no-store'
-          });
-          var payload = await response.json().catch(function () { return null; });
-          if (token !== generation) return;
-          if (!response.ok) throw new Error(payload && payload.error && payload.error.message || 'Miner returned HTTP ' + response.status + '.');
-          var record = explorerRecord(payload, name);
-          if (!record) throw new Error('No name record found for ' + name + '.');
-          if (record.verification && record.verification.state !== 'verified') throw new Error('Returned without verified provenance.');
-          var body = record.fields && record.fields.sourceRecord && typeof record.fields.sourceRecord === 'object' ? record.fields.sourceRecord : {};
-          var who = window.ArkUI.localIdentity && window.ArkUI.localIdentity.current();
-          var mine = who && body.ownerPublicKey && who.publicKeyB64 === body.ownerPublicKey;
-          cardFields.card.dataset.state = mine ? 'mine' : 'found';
-          cardFields.status.textContent = mine ? 'Owned by your signed-in identity.' : 'Live on the mesh.';
-          cardFields.owner.textContent = text(body.ownerPublicKey, 'Not reported');
-          cardFields.updated.textContent = body.updatedAt ? new Date(body.updatedAt).toLocaleString() : 'Not dated';
-          var target = Array.isArray(body.targets) && body.targets[0];
-          cardFields.target.textContent = target ? text(target.value, 'Not reported') : 'No target recorded';
-          var url = liveUrl(name);
-          if (url) { cardFields.open.hidden = false; cardFields.open.href = url; } else { cardFields.open.hidden = true; }
-        } catch (error) {
-          if (token !== generation) return;
-          cardFields.card.dataset.state = error && error.name === 'AbortError' ? 'timeout' : 'missing';
-          cardFields.status.textContent = error && error.name === 'AbortError' ? 'The Miner did not respond in time.' : text(error && error.message, 'That name has no record on the mesh yet.');
-          cardFields.owner.textContent = '—'; cardFields.updated.textContent = '—'; cardFields.target.textContent = '—';
-          cardFields.open.hidden = true;
-        } finally {
-          window.clearTimeout(timeout);
-          if (controllers[name] === controller) delete controllers[name];
-        }
-      }
-
+      /* each tracked name: open it in Domains (its owner and target, checked there), and its
+         live site; no lookup runs here (see the header comment) */
       function renderList(names) {
-        generation += 1;
-        var token = generation;
         countEl.textContent = '(' + names.length + ')';
         emptyEl.hidden = names.length > 0;
         itemsEl.innerHTML = '';
         names.forEach(function (name) {
           var li = document.createElement('li');
           li.className = 'account-domains-item';
+          var lookup = ArkUI.dash.productLink && ArkUI.dash.productLink({ product: 'domains', query: { q: name }, label: 'Check in Domains' });
+          var live = liveUrl(name);
           li.innerHTML = '<div class="account-domains-item-head"><strong>' + escapeHtml(name) + '</strong><button type="button" data-domains-remove="' + escapeHtml(name) + '">Stop tracking</button></div>' +
-            '<p class="account-domains-item-status" data-status>Checking the mesh…</p>' +
-            '<dl><div><dt>Owner</dt><dd data-owner>—</dd></div><div><dt>Target</dt><dd data-target>—</dd></div><div><dt>Updated</dt><dd data-updated>—</dd></div></dl>' +
-            '<a data-open hidden target="_blank" rel="noopener">Open live site ↗</a>';
+            '<p class="account-domains-item-status">' + (lookup ? 'Owner and target are checked in Domains.' : 'Domains is not reachable from this page.') + '</p>' +
+            (live ? '<a data-open href="' + escapeHtml(live) + '" target="_blank" rel="noopener">Open ' + escapeHtml(live.replace(/^https:\/\//, '')) + ' \u2197</a>' : '');
+          /* the same "Open <Product>" link the overlap pages' handoff carries (the kit's) */
+          if (lookup) li.insertBefore(lookup, li.querySelector('[data-open]'));
           itemsEl.appendChild(li);
-          var cardFields = {
-            card: li, status: li.querySelector('[data-status]'), owner: li.querySelector('[data-owner]'),
-            updated: li.querySelector('[data-updated]'), target: li.querySelector('[data-target]'), open: li.querySelector('[data-open]')
-          };
-          verifyName(name, token, cardFields);
         });
       }
 
@@ -143,11 +114,7 @@
       });
 
       var unsubscribe = window.ArkUI.localDomains.subscribe(renderList);
-      page.arkDispose = function () {
-        generation += 1;
-        Object.keys(controllers).forEach(function (name) { controllers[name].abort(); });
-        unsubscribe();
-      };
+      page.arkDispose = function () { unsubscribe(); };
       return page;
     }
   };

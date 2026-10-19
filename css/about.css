@@ -1,20 +1,8 @@
-/* /about, in the home page's language. Layout comes from the shared hl-* parts in
-   css/home-swiss.css (the page root also carries .home-launch); this file only adds
-   what /about has and home does not. Colour is data, as on home: every slab, label
-   and rule is neutral, and the single accent is the newest record on the FXN chain
-   layer, the same record the home page follows. */
-
-/* No dashboard card. Like /chain and the home page, the page owns its whole canvas.
-   js/ark/panel-continuity.js sizes the host full-bleed for 'about'. */
-#scene .continuity-host[data-panel-page="about"] {border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;}
-#scene .home-launch.about-launch {position:absolute;inset:0;overflow:auto;}
-#scene .about-launch > .hl-hero {min-height:0;padding:56px 0 64px;}
-
-/* The three layers. */
-#scene .about-figure {display:flex;flex-direction:column;gap:8px;}
-#scene .about-layer-picker {margin-left:auto;}
-#scene .about-stage {padding:8px 0 0;}
-#scene .about-layers-figure {display:block;width:100%;height:auto;max-height:420px;overflow:visible;}
+/* /about: the three bounded layers drawing (js/pages/about.js drawLayers) -- its insides only.
+   Since Wave 3 the page is Ark blocks (css/ark-blocks.css) in the shared block-page panel
+   (css/block-page.css); the drawing sits in Ark's figure frame. Colour is data: every slab, label
+   and rule is neutral, and the single accent is the newest record on the FXN chain layer, the same
+   record the home page follows. */
 .about-slab {transition:opacity 320ms;}
 .about-slab-top {fill:hsl(var(--surface));stroke:hsl(var(--border-strong));stroke-width:.8;transition:fill 320ms,stroke 320ms;}
 .about-slab-front {fill:hsl(var(--canvas));stroke:hsl(var(--border-default));stroke-width:.8;}
@@ -34,92 +22,12 @@
 .about-slab[data-selected="true"] .about-slab-mark {fill:hsl(var(--text-strong));}
 .about-slab[data-selected="true"] .about-slab-bar {stroke:hsl(var(--text-strong));}
 .about-slab-label rect {fill:hsl(var(--canvas));stroke:hsl(var(--border-strong));stroke-width:1;transition:stroke 320ms;}
-.about-slab-label text {fill:hsl(var(--text-muted));font:500 10px var(--font-mono,monospace);letter-spacing:.02em;}
+.about-slab-label text {fill:hsl(var(--text-muted));font:500 13px var(--font-mono,monospace);letter-spacing:.02em;}
 .about-label-icon path {fill:none;stroke:hsl(var(--text-muted));stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .about-slab-label[data-selected="true"] rect {stroke:hsl(var(--text-strong));}
 .about-slab-label[data-selected="true"] text {fill:hsl(var(--text-strong));font-weight:600;}
 .about-slab-label[data-selected="true"] .about-label-icon path {stroke:hsl(var(--text-strong));}
-#scene .about-layer-detail {min-height:112px;padding:16px 0 0;border-top:1px solid hsl(var(--border-default));}
-#scene .about-layer-detail strong {display:block;font:600 16px/24px "Albert Sans",sans-serif;color:hsl(var(--text-strong));}
-#scene .about-layer-detail p {margin-top:4px;max-width:520px;font-size:14px;line-height:22px;color:hsl(var(--text-muted));}
-
-/* Cards on the shared principles grid: four across for the promise, three for the rest. */
-#scene .home-launch .about-nos {grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0;}
-#scene .home-launch .about-nos article {padding:28px;}
-#scene .about-nos h3 {margin:16px 0 8px;}
-#scene .about-step-text {margin-top:20px;font-size:20px !important;line-height:30px !important;color:hsl(var(--text)) !important;letter-spacing:-.01em;}
-#scene .home-launch .about-pillars {margin-top:0;}
-#scene .about-launch .hl-section h2 {font-size:clamp(28px,3.4vw,52px);}
-#scene .about-coin {width:14px;height:14px;color:hsl(var(--text-muted));}
-#scene .about-launch .hl-section > .hl-link {margin-top:24px;}
-
-/* Resolution groups: five counted tiles, each a way in, in place of forty links. */
-#scene .about-groups {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-block:1px solid hsl(var(--border-default));}
-#scene .about-group {display:flex;flex-direction:column;gap:12px;padding:24px;border-right:1px solid hsl(var(--border-default));color:hsl(var(--text)) !important;text-decoration:none !important;transition:background 180ms;}
-#scene .about-group:last-child {border-right:0;}
-#scene .about-group:hover {background:hsl(var(--surface));}
-#scene .about-group h3 {font-size:18px;line-height:24px;font-weight:550;letter-spacing:-.02em;color:hsl(var(--text-strong));}
-#scene .about-group p:not(.hl-label) {font-size:13px;line-height:20px;color:hsl(var(--text-muted));}
-
-/* The closing block: boundary first, evidence on request.
-   Law 18 ("one scroll, then it ends"): this page now holds the hero plus
-   one disclosure above it, so the closer is scaled back from a second
-   full "arrival" moment to a calm sign-off. */
-#scene .about-closing {position:relative;margin-top:40px;padding:40px 48px 24px;border-top:1px solid hsl(var(--border-strong));border-radius:4px;background:hsl(var(--anchor));color:hsl(var(--anchor-ink));}
-#scene .about-closing .hl-label {color:hsl(var(--anchor-ink) / .64);}
-#scene .about-closing h2 {margin:16px 0;font-size:clamp(24px,3vw,36px);line-height:1.05;letter-spacing:-.04em;font-weight:550;}
-#scene .about-boundary-text {max-width:640px;font-size:16px;line-height:24px;color:hsl(var(--anchor-ink) / .8);}
-#scene .about-reference {margin-top:32px;border-top:1px solid hsl(var(--anchor-ink) / .16);}
-#scene .about-reference summary {display:flex;justify-content:space-between;padding:20px 0;cursor:pointer;list-style:none;font-size:15px;color:hsl(var(--anchor-ink));}
-#scene .about-reference summary::-webkit-details-marker {display:none;}
-#scene .about-reference summary::after {content:"+";}
-#scene .about-reference[open] summary::after {content:"−";}
-#scene .about-reference-body {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;padding:0 0 32px;}
-#scene .about-reference-item h3 {font-size:16px;line-height:24px;font-weight:600;color:hsl(var(--anchor-ink));}
-#scene .about-reference-item p {margin:8px 0 16px;max-width:520px;font-size:14px;line-height:22px;color:hsl(var(--anchor-ink) / .7);}
-#scene .about-boundary .hl-link {color:hsl(var(--anchor-ink));text-decoration:underline;text-decoration-color:hsl(var(--anchor-ink) / .4);text-underline-offset:4px;}
-#scene .about-boundary .hl-footer-links .hl-link {text-decoration:none;color:hsl(var(--anchor-ink) / .8);}
-
-@media (max-width:1100px) {
-  #scene .home-launch .about-nos {grid-template-columns:repeat(2,minmax(0,1fr));}
-  #scene .about-nos article:nth-child(2) {border-right:0;}
-  #scene .about-nos article:nth-child(-n+2) {border-bottom:1px solid hsl(var(--border-default));}
-  #scene .about-groups {grid-template-columns:repeat(2,minmax(0,1fr));}
-  #scene .about-group:nth-child(2n) {border-right:0;}
-  #scene .about-group {border-bottom:1px solid hsl(var(--border-default));}
-}
-@media (max-width:960px) {
-  #scene .about-closing {padding:32px 24px 24px;}
-  #scene .about-launch > .hl-hero {padding:32px 0 48px;gap:32px;}
-  #scene .home-launch .about-nos {grid-template-columns:1fr;}
-  #scene .about-nos article {border-right:0;border-bottom:1px solid hsl(var(--border-default));}
-  #scene .about-nos article:last-child {border-bottom:0;}
-  #scene .about-reference-body {grid-template-columns:1fr;gap:24px;}
-  #scene .about-step-text {font-size:18px !important;line-height:28px !important;}
-}
-@media (max-width:600px) {
-  #scene .about-groups {grid-template-columns:1fr;}
-  #scene .about-group {border-right:0;}
-  #scene .home-launch .about-layer-picker {display:grid;grid-template-columns:repeat(3,1fr);width:100%;}
-  #scene .home-launch .about-layer-picker .hl-case {justify-content:center;padding:4px 6px;font-size:11px;gap:4px;}
-  #scene .home-launch .about-layer-picker .native-icon {display:none;}
-  #scene .about-slab-label text {font-size:13px;}
-}
-
-/* RekIt laws 1/5/6: "the promise", "what you can resolve" and "who it is
-   for" are real content, kept, just behind one disclosure instead of three
-   more always-visible full sections -- `.hl-faq`/`.about-more` gives the
-   disclosure look already shared with the home page's FAQ; this only
-   styles what is unique once it's open: three stacked, clearly labelled
-   parts. */
-#scene .about-more-part {margin-top:40px;}
-#scene .about-more-part:first-child {margin-top:16px;}
-#scene .about-more-part > h3 {font-size:22px;line-height:28px;font-weight:550;letter-spacing:-.025em;margin:0 0 20px;}
-
-/* Without the card's opaque fill, the generic ambient shapes and the live lattice would
-   show through as stray outlines (the same reason /chain hides them). The brand field
-   stays: it is the same quiet texture the home page sits on. */
-#scene .hero-alive[data-page="about"] .ark-background-host,
-#scene .hero-alive[data-page="about"] :is(.lattice-field,.lattice-activity) {display:none !important;}
-#scene .hero-alive[data-page="about"] .ark-layer-persistent::before,
-#scene .hero-alive[data-page="about"] .ark-layer-persistent::after {content:none !important;}
+/* In Ark's figure frame the drawing takes the frame's width; on a wide screen its height is what
+   is scarce (the fold rule), so it is capped and centred. */
+#scene .about-layers-figure {overflow:visible;max-height:min(46vh,400px);}
+@media (max-width:600px) { #scene .about-layers-figure {max-height:190px;} }

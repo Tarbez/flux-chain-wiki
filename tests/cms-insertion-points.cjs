@@ -14,8 +14,8 @@
       places, and several places open an in-panel picker whose options outline their place in
       the preview on hover/focus.
 
-   Runs js/main.js's cmsInsertionPoints and js/admin/admin.js's renderLibrary, extracted
-   verbatim, in jsdom (geometry stubbed per element: jsdom has no layout). */
+   Runs js/main.js's cmsInsertionPoints, extracted verbatim, and the whole js/admin/library.js
+   in jsdom (geometry stubbed per element: jsdom has no layout). */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -73,26 +73,27 @@ const plain = (x) => JSON.parse(JSON.stringify(x));
 
 /* ---- the editor side: Insert -- direct, picker, or disabled with a reason; never prompt() */
 function library(points, masters) {
-  /* the whole Library module body (js/admin/library.js), up to what it hands the other editor files */
-  const code = cut(admin, "  /* the Library's open definition editor", '  A.provide({ cmsOpenMasterInLibrary', 'renderLibrary');
-  const dom = new JSDOM('<body><div id="libPane"></div><button id="btnContentCms"></button></body>');
-  const doc = dom.window.document, sent = [], highlights = [];
-  const context = {
-    document: doc, $: (id) => doc.getElementById(id), ic: () => '', toast() {}, selectDesign() {}, showLeft() {}, openContentEditor() {},
+  /* the real Library module (js/admin/library.js), run whole in jsdom with the editor's shared
+     builders cut from its source and the components module it reads its blocks from */
+  const dom = new JSDOM('<body><div id="libPane"></div></body>', { runScripts: 'outside-only', url: 'http://x/' });
+  const w = dom.window, doc = w.document, sent = [], highlights = [];
+  w.eval(fs.readFileSync('js/content/components.js', 'utf8'));
+  w.eval(buildersSource() + '\n' + require('./lib/admin-source.cjs').functionSource('h') + '\n' + require('./lib/admin-source.cjs').arkHostSource());
+  w.prompt = () => { throw new Error('prompt() was called'); };
+  w.ArkAdmin = {
     /* shared state (js/admin/state.js): the preview's report, and the Library's own repaint key */
     state: { cmsSourceSite: { components: { masters, routes: {} } }, cmsInsertPoints: points, cmsPreviewRoute: '/download', cmsConnected: true, libKey: '' },
-    cmsPreview: { contentWindow: { postMessage: (m) => highlights.push(m.id) } }, location: { origin: 'http://x' },
-    CMS_BLOCK_RESOLVERS: [{ resolver: 'RBLOCK_TEXT_V1', label: 'Text', props: ['heading', 'body'] }], cmsBlockResolverLabel: () => 'Text', cmsBlockResolverProps: () => ['heading', 'body'],
-    cmsMasterKind: () => 'Text', cmsMasterProps: (m) => Object.keys(m.props), cmsNextComponentId: (p) => p + 'X',
+    $: (id) => doc.getElementById(id), h: w.h, ic: () => '', toast() {}, showLeft() {},
+    cmsPreview: { contentWindow: { postMessage: (m) => highlights.push(m.id) } },
+    cmsMasterKind: () => 'Text', cmsNextComponentId: (p) => p + 'X', ctlField: w.ctlField, ctlSelectField: w.ctlSelectField, ctlSegField: w.ctlSegField, refuse: w.refuse,
+    CMS_BLOCK_RESOLVERS: w.ArkComponents.blocks(), linkPickerEl: () => doc.createElement('div'), devDetails: () => doc.createElement('details'),
+    arkAccordion: w.arkAccordion,   /* the groups' fold (js/admin/ark-host.js), its click fallback here */
     postCmsComponentsCommand: (m) => sent.push(plain(m)),
-    prompt: () => { throw new Error('prompt() was called'); },
+    provide(names) { Object.assign(this, names); },
   };
-  context.window = context;
-  vm.createContext(context);
-  vm.runInContext(buildersSource(), context);
-  vm.runInContext(code.replace(/\n  \/\* =+\s*$/, '') + '\nthis.render = renderLibrary;', context);
-  context.render();
-  const row = (label) => [...doc.querySelectorAll('#libPane .myrow')].find((r) => r.querySelector('span').textContent === label);
+  w.eval(fs.readFileSync('js/admin/library.js', 'utf8'));
+  w.ArkAdmin.renderLibrary();
+  const row = (label) => [...doc.querySelectorAll('#libPane .myrow')].find((r) => r.querySelector('.lib-words span').textContent === label);
   const button = (r, text) => [...r.querySelectorAll('button')].find((b) => b.textContent === text);
   return { doc, dom, sent, highlights, row, button, pane: doc.getElementById('libPane') };
 }
@@ -126,7 +127,7 @@ const MASTERS = { m1: { resolver: 'RBLOCK_TEXT_V1', label: 'Hello', props: { hea
   lib.button(lib.row('Hello'), 'Insert').click();
   assert.deepEqual(lib.sent.pop(), { action: 'insert-instance', anchorId: 'main', key: 'iX', masterId: 'm1' }, 'one place inserts at once');
   lib.button(lib.row('Hello'), 'Edit').click();
-  const field = lib.pane.querySelector('.lib-definition input[aria-label="Definition heading"]');
+  const field = lib.pane.querySelector('.lib-definition input[aria-label="Definition Heading"]');
   assert(field, 'Edit opens the definition\'s own fields');
   field.value = 'New'; field.dispatchEvent(new lib.dom.window.Event('change'));
   assert.deepEqual(lib.sent.pop(), { action: 'update-master', id: 'm1', patch: { props: { heading: 'New', body: 'There' } } }, 'a definition edit updates the master -- every instance follows');

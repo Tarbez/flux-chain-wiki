@@ -1,125 +1,171 @@
-/* Run DEFXN from source, in the How it works chapter layout: a terminal card for the chosen step
-   beside the five steps, one screen, no scroll. Steps swap in place; the card follows the step. */
-ArkUI.pageModules.download = {
-  mount: function (host) {
-    var manifest = ArkManifest.get('download');
-    function words(key) { return ArkCopy.text('DOWNLOAD.' + key); }
-    /* `target` is either a real pageCatalog/route key (meta.next, resolved
-       directly the same way admin.js's routeOptions() picker already edits
-       it), or a manifest field role of kind 'link' (js/content/manifest.js)
-       -- both go through the one shared resolver, js/ark/dash-kit.js's
-       linkEl, which replaces this page's own former direct pageCatalog
-       lookup. */
-    function link(label, target, cls) {
-      var value = /^[A-Z][A-Z0-9.]*$/.test(target) ? words(target) : 'route:' + target;
-      return ArkUI.dash.linkEl(label, value, manifest.route, cls);
-    }
-    /* What each step looks like at the terminal. Commands and defaults come from docs/operators. */
-    var terminal = [
-      { lines: ['node --version', 'npm --version'], expect: 'v22 or newer, with npm on the path' },
-      { lines: ['cd /path/to/ark-miner-cli', 'npm install', 'cp .env.example .env', 'npm start'], expect: 'Review .env before npm start' },
-      { checks: [['Process', 'Stays running'], ['Status', '127.0.0.1:8766 (default)'], ['Record', 'Revision, version, config, time']] },
-      { proves: ['Local startup'], not: ['Public-network membership', 'Deployed resolver capacity', 'Independent-host readiness', 'Production activation'] },
-      { lines: ['flux-network network list', 'flux-network network create "my-network"', 'FLUX_MINER_NETWORK=<network-id> flux-miner start'], expect: 'Networks partition presence only' }
-    ];
-    var count = terminal.length, active = 0;
+/* /download -- Run DEFXN from source -- on the story template (js/pages/story.js).
 
-    var el = ArkUI.el('section', 'ark-page how-chapter download-page'); el.dataset.arkPage = 'download';
-    var header = ArkUI.el('header', 'how-chapter-header');
-    var kicker = ArkUI.el('div', 'download-kicker-row'); kicker.appendChild(ArkUI.el('p', 'download-kicker', words('EYEBROW')));
-    /* Phones have no room in the footer, so the guide link moves up beside the kicker there. */
-    var guideTop = link('Operator guide →', 'GUIDE.HREF', 'download-guide-top'); kicker.appendChild(guideTop);
-    header.appendChild(kicker);
-    var title = ArkUI.el('h1', '', words('TITLE')); title.id = 'download-title'; el.setAttribute('aria-labelledby', title.id);
-    header.appendChild(title); header.appendChild(ArkUI.el('p', '', words('DECK'))); el.appendChild(header);
+   Converted in DEFXN polish Wave 3 (W3-GUIDE). It was a hand-built "How it works chapter" screen:
+   a terminal card beside five step buttons that rendered in Arial and showed only "01-05" on a
+   phone, where the deck, the step names, the guide link, the bundle link and the progress line
+   were display:none (docs/ux-audit/pages-ux-a.md /download P1). It is the one guided template now:
+     The idea      the deck and the five steps, by name
+     How it works  each step in full (Ark's accordion), in step with the terminal
+     Evidence      what a clean local start proves and what it does not, and the full guide
+     boundary      what success proves, in sight in every view
+     figure        the terminal for the chosen step -- its commands with Copy, what to expect,
+                   and the way through (previous / next, "Step n of 5", the hand-off to
+                   /deploy on the last step); folded behind "Show the terminal" below 900px
+   Every step is addressable as before (?step=N, plus ?view= for a depth). Words stay in the
+   download manifest (copy: keys); the terminal's commands come from docs/operators. Layout keys
+   of the old page are pinned (`WAS`, tests/lib/layout-continuity.cjs). Regression:
+   tests/resolver-guide-blocks.cjs, tests/routes-live.cjs. */
+(function () {
+  'use strict';
 
-    /* Left: the terminal card for the current step. */
-    var card = ArkUI.el('section', 'how-record-card how-request-brief download-terminal');
-    card.setAttribute('aria-live', 'polite');
-    var top = ArkUI.el('div', 'download-terminal-top');
-    var label = ArkUI.el('span', 'how-chapter-label'); top.appendChild(label);
-    var copy = ArkUI.el('button', 'download-copy', 'Copy'); copy.type = 'button'; top.appendChild(copy);
-    card.appendChild(top);
-    var cardTitle = ArkUI.el('h2'); card.appendChild(cardTitle);
-    var screen = ArkUI.el('div', 'download-screen'); card.appendChild(screen);
-    var expect = ArkUI.el('p', 'download-expect'); card.appendChild(expect);
-    copy.addEventListener('click', function () {
-      var text = (terminal[active].lines || []).join('\n'); if (!text) return;
-      function done() { copy.textContent = 'Copied'; window.setTimeout(function () { copy.textContent = 'Copy'; }, 1400); }
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { copy.textContent = 'Select to copy'; });
-    });
-    function stepTitle(i) { return words('POINT' + (i + 1) + '.TITLE').replace(/^\d+\.\s*/, '').replace(/\.$/, ''); }
-    function paint() {
-      var t = terminal[active];
-      label.textContent = (t.lines ? 'TERMINAL' : t.checks ? 'CHECK' : 'WHAT IT PROVES') + ' · STEP ' + String(active + 1).padStart(2, '0') + ' / ' + String(count).padStart(2, '0');
-      cardTitle.textContent = stepTitle(active);
-      screen.textContent = ''; copy.hidden = !t.lines; expect.hidden = !t.expect; expect.textContent = t.expect || '';
-      if (t.lines) {
-        var pre = ArkUI.el('pre', 'download-code'); copy.setAttribute('aria-label', 'Copy commands for ' + stepTitle(active));
-        t.lines.forEach(function (line) { var row = ArkUI.el('code'); row.appendChild(ArkUI.el('span', 'download-prompt', '$ ')); row.appendChild(document.createTextNode(line)); pre.appendChild(row); });
-        screen.appendChild(pre);
-      } else if (t.checks) {
-        var dl = ArkUI.el('dl', 'how-record-fields download-checks');
-        t.checks.forEach(function (pair) { dl.appendChild(ArkUI.el('dt', '', pair[0])); dl.appendChild(ArkUI.el('dd', '', pair[1])); });
-        screen.appendChild(dl);
-      } else {
-        var split = ArkUI.el('div', 'download-proves');
-        [['PROVES', t.proves, 'yes'], ['DOES NOT PROVE', t.not, 'no']].forEach(function (group) {
-          var col = ArkUI.el('div', 'download-proves-' + group[2]); col.appendChild(ArkUI.el('span', 'how-chapter-label', group[0]));
-          var ul = ArkUI.el('ul'); group[1].forEach(function (item) { ul.appendChild(ArkUI.el('li', '', item)); }); col.appendChild(ul); split.appendChild(col);
-        });
-        screen.appendChild(split);
-      }
-    }
+  /* What each step looks like at the terminal. Commands and defaults come from docs/operators. */
+  var TERMINAL = [
+    { lines: ['node --version', 'npm --version'], expect: 'v22 or newer, with npm on the path' },
+    { lines: ['cd /path/to/ark-miner-cli', 'npm install', 'cp .env.example .env', 'npm start'], expect: 'Review .env before npm start' },
+    { checks: [['Process', 'Stays running'], ['Status', '127.0.0.1:8766 (default)'], ['Record', 'Revision, version, config, time']] },
+    { proves: ['Local startup'], not: ['Public-network membership', 'Deployed resolver capacity', 'Independent-host readiness', 'Production activation'] },
+    { lines: ['flux-network network list', 'flux-network network create "my-network"', 'FLUX_MINER_NETWORK=<network-id> flux-miner start'], expect: 'Networks partition presence only' }
+  ];
+  /* `was`: the key each element of the hand-built page had, by block id, so a CMS edit saved
+     against it still lands. Started from tests/lib/layout-continuity.cjs's derive against the
+     frozen census (tests/fixtures/layout-keys/download.tsv); every reshaped and retired key is
+     listed with its reason in tests/resolver-guide-blocks.cjs. */
+  var STEP = function (n) { return 'page:/div:1/section:2/ol:1/li:' + n; };
+  var WAS = {
+    'download-hero': { ':root': { key: 'page:/header:1', self: true }, eyebrow: 'page:/header:1/div:1/p:1', 'hero-title': 'id:download-title',
+      'actions': { key: 'page:/header:1/div:1', self: true }, 'button': 'page:/nav:1/a:1' },
+    'download-body': { ':root': { key: 'page:/div:1', self: true } },
+    'download-depth': { ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/header:1/p:1', 'tabs-content#2': { key: 'page:/div:1/section:2', self: true },
+      'accordion': { key: 'page:/div:1/section:2/ol:1', self: true }, 'button#2': 'page:/nav:1/a:2' },
+    'download-figure': { '[data-ark-slot="terminal"]': { key: 'page:/div:1/section:1', self: true }, '.download-terminal-top': 'page:/div:1/section:1/div:1', '.download-terminal-top > [data-ark-block="eyebrow"]': 'page:/div:1/section:1/div:1/span:1',
+      '.download-terminal-title': 'page:/div:1/section:1/h2:1', '.download-screen': 'page:/div:1/section:1/div:2', '.download-expect': 'page:/div:1/section:1/p:1',
+      '.download-way': { key: 'page:/nav:1', self: true }, '.download-progress': 'page:/nav:1/span:1', '.download-previous': 'page:/nav:1/button:1',
+      '.download-next': 'page:/nav:1/button:2', '.download-onward': 'page:/nav:1/a:3' },
+    insert: 'page:/div:2'
+  };
+  [1, 2, 3, 4, 5].forEach(function (n) {
+    var k = n > 1 ? '#' + n : '';
+    WAS['download-depth']['step#' + n] = STEP(n) + '/button:1';
+    WAS['download-depth']['step-title' + k] = STEP(n) + '/button:1/strong:1';
+    WAS['download-depth']['accordion-item' + k] = { key: STEP(n), self: true };
+    WAS['download-depth']['accordion-content' + k] = 'id:source-step-' + n;
+  });
 
-    /* Right: the five steps. The chosen one opens its text in place; the others stay one line. */
-    var picker = ArkUI.el('ol', 'how-steps download-steps'); picker.setAttribute('aria-label', 'Local setup steps');
-    var rows = [], choices = [];
-    for (var i = 0; i < count; i++) (function (index) {
-      var item = ArkUI.el('li', 'how-step'), b = ArkUI.el('button', 'how-step-button'); b.type = 'button';
-      b.appendChild(ArkUI.el('span', 'how-step-number', String(index + 1).padStart(2, '0'))); b.appendChild(ArkUI.el('strong', '', stepTitle(index)));
-      b.dataset.stepNumber = String(index + 1).padStart(2, '0');
-      var text = ArkUI.el('p', 'how-step-text', words('POINT' + (index + 1) + '.TEXT')); text.id = 'source-step-' + (index + 1); b.setAttribute('aria-controls', text.id);
-      b.addEventListener('click', function () { select(index, true); });
-      item.appendChild(b); item.appendChild(text); picker.appendChild(item); choices.push(b); rows.push(text);
-    })(i);
-    var side = ArkUI.el('section', 'how-chapter-side'); side.appendChild(picker);
-    var body = ArkUI.el('div', 'how-chapter-body'); body.appendChild(card); body.appendChild(side); el.appendChild(body);
+  function sentence(text) { return text.charAt(0) + text.slice(1).toLowerCase(); }
 
-    /* Footer: reference links on the left, step navigation on the right; the last step hands on to /deploy. */
-    var footer = ArkUI.el('nav', 'how-chapter-footer download-footer'); footer.setAttribute('aria-label', 'Continue');
-    var guide = link(words('GUIDE').charAt(0) + words('GUIDE').slice(1).toLowerCase() + ' →', 'GUIDE.HREF', 'how-deeper-link');
-    footer.appendChild(guide);
-    footer.appendChild(link('Deploy a site with the Bundle Deployer', 'ASIDE.HREF', 'download-aside-link'));
-    var progress = ArkUI.el('span', 'download-progress'); progress.setAttribute('role', 'status'); footer.appendChild(progress);
-    var previous = ArkUI.el('button', 'download-previous', '← '); previous.type = 'button'; previous.setAttribute('aria-label', 'Previous step'); previous.appendChild(ArkUI.el('span', 'download-previous-word', 'Previous'));
-    var next = ArkUI.el('button', 'how-chapter-next download-next', 'Next step →'); next.type = 'button';
-    var onward = link(words('NEXT').charAt(0) + words('NEXT').slice(1).toLowerCase() + ' →', ArkManifest.get('download').meta.next, 'how-chapter-next download-onward');
-    footer.appendChild(previous); footer.appendChild(next); footer.appendChild(onward);
-    previous.addEventListener('click', function () { select(active - 1, true); });
-    next.addEventListener('click', function () { select(active + 1, true); });
-    el.appendChild(footer);
+  ArkUI.pageModules.download = {
+    mount: function (host) {
+      var manifest = ArkManifest.get('download');
+      function words(key) { return ArkCopy.text('DOWNLOAD.' + key); }
+      function copy(key) { return 'copy:DOWNLOAD.' + key; }
+      var count = TERMINAL.length, active = 0, root = null, syncing = false;
+      function stepTitle(i) { return words('POINT' + (i + 1) + '.TITLE').replace(/^\d+\.\s*/, '').replace(/\.$/, ''); }
+      var el = ArkUI.el;
 
-    function select(index, write) {
-      active = Math.max(0, Math.min(count - 1, index));
-      rows.forEach(function (row, j) {
-        var on = j === active; row.hidden = !on; row.inert = !on;
-        row.parentNode.dataset.active = String(on); choices[j].setAttribute('aria-pressed', String(on));
+      /* ---- the terminal (the figure's slot): hand-built because it is the procedure itself --
+         Copy, the step's commands, and the way through; Ark's figure frames it. */
+      var card = el('div', 'download-terminal');
+      card.setAttribute('aria-live', 'polite');
+      var top = el('div', 'download-terminal-top');
+      /* the label says what the card shows and where you are: Ark's eyebrow, its words set per step */
+      var labelBlock = ArkUI.blocks.render({ block: 'eyebrow', props: { text: 'Terminal' } }), label = labelBlock.querySelector('.ark-eyebrow__text') || labelBlock; top.appendChild(labelBlock);
+      var copyButton = el('button', 'download-copy', 'Copy'); copyButton.type = 'button'; top.appendChild(copyButton);
+      card.appendChild(top);
+      var cardTitle = el('p', 'download-terminal-title'); card.appendChild(cardTitle);
+      var screen = el('div', 'download-screen'); card.appendChild(screen);
+      var expect = el('p', 'download-expect'); card.appendChild(expect);
+      copyButton.addEventListener('click', function () {
+        var text = (TERMINAL[active].lines || []).join('\n'); if (!text) return;
+        function done() { copyButton.textContent = 'Copied'; window.setTimeout(function () { copyButton.textContent = 'Copy'; }, 1400); }
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { copyButton.textContent = 'Select to copy'; });
       });
-      previous.hidden = active === 0; next.hidden = active === count - 1; onward.hidden = active !== count - 1;
-      progress.textContent = 'Step ' + (active + 1) + ' of ' + count;
+      var way = el('div', 'download-way');
+      var previous = el('button', 'download-previous', '← '); previous.type = 'button'; previous.setAttribute('aria-label', 'Previous step'); previous.appendChild(el('span', 'download-previous-word', 'Previous'));
+      var progress = el('span', 'download-progress'); progress.setAttribute('role', 'status');
+      var next = el('button', 'download-next mechanism-next', 'Next step →'); next.type = 'button';
+      var onward = ArkUI.dash.linkEl(sentence(words('NEXT')) + ' →', 'route:' + manifest.meta.next, manifest.route, 'download-onward mechanism-next');
+      way.appendChild(previous); way.appendChild(progress); way.appendChild(next); way.appendChild(onward);
+      card.appendChild(way);
+      previous.addEventListener('click', function () { select(active - 1, true); });
+      next.addEventListener('click', function () { select(active + 1, true); });
+
+      function paint() {
+        var t = TERMINAL[active];
+        label.textContent = (t.lines ? 'TERMINAL' : t.checks ? 'CHECK' : 'WHAT IT PROVES') + ' · STEP ' + String(active + 1).padStart(2, '0') + ' / ' + String(count).padStart(2, '0');
+        cardTitle.textContent = stepTitle(active);
+        screen.textContent = ''; copyButton.hidden = !t.lines; expect.hidden = !t.expect; expect.textContent = t.expect || '';
+        if (t.lines) {
+          var pre = el('pre', 'download-code'); copyButton.setAttribute('aria-label', 'Copy commands for ' + stepTitle(active));
+          t.lines.forEach(function (line) { var row = el('code'); row.appendChild(el('span', 'download-prompt', '$ ')); row.appendChild(document.createTextNode(line)); pre.appendChild(row); });
+          screen.appendChild(pre);
+        } else if (t.checks) {
+          var dl = el('dl', 'download-checks');
+          t.checks.forEach(function (pair) { dl.appendChild(el('dt', '', pair[0])); dl.appendChild(el('dd', '', pair[1])); });
+          screen.appendChild(dl);
+        } else {
+          var split = el('div', 'download-proves');
+          [['PROVES', t.proves, 'yes'], ['DOES NOT PROVE', t.not, 'no']].forEach(function (group) {
+            var col = el('div', 'download-proves-' + group[2]); col.appendChild(ArkUI.blocks.render({ block: 'eyebrow', props: { text: group[0] } }));
+            var ul = el('ul'); group[1].forEach(function (item) { ul.appendChild(el('li', '', item)); }); col.appendChild(ul); split.appendChild(col);
+          });
+          screen.appendChild(split);
+        }
+        previous.hidden = active === 0; next.hidden = active === count - 1; onward.hidden = active !== count - 1;
+        progress.textContent = 'Step ' + (active + 1) + ' of ' + count;
+      }
+      /* The step rows of How it works: Ark's accordion, opened in step with the terminal. */
+      function rows() { var panel = root && root.story && root.story.panel('context'); return panel ? Array.prototype.slice.call(panel.querySelectorAll('[data-ark-part="accordion-trigger"]')) : []; }
+      function openRow(index) {
+        var trigger = rows()[index];
+        if (trigger && trigger.getAttribute('aria-expanded') !== 'true') { syncing = true; trigger.click(); syncing = false; }
+      }
+      function query(view) {
+        var v = view || (root && root.story ? root.story.view() : 'focus');
+        return (v === 'focus' ? '' : 'view=' + v + '&') + 'step=' + active;
+      }
+      function select(index, write) {
+        active = Math.max(0, Math.min(count - 1, index));
+        paint(); openRow(active);
+        if (write && root) ArkUI.route.write(ArkUI.pageCatalog.download.path, query(), 'push');
+      }
       paint();
-      if (write && el.arkWriteState) el.arkWriteState({ step: active, review: false });
+
+      var steps = [];
+      for (var i = 0; i < count; i++) steps.push({ value: 'step-' + (i + 1), title: stepTitle(i), content: copy('POINT' + (i + 1) + '.TEXT') });
+      var guide = { label: sentence(words('GUIDE')), href: words('GUIDE.HREF') };
+      var def = {
+        page: 'download', id: 'download', titleId: 'download-title', was: WAS, insertWas: WAS.insert,
+        crumbs: [{ label: 'Home', href: 'route:zero' }, { label: manifest.title }],
+        eyebrow: copy('EYEBROW'), title: copy('TITLE'),
+        actions: [{ label: guide.label, href: guide.href, tone: 'secondary' }],
+        depth: {
+          focus: { text: copy('DECK'), blocks: [{ block: 'steps', props: { label: 'Local setup steps', items: steps.map(function (s) { return { title: s.title }; }) } }] },
+          context: { blocks: [{ block: 'accordion', props: { label: 'Local setup steps', multiple: false, defaultOpen: ['step-1'], items: steps } }] },
+          reference: { blocks: [
+            { block: 'facts', props: { label: 'What a clean local start proves', columns: 1, items: [
+              { term: 'Proves', value: TERMINAL[3].proves.join(' · ') }, { term: 'Does not prove', value: TERMINAL[3].not.join(' · ') }] } },
+            { block: 'actions', props: { label: 'Go further', items: [{ label: guide.label, href: guide.href, tone: 'link' }, { label: 'Deploy a site with the Bundle Deployer', href: words('ASIDE.HREF'), tone: 'link' }] } }
+          ] }
+        },
+        /* what success proves, in sight in every view; on a phone it folds behind "Show the status" */
+        boundary: { tone: 'drift', title: stepTitle(3), body: copy('POINT4.TEXT') }, boundaryFold: 'phone',
+        figure: { slot: 'terminal', kind: 'illustration', caption: 'What each step looks like at the terminal: its commands with Copy, and what to expect. Commands and defaults come from the operator guide.',
+          more: 'Show the terminal', less: 'Hide the terminal' },
+        slots: { terminal: card },
+        pager: { label: 'Continue', next: { label: sentence(words('NEXT')), href: 'route:' + manifest.meta.next },
+          related: [{ label: 'Deploy a site with the Bundle Deployer', href: words('ASIDE.HREF') }, guide] },
+        query: function (view) { return query(view); },
+        onRestore: function (params) { select(Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)), false); }
+      };
+      root = ArkUI.story.mount(def, host);
+      /* A row opened by hand chooses the terminal's step (and its address). */
+      rows().forEach(function (trigger, index) {
+        trigger.addEventListener('click', function () { if (!syncing && trigger.getAttribute('aria-expanded') === 'true') select(index, true); });
+      });
+      var params = root.story.params();
+      select(params ? Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)) : 0, false);
+      root.downloadSelect = select;
+      return root;
     }
-    select(0, false);
-    ArkUI.attachProcedureState(el, 'download', count, function (index) { select(index, false); });
-
-    /* Anchor for reusable content blocks (js/content/components.js); rendering into it
-       is centralized in js/main.js's onMount hook, not called here. */
-    var components = ArkUI.el('div', 'download-components');
-    components.setAttribute('data-ark-insert', 'main');
-    el.appendChild(components);
-
-    host.appendChild(el); return el;
-  }
-};
+  };
+})();

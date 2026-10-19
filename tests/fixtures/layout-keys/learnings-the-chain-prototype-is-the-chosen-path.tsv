@@ -1,0 +1,106 @@
+# key	tag	text -- layout keys of /learnings/the-chain-prototype-is-the-chosen-path before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	ALL NOTESBENCHMARKS / 007 / 8 MIN READCOREThe chain prototype is the chosen pathTHE COREThe chain path now has three separately measured layers: 51,065 ops/s lo
+page:/header:1	header	ALL NOTESBENCHMARKS / 007 / 8 MIN READCOREThe chain prototype is the chosen pathTHE COREThe chain path now has three separately measured layers: 51,065 ops/s lo
+page:/header:1/div:1	div	ALL NOTESBENCHMARKS / 007 / 8 MIN READCORE
+page:/header:1/div:1/a:1	a	ALL NOTES
+page:/header:1/div:1/a:1/svg:1	svg	
+page:/header:1/div:1/a:1/svg:1/path:1	path	
+page:/header:1/div:1/a:1/svg:1/path:2	path	
+page:/header:1/div:1/span:1	span	BENCHMARKS / 007 / 8 MIN READ
+page:/header:1/div:1/button:1	button	CORE
+page:/header:1/div:1/button:1/svg:1	svg	
+page:/header:1/div:1/button:1/svg:1/path:1	path	
+page:/header:1/div:1/button:1/svg:1/path:2	path	
+page:/header:1/h1:1	h1	The chain prototype is the chosen path
+page:/header:1/div:2	div	THE COREThe chain path now has three separately measured layers: 51,065 ops/s local hot admission, 279,269 ops/s local certified holder-sharded application, and
+page:/header:1/div:2/span:1	span	THE CORE
+page:/header:1/div:2/p:1	p	The chain path now has three separately measured layers: 51,065 ops/s local hot admission, 279,269 ops/s local certified holder-sharded application, and 812,268
+page:/header:1/div:2/p:2	p	Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolv
+page:/div:1	div	QUESTIONS / 080001What exactly moved?02What does the five-minute fleet result describe?03What does the older 79,654 peak describe?04What does the recovery-slack
+page:/div:1/nav:1	nav	QUESTIONS / 080001What exactly moved?02What does the five-minute fleet result describe?03What does the older 79,654 peak describe?04What does the recovery-slack
+page:/div:1/nav:1/p:1	p	QUESTIONS / 08
+page:/div:1/nav:1/button:1	button	00
+page:/div:1/nav:1/button:2	button	01What exactly moved?
+page:/div:1/nav:1/button:2/span:1	span	01
+page:/div:1/nav:1/button:2/span:2	span	What exactly moved?
+page:/div:1/nav:1/button:3	button	02What does the five-minute fleet result describe?
+page:/div:1/nav:1/button:3/span:1	span	02
+page:/div:1/nav:1/button:3/span:2	span	What does the five-minute fleet result describe?
+page:/div:1/nav:1/button:4	button	03What does the older 79,654 peak describe?
+page:/div:1/nav:1/button:4/span:1	span	03
+page:/div:1/nav:1/button:4/span:2	span	What does the older 79,654 peak describe?
+page:/div:1/nav:1/button:5	button	04What does the recovery-slack number mean?
+page:/div:1/nav:1/button:5/span:1	span	04
+page:/div:1/nav:1/button:5/span:2	span	What does the recovery-slack number mean?
+page:/div:1/nav:1/button:6	button	05What is the live pulse endpoint?
+page:/div:1/nav:1/button:6/span:1	span	05
+page:/div:1/nav:1/button:6/span:2	span	What is the live pulse endpoint?
+page:/div:1/nav:1/button:7	button	06How do I run the pulse against my own nodes?
+page:/div:1/nav:1/button:7/span:1	span	06
+page:/div:1/nav:1/button:7/span:2	span	How do I run the pulse against my own nodes?
+page:/div:1/nav:1/button:8	button	07What is still open?
+page:/div:1/nav:1/button:8/span:1	span	07
+page:/div:1/nav:1/button:8/span:2	span	What is still open?
+page:/div:1/nav:1/button:9	button	08What is the honest ceiling now?
+page:/div:1/nav:1/button:9/span:1	span	08
+page:/div:1/nav:1/button:9/span:2	span	What is the honest ceiling now?
+page:/div:1/div:1	div	What exactly movedTwenty-four hours ago the finance resolver was a design document, a test suite that proved seven of seven attacks are refused, and one Mac-cor
+id:the-chain-prototype-is-the-chosen-path-section-0	section	What exactly movedTwenty-four hours ago the finance resolver was a design document, a test suite that proved seven of seven attacks are refused, and one Mac-cor
+page:/div:1/div:1/section:1/span:1	span	
+page:/div:1/div:1/section:1/h2:1	h2	What exactly moved
+page:/div:1/div:1/section:1/p:1	p	Twenty-four hours ago the finance resolver was a design document, a test suite that proved seven of seven attacks are refused, and one Mac-core number (41,762 o
+page:/div:1/div:1/section:1/p:2	p	The chain-server binary — the TCP endpoint that admits <TAG>\t<MANIFEST>\n lines, calls admit_burst, and returns one OK\t<CID> per operation — is now running on
+id:the-chain-prototype-is-the-chosen-path-section-1	section	The sustained number: 12,403 ops/sOne Apple arm64 client drove all six public chain-servers concurrently for 303 seconds. Each fleet-many batch carried 32 holde
+page:/div:1/div:1/section:2/span:1	span	
+page:/div:1/div:1/section:2/h2:1	h2	The sustained number: 12,403 ops/s
+page:/div:1/div:1/section:2/p:1	p	One Apple arm64 client drove all six public chain-servers concurrently for 303 seconds. Each fleet-many batch carried 32 holder chains × 500 operations. The fle
+page:/div:1/div:1/section:2/p:2	p	Per node: bk2 accepted 592,000; mk2 576,000; bk1 592,000; mist1 528,000; eug-2c 720,000; eul-4c 752,000. The measured sustained average was 12,403 ops/s. It is 
+id:the-chain-prototype-is-the-chosen-path-section-2	section	The historical short peak: 79,654 ops/sA traditional chain pays a coordination cost per transaction: a standing approver set has to agree who got there first, a
+page:/div:1/div:1/section:3/span:1	span	
+page:/div:1/div:1/section:3/h2:1	h2	The historical short peak: 79,654 ops/s
+page:/div:1/div:1/section:3/p:1	p	A traditional chain pays a coordination cost per transaction: a standing approver set has to agree who got there first, and that agreement is the serial step th
+page:/div:1/div:1/section:3/p:2	p	The 79,654 ops/s run remains valid as an 868 ms burst: 38,400 operations, zero errors, with one short parallel stream per node. It is useful peak evidence, but 
+id:the-chain-prototype-is-the-chosen-path-section-3	section	Recovery outruns ingestionFast replay — the cold-start path — reads at 279,149 ops/s. Sustained six-node admission measured 12,403 ops/s, while the per-pair pea
+page:/div:1/div:1/section:4/span:1	span	
+page:/div:1/div:1/section:4/h2:1	h2	Recovery outruns ingestion
+page:/div:1/div:1/section:4/p:1	p	Fast replay — the cold-start path — reads at 279,149 ops/s. Sustained six-node admission measured 12,403 ops/s, while the per-pair peak is 22,559 ops/s and the 
+page:/div:1/div:1/section:4/p:2	p	Replay only needs to verify each chain's head signature. The hash chain certifies every earlier entry — because once G is pinned, the only way to construct an e
+id:the-chain-prototype-is-the-chosen-path-section-4	section	A live pulse endpoint so anyone can watchA new binary, fleet-pulse, runs a short self-bench against each configured chain-server every hour from flx-bk2 and pub
+page:/div:1/div:1/section:5/span:1	span	
+page:/div:1/div:1/section:5/h2:1	h2	A live pulse endpoint so anyone can watch
+page:/div:1/div:1/section:5/p:1	p	A new binary, fleet-pulse, runs a short self-bench against each configured chain-server every hour from flx-bk2 and publishes the current result through the pul
+page:/div:1/div:1/section:5/p:2	p	When a seventh node joins, the pulse adds a row. When a node drops, the pulse records the error against that address and the aggregate adjusts. This is the grow
+id:the-chain-prototype-is-the-chosen-path-section-5	section	Run the pulse against your own nodesThe pulse endpoint on bk2 is one example; the binary is portable. Clone defxn-defi-rs, build the dense-wire crate (cargo bui
+page:/div:1/div:1/section:6/span:1	span	
+page:/div:1/div:1/section:6/h2:1	h2	Run the pulse against your own nodes
+page:/div:1/div:1/section:6/p:1	p	The pulse endpoint on bk2 is one example; the binary is portable. Clone defxn-defi-rs, build the dense-wire crate (cargo build --release --bin fleet-pulse), and
+page:/div:1/div:1/section:6/p:2	p	On /stats, setting window.ArkPulseEndpoint before the page loads points the live-pulse panel at your endpoint instead of bk2's. That is how you run it locally a
+id:the-chain-prototype-is-the-chosen-path-section-6	section	What is still openIndependent security review. The resolver has twenty-four chain tests and three TCP tests, and seven of seven attacks are refused by construct
+page:/div:1/div:1/section:7/span:1	span	
+page:/div:1/div:1/section:7/h2:1	h2	What is still open
+page:/div:1/div:1/section:7/p:1	p	Independent security review. The resolver has twenty-four chain tests and three TCP tests, and seven of seven attacks are refused by construction — but nobody o
+page:/div:1/div:1/section:7/p:2	p	The IPFS pin sidecar remains optional. Certified segment application, holder sharding and binary libp2p transport are now built and locally measured. Production
+id:the-chain-prototype-is-the-chosen-path-section-7	section	The honest ceiling nowThe newest sustained fleet number remains 12,403 operations a second, in a metric family since retired: 3,760,000 operations over 303 seco
+page:/div:1/div:1/section:8/span:1	span	
+page:/div:1/div:1/section:8/h2:1	h2	The honest ceiling now
+page:/div:1/div:1/section:8/p:1	p	The newest sustained fleet number remains 12,403 operations a second, in a metric family since retired: 3,760,000 operations over 303 seconds across six public 
+page:/div:1/div:1/section:8/p:2	p	This is where the chain prototype stops being a direction and becomes the production path. The articles before this one explained how we got the certified fabri
+page:/div:1/div:1/div:1	div	← THE CORENEXT QUESTION →
+page:/div:1/div:1/div:1/button:1	button	← THE CORE
+page:/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/button:2	button	NEXT QUESTION →
+page:/div:1/div:1/a:1	a	NEXT NOTE / From one chain to one per identity →
+page:/div:1/nav:2	nav	Related mechanism →Open /stats →
+page:/div:1/nav:2/a:1	a	Related mechanism →
+page:/div:1/nav:2/a:2	a	Open /stats →
+page:/div:1/details:1	details	Evidence & editorial reviewEditorial review: 2026-10-08. This is not live capability verification.The live fleet pulse — see for yourself
+page:/div:1/details:1/summary:1	summary	Evidence & editorial review
+page:/div:1/details:1/p:1	p	Editorial review: 2026-10-08. This is not live capability verification.
+page:/div:1/details:1/a:1	a	The live fleet pulse — see for yourself
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:2	div	

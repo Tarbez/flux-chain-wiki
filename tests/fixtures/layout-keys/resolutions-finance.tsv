@@ -1,0 +1,62 @@
+# key	tag	text -- layout keys of /resolutions/finance before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsPersonal finance06 / 20 · Value & financeResolve your personal financeKeep your own books and balances under your own keys.ForIndividuals and hou
+page:/nav:1	nav	All resolutionsPersonal finance
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Personal finance
+page:/div:1	div	06 / 20 · Value & financeResolve your personal financeKeep your own books and balances under your own keys.ForIndividuals and households keeping track of their 
+page:/div:1/header:1	header	06 / 20 · Value & financeResolve your personal financeKeep your own books and balances under your own keys.ForIndividuals and households keeping track of their 
+page:/div:1/header:1/p:1	p	06 / 20 · Value & finance
+id:resolution-title-finance	h1	Resolve your personal finance
+page:/div:1/header:1/p:2	p	Keep your own books and balances under your own keys.
+page:/div:1/header:1/dl:1	dl	ForIndividuals and households keeping track of their own money.ProblemBooks scattered across apps, exported spreadsheets and nothing that proves a number.
+page:/div:1/header:1/dl:1/div:1	div	ForIndividuals and households keeping track of their own money.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Individuals and households keeping track of their own money.
+page:/div:1/header:1/dl:1/div:2	div	ProblemBooks scattered across apps, exported spreadsheets and nothing that proves a number.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Books scattered across apps, exported spreadsheets and nothing that proves a number.
+page:/div:1/header:1/div:1	div	How resolvers work →Treasury design preview →
+page:/div:1/header:1/div:1/a:1	a	How resolvers work →
+page:/div:1/header:1/div:1/a:2	a	Treasury design preview →
+page:/div:1/section:1	section	Ready now3Product ideas3How it resolvesAuth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →FXN and creditsBuildingSigned valu
+page:/div:1/section:1/div:1	div	Ready now3Product ideas3How it resolves
+id:resolution-level-tab-finance-0	button	Ready now3
+page:/div:1/section:1/div:1/button:1/span:1	span	3
+id:resolution-level-tab-finance-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-finance-2	button	How it resolves
+id:resolution-level-finance	div	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →FXN and creditsBuildingSigned value transfers and usage credits. Balances
+page:/div:1/section:1/div:2/div:1	div	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →FXN and creditsBuildingSigned value transfers and usage credits. Balances
+page:/div:1/section:1/div:2/div:1/a:1	a	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	Auth KitReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Auth Kit
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Your keys and recovery phrase, held by you. No password on a server.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:2	a	FXN and creditsBuildingSigned value transfers and usage credits. Balances start at genesis.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	FXN and creditsBuilding
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	FXN and credits
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Building
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Signed value transfers and usage credits. Balances start at genesis.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:3	a	Mesh ExplorerReadyRead any public record on the mesh and check who signed it.Open →
+page:/div:1/section:1/div:2/div:1/a:3/span:1	span	Mesh ExplorerReady
+page:/div:1/section:1/div:2/div:1/a:3/span:1/strong:1	strong	Mesh Explorer
+page:/div:1/section:1/div:2/div:1/a:3/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:3/span:2	span	Read any public record on the mesh and check who signed it.
+page:/div:1/section:1/div:2/div:1/a:3/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← PaymentsPreviousAll 20Community →Next
+page:/nav:2/a:1	a	← PaymentsPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Community →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

@@ -1,18 +1,27 @@
-/* /about, built from the home page's own parts (the hl-* components in
-   css/home-swiss.css) so the two read as one site.
+/* /about: the protocol overview, as a page of Ark blocks (DEFXN polish Wave 3).
 
-   Five sections, each answering one question and nothing else:
-     hero      what is it, and how is it layered (the three layers are drawn, not hidden)
-     promise   what do I not need
-     flow      what happens to a request
-     resolve   what can I put on it
-     pillars   who is it for
-   The closing block carries the source boundary; the evidence stays behind one disclosure. */
+   It was a hero (with the three layers drawn) followed by ONE closed "More" disclosure holding
+   how it works, the promise, what you can resolve and who it is for -- 2.23x the viewport
+   closed, 4.08x open on a desktop, 7.36x open on a phone (docs/ux-audit/pages-ux-a.md /about) --
+   and a closing block whose evidence sat behind a second disclosure. Organised by question now,
+   each view short enough for the fold rule on its own:
+
+     hero      what DEFXN is (the deck) and the two next steps
+     boundary  the current source boundary, in sight in every view (Ark callout, drift)
+     views     ONE control, Ark tabs: the three bounded layers (drawn, with a layer picker) ·
+               how it works · the promise · what you can resolve · who it is for · evidence and
+               verification (what the source establishes, how to verify it, then the closing line
+               and the way on: home, resolutions, explorer, run from source)
+     anchor    the CMS insertion point
+
+   Words: every one is the manifest's (copy:ABOUT.*), as before. Motion: the layer drawing is
+   still -- it changes only when a layer is chosen (no idle frame loop).
+   Layout keys: every element of the old page with words keeps the key it had (the `was` pins,
+   derived by tests/lib/layout-continuity.cjs from the frozen census
+   tests/fixtures/layout-keys/about.tsv). Regression: tests/about-page.cjs. */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
-  var GROUP_ICONS = { BUILD: 'layers', VALUE: 'cycle', PEOPLE: 'account', INTELLIGENCE: 'model', OPERATIONS: 'network' };
-  var NO_ICONS = ['layers', 'network', 'transfer', 'world'];
   var LAYER_ICONS = ['world', 'chain', 'authority'];
 
   function svg(tag, attrs, text) {
@@ -77,7 +86,7 @@
     names.forEach(function (name, i) {
       var at = point(0, SIZE, i * GAP);
       var g = svg('g', { class: 'about-slab-label', 'data-layer': String(i) });
-      var w = 30 + name.length * 6.4, x = at[0] - 14 - w;
+      var w = 30 + name.length * 8.4, x = at[0] - 14 - w;
       g.appendChild(svg('rect', { x: x, y: at[1] - 23, width: w, height: 22, rx: 11 }));
       var icon = ArkUI.iconPaths && ArkUI.iconPaths[LAYER_ICONS[i]];
       if (icon) {
@@ -96,204 +105,198 @@
     } };
   }
 
+  /* `was`: the old page's layout key for each element that carries its words now, by spec entry
+     id, so a CMS edit saved against the hand-built page still lands. Derived by
+     tests/lib/layout-continuity.cjs (derive /about, with the reshaped and retired keys of
+     tests/about-page.cjs set aside), plus the reshaped ones, each with its reason in that test.
+     Part refs count in document order within the entry ('fact#2' = the second fact). The layer
+     drawing is pinned at its root and keeps every key inside it. */
+  var WAS = {
+    'about-hero': {
+      'hero-title': 'id:about-title',
+      'eyebrow': 'page:/section:1/div:1/p:1',
+      'hero-lede': 'page:/section:1/div:1/p:2',
+      'actions': 'page:/section:1/div:1/div:1',
+      ':root': { key: 'page:/section:1/div:1', self: true }
+    },
+    'about-boundary': {
+      'alert-title': 'page:/footer:1/p:1',
+      'alert-description': 'page:/footer:1/p:2'
+    },
+    'about-views': {
+      'tabs-content#3': 'page:/section:1/section:1/div:3',
+      'tabs-trigger#6': 'page:/footer:1/details:1/summary:1',
+      'tabs-trigger': 'page:/section:1/section:1/div:1/p:1',
+      'tabs-list#2': 'page:/section:1/section:1/div:1/div:1',
+      '[data-ark-slot="layers"]': 'page:/section:1/section:1/div:2/svg:1',
+      'card-title#2': 'page:/section:1/section:1/div:3/strong:1',
+      'card-description#2': 'page:/section:1/section:1/div:3/p:1',
+      'tabs-trigger#10': 'page:/footer:1/details:1/div:1/section:1/h3:1',
+      ':scope > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/footer:1/details:1/div:1/section:1/p:1',
+      'button#3': 'page:/footer:1/details:1/div:1/section:1/a:1',
+      'tabs-trigger#11': 'page:/footer:1/details:1/div:1/section:2/h3:1',
+      ':scope > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(1)': 'page:/footer:1/details:1/div:1/section:2/p:1',
+      'button#4': 'page:/footer:1/details:1/div:1/section:2/a:1',
+      'section-title': 'page:/section:2/div:2/details:1/div:1/section:1/h3:1',
+      'button': 'page:/section:2/div:2/details:1/div:1/section:1/a:1',
+      'section-title#2': 'page:/section:2/div:2/details:1/div:1/section:2/h3:1',
+      'section-lede': 'page:/section:2/div:2/details:1/div:1/section:2/p:1',
+      'section-title#3': 'page:/section:2/div:2/details:1/div:1/section:3/h3:1',
+      'button#2': 'page:/section:2/div:2/details:1/div:1/section:3/a:1',
+      'section-title#4': 'page:/section:2/div:2/details:1/div:1/section:4/h3:1',
+      'step-body': 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:2',
+      'step-body#2': 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:2',
+      'step-body#3': 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:2',
+      'fact-term': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/h3:1',
+      'fact-value': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:2',
+      'fact-term#2': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/h3:1',
+      'fact-value#2': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:2',
+      'fact-term#3': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/h3:1',
+      'fact-value#3': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:2',
+      'fact-term#4': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/h3:1',
+      'fact-value#4': 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:2',
+      'fact-value#5': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/p:2',
+      'fact-value#6': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/p:2',
+      'fact-value#7': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/p:2',
+      'fact-value#8': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/p:2',
+      'fact-value#9': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/p:2',
+      'card-title#4': 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/h3:1',
+      'card-description#4': 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:2',
+      'card-title#5': 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/h3:1',
+      'card-description#5': 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:2',
+      'card-title#6': 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/h3:1',
+      'card-description#6': 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/p:2',
+      ':root': { key: 'page:/section:2/div:2/details:1', self: true },
+      'tabs-list': { key: 'page:/section:2/div:2/details:1/summary:1', self: true },
+      'tabs-content': { key: 'page:/section:1/section:1', self: true },
+      'tabs#2': { key: 'page:/section:1/section:1/div:1', self: true },
+      'figure-frame': { key: 'page:/section:1/section:1/div:2', self: true },
+      'tabs-content#5': { key: 'page:/section:2/div:2/details:1/div:1/section:1', self: true },
+      'stepper': { key: 'page:/section:2/div:2/details:1/div:1/section:1/div:1', self: true },
+      'step': { key: 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1', self: true },
+      'step#2': { key: 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2', self: true },
+      'step#3': { key: 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3', self: true },
+      'step-title': 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:1',
+      'step-title#2': 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:2/p:1',
+      'step-title#3': 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:1',
+      'tabs-content#6': { key: 'page:/section:2/div:2/details:1/div:1/section:2', self: true },
+      'facts': { key: 'page:/section:2/div:2/details:1/div:1/section:2/div:1', self: true },
+      'fact': { key: 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1', self: true },
+      'fact#2': { key: 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2', self: true },
+      'fact#3': { key: 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3', self: true },
+      'fact#4': { key: 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4', self: true },
+      'tabs-content#7': { key: 'page:/section:2/div:2/details:1/div:1/section:3', self: true },
+      'facts#2': { key: 'page:/section:2/div:2/details:1/div:1/section:3/div:1', self: true },
+      'fact#5': { key: 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1', self: true },
+      'fact#6': { key: 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2', self: true },
+      'fact#7': { key: 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3', self: true },
+      'fact#8': { key: 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4', self: true },
+      'fact#9': { key: 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5', self: true },
+      'fact-term#5': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:1/h3:1',
+      'fact-term#6': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:2/h3:1',
+      'fact-term#7': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:3/h3:1',
+      'fact-term#8': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:4/h3:1',
+      'fact-term#9': 'page:/section:2/div:2/details:1/div:1/section:3/div:1/a:5/h3:1',
+      'tabs-content#8': { key: 'page:/section:2/div:2/details:1/div:1/section:4', self: true },
+      'card-grid': { key: 'page:/section:2/div:2/details:1/div:1/section:4/div:1', self: true },
+      'card#4': { key: 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1', self: true },
+      'card#5': { key: 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2', self: true },
+      'card#6': { key: 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3', self: true },
+      'tabs-content#9': { key: 'page:/footer:1/details:1', self: true },
+      'tabs#3': { key: 'page:/footer:1/details:1/div:1', self: true },
+      'tabs-content#10': { key: 'page:/footer:1/details:1/div:1/section:1', self: true },
+      'tabs-content#11': { key: 'page:/footer:1/details:1/div:1/section:2', self: true },
+      ':scope > div:nth-of-type(7) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1)': { key: 'page:/footer:1/nav:1', self: true },
+      ':scope > div:nth-of-type(7) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:1',
+      ':scope > div:nth-of-type(7) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:2',
+      ':scope > div:nth-of-type(7) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:3',
+      ':scope > div:nth-of-type(7) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:4',
+      ':scope > div:nth-of-type(7) > nav:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': 'page:/footer:1/h2:1'
+    },
+    insert: { key: 'page:/div:1', self: true }
+  };
+
+  function copy(role) { return 'copy:ABOUT.' + role; }
+  function words(role) { return ArkCopy.text('ABOUT.' + role); }
+  function shortTitle(value) { return value.split(':')[0].replace(/\.$/, ''); }
+
+  function spec(manifest, groups) {
+    var views = [
+      { value: 'layers', label: copy('MODEL.TITLE'), blocks: [
+        { block: 'figure', props: { kind: 'illustration', slot: 'layers', caption: copy('MODEL.TEXT') } },
+        { block: 'tabs', props: { label: 'Choose a layer', variant: 'segmented', defaultValue: 'chain', items: ['directory', 'chain', 'governance'].map(function (value, i) {
+          return { value: value, label: shortTitle(words('POINT' + (i + 1) + '.TITLE')), blocks: [
+            { block: 'card', props: { title: copy('POINT' + (i + 1) + '.TITLE'), description: copy('POINT' + (i + 1) + '.TEXT'), headingLevel: 3 } }
+          ] };
+        }) } }
+      ] },
+      { value: 'flow', label: 'How it works', blocks: [
+        { block: 'section-header', props: { title: copy('FLOW.TITLE'), level: 3 } },
+        { block: 'steps', props: { label: words('FLOW.LABEL'), items: [1, 2, 3].map(function (i) { return { title: copy('FLOW' + i + '.TITLE'), body: copy('FLOW' + i + '.TEXT') }; }) } },
+        { block: 'actions', props: { items: [{ label: copy('FLOW.LINK'), href: words('FLOW.LINK.HREF'), tone: 'ghost' }] } }
+      ] },
+      { value: 'promise', label: 'The promise', blocks: [
+        { block: 'section-header', props: { title: copy('PROMISE.TITLE'), lede: copy('PROMISE.TEXT'), level: 3 } },
+        { block: 'facts', props: { label: words('PROMISE.LABEL'), columns: 2, items: [1, 2, 3, 4].map(function (i) { return { term: copy('NO' + i + '.TITLE'), value: copy('NO' + i + '.TEXT') }; }) } }
+      ] }
+    ];
+    /* What you can resolve: one row per group of ArkResolutions (counted, never a link per resolution). */
+    if (groups.length) views.push({ value: 'resolve', label: 'What you can resolve', blocks: [
+      { block: 'section-header', props: { title: copy('RESOLVE.TITLE'), level: 3 } },
+      { block: 'facts', props: { label: words('RESOLVE.LABEL'), columns: 1, items: groups.map(function (group) {
+        var names = group.items.slice(0, 3).map(function (item) { return ArkResolutions.shortName(item.title); });
+        return { term: group.title + ' · ' + group.items.length + ' resolutions', value: names.join(', ') + (group.items.length > 3 ? ' and more' : ''), href: words('RESOLVE.GROUP.HREF') };
+      }) } },
+      { block: 'actions', props: { items: [{ label: copy('RESOLVE.ALL'), href: words('RESOLVE.ALL.HREF'), tone: 'ghost' }] } }
+    ] });
+    views.push(
+      { value: 'partners', label: 'Who it is for', blocks: [
+        { block: 'section-header', props: { title: copy('PILLARS.TITLE'), level: 3 } },
+        { block: 'card-grid', props: { label: words('PILLARS.LABEL'), columns: 3, items: [1, 2, 3].map(function (i) { return { title: copy('PILLAR' + i + '.TITLE'), description: copy('PILLAR' + i + '.TEXT'), headingLevel: 3 }; }) } }
+      ] },
+      /* Evidence & verification: what the source establishes and how to verify it -- one at a
+         time, each with its way on -- then the closing line and the way on from the page. */
+      { value: 'evidence', label: copy('REFERENCE'), blocks: [
+        { block: 'tabs', props: { label: words('REFERENCE'), variant: 'segmented', items: [
+          { value: 'source', label: copy('POINT4.TITLE'), content: copy('POINT4.TEXT'), blocks: [{ block: 'actions', props: { items: [{ label: copy('STATUS'), href: words('STATUS.HREF'), tone: 'ghost' }] } }] },
+          { value: 'verify', label: copy('POINT5.TITLE'), content: copy('POINT5.TEXT'), blocks: [{ block: 'actions', props: { items: [{ label: copy('NEXT'), href: 'route:' + manifest.meta.next, tone: 'ghost' }] } }] }
+        ] } },
+        { block: 'pager', props: { label: 'More about DEFXN', relatedLabel: copy('CLOSE.TITLE'),
+          related: [['Home', 'FOOTER.HOME.HREF'], ['Resolutions', 'FOOTER.RESOLUTIONS.HREF'], ['Explorer', 'FOOTER.EXPLORER.HREF'], ['Run from source', 'FOOTER.DOWNLOAD.HREF']].map(function (f) { return { label: f[0], href: words(f[1]) }; }) } }
+      ] }
+    );
+    return [
+      { block: 'hero', id: 'about-hero', was: WAS['about-hero'], props: {
+        eyebrow: copy('EYEBROW'), title: copy('TITLE'), lede: copy('DECK'), density: 'compact', actions: [
+          { label: copy('ACTION'), href: words('ACTION.HREF'), tone: 'primary' },
+          { label: copy('ACTION2'), href: words('ACTION2.HREF'), tone: 'secondary' }
+        ] } },
+      /* The source boundary stays in sight in every view (it qualifies the deck's promise). */
+      { block: 'callout', id: 'about-boundary', was: WAS['about-boundary'], props: { tone: 'drift', title: 'Current source boundary', body: copy('BOUNDARY.TITLE') } },
+      { block: 'tabs', id: 'about-views', was: WAS['about-views'], props: { label: 'About DEFXN', items: views } },
+      { insert: 'main', was: WAS.insert }
+    ];
+  }
+
   ArkUI.pageModules.about = {
+    spec: spec,
     mount: function (host) {
-      var area = 'ABOUT';
       var manifest = ArkManifest.get('about');
-      function words(role) { return ArkCopy.text(area + '.' + role); }
-      function node(tag, cls, text) { return ArkUI.el(tag, cls || '', text); }
-      function iconize(e, name, after) {
-        var icon = ArkUI.icon && ArkUI.icon(name);
-        if (!icon) return e;
-        e.classList.add('has-native-icon');
-        if (after) e.appendChild(icon); else e.insertBefore(icon, e.firstChild);
-        return e;
-      }
-      function label(text, iconName) { var e = node('p', 'hl-label', text); return iconName ? iconize(e, iconName) : e; }
-      /* `hrefRole`'s field is a manifest field of kind 'link' (js/content/manifest.js);
-         js/ark/dash-kit.js's resolveLinkField/linkEl is the one place that turns its
-         tagged value into a real href -- replaces this page's own former routeLink(). */
-      function routeLink(text, hrefRole, cls) {
-        return ArkUI.dash.linkEl(text, words(hrefRole), manifest.route, cls || 'hl-link');
-      }
-      function section(index, title, deck, iconName) {
-        var e = node('section', 'hl-section');
-        var head = node('div', 'hl-section-head');
-        head.appendChild(label(index, iconName));
-        var copy = node('div');
-        copy.appendChild(node('h2', '', title));
-        if (deck) copy.appendChild(node('p', 'hl-deck', deck));
-        head.appendChild(copy); e.appendChild(head);
-        return e;
-      }
-      function shortTitle(value) { return value.split(':')[0].replace(/\.$/, ''); }
-
-      var el = node('section', 'ark-page home-launch about-launch');
-      el.dataset.arkPage = 'about';
-      el.setAttribute('aria-labelledby', 'about-title');
-
-      /* 01  Hero: the answer, and the three layers drawn. */
-      var hero = node('section', 'hl-hero about-hero');
-      var copy = node('div', 'hl-hero-copy');
-      copy.appendChild(label(words('EYEBROW'), 'overview'));
-      var title = node('h1', 'hl-title', words('TITLE')); title.id = 'about-title';
-      copy.appendChild(title);
-      copy.appendChild(node('p', 'hl-intro', words('DECK')));
-      var actions = node('div', 'hl-actions');
-      actions.appendChild(iconize(routeLink(words('ACTION'), 'ACTION.HREF', 'hl-button palette-solid about-primary-action'), 'arrow-right', true));
-      var action2 = routeLink(words('ACTION2'), 'ACTION2.HREF'); actions.appendChild(iconize(action2, ArkUI.dash.linkIcon(action2), true));
-      copy.appendChild(actions); hero.appendChild(copy);
-
-      var points = [1, 2, 3].map(function (i) { return { title: words('POINT' + i + '.TITLE'), text: words('POINT' + i + '.TEXT') }; });
-      var names = points.map(function (item) { return shortTitle(item.title); });
-      var figure = node('section', 'hl-instrument about-figure');
-      figure.setAttribute('aria-label', words('MODEL.TITLE'));
-      var figureHead = node('div', 'hl-instrument-head');
-      figureHead.appendChild(label(words('MODEL.TITLE'), 'layers'));
-      var picker = node('div', 'hl-case-picker about-layer-picker');
-      picker.setAttribute('role', 'group'); picker.setAttribute('aria-label', 'Choose a layer');
-      figureHead.appendChild(picker); figure.appendChild(figureHead);
+      var names = [1, 2, 3].map(function (i) { return shortTitle(words('POINT' + i + '.TITLE')); });
       var layers = drawLayers(names);
-      var stage = node('div', 'about-stage'); stage.appendChild(layers.svg); figure.appendChild(stage);
-      var detail = node('div', 'about-layer-detail'); detail.setAttribute('aria-live', 'polite');
-      figure.appendChild(detail);
-      var buttons = [];
-      function selectLayer(index) {
-        buttons.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
-        detail.replaceChildren();
-        detail.appendChild(node('strong', '', points[index].title));
-        detail.appendChild(node('p', '', points[index].text));
-        layers.select(index);
+      var groups = typeof ArkResolutions !== 'undefined' && ArkUI.pageCatalog.resolutions ? ArkResolutions.list() : [];
+      var page = ArkUI.page(spec(manifest, groups), host, { page: 'about', className: 'about-page', titleId: 'about-title',
+        slots: { layers: function () { return layers.svg; } } });
+      /* The layer chosen in the picker is the slab drawn lit (the drawing changes only then). */
+      var picker = page.querySelector('#about-views [data-ark-block="tabs"]');
+      function paint() {
+        var list = picker && picker.querySelector('[data-ark-part="tabs-list"]');
+        var on = list && list.querySelector('[role="tab"][aria-selected="true"]');
+        layers.select(on ? Array.prototype.indexOf.call(list.children, on) : 1);
       }
-      names.forEach(function (name, i) {
-        var button = iconize(node('button', 'hl-case', name), LAYER_ICONS[i]);
-        button.type = 'button';
-        button.addEventListener('click', function () { selectLayer(i); });
-        buttons.push(button); picker.appendChild(button);
-      });
-      hero.appendChild(figure); el.appendChild(hero);
-
-      /* 02  Everything past the hero, one disclosure. Law 18 ("one
-         scroll, then it ends") + law 8 ("calm is functional"): the hero
-         is the only always-visible section now -- how it works, the
-         promise, what you can resolve and who it's for are real content,
-         not cut, just moved behind one <details> (the same element the
-         FAQ-style pattern elsewhere on this site already uses), each
-         keeping its own heading once open. */
-      var more = section('02 / More', 'More.', null, 'inspect'); more.classList.add('hl-more');
-      var moreWrap = node('div', 'hl-faq about-more');
-      var moreDetails = node('details');
-      moreDetails.appendChild(node('summary', '', 'See how it works, the promise, what you can resolve, and who DEFXN is for'));
-      var moreBody = node('div');
-
-      var flowPart = node('section', 'about-more-part');
-      flowPart.appendChild(node('h3', '', words('FLOW.TITLE')));
-      var steps = node('div', 'hl-principles about-steps');
-      [1, 2, 3].forEach(function (i) {
-        var card = node('article');
-        card.appendChild(label('0' + i + ' / ' + words('FLOW' + i + '.TITLE'), ['sign', 'resolver', 'check'][i - 1]));
-        card.appendChild(node('p', 'about-step-text', words('FLOW' + i + '.TEXT')));
-        steps.appendChild(card);
-      });
-      flowPart.appendChild(steps);
-      var flowLink = routeLink(words('FLOW.LINK'), 'FLOW.LINK.HREF'); flowPart.appendChild(iconize(flowLink, ArkUI.dash.linkIcon(flowLink), true));
-      moreBody.appendChild(flowPart);
-
-      var promisePart = node('section', 'about-more-part');
-      promisePart.appendChild(node('h3', '', words('PROMISE.TITLE')));
-      if (words('PROMISE.TEXT')) promisePart.appendChild(node('p', 'hl-deck', words('PROMISE.TEXT')));
-      var nos = node('div', 'hl-principles about-nos');
-      [1, 2, 3, 4].forEach(function (i) {
-        var card = node('article');
-        card.appendChild(label('0' + i, NO_ICONS[i - 1]));
-        card.appendChild(node('h3', '', words('NO' + i + '.TITLE')));
-        card.appendChild(node('p', '', words('NO' + i + '.TEXT')));
-        nos.appendChild(card);
-      });
-      promisePart.appendChild(nos); moreBody.appendChild(promisePart);
-
-      if (typeof ArkResolutions !== 'undefined' && ArkUI.pageCatalog.resolutions) {
-        var resolvePart = node('section', 'about-more-part');
-        resolvePart.appendChild(node('h3', '', words('RESOLVE.TITLE')));
-        var groups = node('div', 'about-groups');
-        ArkResolutions.list().forEach(function (group) {
-          var tile = routeLink('', 'RESOLVE.GROUP.HREF', 'about-group');
-          tile.appendChild(label(group.items.length + ' resolutions', GROUP_ICONS[group.key]));
-          tile.appendChild(node('h3', '', group.title));
-          var names3 = group.items.slice(0, 3).map(function (item) { return ArkResolutions.shortName(item.title); });
-          tile.appendChild(node('p', '', names3.join(', ') + (group.items.length > 3 ? ' and more' : '')));
-          groups.appendChild(tile);
-        });
-        resolvePart.appendChild(groups);
-        var allLink = routeLink(words('RESOLVE.ALL'), 'RESOLVE.ALL.HREF'); resolvePart.appendChild(iconize(allLink, ArkUI.dash.linkIcon(allLink), true));
-        moreBody.appendChild(resolvePart);
-      }
-
-      var pillarsPart = node('section', 'about-more-part');
-      pillarsPart.appendChild(node('h3', '', words('PILLARS.TITLE')));
-      var pillarGrid = node('div', 'hl-principles about-pillars');
-      [1, 2, 3].forEach(function (i) {
-        var card = node('article');
-        var tag = label('0' + i, i === 3 ? null : ['network', 'account'][i - 1]);
-        if (i === 3) { var coin = node('span', 'brand-mark brand-mark-fxn about-coin'); coin.setAttribute('aria-hidden', 'true'); tag.classList.add('has-native-icon'); tag.insertBefore(coin, tag.firstChild); }
-        card.appendChild(tag);
-        card.appendChild(node('h3', '', words('PILLAR' + i + '.TITLE')));
-        card.appendChild(node('p', '', words('PILLAR' + i + '.TEXT')));
-        pillarGrid.appendChild(card);
-      });
-      pillarsPart.appendChild(pillarGrid); moreBody.appendChild(pillarsPart);
-
-      moreDetails.appendChild(moreBody);
-      moreWrap.appendChild(moreDetails);
-      more.appendChild(moreWrap);
-      el.appendChild(more);
-
-      /* Closing block, on the heavy anchor: the boundary, and the evidence behind one disclosure.
-         Its own class, not home's `hl-closing`: that class carries a layering contract (an
-         ::after overlay at z-index 1 over a 820px-tall art scene, with the copy in an
-         .hl-closing-copy wrapper at z-index 2) that this block does not follow, so the overlay
-         covered every child and left an 800px near-black void where "See what resolves on the
-         mesh", the boundary text and the evidence disclosure should be -- invisible to every
-         visitor while every text-contrast check passed (docs/ux-audit/pages-ux-a.md /about P0;
-         regressions: tests/about-page.cjs, tests/browser/site-fixes.mjs). */
-      var closing = node('footer', 'about-closing about-boundary');
-      closing.setAttribute('aria-label', 'Current source boundary');
-      closing.appendChild(label('CURRENT SOURCE BOUNDARY', 'inspect'));
-      closing.appendChild(node('h2', '', words('CLOSE.TITLE')));
-      closing.appendChild(node('p', 'about-boundary-text', words('BOUNDARY.TITLE')));
-      var reference = node('details', 'about-reference');
-      reference.appendChild(node('summary', '', words('REFERENCE')));
-      var body = node('div', 'about-reference-body');
-      var status = routeLink(words('STATUS'), 'STATUS.HREF');
-      /* The onward link reuses manifest.meta.next (ArkManifest.get('about').meta.next), the
-         same existing route picker the admin editor's "Where it goes" panel already edits
-         (js/admin/admin.js's routeOptions()+selectEl at the manifest.meta.next field) --
-         not a second, parallel 'link' field duplicating the same destination. */
-      var next = iconize(ArkUI.dash.linkEl(words('NEXT'), 'route:' + manifest.meta.next, manifest.route, 'hl-link'), 'arrow-right', true);
-      [[words('POINT4.TITLE'), words('POINT4.TEXT'), iconize(status, ArkUI.dash.linkIcon(status), true)],
-       [words('POINT5.TITLE'), words('POINT5.TEXT'), next]].forEach(function (item) {
-        var part = node('section', 'about-reference-item');
-        part.appendChild(node('h3', '', item[0])); part.appendChild(node('p', '', item[1]));
-        part.appendChild(item[2]); body.appendChild(part);
-      });
-      reference.appendChild(body); closing.appendChild(reference);
-      var footerLinks = node('nav', 'hl-footer-links'); footerLinks.setAttribute('aria-label', 'More about DEFXN');
-      [['Home', 'FOOTER.HOME.HREF', 'arrow-left'], ['Resolutions', 'FOOTER.RESOLUTIONS.HREF', 'layers'], ['Explorer', 'FOOTER.EXPLORER.HREF', 'network'], ['Run from source', 'FOOTER.DOWNLOAD.HREF', 'terminal']].forEach(function (item) {
-        footerLinks.appendChild(iconize(routeLink(item[0], item[1]), item[2]));
-      });
-      closing.appendChild(footerLinks); el.appendChild(closing);
-
-      selectLayer(1);
-
-      /* Anchor for reusable content blocks (js/content/components.js); rendering into it
-         is centralized in js/main.js's onMount hook, not called here. */
-      var components = node('div', 'about-components');
-      components.setAttribute('data-ark-insert', 'main');
-      el.appendChild(components);
-
-      el.arkDispose = function () {};
-      host.appendChild(el);
-      return el;
+      if (picker) picker.addEventListener('click', paint);
+      paint();
+      return page;
     }
   };
 })();

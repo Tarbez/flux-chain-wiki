@@ -3,7 +3,7 @@
    way the shell itself now mounts them: a panel is handed a container and draws into it.
    Loads the real content modules the forms read (manifests, articles, images, encrypted items,
    SEO, mesh settings, theme, the page catalog, the reference docs) and the real editor files
-   core -> notice -> state -> controls -> save -> editor -> articles -> assets -> secrets -> design -> seo ->
+   core -> notice -> overlay -> ark-host -> state -> controls -> save -> editor -> articles -> assets -> secrets -> design -> seo ->
    shapes, in admin-app.html's order. What the SHELL's files would provide (the canvas bridge,
    the rail, the header popovers, versions) is a stub that records its calls, so a test can see
    what a form asked the canvas to do.
@@ -40,7 +40,7 @@ function bootForms() {
     'js/content/states.js', 'js/content/states-data.js', 'js/content/canvas-transitions.js', 'js/content/canvas-transitions-data.js',
     'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
     'js/content/learnings.js', 'js/content/article-index.js', 'js/content/site-pages.js', 'js/content/seo.js', 'js/content/seo-data.js', 'js/pages/catalog.js',
-    'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/primitives.js', 'js/admin/vendor/tweetnacl.js', 'js/admin/crypto.js']) run(rel);
+    'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/vendor/tweetnacl.js', 'js/admin/crypto.js']) run(rel);
   /* every article body, as loadBodies() would fetch them */
   for (const a of window.LearningContent.articles) if (!a.sections) run('js/content/articles/' + a.slug + '.js');
 
@@ -49,6 +49,7 @@ function bootForms() {
   run('js/admin/core.js');
   run('js/admin/notice.js');
   run('js/admin/overlay.js');
+  run('js/admin/ark-host.js');   /* the forms' tabs, disclosures and segmented groups (no ArkKit here: their click fallback) */
   /* what the shell, the bridge and the versions glue provide: recorded, never drawn */
   window.ArkAdmin.provide({
     notifyPreviewState: record('notifyPreviewState'), notifyPreviewMesh: record('notifyPreviewMesh'),

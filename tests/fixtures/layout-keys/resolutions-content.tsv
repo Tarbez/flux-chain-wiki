@@ -1,0 +1,65 @@
+# key	tag	text -- layout keys of /resolutions/content before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsContent02 / 20 · Build & publishResolve your contentPublish once and keep it addressable and permanent on the mesh.ForWriters, journalists, newsl
+page:/nav:1	nav	All resolutionsContent
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Content
+page:/div:1	div	02 / 20 · Build & publishResolve your contentPublish once and keep it addressable and permanent on the mesh.ForWriters, journalists, newsletter authors and podc
+page:/div:1/header:1	header	02 / 20 · Build & publishResolve your contentPublish once and keep it addressable and permanent on the mesh.ForWriters, journalists, newsletter authors and podc
+page:/div:1/header:1/p:1	p	02 / 20 · Build & publish
+id:resolution-title-content	h1	Resolve your content
+page:/div:1/header:1/p:2	p	Publish once and keep it addressable and permanent on the mesh.
+page:/div:1/header:1/dl:1	dl	ForWriters, journalists, newsletter authors and podcasters.ProblemA platform changes its rules, links break and the archive or audience is gone.
+page:/div:1/header:1/dl:1/div:1	div	ForWriters, journalists, newsletter authors and podcasters.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Writers, journalists, newsletter authors and podcasters.
+page:/div:1/header:1/dl:1/div:2	div	ProblemA platform changes its rules, links break and the archive or audience is gone.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	A platform changes its rules, links break and the archive or audience is gone.
+page:/div:1/header:1/div:1	div	How resolvers work →
+page:/div:1/header:1/div:1/a:1	a	How resolvers work →
+page:/div:1/section:1	section	Ready now4Product ideas3How it resolvesCode managerReadyEdit a deployed site’s code and content; access comes from the signed owner record.Site gatewayReadyOpen
+page:/div:1/section:1/div:1	div	Ready now4Product ideas3How it resolves
+id:resolution-level-tab-content-0	button	Ready now4
+page:/div:1/section:1/div:1/button:1/span:1	span	4
+id:resolution-level-tab-content-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-content-2	button	How it resolves
+id:resolution-level-content	div	Code managerReadyEdit a deployed site’s code and content; access comes from the signed owner record.Site gatewayReadyOpens any .fxn site at label.defxn.com afte
+page:/div:1/section:1/div:2/div:1	div	Code managerReadyEdit a deployed site’s code and content; access comes from the signed owner record.Site gatewayReadyOpens any .fxn site at label.defxn.com afte
+page:/div:1/section:1/div:2/div:1/div:1	div	Code managerReadyEdit a deployed site’s code and content; access comes from the signed owner record.
+page:/div:1/section:1/div:2/div:1/div:1/span:1	span	Code managerReady
+page:/div:1/section:1/div:2/div:1/div:1/span:1/strong:1	strong	Code manager
+page:/div:1/section:1/div:2/div:1/div:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:1/span:2	span	Edit a deployed site’s code and content; access comes from the signed owner record.
+page:/div:1/section:1/div:2/div:1/div:2	div	Site gatewayReadyOpens any .fxn site at label.defxn.com after checking its owner’s signature.
+page:/div:1/section:1/div:2/div:1/div:2/span:1	span	Site gatewayReady
+page:/div:1/section:1/div:2/div:1/div:2/span:1/strong:1	strong	Site gateway
+page:/div:1/section:1/div:2/div:1/div:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:2/span:2	span	Opens any .fxn site at label.defxn.com after checking its owner’s signature.
+page:/div:1/section:1/div:2/div:1/a:1	a	.fxn namesReadyA signed name like studio.fxn that points at your site, app or identity.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	.fxn namesReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	.fxn names
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	A signed name like studio.fxn that points at your site, app or identity.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:2	a	Mesh ExplorerReadyRead any public record on the mesh and check who signed it.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	Mesh ExplorerReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Mesh Explorer
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Read any public record on the mesh and check who signed it.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← WebsitePreviousAll 20Files →Next
+page:/nav:2/a:1	a	← WebsitePrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Files →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'), fs=require('node:fs'), vm=require('n
 // Copy lives in page manifests and is referred to by key. This reads the real manifests, patterns, resolvers and pages,
 // so a pattern or page that names a key nobody defines, or a manifest nobody uses, fails here rather than on screen.
 const manifests={}, rendered=[];
-const node=()=>({classList:{add(){}},dataset:{},appendChild(){},insertBefore(){},setAttribute(){},addEventListener(){},replaceChildren(){},querySelector:()=>node(),textContent:''});
+const node=()=>({classList:{add(){}},dataset:{},appendChild(){},insertBefore(){},setAttribute(){},addEventListener(){},replaceChildren(){},querySelector:()=>node(),querySelectorAll:()=>[],textContent:''});
 const ArkUI={pageModules:{},register:(id,m)=>{manifests[id]=m;},alias(){},base(){},atomize(){},render:(src)=>{rendered.push(src);return node();}};
 const written=[];
 const context=vm.createContext({console,ArkUI,Tokens:new Proxy({},{get:()=>()=>''}),document:{createElement:node,createElementNS:node,createTextNode:()=>({}),write:s=>written.push(s)},window:{addEventListener(){}}});
@@ -22,8 +22,15 @@ ArkUI.buildChainFlow=()=>({element:node(),restore(){},dispose(){}});
 // home-flow.js's own data (stubbed here for the same reason buildChainFlow is: it names no copy keys).
 ArkUI.chainCases=[{id:'swaps',label:'Swaps'},{id:'transfers',label:'Transfers'},{id:'staking',label:'Staking'},{id:'governance',label:'Governance'}];
 vm.runInContext(fs.readFileSync('js/ark/dash-kit.js','utf8'),context);
+/* Home and /about are pages of Ark blocks (ArkUI.page, js/ark/blocks.js): their words are copy:KEY
+   values in a spec. The stub keeps each spec so every key it names is checked below. */
+const specs=[];
+ArkUI.page=(spec)=>{specs.push(spec);return node();};
+vm.runInContext(fs.readFileSync('js/content/evidence-registry.js','utf8'),context);
 vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
 context.ArkUI.pageModules.zero.mount({appendChild(){}});
+vm.runInContext(fs.readFileSync('js/pages/about.js','utf8'),context);
+specs.push(context.ArkUI.pageModules.about.spec(vm.runInContext("ArkManifest.get('about')",context),[]));
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);
 
 // Every manifest file is exactly what the admin page would write, and is valid.
@@ -53,6 +60,9 @@ for(const file of ['js/pages/concept.js','js/pages/sheet.js','js/pages/theory.js
   for(const m of src.matchAll(/\['(HOME\.[A-Z.]+)', '/g)) named.add(m[1]);
 }
 for(const key of named) assert(ArkCopy.has(key),key+' is named in code but no manifest defines it');
+// Every copy:KEY a block page's spec names resolves (a missing one would refuse the block).
+assert.equal(specs.length,2,'home and /about each built one spec');
+for(const spec of specs) for(const m of JSON.stringify(spec).matchAll(/"copy:([A-Z0-9.]+)"/g)) { named.add(m[1]); assert(ArkCopy.has(m[1]),'copy:'+m[1]+' is named by a page spec but no manifest defines it'); }
 // Words are never written in a page or the shell where a key belongs.
 for(const [file,literal] of [['js/pages/concept.js','Go beneath'],['js/pages/about.js','Care is part'],['js/resolvers/header.js','INDEPENDENT STUDIO'],['js/hero-motion.js','Curiosity is our'],['js/hero-motion.js','BACK TO ZERO'],['js/pages/home.js','Explore the experiments']])
   assert(!fs.readFileSync(file,'utf8').includes(literal),`${file} still spells out "${literal}"`);

@@ -13,16 +13,15 @@
    This test reads the stylesheets as rules (selector + media + declarations), so a plausible
    "tidy-up" that re-adds `display:none` on one of these elements fails here with the reason.
    What may still be hidden, and why:
-   - a closed fold (`[data-fold="closed"]`), because ArkUI.dash.foldToggle (js/ark/dash-kit.js)
-     renders the button that opens it -- asserted below by running the builder;
-   - a resolver law's body while its card is closed, because the card's own toggle opens it and
-     now draws a visible +/- mark;
-   - the resolver demo's doc / sign / accept canvas labels on phones, because the narration line
-     says the same words (asserted against js/pages/resolver-lab.js narrate()). */
+   - a closed fold drawn by Ark's `disclosure` block (css/ark-blocks.css), because the block renders
+     the button that opens it -- asserted below by rendering the real block (it replaced the local
+     ArkUI.dash.foldToggle on 2026-10-19, W2-ADAPTER);
+   - a resolver law's body while its row is closed: the laws are an Ark accordion (2026-10-19),
+     whose own trigger opens it (the resolver demo's phone-only label hiding went with the
+     conversion: its labels show at 12px). */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const vm = require('node:vm');
 
 /* ---- a stylesheet as rules ------------------------------------------------------------- */
 function rules(file) {
@@ -51,128 +50,101 @@ const where = (r) => `${r.file} ${r.media ? '@media ' + r.media + ' ' : ''}${r.s
 /* ---- /lifecycle: the illustration is folded on phones, never removed -------------------- */
 const lifecycleCss = rules('css/lifecycle.css');
 for (const r of lifecycleCss.filter(hides)) {
-  if (!/stage-scene|lifecycle-object/.test(r.selector)) continue;
+  if (!/stage-scene|lifecycle-object|ark-disclosure/.test(r.selector)) continue;
   if (/^\.stage-scene-/.test(r.selector.split(' ').pop())) continue; // a part of the scene, not the scene
-  assert(r.selector.includes('[data-fold="closed"]'), `${where(r)} hides the lifecycle illustration with no way to open it`);
+  assert.fail(`${where(r)} hides the lifecycle illustration; only the disclosure block's own closed state may fold it`);
 }
-assert(lifecycleCss.some((r) => hides(r) && r.selector.includes('[data-fold="closed"]') && r.selector.includes('.stage-scene') && r.selector.includes('.lifecycle-object')),
-  'phones fold both the stage scene and the overview figure behind the toggle');
+/* Since 2026-10-19 the lifecycle is on the story template (js/pages/story.js), which puts every
+   story page's figure in Ark's disclosure: folded at 900px and narrower behind "Show the
+   illustration", in full beside the depth control wider. */
 const lifecycleJs = fs.readFileSync('js/pages/lifecycle.js', 'utf8');
-assert(/ArkUI\.dash\.foldToggle\(\{\s*host:\s*body,\s*more:\s*'Show the illustration'/.test(lifecycleJs),
-  'js/pages/lifecycle.js renders the "Show the illustration" toggle on the dashboard body the fold rule reads');
-assert(lifecycleCss.some((r) => hides(r) && /min-width:\s*901px/.test(r.media) && r.selector.includes('.lifecycle-dashboard-body > button')),
-  'desktop shows the figure beside the answer, so the toggle exists only on phones');
+const storyJs = fs.readFileSync('js/pages/story.js', 'utf8');
+assert(/block\('disclosure', 'figure', \{\s*foldBelow: 'tablet', more: def\.figure\.more \|\| 'Show the illustration'/.test(storyJs),
+  'js/pages/story.js folds a story page\'s figure in an Ark disclosure (foldBelow tablet, "Show the illustration")');
+assert(/figure: \{ slot: 'illustration', caption: id \? picture\.title : picture\.caption \}/.test(lifecycleJs) && /var picture = id \? ArkUI\.createStageScene\(id, copy\) : trailFigure\(\);/.test(lifecycleJs),
+  'both illustrations -- the stage scene and the overview figure -- go through the template\'s figure, so through the fold');
 
 /* ---- /what-is-a-resolver: nothing on the page is display:none at any width ----------------- */
+/* Since 2026-10-19 (W3-GUIDE) the page is the story template (js/pages/resolver-lab.js builds its
+   def): the definition (the lede), the eyebrow, the breadcrumb, the spec and status links and the
+   four laws are Ark blocks with no page CSS, and the illustration -- its policy address, track,
+   stage and labels -- is the figure, folded below 900px behind "Show the illustration" by the
+   template. css/resolver-lab.css owns only the illustration's insides: it hides nothing that has
+   words, at any width (the phone-only canvas labels it used to hide show at 12px). The laws open
+   one at a time as an Ark accordion (its closed state is the block's, hidden="until-found"). */
 const labCss = rules('css/resolver-lab.css');
-const LAB_CONTENT = ['.resolver-lab-lede', '.resolver-lab-kicker', '.resolver-lab-address', '.content-layer-path',
-  '.resolver-lab-spec', '.resolver-lab-laws-source', '.resolver-mesh-label-rule', '.resolver-track-label small'];
 for (const r of labCss.filter(hides)) {
-  for (const part of LAB_CONTENT) {
-    if (!r.selector.includes(part)) continue;
-    // The one dedup: on the Laws step the laws panel carries its own spec + status links.
-    if (part === '.resolver-lab-spec' && r.selector.includes('[data-step="laws"]') && !r.media) continue;
-    // The laws source is only shown on the Laws step; elsewhere there are no laws to source.
-    if (part === '.resolver-lab-laws-source' && !r.media && r.selector === '.resolver-lab-laws-source') continue;
-    assert.fail(`${where(r)} hides ${part} -- content on /what-is-a-resolver must stay reachable on every width`);
-  }
+  // the step controls the run itself hides at its ends (no "back" on the first step, no "next" on the last)
+  if (/^#scene \.resolver-lab-(again|prev|next)\[hidden\]$/.test(r.selector)) continue;
+  assert.fail(`${where(r)} hides part of /what-is-a-resolver -- content must stay reachable on every width`);
 }
-// A closed law body is allowed only where the card opens it and shows that it does.
-for (const r of labCss.filter((x) => hides(x) && x.selector.endsWith('.resolver-lab-law p'))) {
-  assert(labCss.some((x) => x.media === r.media && x.selector.includes('.resolver-lab-law[data-open="true"] p') && /display\s*:\s*block/.test(x.body)), `${where(r)}: no open state for the law body`);
-  assert(labCss.some((x) => x.media === r.media && x.selector === '.resolver-lab-law-toggle' && /display\s*:\s*block/.test(x.body)), `${where(r)}: the law toggle is not shown where bodies close`);
-}
-assert(labCss.some((r) => r.selector === '.resolver-lab-law-toggle::after' && /content\s*:\s*"\+"/.test(r.body)) &&
-  labCss.some((r) => r.selector === '.resolver-lab-law-toggle[aria-expanded="true"]::after'),
-  'a closed law shows a visible +/- mark, so a closed body does not read as missing');
 const labJs = fs.readFileSync('js/pages/resolver-lab.js', 'utf8');
-assert(labJs.includes("toggle.setAttribute('aria-expanded'"), 'the law toggle announces its state');
-// The canvas labels phones still hide must be said by the narration line instead.
-// The pairing is explicit: each hidden label's text, and the visible line that says it on a phone.
-// Change a label's words and this fails, so the phone copy is re-checked rather than drifting apart.
-const hiddenLabels = labCss.filter((r) => hides(r) && /resolver-mesh-label/.test(r.selector)).map((r) => r.selector).join(' ');
-const narrate = labJs.slice(labJs.indexOf('function narrate('), labJs.indexOf('function at('));
-const resolverManifest = fs.readFileSync('js/content/manifests/resolver.js', 'utf8');
-const checkCaption = (resolverManifest.match(/"CHECK\.BODY"[\s\S]*?"value":\s*"([^"]*)"/) || [])[1] || '';
-for (const [label, labelText, carrier, carrierName, words] of [
-  ['sign', "labels.sign.textContent = 'signed · provider P-3'", narrate, 'narrate()', 'provider P-3'],
-  ['accept', "'same input · same claim'", narrate, 'narrate()', 'same claim'],
-  ['accept', "'trust · decided before sending'", checkCaption, 'the Check step caption (RESOLVER.CHECK.BODY)', 'trust question comes first: before you send'],
-  ['doc', "labels.doc.textContent = 'doc:' + input.id", narrate, 'narrate()', "'doc:' + input.id"]
-]) {
-  if (!hiddenLabels.includes('resolver-mesh-label-' + label)) continue;
-  assert(labJs.includes(labelText), `the ${label} label no longer reads ${labelText}: re-check what a phone shows in its place, then update this pairing`);
-  assert(carrier.includes(words), `the ${label} label (${labelText}) is hidden on phones, so ${carrierName} must say "${words}"`);
-}
+assert(/ArkUI\.resolverLabDef = function/.test(labJs) && /block: 'accordion', props: \{ label: words\('LAWS'\)/.test(labJs), 'the laws are an Ark accordion in the Evidence view');
+assert(/figure: \{ slot: 'lab', kind: 'live'/.test(labJs), 'the illustration goes through the template\'s figure, so through the fold');
 
 /* ---- /resolutions and /resolutions/<slug> --------------------------------------------------- */
+/* Since 2026-10-19 (W3-GUIDE) both are pages of Ark blocks with no page CSS of their own: the
+   hand-built clamps and display:none rules on the deck, the note, the brief, the legend, the main
+   action and the product lines are gone with css/resolutions.css's page rules, and every word is
+   in the page at every width (tests/resolutions-blocks.cjs checks each against the old pages'
+   frozen censuses). What remains to hold here: nothing in that sheet clamps or hides page words. */
 const resCss = rules('css/resolutions.css');
-const RES_CONTENT = ['.resolution-detail-deck', '.resolution-detail-actions', '.resolution-brief', '.resolution-legend span',
-  '.resolution-next-all', '.resolution-entry-copy > span', '.resolutions-domain-tab-name', '.resolutions-domain-tab-count',
-  '.resolutions-note p', '.resolution-product-open', '.resolution-level-tab span', '.resolution-detail-index',
-  '.resolution-idea-audience', '.resolution-how-shift p', '.resolution-idea-builds', '.resolutions-domain-head > p',
-  '.resolution-product-line', '.resolution-idea-pick strong'];
 for (const r of resCss.filter((x) => hides(x) || clamps(x))) {
-  const part = RES_CONTENT.find((p) => r.selector.includes(p));
-  if (!part) continue;
-  if (part === '.resolutions-note p' && clamps(r) && !hides(r)) continue; // clamped, with "More" (below)
-  assert.fail(`${where(r)} ${hides(r) ? 'hides' : 'clamps'} ${part} with no way to read it`);
+  assert(/header-products|products-mega/.test(r.selector), `${where(r)} ${hides(r) ? 'hides' : 'clamps'} resolution page content with no way to read it`);
 }
-// The two clamps that remain each have an open state, and the page renders the control.
-for (const [clamped, open] of [['.resolutions-deck', '.resolutions-hero-copy[data-fold="open"] .resolutions-deck'], ['.resolutions-note p', '.resolutions-note[data-fold="open"] p']]) {
-  assert(resCss.some((r) => clamps(r) && r.selector.endsWith(clamped)), `${clamped} is still clamped (if not, drop its toggle)`);
-  assert(resCss.some((r) => r.selector.includes(open) && /line-clamp\s*:\s*none/.test(r.body)), `${clamped} has no open state that lifts the clamp`);
-}
+// The deck and the status note are Ark disclosures: whole from 601px up, and on a phone they keep
+// their first line in view and offer "More" -- the clamp and its open state are the block's
+// (css/ark-blocks.css), not this page's.
 const resJs = fs.readFileSync('js/pages/resolutions.js', 'utf8');
-assert(/foldToggle\(\{\s*host:\s*heroCopy,\s*clamp:\s*deck/.test(resJs), 'the clamped deck renders a "More" toggle');
-assert(/foldToggle\(\{\s*host:\s*note,\s*clamp:\s*noteText/.test(resJs), 'the clamped status note renders a "More" toggle');
-// Phones read every domain by name; the strip scrolls sideways instead of shrinking to numbers.
-assert(resCss.some((r) => /max-width:\s*700px/.test(r.media) && r.selector === '.resolutions-domains' && /overflow-x\s*:\s*auto/.test(r.body)), 'phone domain tabs scroll and keep their names');
-// With nothing cut, a phone page scrolls instead of clipping what no longer fits.
-assert(resCss.some((r) => /max-width:\s*760px/.test(r.media) && r.selector === '#scene .resolution-detail' && /overflow-y\s*:\s*auto/.test(r.body)), 'a resolution page scrolls on phones');
+assert(/id:\s*'resolutions-deck',[^\n]*props:\s*\{\s*content:\s*'copy:RESOLUTIONS\.DECK',\s*foldBelow:\s*'phone',\s*preview:\s*1/.test(resJs), 'the deck keeps a line and a "More" on a phone (Ark disclosure)');
+assert(/id:\s*'resolutions-note-text',[^\n]*props:\s*\{\s*content:\s*'copy:RESOLUTIONS\.NOTE',\s*foldBelow:\s*'phone',\s*preview:\s*1/.test(resJs), 'the status note keeps a line and a "More" on a phone (Ark disclosure)');
+// The brief (who it is for, the problem) folds only on a phone, behind a button that names it.
+assert(/id:\s*id \+ '-brief',[^\n]*props:\s*\{\s*foldBelow:\s*'phone',\s*more:\s*'Who it is for, and the problem'/.test(resJs), 'the brief is one press away on a phone, never display:none');
 
-/* ---- the control itself: ArkUI.dash.foldToggle -------------------------------------------- */
-class Element {
-  constructor(tag) { this.tagName = tag; this.className = ''; this.children = []; this.dataset = {}; this.attrs = {}; this.listeners = {}; this.textContent = ''; this.hidden = false; this.isConnected = true; this.scrollHeight = 0; this.clientHeight = 0; }
-  appendChild(c) { this.children.push(c); return c; }
-  setAttribute(k, v) { this.attrs[k] = String(v); }
-  getAttribute(k) { return this.attrs[k]; }
-  addEventListener(k, fn) { this.listeners[k] = fn; }
-}
-const frames = [];
-const context = { console, document: { createElement: (t) => new Element(t) }, requestAnimationFrame: (fn) => frames.push(fn) };
-context.window = context;
-vm.createContext(context);
-vm.runInContext('var ArkUI = {};', context);
-vm.runInContext(fs.readFileSync('js/ark/dash-kit.js', 'utf8'), context);
-const foldToggle = vm.runInContext('ArkUI.dash.foldToggle', context);
+/* ---- the control itself: Ark's disclosure block, rendered for real --------------------------- */
+const { JSDOM } = require('jsdom');
+const dom = new JSDOM('<!doctype html><html><body></body></html>', { runScripts: 'outside-only', pretendToBeVisual: true });
+const w = dom.window;
+w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+const observed = [];
+w.ResizeObserver = class { constructor(fn) { this.fn = fn; } observe(el) { observed.push({ el, fn: this.fn }); } };
+w.eval('var ArkCopy = { isKey: function () { return false; }, resolve: function (v) { return v; }, text: function (k) { return k; } };');
+for (const file of ['js/ark/atomizer.js', 'js/ark/flux.js', 'js/ark/runtime.js', 'js/ark/vendor/engines.js']) w.eval(fs.readFileSync(file, 'utf8'));
+w.eval('ArkUI.pageCatalog = {}; ArkUI.blockScripts = [];');
+for (const file of ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js']) w.eval(fs.readFileSync(file, 'utf8'));
+assert.equal(w.eval('typeof ArkUI.dash.foldToggle'), 'undefined', 'the local stand-in is gone: one disclosure, Ark\'s');
+const render = (spec, options) => { const el = w.ArkUI.blocks.render(spec, options || {}); w.document.body.appendChild(el); return el; };
 
-const host = new Element('div');
-const button = foldToggle({ host, more: 'Show the illustration', less: 'Hide the illustration' });
-assert.equal(button.tagName, 'button'); assert.equal(button.type, 'button');
-assert.equal(host.dataset.fold, 'closed', 'starts closed unless asked');
-assert.equal(button.attrs['aria-expanded'], 'false');
-assert.equal(button.textContent, 'Show the illustration');
-button.listeners.click();
-assert.equal(host.dataset.fold, 'open'); assert.equal(button.attrs['aria-expanded'], 'true'); assert.equal(button.textContent, 'Hide the illustration');
-button.listeners.click();
-assert.equal(host.dataset.fold, 'closed', 'and closes again');
+const figure = w.document.createElement('figure'); figure.textContent = 'the illustration';
+const fold = render({ block: 'disclosure', props: { slot: 'illustration', foldBelow: 'tablet', more: 'Show the illustration', less: 'Hide the illustration' } }, { slots: { illustration: figure } });
+const trigger = fold.querySelector('.ark-disclosure__trigger'), panel = fold.querySelector('.ark-disclosure__panel');
+assert.equal(trigger.tagName, 'BUTTON'); assert.equal(trigger.getAttribute('type'), 'button');
+assert.equal(fold.getAttribute('data-state'), 'closed', 'starts closed unless asked');
+assert.equal(trigger.getAttribute('aria-expanded'), 'false');
+assert.equal(trigger.textContent.trim(), 'Show the illustration');
+assert(panel.contains(figure), 'the page\'s own illustration is inside the panel');
+assert(!panel.hasAttribute('hidden'), 'a fold below a width is never marked hidden: wider screens show it');
+trigger.click();
+assert.equal(fold.getAttribute('data-state'), 'open'); assert.equal(trigger.getAttribute('aria-expanded'), 'true'); assert.equal(trigger.textContent.trim(), 'Hide the illustration');
+trigger.click();
+assert.equal(fold.getAttribute('data-state'), 'closed', 'and closes again');
 
 // A clamp that cuts nothing offers no "More"; one that cuts does.
-const fits = new Element('p'); fits.scrollHeight = 40; fits.clientHeight = 40;
-const quiet = foldToggle({ host: new Element('div'), clamp: fits });
-const cut = new Element('p'); cut.scrollHeight = 66; cut.clientHeight = 44;
-const loud = foldToggle({ host: new Element('div'), clamp: cut });
-frames.splice(0).forEach((fn) => fn());
-assert.equal(quiet.hidden, true, 'a clamp that fits hides its toggle');
-assert.equal(loud.hidden, false, 'a clamp that cuts shows its toggle');
-assert.equal(loud.textContent, 'More');
+const fits = render({ block: 'disclosure', props: { content: 'Short.', preview: 1, more: 'More', less: 'Less' } });
+const cut = render({ block: 'disclosure', props: { content: 'Long enough to wrap.', preview: 2, more: 'More', less: 'Less' } });
+const size = (el, scroll, client) => { Object.defineProperty(el, 'scrollHeight', { value: scroll }); Object.defineProperty(el, 'clientHeight', { value: client }); };
+size(fits.querySelector('.ark-disclosure__panel'), 40, 40); size(cut.querySelector('.ark-disclosure__panel'), 66, 44);
+observed.forEach((entry) => entry.fn([]));
+assert.equal(fits.querySelector('.ark-disclosure__trigger').hidden, true, 'a clamp that fits hides its "More"');
+assert.equal(cut.querySelector('.ark-disclosure__trigger').hidden, false, 'a clamp that cuts shows its "More"');
+assert.equal(cut.querySelector('.ark-disclosure__trigger').textContent.trim(), 'More');
 
-// The toggle inherits the page font and has a visible focus ring (components.css owns its paint).
-const components = rules('css/components.css');
-const paint = components.find((r) => r.selector === '#scene .fold-toggle');
-assert(paint && /font\s*:\s*inherit/.test(paint.body), '.fold-toggle inherits the page font');
-assert(components.some((r) => r.selector === '#scene .fold-toggle:focus-visible' && /outline\s*:\s*2px solid hsl\(var\(--reference\)\)/.test(r.body)), '.fold-toggle has a visible focus ring');
-assert(components.some((r) => r.selector === '#scene .fold-toggle[hidden]' && hides(r)), 'a hidden toggle stays hidden despite its inline-flex display');
+// The block's sheet: closed folds only at its width, the button exists only where it folds, the
+// clamp lifts when open (it applies to [data-state='closed'] only), and the button keeps the page font.
+const blocksCss = rules('css/ark-blocks.css');
+assert(blocksCss.some((r) => /max-width:\s*900px/.test(r.media) && r.selector.includes("[data-fold-below='tablet'][data-state='closed'][data-preview='0'][data-hidden-by='state']") && hides(r)), 'a tablet fold closes only at 900px and narrower');
+assert(blocksCss.some((r) => /min-width:\s*901px/.test(r.media) && r.selector.includes("[data-fold-below='tablet'] > .ark-disclosure__trigger") && hides(r)), 'wider, there is no button to press');
+assert(blocksCss.every((r) => !clamps(r) || r.selector.includes("[data-state='closed']")), 'every clamp is a closed state, so opening lifts it');
+assert(blocksCss.some((r) => r.selector === '.ark-block :where(button, input, select, textarea)' && /font\s*:\s*inherit/.test(r.body)), 'block controls inherit the page font');
 
 console.log('PASS: no fold is met by deletion -- lifecycle illustration, resolver lede/address/spec/laws, resolutions deck/note/brief/legend/products all reachable on phones.');

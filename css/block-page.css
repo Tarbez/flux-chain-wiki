@@ -1,0 +1,36 @@
+/* The frame a page built from Ark blocks sits in (ArkUI.page, js/ark/blocks.js): the routed page's
+   panel and scroll box, and its reading column. One rule set for every converted page, so a Wave 3
+   page carries no frame CSS of its own; the blocks inside are styled only by css/ark-blocks.css.
+   The panel is the one the task pages use (css/task-page.css: below the header, above the footer
+   strip, canvas at .97 so the scene's motion never shows through the words); the guided, reference
+   and task frames fold into this one as their pages convert. */
+#scene .ark-block-page {
+  position:relative; box-sizing:border-box; pointer-events:auto; overflow:auto;
+  display:grid; align-content:start; gap:clamp(20px,3vw,32px);
+  padding:clamp(20px,4vw,44px) clamp(16px,4vw,48px) 48px;
+  color:hsl(var(--text)); font-family:var(--font-sans,sans-serif);
+}
+#scene .ark-block-page:not(.continuity-host > *) {
+  width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px;
+  border-radius:14px; background:hsl(var(--canvas) / .97);
+}
+/* Inside the panel-continuity host (js/ark/panel-continuity.js: the story pages, /dao, /concept/*
+   arrive in the panel that morphed from where they were opened) the host is the panel: the page
+   fills it and scrolls inside it. Without this a block page grew past the host, whose
+   overflow:hidden cut off everything below the first screen. */
+#scene .continuity-host > .ark-block-page {height:100%; margin:0; border-radius:inherit;}
+#scene .ark-block-page > * {box-sizing:border-box; width:100%; max-width:1000px; margin-inline:auto; min-width:0;}
+/* The CMS insertion anchor stays a full-width (empty) row: the editor offers only insertion
+   points at least 24px wide (MIN_POINT_WIDTH, js/main.js), so it must never be display:none. */
+@media(max-width:620px){
+ #scene .ark-block-page:not(.continuity-host > *) {width:calc(100% - 16px);}
+}
+/* The story template (js/pages/story.js): the depth control and the boundary on the left, the
+   page's figure and record beside them wider than 900px -- where Ark's disclosure stops folding
+   the figure (foldBelow 'tablet') -- one column narrower. Shared by every story page; a story
+   page adds no layout CSS of its own. */
+#scene .ark-block-page .story-body {display:grid; gap:clamp(20px,3vw,32px); align-items:start;}
+#scene .ark-block-page :is(.story-main,.story-side) {display:grid; gap:clamp(16px,2.2vw,22px); align-content:start; min-width:0;}
+@media(min-width:901px){
+ #scene .ark-block-page .story-body[data-split] {grid-template-columns:minmax(0,1.15fr) minmax(300px,1fr);}
+}

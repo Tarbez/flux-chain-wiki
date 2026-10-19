@@ -73,7 +73,7 @@ function shortNetworkLabel(url, knownNetworks) {
  *  network control on the page (the account page's Wallet tab included)
  *  via `mountNetworkSelect`'s own cross-select `defxn-network-changed`
  *  event -- switching here updates there and back, live, no reload. */
-function buildHeaderChainPopover(el) {
+function buildHeaderChainPopover() {
   var wrap = document.createElement('div');
   wrap.className = 'header-chain';
 
@@ -115,7 +115,6 @@ function buildHeaderChainPopover(el) {
   popover.appendChild(innerLabel);
   popover.appendChild(list);
   wrap.appendChild(popover);
-  el.appendChild(wrap);
 
   function setOpen(open) {
     popover.hidden = !open;
@@ -151,6 +150,7 @@ function buildHeaderChainPopover(el) {
   }).catch(function () {
     wrap.hidden = true;
   });
+  return wrap;
 }
 
 function buildProducts(header, core) {
@@ -332,15 +332,19 @@ function buildProducts(header, core) {
 }
 
 /* One row, never squeezed (tests/browser/public-header.mjs, 1024-1920px). Above the compact
-   breakpoint every core link used to stay in the row and shrink to fit: at 1280px "How it
-   works", "Mesh Explorer" and "Run DEFXN" wrapped onto two lines and Account read "Acc...".
-   Instead, while the row's controls are wider than the header's content box, the next link in
+   breakpoint every core link used to stay in the row and shrink to fit: at 1280px "How it works",
+   "Mesh Explorer" and "Run DEFXN" wrapped onto two lines and Account read "Acc...". Instead, while
+   the row's controls are wider than the header's content box, the next link in
    HEADER_COLLAPSE_ORDER leaves the row (.header-collapsed); every one of them stays one click
    away in the MENU panel, which lists every page. The order is the editorial priority, lowest
    first: supporting reads go before orientation (Overview, Mesh Explorer, the Resolutions
    menu), and the run action goes last. Account is never collapsed: it carries the visitor's
    own state. Widths are MEASURED, not breakpoints, so a longer network name, a signed-in
-   display name or a copy change re-fits instead of silently wrapping again. */
+   display name or a copy change re-fits instead of silently wrapping again. Since 2026-10-19
+   the row is the family bar (DefxnKit.mountShell, below): brand, product switcher, these
+   links in the bar's nav, then Account, Run DEFXN, the network pill and MENU in its actions.
+   The kit's own fold-everything menu (menuAt) is not used: this site already has its
+   all-pages MENU, so collapsing link by link into it keeps every other control in the row. */
 var HEADER_COLLAPSE_ORDER = ['stats', 'deployment', 'about', 'explorer', 'resolutions', 'download'];
 function headerRowOverflows(header) {
   var box = header.getBoundingClientRect();
@@ -368,91 +372,148 @@ function fitHeaderRow(header) {
   if (typeof ResizeObserver === 'undefined') return;
   /* Re-fit whenever anything in the row changes width: the header itself (the viewport), every
      control (a network name, a signed-in name) and the link bar -- whose links are restyled by
-     a route change (home draws bordered pills, inner pages a tighter segmented bar), which no
-     single control's size reveals. Fitting changes the bar's own width, so the fit runs in the
-     next frame, outside the observer's delivery: fitting inside it would resize an observed
-     element mid-delivery ("ResizeObserver loop completed with undelivered notifications"). The
-     fit is idempotent, so the bar's re-measure after it settles in one more frame. */
+     a route change, which no single control's size reveals. Fitting changes the bar's own
+     width, so the fit runs in the next frame, outside the observer's delivery: fitting inside
+     it would resize an observed element mid-delivery ("ResizeObserver loop completed with
+     undelivered notifications"). The fit is idempotent, so the bar's re-measure after it
+     settles in one more frame. */
   var queued = 0;
   function queue() { if (!queued) queued = requestAnimationFrame(function () { queued = 0; fit(); }); }
   var observer = new ResizeObserver(queue);
   observer.observe(header);
-  ['.ark-studio-identity', '.header-core-links', '.header-chain-trigger', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
+  ['.dx-bar__brand', '.dx-switch__trigger', '.header-core-links', '.header-account-link', '.header-chain-trigger', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
+}
+
+/* The header's own controls, built once. Each keeps the class and data-header-item hook the
+   row fit, js/hero-motion.js (MENU open/close, route clicks), the editor's layer tools and the
+   browser drivers read. */
+/* [copy key, page]: the first four are the bar's nav (in this order: the row fit and the
+   editor's layer keys count them), Account and Run DEFXN are its actions. */
+var HEADER_LINKS = [
+  ['NAV.OVERVIEW', 'about'],
+  ['NAV.HOW', 'deployment'],
+  ['NAV.MESH', 'explorer'],
+  ['NAV.STATS', 'stats'],
+  ['NAV.ACCOUNT', 'account'],
+  ['NAV.RUN', 'download']
+];
+var HEADER_ICONS = { about: 'overview', deployment: 'layers', explorer: 'network', stats: 'evidence', account: 'account', download: 'terminal' };
+function headerLink(item) {
+  var key = item[1], link = document.createElement('a');
+  link.href = ArkUI.route.href(ArkUI.pageCatalog[key].path);
+  link.textContent = ArkCopy.text(item[0]);
+  link.dataset.headerItem = key;
+  if (ArkUI.actionIcon) ArkUI.actionIcon(link, HEADER_ICONS[key]);
+  return link;
+}
+function headerAccountLink(item) {
+  var link = headerLink(item);
+  link.className = 'header-account-link dx-btn dx-btn--ghost dx-btn--sm';
+  /* the label is rebuilt as name + state; the icon actionIcon added stays first */
+  Array.prototype.slice.call(link.childNodes).forEach(function (node) { if (node.nodeType === 3) link.removeChild(node); });
+  var accountName = document.createElement('span');
+  accountName.className = 'header-account-name';
+  accountName.textContent = 'Account';
+  var accountStatus = document.createElement('span');
+  accountStatus.className = 'header-account-status';
+  accountStatus.textContent = 'Signed out';
+  var accountLabel = document.createElement('span');
+  accountLabel.className = 'header-account-label';
+  accountLabel.appendChild(accountName); accountLabel.appendChild(accountStatus);
+  link.appendChild(accountLabel);
+  return link;
+}
+function headerMenuToggle() {
+  var toggle = document.createElement('button');
+  toggle.className = 'nav-toggle';
+  toggle.type = 'button';
+  var toggleLabel = document.createElement('span');
+  toggleLabel.className = 'nav-toggle-label';
+  toggleLabel.textContent = 'Menu';
+  toggle.appendChild(toggleLabel);
+  var dots = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  dots.setAttribute('viewBox', '0 0 24 24');
+  dots.setAttribute('width', '20');
+  dots.setAttribute('height', '20');
+  dots.setAttribute('aria-hidden', 'true');
+  dots.setAttribute('focusable', 'false');
+  [5, 12, 19].forEach(function (x) {
+    var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', String(x));
+    dot.setAttribute('cy', '12');
+    dot.setAttribute('r', '1.7');
+    dot.setAttribute('fill', 'currentColor');
+    dots.appendChild(dot);
+  });
+  toggle.appendChild(dots);
+  toggle.setAttribute('aria-label', 'Open all pages');
+  toggle.setAttribute('title', 'All pages');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', 'primary-navigation');
+  return toggle;
 }
 
 ArkUI.register('RHEADER_V1', {
   tag: 'header',
+  /* Placement only: the bar's own layout (height, gutters, gap, alignment) is the family
+     kit's (.dx-bar in assets/kit/defxn-components.css), dressed for the scene in
+     css/navigation.css. */
   base: {
     position: 'absolute',
     top: '0',
     left: '0',
     right: '0',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '8px ' + Tokens.u(3),
-    padding: 'max(18px, 2.35cqmin) max(20px, 2.8cqmin)',
-    zIndex: '4'
+    zIndex: '20'
   },
   decorate: function (el) {
+    /* defxn.com is the DEFXN family home (owner decision 2026-10-19, docs/ux-audit/plan.md):
+       it wears the kit bar every product wears -- the DEFXN mark linking home, the product
+       switcher with all seven lanes, then this site's own nav and actions -- mounted on this
+       resolver's element (options.bar), so the CMS keeps owning the header and the all-pages
+       menu (RNAV_V1) stays its child. Classic script (assets/kit/defxn-product.js), so it also
+       renders in the SSR pass and on file://. */
     el.classList.add('ark-header');
-    var identity = document.createElement('a');
-    identity.className = 'ark-studio-identity';
-    identity.href = ArkUI.route.href('/');
-    identity.dataset.sceneLink = 'zero';
-    identity.setAttribute('aria-label', 'DEFXN — home');
-    var lockup = document.createElement('span');
-    lockup.className = 'ark-brand-lockup';
-    var wordmark = document.createElement('span');
-    wordmark.className = 'ark-brand-wordmark';
-    wordmark.textContent = ArkCopy.text('NAV.BRAND.NAME');
-    var descriptor = document.createElement('span');
-    descriptor.className = 'ark-brand-descriptor';
-    descriptor.textContent = 'FXN CHAIN';
-    descriptor.setAttribute('aria-hidden', 'true');
-    lockup.appendChild(wordmark);
-    lockup.appendChild(descriptor);
-    var mark = document.createElement('span');
-    mark.className = 'brand-mark brand-mark-defxn ark-brand-mark';
-    mark.setAttribute('aria-hidden', 'true');
-    identity.appendChild(mark);
-    identity.appendChild(lockup);
-    el.appendChild(identity);
-
+    /* the links' container: the kit moves them into its own nav, which then takes this class
+       (the row fit, the editor's layer tools and the browser drivers find the links by it) */
     var core = document.createElement('nav');
-    core.className = 'header-core-links';
-    core.setAttribute('aria-label', 'Core pages');
-    [
-      ['NAV.OVERVIEW', 'about'],
-      ['NAV.HOW', 'deployment'],
-      ['NAV.MESH', 'explorer'],
-      ['NAV.STATS', 'stats'],
-      ['NAV.ACCOUNT', 'account'],
-      ['NAV.RUN', 'download']
-    ].forEach(function (item) {
-      var link = document.createElement('a');
-      link.href = ArkUI.route.href(ArkUI.pageCatalog[item[1]].path);
-      link.textContent = ArkCopy.text(item[0]);
-      if (item[1] === 'account') {
-        link.classList.add('header-account-link');
-        link.textContent = '';
-        var accountName = document.createElement('span');
-        accountName.className = 'header-account-name';
-        accountName.textContent = 'Account';
-        var accountStatus = document.createElement('span');
-        accountStatus.className = 'header-account-status';
-        accountStatus.textContent = 'Signed out';
-        var accountLabel = document.createElement('span');
-        accountLabel.className = 'header-account-label';
-        accountLabel.appendChild(accountName); accountLabel.appendChild(accountStatus);
-        link.appendChild(accountLabel);
-      }
-      if (item[1] === 'download') link.classList.add('header-run-link');
-      link.dataset.headerItem = item[1];
-      if(ArkUI.actionIcon)ArkUI.actionIcon(link,{about:'overview',deployment:'layers',explorer:'network',stats:'evidence',account:'account',download:'terminal'}[item[1]]);core.appendChild(link);
+    var account = null, run = null;
+    HEADER_LINKS.forEach(function (item) {
+      if (item[1] === 'account') account = headerAccountLink(item);
+      else if (item[1] === 'download') run = headerLink(item);
+      else core.appendChild(headerLink(item));
     });
-    el.appendChild(core);
+    /* the bar's action, soft: the page below keeps its own one solid action */
+    run.className = 'header-run-link dx-btn dx-btn--soft dx-btn--sm';
+    var chain = buildHeaderChainPopover();
+    var toggle = headerMenuToggle();
+    var kit = typeof window !== 'undefined' && window.DefxnKit;
+    var nav = core;
+    if (kit && typeof kit.mountShell === 'function') {
+      var shell = kit.mountShell({ mode: 'home', bar: el, nav: core, actions: [account, run, chain, toggle], brandSub: 'FXN CHAIN', home: ArkUI.route.href('/') });
+      nav = shell.nav;
+      var brand = el.querySelector('.dx-bar__brand');
+      if (brand) {
+        brand.dataset.sceneLink = 'zero';
+        brand.setAttribute('aria-label', 'DEFXN — home');
+        var word = brand.querySelector('.dx-bar__brand-word');
+        if (word) word.textContent = ArkCopy.text('NAV.BRAND.NAME');
+      }
+      /* one panel at a time: opening the product switcher closes the all-pages MENU (the
+         MENU, the network popover and the Resolutions menu already close on any click
+         outside their own controls) */
+      var switchTrigger = el.querySelector('.dx-switch__trigger');
+      if (switchTrigger) switchTrigger.addEventListener('click', function () { if (el.classList.contains('nav-open')) toggle.click(); });
+    } else {
+      /* no kit (it failed to load): the same controls, unstyled by the family, all reachable */
+      var actions = document.createElement('div');
+      actions.className = 'dx-bar__actions';
+      [account, run, chain, toggle].forEach(function (node) { actions.appendChild(node); });
+      el.appendChild(core);
+      el.appendChild(actions);
+    }
+    nav.className += ' header-core-links';
+    nav.setAttribute('aria-label', 'Core pages');
     function paintAccount(link) {
       if (!link) return;
       var who = ArkUI.localIdentity && ArkUI.localIdentity.current();
@@ -474,38 +535,9 @@ ArkUI.register('RHEADER_V1', {
       ArkUI.accountNavSubscribed = true;
       ArkUI.localIdentity.subscribe(function () { ArkUI.refreshAccountNav(); });
     }
-    // Paint this core before it has been attached to the document.
-    paintAccount(core.querySelector('.header-account-link'));
-
-    var toggle = document.createElement('button');
-    toggle.className = 'nav-toggle';
-    toggle.type = 'button';
-    var toggleLabel = document.createElement('span');
-    toggleLabel.className = 'nav-toggle-label';
-    toggleLabel.textContent = 'Menu';
-    toggle.appendChild(toggleLabel);
-    var dots = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    dots.setAttribute('viewBox', '0 0 24 24');
-    dots.setAttribute('width', '20');
-    dots.setAttribute('height', '20');
-    dots.setAttribute('aria-hidden', 'true');
-    dots.setAttribute('focusable', 'false');
-    [5, 12, 19].forEach(function (x) {
-      var dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      dot.setAttribute('cx', String(x));
-      dot.setAttribute('cy', '12');
-      dot.setAttribute('r', '1.7');
-      dot.setAttribute('fill', 'currentColor');
-      dots.appendChild(dot);
-    });
-    toggle.appendChild(dots);
-    toggle.setAttribute('aria-label', 'Open all pages');
-    toggle.setAttribute('title', 'All pages');
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-controls', 'primary-navigation');
-    buildHeaderChainPopover(el);
-    el.appendChild(toggle);
-    if (ArkUI.pageCatalog.resolutions && typeof ArkResolutions !== 'undefined') buildProducts(el, core);
+    // Paint the account link before the header has been attached to the document.
+    paintAccount(account);
+    if (ArkUI.pageCatalog.resolutions && typeof ArkResolutions !== 'undefined') buildProducts(el, nav);
     fitHeaderRow(el);
   },
   onMount: function (el) {

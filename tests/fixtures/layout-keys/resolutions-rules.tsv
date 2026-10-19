@@ -1,0 +1,62 @@
+# key	tag	text -- layout keys of /resolutions/rules before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsRules and patterns15 / 20 · Intelligence & dataResolve your rules and patternsEncode rules and patterns once; every resolver applies them the sam
+page:/nav:1	nav	All resolutionsRules and patterns
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Rules and patterns
+page:/div:1	div	15 / 20 · Intelligence & dataResolve your rules and patternsEncode rules and patterns once; every resolver applies them the same way.ForCompliance teams, market
+page:/div:1/header:1	header	15 / 20 · Intelligence & dataResolve your rules and patternsEncode rules and patterns once; every resolver applies them the same way.ForCompliance teams, market
+page:/div:1/header:1/p:1	p	15 / 20 · Intelligence & data
+id:resolution-title-rules	h1	Resolve your rules and patterns
+page:/div:1/header:1/p:2	p	Encode rules and patterns once; every resolver applies them the same way.
+page:/div:1/header:1/dl:1	dl	ForCompliance teams, marketplace operators and competition organisers.ProblemThe same rule is read differently by each person who applies it.
+page:/div:1/header:1/dl:1/div:1	div	ForCompliance teams, marketplace operators and competition organisers.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Compliance teams, marketplace operators and competition organisers.
+page:/div:1/header:1/dl:1/div:2	div	ProblemThe same rule is read differently by each person who applies it.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	The same rule is read differently by each person who applies it.
+page:/div:1/header:1/div:1	div	Start here →Resolver Math →
+page:/div:1/header:1/div:1/a:1	a	Start here →
+page:/div:1/header:1/div:1/a:2	a	Resolver Math →
+page:/div:1/section:1	section	Ready now3Product ideas3How it resolvesResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →Agreements resolverReadyEach 
+page:/div:1/section:1/div:1	div	Ready now3Product ideas3How it resolves
+id:resolution-level-tab-rules-0	button	Ready now3
+page:/div:1/section:1/div:1/button:1/span:1	span	3
+id:resolution-level-tab-rules-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-rules-2	button	How it resolves
+id:resolution-level-rules	div	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →Agreements resolverReadyEach side signs terms, work and receipt on i
+page:/div:1/section:1/div:2/div:1	div	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →Agreements resolverReadyEach side signs terms, work and receipt on i
+page:/div:1/section:1/div:2/div:1/a:1	a	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	ResolversReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Resolvers
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Publish logic at an address so anyone can run it and get the same claim.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:2	a	Agreements resolverReadyEach side signs terms, work and receipt on its own chain; the resolver links them.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	Agreements resolverReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Agreements resolver
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Each side signs terms, work and receipt on its own chain; the resolver links them.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:3	a	Network DAOBuildingA roster, a threshold and signed decisions for one network.Open →
+page:/div:1/section:1/div:2/div:1/a:3/span:1	span	Network DAOBuilding
+page:/div:1/section:1/div:2/div:1/a:3/span:1/strong:1	strong	Network DAO
+page:/div:1/section:1/div:2/div:1/a:3/span:1/span:1	span	Building
+page:/div:1/section:1/div:2/div:1/a:3/span:2	span	A roster, a threshold and signed decisions for one network.
+page:/div:1/section:1/div:2/div:1/a:3/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← InformationPreviousAll 20Network →Next
+page:/nav:2/a:1	a	← InformationPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Network →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

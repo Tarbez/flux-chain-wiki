@@ -280,10 +280,11 @@
     const base = String(title || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, kind === 'article' ? '-' : '').replace(/^-+|-+$/g, '').replace(/^[^a-z]+/, '');
     return base.slice(0, 48).replace(/-+$/, '');
   };
-  let newKind = 'page', slugTouched = false;
+  let newKind = 'page', slugTouched = false, kindGroup = null;
+  const kindButtons = $('newItemPanel') ? [...$('newItemPanel').querySelectorAll('[data-new-kind]')] : [];
   function syncNewItem() {
     const panel = $('newItemPanel'); if (!panel) return;
-    for (const b of panel.querySelectorAll('[data-new-kind]')) b.setAttribute('aria-pressed', String(b.dataset.newKind === newKind));
+    if (kindGroup) kindGroup.select(kindButtons.findIndex((b) => b.dataset.newKind === newKind));
     $('newForm').hidden = newKind !== 'page'; $('newArticleForm').hidden = newKind !== 'article';
     const slugInput = newKind === 'page' ? $('newId') : $('newSlug');
     if (!slugTouched) slugInput.value = slugFor(newKind, $('newTitle').value);
@@ -307,7 +308,9 @@
     /* the address forms are its Developer details (the editor's one disclosure, controls.js) */
     const devHolder = $('newItemDev'); devHolder.replaceWith(A.devDetails([], [$('newForm'), $('newArticleForm')]));
     $('btnNewItem').addEventListener('click', () => { if ($('newItemPanel').hidden) openNewItem(); else closeNewItem(); });
-    for (const b of $('newItemPanel').querySelectorAll('[data-new-kind]')) b.addEventListener('click', () => { newKind = b.dataset.newKind; syncNewItem(); $('newTitle').focus(); });
+    /* the kind picker is Ark's toggle group (js/admin/ark-host.js arkSegGroup) */
+    kindGroup = A.arkSegGroup($('newItemPanel').querySelector('.new-kind'), kindButtons, { selected: kindButtons.findIndex((b) => b.dataset.newKind === newKind),
+      onPick: (_i, b) => { newKind = b.dataset.newKind; syncNewItem(); $('newTitle').focus(); } });
     $('newTitle').addEventListener('input', syncNewItem);
     for (const id of ['newId', 'newSlug']) $(id).addEventListener('input', () => { slugTouched = $(id).value.trim() !== ''; syncNewItem(); });
     /* Enter in the title submits the kind's own form (the editor's one create path) */

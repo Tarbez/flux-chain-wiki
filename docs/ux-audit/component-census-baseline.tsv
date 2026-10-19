@@ -1,98 +1,98 @@
 # defxn hand-built UI census baseline -- scripts/ux-component-census.mjs --check fails if a value rises.
 # Values only go down (--ratchet). "-" = not measured for that family. See docs/ux-audit/components.md §2.
-# Raised by hand 2026-10-19 (W1-CONTENT), eyebrow/pill/card/stat used-classes and uses only: /resolvers was rebuilt
-# from one innerHTML string into DOM calls. It uses the same stats-tile, stats-kicker, stats-chips and resolver-status
-# classes it always did; built by string concatenation they were invisible to this lower-bound count, and now they
-# are counted. No new pattern was added. Wave 3 converts the page to Ark blocks and lowers these again.
+# ark-overrides / ark-override-files (css), added 2026-10-19 (W2-ADAPTER): site rules that restyle an Ark
+# block (an Ark class or a block spec id in a selector) -- a per-page variant of a shared block forming.
 # Lowered by hand 2026-10-19 (coordinator), field uses 45 -> 40: an instrument fix, not progress. The literal
 # tokenizer split 'a.b' on the dot and counted property accesses (e.g. stage.title) as class uses; re-measured
-# at 5a1ac71 with the corrected tokenizer, field uses was 40. No UI changed.
-# Raised by hand 2026-10-19 (coordinator, W1-SITE-FIXES), three real additions with reasons; each is replaced by an
-# Ark block in Wave 2/3 and the values fall again:
-#   button +1 class/used/use: resolution-secondary-action, the onward link the pages.md audit asked for on
-#     /resolutions/rules, /algorithms (-> /resolver-math) and /finance (-> /treasury).
-#   stat +1 class: stats-bar-detail, the bar-row detail made visible text when bar rows stopped being
-#     inert Tab stops (a11y fix on /stats/gpu, /stats/ledger).
-#   toggle +1 used/use/css-file: fold-toggle (dash-kit foldToggle), the 'More' control that replaced
-#     display:none / line-clamp hiding on phones (no-feature-reduction rule); Wave 2 swaps it for the
-#     Ark accordion block.
+# at 5a1ac71 with the corrected tokenizer. No UI changed.
+# Raised by hand 2026-10-19 (coordinator, W1-SITE-FIXES), three real additions with reasons, each replaced by an
+# Ark block in Wave 2/3 (values have since fallen): button +1 resolution-secondary-action (the onward link the
+# pages.md audit asked for on /resolutions/rules, /algorithms, /finance); stat +1 stats-bar-detail (bar-row detail
+# made visible text when bar rows stopped being inert Tab stops); toggle +1 fold-toggle (the 'More' control that
+# replaced display:none / line-clamp hiding on phones; replaced by the Ark disclosure block in Wave 2).
+# (Restored 2026-10-19 after --ratchet dropped the header comments; the ratchet now keeps them.)
+# Known undercount 2026-10-19 (coordinator): W3-STATS renamed css/resolver-math.css .rm-build-label -> .rm-build-head
+# and .rm-build-note -> .rm-build-foot, which takes one eyebrow-like and one callout-like hand-built element of the
+# /resolver-math term builder out of the name-based count without replacing them. The builder stays hand-built
+# (pinned whole for layout-key continuity); treat eyebrow and callout as one higher than measured until it is
+# converted. Renaming to leave a family is not a reduction.
 measure	family	value
-classes	hero	44
-used-classes	hero	21
-uses	hero	34
-css-files	hero	31
-classes	eyebrow	62
-used-classes	eyebrow	37
-uses	eyebrow	67
-css-files	eyebrow	36
-classes	pill	27
-used-classes	pill	17
-uses	pill	19
-css-files	pill	12
-classes	button	39
-used-classes	button	15
-uses	button	22
-css-files	button	23
-classes	card	38
-used-classes	card	18
-uses	card	45
-css-files	card	19
-classes	stat	108
-used-classes	stat	31
-uses	stat	99
-css-files	stat	13
-classes	step	36
-used-classes	step	21
-uses	step	27
-css-files	step	21
-classes	table	9
-used-classes	table	5
-uses	table	20
-css-files	table	5
-classes	code	4
-used-classes	code	2
-uses	code	3
-css-files	code	4
-classes	diagram	6
-used-classes	diagram	5
-uses	diagram	7
-css-files	diagram	5
-classes	tabs	31
-used-classes	tabs	21
-uses	tabs	25
-css-files	tabs	19
-classes	accordion	7
-used-classes	accordion	3
-uses	accordion	8
-css-files	accordion	5
-classes	callout	39
-used-classes	callout	15
-uses	callout	49
-css-files	callout	21
-classes	ctaRow	22
-used-classes	ctaRow	10
-uses	ctaRow	15
-css-files	ctaRow	21
-classes	sectionHead	11
-used-classes	sectionHead	9
-uses	sectionHead	17
-css-files	sectionHead	16
-classes	breadcrumb	13
-used-classes	breadcrumb	11
-uses	breadcrumb	21
-css-files	breadcrumb	17
-classes	nextLinks	27
-used-classes	nextLinks	23
-uses	nextLinks	40
-css-files	nextLinks	18
-classes	field	42
-used-classes	field	23
-uses	field	40
-css-files	field	23
-classes	toggle	12
-used-classes	toggle	6
-uses	toggle	9
-css-files	toggle	9
+classes	hero	28
+used-classes	hero	6
+uses	hero	7
+css-files	hero	19
+classes	eyebrow	42
+used-classes	eyebrow	23
+uses	eyebrow	38
+css-files	eyebrow	25
+classes	pill	17
+used-classes	pill	10
+uses	pill	12
+css-files	pill	9
+classes	button	23
+used-classes	button	4
+uses	button	5
+css-files	button	18
+classes	card	29
+used-classes	card	7
+uses	card	9
+css-files	card	15
+classes	stat	8
+used-classes	stat	6
+uses	stat	7
+css-files	stat	7
+classes	step	20
+used-classes	step	4
+uses	step	4
+css-files	step	14
+classes	table	0
+used-classes	table	0
+uses	table	0
+css-files	table	0
+classes	code	3
+used-classes	code	1
+uses	code	1
+css-files	code	2
+classes	diagram	3
+used-classes	diagram	2
+uses	diagram	2
+css-files	diagram	3
+classes	tabs	9
+used-classes	tabs	5
+uses	tabs	7
+css-files	tabs	11
+classes	accordion	2
+used-classes	accordion	0
+uses	accordion	0
+css-files	accordion	1
+classes	callout	23
+used-classes	callout	5
+uses	callout	9
+css-files	callout	10
+classes	ctaRow	13
+used-classes	ctaRow	4
+uses	ctaRow	6
+css-files	ctaRow	13
+classes	sectionHead	6
+used-classes	sectionHead	3
+uses	sectionHead	6
+css-files	sectionHead	10
+classes	breadcrumb	9
+used-classes	breadcrumb	8
+uses	breadcrumb	13
+css-files	breadcrumb	9
+classes	nextLinks	14
+used-classes	nextLinks	7
+uses	nextLinks	8
+css-files	nextLinks	13
+classes	field	38
+used-classes	field	19
+uses	field	35
+css-files	field	17
+classes	toggle	9
+used-classes	toggle	3
+uses	toggle	5
+css-files	toggle	5
 classes	toast	1
 used-classes	toast	0
 uses	toast	0
@@ -101,32 +101,34 @@ classes	modal	9
 used-classes	modal	3
 uses	modal	9
 css-files	modal	3
-classes	empty	6
-used-classes	empty	4
-uses	empty	12
-css-files	empty	5
-signatures	hero	40
-signatures	eyebrow	58
-signatures	pill	14
+classes	empty	5
+used-classes	empty	3
+uses	empty	6
+css-files	empty	4
+signatures	hero	22
+signatures	eyebrow	35
+signatures	pill	6
 signatures	button	-
-signatures	card	29
-signatures	stat	21
-signatures	step	25
-signatures	table	4
+signatures	card	21
+signatures	stat	8
+signatures	step	7
+signatures	table	0
 signatures	code	-
 signatures	diagram	-
-signatures	tabs	34
+signatures	tabs	7
 signatures	accordion	-
-signatures	callout	22
+signatures	callout	13
 signatures	ctaRow	-
-signatures	sectionHead	11
-signatures	breadcrumb	16
-signatures	nextLinks	24
+signatures	sectionHead	3
+signatures	breadcrumb	7
+signatures	nextLinks	15
 signatures	field	-
 signatures	toggle	-
 signatures	toast	-
 signatures	modal	-
 signatures	empty	-
-uppercase-rules	css	117
-px-radius-values	css	17
-px-font-sizes	css	66
+uppercase-rules	css	77
+ark-overrides	css	1
+ark-override-files	css	1
+px-radius-values	css	15
+px-font-sizes	css	57

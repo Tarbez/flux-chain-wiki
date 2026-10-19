@@ -86,11 +86,23 @@ async function main() {
       await page.close();
     }
 
-    /* /about P0: the ending is visible -- the element at the closing heading's centre is the heading */
+    /* /about P0: the ending is visible -- the element at the closing heading's centre is the heading.
+       Since 2026-10-19 (Ark blocks, js/pages/about.js) the ending's source boundary is a callout in
+       sight in every view, and its closing line heads the pager in the Evidence & verification view:
+       both are hit-tested. */
     {
       const page = await open(desk, base, '/about');
+      const boundary = await page.evaluate(() => {
+        const h = document.querySelector('#about-boundary [data-ark-part="alert-title"]');
+        if (!h) return 'no boundary callout';
+        h.scrollIntoView({ block: 'center' });
+        const r = h.getBoundingClientRect(), at = document.elementFromPoint(r.left + Math.min(40, r.width / 2), r.top + r.height / 2);
+        return at && (at === h || h.contains(at)) ? 'visible' : 'covered by ' + (at ? at.className || at.tagName : 'nothing');
+      });
+      check(boundary === 'visible', `/about: its source boundary is visible (${boundary})`);
+      await page.evaluate(() => [...document.querySelectorAll('#about-views > [data-ark-part="tabs-list"] [role="tab"]')].pop().click());
       const hit = await page.evaluate(() => {
-        const h = document.querySelector('[data-ark-page="about"] .about-closing h2');
+        const h = document.querySelector('#about-views [data-ark-part="pager-related"] > p');
         if (!h) return 'no closing heading';
         h.scrollIntoView({ block: 'center' });
         const r = h.getBoundingClientRect(), at = document.elementFromPoint(r.left + Math.min(40, r.width / 2), r.top + r.height / 2);

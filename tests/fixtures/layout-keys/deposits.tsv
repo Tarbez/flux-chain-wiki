@@ -1,0 +1,26 @@
+# key	tag	text -- layout keys of /deposits before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	DESIGN PREVIEW / NOT LIVEPreview a deposit before any funds move.A local-only layout study for a future FXN deposit. Enter an example amount, inspect the propos
+page:/div:1	div	DESIGN PREVIEW / NOT LIVEPreview a deposit before any funds move.A local-only layout study for a future FXN deposit. Enter an example amount, inspect the propos
+page:/div:1/header:1	header	DESIGN PREVIEW / NOT LIVEPreview a deposit before any funds move.A local-only layout study for a future FXN deposit. Enter an example amount, inspect the propos
+page:/div:1/header:1/p:1	p	DESIGN PREVIEW / NOT LIVE
+id:deposits-preview-title	h1	Preview a deposit before any funds move.
+page:/div:1/header:1/p:2	p	A local-only layout study for a future FXN deposit. Enter an example amount, inspect the proposed intent, then return to edit it. There is no submit action.
+page:/div:1/header:1/p:3	p	Design mock only — no wallet, balance, deposit, transfer, or ledger is connected.
+page:/div:1/form:1	form	Example FXN amountIllustrative purposeReserve for future operationFund a service agreementHold for reviewCredits are identity-bound and non-transferable. They a
+page:/div:1/form:1/label:1	label	Example FXN amount
+page:/div:1/form:1/label:2	label	Illustrative purposeReserve for future operationFund a service agreementHold for review
+page:/div:1/form:1/p:1	p	Credits are identity-bound and non-transferable. They are not deposited, sent, or converted in this preview.
+page:/div:1/form:1/button:1	button	Preview draft
+page:/div:1/form:1/button:1/svg:1	svg	
+page:/div:1/form:1/button:1/svg:1/path:1	path	
+page:/div:1/form:1/button:1/svg:1/path:2	path	
+page:/div:1/section:1	section	02 / LOCAL DRAFTThis is only a preview.No wallet connection, signature, transaction, or network record was created.← Edit draft
+page:/div:1/section:1/p:1	p	02 / LOCAL DRAFT
+page:/div:1/section:1/h2:1	h2	This is only a preview.
+page:/div:1/section:1/p:2	p	
+page:/div:1/section:1/dl:1	dl	
+page:/div:1/section:1/p:3	p	No wallet connection, signature, transaction, or network record was created.
+page:/div:1/section:1/button:1	button	← Edit draft
+page:/div:1/nav:1	nav	Return to treasury preview →
+page:/div:1/nav:1/a:1	a	Return to treasury preview →
+page:/div:1/div:1	div	

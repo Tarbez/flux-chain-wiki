@@ -10,61 +10,29 @@
 :where(body) { font-family:var(--font-sans, system-ui, sans-serif); }
 :where(button, input, select, textarea) { font:inherit; }
 .hero-alive { --page-width:1080px; --page-gutter:clamp(20px,4cqw,56px); --page-top:clamp(32px,6cqh,64px); }
-#scene .learning-page {
- inset:84px 0 72px; width:calc(100% - 2 * clamp(16px,3cqw,48px)); max-width:var(--page-width); margin-inline:auto;
- box-sizing:border-box; border:0; border-radius:0;
- background:transparent;
- backdrop-filter:none; -webkit-backdrop-filter:none;
- box-shadow:none;
-}
-#scene .learning-page :is(.expansion,.article-body,.article-playground) { background:transparent; }
-#scene .learning-page .lab { background:hsl(var(--raised,140 10% 12%) / .3); }
-
-.learning-index,.concept-content,.article-header,.experiments-page .experiment-page-intro {
+/* The notes index and the notes (/learnings, /learnings/<slug>) are pages of Ark blocks since
+   2026-10-19 (W3-LEARN): their frame is css/block-page.css, so the learning-page / article-* rules
+   that framed the hand-built reader are gone. */
+.concept-content,.experiments-page .experiment-page-intro {
   box-sizing:border-box; width:100%; max-width:var(--page-width); margin-inline:auto;
   padding:var(--page-top) var(--page-gutter) 40px;
 }
-.learning-heading,.concept-content h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; font-weight:300; }
-.learning-intro,.concept-deck { max-width:40em; font:300 14px/1.75 var(--ark-font); color:hsl(var(--text-muted)); margin:0 0 36px; }
-.learning-eyebrow { margin-bottom:18px; }
+.concept-content h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; font-weight:300; }
+.concept-deck { max-width:40em; font:300 14px/1.75 var(--ark-font); color:hsl(var(--text-muted)); margin:0 0 36px; }
 .concept-content { max-width:var(--page-width); }
 .concept-content h1 { margin:0 0 18px; max-width:16em; }
-.concept-principles { max-width:680px; }
-.concept-principles section { display:grid; grid-template-columns:24px 1fr; gap:20px; padding:20px 0; border-top:1px solid hsl(var(--border-subtle)); }
-.concept-principles section > span { font:400 10px/1.5 var(--ark-font); color:hsl(var(--text-faint)); padding-top:4px; }
-.concept-principles h2 { margin:0 0 8px; font:300 20px/1.3 var(--ark-font); letter-spacing:-.02em; }
-.concept-principles p { max-width:40em; margin:0; font:400 16px/1.65 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
+
 .concept-links { display:flex; flex-wrap:wrap; gap:0 26px; margin:14px 0 0; }
-.concept-links > .article-back { margin:0; }
 .cta-arrow { display:inline-block; margin-left:.3em; transition:transform 220ms cubic-bezier(.2,.7,.2,1); }
-:is(.article-back:hover,.concept-principles section:hover) .cta-arrow, .article-back:focus-visible .cta-arrow { transform:translate(2px,-2px); }
-.article-back { transition:color 200ms ease; }
-.article-back:hover { color:hsl(var(--text-strong)); }
 /* Compact, living principle rows: number, title and link share one line; a line draws in on hover. */
 .concept-page .concept-content { padding-bottom:24px; }
-.concept-page .learning-eyebrow { margin-bottom:14px; }
 .concept-page .concept-content h1 { margin-bottom:14px; }
 .concept-page .concept-deck { margin-bottom:22px; }
-.concept-page .concept-principles section { position:relative; isolation:isolate; grid-template-columns:24px 1fr auto; align-items:center; gap:14px; padding:14px 0; }
-.concept-page .concept-principles section > span { padding-top:0; transition:color 220ms ease; }
-.concept-page .concept-principles h2 { margin:0; font-size:19px; transition:transform 260ms cubic-bezier(.2,.7,.2,1),color 220ms ease; }
-.concept-page .concept-principles .article-back { margin:0; padding:0; }
-.concept-page .concept-principles .article-back::after { content:""; position:absolute; inset:0; }
-.concept-page .concept-principles section::before { content:""; position:absolute; top:-1px; left:0; height:1px; width:0; background:hsl(var(--primary)); transition:width 380ms cubic-bezier(.2,.7,.2,1); }
-.concept-page .concept-principles section::after { content:""; position:absolute; inset:0; z-index:-1; background:hsl(var(--surface) / .6); opacity:0; transition:opacity 260ms ease; }
-.concept-page .concept-principles section:is(:hover,:focus-within)::before { width:100%; }
-.concept-page .concept-principles section:is(:hover,:focus-within)::after { opacity:1; }
-.concept-page .concept-principles section:is(:hover,:focus-within) h2 { transform:translateX(5px); color:hsl(var(--text-strong)); }
-.concept-page .concept-principles section:is(:hover,:focus-within) > span { color:hsl(var(--reference)); }
-.concept-page .concept-principles .article-back { color:hsl(var(--text)); }
-.concept-page .concept-principles section:is(:hover,:focus-within) .article-back { color:hsl(var(--text-strong)); }
+
 /* Detail pages of the theory reuse the same rows, with a short paragraph and an onward link. */
-.theory-page .concept-principles section { padding:15px 0; gap:16px; }
-.theory-page .concept-principles h2 { margin:0 0 5px; font-size:18px; }
+
 .theory-footer { display:flex; flex-wrap:wrap; align-items:center; gap:6px 28px; margin-top:16px; }
-.theory-footer .article-back { margin:0; padding:6px 0; }
-.theory-page .theory-cta { color:hsl(var(--reference)); font-size:10px; }
-.theory-page .theory-cta:hover { color:hsl(var(--text-strong)); }
+
 .content-layer-path { display:flex; flex-wrap:wrap; gap:7px 18px; max-width:680px; margin:0 0 26px; }
 .content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 9px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
 .content-layer-path a:hover,.content-layer-path a:focus-visible,.content-layer-path [aria-current="page"] { color:hsl(var(--text-strong)); }
@@ -119,38 +87,18 @@
 #scene .content-layer-path > [aria-current="page"] { color:hsl(var(--text-muted)); }
 #scene .content-layer-path > a { transition:color 160ms ease,background-color 160ms ease; }
 #scene .content-layer-path > a:hover,#scene .content-layer-path > a:focus-visible { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
-.content-layer { max-width:680px; margin-top:16px; border-top:1px solid hsl(var(--border-subtle)); border-bottom:1px solid hsl(var(--border-subtle)); }
-.content-layer + .content-layer { margin-top:-1px; }
-.content-layer > summary { padding:16px 0; color:hsl(var(--text-strong)); cursor:pointer; font:600 10px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
-.content-layer > summary::marker { color:hsl(var(--primary)); }
-.content-layer[open] > summary { border-bottom:1px solid hsl(var(--border-subtle)); }
-.content-layer .concept-principles { padding-bottom:4px; }
-.mechanism-status-summary { max-width:680px; margin-top:22px; padding:16px; border:1px solid hsl(var(--border-default)); background:hsl(var(--surface) / .72); }
-.mechanism-status-summary h2,.content-layer-reference h2 {
- margin:0 0 7px; color:hsl(var(--primary));
- font:600 9px/1.4 var(--font-mono,ui-monospace,monospace); text-transform:uppercase;
-}
-.mechanism-status-summary p,.content-layer-reference p { margin:0; color:hsl(var(--text-muted)); font:400 16px/1.6 "Albert Sans",sans-serif; }
-.content-layer-reference section { padding:16px 0; }
-.content-layer-reference .theory-evidence-link { display:inline-block; margin:0 0 16px; }
-.theory-evidence-link { color:hsl(var(--text-strong)); }
+
 @keyframes concept-rise { from { opacity:0; transform:translateY(8px); } }
-:is(.concept-page,.theory-page) :is(.learning-eyebrow,.learning-heading,.concept-deck,.concept-principles section,.concept-links,.theory-footer) { animation:concept-rise 520ms cubic-bezier(.2,.7,.2,1) both; }
-:is(.concept-page,.theory-page) .learning-heading { animation-delay:60ms; }
+:is(.concept-page,.theory-page) :is(.concept-deck,.concept-links,.theory-footer) { animation:concept-rise 520ms cubic-bezier(.2,.7,.2,1) both; }
 :is(.concept-page,.theory-page) .concept-deck { animation-delay:120ms; }
-:is(.concept-page,.theory-page) .concept-principles section:nth-child(1) { animation-delay:200ms; }
-:is(.concept-page,.theory-page) .concept-principles section:nth-child(2) { animation-delay:270ms; }
-:is(.concept-page,.theory-page) .concept-principles section:nth-child(3) { animation-delay:340ms; }
-:is(.concept-page,.theory-page) .concept-principles section:nth-child(4) { animation-delay:410ms; }
-:is(.concept-page,.theory-page) .concept-principles section:nth-child(5) { animation-delay:480ms; }
+
 :is(.concept-page,.theory-page) :is(.concept-links,.theory-footer) { animation-delay:560ms; }
 @media(prefers-reduced-motion:reduce) {
  :is(.concept-page,.theory-page) * { animation:none !important; }
- .cta-arrow,.concept-page .concept-principles :is(h2,section::before,section::after) { transition:none; }
+ .cta-arrow{ transition:none; }
 }
 @media(max-width:480px) {
- .concept-page .concept-principles section { grid-template-columns:24px 1fr; gap:4px 14px; }
- .concept-page .concept-principles .article-back { grid-column:2; }
+
  #scene .content-layer-path > :is(a,span) { padding-inline:9px; }
 }
 @media(max-width:620px) {
@@ -162,7 +110,6 @@
 .experiments-page .experiment-page-intro { min-height:calc(85cqh - 150px); }
 
 .experiments-page .expansion > .section { max-width:var(--page-width); margin-inline:auto; padding:40px var(--page-gutter); }
-.article-body { gap:36px; padding-inline:var(--page-gutter); background:transparent; }
 .hero-atmosphere { opacity:.72; filter:blur(12px); }
 .hero-alive { --mesh-opacity:.18; --mesh-blur:1.6px; }
 .hero-alive[data-page="zero"] { --mesh-opacity:.22; --mesh-blur:1.35px; }
@@ -170,19 +117,12 @@
 .hero-alive[data-page^="article/"] { --mesh-opacity:.24; --mesh-blur:1.2px; }
 .hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"] { filter:blur(2px); opacity:.5; }
 @media(max-width:760px) {
- #scene .learning-page { top:76px; width:calc(100% - 32px); border-radius:0; }
  .concept-content { max-width:100%; }
- .concept-principles section { gap:12px; padding:18px 0; }
- .concept-principles h2 { font-size:19px; }
+
  .experiments-page .experiment-page-intro { min-height:calc(80cqh - 150px); }
- .article-body { gap:26px; }
 }
 
 .experiments-page .hero-experiment-copy h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; }
-/* Every routed page is transparent; the shared atmosphere and mesh remain visible. */
-#scene .learning-page :is(.experiment-page-intro,.article-header,.concept-content,.learning-index) {
- background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:none;
-}
 /* The experiment intro and lab are separate routes, not a stacked document. */
 .experiments-page .experiment-page-intro { min-height:0; height:100%; }
 .experiments-page .experiment-mesh-anchor { top:10%; right:0; left:auto; width:52%; height:75%; }
@@ -219,25 +159,17 @@
  .concept-iceberg { top:0; right:10%; width:80%; height:310px; }
 }
 
-/* Deploy: real, copyable commands. Flat monospace panels, no syntax glow. */
-.deploy-content { max-width:720px; }
-.deploy-steps { display:flex; flex-direction:column; gap:0; border-top:1px solid hsl(var(--border-subtle)); margin-top:8px; }
-.deploy-step { display:grid; grid-template-columns:28px 1fr; gap:18px; padding:26px 0; border-bottom:1px solid hsl(var(--border-subtle)); }
-.deploy-step-num { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border:1px solid hsl(var(--border-default)); border-radius:50%; font:500 10px/1 var(--ark-font); color:hsl(var(--text-muted)); }
-.deploy-step-body h2 { margin:0 0 8px; font:300 19px/1.3 var(--ark-font); letter-spacing:-.02em; color:hsl(var(--text-strong)); }
-.deploy-step-body p { margin:0 0 14px; font:300 13px/1.7 var(--ark-font); color:hsl(var(--text-muted)); max-width:44em; }
-.deploy-command { position:relative; margin:0; padding:30px 16px 16px; background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
-.deploy-command::before { content:"RUN"; position:absolute; top:10px; left:16px; font:600 8px/1 var(--ark-font); letter-spacing:.24em; color:hsl(var(--text-faint)); }
-.deploy-command code { font:400 12px/1.5 var(--ark-font-mono, ui-monospace, "SF Mono", Menlo, monospace); color:hsl(var(--text)); white-space:pre; }
+/* Deploy (js/pages/deploy.js, a page of Ark blocks since 2026-10-19, W3-GUIDE): only its command
+   card -- the figure of each step -- is the page's own. Real, copyable commands; a flat monospace
+   panel, no syntax glow; labels at 12px or more. */
+.deploy-command { position:relative; margin:0; padding:34px 16px 16px; background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
+.deploy-command::before { content:"RUN"; position:absolute; top:12px; left:16px; font:600 12px/1 var(--font-mono,monospace); letter-spacing:.24em; color:hsl(var(--text-muted)); }
+.deploy-command code { font:400 13px/1.5 var(--font-mono,monospace); color:hsl(var(--text)); white-space:pre; }
 .deploy-copy {
- position:absolute; top:8px; right:10px; min-height:22px; padding:2px 7px;
+ position:absolute; top:6px; right:10px; min-width:64px; min-height:32px; padding:2px 10px;
  border:1px solid hsl(var(--border-default)); border-radius:5px;
  background:transparent; color:hsl(var(--text-muted)); cursor:pointer;
- font:600 8px/1 var(--ark-font-mono,ui-monospace,monospace); text-transform:uppercase;
+ font:600 12px/1 var(--font-mono,monospace); text-transform:uppercase;
 }
 .deploy-copy:hover,.deploy-copy:focus-visible { border-color:hsl(var(--reference)); color:hsl(var(--text-strong)); }
-.deploy-expected { margin:9px 0 0 !important; font-size:12px !important; color:hsl(var(--text-faint)) !important; }
-.deploy-caveat { margin:28px 0 0; padding:14px 16px; border:1px solid hsl(var(--border-default)); border-radius:4px; background:hsl(var(--surface) / .5); font:400 16px/1.6 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
-@media(max-width:760px) {
- .deploy-step { grid-template-columns:1fr; gap:8px; }
-}
+.deploy-copy-feedback { display:block; min-height:1.5em; margin-top:8px; font:400 13px/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }

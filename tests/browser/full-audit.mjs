@@ -710,8 +710,9 @@ await surface('toolbar', 'component instance: base sections + Component instance
   const { page, app, pv } = await openEditor(opened);
   await gotoRoute(app, pv, '/download');
   await app.click('#tabLib');
-  await app.locator('#libPane select.ctl').first().selectOption('RBLOCK_TEXT_V1');
-  await app.locator('#libPane input[data-prop="heading"]').fill('Audit block');
+  await app.locator('#libPane .lib-block[data-resolver="RBLOCK_TEXT_V1"] button', { hasText: 'Customize' }).click();
+  await app.locator('#libPane .lib-new input[aria-label="New component name"]').fill('Text block');
+  await app.locator('#libPane .lib-new [data-prop="heading"]').fill('Audit block');
   await app.locator('#libPane button', { hasText: 'Create block' }).click();
   const row = app.locator('#libPane .myrow', { hasText: 'Text block' }).first();
   await until(async () => (await row.count()) > 0, 'Create block did not list the new block');
@@ -725,7 +726,7 @@ await surface('toolbar', 'component instance: base sections + Component instance
   const sections = await until(async () => { const s = await toolbarSections(app); return s.includes('Component instance') && s; }, 'the instance\'s toolbar has no Component instance section');
   const base = sections.filter((s) => s !== 'Component instance');
   check([TEXT, CONTAINER, IMAGE].some((t) => JSON.stringify(t) === JSON.stringify(base)), 'the instance\'s other sections are not one taxonomy: ' + sections.join(', '));
-  const heading = (await openToolbarSection(app, 'Component instance')).locator('input[aria-label="heading"]');
+  const heading = (await openToolbarSection(app, 'Component instance')).locator('input[data-prop="heading"]');
   await setValue(heading, 'Audit override');
   await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Audit override')), 'the override did not reach the preview');
   await saveCanvas(app);
