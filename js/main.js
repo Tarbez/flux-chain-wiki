@@ -1208,6 +1208,14 @@
       if (element.closest('[data-ark-state-group]') || element.querySelector('[data-ark-state-group]')) return 'select content outside a state group';
       if (element.namespaceURI === 'http://www.w3.org/2000/svg' && element.tagName.toLowerCase() !== 'svg') return 'select the whole illustration';
     }
+    /* One place to stand in for: the instance takes the selection's place, so the layers must share a
+       parent. Across two containers (a page title in its hero and a paragraph in a tab) there is no
+       single place -- the instance landed after the last one and the hero silently lost its title.
+       Owner-facing choice (2026-10-20): refuse and say how, never move content between containers. */
+    if (elements.length > 1) {
+      var parent = elements[0].parentNode;
+      for (var j = 1; j < elements.length; j++) if (elements[j].parentNode !== parent) return 'select layers that sit side by side in one container (or select that container)';
+    }
     return '';
   }
   /* "Make into component": the selection becomes a reusable component -- its real markup

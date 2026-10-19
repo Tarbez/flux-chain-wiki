@@ -155,3 +155,13 @@ Still open for the agents at 02:00:
     converted js/pages/article.js failing to mount from a blank draft (e.g. empty `relevance` as the
     callout's required body, empty reviewed/evidence) — probe the preview console on that route.
   - studio-flows makecomp + points (see above).
+
+## Resume point 3 (2026-10-20 01:50) — committed af33dc6 (Waves 2–3), unit 198/198, browser 15/17
+Product decision made (coordinator): "Make into component" REFUSES a selection whose layers don't share a
+parent ("select layers that sit side by side in one container (or select that container)") — js/main.js
+cmsComponentRefusal; tests/cms-component-one-place.cjs. Never moves content between containers.
+For the editor agent: studio-flows makecomp must now select a same-parent heading + paragraph pair. On
+/download the intro (page:/header:1/p:1) sits beside the steps OL in the tab panel, not beside the title;
+an Ark hero's h1 and lede are siblings (/learnings: h1 page:/div:1/h1:1 + lede DIV page:/div:1/p:2 — note
+the lede is a DIV, so derived prop names change). Add a step asserting the cross-container refusal and its
+words. Also: studio-flows points 0px fixture; inline-content race.
