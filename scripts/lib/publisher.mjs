@@ -4,41 +4,50 @@
    Three steps, and the second one is not this file's:
 
      prepare   encode the site as one .flx archive, add it to the miner (that
-               yields the CID), and draft the name record that would point the
-               name at it. Nothing is signed and nothing is named yet.
-     (sign)    the OWNER signs the drafted record's signing message. That
+               yields the CID), and draft the public marker for it. Nothing is
+               signed yet.
+     (sign)    the OWNER signs the drafted marker's signing message. That
                happens in the admin page, with a key that never leaves the
                browser. This file never receives, derives or stores a private
                key: it is a mouth, not an owner.
-     publish   check the signed record, confirm the bytes it names really are
-               retrievable and really are a site, hand the record to the
-               miner's `names/*` registry, and read it back.
+     publish   check the signed marker, confirm the bytes it names really are
+               retrievable and really are a site, and mark them public. That
+               is a RELEASE: an address anyone can read.
 
-   The record's signing message and its verification, and the public-marker
-   protocol (a separate, owner-signed, revocable record that lets the
-   published archive be read without a credential at a miner's
-   /explorer/v1/content/<cid>), both come from @flux/bundle-deploy, a small
-   sibling package built specifically so this admin does not need to depend
-   on ark-miner-cli's heavy tree (GUN, libp2p, an IPFS-style daemon) just to
-   draft and verify these two signed records. That package's own
-   name-record.js/public-marker.js are themselves vendored, cited copies of
-   ark-miner-cli/src/state/name-record-validators.js and
-   src/storage/public-markers.js -- see bundle-deploy/README.md. Like
-   ark-miner-desktop importing the daemon by sibling path, this makes
-   flux-chain/ (defxn) and bundle-deploy/ neighbours in one workspace.
+   It does not point the name at the release. The dense-wire name chain
+   (KDOMCLAIM/KDOMREC) is the only system that owns names (owner decision,
+   2026-10-19). This file used to hand a signed record to the miner's
+   `names/*` registry (POST /debug/name-record/publish) -- a second name
+   authority, and a direct miner name write bundle-deploy itself forbids --
+   and that path is gone: a publish that carries a name record is refused
+   with NameBindingRefusal below, whose remedy is to bind the release CID
+   at domains.defxn.com, which signs the dense-wire record update.
+
+   The name's CURRENT record is still read (status, authorize, fetchSite,
+   and the "what would this version remove" diff) from the miner's
+   /debug/name-record. Those are readers, retired in a later batch.
+
+   The public-marker protocol (a separate, owner-signed, revocable record
+   that lets the published archive be read without a credential at a
+   miner's /explorer/v1/content/<cid>) comes from @flux/bundle-deploy, a
+   small sibling package built specifically so this admin does not need to
+   depend on ark-miner-cli's heavy tree (GUN, libp2p, an IPFS-style daemon)
+   just to draft and verify a signed record. Like ark-miner-desktop
+   importing the daemon by sibling path, this makes flux-chain/ (defxn) and
+   bundle-deploy/ neighbours in one workspace.
    ===================================================================== */
 import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import { buildNameRecordSigningMessage, canonicalizeNameRecord, normalizeName, verifyNameRecord }
-  from '../../../bundle-deploy/src/name-record.js';
+import { normalizeName } from '../../../bundle-deploy/src/name-record.js';
 import { buildMarkerFields, publicMarkerSigningMessage, submitSignedMarker, verifyMarkerSignature }
   from '../../../bundle-deploy/src/public-marker.js';
 import { decodeSite, encodeSite, siteProblems } from './site-bundle.mjs';
 
 export const DEFAULT_NAME = 'defxn.fxn';
 const MARKER_CONTENT_TYPE = 'application/octet-stream';
+export const NAME_AUTHORITY_URL = 'https://domains.defxn.com';
 
 /* A refusal names the failure, what is missing, and what would fix it. */
 export class PublishRefusal extends Error {
@@ -46,6 +55,29 @@ export class PublishRefusal extends Error {
     super(`${failure} Missing: ${missing} To fix: ${remedy}`);
     this.name = 'PublishRefusal';
     this.failure = failure; this.missing = missing; this.remedy = remedy; this.status = status;
+  }
+}
+
+/* The one sentence this repo says when asked to point a name at a release. Written once here; the
+   host, the admin page and every test read it from here (prepare/publish return its parts as
+   `nameBinding`, so the page can say it before anything is signed). Same wording as
+   bundle-deploy/src/name-binding-refusal.js, which cannot be imported yet without making this repo
+   depend on an unmerged bundle-deploy branch. */
+export function nameBindingParts(name) {
+  const subject = typeof name === 'string' && name.trim() ? name.trim() : 'a name';
+  return {
+    failure: `This publisher cannot point ${subject} at a release: names are owned only by the dense-wire name chain, and this publisher is not a name authority.`,
+    missing: `an owner-signed dense-wire record update that binds the release CID to ${subject}.`,
+    remedy: `publish the release without a name, then bind its CID to ${subject} at ${NAME_AUTHORITY_URL}, which signs the dense-wire record update.`,
+  };
+}
+
+export class NameBindingRefusal extends PublishRefusal {
+  constructor(name) {
+    const { failure, missing, remedy } = nameBindingParts(name);
+    super(failure, missing, remedy, 409);
+    this.name = 'NameBindingRefusal';
+    this.code = 'NAME_BINDING_IS_DENSE_WIRE';
   }
 }
 
@@ -249,6 +281,11 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     return { firstClaim: !current };
   }
 
+  /* Drafts a RELEASE of `site`: the archive goes on the miner, and the owner-signed public marker for its CID is
+     drafted. No name record is drafted: pointing the name at the release is a dense-wire record update made from
+     domains.defxn.com, and `nameBinding` says so before anything is signed. The name's current record is read only to
+     compare against (unchanged / removes); if it cannot be read, the comparison is unavailable (removes: null, which
+     the page treats as worth asking about) and the release still publishes, because a release needs no name. */
   async function prepare(site, ownerPublicKey) {
     if (typeof ownerPublicKey !== 'string' || Buffer.from(ownerPublicKey, 'base64').length !== 32) {
       throw new PublishRefusal('The owner public key is not an Ed25519 key.', 'a 32-byte base64 public key from the signed-in identity.', 'open the Mesh panel in admin.html and sign in with your recovery file (.auth.flx).');
@@ -256,16 +293,13 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     const bad = siteProblems(site, root);
     if (bad.length) throw new PublishRefusal(`The site is not publishable: ${bad.join('; ')}.`, 'valid manifests and articles.', 'fix what is listed in the admin page, then publish again.');
 
-    const current = await currentRecord();
-    if (current && current.ownerPublicKey !== ownerPublicKey) {
-      throw new PublishRefusal(`${normalized} is owned by another key (${current.ownerPublicKey}).`, 'a signature from that owner.',
-        'sign in with the identity that owns the name, or choose a different name. A name changes hands only by a transfer both keys sign.', 403);
-    }
+    let current = null; let compared = true;
+    try { current = await currentRecord(); } catch { compared = false; }
     const bytes = encodeSite(site, root);
     const cid = await add(bytes);
     const unchanged = current && targetCid(current) === cid;
     // What this version would take away from the one people can read now. A stale admin page must not delete content silently.
-    let removes = { manifests: [], articles: [], assets: [], secrets: [] };
+    let removes = compared ? { manifests: [], articles: [], assets: [], secrets: [] } : null;
     if (current && !unchanged) {
       try {
         const published = decodeSite(await cat(targetCid(current)));
@@ -277,27 +311,17 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
         };
       } catch { removes = null; }
     }
-    const previous = current ? Date.parse(current.updatedAt) : 0;
-    const updatedAt = new Date(Math.max(now().getTime(), previous + 1)).toISOString();
-    const record = { name: normalized, ownerPublicKey, version: current ? current.version + 1 : 1, updatedAt, targets: [{ type: 'ipfs_cid', value: cid }] };
-    // Derived by bundle-deploy's own builder, from the same fields the miner will verify.
-    const signingMessage = buildNameRecordSigningMessage({ ...record, proof: { alg: 'Ed25519', sig: 'x' } });
-    // The public marker: a separate, owner-signed record so the published archive is readable by strangers
-    // without a fleet credential, via GET /explorer/v1/content/<cid>. Drafted alongside the name record so the
-    // browser can review and sign both bytes in one pass. A site archive is binary, never an executable type.
-    const marker = buildMarkerFields({ cid, contentType: MARKER_CONTENT_TYPE, ownerPublicKey, now: Date.parse(updatedAt) });
+    // The public marker: an owner-signed record so the published archive is readable by strangers without a
+    // fleet credential, via GET /explorer/v1/content/<cid>. A site archive is binary, never an executable type.
+    const marker = buildMarkerFields({ cid, contentType: MARKER_CONTENT_TYPE, ownerPublicKey, now: now().getTime() });
     const markerSigningMessage = Buffer.from(publicMarkerSigningMessage(marker)).toString('utf8');
-    return { cid, byteLength: bytes.length, unchanged: !!unchanged, removes, currentVersion: current ? current.version : 0, record, signingMessage, marker, markerSigningMessage };
+    return { cid, byteLength: bytes.length, unchanged: !!unchanged, removes, currentVersion: current ? current.version : 0, marker, markerSigningMessage, nameBinding: { name: normalized, ...nameBindingParts(normalized) } };
   }
 
-  async function publish(signed, signedMarker) {
-    let canonical;
-    try { canonical = canonicalizeNameRecord(signed); }
-    catch (error) { throw new PublishRefusal(`The record is malformed: ${error.message}`, 'a record shaped as prepare drafted it, plus proof.', 'sign the record prepare returned without changing it.'); }
-    if (canonical.name !== normalized) throw new PublishRefusal(`The record is for ${canonical.name}, not ${normalized}.`, `a record for ${normalized}.`, 'publish from the admin page for this name.');
-    if (!verifyNameRecord(canonical)) throw new PublishRefusal('The signature does not verify against the record\'s owner key.', 'a valid Ed25519 signature over the signing message.', 'sign again with the owner key, over exactly the message prepare returned.', 403);
-    const cid = targetCid(canonical);
-    if (!cid) throw new PublishRefusal('The record names no archive.', 'an ipfs_cid target.', 'run prepare again.');
+  /* Publishes the RELEASE `marker` (prepare's marker plus the owner's `signature`). A `record` is the retired
+     name-publish shape and is refused, never ignored: dropping it silently would let the page say the name moved. */
+  async function publish({ marker: signedMarker, record } = {}) {
+    if (record !== undefined && record !== null) throw new NameBindingRefusal(normalized);
 
     if (!signedMarker || typeof signedMarker.signature !== 'string') {
       throw new PublishRefusal('No signed public marker was supplied.', 'a marker object with the owner\'s signature over markerSigningMessage.', 'sign prepare\'s markerSigningMessage and attach it as marker.signature, then publish again.');
@@ -306,30 +330,23 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
     if (!verifyMarkerSignature(markerFields, markerSignature)) {
       throw new PublishRefusal('The public marker signature does not verify against its owner key.', 'a valid Ed25519 signature over the marker signing message.', 'sign again with the owner key, over exactly prepare\'s markerSigningMessage.', 403);
     }
-    if (markerFields.cid !== cid) throw new PublishRefusal('The marker is for a different archive than the name record.', 'a marker for the same CID the record names.', 'run prepare again and sign both messages it returns.');
+    const cid = markerFields.cid;
 
-    // The name must never point at bytes that are missing or are not a site.
+    // Only a site is ever marked public through this admin: never bytes that are missing or are not a site.
     let archived;
     try { archived = decodeSite(await cat(cid)); }
     catch (error) {
       if (error instanceof PublishRefusal) throw error;
       throw new PublishRefusal(`${cid} is retrievable but is not a flux-chain site (${error.message}).`, 'a flux-chain-site/1 archive.', 'run prepare again with the site.');
     }
-    const response = await call('status', '/debug/name-record/publish', { method: 'POST', body: JSON.stringify({ record: canonical }), headers: { 'content-type': 'application/json' } });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok || !body.ok) throw new PublishRefusal(`The miner refused the record: ${body.error || response.status}.`, 'a record the names/* registry accepts.',
-      /advance exactly/.test(body.error || '') ? 'someone published since you prepared; prepare again to get the next version.' : 'read the reason above; version and updatedAt must advance, and the owner must match.', 409);
-    // The mesh write above already succeeded; the marker is a separate record (same two-phase split
-    // bundle-deploy's deploy.js uses) and a STALE (409) means this owner already marked this exact CID
-    // as of an equal-or-newer time, which for an unchanged, content-addressed object is success, not failure.
+    // A STALE (409) means this owner already marked this exact CID as of an equal-or-newer time, which for an
+    // unchanged, content-addressed object is success, not failure.
     const markerResult = await submitSignedMarker(markerFields, markerSignature, { markPublic });
-    const readBack = await currentRecord();
     return {
-      published: canonical.version, cid,
-      readBack: readBack ? { version: readBack.version, cid: targetCid(readBack) } : null,
-      confirmed: !!readBack && readBack.version === canonical.version && targetCid(readBack) === cid,
+      released: true, cid,
       manifests: archived.manifests.length, articles: archived.articles.length, assets: archived.assets.length, secrets: (archived.secrets || []).length,
       marker: markerResult.record,
+      nameBinding: { name: normalized, bound: false, ...nameBindingParts(normalized) },
     };
   }
 

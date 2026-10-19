@@ -13,6 +13,10 @@
    policy forbids network use, and (b) must not hold the miner's credential.
    The host holds that credential; it never holds a signing key. The signed-in
    identity's key lives in the browser and signs between /api/prepare and /api/publish.
+   /api/publish releases the archive (marks its CID public); it never points the name
+   at it -- names are bound on the dense-wire name chain from domains.defxn.com, and a
+   publish body carrying a name record is refused (scripts/lib/publisher.mjs
+   NameBindingRefusal).
    The local launcher opens editing without sign-in on direct loopback requests.
    Publishing requires a signed identity session. Protected hosts authenticate identity
    separately and verify maintainer permission against the signed mesh name record.
@@ -189,12 +193,13 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       }
       if (url.pathname === '/api/publish' && req.method === 'POST') {
         const body = JSON.parse(await readBody(req) || '{}');
-        if (body.record?.ownerPublicKey !== session.publicKeyB64) throw new SessionRefusal('This session belongs to a different identity than the record\'s owner.', 'the signed-in identity as owner.', 'sign in again, then publish.', 403);
         if (body.marker?.ownerPublicKey !== session.publicKeyB64) throw new SessionRefusal('This session belongs to a different identity than the public marker\'s owner.', 'the signed-in identity as owner.', 'sign in again, then publish.', 403);
-        const published = await publisher.publish(body.record, body.marker);
-        // The mesh write above already succeeded -- this is a SEPARATE question (does the public
-        // gateway agree?), so its result never changes whether /api/publish itself reports success.
-        // It fails closed (an explicit {ok:false, reason}), never silently, and never assumes success.
+        const published = await publisher.publish({ marker: body.marker, record: body.record });
+        // The release above already succeeded -- this is a SEPARATE question (does the public
+        // gateway already serve this CID for the name?), so its result never changes whether
+        // /api/publish itself reports success. Until the CID is bound to the name on dense-wire
+        // (domains.defxn.com) the honest answer is usually no. It fails closed (an explicit
+        // {ok:false, reason}), never silently, and never assumes success.
         let resolverCheck;
         try {
           resolverCheck = { ok: true, ...(await resolveCheck({ name: publisher.name, cid: published.cid, resolverBase })) };

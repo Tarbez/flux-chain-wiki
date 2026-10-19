@@ -494,9 +494,14 @@ two test suites (`npm test`, `npm run test:browser`) -- is in [docs/cms-architec
 ## Publishing to the mesh
 
 The whole copy of the site (every page manifest and every article) is one `.flx` archive kept in an
-ark-miner-cli node and named by a signed `names/*` record: `flux-chain.ark` points at the archive's CID.
-An edit is a new archive and a new record version; old versions stay retrievable. The site itself stays a
-static page reading local files, so it needs no network and its Content Security Policy is unchanged.
+ark-miner-cli node. Publishing is a **release**: the archive is pinned and marked public by an owner-signed
+marker at its own CID. Publishing does not point the name at it: names are owned only by the dense-wire name
+chain (owner decision, 2026-10-19), so the release CID is bound to the name at https://domains.defxn.com, which
+signs the dense-wire record update. The admin used to write a `names/*` record to the miner on every publish;
+that write was removed, and a publish carrying a name record is refused (`scripts/lib/publisher.mjs`
+`NameBindingRefusal`). An edit is a new archive at a new address; old releases stay retrievable. The site
+itself stays a static page reading local files, so it needs no network and its Content Security Policy is
+unchanged.
 
 The public `/bundle-deployer` page explains the required local FXN Bundle Deployer workflow.
 The CLI is planned and not yet released; no installation command, download or browser deployment
@@ -567,11 +572,14 @@ Open the page through the host (the address it prints, `http://127.0.0.1:3437/ad
   module it imports, run `node scripts/build-auth.cjs` (`tests/auth-bundle.cjs` fails while it is stale).
 - Publish needs everything saved, and asks before a version would remove a page or article that is
   published now (a page whose saves were only downloaded can be out of date). Publishing unchanged
-  content mints no new version.
+  content releases at the same address. The comparison is against what the name's current record points at;
+  when that cannot be read, the editor asks before publishing.
 - `scripts/lib/site-bundle.mjs` is the one place that knows how a site becomes an archive and back, and
   it loads this project's own validators and serializers rather than copying them.
-- The name record format and its verification are the miner's own (`ark-miner-cli/src/state/name-record-validators.js`),
-  imported by sibling path, so this directory needs `ark-miner-cli/` and `shared/flx-codec/` beside it.
+- The name's current record is still READ from the miner (`/debug/name-record`) for status, sign-in ownership
+  and the removal comparison; those readers move to dense-wire in a later batch. Its format is the miner's own
+  (`ark-miner-cli/src/state/name-record-validators.js`), so this directory needs `ark-miner-cli/` and
+  `shared/flx-codec/` beside it.
 - Measured on this content only: the archive is 63,061 bytes against 25,721 as JSON (about 2.5 times
   larger), because the shared `encodeArchive` wraps every string reference in a structure. That is not the
   `flx-learning` dense encoder the workspace's "47%" figure describes.

@@ -1,5 +1,5 @@
 /* =====================================================================
-   PUBLISH ROUND TRIP, END TO END: editor -> signed publish -> miner -> pull -> public page
+   PUBLISH ROUND TRIP, END TO END: editor -> signed release -> miner -> pull -> public page
    ---------------------------------------------------------------------
    Why this exists: Publish once carried 8 of the 13 drafts. Settings defaults,
    components, states, canvas transitions and element motion worked in the editor and
@@ -13,16 +13,18 @@
         what Publish would send right now: window.ArkAdminApp.site(), i.e. siteFromState();
      3. that payload is published through the REAL client (js/admin/publish.js run as the
         page runs it), signed by a real Ed25519 identity, through the REAL publish host
-        (createHost) and publisher (createPublisher), into a miner;
-     4. the published name is resolved and its archive pulled with the publisher's own
-        fetchSite() and written with writeProject() -- exactly `pull-site.mjs --write`;
+        (createHost) and publisher (createPublisher), into a miner, as a RELEASE: the archive
+        is marked public at its own CID and no name record is written (since 2026-10-19 the
+        dense-wire name chain owns names; binding the CID is done from domains.defxn.com);
+     4. the released archive is pulled BY ITS CID and decoded (decodeSite), then written with
+        writeProject() -- the name is not resolved, because publishing no longer moves it;
      5. the pulled copy is served and its PUBLIC page (no preview flag, fresh visitor) must
         render the state group with its component instance, and carry the canvas
         transition, the element motion and the settings default -- and a control copy
         that was never published must not, so the checks cannot pass vacuously.
 
-   The miner is an in-process stub of the five miner routes the publisher calls
-   (/status, /debug/name-record[/publish], /api/v0/add|cat|public-marker), storing
+   The miner is an in-process stub of the miner routes the publisher calls
+   (/status, /debug/name-record (read only), /api/v0/add|cat|public-marker), storing
    archives by their real BLAKE3 CID. It is NOT ark-miner-cli: replication, pinning and
    the public gateway (gateway/app.js, *.defxn.com) are not exercised here. For a real
    miner run tests/publish.e2e.test.mjs against one.
@@ -39,7 +41,7 @@ import { chromium } from 'playwright';
 import { SITE, copySite, startHost, appFrame, listen, until as untilFor, watchSignals, waitForRouteReady, nextFrames } from './harness.mjs';
 import { populatedDrafts, GROUP, BLOCK_TEXT } from './site-drafts-fixture.mjs';
 import { createPublisher } from '../../scripts/lib/publisher.mjs';
-import { readProject, writeProject, siteDrafts } from '../../scripts/lib/site-bundle.mjs';
+import { readProject, writeProject, siteDrafts, decodeSite } from '../../scripts/lib/site-bundle.mjs';
 import { cidForBytes } from '../../../../flx/flx-codec/src/blake3.js';
 import { createFluxRootHandle } from '../../../flux-auth/src/rootFromMnemonic.mjs';
 
@@ -62,24 +64,21 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 /* ---- the miner stub: the routes scripts/lib/publisher.mjs calls, nothing else ---- */
 function startMiner() {
-  const blobs = new Map(); let record = null;
+  const blobs = new Map(); const record = null; const nameWrites = [];
   const body = (req) => new Promise((resolve) => { const chunks = []; req.on('data', (c) => chunks.push(c)); req.on('end', () => resolve(Buffer.concat(chunks))); });
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
     const json = (status, value) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(value)); };
     if (url.pathname === '/status') return json(200, { network_id: 'stub' });
     if (url.pathname === '/debug/name-record' && req.method === 'GET') return json(200, { record });
-    if (url.pathname === '/debug/name-record/publish' && req.method === 'POST') {
-      const next = JSON.parse(await body(req)).record;
-      if (record && next.version !== record.version + 1) return json(409, { ok: false, error: 'version must advance exactly by one' });
-      record = next; return json(200, { ok: true });
-    }
+    /* the retired names/* write: counted, so the publish step can prove it never happens */
+    if (url.pathname === '/debug/name-record/publish') { nameWrites.push(req.method); return json(410, { ok: false, error: 'names are owned by the dense-wire name chain' }); }
     if (url.pathname === '/api/v0/add' && req.method === 'POST') { const bytes = new Uint8Array(await body(req)); const cid = cidForBytes(bytes); blobs.set(cid, bytes); return json(200, { cid }); }
     if (url.pathname === '/api/v0/cat') { const bytes = blobs.get(url.searchParams.get('arg')); if (!bytes) return json(404, { error: 'not found' }); res.writeHead(200, { 'content-type': 'application/octet-stream' }); return res.end(Buffer.from(bytes)); }
     if (url.pathname === '/api/v0/public-marker' && req.method === 'POST') { await body(req); return json(200, { ok: true }); }
     return json(404, { error: 'stub miner has no ' + url.pathname });
   });
-  return listen(server);   /* any free port: .port / .origin */
+  return listen(server).then((s) => Object.assign(s, { blobs, nameWrites }));   /* any free port: .port / .origin */
 }
 
 /* ---- the real admin client (js/admin/publish.js), signed in the way admin.html's gate does ---- */
@@ -187,16 +186,19 @@ try {
     permissions: async () => ({ authorized: true, source: 'publish-flows test' }), resolveCheck: async () => ({ skipped: 'publish-flows: no public gateway in this test' }) });
   servers.push(host);
 
-  const published = await step('publish it: real client signs, real host + publisher put one archive on the miner and name it', async () => {
+  const published = await step('publish it: real client signs, real host + publisher release one archive on the miner, and write no name', async () => {
     const client = await signedClient(host.origin);
     const result = await client.publishSite(payload);
-    check(result.published === 1 && result.confirmed, 'publish did not confirm version 1: ' + JSON.stringify(result));
+    check(result.released === true && result.cid, 'publish did not release the archive: ' + JSON.stringify(result));
+    check(result.nameBinding && result.nameBinding.bound === false && /domains\.defxn\.com/.test(result.nameBinding.remedy), 'the release did not say where to bind the name: ' + JSON.stringify(result.nameBinding));
+    check(miner.nameWrites.length === 0, 'publishing wrote to the retired names/* registry');
     return result;
   });
 
-  const pulled = await step('pull it back (fetchSite + writeProject = pull-site --write): every draft byte-identical to the payload', async () => {
-    const { cid, site } = await publisher.fetchSite();
-    check(cid === published.cid, 'the name resolves to ' + cid + ', not the published ' + published.cid);
+  const pulled = await step('pull it back by its CID (decodeSite + writeProject): every draft byte-identical to the payload', async () => {
+    const bytes = miner.blobs.get(published.cid);
+    check(bytes, 'the released CID ' + published.cid + ' is not on the miner');
+    const site = decodeSite(bytes, EDITOR);
     for (const key of Object.keys(payload)) check(same(site[key], payload[key]), `${key} came back from the mesh different from what the editor published`);
     return site;
   });

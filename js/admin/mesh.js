@@ -37,7 +37,7 @@
     box.appendChild(h('p', {}, h('strong', { text: 'Encrypted content: ' }),
       document.createTextNode('an item under Encrypted is published the same way — content-addressed, fetchable by anyone — but its body is AES-GCM ciphertext and the file key is only wrapped for the recipients you chose. Only someone holding a matching secret key can read it; everyone else fetches opaque bytes.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Signed, not secret: ' }),
-      document.createTextNode('the record pointing flux-chain.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
+      document.createTextNode('the public marker for that address is signed by your identity, so no one else can publish in its name. Publishing does not point the site’s name at the address: that is a record on the dense-wire name chain, bound from domains.defxn.com. The signature, the marker and that record are all public too.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Actually private: ' }),
       document.createTextNode('only your signing key, and only in this browser tab’s memory (js/admin/auth.js). It is never sent to the publish host, the miner, or the mesh, and is dropped on reload or sign-out. The sign-in gate protects who can edit and publish — it does not make the content itself confidential.')));
     box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
@@ -102,7 +102,7 @@
         rows.push(['Address (CID)', info.current.cid]);
         rows.push(['Owner key', info.current.ownerPublicKey]);
         rows.push(['Updated', info.current.updatedAt]);
-      } else rows.push(['Published', 'Not yet — Publish creates version 1.']);
+      } else rows.push(['Published', 'No name record yet. Publish releases the site at its own address; bind that address to the name at domains.defxn.com.']);
       fill(rows);
 
       if (!info.current) {
@@ -158,10 +158,15 @@
      an ARIA/focus-trap/busy-state primitive with no visual template, so the
      markup below mirrors ark-ui.flux-authorization-react.ts's exactly: a
      dismissible backdrop over a panel, this page's own "admin-auth-*" CSS. */
+  /* A publish is a RELEASE: the identity signs the public marker for the archive's address and
+     nothing else. The name is not repointed here -- names are owned only by the dense-wire name
+     chain, bound from domains.defxn.com -- and the dialog says so before anything is signed
+     (input.nameBinding: the host's failure/missing/remedy, scripts/lib/publisher.mjs). */
   function authorizePublish(input) {
     var who = gate.identity();
     if (!who) return Promise.resolve(false);
-    return authorizationDigest(input.signingMessage).then(function (digest) {
+    var binding = input.nameBinding || {};
+    return authorizationDigest(input.markerSigningMessage).then(function (digest) {
       return new Promise(function (resolve) {
         var titleId = 'authDialogTitle-' + Date.now(), descId = 'authDialogDesc-' + Date.now();
         var dialog = document.createElement('flux-authorization-dialog');
@@ -175,15 +180,15 @@
           requester: who.displayName || 'Signed-in identity',
           network: 'Local publish host',
           authority: who.publicKeyB64,
-          configuration: input.record.name || 'flux-chain.ark',
+          configuration: (binding.name ? binding.name + ' — ' : '') + 'release only; the name is not changed',
           scope: 'site.publish',
           action: 'flux.site.publish',
           manifestDigest: digest,
-          claimStack: 'primary authorize flux.site.publish for exact name record ' + digest + '\nconstraint owner ' + who.publicKeyB64 + '\nfailure reject altered, expired or cross-site bytes\ntrust zero',
-          manifest: input.record,
-          authorizationBytes: input.signingMessage,
-          actionPayloadBytes: input.signingMessage,
-          facts: [{ label: 'Version', value: String(input.record.version || 'next') }, { label: 'Signing profile', value: who.securityProfile === 'hybrid-pq' ? 'Hybrid identity available; names/* record remains Ed25519' : 'Ed25519 name record' }]
+          claimStack: 'primary authorize flux.site.publish for exact public marker ' + digest + '\nconstraint owner ' + who.publicKeyB64 + '\nfailure reject altered, expired or cross-site bytes\ntrust zero',
+          manifest: input.marker,
+          authorizationBytes: input.markerSigningMessage,
+          actionPayloadBytes: input.markerSigningMessage,
+          facts: [{ label: 'Address (CID)', value: String(input.marker.cid) }, { label: 'Signing profile', value: who.securityProfile === 'hybrid-pq' ? 'Hybrid identity available; the public marker remains Ed25519' : 'Ed25519 public marker' }]
         });
         var backdrop = h('div', { class: 'admin-auth-backdrop' });
         var panel = h('section', { class: 'admin-auth-panel' });
@@ -199,7 +204,8 @@
           var details = document.createElement('details'); details.appendChild(h('summary', { text: item.label }));
           var pre = document.createElement('pre'); pre.textContent = item.text; details.appendChild(pre); panel.appendChild(details);
         });
-        panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety + ' This publish action still signs the existing Ed25519 names/* record contract.' }));
+        panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety + ' This signs the public marker only; it does not point the name at this release.' }));
+        if (binding.remedy) panel.appendChild(h('p', { class: 'admin-auth-description', text: 'To point ' + (binding.name || 'the name') + ' at it afterwards: ' + binding.remedy }));
         var footer = h('footer', {}, h('button', { type: 'button', class: 'btn', text: 'Cancel' }), h('button', { type: 'button', class: 'btn primary', 'data-autofocus': true, text: 'Approve scopes & sign' })); panel.appendChild(footer);
         backdrop.appendChild(panel); dialog.appendChild(backdrop); document.body.appendChild(dialog);
         var cancelButton = footer.children[0], approveButton = footer.children[1], closed = false;
@@ -262,7 +268,7 @@
       var who = mesh.identity();
       var through = info.miner ? 'Publishing through ' + (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '') + '. ' : '';
       if (!info.reachable) line.textContent = (info.detail || 'The miner is not reachable.');
-      else if (!info.current) line.textContent = through + siteName(info) + ' is not published yet. Publish creates version 1.';
+      else if (!info.current) line.textContent = through + siteName(info) + ' has no name record yet. Publish releases the site at its own address; bind it to the name at domains.defxn.com.';
       else line.textContent = through + siteName(info) + ' is at version ' + info.current.version + ', address ' + short(info.current.cid) + ', updated ' + info.current.updatedAt + '.';
       owner.textContent = who ? 'Signed in' + (who.displayName ? ' as ' + who.displayName : '') + '. Key ' + who.publicKeyB64 : 'Not signed in.';
       var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'signed in') + ' · ' + short(who.publicKeyB64) : '';
@@ -294,10 +300,10 @@
       });
       if (result.cancelled) status('Not published. Reload this page to pick up the project files, or run node scripts/pull-site.mjs to bring in the published copy.', 'warn');
       else if (result.unchanged) status('Nothing new to publish: version ' + result.version + ' already holds this content.', 'ok');
-      else status('Published version ' + result.published + (result.confirmed ? ', confirmed by the miner reading it back.' : '. The miner has not read it back yet: refresh the Mesh panel.'), result.confirmed ? 'ok' : 'warn');
-      /* The name record keeps no link to the version before it, so this is the only place a
+      else if (result.released) status('Released at address ' + result.cid + '. ' + ((result.nameBinding && result.nameBinding.name) || 'The name') + ' does not point at it yet: ' + ((result.nameBinding && result.nameBinding.remedy) || 'bind this address at https://domains.defxn.com, which signs the dense-wire record update.'), 'ok');
+      /* Nothing on the mesh links a release to the one before it, so this is the only place a
          published address is remembered: a forward 'publish' record in the version history. */
-      if (result && result.published) recordVersion(1, { kind: 'publish', published: { version: result.published, cid: result.cid || '' } });
+      if (result && result.released) recordVersion(1, { kind: 'publish', published: { cid: result.cid || '' } });
     } catch (error) {
       status(error.message + (error.detail && error.detail.remedy && error.message.indexOf(error.detail.remedy) < 0 ? ' To fix: ' + error.detail.remedy : ''), 'error');
     }

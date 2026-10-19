@@ -77,8 +77,10 @@ export async function buildPeerAnnounce({
 /** Build and sign a KDOMXFER1 subdomain ownership transfer.
  *
  *  Mirrors the Rust `chain::domain_transfer` byte for byte. The initial
- *  claim is bundle-deploy's own signed name record — this is only the
- *  verb that moves an already-owned name to another key.
+ *  claim is a KDOMCLAIM1 record on this same dense-wire name chain (the
+ *  only name authority since 2026-10-19; bundle-deploy no longer signs
+ *  name records) — this is only the verb that moves an already-owned
+ *  name to another key.
  *
  *  `priorRecordCid` must be the CURRENT head for `fqdn` (ask the server
  *  with `DOM_WHO <fqdn>` first); naming a superseded record is how a

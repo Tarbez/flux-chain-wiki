@@ -427,7 +427,8 @@
       changes.summary.unshift('joins #' + others.map(function (x) { return x.record.seq + ' (' + x.hash.slice(0, 12) + ')'; }).join(', #') +
         ': saved at the same time as #' + primary.record.seq + ' by another editor of this folder; ' + (others.length > 1 ? 'all' : 'both') + ' are kept');
     }
-    if (kind === 'publish' && meta.published) changes.summary.unshift('published as mesh version ' + meta.published.version + (meta.published.cid ? ' (' + meta.published.cid + ')' : ''));
+    /* A record from before 2026-10-19 carries the name record's version; a release carries only its address. */
+    if (kind === 'publish' && meta.published) changes.summary.unshift(meta.published.version ? 'published as mesh version ' + meta.published.version + (meta.published.cid ? ' (' + meta.published.cid + ')' : '') : 'published as release ' + (meta.published.cid || '(address not recorded)'));
     if (kind === 'import' && meta.importedFrom) changes.summary.unshift('imported from version ' + meta.importedFrom.slice(0, 12) + (meta.importedName ? ' (' + meta.importedName + ')' : ''));
     var seq = heads.reduce(function (max, x) { return Math.max(max, x.record.seq); }, 0) + 1;
     var rec = {

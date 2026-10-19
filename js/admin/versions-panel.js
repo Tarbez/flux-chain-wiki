@@ -108,7 +108,7 @@ var ArkVersionsPanel = (function () {
           joins.length ? h('dt', { text: 'Joins' }) : null, joins.length ? h('dd', { class: 'mono', text: joins.join(' ') }) : null,
           rec.restoredFrom ? h('dt', { text: 'Restored from' }) : null, rec.restoredFrom ? h('dd', { class: 'mono', text: rec.restoredFrom }) : null,
           rec.importedFrom ? h('dt', { text: 'Imported from' }) : null, rec.importedFrom ? h('dd', { class: 'mono', text: rec.importedFrom }) : null,
-          rec.published ? h('dt', { text: 'Published' }) : null, rec.published ? h('dd', { class: 'mono', text: 'version ' + rec.published.version + (rec.published.cid ? ' · ' + rec.published.cid : '') }) : null));
+          rec.published ? h('dt', { text: 'Published' }) : null, rec.published ? h('dd', { class: 'mono', text: rec.published.version ? 'version ' + rec.published.version + (rec.published.cid ? ' · ' + rec.published.cid : '') : 'release · ' + (rec.published.cid || 'address not recorded') }) : null));
       return h('li', { class: 'version' + (previewing === entry.hash ? ' is-previewing' : ''), 'data-hash': entry.hash, 'data-seq': String(rec.seq),
         'data-branch': entry.forked ? branchName(entry.branch) : null, 'data-joins': joins.length ? String(joins.length) : null },
         head, rec.label ? h('strong', { class: 'version-label', text: rec.label }) : null, summary, rest, actions, addresses);

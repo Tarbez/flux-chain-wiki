@@ -4,20 +4,21 @@
    Publishing is three steps and the signed-in identity owns the middle one:
 
      prepare   POST the site to the local publish host, which encodes it as
-               one .flx archive, adds it to the miner, and drafts the name
-               record AND the public marker (a separate, owner-signed record
-               that lets the archive be read without a credential) that
-               would point the name at it.
+               one .flx archive, adds it to the miner, and drafts the public
+               marker (an owner-signed record that lets the archive be read
+               without a credential).
      sign      HERE. The signed-in DeadArk identity (js/admin/auth.js, the
-               same Auth Kit chat.deadark.com signs in with) signs both
-               drafted signing messages. Its key lives in a handle that never
+               same Auth Kit chat.deadark.com signs in with) signs the drafted
+               marker signing message. Its key lives in a handle that never
                exposes the bytes; the host and the miner never receive it.
-     publish   POST both signed records back; the host checks them and hands
-               them to the miner's names/* registry and public-marker store.
+     publish   POST the signed marker back; the host checks it and marks the
+               archive public. That is a RELEASE: a readable address.
 
-   That identity's root public key IS the owner of flux-chain.ark: the registry
-   accepts an update only from the key that holds the name. There is no other
-   owner key: nothing here creates, stores, exports or imports one.
+   It does not point the name at the release. Names are owned only by the
+   dense-wire name chain (owner decision, 2026-10-19); the host returns
+   `nameBinding` (failure, missing, remedy) saying to bind the release CID at
+   domains.defxn.com, which signs the dense-wire record update. There is no
+   owner key here: nothing creates, stores, exports or imports one.
 
    Everything the outside world touches is a parameter (`env`), so a test can
    drive this file with a real identity and a real miner.
@@ -62,21 +63,19 @@ var ArkPublish = (function () {
       var removing = !removes || removes.manifests.length || removes.articles.length || removes.assets.length || (removes.secrets && removes.secrets.length);
       if (removing && confirmRemoval && !(await confirmRemoval(removes))) return { cancelled: true, removes: removes };
       if (!(await authorize({
-        title: 'Publish this site',
-        description: 'Review the exact bytes before this identity signs and sends them to the local publish host: the name record (points the name at this version) and the public marker (lets this version be read without a credential).',
-        record: prepared.record,
-        signingMessage: prepared.signingMessage,
+        title: 'Publish this release',
+        description: 'Review the exact bytes before this identity signs and sends them to the local publish host: the public marker, which lets this version be read without a credential at its own address. It does not point the name at it.',
         marker: prepared.marker,
         markerSigningMessage: prepared.markerSigningMessage,
+        nameBinding: prepared.nameBinding,
       }))) return { cancelled: true, authorization: true };
       /* the identity may have signed out while the person read the prompt */
       who = identity();
-      if (!who || who.publicKeyB64 !== prepared.record.ownerPublicKey) throw signInRefusal();
-      say('Signing version ' + prepared.record.version + ' as ' + (who.displayName || 'your identity') + '...');
-      var record = Object.assign({}, prepared.record, { proof: { alg: 'Ed25519', sig: await who.sign(prepared.signingMessage) } });
+      if (!who || who.publicKeyB64 !== prepared.marker.ownerPublicKey) throw signInRefusal();
+      say('Signing the release as ' + (who.displayName || 'your identity') + '...');
       var marker = Object.assign({}, prepared.marker, { signature: await who.sign(prepared.markerSigningMessage) });
-      say('Publishing to the name registry...');
-      var result = await api('/api/publish', { record: record, marker: marker });
+      say('Publishing the release...');
+      var result = await api('/api/publish', { marker: marker });
       return Object.assign({ unchanged: false, byteLength: prepared.byteLength }, result);
     }
 

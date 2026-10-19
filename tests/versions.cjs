@@ -276,6 +276,14 @@ function single(file, global, extra) {
   // a publish is its own forward record even with unchanged content
   const v5 = await ArkVersions.record(dir, loaded.snapshot, { kind: 'publish', published: { version: 7, cid: 'bafyexample' }, at: '2026-10-18T10:05:00.000Z' });
   assert.equal(v5.record.kind, 'publish'); assert.equal(v5.record.summary[0], 'published as mesh version 7 (bafyexample)');
+  /* Since 2026-10-19 a publish is a release (dense-wire owns names): there is no name-record version to quote, so the
+     record carries only the address -- and must not read "published as mesh version undefined". Written into its own
+     history so the seq numbers asserted below in this one are untouched; the older shape above still reads as before. */
+  const releaseRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-versions-release-'));
+  const released = await ArkVersions.record(await ArkVersions.historyDir(dirHandle(releaseRoot)), loaded.snapshot, { kind: 'publish', published: { cid: 'bafyrelease' }, at: '2026-10-19T10:05:00.000Z' });
+  assert.equal(released.record.summary[0], 'published as release bafyrelease');
+  assert.deepEqual(released.record.published, { cid: 'bafyrelease' });
+  fs.rmSync(releaseRoot, { recursive: true, force: true });
 
   // every file on disk is FLX in the grammar: no JSON document is stored
   for (const file of fs.readdirSync(versionsDir)) {

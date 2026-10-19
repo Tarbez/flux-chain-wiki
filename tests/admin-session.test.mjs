@@ -47,8 +47,8 @@ const publisher = {
   },
   status: async () => { fake.calls.push('status'); return { name: 'flux-chain.ark', reachable: true }; },
   fetchSite: async () => { fake.calls.push('site'); return { site: {} }; },
-  prepare: async (site, key) => { fake.calls.push('prepare'); return { record: { ownerPublicKey: key } }; },
-  publish: async (record) => { fake.calls.push('publish'); return { published: 1 }; },
+  prepare: async (site, key) => { fake.calls.push('prepare'); return { marker: { ownerPublicKey: key } }; },
+  publish: async () => { fake.calls.push('publish'); return { released: true }; },
 };
 let clock = 1_000_000;
 const notices = [];
@@ -137,7 +137,7 @@ try {
   assert.equal(viaTraversal.status, 401, 'a path that resolves to the editor is judged as the editor, not by what it says'); assert(!viaTraversal.text.includes('/* '));
 
   // 2. Locked: every API but the way in refuses, and nothing reached the publisher.
-  for (const [method, url, body] of [['GET', '/api/status'], ['GET', '/api/site'], ['POST', '/api/prepare', { site: {}, ownerPublicKey: owner.publicKeyB64 }], ['POST', '/api/publish', { record: { ownerPublicKey: owner.publicKeyB64 } }]]) {
+  for (const [method, url, body] of [['GET', '/api/status'], ['GET', '/api/site'], ['POST', '/api/prepare', { site: {}, ownerPublicKey: owner.publicKeyB64 }], ['POST', '/api/publish', { marker: { ownerPublicKey: owner.publicKeyB64 } }]]) {
     const r = await b.call(method, url, body); assert.equal(r.status, 401, url); assert.match(r.json.remedy, /sign in with your recovery file/);
   }
   assert.deepEqual(fake.calls, [], 'a locked admin never touched the miner');
@@ -177,7 +177,7 @@ try {
   // 4. A session is one identity. It cannot prepare or publish as another key.
   const asOther = await b.call('POST', '/api/prepare', { site: {}, ownerPublicKey: stranger.publicKeyB64 });
   assert.equal(asOther.status, 403); assert.match(asOther.json.error, /different identity/);
-  assert.equal((await b.call('POST', '/api/publish', { record: { ownerPublicKey: stranger.publicKeyB64 } })).status, 403);
+  assert.equal((await b.call('POST', '/api/publish', { marker: { ownerPublicKey: stranger.publicKeyB64 } })).status, 403);
   assert.equal((await b.call('POST', '/api/prepare', { site: {}, ownerPublicKey: owner.publicKeyB64 })).status, 200);
   assert(!fake.calls.includes('publish'), 'the refused publish never reached the publisher');
 
