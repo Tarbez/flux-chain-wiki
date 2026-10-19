@@ -359,6 +359,10 @@
     resolvers: install(),
     render: render,
     update: update,
+    /* whenLive(): settles once every queued live update has been applied (the live chunk arrived and
+       patched, or failed and replaced). A page's first update is async on public pages; tests and any
+       caller that must read the updated block await this instead of guessing a delay. */
+    whenLive: function () { return liveLoad ? liveLoad.then(function () {}, function () {}) : Promise.resolve(); },
     liveScript: LIVE_SCRIPT,
     page: page,
     glossary: glossary,

@@ -149,10 +149,15 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
     const rules = isIndex ? INDEX : ARTICLE;
     const seen = await converted.check(route, { reshaped: rules.reshaped, retired: rules.retired, reworded: rules.reworded, inspect: (window, page) => {
       const depth = page.querySelector('[data-story-depth]');
-      const text = (el) => el.textContent.replace(/[\u2190\u2192]/g, '').replace(/\s+/g, ' ').trim(); // a block's own arrow glyph is not its words
+      // A block's own arrow glyph is not its words, and neither is a glossary term's hidden tooltip (its
+      // definition sits inside the element: "resolver" in "Written before resolver chains" carries one).
+      const text = (el) => { if (!el.cloneNode) return String(el.textContent || '').trim(); const copy = el.cloneNode(true); copy.querySelectorAll('[data-ark-part="term-tip"]').forEach((t) => t.remove());
+        return copy.textContent.replace(/[\u2190\u2192]/g, '').replace(/\s+/g, ' ').trim(); };
       return {
         cards: [...page.querySelectorAll('[data-ark-block="card-grid"] [data-ark-part="card"]')].map((c) => ({ title: text(c.querySelector('[data-ark-part="card-title"]')), meta: text(c.querySelector('[data-ark-part="card-footer"]') || c), eyebrow: text(c.querySelector('[data-ark-part="eyebrow"]') || c) })),
-        folded: page.querySelectorAll('[data-ark-block="disclosure"][data-fold-below="phone"] [data-ark-part="card"]').length,
+        // index only: cards a press away on a phone. Named apart from the article's `folded` below -- one
+        // object literal held both under `folded`, and the later key silently replaced the count.
+        foldedCards: page.querySelectorAll('[data-ark-block="disclosure"][data-fold-below="phone"] [data-ark-part="card"]').length,
         eyebrow: text(page.querySelector('[data-ark-block="hero"] [data-ark-part="eyebrow"]') || { textContent: '' }),
         meta: [...page.querySelectorAll('[data-ark-block="hero"] [data-ark-part="hero-meta"] dd')].map(text),
         crumbs: [...page.querySelectorAll('[data-ark-block="breadcrumb"] [data-ark-part="breadcrumb-item"]')].map(text),
@@ -185,7 +190,7 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
         assert(c.meta.includes(LC.readTime(a).toLowerCase()) && c.meta.includes(a.reviewed), a.slug + ': the card shows the derived read time and the review date (' + c.meta + ')');
         assert(c.eyebrow.includes(a.category), a.slug + ': the card shows its series');
       });
-      assert.equal(seen.folded, LC.articles.length - 3, 'on a phone the first three cards are in sight and the rest a press away (every card from 601px up)');
+      assert.equal(seen.foldedCards, LC.articles.length - 3, 'on a phone the first three cards are in sight and the rest a press away (every card from 601px up)');
       assert.equal(seen.eyebrow, 'Notes / ' + String(LC.articles.length).padStart(2, '0'), 'the hero counts the notes');
       assert.equal(seen.pagers, 0, 'no pager under the cards: every card leads on (the fold rule at 1440x900)');
     } else {

@@ -69,3 +69,89 @@ components.md, brand.md, resolvers-content.md. Census baseline: component-census
   (theory sheets, how-chapters, lifecycle), about + home, product/overlap pages (explain +
   hand off), learnings; then header, explorer, account, resolver lab, home flow.
 - **Wave 4:** full re-audit (same drivers), census ratchet, fold-rule sweep, owner review.
+
+## Resume point (2026-10-19 ~21:50, all agents paused on the usage limit until 02:00)
+Committed: Wave 0 (5a1ac71), Wave 1 (3462ab4). Uncommitted in the tree: Wave 2 (Ark blocks on the site,
+CMS Library from blocks, defxn.com on the kit shell, /palette pilot) and Wave 3 (stats ×5, story ×18,
+home/about/chain, guide/product/resolutions ~30 routes, idle-frame settle, shared Ark follow-ups,
+census fixes) — ~230 files. Unit suite at this point: 187/197.
+Paused agents (resume with SendMessage, same ids in the coordinator's session):
+- W3-LEARN — nearly done (all views ≤1.57); was reviewing screenshots. Owns learnings-blocks,
+  likely operator-states ("ArkUI.page is not a function": a page now calls ArkUI.page without loading
+  blockScripts in that test's harness) and the no-deprecated-vocabulary failure if it's article copy.
+- W3-EDITOR — owns admin.cjs, auth-bundle.cjs (script order: authorization view must load before
+  js/admin/mesh.js — likely the new js/admin/ark-host.js tag), cms-overlay-z-ladder,
+  design-check-score-excludes-not-built, admin-studio; components.cjs if it's admin CSS.
+- W3-BUDGET — was fixing a docs line (live update now degrades instead of refusing); still needs the
+  ≤30 KB proof and the CSS ledger.
+Cross-agent failures — coordinator fixed 3 of 4 (~22:10): reference-reader (snapshot regenerated),
+state-layering (test updated to the one-standard-frame rule: only deployment + /account are 1600),
+fold-no-hidden-content (test now compares selectors in one spelling; the bundle trim minified
+ark-blocks.css and dropped attribute quotes / combinator spaces — every guarded rule is still there).
+home-launch → W3-BUDGET: ArkUI.blocks.update now loads js/ark/vendor/ark-kit-live.js on a page's first
+live update and applies queued readings when it arrives (async); the test reads the tile synchronously.
+Give the adapter an awaitable (e.g. ArkUI.blocks.whenLive()) and make the test await it — the product
+behaviour (reading lands in the same element a moment later) is fine.
+Also fixed by the coordinator: no-deprecated-vocabulary — js/content/evidence-registry.js now ships claim
++ evidence only for VERIFIED records (no page reads the rest; the frozen registry keeps its words), and
+the test treats a verified record's `evidence:` text as data (home parses figures from it, never shows
+it) with a guard that fails if any page renders it. home-blocks re-checked: passes.
+Coordinator also fixed (~23:00): auth-bundle (script order read from <script src> tags only — a header
+comment naming js/admin/ark-host.js matched first), components (Ark's generated-sheet header was reworded
+by the minifier; both spellings recognised), admin (read time is now DERIVED from the body; the test
+expects the derived figure — NOTE for W3-LEARN: the CMS still shows an editable "Reading time" field in
+js/admin/articles.js that no longer does anything; make it read-only/derived or remove it from the form),
+operator-states (/explore's frame is Ark blocks; the toy-DOM test gets an ArkUI.page stand-in, its
+subject is setup(); the frame is covered in real DOM by task-pages-blocks + routes-live).
+Left: learnings-blocks (W3-LEARN's own test mid-edit: `seen.folded` is [] where a count is expected),
+home-launch (W3-BUDGET: await the live chunk). Unit suite then: expected 195/197.
+Then: full unit suite → all browser drivers serially → commit Waves 2–3 (delete unpinned .vendor
+tarballs) → Wave 4 (re-audit, census ratchet, fold sweep, /account conversion with browser coverage
+of sign-in/wallet/keys first, owner review). Owner-side: Flux Launch kit adoption (merge
+wave3-launchpad-v2 first), fixes in defxn-defi-rs/explore/dense-wire listed in W1-CONTENT's report.
+
+## Resume point 2 (2026-10-20 01:00)
+Unit suite 197/197 (coordinator fixed the rest; learnings-blocks had a duplicate `folded` key and a text
+helper that read glossary tooltips). Browser drivers 9/17 (log: /var/folders/.../defxn-browser-tests-twZBrG):
+- STALE DRIVER SELECTORS after Wave 3 conversions: component-context + studio-flows select
+  `.how-chapter-header` on /download (now the story template); publish-flows looks for an old annotated
+  element on / (home is blocks now). Repoint through the new structure (layout keys / block ids).
+- LIKELY CMS↔BLOCK-PAGE REGRESSIONS (editor agent, highest priority):
+  1. a new unsaved article never shows on the canvas (cms-journeys "article", full-audit content/articles)
+     — the canvas route never becomes /learnings/<slug>. js/main.js still builds draft routes via
+     ArkUI.catalogContentRoutes (js/pages/catalog.js:116; a draft gets no body file only when it carries
+     `sections`) — probe whether createArticle's draft carries sections now, and whether js/pages/article.js
+     (story template) mounts from a draft (LearningContent.find before the body file exists);
+  2. [FIXED 01:05 by coordinator — NOT a product bug] content-panels: the canvas DID update; the driver
+     read body.innerText, and the converted home shows HOME.EYEBROW in Ark's eyebrow (text-transform:
+     uppercase), which Chromium's innerText returns uppercased. Driver now reads textContent; passes.
+     Check the other drivers for the same innerText-vs-uppercase trap (inline-content, full-audit).
+  3. Content lens: clicked text does not become editable (inline-content race step) — binding vs the
+     copy-key stamping on block pages (data-ark-copy-keys);
+  4. design-check-stable: "the page never settled" on the converted home (9/13, settled=false).
+Then all 17 drivers serially, then commit Waves 2–3.
+Coordinator, 01:25: fixed driver staleness — component-context (source moved to /account, the hand-built
+page whose title still takes ancestor styling; letter-spacing asserted as an em unit), publish-flows
+(element must be inside [data-ark-page]: an Ark hero's root is a <header>), content-panels (above). Both pass.
+studio-flows still FAILS two steps — for the editor agent:
+  a) makecomp: on the converted /download the title is in the hero and the intro paragraph opens The idea
+     tab (key page:/header:1/p:1), so the selection spans two containers and the instance lands after the
+     paragraph while the hero loses its title. PRODUCT DECISION needed in cmsMakeComponent: refuse a
+     selection whose members don't share a parent (say why, name the fix), or place the instance at the
+     FIRST member. Then give the driver a same-container pair on /download.
+  b) points: collapsing `.continuity-host,[data-ark-page]` to 0 still leaves a 40px insert slot on /about
+     — find the container the slot's width comes from now and collapse that in the fixture.
+Coordinator, 01:35 (driver staleness, all now passing): design-check-stable (js/admin/design-check.js now
+waits for the animations actually running when they end within 20 s — the converted home plays its scene
+once, longer than the old 6 s budget; 6 readings stable at 9/13), inline-content article steps (driver
+looked for the old h1.article-title; now the Ark hero h1 — title edit, save, reload and public page pass).
+Still open for the agents at 02:00:
+  - inline-content "race": a canvas click while the Page fields sheet is open does not start inline
+    editing. Ruled out: the sheet overlaying the click point (clicked near the line start too) and
+    overlay.js closing the sheet on canvas press (it closes only canvas-closable popovers). Suspect: the
+    sheet's queued re-send re-mounts the block page (ArkUI.page) right as the click starts editing.
+  - cms-journeys + full-audit "new article on the canvas before Save": the preview never navigates to
+    /learnings/<slug>. Ruled out: missing body file (articleBlueprint carries `sections`). Suspect: the
+    converted js/pages/article.js failing to mount from a blank draft (e.g. empty `relevance` as the
+    callout's required body, empty reviewed/evidence) — probe the preview console on that route.
+  - studio-flows makecomp + points (see above).

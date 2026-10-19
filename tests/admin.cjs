@@ -50,8 +50,13 @@ const {ArkManifest,ArkAdminStore,LearningContent}=vm.runInContext('({ArkManifest
  assert(adirs.content.files.get('article-index.js').text.includes('"a-new-note"'));
  const back=vm.createContext({});vm.runInContext(fs.readFileSync('js/content/learnings.js','utf8'),back);
  vm.runInContext(adirs.content.files.get('article-index.js').text,back);vm.runInContext(adirs.articles.files.get('a-new-note.js').text,back);
- assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.find('a-new-note'))),fresh);
- assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.put(fresh))),fresh,'registry updates preserve reading-layer fields');
+ // Read time is DERIVED from the body (js/content/learnings.js readTime: words / 200 per minute, at least 1),
+ // not stored as typed (2026-10-19, W3-LEARN: no number typed twice) -- so the article loads back with the
+ // derived figure and every other field exactly as saved.
+ const derived={...fresh,minutes:back.LearningContent.find('a-new-note').minutes};
+ assert.match(derived.minutes,/^\d+ MIN READ$/,'the read time is derived from the body');
+ assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.find('a-new-note'))),derived);
+ assert.deepEqual(JSON.parse(JSON.stringify(back.LearningContent.put(fresh))),derived,'registry updates preserve reading-layer fields');
  const editorSource=require('./lib/admin-source.cjs').ADMIN;
  const copyStart=editorSource.indexOf('  function articleCopy(a) {');
  const copyEnd=editorSource.indexOf('  function adoptArticles()',copyStart);

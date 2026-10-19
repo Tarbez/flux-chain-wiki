@@ -24,6 +24,12 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
 /* ---- a stylesheet as rules ------------------------------------------------------------- */
+/* A minifier may drop the quotes around attribute values ([data-x=tablet]); the selector means the
+   same thing, so compare in one spelling: values quoted with single quotes, one space around combinators. (2026-10-19: the public
+   bundle trim minified css/ark-blocks.css and these checks read the quoted form.) */
+function canonicalSelector(selector) {
+  return selector.trim().replace(/\[([\w-]+)=(?:"([^"]*)"|'([^']*)'|([^\]'"]+))\]/g, (m, name, dq, sq, bare) => "[" + name + "='" + (dq ?? sq ?? bare) + "']").replace(/\s*([>+~])\s*/g, ' $1 ').replace(/,\s*/g, ', ');
+}
 function rules(file) {
   const css = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const out = [];
@@ -37,7 +43,7 @@ function rules(file) {
       while (j < text.length && depth) { if (text[j] === '{') depth++; else if (text[j] === '}') depth--; j++; }
       const body = text.slice(open + 1, j - 1);
       if (head.startsWith('@media') || head.startsWith('@supports')) walk(body, (media ? media + ' and ' : '') + head.replace(/^@\w+\s*/, ''));
-      else if (!head.startsWith('@')) for (const selector of head.split(/,(?![^()]*\))/)) out.push({ file, media: media || '', selector: selector.trim(), body });
+      else if (!head.startsWith('@')) for (const selector of head.split(/,(?![^()]*\))/)) out.push({ file, media: media || '', selector: canonicalSelector(selector), body });
       i = j;
     }
   })(css, '');

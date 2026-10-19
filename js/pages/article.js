@@ -61,6 +61,17 @@
      so they are written from the structure the old reader built (header, question nav, sections,
      controls, exits, evidence), not pasted per note. Frozen censuses: tests/fixtures/layout-keys/
      learnings-<slug>.tsv; reasons in tests/learnings-blocks.cjs. */
+  /* a field a note has filled in -- the one rule both the page and its pins use, so a pin never
+     names an element the page did not draw (a new draft has no review date, evidence, related
+     page or action yet) */
+  function filled(value) { return typeof value === 'string' && value.trim() !== ''; }
+  function relatedLinks(article) {
+    var out = [];
+    if (filled(article.relatedPage)) out.push('related');
+    if (filled(article.actionPage) && filled(article.actionLabel) && (article.actionPage !== article.relatedPage || article.actionLabel)) out.push('action');
+    out.push('all');
+    return out;
+  }
   function was(article) {
     var n = article.sections.length, out = {}, i, p;
     var item = function (k) { return '[data-ark-part="accordion-item"]:nth-of-type(' + k + ') [data-ark-part="accordion-content"] p:nth-of-type('; };
@@ -70,7 +81,7 @@
     out['article-depth'] = { ':root': { key: 'page:/div:1/div:1/div:1', self: true }, 'tabs-trigger': 'page:/div:1/div:1/div:1/button:1', 'tabs-trigger#2': 'page:/div:1/div:1/div:1/button:2',
       'tabs-content': { key: 'page:/header:1/div:2', self: true },
       '[data-ark-part="tabs-content"] p': 'page:/header:1/div:2/p:1', 'eyebrow': 'page:/div:1/nav:1/p:1', 'eyebrow#2': 'page:/div:1/details:1/summary:1' };
-    out['article-status'] = { 'alert-description': 'page:/header:1/div:2/p:2' };
+    if (filled(article.relevance)) out['article-status'] = { 'alert-description': 'page:/header:1/div:2/p:2' };
     out['article-questions'] = { ':root': { key: 'page:/div:1/nav:1', self: true } };
     if (shown(n) < n) out['article-questions-rest'] = {};
     for (i = 0; i < n; i++) {
@@ -86,10 +97,11 @@
       for (p = 1; p < article.sections[i].length; p++) at[item(j + 1) + (p + 1) + ')'] = 'page:/div:1/div:1/section:' + (i + 1) + '/p:' + p;
     }
     if (article.numbers) out['article-table'] = { ':root': { key: 'page:/div:1/div:1/section:' + n + '/div:1', self: true }, 'table': 'page:/div:1/div:1/section:' + n + '/div:1/table:1' };
-    out['article-evidence'] = { ':root': { key: 'page:/div:1/details:1', self: true }, 'fact': 'page:/div:1/details:1/p:1', 'fact-value#2': 'page:/div:1/details:1/a:1' };
-    out['article-pager'] = { ':root': { key: 'page:/div:1/nav:2', self: true },
-      '[data-ark-part="pager-related"] li:nth-of-type(1) > a': 'page:/div:1/nav:2/a:1', '[data-ark-part="pager-related"] li:nth-of-type(2) > a': 'page:/div:1/nav:2/a:2',
-      '[data-ark-part="pager-related"] li:nth-of-type(3) > a': 'page:/header:1/div:1/a:1' };
+    out['article-evidence'] = { ':root': { key: 'page:/div:1/details:1', self: true }, 'fact': 'page:/div:1/details:1/p:1' };
+    if (filled(article.evidenceLabel) && filled(article.evidenceHref)) out['article-evidence']['fact-value#2'] = 'page:/div:1/details:1/a:1';
+    out['article-pager'] = { ':root': { key: 'page:/div:1/nav:2', self: true } };
+    var oldKey = { related: 'page:/div:1/nav:2/a:1', action: 'page:/div:1/nav:2/a:2', all: 'page:/header:1/div:1/a:1' };
+    relatedLinks(article).forEach(function (link, at) { out['article-pager']['[data-ark-part="pager-related"] li:nth-of-type(' + (at + 1) + ') > a'] = oldKey[link]; });
     out.insert = 'page:/div:2';
     return out;
   }
@@ -117,8 +129,9 @@
       var evidence = [
         { block: 'eyebrow', props: { text: 'Evidence & editorial review' } },
         { block: 'facts', id: 'article-evidence', was: pins['article-evidence'], props: { label: 'Evidence & editorial review', columns: 1, items: [
-          { term: 'Editorial review', value: article.reviewed + '. This is not live capability verification.' },
-          { term: 'Evidence', value: article.evidenceLabel, href: article.evidenceHref }
+          /* a draft that is not yet reviewed or linked says so -- never a blank value (refused) or a made-up one */
+          { term: 'Editorial review', value: filled(article.reviewed) ? article.reviewed + '. This is not live capability verification.' : 'Not reviewed yet.' },
+          filled(article.evidenceLabel) && filled(article.evidenceHref) ? { term: 'Evidence', value: article.evidenceLabel, href: article.evidenceHref } : { term: 'Evidence', value: 'No evidence linked yet.' }
         ] } }
       ];
       /* The table of contents: one accordion, or -- longer than LONG_TOC -- its first half and
@@ -131,22 +144,30 @@
           blocks: [{ block: 'accordion', id: 'article-questions-rest', was: pins['article-questions-rest'], props: { label: 'Questions ' + (k + 1) + ' to ' + rows.length, items: rows.slice(k), multiple: false, headingLevel: 2 } }] } });
         return list;
       }
-      var related = [{ label: 'Related mechanism: ' + name(article.relatedPage.replace(/^route:/, '')), href: article.relatedPage }];
-      if (article.actionPage !== article.relatedPage || article.actionLabel) related.push({ label: article.actionLabel, href: article.actionPage });
-      related.push({ label: 'All notes', href: 'route:learnings' });
+      /* onward links only where the note names them: a new draft has no related page or action yet */
+      var related = relatedLinks(article).map(function (link) {
+        return link === 'related' ? { label: 'Related mechanism: ' + name(article.relatedPage.replace(/^route:/, '')), href: article.relatedPage }
+          : link === 'action' ? { label: article.actionLabel, href: article.actionPage } : { label: 'All notes', href: 'route:learnings' };
+      });
 
       var def = {
         page: page, id: 'article', className: 'article-story', titleId: 'article-title', was: pins, insertWas: pins.insert,
         crumbs: [{ label: 'Home', href: 'route:zero' }, { label: 'Notes', href: 'route:learnings' }, { label: article.title }],
         eyebrow: ArkUI.story.position('Notes', index, total),
         title: article.title,
-        meta: [{ label: 'Series', value: article.category }, { label: 'Read time', value: String(LearningContent.readTime(article)).toLowerCase() }, { label: 'Reviewed', value: article.reviewed }],
+        /* a fact with no value is left out, never shown blank: a new note has no review date until it is
+           reviewed, and an empty meta value is a refused hero -- the whole page failed to mount, so the
+           editor's canvas could not show a brand-new article (regression: tests/article-draft-mounts.cjs) */
+        meta: [{ label: 'Series', value: article.category }, { label: 'Read time', value: String(LearningContent.readTime(article)).toLowerCase() }, { label: 'Reviewed', value: article.reviewed }]
+          .filter(function (fact) { return typeof fact.value === 'string' && fact.value.trim(); }),
         depth: {
           focus: { text: article.core || article.summary },
           context: { blocks: questionBlocks() },
           reference: { blocks: evidence }
         },
-        boundary: { tone: 'info', title: 'When this was written', body: article.relevance, actions: [{ label: 'What is a resolver', href: 'route:resolver' }] },
+        /* the dated-history note only when the note has one: a new draft's relevance is empty, and a
+           callout with no body is refused (same regression as the empty Reviewed fact above) */
+        boundary: article.relevance && String(article.relevance).trim() ? { tone: 'info', title: 'When this was written', body: article.relevance, actions: [{ label: 'What is a resolver', href: 'route:resolver' }] } : null,
         boundaryFold: 'phone', boundaryMore: 'When this was written', boundaryLess: 'Hide the note', boundaryAside: true,
         /* no summaries: "Previous note" / "Next note" only repeated the pager's own direction labels */
         pager: { label: 'Continue reading', relatedLabel: 'Continue from this note',

@@ -79,8 +79,10 @@
      animation ended -- an infinite one (the hero's ambient motion) never ends and changes no
      rule. Resolves false if the page is still moving after `budget` ms; the popover says so
      rather than presenting a mid-animation reading as the page's. */
+  const MAX_SETTLE_MS = 20000;
   async function previewSettled(budget) {
-    const end = Date.now() + budget, pause = (ms) => new Promise((r) => setTimeout(r, ms));
+    const start = Date.now(), pause = (ms) => new Promise((r) => setTimeout(r, ms));
+    let end = start + budget;
     while (Date.now() < end) {
       const doc = (() => { try { return cmsPreview.contentDocument; } catch (e) { return null; } })();
       if (state.cmsPreviewReady && doc && doc.readyState === 'complete' && doc.body) {
@@ -88,7 +90,14 @@
         const scene = doc.getElementById('scene');
         const moving = (doc.getAnimations ? doc.getAnimations() : []).filter((a) => a.playState === 'running' && a.effect && Number.isFinite(a.effect.getComputedTiming().endTime));
         if (!(scene && scene.dataset.transition === 'running') && !moving.length) return true;
-        if (moving.length) { await Promise.race([Promise.all(moving.map((a) => a.finished.catch(() => {}))), pause(250)]); continue; }
+        if (moving.length) {
+          /* A page whose scene plays once and settles (no idle loop, by law) can run longer than the
+             budget; wait for the animations actually running when they end within MAX_SETTLE_MS of
+             the start, instead of reporting a mid-play reading as "not settled". */
+          const remaining = Math.max.apply(null, moving.map((a) => { const t = a.effect.getComputedTiming(); return (t.endTime || 0) - (a.currentTime || 0); }));
+          if (Number.isFinite(remaining) && Date.now() + remaining <= start + MAX_SETTLE_MS) end = Math.max(end, Date.now() + remaining + 250);
+          await Promise.race([Promise.all(moving.map((a) => a.finished.catch(() => {}))), pause(250)]); continue;
+        }
       }
       await pause(100);
     }
@@ -302,12 +311,17 @@
     if (c.fix === 'seo-site') { closePop(); openSiteSeo(); return; }
   }
   /* opens on the last reading at once, and repaints when the settled one lands (measureChecks) */
-  $('btnCheck').addEventListener('click', (e) => { const opening = state.popAnchor !== e.currentTarget; openPop(e.currentTarget, (p) => {
+  $('btnCheck').addEventListener('click', (e) => { const opening = state.popAnchor !== e.currentTarget;
+    /* a first open has no reading yet: measure NOW (marked as not settled) so every rule shows at
+       once, and let the settled reading repaint it -- the settle wait can run as long as the page's
+       own animation (up to MAX_SETTLE_MS), and an empty list for that long read as broken */
+    if (opening && !lastChecks.length) { runChecks(); state.lastChecksSettled = false; }
+    openPop(e.currentTarget, (p) => {
     const checks = lastChecks;
     const head = document.createElement('div'); head.className = 'checkhead';
     const measured = checks.filter((c) => c.status === 'pass' || c.status === 'warn' || c.status === 'fail'), unmeasured = checks.length - measured.length;
     head.innerHTML = `<div><b>Design tips for this page</b><p>${measured.filter((c) => c.status === 'pass').length} of ${measured.length} measured rules pass${unmeasured ? ` · ${unmeasured} not measured` : ''}</p></div>`;
-    if (!state.lastChecksSettled) head.firstChild.appendChild(h('p', { class: 'hint', text: 'Measured while the page was still moving: it had not finished loading fonts or animating after 6 seconds, so this reading can differ from the next. Check again once it is still.' }));
+    if (!state.lastChecksSettled) head.firstChild.appendChild(h('p', { class: 'hint', text: 'Measured while the page was still moving (loading fonts or animating), so this reading can change; it updates by itself once the page is still.' }));
     p.appendChild(head);
     const ul = document.createElement('ul'); ul.className = 'checks';
     for (const c of checks) {

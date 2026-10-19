@@ -84,7 +84,10 @@ const toolbarContent = (app) => app.evaluate(() => {
   return { title: (pop.querySelector('.tb-pop-head span') || {}).textContent || '', field: field ? field.textContent : null, value: value ? value.value : null, refusal: refusal ? refusal.textContent : null, text: pop.textContent };
 });
 /* click an element in the canvas by a selector evaluated there, at the end of its text */
-async function clickText(pv, selector, index = 0) {
+/* at: 'end' (default) clicks near the line's right end so the caret lands at the end of the words;
+   'start' clicks near its left end -- needed while the Page fields sheet is open, because the sheet
+   overlays the canvas's right edge and Playwright cannot see an overlay in the parent document. */
+async function clickText(pv, selector, index = 0, at = 'end') {
   /* the canvas remounts after a committed edit (the editor re-sends the site): an element found
      just before that can be replaced under the click, so a detached target is found again */
   return until(async () => {
@@ -93,7 +96,7 @@ async function clickText(pv, selector, index = 0) {
       await loc.scrollIntoViewIfNeeded({ timeout: 2000 });
       const box = await loc.boundingBox();
       if (!box) return false;
-      await loc.click({ position: { x: Math.max(2, box.width - 4), y: Math.min(box.height - 2, 12) }, timeout: 2000 });
+      await loc.click({ position: { x: at === 'start' ? Math.min(12, box.width - 2) : Math.max(2, box.width - 4), y: Math.min(box.height - 2, 12) }, timeout: 2000 });
       return loc;
     } catch (error) { if (/not attached|not stable|Timeout/.test(error.message)) return false; throw error; }
   }, 'could not click ' + selector, 10000);
@@ -279,7 +282,7 @@ await step('copies: every element showing the edited field takes the words on co
   /* a second copy of the intro on the page (a fixture: the same field drawn twice) */
   await pv.evaluate(() => { const p = document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]'); const copy = p.cloneNode(true); copy.classList.add('test-intro-copy'); p.after(copy); });
   const readyBefore = await previewReadyCount(app);
-  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]:not(.test-intro-copy)');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]:not(.test-intro-copy)', 0, 'start');
   await typeAtEnd(page, pv, ' (twice)');
   await page.keyboard.press(MOD + '+Enter');
   await until(() => editing(pv).then((t) => t === null), 'the edit did not end');
@@ -376,8 +379,9 @@ await step('article: its title edits on its own route', async () => {
   const since = await previewReadyCount(app);
   await app.evaluate((route) => window.ArkAdmin.openRoute(route), '/learnings/' + slug);
   await waitForPreviewReady(app, { since, path: '/learnings/' + slug });
-  await until(() => pv.evaluate(() => !!document.querySelector('[data-ark-page] h1.article-title')), 'the article page never rendered its title');
-  await clickText(pv, '[data-ark-page] h1.article-title');
+  /* the note is the story template now (Wave 3): its title is the Ark hero's h1, not the old h1.article-title */
+  await until(() => pv.evaluate(() => !!document.querySelector('[data-ark-page] [data-ark-block="hero"] h1')), 'the article page never rendered its title');
+  await clickText(pv, '[data-ark-page] [data-ark-block="hero"] h1');
   await typeAtEnd(page, pv, NEW.article);
   await page.keyboard.press('Enter');
   await until(async () => (await draft(app, 'article', slug, 'title')) === original.article + NEW.article, 'the article title draft did not change');
@@ -412,7 +416,7 @@ await step('public: the visitor\'s page and the server render show the new words
   await pub.screenshot({ path: path.join(SHOTS, 'public-home.png') });
   await pub.goto(ORIGIN + '/learnings/' + slug);
   await waitForRouteReady(pub.mainFrame(), { path: '/learnings/' + slug, timeout: 15000 });
-  const title = await until(() => pub.evaluate(() => { const h = document.querySelector('h1.article-title'); return h && h.textContent; }), 'the public article has no title');
+  const title = await until(() => pub.evaluate(() => { const h = document.querySelector('[data-ark-page] [data-ark-block="hero"] h1'); return h && h.textContent; }), 'the public article has no title');
   check(title === original.article + NEW.article, 'the public article title is "' + title + '"');
   await pub.close();
   const html = await renderDocument({ html: await readIndexHtml(WORK), url: 'https://defxn.com/', resources: createLocalResources(WORK), timeoutMs: 60000 });

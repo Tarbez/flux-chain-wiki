@@ -319,11 +319,23 @@ const LITERAL = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g;
 const moduleFiles = ['js/pages', 'js/resolvers', 'js/content'].flatMap((dir) =>
   fs.readdirSync(path.join(ROOT, dir)).filter((f) => f.endsWith('.js')).map((f) => `${dir}/${f}`))
   .filter((file) => file !== 'js/content/reference-text.js');
+// js/content/evidence-registry.js (generated from the frozen docs/evidence/registry.md): its `evidence:`
+// values are DATA -- home reads figures out of them by pattern ("13,476 transfers/s") and never puts
+// the text on the page, and the registry keeps each record's original words (future law). They are
+// skipped as data; every other value in that module (claim, status) is still scanned as copy. The
+// guard below keeps the exemption honest: no page may render a record's evidence text.
+const EVIDENCE_DATA = /^\s*evidence:\s/;
 for (const file of moduleFiles) {
   for (const { n, text } of jsLines(fs.readFileSync(path.join(ROOT, file), 'utf8'))) {
+    if (file === 'js/content/evidence-registry.js' && EVIDENCE_DATA.test(text)) continue;
     for (const literal of text.match(LITERAL) || []) scanText(`${file}:${n}`, literal.slice(1, -1));
   }
   rendered += 1;
+}
+for (const file of fs.readdirSync(path.join(ROOT, 'js/pages')).filter((f) => f.endsWith('.js'))) {
+  const source = fs.readFileSync(path.join(ROOT, 'js/pages', file), 'utf8');
+  assert(!/(textContent|innerHTML|innerText)\s*[+]?=\s*[^;\n]*\.evidence\b/.test(source) && !/text:\s*[^,\n]*\.evidence\b/.test(source),
+    `js/pages/${file} renders an evidence record's text; the vocabulary check skips that text as data, so a page may only read figures from it`);
 }
 assert(rendered > 40, `expected to scan the site's rendered copy, scanned only ${rendered} sources`);
 scanned += rendered;

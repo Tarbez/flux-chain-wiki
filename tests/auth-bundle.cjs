@@ -29,7 +29,10 @@ for (const editorPiece of ['js/admin/admin.js', 'js/admin/store.js', 'js/admin/p
 const app = fs.readFileSync('admin-app.html', 'utf8');
 assert(!app.includes('js/admin/auth.js') && !app.includes('meshAuth'), 'the editor page carries no sign-in bundle');
 assert(app.includes('js/admin/admin.js') && app.includes('js/admin/publish.js'));
-assert(EDITOR_FILES.every((rel) => app.indexOf('js/admin/authorization-view.js') < app.indexOf(rel)), 'admin editor loads the shared authorization view before its consumer (js/admin/mesh.js) and every other editor module');
+// Order by <script src> tags only: a comment that names a module (e.g. js/admin/ark-host.js in the header's
+// segmented-group note) is not a load, and matched first twice before (2026-10-17, 2026-10-19).
+const scriptAt = (rel) => app.indexOf('<script src="' + rel + '"');
+assert(scriptAt('js/admin/authorization-view.js') >= 0 && EDITOR_FILES.every((rel) => scriptAt(rel) > scriptAt('js/admin/authorization-view.js')), 'admin editor loads the shared authorization view before its consumer (js/admin/mesh.js) and every other editor module');
 assert(fs.existsSync('js/admin/authorization-view.js'), 'shared authorization view bundle is missing');
 const authorizationEntry = fs.readFileSync('scripts/authorization-view-entry.js', 'utf8');
 assert(authorizationEntry.includes("'@deadark/ark-ui/flux-authorization-view'"), 'wiki authorization bridge must consume Ark UI shared view data');

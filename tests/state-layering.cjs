@@ -27,7 +27,10 @@ assert(/block: 'callout', id: 'about-boundary'[^\n]*body: copy\('BOUNDARY\.TITLE
 assert(/block: 'steps', props: \{ label: 'Three stages'/.test(deployment), 'how it works retains its own three-part journey composition');
 assert(deployment.includes("'how-deploy-mesh'") && deployment.includes('fabrics.push'), 'each stage of how it works owns a mesh illustration');
 assert(deployment.includes("title: 'Current implementation'"), 'how it works keeps its implementation boundary visible');
-assert(continuity.includes("panelPage === 'deployment' || panelPage === 'explorer'") && continuity.includes('? 1600'), 'how it works and the mesh observatory receive a wider desktop canvas than detail pages');
+// 2026-10-19 (W3-GUIDE): the audit found three different page-frame widths (pages-ux-b.md cross-page #4).
+// /explore now sits in the standard 1080 frame (its views measure <=1.22x the viewport there); only the
+// deployment walkthrough and /account keep the wide 1600 canvas.
+assert(continuity.includes("panelPage === 'deployment' || panelPage === 'account' ? 1600 : 1080"), 'only the deployment walkthrough and /account receive the wide desktop canvas; every other page uses the one standard frame');
 
 const explorer = fs.readFileSync('js/pages/explorer.js', 'utf8');
 assert(explorer.includes('mesh-observatory'), 'explorer renders a dedicated observatory surface');

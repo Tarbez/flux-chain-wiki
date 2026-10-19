@@ -146,8 +146,10 @@ try {
     await page.goto(editorOrigin + '/');
     const key = await until(() => page.evaluate(() => {
       /* a heading: page content a person would group into states, not the persistent
-         background scene (id:scene), which the page router owns and keeps displayed */
-      const el = [...document.querySelectorAll('h1[data-ark-layout-key], h2[data-ark-layout-key]')].find((e) => e.getClientRects().length && getComputedStyle(e).display !== 'none' && !e.closest('header, [data-ark-layer="persistent"]') && (e.textContent || '').trim().length > 3);
+         background scene (id:scene), which the page router owns and keeps displayed. Inside the
+         mounted page, not "not in a <header>": an Ark hero's root IS a <header>, so that filter
+         skipped the page's own title once home became Ark blocks. */
+      const el = [...document.querySelectorAll('h1[data-ark-layout-key], h2[data-ark-layout-key]')].find((e) => e.getClientRects().length && getComputedStyle(e).display !== 'none' && e.closest('[data-ark-page]') && !e.closest('[data-ark-layer="persistent"]') && (e.textContent || '').trim().length > 3);
       return el && el.getAttribute('data-ark-layout-key');
     }), 'no visible annotated element on /');
     await context.close();

@@ -555,7 +555,9 @@ async function setDefinition(app, label, prop, value) {
 await flow('makecomp', async () => {
   const { page, app, pv, shot } = await openEditor();
   let master, origin, other;
-  const H1 = '#download-title', P = '#download-title + p';
+  /* the intro paragraph, by its layout key: it kept the key it had when it sat right after the title,
+     though the story template now opens it in The idea view (Wave 3), so '#download-title + p' no longer finds it */
+  const H1 = '#download-title', P = '[data-ark-layout-key="page:/header:1/p:1"]';
   await step('select a heading + paragraph on /download, right-click > Make into component', async () => {
     await gotoRoute(app, pv, '/download');
     /* in the preview's own coordinates, like instanceBox() -- a locator's boundingBox() is in the editor page's */
@@ -720,7 +722,10 @@ await flow('points', async () => {
   const collapsePage = (pv) => pv.evaluate(() => {
     const style = document.createElement('style');
     style.setAttribute('data-test-fixture', 'zero-width-page');
-    style.textContent = '.continuity-host{width:0!important;min-width:0!important}';
+    /* collapse the mounted page itself (every page has one, whatever frame it sits in): since Wave 3,
+       /about sits in the standard frame and Ark sizes its page, so zeroing .continuity-host no longer
+       reproduced the original 0px-wide page */
+    style.textContent = '.continuity-host,[data-ark-page]{width:0!important;min-width:0!important;max-width:0!important;overflow:hidden!important}';
     document.head.appendChild(style);
     const slot = document.querySelector('[data-ark-insert="main"]');
     return slot ? slot.getBoundingClientRect().width : null;

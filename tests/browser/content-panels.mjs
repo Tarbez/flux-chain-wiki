@@ -85,7 +85,9 @@ await step('page fields: typing keeps every character and the caret while the ca
   check(await app.evaluate(() => window.ArkAdmin.state.drafts.home.fields.EYEBROW.value) === typed, 'the draft does not hold what was typed');
   const frame = await previewFrame(app, scaled(20000)).catch(() => null);
   if (frame && await app.evaluate(() => window.ArkAdmin.state.cmsCurrentRoute === '/')) {
-    await until(async () => (await frame.evaluate(() => document.body.innerText)).includes(typed), 'the canvas never showed the typed text', 20000);
+    // textContent, not innerText: the eyebrow is an Ark eyebrow (text-transform: uppercase), and Chromium's
+    // innerText returns the transformed text, so a case-sensitive match never saw the typed words.
+    await until(async () => (await frame.evaluate(() => document.body.textContent)).includes(typed), 'the canvas never showed the typed text', 20000);
   } else console.log('     (canvas not on / -- live canvas text not checked here)');
 });
 

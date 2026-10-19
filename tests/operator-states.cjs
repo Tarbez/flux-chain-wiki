@@ -14,7 +14,11 @@ const reads=[],pending=[];let authOptions,disposed=false,summaryCounts=null;
 const localIdentitySubs=new Set();let localIdentityState=null;
 const localIdentityStub={current(){return localIdentityState;},storageError(){return '';},subscribe(fn){localIdentitySubs.add(fn);fn(localIdentityState);return()=>{localIdentitySubs.delete(fn);};},set(next){localIdentityState=next;},clear(){localIdentityState=null;},refresh(){localIdentitySubs.forEach(fn=>fn(localIdentityState));}};
 let authState=null;
-const ArkUIStub={pageModules:{},localIdentity:localIdentityStub};
+// /explore's frame is Ark blocks since 2026-10-19 (W3-GUIDE): ArkUI.page builds it, and that frame is checked in a
+// real DOM by tests/task-pages-blocks.cjs and tests/routes-live.cjs. This test is about setup(): the connection,
+// reads, counts and record flow it binds to the page. The toy Element answers any selector, so a stand-in page
+// element is all setup() needs -- the same as before the conversion, when mount() filled innerHTML.
+const ArkUIStub={pageModules:{},localIdentity:localIdentityStub,page:(spec,host)=>{const page=new Element();host.appendChild(page);return page;}};
 window.ArkUI=ArkUIStub; // account.js reaches mesh-auth publishing through window.ArkUI, same object as the bare global
 const context={ArkUI:ArkUIStub,document,window,console,AbortController,Date,TypeError,ArkAdminAuth:{create(opts){authOptions={...opts,onChange(next){authState=next;return opts.onChange(next);}};return {dispose(){disposed=true;},current(){return authState;},signOut(){authOptions.onChange(null);}};}},fetch:async(url,options)=>{
  reads.push({url,options});let data={};

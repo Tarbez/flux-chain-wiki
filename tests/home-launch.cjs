@@ -41,6 +41,8 @@ const ROOT = path.resolve(__dirname, '..');
     tile.querySelector('[data-ark-part="stat-label"]').setAttribute('data-ark-layout-pin', 'pin:label');
     settle.resolve({ data: { nodes: [{ qps: 5 }, { qps: 7 }, { error: 'down' }], aggregate_qps: 12345.4, measured_at_ms: Date.UTC(2026, 9, 19, 12) } });
     await tick(); await tick();
+    // the first live update loads js/ark/vendor/ark-kit-live.js and patches when it arrives (async)
+    if (ArkUI.blocks.whenLive) await ArkUI.blocks.whenLive();
     const sameTile = fleetTile(page);
     out.reading = { same: sameTile === tile, state: sameTile.getAttribute('data-state'), number: (sameTile.querySelector('.ark-stat__number') || {}).textContent, unit: (sameTile.querySelector('[data-ark-part="stat-unit"]') || {}).textContent,
       detail: (sameTile.querySelector('[data-ark-part="stat-detail"]') || {}).textContent, pins: [sameTile.getAttribute('data-ark-layout-pin'), sameTile.querySelector('[data-ark-part="stat-label"]').getAttribute('data-ark-layout-pin')] };

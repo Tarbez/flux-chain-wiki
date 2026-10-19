@@ -611,7 +611,11 @@ await surface('toolbar', 'paragraph <p> (real click): text sections; Fill radius
   const { page, app, pv } = await openEditor(opened);
   await pv.locator('p', { hasText: 'Your own history' }).first().click();
   key = await until(() => toolbarKey(app), 'clicking the paragraph opened no toolbar');
-  check(/\/p:\d+$/.test(key), 'a click on the paragraph selected ' + key);
+  /* the paragraph ITSELF is selected, not a container. Its key is a path (".../p:2") or, for text bound to a
+     field, its copy key ("copy:HOME.INTRO" -- js/content/layout.js prefers it; home's intro is bound since
+     it became Ark blocks), so check the selected element's tag, not the key's shape */
+  const selectedTag = await pv.evaluate((k) => { const el = document.querySelector('[data-ark-layout-key="' + k.replace(/"/g, '\\"') + '"]'); return el ? el.tagName : null; }, key);
+  check(selectedTag === 'P', 'a click on the paragraph selected ' + key + ' (' + selectedTag + ')');
   await expectSections(app, TEXT, 'a <p>');
   await page.close(); opened.pop();
   await controlPersists(opened, { route: '/', key, sectionTitle: 'Fill and border',
