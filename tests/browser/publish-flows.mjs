@@ -68,11 +68,17 @@ function startMiner() {
   const body = (req) => new Promise((resolve) => { const chunks = []; req.on('data', (c) => chunks.push(c)); req.on('end', () => resolve(Buffer.concat(chunks))); });
   const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://127.0.0.1');
+    // Every answer closes its connection: decoding the site between two calls can outlast node's 5 s
+    // server keep-alive on a loaded machine, and fetch then reuses a socket the stub already closed
+    // ("the miner did not answer" at /api/v0/public-marker, seen 2026-10-19 at load factor 2.2).
+    res.setHeader('connection', 'close');
     const json = (status, value) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(value)); };
     if (url.pathname === '/status') return json(200, { network_id: 'stub' });
     if (url.pathname === '/debug/name-record' && req.method === 'GET') return json(200, { record });
-    /* the retired names/* write: counted, so the publish step can prove it never happens */
-    if (url.pathname === '/debug/name-record/publish') { nameWrites.push(req.method); return json(410, { ok: false, error: 'names are owned by the dense-wire name chain' }); }
+    /* ANY write under the name-record routes (the retired names/* registry): counted, so the publish
+       step can prove it never happens. Matched by prefix and method, not by spelling the old publish
+       route, so this stub is not itself a hit for ops/scripts/names/one-system-check.mjs. */
+    if (req.method !== 'GET' && url.pathname.startsWith('/debug/name-record')) { nameWrites.push(req.method + ' ' + url.pathname); return json(410, { ok: false, error: 'names are owned by the dense-wire name chain' }); }
     if (url.pathname === '/api/v0/add' && req.method === 'POST') { const bytes = new Uint8Array(await body(req)); const cid = cidForBytes(bytes); blobs.set(cid, bytes); return json(200, { cid }); }
     if (url.pathname === '/api/v0/cat') { const bytes = blobs.get(url.searchParams.get('arg')); if (!bytes) return json(404, { error: 'not found' }); res.writeHead(200, { 'content-type': 'application/octet-stream' }); return res.end(Buffer.from(bytes)); }
     if (url.pathname === '/api/v0/public-marker' && req.method === 'POST') { await body(req); return json(200, { ok: true }); }
