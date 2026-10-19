@@ -73,23 +73,39 @@
   var rights = make('p', 'site-copyright');
   rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
   scene.appendChild(rights);
-  var paths = make('nav', 'corner-navigation');
-  paths.setAttribute('aria-label', 'Explore Flux Protocol');
-  [['HOME.CORNER.USECASES', 'concept'], ['HOME.CORNER.TUTORIALS', 'learnings'], ['HOME.CORNER.EXPERIMENTS', 'proximity']].forEach(function (item) {
-    var link = make('a'); link.href = router.url(item[1]); link.dataset.sceneLink = item[1];
-    link.textContent = ArkCopy.text(item[0]) + ' ↗'; paths.appendChild(link);
+  /* The footer strip: one link per journey, to the page where that journey starts, derived from
+     js/content/site-pages.js (the same table the "All pages" menu and the sitemap read), on every
+     route. It replaces the scene's corner navigation (Spec / Notes / Interactive model) and the
+     theory invitation, which were built on all 69 routes and visible on none (display:none in
+     css/site-direction.css), yet were the only link to /experiments (docs/ux-audit/pages.md
+     "Footer strip"; regression: tests/site-journeys.cjs, tests/browser/site-fixes.mjs). Kept
+     minimal on purpose: the brand pass restyles the site footer later. */
+  var paths = make('nav', 'site-footer-strip');
+  paths.setAttribute('aria-label', 'Site sections');
+  if (typeof ArkSitePages !== 'undefined') ArkSitePages.journeys().forEach(function (journey) {
+    var lead = ArkSitePages.pages().find(function (row) { return row.journey === journey.id && row.lead && ArkUI.pageCatalog[row.key]; });
+    if (!lead) return;
+    var link = make('a', 'site-footer-link'); link.href = router.url(lead.key); link.dataset.sceneLink = lead.key;
+    link.dataset.journey = journey.id;
+    link.title = journey.title + ': ' + journey.note;
+    link.textContent = lead.label; paths.appendChild(link);
   });
   scene.appendChild(paths);
 
-  var latest = make('a', 'theory-invitation');
-  latest.href = router.url('concept');
-  latest.dataset.sceneLink = 'concept';
-  var latestLabel = make('span', 'theory-invitation-label'); latestLabel.textContent = ArkCopy.text('HOME.INVITE.LABEL');
-  var latestTitle = make('strong'); latestTitle.textContent = ArkCopy.text('HOME.INVITE.TITLE');
-  var latestFoot = make('span', 'theory-invitation-link'); latestFoot.textContent = ArkCopy.text('HOME.INVITE.LINK') + ' ↗';
-  latest.appendChild(latestLabel); latest.appendChild(latestTitle); latest.appendChild(latestFoot);
-  scene.appendChild(latest);
-
+  /* A scene link's query is read by ArkUI.route.linkQuery (js/ark/route.js): its
+     data-route-query, else the query already in its href -- both for the href rewrite on mount
+     and for the click. A doc link that names no `from` is given the page it was clicked on, so
+     the reader's "Return" goes back there (docs/ux-audit/pages.md P1). */
+  var sceneQuery = ArkUI.route.linkQuery;
+  /* The reader returns to the page the link was CLICKED on: that is the source page, whatever
+     `from` the link was built with (a resolution detail page built its doc links with its
+     manifest's route, /resolutions, so "Return" left the page you were reading). A doc link
+     inside the reader itself keeps the origin it already has. */
+  function referenceQuery(query) {
+    var params = new URLSearchParams(query || '');
+    if (ArkUI.route.path() !== '/reference' || !params.get('from')) params.set('from', ArkUI.route.current());
+    return params.toString();
+  }
   router.onMount(function (page, name) {
     var bindings = [];
     if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(page);
@@ -98,7 +114,7 @@
       anchor.removeAttribute('aria-hidden');
       bindings.push(ArkUI.bindMeshDrag(anchor, state));
     });
-    page.querySelectorAll('[data-scene-link]').forEach(function (link) { link.href = router.url(link.dataset.sceneLink)+(link.dataset.routeQuery?'?'+link.dataset.routeQuery:''); });
+    page.querySelectorAll('[data-scene-link]').forEach(function (link) { var query = sceneQuery(link); link.href = router.url(link.dataset.sceneLink) + (query ? '?' + query : ''); });
     var input = page.querySelector('[data-word-input]');
     if (input && state.get().words[name]) input.value = state.get().words[name];
     return function () { bindings.forEach(function (binding) { binding.dispose(); }); };
@@ -128,7 +144,7 @@
     var target = event.target.closest('[data-scene-link], [data-reset-word], [data-section-target]');
     if (!target) {
       var labLink = event.target.closest('a[href="#work"]');
-      if (labLink) { event.preventDefault(); navigate('lab'); }
+      if (labLink) { event.preventDefault(); navigate('proximity'); }
       return;
     }
     if (target.dataset.sceneLink) { event.preventDefault(); navigate(target.dataset.sceneLink, target); }
@@ -156,7 +172,7 @@
   function sync() {
     var current = state.get();
     var isTheory = current.page.indexOf('concept/') === 0;
-    scene.querySelectorAll('.ark-header a').forEach(function (link) {
+    scene.querySelectorAll('.ark-header a, .site-footer-strip a').forEach(function (link) {
       if (router.resolve(link.getAttribute('href')) === current.page) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
@@ -164,12 +180,10 @@
     var isEnabled = enabled();
     scene.classList.toggle('hero-still', !isEnabled);
     toggle.hidden = current.page === 'zero';
-    paths.hidden = current.page !== 'zero';
     var isArticle = current.page.indexOf('article/') === 0;
-    toggle.textContent = '← ' + ArkCopy.text(current.page === 'lab' ? 'NAV.BACK.EXPERIMENTS' : isArticle ? 'NAV.BACK.TUTORIALS' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
+    toggle.textContent = '← ' + ArkCopy.text(isArticle ? 'NAV.BACK.TUTORIALS' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
     toggle.setAttribute('aria-expanded', String(current.page !== 'zero'));
-    toggle.setAttribute('aria-label', current.page === 'lab' ? 'Return to experiments' : current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to learnings' : isTheory ? 'Return to the operating model' : 'Return to the zero hero');
-    latest.hidden = current.page !== 'zero';
+    toggle.setAttribute('aria-label', current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to the notes' : isTheory ? 'Return to the operating model' : 'Return to the zero hero');
     var meshControl=scene.querySelector('.mesh-drag-surface.mesh-drag-target');if(meshControl){var decorative=current.page!=='zero';meshControl.inert=decorative;meshControl.tabIndex=decorative?-1:0;meshControl.setAttribute('aria-hidden',String(decorative));}
     var active = pages[current.page];
     if (!active) return;
@@ -187,11 +201,13 @@
   function navigate(page, source) {
     closeNavigation(header && header.contains(document.activeElement) && header.classList.contains('nav-open'));
     window.clearTimeout(wordTimer);
-    return router.navigate(page, { source: source,query:source&&source.dataset.routeQuery||undefined }).then(function (result) { sync(); return result; });
+    var query = source && source.dataset ? sceneQuery(source) : '';
+    if (page === 'reference') query = referenceQuery(query);
+    return router.navigate(page, { source: source, query: query || undefined }).then(function (result) { sync(); return result; });
   }
   toggle.addEventListener('click', function () {
     var page = state.get().page;
-    navigate(page === 'lab' ? 'proximity' : page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
+    navigate(page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
   });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
@@ -199,7 +215,7 @@
       event.preventDefault(); closeNavigation(true); return;
     }
     if (state.get().page === 'zero') return;
-    navigate(state.get().page === 'lab' ? 'proximity' : state.get().page.indexOf('article/') === 0 ? 'learnings' : state.get().page.indexOf('concept/') === 0 ? 'concept' : 'zero');
+    navigate(state.get().page.indexOf('article/') === 0 ? 'learnings' : state.get().page.indexOf('concept/') === 0 ? 'concept' : 'zero');
     toggle.focus({ preventScroll: true });
   });
   /* An old https://host/#/explore link is opened once, then its address is rewritten to the clean path. */
@@ -216,9 +232,15 @@
   scene.querySelectorAll('.ark-header a').forEach(function (link) {
     link.addEventListener('click', function (event) { event.preventDefault(); navigate(router.resolve(link.getAttribute('href'))); });
   });
+  /* Skip link (index.html, the first thing Tab reaches): past the header's ~10 controls to the
+     page itself. It used to have no element at all, and this handler navigated to the old lab
+     page (docs/ux-audit/pages-ux-a.md cross-page 7; regression: tests/browser/site-fixes.mjs). */
   var skip = document.querySelector('.skip');
   if (skip) skip.addEventListener('click', function (event) {
-    event.preventDefault(); navigate('lab');
+    var active = router.active && pages[router.active];
+    if (!active) return;
+    event.preventDefault();
+    active.focus({ preventScroll: false });
   });
   reduced.addEventListener('change', sync);
   finePointer.addEventListener('change', sync);

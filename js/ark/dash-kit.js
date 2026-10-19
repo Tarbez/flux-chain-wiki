@@ -111,8 +111,11 @@
     var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key];
     return entry ? (ArkUI.route ? ArkUI.route.href(entry.path) : '#' + entry.path) : '#/' + key;
   }
+  /* `from` is the route the reader's "Return" link goes back to. Omitted, the link names no
+     origin and js/hero-motion.js fills in the page it is clicked on -- writing '/' here sent
+     every reader that did not pass `from` back to Home (docs/ux-audit/pages.md P1). */
   function docHref(doc, from) {
-    var query = 'doc=' + encodeURIComponent(doc) + '&from=' + encodeURIComponent(from || '/');
+    var query = 'doc=' + encodeURIComponent(doc) + (from ? '&from=' + encodeURIComponent(from) : '');
     return ArkUI.route ? ArkUI.route.href('/reference?' + query) : '#/reference?' + query;
   }
   function pageLink(label, key, cls) {
@@ -161,6 +164,19 @@
     return a;
   }
 
+  /* The icon an onward link earns: 'open' (the leave-the-site glyph) only when the link really
+     leaves the site -- a new tab, or an absolute address on another origin -- and 'arrow-right'
+     for every in-site route or in-site reader. /about and / put the external glyph on internal
+     routes such as "See how DEFXN works" (docs/ux-audit/pages-ux-a.md /about P1; the same rule
+     as the text arrows: ↗ only on links that leave the site; regression: tests/site-exits.cjs). */
+  function linkIcon(a) {
+    if (!a) return 'arrow-right';
+    if (a.target === '_blank') return 'open';
+    var link = a.getAttribute ? a.getAttribute('href') || '' : String(a.href || '');
+    if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(link)) return 'arrow-right';
+    try { return typeof location !== 'undefined' && new URL(link).origin === location.origin ? 'arrow-right' : 'open'; } catch (_) { return 'open'; }
+  }
+
   /* The page shell every dashboard-shaped page opens with: breadcrumb,
      kicker, title, lede. Returns the parts so a caller can hang its own
      status block in the header. */
@@ -203,6 +219,47 @@
   ArkUI.dash = {
     el: el, fmt: fmt, panel: panel, sectionHead: sectionHead, stat: stat, bar: bar,
     table: table, href: href, docHref: docHref, pageLink: pageLink, docLink: docLink,
-    resolveLinkField: resolveLinkField, linkEl: linkEl, shell: shell
+    resolveLinkField: resolveLinkField, linkEl: linkEl, linkIcon: linkIcon, shell: shell
+  };
+
+  /* foldToggle: the one way a page keeps content off its first screen
+     without deleting it. Defect it replaces (UX audit 2026-10-19,
+     docs/ux-audit/pages-ux-b.md cross-page finding 2): the fold rule was being
+     met by `display:none` on phones and by line-clamps with no way to expand,
+     so the lifecycle illustration, the resolutions deck and footer note were
+     simply gone or cut off with "...". A page now keeps that content in the
+     DOM, marks its container `data-fold="open|closed"`, and lets its own CSS
+     decide what "closed" looks like at which width; this button is the only
+     thing that flips it, and says so to assistive tech (aria-expanded).
+
+     options.host     element whose data-fold this button owns (required)
+     options.more     label while closed   (default 'More')
+     options.less     label while open     (default 'Less')
+     options.controls id of the region it reveals (aria-controls)
+     options.clamp    a line-clamped element: while closed, the button hides
+                      itself when that element is not actually cut off (a wide
+                      screen fits the whole sentence), so it never offers a
+                      "More" that reveals nothing.
+     Site-side until Ark UI ships a Disclosure block (plan.md, Wave 2 adapter);
+     css/components.css paints .fold-toggle. */
+  ArkUI.dash.foldToggle = function (options) {
+    var host = options.host, clamp = options.clamp || null;
+    var button = el('button', 'fold-toggle' + (options.cls ? ' ' + options.cls : ''));
+    button.type = 'button';
+    if (options.controls) button.setAttribute('aria-controls', options.controls);
+    function set(open) {
+      host.dataset.fold = open ? 'open' : 'closed';
+      button.setAttribute('aria-expanded', String(open));
+      button.textContent = open ? (options.less || 'Less') : (options.more || 'More');
+    }
+    function fit() {
+      if (!clamp || host.dataset.fold === 'open' || !clamp.isConnected) return;
+      button.hidden = clamp.scrollHeight <= clamp.clientHeight + 1;
+    }
+    button.addEventListener('click', function () { set(host.dataset.fold !== 'open'); fit(); });
+    set(!!options.open);
+    if (clamp && typeof requestAnimationFrame === 'function') requestAnimationFrame(fit);
+    if (clamp && typeof ResizeObserver === 'function') new ResizeObserver(fit).observe(clamp);
+    return button;
   };
 })();

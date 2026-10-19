@@ -115,7 +115,6 @@ function proseLines(markdown) {
  *     those lines carry the ALLOW token and say why. */
 const LIVE_UI = [
   'js/content/stats-highlights.js',
-  'js/content/resolver-registry.js',
   'js/content/resolver-block.js',
   'js/content/resolver-algebra.js',
   'js/pages/resolver-math.js',
@@ -242,6 +241,93 @@ for (const relative of LIVE_HTML) {
   }
 }
 
+/* ---------------------------------------------------------------------------------------
+ * RENDERED COPY (added 2026-10-19).
+ *
+ * Why: the lists above are files someone remembered to name. The banned words that survived
+ * on the site -- "quorum" on /how-deployment-works and /dao, "validator.fxn" on /chain,
+ * "finality" and "accepted ops/s" in five articles and in llms.txt -- were all in files no
+ * list named (docs/ux-audit/resolvers-content.md §0). So this half does not take a list of
+ * files: it reads every source a visitor's words come from, by kind, and scans the WORDS:
+ *
+ *   - every page manifest (js/content/manifests/*.js): title, every field value, and meta
+ *     (diagram specs are rendered copy too) -- read through ArkManifest, not as text;
+ *   - every article and the article index (js/content/articles/*.js, article-index.js);
+ *   - the SEO data (js/content/seo-data.js) and the generated llms.txt;
+ *   - every string literal that reads as prose in the page modules and shell resolvers
+ *     (js/pages/*.js, js/resolvers/*.js) and the content data modules (js/content/*.js).
+ *
+ * Two structural exemptions, decided by shape, never by a list of words:
+ *   - an identifier is not prose. A string with no whitespace (a key, a field name, a CSS
+ *     class, a URL slug such as the published /learnings/governance-without-a-validator-set,
+ *     which cannot be renamed without a redirect -- owner question Q7) asserts nothing;
+ *   - a URL inside llms.txt is an address, not a sentence.
+ * js/content/reference-text.js stays out: it is generated, and carries the frozen historical
+ * docs verbatim by design (see LIVE_UI above).
+ *
+ * The term list is FORBIDDEN above -- one list, for docs and rendered copy alike. */
+const vm = require('node:vm');
+const isIdentifier = (text) => !/\s/.test(text.trim());
+function scanText(where, text) {
+  if (typeof text !== 'string' || isIdentifier(text)) return;
+  for (const [pattern, remedy] of FORBIDDEN) {
+    const re = new RegExp(pattern, 'i');
+    if (re.test(text)) findings.push(`${where}: "${re.exec(text)[0]}" — ${remedy}\n      ${text.trim().slice(0, 110)}`);
+  }
+}
+function walk(where, value) {
+  if (typeof value === 'string') return scanText(where, value);
+  if (Array.isArray(value)) return value.forEach((item, i) => walk(`${where}[${i}]`, item));
+  if (value && typeof value === 'object') for (const key of Object.keys(value)) walk(`${where}.${key}`, value[key]);
+}
+let rendered = 0;
+
+// Manifests: read through the same ArkManifest the site uses, so a field is scanned as its value.
+const manifestContext = vm.createContext({ document: { write() {} } });
+vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/content/manifest.js'), 'utf8'), manifestContext);
+for (const name of fs.readdirSync(path.join(ROOT, 'js/content/manifests')).filter((f) => f.endsWith('.js') && f !== 'index.js')) {
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'js/content/manifests', name), 'utf8'), manifestContext);
+  const manifest = JSON.parse(JSON.stringify(vm.runInContext(`ArkManifest.get(${JSON.stringify(name.slice(0, -3))})`, manifestContext)));
+  walk(`js/content/manifests/${name} title`, manifest.title);
+  for (const [role, field] of Object.entries(manifest.fields)) walk(`js/content/manifests/${name} ${role}`, field.value);
+  walk(`js/content/manifests/${name} meta`, manifest.meta);
+  rendered += 1;
+}
+
+// Articles and their index.
+const articleList = [];
+vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/content/article-index.js'), 'utf8'), { LearningContent: { define: (list) => articleList.push(...list) } });
+walk('js/content/article-index.js', articleList);
+for (const name of fs.readdirSync(path.join(ROOT, 'js/content/articles')).filter((f) => f.endsWith('.js'))) {
+  let body = null;
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/content/articles', name), 'utf8'), { LearningContent: { load: (_slug, b) => { body = b; } } });
+  walk(`js/content/articles/${name}`, body);
+  rendered += 1;
+}
+assert(articleList.length > 0 && rendered > articleList.length, 'the rendered-copy scan read no articles -- it would pass vacuously');
+
+// SEO data (titles, descriptions, AI summaries) and the llms.txt generated from it.
+let seo = null;
+vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'js/content/seo-data.js'), 'utf8'), { ArkSEO: { define: (whole) => { seo = whole; } } });
+walk('js/content/seo-data.js', seo);
+rendered += 1;
+fs.readFileSync(path.join(ROOT, 'llms.txt'), 'utf8').split('\n').forEach((line, i) => scanText(`llms.txt:${i + 1}`, line.replace(/\(https?:\/\/[^)\s]*\)/g, '')));
+rendered += 1;
+
+// Page modules, shell resolvers and content data modules: string literals that read as prose.
+const LITERAL = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g;
+const moduleFiles = ['js/pages', 'js/resolvers', 'js/content'].flatMap((dir) =>
+  fs.readdirSync(path.join(ROOT, dir)).filter((f) => f.endsWith('.js')).map((f) => `${dir}/${f}`))
+  .filter((file) => file !== 'js/content/reference-text.js');
+for (const file of moduleFiles) {
+  for (const { n, text } of jsLines(fs.readFileSync(path.join(ROOT, file), 'utf8'))) {
+    for (const literal of text.match(LITERAL) || []) scanText(`${file}:${n}`, literal.slice(1, -1));
+  }
+  rendered += 1;
+}
+assert(rendered > 40, `expected to scan the site's rendered copy, scanned only ${rendered} sources`);
+scanned += rendered;
+
 assert(scanned >= 3, `expected to scan the live doc set, scanned only ${scanned} — the list is wrong and this test would pass vacuously`);
 
 assert.equal(
@@ -253,5 +339,5 @@ assert.equal(
 );
 
 console.log(
-  `PASS: ${scanned} live docs and UI files carry no deprecated blockchain vocabulary; ${FORBIDDEN.length} terms enforced.`,
+  `PASS: ${scanned} live docs, UI files and rendered-copy sources (manifests, articles, SEO data, llms.txt, page modules) carry no deprecated blockchain vocabulary; ${FORBIDDEN.length} terms enforced.`,
 );

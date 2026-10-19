@@ -4,10 +4,13 @@
     <loc>https://defxn.com/</loc>
   </url>
   <url>
-    <loc>https://defxn.com/experiments</loc>
+    <loc>https://defxn.com/about</loc>
   </url>
   <url>
-    <loc>https://defxn.com/experiments/lab</loc>
+    <loc>https://defxn.com/resolutions</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/experiments</loc>
   </url>
   <url>
     <loc>https://defxn.com/learnings</loc>
@@ -19,13 +22,25 @@
     <loc>https://defxn.com/palette</loc>
   </url>
   <url>
+    <loc>https://defxn.com/what-is-a-resolver</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/resolver-math</loc>
+  </url>
+  <url>
     <loc>https://defxn.com/resolvers</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/start-from-something-real</loc>
   </url>
   <url>
     <loc>https://defxn.com/account</loc>
   </url>
   <url>
     <loc>https://defxn.com/account/domains</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/bundle-deployer</loc>
   </url>
   <url>
     <loc>https://defxn.com/treasury</loc>
@@ -35,6 +50,24 @@
   </url>
   <url>
     <loc>https://defxn.com/stats</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/stats/gpu</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/stats/ledger</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-deployment-works</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-deployment-works/ask</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-deployment-works/work</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-deployment-works/check</loc>
   </url>
   <url>
     <loc>https://defxn.com/lifecycle</loc>
@@ -58,25 +91,16 @@
     <loc>https://defxn.com/chain</loc>
   </url>
   <url>
-    <loc>https://defxn.com/what-is-a-resolver</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/resolver-math</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/start-from-something-real</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/how-deployment-works</loc>
-  </url>
-  <url>
     <loc>https://defxn.com/concept</loc>
   </url>
   <url>
-    <loc>https://defxn.com/about</loc>
+    <loc>https://defxn.com/dao</loc>
   </url>
   <url>
-    <loc>https://defxn.com/resolutions</loc>
+    <loc>https://defxn.com/download</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/deploy</loc>
   </url>
   <url>
     <loc>https://defxn.com/concept/purpose</loc>
@@ -95,18 +119,6 @@
   </url>
   <url>
     <loc>https://defxn.com/concept/spec</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/download</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/bundle-deployer</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/deploy</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/dao</loc>
   </url>
   <url>
     <loc>https://defxn.com/resolutions/website</loc>

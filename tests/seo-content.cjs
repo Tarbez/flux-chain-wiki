@@ -6,6 +6,7 @@ function load(context) {
   vm.runInContext(fs.readFileSync('js/content/resolutions.js', 'utf8'), context, { filename: 'resolutions.js' });
   vm.runInContext(fs.readFileSync('js/content/learnings.js', 'utf8'), context, { filename: 'learnings.js' });
   vm.runInContext(fs.readFileSync('js/content/article-index.js', 'utf8'), context, { filename: 'article-index.js' });
+  vm.runInContext(fs.readFileSync('js/content/site-pages.js', 'utf8'), context, { filename: 'site-pages.js' });
   vm.runInContext(fs.readFileSync('js/content/seo.js', 'utf8'), context, { filename: 'seo.js' });
 }
 const context = vm.createContext({});
@@ -15,7 +16,7 @@ const { ArkManifest, LearningContent, ArkResolutions, ArkSEO } = vm.runInContext
 // pageEntries(): every non-'site'-group manifest plus every catalog-only SEO identity, and never 'nav'.
 const pageIds = ArkSEO.pageIds();
 assert(pageIds.indexOf('nav') < 0, 'group "site" (shared chrome, e.g. nav) is not a route and is excluded');
-const extraIds = ['proximity', 'lab', 'learnings', 'explorer', 'palette', 'resolvers', 'account', 'account/domains', 'treasury', 'deposits', 'stats', 'stats/gpu', 'stats/ledger', 'how/ask', 'how/work', 'how/check', 'reference', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
+const extraIds = ['proximity', 'learnings', 'explorer', 'palette', 'resolvers', 'account', 'account/domains', 'treasury', 'deposits', 'stats', 'stats/gpu', 'stats/ledger', 'how/ask', 'how/work', 'how/check', 'reference', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
 assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site').map((m) => m.id).concat(extraIds).sort()), 'pageIds includes manifest-less lifecycle and nested resolution pages');
 assert.equal(JSON.stringify(ArkSEO.articleSlugs()), JSON.stringify(LearningContent.articles.map((a) => a.slug)), 'articleSlugs is every article, in order');
 
@@ -123,6 +124,7 @@ const llms = ArkSEO.llmsTxt({ site: { baseUrl: 'https://example.com', defaultDes
 assert(llms.startsWith('# DEFXN\n\n> What this site is.'), 'llms.txt opens with the site name and summary');
 assert(llms.includes('## Pages') && llms.includes('https://example.com/about'), 'a visible page is listed under Pages');
 if (articles.length) assert(llms.includes('## Articles') && llms.includes('https://example.com/learnings/' + articles[0].slug), 'a visible article is listed under Articles');
+if (articles.length && articles[0].title) assert(llms.includes('- [' + articles[0].title + ' — DEFXN](https://example.com/learnings/' + articles[0].slug + ')'), 'an article is listed by its title, not its slug: until 2026-10-19 every article line read as its slug, and the published slug governance-without-a-validator-set reached llms.txt as a title carrying a retired word');
 const llmsHidden = ArkSEO.llmsTxt({ site: { baseUrl: 'https://example.com' }, pages: { about: { noindex: true } } }, manifests, articles);
 assert(!llmsHidden.includes('https://example.com/about'), 'a noindex page is left out of llms.txt too');
 

@@ -54,7 +54,7 @@ assert.deepEqual(s.writes, [['push', '#/about']]);
 
 // The router resolves the new and the old explorer address to the same page, plus every catalog route by path.
 const rs = vm.createContext({ console, document: { querySelector() { return null; }, createElement() { return {}; } }, window: { addEventListener() {}, matchMedia: () => ({ matches: true }) }, location: { protocol: 'https:', pathname: '/', search: '', hash: '' }, getComputedStyle: () => ({}), ArkUI: { prefersReducedMotion: () => true } });
-for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js', 'js/content/article-index.js', 'js/ark/scene-state.js', 'js/pages/catalog.js', 'js/ark/route.js', 'js/ark/page-router.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), rs);
+for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js', 'js/content/article-index.js', 'js/ark/scene-state.js', 'js/content/site-pages.js', 'js/pages/catalog.js', 'js/ark/route.js', 'js/ark/page-router.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), rs);
 const catalog = rs.ArkUI.pageCatalog;
 assert.equal(catalog.explorer.path, '/explore');
 const urlFor = rs.ArkUI.route.href;

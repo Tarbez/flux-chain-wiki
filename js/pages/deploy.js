@@ -15,6 +15,10 @@ ArkUI.pageModules.deploy = {
     title.id = 'deploy-title';
     content.appendChild(title);
     content.appendChild(ArkUI.el('p', 'concept-deck', words('DECK')));
+    // Readers who came to deploy a resolver are on the wrong page: say so first, with the way there.
+    var resolverNote = ArkUI.el('p', 'concept-deck deploy-resolver-note', words('RESOLVER.NOTE') + ' ');
+    resolverNote.appendChild(ArkUI.dash.linkEl(words('RESOLVER.LINK') + ' →', words('RESOLVER.HREF'), manifest.route, ''));
+    content.appendChild(resolverNote);
     var siteDeployment = ArkUI.el('p', 'concept-deck', 'Deploying a site? You will need the local FXN Bundle Deployer. ');
     var deployerLink = ArkUI.el('a', 'article-back', 'CLI status and public bundle guidance →');
     var deployerHref = ArkUI.dash.resolveLinkField(words('BUNDLEDEPLOYER.HREF'));
@@ -110,7 +114,7 @@ ArkUI.pageModules.deploy = {
     content.appendChild(list);
     var controls = ArkUI.el('div', 'deploy-workflow-controls');
     var previous = ArkUI.el('button', 'deploy-workflow-back', 'Previous step'); previous.type = 'button';
-    var next = ArkUI.el('button', 'mechanism-next', 'Next step ↗'); next.type = 'button';
+    var next = ArkUI.el('button', 'mechanism-next', 'Next step →'); next.type = 'button';
     var all = ArkUI.el('button', 'deploy-workflow-all', 'Review all steps'); all.type = 'button';
     var position = ArkUI.el('p', 'deploy-position'); position.setAttribute('role', 'status');
     function selectStep(index, focus) {
@@ -153,7 +157,7 @@ ArkUI.pageModules.deploy = {
     var backHref = ArkUI.dash.resolveLinkField('route:' + manifest.meta.back);
     back.href = backHref.href; back.dataset.sceneLink = backHref.sceneLink;
     back.appendChild(document.createTextNode(words('BACK') + ' '));
-    var arrow = ArkUI.el('span', 'cta-arrow', '↗');
+    var arrow = ArkUI.el('span', 'cta-arrow', '→');
     arrow.setAttribute('aria-hidden', 'true');
     back.appendChild(arrow);
     footer.appendChild(back);

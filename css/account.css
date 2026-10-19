@@ -38,7 +38,7 @@
 #scene .account-hero { grid-column:1; grid-row:1; align-self:center; min-width:0; }
 #scene .account-promise {
   display:flex; align-items:center; gap:11px; margin:0 0 18px;
-  color:hsl(var(--text)); font:500 11px/1.4 var(--mono-font,monospace); letter-spacing:.04em; text-transform:uppercase;
+  color:hsl(var(--text)); font:500 11px/1.4 var(--font-mono,monospace); letter-spacing:.04em; text-transform:uppercase;
 }
 #scene .account-promise::before { content:""; flex:0 0 7px; height:7px; border:1px solid hsl(var(--primary)); border-radius:50%; background:hsl(var(--primary-200)); }
 #scene .account-promise::after { content:none; }
@@ -48,7 +48,7 @@
   position:relative; display:grid; place-items:center; flex:0 0 64px; height:64px;
   border:1px solid hsl(var(--border-strong)); border-radius:50%;
   background:hsl(var(--surface)); color:hsl(var(--text-strong));
-  font:500 18px/1 var(--mono-font,ui-monospace,monospace);
+  font:500 18px/1 var(--font-mono,ui-monospace,monospace);
 }
 #scene .account-avatar::after { content:""; position:absolute; top:6px; right:9px; width:6px; height:6px; border-radius:50%; background:hsl(var(--text-faint)); }
 #scene [data-session="verified-local"] .account-avatar::after { background:var(--signal-trust,hsl(var(--trust))); }
@@ -61,7 +61,7 @@
 #scene .account-page:not([data-session="signed-out"]) .account-hero h1 { max-width:none; font-size:clamp(38px,4.2vw,58px); }
 #scene .account-status {
   display:inline-flex; align-items:center; gap:8px;
-  color:hsl(var(--text-muted)); font:500 11px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.04em; text-transform:uppercase;
+  color:hsl(var(--text-muted)); font:500 11px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.04em; text-transform:uppercase;
 }
 #scene .account-status::before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
 #scene .account-intro {
@@ -83,7 +83,7 @@
 #scene .account-state { max-width:560px; margin:22px 0 0; }
 #scene .account-state dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 24px; margin:0; }
 #scene .account-state dl>div { min-width:0; padding:10px 0; border-top:1px solid var(--account-rule); }
-#scene .account-state dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-state dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 /* The one-line explanation inside each dt (identity/account/wallet) must
    read as prose, not as more shouty uppercase label text -- added after a
    real person pasted the wrong field into a security-critical config
@@ -95,7 +95,7 @@
 }
 #scene .account-state dd {
   display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
-  margin:4px 0 0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 12px/1.45 var(--mono-font,monospace);
+  margin:4px 0 0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 12px/1.45 var(--font-mono,monospace);
 }
 #scene .account-page .account-state>p:last-child { margin:8px 0 0; color:var(--account-muted); font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-page[data-session="verified-local"] .account-state>p:last-child { color:var(--signal-trust,hsl(var(--trust))); }
@@ -117,9 +117,9 @@
 }
 #scene .account-page .account-tabs button:hover { background:transparent; color:hsl(var(--text-strong)); transform:none; }
 #scene .account-page .account-tabs button[aria-selected="true"] { background:transparent; color:hsl(var(--text-strong)); box-shadow:none; }
-#scene .account-card-caption { margin:0 0 14px; color:hsl(var(--primary)); font:500 11px/1.4 var(--mono-font,monospace); letter-spacing:.02em; }
+#scene .account-card-caption { margin:0 0 14px; color:hsl(var(--primary)); font:500 11px/1.4 var(--font-mono,monospace); letter-spacing:.02em; }
 #scene .account-page:not([data-session="signed-out"]) .account-card-caption { display:none; }
-#scene .account-card h3 { margin:0 0 8px; color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-card h3 { margin:0 0 8px; color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-line { margin:8px 0 0; color:var(--signal-trust,hsl(var(--trust))); font:400 12px/1.45 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-line:empty { display:none; }
 #scene .account-next { display:none; }
@@ -150,7 +150,7 @@
 #scene [data-session="verified-local"] [data-ark-auth="body"]>:is(h2,p,dl) { display:none; }
 #scene .account-page [data-ark-auth="rows"] { display:grid; gap:8px; margin:8px 0; }
 #scene .account-page [data-ark-auth="rows"]>div { display:grid; gap:3px; }
-#scene .account-page [data-ark-auth="rows"] dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); }
+#scene .account-page [data-ark-auth="rows"] dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); }
 #scene .account-page [data-ark-auth="rows"] dd { margin:0; overflow-wrap:anywhere; font:400 12px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-page [data-ark-auth="form"] { display:grid; gap:10px; }
 #scene .account-page [data-ark-auth="form"] label { display:grid; gap:6px; color:hsl(var(--text-strong)); font:600 12px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
@@ -160,7 +160,7 @@
 #scene .account-page :is([data-ark-auth="form"] input,.account-contacts-form input,.account-wallet-form input,[data-account-create] select) {
   width:100%; min-height:40px; box-sizing:border-box; padding:9px 12px;
   border:1px solid hsl(var(--border-default)); border-radius:2px;
-  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 13px/1.4 var(--mono-font,ui-monospace,monospace);
+  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 13px/1.4 var(--font-mono,ui-monospace,monospace);
 }
 #scene .account-page .account-signin-tabs button[aria-pressed="true"] { background:transparent; color:hsl(var(--text-strong)); box-shadow:none; }
 #scene .account-page[data-session="signed-out"] .account-session-description { display:none; }
@@ -193,7 +193,7 @@
 #scene .account-balance { display:grid; gap:6px; align-content:start; min-width:0; }
 #scene .account-balance-head { display:flex; align-items:center; gap:6px; }
 #scene .account-balance-head img { width:16px; height:16px; border-radius:50%; object-fit:cover; flex:0 0 auto; }
-#scene .account-balance small { color:hsl(var(--text-muted)); font:500 10.5px/1.2 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-balance small { color:hsl(var(--text-muted)); font:500 10.5px/1.2 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-balance strong { overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:600 30px/1.05 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
 #scene .account-balance span { color:var(--account-muted); font:400 12px/1.45 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-transfers { padding-top:14px; border-top:1px solid var(--account-rule); }
@@ -201,7 +201,7 @@
 #scene .account-transfer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0; padding:7px 0; border-bottom:1px solid var(--account-rule); }
 #scene .account-transfer span { display:grid; gap:2px; min-width:0; }
 #scene .account-transfer strong { color:hsl(var(--text-strong)); font:600 14px/1.3 var(--font-sans,"Albert Sans",sans-serif); }
-#scene .account-transfer small { color:hsl(var(--text-faint)); font:400 11px/1.3 var(--mono-font,monospace); }
+#scene .account-transfer small { color:hsl(var(--text-faint)); font:400 11px/1.3 var(--font-mono,monospace); }
 #scene .account-transfer em { color:hsl(var(--text-faint)); font:400 12px/1.3 var(--font-sans,"Albert Sans",sans-serif); font-style:normal; }
 #scene .account-transfer button { min-height:30px; padding:4px 12px; font-size:12px; }
 #scene [data-account-fxn-pending] .account-transfer strong { color:hsl(var(--primary)); }
@@ -210,13 +210,13 @@
 #scene .account-wallet-form { display:flex; flex-direction:column; gap:8px; }
 #scene .account-wallet-form h3 { margin:0; color:hsl(var(--text-strong)); font:500 24px/1.15 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; text-transform:none; }
 #scene .account-wallet-form p { margin:0 0 6px; color:var(--account-muted); font:400 13px/1.45 var(--font-sans,"Albert Sans",sans-serif); }
-#scene .account-wallet-form label { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-wallet-form label { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-wallet-form button[type="submit"] { align-self:flex-start; margin-top:6px; }
 /* Network switcher (directed 2026-10-16): same input chrome as every
    other wallet field, plain <select> semantics so keyboard/AT users get
    the browser's own picker, not a reimplementation. */
 #scene .account-wallet-network { display:flex; align-items:flex-start; gap:10px; margin-top:10px; }
-#scene .account-wallet-network-label { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; padding-top:7px; }
+#scene .account-wallet-network-label { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; padding-top:7px; }
 /* The option buttons themselves (.network-options/.network-option) are
    styled once, site-wide, in css/navigation.css -- shared with the
    site-nav chain popover's own mount of this same control. */
@@ -227,30 +227,30 @@
 #scene .account-page .account-wallet-form textarea {
   width:100%; box-sizing:border-box; padding:9px 12px; resize:vertical;
   border:1px solid hsl(var(--border-default)); border-radius:2px; overflow-wrap:anywhere; word-break:break-all;
-  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 11.5px/1.45 var(--mono-font,ui-monospace,monospace);
+  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 11.5px/1.45 var(--font-mono,ui-monospace,monospace);
 }
 #scene .account-wallet-form .account-wallet-actions button[type="submit"] { margin-top:0; }
 #scene .account-wallet-form [data-account-fxn-send-whole]:empty, #scene .account-wallet-form [data-account-fxn-next]:empty { display:none; }
 #scene [data-account-fxn-key] { overflow-wrap:anywhere; word-break:break-all; }
 #scene .account-fxn-stages { display:grid; gap:0; margin:4px 0 0; padding:0; list-style:none; counter-reset:fxnleg; }
 #scene .account-fxn-stages li { display:grid; grid-template-columns:22px minmax(0,1fr); column-gap:8px; padding:6px 0; border-bottom:1px solid var(--account-rule); counter-increment:fxnleg; }
-#scene .account-fxn-stages li::before { content:counter(fxnleg); grid-row:span 2; color:hsl(var(--text-faint)); font:500 11px/1.4 var(--mono-font,monospace); }
+#scene .account-fxn-stages li::before { content:counter(fxnleg); grid-row:span 2; color:hsl(var(--text-faint)); font:500 11px/1.4 var(--font-mono,monospace); }
 #scene .account-fxn-stages li[data-done="true"]::before { content:"✓"; color:hsl(var(--trust)); }
 #scene .account-fxn-stages strong { color:hsl(var(--text-strong)); font:600 13px/1.3 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-fxn-stages li[data-done="false"] strong { color:hsl(var(--text-muted)); }
-#scene .account-fxn-stages small { color:hsl(var(--text-faint)); font:400 11px/1.3 var(--mono-font,monospace); overflow-wrap:anywhere; }
+#scene .account-fxn-stages small { color:hsl(var(--text-faint)); font:400 11px/1.3 var(--font-mono,monospace); overflow-wrap:anywhere; }
 
 /* Contacts view */
 #scene .account-contacts [data-contacts-view="list"] { display:flex; flex-direction:column; flex:1; min-height:0; }
 #scene .account-contacts-form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
-#scene .account-contacts-form label { grid-column:1/-1; color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-contacts-form label { grid-column:1/-1; color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-contacts-lists { display:grid; gap:12px; flex:1; min-height:0; margin-top:14px; overflow:auto; scrollbar-width:thin; }
 #scene .account-contacts-lists h3 b { margin-left:4px; color:hsl(var(--text-strong)); font-weight:600; }
 #scene .account-contacts-list { display:grid; gap:0; list-style:none; margin:0; padding:0; }
 #scene .account-contacts-results { margin-top:10px; }
 #scene .account-contacts-list li { display:flex; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--account-rule); }
 #scene .account-contacts-list li button:not(.account-contact-main) { min-height:30px; padding:4px 10px; font-size:12px; }
-#scene .account-contacts-tag { color:hsl(var(--text-faint)); font:500 10px/1.4 var(--mono-font,monospace); text-transform:uppercase; }
+#scene .account-contacts-tag { color:hsl(var(--text-faint)); font:500 10px/1.4 var(--font-mono,monospace); text-transform:uppercase; }
 #scene [data-contacts-incoming] .account-contacts-tag { color:hsl(var(--primary)); }
 #scene .account-contacts-empty { margin:0; color:hsl(var(--text-faint)); font:400 12px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-contacts-list li.account-contacts-empty { border-bottom:0; }
@@ -258,20 +258,20 @@
 #scene .account-page .account-contact-main:hover { background:none; }
 #scene .account-contact-main>span:last-child { min-width:0; }
 #scene .account-contact-main strong { display:block; color:hsl(var(--text-strong)); font:500 13px/1.35 var(--font-sans,"Albert Sans",sans-serif); }
-#scene .account-contact-main small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:hsl(var(--text-faint)); font:400 11px/1.35 var(--mono-font,monospace); }
-#scene .account-contact-mini-avatar { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; border:1px solid hsl(var(--border-default)); border-radius:50%; color:hsl(var(--text-strong)); font:600 10px/1 var(--mono-font,monospace); }
+#scene .account-contact-main small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:hsl(var(--text-faint)); font:400 11px/1.35 var(--font-mono,monospace); }
+#scene .account-contact-mini-avatar { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; border:1px solid hsl(var(--border-default)); border-radius:50%; color:hsl(var(--text-strong)); font:600 10px/1 var(--font-mono,monospace); }
 #scene [data-contacts-refresh] { align-self:flex-start; margin-top:8px; }
 #scene .account-contact-detail { display:grid; align-content:start; gap:14px; }
 #scene .account-contact-detail header { display:flex; align-items:center; gap:14px; }
-#scene .account-contact-avatar { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border:1px solid hsl(var(--border-strong)); border-radius:50%; background:hsl(var(--surface)); color:hsl(var(--text-strong)); font:500 15px/1 var(--mono-font,monospace); }
+#scene .account-contact-avatar { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border:1px solid hsl(var(--border-strong)); border-radius:50%; background:hsl(var(--surface)); color:hsl(var(--text-strong)); font:500 15px/1 var(--font-mono,monospace); }
 #scene .account-contact-detail h2 { margin:0; color:hsl(var(--text-strong)); font:500 24px/1.15 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; }
-#scene .account-contact-detail header span { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); text-transform:uppercase; }
+#scene .account-contact-detail header span { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); text-transform:uppercase; }
 #scene .account-contact-detail dl,
 #scene .account-mesh-detail { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 18px; margin:0; }
 #scene .account-contact-detail dl>div,
 #scene .account-mesh-detail>div { min-width:0; }
-#scene :is(.account-contact-detail,.account-mesh-detail) dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
-#scene :is(.account-contact-detail,.account-mesh-detail) dd { margin:3px 0 0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 12px/1.45 var(--mono-font,monospace); }
+#scene :is(.account-contact-detail,.account-mesh-detail) dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene :is(.account-contact-detail,.account-mesh-detail) dd { margin:3px 0 0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 12px/1.45 var(--font-mono,monospace); }
 #scene .account-contact-detail>p { margin:0; color:var(--account-muted); font:400 13px/1.55 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-contact-detail>a { font:500 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
 
@@ -282,7 +282,7 @@
 #scene .account-mesh { gap:16px; }
 #scene :is(.account-mesh-check,.account-standing) { display:grid; gap:6px; justify-items:start; }
 #scene .account-standing { padding-top:14px; border-top:1px solid var(--account-rule); }
-#scene :is(.account-mesh-check,.account-standing) small { color:hsl(var(--text-muted)); font:500 10.5px/1.2 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene :is(.account-mesh-check,.account-standing) small { color:hsl(var(--text-muted)); font:500 10.5px/1.2 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene :is(.account-mesh-check,.account-standing) strong { color:hsl(var(--text-strong)); font:600 24px/1.1 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; }
 #scene .account-mesh-check p,
 #scene .account-standing span { margin:0; max-width:48ch; color:var(--account-muted); font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
@@ -299,7 +299,7 @@
   border:0; background:none; color:inherit; text-align:left; text-decoration:none; cursor:pointer;
 }
 #scene .account-page .account-rail-item:hover { background:none; }
-#scene .account-rail-item small { color:hsl(var(--text-muted)); font:500 10.5px/1.2 var(--mono-font,monospace); letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+#scene .account-rail-item small { color:hsl(var(--text-muted)); font:500 10.5px/1.2 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
 #scene .account-rail-item strong { max-width:16ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:hsl(var(--text-strong)); font:600 24px/1 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
 #scene .account-rail-item:hover small { color:hsl(var(--reference)); }
 /* Balances and contacts need the unlocked key, so a saved-only identity
@@ -307,7 +307,7 @@
 #scene [data-session="remembered"] .account-rail-item[data-needs-key] { display:none; }
 #scene .account-rail-item[data-attention] strong { color:hsl(var(--primary)); }
 #scene .account-rail-item:last-of-type strong { font-size:16px; letter-spacing:-.01em; }
-#scene .account-rail-link { grid-column:-2 / -1; display:grid; justify-items:end; gap:4px; font:500 12px/1.3 var(--mono-font,monospace); text-align:right; color:hsl(var(--reference)); text-decoration:none; }
+#scene .account-rail-link { grid-column:-2 / -1; display:grid; justify-items:end; gap:4px; font:500 12px/1.3 var(--font-mono,monospace); text-align:right; color:hsl(var(--reference)); text-decoration:none; }
 #scene .account-rail-link small { color:hsl(var(--text-faint)); font:400 11px/1.3 var(--font-sans,sans-serif); }
 
 /* ---- Short desktop windows --------------------------------------------- */
@@ -396,7 +396,7 @@
   display:grid; grid-template-columns:repeat(3,1fr); gap:6px; list-style:none; margin:10px 0; padding:12px;
   border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .72);
 }
-#scene .auth-word-grid li { display:flex; align-items:baseline; gap:5px; font:400 11px/1.4 var(--mono-font,ui-monospace,monospace); }
+#scene .auth-word-grid li { display:flex; align-items:baseline; gap:5px; font:400 11px/1.4 var(--font-mono,ui-monospace,monospace); }
 #scene .auth-word-grid li small { color:hsl(var(--text-muted)); min-width:1.4em; }
 #scene .auth-word-grid li strong { color:hsl(var(--text-strong)); }
 @media(max-width:620px) { #scene .auth-word-grid { grid-template-columns:repeat(2,1fr); } }
@@ -447,7 +447,7 @@
 }
 #scene .account-map text {
   fill:hsl(var(--text-faint));
-  font:500 10px/1 var(--mono-font,ui-monospace,monospace);
+  font:500 10px/1 var(--font-mono,ui-monospace,monospace);
   letter-spacing:.08em;
 }
 #scene .account-map .account-map-you { fill:hsl(var(--text-strong)); font-size:9px; }
@@ -485,7 +485,7 @@
 #scene .account-status {
   margin:-14px 0 24px;
   color:hsl(var(--text-muted));
-  font:500 11px/18px var(--mono-font,ui-monospace,monospace);
+  font:500 11px/18px var(--font-mono,ui-monospace,monospace);
 }
 #scene .account-intro {
   max-width:480px;
@@ -515,7 +515,7 @@
   display:block !important;
   margin:0 0 14px;
   color:hsl(var(--text-muted));
-  font:500 11px/18px var(--mono-font,ui-monospace,monospace);
+  font:500 11px/18px var(--font-mono,ui-monospace,monospace);
   letter-spacing:.06em;
   text-transform:uppercase;
 }
@@ -588,7 +588,7 @@
 }
 #scene .account-security-signal span {
   color:hsl(var(--text-faint));
-  font:500 9px/14px var(--mono-font,ui-monospace,monospace);
+  font:500 9px/14px var(--font-mono,ui-monospace,monospace);
   letter-spacing:.08em;
 }
 #scene .account-security-signal strong {
@@ -785,7 +785,7 @@
 #scene .account-page:not([data-session="signed-out"]) .account-state>p { display:none; }
 #scene .account-page:not([data-session="signed-out"]) .account-state dt {
   color:hsl(var(--text-muted));
-  font:500 10px/14px var(--mono-font,ui-monospace,monospace);
+  font:500 10px/14px var(--font-mono,ui-monospace,monospace);
   letter-spacing:.07em;
   text-transform:uppercase;
 }
@@ -795,7 +795,7 @@
   margin:0;
   overflow:hidden;
   color:hsl(var(--text-strong));
-  font:500 13px/19px var(--mono-font,ui-monospace,monospace);
+  font:500 13px/19px var(--font-mono,ui-monospace,monospace);
   text-overflow:ellipsis;
   white-space:nowrap;
 }

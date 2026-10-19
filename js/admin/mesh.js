@@ -43,15 +43,16 @@
     box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
     return box;
   }
-  /* Drawn into the container the shell hands it: the Mesh sheet, opened on demand from the
-     header's Mesh button (openMeshSheet, js/admin/panels.js), whose own head says "Mesh". */
+  /* Drawn into the container the shell hands it: the Publishing status sheet, opened on demand
+     from the header's More menu (openMeshSheet, js/admin/panels.js). One word for the dependency:
+     "publishing" (docs/ux-audit/cms.md P1-2: Mesh, miner and publish host named one thing). */
   function renderMeshEditor(root) {
     if (!root) return;
     root.textContent = '';
-    var routeLabel = h('div', { class: 'route', text: 'P2P deployment' });
+    var routeLabel = h('div', { class: 'route', text: 'Can the site be published, and what is live' });
     root.appendChild(h('div', { class: 'cms-form-head' },
       h('div', {}, routeLabel),
-      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', id: 'meshViewRefresh', text: 'Refresh', onclick: function () { load(); refreshMesh(); } }))));
+      h('div', { class: 'editor-actions' }, h('button', { type: 'button', class: 'btn', id: 'meshViewRefresh', text: 'Check again', onclick: function () { load(); refreshMesh(); } }))));
     /* Can this site be published right now, and if not, what fixes it -- first, in words and with
        its button, not in a tooltip on a greyed-out Publish (docs/ux-audit/cms.md P0-4). */
     var readiness = h('div', { class: 'mesh-readiness', id: 'meshReadiness' });
@@ -63,7 +64,7 @@
     var liveList = h('ul', { class: 'mesh-list' });
     root.appendChild(h('fieldset', {}, h('legend', { text: 'Deployment status' }), statusRows));
     root.appendChild(h('fieldset', {}, h('legend', { text: 'Local vs. published' }), diffText));
-    root.appendChild(h('fieldset', {}, h('legend', { text: 'What’s live on the mesh right now' }), liveSummary, liveList));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'What is published right now' }), liveSummary, liveList));
     root.appendChild(buildMeshSecurityNote());
 
     function fill(rows) { statusRows.textContent = ''; rows.forEach(function (r) { statusRows.appendChild(meshRow(r[0], r[1])); }); }

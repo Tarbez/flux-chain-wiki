@@ -16,7 +16,7 @@ LearningContent.define([
   },
   {
     "slug": "governance-without-a-validator-set",
-    "title": "Governance without a validator set",
+    "title": "Governance without a standing signer set",
     "category": "AUTHORITY / 003",
     "minutes": "6 MIN READ",
     "summary": "The documented distinction between ephemeral authority cells, substrate policy, and a network DAO—with production activation still unverified."
@@ -47,6 +47,6 @@ LearningContent.define([
     "title": "The chain prototype is the chosen path",
     "category": "BENCHMARKS / 007",
     "minutes": "8 MIN READ",
-    "summary": "Six public nodes sustained 12,403 accepted operations a second for five minutes: 3.76 million accepted, zero failures. The older 79,654 ops/s figure is a short-burst peak; the live monitor shows the latest hourly capacity sample."
+    "summary": "Six public nodes ran 3.76 million signed operations in five minutes with zero failures (12,403 a second, a metric family since retired). The older 79,654 ops/s figure is a short-burst peak; the live monitor shows the latest hourly capacity sample."
   }
 ]);

@@ -166,7 +166,7 @@ function single(file, global, extra) {
     meshSettings: single('mesh-settings', 'ArkMeshSettings'),
     theme: single('theme', 'ArkTheme', ['js/tokens.js', 'js/ark/vendor/backgrounds.js']),
     settingsDefaults: single('settings-defaults', 'ArkSiteDefaults'),
-    seo: single('seo', 'ArkSEO'),
+    seo: single('seo', 'ArkSEO', ['js/content/site-pages.js']),
     layout: single('layout', 'ArkLayout'),
     components: single('components', 'ArkComponents'),
     states: single('states', 'ArkStates'),

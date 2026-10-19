@@ -36,6 +36,20 @@
     /* True while the address is still an old #/route link that should become a clean path. */
     isLegacyHash: function () { return pathMode && legacy() !== null; },
     current: function () { return build(route.path(), route.search()); },
+    /* The query an in-site link carries: its explicit data-route-query, else the query already
+       in its href. js/hero-motion.js rewrites every [data-scene-link] href on mount and passes
+       the query on click; before 2026-10-19 both read data-route-query only, and no document
+       link sets it -- js/ark/dash-kit.js docHref() and the pages' string-built links put the doc
+       in the href (`/reference?doc=...&from=...`) -- so the rewrite stripped every doc link to
+       bare /reference and the reader fell back to agreements.md: 71 evidence links on 41 routes
+       opened the same unrelated document, and "Return to the explanation" went Home
+       (docs/ux-audit/pages.md P1; regressions: tests/scene-link-query.cjs,
+       tests/browser/site-fixes.mjs). */
+    linkQuery: function (link) {
+      if (link.dataset && link.dataset.routeQuery) return link.dataset.routeQuery;
+      var href = (link.getAttribute && link.getAttribute('href')) || '', at = href.indexOf('?');
+      return at < 0 ? '' : href.slice(at + 1).split('#')[0];
+    },
     /* Write a route: push (default) or replace. A no-op when the address is already right. */
     write: function (path, search, mode) {
       var destination = route.href(build(path, search));

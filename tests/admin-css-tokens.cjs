@@ -27,7 +27,7 @@ const fs = require('node:fs');
 
 const SHEETS = ['css/admin.css', 'css/studio-embed.css'];
 const RETIRED = ['bg', 'sunk', 'ink', 'muted', 'accent-soft', 'accent-ink', 'ok', 'comp', 'font-ui', 'font-data'];
-const SCRIPT_COLOURS = ['panel', 'rule', 'warn', 'override', 'cms-accent-color', 'cms-danger-color'];
+const SCRIPT_COLOURS = ['panel', 'rule', 'warn', 'override', 'cms-reference-color', 'cms-danger-color'];
 /* custom properties a script sets at run time (js/admin/*: the header's measured height) */
 const SCRIPT_SET = ['app-bar-h'];
 
@@ -68,11 +68,12 @@ for (const [file, css] of [['css/admin.css', adminRules], ['css/studio-embed.css
 assert.deepEqual(literals(`.x{${alias}}`).filter((l) => !l.startsWith('--')), [], 'the alias block derives from SDK tokens too');
 
 // 2. one token block: only admin.css's :root block defines tokens -- apart from the two scoped
-//    re-points of --accent/--danger for elements whose own inline style names them
-const outside = [...defined(adminRules)].filter((n) => !['--accent', '--danger'].includes(n));
+//    re-points of --reference/--danger for elements whose own inline style names them (scripts write
+//    var(--reference) for selection: --accent is the action colour since 2026-10-19, not a selection)
+const outside = [...defined(adminRules)].filter((n) => !['--reference', '--danger'].includes(n));
 assert.deepEqual(outside, [], 'css/admin.css defines tokens outside its alias block: ' + outside.join(', '));
 assert.deepEqual([...defined(studio)], [], 'css/studio-embed.css defines tokens of its own: ' + [...defined(studio)].join(', ') + ' -- the editor has one token block, at the top of css/admin.css');
-for (const name of ['--accent', '--danger']) {
+for (const name of ['--reference', '--danger']) {
   const lines = adminRules.split('}').filter((r) => new RegExp(name + '\\s*:').test(r));
   assert.equal(lines.length, 1, `exactly one rule re-points ${name}`);
   assert(/\[style\*="var\(/.test(lines[0]) && /:not\(\[style\*="\(var\(/.test(lines[0]), `${name} is re-pointed only on elements whose inline style writes var(${name}) as a colour, never on a swatch writing hsl(var(${name})): ${lines[0].trim()}`);
@@ -85,7 +86,7 @@ for (const [file, css] of [['css/admin.css', adminRules], ['css/studio-embed.css
   assert.deepEqual(retired, [], `${file} reads retired Studio tokens: ${retired.join(', ')}`);
   const scriptOnly = names.filter((n) => SCRIPT_COLOURS.includes(n));
   /* the re-point rules read --cms-*-color by design */
-  const allowed = file === 'css/admin.css' ? ['cms-accent-color', 'cms-danger-color'] : [];
+  const allowed = file === 'css/admin.css' ? ['cms-reference-color', 'cms-danger-color'] : [];
   assert.deepEqual(scriptOnly.filter((n) => !allowed.includes(n)), [], `${file} reads a script-facing complete colour (${scriptOnly.join(', ')}); read the SDK token instead`);
 }
 

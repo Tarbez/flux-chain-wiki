@@ -89,6 +89,8 @@ Any work that reintroduces a deprecated concept is rejected.
 
 Any resolver that does not publish its audit manifest is not registered.
 
+(Note added 2026-10-19: "registered" in the line above means *audited* — it names the audit manifests in `docs/resolver-audit.md`. Since 2026-10-18 "registered" also names a resolver launched on the registry ledger; say "audited" for the first and "launched" for the second. See `docs/glossary.md`.)
+
 ## Quoting a deprecated term in order to retire it
 
 A historical record may need to name what it retired. Put

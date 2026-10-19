@@ -111,7 +111,9 @@ async function main() {
     console.log('title x:', title.captured.tree[0].x);
     /* tokens where a token reproduces the value */
     assert.match(title.captured.tree[0].x, /color:hsl\(var\(--text-strong\)\)/, 'colour is stored as the text-strong token, not a literal rgb');
-    assert.match(title.captured.tree[0].x, /font-family:var\(--font-sans\)/, 'family as the sans font token');
+    // Since W1-BRAND the display and sans slots are both Albert Sans, so a heading's family is
+    // reproduced by --font-display first; either slot token proves it is a token, not a literal.
+    assert.match(title.captured.tree[0].x, /font-family:var\(--font-(display|sans)\)/, 'family as a font slot token, not a literal');
     assert.match(title.captured.tree[0].x, /letter-spacing:-0\.04em/, 'letter-spacing in em, so it scales with the font');
     if (shotDir) await page.screenshot({ path: path.join(shotDir, 'source-download.png') });
 

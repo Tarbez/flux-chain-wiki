@@ -18,7 +18,7 @@
      tagged literal in code, resolved the one shared way every retrofitted
      call site is -- js/ark/dash-kit.js's linkEl. */
   function link(page, label) {
-    return ArkUI.dash.linkEl(label + ' ↗', 'route:' + page, undefined, 'economy-next-link');
+    return ArkUI.dash.linkEl(label + ' →', 'route:' + page, undefined, 'economy-next-link');
   }
   function buildBase(page, title, deck) {
     var root = node('section', 'ark-page task-page economy-preview-page ' + page + '-preview-page');

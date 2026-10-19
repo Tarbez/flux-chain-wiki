@@ -99,15 +99,25 @@ async function save(app) {
    page's fields in the page picker's SEO popover (openPageSeo), the site-wide fields and the
    crawler policy in Theme & defaults (openSiteSeo). `scope` is whichever of the two is open;
    a row is found by data-seo-field, set by admin.js's seoFieldRows. */
+/* A row inside a closed disclosure (canonical URL and structured data sit under "Advanced" since
+   2026-10-19, docs/ux-audit/cms.md P1-2) is shown first, the way a person opens it */
+async function reveal(scope, key) {
+  const row = scope.locator(`[data-seo-field="${key}"]:not([data-seo-bot])`).first();
+  if (!(await row.isVisible())) {
+    const trigger = row.locator('xpath=ancestor::*[@data-ark-primitive="disclosure"][1]/button[contains(@class,"ark-disclosure-trigger")]');
+    if (await trigger.count() && (await trigger.getAttribute('aria-expanded')) !== 'true') await trigger.click();
+  }
+  return row;
+}
 const seoRow = (scope, key) => scope.locator(`[data-seo-field="${key}"]:not([data-seo-bot])`).first();
 async function seoType(scope, key, value) {
-  const input = seoRow(scope, key).locator('input, textarea');
+  const input = (await reveal(scope, key)).locator('input, textarea');
   await input.fill(value);
   await input.evaluate((el) => el.dispatchEvent(new Event('change', { bubbles: true })));
   await input.evaluate((el) => el.blur());
 }
 async function seoPress(scope, key, label) { await seoRow(scope, key).locator('button', { hasText: new RegExp('^' + label + '$') }).click(); }
-async function seoChoose(scope, key, value) { await seoRow(scope, key).locator('select').selectOption(value); }
+async function seoChoose(scope, key, value) { await (await reveal(scope, key)).locator('select').selectOption(value); }
 async function botPress(scope, bot, label) { await scope.locator(`[data-seo-bot="${bot}"] button`, { hasText: label }).click(); }
 const pressed = (scope, selector) => scope.locator(selector + ' [aria-pressed="true"]').first().textContent();
 /* what a crawler reads from a rendered <head> */
@@ -263,7 +273,8 @@ await flow('seo', async () => {
   await step('Page fields: a page\'s own SEO tab has every per-page field, showing the saved values', async () => {
     const { app: a3, page: p3 } = await openEditor();
     const fieldsSheet = await openPageFields(a3, { page: 'about' });
-    await fieldsSheet.locator('[role="tab"]', { hasText: /^SEO$/ }).first().click();
+    // W1-CMS-IA renamed the Page settings tabs to plain language: SEO is now "Search & sharing".
+    await fieldsSheet.locator('[role="tab"]', { hasText: /^Search & sharing$/ }).first().click();
     const fields = await a3.evaluate(() => ArkSEO.OVERRIDE_FIELDS.map((f) => f.key));
     for (const key of fields) check(await a3.locator(`.seo-controls [data-seo-field="${key}"]`).count(), `the Page fields SEO tab has no control for ${key}`);
     check((await pressed(a3, '.seo-controls [data-seo-field="noindex"]')) === 'Yes', 'the Page fields SEO tab does not show the saved noindex for /about');
@@ -332,6 +343,8 @@ await flow('alt', async () => {
 await flow('checks', async () => {
   const { page, app, shot } = await openEditor();
   await step('Design check lists all 14 rules; the 5 restored ones report real measurements; audience is "not built"', async () => {
+    /* Design tips are the Edit style lens's (docs/ux-audit/cms.md P1-10) */
+    await setLens(app, 'design');
     await app.click('#btnCheck');
     const items = await until(async () => { const li = await app.locator('ul.checks li').evaluateAll((els) => els.map((el) => ({ cls: el.className, title: el.dataset.check, text: el.querySelector('p').textContent }))); return li.length >= 14 && li; }, 'the Design check list has fewer than 14 rules');
     for (const item of items) console.log(`     ${item.cls.padEnd(10)} ${item.title} -- ${item.text}`);
@@ -344,7 +357,8 @@ await flow('checks', async () => {
     }
     const audience = by('Designed for the visitor');
     check(audience && audience.cls === 'notBuilt' && /Not built/.test(audience.text), 'the audience rule is not reported as not built: ' + JSON.stringify(audience));
-    const badge = await app.locator('#scoreBadge').textContent();
+    /* the badge shows a quiet count of tips; the score is its data-score (docs/ux-audit/cms.md P1-10) */
+    const badge = await app.locator('#scoreBadge').getAttribute('data-score');
     const scored = items.filter((i) => ['pass', 'warn', 'fail'].includes(i.cls)).length, passed = items.filter((i) => i.cls === 'pass').length;
     check(badge === `${passed}/${scored}`, `badge ${badge} should be passes/measured = ${passed}/${scored} (not built/unmeasured excluded)`);
     await shot('checks-01-popover');

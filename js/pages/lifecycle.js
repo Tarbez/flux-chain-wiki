@@ -82,8 +82,12 @@
       }
       var path = ArkUI.el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Your place');
       path.appendChild(link('← Home', 'zero'));
-      if (id) path.appendChild(link('02 / Agreement lifecycle', 'lifecycle'));
-      var current = ArkUI.el('span', '', id ? '03 / ' + id.charAt(0).toUpperCase() + id.slice(1) : '02 / Agreement lifecycle');
+      /* No ordinals in the breadcrumb: it read "02 / Agreement lifecycle > 03 / Intent" right above
+         the kicker "01 / INTENT" and a 01-05 stage trail, three numberings fighting for one stage
+         (docs/ux-audit/pages-ux-b.md /lifecycle P1; regression: tests/state-layering.cjs).
+         The stage number belongs to the kicker and the trail only. */
+      if (id) path.appendChild(link('Agreement lifecycle', 'lifecycle'));
+      var current = ArkUI.el('span', '', id ? stage.title : 'Agreement lifecycle');
       current.setAttribute('aria-current', 'page'); path.appendChild(current); el.appendChild(path);
       el.dataset.stage=id||'overview';
       var heading=ArkUI.el('h1','',id?copy.heading:'From request to receipt.');
@@ -112,6 +116,12 @@
       boundary.appendChild(ArkUI.el('strong', '', id ? 'Not yet established' : 'Status / Partial'));
       boundary.appendChild(ArkUI.el('p', '', id ? copy.note.replace('What is still not true: ', '') : 'Implemented in source. Full public production automation and economic settlement remain unverified.'));
       answer.appendChild(boundary); body.appendChild(answer);
+      /* Under 900px the illustration used to be display:none -- the request brief, the
+         rules box, the mesh strip and its inspect chips simply did not exist on a phone.
+         It now stacks under the answer behind this toggle (css/lifecycle.css shows the
+         toggle only at that width); on desktop the figure sits beside the answer as before.
+         The toggle is a sibling, not a wrapper, so the figure keeps its layout key. */
+      body.appendChild(ArkUI.dash.foldToggle({ host: body, more: 'Show the illustration', less: 'Hide the illustration' }));
       var unique=id&&ArkUI.createStageScene?ArkUI.createStageScene(id,copy):null;
       var previewStage=id||'receipt';
       if(unique){
@@ -177,7 +187,7 @@
           }
         } else {
           view.appendChild(ArkUI.el('p', '', id ? copy.facts[1][1] : 'The canonical agreement guide describes the record types and their reference chain. This is an illustrative walkthrough, not a live agreement or a verified production run.'));
-          var guide = ArkUI.dash.linkEl('Read the agreement guide ↗', 'doc:docs/protocol/agreements.md', ArkUI.pageCatalog[page].path, 'story-reference'); view.appendChild(guide);
+          var guide = ArkUI.dash.linkEl('Read the agreement guide →', 'doc:docs/protocol/agreements.md', ArkUI.pageCatalog[page].path, 'story-reference'); view.appendChild(guide);
           if (id) view.appendChild(ArkUI.el('p', '', 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.'));
         }
         if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(view);

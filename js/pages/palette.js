@@ -27,6 +27,14 @@
       var page = el('section', 'ark-page task-page palette-page');
       page.setAttribute('aria-labelledby', 'palette-title');
       var shell = el('div', 'palette-shell'); page.appendChild(shell);
+      /* Ways in and out: this page was an orphan and a dead end, reachable only from the "All
+         pages" menu with no link onward (docs/ux-audit/pages.md P2; regression:
+         tests/site-exits.cjs). The settings panel's "See the full palette" now leads here, and
+         these lead back: Home, and the same theme settings that pick the active palette. */
+      var crumbs = el('nav', 'content-layer-path'); crumbs.setAttribute('aria-label', 'Your place');
+      crumbs.appendChild(ArkUI.dash.linkEl('← Home', 'route:zero', '/palette'));
+      var here = el('span', '', 'Interface palette'); here.setAttribute('aria-current', 'page'); crumbs.appendChild(here);
+      shell.appendChild(crumbs);
       var head = el('header', 'palette-head');
       head.appendChild(el('p', 'account-kicker', '// DESIGN SYSTEM'));
       var h1 = el('h1', '', 'Palette'); h1.id = 'palette-title'; head.appendChild(h1);
@@ -74,6 +82,17 @@
       // Anchor for reusable content blocks (js/content/components.js); rendering into it
       // is centralized in js/main.js's onMount hook, not called here.
       var components = el('div', ''); components.setAttribute('data-ark-insert', 'main'); shell.appendChild(components);
+
+      var onward = el('nav', 'palette-onward'); onward.setAttribute('aria-label', 'Continue');
+      onward.appendChild(ArkUI.dash.linkEl('← Home', 'route:zero', '/palette', 'palette-onward-link'));
+      var settings = el('button', 'palette-onward-link', 'Theme settings →'); settings.type = 'button';
+      settings.addEventListener('click', function () {
+        var trigger = document.querySelector('.settings-trigger');
+        if (trigger && trigger.getAttribute('aria-expanded') !== 'true') trigger.click();
+        if (trigger) trigger.focus();
+      });
+      onward.appendChild(settings);
+      shell.appendChild(onward);
 
       function paintFamily() {
         var key = document.documentElement.dataset.theme || 'ghost';

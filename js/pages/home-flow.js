@@ -24,9 +24,9 @@
      cases is the fastest way to show that the chain itself has no idea
      which of these it is admitting. */
   var CASES = [
-    { id: 'swaps', label: 'Swaps', party: 'studio.fxn', recordType: 'YLEDGERENTRY', amount: '36 FXN → studio.fxn', resolverName: 'DeFi resolver', says: 'The DeFi resolver reads the payload: 36 FXN to studio.fxn.' },
+    { id: 'swaps', label: 'Swaps', party: 'studio.fxn', recordType: 'YLEDGERENTRY', amount: '36 FXN → studio.fxn', resolverName: 'DeFi resolver', says: 'An intent to swap. The launch’s signer resolves the batch and signs the result. That signed result is what peers store.' },
     { id: 'transfers', label: 'Transfers', party: 'alice.fxn', recordType: 'YTRANSFER', amount: '120 FXN → alice.fxn', resolverName: 'Transfers resolver', says: 'The transfers resolver reads the payload: 120 FXN to alice.fxn.' },
-    { id: 'staking', label: 'Staking', party: 'validator.fxn', recordType: 'YSTAKE', amount: '500 FXN → validator.fxn', resolverName: 'Staking resolver', says: 'The staking resolver reads the payload: 500 FXN staked with validator.fxn.' },
+    { id: 'staking', label: 'Staking', party: 'provider.fxn', recordType: 'YSTAKE', amount: '500 FXN → provider.fxn', resolverName: 'Stake resolver', says: 'The stake resolver locks 500 FXN for provider.fxn’s seat.' },
     { id: 'governance', label: 'Governance', party: 'dao.fxn', recordType: 'YVOTE', amount: 'YES → proposal-14', resolverName: 'Governance resolver', says: 'The governance resolver reads the payload: a yes vote on proposal 14.' }
   ];
   var CASES_BY_ID = {};
@@ -40,10 +40,10 @@
   var CHECKS = ['G', 'S', 'C', 'K'];
   var BASE_STEPS = [
     { id: 'sign', title: 'Sign', page: 'account', actors: ['holder'], checks: 0, says: 'The holder signs one record that extends their own chain, at position 42.' },
-    { id: 'check', title: 'Check', page: 'stats', actors: ['chain'], checks: 2, says: 'Grammar parses and the signature verifies. Meaning is not checked.' },
+    { id: 'check', title: 'Check', page: 'stats', actors: ['chain'], checks: 2, says: 'The signature verifies and the record fits its grammar: the base grammar and, for a resolver’s record, the grammar that resolver published at launch. What it means is the resolver’s job.' },
     { id: 'extend', title: 'Extend', page: 'explorer', actors: ['chain'], checks: 3, says: 'It points to the current head, #2b9d, and position 42 is still free.' },
     { id: 'replicate', title: 'Replicate', page: 'stats', actors: ['chain'], checks: 4, says: 'Copied to 9 of 12 peers in this example. The other histories remain independent.' },
-    { id: 'resolve', title: 'Resolve', page: 'resolver', actors: ['resolver'], checks: 4, says: 'The DeFi resolver reads the payload: 36 FXN to studio.fxn.' }
+    { id: 'resolve', title: 'Resolve', page: 'resolver', actors: ['resolver'], checks: 4, says: 'An intent to swap. The launch’s signer resolves the batch and signs the result. That signed result is what peers store.' }
   ];
 
   function el(tag, className, text) {
@@ -111,7 +111,7 @@
      with its own length and starting point because none waits on another, and
      each is tied to one of your records by a reference. What J42 is FOR
      differs per example, so the counterpart is drawn per example: a chain for
-     a transfer, a pool for a swap, a validator's stake for staking, a ballot
+     a transfer, a pool for a swap, a provider's stake for staking, a ballot
      for a vote. The mechanism steps are the same in every one; only what the
      resolver reads changes, which is the point. */
   var LAND_MINE = { row: 2, start: 1, len: 7 };
@@ -471,7 +471,7 @@
     { name: 'nova.fxn', d: 'M40 24H92L164 96L236 168H330', stations: [[40, 24], [92, 24], [236, 168], [300, 168]], label: [40, 12, 'start'] },
     { name: 'alice.fxn', d: 'M112 176H164L244 96V20', stations: [[112, 176], [244, 52], [244, 20]], label: [112, 194, 'start'] },
     { name: 'studio.fxn', d: 'M262 20H284L324 60V132L364 172H420', stations: [[262, 20], [324, 132], [420, 172]], label: [262, 12, 'start'] },
-    { name: 'validator.fxn', d: 'M404 172V96L460 40H540', stations: [[404, 172], [460, 40], [540, 40]], label: [540, 28, 'end'] },
+    { name: 'provider.fxn', d: 'M404 172V96L460 40H540', stations: [[404, 172], [460, 40], [540, 40]], label: [540, 28, 'end'] },
     { name: 'dao.fxn', d: 'M484 60V172', stations: [[484, 60], [484, 172]], label: [484, 190, 'middle'] }
   ];
   var WORLD_CROSSINGS = [164, 244, 324, 404, 484];

@@ -9,7 +9,7 @@ class Element {
 }
 const guide = '# Agreements\n\nA **signed** record references `intent_cid`.\n\n<script>alert(1)</script>\n\n[Unsafe](javascript:alert) and [Authority](authority.md).\n\n| Record | Meaning |\n| --- | --- |\n| Intent | exact need |\n\n```sh\nflux miner discover\n```';
 const calls=[];
-const context={ArkUI:{pageModules:{},pageCatalog:{zero:{path:'/'},'lifecycle/offer':{path:'/lifecycle/offer'},reference:{path:'/reference'}},referenceDocs:['docs/protocol/agreements.md','docs/protocol/authority.md'],referenceText:{'docs/protocol/agreements.md':{text:guide}},el:(tag,_cls,text)=>new Element(tag,text)},document:{createTextNode:text=>new Element('#text',text)},location:{href:'http://127.0.0.1:3438/index.html',hash:'#/reference'},URL,URLSearchParams,Map,AbortController,fetch:async(path)=>{calls.push(path);return {ok:true,text:async()=>guide};}};
+const context={ArkUI:{route:{href:p=>'#'+p},pageModules:{},pageCatalog:{zero:{path:'/'},'lifecycle/offer':{path:'/lifecycle/offer',title:'Offer: propose the terms — DEFXN'},reference:{path:'/reference'}},referenceDocs:['docs/protocol/agreements.md','docs/protocol/authority.md'],referenceText:{'docs/protocol/agreements.md':{text:guide}},el:(tag,_cls,text)=>new Element(tag,text)},document:{createTextNode:text=>new Element('#text',text)},location:{href:'http://127.0.0.1:3438/index.html',hash:'#/reference'},URL,URLSearchParams,Map,AbortController,fetch:async(path)=>{calls.push(path);return {ok:true,text:async()=>guide};}};
 vm.runInNewContext(fs.readFileSync('js/pages/reference.js','utf8'),context);
 (async()=>{
  const reader=context.ArkUI.pageModules.reference;
@@ -22,6 +22,13 @@ vm.runInNewContext(fs.readFileSync('js/pages/reference.js','utf8'),context);
  assert(!el.all.some(x=>x.tagName==='script'),'source cannot create an executable script');
  const anchors=el.all.filter(x=>x.tagName==='a');
  assert(anchors.some(x=>x.href==='#/lifecycle/offer?view=reference'),'return preserves the originating route and evidence depth');
+ // Named regression (2026-10-19, docs/ux-audit/pages.md P1): the return link was a bare '#'+from
+ // hash, and every reader opened with from='/' because doc links lost their query; it is a scene
+ // link now (the router takes it, query included) and names the page it returns to.
+ const back=anchors.find(x=>x.dataset.sceneLink==='lifecycle/offer');
+ assert(back&&back.dataset.sceneLink==='lifecycle/offer'&&back.dataset.routeQuery==='view=reference','the return link is a scene link to the source page, with its query');
+ assert(back.textContent.includes('Return to Offer: propose the terms'),'and is labelled with the page it returns to');
+ assert(anchors.some(x=>x.dataset.sceneLink==='reference'&&x.href.startsWith('#/reference?doc=docs%2Fprotocol%2Fauthority.md')),'links between approved docs stay scene links inside the reader');
  assert(anchors.some(x=>x.dataset.referenceOriginal==='true'&&x.href==='docs/protocol/agreements.md'),'original canonical source remains available');
  assert(!anchors.some(x=>/^javascript:/.test(x.href)),'unsafe schemes never become reader links');
  assert(anchors.some(x=>x.href&&x.href.startsWith('#/reference?doc=docs%2Fprotocol%2Fauthority.md')),'approved relative sources stay inside the reader');

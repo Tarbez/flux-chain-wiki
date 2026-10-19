@@ -44,7 +44,7 @@ var ArkAdminStore = (function () {
     { key: 'meshSettings', kind: 'single', global: 'ArkMeshSettings', label: 'Mesh settings', file: 'mesh-settings', title: 'Mesh tuning' },
     { key: 'theme', kind: 'single', global: 'ArkTheme', label: 'Theme', file: 'theme', title: 'Colour theme', needs: ['js/tokens.js', 'js/ark/vendor/backgrounds.js'] },
     { key: 'settingsDefaults', kind: 'single', global: 'ArkSiteDefaults', label: 'Site-wide defaults', file: 'settings-defaults', title: 'Site-wide settings defaults' },
-    { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO', byItem: { manifests: 'pages', articles: 'articles' } },
+    { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO', needs: ['js/content/site-pages.js'], byItem: { manifests: 'pages', articles: 'articles' } },
     { key: 'layout', kind: 'single', global: 'ArkLayout', label: 'Layout', file: 'layout', title: 'Responsive layout', byRoute: ['routes', 'groups', 'labels', 'alts'] },
     { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components', byRoute: ['routes', 'spots'] },
     { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups', byRoute: ['routes'] },

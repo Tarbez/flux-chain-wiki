@@ -40,12 +40,13 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
       if (m.fields[role].kind !== 'link') assert.equal(control.value, m.fields[role].value, `page ${id}: ${role} shows its draft value`);
     }
     const tabs = [...box.querySelectorAll('[role="tab"]')].map((t) => t.textContent);
-    assert(tabs.includes('Content') && tabs.includes('SEO') && tabs.includes('Code'), `page ${id}: Content / SEO / Code tabs (${tabs})`);
+    /* the tabs in plain words since 2026-10-19 (docs/ux-audit/cms.md P1-14): Text / Search & sharing / Advanced */
+    assert(tabs.includes('Text') && tabs.includes('Search & sharing') && tabs.includes('Advanced'), `page ${id}: Text / Search & sharing / Advanced tabs (${tabs})`);
     assert(!box.querySelector('#editor'), 'nothing is drawn into a fixed #editor');
   }
   assert(!document.getElementById('editor'), 'the forms never needed an #editor element');
   const homeTabs = [...A.renderPageFields(detached(), 'home').querySelectorAll('[role="tab"]')].map((t) => t.textContent);
-  assert(homeTabs.includes('Shape'), 'a page with a background shape keeps its Shape tab');
+  assert(homeTabs.includes('Shapes'), 'a page with a background shape keeps its Shapes tab');
 
   /* ---- typing: the draft changes, the canvas is asked, the form is not rebuilt ---- */
   const mount = document.getElementById('mount');

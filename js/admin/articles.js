@@ -173,12 +173,15 @@
   }
   /* createArticle(slug) -> { ok, id } | { ok: false, refusal }: a new article draft (written by
      the next Save, which refuses it until its editorial fields are filled), made current. */
-  function createArticle(slug) {
+  function createArticle(slug, opts) {
     slug = String(slug || '').trim();
-    var refusal = !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(slug) ? 'An article name is lowercase words joined by hyphens, starting with a letter.'
-      : state.aDrafts[slug] ? 'There is already an article called ' + slug + '.' : '';
-    if (refusal) { status(refusal, 'error'); return { ok: false, refusal: refusal }; }
+    var title = opts && opts.title ? String(opts.title).trim() : '';
+    var refusal = !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(slug) ? (title ? 'The title "' + title + '" gives no address: it needs at least one letter (a-z). Add one, or set the address under Developer details.' : 'An article address is lowercase words joined by hyphens, starting with a letter.')
+      : state.aDrafts[slug] ? 'There is already an article at /learnings/' + slug + ' (“' + (state.aDrafts[slug].title || slug) + '”). Change the title, or the address under Developer details.' : '';
+    if (refusal) { status(refusal, 'error'); document.dispatchEvent(new CustomEvent('ark-cms-create-refused', { detail: { refusal: refusal } })); return { ok: false, refusal: refusal }; }
     state.slugs.push(slug); state.aDrafts[slug] = articleBlueprint(slug); state.aSaved[slug] = null;
+    /* asked for by its title (rail.js, the New panel): its name in every list and on its page */
+    if (title) state.aDrafts[slug].title = title;
     state.kind = 'article'; state.aCurrent = slug;
     itemsChanged('article', slug); touch({ kind: 'article', id: slug });
     createdNotice('article', slug);

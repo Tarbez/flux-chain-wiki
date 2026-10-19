@@ -47,7 +47,11 @@
     }
     const bar = document.createElement('div'); bar.className = 'smbar';
     const totalBroken = [...broken.values()].reduce((a, b) => a + b, 0), orphans = ps.filter((p) => p.path !== home && !inbound.get(p.path)).length;
-    bar.innerHTML = `<h2>Sitemap</h2><span class="sum">${ps.length} pages · ${ps.filter((p) => p.seoArticle).length} articles · ${li.filter((l) => l.ok).length} links${totalBroken ? ` · <b style="color:var(--danger)">${totalBroken} broken</b>` : ''}${orphans ? ` · <b style="color:var(--warn)">${orphans} unlinked</b>` : ''}</span><span class="spacer"></span><span class="smlegend"><span><i style="background:var(--accent)"></i>Links out</span><span><i style="background:var(--override)"></i>Links in</span></span>`;
+    /* "not linked from other pages" is a fact, not an alarm (P2-3); a broken link stays danger */
+    bar.innerHTML = `<h2>Site map</h2><span class="sum">${ps.length} pages · ${ps.filter((p) => p.seoArticle).length} articles · ${li.filter((l) => l.ok).length} links${totalBroken ? ` · <b style="color:var(--danger)">${totalBroken} broken</b>` : ''}${orphans ? ` · ${orphans} not linked from other pages` : ''}</span><span class="spacer"></span><span class="smlegend"><span><i style="background:var(--reference)"></i>Links out</span><span><i style="background:var(--override)"></i>Links in</span></span>`;
+    /* the way back to the page, where the person is looking (the views live in the More menu) */
+    const back = document.createElement('button'); back.type = 'button'; back.className = 'btn small'; back.id = 'mapBack'; back.textContent = 'Back to the page'; back.addEventListener('click', () => setView('design'));
+    bar.prepend(back);
     const zoomWrap = document.createElement('span'); zoomWrap.className = 'smzoomctl';
     const zOut = document.createElement('button'); zOut.className = 'btn small'; zOut.type = 'button'; zOut.textContent = '−'; zOut.setAttribute('aria-label', 'Zoom out'); zOut.addEventListener('click', () => setMapZoom(mapZoom - MAPZOOM_STEP));
     const zPct = document.createElement('button'); zPct.className = 'btn small smzoom-pct'; zPct.type = 'button'; zPct.textContent = Math.round(mapZoom * 100) + '%'; zPct.title = 'Reset zoom'; zPct.addEventListener('click', () => setMapZoom(1));
@@ -69,7 +73,7 @@
     const wrap = document.createElement('div'); wrap.className = 'smzoom'; wrap.dataset.w = totalW; wrap.dataset.h = maxY;
     const cv = document.createElement('div'); cv.className = 'smcanvas'; cv.style.width = totalW + 'px'; cv.style.height = maxY + 'px';
     const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'); svg.setAttribute('width', totalW); svg.setAttribute('height', maxY);
-    svg.innerHTML = `<defs><marker id="ah-out" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8z" fill="var(--accent)"/></marker><marker id="ah-in" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8z" fill="var(--override)"/></marker></defs>`;
+    svg.innerHTML = `<defs><marker id="ah-out" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8z" fill="var(--reference)"/></marker><marker id="ah-in" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 8 4 0 8z" fill="var(--override)"/></marker></defs>`;
     const path = (d, stroke, extra) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', stroke); for (const [k, v] of Object.entries(extra || {})) p.setAttribute(k, v); svg.appendChild(p); return p; };
     // hierarchy (quiet)
     const hp = pos.get(home);
@@ -89,7 +93,7 @@
         const ax = a.x + W / 2, ay = a.y + H / 2, bx = b.x + W / 2, by = b.y + H / 2;
         const ex = bx + (ax < bx ? -W / 2 : ax > bx ? W / 2 : 0), ey = by + (ax === bx ? (ay < by ? -H / 2 : H / 2) : 0);
         const p = document.createElementNS(NS, 'path'); p.setAttribute('d', `M${ax} ${ay} C${ax} ${(ay + ey) / 2 - 30} ${ex} ${(ay + ey) / 2 - 30} ${ex} ${ey}`);
-        p.setAttribute('fill', 'none'); p.setAttribute('stroke', out ? 'var(--accent)' : 'var(--override)'); p.setAttribute('stroke-width', 2); p.setAttribute('marker-end', `url(#ah-${out ? 'out' : 'in'})`); p.setAttribute('opacity', .85);
+        p.setAttribute('fill', 'none'); p.setAttribute('stroke', out ? 'var(--reference)' : 'var(--override)'); p.setAttribute('stroke-width', 2); p.setAttribute('marker-end', `url(#ah-${out ? 'out' : 'in'})`); p.setAttribute('opacity', .85);
         linkLayer.appendChild(p);
       }
     };
@@ -101,7 +105,7 @@
       const chips = [];
       if (pg === home) chips.push('<span class="chip info">Home</span>');
       if (navTargets.has(pg)) chips.push('<span class="chip info">In navigation</span>');
-      if (pg !== home && !inbound.get(pg)) chips.push('<span class="chip warn">Nothing links here</span>');
+      if (pg !== home && !inbound.get(pg)) chips.push('<span class="chip">Not linked from other pages</span>');
       if (broken.get(pg)) chips.push(`<span class="chip bad">${broken.get(pg)} broken link${broken.get(pg) > 1 ? 's' : ''}</span>`);
       c.innerHTML = `<div class="t">${ic(route.seoArticle ? 'article' : pg === home ? 'home' : 'page')}<span></span></div><code></code><div class="st">${outbound.get(pg) || 0} out · ${inbound.get(pg) || 0} in</div><div class="chips">${chips.join('')}</div>`;
       c.querySelector('.t span').textContent = route.title || pg; c.querySelector('code').textContent = pg;
@@ -128,6 +132,13 @@
      shows on the real page as it is picked; js/admin/panels.js mounts them). */
   function setView(v) {
     if (v !== 'design' && v !== 'map' && v !== 'theme') return;
+    /* Site style docks on the right edge, the edge the docked overlays (Page settings, Publishing
+       status, Version history: level 'sheet', js/admin/overlay.js) float over. Chosen while one of
+       them was open, it opened UNDER it -- at 1500px the dock [1060,1500] lay beneath Versions
+       [1080,1500] and showed as a 20px sliver, so choosing it seemed to do nothing (2026-10-19;
+       tests/cms-site-style-not-under-sheet.cjs, tests/browser/versions.mjs). What the person just
+       chose is the one on top: choosing Site style closes them, as their close button would. */
+    if (v === 'theme' && A.overlay) A.overlay.closeLevel('sheet', 'view');
     state.view = v;
     $('shell').classList.toggle('mapview', v === 'map'); $('shell').classList.toggle('themeview', v === 'theme');
     $('designView').hidden = v === 'map'; $('mapView').hidden = v !== 'map'; $('themeView').hidden = v !== 'theme';

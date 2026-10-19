@@ -34,27 +34,38 @@ function menuFor(count) {
   vm.runInContext(extract('  function setCmsContextMenuOpen(open) {', '  /* Reusable component edits', 'the context menu') + '\nthis.show = showCmsContextMenu;', context);
   context.show({ clientX: 10, clientY: 10, preventDefault() {}, stopPropagation() {} });
   const buttons = [...context.cmsContextMenu.querySelectorAll('button')];
-  return { ran, item: (label) => buttons.find((b) => b.textContent.startsWith(label)) };
+  return { ran, item: (label) => buttons.find((b) => b.textContent === label || b.textContent.startsWith(label + 'Select') || b.textContent.startsWith(label) && /^[A-Z]/.test(b.textContent.slice(label.length)) ) };
 }
 
+/* Since 2026-10-19 the menu draws THE selection command list (cmsSelectionCommands), which the
+   editor's toolbar More menu draws too (docs/ux-audit/cms.md P1-8). A command that cannot apply
+   still says what it needs, in words beside it and as its tooltip; Align and Distribute are not
+   listed at all until two layers are selected -- eight greyed rows on every single-layer menu was
+   the noise the audit measured (13 items, 8 disabled). */
 {
   const menu = menuFor(1);
   const make = menu.item('Make into states');
   assert.equal(make.disabled, false, 'one selected layer (a whole container) can be made into states');
   make.click();
   assert.deepEqual(menu.ran, ['make-states']);
-  const group = menu.item('Group selection');
+  const group = menu.item('Group');
   assert.equal(group.disabled, true);
-  assert.match(group.textContent, /needs 2\+ layers/, 'a disabled Group says what it needs');
-  assert.equal(group.title, 'needs 2+ layers');
-  assert.match(menu.item('Distribute horizontally').textContent, /needs 3\+ layers/, 'a disabled Distribute says what it needs');
-  assert.match(menu.item('Align left').textContent, /needs 2\+ layers/, 'a disabled Align says what it needs');
-  console.log('PASS: with one container selected, Make into states is enabled and every disabled item says what it needs.');
+  assert.match(group.textContent, /Select 2 or more layers/, 'a disabled Group says what it needs');
+  assert.match(group.title, /Select 2 or more layers to group them/);
+  assert.equal(menu.item('Align left edges'), undefined, 'Align is not offered for one layer');
+  assert.equal(menu.item('Space evenly across'), undefined, 'Distribute is not offered for one layer');
+  console.log('PASS: with one container selected, Make into states is enabled, Group says what it needs, Align/Distribute wait for 2+ layers.');
+}
+{
+  const menu = menuFor(2);
+  assert.equal(menu.item('Align left edges').disabled, false, 'two layers can be aligned');
+  assert.match(menu.item('Space evenly across').textContent, /Select 3 or more layers/, 'a disabled Distribute says what it needs');
 }
 {
   const menu = menuFor(3);
   assert.equal(menu.item('Make into states').textContent, 'Make into states', 'an enabled item carries no "needs" note');
-  assert.equal(menu.item('Distribute vertically').disabled, false);
+  assert.equal(menu.item('Space evenly down').disabled, false);
+  assert.equal(menu.item('Group').disabled, false);
   console.log('PASS: with three layers selected nothing is disabled or annotated.');
 }
 

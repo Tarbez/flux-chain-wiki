@@ -1,4 +1,14 @@
 /* One spacing and type scale for every routed page. */
+/* The page's typeface, set once at the root, and controls take it. The body had no family at
+   all (it computed to Times) and every unstyled <button>/<input>/<select> rendered in the browser
+   default, Arial 13.33px -- about 58 controls, among them the story-sheet depth buttons on 7
+   routes, the /concept toggle and the how-step buttons: a fourth font past the three-slot rule
+   (docs/ux-audit/pages-ux-a.md cross-page 3; regressions: tests/a11y-chrome.cjs,
+   tests/browser/site-fixes.mjs). One base rule, never per-page patches: :where() keeps it at zero
+   specificity, so a component that sets its own font still wins. --font-sans is the brand slot
+   (assets/kit/defxn-fonts.css). */
+:where(body) { font-family:var(--font-sans, system-ui, sans-serif); }
+:where(button, input, select, textarea) { font:inherit; }
 .hero-alive { --page-width:1080px; --page-gutter:clamp(20px,4cqw,56px); --page-top:clamp(32px,6cqh,64px); }
 #scene .learning-page {
  inset:84px 0 72px; width:calc(100% - 2 * clamp(16px,3cqw,48px)); max-width:var(--page-width); margin-inline:auto;
@@ -40,7 +50,7 @@
 .concept-page .concept-principles h2 { margin:0; font-size:19px; transition:transform 260ms cubic-bezier(.2,.7,.2,1),color 220ms ease; }
 .concept-page .concept-principles .article-back { margin:0; padding:0; }
 .concept-page .concept-principles .article-back::after { content:""; position:absolute; inset:0; }
-.concept-page .concept-principles section::before { content:""; position:absolute; top:-1px; left:0; height:1px; width:0; background:hsl(var(--accent)); transition:width 380ms cubic-bezier(.2,.7,.2,1); }
+.concept-page .concept-principles section::before { content:""; position:absolute; top:-1px; left:0; height:1px; width:0; background:hsl(var(--primary)); transition:width 380ms cubic-bezier(.2,.7,.2,1); }
 .concept-page .concept-principles section::after { content:""; position:absolute; inset:0; z-index:-1; background:hsl(var(--surface) / .6); opacity:0; transition:opacity 260ms ease; }
 .concept-page .concept-principles section:is(:hover,:focus-within)::before { width:100%; }
 .concept-page .concept-principles section:is(:hover,:focus-within)::after { opacity:1; }
@@ -53,10 +63,10 @@
 .theory-page .concept-principles h2 { margin:0 0 5px; font-size:18px; }
 .theory-footer { display:flex; flex-wrap:wrap; align-items:center; gap:6px 28px; margin-top:16px; }
 .theory-footer .article-back { margin:0; padding:6px 0; }
-.theory-page .theory-cta { color:hsl(var(--accent)); font-size:10px; }
+.theory-page .theory-cta { color:hsl(var(--reference)); font-size:10px; }
 .theory-page .theory-cta:hover { color:hsl(var(--text-strong)); }
 .content-layer-path { display:flex; flex-wrap:wrap; gap:7px 18px; max-width:680px; margin:0 0 26px; }
-.content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 9px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
+.content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 9px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
 .content-layer-path a:hover,.content-layer-path a:focus-visible,.content-layer-path [aria-current="page"] { color:hsl(var(--text-strong)); }
 
 /* One calm, resilient location control across inner pages. */
@@ -89,7 +99,7 @@
  box-sizing:border-box;
  overflow:hidden;
  color:hsl(var(--text-faint));
- font:550 9px/1 var(--mono-font,ui-monospace,monospace);
+ font:550 9px/1 var(--font-mono,ui-monospace,monospace);
  letter-spacing:.075em;
  text-decoration:none;
  text-overflow:ellipsis;
@@ -111,14 +121,14 @@
 #scene .content-layer-path > a:hover,#scene .content-layer-path > a:focus-visible { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
 .content-layer { max-width:680px; margin-top:16px; border-top:1px solid hsl(var(--border-subtle)); border-bottom:1px solid hsl(var(--border-subtle)); }
 .content-layer + .content-layer { margin-top:-1px; }
-.content-layer > summary { padding:16px 0; color:hsl(var(--text-strong)); cursor:pointer; font:600 10px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
-.content-layer > summary::marker { color:hsl(var(--accent)); }
+.content-layer > summary { padding:16px 0; color:hsl(var(--text-strong)); cursor:pointer; font:600 10px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; }
+.content-layer > summary::marker { color:hsl(var(--primary)); }
 .content-layer[open] > summary { border-bottom:1px solid hsl(var(--border-subtle)); }
 .content-layer .concept-principles { padding-bottom:4px; }
 .mechanism-status-summary { max-width:680px; margin-top:22px; padding:16px; border:1px solid hsl(var(--border-default)); background:hsl(var(--surface) / .72); }
 .mechanism-status-summary h2,.content-layer-reference h2 {
- margin:0 0 7px; color:hsl(var(--accent));
- font:600 9px/1.4 var(--mono-font,ui-monospace,monospace); text-transform:uppercase;
+ margin:0 0 7px; color:hsl(var(--primary));
+ font:600 9px/1.4 var(--font-mono,ui-monospace,monospace); text-transform:uppercase;
 }
 .mechanism-status-summary p,.content-layer-reference p { margin:0; color:hsl(var(--text-muted)); font:400 16px/1.6 "Albert Sans",sans-serif; }
 .content-layer-reference section { padding:16px 0; }

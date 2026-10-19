@@ -4,17 +4,17 @@
 
 #scene .resolvers-page .resolver-card { display:flex; flex-direction:column; gap:12px; }
 #scene .resolvers-page .resolver-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-#scene .resolvers-page .resolver-head h3 { margin:0; font:600 18px/1.25 var(--ark-sans); color:hsl(var(--text-strong)); }
+#scene .resolvers-page .resolver-head h3 { margin:0; font:600 18px/1.25 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
 
 #scene .resolvers-page .resolver-status {
-  font:600 10px/1 var(--ark-mono); letter-spacing:0.08em; text-transform:uppercase;
+  font:600 10px/1 var(--font-mono,ui-monospace,monospace); letter-spacing:0.08em; text-transform:uppercase;
   padding:4px 9px; border-radius:999px; white-space:nowrap;
 }
 #scene .resolvers-page .resolver-status.is-ok    { background:hsl(var(--live, var(--primary)) / 0.18); color:hsl(var(--text-strong)); }
 #scene .resolvers-page .resolver-status.is-warn  { background:hsl(var(--warning, var(--primary)) / 0.18); color:hsl(var(--warning, var(--text-strong))); }
 #scene .resolvers-page .resolver-status.is-faint { background:hsl(var(--surface)); color:hsl(var(--text-muted)); }
 
-#scene .resolvers-page .resolver-meta { font:12px/1.4 var(--ark-mono); color:hsl(var(--text-muted)); margin:0; }
+#scene .resolvers-page .resolver-meta { font:12px/1.4 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-muted)); margin:0; }
 #scene .resolvers-page .resolver-meta code { background:hsl(var(--surface)); padding:1px 5px; border-radius:4px; color:hsl(var(--text)); }
 
 #scene .resolvers-page .resolver-measured {
@@ -22,17 +22,52 @@
   padding:12px 14px; background:hsl(var(--surface)); border-radius:12px; margin-top:4px;
 }
 #scene .resolvers-page .resolver-measured.is-missing { background:hsl(var(--surface) / 0.4); border:1px dashed hsl(var(--text-muted) / 0.3); }
-#scene .resolvers-page .resolver-measured-label { font:11px/1.2 var(--ark-mono); color:hsl(var(--text-muted)); letter-spacing:0.03em; text-transform:uppercase; grid-column:1; }
-#scene .resolvers-page .resolver-measured-value { font:600 20px/1 var(--ark-sans); color:hsl(var(--text-strong)); grid-column:2; grid-row:1; }
+#scene .resolvers-page .resolver-measured-label { font:11px/1.2 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-muted)); letter-spacing:0.03em; text-transform:uppercase; grid-column:1; }
+#scene .resolvers-page .resolver-measured-value { font:600 20px/1 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); grid-column:2; grid-row:1; }
 #scene .resolvers-page .resolver-measured-value strong { font-weight:700; }
-#scene .resolvers-page .resolver-measured-source { grid-column:1 / -1; font:11px/1.4 var(--ark-sans); color:hsl(var(--text-muted)); }
+#scene .resolvers-page .resolver-measured-source { grid-column:1 / -1; font:11px/1.4 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
 #scene .resolvers-page .resolver-measured-secondary { grid-column:1 / -1; list-style:none; padding:0; margin:4px 0 0; display:flex; gap:12px; flex-wrap:wrap; }
-#scene .resolvers-page .resolver-measured-secondary li { font:12px/1.3 var(--ark-mono); color:hsl(var(--text)); }
+#scene .resolvers-page .resolver-measured-secondary li { font:12px/1.3 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text)); }
 
-#scene .resolvers-page .resolver-issues summary { font:12px/1.3 var(--ark-mono); color:hsl(var(--text-muted)); cursor:pointer; }
+#scene .resolvers-page .resolver-issues summary { font:12px/1.3 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-muted)); cursor:pointer; }
 #scene .resolvers-page .resolver-issues ul { list-style:disc; margin:6px 0 0 18px; padding:0; }
-#scene .resolvers-page .resolver-issues li { font:12px/1.4 var(--ark-sans); color:hsl(var(--text)); margin-bottom:4px; }
+#scene .resolvers-page .resolver-issues li { font:12px/1.4 var(--font-sans,sans-serif); color:hsl(var(--text)); margin-bottom:4px; }
 
 @media (max-width:720px) {
   #scene .resolvers-page .resolver-card { grid-column:1 / -1; }
 }
+
+/* Resolvers and capabilities (2026-10-19): the registry snapshot as compact tables. The tables
+   scroll inside their own wrapper on a phone, never the page. */
+#scene .resolvers-page .registry-counts { display:grid; align-content:end; gap:10px; }
+#scene .resolvers-page .registry-count { display:flex; align-items:baseline; gap:10px; margin:0; }
+#scene .resolvers-page .registry-count strong { font:600 clamp(28px,3vw,40px)/1 var(--display-font,var(--font-sans,sans-serif)); color:hsl(var(--text-strong)); font-variant-numeric:tabular-nums; }
+#scene .resolvers-page .registry-count span { font:500 13px/1.3 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
+#scene .resolvers-page .registry-count-source,
+#scene .resolvers-page .registry-footnote { margin:0; font:11.5px/1.45 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-faint)); max-width:72ch; }
+#scene .resolvers-page .registry-scroll { overflow-x:auto; max-width:100%; }
+#scene .resolvers-page .registry-scroll table { width:100%; min-width:620px; border-collapse:collapse; font:13px/1.4 var(--font-sans,sans-serif); }
+#scene .resolvers-page .registry-scroll table th,
+#scene .resolvers-page .registry-scroll table td { padding:8px 10px; text-align:left; vertical-align:middle; border-bottom:1px solid hsl(var(--border-default)); color:hsl(var(--text)); }
+#scene .resolvers-page .registry-scroll table thead th { font:600 10.5px/1.3 var(--font-mono,ui-monospace,monospace); letter-spacing:.05em; color:hsl(var(--text-faint)); }
+#scene .resolvers-page .registry-scroll table tbody th { font-weight:600; color:hsl(var(--text-strong)); }
+#scene .resolvers-page .registry-scroll table code,
+#scene .resolvers-page .registry-uses code { background:hsl(var(--surface)); padding:1px 5px; border-radius:4px; font:12px/1.4 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text)); }
+#scene .resolvers-page .registry-uses { display:inline-flex; flex-wrap:wrap; gap:4px; }
+#scene .resolvers-page .registry-dash { color:hsl(var(--text-faint)); }
+#scene .resolvers-page .registry-zero { margin:0; padding:10px 12px; border-radius:10px; border:1px dashed hsl(var(--border-default)); font:13px/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
+#scene .resolvers-page :is(.registry-open,.registry-live,.registry-way) { color:hsl(var(--text)); text-decoration:none; border-bottom:1px solid hsl(var(--border-default)); white-space:nowrap; }
+#scene .resolvers-page :is(.registry-open,.registry-live,.registry-way):is(:hover,:focus-visible) { color:hsl(var(--reference)); border-bottom-color:hsl(var(--reference)); }
+#scene .resolvers-page .registry-live { padding:5px 9px; border-radius:999px; border:1px solid hsl(var(--border-default)); font:500 11px/1 var(--font-mono,ui-monospace,monospace); }
+#scene .resolvers-page .registry-ways { display:flex; flex-wrap:wrap; gap:8px 18px; margin:0; font:500 13.5px/1.4 var(--font-sans,sans-serif); }
+#scene .resolvers-page .registry-fold summary { cursor:pointer; font:600 14px/1.4 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
+#scene .resolvers-page .registry-fold[open] > :not(summary) { margin-top:10px; }
+#scene .resolvers-page .registry-app-list { list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+#scene .resolvers-page .registry-app { display:grid; gap:4px; padding:10px 12px; border-radius:10px; background:hsl(var(--surface) / .5); }
+#scene .resolvers-page .registry-app-head { display:flex; justify-content:space-between; gap:12px; margin:0; color:hsl(var(--text-strong)); }
+@media (max-width:720px) {
+  #scene .resolvers-page .registry-counts { grid-column:1 / -1; }
+}
+/* Table captions name each table for screen readers only. (--ark-sans/--ark-mono, which this file
+   used until 2026-10-19, are defined nowhere, so every font shorthand here was dropped.) */
+#scene .resolvers-page .visually-hidden { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }

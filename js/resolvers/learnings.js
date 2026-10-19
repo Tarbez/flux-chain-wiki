@@ -58,7 +58,7 @@
         entry.appendChild(node('h2', '', article.title));
         entry.appendChild(node('span', 'learning-duration', article.minutes));
         item.appendChild(node('p','story-topic-purpose',article.summary));
-        var arrow = node('span', 'learning-arrow', '↗');
+        var arrow = node('span', 'learning-arrow', '→');
         arrow.setAttribute('aria-hidden', 'true'); entry.appendChild(arrow);
         item.appendChild(entry); list.appendChild(item);
       });
@@ -75,7 +75,7 @@
       var articleIndex = LearningContent.articles.indexOf(article);
       var header = node('header', 'article-header');
       var top = node('div', 'article-topline');
-      top.appendChild(link('← ALL LEARNINGS', 'learnings', 'article-back'));
+      top.appendChild(link('← ALL NOTES', 'learnings', 'article-back'));
       top.appendChild(node('span', 'article-position', (article.category || 'NOTE / ' + String(articleIndex + 1).padStart(2, '0')) + '  /  ' + article.minutes));
       var coreReturn = node('button', 'article-core-return', '← CORE');
       coreReturn.type = 'button'; coreReturn.hidden = true;
@@ -137,7 +137,7 @@
       var forward = node('button', '', 'NEXT QUESTION →'); forward.type = 'button';
       controls.appendChild(previous); controls.appendChild(counter); controls.appendChild(forward);
       reading.appendChild(controls);
-      var nextNote = link('NEXT NOTE / ' + next.title + ' ↗', 'article/' + next.slug, 'article-next');
+      var nextNote = link('NEXT NOTE / ' + next.title + ' →', 'article/' + next.slug, 'article-next');
       reading.appendChild(nextNote);
       body.appendChild(reading);
       var sources = node('details', 'article-sources');
@@ -146,8 +146,8 @@
       var fromPath = ArkUI.pageCatalog['article/' + article.slug] ? ArkUI.pageCatalog['article/' + article.slug].path : '/learnings/' + article.slug;
       var evidenceLink = resolvedLink(article.evidenceLabel, article.evidenceHref, fromPath, 'article-evidence-link');
       sources.appendChild(evidenceLink);
-      var related = resolvedLink('Related mechanism ↗', article.relatedPage, fromPath, 'article-related');
-      var action = resolvedLink(article.actionLabel + ' ↗', article.actionPage, fromPath, 'article-action');
+      var related = resolvedLink('Related mechanism →', article.relatedPage, fromPath, 'article-related');
+      var action = resolvedLink(article.actionLabel + ' →', article.actionPage, fromPath, 'article-action');
       var exits=node('nav','article-related-actions');exits.setAttribute('aria-label','Continue from this note');
       if (related) exits.appendChild(related);
       if (action) exits.appendChild(action);body.appendChild(exits);

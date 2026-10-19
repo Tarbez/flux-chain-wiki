@@ -275,8 +275,14 @@ await flow('single', async () => {
   await step('the menu explains a disabled item instead of only greying it out', async () => {
     await navLink(pv, 'Overview').click();
     await navLink(pv, 'Overview').click({ button: 'right' });
-    const text = await pv.locator('.ark-studio-menu button', { hasText: 'Distribute horizontally' }).textContent();
-    check(/needs 3\+ layers/.test(text), 'disabled Distribute does not say what it needs: ' + text);
+    /* one layer: Group stays listed and says what it needs; Align / Distribute wait for 2+ layers
+       instead of eight greyed rows (docs/ux-audit/cms.md P1-8) */
+    const text = await pv.locator('.ark-studio-menu button', { hasText: /^Group/ }).first().textContent();
+    check(/Select 2 or more layers/.test(text), 'disabled Group does not say what it needs: ' + text);
+    check(await pv.locator('.ark-studio-menu button', { hasText: 'Space evenly' }).count() === 0, 'Distribute is offered for one layer');
+    /* the menu is placed from its measured size: none of it is cut off by the canvas's edge */
+    const box = await pv.locator('.ark-studio-menu').boundingBox(), vp = await pv.evaluate(() => ({ w: innerWidth, h: innerHeight }));
+    check(box.y >= 0 && box.y + box.height <= vp.h + 1 && box.x >= 0 && box.x + box.width <= vp.w + 1, 'the right-click menu runs past the canvas: ' + JSON.stringify({ box, vp }));
     await page.close();
   });
 });
@@ -459,6 +465,20 @@ const instanceBox = (frame, key) => frame.evaluate((k) => {
   const left = Math.min(...rects.map((r) => r.left)), top = Math.min(...rects.map((r) => r.top)), right = Math.max(...rects.map((r) => r.right)), bottom = Math.max(...rects.map((r) => r.bottom));
   return { x: left, y: top, w: right - left, h: bottom - top };
 }, key);
+/* What is drawn ON TOP of an instance: each of its text elements is scrolled into view the way a
+   visitor would reach it, then hit-tested at its centre. [] = every one of them is reachable.
+   Why (2026-10-19): on /chain at 1280x720 -- and in the editor's 1280x721 desktop canvas -- the
+   flow scene shrank below its own content and its caption and SVG spilled over the inserted block
+   (css/chain.css); a click on the block landed on `strong.flow-says`. */
+const coveredBy = (frame, key) => frame.evaluate((k) => {
+  const root = [...document.querySelectorAll('[data-ark-component-key]')].find((e) => e.getAttribute('data-ark-component-key') === k);
+  if (!root) return ['(no instance ' + k + ')'];
+  return [...root.querySelectorAll('*')].filter((e) => !e.children.length && e.textContent.trim()).map((e) => {
+    e.scrollIntoView({ block: 'center' });
+    const b = e.getBoundingClientRect(), top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return !top || root.contains(top) ? null : e.tagName.toLowerCase() + ' under ' + top.tagName.toLowerCase() + '.' + String(top.getAttribute('class') || '').trim().split(/\s+/).join('.');
+  }).filter(Boolean);
+}, key);
 async function libRow(app, label) {
   await app.click('#tabLib');
   const row = app.locator('#libPane .myrow', { hasText: label }).first();
@@ -522,6 +542,9 @@ await flow('makecomp', async () => {
   });
   await step('override one instance (on /chain) from the toolbar', async () => {
     await gotoRoute(app, pv, '/chain');
+    /* say what covers it instead of timing out on the click (the click below is still the real one) */
+    const cover = await coveredBy(pv, other);
+    check(!cover.length, 'the inserted instance on /chain is drawn under the page, so a click on it never reaches it: ' + cover.join(', '));
     await pv.locator('[data-ark-component-key] p').first().click();
     const field = (await section(app, 'Component instance')).locator('input[aria-label="paragraph"]');
     await field.fill('Only on the chain page.'); await field.evaluate((i) => i.dispatchEvent(new Event('change')));
@@ -571,6 +594,38 @@ await flow('makecomp', async () => {
     await until(async () => /Third heading.*Only on the chain page/.test(Object.values(await instanceTexts(main)).join()), 'public /chain does not show the instance with its override');
     await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-05-public-chain.png') });
+    await pub.close();
+  });
+  await step('PUBLIC /chain on a 1280x720 screen: the inserted block is never drawn under the flow scene, whichever step it shows', async () => {
+    /* REGRESSION (2026-10-19). .chain-flow and .flow-now were allowed to shrink below their content
+       (flex:1 1 auto / 0 1 auto, min-height:0). On a page shorter than the scene the box shrank and
+       the scene (sized by 40vh) and its caption did not, so they spilled over the slot that follows
+       -- where CMS-inserted blocks sit -- and, being position:relative, painted over the block and
+       took its clicks. Measured: 1280x720 public, and the editor's desktop canvas once Wave 1's
+       canvas strip made it 1280x721 (it was 1280x746, which is why this stayed hidden). The steps'
+       captions differ in length, so each one is held (the flow's own hover hold) and checked. */
+    const pub = await context.newPage();
+    await pub.setViewportSize({ width: 1280, height: 720 });
+    await pub.goto(`${ORIGIN}/chain`);
+    const main = pub.mainFrame();
+    await until(async () => /Third heading/.test(Object.values(await instanceTexts(main)).join()), 'public /chain does not show the instance', 15000);
+    await animationsSettled(main);
+    const steps = await main.locator('.chain-flow .flow-record').count();
+    check(steps === 5, 'expected the flow\'s 5 step links on /chain, found ' + steps);
+    for (let i = 0; i < steps; i++) {
+      await main.evaluate((n) => document.querySelectorAll('.chain-flow .flow-record')[n].dispatchEvent(new Event('pointerenter')), i);
+      await until(() => main.evaluate((n) => document.querySelector('.chain-flow').dataset.step === String(n), i), 'the flow did not hold step ' + (i + 1));
+      const box = await main.evaluate(() => {
+        const r = (s) => document.querySelector(s).getBoundingClientRect();
+        const now = r('.chain-flow .flow-now'), says = r('.chain-flow .flow-says'), scene = r('.chain-flow .flow-scene');
+        return { says: document.querySelector('.chain-flow .flow-says').textContent, spill: Math.round(Math.max(says.bottom, scene.bottom) - now.bottom), gap: Math.round(r('.chain-components').top - r('.chain-flow').bottom) };
+      });
+      check(box.spill <= 0, `step ${i + 1}: the scene or its caption runs ${box.spill}px out of its own panel (caption ${box.says})`);
+      check(box.gap >= 0, `step ${i + 1}: the insertion slot starts ${-box.gap}px inside the flow`);
+      const cover = await coveredBy(main, other);
+      check(!cover.length, `step ${i + 1}: the inserted block is drawn under the flow (${cover.join(', ')}); caption ${box.says}`);
+    }
+    await pub.screenshot({ path: path.join(SHOTS, 'makecomp-06-public-chain-1280x720.png') });
     await pub.close();
   });
   await step('SSR (the bot render, api/lib/render-core.mjs) has the components and not the replaced originals', async () => {

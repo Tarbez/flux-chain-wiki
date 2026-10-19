@@ -1,56 +1,136 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "deployment",
-  "title": "How DEFXN works",
+  "title": "Deploy a resolver",
   "route": "/how-deployment-works",
   "group": "page",
   "meta": {
     "next": "download",
     "back": "resolver",
-    "primary": true
+    "primary": true,
+    "diagrams": [
+      {
+        "id": "deploy-flow",
+        "place": "how-deployment-works: above the three cards (desktop), replacing the card meshes on phones",
+        "caption": "Illustration · relationships, not live state",
+        "stations": [
+          "grammar",
+          "capabilities",
+          "control",
+          "review and sign",
+          "serve",
+          "explorer"
+        ],
+        "fork": {
+          "at": "control",
+          "branches": [
+            "immutable",
+            "one control key"
+          ]
+        },
+        "badges": {
+          "serve": "proof"
+        },
+        "refusals": [
+          {
+            "at": "grammar",
+            "when": "before signing",
+            "name": "grammar does not compile"
+          },
+          {
+            "at": "capabilities",
+            "when": "at the node",
+            "name": "CapabilityNotLaunched"
+          }
+        ],
+        "note": "refusals are drawn as short side exits carrying their exact refusal names: a refusal names the problem, it never fails silently"
+      }
+    ]
   },
   "fields": {
     "EYEBROW": {
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "DEFXN / HOW IT WORKS"
+      "value": "DEFXN / DEPLOY A RESOLVER"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "From a network ID to a verifiable receipt."
+      "value": "From a grammar to a chain."
     },
     "BODY1": {
       "label": "First paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "1. Register or select a named network ID. Today this creates a miner-presence namespace, not a complete security boundary."
+      "value": "Say exactly what your records look like: their kinds, their fields, and which fields every record carries. Derive it from real sample records, not by hand. The deployer compiles it with the network’s own compiler before you sign."
     },
     "BODY2": {
       "label": "Second paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "2. Publish or select the addressed resolver logic that defines the input and claim. Publication alone does not establish active execution capacity."
+      "value": "List the shared mechanisms your resolver uses: signatures, custody, a ledger, escrow. The network refuses a launch that names one it has not launched."
     },
     "BODY3": {
       "label": "Third paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "3. Open an intent describing the work and constraints. A provider can answer with an offer, but no agreement exists until terms are accepted."
+      "value": "Immutable: nobody, ever, including you. Or one control key: only that key can sign an upgrade, and every upgrade is a new record that sits beside the old one."
     },
     "BODY4": {
       "label": "Fourth paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "4. Accept the offer, execute the resolver, and submit fulfillment evidence as signed records on your own chain; the agreements resolver links them."
+      "value": "The deployer shows the exact unsigned record. You sign only after you have read it. The network answers with the record’s ID, or a refusal that says what is missing."
     },
     "BODY5": {
       "label": "Fifth paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "5. Verify the receipt under the identified checker and authority rules. A receipt records that decision; it is not universal truth or proof of production readiness."
+      "value": "A provider announces an address for your chain. If your resolver uses capabilities, the provider first proves it runs them by passing their test vectors."
+    },
+    "BODY6": {
+      "label": "Step 6 text",
+      "kind": "text",
+      "section": "Steps",
+      "value": "Every record your resolver admits appears in the explorer, oldest first, re-checked in your browser."
+    },
+    "STEP1": {
+      "label": "Step 1 title",
+      "kind": "line",
+      "section": "Steps",
+      "value": "Write the grammar"
+    },
+    "STEP2": {
+      "label": "Step 2 title",
+      "kind": "line",
+      "section": "Steps",
+      "value": "Name your capabilities"
+    },
+    "STEP3": {
+      "label": "Step 3 title",
+      "kind": "line",
+      "section": "Steps",
+      "value": "Choose who can change it"
+    },
+    "STEP4": {
+      "label": "Step 4 title",
+      "kind": "line",
+      "section": "Steps",
+      "value": "Review and sign"
+    },
+    "STEP5": {
+      "label": "Step 5 title",
+      "kind": "line",
+      "section": "Steps",
+      "value": "Serve it"
+    },
+    "STEP6": {
+      "label": "Step 6 title",
+      "kind": "line",
+      "section": "Steps",
+      "value": "Watch it"
     },
     "NEXT": {
       "label": "Main button",
@@ -68,55 +148,181 @@ ArkManifest.define({
       "label": "Primary answer",
       "kind": "text",
       "section": "Story",
-      "value": "DEFXN runs work as signed records on each party’s own chain, read by addressed resolvers. Register a named network, choose a resolver, agree on terms, submit work evidence, and verify the receipt under the applicable rules."
+      "value": "You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities it uses, and publishes the grammar every record must follow. Then a provider serves it."
     },
     "BOUNDARY": {
       "label": "Essential boundary",
       "kind": "text",
       "section": "Story",
-      "value": "Named-network isolation currently covers miner presence only. Publication does not establish active execution capacity; public production activation remains unverified."
+      "value": "Launched is not served: a resolver with no announcing provider answers nothing. The explorer and deployer run on the development network today; public hosting is not established."
     },
     "FABRIC.NETWORK": {
       "label": "Network fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "A name for miner presence."
+      "value": "A name for miner presence; not a resolver chain."
     },
     "FABRIC.LOGIC": {
       "label": "Logic fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "Inputs and claims meet at an addressed resolver."
+      "value": "A resolver, launched on a chain of its own."
     },
     "FABRIC.INTENT": {
       "label": "Intent fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "A request waits for an offer and accepted terms."
+      "value": "A request waits for an offer and accepted terms (earlier agreement path)."
     },
     "FABRIC.FULFILLMENT": {
       "label": "Fulfillment fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "Signed evidence lands on the provider’s chain, citing the agreement."
+      "value": "Signed evidence lands on the provider’s chain, citing the agreement (earlier agreement path)."
     },
     "FABRIC.RECEIPT": {
       "label": "Receipt fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "An outcome is recorded under identified rules."
+      "value": "An outcome is recorded under identified rules (earlier agreement path)."
     },
     "SIMPLE.TITLE": {
       "label": "Title",
       "kind": "line",
       "section": "Simple story",
-      "value": "One request. One agreement. One verifiable result."
+      "value": "From a grammar to a chain."
     },
     "SIMPLE.INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Simple story",
-      "value": "DEFXN keeps the request, accepted terms, returned work, and verification connected."
+      "value": "You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities it uses, and publishes the grammar every record must follow. Then a provider serves it."
+    },
+    "SIMPLE.WRITE.TITLE": {
+      "label": "Card 1 title",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "Write it"
+    },
+    "SIMPLE.WRITE.SIGNAL": {
+      "label": "Card 1 signal",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "GRAMMAR · CAPABILITIES"
+    },
+    "SIMPLE.WRITE.TEXT": {
+      "label": "Card 1 text",
+      "kind": "text",
+      "section": "Deploy cards",
+      "value": "Your records’ grammar, and the shared capabilities you build on."
+    },
+    "SIMPLE.LAUNCH.TITLE": {
+      "label": "Card 2 title",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "Launch it"
+    },
+    "SIMPLE.LAUNCH.SIGNAL": {
+      "label": "Card 2 signal",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "CONTROL · SIGN"
+    },
+    "SIMPLE.LAUNCH.TEXT": {
+      "label": "Card 2 text",
+      "kind": "text",
+      "section": "Deploy cards",
+      "value": "Choose who can change it, then read and sign one record."
+    },
+    "SIMPLE.SERVE.TITLE": {
+      "label": "Card 3 title",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "Serve it"
+    },
+    "SIMPLE.SERVE.SIGNAL": {
+      "label": "Card 3 signal",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "PROVIDER · EXPLORER"
+    },
+    "SIMPLE.SERVE.TEXT": {
+      "label": "Card 3 text",
+      "kind": "text",
+      "section": "Deploy cards",
+      "value": "A provider proves and announces it; every record it admits shows in the explorer."
+    },
+    "SIMPLE.CAUTION.TITLE": {
+      "label": "Caution disclosure title",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "Before you sign"
+    },
+    "SIMPLE.CAUTION": {
+      "label": "Caution disclosure text",
+      "kind": "text",
+      "section": "Deploy cards",
+      "value": "A launch uses a position on your own key’s chain. Signing two different records at the same position freezes that key for good. Launch once per key, or use a fresh key."
+    },
+    "SIMPLE.PLANNED.TITLE": {
+      "label": "Planned disclosure title",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "What’s next · Planned"
+    },
+    "SIMPLE.PLANNED": {
+      "label": "Planned disclosure text",
+      "kind": "text",
+      "section": "Deploy cards",
+      "value": "One deployer for sites, apps, databases, packages, modules and code repositories, each as records on its own resolver chain. Audits and bounties for capabilities. Service pools. None of these is built yet."
+    },
+    "SIMPLE.DEPLOYER.LINK": {
+      "label": "Action: Deploy product",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "Open Deploy"
+    },
+    "SIMPLE.DEPLOYER.HREF": {
+      "label": "Action target: Deploy product",
+      "kind": "link",
+      "section": "Deploy cards",
+      "value": "url:https://deploy.defxn.com"
+    },
+    "SIMPLE.EXPLORE.LINK": {
+      "label": "Action: Explore product",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "See launched resolvers in Explore"
+    },
+    "SIMPLE.EXPLORE.HREF": {
+      "label": "Action target: Explore product",
+      "kind": "link",
+      "section": "Deploy cards",
+      "value": "url:https://explore.defxn.com"
+    },
+    "SIMPLE.REGISTRY.LINK": {
+      "label": "Action: resolvers and capabilities",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "Every resolver and capability"
+    },
+    "SIMPLE.REGISTRY.HREF": {
+      "label": "Action target: resolvers and capabilities",
+      "kind": "link",
+      "section": "Deploy cards",
+      "value": "route:resolvers"
+    },
+    "SIMPLE.AGREEMENT.TITLE": {
+      "label": "Agreement chapters heading",
+      "kind": "line",
+      "section": "Deploy cards",
+      "value": "The earlier agreement path"
+    },
+    "SIMPLE.AGREEMENT.TEXT": {
+      "label": "Agreement chapters text",
+      "kind": "text",
+      "section": "Deploy cards",
+      "value": "Request, terms, result: how two parties connected work under the agreement path. It is no longer the direction, and is kept read-only for reference."
     },
     "SIMPLE.ASK.TITLE": {
       "label": "Ask Title",
@@ -194,13 +400,13 @@ ArkManifest.define({
       "label": "Boundary",
       "kind": "text",
       "section": "Simple story",
-      "value": "Named networks currently scope miner presence only. Public production activation remains unverified."
+      "value": "Launched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today; public hosting is not established."
     },
     "SIMPLE.CONTEXT": {
       "label": "Context disclosure",
       "kind": "line",
       "section": "Simple story",
-      "value": "Context / see the complete agreement path"
+      "value": "Context / the earlier agreement path"
     },
     "SIMPLE.PATH": {
       "label": "Lifecycle context",
@@ -219,6 +425,18 @@ ArkManifest.define({
       "kind": "link",
       "section": "Simple story",
       "value": "route:lifecycle"
+    },
+    "CHAPTER.BANNER": {
+      "label": "Chapter banner: earlier direction",
+      "kind": "text",
+      "section": "Chapters",
+      "value": "Written for the earlier agreement path, which is no longer the direction. For resolvers today, read What is a resolver."
+    },
+    "CHAPTER.BANNER.HREF": {
+      "label": "Chapter banner link target",
+      "kind": "link",
+      "section": "Chapters",
+      "value": "route:resolver"
     },
     "CHAPTER.ASK.TITLE": {
       "label": "Ask Title",
@@ -392,7 +610,7 @@ ArkManifest.define({
       "label": "Work record label",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "THE AGREEMENT / A REAL FXN TRANSFER RECORD"
+      "value": "THE AGREEMENT / AN EARLIER-PATH TRANSFER RECORD"
     },
     "CHAPTER.WORK.RECORD": {
       "label": "Work record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
@@ -416,7 +634,7 @@ ArkManifest.define({
       "label": "Check record label",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "THE FULFILLMENT / A REAL FXN TRANSFER RECORD"
+      "value": "THE FULFILLMENT / AN EARLIER-PATH TRANSFER RECORD"
     },
     "CHAPTER.CHECK.RECORD": {
       "label": "Check record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
@@ -434,7 +652,7 @@ ArkManifest.define({
       "label": "Check not yet true",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A receipt is not universal truth, legal finality, or settlement."
+      "value": "A receipt is not universal truth, a legal settlement, or a payment."
     },
     "CHAPTER.CHECK.RESULT": {
       "label": "Check heading",
@@ -500,7 +718,7 @@ ArkManifest.define({
       "label": "Work why 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "There is no single global queue. Each party writes to its own chain, so unrelated work never waits behind yours, unlike a blockchain where every transaction shares one block order."
+      "value": "There is no single global queue. Each party writes to its own chain, so unrelated work never waits behind yours, unlike one shared queue that every record has to wait in."
     },
     "CHAPTER.WORK.WHY2.TITLE": {
       "label": "Work why 2 title",
@@ -530,13 +748,13 @@ ArkManifest.define({
       "label": "Check why 1 title",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "Signed does not mean true"
+      "value": "Trust is decided before"
     },
     "CHAPTER.CHECK.WHY1.TEXT": {
       "label": "Check why 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A signature answers \"who said this?\". Whether to accept it is answered by the checker and the authority rules. DEFXN keeps those two questions apart."
+      "value": "A signature answers “who said this?”, and for a resolver its signature is its result. Whether to rely on that resolver is decided before you send anything: its grammar, its capabilities, who can change it."
     },
     "CHAPTER.CHECK.WHY2.TITLE": {
       "label": "Check why 2 title",
@@ -554,13 +772,13 @@ ArkManifest.define({
       "label": "Check why 3 title",
       "kind": "line",
       "section": "How it works chapters",
-      "value": "Accepted, then durable"
+      "value": "Signed, then stored"
     },
     "CHAPTER.CHECK.WHY3.TEXT": {
       "label": "Check why 3 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A result is accepted once the quorum signs it, and durable after three attestations and a commit certificate. Locally that full path closed about 375 times a second."
+      "value": "The resolver signs the result. That signature is the result. Copies go to other peers, which store it without redoing the work. Anyone can check it later by walking the signatures."
     }
   }
 });

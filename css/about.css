@@ -65,8 +65,9 @@
    Law 18 ("one scroll, then it ends"): this page now holds the hero plus
    one disclosure above it, so the closer is scaled back from a second
    full "arrival" moment to a calm sign-off. */
-#scene .about-boundary {margin-top:40px !important;padding:40px 48px 24px !important;}
-#scene .about-boundary h2 {font-size:clamp(24px,3vw,36px) !important;margin:16px 0 !important;}
+#scene .about-closing {position:relative;margin-top:40px;padding:40px 48px 24px;border-top:1px solid hsl(var(--border-strong));border-radius:4px;background:hsl(var(--anchor));color:hsl(var(--anchor-ink));}
+#scene .about-closing .hl-label {color:hsl(var(--anchor-ink) / .64);}
+#scene .about-closing h2 {margin:16px 0;font-size:clamp(24px,3vw,36px);line-height:1.05;letter-spacing:-.04em;font-weight:550;}
 #scene .about-boundary-text {max-width:640px;font-size:16px;line-height:24px;color:hsl(var(--anchor-ink) / .8);}
 #scene .about-reference {margin-top:32px;border-top:1px solid hsl(var(--anchor-ink) / .16);}
 #scene .about-reference summary {display:flex;justify-content:space-between;padding:20px 0;cursor:pointer;list-style:none;font-size:15px;color:hsl(var(--anchor-ink));}
@@ -88,6 +89,7 @@
   #scene .about-group {border-bottom:1px solid hsl(var(--border-default));}
 }
 @media (max-width:960px) {
+  #scene .about-closing {padding:32px 24px 24px;}
   #scene .about-launch > .hl-hero {padding:32px 0 48px;gap:32px;}
   #scene .home-launch .about-nos {grid-template-columns:1fr;}
   #scene .about-nos article {border-right:0;border-bottom:1px solid hsl(var(--border-default));}

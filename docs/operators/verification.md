@@ -18,15 +18,22 @@ Verification must name the capability, environment, source revision, observation
 - show presence discovery from a separate process or host;
 - do not describe discovery output as authoritative membership.
 
-## Resolver deployment
+## Resolver launch and serving
 
-- identify the pattern and resolver address;
-- identify an admitted, active provider;
-- show fresh capacity;
-- record the request, claim, checker result, and relevant receipts;
-- distinguish published resolver metadata from deployed execution capacity.
+Read these in the explorer (explore.defxn.com, or the local explorer on port 4541) and paste its verified rows; it re-checks every CID and signature itself. See [resolvers](../protocol/resolvers.md).
 
-## Agreement fabric
+- chain id and launch CID (the `ResolverLaunch` record);
+- control field: the control key, or immutable;
+- grammar state: enforced, or `Unspecified` (legacy);
+- the capabilities it composes, and that each is launched at the pinned manifest;
+- providers announcing (`CHAIN_PROVIDERS`), each with its proof CID when the resolver composes capabilities;
+- the node and the observation time.
+
+Keep `launched` distinct from `served`: a launched resolver with no announcing provider answers nothing.
+
+## Agreement fabric (retired, read-only)
+
+The agreement-fabric path is no longer the direction ([status](../status.md)); these endpoints are kept read-only for compatibility.
 
 Inspect the fixed endpoints exposed by the miner:
 

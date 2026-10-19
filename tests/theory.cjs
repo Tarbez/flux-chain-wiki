@@ -5,7 +5,7 @@ const context=vm.createContext({console,ArkUI:{},document:{write(){}}});
 vm.runInContext(fs.readFileSync('js/content/manifest.js','utf8'),context);
 vm.runInContext(fs.readFileSync('js/content/manifests/index.js','utf8'),context);
 for(const id of vm.runInContext('ArkManifestIds',context)) vm.runInContext(fs.readFileSync('js/content/manifests/'+id+'.js','utf8'),context);
-for(const file of ['js/content/learnings.js','js/content/article-index.js','js/ark/vendor/engines.js','js/ark/scene-state.js','js/pages/catalog.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+for(const file of ['js/content/learnings.js','js/content/article-index.js','js/ark/vendor/engines.js','js/ark/scene-state.js','js/content/site-pages.js','js/pages/catalog.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 const {ArkManifest,ArkCopy,ArkUI}=vm.runInContext('({ArkManifest,ArkCopy,ArkUI})',context);
 const theory=ArkManifest.group('theory');
 assert.equal(theory.length,6,'three principles plus three rail links');

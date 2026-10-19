@@ -228,8 +228,11 @@
     var t = fieldTarget(kind, id, key);
     if (t.refusal) return { ok: false, refusal: t.refusal };
     if (t.bool ? typeof value !== 'boolean' : typeof value !== 'string') return { ok: false, refusal: kind + ' "' + id + '" ' + key + ' takes ' + (t.bool ? 'true or false' : 'text') + ', not ' + (value === null ? 'null' : typeof value) + '.' };
-    var changed = t.get() !== value;
+    var before = t.get(), changed = before !== value;
     t.set(value);
+    /* one entry in the ONE undo history (js/admin/history.js), unless the canvas already holds
+       this edit in its own (an inline edit) or the history itself is writing it back */
+    if (changed && opts.record !== false && opts.canvas !== false && typeof A.historyField === 'function') A.historyField(kind, id, key, before, value);
     if (opts.canvas === false && state.cmsSourceSite) foldIntoCanvasSite(kind, id, key);
     syncControls(kind + ':' + id + ':' + key, value);
     touch({ canvas: opts.canvas !== false, kind: kind, id: id });
@@ -301,12 +304,14 @@
   }
 
   function fieldEl(manifest, role) {
-    var field = manifest.fields[role], id = 'f-' + manifest.id + '-' + role.replace(/\./g, '-'), note = manifest.id.toUpperCase() + '.' + role;
+    /* a field is called by its label; its copy key (HOME.PROMISE) is the form's Developer details,
+       not a mono tag on every row (docs/ux-audit/cms.md P1-14) */
+    var field = manifest.fields[role], id = 'f-' + manifest.id + '-' + role.replace(/\./g, '-');
     if (field.kind === 'link') {
-      return linkPickerEl(field.label, id, field.value, function (v) { setItemField('page', manifest.id, role, v); }, note, 'page:' + manifest.id + ':' + role);
+      return linkPickerEl(field.label, id, field.value, function (v) { setItemField('page', manifest.id, role, v); }, null, 'page:' + manifest.id + ':' + role);
     }
     var text = field.kind === 'text';
-    var row = boundField('page', manifest.id, role, field.label, { type: text ? 'textarea' : 'text', rows: 3, id: id, note: note });
+    var row = boundField('page', manifest.id, role, field.label, { type: text ? 'textarea' : 'text', rows: 3, id: id });
     row.dataset.markEmpty = '1';
     if (!field.value) row.classList.add('empty');
     if (text) row.appendChild(h('div', { class: 'count', text: field.value.length + ' characters' }));
@@ -353,7 +358,7 @@
       root.classList.add('cms-form');
       var manifest = state.drafts[id];
       if (!manifest) { root.appendChild(h('p', { class: 'empty-state', text: id ? 'There is no page "' + id + '" any more (deleted, or never created). Pick a page in the Pages tab.' : 'Pick a page in the Pages tab.' })); return; }
-      root.appendChild(panelHead(manifest.title, manifest.route + '  ·  js/content/manifests/' + manifest.id + '.js', 'page', id));
+      root.appendChild(panelHead(manifest.title, manifest.route, 'page', id));
 
       var contentPanel = h('div', { class: 'editor-tab-flow' });
       if (manifest.meta.next || manifest.meta.placement) {
@@ -363,23 +368,37 @@
         if (manifest.meta.next) where.appendChild(metaSelect(manifest, 'meta.next', 'The onward link opens', routeOptions()));
         contentPanel.appendChild(where);
       }
+      /* A field the page no longer shows says so in its own label ("... (unused on the current
+         hero; kept for admin history)"): those wait under "Unused fields", folded, instead of
+         sitting between the ones that matter (P1-14). Nothing is dropped. */
+      var unusedRoles = Object.keys(manifest.fields).filter(function (role) { return /\bunused\b/i.test(manifest.fields[role].label || ''); });
       sections(manifest.fields).forEach(function (section) {
+        var roles = section.roles.filter(function (role) { return unusedRoles.indexOf(role) < 0; });
+        if (!roles.length) return;
         var set = h('fieldset', {}, h('legend', { text: section.name }));
-        section.roles.forEach(function (role) { set.appendChild(fieldEl(manifest, role)); });
+        roles.forEach(function (role) { set.appendChild(fieldEl(manifest, role)); });
         contentPanel.appendChild(set);
       });
+      if (unusedRoles.length) {
+        var unusedBody = h('div', {}, h('p', { class: 'hint', text: 'The page does not show these today. They are kept so nothing written in them is lost.' }));
+        unusedRoles.forEach(function (role) { unusedBody.appendChild(fieldEl(manifest, role)); });
+        contentPanel.appendChild(ArkAdminPrimitives.disclosure({ label: 'Unused fields (' + unusedRoles.length + ')', content: unusedBody }));
+      }
+      contentPanel.appendChild(A.devDetails([['File', 'js/content/manifests/' + manifest.id + '.js'], ['Address', manifest.route]].concat(
+        Object.keys(manifest.fields).map(function (role) { return [manifest.fields[role].label + (manifest.fields[role].section ? ' (' + manifest.fields[role].section + ')' : ''), manifest.id.toUpperCase() + '.' + role]; }))));
       if (manifest.fields['POINT1.TITLE']) {
         contentPanel.appendChild(h('div', { class: 'tools' },
           h('button', { type: 'button', class: 'btn', text: 'Add a point', onclick: function () { addPoint(manifest); touch(); repaintPanels('page', id); } }),
           h('button', { type: 'button', class: 'btn', text: 'Remove the last point', disabled: ArkManifest.points(manifest) <= 1, onclick: function () { removePoint(manifest); touch(); repaintPanels('page', id); } })));
       }
-      var tabItems = [{ id: 'content', label: 'Content', content: contentPanel }];
+      /* the tabs in plain words (P1-14): ids stay (opts.tab, drivers) */
+      var tabItems = [{ id: 'content', label: 'Text', content: contentPanel }];
       if (window.ArkMeshSettings && hasShape(id)) {
         var spid = shapePageId(id);
-        tabItems.push({ id: 'shape', label: 'Shape', content: h('div', { class: 'editor-tab-flow' }, buildShapePickers(spid), buildPlacementPanel(spid)) });
+        tabItems.push({ id: 'shape', label: 'Shapes', content: h('div', { class: 'editor-tab-flow' }, buildShapePickers(spid), buildPlacementPanel(spid)) });
       }
-      tabItems.push({ id: 'seo', label: 'SEO', content: h('div', { class: 'editor-tab-flow' }, buildPageSeoPanel(id, manifest.title)) });
-      tabItems.push({ id: 'code', label: 'Code', content: buildCodePanel(id, manifest) });
+      tabItems.push({ id: 'seo', label: 'Search & sharing', content: h('div', { class: 'editor-tab-flow' }, buildPageSeoPanel(id, manifest.title)) });
+      tabItems.push({ id: 'code', label: 'Advanced', content: buildCodePanel(id, manifest) });
       var open = tabItems.some(function (t) { return t.id === tabFor['page:' + id]; }) ? tabFor['page:' + id] : 'content';
       root.appendChild(ArkAdminPrimitives.tabs({ label: manifest.title + ' editor sections', items: tabItems, value: open, className: 'ark-tabs page-editor-tabs',
         onChange: function (tab) { tabFor['page:' + id] = tab; } }));
@@ -458,11 +477,14 @@
   }
   /* createPage(id) -> { ok, id } | { ok: false, refusal }: a new theory page draft (written by
      the next Save), made current (state.kind 'page'); the status line says what happened. */
-  function createPage(id) {
+  function createPage(id, opts) {
     id = String(id || '').trim();
-    if (!/^[a-z][a-z0-9]*$/.test(id)) return refused('A page name is lowercase letters and digits, starting with a letter.');
-    if (state.drafts[id]) return refused('There is already a page called ' + id + '.');
+    var title = opts && opts.title ? String(opts.title).trim() : '';
+    if (!/^[a-z][a-z0-9]*$/.test(id)) return refused(title ? 'The title "' + title + '" gives no address: it needs at least one letter (a-z). Add one, or set the address under Developer details.' : 'A page address is lowercase letters and digits, starting with a letter.');
+    if (state.drafts[id]) return refused('There is already a page at /concept/' + id + ' (“' + (state.drafts[id].title || id) + '”). Change the title, or the address under Developer details.');
     state.ids.push(id); state.drafts[id] = blueprint(id); state.saved[id] = null;
+    /* asked for by its title (rail.js, the New panel): the name every list shows and its heading */
+    if (title) { state.drafts[id].title = title; state.drafts[id].fields.TITLE.value = title; }
     state.kind = 'page'; state.current = id;
     itemsChanged('page', id); touch({ kind: 'page', id: id });
     createdNotice('page', id);
@@ -478,17 +500,20 @@
       body: 'It is on the canvas and its fields are open. It is a draft until you Save: the site gets its file and its address then.',
       actions: [{ label: 'Save now', run: function () { saveEverything(); } }] });
   }
-  function refused(message) { status(message, 'error'); return { ok: false, refusal: message }; }
+  function refused(message) { status(message, 'error'); document.dispatchEvent(new CustomEvent('ark-cms-create-refused', { detail: { refusal: message } })); return { ok: false, refusal: message }; }
   /* The New page / New article / New image / New encrypted item forms: wherever the shell (or a
      panel) draws them, by id, a submit lands here -- delegated, so a form drawn after load works. */
   var CREATE_FORMS = {
-    newForm: function () { var input = $('newId'), r = createPage(input.value); if (r.ok) { input.value = ''; landOn('page', r.id); } },
-    newArticleForm: function () { var input = $('newSlug'), r = A.createArticle(input.value); if (r.ok) { input.value = ''; landOn('article', r.id); } }
+    newForm: function () { var input = $('newId'), r = createPage(input.value, { title: newTitle() }); if (r.ok) { input.value = ''; landOn('page', r.id); } },
+    newArticleForm: function () { var input = $('newSlug'), r = A.createArticle(input.value, { title: newTitle() }); if (r.ok) { input.value = ''; landOn('article', r.id); } }
   };
   /* A created page or article is where the person lands: on the canvas (the preview renders it
      from its draft, js/main.js) and in its own Page fields -- never Home's, which the header's
      Page fields opened while the canvas fell back to Home (docs/ux-audit/cms.md P0-1). */
+  /* the title typed in the New panel (js/admin/rail.js), when the form came from there */
+  function newTitle() { var t = $('newTitle'); return t ? t.value.trim() : ''; }
   function landOn(kind, id) {
+    document.dispatchEvent(new CustomEvent('ark-cms-created', { detail: { kind: kind, id: id } }));
     hook(kind === 'page' ? 'select' : 'selectArticle')(id);
     hook('openPageFields')({ kind: kind, id: id });
   }

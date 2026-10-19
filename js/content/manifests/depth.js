@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "The verifying participant closes the trail under identified checker and authority rules. A receipt is evidence of that decision, not universal truth or legal finality."
+      "value": "The verifying participant closes the trail under identified checker and authority rules. A receipt is evidence of that decision, not universal truth or a legal settlement."
     },
     "STATUS.TITLE": {
       "label": "Status heading",

@@ -241,7 +241,7 @@ const lines=world.element.byClass('world-line');
 assert(world.element.byClass('world-mine').length===1,'your chain is one heavy line through the map');
 const selected=()=>lines.filter(l=>l.getAttribute('data-selected')==='true').map(l=>l.getAttribute('data-name'));
 assert.deepEqual(selected(),['alice.fxn'],'transfers highlights alice.fxn');
-world.select('staking');assert.deepEqual(selected(),['validator.fxn'],'staking highlights validator.fxn');
+world.select('staking');assert.deepEqual(selected(),['provider.fxn'],'staking highlights provider.fxn (a provider stakes for its seat; "validator" is retired vocabulary, docs/deprecated.md)');
 assert.equal(world.element.byClass('world-interchange').length,5,'five chains cross yours at interchanges');
 console.log('PASS: hero scene — 7 real grammar blocks, one panel active per step, ' +
   'checks pass together, partial replication reads partial, the ending stays hidden ' +

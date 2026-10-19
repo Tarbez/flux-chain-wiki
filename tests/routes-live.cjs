@@ -91,7 +91,7 @@ function load(file) { vm.runInContext(fs.readFileSync(file, 'utf8'), context, { 
 load('js/ark/local-identity.js'); load('js/ark/mesh-fabric.js'); load('js/ark/stage-scenes.js'); load('js/ark/route.js'); load('js/tokens.js'); load('js/content/manifest.js');
 for (const id of JSON.parse(fs.readFileSync('js/content/manifests/index.js', 'utf8').match(/var ArkManifestIds = (\[[^;]+\]);/)[1])) load(`js/content/manifests/${id}.js`);
 load('js/content/learnings.js'); load('js/content/article-index.js'); load('js/content/resolutions.js');
-load('js/content/seo.js'); load('js/content/seo-data.js'); load('js/ark/vendor/engines.js'); load('js/ark/story-diagrams.js');
+load('js/content/site-pages.js'); load('js/content/seo.js'); load('js/content/seo-data.js'); load('js/ark/vendor/engines.js'); load('js/ark/story-diagrams.js');
 load('js/content/states.js');
 const ArkStates = vm.runInContext('ArkStates', context);
 load('js/content/canvas-transitions.js'); load('js/content/canvas-transitions-data.js');
@@ -211,13 +211,20 @@ for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
     page.arkDispose();
   }
   if (key === 'deployment') {
+    /* Since 2026-10-19 this page is "Deploy a resolver": six steps in three cards (write,
+       launch, serve). The three agreement chapters it used to be stay reachable from it, each
+       link still returning to its exact source. */
     const cards=page.querySelector('.how-work-cards').children;
-    assert.equal(cards.length,3,'nontechnical story keeps three distinct journey surfaces');
-    assert.deepEqual(cards.map(card=>card.dataset.sceneLink),['how/ask','how/work','how/check']);
-    assert.deepEqual(cards.map(card=>card.dataset.continuityCard),['how/ask','how/work','how/check'],'each journey surface returns to its exact source');
-    assert.equal(cards[1].querySelector('.how-work-answer').textContent,context.ArkCopy.text('DEPLOYMENT.SIMPLE.WORK.TEXT'),'editable explanation survives into the actual card');
-    cards[0].listeners.focus();assert.equal(cards[0].dataset.active,'true');
-    cards[0].listeners.blur();assert.equal(cards[0].dataset.active,'false');
+    assert.equal(cards.length,3,'deploy story keeps three distinct journey surfaces');
+    assert.deepEqual(cards.map(card=>card.querySelector('.how-work-pair').children.length),[2,2,2],'the six steps are split two per card');
+    assert.equal(cards[1].querySelector('.how-work-answer').textContent,context.ArkCopy.text('DEPLOYMENT.SIMPLE.LAUNCH.TEXT'),'editable explanation survives into the actual card');
+    // This file's Element has no querySelectorAll, so the links are collected by walking.
+    const all=[];(function walk(node){(node.children||[]).forEach(child=>{all.push(child);walk(child);});})(page);
+    const chapters=all.filter(a=>a.classList?.contains('how-deploy-chapter')&&a.dataset.continuityCard);
+    assert.deepEqual(chapters.map(a=>a.dataset.sceneLink),['how/ask','how/work','how/check'],'the agreement chapters are not orphaned');
+    assert.deepEqual(chapters.map(a=>a.dataset.continuityCard),['how/ask','how/work','how/check'],'each chapter link returns to its exact source');
+    assert(all.some(a=>a.href==='https://deploy.defxn.com'),'the page hands off to the Deploy product');
+    assert(all.some(a=>a.href==='https://explore.defxn.com'),'the page hands off to the Explore product');
     cards[1].listeners.pointerenter();assert.equal(cards[1].dataset.active,'true');
     cards[1].listeners.pointerleave();assert.equal(cards[1].dataset.active,'false');
     assert(page.querySelector('.how-simple-footer'),'implementation boundary and full lifecycle remain after the journey');
@@ -306,7 +313,9 @@ for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
     }
   });
 }
-assert(fs.readFileSync('js/resolvers/experiment.js', 'utf8').includes("ArkUI.el('h1','','How can threshold agreement be pictured?')"), 'experiment introduction has a primary heading');
+// /experiments and /experiments/lab merged (2026-10-19): one page, one h1; the old intro's question is the lab's own study title.
+assert(!fs.existsSync('js/resolvers/experiment.js') && !fs.existsSync('js/pages/experiments.js'), 'the duplicate experiment entry page is gone, merged into the lab');
+assert(fs.readFileSync('js/pages/lab.js', 'utf8').includes('How can threshold agreement be pictured?'), 'the old intro question survives in the lab');
 assert(fs.readFileSync('js/pages/lab.js', 'utf8').includes('<h1 id=\\"experiments-title\\">Explore three protocol concepts.</h1>'), 'interactive model has a primary heading');
 console.log(`PASS: ${Object.keys(ArkUI.pageCatalog).length} real route modules mount with valid internal links`);
 

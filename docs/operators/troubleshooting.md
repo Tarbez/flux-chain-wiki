@@ -18,17 +18,17 @@
 
 **Check:** both processes use the same intended presence namespace and can reach one another. Remember that the directory is best-effort discovery, not authoritative membership.
 
-## A resolver is published but cannot execute
+## A resolver is launched but nothing answers
 
-**Collect:** resolver address, provider admission state, capacity freshness, request identifier, and checker output.
+**Collect:** chain id, `RESOLVER_LIST` row, `CHAIN_PROVIDERS` output, the record you sent and the node's reply.
 
-**Check:** publication and deployment are different states. Execution requires an admitted active provider with fresh capacity.
+**Check:** launched and served are different states. Is the chain on `RESOLVER_LIST`? Is a provider in `CHAIN_PROVIDERS` before its announce deadline (one hour)? Periodic re-announce comes with `flx-resolver-host`; an older host does not re-announce. If the resolver composes capabilities, does the proved column cover every one, and is each capability launched at the pinned manifest version? A refused record names the failure, what is missing and the remedy: read it before retrying.
 
-## A claim is signed but disputed
+## A result is signed but disputed
 
-**Collect:** claim, signer identity, resolver address, input, checker output, authority decision, and receipts.
+**Collect:** the signed result, the signer, the resolver's chain id, the record sent, and its `RESOLVER_LIST` row.
 
-**Check:** a signature proves attribution, not semantic truth. Evaluate the resolver and authority rules that apply to the claim.
+**Check:** a resolver's signature is its result. Whether to rely on that resolver is decided by its grammar, its capabilities and who can change it; check those facts, not the signature alone.
 
 If the evidence does not establish a cause, report the capability as `Unverified`; do not convert missing evidence into a product conclusion.
 

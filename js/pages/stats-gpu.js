@@ -45,8 +45,13 @@
     return '<ol class="stats-bars stats-bars-wide" aria-label="' + esc(label) + '">' + items.map(function (it) {
       var v = it[key], shown = key === 'sig' || key === 'agree' ? (v / 1000).toFixed(1) + ' µs' : fmt(v) + suffix;
       var tip = it.name + ': ' + shown + ' (' + it.cpu + ')';
-      return '<li class="stats-bar-row" tabindex="0" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' +
-        '<span class="stats-bar-key">' + esc(it.name) + '</span>' +
+      /* Not a tab stop: the row does nothing when focused. It used to be tabindex=0 only so the
+         hover tooltip could show on focus, which made every bar a dead Tab stop (2nd-4th on the
+         page; docs/ux-audit/pages-ux-b.md /stats/gpu P1). The tooltip's extra detail is visible
+         text in the row now, so keyboard and screen-reader users lose nothing (regression:
+         tests/a11y-chrome.cjs). */
+      return '<li class="stats-bar-row" data-tip="' + esc(tip) + '">' +
+        '<span class="stats-bar-key">' + esc(it.name) + '<small class="stats-bar-detail">' + esc(it.cpu) + '</small></span>' +
         '<span class="stats-bar-track"><span class="stats-bar' + (it.kind === 'gpu' ? '' : ' is-strong') + '" style="--w:' + pct(v, max) + '"></span></span>' +
         '<span class="stats-bar-value">' + esc(shown) + '</span></li>';
     }).join('') + '</ol>';

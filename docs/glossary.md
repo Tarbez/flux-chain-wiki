@@ -10,13 +10,37 @@ These terms are canonical for public copy and operator documentation.
 
 **Object** — addressed data evaluated or referenced by protocol logic.
 
-**Resolver** — addressed deterministic logic that accepts defined input and produces a claim.
+**Resolver** — a rulebook launched as its own chain: a composition of capabilities plus its own grammar. (Until 2026-10-19 this read "addressed deterministic logic that accepts defined input and produces a claim"; that was the `flux-resolver` source model, CAP-004.) See [resolvers](protocol/resolvers.md).
 
-**Claim** — a resolver's stated result. A signed claim is attributable; it is not automatically true.
+**Capability** — a shared mechanism (multisig, signer, custody, ledger, escrow) published once on the registry ledger with a derived manifest: version, seam, test vectors, source hash. A resolver composes capabilities; it never carries its own copy. (Replaces the earlier "a declared operation a provider can perform".)
 
-**Capability** — a declared operation a provider can perform.
+**Base chain** — the chain whose launch log is the registry ledger. It records which chains, resolvers and capabilities exist.
 
-**Provider** — a runtime participant that offers and performs capabilities.
+**Chain id** — the name a launch record gives a resolver's chain (`[a-z0-9]{3,32}`). A resolver's records name it.
+
+**Registry ledger** — the launch log on the base chain: `ChainLaunch`, `ResolverLaunch` and `ResolverUpgrade`, `CapabilityLaunch` and `CapabilityUpgrade`. "Registered" means launched here. (An audited resolver family — `docs/resolver-audit.md` — is a different list: say "audited", not "registered", for it.)
+
+**Launch record** — the one signed `ResolverLaunch` (or `CapabilityLaunch`) that creates a resolver's chain (or declares a capability).
+
+**Control key** — the one key named at launch that may sign an upgrade. A resolver with no control key is immutable.
+
+**Immutable** — launched with no control key (`GENESIS_PREV`): nobody, including its creator, can ever change its manifests or provider set.
+
+**Offer manifest** — the blob a launch names that says what a resolver offers and which capabilities it composes.
+
+**Grammar manifest** — the blob a launch names that defines the resolver's own record grammar; compiled at launch and enforced on every record.
+
+**Test vectors** (conformance vectors) — sample records with their expected verdicts, emitted by a capability crate's own tests and published in its manifest.
+
+**Provider proof** — the CID of a passing run of a capability's test vectors, carried on a provider's announce. Without it, a provider gets no seat on a resolver that composes that capability.
+
+**Signer** (of a launch) — the key that signs the launch record; the launch takes a position on that key's own chain.
+
+**Unspecified grammar** — a legacy grammar the network admits and reports as unspecified, without checking records against it.
+
+**Claim** — a resolver's stated result. Its signature is its result; whether to rely on that resolver is decided before you send anything: its grammar, its capabilities, who can change it.
+
+**Provider** — a process that serves a resolver's chain: it announces an address for the chain and, if the resolver composes capabilities, proves it runs them by passing their test vectors.
 
 **Checker** — logic that evaluates a claim against defined rules or evidence.
 
@@ -32,12 +56,15 @@ These terms are canonical for public copy and operator documentation.
 
 **Published** — addressable and discoverable as a definition.
 
-**Deployed** — backed by an admitted active provider with fresh execution capacity.
+**Launched** — on the registry ledger, with a chain of its own.
+
+**Served** — launched, and a provider is announcing for its chain (with proofs for every capability it composes). Replaces **Deployed** (earlier: "backed by an admitted active provider with fresh execution capacity").
 
 ## Prohibited conflations
 
 - Do not use `published` to mean `deployed`.
-- Do not use `signed` to mean `true`.
+- Do not use `launched` to mean `served`.
+- Do not use `signed` to mean `trustworthy`: a resolver's signature is its result, and trust in the resolver is decided by its grammar, its capabilities and who can change it.
 - Do not use `discovered` to mean `admitted` or `authorized`.
 - Do not use `network created` to mean identities, accounts, DAOs, or records are isolated.
 - Do not use `source exists` to mean a public binary or production service is live.

@@ -63,7 +63,7 @@
   function layoutStage() {
     if (state.view === 'map') return;   /* the canvas shows in the Canvas and Theme views */
     const pad = getComputedStyle(wrap), padX = parseFloat(pad.paddingLeft) + parseFloat(pad.paddingRight), padY = parseFloat(pad.paddingTop) + parseFloat(pad.paddingBottom);
-    const label = $('devName').parentElement, labelH = label.offsetHeight ? label.offsetHeight + parseFloat(getComputedStyle(label).marginBottom) : 0;
+    const label = $('canvasTools'), labelH = label.offsetHeight ? label.offsetHeight + parseFloat(getComputedStyle(label).marginBottom) : 0;
     /* the notice banners above the canvas (js/admin/notice.js: no project folder, a page not
        saved yet) take their room from the stage, so the page still ends at the canvas's bottom */
     const banners = $('noticeBanners'), bannersH = banners && banners.offsetHeight ? banners.offsetHeight + parseFloat(getComputedStyle(banners).marginBottom) : 0;
@@ -76,9 +76,11 @@
     stage.style.marginLeft = scale < 1 ? '0' : 'auto';
     const h = cmsPreview.offsetHeight;
     stage.style.marginBottom = scale < 1 ? `${-(h - h * scale)}px` : '0';
-    const routeTitle = (state.cmsRoutes.find((r) => r.path === state.cmsCurrentRoute) || {}).title || state.cmsCurrentRoute;
+    /* the page by the one name every list uses (js/admin/rail.js siteList), then its size */
+    const row = A.siteList ? A.siteList().rows.find((r) => r.path === state.cmsCurrentRoute) : null;
+    const routeTitle = (row && row.title) || (state.cmsRoutes.find((r) => r.path === state.cmsCurrentRoute) || {}).title || state.cmsCurrentRoute;
     $('devName').textContent = `${routeTitle} · ${DEVICES[state.device][0]} · ${w} px`;
-    $('devName').title = $('devName').textContent;
+    $('devName').title = `${routeTitle} (${state.cmsCurrentRoute}) at ${DEVICES[state.device][0].toLowerCase()} size, ${w} px wide`;
     $('devScale').textContent = scale < 1 ? `shown at ${Math.round(scale * 100)}%` : '';
     placeSelToolbar();
   }
@@ -113,7 +115,12 @@
        wrap point would flip back and forth between calls) */
     const acts = box.querySelector('.tb-actions');
     box.classList.toggle('wrapped', !!acts && acts.offsetTop > acts.offsetHeight / 2);
-    const r = rectOfSelectionRect(state.cmsExactSelection && state.cmsExactSelection.rect);
+    /* the WHOLE selection, not only the layer clicked last: placed beside the last one, the bar sat
+       on the other selected layer (a heading over its paragraph) and caught the right-click meant
+       for it */
+    const rects = (state.cmsExactSelections || []).map((sel) => sel && sel.rect).filter(Boolean);
+    const union = rects.length > 1 ? rects.reduce((u, q) => { const x = Math.min(u.x, q.x), y = Math.min(u.y, q.y); return { x, y, width: Math.max(u.x + u.width, q.x + q.width) - x, height: Math.max(u.y + u.height, q.y + q.height) - y }; }) : null;
+    const r = rectOfSelectionRect(union || (state.cmsExactSelection && state.cmsExactSelection.rect));
     /* The bar's MEASURED size (box.offsetWidth/offsetHeight -- a layout property, unaffected
        by the counter-scale transform just applied above, so this is its real on-screen
        footprint; its height varies with which taxonomy sections are showing), clamped to the
@@ -209,10 +216,12 @@
   let statusT = 0, studioStatusTimer = 0;
   function renderStatus() {
     const now = performance.now(); if (now - statusT < 150) { if (!studioStatusTimer) studioStatusTimer = setTimeout(() => { studioStatusTimer = 0; renderStatus(); }, 160); return; } statusT = now;
-    $('studioStatus').innerHTML = `<span><b>${state.cmsRoutes.length}</b> routes</span><span>${state.cmsCurrentRoute}</span><span>${state.cmsLayoutCanUndo ? 'undo available' : 'no undo'}</span>`;
+    /* one quiet line: how many pages the site has and which one is on the canvas. Undo's state is
+       the header's Undo button (one history, js/admin/history.js) -- this line said "no undo"
+       while that button was enabled (docs/ux-audit/cms.md P1-5). */
+    $('studioStatus').innerHTML = `<span><b>${state.cmsRoutes.length}</b> pages</span><span>${A.esc(state.cmsCurrentRoute)}</span>`;
   }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && state.popEl) { const a = state.popAnchor; closePop(); if (a) a.focus(); return; }
     const tag = (e.target.tagName || '').toLowerCase(), typing = tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable;
     const mod = e.ctrlKey || e.metaKey;
     if (mod && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }

@@ -67,8 +67,13 @@
   function cpuBars() {
     return '<ol class="stats-bars stats-bars-wide" aria-label="CPU breakdown on the chain resolver">' + CPU.map(function (p) {
       var tip = p.label + ': ' + p.pct + '%  (' + p.note + ')';
-      return '<li class="stats-bar-row" tabindex="0" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' +
-        '<span class="stats-bar-key">' + esc(p.label) + '</span>' +
+      /* Not a tab stop: the row does nothing when focused. It used to be tabindex=0 only so the
+         hover tooltip could show on focus, which made every bar a dead Tab stop (2nd-4th on the
+         page; docs/ux-audit/pages-ux-b.md /stats/gpu P1). The tooltip's extra detail is visible
+         text in the row now, so keyboard and screen-reader users lose nothing (regression:
+         tests/a11y-chrome.cjs). */
+      return '<li class="stats-bar-row" data-tip="' + esc(tip) + '">' +
+        '<span class="stats-bar-key">' + esc(p.label) + '<small class="stats-bar-detail">' + esc(p.note) + '</small></span>' +
         '<span class="stats-bar-track"><span class="stats-bar is-strong" style="--w:' + p.pct + '%"></span></span>' +
         '<span class="stats-bar-value">' + p.pct.toFixed(1) + '%</span></li>';
     }).join('') + '</ol>';
@@ -93,7 +98,7 @@
       page.className = 'ark-page task-page stats-page';
       page.setAttribute('aria-labelledby', 'statsledger-title');
       page.innerHTML = '<div class="stats-shell"><div class="stats-bento">' +
-        tile('stats-hero', '', '<p class="stats-kicker">Design, not agreement</p><h1 id="statsledger-title">A finance resolver by construction</h1>' +
+        tile('stats-hero', '', '<p class="stats-kicker">Design, not agreement / a finance resolver by construction</p><h1 id="statsledger-title">Ledger benchmark detail</h1>' +
           '<p>Each identity owns its own append-only chain of value moves. A spend is an append to the holder\'s own chain, signed by their own key, at a position their own previous append determined. Position <code>n</code> can hold exactly one record. Two records at the same <code>(G, pos)</code> is self-signed equivocation; the holder has burned their own chain by their own key. No global order, no mempool, no fork choice.</p>' +
           '<p class="stats-chips"><span>2026-10-07</span><span>LEDGERENTRY Y=1A</span><span>flux-spec 0.4.2</span></p>' +
           '<a class="stats-monitor-link" href="' + href('stats') + '" data-scene-link="stats"><span aria-hidden="true">←</span> Back to the measurements</a>') +

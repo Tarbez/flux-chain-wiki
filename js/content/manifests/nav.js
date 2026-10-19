@@ -19,13 +19,13 @@ ArkManifest.define({
       "value": "Overview"
     },
     "HOW": {
-      "label": "Header link: how Flux works",
+      "label": "Header link: how DEFXN works",
       "kind": "line",
       "section": "Header links",
       "value": "How it works"
     },
     "RUN": {
-      "label": "Header link: run Flux",
+      "label": "Header link: run DEFXN",
       "kind": "line",
       "section": "Header links",
       "value": "Run DEFXN"
@@ -64,7 +64,7 @@ ArkManifest.define({
       "label": "Header link: how deployment works",
       "kind": "line",
       "section": "Header links",
-      "value": "How it works"
+      "value": "Deploy a resolver"
     },
     "THEORY": {
       "label": "Header link: manifest",
@@ -133,10 +133,10 @@ ArkManifest.define({
       "value": "EXPERIMENTS"
     },
     "BACK.TUTORIALS": {
-      "label": "Back to tutorials",
+      "label": "Back to the notes",
       "kind": "line",
       "section": "Back button",
-      "value": "TUTORIALS"
+      "value": "NOTES"
     },
     "BACK.THEORY": {
       "label": "Back to the theory",

@@ -10,11 +10,11 @@
 .story-drawing .drawing-point {fill:hsl(var(--text-strong));stroke:none;}
 .story-drawing :is(.drawing-trace,.drawing-accent) {stroke:hsl(var(--primary));stroke-width:1.5;}
 .story-drawing .drawing-selection {fill:hsl(var(--primary-200));stroke:hsl(var(--primary));}
-.story-drawing text {fill:hsl(var(--text-muted));font:500 10px var(--mono-font,monospace);letter-spacing:.04em;}
+.story-drawing text {fill:hsl(var(--text-muted));font:500 10px var(--font-mono,monospace);letter-spacing:.04em;}
 .story-drawing .drawing-title {font-size:8px;letter-spacing:.045em;}
 #scene :is(.guided-diagram,.lifecycle-object):has(.story-drawing) {background:linear-gradient(135deg,hsl(var(--surface) / .5),hsl(var(--canvas) / .3));border-color:hsl(var(--border-default));}
 #scene .guided-diagram:has(.story-drawing) .story-record {display:flex;gap:9px;padding:7px 0;border:0;border-radius:0;background:none;font-size:12px;line-height:1.35;}
-#scene .guided-diagram:has(.story-drawing) .story-record::before {position:static;content:attr(data-diagram-number);height:auto;border:0;color:hsl(var(--text-muted));font:500 10px/1.6 var(--mono-font,monospace);}
+#scene .guided-diagram:has(.story-drawing) .story-record::before {position:static;content:attr(data-diagram-number);height:auto;border:0;color:hsl(var(--text-muted));font:500 10px/1.6 var(--font-mono,monospace);}
 #scene .guided-diagram:has(.story-drawing) .story-record[data-selected="true"] {color:hsl(var(--primary));}
 #scene .guided-diagram:has(.story-drawing) .story-record[data-selected="true"]::before {color:hsl(var(--primary));}
 @media(min-width:901px){

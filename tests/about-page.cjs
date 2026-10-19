@@ -46,7 +46,19 @@ assert.equal(sections.length, 2, 'two top-level sections: hero (layers drawn) an
 const morePartTitles = page.byClass('about-more-part');
 assert.equal(morePartTitles.length, 4, 'the four collapsed sections (promise, flow, resolve, pillars) survive inside the disclosure');
 assert(page.classList.contains('home-launch'), 'the page root is the home page\'s own container, so it inherits the home layout, type and colour');
-for (const part of ['hl-hero', 'hl-title', 'hl-intro', 'hl-button', 'hl-section-head', 'hl-principles', 'hl-closing']) assert(page.byClass(part).length > 0, `uses the shared ${part}`);
+for (const part of ['hl-hero', 'hl-title', 'hl-intro', 'hl-button', 'hl-section-head', 'hl-principles']) assert(page.byClass(part).length > 0, `uses the shared ${part}`);
+// Named regression (2026-10-19, docs/ux-audit/pages-ux-a.md /about P0): the closing block reused
+// home's `hl-closing`, whose ::after overlay (z-index 1 over a 820px art scene) expects the copy
+// inside an .hl-closing-copy wrapper at z-index 2. /about's children are not in one, so the
+// overlay hid the whole ending behind an 800px black void while contrast checks passed. The
+// block has its own class now; it must never borrow hl-closing again without that wrapper.
+assert.equal(page.byClass('hl-closing').length, 0, 'the /about ending does not borrow home\'s layered hl-closing');
+assert.equal(page.byClass('about-closing').length, 1, 'it has its own closing block');
+{
+  const css = fs.readFileSync('css/about.css', 'utf8');
+  assert(/#scene \.about-closing \{[^}]*background:hsl\(var\(--anchor\)\)/.test(css), 'the closing block paints its own anchor surface');
+  assert(!/about-closing[^{]*::after/.test(css), 'and lays no overlay over its own copy');
+}
 assert(!page.all().some((e) => /about-(promise|pillar-grid|resolve-grid|flow-steps|map)\b/.test(e.className)), 'none of the old one-off layouts remain');
 
 // The three layers are visible, not behind a disclosure.

@@ -11,8 +11,11 @@ ArkUI.pageModules.howStory={mount:function(host,page){
     pageCatalog lookup. */
  function link(label,target,cls){return ArkUI.dash.linkEl(label,'route:'+target,undefined,cls);}
  var el=ArkUI.el('section','ark-page how-chapter how-chapter-'+id);el.dataset.arkPage=page;
- var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← How it works','deployment'));var current=ArkUI.el('span','',String(index+1).padStart(2,'0')+' / '+['State the request','Agree on the terms','Verify the result'][index]);current.setAttribute('aria-current','page');path.appendChild(current);el.appendChild(path);
+ var path=ArkUI.el('nav','content-layer-path');path.setAttribute('aria-label','Your place');path.appendChild(link('← Agreement lifecycle','lifecycle'));var current=ArkUI.el('span','',String(index+1).padStart(2,'0')+' / '+['State the request','Agree on the terms','Verify the result'][index]);current.setAttribute('aria-current','page');path.appendChild(current);el.appendChild(path);
  var header=ArkUI.el('header','how-chapter-header');var title=ArkUI.el('h1','',words('TITLE'));title.id='how-'+id+'-title';el.setAttribute('aria-labelledby',title.id);header.appendChild(title);header.appendChild(ArkUI.el('p','',words('INTRO')));el.appendChild(header);
+ /* These chapters describe the earlier agreement path (no longer the direction, kept read-only;
+    the resolver content audit, question Q4). Say so where they are read, and point at today's model. */
+ var banner=ArkUI.el('p','how-chapter-banner',ArkCopy.text('DEPLOYMENT.CHAPTER.BANNER')+' ');banner.appendChild(ArkUI.dash.linkEl('What is a resolver →',ArkCopy.text('DEPLOYMENT.CHAPTER.BANNER.HREF'),undefined,'how-chapter-banner-link'));el.insertBefore(banner,header.nextSibling);
 
  var canvas=ArkUI.el('canvas','how-chapter-mesh');canvas.setAttribute('aria-hidden','true');var motion=ArkUI.el('p','mesh-story-cue');
  var fabric=ArkUI.createMeshFabric(canvas,{caption:motion}),patterns={ask:['story-ask','story-goal','story-limits'],work:['story-request','story-proposal','story-work'],check:['story-promise','story-result','story-decision']}[id],pattern=patterns[0];
@@ -48,7 +51,7 @@ ArkUI.pageModules.howStory={mount:function(host,page){
  var body=ArkUI.el('div','how-chapter-body');body.appendChild(card);body.appendChild(side);el.appendChild(body);
  light(1);
 
- var footer=ArkUI.el('nav','how-chapter-footer');footer.setAttribute('aria-label','Continue this story');var records=['intent','agreement','receipt'];footer.appendChild(link('Explore the signed record','lifecycle/'+records[index],'how-deeper-link'));if(index>0)footer.appendChild(link('← Previous part','how/'+ids[index-1]));footer.appendChild(link(index<2?'Next: '+['','agree on the terms','verify the result'][index+1]+' →':'Back to the three parts →',index<2?'how/'+ids[index+1]:'deployment','how-chapter-next'));el.appendChild(footer);
+ var footer=ArkUI.el('nav','how-chapter-footer');footer.setAttribute('aria-label','Continue this story');var records=['intent','agreement','receipt'];footer.appendChild(link('Explore the signed record','lifecycle/'+records[index],'how-deeper-link'));if(index>0)footer.appendChild(link('← Previous part','how/'+ids[index-1]));footer.appendChild(link(index<2?'Next: '+['','agree on the terms','verify the result'][index+1]+' →':'Back to the lifecycle →',index<2?'how/'+ids[index+1]:'lifecycle','how-chapter-next'));el.appendChild(footer);
  var components=ArkUI.el('div','how-components');components.setAttribute('data-ark-insert','main');el.appendChild(components);
  el.arkDispose=function(){fabric.dispose();};host.appendChild(el);fabric.select(pattern,false);return el;
 }};

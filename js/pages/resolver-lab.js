@@ -6,7 +6,8 @@
    Ask      the chosen document assembles as a block of cells sized by its file size.
    Resolve  it travels to a gate whose opening is the 5 MB rule. It passes or it stops.
    Check    the claim forms as a fingerprint drawn from its claim id, receives a
-            signature mark, and an open frame shows acceptance is decided elsewhere.
+            signature mark, and an open frame shows that trust in the resolver was
+            decided before anything was sent: its grammar, capabilities and control.
    Run again first outlines the previous fingerprint, then fills the new one into
    it: same address + input, same claim (the determinism law, shown).
 
@@ -172,7 +173,7 @@
         });
         // Signature: a mark beside the claim.
         if (checkP > .7) { cell(ctx, L.fpCol + 6, L.fpRow + 6, hsla(colors.primary, dim)); cell(ctx, L.fpCol + 7, L.fpRow + 6, hsla(colors.primary, .55 * dim)); }
-        // Acceptance: an open frame, decided by the checker and authority rules.
+        // Trust: an open frame -- whether to rely on this resolver was decided before the record was sent.
         if (checkP > .82) {
           ctx.save(); ctx.setLineDash([3, 4]); ctx.strokeStyle = hsla(colors.muted, .7 * clamp((checkP - .82) / .18) * dim);
           ctx.strokeRect(OX + (L.fpCol - 1) * CW + .5, OY + (L.fpRow - 1) * CH + .5, 8 * CW, 9 * CH); ctx.restore();
@@ -190,7 +191,9 @@
       var input = view.input, stage = view.stage, p = view.p, text = '';
       if (stage === 'ask') text = p < 1 ? 'Assembling doc:' + input.id + ' (' + size(input.bytes) + ')…' : 'doc:' + input.id + ' is ready. The rule waits at the gate.';
       else if (stage === 'resolve') text = p < .6 ? 'Sending doc:' + input.id + ' to ' + ADDRESS + '…' : p < 1 ? 'Evaluating size ≤ 5 MB…' : (ok ? 'It fits: the rule returns true.' : 'Too large: the rails hold, the rule returns false.');
-      else if (stage === 'check') text = p < .65 ? 'Writing the claim, cell by cell…' : p < 1 ? 'Signing it…' : view.same ? 'Same input, same claim: #' + id + ' again.' : 'Signed claim #' + id + '. A checker decides acceptance.';
+      else if (stage === 'check') text = p < .65 ? 'Writing the claim, cell by cell…' : p < 1 ? 'Signing it…' : view.same ? 'Same input, same claim: #' + id + ' again.' : 'Signed by provider P-3: claim #' + id + '. Its signature is its result.';
+      // Phones hide the stacked doc/sign/accept labels (no room under the fingerprint), so
+      // this line carries what they say -- including the signer, which it once left out.
       if (narration.textContent !== text) narration.textContent = text;
       narration.dataset.show = String(stage !== 'laws');
       narration.dataset.done = String(p >= 1);
@@ -209,7 +212,7 @@
       at(labels.claim, L.fpCol + 3, L.fpRow + 7, checkP > .55 && stage !== 'laws', 6);
       labels.sign.textContent = 'signed · provider P-3';
       at(labels.sign, L.fpCol + 3, L.fpRow + 7, checkP > .75 && stage !== 'laws', 26);
-      labels.accept.textContent = view.same ? 'same input · same claim' : 'acceptance · checker decides';
+      labels.accept.textContent = view.same ? 'same input · same claim' : 'trust · decided before sending';
       labels.accept.dataset.same = String(view.same);
       at(labels.accept, L.fpCol + 3, L.fpRow + 7, checkP > .9 && stage !== 'laws', 46);
     }
@@ -304,14 +307,38 @@
     caption.appendChild(captionTitle); caption.appendChild(captionBody);
     copy.appendChild(caption);
 
+    /* The hub (the resolver content audit, §5): what "verified on chain" means, behind a
+       disclosure so the page keeps its fold budget, and the ways on -- the registry snapshot,
+       the deploy walkthrough, and the Explore and Deploy products (explain + hand off). */
+    var onward = el('div', 'resolver-lab-onward');
+    var verified = el('details', 'resolver-lab-verified');
+    verified.appendChild(el('summary', '', words('VERIFIED.TITLE')));
+    var facts = el('ol', 'resolver-lab-facts');
+    [1, 2, 3].forEach(function (n) { facts.appendChild(el('li', '', words('VERIFIED.FACT' + n))); });
+    verified.appendChild(facts);
+    verified.appendChild(el('p', 'resolver-lab-planned', words('VERIFIED.PLANNED')));
+    onward.appendChild(verified);
+    var hubLinks = el('nav', 'resolver-lab-ways'); hubLinks.setAttribute('aria-label', 'Resolvers on the network');
+    [['REGISTRY', ' →'], ['DEPLOY', ' →'], ['EXPLORE', ' ↗'], ['DEPLOYER', ' ↗'], ['MATH', ' →']].forEach(function (pair) {
+      hubLinks.appendChild(ArkUI.dash.linkEl(words(pair[0] + '.LINK') + pair[1], words(pair[0] + '.HREF'), ArkManifest.get(page).route, 'resolver-lab-way'));
+    });
+    /* The manifest's INSPECT.HREF (-> /start-from-something-real, the reference resolvers) was
+       rendered only by js/pages/resolver-guide.js in a branch this page never reaches once it
+       moved onto this lab, which left that page with no inbound link at all
+       (docs/ux-audit/pages.md P2; regression: tests/site-exits.cjs). */
+    hubLinks.appendChild(ArkUI.dash.linkEl('Inspect reference evidence →', words('INSPECT.HREF'), ArkManifest.get(page).route, 'resolver-lab-way'));
+    onward.appendChild(hubLinks);
+    onward.appendChild(el('p', 'resolver-lab-hosting', words('PRODUCTS.NOTE')));
+
     var footer = el('nav', 'resolver-lab-footer'); footer.setAttribute('aria-label', 'Continue');
     var prev = el('button', 'resolver-lab-prev'); prev.type = 'button';
     var next = el('a', 'resolver-lab-next');
     // Reuses the SOURCE.HREF field js/pages/resolver-guide.js's own "Read the canonical
     // guide" link already reads, rather than a second hardcoded copy of the same doc path.
-    var spec = ArkUI.dash.linkEl('Spec ↗', words('SOURCE.HREF')); spec.className = 'resolver-lab-spec'; spec.setAttribute('aria-label', words('SOURCE'));
+    var spec = ArkUI.dash.linkEl('Spec →', words('SOURCE.HREF')); spec.className = 'resolver-lab-spec'; spec.setAttribute('aria-label', words('SOURCE'));
     footer.appendChild(prev); footer.appendChild(next); footer.appendChild(spec);
     copy.appendChild(footer);
+    copy.appendChild(onward); // after the way on, so the step's own Next stays where the eye is
     root.appendChild(copy);
 
     /* Right: the mesh illustration, its inputs, and the laws. */
@@ -354,10 +381,11 @@
 
     // Laws, shown in place of the stage on the Laws step.
     var laws = el('ol', 'resolver-lab-laws');
-    // Status rows from docs/status.md: definition (Live, CAP-004), publication
-    // (Partial, CAP-004), deployment (Partial, CAP-005). Law 4 is a rule of the
-    // specification, not a capability, so it carries no status claim.
-    var STATUS = [['Live', 'CAP-004'], ['Partial', 'CAP-004'], ['Partial', 'CAP-005'], ['Spec', 'spec']];
+    // Status rows from docs/status.md (observed 2026-10-19): law 1 and law 4 are resolver
+    // launch and upgrade (Partial, CAP-010), law 2 the capability registry and composition
+    // check (Partial, CAP-011), law 3 grammar enforcement (Partial, CAP-012). Partial, not
+    // Live: built and running on the development network, production not established.
+    var STATUS = [['Partial', 'CAP-010'], ['Partial', 'CAP-011'], ['Partial', 'CAP-012'], ['Partial', 'CAP-010']];
     [1, 2, 3, 4].forEach(function (n, i) {
       var item = el('li', 'resolver-lab-law');
       item.style.setProperty('--i', i);
@@ -371,7 +399,7 @@
       var detail = el('p', '', words('LAW' + n + '.TEXT')); detail.id = 'resolver-law-' + n;
       item.appendChild(detail);
       // Laws you can watch happen link back to the moment in the illustration.
-      var SEE = { 1: ['Watch it repeat', 'check', true], 2: ['See the address', 'resolve', false], 4: ['See the signature', 'check', false] };
+      var SEE = { 2: ['See it applied', 'resolve', false], 3: ['See the gate', 'resolve', false], 4: ['Watch it repeat', 'check', true] };
       if (SEE[n]) {
         var see = el('button', 'resolver-lab-law-see', SEE[n][0] + ' →'); see.type = 'button';
         see.addEventListener('click', function (event) {

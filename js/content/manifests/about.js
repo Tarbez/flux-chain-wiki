@@ -12,13 +12,13 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "DEFXN / ABOUT"
+      "value": "DEFXN / OVERVIEW"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Resolutions for the mesh."
+      "value": "Overview."
     },
     "DECK": {
       "label": "Intro",
@@ -90,7 +90,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Every identity writes to its own append-only chain. A record is admitted if its grammar is valid, its signature verifies and it extends that holder’s head. Resolvers decide what it means."
+      "value": "Every identity writes to its own append-only chain, and every resolver runs its own. A record is admitted if its signature verifies, it extends the signer’s head, and it fits the grammar of the resolver it names."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -114,7 +114,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "The DEFXN miner, network CLI, resolver model, the FXN chain prototype, and the agreements resolver are implemented in source. Fleet benchmarks are recorded on the stats page. Automated provider activation remains partial; packaged releases and independent production activation remain unverified."
+      "value": "The resolver model is implemented in source: launch and upgrade, shared capabilities with test vectors, grammar checks, and provider proofs. It runs on the development network. The DEFXN miner, network CLI and FXN chain prototype are implemented in source too, and fleet benchmarks are recorded on the stats page. Packaged releases and production activation remain unverified."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -348,7 +348,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Flow",
-      "value": "A resolver applies the network’s published rules to your request and signs what it did."
+      "value": "A resolver applies its own published grammar and capabilities to your request and signs the result."
     },
     "FLOW3.TITLE": {
       "label": "Heading",

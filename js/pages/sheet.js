@@ -18,7 +18,7 @@ ArkUI.sheet = function (id, page) {
     var a = ArkUI.el('a', className || 'article-back');
     a.href = r.href; a.dataset.sceneLink = r.sceneLink;
     a.appendChild(document.createTextNode(words(role) + ' '));
-    var arrow = ArkUI.el('span', 'cta-arrow', '↗'); arrow.setAttribute('aria-hidden', 'true');
+    var arrow = ArkUI.el('span', 'cta-arrow', '→'); arrow.setAttribute('aria-hidden', 'true');
     a.appendChild(arrow); return a;
   }
   var el = ArkUI.el('section', 'ark-page learning-page theory-page ' + id + '-page');
@@ -70,7 +70,7 @@ ArkUI.sheet = function (id, page) {
       var docs = ArkUI.el('a', 'article-back theory-evidence-link');
       docs.href = manifest.meta.docs;
       docs.appendChild(document.createTextNode(words('EVIDENCE') + ' '));
-      var docsArrow = ArkUI.el('span', 'cta-arrow', '↗'); docsArrow.setAttribute('aria-hidden', 'true');
+      var docsArrow = ArkUI.el('span', 'cta-arrow', '→'); docsArrow.setAttribute('aria-hidden', 'true');
       docs.appendChild(docsArrow); referenceLayer.appendChild(docs);
     }
     content.appendChild(referenceLayer);
@@ -105,7 +105,7 @@ ArkUI.storySheet = function(id,page) {
   ['The core idea','How it works','Evidence & limits'].forEach(function(label,i){var b=ArkUI.el('button','',label);b.type='button';b.dataset.icon=['overview','layers','evidence'][i];b.addEventListener('click',function(){select(i,0,true);});buttons.push(b);controls.appendChild(b);});el.appendChild(controls);
   var body=ArkUI.el('div','guided-body'), copy=ArkUI.el('div','guided-answer');copy.setAttribute('aria-live','polite');var left=ArkUI.el('div','guided-left');left.appendChild(copy);body.appendChild(left);
   var diagram=ArkUI.el('figure','guided-diagram mechanism-relationship');diagram.appendChild(ArkUI.el('figcaption','','Illustration / '+manifest.title+' relationships'));
-  var labels={about:['Directory / named presence','Fabric / linked agreements','Governance / bounded authority'],purpose:['Network A / miner presence','Network B / miner presence','Shared accounts / outside this isolation'],depth:['Intent','Offer','Agreement','Fulfillment','Receipt'],practice:['Object + applicable policy','Bounded authority cell','Threshold evidence','Cell dissolves'],dao:['Mesh policy / substrate','Network policy / own network','Approval ≠ activation'],notes:['Approval / signed consent','Readiness + safety gates','Activation / separate evidence'],studio:['Named network ID','Source revision','Dated observation','Evidence + isolation boundary'],spec:['Workload + method','Raw results / missing','Digest + conditions','Conclusion / Unverified']}[id]||[];
+  var labels={about:['Directory / named presence','Fabric / linked agreements','Governance / bounded authority'],purpose:['Network A / miner presence','Network B / miner presence','Shared accounts / outside this isolation'],depth:['Intent','Offer','Agreement','Fulfillment','Receipt'],practice:['Object + applicable policy','Bounded authority cell','Threshold evidence','Cell dissolves'],dao:['Mesh policy / substrate','Network policy / own network','Approval ≠ activation'],notes:['Approval / signed consent','Readiness + safety gates','Activation / separate evidence'],studio:['Named network ID','Source revision','Dated observation','Evidence + isolation boundary'],spec:['Workload + method','Raw results / registered','Digest + conditions','Conclusion / per record']}[id]||[];
   var drafting=ArkUI.createStoryDiagram&&ArkUI.createStoryDiagram(id);if(drafting)diagram.appendChild(drafting.element);
   labels.forEach(function(label,i){var record=ArkUI.el('button','story-record',label);record.type='button';record.dataset.diagramNumber=String(i+1).padStart(2,'0');record.addEventListener('click',function(){select(1,Math.min(i,count-1),true);});diagram.appendChild(record);});body.appendChild(diagram);el.appendChild(body);
   // Status remains readable in every depth; a code alone cannot state a limit.
@@ -126,9 +126,13 @@ ArkUI.storySheet = function(id,page) {
       // id==='about' never actually reaches here (about.js is its own page module; ArkUI.sheet's
       // own 'about' dispatch above is unreachable through real routing) -- kept consistent anyway.
       // manifest.meta.docs (the live, already-working branch) is left exactly as it was.
-      var doc=id==='about'?ArkUI.dash.linkEl(words('STATUS')+' ↗','doc:docs/status.md'):ArkUI.el('a','story-reference',words('EVIDENCE')+' ↗');
+      var doc=id==='about'?ArkUI.dash.linkEl(words('STATUS')+' →','doc:docs/status.md'):ArkUI.el('a','story-reference',words('EVIDENCE')+' →');
       if(id==='about')doc.className='story-reference';else doc.href=manifest.meta.docs;
       copy.appendChild(doc);
+      // Onward links are data: every 'link' field ROLE.HREF renders here, labelled by its ROLE field,
+      // so a sheet links to where its evidence is published (spec -> /stats, /stats/gpu,
+      // /stats/ledger) without code naming routes. Sheets with no link fields render nothing extra.
+      Object.keys(manifest.fields).forEach(function(role){var f=manifest.fields[role];if(f.kind!=='link'||!/\.HREF$/.test(role)||!manifest.fields[role.replace(/\.HREF$/,'')])return;var row=ArkUI.el('p','');row.appendChild(ArkUI.dash.linkEl(words(role.replace(/\.HREF$/,''))+' →',words(role),manifest.route,'story-reference'));copy.appendChild(row);});
     }
     if(drafting)drafting.select(depth===1?step:0,write);
     diagram.querySelectorAll('.story-record').forEach(function(node,i){var selected=depth===1&&i===Math.min(step,labels.length-1);node.dataset.selected=String(selected);node.setAttribute('aria-pressed',String(selected));});

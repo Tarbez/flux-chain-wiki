@@ -11,7 +11,7 @@
 .reference-body p { margin:14px 0; }
 .reference-body li { margin:10px 0; }
 .reference-body a { color:hsl(var(--reference)); text-underline-offset:4px; overflow-wrap:anywhere; }
-.reference-body pre { overflow:auto; padding:16px; border:1px solid hsl(var(--border-default)); border-radius:5px; background:hsl(var(--nested) / .4); font:400 13px/1.6 var(--mono-font,monospace); }
+.reference-body pre { overflow:auto; padding:16px; border:1px solid hsl(var(--border-default)); border-radius:5px; background:hsl(var(--nested) / .4); font:400 13px/1.6 var(--font-mono,monospace); }
 .reference-body table { display:block; width:100%; overflow-x:auto; border-collapse:collapse; font-size:14px; }
 .reference-body :is(td,th) { border-bottom:1px solid hsl(var(--border-subtle)); padding:10px; min-width:100px; vertical-align:top; }
 .reference-page a:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }

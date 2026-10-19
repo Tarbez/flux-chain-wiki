@@ -5,7 +5,23 @@ ArkManifest.define({
   "route": "/chain",
   "group": "page",
   "meta": {
-    "back": "zero"
+    "back": "zero",
+    "diagrams": [
+      {
+        "id": "swap-signed-resolution",
+        "place": "chain: the Swaps case, in place of the payload-read illustration",
+        "caption": "Illustration · relationships, not live state",
+        "flow": [
+          "two intents enter",
+          "one signer resolves the batch",
+          "one signed result goes to peers"
+        ],
+        "refusal": {
+          "from": "a second node",
+          "tag": "resolved by <signer>"
+        }
+      }
+    ]
   },
   "fields": {
     "EYEBROW": {
@@ -24,7 +40,7 @@ ArkManifest.define({
       "label": "Introduction",
       "kind": "text",
       "section": "Page",
-      "value": "Every identity signs its own append-only chain. No record waits on anyone else's. Watch one record join, from signature to the resolver that gives it meaning."
+      "value": "Every identity signs its own chain. Every resolver runs its own chain. One base chain records which resolvers and capabilities exist. No record waits on anyone else’s. Watch one record join, from signature to the resolver that gives it meaning."
     },
     "NEXT": {
       "label": "Next-step link",

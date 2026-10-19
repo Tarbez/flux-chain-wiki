@@ -12,7 +12,7 @@
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
-  var state = A.state, postCmsLayoutCommand = A.postCmsLayoutCommand, ctlField = A.ctlField,
+  var state = A.state, postCmsLayoutCommand = A.postCmsLayoutCommand, ctlField = A.ctlField, devDetails = A.devDetails,
       postCmsLayoutReset = A.postCmsLayoutReset, postCmsLayoutOperation = A.postCmsLayoutOperation,
       ctlSegField = A.ctlSegField, CMS_DISPLAY_TOKENS = A.CMS_DISPLAY_TOKENS,
       CMS_ALIGN_TOKENS = A.CMS_ALIGN_TOKENS, CMS_JUSTIFY_TOKENS = A.CMS_JUSTIFY_TOKENS,
@@ -101,8 +101,8 @@
   function buildFrameSection(pane, ctx, isGroup) {
     const body = toolbarSection(pane, 'cms-frame', 'Frame', 'move');
     body.append(ctlField(ctx, 'X', 'x'), ctlField(ctx, 'Y', 'y'), ctlField(ctx, 'Width', 'width'), ctlField(ctx, 'Height', 'height'), ctlField(ctx, 'Rotation', 'rotation'), ctlField(ctx, 'Scale X', 'scaleX', { step: '0.01' }), ctlField(ctx, 'Scale Y', 'scaleY', { step: '0.01' }));
-    const meta = document.createElement('p'); meta.className = 'hint'; meta.textContent = `${state.cmsExactSelection.breakpoint || 'desktop'} · ${state.cmsExactSelection.key}`; body.appendChild(meta);
-    const reset = document.createElement('button'); reset.className = 'btn small'; reset.type = 'button'; reset.textContent = 'Reset this breakpoint'; reset.addEventListener('click', postCmsLayoutReset); body.appendChild(reset);
+    const reset = document.createElement('button'); reset.className = 'btn small'; reset.type = 'button'; reset.textContent = 'Reset for this screen size'; reset.title = 'Put this element back the way it is at this screen size before your changes'; reset.addEventListener('click', postCmsLayoutReset); body.appendChild(reset);
+    body.appendChild(devDetails([['Screen size', state.cmsExactSelection.breakpoint || 'desktop'], ['Layout key', state.cmsExactSelection.key]]));
     if (state.cmsExactSelections.length > 1) {
       const align = document.createElement('div'); align.style.display = 'grid'; align.style.gridTemplateColumns = 'repeat(3,minmax(0,1fr))'; align.style.gap = '5px'; align.style.marginTop = '8px';
       [['Left', 'left'], ['Center X', 'hcenter'], ['Right', 'right'], ['Top', 'top'], ['Center Y', 'vcenter'], ['Bottom', 'bottom']].forEach(([label, op]) => { const b = document.createElement('button'); b.className = 'btn small'; b.type = 'button'; b.textContent = label; b.addEventListener('click', () => postCmsLayoutOperation(op)); align.appendChild(b); });
@@ -203,10 +203,11 @@
     const instance = anchorList.find((item) => item.key === comp.key);
     const overrides = (instance && instance.overrides) || {};
     const body = toolbarSection(pane, 'cms-component', 'Component instance', 'comp');
-    const info = document.createElement('p'); info.className = 'hint'; info.innerHTML = '<b></b><br><code></code>';
-    info.querySelector('b').textContent = master ? master.label : comp.masterId;
-    info.querySelector('code').textContent = master ? cmsMasterKind(master) + ' · ' + comp.anchorId : comp.anchorId;
+    /* named for what it is, never by its ids ("spot-mveixci6q6trc"); the ids are Developer details */
+    const info = document.createElement('p'); info.className = 'hint'; info.innerHTML = '<b></b>';
+    info.querySelector('b').textContent = master ? (/^spot-|^m[a-z0-9]{6,}$/.test(master.label || '') ? 'Made from your selection' : master.label) : 'A component whose definition is missing';
     body.appendChild(info);
+    body.appendChild(devDetails([['Kind', master ? cmsMasterKind(master) : ''], ['Definition id', comp.masterId], ['Placed at', comp.anchorId], ['Instance', comp.key]]));
     const scope = document.createElement('p'); scope.className = 'hint';
     scope.textContent = master && master.detached ? 'Detached: this copy no longer follows any definition.' : 'Fields here override this instance only. Edit definition changes every instance.';
     body.appendChild(scope);
@@ -326,11 +327,12 @@
     body.appendChild(addState);
     const triggerNote = document.createElement('p'); triggerNote.className = 'hint';
     const triggerRow0 = group.trigger === 'self' ? null : cmsTreeRowForKey(group.trigger);
-    triggerNote.textContent = group.trigger === 'self' ? 'Click trigger: the state-zero selection itself.' : 'Click trigger: ' + (triggerRow0 ? '"' + triggerRow0.label + '"' : 'a specific element') + ' (' + group.trigger + '). While another state shows and that element is hidden with state 0, clicking the showing state moves on.';
+    triggerNote.textContent = group.trigger === 'self' ? 'A click on the first state moves it on.' : 'A click on ' + (triggerRow0 ? '"' + triggerRow0.label + '"' : 'the element you chose') + ' moves it on. While another state shows and that element is hidden with the first state, a click on the state showing moves on.';
     body.appendChild(triggerNote);
+    body.appendChild(devDetails([['Group id', groupId], ['Trigger', group.trigger]]));
     const triggerRow = document.createElement('div'); triggerRow.style.display = 'flex'; triggerRow.style.gap = '6px'; triggerRow.style.flexWrap = 'wrap';
-    const useSelf = document.createElement('button'); useSelf.type = 'button'; useSelf.className = 'btn small'; useSelf.textContent = 'Use state-zero selection as trigger';
-    refuse(useSelf, group.trigger === 'self' ? 'Already the trigger: a click on the state-zero selection moves this group on.' : '');
+    const useSelf = document.createElement('button'); useSelf.type = 'button'; useSelf.className = 'btn small'; useSelf.textContent = 'A click on the first state moves it on';
+    refuse(useSelf, group.trigger === 'self' ? 'Already so: a click on the first state moves this group on.' : '');
     useSelf.addEventListener('click', () => postCmsStatesCommand({ action: 'set-trigger', groupId, trigger: 'self' }));
     const useThis = document.createElement('button'); useThis.type = 'button'; useThis.className = 'btn small'; useThis.textContent = 'Use this element as trigger';
     refuse(useThis, !state.cmsExactSelection.key ? 'Select an element on the page first: the selected element becomes the trigger.' : group.trigger === state.cmsExactSelection.key ? 'Already the trigger: this element is what a click moves this group on with. Select another element to use it instead.' : '');
@@ -394,14 +396,19 @@
   function buildContentSection(pane) {
     /* a binding reported for another element (a message that moved the selection without one) is not this one's */
     const content = state.cmsContent && (!state.cmsContent.key || state.cmsContent.key === state.cmsExactSelection.key) ? state.cmsContent : null;
+    /* "Details": the field's name, its words in a box, its link target, Revert -- opened on demand
+       (by itself only for text that cannot be edited in place, whose explanation is the answer) */
     const body = toolbarSection(pane, 'cms-content', 'Content', 'text');
     const applyCmsCopyEdit = A.applyCmsCopyEdit;
     const p = (cls, text) => { const el = document.createElement('p'); el.className = cls; el.textContent = text; return el; };
     if (!content) { body.appendChild(p('hint', 'Nothing reported for this selection yet: click a piece of text on the canvas.')); return; }
     if (content.bound) {
-      const info = document.createElement('p'); info.className = 'hint cms-content-field'; info.innerHTML = '<b></b><br><code></code>';
+      /* the field by its name ("Heading"); its copy key and file are Developer details (P1-2) */
+      const info = document.createElement('p'); info.className = 'hint cms-content-field'; info.innerHTML = '<b></b> <span></span>';
       info.querySelector('b').textContent = content.label;
-      info.querySelector('code').textContent = content.field + '  ·  ' + (content.multiline ? 'paragraph' : 'one line') + '  ·  ' + content.file;
+      info.querySelector('span').textContent = '· ' + (content.multiline ? 'a paragraph' : 'one line');
+      const keyCode = document.createElement('code'); keyCode.textContent = content.field + '  ·  ' + content.file;
+      const dev = devDetails([], [keyCode]); info.appendChild(dev);
       body.appendChild(info);
       /* How an edit on the canvas ends, said where the person is looking: nothing on screen did,
          and Escape threw the typing away (docs/ux-audit/cms.md P0-2). The keys are js/main.js's
@@ -419,7 +426,7 @@
         } };
       const data = component ? {} : { cmsField: content.kind + ':' + content.id + ':' + content.fieldKey };
       body.appendChild(ctlField(ctx, 'Text', 'value',
-        { type: content.multiline ? 'textarea' : 'text', rows: content.multiline ? 4 : undefined, id: 'cmsContentValue', live: !component, data }));
+        { type: content.multiline ? 'textarea' : 'text', rows: content.multiline ? 4 : undefined, id: 'cmsContentValue', live: !component, data, hint: 'The same words as on the page: type here when that is easier.' }));
       if (component) body.appendChild(p('hint', 'This instance\'s override: the definition keeps its own value.'));
       else body.appendChild(revertFieldButton(content));
       if (content.link && content.link.field) {
@@ -430,11 +437,12 @@
       } else if (content.link) body.appendChild(p('hint cms-content-refusal', content.link.refusal));
     } else {
       body.appendChild(p('hint cms-content-refusal', content.reason));
-      if (content.reason.indexOf(content.source) < 0) body.appendChild(p('hint', 'Source: ' + content.source + '.'));
       body.appendChild(p('hint', content.remedy));
+      /* what writes the words and how a developer makes them editable (P1-2) */
+      body.appendChild(devDetails([['Written by', content.source]], content.detail ? [p('hint', content.detail)] : []));
     }
     /* the whole form of the item this text belongs to (the page shown, when it belongs to none) */
-    const all = document.createElement('button'); all.type = 'button'; all.className = 'btn small'; all.dataset.action = 'open-page-fields'; all.textContent = 'Open all page fields';
+    const all = document.createElement('button'); all.type = 'button'; all.className = 'btn small'; all.dataset.action = 'open-page-fields'; all.textContent = 'All fields of this page';
     refuse(all, typeof A.openPageFields === 'function' ? '' : 'Page fields are not available in this editor build: js/admin/ provides no openPageFields().');
     all.addEventListener('click', () => A.openPageFields(content.bound && content.kind !== 'component' ? { kind: content.kind, id: content.id, field: content.fieldKey } : {}));
     body.appendChild(all);

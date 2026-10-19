@@ -1,29 +1,45 @@
 # defxn hand-built UI census baseline -- scripts/ux-component-census.mjs --check fails if a value rises.
 # Values only go down (--ratchet). "-" = not measured for that family. See docs/ux-audit/components.md §2.
+# Raised by hand 2026-10-19 (W1-CONTENT), eyebrow/pill/card/stat used-classes and uses only: /resolvers was rebuilt
+# from one innerHTML string into DOM calls. It uses the same stats-tile, stats-kicker, stats-chips and resolver-status
+# classes it always did; built by string concatenation they were invisible to this lower-bound count, and now they
+# are counted. No new pattern was added. Wave 3 converts the page to Ark blocks and lowers these again.
+# Lowered by hand 2026-10-19 (coordinator), field uses 45 -> 40: an instrument fix, not progress. The literal
+# tokenizer split 'a.b' on the dot and counted property accesses (e.g. stage.title) as class uses; re-measured
+# at 5a1ac71 with the corrected tokenizer, field uses was 40. No UI changed.
+# Raised by hand 2026-10-19 (coordinator, W1-SITE-FIXES), three real additions with reasons; each is replaced by an
+# Ark block in Wave 2/3 and the values fall again:
+#   button +1 class/used/use: resolution-secondary-action, the onward link the pages.md audit asked for on
+#     /resolutions/rules, /algorithms (-> /resolver-math) and /finance (-> /treasury).
+#   stat +1 class: stats-bar-detail, the bar-row detail made visible text when bar rows stopped being
+#     inert Tab stops (a11y fix on /stats/gpu, /stats/ledger).
+#   toggle +1 used/use/css-file: fold-toggle (dash-kit foldToggle), the 'More' control that replaced
+#     display:none / line-clamp hiding on phones (no-feature-reduction rule); Wave 2 swaps it for the
+#     Ark accordion block.
 measure	family	value
 classes	hero	44
 used-classes	hero	21
 uses	hero	34
 css-files	hero	31
 classes	eyebrow	62
-used-classes	eyebrow	36
-uses	eyebrow	65
+used-classes	eyebrow	37
+uses	eyebrow	67
 css-files	eyebrow	36
 classes	pill	27
-used-classes	pill	16
-uses	pill	18
+used-classes	pill	17
+uses	pill	19
 css-files	pill	12
-classes	button	38
-used-classes	button	14
-uses	button	21
+classes	button	39
+used-classes	button	15
+uses	button	22
 css-files	button	23
 classes	card	38
-used-classes	card	16
-uses	card	43
+used-classes	card	18
+uses	card	45
 css-files	card	19
-classes	stat	107
-used-classes	stat	26
-uses	stat	95
+classes	stat	108
+used-classes	stat	31
+uses	stat	99
 css-files	stat	13
 classes	step	36
 used-classes	step	21
@@ -71,12 +87,12 @@ uses	nextLinks	40
 css-files	nextLinks	18
 classes	field	42
 used-classes	field	23
-uses	field	45
+uses	field	40
 css-files	field	23
 classes	toggle	12
-used-classes	toggle	5
-uses	toggle	8
-css-files	toggle	8
+used-classes	toggle	6
+uses	toggle	9
+css-files	toggle	9
 classes	toast	1
 used-classes	toast	0
 uses	toast	0

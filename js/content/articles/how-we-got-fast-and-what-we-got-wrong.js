@@ -1,11 +1,11 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("how-we-got-fast-and-what-we-got-wrong", {
   "core": "A value transfer on the first version of this protocol ran at under 7 a second. The same idea, written in the registered grammar and sent over a plain socket, now runs at about 25,000 a second across ten machines. Most of the trail between those two numbers is mistakes, and this note lists them.",
-  "relevance": "Read this before quoting any DEFXN speed. It says which number describes which protocol, how each was measured, and which earlier explanations turned out to be wrong.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Read this before quoting any DEFXN speed. It says which number describes which protocol, how each was measured, and which earlier explanations turned out to be wrong.",
   "reviewed": "2026-10-07",
   "evidenceLabel": "BENCH-003: the full investigation log, sections 1 to 15",
   "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
-  "relatedPage": "route:stats",
+  "relatedPage": "route:stats/gpu",
   "actionLabel": "Watch the fleet right now",
   "actionPage": "route:stats",
   "questions": [
@@ -29,28 +29,28 @@ LearningContent.load("how-we-got-fast-and-what-we-got-wrong", {
     ],
     [
       "What Rust changed, and the first surprise",
-      "The Rust rebuild started out three times slower than Node: 46.88 a second, because it forced the disk to flush after every single write. Batching the flushes of concurrent requests together (group commit) gave 182.70. Then came the useful question: why flush at all when three validators already hold a copy? Dropping that redundant flush gave 354.54 a second for the durable path.",
-      "The accepted path, which stops at a signed certificate and writes nothing, reached about 3,250 a second per quorum. Four independent quorums run side by side summed to 5,711 to 6,041 a second. That was the record before the grammar work, and it is still the record for the certified fabric."
+      "The Rust rebuild started out three times slower than Node: 46.88 a second, because it forced the disk to flush after every single write. Batching the flushes of concurrent requests together (group commit) gave 182.70. Then came the useful question: why flush at all when three replicas already hold a copy? Dropping that redundant flush gave 354.54 a second for the durable path.",
+      "The accepted path, which stops at a signed certificate and writes nothing, reached about 3,250 a second per signer group. Four independent signer groups run side by side summed to 5,711 to 6,041 a second. That was the record before the grammar work, and it is still the record for the certified fabric."
     ],
     [
       "Accepted is not durable",
-      "Accepted means the quorum has signed. Durable means every validator has committed it and the successor is registered. They are different promises, and the second one was slow: one quorum measured 131 to 184 a second, flat from 50 to 2,400 concurrent requests, which is what a real ceiling looks like.",
-      "Three separate problems were hiding in it. A routing bug: a node that joined the quorum broke durable finality for any client that had not heard of it. The redundant flush from the last section. And thread starvation: the server defaulted its thread count to the number of CPU cores, which was 2, while its requests spent most of their time waiting. Setting 256 threads took the same quorum to 676 to 827 a second.",
+      "Accepted meant the signer group had signed. Durable meant every replica had committed it and the successor was registered. They are different promises, and the second one was slow: one signer group measured 131 to 184 a second, flat from 50 to 2,400 concurrent requests, which is what a real ceiling looks like.",
+      "Three separate problems were hiding in it. A routing bug: a node that joined the signer group broke the durable path for any client that had not heard of it. The redundant flush from the last section. And thread starvation: the server defaulted its thread count to the number of CPU cores, which was 2, while its requests spent most of their time waiting. Setting 256 threads took the same signer group to 676 to 827 a second.",
       "The same starvation was in the single-node server too: 7 threads gave about 90 a second with the CPU 97 percent idle, and 256 gave around 820. Idle CPU with flat throughput is a symptom, not a finding."
     ],
     [
       "A good idea that lost, then won",
-      "Durable finality took four round trips. Collapsing them into one, with the first server doing the rest, should have been faster. On the quorum measured it was slower: 579 a second against 763, because its two machines are under a millisecond apart and the redesign only added serial work. On a rented box about 71 milliseconds away it was twice as fast: 253 against 127.",
+      "The durable path took four round trips. Collapsing them into one, with the first server doing the rest, should have been faster. On the signer group measured it was slower: 579 a second against 763, because its two machines are under a millisecond apart and the redesign only added serial work. On a rented box about 71 milliseconds away it was twice as fast: 253 against 127.",
       "The idea was right and the map was wrong. Fewer round trips only help when a round trip costs something."
     ],
     [
       "The GPU that changed nothing, and the conclusion we got wrong",
-      "A rented GPU box joined the fleet to see whether more compute would raise the total. A laptop and the GPU box, each running the same standalone quorum, landed within 2.5 percent of each other: 2,298 and 2,356 a second. The GPU was never used, which is correct, because nothing here runs on a GPU.",
+      "A rented GPU box joined the fleet to see whether more compute would raise the total. A laptop and the GPU box, each running the same standalone signer group, landed within 2.5 percent of each other: 2,298 and 2,356 a second. The GPU was never used, which is correct, because nothing here runs on a GPU.",
       "But the conclusion written down that night, that the protocol is not compute-bound, was wrong. The CPUs looked idle because the servers were starved of threads. Once that was fixed, the same servers ran at 90 to 95 percent CPU and the signature checks turned out to be the largest cost. A flat result can be the right answer to the wrong question."
     ],
     [
       "The mistakes that cost hours, none of them in the protocol",
-      "A single missing firewall rule on one machine looked like an architectural ceiling for hours. A kill command scoped too broadly once took the production quorum down for 19 minutes. A test client placed 80 milliseconds from the validators understated one quorum by about 7.9 times. A file-descriptor limit of 1,024 made a server quietly stop accepting connections at around 600 concurrent requests, with nothing in the log. A binary built on a Mac was copied to Linux machines.",
+      "A single missing firewall rule on one machine looked like an architectural ceiling for hours. A kill command scoped too broadly once took the production signer group down for 19 minutes. A test client placed 80 milliseconds from the signers understated one signer group by about 7.9 times. A file-descriptor limit of 1,024 made a server quietly stop accepting connections at around 600 concurrent requests, with nothing in the log. A binary built on a Mac was copied to Linux machines.",
       "Each one produced a believable number that was wrong. The fix every time was the same: write down what was held constant, and check the machine before blaming the design."
     ],
     [
@@ -76,7 +76,7 @@ LearningContent.load("how-we-got-fast-and-what-we-got-wrong", {
     ],
     [
       "What none of this proves",
-      "This is accepted finality only: nothing is replicated or flushed, so a crash loses it. There is no threshold certificate, so no Byzantine tolerance; the certified fabric does more per transfer, and comparing the two is real but not like for like. The clients were fleet machines, not the public. It is a prototype that is not deployed as a service, and a replica-confirmed path over the wire does not exist yet.",
+      "This is the accepted path only: nothing is replicated or flushed, so a crash loses it. There is no threshold certificate, so no tolerance of faulty or hostile signers; the certified fabric does more per transfer, and comparing the two is real but not like for like. The clients were fleet machines, not the public. It is a prototype that is not deployed as a service, and a replica-confirmed path over the wire does not exist yet.",
       "The next gains are in the cryptography, not the parser: standing intents and offers that remove two of the six signatures, and a holder field that is not the hex of a hex key. The honest summary is one sentence long. The grammar is cheap, the signatures are the cost, and every number here says which protocol it describes."
     ]
   ],

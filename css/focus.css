@@ -14,6 +14,14 @@
 #scene .mesh-drag-target:focus-visible { background:hsl(var(--nested)); }
 #scene input[type="range"]:focus-visible { accent-color:hsl(var(--reference)); background-color:hsl(var(--overlay)); }
 #scene .learning-entry:focus-visible h2 { color:hsl(var(--text-strong)); }
+/* Anything made focusable with tabindex that is not a link, button or field -- a tabpanel, a
+   region -- had no visible focus at all (the :focus rule above removes the outline and the tint
+   below covers only a/button/input): the resolutions tabpanel took focus invisibly on 21 routes
+   (docs/ux-audit/pages-ux-b.md /resolutions P1; regression: tests/a11y-chrome.cjs). */
+#scene [tabindex]:not(a,button,input,select,textarea,[tabindex="-1"]):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:2px; }
+/* Custom controls built on buttons keep the tint above and gain a ring, so focus never depends on
+   a background a palette may flatten. */
+#scene :is(button,[role="tab"],summary):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:2px; }
 /* High-contrast palettes may suppress backgrounds; retain a system indicator. */
 @media(forced-colors:active) {
   #scene :is(a,button,input,[tabindex]):focus-visible { outline:2px solid Highlight; outline-offset:3px; }

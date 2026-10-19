@@ -33,6 +33,15 @@
       var draft = route.slug ? state.aDrafts[route.slug] : route.id ? state.drafts[route.id] : null;
       if (!seen[route.path]) { seen[route.path] = true; out.push({ path: route.path, title: (draft && draft.title) || (route.path === '/' ? 'Home' : route.path.split('/').filter(Boolean).pop().replace(/-/g, ' ')), seoId: route.id || '', seoArticle: route.slug || '', key: '' }); }
     });
+    /* ONE name per page (docs/ux-audit/cms.md P1-3): a route a draft owns is called by the draft's
+       title -- what Page settings edits and the Pages list shows -- in every surface that reads
+       this list (the site map, the page SEO popover), never the catalog's longer SEO title */
+    out.forEach(function (route) {
+      var id = state.ids.filter(function (i) { return state.drafts[i] && state.drafts[i].route === route.path && state.drafts[i].group !== 'site'; })[0];
+      var m = /^\/learnings\/([^/]+)$/.exec(route.path);
+      var title = id ? state.drafts[id].title : m && state.aDrafts[m[1]] ? state.aDrafts[m[1]].title : '';
+      if (title) route.title = title;
+    });
     return out.sort(function (a, b) { return a.path.localeCompare(b.path); });
   }
   /* Step 2 merge: sendStudioState()/sendStudioPreviewState() are deleted outright -- they

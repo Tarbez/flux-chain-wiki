@@ -51,7 +51,9 @@ const lab = fs.readFileSync('js/pages/lab.js', 'utf8');
 assert(lab.includes('Illustrative, not live network data.'), 'model boundary is beside the title');
 assert(!lab.includes('Nothing simulated but the pace'));
 assert(!lab.includes('mechanics are real and sourced'));
-const modelIntro = fs.readFileSync('js/resolvers/experiment.js', 'utf8');
-assert(modelIntro.includes('They do not represent real nodes, votes, or a ledger.'));
+// The old /experiments entry page's boundary moved into the lab when the two merged (2026-10-19,
+// docs/ux-audit/pages.md P3); it must survive the merge word for word.
+assert(lab.includes('do not represent real nodes, votes, or a ledger.'), 'the old entry page\'s boundary survives in the lab');
+assert(lab.includes('The model does not calculate a roster,'), 'including what the model does not calculate');
 
 console.log('PASS: Batch 3 mechanism questions, status boundaries, evidence links, benchmark restraint, and illustrative-model labels.');

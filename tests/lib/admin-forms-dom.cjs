@@ -39,7 +39,7 @@ function bootForms() {
     'js/content/layout.js', 'js/content/layout-data.js', 'js/content/components.js', 'js/content/components-data.js',
     'js/content/states.js', 'js/content/states-data.js', 'js/content/canvas-transitions.js', 'js/content/canvas-transitions-data.js',
     'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
-    'js/content/learnings.js', 'js/content/article-index.js', 'js/content/seo.js', 'js/content/seo-data.js', 'js/pages/catalog.js',
+    'js/content/learnings.js', 'js/content/article-index.js', 'js/content/site-pages.js', 'js/content/seo.js', 'js/content/seo-data.js', 'js/pages/catalog.js',
     'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/primitives.js', 'js/admin/vendor/tweetnacl.js', 'js/admin/crypto.js']) run(rel);
   /* every article body, as loadBodies() would fetch them */
   for (const a of window.LearningContent.articles) if (!a.sections) run('js/content/articles/' + a.slug + '.js');
@@ -48,6 +48,7 @@ function bootForms() {
   const record = (name) => function () { calls.push({ name, args: Array.from(arguments) }); };
   run('js/admin/core.js');
   run('js/admin/notice.js');
+  run('js/admin/overlay.js');
   /* what the shell, the bridge and the versions glue provide: recorded, never drawn */
   window.ArkAdmin.provide({
     notifyPreviewState: record('notifyPreviewState'), notifyPreviewMesh: record('notifyPreviewMesh'),

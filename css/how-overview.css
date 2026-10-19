@@ -27,7 +27,7 @@
 }
 #scene .how-triptych .story-kicker {
   margin:0 0 11px;
-  font:500 10px/1.4 var(--mono-font,ui-monospace,monospace);
+  font:500 10px/1.4 var(--font-mono,ui-monospace,monospace);
   letter-spacing:.09em;
   color:hsl(var(--text-muted));
 }
@@ -112,8 +112,8 @@
   transform:translateY(-4px);
 }
 .how-work-card-top {display:flex;align-items:center;justify-content:space-between;gap:16px;}
-.how-work-number {font:500 10px/1.35 var(--mono-font,monospace);color:hsl(var(--primary));}
-.how-work-signal {font:500 8px/1.35 var(--mono-font,monospace);letter-spacing:.1em;color:hsl(var(--text-muted));}
+.how-work-number {font:500 10px/1.35 var(--font-mono,monospace);color:hsl(var(--primary));}
+.how-work-signal {font:500 8px/1.35 var(--font-mono,monospace);letter-spacing:.1em;color:hsl(var(--text-muted));}
 #scene .how-work-card h2 {
   margin:0;
   font:500 clamp(22px,1.9cqw,30px)/1.08 var(--font-sans,"Albert Sans",sans-serif);
@@ -139,7 +139,7 @@
   background:hsl(var(--surface) / .16);
   overflow:hidden;
 }
-.how-work-mesh-label {position:relative;z-index:1;font:500 8px/1.3 var(--mono-font,monospace);letter-spacing:.06em;color:hsl(var(--text-faint));}
+.how-work-mesh-label {position:relative;z-index:1;font:500 8px/1.3 var(--font-mono,monospace);letter-spacing:.06em;color:hsl(var(--text-faint));}
 .how-work-mesh {display:block;width:100%;height:100%;min-height:72px;border-radius:3px;pointer-events:none;}
 .how-work-more {
   display:flex;
@@ -166,7 +166,7 @@
   align-items:center;
   gap:16px 24px;
 }
-.how-boundary-label {flex:0 0 auto;font:500 8px/1.4 var(--mono-font,monospace);letter-spacing:.08em;color:hsl(var(--primary));}
+.how-boundary-label {flex:0 0 auto;font:500 8px/1.4 var(--font-mono,monospace);letter-spacing:.08em;color:hsl(var(--primary));}
 #scene .how-triptych .how-simple-boundary strong {font:500 12px/1.45 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 #scene .how-simple-next {
   min-height:38px;
@@ -214,4 +214,35 @@
 }
 @media(prefers-reduced-motion:reduce) {
   #scene .how-work-card {transition:none;}
+}
+
+/* Deploy a resolver (2026-10-19, js/pages/deployment.js): each card lists its two of the six
+   steps; detail sits behind two disclosures; the footer hands off to Deploy and Explore. */
+#scene .how-work-card .how-work-pair {margin:0;padding-left:20px;display:grid;gap:8px;font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+#scene .how-work-card .how-work-pair li::marker {font:500 11px var(--font-mono,monospace);color:hsl(var(--primary));}
+#scene .how-work-card .how-work-pair strong {display:block;font-weight:600;color:hsl(var(--text-strong));}
+.how-deploy-detail {display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1.4fr);gap:10px 18px;align-items:start;flex:0 0 auto;}
+#scene .how-deploy-fold summary {cursor:pointer;font:600 12.5px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
+#scene .how-deploy-fold p,#scene .how-deploy-agreement p {margin:6px 0 0;max-width:56ch;font:400 12.5px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+#scene .how-deploy-hazard summary {color:hsl(var(--drift,var(--warning)));}
+#scene .how-deploy-agreement strong {font:600 12.5px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-faint));}
+#scene .how-deploy-chapters {display:flex;flex-wrap:wrap;gap:4px 14px;}
+#scene :is(.how-deploy-chapter,.how-deploy-handoff) {color:hsl(var(--reference));font:500 12px/1.4 var(--font-sans,"Albert Sans",sans-serif);text-decoration:none;border-bottom:1px solid hsl(var(--reference-300));}
+.how-deploy-handoffs {display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px 16px;}
+@media(max-width:900px) {
+  .how-deploy-detail {grid-template-columns:1fr;}
+  .how-deploy-handoffs {justify-content:flex-start;}
+}
+/* The agreement chapters' "earlier path" banner (js/pages/how-stories.js). */
+#scene .how-chapter-banner {margin:0 0 10px;padding:8px 12px;border-left:2px solid hsl(var(--drift,var(--warning)));background:hsl(var(--surface) / .4);font:400 12.5px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
+#scene .how-chapter-banner-link {color:hsl(var(--reference));text-decoration:none;border-bottom:1px solid hsl(var(--reference-300));}
+/* Deploy a resolver: the cards size to their two steps (they were clipped at a fixed row height
+   with overflow:hidden), and the decorative mesh is shorter so the six steps stay above the fold. */
+.how-deploy .how-work-cards {flex:0 0 auto;min-height:0;}
+#scene .how-deploy .how-work-card {grid-template-rows:auto auto auto 64px auto;align-content:start;overflow:visible;}
+.how-deploy .how-work-mesh-frame {min-height:64px;grid-template-rows:minmax(44px,1fr);}
+.how-deploy .how-work-mesh {min-height:44px;}
+@media(max-width:900px) {
+  #scene .how-deploy .how-work-card {min-height:0;grid-template-rows:auto auto auto auto;}
+  .how-deploy .how-work-mesh-frame {display:none;}
 }

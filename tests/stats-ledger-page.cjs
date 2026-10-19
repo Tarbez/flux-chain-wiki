@@ -12,7 +12,13 @@ for (const file of ['js/ark/dash-kit.js', 'js/content/chain-sample.js', 'js/page
   vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 }
 const page = context.ArkUI.pageModules.statsLedger.mount(node('main'));
-assert(page.innerHTML.includes('A finance resolver by construction'), 'hero present');
+assert(page.innerHTML.includes('a finance resolver by construction'), 'hero present');
+// Named regression (2026-10-19, docs/ux-audit/pages.md P6): this dashboard and the article
+// /learnings/a-resolver-by-construction had the same title and h1, "A finance resolver by
+// construction", so search results and the menu showed two pages with one name. The article
+// keeps the narrative title; the dashboard is "Ledger benchmark detail".
+assert(/<h1 id="statsledger-title">Ledger benchmark detail<\/h1>/.test(page.innerHTML), 'the dashboard h1 is its own name, not the article\'s');
+assert.equal(JSON.parse(JSON.stringify(require('node:vm').runInNewContext(require('node:fs').readFileSync('js/content/site-pages.js', 'utf8') + ';ArkSitePages.row("stats/ledger")'))).label, 'Ledger benchmark detail', 'and its catalog name says so');
 assert(page.innerHTML.includes('279,269 certified'), 'measured headline exposes certified holder-sharded application');
 assert(page.innerHTML.includes('1,712,006 combined replica-applications/s'), 'nine-node certified capacity is the newest fleet result');
 assert(page.innerHTML.includes('61,398 all-replica logical ops/s'), 'replicated logical rate is kept distinct from summed work');
@@ -36,6 +42,5 @@ for (const e of context.ArkChainSample.entries) {
 // stats.js references stats/ledger
 assert(fs.readFileSync('js/pages/stats.js', 'utf8').includes("'stats/ledger'"), '/stats links to /stats/ledger');
 // catalog registers the route and loads the sample first
-const cat = fs.readFileSync('js/pages/catalog.js', 'utf8');
-assert(/stats\/ledger[^}]+scripts:\s*\['js\/content\/chain-sample\.js'/.test(cat), '/stats/ledger loads chain-sample.js first');
+assert.equal(require('./lib/site-catalog.cjs').loadCatalog().catalog['stats/ledger'].scripts[0], 'js/content/chain-sample.js', '/stats/ledger loads chain-sample.js first');
 console.log('PASS: /stats/ledger mounts, chain sample is real signed ledger, /stats links to it, catalog registered.');

@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "No canonical public benchmark artifact is registered in this repository. Performance numbers remain unverified until their workload, environment, source revision, method, raw output, and digest can be inspected together."
+      "value": "Six benchmark records are verified in the evidence registry, each at its own stated boundary: one machine or a named set of fleet nodes, a dated run, and a unit that says what it counts. None is a production, sustained-mainnet or cross-chain result, and none is added to another or multiplied by node count. Everything else stays Partial, Historical or Superseded until its evidence is complete."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -39,13 +39,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Point 1",
-      "value": "Current conclusion: Unverified."
+      "value": "Current conclusion: verified at stated boundaries."
     },
     "POINT1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Historical numbers appear in project material, but the evidence registry does not contain the complete reproducible artifacts required to publish them as verified results."
+      "value": "A record is promoted only when its evidence record names the workload, the machine or fleet, the date and the method beside the number. Six records meet that today. A local result is not a fleet result, a fleet result is not production, and a rate in one unit is never compared with a rate in another."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -95,17 +95,41 @@ ArkManifest.define({
       "section": "Point 5",
       "value": "The evidence registry must link the raw result and digest before a public page can promote a measurement from Unverified to Live or Partial."
     },
+    "POINT6.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 6",
+      "value": "Verified on one machine."
+    },
+    "POINT6.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 6",
+      "value": "BENCH-006 (Local, verified): 279,269 ops/s certified sharded segment application, 5.47× the 51,065 ops/s per-operation admission; one local Apple M-series machine, 2026-10-08; no eight-node projection. BENCH-013 (Local, verified): every operation in its own unit, one machine, no network, median of 5 reps, 2026-10-10: 13,476 same-shard transfers/s, 6,799 cross-shard transfers/s, 46,178 swaps/s in a batched auction. BENCH-015 (Local, verified): 4,425 swaps/s at 1 connection and ~31,000 at 1,000, one local node over loopback, unbacked, zero-confirmation store, 2026-10-15; not a fleet figure."
+    },
+    "POINT7.TITLE": {
+      "label": "Heading",
+      "kind": "line",
+      "section": "Point 7",
+      "value": "Verified on the fleet."
+    },
+    "POINT7.TEXT": {
+      "label": "Text",
+      "kind": "text",
+      "section": "Point 7",
+      "value": "BENCH-007 (Fleet, verified application boundary): 61,398 all-replica logical ops/s, bounded by the slowest replica; one 20,000-operation segment applied on eight VPS nodes plus one local node, 180,000/180,000 applied, zero errors, 2026-10-08; broadcast and durable segment commit excluded. BENCH-009 (Fleet, verified): 11,318 accepted ops/s with live 4-of-6 cross-node certified-segment signing, against 11,169 with no approval; six public nodes, 300 s per configuration, zero failures, 2026-10-09/10; acceptance does not imply inclusion in a signed segment. BENCH-012 (Fleet, verified): 15,360 swaps in 60 batches of 256, broadcast to 10 live replicas, 60/60 audits passed, 13.874 ms batch latency, 2026-10-10; the unpipelined broadcast dominates end to end."
+    },
     "STATUS.TITLE": {
       "label": "Status heading",
       "kind": "line",
       "section": "Evidence",
-      "value": "Status / Unverified"
+      "value": "Status / Six records verified"
     },
     "STATUS.TEXT": {
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "BENCH-001 has no complete public benchmark artifact. This page therefore publishes the evidence standard, not unsupported performance numbers."
+      "value": "BENCH-006 (Local, verified), BENCH-007 (Fleet, verified application boundary), BENCH-009 (Fleet, verified), BENCH-012 (Fleet, verified), BENCH-013 (Local, verified) and BENCH-015 (Local, verified). Each number, machine or fleet, and date is under How it works; what is still not verified is under Evidence & limits."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -117,7 +141,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "No current throughput, latency, scale, or external-chain comparison is verified by the evidence registered here."
+      "value": "Still not verified. BENCH-001 (Partial): a 10,000-transfer real-fleet run of the directory registry did not complete. BENCH-002 (Partial): the gap between the writer-contention model and the fleet's multi-second p50 is not yet explained. BENCH-003 (Partial): the Rust rebuild's fleet figures; membership is not persisted across restarts. BENCH-004 (Partial): 12,403 accepted ops/s over 303.152 seconds from one arm64 client, not cumulative growth or replica-certified durability. BENCH-005 (Superseded in part): one million accepted durable ops/s remains unverified. BENCH-008 (Historical): the six-node baseline, superseded. BENCH-011 (Partial): 82,863 finalized transfers/s on all 10 nodes; raw JSON and source revision still to be attached. BENCH-014 (Partial): 17 claims/s durable on two fleet nodes over real WAN, not the 3-of-9 shape, not on production. No verified record is a throughput, latency or scale claim for production, and none is a comparison with an external chain."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",
@@ -129,13 +153,49 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "RUN FLUX FROM SOURCE"
+      "value": "RUN DEFXN FROM SOURCE"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",
       "kind": "line",
       "section": "Links",
       "value": "OPERATING MODEL"
+    },
+    "STATS": {
+      "label": "Live fleet dashboard link",
+      "kind": "line",
+      "section": "Links",
+      "value": "See the measured results on the fleet dashboard"
+    },
+    "STATS.HREF": {
+      "label": "Live fleet dashboard target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:stats"
+    },
+    "GPU": {
+      "label": "GPU measurement link",
+      "kind": "line",
+      "section": "Links",
+      "value": "Why the GPU does nothing here"
+    },
+    "GPU.HREF": {
+      "label": "GPU measurement target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:stats/gpu"
+    },
+    "LEDGER": {
+      "label": "Finance resolver link",
+      "kind": "line",
+      "section": "Links",
+      "value": "A finance resolver by construction"
+    },
+    "LEDGER.HREF": {
+      "label": "Finance resolver target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:stats/ledger"
     }
   }
 });

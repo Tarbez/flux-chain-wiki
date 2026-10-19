@@ -19,9 +19,18 @@
      Content | Design app switch became a LENS on the one canvas, the page
      picker gained Page fields, and on a phone the rail became a drawer.
 
+   - 2026-10-19 (docs/ux-audit/cms.md P1-1, P1-13): 23 header controls, 16
+     icon-only, all under 44px on a phone in 3 rows. The header now holds
+     what is used on every screen (11 controls); the canvas's own controls
+     sit on the canvas strip; the occasional ones are in More.
+
    Per width (390, 760, 1280, 1500) it checks, in the Canvas view with
-   the tablet-override note AND a long status message showing (the widest
+   the tablet size note AND a long status message showing (the widest
    the header gets):
+   - at most 11 header controls, every icon-only one named (aria-label) and
+     with a tooltip; a long status message moves no control;
+   - on a phone: at most two header rows, every header and strip control
+     at least 44px in both directions;
    - every header control's centre hit-tests to that control
      (elementFromPoint), inside the viewport -- the account menu's controls
      after opening it;
@@ -59,10 +68,14 @@ const WIDTHS = process.env.HEADER_REACH_WIDTHS
   ? process.env.HEADER_REACH_WIDTHS.split(',').map((w) => [Number(w), 900])
   : [[390, 844], [760, 900], [1280, 800], [1500, 900]];
 /* every control the header holds in the Canvas view (the account menu's are checked once it is open) */
-const CANVAS_CONTROLS = ['#lensContentBtn', '#lensDesignBtn', '#viewCanvasBtn', '#viewMapBtn', '#backgroundBtn', '#viewThemeBtn',
-  '#btnLeftRail', '#btnPage', '#btnPageFields', '#btnPageSeo', '#bpNote', '#devices [data-d="0"]', '#devices [data-d="1"]', '#devices [data-d="2"]', '#btnUndo', '#btnRedo', '#btnCheck',
-  '#mode [data-m="edit"]', '#mode [data-m="live"]', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn'];
-const ACCOUNT_CONTROLS = ['#connect', '#signOut'];
+/* the header's own controls (every screen, either lens) */
+const HEADER_CONTROLS = ['#btnLeftRail', '#btnPage', '#btnPageFields', '#lensContentBtn', '#lensDesignBtn', '#btnUndo', '#btnRedo', '#save', '#publish', '#accountBtn'];
+/* the canvas strip's (Edit style lens: the size note and Design tips show there) */
+const STRIP_CONTROLS = ['#devices [data-d="0"]', '#devices [data-d="1"]', '#devices [data-d="2"]', '#bpNote', '#btnCheck', '#mode [data-m="edit"]', '#mode [data-m="live"]'];
+const CANVAS_CONTROLS = [...HEADER_CONTROLS, ...STRIP_CONTROLS];
+const HEADER_MAX = 11, PHONE = 599, TARGET = 44;
+/* More: the views, this page's search & sharing, the page transition, history, publishing, the account */
+const ACCOUNT_CONTROLS = ['#viewCanvasBtn', '#viewMapBtn', '#viewThemeBtn', '#btnPageSeo', '#backgroundBtn', '#versionsNav', '#meshNav', '#connect', '#signOut'];
 const CANVAS_ONLY = ['#canvasTools'];
 const RAIL_TABS = ['#tabPages', '#tabLayers', '#tabLib', '#tabMedia', '#tabVault'];
 const ONE_ROW_FROM = 1280;
@@ -79,7 +92,7 @@ function measure(frame, selectors) {
       const r = el.getBoundingClientRect();
       const x = r.left + r.width / 2, y = r.top + r.height / 2;
       const hit = document.elementFromPoint(x, y);
-      return { sel, shown: true, cy: y, top: r.top, bottom: r.bottom, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hitsSelf: !!hit && (hit === el || el.contains(hit)), hit: hit ? (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ')[0] : '')) : null };
+      return { sel, shown: true, cy: y, top: r.top, bottom: r.bottom, left: r.left, w: r.width, h: r.height, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hitsSelf: !!hit && (hit === el || el.contains(hit)), hit: hit ? (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ')[0] : '')) : null };
     });
     const studioRect = studio && !studio.hidden ? studio.getBoundingClientRect() : null;
     return {
@@ -119,6 +132,7 @@ async function main() {
       /* the widest the header gets: the tablet-override note on, and a long status message */
       await click('#devices [data-d="1"]');
       await frame.waitForSelector('#bpNote:not([hidden])', { timeout: scaled(5000) }).catch(() => fail(width, 'Tablet did not show the overrides note'));
+      const quiet = await measure(frame, HEADER_CONTROLS);
       await frame.evaluate(() => { const s = document.getElementById('status'); s.textContent = 'Saved 4 items to the connected project: Page "home", Layout, Components, sitemap.xml / robots.txt / llms.txt.'; s.dataset.tone = 'ok'; });
       /* the header's own layout has settled: its box and scroll width read the same twice in a row
          (was a fixed 600 ms) */
@@ -126,12 +140,28 @@ async function main() {
       const design = await measure(frame, CANVAS_CONTROLS);
       if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-design.png`) });
 
+      /* a status message moves nothing (it used to be inserted between the groups) */
+      for (const c of design.controls) { const q = quiet.controls.find((x) => x.sel === c.sel); if (q && q.shown && c.shown && (Math.abs(q.left - c.left) > 0.5 || Math.abs(q.top - c.top) > 0.5)) fail(width, `${c.sel} moved when a status message appeared (${q.left},${q.top} -> ${c.left},${c.top})`); }
+      /* the header's size, in the audit's own measure: every visible control in #appBar */
+      const bar = await frame.evaluate(() => {
+        const els = [...document.getElementById('appBar').querySelectorAll('button, a[href], input, select, summary')].filter((el) => !el.closest('[hidden]') && el.getClientRects().length);
+        return { count: els.length, unnamed: els.filter((el) => !(el.innerText || '').trim() && !(el.getAttribute('aria-label') && el.getAttribute('title'))).map((el) => '#' + el.id) };
+      });
+      if (bar.count > HEADER_MAX) fail(width, `the header shows ${bar.count} controls (at most ${HEADER_MAX})`);
+      if (bar.unnamed.length) fail(width, 'icon-only header controls without both a name and a tooltip: ' + bar.unnamed.join(', '));
+      if (width <= PHONE) {
+        const rowsSeen = new Set(design.controls.filter((c) => c.shown && HEADER_CONTROLS.includes(c.sel)).map((c) => Math.round(c.cy / 12))).size;
+        if (rowsSeen > 2) fail(width, `the phone header has ${rowsSeen} rows (at most 2)`);
+        for (const c of design.controls) if (c.shown && c.sel !== '#bpNote' && (c.w < TARGET - 0.5 || c.h < TARGET - 0.5)) fail(width, `${c.sel} is ${Math.round(c.w)}x${Math.round(c.h)}px, under the ${TARGET}px touch target`);
+        /* the phone-only scope is said in words, not an icon */
+        if (!/Phone only|Tablet and phone only/.test(await frame.evaluate(() => document.getElementById('bpNote').textContent))) fail(width, 'the size note does not say which sizes a style edit changes');
+      }
       for (const c of design.controls) {
         if (!c.shown) { fail(width, `${c.sel} is not shown in the Canvas view`); continue; }
         if (!c.inView) fail(width, `${c.sel} is outside the viewport`);
         if (!c.hitsSelf) fail(width, `${c.sel}'s centre hit-tests to ${c.hit}, not the control -- something is painted over the header`);
       }
-      const shown = design.controls.filter((c) => c.shown);
+      const shown = design.controls.filter((c) => c.shown && HEADER_CONTROLS.includes(c.sel));
       const rows = new Set(shown.map((c) => Math.round(c.cy / 8))).size;
       if (width >= ONE_ROW_FROM) {
         const first = Math.min(...shown.map((c) => c.top)), band = Math.max(...shown.filter((c) => c.top - first < 20).map((c) => c.bottom));
@@ -171,7 +201,9 @@ async function main() {
       if (await click('#lensContentBtn')) {
         const content = await frame.evaluate(() => ({ workspace: !document.getElementById('studioRoot').hidden, iframes: document.querySelectorAll('iframe').length, pressed: document.getElementById('lensContentBtn').getAttribute('aria-pressed') }));
         if (!content.workspace || content.iframes !== 1 || content.pressed !== 'true') fail(width, `Design -> Content lens by click did not keep the one workspace (${JSON.stringify(content)})`);
-        const cm = await measure(frame, ['#lensContentBtn', '#lensDesignBtn', '#btnPage', '#btnPageFields', '#versionsNav', '#meshNav', '#save', '#publish', '#accountBtn']);
+        const cm = await measure(frame, ['#lensContentBtn', '#lensDesignBtn', '#btnPage', '#btnPageFields', '#btnUndo', '#btnRedo', '#save', '#publish', '#accountBtn']);
+        /* the Edit style tools stay in their lens: no Design tips, no size note in Edit words */
+        if (await frame.evaluate(() => !document.getElementById('btnCheck').hidden || !document.getElementById('bpNote').hidden)) fail(width, 'Edit words shows Design tips or the size note');
         for (const c of cm.controls) if (!c.shown || !c.hitsSelf || !c.inView) fail(width, `Content lens: ${c.sel} is not reachable (${c.shown ? c.hit : 'hidden'})`);
         if (width >= ONE_ROW_FROM && cm.barHeight > 60) fail(width, `the Content lens's header is ${cm.barHeight}px tall, more than one row`);
         if (cm.hScroll > 0) fail(width, `the Content lens scrolls horizontally by ${cm.hScroll}px`);

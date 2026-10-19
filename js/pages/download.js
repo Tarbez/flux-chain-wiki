@@ -28,7 +28,7 @@ ArkUI.pageModules.download = {
     var header = ArkUI.el('header', 'how-chapter-header');
     var kicker = ArkUI.el('div', 'download-kicker-row'); kicker.appendChild(ArkUI.el('p', 'download-kicker', words('EYEBROW')));
     /* Phones have no room in the footer, so the guide link moves up beside the kicker there. */
-    var guideTop = link('Operator guide ↗', 'GUIDE.HREF', 'download-guide-top'); kicker.appendChild(guideTop);
+    var guideTop = link('Operator guide →', 'GUIDE.HREF', 'download-guide-top'); kicker.appendChild(guideTop);
     header.appendChild(kicker);
     var title = ArkUI.el('h1', '', words('TITLE')); title.id = 'download-title'; el.setAttribute('aria-labelledby', title.id);
     header.appendChild(title); header.appendChild(ArkUI.el('p', '', words('DECK'))); el.appendChild(header);
@@ -88,7 +88,7 @@ ArkUI.pageModules.download = {
 
     /* Footer: reference links on the left, step navigation on the right; the last step hands on to /deploy. */
     var footer = ArkUI.el('nav', 'how-chapter-footer download-footer'); footer.setAttribute('aria-label', 'Continue');
-    var guide = link(words('GUIDE').charAt(0) + words('GUIDE').slice(1).toLowerCase() + ' ↗', 'GUIDE.HREF', 'how-deeper-link');
+    var guide = link(words('GUIDE').charAt(0) + words('GUIDE').slice(1).toLowerCase() + ' →', 'GUIDE.HREF', 'how-deeper-link');
     footer.appendChild(guide);
     footer.appendChild(link('Deploy a site with the Bundle Deployer', 'ASIDE.HREF', 'download-aside-link'));
     var progress = ArkUI.el('span', 'download-progress'); progress.setAttribute('role', 'status'); footer.appendChild(progress);

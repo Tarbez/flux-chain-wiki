@@ -33,8 +33,12 @@ assert(explorer.includes('mesh-observatory-dock'), 'explorer keeps secondary obs
 assert(explorer.includes("other.open = false"), 'opening one observatory layer closes the others');
 
 const lifecycle = fs.readFileSync('js/pages/lifecycle.js', 'utf8');
-assert(lifecycle.includes("'02 / Agreement lifecycle'"), 'lifecycle overview is layer two');
-assert(lifecycle.includes("'03 / ' + id.charAt(0).toUpperCase()"), 'stage route is layer three');
+// The layers stay (Home > Agreement lifecycle > stage), but the breadcrumb carries no ordinals since
+// 2026-10-19: "02 / Agreement lifecycle > 03 / Intent" sat right above the kicker "01 / INTENT" and
+// a 01-05 trail, three numberings for one stage (docs/ux-audit/pages-ux-b.md /lifecycle P1).
+assert(lifecycle.includes("path.appendChild(link('Agreement lifecycle', 'lifecycle'))"), 'lifecycle overview is layer two of the breadcrumb');
+assert(lifecycle.includes("id ? stage.title : 'Agreement lifecycle'"), 'stage route is layer three, named by its stage');
+assert(!/link\('0\d \/ Agreement lifecycle'/.test(lifecycle) && !lifecycle.includes("'03 / ' + id.charAt(0)"), 'no ordinal numbers in the breadcrumb');
 assert(lifecycle.includes("'lifecycle-trail'"), 'the overview exposes a compact route trail instead of stacked stage detail');
 assert(lifecycle.includes("'Understand why'") && lifecycle.includes("'Evidence'"), 'stage anatomy is a requested inner explanation');
 assert(lifecycle.includes("'Continue to '") && lifecycle.includes("'lifecycle/' + nextStage.id"), 'Continue opens a real next-stage route');

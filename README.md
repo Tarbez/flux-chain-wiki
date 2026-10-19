@@ -14,8 +14,8 @@ HTML does not contain the experiment lab or article bodies.
 Canonical routes use hashes so static hosting does not need rewrite rules:
 
 - `#/`: home.
-- `#/experiments`: the filament experiment introduction.
-- `#/experiments/lab`: the standalone interactive lab.
+- `#/experiments`: the interactive model (the old `#/experiments/lab` address opens it too).
+- Any other address: a not-found page that names it and offers the closest pages.
 - `#/learnings`: three article previews.
 - `#/learnings/<slug>`: an individual article.
 - `#/about`: the Flux Protocol overview and current capability boundary.
@@ -34,7 +34,9 @@ Canonical routes use hashes so static hosting does not need rewrite rules:
 Legacy `#zero`, `#proximity`, `#work`, `#learnings`, and `#article/<slug>` links
 also resolve. Back/Forward and direct links use the same router.
 
-`js/pages/catalog.js` supplies route metadata and dependency lists.
+`js/content/site-pages.js` is the one page table (path, name, journey); `js/pages/catalog.js`
+adds each page's module and dependency list, and the "All pages" menu, footer strip, sitemap and
+llms.txt are derived from the journeys.
 `js/ark/page-router.js` loads each page's scripts only when requested and caches
 successful modules and data. Only the active page and pages finishing their exit
 are mounted. After transitions, outgoing DOM and its subscriptions are removed.

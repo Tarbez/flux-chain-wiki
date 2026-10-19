@@ -72,7 +72,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "A clean local start proves your miner starts. It says nothing yet about the public network, resolver capacity or production."
+      "value": "A clean local start proves your miner starts. It does not mean any resolver is served, and says nothing about the public network or production."
     },
     "POINT5.TITLE": {
       "label": "Heading",

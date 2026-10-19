@@ -433,12 +433,13 @@ check('shape resolution verifies no signature, and does not imply it did', () =>
  * from nowhere: its own palette, no header, no breadcrumb, no way back.
  * These checks keep it a route of the site. */
 check('the page is a registered route with its scripts declared', () => {
+  const route = require('./lib/site-catalog.cjs').loadCatalog().catalog['resolver-math'];
   assert.ok(
-    /'resolver-math':\s*\{[^}]*path: '\/resolver-math'/.test(catalog),
+    route && route.path === '/resolver-math',
     'js/pages/catalog.js has no /resolver-math route. Without it the page is unreachable ' +
       'through the site shell and the address falls back to the app shell.'
   );
-  const entry = catalog.match(/'resolver-math':\s*\{[^}]*\}/)[0];
+  const entry = JSON.stringify(route);
   for (const script of [
     'js/ark/dash-kit.js',
     'js/content/resolver-algebra.js',
@@ -452,11 +453,11 @@ check('the page is a registered route with its scripts declared', () => {
     );
   }
   assert.ok(
-    /module: 'resolverMath'/.test(entry),
+    route.module === 'resolverMath',
     "the route must name the module it mounts ('resolverMath')"
   );
   assert.ok(
-    !/hiddenFromNavigation/.test(entry),
+    !route.hiddenFromNavigation && !!route.journey,
     'the page must stay in navigation; being unreachable is what made it feel like it ' +
       'dropped out of nowhere'
   );
@@ -470,15 +471,13 @@ check('there is no standalone copy of the page left behind', () => {
   );
 });
 
-check('it sits in the Understand group, beside "what is a resolver"', () => {
-  const header = fs.readFileSync(path.join(ROOT, 'js', 'resolvers', 'header.js'), 'utf8');
-  const group = header.match(/var understand = \[([^\]]+)\]/);
-  assert.ok(group, 'js/resolvers/header.js no longer defines the understand group');
-  assert.ok(
-    group[1].includes("'resolver-math'"),
-    'resolver-math is not in the Understand group, so header.js would push it into Evaluate ' +
-      'by default. It is a foundational concept, not an evidence page.'
-  );
+check('it sits in the same journey as "what is a resolver", not with the evidence', () => {
+  // The menu's groups are derived from each page's journey (js/content/site-pages.js) since
+  // 2026-10-19; the hand-written `understand` array in header.js is gone.
+  const { sitePages } = require('./lib/site-catalog.cjs').loadCatalog();
+  assert.equal(sitePages.journeyOf('resolver-math'), sitePages.journeyOf('resolver'),
+    'resolver-math is not in the same journey as "what is a resolver". It is a foundational concept, not an evidence page.');
+  assert.notEqual(sitePages.journeyOf('resolver-math'), 'prove', 'and it is not filed with the evidence');
 });
 
 check('it uses the shared dashboard kit, not a private layout', () => {
@@ -925,8 +924,10 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
   for (const file of [
     path.join(ROOT, 'js', 'ark', 'dash-kit.js'),
     path.join(ROOT, 'js', 'ark', 'story-diagrams.js'), DATA,
-    path.join(ROOT, 'js', 'content', 'resolver-block.js'), PAGE
+    path.join(ROOT, 'js', 'content', 'resolver-block.js'),
+    path.join(ROOT, 'js', 'content', 'registry-snapshot.js'), PAGE
   ]) vm.runInContext(fs.readFileSync(file, 'utf8'), ctx);
+  const SNAP = ctx.ArkRegistrySnapshot;
 
   const el = ctx.ArkUI.pageModules.resolverMath.mount(new Node('main'));
   const flat = el.all();
@@ -967,8 +968,14 @@ check('the page opens on the sum of definitions, and no symbol opens it', () => 
   const fieldCells = el.find('rm-cell').filter((c) => !String(c.className).includes('rm-cell-never'));
   const builtResolvers = (page.match(/built: true/g) || []).length;
   assert.ok(builtResolvers > 0, 'the page lists no built resolvers');
+  /* Since 2026-10-19 the resolver term of the sum is the resolver CHAINS (native + bridge) plus
+     the capabilities they are built from, both read from the generated registry snapshot. The
+     audited-family count (built: true rows above) is a different list -- it once stood in for
+     "resolvers" here, and two such counts circulated on the site at once. */
+  assert.ok(SNAP && SNAP.counts, 'the page context loads js/content/registry-snapshot.js');
   const perTerm = [ALG.roles.registered.length, ALG.roles.labels.length, ALG.verbs.all.length,
-                   ALG.manifestTypes.count, ALG.typeScoped.entries.length, builtResolvers];
+                   ALG.manifestTypes.count, ALG.typeScoped.entries.length,
+                   SNAP.counts.nativeResolverChains + SNAP.counts.bridgeChains, SNAP.counts.capabilities];
   const summed = perTerm.reduce((a, n) => a + n, 0);
   assert.equal(
     fieldCells.length, summed,

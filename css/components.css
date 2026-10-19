@@ -113,6 +113,20 @@
 }
 #scene :is(.home-lifecycle-all,.home-question-links a) .native-icon {color:inherit !important;}
 
+/* fold toggle --------------------------------------------------------------- */
+/* ArkUI.dash.foldToggle (js/ark/dash-kit.js): "More" / "Show the illustration".
+   It replaces display:none and line-clamps that hid content with no way back
+   (docs/ux-audit/pages-ux-b.md, cross-page finding 2), so it reads as a link-weight
+   control, inherits the page font, and carries a +/- mark for its state. A page's
+   own sheet decides at which widths it shows. */
+#scene .fold-toggle {display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 2px;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:12px;font-weight:500;line-height:1.3;color:hsl(var(--reference));text-decoration:underline;text-decoration-color:hsl(var(--reference-300));text-underline-offset:3px;}
+#scene .fold-toggle::after {content:"+";font-family:var(--font-mono,monospace);text-decoration:none;}
+#scene .fold-toggle[aria-expanded="true"]::after {content:"\2212";}
+#scene .fold-toggle:is(:hover,:focus-visible) {color:hsl(var(--reference-700));text-decoration-color:hsl(var(--reference-400));}
+#scene .fold-toggle:focus-visible {outline:2px solid hsl(var(--reference)) !important;outline-offset:3px;}
+#scene .fold-toggle[hidden] {display:none;}
+
 /* focus --------------------------------------------------------------------- */
 #scene :is(a,button,summary,[role="tab"]):focus-visible {outline:2px solid hsl(var(--reference)) !important;outline-offset:3px;}
 /* home ---------------------------------------------------------------------- */

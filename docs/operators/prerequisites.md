@@ -12,7 +12,7 @@
 
 - `flux-network-cli` for identity, directory, network, record, catalog, health, and topology commands
 - `ark-miner-desktop` for the desktop development surface
-- `flux-provider-runtime` when evaluating provider activation and execution
+- `flux-provider-runtime` for the earlier provider-activation model; serving a resolver chain today means announcing for it, with a capability proof when the resolver composes capabilities ([resolvers](../protocol/resolvers.md))
 
 ## Names and compatibility
 

@@ -35,7 +35,7 @@ const context = vm.createContext({
 });
 context.window = context;
 context.ArkPulse = { get: () => pulseResult };
-for (const file of ['js/ark/dash-kit.js', 'js/content/stats-highlights.js', 'js/content/resolver-registry.js', 'js/pages/stats.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
+for (const file of ['js/ark/dash-kit.js', 'js/content/stats-highlights.js', 'js/pages/stats.js']) vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 const S = context.ArkStatsHighlights;
 function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
 
@@ -267,9 +267,9 @@ function fmt(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigi
   // The pulse client must load BEFORE the page, not immediately before it:
   // the route legitimately gained js/ark/chain-pulse-client.js between them.
   // Asserting adjacency made a correct addition look like a regression.
-  const statsEntry = catalog.match(/stats:\s*\{\s*path:\s*'\/stats'[^}]*\}/);
-  assert(statsEntry, '/stats route is missing from the catalog');
-  const statsScripts = statsEntry[0];
+  const statsRoute = require('./lib/site-catalog.cjs').loadCatalog().catalog.stats;
+  assert(statsRoute && statsRoute.path === '/stats', '/stats route is missing from the catalog');
+  const statsScripts = statsRoute.scripts.map((file) => "'" + file + "'").join(', ');
   // indexOf returns -1 when absent, and -1 is "before" everything -- so the
   // presence check has to be its own assertion or dropping the script passes.
   const pulseAt = statsScripts.indexOf("'js/ark/pulse-client.js'");

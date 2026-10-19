@@ -46,6 +46,8 @@ function build(states) {
     accordion: (pane) => { const body = doc.createElement('div'); pane.appendChild(body); return body; },
     /* the toolbar shell's section builder (an accordion, now an icon-bar popover): the content goes in the body it returns */
     toolbarSection: (pane) => { const body = doc.createElement('div'); pane.appendChild(body); return body; },
+    /* the one Developer details disclosure (js/admin/controls.js): ids and keys go there */
+    devDetails: () => doc.createElement('div'),
     postCmsStatesCommand: (p) => sent.push(Object.assign({ to: 'states' }, JSON.parse(JSON.stringify(p)))),
     postCmsComponentsCommand: (p) => sent.push(Object.assign({ to: 'components' }, JSON.parse(JSON.stringify(p)))),
   };

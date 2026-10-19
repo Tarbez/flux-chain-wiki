@@ -36,6 +36,11 @@ const context = { document: window.document, window: { ArkManifest: { groups: ['
 vm.createContext(context);
 vm.runInContext(code + '\nrenderPages();', context);
 
+/* "More pages" (routes with no fields) starts folded; its head says how many it holds and unfolds it */
+const moreHead = window.document.querySelector('#pages li.side-group > .layer-toggle[data-group="other"]');
+assert(moreHead && moreHead.getAttribute('aria-expanded') === 'false' && /\(1\)/.test(moreHead.getAttribute('aria-label')), 'More pages starts folded, with its count, on the rail\'s own expand control');
+assert.equal(window.document.querySelectorAll('#pages li.tree-row').length, 5, 'a folded group draws no rows');
+moreHead.click();
 const rows = [...window.document.querySelectorAll('#pages li.tree-row')];
 assert.equal(rows.length, 6, 'every page, the site chrome, the article and the route with no manifest each get a row');
 for (const li of rows) {
@@ -43,8 +48,10 @@ for (const li of rows) {
   assert(open, 'each row opens its page with a real <button>');
   assert(!open.querySelector('button'), 'no control nested inside the open button');
 }
-const heads = [...window.document.querySelectorAll('#pages li.side-group')].map((li) => li.textContent);
-assert.deepEqual(heads, ['Site chrome', 'Pages', 'Theory pages', 'Articles', 'Other pages'], 'the tree is grouped like the site');
+/* grouped the way a person looks for a page, in plain names (docs/ux-audit/cms.md P1-2) */
+const heads = [...window.document.querySelectorAll('#pages li.side-group > span')].map((el) => el.textContent);
+assert.deepEqual(heads, ['Main pages', 'Guides', 'Articles', 'Header & footer', 'More pages'], 'the tree is grouped like the site, in plain names');
+assert.equal(rows.find((li) => li.querySelector('.tree-open').dataset.path === '/download').querySelector('.nm').textContent, 'Download', 'a route with no fields is named, not a slug');
 
 const byPath = (p) => rows.find((li) => li.querySelector('.tree-open').dataset.path === p && (p !== '/' || li.querySelector('.nm').textContent === 'Home'));
 byPath('/about').querySelector('.tree-open').click();

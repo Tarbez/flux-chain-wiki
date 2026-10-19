@@ -12,7 +12,11 @@ const cell=create('practice'),net=create('purpose'),missing=create('spec');
 assert.equal(cell.element.attrs['aria-hidden'],'true','the figure caption and labeled controls carry the explanation');
 assert(cell.element.children.some(n=>n.textContent==='ONE OBJECT / BOUNDED AUTHORITY'));
 assert(net.element.children.some(n=>n.textContent==='SEPARATE PRESENCE / SHARED SUBSTRATE'));
-assert(missing.element.children.some(n=>n.textContent==='NO RAW ARTIFACT'),'missing evidence never gets an invented performance curve');
+// 2026-10-19: the benchmark figure stopped saying "NO RAW ARTIFACT" once the registry verified
+// BENCH-006/-007/-009/-012/-013/-015 (docs/ux-audit/pages.md P4). The rule it drew is kept:
+// the raw artifact comes first, and no performance curve is inferred from a figure.
+assert(missing.element.children.some(n=>n.textContent==='ARTIFACT FIRST'),'the benchmark figure states the artifact rule');
+assert(missing.element.children.some(n=>n.textContent==='NO PERFORMANCE CURVE INFERRED'),'missing evidence never gets an invented performance curve');
 function runs(d){return d.element.children.flatMap(n=>n.runs);}
 assert.equal(runs(cell).length,0,'no idle or mount animation');cell.select(2,true);
 assert.equal(runs(cell).length,2,'selection moves its marker and traces the actual relationship');assert(runs(cell).every(r=>r.frames.every(f=>!('opacity' in f))));

@@ -391,7 +391,18 @@ export async function appFrame(page) {
    shell change edits this block and no driver. Names match by prefix ("States" matches
    "States (2)"). */
 export const toolbarButton = (app, name) => app.locator(`#selToolbar:not([hidden]) [data-section][data-name^="${name}"]`).first();
-export const toolbarAction = (app, label) => app.locator(`#selToolbar:not([hidden]) [data-action][aria-label="${label}"]`).first();
+/* An action is a bar button, or -- since 2026-10-19 -- one of the commands behind the bar's More
+   (the selection's commands: Make into component, Make into states, Group ...). toolbarAction
+   finds it in either place; clickToolbarAction opens More first when it lives there. */
+export const toolbarAction = (app, label) => app.locator(`#selToolbar:not([hidden]) [data-action][aria-label="${label}"], #selToolbarPop:not([hidden]) [data-action][aria-label="${label}"]`).first();
+export async function clickToolbarAction(app, label, timeout = 5000) {
+  const inBar = app.locator(`#selToolbar:not([hidden]) [data-action][aria-label="${label}"]`).first();
+  if (await inBar.count()) return inBar.click();
+  const body = await openToolbarSection(app, 'More', timeout);
+  const item = body.locator(`[data-action][aria-label="${label}"]`).first();
+  await item.waitFor({ state: 'visible', timeout: scaled(timeout) });
+  return item.click();
+}
 export const toolbarPopover = (app) => app.locator('#selToolbarPop:not([hidden])');
 export async function hasToolbarSection(app, name) { return (await toolbarButton(app, name).count()) > 0; }
 export async function toolbarSectionIsOpen(app, name) {
@@ -399,7 +410,7 @@ export async function toolbarSectionIsOpen(app, name) {
   return (await button.count()) > 0 && (await button.getAttribute('aria-expanded')) === 'true';
 }
 /* the section names the bar offers for the current selection, in order */
-export const toolbarSections = (app) => app.evaluate(() => [...document.querySelectorAll('#selToolbar:not([hidden]) [data-section]')].map((b) => b.dataset.name));
+export const toolbarSections = (app) => app.evaluate(() => [...document.querySelectorAll('#selToolbar:not([hidden]) [data-section]:not([data-section="tb-more"])')].map((b) => b.dataset.name));
 /* the layout key of what the toolbar is editing (null when it is not showing) */
 export const toolbarKey = (app) => app.evaluate(() => { const bar = document.getElementById('selToolbar'); return bar && !bar.hidden ? bar.dataset.key || null : null; });
 /* open one section (a no-op when it is already open) and return the element holding its controls */
@@ -432,29 +443,61 @@ export async function closeToolbarSection(app) {
    One header, one rail, one canvas. Content and Design are a LENS on the canvas (what a click
    there edits), not two apps. Where each control lives, so drivers name the control and not
    its position:
-   - the lens: #lensContentBtn / #lensDesignBtn (setLens below; was the Content | Design app
-     switch #modeContentBtn / #modeDesignBtn);
-   - the views of the one site, in either lens: #viewCanvasBtn, #viewMapBtn (the sitemap),
-     #viewThemeBtn (Theme & defaults, the site-wide SEO #siteSeo, mesh tuning and page shapes,
-     docked beside the live canvas) -- designView below; #backgroundBtn opens the page
-     transition popover;
-   - the page: #btnLeftRail, #btnPage (picker), #btnPageFields (the Page fields sheet: every
-     field of the page, was Content mode's #editor column), #btnPageSeo (its SEO popover), in
-     every view; the canvas tools #devices, #btnUndo/#btnRedo, #btnCheck, #mode show whenever a
-     canvas is on screen (Canvas and Theme);
-   - the rail's tabs: #tabPages (the site tree, was Content's #pageList sidebar and Studio's
-     Pages tab), #tabLayers, #tabLib, #tabMedia (images), #tabVault (encrypted items);
-   - ONE #save; #meshNav opens the Mesh status in the sheet; #connect, #who, #signOut and the
-     publish host's status (#mesh) sit in #accountMenu behind #accountBtn. */
+   - the lens: #lensContentBtn / #lensDesignBtn ("Edit words" / "Edit style"; setLens below);
+   - the header: #btnLeftRail, #btnPage (the page switcher), #btnPageFields (Page settings: the
+     sheet), the lens, #btnUndo / #btnRedo (the one history), #save, #publish, #accountBtn (More);
+   - the More menu (#accountMenu): the views #viewCanvasBtn / #viewMapBtn / #viewThemeBtn
+     (designView below), #btnPageSeo (openPageSeo), #backgroundBtn (the Page transition popover,
+     openBackground), #versionsNav (openVersions), #meshNav (Publishing status), #connect, #who,
+     #signOut -- clickHeader() opens More first for any of them (MORE_MENU_IDS);
+   - the canvas strip (#canvasTools, above the canvas): #devices, #bpNote, #btnCheck (Design tips,
+     Edit style only: openDesignTips), #mode (Edit / Preview);
+   - the rail's tabs: #tabPages (the one page list, with #pageSearch and + New: createItem),
+     #tabLayers, #tabLib, #tabMedia (images), #tabVault (encrypted items). */
 export const ACCOUNT_MENU_IDS = ['connect', 'who', 'signOut'];
+/* Three tiers since 2026-10-19 (docs/ux-audit/cms.md (b)): the header keeps what is used on every
+   screen; the More menu (#accountMenu behind #accountBtn) holds the views, this page's search &
+   sharing, the page transition, version history, publishing status and the account; the canvas
+   strip (#canvasTools) holds #devices, #mode, #bpNote and #btnCheck (Design tips, Edit style only). */
+export const MORE_MENU_IDS = ['viewCanvasBtn', 'viewMapBtn', 'viewThemeBtn', 'btnPageSeo', 'backgroundBtn', 'versionsNav', 'meshNav', ...ACCOUNT_MENU_IDS];
 export async function openAccountMenu(app) {
   if (await app.evaluate(() => document.getElementById('accountMenu').hidden)) await app.click('#accountBtn');
   await app.locator('#accountMenu').waitFor({ state: 'visible', timeout: scaled(5000) });
 }
-/* a real click on a header control, opening the account menu first when it lives there */
+export const openMoreMenu = openAccountMenu;
+/* a real click on a header control, opening the More menu first when it lives there */
 export async function clickHeader(app, id, options) {
-  if (ACCOUNT_MENU_IDS.includes(id)) await openAccountMenu(app);
+  if (MORE_MENU_IDS.includes(id)) await openAccountMenu(app);
   await app.click('#' + id, options);
+}
+/* version history (More -> Version history); returns the panel */
+export async function openVersions(app) {
+  if (await app.locator('#versionsPanel').isHidden()) await clickHeader(app, 'versionsNav');
+  const panel = app.locator('#versionsPanel');
+  await panel.waitFor({ state: 'visible', timeout: scaled(10000) });
+  return panel;
+}
+/* Design tips (the canvas strip, in Edit style): opens its popover */
+export async function openDesignTips(app) {
+  await setLens(app, 'design');
+  if ((await app.locator('#btnCheck').getAttribute('aria-expanded')) !== 'true') await app.click('#btnCheck');
+  const pop = app.locator('#studioRoot > .pop', { has: app.locator('ul.checks') });
+  await pop.waitFor({ state: 'visible', timeout: scaled(10000) });
+  return pop;
+}
+/* New page or article, asked for by title (the Pages tab's + New); kind 'page' | 'article'.
+   `address` (optional) is typed under Developer details instead of the derived one. */
+export async function createItem(app, kind, title, address) {
+  await openRailTab(app, 'pages');
+  if ((await app.locator('#btnNewItem').getAttribute('aria-expanded')) !== 'true') await app.click('#btnNewItem');
+  await app.click(`#newItemPanel [data-new-kind="${kind}"]`);
+  await app.fill('#newTitle', title);
+  if (address) {
+    const dev = app.locator('#newItemPanel .ark-disclosure-trigger');
+    if ((await dev.getAttribute('aria-expanded')) !== 'true') await dev.click();
+    await app.fill(kind === 'page' ? '#newId' : '#newSlug', address);
+  }
+  await app.click('#newItemCreate');
 }
 /* the lens: 'content' | 'design' (what a click on the canvas edits) */
 export async function setLens(app, lens) {
@@ -467,7 +510,7 @@ export async function setLens(app, lens) {
 export async function designView(app, view) {
   const id = { canvas: 'viewCanvasBtn', map: 'viewMapBtn', theme: 'viewThemeBtn' }[view];
   if (!id) throw new Error('no view named ' + view);
-  if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await app.click('#' + id);
+  if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await clickHeader(app, id);
   await app.waitForFunction((b) => document.getElementById(b).getAttribute('aria-pressed') === 'true', id, { timeout: scaled(15000) });
 }
 /* a rail tab: 'pages' | 'layers' | 'lib' | 'media' | 'vault'; returns its pane */
@@ -492,6 +535,7 @@ export async function openPageFields(app, item) {
     await openRailTab(app, 'pages');
     await pageRow(app, item).locator('[aria-label^="Fields of "]').click();
   } else if ((await app.locator('#btnPageFields').getAttribute('aria-expanded')) !== 'true') await app.click('#btnPageFields');
+  /* the Developer details of a sheet are closed: drivers reading a key open them themselves */
   const body = sheetBody(app);
   await body.waitFor({ state: 'visible', timeout: scaled(10000) });
   return body;
@@ -501,22 +545,33 @@ export async function closeSheet(app) { if (await app.locator('#sheet:not([hidde
 export const headerPopover = (app) => app.locator('#studioRoot > .pop');
 /* this page's SEO popover (opened from beside the page picker); returns it */
 export async function openPageSeo(app) {
-  if ((await app.locator('#btnPageSeo').getAttribute('aria-expanded')) !== 'true') await app.click('#btnPageSeo');
+  if ((await app.locator('#btnPageSeo').getAttribute('aria-expanded')) !== 'true') await clickHeader(app, 'btnPageSeo');
   const pop = app.locator('#studioRoot > .pop.seo-pop');
   await pop.waitFor({ state: 'visible', timeout: scaled(5000) });
   return pop;
 }
+/* a tab of Site style (the Theme view): 'Colours & background' | 'Visitor defaults' | 'Search defaults' */
+export async function siteStyleTab(app, name) {
+  await designView(app, 'theme');
+  const tab = app.locator('#themePanel [role="tab"]', { hasText: name }).first();
+  await tab.waitFor({ state: 'visible', timeout: scaled(15000) });
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
+}
 /* the site-wide SEO section of Theme & defaults; returns it */
 export async function openSiteSeo(app) {
   await designView(app, 'theme');
+  /* Site style is tabbed (Colours & background / Visitor defaults / Search defaults) */
+  const tab = app.locator('#themePanel [role="tab"]', { hasText: 'Search defaults' }).first();
+  await tab.waitFor({ state: 'visible', timeout: scaled(15000) });
+  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
   const box = app.locator('#siteSeo');
   await box.waitFor({ state: 'visible', timeout: scaled(15000) });
   return box;
 }
-/* the Background (page transition) popover; returns it */
+/* the Page transition popover (More -> Page transition; it was called "Background"); returns it */
 export async function openBackground(app) {
-  if ((await app.locator('#backgroundBtn').getAttribute('aria-expanded')) !== 'true') await app.click('#backgroundBtn');
-  const pop = app.locator('#studioRoot > .pop', { has: app.locator('h4', { hasText: 'Background transition' }) });
+  if ((await app.locator('#backgroundBtn').getAttribute('aria-expanded')) !== 'true') await clickHeader(app, 'backgroundBtn');
+  const pop = app.locator('#studioRoot > .pop', { has: app.locator('h4', { hasText: 'Page transition' }) });
   await pop.waitFor({ state: 'visible', timeout: scaled(5000) });
   return pop;
 }

@@ -28,7 +28,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { appFrame, SITE, copySite, startHost, fakeFolder, previewFrame, until as untilFor, waitForPreviewReady, previewReadyCount,
-  statusCount, waitForSave, gotoEditor, reloadEditor, clickHeader, waitForRouteReady, setLens as setLensButton, sheetBody, closeSheet, openPageFields, closeToolbarSection } from './harness.mjs';
+  statusCount, waitForSave, gotoEditor, reloadEditor, clickHeader, waitForRouteReady, setLens as setLensButton, sheetBody, closeSheet, openPageFields, closeToolbarSection, openToolbarSection } from './harness.mjs';
 import { readIndexHtml, renderDocument, createLocalResources } from '../../api/lib/render-core.mjs';
 
 const args = process.argv.slice(2);
@@ -149,12 +149,18 @@ await step('home: click the H1, type, and the draft field follows each keystroke
   await shot(page, 'home-typing');
 });
 
-await step('home: the toolbar Content section names the field and shows the value', async () => {
-  const content = await until(async () => { const c = await toolbarContent(app); return c && c.field && c; }, 'the Content section never opened for the H1');
-  check(/HOME\.TITLE/.test(content.field), 'the Content section names ' + content.field + ', not HOME.TITLE');
-  check(content.value === original.title + NEW.title, 'the Content section shows "' + content.value + '"');
+/* The bar beside the words names their field and says how to finish; NO second editor covers
+   them (docs/ux-audit/cms.md P1-6: a Content popover with the same words in a textarea opened over
+   the heading). The field's key and the textarea are its Details, on demand (next step). */
+await step('home: the bar names the field and how to finish; nothing covers the words', async () => {
+  const bar = await until(() => app.evaluate(() => { const b = document.getElementById('selToolbar'); const keys = b && !b.hidden && b.querySelector('.cms-content-keys'); return keys && { chip: b.querySelector('.tb-chip-name').textContent, keys: keys.textContent, field: (window.ArkAdmin.state.cmsContent || {}).field, label: (window.ArkAdmin.state.cmsContent || {}).label, pop: !document.getElementById('selToolbarPop').hidden }; }), 'the Content lens bar never named the H1\'s field');
+  check(bar.field === 'HOME.TITLE', 'the H1 is bound to ' + bar.field + ', not HOME.TITLE');
+  check(bar.chip === bar.label, 'the bar calls the field "' + bar.chip + '", not its name "' + bar.label + '"');
+  check(/Enter or Esc to finish/.test(bar.keys), 'the bar says "' + bar.keys + '"');
+  check(!bar.pop, 'a popover opened over the words being edited');
   const sections = await app.evaluate(() => [...document.querySelectorAll('#selToolbar:not([hidden]) [data-section]')].map((b) => b.dataset.name));
-  check(!sections.includes('Typography'), 'the Content lens still offers style sections: ' + sections.join(', '));
+  check(!sections.includes('Typography') && !sections.includes('More'), 'the Content lens still offers style sections or design commands: ' + sections.join(', '));
+  check(await app.evaluate(() => !document.querySelector('#selToolbar [data-action="make-component"]')), 'the Content lens offers Make into component');
 });
 
 await step('home: Enter commits in place -- no re-render, no transition, no blank frame', async () => {
@@ -172,6 +178,15 @@ await step('home: Enter commits in place -- no re-render, no transition, no blan
   check((await previewReadyCount(app)) === readyBefore, 'the commit re-sent the site and the canvas re-rendered');
   check(await pv.evaluate(() => document.querySelector('[data-ark-page] h1').__beforeCommit === true), 'the heading is a new node: the page was rebuilt under the edit');
   check((await draft(app, 'page', 'home', 'TITLE')) === original.title + NEW.title, 'the commit did not keep the typed heading in the draft');
+});
+
+await step('home: Details holds the key, the same words in a box, and All fields', async () => {
+  const body = await openToolbarSection(app, 'Content');
+  const content = await until(async () => { const c = await toolbarContent(app); return c && c.field && c; }, 'the Details popover never drew for the H1');
+  check(/HOME\.TITLE/.test(content.field), 'Details names ' + content.field + ', not HOME.TITLE');
+  check(await app.evaluate(() => { const r = document.querySelector('#selToolbarPop .cms-content-field code').closest('[role="region"]'); return !!r && r.hidden; }), 'the copy key shows outright instead of under the closed Developer details');
+  check(content.value === original.title + NEW.title, 'Details shows "' + content.value + '"');
+  check(await body.locator('[data-action="open-page-fields"]').count() === 1, 'Details has no All fields');
 });
 
 await step('home: Page fields shows the same value; a sheet edit reaches the canvas in place', async () => {
@@ -199,7 +214,12 @@ await step('home: Page fields shows the same value; a sheet edit reaches the can
   await closeSheet(app);
 });
 
-await step('home: Ctrl/Cmd+Z on the canvas undoes the inline edit, Shift redoes it', async () => {
+/* ONE history (js/admin/history.js, docs/ux-audit/cms.md P1-5): the sheet's eyebrow edit came
+   after the inline heading edit, so Ctrl/Cmd+Z on the canvas takes it back first, then the heading */
+await step('home: Ctrl/Cmd+Z on the canvas walks back the sheet edit, then the inline edit; Shift redoes', async () => {
+  await pv.locator('body').press(MOD + '+z').catch(() => {});
+  await until(async () => (await draft(app, 'page', 'home', 'EYEBROW')) === original.eyebrow, 'the first undo did not take back the newest edit (the eyebrow typed in Page settings)');
+  check((await draft(app, 'page', 'home', 'TITLE')) === original.title + NEW.title, 'the first undo took back the heading before the newer eyebrow edit');
   await pv.locator('body').press(MOD + '+z').catch(() => {});
   await until(async () => (await draft(app, 'page', 'home', 'TITLE')) === original.title, 'undo did not put HOME.TITLE back');
   await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] h1').textContent.replace(/\s+/g, '') === t.replace(/\s+/g, ''), original.title), 'the canvas does not show the undone heading');
@@ -224,6 +244,7 @@ await step('escape: typing then Escape finishes the edit and KEEPS the words', a
 
 await step('revert: "Revert to saved" puts the saved words back, and Undo brings the typing back', async () => {
   await clickText(pv, '[data-ark-page] p.hl-intro');
+  await openToolbarSection(app, 'Content');
   const revert = app.locator('#selToolbarPop:not([hidden]) [data-action="revert-field"]');
   await until(async () => (await revert.count()) && (await revert.isEnabled()), 'the Content section offers no enabled "Revert to saved"');
   await revert.click();
@@ -245,8 +266,8 @@ await step('enter: plain Enter finishes the home heading and the intro -- no lin
     await closeToolbarSection(app);
     await clickText(pv, selector);
     await until(() => editing(pv).then((t) => t !== null), field + ': the click did not start an edit');
-    const hint = await until(() => app.evaluate((f) => { const el = document.querySelector('#selToolbarPop:not([hidden]) .cms-content-keys'), code = document.querySelector('#selToolbarPop:not([hidden]) .cms-content-field code'); return el && code && code.textContent.includes('HOME.' + f) && el.textContent; }, field), field + ': the Content section does not say how to finish an edit');
-    check(/Enter or Esc to finish/.test(hint), field + ': the Content section says "' + hint + '"');
+    const hint = await until(() => app.evaluate((f) => { const el = document.querySelector('#selToolbar:not([hidden]) .cms-content-keys'), c = window.ArkAdmin.state.cmsContent; return el && c && c.field === 'HOME.' + f && el.textContent; }, field), field + ': the bar does not say how to finish an edit');
+    check(/Enter or Esc to finish/.test(hint), field + ': the bar says "' + hint + '"');
     await page.keyboard.press('Enter');
     await until(() => editing(pv).then((t) => t === null), field + ': Enter did not finish the edit');
     check((await draft(app, 'page', 'home', field)) === was, field + ': Enter changed the words (a line break went in): "' + await draft(app, 'page', 'home', field) + '"');
@@ -300,7 +321,8 @@ await step('nav: a header link label edits Site chrome (NAV.*)', async () => {
   check(text, 'no header link shows a Site chrome field');
   await clickText(pv, '[data-test-nav]');
   /* which field it is, as the canvas derived it (two Site chrome fields can hold the same words) */
-  const content = await until(async () => { const c = await toolbarContent(app); return c && c.field && /^NAV\./.test(c.field) && c; }, 'the Content section never named a NAV field for "' + text + '"');
+  /* the field the canvas bound the click to (the bar names it; its key is in Details) */
+  const content = await until(() => app.evaluate(() => { const c = window.ArkAdmin.state.cmsContent; return c && c.field && /^NAV\./.test(c.field) && { field: c.field }; }), 'the canvas never bound "' + text + '" to a NAV field');
   const role = content.field.split(/\s/)[0].slice(4);
   const others = await app.evaluate(([t, r]) => { const f = window.ArkAdmin.state.drafts.nav.fields; return Object.keys(f).filter((k) => k !== r && f[k].value === t); }, [text, role]);
   original.nav = { role, text };
@@ -329,8 +351,10 @@ await step('refusal: text no field holds says why and names its source', async (
   await clickText(pv, '[data-test-unbound]');
   const key = await pv.evaluate(() => document.querySelector('[data-test-unbound]').getAttribute('data-ark-layout-key'));
   /* the bar is drawn for THIS selection (not still showing the last one's section) */
-  const content = await until(async () => { const c = await toolbarContent(app); const barKey = await app.evaluate(() => document.getElementById('selToolbar').dataset.key); return barKey === key && c && c.refusal && /not read from any field|separate pieces|no text/.test(c.refusal) && c; }, 'the Content section never explained why the unbound text "' + found + '" cannot be edited');
+  const content = await until(async () => { const c = await toolbarContent(app); const barKey = await app.evaluate(() => document.getElementById('selToolbar').dataset.key); return barKey === key && c && c.refusal && /site template|separate pieces|no words/.test(c.refusal) && c; }, 'the Details never explained why the unbound text "' + found + '" cannot be edited');
+  /* the source is named for a developer, under Developer details (pop.textContent includes the closed region) */
   check(/js\/pages\/|F_SCENE_RZERO_V0|component/.test(content.text), 'the refusal names no source: ' + content.text);
+  check(!/js\/pages\/|F_SCENE_RZERO_V0/.test(content.refusal), 'the plain reason carries a file or resolver id: ' + content.refusal);
   check((await editing(pv)) === null, 'unbound text became editable');
   await shot(page, 'unbound-refusal');
 });

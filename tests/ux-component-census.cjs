@@ -24,4 +24,26 @@ assert(/^signatures\tbutton\t-$/m.test(baseline), 'an unmeasured signature famil
 const init = spawnSync(process.execPath, ['scripts/ux-component-census.mjs', '--init-baseline'], { encoding: 'utf8' });
 assert.notEqual(init.status, 0, '--init-baseline must refuse to overwrite the frozen baseline');
 
-console.log('ux component census ok: every family measured, nothing above the baseline');
+// 5. Regression (2026-10-19): a property access is not a class use. The literal tokenizer used to
+//    split every token on dots, so `stage.title` inside a string-delimited span of
+//    js/pages/lifecycle.js counted as a use of the step-family class .stage and the census
+//    reported a rise no UI caused. Only a selector-shaped token ('.stage', 'div.card') names a class.
+const os = require('node:os');
+const path = require('node:path');
+const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'census-fixture-'));
+fs.mkdirSync(path.join(fixture, 'css'));
+fs.mkdirSync(path.join(fixture, 'js', 'pages'), { recursive: true });
+fs.writeFileSync(path.join(fixture, 'css', 'a.css'), '.stage{color:red}.card{color:blue}\n');
+fs.writeFileSync(path.join(fixture, 'js', 'pages', 'p.js'), [
+  "label(', id ? stage.title : ');",  // property access between two string delimiters: no use
+  "find('.stage');",                   // selector: one use of .stage
+  "el('div.card');",                   // tag.class: one use of .card
+].join('\n'));
+import(path.resolve('scripts/ux-component-census.mjs')).then(({ census }) => {
+  const rows = census(fixture);
+  const value = (measure, family) => rows.find((r) => r[0] === measure && r[1] === family)[2];
+  assert.equal(value('uses', 'step'), 1, 'stage.title is a property access, not a use of .stage');
+  assert.equal(value('uses', 'card'), 1, "'div.card' still counts as a use of .card");
+  fs.rmSync(fixture, { recursive: true, force: true });
+  console.log('ux component census ok: every family measured, nothing above the baseline, property access is not a class use');
+});

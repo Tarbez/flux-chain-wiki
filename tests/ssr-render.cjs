@@ -166,7 +166,8 @@ const STALL_DEADLINE_MS = 60000;
       aboutChecked = true;
       const shellTitle = /<title>([^<]*)<\/title>/.exec(html)[1];
       assert.notEqual(titleMatch[1], shellTitle, 'about: real per-route title must differ from the generic index.html shell title');
-      assert(/Protocol overview|business partner/.test(titleMatch[1]), `about: unexpected rendered title "${titleMatch[1]}"`);
+      // /about has one name, "Overview", across title, h1 and header label since 2026-10-19 (docs/ux-audit/pages.md P6).
+      assert(/^Overview/.test(titleMatch[1]), `about: unexpected rendered title "${titleMatch[1]}"`);
 
       const descMatch = /<meta\s+name="description"\s+content="([^"]*)"/.exec(rendered);
       assert(descMatch, 'about: rendered document has no meta description');

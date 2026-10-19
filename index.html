@@ -19,7 +19,7 @@
 
 <link rel="stylesheet" href="css/themes.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/flux-themes.css?v=20261014-nav2" />
-<link rel="stylesheet" href="css/fonts.css?v=20261006-system1" />
+<link rel="stylesheet" href="assets/kit/defxn-fonts.css?v=20261019-kit1" />
 <link rel="stylesheet" href="css/fallback.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/studio.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/hero-motion.css?v=20261006-system1" />
@@ -56,7 +56,7 @@
 <link rel="stylesheet" href="css/color-system.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/brand-identity.css?v=20261014-living2" />
 <link rel="stylesheet" href="css/home-flow.css?v=20261008-chain1" />
-<link rel="stylesheet" href="css/chain.css?v=20261011-illustration1" />
+<link rel="stylesheet" href="css/chain.css?v=20261019-flow-holds1" />
 <link rel="stylesheet" href="css/bundle-deployer.css?v=20261006-system1">
 <link rel="stylesheet" href="css/how-overview.css?v=20261006-system1">
 <link rel="stylesheet" href="css/explorer-observatory.css?v=20261006-system1">
@@ -66,7 +66,7 @@
 <link rel="stylesheet" href="css/resolver-lab.css?v=20261007-footer1" />
 <link rel="stylesheet" href="css/download.css?v=20261007-brand1">
 <link rel="stylesheet" href="css/home-swiss.css?v=20261016-interactive-map1" />
-<link rel="stylesheet" href="css/brand-marks.css?v=20261014-marks1" />
+<link rel="stylesheet" href="assets/kit/defxn-marks.data.css?v=20261019-kit1" />
 <link rel="stylesheet" href="css/components.css?v=20261014-nav2" />
 </head>
 <body>
@@ -74,6 +74,9 @@
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
      authored by hand. -->
+<!-- Skip link: the first thing Tab reaches, past the header's controls to the page itself
+     (js/hero-motion.js focuses the routed page; with JavaScript off it jumps to the fallback). -->
+<a class="skip" href="#fallback">Skip to content</a>
 <main id="main">
 <div id="scene"></div>
 
@@ -89,10 +92,13 @@
       through applications and signed results you can inspect. Explore the protocol,
       understand resolvers, or follow the instructions to run from source.
     </p>
-    <p><a href="docs/quickstart.md">Read the source</a></p>
-    <nav aria-label="Learn about Flux">
-      <a href="docs/protocol/resolvers.md">What is a resolver?</a>
-      <a href="docs/overview.md">Read the protocol overview</a>
+    <!-- The site's own pages, not raw docs/*.md files (docs/ux-audit/pages.md P10). Once the
+         scene is up, js/main.js makes this block inert as well as aria-hidden: it is visually
+         clipped, so its links must not be Tab stops. -->
+    <p><a href="/download">Run DEFXN from source</a></p>
+    <nav aria-label="Learn about DEFXN">
+      <a href="/what-is-a-resolver">What is a resolver?</a>
+      <a href="/about">Read the overview</a>
     </nav>
   </div>
 </section>
@@ -148,6 +154,7 @@
 <script src="js/content/stats-highlights.js?v=20261008-ops1" defer></script>
 <script src="js/content/resolutions.js?v=20261004-products2" defer></script>
 <script src="js/content/resolution-products.js?v=20261007-mega2" defer></script>
+<script src="js/content/site-pages.js" defer></script>
 <script src="js/content/seo.js?v=20261004-products2" defer></script>
 <script src="js/content/seo-data.js?v=20261014-landscape1" defer></script>
 <script src="js/ark/text-scramble.js" defer></script>

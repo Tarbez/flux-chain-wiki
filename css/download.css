@@ -1,15 +1,15 @@
 /* Run DEFXN from source: the How it works chapter layout (lifecycle.css) with a terminal card. */
 #scene .download-page .download-kicker-row {display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px;}
 #scene .download-page .download-guide-top {display:none;font:500 12px var(--font-sans,sans-serif);color:hsl(var(--reference));text-decoration:none;}
-#scene .download-page .download-kicker {margin:0;font:500 10px/1.4 var(--mono-font,monospace);letter-spacing:.09em;color:hsl(var(--text-muted));}
+#scene .download-page .download-kicker {margin:0;font:500 10px/1.4 var(--font-mono,monospace);letter-spacing:.09em;color:hsl(var(--text-muted));}
 #scene .download-page .how-chapter-header h1 {max-width:none;}
 .download-terminal {gap:0;}
 .download-terminal-top {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px;}
-#scene .download-copy {min-height:28px;padding:4px 10px;border:1px solid hsl(var(--primary-300));border-radius:5px;background:transparent;font:500 11px var(--mono-font,monospace);color:hsl(var(--primary));cursor:pointer;}
+#scene .download-copy {min-height:28px;padding:4px 10px;border:1px solid hsl(var(--primary-300));border-radius:5px;background:transparent;font:500 11px var(--font-mono,monospace);color:hsl(var(--primary));cursor:pointer;}
 #scene .download-copy:is(:hover,:focus-visible) {background:hsl(var(--reference-100));border-color:hsl(var(--reference-400));color:hsl(var(--text-strong));}
 .download-screen {flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;}
 #scene .download-code {display:flex;flex-direction:column;gap:9px;margin:18px 0 0;padding:18px 20px;border-radius:7px;background:hsl(var(--canvas) / .72);border:1px solid hsl(var(--primary-200));white-space:pre-wrap;overflow-wrap:anywhere;}
-#scene .download-code code {font:500 14px/1.45 var(--mono-font,monospace);color:hsl(var(--text-strong));}
+#scene .download-code code {font:500 14px/1.45 var(--font-mono,monospace);color:hsl(var(--text-strong));}
 #scene .download-prompt {color:hsl(var(--primary));user-select:none;}
 #scene .download-expect {display:flex;align-items:center;gap:10px;margin:14px 0 0;font:400 13px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text-muted));}
 #scene .download-expect[hidden] {display:none;}
@@ -29,7 +29,7 @@
 #scene .download-page .how-chapter-footer {justify-content:flex-start;}
 #scene .download-page .how-chapter-footer .how-deeper-link {margin-right:0;}
 #scene .download-page .how-chapter-footer .download-aside-link {color:hsl(var(--text-muted));}
-#scene .download-page .download-progress {margin-left:auto;font:500 11px var(--mono-font,monospace);color:hsl(var(--text-faint));}
+#scene .download-page .download-progress {margin-left:auto;font:500 11px var(--font-mono,monospace);color:hsl(var(--text-faint));}
 #scene .download-page .download-previous {min-height:40px;padding:8px 10px;border:0;background:none;font:500 13px var(--font-sans,sans-serif);color:hsl(var(--text-muted));cursor:pointer;}
 #scene .download-page .download-previous:hover {color:hsl(var(--text-strong));}
 #scene .download-page button.how-chapter-next {min-height:40px;font:500 13px/1.4 var(--font-sans,sans-serif);cursor:pointer;}

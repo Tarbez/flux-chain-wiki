@@ -105,8 +105,8 @@
     if (!window.ArkTheme) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Theme editing is unavailable on this page.' })); return wrap; }
     state.themeDraft = ArkTheme.sanitize(state.themeDraft);
     var active = state.themeDraft.activeTheme || 'ghost';
-    var colorsBox = h('fieldset', { class: 'relief theme-core' }, h('legend', { text: 'Theme core' }));
-    colorsBox.appendChild(h('p', { class: 'hint', text: 'Pick a theme and edit the actual core colours the site uses: canvas, surfaces, text, primary, complement and accent.' }));
+    var colorsBox = h('fieldset', { class: 'relief theme-core' }, h('legend', { text: 'Colours' }));
+    colorsBox.appendChild(h('p', { class: 'hint', text: 'Pick a theme, then change the colours the site is built from: the page, its panels, its text and its accents.' }));
     var themeSelect = h('select', { id: 'theme-active' });
     ArkTheme.themeOptions().forEach(function (theme) {
       themeSelect.appendChild(h('option', { value: theme.key, selected: theme.key === active, text: theme.label }));
@@ -154,18 +154,19 @@
         var inherited = computedThemeValue(active, f.key);
         var current = themeValue(active, f.key);
         var swatch = h('input', { id: id, type: 'color', value: hslToHex(current) });
-        var out = h('output', { text: current });
+        /* the colour as people write it (hex); its raw HSL channels are Developer details (P1-2) */
+        var out = h('output', { text: hslToHex(current), 'data-hsl': current });
         var ALREADY_DEFAULT = 'Already this theme\u2019s default colour.';
         swatch.addEventListener('input', function () {
           var next = hexToHsl(swatch.value);
           setThemeValue(active, f.key, next);
-          out.textContent = next;
+          out.textContent = swatch.value; out.dataset.hsl = next;
           refuse(resetOne, '');
           notifyPreviewTheme(); touch();
         });
         var resetOne = h('button', { type: 'button', class: 'btn tiny', text: 'Default', onclick: function () {
           if (state.themeDraft.themes && state.themeDraft.themes[active]) delete state.themeDraft.themes[active][f.key];
-          swatch.value = hslToHex(inherited); out.textContent = inherited; refuse(resetOne, ALREADY_DEFAULT);
+          swatch.value = hslToHex(inherited); out.textContent = swatch.value; out.dataset.hsl = inherited; refuse(resetOne, ALREADY_DEFAULT);
           notifyPreviewTheme(); touch();
         } });
         refuse(resetOne, current === inherited ? ALREADY_DEFAULT : '');
@@ -173,6 +174,7 @@
           h('div', { class: 'theme-field-head' }, h('label', { for: id, text: f.label }), resetOne),
           h('div', { class: 'theme-color-row' }, swatch, out)));
       });
+      colorFields.appendChild(A.devDetails([['Theme', active]].concat(ArkTheme.semanticFields().map(function (f) { return [f.label + ' (--' + f.key + ', HSL)', themeValue(active, f.key)]; }))));
     }
     themeSelect.addEventListener('change', function () {
       state.themeDraft.activeTheme = themeSelect.value;
@@ -182,8 +184,10 @@
     colorsBox.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'theme-active', text: 'Editing theme' }), themeSelect));
     colorsBox.appendChild(colorFields);
 
+    /* "Background" is this: the layer behind every page. How one page changes into the next is
+       "Page transition" (the More menu), never also called Background (docs/ux-audit/cms.md P1-9). */
     var bgBox = h('fieldset', { class: 'relief' }, h('legend', { text: 'Background' }));
-    bgBox.appendChild(h('p', { class: 'hint', text: 'A layer behind every page (js/ark/vendor/backgrounds.js). None keeps the flat canvas colour.' }));
+    bgBox.appendChild(h('p', { class: 'hint', text: 'A moving layer behind every page. None keeps the plain page colour. (How one page changes into the next is Page transition, in More.)' }));
     var bgGrid = h('div', { class: 'bg-grid' });
     function refreshBackground() {
       bgGrid.textContent = '';
@@ -222,7 +226,7 @@
      closer analog to ArkMeshSettings (site-wide, not per-page) than to ArkTheme's own
      mechanism, which this deliberately does NOT share state with. */
   function buildSettingsDefaultsPanel() {
-    var wrap = h('fieldset', { class: 'relief' }, h('legend', { text: 'Settings-gear defaults' }));
+    var wrap = h('fieldset', { class: 'relief' }, h('legend', { text: 'What a first-time visitor sees' }));
     if (!window.ArkSiteDefaults) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Settings-gear defaults editing is unavailable on this page.' })); return wrap; }
     state.settingsDefaultsDraft = ArkSiteDefaults.sanitize(state.settingsDefaultsDraft);
     wrap.appendChild(h('p', { class: 'hint', text: 'What a first-time visitor sees before they ever touch the settings gear (⚙) -- their own later choice, saved to their own browser, always wins over this.' }));
@@ -301,21 +305,34 @@
      colour theme, the background, the settings-gear defaults, the site-wide SEO), drawn into
      whatever container the shell's Theme view gives it, with its Revert. A revert or a reset
      redraws every mounted copy (repaintPanels('design')). Returns the container. */
+  var siteStyleTab = 'look';   /* the Site style tab last used: a repaint keeps it */
   function renderDesignEditor(container) {
     var record = { kind: 'design', repaint: function () { renderDesignEditor(container); } };
     paintInto(container, record, function (root) {
       root.classList.add('cms-form', 'cms-theme');
       var revert = h('button', { type: 'button', class: 'btn', text: 'Revert', 'data-revert': 'design:', onclick: revertDesign });
+      /* Site style (was "Theme & defaults", one long scroll of everything site-wide: P1-17), in
+         tabs; the files it writes are Developer details */
       root.appendChild(h('div', { class: 'cms-form-head' },
-        h('div', {}, h('h2', { text: 'Theme & defaults' }), h('div', { class: 'route', text: 'Site-wide · theme-data.js · settings-defaults-data.js · seo-data.js' })),
-        h('div', { class: 'editor-actions' }, revert)));
-      root.appendChild(buildDesignPanel());
-      root.appendChild(buildSettingsDefaultsPanel());
-      root.appendChild(buildSiteSeoPanel());
+        h('div', {}, h('h2', { text: 'Site style' }), h('div', { class: 'route', text: 'For every page' })),
+        h('div', { class: 'editor-actions' }, revert, A.overlay.closeButton(function () { A.later('setView')('design'); }, 'Close Site style'))));
+      root.appendChild(ArkAdminPrimitives.tabs({ label: 'Site style sections', className: 'ark-tabs page-editor-tabs', value: siteStyleTab,
+        onChange: function (tab) { siteStyleTab = tab; },
+        items: [{ id: 'look', label: 'Colours & background', content: buildDesignPanel() },
+          { id: 'visitors', label: 'Visitor defaults', content: buildSettingsDefaultsPanel() },
+          { id: 'search', label: 'Search defaults', content: buildSiteSeoPanel() }] }));
+      root.appendChild(A.devDetails([['Writes', 'js/content/theme-data.js · js/content/settings-defaults-data.js · js/content/seo-data.js']]));
     });
     return container;
   }
-  A.provide({ renderDesignEditor: renderDesignEditor, renderThemePanel: renderDesignEditor, revertDesign: revertDesign,
+  /* open Site style on a tab (the Design tips' "Open SEO defaults", the harness) */
+  var SITE_STYLE_TABS = ['look', 'visitors', 'search'];
+  function showSiteStyleTab(tab) {
+    siteStyleTab = tab;
+    var t = document.querySelectorAll('#themePanel .page-editor-tabs > .ark-tabs-list > [role="tab"]')[SITE_STYLE_TABS.indexOf(tab)];
+    if (t && t.getAttribute('aria-selected') !== 'true') t.click();
+  }
+  A.provide({ renderDesignEditor: renderDesignEditor, showSiteStyleTab: showSiteStyleTab, renderThemePanel: renderDesignEditor, revertDesign: revertDesign,
       saveSettingsDefaultsDraft: saveSettingsDefaultsDraft, saveThemeDraft: saveThemeDraft,
       selectDesign: selectDesign, settingsDefaultsDirty: settingsDefaultsDirty, themeDirty: themeDirty });
 })();

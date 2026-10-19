@@ -10,7 +10,26 @@
     if (!Object.keys(ArkUI.pageCatalog).some(function (key) { return key !== 'reference' && ArkUI.pageCatalog[key].path === from.split('?')[0]; })) from = '/';
     return {doc:doc, from:from};
   }
-  function referenceUrl(doc, from) { return '#/reference?' + new URLSearchParams({doc:doc, from:from}).toString(); }
+  function referenceUrl(doc, from) { return ArkUI.route.href('/reference?' + new URLSearchParams({doc:doc, from:from}).toString()); }
+  /* The catalog key a `from` address names ('/stats?x=1' -> 'stats'); request() has already
+     checked that its path is a catalog path. */
+  function fromKey(from) {
+    var path = from.split('?')[0];
+    return Object.keys(ArkUI.pageCatalog).find(function (key) { return key !== 'reference' && ArkUI.pageCatalog[key].path === path; }) || 'zero';
+  }
+  /* The return link is a scene link like every other in-site link, so the router takes it
+     (with its query) instead of a '#/path' legacy hash; it is labelled with the page it returns
+     to -- "Return to the explanation" said nothing when the reader came from /stats
+     (docs/ux-audit/pages-ux-b.md /reference). */
+  function backLink(from) {
+    var key = fromKey(from), at = from.indexOf('?');
+    var name = key === 'zero' ? 'Home' : String(ArkUI.pageCatalog[key].title || '').split(' — ')[0];
+    var back = ArkUI.el('a', '', '← Return to ' + (name || 'the explanation'));
+    back.href = ArkUI.route.href(from);
+    back.dataset.sceneLink = key;
+    if (at >= 0) back.dataset.routeQuery = from.slice(at + 1);
+    return back;
+  }
   function inline(host, text, current) {
     var pattern = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g, last = 0, match;
     while ((match = pattern.exec(text))) {
@@ -22,7 +41,9 @@
           var link = ArkUI.el('a','',match[1]);
           var doc = decodeURIComponent(url.pathname).split('/docs/')[1];
           doc = doc && 'docs/'+doc;
-          link.href = doc && ArkUI.referenceDocs.indexOf(doc)>=0 ? referenceUrl(doc,current.from) : url.href;
+          var own = doc && ArkUI.referenceDocs.indexOf(doc)>=0;
+          link.href = own ? referenceUrl(doc,current.from) : url.href;
+          if (own) link.dataset.sceneLink = 'reference';
           host.appendChild(link);
         } else host.appendChild(document.createTextNode(match[1]));
       } else host.appendChild(ArkUI.el(match[3]?'strong':'code','',match[3]||match[4]));
@@ -58,7 +79,7 @@
   function populate(el, current) {
     el.replaceChildren();el.dataset.referenceDoc=current.doc;
     var top=ArkUI.el('nav','reference-orientation');top.setAttribute('aria-label','Reference return');
-    var back=ArkUI.el('a','','← Return to the explanation');back.href='#'+current.from;top.appendChild(back);
+    top.appendChild(backLink(current.from));
     var source=ArkUI.el('a','story-reference','Original Markdown ↗');source.href=current.doc;source.dataset.referenceOriginal='true';source.dataset.icon='open';top.appendChild(source);el.appendChild(top);
     var title=(documents.get(current.doc).match(/^#\s+(.+)$/m)||[])[1]||'Reference';
     current.title = title;

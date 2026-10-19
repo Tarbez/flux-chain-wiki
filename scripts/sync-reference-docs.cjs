@@ -7,7 +7,12 @@ function main() {
   const root = path.resolve(__dirname, '..'), found = new Set(['docs/protocol/resolvers.md']);
   for (const dir of ['js/pages', 'js/content/manifests']) {
     for (const file of fs.readdirSync(path.join(root, dir)).filter(x=>x.endsWith('.js'))) {
-      for (const match of fs.readFileSync(path.join(root, dir, file), 'utf8').matchAll(/docs\/[a-z0-9/.-]+\.md/g)) found.add(match[0]);
+      /* Only what a page can link counts, never what a comment mentions. Until 2026-10-19 a code
+         comment citing an internal audit (docs/ux-audit/*.md) made that audit a public reference
+         document -- with an absolute local path in it (tests/ark-vendor.cjs caught it). Block
+         comments and whole-line // comments are removed before matching. */
+      const code = fs.readFileSync(path.join(root, dir, file), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+      for (const match of code.matchAll(/docs\/[a-z0-9/.-]+\.md/g)) found.add(match[0]);
     }
   }
   for (const doc of found) {

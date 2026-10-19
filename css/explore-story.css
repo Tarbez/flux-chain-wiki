@@ -9,7 +9,7 @@
 #scene .explore-page .explore-raw .mesh-explorer-header { grid-template-columns:auto minmax(200px,280px); justify-content:space-between; }
 #scene .explore-page .content-layer-path > button {
   display:inline-flex; align-items:center; min-height:26px; margin:0; padding:0 11px; border:0; border-radius:3px; cursor:pointer;
-  background:hsl(var(--reference-100)); color:var(--signal-reference); font:550 9px/1 var(--mono-font,ui-monospace,monospace); letter-spacing:.075em; text-transform:uppercase;
+  background:hsl(var(--reference-100)); color:var(--signal-reference); font:550 9px/1 var(--font-mono,ui-monospace,monospace); letter-spacing:.075em; text-transform:uppercase;
   transition:color 160ms ease,background-color 160ms ease;
 }
 #scene .explore-page .content-layer-path > button:is(:hover,:focus-visible) { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
@@ -42,7 +42,7 @@
 }
 #scene .explore-page .explore-stepper button span {
   display:grid; place-items:center; width:28px; height:28px; border-radius:999px; box-sizing:border-box;
-  border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas)); font:500 10px/1 var(--mono-font,ui-monospace,monospace); color:hsl(var(--text-muted));
+  border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas)); font:500 10px/1 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-muted));
   transition:border-color 160ms,background-color 160ms,color 160ms;
 }
 #scene .explore-page .explore-stepper button:hover { color:hsl(var(--text-strong)); }
@@ -66,7 +66,7 @@
 #scene .explore-page .explore-kind strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 15px/1.25 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.01em; color:hsl(var(--text-strong)); }
 /* The tile is the name and its live figure; what the kind means opens with it */
 #scene .explore-page .explore-kind-text { display:none; }
-#scene .explore-page .explore-kind small { grid-column:1 / -1; font:500 9.5px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-faint)); }
+#scene .explore-page .explore-kind small { grid-column:1 / -1; font:500 9.5px/1.3 var(--font-mono,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-faint)); }
 #scene .explore-page .explore-private { margin:0; font:400 12px/1.45 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-faint)); }
 
 /* A kind, opened over the list */
@@ -96,9 +96,9 @@
 #scene .explore-page .explore-record strong { order:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 14px/1.3 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-strong)); }
 #scene .explore-page .explore-record > .explore-record-id { order:2; }
 #scene .explore-page .explore-record > .explore-record-top { order:3; }
-#scene .explore-page .explore-record-top { display:flex; align-items:center; justify-content:space-between; gap:12px; font:500 10px/1.3 var(--mono-font,ui-monospace,monospace); color:hsl(var(--text-faint)); }
-#scene .explore-page .explore-record-id { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 10.5px/1.3 var(--mono-font,ui-monospace,monospace); color:hsl(var(--text-faint)); }
-#scene .explore-page .explore-chip { font:500 9px/1.3 var(--mono-font,ui-monospace,monospace); letter-spacing:.08em; text-transform:uppercase; color:hsl(var(--text-muted)); white-space:nowrap; }
+#scene .explore-page .explore-record-top { display:flex; align-items:center; justify-content:space-between; gap:12px; font:500 10px/1.3 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-faint)); }
+#scene .explore-page .explore-record-id { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 10.5px/1.3 var(--font-mono,ui-monospace,monospace); color:hsl(var(--text-faint)); }
+#scene .explore-page .explore-chip { font:500 9px/1.3 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; text-transform:uppercase; color:hsl(var(--text-muted)); white-space:nowrap; }
 #scene .explore-page .explore-chip::before { content:""; display:inline-block; width:5px; height:5px; margin:0 6px 1px 0; border-radius:1px; transform:rotate(45deg); background:currentColor; opacity:.7; }
 #scene .explore-page .explore-chip[data-state="ok"] { color:hsl(var(--success, var(--primary))); }
 
@@ -117,7 +117,7 @@
 #scene .explore-page .explore-record-open .explore-record-id { white-space:normal; overflow-wrap:anywhere; }
 #scene .explore-page .explore-record-facts { margin:6px 0 0; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); column-gap:18px; }
 #scene .explore-page .explore-record-facts > div { min-width:0; display:grid; gap:3px; padding:9px 0; border-top:1px solid hsl(var(--border-subtle)); }
-#scene .explore-page .explore-record-facts dt { font:500 8.5px/1.4 var(--mono-font,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+#scene .explore-page .explore-record-facts dt { font:500 8.5px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-muted)); }
 #scene .explore-page .explore-record-facts dd { margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text)); }
 
 /* Footer line: where the data comes from, and the ways onward */
@@ -161,7 +161,7 @@
   }
   #scene .explore-page .explore-panes button {
     min-height:30px; margin:0; border:0; border-radius:3px; background:none; cursor:pointer; color:hsl(var(--text-faint));
-    font:550 9.5px/1 var(--mono-font,ui-monospace,monospace); letter-spacing:.075em; text-transform:uppercase;
+    font:550 9.5px/1 var(--font-mono,ui-monospace,monospace); letter-spacing:.075em; text-transform:uppercase;
   }
   #scene .explore-page .explore-panes button[aria-pressed="true"] { background:hsl(var(--reference-100)); color:var(--signal-reference); }
   #scene .explore-page .explore-cards { grid-template-columns:1fr; }

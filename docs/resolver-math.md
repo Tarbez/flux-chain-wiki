@@ -15,23 +15,32 @@ verbs, the record types, the rules, the resolvers. Nothing is in the result that
 defined into it, and whatever was never defined is not slow. It does not
 exist.
 
-Today, from the live registry:
+A snapshot (2026-10-19) of the generated counts — the grammar from the census
+(`js/content/resolver-algebra.js`), the resolvers and capabilities from the
+registry snapshot (`js/content/registry-snapshot.js`, shown on
+[/resolvers](/resolvers)). Those two files are the source; re-read them rather
+than this table:
 
 | | term | what it buys |
 |---:|---|---|
 | 20 | role letters | what a box can be |
 | 5 | longer labels | a box named by more than one letter |
 | 18 | action verbs | what can be done |
-| 93 | record types | what a record is about |
-| 10 | type-scoped shapes | where meaning bends |
-| 5 | resolvers | what can be worked out and signed |
+| 95 | record types | what a record is about |
+| 12 | type-scoped shapes | where meaning bends |
+| 12 + 5 | resolver chains (first-party native + bridge), in source | what can be worked out and signed |
+| 5 | capabilities, derived manifests | the mechanisms resolvers are built from |
 | **=** | | **everything FLX can make real today** |
+
+Two other resolver counts are not this one: the resolver *families audited*
+in [resolver audit](resolver-audit.md) (20 families, 6 measured, 14 not
+built) count audit manifests, not launched chains.
 | 0 | lending resolvers | so lending cannot happen |
 | 0 | split-payment verbs | so a split payment cannot be said at all |
 
 The live figures are rendered on [/resolver-math](/resolver-math) from the
 generated census; the table above is a snapshot and the page is the
-source. Take a term out there and capabilities disappear — computed by
+source. Take a term out there and sayable things disappear — computed by
 rebuilding the real resolver without that definition, never by a lookup
 table.
 
@@ -80,8 +89,10 @@ peers resolve the same bytes differently and **neither signature means
 anything to the other.** What prevents that is not a rule against
 imagination; it is that `O` publishes its table, signed, so anyone can
 tell which observer produced a result. That is why every resolver in the
-[resolver audit](resolver-audit.md) carries a signed manifest, and why
-one that does not publish its manifest is not registered.
+[resolver audit](resolver-audit.md) carries a signed manifest, and why one
+that does not publish its manifest is not audited. Since 2026-10-18 a
+resolver also publishes its own grammar manifest when it launches, and the
+network enforces it on every record ([resolvers](protocol/resolvers.md)).
 
 An unbounded space of meanings needs a *pinned* observer to be worth
 anything.
@@ -152,7 +163,7 @@ is the mistake — a store reference is not a weight.
 
 ---
 
-## Observer-relative meaning, built — for exactly one letter
+## Observer-relative meaning, built — for five letters
 
 The strong form of `S(s, i, O)` — the same symbol at the same position
 meaning different things to different readers — is not a thought
@@ -160,7 +171,7 @@ experiment here. It is implemented for a deliberately tiny slice of the
 namespace: a letter with **no single global shape** may be given one
 *per manifest type*.
 
-`J` is that letter. It is the one letter still free at the top level,
+The generated census (2026-10-19) has twelve type-scoped shapes over five letters — A, J, O, N and K. `J` is the clearest of them. It is the one letter still free at the top level,
 and it means a different thing depending on what the record is about —
 the chain position on a `LEDGERENTRY`, a different shape on a `POOL`.
 The live table is rendered on
@@ -290,9 +301,11 @@ behind it. These are the limits of the resolvers that exist today.
 | Grammar-Admission-Floor | 1 dense record → fields | 715,955 records/s |
 | Stake-Position | 1 signed stake lock → position | verifies its own signature, far slower |
 
-**Fifteen further resolvers are declared and not built** — lending,
-borrowing, liquidation, governance, treasury, group membership, content
-publish, claim, vault, search, geometric, AI/TLM, traffic. Each is a
+**Further resolver families are declared and not built** — lending,
+borrowing, liquidation, group membership, content publish, claim, vault,
+search, geometric, AI/TLM. (Governance and treasury have since launched as
+the `dao` and `treasury` resolver chains, and traffic was measured; see
+[resolver audit](resolver-audit.md) and [/resolvers](/resolvers).) Each is a
 region of intent that currently **cannot be made real**. See
 [resolver audit](resolver-audit.md).
 
@@ -310,7 +323,7 @@ named rather than reported as working, and never as zero.
 | Piece of the algebra | Status | What it would take |
 |---|---|---|
 | **A per-*peer* meaning table** — two peers privately holding different meanings for one symbol at one position | **not built, and partly on purpose** | The *type*-scoped form above is built and real. What does not exist is a per-peer override: the type-scoped shapes live in one shared registry every observer reads the same way. Two peers cannot privately disagree about what a type means — if they could, neither's signature would mean anything to the other. |
-| **Runtime self-registration** — a record that defines a new dimension, so the grammar extends itself as it runs | **not built** | Registering a dimension today is a signed change to the registry, reviewed against absorbing roles for silent collisions. The review is the cost, and it is not zero. A self-registering record would have to carry that collision check or it re-introduces `TYPEGHOST` at runtime. |
+| **Runtime self-registration** — a record that defines a new dimension, so the grammar extends itself as it runs | **not built for the shared registry**; a resolver's own grammar, published at launch, is built (2026-10-18) | Registering a dimension today is a signed change to the registry, reviewed against absorbing roles for silent collisions. The review is the cost, and it is not zero. A self-registering record would have to carry that collision check or it re-introduces `TYPEGHOST` at runtime. |
 | **Asking a human at parse time** for a meaning the table lacks | **rejected, not pending** | Deliberately not a gap to close. Resolution must be deterministic to be signable: two observers have to get the same result from the same bytes, and a parse that stops to ask does not. An unresolved dimension refuses by name instead — that is axiom 1. |
 | **"Zero cost" for an unbounded space** | **overstated** | A lookup is O(1) and a small record parses in O(n); that part holds. What is not free is admitting a new *position*, which costs a collision audit against every absorbing role. That is human review, and this grammar has already got it wrong once. |
 

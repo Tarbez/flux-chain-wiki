@@ -63,7 +63,11 @@ for (const name of names) {
 
   // Roles: secondary is the main CTA; every action token resolves to it.
   for (const key of ['action','complement','action-bg']) assert.equal(get(key), get('secondary'), `${name} --${key} must be the secondary (main CTA) color`);
-  for (const key of ['signal','accent']) assert.equal(get(key), get('primary'), `${name} --${key} is the primary identity color`);
+  for (const key of ['signal','badge']) assert.equal(get(key), get('primary'), `${name} --${key} is the primary identity color`);
+  /* Named regression (2026-10-19, docs/ux-audit/brand.md 6.3): --accent aliased --primary, so
+     the SDK's action lane (Ark UI / SDK primary buttons) and the CMS's selected states painted
+     in the identity colour. One meaning per name: --accent is the action colour, as in the SDK. */
+  for (const key of ['accent','dak-accent']) assert.equal(get(key), get('secondary'), `${name} --${key} is the action (secondary) color, the SDK meaning`);
   for (const [key, role] of [['trust','success'],['live','success'],['drift','warning'],['role','reference']]) assert.equal(get(key), get(role), `${name} --${key} maps to --${role}`);
 
   const roles = ['primary','secondary','reference','success','warning','danger'];

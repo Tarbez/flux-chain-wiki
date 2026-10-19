@@ -224,6 +224,9 @@
     if (removing.length) message += ' Save also removes ' + removing.length + ' file' + (removing.length === 1 ? '' : 's') + ' #' + entry.record.seq + ' never had (the history keeps them): ' + removing.join(', ') + '.';
     if (kept.length) message += ' Kept, as you chose (not in #' + entry.record.seq + '): ' + kept.join(', ') + '.';
     status(message, 'warn');
+    /* the whole sentence where it can be read: the status line cut it to "Loaded ..." (P1-15) */
+    if (A.notice) A.notice({ tone: 'info', key: 'version-restored', title: 'Version #' + entry.record.seq + ' is back, as unsaved changes', body: message.replace(/^Loaded version #\d+ as unsaved drafts\. /, ''),
+      actions: [{ label: 'Save now', run: function () { A.later('saveEverything')(); } }] });
     return true;
   }
   var versionsPanel = window.ArkVersionsPanel && $('versionsPanel') ? ArkVersionsPanel.create({
@@ -231,7 +234,19 @@
     dir: function () { return Promise.resolve(state.historyDir || null); },
     savedSnapshot: savedSnapshot, anyDirty: anyDirty, status: status, download: download, connect: connectProject,
     preview: previewVersion, exitPreview: exitVersionPreview, restore: restoreVersion, restorePlan: restorePlan,
-    onToggle: function (open) { $('versionsNav').setAttribute('aria-expanded', String(open)); }
+    /* one close button, and Versions shares the docked slot with the sheet: opening one closes
+       the other (js/admin/overlay.js, level 'sheet'; docs/ux-audit/cms.md P1-12) */
+    closeButton: A.overlay.closeButton, devDetails: A.devDetails,
+    itemName: function (draft, id) {
+      if (draft === 'manifests') return state.drafts[id] && state.drafts[id].title ? state.drafts[id].title : '';
+      if (draft === 'articles') return state.aDrafts[id] && state.aDrafts[id].title ? state.aDrafts[id].title : '';
+      return '';
+    },
+    onToggle: function (open) {
+      $('versionsNav').setAttribute('aria-expanded', String(open));
+      if (open) A.overlay.open($('versionsPanel'), { anchor: $('versionsNav'), level: 'sheet', onClose: function () { if (versionsPanel && !$('versionsPanel').hidden) versionsPanel.close(); } });
+      else A.overlay.forget($('versionsPanel'));
+    }
   }) : null;
   if (versionsPanel) $('versionsNav').addEventListener('click', versionsPanel.toggle);
   A.provide({ ensureVersionBaseline: ensureVersionBaseline, recordVersion: recordVersion,

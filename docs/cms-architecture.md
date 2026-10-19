@@ -19,39 +19,64 @@ behind a Content | Design switch -- Content was a page list, a form column and a
 of its own (`#cmsShell`, `#editor`, `#frame`, `js/admin/preview.js`); Design was the canvas.
 All four are deleted. Exactly one site iframe exists in the document: `#cmsPreview`.
 
-**Header** (`#appBar`, one row from 1280px; `js/admin/header.js`, `nav.js`):
+**Three tiers** (2026-10-19, docs/ux-audit/cms.md (b): 23 header controls, 16 of them bare icons,
+became 11): what is used on every screen is in the header and labelled; what belongs to the
+canvas is on the canvas's own strip; what is occasional is one click away in **More**. Every
+feature kept its id and its behaviour; only where it sits changed.
 
-- the page: `#btnLeftRail` (fold the rail), `#btnPage` (page picker), `#btnPageFields` (the
-  Page fields sheet, below), `#btnPageSeo` (this page's SEO popover, `seo.js`) -- in every view;
-- the views of the one site, in either lens (`#viewSwitch`; `setView()`, `js/admin/sitemap.js`):
-  **Canvas** (`#viewCanvasBtn`, `#designView`), **Sitemap** (`#viewMapBtn`, `#mapView`) and
-  **Theme** (`#viewThemeBtn`): the site-wide settings docked beside the canvas (`#themeView`),
-  which stays live so a colour or a font shows on the real page as it is picked. `#backgroundBtn`
-  opens the page-transition popover (`ArkCanvasTransitions`);
-- the **lens** (`#lensSwitch`: `#lensContentBtn` / `#lensDesignBtn`; `setLens()` in `nav.js`):
-  what a click on the canvas edits. `state.lens` opens on `content` (most edits are text) and is
-  remembered per browser (`defxn-cms-lens`); a change is posted to the canvas
-  (`defxn-cms-preview-lens`), redraws the toolbar for the lens and opens the rail tab last used
-  in that lens. Nothing is torn down: the selection, the drafts and an open sheet stay. The
-  [Content lens](#the-content-lens) edits text in place; the Design lens selects and styles;
-- the canvas tools, shown while a canvas is on screen (Canvas and Theme): breakpoints
-  `#devices`, undo/redo, Design check `#btnCheck`, Edit/Live `#mode`;
-- `#versionsNav`, `#meshNav`, the one `#save`, `#publish`, and `#accountMenu` behind
-  `#accountBtn` (folder connect, who is signed in, the publish host's status `#mesh`, sign out;
-  `js/admin/project.js`, `mesh.js`). The menu closes on a press anywhere, the canvas included
-  (focus leaving the editor's window for the iframe; `tests/cms-account-menu-canvas-close.cjs`).
-  While no project folder is connected, a banner above the canvas says what connecting does,
-  with the button (`connectProject()`, the one connect flow behind every Connect button: the
-  menu, the banner, Save's refusal, Versions). `#publish` refused (no miner, a copy opened from
-  disk) stays clickable: a click opens the Publish sheet with the reason (`refuse(button, reason,
-  explain)`, `js/admin/core.js`; `tests/cms-refusal-explains.cjs`).
+**Header** (`#appBar`, one row from 1100px; `js/admin/header.js`, `nav.js`): `#btnLeftRail` (the
+side panel), `#btnPage` (the page switcher: a search over the one page list, below),
+`#btnPageFields` ("Page settings": the sheet with the page's every field), the lens
+(`#lensSwitch`: **Edit words** `#lensContentBtn` / **Edit style** `#lensDesignBtn`; `setLens()` in
+`nav.js`; `state.lens` stays `content` / `design`, remembered per browser as `defxn-cms-lens`),
+`#btnUndo` / `#btnRedo` (the ONE history, `js/admin/history.js`, below), `#status` (a slot of its
+own width: a message never moves a control), `#save`, `#publish`, and `#accountBtn` -- **More** --
+whose menu `#accountMenu` holds:
 
-Below 760px the header is two rows (the page, lens and views; the canvas tools and actions) and
-below 600px three (the page with Save and Publish; the lens and views with Versions and Mesh;
-the canvas tools with the account), cut by explicit row breaks (`#appBar::before/::after`,
-`css/admin.css`); on a phone the status line takes the screen's bottom strip while it has
-something to say. Measured 2026-10-19: 121px at 390px (159px in four rows before), 83px at 760px
-(121px).
+- the views of the one site (`#viewSwitch`; `setView()`, `js/admin/sitemap.js`): **The page**
+  (`#viewCanvasBtn`), **Site map** (`#viewMapBtn`, `#mapView`, with its own "Back to the page") and
+  **Site style** (`#viewThemeBtn`, `#themeView`, docked beside the live canvas; tabs Colours &
+  background / Visitor defaults / Search defaults; its own close button);
+- **Search & sharing for this page** (`#btnPageSeo`, the page SEO popover, `seo.js`; canonical
+  URL and structured data under its Advanced), **Page transition** (`#backgroundBtn`, the
+  `ArkCanvasTransitions` popover -- it was called "Background", which is the backdrop layer in
+  Site style), **Version history** (`#versionsNav`) and **Publishing status** (`#meshNav`, the
+  sheet);
+- the account: who is signed in (`#who`), `#connect` (`connectProject()`, the one connect flow
+  behind every Connect button: the menu, the banner, Save's refusal, Versions), the publishing
+  service's status (`#mesh`), keyboard shortcuts, `#signOut` (`js/admin/project.js`, `mesh.js`).
+
+While no project folder is connected, a banner above the canvas says what connecting does, with
+the button. `#publish` refused (no publishing service, a copy opened from disk) stays clickable:
+a click opens the Publish sheet with the reason (`refuse(button, reason, explain)`,
+`js/admin/core.js`; `tests/cms-refusal-explains.cjs`).
+
+**The canvas strip** (`#canvasTools`, above the stage, also in Preview -- it is the way back to
+Edit): screen size `#devices`; the size note `#bpNote` (Edit style at tablet or phone size only,
+in words: "Phone only" / "Tablet and phone only"); the page's name and size (`#devName`,
+`#devScale`); **Design tips** `#btnCheck` (`.ibtn.score`; Edit style only: a quiet count of tips, the score in
+`#scoreBadge`'s `data-score`, warning tone only when the reading just got worse on that page);
+Edit / Preview (`#mode`). It is hidden in the Site map, where there is no canvas.
+
+On a phone (below 600px) the header is two rows -- the side panel, the page, Save, Publish, More;
+then Page settings, the lens, undo, redo -- every control at least 44px; the status line takes the
+screen's bottom strip while it has something to say. `tests/browser/header-reach.mjs` measures it
+(at most 11 header controls, two phone rows, 44px targets, a status message moving nothing).
+
+**Overlays** (`js/admin/overlay.js`): everything that floats over the workspace registers with
+ONE dismissable-layer stack -- the header popovers (`openPop`), the More menu and the toolbar's
+section popover (level `popover`: one at a time; Esc, a press outside, leaving the window, or a
+press on the canvas closes them -- the canvas reports the press, `defxn-cms-preview-pointerdown`,
+because losing focus to it is not enough: it also takes focus by itself), and the sheet and
+Versions (level `sheet`: one docked slot, opening one closes the other; Esc or their close
+button). Choosing **Site style** closes them as well: its dock is on the edge they float over,
+and chosen under an open Versions it showed as a 20px sliver (`setView()`, `js/admin/sitemap.js`;
+`tests/cms-site-style-not-under-sheet.cjs`). The page and the Site map leave them open. A closed
+Versions panel is not refreshed by a Save; opening it lists the history again. Esc closes the
+topmost only. One close button (`overlay.closeButton`, `.ov-close`). It
+mirrors Ark UI's popover / dismissable-layer shape; `js/ark/vendor/ark-kit.js` exports
+`createArkPopover` but not the `createArkUI` runtime it runs on, so that swap waits for the kit
+to carry the runtime.
 
 **The canvas** (`js/admin/canvas.js`, `layoutStage()`): the stage is the breakpoint's width,
 zoomed down when the area is narrower, and exactly as tall as the area under its size label --
@@ -61,22 +86,28 @@ else the one the editor's own screen is by the site's thresholds (`ArkLayout.bre
 phone opens on the phone layout at 100%, a 760px window on tablet, a desktop on desktop. A resize
 afterwards never switches it.
 
-**Rail** (`#studioLeft`, `js/admin/rail.js`): tabs **Pages** (the one site tree -- Site chrome,
-Pages, Theory pages, Articles, then every other route; Content mode's page list and the old
-Studio's Pages tab merged into it. A row's button shows its page on the canvas, Fields opens its
-Page fields, Delete is offered for theory pages and articles; New theory page / New article sit
-under the tree), **Layers** (the page's real element tree; each row is named by
-`ArkLayout.layerName` in `js/content/layout.js` -- the element's group, block or state name, its
-accessible name, landmark, the heading it owns, its own words, an id/class hint, its tag last --
-with the tag beside it as metadata; a name typed over it is stored and wins, and clearing it goes
-back to the derived one; the toolbar's chip uses the same name; `tests/layer-names.cjs`),
-**Library** (`library.js`), **Media** and **Vault** (the forms' own panels). The Content lens opens on Pages and the Design lens on Layers; the last tab used in
-each lens is remembered (`defxn-cms-rail-tab`). Below 860px the rail is a drawer over the canvas
-(`#railScrim`; Esc or choosing a page closes it).
+**Rail** (`#studioLeft`, `js/admin/rail.js`): tabs **Pages**, **Layers**, **Blocks** (`#tabLib`,
+`library.js`), **Images** (`#tabMedia`) and **Private** (`#tabVault`, encrypted content). Pages
+draws THE page list, `siteList()`: every page named once -- its draft's title, else its catalog
+title, else its address in words, never a raw slug -- in the groups a person looks for: Main
+pages, Guides (the theory pages, `/concept/...`), Articles, Header & footer (the site chrome),
+More pages (routes with no fields, folded). The header's page switcher searches the same list and
+the canvas strip, Page settings and the page SEO popover use the same names
+(`tests/cms-pages-rows-are-buttons.cjs`). `#pageSearch` filters it; **+ New** (`#btnNewItem`) asks
+"Guide page or Article?" and a **title**; the address is derived and shown, and can be changed
+under Developer details (`#newForm` / `#newId`, `#newArticleForm` / `#newSlug`, the forms
+`editor.js` already handles). A row opens its page on the canvas; its Page settings and Delete
+buttons are not extra tab stops (the arrow keys walk the rows). **Layers** is the page's real
+element tree; each row is named by `ArkLayout.layerName` in `js/content/layout.js`, and a typed
+name wins (`tests/layer-names.cjs`). The Content lens opens on Pages and the Design lens on
+Layers; the last tab used in each lens is remembered (`defxn-cms-rail-tab`). Below 860px the rail
+is a drawer over the canvas (`#railScrim`; Esc or choosing a page closes it).
 
 **The sheet** (`#sheet`, `js/admin/panels.js`): one form panel at a time, on demand -- a page's
-or an article's every field (**Page fields**: every manifest field including those the canvas
-does not show, the Shape / SEO / Code tabs), or the **Mesh** deploy status. It is never open on
+or an article's every field (**Page settings**: every manifest field including those the canvas
+does not show, called by its label; fields whose label says the page no longer shows them wait
+under "Unused fields"; the copy keys and the file are its Developer details; tabs Text / Shapes /
+Search & sharing / Advanced), or **Publishing status**. It is never open on
 load or on a selection, and never a fixed right column: it overlays the canvas's right edge (the
 canvas keeps its width) and closes on Esc or its close button. Opened from the header or a Pages
 row it follows the canvas to the next page; opened transiently (the toolbar's and the Library's
@@ -309,8 +340,13 @@ keeps the page showing until its rebuilt replacement is shown in the same task, 
 entrance, no background fade and the scroll kept. A same-route re-render is not a navigation; it
 replayed the route-change transition and flashed the canvas blank on every edit (regression:
 `tests/page-router-refresh-in-place.cjs`; the browser driver samples every frame for a blank one). A committed edit is an entry
-in the canvas's one undo history (`cmsLayoutUndo`, beside layout snapshots): the header's
-undo/redo and Ctrl/Cmd+Z with focus in the canvas re-post its other side. Ctrl/Cmd+S commits first.
+in the canvas's undo history (`cmsLayoutUndo`, beside layout snapshots), which reports each new
+entry (`layout-history`, reason `push`) to the editor's ONE history (`js/admin/history.js`). It
+interleaves those entries with fields written from the editor's own forms (`setItemField`, one
+entry per field until a pause) and owns Undo / Redo and Ctrl/Cmd+Z in the editor and on the canvas
+(the canvas forwards the key, `defxn-cms-preview-undo-key`): a canvas entry is undone by the
+canvas, a form entry through `setItemField`. The canvas's snapshots end when it loads another page
+(`historyCanvasReset`); form entries stay. Ctrl/Cmd+S commits first.
 
 **The Content section** shows the field's label, address, kind and file; its value (a textarea
 for a paragraph field) carries the form's `data-cms-field` address, so the canvas, the Page fields
@@ -338,12 +374,21 @@ preview's Layers tree (`selToolbarKind()` in `toolbar-sections.js`):
 | a layout group (`group:` key) | Frame, plus the Ungroup action |
 | a component instance / a state-group member | its kind's sections plus Component instance / States |
 
-The actions are Make into component, Open in Content and Theme & defaults; a disabled action
-carries its reason in its title. Component instance and States are identity sections: they
-open by themselves on the selection that created them. A control edit re-renders the open
-popover in place, keeping focus and an uncommitted typed value. The browser drivers name a
-section and act inside it; every assumption about how the shell is drawn lives in
-`tests/browser/harness.mjs` (`openToolbarSection`, `toolbarSections`, `toolbarKey`).
+The bar is lens-aware (docs/ux-audit/cms.md P1-6, P1-7, P1-8). **Edit style**: the sections --
+the three used most labelled (Text, Colour, Spacing), the rest icons named by tooltip and
+aria-label -- then **More** (`data-section="tb-more"`): the selection's commands, the SAME list the
+canvas's right-click menu draws (`cmsSelectionCommands()` in `js/main.js`, reported with every
+selection as `commands` and run by `defxn-cms-preview-selection-command`): Make into states, Make
+into component, Group, Ungroup, Remove, Align and Distribute once two layers are selected, Page
+transition. A command that cannot apply stays listed with the reason under it. Then the editor's
+own: Edit its words, Site style. A group's Ungroup is also a bar button. **Edit words**: nothing
+opens over the words being edited; the chip names the field ("Heading"), the bar says how an edit
+ends ("Enter or Esc to finish") and offers Done and All fields; the field's Details (its words in
+a box, its link target, Revert to saved, its key under Developer details) open on demand -- and by
+themselves only for text that cannot be edited in place, whose explanation is the answer. The
+right-click menu reads SDK tokens and is placed from its measured size, so the canvas edge never
+cuts it off. Frame, Component instance and States show ids and keys only under Developer details
+(`devDetails()`, `js/admin/controls.js`).
 
 The bar is placed in the stage's own (zoomed) coordinates and moves with it by CSS; the popover
 is `position: fixed` and placed from the bar's on-screen box. `canvas.js` re-places the bar on
@@ -491,9 +536,11 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | file | owns |
 |---|---|
 | `core.js` | the `ArkAdmin` namespace and its vocabulary (`$`, `h`, `status`, `toast`, `refuse`, ...); refuses to run outside `admin.html` |
+| `overlay.js` | the one dismissable-layer stack (`overlay.open/close/forget/closeLevel/isOpen`) and the one close button |
+| `history.js` | the ONE undo history: canvas entries and form-field entries, in order; `undo()`, `redo()`, `historyState()` |
 | `notice.js` | `notice({ tone, title, body, actions, persist, key, into })`: the one toast / banner / inline alert (Ark UI's alert and toast-region shape, so a later wave swaps its internals); `toast()` is a notice; `tests/cms-notice.cjs` |
 | `state.js` | `A.state`: the lens and its rail tabs, the view, the item a form edits, every draft and its saved copy, dirty checks (`anyDirty`) |
-| `controls.js` | the control-row builders every panel draws with |
+| `controls.js` | the control-row builders every panel draws with, and `devDetails()` -- the one "Developer details" disclosure where keys, files, ids and raw values live |
 | `save.js` | `saveEverything`, `singleDraftHandle`, `siteFromState`, the one removal path |
 | `nav.js` | the lens (`setLens`), the `select*()` entry points (a page or article is also shown on the canvas), `renderList()` (the repaint after a draft change: header dots, Save, the Pages tree), `--app-bar-h` |
 | `editor.js` | page fields (`renderPageFields`), the one field write (`setItemField`), touch / Revert / create / delete, the panel registry ([Content forms](#content-forms-and-the-one-field-write)) |

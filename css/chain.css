@@ -27,7 +27,7 @@
 
 #scene .chain-page .chain-back {
  flex:0 0 auto;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;
- min-height:32px;margin-bottom:12px;font:500 11px/1.4 var(--mono-font,monospace);
+ min-height:32px;margin-bottom:12px;font:500 11px/1.4 var(--font-mono,monospace);
  text-transform:uppercase;letter-spacing:.03em;color:hsl(var(--reference));
 }
 #scene .chain-page .chain-back .native-icon {width:16px;height:16px;flex:0 0 16px;padding:3px;}
@@ -41,8 +41,18 @@
 
 /* Narrow viewports: width is what's scarce, not height, and there is
    already ample vertical room to scroll naturally -- so the scene stays
-   the simple width:100%/height:auto it already was, top-aligned. */
-#scene .chain-page .chain-flow {flex:1 1 auto;min-height:0;width:100%;margin:0;}
+   the simple width:100%/height:auto it already was, top-aligned.
+   The flow GROWS into spare height but never SHRINKS below its content.
+   It used to (flex:1 1 auto; min-height:0, and the same on .flow-now): on a
+   page shorter than the scene -- 1280x720, and the editor's 1280x721 desktop
+   canvas -- the box shrank while the scene (sized by 40vh) and its caption
+   did not, so they spilled out of it and over whatever follows: the
+   [data-ark-insert="main"] slot, where CMS-inserted blocks sit. .flow and
+   .flow-now are position:relative, so they painted over the block and took
+   its clicks (2026-10-19; regression in tests/browser/studio-flows.mjs,
+   makecomp's PUBLIC /chain step). A page taller than the screen scrolls
+   (.chain-page is overflow:auto); nothing is ever drawn under the scene. */
+#scene .chain-page .chain-flow {flex:1 0 auto;width:100%;margin:0;}
 
 @media(min-width:901px){
  /* Wide viewports: sizing the scene by width let its height (fixed by the
@@ -53,7 +63,7 @@
  #scene .chain-page .chain-flow {
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
  }
- #scene .chain-page .chain-flow .flow-now {flex:0 1 auto;min-height:0;width:auto;max-width:100%;box-sizing:border-box;}
+ #scene .chain-page .chain-flow .flow-now {flex:0 0 auto;width:auto;max-width:100%;box-sizing:border-box;}
  #scene .chain-page .chain-flow .flow-scene {width:auto;height:min(40vh,380px);max-width:100%;}
  #scene .chain-page .chain-flow .flow-ledger {flex:0 0 auto;width:min(100%,860px);}
 }

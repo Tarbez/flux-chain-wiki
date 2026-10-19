@@ -1,8 +1,8 @@
 {
   "package": "@deadark/ark-elements",
-  "version": "0.1.0",
-  "tarball": ".vendor/deadark-ark-elements-0.1.0.tgz",
-  "sha256": "5ab68a1adbe682b7bfc317a8fd5a673a3858c00d71241b95e055ff2b2e1550a1",
+  "version": "0.2.0",
+  "tarball": ".vendor/deadark-ark-elements-0.2.0.tgz",
+  "sha256": "5cf72231651977d01ec709787860f3752b0fb33fd0d9176f9bcd7b34a838f75b",
   "sourceRoot": "../../../design/ark-elements",
-  "updatedAt": "2026-10-19T00:53:45.079Z"
+  "updatedAt": "2026-10-19T08:00:49.923Z"
 }

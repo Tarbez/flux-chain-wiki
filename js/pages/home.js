@@ -226,7 +226,7 @@ ArkUI.pageModules.zero = {
       var content = node('div'); content.appendChild(label(item.forWho)); content.appendChild(node('h3', '', item.title)); content.appendChild(node('p', '', item.text));
       var routes = node('div', 'hl-audience-routes'); routes.appendChild(iconize(link(item.action, item.route, 'hl-button hl-neutral-button'), 'arrow-right', true));
       var refs = node('nav', 'hl-ref-links'); refs.setAttribute('aria-label', item.name + ' resources');
-      item.refs.forEach(function (ref) { refs.appendChild(iconize(link(ref[0], ref[1]), 'open', true)); });
+      item.refs.forEach(function (ref) { var refLink = link(ref[0], ref[1]); refs.appendChild(iconize(refLink, ArkUI.dash.linkIcon(refLink), true)); });
       routes.appendChild(refs); audiencePanel.appendChild(content); audiencePanel.appendChild(routes);
       if (focus) audienceButtons[i].focus();
     }
@@ -263,7 +263,7 @@ ArkUI.pageModules.zero = {
       card.appendChild(node('h3', '', item[1])); card.appendChild(node('p', '', item[2])); principleGrid.appendChild(card);
     });
     principles.appendChild(principleGrid);
-    var pressureTest = iconize(link('Go deeper into the resolver model', 'PRESSURETEST.HREF'), 'open', true); principles.appendChild(pressureTest); pageMoreBody.appendChild(principles);
+    var pressureTest = link('Go deeper into the resolver model', 'PRESSURETEST.HREF'); iconize(pressureTest, ArkUI.dash.linkIcon(pressureTest), true); principles.appendChild(pressureTest); pageMoreBody.appendChild(principles);
 
     // RekIt law 16 ("no dashboard thinking") + law 14 ("silence is
     // functional"): a 3-up stat wall reads as a dashboard. One lead metric
@@ -302,7 +302,7 @@ ArkUI.pageModules.zero = {
       var operations = stats && stats.operations;
       var scope = operations ? operations.record + ' · ' + operations.fleet.nodes + ' nodes · ' + operations.fleet.cores + ' cores · ' + operations.date + '. ' : '';
       evidenceFoot.appendChild(node('p', '', scope + 'These are resolution and storage benchmarks, not end-to-end transaction rates.'));
-      evidenceFoot.appendChild(iconize(link('Read methodology & limits', 'METHODOLOGY.HREF'), 'open', true));
+      var methodology = link('Read methodology & limits', 'METHODOLOGY.HREF'); evidenceFoot.appendChild(iconize(methodology, ArkUI.dash.linkIcon(methodology), true));
       statsMoreBody.appendChild(evidenceFoot);
       statsMoreDetails.appendChild(statsMoreBody);
       statsMoreWrap.appendChild(statsMoreDetails);
@@ -316,7 +316,7 @@ ArkUI.pageModules.zero = {
     var pulse = node('span', 'hl-pulse', 'Fleet measurement loading');
     var pulseTime = node('span', 'hl-pulse-time', 'Hourly synthetic capacity test');
     signal.appendChild(label('A network you can inspect', 'network')); signal.appendChild(pulse); signal.appendChild(pulseTime);
-    signal.appendChild(iconize(link('Open the explorer', 'OBSERVATORY.HREF'), 'open', true));
+    var observatory = link('Open the explorer', 'OBSERVATORY.HREF'); signal.appendChild(iconize(observatory, ArkUI.dash.linkIcon(observatory), true));
     pageMoreBody.appendChild(signal);
 
     var faq = node('section', 'about-more-part');

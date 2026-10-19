@@ -27,7 +27,9 @@
       refreshPop = A.later('refreshPop'), layoutStage = A.later('layoutStage'),
       openCanvasTransitionsPopover = A.later('openCanvasTransitionsPopover'),
       renderSelToolbar = A.later('renderSelToolbar'), openRoute = A.later('openRoute'),
-      itemForRoute = A.later('itemForRoute'), openPageFields = A.later('openPageFields');
+      itemForRoute = A.later('itemForRoute'), openPageFields = A.later('openPageFields'),
+      historyCanvasPush = A.later('historyCanvasPush'), historyCanvasReset = A.later('historyCanvasReset'),
+      undo = A.later('undo'), redo = A.later('redo');
 
   /* =========================================================================
      STEP 1 CLEANUP (2026-10-17): the dense typed-array document engine (node
@@ -239,12 +241,8 @@
   }
   function postCmsLayoutUndo() { if (!state.cmsConnected || !cmsPreview.contentWindow) return; cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-layout-undo' }, window.location.origin); }
   function postCmsLayoutRedo() { if (!state.cmsConnected || !cmsPreview.contentWindow) return; cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-layout-redo' }, window.location.origin); }
-  /* STEP 1 CLEANUP: undo()/redo() used to fall back to this document's own dense undoStack/
-     redoStack when the connected relay had nothing to undo; that dense op-log is deleted
-     along with the rest of the standalone engine, so the only real undo history left is the
-     one already relayed from the iframe (see the comment above). */
-  function undo() { if (state.cmsLayoutCanUndo) postCmsLayoutUndo(); }
-  function redo() { if (state.cmsLayoutCanRedo) postCmsLayoutRedo(); }
+  /* undo()/redo() are the ONE history's (js/admin/history.js): it posts these two when the edit
+     to take back is one the canvas made. */
   function postCmsSelectGroup(id) { if (!state.cmsConnected || !cmsPreview.contentWindow) return; cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-select-group', id }, window.location.origin); }
   /* Select any annotated element by its stable key -- generalizes postCmsSelectGroup's
      existing message (select-by-group-id) rather than inventing a sibling message type, since
@@ -326,6 +324,8 @@
       state.cmsPreviewRoute = route; state.cmsPreviewReady = false;
       navigating = true; arriving = route;
       cmsPreview.src = 'index.html?cms-preview=1#' + route;
+      /* the canvas's own snapshots stay with the page it leaves */
+      historyCanvasReset();
     }
   }
   cmsPreview.addEventListener('load', () => { navigating = false; postCmsPreviewState(); postCmsPreviewMode(); postCmsPreviewLens(); layoutStage(); });
@@ -381,7 +381,9 @@
     if (state.cmsContent && state.cmsContent.field === edit.field) state.cmsContent.value = value;
     /* stale: the preview held a site sent while the words were typed and dropped it -- send the current one */
     if (at.kind === 'component') { if (edit.stale) notifyPreviewState(); renderSelToolbar(); return { ok: true }; }
-    const result = A.setItemField(at.kind, at.id, at.key, value, { canvas: !edit.canvasShows });
+    /* an edit the canvas made is already an entry in its history (js/main.js); one made from the
+       editor's own controls (Revert to saved, its Undo) is an entry of the editor's */
+    const result = A.setItemField(at.kind, at.id, at.key, value, { canvas: !edit.canvasShows, record: !edit.fromCanvas });
     if (!result.ok) toast(result.refusal);
     else if (edit.canvasShows && edit.final) A.previewShowsDrafts();
     renderSelToolbar();
@@ -391,6 +393,8 @@
     if (event.origin !== window.location.origin || !event.data) return;
     if (event.source !== cmsPreview.contentWindow) return;
     if (event.data.points) state.cmsInsertPoints = event.data.points;
+    /* the selection's commands (js/main.js cmsSelectionCommands: the right-click menu's list), for the toolbar's More menu */
+    if (Array.isArray(event.data.commands)) state.cmsSelectionCommands = event.data.commands;
     if (event.data.showing) state.cmsStatesShowing = event.data.showing;
     if (event.data.type === 'defxn-cms-preview-ready') {
       state.cmsPreviewReady = true;
@@ -412,7 +416,7 @@
       }
       if (event.data.groups) state.cmsGroups = event.data.groups; if (event.data.tree) state.cmsTree = event.data.tree; renderInspector(); renderLayersPane(); state.libKey = ''; renderLibrary(); queueCheck(); }
     else if (event.data.type === 'defxn-cms-preview-error') toast('Preview update failed: ' + event.data.message);
-    else if (event.data.type === 'defxn-cms-preview-copy-edit') applyCmsCopyEdit(Object.assign({}, event.data, { canvasShows: !event.data.stale && (!event.data.history || event.data.history === 'revert') }));
+    else if (event.data.type === 'defxn-cms-preview-copy-edit') applyCmsCopyEdit(Object.assign({}, event.data, { fromCanvas: true, canvasShows: !event.data.stale && (!event.data.history || event.data.history === 'revert') }));
     else if (event.data.type === 'defxn-cms-preview-select') {
       state.cmsExactSelection = event.data.selection || null;
       state.cmsContent = event.data.content || null;
@@ -459,7 +463,15 @@
       applyStudioLayoutReplace(event.data.layout);
       renderLayersPane();
     } else if (event.data.type === 'defxn-cms-preview-layout-history') {
-      state.cmsLayoutCanUndo = !!event.data.canUndo; state.cmsLayoutCanRedo = !!event.data.canRedo; renderInspector();
+      state.cmsLayoutCanUndo = !!event.data.canUndo; state.cmsLayoutCanRedo = !!event.data.canRedo;
+      if (event.data.reason === 'push') historyCanvasPush(event.data.label);
+      renderInspector();
+    } else if (event.data.type === 'defxn-cms-preview-pointerdown') {
+      /* a press on the canvas closes the editor's popovers (js/admin/overlay.js) */
+      if (A.overlay) A.overlay.closeCanvas();
+    } else if (event.data.type === 'defxn-cms-preview-undo-key') {
+      /* Ctrl/Cmd+Z (Shift, or Y: redo) pressed on the canvas: the one history decides what it undoes */
+      if (event.data.redo) redo(); else undo();
     } else if (event.data.type === 'defxn-cms-preview-notice') toast(event.data.message || 'That operation is unavailable for this selection.');
     /* Step 4: js/main.js's unconditional "Edit canvas" context-menu entry still posts this
        exact message (that protocol is untouched, per scope) -- it used to call
@@ -492,6 +504,6 @@
       postCmsPreviewMode: postCmsPreviewMode, postCmsPreviewState: postCmsPreviewState,
       postCmsRemoveSelection: postCmsRemoveSelection, postCmsSelectGroup: postCmsSelectGroup,
       postCmsSelectKey: postCmsSelectKey, postCmsSetAlt: postCmsSetAlt, postCmsSetLabel: postCmsSetLabel,
-      postCmsStatesCommand: postCmsStatesCommand, redo: redo, schedule: schedule,
-      syncCmsPreview: syncCmsPreview, undo: undo });
+      postCmsStatesCommand: postCmsStatesCommand, postCmsLayoutUndo: postCmsLayoutUndo, postCmsLayoutRedo: postCmsLayoutRedo,
+      schedule: schedule, syncCmsPreview: syncCmsPreview });
 })();

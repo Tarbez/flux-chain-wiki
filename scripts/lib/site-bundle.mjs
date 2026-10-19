@@ -134,6 +134,8 @@ function readSeo(root, ids) {
   for (const id of ids) vm.runInContext(read(root, `js/content/manifests/${id}.js`), context, { filename: `manifests/${id}.js` });
   vm.runInContext(read(root, 'js/content/learnings.js'), context, { filename: 'learnings.js' });
   vm.runInContext(read(root, 'js/content/article-index.js'), context, { filename: 'article-index.js' });
+  // the site's page table (journeys, non-manifest page ids): seo.js derives its page ids from it
+  vm.runInContext(read(root, 'js/content/site-pages.js'), context, { filename: 'site-pages.js' });
   vm.runInContext(read(root, 'js/content/seo.js'), context, { filename: 'seo.js' });
   vm.runInContext(read(root, 'js/content/seo-data.js'), context, { filename: 'seo-data.js' });
   return JSON.parse(JSON.stringify(vm.runInContext('ArkSEO.get()', context)));

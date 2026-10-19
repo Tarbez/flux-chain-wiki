@@ -116,7 +116,17 @@ export function census(site = SITE) {
   const count = (token) => { if (cssDefs.has(token)) uses.set(token, (uses.get(token) || 0) + 1); };
   for (const file of [...sources, ...html]) {
     for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-      for (const m of line.matchAll(/(['"`])((?:(?!\1).){1,200})\1/g)) for (const token of m[2].split(/[\s.]+/)) count(token);
+      // A token's segment BEFORE a dot is a class only when the token is written as a selector
+      // ('.stage', '.a.b'); in 'stage.title' or 'div.card' the head is a JS identifier or a tag
+      // name, so only the segments after the dot can be classes. Splitting on every dot counted
+      // the property access `stage.title` (js/pages/lifecycle.js) as a use of the class .stage.
+      for (const m of line.matchAll(/(['"`])((?:(?!\1).){1,200})\1/g)) {
+        for (const token of m[2].split(/\s+/)) {
+          if (!token.includes('.')) { count(token); continue; }
+          const parts = token.split('.');
+          for (const part of token.startsWith('.') ? parts : parts.slice(1)) if (part) count(part);
+        }
+      }
       if (file.endsWith('.html')) for (const m of line.matchAll(/class="([^"]+)"/g)) for (const token of m[1].split(/\s+/)) count(token);
     }
   }

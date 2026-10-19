@@ -47,7 +47,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, setLens, openRailTab, openPageFields, pageRow, sheetBody, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, setLens, openRailTab, openPageFields, pageRow, sheetBody, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor, createItem, MORE_MENU_IDS, siteStyleTab } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const ALL = ['content', 'design', 'toolbar', 'canvas', 'sweep'];
@@ -241,20 +241,18 @@ await surface('content', 'pages: Ctrl/Cmd+S saves', async (opened) => {
 await surface('content', 'pages: create and delete a theory page', async (opened) => {
   const { app } = await openEditor(opened, 'content');
   await connect(app);
-  await openRailTab(app, 'pages');
-  await app.locator('#pagesPane summary', { hasText: 'New theory page' }).click();
-  await app.fill('#newId', 'auditpage');
-  await app.press('#newId', 'Enter');
+  /* asked for by its title; the address is derived (docs/ux-audit/cms.md P1-4) */
+  await createItem(app, 'page', 'Audit page');
   await until(async () => (await pageRow(app, { page: 'auditpage' }).count()) === 1, 'the new page is not in the Pages tab');
   /* an unsaved page is ON the canvas, rendered from its draft (it used to fall back to Home while
      the label named the new page: docs/ux-audit/cms.md P0-1), and its own Page fields are open */
-  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the unsaved new page is not on the canvas: ' + await statusText(app), 15000);
+  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('Audit page'), 'the unsaved new page is not on the canvas: ' + await statusText(app), 15000);
   check(await app.evaluate(() => !!document.querySelector('#sheet:not([hidden]) [data-cms-field^="page:auditpage:"]')), 'creating the page did not open its own Page fields');
   await openPageFields(app, { page: 'auditpage' });
   await app.click('#save');
   await until(() => savedExists('manifests/auditpage.js') && readSaved('manifests/index.js').includes('auditpage'), 'Save did not create manifests/auditpage.js and list it in the index');
   /* ...and once it is saved, it is still the page on the canvas */
-  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the saved new page is not on the canvas', 15000);
+  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('Audit page'), 'the saved new page is not on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this page' }).click();
   await until(() => !savedExists('manifests/auditpage.js') && !readSaved('manifests/index.js').includes('auditpage'), 'Delete did not remove the file and its index entry');
@@ -291,10 +289,7 @@ await surface('content', 'articles: edit, preview, Save, Ctrl+S, reload', async 
 await surface('content', 'articles: create and delete', async (opened) => {
   const { app } = await openEditor(opened, 'content');
   await connect(app);
-  await openRailTab(app, 'pages');
-  await app.locator('#pagesPane summary', { hasText: 'New article' }).click(); debug('new article form');
-  await app.fill('#newSlug', 'audit-note');
-  await app.press('#newSlug', 'Enter'); debug('submitted');
+  await createItem(app, 'article', 'Audit note'); debug('submitted');
   await until(async () => (await pageRow(app, { article: 'audit-note' }).count()) === 1, 'the new article is not in the Pages tab');
   /* named from what was typed ("audit-note" -> "Audit note", it was "New note") and on the canvas before Save */
   await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('Audit note'), 'the unsaved new article is not on the canvas: ' + await statusText(app), 15000);
@@ -415,11 +410,11 @@ await surface('content', 'shapes: tuning reaches the preview, Save writes it', a
 
 await surface('content', 'mesh: status view opens and refreshes', async (opened) => {
   const { app } = await openEditor(opened, 'content');
-  await app.click('#meshNav');
-  await until(() => app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheetTitle').textContent === 'Mesh'), 'Mesh did not open its status in the sheet');
+  await clickHeader(app, 'meshNav');
+  await until(() => app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheetTitle').textContent === 'Publishing status'), 'Publishing status did not open in the sheet');
   await until(() => app.evaluate(() => !/Checking/.test((document.querySelector('#sheetBody .mesh-rows') || {}).textContent || 'Checking')), 'the mesh status never finished checking');
   check(await app.evaluate(() => document.getElementById('lensContentBtn').getAttribute('aria-pressed') === 'true'), 'opening Mesh changed the lens');
-  await app.click('#meshNav');
+  await clickHeader(app, 'meshNav');
   check(await app.evaluate(() => document.getElementById('sheet').hidden), 'a second press of Mesh did not close its sheet');
 });
 
@@ -476,8 +471,11 @@ await surface('design', 'theme & defaults: a colour reaches the preview, Save, r
   await until(async () => (await swatch.count()) > 0, 'Theme & defaults shows no colour fields');
   const id = await swatch.getAttribute('id'), key = id.split('-').slice(2).join('-');
   await swatch.fill('#12ab34');
-  const hsl = (await app.locator(`#${id} + output`).textContent()).trim();
-  check(/^\d+ \d+% \d+%$/.test(hsl), 'the colour field does not show the HSL it stores: ' + hsl);
+  /* the colour reads as people write it (hex); the HSL channels it stores ride on data-hsl and in
+     Developer details (docs/ux-audit/cms.md P1-2) */
+  check(/^#[0-9a-f]{6}$/i.test((await app.locator(`#${id} + output`).textContent()).trim()), 'the colour field does not show a hex colour');
+  const hsl = ((await app.locator(`#${id} + output`).getAttribute('data-hsl')) || '').trim();
+  check(/^\d+ \d+% \d+%$/.test(hsl), 'the colour field does not carry the HSL it stores: ' + hsl);
   const frame = await canvasPreview(app, '/');
   await until(() => frame.evaluate((k) => getComputedStyle(document.documentElement).getPropertyValue('--' + k).trim(), key).then((v) => v === hsl), `the preview's --${key} never became ${hsl}`);
   await app.click('#save');
@@ -485,13 +483,14 @@ await surface('design', 'theme & defaults: a colour reaches the preview, Save, r
   await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await designView(again, 'theme');
-  await until(async () => ((await again.locator(`#${id} + output`).textContent()) || '').trim() === hsl, 'after reload the colour is not the saved one');
+  await until(async () => ((await again.locator(`#${id} + output`).getAttribute('data-hsl')) || '').trim() === hsl, 'after reload the colour is not the saved one');
 });
 
 await surface('design', 'theme & defaults: settings-gear default reaches the preview, Save', async (opened) => {
   const { app } = await openEditor(opened);
   await connect(app);
   await designView(app, 'theme');
+  await siteStyleTab(app, 'Visitor defaults');
   const motif = app.locator('#defaults-motif');
   await until(async () => (await motif.count()) > 0, 'Theme & defaults has no default-pattern control');
   const options = await motif.locator('option').evaluateAll((os) => os.map((o) => o.value));
@@ -541,10 +540,13 @@ await surface('design', 'design check: lists every rule, Show selects, Open SEO 
   /* openEditor already waited for the preview's ready message; the check itself waits for the
      page to settle before it measures (design-check-stable) */
   const { app, shot } = await openEditor(opened);
+  /* Design tips are the Edit style lens's (docs/ux-audit/cms.md P1-10) */
+  await setLens(app, 'design');
   await app.click('#btnCheck');
   const items = app.locator('.pop ul.checks > li');
   await until(async () => (await items.count()) >= 13, 'the design check lists fewer than 13 rules');
-  const badge = (await app.locator('#scoreBadge').textContent()).trim();
+  /* the badge shows a quiet count of tips; the score is its data-score (docs/ux-audit/cms.md P1-10) */
+  const badge = (await app.locator('#scoreBadge').getAttribute('data-score') || '').trim();
   check(/^\d+\/\d+$/.test(badge), 'the score badge is not passes/measured: ' + badge);
   await shot('design-check');
   const show = app.locator('.pop ul.checks .acts button', { hasText: 'Show' }).first();
@@ -956,10 +958,11 @@ const withSelection = (key, sections) => async (env, again) => { await toCanvas(
 
 await sweep('app header (Content lens)', '#appBar', toContent);
 await sweep('account menu', '#accountMenu', async (env) => { await openAccountMenu(env.app); });
-await sweep('page fields: Content tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Content'));
-await sweep('page fields: Shape tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Shape'));
-await sweep('page fields: SEO tab', '#sheet', pageFieldsTab({ page: 'home' }, 'SEO'));
-await sweep('page fields: Code tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Code'));
+/* the tabs in plain words since 2026-10-19: Text / Shapes / Search & sharing / Advanced */
+await sweep('page fields: Text tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Text'));
+await sweep('page fields: Shapes tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Shapes'));
+await sweep('page fields: Search & sharing tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Search & sharing'));
+await sweep('page fields: Advanced tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Advanced'));
 await sweep('rail: Pages', '#pagesPane', async (env) => { await toContent(env); await openRailTab(env.app, 'pages'); });
 await sweep('article fields', '#sheet', async (env) => { const slug = await env.app.evaluate(() => { const b = document.querySelector('#pages .tree-open[data-item^="article:"]'); return b ? b.dataset.item.slice(8) : null; }); return pageFieldsTab({ article: slug })(env); });
 await sweep('rail: Media (an image open)', '#mediaPane', railItem('media', 'asset:'));
@@ -976,7 +979,7 @@ await sweep('rail: Vault', '#vaultPane', async (env, again) => {
   }
   await until(() => env.app.evaluate(() => !!document.querySelector('#sec-sweep-secret-label')), 'the new encrypted item did not open');
 });
-await sweep('mesh sheet', '#sheet', async (env) => { if (!(await env.app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheet').dataset.sheet === 'mesh'))) { await env.app.click('#meshNav'); await until(() => env.app.evaluate(() => document.getElementById('sheet').dataset.sheet === 'mesh'), 'Mesh did not open'); } });
+await sweep('mesh sheet', '#sheet', async (env) => { if (!(await env.app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheet').dataset.sheet === 'mesh'))) { await clickHeader(env.app, 'meshNav'); await until(() => env.app.evaluate(() => document.getElementById('sheet').dataset.sheet === 'mesh'), 'Publishing status did not open'); } });
 await sweep('theme view (theme & defaults, mesh tuning, page shapes)', '#themeView', async (env) => { await designView(env.app, 'theme'); await until(() => env.app.evaluate(() => !!document.querySelector('#themeView .theme-fields')), 'the Theme view did not draw'); });
 /* the one header in Design -> Canvas: the Design views and every canvas-only control */
 await sweep('app header (Design lens, Canvas view)', '#appBar', withSelection('id:hl-title'));
@@ -990,9 +993,10 @@ const firstSection = async (env) => env.sectionKey || (env.sectionKey = await un
 for (const sec of CONTAINER.filter((x) => !TEXT.includes(x))) await sweep('toolbar: container / ' + sec, '#selToolbar, #selToolbarPop', async (env, again) => withSelection(await firstSection(env), [sec])(env, again));
 await sweep('sitemap', '#mapView', async (env) => { if (await env.app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('mapView').hidden)) { await designView(env.app, 'map'); await until(() => env.app.evaluate(() => !document.getElementById('mapView').hidden && document.querySelectorAll('#mapView .smcard').length > 0), 'the sitemap did not draw'); } });
 for (const [name, button] of [['popover: Design check', '#btnCheck'], ['popover: page switcher', '#btnPage'], ['popover: page SEO', '#btnPageSeo'], ['popover: Background', '#backgroundBtn']]) {
-  await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { await env.app.click(button, { timeout: scaled(15000) }); await env.app.locator('.pop').first().waitFor({ state: 'visible', timeout: scaled(5000) }); } });
+  /* page SEO and Page transition are More menu items since 2026-10-19 (clickHeader opens More first) */
+  await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { if (MORE_MENU_IDS.includes(button.slice(1))) await clickHeader(env.app, button.slice(1)); else await env.app.click(button, { timeout: scaled(15000) }); await env.app.locator('.pop').first().waitFor({ state: 'visible', timeout: scaled(5000) }); } });
 }
-await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await env.app.click('#versionsNav'); await until(() => env.app.evaluate(() => !document.getElementById('versionsPanel').hidden), 'the versions panel did not open'); } });
+await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await clickHeader(env.app, 'versionsNav'); await until(() => env.app.evaluate(() => !document.getElementById('versionsPanel').hidden), 'the versions panel did not open'); } });
 
 /* ================================================================ REPORT (placeholder until the other groups land) */
 await browser.close(); server.close();

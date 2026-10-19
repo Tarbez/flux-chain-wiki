@@ -23,28 +23,30 @@
   function renderPageSeoPop(p) {
     p.classList.add('seo-pop');
     const route = state.cmsRoutes.find((r) => r.path === state.cmsCurrentRoute) || { path: state.cmsCurrentRoute };
-    const head = document.createElement('h4'); head.textContent = 'SEO \u00b7 ' + (route.title || route.path); p.appendChild(head);
+    const name = A.siteList ? (A.siteList().rows.find((r) => r.path === route.path) || {}).title : '';
+    const head = document.createElement('h4'); head.textContent = 'Search & sharing \u00b7 ' + (name || route.title || route.path); p.appendChild(head);
     if (!window.ArkSEO) { p.appendChild(h('p', { class: 'hint', text: 'SEO editing is unavailable: js/content/seo.js did not load into the editor. Reload; if it persists, check admin-app.html still includes it.' })); return; }
     const map = route.seoArticle ? 'articles' : 'pages', id = route.seoArticle || route.seoId;
     if (id && state.seoDraft[map] && (state.seoDraft[map][id] || ArkSEO[map === 'pages' ? 'pageIds' : 'articleSlugs']().indexOf(id) >= 0)) {
-      p.appendChild(h('p', { class: 'hint', text: (map === 'articles' ? 'Article ' : 'Page ') + id + ' \u00b7 ' + route.path + '. Blank fields derive from the page itself and the site defaults (Theme & defaults).' }));
+      p.appendChild(h('p', { class: 'hint', text: 'How this page shows up in search results and when its link is shared. Leave a field blank and it is taken from the page itself and the site\u2019s defaults.' }));
       p.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, () => seoOverrideTarget(map, id), seoEdited));
     } else {
       p.appendChild(h('p', { class: 'hint seo-refusal', text: 'No SEO entry for ' + route.path + ': this route has no page id or article slug in js/pages/catalog.js, so there is nothing to store an override under. Give its catalog entry a seoId (pages) or seoArticle (articles) and it gets these fields.' }));
     }
-    const site = document.createElement('button'); site.type = 'button'; site.className = 'btn small'; site.textContent = 'Site-wide SEO and AI crawlers';
-    site.title = 'Theme & defaults holds the settings every page shares';
+    const site = document.createElement('button'); site.type = 'button'; site.className = 'btn small'; site.textContent = 'Defaults for every page…';
+    site.title = 'Site style, Search defaults: what every page falls back to, and which AI assistants may read the site';
     site.addEventListener('click', () => { closePop(); openSiteSeo(); });
     p.appendChild(site);
   }
   /* a repaint (refreshPop, on every preview message) must not pull the caret out of a field */
   renderPageSeoPop.holdWhileEditing = true;
   function openPageSeo() { if (state.popAnchor !== $('btnPageSeo')) openPop($('btnPageSeo'), renderPageSeoPop, 'left'); }
-  /* the header's page-SEO icon (js/admin/header.js draws the header; a panel test has none) */
+  /* "Search & sharing for this page", in the header's More menu (a panel test has none) */
   if ($('btnPageSeo')) $('btnPageSeo').addEventListener('click', (e) => openPop(e.currentTarget, renderPageSeoPop, 'left'));
-  /* Theme & defaults, scrolled to its site-wide SEO section */
+  /* Site style, on its Search defaults tab */
   function openSiteSeo() {
     selectDesign();
+    if (typeof A.showSiteStyleTab === 'function') A.showSiteStyleTab('search');
     const box = $('siteSeo'); if (box) box.scrollIntoView({ block: 'start' });
   }
 
@@ -72,7 +74,7 @@
     const wrap = h('div', { class: 'page-law-panel', id: 'siteSeo' });
     if (!window.ArkSEO) { wrap.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable: js/content/seo.js did not load into the editor. Reload; if it persists, check admin-app.html still includes it.' })); return wrap; }
     const site = h('fieldset', {}, h('legend', { text: 'Search · whole site' }),
-      h('p', { class: 'hint', text: 'What every page falls back to: a page’s own SEO (Canvas → the search icon beside the page picker) overrides these.' }));
+      h('p', { class: 'hint', text: 'What every page falls back to. A page’s own Search & sharing (More, or its Page settings) overrides these.' }));
     site.appendChild(seoFieldsPanel(ArkSEO.SITE_FIELDS.filter((f) => f.group === 'site'), () => state.seoDraft.site, seoEdited));
     const ai = h('fieldset', {}, h('legend', { text: 'AI assistants and crawlers' }));
     ai.appendChild(seoFieldsPanel(ArkSEO.SITE_FIELDS.filter((f) => f.group === 'ai'), () => state.seoDraft.site, seoEdited));
@@ -150,9 +152,25 @@
   }
   /* A self-repainting box of seoFieldRows: segmented/select controls only show their new
      state after a repaint; free-text fields keep the caret (they commit on 'change'). */
+  /* The address search engines treat as the page's own and its structured-data type are a
+     developer's settings: they wait under "Advanced" (docs/ux-audit/cms.md P1-2), still one click
+     away, still derived from the same field list. */
   function seoFieldsPanel(fields, target, onEdited) {
-    var box = h('div', { class: 'seo-controls' });
-    function paint() { box.textContent = ''; seoFieldRows(fields, target, function (f) { onEdited(f); if (!SEO_TEXT_KINDS[f.kind] || f.needs) paint(); }).forEach(function (row) { box.appendChild(row); }); }
+    var SEO_ADVANCED = ['canonical', 'schemaType'];
+    var box = h('div', { class: 'seo-controls' }), advancedOpen = false;
+    function paint() {
+      box.textContent = '';
+      var main = fields.filter(function (f) { return SEO_ADVANCED.indexOf(f.key) < 0; }), adv = fields.filter(function (f) { return SEO_ADVANCED.indexOf(f.key) >= 0; });
+      var edited = function (f) { onEdited(f); if (!SEO_TEXT_KINDS[f.kind] || f.needs) paint(); };
+      seoFieldRows(main, target, edited).forEach(function (row) { box.appendChild(row); });
+      if (adv.length) {
+        var advBox = h('div', { class: 'seo-controls' });
+        seoFieldRows(adv, target, edited).forEach(function (row) { advBox.appendChild(row); });
+        var d = ArkAdminPrimitives.disclosure({ label: 'Advanced', content: advBox, className: 'ark-disclosure quiet', defaultOpen: advancedOpen });
+        d.querySelector('.ark-disclosure-trigger').addEventListener('click', function () { advancedOpen = !advancedOpen; });
+        box.appendChild(d);
+      }
+    }
     paint();
     return box;
   }

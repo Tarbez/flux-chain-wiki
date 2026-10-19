@@ -281,7 +281,7 @@ function buildProducts(header, core) {
 
   var foot = make('div', 'products-mega-foot');
   foot.appendChild(peek);
-  var how = routeTo(make('a', 'products-mega-how', ArkCopy.text('RESOLUTIONS.MEGA.HOW') + ' ↗'), 'resolver');
+  var how = routeTo(make('a', 'products-mega-how', ArkCopy.text('RESOLUTIONS.MEGA.HOW') + ' →'), 'resolver');
   foot.appendChild(how);
   var all = routeTo(make('a', 'products-mega-all', ArkCopy.text('RESOLUTIONS.MEGA.ALL') + ' →'), 'resolutions');
   foot.appendChild(all);
@@ -518,25 +518,32 @@ ArkUI.register('RHEADER_V1', {
     // Rebuild the menu from these detached links. Legacy hash links must not
     // remain as visible siblings behind the new navigation layers.
     menu.replaceChildren();
-    var understand = ['zero', 'about', 'resolutions', 'resolver', 'resolver-math', 'deployment'].filter(function (key) { return catalog[key]; });
-    var evaluate = ['explorer', 'account', 'treasury', 'deposits', 'references', 'concept', 'dao'];
-    var run = ['download', 'bundledeployer', 'deploy'];
-    var read = ['learnings', 'proximity', 'lab'];
-    var lifecycle = Object.keys(catalog).filter(function (key) { return key === 'lifecycle' || key.indexOf('lifecycle/') === 0; });
-    var mechanics = Object.keys(catalog).filter(function (key) { return key.indexOf('concept/') === 0; });
-    var articles = Object.keys(catalog).filter(function (key) { return key.indexOf('article/') === 0; });
-    var nested = Object.keys(catalog).filter(function (key) { return catalog[key].nestedNavigation; });
-    var named = understand.concat(evaluate, run, read, lifecycle, mechanics, articles, nested);
-    Object.keys(catalog).forEach(function (key) { if (named.indexOf(key) < 0 && !catalog[key].hiddenFromNavigation) evaluate.push(key); });
-    menu.dataset.pageCount = String(Object.keys(catalog).filter(function (key) { return !catalog[key].hiddenFromNavigation && !catalog[key].nestedNavigation; }).length);
+    /* Every group is DERIVED from each page's journey (js/content/site-pages.js, copied onto its
+       catalog entry). Until 2026-10-19 this built four hand-written arrays plus a catch-all that
+       pushed every unlisted page into "Evaluate -- live local mesh data, evidence", so the design
+       mocks /treasury and /deposits and the design-system /palette were filed as live evidence
+       (docs/ux-audit/pages.md P7; regression: tests/navigation-index.cjs). A page with no journey
+       is in no group. A page whose path sits under another listed page's path (/lifecycle/intent
+       under /lifecycle) is that page's child: three or more children get their own layer, fewer
+       are listed right after their parent. */
+    var journeys = typeof ArkSitePages !== 'undefined' ? ArkSitePages.journeys() : [];
+    var listed = Object.keys(catalog).filter(function (key) { return catalog[key].journey && !catalog[key].hiddenFromNavigation; });
+    var byPath = Object.create(null);
+    listed.forEach(function (key) { byPath[catalog[key].path] = key; });
+    function parentOf(key) {
+      var path = catalog[key].path;
+      if (path === '/') return null;
+      var parent = path.slice(0, path.lastIndexOf('/'));
+      return parent && byPath[parent] && catalog[byPath[parent]].journey === catalog[key].journey ? byPath[parent] : null;
+    }
+    var children = Object.create(null);
+    listed.forEach(function (key) { var parent = parentOf(key); if (parent) (children[parent] = children[parent] || []).push(key); });
+    menu.dataset.pageCount = String(listed.length);
     function label(key) {
       if (key === 'zero') return 'Home';
-      if (key === 'learnings') return 'Notes';
-      if (key === 'lifecycle') return 'View the full lifecycle';
-      if (key.indexOf('lifecycle/') === 0) return ArkUI.lifecycleStages.find(function (stage) { return stage.id === key.split('/')[1]; }).title;
       if (key.indexOf('concept/') === 0) return ArkCopy.text(key.split('/')[1].toUpperCase() + '.TITLE');
       if (key.indexOf('article/') === 0) return LearningContent.find(key.split('/')[1]).title;
-      return catalog[key].title.split(' — ')[0];
+      return catalog[key].short || catalog[key].title.split(' — ')[0];
     }
     function node(tag, className, text) {
       var item = document.createElement(tag);
@@ -563,7 +570,7 @@ ArkUI.register('RHEADER_V1', {
         top.appendChild(back);
         back.addEventListener('click', function () { goBack(); });
       }
-      top.appendChild(node('span', 'nav-layer-depth', id === 'index' ? '01 / INDEX' : id === 'stages' ? '03 / AGREEMENT LIFECYCLE' : '02 / ' + id.toUpperCase()));
+      top.appendChild(node('span', 'nav-layer-depth', id === 'index' ? '01 / INDEX' : (parent === 'the index' ? '02 / ' : '03 / ') + title.toUpperCase()));
       panel.appendChild(top);
       panel.appendChild(node('h2', 'nav-layer-title', title));
       panel.appendChild(node('p', 'nav-layer-note', note));
@@ -647,24 +654,26 @@ ArkUI.register('RHEADER_V1', {
       return button;
     }
     var index = layer('index', 'Explore DEFXN', 'Choose a path.');
-    [
-      ['Understand', 'Overview, resolvers, networks, and agreements', understand, 'understand'],
-      ['Evaluate', 'Live local mesh data, evidence, governance, and status', evaluate, 'evaluate'],
-      ['Run', 'Source setup and named-network operations', run, 'run'],
-      ['Read', 'Notes, articles, and the interactive model', read, 'read']
-    ].forEach(function (entry) {
-      index.appendChild(choice(entry[0], entry[1], entry[2].length + (entry[3] === 'understand' ? lifecycle.length : entry[3] === 'evaluate' ? mechanics.length : entry[3] === 'read' ? articles.length : 0), entry[3]));
-      var body = layer(entry[3], entry[0], entry[1], 'the index');
-      entry[2].forEach(function (key) { body.appendChild(routeLink(key, key.indexOf('lifecycle/') === 0)); });
-    });
-    [
-      ['understand', 'stages', 'Agreement lifecycle', 'Follow one request through five signed records', lifecycle],
-      ['evaluate', 'mechanics', 'Operating model', 'Choose the mechanism you want to inspect', mechanics],
-      ['read', 'articles', 'Notes and articles', 'Choose an architectural question', articles]
-    ].forEach(function (entry) {
-      panels[entry[0]].body.appendChild(choice(entry[2], entry[3], entry[4].length, entry[1]));
-      var body = layer(entry[1], entry[2], entry[3], entry[0]);
-      entry[4].forEach(function (key) { body.appendChild(routeLink(key, key.indexOf('lifecycle/') === 0)); });
+    journeys.forEach(function (journey) {
+      var top = listed.filter(function (key) { return catalog[key].journey === journey.id && !parentOf(key); });
+      if (!top.length) return;
+      var count = listed.filter(function (key) { return catalog[key].journey === journey.id; }).length;
+      index.appendChild(choice(journey.title, journey.note, count, journey.id));
+      var body = layer(journey.id, journey.title, journey.note, 'the index');
+      top.forEach(function (key) {
+        var kids = children[key] || [];
+        if (kids.length >= 3) {
+          var id = 'sub-' + key.replace(/[^a-z0-9]+/gi, '-');
+          var row = ArkSitePages.row(key) || {};
+          body.appendChild(choice(label(key), row.note || ('Everything under ' + label(key)), kids.length + 1, id));
+          var sub = layer(id, label(key), row.note || '', journey.id);
+          sub.appendChild(routeLink(key, false));
+          kids.forEach(function (child) { sub.appendChild(routeLink(child, child.indexOf('lifecycle/') === 0)); });
+          return;
+        }
+        body.appendChild(routeLink(key, false));
+        kids.forEach(function (child) { body.appendChild(routeLink(child, child.indexOf('lifecycle/') === 0)); });
+      });
     });
     menu.navLayers = { reset: reset, back: goBack, current: function () { return stack[stack.length - 1]; } };
   },

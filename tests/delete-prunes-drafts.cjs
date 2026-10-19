@@ -22,7 +22,7 @@ const vm = require('node:vm');
 const { functionSource } = require('./lib/admin-source.cjs');
 
 const context = vm.createContext({ window: {} });
-for (const file of ['js/content/layout.js', 'js/content/states.js', 'js/content/components.js', 'js/content/element-motion.js', 'js/content/canvas-transitions.js', 'js/content/seo.js', 'js/admin/store.js']) {
+for (const file of ['js/content/layout.js', 'js/content/states.js', 'js/content/components.js', 'js/content/element-motion.js', 'js/content/canvas-transitions.js', 'js/content/site-pages.js', 'js/content/seo.js', 'js/admin/store.js']) {
   vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 }
 const run = (code) => vm.runInContext(code, context);

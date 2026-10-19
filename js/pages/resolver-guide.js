@@ -49,7 +49,7 @@ ArkUI.pageModules.resolverGuide = {
            this module with page==='deployment') -- its fallback stays a literal tagged value
            since no SOURCE.HREF field exists for it, same as any page with no manifest at all. */
         var docValue=page==='resolver'||page==='references'?words('SOURCE.HREF'):'doc:docs/protocol/agreements.md';
-        var source=ArkUI.dash.linkEl('Read the canonical '+(page==='references'?'evidence registry':'guide')+' ↗',docValue,manifest.route,'story-reference');copy.appendChild(source);
+        var source=ArkUI.dash.linkEl('Read the canonical '+(page==='references'?'evidence registry':'guide')+' →',docValue,manifest.route,'story-reference');copy.appendChild(source);
         if(page==='resolver')copy.appendChild(link('Inspect reference evidence →','INSPECT.HREF','story-reference'));
         copy.appendChild(ArkUI.el('p','',page==='references'?words('BODY3'):'The source defines the contract. An illustration does not establish active capacity, accepted work, or production readiness.'));
       }

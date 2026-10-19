@@ -173,6 +173,9 @@
      versionPreviewSite: a past version shown read-only from the Versions panel, which every
      preview reload keeps showing until "Back to current drafts" clears it
      (js/admin/versions-glue.js). */
+  /* the selection's commands as the canvas reports them (js/main.js cmsSelectionCommands): the
+     toolbar's More menu draws them, the same list as the canvas's right-click menu */
+  state.cmsSelectionCommands = [];
   state.popEl = null;
   state.popAnchor = null;
   state.tbOpen = '';

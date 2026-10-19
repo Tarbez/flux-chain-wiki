@@ -53,10 +53,13 @@ assert(!/data-page="zero"\] \.(ark-header|header-|nav-toggle)/.test(home + compo
 for (const sel of ['#scene .hl-signal {', '#scene .hl-closing {', '.land-panel-heavy {'])
   assert(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[^}]*var\\(--anchor\\)').test(home), `${sel} sits on the anchor neutral`);
 
-// The two brand marks are generated masks (scripts/build-brand-marks.cjs), painted with
-// currentColor so they take the ink of every palette. Named regression: a CSS mask loaded
-// from file:// is blocked as cross-origin, so the marks must be embedded, not linked.
-const marks = fs.readFileSync('css/brand-marks.css', 'utf8');
+// The two brand marks are generated masks, painted with currentColor so they take the ink of
+// every palette. Since 2026-10-19 the product kit is their canonical home (defxn-product-kit
+// brand/marks, emitted as defxn-marks.data.css and synced into assets/kit/); this site loads
+// that file. Named regression: a CSS mask loaded from file:// is blocked as cross-origin, so
+// the marks must be embedded, not linked.
+const marks = fs.readFileSync('assets/kit/defxn-marks.data.css', 'utf8');
+assert(/<link rel="stylesheet" href="assets\/kit\/defxn-marks\.data\.css[?"]/.test(fs.readFileSync('index.html', 'utf8')), 'index.html loads the kit\'s data: marks');
 for (const name of ['defxn', 'fxn']) assert(new RegExp('--mark-' + name + ':url\\("data:image/png;base64,').test(marks), `--mark-${name} is embedded as a data: URI`);
 assert(/\.brand-mark \{[^}]*background:currentColor/.test(marks), 'marks are painted with currentColor');
 assert(!/url\((?!"data:)/.test(marks), 'no mark is loaded by file path');

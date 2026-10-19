@@ -70,21 +70,18 @@
   /* ---- the Theme view (setView('theme'), js/admin/sitemap.js) ---------------------------- */
   function mountThemeView() {
     mountPanel($('themePanel'), 'renderThemePanel', [], 'Theme & defaults');
-    mountPanel($('shapesPanel'), 'renderShapesPanel', [], 'Mesh tuning and page shapes');
+    mountPanel($('shapesPanel'), 'renderShapesPanel', [], 'Shape images and their tuning');
   }
 
   /* ---- THE sheet ------------------------------------------------------------------------ */
   var sheet = { key: '', anchor: null, transient: false, item: null };
-  /* The Versions panel (js/admin/versions-panel.js) docks on the right too, above the workspace:
-     with room, the sheet moves to its left so both stay usable (css/studio-embed.css); on a
-     phone there is room for one, so opening one closes the other. (Unhandled, the Versions list
-     covered the sheet's buttons: tests/browser/versions.mjs "Delete a page".) */
-  var narrowScreen = window.matchMedia('(max-width: 860px)');
-  function versionsOpen() { var v = $('versionsPanel'); return !!v && !v.hidden; }
-  if ($('versionsNav')) $('versionsNav').addEventListener('click', function () { setTimeout(function () { if (narrowScreen.matches && versionsOpen()) closeSheet(false); }, 0); });
+  /* The sheet and the Versions panel (js/admin/versions-panel.js) share ONE docked slot on the
+     right: opening one closes the other, at every width (js/admin/overlay.js, level 'sheet').
+     They used to dock side by side on a wide screen and cover each other on a narrow one
+     (tests/browser/versions.mjs "Delete a page"; docs/ux-audit/cms.md P1-12). */
   function openSheet(opts) {
     var el = $('sheet');
-    if (narrowScreen.matches && versionsOpen()) $('versionsNav').click();
+    A.overlay.open(el, { level: 'sheet', onClose: function (reason) { closeSheet(reason === 'escape'); } });
     sheet = { key: opts.key, anchor: opts.anchor || null, transient: !!opts.transient, item: opts.item || null };
     $('sheetKicker').textContent = opts.kicker || '';
     $('sheetTitle').textContent = opts.title || '';
@@ -99,7 +96,9 @@
     if (opts.focus !== false) { var first = body.querySelector('input, textarea, select, button') || $('sheetClose'); try { first.focus({ preventScroll: true }); } catch (e) { /* not focusable */ } }
   }
   function closeSheet(restoreFocus) {
-    var el = $('sheet'); if (el.hidden) return;
+    var el = $('sheet');
+    A.overlay.forget(el);
+    if (el.hidden) return;
     var anchor = sheet.anchor;
     el.hidden = true; delete el.dataset.sheet;
     mounts.delete($('sheetBody')); $('sheetBody').textContent = '';
@@ -114,13 +113,8 @@
     $('meshNav').setAttribute('aria-current', String(open && sheet.key === 'mesh'));
   }
   $('sheetClose').addEventListener('click', function () { closeSheet(true); });
-  /* Esc closes the sheet -- unless a popover or a toolbar section is open, which Esc closes first
-     (capture phase, so this sees them before their own handlers close them) */
-  window.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape' || $('sheet').hidden) return;
-    if (state.popEl || state.tbOpen || !$('accountMenu').hidden || document.querySelector('flux-authorization-dialog')) return;
-    closeSheet(true);
-  }, true);
+  /* Esc closes the sheet when it is the topmost overlay -- a popover or a toolbar section open
+     above it closes first (js/admin/overlay.js, the one stack) */
 
   /* Home / End in a field move its caret to the start / end of the field (a textarea: of the
      line), on every platform. On macOS they are scroll keys even inside a text field: End did not
@@ -167,7 +161,7 @@
   }
   function itemTitle(item) {
     if (!item) return state.cmsCurrentRoute;
-    if (item.kind === 'page') return (state.drafts[item.id] && state.drafts[item.id].title) || item.id;
+    if (item.kind === 'page') return state.drafts[item.id] && state.drafts[item.id].group === 'site' ? 'Header & footer' : (state.drafts[item.id] && state.drafts[item.id].title) || item.id;
     return (state.aDrafts[item.id] && state.aDrafts[item.id].title) || item.id;
   }
   /* opts: { kind, id } names the item (a Pages row's Fields button); without it, the page on the
@@ -181,7 +175,7 @@
       state.kind = item.kind;
       if (item.kind === 'page') state.current = item.id; else state.aCurrent = item.id;
     }
-    openSheet({ key: 'fields', kicker: 'Page fields', title: itemTitle(item), item: item,
+    openSheet({ key: 'fields', kicker: 'Page settings', title: itemTitle(item), item: item,
       anchor: opts.anchor || $('btnPageFields'), transient: !!opts.transient, focus: opts.focus,
       mount: item ? (item.kind === 'page'
         ? { name: 'renderPageFields', args: [item.id].concat(opts.tab ? [{ tab: opts.tab }] : []), label: 'This page’s fields' }
@@ -213,7 +207,7 @@
   /* ---- Mesh: publish and deploy status, on demand from the header (like Versions) --------- */
   function openMeshSheet() {
     if (!$('sheet').hidden && sheet.key === 'mesh') { closeSheet(true); return; }
-    openSheet({ key: 'mesh', kicker: 'Publish', title: 'Mesh', anchor: $('meshNav'), focus: false,
+    openSheet({ key: 'mesh', kicker: 'Publish', title: 'Publishing status', anchor: $('meshNav'), focus: false,
       mount: { name: 'renderMeshEditor', args: [], label: 'The mesh deploy status' } });
   }
 

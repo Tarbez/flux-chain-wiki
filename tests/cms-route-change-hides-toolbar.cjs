@@ -27,9 +27,11 @@ function run(route, previous) {
     state: { cmsConnected: true, cmsCurrentRoute: route, cmsPreviewRoute: previous, cmsPreviewReady: true,
       cmsExactSelection: { key: 'id:download-title' }, cmsExactSelections: [{ key: 'id:download-title' }] },
     cmsPreview: { src: '', getAttribute: () => 'index.html?cms-preview=1#' + previous },
+    /* the canvas's own undo snapshots stay with the page it leaves (js/admin/history.js) */
+    historyCanvasReset: () => { context.resets = (context.resets || 0) + 1; },
   });
   vm.runInContext(src.slice(start, end) + '\nsyncCmsPreview(false);', context);
-  return { nodes, selection: context.state.cmsExactSelection, src: context.cmsPreview.src };
+  return { nodes, selection: context.state.cmsExactSelection, src: context.cmsPreview.src, resets: context.resets || 0 };
 }
 
 {
@@ -38,10 +40,12 @@ function run(route, previous) {
   assert.equal(moved.nodes.selToolbar.hidden, true, 'the old selection\'s toolbar is hidden at once, not at the new page\'s ready');
   assert.equal(moved.nodes.selToolbarPop.hidden, true, 'and so is its open popover');
   assert(/#\/$/.test(moved.src), 'the preview is sent to the new route');
+  assert.equal(moved.resets, 1, 'the canvas entries of the one undo history end with the page they were made on');
 }
 {
   const stayed = run('/download', '/download');
   assert.equal(stayed.nodes.selToolbar.hidden, false, 'no route change: the toolbar is left alone');
   assert.deepEqual(stayed.selection, { key: 'id:download-title' }, 'no route change: the selection is kept');
+  assert.equal(stayed.resets, 0, 'no route change: the undo history is kept');
 }
 console.log('PASS: moving the canvas to another page hides the old selection\'s toolbar and popover at once.');

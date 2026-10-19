@@ -60,7 +60,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access."
+      "value": "Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access. A bridge also writes bundle records to the bundle resolver chain; the mesh path above is still the one in use."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -192,7 +192,7 @@ ArkManifest.define({
       "label": "Release / Note",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Browsing this site or signing in does not deploy a bundle."
+      "value": "Browsing this site or signing in does not deploy a bundle. Planned: sites and apps will deploy from deploy.defxn.com as signed records on the bundle resolver chain. Not built yet."
     }
   }
 });

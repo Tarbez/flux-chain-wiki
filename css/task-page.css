@@ -30,7 +30,7 @@
 #scene .task-page .mesh-explorer-detail { border:1px solid hsl(var(--border-default)); border-radius:8px; padding:18px; }
 @media(max-width:620px) {
  #scene .task-page :is(.source-step-choice,.deploy-step-choice) { font-size:0; width:44px; padding:8px; }
- #scene .task-page :is(.source-step-choice,.deploy-step-choice)::after { content:attr(data-step-number); font:500 13px var(--mono-font,monospace); }
+ #scene .task-page :is(.source-step-choice,.deploy-step-choice)::after { content:attr(data-step-number); font:500 13px var(--font-mono,monospace); }
  #scene .task-page .mesh-explorer-connect { grid-template-columns:1fr; gap:12px; }
  #scene .task-page .deploy-expected { font-size:13px !important; }
  #scene .task-page .deploy-command { padding:34px 12px 14px; }

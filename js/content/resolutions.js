@@ -23,6 +23,10 @@ var ArkResolutions = (function () {
     WEBSITE: 'bundledeployer', DEPLOYMENTS: 'bundledeployer', PAYMENTS: 'treasury', GOVERNANCE: 'dao',
     DATA: 'explorer', INFORMATION: 'explorer', ALGORITHMS: 'resolver', NETWORK: 'deploy', RULES: 'resolver'
   };
+  /* A second page that goes deeper than the start page (docs/ux-audit/pages.md "Next-step links":
+     publishing an algorithm or a rule IS writing a resolver, so they lead on to its math; personal
+     finance leads to the treasury preview, as payments does). Rendered as a secondary link. */
+  var also = { ALGORITHMS: 'resolver-math', RULES: 'resolver-math', FINANCE: 'treasury' };
 
   /* The inner pages stay deliberately short: one shift and three movements.
      This is product framing, not a claim that every capability runs today. */
@@ -52,7 +56,7 @@ var ArkResolutions = (function () {
   function copy(key) { return ArkCopy.text('RESOLUTIONS.' + key); }
   function item(key, group) {
     var profile = profiles[key] || {};
-    return { key: key, slug: key.toLowerCase(), group: group, start: start[key] || null,
+    return { key: key, slug: key.toLowerCase(), group: group, start: start[key] || null, also: also[key] || null,
       title: copy(key + '.TITLE'), text: copy(key + '.TEXT'), shift: profile.shift || '',
       old: profile.old || '', steps: (profile.steps || []).slice() };
   }

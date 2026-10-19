@@ -54,20 +54,24 @@ var ArkVersionsPanel = (function () {
     var label = h('input', { type: 'text', id: 'versionsLabel', placeholder: 'Name this point (optional)', maxlength: '80', spellcheck: 'false' });
     var checkpoint = h('button', { type: 'submit', class: 'btn', id: 'versionsCheckpoint', text: 'Record checkpoint' });
     var form = h('form', { class: 'versions-checkpoint', autocomplete: 'off', onsubmit: function (event) { event.preventDefault(); recordCheckpoint(); } }, label, checkpoint);
-    var close = h('button', { type: 'button', class: 'versions-close', 'aria-label': 'Close versions', text: '×', onclick: function () { api.close(); } });
+    /* the editor's one close button (js/admin/overlay.js) when the editor passes it */
+    var close = env.closeButton ? env.closeButton(function () { api.close(); }, 'Close version history') : h('button', { type: 'button', class: 'ov-close', 'aria-label': 'Close version history', text: '×', onclick: function () { api.close(); } });
     var importInput = h('input', { type: 'file', id: 'versionsImportFile', accept: '.flx', hidden: true, onchange: function () { var file = importInput.files && importInput.files[0]; importInput.value = ''; if (file) importFile(file); } });
-    var importButton = h('button', { type: 'button', class: 'btn', id: 'versionsImport', text: 'Import .flx', title: 'Add an exported version to this history as a new version', onclick: function () { importInput.click(); } });
+    var importButton = h('button', { type: 'button', class: 'btn small', id: 'versionsImport', text: 'Import a version file (.flx)', title: 'Add an exported version to this history as a new version', onclick: function () { importInput.click(); } });
     var importNote = h('p', { class: 'versions-import-note', id: 'versionsImportNote', role: 'alert' });
     var confirmBox = h('div', { class: 'versions-confirm', id: 'versionsConfirm', role: 'group', 'aria-label': 'Confirm restore', hidden: true });
 
     root.textContent = '';
     root.appendChild(h('header', { class: 'versions-head' },
-      h('div', {}, h('span', { class: 'versions-kicker', text: 'History · cms-history/' }), h('h2', { text: 'Versions' })), close));
-    root.appendChild(h('p', { class: 'versions-lede', text: 'Every Save records a version. Restore loads one as unsaved drafts; your next Save records it as a new version, and every version in between is kept.' }));
+      h('div', {}, h('span', { class: 'versions-kicker', text: 'History' }), h('h2', { text: 'Version history' })), close));
+    root.appendChild(h('p', { class: 'versions-lede', text: 'Every Save keeps a version. Bring one back and it becomes your unsaved changes; nothing in between is lost.' }));
     root.appendChild(banner);
     root.appendChild(confirmBox);
     root.appendChild(form);
-    root.appendChild(h('div', { class: 'versions-tools' }, importButton, importInput));
+    /* moving a version between projects is a developer's job: one disclosure, never on every row
+       (docs/ux-audit/cms.md P1-15) */
+    var devTools = [h('p', { class: 'hint', text: 'Versions are kept in the project folder, in cms-history/. A version can be exported from its own Developer details and imported here.' }), importButton, importInput];
+    root.appendChild(env.devDetails ? env.devDetails([], devTools) : h.apply(null, ['div', { class: 'versions-tools' }].concat(devTools)));
     root.appendChild(importNote);
     root.appendChild(note);
     root.appendChild(connect);
@@ -77,11 +81,32 @@ var ArkVersionsPanel = (function () {
     function seqOf(hash) { return bySeq[hash] ? '#' + bySeq[hash] : short(hash); }
 
     function branchName(n) { return n < 26 ? String.fromCharCode(65 + n) : String(n + 1); }
+    /* What a version changed, in words: its derived `changed` list (manifests/home, layout, ...)
+       named the way the editor names things -- the page's own title, "Page layout" -- never the
+       raw diff ("components: +spots, +masters.mmveixci6q6trc", docs/ux-audit/cms.md P1-15). The
+       raw lines stay, under the row's Developer details. */
+    var DRAFT_NAMES = { manifests: 'pages', articles: 'articles', assets: 'images', secrets: 'private items', meshSettings: 'Publishing settings',
+      theme: 'Site colours', settingsDefaults: 'Visitor settings defaults', seo: 'Search & sharing', layout: 'Page layout', components: 'Components',
+      states: 'States', canvasTransitions: 'Page transition', elementMotion: 'Animations' };
+    function humanChanges(rec) {
+      if (rec.kind === 'publish') return 'Published the site';
+      var names = [], seen = {};
+      (Array.isArray(rec.changed) ? rec.changed : []).forEach(function (c) {
+        var parts = String(c).split('/'), draft = parts[0], id = parts.slice(1).join('/');
+        var name = id ? (env.itemName ? env.itemName(draft, id) : '') || id : DRAFT_NAMES[draft] ? DRAFT_NAMES[draft].charAt(0).toUpperCase() + DRAFT_NAMES[draft].slice(1) : draft;
+        if (!seen[name]) { seen[name] = true; names.push(name); }
+      });
+      if (!rec.prev) return 'The project as first recorded';
+      if (!names.length) return 'No change to the site';
+      return 'Changed: ' + names.slice(0, 4).join(', ') + (names.length > 4 ? ' and ' + (names.length - 4) + ' more' : '');
+    }
+    var KIND_WORDS = { save: 'Saved', checkpoint: 'Checkpoint', publish: 'Published', import: 'Imported', restore: 'Restored', baseline: 'First version' };
     function row(entry) {
       var rec = entry.record, joins = Array.isArray(rec.joins) ? rec.joins : [];
       var head = h('div', { class: 'version-head' },
         h('span', { class: 'version-seq', text: '#' + rec.seq }),
-        h('span', { class: 'version-kind', 'data-kind': rec.kind, text: rec.kind }),
+        h('span', { class: 'version-kind', 'data-kind': rec.kind, text: KIND_WORDS[rec.kind] || rec.kind }),
+        entry === entries[0] && !entry.forked ? h('span', { class: 'version-kind', 'data-kind': 'latest', title: 'The newest version: what the project folder holds now, unless something changed since', text: 'Latest' }) : null,
         rec.restoredFrom ? h('span', { class: 'version-kind', 'data-kind': 'restore', title: 'Supersedes: made by restoring ' + rec.restoredFrom, text: 'restores ' + seqOf(rec.restoredFrom) }) : null,
         rec.importedFrom ? h('span', { class: 'version-kind', 'data-kind': 'imported', title: 'Imported from the exported version ' + rec.importedFrom, text: 'from ' + short(rec.importedFrom) }) : null,
         joins.length ? h('span', { class: 'version-kind', 'data-kind': 'joined', title: 'Joins the versions saved at the same time on another branch: ' + joins.join(', '), text: 'joins ' + joins.map(seqOf).join(', ') }) : null,
@@ -97,21 +122,22 @@ var ArkVersionsPanel = (function () {
         rest.appendChild(restList);
       }
       var actions = h('div', { class: 'version-actions' },
-        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'preview', text: previewing === entry.hash ? 'Previewing' : 'Preview', disabled: previewing === entry.hash, onclick: function () { preview(entry); } }),
-        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'restore', text: 'Restore', onclick: function () { restore(entry); } }),
-        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'export', text: 'Export .flx', onclick: function () { exportOne(entry); } }));
-      var addresses = h('details', { class: 'version-addresses' }, h('summary', { text: 'Addresses' }),
-        h('dl', {},
+        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'preview', text: previewing === entry.hash ? 'Showing on the canvas' : 'Look at it', title: 'Show this version on the canvas without changing anything', disabled: previewing === entry.hash, onclick: function () { preview(entry); } }),
+        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'restore', text: 'Bring it back', title: 'Load this version as your unsaved changes; Save keeps it', onclick: function () { restore(entry); } }));
+      var addressList = h('dl', {},
           h('dt', { text: 'Version' }), h('dd', { class: 'mono', text: entry.hash }),
           h('dt', { text: 'Content' }), h('dd', { class: 'mono', text: rec.content }),
           h('dt', { text: 'Previous' }), h('dd', { class: 'mono', text: rec.prev || 'none: the first version' }),
           joins.length ? h('dt', { text: 'Joins' }) : null, joins.length ? h('dd', { class: 'mono', text: joins.join(' ') }) : null,
           rec.restoredFrom ? h('dt', { text: 'Restored from' }) : null, rec.restoredFrom ? h('dd', { class: 'mono', text: rec.restoredFrom }) : null,
           rec.importedFrom ? h('dt', { text: 'Imported from' }) : null, rec.importedFrom ? h('dd', { class: 'mono', text: rec.importedFrom }) : null,
-          rec.published ? h('dt', { text: 'Published' }) : null, rec.published ? h('dd', { class: 'mono', text: 'version ' + rec.published.version + (rec.published.cid ? ' · ' + rec.published.cid : '') }) : null));
+          rec.published ? h('dt', { text: 'Published' }) : null, rec.published ? h('dd', { class: 'mono', text: 'version ' + rec.published.version + (rec.published.cid ? ' · ' + rec.published.cid : '') }) : null);
+      /* the raw per-draft diff, the addresses and Export: a developer's (P1-15) */
+      var devParts = [summary, rest, h('div', { class: 'version-actions' }, h('button', { type: 'button', class: 'btn tiny', 'data-action': 'export', text: 'Export this version (.flx)', onclick: function () { exportOne(entry); } })), addressList];
+      var addresses = env.devDetails ? env.devDetails([], devParts) : h.apply(null, ['div', { class: 'version-addresses' }].concat(devParts));
       return h('li', { class: 'version' + (previewing === entry.hash ? ' is-previewing' : ''), 'data-hash': entry.hash, 'data-seq': String(rec.seq),
         'data-branch': entry.forked ? branchName(entry.branch) : null, 'data-joins': joins.length ? String(joins.length) : null },
-        head, rec.label ? h('strong', { class: 'version-label', text: rec.label }) : null, summary, rest, actions, addresses);
+        head, rec.label ? h('strong', { class: 'version-label', text: rec.label }) : null, h('p', { class: 'version-human', text: humanChanges(rec) }), actions, addresses);
     }
 
     function paint() {
@@ -122,7 +148,7 @@ var ArkVersionsPanel = (function () {
       banner.hidden = !previewing;
       banner.textContent = '';
       if (previewing) {
-        banner.appendChild(h('span', { text: 'Previewing ' + (entry ? '#' + entry.record.seq : short(previewing)) + ' in the canvas. Read-only; nothing is saved.' }));
+        banner.appendChild(h('span', { text: 'Showing version ' + (entry ? '#' + entry.record.seq : short(previewing)) + ' on the canvas. You are only looking: nothing changes until you bring it back.' }));
         banner.appendChild(h('div', { class: 'version-actions' },
           h('button', { type: 'button', class: 'btn tiny', id: 'versionsBack', text: 'Back to current drafts', onclick: function () { exitPreview(); } }),
           entry ? h('button', { type: 'button', class: 'btn tiny primary', text: 'Restore this version', onclick: function () { restore(entry); } }) : null));

@@ -62,7 +62,7 @@
   }else if(kind==='spec'||kind==='benchmark'){
    title='MEASUREMENTS / ARTIFACT REQUIRED';
    path('M47 38v139h265');for(var b=0;b<6;b++)path('M47 '+(53+b*22)+'h265','drawing-mesh');
-   box(102,79,155,53,'drawing-dashed');word(122,110,'NO RAW ARTIFACT');word(48,197,'NO PERFORMANCE CURVE INFERRED');
+   box(102,79,155,53,'drawing-dashed');word(128,110,'ARTIFACT FIRST');word(48,197,'NO PERFORMANCE CURVE INFERRED');
    points=[[47,177],[177,105],[312,177]];route='';
   }else if(kind==='studio'||kind==='references'||kind==='evidence'){
    title='SOURCE / REVISION / DATED EVIDENCE';

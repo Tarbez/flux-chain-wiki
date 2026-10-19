@@ -32,6 +32,7 @@ const { functionSource } = require('./lib/admin-source.cjs');
     ArkManifest: { group: (g) => (g === 'theory' ? [{ id: 'depth', route: '/concept/depth', group: 'theory' }] : []) },
     ArkCopy: { text: (key) => (key === 'DEPTH.TITLE' ? 'Depth.' : key === 'PRICING.TITLE' ? 'New page.' : '') },
   });
+  vm.runInContext(fs.readFileSync('js/content/site-pages.js', 'utf8'), ctx);
   vm.runInContext(fs.readFileSync('js/pages/catalog.js', 'utf8'), ctx);
   const cat = ctx.ArkUI.pageCatalog;
   assert.equal(cat['article/saved-note'].path, '/learnings/saved-note');

@@ -111,7 +111,7 @@
     Object.keys(opts.data || {}).forEach((k) => { input.dataset[k] = opts.data[k]; });
     input.value = String(ctx.get(key) ?? (textual ? '' : 0)); input.setAttribute('aria-label', opts.ariaLabel || label);
     input.addEventListener(opts.live && textual ? 'input' : 'change', () => { if (textual) { ctx.set(key, input.value); return; } const v = Number(input.value); if (Number.isFinite(v)) ctx.set(key, v); });
-    const note = document.createElement('span'); if (opts.note) { note.className = 'field-key'; note.textContent = opts.note; }
+    const note = document.createElement('span'); if (opts.note) { note.className = 'field-key'; note.textContent = opts.note; } else if (opts.hint) { note.className = 'hint'; note.textContent = opts.hint; }
     row.append(l, input, note); return row;
   }
   /* What a choice is called, derived from the value it writes: 'text-muted' -> "Text muted",
@@ -155,6 +155,25 @@
     tokens.forEach((tok) => { const b = document.createElement('button'); b.type = 'button'; b.title = tok; b.setAttribute('aria-label', tok); b.style.background = `hsl(var(--${tok}))`; b.setAttribute('aria-pressed', String(ctx.get(key) === tok)); b.addEventListener('click', () => pick(tok)); sw.appendChild(b); });
     row.append(l, sw, document.createElement('span')); return row;
   }
+  /* Developer details: the ONE place a surface shows the names the code uses -- a copy key, a
+     file, a layout key, an id, a raw value -- closed, so nothing is lost and nothing shouts
+     (docs/ux-audit/cms.md P1-2: HOME.TITLE, js/content/manifests/home.js, page:/section:1/... and
+     spot ids reached the person on almost every surface). rows: [[name, value], ...]; an empty
+     value is skipped. `extra`: elements placed inside after the list. */
+  function devDetails(rows, extra) {
+    const content = document.createElement('div');
+    const dl = document.createElement('dl');
+    (rows || []).forEach(([name, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      const dt = document.createElement('dt'); dt.textContent = name;
+      const dd = document.createElement('dd'); const code = document.createElement('code'); code.textContent = String(value); dd.appendChild(code);
+      dl.append(dt, dd);
+    });
+    if (dl.children.length) content.appendChild(dl);
+    (extra || []).forEach((el) => { if (el) content.appendChild(el); });
+    /* the editor's one disclosure (js/admin/primitives.js, Ark's disclosure shape), quiet */
+    return ArkAdminPrimitives.disclosure({ label: 'Developer details', content, className: 'ark-disclosure quiet' });
+  }
   A.provide({ CMS_ALIGN_TOKENS: CMS_ALIGN_TOKENS, CMS_BLOCK_RESOLVERS: CMS_BLOCK_RESOLVERS,
       CMS_BORDER_TOKENS: CMS_BORDER_TOKENS, CMS_BORDER_VALUES: CMS_BORDER_VALUES,
       CMS_CANVAS_EASINGS: CMS_CANVAS_EASINGS, CMS_CANVAS_EFFECTS: CMS_CANVAS_EFFECTS,
@@ -171,5 +190,5 @@
       CMS_WRAP_VALUES: CMS_WRAP_VALUES, cmsBlockResolverLabel: cmsBlockResolverLabel,
       cmsBlockResolverProps: cmsBlockResolverProps, cmsMasterKind: cmsMasterKind,
       cmsMasterProps: cmsMasterProps, ctlField: ctlField, ctlSegField: ctlSegField,
-      ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField });
+      ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField, devDetails: devDetails });
 })();

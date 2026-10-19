@@ -13,13 +13,13 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / REFERENCE RESOLVERS"
+      "value": "DEFXN / REFERENCE RESOLVERS"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Reference evidence, without the leap of faith."
+      "value": "Reference resolvers, without the leap of faith."
     },
     "BODY1": {
       "label": "First paragraph",
@@ -43,7 +43,7 @@ ArkManifest.define({
       "label": "Onward link",
       "kind": "line",
       "section": "Links",
-      "value": "See how Flux works"
+      "value": "See how DEFXN works"
     },
     "BACK": {
       "label": "Back link",

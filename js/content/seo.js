@@ -125,33 +125,24 @@ var ArkSEO = (function () {
     return out;
   }
 
-  /* Pages with no manifest of their own: their copy is not admin-editable
-     text, but their SEO title/description still are. */
-  var EXTRA_PAGES = [
-    { id: 'proximity', path: '/experiments', label: 'Interactive model' },
-    { id: 'lab', path: '/experiments/lab', label: 'Interactive model controls' },
-    { id: 'learnings', path: '/learnings', label: 'Notes' },
-    { id: 'explorer', path: '/explore', label: 'Mesh Explorer' },
-    { id: 'palette', path: '/palette', label: 'Palette' },
-    { id: 'resolvers', path: '/resolvers', label: 'FXN resolvers' },
-    { id: 'account', path: '/account', label: 'Your account' },
-    { id: 'account/domains', path: '/account/domains', label: 'Your domains' },
-    { id: 'treasury', path: '/treasury', label: 'Treasury preview' },
-    { id: 'deposits', path: '/deposits', label: 'Deposit preview' },
-    { id: 'stats', path: '/stats', label: 'Mesh performance' },
-    { id: 'stats/gpu', path: '/stats/gpu', label: 'GPU benchmark detail', sitemap: false },
-    { id: 'stats/ledger', path: '/stats/ledger', label: 'Ledger benchmark detail', sitemap: false },
-    { id: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', sitemap: false },
-    { id: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', sitemap: false },
-    { id: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', sitemap: false },
-    { id: 'reference', path: '/reference', label: 'Canonical reference', sitemap: false },
-    { id: 'lifecycle', path: '/lifecycle', label: 'Agreement lifecycle' },
-    { id: 'lifecycle/intent', path: '/lifecycle/intent', label: 'Intent / Agreement lifecycle' },
-    { id: 'lifecycle/offer', path: '/lifecycle/offer', label: 'Offer / Agreement lifecycle' },
-    { id: 'lifecycle/agreement', path: '/lifecycle/agreement', label: 'Agreement / Agreement lifecycle' },
-    { id: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle' },
-    { id: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle' }
-  ];
+  /* The site's own pages come from js/content/site-pages.js (ArkSitePages), the one table the
+     catalog, menu, footer strip and not-found page also read. Until 2026-10-19 this file kept a
+     second hand-written copy of those paths (EXTRA_PAGES) with its own sitemap:false flags, and
+     it had drifted from the catalog (docs/ux-audit/pages.md P7). The table must be loaded first:
+     a context without it would silently drop every manifest-less page's SEO override on the next
+     save, so this refuses instead, naming the missing script and where to load it. */
+  function sitePages() {
+    if (typeof ArkSitePages === 'undefined') throw new Error('ArkSEO needs js/content/site-pages.js (ArkSitePages): load it before js/content/seo.js -- index.html and admin-app.html do; a headless context must too (scripts/lib/site-bundle.mjs, js/admin/store.js `needs`).');
+    return ArkSitePages;
+  }
+  /* Pages with no manifest of their own: their copy is not admin-editable text, but their SEO
+     title/description still are. Derived: every table row whose SEO id is not a manifest's. */
+  function extraPages(manifests) {
+    var own = {};
+    (manifests || (typeof ArkManifest !== 'undefined' ? ArkManifest.all() : [])).forEach(function (m) { own[m.id] = true; });
+    return sitePages().pages().filter(function (row) { return !own[row.seoId || row.key]; })
+      .map(function (row) { return { id: row.seoId || row.key, path: row.path, label: row.label, journey: row.journey }; });
+  }
 
   /* Every call here takes an optional explicit manifests/articles list, used where the
      live ArkManifest/LearningContent registries are not populated (site-bundle.mjs reads
@@ -171,7 +162,7 @@ var ArkSEO = (function () {
         }
       });
     });
-    return out.concat(EXTRA_PAGES);
+    return out.concat(extraPages(manifests));
   }
   function pageIds(manifests) { return pageEntries(manifests).map(function (p) { return p.id; }); }
   function articleSlugs(articles) {
@@ -269,17 +260,20 @@ var ArkSEO = (function () {
   }
   function site() { return (get() || defaults()).site; }
 
-  /* Every route a search engine should be told about: the fixed pages,
-     every resolution, theory page, and article -- exactly what js/pages/catalog.js
-     registers, without needing it loaded (site-bundle.mjs runs headless). Each entry
-     carries the id/slug its SEO override is keyed by (besides 'path', the only field
-     the one other caller -- js/admin/admin.js's studioRoutes() -- reads), so sitemap()/
-     robots()/llmsTxt() can tell a noindex/AI-blocked route apart from a visible one. */
+  /* Every route a search engine should be told about: home, then every page of the site's own
+     table that belongs to a journey (js/content/site-pages.js -- a page in no journey, like the
+     reference reader, is in no list, the sitemap included), every manifest route, resolution,
+     theory page, and article -- exactly what js/pages/catalog.js registers, without needing it
+     loaded (site-bundle.mjs runs headless). Each entry carries the id/slug its SEO override is
+     keyed by (besides 'path', the only field the one other caller -- js/admin/studio.js's
+     studioRoutes() -- reads), so sitemap()/robots()/llmsTxt() can tell a noindex/AI-blocked
+     route apart from a visible one. */
   function routes(manifests, articles) {
     var out = [{ path: '/', id: 'home' }];
-    EXTRA_PAGES.filter(function (page) { return page.sitemap !== false; }).forEach(function (page) { if (!out.some(function (entry) { return entry.path === page.path; })) out.push({ path: page.path, id: page.id }); });
+    function has(path) { return out.some(function (entry) { return entry.path === path; }); }
+    sitePages().pages().filter(function (row) { return row.journey; }).forEach(function (row) { if (!has(row.path)) out.push({ path: row.path, id: row.seoId || row.key }); });
     (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
-      if (!out.some(function (entry) { return entry.path === m.route; })) out.push({ path: m.route, id: m.id });
+      if (!has(m.route)) out.push({ path: m.route, id: m.id });
     });
     pageEntries(manifests).filter(function (page) { return page.id.indexOf('resolutions/') === 0; }).forEach(function (page) {
       out.push({ path: '/' + page.id, id: page.id });
@@ -336,7 +330,11 @@ var ArkSEO = (function () {
     routes(manifests, articles).forEach(function (r) {
       var o = routeOverride(full, r);
       if (o && (o.noindex || o.aiBlocked)) return;
-      var title = r.slug ? articleTitleIn(full, r.slug, r.slug) : pageTitleIn(full, r.id, labelById[r.id] || r.id);
+      /* An article is named by its title, not its slug: a slug is an address. Until 2026-10-19
+         every article line here read as its slug, so the published slug
+         governance-without-a-validator-set reached llms.txt as a title, retired word and all. */
+      var article = r.slug ? (articles || []).filter(function (a) { return a && a.slug === r.slug; })[0] : null;
+      var title = r.slug ? articleTitleIn(full, r.slug, (article && article.title) || r.slug) : pageTitleIn(full, r.id, labelById[r.id] || r.id);
       var summary = (o && (o.aiSummary || o.description)) || site.defaultDescription;
       var line = '- [' + title + '](' + site.baseUrl + r.path + ')' + (summary ? ': ' + summary : '');
       (r.slug ? articleLines : pageLines).push(line);

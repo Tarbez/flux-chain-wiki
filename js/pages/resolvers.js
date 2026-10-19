@@ -1,110 +1,210 @@
-/* /resolvers · the directory of FXN resolvers.
+/* /resolvers · Resolvers and capabilities.
  *
- * The chain is agnostic grammar; the resolver interprets payload semantics
- * and OWNS the measured speed for its domain. This page lists every
- * currently published or in-registered-design resolver, each with its own
- * benchmark number, status and open issues. In production this is also
- * the surface backing resolve.defxn.com — the "deploy a resolver" flow
- * routes signed resolver packages here for discovery.
+ * Every fact on this page comes from js/content/registry-snapshot.js, which
+ * scripts/snapshot-registry.mjs generates from the code that defines each
+ * resolver and capability (defxn-defi-rs), plus the last recorded
+ * development-network observation. Nothing here is typed by hand: not the
+ * counts, not the chain ids, not what a resolver composes. The words live in
+ * js/content/manifests/resolver.js (REGISTRY.*), beside the hub that explains
+ * them.
+ *
+ * The snapshot is dated and says so; it is never presented as live. A fact
+ * the sources do not hold (a resolver's control key, how many providers
+ * announce right now) is shown as a dash and sent to Explore, which reads a
+ * node -- never as 0.
+ *
+ * Until 2026-10-19 this page was a hand-written directory of six
+ * applications (js/content/resolver-registry.js). They are not resolver
+ * chains; they stay, collapsed, under their own heading
+ * (js/content/resolver-applications.js).
  */
 (function () {
   'use strict';
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  var EXPLORE = 'https://explore.defxn.com';
+
+  function words(role) { return ArkCopy.text('RESOLVER.' + role); }
+  function el(tag, cls, text) { return ArkUI.el(tag, cls, text); }
+  function short(hex, n) { return hex ? String(hex).slice(0, n || 12) : '—'; }
+  function absent() { return el('span', 'registry-dash', '—'); }
+  /* One literal per hand-built class (docs/ux-audit/component-census-baseline.tsv must never
+     rise): a full-width tile and a tile's prose are spelled once, here, and reused. */
+  function wide(cls, label, id) { return tile('stats-span-12' + (cls ? ' ' + cls : ''), label, id); }
+  function statusChip(ok, text) { return el('span', 'resolver-status ' + (ok ? 'is-ok' : 'is-warn'), text); }
+  function prose(text) { return el('p', 'stats-tile-copy', text); }
+  function tile(cls, label, id) {
+    var t = el('article', 'stats-tile ' + cls);
+    if (label) { var l = el('p', 'stats-tile-label', label); if (id) { l.id = id; t.setAttribute('aria-labelledby', id); } t.appendChild(l); }
+    return t;
+  }
+  function chips(list) {
+    if (!list || !list.length) return absent();
+    var wrap = el('span', 'registry-uses');
+    list.forEach(function (item) { wrap.appendChild(el('code', '', item)); });
+    return wrap;
+  }
+  function explorerLink(chainId) {
+    var a = el('a', 'registry-open', words('REGISTRY.OPEN') + ' ↗');
+    a.href = EXPLORE + '/#' + encodeURIComponent(chainId);
+    a.target = '_blank'; a.rel = 'noopener';
+    a.setAttribute('aria-label', words('REGISTRY.OPEN') + ': ' + chainId);
+    return a;
+  }
+  function table(caption, heads, rows) {
+    var wrap = el('div', 'registry-scroll');
+    var t = el('table', '');
+    t.appendChild(el('caption', 'visually-hidden', caption));
+    var tr = el('tr', '');
+    heads.forEach(function (h) { var th = el('th', '', h); th.scope = 'col'; tr.appendChild(th); });
+    var thead = el('thead', ''); thead.appendChild(tr); t.appendChild(thead);
+    var body = el('tbody', '');
+    rows.forEach(function (cells) {
+      var row = el('tr', '');
+      cells.forEach(function (cell, i) {
+        var td = el(i === 0 ? 'th' : 'td', '');
+        if (i === 0) td.scope = 'row';
+        if (cell && typeof cell === 'object' && cell.nodeType) td.appendChild(cell); else td.textContent = cell;
+        row.appendChild(td);
+      });
+      body.appendChild(row);
     });
+    t.appendChild(body); wrap.appendChild(t);
+    return wrap;
   }
-  function fmt(n) { return n == null ? '–' : Number(n).toLocaleString('en-US'); }
-  function tile(cls, label, body, id) {
-    return '<article class="stats-tile ' + cls + '"' + (id ? ' aria-labelledby="' + id + '"' : '') + '>' +
-      (label ? '<p class="stats-tile-label"' + (id ? ' id="' + id + '"' : '') + '>' + label + '</p>' : '') +
-      body + '</article>';
-  }
-  function statusChip(status) {
-    var map = {
-      deployed: ['Deployed', 'is-ok'],
-      draft:    ['Draft',    'is-warn'],
-      planned:  ['Planned',  'is-faint']
-    };
-    var pair = map[status] || ['Unknown', 'is-faint'];
-    return '<span class="resolver-status ' + pair[1] + '">' + pair[0] + '</span>';
-  }
-  function measuredRow(m) {
-    if (!m || m.rate == null) {
-      var reason = (m && m.source) ? m.source : 'no published benchmark';
-      return '<div class="resolver-measured is-missing">' +
-        '<span class="resolver-measured-label">Measured throughput</span>' +
-        '<span class="resolver-measured-value">—</span>' +
-        '<span class="resolver-measured-source">' + esc(reason) + '</span></div>';
-    }
-    var secondary = (m.secondary || []).map(function (s) {
-      return '<li>' + esc(s.label) + ' · <strong>' + fmt(s.rate) + '</strong> ' + esc(s.unit || '') + '</li>';
-    }).join('');
-    return '<div class="resolver-measured">' +
-      '<span class="resolver-measured-label">' + esc(m.label) + '</span>' +
-      '<span class="resolver-measured-value"><strong>' + fmt(m.rate) + '</strong> ' + esc(m.unit) + '</span>' +
-      '<span class="resolver-measured-source">' + esc(m.source) + '</span>' +
-      (secondary ? '<ul class="resolver-measured-secondary">' + secondary + '</ul>' : '') +
-      '</div>';
-  }
-  function resolverCard(r) {
-    var openIssues = (r.openIssues || []).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
-    var yCodes = (r.yCodes || []).map(function (y) { return '<code>' + esc(y) + '</code>'; }).join(' · ');
-    return tile('stats-span-6 resolver-card', esc(r.domain || ''),
-      '<header class="resolver-head">' +
-        '<h3>' + esc(r.name) + '</h3>' +
-        statusChip(r.status) +
-      '</header>' +
-      '<p class="stats-tile-copy">' + esc(r.shortSummary || '') + '</p>' +
-      '<p class="resolver-meta"><strong>Y codes:</strong> ' + (yCodes || '<em>none registered</em>') + '</p>' +
-      '<p class="resolver-meta"><strong>Implementation:</strong> <code>' + esc(r.implementation || '—') + '</code></p>' +
-      '<p class="resolver-meta"><strong>Author:</strong> ' + esc(r.author || '—') + '</p>' +
-      measuredRow(r.measured) +
-      (openIssues ? '<details class="resolver-issues"><summary>Open issues</summary><ul>' + openIssues + '</ul></details>' : ''),
-      'resolver-' + r.slug + '-title');
+  function grammarChip(state) {
+    var c = statusChip(state === 'enforced', state === 'enforced' ? 'Grammar enforced' : 'Unspecified (legacy)');
+    return c;
   }
 
   ArkUI.pageModules.resolvers = {
     mount: function (host) {
-      var registry = window.ArkResolverRegistry || { chain: {}, resolvers: [] };
-      var page = document.createElement('section');
-      page.className = 'ark-page task-page stats-page resolvers-page';
+      var snap = window.ArkRegistrySnapshot;
+      var apps = window.ArkResolverApplications;
+      var page = el('section', 'ark-page task-page stats-page resolvers-page');
       page.setAttribute('aria-labelledby', 'resolvers-title');
-      var cards = (registry.resolvers || []).map(resolverCard).join('');
-      page.innerHTML = '<div class="stats-shell"><div class="stats-bento">' +
-        tile('stats-hero', '',
-          '<p class="stats-kicker">The chain is agnostic grammar · the resolver carries meaning</p>' +
-          '<h1 id="resolvers-title">FXN resolvers</h1>' +
-          '<p>A LEDGERENTRY is admitted by the chain if its grammar is well-formed, the signature verifies under <code>G</code>, and the position <code>J</code> extends the holder\'s own chain. Nothing else about the payload is interpreted at the chain level. Each resolver below registers against a <code>Y</code> code (the manifest type) and interprets that payload\'s semantics for its own domain. Speed is per resolver.</p>' +
-          '<p class="stats-chips"><span>Updated ' + esc(registry.updated || '') + '</span><span>Future home · resolve.defxn.com</span></p>') +
+      var shell = el('div', 'stats-shell'), bento = el('div', 'stats-bento');
+      shell.appendChild(bento); page.appendChild(shell);
 
-        tile('stats-span-12 stats-chosen', 'The chain, for context', '<h2>Grammar-only admit path</h2>' +
-          '<p class="stats-tile-copy">' + esc(registry.chain.shortSummary || '') + '</p>' +
-          '<p class="resolver-meta"><strong>Y codes it carries:</strong> ' + ((registry.chain.yCodes || []).map(function (y) { return '<code>' + esc(y) + '</code>'; }).join(' · ') || '—') + '</p>' +
-          measuredRow(registry.chain.measured)) +
+      // ---- hero: what this is, and exactly which commit and observation it is ------------------
+      var hero = tile('stats-hero');
+      hero.appendChild(el('p', 'stats-kicker', words('REGISTRY.KICKER')));
+      var h1 = el('h1', '', words('REGISTRY.TITLE')); h1.id = 'resolvers-title'; hero.appendChild(h1);
+      hero.appendChild(el('p', '', words('REGISTRY.LEDE')));
+      var heroChips = el('p', 'stats-chips');
+      if (snap) {
+        heroChips.appendChild(el('span', '', 'Snapshot · ' + snap.source.repo.replace(/^flux\//, '') + ' ' + short(snap.source.commit, 7) + ' · ' + snap.source.commitDate));
+        heroChips.appendChild(el('span', '', 'Development network · ' + snap.observation.date));
+      }
+      var live = el('a', 'registry-live', 'Live view · explore.defxn.com ↗');
+      live.href = EXPLORE; live.target = '_blank'; live.rel = 'noopener';
+      heroChips.appendChild(live);
+      hero.appendChild(heroChips);
+      bento.appendChild(hero);
 
-        tile('stats-span-12', 'Deployed and in-registered-design resolvers', '<h2>' + (registry.resolvers || []).length + ' resolvers, each with its own measured speed</h2>' +
-          '<p class="stats-tile-copy">Different domains, different grammars, different speeds. The DeFi transfer resolver\'s finalized-transfer rate has nothing to do with the PVA resolver\'s record-lookup rate; they share the chain but not the semantics. If a resolver below has no published number, that is honest — nobody has run its benchmark yet, and we say so plainly.</p>') +
+      if (!snap) {
+        // A refusal that names what it needs, never an empty table that reads as "no resolvers".
+        var missing = wide('');
+        missing.appendChild(prose('The registry snapshot did not load, so no resolver is listed here. Missing: js/content/registry-snapshot.js. Remedy: node scripts/snapshot-registry.mjs --write, or read the live list in Explore.'));
+        bento.appendChild(missing);
+      } else {
+        var counts = snap.counts, obs = snap.observation;
 
-        cards +
+        // ---- counts, each with what it counts --------------------------------------------------
+        var countTile = tile('stats-span-5 registry-counts');
+        [[counts.nativeResolverChains, 'native resolver chains'], [counts.bridgeChains, 'bridge chains'], [counts.capabilities, 'capability manifests']].forEach(function (pair) {
+          var row = el('p', 'registry-count');
+          row.appendChild(el('strong', '', String(pair[0])));
+          row.appendChild(el('span', '', pair[1]));
+          countTile.appendChild(row);
+        });
+        countTile.appendChild(el('p', 'registry-count-source', 'In source at ' + short(snap.source.commit, 7) + '. The development network listed ' + obs.resolverChainsListed + ' resolver chains' + (obs.allNative ? ', all native,' : '') + ' on ' + obs.date + '.'));
+        bento.appendChild(countTile);
 
-        tile('stats-span-12 stats-scope', 'Deploy a new resolver', '<h2>How a resolver gets published</h2>' +
-          '<ul class="stats-scope-list is-single">' +
-            '<li>Pick a free <code>Y</code> code or extend a registered one with a payload variant. The registered grammar lives in <code>flux-spec/registry/manifest-types.json</code>.</li>' +
-            '<li>Implement the resolver as a crate or module (Rust for in-process; Node for HTTP). The resolver\'s only job is to interpret payload references and refuse invalid ones. Grammar admission is already handled by the chain.</li>' +
-            '<li>Publish a signed resolver manifest (name, version, Y codes claimed, author key, benchmark proof). On the fleet, this is a LEDGERENTRY on a resolver-registry chain; the chain itself is agnostic about which resolver reads which payload.</li>' +
-            '<li>Register with the directory so <code>/resolvers</code> (and in time <code>resolve.defxn.com</code>) can list it, link its code, and show its measured speed. Numbers are per resolver; the directory does not aggregate them.</li>' +
-            '<li>Open issues are listed next to each resolver, not hidden. A resolver without a benchmark is listed as "no published benchmark" rather than inflated into the chain\'s own numbers.</li>' +
-          '</ul>' +
-          '<p class="stats-tile-copy">A command-line deployer and the <code>resolve.defxn.com</code> landing surface are the next step. Today this page is read-only from <code>js/content/resolver-registry.js</code>.</p>', 'resolvers-deploy-title') +
+        // ---- resolver chains --------------------------------------------------------------------
+        var chains = wide('registry-chains', words('REGISTRY.CHAINS.LABEL'), 'registry-chains-label');
+        chains.appendChild(el('h2', '', counts.nativeResolverChains + ' first-party resolver chains, each launched by one record'));
+        chains.appendChild(prose(words('REGISTRY.CHAINS.BODY')));
+        chains.appendChild(table('Resolver chains in the snapshot', ['Chain id', 'Resolver', 'Built from', 'Grammar', 'Control', ''], snap.resolvers.map(function (r) {
+          return [el('code', '', r.chainId), r.name, chips(r.composes), grammarChip(r.grammar), r.control ? el('code', '', short(r.control)) : absent(), explorerLink(r.chainId)];
+        })));
+        chains.appendChild(el('p', 'registry-footnote', 'Grammar state is the source manifest at ' + short(snap.source.commit, 7) + '; the development network was launched before it and was not re-read. Control key and announcing providers are not in the sources: read them in Explore.'));
+        bento.appendChild(chains);
 
-        /* Anchor for reusable content blocks (js/content/components.js); rendering into
-           it is centralized in js/main.js's onMount hook, not called here. Baked into the
-           HTML string itself, like the rest of this page, rather than a querySelector()
-           afterward, since this page module builds entirely from one innerHTML write. */
-        '<div data-ark-insert="main"></div>' +
-        '</div></div>';
+        // ---- capabilities -----------------------------------------------------------------------
+        var caps = wide('registry-caps', words('REGISTRY.CAPS.LABEL'), 'registry-caps-label');
+        caps.appendChild(el('h2', '', counts.capabilities + ' capability manifests, derived from their crates’ own tests'));
+        caps.appendChild(prose(words('REGISTRY.CAPS.BODY')));
+        // A measured zero is said as a measured zero; only an absent reading would be a dash.
+        if (obs.capabilitiesLaunched === 0) caps.appendChild(el('p', 'registry-zero', words('REGISTRY.CAPS.EMPTY')));
+        else if (typeof obs.capabilitiesLaunched === 'number') caps.appendChild(el('p', 'registry-zero', 'Launched on the development network at its last recorded restart: ' + obs.capabilitiesLaunched + '.'));
+        caps.appendChild(table('Capability manifests in the snapshot', ['Capability', 'Version', 'Test vectors', 'Source hash', 'Used by'], snap.capabilities.map(function (c) {
+          return [el('code', '', c.id), c.version, String(c.vectors), el('code', '', short(c.sourceHash)), chips(c.usedBy)];
+        })));
+        bento.appendChild(caps);
+
+        // ---- bridge chains (collapsed: secondary) ----------------------------------------------
+        var bridges = wide('registry-bridges');
+        var bridgeBox = el('details', 'registry-fold');
+        bridgeBox.appendChild(el('summary', '', words('REGISTRY.BRIDGES.LABEL') + ' · ' + counts.bridgeChains));
+        bridgeBox.appendChild(prose(words('REGISTRY.BRIDGES.BODY')));
+        bridgeBox.appendChild(table('Bridge chains in the snapshot', ['Chain id', 'Product', 'Through', 'Records', 'Note'], snap.bridges.map(function (b) {
+          return [el('code', '', b.chainId), b.name, b.via, chips(b.records), b.note];
+        })));
+        bridges.appendChild(bridgeBox);
+        bento.appendChild(bridges);
+      }
+
+      // ---- deploy your own (the short version; the walkthrough is /how-deployment-works) --------
+      var deploy = wide('stats-scope', words('REGISTRY.DEPLOY.TITLE'), 'registry-deploy-label');
+      var steps = el('ol', 'stats-scope-list is-single');
+      words('REGISTRY.DEPLOY.STEPS').split('\n').filter(Boolean).forEach(function (line) { steps.appendChild(el('li', '', line)); });
+      deploy.appendChild(steps);
+      var actions = el('p', 'registry-ways');
+      actions.appendChild(ArkUI.dash.linkEl(words('REGISTRY.DEPLOY.LINK') + ' →', words('DEPLOY.HREF'), '/resolvers', 'registry-way'));
+      actions.appendChild(ArkUI.dash.linkEl(words('DEPLOYER.LINK') + ' ↗', words('DEPLOYER.HREF'), '/resolvers', 'registry-way'));
+      actions.appendChild(ArkUI.dash.linkEl('What is a resolver? →', 'route:resolver', '/resolvers', 'registry-way'));
+      /* The rest of the resolver journey (js/content/site-pages.js 'build'): this page was a dead
+         end with no way on (docs/ux-audit/pages.md P2/"Next-step links"; regression:
+         tests/site-exits.cjs). */
+      actions.appendChild(ArkUI.dash.linkEl('Resolver math →', 'route:resolver-math', '/resolvers', 'registry-way'));
+      actions.appendChild(ArkUI.dash.linkEl('Reference resolvers →', 'route:references', '/resolvers', 'registry-way'));
+      actions.appendChild(ArkUI.dash.linkEl('Create or join a network →', 'route:deploy', '/resolvers', 'registry-way'));
+      deploy.appendChild(actions);
+      deploy.appendChild(el('p', 'registry-footnote', words('PRODUCTS.NOTE')));
+      bento.appendChild(deploy);
+
+      // ---- applications that are not resolver chains (collapsed; owner question Q5) -------------
+      if (apps && apps.applications && apps.applications.length) {
+        var appTile = wide('registry-apps');
+        var appBox = el('details', 'registry-fold');
+        appBox.appendChild(el('summary', '', words('REGISTRY.APPS.LABEL') + ' · ' + apps.applications.length));
+        appBox.appendChild(prose(words('REGISTRY.APPS.BODY') + ' Listed ' + apps.updated + '.'));
+        var list = el('ul', 'registry-app-list');
+        apps.applications.forEach(function (a) {
+          var li = el('li', 'registry-app');
+          var head = el('p', 'registry-app-head');
+          head.appendChild(el('strong', '', a.name));
+          head.appendChild(statusChip(a.status === 'deployed', a.status === 'deployed' ? 'In service' : 'Draft'));
+          li.appendChild(head);
+          li.appendChild(prose(a.shortSummary));
+          if (a.note) li.appendChild(el('p', 'resolver-meta', a.note));
+          var m = a.measured || {};
+          li.appendChild(el('p', 'resolver-meta', (m.label || 'Measured') + ': ' + (m.rate == null ? '— · ' + (m.source || 'no published benchmark') : Number(m.rate).toLocaleString('en-US') + ' ' + (m.unit || '') + ' · ' + (m.source || ''))));
+          if (a.openIssues && a.openIssues.length) li.appendChild(el('p', 'resolver-meta', 'Open issues: ' + a.openIssues.join('; ')));
+          list.appendChild(li);
+        });
+        appBox.appendChild(list);
+        appTile.appendChild(appBox);
+        bento.appendChild(appTile);
+      }
+
+      var boundary = wide('registry-boundary');
+      boundary.appendChild(prose(words('REGISTRY.BOUNDARY')));
+      bento.appendChild(boundary);
+
+      /* Anchor for reusable content blocks (js/content/components.js); rendering into it is
+         centralized in js/main.js's onMount hook, not called here. */
+      var anchor = el('div', ''); anchor.setAttribute('data-ark-insert', 'main'); bento.appendChild(anchor);
       host.appendChild(page);
       return page;
     }

@@ -57,7 +57,7 @@
         copy.appendChild(el('strong', '', short(item)));
         copy.appendChild(el('span', '', item.text));
         link.appendChild(copy);
-        var arrow = el('span', 'resolution-entry-arrow', '↗');
+        var arrow = el('span', 'resolution-entry-arrow', '→');
         arrow.setAttribute('aria-hidden', 'true');
         link.appendChild(arrow);
         return link;
@@ -75,7 +75,11 @@
         var title = el('h1', '', words('TITLE'));
         title.id = 'resolutions-title';
         heroCopy.appendChild(title);
-        heroCopy.appendChild(el('p', 'resolutions-deck', words('DECK')));
+        var deck = el('p', 'resolutions-deck', words('DECK'));
+        heroCopy.appendChild(deck);
+        // The deck is clamped to two lines to hold the first screen; it used to end in "..."
+        // with no way to read the rest. The toggle shows only while the clamp actually cuts.
+        heroCopy.appendChild(ArkUI.dash.foldToggle({ host: heroCopy, clamp: deck }));
         hero.appendChild(heroCopy);
         var measure = el('dl', 'resolutions-measure');
         [['20', 'resolutions'], ['05', 'domains'], ['01', 'mesh']].forEach(function (entry) {
@@ -148,8 +152,11 @@
         selectGroup(0);
 
         var note = el('aside', 'resolutions-note');
-        note.appendChild(el('p', '', words('NOTE')));
-        var status = fieldLink(words('NOTE.LINK') + ' ↗', 'NOTE.LINK.HREF', 'resolutions-note-link');
+        var noteText = el('p', '', words('NOTE'));
+        note.appendChild(noteText);
+        // Same defect as the deck: a one-line clamp cut the status note mid-sentence.
+        note.appendChild(ArkUI.dash.foldToggle({ host: note, clamp: noteText }));
+        var status = fieldLink(words('NOTE.LINK') + ' →', 'NOTE.LINK.HREF', 'resolutions-note-link');
         note.appendChild(status);
         page.appendChild(note);
         return page;
@@ -191,6 +198,7 @@
         var actions = el('div', 'resolution-detail-actions');
         if (item.start && ArkUI.pageCatalog[item.start]) actions.appendChild(routeLink(words('START') + ' →', item.start, 'resolution-primary-action'));
         else actions.appendChild(fieldLink('How resolvers work →', 'START.FALLBACK.HREF', 'resolution-primary-action'));
+        if (item.also && ArkUI.pageCatalog[item.also]) actions.appendChild(routeLink(String(ArkUI.pageCatalog[item.also].title).split(' — ')[0] + ' →', item.also, 'resolution-secondary-action'));
         intro.appendChild(actions);
         workspace.appendChild(intro);
 
@@ -335,7 +343,7 @@
         legend.appendChild(el('span', 'resolution-legend-ready', 'Ready: usable today'));
         legend.appendChild(el('span', 'resolution-legend-building', 'Building: in source, not released'));
         legend.appendChild(el('span', 'resolution-legend-idea', 'Ideas: proposed, not built'));
-        var statusLink = fieldLink(words('NOTE.LINK') + ' ↗', 'NOTE.LINK.HREF', 'resolution-boundary-link');
+        var statusLink = fieldLink(words('NOTE.LINK') + ' →', 'NOTE.LINK.HREF', 'resolution-boundary-link');
         legend.appendChild(statusLink);
         panel.appendChild(legend);
         workspace.appendChild(panel);

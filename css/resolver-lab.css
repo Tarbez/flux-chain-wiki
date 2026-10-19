@@ -4,7 +4,9 @@
    motion. Primary is the travelling signal and the claim; nothing loops. */
 
 #scene .resolver-lab {
-  position:relative;box-sizing:border-box;height:100%;min-height:0;overflow:hidden;
+  /* overflow-y:auto, not hidden: when a short desktop cannot hold the step, the frame scrolls
+     instead of clipping the way on (the lede used to be display:none for this reason). */
+  position:relative;box-sizing:border-box;height:100%;min-height:0;overflow-x:hidden;overflow-y:auto;
   display:grid;grid-template-columns:minmax(0,.95fr) minmax(380px,1fr);column-gap:clamp(32px,5vw,72px);
   align-items:center;padding:clamp(18px,3.2vh,34px) clamp(24px,4.5vw,64px);color:hsl(var(--text));
   background:radial-gradient(circle at 78% 50%,hsl(var(--primary-100)),transparent 46%);
@@ -14,7 +16,7 @@
 /* Left ---------------------------------------------------------------------- */
 .resolver-lab-copy {display:flex;flex-direction:column;gap:clamp(10px,1.9vh,18px);min-width:0;max-width:600px;}
 #scene .resolver-lab .content-layer-path {align-self:flex-start;}
-.resolver-lab-kicker {margin:0;font:500 11px/1.4 var(--mono-font,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-muted));}
+.resolver-lab-kicker {margin:0;font:500 11px/1.4 var(--font-mono,monospace);letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--text-muted));}
 #scene .resolver-lab h1 {margin:0;font:600 clamp(34px,4.3vw,58px)/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.05em;color:hsl(var(--text-strong));text-wrap:balance;}
 .resolver-lab-lede {margin:0;max-width:50ch;font:400 clamp(15px,1.2vw,17px)/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
 
@@ -36,7 +38,7 @@
 .resolver-track-node[data-step="check"] .resolver-track-mark {border-radius:50%;transform:none;}
 .resolver-track-node[data-step="laws"] .resolver-track-mark {transform:none;border-radius:3px;}
 .resolver-track-label {display:grid;justify-items:inherit;gap:1px;white-space:nowrap;}
-.resolver-track-label small {font:500 9.5px var(--mono-font,monospace);letter-spacing:.06em;color:hsl(var(--text-faint));}
+.resolver-track-label small {font:500 9.5px var(--font-mono,monospace);letter-spacing:.06em;color:hsl(var(--text-faint));}
 #scene .resolver-track-node[data-done="true"] .resolver-track-mark {border-color:hsl(var(--text-muted));background:hsl(var(--nested));}
 #scene .resolver-track-node[aria-pressed="true"] {color:hsl(var(--text-strong));}
 #scene .resolver-track-node[aria-pressed="true"] .resolver-track-mark {border-color:hsl(var(--text-strong));background:hsl(var(--text-strong));box-shadow:0 0 0 4px hsl(var(--nested));}
@@ -73,9 +75,9 @@
 /* Right: the mesh scene ----------------------------------------------------- */
 .resolver-lab-scene {display:flex;flex-direction:column;gap:12px;min-width:0;height:min(100%,560px);margin:0;padding:16px;box-sizing:border-box;
   border:1px solid hsl(var(--border-default));border-radius:14px;background:hsl(var(--surface));box-shadow:0 24px 60px hsl(var(--theme-shadow-color) / .22);}
-.resolver-lab-scene-head {display:flex;align-items:center;justify-content:space-between;gap:12px;font:500 11px var(--mono-font,monospace);letter-spacing:.04em;color:hsl(var(--text-faint));}
+.resolver-lab-scene-head {display:flex;align-items:center;justify-content:space-between;gap:12px;font:500 11px var(--font-mono,monospace);letter-spacing:.04em;color:hsl(var(--text-faint));}
 .resolver-lab-address {min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.resolver-lab-address code {padding:3px 9px;border:1px solid hsl(var(--border-default));border-radius:999px;font:500 11px var(--mono-font,monospace);color:hsl(var(--text));}
+.resolver-lab-address code {padding:3px 9px;border:1px solid hsl(var(--border-default));border-radius:999px;font:500 11px var(--font-mono,monospace);color:hsl(var(--text));}
 
 .resolver-lab-stage {position:relative;flex:1;min-height:200px;border-radius:10px;overflow:hidden;background:hsl(var(--canvas));border:1px solid hsl(var(--border-subtle));}
 .resolver-mesh {display:block;width:100%;height:100%;cursor:crosshair;
@@ -90,7 +92,7 @@
 @keyframes resolver-lab-breathe {50%{box-shadow:0 0 0 6px hsl(var(--primary-100));}}
 .resolver-mesh-labels {position:absolute;inset:0;pointer-events:none;}
 .resolver-mesh-label {position:absolute;padding:2px 7px;border-radius:5px;background:hsl(var(--canvas) / .92);white-space:nowrap;
-  font:500 11px/1.3 var(--mono-font,monospace);color:hsl(var(--text));opacity:0;transform:translateY(3px);transition:opacity 260ms,transform 260ms,left 60ms linear;}
+  font:500 11px/1.3 var(--font-mono,monospace);color:hsl(var(--text));opacity:0;transform:translateY(3px);transition:opacity 260ms,transform 260ms,left 60ms linear;}
 .resolver-mesh-label[data-show="true"] {opacity:1;transform:none;}
 /* The rule sits centred over the gate; the claim's labels centre on the fingerprint. */
 .resolver-mesh-label:is(.resolver-mesh-label-rule,.resolver-mesh-label-claim,.resolver-mesh-label-sign,.resolver-mesh-label-accept) {translate:-50% 0;}
@@ -105,7 +107,7 @@
 .resolver-lab-inputs {display:inline-flex;gap:2px;padding:3px;border:1px solid hsl(var(--border-subtle));border-radius:10px;background:hsl(var(--canvas));}
 #scene .resolver-lab-doc {display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap;height:30px;padding:0 12px;border:0;border-radius:7px;background:transparent;
   font:500 12.5px/30px var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));cursor:pointer;transition:background-color 160ms,color 160ms,box-shadow 160ms;}
-#scene .resolver-lab-doc small {font:500 10.5px var(--mono-font,monospace);color:hsl(var(--text-faint));}
+#scene .resolver-lab-doc small {font:500 10.5px var(--font-mono,monospace);color:hsl(var(--text-faint));}
 #scene .resolver-lab-doc:hover {color:hsl(var(--text-strong));}
 #scene .resolver-lab-doc[aria-pressed="true"] {background:hsl(var(--raised));color:hsl(var(--text-strong));box-shadow:inset 0 0 0 1px hsl(var(--border-default)),0 1px 2px hsl(var(--theme-shadow-color) / .2);}
 #scene .resolver-lab-doc:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:1px;}
@@ -117,7 +119,7 @@
 
 /* Laws: in place of the stage on the Laws step. */
 .resolver-lab-laws {display:none;margin:0;padding:0;list-style:none;}
-.resolver-lab-laws-source {display:none;margin:0;font:400 11px/1.4 var(--mono-font,monospace);color:hsl(var(--text-faint));}
+.resolver-lab-laws-source {display:none;margin:0;font:400 11px/1.4 var(--font-mono,monospace);color:hsl(var(--text-faint));}
 .resolver-lab[data-step="laws"] :is(.resolver-lab-stage,.resolver-lab-controls) {display:none;}
 .resolver-lab[data-step="laws"] .resolver-lab-laws {display:grid;gap:8px;align-content:start;flex:1;}
 .resolver-lab[data-step="laws"] .resolver-lab-laws-source {display:block;}
@@ -126,14 +128,18 @@
   animation:resolver-lab-rise 520ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i,0) * 90ms);}
 .resolver-lab-law::before {content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:2px;background:hsl(var(--primary-300));}
 .resolver-lab-law-top {display:flex;align-items:center;gap:10px;}
-.resolver-lab-law-num {font:500 10px var(--mono-font,monospace);color:hsl(var(--text-faint));}
+.resolver-lab-law-num {font:500 10px var(--font-mono,monospace);color:hsl(var(--text-faint));}
 .resolver-lab-law strong {flex:1;font:600 15px/1.3 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
 .resolver-lab-law p {margin:5px 0 0 26px;font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));}
-.resolver-lab-law-status {padding:2px 8px;border:1px solid;border-radius:999px;font:600 10px var(--mono-font,monospace);letter-spacing:.04em;text-transform:uppercase;}
+.resolver-lab-law-status {padding:2px 8px;border:1px solid;border-radius:999px;font:600 10px var(--font-mono,monospace);letter-spacing:.04em;text-transform:uppercase;}
 .resolver-lab-law-status[data-status="live"] {border-color:hsl(var(--success-300));background:hsl(var(--success-100));color:hsl(var(--success-700));}
 .resolver-lab-law-status[data-status="spec"] {border-color:hsl(var(--border-default));color:hsl(var(--text-muted));}
 .resolver-lab-law-status[data-status="partial"] {border-color:hsl(var(--warning-300));background:hsl(var(--warning-100));color:hsl(var(--warning-700));}
-.resolver-lab-law-toggle {display:none;}
+.resolver-lab-law-toggle {display:none;font:inherit;}
+/* Where laws open one at a time (phones, narrow desktops) the toggle covers the card; this
+   mark says the card opens, and which way. Without it the closed bodies read as missing. */
+.resolver-lab-law-toggle::after {content:"+";position:absolute;top:8px;right:10px;font:500 14px/18px var(--font-mono,monospace);color:hsl(var(--reference));}
+.resolver-lab-law-toggle[aria-expanded="true"]::after {content:"\2212";}
 #scene .resolver-lab-law-see {position:relative;z-index:1;display:inline;margin:0;padding:0;white-space:nowrap;border:0;background:none;cursor:pointer;
   font:500 12px var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--reference));text-decoration:underline;text-decoration-color:hsl(var(--reference-300));text-underline-offset:3px;}
 #scene .resolver-lab-law-see:is(:hover,:focus-visible) {color:hsl(var(--reference-700));text-decoration-color:hsl(var(--reference-400));}
@@ -147,7 +153,7 @@
 }
 @media(min-width:901px) and (max-height:760px){
   #scene .resolver-lab {padding-block:8px;}
-  .resolver-lab-lede {display:none;}
+  .resolver-lab-lede {font-size:14px;line-height:1.45;}
   .resolver-lab-copy {gap:10px;}
   .resolver-track {height:66px;}
   .resolver-lab-caption {min-height:70px;}
@@ -159,7 +165,9 @@
 @media(max-width:900px){
   #scene .resolver-lab {grid-template-columns:minmax(0,1fr);align-items:start;align-content:start;row-gap:14px;overflow-y:auto;padding:14px 16px;}
   .resolver-lab-copy {max-width:none;gap:10px;}
-  .resolver-lab-lede,.resolver-lab-kicker {display:none;}
+  /* The lede is the page's definition ("A resolver is named, deterministic logic...") and
+     used to be display:none here, with the kicker; both stay, smaller. */
+  .resolver-lab-lede {font-size:14px;line-height:1.45;}
   #scene .resolver-lab h1 {font-size:27px;}
   .resolver-track {height:58px;margin-inline:10px;}
   #scene .resolver-track-node {font-size:12px;gap:8px;}
@@ -173,9 +181,10 @@
   .resolver-lab-inputs {width:100%;box-sizing:border-box;}
   #scene .resolver-lab-doc {flex:1;justify-content:center;gap:4px;padding:0 6px;}
   .resolver-mesh-label {font-size:9.5px;padding:1px 5px;}
-  .resolver-lab-scene-head {display:flex;}
-  .resolver-lab-address {display:none;}
-  .resolver-lab-scene-head {position:absolute;right:20px;margin-top:6px;z-index:2;}
+  /* The policy address (what the demo actually runs) was display:none and "Run again"
+     floated over the stage; the head is a wrapping row above the stage instead. */
+  .resolver-lab-scene-head {flex-wrap:wrap;gap:6px 10px;}
+  .resolver-lab-address {white-space:normal;overflow-wrap:anywhere;}
   .resolver-lab-scene {position:relative;}
   #scene .resolver-lab-spec {margin-left:auto;}
   .resolver-lab-law p {display:none;margin-left:0;}
@@ -183,12 +192,17 @@
   .resolver-lab-law {padding:8px 12px;}
   .resolver-lab-law strong {font-size:13.5px;}
   .resolver-lab-law[data-open="true"] p {display:block;}
-  /* The narration line says these on phones; the stage keeps only the claim id. */
+  /* The narration line says these on phones; the stage keeps only the claim id. Allowed to
+     stay hidden only because the same words stay visible: doc id in the narration and size
+     on the document picker, "signed by provider P-3" and "a checker decides acceptance" /
+     "same input, same claim" in the narration (js/pages/resolver-lab.js narrate()).
+     tests/fold-no-hidden-content.cjs holds that pairing. */
   .resolver-mesh-label:is(.resolver-mesh-label-sign,.resolver-mesh-label-accept,.resolver-mesh-label-doc) {display:none;}
   .resolver-mesh-narration {font-size:11px;bottom:6px;}
   .resolver-mesh {cursor:default;}
   .resolver-lab-law-toggle {display:block;position:absolute;inset:0;width:100%;border:0;background:none;cursor:pointer;}
   .resolver-lab-law[data-open="true"] {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));}
+  .resolver-lab-law-top {padding-right:20px;}
 }
 /* Narrower desktops: laws open one at a time, as on phones. */
 @media(min-width:901px) and (max-width:1180px){
@@ -196,30 +210,35 @@
   .resolver-lab-law[data-open="true"] p {display:block;}
   .resolver-lab-law-toggle {display:block;position:absolute;inset:0;width:100%;border:0;background:none;cursor:pointer;}
   .resolver-lab-law[data-open="true"] {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));}
+  .resolver-lab-law-top {padding-right:20px;}
 }
 /* Short phones (e.g. 375x667): keep every step on one screen. */
 @media(max-width:900px) and (max-height:720px){
   #scene .resolver-lab {row-gap:10px;padding-block:10px;}
-  #scene .resolver-lab .content-layer-path {display:none;}
   #scene .resolver-lab h1 {font-size:22px;}
   .resolver-lab-copy {gap:8px;}
   .resolver-track {height:50px;margin-top:0;}
-  .resolver-track-label small {display:none;}
   .resolver-lab-caption h2 {font-size:15px;margin-bottom:3px;}
   .resolver-lab-caption p {font-size:12.5px;line-height:1.45;}
   #scene .resolver-lab-next {height:38px;}
-  #scene .resolver-lab-spec {display:none;}
   .resolver-lab-stage {height:120px;}
   .resolver-lab-scene {padding:6px;gap:6px;}
   #scene .resolver-lab-doc {height:26px;line-height:26px;font-size:11.5px;}
   #scene .resolver-lab-again {min-height:26px;font-size:11.5px;}
-  .resolver-track {height:44px;}
   #scene .resolver-track-node {gap:6px;}
   .resolver-lab-caption {padding-left:12px;}
   .resolver-lab-law {padding:6px 10px;}
-  .resolver-lab-laws-source {display:none !important;}
-  .resolver-mesh-label-rule {display:none;}
 }
 @media(prefers-reduced-motion:reduce){
   .resolver-lab *,.resolver-lab *::before {animation:none !important;transition:none !important;}
 }
+
+/* The hub's way on (js/pages/resolver-lab.js "onward"): a quiet disclosure for what "verified on
+   chain" means, then one row of links to the registry, the walkthrough and the two products. */
+.resolver-lab-onward {display:grid;gap:8px;margin-top:4px;padding-top:12px;border-top:1px solid hsl(var(--border-default));}
+.resolver-lab-verified summary {cursor:pointer;font:600 13px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
+.resolver-lab-facts {margin:8px 0 0;padding-left:18px;display:grid;gap:4px;font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));max-width:56ch;}
+.resolver-lab-planned,.resolver-lab-hosting {margin:6px 0 0;font:400 11.5px/1.45 var(--font-mono,monospace);color:hsl(var(--text-faint));max-width:60ch;}
+.resolver-lab-ways {display:flex;flex-wrap:wrap;gap:6px 16px;}
+#scene .resolver-lab-way {font:500 13px/1.4 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text));text-decoration:none;border-bottom:1px solid hsl(var(--border-default));}
+#scene .resolver-lab-way:is(:hover,:focus-visible) {color:hsl(var(--reference));border-bottom-color:hsl(var(--reference));}

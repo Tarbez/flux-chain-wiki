@@ -34,8 +34,8 @@ var ArkTheme = (function () {
     { key: 'text-muted', label: 'Muted text' },
     { key: 'primary', label: 'Primary' },
     { key: 'complement', label: 'Complement' },
-    { key: 'accent', label: 'Accent' },
-    { key: 'accent-subtle', label: 'Accent surface' },
+    { key: 'accent', label: 'Action accent' },
+    { key: 'accent-subtle', label: 'Action accent surface' },
     { key: 'live', label: 'Live signal' },
     { key: 'badge', label: 'Badge' }
   ];

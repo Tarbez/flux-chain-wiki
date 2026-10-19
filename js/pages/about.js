@@ -141,7 +141,7 @@
       copy.appendChild(node('p', 'hl-intro', words('DECK')));
       var actions = node('div', 'hl-actions');
       actions.appendChild(iconize(routeLink(words('ACTION'), 'ACTION.HREF', 'hl-button palette-solid about-primary-action'), 'arrow-right', true));
-      actions.appendChild(iconize(routeLink(words('ACTION2'), 'ACTION2.HREF'), 'open', true));
+      var action2 = routeLink(words('ACTION2'), 'ACTION2.HREF'); actions.appendChild(iconize(action2, ArkUI.dash.linkIcon(action2), true));
       copy.appendChild(actions); hero.appendChild(copy);
 
       var points = [1, 2, 3].map(function (i) { return { title: words('POINT' + i + '.TITLE'), text: words('POINT' + i + '.TEXT') }; });
@@ -196,7 +196,7 @@
         steps.appendChild(card);
       });
       flowPart.appendChild(steps);
-      flowPart.appendChild(iconize(routeLink(words('FLOW.LINK'), 'FLOW.LINK.HREF'), 'open', true));
+      var flowLink = routeLink(words('FLOW.LINK'), 'FLOW.LINK.HREF'); flowPart.appendChild(iconize(flowLink, ArkUI.dash.linkIcon(flowLink), true));
       moreBody.appendChild(flowPart);
 
       var promisePart = node('section', 'about-more-part');
@@ -225,7 +225,7 @@
           groups.appendChild(tile);
         });
         resolvePart.appendChild(groups);
-        resolvePart.appendChild(iconize(routeLink(words('RESOLVE.ALL'), 'RESOLVE.ALL.HREF'), 'open', true));
+        var allLink = routeLink(words('RESOLVE.ALL'), 'RESOLVE.ALL.HREF'); resolvePart.appendChild(iconize(allLink, ArkUI.dash.linkIcon(allLink), true));
         moreBody.appendChild(resolvePart);
       }
 
@@ -248,8 +248,15 @@
       more.appendChild(moreWrap);
       el.appendChild(more);
 
-      /* Closing block, on the heavy anchor: the boundary, and the evidence behind one disclosure. */
-      var closing = node('footer', 'hl-closing about-boundary');
+      /* Closing block, on the heavy anchor: the boundary, and the evidence behind one disclosure.
+         Its own class, not home's `hl-closing`: that class carries a layering contract (an
+         ::after overlay at z-index 1 over a 820px-tall art scene, with the copy in an
+         .hl-closing-copy wrapper at z-index 2) that this block does not follow, so the overlay
+         covered every child and left an 800px near-black void where "See what resolves on the
+         mesh", the boundary text and the evidence disclosure should be -- invisible to every
+         visitor while every text-contrast check passed (docs/ux-audit/pages-ux-a.md /about P0;
+         regressions: tests/about-page.cjs, tests/browser/site-fixes.mjs). */
+      var closing = node('footer', 'about-closing about-boundary');
       closing.setAttribute('aria-label', 'Current source boundary');
       closing.appendChild(label('CURRENT SOURCE BOUNDARY', 'inspect'));
       closing.appendChild(node('h2', '', words('CLOSE.TITLE')));
@@ -263,7 +270,7 @@
          (js/admin/admin.js's routeOptions()+selectEl at the manifest.meta.next field) --
          not a second, parallel 'link' field duplicating the same destination. */
       var next = iconize(ArkUI.dash.linkEl(words('NEXT'), 'route:' + manifest.meta.next, manifest.route, 'hl-link'), 'arrow-right', true);
-      [[words('POINT4.TITLE'), words('POINT4.TEXT'), iconize(status, 'open', true)],
+      [[words('POINT4.TITLE'), words('POINT4.TEXT'), iconize(status, ArkUI.dash.linkIcon(status), true)],
        [words('POINT5.TITLE'), words('POINT5.TEXT'), next]].forEach(function (item) {
         var part = node('section', 'about-reference-item');
         part.appendChild(node('h3', '', item[0])); part.appendChild(node('p', '', item[1]));

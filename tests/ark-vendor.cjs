@@ -12,11 +12,13 @@ const { spawnSync } = require('node:child_process');
 const check = spawnSync(process.execPath, ['scripts/build-ark-vendor.cjs', '--check'], { encoding: 'utf8' });
 assert.equal(check.status, 0, 'build-ark-vendor --check failed (run npm run sync:ark, then npm run build:ark):\n' + check.stdout + check.stderr);
 for (const out of ['css/themes.css', 'scripts/theme-options.js', 'js/ark/vendor/engines.js', 'js/ark/vendor/backgrounds.js', 'js/settings/panel.js',
-  'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/local-identity.js', 'js/ark/vendor/ark-kit.js']) {
+  'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/local-identity.js', 'js/ark/vendor/ark-kit.js', 'css/ark-blocks.css']) {
   assert(check.stdout.includes('ok ' + out), out + ' is not covered by build-ark-vendor --check');
 }
-// css/ark-blocks.css has no source yet: it must be reported as not built, never shipped empty.
-assert(fs.existsSync('css/ark-blocks.css') || /not built css\/ark-blocks\.css/.test(check.stdout), 'an absent Ark block stylesheet is reported as not built');
+// css/ark-blocks.css is Ark's static block stylesheet (@deadark/ark-ui >= 0.2.0), copied byte for
+// byte: server-rendered blocks are styled by it alone, so a hand-edited or stale copy would style
+// SSR pages differently from the package the client bundle came from.
+assert.deepEqual(fs.readFileSync('css/ark-blocks.css'), fs.readFileSync('node_modules/@deadark/ark-ui/dist/ark-ui.blocks.css'), 'css/ark-blocks.css is exactly the synced package stylesheet');
 
 // 2. Ark UI is pinned, not borrowed. Until 2026-10-19 defxn depended on no @deadark package and
 //    its bundles imported /Volumes/PortableSSD/design/... directly, so two consumers could build
@@ -65,5 +67,17 @@ assert.deepEqual(offenders, [], 'site files must reach Ark UI through node_modul
 const kit = fs.readFileSync('js/ark/vendor/ark-kit.js', 'utf8');
 assert(kit.includes('ArkEngines.setArkElementStyle') && !kit.includes('data-ark-dynamic-style'), 'ark-kit.js bundles no second style registry');
 assert(/@deadark\/ark-ui@[\d.]+\s+\.vendor\/deadark-ark-ui-[\d.]+\.tgz\s+sha256 [0-9a-f]{64}/.test(kit), 'ark-kit.js names the exact tarballs it was built from');
+// 6. ArkKit carries the block registry (Wave 1): the Wave 2 adapter derives every CMS block from
+//    ArkKit.ARK_BLOCKS, so losing the export would silently empty the Library.
+const vm = require('node:vm');
+// ArkKit binds to the page's one style registry (ArkEngines) at load; a stub stands in for it.
+const noop = () => {};
+const sandbox = { window: {}, document: undefined, ArkEngines: { setArkElementStyle: noop, getArkElementStyle: noop, setArkElementStyles: noop, setArkElementHidden: noop } };
+sandbox.globalThis = sandbox;
+vm.runInNewContext(kit + '\n;globalThis.__kit = ArkKit;', sandbox);
+for (const name of ['ARK_BLOCKS', 'ARK_BLOCK_NAMES', 'renderArkBlock', 'renderArkBlocks', 'validateArkBlock', 'describeArkBlocks', 'ArkBlockPropError']) {
+  assert(name in sandbox.__kit, 'ArkKit exports ' + name);
+}
+assert(sandbox.__kit.ARK_BLOCK_NAMES.includes('hero') && sandbox.__kit.ARK_BLOCK_NAMES.includes('stat'), 'ArkKit.ARK_BLOCKS holds the Ark blocks');
 
 console.log('ark vendor ok: outputs match the synced packages; Ark UI is pinned with sha256; no hub paths in site files');

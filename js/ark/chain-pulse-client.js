@@ -68,7 +68,10 @@
     var timer = setTimeout(function () { controller.abort(); }, options.timeoutMs || 6000);
     try {
       var response = await fetch(endpoint, { cache: 'no-store', signal: controller.signal });
-      if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + endpoint);
+      // The status rides on the error so a page can name the failure exactly
+      // (js/pages/stats.js feedUnavailable: a 404 means this host does not
+      // serve the API at all, which is a different remedy from a 502).
+      if (!response.ok) { var http = new Error('HTTP ' + response.status + ' from ' + endpoint); http.status = response.status; http.endpoint = endpoint; throw http; }
       return { endpoint: endpoint, data: validate(await response.json()) };
     } finally {
       clearTimeout(timer);

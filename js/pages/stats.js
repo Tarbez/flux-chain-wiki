@@ -44,6 +44,33 @@
     return h + ' h' + (m ? ' ' + m + ' min' : '') + ' ago';
   }
 
+  /* A live feed this page could not read is refused, never painted as 0 or as a bare dash
+     (AGENTS.md: "never report a capability that does not exist as 0"; "a refusal must name
+     what it needs"). Returns the failure, the missing thing and the remedy for one feed.
+     Named regression (2026-10-19, tests/stats-unavailable-not-zero.cjs): on a host that does
+     not route /api/chain-pulse the "Chain · dense-wire" tiles said "Chain reachable: no" --
+     a claim about the chain the page never measured -- and dashes everywhere else. A 404
+     means THIS HOST does not serve the API; that is a different remedy from a feed that
+     answered and said the chain-server is down. */
+  function feedUnavailable(feed, error) {
+    var e = error || {}, message = e.message || String(error || 'unknown error');
+    var endpoint = e.endpoint || window[feed.override] || feed.endpoint;
+    var serve = 'run ' + feed.server + ' behind ' + endpoint + ' (ops/caddy/defxn-site.caddy routes it on defxn.com), or open this page on defxn.com';
+    var r;
+    if (e.notLoaded) r = { failure: 'did not load its client', missing: feed.client, remedy: 'add ' + feed.client + ' to this route’s scripts' };
+    else if (e.status === 404) r = { failure: 'answered 404', missing: 'the ' + feed.api + ' — this host does not serve it', remedy: serve };
+    else if (e.status) r = { failure: 'answered ' + e.status, missing: 'a working ' + feed.api + ' response', remedy: 'check ' + feed.server + ' on the host behind ' + endpoint };
+    else if (e.name === 'AbortError') r = { failure: 'did not answer within 6 s', missing: 'an answer from ' + feed.server, remedy: 'check that it is running and reachable from this host' };
+    else if (e.name === 'SyntaxError') r = { failure: 'answered with something that is not JSON', missing: 'the ' + feed.api + ' — this host answered with a page instead', remedy: serve };
+    else if (/^Malformed/.test(message)) r = { failure: 'answered in the wrong shape (' + message + ')', missing: 'a response ' + feed.client + ' accepts', remedy: 'fix the response in ' + feed.server };
+    else r = { failure: 'could not be reached (' + message + ')', missing: 'a network path to ' + endpoint, remedy: 'check the connection, then ' + feed.server };
+    r.failure = feed.name + ' unavailable: ' + (e.notLoaded ? 'the page ' : endpoint + ' ') + r.failure;
+    r.text = r.failure + '. Missing: ' + r.missing + '. Remedy: ' + r.remedy + '.';
+    return r;
+  }
+  var CHAIN_PULSE_FEED = { name: 'Chain pulse', api: 'chain pulse API', endpoint: '/api/chain-pulse', override: 'ArkChainPulseEndpoint', server: 'ops/chain-pulse-api.mjs', client: 'js/ark/chain-pulse-client.js' };
+  var FLEET_CAPACITY_FEED = { name: 'Fleet capacity', api: 'fleet capacity API', endpoint: '/api/chain-fleet-capacity', override: 'ArkChainFleetCapacityEndpoint', server: 'ops/chain-fleet-capacity-api.mjs', client: 'js/ark/chain-fleet-capacity-client.js' };
+
   // Readiness: each line names its state and the evidence behind it.
   var READINESS = [
     { state: 'done', badge: 'Measured', title: 'Resolver throughput (synthetic, not production)', text: '256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live replicas, 60/60 audits passed (BENCH-012). Not production: no external users, and the party-to-shard transport is excluded. Earlier generations were measured in units this project no longer reports \u2014 see docs/deprecated.md. Earlier generations of this measurement are in the frozen BENCH records and docs/whitepaper-chain-era.md; they are not restated here.' },
@@ -54,7 +81,7 @@
     { state: 'partial', badge: 'Partial', title: 'Evidence record for the headline run', text: 'Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.' },
     { state: 'todo', badge: 'Not yet', title: 'Pipelined broadcast to replicas', text: 'A signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the fleet near 2.2 batches/s and is the binding constraint on everything. The intended shape is one feed per pool. Historical: Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
     { state: 'todo', badge: 'Not yet', title: 'Public client traffic', text: 'Every client so far was operator-driven.' },
-    { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain + certified-segment path.' },
+    { state: 'todo', badge: 'Not yet', title: 'Independent security review', text: 'Only our own tests have looked at the per-identity chain, the resolver launch and grammar checks, and the capability crates.' },
     { state: 'partial', badge: 'Partial', title: 'DAO treasury multisig', text: 'Real N-of-M threshold-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wire protocol and verified end to end against a real standalone chain-server (devnet dry run, 17/17 steps). Durable: 1174-1357 claims/s local 2-replica, 17 claims/s against two real fleet nodes over real WAN (2-of-2 signer threshold, bottlenecked on the farther node’s real network distance). Accepted, not yet durable: up to ~3017 claims/s local, ~1003 claims/s real WAN. 428 crate tests passing. Still not on production: no sovereign chain or DAO has launched there, and only 2 of 6 fleet nodes have been measured.' }
   ];
 
@@ -65,8 +92,9 @@
       var OPS = stats.operations || {};
       var CP = stats.clientPath || {};
       var INFRA = stats.infraResolvers || {};
-      var registry = window.ArkResolverRegistry || {};
-      var grammarOnly = (registry.chain && registry.chain.measured && registry.chain.measured.rate) || 83225;
+      // The grammar-only admit rate is a dated measurement in js/content/stats-highlights.js
+      // (moved there from the retired hand-written resolver directory, 2026-10-19).
+      var grammarOnly = (stats.grammarOnlyAdmission && stats.grammarOnlyAdmission.rate) || null;
 
       var page = el('section', 'ark-page task-page stats-page stats-dash');
       page.setAttribute('aria-labelledby', 'stats-title');
@@ -162,7 +190,7 @@
       // An empty list is the honest, currently-true answer: no sovereign
       // chain has launched on production yet, so there is nothing here to
       // show, not a failure to measure.
-      shell.appendChild(sectionHead('Sovereign chains · compute credited', 'Chains launched on top of the base chain above, each with its own 1B-unit native token and its own compute-reward reserve. A number here means a real supporter-witness round trip actually moved real units out of that chain’s reserve.'));
+      shell.appendChild(sectionHead('Sovereign chains · compute credited', 'Chains launched on top of the base chain above, each with its own 1B-unit native token and its own compute-reward reserve. A number here means a real supporter-witness round trip actually moved real units out of that chain’s reserve. Today the code gives each launch a chain of its own; the planned model keeps launched tokens as assets inside a native chain, and is not built yet.'));
       var sovereignPanel = panel('dash-span-12', null, null);
       var sovereignWrap = el('div', 'dash-table-wrap');
       var sovereignEmpty = el('p', 'dash-empty', 'Waiting for the chain pulse…');
@@ -518,7 +546,7 @@
         ['Resolver batch', '256 signed intents, one shard', (DS.swapsPerBatch || 256) + ' swaps/batch', (DS.batchLatencyMs || 13.874) + ' ms', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
         ['Signed-result broadcast', (DS.peersReached || 10) + ' replicas, store only', fmt(DS.replicationCostBytes || 1801) + ' bytes/batch', 'not pipelined', '0', 'BENCH-012', 'docs/evidence/bench-012-defi-shard-signed-resolution.md'],
         ['Resolver registry', '20 resolvers audited', '6 measured, 14 not built', 'audit', '\u2014', 'Resolver audit', 'docs/resolver-audit.md'],
-        ['Grammar-only admission', 'one Mac core', fmt(grammarOnly) + ' ops/s', 'bench', '\u2014', 'Whitepaper \u00a73', WHITEPAPER],
+        ['Grammar-only admission', 'one Mac core', grammarOnly == null ? '\u2014' : fmt(grammarOnly) + ' ops/s', 'bench', '\u2014', 'Whitepaper \u00a73', WHITEPAPER],
         ['Platform resolver audit', '6 non-chain systems', '3 measured, 3 absent by design', 'audit', '\u2014', INFRA.record || 'INFRA-001', 'docs/evidence/infra-001-platform-resolver-audit.md'],
         ['DAO treasury claim (durable)', 'local, 2 real replicas', '1174-1357 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
         ['DAO treasury claim (accepted)', 'local, replication off critical path', '2882-3017 claims/s', '3 runs', '0', 'BENCH-014', 'docs/evidence/bench-014-dao-treasury-multisig-claim.md'],
@@ -566,6 +594,9 @@
         docLink('Whitepaper · how it works, what made it fast, every number’s source', WHITEPAPER),
         pageLink('Resolvers · each one’s own measured throughput', 'resolvers'),
         pageLink('Finance ledger · double-spend by construction', 'stats/ledger'),
+        /* /stats/gpu had no inbound link anywhere and was in no menu or sitemap: unreachable
+           (docs/ux-audit/pages.md P2; regression: tests/site-exits.cjs). */
+        pageLink('The GPU, and why it is not compute-bound', 'stats/gpu'),
         pageLink('How we got fast, and what we got wrong', ARTICLE_STORY),
         docLink('Mainnet readiness', 'docs/mainnet-readiness.md')
       ].forEach(function (a) { var li = el('li'); a.className = 'dash-link-row'; li.appendChild(a); links.appendChild(li); });
@@ -575,7 +606,21 @@
 
       // ---- chain pulse wiring (separate endpoint, own short poll loop) --------------------------
       var chainPollTimer = 0, chainDisposed = false, chainInFlight = false;
+      /* A feed this page could not read paints every tile it feeds as the word
+         "unavailable" -- never 0, never a dash -- the lead tile carrying the whole
+         refusal (failure, missing, remedy) and the rest its failure line. */
+      function paintUnavailable(tiles, refusal) {
+        tiles.forEach(function (k, i) {
+          k.tile.dataset.state = 'warn';
+          setStat(k, 'unavailable', '', i ? refusal.failure : refusal.text);
+        });
+      }
       function paintChain(data) {
+        if (data.unavailable) {
+          paintUnavailable([cStatus, cPeers, cSeg, cLines, cSupporters, cProviders], data.unavailable);
+          paintSovereignChains(null, data.unavailable);
+          return;
+        }
         cStatus.tile.dataset.state = data.reachable ? 'ok' : 'down';
         setStat(cStatus, data.reachable ? 'yes' : 'no', '', data.reachable ? '' : (data.lastError || 'chain-server unreachable'));
         if (!data.reachable) {
@@ -621,14 +666,16 @@
         }
         paintSovereignChains(data.sovereignChains);
       }
-      function paintSovereignChains(chains) {
+      function paintSovereignChains(chains, refusal) {
         if (chains == null) {
+          // With no pulse at all, CHAIN_LIST was never asked: say the pulse failed, not the node.
+          var why = refusal ? refusal.text : 'CHAIN_LIST is not deployed on this node, or it is unreachable — no live value substituted.';
           sovereignWrap.textContent = '';
           sovereignEmpty.hidden = false;
-          sovereignEmpty.textContent = 'CHAIN_LIST is not deployed on this node, or it is unreachable — no live value substituted.';
+          sovereignEmpty.textContent = why;
           leaderboardWrap.textContent = '';
           leaderboardEmpty.hidden = false;
-          leaderboardEmpty.textContent = 'CHAIN_LIST is not deployed on this node, or it is unreachable — no live value substituted.';
+          leaderboardEmpty.textContent = why;
           return;
         }
         if (!chains.length) {
@@ -708,12 +755,12 @@
       }
       function checkChain() {
         if (chainDisposed || chainInFlight) return;
-        if (!window.ArkChainPulse) { paintChain({ reachable: false, lastError: 'chain pulse client not loaded' }); return; }
+        if (!window.ArkChainPulse) { paintChain({ unavailable: feedUnavailable(CHAIN_PULSE_FEED, { notLoaded: true }) }); return; }
         chainInFlight = true;
         window.ArkChainPulse.get().then(function (result) {
           if (!chainDisposed) paintChain(result.data);
         }).catch(function (e) {
-          if (!chainDisposed) paintChain({ reachable: false, lastError: e && e.message ? e.message : 'unknown error' });
+          if (!chainDisposed) paintChain({ unavailable: feedUnavailable(CHAIN_PULSE_FEED, e) });
         }).then(function () {
           chainInFlight = false;
           if (!chainDisposed) chainPollTimer = setTimeout(checkChain, POLL_MS);
@@ -725,13 +772,11 @@
       var capacityPollTimer = 0, capacityDisposed = false, capacityInFlight = false;
       function paintCapacity(data) {
         if (!data || !Array.isArray(data.nodes)) {
-          setStat(capSignersUp, '–', 'of 10', 'no live value; nothing substituted');
-          setStat(capSignerFloor, '–', 'needed: 6', 'no live value; nothing substituted');
-          setStat(capPeersUp, '–', 'of 4', 'no live value; nothing substituted');
-          setStat(capGenerated, '–', '', data && data.lastError ? data.lastError : 'unreachable');
+          var refusal = (data && data.unavailable) || feedUnavailable(FLEET_CAPACITY_FEED, { message: 'no node list in the response' });
+          paintUnavailable([capSignersUp, capSignerFloor, capPeersUp, capGenerated], refusal);
           capacityWrap.textContent = '';
           capacityEmpty.hidden = false;
-          capacityEmpty.textContent = 'The fleet capacity probe is unreachable — no live value substituted.';
+          capacityEmpty.textContent = refusal.text;
           return;
         }
         // The live fleet-capacity wire fields below (ops/chain-fleet-capacity-api.mjs,
@@ -765,12 +810,12 @@
       }
       function checkCapacity() {
         if (capacityDisposed || capacityInFlight) return;
-        if (!window.ArkChainFleetCapacity) { paintCapacity(null); return; }
+        if (!window.ArkChainFleetCapacity) { paintCapacity({ unavailable: feedUnavailable(FLEET_CAPACITY_FEED, { notLoaded: true }) }); return; }
         capacityInFlight = true;
         window.ArkChainFleetCapacity.get().then(function (result) {
           if (!capacityDisposed) paintCapacity(result.data);
         }).catch(function (e) {
-          if (!capacityDisposed) paintCapacity({ lastError: e && e.message ? e.message : 'unknown error' });
+          if (!capacityDisposed) paintCapacity({ unavailable: feedUnavailable(FLEET_CAPACITY_FEED, e) });
         }).then(function () {
           capacityInFlight = false;
           if (!capacityDisposed) capacityPollTimer = setTimeout(checkCapacity, POLL_MS);

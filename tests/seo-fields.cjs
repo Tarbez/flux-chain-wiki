@@ -15,7 +15,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const seoSource = fs.readFileSync('js/content/seo.js', 'utf8');
+// js/content/seo.js derives its manifest-less page ids from js/content/site-pages.js, so it loads first, as in index.html.
+const seoSource = fs.readFileSync('js/content/site-pages.js', 'utf8') + ';\n' + fs.readFileSync('js/content/seo.js', 'utf8');
 const admin = require('./lib/admin-source.cjs').ADMIN;
 const context = vm.createContext({});
 vm.runInContext(seoSource + ';this.ArkSEO = ArkSEO;', context, { filename: 'seo.js' });
@@ -75,6 +76,8 @@ function extract(source, signature) {
   const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'outside-only' });
   const win = dom.window;
   win.eval(seoSource + ';window.ArkSEO = ArkSEO;');
+  /* the editor's disclosure (canonical URL and structured data sit under "Advanced") */
+  win.eval(require('node:fs').readFileSync('js/admin/primitives.js', 'utf8') + ';window.ArkAdminPrimitives = ArkAdminPrimitives;');
   const kinds = /const SEO_TEXT_KINDS = \{[^}]*\};/.exec(admin)[0];
   win.eval([extract(admin, 'function h(tag, props)'), extract(admin, 'function ctlLabel(value)'), extract(admin, 'function ctlField(ctx, label, key, opts)'), extract(admin, 'function ctlSegField(ctx, label, key, options, labelOf)'),
     extract(admin, 'function ctlSelectField(ctx, label, key, options, labelOf, opts)'), kinds, extract(admin, 'function seoFieldRows(fields, target, onEdited)'),

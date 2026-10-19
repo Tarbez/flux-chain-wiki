@@ -42,8 +42,12 @@ for(const [file,pattern,prefix] of [
 for(const i of [1,2,3,4]) for(const r of ['TITLE','TEXT']) assert(ArkCopy.has(`ABOUT.NO${i}.${r}`));
 for(const i of [1,2,3]) for(const f of ['PILLAR','FLOW']) for(const r of ['TITLE','TEXT']) assert(ArkCopy.has(`ABOUT.${f}${i}.${r}`));
 // The route is registered and opens in the framed panel like About.
-assert(fs.readFileSync('js/pages/catalog.js','utf8').includes("resolutions: { path: '/resolutions'"));
-assert(fs.readFileSync('js/pages/catalog.js','utf8').includes("path: '/resolutions/' + item.slug"),'every resolution receives a nested route');
+{
+  const { catalog } = require('./lib/site-catalog.cjs').loadCatalog();
+  assert.equal(catalog.resolutions.path, '/resolutions');
+  const nested = Object.keys(catalog).filter((key) => key.startsWith('resolutions/'));
+  assert(nested.length > 0 && nested.every((key) => catalog[key].path === '/' + key), 'every resolution receives a nested route');
+}
 assert(!fs.readFileSync('js/resolvers/header.js','utf8').includes("'?r=' + entry.slug"),'the Products menu no longer creates query-string detail links');
 assert(!fs.readFileSync('js/pages/about.js','utf8').includes("'r=' + item.slug"),'About links directly to inner resolution pages');
 assert(fs.readFileSync('js/ark/panel-continuity.js','utf8').includes("indexOf('resolutions/')"),'inner resolution pages stay in the framed panel');

@@ -4,8 +4,8 @@
    Owns: connecting (and remembering) the project folder Save writes into -- connectProject(),
    the one connect flow behind every "Connect project folder" button (the account menu's
    #connect, the first-run banner, Save's refusal, Versions) -- the banner that says so while no
-   folder is connected, and the header's account menu -- who is signed in, sign-out (it closes
-   on a click anywhere, the canvas included).
+   folder is connected, and the header's More menu, whose last section is the account -- who is
+   signed in, the folder, sign-out (it closes on a press anywhere, the canvas included).
    Must not: write any file (js/admin/save.js does, through the folder this connects).
    ===================================================================== */
 (function () {
@@ -90,18 +90,18 @@
   });
   if (gate.localDevelopment && gate.localDevelopment()) { $('signOut').textContent = 'Sign out identity'; $('signOut').title = 'Drop the identity and signing key; local editing remains open.'; }
   $('signOut').addEventListener('click', function () { gate.signOut(); });
-  /* The header's account menu: who is signed in, the project folder, shortcuts, sign-out --
-     occasional actions, folded into one icon so the header keeps to one row. */
-  function setAccountMenu(open) { $('accountMenu').hidden = !open; $('accountBtn').setAttribute('aria-expanded', String(open)); }
+  /* The header's More menu (#accountMenu): the views, this page's search & sharing, the page
+     transition, version history, publishing status -- and, last, who is signed in, the project
+     folder, shortcuts, sign-out. Occasional, so one menu keeps the header to the things used on
+     every screen (docs/ux-audit/cms.md (b)). It is one overlay of the editor's one stack
+     (js/admin/overlay.js): a press anywhere -- the canvas included -- Esc, or opening another
+     popover closes it. Choosing an item closes it; the item's own result shows where it acts. */
+  function menuClosed() { $('accountMenu').hidden = true; }
+  function setAccountMenu(open) {
+    if (open) { $('accountMenu').hidden = false; A.overlay.open($('accountMenu'), { anchor: $('accountBtn'), level: 'popover', onClose: menuClosed }); var first = $('accountMenu').querySelector('.menu-item[aria-pressed="true"], .menu-item'); if (first) first.focus({ preventScroll: true }); }
+    else if (!A.overlay.close($('accountMenu'))) menuClosed();
+  }
   $('accountBtn').addEventListener('click', function () { setAccountMenu($('accountMenu').hidden); });
-  /* a menu action (Connect, Sign out) closes the menu; its result shows in the status line */
-  $('accountMenu').addEventListener('click', function (event) { if (event.target.closest('button')) setAccountMenu(false); });
-  document.addEventListener('pointerdown', function (event) { if (!$('accountMenu').hidden && !$('account').contains(event.target)) setAccountMenu(false); });
-  /* A press inside the canvas is a press in ANOTHER document (the #cmsPreview iframe): it never
-     reaches the listener above, so the menu stayed open over the canvas (docs/ux-audit/cms.md
-     P1-12). Focus leaving this document for the iframe -- which a press there does -- closes it,
-     as does switching away from the window. Regression: tests/cms-account-menu-canvas-close.cjs. */
-  window.addEventListener('blur', function () { if (!$('accountMenu').hidden) setAccountMenu(false); });
-  $('account').addEventListener('keydown', function (event) { if (event.key === 'Escape' && !$('accountMenu').hidden) { setAccountMenu(false); $('accountBtn').focus(); } });
+  $('accountMenu').addEventListener('click', function (event) { if (event.target.closest('button') && !$('accountMenu').hidden && A.overlay.isOpen($('accountMenu'))) setAccountMenu(false); });
   A.provide({ connectProject: connectProject });
 })();

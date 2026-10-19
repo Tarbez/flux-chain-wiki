@@ -28,7 +28,7 @@ const { ADMIN, buildersSource } = require('./lib/admin-source.cjs');
 
 const dom = new JSDOM('<!doctype html><body></body>');
 const context = vm.createContext({ document: dom.window.document, window: {} });
-for (const file of ['js/content/layout.js', 'js/content/canvas-transitions.js', 'js/content/element-motion.js', 'js/content/components.js', 'js/content/seo.js']) {
+for (const file of ['js/content/layout.js', 'js/content/canvas-transitions.js', 'js/content/element-motion.js', 'js/content/components.js', 'js/content/site-pages.js', 'js/content/seo.js']) {
   vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 }
 /* the option lists admin.js names: every `const CMS_... = <read>;` it defines */
