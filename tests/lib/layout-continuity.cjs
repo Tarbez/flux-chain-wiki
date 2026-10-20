@@ -125,7 +125,9 @@ const words = (el) => loose(clean(ownText(el)));
    changed on purpose -- listed in `reshaped` (old key -> why) and still pinned to its successor,
    or listed in `retired` (old key -> why nothing carries it now). Returns the tally; throws
    listing every old key that would no longer land, with the fix. 'page:/' is always the root. */
-function assertContinuity(census, after, { reshaped = {}, retired = {} } = {}) {
+/* `live`: as for assertSavedEditsLand -- keys whose words the page writes from live data; the key must still
+   name an element, but its words are not compared. */
+function assertContinuity(census, after, { reshaped = {}, retired = {}, live: liveText = {} } = {}) {
   const byKey = new Map(after.map((entry) => [entry.key, entry]));
   const keys = after.map((entry) => entry.key);
   const duplicates = keys.filter((key, i) => keys.indexOf(key) !== i);
@@ -137,10 +139,11 @@ function assertContinuity(census, after, { reshaped = {}, retired = {} } = {}) {
     if (retired[old.key]) { keptRetired.push(old); continue; }
     if (now && loose(now.text) === loose(old.text)) { kept.push(old); continue; }
     if (now && reshaped[old.key]) { keptReshaped.push(old); continue; }
+    if (now && liveText[old.key]) { kept.push(old); continue; }
     lost.push(old.key + ' (' + old.tag + ' "' + old.text.slice(0, 60) + '")' + (now ? ' now names "' + now.text.slice(0, 40) + '"' : ' names nothing'));
   }
   assert.deepEqual(lost, [], 'saved CMS edits keyed to these old layout keys would no longer land; add the pins `node tests/lib/layout-continuity.cjs derive <route>` prints, or list the key as reshaped/retired with the reason');
-  for (const key of Object.keys(reshaped).concat(Object.keys(retired))) assert(census.some((old) => old.key === key), key + ' is listed as reshaped/retired but is not in the census');
+  for (const key of Object.keys(reshaped).concat(Object.keys(retired), Object.keys(liveText))) assert(census.some((old) => old.key === key), key + ' is listed as reshaped/retired/live but is not in the census');
   return { kept: kept.length, reshaped: keptReshaped.length, retired: keptRetired.length };
 }
 

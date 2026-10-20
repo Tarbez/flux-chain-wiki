@@ -113,7 +113,7 @@ assert(/cannot become a/.test(live) && !/ARK_BLOCK_NAMES/.test(live), 'the live 
 // 8. The optional blocks are chunks (W4-ARK, 2026-10-20): field, form, list, status-line and choice (ark-kit-forms.js) and popover
 //    (ark-kit-popover.js, its own file since 0.2.10: a page that floats one panel does not download the forms) cost +3.8 KB gz in
 //    the public kit and every block route pays for the kit, so the public kit's registry is ark-ui's CORE (21 blocks) and each
-//    chunk registers its blocks into it. The editor's full kit has all 27.
+//    chunk registers its blocks into it. The editor's full kit has all 29.
 const FORM_BLOCKS = ['field', 'form', 'list', 'status-line', 'choice'];
 const POPOVER_BLOCKS = ['popover'];
 assert.equal(pub.__kit.ARK_BLOCK_NAMES.length, 21, 'the public kit holds the 21 core blocks');
@@ -121,7 +121,7 @@ for (const name of FORM_BLOCKS.concat(POPOVER_BLOCKS)) {
   assert(!pub.__kit.ARK_BLOCK_NAMES.includes(name), 'the public kit does not carry ' + name);
   assert(sandbox.__kit.ARK_BLOCK_NAMES.includes(name), 'the full kit carries ' + name);
 }
-assert.equal(sandbox.__kit.ARK_BLOCK_NAMES.length, 27, 'the editor\'s kit holds all 27 blocks');
+assert.equal(sandbox.__kit.ARK_BLOCK_NAMES.length, 29, 'the editor\'s kit holds all 29 blocks');
 assert.equal(typeof pub.__kit.registerArkBlocks, 'function', 'the public kit can take late blocks');
 const forms = fs.readFileSync('js/ark/vendor/ark-kit-forms.js', 'utf8');
 const popover = fs.readFileSync('js/ark/vendor/ark-kit-popover.js', 'utf8');

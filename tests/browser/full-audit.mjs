@@ -258,6 +258,8 @@ await surface('content', 'pages: create and delete a theory page', async (opened
   await answerArkDialog(app, 'accept');   /* Ark's dialog, not a native confirm (cms.md P2-11) */
   await until(() => !savedExists('manifests/auditpage.js') && !readSaved('manifests/index.js').includes('auditpage'), 'Delete did not remove the file and its index entry');
   await until(async () => (await pageRow(app, { page: 'auditpage' }).count()) === 0, 'the deleted page is still in the Pages tab');
+  /* the Delete is async after its dialog: the file goes first, then the other drafts are pruned and the status says Deleted */
+  await until(async () => /^Deleted /.test(await statusText(app)), 'the Delete never reported itself done: ' + await statusText(app));
   /* the Delete takes the page's SEO entry with it, saved copy included: nothing is left unsaved,
      and seo-data.js names no deleted page (regression: tests/delete-prunes-drafts.cjs) */
   check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the Delete a draft shows unsaved: ' + await statusText(app));
@@ -316,6 +318,8 @@ await surface('content', 'articles: create and delete', async (opened) => {
   await sheetBody(app).locator('button', { hasText: 'Delete this article' }).click();
   await answerArkDialog(app, 'accept');   /* Ark's dialog, not a native confirm (cms.md P2-11) */
   await until(() => !savedExists('articles/audit-note.js') && !readSaved('article-index.js').includes('audit-note'), 'Delete did not remove the article file and its index entry');
+  /* the file goes first; the SEO draft is pruned and the status says Deleted only when the whole Delete has finished */
+  await until(async () => /^Deleted /.test(await statusText(app)), 'the article Delete never reported itself done: ' + await statusText(app));
   check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the article Delete a draft shows unsaved: ' + await statusText(app));
   check(!readSaved('seo-data.js').includes('"audit-note"'), 'seo-data.js still holds the deleted article\'s entry');
 });
@@ -388,7 +392,7 @@ await surface('content', 'encrypted: create, encrypt, Save, reload, decrypt, del
   await connect(again);
   dialogPolicy = 'accept';
   await vault2.locator('button', { hasText: 'Delete this item' }).click();
-  await answerArkDialog(app, 'accept');
+  await answerArkDialog(again, 'accept');   /* the frame after the reload: `app` is the one that was reloaded away */
   await until(() => !savedExists('secrets/audit-secret.js'), 'Delete did not remove secrets/audit-secret.js');
 });
 
@@ -668,9 +672,15 @@ await surface('toolbar', 'container <section>: container sections; Layout, Size 
 
 await surface('toolbar', 'image <svg>: image sections; Alt text persists', async (opened) => {
   const { page, app, pv } = await openEditor(opened);
-  const KEY = await pv.evaluate(() => [...document.querySelectorAll('svg[data-ark-layout-key]')].find((s) => s.getBoundingClientRect().width > 8 && !s.closest('button,a')).getAttribute('data-ark-layout-key'));
+  /* polled: the home page mounts its drawing and the layout keys are stamped a moment after the canvas reports ready -- under a loaded
+     machine (the full run, load factor 3.8) a single read found none and threw on undefined */
+  /* On /about, whose layer drawing is on screen by default. Since 2026-10-20 the home opens on "Where do I start?" and its
+     scene svg sits on the "See it work" tab, which the editor's canvas does not switch (a canvas click SELECTS, by design);
+     a header icon is shell scope ('*'), never this page's, so only page content ([data-ark-page]) counts. */
+  await gotoRoute(app, pv, '/about');
+  const KEY = await until(() => pv.evaluate(() => { const svg = [...document.querySelectorAll('[data-ark-page] svg[data-ark-layout-key]')].find((s) => s.getBoundingClientRect().width > 8 && !s.closest('button,a')); return svg ? svg.getAttribute('data-ark-layout-key') : null; }), 'no visible inline svg with a layout key on the home page', 20000);
   await page.close(); opened.pop();
-  await controlPersists(opened, { route: '/', key: KEY, sectionTitle: 'Alt text',
+  await controlPersists(opened, { route: '/about', key: KEY, sectionTitle: 'Alt text',
     select: async (app) => { await selectKey(app, KEY); await expectSections(app, IMAGE, 'an <svg>'); },
     act: (s) => setValue(s.locator('textarea[name="alt-text"]'), 'Audit diagram'),
     read: 'el.getAttribute("aria-label")', expect: 'Audit diagram', saved: (l) => JSON.stringify(l).includes('Audit diagram') });

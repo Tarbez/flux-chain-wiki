@@ -380,10 +380,10 @@ test('the optional blocks are chunks: absent from the public kit and its resolve
     await sandbox.ArkUI.loadPage('x', { path: '/x', module: 'm', scripts: ['js/pages/x.js'] });
     return loads;
   };
-  const CHUNK = 'js/ark/vendor/ark-kit-forms.js', POP = 'js/ark/vendor/ark-kit-popover.js';
+  const CHUNK = 'js/ark/vendor/ark-kit-forms.js', POP = 'js/ark/vendor/ark-kit-popover.js', FIG = 'js/ark/vendor/ark-kit-figures.js';
   pending.push((async () => {
     const saved = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_FORM');
-    assert.deepEqual(saved, ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js', CHUNK, POP, 'js/pages/x.js'], 'a saved block the kit has no resolver for: the chunks come after the adapter, before the page (a fake kit here: it never learns the name)');
+    assert.deepEqual(saved, ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js', CHUNK, POP, FIG, 'js/pages/x.js'], 'a saved block the kit has no resolver for: the chunks come after the adapter, before the page (a fake kit here: it never learns the name)');
     const learnt = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_FORM', '', { [CHUNK]: 'ARK_BLOCK_FORM' });
     assert(learnt.includes(CHUNK) && !learnt.includes(POP), 'once the forms chunk teaches the kit the resolver, the popover chunk is not loaded: derived from the kit, not from names');
     const popOnly = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_POPOVER', '', { [POP]: 'ARK_BLOCK_POPOVER' });

@@ -101,11 +101,11 @@ function arkModuleStyles(module) { return ArkUI.pageStyles.modules[module]; }
    scripts/lib/site-routes.mjs both read them here, so a retired path is retired in one place. */
 var arkPageModules = {
   zero: { module: 'zero', scripts: ArkUI.blockScripts.concat(['js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
-  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
+  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
-  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
+  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
-  deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/ark/page-kit.js', 'js/pages/resolver-page-parts.js', 'js/pages/deployment.js']) },
+  deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/ark/page-kit.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/deployment.js']) },
   /* the explorer used to live at /explorer; /explore is its address now */
   explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-popover.js', 'js/pages/explorer.js']) },
   palette: { module: 'palette', scripts: ArkUI.blockScripts.concat(['js/content/palette-tokens.js', 'js/pages/palette.js']) },
@@ -135,7 +135,7 @@ var arkPageModules = {
   download: { module: 'download', scripts: ArkUI.storyScripts.concat(['js/pages/download.js', 'js/ark/page-kit.js']) },
   bundledeployer: { module: 'bundledeployer', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/bundle-deployer.js']) },
   deploy: { module: 'deploy', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/procedure-state.js', 'js/ark/page-kit.js', 'js/pages/deploy.js']) },
-  dao: { module: 'dao', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/resolver-page-parts.js', 'js/pages/dao.js', 'js/ark/page-kit.js']) },
+  dao: { module: 'dao', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/dao.js', 'js/ark/page-kit.js']) },
   'how/ask': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
   'how/work': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
   'how/check': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },

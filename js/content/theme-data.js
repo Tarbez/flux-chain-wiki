@@ -20,7 +20,7 @@ ArkTheme.define({
     "rule": "#6b6b76",
     "dash-on": "#eaeaef"
   },
-  "activeTheme": "ghost",
+  "activeTheme": "ember",
   "themes": {},
   "background": {
     "style": "none"

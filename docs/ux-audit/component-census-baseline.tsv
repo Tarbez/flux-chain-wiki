@@ -33,15 +33,21 @@
 # - card (classes 28 -> 29, used-classes 8 -> 9, uses 10 -> 11, css-files 15 -> 16): deploy-command-card
 #   (css/page-layout.css) only positions the one shared Copy control (ArkUI.copyCommand, js/ark/page-kit.js)
 #   over a command block on /deploy. Ark has no `code` block yet (ledger S11); it goes when one ships.
+# Raised by hand 2026-10-20 (coordinator, Wave 5 merge): uses toggle 5 -> 6, used-classes modal 1 -> 2, uses modal 3 -> 5.
+# No new hand-built toggle or modal: nav-toggle (the existing MENU button) is referenced once more by the header
+# (the Resolutions menu closes on a delegated .nav-toggle click since the MENU moved onto Ark's popover);
+# header-chain-popover is kept on purpose when the network pill swaps onto Ark's popover block (classes, id and
+# layout key move with it); `sheet` is the word "sheet" in a page-loader message string (the per-route CSS loader),
+# which the census reads as the CMS's .sheet class. Measured with scripts/ux-component-census.mjs at 50fa86c..d99c5ca.
 measure	family	value
-classes	hero	27
-used-classes	hero	6
-uses	hero	7
-css-files	hero	19
-classes	eyebrow	42
-used-classes	eyebrow	21
-uses	eyebrow	38
-css-files	eyebrow	25
+classes	hero	26
+used-classes	hero	5
+uses	hero	6
+css-files	hero	18
+classes	eyebrow	40
+used-classes	eyebrow	19
+uses	eyebrow	35
+css-files	eyebrow	24
 classes	pill	16
 used-classes	pill	10
 uses	pill	12
@@ -50,14 +56,14 @@ classes	button	22
 used-classes	button	3
 uses	button	3
 css-files	button	17
-classes	card	29
-used-classes	card	9
-uses	card	11
-css-files	card	16
-classes	stat	6
+classes	card	28
+used-classes	card	8
+uses	card	10
+css-files	card	15
+classes	stat	5
 used-classes	stat	3
 uses	stat	4
-css-files	stat	5
+css-files	stat	4
 classes	step	22
 used-classes	step	8
 uses	step	8
@@ -108,25 +114,25 @@ uses	field	31
 css-files	field	16
 classes	toggle	8
 used-classes	toggle	3
-uses	toggle	5
+uses	toggle	6
 css-files	toggle	5
 classes	toast	1
 used-classes	toast	0
 uses	toast	0
 css-files	toast	1
 classes	modal	7
-used-classes	modal	1
-uses	modal	3
+used-classes	modal	2
+uses	modal	5
 css-files	modal	2
 classes	empty	4
 used-classes	empty	2
 uses	empty	3
 css-files	empty	3
-signatures	hero	18
-signatures	eyebrow	35
+signatures	hero	17
+signatures	eyebrow	34
 signatures	pill	6
 signatures	button	-
-signatures	card	18
+signatures	card	17
 signatures	stat	3
 signatures	step	8
 signatures	table	0
@@ -145,7 +151,7 @@ signatures	toast	-
 signatures	modal	-
 signatures	empty	-
 uppercase-rules	css	66
-ark-overrides	css	1
-ark-override-files	css	1
+ark-overrides	css	0
+ark-override-files	css	0
 px-radius-values	css	15
-px-font-sizes	css	51
+px-font-sizes	css	50

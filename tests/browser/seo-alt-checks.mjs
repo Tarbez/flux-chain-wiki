@@ -297,10 +297,14 @@ await flow('seo', async () => {
 await flow('alt', async () => {
   const { page, app, pv, shot } = await openEditor();
   let key;
-  await step('select a plain image on the home page: the toolbar shows an Alt text field', async () => {
+  await step('select a plain image on /about: the toolbar shows an Alt text field', async () => {
     /* the site's pages draw no visible <img>; their plain images are inline <svg>s */
-    key = await pv.evaluate(() => { const el = [...document.querySelectorAll('main svg[data-ark-layout-key], [data-ark-layer="outlet"] svg[data-ark-layout-key]')].find((s) => { const r = s.getBoundingClientRect(); return r.width >= 8 && r.height >= 8 && r.top > 0 && r.top < innerHeight; }); return el && el.getAttribute('data-ark-layout-key'); });
-    check(key, 'no visible inline svg on the home page to describe');
+    /* on /about, whose layer drawing is on screen by default: the home's scene svg sits on the "See it work" tab since
+       2026-10-20, and the editor's canvas selects rather than switches tabs. Page content only: a header icon is the
+       shared shell, whose edits are stored under '*' (found by this step saving to '*'). */
+    await openRoute(app, pv, '/about');
+    key = await pv.evaluate(() => { const el = [...document.querySelectorAll('[data-ark-page] svg[data-ark-layout-key]')].filter((s) => !s.closest('button,a')).find((s) => { const r = s.getBoundingClientRect(); return r.width >= 8 && r.height >= 8 && r.top > 0 && r.top < innerHeight; }); return el && el.getAttribute('data-ark-layout-key'); });
+    check(key, 'no visible inline svg on /about to describe');
     await app.click('#tabLayers');
     await app.evaluate((k) => { const pv = document.getElementById('cmsPreview'); pv.contentWindow.postMessage({ type: 'defxn-cms-preview-select-group', key: k }, location.origin); }, key);
     await until(async () => (await toolbarKey(app)) === key, 'the toolbar is not on the selected svg');
@@ -316,11 +320,12 @@ await flow('alt', async () => {
   });
   await step('Save writes it to layout-data.js', async () => {
     await save(app);
-    await until(() => { try { const l = savedJson('layout-data.js'); return l.alts && l.alts['/'] && l.alts['/'][key] === 'Signed chain diagram'; } catch { return false; } }, 'Save did not write the alt to layout-data.js');
+    await until(() => { try { const l = savedJson('layout-data.js'); return l.alts && l.alts['/about'] && l.alts['/about'][key] === 'Signed chain diagram'; } catch { return false; } }, 'Save did not write the alt to layout-data.js');
   });
   await step('reload: the field shows the saved alt', async () => {
     await page.close();
     const again = await openEditor();
+    await openRoute(again.app, again.pv, '/about');
     await again.app.evaluate((k) => { const pv = document.getElementById('cmsPreview'); pv.contentWindow.postMessage({ type: 'defxn-cms-preview-select-group', key: k }, location.origin); }, key);
     await until(async () => (await toolbarKey(again.app)) === key, 'the reloaded toolbar is not on the svg');
     const field = (await openToolbarSection(again.app, 'Alt text')).locator('textarea[name="alt-text"]');
@@ -329,11 +334,11 @@ await flow('alt', async () => {
     await again.page.close();
   });
   await step('the PUBLIC page and the server render carry it', async () => {
-    const pub = await publicPage('/');
+    const pub = await publicPage('/about');
     const label = await until(() => pub.evaluate((k) => { const el = document.querySelector(`[data-ark-layout-key="${CSS.escape(k)}"]`); return el && el.getAttribute('aria-label'); }, key), 'the public page svg has no aria-label');
     check(label === 'Signed chain diagram', 'public aria-label ' + label);
     await pub.close();
-    const html = await serverRender('/');
+    const html = await serverRender('/about');
     const tag = new RegExp('<svg[^>]*data-ark-layout-key="' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"[^>]*>').exec(html);
     check(tag && tag[0].includes('aria-label="Signed chain diagram"'), 'SSR svg: ' + (tag && tag[0]));
   });

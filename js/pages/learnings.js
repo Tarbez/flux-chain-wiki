@@ -27,7 +27,7 @@
   function card(article) {
     return { eyebrow: article.category, title: article.title, description: article.summary, href: 'route:article/' + article.slug, meta: meta(article), headingLevel: 2 };
   }
-  function grid(label, list) { return { block: 'card-grid', props: { label: label, columns: 3, items: list.map(card) } }; }
+  function grid(label, list) { return { block: 'card-grid', props: { label: label, columns: 3, alignRows: true, items: list.map(card) } }; }
 
   /* `was`: the layout keys of the hand-built index (tests/fixtures/layout-keys/learnings.tsv),
      derived by tests/lib/layout-continuity.cjs, never typed. */

@@ -226,5 +226,19 @@ link, bundle-deployer journey links, resolutions alsoMore; transit-map labels on
 row alignment (Ark card); Ark: line/lane diagram part, field step:'any', styled select, foldBelow
 hidden=until-found (core budget has ~10 B headroom on live routes); long reference docs (whitepaper,
 bench-003 > 3x); reference text is one file per document (W5-REF: js/content/reference/, an index, `sync-reference-docs.cjs --check` run by tests/reference-reader.cjs).
+W5-ARK (2026-10-20): @deadark/ark-ui 0.2.11 / @deadark/sdk 0.2.42 closed the Ark follow-ups above: field step 'any', styled select, foldBelow hidden=until-found (reference section folds and story depth folds are findable with no page change), card-grid alignRows (/learnings), lane + band blocks (resolver figures; local mfig-lane/band CSS deleted). Budget table in docs/cms-architecture.md.
 Owner calls: glossary size vs budget; minify page modules (/account +42.8 KB -> ~+31); home tab order;
 commit the kit sync in the 23 consumer repos (dense-wire/web held).
+
+## Resume point 7 (2026-10-20 night) — Wave 5 CLOSED at 14e445a
+Merged on main: minified page scripts (js/min), page follow-ups, header + all-pages MENU on Ark (lazy popover),
+on-demand reference documents, per-route glossary (+14 terms), theme-id/storage-key migration (published ids,
+old ones mapped on read), per-route stylesheets, @deadark/ark-ui 0.2.12 + @deadark/sdk 0.2.43 (field step any,
+styled select, find-in-page folds, aligned card rows, lane/band in a figures chunk). Every driver and every
+failed unit test passes when run alone; the full-run failures that passed alone were memory pressure (load 25-50
+from other sessions). Named budget exception: /resolvers 30.18, /stats 30.02 on the glossary sub-budget.
+Next (last item): W5-CSSCLEAN WIP on worktree-agent-a79103e6608b5535a (5847ef9): components.css !important
+41 -> 0, dead rules out of 17 sheets, px font sizes 51 -> 39. Verify with the computed-style diff harness left in
+the scratchpad, then fold-contrast-sweep + route-sweep, then merge.
+Follow-ups: the editor canvas cannot switch a page's tabs by clicking (a click selects), so a non-default tab's
+content is reachable only through Layers or Preview -- e.g. the home scene since the paths tab became the default.
