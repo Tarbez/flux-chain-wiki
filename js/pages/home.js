@@ -381,7 +381,7 @@
       if (window.ArkPulse) ArkPulse.get().then(function (result) { paintFleet({ data: result.data }); }).catch(function () { paintFleet({ failed: true }); });
 
       page.arkRestore = follow;
-      page.arkDispose = function () { disposed = true; Object.keys(scenes).forEach(function (id) { scenes[id].dispose(); }); };
+      page.arkDispose = function () { disposed = true; if (world && world.dispose) world.dispose(); Object.keys(scenes).forEach(function (id) { scenes[id].dispose(); }); };
       return page;
     }
   };

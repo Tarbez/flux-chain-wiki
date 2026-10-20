@@ -353,18 +353,6 @@
     } };
   }
 
-  /* The swap as signed resolution, from the manifest's spec { caption, flow: [step, ...], refusal: { from, tag } }:
-     Ark's steps (the order the batch goes through) and callout (the refusal a second node meets; its tag names the
-     signer, who is the example's party), folded behind Ark's disclosure so the Resolve step stays one box and a line.
-     Without the block kit (a toy DOM) there is no diagram: the payload above it is the step. */
-  function swapDiagram(spec, payload) {
-    if (!(ArkUI.blocks && typeof ArkUI.blocks.render === 'function')) return null;
-    function sentence(text) { return String(text).charAt(0).toUpperCase() + String(text).slice(1); }
-    var blocks = [{ block: 'steps', props: { label: spec.caption, items: (spec.flow || []).map(function (text) { return { title: sentence(text) }; }) } }];
-    if (spec.refusal) blocks.push({ block: 'callout', props: { tone: 'warning', title: sentence(spec.refusal.from) + ' is refused', body: String(spec.refusal.tag).replace('<signer>', payload.party) } });
-    try { return ArkUI.blocks.render({ block: 'disclosure', id: 'flow-swap', props: { more: 'How a swap is resolved', less: 'Hide how a swap is resolved', blocks: blocks } }, { onInvalid: 'throw' }); } catch (error) { return null; }
-  }
-
   /* One box of the record: its letters, with what the box is one hover, focus or tap away -- Ark's
      glossary term (ArkUI.blocks), whose tip is the trigger's accessible description too. The tip's
      words are not the box's words (tests/lib/layout-continuity.cjs sets term tips aside). Without
@@ -384,7 +372,7 @@
      SVG drew the record at about 6px at 390px wide). One panel per step, stacked in one cell and
      cross-faded; only the current one is shown, the others are aria-hidden. The rich scene (home)
      is the landscape above. */
-  function drawScene(payload, rich, diagram) {
+  function drawScene(payload, rich) {
     if (rich) return drawLandscape(payload);
     var root = el('div', 'flow-scene flow-plain');
     function panel(id, label) {
@@ -453,12 +441,6 @@
     meaning.appendChild(el('strong', 'flow-meaning-text', payload.amount));
     meaning.appendChild(el('span', 'flow-meaning-who', payload.resolverName));
     pResolve.appendChild(meaning);
-    /* A swap is the one example whose resolution is a batch: two intents, one signer, one signed result for
-       the peers, and a second node's result refused. The diagram is the manifest's own (chain.meta.diagrams,
-       docs/ux-audit/ledger.md 4.5); it stands under the payload, which stays. */
-    var swap = diagram && payload.id === 'swaps' ? swapDiagram(diagram, payload) : null;
-    if (swap) pResolve.appendChild(swap);
-
     var panels = { sign: pSign, check: pCheck, extend: pExtend, replicate: pReplicate, resolve: pResolve };
 
     return {
@@ -486,25 +468,31 @@
      selected one is drawn in full ink. Monochrome on purpose: the single
      accent on the page belongs to the record in flight on the right.
      The lines draw in once and then hold still. */
+  /* `label`: [x, edge, anchor, where]. The words are laid out by fitWorld() (below), which sizes them from the
+     drawing's scale; `edge` is the line of the words' box that stays put as they grow -- the box's bottom for a
+     name above its line ('top'), its top for one below it ('bottom') -- so a bigger name grows away from its line. */
   var WORLD_LINES = [
-    { name: 'nova.fxn', d: 'M40 24H92L164 96L236 168H330', stations: [[40, 24], [92, 24], [236, 168], [300, 168]], label: [40, 12, 'start'] },
-    { name: 'alice.fxn', d: 'M112 176H164L244 96V20', stations: [[112, 176], [244, 52], [244, 20]], label: [112, 194, 'start'] },
-    { name: 'studio.fxn', d: 'M262 20H284L324 60V132L364 172H420', stations: [[262, 20], [324, 132], [420, 172]], label: [262, 12, 'start'] },
-    { name: 'provider.fxn', d: 'M404 172V96L460 40H540', stations: [[404, 172], [460, 40], [540, 40]], label: [540, 28, 'end'] },
-    { name: 'dao.fxn', d: 'M484 60V172', stations: [[484, 60], [484, 172]], label: [484, 190, 'middle'] }
+    { name: 'nova.fxn', d: 'M40 24H92L164 96L236 168H330', stations: [[40, 24], [92, 24], [236, 168], [300, 168]], label: [40, 15, 'start', 'top'] },
+    { name: 'alice.fxn', d: 'M112 176H164L244 96V20', stations: [[112, 176], [244, 52], [244, 20]], label: [112, 185, 'start', 'bottom'] },
+    { name: 'studio.fxn', d: 'M262 20H284L324 60V132L364 172H420', stations: [[262, 20], [324, 132], [420, 172]], label: [262, 15, 'start', 'top'] },
+    { name: 'provider.fxn', d: 'M404 172V96L460 40H540', stations: [[404, 172], [460, 40], [540, 40]], label: [540, 31, 'end', 'top'] },
+    { name: 'dao.fxn', d: 'M484 60V172', stations: [[484, 60], [484, 172]], label: [484, 181, 'middle', 'bottom'] }
   ];
   var WORLD_CROSSINGS = [164, 244, 324, 404, 484];
+  var WORLD_W = 560, WORLD_H = 200, WORLD_LABEL = 12;
   ArkUI.buildChainWorld = function (options) {
-    var root = svg('svg', { viewBox: '0 0 560 200', class: 'hl-world', fill: 'none', 'aria-hidden': 'true' });
+    var root = svg('svg', { viewBox: '0 0 ' + WORLD_W + ' ' + WORLD_H, class: 'hl-world', fill: 'none', 'aria-hidden': 'true' });
     var lines = {};
     var others = svg('g', { class: 'world-others' });
     root.appendChild(others);
+    var names = [];
     WORLD_LINES.forEach(function (line, i) {
       var g = svg('g', { class: 'world-line', 'data-name': line.name, style: '--i:' + (i + 1) });
       g.appendChild(svg('path', { d: line.d, class: 'world-track', pathLength: 1 }));
       line.stations.forEach(function (p) { g.appendChild(svg('circle', { cx: p[0], cy: p[1], r: 3, class: 'world-station' })); });
-      var label = svg('text', { x: line.label[0], y: line.label[1], 'text-anchor': line.label[2], class: 'world-name' }, line.name);
+      var label = svg('text', { x: line.label[0], y: line.label[3] === 'top' ? line.label[1] - .25 * WORLD_LABEL : line.label[1] + .75 * WORLD_LABEL, 'text-anchor': line.label[2], class: 'world-name' }, line.name);
       g.appendChild(label);
+      names.push({ node: label, line: line });
       others.appendChild(g); lines[line.name] = g;
     });
     // Your chain, drawn last so it reads as the line everything else meets.
@@ -515,22 +503,89 @@
       else mine.appendChild(svg('rect', { x: x - 4, y: 92, width: 8, height: 8, class: 'world-record' }));
     }
     var tagG = svg('g', { class: 'world-you' });
-    tagG.appendChild(svg('rect', { x: 8, y: 84, width: 88, height: 24, rx: 12 }));
+    var tagRect = svg('rect', { x: 8, y: 84, width: 88, height: 24, rx: 12 });
+    tagG.appendChild(tagRect);
     var paths = ArkUI.iconPaths && ArkUI.iconPaths.account;
+    var tagIcon = null;
     if (paths) {
-      var ic = svg('g', { class: 'world-icon', transform: 'translate(16 88) scale(.6667)' });
-      paths.forEach(function (p) { ic.appendChild(svg('path', { d: p })); });
-      tagG.appendChild(ic);
+      tagIcon = svg('g', { class: 'world-icon', transform: 'translate(16 88) scale(.6667)' });
+      paths.forEach(function (p) { tagIcon.appendChild(svg('path', { d: p })); });
+      tagG.appendChild(tagIcon);
     }
-    tagG.appendChild(svg('text', { x: 36, y: 100, class: 'world-you-name' }, 'you.fxn'));
+    var tagText = svg('text', { x: 36, y: 100, class: 'world-you-name' }, 'you.fxn');
+    tagG.appendChild(tagText);
     mine.appendChild(tagG);
     root.appendChild(mine);
+
+    /* Every word on the map is drawn at LABEL px ON SCREEN, whatever width the map has: the names were set in the
+       drawing's own units (12 of 560), which is about 7px on a 390px phone (docs/ux-audit/ledger.md, "How it fits
+       together"). A name's size in drawing units is LABEL / scale, and the scale depends on the drawing's width,
+       which depends on how much room the bigger "you.fxn" pill takes (it grows leftwards, off the drawing's left
+       edge), so the two are settled together (a few passes). Names that would touch are slid apart along their
+       row, and the drawing gains a margin above and below for the words that grew past it. At the width the map
+       was drawn for (scale 1) nothing moves: this is the same drawing. */
+    var WORD = 0.66;   // a mono word's width, in its own size (advance .6 + letter-spacing .04)
+    function pillWidth(L) { return Math.ceil(2 * .45 * L + .8 * L + .35 * L + 'you.fxn'.length * WORD * L); }
+    function slide(row, lo, hi, gap) {
+      row.sort(function (a, b) { return a.left - b.left; });
+      row.forEach(function (n, i) { if (i && n.left < row[i - 1].left + row[i - 1].w + gap) n.left = row[i - 1].left + row[i - 1].w + gap; });
+      var last = row[row.length - 1];
+      if (last && last.left + last.w > hi) last.left = hi - last.w;
+      for (var i = row.length - 2; i >= 0; i--) if (row[i].left + row[i].w + gap > row[i + 1].left) row[i].left = row[i + 1].left - gap - row[i].w;
+      row.forEach(function (n) { if (n.left < lo) n.left = lo; });
+    }
+    var drawn = '';
+    function fitWorld() {
+      var px = root.getBoundingClientRect ? root.getBoundingClientRect().width : 0;
+      if (!px) return;
+      var extra = 0, L = WORLD_LABEL;
+      for (var pass = 0; pass < 6; pass++) {
+        L = Math.max(WORLD_LABEL, WORLD_LABEL * (WORLD_W + extra) / px);
+        var next = Math.max(0, pillWidth(L) - 88);
+        if (next === extra) break;
+        extra = next;
+      }
+      L = Math.round(L * 10) / 10;
+      var key = px + ':' + extra + ':' + L;
+      if (key === drawn) return;
+      drawn = key;
+      var gap = L * .8, rows = { top: [], bottom: [] };
+      names.forEach(function (n) {
+        var w = n.line.name.length * WORD * L, anchor = n.line.label[2], x = n.line.label[0];
+        n.w = w; n.left = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x;
+        rows[n.line.label[3]].push(n);
+      });
+      slide(rows.top, -extra, WORLD_W - 4, gap);
+      slide(rows.bottom, -extra, WORLD_W - 4, gap);
+      var top = 0, bottom = 0;
+      names.forEach(function (n) {
+        var edge = n.line.label[1], isTop = n.line.label[3] === 'top';
+        var baseline = isTop ? edge - .25 * L : edge + .75 * L;
+        n.node.setAttribute('x', String(Math.round(n.left * 10) / 10));
+        n.node.setAttribute('y', String(Math.round(baseline * 10) / 10));
+        n.node.setAttribute('text-anchor', 'start');
+        n.node.setAttribute('style', 'font-size:' + L + 'px');
+        if (isTop) top = Math.max(top, L - edge + 2); else bottom = Math.max(bottom, edge + L - WORLD_H + 2);
+      });
+      top = Math.max(0, Math.ceil(top)); bottom = Math.max(0, Math.ceil(bottom));
+      /* the "you.fxn" pill: sized from its words, its right edge where it always was */
+      var w = Math.max(88, pillWidth(L)), h = Math.max(24, Math.round(L * 1.7)), left = 96 - w, icon = Math.max(16, .8 * L);
+      tagRect.setAttribute('x', String(left)); tagRect.setAttribute('y', String(96 - h / 2));
+      tagRect.setAttribute('width', String(w)); tagRect.setAttribute('height', String(h)); tagRect.setAttribute('rx', String(h / 2));
+      if (tagIcon) tagIcon.setAttribute('transform', 'translate(' + (left + .45 * L).toFixed(1) + ' ' + (96 - icon / 2).toFixed(1) + ') scale(' + (icon / 24).toFixed(4) + ')');
+      tagText.setAttribute('x', (left + .45 * L + (paths ? icon + .35 * L : 0)).toFixed(1));
+      tagText.setAttribute('y', String((96 + .35 * L).toFixed(1)));
+      tagText.setAttribute('style', 'font-size:' + L + 'px');
+      root.setAttribute('viewBox', (-extra) + ' ' + (-top) + ' ' + (WORLD_W + extra) + ' ' + (WORLD_H + top + bottom));
+    }
+    var worldObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(fitWorld) : null;
+    if (worldObserver) worldObserver.observe(root);
     function select(caseId) {
       var party = (CASES_BY_ID[caseId] || CASES_BY_ID.swaps).party;
       Object.keys(lines).forEach(function (name) { lines[name].setAttribute('data-selected', String(name === party)); });
     }
     select(options && options.caseId);
-    return { element: root, select: select };
+    return { element: root, select: select, fit: fitWorld, dispose: function () { if (worldObserver) worldObserver.disconnect(); } };
   };
 
   /* The five steps of one example, in order: [{ id, title, page, says }]. Only the last step's words
@@ -624,7 +679,7 @@
     // Now: the one panel that answers the selected step. The step picker (an Ark tabs block the page
     // places above it, ArkUI.chainStepsBlock) says the step in words.
     var now = el('div', 'flow-now');
-    var scene = drawScene(payload, options.rich, options.diagram);
+    var scene = drawScene(payload, options.rich);
     // The landscape is a picture of the step the words say; the plain scene's record is real content.
     if (options.rich) scene.svg.setAttribute('aria-hidden', 'true');
     now.appendChild(scene.svg);

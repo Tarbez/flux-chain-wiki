@@ -27,6 +27,10 @@ var ArkResolutions = (function () {
      publishing an algorithm or a rule IS writing a resolver, so they lead on to its math; personal
      finance leads to the treasury preview, as payments does). Rendered as a secondary link. */
   var also = { ALGORITHMS: 'resolver-math', RULES: 'resolver-math', FINANCE: 'treasury' };
+  /* A third page, for the resolution whose `also` is not the only place it leads (W5-PAGES, ledger
+     "Next-step links"): publishing an algorithm leads to the math AND to the list of what resolves it
+     (/resolvers). `also` stays one page (a string); this is its own map, rendered as one more related link. */
+  var alsoMore = { ALGORITHMS: 'resolvers' };
 
   /* The inner pages stay deliberately short: one shift and three movements.
      This is product framing, not a claim that every capability runs today. */
@@ -56,7 +60,7 @@ var ArkResolutions = (function () {
   function copy(key) { return ArkCopy.text('RESOLUTIONS.' + key); }
   function item(key, group) {
     var profile = profiles[key] || {};
-    return { key: key, slug: key.toLowerCase(), group: group, start: start[key] || null, also: also[key] || null,
+    return { key: key, slug: key.toLowerCase(), group: group, start: start[key] || null, also: also[key] || null, alsoMore: alsoMore[key] || null,
       title: copy(key + '.TITLE'), text: copy(key + '.TEXT'), shift: profile.shift || '',
       old: profile.old || '', steps: (profile.steps || []).slice() };
   }
@@ -85,11 +89,11 @@ var ArkResolutions = (function () {
     return rest.charAt(0).toUpperCase() + rest.slice(1);
   }
   function keys() { return groups.reduce(function (all, group) { return all.concat(group.items); }, []); }
-  /* The resolutions that begin at a page (`start`, or the deeper `also`): the inverse of the two maps
+  /* The resolutions that begin at a page (`start`, or the deeper `also` / `alsoMore`): the inverse of the two maps
      above, so a page can lead to what it is the start of without anyone listing that again
      (/dao -> /resolutions/governance, /bundle-deployer -> website and deployments). */
   function startingFrom(pageKey) {
-    return all().filter(function (item) { return item.start === pageKey || item.also === pageKey; });
+    return all().filter(function (item) { return item.start === pageKey || item.also === pageKey || item.alsoMore === pageKey; });
   }
 
   return { groups: groups, list: list, all: all, find: find, groupFor: groupFor, keys: keys, copy: copy, shortName: shortName, startingFrom: startingFrom };

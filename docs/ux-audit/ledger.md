@@ -140,7 +140,7 @@ status depends on measured fold or live behaviour are UNVERIFIED (needs browser)
 | /dao exits: resolve your governance, model analogy | P3 | OPEN | js/pages/sheet.js:494-496 gives only parent + "Inspect activation gates"; no /resolutions/governance or /experiments link. Fix edits js/pages/sheet.js (and js/content/manifests/dao) |
 | /resolutions/* P1-only rows (website, content, files, deployments, payments, community, communications, collaborations, governance, intelligence, data, information, network, encryptions, automation, productivity, logistics) | P0 via P1 | FIXED | see P1 (tests/browser/site-fixes.mjs:44-65 includes /resolutions/website) |
 | /resolutions/finance add /treasury | P3 | FIXED | js/content/resolutions.js:29 `FINANCE: 'treasury'`; rendered as related page, js/pages/resolutions.js:164 |
-| /resolutions/algorithms add /resolvers and /resolver-math | P3 | PARTIAL | resolver-math done (resolutions.js:29); /resolvers not linked from the page. Fix edits js/content/resolutions.js (a second `also`) |
+| /resolutions/algorithms add /resolvers and /resolver-math | P3 | FIXED | js/content/resolutions.js `alsoMore` (ALGORITHMS: resolvers), rendered as a second related link by `js/pages/resolutions.js` detailSpec; `also` stays a string; tests/site-exits.cjs, tests/resolutions-blocks.cjs (W5-PAGES) |
 | /resolutions/rules add /resolver-math | P3 | FIXED | resolutions.js:29; tests/site-exits.cjs |
 | /how-deployment-works/ask, /work | - | n/a | report: none |
 | /how-deployment-works/check closing "Run it yourself" -> /download | P3 | OPEN | js/pages/how-stories.js:392 next is "Back to the lifecycle"; no /download. Fix edits js/pages/how-stories.js |
@@ -1035,7 +1035,7 @@ Counts: FIXED 115, PARTIAL 23, OPEN 10, OWNER 9, OUT-OF-REPO 32, UNVERIFIED 4
 | 2.4-d home-flow.js :27 Swaps case "DeFi resolver reads the payload" | STALE | FIXED | home-flow.js CASES swaps: "The launch's signer resolves the batch and signs the result" |
 | 2.4-e home-flow.js :29/:474 party "validator.fxn" | BANNED | FIXED | home-flow.js:31 and :435 use provider.fxn; grep validator = none |
 | 2.4-f chain.js NEXT -> /what-is-a-resolver | CURRENT | FIXED | unchanged |
-| 3.4-x /chain proposed detail "Where do resolver chains come from? -> What is a resolver" | MISSING | OPEN | no such line in js/pages/chain.js or manifests/chain.js (grep "resolver chains come" = none). Fix: js/pages/chain.js, js/content/manifests/chain.js |
+| 3.4-x /chain proposed detail "Where do resolver chains come from? -> What is a resolver" | MISSING | FIXED | manifest fields CHAIN.SOURCE.LINK / CHAIN.SOURCE.HREF, rendered by `js/pages/chain.js` (chain-onward); tests/site-exits.cjs, tests/chain-blocks.cjs (W5-PAGES) |
 | 2.5-a /about POINT2 admission rule | MISSING | FIXED | js/content/manifests/about.js:89 |
 | 2.5-b /about POINT4 agreements resolver "implemented in source" | STALE | FIXED | about.js:113 |
 | 2.5-c /about FLOW2 "network's published rules" | STALE | FIXED | about.js:347 |
@@ -1146,7 +1146,7 @@ Counts: FIXED 115, PARTIAL 23, OPEN 10, OWNER 9, OUT-OF-REPO 32, UNVERIFIED 4
 | 4.2 Diagram: deploy flow, six stations, two refusal exits | - | OPEN | spec only in DM meta.diagrams[deploy-flow] (DM:12); not rendered. Files: js/pages/deployment.js |
 | 4.3 Diagram: launched vs served | - | OPEN | spec only RM meta.diagrams[launched-vs-served]; not rendered. Files: js/pages/resolver-guide.js |
 | 4.4 Diagram: upgrade supersedes | - | OPEN | spec only js/content/manifests/dao.js meta; not rendered. Files: js/pages/dao.js (story template) |
-| 4.5 Diagram: swap as signed resolution | - | OPEN | spec only js/content/manifests/chain.js:11 (swap-signed-resolution); not rendered. Files: js/pages/chain.js, js/pages/home-flow.js |
+| 4.5 Diagram: swap as signed resolution | - | FIXED | drawn by `ArkUI.resolverPageParts.figureBlock('chain','swap-signed-resolution')` in the Swaps tab behind a disclosure (`#chain-swap`, foldBelow always), `js/pages/chain.js`; the second copy in home-flow.js is deleted; tests/chain-blocks.cjs, tests/resolver-page-parts.cjs (W5-PAGES) |
 | 5.a /what-is-a-resolver hub with outbound links | - | FIXED | RM REGISTRY/DEPLOY/EXPLORE/DEPLOYER/MATH links (RM:340-394) |
 | 5.b /resolvers inbound links (stats, hub, deployment, resolver-math, chain, header menu) | - | PARTIAL | Inbound now: RM:340, DM:313, js/pages/resolver-math.js:782,792, js/content/manifests/home.js:229, js/pages/stats.js:631, menu via site-pages.js:45 (journey 'build'). Left: /chain does not link it |
 | 5.c /how-deployment-works inbound (hub, registry, /deploy, /bundle-deployer, /dao) | - | PARTIAL | Linked from RM:352, deploy.js:45 (RESOLVER.HREF), about.js:159, home.js:193. Left: /bundle-deployer and /dao carry no link to it. Files: js/content/manifests/bundledeployer.js, dao.js |

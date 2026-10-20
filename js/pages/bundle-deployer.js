@@ -6,7 +6,8 @@
    2.0x the viewport on a phone, and its only way on was "Back to your account"
    (docs/ux-audit/pages-ux-a.md /bundle-deployer P1/P2). It is the hero, the Bundles hand-off,
    the two halves as tabs -- the three steps, and what becomes public -- the release boundary in
-   sight, and a pager that leads on to running DEFXN from source. Every word is kept; the words
+   sight, and a pager that leads on to running DEFXN from source, to resolving deployments and
+   to /how-deployment-works (W5-PAGES: the page that explains what the deployer feeds into). Every word is kept; the words
    are the bundledeployer manifest's (copy: keys). Layout keys of the old page are pinned (`WAS`,
    tests/lib/layout-continuity.cjs). Regression: tests/task-pages-blocks.cjs. */
 (function () {
@@ -44,6 +45,12 @@
     WAS['bundledeployer-views']['step-title' + k] = B + '/figure:1/ol:1/li:' + n;
   });
 
+  /* A page's name as the journey table spells it (js/content/site-pages.js), so a renamed page renames its link. */
+  function pageLabel(key) {
+    var row = typeof ArkSitePages !== 'undefined' ? ArkSitePages.pages().filter(function (p) { return p.key === key; })[0] : null;
+    return row ? (row.short || row.label) : 'Deploy a resolver';
+  }
+
   function spec() {
     var manifest = ArkManifest.get('bundledeployer');
     function copy(key) { return 'copy:BUNDLEDEPLOYER.' + key; }
@@ -77,7 +84,7 @@
       { block: 'pager', id: 'bundledeployer-pager', was: WAS['bundledeployer-pager'], props: { label: 'Continue',
         prev: { label: copy('BACK'), href: 'route:' + manifest.meta.back },
         next: { label: 'Run DEFXN from source', href: 'route:download' },
-        related: [{ label: 'Resolve your deployments', href: 'route:resolutions/deployments' }] } }
+        related: [{ label: 'Resolve your deployments', href: 'route:resolutions/deployments' }, { label: pageLabel('deployment'), href: 'route:deployment' }] } }
     ];
   }
 

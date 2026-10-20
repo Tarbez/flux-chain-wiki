@@ -13,8 +13,10 @@
                 the open tab says its step and opens the page that shows that part for real. They
                 replaced the hand-built `flow-record` links. Each record box is an Ark glossary
                 term whose tip is the role letter's meaning (docs/ux-audit/ledger.md /chain).
-   onward       what each resolver reads from the chain (CHAIN.NEXT) and where resolver chains come
-                from (/resolver)
+   swap         on the Swaps tab only, behind a disclosure under the scene: the swap as one signed
+                resolution (meta.diagrams, drawn by resolver-page-parts.js)
+   onward       what each resolver reads from the chain (CHAIN.NEXT -> CHAIN.NEXT.HREF) and where
+                resolver chains come from (CHAIN.SOURCE.LINK -> CHAIN.SOURCE.HREF): both in the manifest
    anchor       the CMS insertion point
 
    The scene is drawn in HTML (home-flow.js drawScene), so the record's wire grammar stays at
@@ -87,7 +89,17 @@
     insert: { key: 'page:/div:3', self: true }
   };
 
-  function spec(manifest, current) {
+  /* The Swaps example's second picture: the swap as one signed resolution (the manifest's own diagram,
+     drawn by js/pages/resolver-page-parts.js), behind Ark's disclosure under the scene. A swap is the one
+     example whose resolution is a batch -- two intents, one signer, one signed result for the peers, and a
+     second node's result refused -- so only that tab carries it. It replaced a smaller copy of the same
+     diagram that stood inside the scene's Resolve panel (one renderer, not two). Null without the parts. */
+  function swapFigure() {
+    var parts = ArkUI.resolverPageParts;
+    return parts ? parts.figureBlock('chain', 'swap-signed-resolution', { id: 'chain-swap', foldBelow: 'always', more: 'How a swap is resolved', less: 'Hide how a swap is resolved' }) : null;
+  }
+
+  function spec(manifest, current, swap) {
     return [
       { block: 'breadcrumb', id: 'chain-crumbs', was: WAS['chain-crumbs'], props: { label: 'Your place', items: [
         { label: 'Home', href: 'route:' + manifest.meta.back }, { label: 'The chain of chains' }
@@ -96,17 +108,19 @@
       { block: 'tabs', id: 'chain-cases', was: WAS['chain-cases'], props: {
         label: 'See it from a different resolver', variant: 'segmented', defaultValue: current,
         items: ArkUI.chainCases.map(function (c) {
-          return { value: c.id, label: c.label, blocks: [{ block: 'figure', props: {
+          var blocks = [{ block: 'figure', props: {
             kind: 'illustration', slot: 'flow-' + c.id,
             caption: 'Illustrative values · the record shape is the real wire grammar. Only what the resolver reads at the end changes between examples.'
-          } }] };
+          } }];
+          if (swap && c.id === 'swaps') blocks.push(swap.spec);
+          return { value: c.id, label: c.label, blocks: blocks };
         })
       } },
       /* The way on: what each resolver reads from the chain (the manifest's next-step line), and where
          resolver chains come from (docs/ux-audit/ledger.md 3.4-x). */
       { block: 'actions', id: 'chain-onward', props: { label: 'Where next', items: [
-        { label: 'copy:CHAIN.NEXT', href: 'route:resolvers', tone: 'secondary' },
-        { label: 'Where do resolver chains come from?', href: 'route:resolver', tone: 'ghost' }
+        { label: 'copy:CHAIN.NEXT', href: ArkCopy.text('CHAIN.NEXT.HREF'), tone: 'secondary' },
+        { label: 'copy:CHAIN.SOURCE.LINK', href: ArkCopy.text('CHAIN.SOURCE.HREF'), tone: 'ghost' }
       ] } },
       { insert: 'main', was: WAS.insert }
     ];
@@ -121,10 +135,11 @@
     },
     mount: function (host) {
       var manifest = ArkManifest.get('chain');
-      var flows = {}, slots = {};
+      var flows = {}, slots = {}, swap = swapFigure();
+      if (swap) slots[swap.slot] = swap.node;
       ArkUI.chainCases.forEach(function (c) {
         slots['flow-' + c.id] = function () {
-          var flow = flows[c.id] = ArkUI.buildChainFlow({ caseId: c.id, diagram: (manifest.meta.diagrams || [])[0] });
+          var flow = flows[c.id] = ArkUI.buildChainFlow({ caseId: c.id });
           flow.element.classList.add('chain-flow');
           /* the five steps at the top of the scene's frame, each opening the page that shows that part for real */
           ArkUI.buildChainSteps(flow, c.id, { id: 'chain-steps-' + c.id, links: true, was: c.id === ArkUI.chainCases[0].id ? stepsWas() : undefined });
@@ -132,7 +147,7 @@
         };
       });
       var current = preparedCase || ArkUI.chainCases[0].id;
-      var page = ArkUI.page(spec(manifest, current), host, { page: 'chain', className: 'chain-page', titleId: 'chain-title', slots: slots });
+      var page = ArkUI.page(spec(manifest, current, swap), host, { page: 'chain', className: 'chain-page', titleId: 'chain-title', slots: slots });
       /* A hidden tab's scene schedules nothing; the one a choice shows starts (and settles) again. */
       var tabs = page.querySelector('#chain-cases');
       function shown() {
