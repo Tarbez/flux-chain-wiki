@@ -333,17 +333,17 @@ test('the optional blocks are chunks: absent from the public kit and its resolve
   // only (the popover alone, 3.2 KB, for a page that takes no input). A chunk that registered its blocks but not their resolvers would
   // render nothing on the page ("[ArkUI] unresolved resolver") with every block route's tests green.
   const FORM = ['field', 'form', 'list', 'status-line', 'choice'], POPOVER = ['popover'];
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 21, 'the public kit holds the 21 core blocks');
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 23, 'the public kit holds the 23 core blocks');
   for (const name of FORM.concat(POPOVER)) assert.equal(ArkUI.blocks.resolvers.includes(ArkUI.blocks.resolverId(name)), false, name + ' is not a resolver before its chunk');
   assert.equal(ArkUI.blocks.formsScript, 'js/ark/vendor/ark-kit-forms.js');
   assert.equal(ArkUI.blocks.popoverScript, 'js/ark/vendor/ark-kit-popover.js');
   const before = ArkUI.build({ resolver: 'ARK_BLOCK_FORM', props: {}, children: [] }, { mounts: [], emerge: [] });
   assert.equal(before, null, 'without the chunk a saved form block is unresolved, not a thrown page');
   run(ArkUI.blocks.popoverScript);
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 22, 'the popover chunk adds the popover and no form block');
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 24, 'the popover chunk adds the popover and no form block');
   assert(ArkUI.blocks.resolvers.includes('ARK_BLOCK_POPOVER') && !ArkUI.blocks.resolvers.includes('ARK_BLOCK_FORM'));
   run(ArkUI.blocks.formsScript);
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 27);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 29);
   assert.equal(window.ArkKitForms.FORM_BLOCK_NAMES.length, 5);
   for (const name of FORM.concat(POPOVER)) assert(ArkUI.blocks.resolvers.includes(ArkUI.blocks.resolverId(name)), name + ' is a resolver after its chunk (ArkUI.blocks.sync)');
   assert.deepEqual(JSON.parse(JSON.stringify(ArkUI.blocks.resolvers)), [...ArkKit.ARK_BLOCK_NAMES].map(ArkUI.blocks.resolverId), 'and the list is still the kit\'s, derived');
@@ -360,7 +360,7 @@ test('the optional blocks are chunks: absent from the public kit and its resolve
   assert.deepEqual(heard.map((d) => [d.action, d.values.name, d.block]), [['lookup', 'radio.fxn', 'form']], 'the page handler gets { action, values } and nothing posts');
   // Loaded again (a route lists it and the loader adds it): harmless.
   run(ArkUI.blocks.formsScript); run(ArkUI.blocks.popoverScript);
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 27);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 29);
   root.remove();
 });
 

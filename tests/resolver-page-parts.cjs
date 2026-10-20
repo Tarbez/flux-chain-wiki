@@ -76,7 +76,7 @@ function units() {
     const allowed = new Set(strings(meta(m, d)));
     const stray = [];
     const f = fig(m, d);
-    const shown = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(shown) : v && typeof v === 'object' ? Object.entries(v).filter(([k]) => !['tone', 'mode', 'state', 'meaning'].includes(k)).flatMap(([, x]) => shown(x)) : []);
+    const shown = (v) => (typeof v === 'string' ? [v] : Array.isArray(v) ? v.flatMap(shown) : v && typeof v === 'object' ? Object.entries(v).filter(([k]) => !['tone', 'mode', 'state', 'meaning', 'block', 'outline'].includes(k)).flatMap(([, x]) => shown(x)) : []);
     for (const x of blocks(f)) for (const t of shown(x.props)) {
       if (allowed.has(t) || t === x.props.label) continue;
       // a derived label: parts joined by the figure's own separators out of manifest strings, snapshot values or numbers
@@ -105,26 +105,28 @@ function units() {
 
   // 5. the layers: three bands, base at the bottom; capability cards are the snapshot's rows and nothing else
   const layers = fig('resolver', 'resolver-layers');
-  assert.deepEqual([...layers.node.querySelectorAll('.ark-band')].map((x) => x.dataset.band), ['resolvers', 'capabilities', 'base'], 'resolver chains on top, the base chain at the bottom');
-  const caps = layers.node.querySelector('[data-band="capabilities"] [data-ark-block="card-grid"]');
-  const capItems = JSON.parse(caps.getAttribute('data-props')).items;
+  /* the stub renderer keeps a band's nested blocks in its props (`blocks`); Ark renders them inside the band */
+  const bandProps = (node, id) => JSON.parse(node.querySelector('[data-band="' + id + '"]').getAttribute('data-props'));
+  assert.deepEqual([...layers.node.querySelectorAll('[data-ark-block="band"]')].map((x) => x.dataset.band), ['resolvers', 'capabilities', 'base'], 'resolver chains on top, the base chain at the bottom');
+  const capItems = bandProps(layers.node, 'capabilities').blocks[0].props.items;
   assert.deepEqual(capItems.map((c) => c.title), snapJson.capabilities.map((c) => c.id), 'the capability cards are the snapshot\'s rows, no more, no fewer');
   assert.deepEqual(capItems.map((c) => c.status.label), snapJson.capabilities.map((c) => c.vectors + ' vectors'), 'each shows its count of vectors in an Ark status chip');
   assert(capItems.every((c, i) => c.description.endsWith(snapJson.capabilities[i].sourceHash.slice(0, 8))), 'and a stub of its source hash');
-  const chains = JSON.parse(layers.node.querySelector('[data-band="resolvers"] [data-ark-block="card-grid"]').getAttribute('data-props')).items;
+  const chains = bandProps(layers.node, 'resolvers').blocks[0].props.items;
   assert(chains.find((c) => c.title === 'dao').description.includes(snapJson.resolvers.find((r) => r.chainId === 'dao').composes.join(' + ')), 'dao shows what it composes, from the snapshot');
   assert.equal(chains[chains.length - 1].title, 'your-resolver', 'and the reader\'s own resolver closes the row');
-  assert.deepEqual([...layers.node.querySelectorAll('[data-band="base"] .ark-band__mark')].map((x) => x.textContent), meta('resolver', 'resolver-layers').bands[0].marks, 'the base chain\'s four kinds of record');
+  assert.deepEqual(bandProps(layers.node, 'base').marks, meta('resolver', 'resolver-layers').bands[0].marks, 'the base chain\'s four kinds of record');
   assert(layers.node.querySelector('.mfig-source').textContent.includes(snapJson.source.commitDate), 'the figure says it is a dated read of the source, with the date');
   assert(!/\u2713|verified|launched on/i.test(layers.node.textContent), 'the layers never draw a tick or claim a capability is launched: the snapshot holds a count of vectors, not a pass');
   const bare = sandbox({ snapshot: false }).ArkUI.manifestFigure('resolver', 'resolver-layers').node;
-  assert.equal(bare.querySelectorAll('[data-band="capabilities"] [data-ark-block="card-grid"]').length, 0, 'without the snapshot no capability is drawn');
+  assert.equal(bandProps(bare, 'capabilities').blocks, undefined, 'without the snapshot no capability is drawn');
   assert(bare.querySelector('.mfig-source[data-absent]') && /did not load/.test(bare.querySelector('.mfig-source').textContent), 'and the figure says what it needs, not an empty band');
 
   // 6. launched versus served; the upgrade keeps the old declaration on the line
   const states = fig('resolver', 'launched-vs-served').node;
-  assert.equal(states.querySelector('[data-state="launched"] .ark-lane').dataset.outline, 'dashed');
-  assert(!states.querySelector('[data-state="launched"] .ark-lane__provider') && states.querySelector('[data-state="served"] .ark-lane__provider'), 'only the served chain has a provider');
+  assert.equal(JSON.parse(states.querySelector('[data-state="launched"] [data-ark-block="lane"]').getAttribute('data-props')).outline, 'dashed');
+  const laneOf = (state) => JSON.parse(states.querySelector('[data-state="' + state + '"] [data-ark-block="lane"]').getAttribute('data-props'));
+  assert(!laneOf('launched').provider && laneOf('served').provider === true, 'only the served chain has a provider');
   assert.deepEqual(JSON.parse(states.querySelector('[data-state="served"] [data-ark-block="card"]').getAttribute('data-props')).status, { label: 'proof', tone: 'trust' }, 'the proof is an Ark status chip');
   assert(!JSON.parse(states.querySelector('[data-state="launched"] [data-ark-block="card"]').getAttribute('data-props')).status, 'a launched chain has no proof');
   const up = fig('dao', 'upgrade-supersedes').node;
