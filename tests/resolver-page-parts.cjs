@@ -105,7 +105,7 @@ function units() {
 
   // 5. the layers: three bands, base at the bottom; capability cards are the snapshot's rows and nothing else
   const layers = fig('resolver', 'resolver-layers');
-  assert.deepEqual([...layers.node.querySelectorAll('.mfig-band')].map((x) => x.dataset.band), ['resolvers', 'capabilities', 'base'], 'resolver chains on top, the base chain at the bottom');
+  assert.deepEqual([...layers.node.querySelectorAll('.ark-band')].map((x) => x.dataset.band), ['resolvers', 'capabilities', 'base'], 'resolver chains on top, the base chain at the bottom');
   const caps = layers.node.querySelector('[data-band="capabilities"] [data-ark-block="card-grid"]');
   const capItems = JSON.parse(caps.getAttribute('data-props')).items;
   assert.deepEqual(capItems.map((c) => c.title), snapJson.capabilities.map((c) => c.id), 'the capability cards are the snapshot\'s rows, no more, no fewer');
@@ -114,7 +114,7 @@ function units() {
   const chains = JSON.parse(layers.node.querySelector('[data-band="resolvers"] [data-ark-block="card-grid"]').getAttribute('data-props')).items;
   assert(chains.find((c) => c.title === 'dao').description.includes(snapJson.resolvers.find((r) => r.chainId === 'dao').composes.join(' + ')), 'dao shows what it composes, from the snapshot');
   assert.equal(chains[chains.length - 1].title, 'your-resolver', 'and the reader\'s own resolver closes the row');
-  assert.deepEqual([...layers.node.querySelectorAll('[data-band="base"] .mfig-tick')].map((x) => x.textContent), meta('resolver', 'resolver-layers').bands[0].marks, 'the base chain\'s four kinds of record');
+  assert.deepEqual([...layers.node.querySelectorAll('[data-band="base"] .ark-band__mark')].map((x) => x.textContent), meta('resolver', 'resolver-layers').bands[0].marks, 'the base chain\'s four kinds of record');
   assert(layers.node.querySelector('.mfig-source').textContent.includes(snapJson.source.commitDate), 'the figure says it is a dated read of the source, with the date');
   assert(!/\u2713|verified|launched on/i.test(layers.node.textContent), 'the layers never draw a tick or claim a capability is launched: the snapshot holds a count of vectors, not a pass');
   const bare = sandbox({ snapshot: false }).ArkUI.manifestFigure('resolver', 'resolver-layers').node;
@@ -123,8 +123,8 @@ function units() {
 
   // 6. launched versus served; the upgrade keeps the old declaration on the line
   const states = fig('resolver', 'launched-vs-served').node;
-  assert.equal(states.querySelector('[data-state="launched"] .mfig-lane').dataset.outline, 'dashed');
-  assert(!states.querySelector('[data-state="launched"] .mfig-provider') && states.querySelector('[data-state="served"] .mfig-provider'), 'only the served chain has a provider');
+  assert.equal(states.querySelector('[data-state="launched"] .ark-lane').dataset.outline, 'dashed');
+  assert(!states.querySelector('[data-state="launched"] .ark-lane__provider') && states.querySelector('[data-state="served"] .ark-lane__provider'), 'only the served chain has a provider');
   assert.deepEqual(JSON.parse(states.querySelector('[data-state="served"] [data-ark-block="card"]').getAttribute('data-props')).status, { label: 'proof', tone: 'trust' }, 'the proof is an Ark status chip');
   assert(!JSON.parse(states.querySelector('[data-state="launched"] [data-ark-block="card"]').getAttribute('data-props')).status, 'a launched chain has no proof');
   const up = fig('dao', 'upgrade-supersedes').node;

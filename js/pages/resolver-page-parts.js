@@ -15,8 +15,8 @@
       registry snapshot), so the picture cannot name a station, a refusal or a capability the data
       does not hold. No raster image and no SVG: the figure is Ark's own parts (card-grid, card with a
       status chip, eyebrow, steps, facts) in Ark's `figure` frame, whose `data-ark-label` rule holds a
-      label at 12px or more on a phone. Only the layer band and the launched chain's lane are this
-      file's (Ark has no line-diagram part: reported as missing). It never moves, so there is
+      label at 12px or more on a phone. The layer band and the launched
+      chain's lane are Ark's `band` and `lane` blocks (@deadark/ark-ui 0.2.11, W5-ARK). It never moves, so there is
       no loop to settle. `ArkUI.manifestFigure(manifestId, diagramId)` returns { slot, node,
       caption, description }; `ArkUI.resolverPageParts.figureBlock` wraps it in the story
       template's fold (Ark's disclosure + figure) and names the slot the page must register.
@@ -34,13 +34,16 @@
   function el(tag, cls, text) { return ArkUI.el(tag, cls, text); }
   /* A figure is a small tree: plain layout elements ({ tag, cls, text, attrs, children }) around Ark
      blocks ({ block, props }) -- the cards, status chips, eyebrows, steps and facts are Ark's own parts,
-     rendered by the adapter (ArkUI.blocks.render), never a second set of classes drawn here. Only the
-     lane of a launched chain and the band that groups a layer are this file's, because Ark has no
-     part for a line diagram (named in the W4-S13 report as missing). */
+     rendered by the adapter (ArkUI.blocks.render), never a second set of classes drawn here. The layer
+     band and the launched chain's lane are Ark's `band` and `lane` too (0.2.11). */
   function h(tag, cls, children, attrs) { return { tag: tag, cls: cls, text: typeof children === 'string' ? children : undefined, children: Array.isArray(children) ? children : undefined, attrs: attrs }; }
-  function b(block, props) { return { block: block, props: props }; }
+  function b(block, props, attrs) { return { block: block, props: props, attrs: attrs }; }
   function make(node) {
-    if (node.block) return ArkUI.blocks.render({ block: node.block, props: node.props });
+    if (node.block) {
+      var rendered = ArkUI.blocks.render({ block: node.block, props: node.props });
+      Object.keys(node.attrs || {}).forEach(function (k) { rendered.setAttribute(k, node.attrs[k]); });
+      return rendered;
+    }
     var e = el(node.tag, node.cls, node.text);
     Object.keys(node.attrs || {}).forEach(function (k) { e.setAttribute(k, node.attrs[k]); });
     (node.children || []).forEach(function (c) { if (c) e.appendChild(make(c)); });
@@ -68,18 +71,18 @@
   function layers(d) {
     var snap = snapshot(), absent = false, bands = [];
     d.bands.slice().reverse().forEach(function (band) {
-      var body;
+      var props = { label: band.label, rule: band.rule };
       if (band.marks) {
-        body = h('ul', 'mfig-row', band.marks.map(function (mark) { return h('li', 'mfig-tick', mark); }));
+        props.marks = band.marks;
       } else if (band.id === 'capabilities') {
         var caps = (snap && snap.capabilities) || [];
         if (!caps.length) absent = true;
-        body = caps.length ? b('card-grid', { label: band.label, columns: 2, items: caps.map(function (cap) {
+        if (caps.length) props.blocks = [b('card-grid', { label: band.label, columns: 2, items: caps.map(function (cap) {
           var n = cap[band.badge], item = { title: cap.id, headingLevel: 6 };
           if (cap[band.stub]) item.description = words(band.stub) + ' ' + String(cap[band.stub]).slice(0, 8);
           if (n != null) item.status = { label: n + ' ' + band.badge, tone: 'reference' };
           return item;
-        }) }) : null;
+        }) })];
       } else {
         var items = (band.show || []).map(function (id) {
           var chain = byId(snap && snap.resolvers, 'chainId', id), composes = chain && chain.composes;
@@ -87,9 +90,9 @@
           return { title: id, headingLevel: 6, description: band.lines + ' \u00b7 ' + (composes ? (composes.length ? composes.join(' + ') : 'none') : '\u2014') };
         });
         if (band.plus) items.push({ title: band.plus, headingLevel: 6 });
-        body = b('card-grid', { label: band.label, columns: 2, items: items });
+        props.blocks = [b('card-grid', { label: band.label, columns: 2, items: items })];
       }
-      bands.push(h('section', 'mfig-band', [b('eyebrow', { text: band.label }), h('p', 'mfig-rule', band.rule), body], { 'data-band': band.id, 'aria-label': band.label }));
+      bands.push(b('band', props, { 'data-band': band.id }));
     });
     /* A refusal names what it needs: without the snapshot the band cannot be drawn from data. */
     bands.push(h('p', 'mfig-source', snap && snap.source
@@ -102,11 +105,10 @@
   /* ---- 2. launched, then served ------------------------------------------------------------ */
   function states(d) {
     var frames = d.frames.map(function (frame) {
-      var lane = [1, 2, 3, 4, 5].map(function () { return h('span', 'mfig-lane-tick', ''); });
-      if (frame.provider) lane.push(h('span', 'mfig-provider', ''));
       var card = { title: frame.state, description: frame.note, headingLevel: 6 };
       if (frame.provider && frame.badge) card.status = { label: frame.badge, tone: 'trust' };
-      return h('div', 'mfig-state', [h('div', 'mfig-lane', lane, { 'aria-hidden': 'true', 'data-outline': frame.outline }), b('card', card)], { 'data-state': frame.state, 'data-outline': frame.outline });
+      var lane = { label: frame.state + ' chain' + (frame.provider ? ', with a provider' : ''), outline: frame.outline === 'dashed' ? 'dashed' : 'solid', links: 5, provider: !!frame.provider };
+      return h('div', 'mfig-state', [b('lane', lane), b('card', card)], { 'data-state': frame.state, 'data-outline': frame.outline });
     });
     var summary = d.frames.map(function (f) { return f.state + ': ' + f.note; }).join('. ') + '.';
     return { tree: h('div', 'mfig mfig-states', frames), summary: summary, description: summary };

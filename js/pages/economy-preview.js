@@ -113,14 +113,12 @@
     var form = ArkUI.blocks.render({ block: 'form', id: 'deposits-form', was: WAS.deposits['deposits-form'], props: {
       label: 'Mock FXN deposit draft',
       fields: [
-        { name: 'amount', label: 'Example FXN amount', type: 'number', required: true, min: 0.01, placeholder: '0.00',
+        { name: 'amount', label: 'Example FXN amount', type: 'number', step: 'any', required: true, min: 0.01, placeholder: '0.00',
           hint: 'Credits are identity-bound and non-transferable. They are not deposited, sent, or converted in this preview.' },
         { name: 'purpose', label: 'Illustrative purpose', type: 'select', value: PURPOSES[0][0], options: PURPOSES.map(function (pair) { return { value: pair[0], label: pair[1] }; }) }
       ],
       submit: { label: 'Preview draft', action: 'deposit-preview', tone: 'primary' }
     } });
-    /* any amount above the smallest is a deposit: the browser's "no step", which Ark's numeric `step` cannot say */
-    form.querySelector('[name="amount"]').setAttribute('step', 'any');
     box.appendChild(form);
     var result = node('section', 'economy-deposit-result'); result.hidden = true; result.inert = true;
     result.setAttribute('aria-label', 'Mock deposit preview');

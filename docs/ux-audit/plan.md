@@ -226,5 +226,6 @@ link, bundle-deployer journey links, resolutions alsoMore; transit-map labels on
 row alignment (Ark card); Ark: line/lane diagram part, field step:'any', styled select, foldBelow
 hidden=until-found (core budget has ~10 B headroom on live routes); long reference docs (whitepaper,
 bench-003 > 3x); reference text is one file per document (W5-REF: js/content/reference/, an index, `sync-reference-docs.cjs --check` run by tests/reference-reader.cjs).
+W5-ARK (2026-10-20): @deadark/ark-ui 0.2.11 / @deadark/sdk 0.2.42 closed the Ark follow-ups above: field step 'any', styled select, foldBelow hidden=until-found (reference section folds and story depth folds are findable with no page change), card-grid alignRows (/learnings), lane + band blocks (resolver figures; local mfig-lane/band CSS deleted). Budget table in docs/cms-architecture.md.
 Owner calls: glossary size vs budget; minify page modules (/account +42.8 KB -> ~+31); home tab order;
 commit the kit sync in the 23 consumer repos (dense-wire/web held).
