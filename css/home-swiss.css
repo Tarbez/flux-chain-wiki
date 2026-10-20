@@ -6,7 +6,10 @@
    identity accent on the one record in flight and what points at it (tests/home-color-semantics.cjs). */
 
 /* The world: your chain is the heavy line; the others cross it at interchanges. The example's
-   counterparty is drawn in full ink. Monochrome by rule. */
+   counterparty is drawn in full ink. Monochrome by rule. The names' size here (12px of a 560-unit
+   drawing) is only the first paint: js/pages/home-flow.js fitWorld() sets each name to 12px ON SCREEN
+   (an inline font-size in drawing units), sizes the "you.fxn" pill from its words, slides names that
+   would touch apart and reserves a margin for them in the viewBox. tests/home-hero-scene.cjs. */
 #scene .hl-world {display:block;width:100%;max-width:560px;height:auto;margin-inline:auto;overflow:visible;}
 .world-track {stroke:hsl(var(--text-faint));stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke 320ms,stroke-width 320ms;}
 .world-station {fill:hsl(var(--canvas));stroke:hsl(var(--text-faint));stroke-width:1.5;}

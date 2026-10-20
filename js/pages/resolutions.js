@@ -161,9 +161,12 @@
       ? { label: 'copy:RESOLUTIONS.START', href: 'route:' + item.start, tone: 'primary' }
       : { label: 'How resolvers work', href: words('START.FALLBACK.HREF'), tone: 'primary' };
     var related = [];
-    if (item.also && ArkUI.pageCatalog[item.also]) related.push({ label: String(ArkUI.pageCatalog[item.also].title).split(' — ')[0], href: 'route:' + item.also });
+    var hasAlso = !!(item.also && ArkUI.pageCatalog[item.also]);
+    [item.also, item.alsoMore].forEach(function (page) {
+      if (page && ArkUI.pageCatalog[page]) related.push({ label: String(ArkUI.pageCatalog[page].title).split(' — ')[0], href: 'route:' + page });
+    });
     related.push({ label: 'All 20', href: words('INDEX.HREF') }, { label: 'copy:RESOLUTIONS.NOTE.LINK', href: words('NOTE.LINK.HREF') });
-    var was = detailWas(item, shelf, related.length === 3, related.length);
+    var was = detailWas(item, shelf, hasAlso, related.length);
 
     /* the shift, then its three movements */
     var how = { content: 'The shift: ' + lower(item.shift) + ' Instead of ' + lower(item.old),

@@ -35,6 +35,18 @@ assert(read('js/content/articles/how-we-got-fast-and-what-we-got-wrong.js').incl
   assert.equal(byKey.RULES.also, 'resolver-math', '/resolutions/rules leads to /resolver-math');
   assert.equal(byKey.ALGORITHMS.also, 'resolver-math', '/resolutions/algorithms leads to /resolver-math');
   assert(/item\.also && ArkUI\.pageCatalog\[item\.also\]/.test(read('js/pages/resolutions.js')), 'and the detail page renders that link');
+  // W5-PAGES: a second page (`alsoMore`) is its own map, and `also` stays one page (a string)
+  assert.equal(typeof byKey.ALGORITHMS.also, 'string', '`also` is still one page');
+  assert.equal(byKey.ALGORITHMS.alsoMore, 'resolvers', '/resolutions/algorithms also leads to /resolvers (what resolves it)');
+  assert(/item\.alsoMore/.test(read('js/pages/resolutions.js')), 'and the detail page renders that link');
+}
+// W5-PAGES (ledger 3.4-x): /chain's two ways on are manifest fields AND rendered (a field nothing reads is a dead field)
+{
+  const chainManifest = read('js/content/manifests/chain.js'), chainPage = read('js/pages/chain.js');
+  for (const [field, value] of [['SOURCE.LINK', 'Where do resolver chains come from?'], ['SOURCE.HREF', 'route:resolver'], ['NEXT.HREF', 'route:resolvers']])
+    assert(new RegExp('"' + field.replace('.', '\\.') + '"[\\s\\S]{0,160}"value": "' + value.replace(/[?]/g, '\\?') + '"').test(chainManifest), '/chain manifest holds ' + field);
+  assert(chainPage.includes("'copy:CHAIN.SOURCE.LINK'") && chainPage.includes("ArkCopy.text('CHAIN.SOURCE.HREF')") && chainPage.includes("ArkCopy.text('CHAIN.NEXT.HREF')"), '/chain renders all three: the page keeps no copy of the words or routes');
+  assert(!/href: 'route:resolvers?'/.test(chainPage), 'and types no route of its own for them');
 }
 const palette = read('js/pages/palette.js');
 // /palette is a spec of Ark blocks since 2026-10-19: its way home is an actions item routed to

@@ -12,12 +12,12 @@ ArkManifest.define({
         "place": "chain: the Swaps case, in place of the payload-read illustration",
         "caption": "Illustration · relationships, not live state",
         "flow": [
-          "two intents enter",
-          "one signer resolves the batch",
-          "one signed result goes to peers"
+          "Two intents enter",
+          "One signer resolves the batch",
+          "One signed result goes to peers"
         ],
         "refusal": {
-          "from": "a second node",
+          "from": "A second node",
           "tag": "resolved by <signer>"
         }
       }
@@ -47,6 +47,24 @@ ArkManifest.define({
       "kind": "line",
       "section": "Page",
       "value": "See what each resolver reads from the chain"
+    },
+    "NEXT.HREF": {
+      "label": "Next-step link target",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:resolvers"
+    },
+    "SOURCE.LINK": {
+      "label": "Where resolver chains come from (link)",
+      "kind": "line",
+      "section": "Page",
+      "value": "Where do resolver chains come from?"
+    },
+    "SOURCE.HREF": {
+      "label": "Where resolver chains come from (link target)",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:resolver"
     }
   }
 });

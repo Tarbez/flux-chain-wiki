@@ -135,7 +135,7 @@ const REWORDED = [
         shelf.ideas.forEach((idea, i) => words.push(idea.name, 'Idea 0' + (i + 1), 'not built yet', idea.audience.slice(1), idea.problem, idea.product, ...idea.builds.map((b) => b.name)));
         words.push('How it resolves', 'The shift', item.shift.slice(1), 'Instead of', item.old.slice(1), ...item.steps, 'Define', 'Publish', 'Resolve');
         words.push(item.start && window.ArkUI.pageCatalog[item.start] ? ArkCopy.text('RESOLUTIONS.START') : 'How resolvers work');
-        if (item.also && window.ArkUI.pageCatalog[item.also]) words.push(String(window.ArkUI.pageCatalog[item.also].title).split(' — ')[0]);
+        for (const more of [item.also, item.alsoMore]) if (more && window.ArkUI.pageCatalog[more]) words.push(String(window.ArkUI.pageCatalog[more].title).split(' — ')[0]);
         words.push(ArkResolutions.shortName(all[(at - 1 + all.length) % all.length].title), ArkResolutions.shortName(all[(at + 1) % all.length].title), 'Previous', 'Next', 'All 20', ArkCopy.text('RESOLUTIONS.NOTE.LINK'));
       }
       const missing = words.filter((w) => w && !text.includes(lc(w).replace(/\s+/g, ' ').toLowerCase()));
@@ -156,6 +156,7 @@ const REWORDED = [
         insert: page.querySelectorAll('[data-ark-insert="main"]').length,
         hiddenByStyle: page.querySelectorAll('[style*="display: none"], [style*="display:none"]').length,
         badHrefs: [...page.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => !/^(\/|#|https?:\/\/)/.test(h)),
+        related: [...page.querySelectorAll('[data-ark-block="pager"] [data-ark-part="pager-related"] a')].map((a) => a.getAttribute('href')),
         pager: page.querySelectorAll('[data-ark-block="pager"] a[rel="prev"], [data-ark-block="pager"] a[rel="next"]').length,
         unfolded: [...page.querySelectorAll('[data-ark-block="disclosure"]')].map((d) => d.id + ':' + (d.getAttribute('data-fold-below') || 'always') + ':' + (d.getAttribute('data-preview') || '0'))
       };
@@ -190,6 +191,9 @@ const REWORDED = [
       assert(seen.rows[0] >= 2, route + ': every ready product is a row');
       assert.equal(seen.steps, 3, route + ': three movements');
       assert.equal(seen.pager, 2, route + ': previous and next');
+      /* W5-PAGES: `also` stays one page; a second (`alsoMore`) is its own related link, so publishing an algorithm leads to the math AND to what resolves it */
+      if (slug === 'algorithms') assert(seen.related.includes('/resolver-math') && seen.related.includes('/resolvers'), route + ': leads to /resolver-math and /resolvers: ' + seen.related.join(' '));
+      if (slug === 'rules') assert(seen.related.includes('/resolver-math') && !seen.related.includes('/resolvers'), route + ': only algorithms has a second page');
       assert.deepEqual(seen.unfolded, ['resolution-' + slug + '-brief:phone:0'], route + ': who it is for folds only on a phone, behind a button that names it');
     }
     assert(keys.every((entry) => !/^id:ark-r-/.test(entry.key)), route + ': no generated (ark-r-) id became a layout key');
