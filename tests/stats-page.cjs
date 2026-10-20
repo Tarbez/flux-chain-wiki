@@ -347,7 +347,7 @@ for (let li = 1; li <= 6; li++) X['page:/div:1/div:10/section:1/ol:1/li:' + li +
   assert(statsRoute && statsRoute.path === '/stats', '/stats route is missing from the catalog');
   const scripts = [...statsRoute.scripts];
   // indexOf returns -1 when absent, and -1 is "before" everything -- so presence is its own check.
-  for (const file of ['js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/ark/blocks.js', 'js/content/glossary.js']) {
+  for (const file of ['js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/ark/blocks.js', 'js/content/glossary/stats.js']) {
     assert(scripts.indexOf(file) >= 0 && scripts.indexOf(file) < scripts.indexOf('js/pages/stats.js'), '/stats loads ' + file + ' before the page');
   }
   assert(fs.readFileSync('index.html', 'utf8').includes('css/ark-blocks.css'), 'the block styles are linked');

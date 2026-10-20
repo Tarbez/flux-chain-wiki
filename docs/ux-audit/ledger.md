@@ -1253,3 +1253,8 @@ Slices below are owned by files, so agents can run in parallel without editing t
 - Home: plain-sentence headline copy (`js/content/manifests/home.js:15-31`); keep or drop the "Production" network pill at phone widths (`css/navigation.css:52`).
 - Whether lifecycle and palette copy stay in-module until the FLX manifest store exists; whether content keeps scrolling inside `section#scene-page-*`; whether the lab's stepper becomes the shared Stepper.
 - "A finance resolver by construction" ends with an unrelated "starting values" table; derived read times are much shorter than the typed ones (plan.md resume point 4).
+
+## W5-GLOSS (2026-10-20): per-route glossary
+- R2b (glossary vs the +30 KB budget): FIXED for every block+terms route -- the glossary is per route (`js/content/glossary/<route>.js`, 58 files, derived by rendering each route, drift-checked by `node scripts/build-glossary.cjs --check --routes`); numbers and the routes still over for their chunks (`/stats`, `/explore`, `/account`) in `docs/cms-architecture.md` Budget. The named exceptions are removed there.
+- CP-5 / X6 / RS-5 / RD-4 / TR-3 / story-sheet terms: 14 terms added (mesh, resolution, FXN, FXN chain, bundle, tier, ops/s, DAO, roster, threshold, substrate, Auth Kit, Ghost ID, miner presence). "Quorum" is deliberately NOT defined (retired vocabulary, docs/deprecated.md); threshold and roster say the current thing.
+- ST-2, LG-2, RV-2, RM-3: `terms: 'first-use'` on /stats, /stats/ledger, /resolvers, /resolver-math, /explore, /account; /resolvers' hand `gloss()` and the hand `[[...]]` marks are gone. Hero titles stay unglossed (WR-4 unchanged).

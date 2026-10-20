@@ -94,7 +94,7 @@
       except: ((entry && entry.except) || []).map(function (phrase) { return wordsRe(source(phrase)); }) };
   }
   function termMarker(map) {
-    var keys = Object.keys(map || {}).sort(function (a, b) { return b.length - a.length; });
+    var keys = Object.keys(map = map || glossary()).sort(function (a, b) { return b.length - a.length; });
     if (!keys.length) return null;
     var re = wordsRe(keys.map(source).join('|'));
     var used = {}, senses = {};
@@ -298,7 +298,7 @@
     if (options.labelledBy) root.setAttribute('aria-labelledby', options.labelledBy);
     var renderOptions = { from: from, slots: options.slots, onInvalid: options.onInvalid || 'throw', document: doc, glossary: options.glossary,
       onFigureVisibility: options.onFigureVisibility, terms: options.terms,
-      termState: options.terms === 'first-use' ? termMarker(options.glossary || glossary()) : null };
+      termState: options.terms === 'first-use' ? (options.termState || termMarker(options.glossary)) : null };
     (specs || []).forEach(function (entry) {
       if (!entry) return;
       var node;
@@ -372,6 +372,9 @@
     liveScript: LIVE_SCRIPT,
     page: page,
     glossary: glossary,
+    /* termMarker(): one first-use state for a page that renders its blocks in more than one call (js/pages/account.js):
+       pass it as `termState` beside terms: 'first-use' so a word is glossed once on the page, not once per call. */
+    termMarker: termMarker,
     resolveHref: resolveHref
   };
   ArkUI.page = page;

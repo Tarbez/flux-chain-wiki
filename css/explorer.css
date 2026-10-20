@@ -18,7 +18,7 @@
 #scene .mesh-explorer-connect-actions label span { color:hsl(var(--text-muted)); font-weight:400; }
 #scene .mesh-explorer-page input,#scene .mesh-explorer-page select { display:block; width:100%; min-height:44px; margin:8px 0 12px; padding:10px 12px; box-sizing:border-box; border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--surface) / .66); color:hsl(var(--text-strong)); font:400 14px/1.4 "Albert Sans",sans-serif; }
 #scene .mesh-explorer-buttons { display:flex; flex-wrap:wrap; gap:8px; }
-#scene .mesh-explorer-page button { min-height:44px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:transparent; color:hsl(var(--text-strong)); cursor:pointer; font:600 12px/1.4 "Albert Sans",sans-serif; }
+#scene .mesh-explorer-page button:where(:not(.ark-term__trigger)) { min-height:44px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:transparent; color:hsl(var(--text-strong)); cursor:pointer; font:600 12px/1.4 "Albert Sans",sans-serif; }
 #scene .mesh-explorer-buttons button { padding:9px 13px; }
 #scene .mesh-explorer-buttons [data-explorer-connect],#scene .mesh-explorer-controls form button { background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); border-color:hsl(var(--text-strong)); }
 #scene .mesh-explorer-page button:disabled { opacity:.42; cursor:not-allowed; }

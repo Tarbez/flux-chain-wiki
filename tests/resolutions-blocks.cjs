@@ -103,7 +103,7 @@ const REWORDED = [
   for (const key of ['resolutions', 'resolutions/finance']) {
     const scripts = [...catalog[key].scripts];
     assert(scripts.includes('js/ark/blocks.js') && scripts.indexOf('js/ark/blocks.js') < scripts.indexOf('js/pages/resolutions.js'), key + ': the route loads the blocks before its module');
-    assert(scripts.includes('js/content/glossary.js'), key + ': the route loads the glossary (first-use terms)');
+    assert(scripts.includes('js/content/glossary/' + key.replace('/', '-') + '.js') && !scripts.includes('js/content/glossary.js'), key + ': the route loads its own glossary (first-use terms), not the whole one');
   }
   const css = read('css/resolutions.css');
   assert(!/\.resolution(s-(page|hero|deck|domain|note|list|browser|measure)|-(detail|product|idea|level|legend|next|brief|status|chip))/.test(css), 'the hand-built resolution page CSS is gone (css/resolutions.css keeps the header\'s Products menu)');
