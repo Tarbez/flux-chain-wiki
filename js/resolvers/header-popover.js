@@ -4,7 +4,7 @@
    Renders Ark's `popover` block in place of the plain control: the block's root takes the wrapper's class,
    attributes and place among its siblings (structural layout keys and the row fit do not move), its button takes the
    plain button's class, id, attributes and children (the site's styling, an icon, a live label and any CMS style
-   survive), and its panel is emptied for the caller's content (`spec.content`, moved in; `spec.fallback`, the plain panel, removed; `spec.done` told; `spec.align` defaults to start). Checked by tests/header-ark-parts.cjs. */
+   survive), and its panel is emptied for the caller's content (`spec.content`, moved in; `spec.fallback`, the plain panel, removed; `spec.done`, if any, told; `spec.align` defaults to start). Checked by tests/header-ark-parts.cjs. */
 var ArkHeaderPopover = (function () {
   function parts(spec) {
     var root = ArkKit.renderArkBlock({ block: 'popover', props: { label: spec.label, content: spec.label, align: spec.align, group: 'header' } }, { document: document });
@@ -32,6 +32,20 @@ var ArkHeaderPopover = (function () {
     spec.fallback.remove();
     return { root: root, trigger: trigger, panel: panel };
   }
+  /* The all-pages MENU (spec.menu = the header): the layer stack (navLayers) stays the site's and moves to the new panel; the
+     header mirrors the block's state as .nav-open (the row fit and the bar's styles read it) and the button's name. */
+  function menu(spec, made) {
+    var header = spec.menu;
+    made.panel.navLayers = spec.fallback.navLayers;
+    made.panel.setAttribute('role', 'navigation'); made.panel.setAttribute('aria-label', 'Primary');
+    new MutationObserver(function () {
+      var open = made.root.getAttribute('data-state') === 'open';
+      header.classList.toggle('nav-open', open);
+      made.trigger.setAttribute('aria-label', open ? 'Close all pages' : 'Open all pages');
+      made.trigger.title = open ? 'Close all pages' : 'All pages';
+      if (!open) made.panel.navLayers.reset();
+    }).observe(made.root, { attributes: true, attributeFilter: ['data-state'] });
+  }
   /* Called by the stub once this file is in; resolves to the controller { isOpen, want }. It first makes sure the page
      has the public kit (a route that lists no block scripts gets them here, in order) and Ark's popover chunk
      (js/ark/vendor/ark-kit-popover.js, 3.2 KB gz; skipped where the block is already registered: /explore, the editor's
@@ -50,7 +64,8 @@ var ArkHeaderPopover = (function () {
       made.trigger.addEventListener('click', function (event) {
         if (event.isTrusted && isOpen() && hoverAt && Date.now() - hoverAt < 400) event.stopImmediatePropagation();
       }, true);
-      spec.done(made);
+      if (spec.done) spec.done(made);
+      if (spec.menu) menu(spec, made);
       if (focus) made.trigger.focus();
       if (ask.open) made.trigger.click();
       return {

@@ -540,10 +540,13 @@ render Ark's refusal callout (`data-ark-block-refused`) -- a saved record never 
 (the link resolver), the public kit, the adapter: a page built from blocks lists them first
 (`scripts: ArkUI.blockScripts.concat(['js/pages/<page>.js'])`). The loader adds them by itself
 to a route holding a saved `ARK_BLOCK_*` instance (its own or the shell's) and to every route in
-the editor's canvas. `ArkUI.glossaryScript` (`js/content/glossary.js`, ~2 KB gz, generated from `docs/glossary.md` by
-`node scripts/build-glossary.cjs`; `--check` in `tests/ark-blocks-adapter.cjs`) is separate: a
-page whose words use `[[term]]` lists it; the loader adds it for saved term blocks or `[[` markup
-and in the canvas. Every other route loads none of it. Styling is `css/ark-blocks.css` (Ark's,
+the editor's canvas. The glossary is separate and PER ROUTE (see the Budget): a route whose words carry terms lists
+`ArkUI.glossaryScript` and `js/pages/catalog.js` swaps in the route's own file by one rule,
+`ArkUI.glossaryFor(key)` = `js/content/glossary/<key with / as ->.js`, carrying only the terms that route renders
+(generated from `docs/glossary.md` by `node scripts/build-glossary.cjs`). `ArkUI.glossaryScript` itself is the WHOLE
+glossary (`js/content/glossary.js`, 58 terms, 4.0 KB gz): the loader adds it for saved term blocks or `[[` markup and in the
+canvas, and a draft route the editor adds keeps it until it is saved and built. A route's file adds to whatever glossary is
+already loaded and never takes a term away, so the two may load in either order. Every other route loads none of it. Styling is `css/ark-blocks.css` (Ark's,
 static, linked on every route so the server render is styled; minified by the vendor build,
 7.3 KB gz) and `css/block-page.css` (the frame every block page sits in).
 
@@ -589,11 +592,11 @@ modal host use, taking ~0.8 KB gz out of the core. gzip -9, this Mac, 2026-10-20
 | route bill (added JS) | files | gz | vs R2 (+30.0) |
 |---|---|---|---|
 | a block route | kit 24.49 + adapter 4.08 | **28.58** | -1.42 (was 28.08 before W4-ARK) |
-| block + live (`/`, a page that updates a block) | + live 1.42 | **29.99** | -0.01 (was 29.5; no headroom left) |
-| block + terms | + glossary 2.88 | 31.45 | +1.45 (named exception, was 31.0) |
-| `/stats` (live + terms) | + live + glossary | 32.87 | +2.87 (named exception, was 32.4) |
-| block + popover (`/explore`: one popover, no input) | + popover 3.20 | **31.78** | +1.78 (was 35.33 with the whole forms chunk: -3.55) |
-| block + forms (`/account`) | + forms 4.85 | **33.42** | +3.42: the new capability's bill; the hand-built JS the conversion deletes is the offset (measure per route when converted) |
+| block + live (`/`, a page that updates a block) | + live 1.42 | **30.00** (29,999 B) | -0.001: 1 byte of headroom (was 29.5, then 29.99) |
+| block + terms | + the route's own glossary, 0.22-1.44 (median 0.44) | **28.8-30.0**: `/resolvers` 29.99, `/stats/ledger` 29.59, `/resolutions` 29.32, `/deploy` 29.28, `/resolver-math` 28.96 | **inside R2 on every one of them** (was 31.45 on all of them) |
+| `/stats` (live + terms) | + live + its glossary 1.27 | 31.23 | +1.23 (was 32.87) |
+| block + popover (`/explore`: one popover, no input) | + popover 3.20 + its glossary 0.22 | **31.96** | +1.96 (was 35.33 with the whole forms chunk: -3.55) |
+| block + forms (`/account`) | + forms 4.85 + its glossary 0.32 | **33.70** | +3.70: the new capability's bill; the hand-built JS the conversion deletes is the offset (measure per route when converted) |
 | block + forms + popover | both chunks | 36.63 | +6.63 (the popover and forms chunks each carry their own copy of the small shared helpers: +1.2 over the old single chunk, paid only by a page using both) |
 | block + forms + live | + forms + live | 34.84 | +4.84 |
 | the editor | `ark-kit.js` 60.19 (was 49.7: all 27 blocks, `arkConfirm`) | n/a (editor, not a public route) | |
@@ -663,29 +666,47 @@ route) is counted in the after column; `/` and `/stats` include the live chunk (
 | `/lifecycle` (a story page) | 7.89 | 48.01 | 41.03 | +40.12 | +33.14 |
 
 `/account` and `/explore` are now inside R2's +30. The story pages (`/lifecycle`, `/what-is-a-resolver`, `/how/*`,
-concepts, articles) stay 1-4 KB over: they are the block route plus the glossary (the named exception below) plus the
+concepts, articles) stay 1-4 KB over: they are the block route plus the glossary (per route since W5-GLOSS, below) plus the
 story template and `page-kit`, and their page modules are small, so there is little left to minify. The biggest
 single wins: `account.js` 26.5 -> 15.1 KB gz, `explorer.js` 23.4 -> 16.5, `stats.js` 21.6 -> 16.7, `home-flow.js`
 14.8 -> 8.7, `resolver-math.js` 14.9 -> 10.2. The 5a1ac71 column counts the scripts the catalog loaded then, so it
-differs a little from the earlier "+42.8" reading of `/account` (this method gives +40.6 for the same state). Not
-done, and why: `js/content/reference-text.js` is 150.8 KB gz on `/reference` alone (generated from Markdown; its
-generator would have to emit it smaller or load a document on demand), and `index.html`'s own 84 static scripts are
-not in the catalog, so they are served as written.
+differs a little from the earlier "+42.8" reading of `/account` (this method gives +40.6 for the same state). Since
+then (W5-REF) `/reference` loads only the document it shows (5.0 KB gz by default, was 150.8); `index.html`'s own 84
+static scripts are not in the catalog, so they are still served as written.
 
-**Named exception: the glossary on terms routes** (measured 2026-10-20, same method). A route
-whose words carry terms adds `js/content/glossary.js` (2.9 KB gz, 44 entries) and lands at 31.0
-KB; /stats, which is also live, at 32.4 -- 1.0 and 2.4 over R2. The cause is the definitions'
-words: they alone compress to 2.18 KB gz, more than the 1.92 KB left on a block route and the
-0.51 left on /stats, so no packaging of the same words fits (the tightest form, compact JSON with
-the same fields, saves 0.14). Loading them on first use is refused on Ark's term contract
-(`@deadark/ark-ui` `blocks/term`): the definition is in the tip at mount and is the trigger's
-accessible description, so a screen reader hears it without opening anything; deferred, the first
-focus would announce nothing, the crawler's HTML (`api/lib/render-core.mjs` serializes the
-mounted page) would lose every definition, and the adapter's first-use marking needs the entries
-at render. What would close it, for whoever owns the call: fewer or shorter definitions in
-`docs/glossary.md` (a content change), a per-route glossary derived from each route's words
-(build-time, from the rendered pages), or the Ark host redesign above (~0.8, which closes the
-block+terms case only). Until then the overage stands, here, with this cause.
+**The glossary is per route** (owner decision 2026-10-20; measured the same way, this Mac). Until then every route
+that glossed a word shipped the whole glossary: `js/content/glossary.js` was 2.88 KB gz for 44 terms (31.45 on a block+terms
+route, /stats 32.87), and the 14 terms the pages were missing (mesh, resolution, FXN, FXN chain, bundle, tier, ops/s, DAO,
+roster, threshold, substrate, Auth Kit, Ghost ID, miner presence) take it to 4.03 KB for 58 -- 32.6 and 34.0 if every route
+still shipped all of it. The definitions alone compress to 3.08 KB, so the words could not be repacked into the room left
+(the tightest form saves 0.14), and shortening them would have made the definitions worse. What changed is who pays for which:
+`scripts/build-glossary.cjs` renders every route that loads a glossary (jsdom, the real scripts, the whole glossary behind its
+file), reads which terms the page actually rendered -- the first-use marking and any hand `[[word|key]]` -- and writes one
+small file per route, `js/content/glossary/<route>.js`: **58 files, 0.22-1.44 KB gz, 0.44 median, 31.5 KB in all but a visitor
+loads one**. Nothing is shortened and no word is listed by hand; a route's set is whatever its own text uses.
+
+- *Accessibility is unchanged.* A route's file loads with the route, before its module, so the definition is in the tip at
+  mount, is the trigger's accessible description, and is in the crawler's HTML (`tests/glossary-routes.cjs` checks all three on
+  /stats and /resolvers). Lazy loading stays refused, on Ark's term contract (`@deadark/ark-ui` `blocks/term`).
+- *One rule maps a route to its file* (`ArkUI.glossaryFor` in `js/pages/catalog.js`); a route lists `ArkUI.glossaryScript`
+  as before and a pass at the end of the catalog swaps in its file. The whole glossary stays for the editor, for a page with a
+  saved term block, and for a draft route the editor adds before it is saved and built.
+- *A file adds to what is loaded and takes nothing away*, so it may load before or after the whole glossary.
+- *A shared core plus per-route additions* was measured and is larger: with the four terms used by 30% of routes as the core
+  the sum over routes is 54.1 KB against 36.6 KB for per-route files (a second gzip stream shares no dictionary, and a route
+  using the core pays for all of it). The row form `[key, definition, term?]` saves 8% over objects, and a route file carries no header comment (39 B gz: `/resolvers` had 8 B of room).
+- *Drift is a failure.* `node scripts/build-glossary.cjs --check --routes` renders every route twice (the whole glossary behind
+  its file, then its own file) and fails when a page uses a glossary word its file does not carry, ships one it no longer
+  uses, or marks differently with only its own terms. `--check` alone (the doc against the generated files, no render) runs in
+  `tests/ark-blocks-adapter.cjs`. Adding an article or a theory page through the editor therefore needs the build before it is
+  published, or its route would name a file that does not exist.
+
+*What is still over R2, honestly* (measured on source scripts, before W5-MIN landed; with the minified page scripts above, `/explore` and `/account` are inside R2 and story pages gain the per-route glossary's saving): `/stats` by 1.23 (the live chunk alone is 1.42), and `/explore` and `/account` (+1.96, +3.70),
+which were already over for their popover and forms chunks and each gained a small glossary. `/resolvers` fits with a few bytes
+to spare, so the next term added to its text can push it over: `tests/glossary-routes.cjs` fails then, naming the route. What would
+close the rest: Ark's live chunk or kit shedding about 1.4 KB, or leaving a word unglossed on those pages.
+A limit of deriving from the rendered page: a view built only after an action (the signed-in views of `/account`) glosses the
+words its first view had; the rest stay plain, never a broken tooltip.
 
 **CSS ledger** (`gzip -9 < file | wc -c`, every stylesheet `index.html` links, 5a1ac71 vs 45d6b1a,
 2026-10-20): 160.4 KB gz (51 files) -> 114.3 KB gz (44 files), **-46.0 KB gz net** (-189 KB raw).

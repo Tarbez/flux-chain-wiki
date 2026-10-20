@@ -1,0 +1,6 @@
+var ArkGlossary=window.ArkGlossary||{map:{}};
+[
+  ["claim","A resolver's stated result. Its signature is its result; whether to rely on that resolver is decided before you send anything: its grammar, its capabilities, who can change it."],
+  ["provider","A process that serves a resolver's chain: it announces an address for the chain and, if the resolver composes capabilities, proves it runs them by passing their test vectors."],
+  ["mesh","The peers that find, store and check records together. Taking part means running a correctly configured miner; there is no separate join step."]
+].forEach(function(e){ArkGlossary.map[e[0]]={term:e[2]||e[0][0].toUpperCase()+e[0].slice(1),definition:e[1]}});

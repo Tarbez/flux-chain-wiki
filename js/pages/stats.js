@@ -498,7 +498,7 @@
     var FL = OPS.fleet;
     var views = [
       { value: 'live', label: 'Live', blocks: [
-        note('Hourly self-bench, fleet-wide. Record admission from flx-bk2 against every [[node]]; swaps, transfers, stores and stakes from each node’s own hardware, summed here.', 'What these live figures are'),
+        note('Hourly self-bench, fleet-wide. Record admission from flx-bk2 against every node; swaps, transfers, stores and stakes from each node’s own hardware, summed here.', 'What these live figures are'),
         { block: 'disclosure', props: { foldBelow: 'phone', more: 'The four admission figures', less: 'Fold the figures', blocks: [live.live] } },
         { block: 'accordion', props: { label: 'More live figures, and each node', items: [
           { value: 'throughput', title: 'Swaps, transfers, stores and stakes · fleet-wide', blocks: [live.throughput] },
@@ -512,7 +512,7 @@
         { block: 'disclosure', props: { foldBelow: 'phone', more: 'The six chain figures', less: 'Fold the figures', blocks: [live.chain] } },
         { block: 'accordion', props: { label: 'The chain-server mesh', items: [
           { value: 'capacity', title: 'Fleet capacity · chain-server mesh',
-            content: 'Every dense-wire chain-server node, probed directly. Signer nodes can sign and propose [[segments|segment]]; peer nodes bootstrap and serve but never sign — a real, live reachability check, not a roster that assumes everything it lists is up.',
+            content: 'Every dense-wire chain-server node, probed directly. Signer nodes can sign and propose segments; peer nodes bootstrap and serve but never sign — a real, live reachability check, not a roster that assumes everything it lists is up.',
             blocks: [live.capacity, live.capTable] },
           { value: 'sovereign', title: 'Sovereign chains · compute credited, and top contributors per chain',
             content: 'Sovereign chains · compute credited\n\nChains launched on top of the base chain above, each with its own 1B-unit native token and its own compute-reward reserve. A number here means a real supporter-witness round trip actually moved real units out of that chain’s reserve. Today the code gives each launch a chain of its own; the planned model keeps launched tokens as assets inside a native chain, and is not built yet.\n\nTop contributors · per chain\n\nReal per-identity holdings, ranked. The project’s own treasury and compute-reserve accounts are excluded server-side so this list is supporters and providers only, never the project itself.',
@@ -525,12 +525,12 @@
            /stats fix 2). */
         { block: 'accordion', props: { label: 'Measured runs', items: [
           { value: 'resolver', title: 'Measured resolver · ' + (DS.date || '2026-10-10') + ' · ' + fmt(DS.swapsPerSecondResolved) + ' swaps/s resolved',
-            content: 'BENCH-012. Two parties sign their intent; a resolver [[shard]] resolves a batch and signs the result — that signature is the truth; [[replicas|replica]] store it without re-verifying. Not live; re-run to update.',
+            content: 'BENCH-012. Two parties sign their intent; a resolver shard resolves a batch and signs the result — that signature is the truth; replicas store it without re-verifying. Not live; re-run to update.',
             blocks: [{ block: 'stats', props: { label: 'Measured resolver, BENCH-012', columns: 2, items: [
-          { label: 'Swaps resolved / s', value: String(DS.swapsPerSecondResolved), unit: 'swaps/s', detail: (DS.batchesPerSecond || 153.7) + ' [[batch auctions|batch auction]] per second x ' + (DS.swapsPerBatch || 256) + ' swaps per batch, on one resolver shard. Resolution only — never add the broadcast to this.' },
+          { label: 'Swaps resolved / s', value: String(DS.swapsPerSecondResolved), unit: 'swaps/s', detail: (DS.batchesPerSecond || 153.7) + ' batch auctions per second x ' + (DS.swapsPerBatch || 256) + ' swaps per batch, on one resolver shard. Resolution only — never add the broadcast to this.' },
           { label: 'Swaps per batch auction', value: String(DS.swapsPerBatch), unit: 'swaps', detail: 'Every intent in a batch clears at one price, so position inside the batch cannot change what anyone pays. ' + (DS.matchedInternallyPct || 100) + '% matched internally with zero curve slippage.' },
           { label: 'Batch latency', value: String(DS.batchLatencyMs), unit: 'ms', detail: 'Batched signature verification is ' + (DS.verifyLatencyMsBatched || 10.403) + ' ms of it; the shard signing the result — the thing that makes it true — is ' + (DS.signLatencyMs || 0.0403) + ' ms.' },
-          { label: 'Bytes per signed result', value: String(DS.signedResultBytes), unit: 'bytes', detail: (DS.signedResultBytesRaw || 580) + ' bytes of dense FLX, ' + (DS.lzma2RunRatio || 3.22) + 'x smaller after LZMA2 across a run. Audit cost: ' + (DS.auditEd25519Verifies || 3) + ' [[Ed25519]] verifications.' }
+          { label: 'Bytes per signed result', value: String(DS.signedResultBytes), unit: 'bytes', detail: (DS.signedResultBytesRaw || 580) + ' bytes of dense FLX, ' + (DS.lzma2RunRatio || 3.22) + 'x smaller after LZMA2 across a run. Audit cost: ' + (DS.auditEd25519Verifies || 3) + ' Ed25519 verifications.' }
         ] } }] },
           { value: 'registry', title: 'Resolver families audited · 20 resolvers',
             content: 'What can be made real today\n\nNot built is recorded as not built, never as zero: zero would mean measured and scored nothing. Each unbuilt resolver is a region of intent that cannot be made real yet. Full table and signed audit manifests: docs/resolver-audit.md.',
@@ -704,7 +704,7 @@
     mount: function (host) {
       var S = window.ArkStatsHighlights || {};
       var state = freshState();
-      var page = ArkUI.page(spec(S, state), host, { page: 'stats', className: 'stats-page', titleId: 'stats-title',
+      var page = ArkUI.page(spec(S, state), host, { page: 'stats', className: 'stats-page', titleId: 'stats-title', terms: 'first-use',
         actions: { refresh: function () { clearTimeout(pollTimer); pollTimer = 0; check(); } } });
       var meta = Array.prototype.slice.call(page.querySelectorAll('#stats-hero [data-ark-part="hero-meta"] dd'));
       var refreshButton = page.querySelector('#stats-hero button[data-action="refresh"]');

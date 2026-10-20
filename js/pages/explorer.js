@@ -247,7 +247,7 @@
   ArkUI.pageModules.explorer = {
     spec: spec,
     mount: function (host) {
-      var page = ArkUI.page(spec(), host, { page: 'explorer', className: 'mesh-explorer-page explore-page', titleId: 'mesh-explorer-title', slots: { 'explore-operator': operatorKey } });
+      var page = ArkUI.page(spec(), host, { page: 'explorer', className: 'mesh-explorer-page explore-page', titleId: 'mesh-explorer-title', terms: 'first-use', slots: { 'explore-operator': operatorKey } });
       page.dataset.view = 'home';
       /* "Browse the raw records" is Ark's action button; setup() opens the raw view from it. */
       var open = page.querySelector('#explore-onward [data-action="explore-raw"]');

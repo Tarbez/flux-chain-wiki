@@ -97,7 +97,7 @@ for (const [key] of continuity.readCensus(ROUTE).map((e) => [e.key])) {
   assert(/block: 'meter'/.test(source) && !/stats-bar-row|tabindex/.test(source), 'the CPU bars are Ark\'s meter (rows are list items, never Tab stops)');
   const route = require('./lib/site-catalog.cjs').loadCatalog().catalog['stats/ledger'];
   assert.equal(route.scripts[0], 'js/content/chain-sample.js', '/stats/ledger loads chain-sample.js first');
-  assert.deepEqual([...route.scripts.slice(-2)], ['js/content/glossary.js', file], 'the route loads the glossary, then the page');
+  assert.deepEqual([...route.scripts.slice(-2)], ['js/content/glossary/stats-ledger.js', file], 'the route loads its own glossary (the terms it renders), then the page');
   assert(route.scripts.indexOf('js/ark/blocks.js') > 0 && route.scripts.indexOf('js/ark/blocks.js') < route.scripts.indexOf(file), 'the route loads the blocks before its module');
   assert.equal(JSON.parse(JSON.stringify(vm.runInNewContext(fs.readFileSync('js/content/site-pages.js', 'utf8') + ';ArkSitePages.row("stats/ledger")'))).label, 'Ledger benchmark detail', 'its catalog name is its own, not the article\'s');
   assert(fs.readFileSync('js/pages/stats.js', 'utf8').includes("'route:stats/ledger'"), '/stats links to /stats/ledger');
