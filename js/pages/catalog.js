@@ -69,7 +69,7 @@ ArkUI.pageStyles = {
     howStory: ['css/block-page.css'],
     reference: ['css/reference.css', 'css/guided-page.css'],
     lifecycle: ['css/block-page.css'],
-    chain: ['css/home-flow.css', 'css/block-page.css'],
+    chain: ['css/resolver-guide.css', 'css/home-flow.css', 'css/block-page.css'],
     concept: ['css/block-page.css'],
     dao: ['css/resolver-guide.css', 'css/block-page.css'],
     download: ['css/block-page.css'],
