@@ -68,7 +68,7 @@ for (const a of [2, 6]) retired['page:/div:1/div:1/article:' + a + '/h2:1'] = 't
   checks.assertSourceIsSpec(source, file);
   assert(/block: 'meter'/.test(source) && !/stats-bar-row|tabindex/.test(source), 'the bars are Ark\'s meter (rows are list items, never Tab stops)');
   const route = require('./lib/site-catalog.cjs').loadCatalog().catalog['stats/gpu'];
-  assert.deepEqual([...route.scripts.slice(-2)], ['js/content/glossary.js', 'js/pages/stats-gpu.js'], 'the route loads the glossary, then the page');
+  assert.deepEqual([...route.scripts.slice(-2)], ['js/content/glossary/stats-gpu.js', 'js/pages/stats-gpu.js'], 'the route loads its own glossary (the terms it renders), then the page');
   assert(route.scripts.includes('js/ark/blocks.js') && route.scripts.indexOf('js/ark/blocks.js') < route.scripts.indexOf(file), 'the route loads the blocks before its module');
 
   /* ---- what the visitor gets: everything the old page had ---------------------------------- */

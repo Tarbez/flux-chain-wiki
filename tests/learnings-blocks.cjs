@@ -147,7 +147,7 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
   const { catalog } = require('./lib/site-catalog.cjs').loadCatalog();
   assert(catalog.learnings.scripts.includes('js/ark/blocks.js') && !catalog.learnings.scripts.includes('js/resolvers/learnings.js'), '/learnings loads the blocks, not the old reader');
   const first = catalog['article/' + LC.articles[0].slug].scripts;
-  assert(first.includes('js/pages/story.js') && first.indexOf('js/pages/story.js') < first.indexOf('js/pages/article.js') && first.includes('js/content/glossary.js'), 'a note loads the story template and the glossary before its module');
+  assert(first.includes('js/pages/story.js') && first.indexOf('js/pages/story.js') < first.indexOf('js/pages/article.js') && first.includes('js/content/glossary/article-' + LC.articles[0].slug + '.js'), 'a note loads the story template and its own glossary before its module');
 
   /* ---- every route: the page, its words, its keys ------------------------------------------- */
   const lines = [];

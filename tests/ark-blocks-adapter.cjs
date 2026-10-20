@@ -199,7 +199,7 @@ test("terms: 'first-use' glosses whole words only -- a hyphen joins words -- and
     { block: 'callout', id: 'sense-b', props: { body: 'A shard signs a batch, and the chain is served. The signer of a launch signs its record. Its type-scoped shape is declared.' } }
   ], null, { page: 'palette', terms: 'first-use' });
   const termsIn = (id) => [...page.querySelector('#' + id).querySelectorAll('[data-term]')].map((node) => node.getAttribute('data-term'));
-  assert.deepEqual(termsIn('sense-a'), ['resolver'], 'no word inside a hyphenated compound, and "signer" is not glossed where no launch is meant');
+  assert.deepEqual(termsIn('sense-a'), ['resolver', 'roster'], 'no word inside a hyphenated compound, and "signer" is not glossed where no launch is meant; a governance "roster" is the roster the glossary defines (added 2026-10-20)');
   assert.deepEqual(termsIn('sense-b'), ['shard', 'served', 'signer', 'type-scoped shape'], 'the standalone words are glossed at their first use; a key with a hyphen still matches whole');
   assert.match(page.querySelector('#sense-a').textContent, /HTTP-served/, 'the compound reads as written');
   // An entry may declare phrases it never applies inside.
@@ -209,6 +209,19 @@ test("terms: 'first-use' glosses whole words only -- a hyphen joins words -- and
   assert.equal(terms.length, 1);
   assert.match(terms[0].previousSibling.textContent, /every $/, 'the gloss lands on "every box", not "black box"');
   assert.match(own.querySelector('.ark-term__tip').textContent, /One field of a record/, "the page's glossary is the one the tooltip reads");
+});
+
+test("a page that renders its blocks in several calls shares one first-use state (ArkUI.blocks.termMarker), so a word is glossed once on the page", () => {
+  // Defect guarded: /account renders each view in its own ArkUI.blocks.render call; with a state per call, "Auth Kit" was glossed in every view.
+  const state = ArkUI.blocks.termMarker();
+  const one = ArkUI.blocks.render({ block: 'callout', props: { body: 'A resolver signs.' } }, { terms: 'first-use', termState: state });
+  const two = ArkUI.blocks.render({ block: 'callout', props: { body: 'Another resolver, and a claim.' } }, { terms: 'first-use', termState: state });
+  assert.deepEqual([...one.querySelectorAll('[data-term]')].map((n) => n.getAttribute('data-term')), ['resolver']);
+  assert.deepEqual([...two.querySelectorAll('[data-term]')].map((n) => n.getAttribute('data-term')), ['claim'], 'the second call glosses only what the first did not');
+  const apart = ArkUI.blocks.render({ block: 'callout', props: { body: 'A resolver signs.' } }, { terms: 'first-use' });
+  assert.equal(apart.querySelectorAll('[data-term]').length, 1, 'without a shared state a call starts fresh');
+  const own = ArkUI.page([{ block: 'callout', id: 'shared-state', props: { body: 'The resolver again.' } }], null, { page: 'palette', terms: 'first-use', termState: ArkUI.blocks.termMarker() });
+  assert.equal(own.querySelectorAll('[data-term="resolver"]').length, 1, "ArkUI.page takes the page's state from its options");
 });
 
 test('`was` pins reach nested blocks with ids (a table moved into a tab panel keeps its old keys)', () => {
