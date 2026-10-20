@@ -60,8 +60,11 @@ article questions, procedure step/review, and model selection/value.
 Canonical reference links open the in-shell `/reference` reader with the exact
 originating route/query and an Original Markdown link. Run
 `node scripts/sync-reference-docs.cjs` after editing a linked canonical document.
-It regenerates the approved-document list and lazy text/hash snapshot from the
-source files; do not hand-edit the generated copies. The reader uses the existing
+It regenerates the approved-document list, a small index (title, sha256, origins)
+and one text/hash file per document under `js/content/reference/` from the source
+files; the reader loads only the file of the document it shows. Do not hand-edit
+the generated copies. `node scripts/sync-reference-docs.cjs --check` writes nothing
+and fails naming what is stale; `tests/reference-reader.cjs` runs it. The reader uses the existing
 local script policy, including `file://`, without broadening `connect-src`.
 
 `css/color-system.css` enforces three color roles: primary for critical page

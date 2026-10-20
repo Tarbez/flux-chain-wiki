@@ -109,8 +109,9 @@ function proseLines(markdown) {
 }
 
 /* The UI is the surface a visitor actually reads, so it is enforced too.
- * `reference-text.js` is EXCLUDED: it is generated, and it carries the
- * historical docs verbatim by design.
+ * `reference-index.js` and `js/content/reference/` (one generated text file per
+ * document) are EXCLUDED: they are generated, and they carry the historical docs
+ * (their text and their titles) verbatim by design.
  *
  * Two JS-specific rules:
  *   - `//` comment lines are skipped. A comment explaining that a term was
@@ -267,8 +268,9 @@ for (const relative of LIVE_HTML) {
  *     class, a URL slug such as the published /learnings/governance-without-a-validator-set,
  *     which cannot be renamed without a redirect -- owner question Q7) asserts nothing;
  *   - a URL inside llms.txt is an address, not a sentence.
- * js/content/reference-text.js stays out: it is generated, and carries the frozen historical
- * docs verbatim by design (see LIVE_UI above).
+ * js/content/reference-index.js (titles) and js/content/reference/ (text) stay out: they are generated,
+ * and carry the frozen historical docs verbatim by design (see LIVE_UI above). The directory is never
+ * walked here (only `.js` files directly under js/content are), so only the index needs naming.
  *
  * The term list is FORBIDDEN above -- one list, for docs and rendered copy alike. */
 const vm = require('node:vm');
@@ -323,7 +325,7 @@ rendered += 1;
 const LITERAL = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g;
 const moduleFiles = ['js/pages', 'js/resolvers', 'js/content'].flatMap((dir) =>
   fs.readdirSync(path.join(ROOT, dir)).filter((f) => f.endsWith('.js')).map((f) => `${dir}/${f}`))
-  .filter((file) => file !== 'js/content/reference-text.js');
+  .filter((file) => file !== 'js/content/reference-index.js');
 // js/content/evidence-registry.js (generated from the frozen docs/evidence/registry.md): its `evidence:`
 // values are DATA -- home reads figures out of them by pattern ("13,476 transfers/s") and never puts
 // the text on the page, and the registry keeps each record's original words (future law). They are
