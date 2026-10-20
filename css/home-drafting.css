@@ -20,22 +20,16 @@
    pressure-test are real audiences, not afterthoughts, but they read as the
    secondary text links below -- css/components.css's "link" variant,
    already shared with .home-status-link -- not a second and third CTA box. */
-#scene .home-hero-actions {display:flex;margin-top:25px;}
+
 /* A pill, not a sharp-cornered box: the teaser card, case tabs and micro
    cards are all rounded now, and this was the one hard-edged rectangle
    left on the page. Sized down from the original 70px/34px icon version --
    next to the flat, hairline-divided rest of the redesigned page, that
    size and glow read as the one loud leftover thing, not as emphasis. */
 #scene :is(.home-primary-cta,.home-ghost-cta) {position:relative;display:flex;align-items:center;justify-content:flex-start;gap:14px;min-height:56px;padding:9px 22px 9px 24px;border:1px solid var(--home-rule);border-radius:999px;font:500 13px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;text-decoration:none;color:hsl(var(--text-strong));overflow:hidden;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s;}
-#scene .home-primary-cta {border-color:transparent;background:linear-gradient(110deg,var(--signal-primary),color-mix(in srgb,var(--signal-primary) 82%,white));color:hsl(var(--text-inverse)) !important;box-shadow:0 6px 18px hsl(var(--primary-200) / .7);}
-#scene .home-primary-cta:hover {transform:translateY(-2px);box-shadow:0 10px 24px hsl(var(--primary-300) / .7);}
-#scene .home-ghost-cta {border-color:var(--signal-reference);background:linear-gradient(120deg,hsl(var(--reference-200)),hsl(var(--canvas) / .76));color:var(--signal-reference) !important;}
-#scene .home-ghost-cta::before {content:"";position:absolute;inset:9px auto 9px 0;width:1px;background:var(--signal-reference);box-shadow:0 0 14px hsl(var(--reference-400));}
-#scene .home-ghost-cta:hover {border-color:var(--signal-reference);background:hsl(var(--reference-200));transform:translateY(-3px);box-shadow:0 14px 34px hsl(var(--canvas) / .28);}
-#scene .home-primary-cta::after {content:none;}
+
 #scene :is(.home-primary-cta,.home-ghost-cta) .native-icon {order:2;flex:0 0 28px;width:28px;height:28px;box-sizing:border-box;margin-left:auto;padding:7px;border:1px solid currentColor;border-radius:50%;overflow:visible;}
-#scene .home-primary-cta .native-icon {color:hsl(var(--text-inverse));border-color:hsl(var(--text-inverse) / .28);}
-#scene .home-ghost-cta .native-icon {color:var(--signal-reference);border-color:hsl(var(--reference-400));}
+
 /* .ark-hero-body disables pointer-events by default (css/hero-motion.css)
    and only re-enables it for specific descendants -- .home-hero-actions was
    on that list, this sibling row was not, so the links rendered but every
@@ -49,10 +43,7 @@
  box-shadow:0 20px 50px hsl(var(--canvas) / .2);transition:border-color .22s,box-shadow .22s;
 }
 #scene .home-lifecycle::before {content:none;}
-#scene .home-lifecycle-caption {margin:0 0 17px;font:500 11px/1.4 var(--font-mono,monospace);letter-spacing:.02em;color:hsl(var(--primary));}
-#scene .home-lifecycle-caption::before {content:none;}
-#scene .home-lifecycle-all {position:static;display:flex;align-items:center;justify-content:flex-start;min-height:56px;margin-top:12px;padding:0;border-top:1px solid hsl(var(--border-subtle));font:500 14px/1.3 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;color:hsl(var(--text-strong));}
-#scene .home-lifecycle-all .native-icon {margin-left:auto;order:1;}
+
 /* A flex row with space-between silently overlapped its own labels once
    the measured set grew past four items. A wrapping grid with a minimum
    column and truncation cannot collide at any item count, which is the
@@ -66,7 +57,7 @@
 @media(min-width:901px) and (max-height:740px){
  #scene .hero-alive[data-page="zero"] .ark-hero-title {margin-bottom:18px;}
  #scene .hero-alive[data-page="zero"] .ark-hero-copy {font-size:15px;line-height:1.45;}
- #scene .home-hero-actions {margin-top:18px;}
+
  #scene .home-lifecycle {padding:20px;}
 }
 /* Mobile and tablet use document flow inside the viewport. Keeping the first
@@ -88,34 +79,21 @@
   box-shadow:inset 0 1px hsl(var(--text-strong) / .035);
  }
  #scene .home-lifecycle::before {content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,hsl(var(--primary)),hsl(var(--primary-300)));}
- #scene .home-lifecycle-caption {grid-column:1/-1;margin:0 0 4px;font-size:9px;letter-spacing:.09em;color:hsl(var(--text-muted));}
- #scene .home-lifecycle-all {grid-column:1/-1;min-height:38px;margin:0;border:0;padding:0;font-size:16px;line-height:1.25;color:hsl(var(--text-strong));}
- #scene .home-lifecycle-all .native-icon {width:20px;height:20px;flex-basis:20px;color:hsl(var(--primary));}
+
 }
 @media(max-width:480px){
  #scene .hero-alive[data-page="zero"] .ark-hero-copy {font-size:14px;line-height:1.52;}
- #scene .home-primary-cta {width:100%;box-sizing:border-box;}
+
  #scene .home-lifecycle {padding:14px 15px 13px;}
- #scene .home-lifecycle-all {font-size:15px;}
+
 }
 @media(prefers-reduced-motion:reduce){#scene .home-lifecycle {transition:none;}}
 
 /* The mesh is inner material: let it yield with the compact copy while the box moves. */
 /* Hover and keyboard focus share a visible invitation, with no layout movement. */
-#scene .home-primary-cta .native-icon,
-#scene .home-ghost-cta .native-icon,
-#scene .home-lifecycle-all .native-icon {transition:transform 180ms cubic-bezier(.22,1,.36,1),color 180ms;}
-#scene .home-primary-cta:is(:hover,:focus-visible) {background:linear-gradient(110deg,color-mix(in srgb,var(--signal-primary) 90%,white),var(--signal-primary));border-color:transparent;box-shadow:0 10px 24px hsl(var(--primary-300) / .7);}
-#scene .home-primary-cta:is(:hover,:focus-visible) .native-icon {transform:translateX(3px);color:hsl(var(--text-inverse));}
-#scene .home-ghost-cta:is(:hover,:focus-visible) {background:hsl(var(--reference-200));border-color:var(--signal-reference);}
-#scene .home-ghost-cta:is(:hover,:focus-visible) .native-icon {color:hsl(var(--text-strong));transform:translateY(-1px);}
 
 /* Each record owns its invitation; the surrounding panel stays quiet. */
 #scene .home-lifecycle:focus-within {outline:none;}
-#scene .home-lifecycle-all:is(:hover,:focus-visible) {color:hsl(var(--reference));}
-#scene .home-lifecycle-all:is(:hover,:focus-visible) .native-icon {transform:translateX(4px);color:hsl(var(--reference));}
-
-#scene .home-lifecycle-all::after {content:none;}
 
 /* The chain walkthrough now has its own page; Home keeps only a small
    fraction of it (the compact origin the panel expands from) and no longer

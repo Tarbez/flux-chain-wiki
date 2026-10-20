@@ -14,13 +14,13 @@
 
 #scene .task-page .source-step-controls { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0; }
 #scene .task-page .source-step-controls button { padding:9px 12px; font-size:13px; }
-#scene .task-page .theory-footer { margin:16px 0 0; }
+
 #scene .task-page .mesh-explorer-connect { margin:18px 0; padding:16px 0; gap:24px; }
 #scene .task-page .mesh-explorer-connect h2 { margin-top:0; }
 #scene .task-page .mesh-explorer-metrics { margin-bottom:20px; }
-#scene .task-page .mesh-operator-access summary { display:flex; align-items:center; color:hsl(var(--reference)); cursor:pointer; }
+
 #scene .task-page[data-connection="live"] .mesh-explorer-status-dot { background:hsl(var(--live)); }
-#scene .task-page[data-connection="error"] .mesh-explorer-status { color:hsl(var(--warning)); }
+
 #scene .task-page .mesh-explorer-record { border-radius:6px; }
 #scene .task-page .mesh-explorer-detail { border:1px solid hsl(var(--border-default)); border-radius:8px; padding:18px; }
 @media(max-width:620px) {
@@ -55,8 +55,7 @@
 
 @media(min-width:901px){
  #scene .task-page h1 {max-width:40ch;}
- #scene .task-page .procedure-help {margin:12px 0;}
- #scene .task-page .procedure-help summary {display:flex;align-items:center;color:hsl(var(--reference));cursor:pointer;font-size:14px;}
+
 }
 
 @media(min-width:901px){
@@ -65,7 +64,7 @@
  #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect > div:first-child {display:none;}
  #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect-actions {display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
  #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-metrics > div {padding-block:10px;gap:4px;}
- #scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-deck {max-width:82ch;margin-bottom:12px;}
+
  #scene .task-page.mesh-explorer-page .mesh-explorer-section-head h2 {font-size:24px;}
  #scene .task-page.mesh-explorer-page .mesh-explorer-boundary {font-size:14px;line-height:1.5;margin-bottom:12px;}
 }

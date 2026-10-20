@@ -13,25 +13,11 @@
 /* The notes index and the notes (/learnings, /learnings/<slug>) are pages of Ark blocks since
    2026-10-19 (W3-LEARN): their frame is css/block-page.css, so the learning-page / article-* rules
    that framed the hand-built reader are gone. */
-.concept-content,.experiments-page .experiment-page-intro {
-  box-sizing:border-box; width:100%; max-width:var(--page-width); margin-inline:auto;
-  padding:var(--page-top) var(--page-gutter) 40px;
-}
-.concept-content h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; font-weight:300; }
-.concept-deck { max-width:40em; font:300 14px/1.75 var(--ark-font); color:hsl(var(--text-muted)); margin:0 0 36px; }
-.concept-content { max-width:var(--page-width); }
-.concept-content h1 { margin:0 0 18px; max-width:16em; }
 
-.concept-links { display:flex; flex-wrap:wrap; gap:0 26px; margin:14px 0 0; }
 .cta-arrow { display:inline-block; margin-left:.3em; transition:transform 220ms cubic-bezier(.2,.7,.2,1); }
 /* Compact, living principle rows: number, title and link share one line; a line draws in on hover. */
-.concept-page .concept-content { padding-bottom:24px; }
-.concept-page .concept-content h1 { margin-bottom:14px; }
-.concept-page .concept-deck { margin-bottom:22px; }
 
 /* Detail pages of the theory reuse the same rows, with a short paragraph and an onward link. */
-
-.theory-footer { display:flex; flex-wrap:wrap; align-items:center; gap:6px 28px; margin-top:16px; }
 
 .content-layer-path { display:flex; flex-wrap:wrap; gap:7px 18px; max-width:680px; margin:0 0 26px; }
 .content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 9px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
@@ -90,7 +76,6 @@
 
 @keyframes concept-rise { from { opacity:0; transform:translateY(8px); } }
 :is(.concept-page,.theory-page) :is(.concept-deck,.concept-links,.theory-footer) { animation:concept-rise 520ms cubic-bezier(.2,.7,.2,1) both; }
-:is(.concept-page,.theory-page) .concept-deck { animation-delay:120ms; }
 
 :is(.concept-page,.theory-page) :is(.concept-links,.theory-footer) { animation-delay:560ms; }
 @media(prefers-reduced-motion:reduce) {
@@ -107,39 +92,30 @@
  #scene .content-layer-path > :first-child:nth-last-child(n+3) { display:none; }
  #scene .content-layer-path > :first-child:nth-last-child(n+3) + * { border-left:0; border-radius:3px; background:hsl(var(--reference-100)); color:var(--signal-reference); }
 }
-.experiments-page .experiment-page-intro { min-height:calc(85cqh - 150px); }
 
-.experiments-page .expansion > .section { max-width:var(--page-width); margin-inline:auto; padding:40px var(--page-gutter); }
 .hero-atmosphere { opacity:.72; filter:blur(12px); }
 .hero-alive { --mesh-opacity:.18; --mesh-blur:1.6px; }
 .hero-alive[data-page="zero"] { --mesh-opacity:.22; --mesh-blur:1.35px; }
 .hero-alive[data-page="concept"],.hero-alive[data-page^="concept/"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.17; --mesh-blur:1.7px; }
 .hero-alive[data-page^="article/"] { --mesh-opacity:.24; --mesh-blur:1.2px; }
 .hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"] { filter:blur(2px); opacity:.5; }
-@media(max-width:760px) {
- .concept-content { max-width:100%; }
 
- .experiments-page .experiment-page-intro { min-height:calc(80cqh - 150px); }
-}
-
-.experiments-page .hero-experiment-copy h1 { font-size:clamp(34px,3.8cqw,52px); line-height:1.08; letter-spacing:-.045em; }
 /* The experiment intro and lab are separate routes, not a stacked document. */
-.experiments-page .experiment-page-intro { min-height:0; height:100%; }
-.experiments-page .experiment-mesh-anchor { top:10%; right:0; left:auto; width:52%; height:75%; }
+
 .lab-page .expansion > .section { padding:var(--page-top) var(--page-gutter) 28px; }
 .lab-page .expansion .experiments { border:0; }
 .lab-page .expansion .experiment-stage { height:clamp(180px,30cqh,300px); }
 .lab-page .expansion .section-heading { margin-bottom:24px; }
 .lab-page .expansion .lab-bottom { padding:20px 26px; }
-@media(max-width:760px) { .experiments-page .experiment-mesh-anchor { top:40%; height:55%; width:62%; } .lab-page .expansion .lab-bottom { padding:18px; } }
+@media(max-width:760px) {  .lab-page .expansion .lab-bottom { padding:18px; } }
 
 /* Theory pairs its explanation with a shared two-mesh iceberg, without a card. */
-#scene .concept-page .concept-content { width:54%; margin-left:0; padding-right:24px; }
+
 /* vh, not cqh: no ancestor anywhere in this project declares container-type, so cqh is invalid at
    computed-value time and height falls back to auto. That collapses to 0 on this element (an empty
    <figure>, no content to size from), which makes measureIceberg()'s bounds.height check fail and
    leaves the iceberg at its unanchored fallback placement instead of this anchor. vh needs no container. */
-.concept-iceberg { position:absolute; right:0; top:40px; width:44%; height:min(68vh,640px); margin:0; pointer-events:none; }
+
 /* Generic version of the above for any other page that picks its own two
    shape images (admin.html -> a page's Shapes tab): same box, no concept-only
    inset variant. A page with unusual layout can still override this. */
@@ -149,14 +125,8 @@
 /* With room in the left margin the onward links leave the copy and sit beside it, aligned with the studio mark.
    The page box spans the viewport so the margin is inside it; padding keeps the copy and iceberg where they were. */
 @media(min-width:1400px) {
- #scene .concept-page { --concept-inset:max(clamp(16px,3cqw,48px),(100cqw - var(--page-width)) / 2); width:100%; max-width:none; padding-inline:var(--concept-inset); }
- .concept-page .concept-iceberg { right:var(--concept-inset); width:calc((100% - 2 * var(--concept-inset)) * .44); }
- .concept-page .concept-links { position:absolute; left:25px; top:50%; transform:translateY(-50%); flex-direction:column; flex-wrap:nowrap; align-items:flex-start; gap:22px; margin:0; animation-name:concept-fade; }
+
  @keyframes concept-fade { from { opacity:0; } }
-}
-@media(max-width:760px) {
- #scene .concept-page .concept-content { width:100%; padding-right:var(--page-gutter); padding-top:340px; }
- .concept-iceberg { top:0; right:10%; width:80%; height:310px; }
 }
 
 /* Deploy (js/pages/deploy.js, a page of Ark blocks since 2026-10-19, W3-GUIDE): only its command

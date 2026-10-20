@@ -23,44 +23,9 @@
 #scene .hero-alive[data-transition="running"] .ark-layer-persistent::before { transform:rotate(24deg) scale(1.16); opacity:.45; }
 #scene .hero-alive[data-transition="running"] .ark-layer-persistent::after { transform:rotate(90deg) scale(.85); opacity:1; }
 #scene .hero-alive .lattice-field { mask-image:linear-gradient(90deg,rgba(0,0,0,.24),rgba(0,0,0,.45) 52%,#000); }
-#scene .theory-page .concept-content { max-width:1100px; }
-#scene .mechanism-explorer .concept-content { min-height:calc(100dvh - 130px); position:relative; }
-#scene .mechanism-explorer .concept-content::after { content:"+"; position:absolute; top:42px; right:4%; color:hsl(var(--text-muted)); font:300 30px/1 "Albert Sans",sans-serif; pointer-events:none; }
-
-.mechanism-depth { display:flex; gap:0; max-width:790px; border-block:1px solid hsl(var(--border-default)); margin:32px 0; }
-.mechanism-depth-button { position:relative; flex:1; display:flex; align-items:center; gap:14px; border:0; border-right:1px solid hsl(var(--border-subtle)); background:transparent; color:hsl(var(--text-muted)); padding:20px 16px; text-align:left; cursor:pointer; font:500 14px/1.4 "Albert Sans",sans-serif; transition:background 180ms,color 180ms; }
-.mechanism-depth-button:last-child { border-right:0; }
-.mechanism-depth-button::after { content:""; position:absolute; inset:auto 16px -1px; height:2px; background:hsl(var(--text-strong)); transform:scaleX(0); transform-origin:left; transition:transform 220ms; }
-.mechanism-depth-button[aria-pressed="true"] { color:hsl(var(--text-strong)); background:linear-gradient(180deg,hsl(var(--text-strong) / .045),transparent); }
-.mechanism-depth-button[aria-pressed="true"]::after { transform:scaleX(1); }
-.mechanism-depth-number { font:500 10px/1.3 ui-monospace,monospace; color:hsl(var(--primary)); }
-.mechanism-depth-button:hover{ background:hsl(var(--text-strong) / .045); color:hsl(var(--text-strong)); }
-#scene .mechanism-inner-title { max-width:22ch; margin:35px 0 0; font:500 clamp(32px,4vw,56px)/1.08 "Albert Sans",sans-serif; letter-spacing:-.04em; color:hsl(var(--text-strong)); }
-.mechanism-inner { max-width:790px; }
-.mechanism-inner#dao-context { max-width:900px; }
-.mechanism-steps { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 26px; }
-
-#scene .mechanism-inner p { font:400 17px/1.7 "Albert Sans",sans-serif; color:hsl(var(--text)); max-width:55ch; }
-#scene .mechanism-inner .mechanism-progress { font:500 10px/1.5 ui-monospace,monospace; letter-spacing:.12em; color:hsl(var(--text-muted)); }
 
 .mechanism-next { min-height:44px; padding:10px 18px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--canvas)); font:500 13px/1.3 "Albert Sans",sans-serif; cursor:pointer; }
-.mechanism-explorer .theory-footer { margin-top:36px; }
-.mechanism-explorer :is(button,a):focus-visible { outline:2px solid hsl(var(--text-strong)); outline-offset:4px; }
-#scene .concept-page .concept-content { width:100%; padding:var(--page-top) var(--page-gutter) 60px; }
 
-.concept-symbol { position:relative; height:115px; width:100%; display:grid; place-items:center; pointer-events:none; }
-.concept-symbol i { position:absolute; width:92px; height:92px; border:1px solid hsl(var(--text-strong) / .35); border-radius:50%; transition:transform 500ms cubic-bezier(.2,.7,.2,1),border-color 400ms; }
-.concept-symbol i:nth-child(1) { transform:translateX(-28px); }
-.concept-symbol i:nth-child(3) { transform:translateX(28px); border-color:hsl(var(--primary-400)); }
-.concept-symbol-depth i { border-radius:2px; height:68px; transform:rotate(-15deg); }
-.concept-symbol-depth i:nth-child(1) { transform:translate(-25px,10px) rotate(-15deg); }
-.concept-symbol-depth i:nth-child(3) { transform:translate(25px,-10px) rotate(-15deg); }
-.concept-symbol-practice i:nth-child(2) { width:60px; height:60px; }
-.concept-symbol-practice i:nth-child(3) { width:25px; height:25px; transform:none; }
-#scene .concept-page section:is(:hover,:focus-within) .concept-symbol i:first-child { transform:translateX(-42px) rotate(-25deg); }
-#scene .concept-page section:is(:hover,:focus-within) .concept-symbol i:last-child { transform:translateX(42px) rotate(25deg); border-color:hsl(var(--text-strong)); }
-#scene .concept-page .concept-links { position:static; transform:none; flex-direction:row; margin:24px 0 0; gap:12px 28px; }
-#scene .concept-page .concept-iceberg { display:none; }
 #scene .hero-alive[data-page="zero"] .ark-layer-zero { height:auto; min-height:100dvh; display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,340px); grid-template-rows:minmax(0,1fr) auto; gap:24px clamp(28px,4vw,64px); padding:clamp(120px,15vh,190px) 6% 22px; align-content:stretch; }
 #scene .hero-alive[data-page="zero"] .ark-hero-body { position:relative !important; inset:auto !important; grid-column:1; grid-row:1; width:auto !important; max-width:730px !important; min-height:0; align-self:start; }
 #scene .hero-alive[data-page="zero"] .ark-hero-title { max-width:15ch; font-size:clamp(42px,5.2vw,78px); font-weight:550; line-height:1.04; letter-spacing:-.055em; }
@@ -68,24 +33,15 @@
 #scene .hero-alive[data-page="zero"] .ark-hero-copy { font:400 17px/1.65 "Albert Sans",sans-serif; max-width:53ch; }
 #scene .home-lifecycle { position:relative; inset:auto; grid-column:2; grid-row:1; width:100%; margin:0; align-self:start; border:1px solid hsl(var(--text-strong) / .16); border-radius:3px; padding:24px; box-shadow:none; background:linear-gradient(150deg,hsl(var(--text-strong) / .07),hsl(var(--canvas) / .5)); }
 #scene .home-lifecycle::before { content:"+"; position:absolute; top:-9px; left:-6px; color:hsl(var(--text-strong)); font:300 16px/1 monospace; }
-#scene .home-lifecycle-intro strong { font-size:30px; font-weight:500; }
-#scene .home-stage-link { min-height:54px; background:transparent; }
-#scene .home-status-rail { position:relative; inset:auto; grid-column:1/-1; grid-row:2; flex-wrap:wrap; justify-content:flex-start; gap:16px 32px; margin:0; padding-top:20px; }
-#scene .home-status-item small { font-size:9px; }
-#scene .home-status-item strong { font-size:10px; }
-#scene .home-status-link { font-size:9px; }
-#scene .home-status-rail::before { content:none; }
-#scene .home-primary-cta { background:hsl(var(--text-strong)); color:hsl(var(--canvas)); border-color:transparent; min-height:46px; padding:0 20px; transition:transform 180ms,box-shadow 180ms; }
-#scene .home-primary-cta:hover { transform:translateY(-2px); box-shadow:0 8px 30px hsl(var(--text-strong) / .08); }
-#scene .home-ghost-cta { min-height:44px; }
-#scene .hero-alive[data-page="zero"] .ark-hero-copy,#scene .mechanism-inner p { color:hsl(var(--text-strong) / .78); }
+
+#scene .hero-alive[data-page="zero"] .ark-hero-copy { color:hsl(var(--text-strong) / .78); }
 #scene .hero-alive:has(.mechanism-explorer[data-reading-layer="context"]) .ark-layer-persistent::before { transform:translateX(-4%) rotate(35deg) scale(.9); }
 #scene .hero-alive:has(.mechanism-explorer[data-reading-layer="reference"]) .ark-layer-persistent::before { transform:translateY(6%) rotate(-35deg) scale(1.12); }
 
 @media(max-width:900px) {
  #scene .hero-alive[data-page="zero"] .ark-layer-zero { display:flex; flex-direction:column; gap:34px; padding:112px 24px 60px; }
  #scene .hero-alive[data-page="zero"] .ark-hero-body { min-height:calc(100dvh - 112px); }
- #scene .home-status-rail { order:2; }
+
  #scene .home-lifecycle { order:3; max-width:none; margin:10px 0 0; }
 }
 @media(max-width:760px) {
@@ -93,15 +49,13 @@
  .source-step-picker button { flex:1; min-width:0; padding:10px 4px; text-align:center; font-size:0; }
  .source-step-picker button::before { content:attr(data-step-number); font:600 12px/1.4 ui-monospace,monospace; }
 
- #scene .concept-page .concept-content { padding-top:36px; }
  #scene .hero-alive[data-page="zero"] .ark-hero-title { font-size:clamp(39px,8.8vw,62px); }
- .mechanism-depth-button { display:grid; gap:7px; padding:14px 9px; font-size:12px; }
- .mechanism-depth { margin-block:24px; }
 
  #scene .hero-alive .ark-layer-persistent::before { width:90vw; right:-45%; top:20%; }
 }
 @media(prefers-reduced-motion:reduce) {
- .concept-symbol i { transition:none; }
- #scene .hero-alive .ark-layer-persistent::before,#scene .hero-alive .ark-layer-persistent::after,.mechanism-depth-button::after { transition:none; }
+
+ #scene .hero-alive .ark-layer-persistent::before,
+#scene .hero-alive .ark-layer-persistent::after { transition:none; }
 }
 .hero-alive.hero-still .ark-layer-persistent::before,.hero-alive.hero-still .ark-layer-persistent::after { transition:none !important; }
