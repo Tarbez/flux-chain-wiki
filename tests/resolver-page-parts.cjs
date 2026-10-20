@@ -179,14 +179,14 @@ function units() {
 /* -------------------------------------------------------------- source ---------------------- */
 function sources() {
   const catalog = read('js/pages/catalog.js');
-  /* route entries only (`module:`): since per-route CSS, ArkUI.pageStyles also has `deployment: ['css/...']` lines */
-  for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|deployment|dao):/.test(l) && /module:/.test(l))) assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40));
-  assert(/resolver: \{[^\n]*registry-snapshot\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/what-is-a-resolver also loads the snapshot its layers are drawn from, before the parts');
+  for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|deployment|dao|chain): \{ module/.test(l))) { assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40)); assert(line.indexOf('js/ark/vendor/ark-kit-figures.js') > 0 && line.indexOf('js/ark/vendor/ark-kit-figures.js') < line.indexOf('js/pages/resolver-page-parts.js'), 'and the lane and band chunk before them: ' + line.trim().slice(0, 40)); }
+  assert(/resolver: \{[^\n]*registry-snapshot\.js[^\n]*ark-kit-figures\.js', 'js\/pages\/resolver-page-parts\.js/.test(catalog), '/what-is-a-resolver also loads the snapshot its layers are drawn from, before the parts');
   assert(!/resolver-page-parts/.test(catalog.split('\n').filter((l) => /^\s*(stats|zero|bundledeployer|explorer):/.test(l)).join('\n')), 'and no other route pays for them');
+  assert(!/ark-kit-figures/.test(catalog.split('\n').filter((l) => !/resolver-page-parts/.test(l)).join('\n')), 'nor for the lane and band chunk');
   assert(/figureBlock\('resolver', 'resolver-layers'/.test(read('js/pages/resolver-guide.js')) && /figureBlock\('resolver', 'launched-vs-served'/.test(read('js/pages/resolver-guide.js')), '/what-is-a-resolver draws both of its diagrams');
   for (const file of ['js/pages/deployment.js', 'js/pages/dao.js']) { assert(/ArkUI\.journeyPageBlocks/.test(read(file)), file + ' takes its onward links from page-kit.js'); }
   assert(!/onwardGroups|onwardBlocks/.test(read('js/pages/resolver-page-parts.js').replace(/\/\*[\s\S]*?\*\//g, '')), 'and the parts file keeps no second copy of the journey helper');
-  assert(/deployment: \{[^\n]*page-kit\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/how-deployment-works loads page-kit.js before the parts');
+  assert(/deployment: \{ module[^\n]*page-kit\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/how-deployment-works loads page-kit.js before the parts');
   assert(/figureBlock\('deployment', 'deploy-flow'/.test(read('js/pages/deployment.js')), '/how-deployment-works draws the deploy flow');
   assert(/figureBlock\('dao',\s*'upgrade-supersedes'/.test(read('js/pages/dao.js')), '/dao draws the upgrade figure');
   /* W5-PAGES (ledger 4.5): the swap as signed resolution stands in the Swaps tab of /chain, behind a disclosure, drawn by the parts */

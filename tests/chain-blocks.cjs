@@ -63,7 +63,7 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
   assert(/ArkUI\.page\(spec\(manifest, current, swap\), host,/.test(source), 'the page is built by ArkUI.page from its spec');
   assert(!/ArkUI\.el\('(section|header|h1|h2|nav|a)'/.test(source) && !/visually-hidden/.test(source), 'no hand-built page structure, and no visually hidden heading');
   const catalog = fs.readFileSync(path.join(ROOT, 'js/pages/catalog.js'), 'utf8');
-  assert(/chain: \{ module: 'chain', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/home-flow\.js', 'js\/pages\/resolver-page-parts\.js', 'js\/pages\/chain\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its scene, the figure parts and its module');
+  assert(/chain: \{ module: 'chain', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/home-flow\.js', 'js\/ark\/vendor\/ark-kit-figures\.js', 'js\/pages\/resolver-page-parts\.js', 'js\/pages\/chain\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its scene, the figure parts and its module');
 
   /* ---- nothing in the plain scene is drawn below 12px -------------------------------------- */
   const flowCss = fs.readFileSync(path.join(ROOT, 'css/home-flow.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
