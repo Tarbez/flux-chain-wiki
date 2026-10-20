@@ -26,6 +26,114 @@ var RESOLUTION_ART = {
 };
 var RESOLUTION_GROUP_ICONS = { BUILD: 'layers', VALUE: 'cycle', PEOPLE: 'account', INTELLIGENCE: 'model', OPERATIONS: 'network' };
 
+/* The network pill's panel and the Resolutions menu are Ark's `popover` block: Ark owns open state,
+   Escape, the press and focus that dismiss, focus in and back to the button, placement and the
+   exclusive group (one panel of the header open at a time). Here: what the panels hold, the mouse's
+   hover-intent and closing after a choice. The chunk (js/ark/vendor/ark-kit-popover.js, 3.2 KB gz)
+   is NOT on every route: the bar paints plain buttons (SSR, file://) and the first press loads it
+   once, then the block takes the button's place (same classes, children, id, focus) and opens.
+   A failed load leaves a plain show/hide of the panel already built, and says so in the console.
+   Why and how it is checked: tests/header-ark-parts.cjs. */
+var HEADER_POPOVER_CHUNK = 'js/ark/vendor/ark-kit-popover.js';
+var headerPopoverReady = null;
+function loadHeaderPopover() {
+  if (!headerPopoverReady) {
+    headerPopoverReady = Promise.resolve().then(function () {
+      if (!ArkUI.loadScript) throw new Error('this page has no ArkUI.loadScript (js/ark/page-loader.js)');
+      var chain = Promise.resolve();
+      /* a page that listed no block scripts gets the public kit here */
+      if (typeof ArkKit === 'undefined' || !ArkKit.renderArkBlock) (ArkUI.blockScripts || []).forEach(function (url) { chain = chain.then(function () { return ArkUI.loadScript(url); }); });
+      return chain;
+    }).then(function () {
+      if (typeof ArkKit === 'undefined' || !ArkKit.renderArkBlock) throw new Error('no Ark kit is loaded (js/ark/vendor/ark-kit-public.js)');
+      return ArkKit.ARK_BLOCKS.popover ? null : ArkUI.loadScript(HEADER_POPOVER_CHUNK);
+    }).catch(function (error) {
+      headerPopoverReady = null;
+      throw error;
+    });
+  }
+  return headerPopoverReady;
+}
+/* Renders the block in place of the plain control: the block's root takes `spec.wrap`'s class and
+   attributes (same tag, same place among its siblings, so structural layout keys and the row fit
+   do not move), its button takes the plain button's class, id, attributes and children (the
+   site's styling, an icon, a live label and any CMS style survive), and its panel is emptied for
+   the caller's content. The caller swaps `wrap` for `root`. */
+function headerPopoverParts(spec) {
+  var root = ArkKit.renderArkBlock({ block: 'popover', props: { label: spec.label, content: spec.label, align: spec.align, group: 'header' } }, { document: document });
+  var trigger = root.querySelector('[data-ark-part="popover-trigger"]');
+  var panel = root.querySelector('[data-ark-part="popover-panel"]');
+  var old = spec.trigger;
+  function carry(from, to, skip) {
+    Array.prototype.slice.call(from.attributes).forEach(function (attr) {
+      if (skip.indexOf(attr.name) < 0) to.setAttribute(attr.name, attr.value);
+    });
+  }
+  carry(spec.wrap, root, ['class']);
+  root.classList.remove('ark-block');   /* the header's wrapper, not a block of the page: its own fonts and display */
+  root.className += ' ' + spec.wrap.className;
+  carry(old, trigger, ['class', 'type', 'aria-expanded', 'aria-haspopup', 'aria-controls', 'aria-busy']);
+  trigger.className = old.className;
+  old.removeAttribute('id');
+  trigger.replaceChildren.apply(trigger, Array.prototype.slice.call(old.childNodes));
+  panel.replaceChildren();
+  panel.id = spec.panelId;
+  panel.className += ' ' + spec.panelClass;
+  trigger.setAttribute('aria-controls', spec.panelId);
+  return { root: root, trigger: trigger, panel: panel };
+}
+/* One panel in two lives: the plain button until its first press, the Ark popover after.
+   spec.trigger the plain button; spec.fallback the built panel, shown by hand only if the chunk
+   fails; spec.build() renders headerPopoverParts, puts root in the DOM, returns the parts.
+   want(open, byHover) is the one way to open or close it: opening is the block button's click,
+   closing the block's own `ark:close`, so Ark's state is never written around. */
+function lazyHeaderPopover(spec) {
+  var placeholder = spec.trigger, parts = null, pending = false, failed = false, wantOpen = false, hoverIntent = false, hoverAt = 0;
+  function isOpen() { return parts ? parts.root.getAttribute('data-state') === 'open' : failed && !spec.fallback.hidden; }
+  function justHovered() { return hoverAt && Date.now() - hoverAt < 400; }
+  function showFallback(open) {
+    spec.fallback.hidden = !open;
+    placeholder.setAttribute('aria-expanded', String(open));
+  }
+  function adopt() {
+    if (parts || pending || failed) return;
+    pending = true;
+    placeholder.setAttribute('aria-busy', 'true');
+    loadHeaderPopover().then(function () {
+      var hadFocus = document.activeElement === placeholder;
+      parts = spec.build();
+      pending = false;
+      /* the press that follows a hover-open is not a second toggle */
+      parts.trigger.addEventListener('click', function (event) {
+        if (event.isTrusted && isOpen() && justHovered()) event.stopImmediatePropagation();
+      }, true);
+      if (hadFocus) parts.trigger.focus();
+      if (wantOpen) { if (hoverIntent) hoverAt = Date.now(); hoverIntent = false; parts.trigger.click(); }
+    }, function (error) {
+      pending = false; failed = true;
+      placeholder.removeAttribute('aria-busy');
+      console.error('The header menu could not load its popover (' + (error && error.message) + '). Needs: ' + HEADER_POPOVER_CHUNK + ' after the public kit. Remedy: reload the page; until then the menu opens and closes by its button only, with no Escape or focus handling.');
+      showFallback(wantOpen);
+    });
+  }
+  function want(open, byHover) {
+    wantOpen = open;
+    hoverIntent = open && !!byHover;
+    if (parts) {
+      if (open === isOpen()) return;
+      if (open && byHover) hoverAt = Date.now();
+      if (open) parts.trigger.click();
+      else parts.root.dispatchEvent(new CustomEvent('ark:close'));
+    } else if (failed) showFallback(open);
+    else if (open) adopt();
+  }
+  placeholder.addEventListener('click', function () {
+    if (wantOpen && (hoverIntent || justHovered())) { hoverIntent = false; return; }
+    want(failed ? !isOpen() : !wantOpen, false);
+  });
+  return { want: want, isOpen: isOpen, adopted: function () { return !!parts; } };
+}
+
 /* Network switcher, site-wide (directed 2026-10-16: "the network chain
    switch at the nav level inside defxn"; corrected the same day: "make
    sure it is outside of the popover and right next to the menu icon
@@ -116,17 +224,19 @@ function buildHeaderChainPopover() {
   popover.appendChild(list);
   wrap.appendChild(popover);
 
-  function setOpen(open) {
-    popover.hidden = !open;
-    trigger.setAttribute('aria-expanded', String(open));
-    if (open) { var first = list.querySelector('.network-option'); if (first) first.focus(); }
-  }
-  trigger.addEventListener('click', function () { setOpen(popover.hidden); });
-  document.addEventListener('click', function (event) {
-    if (!popover.hidden && !wrap.contains(event.target)) setOpen(false);
-  });
-  wrap.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !popover.hidden) { setOpen(false); trigger.focus(); }
+  /* the first press swaps in Ark's popover; the label and the listbox (mounted below) move into its panel */
+  var pop = lazyHeaderPopover({
+    trigger: trigger,
+    fallback: popover,
+    build: function () {
+      var parts = headerPopoverParts({ wrap: wrap, trigger: trigger, label: 'Network', align: 'end', panelId: 'header-chain-popover', panelClass: 'header-chain-popover' });
+      parts.panel.appendChild(innerLabel);
+      parts.panel.appendChild(list);
+      wrap.replaceWith(parts.root);
+      wrap = parts.root;
+      trigger = parts.trigger;
+      return parts;
+    }
   });
 
   loadHeaderWalletModule().then(function (dw) {
@@ -137,9 +247,9 @@ function buildHeaderChainPopover() {
          already does) -- nothing in the header itself holds a live wire
          connection to reset. Closing is this surface's own UX choice:
          the popover's one job is picking a network, so a real choice
-         closes it, same as any other menu on this site. */
-      setOpen(false);
-      trigger.focus();
+         closes it, same as any other menu on this site; Ark returns
+         focus to the button. */
+      pop.want(false);
     });
     if (typeof window !== 'undefined') {
       window.addEventListener('defxn-network-changed', function (event) {
@@ -288,47 +398,46 @@ function buildProducts(header, core) {
   mega.appendChild(foot);
   header.appendChild(mega);
 
-  var closeTimer = 0, openedAt = 0;
+  /* Ark's popover (lazyHeaderPopover) on the first press or a resting mouse; left here is the mouse's
+     hover-intent (close 220 ms after leaving, so the pointer can cross to the panel) and closing after
+     a link (a route change keeps this page) */
+  var closeTimer = 0;
   var hover = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : { matches: false };
-  function setOpen(open, focusTrigger) {
-    window.clearTimeout(closeTimer);
-    if (mega.hidden === !open) return;
-    mega.hidden = !open;
-    if (open) openedAt = Date.now();
-    trigger.setAttribute('aria-expanded', String(open));
-    header.classList.toggle('products-open', open);
-    if (!open) showPeek(null);
-    if (!open && focusTrigger) trigger.focus();
-  }
-  trigger.addEventListener('click', function () {
-    /* A hover that just opened the menu must not be undone by the click that follows it. */
-    if (!mega.hidden && Date.now() - openedAt < 400) return;
-    setOpen(mega.hidden, false);
+  var pop = lazyHeaderPopover({
+    trigger: trigger,
+    fallback: mega,
+    build: function () {
+      var parts = headerPopoverParts({ wrap: wrap, trigger: trigger, label: ArkCopy.text('NAV.PRODUCTS'), align: 'start', panelId: 'products-mega', panelClass: 'products-mega' });
+      parts.panel.appendChild(body);
+      parts.panel.appendChild(foot);
+      wrap.replaceWith(parts.root);
+      mega.remove();
+      wrap = parts.root;
+      trigger = parts.trigger;
+      watch(wrap);
+      return parts;
+    }
   });
-  [wrap, mega].forEach(function (zone) {
-    zone.addEventListener('pointerenter', function (event) { if (hover.matches && event.pointerType === 'mouse') setOpen(true); });
+  function watch(zone) {
+    zone.addEventListener('pointerenter', function (event) {
+      if (!hover.matches || event.pointerType !== 'mouse') return;
+      window.clearTimeout(closeTimer);
+      pop.want(true, true);
+    });
     zone.addEventListener('pointerleave', function (event) {
       if (!hover.matches || event.pointerType !== 'mouse') return;
       window.clearTimeout(closeTimer);
-      closeTimer = window.setTimeout(function () { setOpen(false); }, 220);
+      closeTimer = window.setTimeout(function () { pop.want(false); }, 220);
     });
-  });
-  header.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !mega.hidden) { event.stopPropagation(); setOpen(false, true); }
-  });
-  header.addEventListener('focusout', function (event) {
-    if (!mega.hidden && !wrap.contains(event.relatedTarget) && !mega.contains(event.relatedTarget)) setOpen(false);
-  });
-  document.addEventListener('click', function (event) {
-    if (!mega.hidden && !wrap.contains(event.target) && !mega.contains(event.target)) setOpen(false);
-  });
-  mega.addEventListener('click', function (event) {
-    var link = event.target.closest('a');
-    if (!link) return;
-    setOpen(false);
-  });
+    zone.addEventListener('click', function (event) {
+      if (event.target.closest('.products-mega a')) { window.clearTimeout(closeTimer); pop.want(false); }
+    });
+  }
+  watch(wrap);
+  /* before Ark has the panel (the fallback) it is the header's child, not the wrapper's */
+  mega.addEventListener('click', function (event) { if (event.target.closest('a')) pop.want(false); });
   var toggle = header.querySelector('.nav-toggle');
-  if (toggle) toggle.addEventListener('click', function () { setOpen(false); });
+  if (toggle) toggle.addEventListener('click', function () { pop.want(false); });
 }
 
 /* One row, never squeezed (tests/browser/public-header.mjs, 1024-1920px). Above the compact
@@ -381,7 +490,7 @@ function fitHeaderRow(header) {
   function queue() { if (!queued) queued = requestAnimationFrame(function () { queued = 0; fit(); }); }
   var observer = new ResizeObserver(queue);
   observer.observe(header);
-  ['.dx-bar__brand', '.dx-switch__trigger', '.header-core-links', '.header-account-link', '.header-chain-trigger', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
+  ['.dx-bar__brand', '.dx-switch__trigger', '.header-core-links', '.header-account-link', '.dx-bar__actions', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
 }
 
