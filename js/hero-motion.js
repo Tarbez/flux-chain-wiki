@@ -27,33 +27,16 @@
   persistent.insertBefore(atmosphere, persistent.firstChild);
 
   var header = scene.querySelector('.ark-header');
-  var navToggle = header && header.querySelector('.nav-toggle');
+  /* The MENU opens, closes, takes Escape and an outside press, and returns focus through Ark's popover
+     (header.menuPop, js/resolvers/header.js); what is left here is "close it" for route clicks, a wide
+     window and the plain panel a failed chunk leaves. */
   function closeNavigation(restoreFocus) {
-    if (!navToggle) return;
-    header.classList.remove('nav-open');
-    var menu = header.querySelector('#primary-navigation');
-    if (menu && menu.navLayers) menu.navLayers.reset();
-    navToggle.setAttribute('aria-expanded', 'false');
-    navToggle.setAttribute('aria-label', 'Open all pages');
-    navToggle.title = 'All pages';
-    if (restoreFocus) navToggle.focus();
+    var pop = header && header.menuPop, button = header && header.querySelector('.nav-toggle');
+    if (!pop) return;
+    pop.want(false);
+    if (restoreFocus && button) button.focus();
   }
-  if (navToggle) {
-    navToggle.addEventListener('click', function () {
-      if (header.classList.contains('nav-open')) { closeNavigation(false); return; }
-      header.classList.add('nav-open');
-      navToggle.setAttribute('aria-expanded', 'true');
-      navToggle.setAttribute('aria-label', 'Close all pages');
-      navToggle.title = 'Close all pages';
-    });
-    document.addEventListener('click', function (event) {
-      if (!header.contains(event.target)) closeNavigation(false);
-    });
-    header.addEventListener('focusout', function (event) {
-      if (!header.contains(event.relatedTarget)) closeNavigation(false);
-    });
-    window.matchMedia('(max-width: 1000px)').addEventListener('change', function () { closeNavigation(false); });
-  }
+  window.matchMedia('(max-width: 1000px)').addEventListener('change', function () { closeNavigation(false); });
 
   var wordTimer = 0;
 
@@ -219,7 +202,7 @@
   });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
-    if (header && header.classList.contains('nav-open')) {
+    if (header && header.menuPop && header.menuPop.isOpen()) {
       event.preventDefault(); closeNavigation(true); return;
     }
     if (state.get().page === 'zero') return;

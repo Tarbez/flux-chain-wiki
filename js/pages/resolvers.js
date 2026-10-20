@@ -18,7 +18,7 @@
  * bridge chains, deploying your own, and the applications that are not chains yet. It was 2.66x
  * the viewport on a desktop and 3.66x on a phone, with its tables, chips and tiles hand-built
  * (docs/ux-audit/pages-ux-b.md /resolvers); every row and link is still here. Words that the
- * glossary defines are glossed where they first appear (gloss(), below).
+ * glossary defines are glossed where they first appear (terms: 'first-use').
  *
  * Until 2026-10-19 this page was a hand-written directory of six
  * applications (js/content/resolver-registry.js). They are not resolver
@@ -44,17 +44,9 @@
   /* A tab name is at most 32 characters, and Ark measures the value it is given -- a copy: key
      ("copy:RESOLVER.REGISTRY.CHAINS.LABEL" is 35) -- not the words it resolves to, so short
      fields take the manifest's words directly (reported to the coordinator, W3-STATS). */
-  /* Glossary terms, marked by hand on their first use ([[word|key]], Ark's term markup). The
-     adapter's automatic first-use marking (terms: 'first-use') also glossed "HTTP-served" and
-     "signer rotations" in the application notes, where the words mean something else, so this
-     page names the words it glosses. Marks the first whole-word occurrence of each key. */
-  function gloss(text, keys) {
-    keys.forEach(function (key) {
-      var re = new RegExp('(^|[^\\w-])(' + key + 's?)(?![\\w-])', 'i');
-      text = text.replace(re, function (all, before, word) { return before + '[[' + word + '|' + key + ']]'; });
-    });
-    return text;
-  }
+  /* Glossary terms are marked on first use by the adapter (terms: 'first-use' in the page options, derived from
+     docs/glossary.md). The adapter reads a hyphen as part of a word and an entry in its own sense only, which
+     is what this page used to do by hand: "HTTP-served" is not "served", "signer rotations" is not a launch's signer. */
   function grammar(state) { return state === 'enforced' ? 'Grammar enforced' : 'Unspecified (legacy)'; }
 
   /* `was`: the layout key each element had on the old page, by spec entry. HAND are the pins words
@@ -178,10 +170,10 @@
     var items = [
       { value: 'chains', label: words('REGISTRY.CHAINS.LABEL'), blocks: [
         { block: 'disclosure', props: { foldBelow: 'phone', more: 'About these chains, and each one live', less: 'Fold it',
-          content: gloss(words('REGISTRY.CHAINS.BODY'), ['launched', 'grammar']),
+          content: words('REGISTRY.CHAINS.BODY'),
           blocks: [{ block: 'accordion', props: { label: 'Each chain, live', items: [
             { value: 'explore', title: words('REGISTRY.OPEN') + ' · each chain',
-              content: 'Grammar state is the source manifest at ' + commit + '; the development network was launched before it and was not re-read. [[Control key|control key]] and announcing providers are not in the sources: read them in Explore.',
+              content: 'Grammar state is the source manifest at ' + commit + '; the development network was launched before it and was not re-read. Control key and announcing providers are not in the sources: read them in Explore.',
               blocks: [{ block: 'facts', props: { label: words('REGISTRY.OPEN'), columns: 2, items: snap.resolvers.map(function (r) {
                 return { term: r.chainId, value: words('REGISTRY.OPEN') + ' ↗', href: EXPLORE + '/#' + encodeURIComponent(r.chainId), mono: true };
               }) } }] }
@@ -193,7 +185,7 @@
       { value: 'capabilities', label: words('REGISTRY.CAPS.LABEL'), blocks: [
         { block: 'disclosure', props: { foldBelow: 'phone', more: 'What a capability is, and what is launched', less: 'Fold it',
           /* A measured zero is said as a measured zero; only an absent reading would be "no reading". */
-          content: gloss(words('REGISTRY.CAPS.BODY'), ['provider']) + '\n\n' + (obs.capabilitiesLaunched === 0 ? words('REGISTRY.CAPS.EMPTY')
+          content: words('REGISTRY.CAPS.BODY') + '\n\n' + (obs.capabilitiesLaunched === 0 ? words('REGISTRY.CAPS.EMPTY')
             : typeof obs.capabilitiesLaunched === 'number' ? 'Launched on the development network at its last recorded restart: ' + obs.capabilitiesLaunched + '.'
             : 'The development-network observation in the snapshot carries no capability count: read it in Explore.') } },
         { block: 'table', props: { caption: counts.capabilities + ' capability manifests, derived from their crates’ own tests', maxHeight: 'compact', rowHeader: true,
@@ -239,7 +231,7 @@
         { label: 'Home', href: 'route:zero' }, { label: 'copy:RESOLVER.REGISTRY.TITLE' }] } },
       /* The answer: what this is, and the counts that matter (the live view is in the pager). */
       { block: 'hero', id: 'registry-hero', was: WAS['registry-hero'], props: {
-        eyebrow: 'copy:RESOLVER.REGISTRY.KICKER', title: 'copy:RESOLVER.REGISTRY.TITLE', lede: gloss(words('REGISTRY.LEDE'), ['resolver', 'capability']), density: 'compact',
+        eyebrow: 'copy:RESOLVER.REGISTRY.KICKER', title: 'copy:RESOLVER.REGISTRY.TITLE', lede: words('REGISTRY.LEDE'), density: 'compact',
         meta: snap ? [
           { label: 'First-party chains', value: String(snap.counts.nativeResolverChains) },
           { label: 'Bridge chains', value: String(snap.counts.bridgeChains) },
@@ -268,7 +260,7 @@
   ArkUI.pageModules.resolvers = {
     spec: spec,
     mount: function (host) {
-      return ArkUI.page(spec(window.ArkRegistrySnapshot, window.ArkResolverApplications), host, { page: 'resolvers', className: 'resolvers-page', titleId: 'resolvers-title' });
+      return ArkUI.page(spec(window.ArkRegistrySnapshot, window.ArkResolverApplications), host, { page: 'resolvers', className: 'resolvers-page', titleId: 'resolvers-title', terms: 'first-use' });
     }
   };
 })();

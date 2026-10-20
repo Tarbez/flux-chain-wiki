@@ -12,10 +12,21 @@ function arkSeoTitle(id, fallbackLabel) { return typeof ArkSEO !== 'undefined' ?
    first; js/ark/page-loader.js adds them by itself to a route that has a saved Ark block
    instance, and to every route in the editor's canvas (which can insert one anywhere). Kept off
    the other routes: ~31 KB gz of JS they would not use (docs/ux-audit/components.md R2).
-   The glossary ([[term]] markup, the term block; ~2 KB gz) is separate: a page whose words use it
-   lists ArkUI.glossaryScript, and the loader adds it where saved blocks or the canvas need it. */
+   The glossary ([[term]] markup, the term block) is separate: a page whose words use it lists
+   ArkUI.glossaryScript, and the loader adds it where saved blocks or the canvas need it. */
 ArkUI.blockScripts = ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js'];
+/* The WHOLE glossary (every term of docs/glossary.md): the editor, and a page holding a saved term block. */
 ArkUI.glossaryScript = 'js/content/glossary.js';
+/* A route does not ship the whole glossary: it ships the terms its own rendered text uses, one small
+   file per route (js/content/glossary/<route>.js, derived and checked by scripts/build-glossary.cjs --check
+   --routes; docs/cms-architecture.md Budget). A route lists ArkUI.glossaryScript below and the pass at the
+   end of this file swaps in its own file by this one rule, so a route is never named twice. */
+ArkUI.glossaryFor = function (key) { return 'js/content/glossary/' + String(key).replace(/\//g, '-') + '.js'; };
+ArkUI.routeGlossary = function (key) {
+  var entry = ArkUI.pageCatalog[key], at = entry && entry.scripts ? entry.scripts.indexOf(ArkUI.glossaryScript) : -1;
+  if (at >= 0) { entry.scripts = entry.scripts.slice(); entry.scripts[at] = ArkUI.glossaryFor(key); }
+  return entry;
+};
 /* The story template (js/pages/story.js): the theory sheets, the agreement chapters and the
    agreement lifecycle are one guided page built from Ark blocks, whose prose defines its glossary
    words in place -- so a story route loads the blocks, the glossary and the template. */
@@ -33,7 +44,7 @@ var arkPageModules = {
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
   deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/ark/page-kit.js', 'js/pages/resolver-page-parts.js', 'js/pages/deployment.js']) },
   /* the explorer used to live at /explorer; /explore is its address now */
-  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-popover.js', 'js/pages/explorer.js']) },
+  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-popover.js', 'js/pages/explorer.js']) },
   palette: { module: 'palette', scripts: ArkUI.blockScripts.concat(['js/content/palette-tokens.js', 'js/pages/palette.js']) },
   /* /monitor was retired 2026-10-10; /stats carries the same live pulse now, plus the dated evidence the old page never had. */
   stats: { module: 'stats', aliases: ['/monitor'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/pages/stats.js']) },
@@ -44,7 +55,7 @@ var arkPageModules = {
   /* The Wallet tab's dense-wire modules (js/ark/dense-wire-wallet.mjs over
      js/dense-wire/*.mjs) are ES modules, which page-loader.js does not load:
      js/pages/account.js import()s them on first use instead. */
-  account: { module: 'account', scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/pages/account.js']) },
+  account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/pages/account.js']) },
   'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/pages/account-domains.js']) },
   treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
   deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/pages/economy-preview.js']) },
@@ -128,4 +139,7 @@ ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
   return added;
 };
 ArkUI.catalogContentRoutes(LearningContent.articles, typeof ArkManifest !== 'undefined' ? ArkManifest.group('theory') : []);
+/* Every saved route, the derived ones too, now loads its own glossary file. A route the editor adds later (a draft
+   article or theory page, catalogContentRoutes above) has no file until it is saved and built: it keeps the whole glossary. */
+Object.keys(ArkUI.pageCatalog).forEach(function (key) { ArkUI.routeGlossary(key); });
 

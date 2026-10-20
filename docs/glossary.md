@@ -95,6 +95,43 @@ These are the words the evidence pages (/stats, /stats/ledger, /stats/gpu, /reso
 
 **Type-scoped shape** — a letter whose meaning depends on the record's type: the type declares it, instead of one meaning fixed for every record.
 
+## Words the pages use
+
+The words the public pages use that are not measurements: the network, how it is governed,
+the account and the treasury preview. A closing "Source:" sentence names the document an entry
+was written from; a tooltip leaves that sentence out. One word is deliberately not defined
+here: the retired name for a group that must agree before a result counts
+(`docs/deprecated.md`). Here one shard signs and its signature is the result; for a decision
+that needs several signers, see **Threshold**.
+
+**Mesh** — the peers that find, store and check records together. Taking part means running a correctly configured miner; there is no separate join step. Source: [networks](operators/networks.md).
+
+**Resolution** — a named resolver combined with signed records, so the mesh can find, run and verify an outcome. The resolver is the rulebook; a resolution is a use of it that you can choose. Source: the Resolutions page copy, `js/content/manifests/resolutions.js`.
+
+**FXN** — the name of this system (signed resolution over dense grammar) and of its native token, the unit of the transfers and balances shown on these pages. Credits are a separate unit, bound to one identity and not transferable. Source: [whitepaper](whitepaper.md), `docs/economy-preview.md`.
+
+**FXN chain** — one signed, append-only chain per identity. It checks grammar, signature and position, and nothing else; what a record means is up to the resolver that reads it. Source: [whitepaper](whitepaper.md), `docs/ux-copy-design-implementation-plan.md` (terminology contract).
+
+**Bundle** — a site's or app's reviewed content and assets, packaged to be shared on the mesh as signed records. Browsing a site or signing in never deploys one. Source: `js/content/manifests/bundledeployer.js`.
+
+**Tier** — a label that tells one kind of asset from another in the treasury preview. Tier 1 is FXN, the native token; Credits are a separate unit, bound to one identity and not transferable. Source: `docs/economy-preview.md`.
+
+**Ops/s** — operations per second: how many operations a run completed each second. A rate only means something once it names the operation it counts (a transfer, a store, a swap), because they cost different amounts of work. Source: [deprecated](deprecated.md), [benchmarks](protocol/benchmarks.md).
+
+**DAO** — a decision group that belongs to one network, with its own roster, threshold, governed objects and activation rules. It cannot change the shared substrate, and mesh operations cannot decide its proposals. Source: [governance](protocol/governance.md).
+
+**Roster** — the list of signers eligible to take a decision. A decision record names the roster, the threshold and the approvals collected. Source: [governance](protocol/governance.md).
+
+**Threshold** — how many of a roster's signers must approve before a decision counts, for example 4 of 7. Approval is not activation: the change runs only when its activation rule is also met. Source: [governance](protocol/governance.md), [authority](protocol/authority.md).
+
+**Substrate** — the shared layer every network builds on, which no single network owns. Mesh operations governs it; a network's DAO governs only its own network. Source: [governance](protocol/governance.md), `js/content/manifests/dao.js`.
+
+**Auth Kit** — the recovery file (`.auth.flx`) that holds your keys. It stays on your device and is never uploaded; you choose it to unlock your account. Source: `docs/account-auth.md`.
+
+**Ghost ID** — your identity ID as developer tools name it: the public name your Auth Kit unlocks. Source: `js/pages/account.js` ("What is an Auth Kit?"), `docs/account-auth.md`.
+
+**Miner presence** — which miners are reachable on the mesh under a name. A named network partitions this and nothing else: it does not isolate accounts, identities, DAOs, records or treasuries, and it is not a security boundary. Source: [networks](operators/networks.md), [status](status.md).
+
 ## Prohibited conflations
 
 - Do not use `published` to mean `deployed`.

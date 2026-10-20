@@ -271,7 +271,10 @@
       }
       function isAuthenticated(next) { return !!(next && ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(next.publicKeyB64)); }
       function fromPath() { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog.account; return entry ? entry.path : '/account'; }
-      function make(spec) { return ArkUI.blocks.render(spec, { from: fromPath(), onInvalid: 'throw', slots: { 'account-map': function () { var d = el('div', null, MAP_SVG); return d.firstChild; } } }); }
+      /* Glossary terms (docs/glossary.md: Auth Kit, Ghost ID, FXN ...) are marked on first use, once for the whole page: this
+         page renders its views in many calls, so they share one first-use state (the page's own spec shares it below). */
+      var termState = ArkUI.blocks.termMarker();
+      function make(spec) { return ArkUI.blocks.render(spec, { from: fromPath(), onInvalid: 'throw', terms: 'first-use', termState: termState, slots: { 'account-map': function () { var d = el('div', null, MAP_SVG); return d.firstChild; } } }); }
       /* A live block repainted in place (ArkUI.blocks.update: a CMS edit or pin on it survives), only when
          its props changed; the first update of a page loads Ark's 1.4 KB live chunk. */
       function paint(name, props) {
@@ -695,7 +698,7 @@
         /* Anchor for reusable content blocks (js/content/components.js); rendering into it is centralized in js/main.js's onMount hook. */
         { insert: 'main', was: 'page:/div:1/div:1' }
       ];
-      page = ArkUI.page(spec, host, { page: 'account', className: 'account-page', titleId: 'account-title',
+      page = ArkUI.page(spec, host, { page: 'account', className: 'account-page', titleId: 'account-title', terms: 'first-use', termState: termState,
         slots: { 'account-map': function () { return el('div', null, MAP_SVG).firstChild; } },
         /* every press that means something to the page raises ark:action (Ark's actions, forms, lists, stats); `item` is a list row's id */
         actions: {

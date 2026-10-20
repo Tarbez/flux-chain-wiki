@@ -730,7 +730,7 @@
         ] },
         { value: 'fixed', label: 'Fixed vs bends', blocks: [
           { block: 'disclosure', props: { foldBelow: 'phone', more: 'What is fixed, and what bends', less: 'Fold it',
-            content: 'What is fixed, and the one letter that bends\n\nYou can define new things to say almost without limit. You can almost never define a new kind of [[box]] — except one, whose meaning depends on context.' } },
+            content: 'What is fixed, and the one letter that bends\n\nYou can define new things to say almost without limit. You can almost never define a new kind of box — except one, whose meaning depends on context.' } },
           { block: 'table', props: { caption: 'Each layer was decided by a hazard somebody hit, not by taste.', maxHeight: 'compact',
             columns: [{ key: 'dim', label: 'Dimension' }, { key: 'kind', label: 'Status' }, { key: 'count', label: 'Count', numeric: true }, { key: 'why', label: 'Why it is this way' }],
             rows: ENGINE.layers().map(function (row) { return { dim: row.dim, kind: row.kind, count: row.count, why: row.why }; }) } },
@@ -748,7 +748,7 @@
           { block: 'disclosure', props: { foldBelow: 'phone', more: 'Try it: resolve a block', less: 'Fold it', blocks: [
             { block: 'figure', props: { kind: 'live', slot: 'explorer',
               caption: 'Resolve a block yourself',
-              description: 'Type a [[box]] and watch what happens to it. The frightening ones are not the refusals — they are the ones that say “resolved” and are wrong.' } }
+              description: 'Type a box and watch what happens to it. The frightening ones are not the refusals — they are the ones that say “resolved” and are wrong.' } }
           ] } }
         ] },
         { value: 'rules', label: 'Rules and limits', blocks: [
@@ -824,7 +824,7 @@
       var SNAP = window.ArkRegistrySnapshot || null;
       var RESTRICT = window.ArkResolverRestrict;
       var REBUILD = window.ArkResolverBlockBuild;
-      var options = { page: 'resolver-math', className: 'resolver-math-page', titleId: 'resolver-math-title' };
+      var options = { page: 'resolver-math', className: 'resolver-math-page', titleId: 'resolver-math-title', terms: 'first-use' };
       if (!ALG || !ENGINE) return ArkUI.page(unavailable(!ALG ? 'js/content/resolver-algebra.js' : 'js/content/resolver-block.js'), host, options);
       options.slots = {
         equation: function () { return equation(ALG, SNAP); },
