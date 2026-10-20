@@ -51,9 +51,15 @@ const ROOT = path.resolve(__dirname, '..');
   assert.equal(injected.length, 0, 'no block rule was injected into a <style> element at run time');
 
   // Folded content is hidden, never missing: every swatch of every tab is in the HTML.
-  assert.equal(page.querySelectorAll('.palette-swatch').length, 90, 'all 90 swatches, in every tab panel, are in the crawler\'s HTML');
+  /* Derived, never a typed count (2026-10-20: /palette now draws every SDK colour token, so the old
+     "90" went stale): every colour token the SDK defines (js/content/palette-tokens.js, generated from
+     @deadark/sdk/theme) is a swatch in the crawler's HTML, and every tab has its panel. */
+  const tokenSrc = fs.readFileSync(path.join(ROOT, 'js/content/palette-tokens.js'), 'utf8');
+  const sdkColors = JSON.parse(tokenSrc.slice(tokenSrc.indexOf('Object.freeze(') + 14, tokenSrc.lastIndexOf(');'))).colors;
+  const swatchTokens = new Set([...page.querySelectorAll('.palette-swatch')].map((s) => s.getAttribute('title')));
+  assert.deepEqual(sdkColors.filter((t) => !swatchTokens.has('--' + t)), [], 'every SDK colour token, in every tab panel, is a swatch in the crawler\'s HTML');
   const panels = [...page.querySelectorAll('#palette-views [role="tabpanel"]')];
-  assert.equal(panels.length, 6);
+  assert.equal(panels.length, page.querySelectorAll('#palette-views [role="tab"]').length, 'every tab has its panel in the HTML');
   assert.equal(panels.filter((p) => !p.hasAttribute('hidden')).length, 1, 'one tab panel shows; the others are hidden, not absent');
 
   // Generated ids: reserved, and deterministic per document.
