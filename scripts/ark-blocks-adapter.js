@@ -363,6 +363,7 @@
     sync: function () { return (ArkUI.blocks.resolvers = install()); },
     formsScript: 'js/ark/vendor/ark-kit-forms.js',
     popoverScript: 'js/ark/vendor/ark-kit-popover.js',
+    figuresScript: 'js/ark/vendor/ark-kit-figures.js',
     render: render,
     update: update,
     /* whenLive(): settles once every queued live update has been applied (the live chunk arrived and

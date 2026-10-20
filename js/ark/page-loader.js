@@ -64,12 +64,12 @@
   }
   function needsBlocks(definition) { return blockScriptsFor(definition).length > 0; }
   /* The optional blocks are not in the public kit: the form blocks (field, form, list, status-line, choice) are
-     js/ark/vendor/ark-kit-forms.js and the popover is js/ark/vendor/ark-kit-popover.js; each registers into it
+     js/ark/vendor/ark-kit-forms.js and the popover is js/ark/vendor/ark-kit-popover.js and the lane and band are js/ark/vendor/ark-kit-figures.js; each registers into it
      (docs/cms-architecture.md Budget). A page that uses them lists the chunk itself; this adds them where nothing in
      the code can say so -- every route in the editor's canvas (the Library can insert any block anywhere), and a route
      whose saved Ark block has a resolver the loaded kit does not know: load a chunk, and ask again. Derived from the
      kit's own resolvers, never from a list of block names. */
-  var OPTIONAL_CHUNKS = ['js/ark/vendor/ark-kit-forms.js', 'js/ark/vendor/ark-kit-popover.js'];
+  var OPTIONAL_CHUNKS = ['js/ark/vendor/ark-kit-forms.js', 'js/ark/vendor/ark-kit-popover.js', 'js/ark/vendor/ark-kit-figures.js'];
   function unknownSaved(definition) {
     var known = (ArkUI.blocks && ArkUI.blocks.resolvers) || [];
     return savedBlocks(definition).some(function (entry) { return known.indexOf(entry.master.resolver) < 0; });
