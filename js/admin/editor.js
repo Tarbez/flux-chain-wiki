@@ -193,7 +193,7 @@
      already shows it -- the draft and the canvas's copy of the site are updated without
      remounting the preview under the person typing in it. Every form control bound to the
      field (data-cms-field="<kind>:<id>:<key>") shows the new value unless it has focus. */
-  var ARTICLE_TEXT_KEYS = ['title', 'category', 'minutes', 'summary', 'core', 'relevance', 'reviewed', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'];
+  var ARTICLE_TEXT_KEYS = ['title', 'category', 'summary', 'core', 'relevance', 'reviewed', 'evidenceLabel', 'evidenceHref', 'relatedPage', 'actionLabel', 'actionPage'];
   /* `item`: the copy to read or write (default: the draft; savedFieldValue passes the saved one) */
   function fieldTarget(kind, id, key, item) {
     if (kind === 'page') {
@@ -211,6 +211,9 @@
     if (kind === 'article') {
       var a = item || state.aDrafts[id];
       if (!a) return { refusal: 'No article "' + id + '" to edit. Needs: a slug from the Articles list (' + state.slugs.join(', ') + ').' };
+      /* the read time is derived from the words (LearningContent.readTime, js/content/learnings.js) and
+         written by the serializer on Save: an edit to it would be silently replaced, so it is refused */
+      if (key === 'minutes') return { refusal: 'Article "' + id + '": the read time is not edited; it is derived from the article\'s words (about ' + LearningContent.WORDS_PER_MINUTE + ' a minute) and written when the article is saved. To change it, change the sections.' };
       if (key === 'numbers') return { bool: true, get: function () { return a.numbers; }, set: function (v) { a.numbers = v; } };
       if (ARTICLE_TEXT_KEYS.indexOf(key) >= 0) return { get: function () { return a[key] === undefined ? (key === 'core' ? a.summary : '') : a[key]; }, set: function (v) { a[key] = v; } };
       var s = /^sections\.(\d+)\.(\d+)$/.exec(key), q = /^questions\.(\d+)$/.exec(key);

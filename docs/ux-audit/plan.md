@@ -165,3 +165,25 @@ For the editor agent: studio-flows makecomp must now select a same-parent headin
 an Ark hero's h1 and lede are siblings (/learnings: h1 page:/div:1/h1:1 + lede DIV page:/div:1/p:2 — note
 the lede is a DIV, so derived prop names change). Add a step asserting the cross-container refusal and its
 words. Also: studio-flows points 0px fixture; inline-content race.
+
+## Resume point 4 (2026-10-20 ~03:30) — Wave 3 agents all reported; unit 199/199; full browser run started
+All three Wave 3 agents finished (nothing they changed is committed yet; coordinator commits after the
+browser run):
+- W3-EDITOR: makecomp now makes a component from the /download hero's eyebrow + title (selected via the
+  Layers row, then Shift-click) and adds a step asserting the cross-container refusal; points fixture
+  collapses `[data-ark-page]` (its grid tracks were the 40px); inline-content race was a DRIVER defect
+  (the click point sat under the open sheet) — clickText now hit-tests and picks the uncovered end.
+  primitives.js → js/admin/ark-host.js (Ark tabs/accordion/toggle group) was already done.
+  Left: rail's five tabs + More menu's #viewSwitch still hand-wired; Page settings tab strip scrolls
+  sideways at 390px with no visible scrollbar (Ark list styling).
+- W3-LEARN: CMS "Reading time" is read-only + derived (js/admin/articles.js, editor.js refuses edits to
+  `minutes`). Every learnings view ≤ 1.6 fold at 1440/390. Content calls for the owner: "A finance
+  resolver by construction" ends with an unrelated particle-mesh "starting values" table; derived read
+  times are much shorter than the typed ones (7 → 2 min on 487 words).
+- W3-BUDGET: block routes +28.1 KB gz (≤ 30); block+live 29.5. NAMED EXCEPTION: block+terms 31.0 and
+  /stats 32.4 — the glossary (2.9 KB). Lazy definitions would take them from screen readers and SSR;
+  trimming can't close it. Owner call: shorter/fewer definitions, or a per-route glossary. Public CSS
+  net -46.0 KB gz vs 5a1ac71. Ledger + numbers in docs/cms-architecture.md "Budget".
+Census ratcheted: classes card 29→28, tabs 9→8, toggle 9→8.
+Next: browser run result → commit → Wave 4 (re-audit vs docs/ux-audit findings, fold sweep, /account
+conversion with sign-in/wallet/keys browser coverage first).

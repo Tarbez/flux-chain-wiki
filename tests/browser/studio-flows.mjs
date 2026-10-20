@@ -24,7 +24,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor } from './harness.mjs';
+import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor, openRailTab } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'states,single,component,arkblock,hide,motion,makecomp,points,statesui').split(',');
@@ -555,27 +555,61 @@ async function setDefinition(app, label, prop, value) {
 await flow('makecomp', async () => {
   const { page, app, pv, shot } = await openEditor();
   let master, origin, other;
-  /* the intro paragraph, by its layout key: it kept the key it had when it sat right after the title,
-     though the story template now opens it in The idea view (Wave 3), so '#download-title + p' no longer finds it */
-  const H1 = '#download-title', P = '[data-ark-layout-key="page:/header:1/p:1"]';
-  await step('select a heading + paragraph on /download, right-click > Make into component', async () => {
+  /* Since /download became Ark blocks (Wave 3) its title sits in the hero beside the hero's eyebrow,
+     and the intro paragraph opens The idea view (it kept its layout key from when it followed the
+     title). A selection across the two containers is REFUSED (owner decision 2026-10-20, js/main.js
+     cmsComponentRefusal; tests/cms-component-one-place.cjs): the instance would stand in for both
+     from one place, and the hero silently lost its title. The pair that becomes the component is
+     the hero's eyebrow and title -- siblings, a paragraph and a heading. */
+  const H1 = '#download-title', EYEBROW = 'header.ark-hero:has(> #download-title) > p.ark-eyebrow', INTRO = '[data-ark-layout-key="page:/header:1/p:1"]';
+  await step('a heading + a paragraph in ANOTHER container: Make into component is refused, saying how to select', async () => {
     await gotoRoute(app, pv, '/download');
-    /* in the preview's own coordinates, like instanceBox() -- a locator's boundingBox() is in the editor page's */
-    const before = await pv.evaluate((s) => document.querySelector(s).getBoundingClientRect().toJSON(), H1);
     await pv.locator(H1).click();
-    await pv.locator(P).click({ modifiers: ['Shift'] });
+    await pv.locator(INTRO).click({ modifiers: ['Shift'] });
     await pv.locator(H1).click({ button: 'right' });
+    await pv.locator('.ark-studio-menu').waitFor({ state: 'visible' });
+    const item = pv.locator('.ark-studio-menu button', { hasText: 'Make into component' }).first();
+    check(await item.isDisabled(), 'Make into component is offered for a selection across two containers');
+    const why = await item.getAttribute('title');
+    check(/side by side in one container/.test(why || '') && /select that container/.test(why || ''), 'the refusal does not say what to select instead: ' + why);
+    check(Object.keys((await componentsIn(pv)).masters || {}).length === 0, 'a component was made anyway');
+    await page.keyboard.press('Escape');
+    await pv.locator('.ark-studio-menu').waitFor({ state: 'hidden' }).catch(() => {});
+  });
+  await step('select the hero\'s eyebrow + heading on /download (one container), right-click > Make into component', async () => {
+    /* in the preview's own coordinates, like instanceBox() -- a locator's boundingBox() is in the editor
+       page's. The instance takes the place of the FIRST selected layer in the page's order: the eyebrow */
+    const before = await pv.evaluate((s) => document.querySelector(s).getBoundingClientRect().toJSON(), EYEBROW);
+    /* The eyebrow paragraph holds its words in a child bound to the copy key, so a click on it selects
+       that child (copy:DOWNLOAD.EYEBROW), whose parent is the eyebrow -- and with the title that pair is
+       rightly refused (measured 2026-10-20). The paragraph itself is reached the way a person reaches a
+       container: its row in the Layers tab (which also replaces the refused selection still standing
+       from the step before). Then Shift-click adds the title on the canvas. */
+    const eyebrowKey = await pv.evaluate((s) => document.querySelector(s).getAttribute('data-ark-layout-key'), EYEBROW);
+    await openRailTab(app, 'layers');
+    const eyebrowRow = app.locator(`#layers li[data-key="${eyebrowKey}"]`);
+    await until(async () => (await eyebrowRow.count()) > 0, 'the Layers tab has no row for the eyebrow (' + eyebrowKey + ')');
+    await eyebrowRow.locator('svg.ic').first().click();   /* its icon: the eye button floats over the row's tag */
+    await until(() => app.evaluate((k) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).join() === k, eyebrowKey), 'the Layers row did not select the eyebrow paragraph');
+    await pv.locator(H1).click({ modifiers: ['Shift'] });
+    await until(() => app.evaluate(([a, b]) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).sort().join() === [a, b].sort().join(), [eyebrowKey, 'id:download-title']), 'Shift-click did not add the title to the eyebrow');
+    /* the two-layer label ("2 layers ...") is drawn over the selection, so Playwright refuses the click
+       as intercepted. A person right-clicking there hits that label, and a right-click on the canvas's
+       own selection chrome opens the same context menu (js/main.js, its contextmenu listener) -- so the
+       click is forced: whatever is on top receives it, exactly as for a person. */
+    await pv.locator(H1).click({ button: 'right', force: true });
     await clickMenuItem(page, app, pv, 'Make into component');
     const c = await until(async () => { const c = await componentsIn(pv); const id = Object.keys(c.masters)[0]; return id && c.masters[id].resolver === 'RBLOCK_CAPTURED_V1' && Object.assign(c, { id }); }, 'no captured master after Make into component');
     master = Object.assign({ id: c.id }, c.masters[c.id]);
     const spot = Object.keys((c.spots || {})['/download'] || {})[0];
     check(spot && c.spots['/download'][spot].replaces.length === 2, 'the instance does not stand in for both selected elements: ' + JSON.stringify(c.spots));
     origin = c.routes['/download'][spot][0].key;
-    check(JSON.stringify(Object.keys(master.props)) === JSON.stringify(['heading', 'paragraph']), 'props are not derived from the selection\'s text: ' + JSON.stringify(master.props));
-    const hidden = await pv.evaluate(([a, b]) => [a, b].map((s) => getComputedStyle(document.querySelector(s)).display), [H1, P]);
+    check(JSON.stringify(Object.keys(master.props).sort()) === JSON.stringify(['heading', 'paragraph']), 'props are not derived from the selection\'s text: ' + JSON.stringify(master.props));
+    const hidden = await pv.evaluate(([a, b]) => [a, b].map((s) => getComputedStyle(document.querySelector(s)).display), [H1, EYEBROW]);
     check(hidden.every((d) => d === 'none'), 'the original elements are still showing: ' + hidden);
+    check(await pv.evaluate((s) => getComputedStyle(document.querySelector(s)).display !== 'none', INTRO), 'the intro paragraph (not selected) was hidden too');
     const texts = await instanceTexts(pv);
-    check(/Start a local miner/.test(texts[origin]) && /source packages/.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
+    check(/Start a local miner/.test(texts[origin]) && /run defxn/i.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
     await animationsSettled(pv); await shot('makecomp-01-made');
     const box = await instanceBox(pv, origin);
     check(box && Math.abs(box.y - before.y) < 4 && Math.abs(box.x - before.x) < 4, `the instance is not where the selection was: ${JSON.stringify(box)} vs ${JSON.stringify(before)} ` + JSON.stringify(c.spots) + JSON.stringify(master.tree).slice(0, 400));
@@ -609,7 +643,7 @@ await flow('makecomp', async () => {
     const field = (await section(app, 'Component instance')).locator('input[data-prop="paragraph"]');
     await field.fill('Only on the chain page.'); await field.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(async () => /Only on the chain page/.test((await instanceTexts(pv))[other]), 'the override did not show');
-    check(/source packages/.test((await componentsIn(pv)).masters[master.id].props.paragraph), 'the override leaked into the definition');
+    check((await componentsIn(pv)).masters[master.id].props.paragraph === master.props.paragraph, 'the override leaked into the definition');
   });
   await step('detach the other one (on /download); a later definition edit no longer reaches it', async () => {
     await gotoRoute(app, pv, '/download');
@@ -639,7 +673,8 @@ await flow('makecomp', async () => {
     await gotoRoute(again.app, again.pv, '/download');
     await until(async () => /Run DEFXN from source/.test(Object.values(await instanceTexts(again.pv)).join()), 'after reload /download lost its (detached) instance');
     await gotoRoute(again.app, again.pv, '/chain');
-    await until(async () => /Third heading.*Only on the chain page/.test(Object.values(await instanceTexts(again.pv)).join()), 'after reload /chain lost its instance or override');
+    /* both words, in either order: the captured eyebrow (the paragraph) comes before the heading */
+    await until(async () => { const t = Object.values(await instanceTexts(again.pv)).join(); return /Third heading/.test(t) && /Only on the chain page/.test(t); }, 'after reload /chain lost its instance or override');
     await again.page.close();
   });
   await step('PUBLIC pages: /download shows the detached copy in place of the originals, /chain the instance with its override', async () => {
@@ -651,7 +686,7 @@ await flow('makecomp', async () => {
     await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-04-public-download.png') });
     await pub.goto(`${ORIGIN}/chain`);
-    await until(async () => /Third heading.*Only on the chain page/.test(Object.values(await instanceTexts(main)).join()), 'public /chain does not show the instance with its override');
+    await until(async () => { const t = Object.values(await instanceTexts(main)).join(); return /Third heading/.test(t) && /Only on the chain page/.test(t); }, 'public /chain does not show the instance with its override');
     await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-05-public-chain.png') });
     await pub.close();
@@ -724,8 +759,14 @@ await flow('points', async () => {
     style.setAttribute('data-test-fixture', 'zero-width-page');
     /* collapse the mounted page itself (every page has one, whatever frame it sits in): since Wave 3,
        /about sits in the standard frame and Ark sizes its page, so zeroing .continuity-host no longer
-       reproduced the original 0px-wide page */
-    style.textContent = '.continuity-host,[data-ark-page]{width:0!important;min-width:0!important;max-width:0!important;overflow:hidden!important}';
+       reproduced the original 0px-wide page. Since the block-page conversion the page is a GRID with
+       inline padding: zeroed, it stayed 96px wide and its tracks' minimums still gave the slot 40px
+       (measured 2026-10-20). So the fixture also drops that padding and lays the page out as a block:
+       every child, the slot included, gets the page's 0px content width, as the original defect did.
+       Only the page is collapsed: it is the container the slot's width comes from (zeroing
+       .continuity-host as well is not needed). Nothing in the collapsed page can be clicked on the
+       canvas (it clips what spills out of its 0px column), so the next step selects through Layers. */
+    style.textContent = '[data-ark-page]{width:0!important;min-width:0!important;max-width:0!important;padding-left:0!important;padding-right:0!important;display:block!important}';
     document.head.appendChild(style);
     const slot = document.querySelector('[data-ark-insert="main"]');
     return slot ? slot.getBoundingClientRect().width : null;
@@ -747,8 +788,18 @@ await flow('points', async () => {
     check(/select an element/i.test(await row.locator('button', { hasText: 'Insert' }).getAttribute('title')), 'the disabled Insert does not say what it needs');
   });
   await step('/about collapsed: a place after a selection inside the same 0px-wide layout is not offered either -- the rule is geometry, not a page list', async () => {
-    /* every element in the collapsed page sits in a 0px column; the readable text overflows it */
-    await pv.locator('section.ark-page :is(h1,h2,h3,p,span,a):visible').first().click();
+    /* every element in the collapsed page sits in a 0px column, and the page clips what spills out
+       (measured 2026-10-20: no text in it receives a hit), so it cannot be clicked on the canvas.
+       A person reaches it the other way the editor offers: its row in the Layers tab. */
+    const key = await pv.evaluate(() => { const h = document.querySelector('[data-ark-page] h1'); return h && h.getAttribute('data-ark-layout-key'); });
+    check(key, 'the collapsed /about has no keyed h1 to select');
+    await openRailTab(app, 'layers');
+    const layer = app.locator(`#layers li[data-key="${key}"]`);
+    await until(async () => (await layer.count()) > 0, 'the Layers tab has no row for ' + key);
+    /* the row's icon: its tag at the end has the eye button floating over it */
+    await layer.locator('svg.ic').first().click();
+    await until(() => app.evaluate((k) => !!document.querySelector(`#layers li[data-key="${k}"][aria-selected="true"]`), key), 'choosing the Layers row did not select the heading');
+    await app.click('#tabLib');
     await until(async () => /Not offered:.*After the selection.*0px wide/.test(await pointsNote()), '"after the selection" inside a 0px column is offered: ' + await pointsNote());
     const row = await libRow(app, 'Text block');
     check(await row.locator('button', { hasText: 'Insert' }).isDisabled(), 'Insert is enabled although every place on the collapsed /about is invisible');

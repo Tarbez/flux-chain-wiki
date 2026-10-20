@@ -87,19 +87,37 @@ const toolbarContent = (app) => app.evaluate(() => {
 /* at: 'end' (default) clicks near the line's right end so the caret lands at the end of the words;
    'start' clicks near its left end -- needed while the Page fields sheet is open, because the sheet
    overlays the canvas's right edge and Playwright cannot see an overlay in the parent document. */
+/* Playwright's actionability check hit-tests inside the canvas frame only, so a point the editor's
+   own overlay covers (the Page fields sheet docks over the canvas's right ~480px) is "clickable" and
+   the press lands on the sheet. REGRESSION (2026-10-20, the "race" step): its line-end click at
+   1440x900 hit the sheet's Title textarea (1100,462 inside the sheet at x 952-1432), so the canvas
+   never saw a click and no inline edit started -- read as a product race until measured. Every
+   click therefore hit-tests the EDITOR document first: the asked-for end of the line when the canvas
+   is really there, else the other end; both covered is a failure naming what covers the text. */
 async function clickText(pv, selector, index = 0, at = 'end') {
+  const editorDoc = pv.parentFrame();
   /* the canvas remounts after a committed edit (the editor re-sends the site): an element found
      just before that can be replaced under the click, so a detached target is found again */
+  let covered = '';
   return until(async () => {
     const loc = pv.locator(selector).nth(index);
     try {
       await loc.scrollIntoViewIfNeeded({ timeout: 2000 });
       const box = await loc.boundingBox();
       if (!box) return false;
-      await loc.click({ position: { x: at === 'start' ? Math.min(12, box.width - 2) : Math.max(2, box.width - 4), y: Math.min(box.height - 2, 12) }, timeout: 2000 });
+      const y = Math.min(box.height - 2, 12), ends = { start: Math.min(12, box.width - 2), end: Math.max(2, box.width - 4) };
+      const order = at === 'start' ? ['start', 'end'] : ['end', 'start'];
+      let x = null; covered = '';
+      for (const end of order) {
+        const hit = await editorDoc.evaluate(([px, py]) => { const e = document.elementFromPoint(px, py); return !e ? 'nothing' : e.id === 'cmsPreview' ? '' : e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + ' in ' + ((e.closest('[id]') || {}).id || 'the editor'); }, [box.x + ends[end], box.y + y]);
+        if (!hit) { x = ends[end]; break; }
+        covered += (covered ? '; ' : '') + end + ' of the line under ' + hit;
+      }
+      if (x === null) return false;
+      await loc.click({ position: { x, y }, timeout: 2000 });
       return loc;
     } catch (error) { if (/not attached|not stable|Timeout/.test(error.message)) return false; throw error; }
-  }, 'could not click ' + selector, 10000);
+  }, 'could not click ' + selector, 10000).catch((error) => { throw new StepFailure(error.message + (covered ? ' -- the editor covers it: ' + covered : '')); });
 }
 const editing = (pv) => pv.evaluate(() => { const el = document.querySelector('[data-ark-inline-editing]'); return el ? el.textContent : null; });
 async function typeAtEnd(page, pv, text) {

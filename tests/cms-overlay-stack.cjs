@@ -33,6 +33,14 @@ for (const withKit of [true, false]) {
 
   open('menu', { anchor: $('anchor') });
   assert.equal($('anchor').getAttribute('aria-expanded'), 'true', 'the anchor says its overlay is open');
+  /* Regression (2026-10-20, tests/browser/versions.mjs "Restore #4"): an AUTOMATIC open (the toolbar
+     opening a text's Details for a new selection) must not replace a popover the person opened --
+     More shut under the click when the canvas reloaded after a Save. busy() is how a caller asks;
+     the toolbar skips its automatic open while it is true (js/admin/toolbar.js `auto`). */
+  assert.equal(overlay.busy('popover', $('pop')), true, 'the person\'s open popover makes the level busy for anything else');
+  assert.equal(overlay.busy('popover', $('menu')), false, 'an overlay is never busy because of itself');
+  assert.equal(overlay.busy('sheet'), false, 'a level with nothing open is not busy');
+  assert.equal(/let auto = false;[\s\S]*if \(auto && A\.overlay\.busy\('popover', pop\)\) state\.tbOpen = '';/.test(fs.readFileSync('js/admin/toolbar.js', 'utf8')), true, 'the toolbar skips an automatic open while another popover is open');
   open('pop');
   assert.deepEqual(closed.splice(0), ['menu:replaced'], 'one popover at a time: opening another closes the first');
   assert.equal($('anchor').getAttribute('aria-expanded'), 'false');

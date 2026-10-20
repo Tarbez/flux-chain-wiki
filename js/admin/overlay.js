@@ -125,6 +125,11 @@
     stack.filter(function (e) { return !level || e.level === level; }).reverse().forEach(function (e) { close(e.el, reason || 'close'); });
   }
   function isOpen(el) { return indexOf(el) >= 0; }
+  /* An overlay nobody asked for (the toolbar opening a text's Details by itself) must not replace
+     one the person opened: it waits while another of its level is open, and the caller skips it.
+     Found 2026-10-20 (tests/browser/versions.mjs "Restore #4"): More opened just after a Save,
+     the canvas reloaded, the new selection auto-opened Details, and More shut under the click. */
+  function busy(level, except) { return stack.some(function (e) { return e.level === (level || 'popover') && e.el !== except; }); }
   function inside(entry, target) { return !!target && (entry.el.contains(target) || (!!entry.anchor && entry.anchor.contains(target)) || entry.within.some(function (w) { return w && w.contains(target); })); }
 
   /* Esc: the topmost overlay, and only it. A control that handles Esc itself (an inline edit, a
@@ -167,6 +172,6 @@
     return b;
   }
 
-  A.provide({ overlay: { open: open, close: close, forget: forget, closeLevel: closeLevel, closeCanvas: closeCanvas, isOpen: isOpen, closeButton: closeButton,
+  A.provide({ overlay: { open: open, close: close, forget: forget, closeLevel: closeLevel, closeCanvas: closeCanvas, isOpen: isOpen, busy: busy, closeButton: closeButton,
       layers: LAYERS.map(function (layer) { return { token: layer[0], z: layer[1] }; }) } });
 })();

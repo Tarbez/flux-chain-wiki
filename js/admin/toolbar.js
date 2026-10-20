@@ -151,9 +151,13 @@
        it is, with Done and All fields. Text that cannot be edited opens its Details by itself, once
        per selection, because the explanation is the answer (closing it stays closed). */
     const contentNow = state.cmsContent && (!state.cmsContent.key || state.cmsContent.key === key) ? state.cmsContent : null;
-    if (state.lens === 'content' && kind !== 'group' && !state.tbOpen && tbContentAutoKey !== key && contentNow && !contentNow.bound) { state.tbOpen = 'cms-content'; state.tbOpenKey = key; tbContentAutoKey = key; }
+    let auto = false;   /* this render opened a section by itself, not on a press */
+    if (state.lens === 'content' && kind !== 'group' && !state.tbOpen && tbContentAutoKey !== key && contentNow && !contentNow.bound) { state.tbOpen = 'cms-content'; state.tbOpenKey = key; tbContentAutoKey = key; auto = true; }
     if (state.tbAutoOpen && Date.now() - state.tbAutoOpen.at > 5000) state.tbAutoOpen = null;
-    if (state.tbAutoOpen && kind !== 'group' && state.cmsExactSelection[TB_IDENTITY[state.tbAutoOpen.key]]) { state.tbOpen = state.tbAutoOpen.key; state.tbOpenKey = key; state.tbAutoOpen = null; }
+    if (state.tbAutoOpen && kind !== 'group' && state.cmsExactSelection[TB_IDENTITY[state.tbAutoOpen.key]]) { state.tbOpen = state.tbAutoOpen.key; state.tbOpenKey = key; state.tbAutoOpen = null; auto = true; }
+    /* an automatic open never replaces a popover the person opened (More, a header popover):
+       it is skipped, and stays skipped for this selection (js/admin/overlay.js busy()) */
+    if (auto && A.overlay.busy('popover', pop)) state.tbOpen = '';
     const active = document.activeElement, barFocus = active && box.contains(active) ? active.dataset.tb : '';
     let popFocus = null;
     if (sameEdit && active && pop.contains(active)) {

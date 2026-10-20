@@ -549,10 +549,11 @@ static, linked on every route so the server render is styled; minified by the ve
 below: `gzip -9 -c <file> | wc -c` on the shipped file, 2026-10-19, this Mac (the same method as
 the earlier readings; esbuild's metafile gives the per-module shares). Wave 2 measured kit 25.9 +
 adapter 3.8 = 29.6 KB; Wave 3's page work (W3-ARK-FOLLOWUPS) took it to kit 26.9 + adapter 6.1
-= 33.0, 3.0 over. W3-BUDGET, same day: kit 24.0 + adapter 4.0 = **28.0 KB** on a route that
+= 33.0, 3.0 over. W3-BUDGET, same day: kit 24.0 + adapter 4.0 = **28.1 KB** on a route that
 renders blocks; +0 on a route with no block; +1.4 (the live chunk) where a page updates a block
 (29.5); +2.9 (`js/content/glossary.js`, which grows with `docs/glossary.md`) where words carry
-terms (30.9); /stats carries all three (32.3). What moved: the editor text stripped from the
+terms (31.0); /stats carries all three (32.4). Every one of these files is new since 5a1ac71, so
+each figure is the route's added JS (re-measured 2026-10-20 at 45d6b1a, adapter with `whenLive`). What moved: the editor text stripped from the
 public kit's prop schemas (78 `help` + 21 `description` strings: -2.1 KB), the morph into the
 live chunk (-0.7 from the kit, paid only by live routes), the public banner cut to ark-ui's
 version and where the pins are (-0.2), and the adapter served minified (-2.4: its commented
@@ -565,13 +566,29 @@ which only `createArkPopover` drives and the public kit refuses, ~0.8 KB gz insi
 A block route's bill also carries `js/ark/dash-kit.js` (3.9 KB, the link resolver blocks need),
 which existed at 5a1ac71 but loaded only on the stats family then.
 
-**CSS ledger** (same method, every stylesheet `index.html` links, 5a1ac71 vs now): 160.4 KB gz
-(51 files) -> 121.7 KB gz (47 files), **-38.7 KB gz net** (-155 KB raw). Added: ark-blocks 7.3,
-block-page 1.2, themes +2.6 (the SDK sheet grew). Deleted: brand-marks -12.6, stats -5.3, chain
--1.7, bundle-deployer -1.3, resolvers -0.9, fonts -0.4; shrunk as pages became blocks: home-swiss
+**Named exception: the glossary on terms routes** (measured 2026-10-20, same method). A route
+whose words carry terms adds `js/content/glossary.js` (2.9 KB gz, 44 entries) and lands at 31.0
+KB; /stats, which is also live, at 32.4 -- 1.0 and 2.4 over R2. The cause is the definitions'
+words: they alone compress to 2.18 KB gz, more than the 1.92 KB left on a block route and the
+0.51 left on /stats, so no packaging of the same words fits (the tightest form, compact JSON with
+the same fields, saves 0.14). Loading them on first use is refused on Ark's term contract
+(`@deadark/ark-ui` `blocks/term`): the definition is in the tip at mount and is the trigger's
+accessible description, so a screen reader hears it without opening anything; deferred, the first
+focus would announce nothing, the crawler's HTML (`api/lib/render-core.mjs` serializes the
+mounted page) would lose every definition, and the adapter's first-use marking needs the entries
+at render. What would close it, for whoever owns the call: fewer or shorter definitions in
+`docs/glossary.md` (a content change), a per-route glossary derived from each route's words
+(build-time, from the rendered pages), or the Ark host redesign above (~0.8, which closes the
+block+terms case only). Until then the overage stands, here, with this cause.
+
+**CSS ledger** (`gzip -9 < file | wc -c`, every stylesheet `index.html` links, 5a1ac71 vs 45d6b1a,
+2026-10-20): 160.4 KB gz (51 files) -> 114.3 KB gz (44 files), **-46.0 KB gz net** (-189 KB raw).
+Added: ark-blocks 7.3, block-page 1.2, themes +2.6 (the SDK sheet grew). Deleted: brand-marks
+-12.6, stats -5.3, article-reading -2.5, learnings -2.3, chain -1.7, bundle-deployer -1.3,
+resolvers -0.9, document-flow -0.4, fonts -0.4; shrunk as pages became blocks: home-swiss
 -6.7, resolutions -3.0, stats-dashboard -2.7, home-drafting -2.4, about -1.8, resolver-lab -1.7,
 home -1.2, home-flow -1.1, resolver-math -1.1, lifecycle -1.0, and smaller cuts across 20 more.
-Without brand-marks (a token move, not block work) the ledger is still -26.1. `ark-overrides` in
+Without brand-marks (a token move, not block work) the ledger is still -33.4. `ark-overrides` in
 the census counts site rules over Ark blocks; nothing still used was deleted.
 
 **The spec.** A page module returns `ArkUI.page(spec, host, options)`:

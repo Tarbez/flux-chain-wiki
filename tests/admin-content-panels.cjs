@@ -133,6 +133,14 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
   const art = A.renderArticleFields(detached(), slug);
   for (const key of ['title', 'category', 'minutes', 'summary', 'core', 'relevance', 'reviewed', 'evidenceLabel', 'actionLabel']) assert(art.querySelector('#a-' + slug + '-' + key), 'article field ' + key);
   for (const key of ['evidenceHref', 'relatedPage', 'actionPage']) assert(art.querySelector('#lp-type-a-' + slug + '-' + key), 'article link ' + key);
+  /* The read time is derived (LearningContent.readTime) and written on Save; it was a typed field
+     up to three times the real read time (W3-LEARN). It is shown read-only, follows the words, and
+     an edit to it is refused with the reason instead of being silently replaced on Save. */
+  const readTime = art.querySelector('#a-' + slug + '-minutes');
+  assert(readTime.readOnly, 'the reading time is shown, not edited');
+  assert.equal(readTime.value, window.LearningContent.readTime(state.aDrafts[slug]), 'the reading time shown is the one derived from the draft\'s words');
+  const refusedReadTime = A.setItemField('article', slug, 'minutes', '99 MIN READ');
+  assert(!refusedReadTime.ok && /derived from the article's words/.test(refusedReadTime.refusal), 'an edit to the read time is refused, naming why');
   type(window, art.querySelector('#a-' + slug + '-title'), 'Panel title');
   assert.equal(state.aDrafts[slug].title, 'Panel title');
   const hadQuestions = !!state.aDrafts[slug].questions;

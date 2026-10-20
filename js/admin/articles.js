@@ -49,6 +49,18 @@
   function articleField(article, key, label, kind) {
     return boundField('article', article.slug, key, label, { type: kind === 'text' ? 'textarea' : 'text', rows: 3, id: 'a-' + article.slug + '-' + key });
   }
+  /* The read time, shown and never edited: LearningContent.readTime derives it from the draft's
+     words and the serializer writes it on Save (W3-LEARN, 2026-10-19 -- it was a typed field, up to
+     three times the real read time). It follows the words as they are typed. */
+  function readTimeField(article, root) {
+    var derived = function () { return LearningContent.readTime(article) || ''; };
+    var row = A.ctlField({ get: derived, set: function () {} }, 'Reading time', 'minutes',
+      { type: 'text', readOnly: true, id: 'a-' + article.slug + '-minutes', hint: 'Derived from the words; written on Save' });
+    var control = row.children[1];
+    control.dataset.derived = 'readTime';
+    root.addEventListener('input', function () { control.value = derived(); });
+    return row;
+  }
   /* relatedPage/actionPage/evidenceHref are link data in spirit (a page key, a page key, a
      reference-doc path) even though LearningContent is not ArkManifest, so they get the same
      tagged route:/doc: picker -- see linkPickerEl (js/admin/editor.js) and
@@ -82,7 +94,7 @@
       var card = h('fieldset', {}, h('legend', { text: 'Card' }));
       card.appendChild(articleField(a, 'title', 'Title', 'line'));
       card.appendChild(articleField(a, 'category', 'Category', 'line'));
-      card.appendChild(articleField(a, 'minutes', 'Reading time', 'line'));
+      card.appendChild(readTimeField(a, root));
       card.appendChild(articleField(a, 'summary', 'Summary', 'text'));
       root.appendChild(card);
 

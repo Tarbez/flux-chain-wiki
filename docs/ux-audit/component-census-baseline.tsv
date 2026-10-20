@@ -33,7 +33,7 @@ classes	button	23
 used-classes	button	4
 uses	button	5
 css-files	button	18
-classes	card	29
+classes	card	28
 used-classes	card	7
 uses	card	9
 css-files	card	15
@@ -57,7 +57,7 @@ classes	diagram	3
 used-classes	diagram	2
 uses	diagram	2
 css-files	diagram	3
-classes	tabs	9
+classes	tabs	8
 used-classes	tabs	5
 uses	tabs	7
 css-files	tabs	11
@@ -89,7 +89,7 @@ classes	field	38
 used-classes	field	19
 uses	field	35
 css-files	field	17
-classes	toggle	9
+classes	toggle	8
 used-classes	toggle	3
 uses	toggle	5
 css-files	toggle	5
