@@ -26,6 +26,30 @@ var RESOLUTION_ART = {
 };
 var RESOLUTION_GROUP_ICONS = { BUILD: 'layers', VALUE: 'cycle', PEOPLE: 'account', INTELLIGENCE: 'model', OPERATIONS: 'network' };
 
+/* Ark popovers for the pill and the Resolutions menu, swapped in on first press by js/resolvers/header-popover.js (tests/header-ark-parts.cjs) */
+function lazyHeaderPopover(spec) {
+  var ctl, state = 0, ask = {};
+  function plain(on) { spec.fallback.hidden = !on; spec.trigger.setAttribute('aria-expanded', !!on); }
+  function load() {
+    state = 1;
+    ArkUI.loadScript('js/resolvers/header-popover.js').then(function () { return ArkHeaderPopover.attach(spec, ask); }).then(function (made) { ctl = made; }, function (error) {
+      state = 3; plain(ask.open);
+      console.error('Header popover not loaded (' + (error && error.message) + '). Needs: js/resolvers/header-popover.js and js/ark/vendor/ark-kit-popover.js. Remedy: reload; the menu still opens and closes by its button.');
+    });
+  }
+  var pop = {
+    isOpen: function () { return ctl ? ctl.isOpen() : state === 3 && !spec.fallback.hidden; },
+    want: function (on, byHover) {
+      ask.open = on; ask.intent = on && byHover;
+      if (ctl) ctl.want(on, byHover); else if (state === 3) plain(on); else if (on && !state) load();
+    }
+  };
+  spec.trigger.addEventListener('click', function () {
+    if (ask.open && ask.intent) ask.intent = false; else pop.want(state === 3 ? spec.fallback.hidden : !ask.open);
+  });
+  return pop;
+}
+
 /* Network switcher, site-wide (directed 2026-10-16: "the network chain
    switch at the nav level inside defxn"; corrected the same day: "make
    sure it is outside of the popover and right next to the menu icon
@@ -116,18 +140,8 @@ function buildHeaderChainPopover() {
   popover.appendChild(list);
   wrap.appendChild(popover);
 
-  function setOpen(open) {
-    popover.hidden = !open;
-    trigger.setAttribute('aria-expanded', String(open));
-    if (open) { var first = list.querySelector('.network-option'); if (first) first.focus(); }
-  }
-  trigger.addEventListener('click', function () { setOpen(popover.hidden); });
-  document.addEventListener('click', function (event) {
-    if (!popover.hidden && !wrap.contains(event.target)) setOpen(false);
-  });
-  wrap.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !popover.hidden) { setOpen(false); trigger.focus(); }
-  });
+  var pop = lazyHeaderPopover({ wrap: wrap, trigger: trigger, fallback: popover, label: 'Network', align: 'end', id: 'header-chain-popover', content: [innerLabel, list],
+    done: function (made) { wrap = made.root; trigger = made.trigger; } });
 
   loadHeaderWalletModule().then(function (dw) {
     showNetwork(shortNetworkLabel(dw.resolveWireUrl(), dw.KNOWN_NETWORKS));
@@ -138,8 +152,7 @@ function buildHeaderChainPopover() {
          connection to reset. Closing is this surface's own UX choice:
          the popover's one job is picking a network, so a real choice
          closes it, same as any other menu on this site. */
-      setOpen(false);
-      trigger.focus();
+      pop.want(false);
     });
     if (typeof window !== 'undefined') {
       window.addEventListener('defxn-network-changed', function (event) {
@@ -288,47 +301,24 @@ function buildProducts(header, core) {
   mega.appendChild(foot);
   header.appendChild(mega);
 
-  var closeTimer = 0, openedAt = 0;
+  /* the header's own: hover-intent (closes 220 ms after leaving), and closing after a link */
+  var closeTimer = 0;
   var hover = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : { matches: false };
-  function setOpen(open, focusTrigger) {
-    window.clearTimeout(closeTimer);
-    if (mega.hidden === !open) return;
-    mega.hidden = !open;
-    if (open) openedAt = Date.now();
-    trigger.setAttribute('aria-expanded', String(open));
-    header.classList.toggle('products-open', open);
-    if (!open) showPeek(null);
-    if (!open && focusTrigger) trigger.focus();
-  }
-  trigger.addEventListener('click', function () {
-    /* A hover that just opened the menu must not be undone by the click that follows it. */
-    if (!mega.hidden && Date.now() - openedAt < 400) return;
-    setOpen(mega.hidden, false);
-  });
-  [wrap, mega].forEach(function (zone) {
-    zone.addEventListener('pointerenter', function (event) { if (hover.matches && event.pointerType === 'mouse') setOpen(true); });
-    zone.addEventListener('pointerleave', function (event) {
-      if (!hover.matches || event.pointerType !== 'mouse') return;
-      window.clearTimeout(closeTimer);
-      closeTimer = window.setTimeout(function () { setOpen(false); }, 220);
+  var pop = lazyHeaderPopover({ wrap: wrap, trigger: trigger, fallback: mega, label: ArkCopy.text('NAV.PRODUCTS'), id: 'products-mega', content: [body, foot],
+    done: function (made) { watch(made.root); } });
+  function watch(zone) {
+    ['pointerenter', 'pointerleave'].forEach(function (type) {
+      zone.addEventListener(type, function (event) {
+        if (!hover.matches || event.pointerType !== 'mouse') return;
+        window.clearTimeout(closeTimer);
+        if (type === 'pointerenter') pop.want(true, true); else closeTimer = window.setTimeout(function () { pop.want(false); }, 220);
+      });
     });
-  });
-  header.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !mega.hidden) { event.stopPropagation(); setOpen(false, true); }
-  });
-  header.addEventListener('focusout', function (event) {
-    if (!mega.hidden && !wrap.contains(event.relatedTarget) && !mega.contains(event.relatedTarget)) setOpen(false);
-  });
-  document.addEventListener('click', function (event) {
-    if (!mega.hidden && !wrap.contains(event.target) && !mega.contains(event.target)) setOpen(false);
-  });
-  mega.addEventListener('click', function (event) {
-    var link = event.target.closest('a');
-    if (!link) return;
-    setOpen(false);
-  });
+  }
+  watch(wrap);
+  header.addEventListener('click', function (event) { if (event.target.closest('.products-mega a')) { window.clearTimeout(closeTimer); pop.want(false); } });
   var toggle = header.querySelector('.nav-toggle');
-  if (toggle) toggle.addEventListener('click', function () { setOpen(false); });
+  if (toggle) toggle.addEventListener('click', function () { pop.want(false); });
 }
 
 /* One row, never squeezed (tests/browser/public-header.mjs, 1024-1920px). Above the compact
@@ -381,7 +371,7 @@ function fitHeaderRow(header) {
   function queue() { if (!queued) queued = requestAnimationFrame(function () { queued = 0; fit(); }); }
   var observer = new ResizeObserver(queue);
   observer.observe(header);
-  ['.dx-bar__brand', '.dx-switch__trigger', '.header-core-links', '.header-account-link', '.header-chain-trigger', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
+  ['.dx-bar__brand', '.dx-switch__trigger', '.header-core-links', '.header-account-link', '.dx-bar__actions', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(queue);
 }
 

@@ -61,11 +61,20 @@
 #scene .ark-header .header-chain-trigger:is(:hover,[aria-expanded="true"]) { background:hsl(var(--raised)); border-color:var(--dx-edge,hsl(var(--border-control))); }
 .header-chain-dot { width:8px; height:8px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
 .header-chain-trigger-label { white-space:nowrap; max-width:112px; overflow:hidden; text-overflow:ellipsis; }
+/* Once pressed, the panel is Ark's popover block (js/resolvers/header.js): ark-blocks.css makes it fixed,
+   the block places it under the pill (inline top/left) and on a phone it is a full-width sheet. The
+   top/right here are where the plain panel opens before that, and if the popover chunk fails to load. */
 #scene .ark-header .header-chain-popover {
- position:absolute; top:calc(100% + 8px); right:0; z-index:46; min-width:220px; padding:12px;
+ position:fixed; top:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px) + 8px); right:max(var(--dx-gutter),env(safe-area-inset-right,0px)); left:auto;
+ z-index:46; display:block; min-width:220px; max-width:min(320px,calc(100vw - 16px)); padding:12px;
  border:1px solid hsl(var(--border-strong)); border-radius:var(--dx-radius,8px);
- background:hsl(var(--overlay)); box-shadow:none;
+ background:hsl(var(--overlay)); box-shadow:none; color:inherit; font:inherit;
 }
+#scene .ark-header .header-chain-popover[hidden] { display:none; }
+/* a phone: Ark's full-width sheet, so the cap above steps aside */
+@media(max-width:600px) { #scene .ark-header .header-chain-popover { max-width:none; width:auto; } }
+/* an open panel lifts the bar over the page's layers (was .products-open) */
+#scene .ark-header:has(.ark-popover[data-state="open"]) { z-index:60 !important; }
 .header-network-label {
  display:block; margin-bottom:8px; font:600 11px/1 var(--dx-font-mono,var(--font-mono,monospace));
  letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); white-space:nowrap;
@@ -85,6 +94,16 @@
 .network-option.is-selected { color:hsl(var(--text-strong)); background:hsl(var(--reference-100)); }
 .network-option.is-selected::before { background:hsl(var(--trust,var(--success))); border-color:hsl(var(--trust,var(--success))); }
 .network-option:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:-2px; }
+
+/* The Resolutions menu (look: css/resolutions.css) is Ark's popover too: by id, set aside the block's
+   24rem padded grid card for the menu's own width; the block places it and it scrolls inside when the
+   viewport is short, so nothing is cut. top/left: where the plain panel opens (before the first press,
+   or if the chunk fails). */
+#scene .ark-header #products-mega {
+ position:fixed; top:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px) + 8px); left:max(20px,2.8cqmin); right:auto;
+ width:min(1080px,calc(100vw - 2 * max(20px,2.8cqmin))); min-width:0; max-width:none; gap:0;
+ overflow-x:hidden; overflow-y:auto; color:inherit; font:inherit;
+}
 
 /* MENU: every page of the site, in layers (js/resolvers/header.js onMount). Drawn like the
    kit's menu control. */
