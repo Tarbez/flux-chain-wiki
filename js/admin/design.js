@@ -124,7 +124,7 @@
     var wrap = h('div', { class: 'page-law-panel' });
     if (!window.ArkTheme) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Theme editing is unavailable on this page.' })); return wrap; }
     state.themeDraft = ArkTheme.sanitize(state.themeDraft);
-    var active = state.themeDraft.activeTheme || 'ghost';
+    var active = state.themeDraft.activeTheme || 'ember';
     var colorsBox = h('fieldset', { class: 'relief theme-core' }, h('legend', { text: 'Colours' }));
     colorsBox.appendChild(h('p', { class: 'hint', text: 'Pick a theme, then change the colours the site is built from: the page, its panels, its text and its accents.' }));
     var themeSelect = h('select', { id: 'theme-active' });

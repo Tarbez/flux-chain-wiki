@@ -15,7 +15,7 @@ const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
 
 const script = fs.readFileSync('assets/kit/defxn-product.js', 'utf8');
-const dom = new JSDOM('<!doctype html><html data-theme="clay"><head><title>Home</title></head><body><nav id="n"><a href="/how">How it works</a><a href="/stats">Stats</a></nav><main></main></body></html>', { runScripts: 'outside-only', url: 'http://127.0.0.1:3438/' });
+const dom = new JSDOM('<!doctype html><html data-theme="defxn-tide"><head><title>Home</title></head><body><nav id="n"><a href="/how">How it works</a><a href="/stats">Stats</a></nav><main></main></body></html>', { runScripts: 'outside-only', url: 'http://127.0.0.1:3438/' });
 const { window } = dom;
 window.eval(script);
 const kit = window.DefxnKit;
@@ -32,7 +32,7 @@ const doc = window.document;
 const bar = doc.querySelector('header.dx-bar');
 assert(bar, 'the bar renders in the SSR pass');
 assert.equal(bar.getAttribute('data-dx-mode'), 'home');
-assert.equal(doc.documentElement.getAttribute('data-theme'), 'clay', 'home mode leaves the page palette alone');
+assert.equal(doc.documentElement.getAttribute('data-theme'), 'defxn-tide', 'home mode leaves the page palette alone');
 assert.equal(doc.documentElement.getAttribute('data-dx-theme'), null, 'home mode sets no product theme attribute');
 assert(!doc.querySelector('.dx-theme-toggle'), 'no product light/dark toggle on the family home');
 assert(!doc.querySelector('.dx-product-link[aria-current]'), 'no product is current on the family home');
@@ -56,7 +56,7 @@ assert.equal(typeof shell.refit, 'function');
    - the switcher's Escape also reached this site's own Escape ("back to the previous page"),
      so closing the panel on an inner page navigated home. */
 {
-  const dom2 = new JSDOM('<!doctype html><html data-theme="moss"><head><title>About — DEFXN site</title></head><body><main><header id="h"><nav id="primary-navigation"><a href="/x">X</a></nav></header></main></body></html>', { runScripts: 'outside-only', url: 'http://127.0.0.1:3438/about' });
+  const dom2 = new JSDOM('<!doctype html><html data-theme="defxn-moss-light"><head><title>About — DEFXN site</title></head><body><main><header id="h"><nav id="primary-navigation"><a href="/x">X</a></nav></header></main></body></html>', { runScripts: 'outside-only', url: 'http://127.0.0.1:3438/about' });
   dom2.window.eval(script);
   const d = dom2.window.document;
   const host = d.getElementById('h');

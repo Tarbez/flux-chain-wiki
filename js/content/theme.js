@@ -23,8 +23,17 @@ var ArkTheme = (function () {
 
   var HEX = /^#[0-9a-fA-F]{6}$/;
   var HSL_VALUE = /^\s*\d+(?:\.\d+)?\s+\d+(?:\.\d+)?%\s+\d+(?:\.\d+)?%(?:\s*\/\s*(?:0|1|0?\.\d+|\d+(?:\.\d+)?%))?\s*$/;
-  var THEME_KEYS = ['ghost', 'bone', 'glacier', 'moss', 'clay', 'grove', 'ochre', 'marine', 'dusk', 'dawn'];
-  var THEME_LABELS = { ghost: 'Ember dark', glacier: 'Ember light', clay: 'Tide dark', grove: 'Tide light', ochre: 'Moss dark', moss: 'Moss light', marine: 'Dune dark', bone: 'Dune light', dusk: 'Dusk dark', dawn: 'Dusk light' };
+  /* Palette ids are the SDK's published names (@deadark/sdk/theme: getDeadArkRoleLadderPublishedName):
+     ember keeps its SDK id, the other four families are defxn-<family>[-light] because tide and moss
+     are already SDK themes with other values. LEGACY_TO_PUBLISHED is the old stored vocabulary
+     (ghost, glacier, ...) mapped on READ only -- saved activeTheme / theme overrides keep working and
+     the saved record is never rewritten; the next save writes the published form. It mirrors
+     DEADARK_ROLE_LADDER_LEGACY_TO_PUBLISHED (tests/theme-content.cjs pins the two together). Legacy
+     'moss' means Moss LIGHT while the published 'defxn-moss' is Moss dark: map only values read from
+     a legacy slot, never a published id. */
+  var THEME_KEYS = ['ember', 'ember-light', 'defxn-tide', 'defxn-tide-light', 'defxn-moss', 'defxn-moss-light', 'defxn-dune', 'defxn-dune-light', 'defxn-dusk', 'defxn-dusk-light'];
+  var LEGACY_TO_PUBLISHED = { ghost: 'ember', glacier: 'ember-light', clay: 'defxn-tide', grove: 'defxn-tide-light', ochre: 'defxn-moss', moss: 'defxn-moss-light', marine: 'defxn-dune', bone: 'defxn-dune-light', dusk: 'defxn-dusk', dawn: 'defxn-dusk-light' };
+  var THEME_LABELS = { 'ember': 'Ember dark', 'ember-light': 'Ember light', 'defxn-tide': 'Tide dark', 'defxn-tide-light': 'Tide light', 'defxn-moss': 'Moss dark', 'defxn-moss-light': 'Moss light', 'defxn-dune': 'Dune dark', 'defxn-dune-light': 'Dune light', 'defxn-dusk': 'Dusk dark', 'defxn-dusk-light': 'Dusk light' };
   var SEMANTIC_FIELDS = [
     { key: 'canvas', label: 'Canvas' },
     { key: 'surface', label: 'Surface' },
@@ -76,6 +85,13 @@ var ArkTheme = (function () {
     return ['none'].concat(keys).map(function (key) { return { key: key, label: BACKGROUND_LABELS[key] || key }; });
   }
 
+  /* a published id as it is, an old stored key mapped to its published id, anything else null */
+  function publishedId(key) {
+    if (typeof key !== 'string') return null;
+    if (THEME_KEYS.indexOf(key) >= 0) return key;
+    return Object.prototype.hasOwnProperty.call(LEGACY_TO_PUBLISHED, key) ? LEGACY_TO_PUBLISHED[key] : null;
+  }
+
   function themeOptions() {
     return THEME_KEYS.map(function (key) { return { key: key, label: THEME_LABELS[key] || key }; });
   }
@@ -100,21 +116,24 @@ var ArkTheme = (function () {
   }
 
   function sanitizeActiveTheme(key) {
-    return typeof key === 'string' && THEME_KEYS.indexOf(key) >= 0 ? key : 'ghost';
+    return publishedId(key) || 'ember';
   }
 
   function sanitizeSemantic(themes) {
     var out = {};
     if (!themes || typeof themes !== 'object') return out;
-    THEME_KEYS.forEach(function (theme) {
-      var source = themes[theme];
+    /* old keys first, so a published key saved beside its old twin wins */
+    var inputKeys = Object.keys(LEGACY_TO_PUBLISHED).concat(THEME_KEYS);
+    inputKeys.forEach(function (inputKey) {
+      var theme = publishedId(inputKey);
+      var source = Object.prototype.hasOwnProperty.call(themes, inputKey) ? themes[inputKey] : null;
       if (!source || typeof source !== 'object') return;
       var clean = {};
       SEMANTIC_FIELDS.forEach(function (f) {
         var v = source[f.key];
         if (typeof v === 'string' && HSL_VALUE.test(v)) clean[f.key] = v.trim().replace(/\s+/g, ' ');
       });
-      if (Object.keys(clean).length) out[theme] = clean;
+      if (Object.keys(clean).length) out[theme] = Object.assign(out[theme] || {}, clean);
     });
     return out;
   }
@@ -131,7 +150,7 @@ var ArkTheme = (function () {
   function defaults() {
     var colors = {};
     colorFields().forEach(function (f) { colors[f.key] = f.def; });
-    return { colors: colors, activeTheme: 'ghost', themes: {}, background: { style: 'none' } };
+    return { colors: colors, activeTheme: 'ember', themes: {}, background: { style: 'none' } };
   }
 
   function problems(whole) {
@@ -171,6 +190,6 @@ var ArkTheme = (function () {
       'ArkTheme.define(' + JSON.stringify(sanitize(whole), null, 2) + ');\n';
   }
 
-  return { colorFields: colorFields, semanticFields: semanticFields, themeOptions: themeOptions, backgroundStyles: backgroundStyles, defaults: defaults, sanitize: sanitize, problems: problems,
+  return { colorFields: colorFields, semanticFields: semanticFields, themeOptions: themeOptions, publishedId: publishedId, backgroundStyles: backgroundStyles, defaults: defaults, sanitize: sanitize, problems: problems,
            define: define, get: get, css: css, serialize: serialize };
 })();

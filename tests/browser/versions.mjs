@@ -295,7 +295,7 @@ try {
   });
 
   /* ---- Preview shows site-wide settings-defaults, live and per version ---- */
-  const docState = (frame) => frame.evaluate(() => ({ theme: document.documentElement.dataset.theme, motif: document.documentElement.dataset.motif, stored: localStorage.getItem('flux-chain-theme'), marker: window.__versionsMarker === 1 }));
+  const docState = (frame) => frame.evaluate(() => ({ theme: document.documentElement.dataset.theme, motif: document.documentElement.dataset.motif, stored: localStorage.getItem('defxn-theme-v1') + '|' + localStorage.getItem('flux-chain-theme'), marker: window.__versionsMarker === 1 }));
   await step('Site style chosen while Version history is open is not opened underneath it', async () => {
     /* REGRESSION (2026-10-19): Site style docks on the right edge and Version history floats over
        that edge above it; chosen while Versions was open, the dock [1060,1500] lay under the panel
@@ -318,12 +318,12 @@ try {
     await siteStyleTab(app, 'Visitor defaults');
     await app.locator('#defaults-theme').waitFor({ state: 'visible' });
     const frame = await until(async () => { const f = await (await app.$('#cmsPreview')).contentFrame(); return f && await f.evaluate(() => !!document.querySelector('.site-settings')).catch(() => false) && f; }, 'the design preview never loaded');
-    await until(async () => (await docState(frame)).theme === 'ghost', 'the design preview does not start on the saved default theme');
+    await until(async () => (await docState(frame)).theme === 'ember', 'the design preview does not start on the saved default theme');
     await frame.evaluate(() => { window.__versionsMarker = 1; });
     const storedBefore = (await docState(frame)).stored;
-    await app.selectOption('#defaults-theme', 'marine');
+    await app.selectOption('#defaults-theme', 'defxn-dune');
     await app.selectOption('#defaults-motif', 'traces');
-    const live = await until(async () => { const s = await docState(frame); return s.theme === 'marine' && s.motif === 'traces' && s; }, 'the design preview does not show the unsaved default theme/pattern', 6000);
+    const live = await until(async () => { const s = await docState(frame); return s.theme === 'defxn-dune' && s.motif === 'traces' && s; }, 'the design preview does not show the unsaved default theme/pattern', 6000);
     check(live.marker, 'the preview was reloaded to show the edit (it should arrive by message)');
     check(live.stored === storedBefore, 'previewing wrote the visitor\'s own theme choice into localStorage: ' + storedBefore + ' -> ' + live.stored);
     await shot('versions-09-defaults-live');
@@ -332,16 +332,16 @@ try {
   await step('Save, then Preview #6: the canvas shows #6\'s settings-defaults, and Back shows the current ones', async () => {
     await app.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true, cancelable: true })));
     await until(() => { const x = head(); return x && x.seq === 8; }, 'no version 8 after saving the settings defaults');
-    check(/"theme": "marine"/.test(fs.readFileSync(path.join(WORK, 'js/content/settings-defaults-data.js'), 'utf8')), 'the settings defaults file was not saved');
+    check(/"theme": "defxn-dune"/.test(fs.readFileSync(path.join(WORK, 'js/content/settings-defaults-data.js'), 'utf8')), 'the settings defaults file was not saved');
     /* choosing Site style closed Version history (the step above): open it again, over Site style */
     await openVersions(app);
     await until(async () => (await row(6).count()) === 1, 'the panel does not list #6');
     await row(6).locator('button[data-action="preview"]').click();
     const studio = async () => (await app.$('#cmsPreview')).contentFrame();
-    await until(async () => { const s = await docState(await studio()); return s.theme === 'ghost' && s.motif === 'blocks'; }, 'previewing #6 does not show #6\'s default theme/pattern (ghost/blocks)', 15000);
+    await until(async () => { const s = await docState(await studio()); return s.theme === 'ember' && s.motif === 'blocks'; }, 'previewing #6 does not show #6\'s default theme/pattern (ghost/blocks)', 15000);
     await shot('versions-10-preview-old-defaults');
     await app.click('#versionsBack');
-    await until(async () => { const s = await docState(await studio()); return s.theme === 'marine' && s.motif === 'traces'; }, 'Back to current drafts does not show the current default theme/pattern (marine/traces)', 15000);
+    await until(async () => { const s = await docState(await studio()); return s.theme === 'defxn-dune' && s.motif === 'traces'; }, 'Back to current drafts does not show the current default theme/pattern (marine/traces)', 15000);
     await shot('versions-11-back-current-defaults');
   });
 

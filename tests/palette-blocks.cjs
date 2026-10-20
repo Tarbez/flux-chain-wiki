@@ -145,7 +145,7 @@ const retired = {
 
   /* ---- a theme switch repaints the readings -------------------------------------------------- */
   const switched = await inspectDocument({ html: await readIndexHtml(ROOT), url: 'https://defxn.com' + ROUTE, resources: createLocalResources(ROOT), root: ROOT, timeoutMs: 30000 }, async (window) => {
-    window.document.documentElement.dataset.theme = 'glacier';
+    window.document.documentElement.dataset.theme = 'ember-light';
     await new Promise((resolve) => setTimeout(resolve, 600));
     return read(window);
   });

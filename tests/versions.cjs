@@ -710,7 +710,7 @@ function single(file, global, extra) {
   const entry = fs.readFileSync('scripts/settings-entry.js', 'utf8');
   assert(entry.includes("window.addEventListener('ark-site-defaults-preview'") && /const save=\(key,value\)=>\{if\(previewOnly\)return;/.test(entry), 'the settings panel re-applies previewed defaults and never saves while previewing');
   assert(fs.readFileSync('js/settings/panel.js', 'utf8').includes('ark-site-defaults-preview'), 'js/settings/panel.js was rebuilt from scripts/settings-entry.js (node scripts/build-ark-vendor.cjs)');
-  assert(!/localStorage\.setItem\('flux-chain-theme'/.test(admin) && !admin.includes('pokeSettingsDefaultsPreview'), 'the editor never writes a visitor\'s own settings keys to preview defaults');
+  assert(!/localStorage\.setItem\('(?:flux-chain-theme|defxn-theme-v1)'/.test(admin) && !admin.includes('pokeSettingsDefaultsPreview'), 'the editor never writes a visitor\'s own settings keys to preview defaults');
   assert(ArkAdminDraftKeys().includes('settingsDefaults'), 'settingsDefaults is one of the drafts siteFromState() sends to the preview');
   function ArkAdminDraftKeys() { const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync('js/admin/store.js', 'utf8') + ';this.S=ArkAdminStore;', ctx); return ctx.S.drafts().map((d) => d.key); }
   console.log('versions: ok');

@@ -1,4 +1,4 @@
-import themeOptions from './theme-options.js';
+import themeOptions, { legacyThemeIds } from './theme-options.js';
 // Ark UI comes from the synced packages (node_modules/@deadark/*, filled by `npm run sync:ark`);
 // build: node scripts/build-ark-vendor.cjs -> js/settings/panel.js.
 import { createArkUI } from '@deadark/ark-ui/runtime';
@@ -23,8 +23,18 @@ const root=document.documentElement;
 let SITE_DEFAULTS=(window.ArkSiteDefaults&&ArkSiteDefaults.get())||{},previewOnly=false;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
 const save=(key,value)=>{if(previewOnly)return;try{localStorage.setItem(key,value);}catch{}};
-let theme=read('flux-chain-theme',SITE_DEFAULTS.theme||'ghost'),renderer,frame=0;
-if(!themes.includes(theme))theme='ghost';
+// Palette ids are the SDK's published names (generated scripts/theme-options.js). Stored choices
+// live in two vocabularies in SEPARATE keys (legacy `moss` = Moss light, published `defxn-moss` =
+// Moss dark): THEME_KEY holds published ids and is the only one written; the old keys
+// (flux-chain-theme, defxn-site-theme-default) are READ once, mapped, and never rewritten or removed.
+// The visitor's own choice, old or new, beats the site default (precedence unchanged).
+const THEME_KEY='defxn-theme-v1',SITE_THEME_KEY='defxn-theme-default-v1';
+const publishedNow=value=>value&&themes.includes(value)?value:null;
+const publishedOld=value=>value&&Object.prototype.hasOwnProperty.call(legacyThemeIds,value)?legacyThemeIds[value]:null;
+const publishedAny=value=>publishedNow(value)||publishedOld(value);
+const ownTheme=publishedNow(read(THEME_KEY,''))||publishedOld(read('flux-chain-theme',''));
+if(ownTheme&&!publishedNow(read(THEME_KEY,'')))save(THEME_KEY,ownTheme);
+let theme=ownTheme||publishedAny(SITE_DEFAULTS.theme)||'ember',renderer,frame=0;
 let saved={};try{saved=JSON.parse(read('defxn-pattern-config-v1','{}'))||{};}catch{}
 let values={};
 function patternValues(name){const stored=saved[name]||{};const siteDefault=(SITE_DEFAULTS.patternConfig&&SITE_DEFAULTS.patternConfig[name])||{};const result={animated:stored.animated!==undefined?stored.animated!==false:typeof siteDefault.animated==='boolean'?siteDefault.animated:true};for(const [key,c] of Object.entries(controls)){result[key]=typeof stored[key]==='number'&&Number.isFinite(stored[key])?Math.max(c.min,Math.min(c.max,stored[key])):typeof siteDefault[key]==='number'&&Number.isFinite(siteDefault[key])?Math.max(c.min,Math.min(c.max,siteDefault[key])):c.value;}for(const [key,choices] of Object.entries({scale:[80,100,140],density:[35,60,90]}))result[key]=choices.reduce((a,b)=>Math.abs(a-result[key])<Math.abs(b-result[key])?a:b);return result;}
@@ -36,8 +46,8 @@ const brandField=document.createElement('div');brandField.className='defxn-brand
 const meshCanvas=document.createElement('canvas');meshCanvas.className='defxn-brand-mesh';brandField.append(meshCanvas);
 const meshPattern=ArkUI.createMeshFabric(meshCanvas,{background:true});
 // Five relaxed families, each in a dark and a light palette (css/flux-themes.css).
-const themeNames={ghost:'Ember',clay:'Tide',ochre:'Moss',marine:'Dune',dusk:'Dusk',glacier:'Ember',grove:'Tide',moss:'Moss',bone:'Dune',dawn:'Dusk'};
-const darkThemes=['ghost','clay','ochre','marine','dusk'],lightThemes=['glacier','grove','moss','bone','dawn'];
+const themeNames={'ember':'Ember','defxn-tide':'Tide','defxn-moss':'Moss','defxn-dune':'Dune','defxn-dusk':'Dusk','ember-light':'Ember','defxn-tide-light':'Tide','defxn-moss-light':'Moss','defxn-dune-light':'Dune','defxn-dusk-light':'Dusk'};
+const darkThemes=['ember','defxn-tide','defxn-moss','defxn-dune','defxn-dusk'],lightThemes=['ember-light','defxn-tide-light','defxn-moss-light','defxn-dune-light','defxn-dusk-light'];
 const motifs=['blocks','traces','layers','nodes','routes','tiles','frames','none'];
 const motifMigration={wave:'traces',weave:'traces',rosette:'blocks',arches:'layers',survey:'traces'};
 let motif=read('defxn-motif-v1',SITE_DEFAULTS.motif||'blocks');motif=motifMigration[motif]||motif;if(!motifs.includes(motif))motif='blocks';
@@ -80,7 +90,7 @@ function selected(group,values,current){values.forEach((value,i)=>{const ref=com
 // load saved the current site default here as if chosen, so a visitor who never touched the
 // theme kept their first visit's default forever and never saw the owner change it
 // (regression: tests/browser/theme-owner.mjs). The same holds for the pattern (motif).
-function applyTheme(value,chosen){theme=value;root.dataset.theme=value;if(chosen)save('flux-chain-theme',value);selected('themesDark',darkThemes,value);selected('themesLight',lightThemes,value);}
+function applyTheme(value,chosen){theme=value;root.dataset.theme=value;if(chosen)save(THEME_KEY,value);selected('themesDark',darkThemes,value);selected('themesLight',lightThemes,value);}
 function applyMotif(value,chosen){motif=value;root.dataset.motif=value;if(chosen)save('defxn-motif-v1',value);selected('motifs',motifs,value);values=patternValues(value);meshPattern.select({blocks:'network',traces:'logic',layers:'story-check',nodes:'mesh-nodes',routes:'mesh-routes',tiles:'mesh-tiles',frames:'mesh-frames'}[value]||'quiet',false);if(ready)syncPattern();}
 motifs.forEach((value,i)=>bind('motifs'+i,()=>applyMotif(value,true)));
 let ready=false;applyMotif(motif);
@@ -147,7 +157,7 @@ applyTheme(theme);renderer=mountArkBackground(backgroundHost,atmosphereConfig())
 // What js/bootstrap.js paints before first paint for a visitor with no choice of their own: the
 // site default as this browser last saw it (a cache of the owner's setting, never the visitor's
 // choice). A changed default shows from the next load on with no flash.
-if(SITE_DEFAULTS.theme&&themes.includes(SITE_DEFAULTS.theme))save('defxn-site-theme-default',SITE_DEFAULTS.theme);
+if(publishedAny(SITE_DEFAULTS.theme))save(SITE_THEME_KEY,publishedAny(SITE_DEFAULTS.theme));
 // CMS preview hook. js/main.js fires this only inside the editor's preview iframe, after it
 // re-defines ArkSiteDefaults from an unsaved edit or from a past version (Versions panel). The
 // preview shows what an UNCONFIGURED visitor lands on, so the defaults apply over this browser's
@@ -158,7 +168,7 @@ if(SITE_DEFAULTS.theme&&themes.includes(SITE_DEFAULTS.theme))save('defxn-site-th
 let previewShown='';
 window.addEventListener('ark-site-defaults-preview',event=>{
  const next=event.detail||{};previewOnly=true;
- applyTheme(themes.includes(next.theme)?next.theme:'ghost');
+ applyTheme(publishedAny(next.theme)||'ember');
  const key=JSON.stringify(next);if(key===previewShown)return;previewShown=key;
  SITE_DEFAULTS=next;saved={};
  let nextMotif=motifMigration[next.motif]||next.motif;if(!motifs.includes(nextMotif))nextMotif='blocks';
