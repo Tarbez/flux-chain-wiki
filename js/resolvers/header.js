@@ -38,6 +38,7 @@ function lazyHeaderPopover(spec) {
     });
   }
   var pop = {
+    warm: function () { if (!state) load(); },
     isOpen: function () { return ctl ? ctl.isOpen() : state === 3 && !spec.fallback.hidden; },
     want: function (on, byHover) {
       ask.open = on; ask.intent = on && byHover;
@@ -317,8 +318,7 @@ function buildProducts(header, core) {
   }
   watch(wrap);
   header.addEventListener('click', function (event) { if (event.target.closest('.products-mega a')) { window.clearTimeout(closeTimer); pop.want(false); } });
-  var toggle = header.querySelector('.nav-toggle');
-  if (toggle) toggle.addEventListener('click', function () { pop.want(false); });
+  header.addEventListener('click', function (event) { if (event.target.closest('.nav-toggle')) pop.want(false); });
 }
 
 /* One row, never squeezed (tests/browser/public-header.mjs, 1024-1920px). Above the compact
@@ -477,10 +477,13 @@ ArkUI.register('RHEADER_V1', {
     run.className = 'header-run-link dx-btn dx-btn--soft dx-btn--sm';
     var chain = buildHeaderChainPopover();
     var toggle = headerMenuToggle();
+    var menuWrap = document.createElement('span');   /* the MENU's Ark popover root takes this wrapper's place */
+    menuWrap.className = 'header-menu';
+    menuWrap.appendChild(toggle);
     var kit = typeof window !== 'undefined' && window.DefxnKit;
     var nav = core;
     if (kit && typeof kit.mountShell === 'function') {
-      var shell = kit.mountShell({ mode: 'home', bar: el, nav: core, actions: [account, run, chain, toggle], brandSub: 'FXN CHAIN', home: ArkUI.route.href('/') });
+      var shell = kit.mountShell({ mode: 'home', bar: el, nav: core, actions: [account, run, chain, menuWrap], brandSub: 'FXN CHAIN', home: ArkUI.route.href('/') });
       nav = shell.nav;
       var brand = el.querySelector('.dx-bar__brand');
       if (brand) {
@@ -493,12 +496,12 @@ ArkUI.register('RHEADER_V1', {
          MENU, the network popover and the Resolutions menu already close on any click
          outside their own controls) */
       var switchTrigger = el.querySelector('.dx-switch__trigger');
-      if (switchTrigger) switchTrigger.addEventListener('click', function () { if (el.classList.contains('nav-open')) toggle.click(); });
+      if (switchTrigger) switchTrigger.addEventListener('click', function () { if (el.menuPop) el.menuPop.want(false); });
     } else {
       /* no kit (it failed to load): the same controls, unstyled by the family, all reachable */
       var actions = document.createElement('div');
       actions.className = 'dx-bar__actions';
-      [account, run, chain, toggle].forEach(function (node) { actions.appendChild(node); });
+      [account, run, chain, menuWrap].forEach(function (node) { actions.appendChild(node); });
       el.appendChild(core);
       el.appendChild(actions);
     }
@@ -698,6 +701,14 @@ ArkUI.register('RHEADER_V1', {
       });
     });
     menu.navLayers = { reset: reset, back: goBack, current: function () { return stack[stack.length - 1]; } };
+    /* The MENU's open/close, Escape, outside press and focus return are Ark's popover, loaded on the first press
+       (or a resting pointer / focus on the button) like the pill and the Resolutions menu; the layer stack above stays
+       ours. header-popover.js and hero-motion.js reach it as el.menuPop. */
+    var wrap = el.querySelector('.header-menu'), trigger = wrap && wrap.querySelector('.nav-toggle');
+    if (!trigger) return;
+    menu.hidden = true;
+    el.menuPop = lazyHeaderPopover({ wrap: wrap, trigger: trigger, fallback: menu, label: 'Menu', align: 'end', id: 'primary-navigation', content: [].slice.call(menu.childNodes), menu: el });
+    ['pointerenter', 'focus'].forEach(function (type) { trigger.addEventListener(type, el.menuPop.warm); });
   },
   emerge: { delay: 0, dur: 400 }
 });

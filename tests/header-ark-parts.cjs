@@ -239,6 +239,42 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert.equal(isOpen(a), true);
   }
 
+  /* ---- 9b. the all-pages MENU: the same popover, with the site's layer stack carried over ---- */
+  {
+    const env = boot(), { w, doc } = env, header = doc.querySelector('header');
+    const wrap = doc.createElement('span'); wrap.className = 'header-menu';
+    const trigger = doc.createElement('button'); trigger.className = 'nav-toggle'; trigger.type = 'button'; trigger.title = 'All pages'; trigger.setAttribute('aria-label', 'Open all pages');
+    wrap.append(trigger);
+    const menu = doc.createElement('nav'); menu.id = 'primary-navigation'; menu.hidden = true;
+    const layer = doc.createElement('div'); layer.className = 'nav-layer'; const link = doc.createElement('a'); link.href = '/x'; layer.append(link); menu.append(layer);
+    let resets = 0; menu.navLayers = { reset() { resets++; } };
+    header.append(wrap, menu);
+    const pop = w.lazyHeaderPopover({ wrap, trigger, fallback: menu, label: 'Menu', align: 'end', id: 'primary-navigation', content: [layer], menu: header });
+    header.menuPop = pop;
+    assert.deepEqual(env.calls, [], 'building the MENU loads nothing');
+    pop.warm(); await tick();
+    assert.deepEqual(env.calls, [HELPER, CHUNK], 'a resting pointer or focus loads the chunk before the press, without opening');
+    assert.equal(pop.isOpen(), false);
+    const now = header.querySelector('.nav-toggle');
+    assert.notEqual(now, trigger, 'the block\'s button took the place of the plain one');
+    const panel = doc.getElementById('primary-navigation');
+    assert(panel.contains(link) && panel.navLayers === menu.navLayers, 'the layer stack and its links moved into the block\'s panel');
+    assert.equal(panel.getAttribute('aria-label'), 'Primary');
+    now.focus(); now.click(); await tick();
+    assert.equal(pop.isOpen(), true); assert(header.classList.contains('nav-open'), 'the header mirrors the open state as .nav-open');
+    assert.equal(now.getAttribute('aria-label'), 'Close all pages');
+    link.focus();
+    const esc = key(w, link, 'Escape');
+    await tick();
+    assert.equal(esc.defaultPrevented, true, 'Escape while open is consumed: "close the menu", not "go home"');
+    assert.equal(pop.isOpen(), false); assert(!header.classList.contains('nav-open'));
+    assert.equal(now.getAttribute('aria-label'), 'Open all pages'); assert.equal(resets, 1, 'closing resets the layer stack to the index');
+    assert.equal(doc.activeElement, now, 'focus returns to the MENU button');
+    assert.equal(key(w, doc.body, 'Escape').defaultPrevented, false, 'closed: Escape is left to the page (go home)');
+    now.click(); await tick(); doc.body.dispatchEvent(new w.MouseEvent('pointerdown', { bubbles: true })); doc.body.dispatchEvent(new w.MouseEvent('pointerup', { bubbles: true })); await tick();
+    assert.equal(pop.isOpen(), false, 'an outside press closes it');
+  }
+
   /* ---- 10. what the source must keep true ---- */
   {
     assert(!/key === 'Escape'|key==='Escape'/.test(source.replace(/\/\*[\s\S]*?\*\//g, '')), 'js/resolvers/header.js has no Escape handler of its own: Ark\'s layer handles it (comments aside)');
@@ -265,7 +301,8 @@ const index0 = fs.readFileSync('index.html', 'utf8');
   /* ---- 11. the weight every route pays ---- */
   {
     const gz = require('node:zlib').gzipSync(Buffer.from(source), { level: 9 }).length;
-    assert(gz <= 11611 + 300, `js/resolvers/header.js is ${gz} B gz; every route pays it and the budget allows 11,911 (move code into js/resolvers/header-popover.js)`);
+    /* 11,883 B at 3588f78, before the MENU moved onto the popover; hero-motion.js shrank 25 B and navigation.css grew 15 B (+244 B across the three) */
+    assert(gz <= 11883 + 300, `js/resolvers/header.js is ${gz} B gz; every route pays it and the budget allows 12,183 (move code into js/resolvers/header-popover.js)`);
   }
 
   console.log('PASS: the header\'s network pill and Resolutions menu are Ark popovers loaded on the first press (nothing before it), keep their classes, children and id, close on Escape / an outside press / focus leaving with focus back on the button, one at a time, survive a failed chunk, and the header holds no open/close/Escape code of its own.');
