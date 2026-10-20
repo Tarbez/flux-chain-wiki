@@ -694,6 +694,53 @@ home -1.2, home-flow -1.1, resolver-math -1.1, lifecycle -1.0, and smaller cuts 
 Without brand-marks (a token move, not block work) the ledger is still -33.4. `ark-overrides` in
 the census counts site rules over Ark blocks; nothing still used was deleted.
 
+**Per-route stylesheets** (owner decision 2026-10-20, W5-CSS). `index.html` no longer links every sheet: it
+links the SHARED ones (30 of 46) and each route adds its own, so a page pays for its CSS and the shared sheets,
+not for every other page's. Nothing is listed per page by hand:
+
+- `node scripts/page-styles.mjs --write` derives the lists. A sheet is parsed into rules; a rule needs the
+  classes, ids, `data-*` attributes and `[data-page]` route values its selector names (nothing inside
+  `:not()/:is()`, no tag). A module's vocabulary is three independent sources: the DOM its routes really mount
+  (every route rendered through the server render's jsdom), the string literals of the scripts only that module
+  loads, and the shell's own words that no page file also uses (the header, settings panel, scene). A sheet is the
+  module's when any rule finds all its names; the sheet that provides an `@keyframes`/`@font-face` a needed rule
+  uses comes with it. A sheet every module needs is shared and stays linked in `index.html`; the rest is written
+  into `js/pages/catalog.js` (`ArkUI.pageStyles`, between the BEGIN/END markers) and onto each catalog entry as
+  `styles`. `--check` fails on drift (stale block, `index.html` links, an unplaced or orphan sheet);
+  `--why css/x.css` says which rule put a sheet where it is; `--sizes` prints the table below.
+- The one hand-kept fact is the cascade order (`ArkUI.styleOrder`, the order the sheets used to be linked in).
+- `js/ark/page-loader.js` `loadStyles` links a route's sheets before the page mounts and awaits their `load`
+  (the way it awaits scripts), each inserted at its place in the cascade, so `css/components.css` is still last.
+  A sheet that fails or stalls (8 s) never blocks the page: the console names it. Same `?v=` tag as the scripts
+  (`pageAssetVersion`). An entry with no `styles` list gets every sheet the shell does not link (heavy, correct).
+- The server render serializes the live document, so a bot's `<head>` carries the route's `<link>`s (checked by
+  `tests/page-styles-routes.cjs`). The editor's canvas is the same page in an iframe: the previewed route loads
+  its own list, a draft article/theory route carries its module's, and the Library's blocks are Ark blocks
+  (`css/ark-blocks.css`, shared) or legacy resolvers whose classes are shell words.
+- Proof: `tests/page-styles.cjs` (lists coherent, no orphan sheet, the selector reading, the loader) and
+  `tests/page-styles-routes.cjs` (every route rendered; no sheet it does NOT load has a rule matching an element
+  of the mounted page, asked of the DOM with the browser's own selector matching).
+- `css/stats-dashboard.css` was the first orphan the check found (no page draws a dashboard shell since the Ark
+  conversion) and is deleted (-1.0 KB gz).
+
+Cold-load CSS per route (`node scripts/page-styles.mjs --sizes`; every sheet `gzip -9` separately and summed, as
+a cold load fetches them; byte counts do not depend on the machine, measured on an Apple M2 8 GB, 2026-10-20):
+
+| route | before (all 47 sheets) | after | saved | requests |
+|---|---|---|---|---|
+| `/` | 134.3 KB gz | 103.4 | -30.9 | 47 -> 32 |
+| a story page (`/lifecycle`, `/concept`) | 134.3 | 100.6 | -33.7 | 47 -> 31 |
+| `/account` | 134.3 | 103.8 | -30.5 | 47 -> 32 |
+| `/stats` | 134.3 | 100.6 | -33.7 | 47 -> 31 |
+| `/explore` | 134.3 | 111.8 | -22.5 | 47 -> 34 |
+| mean of 65 routes | 134.3 | 101.4 | -32.9 (-24%) | |
+
+The saving is smaller than the page-specific sheets' total because 30 sheets stay shared: 14 are global by
+construction (themes, kit, fonts, `:root` token rules), and the home/scene sheets (`home`, `home-drafting`,
+`home-swiss`, `experience`, `lifecycle`, `download`, `how-overview` ...) are shared because their rules also name
+classes the shell or every route's DOM carries. Moving those out is a CSS refactor (their shared rules into the
+sheets that own them), not a loader change; `--why` names the rule for each.
+
 **The spec.** A page module returns `ArkUI.page(spec, host, options)`:
 
 ```js

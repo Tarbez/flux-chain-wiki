@@ -74,17 +74,79 @@
     var known = (ArkUI.blocks && ArkUI.blocks.resolvers) || [];
     return savedBlocks(definition).some(function (entry) { return known.indexOf(entry.master.resolver) < 0; });
   }
+  /* Page stylesheets. index.html links the shared sheets; a page's own are listed on its catalog entry
+     (`styles`, js/pages/catalog.js, derived by scripts/page-styles.mjs) and linked here, and the page
+     mounts only after they have loaded, the way it waits for its scripts, so it is never painted bare.
+     A late sheet is inserted at its place in the cascade (ArkUI.styleOrder), before the next sheet
+     already linked, so css/components.css is still the last word, exactly as when index.html linked every
+     sheet. Sheets stay once linked (a second visit costs nothing; a sheet only adds rules for classes
+     the page it came for used). An entry with no `styles` list gets every sheet the shell does not link:
+     right, but heavy, which is what scripts/page-styles.mjs --check exists to prevent.
+     A sheet that cannot load never blocks the page (it shows unstyled, and the console says which), and
+     neither does one that stalls: after STYLE_WAIT_MS the page mounts and the sheet applies when it lands. */
+  var sheetPromises = new Map();
+  var STYLE_WAIT_MS = 8000;
+  function sheetFile(href) { return String(href || '').split('?')[0].split('#')[0].replace(/^(?:\.?\/)+/, ''); }
+  function linkedSheet(file) {
+    var links = document.querySelectorAll('link[rel~="stylesheet"]');
+    for (var i = 0; i < links.length; i++) if (sheetFile(links[i].getAttribute('href')) === file) return links[i];
+    return null;
+  }
+  function placeSheet(link, file) {
+    var order = ArkUI.styleOrder || [], at = order.indexOf(file);
+    for (var i = at + 1; at >= 0 && i < order.length; i++) {
+      var later = linkedSheet(order[i]);
+      if (later && later.parentNode) { later.parentNode.insertBefore(link, later); return; }
+    }
+    document.head.appendChild(link);
+  }
+  function loadSheet(file) {
+    if (!/^(?:css|assets\/kit)\/[a-z0-9.-]+\.css$/.test(file)) return Promise.reject(new Error('Invalid page stylesheet'));
+    if (sheetPromises.has(file)) return sheetPromises.get(file);
+    if (linkedSheet(file)) return Promise.resolve();
+    var promise = new Promise(function (resolve) {
+      var link = document.createElement('link'), settled = false, timer = null;
+      function settle(error) {
+        if (settled) return;
+        settled = true; clearTimeout(timer);
+        if (error) {
+          sheetPromises.delete(file); link.remove();
+          if (window.console) console.error('[ark] stylesheet failed to load: ' + file + ' (' + error + '). The page shows without it; reloading may fix it.');
+        }
+        resolve();
+      }
+      link.rel = 'stylesheet';
+      link.setAttribute('data-ark-style', file);
+      link.href = (location.protocol === 'file:' ? file : '/' + file) + '?v=' + pageAssetVersion;
+      link.onload = function () { settle(null); };
+      link.onerror = function () { settle('network error'); };
+      timer = setTimeout(function () { if (!settled) { settled = true; if (window.console) console.warn('[ark] stylesheet is slow: ' + file + '; mounting the page without waiting.'); resolve(); } }, STYLE_WAIT_MS);
+      placeSheet(link, file);
+    });
+    sheetPromises.set(file, promise);
+    return promise;
+  }
+  function stylesFor(definition) {
+    if (definition.styles) return definition.styles;
+    var shared = (ArkUI.pageStyles && ArkUI.pageStyles.shared) || [];
+    return (ArkUI.styleOrder || []).filter(function (file) { return shared.indexOf(file) < 0; });
+  }
+  function loadStyles(definition) { return Promise.all(stylesFor(definition).map(loadSheet)); }
   async function loadPage(page, definition) {
+    var styles = loadStyles(definition);
+    styles.catch(function () {}); /* awaited below; a script failing first must not leave this unhandled */
     var blocks = blockScriptsFor(definition);
     for (var block of blocks) await loadScript(block);
     if (blocks.length) for (var chunk of OPTIONAL_CHUNKS) if (inPreview() || unknownSaved(definition)) await loadScript(chunk);
     var urls = definition.scripts;
     for (var url of urls) await loadScript(url);
+    await styles;
     var module = ArkUI.pageModules[definition.module];
     if (!module) throw new Error('Page module missing: ' + page);
     return module;
   }
   ArkUI.loadPage = loadPage;
+  ArkUI.loadStyles = loadStyles;
   ArkUI.pageNeedsBlocks = needsBlocks;
   /* One script by its site path, once (js/ark/blocks.js loads the live chunk through it). */
   ArkUI.loadScript = loadScript;

@@ -17,6 +17,11 @@
 <!-- Tells the stylesheet JS is available, so the fallback copy does not flash before the scene paints. -->
 <script src="js/bootstrap.js?v=20261020-theme-ids"></script>
 
+<!-- The SHARED stylesheets: the ones every route needs. A route's own sheets are not linked here; the page
+     loader (js/ark/page-loader.js loadStyles) links them, in cascade order, before the page mounts, and
+     the server render's <head> carries them. Which sheet is shared and which is a page's own is DERIVED
+     (node scripts/page-styles.mjs --write rewrites this list and the lists in js/pages/catalog.js;
+     --check fails on drift). Do not add a page's sheet here by hand. -->
 <link rel="stylesheet" href="css/themes.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/flux-themes.css?v=20261014-nav2" />
 <link rel="stylesheet" href="assets/kit/defxn-fonts.css?v=20261019-kit1" />
@@ -35,43 +40,27 @@
 <link rel="stylesheet" href="css/settings.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/page-layout.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/home.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/resolver-guide.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/site-direction.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/experience.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/explorer.css?v=20261020-w4" />
-<link rel="stylesheet" href="css/economy-preview.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/home-drafting.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/lifecycle.css?v=20261019-ark027" />
-<link rel="stylesheet" href="css/reference.css?v=20261020-w4" />
-<link rel="stylesheet" href="css/guided-page.css?v=20261006-resolver1" />
-<link rel="stylesheet" href="css/about.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/resolutions.css?v=20261019-ark027" />
-  <link rel="stylesheet" href="css/task-page.css?v=20261020-w4">
-<link rel="stylesheet" href="css/account.css?v=20261020-w4" />
-<link rel="stylesheet" href="css/account-domains.css?v=20261020-w4" />
-<link rel="stylesheet" href="css/stats-dashboard.css?v=20261019-blocks1" />
-<link rel="stylesheet" href="css/resolver-math.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/icons.css?v=20261006-system1">
 <link rel="stylesheet" href="css/story-diagrams.css?v=20261006-system1">
 <link rel="stylesheet" href="css/color-system.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/brand-identity.css?v=20261014-living2" />
-<link rel="stylesheet" href="css/home-flow.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/how-overview.css?v=20261020-w4">
-<link rel="stylesheet" href="css/explorer-observatory.css?v=20261020-w4">
-<link rel="stylesheet" href="css/explore-story.css?v=20261020-w4">
 <link rel="stylesheet" href="css/authorization-dialog.css?v=20261006-system1">
-<link rel="stylesheet" href="css/palette.css?v=20261020-w4" />
-<link rel="stylesheet" href="css/resolver-lab.css?v=20261007-footer1" />
 <link rel="stylesheet" href="css/download.css?v=20261020-w4">
 <link rel="stylesheet" href="css/home-swiss.css?v=20261020-w4" />
 <link rel="stylesheet" href="assets/kit/defxn-marks.data.css?v=20261019-kit1" />
 <!-- Ark UI blocks (@deadark/ark-ui/blocks, copied by scripts/build-ark-vendor.cjs): the only styling
-     a block has, static so the server render arrives styled (no injected rules). Loaded on every
-     route (~7 KB gz) because the server render serializes before any lazy sheet could arrive; the
-     blocks' JS is lazy (ArkUI.blockScripts, js/pages/catalog.js). Then the frame a page built
-     from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is last. -->
+     a block has, static so the server render arrives styled (no injected rules). Shared: every
+     route renders blocks, so it is linked here (~9 KB gz) rather than fetched after the page's
+     scripts; the blocks' JS is lazy (ArkUI.blockScripts, js/pages/catalog.js). Then the frame a
+     page built from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is
+     last. -->
 <link rel="stylesheet" href="css/ark-blocks.css?v=20261020-w4" />
-<link rel="stylesheet" href="css/block-page.css?v=20261019-ark027" />
 <link rel="stylesheet" href="css/components.css?v=20261020-w4" />
 </head>
 <body>
