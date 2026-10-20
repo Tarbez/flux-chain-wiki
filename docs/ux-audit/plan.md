@@ -225,6 +225,6 @@ Follow-ups (next wave): /chain swap figure placement (renderer exists), /chain S
 link, bundle-deployer journey links, resolutions alsoMore; transit-map labels on /; learnings card
 row alignment (Ark card); Ark: line/lane diagram part, field step:'any', styled select, foldBelow
 hidden=until-found (core budget has ~10 B headroom on live routes); long reference docs (whitepaper,
-bench-003 > 3x); reference-text sync has no trigger (reference-reader catches staleness).
+bench-003 > 3x); reference text is one file per document (W5-REF: js/content/reference/, an index, `sync-reference-docs.cjs --check` run by tests/reference-reader.cjs).
 Owner calls: glossary size vs budget; minify page modules (/account +42.8 KB -> ~+31); home tab order;
 commit the kit sync in the 23 consumer repos (dense-wire/web held).

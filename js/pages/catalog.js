@@ -71,7 +71,7 @@ var arkPageModules = {
   'lifecycle/agreement': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
   'lifecycle/fulfillment': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
   'lifecycle/receipt': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
-  reference: { module: 'reference', scripts: ArkUI.blockScripts.concat(['js/content/reference-text.js', 'js/pages/reference.js']) }
+  reference: { module: 'reference', scripts: ArkUI.blockScripts.concat(['js/content/reference-index.js', 'js/pages/reference.js']) }
 };
 ArkUI.pageCatalog = {};
 /* journey: which visitor path the page serves (ArkSitePages.journeys()); null keeps it out of

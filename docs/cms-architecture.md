@@ -568,6 +568,15 @@ which only `createArkPopover` drives and the public kit refuses, ~0.8 KB gz insi
 A block route's bill also carries `js/ark/dash-kit.js` (3.9 KB, the link resolver blocks need),
 which existed at 5a1ac71 but loaded only on the stats family then.
 
+**W5-REF (2026-10-20): /reference loads the document it shows.** `js/content/reference-text.js` held every approved
+document (43) in one file: 150.8 KB gz on every visit to /reference. `scripts/sync-reference-docs.cjs` now writes
+`js/content/reference-index.js` (per document: text file, title, sha256, origins; 4.1 KB gz, loaded by the route) and
+one `js/content/reference/<document>.js` each; `js/pages/reference.js` loads the one it shows through `ArkUI.loadScript`
+and checks its sha256 against the index (a failure is a refusal naming failure, missing and remedy). Method:
+`gzip -9 -c <file> | wc -c`, 2026-10-20, this Mac. Default document (agreements): 4.1 + 0.9 = 5.0 KB (was 150.8);
+largest (bench-003): 4.1 + 24.8 = 28.9 KB. The server render needs no change: jsdom boots the same page and
+`loadScript` is answered from the file tree. `--check` fails naming the remedy command; tests/reference-reader.cjs runs it.
+
 **W4-ARK (2026-10-20): the form blocks.** `field`, `form`, `list`, `status-line`, `choice` and `popover`
 (plus interactive `stat`, `actions` link/disabled/busy, which stay in the core) were measured IN the public
 kit at +4.5 KB gz (field + form 1.8, popover 0.6, list 0.6, choice 0.5, status-line 0.1, stat 0.4,
