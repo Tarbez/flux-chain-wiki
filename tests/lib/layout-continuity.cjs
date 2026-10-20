@@ -217,8 +217,12 @@ async function derivePins(route, census, options = {}) {
 
 /* A real saved edit on every old key: a layout draft holding one frame per old key, rendered on
    the converted page. Each must land (ArkLayout applied it) on the element now carrying the key
-   -- with the same words, unless the key is listed as reshaped. Retired keys are skipped. */
-async function assertSavedEditsLand(route, census, { reshaped = {}, retired = {} } = {}) {
+   -- with the same words, unless the key is listed as reshaped. Retired keys are skipped.
+   `live`: keys whose words the page writes from live data (a status line); the edit must still land
+   on the element, but its words are not compared -- the census froze one moment of them. Each entry
+   is a reason. Found 2026-10-20: /stats' pulse line read "No pulse received yet" when frozen and
+   something else while a fetch was in flight, so the check failed only under load. */
+async function assertSavedEditsLand(route, census, { reshaped = {}, retired = {}, live: liveText = {} } = {}) {
   const live = census.filter((entry) => entry.key !== 'page:/' && !retired[entry.key]);
   const routes = {}; routes[route] = {};
   // op 80: one of the editor's opacity steps (ArkLayout's sanitize drops any other value)
@@ -230,7 +234,7 @@ async function assertSavedEditsLand(route, census, { reshaped = {}, retired = {}
       const host = window.document.getElementById('scene');
       return live.map((entry) => {
         const el = window.ArkLayout.find(host, entry.key, route);
-        const sameWords = !entry.text || reshaped[entry.key] || (el && words(el) === loose(entry.text));
+        const sameWords = !entry.text || reshaped[entry.key] || liveText[entry.key] || (el && words(el) === loose(entry.text));
         return { key: entry.key, text: entry.text, landed: !!el && !!sameWords && el.hasAttribute('data-ark-layout-applied') };
       });
     } });

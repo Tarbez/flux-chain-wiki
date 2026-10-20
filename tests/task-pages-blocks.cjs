@@ -168,7 +168,7 @@ const ROUTES = {
     if (route === '/bundle-deployer') {
       assert.equal(seen.tabs.length, 3, 'the three parts are tabs');
       assert.equal(seen.handoff, 1, 'the Bundles hand-off (the family kit) stays');
-      for (const to of ['/account', '/download', '/resolutions/deployments']) assert(seen.pager.includes(to), '/bundle-deployer leads on to ' + to);
+      for (const to of ['/account', '/download', '/resolutions/deployments', '/how-deployment-works']) assert(seen.pager.includes(to), '/bundle-deployer leads on to ' + to);
     }
     if (route === '/deploy') {
       assert.deepEqual(seen.tabs, ['01 / Check discovery', '02 / Create or select', '03 / Start the miner', '04 / Verify health', '05 / Inspect topology'], 'every step is a named tab');

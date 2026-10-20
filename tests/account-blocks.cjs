@@ -104,7 +104,8 @@ const reworded = [
   assert(!/<form|<ul|<li\b|<input[^>]*(number|text)|role="status"|aria-live|class="account-rail-item"|account-contact-main/.test(source.replace(/type="password"/g, '')) , 'no hand-built form, list, status line or rail tile is left (only the PIN and password pair: Ark\'s field has no password kind)');
   const catalog = read('js/pages/catalog.js');
   assert(/account: \{ module: 'account', scripts: ArkUI\.blockScripts\.concat\(\[/.test(catalog), 'the route loads the blocks before its module');
-  assert(/ark-kit-forms\.js/.test(catalog) && /explorer: \{[^\n]*ark-kit-forms\.js/.test(catalog), 'the account and explore routes list the forms chunk (a literal path)');
+  /* /explore uses only `popover`, which ships as its own smaller chunk since Ark 0.2.10 (W4-ARK). */
+  assert(/account: \{[^\n]*ark-kit-forms\.js/.test(catalog) && /explorer: \{[^\n]*ark-kit-popover\.js/.test(catalog), 'the account route lists the forms chunk and explore the popover chunk (literal paths)');
 
   /* ---- what the visitor gets, and every old key ----------------------------------------------- */
   const seen = await converted.check('/account', { reshaped, retired, reworded, inspect: (window, page) => {

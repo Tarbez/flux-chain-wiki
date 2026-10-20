@@ -90,7 +90,7 @@ function arkModuleStyles(module) { return ArkUI.pageStyles.modules[module]; }
    scripts/lib/site-routes.mjs both read them here, so a retired path is retired in one place. */
 var arkPageModules = {
   zero: { module: 'zero', scripts: ArkUI.blockScripts.concat(['js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
-  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/pages/chain.js']) },
+  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
   resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
@@ -134,7 +134,7 @@ var arkPageModules = {
   'lifecycle/agreement': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
   'lifecycle/fulfillment': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
   'lifecycle/receipt': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
-  reference: { module: 'reference', scripts: ArkUI.blockScripts.concat(['js/content/reference-text.js', 'js/pages/reference.js']) }
+  reference: { module: 'reference', scripts: ArkUI.blockScripts.concat(['js/content/reference-index.js', 'js/pages/reference.js']) }
 };
 ArkUI.pageCatalog = {};
 /* journey: which visitor path the page serves (ArkSitePages.journeys()); null keeps it out of

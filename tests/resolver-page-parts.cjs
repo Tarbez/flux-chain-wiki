@@ -136,7 +136,7 @@ function units() {
   assert.equal(JSON.parse(lock.querySelector('[data-ark-block="eyebrow"]').getAttribute('data-props')).text, 'lock');
   const swap = fig('chain', 'swap-signed-resolution');
   assert.deepEqual(blocks(swap, 'steps')[0].props.items.map((x) => x.title), meta('chain', 'swap-signed-resolution').flow, 'the swap flow');
-  assert.deepEqual(blocks(swap, 'facts')[0].props.items[0], { term: 'a second node', value: 'resolved by <signer>', mono: true }, 'the second node\'s refusal tag');
+  assert.deepEqual(blocks(swap, 'facts')[0].props.items[0], { term: 'A second node', value: 'resolved by <signer>', mono: true }, 'the second node\'s refusal tag');
 
   // 7. figureBlock: the story template's fold around Ark's figure, or the bare figure inside an opened row
   const folded = w.ArkUI.resolverPageParts.figureBlock('dao', 'upgrade-supersedes', { id: 'x', lead: 'copy:DAO.DECK' });
@@ -170,6 +170,7 @@ function units() {
   assert.deepEqual(from('dao'), ['governance'], '/dao begins the governance resolution');
   assert.deepEqual(from('bundledeployer'), ['deployments', 'website'], 'the bundle deployer begins website and deployments');
   assert.deepEqual(from('resolver-math'), ['algorithms', 'rules'], 'and `also` counts');
+  assert.deepEqual(from('resolvers'), ['algorithms'], '`alsoMore` counts: /resolvers is where algorithms lead on');
   assert.deepEqual(from('nowhere'), []);
 }
 
@@ -178,13 +179,17 @@ function sources() {
   const catalog = read('js/pages/catalog.js');
   for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|deployment|dao):/.test(l))) assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40));
   assert(/resolver: \{[^\n]*registry-snapshot\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/what-is-a-resolver also loads the snapshot its layers are drawn from, before the parts');
-  assert(!/resolver-page-parts/.test(catalog.split('\n').filter((l) => /^\s*(stats|zero|chain|bundledeployer|explorer):/.test(l)).join('\n')), 'and no other route pays for them');
+  assert(!/resolver-page-parts/.test(catalog.split('\n').filter((l) => /^\s*(stats|zero|bundledeployer|explorer):/.test(l)).join('\n')), 'and no other route pays for them');
   assert(/figureBlock\('resolver', 'resolver-layers'/.test(read('js/pages/resolver-guide.js')) && /figureBlock\('resolver', 'launched-vs-served'/.test(read('js/pages/resolver-guide.js')), '/what-is-a-resolver draws both of its diagrams');
   for (const file of ['js/pages/deployment.js', 'js/pages/dao.js']) { assert(/ArkUI\.journeyPageBlocks/.test(read(file)), file + ' takes its onward links from page-kit.js'); }
   assert(!/onwardGroups|onwardBlocks/.test(read('js/pages/resolver-page-parts.js').replace(/\/\*[\s\S]*?\*\//g, '')), 'and the parts file keeps no second copy of the journey helper');
   assert(/deployment: \{[^\n]*page-kit\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/how-deployment-works loads page-kit.js before the parts');
   assert(/figureBlock\('deployment', 'deploy-flow'/.test(read('js/pages/deployment.js')), '/how-deployment-works draws the deploy flow');
   assert(/figureBlock\('dao',\s*'upgrade-supersedes'/.test(read('js/pages/dao.js')), '/dao draws the upgrade figure');
+  /* W5-PAGES (ledger 4.5): the swap as signed resolution stands in the Swaps tab of /chain, behind a disclosure, drawn by the parts */
+  assert(/chain: \{[^\n]*home-flow\.js[^\n]*resolver-page-parts\.js[^\n]*chain\.js/.test(catalog), '/chain loads the parts after the scene and before its module');
+  assert(/figureBlock\('chain',\s*'swap-signed-resolution',\s*\{[^}]*foldBelow: 'always'/.test(read('js/pages/chain.js')), '/chain draws the swap figure behind an always-closed disclosure');
+  assert(!/swapDiagram|diagram:/.test(read('js/pages/home-flow.js')), 'and the scene keeps no second copy of the swap diagram');
   assert(!/<svg|createElementNS/.test(read('js/pages/resolver-page-parts.js').replace(/\/\*[\s\S]*?\*\//g, '')), 'the parts draw no SVG');
 }
 
@@ -192,7 +197,8 @@ function sources() {
 const PAGES = {
   '/what-is-a-resolver': { figures: ['resolver-layers', 'launched-vs-served'] },
   '/how-deployment-works': { figures: ['deploy-flow'], links: ['/chain', '/dao', '/bundle-deployer'] },
-  '/dao': { figures: ['upgrade-supersedes'], links: ['/resolutions/governance', '/how-deployment-works', '/chain'] }
+  '/dao': { figures: ['upgrade-supersedes'], links: ['/resolutions/governance', '/how-deployment-works', '/chain'] },
+  '/chain': { figures: ['swap-signed-resolution'], links: ['/resolvers', '/what-is-a-resolver'] }
 };
 async function pages() {
   for (const [route, want] of Object.entries(PAGES)) {

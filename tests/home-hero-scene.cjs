@@ -334,6 +334,33 @@ const selected=()=>lines.filter(l=>l.getAttribute('data-selected')==='true').map
 assert.deepEqual(selected(),['alice.fxn'],'transfers highlights alice.fxn');
 world.select('staking');assert.deepEqual(selected(),['provider.fxn'],'staking highlights provider.fxn (a provider stakes for its seat; "validator" is retired vocabulary, docs/deprecated.md)');
 assert.equal(world.element.byClass('world-interchange').length,5,'five chains cross yours at interchanges');
+/* Named regression (docs/ux-audit/ledger.md, "How it fits together", 2026-10-20): the transit map's names were set in the
+   drawing's own units, 12 of 560 -- about 7px on a 390px phone. Every word is drawn at 12px ON SCREEN at any width now
+   (its size is 12 / scale), the "you.fxn" pill is sized from its words, names that would touch slide apart along their
+   row, and the drawing gains a margin above and below for the words that grew past it. */
+{
+  const at = (px) => {
+    const w = sandbox.ArkUI.buildChainWorld({ caseId: 'transfers' });
+    w.element.getBoundingClientRect = () => ({ width: px });
+    w.fit();
+    const [x, y, vw, vh] = w.element.getAttribute('viewBox').split(' ').map(Number), scale = px / vw;
+    const words = [...w.element.byClass('world-name'), ...w.element.byClass('world-you-name')].map((t) => {
+      const size = parseFloat(/([\d.]+)px/.exec(t.getAttribute('style'))[1]), left = +t.getAttribute('x'), base = +t.getAttribute('y');
+      return { text: t.textContent, size, onScreen: size * scale, x0: left, x1: left + t.textContent.length * .64 * size, y0: base - .75 * size, y1: base + .25 * size };
+    });
+    const pill = w.element.byClass('world-you')[0].children.find((c) => c.tagName === 'rect');
+    return { x, y, vw, vh, scale, words, pill: { x: +pill.getAttribute('x'), w: +pill.getAttribute('width') } };
+  };
+  for (const px of [560, 430, 358, 330, 300]) {
+    const m = at(px);
+    m.words.forEach((t) => assert(t.onScreen >= 11.99, `${px}px wide: "${t.text}" is ${t.onScreen.toFixed(1)}px on screen (it was about 7px on a phone)`));
+    m.words.forEach((a, i) => m.words.slice(i + 1).forEach((b) => assert(!(a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1), `${px}px wide: "${a.text}" and "${b.text}" do not overlap`)));
+    m.words.forEach((t) => assert(t.x0 >= m.x - .5 && t.x1 <= m.x + m.vw + .5 && t.y0 >= m.y - .5 && t.y1 <= m.y + m.vh + .5, `${px}px wide: "${t.text}" is inside the drawing (a reserved margin holds the words that grew)`));
+    const you = m.words.find((t) => t.text === 'you.fxn');
+    assert(you.x0 > m.pill.x && you.x1 < m.pill.x + m.pill.w && m.pill.x + m.pill.w <= 104, `${px}px wide: the you.fxn pill is sized from its words and ends before your line starts`);
+    if (px === 560) assert.equal([m.x, m.y, m.vw, m.vh].join(' '), '0 0 560 200', 'at the width it was drawn for the map is the same drawing');
+  }
+}
 console.log('PASS: hero scene — 7 real grammar blocks in an HTML list, one panel active per step, ' +
   'checks pass together, partial replication reads partial, the ending stays hidden ' +
   'until it happens, it plays once and settles, and it is still when paused, hidden or disposed.');

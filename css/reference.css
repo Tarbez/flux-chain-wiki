@@ -19,6 +19,12 @@
 .reference-contents li[data-level="2"] { padding-left:16px; }
 .reference-contents li[data-level="3"] { padding-left:32px; }
 .reference-contents a { display:inline-flex; align-items:center; min-height:44px; color:hsl(var(--reference)); text-underline-offset:4px; overflow-wrap:anywhere; }
+.reference-refusal { max-width:70ch; margin:20px 0; padding:4px 16px 8px; border:1px solid hsl(var(--warning) / .5); border-left-width:3px; border-radius:5px; background:hsl(var(--nested) / .4); }
+.reference-refusal p { margin:12px 0 4px; color:hsl(var(--text-strong)); font-weight:500; }
+.reference-refusal dl { display:grid; grid-template-columns:max-content minmax(0,1fr); gap:8px 16px; margin:8px 0; }
+.reference-refusal dt { font:500 12px/1.65 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+.reference-refusal dd { margin:0; overflow-wrap:anywhere; }
+@media (max-width: 600px) { .reference-refusal dl { grid-template-columns:minmax(0,1fr); gap:0; } .reference-refusal dd { margin-bottom:8px; } }
 .reference-page a:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 /* A phone: tighter rhythm for a long document, and a folded section's heading sits close to the button that opens it
    (fold sweep S0-1: the default document was 1.69x the viewport at 390; its sections now fold behind Ark's disclosure,

@@ -46,6 +46,15 @@
                                                 once the synced @deadark/ark-ui ships it; until then
                                                 reported as NOT BUILT, never as empty
 
+     js/min/**, js/min/manifest.js, index.html's manifest stamp
+                                                the site's page scripts (the ones js/pages/catalog.js lists)
+                                                served minified, with source maps: the commented source
+                                                stays canonical. Derived from the catalog, not listed
+                                                here -- scripts/lib/page-scripts.cjs says which files and
+                                                why; `--pages` builds or checks only these (npm run
+                                                build:pages / check:pages), `npm run build:ark` does all.
+                                                A copy no catalog script builds is deleted (or DRIFT).
+
    It replaced, on 2026-10-19 (DEFXN polish Wave 0, docs/ux-audit/components.md §5.3):
    scripts/sync-ark.cjs and scripts/sync-ark-backgrounds.cjs (which read
    the hub's shared/ directory -- empty since the 2026-09-23 domain move), and the
@@ -381,15 +390,32 @@ function targets(packages) {
   ];
 }
 
+/* The page scripts served minified (js/min/*, its manifest, and the manifest's stamp in index.html):
+   scripts/lib/page-scripts.cjs derives the files from the catalog and builds them. They need esbuild
+   and the site's own source only -- not the pinned Ark packages -- so `--pages` builds or checks
+   just these (npm run build:pages / check:pages) without the provenance proof. */
+function pageTargets() {
+  const pages = require('./lib/page-scripts.cjs');
+  const plan = pages.plan(ROOT);
+  for (const item of plan.exempt) console.log('[build-ark-vendor] served as written ' + item.script + ': ' + item.exempt);
+  return { targets: plan.outputs.map((output) => ({ out: output.out, build: () => output.bytes })), orphans: pages.orphans(ROOT, plan.outputs) };
+}
+
 function main() {
   const check = process.argv.includes('--check');
-  const { packages, problems } = vendoredPackages();
-  if (problems.length) {
-    for (const problem of problems) console.error('[build-ark-vendor] ' + problem);
-    process.exit(1);
+  const pagesOnly = process.argv.includes('--pages');
+  let packages = [];
+  if (!pagesOnly) {
+    const proof = vendoredPackages();
+    if (proof.problems.length) {
+      for (const problem of proof.problems) console.error('[build-ark-vendor] ' + problem);
+      process.exit(1);
+    }
+    packages = proof.packages;
   }
   let drift = 0;
-  for (const target of targets(packages)) {
+  const pages = pageTargets();
+  for (const target of (pagesOnly ? [] : targets(packages)).concat(pages.targets)) {
     const file = path.join(ROOT, target.out);
     if (target.notBuilt) {
       // Absent is not empty: say what is missing instead of writing a zero-byte stylesheet.
@@ -408,8 +434,13 @@ function main() {
     if (!same) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, bytes); }
     console.log('[build-ark-vendor] ' + (same ? 'unchanged ' : 'wrote ') + target.out + ' (' + bytes.length + ' bytes, sha256 ' + sha256(bytes).slice(0, 12) + ')');
   }
+  // A copy no output names (its script left the catalog, or became exempt) would be served stale forever.
+  for (const orphan of pages.orphans) {
+    if (check) { console.error('[build-ark-vendor] DRIFT ' + orphan + ': no catalog script builds it; run node scripts/build-ark-vendor.cjs'); drift += 1; }
+    else { fs.unlinkSync(path.join(ROOT, orphan)); console.log('[build-ark-vendor] removed ' + orphan + ' (no catalog script builds it)'); }
+  }
   if (check && drift) {
-    console.error('[build-ark-vendor] ' + drift + ' output(s) drifted from the synced packages');
+    console.error('[build-ark-vendor] ' + drift + ' output(s) drifted from their sources');
     process.exit(1);
   }
 }

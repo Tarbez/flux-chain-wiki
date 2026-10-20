@@ -60,10 +60,10 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
 (async () => {
   /* ---- the module is a spec of Ark blocks -------------------------------------------------- */
   const source = fs.readFileSync(path.join(ROOT, 'js/pages/chain.js'), 'utf8');
-  assert(/ArkUI\.page\(spec\(manifest, current\), host,/.test(source), 'the page is built by ArkUI.page from its spec');
+  assert(/ArkUI\.page\(spec\(manifest, current, swap\), host,/.test(source), 'the page is built by ArkUI.page from its spec');
   assert(!/ArkUI\.el\('(section|header|h1|h2|nav|a)'/.test(source) && !/visually-hidden/.test(source), 'no hand-built page structure, and no visually hidden heading');
   const catalog = fs.readFileSync(path.join(ROOT, 'js/pages/catalog.js'), 'utf8');
-  assert(/chain: \{ module: 'chain', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/home-flow\.js', 'js\/pages\/chain\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its scene and module');
+  assert(/chain: \{ module: 'chain', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/home-flow\.js', 'js\/pages\/resolver-page-parts\.js', 'js\/pages\/chain\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its scene, the figure parts and its module');
 
   /* ---- nothing in the plain scene is drawn below 12px -------------------------------------- */
   const flowCss = fs.readFileSync(path.join(ROOT, 'css/home-flow.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -103,10 +103,12 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
       // the record list is real content: only a panel that is not the current step is aria-hidden
       formatHidden: shown.querySelector('.flow-record-format').closest('.flow-scene, svg').getAttribute('aria-hidden') === 'true' ||
         (shown.querySelector('.flow').dataset.step === '0') === (shown.querySelector('[data-panel="sign"]').getAttribute('aria-hidden') === 'true'),
-      swap: [...shown.querySelectorAll('#flow-swap [data-ark-part="step-title"]')].map((li) => li.textContent.trim()),
-      swapRefusal: [...shown.querySelectorAll('#flow-swap [data-ark-block="callout"]')].map((c) => c.textContent.replace(/\s+/g, ' ').trim()).join('|'),
-      swapFold: [...shown.querySelectorAll('#flow-swap > [data-ark-part="disclosure-trigger"]')].map((b) => b.textContent.trim() + ':' + b.getAttribute('aria-expanded')),
-      swapOnOtherCases: [...panels].filter((p) => p !== shown).reduce((n, p) => n + p.querySelectorAll('#flow-swap').length, 0),
+      swap: [...shown.querySelectorAll('#chain-swap [data-manifest-figure="swap-signed-resolution"] [data-ark-part="step-title"]')].map((li) => li.textContent.trim()),
+      swapRefusal: [...shown.querySelectorAll('#chain-swap [data-manifest-figure] [data-ark-part="fact"]')].map((c) => c.textContent.replace(/\s+/g, ' ').trim()).join('|'),
+      swapFold: [...shown.querySelectorAll('#chain-swap > [data-ark-part="disclosure-trigger"]')].map((b) => b.textContent.trim() + ':' + b.getAttribute('aria-expanded')),
+      swapInScene: shown.querySelectorAll('.flow-scene #chain-swap, #flow-swap').length,
+      swapInFrame: !!shown.querySelector('#chain-swap figure figcaption'),
+      swapOnOtherCases: [...panels].filter((p) => p !== shown).reduce((n, p) => n + p.querySelectorAll('#chain-swap, [data-manifest-figure]').length, 0),
       onward: [...page.querySelectorAll('#chain-onward a[data-scene-link]')].map((a) => a.getAttribute('data-scene-link') + ':' + a.textContent.replace(/\s+/g, ' ').trim()),
       toggles: shown.querySelectorAll('.flow-toggle').length,
       caption: (shown.querySelector('[data-ark-part="figure-caption"]') || {}).textContent || '',
@@ -143,8 +145,12 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
   assert.equal(seen.formatHidden, false, 'the record format is real content, hidden from a screen reader only while another step is shown (the SVG was always aria-hidden)');
   /* ledger 4.5: the swap as signed resolution -- the manifest's own diagram (meta.diagrams[0]), under the Swaps payload */
   assert.deepEqual(seen.swap, ['Two intents enter', 'One signer resolves the batch', 'One signed result goes to peers'], 'the Swaps example draws the swap as signed resolution, in the manifest\'s own steps');
-  assert(/A second node is refused.*resolved by studio\.fxn/.test(seen.swapRefusal), 'and a second node\'s result ends in the refusal "resolved by <signer>": ' + seen.swapRefusal);
-  assert.deepEqual(seen.swapFold, ['How a swap is resolved:false'], 'folded behind Ark\'s disclosure so the Resolve step stays one box and a line (nothing removed)');
+  assert(/A second node.*resolved by <signer>/.test(seen.swapRefusal), 'and a second node\'s result ends in the refusal "resolved by <signer>": ' + seen.swapRefusal);
+  assert.deepEqual(seen.swapFold, ['How a swap is resolved:false'], 'folded behind Ark\'s disclosure, closed (nothing removed)');
+  /* W5-PAGES: the figure is resolver-page-parts.js' (ArkUI.manifestFigure), placed in the Swaps tab beside the scene's frame; the smaller
+     copy that stood inside the scene's Resolve panel (home-flow.js swapDiagram) is gone, so the diagram has one renderer. */
+  assert.equal(seen.swapInScene, 0, 'the diagram stands under the scene\'s frame, not inside its Resolve panel');
+  assert(seen.swapInFrame, 'it sits in Ark\'s figure frame with a caption');
   assert.equal(seen.swapOnOtherCases, 0, 'only the Swaps example carries it (a transfer, a stake and a vote are not batches)');
   assert.deepEqual(seen.onward, ['resolvers:See what each resolver reads from the chain→', 'resolver:Where do resolver chains come from?→'], 'the way on: what each resolver reads (the manifest\'s CHAIN.NEXT, which nothing showed) and where resolver chains come from (ledger 3.4-x)');
   assert.equal(seen.toggles, 1, 'the pause/play control is still there');
