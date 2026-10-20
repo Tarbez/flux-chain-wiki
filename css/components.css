@@ -9,11 +9,15 @@
      solid        main call to action, once per view
                   secondary-500 fill, -600 hover, -ink text
      soft         repeated main action (Run DEFXN in the header)
-                  secondary-100 fill, -300 border, -700 text; -200/-400 on hover
+                  secondary-100 fill, control-edge border, -700 text; -200 fill on hover
      quiet        secondary actions and utilities
-                  reference-100 fill, -300 border, -700 text; -200/-400 on hover
-     choice       tabs, pickers, toggles: neutral at rest, reference when selected
-                  reference-100 fill, -400 border, -700 text
+                  reference-100 fill, control-edge border, -700 text; -200 fill on hover
+     choice       tabs, pickers, toggles: control-edge border at rest, reference when selected
+                  reference-100 fill, -700 border (a light edge is 2.5:1 on the light themes), -700 text
+     control edge --border-control: the one boundary ink of anything pressed or typed into
+                  (WCAG 1.4.11, 3:1 in every theme; the kit's --dx-edge reads the same role).
+                  Named regression (fold-contrast sweep 2026-10-20): soft, quiet and choice drew
+                  their edge with -300 / --border-default tints, 1.2 to 1.9:1 on the dark themes.
      link         text links: reference ink, -300 underline, -700 on hover
    Focus is always a 2px reference ring. */
 
@@ -49,9 +53,9 @@
 /* soft ---------------------------------------------------------------------- */
 #scene :is(.palette-soft,.ark-header a.products-mega-all) {
   background:hsl(var(--secondary-100)) !important;background-image:none !important;
-  border:1px solid hsl(var(--secondary-300)) !important;color:hsl(var(--secondary-700)) !important;box-shadow:none !important;
+  border:1px solid hsl(var(--border-control)) !important;color:hsl(var(--secondary-700)) !important;box-shadow:none !important;
 }
-#scene :is(.palette-soft,.ark-header a.products-mega-all):is(:hover,:focus-visible) {background:hsl(var(--secondary-200)) !important;border-color:hsl(var(--secondary-400)) !important;}
+#scene :is(.palette-soft,.ark-header a.products-mega-all):is(:hover,:focus-visible) {background:hsl(var(--secondary-200)) !important;border-color:hsl(var(--border-control)) !important;}
 /* The header is the family kit bar since 2026-10-19 (js/resolvers/header.js): its look is the kit's
    (assets/kit/defxn-components.css) and its placement css/navigation.css. Run DEFXN is the kit's soft action; its old fill rules went with the old header. */
 
@@ -62,13 +66,13 @@
   .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
 ) {
   background:hsl(var(--reference-100)) !important;background-image:none !important;
-  border:1px solid hsl(var(--reference-300)) !important;color:hsl(var(--reference-700)) !important;box-shadow:none !important;text-decoration:none !important;
+  border:1px solid hsl(var(--border-control)) !important;color:hsl(var(--reference-700)) !important;box-shadow:none !important;text-decoration:none !important;
 }
 #scene :is(
   .palette-quiet,.resolver-lab-again,.home-ghost-cta,.content-layer-path a,.link-button,
   .source-step-controls button:not(.mechanism-next),.deploy-copy,
   .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
-):is(:hover,:focus-visible) {background:hsl(var(--reference-200)) !important;border-color:hsl(var(--reference-400)) !important;}
+):is(:hover,:focus-visible) {background:hsl(var(--reference-200)) !important;border-color:hsl(var(--border-control)) !important;}
 #scene :is(.home-ghost-cta,.content-layer-path a) .native-icon {color:hsl(var(--reference-700)) !important;border-color:hsl(var(--reference-300)) !important;}
 #scene .home-ghost-cta::before {background:hsl(var(--reference-400)) !important;box-shadow:none !important;}
 
@@ -77,19 +81,63 @@
   .story-depth button,.source-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.how-chapter-choice,.how-check-row
 ) {
-  background:transparent !important;background-image:none !important;border-color:hsl(var(--border-default)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
+  background:transparent !important;background-image:none !important;border-color:hsl(var(--border-control)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
 }
 #scene :is(
   .story-depth button,.source-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.how-chapter-choice,.how-check-row
-):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--reference-300)) !important;}
+):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--border-control)) !important;}
 #scene :is(
   .story-depth button,.source-step-choice,
   .stage-scene-choices button,.guided-step-picker button,.how-chapter-choice,.how-check-row
 ):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
-  background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-400)) !important;color:hsl(var(--reference-700)) !important;
+  background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-700)) !important;color:hsl(var(--reference-700)) !important;
 }
 #scene .source-step-choice :is(span,b,strong,small,em) {color:inherit !important;}
+/* The header is the family kit bar since 2026-10-19 (js/resolvers/header.js): its look is the kit's
+   (assets/kit/defxn-components.css) and its placement css/navigation.css. Run DEFXN is the kit's soft action; its old fill rules went with the old header. */
+
+/* quiet --------------------------------------------------------------------- */
+#scene :is(
+  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.content-layer-path a,.link-button,
+  .source-step-controls button:not(.mechanism-next),.deploy-copy,
+  .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
+) {
+  background:hsl(var(--reference-100)) !important;background-image:none !important;
+  border:1px solid hsl(var(--border-control)) !important;color:hsl(var(--reference-700)) !important;box-shadow:none !important;text-decoration:none !important;
+}
+#scene :is(
+  .palette-quiet,.resolver-lab-again,.home-ghost-cta,.content-layer-path a,.link-button,
+  .source-step-controls button:not(.mechanism-next),.deploy-copy,
+  .mesh-explorer-controls button:not([data-explorer-connect]),.mesh-source-inspector form button
+):is(:hover,:focus-visible) {background:hsl(var(--reference-200)) !important;border-color:hsl(var(--border-control)) !important;}
+#scene :is(.home-ghost-cta,.content-layer-path a) .native-icon {color:hsl(var(--reference-700)) !important;border-color:hsl(var(--reference-300)) !important;}
+#scene .home-ghost-cta::before {background:hsl(var(--reference-400)) !important;box-shadow:none !important;}
+
+/* choice -------------------------------------------------------------------- */
+#scene :is(
+  .story-depth button,.source-step-choice,
+  .stage-scene-choices button,.guided-step-picker button,.how-chapter-choice,.how-check-row
+) {
+  background:transparent !important;background-image:none !important;border-color:hsl(var(--border-control)) !important;color:hsl(var(--text-muted)) !important;box-shadow:none !important;
+}
+#scene :is(
+  .story-depth button,.source-step-choice,
+  .stage-scene-choices button,.guided-step-picker button,.how-chapter-choice,.how-check-row
+):hover {color:hsl(var(--text-strong)) !important;border-color:hsl(var(--border-control)) !important;}
+#scene :is(
+  .story-depth button,.source-step-choice,
+  .stage-scene-choices button,.guided-step-picker button,.how-chapter-choice,.how-check-row
+):is([aria-pressed="true"],[aria-selected="true"],[aria-current]:not([aria-current="false"])) {
+  background:hsl(var(--reference-100)) !important;border-color:hsl(var(--reference-700)) !important;color:hsl(var(--reference-700)) !important;
+}
+#scene .source-step-choice :is(span,b,strong,small,em) {color:inherit !important;}
+/* A selected segmented tab (Ark's tab strip draws its edge with --text-faint, 1.76:1 on the dark themes; the fix
+   belongs in Ark's block -- until it takes --border-control, this role selector is the one site rule). */
+#scene [data-ark-block="tabs"][data-variant="segmented"] [role="tab"][aria-selected="true"] {border-color:hsl(var(--border-control));}
+/* ...and its unselected segments drew a hairline (--border-default, 1.8:1) inside the strip's own control-edge box: a boundary
+   that cannot be seen is not one, so the strip's box is the boundary and only the selected segment is outlined. */
+#scene [data-ark-block="tabs"][data-variant="segmented"] [role="tab"][aria-selected="false"] {border-color:transparent;}
 
 /* The header is the family kit bar since 2026-10-19 (js/resolvers/header.js): its look is the kit's
    (assets/kit/defxn-components.css) and its placement css/navigation.css. Its nav's current page is the kit's segment (raised, one reference bar), so the old
@@ -102,11 +150,16 @@
 #scene .resolver-back-link:is(:hover,:focus-visible) {color:hsl(var(--reference-700)) !important;text-decoration-color:hsl(var(--reference-400)) !important;}
 #scene .resolver-back-link .native-icon {color:inherit !important;}
 #scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.reference-orientation a,.resolver-guide-links a,.account-next a,.account-cms a,.story-reference) {
-  color:hsl(var(--reference)) !important;text-decoration-color:hsl(var(--reference-300)) !important;border-color:hsl(var(--reference-300)) !important;
+  color:hsl(var(--reference)) !important;text-decoration-color:hsl(var(--reference-300)) !important;
 }
+/* A text link has no edge to colour; the account page's "Where next" ways are Ark buttons (an actions block),
+   and a link rule must not repaint a button's boundary (fold sweep S0: its edge was this rule's reference-300,
+   2.07:1). So the two account containers are left out of the border rules. */
+#scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.reference-orientation a,.resolver-guide-links a,.story-reference) {border-color:hsl(var(--reference-300)) !important;}
 #scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.reference-orientation a,.resolver-guide-links a,.account-next a,.account-cms a,.story-reference):is(:hover,:focus-visible) {
-  color:hsl(var(--reference-700)) !important;border-color:hsl(var(--reference-400)) !important;
+  color:hsl(var(--reference-700)) !important;
 }
+#scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.stats-section a,.reference-orientation a,.resolver-guide-links a,.story-reference):is(:hover,:focus-visible) {border-color:hsl(var(--reference-400)) !important;}
 #scene :is(.home-lifecycle-all,.home-question-links a) .native-icon {color:inherit !important;}
 
 /* focus --------------------------------------------------------------------- */

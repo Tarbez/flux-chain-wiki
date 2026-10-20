@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { copySite, startHost, fakeFolder, gotoEditor, appFrame, clickHeader, previewFrame, until as untilFor, scaled } from './harness.mjs';
+import { copySite, startHost, fakeFolder, gotoEditor, appFrame, clickHeader, previewFrame, until as untilFor, scaled, answerArkDialog } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-panels-'));
@@ -41,7 +41,9 @@ const browser = await chromium.launch({ headless: !args.includes('--headed') });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 await fakeFolder(context, WORK);
 const page = await context.newPage();
-page.on('dialog', (d) => d.accept());
+/* the editor asks with Ark's dialog now (cms.md P2-11): a NATIVE dialog is a regression, and is counted */
+const nativeDialogs = [];
+page.on('dialog', (d) => { nativeDialogs.push(d.message()); d.accept(); });
 page.on('pageerror', (e) => console.log('     [pageerror] ' + e.message));
 await gotoEditor(page, server.origin);
 const app = await appFrame(page);
@@ -116,7 +118,13 @@ await step('media: label, replace, Save; create and delete', async () => {
   await panel().locator('#newAssetId').press('Enter');
   await until(() => app.evaluate(() => !!document.querySelector('#panelTest #as-panel-dot-label')), 'the new image did not open');
   await save(() => exists('assets/panel-dot.js') && saved('assets/index.js').includes('panel-dot'), 'Save did not create assets/panel-dot.js');
+  /* Keep it: the dialog names what goes and that Versions can bring it back, and cancelling leaves the image alone */
   await panel().locator('button', { hasText: 'Delete this image' }).click();
+  const asked = await answerArkDialog(app, 'dismiss');
+  check(/Delete the image/.test(asked) && /Versions/.test(asked) || /cannot be undone/.test(asked), 'the Delete dialog does not say what goes and whether it can be undone: ' + asked.replace(/\s+/g, ' '));
+  check(exists('assets/panel-dot.js'), 'Keep it still deleted the image');
+  await panel().locator('button', { hasText: 'Delete this image' }).click();
+  await answerArkDialog(app, 'accept');
   await until(() => !exists('assets/panel-dot.js') && !saved('assets/index.js').includes('panel-dot'), 'Delete did not remove the image');
 });
 
@@ -134,6 +142,7 @@ await step('vault: create, encrypt, Save, decrypt, delete', async () => {
   await panel().locator('button', { hasText: 'Decrypt to check' }).click();
   await until(() => app.evaluate(() => [...document.querySelectorAll('#panelTest textarea[readonly]')].some((t) => t.value === 'the panel plaintext')), 'Decrypt to check did not recover the plaintext');
   await panel().locator('button', { hasText: 'Delete this item' }).click();
+  await answerArkDialog(app, 'accept');
   await until(() => !exists('secrets/panel-secret.js'), 'Delete did not remove the item');
 });
 
@@ -150,6 +159,8 @@ await step('theme & defaults: draws in a container', async () => {
   check(await panel().locator('#siteSeo').count() === 1 && await panel().locator('#theme-active').count() === 1, 'Theme & defaults did not draw its theme and site SEO');
   check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the saves above, a draft still shows unsaved');
 });
+
+await step('the editor asked with Ark\'s dialog, never a native one', async () => { check(!nativeDialogs.length, 'a native dialog was shown: ' + nativeDialogs.join(' | ')); });
 
 await browser.close();
 await new Promise((resolve) => server.close(resolve));

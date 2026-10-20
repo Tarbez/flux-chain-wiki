@@ -132,7 +132,7 @@ ArkManifest.define({
       "section": "Back button",
       "value": "EXPERIMENTS"
     },
-    "BACK.TUTORIALS": {
+    "BACK.NOTES": {
       "label": "Back to the notes",
       "kind": "line",
       "section": "Back button",

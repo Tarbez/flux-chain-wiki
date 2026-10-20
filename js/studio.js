@@ -2,6 +2,13 @@
 ArkUI.studioValues = ArkUI.studioValues || { mode: 'spacing', spacing: 50, rhythm: 50, depth: 50 };
 ArkUI.mountStudio = function (root) {
   'use strict';
+  /* The model's address is its catalog entry's (js/pages/catalog.js): the canonical path it is written to, and the old ones
+     (/experiments/lab, /work) it is still restored from. Before 2026-10-20 this file wrote and read only the merged-away alias, so on
+     /experiments the first touched study rewrote the address to the alias and /experiments?model=..&value=.. restored nothing. */
+  var home = (function () {
+    var catalog = ArkUI.pageCatalog || {}, key = Object.keys(catalog).filter(function (k) { return catalog[k].module === 'lab'; })[0], entry = key && catalog[key];
+    return entry ? { path: entry.path, paths: [entry.path].concat(entry.aliases || []) } : { path: '/experiments', paths: ['/experiments'] };
+  })();
   function findById(id) { return root.querySelector('#' + id); }
   var studies = {
     spacing: { title: 'How can threshold agreement be pictured?', description: 'This model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.', label: 'Visual convergence', start: 'Apart', end: 'Together', note: 'A VISUAL ANALOGY FOR DERIVED, TEMPORARY AUTHORITY.', code: 'FX—001' },
@@ -30,14 +37,18 @@ ArkUI.mountStudio = function (root) {
   function selectStudy(next,write) {
     mode = next; values.mode = next; var study = studies[mode];
     root.querySelector('.lab').dataset.mode = mode;
-    root.querySelectorAll('[data-study]').forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.study === mode)); });
+    root.querySelectorAll('.study-tabs input[type="radio"]').forEach(function (radio) { radio.checked = radio.value === mode; });
     findById('study-title').textContent = study.title;findById('experiments-title').textContent=study.title;
     findById('study-description').textContent = study.description;
     root.querySelector('label[for="variable"]').textContent = study.label;
+    /* The instruction is derived from the study's own end labels, so a new study carries one: "Drag the slider ... from apart to together." */
+    findById('variable-hint').textContent = 'Drag the slider, or use the arrow keys, to move from ' + study.start.toLowerCase() + ' to ' + study.end.toLowerCase() + '.';
     findById('range-start').textContent = study.start;
     findById('range-end').textContent = study.end;
     root.querySelector('.stage-footnote').textContent = study.note;
-    root.querySelector('.stage-corner').textContent = study.code;
+    /* The specimen's own code ("FX—001") leads with what it is, derived from the study's place: "Figure 1 of 3 · FX—001". */
+    var places = Object.keys(studies);
+    root.querySelector('.stage-corner').textContent = 'Figure ' + (places.indexOf(mode) + 1) + ' of ' + places.length + ' · ' + study.code;
     specimen.replaceChildren(); range.value = values[mode];
     var count = mode === 'spacing' ? 3 : mode === 'rhythm' ? 5 : 4;
     for (var j = 0; j < count; j++) {
@@ -50,11 +61,13 @@ ArkUI.mountStudio = function (root) {
     }
     update(false);if(write)writeState();
   }
-  root.querySelectorAll('[data-study]').forEach(function (button) { button.addEventListener('click', function () { selectStudy(button.dataset.study,true); }); });
+  /* The study picker is Ark's `choice` (js/pages/lab.js): a change is an ark:action, heard here on the page. */
+  function picked(event){var detail=event.detail||{};if(detail.action==='lab-study'&&studies[detail.value])selectStudy(detail.value,true);}
+  root.addEventListener('ark:action',picked);
   range.addEventListener('input',function(){update(true);});
-  function writeState(){ArkUI.route.write('/experiments/lab','model='+mode+'&value='+Number(range.value),'replace');}
-  function restore(){if(ArkUI.route.path()!=='/experiments/lab')return;var q=new URLSearchParams(ArkUI.route.search()),next=q.get('model');if(studies[next])mode=next;var value=q.get('value');if(value!==null&&Number.isFinite(Number(value)))values[mode]=Math.max(0,Math.min(100,Number(value)));selectStudy(mode,false);}
-  selectStudy(mode,false);root.arkRestore=restore;restore();window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);root.arkDispose=function(){window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};
-  root.querySelectorAll('[data-study], #variable').forEach(function (control) { control.disabled = false; });
+  function writeState(){ArkUI.route.write(home.path,'model='+mode+'&value='+Number(range.value),'replace');}
+  function restore(){if(home.paths.indexOf(ArkUI.route.path())<0)return;var q=new URLSearchParams(ArkUI.route.search()),next=q.get('model');if(studies[next])mode=next;var value=q.get('value');if(value!==null&&Number.isFinite(Number(value)))values[mode]=Math.max(0,Math.min(100,Number(value)));selectStudy(mode,false);}
+  selectStudy(mode,false);root.arkRestore=restore;restore();window.addEventListener('popstate',restore);window.addEventListener('hashchange',restore);root.arkDispose=function(){root.removeEventListener('ark:action',picked);window.removeEventListener('popstate',restore);window.removeEventListener('hashchange',restore);};
+  range.disabled = false;
   document.documentElement.classList.add('is-ready');
 };

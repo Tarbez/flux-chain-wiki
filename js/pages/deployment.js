@@ -11,6 +11,15 @@
      boundary       launched is not served -- in sight in every view
      figure         each stage keeps its own mesh; pointing at a stage runs its pattern
 
+   W4-S13 (2026-10-20): the deploy-flow diagram of the content audit (six stations, the control
+   fork, serve's proof badge and the two refusals that name their problem) is drawn from
+   js/content/manifests/deployment.js `meta.diagrams` by js/pages/resolver-page-parts.js, at the
+   head of Evidence, beside what to hear before signing (the refusals are that): folded at every width
+   behind "Show the deploy flow" (open it ran to 1.9 screens at 1440 and 2.4 on a phone; in How it works
+   its button alone took the phone view from 1.60 to 1.66). Evidence ends in the
+   journey's other pages, derived from the site's journey table (Governance and Every identity,
+   its own chain among them); the pager now names its previous and next pages from `meta`.
+
    Words: js/content/manifests/deployment.js (W1-CONTENT's). Regression: tests/story-blocks.cjs;
    behaviour in a real DOM: tests/routes-live.cjs. */
 (function () {
@@ -180,6 +189,11 @@
       var chapters = CHAPTERS.map(function (c) { return { label: copy(c[0] + '.TITLE'), href: words(c[0] + '.HREF') }; })
         .concat([{ label: 'Agreement lifecycle', href: words('NEXT.HREF') }]);
 
+      /* the manifest's deploy-flow figure and the journey's other pages (resolver-page-parts.js, js/ark/page-kit.js) */
+      var parts = ArkUI.resolverPageParts;
+      var flow = parts && parts.figureBlock('deployment', 'deploy-flow', { id: 'deploy-flow', foldBelow: 'always', more: 'Show the deploy flow', less: 'Hide the deploy flow' });
+      var onward = ArkUI.journeyPageBlocks ? ArkUI.journeyPageBlocks('deployment', { journeys: ['understand', 'build'], exclude: ['lifecycle', 'resolver', 'resolvers'] }) : [];
+
       var def = {
         page: 'deployment', id: 'deploy', className: 'story-deploy', titleId: 'deployment-title', was: WAS, insertWas: WAS.insert,
         crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
@@ -203,22 +217,25 @@
               return { value: 'step-' + n, title: n + ' · ' + ArkCopy.text('DEPLOYMENT.STEP' + n), content: top('BODY' + n) };
             }) } }
           ] },
-          reference: { blocks: [
+          reference: { blocks: ([
             { block: 'accordion', props: { label: 'Before you deploy', items: [
               { value: 'caution', title: copy('CAUTION.TITLE'), content: copy('CAUTION') },
               { value: 'planned', title: copy('PLANNED.TITLE'), content: copy('PLANNED') },
               { value: 'agreement', title: copy('AGREEMENT.TITLE'), content: copy('AGREEMENT.TEXT'),
                 blocks: [{ block: 'actions', props: { label: words('AGREEMENT.TITLE'), items: chapters.map(function (c) { return { label: c.label, href: c.href, tone: 'link' }; }) } }] }
             ] } }
-          ] }
+          ]).concat(flow ? [flow.spec] : [], onward) }
         },
         boundary: { tone: 'drift', title: 'Current implementation', body: copy('BOUNDARY') }, boundaryFold: 'phone',
         figure: { slot: 'meshes', caption: words('WRITE.TITLE') + ' · ' + words('LAUNCH.TITLE') + ' · ' + words('SERVE.TITLE') + ': each stage on the mesh.', more: 'Show the three meshes', less: 'Hide the three meshes' },
         slots: { meshes: meshes },
-        pager: { label: 'Continue', relatedLabel: copy('AGREEMENT.TITLE'), related: chapters },
+        pager: { label: 'Continue', relatedLabel: copy('AGREEMENT.TITLE'), related: chapters,
+          prev: manifest.meta.back ? { label: top('BACK'), href: 'route:' + manifest.meta.back } : undefined,
+          next: manifest.meta.next ? { label: top('NEXT'), href: 'route:' + manifest.meta.next } : undefined },
         onFigureVisibility: function (figure, visible) { fabrics.forEach(function (f) { f.controller.visible(visible); }); },
         dispose: function () { fabrics.forEach(function (f) { f.controller.dispose(); }); }
       };
+      if (flow) def.slots[flow.slot] = flow.node;
       var el = ArkUI.story.mount(def, null);
       /* A chapter link returns to its exact source (js/ark/panel-continuity.js). */
       Array.prototype.forEach.call(el.querySelectorAll('a[data-scene-link^="how/"]'), function (a) { a.dataset.continuityCard = a.getAttribute('data-scene-link'); });

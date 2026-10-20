@@ -11,14 +11,17 @@ Method: CMS section by the coordinator; the other six reports were audited by on
 | Report | FIXED | PARTIAL | OPEN | OWNER | OUT-OF-REPO | UNVERIFIED | Total | Rows with no finding |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | cms.md | 14 | 15 | 3 | 0 | 0 | 2 | 34 | 0 |
-| pages.md | 69 | 14 | 12 | 0 | 0 | 14 | 109 | 8 |
-| pages-crawl TSVs | 10 | 1 | 0 | 0 | 0 | 2 | 13 | 6 |
-| pages-ux-a.md | 72 | 56 | 27 | 2 | 0 | 28 | 185 | 0 |
-| pages-ux-b.md | 64 | 28 | 14 | 4 | 0 | 20 | 130 | 0 |
-| components.md | 73 | 53 | 20 | 1 | 3 | 3 | 153 | 0 |
-| brand.md | 44 | 29 | 10 | 6 | 41 | 4 | 134 | 0 |
-| resolvers-content.md | 114 | 23 | 10 | 9 | 32 | 5 | 193 | 0 |
-| **Total** | **460** | **219** | **96** | **22** | **76** | **78** | **951** | |
+| pages.md | 83 | 14 | 12 | 0 | 0 | 0 | 109 | 8 |
+| pages-crawl TSVs | 11 | 1 | 0 | 0 | 0 | 1 | 13 | 6 |
+| pages-ux-a.md | 83 | 56 | 27 | 2 | 0 | 17 | 185 | 0 |
+| pages-ux-b.md | 73 | 29 | 14 | 4 | 0 | 10 | 130 | 0 |
+| components.md | 76 | 53 | 20 | 1 | 3 | 0 | 153 | 0 |
+| brand.md | 46 | 29 | 10 | 6 | 41 | 2 | 134 | 0 |
+| resolvers-content.md | 115 | 23 | 10 | 9 | 32 | 4 | 193 | 0 |
+| S0 sweep (new, section below) | 4 | 0 | 3 | 0 | 0 | 0 | 7 | 0 |
+| **Total** | **505** | **220** | **99** | **22** | **76** | **36** | **958** | |
+
+**Updated 2026-10-20 by W4-S0** (`tests/browser/fold-contrast-sweep.mjs`, readings in `docs/ux-audit/fold-contrast-readings.tsv`, summary in `docs/ux-audit/fold-contrast.md`): 42 of the 78 UNVERIFIED rows were decided (41 FIXED, 1 PARTIAL), each carries a `S0 sweep` note citing the TSV line (`L<n>` = line n of the TSV). The 36 left are not decidable by a fold, text-contrast, control-boundary or font-size reading (tap targets, radii and size counts, empty bands, hover and layout, landmarks, other repos, live state). The sweep also found 7 new OPEN items (section "S0 sweep: new findings"). All fold, contrast and font readings are at rest (default tab, step and accordion).
 
 Each report's per-finding rows follow; the consolidated "Next work" is at the end.
 
@@ -67,7 +70,7 @@ Each report's per-finding rows follow; the consolidated "Next work" is at the en
 ---
 
 ## pages.md (page inventory and reachability audit, 2026-10-19)
-Counts: FIXED 69, PARTIAL 14, OPEN 12, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 14 (plus 8 n/a rows with no finding, not counted)
+Counts: FIXED 83, PARTIAL 14, OPEN 12, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 0 (plus 8 n/a rows with no finding, not counted)
 
 Ledger basis: code on disk (working tree over 45d6b1a). Nothing was run; the crawl numbers in the report were not re-measured. Rows whose
 status depends on measured fold or live behaviour are UNVERIFIED (needs browser). The regression tests cited were read, not executed.
@@ -79,18 +82,18 @@ status depends on measured fold or live behaviour are UNVERIFIED (needs browser)
 | P2 three orphans plus the unreachable /stats/gpu | P1 | FIXED | tests/site-exits.cjs asserts each inbound link: js/pages/stats.js:635 (-> /stats/gpu), js/pages/resolver-lab.js:497-500 (INSPECT.HREF -> /start-from-something-real), js/pages/resolvers.js:258-262 and js/pages/concept.js:59 (-> /resolver-math), settings panel "See the full palette" (scripts/settings-entry.js:132) |
 | P3 two pages for one interactive model | P1 | PARTIAL | Merged: js/pages/catalog.js:51-55 (`proximity` module `lab`, alias `/experiments/lab`), js/content/site-pages.js:39, seo-data.js title "Interactive model"; tests/browser/site-fixes.mjs:116-120. Left: js/studio.js:55-56 still writes the model state to and restores it only at `/experiments/lab`, so on the canonical `/experiments` the URL is rewritten to the alias once a study is touched and `/experiments?model=..&value=..` is not restored |
 | P4 stale /concept/spec ("no benchmark verified") | P1 | FIXED | tests/concept-spec-current.cjs derives the verified set from docs/evidence/registry.md and fails if the sheet disagrees; js/content/manifests/spec.js links /stats, /stats/gpu, /stats/ledger (lines 174ff); owner chose "rewrite", not the /stats merge |
-| P5 fold budget broken on 11 routes (summary) | P1 | UNVERIFIED (needs browser) | Structure now tabs/accordions/disclosures per route (rows below); every number is an agent-reported measurement in a test header, not a gate. docs/ux-audit/plan.md:71 lists the Wave 4 fold sweep as still to do. No test asserts fold <= 1.6 across routes (tests/browser/fold-disclosures.mjs only checks reachability of folded content) |
-| P5a fold: /stats (12.53/20.63) | P1 | UNVERIFIED (needs browser) | tests/stats-page.cjs:18 claims <= 1.6x per view at 1440x900 and 390x844 (W3-STATS report) |
-| P5b fold: /stats/ledger (8.89/14.50) | P1 | UNVERIFIED (needs browser) | tests/stats-ledger-page.cjs:10 (tabs + accordions, claims <= 1.6) |
-| P5c fold: /resolver-math (8.36/13.42) | P1 | UNVERIFIED (needs browser) | tests/resolver-math-blocks.cjs:8 (seven tabs, claims <= 1.6) |
-| P5d fold: /resolvers (3.93/7.75) | P1 | UNVERIFIED (needs browser) | tests/resolvers-blocks.cjs:11 (one tab per question, claims <= 1.6) |
-| P5e fold: /palette (2.67/4.41) | P2 | UNVERIFIED (needs browser) | js/pages/palette.js:9 states the fold fix (was 2.76x); no measuring test |
-| P5f fold: / (2.39/2.72) | P1 | UNVERIFIED (needs browser) | js/pages/home.js:7 and tests/home-blocks.cjs:9 (five tabs, "fold is measured per view by the browser check"); no measuring gate in tests/ |
-| P5g fold: /about (2.08/2.65) | P1 | UNVERIFIED (needs browser) | js/pages/about.js:7, tests/about-page.cjs (tabs, views short) |
-| P5h fold: /stats/gpu (1.89/3.09) | P2 | UNVERIFIED (needs browser) | tests/stats-gpu-blocks.cjs:8 (five tabs, claims <= 1.6) |
-| P5i fold: /learnings (1.28/1.99) | P2 | UNVERIFIED (needs browser) | tests/learnings-blocks.cjs:22-26 (index rows folded on phone); docs/ux-audit/plan.md "Every learnings view <= 1.6 fold at 1440/390" |
-| P5j fold: /how-deployment-works at 390 (1.84) | P2 | UNVERIFIED (needs browser) | on the story template (js/pages/catalog.js:34); no fold test names it |
-| P5k fold: /bundle-deployer at 390 (1.83) | P2 | UNVERIFIED (needs browser) | js/pages/bundle-deployer.js:74 folds the release status on phone (`foldBelow: 'phone'`); no measurement |
+| P5 fold budget broken on 11 routes (summary) | P1 | FIXED | Structure now tabs/accordions/disclosures per route (rows below); every number is an agent-reported measurement in a test header, not a gate. docs/ux-audit/plan.md:71 lists the Wave 4 fold sweep as still to do. No test asserts fold <= 1.6 across routes (tests/browser/fold-disclosures.mjs only checks reachability of folded content) **S0 sweep 2026-10-20:** Decided by `tests/browser/fold-contrast-sweep.mjs`: 68 of 69 catalog routes are <= 1.6x at rest at 1440x900 and 390x844; the one over is hidden `/reference` at 390 (1.69, fold-contrast-readings.tsv L94, new row S0-1 below). All eleven P5 routes pass (rows below). At rest (default tab/step/accordion); the other views a reader opens on purpose are not measured. |
+| P5a fold: /stats (12.53/20.63) | P1 | FIXED | tests/stats-page.cjs:18 claims <= 1.6x per view at 1440x900 and 390x844 (W3-STATS report) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L18 (1440: 1.20), L87 (390: 1.17); was 12.53/20.63 |
+| P5b fold: /stats/ledger (8.89/14.50) | P1 | FIXED | tests/stats-ledger-page.cjs:10 (tabs + accordions, claims <= 1.6) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L20 (1440: 1.00), L89 (390: 1.16); was 8.89/14.50 |
+| P5c fold: /resolver-math (8.36/13.42) | P1 | FIXED | tests/resolver-math-blocks.cjs:8 (seven tabs, claims <= 1.6) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L10 (1440: 1.41), L79 (390: 1.00); was 8.36/13.42 |
+| P5d fold: /resolvers (3.93/7.75) | P1 | FIXED | tests/resolvers-blocks.cjs:11 (one tab per question, claims <= 1.6) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L11 (1440: 1.41), L80 (390: 1.38); was 3.93/7.75 |
+| P5e fold: /palette (2.67/4.41) | P2 | FIXED | js/pages/palette.js:9 states the fold fix (was 2.76x); no measuring test **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L8 (1440: 1.03), L77 (390: 1.59, only 0.01 under the limit); was 2.67/4.41 |
+| P5f fold: / (2.39/2.72) | P1 | FIXED | js/pages/home.js:7 and tests/home-blocks.cjs:9 (five tabs, "fold is measured per view by the browser check"); no measuring gate in tests/ **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L2 (1440: 1.39), L71 (390: 1.23); was 2.39/2.72 |
+| P5g fold: /about (2.08/2.65) | P1 | FIXED | js/pages/about.js:7, tests/about-page.cjs (tabs, views short) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L3 (1440: 1.38), L72 (390: 1.41); was 2.08/2.65 |
+| P5h fold: /stats/gpu (1.89/3.09) | P2 | FIXED | tests/stats-gpu-blocks.cjs:8 (five tabs, claims <= 1.6) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L19 (1440: 1.19), L88 (390: 1.48); was 1.89/3.09 |
+| P5i fold: /learnings (1.28/1.99) | P2 | FIXED | tests/learnings-blocks.cjs:22-26 (index rows folded on phone); docs/ux-audit/plan.md "Every learnings view <= 1.6 fold at 1440/390" **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L6 (1440: 1.49), L75 (390: 1.34); was 1.28/1.99 |
+| P5j fold: /how-deployment-works at 390 (1.84) | P2 | FIXED | on the story template (js/pages/catalog.js:34); no fold test names it **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L21 (1440: 1.10), L90 (390: 1.33); was 1.00/1.84 |
+| P5k fold: /bundle-deployer at 390 (1.83) | P2 | FIXED | js/pages/bundle-deployer.js:74 folds the release status on phone (`foldBelow: 'phone'`); no measurement **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L15 (1440: 1.47), L84 (390: 1.40); was 1.00/1.83 |
 | P6a /about has three names; h1 equals /resolutions h1 | P2 | FIXED | js/content/seo-data.js:88 title "Overview", js/content/manifests/about.js:17-22 h1 "Overview.", js/content/site-pages.js:34 label "Overview"; "Resolutions for the mesh." now only in manifests/resolutions.js:21 |
 | P6b /stats/ledger and the article share a title | P2 | FIXED | js/content/seo-data.js:516-517 "Ledger benchmark detail"; site-pages.js label matches; the article keeps "A finance resolver by construction"; no duplicate title remains in seo-data.js (only the empty one) |
 | P7a hand-written "All pages" menu with a catch-all | P1 | FIXED | js/resolvers/header.js:553-562, 689 derive groups from `journey`; js/content/site-pages.js is the one table; tests/site-journeys.cjs, tests/navigation-index.cjs; treasury/deposits/palette/proximity are journey `preview` |
@@ -115,7 +118,7 @@ status depends on measured fold or live behaviour are UNVERIFIED (needs browser)
 | /chain only inbound is Home's disclosure; link from /how-deployment-works, /explore, retired article | P3 | PARTIAL | Article link done (js/content/articles/why-the-chain-was-retired.js:8). Not linked from /how-deployment-works (manifests/deployment.js routes: how/*, lifecycle, resolver, resolvers, zero) or /explore (explorer.js:117-126) |
 | /what-is-a-resolver exits: INSPECT.HREF, math, browse resolvers | P2 | FIXED | resolver-lab.js:497-500 (pager related = REGISTRY, MATH, EXPLORE, DEPLOYER + Inspect reference evidence); tests/site-exits.cjs |
 | /start-from-something-real no inbound | P2 | FIXED | see P2 and resolvers.js:260 |
-| /how-deployment-works fold at 390 | P2 | UNVERIFIED (needs browser) | see P5j |
+| /how-deployment-works fold at 390 | P2 | FIXED | see P5j **S0 sweep 2026-10-20:** see P5j: fold-contrast-readings.tsv L90 (390: 1.33) |
 | /explore exits: reference (P1), "Walk one chain" -> /chain, "Measured performance" -> /stats | P3 | PARTIAL | P1 part fixed. js/pages/explorer.js:117-126 `onward` still only What is a resolver / family Explore / raw records; no /chain or /stats link. Fix edits js/pages/explorer.js |
 | /palette keep; settings link; menu group; exits | P2 | FIXED | see C4 |
 | /stats: link to /stats/gpu; 404s | P2 | PARTIAL | link fixed (stats.js:635); 404 environment: P9; fold: P5a |
@@ -189,12 +192,12 @@ status depends on measured fold or live behaviour are UNVERIFIED (needs browser)
 | A13 (=P6a) one name for /about | P2 | FIXED | see P6a |
 | A14 `journey` field read by menu, sitemap, footer strip; retire hand lists | P2 | FIXED | see S1-S6 and P7a/P7b |
 | A15 (=P7c) CMS orphan tag from the link graph | P2 | OPEN | js/admin/rail.js:137-169; edit js/admin/rail.js (derive from the rendered page links or the same resolver the pages use) |
-| A16 (=P5) layer / fit the folds | P1 | UNVERIFIED (needs browser) | see P5a-P5k |
+| A16 (=P5) layer / fit the folds | P1 | FIXED | see P5a-P5k **S0 sweep 2026-10-20:** see P5a-P5k: all eleven pass at rest (fold-contrast-readings.tsv L2-L21, L71-L90). The sweep's one other fold failure is `/reference` at 390 (L94, 1.69), tracked as S0-1 |
 | A17 Drop: none | - | n/a | no finding |
 | A18 verify production routing of /api/chain-*; point #fallback links at routes | P2 | PARTIAL | fallback: done (P10). Production routing: Caddy rules exist (ops/caddy/defxn-site.caddy:74-93); live check not decidable from code |
 
 ## pages-crawl TSVs (docs/ux-audit/pages-crawl.tsv, pages-crawl-links.tsv)
-Counts: FIXED 10, PARTIAL 1, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 2 (plus 6 n/a rows, not counted)
+Counts: FIXED 11, PARTIAL 1, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1 (plus 6 n/a rows, not counted)
 
 The TSVs are 69 route rows (31 columns, measured 2026-10-19 at baseline) and 544 link rows (kinds: 531 route, 11 file, 1 broken; regions header 7, mega 22, menu 43, page 450, page-footer 14, other 7). They are evidence for the findings above; the conclusions below are per class of row, derived from current code (js/content/site-pages.js, js/pages/catalog.js, sitemap.xml, llms.txt, js/hero-motion.js, js/ark/route.js, js/ark/page-router.js). The crawl was not re-run, so "resolved" means "the cause the row recorded no longer exists in code", not "re-measured".
 
@@ -205,7 +208,7 @@ The TSVs are 69 route rows (31 columns, measured 2026-10-19 at baseline) and 544
 | routes: `chromePlacement=none` (stats/gpu, stats/ledger, how-deployment-works/ask,work,check, reference) | 6 | FIXED | all but /reference have a `journey` in site-pages.js so the menu lists them (header.js:562 filter); /reference is `journey: null` by design (site-pages.js:59) and stays a utility |
 | routes: `outboundCount=0` dead ends (palette, resolvers) and `=1` near dead ends (account/domains, bundle-deployer, treasury, deposits) | 2 + 4 | FIXED | exits added (R4/R5 rows) |
 | routes: `inSitemap=false` / `inLlms=false` (stats/gpu, stats/ledger, how-deployment-works/ask,work,check, reference) | 6 | FIXED | sitemap.xml:13-70 and llms.txt:24-29 list all but /reference (`journey: null`, excluded on purpose, seo.js:265-276); /experiments/lab no longer a separate entry. Sitemap is now derived (seo.js:271) so it cannot drift again |
-| routes: `fold1440` / `fold390` over 1.6 (11 routes) | 11 | UNVERIFIED (needs browser) | structure converted to tabs/accordions per route (P5a-P5k); no gate measures it. Needs the Wave 4 fold sweep |
+| routes: `fold1440` / `fold390` over 1.6 (11 routes) | 11 | FIXED | structure converted to tabs/accordions per route (P5a-P5k); no gate measures it. Needs the Wave 4 fold sweep **S0 sweep 2026-10-20:** fold-contrast-readings.tsv: none of the 11 routes is over 1.6 now (largest 1.59 `/palette` at 390, L77); sweep total is 1 route over (`/reference` at 390, L94) |
 | routes: `consoleErrors` / `failedRequests` (/stats: 404 x2 for /api/chain-pulse, /api/chain-fleet-capacity, at both widths) | 1 route | PARTIAL | same as P9: page degrades by name; production routing declared in Caddy, live answer not decidable here |
 | routes: duplicate `h1` ("How can threshold agreement be pictured?" on /experiments and /experiments/lab; "Resolutions for the mesh." on /about and /resolutions) | 4 | FIXED | one lab page; /about h1 is "Overview." (manifests/about.js:17-22) |
 | routes: duplicate `title` (/stats/ledger vs article) | 2 | FIXED | seo-data.js:516-517; no duplicate titles remain in seo-data.js |
@@ -224,7 +227,7 @@ The TSVs are 69 route rows (31 columns, measured 2026-10-19 at baseline) and 544
 ---
 
 ## docs/ux-audit/pages-ux-a.md (first half of the routes, `/` through `/lifecycle/fulfillment`)
-Counts: FIXED 72, PARTIAL 56, OPEN 27, OWNER 2, OUT-OF-REPO 0, UNVERIFIED 28 (185 rows)
+Counts: FIXED 83, PARTIAL 56, OPEN 27, OWNER 2, OUT-OF-REPO 0, UNVERIFIED 17 (185 rows)
 
 Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, working tree has only admin/CMS edits that do not touch these routes). Fold ratios, contrast, tap targets and rAF rates are measured browser behaviour: they are UNVERIFIED unless a regression test pins them; where the structure that fixes them is in the code, the evidence cell says so. No test in the repo asserts a fold ratio of 1.6 or less (tests/browser/route-sweep.mjs and layout-key-stability.mjs were "Not run (Wave 4)" per commit af33dc6), so every fold row stays UNVERIFIED until the Wave 4 re-audit.
 
@@ -232,10 +235,10 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| M1 fold D/M over 1.6 on 13 of 35 routes (/ 2.53/2.88, /about 2.23/2.81, /bundle-deployer M 2.00, /how-deployment-works M 2.02, /learnings M 2.16, 4 articles M 1.65-1.76, 3 how chapters M 1.63-1.68) | P1 | UNVERIFIED (needs browser) | Structure that fixes it is in place on every named route (tabs/accordion/disclosure: home.js:247-303, about.js:276, story.js, learnings.js:69-73, article.js:40 LONG_TOC) and commit af33dc6 claims every view at 1.6 or less, but no test asserts it; Wave 4 fold sweep pending (docs/ux-audit/plan.md "Resume point 4") |
+| M1 fold D/M over 1.6 on 13 of 35 routes (/ 2.53/2.88, /about 2.23/2.81, /bundle-deployer M 2.00, /how-deployment-works M 2.02, /learnings M 2.16, 4 articles M 1.65-1.76, 3 how chapters M 1.63-1.68) | P1 | FIXED | Structure that fixes it is in place on every named route (tabs/accordion/disclosure: home.js:247-303, about.js:276, story.js, learnings.js:69-73, article.js:40 LONG_TOC) and commit af33dc6 claims every view at 1.6 or less, but no test asserts it; Wave 4 fold sweep pending (docs/ux-audit/plan.md "Resume point 4") **S0 sweep 2026-10-20:** fold-contrast-readings.tsv: `/` L2/L71 (1.39/1.23), `/about` L3/L72 (1.38/1.41), `/bundle-deployer` L15/L84 (1.47/1.40), `/how-deployment-works` L21/L90 (1.10/1.33), `/learnings` L6/L75 (1.49/1.34), the four articles at most 1.36 (L127-L133), the three how chapters 1.16-1.38 (L22-L24, L91-L93). At rest (default tab/step/accordion); the other views a reader opens on purpose are not measured. |
 | M2 "More" open takes / to 4.95 and /about to 4.08 (one undivided wall) | P1 | FIXED | The single "More" details no longer exists: home.js:247-303 and about.js:276 are one Ark tabs control, one view at a time; regressions tests/home-blocks.cjs, tests/about-page.cjs. (Re-measured numbers UNVERIFIED) |
 | M3 ctl<3: 170 of 195 desktop controls (87%) below 3:1 boundary contrast | P1 | PARTIAL | Ark controls use --border-control (css/ark-blocks.css `.ark-btn`, segmented tabs, accordion icon; css/flux-themes.css:10 etc.). Left: hand-built controls still on --border-default (css/explore-story.css:60 `.explore-kind`; css/download.css:7 and css/page-layout.css:168 copy buttons; css/story-diagrams.css:20 `.story-record`; account.js tabs). No defxn test asserts the 3:1 ratio |
-| M4 txt contrast failures (/ 1, how chapters 8/6/8) | P1 | UNVERIFIED (needs browser) | Record card is Ark `facts` now (how-stories.js:403-407) so the 1.91:1 opacity-dimmed dt/dd rows are gone from the markup, but no test measures text contrast on these routes |
+| M4 txt contrast failures (/ 1, how chapters 8/6/8) | P1 | FIXED | Record card is Ark `facts` now (how-stories.js:403-407) so the 1.91:1 opacity-dimmed dt/dd rows are gone from the markup, but no test measures text contrast on these routes **S0 sweep 2026-10-20:** fold-contrast-readings.tsv: `/` lowest text contrast 5.00 (L140 at 1440, L215 at 390); how chapters 6.03 / 7.52 (L160-L162, L235-L237). No text under 4.5:1 on any catalog route (only the editor has one, S0-3) |
 | M5 phone tap targets under 24px (/account/domains, /concept, /deposits, /download, /experiments/lab, how/ask, check, work) | P2 | UNVERIFIED (needs browser) | Pages rebuilt from Ark blocks (min 2.5rem buttons in css/ark-blocks.css `.ark-btn`); not measured |
 | M6 jargon counts per route (chain, signature, FXN, resolver ...) | P1 | PARTIAL | See X6: glossary-term component exists and is wired on 8 page modules, not on the others |
 | M7 totals: 42 distinct font sizes, 60 button signatures, 12 corner radii | P2 | UNVERIFIED (needs browser) | Census ratchet exists (docs/ux-audit/component-census-baseline.tsv, tests/ux-component-census.cjs) but the audit's rendered-style counts were not re-run; hard-coded CSS font-size px declarations fell from 485 to 266 and !important from 323 to 244 across css/*.css since 5a1ac71 (grep count) |
@@ -246,7 +249,7 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| `/` P1 fold 2.53/2.88 | P1 | UNVERIFIED (needs browser) | See M1; hero + five Ark tabs, home.js:243-303 |
+| `/` P1 fold 2.53/2.88 | P1 | FIXED | See M1; hero + five Ark tabs, home.js:243-303 **S0 sweep 2026-10-20:** see M1: fold-contrast-readings.tsv L2 (1440: 1.39), L71 (390: 1.23) |
 | `/` P1 everything behind one "More" (hides Explore/Build/Operate) | P1 | FIXED | home.js:247-303 (five tabs: See it work, Where do I start?, How it fits together, What is measured?, Questions); tests/home-blocks.cjs |
 | `/` P1 11 of 16 controls below 3:1 (hl-case, home-cycle-step) | P1 | PARTIAL | hl-case replaced by Ark segmented tabs (home.js:252, 260, 283); the scene step buttons `home-cycle-step`/`flow-record` (home-flow.js:499) are still hand-built, css/home-flow.css:94; see M3 |
 | `/` P1 header on `/` is a different component | P1 | FIXED | js/resolvers/header.js:492-493 mounts the kit family bar the same way for every route; tests/browser/public-header.mjs and tests/kit-home-shell.cjs |
@@ -261,7 +264,7 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 | `/` Fix split "More" into named accordions; shared header | P2 | FIXED | home.js:273-303 (Architecture/Evidence/Questions views, accordions); header see above |
 | `/` Hand-built list (hero, case picker, More, tabs, principle grid, stat cards, FAQ, closing, 2 SVG diagrams, local helpers) | - | PARTIAL | All but the drawings are Ark blocks (home.js:243-303); audience/principle/question copy still hard-coded in JS (home.js:34-48); the two SVG drawings stay imperative (home-flow.js drawLandscape/buildChainWorld) |
 | `/about` P0 closing section invisible under hl-closing overlay | P0 | FIXED | No `hl-closing` anywhere in js/ or css/ (grep); ending is Ark callout + pager (about.js:264-265, 275); hit-test tests/browser/site-fixes.mjs:89-111; tests/about-page.cjs header |
-| `/about` P1 fold 2.23/2.81 (4.08 open) | P1 | UNVERIFIED (needs browser) | See M1/M2; one Ark tabs control about.js:276 |
+| `/about` P1 fold 2.23/2.81 (4.08 open) | P1 | FIXED | See M1/M2; one Ark tabs control about.js:276 **S0 sweep 2026-10-20:** see M1/M2: fold-contrast-readings.tsv L3 (1440: 1.38), L72 (390: 1.41); the 4.08 open state is not measured (a reader opens it on purpose) |
 | `/about` P1 "More." set as 49px H2 to label one disclosure | P1 | FIXED | Disclosure removed; tab list replaces it (about.js:276), tests/about-page.cjs |
 | `/about` P1 "See how DEFXN works" external-link icon on internal route | P1 | FIXED | Ark derives the arrow from the href (tests/about-page.cjs header); tests/browser/site-fixes.mjs:179-225 asserts the arrow only on leaving links on all routes |
 | `/about` P2 phone layer picker and diagram push CTA explanation below fold | P2 | UNVERIFIED (needs browser) | Layer picker is Ark segmented tabs (about.js:227); phone layout not measured |
@@ -281,7 +284,7 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 | `/account/domains` P2 one phone tap target under 24px | P2 | UNVERIFIED (needs browser) | Not measured |
 | `/account/domains` Fixes (copy; empty card) | P2 | PARTIAL | Copy fixed (see CMS row); empty card still open |
 | `/account/domains` Hand-built (form row, status line, domain cards) | - | PARTIAL | Crumbs/hero/pager are Ark blocks (account-domains.js:42-60); form and cards remain hand-built `custom` blocks (:45-57, :90-92), justified in-file as the page's live parts |
-| `/bundle-deployer` P1 phone fold 2.00 | P1 | UNVERIFIED (needs browser) | Tabs + accordion + phone-folded disclosure, bundle-deployer.js:60-77; not measured |
+| `/bundle-deployer` P1 phone fold 2.00 | P1 | FIXED | Tabs + accordion + phone-folded disclosure, bundle-deployer.js:60-77; not measured **S0 sweep 2026-10-20:** see M1: fold-contrast-readings.tsv L15 (1440: 1.47), L84 (390: 1.40) |
 | `/bundle-deployer` P2 only action is "Back to your account"; no next step | P2 | FIXED | bundle-deployer.js:79 pager `next: Run DEFXN from source -> route:download`, plus Bundles hand-off :60 |
 | `/bundle-deployer` P2 accent spent on "Becomes public" table header | P2 | UNVERIFIED (needs browser) | Table is Ark `table` block (bundle-deployer.js:70-72); header colour not measured |
 | `/bundle-deployer` Fixes (phone accordion; add /download step) | P1 | FIXED | Accordion/tabs/disclosure foldBelow 'phone' (bundle-deployer.js:62, 75) and pager next (:79) |
@@ -344,19 +347,19 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 | `/explore` P2 pane switch only on the phone | P2 | OPEN | css/explore-story.css:19 hides `.explore-panes` on desktop by design; the audit asked for nothing more, so only a note (kept as described) |
 | `/explore` Fixes (border-strong tokens, 12px sans captions, pluralise) | P1 | OPEN | None applied (rows above) |
 | `/explore` Hand-built list (innerHTML template, pane toggle, kind tiles, chips, record list, own stat card, node rows) | - | PARTIAL | Crumbs, hero, ways-on are Ark (explorer.js:117-140); live cards, tiles and the raw view stay hand-built `custom` blocks, own `mesh-explorer-stat` still duplicates dash-kit stat |
-| `/how-deployment-works` P1 phone fold 2.02 | P1 | UNVERIFIED (needs browser) | The page is now "Deploy a resolver" on the story template (deployment.js:1-14); six-step accordion one open at a time (deployment.js:~200 accordion); not measured |
+| `/how-deployment-works` P1 phone fold 2.02 | P1 | FIXED | The page is now "Deploy a resolver" on the story template (deployment.js:1-14); six-step accordion one open at a time (deployment.js:~200 accordion); not measured **S0 sweep 2026-10-20:** see M1: fold-contrast-readings.tsv L21 (1440: 1.10), L90 (390: 1.33) |
 | `/how-deployment-works` P2 grid diagram labels 6px | P2 | FIXED | css/lifecycle.css:157-159 mesh names and signals at 12px |
 | `/how-deployment-works` P2 three canvases per page | P2 | PARTIAL | Still three canvases (deployment.js:171 STAGES), now paused off screen via onFigureVisibility (:219) and behind "Show the three meshes" under 900px |
 | `/how-deployment-works` Fix phone cards as carousel/tabs | P1 | FIXED | Replaced by the story template depth control and accordion (deployment.js depth) |
 | `/how-deployment-works` Hand-built list | - | FIXED | story.mount with Ark blocks (deployment.js:~175-212) |
-| how chapters (/ask, /check, /work) P1 text contrast failures 8/6/8 (unlit dt/dd 1.91:1) | P1 | UNVERIFIED (needs browser) | See M4; rows are Ark facts (how-stories.js:403-407) |
+| how chapters (/ask, /check, /work) P1 text contrast failures 8/6/8 (unlit dt/dd 1.91:1) | P1 | FIXED | See M4; rows are Ark facts (how-stories.js:403-407) **S0 sweep 2026-10-20:** see M4: fold-contrast-readings.tsv L160-L162 and L235-L237 (lowest 6.03 at 1440, 7.52 at 390) |
 | how chapters P1 phone record fields expose raw identifiers (inputCid, recipientId, nextSequence) | P1 | OPEN | Still the manifest term: js/content/manifests/deployment.js:619, 643 ("[1] inputCid: What you asked to move"); at least folded on a phone behind "Show the record's fields" (how-stories.js:407) |
 | how chapters P1 step buttons render in Arial | P1 | FIXED | Ark steps (how-stories.js:401); global font inherit; tests/browser/site-fixes.mjs |
-| how chapters P1 phone fold 1.63-1.68 | P1 | UNVERIFIED (needs browser) | See M1 |
+| how chapters P1 phone fold 1.63-1.68 | P1 | FIXED | See M1 **S0 sweep 2026-10-20:** see M1: fold-contrast-readings.tsv L91 (ask 1.28), L92 (work 1.33), L93 (check 1.38) at 390 |
 | how chapters P2 view tabs a third segmented look | P2 | FIXED | One depth control (story.js:59-63); tests/story-blocks.cjs |
 | how chapters Fixes (muted token not opacity; friendly names; shared components) | P1 | PARTIAL | Shared components done; friendly names with raw key as hint not done; contrast unverified |
 | how chapters Hand-built list | - | FIXED | how-stories.js:392-420 builds a story def |
-| `/learnings` P1 phone fold 2.16 | P1 | UNVERIFIED (needs browser) | First 3 cards in sight, rest behind a phone-only disclosure (learnings.js:64-67); tests/learnings-blocks.cjs:193; W3-LEARN reports 1.57 or less, not asserted |
+| `/learnings` P1 phone fold 2.16 | P1 | FIXED | First 3 cards in sight, rest behind a phone-only disclosure (learnings.js:64-67); tests/learnings-blocks.cjs:193; W3-LEARN reports 1.57 or less, not asserted **S0 sweep 2026-10-20:** see M1: fold-contrast-readings.tsv L75 (390: 1.34) |
 | `/learnings` P1 card shows excerpt above title on phone | P1 | UNVERIFIED (needs browser) | Cards are Ark `card-grid` (learnings.js:34-36) with one DOM order (eyebrow, title, description, meta); rendered order not measured |
 | `/learnings` P1 section has four names | P1 | PARTIAL | "Notes" everywhere visitor-facing (learnings.js:3-8, js/content/manifests/nav.js:138 BACK.TUTORIALS = "NOTES", site-pages.js:40); the fixed corner button text is still built from key `NAV.BACK.TUTORIALS` (js/hero-motion.js:192) and the URL stays /learnings by design |
 | `/learnings` P2 card excerpts misalign when titles wrap | P2 | UNVERIFIED (needs browser) | Ark card layout (flex column); not measured |
@@ -367,7 +370,7 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 | `/learnings/*` articles P1 H1 and body in uppercase/mono | P1 | FIXED | Story template with Ark hero (js/pages/article.js header); tests/learnings-blocks.cjs |
 | `/learnings/*` P1 choosing a question shows an empty panel ~1s | P1 | FIXED | Questions are an Ark accordion, no exit-then-enter transition (article.js header); tests/learnings-blocks.cjs |
 | `/learnings/*` P1 question tabs numbers only (00-11) | P1 | FIXED | Rows show the question title, numbered by position (article.js header) |
-| `/learnings/*` P1 phone folds 1.65-1.76 on four articles | P1 | UNVERIFIED (needs browser) | LONG_TOC halves long lists on phone (article.js:40); not asserted |
+| `/learnings/*` P1 phone folds 1.65-1.76 on four articles | P1 | FIXED | LONG_TOC halves long lists on phone (article.js:40); not asserted **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L127-L133: the seven articles at 390 are 1.18-1.36 |
 | `/learnings/*` P2 native ▶ evidence disclosure (third style) | P2 | FIXED | Evidence is Ark facts/accordion (article.js header) |
 | `/learnings/*` P2 "Related mechanism ↗" underlined blue | P2 | FIXED | Related mechanism is a pager related link (article.js header); ↗ only on leaving links per tests/browser/site-fixes.mjs |
 | `/learnings/*` Fixes (display font, immediate answer, question titles, shared accordion) | P1 | FIXED | Same evidence |
@@ -387,7 +390,7 @@ Read-only ledger from the code on disk (baseline 5a1ac71, waves 1-3 committed, w
 | X1 /about closing invisible (borrowed class with z-index contract; needs one closing component) | P0 | FIXED | See /about P0 row |
 | X2 ghost controls, 87% below 3:1 (article-choice, depth buttons, story-record, how-step-button, how-view-tab, hl-case, chain-case) | P1 | PARTIAL | article-choice, how-step-button, how-view-tab, hl-case, chain-case, depth buttons are gone (replaced by Ark tabs/accordion, which use --border-control: css/ark-blocks.css `.ark-btn`, segmented tabs). `story-record` still borderless (css/story-diagrams.css:20); hand-built tiles and Copy buttons as in M3; no defxn test asserts 3:1 |
 | X3 Arial as fourth typeface; two sans faces | P1 | FIXED | See M8 |
-| X4 fold budget missed on 13 of 35 routes | P1 | UNVERIFIED (needs browser) | See M1 |
+| X4 fold budget missed on 13 of 35 routes | P1 | FIXED | See M1 **S0 sweep 2026-10-20:** see M1: fold-contrast-readings.tsv; 0 of those 13 routes is over 1.6 now |
 | X5 same control built 7+ ways (3 ARIA models, 4 looks, 3 depth vocabularies) | P1 | PARTIAL | Ark tabs now drive home, about, chain, concept, story depth, lifecycle, economy, deploy; still hand-built: account sign-in tabs (account.js:68-75), lab study-tabs, explore pane switch (explore-story.css:149), story-record legend buttons (sheet.js:467) |
 | X6 jargon with no glossary on page (abbr/dfn/tooltip aids 0 on non-article pages) | P1 | PARTIAL | Glossary-term mechanism shipped (js/content/glossary.js, 44 terms; `terms: 'first-use'` on story, deploy, bundle-deployer, concept, resolutions). Not wired on home, about, chain, explorer, account, lab, learnings, economy; no entries for mesh, quorum, DAO, roster, substrate, Auth Kit, Ghost ID, miner presence, CMS |
 | X7 keyboard focus enters invisible fallback links; no skip link | P1 | FIXED | js/main.js:133-138 sets the fallback inert as well as aria-hidden; skip link index.html:84; tests/browser/site-fixes.mjs:152-163 |
@@ -465,10 +468,10 @@ Counts: FIXED 6, PARTIAL 0, OPEN 0, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 1
 | LC-8 hand-built patterns (breadcrumb, kicker, depth tabs, callout, figure frame, stepper, fact chips, prev/continue nav) | - | FIXED | all are Ark blocks via the story template: `js/pages/story.js` spec() (breadcrumb, hero, tabs, accordion, callout, disclosure+figure, pager); `tests/story-blocks.cjs` asserts "no hand-built page structure is left" for lifecycle.js |
 
 ### /palette
-Counts: FIXED 4, PARTIAL 1, OPEN 3, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 1
+Counts: FIXED 5, PARTIAL 1, OPEN 3, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 0
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| PA-1 over the fold: 2.76x desktop / 4.51x mobile | P1 | UNVERIFIED (needs browser) | structure is the fix: six Ark tabs (Components / Primary / Secondary / Reference / States / Neutrals) and a States accordion, `js/pages/palette.js:126-141` (spec 'palette-views'); header comment `palette.js:7-10` claims it is inside the rule; no test asserts the ratio |
+| PA-1 over the fold: 2.76x desktop / 4.51x mobile | P1 | FIXED | structure is the fix: six Ark tabs (Components / Primary / Secondary / Reference / States / Neutrals) and a States accordion, `js/pages/palette.js:126-141` (spec 'palette-views'); header comment `palette.js:7-10` claims it is inside the rule; no test asserts the ratio **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L8 (1440: 1.03), L77 (390: 1.59, only 0.01 under the limit) |
 | PA-2 page omits the SDK semantic tokens (`--overlay`, `--drift`, `--trust`, `--live`, `--role`, `--badge`, `--hidden`) | P1 | OPEN | `ROLES` and `NEUTRALS` still list only primary/secondary/reference/success/warning/danger and canvas/depth/surface/raised/nested/text-* `js/pages/palette.js:22-30`; fix edits `js/pages/palette.js` (+ `css/palette.css` if the grid changes) |
 | PA-3 rule shown here broken elsewhere (primary "Never a button" vs Ready painted `--primary`) | P1 | FIXED | status is now said in words, no hue: `js/pages/resolutions.js:31-36` (STATUS = ready/building labels); `css/resolutions.css` has no page rules (header, lines 1-4); `tests/resolutions-blocks.cjs` |
 | PA-4 wrong kicker class (`account-kicker` renders sans) | P2 | FIXED | hero block's own eyebrow replaces it, `js/pages/palette.js:121-124`; `account-kicker` no longer in `palette.js` |
@@ -517,24 +520,24 @@ Counts: FIXED 5, PARTIAL 2, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1
 | RD-8 hand-built patterns (breadcrumb, hero, tablist #2, product tile, status mark+legend, idea rail, step list, pager) | - | FIXED | Ark breadcrumb/hero/disclosure/tabs/accordion/steps/pager `js/pages/resolutions.js:173-207` |
 
 ### /resolver-math
-Counts: FIXED 2, PARTIAL 2, OPEN 1, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 2
+Counts: FIXED 4, PARTIAL 2, OPEN 1, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 0
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| RM-1 fold and length: 8.45x / 13.52x, 2,068 words, 21 buttons, 45 chips (keep equation hero; six sections into Tabs/Accordion) | P0 | UNVERIFIED (needs browser) | structure done: hero states the sum, equation is the first of seven Ark tabs, tables/drawings in accordions `js/pages/resolver-math.js:21-30,697-796`; `tests/resolver-math-blocks.cjs:6-9` states each view <= 1.6x but only from the W3-STATS agent's measurement; no test asserts a ratio |
+| RM-1 fold and length: 8.45x / 13.52x, 2,068 words, 21 buttons, 45 chips (keep equation hero; six sections into Tabs/Accordion) | P0 | FIXED | structure done: hero states the sum, equation is the first of seven Ark tabs, tables/drawings in accordions `js/pages/resolver-math.js:21-30,697-796`; `tests/resolver-math-blocks.cjs:6-9` states each view <= 1.6x but only from the W3-STATS agent's measurement; no test asserts a ratio **S0 sweep 2026-10-20:** fold part decided: fold-contrast-readings.tsv L10 (1440: 1.41), L79 (390: 1.00); At rest (default tab/step/accordion); the other views a reader opens on purpose are not measured. |
 | RM-2 type-scale drift: 22 font sizes, 86 elements under 12px | P1 | PARTIAL | shell/tables/notes are Ark's now, but `css/resolver-math.css` still has ~14 distinct sizes (rem steps `:38-168`, 15px `:195`) and drawing text at 7.5/9px `:196-202` (SVG units, so rendered size unmeasured); no shared SDK scale yet |
 | RM-3 jargon: 82 hits on 14 terms; glosses only in the equation | P1 | OPEN | `ArkUI.page` options carry no `terms: 'first-use'` (`js/pages/resolver-math.js:827`), only 2 hand `[[...]]` marks; equation glosses still live in one array (the "glossary source" fix is not built). Fix edits `js/pages/resolver-math.js` (+ `docs/glossary.md` for role letter/box/type-scoped shape, which are already there) |
 | RM-4 orphaned (0 inbound; /what-is-a-resolver does not link) | P1 | FIXED | /what-is-a-resolver pager related includes MATH `js/pages/resolver-lab.js:499` (`MATH.HREF` = `route:resolver-math`, `js/content/manifests/resolver.js:394`); also /concept and /resolutions/rules,/algorithms: `tests/site-exits.cjs:27-35`; the page leads on to /resolvers `resolver-math.js:793` |
-| RM-5 low-contrast small text (kicker 4.44:1 at 9px, captions 4.44:1) | P2 | UNVERIFIED (needs browser) | kicker is the hero eyebrow (Ark) and caption sizes are Ark's figure caption; contrast of the Ark tokens not computed here |
+| RM-5 low-contrast small text (kicker 4.44:1 at 9px, captions 4.44:1) | P2 | FIXED | kicker is the hero eyebrow (Ark) and caption sizes are Ark's figure caption; contrast of the Ark tokens not computed here **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L148/L223: lowest text contrast on `/resolver-math` is 5.71 (1440) and 8.30 (390), so no 4.44:1 text remains; no text under 12px in the page body, only the kit footer strip (L1262-L1269) |
 | RM-6 hand-built patterns (shell, figure frame, status tag, callout, equation grid, builder, D.table x5, chips, code list, D.stat, link panel) | - | PARTIAL | shell/hero, figures, tables, stats, callout, pager are Ark blocks; the equation, builder and explorer stay page-owned slots by design `js/pages/resolver-math.js:818-836`; the builder's `.rm-chips` buttons are not a shared component |
 | RM-7 fix: "Next: the math behind it ->" link from the Laws step | - | FIXED | same as RM-4 (`js/pages/resolver-lab.js:499`) |
 
 ### /resolvers
-Counts: FIXED 3, PARTIAL 2, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 2
+Counts: FIXED 4, PARTIAL 2, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1
 | id / short title | severity | status | evidence |
 |---|---|---|---|
 | RV-1 dead end: 0 links, 0 buttons, no breadcrumb | P0 | FIXED | breadcrumb + pager of six links (what is a resolver, resolver math, reference resolvers, create a network, /stats throughput, Explore) `js/pages/resolvers.js:257-266`; named in `tests/resolvers-blocks.cjs:6-8`; `tests/site-exits.cjs:26` |
 | RV-2 jargon wall: 93 hits on 22 terms, `LEDGERENTRY`/`G`/`J`/`Y` identifiers up front | P0 | PARTIAL | page was rewritten as a registry snapshot with a plain lede (`copy:RESOLVER.REGISTRY.LEDE`, `js/content/manifests/resolver.js:408`), no `LEDGERENTRY` in `js/pages/resolvers.js`; resolver/capability/provider glossed by hand `resolvers.js:51-58,181,196,242`. Chain ids, source hashes and `dense-wire` names remain in the tables by design; hit counts not re-measured. The lede still does not say "a resolver is the logic that turns signed records into an answer" in one sentence |
-| RV-3 fold: 4.02x / 7.85x (DeFi card ~1.3 viewports) | P1 | UNVERIFIED (needs browser) | one Ark tab per question (chains, capabilities, bridges, deploy, applications) `js/pages/resolvers.js:176-226,254`; `tests/resolvers-blocks.cjs:11` says each view <= 1.6x (agent report only) |
+| RV-3 fold: 4.02x / 7.85x (DeFi card ~1.3 viewports) | P1 | FIXED | one Ark tab per question (chains, capabilities, bridges, deploy, applications) `js/pages/resolvers.js:176-226,254`; `tests/resolvers-blocks.cjs:11` says each view <= 1.6x (agent report only) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L11 (1440: 1.41), L80 (390: 1.38) |
 | RV-4 empty right half of the hero tile | P1 | UNVERIFIED (needs browser) | the 7-of-12 `stats-tile` hero is gone (Ark hero with details, `resolvers.js:241-252`); the first screen was not screenshotted |
 | RV-5 second tile system; `esc`/`fmt`/`tile` re-implemented | P2 | FIXED | no `stats-tile`/`css/stats.css` left (`git grep stats-tile` empty), page is Ark blocks (`js/pages/resolvers.js:1-22`); `tests/resolvers-blocks.cjs:9-10`. A one-line local `fmt()` remains (`resolvers.js:43`) |
 | RV-6 fixes: compact resolver cards with Details disclosures; add links | - | PARTIAL | links added (RV-1); the six applications are an accordion `resolvers.js:219-226`; the "card with headline number" shape was not built (chains are a table row each) |
@@ -553,12 +556,12 @@ Counts: FIXED 4, PARTIAL 1, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 2
 | SR-7 hand-built patterns (breadcrumb, kicker, depth tabs duplicate, diagram frame, boundary, continue nav, step picker) | - | FIXED | story template: `js/pages/story.js` (`tests/story-blocks.cjs` asserts no hand-built structure) |
 
 ### /stats
-Counts: FIXED 2, PARTIAL 3, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 3
+Counts: FIXED 3, PARTIAL 4, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| ST-1 information overload: 12.62x / 20.73x, 3,387 words, 20 H2, one button, no in-page nav | P0 | UNVERIFIED (needs browser) | hero answers; seven Ark tabs (Live / Chain / Throughput / Client path / Platform / Evidence / Readiness), each dated run an accordion `js/pages/stats.js:12-24,670-710`; Refresh is the hero's second action `:670-679`; `tests/stats-page.cjs:15-18` records <= 1.6x from the W3-STATS agent only; engineering detail moved to `docs/whitepaper.md` appendices B-F (stats.js:21-24) |
+| ST-1 information overload: 12.62x / 20.73x, 3,387 words, 20 H2, one button, no in-page nav | P0 | FIXED | hero answers; seven Ark tabs (Live / Chain / Throughput / Client path / Platform / Evidence / Readiness), each dated run an accordion `js/pages/stats.js:12-24,670-710`; Refresh is the hero's second action `:670-679`; `tests/stats-page.cjs:15-18` records <= 1.6x from the W3-STATS agent only; engineering detail moved to `docs/whitepaper.md` appendices B-F (stats.js:21-24) **S0 sweep 2026-10-20:** fold part decided: fold-contrast-readings.tsv L18 (1440: 1.20), L87 (390: 1.17); At rest (default tab/step/accordion); the other views a reader opens on purpose are not measured. |
 | ST-2 jargon: 236 hits on 23 terms | P0 | PARTIAL | hand-marked glossary tips (node, segment, shard, replica, batch auction) `js/pages/stats.js:501-528`; no `terms: 'first-use'` on the page (`:707`); host names and fleet jargon remain. Fix edits `js/pages/stats.js` |
-| ST-3 type-scale drift: 16 sizes, 171 elements under 12px | P1 | UNVERIFIED (needs browser) | tiles/tables/bars are Ark blocks (no `innerHTML`/`el('table')` in `js/pages/stats.js`); `css/stats-dashboard.css` is now 26 lines and only the shared dash-kit shell uses it; sizes not re-measured |
+| ST-3 type-scale drift: 16 sizes, 171 elements under 12px | P1 | PARTIAL | tiles/tables/bars are Ark blocks (no `innerHTML`/`el('table')` in `js/pages/stats.js`); `css/stats-dashboard.css` is now 26 lines and only the shared dash-kit shell uses it; sizes not re-measured **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L1332-L1339: at rest the `/stats` body has no text under 12px (the 171 are gone); what remains under 12px is the kit header/footer strip (10-11px, S0-5). The count of distinct sizes (16) was not re-measured |
 | ST-4 failed API calls locally: check the unavailable state | P1 | FIXED | `feedUnavailable()` names failure, missing thing and remedy, tiles say "No reading" (never 0 or a dash) `js/pages/stats.js:60-77`; `tests/stats-unavailable-not-zero.cjs` |
 | ST-5 1s clock keeps running when the tab is hidden | P2 | FIXED | clock runs only while visible `js/pages/stats.js:891-919`; asserted `tests/stats-page.cjs:12` |
 | ST-6 bar-row asymmetric radii, 8 radius values | P2 | UNVERIFIED (needs browser) | hand-built bar rows are gone (Ark `meter`, 2 uses in `js/pages/stats.js`); the radii of Ark's meter/tiles not measured |
@@ -566,21 +569,21 @@ Counts: FIXED 2, PARTIAL 3, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 3
 | ST-8 hand-built patterns (header shell, stat value, 7+ bar lists, 7 tables, node cards, readiness list, polling loops) | - | PARTIAL | header, tables and bars are Ark blocks; the polling loops stay page-owned (`stats.js:787,823,899`) and there is no shared `LiveStatus` component |
 
 ### /stats/gpu (hidden)
-Counts: FIXED 5, PARTIAL 0, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1
+Counts: FIXED 6, PARTIAL 0, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 0
 | id / short title | severity | status | evidence |
 |---|---|---|---|
 | GP-1 orphan: unreachable | P1 | FIXED | /stats links it (`{ label: 'The GPU, and why it is not compute-bound', href: 'route:stats/gpu' }`, `js/pages/stats.js:635`); in the `prove` journey `js/content/site-pages.js:53`; `tests/site-exits.cjs:21` |
-| GP-2 fold 1.98x / 3.19x, half-width hero | P1 | UNVERIFIED (needs browser) | answer first, detail in five Ark tabs `js/pages/stats-gpu.js:8-14,89`; `tests/stats-gpu-blocks.cjs:6-10` (<= 1.6x from the agent report) |
+| GP-2 fold 1.98x / 3.19x, half-width hero | P1 | FIXED | answer first, detail in five Ark tabs `js/pages/stats-gpu.js:8-14,89`; `tests/stats-gpu-blocks.cjs:6-10` (<= 1.6x from the agent report) **S0 sweep 2026-10-20:** fold part decided: fold-contrast-readings.tsv L19 (1440: 1.19), L88 (390: 1.48); the half-width hero was not measured |
 | GP-3 non-interactive `<li>` bar rows are Tab stops | P1 | FIXED | bars are Ark `meter`, nothing sets a tabindex: `tests/a11y-chrome.cjs:43-48`; each bar names its CPU in text `stats-gpu.js` |
 | GP-4 tables in monospace | P2 | FIXED | Ark table; one mono column only (`How`, `js/pages/stats-gpu.js:92`) |
 | GP-5 duplicated helpers `esc/fmt/pct/tile/headRow/row/bars` | P2 | FIXED | deleted, per header `js/pages/stats-gpu.js:11-13`; `git grep "function esc\|function headRow"` empty in these pages |
 | GP-6 hand-built patterns (`tile`, `headRow/row`, `bars`, hero) | - | FIXED | Ark hero/table/meter/tabs |
 
 ### /stats/ledger (hidden)
-Counts: FIXED 2, PARTIAL 4, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1
+Counts: FIXED 3, PARTIAL 4, OPEN 0, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 0
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| LG-1 overload: 8.98x / 14.6x, 2,636 words, raw-number H2s | P0 | UNVERIFIED (needs browser) | plain hero + three numbers, seven Ark tabs, dated runs in accordions `js/pages/stats-ledger.js:6-14,206-310`; raw-number headings gone (tab labels are plain: How it works / What it closes / On the wire / Fleet runs / One machine / Attacks / Durability); `tests/stats-ledger-page.cjs:6-10` (<= 1.6x from the agent report) |
+| LG-1 overload: 8.98x / 14.6x, 2,636 words, raw-number H2s | P0 | FIXED | plain hero + three numbers, seven Ark tabs, dated runs in accordions `js/pages/stats-ledger.js:6-14,206-310`; raw-number headings gone (tab labels are plain: How it works / What it closes / On the wire / Fleet runs / One machine / Attacks / Durability); `tests/stats-ledger-page.cjs:6-10` (<= 1.6x from the agent report) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L20 (1440: 1.00), L89 (390: 1.16) |
 | LG-2 jargon: 158 hits on 22 terms, inline `code` identifiers | P0 | PARTIAL | 4 hand glossary marks `js/pages/stats-ledger.js` (glossary has equivocation, CID, K-of-N); no `terms: 'first-use'` (`js/pages/stats-ledger.js:316`); code identifiers (`admit_burst`, ...) remain in the evidence tabs by design |
 | LG-3 focusable bar rows; 142 elements under 12px on mobile | P1 | PARTIAL | focus half FIXED (Ark meter, `tests/a11y-chrome.cjs:43-48`); text-size count UNVERIFIED (needs browser) |
 | LG-4 duplicated helpers | P2 | FIXED | helpers and `css/stats.css` classes gone (`js/pages/stats-ledger.js:12-14`) |
@@ -601,21 +604,21 @@ Counts: FIXED 5, PARTIAL 0, OPEN 1, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 1
 | TR-7 hand-built patterns | - | FIXED | Ark hero/callout/tabs/accordion/facts/pager; only the deposit form is page-owned by design `economy-preview.js:97-137` |
 
 ### /what-is-a-resolver (catalog id `resolver`)
-Counts: FIXED 1, PARTIAL 2, OPEN 1, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 1
+Counts: FIXED 2, PARTIAL 2, OPEN 1, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 0
 | id / short title | severity | status | evidence |
 |---|---|---|---|
 | WR-1 mobile hides the definition, kicker, policy address, law bodies, breadcrumb, spec, mesh labels (~10 `display:none`) | P1 | FIXED | story template (lede, eyebrow, breadcrumb, spec/status links = blocks), laws are an Ark accordion, figure folds under "Show the illustration"; `css/resolver-lab.css` hides only the run's own back/next/again controls: `tests/fold-no-hidden-content.cjs:73-89`; `tests/resolver-guide-blocks.cjs`; `tests/browser/fold-disclosures.mjs` (browser driver, not run here) |
-| WR-2 "3.2 MB" label 4.44:1 at 10.5px | P2 | UNVERIFIED (needs browser) | labels are 12px now (`css/resolver-lab.css:31,56`); contrast of the label colour not computed |
+| WR-2 "3.2 MB" label 4.44:1 at 10.5px | P2 | FIXED | labels are 12px now (`css/resolver-lab.css:31,56`); contrast of the label colour not computed **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L147/L222: lowest text contrast on `/what-is-a-resolver` is 5.71 (1440) and 7.52 (390); no "3.2 MB" label exists in js/ or css/ any more |
 | WR-3 dead-ish end: Laws step does not link to /resolver-math, /resolvers, /resolutions | P2 | PARTIAL | pager related: REGISTRY (/resolvers), MATH, EXPLORE, DEPLOYER plus reference resolvers `js/pages/resolver-lab.js:497-499`; no link to /resolutions. Fix edits `js/pages/resolver-lab.js` and the RESOLVER manifest |
 | WR-4 "claim" in the H1 before it is defined | P2 | OPEN | the first-use marker glosses only `text`-kind props (`scripts/ark-blocks-adapter.js:134`), so the hero title is not marked; no tip on the H1 word |
 | WR-5 fix: promote this page's stepper/demo frame as the reference implementation | - | OWNER | advisory, no code change; decision: whether the lab's step track and demo figure become the shared `Stepper`/`FigureFrame` (the track is still page-owned in `css/resolver-lab.css`) |
 | WR-6 hand-built patterns | - | PARTIAL | breadcrumb, hero, laws accordion, pager, figure frame are Ark; the stepper track and segmented input picker stay page-owned inside the live figure |
 
 ### Cross-page findings (ranked 1-11)
-Counts: FIXED 8, PARTIAL 3, OPEN 0, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 4
+Counts: FIXED 9, PARTIAL 3, OPEN 0, OWNER 1, OUT-OF-REPO 0, UNVERIFIED 3
 | id / short title | severity | status | evidence |
 |---|---|---|---|
-| CP-1 four pages hold ~9,000 words of research log (/stats, /stats/ledger, /resolver-math, /resolvers); no in-page nav; one `<details>` | P0 | UNVERIFIED (needs browser) | all four are now hero + Ark tabs + accordions (`js/pages/stats.js:670-680`, `stats-ledger.js:214`, `resolver-math.js:697-796`, `resolvers.js:254`); 38 `disclosure` and 36 `accordion` uses across `js/pages`; no `BenchmarkCard` block was built (accordion rows instead). The <= 1.6x claims in the tests are agent-reported, not asserted |
+| CP-1 four pages hold ~9,000 words of research log (/stats, /stats/ledger, /resolver-math, /resolvers); no in-page nav; one `<details>` | P0 | FIXED | all four are now hero + Ark tabs + accordions (`js/pages/stats.js:670-680`, `stats-ledger.js:214`, `resolver-math.js:697-796`, `resolvers.js:254`); 38 `disclosure` and 36 `accordion` uses across `js/pages`; no `BenchmarkCard` block was built (accordion rows instead). The <= 1.6x claims in the tests are agent-reported, not asserted **S0 sweep 2026-10-20:** fold part decided: fold-contrast-readings.tsv L18/L87 (`/stats` 1.20/1.17), L20/L89 (`/stats/ledger` 1.00/1.16), L10/L79 (`/resolver-math` 1.41/1.00), L11/L80 (`/resolvers` 1.41/1.38) |
 | CP-2 fold rule met by deletion and clamping, not structure | P1 | FIXED | `tests/fold-no-hidden-content.cjs` reads the stylesheets as rules and fails on `display:none`/`line-clamp` on lifecycle, resolver-lab and resolutions content; the "Disclosure" primitive is Ark's `disclosure` block (`css/ark-blocks.css`); `tests/browser/fold-disclosures.mjs` proves reachability (browser driver, not run here) |
 | CP-3 two tile systems and copied helpers (/resolvers, /stats/gpu, /stats/ledger) | P1 | FIXED | `css/stats.css` and every `stats-tile` are gone (`git grep stats-tile` empty); the three pages are Ark blocks; `esc/fmt/pct/tile/headRow/row` deleted (`js/pages/stats-gpu.js:11-13`, `stats-ledger.js:12-14`). `D.barList()`/`D.benchmark()` were not added: Ark `meter`/`table` are used instead |
 | CP-4 three page-frame widths (1080 / 1352 / full-bleed) | P1 | FIXED | one standard 1080 frame; only deployment and /account keep 1600: `js/ark/panel-continuity.js:34-36`; `tests/state-layering.cjs:30-39`. No `PageFrame narrow/wide/dashboard` component, and `/reference` keeps its own 1080 (`css/reference.css:2`) |
@@ -660,7 +663,7 @@ Counts: FIXED 10, PARTIAL 6, OPEN 3, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 0
 ---
 
 ## components.md (component duplication / Ark port audit)
-Counts: FIXED 73, PARTIAL 56, OPEN 20, OWNER 1, OUT-OF-REPO 3, UNVERIFIED 3
+Counts: FIXED 76, PARTIAL 56, OPEN 20, OWNER 1, OUT-OF-REPO 3, UNVERIFIED 0
 
 Basis: code on disk at the current working tree (HEAD 45d6b1a plus uncommitted edits); census numbers are `docs/ux-audit/component-census-baseline.tsv` (5a1ac71 -> current, ratcheted through plan.md Resume point 4), cross-checked by grep on css/ and js/ (the census was not run). The report states no severities, so the severity column is "-". Ids: M = method, S = shape, D/L/X = delivery and local copies, SC = scale, P = the 22 pattern rows, C = CMS typed blocks, DN = per-page density, MP = section 3 mapping rows, G = gaps G0-G17, A = architecture summary 1-10, DS = data shape, SS = SSR, PL = pipeline, W = work-plan waves, PR = priority list, R = risks.
 
@@ -668,7 +671,7 @@ Basis: code on disk at the current working tree (HEAD 45d6b1a plus uncommitted e
 |---|---|---|---|
 | M1 §0 method: counts are lower bounds; distinct-signature proxy | - | FIXED | Instrument is now repo code, not scratch: `scripts/ux-component-census.mjs:1-30` (USE_FAMILIES / SIGNATURE_FAMILIES), baseline `docs/ux-audit/component-census-baseline.tsv`, guard `tests/ux-component-census.cjs:8` runs `--check`. Baseline at 5a1ac71 reproduces this report's tables; the current tsv (ratcheted, Resume point 4) is the comparison used below. |
 | M2 §0 "reproducing the counts": scan scripts are temporary; Wave 0 turns them into a repo script with `--check` | - | FIXED | `scripts/ux-component-census.mjs` (`--check`, `--ratchet`, `--init-baseline`); `package.json` script `census`. |
-| M3 §0 fold ratios come from `pages-crawl.tsv` (`fold1440`/`fold390`) | - | UNVERIFIED (needs browser) | The TSV is the 5a1ac71 crawl; no later whole-site fold re-measure is in the tree (plan.md "Wave 4: fold-rule sweep" not yet run; only W3-LEARN reports learnings views <= 1.6, plan.md Resume point 4). |
+| M3 §0 fold ratios come from `pages-crawl.tsv` (`fold1440`/`fold390`) | - | FIXED | The TSV is the 5a1ac71 crawl; no later whole-site fold re-measure is in the tree (plan.md "Wave 4: fold-rule sweep" not yet run; only W3-LEARN reports learnings views <= 1.6, plan.md Resume point 4). **S0 sweep 2026-10-20:** re-measured after the conversion: fold-contrast-readings.tsv (fold rows L2-L139) replaces the 5a1ac71 crawl numbers |
 | M4 §0 `deadark-ui-lab` does not exist under /Volumes/PortableSSD | - | OUT-OF-REPO | Still absent from `/Volumes/PortableSSD/design/` listing; Ark UI stays the reference. Nothing to do in this repo. |
 | M5 §0 check new Ark parts against write.deadark.com, articles.deadark.com, ark-app (AGENTS.md) | - | OUT-OF-REPO | Those are other repos; no evidence in the tree that the new blocks were compared (no note in docs/cms-architecture.md). Owner/process item. |
 | S1 §1.1 shape table (runtime, components pack, primitives, core, page-builders "no content sections", elements, a11y, CSS AOT, theme, CMS schema) | - | FIXED | Descriptive. The "no content/marketing sections" finding is answered: `@deadark/ark-ui/blocks` now exists (`design/ark-ui/package.json:128-136`, `ark-ui.blocks.ts:113` `ARK_BLOCKS`, 21 blocks), plus `./blocks/patch`. Components-pack part list unchanged (see G1/G3/G8). |
@@ -714,7 +717,7 @@ Basis: code on disk at the current working tree (HEAD 45d6b1a plus uncommitted e
 | C3 §2 `@deadark/sdk/cms` canonical block schema unused by defxn | - | FIXED | Editor bundles `ArkCmsBlocks` (`js/admin/vendor/cms-blocks.js`, entry `scripts/cms-blocks-entry.js`) and `js/admin/controls.js:48-53` calls `getCmsArkBlockEditorFields`; SDK side `design/deadark-sdk/src/cms/ark-blocks.ts`. |
 | DN1 §2.1 density: stats.js, stats-ledger.js, resolvers.js, stats-gpu.js (duplicated `tile()`, innerHTML copy) | - | FIXED | All four are `ArkUI.page` block specs with 0 `innerHTML`; regression `tests/stats-page.cjs`, `stats-ledger-page.cjs`, `resolvers-blocks.cjs`, `stats-gpu-blocks.cjs`, `stats-unavailable-not-zero.cjs`. |
 | DN2 §2.1 density: resolver-math.js (3 eyebrows, 9 notes, fold 8.36/13.42) | - | PARTIAL | Page is blocks (`tests/resolver-math-blocks.cjs`) but the term builder stays hand-built, pinned whole for layout-key continuity: `rm-eq-kicker`, `rm-eq-note`, 8 field uses, `aria-live` at `js/pages/resolver-math.js:562`; tsv header calls this a known undercount. Needs: convert the builder (field block + eyebrow/callout). |
-| DN3 §2.1 fold ratios of the stats family (12.53/20.63, 8.89/14.50, 8.36/13.42, 3.93/7.75, 1.89/3.09) and "11 of 69 routes exceed 1.6x on phone" | - | UNVERIFIED (needs browser) | Structure now bounds height (Ark tabs/accordion/meter, `tests/fold-no-hidden-content.cjs`, `tests/browser/fold-disclosures.mjs`) but no post-conversion whole-site fold sweep exists; plan.md names it Wave 4. |
+| DN3 §2.1 fold ratios of the stats family (12.53/20.63, 8.89/14.50, 8.36/13.42, 3.93/7.75, 1.89/3.09) and "11 of 69 routes exceed 1.6x on phone" | - | FIXED | Structure now bounds height (Ark tabs/accordion/meter, `tests/fold-no-hidden-content.cjs`, `tests/browser/fold-disclosures.mjs`) but no post-conversion whole-site fold sweep exists; plan.md names it Wave 4. **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L18/L87, L20/L89, L10/L79, L11/L80, L19/L88: 1.00-1.48; phone routes over 1.6 are now 1 of 69 (`/reference`, L94) |
 | DN4 §2.1 density: palette.js | - | FIXED | Pilot conversion, `tests/palette-blocks.cjs`; `js/pages/palette.js` calls `ArkUI.page`. Fold UNVERIFIED. |
 | DN5 §2.1 density: about.js, home.js (6-8 eyebrows, 7 next links, fold 2.1-2.7) | - | PARTIAL | Both `ArkUI.page` (`tests/about-page.cjs`, `tests/home-blocks.cjs`); hero scene stays custom by design. Left: `about-layers-figure` (`about.js`), `home-flow.js` cards/tags. Fold UNVERIFIED. |
 | DN6 §2.1 density: economy-preview.js (12 eyebrows, 15 buttons), resolutions.js, resolver-lab.js | - | PARTIAL | `economy-preview.js` and `resolutions.js` are blocks (`tests/resolutions-blocks.cjs`) with residual `economy-return` (:120), `economy-warning`, `economy-credit-note`; `resolver-lab.js` (559 lines) is hand-built: own arrow keys (:321), `aria-live` (:328,:357), `resolver-lab-next` pill CSS. Resolver-lab is OPEN (Wave 4). |
@@ -813,7 +816,7 @@ Basis: code on disk at the current working tree (HEAD 45d6b1a plus uncommitted e
 | R4 §7 Generated ids become layout keys | - | FIXED | G15; `js/content/layout.js:300`; `primitives.js` `uid()` deleted with the file. |
 | R5 §7 Saved component masters (`RBLOCK_*_V1`) dropped by `sanitize()` | - | FIXED | `tests/components-legacy-continuity.cjs` (sha256 pins of every legacy block); `js/content/components.js:60-84`. |
 | R6 §7 `data-ark-insert` anchors key `ArkComponents.routes` | - | FIXED | `ArkUI.page` emits them (`scripts/ark-blocks-adapter.js` insert branch); `tests/components-capture.cjs`, `tests/resolutions-blocks.cjs`, `tests/palette-blocks.cjs` assert anchor ids. |
-| R7 §7 Fold rule: blocks take `density`; measure scrollHeight/innerHeight per route per state after each wave | - | UNVERIFIED (needs browser) | Structural guards exist (`tests/fold-no-hidden-content.cjs`, `tests/browser/fold-disclosures.mjs`, `docs/cms-architecture.md:649-653`); no committed whole-site per-wave measurement later than the 5a1ac71 crawl. Wave 4 fold sweep owns it. |
+| R7 §7 Fold rule: blocks take `density`; measure scrollHeight/innerHeight per route per state after each wave | - | FIXED | Structural guards exist (`tests/fold-no-hidden-content.cjs`, `tests/browser/fold-disclosures.mjs`, `docs/cms-architecture.md:649-653`); no committed whole-site per-wave measurement later than the 5a1ac71 crawl. Wave 4 fold sweep owns it. **S0 sweep 2026-10-20:** `tests/browser/fold-contrast-sweep.mjs` is the whole-site per-route measurement (fold-contrast-readings.tsv); rerun it after each wave. Measured at rest, not per tab |
 | R8 §7 Cascade collisions with `#scene :is(...)` `!important` lists | - | PARTIAL | See A9/P1: 30 `!important` lines left in `css/components.css`. Ark parts use their own `ark-*` classes (`css/ark-blocks.css`). |
 | R9 §7 Test coupling: 25 test files assert page class names | - | PARTIAL | Each converted family has its own `*-blocks.cjs` that replaced class-name asserts (e.g. `tests/stats-gpu-blocks.cjs`, `story-blocks.cjs`); plan.md records unit 199/199 at Resume point 4 (not re-run here). Wave 4 pages will repeat this. |
 | R10 §7 Feature loss in bespoke pages (stats absent state, explorer popovers, resolutions keyboard tabs) | - | FIXED | Stats absent state: `tests/stats-unavailable-not-zero.cjs`; resolutions tabs/disclosures: `tests/resolutions-blocks.cjs`; explorer untouched (Wave 4). |
@@ -827,7 +830,7 @@ Basis: code on disk at the current working tree (HEAD 45d6b1a plus uncommitted e
 ---
 
 ## docs/ux-audit/brand.md (brand / tokens / product-kit audit)
-Counts: FIXED 44, PARTIAL 29, OPEN 10, OWNER 6, OUT-OF-REPO 41, UNVERIFIED 4 (134 rows)
+Counts: FIXED 46, PARTIAL 29, OPEN 10, OWNER 6, OUT-OF-REPO 41, UNVERIFIED 2 (134 rows)
 
 Notes on how to read this ledger.
 - The report gave no severities, so the severity column is "-" for every row. Section 1.1 is ordered "worst first" by the report; that order is kept.
@@ -846,7 +849,7 @@ Notes on how to read this ledger.
 | §0.6 Overlap pages (/explore /deploy /dao /treasury /bundle-deployer /account/domains): explain + hand off | - | FIXED | `DefxnKit.productHandoff/productLink` used in `js/pages/explorer.js:92`, `deploy.js:113`, `dao.js`, `economy-preview.js`, `bundle-deployer.js`, `account-domains.js`; owner decision `plan.md:16-18`; `tests/kit-home-shell.cjs` ("Open Explore"). |
 | §0.7 Branch order for Launch (merge v2 before kit restyle) | - | OWNER | Owner must merge `wave3-launchpad-v2` into the design-current tree (plan.md:110 says "Owner-side"). v2 still renders unstyled: `flux-launchpad-wt-v2/index.html:41` links `css/home.css`, which does not exist there. |
 | §1 inv: defxn.com public chrome (kit bar, switcher, footer, fonts) | - | FIXED | Kit loaded `index.html:22-27,67,183`; bar `js/resolvers/header.js:493`; footer `js/hero-motion.js:91-98`; inner-heading face now Albert via `assets/kit/defxn-fonts.css` (`tests/browser/site-fixes.mjs:204-217`). |
-| §1 inv: defxn.com page-height ratios (home 2.39/2.72, /stats 12.6/20.7, /about 2.08/2.65) | - | UNVERIFIED (needs browser) | Waves 2-3 converted home/about/stats to blocks (`plan.md:75-76`, `tests/fold-no-hidden-content.cjs`), but no measured ratio is in the tree. Needs a viewport measurement. |
+| §1 inv: defxn.com page-height ratios (home 2.39/2.72, /stats 12.6/20.7, /about 2.08/2.65) | - | FIXED | Waves 2-3 converted home/about/stats to blocks (`plan.md:75-76`, `tests/fold-no-hidden-content.cjs`), but no measured ratio is in the tree. Needs a viewport measurement. **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L2/L71 (home 1.39/1.23), L18/L87 (`/stats` 1.20/1.17), L3/L72 (`/about` 1.38/1.41) |
 | §1 inv: defxn CMS (own gate-bar, no switcher/footer) | - | PARTIAL | Fonts + SDK tokens now (`admin-app.html:14-18`, `css/admin.css:1-60`, `tests/admin-css-tokens.cjs`). Left: still its own bar `admin-app.html:40` `<header class="bar" id="appBar">`, no kit bar/switcher. |
 | §1 inv: Flux Launch current (`ink`, own bar, no kit, home 2.19/4.87) | - | OUT-OF-REPO | flux-launchpad: `LP:index.html:2,16-28`; `LP:vendor/defxn-ark/flux-themes.css` still holds the stale canvas `18 32.6% 5.3%` (7 hits). Fold part UNVERIFIED. |
 | §1 inv: Flux Launch v2 (stale Ember, half-unstyled) | - | OUT-OF-REPO | flux-launchpad-wt-v2: `css/home.css` missing (`ls` fails) while `index.html:41` links it. |
@@ -901,7 +904,7 @@ Notes on how to read this ledger.
 | §3.14 Motion (background loop gap) | - | PARTIAL | Same as §2 Motion. |
 | §3.15 Figure grammar (frame defxn drawings in `.dx-frame`) | - | OPEN | Same as §2 Figures. |
 | §3.16 Mark delivery (two encodings from one PNG) | - | FIXED | Kit emits both; defxn loads the `data:` variant (`index.html:67`), PNG also synced (`assets/kit/defxn-mark.png`). |
-| §3.17 Fold (home 2.39/2.72, /about 2.08/2.65, /stats 12.6/20.7) | - | UNVERIFIED (needs browser) | Pages were converted (`plan.md:75-76`); there is no measured post-conversion figure. Needs the fold sweep (Wave 4). |
+| §3.17 Fold (home 2.39/2.72, /about 2.08/2.65, /stats 12.6/20.7) | - | FIXED | Pages were converted (`plan.md:75-76`); there is no measured post-conversion figure. Needs the fold sweep (Wave 4). **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L2/L71, L3/L72, L18/L87 (same readings as §1 inv) |
 | §3.18 CMS look = third visual language | - | PARTIAL | Shares fonts, palette and SDK tokens only (`css/admin.css:1-60`). Not on the kit bar; weight-300 lockup and gate styling unchanged (`admin-app.html:40`). |
 | §4.1 Launch colour: `ink` mono+cyan vs Ember | - | OUT-OF-REPO | flux-launchpad (`index.html:2`). |
 | §4.2 Launch bar content vs kit (actions slot, sub-brand, menu mode, sliding indicator) | - | OUT-OF-REPO | Kit gained actions slot / `brandSub` / menu mode (`K:src/shell.mjs:419-520`); sliding indicator absent in kit. Launch adoption not started in flux-launchpad. |
@@ -982,7 +985,7 @@ Read-only status check against the working tree on 2026-10-20. Wave 1 (3462ab4) 
 
 Evidence short forms: `RM` = js/content/manifests/resolver.js; `DM` = js/content/manifests/deployment.js; `snap` = js/content/registry-snapshot.js; `vocab` = tests/no-deprecated-vocabulary.cjs; `PR` = docs/protocol/resolvers.md.
 
-Counts: FIXED 114, PARTIAL 23, OPEN 10, OWNER 9, OUT-OF-REPO 32, UNVERIFIED 5
+Counts: FIXED 115, PARTIAL 23, OPEN 10, OWNER 9, OUT-OF-REPO 32, UNVERIFIED 4
 
 | id / short title | severity | status | evidence |
 |---|---|---|---|
@@ -1175,11 +1178,26 @@ Counts: FIXED 114, PARTIAL 23, OPEN 10, OWNER 9, OUT-OF-REPO 32, UNVERIFIED 5
 | Q8 Which resolver count is public | - | FIXED | both shown, labelled (stats-highlights.js:254; resolver-math.md; /resolvers hero meta). Note residual label in row 2.11-a |
 | Q9 Token chains: state discrepancy now or wait | - | FIXED | plan.md default: not stated as live, described as planned; stats.js:518 does so. Flux Launch copy remains out-of-repo (2.15-n) |
 | Q10 CMS blocks read live node or snapshot only | - | FIXED | snapshot only (snap, no live reads in resolvers.js) |
-| 8.x UNVERIFIED: that /resolvers, /what-is-a-resolver and /how-deployment-works meet the fold rule (<= 1.6x viewport) after conversion | - | UNVERIFIED (needs browser) | converted to tabs/disclosures (resolvers.js, story template); measured fold height not checkable from code (tests/story-blocks.cjs, resolvers-blocks.cjs cover structure) |
+| 8.x UNVERIFIED: that /resolvers, /what-is-a-resolver and /how-deployment-works meet the fold rule (<= 1.6x viewport) after conversion | - | FIXED | converted to tabs/disclosures (resolvers.js, story template); measured fold height not checkable from code (tests/story-blocks.cjs, resolvers-blocks.cjs cover structure) **S0 sweep 2026-10-20:** fold-contrast-readings.tsv L11/L80 (`/resolvers` 1.41/1.38), L9/L78 (`/what-is-a-resolver` 1.39/1.25), L21/L90 (`/how-deployment-works` 1.10/1.33) |
 | 8.y UNVERIFIED: owner-facing claim that explore.defxn.com / deploy.defxn.com are reachable | - | UNVERIFIED (needs browser) | status.md CAP-014 records neither answered HTTPS on 2026-10-19; not re-measured |
 | 8.z UNVERIFIED: whether capabilities are now launched on the devnet (snapshot says 0 at 2026-10-18) | - | UNVERIFIED (needs browser) | snap observation.capabilitiesLaunched = 0; needs a node read; page says so honestly (RM REGISTRY.CAPS.EMPTY) |
 | 8.w UNVERIFIED: whether the per-resolver "Open in Explore" deep links (EXPLORE + '/#' + chainId, resolvers.js) resolve to a dossier | - | UNVERIFIED (needs browser) | requires the explorer's routing; flux/explore not read |
 
+
+## S0 sweep: new findings (W4-S0, 2026-10-20)
+Counts: FIXED 4, PARTIAL 0, OPEN 3, OWNER 0, OUT-OF-REPO 0, UNVERIFIED 0
+
+Source: `fold-contrast-readings.tsv` (L<n> = TSV line). Every row below is a violation the driver reports and `docs/ux-audit/fold-contrast-allowlist.tsv` (empty) does not excuse. Proposed fixes by file are in `docs/ux-audit/fold-contrast.md`.
+
+| id / short title | severity | status | evidence |
+|---|---|---|---|
+| S0-1 fold: hidden `/reference` is 1.69x on a phone | P2 | FIXED | **W4-F1 2026-10-20:** fold-contrast-readings.tsv L94 (390: 1.30, was 1.69), L25 (1440: 1.09). Each section of a document folds behind Ark's disclosure on a phone (`foldBelow: 'phone'`; `js/pages/reference.js` foldSections, `js/pages/catalog.js` loads the blocks, `css/reference.css` phone rhythm); every layout key kept by pin, none reshaped or retired (`tests/reference-fold.cjs` against the census frozen first, `tests/fixtures/layout-keys/reference.tsv`). The other approved documents are long by nature (a whitepaper is 3 to 4x at 390 even folded, 40x open on desktop) and are not at-rest routes; not measured by the sweep |
+| S0-2 kit app bar: six controls draw a boundary under 3:1 on every route | P1 | FIXED | **W4-F1 2026-10-20:** `control-contrast` has no violation on any of the 69 routes at either width (summary-pass rows, e.g. L284 `/` 1440, L356 `/` 390; lowest control 4.29:1 on `/`, was 1.44). One token, `--dx-edge` = the palette's `--border-control`, in the kit (`defxn-product-kit/src/product.css`: switch trigger, nav group, theme toggle, menu toggle, pill, `.dx-btn` default/soft/ghost, inputs, copy, tabs, file) and in `css/navigation.css` (network pill, MENU). Held to 3:1 on canvas and surface in all 10 site themes by `defxn-product-kit/test/kit.test.mjs`, and measured in a browser across the 10 themes (1440) and 5 (390) |
+| S0-3 editor: "Connect project folder" notice button is 1.28:1 | P1 | OPEN | fold-contrast-readings.tsv L210-L214 (1440), L285-L289 (390): text `#cfcdcc` on fill `#05cbc7` in `div.notice-actions > button.btn.small`, in all three editor states. The first-run banner's primary action is unreadable |
+| S0-4 page controls under 3:1 outside the app bar | P1 | FIXED | **W4-F1 2026-10-20:** no `control-contrast` violation on `/deposits` (L299, L371), `/account/domains` (L296, L368), `/account`, `/bundle-deployer` (L297), `/treasury` (L298), `/dao` (L316), `/explore` (L289, L361), `/experiments` (L287, L359), `/chain` (L314), the five lifecycle pages, `/download` (L317), `/deploy` (L318), `/palette` (L290, L362). Fixed in the variant, not the page: `css/components.css` (soft, quiet, choice take `--border-control`; selected choice `--reference-700`; segmented Ark tab strips; the account links no longer repainted by the link rule), the kit's `.dx-btn--soft`; fields in `css/economy-preview.css`, `css/account-domains.css`; ring on a selected `.study-tabs` / `.explore-panes` button, `.flow-toggle`; `css/download.css`, `css/page-layout.css` copy buttons. /palette specimens need no override: they are the variants. Found by the theme sweep and fixed with them: light-theme text on `.flow-record`, `.download-copy`, `.download-prompt`, Ark link-tone buttons, the selected choice edge |
+| S0-5 font size: kit header/footer strip and handoff labels under 12px | P2 | FIXED | **W4-F1 2026-10-20:** `font-size` has no violation on any route at either width (summary-pass rows, e.g. L428 `/` 1440, L500 `/` 390; smallest text on every route is 12.00px). Kit labels raised to 12px at the source (`defxn-product-kit/src/product.css`: brand sub-label, lane and product labels, `dx-onward` lane and where, footer strip, pills, badges, copy, eyebrow, field labels, refusal and frame labels; the SVG diagram label is a drawing and keeps its size; held by `kit.test.mjs` "no kit label is set under 12px"), `css/navigation.css` (account status, back home), `css/settings.css` (credit, copyright), `css/home-drafting.css` (question links) |
+| S0-6 editor chrome: header and strip controls under 3:1 | P1 | OPEN | Edit words/Edit style switch 1.10 (L797), page switcher 1.32 (L796), canvas size and Edit/Preview switches 1.14 (L799, L800), rail button 1.29 at 390 (L1183), More 1.67 (L810), New 2.34 (L798), sign out/connect 2.25 (L812, L813), Canvas view 1.89 (L811); 45 of 53 editor controls are borderless (identified by text only) |
+| S0-7 editor chrome: labels under 12px | P2 | OPEN | rail tab labels 10.5px (L1759-L1763), group labels 10px (L1764-L1765), page-row sub-labels 11px (L1766), size note 11px (L1767-L1768), status bar 11px (L1769-L1770), More menu group heads 10px (L1785) |
 
 ---
 
@@ -1190,7 +1208,7 @@ Ordered by user impact. **No P0 finding is OPEN** in any report: every P0 is FIX
 Slices below are owned by files, so agents can run in parallel without editing the same file. Where two slices need one file it is stated and one of them goes second. All Wave 4 browser checks stay UNVERIFIED until the full browser run in progress has finished; nothing here was decided by running anything.
 
 ## Step 0 (read-only, do first or alongside): measure what the code cannot decide
-- **S0 Fold and contrast sweep.** No test in the repo asserts a fold ratio (<= 1.6x) or the 3:1 control-border contrast; every fold row in pages*.md and components.md is UNVERIFIED. Add a browser driver over `ArkUI.pageCatalog` at 1440x900 and 390x844 and decide each route. Files: new `tests/browser/fold-sweep.mjs` (or extend `tests/browser/route-sweep.mjs`), `docs/ux-audit/pages-crawl.tsv` (re-crawl output). Touches no product file; page fixes then go to the slice that owns the route.
+- **S0 Fold and contrast sweep. DONE 2026-10-20 (W4-S0).** `tests/browser/fold-contrast-sweep.mjs` measures every catalog route at 1440x900 and 390x844 plus the CMS editor; readings in `docs/ux-audit/fold-contrast-readings.tsv`, summary and fix slices in `docs/ux-audit/fold-contrast.md`. 42 UNVERIFIED rows decided; the 7 new OPEN items (S0-1..S0-7) are in the section above. Rerun after each wave; the run fails until the findings are fixed or allowlisted with a reason.
 
 ## Tier 1: P0/P1 OPEN or PARTIAL, by user impact
 - **S1 CMS editor residuals (js/admin, admin-app.html, css/admin.css, css/studio-embed.css).** Own all of these files; nothing else edits them.

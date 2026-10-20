@@ -37,7 +37,8 @@
    - at >= 1280px the header is ONE row: every visible control's vertical
      centre lies within the first row's band;
    - #studioRoot starts at the header's bottom edge (no overlap, no gap)
-     and reaches the viewport bottom;
+     and reaches the viewport bottom (on a phone, the top of its action bar: #phoneBar holds the side-panel
+     button, Edit words / Edit style, Save and Publish below 600px, empty and hidden above);
    - no horizontal scroll in the app document or #studioRoot;
    - the canvas tools hide in the Sitemap (no canvas there) and stay in the
      Theme view (the canvas stays live beside the settings);
@@ -92,11 +93,12 @@ function measure(frame, selectors) {
       const r = el.getBoundingClientRect();
       const x = r.left + r.width / 2, y = r.top + r.height / 2;
       const hit = document.elementFromPoint(x, y);
-      return { sel, shown: true, cy: y, top: r.top, bottom: r.bottom, left: r.left, w: r.width, h: r.height, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hitsSelf: !!hit && (hit === el || el.contains(hit)), hit: hit ? (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ')[0] : '')) : null };
+      return { sel, shown: true, inHeader: !!el.closest('#appBar'), cy: y, top: r.top, bottom: r.bottom, left: r.left, w: r.width, h: r.height, inView: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, hitsSelf: !!hit && (hit === el || el.contains(hit)), hit: hit ? (hit.id ? '#' + hit.id : hit.tagName.toLowerCase() + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ')[0] : '')) : null };
     });
     const studioRect = studio && !studio.hidden ? studio.getBoundingClientRect() : null;
     return {
       viewport: { w: innerWidth, h: innerHeight },
+      phoneBarH: (() => { const pb = document.getElementById('phoneBar'); return pb && !pb.hidden ? pb.getBoundingClientRect().height : 0; })(),
       barHeight: barRect.height, barTop: barRect.top, barBottom: barRect.bottom,
       studio: studioRect ? { top: studioRect.top, bottom: studioRect.bottom } : null,
       barVar: getComputedStyle(document.documentElement).getPropertyValue('--app-bar-h').trim(),
@@ -150,7 +152,7 @@ async function main() {
       if (bar.count > HEADER_MAX) fail(width, `the header shows ${bar.count} controls (at most ${HEADER_MAX})`);
       if (bar.unnamed.length) fail(width, 'icon-only header controls without both a name and a tooltip: ' + bar.unnamed.join(', '));
       if (width <= PHONE) {
-        const rowsSeen = new Set(design.controls.filter((c) => c.shown && HEADER_CONTROLS.includes(c.sel)).map((c) => Math.round(c.cy / 12))).size;
+        const rowsSeen = new Set(design.controls.filter((c) => c.shown && c.inHeader && HEADER_CONTROLS.includes(c.sel)).map((c) => Math.round(c.cy / 12))).size;
         if (rowsSeen > 2) fail(width, `the phone header has ${rowsSeen} rows (at most 2)`);
         for (const c of design.controls) if (c.shown && c.sel !== '#bpNote' && (c.w < TARGET - 0.5 || c.h < TARGET - 0.5)) fail(width, `${c.sel} is ${Math.round(c.w)}x${Math.round(c.h)}px, under the ${TARGET}px touch target`);
         /* the phone-only scope is said in words, not an icon */
@@ -172,7 +174,11 @@ async function main() {
       else {
         if (design.studio.top < design.barBottom - 0.5) fail(width, `#studioRoot starts at ${design.studio.top}px, above the header's bottom edge (${design.barBottom}px)`);
         if (design.studio.top > design.barBottom + 1) fail(width, `#studioRoot starts at ${design.studio.top}px, leaving a gap below the header (${design.barBottom}px)`);
-        if (Math.abs(design.studio.bottom - design.viewport.h) > 1) fail(width, `#studioRoot ends at ${design.studio.bottom}px, not the viewport bottom (${design.viewport.h}px)`);
+        if (Math.abs(design.studio.bottom - (design.viewport.h - design.phoneBarH)) > 1) fail(width, `#studioRoot ends at ${design.studio.bottom}px, not the viewport bottom (${design.viewport.h}px) less the phone action bar (${design.phoneBarH}px)`);
+        /* a phone's action bar (2026-10-20, cms.md P1-13): the side-panel button, Edit words / Edit style, Save and Publish live in it, each exactly once; wider, the bar is empty and hidden */
+        const barAt = await frame.evaluate(() => ({ hidden: document.getElementById('phoneBar').hidden, held: [...document.getElementById('phoneBar').querySelectorAll('[id]')].map((e) => e.id).filter((id) => ['btnLeftRail', 'lensSwitch', 'save', 'publish'].includes(id)), kids: document.getElementById('phoneBar').children.length }));
+        if (width <= PHONE) { if (barAt.hidden || barAt.held.join() !== 'btnLeftRail,lensSwitch,save,publish') fail(width, 'the phone action bar does not hold the side-panel button, the lens switch, Save and Publish: ' + JSON.stringify(barAt)); }
+        else if (!barAt.hidden || barAt.kids) fail(width, 'the phone action bar is not empty and hidden on a wide screen: ' + JSON.stringify(barAt));
       }
       if (design.hScroll > 0) fail(width, `the app document scrolls horizontally by ${design.hScroll}px`);
       if (design.studioHScroll > 0) fail(width, `#studioRoot scrolls horizontally by ${design.studioHScroll}px`);
@@ -214,6 +220,11 @@ async function main() {
           const sheet = await measure(frame, ['#sheetClose']);
           if (!sheet.controls[0].shown || !sheet.controls[0].hitsSelf || !sheet.controls[0].inView) fail(width, `the Page fields sheet's close button is not reachable (${sheet.controls[0].hit})`);
           if (sheet.hScroll > 0) fail(width, `the open sheet makes the page scroll horizontally by ${sheet.hScroll}px`);
+          /* the sheet's tab strip scrolls sideways at a phone's width; Ark hides its scrollbar, so a thin one and an edge fade
+             are brought back (cms.md P1-13: nothing said "Advanced" was off the right edge); the sheet and a bottom-sheet stop above the action bar */
+          const strip = await frame.evaluate(() => { const l = document.querySelector('#sheet .page-editor-tabs [role="tablist"]'); if (!l) return null; const cs = getComputedStyle(l); return { overflows: l.scrollWidth > l.clientWidth + 1, scrollbar: cs.scrollbarWidth, cue: cs.backgroundAttachment.includes('local'), sheetBottom: document.getElementById('sheet').getBoundingClientRect().bottom, barTop: document.getElementById('phoneBar').hidden ? innerHeight : document.getElementById('phoneBar').getBoundingClientRect().top }; });
+          if (strip && width <= PHONE && strip.overflows && (strip.scrollbar === 'none' || !strip.cue)) fail(width, 'the Page settings tab strip scrolls sideways with no visible cue: ' + JSON.stringify(strip));
+          if (strip && strip.sheetBottom > strip.barTop + 1) fail(width, `the Page fields sheet ends at ${strip.sheetBottom}px, under the phone action bar (${strip.barTop}px)`);
           if (shotDir) await page.screenshot({ path: path.join(shotDir, `header-reach-${width}-fields.png`) });
           await frame.press('#sheetClose', 'Escape');
           if (!(await frame.evaluate(() => document.getElementById('sheet').hidden))) fail(width, 'Escape did not close the Page fields sheet');

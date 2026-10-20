@@ -178,7 +178,7 @@
     openSheet({ key: 'fields', kicker: 'Page settings', title: itemTitle(item), item: item,
       anchor: opts.anchor || $('btnPageFields'), transient: !!opts.transient, focus: opts.focus,
       mount: item ? (item.kind === 'page'
-        ? { name: 'renderPageFields', args: [item.id].concat(opts.tab ? [{ tab: opts.tab }] : []), label: 'This page’s fields' }
+        ? { name: 'renderPageFields', args: [item.id].concat(opts.tab || opts.field ? [{ tab: opts.tab, field: opts.field }] : []), label: 'This page’s fields' }
         : { name: 'renderArticleFields', args: [item.id], label: 'This article’s fields' }) : null,
       build: item ? null : function (body) {
         body.appendChild(h('p', { class: 'hint seo-refusal', role: 'note', text: 'No page fields for ' + state.cmsCurrentRoute + ': no manifest in js/content/manifests/ has this route and it is not an article, so its words live in its page module (js/pages/), not in a draft this editor saves. To edit them here, give the page a manifest; its SEO is the page picker’s SEO popover, its shapes are in Theme.' }));

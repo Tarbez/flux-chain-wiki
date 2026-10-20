@@ -78,10 +78,33 @@
     };
   }
 
+  /* /what-is-a-resolver carries two of the content audit's five diagrams (W4-S13), drawn from
+     js/content/manifests/resolver.js `meta.diagrams` by js/pages/resolver-page-parts.js:
+       resolver-layers      How it works, after the steps: base chain -> capabilities -> resolver chains,
+                            with the capabilities and chains read from the dated registry snapshot
+       launched-vs-served   Evidence, before the sources: a launched resolver answers nothing until a
+                            provider announces for it
+     The layers fold at every width (tall: open, How it works ran to 2.2 screens at 1440 and 2.8 on a phone), launched-versus-served too (open inline it took Evidence from 1.3 to 1.8 screens at 1440), each behind "Show ..." (Ark's disclosure: a press away, never removed) and
+     leads with the plain sentence the page lost in its conversion (BODY2, BODY3 -- the manifest's
+     words for them, which nothing rendered). */
+  function addFigures(def) {
+    var parts = ArkUI.resolverPageParts;
+    if (!parts) return def;
+    var layers = parts.figureBlock('resolver', 'resolver-layers', { id: 'resolver-layers', foldBelow: 'always', lead: 'copy:RESOLVER.BODY2', more: 'Show how the layers fit', less: 'Hide the layers' });
+    var served = parts.figureBlock('resolver', 'launched-vs-served', { id: 'resolver-served', foldBelow: 'always', lead: 'copy:RESOLVER.BODY3', more: 'Show launched versus served', less: 'Hide launched versus served' });
+    def.slots = def.slots || {};
+    def.slots[layers.slot] = layers.node; def.slots[served.slot] = served.node;
+    def.depth.context.blocks = (def.depth.context.blocks || []).concat([layers.spec]);
+    var evidence = def.depth.reference.blocks || [], last = evidence.length - 1;
+    /* before the Sources row, which stays the view's last line */
+    def.depth.reference.blocks = evidence.slice(0, last).concat([served.spec], evidence.slice(last));
+    return def;
+  }
+
   ArkUI.pageModules.resolverGuide = {
     referencesDef: referencesDef,
     mount: function (host, page) {
-      var def = page === 'resolver' ? ArkUI.resolverLabDef(page) : referencesDef(page);
+      var def = page === 'resolver' ? addFigures(ArkUI.resolverLabDef(page)) : referencesDef(page);
       var el = ArkUI.story.mount(def, host);
       if (def.afterMount) def.afterMount(el);
       return el;

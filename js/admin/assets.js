@@ -3,8 +3,9 @@
    ---------------------------------------------------------------------
    Owns: the Media panel -- renderMediaPanel(container), drawn into whatever container the
    shell gives it (the rail's Media tab, ~280px): every image (ArkAsset) as a grid or a list
-   with its dirty dot, New image, and per image an inline detail -- preview, label, replace
-   the file, Revert, Delete. Also reading a file into an asset (readFileAsAsset; adding an
+   with its dirty dot, New image, and per image an inline detail -- preview, Alt text, Replace
+   image, Revert, Delete. Files are chosen with controls.js filePicker (a styled button and a
+   drop target over the native input), never the browser's bare "Choose File" box. Also reading a file into an asset (readFileAsAsset; adding an
    image beside a shape picker is quickAddAsset, js/admin/shapes.js, through it).
    Must not: write files itself (js/admin/save.js does).
    ===================================================================== */
@@ -14,7 +15,8 @@
   var state = A.state, status = A.status, h = A.h, touch = A.touch,
       removeItemFile = A.removeItemFile, afterDelete = A.afterDelete, ctlField = A.ctlField,
       paintInto = A.paintInto, panelHead = A.panelHead, itemsChanged = A.itemsChanged,
-      itemDirty = A.itemDirty, afterItemRemoved = A.afterItemRemoved, deleteItem = A.deleteItem;
+      itemDirty = A.itemDirty, afterItemRemoved = A.afterItemRemoved, deleteItem = A.deleteItem,
+      filePicker = A.filePicker;
   /* the bridge's (js/admin/bridge.js); skipped when no canvas is there to show it */
   function notifyPreviewAssets() { if (typeof A.notifyPreviewAssets === 'function') A.notifyPreviewAssets(); }
 
@@ -40,27 +42,31 @@
     box.appendChild(panelHead(asset.label || id, 'js/content/assets/' + id + '.js', 'asset', id));
     var preview = h('img', { src: assetSrc(asset), alt: asset.label, class: 'asset-preview' });
     box.appendChild(preview);
+    /* "Alt text" is the image's stored label: it is what the image is called in this list AND what
+       it says to someone who cannot see it (the preview's alt), so one field serves both
+       (docs/ux-audit/cms.md P1-11: select an image, get Replace image and Alt text) */
     var label = ctlField({ get: function () { return asset.label; }, set: function (_k, v) {
       asset.label = v; preview.alt = v;
       var name = box.parentNode && box.parentNode.querySelector('[data-cms-item="asset:' + id + '"] .media-name');
       if (name) name.textContent = v || id;
       touch({ kind: 'asset', id: id });
-    } }, 'Label', 'label', { type: 'text', live: true, id: 'as-' + id + '-label' });
+    } }, 'Alt text', 'label', { type: 'text', live: true, id: 'as-' + id + '-label', ariaLabel: 'Alt text',
+      hint: 'Describes the image for people who cannot see it. It is also this image\u2019s name in the list.' });
     label.classList.add('field');
     box.appendChild(label);
-    var file = h('input', { type: 'file', id: 'as-' + id + '-file', accept: ArkAsset.mimeTypes.join(',') });
-    file.addEventListener('change', function () {
-      var picked = file.files && file.files[0];
-      if (!picked) return;
-      readFileAsAsset(picked, function (next) {
-        asset.mime = next.mime; asset.dataBase64 = next.dataBase64;
-        preview.src = assetSrc(asset);
-        var thumb = box.parentNode && box.parentNode.querySelector('[data-cms-item="asset:' + id + '"] img');
-        if (thumb) thumb.src = preview.src;
-        touch({ kind: 'asset', id: id }); notifyPreviewAssets();
-      });
-    });
-    box.appendChild(h('div', { class: 'field' }, h('label', { for: 'as-' + id + '-file', text: 'Replace the image' }), file));
+    var pick = filePicker({ id: 'as-' + id + '-file', accept: ArkAsset.mimeTypes.join(','), label: 'Replace image', ariaLabel: 'Replace image', empty: 'or drop a new file here',
+      onFile: function (picked, input) {
+        readFileAsAsset(picked, function (next) {
+          asset.mime = next.mime; asset.dataBase64 = next.dataBase64;
+          preview.src = assetSrc(asset);
+          var thumb = box.parentNode && box.parentNode.querySelector('[data-cms-item="asset:' + id + '"] img');
+          if (thumb) thumb.src = preview.src;
+          touch({ kind: 'asset', id: id }); notifyPreviewAssets();
+          status('Image replaced. Save to keep it.', '');
+        });
+        input.value = '';   /* the same file can be chosen again after a Revert */
+      } });
+    box.appendChild(h('div', { class: 'field media-replace' }, pick));
     box.appendChild(h('div', { class: 'danger-zone' },
       h('button', { type: 'button', class: 'btn danger', text: 'Delete this image', onclick: function () { deleteItem('asset', id); } })));
     return box;
@@ -86,7 +92,7 @@
       } });
       root.appendChild(h('div', { class: 'media-head' }, h('span', { class: 'field-key', text: state.assetIds.length + ' image' + (state.assetIds.length === 1 ? '' : 's') }), views));
       root.appendChild(newAssetForm());
-      if (!state.assetIds.length) { root.appendChild(h('p', { class: 'hint', text: 'No images yet. Add one above; Save writes it to js/content/assets/.' })); return; }
+      if (!state.assetIds.length) { root.appendChild(h('p', { class: 'hint', text: 'No images yet. Choose New image above to add one; Save puts it on the site.' })); return; }
       var list = h('ul', { class: 'media-items media-' + mediaView });
       state.assetIds.forEach(function (id) {
         var asset = state.assetDrafts[id], open = state.kind === 'asset' && state.assetCurrent === id;
@@ -112,7 +118,8 @@
   function newAssetForm() {
     return h('details', { class: 'add-toggle' }, h('summary', { text: 'New image' }),
       h('form', { id: 'newAssetForm', class: 'new-form', autocomplete: 'off' },
-        h('input', { type: 'file', id: 'newAssetFile', accept: ArkAsset.mimeTypes.join(','), 'aria-label': 'Image file' }),
+        filePicker({ id: 'newAssetFile', accept: ArkAsset.mimeTypes.join(','), label: 'Choose an image', ariaLabel: 'Image file', empty: 'or drop one here' }),
+        h('p', { class: 'hint', text: 'PNG, JPEG, WebP or SVG, up to ' + ArkAsset.sizeLabel(ArkAsset.maxBytes) + '.' }),
         h('img', { id: 'newAssetPreview', class: 'asset-preview new-asset-preview', alt: '', hidden: true }),
         h('div', { class: 'new-row' }, h('input', { type: 'text', id: 'newAssetId', placeholder: 'image-name', 'aria-label': 'Image name', spellcheck: false }),
           h('button', { type: 'submit', class: 'btn', text: 'Add' }))));
@@ -133,12 +140,13 @@
     var asset = state.assetDrafts[id];
     if (!asset) { status('Nothing deleted: there is no image "' + id + '".', 'error'); return; }
     if (!state.assetDir && state.assetSaved[id] !== null) { status('Connect the project folder to delete an image: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + (asset.label || id) + '"? Anything using this image (for example the concept page) falls back to its default.')) return;
+    if (!(await A.confirmDelete('image', asset.label || id, 'Anything using this image (for example the concept page) falls back to its default.', state.assetSaved[id] === null))) return;
     try { await removeItemFile('asset', id); }
     catch (error) { status(error.message, 'error'); return; }
     if (state.assetCurrent === id) state.assetCurrent = state.assetIds[0] || null;
     afterItemRemoved('asset', id);
     status('Deleted ' + (asset.label || id) + '.' + await afterDelete(), 'ok');
+    if (typeof A.deletedNotice === 'function') A.deletedNotice(asset.label || id);
   }
 
   function assetIdSlug(filename) {
@@ -167,7 +175,8 @@
     state.assetSaved[id] = null;
     state.kind = 'asset'; state.assetCurrent = id;
     itemsChanged('asset', id); touch({ kind: 'asset', id: id }); notifyPreviewAssets();
-    status('New image. Edit the label, then Save to create it.', '');
+    if (typeof A.recordCreate === 'function') A.recordCreate('asset', id);
+    status('New image. Edit its alt text, then Save to create it.', '');
     return { ok: true, id: id };
   }
   document.addEventListener('change', function (event) {
@@ -191,7 +200,8 @@
     var idInput = form.querySelector('#newAssetId');
     var r = createAsset(idInput.value, form.cmsPending);
     if (!r.ok) return;
-    form.cmsPending = null; idInput.value = ''; form.querySelector('#newAssetFile').value = '';
+    form.cmsPending = null; idInput.value = '';
+    var chooser = form.querySelector('#newAssetFile'); chooser.value = ''; chooser.dispatchEvent(new Event('change', { bubbles: true }));   /* the picker names no file again */
     form.querySelector('#newAssetPreview').hidden = true; form.querySelector('#newAssetPreview').removeAttribute('src');
     if (typeof A.selectAsset === 'function') A.selectAsset(r.id);
   });

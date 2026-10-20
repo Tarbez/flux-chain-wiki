@@ -1,7 +1,7 @@
 /* /palette: the design-system reference page (js/pages/palette.js), a page of Ark blocks since
    2026-10-19. Its frame is css/block-page.css and its blocks are css/ark-blocks.css; what is left
    here is the page's own live content, passed to the blocks as slots: the swatch grids and the
-   button demo. (The header, section, note and onward rules went with the hand-built markup.) */
+   button demo, the type specimens (three font slots, the derived scale). (The header, section, note and onward rules went with the hand-built markup.) */
 #scene .palette-shades,#scene .palette-tones {display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;}
 #scene .palette-tones {grid-template-columns:repeat(11,minmax(0,1fr));gap:4px;}
 #scene .palette-swatch {display:grid;gap:4px;min-width:0;}
@@ -15,6 +15,13 @@
 #scene .palette-demo {justify-self:start;min-height:40px;padding:0 16px;border-radius:6px;font:600 13px var(--font-sans,sans-serif);cursor:pointer;}
 #scene .palette-choices {display:flex;flex-wrap:wrap;gap:6px;}
 #scene .palette-choices button {min-height:34px;padding:0 12px;border:1px solid;border-radius:6px;font:500 12px var(--font-sans,sans-serif);cursor:pointer;}
+#scene .palette-slots,#scene .palette-scale {display:grid;gap:12px;margin:0;padding:0;list-style:none;}
+#scene .palette-slot,#scene .palette-step {display:grid;gap:4px;min-width:0;padding:12px 16px;border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--surface));}
+#scene .palette-slot b,#scene .palette-step code {font:600 12px var(--font-mono,monospace);color:hsl(var(--text-strong));}
+#scene .palette-slot-sample {margin:0;font-size:28px;line-height:1.25;color:hsl(var(--text-strong));overflow-wrap:anywhere;}
+#scene .palette-step-sample {line-height:1.2;color:hsl(var(--text-strong));overflow-wrap:anywhere;}
+#scene .palette-slot-meta,#scene .palette-step-meta {font:400 12px/1.4 var(--font-mono,monospace);color:hsl(var(--text-faint));overflow-wrap:anywhere;}
+#scene .palette-step-probe {position:absolute;width:0;height:0;overflow:hidden;visibility:hidden;}
 @media(max-width:700px){
  #scene .palette-shades {grid-template-columns:repeat(4,minmax(0,1fr));}
  #scene .palette-tones {grid-template-columns:repeat(6,minmax(0,1fr));}

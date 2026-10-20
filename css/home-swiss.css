@@ -28,7 +28,9 @@
 
 /* The landscape sits in the scene tile; on a wide screen its height, not its width, is what is
    scarce (the fold rule), so it is capped and centred. */
-#scene .flow-rich .flow-landscape {display:block;width:100%;height:auto;max-height:min(46vh,400px);overflow:visible;}
+/* (capped by WIDTH at the drawing's 4:3 shape, not by height: a box taller than the drawing leaves the drawing smaller than
+   its box, and Ark's figure frame measures the box -- its 12px label size would come out at about 7px) */
+#scene .flow-rich .flow-landscape {display:block;width:100%;max-width:calc(min(46vh,400px) * 640 / 480);height:auto;margin-inline:auto;overflow:visible;}
 /* The landscape (js/pages/home-flow.js drawLandscape). Colour is data: every
    history is 0% saturation, and only the record whose state changes (J42),
    the head that points at it and the reference its resolution creates carry
@@ -46,12 +48,13 @@
 .land-record-main .land-front {fill:hsl(var(--anchor));stroke:hsl(var(--text-faint));}
 .land-record-main .land-side {fill:hsl(var(--surface));stroke:hsl(var(--text-faint));}
 .land-record-main .land-inscription {stroke:hsl(var(--text-muted));}
-.land-index {fill:hsl(var(--text-muted));font:500 8px var(--font-mono,monospace);letter-spacing:.04em;}
-.land-party {fill:hsl(var(--text-faint));font:500 9px var(--font-mono,monospace);letter-spacing:.04em;}
+/* Every word in the drawing is data-ark-label (js/pages/home-flow.js): Ark's figure frame sets its size, so no rule here does. */
+.land-index {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.04em;}
+.land-party {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.04em;}
 .land-party-mine {fill:hsl(var(--text-strong));font-weight:600;}
-.land-label {fill:hsl(var(--text-strong));font:600 10px var(--font-mono,monospace);letter-spacing:.14em;}
-.land-meta {fill:hsl(var(--text-muted));font:500 9px var(--font-mono,monospace);letter-spacing:.08em;text-transform:uppercase;}
-.land-value {fill:hsl(var(--text-strong));font:500 13px "Albert Sans",sans-serif;}
+.land-label {fill:hsl(var(--text-strong));font-family:var(--font-mono,monospace);font-weight:600;letter-spacing:.14em;}
+.land-meta {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
+.land-value {fill:hsl(var(--text-strong));font-family:var(--font-sans,"Albert Sans",sans-serif);font-weight:500;}
 .land-panel {fill:hsl(var(--canvas));stroke:hsl(var(--border-strong));stroke-width:1;}
 .land-panel-heavy {fill:hsl(var(--anchor));}
 .land-leader {stroke:hsl(var(--text-faint));stroke-width:1;}
@@ -77,7 +80,7 @@
 /* Icons from js/ark/icons.js, upright in tags or laid flat on the floor plane. */
 .land-icon {fill:none;stroke:hsl(var(--text-muted));stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
 .land-tag rect {fill:hsl(var(--canvas));stroke:hsl(var(--border-strong));stroke-width:1;}
-.land-tag-text {fill:hsl(var(--text-muted));font:500 9px var(--font-mono,monospace);letter-spacing:.02em;}
+.land-tag-text {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.02em;}
 .land-party-mine rect {stroke:hsl(var(--text-strong));}
 .land-party-mine .land-tag-text {fill:hsl(var(--text-strong));font-weight:600;}
 .land-party-mine .land-icon,.land-party-counterpart .land-icon {stroke:hsl(var(--text-strong));}
@@ -105,7 +108,7 @@
 .land-check[data-shown="true"],.land-peer[data-shown="true"] {opacity:1;}
 .land-check rect,.land-peer {fill:none;stroke:hsl(var(--border-strong));}
 .land-check[data-on="true"] rect,.land-peer[data-on="true"] {fill:hsl(var(--text-strong));stroke:hsl(var(--text-strong));}
-.land-check text {fill:hsl(var(--text-muted));font:600 10px var(--font-mono,monospace);}
+.land-check text {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:600;}
 .land-check[data-on="true"] text {fill:hsl(var(--canvas));}
 .land-check:nth-child(2),.land-peer:nth-child(6) {transition-delay:60ms;}
 .land-check:nth-child(3),.land-peer:nth-child(9) {transition-delay:120ms;}
@@ -126,10 +129,13 @@
 @media (max-width:600px) {
   #scene .flow-landscape :is(.land-legend,.land-readout,.land-resolver,.land-leader) {display:none;}
   #scene .flow-landscape .land-label {display:none;}
-  #scene .flow-landscape :is(.land-party,.land-head-label) {font-size:15px;}
   #scene .flow-landscape .land-index {display:none;}
+  /* At 12px on screen a name is about a quarter of the drawing's width: the other chains' names would sit on each other.
+     Yours and the example's counterparty stay; the other four are named on the map under "How it fits together". */
+  #scene .flow-landscape .land-party:not(.land-party-mine,.land-party-counterpart) {display:none;}
+  #scene .flow-rich .flow-now {padding-bottom:50px;}  /* the play button sits under the drawing, not over a name */
   /* The legend band is empty here, so pull the drawing up into it. */
-  #scene .flow-rich .flow-landscape {margin:-14% 0 -5%;}
+  #scene .flow-rich .flow-landscape {margin:-14% auto -5%;}
 }
 @media (prefers-reduced-motion:reduce) {
   #scene :is(.hl-world,.flow-landscape) *,#scene :is(.hl-world,.flow-landscape) *::before,#scene :is(.hl-world,.flow-landscape) *::after {animation:none !important;transition:none !important;}

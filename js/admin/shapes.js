@@ -103,24 +103,23 @@
         select.appendChild(h('option', { value: assetId, text: state.assetDrafts[assetId].label || assetId }));
       });
       select.value = page[slot] || '';
-      var upload = h('input', { id: id + '-upload', type: 'file', accept: ArkAsset.mimeTypes.join(',') });
-      upload.addEventListener('change', function () {
-        var file = upload.files && upload.files[0];
-        if (!file) return;
-        quickAddAsset(file, function (assetId) {
-          page[slot] = assetId;
-          page[modeKey] = 'image';
-          notifyPreviewAssets(); notifyPreviewMesh();
-          itemsChanged('asset', assetId); shapesChanged();
-          status('Added "' + assetId + '" and set it as this page’s ' + slot + ' image. Save the image and Save this page’s shapes to keep it.', 'ok');
-        });
-      });
+      /* the editor's one file chooser (controls.js filePicker): a button and a drop target over the
+         native input, whose id stays <slot id>-upload */
+      var upload = A.filePicker({ id: id + '-upload', accept: ArkAsset.mimeTypes.join(','), label: 'Upload a new image', ariaLabel: slot === 'primary' ? 'Upload an image for Shape 1' : 'Upload an image for Shape 2',
+        onFile: function (file, input) {
+          quickAddAsset(file, function (assetId) {
+            page[slot] = assetId;
+            page[modeKey] = 'image';
+            notifyPreviewAssets(); notifyPreviewMesh();
+            itemsChanged('asset', assetId); shapesChanged();
+            status('Added "' + assetId + '" and set it as this page\u2019s ' + slot + ' image. Save the image and Save this page\u2019s shapes to keep it.', 'ok');
+          });
+        } });
       box.appendChild(h('div', { class: 'field' },
         h('label', { for: modeId, text: slot === 'primary' ? 'Shape 1' : 'Shape 2' }),
         mode,
         h('label', { for: id, class: 'hint', text: slot === 'primary' ? 'Image for Shape 1' : 'Image for Shape 2' }),
         select,
-        h('label', { for: id + '-upload', class: 'hint', text: 'or upload a new image' }),
         upload));
     });
     return box;

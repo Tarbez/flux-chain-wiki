@@ -127,7 +127,8 @@ const ROUTES = {
     assert.deepEqual(seen.depth, DEPTH, route + ': the one depth label set');
     assert.equal(seen.variant, 'segmented', route + ': the depth control is segmented');
     assert.equal(seen.tablists, 1, route + ': one depth control, no second tab or pressed-button control');
-    assert.deepEqual(seen.figureFold, ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
+    // /what-is-a-resolver also carries the manifest's layers and launched-vs-served figures (W4-S13, tests/resolver-page-parts.cjs): the same fold
+    assert.deepEqual(seen.figureFold.slice().sort(), route === '/what-is-a-resolver' ? ['always', 'always', 'tablet'] : ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
     assert(seen.pager > 0, route + ': the page ends in a pager');
     assert(seen.terms > 0, route + ': the first use of a glossary word is a term');
     if (route === '/what-is-a-resolver') {

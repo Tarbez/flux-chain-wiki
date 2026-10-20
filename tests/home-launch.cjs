@@ -66,13 +66,16 @@ const ROOT = path.resolve(__dirname, '..');
     out.late = { unchanged: fleetTile(page).textContent === before };
 
     // the chosen path is remembered across mounts
-    const pathTab = (p, i) => p.querySelectorAll('#home-questions [data-ark-block="tabs"]')[1].querySelectorAll('[role="tab"]')[i];
+    /* the path picker is the "Where do I start?" view's own tabs, the example picker "See it work"'s (the steps inside each scene are tabs too) */
+    const VIEWS = ['start', 'walk', 'model', 'evidence', 'faq']; // the questions' order (js/pages/home.js)
+    const viewTabs = (p, value) => p.querySelectorAll('#home-questions > [data-ark-part="tabs-content"]')[VIEWS.indexOf(value)].querySelector(':scope > [data-ark-block="tabs"]');
+    const pathTab = (p, i) => viewTabs(p, 'start').querySelectorAll(':scope > [data-ark-part="tabs-list"] [role="tab"]')[i];
     pathTab(page, 2).click();
     const again = mount();
     out.remembered = pathTab(again, 2).getAttribute('aria-selected');
 
     // choosing an example inks its counterparty on the map
-    const caseTab = (p, i) => p.querySelectorAll('#home-questions [data-ark-block="tabs"]')[0].querySelectorAll('[role="tab"]')[i];
+    const caseTab = (p, i) => viewTabs(p, 'walk').querySelectorAll(':scope > [data-ark-part="tabs-list"] [role="tab"]')[i];
     caseTab(again, 2).click(); // Staking
     out.inked = [...again.querySelectorAll('[data-ark-slot="world"] .world-line[data-selected="true"]')].map((l) => l.getAttribute('data-name'));
     again.arkDispose();

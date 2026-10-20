@@ -57,4 +57,31 @@ for (const file of ['js/pages/about.js', 'js/pages/home.js']) assert(!/,\s*'open
 for (const [file, re] of [['css/navigation.css', /\.ark-link::after \{ content:"↗"/], ['css/home.css', /home-question-links a::after \{ content:"↗"/], ['js/pages/lifecycle.js', /Read the agreement guide ↗/], ['js/pages/economy-preview.js', /label \+ ' ↗'/]])
   assert(!re.test(read(file)), file + ': internal links do not carry ↗');
 
+// W4-S14 (2026-10-20, ledger WR-3 and the lifecycle / sheet next-step rows): the Laws step led to the registry, the math and the examples but
+// not to the list of what resolves; the lifecycle and the sheets named no way out of their own journey. Both are derived from the journey
+// table (js/ark/page-kit.js), never typed: no page is named in the code that renders them.
+{
+  assert(/ArkUI\.journeyLead\(page\)/.test(read('js/pages/resolver-lab.js')) && /concat\(\[\{ label: 'Inspect reference evidence'[^\n]*resolutions\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver\'s pager leads on to the journey\'s start (Resolutions)');
+  const kit = read('js/ark/page-kit.js');
+  assert(!/route:(resolutions|stats|proximity|download)/.test(kit.replace(/\/\*[\s\S]*?\*\//g, '')), 'the page kit names no page: its links come from ArkSitePages');
+  const ctx = vm.createContext({ ArkUI: { el: () => ({}) }, window: {} });
+  vm.runInContext(read('js/content/site-pages.js') + '\n;this.ArkSitePages = ArkSitePages;', ctx);
+  vm.runInContext(kit, ctx);
+  const hrefs = (key) => JSON.parse(JSON.stringify(ctx.ArkUI.nextSteps(key).map((item) => item.href))); // out of the vm realm, for deepStrictEqual
+  assert.deepEqual(hrefs('lifecycle/receipt'), ['route:resolutions', 'route:stats', 'route:proximity'], '/lifecycle/receipt leads out: resolve something, the evidence, the model');
+  assert.deepEqual(hrefs('lifecycle'), hrefs('concept/practice'), 'the lifecycle and the sheets share one rule');
+  assert(hrefs('dao').includes('route:proximity') && hrefs('concept/practice').includes('route:proximity'), '/dao and /concept/practice lead to the interactive model (/experiments)');
+  assert.deepEqual(hrefs('proximity'), [], 'the last journey has no journey after it');
+  assert.equal(ctx.ArkUI.journeyLead('resolver').href, 'route:resolutions', 'the start of the build journey is Resolutions');
+  assert.equal(ctx.ArkUI.journeyLead('resolutions'), null, 'a journey\'s own start does not lead to itself');
+  for (const file of ['js/pages/lifecycle.js', 'js/pages/sheet.js']) assert(/ArkUI\.nextSteps\(/.test(read(file)), file + ' takes its ways on from ArkUI.nextSteps');
+}
+// S8 (ledger /experiments P3): the model's state is written to and restored from its catalog address, not the alias.
+{
+  const studio = read('js/studio.js');
+  assert(!/'\/experiments\/lab'/.test(studio), 'js/studio.js names no address of its own: the model\'s path is its catalog entry\'s');
+  assert(/module === 'lab'/.test(studio) && /ArkUI\.route\.write\(home\.path,/.test(studio) && /home\.paths\.indexOf\(ArkUI\.route\.path\(\)\)<0/.test(studio), 'it writes to the canonical path and restores from it and its old addresses');
+  assert(!/-H-#\/experiments\/lab/.test(read('js/scene.flux.js')), 'the shell pattern links /experiments, not the merged-away address');
+}
+
 console.log('PASS: the former orphans have inbound links, the former dead ends lead on, and ↗ marks only links that leave the site.');

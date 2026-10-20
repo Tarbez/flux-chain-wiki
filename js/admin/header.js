@@ -29,7 +29,7 @@
   /* false until the popover code below has run. In the single-file editor this held syncHeader()
      off until the Studio block's `let view`/popover state existed; view and the popover anchor
      are shared state now (js/admin/state.js), so it only says this file has finished loading. */
-  var headerReady = false;
+  var headerReady = false, viewGroup = null, VIEWS = [];   /* the More menu's Show group, wired below */
 
   /* the open popover's builder (its element and anchor are state.popEl/popAnchor): refreshPop() reruns it */
   let popBuild = null;
@@ -180,7 +180,7 @@
      renderList() (every draft change) and setView(). */
   function syncHeader() {
     if (!headerReady) return;
-    for (const b of $('viewSwitch').querySelectorAll('[data-view]')) b.setAttribute('aria-pressed', String(b.dataset.view === state.view));
+    if (viewGroup) viewGroup.select(VIEWS.indexOf(state.view));
     $('canvasTools').hidden = state.view === 'map';
     /* Design tips are about how the page looks: the Edit style lens's, never a score shouting
        on every page in both lenses (docs/ux-audit/cms.md P1-10) */
@@ -231,7 +231,12 @@
   $('backgroundBtn').addEventListener('click', openCanvasTransitionsPopover);
   /* The views of the one site: the page, Site map, Site style (setView, js/admin/sitemap.js), in
      the More menu. Page transition is wired next to its popover (openCanvasTransitionsPopover). */
-  for (const b of $('viewSwitch').querySelectorAll('[data-view]')) b.addEventListener('click', () => setView(b.dataset.view));
+  /* Ark's toggle group like the lens and screen-size groups (js/admin/ark-host.js arkSegGroup): one
+     pressed, one tab stop, arrows between the three; a pick calls the one setView, and a view set by
+     another route moves the pressed state through select() in syncHeader */
+  const viewButtons = [...$('viewSwitch').querySelectorAll('[data-view]')];
+  VIEWS = viewButtons.map((b) => b.dataset.view);
+  viewGroup = A.arkSegGroup($('viewSwitch'), viewButtons, { selected: VIEWS.indexOf(state.view), onPick: (i) => setView(VIEWS[i]) });
 
   /* The screen-size and Edit / Preview groups are Ark's toggle groups (js/admin/ark-host.js
      arkSegGroup): one pressed, one tab stop, arrows between the choices. The breakpoint buttons
@@ -250,6 +255,31 @@
       if (state.live && state.view === 'map') setView('design');
       layoutStage(); schedule();
     } });
+  /* A phone's action bar (docs/ux-audit/cms.md P1-13). Up to 599px the four controls a thumb needs --
+     the side panel, Edit words / Edit style, Save, Publish -- are moved into #phoneBar at the foot of the
+     screen, and back to their places in the header above that width. MOVED, not copied: one element
+     each, the same ids and listeners, so nothing is duplicated and nothing is rewired (a comment
+     marks each one's place). The bar publishes its height as --phone-bar-h, which the workspace, the
+     drawer, the sheet, the status strip and the toasts keep clear of (css/admin.css, css/studio-embed.css). */
+  const phoneBar = $('phoneBar'), phoneQuery = window.matchMedia('(max-width: 599px)');
+  const PHONE_ORDER = ['btnLeftRail', 'lensSwitch', 'save', 'publish'], places = {};
+  function seatPhoneBar() {
+    const phone = phoneQuery.matches;
+    if (phone) {
+      PHONE_ORDER.forEach((id) => {
+        const el = $(id); if (!el || places[id]) return;
+        places[id] = document.createComment('phone-bar: ' + id + ' lives here on a wide screen'); el.parentNode.insertBefore(places[id], el);
+        phoneBar.appendChild(el);
+      });
+    } else {
+      PHONE_ORDER.forEach((id) => { const el = $(id), mark = places[id]; if (!el || !mark) return; mark.parentNode.insertBefore(el, mark); mark.remove(); delete places[id]; });
+    }
+    phoneBar.hidden = !phone;
+    document.documentElement.style.setProperty('--phone-bar-h', phone ? phoneBar.getBoundingClientRect().height + 'px' : '0px');
+  }
+  phoneQuery.addEventListener('change', () => { seatPhoneBar(); layoutStage(); });
+  seatPhoneBar();
+  if (typeof ResizeObserver === 'function') new ResizeObserver(() => { if (phoneQuery.matches) document.documentElement.style.setProperty('--phone-bar-h', phoneBar.getBoundingClientRect().height + 'px'); }).observe(phoneBar);
   $('btnUndo').addEventListener('click', () => undo());
   $('btnRedo').addEventListener('click', () => redo());
   A.provide({ closePop: closePop, openCanvasTransitionsPopover: openCanvasTransitionsPopover,

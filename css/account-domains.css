@@ -6,7 +6,7 @@
 #scene [data-domains-form] label { grid-column:1/-1; color:hsl(var(--text-muted)); font:500 12px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-domains-page [data-domains-form] input {
   width:100%; min-height:44px; box-sizing:border-box; padding:10px 12px;
-  border:1px solid hsl(var(--border-default)); border-radius:2px;
+  border:1px solid hsl(var(--border-control)); border-radius:2px;
   background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 13px/1.4 var(--font-mono,ui-monospace,monospace);
 }
 #scene .account-domains-page [data-domains-form] button { min-height:44px; }

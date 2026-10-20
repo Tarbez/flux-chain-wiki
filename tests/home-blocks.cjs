@@ -32,6 +32,7 @@ const ROUTE = '/';
 const MORE = 'page:/section:2/div:1/details:1/div:1';
 const EVIDENCE = MORE + '/section:3';
 const CLOSING = 'page:/footer:1';
+const SCENE = 'page:/section:1/section:1/div:2/div:1';
 
 /* Why each old key whose words changed shape still lands on its successor. */
 const reshaped = {
@@ -83,7 +84,16 @@ const reshaped = {
   [MORE + '/div:1/span:1']: 'the "unavailable" state is the tile\'s absent reason now',
   [MORE + '/section:4']: 'the FAQ section is the "Questions" view',
   [CLOSING + '/div:2']: 'the closing\'s words are the "Not sure yet" path now',
-  [CLOSING + '/div:2/a:1']: 'its "Explore DEFXN" line is the pager\'s next link'
+  [CLOSING + '/div:2/a:1']: 'its "Explore DEFXN" line is the pager\'s next link',
+  /* The scene's step list (ol > li > button > number, icon, name) is the step picker's Ark tabs now (ledger: `home-cycle-step`
+     / `flow-record` were hand-built, 1.4:1 on their boundary): its list and each step's tab keep the old list's and button's keys. */
+  [SCENE]: 'the scene\'s frame began with the step list\'s words; the list is the step picker above the scene\'s tile now (same words, then the tile)',
+  [SCENE + '/ol:1']: 'the step list is the picker\'s tab list (the numbers before each name, and the icons, are gone)',
+  [SCENE + '/ol:1/li:1/button:1']: 'step 1, Sign, is a tab: its label is the name alone',
+  [SCENE + '/ol:1/li:2/button:1']: 'step 2, Check, likewise',
+  [SCENE + '/ol:1/li:3/button:1']: 'step 3, Extend, likewise',
+  [SCENE + '/ol:1/li:4/button:1']: 'step 4, Replicate, likewise',
+  [SCENE + '/ol:1/li:5/button:1']: 'step 5, Resolve, likewise'
 };
 
 /* Why nothing carries these keys now. */
@@ -125,6 +135,8 @@ function retireUnder(census, prefix, reason, test) {
   for (const old of census) if (old.key.startsWith(prefix) && (!test || test(old.key)) && !retired[old.key] && !reshaped[old.key]) retired[old.key] = reason;
 }
 function prepare(census) {
+  retireUnder(census, SCENE + '/ol:1/li:', 'the step list\'s list item, number, name span and icon: a tab is one element whose label is the name, which keeps the old button\'s key',
+    (key) => /\/ol:1\/li:\d($|\/button:1\/(span|svg))/.test(key));
   retireUnder(census, CLOSING + '/div:1', 'the closing block\'s decorative art (aria-hidden, no words); the closing is a short path in "Where do I start?" now');
   retireUnder(census, MORE + '/section:2/div:1/article:', 'the decorative record studies ("01".."05", aria-hidden) on the principle cards', (key) => /\/article:\d\/div:1($|\/)/.test(key));
   /* The icons js/ark/icons.js drew beside labels, links and buttons; Ark's blocks draw none (the
@@ -157,7 +169,8 @@ if (require.main === module) (async () => {
     const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
     const tabsOf = (root) => [...root.querySelector(':scope > [data-ark-part="tabs-list"]').querySelectorAll('[role="tab"]')].map((t) => t.textContent.trim());
     const questions = page.querySelector('#home-questions');
-    const nested = [...questions.querySelectorAll('[data-ark-block="tabs"]')];
+    // (the five steps inside each scene are Ark tabs too; they are the scene's, not a view of the question)
+    const nested = [...questions.querySelectorAll('[data-ark-block="tabs"]')].filter((tabs) => !tabs.closest('.flow'));
     const stats = [...page.querySelectorAll('[data-ark-part="stat"]')].map((s) => ({
       label: text(s.querySelector('[data-ark-part="stat-label"]')),
       number: text(s.querySelector('.ark-stat__number')),
@@ -170,9 +183,10 @@ if (require.main === module) (async () => {
       h1: { id: (page.querySelector('h1') || {}).id, count: page.querySelectorAll('h1').length, keys: (page.querySelector('h1') || { getAttribute() {} }).getAttribute('data-ark-copy-keys') },
       primary: [...page.querySelectorAll('#home-hero [data-tone="primary"]')].map((a) => text(a) + ' ' + a.getAttribute('data-scene-link')),
       questions: tabsOf(questions),
-      cases: tabsOf(nested[0]), paths: tabsOf(nested[1]), evidence: tabsOf(nested[2]),
+      paths: tabsOf(nested[0]), cases: tabsOf(nested[1]), evidence: tabsOf(nested[2]),
       scenes: page.querySelectorAll('.flow-rich').length,
-      steps: [...page.querySelectorAll('.flow-rich')].map((f) => f.querySelectorAll('.flow-ledger button').length),
+      steps: [...page.querySelectorAll('.flow-rich')].map((f) => f.querySelectorAll(':scope > [data-ark-block="tabs"] > [data-ark-part="tabs-list"] [role="tab"]').length),
+      handBuilt: page.querySelectorAll('.flow-ledger, .flow-record, .home-cycle-step, .flow-says').length,
       world: page.querySelectorAll('[data-ark-slot="world"] .world-line:not(.world-mine)').length,
       captions: [...page.querySelectorAll('[data-ark-part="figure-caption"]')].map(text),
       links: [...page.querySelectorAll('a[data-scene-link]')].map((a) => a.getAttribute('data-scene-link')),
@@ -192,12 +206,13 @@ if (require.main === module) (async () => {
   assert.equal(seen.h1.count, 1, 'one main heading');
   assert.equal(seen.h1.keys, 'HOME.TITLE', 'the heading is the manifest\'s HOME.TITLE (the Content lens binds it)');
   assert.deepEqual(seen.primary, ['Follow the line→ deployment'], 'one primary action, a real button, to the same place');
-  assert.deepEqual(seen.questions, ['See it work', 'Where do I start?', 'How it fits together', 'What is measured?', 'Questions'], 'organised by the visitor\'s next question, not one "More"');
+  assert.deepEqual(seen.questions, ['Where do I start?', 'See it work', 'How it fits together', 'What is measured?', 'Questions'], 'organised by the visitor\'s next question, not one "More", and the first view under the hero is the way in (the three paths), not the scene (ledger: promote Explore/Build/Operate under the hero)');
   assert.deepEqual(seen.cases, ['Swaps', 'Transfers', 'Staking', 'Governance'], 'every example is still offered');
   assert.deepEqual(seen.paths, ['Explore', 'Build', 'Operate', 'Not sure yet'], 'the three paths, plus the way on for anyone not sure yet');
   assert.deepEqual(seen.evidence, ['Benchmarks', 'The fleet now', 'How to read them']);
   assert.equal(seen.scenes, 4, 'one scene per example');
-  assert(seen.steps.every((n) => n === 5), 'five steps in every scene');
+  assert(seen.steps.every((n) => n === 5), 'five steps in every scene, as Ark tabs');
+  assert.equal(seen.handBuilt, 0, 'no hand-built step list (`flow-record`, `home-cycle-step`) or separate caption is left: the steps are Ark tabs (ledger: home-cycle-step / flow-record)');
   assert.equal(seen.world, 5, 'the transit map draws the five chains around yours');
   assert(seen.captions.some((c) => /Your history begins here/.test(c) && /Illustrative \/ not live traffic/.test(c) && /you\.fxn/.test(c)), 'the old action\'s kicker and the "not live" note introduce the scene');
   for (const route of ['deployment', 'about', 'chain', 'stats', 'resolver', 'resolvers', 'download', 'deploy', 'explorer', 'dao']) assert(seen.links.includes(route), 'still links ' + route);

@@ -11,9 +11,11 @@
          Developer details (controls.js devDetails), SEO's Advanced, Unused fields, a
          version row's longer change list: ArkKit.createArkAccordion, one collapsible item,
          in Ark's `disclosure` block markup (css/ark-blocks.css draws it).
+     arkTabsOn({ list, triggers, panels, values, value, onChange })  -> { select(value) }
+         the same tabs over elements the page already has: the rail's five tabs (js/admin/rail.js).
      arkSegGroup(root, buttons, { selected, onPick })  -> { select(index) }
          the hand-built segmented groups (Edit words / Edit style, screen size, Edit / Preview,
-         the new item's kind, Media's Grid / List): ArkKit.createArkToggleGroup, one pressed,
+         the new item's kind, Media's Grid / List, the More menu's Show: page / site map / site style): ArkKit.createArkToggleGroup, one pressed,
          one tab stop, arrows between the choices. Form rows use controls.js ctlSegField.
    Why it exists (docs/ux-audit/components.md §4 "Admin tabs / disclosure", cms.md (c)): the
    editor carried its own tabs and disclosure (js/admin/primitives.js, 109 lines) whose
@@ -88,6 +90,48 @@
       show(current);
     }
     return root;
+  }
+
+  /* Tabs over elements the page already has (the rail's five tabs, whose panels are separate panes
+     elsewhere in the document): options { list, triggers, panels, values, value, onChange(value) }.
+     Ark's tabs own the roles, aria-selected / aria-controls, the roving tab stop and the arrow keys
+     (automatic activation: an arrow selects as it moves, as the rail always did). `onChange` is told of
+     a choice the PERSON made; the returned select(value) moves the selection for a change made by
+     another route (a lens that opens its own tab) and reports nothing. Without ArkKit the same
+     buttons work by click and arrow keys with the same attributes. */
+  function arkTabsOn(options) {
+    var values = options.values, triggers = options.triggers, panels = options.panels;
+    var current = values.indexOf(options.value) >= 0 ? options.value : values[0];
+    var told = function (value) { if (value && value !== current) { current = value; if (typeof options.onChange === 'function') options.onChange(value); } };
+    var host = arkHost(), kit = window.ArkKit;
+    if (host && typeof kit.createArkTabs === 'function') {
+      var ready = false, syncing = false;
+      var handle = kit.createArkTabs(host, { listRef: host.bind(options.list, 'tablist'), tabRefs: triggers.map(function (t) { return host.bind(t, 'tab'); }),
+        panelRefs: panels.map(function (p) { return host.bind(p, 'tabpanel'); }), values: values, defaultValue: current, activationMode: 'automatic',
+        onValueChange: function (value) { if (ready && !syncing) told(value); } });
+      ready = true;
+      return { select: function (value) {
+        if (values.indexOf(value) < 0 || value === current) return;
+        current = value; syncing = true; try { handle.setValue(value); } finally { syncing = false; }
+      } };
+    }
+    var show = function (value) {
+      triggers.forEach(function (t, i) {
+        var on = values[i] === value;
+        t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; panels[i].hidden = !on;
+      });
+    };
+    options.list.setAttribute('role', 'tablist');
+    triggers.forEach(function (t, i) { t.setAttribute('role', 'tab'); t.addEventListener('click', function () { show(values[i]); told(values[i]); }); });
+    options.list.addEventListener('keydown', function (e) {
+      var i = triggers.indexOf(document.activeElement);
+      if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
+      e.preventDefault();
+      var next = (i + (e.key === 'ArrowRight' ? 1 : triggers.length - 1)) % triggers.length;
+      show(values[next]); told(values[next]); triggers[next].focus();
+    });
+    show(current);
+    return { select: function (value) { if (values.indexOf(value) >= 0) { current = value; show(value); } } };
   }
 
   /* A disclosure: Ark's `disclosure` block markup (its trigger with the +/- icon, its panel),
@@ -198,5 +242,5 @@
     return { open: function (v) { set(v, true); }, close: function (v) { set(v, false); } };
   }
 
-  A.provide({ arkAccordion: arkAccordion, arkDisclosure: arkDisclosure, arkHost: arkHost, arkSegGroup: arkSegGroup, arkTabs: arkTabs });
+  A.provide({ arkAccordion: arkAccordion, arkDisclosure: arkDisclosure, arkHost: arkHost, arkSegGroup: arkSegGroup, arkTabs: arkTabs, arkTabsOn: arkTabsOn });
 })();

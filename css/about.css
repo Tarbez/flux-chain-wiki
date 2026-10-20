@@ -22,12 +22,14 @@
 .about-slab[data-selected="true"] .about-slab-mark {fill:hsl(var(--text-strong));}
 .about-slab[data-selected="true"] .about-slab-bar {stroke:hsl(var(--text-strong));}
 .about-slab-label rect {fill:hsl(var(--canvas));stroke:hsl(var(--border-strong));stroke-width:1;transition:stroke 320ms;}
-.about-slab-label text {fill:hsl(var(--text-muted));font:500 13px var(--font-mono,monospace);letter-spacing:.02em;}
+/* the words' size is Ark's: each is data-ark-label (js/pages/about.js), drawn at the figure frame's label size */
+.about-slab-label text {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.02em;}
 .about-label-icon path {fill:none;stroke:hsl(var(--text-muted));stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .about-slab-label[data-selected="true"] rect {stroke:hsl(var(--text-strong));}
 .about-slab-label[data-selected="true"] text {fill:hsl(var(--text-strong));font-weight:600;}
 .about-slab-label[data-selected="true"] .about-label-icon path {stroke:hsl(var(--text-strong));}
 /* In Ark's figure frame the drawing takes the frame's width; on a wide screen its height is what
    is scarce (the fold rule), so it is capped and centred. */
-#scene .about-layers-figure {overflow:visible;max-height:min(46vh,400px);}
-@media (max-width:600px) { #scene .about-layers-figure {max-height:190px;} }
+#scene .about-layers-figure {overflow:visible;display:block;width:100%;height:auto;max-width:calc(min(46vh,400px) * 560 / 420);margin-inline:auto;}  /* capped by WIDTH at the drawing's shape: a box taller than the drawing would make Ark's measured label size come out small */
+/* On a phone the picker right under the drawing names the three layers, and at 12px on screen the names would be a third of the drawing: it is drawn without them. */
+@media (max-width:600px) { #scene .about-layers-figure {max-width:calc(190px * 560 / 420);} #scene .about-slab-labels {display:none;} }

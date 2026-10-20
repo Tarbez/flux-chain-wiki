@@ -334,8 +334,15 @@
      Which tab each lens opens is remembered (state.railTab, per browser): Pages in the Content
      lens and Layers in the Design lens until changed. */
   const TABS = { pages: ['tabPages', 'pagesPane'], layers: ['tabLayers', 'layersPane'], lib: ['tabLib', 'libPane'], media: ['tabMedia', 'mediaPane'], vault: ['tabVault', 'vaultPane'] };
+  /* The five tabs are Ark's tabs (js/admin/ark-host.js arkTabsOn) over the buttons and panes in
+     admin-app.html, ids unchanged: roles, aria-selected, the one tab stop and the arrow keys are
+     Ark's; a pick (a click, an arrow) comes here as showLeft, and showLeft moves Ark's selection
+     for a tab chosen by another route (the lens, a Media link). */
+  const TAB_KEYS = Object.keys(TABS);
+  let railTabs = null;
   function showLeft(which, opts) {
     if (!TABS[which]) which = 'pages';
+    if (railTabs) railTabs.select(which);
     for (const [key, ids] of Object.entries(TABS)) { $(ids[0]).setAttribute('aria-selected', String(key === which)); $(ids[0]).tabIndex = key === which ? 0 : -1; $(ids[1]).hidden = key !== which; }
     if (!opts || opts.remember !== false) {
       state.railTab[state.lens] = which;
@@ -345,15 +352,8 @@
     if (which === 'pages') renderPages();
     schedule();
   }
-  for (const [key, ids] of Object.entries(TABS)) $(ids[0]).addEventListener('click', () => showLeft(key));
-  /* arrow keys move between the tabs (one tab stop) */
-  $('studioLeft').querySelector('.tabs').addEventListener('keydown', (e) => {
-    const keys = Object.keys(TABS), i = keys.findIndex((k) => $(TABS[k][0]) === document.activeElement);
-    if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
-    e.preventDefault();
-    const next = keys[(i + (e.key === 'ArrowRight' ? 1 : keys.length - 1)) % keys.length];
-    showLeft(next); $(TABS[next][0]).focus();
-  });
+  railTabs = A.arkTabsOn({ list: $('studioLeft').querySelector('.tabs'), triggers: TAB_KEYS.map((k) => $(TABS[k][0])), panels: TAB_KEYS.map((k) => $(TABS[k][1])),
+    values: TAB_KEYS, value: state.railTab[state.lens] || 'pages', onChange: (key) => showLeft(key) });
 
   /* ---- folding the rail -------------------------------------------------------------------
      Wide: the rail folds away so the canvas takes the full width (remembered per browser, a

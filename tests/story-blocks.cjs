@@ -65,9 +65,9 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
   const catalog = read('js/pages/catalog.js');
   assert(/ArkUI\.storyScripts = ArkUI\.blockScripts\.concat\(\[ArkUI\.glossaryScript, 'js\/pages\/story\.js'\]\);/.test(catalog), 'a story route loads the blocks, the glossary and the template');
   for (const [key, file] of [['lifecycle', 'lifecycle.js'], ["'lifecycle/intent'", 'lifecycle.js'], ["'how/ask'", 'how-stories.js'], ['deployment', 'deployment.js'], ['concept', 'concept.js'], ['dao', 'sheet.js']]) {
-    assert(new RegExp('  ' + key.replace(/[/']/g, (c) => '\\' + c) + ": \\{ module: '[a-zA-Z]+', scripts: ArkUI\\.storyScripts\\.concat\\(\\['js/pages/" + file.replace('.', '\\.')).test(catalog), key + ' loads the story scripts');
+    assert(new RegExp('  ' + key.replace(/[/']/g, (c) => '\\' + c) + ": \\{ module: '[a-zA-Z]+', scripts: ArkUI\\.storyScripts\\.concat\\(\\[(?:'[^']+', )*'js/pages/" + file.replace('.', '\\.')).test(catalog), key + ' loads the story scripts');
   }
-  assert(catalog.includes("module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js'])"), 'derived theory routes load the story scripts');
+  assert(catalog.includes("module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js', 'js/ark/page-kit.js'])"), 'derived theory routes load the story scripts (and the page kit, W4-S14: the case rule and the ways on)');
 
   /* ---- every route: the page, its words, its keys ------------------------------------------- */
   const lines = [];
@@ -112,7 +112,7 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
       } else {
         const area = id.toUpperCase(), m = ArkManifest.get(id);
         Object.keys(m.fields).filter((k) => /^(TITLE|DECK|NEXT|EVIDENCE|STATUS\.(TITLE|TEXT)|LIMIT\.(TITLE|TEXT)|POINT\d+\.(TITLE|TEXT))$/.test(k) || (m.fields[k + '.HREF'] && m.fields[k + '.HREF'].kind === 'link')).forEach((k) => copy(area + '.' + k));
-        if (id === 'dao') { copy('DAO.EYEBROW'); words.push('Inspect activation gates'); }
+        if (id === 'dao') { copy('DAO.EYEBROW'); copy('NOTES.CTA'); } // /dao leads on with the words its destination authored for the link (W4-S14), not the hand-typed "Inspect activation gates"
       }
       const missing = words.filter((w) => w && !text.includes(String(w).replace(/\s+/g, ' ').toLowerCase()));
       const depth = page.querySelector('[data-story-depth]');
@@ -128,12 +128,17 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
         crumbs: [...page.querySelectorAll('[data-ark-block="breadcrumb"] [data-ark-part="breadcrumb-item"]')].map((a) => a.textContent.trim()),
         eyebrow: (page.querySelector('[data-ark-block="hero"] [data-ark-part="eyebrow"]') || {}).textContent || '',
         onward: page.querySelectorAll('[data-ark-block="pager"] a, [data-ark-block="hero"] a[data-ark-part="button"], .dx-onward a, [data-ark-block="card-grid"] a').length,
+        pager: [...page.querySelectorAll('[data-ark-block="pager"] a')].map((a) => ({ text: a.textContent.replace(/\s+/g, ' ').trim(), href: a.getAttribute('href') })),
         terms: page.querySelectorAll('[data-ark-part="term"][data-term]').length,
         refused: page.querySelectorAll('[data-ark-block-refused]').length,
         /* every link opens a real address: a copy: key in an href opened nothing */
         badHrefs: [...page.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => !/^(\/|#|https?:\/\/)/.test(h)),
         insert: page.querySelectorAll('[data-ark-insert="main"]').length,
-        hiddenByStyle: page.querySelectorAll('[style*="display: none"], [style*="display:none"]').length
+        hiddenByStyle: page.querySelectorAll('[style*="display: none"], [style*="display:none"]').length,
+        /* a chapter's record fields (inside the "Show the record's fields" disclosure): { term, value, mono } */
+        recordFacts: [...page.querySelectorAll('[data-ark-block="disclosure"] [data-ark-block="facts"] [data-ark-part="fact"]')].map((f) => ({
+          term: (f.querySelector('[data-ark-part="fact-term"]') || {}).textContent || '', value: (f.querySelector('[data-ark-part="fact-value"]') || {}).textContent || '', mono: (f.querySelector('[data-ark-part="fact-value"]') || { getAttribute() {} }).getAttribute('data-mono') === 'true'
+        }))
       };
     } });
     assert.deepEqual(seen.missing, [], route + ': every word the old page showed is still on the page');
@@ -144,13 +149,32 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
     assert.equal(seen.hiddenByStyle, 0, route + ': nothing is hidden by an inline style');
     assert(seen.onward > 0, route + ': the page is not a dead end');
     assert(seen.crumbs.length >= 2 && seen.crumbs.every((c) => !/^\d\d \//.test(c)), route + ': a breadcrumb with no ordinals');
+    /* Regression (2026-10-20): /how-deployment-works/work and /check led each record row with the raw field
+       name ("inputCid", "recipientId", "signatureB64"). A field name is the secondary, mono label under a
+       plain-language one; a person's own label (the ask chapter's "Snapshot") stays as it was. */
+    if (/^\/how-deployment-works\/(ask|work|check)$/.test(route)) {
+      assert(seen.recordFacts.length >= 5, route + ': the record shows its fields');
+      for (const fact of seen.recordFacts) {
+        const raw = /^[a-z][A-Za-z0-9_]*(, [a-z][A-Za-z0-9_]*)*$/.test(fact.term);
+        assert(!raw, route + ': "' + fact.term + '" is a raw field name used as the primary label');
+        assert.equal(fact.mono, /^[a-z][A-Za-z0-9_]*(, [a-z][A-Za-z0-9_]*)*$/.test(fact.value), route + ': a field name is set in mono and nothing else is (' + fact.value + ')');
+      }
+      if (route !== '/how-deployment-works/ask') {
+        assert(seen.recordFacts.some((f) => f.mono && /Cid$|Id$/.test(f.value)), route + ': the field names are kept, as the secondary line');
+        assert(seen.recordFacts.some((f) => f.term.startsWith('What you asked to move') || f.term.startsWith('The terms it is checked against')), route + ': the plain meaning leads');
+      }
+    }
+    /* Regression (docs/ux-audit/ledger.md, 2026-10-20): the last chapter closed on "Back to the lifecycle" and never said how to do it
+       for real; "Run it yourself" leads on to /download. */
+    if (route === '/how-deployment-works/check') assert(seen.pager.some((p) => /^Run it yourself/.test(p.text) && /^\/download/.test(p.href)), route + ': the closing leads on to /download ("Run it yourself")');
     if (route === '/concept') {
       assert.equal(seen.tablists, 1, '/concept: one question-group control');
     } else {
       assert.deepEqual(seen.depth, DEPTH, route + ': the one depth label set');
       assert.equal(seen.variant, 'segmented', route + ': the depth control is segmented');
       assert.equal(seen.tablists, 1, route + ': one depth control, no second segmented control');
-      assert.deepEqual(seen.figureFold, ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
+      // /how-deployment-works also carries the manifest's deploy-flow figure (W4-S13, tests/resolver-page-parts.cjs): a second fold, closed at every width (open it ran to 1.9 screens)
+      assert.deepEqual(seen.figureFold.slice().sort(), route === '/how-deployment-works' || route === '/dao' ? ['always', 'tablet'] : ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
       assert.equal(seen.unlabelled, 0, route + ': every drawn label is held at 12px or more');
       assert(seen.terms > 0, route + ': the first use of a glossary word is a term');
     }

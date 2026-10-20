@@ -13,8 +13,15 @@
                                       createArkPopover, createArkToggleGroup, patchArkBlock -- and
                                       the prop schemas' editor help stripped (public pages that
                                       render blocks; js/ark/blocks.js, js/ark/page-loader.js)
+     js/ark/vendor/ark-kit-popover.js scripts/ark-kit-popover-entry.js: the popover block alone, for a page that
+                                      floats a panel and takes no input (a page using both lists both)
      js/ark/vendor/ark-kit-live.js    scripts/ark-kit-live-entry.js: patchArkBlock alone, loaded by
                                       js/ark/blocks.js on a page's first live update
+     js/ark/vendor/ark-kit-forms.js   scripts/ark-kit-forms-entry.js: the form blocks (field, form, list,
+                                      status-line, choice), registered into the public kit's registry
+                                      by a page that takes input. The public kit imports ark-ui's
+                                      @deadark/ark-ui/blocks/core, which has none of them (they cost +3.8 KB gz
+                                      on every block route; docs/cms-architecture.md Budget)
    Wave 0 shipped the four behaviour primitives that §5 line 8 names as the wrappers for
    interactive blocks; Wave 1 adds the
    `@deadark/ark-ui/blocks` registry and renderers (styled by css/ark-blocks.css,
@@ -28,7 +35,7 @@ export { createArkTabs } from '@deadark/ark-primitives/tabs';
 export { createArkAccordion } from '@deadark/ark-primitives/accordion';
 export { createArkToggleGroup } from '@deadark/ark-primitives/toggle';
 export { createArkPopover } from '@deadark/ark-primitives/dialog';
-export { ARK_BLOCKS, ARK_BLOCK_NAMES, renderArkBlock, renderArkBlocks, validateArkBlock, describeArkBlocks, ArkBlockPropError, createArkDomHost } from '@deadark/ark-ui/blocks';
+export { ARK_BLOCKS, ARK_BLOCK_NAMES, renderArkBlock, renderArkBlocks, validateArkBlock, describeArkBlocks, ArkBlockPropError, createArkDomHost, registerArkBlocks } from '@deadark/ark-ui/blocks';
 /* A live block patched in place -- ArkUI.blocks.update (js/ark/blocks.js) renders through the
    adapter (copy keys, scene links) and patches with this; updateArkBlock, Ark's own
    render-and-patch, has no caller here and stays out (R2). ark-ui 0.2.7 keeps the morph in its
@@ -52,3 +59,9 @@ export const PUBLIC_KIT = __ARK_KIT_PUBLIC__;
    one export list, two weights, and a page that needs one gets a refusal naming the file to
    load instead of a missing function. */
 export { createArkUI } from '@deadark/ark-ui/runtime';
+/* W4-ARK (2026-10-20): the CMS's window.confirm() replacement. arkConfirm({ title, message, confirmLabel,
+   cancelLabel, tone }) -> Promise<boolean>: Ark's createArkAlertDialog (modal, Esc cancels, an outside press
+   does not, focus on the safe choice) on the modal host (createArkModalHost: the light-DOM host plus a focus
+   trap and an inert page behind it), over elements it builds; styled by css/ark-blocks.css (.ark-alert-dialog).
+   Editor-only: the public kit refuses all three (scripts/ark-kit-public-refused.js) -- it never traps focus. */
+export { arkConfirm, createArkAlertDialog, createArkModalHost } from '@deadark/ark-ui/blocks/confirm';

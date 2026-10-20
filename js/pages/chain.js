@@ -9,6 +9,12 @@
                 sign/check/extend/replicate mechanism never changes, which is the point -- the
                 chain has no idea which of these it admitted. Each tab holds the scene in Ark's
                 figure frame; the scene plays once and settles, and only the shown one runs.
+   steps        at the top of each scene's frame, the five steps as Ark tabs (ArkUI.buildChainSteps):
+                the open tab says its step and opens the page that shows that part for real. They
+                replaced the hand-built `flow-record` links. Each record box is an Ark glossary
+                term whose tip is the role letter's meaning (docs/ux-audit/ledger.md /chain).
+   onward       what each resolver reads from the chain (CHAIN.NEXT) and where resolver chains come
+                from (/resolver)
    anchor       the CMS insertion point
 
    The scene is drawn in HTML (home-flow.js drawScene), so the record's wire grammar stays at
@@ -30,6 +36,7 @@
   function flowWas(slot, base) {
     var scene = base + '/div:1/svg:1', at = slot + ' ', was = {};
     was[slot] = base;
+    was[at + '.flow-now'] = base + '/div:1';   /* the step picker now stands before it (as the list did), so it is pinned, not counted */
     was[at + '.flow-scene'] = scene;
     was[at + '[data-panel="sign"]'] = scene + '/g:1';
     for (var b = 1; b <= 7; b++) {
@@ -63,6 +70,16 @@
     was[at + '.flow-meaning-who'] = scene + '/g:5/text:2';
     return was;
   }
+  /* The old step list (ol > li > a > number + name) is the step picker's tab list and tabs now: its
+     list and each link keep their keys (the link's words lost the number: one label, "Sign"). */
+  function stepsWas() {
+    var was = { 'tabs-list': { key: 'page:/div:2/ol:1', self: true } };
+    for (var k = 1; k <= 5; k++) was['tabs-trigger' + (k > 1 ? '#' + k : '')] = { key: 'page:/div:2/ol:1/li:' + k + '/a:1', self: true };
+    /* the one step's words the census held, the quote under the scene (strong.flow-says, "An intent to swap..."):
+       it is the Resolve step's quote, in that tab's panel */
+    was['[data-value="resolve"] > p'] = { key: 'page:/div:2/div:1/strong:1', self: true };
+    return was;
+  }
   var WAS = {
     'chain-crumbs': { 'breadcrumb-item': 'page:/a:1', ':scope > ol > li:first-child': 'page:/a:1/span:1' },
     'chain-cases': Object.assign({ 'tabs-list': 'page:/div:1', 'figure-caption': { key: 'page:/div:2/div:1/svg:1/text:1', self: true } },
@@ -85,6 +102,12 @@
           } }] };
         })
       } },
+      /* The way on: what each resolver reads from the chain (the manifest's next-step line), and where
+         resolver chains come from (docs/ux-audit/ledger.md 3.4-x). */
+      { block: 'actions', id: 'chain-onward', props: { label: 'Where next', items: [
+        { label: 'copy:CHAIN.NEXT', href: 'route:resolvers', tone: 'secondary' },
+        { label: 'Where do resolver chains come from?', href: 'route:resolver', tone: 'ghost' }
+      ] } },
       { insert: 'main', was: WAS.insert }
     ];
   }
@@ -98,14 +121,13 @@
     },
     mount: function (host) {
       var manifest = ArkManifest.get('chain');
-      /* Each step links to the page that shows that part for real, through the site's one link
-         resolver (js/ark/dash-kit.js). */
-      function pageHref(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
       var flows = {}, slots = {};
       ArkUI.chainCases.forEach(function (c) {
         slots['flow-' + c.id] = function () {
-          var flow = flows[c.id] = ArkUI.buildChainFlow({ hrefFor: pageHref, caseId: c.id });
+          var flow = flows[c.id] = ArkUI.buildChainFlow({ caseId: c.id, diagram: (manifest.meta.diagrams || [])[0] });
           flow.element.classList.add('chain-flow');
+          /* the five steps at the top of the scene's frame, each opening the page that shows that part for real */
+          ArkUI.buildChainSteps(flow, c.id, { id: 'chain-steps-' + c.id, links: true, was: c.id === ArkUI.chainCases[0].id ? stepsWas() : undefined });
           return flow.element;
         };
       });
@@ -114,7 +136,7 @@
       /* A hidden tab's scene schedules nothing; the one a choice shows starts (and settles) again. */
       var tabs = page.querySelector('#chain-cases');
       function shown() {
-        var selected = tabs && tabs.querySelector('[role="tab"][aria-selected="true"]');
+        var selected = tabs && tabs.querySelector(':scope > [data-ark-part="tabs-list"] > [role="tab"][aria-selected="true"]');
         var index = selected ? Array.prototype.indexOf.call(selected.parentNode.children, selected) : 0;
         return flows[ArkUI.chainCases[index].id];
       }

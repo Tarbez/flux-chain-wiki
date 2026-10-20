@@ -41,7 +41,7 @@
   <div class="bar-brand" title="Flux Protocol editor"><strong>Flux Protocol</strong></div>
   <!-- the page being edited: the side panel, the page switcher, its settings -->
   <div class="bar-group" id="pageNav">
-    <button type="button" class="ibtn" id="btnLeftRail" aria-pressed="true" aria-controls="studioLeft" aria-label="Side panel" title="Show or hide the side panel (pages, layers, components, images)"><svg class="ic" aria-hidden="true"><use href="#i-sidebar"/></svg></button>
+    <button type="button" class="ibtn" id="btnLeftRail" aria-pressed="true" aria-controls="studioLeft" aria-label="Pages and side panel" title="Show or hide the side panel (pages, layers, components, images)"><svg class="ic" aria-hidden="true"><use href="#i-sidebar"/></svg><span class="rail-lbl">Pages</span></button>
     <button type="button" class="bar-page" id="btnPage" aria-haspopup="dialog" aria-expanded="false" title="Switch page (search every page)"></button>
     <button type="button" class="btn quiet bar-labelled" id="btnPageFields" aria-haspopup="dialog" aria-expanded="false" aria-controls="sheet" aria-label="Page settings" title="Page settings: every field of this page, its search &amp; sharing, its shapes"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg><span class="lbl">Page settings</span></button>
   </div>
@@ -104,6 +104,11 @@
     </div>
   </div>
 </header>
+<!-- A phone's action bar (docs/ux-audit/cms.md P1-13): below 600px js/admin/header.js MOVES the side-panel
+     button, the Edit words / Edit style switch, Save and Publish in here, to where a thumb rests, and
+     moves them back above that width. They are the same elements (same ids, same handlers): every
+     control still appears exactly once. Empty and hidden on a wide screen. -->
+<nav class="phone-bar" id="phoneBar" aria-label="Pages, edit, save and publish" hidden></nav>
 <!-- The icon sprite sits at body level: the header above and the workspace below both use it. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>

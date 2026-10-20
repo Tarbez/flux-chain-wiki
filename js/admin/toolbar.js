@@ -98,9 +98,16 @@
   /* More: every command on the selection -- the canvas's right-click menu's own list (js/main.js
      cmsSelectionCommands, reported with the selection), so Make into states, Group, Remove, Align
      and the rest are a click away instead of right-click only (docs/ux-audit/cms.md P1-8). A
-     command that cannot apply stays listed with the reason under it; Align / Distribute are listed
-     only once two layers are selected. Then the editor's own: the words of this element, Site style. */
+     command that is waiting for a bigger selection (Group with one layer, Space evenly with two) is
+     NOT listed as a greyed-out row: one quiet line under the list says what it needs ("Group: Select
+     2 or more layers ..."), so the reason is still there and the list holds only what works. A
+     command refused for what THIS selection is (Make into component on an inserted block) stays a
+     row with its reason under it -- the person asked for that one, and it is the answer. Align /
+     Distribute are drawn only once two layers are selected. Then the editor's own: the words of this
+     element, Site style. */
   const MORE_GROUP_HEADS = { select: 'Select', edit: 'This selection', align: 'Line up', site: 'Whole site' };
+  /* A refusal that only more layers would lift: js/main.js marks it `waits` (cmsSelectionCommands). */
+  const commandWaits = (c) => !!c.needs && c.waits === true;
   function buildMoreSection(pane) {
     const body = toolbarSection(pane, 'tb-more', 'More', 'more');
     /* drawn as the editor's existing menu (the header popovers' .menu, .sep and h4), not a new list */
@@ -109,7 +116,8 @@
       : [{ id: 'make-component', label: 'Make into component', needs: state.cmsExactSelections.some((sel) => sel.component || sel.stateGroup) ? 'Select page content, not an inserted block or a state group.' : '', group: 'edit' }];
     const head = (text) => { if (menu.children.length) { const sep = document.createElement('div'); sep.className = 'sep'; menu.appendChild(sep); } const h4 = document.createElement('h4'); h4.textContent = text; menu.appendChild(h4); };
     let last = '';
-    commands.forEach((c) => {
+    const waiting = commands.filter(commandWaits);
+    commands.filter((c) => !commandWaits(c)).forEach((c) => {
       if (c.group !== last) { if (MORE_GROUP_HEADS[c.group]) head(MORE_GROUP_HEADS[c.group]); last = c.group; }
       const b = document.createElement('button'); b.type = 'button'; b.dataset.action = c.id; b.setAttribute('aria-label', c.label.replace(/…$/, ''));
       b.innerHTML = '<span></span>'; b.firstChild.textContent = c.label;
@@ -122,6 +130,14 @@
       });
       menu.appendChild(b);
     });
+    if (waiting.length) {
+      /* one line per reason, naming every command that waits on it */
+      const byReason = new Map();
+      waiting.forEach((c) => { const label = c.label.replace(/…$/, ''); byReason.set(c.needs, (byReason.get(c.needs) || []).concat(label)); });
+      const note = document.createElement('p'); note.className = 'hint'; note.dataset.waits = 'true';   /* a hook, not a class: no style family */
+      note.textContent = [...byReason].map(([needs, labels]) => labels.join(', ') + ': ' + needs).join(' ');
+      menu.appendChild(note);
+    }
     head('Elsewhere');
     [['content-cms', 'Edit its words', () => openContentEditor()], ['design-controls', 'Site style…', () => selectDesign()]].forEach(([id, label, run]) => {
       const b = document.createElement('button'); b.type = 'button'; b.dataset.action = id; b.setAttribute('aria-label', label.replace(/…$/, ''));
@@ -209,6 +225,10 @@
     const sections = document.createElement('div'); sections.className = 'tb-group tb-sections'; sections.append(...box.querySelectorAll('[data-section]:not([data-section="tb-more"])'));
     const actions = document.createElement('div'); actions.className = 'tb-group tb-actions';
     box.append(sections, actions);
+    /* An image that is one of the site's Media images (the canvas reports which, js/main.js asset) can be
+       replaced from here: Media opens on it with its Replace image button (docs/ux-audit/cms.md P1-11) */
+    const assetId = kind === 'image' && state.cmsExactSelection.asset;
+    if (assetId && state.assetDrafts && state.assetDrafts[assetId]) toolbarAction(actions, 'replace-image', 'image', 'Replace image: opens it in Media', () => { setToolbarSection('', false); A.selectAsset(assetId); }, '', 'Replace image');
     if (state.lens === 'content' && kind !== 'group') {
       /* Content lens: what finishing and the rest of the page's words need -- no design actions
          (docs/ux-audit/cms.md P1-7: "Make into component", "Open in Content" while in Content,

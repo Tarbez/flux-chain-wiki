@@ -81,14 +81,18 @@
      Illustrative values: the hashes and the amount are examples, and the
      long fields are truncated to fit. The SHAPE is real. */
 
+  /* The record's boxes, in wire order. `under` is the plain name on the page; `means` is the box's
+     tooltip (an Ark glossary term on /chain), taken from the role-letter registry's own words
+     (flx/flux-spec/registry/role-letters.json: name + summary for G, Y, V, M, C, S). J is the one
+     letter the registry leaves to each record type (manifest-types.json), so its line says that. */
   var BLOCKS = [
-    { text: 'G',            under: 'who' },
-    { text: 'YLEDGERENTRY', under: 'what kind' },
-    { text: 'V3',           under: 'version' },
-    { text: 'M1760…',       under: 'when' },
-    { text: 'J42',          under: 'position' },
-    { text: 'C2b9d…',       under: 'extends' },
-    { text: 'S9f1…',        under: 'signature' }
+    { text: 'G',            under: 'who',       means: 'G is the role letter for the Ghost identity key: who signed this record.' },
+    { text: 'YLEDGERENTRY', under: 'what kind', means: 'Y is the role letter for the record type: what kind of record this is. What it means is the resolver’s job, not the chain’s.' },
+    { text: 'V3',           under: 'version',   means: 'V is the role letter for the version: which version of the grammar the record follows.' },
+    { text: 'M1760…',       under: 'when',      means: 'M is the role letter for the moment: when the record was made, in Unix seconds.' },
+    { text: 'J42',          under: 'position',  means: 'J is the position: this record’s place in its holder’s own chain. Each record type declares what its J means.' },
+    { text: 'C2b9d…',       under: 'extends',   means: 'C is the role letter for a content address: a link to another record by its exact content. Here it names the head this record extends.' },
+    { text: 'S9f1…',        under: 'signature', means: 'S is the role letter for the signature, which proves the record is real and unchanged. It covers every box before it.' }
   ];
   var LAMPS = [
     { mark: 'G', name: 'grammar' },
@@ -136,7 +140,11 @@
     function d(points, close) { return points.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ') + (close ? 'Z' : ''); }
     function add(parent, tag, attrs, value) { return parent.appendChild(svg(tag, attrs, value)); }
     function line(a, b, cls, parent) { return add(parent || root, 'path', { d: d([a, b]), class: cls }); }
-    function text(x, y, cls, value, parent) { return add(parent || root, 'text', { x: x, y: y, class: cls }, value); }
+    /* Every word in the drawing is data-ark-label: inside Ark's figure frame it is drawn at the frame's
+       smallest label size (12px on screen) whatever the drawing's scale -- css/ark-blocks.css
+       `.ark-figure__frame text[data-ark-label]`. The frame also measures that scale; so does `fit` below,
+       because the pills round the words must grow with them. */
+    function text(x, y, cls, value, parent) { return add(parent || root, 'text', { x: x, y: y, class: cls, 'data-ark-label': '' }, value); }
     // An icon from js/ark/icons.js, either upright (a tag) or laid flat on the floor plane.
     function icon(parent, name, at, size, flat, cls) {
       var paths = ArkUI.iconPaths && ArkUI.iconPaths[name];
@@ -151,13 +159,29 @@
     function coin(parent, cx, cy, size, cls) {
       return add(parent, 'rect', { x: cx - size / 2, y: cy - size / 2, width: size, height: size, class: 'land-coin ' + (cls || '') });
     }
+    /* A name tag: a pill round an icon (or the coin) and its words. Its size follows the label size
+       (`labelUnits`, in the drawing's own units), so the pill always holds the words at 12px on screen. */
+    var LABEL_MIN = 12, labelUnits = 14, tags = [];
+    function drawTag(t) {
+      var L = labelUnits, h = L * 1.6 + 2, pad = L * .6, gap = L * .45, w = pad + L + gap + t.value.length * L * .66 + pad;
+      var left = t.anchorEnd ? t.x - w : t.x, cy = t.y - 2;
+      left = Math.max(4, Math.min(left, 636 - w));   // a pill stays inside the drawing, whatever size its words are drawn at
+      while (t.g.firstChild) t.g.removeChild(t.g.firstChild);
+      add(t.g, 'rect', { x: left, y: cy - h / 2, width: w, height: h, rx: h / 2 });
+      if (t.name === 'fxn') coin(t.g, left + pad + L / 2, cy, L * 1.1); else icon(t.g, t.name, [left + pad + L / 2, cy], L, false);
+      text(left + pad + L + gap, cy + L * .35, 'land-tag-text', t.value, t.g);
+    }
     function tag(parent, x, y, name, value, anchorEnd, cls) {
-      var w = 22 + value.length * 6.2, left = anchorEnd ? x - w : x;
-      var g = add(parent, 'g', { class: 'land-tag ' + (cls || '') });
-      add(g, 'rect', { x: left, y: y - 11, width: w, height: 18, rx: 9 });
-      if (name === 'fxn') coin(g, left + 11, y - 2, 12); else icon(g, name, [left + 11, y - 2], 11, false);
-      text(left + 19, y + 2, 'land-tag-text', value, g);
-      return g;
+      var t = { g: add(parent, 'g', { class: 'land-tag ' + (cls || '') }), x: x, y: y, name: name, value: value, anchorEnd: anchorEnd };
+      tags.push(t); drawTag(t);
+      return t.g;
+    }
+    function fit() {
+      var width = root.getBoundingClientRect ? root.getBoundingClientRect().width : 0;
+      if (!width) return;
+      var next = Math.max(9, LABEL_MIN / (width / 640));
+      if (Math.abs(next - labelUnits) < .5) return;
+      labelUnits = next; tags.forEach(drawTag);
     }
     function block(parent, x, y, z, w, depth, h, cls) {
       var g = add(parent, 'g', { class: cls });
@@ -211,7 +235,7 @@
       }
       if (c === 0 || isNew) {
         var label = point(x + 4, MY + SIZE + 1, LIFT - 3);
-        add(g, 'text', { x: label[0], y: label[1], transform: 'rotate(25.3 ' + label[0] + ' ' + label[1] + ')', class: 'land-index' }, 'J' + (36 + c));
+        add(g, 'text', { x: label[0], y: label[1], transform: 'rotate(25.3 ' + label[0] + ' ' + label[1] + ')', class: 'land-index', 'data-ark-label': '' }, 'J' + (36 + c));
       }
       tiles.push(g);
     }
@@ -271,17 +295,17 @@
     tag(resolution, landing[0] + 10, landing[1] - 30, 'check', spec.take, false, 'land-result');
     add(resolution, 'path', { d: 'M' + newTop[0].toFixed(1) + ' ' + (newTop[1] - 58).toFixed(1) + 'V76', class: 'land-leader' });
     var card = add(resolution, 'g', { class: 'land-resolver' });
-    add(card, 'rect', { x: 424, y: 20, width: 200, height: 56, class: 'land-panel' });
-    icon(card, 'resolver', [446, 48], 22, false, 'land-card-icon');
-    text(466, 40, 'land-meta', payload.resolverName, card);
-    if (spec.coin) coin(card, 472, 58, 16, 'land-coin-card');
-    text(spec.coin ? 486 : 466, 62, 'land-value', payload.amount, card);
+    add(card, 'rect', { x: 372, y: 14, width: 252, height: 66, class: 'land-panel' });
+    icon(card, 'resolver', [396, 47], 22, false, 'land-card-icon');
+    text(418, 38, 'land-meta', payload.resolverName, card);
+    if (spec.coin) coin(card, 424, 62, 16, 'land-coin-card');
+    text(spec.coin ? 438 : 418, 66, 'land-value', payload.amount, card);
 
     // Title and the colour legend: what each mark means, said in the picture.
     text(16, 28, 'land-label', 'A CHAIN OF CHAINS');
     var legend = add(root, 'g', { class: 'land-legend' });
     [['land-key-accent', 'Record in flight'], ['land-key-history', 'Signed history'], ['land-key-ref', 'Reference']].forEach(function (item, i) {
-      var y = 48 + i * 18;
+      var y = 52 + i * 20;
       if (i === 2) add(legend, 'path', { d: 'M16 ' + (y - 4) + 'h12', class: item[0] });
       else add(legend, 'rect', { x: 17, y: y - 9, width: 9, height: 9, class: item[0] });
       text(36, y, 'land-meta', item[1], legend);
@@ -289,18 +313,18 @@
 
     // Readout: the instrument for the current step, on the heavy anchor.
     var readout = add(root, 'g', { class: 'land-readout' });
-    add(readout, 'rect', { x: 16, y: 380, width: 208, height: 84, class: 'land-panel land-panel-heavy' });
+    add(readout, 'rect', { x: 16, y: 376, width: 292, height: 92, class: 'land-panel land-panel-heavy' });
     var stepIcon = add(readout, 'g', {});
-    var stepLabel = text(40, 400, 'land-meta', '', readout), stepValue = text(28, 452, 'land-value', '', readout);
+    var stepLabel = text(42, 398, 'land-meta', '', readout), stepValue = text(28, 454, 'land-value', '', readout);
     var marks = add(readout, 'g', { class: 'land-marks' });
     var checks = LAMPS.map(function (lamp, k) {
       var m = add(marks, 'g', { class: 'land-check', 'data-mark': lamp.mark });
-      add(m, 'rect', { x: 28 + k * 26, y: 412, width: 20, height: 20 });
-      add(m, 'text', { x: 38 + k * 26, y: 426, 'text-anchor': 'middle' }, lamp.mark);
+      add(m, 'rect', { x: 28 + k * 26, y: 410, width: 20, height: 20 });
+      add(m, 'text', { x: 38 + k * 26, y: 425, 'text-anchor': 'middle', 'data-ark-label': '' }, lamp.mark);
       return m;
     });
     var peers = [];
-    for (var p = 0; p < PEERS; p++) peers.push(add(marks, 'rect', { x: 28 + p * 15, y: 416, width: 10, height: 10, class: 'land-peer' }));
+    for (var p = 0; p < PEERS; p++) peers.push(add(marks, 'rect', { x: 28 + p * 20, y: 414, width: 12, height: 12, class: 'land-peer' }));
 
     var STEP_ICONS = { sign: 'sign', check: 'check', extend: 'chain', replicate: 'peers', resolve: 'resolver' };
     var READOUT = {
@@ -310,20 +334,49 @@
       replicate: ['04 / REPLICATE', PEERS_STORED + ' of ' + PEERS + ' peers hold J42'],
       resolve: ['05 / RESOLVE', 'A reference to ' + payload.party]
     };
-    return { svg: root, paint: function (i) {
+    /* The pills follow the drawing's scale (the same quantity Ark's figure frame measures). */
+    var observer = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
+    if (observer) observer.observe(root);
+    return { svg: root, dispose: function () { if (observer) observer.disconnect(); }, paint: function (i) {
       var id = BASE_STEPS[i].id, placed = i >= 2;
       root.setAttribute('data-phase', id);
       root.setAttribute('data-placed', String(placed));
       headAt(LAND_MINE.len - (placed ? 1 : 2));
       checks.forEach(function (m) { m.setAttribute('data-on', String(i >= 1)); m.setAttribute('data-shown', String(i === 1)); });
       peers.forEach(function (peer, k) { peer.setAttribute('data-on', String(k < PEERS_STORED)); peer.setAttribute('data-shown', String(i === 3)); });
-      stepIcon.textContent = ''; icon(stepIcon, STEP_ICONS[id], [32, 396], 12, false, 'land-step-icon');
+      stepIcon.textContent = ''; icon(stepIcon, STEP_ICONS[id], [32, 394], 12, false, 'land-step-icon');
       stepLabel.textContent = READOUT[id][0];
       stepValue.textContent = READOUT[id][1];
-      stepValue.setAttribute('y', i === 1 || i === 3 ? 452 : 432);
+      stepValue.setAttribute('y', i === 1 || i === 3 ? 454 : 436);
       resolution.setAttribute('data-shown', String(i === 4));
       counterpart.setAttribute('data-resolved', String(i === 4));
     } };
+  }
+
+  /* The swap as signed resolution, from the manifest's spec { caption, flow: [step, ...], refusal: { from, tag } }:
+     Ark's steps (the order the batch goes through) and callout (the refusal a second node meets; its tag names the
+     signer, who is the example's party), folded behind Ark's disclosure so the Resolve step stays one box and a line.
+     Without the block kit (a toy DOM) there is no diagram: the payload above it is the step. */
+  function swapDiagram(spec, payload) {
+    if (!(ArkUI.blocks && typeof ArkUI.blocks.render === 'function')) return null;
+    function sentence(text) { return String(text).charAt(0).toUpperCase() + String(text).slice(1); }
+    var blocks = [{ block: 'steps', props: { label: spec.caption, items: (spec.flow || []).map(function (text) { return { title: sentence(text) }; }) } }];
+    if (spec.refusal) blocks.push({ block: 'callout', props: { tone: 'warning', title: sentence(spec.refusal.from) + ' is refused', body: String(spec.refusal.tag).replace('<signer>', payload.party) } });
+    try { return ArkUI.blocks.render({ block: 'disclosure', id: 'flow-swap', props: { more: 'How a swap is resolved', less: 'Hide how a swap is resolved', blocks: blocks } }, { onInvalid: 'throw' }); } catch (error) { return null; }
+  }
+
+  /* One box of the record: its letters, with what the box is one hover, focus or tap away -- Ark's
+     glossary term (ArkUI.blocks), whose tip is the trigger's accessible description too. The tip's
+     words are not the box's words (tests/lib/layout-continuity.cjs sets term tips aside). Without
+     the block kit (a toy DOM) the box is its letters alone. */
+  function boxText(text, means) {
+    var box = el('span', 'flow-block-text');
+    var tip = null;
+    if (means && ArkUI.blocks && typeof ArkUI.blocks.render === 'function') {
+      try { tip = ArkUI.blocks.render({ block: 'term', props: { term: text, definition: means } }, { onInvalid: 'throw' }); } catch (error) { tip = null; }
+    }
+    if (tip) box.appendChild(tip); else box.textContent = text;
+    return box;
   }
 
   /* The plain scene (/chain): HTML, not SVG, so the record's wire grammar and every caption stay
@@ -331,7 +384,7 @@
      SVG drew the record at about 6px at 390px wide). One panel per step, stacked in one cell and
      cross-faded; only the current one is shown, the others are aria-hidden. The rich scene (home)
      is the landscape above. */
-  function drawScene(payload, rich) {
+  function drawScene(payload, rich, diagram) {
     if (rich) return drawLandscape(payload);
     var root = el('div', 'flow-scene flow-plain');
     function panel(id, label) {
@@ -351,7 +404,7 @@
     BLOCKS.forEach(function (b, i) {
       var item = staggered(el('li', 'flow-block'), i);
       item.setAttribute('data-i', String(i));
-      item.appendChild(el('span', 'flow-block-text', i === 1 ? payload.recordType : b.text));
+      item.appendChild(boxText(i === 1 ? payload.recordType : b.text, b.means));
       item.appendChild(el('span', 'flow-block-under', b.under));
       format.appendChild(item);
     });
@@ -400,6 +453,11 @@
     meaning.appendChild(el('strong', 'flow-meaning-text', payload.amount));
     meaning.appendChild(el('span', 'flow-meaning-who', payload.resolverName));
     pResolve.appendChild(meaning);
+    /* A swap is the one example whose resolution is a batch: two intents, one signer, one signed result for
+       the peers, and a second node's result refused. The diagram is the manifest's own (chain.meta.diagrams,
+       docs/ux-audit/ledger.md 4.5); it stands under the payload, which stays. */
+    var swap = diagram && payload.id === 'swaps' ? swapDiagram(diagram, payload) : null;
+    if (swap) pResolve.appendChild(swap);
 
     var panels = { sign: pSign, check: pCheck, extend: pExtend, replicate: pReplicate, resolve: pResolve };
 
@@ -475,50 +533,101 @@
     return { element: root, select: select };
   };
 
+  /* The five steps of one example, in order: [{ id, title, page, says }]. Only the last step's words
+     are the example's own (what the resolver reads); the mechanism before it never changes. */
+  function stepsFor(caseId) {
+    var payload = CASES_BY_ID[caseId] || CASES_BY_ID.swaps;
+    return BASE_STEPS.map(function (step, i) {
+      if (i < BASE_STEPS.length - 1) return step;
+      var last = {};
+      for (var key in step) last[key] = step[key];
+      last.says = payload.says;
+      return last;
+    });
+  }
+  ArkUI.chainSteps = stepsFor;
+
+  /* The step picker, as an Ark block: the five steps are tabs, and the open tab's panel is the
+     step's own words (a quote, as the scene's caption was). With `links` (/chain) the panel also
+     opens the page that shows that part for real, through the site's one link resolver. It replaces
+     the hand-built `home-cycle-step` / `flow-record` list of buttons and links. Its spec is
+     ArkUI.chainStepsBlock; ArkUI.buildChainSteps (below) renders it into a scene. */
+  ArkUI.chainStepsBlock = function (caseId, options) {
+    options = options || {};
+    var catalog = ArkUI.pageCatalog || {};
+    var items = stepsFor(caseId).map(function (step) {
+      var item = { value: step.id, label: step.title, content: '“' + step.says + '”' };
+      if (options.links) {
+        var entry = catalog[step.page] || {};
+        var name = String(entry.short || entry.title || step.page).split(' — ')[0];
+        item.blocks = [{ block: 'actions', props: { items: [{ label: 'See it for real: ' + name, href: 'route:' + step.page, tone: 'link' }] } }];
+      }
+      return item;
+    });
+    /* The picker's descendants are keyed under it, not by their place in the flow (where the picker took the
+       step list's place, and the scene's tile would count after it): one new key for the root. */
+    var was = {};
+    for (var ref in options.was) was[ref] = options.was[ref];
+    if (!was[':root']) was[':root'] = 'page:/steps/' + (options.id || caseId);
+    return { block: 'tabs', id: options.id, was: was, props: { label: 'The five steps', variant: 'tabs', activation: 'automatic', defaultValue: items[0].value, items: items } };
+  };
+
+  /* Join a rendered step picker to the flow it drives. Choosing a step (a press, or an arrow key,
+     which Ark's tabs activate on focus) holds the scene on it; moving the pointer or focus away lets
+     the scene go on from there. The scene moving by itself chooses the tab (the tab's own press, so
+     Ark's tabs keep their one source of truth). Each tab is stamped data-stage, which
+     js/lattice.js reads to light the background mesh for the step under the pointer. */
+  ArkUI.bindChainSteps = function (picker, flow, caseId) {
+    if (!picker || !flow) return;
+    var list = picker.querySelector('[data-ark-part="tabs-list"]');
+    var tabs = list ? Array.prototype.slice.call(list.querySelectorAll('[role="tab"]')) : [];
+    var steps = stepsFor(caseId), syncing = false;
+    function chosen() {
+      for (var k = 0; k < tabs.length; k++) if (tabs[k].getAttribute('aria-selected') === 'true') return k;
+      return -1;
+    }
+    function follow(i) {
+      if (!tabs[i] || chosen() === i) return;
+      syncing = true;
+      try { tabs[i].click(); } finally { syncing = false; }
+    }
+    tabs.forEach(function (tab, i) {
+      tab.setAttribute('data-stage', steps[i].id);
+      tab.addEventListener('pointerenter', function () { flow.hold(i); });
+      tab.addEventListener('focus', function () { if (!syncing) flow.hold(i); });
+      tab.addEventListener('pointerleave', function () { flow.release(); });
+      tab.addEventListener('blur', function () { flow.release(); });
+      tab.addEventListener('click', function () { if (!syncing) flow.hold(i); });
+    });
+    flow.subscribe(follow);
+    follow(flow.step());
+  };
+
+  /* The scene's step picker, in place: the Ark tabs block rendered at the top of the flow (inside the
+     figure frame the page puts the flow in, where the hand-built list stood) and joined to it.
+     options: { id, was, links } as ArkUI.chainStepsBlock. Returns the picker. */
+  ArkUI.buildChainSteps = function (flow, caseId, options) {
+    var picker = ArkUI.blocks.render(ArkUI.chainStepsBlock(caseId, options), { onInvalid: 'throw' });
+    flow.element.insertBefore(picker, flow.element.firstChild);
+    ArkUI.bindChainSteps(picker, flow, caseId);
+    return picker;
+  };
+
   ArkUI.buildChainFlow = function (options) {
-    var hrefFor = options.hrefFor;
     var payload = CASES_BY_ID[options.caseId] || CASES_BY_ID.swaps;
-    // Only what the resolver reads changes per case; the mechanism (checks,
-    // replication) is identical, so only the resolve step's narration and
-    // its accessible label need the case-specific text.
-    var STEPS = BASE_STEPS.slice();
-    var resolveStep = {};
-    for (var key in BASE_STEPS[4]) resolveStep[key] = BASE_STEPS[4][key];
-    resolveStep.says = payload.says;
-    STEPS[4] = resolveStep;
+    var STEPS = stepsFor(payload.id);
     var root = el('div', options.rich ? 'flow flow-rich' : 'flow');
     root.dataset.step = '0';
     root.dataset.case = payload.id;
+    var listeners = [], shown = 0;
 
-    // Tracker first: the step links (the real, accessible content), each to
-    // the page that shows that part for real. It sits above the scene now
-    // and doubles as the visual "chain" -- five connected circles -- that
-    // the single panel below answers to.
-    var rail = el('ol', 'home-cycle-records flow-ledger');
-    var links = STEPS.map(function (s, i) {
-      var item = el('li'), link = el(options.inline ? 'button' : 'a', 'home-cycle-step flow-record');
-      link.dataset.stage = s.id; link.dataset.i = String(i);
-      if(options.inline)link.type='button';
-      else {link.href = hrefFor(s.page); link.dataset.sceneLink = s.page;}
-      link.appendChild(el('span', 'flow-record-num', String(i + 1).padStart(2, '0')));
-      var stepIcon = options.inline && ArkUI.icon && ArkUI.icon({ sign: 'sign', check: 'check', extend: 'chain', replicate: 'peers', resolve: 'resolver' }[s.id]);
-      if (stepIcon) link.appendChild(stepIcon);
-      link.appendChild(el('span', 'flow-record-name', s.title));
-      link.setAttribute('aria-label', options.inline ? s.title : s.title + ': ' + s.says + ' Illustrative example. Open the related page.');
-      item.appendChild(link); rail.appendChild(item);
-      return link;
-    });
-    root.appendChild(rail);
-
-    // Now: the one panel that answers the selected step.
+    // Now: the one panel that answers the selected step. The step picker (an Ark tabs block the page
+    // places above it, ArkUI.chainStepsBlock) says the step in words.
     var now = el('div', 'flow-now');
-    var scene = drawScene(payload,options.rich);
+    var scene = drawScene(payload, options.rich, options.diagram);
     // The landscape is a picture of the step the words say; the plain scene's record is real content.
     if (options.rich) scene.svg.setAttribute('aria-hidden', 'true');
     now.appendChild(scene.svg);
-    var says = el('strong', 'flow-says');
-    if(!options.inline)says.setAttribute('aria-hidden', 'true');
-    now.appendChild(says);
     root.appendChild(now);
 
     var toggle = el('button', 'flow-toggle');
@@ -535,12 +644,12 @@
 
     function show(i, complete) {
       var step = STEPS[i];
+      shown = i;
       root.dataset.step = String(i);
       root.dataset.complete = complete ? 'true' : 'false';
       root.dataset.actors = step.actors.join(' ');
-      says.textContent = '“' + step.says + '”';
       scene.paint(i);
-      links.forEach(function (link, k) { link.toggleAttribute('data-current', k === i); link.toggleAttribute('data-done', k < i); if(options.inline)link.setAttribute('aria-pressed',String(k===i)); });
+      listeners.forEach(function (listener) { listener(i, complete); });
       root.classList.remove('flow-run'); void root.offsetWidth; root.classList.add('flow-run');
     }
     function still() {
@@ -569,13 +678,6 @@
     function hold(i) { held = i; root.dataset.held = 'true'; show(i, i === STEPS.length - 1); clearTimeout(timer); timer = 0; }
     function release() { if (held < 0) return; current = held; held = -1; delete root.dataset.held; schedule(); }
 
-    links.forEach(function (link, i) {
-      if(options.inline)link.addEventListener('click',function(){hold(i);});
-      link.addEventListener('pointerenter', function () { hold(i); });
-      link.addEventListener('focus', function () { hold(i); });
-      link.addEventListener('pointerleave', release);
-      link.addEventListener('blur', release);
-    });
     toggle.addEventListener('click', function () {
       if (ended) { ended = false; userPaused = false; current = 0; show(0, false); }
       else userPaused = !userPaused;
@@ -597,11 +699,18 @@
     return {
       element: root,
       restore: schedule,
+      /* the step picker's side: hold the scene on step i, let go, say which step shows, and hear
+         every change (ArkUI.bindChainSteps) */
+      hold: hold,
+      release: release,
+      step: function () { return shown; },
+      subscribe: function (listener) { listeners.push(listener); },
       dispose: function () {
         disposed = true; clearTimeout(timer);
         if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', wake);
         if (reduce.removeEventListener) reduce.removeEventListener('change', reducedChanged);
         if (visibility) visibility.disconnect();
+        if (scene.dispose) scene.dispose();
         if (typeof unsubscribe === 'function') unsubscribe();
       }
     };

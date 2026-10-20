@@ -453,6 +453,10 @@
     function copy(role) { return 'copy:' + area + '.' + role; }
     function words(role) { return ArkCopy.text(area + '.' + role); }
     function has(role) { return !!manifest.fields[role]; }
+    /* One case rule for every action label a manifest authored in capitals (the hero's next step, the evidence links):
+       sentence case, derived (js/ark/page-kit.js). Before, the hero's next step was the manifest's capitals on eleven
+       sheets and hand-typed sentence case on /dao (docs/ux-audit/ledger.md, story sheets CTA casing). */
+    function label(role) { return ArkUI.sentenceCase(words(role)); }
     var count = ArkManifest.points(manifest), step = 0;
     var theory = ArkManifest.group('theory'), index = theory.findIndex(function (m) { return m.id === id; });
     var path = ArkUI.pageCatalog[page] && ArkUI.pageCatalog[page].path;
@@ -473,11 +477,11 @@
     /* Evidence: the limit, then every source the manifest names -- its docs, and each 'link'
        field ROLE.HREF labelled by its ROLE field (spec -> /stats, /stats/gpu, /stats/ledger). */
     var sources = [];
-    if (manifest.meta.docs && has('EVIDENCE')) sources.push({ label: copy('EVIDENCE'), href: 'doc:' + manifest.meta.docs, tone: 'link' });
+    if (manifest.meta.docs && has('EVIDENCE')) sources.push({ label: label('EVIDENCE'), href: 'doc:' + manifest.meta.docs, tone: 'link' });
     Object.keys(manifest.fields).forEach(function (role) {
       var f = manifest.fields[role];
       if (f.kind !== 'link' || !/\.HREF$/.test(role) || !manifest.fields[role.replace(/\.HREF$/, '')]) return;
-      sources.push({ label: copy(role.replace(/\.HREF$/, '')), href: words(role), tone: 'link' });
+      sources.push({ label: label(role.replace(/\.HREF$/, '')), href: words(role), tone: 'link' });
     });
     /* The limit can be long (spec lists every benchmark still unverified): its first three lines
        stay in view with "Read the whole limit" (Ark's disclosure, never cut; the button only
@@ -492,8 +496,12 @@
     var points = [];
     for (var n = 1; n <= count; n++) points.push({ value: 'step-' + (n - 1), title: copy('POINT' + n + '.TITLE'), content: copy('POINT' + n + '.TEXT') });
     var parent = { label: 'Operating model', href: 'route:concept' };
-    var onward = manifest.meta.next ? { label: copy('NEXT'), href: 'route:' + manifest.meta.next }
-      : id === 'dao' ? { label: 'Inspect activation gates', href: 'route:concept/notes' } : null;
+    /* Onward: the manifest's own next step; a sheet without one (/dao) leads on with the words of the page it leads to, the
+       link that page's own manifest authored for it (NOTES.CTA), not words typed here. */
+    var onward = manifest.meta.next ? { label: label('NEXT'), href: 'route:' + manifest.meta.next }
+      : id === 'dao' ? { label: ArkUI.sentenceCase(ArkCopy.text('NOTES.CTA')), href: 'route:concept/notes' } : null;
+    /* The ways on out of this page's journey (ArkUI.nextSteps), in sight in The idea. */
+    var ways = ArkUI.nextSteps(page);
 
     var def = {
       page: page, id: id, className: 'story-question', titleId: id + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
@@ -501,7 +509,7 @@
       eyebrow: index >= 0 ? ArkUI.story.position('Operating model', index, theory.length) : (has('EYEBROW') ? copy('EYEBROW') : undefined),
       title: copy('TITLE'),
       depth: {
-        focus: { text: copy('DECK') },
+        focus: { text: copy('DECK'), blocks: ways.length ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : undefined },
         context: points.length ? { blocks: [{ block: 'accordion', props: { label: manifest.title + ' questions', items: points } }] } : { text: copy('DECK') },
         reference: evidence.length ? { blocks: evidence } : { text: copy('DECK') }
       },

@@ -90,10 +90,20 @@ const panel = (id) => root.all().find((n) => n.dataset.panel === id);
 const on = (n) => n.getAttribute('data-on') === 'true';
 const active = (n) => n.className.split(' ').includes('flow-panel-active');
 
-/* The step links are the accessible content and drive the scene. */
-const links = root.byClass('flow-record');
-assert.equal(links.length, 5, 'five steps, named in the DOM, each linking to the page that shows it for real');
-function goto(i) { links[i].listeners.focus[0](); }
+/* The steps are an Ark tabs block the page places above the scene (ArkUI.chainStepsBlock) and
+   binds to it (ArkUI.bindChainSteps): the flow itself is only the scene, and is driven by hold(i). It
+   used to build its own list of step links/buttons (`flow-record`, `home-cycle-step`), hand-built
+   controls that sat at 1.4:1 and that Ark's tabs now replace. */
+const STEPS = sandbox.ArkUI.chainSteps('swaps');
+assert.deepEqual(Array.from(STEPS.map((s) => s.title)), ['Sign', 'Check', 'Extend', 'Replicate', 'Resolve'], 'five steps, in order');
+assert.deepEqual(Array.from(STEPS.map((s) => s.page)), ['account', 'stats', 'explorer', 'stats', 'resolver'], 'each step still names the page that shows that part for real');
+assert(STEPS.every((s) => s.says.trim()), 'every step has its words');
+assert.notEqual(sandbox.ArkUI.chainSteps('governance')[4].says, STEPS[4].says, 'only the last step\'s words belong to the example');
+assert.equal(sandbox.ArkUI.chainSteps('governance')[0].says, STEPS[0].says, 'the mechanism before it never changes');
+assert.equal(root.byClass('flow-record').length + root.byClass('flow-ledger').length + root.byClass('flow-says').length, 0, 'no hand-built step list or caption inside the scene');
+const heard = [];
+flow.subscribe((i) => heard.push(i));
+function goto(i) { flow.hold(i); }
 
 /* ---- band 1: the record is the real wire grammar --------------------- */
 
@@ -169,21 +179,55 @@ assert(
   'stepping back must hide the resolve panel again — a panel that stays shown tells the story backwards'
 );
 
-/* ---- the tracker moves ------------------------------------------------ */
+/* ---- the picker hears the scene move ----------------------------------- */
 
 goto(0);
-assert(links[0].getAttribute('data-current') !== undefined, 'the tracker marks the current step');
+assert.equal(flow.step(), 0, 'the flow says which step shows');
 goto(4);
-assert(
-  links[4].getAttribute('data-current') !== undefined && links[0].getAttribute('data-current') === undefined,
-  'the tracker must move as the step advances — it is the chain, drawn once, and doubles as the accessible content'
-);
+assert.equal(flow.step(), 4);
+assert.deepEqual(heard.slice(-2), [0, 4], 'every step shown is announced to the step picker, so its tab follows the scene');
+
+/* ---- ArkUI.bindChainSteps joins a rendered picker to the flow ----------- */
+{
+  const tabs = ['sign', 'check', 'extend', 'replicate', 'resolve'].map((id, i) => {
+    const attrs = { 'aria-selected': i === 0 ? 'true' : 'false' }, listeners = {};
+    const tab = {
+      getAttribute: (k) => attrs[k], setAttribute: (k, v) => { attrs[k] = String(v); }, listeners, attrs,
+      addEventListener: (type, fn) => { (listeners[type] = listeners[type] || []).push(fn); },
+      click: () => { tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab))); (listeners.click || []).forEach((fn) => fn()); }
+    };
+    return tab;
+  });
+  const list = { querySelectorAll: () => tabs };
+  const picker = { querySelector: () => list };
+  const driven = sandbox.ArkUI.buildChainFlow({ caseId: 'swaps' });
+  sandbox.ArkUI.bindChainSteps(picker, driven, 'swaps');
+  assert.deepEqual(tabs.map((t) => t.attrs['data-stage']), ['sign', 'check', 'extend', 'replicate', 'resolve'], 'every tab is stamped with its step (js/lattice.js lights the background mesh from it)');
+  const chosen = () => tabs.findIndex((t) => t.attrs['aria-selected'] === 'true');
+  assert.equal(chosen(), 0);
+  tabs[3].listeners.pointerenter[0]();
+  assert.equal(driven.step(), 3, 'pointing at a step shows it');
+  assert.equal(chosen(), 3, 'and the tab follows');
+  tabs[3].listeners.pointerleave[0]();
+  timers.clear(); driven.restore();
+  assert.equal(timers.size, 1, 'moving away lets the scene go on from there');
+  const before = driven.step();
+  tabs[1].click();
+  assert.equal(driven.step(), 1, 'choosing a tab (a press, or an arrow key) holds the scene on that step');
+  tabs[1].listeners.blur[0]();
+  const run1 = () => { const [id, t] = [...timers.entries()][0]; timers.delete(id); t.fn(); };
+  timers.clear(); driven.restore(); run1();
+  assert.equal(driven.step(), 2, 'the scene moving by itself moves the tab, without holding itself');
+  assert.equal(chosen(), 2, 'the tab is the scene\'s own step');
+  assert.equal(driven.element.dataset.held, undefined, 'the scene\'s own move is not a hold (it keeps playing)');
+  driven.dispose();
+}
 
 /* ---- stillness: no timer while paused, hidden or reduced ------------- */
 
 function pendingAfter(fn) { timers.clear(); fn(); return timers.size; }
 
-goto(0); links[0].listeners.pointerleave[0]();  // release the hold on a step before the last
+goto(0); flow.release();  // release the hold on a step before the last
 assert(pendingAfter(() => flow.restore()) > 0, 'playing schedules the next step');
 
 doc.hidden = true;
@@ -226,21 +270,37 @@ assert.equal(once.element.dataset.step, '0', 'replay starts from Sign');
 assert.equal(timers.size, 1, 'and schedules the next step');
 once.dispose();
 
-const rich=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:'transfers',inline:true,rich:true});
-const richRoot=rich.element,choices=richRoot.byClass('flow-record');
+const rich=sandbox.ArkUI.buildChainFlow({caseId:'transfers',rich:true});
+const richRoot=rich.element;
 assert.equal(richRoot.byClass('land-history').length,5,'your chain and four independent others');
 assert.equal(richRoot.byClass('land-record-main').length,7,'your chain carries the visual focus: J36..J42');
 assert.equal(richRoot.byClass('land-reference').length,4,'each other chain is tied to one of your records by a reference');
 /* Named regression (2026-10-14): every example drew the same picture, so
    swapping Transfers for Governance changed nothing but a caption. Each
    example now draws its own counterpart, and J42 carries its own mark. */
-const kinds=sandbox.ArkUI.chainCases.map(c=>{const f=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:c.id,inline:true,rich:true});const cp=f.element.byClass('land-counterpart')[0];f.dispose();return cp.getAttribute('data-kind');});
+const kinds=sandbox.ArkUI.chainCases.map(c=>{const f=sandbox.ArkUI.buildChainFlow({caseId:c.id,rich:true});const cp=f.element.byClass('land-counterpart')[0];f.dispose();return cp.getAttribute('data-kind');});
 assert.equal(new Set(kinds).size,kinds.length,'each example draws a different counterpart: '+kinds.join(', '));
-assert(choices.every(choice=>choice.tagName==='button'&&!choice.href),'hero exploration stays on the home page');
+/* Named regression (2026-10-20, docs/ux-audit X11): the landscape's words were drawn at 8-9px, and at the
+   frame's scale on a phone they rendered near 5px. Every text in the drawing is data-ark-label now, so
+   Ark's figure frame draws it at its smallest label size (12px on screen) at any scale. */
+const drawn=richRoot.all().filter(n=>n.tagName==='text');
+assert(drawn.length>20,'the landscape is labelled: '+drawn.length+' texts');
+assert(drawn.every(n=>n.attrs['data-ark-label']!==undefined),'every text in the landscape is a data-ark-label: '+drawn.filter(n=>n.attrs['data-ark-label']===undefined).map(n=>n.className).join(', '));
+/* ...and no rule sets one below 12px any more (css/home-swiss.css had .land-index 8px, .land-meta and .land-tag-text 9px); the
+   frame's size is set by Ark, so these rules name no size at all. */
+for (const file of ['css/home-swiss.css', 'css/about.css']) {
+  const css = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!/\b(land-|about-slab|world-)/.test(m[1])) continue;
+    for (const size of m[2].matchAll(/(?:font:[^;]*?|font-size:\s*)(\d+(?:\.\d+)?)px/g)) {
+      if (/\bworld-/.test(m[1])) continue; // the transit map's 12px names are in a drawing of their own, not part of this change
+      assert(+size[1] >= 12, file + ' "' + m[1].trim().slice(0, 60) + '" sets ' + size[1] + 'px: a drawing\'s words are Ark\'s label size, 12px or more on screen');
+    }
+  }
+}
+const choices=[0,1,2,3,4].map(i=>({listeners:{click:[()=>rich.hold(i)]}}));
 choices[3].listeners.click[0]();
-assert.equal(choices[3].getAttribute('aria-pressed'),'true');
 assert.equal(richRoot.dataset.step,'3');
-assert(richRoot.byClass('flow-says')[0].getAttribute('aria-hidden')!=='true','the selected explanation remains accessible');
 /* Colour is data in the landscape: exactly one record carries the accent (the one
    whose state the steps change), the head moves onto it only when the chain is
    extended, and the reference its resolution creates appears only at resolve. */

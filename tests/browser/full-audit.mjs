@@ -47,7 +47,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, setLens, openRailTab, openPageFields, pageRow, sheetBody, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor, createItem, MORE_MENU_IDS, siteStyleTab } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, answerArkDialog, dismissArkDialogIfOpen, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, setLens, openRailTab, openPageFields, pageRow, sheetBody, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor, createItem, MORE_MENU_IDS, siteStyleTab } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const ALL = ['content', 'design', 'toolbar', 'canvas', 'sweep'];
@@ -255,6 +255,7 @@ await surface('content', 'pages: create and delete a theory page', async (opened
   await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('Audit page'), 'the saved new page is not on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this page' }).click();
+  await answerArkDialog(app, 'accept');   /* Ark's dialog, not a native confirm (cms.md P2-11) */
   await until(() => !savedExists('manifests/auditpage.js') && !readSaved('manifests/index.js').includes('auditpage'), 'Delete did not remove the file and its index entry');
   await until(async () => (await pageRow(app, { page: 'auditpage' }).count()) === 0, 'the deleted page is still in the Pages tab');
   /* the Delete takes the page's SEO entry with it, saved copy included: nothing is left unsaved,
@@ -313,6 +314,7 @@ await surface('content', 'articles: create and delete', async (opened) => {
   await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('Audit note'), 'the saved new article does not render on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this article' }).click();
+  await answerArkDialog(app, 'accept');   /* Ark's dialog, not a native confirm (cms.md P2-11) */
   await until(() => !savedExists('articles/audit-note.js') && !readSaved('article-index.js').includes('audit-note'), 'Delete did not remove the article file and its index entry');
   check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the article Delete a draft shows unsaved: ' + await statusText(app));
   check(!readSaved('seo-data.js').includes('"audit-note"'), 'seo-data.js still holds the deleted article\'s entry');
@@ -357,6 +359,7 @@ await surface('content', 'images: create and delete', async (opened) => {
   await until(() => savedExists('assets/audit-dot.js') && readSaved('assets/index.js').includes('audit-dot'), 'Save did not create assets/audit-dot.js and index it');
   dialogPolicy = 'accept';
   await media.locator('button', { hasText: 'Delete this image' }).click();
+  await answerArkDialog(app, 'accept');
   await until(() => !savedExists('assets/audit-dot.js') && !readSaved('assets/index.js').includes('audit-dot'), 'Delete did not remove the image file and its index entry');
 });
 
@@ -385,6 +388,7 @@ await surface('content', 'encrypted: create, encrypt, Save, reload, decrypt, del
   await connect(again);
   dialogPolicy = 'accept';
   await vault2.locator('button', { hasText: 'Delete this item' }).click();
+  await answerArkDialog(app, 'accept');
   await until(() => !savedExists('secrets/audit-secret.js'), 'Delete did not remove secrets/audit-secret.js');
 });
 
@@ -874,7 +878,9 @@ async function counters(page, app) {
   const mut = await app.evaluate(() => window.__audit ? window.__audit.mut : 0).catch(() => -1);
   /* a field's value is a property, not an attribute: "Show manifest fields" changes only that */
   const values = await app.evaluate(() => [...document.querySelectorAll('input, textarea, select')].map((el) => el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value).join('\u0001').length + ':' + [...document.querySelectorAll('textarea')].map((t) => t.value.slice(0, 200)).join('|')).catch(() => '');
-  return { mut, msg, values, nav: navigations, req: requestsSeen, dialogs: dialogsSeen, pages: pagesOpened, downloads, fs: fsEvents, choosers };
+  /* Ark's confirmation dialog is a dialog too (cms.md P2-11): its appearing is an observable change */
+  const arkDialogs = await app.locator('.ark-alert-dialog').count().catch(() => 0);
+  return { mut, msg, values, nav: navigations, req: requestsSeen, dialogs: dialogsSeen + arkDialogs, pages: pagesOpened, downloads, fs: fsEvents, choosers };
 }
 async function quiet(app) {
   /* wait until the editor's DOM stops changing (a toast fading, a debounced check); a DOM that
@@ -928,6 +934,7 @@ async function sweep(name, scope, setup) {
       const after = await untilFor(async () => { const a = await counters(env.page, env.app); return diff(a) && a; }, 'nothing changed', 1000).catch(() => counters(env.page, env.app));
       const changed = Object.keys(before).filter((k) => after[k] !== before[k]);
       if (!changed.length) { dead.push({ surface: name, control: c.label, path: c.path }); deadHere += 1; }
+      await dismissArkDialogIfOpen(env.app);   /* what the sweep opened is answered No, as the native ones were */
       await env.app.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))).catch(() => {});
     }
     dialogPolicy = 'accept';

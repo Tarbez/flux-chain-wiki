@@ -62,7 +62,8 @@
     ['--z-versions', 60],        /* Version history, docked beside the workspace (.versions-panel) */
     ['--z-notice-toast', 60],    /* the toasts (.notice-toasts) */
     ['--z-header', 65],          /* the app bar: its menus drop over everything docked (#appBar) */
-    ['--z-menu', 70]             /* the More menu (.account-menu) */
+    ['--z-menu', 70],            /* the More menu (.account-menu) */
+    ['--z-modal', 100]           /* a confirmation dialog over everything (Ark's AlertDialog, ArkKit.arkConfirm: .ark-alert-dialog reads it) */
   ];
   LAYERS.forEach(function (layer) { document.documentElement.style.setProperty(layer[0], String(layer[1])); });
 
@@ -134,10 +135,11 @@
 
   /* Esc: the topmost overlay, and only it. A control that handles Esc itself (an inline edit, a
      toolbar section's own keydown) calls preventDefault, and this stays out of it. An open
-     authorization dialog owns Esc while it is up (it is modal and has its own). */
+     authorization dialog -- and an Ark confirmation dialog -- owns Esc while it is up (it is modal and has
+     its own: Esc is its Cancel, and must not also close the sheet or popover beneath it). */
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape' || e.defaultPrevented || !stack.length) return;
-    if (document.querySelector('flux-authorization-dialog')) return;
+    if (document.querySelector('flux-authorization-dialog, .ark-alert-dialog')) return;
     var top = stack[stack.length - 1], anchor = top.anchor;
     e.preventDefault();
     close(top.el, 'escape');
@@ -148,6 +150,7 @@
      that popover does not close anything under it). Capture phase: a control that removes itself
      on click must not hide the press's real target. */
   document.addEventListener('pointerdown', function (e) {
+    if (e.target && e.target.closest && e.target.closest('.ark-alert-dialog')) return;   /* answering a dialog is not a press outside what is under it */
     for (var i = stack.length - 1; i >= 0; i--) {
       var entry = stack[i];
       if (inside(entry, e.target)) return;

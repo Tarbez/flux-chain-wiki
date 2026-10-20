@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var scripts = new Map();
-  var pageAssetVersion = '20261019-ark027';
+  var pageAssetVersion = '20261020-w4';
   function loadScript(url) {
     if (!/^js\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.js$/.test(url)) return Promise.reject(new Error('Invalid page asset'));
     if (scripts.has(url)) return scripts.get(url);
@@ -46,8 +46,22 @@
     return (ArkUI.blockScripts || []).concat(glossary && ArkUI.glossaryScript ? [ArkUI.glossaryScript] : []);
   }
   function needsBlocks(definition) { return blockScriptsFor(definition).length > 0; }
+  /* The optional blocks are not in the public kit: the form blocks (field, form, list, status-line, choice) are
+     js/ark/vendor/ark-kit-forms.js and the popover is js/ark/vendor/ark-kit-popover.js; each registers into it
+     (docs/cms-architecture.md Budget). A page that uses them lists the chunk itself; this adds them where nothing in
+     the code can say so -- every route in the editor's canvas (the Library can insert any block anywhere), and a route
+     whose saved Ark block has a resolver the loaded kit does not know: load a chunk, and ask again. Derived from the
+     kit's own resolvers, never from a list of block names. */
+  var OPTIONAL_CHUNKS = ['js/ark/vendor/ark-kit-forms.js', 'js/ark/vendor/ark-kit-popover.js'];
+  function unknownSaved(definition) {
+    var known = (ArkUI.blocks && ArkUI.blocks.resolvers) || [];
+    return savedBlocks(definition).some(function (entry) { return known.indexOf(entry.master.resolver) < 0; });
+  }
   async function loadPage(page, definition) {
-    var urls = blockScriptsFor(definition).concat(definition.scripts);
+    var blocks = blockScriptsFor(definition);
+    for (var block of blocks) await loadScript(block);
+    if (blocks.length) for (var chunk of OPTIONAL_CHUNKS) if (inPreview() || unknownSaved(definition)) await loadScript(chunk);
+    var urls = definition.scripts;
     for (var url of urls) await loadScript(url);
     var module = ArkUI.pageModules[definition.module];
     if (!module) throw new Error('Page module missing: ' + page);

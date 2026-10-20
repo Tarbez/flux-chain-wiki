@@ -508,9 +508,11 @@ converts the site page by page this way; `/palette` is the worked pilot (`js/pag
 
 | file | where | carries |
 |---|---|---|
-| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup` and `patchArkBlock` are refusals that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. 24.0 KB gz (26.9 before W3-BUDGET) |
+| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup`, `patchArkBlock`, `arkConfirm`, `createArkAlertDialog` and `createArkModalHost` are refusals (a public page's floating panel is the `popover` block, from the forms chunk, not `createArkPopover`) that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. Its registry is ark-ui's CORE (21 blocks, `@deadark/ark-ui/blocks/core`; `createArkDomHost` is the core host, no focus scopes or dismissable layers). 24.5 KB gz (26.9 before W3-BUDGET, 24.0 before W4-ARK) |
+| `js/ark/vendor/ark-kit-forms.js` | a page that takes input (listed after the kit in the route's scripts; the loader adds it in the editor's canvas and for a saved form block the kit has no resolver for) | ark-ui's `@deadark/ark-ui/blocks/forms` alone (`field`, `form`, `list`, `status-line`, `choice`), registered into the public kit's registry by `ArkKit.registerArkBlocks`, then `ArkUI.blocks.sync()` registers their resolvers (so it may load before or after `js/ark/blocks.js`). A second load registers nothing twice. Editor help stripped like the kit's. Global `ArkKitForms`. 4.8 KB gz |
+| `js/ark/vendor/ark-kit-popover.js` | a page that floats a panel and takes no input (`/explore`); the same loading rules | ark-ui's `@deadark/ark-ui/blocks/popover` alone: the `popover` block and `withArkOverlays` (the host's focus scope and dismissable layer). Global `ArkKitPopover`. 3.2 KB gz. A page that uses both lists both (the overlay half is then in the popover chunk only). The loader loads the forms chunk, asks the kit again, then the popover chunk: derived from the kit's resolvers, never a name list |
 | `js/ark/vendor/ark-kit-live.js` | a page's first `ArkUI.blocks.update` (today / and /stats) | `patchArkBlock` alone (ark-ui 0.2.7's `blocks/patch`, `patchArkBlockIn(registry, …)`, bound to the loaded `ArkKit.ARK_BLOCKS`), global `ArkKitLive`. Loaded by the adapter, never listed by a route. 1.4 KB gz |
-| `js/ark/vendor/ark-kit.js` | the editor (`admin-app.html`), any page that needs an overlay | all of the above plus `createArkUI`, the examples, the help text and the morph. `ArkKit.PUBLIC_KIT` is `false`. 49.7 KB gz |
+| `js/ark/vendor/ark-kit.js` | the editor (`admin-app.html`), any page that needs an overlay | all of the above plus `createArkUI`, the form blocks, the examples, the help text, the morph, and `arkConfirm` (the editor's `window.confirm()` replacement: `createArkAlertDialog` on `createArkModalHost`, modal with a focus trap; the public kit refuses it, naming the full kit). All 27 blocks. `ArkKit.PUBLIC_KIT` is `false`. 59.3 KB gz |
 
 **Live update** (`ArkUI.blocks.update(el, props, options)`): `el` is re-rendered through the
 adapter (copy keys, scene links) and patched in place with Ark's `patchArkBlock`, so a CMS edit, a
@@ -562,9 +564,38 @@ and `npm run check:ark` refuses a hand-edited copy). Measured and rejected: `cha
 (+0.02), `target` es2020/es2022 (0), stripping the definitions' `parts` arrays (~-0.4, but the
 `card-grid`/`stats` getters would throw a bare TypeError instead of refusing). The next lever,
 not taken (an Ark host redesign): the light-DOM host's focus-scope and dismissable-layer code,
-which only `createArkPopover` drives and the public kit refuses, ~0.8 KB gz inside `blocks/host`.
+which only `createArkPopover` drives and the public kit refuses, ~0.8 KB gz inside `blocks/host`. (Taken by W4-ARK: `blocks/host-overlay.ts`.)
 A block route's bill also carries `js/ark/dash-kit.js` (3.9 KB, the link resolver blocks need),
 which existed at 5a1ac71 but loaded only on the stats family then.
+
+**W4-ARK (2026-10-20): the form blocks.** `field`, `form`, `list`, `status-line`, `choice` and `popover`
+(plus interactive `stat`, `actions` link/disabled/busy, which stay in the core) were measured IN the public
+kit at +4.5 KB gz (field + form 1.8, popover 0.6, list 0.6, choice 0.5, status-line 0.1, stat 0.4,
+actions ~0.3, engine ~0.3): a block route would have been 32.6 KB, 2.6 over R2, for every page, to pay for
+blocks only two pages use. So the public kit imports ark-ui's CORE registry and the six are
+`js/ark/vendor/ark-kit-forms.js`. Host redesign (the lever named below, taken): the light-DOM host's focus
+scopes and dismissable layers moved to `withArkOverlays`, which only the popover (in the chunk) and the
+modal host use, taking ~0.8 KB gz out of the core. gzip -9, this Mac, 2026-10-20, shipped files:
+
+| route bill (added JS) | files | gz | vs R2 (+30.0) |
+|---|---|---|---|
+| a block route | kit 24.49 + adapter 4.08 | **28.58** | -1.42 (was 28.08 before W4-ARK) |
+| block + live (`/`, a page that updates a block) | + live 1.42 | **29.99** | -0.01 (was 29.5; no headroom left) |
+| block + terms | + glossary 2.88 | 31.45 | +1.45 (named exception, was 31.0) |
+| `/stats` (live + terms) | + live + glossary | 32.87 | +2.87 (named exception, was 32.4) |
+| block + popover (`/explore`: one popover, no input) | + popover 3.20 | **31.78** | +1.78 (was 35.33 with the whole forms chunk: -3.55) |
+| block + forms (`/account`) | + forms 4.85 | **33.42** | +3.42: the new capability's bill; the hand-built JS the conversion deletes is the offset (measure per route when converted) |
+| block + forms + popover | both chunks | 36.63 | +6.63 (the popover and forms chunks each carry their own copy of the small shared helpers: +1.2 over the old single chunk, paid only by a page using both) |
+| block + forms + live | + forms + live | 34.84 | +4.84 |
+| the editor | `ark-kit.js` 60.19 (was 49.7: all 27 blocks, `arkConfirm`) | n/a (editor, not a public route) | |
+
+CSS (`css/ark-blocks.css`, linked on every route): 8.85 KB gz, +1.5 over 7.3 (the form blocks and the alert
+dialog's static rules). The CSS ledger below becomes -44.5 KB gz net. The forms chunk costs 4.8 KB and the popover chunk 3.2 as their own
+files against 3.8 for all six inside the kit: a separate gzip stream shares no dictionary with the kit, and
+each carries its own copy of the small events helper (the popover chunk also `withArkOverlays`, 0.8).
+**Popover split (0.2.10, measured):** `/explore` loaded the whole 6.76 KB chunk for one popover; as its own
+chunk it loads 3.20 (-3.55). A page that uses both pays +1.2 over the old single chunk. Measured and rejected: all six in
+`createArkPopover`'s form (a popover through the primitive is +1.4 KB gz in a public bundle alone).
 
 **Named exception: the glossary on terms routes** (measured 2026-10-20, same method). A route
 whose words carry terms adds `js/content/glossary.js` (2.9 KB gz, 44 entries) and lands at 31.0
@@ -699,6 +730,22 @@ registry (`js/content/evidence-registry.js`, `docs/content-sources.md`): a figur
 record carries is absent, never a number. A tile that updates later (the live fleet signal) is
 patched with `ArkUI.blocks.update`. Regression: `tests/home-blocks.cjs`, `tests/about-page.cjs`,
 `tests/chain-blocks.cjs`, `tests/home-launch.cjs`, `tests/home-hero-scene.cjs`.
+
+**Form blocks and the confirm dialog** (W4-ARK, 2026-10-20; the props are `design/ark-ui/BLOCKS.md`).
+A page that takes input lists the chunk with its scripts, anywhere after `ArkUI.blockScripts` (the chunk
+and the adapter may load in either order): `scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/pages/<page>.js'])`.
+`ArkUI.blocks.formsScript` names it; the `popover` block is its own chunk, `ArkUI.blocks.popoverScript` (a page that floats a panel and takes no input lists only that). Every press that means something to the page raises `ark:action`, so
+the page's `options.actions[name](detail, event)` hears it: a form's `detail` is `{ action, values, block }`
+(the form never posts), a list row's button adds `item` (the row's `id`), a `choice`/`field` with `action`
+adds `value`. A refusal the page makes goes back as `ArkUI.blocks.update(formEl, props-with-error)` --
+`error: { failure, needs, remedy }` on the field -- and a result under the form as
+`ArkUI.blocks.update(statusEl, { text, tone })` (the `status-line` is a polite live region that is in the
+DOM before it has anything to say). `actions` items take `disabled`, `busy` (+ `busyLabel`), `target`
+and `rel`; a `stat` takes `href` or `action` (one control, described by the reading) and `logo: { image, alt }`.
+`ArkKit.arkConfirm({ title, message, confirmLabel, cancelLabel, tone })` (the editor's full kit) replaces
+`window.confirm()`: it resolves true or false, Esc cancels, the page behind is inert; it sits at
+`z-index: var(--z-modal, 100)`, so add `['--z-modal', 100]` to the ladder in `js/admin/overlay.js` to place it
+in `tests/cms-overlay-z-ladder.cjs`'s order.
 
 **Layout-key continuity: required for every conversion.** Saved CMS edits are keyed by layout
 key, and most hand-built elements have path keys, so a conversion re-keys them. The workflow

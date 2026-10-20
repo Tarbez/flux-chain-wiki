@@ -45,6 +45,8 @@ const reshaped = {
   [P + '/div:7']: 'the fleet-capacity section head became the accordion item of the same name',
   [P + '/div:9']: 'the measured-resolver section head became the first row of the Throughput tab, its title now carrying its headline number',
   [P + '/div:10/section:1']: 'the resolver-registry panel became an accordion item of the same name',
+  [P + '/div:10/section:1/p:1']: 'the panel\'s title line is the accordion item\'s title, renamed "Resolver families audited": "registry" collided with the registry ledger (the launch log on the base chain), and this table is the audit\'s families (docs/ux-audit/resolvers-content.md 2.11)',
+  [P + '/section:12/div:1/table:1/tbody:1/tr:3/td:1']: 'the records table\'s row for the audit, renamed "Resolver families audited" for the same reason as the accordion item',
   [P + '/div:10/section:1/ol:1']: 'the registry list became a table: resolver, signers and work, state',
   [P + '/div:10/section:2']: 'the binding-constraint panel became an accordion item of the same name',
   [P + '/div:10/section:2/p:2']: 'the "449.229 ms to 10 replicas" line is the stat\'s value now; "to 10 replicas" is its label',

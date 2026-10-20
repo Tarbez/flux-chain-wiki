@@ -343,6 +343,36 @@
     delete manifest.fields['POINT' + n + '.TITLE']; delete manifest.fields['POINT' + n + '.TEXT'];
   }
 
+  /* "Show on page": the canvas scrolls to the first of a group's words it is showing, and the words
+     are outlined for a moment (docs/ux-audit/cms.md P1-14). A field is found by its copy key
+     (HOME.EYEBROW) in the canvas's own data-ark-copy-keys -- the same stamp the Content lens binds
+     inline edits by. Says why when none of them is on this canvas page (a header word on a page
+     that has no header, a hidden field). */
+  var showFlash = null;
+  function showOnPage(manifest, roles) {
+    var frame = $('cmsPreview'), doc = null;
+    try { doc = frame && frame.contentDocument; } catch (e) { doc = null; }
+    if (!doc || state.cmsPreviewRoute !== manifest.route && manifest.group !== 'site') {
+      status('Open ' + (manifest.title || manifest.route) + ' on the canvas to see where these words are.', 'warn'); return false;
+    }
+    var found = null;
+    roles.some(function (role) {
+      var key = manifest.id.toUpperCase() + '.' + role;
+      found = Array.prototype.filter.call(doc.querySelectorAll('[data-ark-copy-keys]'), function (el) { return String(el.getAttribute('data-ark-copy-keys')).split(/\s+/).indexOf(key) >= 0; })[0] || null;
+      return !!found;
+    });
+    if (!found) { status('None of these words are on the canvas right now. They may belong to a part of the page that is not showing.', 'warn'); return false; }
+    if (found.scrollIntoView) found.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (showFlash) { showFlash.el.style.outline = showFlash.was; clearTimeout(showFlash.timer); }
+    showFlash = { el: found, was: found.style.outline, timer: 0 };
+    found.style.outline = '2px solid hsl(var(--reference, 210 80% 55%))';
+    showFlash.timer = setTimeout(function () { if (showFlash && showFlash.el === found) { found.style.outline = showFlash.was; showFlash = null; } }, 1600);
+    return true;
+  }
+  /* which groups of a page's fields are open: the first, until the person opens another; kept
+     across the repaints a keystroke or a Revert causes */
+  var groupsOpen = {};
+
   /* renderPageFields(container, item, opts): every manifest field of one page (or the site
      chrome, id 'nav'), in tabs Content / Shape (pages with a background shape) / SEO / Code,
      with Revert and -- for a theory page -- Delete. `item` is the manifest id (or { id }).
@@ -375,13 +405,42 @@
          hero; kept for admin history)"): those wait under "Unused fields", folded, instead of
          sitting between the ones that matter (P1-14). Nothing is dropped. */
       var unusedRoles = Object.keys(manifest.fields).filter(function (role) { return /\bunused\b/i.test(manifest.fields[role].label || ''); });
-      sections(manifest.fields).forEach(function (section) {
-        var roles = section.roles.filter(function (role) { return unusedRoles.indexOf(role) < 0; });
-        if (!roles.length) return;
-        var set = h('fieldset', {}, h('legend', { text: section.name }));
-        roles.forEach(function (role) { set.appendChild(fieldEl(manifest, role)); });
-        contentPanel.appendChild(set);
-      });
+      /* The fields are grouped by what is on screen (Hero, Status, Links ...): one Ark accordion item
+         per group, drawn in the dress the Library's groups already have (css/studio-embed.css lib-group*: one
+         accordion dress, not a second), the first open, each with the number of fields it holds and "Show on page".
+         A page with one group is just that group, with nothing to fold. */
+      var shown = sections(manifest.fields).map(function (section) {
+        return { name: section.name, roles: section.roles.filter(function (role) { return unusedRoles.indexOf(role) < 0; }) };
+      }).filter(function (section) { return section.roles.length; });
+      var showButton = function (section) {
+        return h('div', { class: 'tools' }, h('button', { type: 'button', class: 'btn tiny', 'data-action': 'show-on-page', text: 'Show on page',
+          title: 'Scroll the canvas to these words', onclick: function () { showOnPage(manifest, section.roles); } }));
+      };
+      /* opts.field (a "All fields" jump from a word on the canvas) opens the group that holds it */
+      var wanted = opts && opts.field ? shown.filter(function (section) { return section.roles.indexOf(opts.field) >= 0; })[0] : null;
+      if (wanted) { var seen = groupsOpen['page:' + id] || []; if (seen.indexOf(wanted.name) < 0) groupsOpen['page:' + id] = seen.concat([wanted.name]); }
+      if (shown.length === 1) {
+        var only = h('fieldset', {}, h('legend', { text: shown[0].name }));
+        shown[0].roles.forEach(function (role) { only.appendChild(fieldEl(manifest, role)); });
+        only.appendChild(showButton(shown[0]));
+        contentPanel.appendChild(only);
+      } else if (shown.length) {
+        var list = h('div', { class: 'lib-groups' }), folds = [];
+        var openNames = groupsOpen['page:' + id] || [shown[0].name];
+        shown.forEach(function (section) {
+          var trigger = h('button', { type: 'button', class: 'lib-group-trigger' }, h('span', { text: section.name }), h('small', { class: 'lib-group-count', text: String(section.roles.length) }));
+          var head = h('h3', { class: 'lib-group-head' }, trigger);
+          var panel = h('div', { class: 'lib-group-rows' });
+          section.roles.forEach(function (role) { panel.appendChild(fieldEl(manifest, role)); });
+          panel.appendChild(showButton(section));
+          var item = h('section', { class: 'lib-group', 'data-group': section.name, 'aria-label': section.name }, head, panel);
+          folds.push({ value: section.name, item: item, header: head, trigger: trigger, panel: panel });
+          list.appendChild(item);
+        });
+        contentPanel.appendChild(list);
+        A.arkAccordion(list, folds, { label: 'Fields on this page', open: openNames,
+          onChange: function (openValues) { groupsOpen['page:' + id] = openValues.slice(); } });
+      }
       if (unusedRoles.length) {
         var unusedBody = h('div', {}, h('p', { class: 'hint', text: 'The page does not show these today. They are kept so nothing written in them is lost.' }));
         unusedRoles.forEach(function (role) { unusedBody.appendChild(fieldEl(manifest, role)); });
@@ -498,10 +557,46 @@
      to "New page. Edit it, th..." (docs/ux-audit/cms.md P0-1). */
   function createdNotice(kind, id) {
     var item = kind === 'page' ? state.drafts[id] : state.aDrafts[id], route = kind === 'page' ? item.route : '/learnings/' + id;
+    recordCreate(kind, id);
     status((kind === 'page' ? 'New page ' : 'New article ') + route + ': not saved yet.', '');
     notice({ tone: 'success', key: 'created', title: (kind === 'page' ? 'New page' : 'New article') + ' “' + item.title + '” (' + route + ')',
       body: 'It is on the canvas and its fields are open. It is a draft until you Save: the site gets its file and its address then.',
       actions: [{ label: 'Save now', run: function () { saveEverything(); } }] });
+  }
+  /* Creating is a step of the one undo history (js/admin/history.js; docs/ux-audit/cms.md P1-5).
+     Undo drops the new draft -- but only while it is still a draft: once Save has written its file
+     it is part of the site, and Delete (which asks, and keeps a version) is how it leaves. Redo puts
+     the same draft back where it was in the list. */
+  var CURRENT = { page: 'current', article: 'aCurrent', asset: 'assetCurrent', secret: 'secretCurrent' };
+  function dropUnsavedDraft(kind, id) {
+    var k = ITEM_KINDS[kind];
+    if (!k || !state[k.drafts][id] || state[k.saved][id] !== null) return false;
+    var route = kind === 'page' ? state.drafts[id].route : kind === 'article' ? '/learnings/' + id : '';
+    state[k.ids] = state[k.ids].filter(function (other) { return other !== id; });
+    delete state[k.drafts][id]; delete state[k.saved][id];
+    if (state[CURRENT[kind]] === id) state[CURRENT[kind]] = state[k.ids][0] || null;
+    afterItemRemoved(kind, id, route);
+    return true;
+  }
+  function putBackDraft(kind, id, copy, at) {
+    var k = ITEM_KINDS[kind];
+    if (!k || state[k.drafts][id]) return false;
+    state[k.ids].splice(Math.min(at, state[k.ids].length), 0, id);
+    state[k.drafts][id] = JSON.parse(JSON.stringify(copy)); state[k.saved][id] = null;
+    state.kind = kind; state[CURRENT[kind]] = id;
+    itemsChanged(kind, id); touch({ kind: kind, id: id });
+    hook(kind === 'page' ? 'select' : kind === 'article' ? 'selectArticle' : 'selectAsset')(id);
+    return true;
+  }
+  function recordCreate(kind, id) {
+    var k = ITEM_KINDS[kind];
+    if (!k || typeof A.historyAction !== 'function' || !state[k.drafts][id]) return;
+    var copy = JSON.parse(JSON.stringify(state[k.drafts][id])), at = state[k.ids].indexOf(id);
+    var name = copy.title || copy.label || id;
+    A.historyAction({ label: 'creating the ' + k.noun.toLowerCase() + ' \u201c' + name + '\u201d',
+      can: function (way) { return way === 'undo' && state[k.drafts][id] && state[k.saved][id] !== null ? '\u201c' + name + '\u201d has been saved, so the site has its file now. Use Delete to remove it (it asks first, and keeps a version).' : ''; },
+      undo: function () { return dropUnsavedDraft(kind, id); },
+      redo: function () { return putBackDraft(kind, id, copy, at); } });
   }
   function refused(message) { status(message, 'error'); document.dispatchEvent(new CustomEvent('ark-cms-create-refused', { detail: { refusal: message } })); return { ok: false, refusal: message }; }
   /* The New page / New article / New image / New encrypted item forms: wherever the shell (or a
@@ -537,11 +632,19 @@
     if (kind === 'page') return deletePage(id);
     status('Nothing deleted: "' + kind + '" is not something Delete removes. Needs: page, article, asset or secret.', 'error');
   }
+  /* The Delete question, worded once for every kind (docs/ux-audit/cms.md P2-11: native confirm -> Ark's
+     AlertDialog): what goes, and whether it can be undone. A saved item's file is removed, but every earlier
+     version still holds it (Versions); an item never saved has no file and no version, so it cannot come back. */
+  function confirmDelete(noun, name, consequence, neverSaved) {
+    return A.confirmDialog({ title: 'Delete the ' + noun + ' \u201c' + name + '\u201d?',
+      message: consequence + '\n\n' + (neverSaved ? 'It has not been saved yet, so this cannot be undone.' : 'You can bring it back from Versions: restore a version from before this delete.'),
+      confirmLabel: 'Delete ' + noun, cancelLabel: 'Keep it', tone: 'danger' });
+  }
   async function deletePage(id) {
     var manifest = state.drafts[id];
     if (!manifest) { status('Nothing deleted: there is no page "' + id + '".', 'error'); return; }
     if (!state.dir && state.saved[id] !== null) { status('Connect the project folder to delete a page: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + manifest.title + '"? This removes its file and its link on the theory page.')) return;
+    if (!(await confirmDelete('page', manifest.title, 'This removes its file and its link on the theory page.', state.saved[id] === null))) return;
     var routesBefore = studioRoutes().map(function (r) { return r.path; });
     try { await removeItemFile('page', id); }
     catch (error) { status(error.message, 'error'); return; }
@@ -549,6 +652,15 @@
     if (state.current === id) state.current = state.ids[0];
     afterItemRemoved('page', id, manifest.route);
     status('Deleted ' + manifest.title + '.' + forgot + await afterDelete(), 'ok');
+    deletedNotice(manifest.title);
+  }
+  /* What a Delete says besides the status line: it is not undone with Ctrl+Z (the file is gone and
+     the earlier versions keep it -- history.js says why), so the way back is in the notice, one click
+     from the list of versions (docs/ux-audit/cms.md P1-5). */
+  function deletedNotice(what) {
+    notice({ tone: 'info', key: 'deleted', title: 'Deleted \u201c' + what + '\u201d',
+      body: 'Its file is gone from the project. Every earlier version still holds it: open Versions and restore the one from before this delete to bring it back.',
+      actions: A.versionsPanel ? [{ label: 'Open Versions', run: function () { A.versionsPanel.open(); } }] : [] });
   }
   /* After a removal: the forms and lists repaint, and the canvas -- if it was showing the route
      that went -- moves to Home before anything is posted to it (a page sent a site without
@@ -619,7 +731,7 @@
   }
 
 
-  A.provide({ boundField: boundField, contentChoices: contentChoices, contentLabel: contentLabel, refreshList: renderList, createPage: createPage, createdNotice: createdNotice, deleteItem: deleteItem, fieldValue: fieldValue,
+  A.provide({ boundField: boundField, contentChoices: contentChoices, contentLabel: contentLabel, refreshList: renderList, createPage: createPage, createdNotice: createdNotice, confirmDelete: confirmDelete, deletedNotice: deletedNotice, recordCreate: recordCreate, deleteItem: deleteItem, fieldValue: fieldValue,
       itemDirty: itemDirty, itemsChanged: itemsChanged, linkPickerEl: linkPickerEl,
       paintInto: paintInto, panelHead: panelHead, refreshSaveButton: refreshSaveButton,
       renderPageFields: renderPageFields, repaintPanels: repaintPanels,

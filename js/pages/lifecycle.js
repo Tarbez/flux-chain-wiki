@@ -565,6 +565,9 @@
       var picture = id ? ArkUI.createStageScene(id, copy) : trailFigure();
       /* The five stages, as links: the pager's related row (the old trail). */
       var related = stages.filter(function (s) { return s.id !== id; }).map(function (s) { return { label: s.title, href: 'route:lifecycle/' + s.id }; });
+      /* Out of the lifecycle, not only along it: the ways on from this page's journey (ArkUI.nextSteps, js/ark/page-kit.js),
+         in sight in The idea. Before, the only exits were the other stages (docs/ux-audit/ledger.md, lifecycle next steps). */
+      var ways = ArkUI.nextSteps(page), onward = ways.length ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : [];
       var def = {
         page: page, id: prefix, className: 'story-lifecycle', titleId: prefix + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
         crumbs: [{ label: 'Home', href: 'route:zero' }].concat(id ? [{ label: 'Agreement lifecycle', href: 'route:lifecycle' }, { label: stage.title }] : [{ label: 'Agreement lifecycle' }]),
@@ -573,7 +576,7 @@
         /* The idea is the short answer: the example, then what becomes true. How it works opens one
            fact at a time, as the old fact chips did (an accordion now: one ARIA model, one look). */
         depth: id ? {
-          focus: { text: copy.lead, blocks: [{ block: 'facts', props: { label: stage.title, columns: 1, items: [{ term: copy.facts[2][0], value: copy.facts[2][1] }] } }] },
+          focus: { text: copy.lead, blocks: [{ block: 'facts', props: { label: stage.title, columns: 1, items: [{ term: copy.facts[2][0], value: copy.facts[2][1] }] } }].concat(onward) },
           /* "Becomes true" is the idea's answer and "References" opens the evidence: each fact is
              shown once, labelled, where it answers its view's question. */
           context: { blocks: [{ block: 'accordion', props: { label: 'Inspect ' + stage.title, defaultOpen: ['why'], items: [
@@ -584,7 +587,7 @@
           reference: { text: 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.',
             blocks: [{ block: 'facts', props: { label: stage.title + ' evidence', columns: 1, items: [{ term: copy.facts[1][0], value: copy.facts[1][1] }] } }, { block: 'actions', props: { items: [guide] } }] }
         } : {
-          focus: { text: 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification. Each stage answers a different question.\n\nEach record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.' },
+          focus: { text: 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification. Each stage answers a different question.\n\nEach record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.', blocks: onward },
           context: { blocks: [{ block: 'accordion', props: { label: 'Agreement stages', items: stages.map(function (s, i) {
               var c = ArkUI.lifecycleContent[s.id];
               return { value: s.id, title: two(i + 1) + ' · ' + s.title, content: c.facts[2][1] + '\n\n' + c.note, blocks: [{ block: 'actions', props: { items: [{ label: 'Open ' + s.title, href: 'route:lifecycle/' + s.id, tone: 'link' }] } }] };

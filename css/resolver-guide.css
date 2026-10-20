@@ -86,3 +86,28 @@
 @media(prefers-reduced-motion:reduce) {
   .resolver-guide-page :is(.learning-eyebrow,.learning-heading,.resolver-guide-copy,.resolver-guide-links) { animation:none; }
 }
+
+/* =====================================================================
+   Manifest figures (js/pages/resolver-page-parts.js): the content audit's five diagrams, drawn
+   from each manifest's meta.diagrams inside Ark's figure frame. The cards, status chips, eyebrows,
+   steps and facts inside are Ark's own parts and take no rule here; this sheet holds only the
+   layout around them -- the layer band, the launched chain's lane -- which Ark has no part for.
+   Nothing moves. Colour is the SDK's semantic tokens; shape (dashed lane, a provider dot) and
+   the words carry every state, never colour alone.
+   ===================================================================== */
+.mfig { display:grid; gap:14px; }
+.mfig-layers { gap:0; }
+.mfig-band { position:relative; display:grid; gap:8px; padding:10px 12px; border:1px solid hsl(var(--border-default)); border-radius:8px; }
+.mfig-band + .mfig-band { margin-top:14px; }
+.mfig-band + .mfig-band::before { content:""; position:absolute; left:22px; top:-15px; height:14px; border-left:2px solid hsl(var(--border-strong)); }
+.mfig-rule, .mfig-source { margin:0; color:hsl(var(--text-muted)); }
+.mfig-source { margin-top:12px; }
+.mfig-row { display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none; }
+.mfig-tick { padding:2px 8px; border-left:3px solid hsl(var(--border-strong)); font-family:var(--font-mono,monospace); color:hsl(var(--text-strong)); }
+.mfig-states { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
+.mfig-state { display:grid; align-content:start; gap:8px; }
+.mfig-lane { display:flex; align-items:center; gap:8px; min-height:24px; padding:0 10px; border:2px solid hsl(var(--border-strong)); border-radius:999px; }
+.mfig-lane[data-outline="dashed"] { border-style:dashed; }
+.mfig-lane-tick { width:14px; height:10px; border:1px solid hsl(var(--border-strong)); border-radius:2px; }
+.mfig-provider { width:12px; height:12px; border-radius:50%; background:hsl(var(--primary)); }
+.mfig-variant { display:grid; gap:8px; padding:10px 12px; border:1px solid hsl(var(--border-default)); border-radius:8px; }

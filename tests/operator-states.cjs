@@ -39,7 +39,6 @@ const context={ArkUI:ArkUIStub,document,window,console,AbortController,Date,Type
 }};
 vm.runInNewContext(fs.readFileSync('js/ark/dash-kit.js','utf8'),context);
 vm.runInNewContext(fs.readFileSync('js/pages/explorer.js','utf8'),context);
-vm.runInNewContext(fs.readFileSync('js/pages/account.js','utf8'),context);
 async function flush(){for(let i=0;i<20;i++)await Promise.resolve();}
 (async()=>{
  const host=new Element(),page=context.ArkUI.pageModules.explorer.mount(host),q=s=>page.querySelector(s);
@@ -80,8 +79,7 @@ async function flush(){for(let i=0;i<20;i++)await Promise.resolve();}
  summary.listeners.click();await flush();pending[2].resolve({ok:true,json:async()=>({apiVersion:'explorer-api-v1',data:{record:{id:'different-record',sourceId:'agreements'}}})});await flush();
  assert.equal(page.dataset.recordView,'list','an unexpected ID cannot open a misleading detail');assert(q('[data-explorer-result-message]').textContent.includes('different record or source'));
  page._explorerCleanup();
- const account=context.ArkUI.pageModules.account.mount(new Element());authOptions.onChange(null);assert(account.querySelector('.account-state').hidden);assert(account.querySelector('.account-live').hidden);const count=reads.length;await account.querySelector('[data-account-mesh-check]').listeners.click();assert.equal(reads.length,count,'signed-out state cannot query an identity');
- authOptions.onChange({identityId:'fixture-identity',publicKeyB64:'fixture-public-root',displayName:'Fixture'});assert(!account.querySelector('.account-state').hidden);assert(!account.querySelector('.account-live').hidden);assert.equal(account.querySelector('[data-account-verification]').textContent,'Identity verified.');
- authOptions.onChange(null);assert(account.querySelector('.account-live').hidden);account.arkDispose();assert(!disposed,'the signer is a shared singleton that outlives one route\'s mount, so route unmount alone must not dispose it');windowListeners.pagehide();assert(disposed,'closing the tab (pagehide) disposes the local signer');
- console.log('PASS: no read before the page starts, public-first with explicit local switch, cursor-walk counts with a cap, wallets never counted, node list, bounded query, retained record identity and reverse, exact-ID rejection, abort/stale-read isolation, local identity scope, and signer disposal.');
+ /* /account's signed-out / signed-in / signer-disposal checks lived here while it was hand-built DOM this toy Element could stand in for.
+    /account is Ark blocks since 2026-10-20 (W4-S2): they moved, unchanged in what they assert, to tests/account-session.cjs (a real DOM). */
+ console.log('PASS: no read before the page starts, public-first with explicit local switch, cursor-walk counts with a cap, wallets never counted, node list, bounded query, retained record identity and reverse, exact-ID rejection, abort/stale-read isolation, local identity scope.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

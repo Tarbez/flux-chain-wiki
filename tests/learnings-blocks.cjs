@@ -89,7 +89,8 @@ const ARTICLE = {
     [/^page:\/div:1\/nav:2\/a:1$/, '"Related mechanism →" names its page now'],
     [/^page:\/div:1\/details:1$/, 'the evidence disclosure is Evidence\'s facts'],
     [/^page:\/div:1\/nav:1\/button:\d+\/span:2$/, 'the question is the row\'s label, with its number ("01 · Was there a real chain?")'],
-    [/^page:\/div:1\/nav:1\/button:\d+\/span:1$/, 'the number was the row\'s marker; Ark\'s accordion marks the row with its chevron, which takes the marker\'s key']
+    [/^page:\/div:1\/nav:1\/button:\d+\/span:1$/, 'the number was the row\'s marker; Ark\'s accordion marks the row with its chevron, which takes the marker\'s key'],
+    [/^page:\/div:1\/nav:1\/p:1$/, 'the question count ("QUESTIONS / 08") is derived from the note\'s questions: the grammar note gained a ninth (W4-S13)']
   ],
   retired: [
     [/^page:\/header:1\/div:1\/button:1$/, 'the Core return button; The idea tab returns to the core'],
@@ -106,7 +107,8 @@ const ARTICLE = {
     [/^page:\/div:1\/nav:1\/button:1$/, '"00" is The idea tab'],
     [/^page:\/div:1\/nav:1\/button:\d+\/span:1$/, 'the number is part of the row\'s label'],
     [/^page:\/div:1\/div:1\/div:1\/button:[12]$/, '"← THE CORE" / "NEXT QUESTION →" are the depth tabs'],
-    [/^page:\/div:1\/div:1\/a:1$/, '"NEXT NOTE / <title> →" is the pager\'s next page, titled']
+    [/^page:\/div:1\/div:1\/a:1$/, '"NEXT NOTE / <title> →" is the pager\'s next page, titled'],
+    [/^page:\/div:1\/nav:1\/p:1$/, 'the question count ("QUESTIONS / 08") is derived from the note\'s questions: a note that gained a section says its new count (the grammar note, 09, W4-S13)']
   ]
 };
 
@@ -136,6 +138,12 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
   for (const file of ['css/article-reading.css', 'css/learnings.css', 'css/document-flow.css']) assert(!fs.existsSync(path.join(ROOT, file)), file + ' is gone');
   assert(!/\.(learning|article)-[a-z-]+/.test(read('css/page-layout.css') + read('css/task-page.css') + read('css/site-direction.css') + read('css/settings.css') + read('css/color-system.css')), 'no learning-* / article-* rule is left in the shared stylesheets');
   assert(!/data-page\^="article\/"\][^{]*canvas/.test(read('css/site-direction.css')), 'no rule puts the particle canvas back on a note');
+  /* Named regression (docs/ux-audit/ledger.md, /learnings "four names", 2026-10-20): the fixed corner button said NOTES
+     but was built from the copy key NAV.BACK.TUTORIALS -- the fourth name survived in the key an editor sees in the Content
+     lens. The key is named for what it says. */
+  assert(read('js/hero-motion.js').includes("'NAV.BACK.NOTES'"), 'the corner button on a note reads the key NAV.BACK.NOTES');
+  assert(!/BACK\.TUTORIALS/.test(read('js/hero-motion.js') + read('js/content/manifests/nav.js')), 'no TUTORIALS key is left in the corner button or the nav manifest');
+  assert(/"BACK\.NOTES": \{\s*"label": "Back to the notes",\s*"kind": "line",\s*"section": "Back button",\s*"value": "NOTES"/.test(read('js/content/manifests/nav.js')), 'the nav manifest holds BACK.NOTES = NOTES');
   const { catalog } = require('./lib/site-catalog.cjs').loadCatalog();
   assert(catalog.learnings.scripts.includes('js/ark/blocks.js') && !catalog.learnings.scripts.includes('js/resolvers/learnings.js'), '/learnings loads the blocks, not the old reader');
   const first = catalog['article/' + LC.articles[0].slug].scripts;

@@ -330,7 +330,8 @@
     return root;
   }
 
-  /* Every Ark block, by the name rule: the list is the kit's. */
+  /* Every Ark block, by the name rule: the list is the kit's. Run at load, and again by sync() when a
+     later chunk (js/ark/vendor/ark-kit-forms.js) has registered more blocks into the kit. */
   function install() {
     var names = kit().ARK_BLOCK_NAMES;
     names.forEach(function (name) {
@@ -357,6 +358,11 @@
       return null;
     },
     resolvers: install(),
+    /* sync(): register the resolvers of blocks the kit gained after this file loaded (the forms and popover chunks call it,
+       so a route may list that chunk before or after this file). Returns the full resolver list. */
+    sync: function () { return (ArkUI.blocks.resolvers = install()); },
+    formsScript: 'js/ark/vendor/ark-kit-forms.js',
+    popoverScript: 'js/ark/vendor/ark-kit-popover.js',
     render: render,
     update: update,
     /* whenLive(): settles once every queued live update has been applied (the live chunk arrived and

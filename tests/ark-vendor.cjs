@@ -13,7 +13,7 @@ const check = spawnSync(process.execPath, ['scripts/build-ark-vendor.cjs', '--ch
 assert.equal(check.status, 0, 'build-ark-vendor --check failed (run npm run sync:ark, then npm run build:ark):\n' + check.stdout + check.stderr);
 for (const out of ['css/themes.css', 'scripts/theme-options.js', 'js/ark/vendor/engines.js', 'js/ark/vendor/backgrounds.js', 'js/settings/panel.js',
   'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/local-identity.js', 'js/ark/vendor/ark-kit.js', 'css/ark-blocks.css',
-  'js/admin/vendor/cms-blocks.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/vendor/ark-kit-live.js', 'js/ark/blocks.js']) {
+  'js/admin/vendor/cms-blocks.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/vendor/ark-kit-forms.js', 'js/ark/vendor/ark-kit-popover.js', 'js/ark/vendor/ark-kit-live.js', 'js/ark/blocks.js']) {
   assert(check.stdout.includes('ok ' + out), out + ' is not covered by build-ark-vendor --check');
 }
 // css/ark-blocks.css is Ark's static block stylesheet (@deadark/ark-ui >= 0.2.0): server-rendered
@@ -109,5 +109,50 @@ pub.ArkKit = pub.__kit;
 vm.runInNewContext(live + '\n;globalThis.__live = ArkKitLive;', pub);
 assert.equal(typeof pub.__live.patchArkBlock, 'function', 'the live chunk carries patchArkBlock');
 assert(/cannot become a/.test(live) && !/ARK_BLOCK_NAMES/.test(live), 'the live chunk carries the morph and no copy of the registry');
+
+// 8. The optional blocks are chunks (W4-ARK, 2026-10-20): field, form, list, status-line and choice (ark-kit-forms.js) and popover
+//    (ark-kit-popover.js, its own file since 0.2.10: a page that floats one panel does not download the forms) cost +3.8 KB gz in
+//    the public kit and every block route pays for the kit, so the public kit's registry is ark-ui's CORE (21 blocks) and each
+//    chunk registers its blocks into it. The editor's full kit has all 27.
+const FORM_BLOCKS = ['field', 'form', 'list', 'status-line', 'choice'];
+const POPOVER_BLOCKS = ['popover'];
+assert.equal(pub.__kit.ARK_BLOCK_NAMES.length, 21, 'the public kit holds the 21 core blocks');
+for (const name of FORM_BLOCKS.concat(POPOVER_BLOCKS)) {
+  assert(!pub.__kit.ARK_BLOCK_NAMES.includes(name), 'the public kit does not carry ' + name);
+  assert(sandbox.__kit.ARK_BLOCK_NAMES.includes(name), 'the full kit carries ' + name);
+}
+assert.equal(sandbox.__kit.ARK_BLOCK_NAMES.length, 27, 'the editor\'s kit holds all 27 blocks');
+assert.equal(typeof pub.__kit.registerArkBlocks, 'function', 'the public kit can take late blocks');
+const forms = fs.readFileSync('js/ark/vendor/ark-kit-forms.js', 'utf8');
+const popover = fs.readFileSync('js/ark/vendor/ark-kit-popover.js', 'utf8');
+for (const [source, entry] of [[forms, 'blocks/forms'], [popover, 'blocks/popover']]) {
+  assert(source.slice(0, 300).includes(entry) && !/ARK_BLOCK_NAMES/.test(source), entry + ' is its ark-ui entry alone: it carries no copy of the registry');
+}
+assert(!/ark-popover__panel|popover-trigger/.test(forms), 'the forms chunk carries no popover (it is its own file)');
+assert(!/field-control|ark-form__fields/.test(popover), 'the popover chunk carries no form blocks');
+for (const [source, global] of [[forms, 'ArkKitForms'], [popover, 'ArkKitPopover']]) {
+  assert.throws(() => vm.runInNewContext(source, { window: {}, document: undefined }), new RegExp(global + ' refused: no Ark kit is loaded.*Needs: js\\/ark\\/vendor\\/ark-kit-public\\.js before'), 'the chunk without a kit is refused, naming the kit');
+}
+const pubWithChunks = { window: {}, document: undefined, ArkEngines: sandbox.ArkEngines };
+pubWithChunks.globalThis = pubWithChunks;
+vm.runInNewContext(publicKit + '\n;globalThis.ArkKit = ArkKit;', pubWithChunks);
+vm.runInNewContext(popover + '\n;globalThis.__popover = ArkKitPopover;', pubWithChunks);
+assert.deepEqual(Array.from(pubWithChunks.__popover.POPOVER_BLOCK_NAMES), POPOVER_BLOCKS, 'the popover chunk registers the popover alone');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 22, 'and nothing else');
+vm.runInNewContext(forms + '\n;globalThis.__forms = ArkKitForms;', pubWithChunks);
+assert.deepEqual(Array.from(pubWithChunks.__forms.FORM_BLOCK_NAMES), FORM_BLOCKS, 'the forms chunk registers the five');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 27, 'the public kit now holds 27');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCKS.field.props.hint.help, undefined, 'the chunks\' editor help is stripped like the kit\'s');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCKS.form.props.fields.kind, 'list', 'and the validation shape stays');
+// A second load (a route that lists a chunk and a loader that adds it again) is harmless.
+vm.runInNewContext(forms, pubWithChunks);
+vm.runInNewContext(popover, pubWithChunks);
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 27, 'loading a chunk twice registers nothing twice');
+// 9. arkConfirm (the CMS's window.confirm replacement) is the editor's: the full kit has it, the public kit refuses it.
+for (const name of ['arkConfirm', 'createArkAlertDialog', 'createArkModalHost']) {
+  assert.equal(typeof sandbox.__kit[name], 'function', 'the full kit exports ' + name);
+  assert.throws(() => pub.__kit[name](), new RegExp('ArkKit\\.' + name + ' refused.*Needs: the full kit'), 'the public kit refuses ' + name + ', naming the full kit');
+}
+assert.throws(() => pub.__kit.createArkDomHost().createFocusScope('s', { containerRef: 'R-x' }), /not in the core light-DOM host.*Needs: the overlay host/, 'the public kit\'s host is the core host (no overlays)');
 
 console.log('ark vendor ok: outputs match the synced packages; Ark UI is pinned with sha256; no hub paths in site files');

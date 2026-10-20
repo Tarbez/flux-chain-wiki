@@ -13,7 +13,7 @@
 
    Layout keys: every element of the old page with words keeps the key it had where a successor
    can carry it (the `was` pins, derived by tests/lib/layout-continuity.cjs from the frozen census
-   tests/fixtures/layout-keys/stats-ledger.tsv); tests/stats-ledger-blocks.cjs lists each key that
+   tests/fixtures/layout-keys/stats-ledger.tsv); tests/stats-ledger-page.cjs lists each key that
    was reshaped or retired, with the reason. */
 (function () {
   'use strict';
@@ -96,7 +96,7 @@
     ['Chain compaction is wired.', 'Payload::Snapshot commits to a history digest; prune_before(g, pos) drops old entries from RAM once a snapshot covers them.'],
     ['Receiver timeout + Refund is wired.', 'Payload::Refund is admitted only when its M ≥ D, so the sender can only refund after the deadline the counterparty signed.'],
     ['Certified binary P2P transport is built locally.', '/flx-traffic/2 signs raw binary segment envelopes over libp2p TCP + Noise + Yamux; legacy dense/hex traffic remains read-compatible. Production wiring still needs the authorized resolver-shard key source and the deployed replica addresses.'],
-    ['10-node fleet is now the headline.', 'Transfer bench BENCH-011 (2026-10-08) ran on every flx-* node with Lever A+B+C and summed to 82,863 finalized transfers/s, 108,362 with the local Mac. The soak above remains 6 nodes (bk1, bk2, mk2, mist1, eug-2c, eul-4c) because the four smallest nodes (mk1, ms1, ms2, ms3) can\'t host a chain-server on their current RAM allocation.'],
+    ['10-node fleet is now the headline.', 'Transfer bench BENCH-011 (2026-10-08) ran on every flx-* node with Lever A+B+C and summed to 82,863 signed transfers/s, 108,362 with the local Mac. The soak above remains 6 nodes (bk1, bk2, mk2, mist1, eug-2c, eul-4c) because the four smallest nodes (mk1, ms1, ms2, ms3) can\'t host a chain-server on their current RAM allocation.'],
     ['No independent security review.', 'Same as the main /stats page: nobody but us has looked at this.']
   ];
 
@@ -120,7 +120,7 @@
      tests/lib/layout-continuity.cjs (derive /stats/ledger) and corrected by hand where words alone
      chose wrongly (an empty bar track, a "CID" label, a list and its first item); the hand pins
      and every reshaped or retired key are listed with their reasons in
-     tests/stats-ledger-blocks.cjs. A `self` pin keys the element alone: a tile that became a tab
+     tests/stats-ledger-page.cjs. A `self` pin keys the element alone: a tile that became a tab
      panel or an accordion item, whose inside is new. Deep refs are paths inside the tabs block:
      panel n is div n+1 (the tab list is div 1); in it, an accordion's item, panel, body, paragraph. */
   var T = 'page:/div:1/div:1';

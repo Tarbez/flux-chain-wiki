@@ -3,6 +3,8 @@
      @deadark/ark-ui/runtime          createArkUI           ~18 KB gz on its own
      @deadark/ark-primitives/dialog   createArkPopover      the editor's overlays
      @deadark/ark-primitives/toggle   createArkToggleGroup  the editor's pickers
+     @deadark/ark-ui/blocks/confirm   arkConfirm, createArkAlertDialog, createArkModalHost
+                                                            the editor's modal confirm (a focus trap)
      @deadark/ark-ui/blocks/patch     patchArkBlockIn       the live morph: ~0.7 KB gz, used only by
                                                             routes with a live block, so it is its own
                                                             chunk (js/ark/vendor/ark-kit-live.js)
@@ -23,6 +25,9 @@ function refused(name, needs, remedy) {
 export const createArkUI = refused('createArkUI');
 export const createArkPopover = refused('createArkPopover');
 export const createArkToggleGroup = refused('createArkToggleGroup');
+export const arkConfirm = refused('arkConfirm', 'the full kit (a modal confirm traps focus)');
+export const createArkAlertDialog = refused('createArkAlertDialog', 'the full kit (a modal alert dialog traps focus)');
+export const createArkModalHost = refused('createArkModalHost', 'the full kit (a focus trap)');
 /* Behind scripts/ark-kit-entry.js's patchArkBlock in the public kit. */
 export const patchArkBlockIn = refused('patchArkBlock', 'the live chunk js/ark/vendor/ark-kit-live.js (ArkKitLive.patchArkBlock)',
   'call ArkUI.blocks.update (js/ark/blocks.js), which loads that chunk on a page\'s first live update, or load it after the kit');

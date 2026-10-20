@@ -7,8 +7,9 @@
    (the deck in the sans body), a callout for readers who came to deploy a resolver or a site, the
    five steps as Ark tabs -- each its words and its command card, the expected result as the
    card's caption -- with the way through, "Review all steps" as one table, the scope boundary in
-   sight, and a pager. The command cards are the page's own (Copy is the procedure, Ark ships no
-   command block); every step stays addressable (?step=N, ?view=review). Layout keys of the old
+   sight, and a pager. The command cards are the page's own (Ark ships no command block); their Copy is the
+   site's one, ArkUI.copyCommand (js/ark/page-kit.js: Ark's secondary button, the same on /download; W4-S14).
+   Every step stays addressable (?step=N, ?view=review). Layout keys of the old
    page are pinned (`WAS`, tests/lib/layout-continuity.cjs). Regression: tests/task-pages-blocks.cjs,
    tests/routes-live.cjs. */
 (function () {
@@ -78,33 +79,18 @@
     WAS['deploy-steps'][':scope > div:nth-of-type(' + (n + 1) + ') > p:nth-of-type(1)'] = at + '/p:1';
     WAS['deploy-steps']['figure' + k] = { key: at, self: true };
     WAS['deploy-steps']['figure-caption' + k] = at + '/p:2';
-    WAS['deploy-steps'][slot + '.deploy-copy'] = at + '/pre:1/button:1';
-    WAS['deploy-steps'][slot + '.deploy-copy-feedback'] = at + '/span:1';
+    WAS['deploy-steps'][slot + '.copy-command [data-ark-part="button"]'] = at + '/pre:1/button:1';
+    WAS['deploy-steps'][slot + '.copy-command-status'] = at + '/span:1';
   });
 
-  /* One command, with Copy and its spoken result: the step's figure. */
+  /* One command, with Copy and its spoken result: the step's figure. Copy is the site's one
+     (js/ark/page-kit.js ArkUI.copyCommand: the same control /download uses). */
   function commandCard(step) {
     var card = ArkUI.el('div', 'deploy-command-card');
     var pre = ArkUI.el('pre', 'deploy-command');
     pre.appendChild(ArkUI.el('code', '', step.cmd));
-    var copy = ArkUI.el('button', 'deploy-copy', 'Copy'); copy.type = 'button';
-    copy.setAttribute('aria-label', 'Copy command for ' + step.title);
-    var feedback = ArkUI.el('span', 'deploy-copy-feedback'); feedback.setAttribute('role', 'status');
-    copy.addEventListener('click', function () {
-      function done() { copy.textContent = 'Copied'; feedback.textContent = 'Command copied.'; window.setTimeout(function () { copy.textContent = 'Copy'; }, 1400); }
-      function failed() { feedback.textContent = 'Copy unavailable. Select and copy the command text below.'; }
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(step.cmd).then(done, failed);
-      else {
-        var field = document.createElement('textarea');
-        field.value = step.cmd; field.setAttribute('readonly', '');
-        field.style.position = 'fixed'; field.style.opacity = '0';
-        document.body.appendChild(field); field.select();
-        try { if (document.execCommand('copy')) done(); else failed(); } catch (error) { failed(); }
-        field.remove();
-      }
-    });
-    pre.appendChild(copy);
-    card.appendChild(pre); card.appendChild(feedback);
+    var copy = ArkUI.copyCommand({ text: step.cmd, name: 'command for ' + step.title });
+    card.appendChild(pre); card.appendChild(copy.element); card.appendChild(copy.status);
     return card;
   }
 
@@ -152,7 +138,7 @@
         blocks: [{ block: 'callout', props: { tone: 'drift', body: SCOPE, actions: [{ label: 'Read the network guide', href: words('GUIDE.HREF'), tone: 'link' }] } }] } },
       { insert: 'main', was: WAS.insert },
       { block: 'pager', id: 'deploy-pager', was: WAS['deploy-pager'], props: { label: 'Continue',
-        prev: { label: words('BACK').charAt(0) + words('BACK').slice(1).toLowerCase(), href: 'route:' + manifest.meta.back },
+        prev: { label: ArkUI.sentenceCase(words('BACK')), href: 'route:' + manifest.meta.back },
         next: { label: 'FXN Bundle Deployer', href: words('BUNDLEDEPLOYER.HREF') } } }
     ];
   }

@@ -367,6 +367,11 @@
     }).filter(Boolean);
   }
 
+  /* "inputCid", "recipientId", "asset, amount", "cid": every comma-separated token is one lowercase-initial word. */
+  function isFieldName(name) {
+    return name.split(',').every(function (token) { return /^[a-z][A-Za-z0-9_]*$/.test(token.trim()); });
+  }
+
   ArkUI.pageModules.howStory = { mount: function (host, page) {
     var id = page.split('/')[1], index = IDS.indexOf(id);
     if (index < 0) throw new Error('Unknown work story');
@@ -383,8 +388,14 @@
     var canvas = ArkUI.el('canvas', 'how-chapter-mesh'); canvas.setAttribute('aria-hidden', 'true'); record.appendChild(canvas);
     var cue = ArkUI.el('p', 'mesh-story-cue'); record.appendChild(cue);
     var fabric = ArkUI.createMeshFabric(canvas, { caption: cue, labelMin: 12 });
+    /* A row's name is either a person's word ("Snapshot", "Signed by") or the record's own field
+       name ("inputCid", "asset, amount", "cid"). Decided by shape, not by a list: a field name is
+       lowercase-initial words with no space inside a word; a person's label starts uppercase or
+       has a space. A field name is never the primary label: the plain meaning leads and the
+       field name follows in mono (the reader who wants the exact name still has it). */
     var fields = rows(words('RECORD')).map(function (row) {
-      return { term: row.name, value: row.meaning + (row.steps ? ' (step ' + row.steps.join(', ') + ')' : '') };
+      var step = row.steps ? ' (step ' + row.steps.join(', ') + ')' : '';
+      return isFieldName(row.name) ? { term: row.meaning + step, value: row.name, mono: true } : { term: row.name, value: row.meaning + step };
     });
 
     var def = {
@@ -417,6 +428,8 @@
         next: index < 2 ? chapter(index + 1) : { label: 'Back to the lifecycle', href: 'route:lifecycle' },
         relatedLabel: 'copy:DEPLOYMENT.SIMPLE.AGREEMENT.TITLE',
         related: (index > 0 ? [chapter(index - 1)] : []).concat(index < 2 ? [{ label: 'Agreement lifecycle', href: 'route:lifecycle' }] : [])
+          /* the last chapter ends on doing it: the way from reading the path to running it (docs/ux-audit/ledger.md, "Run it yourself") */
+          .concat(index === 2 ? [{ label: 'Run it yourself', href: 'route:download' }] : [])
       },
       onFigureVisibility: function (figure, visible) { fabric.visible(visible); },
       dispose: function () { fabric.dispose(); }

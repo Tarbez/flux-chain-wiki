@@ -164,7 +164,7 @@
     var secret = state.secretDrafts[id];
     if (!secret) { status('Nothing deleted: there is no encrypted item "' + id + '".', 'error'); return; }
     if (!state.secretDir && state.secretSaved[id] !== null) { status('Connect the project folder to delete encrypted content: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + (secret.label || id) + '"? This cannot be undone.')) return;
+    if (!(await A.confirmDelete('encrypted item', secret.label || id, 'This removes its file. Anyone it was shared with loses it from the site.', state.secretSaved[id] === null))) return;
     try { await removeItemFile('secret', id); }
     catch (error) { status(error.message, 'error'); return; }
     if (state.secretCurrent === id) state.secretCurrent = state.secretIds[0] || null;

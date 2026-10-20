@@ -527,7 +527,7 @@ assert(app.includes('id="viewCanvasBtn"') && app.includes('id="viewMapBtn"') && 
    Edit / Preview groups (the editor's .ark-tab class collided with Ark's own tab classes and went
    with js/admin/primitives.js, W3-EDITOR 2026-10-19) */
 assert(/<div class="seg seg-text lens-switch" id="lensSwitch"/.test(app) && !/class="ark-tab"/.test(app) && !/primitives\.js/.test(app) && !/ArkAdminPrimitives/.test(admin), 'the lens buttons are a .seg group like the strip\'s, and the editor neither loads nor calls local tabs/disclosure primitives');
-assert(/for \(const b of \$\('viewSwitch'\)\.querySelectorAll\('\[data-view\]'\)\) b\.addEventListener\('click', \(\) => setView\(b\.dataset\.view\)\);/.test(admin) && /function setView\(v\) \{[\s\S]*?\$\('themeView'\)\.hidden = v !== 'theme';/.test(admin), 'every view button calls the one setView(), which also shows the Theme dock beside the live canvas');
+assert(/A\.arkSegGroup\(\$\('viewSwitch'\), viewButtons, \{ selected: VIEWS\.indexOf\(state\.view\), onPick: \(i\) => setView\(VIEWS\[i\]\) \}\);/.test(admin) && /function setView\(v\) \{[\s\S]*?\$\('themeView'\)\.hidden = v !== 'theme';/.test(admin), 'every view pick (Ark\'s toggle group, 2026-10-20) calls the one setView(), which also shows the Theme dock beside the live canvas');
 // One rail and one site list: Content's sidebar list (#pageList, #contentNav) and Studio's
 // Pages tab merged into the rail's Pages tab; images and encrypted items are its Media / Vault.
 assert(!app.includes('id="contentNav"') && !app.includes('id="pageList"') && !app.includes('id="cmsShell"') && !app.includes('id="editor"'), 'the old Content layout (#cmsShell, its #pageList sidebar and #editor column) is gone');

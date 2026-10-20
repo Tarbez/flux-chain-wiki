@@ -7,7 +7,7 @@ class Element {
  setAttribute(k,v){this.attributes[k]=v;} get textContent(){return this.ownText+this.children.map(x=>x.textContent).join('');}
  get all(){return this.children.flatMap(x=>[x,...x.all]);}
 }
-const guide = '# Agreements\n\nA **signed** record references `intent_cid`.\n\n<script>alert(1)</script>\n\n[Unsafe](javascript:alert) and [Authority](authority.md).\n\n| Record | Meaning |\n| --- | --- |\n| Intent | exact need |\n\n```sh\nflux miner discover\n```';
+const guide = '# Agreements\n\nA **signed** record references `intent_cid`.\n\n<script>alert(1)</script>\n\n[Unsafe](javascript:alert) and [Authority](authority.md).\n\n| Record | Meaning |\n| --- | --- |\n| Intent | exact need |\n\n```sh\nflux miner discover\n```\n\n## Evidence\n\nWhat was measured.\n\n### Detail\n\nHow.';
 const calls=[];
 const context={ArkUI:{route:{href:p=>'#'+p},pageModules:{},pageCatalog:{zero:{path:'/'},'lifecycle/offer':{path:'/lifecycle/offer',title:'Offer: propose the terms — DEFXN'},reference:{path:'/reference'}},referenceDocs:['docs/protocol/agreements.md','docs/protocol/authority.md'],referenceText:{'docs/protocol/agreements.md':{text:guide}},el:(tag,_cls,text)=>new Element(tag,text)},document:{createTextNode:text=>new Element('#text',text)},location:{href:'http://127.0.0.1:3438/index.html',hash:'#/reference'},URL,URLSearchParams,Map,AbortController,fetch:async(path)=>{calls.push(path);return {ok:true,text:async()=>guide};}};
 vm.runInNewContext(fs.readFileSync('js/pages/reference.js','utf8'),context);
@@ -33,6 +33,16 @@ vm.runInNewContext(fs.readFileSync('js/pages/reference.js','utf8'),context);
  assert(!anchors.some(x=>/^javascript:/.test(x.href)),'unsafe schemes never become reader links');
  assert(anchors.some(x=>x.href&&x.href.startsWith('#/reference?doc=docs%2Fprotocol%2Fauthority.md')),'approved relative sources stay inside the reader');
  assert(el.all.some(x=>x.tagName==='th'&&x.attributes.scope==='col'),'table headers retain semantic scope');
+ // Named regression (2026-10-20, docs/ux-audit/ledger.md RF-2/RF-3): a document's `##` rendered as h3 under the page h1
+ // (the outline skipped h2), and a raw "Canonical reference / docs/..." path stood as the kicker. The reader owns one h1 (the
+ // title), `##` is h2 and `###` is h3; each keeps the layout key it was saved under as the old h3/h4, by pin.
+ const tags=el.all.filter(x=>/^h[1-6]$/.test(x.tagName));
+ assert.deepEqual(tags.map(x=>x.tagName+':'+x.textContent),['h1:Agreements','h2:Evidence','h3:Detail'],'the outline is h1 > h2 > h3, with no level skipped and the title once');
+ assert.equal(tags[1].attributes['data-ark-layout-pin'],'page:/article:1/h3:1','a corrected heading keeps the key it was saved under (it was an h3)');
+ assert.equal(tags[2].attributes['data-ark-layout-pin'],'page:/article:1/h4:1','and so does the one below it (it was an h4)');
+ assert(tags.slice(1).every(x=>/^reference-/.test(x.id)),'every heading has an id for the contents to link to');
+ assert(!el.textContent.includes('Canonical reference'),'the raw path kicker is gone');
+ assert(!el.textContent.includes('docs/protocol/agreements.md Agreements'),'and the document path is not printed as text');
  const original=el.textContent;
  await assert.rejects(reader.prepare('reference',{query:'doc=docs%2Fprotocol%2Fauthority.md'}),/could not load/);assert.equal(el.textContent,original,'load failure cannot erase current evidence');
  console.log('PASS: allowlisted sources, literal HTML, safe links, canonical content/commands, table semantics, provenance, exact return depth, and load-failure preservation.');

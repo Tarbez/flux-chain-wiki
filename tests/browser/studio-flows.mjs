@@ -709,16 +709,19 @@ await flow('makecomp', async () => {
        tab panel, and the CMS slot is the page's [data-ark-insert] after the tabs. The shown scene is
        the one in the open panel. */
     const F = '#chain-cases [role="tabpanel"]:not([hidden]) .chain-flow';
-    const steps = await main.locator(F + ' .flow-record').count();
-    check(steps === 5, 'expected the flow\'s 5 step links on /chain, found ' + steps);
+    /* The five steps are Ark tabs at the top of the scene's frame now (ArkUI.buildChainSteps; the hand-built `flow-record` links and
+       the caption inside the tile are gone): the open tab's panel is the step's words, above the tile. */
+    const TABS = F + ' > [data-ark-block="tabs"]';
+    const steps = await main.locator(TABS + ' > [data-ark-part="tabs-list"] [role="tab"]').count();
+    check(steps === 5, 'expected the flow\'s 5 step tabs on /chain, found ' + steps);
     for (let i = 0; i < steps; i++) {
-      await main.evaluate(([f, n]) => document.querySelectorAll(f + ' .flow-record')[n].dispatchEvent(new Event('pointerenter')), [F, i]);
+      await main.evaluate(([t, n]) => document.querySelectorAll(t + ' > [data-ark-part="tabs-list"] [role="tab"]')[n].dispatchEvent(new Event('pointerenter')), [TABS, i]);
       await until(() => main.evaluate(([f, n]) => document.querySelector(f).dataset.step === String(n), [F, i]), 'the flow did not hold step ' + (i + 1));
-      const box = await main.evaluate((f) => {
+      const box = await main.evaluate(([f, t]) => {
         const r = (s) => document.querySelector(s).getBoundingClientRect();
-        const now = r(f + ' .flow-now'), says = r(f + ' .flow-says'), scene = r(f + ' .flow-scene');
-        return { says: document.querySelector(f + ' .flow-says').textContent, spill: Math.round(Math.max(says.bottom, scene.bottom) - now.bottom), gap: Math.round(r('[data-ark-page="chain"] [data-ark-insert="main"]').top - r(f).bottom) };
-      }, F);
+        const now = r(f + ' .flow-now'), scene = r(f + ' .flow-scene');
+        return { says: (document.querySelector(t + ' > [data-ark-part="tabs-content"]:not([hidden]) > p') || {}).textContent, spill: Math.round(scene.bottom - now.bottom), gap: Math.round(r('[data-ark-page="chain"] [data-ark-insert="main"]').top - r(f).bottom) };
+      }, [F, TABS]);
       check(box.spill <= 0, `step ${i + 1}: the scene or its caption runs ${box.spill}px out of its own panel (caption ${box.says})`);
       check(box.gap >= 0, `step ${i + 1}: the insertion slot starts ${-box.gap}px inside the flow`);
       const cover = await coveredBy(main, other);

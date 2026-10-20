@@ -81,23 +81,40 @@
         seg(root, low, high, 'about-slab-reference');
       }
     });
-    // Names sit on their own layer, to the left of each slab.
+    /* Names sit on their own layer, to the left of each slab. Each word is data-ark-label: inside Ark's
+       figure frame it is drawn at the frame's smallest label size (12px on screen) whatever the drawing's
+       scale, so the pill round it is sized from that size, and follows the drawing as it resizes. */
     var labels = svg('g', { class: 'about-slab-labels' });
-    names.forEach(function (name, i) {
-      var at = point(0, SIZE, i * GAP);
-      var g = svg('g', { class: 'about-slab-label', 'data-layer': String(i) });
-      var w = 30 + name.length * 8.4, x = at[0] - 14 - w;
-      g.appendChild(svg('rect', { x: x, y: at[1] - 23, width: w, height: 22, rx: 11 }));
-      var icon = ArkUI.iconPaths && ArkUI.iconPaths[LAYER_ICONS[i]];
+    var LABEL_MIN = 12, labelUnits = 13, drawn = [];
+    function drawLabel(entry) {
+      var L = labelUnits, h = L * 1.7, pad = L * .6, gap = L * .45;
+      var w = pad + L + gap + entry.name.length * L * .62 + pad, x = Math.max(4, entry.at[0] - 14 - w), cy = entry.at[1] - 12;
+      while (entry.g.firstChild) entry.g.removeChild(entry.g.firstChild);
+      entry.g.appendChild(svg('rect', { x: x, y: cy - h / 2, width: w, height: h, rx: h / 2 }));
+      var icon = ArkUI.iconPaths && ArkUI.iconPaths[LAYER_ICONS[entry.i]];
       if (icon) {
-        var ig = svg('g', { class: 'about-label-icon', transform: 'translate(' + (x + 8) + ' ' + (at[1] - 18) + ') scale(.5)' });
+        var s = L / 24, ig = svg('g', { class: 'about-label-icon', transform: 'translate(' + (x + pad) + ' ' + (cy - L / 2) + ') scale(' + s.toFixed(3) + ')' });
         icon.forEach(function (p) { ig.appendChild(svg('path', { d: p })); });
-        g.appendChild(ig);
+        entry.g.appendChild(ig);
       }
-      g.appendChild(svg('text', { x: x + 25, y: at[1] - 8 }, name));
+      entry.g.appendChild(svg('text', { x: x + pad + L + gap, y: cy + L * .35, 'data-ark-label': '' }, entry.name));
+    }
+    names.forEach(function (name, i) {
+      var g = svg('g', { class: 'about-slab-label', 'data-layer': String(i) });
+      var entry = { g: g, name: name, i: i, at: point(0, SIZE, i * GAP) };
+      drawn.push(entry); drawLabel(entry);
       labels.appendChild(g);
     });
     root.appendChild(labels);
+    function fit() {
+      var width = root.getBoundingClientRect ? root.getBoundingClientRect().width : 0;
+      if (!width) return;
+      var next = Math.max(9, LABEL_MIN / (width / 560));
+      if (Math.abs(next - labelUnits) < .5) return;
+      labelUnits = next; drawn.forEach(drawLabel);
+    }
+    var observer = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
+    if (observer) observer.observe(root);
     return { svg: root, select: function (index) {
       root.setAttribute('data-selected', String(index));
       slabs.forEach(function (slab, i) { slab.setAttribute('data-selected', String(i === index)); });

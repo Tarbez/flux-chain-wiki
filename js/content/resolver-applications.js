@@ -24,10 +24,10 @@
         "domain": "finance",
         "status": "deployed",
         "author": "defxn.com",
-        "shortSummary": "Interprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-shard, 2 ops; the production path), and the legacy 4-op PREPARE/ACCEPT/COMMIT/FINALIZE (still accepted). Timeouts clear reservations via Refund.",
+        "shortSummary": "Interprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-shard, 2 ops; the production path), and the legacy 4-op PREPARE/ACCEPT/COMMIT/FINALIZE (still accepted). Timeouts clear reservations via Refund.", // ALLOW-DEPRECATED-TERM: FINALIZE is the legacy wire opcode name, an identifier
         "implementation": "dense-wire::cross_shard",
         "yCodes": [
-          "1A w/ Payload=TransferSend/Receive (Lever B), TransferAtomic (Lever A, same-shard), Prepare/Accept/Commit/Finalize (legacy 4-op)"
+          "1A w/ Payload=TransferSend/Receive (Lever B), TransferAtomic (Lever A, same-shard), Prepare/Accept/Commit/Finalize (legacy 4-op)" // ALLOW-DEPRECATED-TERM: Finalize is the legacy wire opcode name, an identifier
         ],
         "measured": {
           "label": "Swaps per batch auction · one resolver shard · 10 replicas",

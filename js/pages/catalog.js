@@ -29,12 +29,12 @@ var arkPageModules = {
   zero: { module: 'zero', scripts: ArkUI.blockScripts.concat(['js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
   chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/pages/chain.js']) },
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
-  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
+  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
-  deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/pages/deployment.js']) },
+  deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/ark/page-kit.js', 'js/pages/resolver-page-parts.js', 'js/pages/deployment.js']) },
   /* the explorer used to live at /explorer; /explore is its address now */
-  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat(['js/pages/explorer.js']) },
-  palette: { module: 'palette', scripts: ArkUI.blockScripts.concat(['js/pages/palette.js']) },
+  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-popover.js', 'js/pages/explorer.js']) },
+  palette: { module: 'palette', scripts: ArkUI.blockScripts.concat(['js/content/palette-tokens.js', 'js/pages/palette.js']) },
   /* /monitor was retired 2026-10-10; /stats carries the same live pulse now, plus the dated evidence the old page never had. */
   stats: { module: 'stats', aliases: ['/monitor'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/pages/stats.js']) },
   'stats/gpu': { module: 'statsGpu', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/stats-gpu.js']) },
@@ -44,34 +44,34 @@ var arkPageModules = {
   /* The Wallet tab's dense-wire modules (js/ark/dense-wire-wallet.mjs over
      js/dense-wire/*.mjs) are ES modules, which page-loader.js does not load:
      js/pages/account.js import()s them on first use instead. */
-  account: { module: 'account', scripts: ['js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/ark/dash-kit.js', 'js/pages/account.js'] },
+  account: { module: 'account', scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/pages/account.js']) },
   'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/pages/account-domains.js']) },
   treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
-  deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
+  deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/pages/economy-preview.js']) },
   /* /experiments and /experiments/lab were two pages for one interactive model, with the same
      h1 (docs/ux-audit/pages.md P3). They are one page now: the lab, introduced by the old entry
      page's lede and disclaimer (js/pages/lab.js). The old lab address and the retired Work page
      (`#work`, `#/work`) open it. */
-  proximity: { module: 'lab', aliases: ['/experiments/lab', '/work', 'work'], scripts: ArkUI.blockScripts.concat(['js/studio.js', 'js/pages/lab.js']) },
+  proximity: { module: 'lab', aliases: ['/experiments/lab', '/work', 'work'], scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/studio.js', 'js/pages/lab.js']) },
   /* the notes index and each note are pages of Ark blocks since 2026-10-19 (W3-LEARN); a note is on the story template */
   learnings: { module: 'learnings', scripts: ArkUI.blockScripts.concat(['js/pages/learnings.js']) },
   about: { module: 'about', scripts: ArkUI.blockScripts.concat(['js/pages/about.js']) },
   resolutions: { module: 'resolutions', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/resolutions.js']) },
   concept: { module: 'concept', scripts: ArkUI.storyScripts.concat(['js/pages/concept.js']) },
-  download: { module: 'download', scripts: ArkUI.storyScripts.concat(['js/pages/download.js']) },
+  download: { module: 'download', scripts: ArkUI.storyScripts.concat(['js/pages/download.js', 'js/ark/page-kit.js']) },
   bundledeployer: { module: 'bundledeployer', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/bundle-deployer.js']) },
-  deploy: { module: 'deploy', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/procedure-state.js', 'js/pages/deploy.js']) },
-  dao: { module: 'dao', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/dao.js']) },
+  deploy: { module: 'deploy', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/procedure-state.js', 'js/ark/page-kit.js', 'js/pages/deploy.js']) },
+  dao: { module: 'dao', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/resolver-page-parts.js', 'js/pages/dao.js', 'js/ark/page-kit.js']) },
   'how/ask': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
   'how/work': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
   'how/check': { module: 'howStory', scripts: ArkUI.storyScripts.concat(['js/pages/how-stories.js']) },
-  lifecycle: { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
-  'lifecycle/intent': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
-  'lifecycle/offer': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
-  'lifecycle/agreement': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
-  'lifecycle/fulfillment': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
-  'lifecycle/receipt': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js']) },
-  reference: { module: 'reference', scripts: ['js/content/reference-text.js', 'js/pages/reference.js'] }
+  lifecycle: { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
+  'lifecycle/intent': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
+  'lifecycle/offer': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
+  'lifecycle/agreement': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
+  'lifecycle/fulfillment': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
+  'lifecycle/receipt': { module: 'lifecycle', scripts: ArkUI.storyScripts.concat(['js/pages/lifecycle.js', 'js/ark/page-kit.js']) },
+  reference: { module: 'reference', scripts: ArkUI.blockScripts.concat(['js/content/reference-text.js', 'js/pages/reference.js']) }
 };
 ArkUI.pageCatalog = {};
 /* journey: which visitor path the page serves (ArkSitePages.journeys()); null keeps it out of
@@ -123,7 +123,7 @@ ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
   (theoryManifests || []).forEach(function (m) {
     var key = 'concept/' + m.id, label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
     if (!ArkUI.pageCatalog[key]) added.push(key);
-    ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, journey: ArkSitePages.journeyOf(key), module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js']) };
+    ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, journey: ArkSitePages.journeyOf(key), module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js', 'js/ark/page-kit.js']) };
   });
   return added;
 };

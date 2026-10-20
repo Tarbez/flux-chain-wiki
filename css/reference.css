@@ -14,4 +14,27 @@
 .reference-body pre { overflow:auto; padding:16px; border:1px solid hsl(var(--border-default)); border-radius:5px; background:hsl(var(--nested) / .4); font:400 13px/1.6 var(--font-mono,monospace); }
 .reference-body table { display:block; width:100%; overflow-x:auto; border-collapse:collapse; font-size:14px; }
 .reference-body :is(td,th) { border-bottom:1px solid hsl(var(--border-subtle)); padding:10px; min-width:100px; vertical-align:top; }
+.reference-contents-fold { margin:12px 0 0; }
+.reference-contents ol { display:grid; gap:2px 28px; grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr)); margin:0; padding:0; list-style:none; }
+.reference-contents li[data-level="2"] { padding-left:16px; }
+.reference-contents li[data-level="3"] { padding-left:32px; }
+.reference-contents a { display:inline-flex; align-items:center; min-height:44px; color:hsl(var(--reference)); text-underline-offset:4px; overflow-wrap:anywhere; }
 .reference-page a:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
+/* A phone: tighter rhythm for a long document, and a folded section's heading sits close to the button that opens it
+   (fold sweep S0-1: the default document was 1.69x the viewport at 390; its sections now fold behind Ark's disclosure,
+   js/pages/reference.js). The same 12px floor and 44px targets hold; only the vertical gaps change. */
+@media (max-width: 600px) {
+  #scene .reference-page h1 { margin:8px 0; }
+  .reference-body :is(h2,h3,h4) { margin:12px 0 4px; }
+  .reference-body h2 { font-size:20px; }
+  .reference-body h3 { font-size:18px; }
+  /* A folded section's button sits on its heading's own row (it is the heading's, and a document of ten sections would
+     otherwise spend ten rows on ten buttons: resolver-math was 4.3x the viewport). Open, the section takes the full width
+     under its heading. Only this page's own classes are styled; Ark's disclosure is untouched. */
+  .reference-body { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:12px; align-items:center; }
+  .reference-body > * { grid-column:1 / -1; }
+  .reference-body > :is(h2,h3,h4,h5,h6) { grid-column:1; }
+  .reference-body > .reference-fold[data-state="closed"] { grid-column:2; }
+  .reference-body p { margin:10px 0; }
+  .reference-body li { margin:6px 0; }
+}

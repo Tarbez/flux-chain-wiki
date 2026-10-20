@@ -99,6 +99,26 @@
     return box;
   }
 
+  /* A theme edit is one step of the editor's one undo history (js/admin/history.js; docs/ux-audit/
+     cms.md P1-5): a colour, the active theme, the background, a removal or a reset. `change()` makes
+     the edit on state.themeDraft; the step undoes and redoes by putting a snapshot of the whole
+     theme draft back, then telling the canvas and redrawing Site style. `merge` keeps a colour
+     dragged across a picker (many input events) as ONE step. The draft is the only thing changed:
+     nothing is saved by undoing (Save does that), so undo never rewrites a file. */
+  function themeSnapshot() { return JSON.parse(JSON.stringify(state.themeDraft)); }
+  function putThemeBack(snapshot) {
+    state.themeDraft = JSON.parse(JSON.stringify(snapshot));
+    notifyPreviewTheme(); touch(); repaintPanels('design');
+    return true;
+  }
+  function themeStep(label, merge, change) {
+    var before = themeSnapshot();
+    change();
+    var after = themeSnapshot();
+    if (typeof A.historyAction !== 'function' || JSON.stringify(before) === JSON.stringify(after)) return;
+    A.historyAction({ label: label, merge: merge, undo: function () { return putThemeBack(before); }, redo: function () { return putThemeBack(after); } });
+  }
+
   function buildDesignPanel(options) {
     options = options || {};
     var wrap = h('div', { class: 'page-law-panel' });
@@ -159,13 +179,13 @@
         var ALREADY_DEFAULT = 'Already this theme\u2019s default colour.';
         swatch.addEventListener('input', function () {
           var next = hexToHsl(swatch.value);
-          setThemeValue(active, f.key, next);
+          themeStep('changing the ' + f.label.toLowerCase() + ' colour', 'theme:' + active + ':' + f.key, function () { setThemeValue(active, f.key, next); });
           out.textContent = swatch.value; out.dataset.hsl = next;
           refuse(resetOne, '');
           notifyPreviewTheme(); touch();
         });
         var resetOne = h('button', { type: 'button', class: 'btn tiny', text: 'Default', onclick: function () {
-          if (state.themeDraft.themes && state.themeDraft.themes[active]) delete state.themeDraft.themes[active][f.key];
+          themeStep('resetting the ' + f.label.toLowerCase() + ' colour', '', function () { if (state.themeDraft.themes && state.themeDraft.themes[active]) delete state.themeDraft.themes[active][f.key]; });
           swatch.value = hslToHex(inherited); out.textContent = swatch.value; out.dataset.hsl = inherited; refuse(resetOne, ALREADY_DEFAULT);
           notifyPreviewTheme(); touch();
         } });
@@ -177,7 +197,7 @@
       colorFields.appendChild(A.devDetails([['Theme', active]].concat(ArkTheme.semanticFields().map(function (f) { return [f.label + ' (--' + f.key + ', HSL)', themeValue(active, f.key)]; }))));
     }
     themeSelect.addEventListener('change', function () {
-      state.themeDraft.activeTheme = themeSelect.value;
+      themeStep('changing the editing theme', '', function () { state.themeDraft.activeTheme = themeSelect.value; });
       active = themeSelect.value;
       refreshColors(); notifyPreviewTheme(); touch();
     });
@@ -196,7 +216,7 @@
         var picked = state.themeDraft.background.style === s.key;
         var radio = h('input', { id: id, type: 'radio', name: 'bg-style', checked: picked });
         radio.addEventListener('change', function () {
-          state.themeDraft.background = { style: s.key };
+          themeStep('changing the background', '', function () { state.themeDraft.background = { style: s.key }; });
           notifyPreviewTheme(); touch(); refreshBackground();
         });
         var card = h('label', { for: id, class: 'bg-card' + (picked ? ' picked' : '') },
@@ -208,10 +228,10 @@
     bgBox.appendChild(bgGrid);
 
     function refreshAll() { refreshColors(); refreshBackground(); touch(); }
-    var removeBg = h('button', { type: 'button', class: 'btn', text: 'Remove background layer', onclick: function () { state.themeDraft.background = { style: 'none' }; refreshAll(); notifyPreviewTheme(); } });
-    var removeTheme = h('button', { type: 'button', class: 'btn', text: 'Remove this theme override', onclick: function () { if (state.themeDraft.themes) delete state.themeDraft.themes[active]; refreshAll(); notifyPreviewTheme(); } });
-    var removeAllThemes = h('button', { type: 'button', class: 'btn', text: 'Remove all theme overrides', onclick: function () { state.themeDraft.themes = {}; refreshAll(); notifyPreviewTheme(); } });
-    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset design to defaults', onclick: function () { state.themeDraft = ArkTheme.defaults(); refreshAll(); notifyPreviewTheme(); } });
+    var removeBg = h('button', { type: 'button', class: 'btn', text: 'Remove background layer', onclick: function () { themeStep('removing the background', '', function () { state.themeDraft.background = { style: 'none' }; }); refreshAll(); notifyPreviewTheme(); } });
+    var removeTheme = h('button', { type: 'button', class: 'btn', text: 'Remove this theme override', onclick: function () { themeStep('removing this theme\u2019s colours', '', function () { if (state.themeDraft.themes) delete state.themeDraft.themes[active]; }); refreshAll(); notifyPreviewTheme(); } });
+    var removeAllThemes = h('button', { type: 'button', class: 'btn', text: 'Remove all theme overrides', onclick: function () { themeStep('removing every theme\u2019s colours', '', function () { state.themeDraft.themes = {}; }); refreshAll(); notifyPreviewTheme(); } });
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset design to defaults', onclick: function () { themeStep('resetting the design', '', function () { state.themeDraft = ArkTheme.defaults(); }); refreshAll(); notifyPreviewTheme(); } });
     refreshAll();
     wrap.appendChild(colorsBox);
     wrap.appendChild(bgBox);

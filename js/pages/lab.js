@@ -24,6 +24,8 @@
     'lab-pager': { ':root': { key: 'page:/div:1/section:1/p:1', self: true },
       ':scope > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)': 'page:/div:1/section:1/p:1/a:1',
       ':scope > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)': 'page:/div:1/section:1/p:1/a:2' },
+    /* the study picker (Ark's choice): each option's words keep the key of the button they replaced */
+    'lab-study': { 'choice-text': L + '/div:1/div:1/button:1', 'choice-text#2': L + '/div:1/div:1/button:2', 'choice-text#3': L + '/div:1/div:1/button:3' },
     insert: 'page:/div:2'
   };
 
@@ -34,15 +36,26 @@
   function model(practiceHref) {
     var box = document.createElement('div');
     box.innerHTML = '<div class="lab" data-mode="spacing">' +
-      '<div class="lab-toolbar"><div class="study-tabs" role="group" aria-label="Choose a model"><button type="button" disabled data-icon="authority" data-study="spacing" aria-pressed="true">01 <span>Authority</span></button><button type="button" disabled data-icon="cycle" data-study="rhythm" aria-pressed="false">02 <span>Lifecycle</span></button><button type="button" disabled data-icon="network" data-study="depth" aria-pressed="false">03 <span>Networks</span></button></div><span class="live-label">INTERACTIVE MODEL</span></div>' +
+      '<div class="lab-toolbar"><div class="study-tabs"></div><span class="live-label">INTERACTIVE MODEL</span></div>' +
       '<div class="experiment-stage" role="img" aria-label="Illustrative dots in three independent groups. Adjust their spacing to explore the idea of threshold agreement."><div class="experiment-grid"></div><span class="stage-corner">FX—001</span><div class="specimen" aria-hidden="true"><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span></div><span class="stage-footnote">A VISUAL ANALOGY FOR DERIVED, TEMPORARY AUTHORITY.</span><span class="stage-axis" aria-hidden="true">x →</span></div>' +
-      '<div class="lab-bottom"><details class="study-description"><summary>Understand this analogy</summary><h3 id="study-title">How can threshold agreement be pictured?</h3><p id="study-description">This model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.</p></details><div class="control"><div class="control-label"><label for="variable">Visual convergence</label><output for="variable" id="variable-value">50%</output></div><input id="variable" disabled type="range" min="0" max="100" value="50" aria-describedby="study-description"><div class="control-ends"><span id="range-start">Apart</span><span id="range-end">Together</span></div></div></div>' +
+      '<div class="lab-bottom"><details class="study-description"><summary>Understand this analogy</summary><h3 id="study-title">How can threshold agreement be pictured?</h3><p id="study-description">This model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.</p></details><div class="control"><div class="control-label"><label for="variable">Visual convergence</label><output for="variable" id="variable-value">50%</output></div><p class="control-hint" id="variable-hint">Drag the slider to explore the model.</p><input id="variable" disabled type="range" min="0" max="100" value="50" aria-describedby="variable-hint study-description"><div class="control-ends"><span id="range-start">Apart</span><span id="range-end">Together</span></div></div></div>' +
       '<p class="model-consequence" role="status"></p><a class="model-canonical" href="' + practiceHref + '" data-scene-link="concept/practice">Read the authority contract →</a><p class="no-script">This model needs JavaScript to respond to your input.</p>' +
       '</div>';
     var section = document.createElement('section');
-    section.className = 'experiments section'; section.tabIndex = -1;
+    /* `expansion` is the scope css/studio.css styles the whole model under (the stage, the dots, the tabs, the slider). The
+       converted page had dropped it with the wrapper it sat on, so the model drew unstyled -- no dots, a 0px stage -- until
+       2026-10-20; it rides on the section itself (a class, so no layout key moves). */
+    section.className = 'expansion experiments section'; section.tabIndex = -1;
     section.setAttribute('aria-label', 'The model');
     section.appendChild(box.firstChild);
+    /* The three studies are ONE stage and ONE slider re-drawn, not three panels, so they are not tabs (a tab owns a panel); they are Ark's
+       `choice` -- pick one of a few, a real radio group with the browser's keyboard model -- in the forms chunk this route lists. The
+       hand-built group was three aria-pressed buttons with their own look (docs/ux-audit/ledger.md /experiments/lab, S8). A pick is an
+       ark:action that js/studio.js hears. */
+    section.querySelector('.study-tabs').appendChild(ArkUI.blocks.render({ block: 'choice', id: 'lab-study', was: WAS['lab-study'], props: {
+      label: 'Choose a model', look: 'segmented', value: 'spacing', action: 'lab-study',
+      options: [{ value: 'spacing', label: '01 Authority' }, { value: 'rhythm', label: '02 Lifecycle' }, { value: 'depth', label: '03 Networks' }]
+    } }));
     return section;
   }
 

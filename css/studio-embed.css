@@ -52,6 +52,10 @@
 /* the compact form of admin.css's one .btn (which paints it) */
 #studioRoot .btn { border-radius: var(--radius-md); padding: 5px 10px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 #studioRoot .btn.small { padding: 3px 8px; font-size: 12px; }
+/* #studioRoot button { color: inherit } (an id selector) outranks admin.css's .btn.primary, which painted the primary
+   action's words in the body text colour on the teal fill (1.28:1, the "Connect project folder" banner): the
+   inverse ink the fill is made for is set again at the same weight (fold-contrast S0-3) */
+#studioRoot .btn.primary { color: hsl(var(--secondary-ink)); }
 
 /* the rail and the canvas; .rail-closed (the header's #btnLeftRail) gives the canvas the full
    width; the Theme view adds its dock as a third column, so the canvas beside it stays live */
@@ -82,7 +86,7 @@
 #studioRoot .left input, #studioRoot .left textarea { -webkit-user-select: text; user-select: text; }
 #studioRoot .tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border-bottom: 1px solid hsl(var(--border-soft)); position: sticky; top: 0; background: hsl(var(--depth)); z-index: 2; }
 /* five tabs in a 228-264px rail: icon over a small label */
-#studioRoot .tabs button { border: 0; background: transparent; padding: 7px 2px 6px; font: 600 10.5px/1 var(--sans); letter-spacing: .01em; color: hsl(var(--text-muted)); border-bottom: 2px solid transparent; display: inline-flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; min-width: 0; }
+#studioRoot .tabs button { border: 0; background: transparent; padding: 7px 2px 6px; font: 600 12px/1 var(--sans); letter-spacing: .01em; color: hsl(var(--text-muted)); border-bottom: 2px solid transparent; display: inline-flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; min-width: 0; }
 #studioRoot .tabs button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #studioRoot .tabs button:hover { color: hsl(var(--text-strong)); }
 #studioRoot .tabs button[aria-selected="true"] { color: hsl(var(--text-strong)); border-bottom-color: hsl(var(--reference)); }
@@ -93,7 +97,7 @@
 #studioRoot .list li .ic { color: hsl(var(--text-muted)); }
 #studioRoot .list li[aria-selected="true"] .ic { color: hsl(var(--reference)); }
 #studioRoot .list li .nm { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-#studioRoot .list li .sub { color: hsl(var(--text-muted)); font: 500 11px/1 var(--mono); margin-left: auto; overflow: hidden; text-overflow: ellipsis; }
+#studioRoot .list li .sub { color: hsl(var(--text-muted)); font: 500 12px/1 var(--mono); margin-left: auto; overflow: hidden; text-overflow: ellipsis; }
 #studioRoot .list li .tag { font: 600 9.5px/1 var(--sans); text-transform: uppercase; letter-spacing: .06em; color: hsl(var(--text-muted)); border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-xs); padding: 2px 4px; }
 #studioRoot .list li .row-act { margin-left: auto; opacity: 0; }
 #studioRoot .list li:hover .row-act, #studioRoot .list li[aria-selected="true"] .row-act { opacity: 1; }
@@ -122,7 +126,7 @@
 #studioRoot .site-tree .side-group { margin: 10px 2px 4px; padding: 4px 6px; min-height: 30px; cursor: pointer; border-radius: var(--radius-sm); }
 #studioRoot .site-tree .side-group:hover { color: hsl(var(--text-strong)); }
 #studioRoot .site-tree .side-group::before { display: none; }
-#studioRoot .site-tree .side-group small { margin-left: auto; font: 500 10px/1 var(--mono); color: hsl(var(--text-faint)); }
+#studioRoot .site-tree .side-group small { margin-left: auto; font: 500 12px/1 var(--mono); color: hsl(var(--text-faint)); }
 #studioRoot .site-tree > li.hint { padding: 10px 8px; white-space: normal; }
 /* the Pages tab's top: find a page, + New (sticky, so both are there at the 70th row) */
 #studioRoot .pages-top { position: sticky; top: 0; z-index: 2; display: flex; gap: 6px; padding: 8px 8px 6px; background: hsl(var(--depth)); }
@@ -206,7 +210,7 @@
    that size, the page's name and zoom, Design tips (Edit style only), Edit / Preview. It stays in
    Preview: it is how you get back to Edit. One row; the words yield before the controls do. */
 #studioRoot .canvas-bar { display: flex; align-items: center; gap: 8px; margin: 0 auto 8px; min-height: 34px; white-space: nowrap; font-size: 12px; color: hsl(var(--text-muted)); }
-#studioRoot .canvas-bar .dev-text { flex: 1 1 auto; min-width: 0; display: flex; gap: 8px; font: 500 11px/1.2 var(--mono); }
+#studioRoot .canvas-bar .dev-text { flex: 1 1 auto; min-width: 0; display: flex; gap: 8px; font: 500 12px/1.2 var(--mono); }
 /* one line at any width: a long page title is ellipsized (its whole text is the title), the zoom keeps its words */
 #studioRoot #devName { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 #studioRoot #devScale { flex: none; }
@@ -338,17 +342,23 @@
    each head is its button, in the group heading's own type, with a chevron that turns off
    aria-expanded; the rows are its panel. The look is the editor's: Ark's page-scale accordion
    dress (a 52px row, 1rem) does not fit a 264px rail. */
-#studioRoot .lib-groups { display: grid; }
-#studioRoot .lib-group { gap: 0; padding-top: 2px; }
-#studioRoot .lib-group-head { margin: 0; display: block; }
-#studioRoot .lib-group-trigger { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 30px; margin: 0; padding: 4px 2px; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: left; }
-#studioRoot .lib-group-trigger:hover { color: hsl(var(--text-strong)); background: hsl(var(--raised)); }
-#studioRoot .lib-group-trigger::before { content: '›'; font: 700 16px/1 var(--sans); letter-spacing: 0; transform: rotate(90deg); transition: transform .12s ease; }
-#studioRoot .lib-group-trigger[aria-expanded="false"]::before { transform: rotate(0); }
-#studioRoot .lib-group-trigger > span { flex: 1 1 auto; min-width: 0; }
-#studioRoot .lib-group-count { font: 500 10px/1 var(--mono); letter-spacing: 0; color: hsl(var(--text-faint)); }
-#studioRoot .lib-group-rows { display: grid; gap: 8px; padding-top: 6px; }
-@media (max-width: 599px) { #studioRoot .lib-group-trigger { min-height: 44px; } }
+:is(#studioRoot, #sheet) .lib-groups { display: grid; }
+:is(#studioRoot, #sheet) .lib-group { gap: 0; padding-top: 2px; }
+:is(#studioRoot, #sheet) .lib-group-head { margin: 0; display: block; }
+:is(#studioRoot, #sheet) .lib-group-trigger { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 30px; margin: 0; padding: 4px 2px; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: left; }
+:is(#studioRoot, #sheet) .lib-group-trigger:hover { color: hsl(var(--text-strong)); background: hsl(var(--raised)); }
+:is(#studioRoot, #sheet) .lib-group-trigger::before { content: '›'; font: 700 16px/1 var(--sans); letter-spacing: 0; transform: rotate(90deg); transition: transform .12s ease; }
+:is(#studioRoot, #sheet) .lib-group-trigger[aria-expanded="false"]::before { transform: rotate(0); }
+:is(#studioRoot, #sheet) .lib-group-trigger > span { flex: 1 1 auto; min-width: 0; }
+:is(#studioRoot, #sheet) .lib-group-count { font: 500 10px/1 var(--mono); letter-spacing: 0; color: hsl(var(--text-faint)); }
+:is(#studioRoot, #sheet) .lib-group-rows { display: grid; gap: 8px; padding-top: 6px; }
+#sheet .lib-groups { gap: 8px; margin: 0 0 20px; }
+#sheet .lib-group { border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .6); padding: 0; }
+#sheet .lib-group-head { font: 600 13px/1.3 var(--sans); color: hsl(var(--text-strong)); }
+#sheet .lib-group-trigger { min-height: 40px; padding: 8px 14px; }
+#sheet .lib-group-rows { padding: 4px 14px 14px; }
+#sheet .lib-group-rows[hidden] { display: none; }
+@media (max-width: 599px) { :is(#studioRoot, #sheet) .lib-group-trigger { min-height: 44px; } }
 #studioRoot .myrow { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-md); }
 #studioRoot .myrow span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
 #studioRoot .myrow small { color: hsl(var(--text-muted)); }
@@ -415,6 +425,7 @@
 /* the toolbar More's commands: a refused one says why on its own line (aria-disabled, never greyed out mute) */
 #studioRoot .tb-pop .menu button { flex-wrap: wrap; row-gap: 1px; }
 #studioRoot .tb-pop .menu button .hint { flex-basis: 100%; margin: 0; }
+#studioRoot .tb-pop .menu [data-waits] { margin: 4px 8px 2px; padding-top: 6px; border-top: 1px solid hsl(var(--border-soft)); font-size: 11.5px; }
 #studioRoot .tb-pop .menu button[aria-disabled="true"] > span:first-child { color: hsl(var(--text-muted)); }
 #studioRoot :is(.pop, .tb-pop) .menu button:hover { background: hsl(var(--nested)); }
 #studioRoot :is(.pop, .tb-pop) .menu button small { margin-left: auto; color: hsl(var(--text-muted)); font: 500 11px/1 var(--mono); }
@@ -444,7 +455,17 @@
 #studioRoot .checkhead p { margin: 0; color: hsl(var(--text-muted)); font-size: 12px; }
 
 /* status bar: the rail's surface, mono metadata */
-#studioRoot .studio-statusbar { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 5px 14px; border-top: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); font: 500 11px/1.3 var(--mono); color: hsl(var(--text-muted)); }
+#studioRoot .studio-statusbar { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 5px 14px; border-top: 1px solid hsl(var(--border-soft)); background: hsl(var(--depth)); font: 500 12px/1.3 var(--mono); color: hsl(var(--text-muted)); }
 #studioRoot .studio-statusbar b { color: hsl(var(--text-strong)); font-weight: 500; }
 
 @media (prefers-reduced-motion: reduce) { #studioRoot, #studioRoot * { transition: none !important; } }
+
+/* A phone's action bar (#phoneBar, css/admin.css) takes the foot of the screen: the workspace and everything fixed to
+   the viewport that used to reach the bottom edge stops at its top (--phone-bar-h, published by js/admin/header.js). Popovers
+   become bottom sheets there: pinned to the full width just above the bar, at most 60% of the screen, rounded on top;
+   their inline left/top (placed beside an anchor) are overridden because an anchor beside a 390px popover has nowhere to be. */
+@media (max-width: 599px) {
+  #studioRoot { bottom: var(--phone-bar-h, 0px); }
+  #studioRoot .left, #studioRoot .rail-closed .left, #studioRoot .rail-scrim, #studioRoot .theme-dock, #studioRoot .sheet { bottom: var(--phone-bar-h, 0px); }
+  #studioRoot :is(.tb-pop, .pop) { left: 0 !important; right: 0 !important; top: auto !important; bottom: var(--phone-bar-h, 0px) !important; width: auto; max-height: 60vh !important; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-width: 1px 0 0; }
+}

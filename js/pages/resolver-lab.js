@@ -476,6 +476,9 @@
     var sources = [{ label: 'Wording from the resolver spec', href: words('SOURCE.HREF'), tone: 'link' }, { label: 'Status from the status page', href: words('STATUS.HREF'), tone: 'link' }];
     /* what "verified on chain" means, what is planned, and where the two products run today */
     var verified = [1, 2, 3].map(function (n) { return words('VERIFIED.FACT' + n); }).concat([words('VERIFIED.PLANNED'), words('PRODUCTS.NOTE')]).join('\n\n');
+    /* The page this journey starts at (Resolutions: every thing you can resolve, one page each): the Laws step led to the registry, the math and
+       the examples but not to the list of what resolves (docs/ux-audit/ledger.md WR-3). Derived from the journey, not typed here. */
+    var resolutions = ArkUI.journeyLead ? [ArkUI.journeyLead(page)].filter(Boolean).map(function (item) { return { label: item.label, href: item.href }; }) : [];
     return {
       page: page, id: 'resolver', className: 'resolver-lab', titleId: 'resolver-lab-title', was: WAS, insertWas: WAS.insert,
       crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: 'Resolver' }],
@@ -497,7 +500,7 @@
       pager: { label: 'Continue',
         next: { label: copy('NEXT'), href: 'route:' + manifest.meta.next },
         related: ['REGISTRY', 'MATH', 'EXPLORE', 'DEPLOYER'].map(function (k) { return { label: copy(k + '.LINK'), href: words(k + '.HREF') }; })
-          .concat([{ label: 'Inspect reference evidence', href: words('INSPECT.HREF') }]) },
+          .concat([{ label: 'Inspect reference evidence', href: words('INSPECT.HREF') }], resolutions) },
       query: function (depth) { return query(depth); },
       onView: function (depth) {
         if (!root) return;

@@ -29,7 +29,7 @@ Everything else is deprecated.
 ## Blockchain Thinking (Deprecated)
 
 - Committees, validators, consensus rounds
-- Block production, block time, finality
+- Block production, block time, finality (and finalize, finalized, finalization)
 - TPS, accepted/s, admissions/s
 - Replica apps, replica application
 - Segment shipping, durability layers
@@ -62,7 +62,7 @@ does not hold here.
 | Term | The assumption it smuggles in | What is true instead |
 |---|---|---|
 | committee, consensus round | that several parties must agree before a result is real | one shard signs; its signature IS the result |
-| finality, block time | that truth arrives later, after rounds | truth exists the moment the shard signs |
+| finality (finalize, finalized, finalization), block time | that truth arrives later, after rounds | truth exists the moment the shard signs |
 | TPS, accepted/s, admissions/s | that swaps compete for block space and the rate is the product | swaps per batch auction and batch latency are the product |
 | replica apps / replica application | that a replica re-executes | a replica **stores**; re-executing would make it an authority it is not |
 | segment shipping, durability layer | that durability is a separate layer bolted beneath | the signed result is the unit; a feed carries it |

@@ -213,11 +213,6 @@
 #scene .mesh-explorer-record strong {font:500 12px/1.35 var(--font-mono,monospace);}
 #scene .mesh-explorer-record-kind,#scene .mesh-explorer-record-meta {font-size:8px;}
 
-#scene .mesh-explorer-secondary,#scene .mesh-explorer-reference {margin-top:10px;border-block:1px solid hsl(var(--border-subtle));}
-#scene .mesh-explorer-secondary > summary,#scene .mesh-explorer-reference > summary {min-height:42px;display:flex;align-items:center;color:hsl(var(--reference));font:500 10px/1.4 var(--font-sans,sans-serif);cursor:pointer;}
-#scene .mesh-explorer-secondary .mesh-explorer-stats {grid-template-columns:repeat(5,minmax(0,1fr));padding:8px 0 14px;border-top:1px solid hsl(var(--border-subtle));}
-#scene .mesh-explorer-secondary .mesh-explorer-stat {padding:9px;border-bottom:0;border-right:1px solid hsl(var(--border-subtle));}
-#scene .mesh-explorer-secondary .mesh-explorer-stat strong {font-size:18px;}
 #scene .mesh-explorer-reference-body {padding:12px 0 20px;border-top:1px solid hsl(var(--border-subtle));}
 #scene .mesh-explorer-reference-body p {font-size:12px;}
 
@@ -234,45 +229,17 @@
   gap:0;
   border-top:1px solid hsl(var(--border-subtle));
 }
-#scene .mesh-observatory-popover {position:static;margin:0;border:0;}
-#scene .mesh-observatory-popover > summary {
-  min-height:42px;
-  box-sizing:border-box;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:0 14px;
-  border-left:1px solid hsl(var(--border-subtle));
-  color:hsl(var(--text-muted));
-  font:500 10px/1.3 var(--font-sans,sans-serif);
-  list-style:none;
-  cursor:pointer;
-}
-#scene .mesh-observatory-popover > summary::-webkit-details-marker {display:none;}
-#scene .mesh-observatory-popover > summary span {color:hsl(var(--reference));font:500 7px/1 var(--font-mono,monospace);}
-#scene .mesh-observatory-popover[open] > summary {background:hsl(var(--reference-100));color:hsl(var(--text-strong));}
-#scene .mesh-observatory-popover > :not(summary) {
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:42px;
-  z-index:2;
-  max-height:min(430px,calc(100vh - 210px));
-  box-sizing:border-box;
-  overflow:auto;
-  margin:0;
-  padding:18px 20px;
-  border:1px solid hsl(var(--border-default));
-  border-bottom:0;
-  border-radius:7px 7px 0 0;
-  background:hsl(var(--canvas) / .98);
-  box-shadow:0 -18px 36px hsl(var(--canvas) / .32);
-}
-#scene .mesh-observatory-popover .mesh-explorer-stats {display:grid;}
-#scene .mesh-observatory-popover .mesh-explorer-reference-body {display:grid;}
-#scene .mesh-observatory-popover .mesh-node-strip,
-#scene .mesh-observatory-popover .mesh-explorer-data {display:block;}
-#scene .mesh-observatory-popover .mesh-explorer-nodes {margin-bottom:0;}
+/* The dock's layers are Ark popovers (js/pages/explorer.js POPOVERS, side 'top', one group): their button and panel are Ark's. Only
+   what the panel HOLDS is the page's: the layouts of the node strip, the ledger, the figures and the topology note. */
+#scene .mesh-observatory-dock > [data-ark-block="popover"] {flex:0 0 auto;align-self:stretch;margin:0;}
+#scene .mesh-observatory-dock .mesh-explorer-stats {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+#scene .mesh-observatory-dock .mesh-explorer-stat {padding:9px;border-bottom:0;border-right:1px solid hsl(var(--border-subtle));}
+#scene .mesh-observatory-dock .mesh-explorer-stat strong {font-size:18px;}
+#scene .mesh-observatory-dock .mesh-explorer-reference-body {display:grid;}
+#scene .mesh-observatory-dock .mesh-node-strip,
+#scene .mesh-observatory-dock .mesh-explorer-data {display:block;}
+#scene .mesh-observatory-dock .mesh-explorer-nodes {margin-bottom:0;}
+#scene .mesh-observatory-dock .mesh-explorer-records {grid-template-columns:1fr;}
 #scene .mesh-explorer-page :is(button,input,select,summary,a):focus-visible {outline:2px solid hsl(var(--reference));outline-offset:3px;}
 
 .hero-alive[data-page="explorer"] .lattice-activity {opacity:0;pointer-events:none;}
@@ -322,11 +289,7 @@
   #scene .mesh-explorer-core-stats .mesh-explorer-stat:nth-child(2) {border-right:0;}
   #scene .mesh-explorer-nodes {grid-template-columns:1fr 1fr;}
   #scene .mesh-explorer-records {grid-template-columns:1fr;}
-  #scene .mesh-explorer-secondary .mesh-explorer-stats {grid-template-columns:repeat(2,minmax(0,1fr));}
-  #scene .mesh-observatory-dock {justify-content:stretch;}
-  #scene .mesh-observatory-popover {flex:1 1 0;}
-  #scene .mesh-observatory-popover > summary {justify-content:center;padding:0 7px;font-size:0;}
-  #scene .mesh-observatory-popover > summary span {font-size:8px;}
+  #scene .mesh-observatory-dock {justify-content:flex-start;height:auto;flex-wrap:wrap !important;}
 }
 @media(max-width:520px) {
   #scene .mesh-explorer-header h1 {font-size:35px;}
@@ -433,21 +396,16 @@
 
 /* Connection controls live in a popover beside the status strip; the masthead is one row. */
 #scene .mesh-explorer-header {position:relative;grid-template-columns:minmax(260px,1fr) minmax(0,720px) auto !important;align-items:center;}
-#scene .mesh-explorer-header > .mesh-explorer-connect {display:none;}
-#scene .mesh-connect-popover {position:relative;align-self:stretch;margin:0;}
-#scene .mesh-connect-popover > summary {height:100%;min-height:36px;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid hsl(var(--border-default));border-radius:5px;background:hsl(var(--surface) / .3);color:hsl(var(--text-strong));font:500 11px/1.2 var(--font-sans,sans-serif);white-space:nowrap;list-style:none;cursor:pointer;}
-#scene .mesh-connect-popover > summary::-webkit-details-marker {display:none;}
-#scene .mesh-connect-popover > summary::after {content:"";width:6px;height:6px;margin-left:2px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:translateY(-2px) rotate(45deg);}
-#scene .mesh-connect-popover[open] > summary {border-color:hsl(var(--reference));background:hsl(var(--reference-100));}
-#scene .mesh-connect-dot {width:7px;height:7px;border-radius:2px;transform:rotate(45deg);background:hsl(var(--text-muted));}
-#scene .mesh-explorer-page[data-connection="live"] .mesh-connect-dot {background:hsl(var(--success));}
-#scene .mesh-connect-popover > .mesh-explorer-connect {position:absolute;top:calc(100% + 6px);right:0;z-index:20;width:min(420px,calc(100vw - 48px));box-sizing:border-box;padding:12px !important;border:1px solid hsl(var(--border-default)) !important;border-radius:7px;background:hsl(var(--canvas) / .98);box-shadow:0 18px 36px hsl(var(--canvas) / .45);}
-#scene .mesh-connect-popover .mesh-explorer-connect-actions {display:grid !important;grid-template-columns:1fr;gap:8px;}
-#scene .mesh-connect-popover .mesh-explorer-connect-actions > label {display:grid;gap:4px;flex:none;}
-#scene .mesh-connect-popover .mesh-explorer-buttons {display:flex;gap:6px;}
-#scene .mesh-connect-popover .mesh-explorer-buttons button {flex:1 1 0;}
-#scene .mesh-connect-popover .mesh-operator-access > summary {padding:0;}
-#scene .mesh-connect-popover .mesh-operator-access input {min-width:0;width:100%;box-sizing:border-box;}
+/* The connection controls: Ark's popover (js/pages/explorer.js POPOVERS.connect) in a slot of the masthead grid; its panel holds the
+   page's own form. The old panel's sheet styling (absolute, border, shadow) is Ark's now; only the form's layout is the page's. */
+#scene .mesh-connect-slot {align-self:center;justify-self:end;margin:0;}
+#scene .mesh-connect-slot .mesh-explorer-connect {display:block !important;margin:0 !important;padding:0 !important;border:0 !important;background:none;box-shadow:none;}
+#scene .mesh-connect-slot .mesh-explorer-connect-actions {display:grid !important;grid-template-columns:1fr;gap:8px;}
+#scene .mesh-connect-slot .mesh-explorer-connect-actions > label {display:grid;gap:4px;flex:none;}
+#scene .mesh-connect-slot .mesh-explorer-buttons {display:flex;gap:6px;}
+#scene .mesh-connect-slot .mesh-explorer-buttons button {flex:1 1 0;}
+#scene .mesh-connect-slot .mesh-operator-access > summary {padding:0;}
+#scene .mesh-connect-slot .mesh-operator-access input {min-width:0;width:100%;box-sizing:border-box;}
 
 /* Source field heading: title, figures and timestamp share one row. */
 #scene .mesh-source-head {align-items:center;gap:16px;padding-bottom:8px;}
@@ -459,9 +417,7 @@
 #scene .mesh-source-stamp {flex:0 0 auto;color:hsl(var(--text-faint));font:500 8px/1.4 var(--font-mono,monospace);}
 
 /* The dock is always a single row. */
-#scene .mesh-observatory-dock {flex-wrap:nowrap !important;}
-#scene .mesh-observatory-dock > .mesh-observatory-popover {flex:0 0 auto;margin:0 !important;padding:0 !important;align-self:stretch;}
-#scene .mesh-observatory-popover > summary {white-space:nowrap;}
+@media(min-width:821px) {#scene .mesh-observatory-dock {flex-wrap:nowrap !important;}}
 #scene .mesh-explorer-page .mesh-explorer-shell {grid-template-rows:auto minmax(0,1fr) auto;}
 #scene .mesh-explorer-header {grid-template-columns:auto minmax(0,1fr) auto !important;}
 #scene .mesh-explorer-header .mesh-explorer-title-group {max-width:none;}
@@ -472,7 +428,6 @@
   #scene .mesh-explorer-header > .mesh-explorer-live-panel {grid-column:1 / -1;grid-row:2;}
 }
 #scene .mesh-explorer-header {z-index:30;}
-#scene .mesh-connect-popover > .mesh-explorer-connect {background:hsl(var(--canvas));}
 #scene .mesh-source-head {flex-wrap:wrap;row-gap:4px;}
 #scene .mesh-source-head .mesh-explorer-core-stats .mesh-explorer-stat {flex:0 0 auto;}
 #scene .mesh-source-head .mesh-explorer-core-stats {flex-wrap:wrap;}

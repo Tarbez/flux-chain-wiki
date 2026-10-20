@@ -163,7 +163,7 @@
     if (!a) { status('Nothing deleted: there is no article "' + slug + '".', 'error'); return; }
     if (state.slugs.length <= 1) { status('Keep at least one article: the site links each note to the next.', 'warn'); return; }
     if (!state.cdirs && state.aSaved[slug] !== null) { status('Connect the project folder to delete an article: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + a.title + '"? This removes its file and its card on the Learnings page.')) return;
+    if (!(await A.confirmDelete('article', a.title, 'This removes its file and its card on the Learnings page.', state.aSaved[slug] === null))) return;
     var routesBefore = studioRoutes().map(function (r) { return r.path; });
     try { await removeItemFile('article', slug); }
     catch (error) { status(error.message, 'error'); return; }
@@ -171,6 +171,7 @@
     if (state.aCurrent === slug) state.aCurrent = state.slugs[0];
     afterItemRemoved('article', slug, '/learnings/' + slug);
     status('Deleted ' + a.title + '.' + forgot + await afterDelete(), 'ok');
+    if (typeof A.deletedNotice === 'function') A.deletedNotice(a.title);
   }
 
   /* An article is named from what was typed ("hello-world" -> "Hello world"): it was "New note"

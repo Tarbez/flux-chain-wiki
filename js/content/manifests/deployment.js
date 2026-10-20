@@ -94,7 +94,7 @@ ArkManifest.define({
       "label": "Step 6 text",
       "kind": "text",
       "section": "Steps",
-      "value": "Every record your resolver admits appears in the explorer, oldest first, re-checked in your browser."
+      "value": "Every record your resolver admits appears in the explorer, oldest first, re-checked in your browser. The signature on a record is the result. Whether to rely on that resolver is decided before anyone sends it anything: its grammar, its capabilities, who can change it. Steps 1 to 3 set all three."
     },
     "STEP1": {
       "label": "Step 1 title",
@@ -616,7 +616,7 @@ ArkManifest.define({
       "label": "Work record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "kind: agreement, flux.fabric-transfer.v1\n[1] inputCid: What you asked to move\n[2] recipientId: Who receives it\n[2] asset, amount: The terms on offer\n[3] nextSequence: The input's next version\n[3] cid: SHA-256 of the signed record"
+      "value": "kind: A signed agreement (flux.fabric-transfer.v1)\n[1] inputCid: What you asked to move\n[2] recipientId: Who receives it\n[2] asset, amount: The terms on offer\n[3] nextSequence: The input's next version\n[3] cid: SHA-256 of the signed record"
     },
     "CHAPTER.WORK.NOW": {
       "label": "Work true now",
@@ -640,7 +640,7 @@ ArkManifest.define({
       "label": "Check record rows (one \"name: meaning\" per line; \"[1] \" lights a row for choice 1)",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "kind: fulfillment, flux.fabric-transfer.v1\n[1] agreementCid: The terms it is checked against\n[2] inputCid, outputCid: What went in and what came out\n[2] signatureB64: The provider's Ed25519 signature\n[3] cid: What the receipt points back to"
+      "value": "kind: A signed fulfillment (flux.fabric-transfer.v1)\n[1] agreementCid: The terms it is checked against\n[2] inputCid, outputCid: What went in and what came out\n[2] signatureB64: The provider's Ed25519 signature\n[3] cid: What the receipt points back to"
     },
     "CHAPTER.CHECK.NOW": {
       "label": "Check true now",

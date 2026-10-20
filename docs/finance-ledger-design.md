@@ -43,7 +43,7 @@ their own chain by their own key, and the normal **freeze** rule
 ## 3. Why MEV disappears
 
 MEV requires three things to exist together: (a) a public pending pool, (b) a
-party that can reorder it before finalization, (c) extractable value from the
+party that can reorder it before it is signed, (c) extractable value from the
 reordering. The chain-local design removes (a): there is no pool. A transfer
 is a bilateral conversation; the only global object is the content-addressed
 set of records, which is observable only *after* a transfer has already

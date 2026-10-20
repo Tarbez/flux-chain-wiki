@@ -315,4 +315,76 @@ test('dash-kit carries no dead builders: stat, table, bar and sectionHead had no
   for (const name of ['panel', 'pageLink', 'docLink', 'resolveLinkField', 'linkEl']) assert.equal(typeof ArkUI.dash[name], 'function', name + ' still has callers (not-found, link fields)');
 });
 
+test('the optional blocks are chunks: absent from the public kit and its resolvers, present after their chunk, whichever of it and the adapter loaded first (W4-ARK)', () => {
+  // Defect guarded: the six cost +3.8 KB gz in the public kit (every block route paid); as chunks they cost the routes that use them
+  // only (the popover alone, 3.2 KB, for a page that takes no input). A chunk that registered its blocks but not their resolvers would
+  // render nothing on the page ("[ArkUI] unresolved resolver") with every block route's tests green.
+  const FORM = ['field', 'form', 'list', 'status-line', 'choice'], POPOVER = ['popover'];
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 21, 'the public kit holds the 21 core blocks');
+  for (const name of FORM.concat(POPOVER)) assert.equal(ArkUI.blocks.resolvers.includes(ArkUI.blocks.resolverId(name)), false, name + ' is not a resolver before its chunk');
+  assert.equal(ArkUI.blocks.formsScript, 'js/ark/vendor/ark-kit-forms.js');
+  assert.equal(ArkUI.blocks.popoverScript, 'js/ark/vendor/ark-kit-popover.js');
+  const before = ArkUI.build({ resolver: 'ARK_BLOCK_FORM', props: {}, children: [] }, { mounts: [], emerge: [] });
+  assert.equal(before, null, 'without the chunk a saved form block is unresolved, not a thrown page');
+  run(ArkUI.blocks.popoverScript);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 22, 'the popover chunk adds the popover and no form block');
+  assert(ArkUI.blocks.resolvers.includes('ARK_BLOCK_POPOVER') && !ArkUI.blocks.resolvers.includes('ARK_BLOCK_FORM'));
+  run(ArkUI.blocks.formsScript);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 27);
+  assert.equal(window.ArkKitForms.FORM_BLOCK_NAMES.length, 5);
+  for (const name of FORM.concat(POPOVER)) assert(ArkUI.blocks.resolvers.includes(ArkUI.blocks.resolverId(name)), name + ' is a resolver after its chunk (ArkUI.blocks.sync)');
+  assert.deepEqual(JSON.parse(JSON.stringify(ArkUI.blocks.resolvers)), [...ArkKit.ARK_BLOCK_NAMES].map(ArkUI.blocks.resolverId), 'and the list is still the kit\'s, derived');
+  for (const name of FORM.concat(POPOVER)) {
+    const el = ArkUI.build({ name: 'i1', resolver: ArkUI.blocks.resolverId(name), props: Object.assign({}, EXAMPLES[name], { from: '/about' }), children: [] }, { mounts: [], emerge: [] });
+    assert(el && el.getAttribute('data-ark-block') === name, name + ' builds through the adapter');
+    assert(!el.hasAttribute('data-ark-block-refused'), name + ': its own example was refused');
+  }
+  assert.equal(ArkKit.ARK_BLOCKS.form.example, undefined, 'the public kit carries no demo data, chunks included');
+  // A form on a page: its press reaches the page handler through ArkUI.page options.actions with the values.
+  const heard = [];
+  const root = ArkUI.page([{ block: 'form', id: 'lookup', props: { label: 'Look up', fields: [{ name: 'name', label: 'Name', value: 'radio.fxn' }], submit: { label: 'Look up', action: 'lookup' } } }], document.body, { page: 'palette', actions: { lookup: (detail) => heard.push(detail) } });
+  root.querySelector('form').requestSubmit();
+  assert.deepEqual(heard.map((d) => [d.action, d.values.name, d.block]), [['lookup', 'radio.fxn', 'form']], 'the page handler gets { action, values } and nothing posts');
+  // Loaded again (a route lists it and the loader adds it): harmless.
+  run(ArkUI.blocks.formsScript); run(ArkUI.blocks.popoverScript);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 27);
+  root.remove();
+});
+
+{
+  // The page loader adds the forms chunk where nothing in the code can say so: the editor's canvas, and a saved block the loaded kit
+  // does not know. Derived from the preview flag and the kit's own resolvers, never from a list of block names.
+  const source = read('js/ark/page-loader.js');
+  assert(/ark-kit-forms\.js/.test(source) && /inPreview\(\) \|\| unknownSaved\(definition\)/.test(source), 'the loader derives the need');
+  const vm = require('node:vm');
+  const loadRoute = async (known, resolver, search, learns) => {
+    const loads = [];
+    const sandbox = { ArkUI: { blockScripts: ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js'], pageModules: { m: {} }, blocks: { resolvers: known } }, location: { search: search || '', protocol: 'https:' },
+      ArkComponents: { SHELL: '*', get: () => ({ routes: resolver ? { '/x': { main: [{ masterId: 'a' }] } } : {}, masters: { a: { resolver } } }) },
+      setTimeout, document: { createElement: () => { const el = { remove() {} }; setTimeout(() => { const name = el.src.replace(/^\//, '').replace(/\?.*/, ''); loads.push(name); if (learns && learns[name]) sandbox.ArkUI.blocks.resolvers.push(learns[name]); el.onload(); }, 0); return el; }, head: { appendChild() {} } } };
+    sandbox.window = sandbox;
+    vm.runInNewContext(source, sandbox);
+    await sandbox.ArkUI.loadPage('x', { path: '/x', module: 'm', scripts: ['js/pages/x.js'] });
+    return loads;
+  };
+  const CHUNK = 'js/ark/vendor/ark-kit-forms.js', POP = 'js/ark/vendor/ark-kit-popover.js';
+  pending.push((async () => {
+    const saved = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_FORM');
+    assert.deepEqual(saved, ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js', CHUNK, POP, 'js/pages/x.js'], 'a saved block the kit has no resolver for: the chunks come after the adapter, before the page (a fake kit here: it never learns the name)');
+    const learnt = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_FORM', '', { [CHUNK]: 'ARK_BLOCK_FORM' });
+    assert(learnt.includes(CHUNK) && !learnt.includes(POP), 'once the forms chunk teaches the kit the resolver, the popover chunk is not loaded: derived from the kit, not from names');
+    const popOnly = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_POPOVER', '', { [POP]: 'ARK_BLOCK_POPOVER' });
+    assert(popOnly.includes(POP), 'a saved popover loads the popover chunk (after the forms chunk, which does not know it)');
+    const known = await loadRoute(['ARK_BLOCK_HERO', 'ARK_BLOCK_FORM'], 'ARK_BLOCK_FORM');
+    assert(!known.includes(CHUNK), 'a resolver the kit already knows adds nothing');
+    const core = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_HERO');
+    assert(!core.includes(CHUNK), 'a saved core block adds nothing');
+    const canvas = await loadRoute(['ARK_BLOCK_HERO'], null, '?cms-preview=1');
+    assert(canvas.includes(CHUNK) && canvas.includes(POP) && canvas.indexOf(POP) < canvas.indexOf('js/pages/x.js'), 'the editor\'s canvas gets both chunks: the Library can insert any block anywhere');
+    const plain = await loadRoute([], null);
+    assert.deepEqual(plain, ['js/pages/x.js'], 'a route with no blocks loads nothing extra');
+    passed += 1;
+  })());
+}
+
 Promise.all(pending).then(() => console.log('PASS: ark-blocks-adapter (' + passed + ' cases)'), (error) => { console.error('FAIL (async)'); console.error(error); process.exit(1); });

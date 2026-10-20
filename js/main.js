@@ -814,10 +814,18 @@
        page module itself wrote there (before any saved override), so the toolbar's Alt text
        field can show the override and the markup's own value as its fallback. */
     var alt = typeof ArkLayout !== 'undefined' && ArkLayout.altOwn ? ArkLayout.altOwn(element) : null;
+    /* An <img> (or SVG <image>) that shows one of the site's Media images says which: the editor offers
+       "Replace image" for it (docs/ux-audit/cms.md P1-11). Matched by the data URL the image shows, the one
+       ArkAsset.dataUrl(id) makes; '' for any other image (a file, a drawing). */
+    var asset = '';
+    var imageSrc = element.tagName === 'IMG' ? element.getAttribute('src') : element.tagName && element.tagName.toLowerCase() === 'image' ? (element.getAttribute('href') || element.getAttribute('xlink:href')) : '';
+    if (imageSrc && imageSrc.indexOf('data:') === 0 && window.ArkAsset && ArkAsset.all) {
+      ArkAsset.all().some(function (a) { if (ArkAsset.dataUrl(a.id) === imageSrc) { asset = a.id; return true; } return false; });
+    }
     /* route: the SCOPE the element's edits are stored under (its route, or SHELL for the header);
        page: the route the preview shows */
     return { key: key, route: cmsScopeOf(element), page: cmsRoutePath(), breakpoint: cmsLayoutBreakpoint(), label: element.getAttribute('aria-label') || element.id || element.tagName.toLowerCase(),
-      rect: { x: Math.round(rect.left), y: Math.round(rect.top), width: Math.round(rect.width), height: Math.round(rect.height) }, frame: frame, component: component, stateGroup: stateGroup, alt: alt };
+      rect: { x: Math.round(rect.left), y: Math.round(rect.top), width: Math.round(rect.width), height: Math.round(rect.height) }, frame: frame, component: component, stateGroup: stateGroup, alt: alt, asset: asset };
   }
   function cmsSelectionList() { return cmsPreviewSelections.filter(function (element) { return element && element.isConnected; }); }
   function cmsSelectionPayload() { return cmsSelectionList().map(cmsSelectionInfo); }
@@ -1037,7 +1045,10 @@
      rows on every single-layer menu. `context`: right-click only (the layer under the pointer). */
   function cmsSelectionCommands(context) {
     var count = cmsSelectionList().length, isGroup = cmsPreviewSelected && cmsPreviewSelected.hasAttribute('data-ark-layout-group');
-    var out = [], add = function (id, label, run, needs, group) { out.push({ id: id, label: label, run: run, needs: needs || '', group: group || 'edit' }); };
+    /* `waits`: the refusal is only that the selection is too small (Group with one layer, Space evenly with two). Both menus
+       leave such a command out of their list and say its reason once, in a line under it; a command refused for WHAT is
+       selected (Make into component on an inserted block) has no `waits` and stays a row, marked, with its reason. */
+    var out = [], add = function (id, label, run, needs, group, waits) { out.push({ id: id, label: label, run: run, needs: needs || '', group: group || 'edit', waits: !!(needs && waits) }); };
     if (context && cmsContextTarget && cmsPreviewSelections.indexOf(cmsContextTarget) < 0) add('add-layer', 'Add this layer to the selection', function () { cmsPreviewSelections.push(cmsContextTarget); cmsPreviewSelected = cmsContextTarget; placeCmsLayoutUi(); emitCmsLayoutSelection(); }, '', 'select');
     if (cmsIllustrationParts(cmsPreviewSelected).length) add('enter-illustration', 'Select inside this illustration', function () { cmsSelectIllustrationPart(cmsPreviewSelected); }, '', 'select');
     if (cmsPreviewSelected && cmsPreviewSelected.namespaceURI === 'http://www.w3.org/2000/svg' && cmsPreviewSelected.parentElement) add('select-parent', 'Select the drawing it belongs to', function () { cmsPreviewSelected = cmsPreviewSelected.parentElement; cmsPreviewSelections = [cmsPreviewSelected]; placeCmsLayoutUi(); emitCmsLayoutSelection(); }, '', 'select');
@@ -1047,20 +1058,20 @@
     /* the selection becomes a reusable component, and an instance of it takes its place */
     var componentRefusal = cmsComponentRefusal(cmsSelectionList());
     add('make-component', 'Make into component', cmsMakeComponent, componentRefusal || '');
-    add('group', 'Group', cmsGroupSelection, count < 2 ? 'Select 2 or more layers to group them (Shift-click adds a layer).' : '');
+    add('group', 'Group', cmsGroupSelection, count < 2 ? 'Select 2 or more layers to group them (Shift-click adds a layer).' : '', 'edit', true);
     if (isGroup) add('ungroup', 'Ungroup', cmsUngroupSelection);
     add('remove', 'Remove', cmsRemoveSelection, !cmsPreviewSelected ? 'Select a layer first.' : '');
     if (count >= 2) [['align-left', 'Align left edges', 'left'], ['align-hcenter', 'Align centres (across)', 'hcenter'], ['align-right', 'Align right edges', 'right'], ['align-top', 'Align top edges', 'top'], ['align-vcenter', 'Align middles (down)', 'vcenter'], ['align-bottom', 'Align bottom edges', 'bottom']].forEach(function (item) { add(item[0], item[1], function () { cmsAlign(item[2]); }, '', 'align'); });
     if (count >= 2) {
-      add('distribute-horizontal', 'Space evenly across', function () { cmsDistribute('horizontal'); }, count < 3 ? 'Select 3 or more layers to space them evenly.' : '', 'align');
-      add('distribute-vertical', 'Space evenly down', function () { cmsDistribute('vertical'); }, count < 3 ? 'Select 3 or more layers to space them evenly.' : '', 'align');
+      add('distribute-horizontal', 'Space evenly across', function () { cmsDistribute('horizontal'); }, count < 3 ? 'Select 3 or more layers to space them evenly.' : '', 'align', true);
+      add('distribute-vertical', 'Space evenly down', function () { cmsDistribute('vertical'); }, count < 3 ? 'Select 3 or more layers to space them evenly.' : '', 'align', true);
     }
     /* site-wide, not about the selection: last, and named for what it opens (it was "Edit canvas") */
     add('page-transition', 'Page transition…', function () { window.parent.postMessage({ type: 'defxn-cms-preview-enter-canvas-mode' }, location.origin); }, '', 'site');
     return out;
   }
   /* what the editor's toolbar needs to draw them: no functions cross the frame */
-  function cmsSelectionCommandList() { return cmsSelectionCommands(false).map(function (c) { return { id: c.id, label: c.label, needs: c.needs, group: c.group }; }); }
+  function cmsSelectionCommandList() { return cmsSelectionCommands(false).map(function (c) { return { id: c.id, label: c.label, needs: c.needs, group: c.group, waits: c.waits }; }); }
   function cmsRunSelectionCommand(id) {
     var command = cmsSelectionCommands(false).filter(function (c) { return c.id === id; })[0];
     if (!command) { window.parent.postMessage({ type: 'defxn-cms-preview-notice', message: 'That command does not apply to this selection any more: select the layer again.' }, location.origin); return; }
@@ -1073,7 +1084,9 @@
     cmsContextMenu.setAttribute('role', 'menu');
     var note = document.createElement('small'); note.textContent = count + ' layer' + (count === 1 ? '' : 's') + ' selected · Shift-click adds layers'; cmsContextMenu.appendChild(note);
     var lastGroup = '';
+    var waiting = {};
     cmsSelectionCommands(true).forEach(function (command) {
+      if (command.waits) { (waiting[command.needs] = waiting[command.needs] || []).push(command.label); return; }
       if (lastGroup && command.group !== lastGroup) cmsContextMenu.appendChild(document.createElement('hr'));
       lastGroup = command.group;
       var button = document.createElement('button'); button.type = 'button'; button.setAttribute('role', 'menuitem'); button.dataset.command = command.id;
@@ -1082,6 +1095,13 @@
       button.addEventListener('click', function () { setCmsContextMenuOpen(false); command.run(); });
       cmsContextMenu.appendChild(button);
     });
+    /* what is waiting for a bigger selection: one quiet line per reason, not a greyed row each */
+    var reasons = Object.keys(waiting);
+    if (reasons.length) {
+      var waits = document.createElement('small'); waits.dataset.waits = 'true';
+      waits.textContent = reasons.map(function (needs) { return waiting[needs].join(', ') + ': ' + needs; }).join(' ');
+      cmsContextMenu.appendChild(waits);
+    }
     /* placed from its MEASURED size, flipped up / left when it would run past the canvas's
        edge: it was placed by a guessed 230 x 330 box and its bottom rows were clipped */
     cmsContextMenu.style.left = '0px'; cmsContextMenu.style.top = '0px'; setCmsContextMenuOpen(true);

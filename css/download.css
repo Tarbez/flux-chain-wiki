@@ -1,16 +1,13 @@
 /* /download (js/pages/download.js): the insides of its terminal, the story figure. The page is the
    story template (js/pages/story.js) in the shared block-page frame (css/block-page.css) since
    2026-10-19 (W3-GUIDE), so this file owns no page layout -- only the terminal: its label row with
-   Copy, the step's commands, what to expect, and the way through. Nothing in it is hidden by width. */
+   Copy (the site's one, css/page-layout.css .copy-command), the step's commands, what to expect, and the way through. Nothing in it is hidden by width. */
 .download-terminal {display:grid;gap:12px;min-width:0;}
 .download-terminal-top {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:32px;}
-#scene .download-copy {min-height:32px;padding:4px 12px;border:1px solid hsl(var(--primary-300));border-radius:5px;background:transparent;font:500 12px var(--font-mono,monospace);color:hsl(var(--primary));cursor:pointer;}
-#scene .download-copy:is(:hover,:focus-visible) {background:hsl(var(--reference-100));border-color:hsl(var(--reference-400));color:hsl(var(--text-strong));}
-#scene .download-copy[hidden] {display:none;}
 #scene .download-terminal-title {margin:0;font:600 20px/1.2 var(--font-sans,sans-serif);letter-spacing:-.02em;color:hsl(var(--text-strong));}
 #scene .download-code {display:flex;flex-direction:column;gap:8px;margin:0;padding:16px 18px;border-radius:7px;background:hsl(var(--canvas) / .72);border:1px solid hsl(var(--primary-200));white-space:pre-wrap;overflow-wrap:anywhere;}
 #scene .download-code code {font:500 14px/1.45 var(--font-mono,monospace);color:hsl(var(--text-strong));}
-#scene .download-prompt {color:hsl(var(--primary));user-select:none;}
+#scene .download-prompt {color:hsl(var(--primary-700));user-select:none;}
 #scene .download-expect {display:flex;align-items:center;gap:10px;margin:0;font:400 14px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text-muted));}
 #scene .download-expect[hidden] {display:none;}
 #scene .download-expect::before {content:"";flex:0 0 6px;height:6px;border-radius:50%;background:hsl(var(--primary));}

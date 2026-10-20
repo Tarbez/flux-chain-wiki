@@ -29,6 +29,9 @@ assert(z('workspace') > z('popover'), 'the workspace layers sit inside #studioRo
 assert(z('versions') > z('workspace') && z('header') > z('versions') && z('menu') > z('header'), 'Version history over the workspace, the header over it, its menu over all');
 assert(z('notice-banner') > z('workspace') && z('notice-toast') > z('workspace'), 'notices are over the workspace');
 
+/* a confirmation dialog (Ark's AlertDialog, ArkKit.arkConfirm; cms.md P2-11) is over EVERYTHING, the More menu included */
+assert(z('modal') > z('menu'), 'the modal layer is over the menu, the header and every notice');
+assert(/\.ark-alert-dialog\{[^}]*z-index:var\(--z-modal,\s*100\)/.test(fs.readFileSync('css/ark-blocks.css', 'utf8')), "Ark's dialog reads --z-modal, the level overlay.js publishes (100)");
 /* the sheets read the ladder and keep no floating layer's number of their own */
 const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const studio = strip(fs.readFileSync('css/studio-embed.css', 'utf8')), admin = strip(fs.readFileSync('css/admin.css', 'utf8'));
@@ -51,4 +54,20 @@ for (const [file, css] of [['css/studio-embed.css', studio], ['css/admin.css', a
   for (const m of css.matchAll(/z-index:\s*(\d+)/g)) assert(Number(m[1]) <= 5, `${file} keeps a floating layer's literal z-index ${m[1]}: put it on the ladder in overlay.js`);
 }
 assert(!/#versionsPanel:not\(\[hidden\]\)\)[^{]*\.sheet/.test(studio), 'the "sheet beside Version history" rule is gone: they share one docked slot (overlay level sheet), so it never applied');
+/* Esc and presses while a confirmation dialog is up: the dialog owns Esc (its Cancel), and answering it is not a press
+   outside the sheet beneath it (js/admin/overlay.js) -- else Cancel in "Delete this page?" also closed Page settings */
+{
+  const doc = w.document, sheet = doc.createElement('aside'); doc.body.appendChild(sheet);
+  let closed = 0;
+  w.ArkAdmin.overlay.open(sheet, { level: 'sheet', onClose: () => { closed += 1; } });
+  const esc = () => doc.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+  const dialog = doc.createElement('div'); dialog.className = 'ark-alert-dialog'; const cancel = doc.createElement('button'); dialog.appendChild(cancel); doc.body.appendChild(dialog);
+  esc();
+  assert.equal(closed, 0, 'Esc belongs to the open confirmation dialog: the sheet beneath stays open');
+  cancel.dispatchEvent(new w.Event('pointerdown', { bubbles: true }));
+  assert.equal(closed, 0, 'a press on the dialog is not a press outside the sheet');
+  dialog.remove();
+  esc();
+  assert.equal(closed, 1, 'with the dialog gone, Esc closes the sheet again');
+}
 console.log('PASS: one stacking order, published by overlay.js and read by both sheets; a sheet is over the Site style dock, a popover over everything it opened from.');

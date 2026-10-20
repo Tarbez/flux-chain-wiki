@@ -45,7 +45,7 @@
 #scene .ark-header .header-account-link { justify-content:flex-start; padding:0 16px 0 12px; color:hsl(var(--text-strong)); font:600 12px/14px var(--dx-font-sans,var(--font-sans,sans-serif)); }
 .header-account-label { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
 .header-account-name { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.header-account-status { display:flex; align-items:center; gap:4px; font:500 11px/12px var(--dx-font-mono,var(--font-mono,monospace)); color:hsl(var(--text-muted)); }
+.header-account-status { display:flex; align-items:center; gap:4px; font:500 12px/14px var(--dx-font-mono,var(--font-mono,monospace)); color:hsl(var(--text-muted)); }
 .header-account-status::before { content:""; width:4px; height:4px; border-radius:50%; background:currentColor; }
 .header-account-link[data-signed-in="true"] .header-account-status { color:hsl(var(--trust,var(--success))); }
 
@@ -54,11 +54,11 @@
 #scene .ark-header .header-chain { position:relative; }
 #scene .ark-header .header-chain-trigger {
  display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 12px;
- border:1px solid hsl(var(--border-default)); border-radius:var(--dx-radius,8px);
+ border:1px solid var(--dx-edge,hsl(var(--border-control))); border-radius:var(--dx-radius,8px);
  background:hsl(var(--surface)); color:hsl(var(--text-strong)); cursor:pointer;
  font:500 12px/1 var(--dx-font-mono,var(--font-mono,monospace)); transition:background-color .15s ease,border-color .15s ease;
 }
-#scene .ark-header .header-chain-trigger:is(:hover,[aria-expanded="true"]) { background:hsl(var(--raised)); border-color:hsl(var(--border-strong)); }
+#scene .ark-header .header-chain-trigger:is(:hover,[aria-expanded="true"]) { background:hsl(var(--raised)); border-color:var(--dx-edge,hsl(var(--border-control))); }
 .header-chain-dot { width:8px; height:8px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
 .header-chain-trigger-label { white-space:nowrap; max-width:112px; overflow:hidden; text-overflow:ellipsis; }
 #scene .ark-header .header-chain-popover {
@@ -90,7 +90,7 @@
    kit's menu control. */
 #scene .ark-header .nav-toggle {
  display:inline-flex; align-items:center; justify-content:center; gap:8px; height:40px; min-width:0; padding:0 12px;
- border:1px solid hsl(var(--border-default)); border-radius:var(--dx-radius,8px);
+ border:1px solid var(--dx-edge,hsl(var(--border-control))); border-radius:var(--dx-radius,8px);
  background:hsl(var(--surface)); color:hsl(var(--text-strong)); cursor:pointer;
  transition:background-color .15s ease,border-color .15s ease;
 }
@@ -250,7 +250,7 @@
 /* the Back control (js/hero-motion.js) closes the row */
 #scene .site-footer-strip .hero-motion-toggle {
  position:static; min-height:44px; padding:0 4px; border:0; background:transparent;
- color:hsl(var(--text-muted)); font:500 11px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.06em;
+ color:hsl(var(--text-muted)); font:500 12px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.06em;
  text-transform:uppercase; white-space:nowrap; cursor:pointer; transition:color .15s ease;
 }
 #scene .site-footer-strip .hero-motion-toggle:hover { color:hsl(var(--text-strong)); letter-spacing:.06em; }

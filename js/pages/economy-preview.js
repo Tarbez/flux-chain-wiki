@@ -49,7 +49,13 @@
       insert: S + '/div:2'
     },
     deposits: {
-      'deposits-draft': { ':root': S },
+      'deposits-draft': { ':root': S, 'button#2': S + '/section:1/button:1' },
+      /* the form block, rendered by draft() inside the page's own frame */
+      'deposits-form': {
+        ':root': { key: S + '/form:1', self: true },
+        ':scope > div:nth-of-type(1) > div:nth-of-type(1) > label:nth-of-type(1) > span:nth-of-type(1)': S + '/form:1/label:1',
+        'field#2': S + '/form:1/label:2', 'field-hint': S + '/form:1/p:1', 'button': S + '/form:1/button:1'
+      },
       'deposits-pager': { ':root': { key: S + '/nav:1', self: true }, ':scope > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2)': S + '/nav:1/a:1' },
       insert: S + '/div:1'
     }
@@ -74,7 +80,9 @@
         return ArkUI.dash.productHandoff && ArkUI.dash.productHandoff({ product: 'treasury', text: 'A treasury is money a group holds together, and it moves only when enough of the group’s named signers approve the same spend. Every founded DAO’s real treasury is in Treasury.' }) || document.createComment('no product kit');
       } },
       { block: 'tabs', id: 'treasury-tabs', was: was['treasury-tabs'], props: { label: 'Choose a sample asset', items: [
-        { value: 'fxn', label: 'FXN / Tier 1', content: 'Fictional sample amount for the native token. Not supply, price, or a real treasury balance.',
+        { value: 'fxn', label: 'FXN / Tier 1', /* "Tier 1" was a bare label (docs/ux-audit/ledger.md TR-3). docs/economy-preview.md is the one place that says what it is:
+             the native token, set apart from Credits. Said in plain words in the sentence beside the figure it labels. */
+          content: 'Fictional sample amount for the native token. Not supply, price, or a real treasury balance. “Tier 1” is this preview’s label for FXN, the network’s native token, to tell it apart from Credits: identity-bound units that cannot be transferred.',
           blocks: [{ block: 'facts', props: { label: 'Sample asset overview', columns: 1, items: [{ term: 'FXN / TIER 1', value: '12,400 FXN', mono: true }] } }] },
         { value: 'credits', label: 'Credits', content: 'Universal name: Credits. Identity-bound and non-transferable; separate from FXN. This quantity is fictional.',
           blocks: [{ block: 'facts', props: { label: 'Sample asset overview', columns: 1, items: [{ term: 'CREDITS', value: '840 Credits', mono: true }] } }] },
@@ -94,21 +102,25 @@
     ]);
   }
 
-  /* The deposit draft: the page's own form and its local result (the preview IS the form). */
+  /* The deposit draft: the page's own form and its local result (the preview IS the form). The form is Ark's
+     `form` block (js/ark/vendor/ark-kit-forms.js, listed in the /deposits route's scripts): its purpose list was
+     a native <select> with the browser's own arrow (docs/ux-audit/ledger.md /deposits P2), it is Ark's select
+     field now, and an amount that is missing, not a number, or below the smallest is refused by the form in
+     words, beside the field (it used to move focus and say nothing). Nothing is posted; the result stays local. */
+  var PURPOSES = [['reserve', 'Reserve for future operation'], ['service', 'Fund a service agreement'], ['review', 'Hold for review']];
   function draft() {
     var box = node('div', 'economy-draft');
-    var form = node('form', 'economy-deposit-form'); form.setAttribute('aria-label', 'Mock FXN deposit draft');
-    var amountLabel = node('label', '', 'Example FXN amount');
-    var amount = node('input'); amount.type = 'number'; amount.min = '0.01'; amount.step = 'any'; amount.inputMode = 'decimal';
-    amount.placeholder = '0.00'; amount.required = true; amountLabel.appendChild(amount); form.appendChild(amountLabel);
-    var purposeLabel = node('label', '', 'Illustrative purpose');
-    var purpose = node('select');
-    [['reserve', 'Reserve for future operation'], ['service', 'Fund a service agreement'], ['review', 'Hold for review']].forEach(function (pair) {
-      var option = node('option', '', pair[1]); option.value = pair[0]; purpose.appendChild(option);
-    });
-    purposeLabel.appendChild(purpose); form.appendChild(purposeLabel);
-    form.appendChild(node('p', 'economy-credit-note', 'Credits are identity-bound and non-transferable. They are not deposited, sent, or converted in this preview.'));
-    var preview = node('button', 'economy-primary', 'Preview draft'); preview.type = 'submit'; form.appendChild(preview);
+    var form = ArkUI.blocks.render({ block: 'form', id: 'deposits-form', was: WAS.deposits['deposits-form'], props: {
+      label: 'Mock FXN deposit draft',
+      fields: [
+        { name: 'amount', label: 'Example FXN amount', type: 'number', required: true, min: 0.01, placeholder: '0.00',
+          hint: 'Credits are identity-bound and non-transferable. They are not deposited, sent, or converted in this preview.' },
+        { name: 'purpose', label: 'Illustrative purpose', type: 'select', value: PURPOSES[0][0], options: PURPOSES.map(function (pair) { return { value: pair[0], label: pair[1] }; }) }
+      ],
+      submit: { label: 'Preview draft', action: 'deposit-preview', tone: 'primary' }
+    } });
+    /* any amount above the smallest is a deposit: the browser's "no step", which Ark's numeric `step` cannot say */
+    form.querySelector('[name="amount"]').setAttribute('step', 'any');
     box.appendChild(form);
     var result = node('section', 'economy-deposit-result'); result.hidden = true; result.inert = true;
     result.setAttribute('aria-label', 'Mock deposit preview');
@@ -117,22 +129,25 @@
     var resultText = node('p', 'economy-detail-copy'); result.appendChild(resultText);
     var facts = node('dl', 'economy-detail-facts'); result.appendChild(facts);
     result.appendChild(node('p', 'economy-warning', 'No wallet connection, signature, transaction, or network record was created.'));
-    var edit = node('button', 'economy-return', '← Edit draft'); edit.type = 'button'; result.appendChild(edit);
+    result.appendChild(ArkUI.blocks.render({ block: 'actions', props: { items: [{ label: 'Edit draft', action: 'deposit-edit', tone: 'ghost' }] } }));
     box.appendChild(result);
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      var value = Number(amount.value);
-      if (!Number.isFinite(value) || value <= 0) { amount.focus(); return; }
-      facts.replaceChildren();
-      [['Asset', 'FXN / Tier 1'], ['Example amount', String(value) + ' FXN'], ['Purpose', purpose.options[purpose.selectedIndex].textContent],
-        ['Recipient', 'Not selected'], ['State', 'Local mock draft']].forEach(function (pair) {
-        var row = node('div'); row.appendChild(node('dt', '', pair[0])); row.appendChild(node('dd', '', pair[1])); facts.appendChild(row);
-      });
-      resultText.textContent = 'The future flow would let an operator inspect these terms and their authority before signing. This preview stops here.';
-      form.hidden = true; form.inert = true; result.hidden = false; result.inert = false;
-      resultTitle.focus({ preventScroll: true });
+    box.addEventListener('ark:action', function (event) {
+      var detail = event.detail || {};
+      if (detail.action === 'deposit-preview') {
+        var value = Number(detail.values.amount), purpose = PURPOSES.filter(function (pair) { return pair[0] === detail.values.purpose; })[0];
+        facts.replaceChildren();
+        [['Asset', 'FXN / Tier 1'], ['Example amount', String(value) + ' FXN'], ['Purpose', purpose ? purpose[1] : String(detail.values.purpose)],
+          ['Recipient', 'Not selected'], ['State', 'Local mock draft']].forEach(function (pair) {
+          var row = node('div'); row.appendChild(node('dt', '', pair[0])); row.appendChild(node('dd', '', pair[1])); facts.appendChild(row);
+        });
+        resultText.textContent = 'The future flow would let an operator inspect these terms and their authority before signing. This preview stops here.';
+        form.hidden = true; form.inert = true; result.hidden = false; result.inert = false;
+        resultTitle.focus({ preventScroll: true });
+      } else if (detail.action === 'deposit-edit') {
+        result.hidden = true; result.inert = true; form.hidden = false; form.inert = false;
+        form.querySelector('[name="amount"]').focus({ preventScroll: true });
+      }
     });
-    edit.addEventListener('click', function () { result.hidden = true; result.inert = true; form.hidden = false; form.inert = false; amount.focus({ preventScroll: true }); });
     return box;
   }
 

@@ -16,35 +16,52 @@
 # /resolver-math term builder out of the name-based count without replacing them. The builder stays hand-built
 # (pinned whole for layout-key continuity); treat eyebrow and callout as one higher than measured until it is
 # converted. Renaming to leave a family is not a reduction.
+# Raised by hand 2026-10-20 (W4-S1, CMS editor), classes field +1 (38 -> 39): file-pick__input (css/admin.css), the
+# visually hidden native <input type=file> half of controls.js filePicker -- the styled file chooser that replaced
+# the browser's bare "Choose File" box in Media (docs/ux-audit/cms.md P1-11). It matches the family's /input/ because
+# it IS an input; the button, the file name and the drop edge are file-pick__btn / __name and the .btn already
+# counted. One chooser for the Media panel, New image and a page's Shape pickers (three bare inputs before).
+# Raised by hand 2026-10-20 (coordinator, W4-S2 /account), used-classes card 7 -> 8 and uses card 9 -> 10:
+# account-card is NOT new -- the old /account page built it inside one innerHTML string the census never read
+# (an undercount). The Ark-block rewrite makes it an el() call, so it is now counted. A measurement correction,
+# not new hand-built UI; it shrinks when the account panels move to an Ark card/list block (missing today).
+# Raised by hand 2026-10-20 (coordinator, Wave 4 close-out):
+# - step (classes 20 -> 22, used-classes 4 -> 8, uses 4 -> 8, signatures 7 -> 8): palette-step, -sample, -meta,
+#   -probe (css/palette.css) are the rows of /palette's Type tab -- one per SDK type-scale STEP
+#   (DEADARK_TYPE_SCALE), derived from the SDK. They match the step family by name, but no stepper or
+#   progress UI is drawn. Net of W4-S6 deleting home-cycle-step/flow-record (those were real steppers, now Ark tabs).
+# - card (classes 28 -> 29, used-classes 8 -> 9, uses 10 -> 11, css-files 15 -> 16): deploy-command-card
+#   (css/page-layout.css) only positions the one shared Copy control (ArkUI.copyCommand, js/ark/page-kit.js)
+#   over a command block on /deploy. Ark has no `code` block yet (ledger S11); it goes when one ships.
 measure	family	value
-classes	hero	28
+classes	hero	27
 used-classes	hero	6
 uses	hero	7
 css-files	hero	19
 classes	eyebrow	42
-used-classes	eyebrow	23
+used-classes	eyebrow	21
 uses	eyebrow	38
 css-files	eyebrow	25
-classes	pill	17
+classes	pill	16
 used-classes	pill	10
 uses	pill	12
-css-files	pill	9
-classes	button	23
-used-classes	button	4
-uses	button	5
-css-files	button	18
-classes	card	28
-used-classes	card	7
-uses	card	9
-css-files	card	15
-classes	stat	8
-used-classes	stat	6
-uses	stat	7
-css-files	stat	7
-classes	step	20
-used-classes	step	4
-uses	step	4
-css-files	step	14
+css-files	pill	8
+classes	button	22
+used-classes	button	3
+uses	button	3
+css-files	button	17
+classes	card	29
+used-classes	card	9
+uses	card	11
+css-files	card	16
+classes	stat	6
+used-classes	stat	3
+uses	stat	4
+css-files	stat	5
+classes	step	22
+used-classes	step	8
+uses	step	8
+css-files	step	13
 classes	table	0
 used-classes	table	0
 uses	table	0
@@ -57,38 +74,38 @@ classes	diagram	3
 used-classes	diagram	2
 uses	diagram	2
 css-files	diagram	3
-classes	tabs	8
-used-classes	tabs	5
+classes	tabs	7
+used-classes	tabs	3
 uses	tabs	7
-css-files	tabs	11
+css-files	tabs	10
 classes	accordion	2
 used-classes	accordion	0
 uses	accordion	0
 css-files	accordion	1
-classes	callout	23
-used-classes	callout	5
-uses	callout	9
-css-files	callout	10
-classes	ctaRow	13
-used-classes	ctaRow	4
-uses	ctaRow	6
-css-files	ctaRow	13
-classes	sectionHead	6
-used-classes	sectionHead	3
-uses	sectionHead	6
-css-files	sectionHead	10
-classes	breadcrumb	9
-used-classes	breadcrumb	8
-uses	breadcrumb	13
-css-files	breadcrumb	9
-classes	nextLinks	14
-used-classes	nextLinks	7
-uses	nextLinks	8
-css-files	nextLinks	13
-classes	field	38
-used-classes	field	19
-uses	field	35
-css-files	field	17
+classes	callout	21
+used-classes	callout	4
+uses	callout	8
+css-files	callout	9
+classes	ctaRow	12
+used-classes	ctaRow	3
+uses	ctaRow	4
+css-files	ctaRow	12
+classes	sectionHead	5
+used-classes	sectionHead	2
+uses	sectionHead	5
+css-files	sectionHead	9
+classes	breadcrumb	8
+used-classes	breadcrumb	7
+uses	breadcrumb	11
+css-files	breadcrumb	8
+classes	nextLinks	13
+used-classes	nextLinks	6
+uses	nextLinks	7
+css-files	nextLinks	11
+classes	field	37
+used-classes	field	17
+uses	field	31
+css-files	field	16
 classes	toggle	8
 used-classes	toggle	3
 uses	toggle	5
@@ -97,38 +114,38 @@ classes	toast	1
 used-classes	toast	0
 uses	toast	0
 css-files	toast	1
-classes	modal	9
-used-classes	modal	3
-uses	modal	9
-css-files	modal	3
-classes	empty	5
-used-classes	empty	3
-uses	empty	6
-css-files	empty	4
-signatures	hero	22
+classes	modal	7
+used-classes	modal	1
+uses	modal	3
+css-files	modal	2
+classes	empty	4
+used-classes	empty	2
+uses	empty	3
+css-files	empty	3
+signatures	hero	18
 signatures	eyebrow	35
 signatures	pill	6
 signatures	button	-
-signatures	card	21
-signatures	stat	8
-signatures	step	7
+signatures	card	18
+signatures	stat	3
+signatures	step	8
 signatures	table	0
 signatures	code	-
 signatures	diagram	-
-signatures	tabs	7
+signatures	tabs	3
 signatures	accordion	-
-signatures	callout	13
+signatures	callout	10
 signatures	ctaRow	-
 signatures	sectionHead	3
-signatures	breadcrumb	7
-signatures	nextLinks	15
+signatures	breadcrumb	3
+signatures	nextLinks	14
 signatures	field	-
 signatures	toggle	-
 signatures	toast	-
 signatures	modal	-
 signatures	empty	-
-uppercase-rules	css	77
+uppercase-rules	css	66
 ark-overrides	css	1
 ark-override-files	css	1
 px-radius-values	css	15
-px-font-sizes	css	57
+px-font-sizes	css	51

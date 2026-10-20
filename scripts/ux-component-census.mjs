@@ -54,7 +54,8 @@ export const USE_FAMILIES = {
   pill: /pill|chip|(^|-)tag($|-)|badge/,
   button: /(^|-)btn|button|(^|-)cta($|-)|(^|-)action($|s$)/,
   card: /card|tile(?!d)|(^|-)panel($|-)/,
-  stat: /stat(?!e|us|ic)|metric|figure-value|(^|-)kpi|-num($|-)/,
+  /* not station: a transit-map stop is not a statistic (world-station, 2026-10-20) */
+  stat: /stat(?!e|us|ic|ion)|metric|figure-value|(^|-)kpi|-num($|-)/,
   step: /step|stage(?!-)/,
   table: /table/,
   code: /(^|-)code($|-)|(^|-)pre($|-)|snippet|(^|-)kbd/,

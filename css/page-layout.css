@@ -162,14 +162,15 @@
 /* Deploy (js/pages/deploy.js, a page of Ark blocks since 2026-10-19, W3-GUIDE): only its command
    card -- the figure of each step -- is the page's own. Real, copyable commands; a flat monospace
    panel, no syntax glow; labels at 12px or more. */
-.deploy-command { position:relative; margin:0; padding:34px 16px 16px; background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
+.deploy-command { position:relative; margin:0; padding:48px 16px 16px; background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
 .deploy-command::before { content:"RUN"; position:absolute; top:12px; left:16px; font:600 12px/1 var(--font-mono,monospace); letter-spacing:.24em; color:hsl(var(--text-muted)); }
 .deploy-command code { font:400 13px/1.5 var(--font-mono,monospace); color:hsl(var(--text)); white-space:pre; }
-.deploy-copy {
- position:absolute; top:6px; right:10px; min-width:64px; min-height:32px; padding:2px 10px;
- border:1px solid hsl(var(--border-default)); border-radius:5px;
- background:transparent; color:hsl(var(--text-muted)); cursor:pointer;
- font:600 12px/1 var(--font-mono,monospace); text-transform:uppercase;
-}
-.deploy-copy:hover,.deploy-copy:focus-visible { border-color:hsl(var(--reference)); color:hsl(var(--text-strong)); }
-.deploy-copy-feedback { display:block; min-height:1.5em; margin-top:8px; font:400 13px/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
+/* Copy: the site's one (js/ark/page-kit.js ArkUI.copyCommand) is Ark's secondary button in an actions row, so it
+   draws as every Ark button does; only where it sits is a page's choice. The status line says "copied", or when
+   copying was refused what to do instead; a success is the button's own "Copied" (the line is for a screen reader), so nothing moves. */
+.copy-command[hidden] { display:none; }
+.copy-command-status { display:block; margin-top:8px; font:400 13px/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
+.copy-command-status:empty { display:none; }
+.copy-command-status[data-state="done"] { position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.deploy-command-card { position:relative; }
+.deploy-command-card > .copy-command { position:absolute; top:4px; right:8px; }

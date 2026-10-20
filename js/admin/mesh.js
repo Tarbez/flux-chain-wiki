@@ -62,12 +62,19 @@
     var diffText = h('p', { class: 'hint' });
     var liveSummary = h('p', { class: 'hint' });
     var liveList = h('ul', { class: 'mesh-list' });
-    root.appendChild(h('fieldset', {}, h('legend', { text: 'Deployment status' }), statusRows));
-    root.appendChild(h('fieldset', {}, h('legend', { text: 'Local vs. published' }), diffText));
-    root.appendChild(h('fieldset', {}, h('legend', { text: 'What is published right now' }), liveSummary, liveList));
+    /* plain words (docs/ux-audit/cms.md P1-2): the technical names -- the address (CID) and the
+       owner key -- are Developer details under the status rows, where this editor keeps every
+       name the code uses */
+    var devHolder = h('div', { class: 'mesh-dev' });
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'Publishing status' }), statusRows, devHolder));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'This copy vs. the live site' }), diffText));
+    root.appendChild(h('fieldset', {}, h('legend', { text: 'What is live right now' }), liveSummary, liveList));
     root.appendChild(buildMeshSecurityNote());
 
-    function fill(rows) { statusRows.textContent = ''; rows.forEach(function (r) { statusRows.appendChild(meshRow(r[0], r[1])); }); }
+    function fill(rows, devRows) {
+      statusRows.textContent = ''; rows.forEach(function (r) { statusRows.appendChild(meshRow(r[0], r[1])); });
+      devHolder.textContent = ''; if (devRows && devRows.length) devHolder.appendChild(A.devDetails(devRows));
+    }
 
     function ready(info, error) {
       readiness.textContent = '';
@@ -80,8 +87,8 @@
 
     async function load() {
       if (!mesh) {
-        fill([['Publish host', 'Not reachable from this copy of the page']]);
-        diffText.textContent = 'Open this page through the publish host (node scripts/publish-host.mjs) to compare.';
+        fill([['Publishing service', 'Not reachable from this copy of the page']]);
+        diffText.textContent = 'Open this page through the publishing service (node scripts/publish-host.mjs) to compare.';
         liveSummary.textContent = ''; liveList.textContent = '';
         ready(null, null);
         return;
@@ -95,20 +102,20 @@
       ready(info, null);
       /* the host's status may not name the site (a publisher that reports no name): never print
          "undefined" -- the name is the host's, else plainly "This site" */
-      routeLabel.textContent = siteName(info) + ' — P2P deployment';
-      var rows = [['Reachable', info.reachable ? 'Yes' : 'No' + (info.detail ? ' — ' + info.detail : '')]];
-      if (info.miner) rows.push(['Through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
+      routeLabel.textContent = siteName(info) + ' — Publishing status';
+      var rows = [['Publishing service', info.reachable ? 'Answering' : 'Not answering' + (info.detail ? ' — ' + info.detail : '')]];
+      var devRows = [];
+      if (info.miner) rows.push(['Published through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
       if (info.current) {
-        rows.push(['Version', String(info.current.version)]);
-        rows.push(['Address (CID)', info.current.cid]);
-        rows.push(['Owner key', info.current.ownerPublicKey]);
-        rows.push(['Updated', info.current.updatedAt]);
+        rows.push(['Live version', String(info.current.version)]);
+        rows.push(['Last published', info.current.updatedAt]);
+        devRows.push(['Address (CID)', info.current.cid], ['Owner key', info.current.ownerPublicKey]);
       } else rows.push(['Published', 'Not yet — Publish creates version 1.']);
-      fill(rows);
+      fill(rows, devRows);
 
       if (!info.current) {
-        diffText.textContent = 'Nothing is published yet, so everything saved here is local-only.';
-        liveSummary.textContent = 'Nothing published yet.'; liveList.textContent = '';
+        diffText.textContent = 'Nothing is live yet, so everything saved here stays on this computer.';
+        liveSummary.textContent = 'Nothing is live yet.'; liveList.textContent = '';
         return;
       }
       try {
@@ -131,8 +138,8 @@
         var removed = meshPageIds.filter(notIn(localPageIds)).concat(meshArticleSlugs.filter(notIn(localArticleSlugs))).concat(meshAssetIds.filter(notIn(localAssetIds)));
         var unsaved = state.ids.filter(dirty).length + state.slugs.filter(dirtyA).length + state.assetIds.filter(dirtyI).length + (reliefDirty() ? 1 : 0);
         var parts = [];
-        if (added.length) parts.push(added.length + ' saved here but not on the mesh yet (' + added.join(', ') + ')');
-        if (removed.length) parts.push(removed.length + ' on the mesh but not here — Publish would remove these (' + removed.join(', ') + ')');
+        if (added.length) parts.push(added.length + ' saved here but not live yet (' + added.join(', ') + ')');
+        if (removed.length) parts.push(removed.length + ' live but not here — Publish would remove these (' + removed.join(', ') + ')');
         if (unsaved) parts.push(unsaved + ' unsaved edit(s) in this browser, not even written to the project folder yet');
         diffText.textContent = parts.length ? parts.join('. ') + '.' : 'Every id saved here matches what is published. (This only compares which pages/articles/images exist, not their exact content — Publish always re-checks before it changes anything.)';
       } catch (error) {
@@ -264,8 +271,9 @@
       var through = info.miner ? 'Publishing through ' + (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '') + '. ' : '';
       if (!info.reachable) line.textContent = (info.detail || 'The miner is not reachable.');
       else if (!info.current) line.textContent = through + siteName(info) + ' is not published yet. Publish creates version 1.';
-      else line.textContent = through + siteName(info) + ' is at version ' + info.current.version + ', address ' + short(info.current.cid) + ', updated ' + info.current.updatedAt + '.';
-      owner.textContent = who ? 'Signed in' + (who.displayName ? ' as ' + who.displayName : '') + '. Key ' + who.publicKeyB64 : 'Not signed in.';
+      else line.textContent = through + siteName(info) + ' is live at version ' + info.current.version + ', last published ' + info.current.updatedAt + '.';
+      owner.textContent = who ? 'Signed in' + (who.displayName ? ' as ' + who.displayName : '') + '.' : 'Not signed in.';
+      owner.title = who ? 'Signing key ' + who.publicKeyB64 : '';   /* the full key stays one hover away */
       var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'signed in') + ' · ' + short(who.publicKeyB64) : '';
       if (info.current && who && info.current.ownerPublicKey !== who.publicKeyB64) {
         line.textContent += ' This identity does not own the name: sign in with the identity that does.';
@@ -291,7 +299,10 @@
     try {
       var result = await mesh.publishSite(siteFromState(), function (message) { status(message, ''); }, function (removes) {
         var what = removes ? removes.manifests.concat(removes.articles).concat(removes.assets).concat(removes.secrets || []).join(', ') : 'possibly some pages, articles, images or encrypted items (the published version could not be compared)';
-        return window.confirm('This version removes what is published now: ' + what + '.\n\nThis page may be out of date, for example if its saves were only downloaded. Publish anyway?');
+        /* ArkPublish awaits the answer (js/admin/publish.js confirmRemoval): Ark's AlertDialog, worded here (cms.md P2-11) */
+        return A.confirmDialog({ title: 'Publish and take these off the live site?',
+          message: 'This version removes what is live now: ' + what + '.\n\nThis page may be out of date, for example if its saves were only downloaded. If so, cancel, reload this page and publish again.\n\nPublishing is public: what you remove stays off the site until you publish it again.',
+          confirmLabel: 'Publish and remove', cancelLabel: 'Cancel', tone: 'danger' });
       });
       if (result.cancelled) status('Not published. Reload this page to pick up the project files, or run node scripts/pull-site.mjs to bring in the published copy.', 'warn');
       else if (result.unchanged) status('Nothing new to publish: version ' + result.version + ' already holds this content.', 'ok');

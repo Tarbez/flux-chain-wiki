@@ -76,3 +76,12 @@ import(path.resolve('scripts/ux-component-census.mjs')).then(({ census }) => {
   fs.rmSync(fixture, { recursive: true, force: true });
   console.log('ux component census ok: every family measured, nothing above the baseline, property access is not a class use, Ark overrides counted apart');
 });
+
+/* Regression (2026-10-20): `stat(?!e|us|ic)` counted "station" (a transit-map stop, .world-station) as a
+   statistic, so a diagram of stations read as hand-built stat UI. A family is decided by what the
+   name means, never by a substring it happens to contain. */
+import('../scripts/ux-component-census.mjs').then(({ USE_FAMILIES }) => {
+  assert(!USE_FAMILIES.stat.test('world-station') && !USE_FAMILIES.stat.test('mfig-stations'), 'station is not a stat');
+  assert(USE_FAMILIES.stat.test('hero-stat') && USE_FAMILIES.stat.test('stats-grid'), 'stat and stats still count');
+  console.log('PASS: the stat family does not count stations.');
+});

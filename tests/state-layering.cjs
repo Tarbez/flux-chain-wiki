@@ -36,9 +36,13 @@ const explorer = fs.readFileSync('js/pages/explorer.js', 'utf8');
 assert(explorer.includes('mesh-observatory'), 'explorer renders a dedicated observatory surface');
 assert(explorer.includes('data-explorer-source-field'), 'explorer renders the catalog as a source field');
 assert(explorer.includes('sourceAccess'), 'explorer derives access states from the real catalog');
-assert(explorer.includes('mesh-explorer-secondary'), 'explorer keeps dense operational detail behind disclosure');
+/* Since 2026-10-20 (W4-S3) the dock's layers are Ark `popover` blocks, not hand-built <details>: the
+   same contract, held by Ark -- dense detail stays behind a press, and one shared `group` makes opening
+   a layer close the others (the old `other.open = false` loop is gone with the <details>). Behaviour is
+   driven in tests/browser/explore-flows.mjs (ten-step switching, one open at a time). */
+assert(/block: 'popover'/.test(explorer) && (explorer.match(/side: 'top', dock: true/g) || []).length === 4, 'explorer keeps dense operational detail behind disclosure: four dock layers are Ark popovers');
 assert(explorer.includes('mesh-observatory-dock'), 'explorer keeps secondary observation layers in a compact interactive dock');
-assert(explorer.includes("other.open = false"), 'opening one observatory layer closes the others');
+assert(explorer.includes("group: 'explore-raw'"), 'opening one observatory layer closes the others (one Ark popover group)');
 
 const lifecycle = fs.readFileSync('js/pages/lifecycle.js', 'utf8');
 // The layers stay (Home > Agreement lifecycle > stage), but the breadcrumb carries no ordinals since

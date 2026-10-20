@@ -688,7 +688,7 @@
     }
     homeMeshFrame=window.requestAnimationFrame(frame);
   }
-  function homeStep(target){var link=target&&target.closest&&target.closest('.home-cycle-step');return link&&scene.contains(link)?link.dataset.stage:'';}
+  function homeStep(target){var link=target&&target.closest&&target.closest('[data-ark-part="tabs-trigger"][data-stage]');return link&&scene.contains(link)?link.dataset.stage:'';}
   function refreshHomeMesh(){
     var next=homeHover||homeFocus;
     if(next===homeMeshStage)return;

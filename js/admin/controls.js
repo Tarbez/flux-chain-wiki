@@ -175,6 +175,44 @@
     tokens.forEach((tok) => { const b = document.createElement('button'); b.type = 'button'; b.title = tok; b.setAttribute('aria-label', tok); b.style.background = `hsl(var(--${tok}))`; b.setAttribute('aria-pressed', String(ctx.get(key) === tok)); b.addEventListener('click', () => pick(tok)); sw.appendChild(b); });
     row.append(l, sw, document.createElement('span')); return row;
   }
+  /* filePicker({ id, accept, label, ariaLabel, hint, onFile }) -> root: the editor's one file
+     chooser, in place of the browser's native "Choose File / No file chosen" input (docs/ux-audit/
+     cms.md P1-11: unstyled, English-only per browser, cut off in the rail). The native <input
+     type=file> stays in the page -- visually hidden, still the tab stop, still carrying `id` and
+     `accept`, so the keyboard, a screen reader and a browser driver reach the same control -- and
+     a real <label class="btn"> is the button drawn over it. It names the chosen file beside the
+     button, and takes a file dropped on it (the same change event, so one handler serves both).
+     `onFile(file, input)` runs for a new choice (not for a cleared one); a caller that listens
+     for `change` on the input itself (assets.js's New image form) needs no onFile. */
+  function filePicker(opts) {
+    opts = opts || {};
+    const root = document.createElement('span'); root.className = 'file-pick'; root.dataset.state = 'empty';
+    const input = document.createElement('input'); input.type = 'file'; input.className = 'file-pick__input';
+    if (opts.id) input.id = opts.id;
+    if (opts.accept) input.accept = opts.accept;
+    const id = input.id || (input.id = 'file-pick-' + (filePicker.n = (filePicker.n || 0) + 1));
+    if (opts.ariaLabel) input.setAttribute('aria-label', opts.ariaLabel);
+    const button = document.createElement('label'); button.className = 'btn file-pick__btn'; button.htmlFor = id; button.textContent = opts.label || 'Choose a file';
+    const name = document.createElement('span'); name.className = 'file-pick__name'; name.textContent = opts.empty || 'or drop a file here';
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      root.dataset.state = file ? 'chosen' : 'empty';
+      name.textContent = file ? file.name : (opts.empty || 'or drop a file here');
+      if (file && typeof opts.onFile === 'function') opts.onFile(file, input);
+    });
+    root.addEventListener('dragover', (e) => { if (e.dataTransfer) { e.preventDefault(); root.dataset.over = 'true'; } });
+    root.addEventListener('dragleave', () => { delete root.dataset.over; });
+    root.addEventListener('drop', (e) => {
+      delete root.dataset.over;
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      e.preventDefault();
+      try { input.files = files; } catch (err) { return; }   /* a browser that will not take dropped files: the button still works */
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    root.append(input, button, name);
+    return root;
+  }
   /* Developer details: the ONE place a surface shows the names the code uses -- a copy key, a
      file, a layout key, an id, a raw value -- closed, so nothing is lost and nothing shouts
      (docs/ux-audit/cms.md P1-2: HOME.TITLE, js/content/manifests/home.js, page:/section:1/... and
@@ -211,5 +249,6 @@
       CMS_WRAP_VALUES: CMS_WRAP_VALUES, cmsBlockResolverLabel: cmsBlockResolverLabel,
       cmsBlockResolverProps: cmsBlockResolverProps, cmsMasterKind: cmsMasterKind,
       cmsMasterProps: cmsMasterProps, ctlField: ctlField, ctlSegField: ctlSegField,
-      ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField, devDetails: devDetails });
+      ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField, devDetails: devDetails,
+      filePicker: filePicker });
 })();

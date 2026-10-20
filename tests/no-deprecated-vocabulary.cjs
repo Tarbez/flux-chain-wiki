@@ -75,7 +75,12 @@ const FORBIDDEN = [
   ['segment shipping', 'a feed carries signed results'],
   ['durability layer', 'the signed result is the unit'],
   ['block time', 'batch latency'],
-  ['finality', 'the shard signature IS the truth, at the moment it is made'],
+  // One pattern derives every form of the word (finality, finalize, finalized, finalizes,
+  // finalizing, finalization, and the -ise spellings) from its stem instead of listing them:
+  // "final" + either "ity" or "i[sz]" + a verb ending. Plain "final" ("the final step") and
+  // "finalist" are not the retired idea and do not match. 2026-10-20: "finalized transfers"
+  // was on /stats, /stats/ledger and /spec while only "finality" was matched.
+  ['\\bfinal(?:ity|i[sz](?:e[sd]?|ing|ation))\\b', 'the shard signature IS the truth, at the moment it is made; say "signed" (a signed transfer, a signed result)'],
   ['proof-of-work', 'not used'],
   ['proof-of-stake', 'Proof of Support, for storage allocation only'],
   ['gas fee', 'not used'],

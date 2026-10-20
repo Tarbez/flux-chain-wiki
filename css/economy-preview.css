@@ -1,28 +1,20 @@
 /* Mock deposit surface (js/pages/economy-preview.js): never style sample figures as live telemetry.
    /treasury and /deposits are pages of Ark blocks since 2026-10-19 (W3-GUIDE), in the shared
    block-page frame (css/block-page.css): this file styles only the deposit draft -- the page's own
-   form and its local result. */
+   form and its local result. The form is Ark's `form` block (its fields, hints and refusals are Ark's;
+   2026-10-20), so this file styles only the frame around it and the result. */
+#scene .economy-draft { max-width:800px; padding-top:24px; border-top:1px solid hsl(var(--border-default)); }
 #scene .economy-warning { margin:0; padding:12px 0 12px 14px; border-left:2px solid hsl(var(--warning)); color:hsl(var(--text-strong)); font:500 14px/1.5 var(--font-sans,sans-serif); }
 #scene .economy-preview-page button { min-height:44px; cursor:pointer; }
-#scene .economy-primary { padding:11px 20px; border:1px solid hsl(var(--text-strong)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); font:600 13px/1.4 var(--font-sans,sans-serif); }
-#scene .economy-primary:hover { opacity:.83; }
-#scene .economy-return { display:block; margin:0 0 30px; padding:0; border:0; background:transparent; color:hsl(var(--text-strong)); font:600 13px/1.4 var(--font-sans,sans-serif); }
-#scene .economy-preview-page :is(button,input,select,a):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:4px; }
-#scene .economy-deposit-result { border-top:1px solid hsl(var(--border-default)); padding-top:20px; }
-#scene .economy-deposit-result[hidden],#scene .economy-deposit-form[hidden] { display:none !important; }
+#scene .economy-preview-page :is(button,a):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:4px; }
 #scene .economy-deposit-result h2 { max-width:24ch; margin:0 0 20px; color:hsl(var(--text-strong)); font:500 clamp(26px,3.4vw,40px)/1.14 var(--font-sans,sans-serif); letter-spacing:-.03em; }
 #scene .economy-detail-copy { max-width:55ch; margin:0 0 28px; color:hsl(var(--text)); font:400 17px/1.6 var(--font-sans,sans-serif); }
 #scene .economy-detail-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 28px; max-width:750px; margin:0 0 25px; }
 #scene .economy-detail-facts > div { display:grid; grid-template-columns:125px minmax(0,1fr); gap:15px; padding:14px 0; border-top:1px solid hsl(var(--border-default)); }
 #scene .economy-detail-facts dt { color:hsl(var(--text-muted)); font:600 12px/1.5 var(--font-mono,ui-monospace,monospace); }
 #scene .economy-detail-facts dd { min-width:0; margin:0; color:hsl(var(--text-strong)); font:400 15px/1.5 var(--font-sans,sans-serif); overflow-wrap:anywhere; }
-#scene .economy-deposit-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; max-width:800px; padding-top:24px; border-top:1px solid hsl(var(--border-default)); }
-#scene .economy-deposit-form label { color:hsl(var(--text-strong)); font:600 13px/1.5 var(--font-sans,sans-serif); }
-#scene .economy-deposit-form :is(input,select) { display:block; width:100%; min-height:48px; box-sizing:border-box; margin-top:10px; padding:11px 13px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--surface) / .5); color:hsl(var(--text-strong)); font:400 16px/1.4 var(--font-sans,sans-serif); }
-#scene .economy-credit-note { grid-column:1/-1; max-width:60ch; margin:6px 0; color:hsl(var(--text)); font:400 15px/1.55 var(--font-sans,sans-serif); }
-#scene .economy-deposit-form .economy-primary { justify-self:start; }
 @media(max-width:680px) {
- #scene .economy-detail-facts,#scene .economy-deposit-form { grid-template-columns:1fr; }
+ #scene .economy-detail-facts { grid-template-columns:1fr; }
  #scene .economy-detail-facts > div { grid-template-columns:105px minmax(0,1fr); }
 }
 @media(prefers-reduced-motion:reduce) { #scene .economy-preview-page * { scroll-behavior:auto !important; animation:none !important; transition:none !important; } }

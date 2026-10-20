@@ -81,7 +81,7 @@
     { state: 'done', badge: 'Measured', title: 'Resolver throughput (synthetic, not production)', text: '256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live replicas, 60/60 audits passed (BENCH-012). Not production: no external users, and the party-to-shard transport is excluded. Earlier generations were measured in units this project no longer reports \u2014 see docs/deprecated.md. Earlier generations of this measurement are in the frozen BENCH records and docs/whitepaper-chain-era.md; they are not restated here.' },
     { state: 'done', badge: 'Passing', title: 'Attack suite', text: '7 of 7 attacks refused: replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation.' },
     { state: 'partial', badge: 'Partial', title: 'Sustained load', text: 'A 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.' },
-    { state: 'done', badge: 'Measured', title: 'Full 10-node transfer bench', text: 'BENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 finalized transfers.' },
+    { state: 'done', badge: 'Measured', title: 'Full 10-node transfer bench', text: 'BENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 signed transfers.' },
     { state: 'partial', badge: 'Partial', title: 'Live node discovery', text: 'The pulse reads a configured roster; nodes that join are not discovered automatically yet.' },
     { state: 'partial', badge: 'Partial', title: 'Evidence record for the headline run', text: 'Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.' },
     { state: 'todo', badge: 'Not yet', title: 'Pipelined broadcast to replicas', text: 'A signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the fleet near 2.2 batches/s and is the binding constraint on everything. The intended shape is one feed per pool. Historical: Implemented and tested, but the fleet soak ran on the local cache. The rerun with replication on is planned as BENCH-009.' },
@@ -532,9 +532,9 @@
           { label: 'Batch latency', value: String(DS.batchLatencyMs), unit: 'ms', detail: 'Batched signature verification is ' + (DS.verifyLatencyMsBatched || 10.403) + ' ms of it; the shard signing the result — the thing that makes it true — is ' + (DS.signLatencyMs || 0.0403) + ' ms.' },
           { label: 'Bytes per signed result', value: String(DS.signedResultBytes), unit: 'bytes', detail: (DS.signedResultBytesRaw || 580) + ' bytes of dense FLX, ' + (DS.lzma2RunRatio || 3.22) + 'x smaller after LZMA2 across a run. Audit cost: ' + (DS.auditEd25519Verifies || 3) + ' [[Ed25519]] verifications.' }
         ] } }] },
-          { value: 'registry', title: 'Resolver registry · 20 resolvers',
+          { value: 'registry', title: 'Resolver families audited · 20 resolvers',
             content: 'What can be made real today\n\nNot built is recorded as not built, never as zero: zero would mean measured and scored nothing. Each unbuilt resolver is a region of intent that cannot be made real yet. Full table and signed audit manifests: docs/resolver-audit.md.',
-            blocks: [{ block: 'table', props: { caption: 'Resolver registry: what can be made real today', maxHeight: 'compact',
+            blocks: [{ block: 'table', props: { caption: 'Resolver families audited: what can be made real today', maxHeight: 'compact',
               columns: [{ key: 'name', label: 'Resolver' }, { key: 'work', label: 'Signers and work' }, { key: 'state', label: 'State' }],
               rows: [
                 ['DeFi-Swap-AMM', '2 signers · batch auction + AMM residual', 'measured'],
@@ -640,7 +640,7 @@
       { block: 'accordion', props: { label: 'The records', items: [{ value: 'records', title: 'The records behind the runs', blocks: [
       { block: 'facts', props: { label: 'The records behind the runs', columns: 2, items: [
         { term: 'Resolver batch and broadcast', value: 'BENCH-012', href: 'doc:docs/evidence/bench-012-defi-shard-signed-resolution.md' },
-        { term: 'Resolver registry', value: 'Resolver audit', href: 'doc:docs/resolver-audit.md' },
+        { term: 'Resolver families audited', value: 'Resolver audit', href: 'doc:docs/resolver-audit.md' },
         { term: 'Grammar-only admission', value: 'Whitepaper §3', href: 'doc:' + WHITEPAPER },
         { term: 'Platform resolver audit', value: INFRA.record || 'INFRA-001', href: 'doc:docs/evidence/infra-001-platform-resolver-audit.md' },
         { term: 'DAO treasury claim, local', value: 'BENCH-014', href: 'doc:docs/evidence/bench-014-dao-treasury-multisig-claim.md' },
@@ -687,7 +687,7 @@
     return [
       ['Resolver batch', '256 signed intents, one shard', (DS.swapsPerBatch || 256) + ' swaps/batch', (DS.batchLatencyMs || 13.874) + ' ms', '0', 'BENCH-012'],
       ['Signed-result broadcast', (DS.peersReached || 10) + ' replicas, store only', fmt(DS.replicationCostBytes || 1801) + ' bytes/batch', 'not pipelined', '0', 'BENCH-012'],
-      ['Resolver registry', '20 resolvers audited', '6 measured, 14 not built', 'audit', '—', 'Resolver audit'],
+      ['Resolver families audited', '20 resolvers audited', '6 measured, 14 not built', 'audit', '—', 'Resolver audit'],
       ['Grammar-only admission', 'one Mac core', grammarOnly == null ? 'not recorded' : fmt(grammarOnly) + ' ops/s', 'bench', '—', 'Whitepaper §3'],
       ['Platform resolver audit', '6 non-chain systems', '3 measured, 3 absent by design', 'audit', '—', INFRA.record || 'INFRA-001'],
       ['DAO treasury claim (durable)', 'local, 2 real replicas', '1174-1357 claims/s', '3 runs', '0', 'BENCH-014'],

@@ -187,3 +187,44 @@ browser run):
 Census ratcheted: classes card 29→28, tabs 9→8, toggle 9→8.
 Next: browser run result → commit → Wave 4 (re-audit vs docs/ux-audit findings, fold sweep, /account
 conversion with sign-in/wallet/keys browser coverage first).
+
+## Resume point 5 (2026-10-20 ~07:20) — committed 2665642 (Wave 3 close-out); Wave 4 slices running
+Wave 3 closed: unit 199/199; every browser driver passes on 2665642, each run alone (/stats layout keys
+NOT BUILT: its node rows re-sort by live data). The fix found by the full run: an automatic toolbar
+popover shut the More menu the person had opened (overlay.busy(), toolbar `auto`). Flake to watch:
+studio-flows "reload the editor" (preview ready on /download) under load 9.
+Machine: 8 GB with ~13 GB swap in use by other apps/sessions -- long drivers time out across unrelated
+steps under that pressure; re-run alone before diagnosing.
+Wave 4 slices from docs/ux-audit/ledger.md "Next work", Sonnet agents (Fable out of credits):
+- W4-S1 CMS editor (js/admin/*, admin-app.html, admin/studio-embed css): Media picker + Replace/Alt,
+  Mesh wording, Versions "Current", hide inapplicable commands, Page-field groups, then P1-16/P1-5.
+- W4-S3 public pages (/explore, stats family, seo-data, vocabulary test): "finalized", 25,232 ops/s,
+  explore contrast/type/plural, how-chapter labels, Tier 1, lab drag hint.
+- W4-S2 /account: browser coverage FIRST (tests/browser/account-flows.mjs), then conversion.
+Owner calls pending: glossary size vs budget; Q1/Q2/Q4/Q6/Q7 + BFT/Byzantine; home headline; phone
+"Production" pill; lifecycle/palette copy in-module until the FLX manifest store; the unrelated
+particle-mesh table in "A finance resolver by construction".
+
+## Resume point 6 (2026-10-20 ~afternoon) — Wave 4 slices all reported; full verification running
+Done (uncommitted until the full run passes): W4-S1 CMS (Media picker, Replace/Alt, Mesh wording, Versions
+Current, waits flag, page-field groups, undo steps, phone bar + bottom sheets, rail tabs/viewSwitch on Ark,
+F2 contrast/12px, confirm() -> ArkKit.arkConfirm); W4-S2 /account (143-step account-flows driver, Ark
+blocks incl. forms; Keys view was inert -- fixed); W4-S3 /explore (stepper = Ark tabs, popovers + dock =
+Ark popover side:'top', lab regression fixed); W4-S0 fold/contrast sweep driver (now 0 violations);
+W4-F1 kit chrome (flux/defxn-product-kit src, synced to 23 consumers -- UNCOMMITTED in those repos) +
+page controls + /reference fold; W4-ARK @deadark/ark-ui 0.2.8 -> 0.2.10, @deadark/sdk -> 0.2.40 (field,
+form, list, status-line, choice, popover chunk, interactive stat, actions opener/busy, arkConfirm, patch
+label fix, Esc preventDefault, popover placement, pointerup dismiss); W4-S6 home/about/chain (grammar
+tooltips, steps -> Ark tabs, 12px labels, home opens on "Where do I start?" -- owner may revert); W4-S7
+palette (SDK-derived tokens, Type + Contrast tabs) + reference (outline, breadcrumb, TOC);
+W4-S13 resolver figures (resolver-page-parts.js), journey links (page-kit journeyPages); W4-S14 one
+Copy (page-kit copyCommand), sentence-case rule, /deposits Ark form, lab state at /experiments.
+Census: station no longer counts as stat; step/card raised by hand with reasons; 57 values ratcheted down.
+Cache-bust: index.html changed assets + pageAssetVersion -> 20261020-w4.
+Follow-ups (next wave): /chain swap figure placement (renderer exists), /chain SOURCE link + /resolvers
+link, bundle-deployer journey links, resolutions alsoMore; transit-map labels on /; learnings card
+row alignment (Ark card); Ark: line/lane diagram part, field step:'any', styled select, foldBelow
+hidden=until-found (core budget has ~10 B headroom on live routes); long reference docs (whitepaper,
+bench-003 > 3x); reference-text sync has no trigger (reference-reader catches staleness).
+Owner calls: glossary size vs budget; minify page modules (/account +42.8 KB -> ~+31); home tab order;
+commit the kit sync in the 23 consumer repos (dense-wire/web held).

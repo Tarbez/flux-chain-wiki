@@ -173,4 +173,29 @@ assert.equal(shipped.site.baseUrl,'https://defxn.com','production origin, confir
 const html=fs.readFileSync('index.html','utf8');
 assert(html.includes('<title>'+shipped.pages.home.title+'</title>'),'static home title matches editable metadata');
 assert(html.includes('name="description" content="'+shipped.pages.home.description+'"'),'static home description matches editable metadata');
+/* Regression (2026-10-20): an article's SEO description quoted "25,232 ops/s" after its note and its
+   card said 51,065. A figure in a description is the note's figure, not a second one typed beside it:
+   every number a shipped article description or AI summary quotes must be one the article's own body
+   (or the evidence registry) states, by the same LearningContent.ungrounded rule the card excerpts
+   obey (tests/learnings-blocks.cjs). llms.txt is generated from the same overrides, so it must carry
+   the same text. */
+{
+  const bodies = vm.createContext({});
+  vm.runInContext(fs.readFileSync('js/content/learnings.js', 'utf8'), bodies);
+  vm.runInContext(fs.readFileSync('js/content/article-index.js', 'utf8'), bodies);
+  vm.runInContext(fs.readFileSync('js/content/evidence-registry.js', 'utf8'), bodies);
+  const registryText = Object.values(bodies.ArkEvidence.benchmarks).map((b) => b.claim + ' ' + b.evidence);
+  const llmsText = fs.readFileSync('llms.txt', 'utf8');
+  for (const slug of Object.keys(shipped.articles)) {
+    vm.runInContext(fs.readFileSync('js/content/articles/' + slug + '.js', 'utf8'), bodies);
+    const body = bodies.LearningContent.find ? bodies.LearningContent.find(slug) : null;
+    const known = [bodies.LearningContent.bodyText(body)].concat(registryText);
+    for (const field of ['description', 'aiSummary']) {
+      const text = shipped.articles[slug][field];
+      if (!text) continue;
+      assert.deepEqual(Array.from(bodies.LearningContent.ungrounded(text, known)), [], slug + ' ' + field + ': every figure it quotes is one the note or the evidence registry states');
+      if (field === 'description') assert(llmsText.includes(text), slug + ': llms.txt carries the description as shipped (regenerate the root files after an SEO edit)');
+    }
+  }
+}
 console.log('PASS: complete route metadata, overrides, sitemap/robots, and serialization.');

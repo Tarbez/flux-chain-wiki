@@ -26,6 +26,14 @@ The packaged command name is `flux-miner`; `ark-miner` remains a legacy alias. T
 
 Confirm that the process remains running and that its status endpoint responds on the configured host and port. Record the version, configuration, startup output, and status response. Use the full [verification checklist](operators/verification.md) before making a capability claim.
 
+## After it runs
+
+A running miner is one node. These are the next places to look; none of them needs the miner to be public.
+
+- To read what is on the network and re-check who signed it, open the Mesh Explorer (explore.defxn.com). It runs on the development network today; public hosting is not established.
+- To launch your own resolver, follow the six steps on defxn.com at `/how-deployment-works`. The deployer (deploy.defxn.com) shows the exact record before you sign it.
+- To see what a resolver is built from, read `/resolvers` on defxn.com: the resolver chains and the shared capabilities, from a dated read of the source rather than a live network.
+
 ## Continue
 
 - Full procedure and recovery steps: [Run from source](operators/run-from-source.md)

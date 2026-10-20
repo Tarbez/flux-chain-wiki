@@ -38,6 +38,7 @@
     'download-depth': { ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/header:1/p:1', 'tabs-content#2': { key: 'page:/div:1/section:2', self: true },
       'accordion': { key: 'page:/div:1/section:2/ol:1', self: true }, 'button#2': 'page:/nav:1/a:2' },
     'download-figure': { '[data-ark-slot="terminal"]': { key: 'page:/div:1/section:1', self: true }, '.download-terminal-top': 'page:/div:1/section:1/div:1', '.download-terminal-top > [data-ark-block="eyebrow"]': 'page:/div:1/section:1/div:1/span:1',
+      '.download-terminal-top .copy-command [data-ark-part="button"]': 'page:/div:1/section:1/div:1/button:1',
       '.download-terminal-title': 'page:/div:1/section:1/h2:1', '.download-screen': 'page:/div:1/section:1/div:2', '.download-expect': 'page:/div:1/section:1/p:1',
       '.download-way': { key: 'page:/nav:1', self: true }, '.download-progress': 'page:/nav:1/span:1', '.download-previous': 'page:/nav:1/button:1',
       '.download-next': 'page:/nav:1/button:2', '.download-onward': 'page:/nav:1/a:3' },
@@ -51,7 +52,8 @@
     WAS['download-depth']['accordion-content' + k] = 'id:source-step-' + n;
   });
 
-  function sentence(text) { return text.charAt(0) + text.slice(1).toLowerCase(); }
+  /* the one case rule for a label a manifest authored in capitals (js/ark/page-kit.js) */
+  function sentence(text) { return ArkUI.sentenceCase(text); }
 
   ArkUI.pageModules.download = {
     mount: function (host) {
@@ -69,16 +71,14 @@
       var top = el('div', 'download-terminal-top');
       /* the label says what the card shows and where you are: Ark's eyebrow, its words set per step */
       var labelBlock = ArkUI.blocks.render({ block: 'eyebrow', props: { text: 'Terminal' } }), label = labelBlock.querySelector('.ark-eyebrow__text') || labelBlock; top.appendChild(labelBlock);
-      var copyButton = el('button', 'download-copy', 'Copy'); copyButton.type = 'button'; top.appendChild(copyButton);
+      /* Copy is the site's one (js/ark/page-kit.js ArkUI.copyCommand), the control /deploy uses; its words follow the step. */
+      var copier = ArkUI.copyCommand({ text: function () { return (TERMINAL[active].lines || []).join('\n'); }, noun: 'commands' });
+      top.appendChild(copier.element);
       card.appendChild(top);
       var cardTitle = el('p', 'download-terminal-title'); card.appendChild(cardTitle);
       var screen = el('div', 'download-screen'); card.appendChild(screen);
       var expect = el('p', 'download-expect'); card.appendChild(expect);
-      copyButton.addEventListener('click', function () {
-        var text = (TERMINAL[active].lines || []).join('\n'); if (!text) return;
-        function done() { copyButton.textContent = 'Copied'; window.setTimeout(function () { copyButton.textContent = 'Copy'; }, 1400); }
-        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { copyButton.textContent = 'Select to copy'; });
-      });
+      card.appendChild(copier.status);
       var way = el('div', 'download-way');
       var previous = el('button', 'download-previous', '← '); previous.type = 'button'; previous.setAttribute('aria-label', 'Previous step'); previous.appendChild(el('span', 'download-previous-word', 'Previous'));
       var progress = el('span', 'download-progress'); progress.setAttribute('role', 'status');
@@ -93,9 +93,9 @@
         var t = TERMINAL[active];
         label.textContent = (t.lines ? 'TERMINAL' : t.checks ? 'CHECK' : 'WHAT IT PROVES') + ' · STEP ' + String(active + 1).padStart(2, '0') + ' / ' + String(count).padStart(2, '0');
         cardTitle.textContent = stepTitle(active);
-        screen.textContent = ''; copyButton.hidden = !t.lines; expect.hidden = !t.expect; expect.textContent = t.expect || '';
+        screen.textContent = ''; copier.element.hidden = !t.lines; expect.hidden = !t.expect; expect.textContent = t.expect || '';
         if (t.lines) {
-          var pre = el('pre', 'download-code'); copyButton.setAttribute('aria-label', 'Copy commands for ' + stepTitle(active));
+          var pre = el('pre', 'download-code'); copier.setName('commands for ' + stepTitle(active));
           t.lines.forEach(function (line) { var row = el('code'); row.appendChild(el('span', 'download-prompt', '$ ')); row.appendChild(document.createTextNode(line)); pre.appendChild(row); });
           screen.appendChild(pre);
         } else if (t.checks) {

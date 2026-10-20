@@ -12,9 +12,6 @@
 .flow-now {position:relative;display:grid;gap:10px;align-content:start;min-width:0;padding:14px 18px 18px;border-radius:12px;
  background:radial-gradient(120% 90% at 0% 0%,hsl(var(--primary-100)),transparent 55%),hsl(var(--text-strong) / .04);}
 .flow-scene {display:block;width:100%;height:auto;overflow:visible;}
-.flow-says {display:block;min-height:2.7em;padding-right:40px;font:500 clamp(15px,1.4vw,18px)/1.35 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.015em;color:hsl(var(--text-strong));text-wrap:balance;}
-.flow.flow-run .flow-says {animation:flow-caption 420ms ease-out both;}
-@keyframes flow-caption {from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
 
 /* ---------------------------------------------------------------------
    The plain scene (/chain): one changing panel, not five stacked rows. Sign, check, extend,
@@ -24,8 +21,8 @@
    --------------------------------------------------------------------- */
 .flow-plain {display:grid;min-width:0;}
 .flow-plain > .flow-panel {grid-area:1/1;display:grid;align-content:center;justify-items:center;gap:14px;min-width:0;padding:clamp(10px,2.4vw,26px) 0;}
-.flow-panel {opacity:0;transition:opacity 320ms ease;}
-.flow-panel-active {opacity:1;}
+.flow-panel {opacity:0;pointer-events:none;transition:opacity 320ms ease;}
+.flow-panel-active {opacity:1;pointer-events:auto;}  /* the panels share one cell: only the shown one may take the pointer, or a later panel sits over the record's boxes and their tooltips never open */
 
 /* SIGN -- the record, field by field: the real wire grammar, dash-separated as on the wire, each
    field's plain name underneath. The signature is drawn differently: it covers everything before it. */
@@ -52,7 +49,7 @@
 .flow-node-text {display:block;padding:9px 12px;border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--raised));
  font:600 13px var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;color:hsl(var(--text-muted));}
 .flow-node[data-on="false"],.flow-link[data-on="false"] {visibility:hidden;}
-.flow-node[data-new="true"] .flow-node-text {border-color:hsl(var(--primary));background:hsl(var(--primary-100));color:hsl(var(--primary));}
+.flow-node[data-new="true"] .flow-node-text {border-color:hsl(var(--primary));background:hsl(var(--primary-100));color:hsl(var(--text-strong));}  /* the accent is the border; the words take the strong ink (primary-700 on primary-100 is 3.75:1 on marine) */
 
 /* REPLICATE -- peers. Each one that holds it fills; the rest stay outlines, so a partial quorum
    reads as partial rather than full. */
@@ -79,38 +76,8 @@
  #scene .flow-toggle {display:none;}
 }
 
-/* Steps: five nodes on one track, the step links (or, on home, buttons) that drive the scene --
-   this IS the chain, drawn once, reused as both tracker and accessible content. The segment into
-   a step fills once it is reached; while playing, the segment out of the current step fills over
-   its duration. */
-#scene .flow-ledger {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:0 0 4px;padding:0 0 2px;list-style:none;}
-#scene .flow-ledger li {position:relative;min-width:0;}
-#scene .flow-ledger li:not(:first-child)::before,
-#scene .flow-ledger li:not(:first-child)::after {content:"";position:absolute;top:19px;left:calc(-50% + 20px);right:calc(50% + 20px);height:2px;border-radius:2px;background:hsl(var(--text-strong) / .08);}
-#scene .flow-ledger li:not(:first-child)::after {background:hsl(var(--primary-400));transform:scaleX(0);transform-origin:left;transition:transform 300ms;}
-#scene .flow-ledger li:has(> [data-done],> [data-current])::after {transform:none;}
-#scene .flow[data-playing="true"]:not([data-held]).flow-run .flow-ledger li:has(> [data-current]) + li::after {animation:flow-progress var(--flow-step) linear both;}
-#scene .flow-ledger .flow-record {display:grid;justify-items:center;gap:8px;min-height:0;margin:0;padding:4px 0 2px;border:0;border-radius:10px;background:none;
- font:inherit;text-align:center;text-decoration:none;color:hsl(var(--text-faint)) !important;cursor:pointer;transition:color 200ms;}
-#scene .flow-ledger .flow-record-num {display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:hsl(var(--text-strong) / .06);
- font:600 12px/1 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;transition:background 240ms,color 240ms,box-shadow 240ms;}
-#scene .flow-ledger .flow-record-name {max-width:100%;font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:-.005em;white-space:nowrap;}
-#scene .flow-ledger .flow-record[data-done] {color:hsl(var(--text-muted)) !important;}
-#scene .flow-ledger .flow-record[data-done] .flow-record-num {font-size:0;background:hsl(var(--primary-200));color:hsl(var(--primary));}
-#scene .flow-ledger .flow-record[data-done] .flow-record-num::after {content:"✓";font-size:12px;}
-#scene .flow-ledger .flow-record[data-current] {color:hsl(var(--text-strong)) !important;}
-#scene .flow-ledger .flow-record[data-current] .flow-record-num {background:hsl(var(--primary));color:hsl(var(--text-inverse));box-shadow:0 0 0 5px hsl(var(--primary-200));}
-#scene .flow[data-complete="true"] .flow-ledger li::after {background:hsl(var(--success));}
-#scene .flow[data-complete="true"] .flow-ledger .flow-record .flow-record-num {background:hsl(var(--success-100));color:hsl(var(--success));box-shadow:none;}
-#scene .flow[data-complete="true"] .flow-ledger .flow-record[data-current] .flow-record-num {font-size:0;}
-#scene .flow[data-complete="true"] .flow-ledger .flow-record[data-current] .flow-record-num::after {content:"✓";font-size:12px;}
-#scene .flow-ledger .flow-record:is(:hover,:focus-visible) {color:hsl(var(--reference)) !important;}
-#scene .flow-ledger .flow-record:is(:hover,:focus-visible) .flow-record-num {box-shadow:0 0 0 5px hsl(var(--reference-200));}
-#scene .flow-ledger .flow-record:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
-@keyframes flow-progress {from{transform:scaleX(0);}to{transform:scaleX(1);}}
-
 /* Play control: a quiet round button in the scene tile's bottom-right corner. */
-#scene .flow-toggle {position:absolute;right:14px;bottom:14px;z-index:1;display:grid;place-items:center;width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:50%;
+#scene .flow-toggle {position:absolute;right:14px;bottom:14px;z-index:1;display:grid;place-items:center;width:32px;height:32px;min-height:0;padding:0;border:0;border-radius:50%;box-shadow:inset 0 0 0 1px hsl(var(--text-muted));
  background:hsl(var(--text-strong) / .07);color:hsl(var(--text-muted));cursor:pointer;transition:background 200ms,color 200ms;}
 #scene .flow-toggle svg {grid-area:1/1;width:11px;height:11px;fill:currentColor;}
 #scene .flow-toggle svg + svg,
@@ -121,7 +88,4 @@
 
 @media(max-width:480px){
  .flow-now {padding:10px 12px 14px;}
- #scene .flow-ledger .flow-record-num {width:28px;height:28px;}
- #scene .flow-ledger li:not(:first-child)::before,
- #scene .flow-ledger li:not(:first-child)::after {top:18px;left:calc(-50% + 19px);right:calc(50% + 19px);}
 }

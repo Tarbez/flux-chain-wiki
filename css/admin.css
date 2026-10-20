@@ -95,7 +95,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 #appBar .bar-brand strong { font-size: 13px; letter-spacing: .16em; white-space: nowrap; }
 /* below 1440px the wordmark yields its ~115px to the controls (the tab title still names the app) */
 @media (max-width: 1439px) { #appBar .bar-brand { display: none; } }
-#appBar .ic, #canvasTools .ic, .account-menu .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+#appBar .ic, #canvasTools .ic, .account-menu .ic, #phoneBar .ic { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 #appBar .ic.sm { width: 13px; height: 13px; }
 .bar-nav, .bar-group { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .bar-group[hidden] { display: none; }
@@ -106,27 +106,29 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 }
 .ibtn:hover:not(:disabled) { background: hsl(var(--raised)); color: hsl(var(--text-strong)); }
 .ibtn:disabled, .ibtn[aria-disabled="true"] { opacity: .35; cursor: default; }
-.ibtn[aria-expanded="true"], .ibtn[aria-current="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--reference-300)); color: hsl(var(--text-strong)); }
+.ibtn[aria-expanded="true"], .ibtn[aria-current="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--border-control)); color: hsl(var(--text-strong)); }
 #btnLeftRail[aria-pressed="false"] { color: hsl(var(--text-faint)); }
+/* the side-panel button's word: shown only in the phone's action bar (below) */
+.rail-lbl { display: none; }
 /* a quiet labelled button: Page settings, More -- an icon and its words, no box until hovered */
 .btn.quiet { border-color: transparent; background: transparent; color: hsl(var(--text)); }
-.btn.quiet:hover:not(:disabled), .btn.quiet[aria-expanded="true"] { border-color: hsl(var(--border-soft)); background: hsl(var(--raised)); color: hsl(var(--text-strong)); }
+.btn.quiet:hover:not(:disabled), .btn.quiet[aria-expanded="true"] { border-color: hsl(var(--border-control)); background: hsl(var(--raised)); color: hsl(var(--text-strong)); }
 .bar-labelled { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 #appBar .bar-labelled { min-height: 34px; padding: 5px 10px; font-size: 13px; }
 /* the page switcher: the canvas's one place to change page, by name */
 .bar-page {
   display: inline-flex; align-items: center; gap: 7px; height: 34px; max-width: 220px; min-width: 0; padding: 0 8px 0 9px;
-  border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-md); background: hsl(var(--surface) / .5); color: hsl(var(--text-strong)); cursor: pointer; font-size: 13px;
+  border: 1px solid hsl(var(--border-control)); border-radius: var(--radius-md); background: hsl(var(--surface) / .5); color: hsl(var(--text-strong)); cursor: pointer; font-size: 13px;
 }
 .bar-page:hover, .bar-page[aria-expanded="true"] { border-color: hsl(var(--border-strong)); background: hsl(var(--raised)); }
 .bar-page > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bar-page small { display: none; }
 .bar-page .ic { color: hsl(var(--text-muted)); }
 /* segmented groups: the lens (header), screen size and Edit / Preview (canvas strip) */
-.seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius); background: hsl(var(--surface) / .5); }
-.seg button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 30px; height: 28px; padding: 0 6px; border: 0; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--text-muted)); cursor: pointer; font-size: 12px; }
+.seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid hsl(var(--border-control)); border-radius: var(--radius); background: hsl(var(--surface) / .5); }
+.seg button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 30px; height: 28px; padding: 0 6px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--text-muted)); cursor: pointer; font-size: 12px; }
 .seg button:hover { color: hsl(var(--text-strong)); }
-.seg button[aria-pressed="true"] { background: hsl(var(--reference-100)); color: hsl(var(--text-strong)); }
+.seg button[aria-pressed="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--border-control)); color: hsl(var(--text-strong)); }
 .seg-text button { padding: 0 9px; }
 /* The size note (#bpNote, on the canvas strip): editing at tablet or phone size changes that size
    only, and it says so in words, next to the size it is about (docs/ux-audit/cms.md P1-13: the only
@@ -158,7 +160,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .account-menu .menu-views .menu-item { flex-direction: column; justify-content: center; gap: 4px; min-height: 58px; padding: 8px 4px; text-align: center; font-size: 12px; }
 .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 7px 10px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--text)); text-align: left; cursor: pointer; font-size: 13px; }
 .menu-item:hover, .menu-item:focus-visible { background: hsl(var(--nested)); color: hsl(var(--text-strong)); }
-.menu-item[aria-pressed="true"], .menu-item[aria-expanded="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--reference-300)); color: hsl(var(--text-strong)); }
+.menu-item[aria-pressed="true"], .menu-item[aria-expanded="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--border-control)); color: hsl(var(--text-strong)); }
 .menu-item .ic { color: hsl(var(--text-muted)); }
 .menu-item small { margin-left: auto; color: hsl(var(--text-muted)); font-size: 11px; }
 .account-menu .menu-account { gap: 8px; padding: 8px 6px 4px; }
@@ -169,7 +171,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .account-menu details > summary { cursor: pointer; font-size: 12.5px; color: hsl(var(--text-muted)); padding: 4px 2px; }
 .account-menu details > summary:hover { color: hsl(var(--text-strong)); }
 /* the editor's one mono-uppercase metadata label: also the More menu's group heads */
-.bar-brand span, .field-key, .side-group, legend, .menu-head { font: 500 10px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.bar-brand span, .field-key, .side-group, legend, .menu-head { font: 500 12px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 .bar-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; min-width: 0; margin-left: auto; }
 .bar-actions::before { content: ""; width: 1px; align-self: stretch; margin: 10px 6px; background: hsl(var(--border-soft)); }
 .status { padding: 0 4px; font-size: 12px; color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40vw; }
@@ -177,7 +179,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
 .status[data-tone="error"] { color: hsl(var(--danger)); }
 .status[data-tone="warn"] { color: hsl(var(--warning)); }
 
-.btn { min-height: 34px; padding: 7px 14px; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); background: hsl(var(--raised)); cursor: pointer; transition: background-color .15s, border-color .15s, transform .1s; }
+.btn { min-height: 34px; padding: 7px 14px; border: 1px solid hsl(var(--border-control)); border-radius: var(--radius-md); background: hsl(var(--raised)); cursor: pointer; transition: background-color .15s, border-color .15s, transform .1s; }
 .btn:hover:not(:disabled) { border-color: hsl(var(--border-strong)); background: hsl(var(--nested)); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn.tiny { padding: 2px 8px; font-size: 11px; border-radius: var(--radius-sm); }
@@ -311,6 +313,27 @@ legend { padding: 0 4px; margin-left: -4px; }
   #appBar .status:not(:empty) { background: hsl(var(--depth)); border-top: 1px solid hsl(var(--border-soft)); }
   .account-menu { position: fixed; top: var(--app-bar-h, 100px); left: 8px; right: 8px; width: auto; }
   .menu-item { min-height: 44px; }
+  /* the phone's action bar (js/admin/header.js seatPhoneBar moves the side-panel button, the lens switch,
+     Save and Publish in here): at the foot of the screen, over the workspace, under every popover that
+     rises from it. The workspace, drawer, sheet, status strip and toasts all stop at --phone-bar-h. */
+  .phone-bar { position: fixed; z-index: var(--z-status); left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 6px; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); background: hsl(var(--depth)); border-top: 1px solid hsl(var(--border-soft)); }
+  /* the side-panel button says what it opens, in words, on the bar (the icon alone was a square with a sidebar glyph) */
+  .phone-bar .rail-lbl { display: inline; font-size: 12px; font-weight: 600; }
+  .phone-bar #btnLeftRail { display: inline-flex; align-items: center; gap: 5px; width: auto; padding: 0 8px; border-color: hsl(var(--border-control)); }
+  .phone-bar .ibtn, .phone-bar .btn { min-width: 44px; min-height: 44px; height: 44px; flex: 0 0 auto; }
+  .phone-bar .btn { padding: 5px 12px; }
+  .phone-bar #btnLeftRail { order: 1; } .phone-bar #lensSwitch { flex: 1 1 0; min-width: 0; order: 2; } .phone-bar #save { order: 3; } .phone-bar #publish { order: 4; }
+  .phone-bar #lensSwitch button { padding: 0 4px; font-size: 12px; white-space: nowrap; }
+  #appBar .status { bottom: var(--phone-bar-h, 0px); }
+  .notice-toasts { bottom: calc(var(--phone-bar-h, 0px) + 44px); }
+  /* the Page settings tab strip scrolls sideways at this width; Ark hides its scrollbar, so a thin one is
+     brought back and each end that has more to show fades (background-attachment: local cues, drawn only
+     while there is something off that edge) -- there was no sign that "Advanced" was off the right edge */
+  .page-editor-tabs[data-variant][data-ark-primitive] [role="tablist"] { scrollbar-width: thin; scrollbar-color: hsl(var(--text-faint)) transparent;
+    background-image: linear-gradient(to right, hsl(var(--surface)) 12px, transparent), linear-gradient(to left, hsl(var(--surface)) 12px, transparent), linear-gradient(to right, hsl(var(--text-faint) / .6), transparent), linear-gradient(to left, hsl(var(--text-faint) / .6), transparent);
+    background-repeat: no-repeat; background-position: left center, right center, left center, right center; background-size: 28px 100%, 28px 100%, 10px 100%, 10px 100%; background-attachment: local, local, scroll, scroll; }
+  .page-editor-tabs[data-variant][data-ark-primitive] [role="tablist"]::-webkit-scrollbar { height: 4px; }
+  .page-editor-tabs[data-variant][data-ark-primitive] [role="tablist"]::-webkit-scrollbar-thumb { border-radius: 2px; background: hsl(var(--text-faint)); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -568,6 +591,8 @@ body.locked { overflow: auto; }
 .version-kind[data-kind="publish"] { color: hsl(var(--trust)); }
 .version-kind[data-kind="restore"] { color: hsl(var(--drift)); }
 .version-kind[data-kind="checkpoint"] { color: hsl(var(--text-muted)); }
+.version-kind[data-kind="current"] { color: hsl(var(--trust)); }
+.version-here { align-self: center; font-size: 12px; color: hsl(var(--text-muted)); }
 .version-label { font-size: 13px; color: hsl(var(--text-strong)); }
 .version-summary { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; font: 11px/1.45 var(--mono); color: hsl(var(--text)); overflow-wrap: anywhere; }
 .version-actions { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -619,6 +644,17 @@ body.locked { overflow: auto; }
 .media-grid .media-item img { width: 100%; height: 84px; }
 .media-name, .vault-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; }
 .media-detail, .vault-detail { margin: 8px 0 4px; }
+/* the file chooser (js/admin/controls.js filePicker): a real .btn over a visually hidden native input
+   (still the tab stop), the chosen file's name beside it, a dashed edge while a file is dragged over.
+   It wraps, so in the ~280px rail the name drops under the button instead of cutting it off. */
+.file-pick { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; min-width: 0; padding: 4px; border: 1px dashed transparent; border-radius: var(--radius-md); }
+.file-pick[data-over="true"] { border-color: hsl(var(--reference-400)); background: hsl(var(--reference-100) / .5); }
+.file-pick__input { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; opacity: 0; }
+.field .file-pick__btn, .file-pick__btn { display: inline-flex; align-items: center; justify-content: center; margin: 0; width: auto; color: hsl(var(--text-strong)); font-size: 13px; cursor: pointer; }
+.file-pick__input:focus-visible + .file-pick__btn { outline: 2px solid hsl(var(--reference-400)); outline-offset: 2px; }
+.file-pick__name { flex: 1 1 8em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: hsl(var(--text-muted)); }
+.file-pick[data-state="chosen"] .file-pick__name { color: hsl(var(--text)); }
+.media-detail .btn.danger { max-width: 100%; }
 
 /* ---- notices (js/admin/notice.js): the editor's one toast / banner -----------------------------
    One shape for every message that is not a control's own answer: an icon, a title, a body, its

@@ -466,6 +466,26 @@ export async function openAccountMenu(app) {
 }
 export const openMoreMenu = openAccountMenu;
 /* a real click on a header control, opening the More menu first when it lives there */
+/* Ark's confirmation dialog (ArkKit.arkConfirm, @deadark/ark-ui 0.2.8) replaced every native confirm() in the editor
+   (docs/ux-audit/cms.md P2-11). It is a real element in the editor frame's document, so a driver that used to answer
+   page.on('dialog') clicks its buttons instead: Cancel is the first button of its actions row, the confirm action
+   the last. answerArkDialog waits for it, returns its text (title and body, for a check on the words), clicks the answer
+   ('accept' | 'dismiss') and waits for it to go. dismissArkDialogIfOpen is for a sweep that clicks everything. */
+export const arkDialog = (app) => app.locator('.ark-alert-dialog');
+export async function answerArkDialog(app, answer = 'accept', timeout = 8000) {
+  const dialog = arkDialog(app).first();
+  await dialog.waitFor({ state: 'visible', timeout: scaled(timeout) });
+  const text = await dialog.innerText();
+  const buttons = dialog.locator('.ark-alert-dialog__actions button');
+  await (answer === 'accept' ? buttons.last() : buttons.first()).click();
+  await dialog.waitFor({ state: 'detached', timeout: scaled(8000) });
+  return text;
+}
+export async function dismissArkDialogIfOpen(app) {
+  if (!(await arkDialog(app).count())) return false;
+  await answerArkDialog(app, 'dismiss').catch(() => {});
+  return true;
+}
 export async function clickHeader(app, id, options) {
   if (MORE_MENU_IDS.includes(id)) await openAccountMenu(app);
   await app.click('#' + id, options);

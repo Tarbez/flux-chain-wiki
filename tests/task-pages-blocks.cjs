@@ -66,13 +66,21 @@ const ROUTES = {
   '/explore': { page: 'explorer', ids: ['explore-', 'mesh-'],
     reshaped: [
       [/^page:\/div:1$/, 'the home: the same live parts, with Ark\'s crumbs, heading and ways on'],
+      [/^page:\/div:2\/div:1\/header:1\/details:1(\/section:1(\/div:1(\/details:1)?)?)?$/, 'the connection control and its panel are Ark\'s popover (its button ends with Ark\'s arrow); "Operator access" is Ark\'s disclosure around the same key field, whose button follows the field in reading order'],
+      [/^page:\/div:2\/div:1\/nav:1(\/details:[1-4])?$/, 'the dock and its four layers: each layer is an Ark popover (button with Ark\'s arrow, floating panel) in one exclusive group, opening upward'],
+      [/^page:\/div:2(\/div:1(\/header:1)?)?$/, 'the raw view: its connection control is Ark\'s popover now (its button ends with Ark\'s arrow glyph), so the text of the masthead differs by that glyph'],
+      [/^page:\/div:1\/div:2(\/article:1)?$/, 'the two cards: the how-it-works card\'s steps are Ark tabs now (below), so its words are in the tab labels and panels, not the old heading, sentence and numbered buttons'],
+      [/^page:\/div:1\/div:2\/article:1\/div:3$/, 'the hand-built stepper is Ark\'s tab strip (the tablist, its panels after it): each numbered button is a tab, its heading and sentence the panel'],
       [/^page:\/div:1\/footer:1\/div:2$/, 'the footer\'s ways on are Ark\'s actions, shown on every width (they were display:none on a phone)'],
       [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the family\'s Explore link is Ark\'s link button, which says it opens another site']
     ],
     retired: [
       [/^page:\/div:1\/header:1\/div:1$/, 'the heading\'s wrapper; the h1 keeps its id key'],
       [/^page:\/div:1\/footer:1$/, 'the footer row: its status line and its ways on keep their keys as parts of the home'],
-      [/^page:\/div:1\/footer:1\/div:2\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own']
+      [/^page:\/div:1\/footer:1\/div:2\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own'],
+      [/^page:\/div:2\/div:1\/nav:1\/details:[1-4]\/summary:1\/span:1$/, 'the layer number ("03".."06"): part of the popover button\'s one label now ("03 Node pulse"), which keeps the summary\'s key'],
+      [/^page:\/div:2\/div:1\/header:1\/details:1\/summary:1\/span:1$/, 'the connection button\'s status dot: Ark\'s popover button carries a label and an arrow; the Connection figure beside it says live or offline in words'],
+      [/^page:\/div:1\/div:2\/article:1\/div:3\/button:\d\/span:1$/, 'the stop\'s number circle; an Ark tab is one label ("01 Shape"), which keeps the button\'s key']
     ],
     reworded: [] },
   '/treasury': { page: 'treasury', ids: ['treasury-'],
@@ -81,6 +89,7 @@ const ROUTES = {
       [/^page:\/div:1\/div:1$/, 'the asset picker (aria-pressed buttons styled as tabs) is Ark\'s tab list, with the sample movements as its third tab'],
       [/^page:\/div:1\/section:1$/, 'the asset overview is Ark tabs'],
       [/^page:\/div:1\/section:1\/div:[12]$/, 'an asset line is its tab panel: the line\'s text first, then the code and the amount as a fact'],
+      [/^page:\/div:1\/section:1\/div:1\/p:1$/, 'the FXN line keeps its sentence and now ends with what "Tier 1" means (the label was unexplained: docs/ux-audit/ledger.md TR-3)'],
       [/^page:\/div:1\/section:2$/, 'the movement list is the third tab panel: its heading, then each movement as an accordion row'],
       [/^page:\/div:1\/nav:1$/, 'the way on is Ark\'s pager: Preview a deposit, and the related pages']
     ],
@@ -95,20 +104,25 @@ const ROUTES = {
     reshaped: [
       [/^page:\/div:1$/, 'the page shell holds the draft now (the form and its local result, the page\'s own); its header is the hero and the callout'],
       [/^page:\/div:1\/header:1$/, 'the header became the hero; its warning line is the callout after it'],
+      [/^page:\/div:1\/form:1$/, 'the form is Ark\'s form block (W4-S14): the same two fields and button; the credit note is the amount\'s hint and the purpose list is Ark\'s select field'],
       [/^page:\/div:1\/nav:1$/, 'the way back is Ark\'s pager: Return to treasury preview, and a related page']
     ],
-    retired: [], reworded: [] },
+    retired: [], reworded: [[/^page:\/div:1\/section:1\/button:1$/, '"← Edit draft" is Ark\'s ghost button "Edit draft" (an arrow is not typed into a label; W4-S14)']] },
   '/experiments': { page: 'proximity', ids: ['lab-', 'work', 'experiments-title', 'study-', 'variable', 'range-'],
     reshaped: [
       [/^id:work$/, 'the model\'s section holds the model alone; its breadcrumb, heading and introduction are blocks before it'],
       [/^page:\/div:1\/section:1\/div:1$/, 'the heading block became the hero (its status line a detail); its introduction is the disclosure after it'],
       [/^page:\/div:1\/section:1\/div:2$/, 'the same model; only the whitespace between its parts changed (the census\'s 160-character cut falls later)'],
+      [/^page:\/div:1\/section:1\/div:2\/div:1(\/div:1)?$/, 'the toolbar and its picker: Ark\'s choice (W4-S14) names itself with a visible legend ("Choose a model") before the three studies'],
+      [/^page:\/div:1\/section:1\/div:2\/div:2(\/span:1)?$/, 'the stage\'s corner label leads with what the code is ("Figure 1 of 3 · FX—001"; FX—001 was unexplained), derived from the study\'s place'],
+      [/^page:\/div:1\/section:1\/div:2\/div:3\/div:1$/, 'the slider\'s control now opens with one line saying how to use it ("Drag the slider ..."), between its label and the slider'],
       [/^page:\/div:1\/section:1\/p:1$/, 'the evidence line is the pager\'s related pages, under "↳ Evidence context"']
     ],
     retired: [
       [/^page:\/div:1$/, 'the model\'s wrapper; a block page stacks its blocks in its root'],
       [/^page:\/div:1\/section:1\/div:1\/div:1$/, 'the heading\'s inner column; the hero has none'],
-      [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the "↳" glyph is the related heading\'s ("↳ Evidence context")']
+      [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the "↳" glyph is the related heading\'s ("↳ Evidence context")'],
+      [/^page:\/div:1\/section:1\/div:2\/div:1\/div:1\/button:\d\/span:1$/, 'the study button\'s name span: the study picker is Ark\'s choice (W4-S14), whose option is one label ("01 Authority") that keeps the button\'s key']
     ],
     reworded: [[/^page:\/div:1\/section:1\/p:1$/, '"Evidence context: claim inventory and evidence registry." reads as the two related links under "↳ Evidence context"']] },
   '/account/domains': { page: 'account/domains', ids: ['account-domains-', 'domainsNameInput'],
@@ -140,9 +154,13 @@ const ROUTES = {
     const seen = await converted.check(route, { reshaped: spec.reshaped, retired: spec.retired, reworded: spec.reworded, inspect: (window, page) => ({
       tabs: [...page.querySelectorAll('[data-ark-block="tabs"] [role="tab"]')].map((t) => t.textContent.trim()),
       handoff: page.querySelectorAll('.dx-onward').length,
-      copies: page.querySelectorAll('.deploy-copy').length,
+      copies: page.querySelectorAll('.copy-command').length,
+      nativeSelects: page.querySelectorAll('select:not(.ark-field__control)').length, fieldSelects: page.querySelectorAll('[data-ark-block="form"] select.ark-field__control, form.ark-form select.ark-field__control').length,
       reviewRows: page.querySelectorAll('#deploy-review tbody tr').length,
       pager: [...page.querySelectorAll('[data-ark-block="pager"] a')].map((a) => a.getAttribute('href')),
+      tierExplained: /“Tier 1” is this preview’s label for FXN/.test(page.textContent),
+      hint: (page.querySelector('#variable-hint') || {}).textContent || '',
+      hintDescribes: ((page.querySelector('#variable') || { getAttribute() { return ''; } }).getAttribute('aria-describedby') || '').split(' ').includes('variable-hint'),
       rawOpen: page.querySelectorAll('[data-explore-raw-open]').length,
       onward: [...page.querySelectorAll('#explore-onward [data-ark-part="button"]')].map((b) => b.textContent.replace(/\s+/g, ' ').trim()),
       liveParts: ['[data-explore-kinds]', '[data-explore-fabric]', '[data-explorer-status]', '[data-explore-raw]', '[data-explorer-connect]'].filter((sel) => page.querySelector(sel)).length
@@ -156,6 +174,22 @@ const ROUTES = {
       assert.deepEqual(seen.tabs, ['01 / Check discovery', '02 / Create or select', '03 / Start the miner', '04 / Verify health', '05 / Inspect topology'], 'every step is a named tab');
       assert.equal(seen.copies, 5, 'every command keeps its Copy');
       assert.equal(seen.reviewRows, 5, '"Review all steps" shows every command');
+    }
+    /* Regression (W4-S14, 2026-10-20): the deposit draft's purpose list was a native <select> with the browser's own arrow
+       (ledger /deposits P2); it is Ark's select field in Ark's form, in the forms chunk the route lists. */
+    if (route === '/deposits') {
+      assert.equal(seen.nativeSelects, 0, '/deposits has no native select outside Ark\'s field');
+      assert.equal(seen.fieldSelects, 1, 'the purpose list is Ark\'s select field');
+      assert(/ark-kit-forms\.js/.test(/deposits: \{[^\n]*\}/.exec(read('js/pages/catalog.js'))[0]), 'the /deposits route lists the forms chunk (a literal path)');
+    }
+    /* Regression (W4-S14): /deploy and /download drew two Copy controls (.deploy-copy, .download-copy). */
+    if (route === '/deploy') assert(!read('js/pages/deploy.js').includes("'deploy-copy'") && read('js/pages/deploy.js').includes('ArkUI.copyCommand('), '/deploy uses the one Copy (ArkUI.copyCommand)');
+    /* Regression (2026-10-20): the lab's slider had no instruction (docs/ux-audit/ledger.md, /experiments/lab P1): one line,
+       derived from the study's own end labels, and the slider is described by it. */
+    if (route === '/treasury') assert(seen.tierExplained, '/treasury says what "Tier 1" means beside the label (it was a bare term: ledger TR-3)');
+    if (route === '/experiments') {
+      assert(/^Drag the slider.* from apart to together\.$/.test(seen.hint) || /^Drag the slider.*to move from apart to together\.$/.test(seen.hint), 'the model says how to use it: ' + seen.hint);
+      assert(seen.hintDescribes, 'the slider is described by that instruction');
     }
     if (route === '/explore') {
       assert.equal(seen.liveParts, 5, 'the live explorer is all there');

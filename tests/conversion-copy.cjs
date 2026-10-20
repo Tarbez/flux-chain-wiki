@@ -50,7 +50,7 @@ assert(deploySource.includes('flux-network health --miner http://127.0.0.1:8766'
 assert(deploySource.includes('flux-network topology --miner http://127.0.0.1:8766 --network-id <network-id>'));
 assert(!deploySource.includes('network create --name'), 'unsupported --name syntax is absent');
 assert(!deploySource.includes('network inspect'), 'unsupported network inspect command is absent');
-assert(deploySource.includes("copy.setAttribute('aria-label'"), 'every rendered command receives a copy control');
+assert(deploySource.includes("ArkUI.copyCommand({ text: step.cmd, name: 'command for ' + step.title })") && fs.readFileSync('js/ark/page-kit.js', 'utf8').includes("button.setAttribute('aria-label'"), 'every rendered command receives the site\'s one copy control, named for its step');
 assert(deploySource.includes('step.expected'), 'every rendered command includes expected output');
 
 const header = fs.readFileSync('js/resolvers/header.js', 'utf8');

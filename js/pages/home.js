@@ -7,11 +7,17 @@
    view short enough for the fold rule (<= 1.6 screens) on its own:
 
      hero        what DEFXN is, in its own words, and the one primary action (Follow the line)
-     questions   ONE control, Ark tabs: See it work · Where do I start? · How it fits together ·
-                 What is measured? · Questions
-       See it work            the hero scene (js/pages/home-flow.js): pick an example, watch one
-                              record join your chain; it plays once and settles
+     questions   ONE control, Ark tabs: Where do I start? · See it work · How it fits together ·
+                 What is measured? · Questions. The first view under the hero is the way in -- the
+                 three paths a first-time visitor chooses from -- and the scene is one press away
+                 (it was the first view, with the paths second: docs/ux-audit/ledger.md, "promote
+                 Explore / Build / Operate"; the order of the five views changes no layout key, every
+                 `was` pin below follows its element)
        Where do I start?      the three paths (Explore / Build / Operate) and the way on
+       See it work            the hero scene (js/pages/home-flow.js): pick an example, then a step
+                              (Ark tabs inside the scene's frame), watch one record join your chain;
+                              it plays once and settles. The step picker replaced the hand-built
+                              `home-cycle-step` buttons (ArkUI.buildChainSteps)
        How it fits together   your chain among the others (the transit map) and the three parts
        What is measured?      benchmark figures FROM THE EVIDENCE REGISTRY, and the live fleet
        Questions              the FAQ
@@ -111,33 +117,34 @@
       'stat-unit#2': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/span:1',
       'stat-label#3': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1',
       ':root': { key: 'page:/section:2/div:1/details:1', self: true },
+      '[data-ark-slot="scene-transfers"] .flow-now': 'page:/section:1/section:1/div:2/div:1/div:1',   /* the step picker now stands before the scene's tile (as the list did), so the tile is pinned, not counted */
       'tabs-list': { key: 'page:/section:2/div:1/details:1/summary:1', self: true },
-      'tabs-content': { key: 'page:/section:1/section:1', self: true },
-      'tabs#2': { key: 'page:/section:1/section:1/div:1/div:1', self: true },
-      'tabs-list#2': 'page:/section:1/section:1/div:1/div:1/div:1',
+      'tabs-content#6': { key: 'page:/section:1/section:1', self: true },
+      'tabs#3': { key: 'page:/section:1/section:1/div:1/div:1', self: true },
+      'tabs-list#3': 'page:/section:1/section:1/div:1/div:1/div:1',
       'figure-frame#2': { key: 'page:/section:1/section:1/div:2', self: true },
       'figure-caption#2': { key: 'page:/section:1/section:1/div:1/div:1/p:1', self: true },
-      ':scope > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > figure:nth-of-type(1) > figcaption:nth-of-type(1) > p:nth-of-type(1)': 'page:/section:1/div:1/div:1/a:1/span:3/small:1',
-      'tabs-content#6': { key: 'id:hl-start', self: true },
-      'tabs#3': { key: 'page:/section:2/div:1/details:1/div:1/section:1/div:1', self: true },
-      'tabs-list#3': { key: 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1', self: true },
-      'tabs-trigger#10': 'id:hl-audience-0',
-      'tabs-trigger#11': 'id:hl-audience-1',
-      'tabs-trigger#12': 'id:hl-audience-2',
-      'tabs-content#7': { key: 'id:hl-audience-panel', self: true },
+      ':scope > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3) > figure:nth-of-type(1) > figcaption:nth-of-type(1) > p:nth-of-type(1)': 'page:/section:1/div:1/div:1/a:1/span:3/small:1',
+      'tabs-content': { key: 'id:hl-start', self: true },
+      'tabs#2': { key: 'page:/section:2/div:1/details:1/div:1/section:1/div:1', self: true },
+      'tabs-list#2': { key: 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1', self: true },
+      'tabs-trigger#6': 'id:hl-audience-0',
+      'tabs-trigger#7': 'id:hl-audience-1',
+      'tabs-trigger#8': 'id:hl-audience-2',
+      'tabs-content#2': { key: 'id:hl-audience-panel', self: true },
       'card': { key: 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:1', self: true },
       'actions': { key: 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2', self: true },
-      'tabs-content#10': { key: 'page:/footer:1/div:2', self: true },
+      'tabs-content#5': { key: 'page:/footer:1/div:2', self: true },
       'pager-next': { key: 'page:/footer:1/div:2/a:1', self: true },
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2)': 'page:/footer:1/div:2/a:1/span:3/strong:1',
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(3)': 'page:/footer:1/div:2/a:1/span:3/small:1',
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1)': { key: 'page:/footer:1/nav:1', self: true },
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:1',
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:2',
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:3',
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(4) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:4',
-      ':scope > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(5) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:5',
-      'tabs-content#11': { key: 'page:/section:2/div:1/details:1/div:1/section:2', self: true },
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2)': 'page:/footer:1/div:2/a:1/span:3/strong:1',
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(3)': 'page:/footer:1/div:2/a:1/span:3/small:1',
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1)': { key: 'page:/footer:1/nav:1', self: true },
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:1',
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:2',
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(3) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:3',
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(4) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:4',
+      ':scope > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(5) > nav:nth-of-type(1) > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(5) > a:nth-of-type(1)': 'page:/footer:1/nav:1/a:5',
+      'tabs-content#31': { key: 'page:/section:2/div:1/details:1/div:1/section:2', self: true },
       ':scope > div:nth-of-type(4) > figure:nth-of-type(1) > figcaption:nth-of-type(1) > p:nth-of-type(1)': 'page:/section:2/div:1/details:1/div:1/section:2/p:1',
       'accordion': { key: 'page:/section:2/div:1/details:1/div:1/section:2/div:1', self: true },
       'accordion-item': { key: 'page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1', self: true },
@@ -146,7 +153,7 @@
       'accordion-trigger': 'page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/h3:1',
       'accordion-trigger#2': 'page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/h3:1',
       'accordion-trigger#3': 'page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/h3:1',
-      'tabs-content#12': { key: 'page:/section:2/div:1/details:1/div:1/section:3', self: true },
+      'tabs-content#32': { key: 'page:/section:2/div:1/details:1/div:1/section:3', self: true },
       ':scope > div:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(4) > p:nth-of-type(1)': 'page:/section:2/div:1/details:1/div:1/section:3/p:1',
       'stats': { key: 'page:/section:2/div:1/details:1/div:1/section:3/div:1', self: true },
       'stat': { key: 'page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1', self: true },
@@ -159,15 +166,26 @@
       ':scope > div:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/strong:1',
       'stat-unit#3': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/span:1',
       'stat-detail#3': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:2',
-      'tabs-content#13': { key: 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2', self: true },
+      'tabs-content#33': { key: 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2', self: true },
       ':scope > div:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/p:1',
       'stat#4': { key: 'page:/section:2/div:1/details:1/div:1/div:1', self: true },
       ':scope > div:nth-of-type(5) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': 'page:/section:2/div:1/details:1/div:1/div:1/span:1',
-      'tabs-content#16': { key: 'page:/section:2/div:1/details:1/div:1/section:4', self: true },
+      'tabs-content#36': { key: 'page:/section:2/div:1/details:1/div:1/section:4', self: true },
       'accordion#2': 'page:/section:2/div:1/details:1/div:1/section:4/div:1',
       'accordion-item#4': 'page:/section:2/div:1/details:1/div:1/section:4/div:1/details:1'
     }
   };
+
+  /* The old step list of the Transfers scene (ol > li > button > number, icon, name) is the step
+     picker's tab list and tabs now: the list and each button keep their keys (the button's words lost
+     the number and the icon: one label, "Sign"). */
+  var STEPS_WAS = (function () {
+    var base = 'page:/section:1/section:1/div:2/div:1/ol:1', was = { 'tabs-list': { key: base, self: true } };
+    for (var k = 1; k <= 5; k++) was['tabs-trigger' + (k > 1 ? '#' + k : '')] = { key: base + '/li:' + k + '/button:1', self: true };
+    /* the quote under the scene (strong.flow-says) was captured at the Resolve step: it is that tab's panel now */
+    was['[data-value="resolve"] > p'] = { key: 'page:/section:1/section:1/div:2/div:1/div:1/strong:1', self: true };
+    return was;
+  })();
 
   /* A home manifest link field holds a tagged value (route:...): the block resolves it. */
   function link(role) { return ArkCopy.text('HOME.' + role); }
@@ -245,15 +263,6 @@
         actions: [{ label: 'Follow the line', href: link('LEARN.HREF'), tone: 'primary' }]
       } },
       { block: 'tabs', id: 'home-questions', was: WAS['home-questions'], props: { label: 'Your next question', items: [
-        /* See it work: the hero scene. The example picker is Ark's segmented tabs, one scene each;
-           only the shown one runs. "Your history begins here" -- the old call to action's kicker --
-           introduces the scene it always pointed at. */
-        { value: 'walk', label: 'See it work', blocks: [
-          { block: 'tabs', props: { label: 'Choose an illustrated example', variant: 'segmented', defaultValue: 'transfers', items: ArkUI.chainCases.map(function (c) {
-            return { value: c.id, label: c.label, blocks: [{ block: 'figure', props: { kind: 'illustration', slot: 'scene-' + c.id,
-              caption: 'Your history begins here: one record joins your chain, you.fxn, in five steps. Illustrative / not live traffic; only what the resolver reads at the end changes between examples.' } }] };
-          }) } }
-        ] },
         /* Where do I start: the three paths, and -- for anyone not sure yet -- the way on. */
         { value: 'start', label: 'Where do I start?', blocks: [
           { block: 'section-header', props: { title: 'Different ambitions. Common ground.', lede: 'Explore the idea, build with it, or help run it. Choose your way into DEFXN.', level: 3 } },
@@ -268,6 +277,15 @@
               next: { label: 'Explore DEFXN', href: link('CLOSING.HREF'), summary: 'Every possibility starts with a history' },
               related: FOOTER.map(function (f) { return { label: f[0], href: link(f[1]) }; }) } }
           ] }]) } }
+        ] },
+        /* See it work: the hero scene. The example picker is Ark's segmented tabs, one scene each;
+           only the shown one runs. "Your history begins here" -- the old call to action's kicker --
+           introduces the scene it always pointed at. */
+        { value: 'walk', label: 'See it work', blocks: [
+          { block: 'tabs', props: { label: 'Choose an illustrated example', variant: 'segmented', defaultValue: 'transfers', items: ArkUI.chainCases.map(function (c) {
+            return { value: c.id, label: c.label, blocks: [{ block: 'figure', props: { kind: 'illustration', slot: 'scene-' + c.id,
+              caption: 'Your history begins here: one record joins your chain, you.fxn, in five steps. Illustrative / not live traffic; only what the resolver reads at the end changes between examples.' } }] };
+          }) } }
         ] },
         /* How it fits together: your chain among the others (the transit map), and the three parts. */
         { value: 'model', label: 'How it fits together', blocks: [
@@ -310,10 +328,11 @@
     mount: function (host) {
       var world = ArkUI.buildChainWorld ? ArkUI.buildChainWorld({ caseId: 'transfers' }) : null;
       var scenes = {}, slots = { world: function () { return world ? world.element : null; } };
-      function hrefFor(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
       ArkUI.chainCases.forEach(function (c) {
         slots['scene-' + c.id] = function () {
-          var flow = scenes[c.id] = ArkUI.buildChainFlow({ hrefFor: hrefFor, caseId: c.id, inline: true, rich: true });
+          var flow = scenes[c.id] = ArkUI.buildChainFlow({ caseId: c.id, rich: true });
+          /* the five steps at the top of the scene's frame (Ark tabs; the open one says its step) */
+          ArkUI.buildChainSteps(flow, c.id, { id: 'home-steps-' + c.id, was: c.id === 'transfers' ? STEPS_WAS : undefined });
           return flow.element;
         };
       });
@@ -322,12 +341,18 @@
 
       /* Which tab of a tabs block shows now (its value, by position). */
       function selected(tabs, values) {
-        var list = tabs.querySelector('[data-ark-part="tabs-list"]');
+        var list = tabs.querySelector(':scope > [data-ark-part="tabs-list"]');
         var on = list && list.querySelector('[role="tab"][aria-selected="true"]');
         return on ? values[Array.prototype.indexOf.call(list.children, on)] : values[0];
       }
-      var nested = page.querySelectorAll('#home-questions [data-ark-block="tabs"]');
-      var caseTabs = nested[0], pathTabs = nested[1];
+      /* The path picker is the "Where do I start?" view's own tabs; the example picker, "See it work"'s. (The
+         steps inside each example are tabs too, deeper down.) */
+      var order = spec(remembered)[1].props.items.map(function (item) { return item.value; });
+      function viewTabs(value) {
+        var view = page.querySelectorAll('#home-questions > [data-ark-part="tabs-content"]')[order.indexOf(value)];
+        return view && view.querySelector(':scope > [data-ark-block="tabs"]');
+      }
+      var caseTabs = viewTabs('walk'), pathTabs = viewTabs('start');
       var caseIds = ArkUI.chainCases.map(function (c) { return c.id; });
       function shownScene() { return caseTabs ? scenes[selected(caseTabs, caseIds)] : null; }
       /* The example chosen in the scene is the line drawn in full ink on the map; only the shown

@@ -31,7 +31,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
-import { openPageFields, openRailTab, designView, siteStyleTab, openVersions, SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor } from './harness.mjs';
+import { openPageFields, openRailTab, designView, siteStyleTab, openVersions, SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor, answerArkDialog } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
 const FLX = require('../../js/admin/vendor/flx-state-grammar.js');
@@ -362,6 +362,7 @@ try {
     check(/concept\/depth/.test(rootFile('sitemap.xml')) && /concept\/depth/.test(rootFile('llms.txt')), 'the fixture assumes sitemap.xml and llms.txt list /concept/depth');
     await openPageFields(app, { page: 'depth' });
     await app.locator('button', { hasText: /^Delete this page$/ }).click();
+    await answerArkDialog(app, 'accept');   /* Ark's dialog (cms.md P2-11), not a native confirm */
     const h = await until(() => { const x = head(); return x && x.seq === 9 && x; }, 'Delete did not record version 9 by itself (no Save was pressed)');
     check(!fs.existsSync(DEPTH) && !indexIds().includes('depth'), 'the page file or its index entry is still there');
     const rec9 = record(h.head);

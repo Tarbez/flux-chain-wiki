@@ -85,6 +85,12 @@ var ArkResolutions = (function () {
     return rest.charAt(0).toUpperCase() + rest.slice(1);
   }
   function keys() { return groups.reduce(function (all, group) { return all.concat(group.items); }, []); }
+  /* The resolutions that begin at a page (`start`, or the deeper `also`): the inverse of the two maps
+     above, so a page can lead to what it is the start of without anyone listing that again
+     (/dao -> /resolutions/governance, /bundle-deployer -> website and deployments). */
+  function startingFrom(pageKey) {
+    return all().filter(function (item) { return item.start === pageKey || item.also === pageKey; });
+  }
 
-  return { groups: groups, list: list, all: all, find: find, groupFor: groupFor, keys: keys, copy: copy, shortName: shortName };
+  return { groups: groups, list: list, all: all, find: find, groupFor: groupFor, keys: keys, copy: copy, shortName: shortName, startingFrom: startingFrom };
 })();

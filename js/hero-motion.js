@@ -189,7 +189,7 @@
     scene.classList.toggle('hero-still', !isEnabled);
     toggle.hidden = current.page === 'zero';
     var isArticle = current.page.indexOf('article/') === 0;
-    toggle.textContent = '← ' + ArkCopy.text(isArticle ? 'NAV.BACK.TUTORIALS' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
+    toggle.textContent = '← ' + ArkCopy.text(isArticle ? 'NAV.BACK.NOTES' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
     toggle.setAttribute('aria-expanded', String(current.page !== 'zero'));
     toggle.setAttribute('aria-label', current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to the notes' : isTheory ? 'Return to the operating model' : 'Return to the zero hero');
     var meshControl=scene.querySelector('.mesh-drag-surface.mesh-drag-target');if(meshControl){var decorative=current.page!=='zero';meshControl.inert=decorative;meshControl.tabIndex=decorative?-1:0;meshControl.setAttribute('aria-hidden',String(decorative));}

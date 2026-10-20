@@ -678,7 +678,7 @@ ArkSEO.define({
     },
     "a-resolver-by-construction": {
       "title": "",
-      "description": "See how a finance resolver makes double-spend unrepresentable using one registered letter, a chain per identity, six resolver steps, and a measured 25,232 ops/s result.",
+      "description": "See how a finance resolver makes double-spend unrepresentable using one registered letter, a chain per identity, six resolver steps, and a measured 51,065 ops/s result.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",

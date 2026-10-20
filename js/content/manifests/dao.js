@@ -13,14 +13,25 @@ ArkManifest.define({
         "place": "dao: beside POINT6 (Who can change a resolver?)",
         "caption": "Illustration · relationships, not live state",
         "line": "a declaration head moves right; the old declaration stays on the line, greyed but present",
+        "declarations": [
+          "launch",
+          "upgrade",
+          "upgrade"
+        ],
+        "head": "current",
+        "superseded": "superseded, still on the line",
         "variants": [
           {
             "control": "key",
-            "mark": "key"
+            "mark": "key",
+            "label": "A control key was named at launch: each upgrade adds a declaration beside the old one",
+            "shows": 3
           },
           {
             "control": "immutable",
-            "mark": "lock"
+            "mark": "lock",
+            "label": "Launched immutable: no upgrade can be signed, ever",
+            "shows": 1
           }
         ]
       }
@@ -43,7 +54,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Mesh operations governs the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are separate; neither threshold acts for the other."
+      "value": "Two separate groups can decide things, and each decides only inside its own scope. Mesh operations looks after the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are separate; neither threshold acts for the other."
     },
     "POINT1.TITLE": {
       "label": "Heading",

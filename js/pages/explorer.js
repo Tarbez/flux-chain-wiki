@@ -65,6 +65,28 @@
     thread: ['Threads', 'Conversations kept together by topic.', '<path d="M4 6h16M4 12h10M4 18h13"/>']
   };
   var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'miners', publications: 'publications', documents: 'documents' };
+  /* One plural rule for every counted noun on this page ("1 miner", "2 miners", "1 identity"). The
+     table above holds the PLURAL a count is shown with; the singular is derived from it by the
+     English rule below, never typed a second time, so a new kind needs one entry or none. The
+     tile's figure is a count of records, so exactly one (and not "100+") takes the singular. */
+  function singular(word) {
+    return /ies$/.test(word) ? word.slice(0, -3) + 'y' : /[^s]s$/.test(word) ? word.slice(0, -1) : word;
+  }
+  function countPhrase(count, capped, plural) { return count + (capped ? '+' : '') + ' ' + (count === 1 && !capped ? singular(plural) : plural); }
+  /* A way back inside the page's own views is Ark's action button (tone secondary), not a hand-built <button>. The view change is
+     the page's own state, not an address, so it is an `action` the page answers (setup()), never a link. Without the block
+     adapter loaded (the unit test's toy DOM) it is the plain button it was. Returns the element to put on the page. */
+  function backAction(label, className, onClick) {
+    var root;
+    if (ArkUI.blocks && ArkUI.blocks.render) {
+      root = ArkUI.blocks.render({ block: 'actions', props: { label: 'Back', items: [{ label: label, action: 'explore-back', tone: 'secondary' }] } });
+      root.classList.add(className);
+      root.addEventListener('click', function (event) { if (event.target.closest && event.target.closest('[data-action="explore-back"]')) onClick(event); });
+      return root;
+    }
+    root = node('button', className, label); root.type = 'button'; root.addEventListener('click', onClick);
+    return root;
+  }
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
   /* The live parts of the home (the page's own, hand-built because they ARE the explorer: the
      mesh fabric stepper and the live kinds read from the public mesh), and the phone's pane
@@ -72,13 +94,10 @@
   function cards() {
     return '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
       '<div class="explore-cards">' +
-      '<article class="how-work-card explore-how-card" aria-labelledby="explore-step-title">' +
+      '<article class="how-work-card explore-how-card" aria-label="How it works">' +
       '<div class="how-work-card-top"><span class="how-work-number" data-explore-step-n>01 / 03</span><span class="how-work-signal">HOW IT WORKS</span></div>' +
-      '<h2 id="explore-step-title" data-explore-step-title>' + STEPS[0][0] + '</h2><p class="how-work-answer" data-explore-step-text>' + STEPS[0][1] + '</p>' +
       '<div class="how-work-mesh-frame"><canvas class="how-work-mesh" data-explore-fabric aria-hidden="true"></canvas></div>' +
-      '<div class="explore-stepper" role="tablist" aria-label="How it works">' + STEPS.map(function (step, i) {
-        return '<button type="button" role="tab" aria-selected="' + (i === 0) + '" aria-controls="explore-step-title" data-explore-step="' + i + '"><span>0' + (i + 1) + '</span>' + step[3] + '</button>';
-      }).join('') + '</div></article>' +
+      '<div data-explore-steps></div></article>' +
       '<section class="how-work-card explore-live-card" aria-labelledby="explore-live-title">' +
       '<div class="how-work-card-top"><span class="how-work-number">LIVE</span><span class="how-work-signal">READ FROM THE PUBLIC MESH</span></div>' +
       '<h2 id="explore-live-title">Running on the mesh now</h2>' +
@@ -86,6 +105,19 @@
       '<p class="explore-private" data-explore-private hidden></p></section></div>' +
       '<div class="explore-status" role="status" aria-live="polite"><span class="how-boundary-label"><span class="mesh-explorer-status-dot" aria-hidden="true"></span>PUBLIC MESH</span>' +
       '<strong data-explorer-status>Connecting…</strong><span data-explorer-message>Reading the public mesh.</span></div>';
+  }
+  /* The three steps are Ark tabs (a hand-built tablist stood here): the numbered stop is the tab, the step's
+     heading and sentence its panel. The mesh drawing above them is shared and follows the chosen step
+     (setup()). `was` keeps what the hand-built stepper's elements were keyed as: the tab strip, its three
+     buttons (their words, "01Shape", are the tab labels) and the first step's heading and sentence. */
+  var STEPPER = 'page:/div:1/div:2/article:1';
+  function stepsSpec() {
+    return { block: 'tabs', id: 'explore-steps', was: { ':root': STEPPER + '/div:3', 'tabs-trigger': STEPPER + '/div:3/button:1', 'tabs-trigger#2': STEPPER + '/div:3/button:2', 'tabs-trigger#3': STEPPER + '/div:3/button:3' },
+      props: { label: 'How it works', variant: 'segmented', activation: 'automatic', items: STEPS.map(function (step, i) {
+        return { value: 'step-' + (i + 1), label: '0' + (i + 1) + ' ' + step[3], blocks: [{ block: 'section-header', id: 'explore-step-' + (i + 1),
+          was: i === 0 ? { 'section-title': 'id:explore-step-title', 'section-lede': STEPPER + '/p:1' } : undefined,
+          props: { title: step[0], lede: step[1], level: 2 } }] };
+      }) } };
   }
   /* The family's "Every launched resolver, in Explore" (the Explore product), its address from the kit's catalog. */
   function exploreProduct() {
@@ -125,6 +157,7 @@
         home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Your idea, live on the mesh.', density: 'compact',
           lede: 'DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.' } }));
         var live = node('div'); live.innerHTML = cards();
+        live.querySelector('[data-explore-steps]').replaceWith(ctx.render(stepsSpec()));
         while (live.firstChild) home.appendChild(live.firstChild);
         /* the ways on keep the footer's keys: What is a resolver, the family's Explore link (when the kit names it), Browse the raw records */
         var onwardWas = { ':root': { key: FOOT + '/div:2', self: true }, 'button': FOOT + '/div:2/a:1' };
@@ -133,17 +166,69 @@
         home.appendChild(ctx.render({ block: 'actions', id: 'explore-onward', was: onwardWas, props: { label: 'Ways on', items: onward } }));
         return home;
       } },
-      { block: 'custom', id: 'explore-raw-view', was: WAS['explore-raw-view'], mount: function () { var box = node('div'); box.innerHTML = rawView(); return box.firstChild; } }
+      { block: 'custom', id: 'explore-raw-view', was: WAS['explore-raw-view'], mount: rawBox }
     ];
   }
+  /* The raw view's floating panels are Ark's `popover` block (a button that opens a small floating panel: Esc, a press outside,
+     focus leaving or another popover of its group dismisses it, and focus returns to the button): the connection control in the
+     masthead and the four layers of the dock (03-06), one group, so one is open at a time. The dock's open upward (`side: 'top'`;
+     Ark flips a side that lacks room). Their CONTENT is the page's own markup, set in the panel after the block renders: the
+     panel holds blocks, and setup() drives these controls. `pin` is what the <details> a popover replaced was keyed as, and
+     `inner` the key of the element its panel held (an Ark panel adds one level, so that element is pinned by hand). */
+  var RAW_HEADER = 'page:/div:2/div:1/header:1', RAW_DOCK = 'page:/div:2/div:1/nav:1';
+  var POPOVERS = {
+    connect: { label: 'Public mesh', tone: 'secondary', align: 'end', pin: RAW_HEADER + '/details:1', inner: '/section:1',
+      html: '<section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
+        '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
+        '<span data-explore-operator-slot></span></div></section>' },
+    nodes: { label: '03 Node pulse', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:1', inner: '/section:1',
+      html: '<section class="mesh-node-strip" aria-labelledby="mesh-nodes-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">03 / NODE PULSE</p><h2 id="mesh-nodes-title">Public observation points</h2></div><span>REACHABILITY / RESPONSE</span></div><div class="mesh-explorer-nodes" data-explorer-nodes></div></section>' },
+    ledger: { label: '04 Record ledger', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:2', inner: '/section:1',
+      html: '<section class="mesh-explorer-data" aria-labelledby="mesh-data-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">04 / RECORD LEDGER</p><h2 id="mesh-data-title">Records from the selected source</h2></div><span>REFRESHES EVERY 10 SECONDS</span></div>' +
+        '<p class="mesh-explorer-result-message" data-explorer-result-message>Records appear once the node answers. No sample data is substituted.</p>' +
+        '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section>' },
+    details: { label: '05 Observation details', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:3', inner: '/div:1',
+      html: '<div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div>' },
+    topology: { label: '06 Operator topology', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:4', inner: '/div:1',
+      html: '<div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="' + docHref('docs/operators/verification.md') + '" data-scene-link="reference">How to verify an observation →</a> · <a href="' + docHref('docs/evidence/registry.md') + '" data-scene-link="reference">Evidence registry →</a></p></div>' }
+  };
+  /* The optional operator key: a password field the page reads by id (setup()), in the disclosure's slot. Its label keeps the old key. */
+  function operatorKey() {
+    var box = node('div');
+    box.innerHTML = '<label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources">';
+    box.firstChild.setAttribute('data-ark-layout-pin', POPOVERS.connect.pin + '/section:1/div:1/details:1/label:1');
+    return box;
+  }
+  function rawBox(ctx) {
+    var box = node('div'); box.innerHTML = rawView();
+    box.querySelector('[data-explore-raw-back-slot]').replaceWith(ctx.render({ block: 'actions', id: 'explore-raw-back', was: { button: 'page:/div:2/nav:1/button:1' }, props: { label: 'Back', items: [{ label: '← Mesh Explorer', action: 'explore-raw-back', tone: 'secondary' }] } }));
+    Array.from(box.querySelectorAll('[data-explore-popover]')).forEach(function (slot) {
+      var def = POPOVERS[slot.getAttribute('data-explore-popover')], name = slot.getAttribute('data-explore-popover');
+      var pop = ctx.render({ block: 'popover', id: 'explore-pop-' + name, was: { ':root': def.pin, 'popover-trigger': { key: def.pin + '/summary:1', self: true }, '.ark-btn__label': { key: def.pin + '/summary:1/span:2', self: true }, 'popover-panel': { key: def.pin + '/panel', self: true } },
+        props: Object.assign({ label: def.label, tone: def.tone, align: def.align, group: 'explore-raw', content: def.label }, def.side ? { side: def.side } : {}) });
+      var panel = pop.querySelector('[data-ark-part="popover-panel"]'), body = node('div');
+      body.innerHTML = def.html;
+      var content = body.firstChild;
+      content.setAttribute('data-ark-layout-pin', def.pin + def.inner);
+      panel.replaceChildren(content);
+      if (name === 'connect') {
+        pop.querySelector('.ark-btn__label').setAttribute('data-explorer-origin-label', '');
+        /* "Operator access" is Ark's disclosure around the page's own key field (the slot); it was a <details> in the old panel. */
+        var access = def.pin + '/section:1/div:1/details:1';
+        content.querySelector('[data-explore-operator-slot]').replaceWith(ctx.render({ block: 'disclosure', id: 'explore-operator-access',
+          was: { ':root': access, 'disclosure-trigger': { key: access + '/summary:1', self: true } },
+          props: { slot: 'explore-operator', more: 'Operator access', less: 'Operator access', foldBelow: 'always', preview: 0 } }));
+      }
+      if (def.dock) slot.replaceWith(pop); else slot.appendChild(pop);
+    });
+    return box.firstChild;
+  }
   function rawView() {
-    return '<div class="explore-raw" data-explore-raw hidden><nav class="content-layer-path how-path" aria-label="Your place"><button type="button" class="explore-raw-back" data-explore-raw-back>← Mesh Explorer</button><span aria-current="page">Raw records</span></nav><div class="mesh-explorer-shell">' +
+    return '<div class="explore-raw" data-explore-raw hidden><nav class="content-layer-path how-path" aria-label="Your place"><span data-explore-raw-back-slot></span><span aria-current="page">Raw records</span></nav><div class="mesh-explorer-shell">' +
         '<header class="mesh-explorer-header">' +
         '<aside class="mesh-explorer-live-panel" aria-label="Current observation">' +
         '<div class="mesh-explorer-metrics"><div><span>Connection</span><strong data-explorer-connection>Offline</strong></div><div><span>Declared sources</span><strong data-explorer-sources>—</strong></div><div><span>Observed</span><strong data-explorer-observed>—</strong></div><div><span>Coverage</span><strong data-explorer-coverage>—</strong></div></div></aside>' +
-        '<details class="mesh-connect-popover"><summary aria-label="Observation controls"><span class="mesh-connect-dot" aria-hidden="true"></span><span data-explorer-origin-label>Public mesh</span></summary><section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
-        '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
-        '<details class="mesh-operator-access"><summary>Operator access</summary><label for="mesh-operator-key">Optional key <span>memory only</span></label><input id="mesh-operator-key" type="password" autocomplete="off" spellcheck="false" placeholder="Unlock operator-only sources"></details></div></section></details></header>' +
+        '<span class="mesh-connect-slot" data-explore-popover="connect"></span></header>' +
         '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head mesh-source-head"><h2 id="mesh-glance-title"><span class="mesh-explorer-kicker">01</span>What this node exposes</h2>' +
         '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><span class="mesh-source-stamp" data-explorer-glance-stamp>—</span></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
         '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
@@ -151,12 +236,7 @@
         '<div class="mesh-explorer-controls"><label for="mesh-source">Selected source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
         '<form data-explorer-lookup><label for="mesh-record-id">Exact record ID<input id="mesh-record-id" type="search" autocomplete="off" placeholder="Paste an exact record ID" disabled></label><button type="submit" disabled>Inspect</button></form><div class="mesh-inspect-result" role="status" aria-live="polite" data-explorer-inspect-result hidden></div></div>' +
         '<p class="mesh-explorer-boundary">A returned record is evidence from this Miner, not automatic proof of a production deployment.</p></aside></section>' +
-        '<nav class="mesh-observatory-dock" aria-label="Observation layers"><details class="mesh-observatory-popover"><summary><span>03</span> Node pulse</summary><section class="mesh-node-strip" aria-labelledby="mesh-nodes-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">03 / NODE PULSE</p><h2 id="mesh-nodes-title">Public observation points</h2></div><span>REACHABILITY / RESPONSE</span></div><div class="mesh-explorer-nodes" data-explorer-nodes></div></section></details>' +
-        '<details class="mesh-observatory-popover"><summary><span>04</span> Record ledger</summary><section class="mesh-explorer-data" aria-labelledby="mesh-data-title"><div class="mesh-explorer-section-head"><div><p class="mesh-explorer-kicker">04 / RECORD LEDGER</p><h2 id="mesh-data-title">Records from the selected source</h2></div><span>REFRESHES EVERY 10 SECONDS</span></div>' +
-        '<p class="mesh-explorer-result-message" data-explorer-result-message>Records appear once the node answers. No sample data is substituted.</p>' +
-        '<div class="mesh-explorer-records" data-explorer-records></div><div class="mesh-explorer-detail" data-explorer-detail hidden></div></section></details>' +
-        '<details class="mesh-observatory-popover mesh-explorer-secondary"><summary><span>05</span> Observation details</summary><div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div></details>' +
-        '<details class="mesh-observatory-popover mesh-explorer-reference"><summary><span>06</span> Operator topology</summary><div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="' + docHref('docs/operators/verification.md') + '" data-scene-link="reference">How to verify an observation →</a> · <a href="' + docHref('docs/evidence/registry.md') + '" data-scene-link="reference">Evidence registry →</a></p></div></details></nav>' +
+        '<nav class="mesh-observatory-dock" aria-label="Observation layers"><span data-explore-popover="nodes"></span><span data-explore-popover="ledger"></span><span data-explore-popover="details"></span><span data-explore-popover="topology"></span></nav>' +
         /* Anchor for reusable content blocks (js/content/components.js); rendering into it is
            centralized in js/main.js's onMount hook, not called here. It stays where it was (inside
            the raw view), so components saved against it keep their place. */
@@ -167,11 +247,13 @@
   ArkUI.pageModules.explorer = {
     spec: spec,
     mount: function (host) {
-      var page = ArkUI.page(spec(), host, { page: 'explorer', className: 'mesh-explorer-page explore-page', titleId: 'mesh-explorer-title' });
+      var page = ArkUI.page(spec(), host, { page: 'explorer', className: 'mesh-explorer-page explore-page', titleId: 'mesh-explorer-title', slots: { 'explore-operator': operatorKey } });
       page.dataset.view = 'home';
       /* "Browse the raw records" is Ark's action button; setup() opens the raw view from it. */
       var open = page.querySelector('#explore-onward [data-action="explore-raw"]');
       if (open) open.setAttribute('data-explore-raw-open', '');
+      var rawBack = page.querySelector('[data-action="explore-raw-back"]');
+      if (rawBack) rawBack.setAttribute('data-explore-raw-back', '');
       if (page.querySelector('[data-explorer-connect]')) setup(page);
       return page;
     }
@@ -200,31 +282,36 @@
     var glance = $('.mesh-observatory');
     var browseBox = $('[data-explore-browse]'), browsing = { category: null, source: null, token: 0 };
     var kindsBox = $('[data-explore-kinds]'), privateLine = $('[data-explore-private]'), raw = $('[data-explore-raw]'), liveCounts = {};
-    var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stepTimer = 0, step = 0;
+    var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stepTimer = 0, step = 0, stepObserver = null;
     var fabricCanvas = $('[data-explore-fabric]');
     var fabric = ArkUI.createMeshFabric && fabricCanvas.getContext ? ArkUI.createMeshFabric(fabricCanvas) : null;
-    function showStep(index, focus) {
-      step = (index + STEPS.length) % STEPS.length;
-      Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
-        var on = Number(tab.dataset.exploreStep) === step; tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1;
-        if (on && focus) tab.focus();
-      });
-      $('[data-explore-step-n]').textContent = '0' + (step + 1) + ' / 0' + STEPS.length;
-      $('[data-explore-step-title]').textContent = STEPS[step][0];
-      $('[data-explore-step-text]').textContent = STEPS[step][1];
+    /* The steps are Ark tabs: the primitive owns the click and the arrow keys; this follows the result. The mesh
+       drawing and the "01 / 03" count are the page's own and follow the tab that is selected. */
+    var stepTabs = Array.from(page.querySelectorAll('#explore-steps [data-ark-part="tabs-trigger"]')), selfMoving = false;
+    function selectedStep() {
+      for (var i = 0; i < stepTabs.length; i++) if (stepTabs[i].getAttribute('aria-selected') === 'true') return i;
+      return 0;
+    }
+    function paintStep() {
+      step = selectedStep();
+      var count = $('[data-explore-step-n]'); if (count) count.textContent = '0' + (step + 1) + ' / 0' + STEPS.length;
       if (fabric) fabric.select(STEPS[step][2], true, true);
     }
+    /* Moving the tab goes through the primitive (a click), never by hand. */
+    function showStep(index) { var next = (index + STEPS.length) % STEPS.length; if (stepTabs[next] && next !== selectedStep()) { selfMoving = true; stepTabs[next].click(); selfMoving = false; } }
     window.setTimeout(function () { if (fabric && page.isConnected) fabric.select(STEPS[step][2], true, true); }, 60);
     /* The steps play once through on their own, and stop for good the moment someone picks one. */
     function stopSteps() { window.clearInterval(stepTimer); stepTimer = 0; }
-    Array.from(page.querySelectorAll('[data-explore-step]')).forEach(function (tab) {
-      tab.addEventListener('click', function () { stopSteps(); showStep(Number(tab.dataset.exploreStep)); });
-      tab.addEventListener('keydown', function (event) {
-        var move = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
-        if (!move) return; event.preventDefault(); stopSteps(); showStep(step + move, true);
-      });
-    });
-    if (!(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) stepTimer = window.setInterval(function () {
+    if (stepTabs.length) {
+      var stepList = stepTabs[0].parentNode;
+      /* any change of the selected tab (a click or an arrow key) repaints; one the person made also stops the tour */
+      if (typeof MutationObserver === 'function') {
+        stepObserver = new MutationObserver(function () { if (selectedStep() === step) return; if (!selfMoving) stopSteps(); paintStep(); });
+        stepObserver.observe(stepList, { attributes: true, attributeFilter: ['aria-selected'], subtree: true });
+      }
+      stepList.addEventListener('click', function () { if (!selfMoving) stopSteps(); if (selectedStep() !== step) paintStep(); });
+    }
+    if (stepTabs.length && !(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) stepTimer = window.setInterval(function () {
       if (step === STEPS.length - 1 || !page.isConnected) { stopSteps(); return; }
       if (document.visibilityState !== 'hidden') showStep(step + 1);
     }, 5200);
@@ -252,18 +339,6 @@
     var records = $('[data-explorer-records]');
     var detail = $('[data-explorer-detail]');
     var topology = $('[data-explorer-topology]');
-    var popovers = Array.from(page.querySelectorAll('.mesh-observatory-popover,.mesh-connect-popover'));
-    popovers.forEach(function (popover) {
-      popover.addEventListener('toggle', function () {
-        if (!popover.open) return;
-        popovers.forEach(function (other) { if (other !== popover) other.open = false; });
-      });
-    });
-    page.addEventListener('keydown', function (event) {
-      if (event.key !== 'Escape' || !popovers.some(function (popover) { return popover.open; })) return;
-      event.preventDefault(); event.stopPropagation();
-      popovers.forEach(function (popover) { popover.open = false; });
-    });
     var fallbackDetail = detail, selectedBox = null, selectedContents = [], boxMotion = null;
     function settleBox() { if(boxMotion){boxMotion.cancel();boxMotion=null;} }
     function animateBox(box, before) {
@@ -586,7 +661,7 @@
       });
       function counted(c) {
         return groups[c].filter(function (item) { return liveCounts[item.id]; }).map(function (item) {
-          var r = liveCounts[item.id]; return r.count + (r.capped ? '+' : '') + ' ' + (COUNT_WORDS[item.id] || item.id);
+          var r = liveCounts[item.id]; return countPhrase(r.count, r.capped, COUNT_WORDS[item.id] || item.id);
         });
       }
       function weight(c) { return groups[c].reduce(function (sum, item) { return sum + (liveCounts[item.id] ? liveCounts[item.id].count : 0); }, 0); }
@@ -638,8 +713,7 @@
       browseBox.id = 'explore-browse'; browseBox.hidden = false; browseBox.replaceChildren(); liveBody.dataset.state = 'browse';
       var head = node('div', 'explore-browse-head'), icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
       var title = node('div', 'explore-browse-title'); title.appendChild(node('h3', '', kind[0])); title.appendChild(node('p', '', kind[1]));
-      var close = node('button', 'explore-browse-close', '← All kinds'); close.type = 'button';
-      close.addEventListener('click', function () { var c = browsing.category; closeBrowse(); var tile = kindsBox.querySelector && kindsBox.querySelector('[data-category="' + c + '"]'); if (tile) tile.focus(); });
+      var close = backAction('← All kinds', 'explore-browse-close', function () { var c = browsing.category; closeBrowse(); var tile = kindsBox.querySelector && kindsBox.querySelector('[data-category="' + c + '"]'); if (tile) tile.focus(); });
       head.appendChild(close); head.appendChild(icon); head.appendChild(title); browseBox.appendChild(head);
       if (list.length > 1) {
         var tabs = node('div', 'explore-browse-tabs'); tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', kind[0] + ' sources');
@@ -677,8 +751,7 @@
       } catch (error) { if (token === browsing.token) body.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
     }
     async function showBrowseRecord(item, record, body, token) {
-      var back = node('button', 'explore-record-back', '← All ' + humanField(item.label || item.id).toLowerCase()); back.type = 'button';
-      back.addEventListener('click', function () { browseKind(browsing.category, item.id); });
+      var back = backAction('← All ' + humanField(item.label || item.id).toLowerCase(), 'explore-record-back', function () { browseKind(browsing.category, item.id); });
       var card = node('article', 'explore-record-open');
       var top = node('div', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state)); top.appendChild(node('span', '', ago(record.updatedAt)));
       card.appendChild(top); card.appendChild(node('h4', '', recordTitle(record))); card.appendChild(node('p', 'explore-record-id', safeString(record.id)));
@@ -726,8 +799,7 @@
         Array.from(records.children).forEach(function(item){item.hidden=item!==origin;item.inert=item!==origin;});
       }
       detail.replaceChildren();
-      var back = node('button', 'mesh-explorer-back', 'Back to records'); back.type = 'button';back.dataset.icon='arrow-left';
-      back.addEventListener('click', function () { restoreRecord(true,true); });
+      var back = backAction('← Back to records', 'mesh-explorer-back', function () { restoreRecord(true,true); });
       detail.appendChild(back);
       detail.appendChild(node('p', 'mesh-explorer-kicker', '04 / RECORD DETAIL'));
       detail.appendChild(node('h3', '', record.id));
@@ -1005,7 +1077,7 @@
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });
     source.addEventListener('change', function () { chooseSource(source.value, true); });
     lookup.addEventListener('submit', function (event) { event.preventDefault(); inspect(recordId.value.trim()); });
-    page._explorerCleanup = function () { clearLive(); stopSteps(); if (fabric) fabric.dispose(); key.value = ''; };
+    page._explorerCleanup = function () { clearLive(); stopSteps(); if (stepObserver) stepObserver.disconnect(); if (fabric) fabric.dispose(); key.value = ''; };
     /* Start reading as soon as the page is on screen; no button press needed for the public mesh. */
     window.setTimeout(function () { if (page.isConnected && !connected && !busy) start(); }, 0);
   }

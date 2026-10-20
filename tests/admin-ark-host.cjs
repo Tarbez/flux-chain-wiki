@@ -115,6 +115,31 @@ for (const withKit of [true, false]) {
     }
     root.remove();
   }
+  /* ---- tabs over elements the page already has (the rail's five tabs; docs/ux-audit/cms.md P2-7: the rail
+     tabs were hand-wired, with their own arrow-key handler, beside Ark's tabs everywhere else) ---- */
+  {
+    const list = doc.createElement('div'), values = ['pages', 'layers', 'lib'];
+    const triggers = values.map((v) => { const b = doc.createElement('button'); b.id = 'tab-' + v; b.textContent = v; list.appendChild(b); return b; });
+    const panels = values.map((v) => { const d = doc.createElement('div'); d.id = 'pane-' + v; doc.body.appendChild(d); return d; });
+    doc.body.appendChild(list);
+    const picked = [];
+    const tabs = w.arkTabsOn({ list, triggers, panels, values, value: 'layers', onChange: (v) => picked.push(v) });
+    assert.deepEqual(triggers.map((t) => t.getAttribute('aria-selected')), ['false', 'true', 'false'], 'the asked-for tab is selected');
+    assert.deepEqual(triggers.map((t) => t.getAttribute('role')), ['tab', 'tab', 'tab'], 'each trigger is a tab (ids are kept: ' + triggers.map((t) => t.id) + ')');
+    assert.deepEqual(panels.map((p) => p.hidden), [true, false, true], 'only its pane shows');
+    assert.deepEqual(triggers.map((t) => t.tabIndex), [-1, 0, -1], 'one tab stop');
+    assert.deepEqual(picked, [], 'wiring reports nothing');
+    triggers[2].click();
+    assert.deepEqual(picked, ['lib'], 'a click reports the person\'s choice once');
+    assert.deepEqual(panels.map((p) => p.hidden), [true, true, false]);
+    tabs.select('pages');
+    assert.deepEqual(picked, ['lib'], 'select() for a change made by another route reports nothing');
+    assert.deepEqual(triggers.map((t) => t.getAttribute('aria-selected')), ['true', 'false', 'false'], 'and moves the selection');
+    triggers[0].focus(); key(w, triggers[0], 'ArrowRight');
+    assert.equal(doc.activeElement, triggers[1], 'the arrow keys move between the tabs');
+    assert.equal(picked[picked.length - 1], 'layers', 'and select the tab they land on');
+    list.remove(); panels.forEach((p) => p.remove());
+  }
   /* ---- accordion over sections (the Library's groups) ---- */
   {
     const list = doc.createElement('div');

@@ -38,6 +38,7 @@ var ArkVersionsPanel = (function () {
   function create(env) {
     var h = env.h, root = env.root;
     var entries = [], next = null, bySeq = {}, previewing = null, loading = false;
+    var currentContent = '';   /* the content address of what the project folder holds now (savedSnapshot): the version with it is "Current" */
 
     function short(hash) { return hash ? hash.slice(0, 12) : ''; }
     function when(at) { var d = new Date(at); return isNaN(d) ? at : d.toLocaleString(); }
@@ -78,6 +79,8 @@ var ArkVersionsPanel = (function () {
     root.appendChild(list);
     root.appendChild(more);
 
+    /* the version whose content is what the project folder holds now; the newest if two share it */
+    function currentEntry() { return currentContent ? entries.filter(function (e) { return e.record.content === currentContent; })[0] || null : null; }
     function seqOf(hash) { return bySeq[hash] ? '#' + bySeq[hash] : short(hash); }
 
     function branchName(n) { return n < 26 ? String.fromCharCode(65 + n) : String(n + 1); }
@@ -106,7 +109,7 @@ var ArkVersionsPanel = (function () {
       var head = h('div', { class: 'version-head' },
         h('span', { class: 'version-seq', text: '#' + rec.seq }),
         h('span', { class: 'version-kind', 'data-kind': rec.kind, text: KIND_WORDS[rec.kind] || rec.kind }),
-        entry === entries[0] && !entry.forked ? h('span', { class: 'version-kind', 'data-kind': 'latest', title: 'The newest version: what the project folder holds now, unless something changed since', text: 'Latest' }) : null,
+        entry === currentEntry() ? h('span', { class: 'version-kind', 'data-kind': 'current', title: 'The version your site is at: its pages, articles and settings are exactly what is saved in the project folder now', text: 'Current' }) : null,
         rec.restoredFrom ? h('span', { class: 'version-kind', 'data-kind': 'restore', title: 'Supersedes: made by restoring ' + rec.restoredFrom, text: 'restores ' + seqOf(rec.restoredFrom) }) : null,
         rec.importedFrom ? h('span', { class: 'version-kind', 'data-kind': 'imported', title: 'Imported from the exported version ' + rec.importedFrom, text: 'from ' + short(rec.importedFrom) }) : null,
         joins.length ? h('span', { class: 'version-kind', 'data-kind': 'joined', title: 'Joins the versions saved at the same time on another branch: ' + joins.join(', '), text: 'joins ' + joins.map(seqOf).join(', ') }) : null,
@@ -124,9 +127,16 @@ var ArkVersionsPanel = (function () {
         rest = env.disclosure ? env.disclosure({ label: restLabel, content: restList, className: 'dev-details' })
           : h('details', { class: 'version-more' }, h('summary', { text: restLabel }), restList);
       }
+      /* Restore is offered where it does something: the Current version IS the saved site, so with
+         nothing unsaved there is nothing to restore -- said in words instead of a button that runs
+         and changes nothing (docs/ux-audit/cms.md P1-15). With unsaved changes it stays, and says
+         it throws them away. */
+      var isCurrent = entry === currentEntry(), dirtyNow = !!(env.anyDirty && env.anyDirty());
       var actions = h('div', { class: 'version-actions' },
-        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'preview', text: previewing === entry.hash ? 'Showing on the canvas' : 'Look at it', title: 'Show this version on the canvas without changing anything', disabled: previewing === entry.hash, onclick: function () { preview(entry); } }),
-        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'restore', text: 'Bring it back', title: 'Load this version as your unsaved changes; Save keeps it', onclick: function () { restore(entry); } }));
+        h('button', { type: 'button', class: 'btn tiny', 'data-action': 'preview', text: previewing === entry.hash ? 'Showing on the canvas' : 'Preview', title: 'Show this version on the canvas without changing anything', disabled: previewing === entry.hash, onclick: function () { preview(entry); } }),
+        isCurrent && !dirtyNow ? h('span', { class: 'version-here', text: 'Your site is at this version.' })
+          : h('button', { type: 'button', class: 'btn tiny', 'data-action': 'restore', text: isCurrent ? 'Discard unsaved changes' : 'Restore this version',
+            title: isCurrent ? 'Go back to this version: your unsaved changes are replaced by it, as unsaved changes' : 'Load this version as unsaved changes. Nothing is written until you Save.', onclick: function () { restore(entry); } }));
       var addressList = h('dl', {},
           h('dt', { text: 'Version' }), h('dd', { class: 'mono', text: entry.hash }),
           h('dt', { text: 'Content' }), h('dd', { class: 'mono', text: rec.content }),
@@ -170,6 +180,8 @@ var ArkVersionsPanel = (function () {
       }
       loading = true;
       try {
+        try { currentContent = await ArkVersions.address((await ArkVersions.addressSnapshot(env.savedSnapshot())).items); }
+        catch (e) { currentContent = ''; }   /* no marker rather than a wrong one */
         var page = await ArkVersions.list(dir, { from: older ? next : null, limit: 20 });
         entries = older ? entries.concat(page.entries) : page.entries;
         next = page.next;

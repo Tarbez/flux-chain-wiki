@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("the-grammar-does-almost-no-work", {
   "core": "A transfer is five short lines of text. The parser splits each on a dash and nothing more; each block's own resolver decides what it means only when it is reached. Measured on a busy server, that whole layer is about 2 percent of the work.",
-  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Read this to understand what the registered grammar is, why it is built this way, and what it can and cannot make faster.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Read this to understand what the registered grammar is, why it is built this way, and what it can and cannot make faster. A closing section on a resolver's own grammar was added on 2026-10-20.",
   "reviewed": "2026-10-07",
   "evidenceLabel": "BENCH-003 section 14: the real grammar, measured",
   "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
@@ -16,7 +16,8 @@ LearningContent.load("the-grammar-does-almost-no-work", {
     "How do records point at each other?",
     "What needs an order?",
     "What does it refuse?",
-    "Where does the speed come from?"
+    "Where does the speed come from?",
+    "What can a resolver add of its own?"
   ],
   "sections": [
     [
@@ -59,6 +60,12 @@ LearningContent.load("the-grammar-does-almost-no-work", {
       "Where the speed comes from, and where it does not",
       "It does not come from size. A transfer in this grammar is about 2,500 characters across five records, more than the 1,560 bytes of JSON the old version sent in three. The gain came from dropping HTTP, not rebuilding trees, and not re-serializing, which took one server from about 1,900 transfers a second to about 5,000 on the same four cores.",
       "What is left is cryptography. Signatures are about 55 percent of the server, which is why batch checking and removing signatures that are not needed are the next steps, not a faster parser."
+    ],
+    [
+      "A resolver can add a second grammar of its own",
+      "Everything above is the base grammar, the one every record on the network shares. A resolver chain can also publish a narrower grammar of its own when it is launched. It says which kinds of record that resolver accepts and which fields each kind carries.",
+      "The network compiles that grammar at launch, and applies it after the signature check and before a record goes to any peer. A record that does not fit is refused, with what failed, what is missing and how to fix it. A launch whose grammar cannot be compiled is refused too.",
+      "Some resolvers publish no grammar the network can check. They are listed as Unspecified: their records are admitted without being checked. The dated list on the Resolvers and capabilities page (/resolvers) shows which resolvers are which."
     ]
   ],
   "numbers": false
