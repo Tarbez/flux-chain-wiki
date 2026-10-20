@@ -333,17 +333,17 @@ test('the optional blocks are chunks: absent from the public kit and its resolve
   // only (the popover alone, 3.2 KB, for a page that takes no input). A chunk that registered its blocks but not their resolvers would
   // render nothing on the page ("[ArkUI] unresolved resolver") with every block route's tests green.
   const FORM = ['field', 'form', 'list', 'status-line', 'choice'], POPOVER = ['popover'];
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 23, 'the public kit holds the 23 core blocks');
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 21, 'the public kit holds the 21 core blocks');
   for (const name of FORM.concat(POPOVER)) assert.equal(ArkUI.blocks.resolvers.includes(ArkUI.blocks.resolverId(name)), false, name + ' is not a resolver before its chunk');
   assert.equal(ArkUI.blocks.formsScript, 'js/ark/vendor/ark-kit-forms.js');
   assert.equal(ArkUI.blocks.popoverScript, 'js/ark/vendor/ark-kit-popover.js');
   const before = ArkUI.build({ resolver: 'ARK_BLOCK_FORM', props: {}, children: [] }, { mounts: [], emerge: [] });
   assert.equal(before, null, 'without the chunk a saved form block is unresolved, not a thrown page');
   run(ArkUI.blocks.popoverScript);
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 24, 'the popover chunk adds the popover and no form block');
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 22, 'the popover chunk adds the popover and no form block');
   assert(ArkUI.blocks.resolvers.includes('ARK_BLOCK_POPOVER') && !ArkUI.blocks.resolvers.includes('ARK_BLOCK_FORM'));
   run(ArkUI.blocks.formsScript);
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 29);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 27);
   assert.equal(window.ArkKitForms.FORM_BLOCK_NAMES.length, 5);
   for (const name of FORM.concat(POPOVER)) assert(ArkUI.blocks.resolvers.includes(ArkUI.blocks.resolverId(name)), name + ' is a resolver after its chunk (ArkUI.blocks.sync)');
   assert.deepEqual(JSON.parse(JSON.stringify(ArkUI.blocks.resolvers)), [...ArkKit.ARK_BLOCK_NAMES].map(ArkUI.blocks.resolverId), 'and the list is still the kit\'s, derived');
@@ -360,7 +360,7 @@ test('the optional blocks are chunks: absent from the public kit and its resolve
   assert.deepEqual(heard.map((d) => [d.action, d.values.name, d.block]), [['lookup', 'radio.fxn', 'form']], 'the page handler gets { action, values } and nothing posts');
   // Loaded again (a route lists it and the loader adds it): harmless.
   run(ArkUI.blocks.formsScript); run(ArkUI.blocks.popoverScript);
-  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 29);
+  assert.equal(ArkKit.ARK_BLOCK_NAMES.length, 27);
   root.remove();
 });
 
@@ -380,10 +380,10 @@ test('the optional blocks are chunks: absent from the public kit and its resolve
     await sandbox.ArkUI.loadPage('x', { path: '/x', module: 'm', scripts: ['js/pages/x.js'] });
     return loads;
   };
-  const CHUNK = 'js/ark/vendor/ark-kit-forms.js', POP = 'js/ark/vendor/ark-kit-popover.js';
+  const CHUNK = 'js/ark/vendor/ark-kit-forms.js', POP = 'js/ark/vendor/ark-kit-popover.js', FIG = 'js/ark/vendor/ark-kit-figures.js';
   pending.push((async () => {
     const saved = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_FORM');
-    assert.deepEqual(saved, ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js', CHUNK, POP, 'js/pages/x.js'], 'a saved block the kit has no resolver for: the chunks come after the adapter, before the page (a fake kit here: it never learns the name)');
+    assert.deepEqual(saved, ['js/ark/dash-kit.js', 'js/ark/vendor/ark-kit-public.js', 'js/ark/blocks.js', CHUNK, POP, FIG, 'js/pages/x.js'], 'a saved block the kit has no resolver for: the chunks come after the adapter, before the page (a fake kit here: it never learns the name)');
     const learnt = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_FORM', '', { [CHUNK]: 'ARK_BLOCK_FORM' });
     assert(learnt.includes(CHUNK) && !learnt.includes(POP), 'once the forms chunk teaches the kit the resolver, the popover chunk is not loaded: derived from the kit, not from names');
     const popOnly = await loadRoute(['ARK_BLOCK_HERO'], 'ARK_BLOCK_POPOVER', '', { [POP]: 'ARK_BLOCK_POPOVER' });

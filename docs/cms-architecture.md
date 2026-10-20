@@ -508,7 +508,7 @@ converts the site page by page this way; `/palette` is the worked pilot (`js/pag
 
 | file | where | carries |
 |---|---|---|
-| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup`, `patchArkBlock`, `arkConfirm`, `createArkAlertDialog` and `createArkModalHost` are refusals (a public page's floating panel is the `popover` block, from the forms chunk, not `createArkPopover`) that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. Its registry is ark-ui's CORE (23 blocks, with `lane` and `band` since 0.2.11; `@deadark/ark-ui/blocks/core`; `createArkDomHost` is the core host, no focus scopes or dismissable layers). 25.1 KB gz (26.9 before W3-BUDGET, 24.0 before W4-ARK, 24.5 before W5-ARK) |
+| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup`, `patchArkBlock`, `arkConfirm`, `createArkAlertDialog` and `createArkModalHost` are refusals (a public page's floating panel is the `popover` block, from the forms chunk, not `createArkPopover`) that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. Its registry is ark-ui's CORE (21 blocks; `@deadark/ark-ui/blocks/core`; `createArkDomHost` is the core host, no focus scopes or dismissable layers). 25.1 KB gz (26.9 before W3-BUDGET, 24.0 before W4-ARK, 24.5 before W5-ARK) |
 | `js/ark/vendor/ark-kit-forms.js` | a page that takes input (listed after the kit in the route's scripts; the loader adds it in the editor's canvas and for a saved form block the kit has no resolver for) | ark-ui's `@deadark/ark-ui/blocks/forms` alone (`field`, `form`, `list`, `status-line`, `choice`), registered into the public kit's registry by `ArkKit.registerArkBlocks`, then `ArkUI.blocks.sync()` registers their resolvers (so it may load before or after `js/ark/blocks.js`). A second load registers nothing twice. Editor help stripped like the kit's. Global `ArkKitForms`. 4.8 KB gz |
 | `js/ark/vendor/ark-kit-popover.js` | a page that floats a panel and takes no input (`/explore`); the same loading rules | ark-ui's `@deadark/ark-ui/blocks/popover` alone: the `popover` block and `withArkOverlays` (the host's focus scope and dismissable layer). Global `ArkKitPopover`. 3.2 KB gz. A page that uses both lists both (the overlay half is then in the popover chunk only). The loader loads the forms chunk, asks the kit again, then the popover chunk: derived from the kit's resolvers, never a name list |
 | `js/ark/vendor/ark-kit-live.js` | a page's first `ArkUI.blocks.update` (today / and /stats) | `patchArkBlock` alone (ark-ui 0.2.7's `blocks/patch`, `patchArkBlockIn(registry, …)`, bound to the loaded `ArkKit.ARK_BLOCKS`), global `ArkKitLive`. Loaded by the adapter, never listed by a route. 1.4 KB gz |
@@ -609,7 +609,7 @@ each carries its own copy of the small events helper (the popover chunk also `wi
 chunk it loads 3.20 (-3.55). A page that uses both pays +1.2 over the old single chunk. Measured and rejected: all six in
 `createArkPopover`'s form (a popover through the primitive is +1.4 KB gz in a public bundle alone).
 
-**W5-ARK (2026-10-20): @deadark/ark-ui 0.2.11, @deadark/sdk 0.2.42.** Five parts, all in the core kit except where noted:
+**W5-ARK (2026-10-20): @deadark/ark-ui 0.2.12, @deadark/sdk 0.2.43** (0.2.11 put `lane` and `band` in the core registry; 0.2.12 moved them to `js/ark/vendor/ark-kit-figures.js`, see the end of this entry). Five parts, all in the core kit except where noted:
 `field` number `step: 'any'` (the page no longer sets the attribute by hand); a styled `select` arrow on SDK tokens (the
 control stays a native `<select>`; forced colours keep the system's); `disclosure` breakpoint folds (`foldBelow` tablet or
 phone) carry `hidden="until-found"` while closed where the browser has `onbeforematch`, so find-in-page reaches their text and
@@ -632,6 +632,18 @@ Only the kit and the forms chunk moved, so each route of the minified-scripts ta
 
 The component bills of the W4-ARK table move the same way: a block route 28.58 -> 29.19, block + live 29.99 -> 30.60
 (0.60 over the +30 component sum; the route totals above are the budget and stay inside it).
+
+**W5-ARK 0.2.12: lane and band are a lazy chunk.** In 0.2.11 the core kit grew 0.61 KB and ten block+terms routes landed at
+30.04-30.62 (`tests/glossary-routes.cjs`). `lane` and `band` are drawn only by `js/pages/resolver-page-parts.js` (/what-is-a-resolver,
+/how-deployment-works, /dao, /chain), so they are now `@deadark/ark-ui/blocks/figures` -> `js/ark/vendor/ark-kit-figures.js`
+(`scripts/ark-kit-figures-entry.js`, `ArkUI.blocks.figuresScript`, in the page loader's optional chunks, listed in those four routes'
+scripts before the parts). Measured `gzip -9`, this Mac, 2026-10-20: kit-public 24.66 (24.48 at 3588f78; +0.18 is the findable
+folds and `alignRows`), adapter 4.09, figures chunk 1.35, forms 4.93, `ark-blocks.css` 9.32. Block route (kit + adapter) 28.75.
+Block + terms: 10 routes were over, now two are: resolvers 30.18 and stats 30.02 (glossary 1.44 and 1.27). Without any 0.2.11 feature the
+same routes measure 30.01 (the glossary files grew on main), so the remaining 0.18 is not this work's; closing it needs ~0.19 KB out of the
+kit, adapter or those glossaries. Figure routes pay their chunk: /chain 30.10, /what-is-a-resolver 31.01, /how-deployment-works 31.03,
+/dao 31.12 (kit + adapter + glossary + figures), 0.9 more than with `lane`/`band` in the core (the chunk carries its own copies of the
+eyebrow renderer and the block objects: 2.9 KB raw, 1.35 gz, against 0.43 marginal in the core).
 
 **W5-MIN (2026-10-20): page scripts are served minified.** Owner decision after `/account` measured +42.8 KB
 gz of added JS and `/explore` was over R2. The commented source (`js/pages/*.js`, the per-route `js/ark/*` and
