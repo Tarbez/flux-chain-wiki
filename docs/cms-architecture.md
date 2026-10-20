@@ -1083,3 +1083,11 @@ is the out-of-memory pattern.
   `pageRow` (a Pages-tree row), `openPageFields` / `sheetBody` / `closeSheet`, `openPageSeo`,
   `openSiteSeo`, `openBackground`, `clickHeader`. `appFrame` waits for `#lensDesignBtn` and
   `window.ArkAdminApp`.
+
+**Named exception (coordinator, 2026-10-20, after Ark 0.2.12):** `/resolvers` (30.18 KB gz: kit + adapter +
+its glossary) and `/stats` (30.02) stay over the +30 sub-budget that `tests/glossary-routes.cjs` measures. Ark
+0.2.12 moved `lane`/`band` into a figures-only chunk and brought the other eight routes back under; these two were
+at 30.01 and ~29.9 before any 0.2.11 feature, and the findable folds and aligned card rows that stay in the core kit
+cost ~0.17. The test holds them to ceilings (30.25, 30.10) so neither can grow unnoticed. Measured on the whole
+minified route against 5a1ac71 (the R2 definition), both are well inside (`/stats` +26.9). What would close them:
+about 0.2 KB out of the core kit, the adapter or these two pages' glossaries, or a smaller live chunk.

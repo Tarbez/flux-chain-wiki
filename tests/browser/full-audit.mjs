@@ -674,9 +674,13 @@ await surface('toolbar', 'image <svg>: image sections; Alt text persists', async
   const { page, app, pv } = await openEditor(opened);
   /* polled: the home page mounts its drawing and the layout keys are stamped a moment after the canvas reports ready -- under a loaded
      machine (the full run, load factor 3.8) a single read found none and threw on undefined */
-  const KEY = await until(() => pv.evaluate(() => { const svg = [...document.querySelectorAll('svg[data-ark-layout-key]')].find((s) => s.getBoundingClientRect().width > 8 && !s.closest('button,a')); return svg ? svg.getAttribute('data-ark-layout-key') : null; }), 'no visible inline svg with a layout key on the home page', 20000);
+  /* On /about, whose layer drawing is on screen by default. Since 2026-10-20 the home opens on "Where do I start?" and its
+     scene svg sits on the "See it work" tab, which the editor's canvas does not switch (a canvas click SELECTS, by design);
+     a header icon is shell scope ('*'), never this page's, so only page content ([data-ark-page]) counts. */
+  await gotoRoute(app, pv, '/about');
+  const KEY = await until(() => pv.evaluate(() => { const svg = [...document.querySelectorAll('[data-ark-page] svg[data-ark-layout-key]')].find((s) => s.getBoundingClientRect().width > 8 && !s.closest('button,a')); return svg ? svg.getAttribute('data-ark-layout-key') : null; }), 'no visible inline svg with a layout key on the home page', 20000);
   await page.close(); opened.pop();
-  await controlPersists(opened, { route: '/', key: KEY, sectionTitle: 'Alt text',
+  await controlPersists(opened, { route: '/about', key: KEY, sectionTitle: 'Alt text',
     select: async (app) => { await selectKey(app, KEY); await expectSections(app, IMAGE, 'an <svg>'); },
     act: (s) => setValue(s.locator('textarea[name="alt-text"]'), 'Audit diagram'),
     read: 'el.getAttribute("aria-label")', expect: 'Audit diagram', saved: (l) => JSON.stringify(l).includes('Audit diagram') });

@@ -61,7 +61,8 @@ const builtKeys = Object.keys(plan.hashes);
   const generatedHeader = /\b(?:generated (?:by|from)|do not edit)\b/i;
   const generatedScripts = scripts.filter((s) => generatedHeader.test(fs.readFileSync(s, 'utf8').slice(0, 400)));
   assert(generatedScripts.includes('js/ark/blocks.js'), 'js/ark/blocks.js (built from scripts/ark-blocks-adapter.js) is a catalog script with a generated header');
-  for (const script of generatedScripts) assert(/generated/.test(why(script)), script + ' is generated: its generator owns its bytes');
+  /* a vendor chunk is generated too, by its own esbuild pipeline: either reason keeps a generated file unbuilt */
+  for (const script of generatedScripts) assert(/generated|another pipeline/.test(why(script)), script + ' is generated: its generator (or its own pipeline) owns its bytes');
   assert(/nothing to gain/.test(why('js/ark/ml-dsa.js')), 'js/ark/ml-dsa.js is an esbuild bundle already: a second copy would gain nothing');
   for (const script of ['js/pages/account.js', 'js/pages/explorer.js', 'js/pages/stats.js', 'js/pages/home.js', 'js/pages/resolver-math.js', 'js/studio.js', 'js/ark/mesh-directory-client.js', 'js/content/resolution-products.js'])
     assert(!exempt.has(script), script + ' is built: it is the budget this change exists for');
@@ -129,7 +130,8 @@ const loaderCases = async () => {
   const tag = pages.MANIFEST_TAG.exec(html);
   assert(tag, 'index.html loads js/min/manifest.js');
   assert.equal(tag[2], pages.sha256(plan.manifest).slice(0, 8), 'the manifest\'s ?v= is its own hash (npm run build:ark stamps it)');
-  assert(html.indexOf('js/min/manifest.js') < html.indexOf('js/ark/page-loader.js'), 'the manifest is listed before the loader that reads it');
+  /* script TAGS, not mentions: index.html's per-route CSS comment names page-loader.js above both (2026-10-20) */
+  assert(html.indexOf('<script src="js/min/manifest.js') >= 0 && html.indexOf('<script src="js/min/manifest.js') < html.indexOf('<script src="js/ark/page-loader.js'), 'the manifest is listed before the loader that reads it');
   assert(html.indexOf('js/pages/catalog.js') < html.indexOf('js/min/manifest.js'), 'ArkUI exists (the catalog has run) when the manifest assigns to it');
 }
 

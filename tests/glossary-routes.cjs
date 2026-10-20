@@ -119,6 +119,13 @@ const WIRED_SOURCE = { stats: 'js/pages/stats.js', 'stats/ledger': 'js/pages/sta
 
   await test('the budget: block + a route glossary stays inside +30 KB gz of added JS (R2), measured with gzip -9', () => {
     // Defect guarded: the glossary growing back to the whole file on a route. Kit + adapter is the block route's bill (docs/cms-architecture.md Budget).
+    /* NAMED EXCEPTIONS (coordinator, 2026-10-20; docs/cms-architecture.md Budget): two routes whose budget is spent
+       before this change. Without any Ark 0.2.11 feature /resolvers measured 30.01 and /stats about 29.9 (W5-ARK);
+       the findable folds and aligned card rows that stay in the core kit cost about 0.17. Each has a CEILING, so it
+       cannot grow unnoticed; what would close it: about 0.2 KB out of the core kit, the adapter or these two
+       routes' glossaries (fewer glossed words on the page), or a smaller live chunk. Measured on the fully
+       minified route, both are well inside R2 (/stats +26.9 against 5a1ac71). */
+    const EXCEPTIONS = { resolvers: { max: 30.25 }, stats: { max: 30.10 } };
     const base = gz('js/ark/vendor/ark-kit-public.js') + gz('js/ark/blocks.js');
     const rows = [], over = [];
     for (const key of Object.keys(catalog)) {
@@ -127,7 +134,8 @@ const WIRED_SOURCE = { stats: 'js/pages/stats.js', 'stats/ledger': 'js/pages/sta
       const bytes = gz(file);
       assert(bytes < gz('js/content/glossary.js'), key + ': a route file is smaller than the whole glossary');
       rows.push([key, bytes, base + bytes]);
-      if (base + bytes > 30 * 1000) over.push(key + ' ' + ((base + bytes) / 1000).toFixed(2));
+      const ceiling = (EXCEPTIONS[key] ? EXCEPTIONS[key].max : 30) * 1000;
+      if (base + bytes > ceiling) over.push(key + ' ' + ((base + bytes) / 1000).toFixed(2) + (EXCEPTIONS[key] ? ' (named exception, ceiling ' + EXCEPTIONS[key].max + ')' : ''));
     }
     rows.sort((a, b) => b[1] - a[1]);
     console.log('route glossary (B gz): ' + rows.slice(0, 8).map((r) => r[0] + ' ' + r[1]).join(', ') + ' ... largest of ' + rows.length + '; kit+adapter ' + base + ' B');

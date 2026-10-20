@@ -4,7 +4,7 @@
    over this. Edit these inside admin-app.html's Design panel; this file is not meant
    for hand editing. */
 ArkSiteDefaults.define({
-  "theme": "ghost",
+  "theme": "ember",
   "motif": "blocks",
   "patternConfig": {
     "blocks": {
