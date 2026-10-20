@@ -112,16 +112,16 @@ assert(/cannot become a/.test(live) && !/ARK_BLOCK_NAMES/.test(live), 'the live 
 
 // 8. The optional blocks are chunks (W4-ARK, 2026-10-20): field, form, list, status-line and choice (ark-kit-forms.js) and popover
 //    (ark-kit-popover.js, its own file since 0.2.10: a page that floats one panel does not download the forms) cost +3.8 KB gz in
-//    the public kit and every block route pays for the kit, so the public kit's registry is ark-ui's CORE (21 blocks) and each
-//    chunk registers its blocks into it. The editor's full kit has all 27.
+//    the public kit and every block route pays for the kit, so the public kit's registry is ark-ui's CORE (23 blocks) and each
+//    chunk registers its blocks into it. The editor's full kit has all 29.
 const FORM_BLOCKS = ['field', 'form', 'list', 'status-line', 'choice'];
 const POPOVER_BLOCKS = ['popover'];
-assert.equal(pub.__kit.ARK_BLOCK_NAMES.length, 21, 'the public kit holds the 21 core blocks');
+assert.equal(pub.__kit.ARK_BLOCK_NAMES.length, 23, 'the public kit holds the 23 core blocks');
 for (const name of FORM_BLOCKS.concat(POPOVER_BLOCKS)) {
   assert(!pub.__kit.ARK_BLOCK_NAMES.includes(name), 'the public kit does not carry ' + name);
   assert(sandbox.__kit.ARK_BLOCK_NAMES.includes(name), 'the full kit carries ' + name);
 }
-assert.equal(sandbox.__kit.ARK_BLOCK_NAMES.length, 27, 'the editor\'s kit holds all 27 blocks');
+assert.equal(sandbox.__kit.ARK_BLOCK_NAMES.length, 29, 'the editor\'s kit holds all 29 blocks');
 assert.equal(typeof pub.__kit.registerArkBlocks, 'function', 'the public kit can take late blocks');
 const forms = fs.readFileSync('js/ark/vendor/ark-kit-forms.js', 'utf8');
 const popover = fs.readFileSync('js/ark/vendor/ark-kit-popover.js', 'utf8');
@@ -138,16 +138,16 @@ pubWithChunks.globalThis = pubWithChunks;
 vm.runInNewContext(publicKit + '\n;globalThis.ArkKit = ArkKit;', pubWithChunks);
 vm.runInNewContext(popover + '\n;globalThis.__popover = ArkKitPopover;', pubWithChunks);
 assert.deepEqual(Array.from(pubWithChunks.__popover.POPOVER_BLOCK_NAMES), POPOVER_BLOCKS, 'the popover chunk registers the popover alone');
-assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 22, 'and nothing else');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 24, 'and nothing else');
 vm.runInNewContext(forms + '\n;globalThis.__forms = ArkKitForms;', pubWithChunks);
 assert.deepEqual(Array.from(pubWithChunks.__forms.FORM_BLOCK_NAMES), FORM_BLOCKS, 'the forms chunk registers the five');
-assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 27, 'the public kit now holds 27');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 29, 'the public kit now holds 29');
 assert.equal(pubWithChunks.ArkKit.ARK_BLOCKS.field.props.hint.help, undefined, 'the chunks\' editor help is stripped like the kit\'s');
 assert.equal(pubWithChunks.ArkKit.ARK_BLOCKS.form.props.fields.kind, 'list', 'and the validation shape stays');
 // A second load (a route that lists a chunk and a loader that adds it again) is harmless.
 vm.runInNewContext(forms, pubWithChunks);
 vm.runInNewContext(popover, pubWithChunks);
-assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 27, 'loading a chunk twice registers nothing twice');
+assert.equal(pubWithChunks.ArkKit.ARK_BLOCK_NAMES.length, 29, 'loading a chunk twice registers nothing twice');
 // 9. arkConfirm (the CMS's window.confirm replacement) is the editor's: the full kit has it, the public kit refuses it.
 for (const name of ['arkConfirm', 'createArkAlertDialog', 'createArkModalHost']) {
   assert.equal(typeof sandbox.__kit[name], 'function', 'the full kit exports ' + name);

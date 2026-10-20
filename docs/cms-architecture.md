@@ -508,7 +508,7 @@ converts the site page by page this way; `/palette` is the worked pilot (`js/pag
 
 | file | where | carries |
 |---|---|---|
-| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup`, `patchArkBlock`, `arkConfirm`, `createArkAlertDialog` and `createArkModalHost` are refusals (a public page's floating panel is the `popover` block, from the forms chunk, not `createArkPopover`) that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. Its registry is ark-ui's CORE (21 blocks, `@deadark/ark-ui/blocks/core`; `createArkDomHost` is the core host, no focus scopes or dismissable layers). 24.5 KB gz (26.9 before W3-BUDGET, 24.0 before W4-ARK) |
+| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup`, `patchArkBlock`, `arkConfirm`, `createArkAlertDialog` and `createArkModalHost` are refusals (a public page's floating panel is the `popover` block, from the forms chunk, not `createArkPopover`) that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. Its registry is ark-ui's CORE (23 blocks, with `lane` and `band` since 0.2.11; `@deadark/ark-ui/blocks/core`; `createArkDomHost` is the core host, no focus scopes or dismissable layers). 25.1 KB gz (26.9 before W3-BUDGET, 24.0 before W4-ARK, 24.5 before W5-ARK) |
 | `js/ark/vendor/ark-kit-forms.js` | a page that takes input (listed after the kit in the route's scripts; the loader adds it in the editor's canvas and for a saved form block the kit has no resolver for) | ark-ui's `@deadark/ark-ui/blocks/forms` alone (`field`, `form`, `list`, `status-line`, `choice`), registered into the public kit's registry by `ArkKit.registerArkBlocks`, then `ArkUI.blocks.sync()` registers their resolvers (so it may load before or after `js/ark/blocks.js`). A second load registers nothing twice. Editor help stripped like the kit's. Global `ArkKitForms`. 4.8 KB gz |
 | `js/ark/vendor/ark-kit-popover.js` | a page that floats a panel and takes no input (`/explore`); the same loading rules | ark-ui's `@deadark/ark-ui/blocks/popover` alone: the `popover` block and `withArkOverlays` (the host's focus scope and dismissable layer). Global `ArkKitPopover`. 3.2 KB gz. A page that uses both lists both (the overlay half is then in the popover chunk only). The loader loads the forms chunk, asks the kit again, then the popover chunk: derived from the kit's resolvers, never a name list |
 | `js/ark/vendor/ark-kit-live.js` | a page's first `ArkUI.blocks.update` (today / and /stats) | `patchArkBlock` alone (ark-ui 0.2.7's `blocks/patch`, `patchArkBlockIn(registry, …)`, bound to the loaded `ArkKit.ARK_BLOCKS`), global `ArkKitLive`. Loaded by the adapter, never listed by a route. 1.4 KB gz |
@@ -608,6 +608,30 @@ each carries its own copy of the small events helper (the popover chunk also `wi
 **Popover split (0.2.10, measured):** `/explore` loaded the whole 6.76 KB chunk for one popover; as its own
 chunk it loads 3.20 (-3.55). A page that uses both pays +1.2 over the old single chunk. Measured and rejected: all six in
 `createArkPopover`'s form (a popover through the primitive is +1.4 KB gz in a public bundle alone).
+
+**W5-ARK (2026-10-20): @deadark/ark-ui 0.2.11, @deadark/sdk 0.2.42.** Five parts, all in the core kit except where noted:
+`field` number `step: 'any'` (the page no longer sets the attribute by hand); a styled `select` arrow on SDK tokens (the
+control stays a native `<select>`; forced colours keep the system's); `disclosure` breakpoint folds (`foldBelow` tablet or
+phone) carry `hidden="until-found"` while closed where the browser has `onbeforematch`, so find-in-page reaches their text and
+a match opens the fold (the sheet draws it only at the fold's width; elsewhere `display:none` stands and the text is in the
+HTML either way: tests/fold-no-hidden-content.cjs is unchanged); `card-grid` `alignRows` (subgrid, four tracks per card,
+behind `@supports`); and the `lane` and `band` blocks that replace `mfig-lane`, `mfig-band`, `mfig-row`, `mfig-tick` and
+`mfig-provider` in `css/resolver-guide.css` (-0.2 KB there). Measured `gzip -9`, this Mac, 2026-10-20, shipped files:
+kit-public 24.48 -> 25.08 (+0.61), forms chunk 4.83 -> 4.93 (+0.10, the `step` schema and check), `css/ark-blocks.css`
+8.84 -> 9.35 (+0.51), `css/resolver-guide.css` 1.67 -> 1.46 (-0.21), the adapter, live, popover chunks and glossary +0.
+Only the kit and the forms chunk moved, so each route of the minified-scripts table below shifts by the kit's +0.61 (and
+`/account` by +0.10 more), the changed page scripts net -0.02:
+
+| route | after (minified), W5-MIN | after W5-ARK | added vs 5a1ac71 |
+|---|---|---|---|
+| `/` | 48.95 | 49.56 | **+24.07** |
+| `/account` | 188.89 | 189.60 | **+22.31** |
+| `/explore` | 49.19 | 49.80 | **+26.96** |
+| `/stats` | 53.37 | 53.98 | **+26.92** |
+| `/lifecycle` (a story page) | 41.03 | 41.64 | +33.75 (over, as before: the glossary exception and the story template) |
+
+The component bills of the W4-ARK table move the same way: a block route 28.58 -> 29.19, block + live 29.99 -> 30.60
+(0.60 over the +30 component sum; the route totals above are the budget and stay inside it).
 
 **W5-MIN (2026-10-20): page scripts are served minified.** Owner decision after `/account` measured +42.8 KB
 gz of added JS and `/explore` was over R2. The commented source (`js/pages/*.js`, the per-route `js/ark/*` and
