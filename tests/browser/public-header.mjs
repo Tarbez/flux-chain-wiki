@@ -171,8 +171,8 @@ export async function checkPanels(context, base, width) {
   const page = await context.newPage();
   const problems = [];
   let step = 'start';
-  const chunk = [];
-  page.on('request', (request) => { if (/ark-kit-popover\.js/.test(request.url())) chunk.push(request.url()); });
+  const chunk = [], helper = [];
+  page.on('request', (request) => { if (/ark-kit-popover\.js/.test(request.url())) chunk.push(request.url()); if (/header-popover\.js/.test(request.url())) helper.push(request.url()); });
   const visible = (selector) => page.evaluate((sel) => { const el = document.querySelector(sel); if (!el || el.closest('[hidden]')) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; }, selector);
   const waitOpen = (selector) => page.waitForFunction((sel) => { const el = document.querySelector(sel); return !!el && !el.closest('[hidden]') && el.getBoundingClientRect().height > 0; }, selector, { timeout: scaled(8000) });
   const waitClosed = (selector) => page.waitForFunction((sel) => { const el = document.querySelector(sel); return !el || !!el.closest('[hidden]') || el.getBoundingClientRect().height === 0; }, selector, { timeout: scaled(3000) });
@@ -185,7 +185,7 @@ export async function checkPanels(context, base, width) {
     await settled(page, 'about');
     await page.evaluate(() => document.fonts.ready);
     const path0 = await page.evaluate(() => location.pathname);
-    if (chunk.length) problems.push(`the popover chunk was requested before any press (${chunk.length})`);
+    if (chunk.length || helper.length) problems.push(`the popover chunk or its swap helper was requested before any press (${chunk.length} + ${helper.length})`);
 
     /* ---- the network pill, from the keyboard ---- */
     await page.focus('.header-chain-trigger');
@@ -199,7 +199,7 @@ export async function checkPanels(context, base, width) {
     pill.options.forEach((o) => { if (!o.shown || o.tab < 0) problems.push(`network option "${o.name}" is not a visible, focusable control`); });
     const box = await inside('#header-chain-popover');
     if (box.left < -0.5 || box.right > box.vw + 0.5 || box.top < -0.5) problems.push(`the network panel lies outside the viewport (${box.left}-${box.right} of ${box.vw}, top ${box.top})`);
-    if (chunk.length !== 1) problems.push(`the first press requested the popover chunk ${chunk.length} times, not once`);
+    if (chunk.length !== 1 || helper.length !== 1) problems.push(`the first press requested the popover chunk ${chunk.length} times and the swap helper ${helper.length}, not once each`);
 
     await page.keyboard.press('Escape');
     step = 'waitClosed#6'; await waitClosed('#header-chain-popover');
@@ -238,7 +238,7 @@ export async function checkPanels(context, base, width) {
       if (!mesc.onTrigger) problems.push('Escape closed the Resolutions menu but focus did not return to its trigger');
       if (mesc.path !== path0) problems.push(`Escape in the Resolutions menu also left the page (${path0} -> ${mesc.path})`);
       if (mesc.expanded !== 'false') problems.push('the Resolutions trigger still says aria-expanded after Escape');
-      if (chunk.length !== 1) problems.push(`the popover chunk was requested ${chunk.length} times for both panels, not once`);
+      if (chunk.length !== 1 || helper.length !== 1) problems.push(`the popover chunk (${chunk.length}) and swap helper (${helper.length}) were requested for both panels, not once each`);
 
       /* a mouse resting on the trigger opens the menu; a press within the hover-intent window (400 ms) keeps it open.
          The window is wall-clock, so the page stamps the hover and the press itself and the keep-open assertion

@@ -6,6 +6,10 @@
    - The core kit has about 10 B of headroom on live routes, so the 3.2 KB popover chunk cannot ride
      on every route: "nothing is loaded until a press" is asserted on the real kit, and the chunk is
      asserted to be absent from index.html and from the block scripts every route shares.
+   - header.js ships on every route and the core kit has about 10 B of headroom, so the stub is held to
+     +0.3 KB gz over the 11,611 B it weighed before the popovers (a 13,487 B first draft with the swap
+     helpers inline was refused); the swap and the kit/chunk loading live in js/resolvers/header-popover.js,
+     which only a press loads. Site code stays out of Ark's vendor chunk.
    - The block must take the button's place WITHOUT losing what the bar and the site paint on it
      (classes, children, id, title, aria-label); a swap that rebuilt the button would drop the live
      network label and the kit's styling, and nothing but a pixel check would notice.
@@ -25,11 +29,11 @@ const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
 
 const source = fs.readFileSync('js/resolvers/header.js', 'utf8');
-const start = source.indexOf('var HEADER_POPOVER_CHUNK');
+const start = source.indexOf('function lazyHeaderPopover');
 const end = source.indexOf('/* Network switcher, site-wide');
-assert(start >= 0 && end > start, 'js/resolvers/header.js still defines the popover helpers before the network switcher');
-const helpers = source.slice(start, end);
-const CHUNK = 'js/ark/vendor/ark-kit-popover.js';
+assert(start >= 0 && end > start, 'js/resolvers/header.js still defines the popover stub before the network switcher');
+const stub = source.slice(start, end);
+const CHUNK = 'js/ark/vendor/ark-kit-popover.js', HELPER = 'js/resolvers/header-popover.js';
 
 const tick = (ms = 30) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -40,14 +44,19 @@ function boot(options = {}) {
   const w = dom.window;
   w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
   for (const file of ['js/ark/vendor/engines.js', options.kit || 'js/ark/vendor/ark-kit-public.js']) w.eval(fs.readFileSync(file, 'utf8'));
-  const calls = [];
+  const calls = [], loaded = new Map();
+  /* like the page loader's: one script by its site path, once */
+  const real = (url) => { w.eval(fs.readFileSync(url, 'utf8')); return Promise.resolve(); };
   w.ArkUI = {
     blockScripts: [],
-    loadScript: options.loadScript ? (url) => { calls.push(url); return options.loadScript(url, w); } : (url) => { calls.push(url); w.eval(fs.readFileSync(url, 'utf8')); return Promise.resolve(); }
+    loadScript: (url) => {
+      if (!loaded.has(url)) { calls.push(url); loaded.set(url, (options.loadScript || real)(url, w)); }
+      return loaded.get(url);
+    }
   };
   const errors = [];
   w.console.error = (...args) => errors.push(args.join(' '));
-  w.eval(helpers);
+  w.eval(stub);
   return { w, doc: w.document, calls, errors };
 }
 
@@ -75,19 +84,15 @@ function lazy(env, id, label, align) {
   const parts = plainControl(env, id, label);
   let trigger = parts.trigger, wrap = parts.wrap, adopted = null;
   const pop = env.w.lazyHeaderPopover({
-    trigger, fallback: parts.fallback,
-    build() {
-      const p = env.w.headerPopoverParts({ wrap, trigger, label, align: align || 'start', panelId: id + '-popover', panelClass: id + '-panel-class' });
-      p.panel.appendChild(parts.link);
-      wrap.replaceWith(p.root);
-      wrap = p.root; trigger = p.trigger; adopted = p;
-      return p;
-    }
+    wrap, trigger, fallback: parts.fallback, label, align, id: id + '-popover', content: [parts.link],
+    done(made) { wrap = made.root; trigger = made.trigger; adopted = made; }
   });
   return { ...parts, pop, now: () => trigger, adopted: () => adopted };
 }
 const isOpen = (c) => c.adopted().root.getAttribute('data-state') === 'open';
 const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }); el.dispatchEvent(e); return e; };
+
+const index0 = fs.readFileSync('index.html', 'utf8');
 
 (async () => {
   /* ---- 1. nothing is paid for until a press ---- */
@@ -107,7 +112,7 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     a.trigger.focus();
     a.trigger.click();
     await tick();
-    assert.deepEqual(env.calls, [CHUNK], 'one press loads the popover chunk, once, and nothing else (the kit is already on the page)');
+    assert.deepEqual(env.calls, [HELPER, CHUNK], 'one press loads the swap helper and Ark\'s popover chunk, once, and nothing else (the kit is already on the page)');
     const p = a.adopted();
     assert(p, 'the block was rendered');
     assert.equal(a.trigger.isConnected, false, 'the plain button left the page');
@@ -126,8 +131,9 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     assert.equal(p.root.dataset.headerItem, 'resolutions', "and its data-header-item, which the row fit collapses by");
     assert(!p.root.classList.contains('ark-block'), 'it is not an Ark block of the page: the header keeps its own fonts and display');
     assert(p.root.previousElementSibling === a.before && p.root.nextElementSibling === a.after, 'it sits where the wrapper sat (structural layout keys of its neighbours do not move)');
-    assert.equal(p.panel.id, 'products-trigger-popover'); assert.equal(p.trigger.getAttribute('aria-controls'), p.panel.id, 'the button names the panel');
-    assert(p.panel.classList.contains('products-trigger-panel-class') && p.panel.classList.contains('ark-popover__panel'), "the site's class joins Ark's (Ark places it)");
+    assert.equal(p.panel.id, 'products-trigger-popover'); assert(p.panel.classList.contains('products-trigger-popover')); assert.equal(p.trigger.getAttribute('aria-controls'), p.panel.id, 'the button names the panel');
+    assert(p.panel.classList.contains('ark-popover__panel'), "the site's class joined Ark's (Ark places it)");
+    assert.equal(a.fallback.isConnected, false, 'the plain panel left the page');
     assert(p.panel.contains(a.link), "the menu's own content is in Ark's panel");
     assert.equal(p.panel.querySelectorAll('.ark-popover__p').length, 0, "the block's stand-in sentence is gone");
     assert.equal(p.root.getAttribute('data-state'), 'open', 'the press that loaded it also opened it');
@@ -153,7 +159,7 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     assert.equal(isOpen(a), true, 'want(true) opens through the block, not around it');
     a.pop.want(false); await tick();
     assert.equal(isOpen(a), false, 'want(false) closes through Ark\'s own event');
-    assert.equal(a.pop.adopted(), true);
+    assert(a.adopted());
 
     /* ---- 5. an outside press and focus leaving dismiss it ---- */
     a.pop.want(true); await tick();
@@ -171,7 +177,7 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     a.trigger.click(); await tick();
     assert.equal(isOpen(a), true);
     b.trigger.click(); await tick();
-    assert.deepEqual(env.calls, [CHUNK], 'the second panel does not load the chunk again');
+    assert.deepEqual(env.calls, [HELPER, CHUNK], 'the second panel loads nothing again');
     assert.equal(isOpen(b), true, 'the network pill opened');
     assert.equal(isOpen(a), false, 'and the Resolutions menu closed: one panel of the header is open at a time');
     a.now().click(); await tick();
@@ -180,22 +186,29 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
 
   /* ---- 7. presses while the chunk is loading are toggles ---- */
   {
-    let release;
-    const env = boot({ loadScript: (url, w) => new Promise((resolve) => { release = () => { w.eval(fs.readFileSync(url, 'utf8')); resolve(); }; }) });
+    /* the two scripts arrive one after the other, by hand */
+    const queue = [];
+    const deferred = { loadScript: (url, w) => new Promise((resolve) => queue.push(() => { w.eval(fs.readFileSync(url, 'utf8')); resolve(); })) };
+    const release = async () => { for (let i = 0; i < 4; i++) { await tick(5); while (queue.length) queue.shift()(); } await tick(); };
+    const env = boot(deferred);
     const a = lazy(env, 'products-trigger', 'Resolutions');
     a.trigger.click();
-    assert.equal(a.trigger.getAttribute('aria-busy'), 'true', 'the button says it is working while the chunk loads');
     a.trigger.click();
-    await tick(5); release(); await tick();
+    await release();
     assert(a.adopted(), 'the block arrived');
     assert.equal(isOpen(a), false, 'two presses before it arrived end closed, not open');
-    assert.equal(a.now().getAttribute('aria-busy'), null);
     /* hover-intent that is withdrawn before the chunk arrives opens nothing */
-    const env2 = boot({ loadScript: (url, w) => new Promise((resolve) => { release = () => { w.eval(fs.readFileSync(url, 'utf8')); resolve(); }; }) });
+    const env2 = boot(deferred);
     const b = lazy(env2, 'products-trigger', 'Resolutions');
     b.pop.want(true, true); b.pop.want(false);
-    await tick(5); release(); await tick();
+    await release();
     assert.equal(isOpen(b), false, 'a mouse that left before the chunk arrived opens nothing');
+    /* and one that is still resting when it arrives opens it */
+    const env3 = boot(deferred);
+    const c = lazy(env3, 'products-trigger', 'Resolutions');
+    c.pop.want(true, true);
+    await release();
+    assert.equal(isOpen(c), true, 'a mouse still resting when the chunk arrives opens it');
   }
 
   /* ---- 8. a chunk that cannot load leaves a working, plain menu and a refusal that names the remedy ---- */
@@ -213,7 +226,7 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     a.pop.want(true); assert.equal(a.pop.isOpen(), true);
     a.pop.want(false); assert.equal(a.fallback.hidden, true);
     /* a later press does not retry forever in a loop: it stays plain for this page */
-    assert.equal(env.calls.length, 1);
+    assert.equal(env.calls.length, 1, 'the failed script was asked for once');
   }
 
   /* ---- 9. a page that already has the popover (the full kit in the editor, /explore's chunk) loads nothing ---- */
@@ -222,7 +235,7 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     assert.equal(typeof env.w.ArkKit.ARK_BLOCKS.popover, 'object', 'the full kit has the block');
     const a = lazy(env, 'products-trigger', 'Resolutions');
     a.trigger.click(); await tick();
-    assert.deepEqual(env.calls, [], 'nothing is loaded: the block is already registered');
+    assert.deepEqual(env.calls, [HELPER], 'only the small swap helper is loaded: the block is already registered, so not the chunk');
     assert.equal(isOpen(a), true);
   }
 
@@ -233,17 +246,26 @@ const key = (w, el, k) => { const e = new w.KeyboardEvent('keydown', { key: k, b
     assert(!/document\.addEventListener\('click'/.test(code), 'no hand-built "press outside" listener on the document');
     assert(!/addEventListener\('focusout', function \(event\) \{\s*if \(!mega/.test(code), 'no hand-built "focus left" listener for the Resolutions menu');
     assert(!/products-open/.test(code), 'the header class that lifted the bar is a CSS :has() on the open popover now');
-    assert(/headerPopoverParts\(\{ wrap: wrap, trigger: trigger, label: 'Network'/.test(code) && /label: ArkCopy\.text\('NAV\.PRODUCTS'\)/.test(code), 'both panels are built from the one helper');
+    assert(/id: 'header-chain-popover'/.test(code) && /label: ArkCopy\.text\('NAV\.PRODUCTS'\)/.test(code), 'both panels are built by the one stub');
     /* loading happens inside the first press, never while the bar is built */
-    const decorate = code.slice(code.indexOf("ArkUI.register('RHEADER_V1'"));
-    assert(!/loadHeaderPopover\(/.test(decorate), 'the resolver does not load the chunk while building the bar');
     const lazyBody = code.slice(code.indexOf('function lazyHeaderPopover'), code.indexOf('function buildHeaderChainPopover'));
-    assert(/function adopt\(\)[\s\S]*loadHeaderPopover\(\)/.test(lazyBody), 'the chunk is loaded by adopt(), which only a press or a hover calls');
+    assert(/function load\(\)[\s\S]*loadScript\('js\/resolvers\/header-popover\.js'\)/.test(lazyBody) && /on && !state\) load\(\)/.test(lazyBody), 'the helper is loaded by load(), which only an open request calls');
+    assert(!/loadScript|ArkKit/.test(code.replace(lazyBody, '')), 'nothing else in the header loads a script or reads the kit');
+    /* the weight stays in the helper file: the stub is all every route pays for */
+    assert(fs.readFileSync('js/resolvers/header-popover.js', 'utf8').includes('ArkKit.renderArkBlock') && !code.includes('renderArkBlock'), 'rendering the block is the helper\'s, not the always-loaded header\'s');
+    assert(!fs.readFileSync('js/ark/vendor/ark-kit-popover.js', 'utf8').includes('header-chain'), 'site code is not in the Ark vendor chunk');
+    assert(!index0.includes('header-popover'), 'index.html does not carry the helper either');
 
     const index = fs.readFileSync('index.html', 'utf8');
     assert(!index.includes('ark-kit-popover'), 'index.html does not carry the popover chunk: every route would pay 3.2 KB');
     const catalog = fs.readFileSync('js/pages/catalog.js', 'utf8');
     assert(!/blockScripts = [^;]*ark-kit-popover/.test(catalog), 'the shared block scripts do not carry it');
+  }
+
+  /* ---- 11. the weight every route pays ---- */
+  {
+    const gz = require('node:zlib').gzipSync(Buffer.from(source), { level: 9 }).length;
+    assert(gz <= 11611 + 300, `js/resolvers/header.js is ${gz} B gz; every route pays it and the budget allows 11,911 (move code into js/resolvers/header-popover.js)`);
   }
 
   console.log('PASS: the header\'s network pill and Resolutions menu are Ark popovers loaded on the first press (nothing before it), keep their classes, children and id, close on Escape / an outside press / focus leaving with focus back on the button, one at a time, survive a failed chunk, and the header holds no open/close/Escape code of its own.');
