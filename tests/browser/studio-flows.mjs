@@ -287,11 +287,16 @@ await flow('single', async () => {
   await step('the menu explains a disabled item instead of only greying it out', async () => {
     await navLink(pv, 'Overview').click();
     await navLink(pv, 'Overview').click({ button: 'right' });
-    /* one layer: Group stays listed and says what it needs; Align / Distribute wait for 2+ layers
-       instead of eight greyed rows (docs/ux-audit/cms.md P1-8) */
-    const text = await pv.locator('.ark-studio-menu button', { hasText: /^Group/ }).first().textContent();
-    check(/Select 2 or more layers/.test(text), 'disabled Group does not say what it needs: ' + text);
+    /* one layer (docs/ux-audit/cms.md P1-8, 2026-10-20): a command that is only waiting for a bigger selection -- Group, Align,
+       Space evenly -- is NOT a greyed-out row; ONE quiet line under the list says what it needs (js/main.js `waits`). A
+       command refused for what the selection IS stays a disabled row and carries its reason. */
+    await pv.locator('.ark-studio-menu').waitFor({ state: 'visible' });
+    check(await pv.locator('.ark-studio-menu button', { hasText: /^Group/ }).count() === 0, 'Group (waiting for a second layer) is still listed as a row');
+    const waits = await pv.locator('.ark-studio-menu [data-waits]').first().textContent();
+    check(/^Group: Select 2 or more layers to group them/.test(waits), 'the one line does not say what Group needs: ' + waits);
     check(await pv.locator('.ark-studio-menu button', { hasText: 'Space evenly' }).count() === 0, 'Distribute is offered for one layer');
+    const refused = await pv.locator('.ark-studio-menu button:disabled').evaluateAll((bs) => bs.map((b) => ({ label: b.firstChild ? b.firstChild.textContent : '', why: (b.title || '').trim() || (b.querySelector('small') ? b.querySelector('small').textContent : '') })));
+    for (const r of refused) check(r.why, `the disabled "${r.label}" row does not say why it cannot apply`);
     /* the menu is placed from its measured size: none of it is cut off by the canvas's edge */
     const box = await pv.locator('.ark-studio-menu').boundingBox(), vp = await pv.evaluate(() => ({ w: innerWidth, h: innerHeight }));
     check(box.y >= 0 && box.y + box.height <= vp.h + 1 && box.x >= 0 && box.x + box.width <= vp.w + 1, 'the right-click menu runs past the canvas: ' + JSON.stringify({ box, vp }));
