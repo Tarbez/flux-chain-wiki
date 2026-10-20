@@ -6,6 +6,8 @@
     "sync:ark": "deadark-theme sync-consumer . --no-build",
     "build:ark": "node scripts/build-ark-vendor.cjs",
     "check:ark": "node scripts/build-ark-vendor.cjs --check",
+    "build:pages": "node scripts/build-ark-vendor.cjs --pages",
+    "check:pages": "node scripts/build-ark-vendor.cjs --pages --check",
     "census": "node scripts/ux-component-census.mjs"
   },
   "dependencies": {

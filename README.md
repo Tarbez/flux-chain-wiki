@@ -267,6 +267,17 @@ Ark UI reaches this site one way, and no file here names a hub path:
    `npm run check:ark` (`--check`) writes nothing and fails on any drift; `tests/ark-vendor.cjs` runs it.
    `css/ark-blocks.css` is reported as not built until the synced Ark UI ships `dist/ark-ui.blocks.css`.
 
+**Page scripts are served minified** (W5-MIN, 2026-10-20). The commented source under `js/pages/`,
+`js/ark/` and `js/content/` stays canonical -- edit it, read it, test it. The same `npm run build:ark`
+writes a minified, source-mapped copy of every script `js/pages/catalog.js` lists (except what
+another pipeline or generator already owns) to `js/min/<same path under js/>`, plus
+`js/min/manifest.js` (each copy's hash) and the stamp of that manifest in `index.html`;
+`js/ark/page-loader.js` requests the copy as `?v=<its hash>`. After editing a page script run
+`npm run build:ark` (or `npm run build:pages`, which needs only esbuild); `npm run check:pages`
+and `tests/page-scripts-min.cjs` refuse a stale or hand-edited copy. A page opened with
+`?ark-source=1` reads the source, and jsdom (server rendering, the unit tests) always does.
+Which files and why: `scripts/lib/page-scripts.cjs`.
+
 `js/admin/auth.js` stays with `scripts/build-auth.cjs`: its flux-auth parts are sibling `flux/`
 sources, not Ark UI packages, and are not delivered by sync-consumer yet.
 
