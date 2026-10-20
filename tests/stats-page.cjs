@@ -385,11 +385,12 @@ for (let li = 1; li <= 6; li++) X['page:/div:1/div:10/section:1/ol:1/li:' + li +
   /* ---- saved CMS edits still land ---------------------------------------------------------- */
   const census = continuity.readCensus(ROUTE);
   const after = await continuity.pageKeys(ROUTE);
-  const tally = continuity.assertContinuity(census, after, { reshaped, retired });
+  /* The pulse status line's words follow the fetch ("No pulse received yet", then "· Next check in 0:NN"),
+     so the census froze one state of them: its key must still name it, its words are not compared. */
+  const live = { 'page:/div:1/header:1/div:2/p:2': 'the pulse status line (stats.js paintOffline/paintAge): its words follow the fetch' };
+  const tally = continuity.assertContinuity(census, after, { reshaped, retired, live });
   assert.equal(tally.kept + tally.reshaped + tally.retired, census.length, 'every old key is accounted for');
-  const landed = await continuity.assertSavedEditsLand(ROUTE, census, { reshaped, retired, live: {
-    'page:/div:1/header:1/div:2/p:2': 'the pulse status line (stats.js paintOffline/paintAge): its words follow the fetch, so the census froze one state of them'
-  } });
+  const landed = await continuity.assertSavedEditsLand(ROUTE, census, { reshaped, retired, live });
   assert.equal(landed, census.length - 1 - Object.keys(retired).length, 'a saved frame on every old key but page:/ and the retired ones landed');
   assert(after.every((entry) => !/^id:ark-r-/.test(entry.key)), 'no generated (ark-r-) id became a layout key');
 

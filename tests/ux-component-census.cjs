@@ -85,3 +85,14 @@ import('../scripts/ux-component-census.mjs').then(({ USE_FAMILIES }) => {
   assert(USE_FAMILIES.stat.test('hero-stat') && USE_FAMILIES.stat.test('stats-grid'), 'stat and stats still count');
   console.log('PASS: the stat family does not count stations.');
 });
+
+/* Regressions (2026-10-20): the census measures what a rule styles and what a name means.
+   - `rel = 'stylesheet'` (the per-route CSS loader) is not a modal sheet;
+   - an Ark class inside :not()/:has() excludes Ark or reads its state, it does not restyle it. */
+import('../scripts/ux-component-census.mjs').then(({ USE_FAMILIES }) => {
+  assert(!USE_FAMILIES.modal.test('stylesheet') && USE_FAMILIES.modal.test('bottom-sheet') && USE_FAMILIES.modal.test('ark-dialog'), 'stylesheet is not a modal; a sheet or dialog still is');
+  const styled = (sel) => sel.replace(/:(?:not|has)\((?:[^()]|\([^()]*\))*\)/g, '');
+  assert(!/ark-term__trigger/.test(styled('#scene .x button:where(:not(.ark-term__trigger))')) && !/ark-popover/.test(styled('.ark-header:has(.ark-popover[data-state="open"])')) && /ark-btn/.test(styled('.page .ark-btn')), 'only the styled subject counts as an Ark override');
+  console.log('PASS: the census does not count a stylesheet as a modal or an Ark exclusion as an override.');
+});
+

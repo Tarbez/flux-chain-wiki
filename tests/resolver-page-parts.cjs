@@ -179,7 +179,8 @@ function units() {
 /* -------------------------------------------------------------- source ---------------------- */
 function sources() {
   const catalog = read('js/pages/catalog.js');
-  for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|deployment|dao):/.test(l))) assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40));
+  /* route entries only (`module:`): since per-route CSS, ArkUI.pageStyles also has `deployment: ['css/...']` lines */
+  for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|deployment|dao):/.test(l) && /module:/.test(l))) assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40));
   assert(/resolver: \{[^\n]*registry-snapshot\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/what-is-a-resolver also loads the snapshot its layers are drawn from, before the parts');
   assert(!/resolver-page-parts/.test(catalog.split('\n').filter((l) => /^\s*(stats|zero|bundledeployer|explorer):/.test(l)).join('\n')), 'and no other route pays for them');
   assert(/figureBlock\('resolver', 'resolver-layers'/.test(read('js/pages/resolver-guide.js')) && /figureBlock\('resolver', 'launched-vs-served'/.test(read('js/pages/resolver-guide.js')), '/what-is-a-resolver draws both of its diagrams');

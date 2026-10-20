@@ -70,7 +70,8 @@ export const USE_FAMILIES = {
   field: /field|input|(^|-)form($|-)|select/,
   toggle: /toggle|switch/,
   toast: /toast|snackbar/,
-  modal: /modal|dialog|sheet|drawer|popover/,
+  /* not stylesheet: a <link rel=stylesheet> is not a modal sheet (the per-route CSS loader, 2026-10-20) */
+  modal: /modal|dialog|(?<!style)sheet|drawer|popover/,
   empty: /empty|skeleton|loading|spinner/,
 };
 
@@ -207,7 +208,11 @@ export function census(site = SITE) {
     const css = stripComments(fs.readFileSync(file, 'utf8')).replace(/@media[^{]*\{/g, '');
     for (const m of css.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
       const selector = m[1];
-      const names = [...selector.matchAll(/\.([a-zA-Z][\w-]*)/g)].some((c) => arkClasses.has(c[1])) || [...selector.matchAll(/#([a-zA-Z][\w-]*)/g)].some((c) => blockIds.has(c[1]));
+      /* Only what a rule STYLES counts: an Ark class inside :not()/:has()/:where(:not()) excludes Ark from a
+         site rule or styles a site element by Ark's state -- neither restyles Ark (2026-10-20: explorer.css's
+         button:where(:not(.ark-term__trigger)), navigation.css's .ark-header:has(.ark-popover[data-state=open])). */
+      const styled = selector.replace(/:(?:not|has)\((?:[^()]|\([^()]*\))*\)/g, '');
+      const names = [...styled.matchAll(/\.([a-zA-Z][\w-]*)/g)].some((c) => arkClasses.has(c[1])) || [...styled.matchAll(/#([a-zA-Z][\w-]*)/g)].some((c) => blockIds.has(c[1]));
       if (names) { overrides += 1; overrideFiles.add(path.basename(file)); }
     }
   }

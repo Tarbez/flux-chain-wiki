@@ -1,5 +1,5 @@
 'use strict';
-/* run-tests-timeout-ms: 900000 -- boots the whole site through jsdom once per route (about 65), one at a time. */
+/* run-tests-timeout-ms: 1800000 -- boots the whole site through jsdom once per route (about 65), one at a time. Killed at the old 900000 guard in the 2026-10-20 full run (load 8-15): the guard is a hang guard, not a speed budget. */
 /* Every route renders styled by the sheets it loads, and the committed derivation is the one the code
    gives today.
 

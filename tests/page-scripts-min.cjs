@@ -55,7 +55,13 @@ const builtKeys = Object.keys(plan.hashes);
   const why = (script) => exempt.get(script) || '';
   for (const script of scripts.filter((s) => s.startsWith('js/content/articles/'))) assert(/another pipeline/.test(why(script)), script + ': a CMS-written article body is never built (a built copy would go stale on publish)');
   for (const script of ['js/ark/vendor/ark-kit-public.js', 'js/ark/vendor/ark-kit-forms.js', 'js/admin/auth.js', 'js/admin/vendor/auth-kit-create.js']) assert(/another pipeline/.test(why(script)), script + ' is built by its own pipeline already');
-  for (const script of ['js/ark/blocks.js', 'js/content/glossary.js', 'js/content/registry-snapshot.js', 'js/content/resolver-algebra.js', 'js/content/reference-text.js']) assert(/generated/.test(why(script)), script + ' is generated: its generator owns its bytes');
+  /* Derived, not listed (2026-10-20): a hand list named js/content/reference-text.js after W5-REF deleted it and
+     js/content/glossary.js after W5-GLOSS gave each route its own file, and failed on both. Every catalog script
+     whose first lines say it is generated is exempt as generated; the adapter bundle is always one of them. */
+  const generatedHeader = /\b(?:generated (?:by|from)|do not edit)\b/i;
+  const generatedScripts = scripts.filter((s) => generatedHeader.test(fs.readFileSync(s, 'utf8').slice(0, 400)));
+  assert(generatedScripts.includes('js/ark/blocks.js'), 'js/ark/blocks.js (built from scripts/ark-blocks-adapter.js) is a catalog script with a generated header');
+  for (const script of generatedScripts) assert(/generated/.test(why(script)), script + ' is generated: its generator owns its bytes');
   assert(/nothing to gain/.test(why('js/ark/ml-dsa.js')), 'js/ark/ml-dsa.js is an esbuild bundle already: a second copy would gain nothing');
   for (const script of ['js/pages/account.js', 'js/pages/explorer.js', 'js/pages/stats.js', 'js/pages/home.js', 'js/pages/resolver-math.js', 'js/studio.js', 'js/ark/mesh-directory-client.js', 'js/content/resolution-products.js'])
     assert(!exempt.has(script), script + ' is built: it is the budget this change exists for');
