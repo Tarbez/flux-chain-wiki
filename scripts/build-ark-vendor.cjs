@@ -221,17 +221,22 @@ function buildBackgrounds() {
 /* ---------- SDK theme, through the SDK CLI (AGENTS.md: theme behaviour comes from the SDK) ---------- */
 
 const THEME_CLI = () => path.join(packageDir('@deadark/sdk'), 'bin', 'deadark-theme.mjs');
-// Curated for the lattice direction; only names the SDK catalog really has are kept.
-const ALLOWED_THEMES = ['clay', 'ochre', 'ghost', 'marine', 'grove', 'moss', 'glacier', 'bone'];
-
 function buildThemeCss() {
   return execFileSync(process.execPath, [THEME_CLI(), 'css']);
 }
 
+/* The site's palette ids, from the SDK's role-ladder module (@deadark/sdk/theme): the published
+   names, in family order, and the map from the old stored keys (ghost, glacier, ...) that the
+   settings panel reads once and writes forward. Nothing here is curated by hand. */
 function buildThemeOptions() {
-  const themes = JSON.parse(execFileSync(process.execPath, [THEME_CLI(), 'themes'], { encoding: 'utf8' }));
-  return '// Generated from the SDK theme catalog; curated for the lattice direction.\nexport default ' +
-    JSON.stringify(ALLOWED_THEMES.filter((name) => themes.some((theme) => theme.name === name))) + ';\n';
+  const script = "import('@deadark/sdk/theme').then((sdk)=>{const f=sdk.DEADARK_ROLE_LADDER_FAMILIES;" +
+    "console.log(JSON.stringify({options:f.flatMap((x)=>[sdk.getDeadArkRoleLadderPublishedName(x,'dark'),sdk.getDeadArkRoleLadderPublishedName(x,'light')])," +
+    "legacy:sdk.DEADARK_ROLE_LADDER_LEGACY_TO_PUBLISHED}));})";
+  const { options, legacy } = JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8', cwd: ROOT }));
+  return '// Generated from the SDK role-ladder palettes (@deadark/sdk/theme getDeadArkRoleLadderPublishedName).\n' +
+    'export default ' + JSON.stringify(options) + ';\n' +
+    '// Old stored key -> published id, for READING a visitor\'s earlier choice only.\n' +
+    'export const legacyThemeIds = ' + JSON.stringify(legacy) + ';\n';
 }
 
 /* ---------- esbuild bundles (classic IIFE scripts) ---------- */

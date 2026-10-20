@@ -39,7 +39,7 @@ export function populatedDrafts(root, { route = '/', memberKey = 'copy:home.TITL
   const transitions = load(root, 'canvas-transitions', 'ArkCanvasTransitions');
   const motion = load(root, 'element-motion', 'ArkElementMotion');
 
-  const settingsDefaults = defaults.api.sanitize({ theme: 'clay', motif: 'traces', patternConfig: { traces: { structure: 33, visibility: 44, delay: 2.5, animated: false } } });
+  const settingsDefaults = defaults.api.sanitize({ theme: 'defxn-tide', motif: 'traces', patternConfig: { traces: { structure: 33, visibility: 44, delay: 2.5, animated: false } } });
 
   /* a state group on a real element, a second state, and that state shown first: its
      content is a component instance in the state's anchor (js/content/states.js) */

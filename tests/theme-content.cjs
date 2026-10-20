@@ -25,24 +25,25 @@ assert.equal(ArkTheme.get(), null, 'get() is null before a data file calls defin
 const defaults = ArkTheme.defaults();
 assert.equal(JSON.stringify(defaults.colors), JSON.stringify(Object.fromEntries(colorFields.map((f) => [f.key, f.def]))), 'defaults().colors is every field at its tokens.js value');
 assert.equal(defaults.background.style, 'none', 'the default background style is none (the site’s original flat-canvas look)');
-assert.equal(defaults.activeTheme, 'ghost', 'the default active semantic theme is ghost');
+assert.equal(defaults.activeTheme, 'ember', 'the default active semantic theme is ember (the SDK id; it was ghost)');
 assert.equal(JSON.stringify(defaults.themes), '{}', 'semantic theme overrides start empty');
-assert(ArkTheme.themeOptions().some((t) => t.key === 'marine'), 'semantic theme options expose the routed site themes');
+assert(ArkTheme.themeOptions().some((t) => t.key === 'defxn-dune'), 'semantic theme options expose the routed site themes by their published ids');
+assert(!ArkTheme.themeOptions().some((t) => t.key === 'marine'), 'the old key is no longer an option, only readable');
 assert(ArkTheme.semanticFields().some((f) => f.key === 'primary'), 'semantic fields expose real theme core colours');
 
 // sanitize(): a valid hex survives, an invalid one falls back to the default, per key;
 // an unknown background style falls back to 'none' rather than passing through.
 const canvasKey = colorFields[0].key;
-const partial = { colors: { [canvasKey]: '#112233' }, activeTheme: 'marine', themes: { marine: { primary: '210 50% 60%', canvas: 'bad' } }, background: { style: 'lattice' } };
+const partial = { colors: { [canvasKey]: '#112233' }, activeTheme: 'defxn-dune', themes: { 'defxn-dune': { primary: '210 50% 60%', canvas: 'bad' } }, background: { style: 'lattice' } };
 const sanitized = ArkTheme.sanitize(partial);
 assert.equal(sanitized.colors[canvasKey], '#112233', 'a valid colour override survives sanitize()');
 colorFields.slice(1).forEach((f) => assert.equal(sanitized.colors[f.key], f.def, f.key + ' with no override falls back to its default'));
 assert.equal(ArkTheme.sanitize({ colors: { ink: 'not-a-color' } }).colors.ink, colorFields.find((f) => f.key === 'ink').def, 'an invalid colour is refused silently to the default, never passed through');
 assert.equal(sanitized.background.style, 'lattice', 'a known background style survives sanitize()');
 assert.equal(ArkTheme.sanitize({ background: { style: 'not-a-real-style' } }).background.style, 'none', 'an unknown background style falls back to none, never passed through');
-assert.equal(sanitized.activeTheme, 'marine', 'a known active theme survives sanitize()');
-assert.equal(sanitized.themes.marine.primary, '210 50% 60%', 'a valid semantic colour survives sanitize()');
-assert.equal(sanitized.themes.marine.canvas, undefined, 'an invalid semantic colour is refused silently');
+assert.equal(sanitized.activeTheme, 'defxn-dune', 'a known active theme survives sanitize()');
+assert.equal(sanitized.themes['defxn-dune'].primary, '210 50% 60%', 'a valid semantic colour survives sanitize()');
+assert.equal(sanitized.themes['defxn-dune'].canvas, undefined, 'an invalid semantic colour is refused silently');
 
 // define()/get() round-trip through sanitize().
 ArkTheme.define(partial);
@@ -54,7 +55,7 @@ assert.equal(JSON.stringify(ArkTheme.get()), JSON.stringify(sanitized), 'get() r
 const css = ArkTheme.css();
 assert(css.startsWith(':root{') && css.endsWith('}'), 'css() emits CSS rules');
 colorFields.forEach((f) => assert(css.includes('--ark-' + f.key + ':' + sanitized.colors[f.key] + ';'), 'css() declares --ark-' + f.key));
-assert(css.includes(':root[data-theme="marine"]{--primary:210 50% 60%;}'), 'css() declares semantic overrides for edited themes');
+assert(css.includes(':root[data-theme="defxn-dune"]{--primary:210 50% 60%;}'), 'css() declares semantic overrides for edited themes');
 assert(!css.includes('lattice'), 'css() never mentions the background style');
 
 // serialize()/define() round-trips the exact sanitized object.
@@ -102,3 +103,63 @@ Object.keys(liveBackgrounds).forEach((key) => {
 });
 
 console.log('PASS: ArkTheme colours/background round-trip, every vendored background style mounts and destroys cleanly.');
+
+/* ---- palette ids: published names, old keys read-only (docs/ux-audit/brand.md D3) ----
+   The saved record (js/content/theme-data.js says "ghost"; an old save may say "marine" under
+   themes) predates the SDK's published names. It is mapped on READ and never rewritten here. */
+(async () => {
+  const sdk = await import('@deadark/sdk/theme');
+  const sdkMap = sdk.DEADARK_ROLE_LADDER_LEGACY_TO_PUBLISHED;
+  const publishedIds = sdk.DEADARK_ROLE_LADDER_FAMILIES.flatMap((f) => [sdk.getDeadArkRoleLadderPublishedName(f, 'dark'), sdk.getDeadArkRoleLadderPublishedName(f, 'light')]);
+  assert.equal(JSON.stringify(ArkTheme.themeOptions().map((t) => t.key)), JSON.stringify(publishedIds), 'theme.js lists exactly the SDK published ids, in family order');
+  for (const [legacy, published] of Object.entries(sdkMap)) {
+    assert.equal(ArkTheme.publishedId(legacy), published, 'theme.js maps the old key ' + legacy + ' to ' + published + ' like the SDK');
+    assert.equal(ArkTheme.publishedId(published), published, published + ' is already published');
+  }
+  assert.equal(ArkTheme.publishedId('moss'), 'defxn-moss-light', 'the OLD moss is Moss light (the reason old and new keys never share a slot)');
+  assert.equal(ArkTheme.publishedId('defxn-moss'), 'defxn-moss', 'the published defxn-moss is Moss dark');
+  for (const bad of ['', 'constructor', '__proto__', 'toString', 'tide', null, 7]) assert.equal(ArkTheme.publishedId(bad), null, String(bad) + ' is not a palette');
+
+  // The shipped saved record: activeTheme "ghost" reads as ember, the file itself is untouched by reading.
+  const dataSource = fs.readFileSync('js/content/theme-data.js', 'utf8');
+  const ctx3 = vm.createContext({}); load(ctx3); vm.runInContext(dataSource, ctx3);
+  assert.equal(vm.runInContext('ArkTheme.get().activeTheme', ctx3), 'ember', 'a saved activeTheme of ghost reads as ember');
+  assert(/"activeTheme": "ghost"/.test(dataSource), 'the saved record still says ghost: future law, the past is not rewritten');
+
+  // Old saved overrides keyed by an old theme key land on the published key; a published twin wins.
+  const old = ArkTheme.sanitize({ activeTheme: 'marine', themes: { marine: { primary: '10 20% 30%', accent: '1 2% 3%' }, 'defxn-dune': { primary: '40 50% 60%' }, glacier: { text: '0 0% 90%' } } });
+  assert.equal(old.activeTheme, 'defxn-dune');
+  assert.equal(old.themes['defxn-dune'].primary, '40 50% 60%', 'a published key saved beside its old twin wins');
+  assert.equal(old.themes['defxn-dune'].accent, '1 2% 3%', 'the old twin still contributes the fields the published one lacks');
+  assert.equal(old.themes['ember-light'].text, '0 0% 90%', 'an old glacier override reads as ember-light');
+  assert.equal(Object.keys(old.themes).some((k) => k in sdkMap), false, 'no old key survives into the sanitized record (the next save writes the published form)');
+
+  // bootstrap.js is a standalone copy (it runs before anything else): pin its two tables to the SDK.
+  const boot = fs.readFileSync('js/bootstrap.js', 'utf8');
+  assert.equal(JSON.stringify(eval('(' + boot.match(/var published = (\[[^\]]*\]);/)[1] + ')')), JSON.stringify(publishedIds), 'bootstrap.js lists the SDK published ids');
+  assert.equal(JSON.stringify(eval('(' + boot.match(/var legacy = (\{[^}]*\});/)[1] + ')')), JSON.stringify(sdkMap), 'bootstrap.js maps old keys exactly like the SDK');
+  const opts = fs.readFileSync('scripts/theme-options.js', 'utf8');
+  assert.equal(JSON.stringify(JSON.parse(opts.match(/legacyThemeIds = (\{.*\});/)[1])), JSON.stringify(sdkMap), 'generated scripts/theme-options.js carries the SDK map');
+
+  // First paint: the visitor's own choice (new key, then old key) beats the site default (new, then old).
+  function paint(store) {
+    const attrs = {};
+    const doc = { documentElement: { classList: { add() {} }, dataset: attrs } };
+    const sandbox = vm.createContext({ document: doc, localStorage: { getItem: (k) => (k in store ? store[k] : null) } });
+    vm.runInContext(boot, sandbox);
+    return attrs.theme;
+  }
+  assert.equal(paint({}), undefined, 'nothing stored: no data-theme, the default palette applies');
+  assert.equal(paint({ 'flux-chain-theme': 'clay' }), 'defxn-tide', 'an old visitor choice paints as its published id');
+  assert.equal(paint({ 'flux-chain-theme': 'moss' }), 'defxn-moss-light', 'old moss is Moss light');
+  assert.equal(paint({ 'defxn-theme-v1': 'defxn-moss' }), 'defxn-moss', 'new moss is Moss dark');
+  assert.equal(paint({ 'defxn-theme-v1': 'defxn-dune', 'flux-chain-theme': 'clay' }), 'defxn-dune', 'the new key wins over a stale old key');
+  assert.equal(paint({ 'flux-chain-theme': 'bone', 'defxn-theme-default-v1': 'ember' }), 'defxn-dune-light', 'the visitor (old key) beats a NEW site default');
+  assert.equal(paint({ 'flux-chain-theme': 'bone', 'defxn-site-theme-default': 'ghost' }), 'defxn-dune-light', 'the visitor (old key) beats an OLD site default');
+  assert.equal(paint({ 'defxn-theme-default-v1': 'defxn-dusk', 'defxn-site-theme-default': 'ghost' }), 'defxn-dusk', 'new site default before old site default');
+  assert.equal(paint({ 'defxn-site-theme-default': 'dawn' }), 'defxn-dusk-light', 'an old site default still paints');
+  assert.equal(paint({ 'flux-chain-theme': 'constructor', 'defxn-theme-v1': 'tide' }), undefined, 'unknown values paint nothing (inherited names and un-namespaced ids included)');
+  const throwing = vm.createContext({ document: { documentElement: { classList: { add() {} }, dataset: {} } }, localStorage: { getItem() { throw new Error('blocked'); } } });
+  vm.runInContext(boot, throwing);
+  console.log('PASS: theme ids are the SDK published names; old keys map on read only');
+})().catch((error) => { console.error(error); process.exit(1); });

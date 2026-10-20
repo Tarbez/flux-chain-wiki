@@ -40,7 +40,7 @@
   var ROLES = TOKENS.roles.map(function (key) { return [key, key.charAt(0).toUpperCase() + key.slice(1), ROLE_COPY[key] || '']; });
   var SHADES = [['100', 'subtle fill'], ['200', 'hover fill'], ['300', 'border'], ['400', 'strong border'], ['500', 'base'], ['600', 'hover on fill'], ['700', 'text on subtle']];
   var TONES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
-  var THEME_NAMES = { ghost: 'Ember dark', glacier: 'Ember light', clay: 'Tide dark', grove: 'Tide light', ochre: 'Moss dark', moss: 'Moss light', marine: 'Dune dark', bone: 'Dune light', dusk: 'Dusk dark', dawn: 'Dusk light' };
+  var THEME_NAMES = { 'ember': 'Ember dark', 'ember-light': 'Ember light', 'defxn-tide': 'Tide dark', 'defxn-tide-light': 'Tide light', 'defxn-moss': 'Moss dark', 'defxn-moss-light': 'Moss light', 'defxn-dune': 'Dune dark', 'defxn-dune-light': 'Dune light', 'defxn-dusk': 'Dusk dark', 'defxn-dusk-light': 'Dusk light' };
 
   /* The SDK's colour tokens in groups, read from its order and prefixes. */
   function groupTokens(names) {
@@ -236,7 +236,7 @@
     return row;
   }
   function familyName() {
-    var key = document.documentElement.dataset.theme || 'ghost';
+    var key = document.documentElement.dataset.theme || 'ember';
     return THEME_NAMES[key] || key;
   }
 
