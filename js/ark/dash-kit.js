@@ -5,7 +5,7 @@
    needed the same vocabulary. The alternative was a second copy of these
    sixty lines, which is the defect this workspace's first law names: a
    duplicated builder drifts, and then two pages that are supposed to look
-   identical slowly stop. css/stats-dashboard.css owns the matching styles;
+   identical slowly stop. css/stats-dashboard.css owned the matching styles until 2026-10-20 (deleted: no page draws a shell);
    neither page defines its own panel or grid.
 
    Every builder returns the element it made, so a caller composes rather
