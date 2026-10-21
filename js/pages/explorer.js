@@ -73,27 +73,31 @@
     return /ies$/.test(word) ? word.slice(0, -3) + 'y' : /[^s]s$/.test(word) ? word.slice(0, -1) : word;
   }
   function countPhrase(count, capped, plural) { return count + (capped ? '+' : '') + ' ' + (count === 1 && !capped ? singular(plural) : plural); }
+  /* One Ark block from a spec, drawn after the page is up (live readings, a record): the adapter's render (js/ark/blocks.js).
+     A spec the kit refuses becomes Ark's refusal callout in its place; a reading never breaks the page. */
+  function block(spec) { return ArkUI.blocks.render(spec, { onInvalid: 'render' }); }
+  /* Puts a freshly drawn block where the old one was and returns it. */
+  function swap(old, fresh) { if (old && old.replaceWith) old.replaceWith(fresh); return fresh; }
   /* A way back inside the page's own views is Ark's action button (tone secondary), not a hand-built <button>. The view change is
-     the page's own state, not an address, so it is an `action` the page answers (setup()), never a link. Without the block
-     adapter loaded (the unit test's toy DOM) it is the plain button it was. Returns the element to put on the page. */
+     the page's own state, not an address, so it is an `action` the page answers (setup()), never a link. Returns the element. */
   function backAction(label, className, onClick) {
-    var root;
-    if (ArkUI.blocks && ArkUI.blocks.render) {
-      root = ArkUI.blocks.render({ block: 'actions', props: { label: 'Back', items: [{ label: label, action: 'explore-back', tone: 'secondary' }] } });
-      root.classList.add(className);
-      root.addEventListener('click', function (event) { if (event.target.closest && event.target.closest('[data-action="explore-back"]')) onClick(event); });
-      return root;
-    }
-    root = node('button', className, label); root.type = 'button'; root.addEventListener('click', onClick);
+    var root = block({ block: 'actions', props: { label: 'Back', items: [{ label: label, action: 'explore-back', tone: 'secondary' }] } });
+    root.classList.add(className);
+    root.addEventListener('click', function (event) { if (event.target.closest && event.target.closest('[data-action="explore-back"]')) onClick(event); });
     return root;
+  }
+  /* A record's fields as Ark facts (a hand-built <dl> stood here three times: ledger recheck T11 / C9). The label is the
+     field's name, cut to Ark's 48 characters; a field with no value says "Not recorded" (Ark's absent value), never a dash. */
+  function factItem(term, value, mono) {
+    var text = value == null || value === '' ? null : typeof value === 'object' ? JSON.stringify(value) : String(value);
+    return { term: String(term).slice(0, 48), value: text, mono: !!mono };
   }
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
   /* The live parts of the home (the page's own, hand-built because they ARE the explorer: the
-     mesh fabric stepper and the live kinds read from the public mesh), and the phone's pane
-     switch between them. The page around them -- crumbs, heading, the ways on -- is Ark blocks. */
+     mesh fabric stepper and the live kinds read from the public mesh). The page around them -- crumbs,
+     heading, the phone's switch between the two cards, the ways on -- is Ark blocks (spec() below). */
   function cards() {
-    return '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
-      '<div class="explore-cards">' +
+    return '<div class="explore-cards">' +
       '<article class="how-work-card explore-how-card" aria-label="How it works">' +
       '<div class="how-work-card-top"><span class="how-work-number" data-explore-step-n>01 / 03</span><span class="how-work-signal">HOW IT WORKS</span></div>' +
       '<div class="how-work-mesh-frame"><canvas class="how-work-mesh" data-explore-fabric aria-hidden="true"></canvas></div>' +
@@ -110,7 +114,15 @@
      heading and sentence its panel. The mesh drawing above them is shared and follows the chosen step
      (setup()). `was` keeps what the hand-built stepper's elements were keyed as: the tab strip, its three
      buttons (their words, "01Shape", are the tab labels) and the first step's heading and sentence. */
-  var STEPPER = 'page:/div:1/div:2/article:1';
+  var CARDS = 'page:/div:1/div:2', STEPPER = CARDS + '/article:1';
+  /* The phone's switch between the two cards is Ark tabs (a hand-built aria-pressed button pair stood here: ledger recheck X5 /
+     CP-6): each card is its tab's panel. From 901px both cards stand side by side and the tab strip is not drawn
+     (css/explore-story.css), so setup() shows both panels there. `was`: the strip keeps the old button pair's keys, the
+     tabs block the cards' wrapper's; mount() pins the two cards by hand, since the page puts them in the panels. */
+  function panesSpec() {
+    return { block: 'tabs', id: 'explore-panes', was: { ':root': { key: CARDS, self: true }, 'tabs-list': 'page:/div:1/div:1', 'tabs-trigger': 'page:/div:1/div:1/button:1', 'tabs-trigger#2': 'page:/div:1/div:1/button:2' },
+      props: { label: 'Show', variant: 'segmented', activation: 'automatic', items: [{ value: 'how', label: 'How it works' }, { value: 'live', label: 'Live now' }] } };
+  }
   function stepsSpec() {
     return { block: 'tabs', id: 'explore-steps', was: { ':root': STEPPER + '/div:3', 'tabs-trigger': STEPPER + '/div:3/button:1', 'tabs-trigger#2': STEPPER + '/div:3/button:2', 'tabs-trigger#3': STEPPER + '/div:3/button:3' },
       props: { label: 'How it works', variant: 'segmented', activation: 'automatic', items: STEPS.map(function (step, i) {
@@ -156,12 +168,20 @@
     onward.push({ label: 'How the chain works', href: 'route:chain', tone: 'link' });
     return [
       { block: 'custom', id: 'explore-home', was: WAS['explore-home'], mount: function (ctx) {
-        var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', ''); home.dataset.pane = 'how';
+        var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', '');
         home.appendChild(ctx.render({ block: 'breadcrumb', id: 'explore-crumbs', was: WAS['explore-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Mesh Explorer' }] } }));
         home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Your idea, live on the mesh.', density: 'compact',
           lede: 'DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.' } }));
         var live = node('div'); live.innerHTML = cards();
         live.querySelector('[data-explore-steps]').replaceWith(ctx.render(stepsSpec()));
+        var panes = ctx.render(panesSpec()), panels = panes.querySelectorAll('[data-ark-part="tabs-content"]');
+        panes.classList.add('explore-cards');
+        panes.querySelector('[data-ark-part="tabs-list"]').classList.add('explore-panes');
+        Array.prototype.forEach.call(panes.querySelectorAll('[data-ark-part="tabs-trigger"]'), function (tab, i) { tab.setAttribute('data-explore-pane', i ? 'live' : 'how'); });
+        [['.explore-how-card', '/article:1'], ['.explore-live-card', '/section:1']].forEach(function (card, i) {
+          var el = live.querySelector(card[0]); el.setAttribute('data-ark-layout-pin', CARDS + card[1]); panels[i].appendChild(el);
+        });
+        live.querySelector('.explore-cards').replaceWith(panes);
         while (live.firstChild) home.appendChild(live.firstChild);
         /* the ways on keep the footer's keys: What is a resolver, the family's Explore link (when the kit names it), Browse the raw records */
         var onwardWas = { ':root': { key: FOOT + '/div:2', self: true }, 'button': FOOT + '/div:2/a:1' };
@@ -320,12 +340,15 @@
       if (step === STEPS.length - 1 || !page.isConnected) { stopSteps(); return; }
       if (document.visibilityState !== 'hidden') showStep(step + 1);
     }, 5200);
-    Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (button) {
-      button.addEventListener('click', function () {
-        home.dataset.pane = button.dataset.explorePane;
-        Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (other) { other.setAttribute('aria-pressed', String(other === button)); });
-      });
-    });
+    /* The two cards are the panels of Ark tabs that only a phone or tablet draws. From 901px (the width
+       css/explore-story.css sets them side by side at) both panels show; below it Ark shows the selected one. */
+    var panePanels = Array.from(page.querySelectorAll('#explore-panes > [data-ark-part="tabs-content"]'));
+    var wide = window.matchMedia ? window.matchMedia('(min-width: 901px)') : null;
+    function syncPanes() { panePanels.forEach(function (panel) { panel.hidden = !(wide && wide.matches) && panel.getAttribute('data-state') !== 'active'; }); }
+    if (wide && panePanels.length) {
+      syncPanes();
+      if (wide.addEventListener) wide.addEventListener('change', syncPanes);
+    }
     function showView(view) {
       page.dataset.view = view; raw.hidden = view !== 'raw'; home.hidden = view === 'raw';
       if (view === 'raw') $('[data-explore-raw-back]').focus({ preventScroll: true });
@@ -671,17 +694,22 @@
       }
       function weight(c) { return groups[c].reduce(function (sum, item) { return sum + (liveCounts[item.id] ? liveCounts[item.id].count : 0); }, 0); }
       open.sort(function (a, b) { return weight(b) - weight(a) || a.localeCompare(b); });
-      kindsBox.replaceChildren.apply(kindsBox, open.map(function (c) {
-        var kind = KINDS[c] || [c.charAt(0).toUpperCase() + c.slice(1), CATEGORY_NOTES[c] || 'Records declared by this node.'];
-        var tile = node('button', 'explore-kind'); tile.type = 'button'; tile.dataset.category = c;
-        var icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
-        var figures = counted(c);
-        tile.appendChild(icon); tile.appendChild(node('strong', '', kind[0])); tile.appendChild(node('span', 'explore-kind-text', kind[1]));
-        tile.appendChild(node('small', '', figures.length ? figures.join(' · ') : 'Open to browse'));
-        tile.setAttribute('aria-pressed', String(browsing.category === c)); tile.setAttribute('aria-controls', 'explore-browse');
-        tile.addEventListener('click', function () { if (browsing.category === c) closeBrowse(); else browseKind(c); });
-        return tile;
-      }));
+      /* A kind is an Ark stat tile that is a button (a hand-built <button> tile stood here: ledger recheck W4b): its name, and its
+         live count where the node gave one. A kind this page does not count says so (Ark's absent reading), never 0. */
+      var tiles = open.map(function (c) {
+        var kind = KINDS[c] || [humanField(c)], figures = counted(c);
+        return figures.length ? { label: kind[0], value: figures.join(' · '), action: 'explore-kind' }
+          : { label: kind[0], action: 'explore-kind', absent: { reason: 'Not counted here.' } };
+      });
+      if (!tiles.length) { kindsBox.replaceChildren(); privateLine.hidden = !closed.length; privateLine.textContent = closed.length ? 'Kept private: ' + closed.join(', ') + '.' : ''; return; }
+      kindsBox.replaceChildren(block({ block: 'stats', props: { label: 'Kinds of record', items: tiles } }));
+      kindTiles().forEach(function (tile, i) {
+        var c = open[i], icon = node('span', 'explore-kind-icon'), control = tile.querySelector('.ark-stat__control');
+        icon.innerHTML = kindIcon((KINDS[c] || [])[2]);
+        tile.classList.add('explore-kind'); tile.dataset.category = c;
+        tile.querySelector('[data-ark-part="stat-label"]').prepend(icon);
+        control.setAttribute('aria-controls', 'explore-browse'); control.setAttribute('aria-expanded', String(browsing.category === c));
+      });
       privateLine.hidden = !closed.length;
       privateLine.textContent = closed.length ? 'Kept private: ' + closed.join(', ') + '.' : '';
     }
