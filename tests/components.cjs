@@ -13,9 +13,12 @@ assert.equal(sheets[sheets.length - 1], 'css/components.css', 'components.css lo
 const components = fs.readFileSync('css/components.css', 'utf8');
 for (const variant of ['solid', 'soft', 'quiet', 'choice', 'link'])
   assert(components.includes(`/* ${variant} `), `components.css defines the ${variant} variant`);
-for (const cls of ['.home-primary-cta', '.resolver-story-primary', '.story-primary', '.mechanism-next', '.home-ghost-cta'])
+for (const cls of ['.mechanism-next'])
   /* (.resolutions-domain-tab left this list 2026-10-19: the domains are Ark's tabs, painted by css/ark-blocks.css;
-     .about-primary-action left it the same day: /about's main action is the Ark hero's primary button) */
+     .about-primary-action left it the same day: /about's main action is the Ark hero's primary button;
+     .home-primary-cta, .home-ghost-cta, .story-primary and .resolver-story-primary left it 2026-10-21 (W5-CSSCLEAN):
+     no script builds them any more -- the home hero and the story pager are Ark blocks -- so components.css
+     deleted their rules; only js/ark/icons.js's selector table still names them) */
   assert(components.includes(cls), `${cls} is painted by the component layer`);
 /* "Run DEFXN" is the family bar's soft action since 2026-10-19: its paint is the kit's component
    layer (assets/kit/defxn-components.css .dx-btn--soft), one rule on every route, and no site

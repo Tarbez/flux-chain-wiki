@@ -154,7 +154,6 @@
   #scene .explore-page .explore-kinds { grid-template-columns:1fr 1fr; gap:6px; }
   #scene .explore-page .explore-kind { padding:9px 10px; row-gap:4px; }
   #scene .explore-page .explore-kind strong { font-size:14px; }
-  #scene .explore-page .explore-live:has([data-state="browse"]) .explore-private,
   #scene .explore-page .explore-live-card:has([data-state="browse"]) :is(.how-work-card-top,h2,.explore-private) { display:none; }
   #scene .explore-page .explore-live-card:has([data-state="browse"]) { grid-template-rows:minmax(0,1fr); }
   #scene .explore-page .explore-browse-head { grid-template-columns:auto minmax(0,1fr); }

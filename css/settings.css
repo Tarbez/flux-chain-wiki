@@ -54,7 +54,7 @@
 .settings-range::-moz-range-thumb { width:12px; height:12px; border:0; border-radius:50%; background:hsl(var(--primary)); }
 .settings-panel .settings-action { display:block; width:100%; min-height:38px; margin:3px 0 0; padding:10px 12px; border-radius:7px; background:transparent; text-align:left; font-size:11px; color:hsl(var(--text-muted)); }
 .settings-panel .settings-action:hover,.settings-panel .settings-action[aria-pressed="true"] { background:hsl(var(--text-strong)/.06); color:hsl(var(--text-strong)); }
-#scene .settings-panel :is(button,input):focus-visible,#scene .settings-trigger:focus-visible { outline:none; background-color:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
+#scene .settings-panel :is(button,input):focus-visible,#scene .settings-trigger:focus-visible { background-color:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
 @media(max-width:760px) { .site-settings { left:10px; } .settings-panel { padding:22px; } }
 @media(prefers-reduced-motion:reduce) { .settings-trigger,.settings-choice { transition:none; } }
 

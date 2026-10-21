@@ -4,8 +4,10 @@
 /* Not inside an Ark block: a block paints its own focus (a --reference ring, css/ark-blocks.css),
    and this tint turned a focused primary button's fill grey -- an id-weight rule over the
    block's class rule (docs/ux-audit/components.md risk R8). */
+/* The tint adds to the ring and never removes it: this rule out-ranks components.css's ring (id + :not(.class)),
+   and with `outline:none` here the header and page links lost their ring once components.css dropped
+   !important (style snapshot 2026-10-21: 740 focused controls, solid -> none). */
 #scene :is(a,button,input):not(.ark-block *):focus-visible {
-  outline:none;
   color:hsl(var(--text-strong));
   background-color:hsl(var(--raised));
 }

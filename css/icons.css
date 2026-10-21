@@ -5,5 +5,4 @@
 #scene .nav-route-link > .native-icon { position:absolute; top:16px; right:16px; color:hsl(var(--primary)); }
 #scene .nav-route-link::after { content:none; }
 
-#scene .home-primary-cta.has-native-icon::after {content:none;}
 /* header link type and icon sizes: the kit bar's (css/navigation.css sizes the glyphs) */

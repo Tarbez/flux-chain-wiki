@@ -81,4 +81,4 @@
 @media(prefers-reduced-motion:reduce) { #scene .ark-header .products-mega {animation:none;} .products-mega-art * {transition:none !important;} }
 
 /* While the menu is open the header sits above the routed page. */
-#scene .ark-header.products-open {z-index:60 !important;}
+

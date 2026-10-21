@@ -19,14 +19,11 @@
 :is([data-stage],[data-record]) {--record-color:var(--signal-reference);}
 
 /* Primary: one brand moment per view. */
-#scene .hero-alive[data-page="zero"] .home-headline-network {color:hsl(var(--primary));-webkit-text-stroke:0;text-shadow:none;}
-#scene .hero-alive[data-page="zero"] .home-headline-network::before {background:linear-gradient(90deg,hsl(var(--primary-100)),transparent 82%);border-left-color:hsl(var(--primary-400));}
-#scene .hero-alive[data-page="zero"] .home-headline-network::after {height:1px;background:linear-gradient(90deg,hsl(var(--primary-400)),transparent);}
+
 #scene .hero-alive[data-page="zero"] .ark-hero-body::before {background:linear-gradient(180deg,hsl(var(--border-strong)),transparent);box-shadow:none;}
 #scene .hero-alive[data-page="zero"] .ark-layer-zero {background:radial-gradient(hsl(var(--text-muted) / .22) .65px,transparent .8px) 0 0/48px 48px;}
 #scene .hero-alive[data-page="zero"] .ark-layer-zero::before {background:linear-gradient(90deg,hsl(var(--border-subtle)) 0 1px,transparent 1px) 0 0/25% 100%;}
-#scene .hero-alive[data-page="zero"] .home-promise::before {border-color:hsl(var(--primary));background:hsl(var(--primary-200));box-shadow:none;}
-#scene .hero-alive[data-page="zero"] .home-promise::after {background:linear-gradient(90deg,hsl(var(--border-strong)),transparent);}
+
 #scene .hero-alive[data-page="zero"] .ark-hero-copy {color:hsl(var(--text));}
 
 /* Neutral by default: headings, records, labels and captions. */
@@ -39,35 +36,30 @@
 
 /* Reference is the low-level interaction color: links, pickers and disclosure. */
 #scene :is(.home-question-links a,.home-lifecycle-all,.home-status-link,.story-reference,.reference-orientation a,.resolver-back-link,.resolver-guide-links a,.lifecycle-trail-item,.source-step-choice,.guided-step-picker button,.story-depth button,.account-page summary,.mesh-explorer-page summary) {color:var(--signal-reference);}
-#scene .home-lifecycle-all .native-icon {color:var(--signal-reference);}
+
 #scene .home-question-links a {border-color:hsl(var(--reference-300));}
 
 #scene :is(.source-step-choice,.guided-step-picker button,.story-depth button)[aria-pressed="true"] {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}
 #scene :is(.task-page,.guided-page) :is(a,button,input,select,summary):focus-visible {outline-color:var(--signal-reference);}
 #scene .nav-layer-choice .nav-choice-title {color:var(--signal-reference);}
 #scene .nav-layer-choice .nav-choice-count {color:hsl(var(--text-muted));}
-#scene .account-avatar {color:hsl(var(--text-strong));border-color:hsl(var(--border-strong));background:hsl(var(--surface));}
-#scene .account-state dt {color:hsl(var(--text-muted));}
-#scene [data-session="verified-local"] .account-status,#scene .header-account-link[data-signed-in="true"] .header-account-status {color:var(--signal-trust);}
-#scene .account-state>p:last-child {color:var(--signal-trust);}
+
+#scene .header-account-link[data-signed-in="true"] .header-account-status {color:var(--signal-trust);}
+
 #scene .mesh-explorer-page[data-connection="live"] .mesh-explorer-status-dot {background:var(--signal-trust);}
-#scene .mesh-explorer-page[data-connection="error"] .mesh-explorer-status {color:var(--signal-danger);}
-#scene .account-storage-notice {color:hsl(var(--danger));}
 
 /* Match the route shells that previously forced their own primary colors. */
 
 #scene .task-page .source-step-choice[aria-pressed="true"] {border-color:var(--signal-reference);background:hsl(var(--reference-100));color:var(--signal-reference);}
-#scene .content-layer-path a,#scene .account-next a {color:var(--signal-reference);}
+#scene .content-layer-path a {color:var(--signal-reference);}
 #scene .account-page :is(button,input,a,summary):focus-visible {outline-color:var(--signal-reference);}
 #scene .home-question-links a .native-icon {color:var(--signal-reference);}
-#scene .stage-scene-choices button,#scene .how-work-more,#scene .how-work-number {color:var(--signal-reference);}
+#scene .stage-scene-choices button,
+#scene .how-work-number {color:var(--signal-reference);}
 #scene .stage-scene-choices button:is(:hover,[aria-pressed="true"]) {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}
 #scene .how-work-card:is(:hover,:focus-visible,[data-active="true"]) {border-color:var(--signal-reference);background-color:hsl(var(--reference-100));}
-#scene .guided-page .guided-step-picker button[aria-pressed="true"] {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}
+
 #scene .reference-page h1 {color:hsl(var(--text-strong));}
 #scene .settings-panel .settings-choice[aria-pressed="true"] {background:hsl(var(--reference-100));color:var(--signal-reference);}
 #scene .settings-panel .settings-range {accent-color:var(--signal-reference);}
-#scene .how-chapter h1 {color:hsl(var(--text-strong));}
-#scene .how-chapter .story-kicker {color:hsl(var(--text-muted));}
-#scene .how-chapter-choice,#scene .how-check-row,#scene .how-check-row span {color:var(--signal-reference);}
-#scene .how-chapter-choice[aria-pressed="true"],#scene .how-check-row[aria-pressed="true"] {color:var(--signal-reference);border-color:var(--signal-reference);background:hsl(var(--reference-100));}
+
