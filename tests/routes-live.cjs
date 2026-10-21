@@ -294,25 +294,31 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
         assert(panelOf(page, 2).querySelector('a[data-scene-link="lifecycle/' + ['intent', 'agreement', 'receipt'][['ask', 'work', 'check'].indexOf(id)] + '"]'), 'the signed record is one press away');
         assert.equal(typeof page.arkDispose, 'function', `${key}: the page can be disposed`);
       }
-      /* /download is the story template since 2026-10-19 (W3-GUIDE): How it works is the five steps
-         as an Ark accordion, in step with the terminal (the figure) and its way through. */
+      /* /download is the story template since 2026-10-19 (W3-GUIDE). Since 2026-10-21 How it works is
+         the five steps as Ark tabs -- the step control /deploy uses, where it was an accordion (ledger
+         recheck 2026-10-21, "/download fixes (one step component with /deploy)") -- in step with the
+         terminal (the figure), whose way through is an Ark actions row like /deploy's ("/download
+         hand-built", DN7/P8). The checks are the same: one step shown, terminal and tabs follow each
+         other both ways, the last step hands on. */
       if (key === 'download') {
         ran.download.push(key);
         const terminal = page.querySelector('.download-terminal');
-        const rows = [...page.story.panel('context').querySelectorAll('[data-ark-part="accordion-trigger"]')];
-        const open = () => rows.map((row) => row.getAttribute('aria-expanded') === 'true');
-        const next = terminal.querySelector('.download-next'), progress = terminal.querySelector('.download-progress');
+        const steps = page.story.panel('context').querySelector('#download-steps');
+        const rows = [...steps.querySelectorAll('[data-ark-part="tabs-trigger"]')];
+        const panels = [...steps.children].filter((n) => n.getAttribute('data-ark-part') === 'tabs-content');
+        const open = () => panels.map((panel) => !panel.hidden);
+        const next = terminal.querySelector('.download-way [data-action="download-next"]'), progress = terminal.querySelector('.download-progress');
         assert.equal(rows.length, 5, 'five source steps');
         assert.equal(progress.textContent, 'Step 1 of 5', 'source guide starts at the first step');
-        assert.deepEqual(open(), [true, false, false, false, false], 'source guide starts with one step open');
+        assert.deepEqual(open(), [true, false, false, false, false], 'source guide starts with one step shown');
         next.click();
         assert.equal(progress.textContent, 'Step 2 of 5', 'source guide advances one step');
-        assert.deepEqual(open(), [false, true, false, false, false], 'the open step follows the terminal');
+        assert.deepEqual(open(), [false, true, false, false, false], 'the shown step follows the terminal');
         rows[4].click();
-        assert.equal(progress.textContent, 'Step 5 of 5', 'opening a step chooses it in the terminal');
+        assert.equal(progress.textContent, 'Step 5 of 5', 'choosing a step chooses it in the terminal');
         assert(next.hidden, 'final source step has no next step');
-        assert(!terminal.querySelector('.download-onward').hidden, 'final source step hands on to the network page');
-        terminal.querySelector('.download-previous').click();
+        assert(!terminal.querySelector('.download-way .ark-actions > a').hidden, 'final source step hands on to the network page');
+        terminal.querySelector('.download-way [data-action="download-previous"]').click();
         assert.equal(progress.textContent, 'Step 4 of 5', 'previous step works');
         assert.deepEqual(open(), [false, false, false, true, false]);
       }

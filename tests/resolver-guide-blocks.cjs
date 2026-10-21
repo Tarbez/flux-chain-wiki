@@ -86,9 +86,14 @@ const ROUTES = {
       [/^page:\/div:1$/, 'the terminal beside the steps: the story body'],
       [/^page:\/div:1\/section:1$/, 'the terminal card is the figure\'s slot; its way through (previous, step n of 5, next, the hand-off) moved into it'],
       [/^page:\/div:1\/section:2$/, 'the steps column is the How it works view'],
-      [/^page:\/div:1\/section:2\/ol:1$/, 'the step list is Ark\'s accordion, in step with the terminal'],
-      [/^page:\/div:1\/section:2\/ol:1\/li:\d$/, 'a step row (its number, name and text) is an accordion row (its name and text; the number is its place)'],
-      [/^page:\/nav:1$/, 'the footer: its step controls are the terminal\'s way through; its two links are the hero\'s guide action and an Evidence link']
+      /* 2026-10-21: the step list was Ark's accordion, then became Ark tabs -- the step control /deploy
+         uses (ledger recheck 2026-10-21, "/download fixes (one step component with /deploy)"). */
+      [/^page:\/div:1\/section:2\/ol:1$/, 'the step list is Ark tabs (the step control /deploy uses), in step with the terminal'],
+      [/^page:\/div:1\/section:2\/ol:1\/li:\d$/, 'a step row (its number, name and text) is a step tab (its name; the number is its place); the row\'s text is the tab\'s panel, which keeps the text\'s key'],
+      [/^page:\/nav:1$/, 'the footer: its step controls are the terminal\'s way through; its two links are the hero\'s guide action and an Evidence link'],
+      /* 2026-10-21 ("/download hand-built", DN7/P8): the hand-built step buttons became Ark's actions row,
+         with /deploy's words and tones */
+      [/^page:\/nav:1\/button:1(\/span:1)?$/, '"← Previous" is Ark\'s "Previous step" button (the words /deploy\'s way through uses); its label keeps the inner key']
     ],
     retired: [
       [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width']
@@ -111,16 +116,27 @@ const ROUTES = {
     assert(!/story-depth|guided-step-picker|how-step-button|content-layer-path|lifecycle-boundary/.test(source), file + ' builds none of the old guide parts');
     assert(!/ArkUI\.el\('(section|header|h1|nav|figure)'/.test(source) && !/el\('(section|header|h1|nav|figure)'/.test(source), file + ': no hand-built page structure');
   }
+  /* ledger recheck 2026-10-21, "/download hand-built" (T11, DN7/P8): the terminal's checks are Ark
+     facts and its step buttons Ark actions; only the commands themselves stay the page's own (Ark
+     has no command block, P22) */
+  assert(!/el\('(dl|dt|dd|button|a)'/.test(read('js/pages/download.js')) && !/linkEl\(/.test(read('js/pages/download.js')), 'js/pages/download.js: no hand-built key/value list, button or link');
 
   const lines = [];
   for (const route of Object.keys(ROUTES).filter((r) => process.argv.length <= 2 || process.argv.slice(2).includes(r))) {
     const spec = ROUTES[route];
     const seen = await converted.check(route, { reshaped: spec.reshaped, retired: spec.retired, reworded: spec.reworded, inspect: (window, page) => {
       const depth = page.querySelector('[data-story-depth]');
+      const ownList = depth && [...depth.children].find((n) => n.getAttribute('data-ark-part') === 'tabs-list');
       return {
-        depth: depth ? [...depth.querySelectorAll('[role="tab"]')].map((t) => t.textContent.trim()) : null,
+        depth: ownList ? [...ownList.querySelectorAll('[role="tab"]')].map((t) => t.textContent.trim()) : null,
         variant: depth && depth.getAttribute('data-variant'),
         tablists: page.querySelectorAll('[role="tablist"]').length,
+        /* every tab control that is not the depth control: where it sits, its look, its tab names */
+        others: [...page.querySelectorAll('[role="tablist"]')].filter((list) => list !== ownList).map((list) => {
+          const tabs = list.closest('[data-ark-block="tabs"]'), panel = tabs && tabs.parentElement && tabs.parentElement.closest('[data-ark-part="tabs-content"]');
+          return { id: tabs && tabs.id, variant: tabs && tabs.getAttribute('data-variant'), inView: panel ? [...depth.children].filter((n) => n.getAttribute('data-ark-part') === 'tabs-content').indexOf(panel) : -1,
+            names: [...list.querySelectorAll('[role="tab"]')].map((t) => t.textContent.trim()) };
+        }),
         figureFold: [...page.querySelectorAll('[data-ark-block="disclosure"]')].filter((d) => d.querySelector('[data-ark-block="figure"]')).map((d) => d.getAttribute('data-fold-below')),
         pager: page.querySelectorAll('[data-ark-block="pager"] a').length,
         related: [...page.querySelectorAll('[data-ark-block="pager"] [data-ark-part="pager-related"] a')].map((a) => a.getAttribute('href'))
@@ -128,7 +144,21 @@ const ROUTES = {
     } });
     assert.deepEqual(seen.depth, DEPTH, route + ': the one depth label set');
     assert.equal(seen.variant, 'segmented', route + ': the depth control is segmented');
-    assert.equal(seen.tablists, 1, route + ': one depth control, no second tab or pressed-button control');
+    /* One depth control, and no second depth or pressed-button control. The one other tab control
+       allowed is /download's step tabs inside How it works: since 2026-10-21 its five steps use the
+       step control /deploy uses (Ark tabs, the plain look; ledger recheck 2026-10-21, "/download fixes
+       (one step component with /deploy)"), where they were an accordion. They are named by step, never
+       "01-05" (the defect this check was written against). */
+    if (route === '/download') {
+      assert.equal(seen.tablists, 2, route + ': the depth control and the step tabs, no other tab or pressed-button control');
+      assert.equal(seen.others.length, 1, route + ': one step control');
+      const [stepTabs] = seen.others;
+      assert.equal(stepTabs.id, 'download-steps', route + ': the step control is the How it works step tabs');
+      assert.equal(stepTabs.variant, 'tabs', route + ': the step tabs have /deploy\'s look, not the depth control\'s');
+      assert.equal(stepTabs.inView, 1, route + ': the step tabs sit in How it works');
+      assert.equal(stepTabs.names.length, 5, route + ': five step tabs');
+      assert(stepTabs.names.every((name) => /[a-z]{3}/i.test(name)), route + ': every step tab is named by its step, never only its number');
+    } else assert.equal(seen.tablists, 1, route + ': one depth control, no second tab or pressed-button control');
     // /what-is-a-resolver also carries the manifest's layers and launched-vs-served figures (W4-S13, tests/resolver-page-parts.cjs): the same fold
     assert.deepEqual(seen.figureFold.slice().sort(), route === '/what-is-a-resolver' ? ['always', 'always', 'tablet'] : ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
     assert(seen.pager > 0, route + ': the page ends in a pager');

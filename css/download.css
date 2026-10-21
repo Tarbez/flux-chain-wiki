@@ -1,7 +1,8 @@
 /* /download (js/pages/download.js): the insides of its terminal, the story figure. The page is the
    story template (js/pages/story.js) in the shared block-page frame (css/block-page.css) since
    2026-10-19 (W3-GUIDE), so this file owns no page layout -- only the terminal: its label row with
-   Copy (the site's one, css/page-layout.css .copy-command), the step's commands, what to expect, and the way through. Nothing in it is hidden by width. */
+   Copy (the site's one, css/page-layout.css .copy-command), the step's commands, what to expect, and the way through.
+   A step's checks (Ark facts) and the way through (Ark actions) keep Ark's own look. Nothing in it is hidden by width. */
 .download-terminal {display:grid;gap:12px;min-width:0;}
 .download-terminal-top {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:32px;}
 #scene .download-terminal-title {margin:0;font:600 20px/1.2 var(--font-sans,sans-serif);letter-spacing:-.02em;color:hsl(var(--text-strong));}
@@ -11,20 +12,15 @@
 #scene .download-expect {display:flex;align-items:center;gap:10px;margin:0;font:400 14px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text-muted));}
 #scene .download-expect[hidden] {display:none;}
 #scene .download-expect::before {content:"";flex:0 0 6px;height:6px;border-radius:50%;background:hsl(var(--primary));}
-#scene .download-checks {display:grid;grid-template-columns:max-content minmax(0,1fr);gap:8px 18px;margin:0;}
-#scene .download-checks dt {font:500 12px/1.45 var(--font-mono,monospace);color:hsl(var(--reference));}
-#scene .download-checks dd {margin:0;font:400 15px/1.45 var(--font-sans,sans-serif);color:hsl(var(--text-strong));}
 .download-proves {display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:18px;}
 #scene .download-proves ul {margin:8px 0 0;padding:0;list-style:none;display:grid;gap:6px;}
 #scene .download-proves li {font:400 15px/1.35 var(--font-sans,sans-serif);color:hsl(var(--text-strong));}
 #scene .download-proves-no li {color:hsl(var(--text-muted));}
 #scene .download-proves-yes li::before {content:"✓  ";color:hsl(var(--primary));}
 #scene .download-proves-no li::before {content:"–  ";color:hsl(var(--text-faint));}
-/* The way through: previous, where you are, next -- and on the last step, the hand-off. */
+/* The way through: where you are, then Ark's actions row (Previous step / Next step, or the
+   hand-off on the last step), pushed to the end. The buttons are Ark's own paint. */
 .download-way {display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-top:10px;border-top:1px solid hsl(var(--border-subtle));}
 #scene .download-progress {font:500 12px var(--font-mono,monospace);color:hsl(var(--text-muted));}
-#scene .download-previous {min-height:40px;padding:8px 10px;border:0;background:none;font:500 14px var(--font-sans,sans-serif);color:hsl(var(--text-muted));cursor:pointer;}
-#scene .download-previous:hover {color:hsl(var(--text-strong));}
-#scene :is(.download-next,.download-onward) {margin-left:auto;min-height:40px;font:500 14px/1.4 var(--font-sans,sans-serif);}
-#scene :is(.download-previous,.download-next,.download-onward)[hidden] {display:none;}
+#scene .download-way > .ark-actions {margin:0 0 0 auto;}
 @media(max-width:600px){.download-proves {grid-template-columns:1fr;gap:10px;}#scene .download-code code {font-size:13px;}}

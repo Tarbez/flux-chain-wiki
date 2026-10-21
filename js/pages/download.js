@@ -5,12 +5,17 @@
    phone, where the deck, the step names, the guide link, the bundle link and the progress line
    were display:none (docs/ux-audit/pages-ux-a.md /download P1). It is the one guided template now:
      The idea      the deck and the five steps, by name
-     How it works  each step in full (Ark's accordion), in step with the terminal
+     How it works  each step in full as Ark tabs -- the step control /deploy uses (ledger recheck
+                   2026-10-21, "/download fixes (one step component with /deploy)": the
+                   accordion here and the tabs there were two controls for one kind of list) --
+                   in step with the terminal
      Evidence      what a clean local start proves and what it does not, and the full guide
      boundary      what success proves, in sight in every view
-     figure        the terminal for the chosen step -- its commands with Copy, what to expect,
-                   and the way through (previous / next, "Step n of 5", the hand-off to
-                   /deploy on the last step); folded behind "Show the terminal" below 900px
+     figure        the terminal for the chosen step -- its commands with Copy, what to expect
+                   (a step's checks are Ark facts), and the way through: "Step n of 5" and an
+                   Ark actions row (Previous step / Next step, as on /deploy, and on the last
+                   step the hand-off to /deploy); folded behind "Show the terminal" below 900px.
+                   The terminal itself stays the page's own: Ark ships no command block (P22).
    Every step is addressable as before (?step=N, plus ?view= for a depth). Words stay in the
    download manifest (copy: keys); the terminal's commands come from docs/operators. Layout keys
    of the old page are pinned (`WAS`, tests/lib/layout-continuity.cjs). Regression:
@@ -36,20 +41,24 @@
       'actions': { key: 'page:/header:1/div:1', self: true }, 'button': 'page:/nav:1/a:1' },
     'download-body': { ':root': { key: 'page:/div:1', self: true } },
     'download-depth': { ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/header:1/p:1', 'tabs-content#2': { key: 'page:/div:1/section:2', self: true },
-      'accordion': { key: 'page:/div:1/section:2/ol:1', self: true }, 'button#2': 'page:/nav:1/a:2' },
+      'button#2': 'page:/nav:1/a:2' },
+    /* How it works' step tabs (nested in the depth control, so pinned by their own id): the old
+       step list is the tabs, a step row its tab, the row's text the tab's panel. */
+    'download-steps': { ':root': { key: 'page:/div:1/section:2/ol:1', self: true } },
     'download-figure': { '[data-ark-slot="terminal"]': { key: 'page:/div:1/section:1', self: true }, '.download-terminal-top': 'page:/div:1/section:1/div:1', '.download-terminal-top > [data-ark-block="eyebrow"]': 'page:/div:1/section:1/div:1/span:1',
       '.download-terminal-top .copy-command [data-ark-part="button"]': 'page:/div:1/section:1/div:1/button:1',
       '.download-terminal-title': 'page:/div:1/section:1/h2:1', '.download-screen': 'page:/div:1/section:1/div:2', '.download-expect': 'page:/div:1/section:1/p:1',
-      '.download-way': { key: 'page:/nav:1', self: true }, '.download-progress': 'page:/nav:1/span:1', '.download-previous': 'page:/nav:1/button:1',
-      '.download-next': 'page:/nav:1/button:2', '.download-onward': 'page:/nav:1/a:3' },
+      '.download-way': { key: 'page:/nav:1', self: true }, '.download-progress': 'page:/nav:1/span:1',
+      '.download-way [data-action="download-previous"]': 'page:/nav:1/button:1',
+      '.download-way [data-action="download-next"]': 'page:/nav:1/button:2', '.download-way .ark-actions > a': 'page:/nav:1/a:3' },
     insert: 'page:/div:2'
   };
   [1, 2, 3, 4, 5].forEach(function (n) {
     var k = n > 1 ? '#' + n : '';
     WAS['download-depth']['step#' + n] = STEP(n) + '/button:1';
     WAS['download-depth']['step-title' + k] = STEP(n) + '/button:1/strong:1';
-    WAS['download-depth']['accordion-item' + k] = { key: STEP(n), self: true };
-    WAS['download-depth']['accordion-content' + k] = 'id:source-step-' + n;
+    WAS['download-steps']['tabs-trigger' + k] = { key: STEP(n), self: true };
+    WAS['download-steps']['tabs-content' + k] = 'id:source-step-' + n;
   });
 
   /* the one case rule for a label a manifest authored in capitals (js/ark/page-kit.js) */
@@ -79,15 +88,19 @@
       var screen = el('div', 'download-screen'); card.appendChild(screen);
       var expect = el('p', 'download-expect'); card.appendChild(expect);
       card.appendChild(copier.status);
+      /* The way through: where you are, then Ark's actions row -- Previous step / Next step, the
+         words and tones /deploy's row uses, and on the last step the hand-off to the next page
+         (Ark draws its arrow). The presses reach the page as ark:action (def.handlers below). */
       var way = el('div', 'download-way');
-      var previous = el('button', 'download-previous', '← '); previous.type = 'button'; previous.setAttribute('aria-label', 'Previous step'); previous.appendChild(el('span', 'download-previous-word', 'Previous'));
       var progress = el('span', 'download-progress'); progress.setAttribute('role', 'status');
-      var next = el('button', 'download-next mechanism-next', 'Next step →'); next.type = 'button';
-      var onward = ArkUI.dash.linkEl(sentence(words('NEXT')) + ' →', 'route:' + manifest.meta.next, manifest.route, 'download-onward mechanism-next');
-      way.appendChild(previous); way.appendChild(progress); way.appendChild(next); way.appendChild(onward);
+      var stepper = ArkUI.blocks.render({ block: 'actions', props: { label: 'Step through', align: 'end', items: [
+        { label: 'Previous step', action: 'download-previous', tone: 'ghost' },
+        { label: 'Next step', action: 'download-next', tone: 'primary' },
+        { label: sentence(words('NEXT')), href: 'route:' + manifest.meta.next, tone: 'primary' }
+      ] } }, { from: manifest.route });
+      var previous = stepper.querySelector('[data-action="download-previous"]'), next = stepper.querySelector('[data-action="download-next"]'), onward = stepper.querySelector('a');
+      way.appendChild(progress); way.appendChild(stepper);
       card.appendChild(way);
-      previous.addEventListener('click', function () { select(active - 1, true); });
-      next.addEventListener('click', function () { select(active + 1, true); });
 
       function paint() {
         var t = TERMINAL[active];
@@ -99,9 +112,9 @@
           t.lines.forEach(function (line) { var row = el('code'); row.appendChild(el('span', 'download-prompt', '$ ')); row.appendChild(document.createTextNode(line)); pre.appendChild(row); });
           screen.appendChild(pre);
         } else if (t.checks) {
-          var dl = el('dl', 'download-checks');
-          t.checks.forEach(function (pair) { dl.appendChild(el('dt', '', pair[0])); dl.appendChild(el('dd', '', pair[1])); });
-          screen.appendChild(dl);
+          /* what to look for once it runs: Ark's facts (one record, one pair per line) */
+          screen.appendChild(ArkUI.blocks.render({ block: 'facts', props: { label: 'What to check', columns: 1,
+            items: t.checks.map(function (pair) { return { term: pair[0], value: pair[1] }; }) } }));
         } else {
           var split = el('div', 'download-proves');
           [['PROVES', t.proves, 'yes'], ['DOES NOT PROVE', t.not, 'no']].forEach(function (group) {
@@ -113,11 +126,14 @@
         previous.hidden = active === 0; next.hidden = active === count - 1; onward.hidden = active !== count - 1;
         progress.textContent = 'Step ' + (active + 1) + ' of ' + count;
       }
-      /* The step rows of How it works: Ark's accordion, opened in step with the terminal. */
-      function rows() { var panel = root && root.story && root.story.panel('context'); return panel ? Array.prototype.slice.call(panel.querySelectorAll('[data-ark-part="accordion-trigger"]')) : []; }
+      /* The step tabs of How it works (Ark tabs, as /deploy's), chosen in step with the terminal:
+         through the primitive (a click), never by hand. */
+      function stepTabs() { return root && root.querySelector('#download-steps'); }
+      function tabs() { var t = stepTabs(); return t ? Array.prototype.slice.call(t.querySelector('[data-ark-part="tabs-list"]').querySelectorAll('[data-ark-part="tabs-trigger"]')) : []; }
+      function shown() { var list = tabs(); for (var i = 0; i < list.length; i++) if (list[i].getAttribute('aria-selected') === 'true') return i; return 0; }
       function openRow(index) {
-        var trigger = rows()[index];
-        if (trigger && trigger.getAttribute('aria-expanded') !== 'true') { syncing = true; trigger.click(); syncing = false; }
+        var trigger = tabs()[index];
+        if (trigger && trigger.getAttribute('aria-selected') !== 'true') { syncing = true; trigger.click(); syncing = false; }
       }
       function query(view) {
         var v = view || (root && root.story ? root.story.view() : 'focus');
@@ -140,7 +156,10 @@
         actions: [{ label: guide.label, href: guide.href, tone: 'secondary' }],
         depth: {
           focus: { text: copy('DECK'), blocks: [{ block: 'steps', props: { label: 'Local setup steps', items: steps.map(function (s) { return { title: s.title }; }) } }] },
-          context: { blocks: [{ block: 'accordion', props: { label: 'Local setup steps', multiple: false, defaultOpen: ['step-1'], items: steps } }] },
+          /* the tab names are the step names; the number is the tab's place (a tab name holds 32
+             characters, and "02 / Install the trusted checkout" is 33) and the terminal says it */
+          context: { blocks: [{ block: 'tabs', id: 'download-steps', was: WAS['download-steps'], props: { label: 'Local setup steps',
+            items: steps.map(function (s) { return { value: s.value, label: s.title, content: s.content }; }) } }] },
           reference: { blocks: [
             { block: 'facts', props: { label: 'What a clean local start proves', columns: 1, items: [
               { term: 'Proves', value: TERMINAL[3].proves.join(' · ') }, { term: 'Does not prove', value: TERMINAL[3].not.join(' · ') }] } },
@@ -152,15 +171,17 @@
         figure: { slot: 'terminal', kind: 'illustration', caption: 'What each step looks like at the terminal: its commands with Copy, and what to expect. Commands and defaults come from the operator guide.',
           more: 'Show the terminal', less: 'Hide the terminal' },
         slots: { terminal: card },
+        handlers: { 'download-previous': function () { select(active - 1, true); }, 'download-next': function () { select(active + 1, true); } },
         pager: { label: 'Continue', next: { label: sentence(words('NEXT')), href: 'route:' + manifest.meta.next },
           related: [{ label: 'Deploy a site with the Bundle Deployer', href: words('ASIDE.HREF') }, guide] },
         query: function (view) { return query(view); },
         onRestore: function (params) { select(Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)), false); }
       };
       root = ArkUI.story.mount(def, host);
-      /* A row opened by hand chooses the terminal's step (and its address). */
-      rows().forEach(function (trigger, index) {
-        trigger.addEventListener('click', function () { if (!syncing && trigger.getAttribute('aria-expanded') === 'true') select(index, true); });
+      /* A tab chosen by hand chooses the terminal's step (and its address). The tabs primitive
+         handles the press (and Enter / Space); this only follows the result. */
+      stepTabs().querySelector('[data-ark-part="tabs-list"]').addEventListener('click', function () {
+        if (!syncing && shown() !== active) select(shown(), true);
       });
       var params = root.story.params();
       select(params ? Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)) : 0, false);
