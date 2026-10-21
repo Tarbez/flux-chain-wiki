@@ -1,39 +1,29 @@
-/* /what-is-a-resolver: the insides of its illustration (js/pages/resolver-lab.js) -- the signal
-   track, the step line, the mesh stage, the document picker and the way through. The page itself
+/* /what-is-a-resolver: the insides of its illustration (js/pages/resolver-lab.js) -- the steps with
+   their signal rail, the step line, the mesh stage, the documents and the way through. The page itself
    is the story template (js/pages/story.js) in the shared block-page frame (css/block-page.css),
    and the illustration sits in Ark's figure frame: this file owns no page layout since 2026-10-19
-   (W3-GUIDE), only the drawing's insides, like css/lifecycle.css for the lifecycle's. Buttons are
-   painted by css/components.css. Primary is the travelling signal and the claim; nothing loops. */
+   (W3-GUIDE), only the drawing's insides, like css/lifecycle.css for the lifecycle's. The controls
+   are Ark blocks since 2026-10-21 (ledger W4d / P4): the steps and the documents are Ark's choice,
+   Run again and the way through Ark's actions, painted by Ark; this file only places them. Primary
+   is the travelling signal and the claim; nothing loops. */
 
 .resolver-lab-scene {display:grid;gap:12px;min-width:0;}
 .resolver-lab-scene-head {display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 12px;font:500 12px var(--font-mono,monospace);letter-spacing:.04em;color:hsl(var(--text-muted));}
 .resolver-lab-address {min-width:0;overflow-wrap:anywhere;}
 .resolver-lab-address code {padding:3px 9px;border:1px solid hsl(var(--border-default));border-radius:999px;font:500 12px var(--font-mono,monospace);color:hsl(var(--text));}
 
-/* The signal track: the old resolver motif, now the illustration's stepper. */
-.resolver-track {position:relative;height:66px;margin:4px 14px 0;}
-.resolver-track-line,.resolver-track-progress {position:absolute;left:0;top:17px;height:1px;}
-.resolver-track-line {right:0;background:hsl(var(--border-strong));}
-.resolver-track-progress {width:var(--progress,0%);background:linear-gradient(90deg,hsl(var(--primary-300)),hsl(var(--primary)));transition:width 720ms cubic-bezier(.65,0,.35,1);}
+/* The steps: Ark's choice, one equal share of the width per step, over the signal rail -- the old
+   resolver motif. The glow travels to the chosen step (--progress, set by the page) and stops. */
+.resolver-track {position:relative;padding-bottom:10px;}
+.resolver-track .ark-choice__options {width:100%;box-sizing:border-box;flex-wrap:nowrap;}
+.resolver-track .ark-choice__option {flex:1 1 0;min-width:0;}
+.resolver-track .ark-choice__text {width:100%;justify-content:center;white-space:nowrap;}
+.resolver-track-rail {position:absolute;left:5px;right:5px;bottom:2px;height:1px;background:hsl(var(--border-strong));}
+.resolver-track-progress {position:absolute;left:0;top:0;height:1px;width:var(--progress,0%);background:linear-gradient(90deg,hsl(var(--primary-300)),hsl(var(--primary)));transition:width 720ms cubic-bezier(.65,0,.35,1);}
 .resolver-track.is-arriving .resolver-track-glow {animation:resolver-lab-arrive 900ms cubic-bezier(.22,1,.36,1) 600ms both;}
-@keyframes resolver-lab-arrive {0%{box-shadow:0 0 0 5px hsl(var(--primary-200)),0 0 22px hsl(var(--primary));}40%{box-shadow:0 0 0 12px hsl(var(--primary-100)),0 0 32px hsl(var(--primary));}100%{box-shadow:0 0 0 5px hsl(var(--primary-200)),0 0 22px hsl(var(--primary));}}
-.resolver-track-glow {position:absolute;top:14px;left:var(--progress,0%);width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:hsl(var(--primary));
-  box-shadow:0 0 0 5px hsl(var(--primary-200)),0 0 22px hsl(var(--primary));transition:left 720ms cubic-bezier(.65,0,.35,1);pointer-events:none;z-index:2;}
-#scene .resolver-track-node {position:absolute;left:var(--at);top:0;transform:translateX(-50%);display:grid;justify-items:center;gap:10px;
-  padding:4px 6px;border:0;background:none;color:hsl(var(--text-muted));cursor:pointer;font:500 13px/1.2 var(--font-sans,"Albert Sans",sans-serif);}
-#scene .resolver-track-node:first-of-type {transform:translateX(-14px);justify-items:start;}
-#scene .resolver-track-node:last-of-type {transform:translateX(calc(-100% + 14px));justify-items:end;}
-.resolver-track-mark {display:block;width:16px;height:16px;margin-top:2px;box-sizing:border-box;border:1px solid hsl(var(--border-strong));background:hsl(var(--canvas));transform:rotate(45deg);
-  transition:background-color 260ms,border-color 260ms,box-shadow 260ms,transform 260ms;}
-.resolver-track-node[data-step="check"] .resolver-track-mark {border-radius:50%;transform:none;}
-.resolver-track-node[data-step="laws"] .resolver-track-mark {transform:none;border-radius:3px;}
-.resolver-track-label {display:grid;justify-items:inherit;gap:1px;white-space:nowrap;}
-.resolver-track-label small {font:500 12px var(--font-mono,monospace);letter-spacing:.06em;color:hsl(var(--text-faint));}
-#scene .resolver-track-node[data-done="true"] .resolver-track-mark {border-color:hsl(var(--text-muted));background:hsl(var(--nested));}
-#scene .resolver-track-node[aria-pressed="true"] {color:hsl(var(--text-strong));}
-#scene .resolver-track-node[aria-pressed="true"] .resolver-track-mark {border-color:hsl(var(--text-strong));background:hsl(var(--text-strong));box-shadow:0 0 0 4px hsl(var(--nested));}
-#scene .resolver-track-node:is(:hover,:focus-visible) {color:hsl(var(--reference-700));}
-#scene .resolver-track-node:is(:hover,:focus-visible) .resolver-track-mark {border-color:hsl(var(--reference-400));}
+@keyframes resolver-lab-arrive {0%{box-shadow:0 0 0 4px hsl(var(--primary-200)),0 0 18px hsl(var(--primary));}40%{box-shadow:0 0 0 9px hsl(var(--primary-100)),0 0 26px hsl(var(--primary));}100%{box-shadow:0 0 0 4px hsl(var(--primary-200)),0 0 18px hsl(var(--primary));}}
+.resolver-track-glow {position:absolute;top:-3px;left:var(--progress,0%);width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:hsl(var(--primary));
+  box-shadow:0 0 0 4px hsl(var(--primary-200)),0 0 18px hsl(var(--primary));transition:left 720ms cubic-bezier(.65,0,.35,1);pointer-events:none;}
 
 /* The step, in one line. */
 .resolver-lab-caption {margin:0;padding-left:14px;border-left:2px solid hsl(var(--primary-300));font:500 15px/1.45 var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-strong));}
@@ -63,34 +53,20 @@
 .resolver-mesh-label-sign,.resolver-mesh-label-accept {color:hsl(var(--text-muted));}
 .resolver-mesh-label-accept[data-same="true"] {color:hsl(var(--success-700));background:hsl(var(--success-100));border:1px solid hsl(var(--success-300));}
 
-/* Documents and the way through: one row. */
+/* Documents and the way through: one row; Run again sits at the end of the head. */
 .resolver-lab-controls {display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
-.resolver-lab-inputs {display:inline-flex;gap:2px;padding:3px;border:1px solid hsl(var(--border-subtle));border-radius:10px;background:hsl(var(--canvas));}
-#scene .resolver-lab-doc {display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap;height:32px;padding:0 12px;border:0;border-radius:7px;background:transparent;
-  font:500 13px/32px var(--font-sans,"Albert Sans",sans-serif);color:hsl(var(--text-muted));cursor:pointer;transition:background-color 160ms,color 160ms,box-shadow 160ms;}
-#scene .resolver-lab-doc small {font:500 12px var(--font-mono,monospace);color:hsl(var(--text-muted));}
-#scene .resolver-lab-doc:hover {color:hsl(var(--text-strong));}
-#scene .resolver-lab-doc[aria-pressed="true"] {background:hsl(var(--raised));color:hsl(var(--text-strong));box-shadow:inset 0 0 0 1px hsl(var(--border-default)),0 1px 2px hsl(var(--theme-shadow-color) / .2);}
-#scene .resolver-lab-again {flex:none;display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border:1px solid;border-radius:999px;font:500 13px var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;}
-#scene .resolver-lab-again[hidden],#scene .resolver-lab-prev[hidden],#scene .resolver-lab-next[hidden] {display:none;}
-.resolver-lab-again-icon {display:inline-block;font-size:14px;transition:transform 420ms cubic-bezier(.22,1,.36,1);}
-#scene .resolver-lab-again:hover .resolver-lab-again-icon {transform:rotate(-200deg);}
-#scene .resolver-lab-prev {display:inline-grid;place-items:center;flex:none;width:36px;height:36px;margin-left:auto;padding:0;border:1px solid hsl(var(--border-default));border-radius:50%;
-  background:transparent;color:hsl(var(--text-muted));font:500 15px/1 var(--font-sans,"Albert Sans",sans-serif);cursor:pointer;}
-#scene .resolver-lab-prev:is(:hover,:focus-visible) {border-color:hsl(var(--border-strong));background:hsl(var(--nested));color:hsl(var(--text-strong));}
-#scene .resolver-lab-next {display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px 0 16px;border-radius:999px;font:600 13px/1 var(--font-sans,"Albert Sans",sans-serif);}
-#scene .resolver-lab-prev[hidden] + .resolver-lab-next {margin-left:auto;}
+.resolver-lab-scene-head .ark-actions,.resolver-lab-controls .ark-actions {margin:0;}
+.resolver-lab-way {margin-left:auto;}
 /* Once a run finishes, the way on draws the eye once. */
-#scene .resolver-lab-next.is-ready {animation:resolver-lab-nudge 900ms cubic-bezier(.22,1,.36,1) 250ms 1;}
+.resolver-lab-way [data-action="resolver-next"].is-ready {animation:resolver-lab-nudge 900ms cubic-bezier(.22,1,.36,1) 250ms 1;}
 @keyframes resolver-lab-nudge {0%,100%{transform:none;}30%{transform:translateX(5px);}55%{transform:translateX(-2px);}}
-.resolver-lab-next-arrow {display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,currentColor 16%,transparent);font-size:13px;}
 .resolver-lab-sr {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 
 @media(max-width:600px){
-  .resolver-track {margin-inline:10px;}
-  #scene .resolver-track-node {font-size:12px;gap:8px;}
-  .resolver-lab-inputs {width:100%;box-sizing:border-box;}
-  #scene .resolver-lab-doc {flex:1;justify-content:center;gap:4px;padding:0 6px;}
+  .resolver-track .ark-choice__text {padding-inline:.25rem;font-size:.8125rem;}
+  .resolver-lab-controls > .ark-choice,.resolver-lab-controls .ark-choice__options {width:100%;box-sizing:border-box;}
+  .resolver-lab-controls .ark-choice__option {flex:1 1 0;min-width:0;}
+  .resolver-lab-controls .ark-choice__text {width:100%;justify-content:center;padding-inline:.25rem;white-space:nowrap;}
   .resolver-mesh {cursor:default;}
 }
 @media(prefers-reduced-motion:reduce){

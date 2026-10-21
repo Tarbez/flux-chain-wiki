@@ -11,7 +11,17 @@ const js = fs.readFileSync('js/pages/resolver-lab.js', 'utf8');
 assert(!/setInterval/.test(js), 'the run is a finite sequence of timeouts, not an interval');
 assert(js.includes("['ask', 'resolve', 'check', 'laws']") && js.includes("'step=' + state.step + '&input=' + state.input"), 'each step and input is an addressable state');
 assert(js.includes("if (v === 'reference') return 'view=reference&step=laws&input=' + state.input;"), 'Laws is the Evidence view, and its old address (?step=laws) still opens it');
-assert(js.includes('event.stopPropagation(); go(STEPS[i + 1], true)'), 'stepping forward cannot be hijacked into leaving the page');
+// Stepping forward cannot be hijacked into leaving the page. Until 2026-10-21 Next was a link that
+// go() repainted, so the click had to stop before the router followed the new href; since ledger
+// W4d / P4 the way through is Ark action buttons (no href at all), answered by the def's handlers.
+assert(/label: 'Next step', action: 'resolver-next', tone: 'primary'/.test(js) && /'resolver-next': function \(\) \{[^}]*go\(STEPS\[i \+ 1\], true\)/.test(js), 'Next is an Ark action button that steps forward in the page');
+assert(!/resolver-lab-(prev|next)'/.test(js) && !/\.href = /.test(js), 'no hand-built back/next and no link to repaint');
+// Ledger W4d / P4 (2026-10-21): the page had its own arrow keys, aria-pressed buttons and a pill-shaped
+// Next. The steps and the documents are Ark's choice (a radio group: the browser's keyboard model), so
+// none of the three may come back.
+assert(/block: 'choice', id: 'resolver-steps'/.test(js) && /block: 'choice', id: 'resolver-documents'/.test(js), 'the steps and the documents are Ark choice blocks');
+assert(!/'keydown'/.test(js) && !/aria-pressed/.test(js) && !/ArrowRight|ArrowLeft/.test(js), 'no hand-built arrow keys or pressed buttons');
+assert(!/border-radius:\s*999px/.test(css.replace(/\.resolver-lab-address code \{[^}]*\}/, '')), 'no pill-shaped control (the policy address chip is the one rounded label)');
 // Since 2026-10-19 (W3-GUIDE) the page is the story template: the def, not hand-built page structure.
 assert(/ArkUI\.resolverLabDef = function/.test(js) && !/el\('(section|h1|nav|figure)'/.test(js), 'the page is a story def; only the illustration is hand-built');
 
