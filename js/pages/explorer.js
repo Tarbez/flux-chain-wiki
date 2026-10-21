@@ -87,6 +87,24 @@
     root = node('button', className, label); root.type = 'button'; root.addEventListener('click', onClick);
     return root;
   }
+  /* A record's fields: Ark's facts, where a hand-built <dl> stood four times (ledger recheck 2026-10-21, T11 / C9). A field
+     with no value is empty, so Ark says it is not recorded (never a dash); a name is cut to Ark's 48 characters. Without
+     the block adapter (tests/operator-states.cjs's toy DOM) it is the plain list it was. */
+  function factValue(value, max) {
+    if (value == null || value === '') return null;
+    var text = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    return max && text.length > max ? text.slice(0, max - 3) + '…' : text;
+  }
+  function factsEl(label, pairs, className) {
+    if (ArkUI.blocks && ArkUI.blocks.render && pairs.length) {
+      var facts = ArkUI.blocks.render({ block: 'facts', props: { label: label, columns: 2, items: pairs.map(function (p) { return { term: String(p[0]).slice(0, 48), value: p[1] }; }) } }, { onInvalid: 'render' });
+      facts.classList.add(className);
+      return facts;
+    }
+    var dl = node('dl', className);
+    pairs.forEach(function (p) { var item = node('div', 'mesh-explorer-field'); item.appendChild(node('dt', '', p[0])); item.appendChild(node('dd', '', safeString(p[1]))); dl.appendChild(item); });
+    return dl;
+  }
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
   /* The live parts of the home (the page's own, hand-built because they ARE the explorer: the
      mesh fabric stepper and the live kinds read from the public mesh). The page around them -- crumbs,
@@ -549,14 +567,8 @@
       inspectResult.replaceChildren(); inspectResult.hidden = false; inspectResult.dataset.state = 'found';
       inspectResult.appendChild(node('h4', '', 'Record found'));
       inspectResult.appendChild(node('p', 'mesh-inspect-id', record.id));
-      var facts = node('dl', 'mesh-explorer-fields');
-      facts.appendChild(row('Source', record.sourceId)); facts.appendChild(row('Kind', record.kind));
-      facts.appendChild(row('Verification', record.verification && record.verification.state));
-      facts.appendChild(row('Updated', time(record.updatedAt)));
-      facts.appendChild(row('Provenance', record.provenance && record.provenance.protocol));
       var fields = data.safeDetail || record.fields || {};
-      Object.keys(fields).slice(0, 20).forEach(function (field) { facts.appendChild(row(field, fields[field])); });
-      inspectResult.appendChild(facts);
+      inspectResult.appendChild(factsEl('Record ' + record.id, recordPairs(record).concat(Object.keys(fields).slice(0, 20).map(function (field) { return [field, factValue(fields[field])]; })), 'mesh-explorer-fields'));
       if (inspectResult.scrollIntoView) inspectResult.scrollIntoView({ block: 'nearest' });
       if (Array.isArray(data.links) && data.links.length) {
         inspectResult.appendChild(node('h4', '', 'Declared links'));
@@ -778,7 +790,7 @@
       var card = node('article', 'explore-record-open');
       var top = node('div', 'explore-record-top'); top.appendChild(verifiedChip(record.verification && record.verification.state)); top.appendChild(node('span', '', ago(record.updatedAt)));
       card.appendChild(top); card.appendChild(node('h4', '', recordTitle(record))); card.appendChild(node('p', 'explore-record-id', safeString(record.id)));
-      var facts = node('dl', 'explore-record-facts'); facts.appendChild(node('p', 'explore-browse-note', 'Opening…')); card.appendChild(facts);
+      var facts = node('div', 'explore-record-facts'); facts.appendChild(node('p', 'explore-browse-note', 'Opening…')); card.appendChild(facts);
       var rawLink = node('button', 'explore-browse-raw', 'Every field'); rawLink.type = 'button';
       rawLink.addEventListener('click', function () { openKind(browsing.category); });
       var bar = node('div', 'explore-record-bar'); bar.appendChild(back); bar.appendChild(rawLink);
@@ -787,13 +799,8 @@
         var payload = await request('/explorer/v1/record', { sourceId: item.id, recordId: record.id, scope: recordScopes[record.id] });
         if (token !== browsing.token || !page.isConnected) return;
         var fields = payload.data.safeDetail || (payload.data.record && payload.data.record.fields) || record.fields || {};
-        facts.replaceChildren();
-        Object.keys(fields).slice(0, 8).forEach(function (key) {
-          var value = safeString(fields[key]); var line = node('div');
-          line.appendChild(node('dt', '', humanField(key))); line.appendChild(node('dd', '', value.length > 120 ? value.slice(0, 117) + '…' : value));
-          facts.appendChild(line);
-        });
-        if (!facts.children.length) facts.appendChild(node('p', 'explore-browse-note', 'This record shares no public fields.'));
+        var shown = Object.keys(fields).slice(0, 8).map(function (key) { return [humanField(key), factValue(fields[key], 120)]; });
+        facts.replaceChildren(shown.length ? factsEl(recordTitle(record), shown, 'explore-record-fields') : node('p', 'explore-browse-note', 'This record shares no public fields.'));
         var links = Array.isArray(payload.data.links) ? payload.data.links.length : 0;
         if (links) top.insertBefore(node('span', 'explore-record-links', 'Linked to ' + links + ' record' + (links === 1 ? '' : 's')), top.lastChild);
       } catch (error) { if (token === browsing.token) facts.replaceChildren(node('p', 'explore-browse-note', errorText(error))); }
@@ -806,10 +813,10 @@
       showView('raw');
     }
     filterSearch.addEventListener('input', function () { filters.query = filterSearch.value; renderField(); });
-    function row(label, value) {
-      var item = node('div', 'mesh-explorer-field');
-      item.appendChild(node('dt', '', label)); item.appendChild(node('dd', '', safeString(value)));
-      return item;
+    /* the five fields every record has, as fact pairs */
+    function recordPairs(record) {
+      return [['Source', factValue(record.sourceId)], ['Kind', factValue(record.kind)], ['Verification', factValue(record.verification && record.verification.state)],
+        ['Updated', record.updatedAt ? factValue(time(record.updatedAt)) : null], ['Provenance', factValue(record.provenance && record.provenance.protocol)]];
     }
     function renderDetail(payload, origin) {
       var data = payload.data, record = data.record;
@@ -826,16 +833,8 @@
       detail.appendChild(back);
       detail.appendChild(node('p', 'mesh-explorer-kicker', '04 / RECORD DETAIL'));
       detail.appendChild(node('h3', '', record.id));
-      var facts = node('dl', 'mesh-explorer-fields');
-      facts.appendChild(row('Source', record.sourceId));
-      facts.appendChild(row('Kind', record.kind));
-      facts.appendChild(row('Verification', record.verification && record.verification.state));
-      facts.appendChild(row('Updated', time(record.updatedAt)));
-      facts.appendChild(row('Provenance', record.provenance && record.provenance.protocol));
-      Object.keys(data.safeDetail || record.fields || {}).slice(0,30).forEach(function (field) {
-        facts.appendChild(row(field, (data.safeDetail || record.fields)[field]));
-      });
-      detail.appendChild(facts);
+      var extra = data.safeDetail || record.fields || {};
+      detail.appendChild(factsEl('Record ' + record.id, recordPairs(record).concat(Object.keys(extra).slice(0, 30).map(function (field) { return [field, factValue(extra[field])]; })), 'mesh-explorer-fields'));
       if (Array.isArray(data.links) && data.links.length) {
         detail.appendChild(node('h4', '', 'Declared links'));
         data.links.slice(0,30).forEach(function (link) {
