@@ -296,3 +296,16 @@ Merged 2026-10-21 23:50 (owner: merge and keep the uncommitted FXN ID edits on t
 main (b40b5ca, b7e05be, 21d8b9a, d2cb9ce, 75e411c). Built in a clean worktree; built-file conflicts settled by
 `npm run build:pages`; page tests, glossary-routes, ssr-render and the fold/route sweeps of all 14 changed routes
 pass. The FXN ID edits to index.html and js/min/manifest.js were backed up, set aside, and put back uncommitted.
+
+## Resume point 11 (2026-10-22, ~01:00) — swarm round 1 (four page ports), two merged
+A workflow of four opus agents, one worktree per page, stopped at the account's usage limit (resets 04:30) with
+partial work; the coordinator finished and verified what was close:
+- merged (7324fd6): /download (one step control with /deploy: Ark tabs; the terminal's checks are Ark facts and its
+  way through an Ark actions row) and /what-is-a-resolver (the illustration's steps and documents are Ark choice
+  blocks, Run again / Previous / Next are Ark actions; the forms chunk loads there). Tests, glossary budget, SSR and
+  sweeps pass; both probed in Chromium. FXN ID edits to index.html / js/min/manifest.js again kept on top, uncommitted.
+- WIP, not merged: worktree-wf_c079f17f-7e6-1 at 99c62b1 (/explore: panes as Ark tabs, kinds as an Ark stats block,
+  facts helper). Unfinished and never run: kindTiles() and humanField() undefined, kind descriptions dropped, CSS and
+  tests not updated.
+- not started: the home's cards and tags as Ark cards (W4e / P7; the agent made no change before the limit).
+Next: resume /explore from 99c62b1 and do the home, each in its own worktree, after 04:30.
