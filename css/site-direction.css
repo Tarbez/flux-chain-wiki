@@ -2,10 +2,10 @@
 .hero-alive {
   --mesh-opacity:0;
   --mesh-blur:0px;
-  background:hsl(var(--canvas)) !important;
+  background:hsl(var(--canvas));
 }
 .hero-alive .ark-background-host,
-.hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.lattice) { display:none !important; }
+.hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.lattice) { display:none; }
 /* A note (/learnings/<slug>) used to be the one route that put the particle canvas back
    (display:block, --mesh-opacity .5) for the particle-title playground it once held; the
    playground went, css/article-reading.css then hid the canvas with opacity 0, and the scene kept

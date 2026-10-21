@@ -2,19 +2,19 @@
 .hero-alive[data-page="zero"] {
  --mesh-opacity:0;
  --mesh-blur:0px;
- background:hsl(var(--canvas)) !important;
+ background:hsl(var(--canvas));
 }
-.hero-alive[data-page="zero"] .ark-background-host { display:none !important; }
+.hero-alive[data-page="zero"] .ark-background-host { display:none; }
 .hero-alive[data-page="zero"] .ark-hero-body {
- position:absolute !important;
- inset:auto !important;
- top:clamp(132px,24cqh,240px) !important;
- left:max(28px,5cqw) !important;
- width:min(760px,calc(100% - 390px)) !important;
- max-width:none !important;
+ position:absolute;
+ inset:auto;
+ top:clamp(132px,24cqh,240px);
+ left:max(28px,5cqw);
+ width:min(760px,calc(100% - 390px));
+ max-width:none;
  margin:0;
  padding:0;
- transform:none !important;
+ transform:none;
  text-align:left;
  letter-spacing:0;
 }
@@ -26,7 +26,7 @@
  font:600 16px/1.4 "Albert Sans",sans-serif;
  letter-spacing:0;
  text-transform:uppercase;
- color:hsl(var(--text-muted)) !important;
+ color:hsl(var(--text-muted));
 }
 .hero-alive[data-page="zero"] .ark-hero-eyebrow::before {
  content:"";
@@ -119,10 +119,10 @@
 
 /* The settings layer applies important link/headline colors globally. Keep
    this page's own semantic hierarchy while still following the theme. */
-:root[data-theme] #scene .hero-alive[data-page="zero"] .ark-hero-title { color:hsl(var(--text-strong)) !important; }
+:root[data-theme] #scene .hero-alive[data-page="zero"] .ark-hero-title { color:hsl(var(--text-strong)); }
 @media(max-width:1150px) {
  .hero-alive[data-page="zero"] .ark-hero-body {
-  width:calc(100% - 330px) !important;
+  width:calc(100% - 330px);
  }
  .hero-alive[data-page="zero"] .ark-hero-title { font-size:58px; }
 
@@ -130,7 +130,7 @@
 
 }
 @media(max-height:620px) and (min-width:761px) {
- .hero-alive[data-page="zero"] .ark-hero-body { top:94px !important; }
+ .hero-alive[data-page="zero"] .ark-hero-body { top:94px; }
  .hero-alive[data-page="zero"] .ark-hero-title { font-size:54px; margin-bottom:15px; }
 
  .hero-alive[data-page="zero"] .ark-hero-eyebrow { margin-bottom:15px; }
@@ -139,10 +139,10 @@
 }
 @media(max-width:760px) {
  .hero-alive[data-page="zero"] .ark-hero-body {
-  position:relative !important;
-  inset:auto !important;
-  width:100% !important;
-  max-width:100% !important;
+  position:relative;
+  inset:auto;
+  width:100%;
+  max-width:100%;
  }
  .hero-alive[data-page="zero"] .ark-hero-title { max-width:13ch; font-size:42px; }
 

@@ -44,7 +44,7 @@
   letter-spacing: .28em !important;
 }
 
-.ark-hero-body { pointer-events: none; z-index: 3 !important; }
+.ark-hero-body { pointer-events: none; z-index: 3; }
 .ark-hero-title,.ark-hero-copy,.ark-hero-eyebrow { pointer-events: auto; user-select: text; }
 .ark-hero-title {
   max-width: 8em;
@@ -61,7 +61,7 @@
   font: 300 clamp(12px,1.02cqw,16px)/1.62 var(--ark-font);
   text-wrap: balance;
 }
-.ark-hero-eyebrow { color: var(--field-accent) !important; }
+.ark-hero-eyebrow { color: var(--field-accent); }
 
 .hero-motion-toggle {
   position: absolute;
@@ -92,16 +92,16 @@
 
 @media (max-width:760px) {
   .ark-field-pill::before,.ark-field-pill::after { width: 26px; margin: 0 10px; }
-  .ark-hero-body { left: 20px !important; bottom: 66px !important; max-width: calc(100% - 40px) !important; }
+  .ark-hero-body { left: 20px; bottom: 66px; max-width: calc(100% - 40px); }
   .ark-hero-title { font-size: clamp(34px,10cqw,54px); max-width: 7em; }
   .ark-hero-copy { max-width: 31em; font-size: 12px; }
   .hero-motion-toggle { bottom: 14px; }
 
 }
 @media (max-height:680px) and (min-width:761px) {
-  .ark-hero-body { bottom: 24px !important; max-width: 38cqw !important; }
+  .ark-hero-body { bottom: 24px; max-width: 38cqw; }
   .ark-hero-title { font-size: 32px; margin-bottom: 7px; }
-  .ark-hero-eyebrow { margin-bottom: 7px !important; }
+  .ark-hero-eyebrow { margin-bottom: 7px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { animation: none; transition: none; translate: 0 0; opacity: .12; }
@@ -111,7 +111,7 @@
 .ark-hero-body { transition-duration: 1ms !important; transition-delay: 0s !important; }
 }
 
-.ark-hero-body { bottom: max(66px, 7cqh) !important; }
+.ark-hero-body { bottom: max(66px, 7cqh); }
 
 .ark-layer { position: absolute; inset: 0; }
 .ark-layer-persistent { z-index: 0; pointer-events: none; }
@@ -126,4 +126,4 @@
 }
 
 /* Match the enlarged home zero when the GPU renderer is unavailable. */
-.hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { scale:1.2 !important; }
+.hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { scale:1.2; }

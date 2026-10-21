@@ -37,7 +37,7 @@
 #scene .ark-header[data-dx-mode] > a[data-scene-link="zero"] { background:none; }
 #scene .ark-header[data-dx-mode] nav a[aria-current="page"] { background-color:hsl(var(--raised)); }
 /* a control the row fit moved out (a nav link, or Run DEFXN in the actions) */
-#scene .ark-header .header-collapsed { display:none !important; }
+#scene .ark-header .header-collapsed { display:none; }
 #scene .ark-header .native-icon { width:16px; height:16px; flex-basis:16px; }
 #scene .ark-header .header-core-links .native-icon { opacity:.75; }
 
@@ -74,7 +74,7 @@
 /* a phone: Ark's full-width sheet, so the cap above steps aside */
 @media(max-width:600px) { #scene .ark-header .header-chain-popover { max-width:none; width:auto; } }
 /* an open panel lifts the bar over the page's layers (was .products-open) */
-#scene .ark-header:has(.ark-popover[data-state="open"]) { z-index:60 !important; }
+#scene .ark-header:has(.ark-popover[data-state="open"]) { z-index:60; }
 .header-network-label {
  display:block; margin-bottom:8px; font:600 11px/1 var(--dx-font-mono,var(--font-mono,monospace));
  letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); white-space:nowrap;
@@ -139,7 +139,7 @@
 }
 #scene .ark-header .ark-link::before { content:counter(nav-group, decimal-leading-zero); color:hsl(var(--text-muted) / .7); font-size:11px; }
 #scene .ark-header .ark-link::after { content:"→"; margin-left:auto; color:hsl(var(--reference)); font-size:12px; }
-:root[data-theme] #scene .ark-header .ark-link { color:hsl(var(--text-muted)) !important; }
+:root[data-theme] #scene .ark-header .ark-link { color:hsl(var(--text-muted)); }
 :root[data-theme] #scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { color:hsl(var(--text-strong)) !important; }
 #scene .ark-header .ark-link[aria-current="page"]::before { color:hsl(var(--reference)); }
 #scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { background:hsl(var(--nested)); }
@@ -282,7 +282,7 @@
 @media(max-width:1023.98px) { #scene .site-footer-strip .site-copyright { display:none; } }
 @media(max-width:760px) {
  #scene .site-footer-strip { left:60px; right:16px; bottom:14px; }
- .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px !important; }
+ .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px; }
 }
 @media(max-width:480px) { .ark-studio-label { max-width:85px; line-height:1.5; } }
 

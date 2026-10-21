@@ -27,7 +27,7 @@
 #scene .ark-header .products-mega-feature {
   position:relative;display:grid;grid-template-columns:68px minmax(0,1fr);align-items:center;gap:14px;min-width:0;
   padding:11px 34px 11px 11px;border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--surface) / .45);
-  box-shadow:none !important;text-decoration:none;transition:border-color 160ms,background-color 160ms;
+  box-shadow:none;text-decoration:none;transition:border-color 160ms,background-color 160ms;
 }
 #scene .ark-header .products-mega-feature::after {content:"→";position:absolute;top:50%;right:13px;color:hsl(var(--text-faint));transform:translateY(-50%);transition:color 160ms,transform 160ms;}
 #scene .ark-header .products-mega-feature:is(:hover,:focus-visible) {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));}
@@ -59,7 +59,7 @@
 .products-mega-row-label svg {flex:none;width:13px;height:13px;}
 .products-mega-row.is-peeked .products-mega-row-label {color:hsl(var(--reference));}
 .products-mega-chips {display:flex;flex-wrap:wrap;gap:2px;margin:0;padding:0;list-style:none;}
-#scene .ark-header .products-mega-link {display:inline-flex;align-items:center;min-height:26px;padding:0 8px;border-radius:5px;background:transparent;box-shadow:none !important;color:hsl(var(--text));font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);text-decoration:none;white-space:nowrap;transition:background-color 140ms,color 140ms;}
+#scene .ark-header .products-mega-link {display:inline-flex;align-items:center;min-height:26px;padding:0 8px;border-radius:5px;background:transparent;box-shadow:none;color:hsl(var(--text));font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);text-decoration:none;white-space:nowrap;transition:background-color 140ms,color 140ms;}
 #scene .ark-header .products-mega-link:is(:hover,:focus-visible) {background:hsl(var(--reference-100));color:hsl(var(--text-strong));}
 
 /* Reference: one line that describes the name under the pointer. */
@@ -69,7 +69,7 @@
 .products-mega-peek span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 .products-mega-foot {display:flex;align-items:center;gap:18px;padding:9px 20px;border-top:1px solid hsl(var(--border-subtle));background:hsl(var(--canvas) / .3);}
-#scene .ark-header .products-mega-how {display:inline-flex;align-items:center;min-height:32px;color:hsl(var(--reference)) !important;font:500 11px/1.2 var(--font-mono,monospace);letter-spacing:.04em;text-decoration:none;}
+#scene .ark-header .products-mega-how {display:inline-flex;align-items:center;min-height:32px;color:hsl(var(--reference));font:500 11px/1.2 var(--font-mono,monospace);letter-spacing:.04em;text-decoration:none;}
 #scene .ark-header .products-mega-how:hover {color:hsl(var(--text-strong)) !important;}
 #scene .ark-header .products-mega-all {display:inline-flex;align-items:center;min-height:32px;padding:0 14px;border-radius:3px;font:600 12px/1.2 var(--font-sans,sans-serif);text-decoration:none;}
 @media(max-width:1180px) {

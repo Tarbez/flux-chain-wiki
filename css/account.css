@@ -23,7 +23,7 @@
 #scene .ark-page.ark-block-page.account-page:not(.continuity-host > *) { height:100%; margin:0; background:transparent; }
 /* Account content belongs directly to the scene, without dashboard chrome. */
 #scene .continuity-host[data-panel-page="account"] {
-  border:0; border-radius:0 !important; background:transparent;
+  border:0; border-radius:0; background:transparent;
   box-shadow:none; overflow:visible;
 }
 #scene .account-page [hidden] { display:none !important; }
