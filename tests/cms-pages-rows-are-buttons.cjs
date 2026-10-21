@@ -67,4 +67,18 @@ byPath('/concept/networks').querySelector('[aria-label="Delete Networks"]').clic
 assert.deepEqual(calls.splice(0), [['delete', 'page', 'networks']], 'a theory page is deleted through the one delete path');
 assert(byPath('/about').querySelector('.dot'), 'an unsaved page carries its dot');
 assert.equal(byPath('/').getAttribute('aria-selected'), 'true', 'the page on the canvas is the selected row');
-console.log('PASS: the Pages tree rows are keyboard-operable buttons that open, edit and delete pages.');
+/* "Not linked" (ledger recheck 2026-10-21, pages.md P7c / cms.md P2-6): the site menu links every catalog page
+   with a journey (js/resolvers/header.js), so only a page in no journey and no link field is marked; the marks
+   on screen are explained once, under the list. Here no link field points anywhere (realLinkIndex is empty). */
+const legend = window.document.querySelector('#pages li.tree-legend');
+assert(legend && /Unsaved changes/.test(legend.textContent) && /Not linked: no menu entry and no page links here/.test(legend.textContent), 'the legend says what the dot and the not-linked mark mean');
+assert(byPath('/download').querySelector('.tag.orphan'), 'with no menu and no link, a page is marked not linked');
+{
+  context.window.ArkUI = { pageCatalog: { about: { path: '/about', journey: 'understand' }, download: { path: '/download', journey: null, hiddenFromNavigation: true } } };
+  vm.runInContext('renderPages();', context);
+  const again = (p) => [...window.document.querySelectorAll('#pages li.tree-row')].find((li) => li.querySelector('.tree-open').dataset.path === p);
+  assert(!again('/about').querySelector('.tag.orphan'), 'a page the site menu lists is not marked, though no link field points to it');
+  assert(again('/download').querySelector('.tag.orphan'), 'a page in no journey (no menu entry) and no link field is still marked');
+  assert.equal(again('/download').querySelector('.tag.orphan').getAttribute('aria-label'), 'Not linked: no menu entry and no page links here');
+}
+console.log('PASS: the Pages tree rows are keyboard-operable buttons that open, edit and delete pages; "not linked" counts the site menu and is explained.');

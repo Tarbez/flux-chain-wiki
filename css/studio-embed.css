@@ -157,6 +157,10 @@
 /* "nothing links here": a quiet warning ring, its words in the title -- a list of loud tags
    on half the theory pages read as errors */
 #studioRoot .tree-row .tag.orphan { flex: none; width: 8px; height: 8px; padding: 0; border: 1.5px solid hsl(var(--warning)); border-radius: 50%; font-size: 0; }
+/* the legend under the page list (js/admin/rail.js renderPages): the same marks, each with its words */
+#studioRoot .tree-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 8px 10px 4px; font-size: 12px; color: hsl(var(--text-muted)); list-style: none; }
+#studioRoot .tree-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+#studioRoot .tree-legend .tag.orphan { flex: none; width: 8px; height: 8px; border: 1.5px solid hsl(var(--warning)); border-radius: 50%; }
 /* a "New ..." disclosure under a list (css/admin.css .add-toggle), at the rail's size */
 #studioRoot .rail-pane > .add-toggle { margin: 6px 8px 0; }
 #studioRoot .rail-pane > .add-toggle summary { padding: 10px 2px; }

@@ -160,13 +160,20 @@
      theory group, /concept/...), the articles, the header & footer (the site chrome), then every
      other route the site serves (a page module with no fields: its words are in code), folded. */
   const GROUP_NAMES = { site: 'Header & footer', page: 'Main pages', theory: 'Guides' };
+  const ORPHAN_SAYS = 'Not linked: no menu entry and no page links here';
   const GROUP_ORDER = ['page', 'theory', 'article', 'site', 'other'];
   /* "community" -> "Community", "/concept/state-of-the-art" -> "State of the art" */
   const words = (s) => { const t = String(s || '').replace(/^.*\//, '').replace(/[-_]+/g, ' ').trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Home'; };
   function routeName(route) { return route.title && route.title !== route.key ? route.title : words(route.path); }
   function siteList() {
     const inbound = new Map(); for (const l of realLinkIndex()) if (l.ok && l.tgt !== l.src) inbound.set(l.tgt, (inbound.get(l.tgt) || 0) + 1);
-    const orphanOf = (path) => path !== '/' && !inbound.get(path);
+    /* The site menu links every catalog page that has a journey (js/resolvers/header.js `listed`: journey and
+       not hiddenFromNavigation, which catalog.js sets exactly when a page has no journey). Counting only the
+       manifests' link fields marked menu pages as orphans and missed nothing real (ledger recheck 2026-10-21,
+       pages.md P7c): "not linked" now means no menu entry and no link field. */
+    const catalog = (window.ArkUI && window.ArkUI.pageCatalog) || {};
+    const inMenu = new Set(Object.keys(catalog).filter((k) => catalog[k].journey && !catalog[k].hiddenFromNavigation).map((k) => catalog[k].path));
+    const orphanOf = (path) => path !== '/' && !inbound.get(path) && !inMenu.has(path);
     const covered = new Set(), byGroup = { page: [], theory: [], article: [], site: [], other: [] };
     const groups = (window.ArkManifest && window.ArkManifest.groups) || ['site', 'page', 'theory'];
     groups.forEach((group) => {
@@ -215,7 +222,7 @@
       open.querySelector('.nm').textContent = r.title; open.querySelector('.sub').textContent = r.path;
       open.addEventListener('click', r.onOpen);
       li.appendChild(open);
-      if (r.orphan) li.appendChild(h('span', { class: 'tag orphan', role: 'img', 'aria-label': 'Orphan: no page links here', title: 'Orphan: no page links here', text: 'orphan' }));
+      if (r.orphan) li.appendChild(h('span', { class: 'tag orphan', role: 'img', 'aria-label': ORPHAN_SAYS, title: ORPHAN_SAYS, text: 'not linked' }));
       if (r.dirty) li.appendChild(h('span', { class: 'dot', role: 'img', 'aria-label': r.dirtyTitle || 'Unsaved changes', title: r.dirtyTitle || 'Unsaved changes' }));
       /* the row's own actions are one tab stop each only while the row is reached: the list is
          walked by its rows (P2-7: every row had two tab stops, ~140 Tabs past the rail) */
@@ -256,6 +263,15 @@
       if (open) { rows.forEach(row); shown += rows.length; }
     });
     if (q && !shown) ul.appendChild(h('li', { class: 'hint', text: 'No page matches "' + q + '". Try part of its name or its address (like /about).' }));
+    /* what the row marks mean, said once under the list while a mark is on screen (cms.md P2-6: they had only
+       a tooltip) */
+    const marks = list.rows.filter((r) => r.orphan || r.dirty);
+    if (marks.length) {
+      const legend = h('li', { class: 'tree-legend hint', role: 'note' });
+      if (list.rows.some((r) => r.dirty)) legend.appendChild(h('span', {}, h('span', { class: 'dot', 'aria-hidden': 'true' }), h('span', { text: 'Unsaved changes' })));
+      if (list.rows.some((r) => r.orphan)) legend.appendChild(h('span', {}, h('span', { class: 'tag orphan', 'aria-hidden': 'true' }), h('span', { text: 'Not linked: ' + ORPHAN_SAYS.replace(/^Not linked: /, '') })));
+      ul.appendChild(legend);
+    }
     if ($('pagesCount')) $('pagesCount').textContent = list.rows.length + ' pages';
     /* a row repainted under the keyboard keeps the focus (a dirty dot appearing re-draws the tree) */
     if (keepFocus) { const again = keepFocus.indexOf('group:') === 0 ? ul.querySelector(`[data-group="${CSS.escape(keepFocus.slice(6))}"]`) : ul.querySelector(`[data-row="${CSS.escape(keepFocus)}"]`); if (again) again.focus({ preventScroll: true }); }
