@@ -639,7 +639,8 @@ assert(!/saveThemeDraft[\s\S]{0,400}catch \(error\) \{ status\(error\.message, '
 // saves every dirty draft, so the button must enable for a dirty draft anywhere, not only
 // for whatever section happens to be on screen); Revert stays scoped to the current section
 // (it only ever reverts what's on screen), so it keeps using currentDirty().
-assert(admin.includes("function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }") && /function touch\([^)]*\) \{[\s\S]{0,600}refreshSaveButton\(\);/.test(admin), "the Save button's disabled state uses the fixed anyDirty(), not currentDirty() -- a dirty theme/canvas draft must not leave the Save button looking disabled just because the page on screen is clean");
+/* (since 2026-10-21 the function also paints the unsaved count, cms.md P1-16; its refusal is the same line) */
+assert(/function refreshSaveButton\(\) \{[\s\S]{0,1600}?refuse\(\$\('save'\), anyDirty\(\) \? '' : NOTHING_TO_SAVE\);\n  \}/.test(admin) && /function touch\([^)]*\) \{[\s\S]{0,600}refreshSaveButton\(\);/.test(admin), "the Save button's disabled state uses the fixed anyDirty(), not currentDirty() -- a dirty theme/canvas draft must not leave the Save button looking disabled just because the page on screen is clean");
 // Since the one-workspace unification each form panel carries its own Revert (data-revert="kind:id"),
 // so "scoped to the current section" now means scoped to that panel's item: itemDirty(kind, id).
 assert(/refuse\(revert, neverSaved\(kind, id\) \? '[^']+' : itemDirty\(kind, id\) \? '' : /.test(admin), "Revert's disabled state is scoped to its own item (itemDirty(kind, id)) -- Revert only reverts the item its panel edits, unlike the unified Save button");
