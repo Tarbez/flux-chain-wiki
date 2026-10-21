@@ -292,3 +292,7 @@ Left in repo (lower value or tightly pinned): /download step control (accordion 
 switch and body on Ark blocks, /reference tables on the Ark table, hand-rolled aria-live regions, three back-link
 styles, home cards as Ark cards, CMS select/command picker on Ark (no editor primitive yet).
 The test-copy helper link .claude/worktrees/flux-auth now points to flux/fxn-auth (the repo was renamed).
+Merged 2026-10-21 23:50 (owner: merge and keep the uncommitted FXN ID edits on top): fix/site-polish-b..e are on
+main (b40b5ca, b7e05be, 21d8b9a, d2cb9ce, 75e411c). Built in a clean worktree; built-file conflicts settled by
+`npm run build:pages`; page tests, glossary-routes, ssr-render and the fold/route sweeps of all 14 changed routes
+pass. The FXN ID edits to index.html and js/min/manifest.js were backed up, set aside, and put back uncommitted.
