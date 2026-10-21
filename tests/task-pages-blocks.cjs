@@ -170,7 +170,8 @@ const ROUTES = {
       nativeSelects: page.querySelectorAll('select:not(.ark-field__control)').length, fieldSelects: page.querySelectorAll('[data-ark-block="form"] select.ark-field__control, form.ark-form select.ark-field__control').length,
       reviewRows: page.querySelectorAll('#deploy-review tbody tr').length,
       pager: [...page.querySelectorAll('[data-ark-block="pager"] a')].map((a) => a.getAttribute('href')),
-      tierExplained: /“Tier 1” is this preview’s label for FXN/.test(page.textContent),
+      /* read without a glossed term's tip (since 2026-10-21 /treasury marks terms on first use, and "Tier" is one) */
+      tierExplained: /“Tier 1” is this preview’s label for FXN/.test((() => { const c = page.cloneNode(true); c.querySelectorAll('[data-ark-part="term-tip"]').forEach((t) => t.remove()); return c.textContent; })()),
       hint: (page.querySelector('#variable-hint') || {}).textContent || '',
       hintDescribes: ((page.querySelector('#variable') || { getAttribute() { return ''; } }).getAttribute('aria-describedby') || '').split(' ').includes('variable-hint'),
       rawOpen: page.querySelectorAll('[data-explore-raw-open]').length,
