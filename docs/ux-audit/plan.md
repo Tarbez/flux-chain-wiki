@@ -253,3 +253,19 @@ focus ring (740 controls, solid -> none), because css/focus.css and css/settings
 Not done from that slice: the remaining 174 !important in other sheets, flattening blur, home-only animated
 backgrounds, wiring the kit's check:design. js/ark/icons.js's selector table still names CTA classes no script builds.
 Follow-up (unchanged): the editor canvas cannot switch a page's tabs by clicking.
+
+## Resume point 9 (2026-10-21 night) — ledger rechecked; fixes going in one group at a time
+Merged on main: 3111fcf (90 !important out, 6 kept: each removal checked by a computed-style snapshot of every
+route, then each changed element matched against the removed selectors), 8e40c2c (7 dead selectors out of
+js/ark/icons.js), e4ddd0a (ledger recheck: docs/ux-audit/ledger-recheck-2026-10-21.md, 116 FIXED, 172 STILL OPEN,
+37 OWNER, 34 NEEDS-BROWSER), 06e802e (CMS words: link refusal, As designed, spacing units, Site style pointer,
+skip link), 5e9673e (page list: not linked counts the site menu; legend), af70f25 (canvas opens a closed tab).
+Waiting: fix/site-polish-b (624baab: /explore ways on to /chain and /stats, plain words on /resolvers,
+/what-is-a-resolver, /deploy, /start-from-something-real, /experiments). It must rewrite index.html and
+js/min/manifest.js (build:pages), which another session holds uncommitted (FXN ID gate CSP, tab icon): merge it,
+then `npm run build:pages`, once that work is committed.
+Ark: design/ark-ui 079aade fixes the popover's resize listener (contains(Window) threw; seen as a page error in
+studio-flows). Not released: defxn gets it with the next ark-ui version.
+Next (from the recheck's Top fixes): glossary first-use on the 9 pages without it; /account/domains on Ark
+form/list; /download step navigation and /explore body on Ark blocks; background animation home-only; the
+account menu's duplicate "Publishing service" (mesh.js reads its nodes); CMS feedback channels (P1-16).
