@@ -119,7 +119,7 @@ var arkPageModules = {
      js/dense-wire/*.mjs) are ES modules, which page-loader.js does not load:
      js/pages/account.js import()s them on first use instead. */
   account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/pages/account.js']) },
-  'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/pages/account-domains.js']) },
+  'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/ark/vendor/ark-kit-forms.js', 'js/pages/account-domains.js']) },
   treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
   deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/pages/economy-preview.js']) },
   /* /experiments and /experiments/lab were two pages for one interactive model, with the same
