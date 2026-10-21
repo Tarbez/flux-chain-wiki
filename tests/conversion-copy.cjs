@@ -42,7 +42,9 @@ assert(!Object.values(how.fields).some((field) => /quorum|375 times a second|thr
 assert.equal(manifest('download').title, 'Run DEFXN from source');
 assert(value('download', 'DECK').includes('Public repository URLs and packaged downloads are not yet verified'));
 assert.equal(manifest('deploy').title, 'Create or join a network');
-assert(value('deploy', 'DECK').includes('miner presence only'));
+/* the deck leads with what a named network does, then its limit (ledger recheck 2026-10-21: it opened with a list
+   of what networks do not do); the limit is still said */
+assert(/decides which group of miners/.test(value('deploy', 'DECK')) && /not a security boundary/.test(value('deploy', 'DECK')), 'the /deploy deck says what a named network does and that it is not a security boundary');
 
 const deploySource = fs.readFileSync('js/pages/deploy.js', 'utf8');
 assert(deploySource.includes('flux-network network create "my-network"'), 'network name is the supported positional argument');

@@ -62,7 +62,9 @@
         focus: { text: copy('BODY1') },
         context: { text: copy('BODY3') },
         /* the evidence: the registry it is checked against (what a publishable reference needs) */
-        reference: { text: copy('BODY3'), blocks: [{ block: 'actions', props: { label: 'Evidence', items: [{ label: 'Read the canonical evidence registry', href: words('SOURCE.HREF'), tone: 'link' }] } }] }
+        /* the registry link alone: the same BODY3 under How it works and Evidence read as one view twice
+           (ledger recheck 2026-10-21, SR-6) */
+        reference: { blocks: [{ block: 'actions', props: { label: 'Evidence', items: [{ label: 'Read the canonical evidence registry', href: words('SOURCE.HREF'), tone: 'link' }] } }] }
       },
       /* A refusal names what it needs: the boundary says the evidence is pending, and the remedy
          is the registry entry How it works lists. */

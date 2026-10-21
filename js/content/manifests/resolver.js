@@ -85,7 +85,7 @@ ArkManifest.define({
       "label": "Display heading",
       "kind": "line",
       "section": "Page",
-      "value": "Ask the mesh. Get a claim you can check."
+      "value": "Ask the mesh. Get an answer you can check."
     },
     "DISPLAY.LEDE": {
       "label": "Display introduction",
@@ -409,7 +409,7 @@ ArkManifest.define({
       "label": "Registry page: introduction",
       "kind": "text",
       "section": "Registry page",
-      "value": "A dated snapshot of every first-party resolver chain and every capability a resolver can be built from, read from the code that defines them. Each row opens in Explore, which reads a node directly."
+      "value": "A resolver is a rulebook launched as its own chain, built from shared capabilities. This is a dated snapshot of every first-party resolver chain and every capability, read from the code that defines them. Each row opens in Explore, which reads a node directly."
     },
     "REGISTRY.BOUNDARY": {
       "label": "Registry page: boundary",

@@ -46,7 +46,8 @@ const ROUTES = {
       [/^page:\/div:1\/div:2\/nav:1\/a:2$/, '"Deploy a resolver" is the pager\'s next page'],
       [/^page:\/div:1\/div:2\/nav:1\/a:\d$/, 'a hub link is a related page in the pager'],
       [/^page:\/div:1\/nav:3\/a:1$/, 'the way on to the next step sits under the stage, beside the documents'],
-      [/^page:\/figure:1\/div:2$/, 'the document picker\'s row also holds the way through (back, next)']
+      [/^page:\/figure:1\/div:2$/, 'the document picker\'s row also holds the way through (back, next)'],
+      [/^id:resolver-lab-title$/, 'the same heading, reworded: "a claim" reads "an answer" (WR-4, see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the left column; a block page stacks its blocks in its root'],
@@ -58,7 +59,8 @@ const ROUTES = {
     ],
     reworded: [
       [/^page:\/div:1\/nav:3(\/a:2)?$/, '"Spec →" reads "Wording from the resolver spec" (and "Resolve→" is the illustration\'s next button)'],
-      [/^page:\/figure:1\/p:2\/a:[12]$/, '"resolver spec" / "status page" read "Wording from the resolver spec" / "Status from the status page"']
+      [/^page:\/figure:1\/p:2\/a:[12]$/, '"resolver spec" / "status page" read "Wording from the resolver spec" / "Status from the status page"'],
+      [/^id:resolver-lab-title$/, '"Get a claim you can check" reads "Get an answer you can check": the heading used "claim" before the page defines it (ledger recheck 2026-10-21, WR-4)']
     ]
   },
   '/start-from-something-real': { page: 'references', ids: ['references-'],

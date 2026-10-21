@@ -107,7 +107,7 @@ var arkPageModules = {
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
   deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/ark/page-kit.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/deployment.js']) },
   /* the explorer used to live at /explorer; /explore is its address now */
-  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-popover.js', 'js/pages/explorer.js']) },
+  explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-popover.js', 'js/ark/page-kit.js', 'js/pages/explorer.js']) },
   palette: { module: 'palette', scripts: ArkUI.blockScripts.concat(['js/content/palette-tokens.js', 'js/pages/palette.js']) },
   /* /monitor was retired 2026-10-10; /stats carries the same live pulse now, plus the dated evidence the old page never had. */
   stats: { module: 'stats', aliases: ['/monitor'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/pulse-client.js', 'js/ark/chain-pulse-client.js', 'js/ark/chain-fleet-capacity-client.js', 'js/pages/stats.js']) },

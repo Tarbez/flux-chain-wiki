@@ -34,6 +34,7 @@ const T = 'page:/div:1/div:1';
 /* Why each old key whose words changed shape still lands on its successor. */
 const reshaped = {
   [T + '/article:1']: 'the hero tile became the hero block: kicker, title and lede kept; the counts are its details now, the chips moved to "About this snapshot" and the live link to the pager',
+  [T + '/article:1/p:2']: 'the same lede, now opening with what a resolver is (ledger recheck 2026-10-21, RV-2: the page never said it)',
   [T + '/article:2']: 'the counts tile became the hero\'s details: the same three counts (label first, then the number), plus the capabilities launched',
   [T + '/article:2/p:1']: 'a count row became a hero detail: its label first ("First-party chains"), then the number',
   [T + '/article:2/p:2']: 'a count row became a hero detail: its label first, then the number',
