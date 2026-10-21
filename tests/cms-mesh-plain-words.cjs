@@ -30,8 +30,9 @@ const { bootForms } = require('./lib/admin-forms-dom.cjs');
   A.provide({ selectMesh: () => {}, openMeshSheet: () => {} });
   window.eval(fs.readFileSync('js/admin/mesh.js', 'utf8') + '\n//# sourceURL=js/admin/mesh.js');
   await A.refreshMesh();
-  assert(!document.getElementById('meshState').textContent.includes('bafy'), 'the account menu line does not print the address');
-  assert(/live at version 3/.test(document.getElementById('meshState').textContent), 'it says the site is live, and at which version: ' + document.getElementById('meshState').textContent);
+  /* the account menu's second "Publishing service" block is gone (cms.md P2-9, 2026-10-21): the sheet below is the
+     one place the service's state is said */
+  assert(!fs.readFileSync('admin-app.html', 'utf8').includes('id="meshState"'), 'the account menu no longer repeats the publishing state');
 
   const box = document.createElement('div'); document.body.appendChild(box);
   A.renderMeshEditor(box);
@@ -46,5 +47,20 @@ const { bootForms } = require('./lib/admin-forms-dom.cjs');
   const visible = clone.textContent;
   for (const word of ['Deployment status', 'P2P deployment', 'Address (CID)', 'Owner key', 'Reachable']) assert(!visible.includes(word), `"${word}" is jargon outside Developer details: ${visible.slice(0, 200)}`);
   for (const word of ['Publishing status', 'Live version', 'Last published', 'Publishing service', 'Answering']) assert(visible.includes(word), `the sheet says "${word}"`);
-  console.log('PASS: the Publishing sheet speaks plainly; the address and owner key live under Developer details.');
+
+  /* the warning that lived only in the removed menu block: an identity that does not own the name is told so on the
+     sheet, first among what stops a publish, with the way to fix it (cms.md P2-9, 2026-10-21) */
+  const second = bootForms();
+  for (const [id, tag] of [['publish', 'button'], ['meshNav', 'button'], ['who', 'span']]) { const el = second.document.createElement(tag); el.id = id; second.document.body.appendChild(el); }
+  const sheet2 = second.document.createElement('aside'); sheet2.id = 'sheet'; sheet2.hidden = true; second.document.body.appendChild(sheet2);
+  second.window.ArkPublish = { create: (env) => ({ identity: () => ({ publicKeyB64: 'someoneelse0000000000000000000000000000000=', displayName: 'Other' }), status: async () => info,
+    pullSite: async () => ({ site: { manifests: [], articles: [], assets: [], secrets: [] } }), publishSite: async () => { throw new Error('must not publish'); } }) };
+  second.A.provide({ selectMesh: () => {}, openMeshSheet: () => {} });
+  second.window.eval(fs.readFileSync('js/admin/mesh.js', 'utf8') + '\n//# sourceURL=js/admin/mesh.js');
+  const other = second.document.createElement('div'); second.document.body.appendChild(other);
+  second.A.renderMeshEditor(other);
+  for (let i = 0; i < 80 && !other.querySelector('#meshReadiness .notice'); i++) await tick();
+  const blocker = other.querySelector('#meshReadiness .notice');
+  assert(blocker && /does not own the site's name/.test(blocker.textContent) && /Sign in/.test(blocker.textContent), 'another identity is told it does not own the name, with Sign in: ' + (blocker && blocker.textContent.slice(0, 160)));
+  console.log('PASS: the Publishing sheet speaks plainly; the address and owner key live under Developer details; it is the one place the state is said, owner mismatch included.');
 })().catch((error) => { console.error(error); process.exit(1); });

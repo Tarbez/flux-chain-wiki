@@ -245,7 +245,11 @@
     if (error) return { title: 'Cannot publish: the publishing service did not answer', body: error.message + ' ' + START_MINER, actions: [] };
     if (info && !info.reachable) return { title: 'Cannot publish: Ark Miner is not running (or not reachable)', body: (info.detail ? 'The publish host says: ' + info.detail + ' ' : '') + START_MINER, actions: [] };
     if (anyDirty()) return { title: 'Save first', body: 'Publishing sends what is saved in your project folder; there are unsaved changes, so the published site would not match what you see.', actions: [{ label: 'Save now', run: function () { return saveEverything(); } }] };
-    if (!mesh.identity()) return { title: 'Sign in to publish', body: 'Publishing is signed with your identity, and its key is not unlocked in this tab (a reload drops it). Choose your sign-in file (.auth.flx) to unlock it; your edits stay.', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
+    /* an identity that does not own the site's name cannot publish it (this was a sentence only in the account
+       menu's duplicate "Publishing service" block, removed 2026-10-21: docs/ux-audit/cms.md P2-9) */
+    var me = mesh.identity();
+    if (info && info.current && me && info.current.ownerPublicKey && info.current.ownerPublicKey !== me.publicKeyB64) return { title: 'This identity does not own the site\'s name', body: 'The live site was published by another identity, so a publish from this one would be refused. Sign in with the identity that owns the name (Owner key, under Developer details).', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
+    if (!me) return { title: 'Sign in to publish', body: 'Publishing is signed with your identity, and its key is not unlocked in this tab (a reload drops it). Choose your sign-in file (.auth.flx) to unlock it; your edits stay.', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
     return null;
   }
   /* A click on Publish while it is refused: the sheet that says why, with the remedy and Check
@@ -254,32 +258,18 @@
     if (reason === PUBLISHING_NOW) { notice({ tone: 'info', title: 'Publishing now', body: reason }); return; }
     if ($('sheet').hidden || $('sheet').dataset.sheet !== 'mesh') openMeshSheet();
   }
+  /* What the header needs from the publishing service: the identity chip and whether Publish is refused (with
+     why). The service's state itself is said in ONE place, the Publishing status sheet (renderMeshEditor): the
+     account menu had a second "Publishing service" block with its own line and Check again (cms.md P2-9). */
   async function refreshMesh() {
-    var line = $('meshState'), owner = $('meshOwner');
-    if (!mesh) {
-      /* opened from disk: this page cannot reach a miner, but a plain link to the host's copy of it can be followed */
-      line.textContent = 'This copy of the page cannot publish. Double-click "Flux Chain Admin.command" in the flux-chain folder, or use the copy served by the host: ';
-      line.appendChild(h('a', { href: 'http://127.0.0.1:3437/admin.html', text: 'http://127.0.0.1:3437/admin.html' }));
-      owner.textContent = ''; $('mesh').open = true;
-      refuse($('publish'), PUBLISH_NEEDS_HOST, explainPublish);
-      refuse($('meshRefresh'), PUBLISH_NEEDS_HOST);
-      return;
-    }
+    if (!mesh) { refuse($('publish'), PUBLISH_NEEDS_HOST, explainPublish); return; }
     try {
       var info = await mesh.status();
       var who = mesh.identity();
-      var through = info.miner ? 'Publishing through ' + (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '') + '. ' : '';
-      if (!info.reachable) line.textContent = (info.detail || 'The miner is not reachable.');
-      else if (!info.current) line.textContent = through + siteName(info) + ' is not published yet. Publish creates version 1.';
-      else line.textContent = through + siteName(info) + ' is live at version ' + info.current.version + ', last published ' + info.current.updatedAt + '.';
-      owner.textContent = who ? 'Signed in' + (who.displayName ? ' as ' + who.displayName : '') + '.' : 'Not signed in.';
-      owner.title = who ? 'Signing key ' + who.publicKeyB64 : '';   /* the full key stays one hover away */
       var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'signed in') + ' · ' + short(who.publicKeyB64) : '';
-      if (info.current && who && info.current.ownerPublicKey !== who.publicKeyB64) {
-        line.textContent += ' This identity does not own the name: sign in with the identity that does.';
-      }
+      if (chip) chip.title = who ? 'Signing key ' + who.publicKeyB64 : '';   /* the full key stays one hover away */
       refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: the miner is not reachable (' + (info.detail || 'no answer') + '). Start the miner or check its address, then Refresh.', explainPublish);
-    } catch (error) { line.textContent = error.message; refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.', explainPublish); }
+    } catch (error) { refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.', explainPublish); }
   }
 
   $('publish').addEventListener('click', async function () {
@@ -315,7 +305,6 @@
     }
     publishing = false; refuse(button, '', explainPublish); refreshMesh();
   });
-  $('meshRefresh').addEventListener('click', refreshMesh);
   $('meshNav').addEventListener('click', selectMesh);
   A.provide({ refreshMesh: refreshMesh, renderMeshEditor: renderMeshEditor });
 })();
