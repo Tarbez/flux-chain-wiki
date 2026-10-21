@@ -89,11 +89,10 @@
   }
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
   /* The live parts of the home (the page's own, hand-built because they ARE the explorer: the
-     mesh fabric stepper and the live kinds read from the public mesh), and the phone's pane
-     switch between them. The page around them -- crumbs, heading, the ways on -- is Ark blocks. */
+     mesh fabric stepper and the live kinds read from the public mesh). The page around them -- crumbs,
+     heading, the phone's switch between the two cards, the ways on -- is Ark blocks (spec() below). */
   function cards() {
-    return '<div class="explore-panes" role="group" aria-label="Show"><button type="button" data-explore-pane="how" aria-pressed="true">How it works</button><button type="button" data-explore-pane="live" aria-pressed="false">Live now</button></div>' +
-      '<div class="explore-cards">' +
+    return '<div class="explore-cards">' +
       '<article class="how-work-card explore-how-card" aria-label="How it works">' +
       '<div class="how-work-card-top"><span class="how-work-number" data-explore-step-n>01 / 03</span><span class="how-work-signal">HOW IT WORKS</span></div>' +
       '<div class="how-work-mesh-frame"><canvas class="how-work-mesh" data-explore-fabric aria-hidden="true"></canvas></div>' +
@@ -110,7 +109,15 @@
      heading and sentence its panel. The mesh drawing above them is shared and follows the chosen step
      (setup()). `was` keeps what the hand-built stepper's elements were keyed as: the tab strip, its three
      buttons (their words, "01Shape", are the tab labels) and the first step's heading and sentence. */
-  var STEPPER = 'page:/div:1/div:2/article:1';
+  var CARDS = 'page:/div:1/div:2', STEPPER = CARDS + '/article:1';
+  /* The phone's switch between the two cards is Ark tabs (a hand-built aria-pressed button pair stood here: ledger recheck X5 /
+     CP-6): each card is its tab's panel. From 901px both cards stand side by side and the tab strip is not drawn
+     (css/explore-story.css), so setup() shows both panels there. `was`: the strip keeps the old button pair's keys, the
+     tabs block the cards' wrapper's; mount() pins the two cards by hand, since the page puts them in the panels. */
+  function panesSpec() {
+    return { block: 'tabs', id: 'explore-panes', was: { ':root': { key: CARDS, self: true }, 'tabs-list': 'page:/div:1/div:1', 'tabs-trigger': 'page:/div:1/div:1/button:1', 'tabs-trigger#2': 'page:/div:1/div:1/button:2' },
+      props: { label: 'Show', variant: 'segmented', activation: 'automatic', items: [{ value: 'how', label: 'How it works' }, { value: 'live', label: 'Live now' }] } };
+  }
   function stepsSpec() {
     return { block: 'tabs', id: 'explore-steps', was: { ':root': STEPPER + '/div:3', 'tabs-trigger': STEPPER + '/div:3/button:1', 'tabs-trigger#2': STEPPER + '/div:3/button:2', 'tabs-trigger#3': STEPPER + '/div:3/button:3' },
       props: { label: 'How it works', variant: 'segmented', activation: 'automatic', items: STEPS.map(function (step, i) {
@@ -156,12 +163,20 @@
     onward.push({ label: 'How the chain works', href: 'route:chain', tone: 'link' });
     return [
       { block: 'custom', id: 'explore-home', was: WAS['explore-home'], mount: function (ctx) {
-        var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', ''); home.dataset.pane = 'how';
+        var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', '');
         home.appendChild(ctx.render({ block: 'breadcrumb', id: 'explore-crumbs', was: WAS['explore-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Mesh Explorer' }] } }));
         home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Your idea, live on the mesh.', density: 'compact',
           lede: 'DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.' } }));
         var live = node('div'); live.innerHTML = cards();
         live.querySelector('[data-explore-steps]').replaceWith(ctx.render(stepsSpec()));
+        var panes = ctx.render(panesSpec()), panels = panes.querySelectorAll('[data-ark-part="tabs-content"]');
+        panes.classList.add('explore-cards');
+        panes.querySelector('[data-ark-part="tabs-list"]').classList.add('explore-panes');
+        Array.prototype.forEach.call(panes.querySelectorAll('[data-ark-part="tabs-trigger"]'), function (tab, i) { tab.setAttribute('data-explore-pane', i ? 'live' : 'how'); });
+        [['.explore-how-card', '/article:1'], ['.explore-live-card', '/section:1']].forEach(function (card, i) {
+          var el = live.querySelector(card[0]); el.setAttribute('data-ark-layout-pin', CARDS + card[1]); panels[i].appendChild(el);
+        });
+        live.querySelector('.explore-cards').replaceWith(panes);
         while (live.firstChild) home.appendChild(live.firstChild);
         /* the ways on keep the footer's keys: What is a resolver, the family's Explore link (when the kit names it), Browse the raw records */
         var onwardWas = { ':root': { key: FOOT + '/div:2', self: true }, 'button': FOOT + '/div:2/a:1' };
@@ -320,12 +335,15 @@
       if (step === STEPS.length - 1 || !page.isConnected) { stopSteps(); return; }
       if (document.visibilityState !== 'hidden') showStep(step + 1);
     }, 5200);
-    Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (button) {
-      button.addEventListener('click', function () {
-        home.dataset.pane = button.dataset.explorePane;
-        Array.from(page.querySelectorAll('[data-explore-pane]')).forEach(function (other) { other.setAttribute('aria-pressed', String(other === button)); });
-      });
-    });
+    /* The two cards are the panels of Ark tabs that only a phone or tablet draws. From 901px (the width
+       css/explore-story.css sets them side by side at) both panels show; below it Ark shows the selected one. */
+    var panePanels = Array.from(page.querySelectorAll('#explore-panes > [data-ark-part="tabs-content"]'));
+    var wide = window.matchMedia ? window.matchMedia('(min-width: 901px)') : null;
+    function syncPanes() { panePanels.forEach(function (panel) { panel.hidden = !(wide && wide.matches) && panel.getAttribute('data-state') !== 'active'; }); }
+    if (wide && panePanels.length) {
+      syncPanes();
+      if (wide.addEventListener) wide.addEventListener('change', syncPanes);
+    }
     function showView(view) {
       page.dataset.view = view; raw.hidden = view !== 'raw'; home.hidden = view === 'raw';
       if (view === 'raw') $('[data-explore-raw-back]').focus({ preventScroll: true });

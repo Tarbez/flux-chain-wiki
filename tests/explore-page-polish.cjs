@@ -43,9 +43,10 @@ assert(!/r\.count \+ \(r\.capped/.test(explorer), 'the tile no longer joins a co
 const rules = (css) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({ selector: m[1].trim(), body: m[2] }));
 const kind = rules(story).find((r) => /\.explore-kind$/.test(r.selector));
 assert(kind && /border:1px solid hsl\(var\(--border-control\)\)/.test(kind.body), 'the kind tile is drawn on --border-control');
-for (const sel of ['.explore-panes']) {
-  assert(rules(story).some((x) => x.selector.endsWith(sel) && /--border-control/.test(x.body)), sel + ' is drawn on --border-control');
-}
+/* the phone's two-card switch is Ark's segmented tabs since 2026-10-21 (ledger recheck X5 / CP-6): its edge is the one
+   segmented-tab rule in css/components.css, on --border-control, not a page rule */
+assert(/segmented[^{]*\[aria-selected="true"\][^{]*\{[^}]*--border-control/.test(fs.readFileSync('css/components.css', 'utf8')), 'the segmented switch is drawn on --border-control');
+assert(/block: 'tabs', id: 'explore-panes'/.test(explorer) && /variant: 'segmented'/.test(explorer), 'the two-card switch is Ark tabs');
 const themes = fs.readFileSync('css/themes.css', 'utf8') + fs.readFileSync('css/flux-themes.css', 'utf8');
 assert((themes.match(/--border-control:/g) || []).length >= 10, 'every theme defines --border-control');
 
