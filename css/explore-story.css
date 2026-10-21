@@ -16,7 +16,10 @@
   transition:color 160ms ease,background-color 160ms ease;
 }
 #scene .explore-page .content-layer-path > button:is(:hover,:focus-visible) { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
+/* the two cards are the panels of Ark tabs (js/pages/explorer.js panesSpec); from 901px both stand side by side and the
+   tab strip is not drawn */
 #scene .explore-page .explore-panes { display:none; }
+#scene .explore-page .explore-cards > [data-ark-part="tabs-content"] { min-width:0; margin:0; padding:0; }
 
 /* The two cards */
 #scene .explore-page .explore-cards { position:relative; display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:14px; min-height:0; }
@@ -137,19 +140,11 @@
 
 /* Phone and tablet: the two cards become panes in the same place */
 @media (max-width:900px) {
-  #scene .explore-page .explore-panes {
-    display:grid; grid-template-columns:1fr 1fr; padding:3px; border:1px solid hsl(var(--border-control)); border-radius:5px; background:hsl(var(--surface) / .52);
-  }
-  #scene .explore-page .explore-panes button {
-    min-height:30px; margin:0; border:0; border-radius:3px; background:none; cursor:pointer; color:hsl(var(--text-faint));
-    font:550 var(--caption-size,.75rem)/1 var(--font-mono,ui-monospace,monospace); letter-spacing:.075em; text-transform:uppercase;
-  }
-  #scene .explore-page .explore-panes button[aria-pressed="true"] { background:hsl(var(--reference-100)); color:var(--signal-reference); box-shadow:inset 0 0 0 1px hsl(var(--border-control)); }
+  /* Ark draws the switch (segmented tabs) and shows one panel at a time */
+  #scene .explore-page .explore-panes { display:flex; }
   #scene .explore-page .explore-cards { grid-template-columns:1fr; }
-  #scene .explore-page .explore-home[data-pane="live"] .explore-live-card .how-work-card-top { display:none; }
+  #scene .explore-page .explore-live-card .how-work-card-top { display:none; }
   #scene .explore-page .explore-cards .how-work-card::after { display:none; }
-  #scene .explore-page .explore-home[data-pane="how"] .explore-live-card,
-  #scene .explore-page .explore-home[data-pane="live"] .explore-how-card { display:none; }
   #scene .explore-page .explore-cards .how-work-card { padding:16px; gap:10px; }
   #scene .explore-page .explore-kinds { grid-template-columns:1fr 1fr; gap:6px; }
   #scene .explore-page .explore-kind { padding:9px 10px; row-gap:4px; }

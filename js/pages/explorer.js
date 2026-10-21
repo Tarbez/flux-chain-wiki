@@ -73,24 +73,19 @@
     return /ies$/.test(word) ? word.slice(0, -3) + 'y' : /[^s]s$/.test(word) ? word.slice(0, -1) : word;
   }
   function countPhrase(count, capped, plural) { return count + (capped ? '+' : '') + ' ' + (count === 1 && !capped ? singular(plural) : plural); }
-  /* One Ark block from a spec, drawn after the page is up (live readings, a record): the adapter's render (js/ark/blocks.js).
-     A spec the kit refuses becomes Ark's refusal callout in its place; a reading never breaks the page. */
-  function block(spec) { return ArkUI.blocks.render(spec, { onInvalid: 'render' }); }
-  /* Puts a freshly drawn block where the old one was and returns it. */
-  function swap(old, fresh) { if (old && old.replaceWith) old.replaceWith(fresh); return fresh; }
   /* A way back inside the page's own views is Ark's action button (tone secondary), not a hand-built <button>. The view change is
-     the page's own state, not an address, so it is an `action` the page answers (setup()), never a link. Returns the element. */
+     the page's own state, not an address, so it is an `action` the page answers (setup()), never a link. Without the block
+     adapter loaded (the unit test's toy DOM) it is the plain button it was. Returns the element to put on the page. */
   function backAction(label, className, onClick) {
-    var root = block({ block: 'actions', props: { label: 'Back', items: [{ label: label, action: 'explore-back', tone: 'secondary' }] } });
-    root.classList.add(className);
-    root.addEventListener('click', function (event) { if (event.target.closest && event.target.closest('[data-action="explore-back"]')) onClick(event); });
+    var root;
+    if (ArkUI.blocks && ArkUI.blocks.render) {
+      root = ArkUI.blocks.render({ block: 'actions', props: { label: 'Back', items: [{ label: label, action: 'explore-back', tone: 'secondary' }] } });
+      root.classList.add(className);
+      root.addEventListener('click', function (event) { if (event.target.closest && event.target.closest('[data-action="explore-back"]')) onClick(event); });
+      return root;
+    }
+    root = node('button', className, label); root.type = 'button'; root.addEventListener('click', onClick);
     return root;
-  }
-  /* A record's fields as Ark facts (a hand-built <dl> stood here three times: ledger recheck T11 / C9). The label is the
-     field's name, cut to Ark's 48 characters; a field with no value says "Not recorded" (Ark's absent value), never a dash. */
-  function factItem(term, value, mono) {
-    var text = value == null || value === '' ? null : typeof value === 'object' ? JSON.stringify(value) : String(value);
-    return { term: String(term).slice(0, 48), value: text, mono: !!mono };
   }
   function kindIcon(paths) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + (paths || '<circle cx="12" cy="12" r="7"/>') + '</svg>'; }
   /* The live parts of the home (the page's own, hand-built because they ARE the explorer: the
@@ -694,22 +689,17 @@
       }
       function weight(c) { return groups[c].reduce(function (sum, item) { return sum + (liveCounts[item.id] ? liveCounts[item.id].count : 0); }, 0); }
       open.sort(function (a, b) { return weight(b) - weight(a) || a.localeCompare(b); });
-      /* A kind is an Ark stat tile that is a button (a hand-built <button> tile stood here: ledger recheck W4b): its name, and its
-         live count where the node gave one. A kind this page does not count says so (Ark's absent reading), never 0. */
-      var tiles = open.map(function (c) {
-        var kind = KINDS[c] || [humanField(c)], figures = counted(c);
-        return figures.length ? { label: kind[0], value: figures.join(' · '), action: 'explore-kind' }
-          : { label: kind[0], action: 'explore-kind', absent: { reason: 'Not counted here.' } };
-      });
-      if (!tiles.length) { kindsBox.replaceChildren(); privateLine.hidden = !closed.length; privateLine.textContent = closed.length ? 'Kept private: ' + closed.join(', ') + '.' : ''; return; }
-      kindsBox.replaceChildren(block({ block: 'stats', props: { label: 'Kinds of record', items: tiles } }));
-      kindTiles().forEach(function (tile, i) {
-        var c = open[i], icon = node('span', 'explore-kind-icon'), control = tile.querySelector('.ark-stat__control');
-        icon.innerHTML = kindIcon((KINDS[c] || [])[2]);
-        tile.classList.add('explore-kind'); tile.dataset.category = c;
-        tile.querySelector('[data-ark-part="stat-label"]').prepend(icon);
-        control.setAttribute('aria-controls', 'explore-browse'); control.setAttribute('aria-expanded', String(browsing.category === c));
-      });
+      kindsBox.replaceChildren.apply(kindsBox, open.map(function (c) {
+        var kind = KINDS[c] || [c.charAt(0).toUpperCase() + c.slice(1), CATEGORY_NOTES[c] || 'Records declared by this node.'];
+        var tile = node('button', 'explore-kind'); tile.type = 'button'; tile.dataset.category = c;
+        var icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
+        var figures = counted(c);
+        tile.appendChild(icon); tile.appendChild(node('strong', '', kind[0])); tile.appendChild(node('span', 'explore-kind-text', kind[1]));
+        tile.appendChild(node('small', '', figures.length ? figures.join(' · ') : 'Open to browse'));
+        tile.setAttribute('aria-pressed', String(browsing.category === c)); tile.setAttribute('aria-controls', 'explore-browse');
+        tile.addEventListener('click', function () { if (browsing.category === c) closeBrowse(); else browseKind(c); });
+        return tile;
+      }));
       privateLine.hidden = !closed.length;
       privateLine.textContent = closed.length ? 'Kept private: ' + closed.join(', ') + '.' : '';
     }
