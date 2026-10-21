@@ -18,7 +18,7 @@ for (const cls of ['.mechanism-next'])
      .about-primary-action left it the same day: /about's main action is the Ark hero's primary button;
      .home-primary-cta, .home-ghost-cta, .story-primary and .resolver-story-primary left it 2026-10-21 (W5-CSSCLEAN):
      no script builds them any more -- the home hero and the story pager are Ark blocks -- so components.css
-     deleted their rules; only js/ark/icons.js's selector table still names them) */
+     deleted their rules, and js/ark/icons.js's selector table dropped them too) */
   assert(components.includes(cls), `${cls} is painted by the component layer`);
 /* "Run DEFXN" is the family bar's soft action since 2026-10-19: its paint is the kit's component
    layer (assets/kit/defxn-components.css .dx-btn--soft), one rule on every route, and no site
