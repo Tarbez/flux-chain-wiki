@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Named networks partition miner presence only. They do not isolate accounts, identities, DAOs, records, or treasuries, and are not a security boundary."
+      "value": "A named network decides which group of miners your machine shows up in. Accounts, identities, DAOs, records and treasuries are shared by every network, so a network is not a security boundary."
     },
     "RESOLVER.NOTE": {
       "label": "Resolver deployment pointer",

@@ -150,6 +150,10 @@
     var product = exploreProduct();
     var onward = [{ label: 'What is a resolver?', href: 'route:resolver', tone: 'link' }, { label: 'Browse the raw records', action: 'explore-raw', tone: 'secondary' }];
     if (product) onward.splice(1, 0, product);
+    /* the chain the records are written to (ledger recheck 2026-10-21, pages.md /explore exits); appended, so
+       the ways above keep their layout keys, and the fourth at most (Ark's actions row holds four). The
+       fleet's measured numbers are this page's own journey (Prove), derived below by ArkUI.journeyPageBlocks. */
+    onward.push({ label: 'How the chain works', href: 'route:chain', tone: 'link' });
     return [
       { block: 'custom', id: 'explore-home', was: WAS['explore-home'], mount: function (ctx) {
         var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', ''); home.dataset.pane = 'how';
@@ -164,6 +168,7 @@
         if (product) onwardWas['button#2'] = { key: FOOT + '/div:2/a:2', self: true };
         onwardWas['button#' + (product ? 3 : 2)] = FOOT + '/div:2/button:1';
         home.appendChild(ctx.render({ block: 'actions', id: 'explore-onward', was: onwardWas, props: { label: 'Ways on', items: onward } }));
+        (ArkUI.journeyPageBlocks ? ArkUI.journeyPageBlocks('explorer') : []).forEach(function (b) { home.appendChild(ctx.render(b)); });
         return home;
       } },
       { block: 'custom', id: 'explore-raw-view', was: WAS['explore-raw-view'], mount: rawBox }
