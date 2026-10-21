@@ -477,7 +477,25 @@
      (every dirty draft, not just what is on screen), so it enables whenever ANY of the drafts is
      dirty -- a dirty theme while looking at a clean page must not leave the one save action
      looking disabled. */
-  function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }
+  function refreshSaveButton() {
+    var button = $('save'); if (!button) return;
+    /* how much is waiting, on the button itself (cms.md P1-16): a count, and in its title what it is */
+    var unsaved = A.unsavedSummary ? A.unsavedSummary() : { count: anyDirty() ? 1 : 0, words: '' };
+    var label = button.querySelector('.save-label') || button;
+    if (label === button) { var word = button.textContent.trim(); button.textContent = ''; label = h('span', { class: 'save-label', text: word }); button.appendChild(label); }
+    var badge = button.querySelector('.save-count');
+    if (unsaved.count && unsaved.words) {
+      if (!badge) { badge = h('span', { class: 'save-count', 'aria-hidden': 'true' }); button.appendChild(badge); }
+      badge.textContent = String(unsaved.count);
+      button.setAttribute('aria-label', 'Save ' + unsaved.words);
+      button.dataset.baseTitle = 'Save ' + unsaved.words + ' (Ctrl/Cmd+S)';
+    } else {
+      if (badge) badge.remove();
+      button.removeAttribute('aria-label');
+      button.dataset.baseTitle = 'Save every unsaved change (Ctrl/Cmd+S)';
+    }
+    refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE);
+  }
   if ($('save')) $('save').addEventListener('click', function () { saveEverything(); });
 
   /* touch(opts): update everything that depends on "is it dirty" without rebuilding any form --

@@ -481,3 +481,5 @@
 .cms-skip { position: fixed; top: -100px; left: 12px; z-index: 1000; padding: 10px 14px; border-radius: var(--radius-md, 6px); background: hsl(var(--text-strong)); color: hsl(var(--canvas)); font: 600 13px/1.2 var(--sans, sans-serif); text-decoration: none; }
 .cms-skip:focus { top: 12px; }
 #canvasWrap:focus { outline: none; }
+/* how many unsaved items Save will write (js/admin/editor.js refreshSaveButton; cms.md P1-16) */
+#save .save-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; margin-left: 6px; padding: 0 5px; border-radius: 9px; background: hsl(var(--text-strong)); color: hsl(var(--canvas)); font: 600 12px/1 var(--sans, sans-serif); }
