@@ -115,7 +115,10 @@
 #studioRoot #layers li { position: relative; }
 #studioRoot #layers li .eye-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin: 0; background: hsl(var(--raised)); }
 #studioRoot #layers li[aria-selected="true"] .eye-toggle { background: hsl(var(--reference-100)); }
-#studioRoot #layers .layer-tag { flex: none; margin-right: 2px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; font: 500 9.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+/* the element's tag (h1, div), on the selected row only: every row already carries its kind's icon, and a tag on
+   all of them read "DIV, DIV, CANVAS" down the tree (docs/ux-audit/cms.md P2-4). 12px, the editor's floor. */
+#studioRoot #layers .layer-tag { flex: none; margin-right: 2px; max-width: 64px; overflow: hidden; text-overflow: ellipsis; font: 500 12px/1 var(--mono); color: hsl(var(--text-muted)); }
+#studioRoot #layers li:not([aria-selected="true"]) .layer-tag { display: none; }
 /* the Pages tab: the one site tree (js/admin/rail.js renderPages). A row is its open button
    (name, path), its marks (orphan, unsaved dot) and its actions (Fields, Delete). */
 #studioRoot .rail-pane { padding-bottom: 12px; }
