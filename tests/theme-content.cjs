@@ -120,11 +120,16 @@ console.log('PASS: ArkTheme colours/background round-trip, every vendored backgr
   assert.equal(ArkTheme.publishedId('defxn-moss'), 'defxn-moss', 'the published defxn-moss is Moss dark');
   for (const bad of ['', 'constructor', '__proto__', 'toString', 'tide', null, 7]) assert.equal(ArkTheme.publishedId(bad), null, String(bad) + ' is not a palette');
 
-  // The shipped saved record: activeTheme "ghost" reads as ember, the file itself is untouched by reading.
-  const dataSource = fs.readFileSync('js/content/theme-data.js', 'utf8');
+  /* A saved record with the OLD id: activeTheme "ghost" reads as ember, and reading never rewrites it.
+     Since 14e445a the shipped record itself was written forward with the published id (a new save, as the
+     CMS makes: tests/site-bundle round trip), so the old-id record is the shipped one with its id put back --
+     the reader must still accept what older saves wrote. */
+  const shipped = fs.readFileSync('js/content/theme-data.js', 'utf8');
+  assert(/"activeTheme": "(ghost|ember)"/.test(shipped), 'the shipped record names the default palette');
+  const dataSource = shipped.replace(/"activeTheme": "ember"/, '"activeTheme": "ghost"');
   const ctx3 = vm.createContext({}); load(ctx3); vm.runInContext(dataSource, ctx3);
   assert.equal(vm.runInContext('ArkTheme.get().activeTheme', ctx3), 'ember', 'a saved activeTheme of ghost reads as ember');
-  assert(/"activeTheme": "ghost"/.test(dataSource), 'the saved record still says ghost: future law, the past is not rewritten');
+  assert.equal(fs.readFileSync('js/content/theme-data.js', 'utf8'), shipped, 'reading leaves the saved file untouched: future law, the past is not rewritten');
 
   // Old saved overrides keyed by an old theme key land on the published key; a published twin wins.
   const old = ArkTheme.sanitize({ activeTheme: 'marine', themes: { marine: { primary: '10 20% 30%', accent: '1 2% 3%' }, 'defxn-dune': { primary: '40 50% 60%' }, glacier: { text: '0 0% 90%' } } });
