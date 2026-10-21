@@ -47,15 +47,25 @@ const ROUTES = {
       [/^page:\/div:1\/div:2\/nav:1\/a:\d$/, 'a hub link is a related page in the pager'],
       [/^page:\/div:1\/nav:3\/a:1$/, 'the way on to the next step sits under the stage, beside the documents'],
       [/^page:\/figure:1\/div:2$/, 'the document picker\'s row also holds the way through (back, next)'],
-      [/^id:resolver-lab-title$/, 'the same heading, reworded: "a claim" reads "an answer" (WR-4, see reworded)']
+      [/^id:resolver-lab-title$/, 'the same heading, reworded: "a claim" reads "an answer" (WR-4, see reworded)'],
+      /* 2026-10-21 (ledger W4d / P4): the illustration's controls are Ark blocks */
+      [/^page:\/div:1\/nav:3$/, 'the footer row\'s back and next are the illustration\'s Ark actions row (Previous step / Next step)'],
+      [/^page:\/div:1\/nav:3\/button:1$/, '"←" is Ark\'s "Previous step" button'],
+      [/^page:\/div:1\/nav:3\/a:1\/span:1$/, 'the next step\'s name on the pill ("Resolve") is "Next step": the chosen step is named by the steps row above'],
+      [/^page:\/figure:1\/figcaption:1\/button:1\/span:1$/, 'the "↻" glyph of Run again: the Ark button says "Run again"'],
+      [/^page:\/figure:1\/div:2\/div:1\/button:\d\/span:1$/, 'a document\'s name is its Ark choice option, with its size: "Report · 3.2 MB"']
     ],
     retired: [
       [/^page:\/div:1$/, 'the left column; a block page stacks its blocks in its root'],
-      [/^page:\/div:1\/nav:3$/, 'the footer row: its back and next buttons sit with the documents under the stage, its spec link is the laws\' "Wording from the resolver spec"'],
       [/^page:\/div:1\/nav:3\/a:2$/, '"Spec →": the laws\' "Wording from the resolver spec" opens the same spec'],
       [/^page:\/figure:1\/ol:1\/li:\d\/div:1\/(span|strong):\d$/, 'the law\'s number, name and status chip are one row title now, which keeps the top\'s key'],
       [/^page:\/figure:1\/ol:1\/li:\d\/button:1$/, 'the phone-only full-cover toggle; Ark\'s accordion trigger opens the law on every width'],
-      [/^page:\/div:1\/div:2\/details:1\/ol:1$/, 'the facts list; each fact keeps its key as a paragraph of the row']
+      [/^page:\/div:1\/div:2\/details:1\/ol:1$/, 'the facts list; each fact keeps its key as a paragraph of the row'],
+      /* 2026-10-21 (ledger W4d / P4) */
+      [/^page:\/div:1\/nav:2\/button:\d\/span:1$/, 'a step\'s dot on the old track: Ark\'s choice option marks the chosen step itself'],
+      [/^page:\/div:1\/nav:2\/button:\d\/span:2\/small:1$/, 'a step\'s number ("01"): it starts the step\'s Ark choice label ("01 Ask")'],
+      [/^page:\/div:1\/nav:3\/a:1\/span:2$/, 'the pill\'s "→": Ark\'s Next step button needs no glyph'],
+      [/^page:\/figure:1\/div:2\/div:1\/button:\d\/small:1$/, 'a document\'s size: it is in the document\'s Ark choice label ("Report · 3.2 MB")']
     ],
     reworded: [
       [/^page:\/div:1\/nav:3(\/a:2)?$/, '"Spec →" reads "Wording from the resolver spec" (and "Resolve→" is the illustration\'s next button)'],

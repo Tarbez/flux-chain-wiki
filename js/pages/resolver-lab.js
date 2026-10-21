@@ -285,44 +285,39 @@
       laws: [words('LAWS'), words('LAWS.BODY'), '']
     };
 
-    /* ---- the illustration (the figure's slot): its head, the track, the step, the stage, the
-       document picker and the way through -- the page's own live content, hand-built because it
-       IS the run (a canvas scene driven by its controls), framed by Ark's figure. */
+    /* ---- the illustration (the figure's slot): its head, the steps, the step's line, the stage, the
+       documents and the way through -- the page's own live content, framed by Ark's figure. The
+       canvas scene is hand-drawn because it IS the run; its controls are Ark blocks (ledger W4d / P4,
+       2026-10-21), where a hand-built track with its own arrow keys, pressed-state document buttons
+       and a pill-shaped Next stood:
+         the steps and the documents  Ark's `choice`: a real radio group, so the browser supplies the
+                                      keyboard (one tab stop; arrow keys move AND choose). They redraw
+                                      one stage and own no panel, so they are not tabs (a tab owns a
+                                      panel; the page's one tablist is the depth control).
+         Run again, Previous, Next    Ark's actions: buttons that raise ark:action (the def's
+                                      handlers), never links a router could follow away from the page.
+       The signal rail under the steps stays the page's own drawing: a glow travels to the chosen
+       step and stops. */
+    function block(spec) { return ArkUI.blocks.render(spec, { onInvalid: 'throw' }); }
     var figure = el('div', 'resolver-lab-scene');
     var head = el('div', 'resolver-lab-scene-head');
     var address = el('span', 'resolver-lab-address');
     address.appendChild(el('code', '', ADDRESS));
     address.appendChild(document.createTextNode(' · runs in your browser'));
     head.appendChild(address);
-    var again = el('button', 'resolver-lab-again'); again.type = 'button';
-    again.appendChild(el('span', 'resolver-lab-again-icon', '↻')); again.appendChild(document.createTextNode('Run again'));
-    again.addEventListener('click', function () { rerun(); });
+    var again = block({ block: 'actions', was: WAS['resolver-again'], props: { items: [{ label: 'Run again', action: 'resolver-again', tone: 'secondary' }] } });
     head.appendChild(again);
     figure.appendChild(head);
 
-    var track = el('div', 'resolver-track'); track.setAttribute('role', 'group'); track.setAttribute('aria-label', 'Resolver steps');
-    var line = el('span', 'resolver-track-line'); line.setAttribute('aria-hidden', 'true');
-    var glow = el('span', 'resolver-track-glow'); glow.setAttribute('aria-hidden', 'true');
-    var progress = el('span', 'resolver-track-progress'); progress.setAttribute('aria-hidden', 'true');
-    track.appendChild(line); track.appendChild(progress); track.appendChild(glow);
-    var tabButtons = STEPS.map(function (id, i) {
-      var b = el('button', 'resolver-track-node'); b.type = 'button'; b.dataset.step = id;
-      b.style.setProperty('--at', (i / (STEPS.length - 1) * 100) + '%');
-      b.appendChild(el('span', 'resolver-track-mark'));
-      var label = el('span', 'resolver-track-label');
-      label.appendChild(el('small', '', String(i + 1).padStart(2, '0')));
-      label.appendChild(document.createTextNode(STEP_COPY[id][0]));
-      b.appendChild(label);
-      b.addEventListener('click', function () { go(id, true); });
-      track.appendChild(b); return b;
-    });
-    // Arrow keys move along the track.
-    track.addEventListener('keydown', function (event) {
-      var i = STEPS.indexOf(state.step), to = event.key === 'ArrowRight' ? i + 1 : event.key === 'ArrowLeft' ? i - 1 : event.key === 'Home' ? 0 : event.key === 'End' ? STEPS.length - 1 : -2;
-      if (to === -2) return;
-      event.preventDefault(); to = Math.max(0, Math.min(STEPS.length - 1, to));
-      go(STEPS[to], true); tabButtons[to].focus();
-    });
+    var track = el('div', 'resolver-track');
+    var stepChoice = block({ block: 'choice', id: 'resolver-steps', was: WAS['resolver-steps'], props: { label: 'Resolver steps', look: 'segmented', value: STEPS[0],
+      options: STEPS.map(function (id, i) { return { value: id, label: String(i + 1).padStart(2, '0') + ' ' + STEP_COPY[id][0] }; }) } });
+    track.appendChild(stepChoice);
+    var rail = el('span', 'resolver-track-rail'); rail.setAttribute('aria-hidden', 'true');
+    rail.appendChild(el('span', 'resolver-track-progress')); rail.appendChild(el('span', 'resolver-track-glow'));
+    track.appendChild(rail);
+    // A choice of a step is a step (an arrow key chooses too).
+    stepChoice.addEventListener('change', function (event) { if (event.target.checked) go(event.target.value, true); });
     figure.appendChild(track);
     // What this step does, in one line (the full step is How it works).
     var caption = el('p', 'resolver-lab-caption'); caption.setAttribute('aria-live', 'polite');
@@ -335,24 +330,26 @@
     figure.appendChild(stage);
 
     var controls = el('div', 'resolver-lab-controls');
-    var inputs = el('div', 'resolver-lab-inputs'); inputs.setAttribute('role', 'group'); inputs.setAttribute('aria-label', 'Choose a document');
-    var inputButtons = INPUTS.map(function (input) {
-      var b = el('button', 'resolver-lab-doc'); b.type = 'button'; b.dataset.input = input.id;
-      b.appendChild(el('span', '', input.name));
-      b.appendChild(el('small', '', size(input.bytes)));
-      b.setAttribute('aria-label', input.name + ', ' + size(input.bytes) + ', doc:' + input.id);
-      b.addEventListener('click', function () { choose(input.id, true); });
-      b.addEventListener('pointerenter', function () { mesh && mesh.preview(input); });
-      b.addEventListener('focus', function () { mesh && mesh.preview(input); });
-      b.addEventListener('pointerleave', function () { mesh && mesh.preview(null); });
-      b.addEventListener('blur', function () { mesh && mesh.preview(null); });
-      inputs.appendChild(b); return b;
+    var docChoice = block({ block: 'choice', id: 'resolver-documents', was: WAS['resolver-documents'], props: { label: 'Choose a document', look: 'segmented', value: INPUTS[0].id,
+      options: INPUTS.map(function (input) { return { value: input.id, label: input.name + ' · ' + size(input.bytes) }; }) } });
+    docChoice.addEventListener('change', function (event) { if (event.target.checked) choose(event.target.value, true); });
+    // Pointing at or focusing a document previews its footprint on the stage.
+    Array.prototype.forEach.call(docChoice.querySelectorAll('[data-ark-part="choice-option"]'), function (option) {
+      var input = INPUTS.filter(function (x) { return x.id === option.querySelector('input').value; })[0];
+      function on() { if (mesh) mesh.preview(input); }
+      function off() { if (mesh) mesh.preview(null); }
+      option.addEventListener('pointerenter', on); option.addEventListener('pointerleave', off);
+      option.addEventListener('focusin', on); option.addEventListener('focusout', off);
     });
-    controls.appendChild(inputs);
-    var prev = el('button', 'resolver-lab-prev'); prev.type = 'button';
-    var next = el('button', 'resolver-lab-next'); next.type = 'button';
-    controls.appendChild(prev); controls.appendChild(next);
+    controls.appendChild(docChoice);
+    var way = block({ block: 'actions', was: WAS['resolver-way'], props: { label: 'Step through', items: [
+      { label: 'Previous step', action: 'resolver-back', tone: 'ghost' }, { label: 'Next step', action: 'resolver-next', tone: 'primary' }] } });
+    way.classList.add('resolver-lab-way');
+    var prev = way.querySelector('[data-action="resolver-back"]'), next = way.querySelector('[data-action="resolver-next"]');
+    controls.appendChild(way);
     figure.appendChild(controls);
+    // The legends name each group for a screen reader; on screen the steps and documents say it.
+    [stepChoice, docChoice].forEach(function (choice) { choice.querySelector('[data-ark-part="choice-legend"]').classList.add('ark-visually-hidden'); });
     // The run, in words, for screen readers (the canvas is decorative).
     var result = el('p', 'resolver-lab-sr'); result.setAttribute('aria-live', 'polite'); figure.appendChild(result);
 
@@ -366,7 +363,13 @@
       if (SEE[n]) item.blocks = [{ block: 'actions', props: { label: words('LAW' + n), items: [{ label: SEE[n][0], action: 'see-law-' + n, tone: 'link' }] } }];
       return item;
     });
-    var handlers = {};
+    /* The way through and Run again: Ark action buttons, answered here. A button is not a link, so
+       nothing can follow it off the page after go() repaints (the old Next was a link the router took). */
+    var handlers = {
+      'resolver-back': function () { var i = STEPS.indexOf(state.step); if (i > 0) go(STEPS[i - 1], true); },
+      'resolver-next': function () { var i = STEPS.indexOf(state.step); if (i < STEPS.length - 1) go(STEPS[i + 1], true); },
+      'resolver-again': function () { rerun(); }
+    };
     Object.keys(SEE).forEach(function (n) {
       handlers['see-law-' + n] = function () {
         var input = current();
@@ -394,26 +397,23 @@
       return (v === 'context' ? 'view=context&' : '') + 'step=' + state.step + '&input=' + state.input;
     }
     function write(mode) { if (root) ArkUI.route.write(ArkUI.pageCatalog[page].path, query(), mode); }
+    // Choosing in a choice block is checking its radio (no change event, so no second go()).
+    function mark(choice, value) { var box = choice.querySelector('input[value="' + value + '"]'); if (box && !box.checked) box.checked = true; }
     function paintStep() {
       var i = STEPS.indexOf(state.step), copyFor = STEP_COPY[state.step];
       figure.dataset.step = state.step;
-      track.style.setProperty('--progress', (i / (STEPS.length - 1) * 100) + '%');
-      tabButtons.forEach(function (b, k) { b.setAttribute('aria-pressed', String(k === i)); b.dataset.done = String(k < i); b.tabIndex = k === i ? 0 : -1; });
+      // The rail's glow stops under the chosen step (the steps share the width equally).
+      track.style.setProperty('--progress', ((i + .5) / STEPS.length * 100) + '%');
+      mark(stepChoice, state.step);
       track.classList.remove('is-arriving'); void track.offsetWidth; track.classList.add('is-arriving');
       caption.textContent = copyFor[1];
-      prev.hidden = i === 0;
-      if (i > 0) { prev.textContent = '←'; prev.setAttribute('aria-label', 'Back to ' + STEP_COPY[STEPS[i - 1]][0]); prev.title = STEP_COPY[STEPS[i - 1]][0]; prev.onclick = function (event) { event.stopPropagation(); go(STEPS[i - 1], true); }; }
-      next.hidden = i === STEPS.length - 1;
-      if (i < STEPS.length - 1) {
-        var to = STEP_COPY[STEPS[i + 1]][0];
-        next.replaceChildren(el('span', 'resolver-lab-next-text', to), el('span', 'resolver-lab-next-arrow', '→'));
-        next.lastChild.setAttribute('aria-hidden', 'true');
-        next.setAttribute('aria-label', 'Next: ' + to);
-        next.onclick = function (event) { event.stopPropagation(); go(STEPS[i + 1], true); };
-      }
+      // A button that is about to hide hands the focus to the step now chosen, not to the page.
+      var lost = (i === 0 && document.activeElement === prev) || (i === STEPS.length - 1 && document.activeElement === next);
+      prev.hidden = i === 0; next.hidden = i === STEPS.length - 1;
+      if (lost) { var chosen = stepChoice.querySelector('input:checked'); if (chosen) chosen.focus(); }
       again.hidden = state.step === 'ask' || state.step === 'laws';
     }
-    function paintInput() { inputButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.input === state.input)); }); }
+    function paintInput() { mark(docChoice, state.input); }
     function visible() { return figure.isConnected && !(figure.closest && figure.closest('[hidden]')) && figure.getBoundingClientRect().width > 0; }
     function show(animate, ghost) {
       describe();
@@ -545,16 +545,29 @@
     },
     'resolver-figure': {
       'figure': { key: 'page:/figure:1', self: true },
-      '.resolver-lab-scene-head': 'page:/figure:1/figcaption:1', '.resolver-track': 'page:/div:1/nav:2', '.resolver-lab-caption': 'page:/div:1/div:1/h2:1',
+      '.resolver-lab-scene-head': 'page:/figure:1/figcaption:1', '.resolver-lab-caption': 'page:/div:1/div:1/h2:1',
       '.resolver-lab-stage': 'page:/figure:1/div:1', '.resolver-lab-controls': 'page:/figure:1/div:2', '.resolver-lab-sr': 'page:/figure:1/p:1',
-      '.resolver-lab-prev': 'page:/div:1/nav:3/button:1', '.resolver-lab-next': 'page:/div:1/nav:3/a:1'
+      /* the old track's line, progress and glow are the rail's three spans */
+      '.resolver-track-rail': 'page:/div:1/nav:2/span:1', '.resolver-track-progress': 'page:/div:1/nav:2/span:2', '.resolver-track-glow': 'page:/div:1/nav:2/span:3'
     },
+    /* The illustration's controls became Ark blocks on 2026-10-21 (ledger W4d / P4); each keeps the
+       keys of what it replaced. The steps' choice is the old track (its four buttons, their words);
+       the documents' choice is the old document group; Run again and the way through are Ark buttons. */
+    'resolver-steps': { 'choice-options': 'page:/div:1/nav:2' },
+    'resolver-documents': { 'choice-options': 'page:/figure:1/div:2/div:1', 'choice-option': 'page:/figure:1/div:2/div:1/button:1',
+      'choice-option#2': 'page:/figure:1/div:2/div:1/button:2', 'choice-option#3': 'page:/figure:1/div:2/div:1/button:3' },
+    'resolver-again': { 'button': 'page:/figure:1/figcaption:1/button:1' },
+    'resolver-way': { ':root': { key: 'page:/div:1/nav:3', self: true }, 'button': 'page:/div:1/nav:3/button:1', 'button#2': 'page:/div:1/nav:3/a:1' },
     'resolver-pager': {
       ':scope > div:nth-of-type(1) > a:nth-of-type(1) > span:nth-of-type(2)': 'page:/div:1/div:2/nav:1/a:2', ':scope > div:nth-of-type(2) > ul:nth-of-type(1)': { key: 'page:/div:1/div:2/nav:1', self: true }
     },
     insert: 'page:/div:2'
   };
   [1, 2, 3, 4].forEach(function (n) { WAS['resolver-depth'][LAW(n) + ' > p:nth-of-type(1)'] = 'id:resolver-law-' + n; });
+  [1, 2, 3, 4].forEach(function (n) {
+    var sfx = n > 1 ? '#' + n : '', old = 'page:/div:1/nav:2/button:' + n;
+    WAS['resolver-steps']['choice-option' + sfx] = old; WAS['resolver-steps']['choice-text' + sfx] = old + '/span:2';
+  });
   [1, 2, 3].forEach(function (n) { WAS['resolver-depth'][VERIFIED + n + ')'] = 'page:/div:1/div:2/details:1/ol:1/li:' + n; });
   WAS['resolver-depth'][VERIFIED + '4)'] = 'page:/div:1/div:2/details:1/p:1';
   WAS['resolver-depth'][VERIFIED + '5)'] = 'page:/div:1/div:2/p:1';

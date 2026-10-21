@@ -103,7 +103,7 @@ var arkPageModules = {
   zero: { module: 'zero', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
   chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
-  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
+  resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/ark/vendor/ark-kit-forms.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },
   deployment: { module: 'deployment', scripts: ArkUI.storyScripts.concat(['js/ark/page-kit.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/deployment.js']) },
   /* the explorer used to live at /explorer; /explore is its address now */
