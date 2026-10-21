@@ -309,3 +309,8 @@ partial work; the coordinator finished and verified what was close:
   tests not updated.
 - not started: the home's cards and tags as Ark cards (W4e / P7; the agent made no change before the limit).
 Next: resume /explore from 99c62b1 and do the home, each in its own worktree, after 04:30.
+Round 1 finished by the coordinator (2026-10-22 ~02:00): /explore merged at b9cc9e6 in a smaller scope (the phone's
+two-card switch is Ark tabs; the record kinds and the record dl lists stay the page's own, W4b and T11 / C9 open).
+Home W4e / P7 closed as no change, with this reason: `land-panel` and `land-tag` are SVG shapes inside the home's
+isometric drawing, and `flow-panel` is a panel of the animated step scene; they are parts of an illustration, not
+content cards, and Ark's card block would replace the drawing, not dress it.
