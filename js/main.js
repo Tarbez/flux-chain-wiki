@@ -1772,10 +1772,30 @@
     if (!compRoot || compRoot === resolved) return resolved;
     return (cmsPreviewSelected && compRoot.contains(cmsPreviewSelected)) ? resolved : compRoot;
   }
+  /* A press on a CLOSED tab opens it and selects it (the owner's follow-up, 2026-10-20: a page's other
+     views were reachable only through Layers or Preview, because this listener ate every click -- the
+     home's first view since "Where do I start?" became the default). The click is passed on to the
+     page's own tabs handler once, then the tab is selected like any element. A press on the OPEN tab
+     is an ordinary selection (and, in the content lens, edits its label). Regression:
+     tests/browser/canvas-tabs.mjs. */
+  var cmsTabPass = null;
+  function cmsOpenTab(event) {
+    var tab = event.target && event.target.closest && event.target.closest('[role="tab"]');
+    if (!tab || !host.contains(tab) || tab.getAttribute('aria-selected') !== 'false' || tab.disabled || tab.getAttribute('aria-disabled') === 'true') return false;
+    event.preventDefault(); event.stopPropagation();
+    cmsTabPass = tab;
+    try { tab.click(); } finally { cmsTabPass = null; }
+    var target = cmsResolvePick(tab.closest('[data-ark-layout-key]') || tab);
+    cmsPreviewSelected = target; cmsPreviewSelections = [target];
+    placeCmsLayoutUi(); emitCmsLayoutSelection();
+    return true;
+  }
   document.addEventListener('click', function (event) {
     if (!cmsPreviewQuery || !cmsPreviewEdit || window.parent === window) return;
+    if (cmsTabPass && event.target === cmsTabPass) return;
     if (event.target && event.target.closest && event.target.closest('[data-ark-studio-ui]')) return;
     if (window.ArkLayout) ArkLayout.annotate(host);
+    if (!event.shiftKey && !event.metaKey && !event.ctrlKey && cmsOpenTab(event)) return;
     if (cmsPreviewLens === 'content' && !event.shiftKey && !event.metaKey && !event.ctrlKey && cmsContentClick(event)) return;
     var graphic = event.target && event.target.closest && event.target.closest('path,rect,circle,ellipse,line,polyline,polygon,svg,canvas,img,figure,picture,video');
     /* The last fallback, [data-ark-component-key], catches a click on a leaf that
