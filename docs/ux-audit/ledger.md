@@ -1258,3 +1258,8 @@ Slices below are owned by files, so agents can run in parallel without editing t
 - R2b (glossary vs the +30 KB budget): FIXED for every block+terms route -- the glossary is per route (`js/content/glossary/<route>.js`, 58 files, derived by rendering each route, drift-checked by `node scripts/build-glossary.cjs --check --routes`); numbers and the routes still over for their chunks (`/stats`, `/explore`, `/account`) in `docs/cms-architecture.md` Budget. The named exceptions are removed there.
 - CP-5 / X6 / RS-5 / RD-4 / TR-3 / story-sheet terms: 14 terms added (mesh, resolution, FXN, FXN chain, bundle, tier, ops/s, DAO, roster, threshold, substrate, Auth Kit, Ghost ID, miner presence). "Quorum" is deliberately NOT defined (retired vocabulary, docs/deprecated.md); threshold and roster say the current thing.
 - ST-2, LG-2, RV-2, RM-3: `terms: 'first-use'` on /stats, /stats/ledger, /resolvers, /resolver-math, /explore, /account; /resolvers' hand `gloss()` and the hand `[[...]]` marks are gone. Hero titles stay unglossed (WR-4 unchanged).
+
+## Recheck 2026-10-21 (main 8e40c2c)
+The rows above are as of Wave 4 and are not rewritten. A read-only recheck of every OPEN, PARTIAL and UNVERIFIED row
+against main 8e40c2c is in `docs/ux-audit/ledger-recheck-2026-10-21.md`: 116 now FIXED, 172 STILL OPEN, 37 OWNER,
+34 NEEDS-BROWSER, each with a HEAD citation, and a "Top fixes" list per part. Work after that point is ordered from it.
