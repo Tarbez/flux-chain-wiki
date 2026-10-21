@@ -128,7 +128,7 @@
   ArkUI.pageModules.statsGpu = {
     spec: spec,
     mount: function (host) {
-      return ArkUI.page(spec(), host, { page: 'stats/gpu', className: 'stats-gpu-page', titleId: 'statsgpu-title' });
+      return ArkUI.page(spec(), host, { page: 'stats/gpu', terms: 'first-use', className: 'stats-gpu-page', titleId: 'statsgpu-title' });
     }
   };
 })();

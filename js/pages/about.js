@@ -302,7 +302,7 @@
       var names = [1, 2, 3].map(function (i) { return shortTitle(words('POINT' + i + '.TITLE')); });
       var layers = drawLayers(names);
       var groups = typeof ArkResolutions !== 'undefined' && ArkUI.pageCatalog.resolutions ? ArkResolutions.list() : [];
-      var page = ArkUI.page(spec(manifest, groups), host, { page: 'about', className: 'about-page', titleId: 'about-title',
+      var page = ArkUI.page(spec(manifest, groups), host, { page: 'about', terms: 'first-use', className: 'about-page', titleId: 'about-title',
         slots: { layers: function () { return layers.svg; } } });
       /* The layer chosen in the picker is the slab drawn lit (the drawing changes only then). */
       var picker = page.querySelector('#about-views [data-ark-block="tabs"]');

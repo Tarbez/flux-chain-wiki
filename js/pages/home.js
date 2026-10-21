@@ -337,7 +337,7 @@
         };
       });
       var remembered = ArkUI.pageModules.zero.selectedAudience || 'explore';
-      var page = ArkUI.page(spec(remembered), host, { page: 'zero', className: 'home-page', titleId: 'hl-title', slots: slots });
+      var page = ArkUI.page(spec(remembered), host, { page: 'zero', terms: 'first-use', className: 'home-page', titleId: 'hl-title', slots: slots });
 
       /* Which tab of a tabs block shows now (its value, by position). */
       function selected(tabs, values) {

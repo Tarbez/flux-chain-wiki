@@ -74,7 +74,7 @@
   ArkUI.pageModules.learnings = {
     spec: spec,
     mount: function (host) {
-      return ArkUI.page(spec(), host, { page: 'learnings', className: 'learnings-page', titleId: 'learnings-title' });
+      return ArkUI.page(spec(), host, { page: 'learnings', terms: 'first-use', className: 'learnings-page', titleId: 'learnings-title' });
     }
   };
 })();
