@@ -52,7 +52,7 @@
   margin:0;
   padding:8px 0;
 }
-#scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect > .mesh-explorer-connect-actions:first-child {display:flex !important;}
+#scene .task-page.mesh-explorer-page[data-connection="live"] .mesh-explorer-connect > .mesh-explorer-connect-actions:first-child {display:flex;}
 #scene .mesh-explorer-connect-actions {display:flex;align-items:center;gap:10px;min-width:0;}
 #scene .mesh-explorer-connect-actions > label {flex:0 1 420px;margin:0;color:hsl(var(--text-muted));font:500 8px/1.3 var(--font-mono,monospace);letter-spacing:.08em;}
 #scene .mesh-explorer-connect-actions > label select {min-height:38px;margin:4px 0 0;padding:7px 10px;border-radius:5px;}
@@ -112,10 +112,10 @@
 #scene .mesh-source-filter {display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 8px;padding:0 0 8px;border-bottom:1px solid hsl(var(--border-subtle));}
 #scene .mesh-source-search {flex:1 1 180px;min-width:150px;margin:0;}
 #scene .mesh-source-search span {position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
-#scene .mesh-source-search input {width:100%;box-sizing:border-box;min-height:28px !important;margin:0 !important;padding:4px 9px !important;font-size:10px !important;}
+#scene .mesh-source-search input {width:100%;box-sizing:border-box;min-height:28px;margin:0;padding:4px 9px;font-size:10px;}
 #scene .mesh-source-chips {display:flex;flex-wrap:nowrap;gap:4px;min-width:0;}
 #scene .mesh-source-chips[aria-label="Filter by category"] {flex:1 1 100%;overflow-x:auto;padding-bottom:3px;scrollbar-width:thin;}
-#scene .mesh-source-chip {flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;min-height:22px !important;padding:2px 8px !important;border:1px solid hsl(var(--border-subtle));border-radius:999px;background:transparent;color:hsl(var(--text-muted));font:500 9px/1.2 var(--font-mono,monospace);cursor:pointer;}
+#scene .mesh-source-chip {flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;min-height:22px;padding:2px 8px;border:1px solid hsl(var(--border-subtle));border-radius:999px;background:transparent;color:hsl(var(--text-muted));font:500 9px/1.2 var(--font-mono,monospace);cursor:pointer;}
 #scene .mesh-source-chip small {color:hsl(var(--text-faint));font:inherit;}
 #scene .mesh-source-chip:hover {border-color:hsl(var(--reference));}
 #scene .mesh-source-chip[aria-pressed="true"] {border-color:hsl(var(--reference));background:hsl(var(--reference-200));color:hsl(var(--text-strong));}
@@ -123,7 +123,7 @@
 #scene .mesh-source-cell {
   position:relative;
   min-width:0;
-  min-height:30px !important;
+  min-height:30px;
   padding:4px 6px;
   display:flex;
   flex-direction:column;
@@ -176,7 +176,7 @@
 #scene .mesh-explorer-result-message {min-height:20px;margin:9px 0;color:hsl(var(--text-muted));font:400 11px/1.45 var(--font-sans,sans-serif);}
 #scene .mesh-explorer-records {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;border:0;}
 #scene .mesh-record-box {border:1px solid hsl(var(--border-subtle));border-radius:4px;background:hsl(var(--surface) / .24);}
-#scene .mesh-record-box > .mesh-explorer-record {grid-template-columns:minmax(90px,.55fr) minmax(0,1.7fr) minmax(130px,.85fr);min-height:54px;padding:10px 12px;border:0 !important;font-size:11px;}
+#scene .mesh-record-box > .mesh-explorer-record {grid-template-columns:minmax(90px,.55fr) minmax(0,1.7fr) minmax(130px,.85fr);min-height:54px;padding:10px 12px;border:0;font-size:11px;}
 #scene .mesh-explorer-record strong {font:500 12px/1.35 var(--font-mono,monospace);}
 #scene .mesh-explorer-record-kind,#scene .mesh-explorer-record-meta {font-size:8px;}
 
@@ -256,7 +256,7 @@
   #scene .mesh-explorer-core-stats .mesh-explorer-stat:nth-child(2) {border-right:0;}
   #scene .mesh-explorer-nodes {grid-template-columns:1fr 1fr;}
   #scene .mesh-explorer-records {grid-template-columns:1fr;}
-  #scene .mesh-observatory-dock {justify-content:flex-start;height:auto;flex-wrap:wrap !important;}
+  #scene .mesh-observatory-dock {justify-content:flex-start;height:auto;flex-wrap:wrap;}
 }
 @media(max-width:520px) {
   #scene .mesh-explorer-header h1 {font-size:35px;}
@@ -309,14 +309,14 @@
   #scene .mesh-explorer-live-panel .mesh-explorer-metrics {height:auto;}
 }
 @media(min-width:821px) {
-  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {margin:0 !important;}
+  #scene .mesh-explorer-live-panel .mesh-explorer-metrics {margin:0;}
   #scene .mesh-explorer-live-panel .mesh-explorer-metrics > div {padding:3px 8px !important;}
 }
 
 /* Source field: category cards drill into one category's sources in place. */
-#scene .mesh-source-field {grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important;gap:8px;align-content:start;}
-#scene .mesh-source-field[data-view="cells"] {grid-template-columns:repeat(auto-fill,minmax(170px,1fr)) !important;gap:6px;}
-#scene .mesh-source-card {position:relative;min-height:64px !important;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;gap:2px 8px;padding:10px 12px;border:1px solid hsl(var(--border-subtle));border-radius:6px;background:hsl(var(--surface) / .18);color:hsl(var(--text-muted));text-align:left;cursor:pointer;}
+#scene .mesh-source-field {grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;align-content:start;}
+#scene .mesh-source-field[data-view="cells"] {grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;}
+#scene .mesh-source-card {position:relative;min-height:64px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;align-items:center;gap:2px 8px;padding:10px 12px;border:1px solid hsl(var(--border-subtle));border-radius:6px;background:hsl(var(--surface) / .18);color:hsl(var(--text-muted));text-align:left;cursor:pointer;}
 #scene .mesh-source-card span {color:hsl(var(--text-strong));font:500 12px/1.2 var(--font-sans,sans-serif);text-transform:capitalize;}
 #scene .mesh-source-card strong {grid-row:1 / 3;grid-column:2;color:hsl(var(--primary));font:500 20px/1 var(--font-sans,sans-serif);}
 #scene .mesh-source-card small {color:hsl(var(--text-faint));font:500 9px/1.2 var(--font-mono,monospace);}
@@ -324,8 +324,8 @@
 #scene .mesh-source-crumb {display:flex;align-items:center;gap:10px;margin:0 0 8px;color:hsl(var(--text-faint));font:500 9px/1.3 var(--font-mono,monospace);}
 #scene .mesh-source-crumb[hidden] {display:none;}
 #scene .mesh-source-crumb strong {color:hsl(var(--text-strong));font:500 12px/1.2 var(--font-sans,sans-serif);text-transform:capitalize;}
-#scene .mesh-source-back {min-height:26px !important;padding:2px 10px !important;border:1px solid hsl(var(--border-default));border-radius:999px;background:transparent;color:hsl(var(--reference));font:500 10px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
-#scene .mesh-source-cell {min-height:40px !important;padding:6px 9px;}
+#scene .mesh-source-back {min-height:26px;padding:2px 10px;border:1px solid hsl(var(--border-default));border-radius:999px;background:transparent;color:hsl(var(--reference));font:500 10px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
+#scene .mesh-source-cell {min-height:40px;padding:6px 9px;}
 #scene .mesh-source-cell span {font-size:10px;}
 #scene .mesh-source-cell small {font-size:8px;}
 /* Quieter summary: one slim line of figures instead of four tall tiles. */
@@ -355,7 +355,7 @@
 #scene .mesh-inspect-result dt {color:hsl(var(--text-faint));}
 #scene .mesh-inspect-result dd {color:hsl(var(--text-strong));}
 #scene .mesh-source-inspector > h2 {margin-bottom:8px;}
-#scene .mesh-inspect-retry {margin-top:8px;min-height:28px !important;padding:3px 10px !important;border:1px solid hsl(var(--reference));border-radius:999px;background:transparent;color:hsl(var(--reference));font:500 10px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
+#scene .mesh-inspect-retry {margin-top:8px;min-height:28px;padding:3px 10px;border:1px solid hsl(var(--reference));border-radius:999px;background:transparent;color:hsl(var(--reference));font:500 10px/1.2 var(--font-sans,sans-serif);cursor:pointer;}
 #scene .mesh-inspect-result[data-state="error"] .mesh-inspect-retry {color:hsl(var(--reference));}
 
 /* Connection controls live in a popover beside the status strip; the masthead is one row. */
@@ -363,15 +363,15 @@
 /* The connection controls: Ark's popover (js/pages/explorer.js POPOVERS.connect) in a slot of the masthead grid; its panel holds the
    page's own form. The old panel's sheet styling (absolute, border, shadow) is Ark's now; only the form's layout is the page's. */
 #scene .mesh-connect-slot {align-self:center;justify-self:end;margin:0;}
-#scene .mesh-connect-slot .mesh-explorer-connect {display:block !important;margin:0 !important;padding:0 !important;border:0 !important;background:none;box-shadow:none;}
-#scene .mesh-connect-slot .mesh-explorer-connect-actions {display:grid !important;grid-template-columns:1fr;gap:8px;}
+#scene .mesh-connect-slot .mesh-explorer-connect {display:block;margin:0;padding:0;border:0;background:none;box-shadow:none;}
+#scene .mesh-connect-slot .mesh-explorer-connect-actions {display:grid;grid-template-columns:1fr;gap:8px;}
 #scene .mesh-connect-slot .mesh-explorer-connect-actions > label {display:grid;gap:4px;flex:none;}
 #scene .mesh-connect-slot .mesh-explorer-buttons {display:flex;gap:6px;}
 #scene .mesh-connect-slot .mesh-explorer-buttons button {flex:1 1 0;}
 
 /* Source field heading: title, figures and timestamp share one row. */
 #scene .mesh-source-head {align-items:center;gap:16px;padding-bottom:8px;}
-#scene .mesh-source-head h2 {display:flex;align-items:baseline;gap:8px;flex:0 0 auto;font-size:16px !important;white-space:nowrap;}
+#scene .mesh-source-head h2 {display:flex;align-items:baseline;gap:8px;flex:0 0 auto;font-size:16px;white-space:nowrap;}
 #scene .mesh-source-head h2 .mesh-explorer-kicker {margin:0;font-size:8px;}
 #scene .mesh-source-head .mesh-explorer-core-stats {flex:1 1 auto;display:flex;justify-content:flex-end;gap:0;margin:0;border:0;min-width:0;}
 #scene .mesh-source-head .mesh-explorer-core-stats .mesh-explorer-stat {padding:2px 10px;border-right:1px solid hsl(var(--border-subtle));white-space:nowrap;}
@@ -379,7 +379,7 @@
 #scene .mesh-source-stamp {flex:0 0 auto;color:hsl(var(--text-faint));font:500 8px/1.4 var(--font-mono,monospace);}
 
 /* The dock is always a single row. */
-@media(min-width:821px) {#scene .mesh-observatory-dock {flex-wrap:nowrap !important;}}
+@media(min-width:821px) {#scene .mesh-observatory-dock {flex-wrap:nowrap;}}
 #scene .mesh-explorer-page .mesh-explorer-shell {grid-template-rows:auto minmax(0,1fr) auto;}
 #scene .mesh-explorer-header {grid-template-columns:auto minmax(0,1fr) auto !important;}
 

@@ -1,15 +1,15 @@
 /* The enclosing panel remains opaque. Only its semantic contents use presence. */
 #scene .ark-page[hidden] { display:none !important; }
 #scene .continuity-host {
- position:absolute !important; z-index:5; box-sizing:border-box; margin:0 !important;
- padding:0 !important; min-width:0; max-width:none !important; max-height:none;
- border:1px solid hsl(var(--border-default)); border-radius:8px !important;
- background:hsl(var(--canvas) / .97); opacity:1 !important;
+ position:absolute; z-index:5; box-sizing:border-box; margin:0;
+ padding:0; min-width:0; max-width:none; max-height:none;
+ border:1px solid hsl(var(--border-default)); border-radius:8px;
+ background:hsl(var(--canvas) / .97); opacity:1;
  overflow:hidden; box-shadow:0 14px 50px hsl(var(--canvas) / .14);
- transform:none !important; backdrop-filter:none; align-self:auto;
+ transform:none; backdrop-filter:none; align-self:auto;
 }
-#scene .continuity-host::before,#scene .continuity-host::after { content:none !important; }
-#scene .continuity-host[data-panel-mode="compact"] { padding:0 !important; }
+#scene .continuity-host::before,#scene .continuity-host::after { content:none; }
+#scene .continuity-host[data-panel-mode="compact"] { padding:0; }
 #scene .continuity-placeholder { visibility:hidden; }
 
 .story-depth {display:flex;gap:5px;flex:0 0 auto;padding-top:4px;}

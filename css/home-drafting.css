@@ -2,7 +2,7 @@
 #scene .hero-alive[data-page="zero"] {--home-rule:hsl(var(--border-default));}
 /* The drafting frame (header rule, footer rule, quarter-column guides) is gone: hairlines read as clutter. */
 #scene .hero-alive[data-page="zero"] .ark-hero-body {
- position:relative;grid-column:1;grid-row:1;align-self:center;min-width:0;min-height:0;z-index:2;max-width:none !important;padding:0 0 0 18px;background:none;
+ position:relative;grid-column:1;grid-row:1;align-self:center;min-width:0;min-height:0;z-index:2;max-width:none;padding:0 0 0 18px;background:none;
 }
 #scene .hero-alive[data-page="zero"] .ark-hero-body::before {content:none;}
 #scene .hero-alive[data-page="zero"] .ark-hero-eyebrow {display:none;}
@@ -52,7 +52,7 @@
 /* The label may truncate; the number never may. A measurement shown as
    "643,632…" is not a measurement. */
 /* The agreement panel draws its own flow; the live lattice stays off the home page. */
-#scene .hero-alive[data-page="zero"] :is(.lattice-field,.lattice-activity) {display:none !important;}
+#scene .hero-alive[data-page="zero"] :is(.lattice-field,.lattice-activity) {display:none;}
 #scene .home-lifecycle:focus-within {outline:2px solid hsl(var(--reference));outline-offset:4px;}
 @media(min-width:901px) and (max-height:740px){
  #scene .hero-alive[data-page="zero"] .ark-hero-title {margin-bottom:18px;}
@@ -67,8 +67,8 @@
    intact at every viewport height. */
 @media(max-width:900px){
  #scene .hero-alive[data-page="zero"] .ark-hero-body {
-  position:relative !important;inset:auto !important;align-self:start;
-  width:100% !important;max-width:none !important;min-height:auto;padding-left:16px;
+  position:relative;inset:auto;align-self:start;
+  width:100%;max-width:none;min-height:auto;padding-left:16px;
  }
  #scene .hero-alive[data-page="zero"] .ark-hero-title {margin-bottom:16px;}
  #scene .home-lifecycle {
