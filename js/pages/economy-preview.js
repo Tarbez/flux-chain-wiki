@@ -165,7 +165,7 @@
     treasurySpec: treasurySpec, depositsSpec: depositsSpec,
     mount: function (host, page) {
       var treasury = page === 'treasury';
-      return ArkUI.page(treasury ? treasurySpec() : depositsSpec(), host, { page: page, className: 'economy-preview-page', titleId: page + '-preview-title' });
+      return ArkUI.page(treasury ? treasurySpec() : depositsSpec(), host, { page: page, terms: 'first-use', className: 'economy-preview-page', titleId: page + '-preview-title' });
     }
   };
 })();

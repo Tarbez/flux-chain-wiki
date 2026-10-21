@@ -100,7 +100,7 @@ function arkModuleStyles(module) { return ArkUI.pageStyles.modules[module]; }
    alternative addresses that open the page: js/ark/page-router.js resolve() and
    scripts/lib/site-routes.mjs both read them here, so a retired path is retired in one place. */
 var arkPageModules = {
-  zero: { module: 'zero', scripts: ArkUI.blockScripts.concat(['js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
+  zero: { module: 'zero', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
   chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
   resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
@@ -120,16 +120,16 @@ var arkPageModules = {
      js/pages/account.js import()s them on first use instead. */
   account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/pages/account.js']) },
   'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/pages/account-domains.js']) },
-  treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/pages/economy-preview.js']) },
-  deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/pages/economy-preview.js']) },
+  treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/economy-preview.js']) },
+  deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/pages/economy-preview.js']) },
   /* /experiments and /experiments/lab were two pages for one interactive model, with the same
      h1 (docs/ux-audit/pages.md P3). They are one page now: the lab, introduced by the old entry
      page's lede and disclaimer (js/pages/lab.js). The old lab address and the retired Work page
      (`#work`, `#/work`) open it. */
-  proximity: { module: 'lab', aliases: ['/experiments/lab', '/work', 'work'], scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/studio.js', 'js/pages/lab.js']) },
+  proximity: { module: 'lab', aliases: ['/experiments/lab', '/work', 'work'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/studio.js', 'js/pages/lab.js']) },
   /* the notes index and each note are pages of Ark blocks since 2026-10-19 (W3-LEARN); a note is on the story template */
-  learnings: { module: 'learnings', scripts: ArkUI.blockScripts.concat(['js/pages/learnings.js']) },
-  about: { module: 'about', scripts: ArkUI.blockScripts.concat(['js/pages/about.js']) },
+  learnings: { module: 'learnings', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/learnings.js']) },
+  about: { module: 'about', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/about.js']) },
   resolutions: { module: 'resolutions', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/resolutions.js']) },
   concept: { module: 'concept', scripts: ArkUI.storyScripts.concat(['js/pages/concept.js']) },
   download: { module: 'download', scripts: ArkUI.storyScripts.concat(['js/pages/download.js', 'js/ark/page-kit.js']) },

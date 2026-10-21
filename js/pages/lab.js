@@ -71,7 +71,7 @@
         { insert: 'main', was: WAS.insert },
         { block: 'pager', id: 'lab-pager', was: WAS['lab-pager'], props: { label: 'Evidence context', relatedLabel: '↳ Evidence context',
           related: [{ label: 'claim inventory', href: 'doc:docs/evidence/public-claim-inventory.md' }, { label: 'evidence registry', href: 'doc:docs/evidence/registry.md' }] } }
-      ], host, { page: 'proximity', className: 'lab-page', titleId: 'experiments-title' });
+      ], host, { page: 'proximity', terms: 'first-use', className: 'lab-page', titleId: 'experiments-title' });
       ArkUI.mountStudio(page);
       return page;
     }

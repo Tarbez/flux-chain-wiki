@@ -104,7 +104,7 @@ if (require.main === module) (async () => {
   assert(/ArkUI\.page\(spec\(manifest, groups\), host,/.test(source), 'the page is built by ArkUI.page from its spec');
   assert(!/node\('(section|header|h1|h2|h3|nav|footer|details)'/.test(source) && !/\bhl-/.test(source.replace(/\/\*[\s\S]*?\*\//g, '')), 'no hand-built page structure, and none of home\'s hl-* parts (the closing overlay defect)');
   const catalog = fs.readFileSync(path.join(ROOT, 'js/pages/catalog.js'), 'utf8');
-  assert(/about: \{ module: 'about', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/about\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its module');
+  assert(/about: \{ module: 'about', scripts: ArkUI\.blockScripts\.concat\(\[ArkUI\.glossaryScript, 'js\/pages\/about\.js'\]\) \}/.test(catalog), 'the route loads the blocks and its glossary (terms first-use, ledger recheck 2026-10-21) before its module');
   const css = fs.readFileSync(path.join(ROOT, 'css/about.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   assert(!/\.ark-|about-(closing|boundary|launch|more)/.test(css), 'css/about.css draws only the layer drawing: no Ark block restyled, no old layout left');
 

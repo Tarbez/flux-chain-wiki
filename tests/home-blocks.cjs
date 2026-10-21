@@ -160,13 +160,15 @@ if (require.main === module) (async () => {
   assert(!/createElement\('(section|header|h1|h2|h3|nav|footer|details)'/.test(source) && !/node\('(section|header|h1|h2|h3|nav|footer|details)'/.test(source), 'no hand-built page structure is left');
   assert(!/643,632|69,895|6,044,992/.test(source), 'no benchmark figure is typed into the page');
   const catalog = fs.readFileSync(path.join(ROOT, 'js/pages/catalog.js'), 'utf8');
-  assert(/zero: \{ module: 'zero', scripts: ArkUI\.blockScripts\.concat\(\['js\/content\/evidence-registry\.js', 'js\/pages\/home-flow\.js', 'js\/ark\/pulse-client\.js', 'js\/pages\/home\.js'\]\) \}/.test(catalog), 'the route loads the blocks and the registry before its scene and module');
+  assert(/zero: \{ module: 'zero', scripts: ArkUI\.blockScripts\.concat\(\[ArkUI\.glossaryScript, 'js\/content\/evidence-registry\.js', 'js\/pages\/home-flow\.js', 'js\/ark\/pulse-client\.js', 'js\/pages\/home\.js'\]\) \}/.test(catalog), 'the route loads the blocks, its glossary (terms first-use, ledger recheck 2026-10-21) and the registry before its scene and module');
 
   /* ---- what the visitor gets: everything the old page had ---------------------------------- */
   const { readIndexHtml, inspectDocument, createLocalResources } = await import('../api/lib/render-core.mjs');
   const seen = await inspectDocument({ html: await readIndexHtml(ROOT), url: 'https://defxn.com' + ROUTE, resources: createLocalResources(ROOT), root: ROOT, timeoutMs: 30000 }, (window) => {
     const page = window.document.querySelector('[data-ark-page="zero"]');
-    const text = (el) => (el ? el.textContent.replace(/\s+/g, ' ').trim() : '');
+    /* the words a reader sees, without a glossed term's tip (the home marks terms on first use since 2026-10-21;
+       tests/lib/layout-continuity.cjs reads text the same way) */
+    const text = (el) => { if (!el) return ''; const copy = el.cloneNode(true); copy.querySelectorAll('[data-ark-part="term-tip"]').forEach((tip) => tip.remove()); return copy.textContent.replace(/\s+/g, ' ').trim(); };
     const tabsOf = (root) => [...root.querySelector(':scope > [data-ark-part="tabs-list"]').querySelectorAll('[role="tab"]')].map((t) => t.textContent.trim());
     const questions = page.querySelector('#home-questions');
     // (the five steps inside each scene are Ark tabs too; they are the scene's, not a view of the question)
