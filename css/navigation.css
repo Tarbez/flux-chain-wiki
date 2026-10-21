@@ -277,8 +277,10 @@
 #scene .site-footer-strip .hero-motion-toggle:hover { color:hsl(var(--text-strong)); letter-spacing:.06em; }
 /* Narrower screens: the credit steps back, then the rights line; the section links and Back
    always stay (the links scroll sideways when they still do not fit, as the strip did on a
-   phone). css/settings.css drops both on a phone, as before. */
-@media(max-width:1279.98px) { #scene .site-footer-strip .site-credit { display:none; } }
+   phone). css/settings.css drops both on a phone, as before. The credit shows from 1600px: from
+   1280px it was drawn over the last section links up to 1599px (measured 2026-10-22: two boxes
+   overlapped at 1280, one at 1366 and 1440). */
+@media(max-width:1599.98px) { #scene .site-footer-strip .site-credit { display:none; } }
 @media(max-width:1023.98px) { #scene .site-footer-strip .site-copyright { display:none; } }
 @media(max-width:760px) {
  #scene .site-footer-strip { left:60px; right:16px; bottom:14px; }
