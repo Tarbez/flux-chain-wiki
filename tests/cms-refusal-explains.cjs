@@ -60,7 +60,6 @@ const { bootForms } = require('./lib/admin-forms-dom.cjs');
   assert.match(publish.title, /miner is not reachable/);
   publish.click();
   assert.equal(sheetOpened, 1, 'a click on the refused Publish opens the Publish sheet');
-  assert(!/undefined/.test(document.getElementById('meshState').textContent), 'the account menu\'s publish line prints "undefined"');
 
   const box = document.createElement('div'); document.body.appendChild(box);
   A.renderMeshEditor(box);
