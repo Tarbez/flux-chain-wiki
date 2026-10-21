@@ -16,6 +16,8 @@
   transition:color 160ms ease,background-color 160ms ease;
 }
 #scene .explore-page .content-layer-path > button:is(:hover,:focus-visible) { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
+/* a record's fields are Ark facts (js/pages/explorer.js factsEl); the wrapper only holds them or the note */
+#scene .explore-page .explore-record-facts { margin:6px 0 0; }
 /* the two cards are the panels of Ark tabs (js/pages/explorer.js panesSpec); from 901px both stand side by side and the
    tab strip is not drawn */
 #scene .explore-page .explore-panes { display:none; }
@@ -113,10 +115,6 @@
 #scene .explore-page .explore-record-open .explore-record-top > :last-child { margin-left:auto; }
 #scene .explore-page .explore-record-open h4 { margin:0; overflow-wrap:anywhere; font:500 24px/1.1 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; color:hsl(var(--text-strong)); }
 #scene .explore-page .explore-record-open .explore-record-id { white-space:normal; overflow-wrap:anywhere; }
-#scene .explore-page .explore-record-facts { margin:6px 0 0; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); column-gap:18px; }
-#scene .explore-page .explore-record-facts > div { min-width:0; display:grid; gap:3px; padding:9px 0; border-top:1px solid hsl(var(--border-subtle)); }
-#scene .explore-page .explore-record-facts dt { font:500 var(--caption-size,.75rem)/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.06em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-#scene .explore-page .explore-record-facts dd { margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text)); }
 
 /* The status line: where the data comes from */
 #scene .explore-page .explore-status { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px; min-width:0; }
@@ -158,7 +156,6 @@
   #scene .explore-page .explore-record { grid-template-columns:minmax(0,1fr) auto; gap:10px; padding:9px 4px; }
   #scene .explore-page .explore-record-open { padding:12px; }
   #scene .explore-page .explore-record-open::before { margin-top:-12px; }
-  #scene .explore-page .explore-record-facts { grid-template-columns:1fr 1fr; column-gap:12px; }
   #scene .explore-page .explore-raw { padding:14px 16px 16px; }
   #scene .explore-page .explore-raw .mesh-explorer-header { grid-template-columns:1fr; }
 }

@@ -44,10 +44,6 @@
 #scene .mesh-explorer-detail[hidden],#scene .mesh-explorer-records[hidden] { display:none !important; }
 #scene .mesh-explorer-back { border:0; padding:0; margin-bottom:28px; }
 #scene .mesh-explorer-detail h3 { overflow-wrap:anywhere; margin:0 0 25px; color:hsl(var(--text-strong)); font:500 clamp(26px,3vw,40px)/1.2 "Albert Sans",sans-serif; }
-#scene .mesh-explorer-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 30px; margin:0; }
-#scene .mesh-explorer-field { display:grid; grid-template-columns:minmax(100px,.35fr) minmax(0,1fr); gap:14px; padding:13px 0; border-top:1px solid hsl(var(--border-default)); }
-#scene .mesh-explorer-field dt { color:hsl(var(--text-muted)); font:600 11px/1.5 var(--font-mono,ui-monospace,monospace); }
-#scene .mesh-explorer-field dd { min-width:0; margin:0; overflow-wrap:anywhere; color:hsl(var(--text-strong)); font:400 14px/1.5 "Albert Sans",sans-serif; }
 #scene .mesh-explorer-detail h4 { margin:30px 0 10px; color:hsl(var(--text-strong)); font:600 18px/1.4 "Albert Sans",sans-serif; }
 #scene .mesh-explorer-link-fact { color:hsl(var(--text)); font:400 14px/1.5 "Albert Sans",sans-serif; }
 #scene .mesh-explorer-reference-body { display:grid; gap:18px; padding:0 0 25px; }
@@ -61,7 +57,7 @@
  #scene .mesh-explorer-metrics > div:nth-child(3) { padding-left:0; }
  #scene .mesh-explorer-section-head { align-items:start; flex-direction:column; }
  #scene .mesh-explorer-record { grid-template-columns:1fr; gap:5px; }
- #scene .mesh-explorer-fields,#scene .mesh-explorer-topology-list { grid-template-columns:1fr; }
+ #scene .mesh-explorer-topology-list { grid-template-columns:1fr; }
 }
 @media(max-width:520px) {
  #scene .mesh-explorer-shell { padding-inline:20px; }
@@ -69,7 +65,6 @@
 
  #scene .mesh-explorer-controls form { display:grid; }
  #scene .mesh-explorer-controls form button { margin:0; }
- #scene .mesh-explorer-field { grid-template-columns:1fr; gap:4px; }
 }
 @media(prefers-reduced-motion:reduce) { #scene .mesh-explorer-page * { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
 
