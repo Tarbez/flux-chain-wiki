@@ -242,3 +242,14 @@ Next (last item): W5-CSSCLEAN WIP on worktree-agent-a79103e6608b5535a (5847ef9):
 the scratchpad, then fold-contrast-sweep + route-sweep, then merge.
 Follow-ups: the editor canvas cannot switch a page's tabs by clicking (a click selects), so a non-default tab's
 content is reachable only through Layers or Preview -- e.g. the home scene since the paths tab became the default.
+
+## Resume point 8 (2026-10-21) — W5-CSSCLEAN merged at 4041064; the polish plan's waves are all closed
+components.css wins by cascade order and specificity, never !important (41 -> 0); dead selectors out of 17 sheets;
+solid actions are flat (no lift shadow). Verified by a computed-style snapshot of every route before and after
+(1280 and 390; at rest, hovered, focused; harness in .claude/snap, untracked). It found one unintended change: the
+focus ring (740 controls, solid -> none), because css/focus.css and css/settings.css set outline:none under the old
+!important ring; both now tint without removing the outline. Fold-contrast sweep 0 violations; route sweep passes
+(two load timeouts passed alone); CSS unit tests pass one at a time; census ratcheted.
+Not done from that slice: the remaining 174 !important in other sheets, flattening blur, home-only animated
+backgrounds, wiring the kit's check:design. js/ark/icons.js's selector table still names CTA classes no script builds.
+Follow-up (unchanged): the editor canvas cannot switch a page's tabs by clicking.
