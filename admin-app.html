@@ -22,6 +22,8 @@
 <link rel="stylesheet" href="css/ark-blocks.css" />
 </head>
 <body>
+<!-- Keyboard: one Tab from the top of the editor reaches the canvas past the header and the rail (docs/ux-audit/cms.md P2-7). -->
+<a class="cms-skip" href="#canvasWrap">Skip to the page</a>
 <!-- ONE workspace (2026-10-18, owner: "I only want to see ONE CMS, unified."). There used to be
      two apps behind a Content | Design switch: Content was a page list, a form and a preview frame
      of its own (#frame); Design was the canvas. Now there is one header, one rail, one canvas
@@ -250,7 +252,7 @@
       </div>
     </aside>
 
-    <main class="canvas-wrap" id="canvasWrap">
+    <main class="canvas-wrap" id="canvasWrap" tabindex="-1">
       <!-- Conditions that hold until they are fixed (no project folder, a page not saved yet):
            the notice banners (notice(), loaded below), above the canvas, which gives them the room
            (layoutStage). Toasts for passing events stack at the bottom. -->

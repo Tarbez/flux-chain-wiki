@@ -182,7 +182,10 @@ function setup(route) {
   assert.equal(info.link.field, 'HOME.CLOSING.HREF');
   assert.equal(info.link.value, 'route:about');
   const nav = t.info(t.$('.nav-docs'));
-  assert.match(nav.link.refusal, /no link field holds/, 'a link target written in code is refused with its source');
+  assert.match(nav.link.refusal, /no link field holds/, 'a link target written in code is refused');
+  /* in plain words (cms.md P1-2): the pattern name and the field grammar are Developer details */
+  assert(!/F_SCENE|route:<|doc:<|\.js/.test(nav.link.refusal + nav.link.remedy), 'the refusal and remedy name no pattern, grammar or file');
+  assert.match(nav.link.detail, /written by .+route:<page>/, 'the detail names what writes the target and how to make it editable');
 }
 {
   /* the click picks the innermost keyed element that binds, climbing past what does not */

@@ -405,8 +405,14 @@
       if (same.length) hits = same;
     }
     if (hits.length === 1) return Object.assign({ href: href }, hits[0]);
-    return { href: href, refusal: hits.length ? 'This link opens ' + href + ', the target of ' + hits.length + ' link fields (' + hits.map(function (hit) { return hit.field; }).join(', ') + '): change the one you mean in Page fields.'
-      : 'This link opens ' + href + ', which no link field holds: the target is written by ' + cmsTextSource(link) + '. To edit it here, move it into a link field (route:<page>, doc:<path> or url:<address>) of the page\'s manifest.' };
+    /* Plain words first, as cmsContentInfo's refusals (docs/ux-audit/cms.md P1-2: the pattern name and the
+       route:/doc: grammar reached the person here); the field addresses and the source are `detail`. */
+    if (hits.length) return { href: href, refusal: 'Where this link goes is set by ' + hits.length + ' link fields at once, so a change here could not say which one it means.',
+      remedy: 'Change the one you mean in Page settings (All fields).',
+      detail: 'Opens ' + href + '. Link fields with this target: ' + hits.map(function (hit) { return hit.field; }).join(', ') + '.' };
+    return { href: href, refusal: 'Where this link goes is written in the site template; no link field holds it, so it cannot be changed here.',
+      remedy: 'A developer can make it editable: see Developer details.',
+      detail: 'Opens ' + href + ', written by ' + cmsTextSource(link) + '. To edit it here, move it into a link field (route:<page>, doc:<path> or url:<address>) of the page\'s manifest.' };
   }
   /* What the Content lens knows about an element: its binding, or why it has none. Reported to
      the editor with every selection (`content`) for the toolbar's Content section. */

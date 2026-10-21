@@ -248,7 +248,7 @@
       CMS_TEXT_TOKENS: CMS_TEXT_TOKENS, CMS_TYPE_SIZE_TOKENS: CMS_TYPE_SIZE_TOKENS,
       CMS_WRAP_VALUES: CMS_WRAP_VALUES, cmsBlockResolverLabel: cmsBlockResolverLabel,
       cmsBlockResolverProps: cmsBlockResolverProps, cmsMasterKind: cmsMasterKind,
-      cmsMasterProps: cmsMasterProps, ctlField: ctlField, ctlSegField: ctlSegField,
+      cmsMasterProps: cmsMasterProps, ctlField: ctlField, ctlLabel: ctlLabel, ctlSegField: ctlSegField,
       ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField, devDetails: devDetails,
       filePicker: filePicker });
 })();
