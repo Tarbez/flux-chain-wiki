@@ -183,7 +183,7 @@
   function buildPageSeoPanel(pageId, label) {
     var box = h('fieldset', {}, h('legend', { text: 'SEO' }));
     if (!window.ArkSEO) { box.appendChild(h('p', { class: 'empty-state', text: 'SEO editing is unavailable on this page: js/content/seo.js did not load. Reload the editor; if it persists, check that admin-app.html still includes it.' })); return box; }
-    box.appendChild(h('p', { class: 'hint', text: 'These values belong to this page (' + ArkSEO.pageTitle(pageId, label) + '). Blank title and description derive from the page text and site defaults. Site-wide settings (base URL, language, AI crawlers) are in Design \u2192 Theme & defaults.' }));
+    box.appendChild(h('p', { class: 'hint', text: 'These values belong to this page (' + ArkSEO.pageTitle(pageId, label) + '). Blank title and description derive from the page text and site defaults. Site-wide settings (base URL, language, AI crawlers) are in Site style \u2192 Search defaults.' }));
     box.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, function () { return seoOverrideTarget('pages', pageId); }, function () { touch(); refreshList(); }));
     return box;
   }

@@ -17,7 +17,7 @@
       ctlSegField = A.ctlSegField, CMS_DISPLAY_TOKENS = A.CMS_DISPLAY_TOKENS,
       CMS_ALIGN_TOKENS = A.CMS_ALIGN_TOKENS, CMS_JUSTIFY_TOKENS = A.CMS_JUSTIFY_TOKENS,
       CMS_WRAP_VALUES = A.CMS_WRAP_VALUES, CMS_FONT_TOKENS = A.CMS_FONT_TOKENS,
-      ctlSelectField = A.ctlSelectField, CMS_TYPE_SIZE_TOKENS = A.CMS_TYPE_SIZE_TOKENS,
+      ctlSelectField = A.ctlSelectField, ctlLabel = A.ctlLabel, CMS_TYPE_SIZE_TOKENS = A.CMS_TYPE_SIZE_TOKENS,
       CMS_FONT_WEIGHT_STEPS = A.CMS_FONT_WEIGHT_STEPS, CMS_LINE_HEIGHT_TOKENS = A.CMS_LINE_HEIGHT_TOKENS,
       CMS_TEXT_ALIGN_VALUES = A.CMS_TEXT_ALIGN_VALUES, ctlSwatchField = A.ctlSwatchField,
       CMS_TEXT_TOKENS = A.CMS_TEXT_TOKENS, CMS_FILL_TOKENS = A.CMS_FILL_TOKENS,
@@ -132,14 +132,18 @@
       const input = document.createElement('input'); input.className = 'ctl ' + cls; input.type = 'number'; input.min = '0'; input.value = String(ctx.get(key) ?? 0); input.setAttribute('aria-label', label);
       input.addEventListener('change', () => ctx.set(key, Number(input.value))); bm.appendChild(input);
     });
-    const mid = document.createElement('div'); mid.className = 'mid'; mid.textContent = 'padding'; bm.appendChild(mid);
+    /* one naming for the spacing fields, with their unit (docs/ux-audit/cms.md P2-8: a lowercase "padding"
+       box beside "Margin ↑", and no unit anywhere; js/content/layout.js writes every value in px) */
+    const mid = document.createElement('div'); mid.className = 'mid'; mid.textContent = 'Padding (px)'; bm.appendChild(mid);
     body.appendChild(bm);
-    body.append(ctlField(ctx, 'Margin ↑', 'mt'), ctlField(ctx, 'Margin ↓', 'mb'));
+    body.append(ctlField(ctx, 'Margin above (px)', 'mt'), ctlField(ctx, 'Margin below (px)', 'mb'));
   }
   function buildTypographySection(pane, ctx) {
     const body = toolbarSection(pane, 'cms-type', 'Typography', 'type');
     body.appendChild(ctlSegField(ctx, 'Font', 'font', CMS_FONT_TOKENS));
-    body.appendChild(ctlSelectField(ctx, 'Size', 'textSize', CMS_TYPE_SIZE_TOKENS));
+    /* unset reads "As designed", not the first size (cms.md P2-8: plain text showed "Hero"); choosing it
+       clears the override (js/content/layout.js keeps only a known size) */
+    body.appendChild(ctlSelectField(ctx, 'Size', 'textSize', [''].concat(CMS_TYPE_SIZE_TOKENS), (v) => (v === '' ? 'As designed' : ctlLabel(v))));
     body.appendChild(ctlSegField(ctx, 'Weight', 'fw', CMS_FONT_WEIGHT_STEPS));
     body.appendChild(ctlSegField(ctx, 'Line height', 'lh', CMS_LINE_HEIGHT_TOKENS));
     body.appendChild(ctlSegField(ctx, 'Align', 'ta', CMS_TEXT_ALIGN_VALUES));
@@ -446,7 +450,11 @@
         body.appendChild(A.linkPickerEl('Link target', 'cms-content-link', content.link.value,
           (value) => { content.link.value = value; applyCmsCopyEdit({ field: content.link.field, value, final: true }); },
           content.link.field, at ? at.kind + ':' + at.id + ':' + at.key : undefined));
-      } else if (content.link) body.appendChild(p('hint cms-content-refusal', content.link.refusal));
+      } else if (content.link) {
+        body.appendChild(p('hint cms-content-refusal', content.link.refusal));
+        if (content.link.remedy) body.appendChild(p('hint', content.link.remedy));
+        if (content.link.detail) body.appendChild(devDetails([['Link', content.link.href]], [p('hint', content.link.detail)]));
+      }
     } else {
       body.appendChild(p('hint cms-content-refusal', content.reason));
       body.appendChild(p('hint', content.remedy));

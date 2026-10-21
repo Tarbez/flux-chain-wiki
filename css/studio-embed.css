@@ -391,7 +391,10 @@
 #studioRoot .lib-refusals ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; }
 #studioRoot .pop .field { display: grid; gap: 4px; margin-bottom: 8px; }
 #studioRoot .pop .field input, #studioRoot .pop textarea { border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); padding: 6px 8px; background: hsl(var(--surface)); }
-#studioRoot .pop textarea { width: 100%; min-height: 120px; font: 400 11px/1.4 var(--mono); }
+/* page words (an SEO description, a text field) are read and written as prose: the editor's sans at the
+   12px floor and up, not 11px mono (docs/ux-audit/cms.md P2-10); a code view keeps .code-view's own mono */
+#studioRoot .pop textarea { width: 100%; min-height: 120px; font: 400 13px/1.45 var(--sans); }
+#studioRoot .pop textarea.code-view { font: 400 12px/1.45 var(--mono); }
 /* segmented control: the same pressed state as every segmented control in the editor */
 #studioRoot .ctl-seg { display: flex; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-sm); overflow: hidden; min-width: 0; }
 #studioRoot .ctl-seg button { flex: 1 1 auto; min-width: 0; border: 0; border-right: 1px solid hsl(var(--border-soft)); background: hsl(var(--surface)); padding: 4px 1px; font-size: 11px; color: hsl(var(--text-muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; justify-content: center; align-items: center; gap: 3px; }
@@ -469,3 +472,8 @@
   #studioRoot .left, #studioRoot .rail-closed .left, #studioRoot .rail-scrim, #studioRoot .theme-dock, #studioRoot .sheet { bottom: var(--phone-bar-h, 0px); }
   #studioRoot :is(.tb-pop, .pop) { left: 0 !important; right: 0 !important; top: auto !important; bottom: var(--phone-bar-h, 0px) !important; width: auto; max-height: 60vh !important; border-radius: var(--radius-lg) var(--radius-lg) 0 0; border-width: 1px 0 0; }
 }
+
+/* the skip link (admin-app.html): off screen until it has keyboard focus, then above everything */
+.cms-skip { position: fixed; top: -100px; left: 12px; z-index: 1000; padding: 10px 14px; border-radius: var(--radius-md, 6px); background: hsl(var(--text-strong)); color: hsl(var(--canvas)); font: 600 13px/1.2 var(--sans, sans-serif); text-decoration: none; }
+.cms-skip:focus { top: 12px; }
+#canvasWrap:focus { outline: none; }
