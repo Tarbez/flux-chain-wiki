@@ -128,8 +128,18 @@ const ROUTES = {
     ],
     reworded: [[/^page:\/div:1\/section:1\/p:1$/, '"Evidence context: claim inventory and evidence registry." reads as the two related links under "↳ Evidence context"']] },
   '/account/domains': { page: 'account/domains', ids: ['account-domains-', 'domainsNameInput'],
-    reshaped: [[/^page:\/div:1\/header:1$/, 'the header became the hero (its back link is the breadcrumb\'s "Your account"); the form and the hand-off are the block after it']],
-    retired: [[/^page:\/div:1$/, 'the page shell; a block page stacks its blocks in its root']], reworded: [] },
+    reshaped: [[/^page:\/div:1\/header:1$/, 'the header became the hero (its back link is the breadcrumb\'s "Your account"); the form and the hand-off are the block after it'],
+      [/^page:\/div:1\/header:1\/form:1$/, 'the form is Ark\'s form block (2026-10-21): the same label and Track, with Ark\'s required mark'],
+      [/^page:\/div:1\/section:1$/, 'the list is Ark\'s list block (2026-10-21); with no names it shows its empty state, why and what to do']],
+    retired: [[/^page:\/div:1$/, 'the page shell; a block page stacks its blocks in its root'],
+      [/^page:\/div:1\/section:1\/p:1(\/span:1)?$/, 'the "Tracked names (0)" caption and its count: they are the Ark list\'s name now'],
+      [/^page:\/div:1\/section:1\/ul:1$/, 'the hand-built rows: Ark\'s list draws its own'],
+      [/^page:\/div:1\/section:1\/p:2$/, 'the empty sentence: the Ark list\'s empty state (a reason and a remedy) replaces it']],
+    /* the form and the list are Ark's since 2026-10-21 (ledger recheck T13/T16/W4c) */
+    reworded: [
+      [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the count "(0)" is in the Ark list\'s name ("Tracked names (0)")'],
+      [/^page:\/div:1\/section:1\/p:2$/, 'the empty sentence is the Ark list\'s empty state: "No names tracked yet." and "Track one above to keep it one step from Domains."']
+    ] },
   '/not-found': { page: 'notfound', ids: ['not-found-'],
     reshaped: [
       [/^page:\/div:1\/header:1$/, 'the header became the hero: the address asked for is its detail, Home its action'],
