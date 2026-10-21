@@ -130,22 +130,22 @@
   var WAS = {
     'statsledger-hero': { ':root': { key: T + '/article:1', self: true }, 'eyebrow': T + '/article:1/p:1' },
     'statsledger-views': {
-      // How it works: the old lede, and the spec tile
-      'disclosure-panel': T + '/article:1/p:2',
-      'accordion-item': { key: T + '/article:3', self: true }, 'accordion-trigger': 'id:statsledger-grammar-title', 'facts': T + '/article:3/ul:1',
-      'fact': T + '/article:3/ul:1/li:1', 'fact#2': T + '/article:3/ul:1/li:2', 'fact#3': T + '/article:3/ul:1/li:3', 'fact#4': T + '/article:3/ul:1/li:4', 'fact#5': T + '/article:3/ul:1/li:5',
-      'fact-term': T + '/article:3/ul:1/li:1/strong:1', 'fact-term#2': T + '/article:3/ul:1/li:2/strong:1', 'fact-term#3': T + '/article:3/ul:1/li:3/strong:1', 'fact-term#4': T + '/article:3/ul:1/li:4/strong:1', 'fact-term#5': T + '/article:3/ul:1/li:5/strong:1',
-      'fact-value#6': T + '/article:1/p:3/span:1', 'fact-value#7': T + '/article:1/p:3/span:2', 'fact-value#8': T + '/article:1/p:3/span:3',
-      // What it closes, and what it does not do yet
-      'tabs-trigger#2': 'id:statsledger-closes-title', 'tabs-content#2': { key: T + '/article:2', self: true },
-      'table-wrap': T + '/article:2/div:1', 'disclosure-panel#2': T + '/article:2/p:2',
-      'accordion-item#2': { key: T + '/article:14', self: true }, 'accordion-trigger#2': 'id:statsledger-notyet-title',
-      'facts#2': T + '/article:14/ul:1', 'fact#9': T + '/article:14/ul:1/li:1', 'fact#10': T + '/article:14/ul:1/li:2', 'fact#11': T + '/article:14/ul:1/li:3',
-      'fact#12': T + '/article:14/ul:1/li:4', 'fact#13': T + '/article:14/ul:1/li:5', 'fact#14': T + '/article:14/ul:1/li:6', 'fact#15': T + '/article:14/ul:1/li:7',
-      'fact#16': T + '/article:14/ul:1/li:8', 'fact#17': T + '/article:14/ul:1/li:9',
-      'fact-term#9': T + '/article:14/ul:1/li:1/strong:1', 'fact-term#10': T + '/article:14/ul:1/li:2/strong:1', 'fact-term#11': T + '/article:14/ul:1/li:3/strong:1',
-      'fact-term#12': T + '/article:14/ul:1/li:4/strong:1', 'fact-term#13': T + '/article:14/ul:1/li:5/strong:1', 'fact-term#14': T + '/article:14/ul:1/li:6/strong:1',
-      'fact-term#15': T + '/article:14/ul:1/li:7/strong:1', 'fact-term#16': T + '/article:14/ul:1/li:8/strong:1', 'fact-term#17': T + '/article:14/ul:1/li:9/strong:1',
+      // What it closes (the first tab since 2026-10-21, LG-5), and what it does not do yet
+      'tabs-trigger': 'id:statsledger-closes-title', 'tabs-content': { key: T + '/article:2', self: true },
+      'table-wrap': T + '/article:2/div:1', 'disclosure-panel': T + '/article:2/p:2',
+      'accordion-item': { key: T + '/article:14', self: true }, 'accordion-trigger': 'id:statsledger-notyet-title',
+      'facts': T + '/article:14/ul:1', 'fact': T + '/article:14/ul:1/li:1', 'fact#2': T + '/article:14/ul:1/li:2', 'fact#3': T + '/article:14/ul:1/li:3',
+      'fact#4': T + '/article:14/ul:1/li:4', 'fact#5': T + '/article:14/ul:1/li:5', 'fact#6': T + '/article:14/ul:1/li:6', 'fact#7': T + '/article:14/ul:1/li:7',
+      'fact#8': T + '/article:14/ul:1/li:8', 'fact#9': T + '/article:14/ul:1/li:9',
+      'fact-term': T + '/article:14/ul:1/li:1/strong:1', 'fact-term#2': T + '/article:14/ul:1/li:2/strong:1', 'fact-term#3': T + '/article:14/ul:1/li:3/strong:1',
+      'fact-term#4': T + '/article:14/ul:1/li:4/strong:1', 'fact-term#5': T + '/article:14/ul:1/li:5/strong:1', 'fact-term#6': T + '/article:14/ul:1/li:6/strong:1',
+      'fact-term#7': T + '/article:14/ul:1/li:7/strong:1', 'fact-term#8': T + '/article:14/ul:1/li:8/strong:1', 'fact-term#9': T + '/article:14/ul:1/li:9/strong:1',
+      // How it works (the second tab): the old lede, and the spec tile
+      'disclosure-panel#2': T + '/article:1/p:2',
+      'accordion-item#2': { key: T + '/article:3', self: true }, 'accordion-trigger#2': 'id:statsledger-grammar-title', 'facts#2': T + '/article:3/ul:1',
+      'fact#10': T + '/article:3/ul:1/li:1', 'fact#11': T + '/article:3/ul:1/li:2', 'fact#12': T + '/article:3/ul:1/li:3', 'fact#13': T + '/article:3/ul:1/li:4', 'fact#14': T + '/article:3/ul:1/li:5',
+      'fact-term#10': T + '/article:3/ul:1/li:1/strong:1', 'fact-term#11': T + '/article:3/ul:1/li:2/strong:1', 'fact-term#12': T + '/article:3/ul:1/li:3/strong:1', 'fact-term#13': T + '/article:3/ul:1/li:4/strong:1', 'fact-term#14': T + '/article:3/ul:1/li:5/strong:1',
+      'fact-value#15': T + '/article:1/p:3/span:1', 'fact-value#16': T + '/article:1/p:3/span:2', 'fact-value#17': T + '/article:1/p:3/span:3',
       // On the wire: the sample, now a table, and the TCP tile
       'tabs-trigger#3': 'id:statsledger-sample-title', 'tabs-content#3': { key: T + '/article:4', self: true }, 'disclosure-panel#3': T + '/article:4/p:2',
       'tbody#2': { key: T + '/article:4/ol:1', self: true },
@@ -212,16 +212,8 @@
           { label: 'Recovery vs live admission', value: fmt(REPLAY.fast.qps) + '/s vs ' + fmt(FLEET_LAN_QPS) + '/s' }
         ] } },
       { block: 'tabs', id: 'statsledger-views', was: WAS['statsledger-views'], props: { label: 'Ledger benchmark views', items: [
-        { value: 'how', label: 'How it works', blocks: [
-          { block: 'disclosure', props: { preview: 3, more: 'Read the whole statement', less: 'Fold it',
-            content: 'Each identity owns its own append-only chain of value moves. A spend is an append to the holder\'s own chain, signed by their own key, at a position their own previous append determined. Position n can hold exactly one record. Two records at the same (G, pos) is self-signed equivocation; the holder has burned their own chain by their own key. No global order, no mempool, no fork choice.' } },
-          { block: 'accordion', props: { label: 'The design in the spec', items: [
-            { value: 'spec', title: 'Where this lives in the spec', blocks: [
-              { block: 'facts', props: { label: 'Where this lives in the spec', columns: 1, items: SPEC.map(function (s) { return { term: s[0], value: s[1] }; }).concat([
-                { term: 'Measured', value: '2026-10-07' }, { term: 'Record', value: 'LEDGERENTRY Y=1A', mono: true }, { term: 'Spec', value: 'flux-spec 0.4.2', mono: true }]) } }
-            ] }
-          ] } }
-        ] },
+        /* what it closes first: the reader's question is what problems stop being problems, the mechanism is the
+           second view (ledger recheck 2026-10-21, pages-ux-b.md LG-5) */
         { value: 'closes', label: 'What it closes', blocks: [
           { block: 'table', props: { caption: 'What this closes by construction: problems that stop being problems', maxHeight: 'compact',
             columns: [{ key: 'problem', label: 'Problem' }, { key: 'why', label: 'Why it disappears' }], rows: rows(CLOSES, ['problem', 'why']) } },
@@ -229,6 +221,16 @@
           { block: 'accordion', props: { label: 'What it does not do yet', items: [
             { value: 'not-yet', title: 'What this does not yet do', blocks: [
               { block: 'facts', props: { label: 'What this does not yet do', columns: 1, items: NOT_YET.map(function (n) { return { term: n[0], value: n[1] }; }) } }
+            ] }
+          ] } }
+        ] },
+        { value: 'how', label: 'How it works', blocks: [
+          { block: 'disclosure', props: { preview: 3, more: 'Read the whole statement', less: 'Fold it',
+            content: 'Each identity owns its own append-only chain of value moves. A spend is an append to the holder\'s own chain, signed by their own key, at a position their own previous append determined. Position n can hold exactly one record. Two records at the same (G, pos) is self-signed equivocation; the holder has burned their own chain by their own key. No global order, no mempool, no fork choice.' } },
+          { block: 'accordion', props: { label: 'The design in the spec', items: [
+            { value: 'spec', title: 'Where this lives in the spec', blocks: [
+              { block: 'facts', props: { label: 'Where this lives in the spec', columns: 1, items: SPEC.map(function (s) { return { term: s[0], value: s[1] }; }).concat([
+                { term: 'Measured', value: '2026-10-07' }, { term: 'Record', value: 'LEDGERENTRY Y=1A', mono: true }, { term: 'Spec', value: 'flux-spec 0.4.2', mono: true }]) } }
             ] }
           ] } }
         ] },

@@ -125,7 +125,8 @@ for (const [key] of continuity.readCensus(ROUTE).map((e) => [e.key])) {
     text: page.textContent
   }));
   assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'tabs', 'pager'], 'trail, the answer, the detail as tabs, the way on');
-  assert.deepEqual(seen.tabs, ['How it works', 'What it closes', 'On the wire', 'Fleet runs', 'One machine', 'Attacks', 'Durability']);
+  /* What it closes leads (ledger recheck 2026-10-21, LG-5: the page opened on the mechanism) */
+  assert.deepEqual(seen.tabs, ['What it closes', 'How it works', 'On the wire', 'Fleet runs', 'One machine', 'Attacks', 'Durability']);
   assert.deepEqual(seen.meta, ['Sustained, 6 nodes, 5 min', 'Attacks refused', 'Recovery vs live admission'], 'the hero answers with the three numbers that matter');
   assert.equal(seen.h1, 'Ledger benchmark detail', 'the dashboard h1 is its own name, not the article\'s');
   assert(seen.text.includes('a finance resolver by construction'), 'the old kicker is kept');
