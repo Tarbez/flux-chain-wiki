@@ -54,7 +54,7 @@ assert(fs.readFileSync('js/ark/panel-continuity.js','utf8').includes("indexOf('r
 const resolutionPage=fs.readFileSync('js/pages/resolutions.js','utf8'),resolutionCss=fs.readFileSync('css/resolutions.css','utf8');
 // Since 2026-10-19 the pages are Ark blocks (js/pages/resolutions.js; tests/resolutions-blocks.cjs holds their
 // words, layout keys and fold): the products, ideas and path are the three tabs of one shelf.
-assert(resolutionPage.includes("label: 'Ready now · '")&&resolutionPage.includes("label: 'Product ideas · '")&&resolutionPage.includes("label: 'How it resolves'"),'inner pages reveal products, ideas and the path one tab at a time');
+assert(resolutionPage.includes("label: 'Products · '")&&resolutionPage.includes("label: 'Product ideas · '")&&resolutionPage.includes("label: 'How it resolves'"),'inner pages reveal products, ideas and the path one tab at a time');
 
 // Every resolution names its audience, problem, ready products and three ideas built on real products.
 vm.runInContext(fs.readFileSync('js/content/resolution-products.js','utf8'),context);

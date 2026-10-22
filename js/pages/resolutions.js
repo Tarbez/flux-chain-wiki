@@ -37,6 +37,18 @@
   var STEP_NAMES = ['Define', 'Publish', 'Resolve'];
 
   function words(role) { return ArkCopy.text('RESOLUTIONS.' + role); }
+  /* The hero's one action. "Start here" only when its page is not a product still being built (the first-visit
+     audit, 2026-10-22, P0: /resolutions/website's Start here opened the unreleased Bundle Deployer, /resolutions/
+     governance's the unreleased DAO); otherwise the first product this resolution lists as ready that has a page
+     ("Open Auth Kit"); "How resolvers work" only when there is none (it was the button of 11 of the 20). */
+  function mainAction(item, shelf) {
+    var catalog = ArkUI.pageCatalog, products = typeof ArkResolutionProducts !== 'undefined' ? ArkResolutionProducts.products : {};
+    var building = Object.keys(products).some(function (k) { return products[k].page === item.start && products[k].status !== 'ready'; });
+    if (item.start && catalog[item.start] && !building) return { label: 'copy:RESOLUTIONS.START', href: 'route:' + item.start, tone: 'primary' };
+    var first = shelf && shelf.ready.filter(function (p) { return p.status === 'ready' && p.page && catalog[p.page]; })[0];
+    if (first) return { label: 'Open ' + first.name, href: 'route:' + first.page, tone: 'primary' };
+    return { label: 'How resolvers work', href: words('START.FALLBACK.HREF'), tone: 'primary' };
+  }
   function short(item) { return ArkResolutions.shortName(item.title); }
   function two(n) { return String(n).padStart(2, '0'); }
   function lower(text) { return text.charAt(0).toLowerCase() + text.slice(1); }
@@ -157,9 +169,7 @@
 
     /* One main action; the deeper page beside it (`also`) is a related page in the pager, so the
        hero keeps one row of buttons on a phone. */
-    var main = item.start && ArkUI.pageCatalog[item.start]
-      ? { label: 'copy:RESOLUTIONS.START', href: 'route:' + item.start, tone: 'primary' }
-      : { label: 'How resolvers work', href: words('START.FALLBACK.HREF'), tone: 'primary' };
+    var main = mainAction(item, shelf);
     var related = [];
     var hasAlso = !!(item.also && ArkUI.pageCatalog[item.also]);
     [item.also, item.alsoMore].forEach(function (page) {
@@ -185,7 +195,9 @@
       spec.push({ block: 'tabs', id: id + '-shelf', was: was[id + '-shelf'], props: { label: 'Products, ideas and how it works', items: [
         /* each product opens in place (its line, and its page when it has one): a row per
            product keeps five products inside a phone's fold, where cards took two screens */
-        { value: 'ready', label: 'Ready now · ' + shelf.ready.length, content: 'Ready: usable today. Building: in source, not released.', blocks: [
+        /* "Products", not "Ready now": the list holds products still being built too, each row saying which
+           (first-visit audit 2026-10-22, P0); the first line says what the two words mean */
+        { value: 'ready', label: 'Products · ' + shelf.ready.length, content: 'Ready: usable today. Building: in source, not released.', blocks: [
           { block: 'accordion', props: { label: short(item) + ' products', multiple: true, headingLevel: 3, items: shelf.ready.map(function (product) {
             var target = product.page && ArkUI.pageCatalog[product.page] ? product.page : null;
             var row = { value: product.key, title: product.name + ' · ' + (STATUS[product.status] || STATUS.building).label, content: product.line };
