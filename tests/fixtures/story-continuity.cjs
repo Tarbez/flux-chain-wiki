@@ -347,6 +347,7 @@ module.exports = {
  },
  "/how-deployment-works/ask": {
   "reshaped": {
+   "page:/div:1/section:2/nav:1/button:1": "the chapter's \"How it works\" view is the \"Step by step\" tab since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
@@ -371,6 +372,7 @@ module.exports = {
  },
  "/how-deployment-works/work": {
   "reshaped": {
+   "page:/div:1/section:2/nav:1/button:1": "the chapter's \"How it works\" view is the \"Step by step\" tab since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
@@ -403,6 +405,7 @@ module.exports = {
  },
  "/how-deployment-works/check": {
   "reshaped": {
+   "page:/div:1/section:2/nav:1/button:1": "the chapter's \"How it works\" view is the \"Step by step\" tab since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
