@@ -37,6 +37,10 @@ assert.equal(catalog.reference.journey, null, 'the reference reader is a utility
 for (const id of journeyIds) assert.equal(rows.filter((r) => r.journey === id && r.lead).length, 1, id + ' has exactly one lead page');
 const hero = fs.readFileSync('js/hero-motion.js', 'utf8');
 assert(/ArkSitePages\.journeys\(\)\.forEach/.test(hero) && /row\.lead/.test(hero) && /make\('a', 'site-footer-link'\)/.test(hero), 'the footer strip is derived from the journeys\' lead pages');
+/* 2026-10-22: the kit's footer text is 16px (the owner kept it) and six links did not fit, so the strip offers a section
+   only when the header bar does not link it already: one list, the header's own (ArkUI.headerPages) */
+assert(/if \(ArkUI\.headerPages && ArkUI\.headerPages\.indexOf\(lead\.key\) >= 0\) return;/.test(hero), 'the footer strip leaves out what the header bar links');
+assert(/ArkUI\.headerPages = HEADER_LINKS\.map\(function \(item\) \{ return item\[1\]; \}\)\.concat\(\['resolutions'\]\)/.test(fs.readFileSync('js/resolvers/header.js', 'utf8')), 'the header publishes the pages it links, its links and the Resolutions menu');
 assert(!/corner-navigation|theory-invitation|HOME\.CORNER/.test(hero), 'the invisible corner navigation is gone');
 // since 2026-10-19 the strip is the section-link row of the family footer (the kit's renderFooter),
 // drawn into a host that keeps the strip's class, so its aria-current sync and the browser driver

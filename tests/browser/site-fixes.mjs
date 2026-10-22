@@ -117,7 +117,8 @@ async function main() {
       const page = await open(desk, base, '/experiments/lab');
       check(await active(page) === 'proximity', '/experiments/lab opens the merged /experiments page');
       check(await page.evaluate(() => document.querySelectorAll('[data-ark-page="proximity"] h1').length) === 1, 'which has one h1');
-      check(await page.evaluate(() => document.querySelector('[data-ark-page="proximity"]').textContent.includes('do not represent real nodes, votes, or a ledger')), 'and keeps the old entry page\'s boundary');
+      /* read without a glossed term's tip: /experiments marks terms on first use since 2026-10-21, and "nodes" is one */
+      check(await page.evaluate(() => { const c = document.querySelector('[data-ark-page="proximity"]').cloneNode(true); c.querySelectorAll('[data-ark-part="term-tip"]').forEach((t) => t.remove()); return c.textContent.includes('do not represent real nodes, votes, or a ledger'); }), 'and keeps the old entry page\'s boundary');
       await page.close();
     }
 
@@ -126,7 +127,10 @@ async function main() {
       const ctx = width === 1440 ? desk : await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = await open(ctx, base, '/deploy');
       const strip = await page.evaluate(() => [...document.querySelectorAll('.site-footer-strip a')].map((a) => ({ href: a.getAttribute('href'), shown: a.getClientRects().length > 0 && getComputedStyle(a).visibility !== 'hidden' })));
-      check(strip.length === ArkSitePagesCount(), `${width}: the footer strip has one link per journey (${strip.length})`);
+      /* one link per journey whose lead page the header bar does not already link (ArkUI.headerPages; 2026-10-22, the
+         kit's 16px footer: fewer links, by the owner's choice) */
+      const expected = await page.evaluate(() => ArkSitePages.journeys().filter((j) => { const lead = ArkSitePages.pages().find((r) => r.journey === j.id && r.lead && ArkUI.pageCatalog[r.key]); return lead && !(ArkUI.headerPages || []).includes(lead.key); }).length);
+      check(expected >= 1 && expected < ArkSitePagesCount() && strip.length === expected, `${width}: the footer strip has one link per journey the header does not link (${strip.length} of ${expected})`);
       check(strip.some((s) => s.href === '/experiments'), `${width}: the footer strip links /experiments`);
       check(await page.evaluate(() => { const s = document.querySelector('.site-footer-strip'); const r = s.getBoundingClientRect(); return r.width > 0 && r.bottom <= innerHeight && getComputedStyle(s).display !== 'none'; }), `${width}: the footer strip is on screen`);
       await page.close();
