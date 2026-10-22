@@ -35,14 +35,26 @@ const ROUTES = {
       [/^page:\/div:2\/section:2\/figure:1$/, 'the flow figure is the third tab panel; its caption is the tab, its note the panel\'s first line'],
       [/^page:\/div:2\/section:2\/figure:1\/ol:1$/, 'the flow trail is Ark\'s steps'],
       [/^page:\/div:2\/section:2\/table:1$/, 'the same table, now captioned'],
-      [/^page:\/aside:1$/, 'the release aside is Ark\'s callout (in sight from 601px, a press away on a phone); its back link is the pager\'s previous page']
+      [/^page:\/aside:1$/, 'the release aside is Ark\'s callout (in sight from 601px, a press away on a phone); its back link is the pager\'s previous page'],
+      /* first-visit audit 2026-10-22: see reworded */
+      [/^page:\/header:1\/p:1$/, 'the lede starts with the state (see reworded)'],
+      [/^(id:bundle-(workflow|boundary)-title|page:\/div:2\/section:2\/figure:1\/figcaption:1)$/, 'a tab named by what it holds (see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the eyebrow and status row; both keep their keys in the hero'],
       [/^page:\/div:2\/section:1\/ol:1\/li:\d$/, 'the numbered row; its words are the accordion row, which keeps the row\'s copy key'],
-      [/^page:\/div:2\/section:1\/ol:1\/li:\d\/span:1$/, 'the step number; an accordion row is numbered by its place']
+      [/^page:\/div:2\/section:1\/ol:1\/li:\d\/span:1$/, 'the step number; an accordion row is numbered by its place'],
+      [/^page:\/div:2\/section:1\/p:1$/, 'the bare line "Local CLI required" that opened the first tab: the lede and the first step say the tool runs on your machine (first-visit audit 2026-10-22); its copy field is retired']
     ],
-    reworded: [] },
+    /* first-visit audit 2026-10-22: the lede spoke as if the tool existed (P1), and two of the three tab labels were
+       slogans (P2). The words are the manifest's (js/content/manifests/bundledeployer.js); each keeps its key. */
+    reworded: [
+      [/^page:\/header:1\/p:1$/, 'the lede starts with the state: "Not released yet. When it is, you deploy from your own machine. ..."'],
+      [/^id:bundle-workflow-title$/, '"Three steps. One local tool." is the tab "Steps"'],
+      [/^id:bundle-boundary-title$/, '"Choose what you share." is the tab "What becomes public"'],
+      [/^page:\/div:2\/section:2\/figure:1\/figcaption:1$/, '"From your machine to the mesh" is the tab "How a bundle travels"'],
+      [/^page:\/div:2\/section:1\/p:1$/, '"Local CLI required" is gone (see retired)']
+    ] },
   '/deploy': { page: 'deploy', ids: ['deploy-'],
     reshaped: [
       [/^page:\/div:1$/, 'the page\'s content column became the hero (eyebrow, heading, deck); the rest are blocks after it'],
