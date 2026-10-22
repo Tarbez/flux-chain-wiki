@@ -54,7 +54,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Two separate groups can decide things, and each decides only inside its own scope. Mesh operations looks after the shared Flux substrate. A network DAO governs only its own network. Their rosters, thresholds, activation rules, and evidence are separate; neither threshold acts for the other."
+      "value": "Mesh operations, a set of named operators, decides changes to the shared substrate every network runs on. Each network’s DAO, its own named signers, decides changes to that one network. Neither group can act for the other."
     },
     "POINT1.TITLE": {
       "label": "Heading",
