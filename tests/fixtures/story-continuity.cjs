@@ -8,9 +8,14 @@
 module.exports = {
  "/concept/purpose": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "id:purpose-title": "the question names the site, DEFXN, not \"Flux\" (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/div:1/div:1/p:1": "the short answer says first what a network is for; its \"does not\" list is the limit, in Evidence (first-visit audit 2026-10-22, P1)",
+   "page:/nav:3": "the hero action is the next question of the sequence (first-visit audit 2026-10-22, P1: the setup link left before the page said what it is for); the old action is a quiet link in Evidence",
+   "page:/nav:3/a:1": "the hero action is the next question of the sequence (first-visit audit 2026-10-22, P1: the setup link left before the page said what it is for); the old action is a quiet link in Evidence",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -25,9 +30,12 @@ module.exports = {
  },
  "/concept/depth": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/nav:1/span:1": "the breadcrumb names the sheet \"Checkable agreements\": \"Agreement lifecycle\" is /lifecycle's name (first-visit audit 2026-10-22, P1)",
+   "id:depth-title": "the sheet is \"Checkable agreements\", its question \"How does an agreement become checkable?\": \"Agreement lifecycle\" is /lifecycle's name (first-visit audit 2026-10-22, P1)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -42,9 +50,14 @@ module.exports = {
  },
  "/concept/practice": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "id:practice-title": "the question in problem words, \"Who can approve a change?\" (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/div:1/div:1/p:1": "the short answer in plain words; \"authority cell\" stays in Step by step (first-visit audit 2026-10-22, P1)",
+   "page:/nav:3": "the hero action says where it goes, \"See who can change what\" (first-visit audit 2026-10-22, P1: \"Compare governance rosters\" was a fifth undefined term)",
+   "page:/nav:3/a:1": "the hero action says where it goes, \"See who can change what\" (first-visit audit 2026-10-22, P1)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -59,9 +72,12 @@ module.exports = {
  },
  "/concept/notes": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/nav:3": "the hero action is the next question; \"Compare governance rosters\" was /concept/practice's action too (first-visit audit 2026-10-22, P2); /dao is a quiet link in Evidence",
+   "page:/nav:3/a:1": "the hero action is the next question (first-visit audit 2026-10-22, P2)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -76,9 +92,14 @@ module.exports = {
  },
  "/concept/studio": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/aside:1/strong:1": "the status is titled \"Status / Partial\" like its siblings; CAP-003 moved to the limit in Evidence (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/div:1/aside:1": "the same status callout, titled \"Status / Partial\" (first-visit audit 2026-10-22, P2)",
+   "page:/nav:3": "the hero action is the next question of the sequence (first-visit audit 2026-10-22, P1: the setup link left before the page said what it is for); the old action is a quiet link in Evidence",
+   "page:/nav:3/a:1": "the hero action is the next question of the sequence (first-visit audit 2026-10-22, P1: the setup link left before the page said what it is for); the old action is a quiet link in Evidence",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -93,9 +114,15 @@ module.exports = {
  },
  "/concept/spec": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/div:1/p:1": "the short answer leads with three verified figures, each with its machine or fleet and date (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/div:1/aside:1/p:1": "the status says six records are verified and where their numbers are; the BENCH codes are in Step by step and Evidence (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/div:1/aside:1": "the same status callout, without the list of BENCH codes (first-visit audit 2026-10-22, P1)",
+   "page:/nav:3": "the hero action answers the page's question: \"See the measured results\" (/stats), not \"Run DEFXN from source\", which is a link in Evidence (first-visit audit 2026-10-22, P1)",
+   "page:/nav:3/a:1": "the hero action is \"See the measured results\" (first-visit audit 2026-10-22, P1)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -110,9 +137,12 @@ module.exports = {
  },
  "/dao": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Operating model / this page",
-   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/nav:3": "the hero action is the product, \"Open DAO\"; the notes link (\"Separate approval from activation\") leads the ways on in The idea (first-visit audit 2026-10-22, P1)",
+   "page:/nav:3/a:1": "the hero action is \"Open DAO\"; the notes link is the first of the ways on in The idea (first-visit audit 2026-10-22, P1)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
+   "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:2/button:3": "\"Evidence & limits\" is \"Evidence\", the one label set on every story page",
    "page:/div:1": "the answer beside its figure: the story body",
    "page:/div:1/div:1": "the answer and its status: the story body's main column",
@@ -130,11 +160,12 @@ module.exports = {
  },
  "/lifecycle": {
   "reshaped": {
+   "page:/div:1/figure:1/strong:1": "the count is \"5\" with its unit beside it (\"records\"): the bare \"05\" said nothing (first-visit audit 2026-10-22, P1)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
-   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/div:1/nav:1/button:1": "\"Answer\" is \"The idea\", the one label set on every story page",
-   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"How it works\", the one label set on every story page",
+   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"Step by step\", the one label set on every story page",
    "page:/nav:2": "the five-stage trail is the pager's related row",
    "page:/nav:3": "the onward links are Ark's pager",
    "page:/div:1/figure:1": "the reference fabric sits in Ark's figure frame, whose caption is the old figcaption",
@@ -157,11 +188,12 @@ module.exports = {
  },
  "/lifecycle/intent": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
-   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/div:1/nav:1/button:1": "\"Answer\" is \"The idea\", the one label set on every story page",
-   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"How it works\", the one label set on every story page",
+   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"Step by step\", the one label set on every story page",
    "page:/nav:2": "the five-stage trail is the pager's related row",
    "page:/nav:3": "the onward links are Ark's pager",
    "page:/div:1/div:1/p:1": "the kicker \"0n / STAGE\" is the eyebrow \"Agreement lifecycle · n of 5\": one numbering; the stage is the breadcrumb's last item",
@@ -187,11 +219,12 @@ module.exports = {
  },
  "/lifecycle/offer": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
-   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/div:1/nav:1/button:1": "\"Answer\" is \"The idea\", the one label set on every story page",
-   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"How it works\", the one label set on every story page",
+   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"Step by step\", the one label set on every story page",
    "page:/nav:2": "the five-stage trail is the pager's related row",
    "page:/nav:3": "the onward links are Ark's pager",
    "page:/div:1/div:1/p:1": "the kicker \"0n / STAGE\" is the eyebrow \"Agreement lifecycle · n of 5\": one numbering; the stage is the breadcrumb's last item",
@@ -218,11 +251,12 @@ module.exports = {
  },
  "/lifecycle/agreement": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
-   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/div:1/nav:1/button:1": "\"Answer\" is \"The idea\", the one label set on every story page",
-   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"How it works\", the one label set on every story page",
+   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"Step by step\", the one label set on every story page",
    "page:/nav:2": "the five-stage trail is the pager's related row",
    "page:/nav:3": "the onward links are Ark's pager",
    "page:/div:1/div:1/p:1": "the kicker \"0n / STAGE\" is the eyebrow \"Agreement lifecycle · n of 5\": one numbering; the stage is the breadcrumb's last item",
@@ -249,11 +283,12 @@ module.exports = {
  },
  "/lifecycle/fulfillment": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
-   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/div:1/nav:1/button:1": "\"Answer\" is \"The idea\", the one label set on every story page",
-   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"How it works\", the one label set on every story page",
+   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"Step by step\", the one label set on every story page",
    "page:/nav:2": "the five-stage trail is the pager's related row",
    "page:/nav:3": "the onward links are Ark's pager",
    "page:/div:1/div:1/p:1": "the kicker \"0n / STAGE\" is the eyebrow \"Agreement lifecycle · n of 5\": one numbering; the stage is the breadcrumb's last item",
@@ -280,11 +315,12 @@ module.exports = {
  },
  "/lifecycle/receipt": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
-   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/div:1/nav:1/button:1": "\"Answer\" is \"The idea\", the one label set on every story page",
-   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"How it works\", the one label set on every story page",
+   "page:/div:1/div:1/nav:1/button:2": "\"Understand why\" is \"Step by step\", the one label set on every story page",
    "page:/nav:2": "the five-stage trail is the pager's related row",
    "page:/nav:3": "the onward links are Ark's pager",
    "page:/div:1/div:1/p:1": "the kicker \"0n / STAGE\" is the eyebrow \"Agreement lifecycle · n of 5\": one numbering; the stage is the breadcrumb's last item",
@@ -311,6 +347,7 @@ module.exports = {
  },
  "/how-deployment-works/ask": {
   "reshaped": {
+   "page:/div:1/section:2/nav:1/button:1": "the chapter's \"How it works\" view is the \"Step by step\" tab since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
@@ -318,7 +355,7 @@ module.exports = {
    "page:/div:1/section:1": "the record card is the figure: its heading and mesh in Ark's frame, its label the caption, its fields in the Evidence view",
    "page:/div:1/section:1/dl:1": "the record's fields are Ark facts in the Evidence view",
    "page:/div:1/section:2": "the three views are the story's depth control",
-   "page:/div:1/section:2/nav:1": "the view buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/section:2/nav:1": "the view buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/section:2/nav:1/button:2": "\"Why this way\" is \"The idea\", the one label set on every story page",
    "page:/div:1/section:2/nav:1/button:3": "\"What it proves\" is \"Evidence\", the one label set on every story page",
    "page:/nav:2": "the footer is Ark's pager",
@@ -335,6 +372,7 @@ module.exports = {
  },
  "/how-deployment-works/work": {
   "reshaped": {
+   "page:/div:1/section:2/nav:1/button:1": "the chapter's \"How it works\" view is the \"Step by step\" tab since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
@@ -342,7 +380,7 @@ module.exports = {
    "page:/div:1/section:1": "the record card is the figure: its heading and mesh in Ark's frame, its label the caption, its fields in the Evidence view",
    "page:/div:1/section:1/dl:1": "the record's fields are Ark facts in the Evidence view",
    "page:/div:1/section:2": "the three views are the story's depth control",
-   "page:/div:1/section:2/nav:1": "the view buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/section:2/nav:1": "the view buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/section:2/nav:1/button:2": "\"Why this way\" is \"The idea\", the one label set on every story page",
    "page:/div:1/section:2/nav:1/button:3": "\"What it proves\" is \"Evidence\", the one label set on every story page",
    "page:/nav:2": "the footer is Ark's pager",
@@ -367,6 +405,7 @@ module.exports = {
  },
  "/how-deployment-works/check": {
   "reshaped": {
+   "page:/div:1/section:2/nav:1/button:1": "the chapter's \"How it works\" view is the \"Step by step\" tab since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",
    "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
@@ -374,7 +413,7 @@ module.exports = {
    "page:/div:1/section:1": "the record card is the figure: its heading and mesh in Ark's frame, its label the caption, its fields in the Evidence view",
    "page:/div:1/section:1/dl:1": "the record's fields are Ark facts in the Evidence view",
    "page:/div:1/section:2": "the three views are the story's depth control",
-   "page:/div:1/section:2/nav:1": "the view buttons are Ark tabs with the one label set: The idea / How it works / Evidence",
+   "page:/div:1/section:2/nav:1": "the view buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/div:1/section:2/nav:1/button:2": "\"Why this way\" is \"The idea\", the one label set on every story page",
    "page:/div:1/section:2/nav:1/button:3": "\"What it proves\" is \"Evidence\", the one label set on every story page",
    "page:/nav:2": "the footer is Ark's pager",
@@ -408,21 +447,21 @@ module.exports = {
    "page:/div:2/nav:1": "the earlier agreement path is an Evidence accordion item, its chapters inside",
    "page:/div:1/article:1": "each card is a stage of The idea (Ark steps)",
    "page:/div:1/article:1/div:2": "the card's mesh, in the figure of the three meshes, named by its stage",
-   "page:/div:1/article:1/ol:1/li:1": "the step is an accordion item of How it works",
+   "page:/div:1/article:1/ol:1/li:1": "the step is an accordion item of Step by step",
    "page:/div:1/article:1/ol:1/li:1/strong:1": "the step's title, numbered across the page",
-   "page:/div:1/article:1/ol:1/li:2": "the step is an accordion item of How it works",
+   "page:/div:1/article:1/ol:1/li:2": "the step is an accordion item of Step by step",
    "page:/div:1/article:1/ol:1/li:2/strong:1": "the step's title, numbered across the page",
    "page:/div:1/article:2": "each card is a stage of The idea (Ark steps)",
    "page:/div:1/article:2/div:2": "the card's mesh, in the figure of the three meshes, named by its stage",
-   "page:/div:1/article:2/ol:1/li:1": "the step is an accordion item of How it works",
+   "page:/div:1/article:2/ol:1/li:1": "the step is an accordion item of Step by step",
    "page:/div:1/article:2/ol:1/li:1/strong:1": "the step's title, numbered across the page",
-   "page:/div:1/article:2/ol:1/li:2": "the step is an accordion item of How it works",
+   "page:/div:1/article:2/ol:1/li:2": "the step is an accordion item of Step by step",
    "page:/div:1/article:2/ol:1/li:2/strong:1": "the step's title, numbered across the page",
    "page:/div:1/article:3": "each card is a stage of The idea (Ark steps)",
    "page:/div:1/article:3/div:2": "the card's mesh, in the figure of the three meshes, named by its stage",
-   "page:/div:1/article:3/ol:1/li:1": "the step is an accordion item of How it works",
+   "page:/div:1/article:3/ol:1/li:1": "the step is an accordion item of Step by step",
    "page:/div:1/article:3/ol:1/li:1/strong:1": "the step's title, numbered across the page",
-   "page:/div:1/article:3/ol:1/li:2": "the step is an accordion item of How it works",
+   "page:/div:1/article:3/ol:1/li:2": "the step is an accordion item of Step by step",
    "page:/div:1/article:3/ol:1/li:2/strong:1": "the step's title, numbered across the page",
    "page:/footer:1/div:2": "the hand-off is the hero's action; a link that leaves the site now also says so to a screen reader (\"opens another site\")",
    "page:/footer:1/div:2/a:1": "the hand-off is the hero's action; a link that leaves the site now also says so to a screen reader (\"opens another site\")",
@@ -432,17 +471,26 @@ module.exports = {
   "retired": {
    "page:/header:1/div:1": "a wrapper around the heading; the hero holds the heading itself",
    "page:/div:1/article:1/div:1": "the card's top row: its number is the stage's marker, its signal labels the stage's mesh",
-   "page:/div:1/article:1/ol:1": "the card's two steps are items of the six-step accordion (How it works), each keyed by the step it was",
+   "page:/div:1/article:1/ol:1": "the card's two steps are items of the six-step accordion (Step by step), each keyed by the step it was",
    "page:/div:1/article:2/div:1": "the card's top row: its number is the stage's marker, its signal labels the stage's mesh",
-   "page:/div:1/article:2/ol:1": "the card's two steps are items of the six-step accordion (How it works), each keyed by the step it was",
+   "page:/div:1/article:2/ol:1": "the card's two steps are items of the six-step accordion (Step by step), each keyed by the step it was",
    "page:/div:1/article:3/div:1": "the card's top row: its number is the stage's marker, its signal labels the stage's mesh",
-   "page:/div:1/article:3/ol:1": "the card's two steps are items of the six-step accordion (How it works), each keyed by the step it was"
+   "page:/div:1/article:3/ol:1": "the card's two steps are items of the six-step accordion (Step by step), each keyed by the step it was"
   }
  },
  "/concept": {
   "reshaped": {
+   "page:/nav:2": "the question-group tabs: \"Inspect evidence & activation\" is \"Evidence & activation\" (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/article:1": "the card reads its sheet's question, reworded in its manifest: \"What does a DEFXN network do today?\" (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/article:1/a:1": "the card title is its sheet's question, reworded in its manifest (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/article:2": "the card reads its sheet's question and name, reworded: \"How does an agreement become checkable?\" / \"Checkable agreements\" (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/article:2/a:1": "the card title is its sheet's question, reworded in its manifest (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/article:2/span:2": "the card names its sheet \"Checkable agreements\": \"Agreement lifecycle\" is /lifecycle's name (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/article:3": "the card reads its sheet's question, reworded: \"Who can approve a change?\" (first-visit audit 2026-10-22, P1)",
+   "page:/div:1/article:3/a:1": "the card title is its sheet's question, reworded in its manifest (first-visit audit 2026-10-22, P1)",
    "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model",
-   "page:/div:1": "the question grid is the chosen group's tab panel (Ark card grid)"
+   "page:/div:1": "the question grid is the chosen group's tab panel (Ark card grid)",
+   "page:/nav:2/button:2": "\"Inspect evidence & activation\" is \"Evidence & activation\" since 2026-10-22 (first-visit audit, P2): the long label was cut off at 390px"
   },
   "retired": {}
  }

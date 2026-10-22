@@ -3,8 +3,8 @@ LearningContent.define([
   {
     "slug": "why-the-chain-was-retired",
     "title": "From one chain to one per identity",
-    "category": "BENCHMARKS / 001",
-    "minutes": "2 MIN READ",
+    "category": "HISTORY / 001",
+    "minutes": "3 MIN READ",
     "summary": "How the block chain gave way to the agreement fabric, and then to one grammar chain per identity, with the measurements behind the current design.",
     "reviewed": "2026-10-08"
   },

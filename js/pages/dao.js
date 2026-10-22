@@ -1,7 +1,7 @@
 /* Governance, explained here; done in DAO (owner decision 2026-10-19: overlap pages explain and
    hand off -- the sheet is the explanation the product does not carry, the signing is the
-   product's). ArkUI.dash.productHandoff reads the DAO product's address from the family catalog.
-   The hand-off follows the short answer, in the story template's first view (js/pages/story.js).
+   product's). The DAO product's address comes from the family catalog (DefxnKit).
+   The hand-off is the hero's one action, "Open DAO" (since 2026-10-22; below).
 
    W4-S13 (2026-10-20), both from js/pages/resolver-page-parts.js (the figure) and js/ark/page-kit.js (the links):
    - "Who can change a resolver?" (point 6) carries the manifest's upgrade-supersedes figure: the
@@ -12,10 +12,17 @@
    - The page used to end in its hero's one action. Evidence now leads on: to the resolution that
      starts here (js/content/resolutions.js `start`) and to the rest of its journey, derived from
      the site's journey table -- Deploy a resolver is one of them (resolvers-content.md 5.c). */
+/* "Open DAO" is the hero's one action (first-visit audit 2026-10-22, P1): the hero's teal button was "Separate approval
+   from activation", the notes page's words, while the product sat in a small outlined button in a card lower down. The
+   address is the family kit's (DefxnKit.productHref), never typed here; with no kit loaded (a headless harness) the page
+   keeps its notes link as the hero action. The notes link is the first of the ways on, in The idea (js/pages/sheet.js).
+   The card that held the button is gone: its one sentence repeated the deck, and its button is the hero's now. */
+function daoProductAction(){
+  var kit=typeof window!=='undefined'&&window.DefxnKit,product=kit&&kit.productById&&kit.productById('dao'),href=product&&kit.productHref(product);
+  return href?{label:'Open '+product.name,href:/^https?:/.test(href)?'url:'+href:href}:null;
+}
 ArkUI.pageModules.dao = { mount: function(host) {
-  var el=ArkUI.sheet('dao','dao');
-  var handoff=ArkUI.dash&&ArkUI.dash.productHandoff&&ArkUI.dash.productHandoff({product:'dao',text:'A network’s named signers decide changes for that network only: a decision counts once enough of them sign, and takes effect only when its own conditions are met. DAO is where they sign.'});
-  if(handoff){var idea=el.story&&el.story.panel('focus');if(idea)idea.appendChild(handoff);else el.appendChild(handoff);}
+  var el=ArkUI.sheet('dao','dao',{action:daoProductAction()});
   var parts=ArkUI.resolverPageParts;
   if(parts&&el.story&&ArkUI.blocks){
     /* the upgrade figure, inside the row that asks the question */

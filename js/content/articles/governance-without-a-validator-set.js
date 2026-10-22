@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("governance-without-a-validator-set", {
   "core": "The protocol model derives a short-lived authority cell for each contested transition instead of using a standing signer set. A separate mesh-operations policy describes a seven-operator substrate roster; production activation remains unverified.",
-  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Use this note to tell transition authority apart from substrate policy and a network's own DAO.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Use this note to tell transition authority apart from substrate policy and a network's own DAO.",
   "reviewed": "2026-09-30",
   "evidenceLabel": "Authority model, thresholds, and current limits",
   "evidenceHref": "doc:docs/protocol/authority.md",

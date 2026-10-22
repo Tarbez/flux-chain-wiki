@@ -56,7 +56,9 @@
     var list = [
       { block: 'breadcrumb', id: 'learnings-crumbs', props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Notes' }] } },
       { block: 'hero', id: 'learnings-hero', was: WAS['learnings-hero'], props: { eyebrow: 'Notes / ' + pad(articles.length), title: 'Notes from the work.', density: 'compact',
-        lede: 'Choose a question. Open the core answer, then follow its evidence.' } },
+        /* the cards are statements, not questions, so the lede does not say "Choose a question" (first-visit audit 2026-10-22, P2);
+           the count is the index's own */
+        lede: articles.length + ' notes from building DEFXN. Open one for its answer and its evidence.' } },
       { block: 'card-grid', id: 'learnings-notes', was: Object.assign({ ':root': { key: 'page:/div:1/ol:1', self: true } }, cardsWas(0, Math.min(IN_SIGHT, articles.length))),
         props: grid('Notes', articles.slice(0, IN_SIGHT)).props }
     ];

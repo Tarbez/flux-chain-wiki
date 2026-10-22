@@ -6,7 +6,7 @@ ArkManifest.define({
   "group": "theory",
   "meta": {
     "placement": "rail",
-    "next": "download",
+    "next": "stats",
     "docs": "docs/protocol/benchmarks.md",
     "back": "concept"
   },
@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Six benchmark records are verified in the evidence registry, each at its own stated boundary: one machine or a named set of fleet nodes, a dated run, and a unit that says what it counts. None is a production, sustained-mainnet or cross-chain result, and none is added to another or multiplied by node count. Everything else stays Partial, Historical or Superseded until its evidence is complete."
+      "value": "Three of the six verified records, each with where and when it ran: 46,178 swaps a second in a batched auction on one machine with no network (2026-10-10); 61,398 operations a second applied on every replica of eight fleet servers plus one local node (2026-10-08); and 11,318 operations a second accepted on six public nodes with live 4-of-6 approval signing (2026-10-09/10). None is a production result, and none is added to another."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -129,7 +129,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "BENCH-006 (Local, verified), BENCH-007 (Fleet, verified application boundary), BENCH-009 (Fleet, verified), BENCH-012 (Fleet, verified), BENCH-013 (Local, verified) and BENCH-015 (Local, verified). Each number, machine or fleet, and date is under How it works; what is still not verified is under Evidence & limits."
+      "value": "Six benchmark records are verified, each at its own stated boundary. Each number, with its machine or fleet and date, is under Step by step. What is still not verified is under Evidence."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -153,7 +153,19 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
+      "value": "SEE THE MEASURED RESULTS"
+    },
+    "RUN": {
+      "label": "Run-it-yourself link (in Evidence)",
+      "kind": "line",
+      "section": "Links",
       "value": "RUN DEFXN FROM SOURCE"
+    },
+    "RUN.HREF": {
+      "label": "Run-it-yourself link (in Evidence): where it goes",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:download"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

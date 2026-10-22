@@ -166,8 +166,10 @@
           reference: { blocks: evidence }
         },
         /* the dated-history note only when the note has one: a new draft's relevance is empty, and a
-           callout with no body is refused (same regression as the empty Reviewed fact above) */
-        boundary: article.relevance && String(article.relevance).trim() ? { tone: 'info', title: 'When this was written', body: article.relevance, actions: [{ label: 'What is a resolver', href: 'route:resolver' }] } : null,
+           callout with no body is refused (same regression as the empty Reviewed fact above). Its link is a quiet one: as a
+           button it was the most prominent control on the screen and took the reader away before the note (first-visit
+           audit 2026-10-22, P2). */
+        boundary: article.relevance && String(article.relevance).trim() ? { tone: 'info', title: 'When this was written', body: article.relevance, actions: [{ label: 'What is a resolver', href: 'route:resolver', tone: 'link' }] } : null,
         boundaryFold: 'phone', boundaryMore: 'When this was written', boundaryLess: 'Hide the note', boundaryAside: true,
         /* no summaries: "Previous note" / "Next note" only repeated the pager's own direction labels */
         pager: { label: 'Continue reading', relatedLabel: 'Continue from this note',

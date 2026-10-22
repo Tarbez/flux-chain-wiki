@@ -125,15 +125,23 @@ const words = (el) => label(el).replace(/\s*[→↗]$/, ''); // a link button dr
       const page = document.querySelector('[data-ark-page]');
       const heroActions = [...page.querySelectorAll('[data-ark-block="hero"] [data-ark-part="button"]')].map(label);
       const sources = [...page.querySelectorAll('[data-ark-part="tabs-content"] [data-ark-block="actions"] [data-ark-part="button"]')].map(label);
-      const where = [...page.querySelectorAll('[data-ark-block="actions"][aria-label="Where next"] [data-ark-part="button"]')].map((a) => ({ text: words(a), href: a.getAttribute('href') }));
-      return { heroActions, sources, where, notes: ArkCopy.text('NOTES.CTA') };
+      /* since 2026-10-22 (first-visit audit, P1) a question of the sequence carries its ways on in its pager's related row
+         ("Where next"), under the previous / next question, so The idea holds one action; /dao keeps them in The idea */
+      const where = [...page.querySelectorAll('[data-ark-block="actions"][aria-label="Where next"] [data-ark-part="button"], [data-ark-block="pager"] [data-ark-part="pager-related"] a')].map((a) => ({ text: words(a), href: a.getAttribute('href') }));
+      const relatedLabel = (page.querySelector('[data-ark-block="pager"] .ark-pager__related-label') || {}).textContent || '';
+      return { heroActions, sources, where, relatedLabel, notes: ArkCopy.text('NOTES.CTA') };
     } });
     const s = seen.extra;
     assert(s.heroActions.length >= 1, route + ' has its next step');
     for (const text of s.heroActions.concat(s.sources)) assert(text !== text.toUpperCase() || text.length < 4, route + ': "' + text + '" is not in capitals (one case rule for the sheet\'s actions)');
     if (route === '/dao') {
-      assert.equal(s.heroActions[0].replace(/\s*[→↗]$/, ''), s.notes.charAt(0) + s.notes.slice(1).toLowerCase(), '/dao leads on with the words its destination authored for the link (NOTES.CTA), in the one case: ' + s.heroActions[0]);
-    }
+      /* since 2026-10-22 (first-visit audit, P1) the hero action is the product, "Open DAO" (the family kit's address), and the
+         notes link it replaced leads the ways on, still in the words its destination authored (NOTES.CTA), in the one case */
+      const notes = s.notes.charAt(0) + s.notes.slice(1).toLowerCase();
+      assert(/^Open DAO/.test(s.heroActions[0]) || s.heroActions[0].replace(/\s*[→↗]$/, '') === notes, '/dao leads with "Open DAO" (or, with no family kit loaded, the notes link): ' + s.heroActions[0]);
+      assert.equal(s.where.length && s.where[0].text, notes, '/dao: the notes link leads the ways on: ' + JSON.stringify(s.where));
+      s.where.shift();
+    } else assert.equal(s.relatedLabel.trim(), 'Where next', route + ': the pager\'s related row is named "Where next"');
     if (route === '/concept/spec') assert(s.heroActions.concat(s.sources).some((t) => /DEFXN/.test(t)), 'a token the site spells in capitals stays in capitals: ' + s.heroActions.join(' | '));
     assert.deepEqual(s.where.map((w) => w.text), ['Resolutions', 'Mesh performance', 'Interactive model'], route + ' has its ways on: ' + JSON.stringify(s.where));
     assert(s.where.some((w) => /experiments/.test(w.href)), route + ' links the interactive model');

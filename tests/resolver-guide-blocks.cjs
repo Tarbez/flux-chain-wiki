@@ -8,7 +8,7 @@
    - A fourth hand-built depth control ("Answer / Understand why / Evidence", square buttons in
      the browser's Arial; docs/ux-audit/pages-ux-b.md /start-from-something-real P1) and two step
      pickers that showed only "01-05" on a phone (pages-ux-a.md /download): ONE depth control on
-     every guide page, Ark tabs, segmented, The idea / How it works / Evidence.
+     every guide page, Ark tabs, segmented, The idea / Step by step / Evidence.
    - Content deleted on phones to fit one screen: /what-is-a-resolver hid its definition, kicker,
      policy address, law bodies, breadcrumb and spec link with ~10 display:none rules (pages-ux-b.md
      P1); /download hid its deck, step names, guide link and progress; the reference resolvers'
@@ -27,7 +27,7 @@ const checks = require('./lib/block-page-checks.cjs');
 
 const ROOT = checks.ROOT;
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
-const DEPTH = ['The idea', 'How it works', 'Evidence'];
+const DEPTH = ['The idea', 'Step by step', 'Evidence']; // 'Step by step' since 2026-10-22 (first-visit audit, P1): 'How it works' is the header's name for /how-deployment-works, so the tab and the nav link said the same words for two things
 
 const ROUTES = {
   '/what-is-a-resolver': { page: 'resolver', ids: ['resolver-'],
@@ -80,16 +80,16 @@ const ROUTES = {
       [/^page:\/div:1$/, 'the answer beside its figure: the story body'],
       [/^page:\/div:1\/div:1$/, 'the answer and its boundary: the story body\'s main column'],
       [/^page:\/div:1\/div:1\/div:1$/, 'the answer surface is The idea\'s panel'],
-      [/^page:\/nav:2$/, 'the depth buttons are Ark tabs with the one label set: The idea / How it works / Evidence'],
+      [/^page:\/nav:2$/, 'the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence'],
       [/^page:\/nav:2\/button:1$/, '"Answer" is "The idea", the one label set on every guided page'],
-      [/^page:\/nav:2\/button:2$/, '"Understand why" is "How it works", the one label set on every guided page'],
+      [/^page:\/nav:2\/button:2$/, '"Understand why" is "Step by step", the one label set on every guided page'],
       [/^page:\/div:1\/figure:1$/, 'the figure is Ark\'s frame around the same drawing and legend, folded behind "Show the illustration" below 900px'],
       [/^page:\/div:1\/figure:1\/figcaption:1$/, 'the caption also names the drawing ("Source / revision / dated evidence"), which it drew inside itself at 8px'],
       [/^page:\/nav:3$/, 'the footer is Ark\'s pager: previous (What is a resolver) and next (See how DEFXN works)'],
       [/^page:\/div:1\/div:1\/aside:1$/, 'the boundary is Ark\'s callout: the same title and words after its tone mark (the census\'s 160-character cut falls one character earlier)']
     ],
     retired: [],
-    reworded: [[/^page:\/nav:2\/button:[12]$/, '"Answer" / "Understand why" read "The idea" / "How it works": the one depth label set (the story template)']]
+    reworded: [[/^page:\/nav:2\/button:[12]$/, '"Answer" / "Understand why" read "The idea" / "Step by step": the one depth label set (the story template)']]
   },
   '/download': { page: 'download', ids: ['download-'],
     reshaped: [

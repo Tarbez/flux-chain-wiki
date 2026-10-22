@@ -6,7 +6,7 @@ ArkManifest.define({
   "group": "theory",
   "meta": {
     "placement": "rail",
-    "next": "dao",
+    "next": "concept/studio",
     "docs": "docs/protocol/governance.md",
     "back": "concept"
   },
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Independent-host role readiness, hostile testing, and signed soak evidence are separate from the approval ceremony and must not be inferred from it."
+      "value": "Independent-host role readiness, hostile testing, and signed soak evidence are separate from the approval signatures and must not be inferred from them."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Do not infer runtime activation, economic settlement, or production readiness from a completed signature ceremony alone."
+      "value": "Do not infer runtime activation, economic settlement, or production readiness from a completed set of approval signatures alone."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",
@@ -129,7 +129,19 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "COMPARE GOVERNANCE ROSTERS"
+      "value": "NEXT QUESTION: HOW TO VERIFY A NETWORK"
+    },
+    "GOVERNANCE": {
+      "label": "Governance link (in Evidence)",
+      "kind": "line",
+      "section": "Links",
+      "value": "SEE WHO CAN CHANGE WHAT"
+    },
+    "GOVERNANCE.HREF": {
+      "label": "Governance link (in Evidence): where it goes",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:dao"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

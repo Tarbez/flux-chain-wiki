@@ -24,7 +24,9 @@ async function state(route, drive) {
     const read = () => {
       const checked = document.querySelector('.study-tabs input[type="radio"]:checked');
       return { path: window.location.pathname, search: window.location.search, mode: checked && checked.value, range: document.getElementById('variable').value,
-        title: document.getElementById('experiments-title').textContent, corner: document.querySelector('.stage-corner').textContent };
+        /* the study's question is the model's own heading (#study-title); since 2026-10-22 the h1 stays the page's name
+           (first-visit audit, P1: the h1 was rewritten to each study's question, so the page's name changed three times) */
+        title: document.getElementById('study-title').textContent, h1: document.getElementById('experiments-title').textContent, corner: document.querySelector('.stage-corner').textContent };
     };
     const first = read();
     const later = drive ? await drive(window, document, read, tick) : null;
@@ -46,7 +48,9 @@ async function state(route, drive) {
     assert.equal(a.first.mode, 'rhythm', 'the canonical link picks its study');
     assert.equal(a.first.range, '80', 'and its value');
     assert.equal(a.first.path, '/experiments', 'and stays on the canonical address');
-    assert(/^How can one agreement lifecycle be pictured\?$/.test(a.first.title), 'the page names the study the address asked for: ' + a.first.title);
+    assert(/^How can one agreement lifecycle be pictured\?$/.test(a.first.title), 'the model names the study the address asked for: ' + a.first.title);
+    assert.equal(a.first.h1, a.later.picked.h1, 'the page heading stays the page\'s name whichever study is picked');
+    assert(/^Interactive model/.test(a.first.h1), 'the page heading names the page as the menu does: ' + a.first.h1);
     assert.equal(a.radios, 3, 'the studies are three radios of one Ark choice');
     assert.equal(a.oldButtons, 0, 'no hand-built study button is left');
     assert.equal(a.pressed, 0, 'and no aria-pressed group');

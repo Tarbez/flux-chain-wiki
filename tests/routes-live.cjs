@@ -73,7 +73,8 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
   assert(!fs.existsSync(path.join(ROOT, 'js/resolvers/experiment.js')) && !fs.existsSync(path.join(ROOT, 'js/pages/experiments.js')), 'the duplicate experiment entry page is gone, merged into the lab');
   assert(read('js/pages/lab.js').includes('How can threshold agreement be pictured?'), 'the old intro question survives in the lab');
   /* the lab is a page of Ark blocks since 2026-10-19 (W3-GUIDE): its h1 is the hero's, given the old id */
-  assert(/block: 'hero', id: 'lab-hero'[^\n]*title: 'Explore three protocol concepts\.'/.test(read('js/pages/lab.js')) && read('js/pages/lab.js').includes("titleId: 'experiments-title'"), 'interactive model has a primary heading');
+  // the hero title names the page as the menu does, and stays (first-visit audit 2026-10-22: it was "Explore three protocol concepts." and then each study's question)
+  assert(/block: 'hero', id: 'lab-hero'[^\n]*title: 'Interactive model: authority, lifecycle and networks'/.test(read('js/pages/lab.js')) && read('js/pages/lab.js').includes("titleId: 'experiments-title'"), 'interactive model has a primary heading');
 
   const summary = await inspectDocument({ html: await readIndexHtml(ROOT), url: HOST + '/', resources, root: ROOT, timeoutMs: STALL_DEADLINE_MS }, async (window) => {
     const { document, ArkUI, ArkCopy, ArkStates, ArkCanvasTransitions, ArkElementMotion } = window;
@@ -192,7 +193,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
         const tabs = root.querySelector('[data-story-depth]');
         assert(tabs, `${current}: the page has no story depth control ([data-story-depth]), which this route's checks drive. If the page was restructured, carry these checks over to its new structure in tests/routes-live.cjs; never delete them.`);
         const triggers = [...tabs.querySelectorAll('[data-ark-part="tabs-trigger"]')];
-        assert.deepEqual(triggers.map((t) => t.textContent.trim()), ['The idea', 'How it works', 'Evidence'], `${current}: one depth vocabulary on every story page`);
+        assert.deepEqual(triggers.map((t) => t.textContent.trim()), ['The idea', 'Step by step', 'Evidence'], `${current}: one depth vocabulary on every story page` /* 'Step by step' since 2026-10-22: the header's 'How it works' names another page */);
         return triggers;
       };
       const panelOf = (root, i) => [...root.querySelector('[data-story-depth]').children].filter((n) => n.getAttribute('data-ark-part') === 'tabs-content')[i];

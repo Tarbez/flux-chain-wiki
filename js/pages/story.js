@@ -14,7 +14,7 @@
                   -- the short answer -- opens The idea, so every view fits the fold rule on a
                   phone (a lede above the depth control pushed two views past 1.6 screens)
      depth        ONE control: Ark tabs, variant segmented, ONE label set on every page --
-                  The idea · How it works · Evidence. Values are the URL's own (?view=context,
+                  The idea · Step by step · Evidence. Values are the URL's own (?view=context,
                   ?view=reference; the idea has none), so every deep link saved since
                   2026-10-02 still opens its view, and history restores it.
      boundary     the callout for what is not true / not live yet, under the depth control,
@@ -56,9 +56,12 @@
 (function () {
   'use strict';
 
+  /* "Step by step", not "How it works" (first-visit audit 2026-10-22, P1): the header's "How it works" opens
+     /how-deployment-works, so the same words on this tab opened two different things. The value stays 'context':
+     every saved ?view=context address still opens this view. */
   var DEPTH = [
     { value: 'focus', label: 'The idea' },
-    { value: 'context', label: 'How it works' },
+    { value: 'context', label: 'Step by step' },
     { value: 'reference', label: 'Evidence' }
   ];
   var VALUES = DEPTH.map(function (d) { return d.value; });

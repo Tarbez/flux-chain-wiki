@@ -2,8 +2,9 @@
    THE THEORY SHEETS (/concept/<id>) and /dao: one question each, on the story template
    (js/pages/story.js). The words are the page's manifest (js/content/manifests/<id>.js): its
    title is the question, its deck the short answer (The idea), its numbered points the mechanism
-   (How it works, one point open at a time, each addressable as ?view=context&step=<n>), its limit
-   and evidence links the Evidence view, its status the boundary every view keeps in sight.
+   (Step by step, one point open at a time, each addressable as ?view=context&step=<n>), its limit
+   and evidence links the Evidence view, its status the boundary every view keeps in sight. A question
+   of the sequence ends in a pager (the previous and next question; the ways out as its related row).
    Theory pages are DERIVED routes (js/pages/catalog.js catalogContentRoutes): a page the editor
    creates in the theory group renders here with no code change, with or without a status.
 
@@ -33,8 +34,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "purpose-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -92,8 +93,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "depth-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -153,8 +154,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "practice-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -213,8 +214,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "notes-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -272,8 +273,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "studio-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -332,8 +333,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "spec-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -392,8 +393,8 @@
      "actions": "page:/nav:3/a:1"
     },
     "dao-crumbs": {
-     "breadcrumb-item#2": "page:/nav:1/a:1",
-     "breadcrumb-item#3": "page:/nav:1/span:1",
+     "breadcrumb-item#3": "page:/nav:1/a:1",
+     "breadcrumb-item#4": "page:/nav:1/span:1",
      ":root": {
       "key": "page:/nav:1",
       "self": true
@@ -448,7 +449,10 @@
 
   function sentence(text) { return text.charAt(0) + text.slice(1).toLowerCase(); }
 
-  ArkUI.sheet = function (id, page) {
+  /* options.action: the page's own hero action, in place of the manifest's onward link (/dao: "Open DAO", the product
+     the page explains, js/pages/dao.js). */
+  ArkUI.sheet = function (id, page, options) {
+    options = options || {};
     var manifest = ArkManifest.get(id), area = id.toUpperCase();
     function copy(role) { return 'copy:' + area + '.' + role; }
     function words(role) { return ArkCopy.text(area + '.' + role); }
@@ -495,21 +499,39 @@
 
     var points = [];
     for (var n = 1; n <= count; n++) points.push({ value: 'step-' + (n - 1), title: copy('POINT' + n + '.TITLE'), content: copy('POINT' + n + '.TEXT') });
+    /* One trail for the index and its sheets (first-visit audit 2026-10-22, P2): /concept is "Home / Overview / Operating
+       model", so a question is "Home / Overview / Operating model / <question>" -- the Overview level no longer appears and
+       disappears. Its address is the index's own field (CONCEPT.BACK.HREF). */
+    var overview = { label: 'Overview', href: ArkCopy.text('CONCEPT.BACK.HREF') };
     var parent = { label: 'Operating model', href: 'route:concept' };
-    /* Onward: the manifest's own next step; a sheet without one (/dao) leads on with the words of the page it leads to, the
-       link that page's own manifest authored for it (NOTES.CTA), not words typed here. */
-    var onward = manifest.meta.next ? { label: label('NEXT'), href: 'route:' + manifest.meta.next }
-      : id === 'dao' ? { label: ArkUI.sentenceCase(ArkCopy.text('NOTES.CTA')), href: 'route:concept/notes' } : null;
-    /* The ways on out of this page's journey (ArkUI.nextSteps), in sight in The idea. */
+    /* Onward: the page's own action (/dao: its product), else the manifest's own next step. A sheet without one (/dao when
+       the family kit is not loaded) leads on with the words of the page it leads to, the link that page's own manifest
+       authored for it (NOTES.CTA), not words typed here. */
+    var notes = id === 'dao' ? { label: ArkUI.sentenceCase(ArkCopy.text('NOTES.CTA')), href: 'route:concept/notes' } : null;
+    var onward = options.action || (manifest.meta.next ? { label: label('NEXT'), href: 'route:' + manifest.meta.next } : notes);
+    /* The ways on out of this page's journey (ArkUI.nextSteps). On /dao they stay in The idea, after the notes link the
+       hero gave up to "Open DAO" (first-visit audit 2026-10-22, P1: the hero borrowed the notes page's words). */
     var ways = ArkUI.nextSteps(page);
+    if (notes && onward !== notes) ways = [{ label: notes.label, href: notes.href, tone: 'link' }].concat(ways);
+    /* A question of the sequence ("Operating model · 2 of 6") ends in a pager: the previous and the next question, in
+       ArkManifest.group('theory') order, as the lifecycle's stages do; the ways out of the sequence are its related row,
+       so The idea holds one action, not four (first-visit audit 2026-10-22, P1 /concept/* and P2 /concept/purpose). */
+    /* the pager says "Previous" / "Next" itself; its title is the question, its line the page's name */
+    function question(m) { return { label: ArkCopy.text(m.id.toUpperCase() + '.TITLE'), summary: m.title, href: 'route:concept/' + m.id }; }
+    var pager = index < 0 ? undefined : {
+      label: 'Operating model questions',
+      prev: index > 0 ? question(theory[index - 1]) : { label: 'All operating model questions', href: 'route:concept' },
+      next: index < theory.length - 1 ? question(theory[index + 1]) : { label: 'All operating model questions', href: 'route:concept' },
+      relatedLabel: 'Where next', related: ways.map(function (w) { return { label: w.label, href: w.href }; })
+    };
 
     var def = {
       page: page, id: id, className: 'story-question', titleId: id + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
-      crumbs: [{ label: 'Home', href: 'route:zero' }, parent, { label: manifest.title }],
+      crumbs: [{ label: 'Home', href: 'route:zero' }, overview, parent, { label: manifest.title }],
       eyebrow: index >= 0 ? ArkUI.story.position('Operating model', index, theory.length) : (has('EYEBROW') ? copy('EYEBROW') : undefined),
       title: copy('TITLE'),
       depth: {
-        focus: { text: copy('DECK'), blocks: ways.length ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : undefined },
+        focus: { text: copy('DECK'), blocks: ways.length && !pager ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : undefined },
         context: points.length ? { blocks: [{ block: 'accordion', props: { label: manifest.title + ' questions', items: points } }] } : { text: copy('DECK') },
         reference: evidence.length ? { blocks: evidence } : { text: copy('DECK') }
       },
@@ -517,8 +539,9 @@
       figure: drawing ? { slot: 'diagram', caption: manifest.title + ' relationships: ' + sentence(drawing.title) + '.' } : undefined,
       slots: { diagram: figure },
       /* Onward: the next step the manifest names (the old call to action) is the one action of the
-         hero (Ark: "the main next step"); every other question is one step up, on /concept. */
+         hero (Ark: "the main next step"); the other questions are the pager's, and all of them one step up, on /concept. */
       actions: onward ? [{ label: onward.label, href: onward.href, tone: 'primary' }] : undefined,
+      pager: pager,
       query: function (view) { return view === 'focus' ? '' : view === 'context' ? 'view=context&step=' + step : 'view=' + view; },
       onView: function (view) { mark(view === 'context'); if (drawing) drawing.select(view === 'context' ? step : 0, false); },
       onRestore: function (params) { open(Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)), true); },

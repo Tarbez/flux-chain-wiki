@@ -121,15 +121,24 @@ const ROUTES = {
       [/^page:\/div:1\/section:1\/div:2\/div:1(\/div:1)?$/, 'the toolbar and its picker: Ark\'s choice (W4-S14) names itself with a visible legend ("Choose a model") before the three studies'],
       [/^page:\/div:1\/section:1\/div:2\/div:2(\/span:1)?$/, 'the stage\'s corner label leads with what the code is ("Figure 1 of 3 · FX—001"; FX—001 was unexplained), derived from the study\'s place'],
       [/^page:\/div:1\/section:1\/div:2\/div:3\/div:1$/, 'the slider\'s control now opens with one line saying how to use it ("Drag the slider ..."), between its label and the slider'],
-      [/^page:\/div:1\/section:1\/p:1$/, 'the evidence line is the pager\'s related pages, under "↳ Evidence context"']
+      [/^page:\/div:1\/section:1\/p:1$/, 'the evidence line is the pager\'s related pages, under "↳ Evidence context"'],
+      /* 2026-10-22 (first-visit audit 2026-10-22, P1): the page keeps one disclaimer in sight and one name */
+      [/^id:experiments-title$/, 'the h1 is the page\'s fixed name ("Interactive model: authority, lifecycle and networks"); the study question it was rewritten to is the model\'s own heading (#study-title)'],
+      [/^page:\/div:1\/section:1\/div:1\/p:1$/, 'the introduction is one sentence that says what to do; what the model is not moved into "Understand this analogy"'],
+      [/^page:\/div:1\/section:1\/div:2\/div:2\/span:2$/, 'the stage footnote names what the figure shows ("THREE INDEPENDENT GROUPS"); its disclaimer is the hero\'s Status line and the analogy panel'],
+      [/^page:\/div:1\/section:1\/div:2(\/div:3(\/details:1)?)?$/, 'the analogy panel also holds what the model does not do (the old introduction\'s caveats)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the model\'s wrapper; a block page stacks its blocks in its root'],
       [/^page:\/div:1\/section:1\/div:1\/div:1$/, 'the heading\'s inner column; the hero has none'],
       [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the "↳" glyph is the related heading\'s ("↳ Evidence context")'],
-      [/^page:\/div:1\/section:1\/div:2\/div:1\/div:1\/button:\d\/span:1$/, 'the study button\'s name span: the study picker is Ark\'s choice (W4-S14), whose option is one label ("01 Authority") that keeps the button\'s key']
+      [/^page:\/div:1\/section:1\/div:2\/div:1\/div:1\/button:\d\/span:1$/, 'the study button\'s name span: the study picker is Ark\'s choice (W4-S14), whose option is one label ("01 Authority") that keeps the button\'s key'],
+      [/^page:\/div:1\/section:1\/div:1\/div:1\/p:1$/, 'the eyebrow "01 / Interactive model" repeated the breadcrumb and the title (first-visit audit 2026-10-22, P1); nothing carries it'],
+      [/^page:\/div:1\/section:1\/div:2\/div:1\/span:1$/, 'the toolbar\'s "INTERACTIVE MODEL" label was the page\'s name a third time (first-visit audit 2026-10-22, P1); nothing carries it']
     ],
-    reworded: [[/^page:\/div:1\/section:1\/p:1$/, '"Evidence context: claim inventory and evidence registry." reads as the two related links under "↳ Evidence context"']] },
+    reworded: [[/^page:\/div:1\/section:1\/p:1$/, '"Evidence context: claim inventory and evidence registry." reads as the two related links under "↳ Evidence context"'],
+      [/^page:\/div:1\/section:1\/div:1\/div:1\/p:1$/, 'the eyebrow is gone: it repeated the breadcrumb and the title (first-visit audit 2026-10-22, P1)'],
+      [/^page:\/div:1\/section:1\/div:2\/div:2(\/span:2)?$/, 'the footnote names what the figure shows instead of a fourth disclaimer (first-visit audit 2026-10-22, P1)']] },
   '/account/domains': { page: 'account/domains', ids: ['account-domains-', 'domainsNameInput'],
     reshaped: [[/^page:\/div:1\/header:1$/, 'the header became the hero (its back link is the breadcrumb\'s "Your account"); the form and the hand-off are the block after it'],
       [/^page:\/div:1\/header:1\/form:1$/, 'the form is Ark\'s form block (2026-10-21): the same label and Track, with Ark\'s required mark'],

@@ -16,7 +16,7 @@
      review date, written by the serializer -- so the shown index is the serializer's output.
    - The question choices had no visible edge and the answer view's tabs were bare numbers
      "00-11": the questions are Ark's accordion, each row numbered and named, keyboard-operable
-     by the primitive; the depth control is the one label set (The idea / How it works / Evidence).
+     by the primitive; the depth control is the one label set (The idea / Step by step / Evidence).
    - Choosing a question replaced the list with an empty panel for about a second: a row opens in
      place. The old ?q=<n> addresses still open their question.
    - The fold rule, by structure (measured 2026-10-19 in Chromium, docs in the W3-LEARN report):
@@ -40,7 +40,7 @@ const checks = require('./lib/block-page-checks.cjs');
 
 const ROOT = checks.ROOT;
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
-const DEPTH = ['The idea', 'How it works', 'Evidence'];
+const DEPTH = ['The idea', 'Step by step', 'Evidence']; // 'Step by step' since 2026-10-22 (first-visit audit, P1): 'How it works' is the header's name for /how-deployment-works, so the tab and the nav link said the same words for two things
 /* arrays made in the content's vm realm, as this realm's (assert.deepEqual compares prototypes) */
 const host = (list) => Array.from(list);
 
@@ -61,7 +61,8 @@ const INDEX = {
     [/^page:\/div:1\/ol:1\/li:\d$/, 'a row is a card: its series, title, excerpt, read time and review date'],
     [/^page:\/div:1\/ol:1\/li:\d\/a:1$/, 'the row\'s link (number, title, read time, arrow) is the card\'s title link; the series label carries the number, the footer the read time'],
     [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:2$/, 'the read time is the card\'s footer, derived from the words ("2 min read") with the review date beside it'],
-    [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:3$/, 'the hand-drawn arrow is the card\'s own arrow']
+    [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:3$/, 'the hand-drawn arrow is the card\'s own arrow'],
+    [/^page:\/div:1\/p:2$/, 'the hero lede says what the cards are ("7 notes from building DEFXN ..."): the cards are statements, so "Choose a question" sent the reader looking for one (first-visit audit 2026-10-22, P2)']
   ],
   retired: [
     [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:1$/, 'the row number ("01"): the card\'s series label says it ("BENCHMARKS / 001")']
@@ -69,7 +70,8 @@ const INDEX = {
   reworded: [
     [/^page:\/div:1\/ol:1\/li:\d\/a:1$/, 'the row read "01 From one chain... 7 MIN READ →"; the card shows its parts apart'],
     [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:1$/, 'the row number is the series label\'s'],
-    [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:2$/, 'the read time is derived from the words now, not typed']
+    [/^page:\/div:1\/ol:1\/li:\d\/a:1\/span:2$/, 'the read time is derived from the words now, not typed'],
+    [/^page:\/div:1\/p:2$/, 'the lede names what the cards are, with their derived count (first-visit audit 2026-10-22, P2)']
   ]
 };
 const ARTICLE = {
@@ -83,14 +85,17 @@ const ARTICLE = {
     [/^page:\/div:1\/div:1$/, 'the reading column is the story body\'s main column'],
     [/^page:\/div:1\/div:1\/div:1$/, 'the answer controls (← The core / Next question →) are the depth control'],
     [/^page:\/div:1\/div:1\/div:1\/button:1$/, '"← THE CORE" is The idea tab'],
-    [/^page:\/div:1\/div:1\/div:1\/button:2$/, '"NEXT QUESTION →" is the How it works tab, where every question is a row'],
+    [/^page:\/div:1\/div:1\/div:1\/button:2$/, '"NEXT QUESTION →" is the Step by step tab, where every question is a row'],
     [/^page:\/div:1\/nav:1$/, 'the question list is Ark\'s accordion: the table of contents'],
     [/^page:\/div:1\/nav:2$/, 'the exits (related mechanism, next step) are the pager\'s related pages'],
     [/^page:\/div:1\/nav:2\/a:1$/, '"Related mechanism →" names its page now'],
     [/^page:\/div:1\/details:1$/, 'the evidence disclosure is Evidence\'s facts'],
     [/^page:\/div:1\/nav:1\/button:\d+\/span:2$/, 'the question is the row\'s label, with its number ("01 · Was there a real chain?")'],
     [/^page:\/div:1\/nav:1\/button:\d+\/span:1$/, 'the number was the row\'s marker; Ark\'s accordion marks the row with its chevron, which takes the marker\'s key'],
-    [/^page:\/div:1\/nav:1\/p:1$/, 'the question count ("QUESTIONS / 08") is derived from the note\'s questions: the grammar note gained a ninth (W4-S13)']
+    [/^page:\/div:1\/nav:1\/p:1$/, 'the question count ("QUESTIONS / 08") is derived from the note\'s questions: the grammar note gained a ninth (W4-S13)'],
+    /* first-visit audit 2026-10-22, P2 */
+    [/^page:\/header:1\/div:2\/p:2$/, 'the dated-history note no longer prints the raw path "(/what-is-a-resolver)": its link is beside it'],
+    [/^(id:why-the-chain-was-retired-section-3|page:\/div:1\/div:1\/section:4\/p:1)$/, 'From one chain to one per identity, "What the numbers say now": the internal lever and type names (Lever A+B+C, TransferAtomic, TransferSend/Receive) are a plain description of the three changes; every figure is the same']
   ],
   retired: [
     [/^page:\/header:1\/div:1\/button:1$/, 'the Core return button; The idea tab returns to the core'],
@@ -237,7 +242,7 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
       const view = [...page.querySelectorAll('[data-story-depth] [role="tab"]')].find((t) => t.getAttribute('aria-selected') === 'true');
       return { open, view: view && view.textContent.trim(), search: window.location.search };
     });
-    assert.equal(deep.view, 'How it works', slug + '?q=n: the old address opens How it works');
+    assert.equal(deep.view, 'Step by step', slug + '?q=n: the old address opens the questions view (Step by step)');
     assert.deepEqual(deep.open.map((o, i) => o ? i + 1 : 0).filter(Boolean), [article.sections.length], slug + '?q=n: the old address opens question n');
     const viewed = await checks.visit('/learnings/' + slug + '?view=reference', (window, page) => ({
       view: ([...page.querySelectorAll('[data-story-depth] [role="tab"]')].find((t) => t.getAttribute('aria-selected') === 'true') || {}).textContent

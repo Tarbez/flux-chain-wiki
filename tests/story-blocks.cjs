@@ -33,7 +33,7 @@ const continuity = require('./lib/layout-continuity.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
-const DEPTH = ['The idea', 'How it works', 'Evidence'];
+const DEPTH = ['The idea', 'Step by step', 'Evidence']; // 'Step by step' since 2026-10-22 (first-visit audit, P1): 'How it works' is the header's name for /how-deployment-works, so the tab and the nav link said the same words for two things
 const STAGES = ['intent', 'offer', 'agreement', 'fulfillment', 'receipt'];
 const SHEETS = ['purpose', 'depth', 'practice', 'notes', 'studio', 'spec'];
 
@@ -52,7 +52,7 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
 (async () => {
   /* ---- the modules are story specs of Ark blocks ------------------------------------------- */
   const story = read('js/pages/story.js');
-  assert(/var DEPTH = \[\s*\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'How it works' \},\s*\{ value: 'reference', label: 'Evidence' \}\s*\];/.test(story), 'ONE depth label set, defined once');
+  assert(/var DEPTH = \[\s*\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'Step by step' \},\s*\{ value: 'reference', label: 'Evidence' \}\s*\];/.test(story), 'ONE depth label set, defined once');
   assert(/block\('tabs', 'depth', \{\s*label: 'Explanation depth', variant: 'segmented'/.test(story), 'the depth control is Ark tabs, segmented');
   for (const file of ['js/pages/lifecycle.js', 'js/pages/sheet.js', 'js/pages/how-stories.js', 'js/pages/deployment.js']) {
     const source = read(file);
@@ -108,7 +108,8 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
       } else if (route === '/concept') {
         copy('CONCEPT.TITLE'); copy('CONCEPT.DECK');
         ArkManifest.group('theory').forEach((m) => { copy(m.id.toUpperCase() + '.TITLE'); words.push(m.title + ' / open explanation'); });
-        words.push('Start with a question', 'Inspect evidence & activation', 'The math behind a resolver', 'Resolver math / open the page');
+        // 'Evidence & activation' since 2026-10-22 (first-visit audit, P2): 'Inspect evidence & activation' was cut off at 390px
+        words.push('Start with a question', 'Evidence & activation', 'The math behind a resolver', 'Resolver math / open the page');
       } else {
         const area = id.toUpperCase(), m = ArkManifest.get(id);
         Object.keys(m.fields).filter((k) => /^(TITLE|DECK|NEXT|EVIDENCE|STATUS\.(TITLE|TEXT)|LIMIT\.(TITLE|TEXT)|POINT\d+\.(TITLE|TEXT))$/.test(k) || (m.fields[k + '.HREF'] && m.fields[k + '.HREF'].kind === 'link')).forEach((k) => copy(area + '.' + k));

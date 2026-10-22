@@ -199,6 +199,10 @@ ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
     var key = 'concept/' + m.id, label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
     if (!ArkUI.pageCatalog[key]) added.push(key);
     ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, journey: ArkSitePages.journeyOf(key), module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js', 'js/ark/page-kit.js']), styles: arkModuleStyles('theory') };
+    /* A readable address beside the old one, derived from the page's name: /concept/networks opens /concept/purpose
+       (first-visit audit 2026-10-22, P2: /concept/notes is "Activation", and "notes" is also the name of /learnings). */
+    var readable = '/concept/' + String(m.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (readable !== '/concept/' && readable !== m.route) ArkUI.pageCatalog[key].aliases = [readable];
   });
   return added;
 };
