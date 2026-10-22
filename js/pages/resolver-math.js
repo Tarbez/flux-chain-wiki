@@ -808,7 +808,7 @@
         { label: 'Resolver math, in full', href: 'doc:docs/resolver-math.md' },
         { label: 'Resolver audit', href: 'doc:docs/resolver-audit.md' },
         { label: 'BENCH-012', href: 'doc:docs/evidence/bench-012-defi-shard-signed-resolution.md' },
-        { label: 'Fleet dashboard', href: 'route:stats' }
+        { label: 'Mesh performance', href: 'route:stats' }
       ] } }
     ];
   }
