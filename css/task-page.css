@@ -50,6 +50,15 @@
 #scene .lab-page .study-description summary { display:flex; align-items:center; color:hsl(var(--reference)); cursor:pointer; font-size:14px; }
 #scene .lab-page .study-description h3 { font-size:18px; }
 #scene .lab-page .lab-bottom { grid-template-columns:minmax(0,1fr) minmax(260px,.65fr); }
+/* the slider sits between the picker and the stage (js/pages/lab.js): the toolbar's rule above it and the stage's below it are its edges */
+#scene .lab-page .lab-bottom { border-top:0; }
+/* From 901px the stage and the slider share one row, so the first screen shows the control and what it moves together */
+@media(min-width:901px){
+ #scene .lab-page .lab { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,340px); }
+ #scene .lab-page .lab > :not(.experiment-stage):not(.lab-bottom) { grid-column:1 / -1; }
+ #scene .lab-page .lab > .experiment-stage { grid-column:1; grid-row:2; }
+ #scene .lab-page .lab > .lab-bottom { grid-column:2; grid-row:2; grid-template-columns:1fr; align-content:start; border-left:1px solid var(--line); border-top:1px solid var(--line); }
+}
 
 @media(max-width:620px){#scene .lab-page .lab-bottom {grid-template-columns:1fr;} #scene .lab-page .experiment-stage {height:140px;}}
 

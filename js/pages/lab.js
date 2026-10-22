@@ -14,7 +14,8 @@
 (function () {
   'use strict';
   /* One sentence that says what to do, so the model rises into view (first-visit audit 2026-10-22, P1: the model began below
-     the fold at 1280x800 under a paragraph that said five times what it is not). The page keeps ONE disclaimer in sight, the
+     the fold at 1280x800 under a paragraph that said five times what it is not; the slider itself still sat below the fold,
+     so it now comes right after the model picker, above the stage it moves). The page keeps ONE disclaimer in sight, the
      hero's Status line; what the model does not do is in "Understand this analogy" (LIMITS), beside each study's own words. */
   var INTRO = 'Pick a model, then drag the slider to watch an idea change shape: how approvals add up, how one agreement moves through five records, or how named networks stay apart.';
   var LIMITS = 'The dots do not represent real nodes, votes, or a ledger. The model does not calculate a roster, signer threshold, certificate, or transition. The controls explain ideas; they do not measure or reproduce a running Flux network. The link under the model opens the actual contract.';
@@ -25,7 +26,9 @@
     'lab-hero': { ':root': { key: 'page:/div:1/section:1/div:1', self: true },
       ':scope > dl:nth-of-type(1) > div:nth-of-type(1) > dd:nth-of-type(1)': 'page:/div:1/section:1/div:1/div:1/p:2' },
     'lab-intro': { ':scope > div:nth-of-type(1) > p:nth-of-type(1)': 'page:/div:1/section:1/div:1/p:1' },
-    'work': { ':root': { key: S, self: true }, '.lab': L },
+    /* The slider and its analogy come before the stage since 2026-10-22 (first-visit audit, P1: the slider sat below the fold):
+       each keeps the key it had in its old place, so a saved edit still lands on the same part. */
+    'work': { ':root': { key: S, self: true }, '.lab': L, '.lab-bottom': L + '/div:3', '.experiment-stage': L + '/div:2' },
     'lab-pager': { ':root': { key: 'page:/div:1/section:1/p:1', self: true },
       ':scope > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(1) > a:nth-of-type(1)': 'page:/div:1/section:1/p:1/a:1',
       ':scope > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2) > a:nth-of-type(1)': 'page:/div:1/section:1/p:1/a:2' },
@@ -42,8 +45,8 @@
     var box = document.createElement('div');
     box.innerHTML = '<div class="lab" data-mode="spacing">' +
       '<div class="lab-toolbar"><div class="study-tabs"></div></div>' +
-      '<div class="experiment-stage" role="img" aria-label="Illustrative dots in three independent groups. Adjust their spacing to explore the idea of threshold agreement."><div class="experiment-grid"></div><span class="stage-corner">Analogy, not live data</span><div class="specimen" aria-hidden="true"><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span></div><span class="stage-footnote">THREE INDEPENDENT GROUPS</span><span class="stage-axis" aria-hidden="true">x →</span></div>' +
       '<div class="lab-bottom"><details class="study-description"><summary>Understand this analogy</summary><h3 id="study-title">How can threshold agreement be pictured?</h3><p id="study-description">This model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.</p><p class="study-limits">' + LIMITS + '</p></details><div class="control"><div class="control-label"><label for="variable">Visual convergence</label><output for="variable" id="variable-value">50%</output></div><p class="control-hint" id="variable-hint">Drag the slider to explore the model.</p><input id="variable" disabled type="range" min="0" max="100" value="50" aria-describedby="variable-hint study-description"><div class="control-ends"><span id="range-start">Apart</span><span id="range-end">Together</span></div></div></div>' +
+      '<div class="experiment-stage" role="img" aria-label="Illustrative dots in three independent groups. Adjust their spacing to explore the idea of threshold agreement."><div class="experiment-grid"></div><span class="stage-corner">Analogy, not live data</span><div class="specimen" aria-hidden="true"><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span><span class="dot-group"><i></i><i></i><i></i><i></i></span></div><span class="stage-footnote">THREE INDEPENDENT GROUPS</span><span class="stage-axis" aria-hidden="true">x →</span></div>' +
       '<p class="model-consequence" role="status"></p><a class="model-canonical" href="' + practiceHref + '" data-scene-link="concept/practice">Read the authority contract →</a><p class="no-script">This model needs JavaScript to respond to your input.</p>' +
       '</div>';
     var section = document.createElement('section');
