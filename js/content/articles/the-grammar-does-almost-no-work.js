@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("the-grammar-does-almost-no-work", {
   "core": "A transfer is five short lines of text. The parser splits each on a dash and nothing more; each block's own resolver decides what it means only when it is reached. Measured on a busy server, that whole layer is about 2 percent of the work.",
-  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Read this to understand what the registered grammar is, why it is built this way, and what it can and cannot make faster. A closing section on a resolver's own grammar was added on 2026-10-20.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Read this to understand what the registered grammar is, why it is built this way, and what it can and cannot make faster. A closing section on a resolver's own grammar was added on 2026-10-20.",
   "reviewed": "2026-10-07",
   "evidenceLabel": "BENCH-003 section 14: the real grammar, measured",
   "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",

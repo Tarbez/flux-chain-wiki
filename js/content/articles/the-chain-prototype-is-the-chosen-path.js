@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("the-chain-prototype-is-the-chosen-path", {
   "core": "The chain path now has three separately measured layers: 51,065 ops/s local hot admission, 279,269 ops/s local certified holder-sharded application, and 812,268 effective ops/s for compact segment transport between two local peers. The latest sustained public-fleet baseline remains 12,403 operations a second across six nodes (a metric family since retired) until the certified path is deployed and rerun.",
-  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Read this to distinguish hot admission, certified segment application, compact P2P transport, replay, short bursts and sustained fleet throughput. Local resolver rates are not multiplied into fleet claims.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Read this to distinguish hot admission, certified segment application, compact P2P transport, replay, short bursts and sustained fleet throughput. Local resolver rates are not multiplied into fleet claims.",
   "reviewed": "2026-10-08",
   "evidenceLabel": "The live fleet pulse — see for yourself",
   "evidenceHref": "doc:docs/protocol/resolvers.md",

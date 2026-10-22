@@ -5,6 +5,7 @@ var ArkGlossary=window.ArkGlossary||{map:{}};
   ["agreement","Accepted terms connecting requested work, provider, execution, and evidence."],
   ["node","One machine in the fleet. It runs a chain-server or a resolver shard, and each node is measured on its own hardware."],
   ["fleet","The machines this project runs the network on (the flx-* nodes). A fleet figure is a sum of measurements taken on each node, never one node's figure multiplied."],
+  ["shard","One resolver process that resolves a batch of signed intents and signs the result. A resolver scales by running more shards, about one per performance core."],
   ["cid","Content identifier: a record's address, derived from a hash of its bytes, so the same bytes always have the same address.","CID"],
   ["soak","A load run sustained for minutes, as opposed to a short burst."],
   ["grammar","The rules a record must follow to be admitted: which labelled boxes it holds and what each box may contain."],

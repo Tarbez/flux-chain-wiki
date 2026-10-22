@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("how-we-got-fast-and-what-we-got-wrong", {
   "core": "A value transfer on the first version of this protocol ran at under 7 a second. The same idea, written in the registered grammar and sent over a plain socket, now runs at about 25,000 a second across ten machines. Most of the trail between those two numbers is mistakes, and this note lists them.",
-  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolver). Read this before quoting any DEFXN speed. It says which number describes which protocol, how each was measured, and which earlier explanations turned out to be wrong.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Read this before quoting any DEFXN speed. It says which number describes which protocol, how each was measured, and which earlier explanations turned out to be wrong.",
   "reviewed": "2026-10-07",
   "evidenceLabel": "BENCH-003: the full investigation log, sections 1 to 15",
   "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
