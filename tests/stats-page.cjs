@@ -13,8 +13,9 @@
      cited there is real grammar;
    - /monitor stays retired;
    - Overload (pages-ux-b.md /stats P0): 3,387 words at 12.6x / 20.7x the viewport; now the hero
-     answers (status, nodes online, swaps per second, last pulse) and the detail is seven tabs by
-     question, each dated run one accordion row -- every number, table, bar and note kept, each view
+     answers (status, nodes online, swaps per second, last pulse) and the detail is tabs by
+     question (seven until 2026-10-22; four since, Evidence holding Throughput, Client path and
+     Platform as its own tabs: first-visit audit 2026-10-22), each dated run one accordion row -- every number, table, bar and note kept, each view
      <= 1.6x at 1440x900 and 390x844 (W3-STATS report);
    - a live refresh keeps each tile's element (only its text moves), so a CMS edit applied to a
      tile is not dropped on the next poll;
@@ -378,7 +379,10 @@ for (let li = 1; li <= 6; li++) X['page:/div:1/div:10/section:1/ol:1/li:' + li +
     links: [...page.querySelectorAll('a[data-scene-link]')].map((a) => a.getAttribute('data-scene-link'))
   }));
   assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'tabs'], 'trail, the answer, the detail as tabs');
-  assert.deepEqual(seen.tabs, ['Live', 'Chain', 'Throughput', 'Client path', 'Platform', 'Evidence', 'Readiness']);
+  /* first-visit audit 2026-10-22 (P2): a first visitor could not tell Throughput, Client path and Evidence apart among seven
+     tabs. Four remain; Throughput, Client path and Platform are Evidence's own tabs, before its runs table and records
+     (the inner tabs follow the outer four in document order). */
+  assert.deepEqual(seen.tabs, ['Live', 'Chain', 'Evidence', 'Readiness', 'Throughput', 'Client path', 'Platform', 'Runs and records']);
   for (const target of ['resolvers', 'stats/ledger', 'stats/gpu', 'reference']) assert(seen.links.includes(target), 'the page leads on to ' + target);
   assert.deepEqual(seen.refused, [], 'no block was refused');
   assert.deepEqual(seen.termsMissing, [], 'every glossary term has an entry in docs/glossary.md');
