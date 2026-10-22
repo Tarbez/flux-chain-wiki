@@ -85,11 +85,19 @@ const ROUTES = {
       [/^page:\/nav:2\/button:2$/, '"Understand why" is "How it works", the one label set on every guided page'],
       [/^page:\/div:1\/figure:1$/, 'the figure is Ark\'s frame around the same drawing and legend, folded behind "Show the illustration" below 900px'],
       [/^page:\/div:1\/figure:1\/figcaption:1$/, 'the caption also names the drawing ("Source / revision / dated evidence"), which it drew inside itself at 8px'],
-      [/^page:\/nav:3$/, 'the footer is Ark\'s pager: previous (What is a resolver) and next (See how DEFXN works)'],
-      [/^page:\/div:1\/div:1\/aside:1$/, 'the boundary is Ark\'s callout: the same title and words after its tone mark (the census\'s 160-character cut falls one character earlier)']
+      [/^page:\/nav:3$/, 'the footer is Ark\'s pager: previous (What is a resolver) and next (Deploy a resolver, the page\'s one name since the first-visit audit 2026-10-22)'],
+      [/^page:\/div:1\/div:1\/aside:1$/, 'the boundary is Ark\'s callout: the same title and words after its tone mark (the census\'s 160-character cut falls one character earlier)'],
+      /* first-visit audit 2026-10-22 (P1): the page was rewritten for the visitor, each key on its successor */
+      [/^id:references-title$/, 'the heading, reworded: "Reference resolvers are not published yet." (see reworded)'],
+      [/^page:\/div:1\/div:1\/div:1\/p:1$/, 'the lede, reworded for the visitor: what a reference resolver is, that neither named one has a public record yet, and where to start today (it read "This audit did not establish...")'],
+      [/^page:\/div:1\/div:1\/aside:1\/p:1$/, 'the boundary, reworded: it repeated the lede ("Reference evidence pending"); it now says what makes a name a reference'],
+      [/^page:\/nav:3\/a:2$/, 'the next link, reworded: "Deploy a resolver" (see reworded)']
     ],
     retired: [],
-    reworded: [[/^page:\/nav:2\/button:[12]$/, '"Answer" / "Understand why" read "The idea" / "How it works": the one depth label set (the story template)']]
+    reworded: [[/^page:\/nav:2\/button:[12]$/, '"Answer" / "Understand why" read "The idea" / "How it works": the one depth label set (the story template)'],
+      /* first-visit audit 2026-10-22: the URL and heading promised what the page could not show */
+      [/^id:references-title$/, '"Reference resolvers, without the leap of faith." reads "Reference resolvers are not published yet.": the heading promised checkable examples the page says do not exist yet'],
+      [/^page:\/nav:3\/a:2$/, '"See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens']]
   },
   '/download': { page: 'download', ids: ['download-'],
     reshaped: [

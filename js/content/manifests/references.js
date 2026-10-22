@@ -19,19 +19,19 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Reference resolvers, without the leap of faith."
+      "value": "Reference resolvers are not published yet."
     },
     "BODY1": {
       "label": "First paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "CR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, or dated live observation for either one."
+      "value": "A reference resolver is a worked example to start from when you build your own. CR3TV and DeArk are named as the first two, but neither has a public record you can inspect yet. Until one does, start from the resolver chains in Resolvers and capabilities: each one opens in Explore."
     },
     "BODY2": {
       "label": "Second paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "Reference evidence pending. Until an inspectable record is registered, these names demonstrate intended examples, not independently verifiable deployment or production status."
+      "value": "A name becomes a reference when its record is registered in the evidence registry. Until then, nothing here shows that CR3TV or DeArk is deployed or in production."
     },
     "BODY3": {
       "label": "Closing paragraph",
@@ -43,13 +43,25 @@ ArkManifest.define({
       "label": "Onward link",
       "kind": "line",
       "section": "Links",
-      "value": "See how DEFXN works"
+      "value": "Deploy a resolver"
     },
     "BACK": {
       "label": "Back link",
       "kind": "line",
       "section": "Links",
       "value": "What is a resolver"
+    },
+    "START.LINK": {
+      "label": "Main action: where to start today",
+      "kind": "line",
+      "section": "Links",
+      "value": "Every resolver and capability"
+    },
+    "START.HREF": {
+      "label": "Main action target",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:resolvers"
     },
     "SOURCE.HREF": {
       "label": "Source link target",

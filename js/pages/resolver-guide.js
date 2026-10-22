@@ -58,6 +58,9 @@
       page: page, id: page, titleId: page + '-title', was: was, insertWas: was.insert,
       crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
       eyebrow: copy('EYEBROW'), title: copy('TITLE'),
+      /* one next step (first-visit audit 2026-10-22): the lede said only that the two examples cannot
+         be checked yet; the resolver chains that can be are one press away */
+      actions: [{ label: copy('START.LINK'), href: words('START.HREF'), tone: 'primary' }],
       depth: {
         focus: { text: copy('BODY1') },
         context: { text: copy('BODY3') },

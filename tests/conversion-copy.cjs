@@ -27,7 +27,12 @@ assert(value('resolver', 'BODY3').startsWith('Launched is not served.'));
 assert.equal(value('resolver', 'BOUNDARY'), 'Its signature is its result. Whether to rely on that resolver is decided before you send anything: its grammar, its capabilities, who can change it.');
 
 assert.equal(manifest('references').title, 'Reference resolvers');
-assert(value('references', 'BODY2').includes('Reference evidence pending'));
+/* The page must never present the named examples as checkable or live. Until 2026-10-22 the boundary
+   said "Reference evidence pending"; the first-visit audit rewrote the page for the visitor (what a
+   reference is, that neither has a public record yet, where to start today), so the same refusal is
+   now said in two places, each pinned. */
+assert.match(value('references', 'BODY1'), /neither has a public record you can inspect yet/);
+assert.match(value('references', 'BODY2'), /nothing here shows that CR3TV or DeArk is deployed or in production/);
 assert(!Object.values(manifest('references').fields).some((field) => /running on the fabric today/i.test(field.value)));
 
 const how = manifest('deployment');
