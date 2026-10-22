@@ -28,6 +28,14 @@ for(const m of theory){
 }
 const paths=Object.values(ArkUI.pageCatalog).flatMap(e=>[e.path].concat(e.aliases||[]));
 assert.equal(new Set(paths).size,paths.length,'no address names two pages (a readable alias never shadows another page)');
+// first-visit audit 2026-10-22 (P2): a note's address said "why-the-chain-was-retired" under the title "From one chain to one per
+// identity". Every note answers at an address derived from its title too; the old one stays its own (saved edits are stored under it).
+for(const a of vm.runInContext('LearningContent.articles',context)){
+  const route=ArkUI.pageCatalog['article/'+a.slug], readable='/learnings/'+a.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  assert.equal(route.path,'/learnings/'+a.slug,a.slug+' keeps its own address');
+  if(readable!==route.path) assert.deepEqual(Array.from(route.aliases||[]),[readable],a.slug+' has the readable alias '+readable);
+}
+assert.deepEqual(Array.from(ArkUI.pageCatalog['article/why-the-chain-was-retired'].aliases),['/learnings/from-one-chain-to-one-per-identity']);
 assert.equal(ArkManifest.points(ArkManifest.get('about')),5);assert(ArkUI.pageCatalog[ArkManifest.get('about').meta.next]);
 // Nothing on the concept page may point at an existing non-theory page: the point of the change is new pages.
 const concept=fs.readFileSync('js/pages/concept.js','utf8');

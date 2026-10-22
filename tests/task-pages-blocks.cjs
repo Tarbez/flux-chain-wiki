@@ -167,7 +167,7 @@ const ROUTES = {
     reshaped: [
       [/^id:work$/, 'the model\'s section holds the model alone; its breadcrumb, heading and introduction are blocks before it'],
       [/^page:\/div:1\/section:1\/div:1$/, 'the heading block became the hero (its status line a detail); its introduction is the disclosure after it'],
-      [/^page:\/div:1\/section:1\/div:2$/, 'the same model; only the whitespace between its parts changed (the census\'s 160-character cut falls later)'],
+      [/^page:\/div:1\/section:1\/div:2$/, 'the same model; the whitespace between its parts changed (the census\'s 160-character cut falls later), and since 2026-10-22 the slider and its analogy come before the stage (first-visit audit, P1: the slider sat below the fold); both keep their old keys by pin'],
       [/^page:\/div:1\/section:1\/div:2\/div:1(\/div:1)?$/, 'the toolbar and its picker: Ark\'s choice (W4-S14) names itself with a visible legend ("Choose a model") before the three studies'],
       [/^page:\/div:1\/section:1\/div:2\/div:2(\/span:1)?$/, 'the stage\'s corner label leads with what the code is ("Figure 1 of 3 · FX—001"; FX—001 was unexplained), derived from the study\'s place'],
       [/^page:\/div:1\/section:1\/div:2\/div:3\/div:1$/, 'the slider\'s control now opens with one line saying how to use it ("Drag the slider ..."), between its label and the slider'],

@@ -181,6 +181,14 @@ if (typeof ArkResolutions !== 'undefined') ArkResolutions.all().forEach(function
     styles: arkModuleStyles('resolutions')
   };
 });
+/* A readable address beside a derived route's own, derived from the page's name (first-visit audit 2026-10-22, P2):
+   /concept/networks opens /concept/purpose, /learnings/from-one-chain-to-one-per-identity opens
+   /learnings/why-the-chain-was-retired. The old path stays the route's own: saved CMS edits are stored under it
+   (js/content/layout.js scopeOf), and a record is never rewritten, so the readable one is the alias that leads to it. */
+function arkReadableAliases(base, name, own) {
+  var readable = base + String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return readable !== base && readable !== own ? [readable] : undefined;
+}
 /* Articles and theory pages are routes DERIVED from the content registries, never listed: one
    function, so the editor's canvas derives an unsaved page's route exactly as the site derives a
    saved one (js/main.js, the CMS preview's 'defxn-cms-preview-state': a new page or article was
@@ -194,15 +202,16 @@ ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
     var key = 'article/' + article.slug, body = article.sections ? [] : ['js/content/articles/' + article.slug + '.js'];
     if (!ArkUI.pageCatalog[key]) added.push(key);
     ArkUI.pageCatalog[key] = { path: '/learnings/' + article.slug, title: typeof ArkSEO !== 'undefined' ? ArkSEO.articleTitle(article.slug, article.title) : article.title, seoArticle: article.slug, journey: ArkSitePages.journeyOf(key), module: 'article', scripts: ArkUI.storyScripts.concat(body, ['js/pages/article.js']), styles: arkModuleStyles('article') };
+    var aliases = arkReadableAliases('/learnings/', article.title, ArkUI.pageCatalog[key].path);
+    if (aliases) ArkUI.pageCatalog[key].aliases = aliases;
   });
   (theoryManifests || []).forEach(function (m) {
     var key = 'concept/' + m.id, label = ArkCopy.text(m.id.toUpperCase() + '.TITLE').replace(/\.$/, '');
     if (!ArkUI.pageCatalog[key]) added.push(key);
     ArkUI.pageCatalog[key] = { path: m.route, title: arkSeoTitle(m.id, label), seoId: m.id, journey: ArkSitePages.journeyOf(key), module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js', 'js/ark/page-kit.js']), styles: arkModuleStyles('theory') };
-    /* A readable address beside the old one, derived from the page's name: /concept/networks opens /concept/purpose
-       (first-visit audit 2026-10-22, P2: /concept/notes is "Activation", and "notes" is also the name of /learnings). */
-    var readable = '/concept/' + String(m.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    if (readable !== '/concept/' && readable !== m.route) ArkUI.pageCatalog[key].aliases = [readable];
+    /* /concept/notes is "Activation", and "notes" is also the name of /learnings */
+    var readable = arkReadableAliases('/concept/', m.title, m.route);
+    if (readable) ArkUI.pageCatalog[key].aliases = readable;
   });
   return added;
 };
