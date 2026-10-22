@@ -69,12 +69,6 @@ ArkManifest.define({
     ]
   },
   "fields": {
-    "EYEBROW": {
-      "label": "Eyebrow",
-      "kind": "line",
-      "section": "Page",
-      "value": "DEFXN / RESOLVERS"
-    },
     "TITLE": {
       "label": "Heading",
       "kind": "line",

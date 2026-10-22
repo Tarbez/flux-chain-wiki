@@ -54,7 +54,10 @@ const ROUTES = {
       [/^page:\/div:1\/nav:3\/a:1\/span:1$/, 'the next step\'s name on the pill ("Resolve") is "Next step": the chosen step is named by the steps row above'],
       [/^page:\/figure:1\/figcaption:1\/button:1\/span:1$/, 'the "↻" glyph of Run again: the Ark button says "Run again"'],
       [/^page:\/figure:1\/div:2\/div:1\/button:\d\/span:1$/, 'a document\'s name is its Ark choice option, with its size: "Report · 3.2 MB"'],
-      [/^page:\/div:1\/p:1$/, 'the eyebrow, reworded: "DEFXN / RESOLVERS" (see reworded)']
+      /* first-visit audit 2026-10-22 (P2): one page name */
+      [/^page:\/div:1\/nav:1\/span:1$/, 'this page in the breadcrumb reads "What is a resolver?", the name the menu and /resolver-math\'s trail use (see reworded)'],
+      [/^page:\/div:1\/nav:1$/, 'the same breadcrumb, its last item reworded'],
+      [/^page:\/figure:1\/figcaption:1(\/span:1)?$/, 'the illustration\'s head names its rule in words, "Example rule: files up to 5 MB · runs in your browser"; the id policy.doc-size/v1 is in the caption (see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the left column; a block page stacks its blocks in its root'],
@@ -66,13 +69,17 @@ const ROUTES = {
       [/^page:\/div:1\/nav:2\/button:\d\/span:1$/, 'a step\'s dot on the old track: Ark\'s choice option marks the chosen step itself'],
       [/^page:\/div:1\/nav:2\/button:\d\/span:2\/small:1$/, 'a step\'s number ("01"): it starts the step\'s Ark choice label ("01 Ask")'],
       [/^page:\/div:1\/nav:3\/a:1\/span:2$/, 'the pill\'s "→": Ark\'s Next step button needs no glyph'],
-      [/^page:\/figure:1\/div:2\/div:1\/button:\d\/small:1$/, 'a document\'s size: it is in the document\'s Ark choice label ("Report · 3.2 MB")']
+      [/^page:\/figure:1\/div:2\/div:1\/button:\d\/small:1$/, 'a document\'s size: it is in the document\'s Ark choice label ("Report · 3.2 MB")'],
+      /* first-visit audit 2026-10-22 (P2): the eyebrow repeated the breadcrumb above it */
+      [/^page:\/div:1\/p:1$/, 'the eyebrow ("FLUX PROTOCOL / RESOLVERS", then "DEFXN / RESOLVERS"): it repeated the breadcrumb, so the page has none (RESOLVER.EYEBROW is retired with it)']
     ],
     reworded: [
       [/^page:\/div:1\/nav:3(\/a:2)?$/, '"Spec →" reads "Wording from the resolver spec" (and "Resolve→" is the illustration\'s next button)'],
       [/^page:\/figure:1\/p:2\/a:[12]$/, '"resolver spec" / "status page" read "Wording from the resolver spec" / "Status from the status page"'],
       [/^id:resolver-lab-title$/, '"Get a claim you can check" reads "Get an answer you can check": the heading used "claim" before the page defines it (ledger recheck 2026-10-21, WR-4)'],
-      [/^page:\/div:1\/p:1$/, 'the eyebrow says "DEFXN / RESOLVERS" like every other page ("FLUX PROTOCOL" was never introduced: first-visit audit 2026-10-22)']
+      [/^page:\/div:1\/p:1$/, 'the eyebrow is gone: it repeated the breadcrumb (first-visit audit 2026-10-22; before that it read "DEFXN / RESOLVERS", "FLUX PROTOCOL" never being introduced)'],
+      [/^page:\/div:1\/nav:1(\/span:1)?$/, '"Resolver" reads "What is a resolver?": one page name (first-visit audit 2026-10-22)'],
+      [/^page:\/figure:1\/figcaption:1(\/span:1)?$/, '"policy.doc-size/v1 · runs in your browser" reads "Example rule: files up to 5 MB · runs in your browser": the head showed only an internal id (first-visit audit 2026-10-22)']
     ]
   },
   '/start-from-something-real': { page: 'references', ids: ['references-'],
@@ -93,8 +100,12 @@ const ROUTES = {
       [/^page:\/div:1\/div:1\/aside:1\/p:1$/, 'the boundary, reworded: it repeated the lede ("Reference evidence pending"); it now says what makes a name a reference'],
       [/^page:\/nav:3\/a:2$/, 'the next link, reworded: "Deploy a resolver" (see reworded)']
     ],
-    retired: [],
-    reworded: [[/^page:\/nav:2\/button:[12]$/, '"Answer" / "Understand why" read "The idea" / "How it works": the one depth label set (the story template)'],
+    retired: [
+      /* first-visit audit 2026-10-22 (P2): "DEFXN / REFERENCE RESOLVERS" repeated the breadcrumb and the heading */
+      [/^page:\/p:1$/, 'the eyebrow: it repeated the breadcrumb above it and the heading below it, so the page has none (REFERENCES.EYEBROW is retired with it)']
+    ],
+    reworded: [[/^page:\/p:1$/, 'the eyebrow is gone (see retired)'],
+      [/^page:\/nav:2\/button:[12]$/, '"Answer" / "Understand why" read "The idea" / "How it works": the one depth label set (the story template)'],
       /* first-visit audit 2026-10-22: the URL and heading promised what the page could not show */
       [/^id:references-title$/, '"Reference resolvers, without the leap of faith." reads "Reference resolvers are not published yet.": the heading promised checkable examples the page says do not exist yet'],
       [/^page:\/nav:3\/a:2$/, '"See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens']]

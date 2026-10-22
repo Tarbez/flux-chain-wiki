@@ -19,7 +19,7 @@
      and retired key is listed with its reason in tests/resolver-guide-blocks.cjs. */
   var WAS = { references: {
     'references-crumbs': { ':root': 'page:/nav:1', 'breadcrumb-item': 'page:/nav:1/a:1', 'breadcrumb-item#2': 'page:/nav:1/span:1' },
-    'references-hero': { eyebrow: 'page:/p:1', 'hero-title': 'id:references-title' },
+    'references-hero': { 'hero-title': 'id:references-title' },
     'references-body': { ':root': { key: 'page:/div:1', self: true }, ':scope > div:nth-of-type(1)': { key: 'page:/div:1/div:1', self: true } },
     'references-depth': { 'tabs-list': { key: 'page:/nav:2', self: true }, 'tabs-trigger': 'page:/nav:2/button:1', 'tabs-trigger#2': 'page:/nav:2/button:2', 'tabs-trigger#3': 'page:/nav:2/button:3',
       'tabs-content': { key: 'page:/div:1/div:1/div:1', self: true }, ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/div:1/div:1/div:1/p:1' },
@@ -56,8 +56,10 @@
 
     return {
       page: page, id: page, titleId: page + '-title', was: was, insertWas: was.insert,
+      /* no eyebrow: "DEFXN / REFERENCE RESOLVERS" repeated the breadcrumb above it and the heading
+         below it (first-visit audit 2026-10-22) */
       crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
-      eyebrow: copy('EYEBROW'), title: copy('TITLE'),
+      title: copy('TITLE'),
       /* one next step (first-visit audit 2026-10-22): the lede said only that the two examples cannot
          be checked yet; the resolver chains that can be are one press away */
       actions: [{ label: copy('START.LINK'), href: words('START.HREF'), tone: 'primary' }],

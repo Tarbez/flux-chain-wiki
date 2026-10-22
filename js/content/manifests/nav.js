@@ -52,7 +52,7 @@ ArkManifest.define({
       "label": "Header link: what is a resolver",
       "kind": "line",
       "section": "Header links",
-      "value": "Resolver"
+      "value": "What is a resolver?"
     },
     "REFERENCES": {
       "label": "Header link: reference resolvers",
