@@ -14,7 +14,7 @@
      the site's journey table -- Deploy a resolver is one of them (resolvers-content.md 5.c). */
 /* "Open DAO" is the hero's one action (first-visit audit 2026-10-22, P1): the hero's teal button was "Separate approval
    from activation", the notes page's words, while the product sat in a small outlined button in a card lower down. The
-   address is the family kit's (DefxnKit.productHref), never typed here; with no kit loaded (a headless harness) the sheet
+   address is the family kit's (DefxnKit.productHref), never typed here; with no kit loaded (a headless harness) the page
    keeps its notes link as the hero action. The notes link is the first of the ways on, in The idea (js/pages/sheet.js).
    The card that held the button is gone: its one sentence repeated the deck, and its button is the hero's now. */
 function daoProductAction(){

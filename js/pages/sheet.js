@@ -500,7 +500,7 @@
     var points = [];
     for (var n = 1; n <= count; n++) points.push({ value: 'step-' + (n - 1), title: copy('POINT' + n + '.TITLE'), content: copy('POINT' + n + '.TEXT') });
     /* One trail for the index and its sheets (first-visit audit 2026-10-22, P2): /concept is "Home / Overview / Operating
-       model", so a sheet is "Home / Overview / Operating model / <sheet>" -- the Overview level no longer appears and
+       model", so a question is "Home / Overview / Operating model / <question>" -- the Overview level no longer appears and
        disappears. Its address is the index's own field (CONCEPT.BACK.HREF). */
     var overview = { label: 'Overview', href: ArkCopy.text('CONCEPT.BACK.HREF') };
     var parent = { label: 'Operating model', href: 'route:concept' };
@@ -516,7 +516,7 @@
     /* A question of the sequence ("Operating model · 2 of 6") ends in a pager: the previous and the next question, in
        ArkManifest.group('theory') order, as the lifecycle's stages do; the ways out of the sequence are its related row,
        so The idea holds one action, not four (first-visit audit 2026-10-22, P1 /concept/* and P2 /concept/purpose). */
-    /* the pager says "Previous" / "Next" itself; its title is the question, its line the sheet's name */
+    /* the pager says "Previous" / "Next" itself; its title is the question, its line the page's name */
     function question(m) { return { label: ArkCopy.text(m.id.toUpperCase() + '.TITLE'), summary: m.title, href: 'route:concept/' + m.id }; }
     var pager = index < 0 ? undefined : {
       label: 'Operating model questions',
