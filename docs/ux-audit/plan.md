@@ -329,3 +329,17 @@ Open, need the owner: P0 /download (no public code link: where does a visitor ge
 Run DEFXN point elsewhere until a download exists?); P1 #1-#4 (header network pill, "Products" vs product, the home's
 hero action and destination, one name for /how-deployment-works); background motion; gate credential name.
 Open, in repo: the rest of the P1/P2 list in docs/ux-audit/first-visit-2026-10-22.md.
+
+## Resume point 13 (2026-10-22) — owner's calls applied
+Owner decisions 2026-10-22, merged: b451b68 (home action "See how DEFXN works" -> /about, See it work keeps the
+walkthrough link; network pill "Network: Production" from 1280px via a CSS prefix; the pattern scan plays on the
+home only), 31e3009 (/download lists the CLI, Flux Miner Desktop, ARK Browser and DEFXN Browser for iOS/Android,
+each "Not published yet" until DOWNLOAD.APP.<KEY>.URL holds an https:// address -- none is public today: the GitHub
+repos are private, flux-miner is not on npm, desktop/mobile builds are local only). Also fixed on the way: header-row-fit
+crashed on main after 1d76b97 (its slice now has ArkUI), /deploy's glossary file re-derived (1d76b97 dropped
+"miner presence"), site-fixes reads /experiments without term tips.
+Build note: js/settings/panel.js was rebuilt in a worktree with the pinned .vendor packages unpacked into a private
+node_modules (the shared one holds ark-ui 0.2.16 / sdk 0.2.45 from another session; check:ark is clean there).
+Next: the rest of docs/ux-audit/first-visit-2026-10-22.md (P1 #2 "Products" naming is a kit change; #4 one name
+for /how-deployment-works; #5, #6, #11-#14, #16-#36; the P2s). The owner publishes the app builds and fills the
+download addresses in the CMS (Download page, "Apps" fields).
