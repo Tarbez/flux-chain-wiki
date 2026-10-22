@@ -36,7 +36,7 @@ ArkManifest.define({
       "label": "Model label",
       "kind": "line",
       "section": "Page",
-      "value": "THREE BOUNDED LAYERS"
+      "value": "Three bounded layers"
     },
     "MODEL.TEXT": {
       "label": "Model summary",
