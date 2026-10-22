@@ -106,8 +106,8 @@ async function main() {
       if (expanded !== 'true') failures.push(`${tag}: toggle aria-expanded is ${expanded} after opening`);
       await check(tag, page, '.story-side [data-ark-part="figure-caption"]', { text: 'The request brief' });
       await check(tag, page, '.stage-brief-job', { text: 'THE JOB' });
-      await check(tag, page, '.stage-scene-choices button', { text: 'Who asks' });
-      await check(tag, page, '.stage-scene-choices button', { text: 'What travels' });
+      await check(tag, page, '.stage-scene-choices button', { text: 'Show who asks' });
+      await check(tag, page, '.stage-scene-choices button', { text: 'Show what goes with the request' });
     });
     /* /lifecycle overview: the reference-fabric figure, the same way. */
     await visit('lifecycle', '/lifecycle', PHONE, async (page, tag) => {

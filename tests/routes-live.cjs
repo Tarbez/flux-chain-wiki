@@ -236,7 +236,11 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
           const inspect = childrenOf(scene, '.stage-scene-choices');
           inspect[0].click(); const firstInspection = scene.querySelector('.stage-scene-mesh').dataset.stage;
           inspect[1].click(); assert.notEqual(scene.querySelector('.stage-scene-mesh').dataset.stage, firstInspection, 'lifecycle inspection controls have different patterns');
-          assert.equal(scene.querySelector('.stage-scene-detail').textContent, ArkUI.lifecycleContent[stageId].facts[1][1], 'scene inspection reveals the actual reference fact');
+          /* first-visit audit 2026-10-22 (P2): the buttons replay a part of the picture and no longer print the stage's facts a
+             third time (The idea and Step by step give them); the mesh caption narrates the replay, live once a visitor asks */
+          assert(!ArkUI.lifecycleContent[stageId].facts.some((f) => scene.textContent.includes(f[1])), 'scene inspection does not repeat the stage\'s facts');
+          assert(inspect.every((b) => /^Show /.test(b.textContent)), 'each scene button says what it shows');
+          assert.equal(scene.querySelector('.mesh-story-cue').getAttribute('aria-live'), 'polite', 'the replay is announced once asked for');
           const other = page.querySelector('[data-ark-block="pager"] [data-ark-part="pager-related"] a');
           const mesh = scene.querySelector('.stage-scene-mesh');
           pointer(other, 'pointerenter'); const previewed = mesh.dataset.stage;

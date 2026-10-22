@@ -188,6 +188,10 @@ module.exports = {
  },
  "/lifecycle/intent": {
   "reshaped": {
+   "page:/div:1/figure:1/nav:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:2": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/p:2": "the line beside the illustration's buttons says what they do (\"Each button below replays one part of the picture.\"); it no longer shows a fact the tabs already give (first-visit audit 2026-10-22, P2)",
    "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
@@ -219,6 +223,10 @@ module.exports = {
  },
  "/lifecycle/offer": {
   "reshaped": {
+   "page:/div:1/figure:1/nav:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:2": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/p:2": "the line beside the illustration's buttons says what they do (\"Each button below replays one part of the picture.\"); it no longer shows a fact the tabs already give (first-visit audit 2026-10-22, P2)",
    "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
@@ -251,6 +259,10 @@ module.exports = {
  },
  "/lifecycle/agreement": {
   "reshaped": {
+   "page:/div:1/figure:1/nav:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:2": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/p:2": "the line beside the illustration's buttons says what they do (\"Each button below replays one part of the picture.\"); it no longer shows a fact the tabs already give (first-visit audit 2026-10-22, P2)",
    "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
@@ -283,6 +295,10 @@ module.exports = {
  },
  "/lifecycle/fulfillment": {
   "reshaped": {
+   "page:/div:1/figure:1/nav:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:2": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/p:2": "the line beside the illustration's buttons says what they do (\"Each button below replays one part of the picture.\"); it no longer shows a fact the tabs already give (first-visit audit 2026-10-22, P2)",
    "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
@@ -315,6 +331,10 @@ module.exports = {
  },
  "/lifecycle/receipt": {
   "reshaped": {
+   "page:/div:1/figure:1/nav:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:1": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/nav:1/button:2": "the illustration's buttons say what part of the picture they replay (\"Show ...\") and no longer print the stage's facts a third time (first-visit audit 2026-10-22, P2)",
+   "page:/div:1/figure:1/p:2": "the line beside the illustration's buttons says what they do (\"Each button below replays one part of the picture.\"); it no longer shows a fact the tabs already give (first-visit audit 2026-10-22, P2)",
    "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
