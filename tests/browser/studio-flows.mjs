@@ -560,13 +560,15 @@ async function setDefinition(app, label, prop, value) {
 await flow('makecomp', async () => {
   const { page, app, pv, shot } = await openEditor();
   let master, origin, other;
-  /* Since /download became Ark blocks (Wave 3) its title sits in the hero beside the hero's eyebrow,
+  /* Since /download became Ark blocks (Wave 3) its title sits in the hero beside the hero's actions row,
      and the intro paragraph opens The idea view (it kept its layout key from when it followed the
      title). A selection across the two containers is REFUSED (owner decision 2026-10-20, js/main.js
      cmsComponentRefusal; tests/cms-component-one-place.cjs): the instance would stand in for both
      from one place, and the hero silently lost its title. The pair that becomes the component is
-     the hero's eyebrow and title -- siblings, a paragraph and a heading. */
-  const H1 = '#download-title', EYEBROW = 'header.ark-hero:has(> #download-title) > p.ark-eyebrow', INTRO = '[data-ark-layout-key="page:/header:1/p:1"]';
+     the hero's title and its actions row (the operator guide link) -- siblings in one container,
+     a heading and a link. It was the eyebrow and the title until the eyebrow left /download
+     (first-visit audit 2026-10-22, P2: "RUN DEFXN / FROM SOURCE" repeated the breadcrumb). */
+  const H1 = '#download-title', ACTIONS = 'header.ark-hero:has(> #download-title) > div.ark-actions', INTRO = '[data-ark-layout-key="page:/header:1/p:1"]';
   await step('a heading + a paragraph in ANOTHER container: Make into component is refused, saying how to select', async () => {
     await gotoRoute(app, pv, '/download');
     await pv.locator(H1).click();
@@ -581,23 +583,21 @@ await flow('makecomp', async () => {
     await page.keyboard.press('Escape');
     await pv.locator('.ark-studio-menu').waitFor({ state: 'hidden' }).catch(() => {});
   });
-  await step('select the hero\'s eyebrow + heading on /download (one container), right-click > Make into component', async () => {
+  await step('select the hero\'s heading + actions row on /download (one container), right-click > Make into component', async () => {
     /* in the preview's own coordinates, like instanceBox() -- a locator's boundingBox() is in the editor
-       page's. The instance takes the place of the FIRST selected layer in the page's order: the eyebrow */
-    const before = await pv.evaluate((s) => document.querySelector(s).getBoundingClientRect().toJSON(), EYEBROW);
-    /* The eyebrow paragraph holds its words in a child bound to the copy key, so a click on it selects
-       that child (copy:DOWNLOAD.EYEBROW), whose parent is the eyebrow -- and with the title that pair is
-       rightly refused (measured 2026-10-20). The paragraph itself is reached the way a person reaches a
-       container: its row in the Layers tab (which also replaces the refused selection still standing
-       from the step before). Then Shift-click adds the title on the canvas. */
-    const eyebrowKey = await pv.evaluate((s) => document.querySelector(s).getAttribute('data-ark-layout-key'), EYEBROW);
+       page's. The instance takes the place of the FIRST selected layer in the page's order: the heading */
+    const before = await pv.evaluate((s) => document.querySelector(s).getBoundingClientRect().toJSON(), H1);
+    /* A click on the actions row lands on its link, so the row itself is reached the way a person
+       reaches a container: its row in the Layers tab (which also replaces the refused selection still
+       standing from the step before). Then Shift-click adds the title on the canvas. */
+    const actionsKey = await pv.evaluate((s) => document.querySelector(s).getAttribute('data-ark-layout-key'), ACTIONS);
     await openRailTab(app, 'layers');
-    const eyebrowRow = app.locator(`#layers li[data-key="${eyebrowKey}"]`);
-    await until(async () => (await eyebrowRow.count()) > 0, 'the Layers tab has no row for the eyebrow (' + eyebrowKey + ')');
-    await eyebrowRow.locator('svg.ic').first().click();   /* its icon: the eye button floats over the row's tag */
-    await until(() => app.evaluate((k) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).join() === k, eyebrowKey), 'the Layers row did not select the eyebrow paragraph');
+    const actionsRow = app.locator(`#layers li[data-key="${actionsKey}"]`);
+    await until(async () => (await actionsRow.count()) > 0, 'the Layers tab has no row for the hero\'s actions row (' + actionsKey + ')');
+    await actionsRow.locator('svg.ic').first().click();   /* its icon: the eye button floats over the row's tag */
+    await until(() => app.evaluate((k) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).join() === k, actionsKey), 'the Layers row did not select the hero\'s actions row');
     await pv.locator(H1).click({ modifiers: ['Shift'] });
-    await until(() => app.evaluate(([a, b]) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).sort().join() === [a, b].sort().join(), [eyebrowKey, 'id:download-title']), 'Shift-click did not add the title to the eyebrow');
+    await until(() => app.evaluate(([a, b]) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).sort().join() === [a, b].sort().join(), [actionsKey, 'id:download-title']), 'Shift-click did not add the title to the actions row');
     /* the two-layer label ("2 layers ...") is drawn over the selection, so Playwright refuses the click
        as intercepted. A person right-clicking there hits that label, and a right-click on the canvas's
        own selection chrome opens the same context menu (js/main.js, its contextmenu listener) -- so the
@@ -609,12 +609,16 @@ await flow('makecomp', async () => {
     const spot = Object.keys((c.spots || {})['/download'] || {})[0];
     check(spot && c.spots['/download'][spot].replaces.length === 2, 'the instance does not stand in for both selected elements: ' + JSON.stringify(c.spots));
     origin = c.routes['/download'][spot][0].key;
-    check(JSON.stringify(Object.keys(master.props).sort()) === JSON.stringify(['heading', 'paragraph']), 'props are not derived from the selection\'s text: ' + JSON.stringify(master.props));
-    const hidden = await pv.evaluate(([a, b]) => [a, b].map((s) => getComputedStyle(document.querySelector(s)).display), [H1, EYEBROW]);
+    /* the heading, then the link's texts in order: its label (`link`), the arrow Ark draws after it (`link2`) and, for a
+       link that leaves the site, the hidden "(opens another site)" note (`link3`) -- every one taken from the selection */
+    const names = Object.keys(master.props).sort();
+    check(names[0] === 'heading' && names[1] === 'link' && names.slice(2).every((n, i) => n === 'link' + (i + 2)), 'props are not derived from the selection\'s text: ' + JSON.stringify(master.props));
+    check(/operator guide/i.test(master.props.link), 'the link prop is not the guide link\'s label: ' + JSON.stringify(master.props));
+    const hidden = await pv.evaluate(([a, b]) => [a, b].map((s) => getComputedStyle(document.querySelector(s)).display), [H1, ACTIONS]);
     check(hidden.every((d) => d === 'none'), 'the original elements are still showing: ' + hidden);
     check(await pv.evaluate((s) => getComputedStyle(document.querySelector(s)).display !== 'none', INTRO), 'the intro paragraph (not selected) was hidden too');
     const texts = await instanceTexts(pv);
-    check(/Start a local miner/.test(texts[origin]) && /run defxn/i.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
+    check(/Start a local miner/.test(texts[origin]) && /operator guide/i.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
     await animationsSettled(pv); await shot('makecomp-01-made');
     const box = await instanceBox(pv, origin);
     check(box && Math.abs(box.y - before.y) < 4 && Math.abs(box.x - before.x) < 4, `the instance is not where the selection was: ${JSON.stringify(box)} vs ${JSON.stringify(before)} ` + JSON.stringify(c.spots) + JSON.stringify(master.tree).slice(0, 400));
@@ -644,11 +648,12 @@ await flow('makecomp', async () => {
     /* say what covers it instead of timing out on the click (the click below is still the real one) */
     const cover = await coveredBy(pv, other);
     check(!cover.length, 'the inserted instance on /chain is drawn under the page, so a click on it never reaches it: ' + cover.join(', '));
-    await pv.locator('[data-ark-component-key] p').first().click();
-    const field = (await section(app, 'Component instance')).locator('input[data-prop="paragraph"]');
+    /* the heading, not the link: a click selects the instance either way, and never follows a link */
+    await pv.locator('[data-ark-component-key] h1').first().click();
+    const field = (await section(app, 'Component instance')).locator('input[data-prop="link"]');
     await field.fill('Only on the chain page.'); await field.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(async () => /Only on the chain page/.test((await instanceTexts(pv))[other]), 'the override did not show');
-    check((await componentsIn(pv)).masters[master.id].props.paragraph === master.props.paragraph, 'the override leaked into the definition');
+    check((await componentsIn(pv)).masters[master.id].props.link === master.props.link, 'the override leaked into the definition');
   });
   await step('detach the other one (on /download); a later definition edit no longer reaches it', async () => {
     await gotoRoute(app, pv, '/download');
@@ -678,7 +683,7 @@ await flow('makecomp', async () => {
     await gotoRoute(again.app, again.pv, '/download');
     await until(async () => /Run DEFXN from source/.test(Object.values(await instanceTexts(again.pv)).join()), 'after reload /download lost its (detached) instance');
     await gotoRoute(again.app, again.pv, '/chain');
-    /* both words, in either order: the captured eyebrow (the paragraph) comes before the heading */
+    /* both words, in either order: the heading and the captured link's override */
     await until(async () => { const t = Object.values(await instanceTexts(again.pv)).join(); return /Third heading/.test(t) && /Only on the chain page/.test(t); }, 'after reload /chain lost its instance or override');
     await again.page.close();
   });
