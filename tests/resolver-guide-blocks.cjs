@@ -79,6 +79,7 @@ const ROUTES = {
       [/^id:resolver-lab-title$/, '"Get a claim you can check" reads "Get an answer you can check": the heading used "claim" before the page defines it (ledger recheck 2026-10-21, WR-4)'],
       [/^page:\/div:1\/p:1$/, 'the eyebrow is gone: it repeated the breadcrumb (first-visit audit 2026-10-22; before that it read "DEFXN / RESOLVERS", "FLUX PROTOCOL" never being introduced)'],
       [/^page:\/div:1\/nav:1(\/span:1)?$/, '"Resolver" reads "What is a resolver?": one page name (first-visit audit 2026-10-22)'],
+      [/^page:\/div:1\/div:2\/nav:1\/a:6$/, '"Inspect reference evidence" reads "Reference resolvers", the name of the page it opens, which says no reference has public evidence yet (first-visit audit 2026-10-22, P1)'],
       [/^page:\/figure:1\/figcaption:1(\/span:1)?$/, '"policy.doc-size/v1 · runs in your browser" reads "Example rule: files up to 5 MB · runs in your browser": the head showed only an internal id (first-visit audit 2026-10-22)']
     ]
   },

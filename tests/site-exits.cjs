@@ -20,7 +20,7 @@ const read = (f) => fs.readFileSync(f, 'utf8');
 // tests/resolver-math-blocks.cjs check they render as router links).
 assert(read('js/pages/stats.js').includes("href: 'route:stats/gpu'"), '/stats links /stats/gpu');
 // /what-is-a-resolver is the story template since 2026-10-19 (W3-GUIDE): the link is a related page in its pager.
-assert(/\{ label: 'Inspect reference evidence', href: words\('INSPECT\.HREF'\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver renders INSPECT.HREF (-> /start-from-something-real)');
+assert(/\{ label: ArkSitePages\.row\('references'\)\.label, href: words\('INSPECT\.HREF'\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver renders INSPECT.HREF (-> /start-from-something-real), named by that page\'s label');
 assert(/"INSPECT\.HREF"[\s\S]{0,200}"value": "route:references"/.test(read('js/content/manifests/resolver.js')), 'and INSPECT.HREF still points at the reference resolvers');
 const resolvers = read('js/pages/resolvers.js');
 for (const target of ['resolver', 'resolver-math', 'references', 'deploy']) assert(resolvers.includes("'route:" + target + "'"), '/resolvers leads on to ' + target);
@@ -73,7 +73,7 @@ for (const [file, re] of [['css/navigation.css', /\.ark-link::after \{ content:"
 // not to the list of what resolves; the lifecycle and the sheets named no way out of their own journey. Both are derived from the journey
 // table (js/ark/page-kit.js), never typed: no page is named in the code that renders them.
 {
-  assert(/ArkUI\.journeyLead\(page\)/.test(read('js/pages/resolver-lab.js')) && /concat\(\[\{ label: 'Inspect reference evidence'[^\n]*resolutions\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver\'s pager leads on to the journey\'s start (Resolutions)');
+  assert(/ArkUI\.journeyLead\(page\)/.test(read('js/pages/resolver-lab.js')) && /concat\(\[\{ label: ArkSitePages\.row\('references'\)\.label[^\n]*resolutions\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver\'s pager leads on to the journey\'s start (Resolutions)');
   const kit = read('js/ark/page-kit.js');
   assert(!/route:(resolutions|stats|proximity|download)/.test(kit.replace(/\/\*[\s\S]*?\*\//g, '')), 'the page kit names no page: its links come from ArkSitePages');
   const ctx = vm.createContext({ ArkUI: { el: () => ({}) }, window: {} });
