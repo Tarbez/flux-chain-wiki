@@ -343,3 +343,20 @@ node_modules (the shared one holds ark-ui 0.2.16 / sdk 0.2.45 from another sessi
 Next: the rest of docs/ux-audit/first-visit-2026-10-22.md (P1 #2 "Products" naming is a kit change; #4 one name
 for /how-deployment-works; #5, #6, #11-#14, #16-#36; the P2s). The owner publishes the app builds and fills the
 download addresses in the CMS (Download page, "Apps" fields).
+
+## Resume point 14 (2026-10-22, paused by the owner: usage limit)
+Paused mid-round. Three opus helpers were fixing the open P1/P2 findings of docs/ux-audit/first-visit-2026-10-22.md,
+one worktree each, and were stopped by the coordinator:
+- guides (concept/*, lifecycle/*, /experiments, articles, story.js, sheet.js incl. /dao's hero action):
+  branch worktree-agent-a6bbe3054f64aee62
+- resolver pages (/how-deployment-works + chapters, /what-is-a-resolver, /start-from-something-real, /resolvers,
+  /resolver-math, /chain, /dao, nav.js label): branch worktree-agent-aad2c0dd47a434e5c
+- explore/money/tools (/explore, /treasury, /deposits, /stats*, /bundle-deployer, /deploy, /download, /palette,
+  /reference, dash-kit hand-off sentence): branch worktree-agent-ab762da39c5fd8fdc
+To resume: read each branch's commits and uncommitted changes (worktrees under .claude/worktrees/agent-<id>), finish
+or re-run the group (same brief: the "Agent" prompts of this session), then merge with the FXN ID routine: back up
+index.html + js/min/manifest.js, merge in .claude/worktrees/merge-pages, `npm run build:pages`, run the page tests,
+`git checkout HEAD -- index.html js/min/manifest.js`, `git merge --ff-only`, re-insert the FXN ID CSP comment+meta and
+the tab-icon link from the backup, `npm run build:pages`, confirm the uncommitted file list is unchanged.
+Excluded until the owner or its session decides: /account (another session's uncommitted work), the header's
+"Products" switcher (kit), the sign-in gate. Main is at 4e0645a + this note.
