@@ -87,9 +87,6 @@ const reshaped = {
   [MORE + '/section:4']: 'the FAQ section is the "Questions" view',
   [CLOSING + '/div:2']: 'the closing\'s words are the "Not sure yet" path now',
   [CLOSING + '/div:2/a:1']: 'its "Explore DEFXN" line is the pager\'s next link',
-  /* the owner's call 2026-10-22: /dao is "How DEFXN is governed" (title, breadcrumb, every link to it); "Network DAO" names the product only */
-  [CLOSING + '/nav:1']: 'the closing links, the pager\'s related row: the same five, the last one renamed (see the next key)',
-  [CLOSING + '/nav:1/a:5']: '"Governance" reads "How DEFXN is governed", /dao\'s one name (the owner\'s call 2026-10-22)',
   /* The scene's step list (ol > li > button > number, icon, name) is the step picker's Ark tabs now (ledger: `home-cycle-step`
      / `flow-record` were hand-built, 1.4:1 on their boundary): its list and each step's tab keep the old list's and button's keys. */
   [SCENE]: 'the scene\'s frame began with the step list\'s words; the list is the step picker above the scene\'s tile now (same words, then the tile)',
