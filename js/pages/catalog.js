@@ -101,7 +101,7 @@ function arkModuleStyles(module) { return ArkUI.pageStyles.modules[module]; }
    scripts/lib/site-routes.mjs both read them here, so a retired path is retired in one place. */
 var arkPageModules = {
   zero: { module: 'zero', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/content/evidence-registry.js', 'js/pages/home-flow.js', 'js/ark/pulse-client.js', 'js/pages/home.js']) },
-  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
+  chain: { module: 'chain', scripts: ArkUI.blockScripts.concat(['js/pages/home-flow.js', 'js/ark/vendor/ark-kit-figures.js', 'js/ark/vendor/ark-kit-forms.js', 'js/pages/resolver-page-parts.js', 'js/pages/chain.js']) },
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
   resolver: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/content/registry-snapshot.js', 'js/ark/vendor/ark-kit-forms.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/resolver-lab.js', 'js/pages/resolver-guide.js']) },
   references: { module: 'resolverGuide', scripts: ArkUI.storyScripts.concat(['js/pages/resolver-guide.js']) },

@@ -41,9 +41,9 @@
   // Checks on the record's band, lit once passed: Grammar, Signature, Chain head, K-of-N peers.
   var CHECKS = ['G', 'S', 'C', 'K'];
   var BASE_STEPS = [
-    { id: 'sign', title: 'Sign', page: 'account', actors: ['holder'], checks: 0, says: 'The holder signs one record that extends their own chain, at position 42.' },
+    { id: 'sign', title: 'Sign', page: 'account', actors: ['holder'], checks: 0, says: 'The holder signs one record and adds it to their own chain, as record 42 (J42).' },
     { id: 'check', title: 'Check', page: 'stats', actors: ['chain'], checks: 2, says: 'The signature verifies and the record fits its grammar: the base grammar and, for a resolver’s record, the grammar that resolver published at launch. What it means is the resolver’s job.' },
-    { id: 'extend', title: 'Extend', page: 'explorer', actors: ['chain'], checks: 3, says: 'It points to the current head, #2b9d, and position 42 is still free.' },
+    { id: 'extend', title: 'Extend', page: 'explorer', actors: ['chain'], checks: 3, says: 'It points to the chain’s latest record, #2b9d, and no record holds place 42 yet.' },
     { id: 'replicate', title: 'Replicate', page: 'stats', actors: ['chain'], checks: 4, says: 'Copied to 9 of 12 peers in this example. The other histories remain independent.' },
     { id: 'resolve', title: 'Resolve', page: 'resolver', actors: ['resolver'], checks: 4, says: 'An intent to swap. The launch’s signer resolves the batch and signs the result. That signed result is what peers store.' }
   ];
@@ -612,7 +612,10 @@
     var catalog = ArkUI.pageCatalog || {};
     var items = stepsFor(caseId).map(function (step) {
       var item = { value: step.id, label: step.title, content: '“' + step.says + '”' };
-      if (options.links) {
+      /* The account step opens a sign-in form for a visitor with no identity: "See it for real" would
+         not show it, so it is offered only once there is one (first-visit audit 2026-10-22). */
+      var signedOut = step.page === 'account' && !(ArkUI.localIdentity && ArkUI.localIdentity.current());
+      if (options.links && !signedOut) {
         var entry = catalog[step.page] || {};
         var name = String(entry.short || entry.title || step.page).split(' — ')[0];
         item.blocks = [{ block: 'actions', props: { items: [{ label: 'See it for real: ' + name, href: 'route:' + step.page, tone: 'link' }] } }];

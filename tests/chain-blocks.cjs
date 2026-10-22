@@ -13,8 +13,9 @@
      (tests/lib/layout-continuity.cjs against tests/fixtures/layout-keys/chain.tsv). A key may
      only be reshaped (pinned to its successor though its words changed shape) or retired
      (nothing carries it now) with the reason below.
-   - No feature reduction: the four examples, the five steps (each still a link to the page that
-     shows that part), the pause/play control, ?case= and the way home are all still there. */
+   - No feature reduction: the four examples (a choice under the one scene since 2026-10-22), the five
+     steps (each still a link to the page that shows that part; the account one once there is an
+     identity), the pause/play control, ?case= and the way home are all still there. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -63,7 +64,8 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
   assert(/ArkUI\.page\(spec\(manifest, current, swap\), host,/.test(source), 'the page is built by ArkUI.page from its spec');
   assert(!/ArkUI\.el\('(section|header|h1|h2|nav|a)'/.test(source) && !/visually-hidden/.test(source), 'no hand-built page structure, and no visually hidden heading');
   const catalog = fs.readFileSync(path.join(ROOT, 'js/pages/catalog.js'), 'utf8');
-  assert(/chain: \{ module: 'chain', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/home-flow\.js', 'js\/ark\/vendor\/ark-kit-figures\.js', 'js\/pages\/resolver-page-parts\.js', 'js\/pages\/chain\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its scene, the figure parts and its module');
+  /* ark-kit-forms.js: the examples are Ark's choice block since 2026-10-22 */
+  assert(/chain: \{ module: 'chain', scripts: ArkUI\.blockScripts\.concat\(\['js\/pages\/home-flow\.js', 'js\/ark\/vendor\/ark-kit-figures\.js', 'js\/ark\/vendor\/ark-kit-forms\.js', 'js\/pages\/resolver-page-parts\.js', 'js\/pages\/chain\.js'\]\) \}/.test(catalog), 'the route loads the blocks before its scene, the figure and form parts and its module');
 
   /* ---- nothing in the plain scene is drawn below 12px -------------------------------------- */
   const flowCss = fs.readFileSync(path.join(ROOT, 'css/home-flow.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -79,16 +81,41 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
   const look = async (query) => inspectDocument({ html: await readIndexHtml(ROOT), url: 'https://defxn.com' + ROUTE + (query || ''), resources: createLocalResources(ROOT), root: ROOT, timeoutMs: 30000 }, (window) => {
     const page = window.document.querySelector('[data-ark-page="chain"]');
     const h1 = page.querySelector('h1');
-    const tabs = [...page.querySelectorAll('#chain-cases > [data-ark-part="tabs-list"] [role="tab"]')];
-    const panels = [...page.querySelectorAll('#chain-cases > [data-ark-part="tabs-content"]')];
-    const shown = panels.find((p) => !p.hidden);
+    /* First-visit audit 2026-10-22 (P1 /chain): the examples were tabs AROUND the scene, whose five steps
+       are tabs too -- two rows of tabs before a word of the example. One scene now; the examples are an
+       Ark choice under it that redraws the scene. */
+    const options = [...page.querySelectorAll('#chain-cases [data-ark-part="choice-option"]')];
+    const radios = options.map((o) => o.querySelector('input'));
+    const shown = page;
+    const swapBlock = page.querySelector('#chain-swap');
+    /* choosing another example redraws the one scene for it; the swap diagram belongs to Swaps alone */
+    const switched = (() => {
+      const before = page.querySelector('.flow') && page.querySelector('.flow').dataset.case;
+      const target = radios.find((r) => r.value === 'transfers');
+      if (!target) return null;
+      target.checked = true; target.dispatchEvent(new window.Event('change', { bubbles: true }));
+      const result = { before, after: page.querySelector('.flow').dataset.case, flows: page.querySelectorAll('.flow').length, swapHidden: !!swapBlock && swapBlock.hidden,
+        stepTabs: page.querySelectorAll('.chain-flow > [data-ark-block="tabs"] > [data-ark-part="tabs-list"] [role="tab"]').length };
+      const back = radios.find((r) => r.value === before);
+      back.checked = true; back.dispatchEvent(new window.Event('change', { bubbles: true }));
+      result.swapBack = !!swapBlock && !swapBlock.hidden;
+      return result;
+    })();
+    /* the account step's link: offered to a visitor with an identity, not to one signed out (it opened a sign-in form) */
+    const identity = window.ArkUI.localIdentity, real = identity && identity.current;
+    if (identity) identity.current = () => ({ identityId: 'audit.fxn', displayName: 'Audit' });
+    const withIdentity = window.ArkUI.chainStepsBlock('swaps', { links: true }).props.items.map((item) => (item.blocks ? item.blocks[0].props.items[0].href : ''));
+    if (identity) identity.current = real;
     return {
+      cases: options.map((o) => o.textContent.trim()),
+      selected: radios.findIndex((r) => r.checked),
+      sceneCase: (page.querySelector('.flow') || { dataset: {} }).dataset.case,
+      switched, withIdentity,
+      tablistsAround: page.querySelectorAll('[data-ark-block="tabs"] [data-ark-block="tabs"], [data-ark-block="tabs"] .chain-flow').length,
       blocks: [...page.querySelectorAll(':scope > [data-ark-block]')].map((el) => el.getAttribute('data-ark-block')),
       h1: { id: h1 && h1.id, text: h1 && h1.textContent.trim(), cls: h1 && h1.className },
       lede: (page.querySelector('#chain-hero [data-ark-part="hero-lede"]') || {}).textContent || '',
-      tabs: tabs.map((t) => t.textContent.trim()),
-      selected: tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true'),
-      flows: panels.map((p) => p.querySelectorAll('.flow').length),
+      flows: page.querySelectorAll('.flow').length,
       stepTabs: [...shown.querySelectorAll('.chain-flow > [data-ark-block="tabs"] > [data-ark-part="tabs-list"] [role="tab"]')].map((t) => t.textContent.trim()),
       stepPicker: shown.querySelectorAll('.chain-flow > [data-ark-block="tabs"]').length,
       handBuilt: shown.querySelectorAll('.flow-ledger, .flow-record, .home-cycle-step, .flow-says').length,
@@ -108,7 +135,6 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
       swapFold: [...shown.querySelectorAll('#chain-swap > [data-ark-part="disclosure-trigger"]')].map((b) => b.textContent.trim() + ':' + b.getAttribute('aria-expanded')),
       swapInScene: shown.querySelectorAll('.flow-scene #chain-swap, #flow-swap').length,
       swapInFrame: !!shown.querySelector('#chain-swap figure figcaption'),
-      swapOnOtherCases: [...panels].filter((p) => p !== shown).reduce((n, p) => n + p.querySelectorAll('#chain-swap, [data-manifest-figure]').length, 0),
       onward: [...page.querySelectorAll('#chain-onward a[data-scene-link]')].map((a) => a.getAttribute('data-scene-link') + ':' + a.textContent.replace(/\s+/g, ' ').trim()),
       toggles: shown.querySelectorAll('.flow-toggle').length,
       caption: (shown.querySelector('[data-ark-part="figure-caption"]') || {}).textContent || '',
@@ -118,18 +144,23 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
     };
   });
   const seen = await look();
-  assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'tabs', 'actions'], 'breadcrumb, hero, the examples as tabs, the way on');
+  assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'figure', 'choice', 'disclosure', 'actions'], 'breadcrumb, hero, the one scene, the examples as a choice under it, the swap diagram, the way on');
   assert.equal(seen.h1.id, 'chain-title', 'the heading keeps the id the old page gave it');
   assert.equal(seen.h1.text, 'Every identity, its own chain');
   assert(!/visually-hidden/.test(seen.h1.cls), 'the heading is visible');
   assert(seen.lede.includes('Watch one record join'), 'a one-line plain intro (CHAIN.LEDE) sits under the heading');
-  assert.deepEqual(seen.tabs, ['Swaps', 'Transfers', 'Staking', 'Governance'], 'every example is still offered');
+  assert.deepEqual(seen.cases, ['Swaps', 'Transfers', 'Staking', 'Governance'], 'every example is still offered');
   assert.equal(seen.selected, 0, 'Swaps opens first, as before');
-  assert.deepEqual(seen.flows, [1, 1, 1, 1], 'each example has its own scene');
+  assert.equal(seen.sceneCase, 'swaps');
+  assert.equal(seen.flows, 1, 'one scene: the examples share it');
+  assert.equal(seen.tablistsAround, 0, 'no tabs inside tabs: the step tabs are the page\'s one row of tabs');
+  assert.deepEqual(seen.switched, { before: 'swaps', after: 'transfers', flows: 1, swapHidden: true, stepTabs: 5, swapBack: true }, 'choosing Transfers redraws the one scene for it (five steps, no swap diagram); Swaps brings the diagram back');
   assert.equal(seen.stepPicker, 1, 'the five steps are one Ark tabs block at the top of the scene\'s frame');
   assert.deepEqual(seen.stepTabs, ['Sign', 'Check', 'Extend', 'Replicate', 'Resolve'], 'every step is a tab');
   assert.equal(seen.handBuilt, 0, 'no hand-built step list (`flow-record`, `home-cycle-step`) or separate caption is left');
-  assert.deepEqual(seen.steps, ['account', 'stats', 'explorer', 'stats', 'resolver'], 'each step still opens the page that shows that part (a link in its panel)');
+  /* First-visit audit 2026-10-22: "See it for real: Your account" sent a signed-out visitor to a sign-in form */
+  assert.deepEqual(seen.steps, ['stats', 'explorer', 'stats', 'resolver'], 'signed out, each step but Sign still opens the page that shows that part (a link in its panel)');
+  assert.deepEqual(JSON.parse(JSON.stringify(seen.withIdentity)), ['route:account', 'route:stats', 'route:explorer', 'route:stats', 'route:resolver'], 'with an identity, Sign opens the account too');
   assert(seen.says.every((words) => /^“.+”$/.test(words)), 'each step says what happens, as the scene\'s caption did: ' + JSON.stringify(seen.says));
   assert.equal(seen.tips.length, 7);
   /* Named regression (docs/ux-audit/ledger.md /chain, 2026-10-20): the grammar letters were unexplained -- each box
@@ -151,7 +182,7 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
      copy that stood inside the scene's Resolve panel (home-flow.js swapDiagram) is gone, so the diagram has one renderer. */
   assert.equal(seen.swapInScene, 0, 'the diagram stands under the scene\'s frame, not inside its Resolve panel');
   assert(seen.swapInFrame, 'it sits in Ark\'s figure frame with a caption');
-  assert.equal(seen.swapOnOtherCases, 0, 'only the Swaps example carries it (a transfer, a stake and a vote are not batches)');
+  // only the Swaps example carries it (a transfer, a stake and a vote are not batches): seen.switched.swapHidden above
   assert.deepEqual(seen.onward, ['resolvers:See what each resolver reads from the chain→', 'resolver:Where do resolver chains come from?→'], 'the way on: what each resolver reads (the manifest\'s CHAIN.NEXT, which nothing showed) and where resolver chains come from (ledger 3.4-x)');
   assert.equal(seen.toggles, 1, 'the pause/play control is still there');
   assert(/the record shape is the real wire grammar/i.test(seen.caption), 'the scene\'s caption is a real figure caption now');
@@ -160,6 +191,7 @@ for (let n = 1; n <= 5; n++) retired[SCENE + '/g:3/g:' + n + '/rect:1'] = 'the b
   assert.equal(seen.refused, 0, 'no block was refused');
   const staking = await look('?case=staking');
   assert.equal(staking.selected, 2, '?case=staking still opens the staking example');
+  assert.equal(staking.sceneCase, 'staking', 'and draws its scene');
 
   /* ---- saved CMS edits still land ---------------------------------------------------------- */
   const census = continuity.readCensus(ROUTE);
