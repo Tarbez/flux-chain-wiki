@@ -137,9 +137,10 @@
       { block: 'disclosure', id: 'deploy-scope', was: WAS['deploy-scope'], props: { more: 'Network scope and source guide', less: 'Hide the network scope',
         blocks: [{ block: 'callout', props: { tone: 'drift', body: SCOPE, actions: [{ label: 'Read the network guide', href: words('GUIDE.HREF'), tone: 'link' }] } }] } },
       { insert: 'main', was: WAS.insert },
+      /* no "next" to the FXN Bundle Deployer: it is not released, and a first visitor took it for the next step of
+         deploying (first-visit audit 2026-10-22, P0); it stays one press away in the callout above */
       { block: 'pager', id: 'deploy-pager', was: WAS['deploy-pager'], props: { label: 'Continue',
-        prev: { label: ArkUI.sentenceCase(words('BACK')), href: 'route:' + manifest.meta.back },
-        next: { label: 'FXN Bundle Deployer', href: words('BUNDLEDEPLOYER.HREF') } } }
+        prev: { label: ArkUI.sentenceCase(words('BACK')), href: 'route:' + manifest.meta.back } } }
     ];
   }
 

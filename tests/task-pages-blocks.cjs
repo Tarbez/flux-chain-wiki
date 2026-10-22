@@ -55,7 +55,8 @@ const ROUTES = {
       [/^page:\/div:1\/div:2$/, 'the controls: previous and next step stay; "Review all steps" is the review table\'s disclosure'],
       [/^page:\/div:1\/details:1$/, 'the scope note is Ark\'s disclosure ("Network scope and source guide"), folded as before'],
       [/^page:\/div:1\/nav:2$/, 'the footer is Ark\'s pager; "Run DEFXN from source" is its previous page'],
-      [/^page:\/div:1\/p:2$/, 'the same deck, reworded (see reworded)']
+      [/^page:\/div:1\/p:2$/, 'the same deck, reworded (see reworded)'],
+      [/^page:\/div:1\/p:3\/a:1$/, 'the same link, named for what it opens: "How deploying a resolver works" (first-visit audit 2026-10-22, see reworded)']
     ],
     retired: [
       [/^page:\/div:1\/p:3\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own'],
@@ -64,7 +65,9 @@ const ROUTES = {
       [/^page:\/div:1\/p:5$/, 'the position line ("Step 1 of 5 / Check discovery"): the selected tab says which step is open']
     ],
     reworded: [[/^page:\/div:1\/p:5$/, 'the position is the selected tab'],
-      [/^page:\/div:1\/p:2$/, 'the deck says what a named network does first, then that it is not a security boundary (ledger recheck 2026-10-21: it opened with a list of what networks do not do)']] },
+      [/^page:\/div:1\/p:2$/, 'the deck says what a named network does first, then that it is not a security boundary (ledger recheck 2026-10-21: it opened with a list of what networks do not do)'],
+      /* first-visit audit 2026-10-22 (P0): the page joins a network; what deploys a resolver is said, not implied */
+      [/^page:\/div:1\/p:3(\/a:1)?$/, 'the resolver note says what this page does ("This page joins your machine to a named network...") and its link names what it opens: "How deploying a resolver works"']] },
   '/explore': { page: 'explorer', ids: ['explore-', 'mesh-'],
     reshaped: [
       [/^page:\/div:1$/, 'the home: the same live parts, with Ark\'s crumbs, heading and ways on'],

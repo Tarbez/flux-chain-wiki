@@ -30,13 +30,13 @@ ArkManifest.define({
       "label": "Resolver deployment pointer",
       "kind": "text",
       "section": "Page",
-      "value": "Deploying a resolver is a different action. A named network scopes miner presence; a resolver gets its own chain."
+      "value": "This page joins your machine to a named network. Deploying a resolver happens in the Deploy product, and the resolver gets its own chain."
     },
     "RESOLVER.LINK": {
       "label": "Resolver deployment link",
       "kind": "line",
       "section": "Page",
-      "value": "Deploy a resolver"
+      "value": "How deploying a resolver works"
     },
     "RESOLVER.HREF": {
       "label": "Resolver deployment link target",
