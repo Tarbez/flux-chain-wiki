@@ -160,6 +160,7 @@ module.exports = {
  },
  "/lifecycle": {
   "reshaped": {
+   "page:/div:1/figure:1/strong:1": "the count is \"5\" with its unit beside it (\"records\"): the bare \"05\" said nothing (first-visit audit 2026-10-22, P1)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
    "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
@@ -187,6 +188,7 @@ module.exports = {
  },
  "/lifecycle/intent": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
    "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
@@ -217,6 +219,7 @@ module.exports = {
  },
  "/lifecycle/offer": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
    "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
@@ -248,6 +251,7 @@ module.exports = {
  },
  "/lifecycle/agreement": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
    "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
@@ -279,6 +283,7 @@ module.exports = {
  },
  "/lifecycle/fulfillment": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
    "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
@@ -310,6 +315,7 @@ module.exports = {
  },
  "/lifecycle/receipt": {
   "reshaped": {
+   "page:/div:1/div:1/h1:1": "the stage heading names the state its record makes true, not a command: the page is read-only and the command sent a visitor looking for a field (first-visit audit 2026-10-22, P2)",
    "page:/div:1": "the answer beside its illustration: the story body",
    "page:/div:1/div:1": "the answer column: the depth control and the boundary (its kicker and heading are the hero's now)",
    "page:/div:1/div:1/nav:1": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",

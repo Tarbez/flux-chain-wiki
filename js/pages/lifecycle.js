@@ -6,10 +6,12 @@
 (function () {
   'use strict';
 
+  /* A stage's heading names the state its record makes true ("The request is signed."), not a command: the stages are
+     read-only pages, and "Say what you need." sent a visitor looking for a field (first-visit audit 2026-10-22, P2). */
   ArkUI.lifecycleContent = {
     intent: {
       lead: 'Example: you ask someone to copy one named snapshot of a dataset.',
-      heading: 'Say what you need.',
+      heading: 'The request is signed.',
       body: 'The client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. It lands on the client’s own chain, admitted like any record, and later records can refer to it by CID instead of relying on a conversation or a shared queue.',
       note: 'What is still not true: no provider has committed, no work has occurred, and no result has been checked.',
       facts: [
@@ -21,7 +23,7 @@
     },
     offer: {
       lead: 'A provider offers to copy the snapshot and explains the proposed terms.',
-      heading: 'Consider their proposal.',
+      heading: 'A provider offers terms.',
       body: 'The provider signs an offer that references the intent CID. The terms stay attached to the request they answer, so the client can inspect capability, constraints, and proposed evidence before accepting anything.',
       note: 'What is still not true: a signed offer is a proposal, not a shared agreement or proof of capacity.',
       facts: [
@@ -33,7 +35,7 @@
     },
     agreement: {
       lead: 'You and the provider record the same accepted terms for the job.',
-      heading: 'Agree on what comes next.',
+      heading: 'Both sides sign the same terms.',
       body: 'The signed agreement links the accepted intent and offer. It defines what fulfillment will be checked against while unrelated agreements continue independently.',
       note: 'What is still not true: accepted terms do not prove the replication happened or that downstream settlement occurred.',
       facts: [
@@ -45,7 +47,7 @@
     },
     fulfillment: {
       lead: 'The provider shares the result and the evidence required by the agreed terms.',
-      heading: 'Open the result package.',
+      heading: 'The provider hands over the result.',
       body: 'The fulfillment record references the agreement and carries the result evidence defined by its terms. The work remains attached to the request, provider, and policy that gave it meaning.',
       note: 'What is still not true: submission is not acceptance, semantic truth, or proof of every downstream effect.',
       facts: [
@@ -57,7 +59,7 @@
     },
     receipt: {
       lead: 'The checking participant records the outcome under the identified rules and authority.',
-      heading: 'Read the checking decision.',
+      heading: 'The check is recorded.',
       body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification across the participants’ own chains; the agreements resolver reads the links.',
       note: 'What is still not true: a receipt is not universal truth, legally binding settlement, treasury settlement, or production-readiness evidence.',
       facts: [
@@ -523,11 +525,15 @@
   function two(n) { return String(n).padStart(2, '0'); }
 
   /* The overview's illustration: the agreements resolver's fabric, one reference trail for five
-     records. Pointing at or focusing a stage (How it works, the pager) previews that record on it. */
+     records. Pointing at or focusing a stage (Step by step, the pager) previews that record on it. */
   function trailFigure() {
     var box = ArkUI.el('div', 'lifecycle-object');
     var top = ArkUI.el('div', 'lifecycle-fabric-top'); top.appendChild(ArkUI.el('span', '', 'AGREEMENTS RESOLVER')); box.appendChild(top);
-    var count = ArkUI.el('strong', 'lifecycle-fabric-count', '05'); box.appendChild(count);
+    /* the number says what it counts ("5 / records", "2 / of 5 records"): a bare "05" read as nothing (first-visit audit
+       2026-10-22, P1). The words are a span of their own beside the number, so the number keeps its size and its key. */
+    var total = ArkUI.lifecycleStages.length;
+    var count = ArkUI.el('strong', 'lifecycle-fabric-count', String(total)); box.appendChild(count);
+    var unit = ArkUI.el('span', 'lifecycle-fabric-unit', 'records'); box.appendChild(unit);
     var mesh = ArkUI.el('canvas', 'lifecycle-fabric-mesh'); mesh.setAttribute('aria-hidden', 'true'); box.appendChild(mesh);
     var preview = ArkUI.el('p', 'lifecycle-fabric-preview', 'Each signed record adds a reference to the same agreement.'); box.appendChild(preview);
     var foot = ArkUI.el('div', 'lifecycle-fabric-foot'); foot.appendChild(ArkUI.el('span', '', 'Dataset snapshot')); foot.appendChild(ArkUI.el('span', '', 'References persist')); box.appendChild(foot);
@@ -535,7 +541,7 @@
     function paint(stage, at, title, text) {
       if (shown === stage && at) return;
       shown = stage; fabric.select(stage, !!at);
-      count.textContent = at; preview.textContent = text;
+      count.textContent = at ? at : String(total); unit.textContent = at ? 'of ' + total + ' records' : 'records'; preview.textContent = text;
       if (caption) caption.textContent = title;
     }
     var all = 'Five records. One reference trail.';
@@ -544,9 +550,9 @@
       bind: function (page) { caption = page.querySelector('[data-ark-part="figure-caption"] p'); },
       preview: function (stage) {
         var i = ArkUI.lifecycleStages.findIndex(function (s) { return s.id === stage; });
-        paint(stage, two(i + 1), ArkUI.lifecycleStages[i].title + ' / same snapshot', ArkUI.lifecycleContent[stage].facts[2][1]);
+        paint(stage, String(i + 1), ArkUI.lifecycleStages[i].title + ' / same snapshot', ArkUI.lifecycleContent[stage].facts[2][1]);
       },
-      reset: function () { paint('receipt', '', all, 'Each signed record adds a reference to the same agreement.'); count.textContent = '05'; },
+      reset: function () { paint('receipt', '', all, 'Each signed record adds a reference to the same agreement.'); },
       start: function () { fabric.select('receipt', false); },
       visible: function (on) { fabric.visible(on); },
       dispose: function () { fabric.dispose(); }
@@ -566,13 +572,18 @@
       /* The five stages, as links: the pager's related row (the old trail). */
       var related = stages.filter(function (s) { return s.id !== id; }).map(function (s) { return { label: s.title, href: 'route:lifecycle/' + s.id }; });
       /* Out of the lifecycle, not only along it: the ways on from this page's journey (ArkUI.nextSteps, js/ark/page-kit.js),
-         in sight in The idea. Before, the only exits were the other stages (docs/ux-audit/ledger.md, lifecycle next steps). */
-      var ways = ArkUI.nextSteps(page), onward = ways.length ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : [];
+         in sight in The idea -- on the overview and the last stage only. In the middle of the story they pushed the visitor
+         out while the way on ("Continue to Offer") sat below the fold (first-visit audit 2026-10-22, P1); there the next
+         stage is the hero's one action, as on the theory sheets. */
+      var last = id && index === stages.length - 1, following = id ? stages[index + 1] : stage;
+      var ways = !id || last ? ArkUI.nextSteps(page) : [], onward = ways.length ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : [];
+      var action = following ? [{ label: (id ? 'Next stage: ' : 'Follow the first stage: ') + following.title, href: 'route:lifecycle/' + following.id, tone: 'primary' }] : undefined;
       var def = {
         page: page, id: prefix, className: 'story-lifecycle', titleId: prefix + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
         crumbs: [{ label: 'Home', href: 'route:zero' }].concat(id ? [{ label: 'Agreement lifecycle', href: 'route:lifecycle' }, { label: stage.title }] : [{ label: 'Agreement lifecycle' }]),
         eyebrow: id ? ArkUI.story.position('Agreement lifecycle', index, stages.length) : 'One snapshot / five signed records',
         title: id ? copy.heading : 'From request to receipt.',
+        actions: action,
         /* The idea is the short answer: the example, then what becomes true. How it works opens one
            fact at a time, as the old fact chips did (an accordion now: one ARIA model, one look). */
         depth: id ? {
@@ -587,8 +598,10 @@
           reference: { text: 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.',
             blocks: [{ block: 'facts', props: { label: stage.title + ' evidence', columns: 1, items: [{ term: copy.facts[1][0], value: copy.facts[1][1] }] } }, { block: 'actions', props: { items: [guide] } }] }
         } : {
-          focus: { text: 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification. Each stage answers a different question.\n\nEach record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.', blocks: onward },
-          context: { blocks: [{ block: 'accordion', props: { label: 'Agreement stages', items: stages.map(function (s, i) {
+          /* The idea is the first paragraph's two sentences; how the records link (CID, grammar, admission) opens Step by step,
+             above the stages (first-visit audit 2026-10-22, P1: 95 words ended "Choose a stage..." with no stage in view). */
+          focus: { text: 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification.', blocks: onward },
+          context: { text: 'Each stage answers a different question. Each record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.', blocks: [{ block: 'accordion', props: { label: 'Agreement stages', items: stages.map(function (s, i) {
               var c = ArkUI.lifecycleContent[s.id];
               return { value: s.id, title: two(i + 1) + ' · ' + s.title, content: c.facts[2][1] + '\n\n' + c.note, blocks: [{ block: 'actions', props: { items: [{ label: 'Open ' + s.title, href: 'route:lifecycle/' + s.id, tone: 'link' }] } }] };
             }) } }] },
