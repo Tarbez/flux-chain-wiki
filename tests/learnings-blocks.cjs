@@ -16,7 +16,7 @@
      review date, written by the serializer -- so the shown index is the serializer's output.
    - The question choices had no visible edge and the answer view's tabs were bare numbers
      "00-11": the questions are Ark's accordion, each row numbered and named, keyboard-operable
-     by the primitive; the depth control is the one label set (The idea / How it works / Evidence).
+     by the primitive; the depth control is the one label set (The idea / Step by step / Evidence).
    - Choosing a question replaced the list with an empty panel for about a second: a row opens in
      place. The old ?q=<n> addresses still open their question.
    - The fold rule, by structure (measured 2026-10-19 in Chromium, docs in the W3-LEARN report):
@@ -40,7 +40,7 @@ const checks = require('./lib/block-page-checks.cjs');
 
 const ROOT = checks.ROOT;
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
-const DEPTH = ['The idea', 'How it works', 'Evidence'];
+const DEPTH = ['The idea', 'Step by step', 'Evidence']; // 'Step by step' since 2026-10-22 (first-visit audit, P1): 'How it works' is the header's name for /how-deployment-works, so the tab and the nav link said the same words for two things
 /* arrays made in the content's vm realm, as this realm's (assert.deepEqual compares prototypes) */
 const host = (list) => Array.from(list);
 
@@ -83,7 +83,7 @@ const ARTICLE = {
     [/^page:\/div:1\/div:1$/, 'the reading column is the story body\'s main column'],
     [/^page:\/div:1\/div:1\/div:1$/, 'the answer controls (← The core / Next question →) are the depth control'],
     [/^page:\/div:1\/div:1\/div:1\/button:1$/, '"← THE CORE" is The idea tab'],
-    [/^page:\/div:1\/div:1\/div:1\/button:2$/, '"NEXT QUESTION →" is the How it works tab, where every question is a row'],
+    [/^page:\/div:1\/div:1\/div:1\/button:2$/, '"NEXT QUESTION →" is the Step by step tab, where every question is a row'],
     [/^page:\/div:1\/nav:1$/, 'the question list is Ark\'s accordion: the table of contents'],
     [/^page:\/div:1\/nav:2$/, 'the exits (related mechanism, next step) are the pager\'s related pages'],
     [/^page:\/div:1\/nav:2\/a:1$/, '"Related mechanism →" names its page now'],
@@ -237,7 +237,7 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
       const view = [...page.querySelectorAll('[data-story-depth] [role="tab"]')].find((t) => t.getAttribute('aria-selected') === 'true');
       return { open, view: view && view.textContent.trim(), search: window.location.search };
     });
-    assert.equal(deep.view, 'How it works', slug + '?q=n: the old address opens How it works');
+    assert.equal(deep.view, 'Step by step', slug + '?q=n: the old address opens the questions view (Step by step)');
     assert.deepEqual(deep.open.map((o, i) => o ? i + 1 : 0).filter(Boolean), [article.sections.length], slug + '?q=n: the old address opens question n');
     const viewed = await checks.visit('/learnings/' + slug + '?view=reference', (window, page) => ({
       view: ([...page.querySelectorAll('[data-story-depth] [role="tab"]')].find((t) => t.getAttribute('aria-selected') === 'true') || {}).textContent

@@ -192,7 +192,7 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
         const tabs = root.querySelector('[data-story-depth]');
         assert(tabs, `${current}: the page has no story depth control ([data-story-depth]), which this route's checks drive. If the page was restructured, carry these checks over to its new structure in tests/routes-live.cjs; never delete them.`);
         const triggers = [...tabs.querySelectorAll('[data-ark-part="tabs-trigger"]')];
-        assert.deepEqual(triggers.map((t) => t.textContent.trim()), ['The idea', 'How it works', 'Evidence'], `${current}: one depth vocabulary on every story page`);
+        assert.deepEqual(triggers.map((t) => t.textContent.trim()), ['The idea', 'Step by step', 'Evidence'], `${current}: one depth vocabulary on every story page` /* 'Step by step' since 2026-10-22: the header's 'How it works' names another page */);
         return triggers;
       };
       const panelOf = (root, i) => [...root.querySelector('[data-story-depth]').children].filter((n) => n.getAttribute('data-ark-part') === 'tabs-content')[i];

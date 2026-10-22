@@ -15,7 +15,7 @@ const continuity = fs.readFileSync('js/ark/panel-continuity.js', 'utf8');
 const story = fs.readFileSync('js/pages/story.js', 'utf8');
 assert(sheet.includes("{ label: 'Operating model', href: 'route:concept' }"), 'mechanism pages name their actual parent');
 assert(sheet.includes('ArkUI.story.mount(') && /block\('tabs', 'depth', \{\s*label: 'Explanation depth', variant: 'segmented'/.test(story), 'the same frame owns depth choices: one Ark tabs block');
-assert(/\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'How it works' \},\s*\{ value: 'reference', label: 'Evidence' \}/.test(story), 'one depth vocabulary on every story page');
+assert(/\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'Step by step' \},\s*\{ value: 'reference', label: 'Evidence' \}/.test(story), 'one depth vocabulary on every story page');
 assert(/main\.appendChild\(depth\);[\s\S]*?def\.boundary/.test(story), 'current status stays outside the replaceable surface (beside the tabs, not in a panel)');
 assert(sheet.includes("'view=context&step='") && story.includes("'view=' + now"), 'mechanism depth and detail are addressable');
 /* Since 2026-10-19 /about is a page of Ark blocks (js/pages/about.js, tests/about-page.cjs): its

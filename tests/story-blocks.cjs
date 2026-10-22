@@ -33,7 +33,7 @@ const continuity = require('./lib/layout-continuity.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
-const DEPTH = ['The idea', 'How it works', 'Evidence'];
+const DEPTH = ['The idea', 'Step by step', 'Evidence']; // 'Step by step' since 2026-10-22 (first-visit audit, P1): 'How it works' is the header's name for /how-deployment-works, so the tab and the nav link said the same words for two things
 const STAGES = ['intent', 'offer', 'agreement', 'fulfillment', 'receipt'];
 const SHEETS = ['purpose', 'depth', 'practice', 'notes', 'studio', 'spec'];
 
@@ -52,7 +52,7 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
 (async () => {
   /* ---- the modules are story specs of Ark blocks ------------------------------------------- */
   const story = read('js/pages/story.js');
-  assert(/var DEPTH = \[\s*\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'How it works' \},\s*\{ value: 'reference', label: 'Evidence' \}\s*\];/.test(story), 'ONE depth label set, defined once');
+  assert(/var DEPTH = \[\s*\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'Step by step' \},\s*\{ value: 'reference', label: 'Evidence' \}\s*\];/.test(story), 'ONE depth label set, defined once');
   assert(/block\('tabs', 'depth', \{\s*label: 'Explanation depth', variant: 'segmented'/.test(story), 'the depth control is Ark tabs, segmented');
   for (const file of ['js/pages/lifecycle.js', 'js/pages/sheet.js', 'js/pages/how-stories.js', 'js/pages/deployment.js']) {
     const source = read(file);
