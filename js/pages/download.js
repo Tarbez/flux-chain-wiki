@@ -55,12 +55,14 @@
   };
   [1, 2, 3, 4, 5].forEach(function (n) {
     var k = n > 1 ? '#' + n : '';
-    WAS['download-depth']['step#' + n] = STEP(n) + '/button:1';
-    WAS['download-depth']['step-title' + k] = STEP(n) + '/button:1/strong:1';
+    /* (the first view's step list -- 'step#n' / 'step-title' pins -- left on 2026-10-22: the five steps are How it works'
+       tabs and the terminal's; tests/resolver-guide-blocks.cjs retires those keys with the reason) */
     WAS['download-steps']['tabs-trigger' + k] = { key: STEP(n), self: true };
     WAS['download-steps']['tabs-content' + k] = 'id:source-step-' + n;
   });
 
+  /* the apps the page offers, in the order a visitor meets them (their words and addresses are DOWNLOAD.APP.<KEY>.*) */
+  var APPS = ['CLI', 'DESKTOP', 'BROWSER', 'MOBILE'];
   /* the one case rule for a label a manifest authored in capitals (js/ark/page-kit.js) */
   function sentence(text) { return ArkUI.sentenceCase(text); }
 
@@ -155,7 +157,19 @@
         eyebrow: copy('EYEBROW'), title: copy('TITLE'),
         actions: [{ label: guide.label, href: guide.href, tone: 'secondary' }],
         depth: {
-          focus: { text: copy('DECK'), blocks: [{ block: 'steps', props: { label: 'Local setup steps', items: steps.map(function (s) { return { title: s.title }; }) } }] },
+          /* the apps first (the owner's call 2026-10-22: this is the download page for the CLI, the desktop apps and the
+             mobile apps), then running from source. An app's card links its download once DOWNLOAD.APP.<KEY>.URL holds an
+             https:// address; until then it says so, never a link that goes nowhere. */
+          focus: { text: copy('DECK'), blocks: [
+            /* the five step names are How it works' tabs and the terminal's, so this view no longer lists them again:
+               the page fits the fold budget with the apps in it (a phone opens them behind one press) */
+            { block: 'section-header', props: { title: copy('APPS.TITLE'), level: 3 } },
+            { block: 'disclosure', id: 'download-apps-fold', props: { foldBelow: 'phone', more: 'Show the four apps', less: 'Hide the apps', blocks: [
+              { block: 'card-grid', id: 'download-apps', props: { label: words('APPS.TITLE'), columns: 4, alignRows: true, items: APPS.map(function (key) {
+                var url = words('APP.' + key + '.URL'), card = { eyebrow: copy('APP.' + key + '.PLATFORMS'), title: copy('APP.' + key + '.NAME'), description: copy('APP.' + key + '.TEXT') };
+                if (/^https:\/\//.test(url)) { card.href = url; card.meta = 'Download'; } else card.status = { label: 'Not published yet', tone: 'drift' };
+                return card;
+              }) } }] } }] },
           /* the tab names are the step names; the number is the tab's place (a tab name holds 32
              characters, and "02 / Install the trusted checkout" is 33) and the terminal says it */
           context: { blocks: [{ block: 'tabs', id: 'download-steps', was: WAS['download-steps'], props: { label: 'Local setup steps',

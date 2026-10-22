@@ -109,6 +109,108 @@ ArkManifest.define({
       "kind": "link",
       "section": "Links",
       "value": "route:bundledeployer"
+    },
+    "APPS.TITLE": {
+      "label": "Apps: heading",
+      "kind": "line",
+      "section": "Apps",
+      "value": "Get the apps"
+    },
+    "APP.CLI.NAME": {
+      "label": "flux-miner (command line): name",
+      "kind": "line",
+      "section": "Apps",
+      "value": "flux-miner (command line)"
+    },
+    "APP.CLI.PLATFORMS": {
+      "label": "flux-miner (command line): systems",
+      "kind": "line",
+      "section": "Apps",
+      "value": "Terminal"
+    },
+    "APP.CLI.TEXT": {
+      "label": "flux-miner (command line): what it is",
+      "kind": "text",
+      "section": "Apps",
+      "value": "A miner without a window. It runs your machine's share of the DEFXN network from a terminal."
+    },
+    "APP.CLI.URL": {
+      "label": "flux-miner (command line): download address (https://..., empty until published)",
+      "kind": "line",
+      "section": "Apps",
+      "value": ""
+    },
+    "APP.DESKTOP.NAME": {
+      "label": "Flux Miner Desktop: name",
+      "kind": "line",
+      "section": "Apps",
+      "value": "Flux Miner Desktop"
+    },
+    "APP.DESKTOP.PLATFORMS": {
+      "label": "Flux Miner Desktop: systems",
+      "kind": "line",
+      "section": "Apps",
+      "value": "Desktop"
+    },
+    "APP.DESKTOP.TEXT": {
+      "label": "Flux Miner Desktop: what it is",
+      "kind": "text",
+      "section": "Apps",
+      "value": "The same miner with a desktop window."
+    },
+    "APP.DESKTOP.URL": {
+      "label": "Flux Miner Desktop: download address (https://..., empty until published)",
+      "kind": "line",
+      "section": "Apps",
+      "value": ""
+    },
+    "APP.BROWSER.NAME": {
+      "label": "ARK Browser: name",
+      "kind": "line",
+      "section": "Apps",
+      "value": "ARK Browser"
+    },
+    "APP.BROWSER.PLATFORMS": {
+      "label": "ARK Browser: systems",
+      "kind": "line",
+      "section": "Apps",
+      "value": "Desktop"
+    },
+    "APP.BROWSER.TEXT": {
+      "label": "ARK Browser: what it is",
+      "kind": "text",
+      "section": "Apps",
+      "value": "A desktop browser for DEFXN sites."
+    },
+    "APP.BROWSER.URL": {
+      "label": "ARK Browser: download address (https://..., empty until published)",
+      "kind": "line",
+      "section": "Apps",
+      "value": ""
+    },
+    "APP.MOBILE.NAME": {
+      "label": "DEFXN Browser: name",
+      "kind": "line",
+      "section": "Apps",
+      "value": "DEFXN Browser"
+    },
+    "APP.MOBILE.PLATFORMS": {
+      "label": "DEFXN Browser: systems",
+      "kind": "line",
+      "section": "Apps",
+      "value": "iOS · Android"
+    },
+    "APP.MOBILE.TEXT": {
+      "label": "DEFXN Browser: what it is",
+      "kind": "text",
+      "section": "Apps",
+      "value": "A browser for DEFXN sites that also runs a full mesh node on your phone."
+    },
+    "APP.MOBILE.URL": {
+      "label": "DEFXN Browser: download address (https://..., empty until published)",
+      "kind": "line",
+      "section": "Apps",
+      "value": ""
     }
   }
 });
