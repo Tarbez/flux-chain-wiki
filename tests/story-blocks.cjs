@@ -113,7 +113,7 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
       } else {
         const area = id.toUpperCase(), m = ArkManifest.get(id);
         Object.keys(m.fields).filter((k) => /^(TITLE|DECK|NEXT|EVIDENCE|STATUS\.(TITLE|TEXT)|LIMIT\.(TITLE|TEXT)|POINT\d+\.(TITLE|TEXT))$/.test(k) || (m.fields[k + '.HREF'] && m.fields[k + '.HREF'].kind === 'link')).forEach((k) => copy(area + '.' + k));
-        if (id === 'dao') { copy('DAO.EYEBROW'); copy('NOTES.CTA'); } // /dao leads on with the words its destination authored for the link (W4-S14), not the hand-typed "Inspect activation gates"
+        if (id === 'dao') copy('NOTES.CTA'); // /dao leads on with the words its destination authored for the link (W4-S14), not the hand-typed "Inspect activation gates"
       }
       const missing = words.filter((w) => w && !text.includes(String(w).replace(/\s+/g, ' ').toLowerCase()));
       const depth = page.querySelector('[data-story-depth]');

@@ -61,7 +61,7 @@
     { label: 'Signed-result storage', record: 'BENCH-013', measure: 'replica store', note: 'Replicas store the signed result without repeating the resolution.' },
     { label: 'All ten nodes at once', figure: 0 }
   ];
-  var FOOTER = [['Protocol', 'FOOTER.PROTOCOL.HREF'], ['Resolvers', 'FOOTER.RESOLVERS.HREF'], ['Explorer', 'FOOTER.EXPLORER.HREF'], ['Run from source', 'FOOTER.DOWNLOAD.HREF'], ['Governance', 'FOOTER.DAO.HREF']];
+  var FOOTER = [['Protocol', 'FOOTER.PROTOCOL.HREF'], ['Resolvers', 'FOOTER.RESOLVERS.HREF'], ['Explorer', 'FOOTER.EXPLORER.HREF'], ['Run from source', 'FOOTER.DOWNLOAD.HREF'], ['How DEFXN is governed', 'FOOTER.DAO.HREF']];
 
   /* `was`: the old page's layout key for each element that carries its words now, by spec entry
      id, so a CMS edit saved against the hand-built home still lands. Derived by

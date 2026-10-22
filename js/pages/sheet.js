@@ -464,6 +464,9 @@
     var count = ArkManifest.points(manifest), step = 0;
     var theory = ArkManifest.group('theory'), index = theory.findIndex(function (m) { return m.id === id; });
     var path = ArkUI.pageCatalog[page] && ArkUI.pageCatalog[page].path;
+    /* The subject's name, for the figure's caption and the questions' list: the page's name, unless that name does not
+       read as a noun (/dao is "How DEFXN is governed", the owner's call 2026-10-22; its subject is meta.topic, "Governance"). */
+    var topic = manifest.meta.topic || manifest.title;
 
     /* The figure: the drawing, then its legend -- each entry opens its point. */
     var drawing = ArkUI.createStoryDiagram ? ArkUI.createStoryDiagram(id) : null;
@@ -532,11 +535,11 @@
       title: copy('TITLE'),
       depth: {
         focus: { text: copy('DECK'), blocks: ways.length && !pager ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : undefined },
-        context: points.length ? { blocks: [{ block: 'accordion', props: { label: manifest.title + ' questions', items: points } }] } : { text: copy('DECK') },
+        context: points.length ? { blocks: [{ block: 'accordion', props: { label: topic + ' questions', items: points } }] } : { text: copy('DECK') },
         reference: evidence.length ? { blocks: evidence } : { text: copy('DECK') }
       },
       boundary: has('STATUS.TEXT') ? { tone: 'drift', title: copy('STATUS.TITLE'), body: copy('STATUS.TEXT') } : undefined, boundaryFold: 'phone',
-      figure: drawing ? { slot: 'diagram', caption: manifest.title + ' relationships: ' + sentence(drawing.title) + '.' } : undefined,
+      figure: drawing ? { slot: 'diagram', caption: topic + ' relationships: ' + sentence(drawing.title) + '.' } : undefined,
       slots: { diagram: figure },
       /* Onward: the next step the manifest names (the old call to action) is the one action of the
          hero (Ark: "the main next step"); the other questions are the pager's, and all of them one step up, on /concept. */

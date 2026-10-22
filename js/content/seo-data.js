@@ -395,7 +395,7 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "dao": {
-      "title": "Governance boundaries — DEFXN",
+      "title": "How DEFXN is governed — DEFXN",
       "description": "Compare shared-substrate governance with network DAO governance. Explore separate rosters, thresholds, activation rules, and evidence limits.",
       "ogImage": "",
       "canonical": "",
