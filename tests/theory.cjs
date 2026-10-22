@@ -22,7 +22,12 @@ for(const m of theory){
   for(let n=1;n<=ArkManifest.points(m);n++) assert(ArkCopy.text(`${area}.POINT${n}.TEXT`),key+' point '+n+' has text');
   assert(ArkUI.pageCatalog[m.meta.next],key+' onward link must resolve: '+m.meta.next);
   assert.equal(m.meta.back,'concept');
+  // first-visit audit 2026-10-22 (P2): a readable address, derived from the sheet's name, opens the sheet beside its old path
+  const readable='/concept/'+m.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  if(readable!==m.route) assert.deepEqual(Array.from(route.aliases||[]),[readable],key+' has the readable alias '+readable);
 }
+const paths=Object.values(ArkUI.pageCatalog).flatMap(e=>[e.path].concat(e.aliases||[]));
+assert.equal(new Set(paths).size,paths.length,'no address names two pages (a readable alias never shadows another page)');
 assert.equal(ArkManifest.points(ArkManifest.get('about')),5);assert(ArkUI.pageCatalog[ArkManifest.get('about').meta.next]);
 // Nothing on the concept page may point at an existing non-theory page: the point of the change is new pages.
 const concept=fs.readFileSync('js/pages/concept.js','utf8');
