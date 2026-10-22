@@ -23,9 +23,11 @@
    Converted to data in DEFXN polish Wave 3 (W3-STATS). It was 8.54x the viewport on a desktop
    and 13.58x on a phone: the equation, then six sections of panels, tables and figures
    (docs/ux-audit/pages-ux-b.md /resolver-math P0). The equation stays first, as a live figure,
-   under a hero that states the sum and its three numbers; the six sections are tabs (Remove a
-   term · Two ideas · Fixed vs bends · Resolve a block · Four rules · What it adds up to · Where it
-   stops). The equation, the builder, the explorer and the two drawings are this page's own live
+   under a hero that states the sum; the six sections were tabs (Remove a term · Two ideas · Fixed vs
+   bends · Resolve a block · Rules and limits · What it adds up to). Since the first-visit audit
+   2026-10-22 they are four views with plain names -- The equation (with the sum's three numbers after
+   it) · Try it · How records work · Rules and limits -- and the equation's figure says "Data", not
+   "Live". The equation, the builder, the explorer and the two drawings are this page's own live
    content, passed to Ark figures as slots with the same markup they had, so a CMS edit saved
    against them still lands; the panels, tables, stat tiles, section heads and shell are Ark's.
 
@@ -602,27 +604,26 @@
   var HAND = {
     'rm-crumbs': { ':root': { key: 'page:/nav:1', self: true } },
     'rm-hero': {
-      ':root': { key: P + '/header:1', self: true },
-      ':scope > dl:nth-of-type(1) > div:nth-of-type(2)': { key: P + '/div:13/article:1', self: true },
-      ':scope > dl:nth-of-type(1) > div:nth-of-type(2) > dd:nth-of-type(1)': P + '/div:13/article:1/p:2',
-      ':scope > dl:nth-of-type(1) > div:nth-of-type(3)': { key: P + '/div:13/article:2', self: true },
-      ':scope > dl:nth-of-type(1) > div:nth-of-type(3) > dd:nth-of-type(1)': P + '/div:13/article:2/p:2'
+      ':root': { key: P + '/header:1', self: true }
     },
     'rm-views': {
+      /* four views since the first-visit audit 2026-10-22: an old section that shares a view keys
+         the disclosure that opens it (the resolve scene's, fixed-or-bends'); the totals section's
+         head is retired (tests/resolver-math-blocks.cjs), its note and table keep their keys */
       '[data-ark-slot="equation"]': P + '/div:1',
       'tabs-content#2': { key: P + '/div:2', self: true }, '[data-ark-slot="builder"]': P + '/div:3',
+      'disclosure#3': { key: P + '/div:8', self: true }, '[data-ark-slot="explorer"]': P + '/div:9',
       'tabs-content#3': { key: P + '/div:4', self: true }, 'accordion': { key: P + '/div:5', self: true },
-      'accordion-item': { key: P + '/div:5/section:1', self: true }, 'figure#3': { key: P + '/div:5/section:1/figure:1', self: true },
+      'accordion-item': { key: P + '/div:5/section:1', self: true }, 'figure#4': { key: P + '/div:5/section:1/figure:1', self: true },
       '[data-ark-slot="record"]': P + '/div:5/section:1/figure:1/svg:1',
-      'accordion-item#2': { key: P + '/div:5/section:2', self: true }, 'figure#4': { key: P + '/div:5/section:2/figure:1', self: true },
+      'accordion-item#2': { key: P + '/div:5/section:2', self: true }, 'figure#5': { key: P + '/div:5/section:2/figure:1', self: true },
       '[data-ark-slot="signing"]': P + '/div:5/section:2/figure:1/svg:1',
-      'tabs-content#4': { key: P + '/div:6', self: true }, 'table-wrap': P + '/div:7/section:1/div:1',
+      'disclosure#4': { key: P + '/div:6', self: true }, 'table-wrap': P + '/div:7/section:1/div:1',
       'accordion-item#4': { key: P + '/div:7/section:2', self: true }, 'table-wrap#2': P + '/div:7/section:2/div:1',
-      'tabs-content#5': { key: P + '/div:8', self: true }, '[data-ark-slot="explorer"]': P + '/div:9',
-      'tabs-content#6': { key: P + '/div:10', self: true }, 'table-wrap#3': P + '/div:11/section:1/div:1',
+      'tabs-content#4': { key: P + '/div:10', self: true }, 'table-wrap#3': P + '/div:11/section:1/div:1',
       'accordion-item#5': { key: P + '/div:11/section:2', self: true },
       'accordion-item#6': { key: P + '/div:14', self: true }, 'table-wrap#4': P + '/div:15/section:1/div:1',
-      'tabs-content#7': { key: P + '/div:12', self: true }, 'disclosure#6': { key: P + '/div:13/section:1', self: true },
+      'disclosure#6': { key: P + '/div:13/section:1', self: true },
       'actions': { key: P + '/div:13/section:1/p:2', self: true }, 'table-wrap#5': P + '/div:13/section:2/div:1'
     },
     insert: { key: P + '/div:17', self: true },
@@ -638,41 +639,47 @@
       'figure-caption#2': P + '/div:2/h2:1',
       'figure-description#2': P + '/div:2/p:1',
       ':scope > div:nth-of-type(4) > p:nth-of-type(1)': P + '/div:4/h2:1',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:6/h2:1',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:6/p:1',
-      'figure-caption#5': P + '/div:8/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:6/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:6/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:7/section:2/p:2',
+      'figure-caption#3': P + '/div:8/h2:1',
       'figure-description#3': P + '/div:8/p:1',
       'disclosure-panel#5': P + '/div:10/p:1',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:12/h2:1',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:12/p:1',
+      'disclosure-panel#6': { key: P + '/div:12', self: true },
+      ':scope > div:nth-of-type(5) > div:nth-of-type(4) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:12/h2:1',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(4) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:12/p:1',
       'accordion-trigger#6': P + '/div:14/h2:1',
       'accordion-trigger': P + '/div:5/section:1/p:1',
       'accordion-trigger#2': P + '/div:5/section:2/p:1',
       'accordion-content#3': P + '/div:7/section:1/p:1',
       'accordion-trigger#4': P + '/div:7/section:2/p:1',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:7/section:2/p:2',
       'accordion-trigger#5': P + '/div:11/section:2/p:1',
-      'fact': P + '/div:11/section:2/div:1',
-      'fact#2': P + '/div:11/section:2/div:2',
-      'fact#3': P + '/div:11/section:2/div:3',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:11/section:2/p:2',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/div:13/section:1/p:1',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:15/section:1/p:1',
+      /* the sum's three numbers, which were the hero's details, follow the equation as Ark facts */
+      'fact#2': { key: P + '/div:13/article:1', self: true },
+      'fact-term#2': P + '/div:13/article:1/p:1',
+      'fact-value#2': P + '/div:13/article:1/p:2',
+      'fact#3': { key: P + '/div:13/article:2', self: true },
+      'fact-term#3': P + '/div:13/article:2/p:1',
+      'fact-value#3': P + '/div:13/article:2/p:2',
+      'fact#4': P + '/div:11/section:2/div:1',
+      'fact#5': P + '/div:11/section:2/div:2',
+      'fact#6': P + '/div:11/section:2/div:3',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:11/section:2/p:2',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(4) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/div:13/section:1/p:1',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:15/section:1/p:1',
       'figure-description': P + '/div:16/section:1/p:2',
-      'figure-caption#3': P + '/div:5/section:1/figure:1/figcaption:1',
-      'figure-caption#4': P + '/div:5/section:2/figure:1/figcaption:1',
-      'fact-value': P + '/div:11/section:2/div:1/p:1',
-      'fact-value#2': P + '/div:11/section:2/div:2/p:1',
-      'fact-value#3': P + '/div:11/section:2/div:3/p:1',
+      'figure-caption#4': P + '/div:5/section:1/figure:1/figcaption:1',
+      'figure-caption#5': P + '/div:5/section:2/figure:1/figcaption:1',
+      'fact-value#4': P + '/div:11/section:2/div:1/p:1',
+      'fact-value#5': P + '/div:11/section:2/div:2/p:1',
+      'fact-value#6': P + '/div:11/section:2/div:3/p:1',
       'button': P + '/div:13/section:1/p:2/a:1',
       'button#2': P + '/div:13/section:1/p:2/a:2',
       'button#3': P + '/div:16/section:1/div:1/a:3'
     },
     'rm-hero': {
       'eyebrow': P + '/header:1/div:1/p:1',
-      'hero-lede': P + '/header:1/div:1/p:2',
-      ':scope > dl:nth-of-type(1) > div:nth-of-type(2) > dt:nth-of-type(1)': P + '/div:13/article:1/p:1',
-      ':scope > dl:nth-of-type(1) > div:nth-of-type(3) > dt:nth-of-type(1)': P + '/div:13/article:2/p:1'
+      'hero-lede': P + '/header:1/div:1/p:2'
     },
     'rm-onward': {
       ':scope > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:16/section:1/p:1',
@@ -696,41 +703,55 @@
     return [
       { block: 'breadcrumb', id: 'rm-crumbs', was: WAS['rm-crumbs'], props: { label: 'Your place', items: [
         { label: 'Home', href: 'route:zero' }, { label: 'What is a resolver?', href: 'route:resolver' }, { label: 'Resolver Math' }] } },
-      /* The answer: the sum in one sentence, and the three numbers it comes to today. */
+      /* The answer: the sum in one sentence. Its three numbers follow the equation they count
+         (first-visit audit 2026-10-22: shown first, they had to be decoded before the page said
+         what it shows). */
       { block: 'hero', id: 'rm-hero', was: WAS['rm-hero'], props: {
         eyebrow: 'DEFXN · Foundational concept', title: 'Resolver Math', density: 'compact',
-        lede: 'Everything this system can do is the sum of what somebody defined. Nothing else is in there.',
-        meta: [
-          { label: 'Definitions in the sum', value: D.fmt(defined) },
-          { label: 'Audited families built', value: builtResolvers + ' · each with a measured limit' },
-          { label: 'Declared, not built', value: notBuilt + ' · things that cannot be made real today' }
-        ] } },
+        lede: 'Everything this system can do is the sum of what somebody defined. Nothing else is in there.' } },
+      /* Four views with plain names (first-visit audit 2026-10-22: seven tabs, "Two ideas", "Fixed vs
+         bends", "Resolve a block", before the reader knew what the page shows). Nothing is dropped:
+         the two live scenes share "Try it", the two drawings and the fixed-or-bends table share "How
+         records work", and the rules share their view with the totals they limit. */
       { block: 'tabs', id: 'rm-views', was: WAS['rm-views'], props: { label: 'Resolver math views', items: [
         /* The equation is the page, so it is the first view. On a phone it folds behind one press:
-           drawn out it is a screen and a half there, and the hero already states its total. */
+           drawn out it is a screen and a half there. Its kind is data: a count read from the
+           registry census, not a live reading (it carried a "Live" badge until 2026-10-22). */
         { value: 'equation', label: 'The equation', blocks: [
           { block: 'disclosure', props: { foldBelow: 'phone', more: 'Show the equation: ' + D.fmt(defined) + ' definitions', less: 'Fold the equation', blocks: [
-            { block: 'figure', props: { kind: 'live', slot: 'equation',
+            { block: 'figure', props: { kind: 'data', slot: 'equation',
               caption: 'The sum, counted from the registry: one cell for every definition. Point at a term to light its cells.',
               description: 'Two parties sign → a resolver shard resolves → the shard signs the result → replicas store → anyone audits. Census generated from ' + ALG.source + ' · spec version ' + ALG.specVersion } }
+          ] } },
+          { block: 'facts', props: { label: 'What the sum comes to today', columns: 3, items: [
+            { term: 'Definitions in the sum', value: D.fmt(defined) },
+            { term: 'Audited families built', value: builtResolvers + ' · each with a measured limit' },
+            { term: 'Declared, not built', value: notBuilt + ' · things that cannot be made real today' }
           ] } }
         ] },
-        { value: 'remove', label: 'Remove a term', blocks: [
-          { block: 'disclosure', props: { foldBelow: 'phone', more: 'Try it: take a term out', less: 'Fold it', blocks: [
+        /* The two scenes a reader runs: the second is a press away at every width (both open ran past
+           the fold budget on a desktop). */
+        { value: 'try', label: 'Try it', blocks: [
+          { block: 'disclosure', props: { foldBelow: 'phone', more: 'Take a term out', less: 'Fold it', blocks: [
             { block: 'figure', props: { kind: 'live', slot: 'builder',
               caption: 'Take a term out and watch something stop existing',
               description: 'Untick a definition. The list on the right is recomputed by the real resolver, rebuilt without that definition — nothing here is a mock-up.' } }
+          ] } },
+          { block: 'disclosure', props: { foldBelow: 'always', more: 'Resolve a block yourself', less: 'Fold it', blocks: [
+            { block: 'figure', props: { kind: 'live', slot: 'explorer',
+              caption: 'Resolve a block yourself',
+              description: 'Type a box and watch what happens to it. The frightening ones are not the refusals — they are the ones that say “resolved” and are wrong.' } }
           ] } }
         ] },
-        { value: 'ideas', label: 'Two ideas', content: 'Two ideas this page cannot show any other way', blocks: [
+        { value: 'records', label: 'How records work', content: 'Two ideas this page cannot show any other way', blocks: [
           { block: 'accordion', props: { label: 'Two ideas', defaultOpen: ['record'], items: [
             { value: 'record', title: 'A record is a row of boxes', blocks: [{ block: 'figure', props: { kind: 'illustration', slot: 'record', caption: CAPTION_RECORD } }] },
             { value: 'signing', title: 'A wish is not a fact', blocks: [{ block: 'figure', props: { kind: 'illustration', slot: 'signing', caption: CAPTION_SIGNING } }] }
-          ] } }
-        ] },
-        { value: 'fixed', label: 'Fixed vs bends', blocks: [
-          { block: 'disclosure', props: { foldBelow: 'phone', more: 'What is fixed, and what bends', less: 'Fold it',
-            content: 'What is fixed, and the one letter that bends\n\nYou can define new things to say almost without limit. You can almost never define a new kind of box — except one, whose meaning depends on context.' } },
+          ] } },
+          /* what is fixed and what bends: its table and its letter, one press away (open, the view ran to
+             1.8 screens at 1440) */
+          { block: 'disclosure', props: { foldBelow: 'always', more: 'What is fixed, and what bends', less: 'Fold it',
+            content: 'What is fixed, and the one letter that bends\n\nYou can define new things to say almost without limit. You can almost never define a new kind of box — except one, whose meaning depends on context.', blocks: [
           { block: 'table', props: { caption: 'Each layer was decided by a hazard somebody hit, not by taste.', maxHeight: 'compact',
             columns: [{ key: 'dim', label: 'Dimension' }, { key: 'kind', label: 'Status' }, { key: 'count', label: 'Count', numeric: true }, { key: 'why', label: 'Why it is this way' }],
             rows: ENGINE.layers().map(function (row) { return { dim: row.dim, kind: row.kind, count: row.count, why: row.why }; }) } },
@@ -743,12 +764,6 @@
                 columns: [{ key: 'letter', label: 'Letter', mono: true }, { key: 'type', label: 'When the record is a…' }, { key: 'shape', label: '…it means' }, { key: 'definedIn', label: 'Defined in', mono: true }],
                 rows: ENGINE.observerTable().map(function (r) { return { letter: r.letter, type: r.type + (r.code ? ' (' + r.code + ')' : ''), shape: r.shape, definedIn: r.definedIn }; }) } }] }
           ] } }
-        ] },
-        { value: 'resolve', label: 'Resolve a block', blocks: [
-          { block: 'disclosure', props: { foldBelow: 'phone', more: 'Try it: resolve a block', less: 'Fold it', blocks: [
-            { block: 'figure', props: { kind: 'live', slot: 'explorer',
-              caption: 'Resolve a block yourself',
-              description: 'Type a box and watch what happens to it. The frightening ones are not the refusals — they are the ones that say “resolved” and are wrong.' } }
           ] } }
         ] },
         { value: 'rules', label: 'Rules and limits', blocks: [
@@ -769,10 +784,9 @@
               blocks: [{ block: 'table', props: { caption: 'Where this page stops being true', maxHeight: 'compact',
                 columns: [{ key: 'piece', label: 'Piece of the idea' }, { key: 'state', label: 'Status' }, { key: 'need', label: 'What it would take' }],
                 rows: GAPS.map(function (g) { return { piece: g.piece, state: g.state, need: g.need }; }) } }] }
-          ] } }
-        ] },
-        { value: 'totals', label: 'What it adds up to', blocks: [
-          { block: 'disclosure', props: { foldBelow: 'phone', more: 'What these numbers mean', less: 'Fold it',
+          ] } },
+          /* what the sum adds up to: the audited families and their measured limits */
+          { block: 'disclosure', props: { foldBelow: 'always', more: 'What these numbers mean', less: 'Fold it',
             content: 'What the sum adds up to today\n\n' + builtResolvers + ' audited resolver famil' + (builtResolvers === 1 ? 'y has' : 'ies have') + ' a measured limit. ' + notBuilt + ' ' +
               (notBuilt === 1 ? 'is' : 'are') + ' declared and not built — named, because zero would mean “we measured it and it scored nothing”.' +
               (SNAP ? ' Resolver chains are a separate count: ' + SNAP.counts.nativeResolverChains + ' native and ' + SNAP.counts.bridgeChains + ' bridge chains in source (snapshot ' + SNAP.source.commitDate + ').' : '') +

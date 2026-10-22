@@ -5,7 +5,7 @@
    Named regressions it holds:
    - Fold (docs/ux-audit/pages-ux-b.md /resolver-math P0): 8.54x the viewport on a desktop and
      13.58x on a phone, the equation then six sections of panels, tables and figures. The hero states
-     the sum and its three numbers; the equation is the first of seven tabs; each view measures <= 1.6x
+     the sum (its three numbers follow the equation since 2026-10-22); the equation is the first of four tabs; each view measures <= 1.6x
      at 1440x900 and 390x844 (W3-STATS report). Folding is structure: on a phone the equation, the
      builder and the explorer open with one press (Ark disclosures), never cut off.
    - Type-scale drift (P1): 22 font sizes, 9px kickers -- the shell, headings, tables and notes are
@@ -30,25 +30,25 @@ const P = 'page:/div:1';
 /* Why each old key whose words changed shape still lands on its successor. */
 const reshaped = {
   'page:/nav:1': 'the hand-built trail became Ark\'s breadcrumb: the same three places',
-  [P + '/header:1']: 'the page header became the hero block: the same eyebrow, title and lede, with the sum\'s three numbers as its details',
-  [P + '/div:2']: 'the builder\'s section head became the "Remove a term" tab panel; its heading is the figure\'s caption',
-  [P + '/div:4']: 'the drawings\' section head became the "Two ideas" tab panel',
+  [P + '/header:1']: 'the page header became the hero block: the same eyebrow, title and lede (the sum\'s three numbers were its details until the first-visit audit 2026-10-22; they follow the equation now)',
+  [P + '/div:2']: 'the builder\'s section head became the "Try it" tab panel ("Remove a term" until 2026-10-22); its heading is the figure\'s caption',
+  [P + '/div:4']: 'the drawings\' section head became the "How records work" tab panel ("Two ideas" until 2026-10-22)',
   [P + '/div:5']: 'the two-drawing grid became an accordion, one drawing per item',
   [P + '/div:5/section:1']: 'the record drawing\'s panel became an accordion item; its label is the item\'s title',
   [P + '/div:5/section:2']: 'the signing drawing\'s panel became an accordion item; its label is the item\'s title',
   [P + '/div:5/section:1/figure:1']: 'the same drawing in Ark\'s figure, which also names its kind ("Illustration")',
   [P + '/div:5/section:2/figure:1']: 'the same drawing in Ark\'s figure, which also names its kind ("Illustration")',
-  [P + '/div:6']: 'the "What is fixed" section head became the "Fixed vs bends" tab panel',
+  [P + '/div:6']: 'the "What is fixed" section head became the "Fixed vs bends" tab panel; since 2026-10-22 it is the "What is fixed, and what bends" disclosure in "How records work"',
   [P + '/div:7/section:2']: 'the "One letter, ten real cases" panel became an accordion item of the same name',
-  [P + '/div:8']: 'the explorer\'s section head became the "Resolve a block" tab panel; its heading is the figure\'s caption',
+  [P + '/div:8']: 'the explorer\'s section head became the "Resolve a block" tab panel; since 2026-10-22 it is the "Resolve a block yourself" disclosure in "Try it"; its heading is the figure\'s caption',
   [P + '/div:10']: 'the rules\' section head became the "Rules and limits" tab panel',
   [P + '/div:11/section:2']: 'the "Written as algebra" panel became an accordion item of the same name; its lines are facts',
-  [P + '/div:12']: 'the totals\' section head became the "What it adds up to" tab panel',
-  [P + '/div:13/article:1']: 'the "Audited families built" tile became a hero detail: the number, then what it counts',
-  [P + '/div:13/article:2']: 'the "Declared, not built" tile became a hero detail: the number, then what it counts',
-  [P + '/div:13/article:1/p:2']: 'the tile\'s number is the hero detail now, followed by its line ("each with a measured limit")',
-  [P + '/div:13/article:2/p:2']: 'the tile\'s number is the hero detail now, followed by its line ("things that cannot be made real today")',
-  [P + '/div:13/section:1']: 'the prose panel became the totals note (open on a desktop, a press away on a phone), with its links',
+  [P + '/div:12']: 'the totals\' section head became the "What it adds up to" tab panel; since 2026-10-22 it is the totals note\'s panel in "Rules and limits"',
+  [P + '/div:13/article:1']: 'the "Audited families built" tile is a fact after the equation (a hero detail until 2026-10-22): the number, then what it counts',
+  [P + '/div:13/article:2']: 'the "Declared, not built" tile is a fact after the equation (a hero detail until 2026-10-22): the number, then what it counts',
+  [P + '/div:13/article:1/p:2']: 'the tile\'s number is the fact\'s value now, followed by its line ("each with a measured limit")',
+  [P + '/div:13/article:2/p:2']: 'the tile\'s number is the fact\'s value now, followed by its line ("things that cannot be made real today")',
+  [P + '/div:13/section:1']: 'the prose panel became the totals note (a press away at every width since 2026-10-22, when it joined "Rules and limits"), with its links',
   [P + '/div:13/section:1/p:2']: 'the links row became an actions row: the same two links, and the deprecation ledger',
   [P + '/div:14']: 'the "Where this page stops being true" section head became an accordion item of the same name',
   [P + '/div:16/section:1']: 'the "Keep reading" panel became the closing pager under the same label',
@@ -118,6 +118,8 @@ retired['page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:3/span:1/spa
       tabs: [...page.querySelectorAll('#rm-views [role="tab"]')].map((el) => el.textContent.trim()),
       slots: [...page.querySelectorAll('[data-ark-slot]')].map((el) => el.getAttribute('data-ark-slot')),
       meta: [...page.querySelectorAll('#rm-hero [data-ark-part="hero-meta"] dt')].map((el) => el.textContent),
+      sumFacts: [...page.querySelector('[data-ark-slot="equation"]').closest('[data-ark-part="tabs-content"]').querySelectorAll('[data-ark-part="fact-term"]')].map((el) => el.textContent),
+      kinds: [...page.querySelectorAll('[data-ark-part="figure"]')].map((el) => el.getAttribute('data-kind')),
       tables: [...page.querySelectorAll('table')].map((t) => t.querySelectorAll('tbody tr').length),
       sum, cells, counted, never, before, after, verdict,
       chips: page.querySelectorAll('.rm-chip').length,
@@ -127,9 +129,15 @@ retired['page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:3/span:1/spa
     };
   });
   assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'tabs', 'pager'], 'trail, the answer, the detail as tabs, the way on');
-  assert.deepEqual(seen.tabs, ['The equation', 'Remove a term', 'Two ideas', 'Fixed vs bends', 'Resolve a block', 'Rules and limits', 'What it adds up to']);
-  assert.deepEqual(seen.meta, ['Definitions in the sum', 'Audited families built', 'Declared, not built'], 'the hero answers with the sum and the audited counts');
-  assert.deepEqual(seen.slots, ['equation', 'builder', 'record', 'signing', 'explorer'], 'the page\'s own live scenes, each in an Ark figure');
+  /* First-visit audit 2026-10-22 (P1): seven tabs ("Two ideas", "Fixed vs bends", "Resolve a block"...) and
+     three stats stood before the page said what it shows. Four views with plain names now, nothing
+     dropped; the stats follow the equation they count, and the equation's figure is "Data" (a count
+     read from the census), not "Live". */
+  assert.deepEqual(seen.tabs, ['The equation', 'Try it', 'How records work', 'Rules and limits']);
+  assert.deepEqual(seen.meta, [], 'the hero states the sum in one sentence; its numbers follow the equation');
+  assert.deepEqual(seen.sumFacts, ['Definitions in the sum', 'Audited families built', 'Declared, not built'], 'the equation view ends with the sum and the audited counts');
+  assert.deepEqual(seen.kinds, ['data', 'live', 'live', 'illustration', 'illustration'], 'the equation is data, the builder and the explorer run live, the drawings are illustrations');
+  assert.deepEqual(seen.slots, ['equation', 'builder', 'explorer', 'record', 'signing'], 'the page\'s own live scenes, each in an Ark figure');
   assert(seen.sum >= 5 && seen.cells > 0 && seen.never === 2, 'the equation counts the census into one cell per definition, and draws the two nobody defined');
   assert.equal(seen.cells, seen.counted, 'one cell per definition: the field has as many cells as the terms of the sum add up to');
   assert(seen.counted >= ALG.roles.registered.length + ALG.verbs.all.length + ALG.manifestTypes.count, 'the sum counts the census (its exact terms: tests/resolver-algebra.cjs)');
