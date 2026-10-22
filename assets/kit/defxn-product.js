@@ -29,9 +29,10 @@
    file puts every export on window.DefxnKit.
 
    Nothing here signs, fetches or stores anything except the viewer's own
-   light/dark choice (localStorage, per browser, wrapped in try/catch). */
+   light/dark choice and, on the family home, the last category the switcher
+   showed (localStorage, per browser, wrapped in try/catch). */
 
-const CATALOG = /* @catalog */ {"lanes":[{"id":"code","name":"Build","line":"Design and hold what you make: code, typed data, and the grammar every record is read by."},{"id":"ship","name":"Ship","line":"Name it, release it exactly, and stand up test environments from those releases."},{"id":"resolve","name":"Network","line":"Launch resolvers, read everything the network admitted, and run a node that signs for it."},{"id":"govern","name":"Govern","line":"Found a network's DAO, mint its genesis supply, and move shared funds only under its rules."},{"id":"social","name":"Social & live","line":"Talk, publish, play and listen: notifications, posts, matches and live radio, each on its own resolver."},{"id":"assets","name":"Assets","line":"Permanent verifiable assets: papers, collections and the listings that trade them."},{"id":"defi","name":"DeFi","line":"Launch a token on a bonding curve, trade it, and move it into a pool when the curve completes."}],"home":{"id":"home","name":"DEFXN","line":"The family home: what DEFXN is, how resolution works, and where each product lives.","site":"https://defxn.com","local":"http://127.0.0.1:3438/"},"icons":{"head":["M12 3v10","M8 9l4 4 4-4","M5 17h14v4H5z"],"terminal":["M3 5h18v14H3z","m6 9 3 3-3 3","M12 15h5"],"overview":["M5 5h6v6H5z","M14 5h5v6h-5z","M5 14h6v5H5z","M14 14h5v5h-5z"],"chain":["M4 9h5v6H4z","M15 9h5v6h-5z","M9 12h6"],"network":["M7 7h10v10H7z","M4 4h3v3H4z","M17 4h3v3h-3z","M4 17h3v3H4z","M17 17h3v3h-3z"],"world":["M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z","M3 12h18","M12 3c3 3 3 15 0 18","M12 3c-3 3-3 15 0 18"],"sign":["m5 19 1-4L16 5l3 3L9 18l-4 1Z","M14 7l3 3","M13 21h7"],"layers":["m12 3 9 5-9 5-9-5 9-5Z","m3 12 9 5 9-5","m3 16 9 5 9-5"],"cycle":["M19 8a8 8 0 0 0-13-2L3 9","M3 4v5h5","M5 16a8 8 0 0 0 13 2l3-3","M21 20v-5h-5"],"resolver":["m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z","M12 12v9","m12 12-8-4.5","m12 12 8-4.5"],"inspect":["M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z","m15 15 6 6"],"peers":["M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z","M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z","M19 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z","m11 7-5 10","m13 7 5 10","M7 19h10"],"account":["M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z","M4 21v-2a8 8 0 0 1 16 0v2"],"evidence":["M6 3h8l4 4v5","M14 3v5h4","M6 3v18h5","M15 14a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z","m17 19 3 3"],"vote":["M5 11h14v9H5z","m9 6 2.5 2.5L16 4","M9 15h6"],"stake":["M6 11h12v9H6z","M9 11V8a3 3 0 0 1 6 0v3","M12 15v2"],"authority":["m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z","M8 10h8","M8 14h5"],"transfer":["M4 12h12","m12 8 4 4-4 4","M20 5v14"],"open":["M14 5h5v5","M19 5 10 14","M19 14v5H5V5h5"],"check":["m5 12 4 4 10-10"],"link":["M10 14a4 4 0 0 0 5.7 0l3-3A4 4 0 0 0 13 5.3l-1 1","M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],"model":["M4 17 8 7l4 10 4-10 4 10","M4 21h16"],"swap":["M4 8h14","m15 5 3 3-3 3","M20 16H6","m9 13-3 3 3 3"],"document":["M7 3h7l4 4v14H7z","M14 3v5h4","M10 12h5","M10 16h5"],"arrow-right":["M5 12h14","m13 6 6 6-6 6"]},"products":[{"id":"repo","name":"Repo","lane":"code","order":10,"line":"Find a repository by its anchor and open it in Code on your own machine.","site":"https://repo.defxn.com","local":"http://127.0.0.1:4174/","takes":[{"what":"a commit anchor","from":"code"}],"gives":[{"what":"repository snapshots","to":"remote"},{"what":"an anchor to open","to":"code"}],"icon":"head"},{"id":"code","name":"Code","lane":"code","order":20,"line":"Edit a repository in the browser. Your key signs every change; the local host never holds it.","local":"http://localhost:3420/","takes":[{"what":"an Auth Kit identity"},{"what":"an anchor to reopen","from":"repo"}],"gives":[{"what":"signed commits and one anchor","to":"repo"}],"icon":"terminal"},{"id":"db","name":"DB Studio","lane":"code","order":30,"icon":"overview","status":"building","line":"Design a record type and browse your own records on the chain. No server account.","local":"http://127.0.0.1:3430/site/index.html","takes":[{"what":"an Auth Kit identity"}],"gives":[{"what":"typed records you own"}]},{"id":"grammar","name":"Grammar","lane":"code","order":40,"icon":"chain","line":"Every registered role letter and manifest type, and the resolver that owns each.","local":"http://127.0.0.1:4411/","takes":[{"what":"the role-letter and manifest-type registry"}],"gives":[{"what":"the grammar a resolver launches with","to":"deploy"}]},{"id":"studio","name":"Resolver Studio","lane":"code","order":50,"status":"building","carries":["ws"],"line":"Build a resolver step by step: its rules, its parts, who may sign, a test, then launch it in Deploy.","local":"http://127.0.0.1:4552/","icon":"network","takes":[{"what":"the rules for its records","from":"grammar"},{"what":"the network's ready-made parts"}],"gives":[{"what":"a launch ready to sign","to":"deploy"},{"what":"a resolver to watch","to":"explore"}]},{"id":"domains","name":"Domains","lane":"ship","order":5,"line":"Look up a .fxn name: who owns it and what it points at.","site":"https://domains.defxn.com","local":"http://127.0.0.1:4173/","takes":[{"what":"an owner key"}],"gives":[{"what":"names to publish under","to":"bundles"},{"what":"package names","to":"packages"},{"what":"preview-domain bindings","to":"remote"}],"icon":"world"},{"id":"bundles","name":"Bundles","lane":"ship","order":10,"status":"building","line":"Approve one site bundle on this machine, then pin it and point your name at it.","local":"http://127.0.0.1:17831/","takes":[{"what":"a name you own","from":"domains"},{"what":"bundle bytes"}],"gives":[{"what":"a pinned bundle CID","to":"remote"},{"what":"a signed name record","to":"domains"}],"icon":"sign"},{"id":"packages","name":"Packages","lane":"ship","order":20,"line":"Publish and install signed packages by exact version, from any healthy miner.","site":"https://registry.defxn.com","local":"http://127.0.0.1:4175/","takes":[{"what":"a .fxn name you own","from":"domains"},{"what":"release bytes"}],"gives":[{"what":"exact package versions","to":"remote"}],"icon":"layers"},{"id":"remote","name":"Remote","lane":"ship","order":30,"status":"planned","line":"Compose exact versions into a test environment, release it to testers, collect feedback.","site":"https://remote.defxn.com","local":"http://127.0.0.1:4546/","takes":[{"what":"bundle CIDs","from":"bundles"},{"what":"package versions","from":"packages"},{"what":"repository snapshots","from":"repo"}],"gives":[{"what":"identity-gated test environments"},{"what":"version-bound feedback"}],"icon":"cycle"},{"id":"deploy","name":"Deploy","lane":"resolve","order":10,"carries":["ws"],"line":"Launch or upgrade a resolver, or declare a capability, after reviewing the exact record.","site":"https://deploy.defxn.com","local":"http://127.0.0.1:4544/","takes":[{"what":"an Auth Kit identity"},{"what":"offer and grammar manifests"}],"gives":[{"what":"a launched resolver","to":"explore"}],"icon":"resolver"},{"id":"explore","name":"Explore","lane":"resolve","order":20,"carries":["ws"],"line":"Every launched resolver and capability, with its full history, verified in the page.","site":"https://explore.defxn.com","local":"http://127.0.0.1:4541/","takes":[{"what":"launched resolvers","from":"deploy"}],"gives":[{"what":"a resolver to upgrade","to":"deploy"}],"icon":"inspect"},{"id":"node","name":"Node","lane":"resolve","order":30,"carries":["ws"],"line":"Keep a tab open to sign certified segments and earn FXN. No install.","site":"https://nodes.defxn.com","local":"http://127.0.0.1:4539/","takes":[{"what":"pending segments from a chain-server"}],"gives":[{"what":"segment signatures"},{"what":"earned FXN"}],"icon":"peers"},{"id":"storage","name":"Storage","lane":"resolve","order":45,"line":"Run a blind storage provider: capacity, retention contracts and allocation, ciphertext only.","local":"http://127.0.0.1:4564/","status":"building","icon":"account","takes":[{"what":"ciphertext under a holder-signed storage grant"}],"gives":[{"what":"retention contracts and verified storage units"}]},{"id":"claims","name":"Claims","lane":"resolve","order":50,"icon":"evidence","line":"Read the claims, conflicts and capacity a miner holds, with its verdict on every record and failed ones kept on file.","local":"http://127.0.0.1:4551/","takes":[{"what":"claims and agreements from miners"}],"gives":[{"what":"case files with the miner's verdict on each"}]},{"id":"dao","name":"DAO","lane":"govern","order":10,"icon":"vote","carries":["ws"],"line":"A roster, a threshold and signed decisions for one network.","site":"https://dao.defxn.com","local":"http://127.0.0.1:4538/","takes":[{"what":"founder identities"},{"what":"a launched DAO resolver","from":"deploy"}],"gives":[{"what":"signed decisions","to":"treasury"}]},{"id":"treasury","name":"Treasury","lane":"govern","order":20,"icon":"stake","carries":["ws"],"line":"Shared funds for every founded DAO, moving only under that DAO’s rules.","site":"https://treasury.defxn.com","local":"http://127.0.0.1:4540/","takes":[{"what":"founded DAOs and their decisions","from":"dao"},{"what":"FXN supply","from":"genesis"}],"gives":[{"what":"spends a DAO approved"}]},{"id":"genesis","name":"Genesis","lane":"govern","order":30,"icon":"authority","carries":["ws"],"line":"Mint a network’s FXN genesis supply, once, under the genesis authority.","site":"https://genesis.defxn.com","local":"http://127.0.0.1:4547/","takes":[{"what":"the genesis authority key"}],"gives":[{"what":"the FXN supply","to":"treasury"}]},{"id":"inbox","name":"Inbox","lane":"social","order":10,"line":"Signed notifications addressed to a key, sorted by topic and sender, each one checked in the tab.","local":"http://127.0.0.1:4561/","status":"building","carries":["ws"],"icon":"transfer","takes":[{"what":"a chain-server to read and write through","from":"node"}],"gives":[{"what":"signed notify records, readable in full","to":"explore"}]},{"id":"posts","name":"Posts","lane":"social","order":20,"line":"Write posts in content types you publish as grammars; every post shows what the node checked and what your reader checked.","local":"http://127.0.0.1:4563/","status":"building","carries":["ws"],"icon":"open","takes":[{"what":"a content type designed as a grammar","from":"grammar"}],"gives":[{"what":"signed posts on the content chain","to":"explore"}]},{"id":"play","name":"Play","lane":"social","order":30,"line":"Turn-based matches where every move is signed in your tab and the referee replays the board from the records.","local":"http://127.0.0.1:4562/","status":"building","carries":["ws"],"icon":"check","takes":[{"what":"an opponent's public key"},{"what":"a chain-server to play through"}],"gives":[{"what":"signed match records, readable in full","to":"explore"},{"what":"achievements anyone can recompute"}]},{"id":"radio","name":"Radio","lane":"social","order":40,"icon":"network","carries":["ws"],"line":"Live peer-to-peer radio and video across the mesh. Stations announce on the chain; every tab listens, watches or broadcasts.","site":"https://radio.defxn.com","local":"http://127.0.0.1:7780/","takes":[{"what":"station presence from the chain"}],"gives":[{"what":"live audio and video between tabs"},{"what":"recordings as verified blobs"}]},{"id":"pva","name":"PVA","lane":"assets","order":5,"icon":"link","line":"Permanent Verifiable Assets: what they are, and the three registries that hold them.","site":"https://pva.defxn.com","local":"http://127.0.0.1:4550/","takes":[],"gives":[{"what":"papers","to":"books"},{"what":"collections","to":"collections"},{"what":"listings","to":"market"}]},{"id":"collections","name":"Collections","lane":"assets","order":10,"icon":"model","line":"Browse upgradeable collections and every item’s signed history.","site":"https://collections.defxn.com","local":"http://127.0.0.1:4548/","takes":[{"what":"the collection registry"}],"gives":[{"what":"items to list","to":"market"}]},{"id":"market","name":"Market","lane":"assets","order":20,"icon":"swap","line":"Native listings for collection items, read from the registry.","site":"https://market.defxn.com","local":"http://127.0.0.1:4542/","takes":[{"what":"items","from":"collections"}],"gives":[{"what":"listings"}]},{"id":"books","name":"Books","lane":"assets","order":30,"icon":"document","line":"Read PVA papers from the registry, each one permanent and verifiable.","site":"https://books.defxn.com","local":"http://127.0.0.1:4549/","takes":[{"what":"the papers registry"}],"gives":[{"what":"papers you can verify"}]},{"id":"launch","name":"Flux Launch","lane":"defi","order":10,"line":"Launch a token on a bonding curve, trade it on the curve, and watch it migrate into a pool.","local":"http://127.0.0.1:8080/","carries":["ws"],"icon":"arrow-right","takes":[{"what":"an Auth Kit identity and a funded creator bond"}],"gives":[{"what":"launched tokens, their curves and pools"}]}],"resolvers":[{"id":"notify","name":"Notify","order":10,"icon":"transfer","status":"building","chain":"notify","line":"Signed notifications to a key: content-free pings or sealed bodies only the recipient opens.","surface":"inbox","dir":"flux-notify"},{"id":"games","name":"Games","order":20,"icon":"check","status":"building","chain":"gtictactoe","chainLabel":"gtictactoe · gconnectfour · gnim · gprogress","line":"Turn-based matches where every move is a signed record, plus achievements recomputed from them.","surface":"play","dir":"flux-games"},{"id":"content","name":"Content","order":30,"icon":"open","status":"building","chain":"content","surface":"posts","line":"Posts in content types you define as grammars; a new type is a published grammar, not code.","dir":"flux-content"},{"id":"data","name":"Data","order":40,"icon":"overview","status":"building","surface":"db","chainLabel":"one chain per table","line":"Typed rows the node checks against each table’s own grammar; recoverable from the chain.","dir":"flux-db-studio"},{"id":"streams","name":"Streams","order":50,"icon":"network","status":"building","surface":"radio","chainLabel":"stream records → cap-signal","line":"Live audio and video: stations announce on the chain, media flows peer to peer.","dir":"defxn-radio"}]} /* @end-catalog */;
+const CATALOG = /* @catalog */ {"lanes":[{"id":"code","name":"Build","line":"Design and hold what you make: code, typed data, and the grammar every record is read by."},{"id":"ship","name":"Ship","line":"Name it, release it exactly, and stand up test environments from those releases."},{"id":"resolve","name":"Network","line":"Launch resolvers, read everything the network admitted, and run a node that signs for it."},{"id":"govern","name":"Govern","line":"Found a network's DAO, mint its genesis supply, and move shared funds only under its rules."},{"id":"social","name":"Social & live","line":"Talk, publish, play and listen: notifications, posts, matches and live radio, each on its own resolver."},{"id":"assets","name":"Assets","line":"Permanent verifiable assets: papers, collections and the listings that trade them."},{"id":"defi","name":"DeFi","line":"Launch a token on a bonding curve, trade it, and move it into a pool when the curve completes."}],"home":{"id":"home","name":"DEFXN","line":"The family home: what DEFXN is, how resolution works, and where each product lives.","site":"https://defxn.com","local":"http://127.0.0.1:3438/"},"icons":{"head":["M12 3v10","M8 9l4 4 4-4","M5 17h14v4H5z"],"terminal":["M3 5h18v14H3z","m6 9 3 3-3 3","M12 15h5"],"overview":["M5 5h6v6H5z","M14 5h5v6h-5z","M5 14h6v5H5z","M14 14h5v5h-5z"],"chain":["M4 9h5v6H4z","M15 9h5v6h-5z","M9 12h6"],"network":["M7 7h10v10H7z","M4 4h3v3H4z","M17 4h3v3h-3z","M4 17h3v3H4z","M17 17h3v3h-3z"],"world":["M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z","M3 12h18","M12 3c3 3 3 15 0 18","M12 3c-3 3-3 15 0 18"],"sign":["m5 19 1-4L16 5l3 3L9 18l-4 1Z","M14 7l3 3","M13 21h7"],"layers":["m12 3 9 5-9 5-9-5 9-5Z","m3 12 9 5 9-5","m3 16 9 5 9-5"],"cycle":["M19 8a8 8 0 0 0-13-2L3 9","M3 4v5h5","M5 16a8 8 0 0 0 13 2l3-3","M21 20v-5h-5"],"resolver":["m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z","M12 12v9","m12 12-8-4.5","m12 12 8-4.5"],"inspect":["M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z","m15 15 6 6"],"peers":["M12 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z","M5 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z","M19 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z","m11 7-5 10","m13 7 5 10","M7 19h10"],"account":["M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z","M4 21v-2a8 8 0 0 1 16 0v2"],"evidence":["M6 3h8l4 4v5","M14 3v5h4","M6 3v18h5","M15 14a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z","m17 19 3 3"],"vote":["M5 11h14v9H5z","m9 6 2.5 2.5L16 4","M9 15h6"],"stake":["M6 11h12v9H6z","M9 11V8a3 3 0 0 1 6 0v3","M12 15v2"],"authority":["m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z","M8 10h8","M8 14h5"],"transfer":["M4 12h12","m12 8 4 4-4 4","M20 5v14"],"open":["M14 5h5v5","M19 5 10 14","M19 14v5H5V5h5"],"check":["m5 12 4 4 10-10"],"link":["M10 14a4 4 0 0 0 5.7 0l3-3A4 4 0 0 0 13 5.3l-1 1","M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],"model":["M4 17 8 7l4 10 4-10 4 10","M4 21h16"],"swap":["M4 8h14","m15 5 3 3-3 3","M20 16H6","m9 13-3 3 3 3"],"document":["M7 3h7l4 4v14H7z","M14 3v5h4","M10 12h5","M10 16h5"],"arrow-right":["M5 12h14","m13 6 6 6-6 6"]},"products":[{"id":"repo","name":"Repo","lane":"code","order":10,"line":"Find a repository by its anchor and open it in Code on your own machine.","site":"https://repo.defxn.com","local":"http://127.0.0.1:4174/","takes":[{"what":"a commit anchor","from":"code"}],"gives":[{"what":"repository snapshots","to":"remote"},{"what":"an anchor to open","to":"code"}],"icon":"head","version":"0.1.0"},{"id":"code","name":"Code","lane":"code","order":20,"line":"Edit a repository in the browser. Your key signs every change; the local host never holds it.","local":"http://localhost:3420/","takes":[{"what":"an Auth Kit identity"},{"what":"an anchor to reopen","from":"repo"}],"gives":[{"what":"signed commits and one anchor","to":"repo"}],"icon":"terminal","version":"0.1.0"},{"id":"db","name":"DB Studio","lane":"code","order":30,"icon":"overview","status":"building","line":"Design a record type and browse your own records on the chain. No server account.","local":"http://127.0.0.1:3430/site/index.html","takes":[{"what":"an Auth Kit identity"}],"gives":[{"what":"typed records you own"}],"version":"0.2.0"},{"id":"grammar","name":"Grammar","lane":"code","order":40,"icon":"chain","line":"Every registered role letter and manifest type, and the resolver that owns each.","local":"http://127.0.0.1:4411/","takes":[{"what":"the role-letter and manifest-type registry"}],"gives":[{"what":"the grammar a resolver launches with","to":"deploy"}],"version":"0.1.0"},{"id":"studio","name":"Resolver Studio","lane":"code","order":50,"status":"building","carries":["ws"],"line":"Build your own workflow one question at a time, then go live in Deploy.","local":"http://127.0.0.1:4552/","icon":"network","takes":[{"what":"your rules","from":"grammar"},{"what":"building blocks from the network"}],"gives":[{"what":"a workflow, ready to go live","to":"deploy"},{"what":"a live workflow to watch","to":"explore"}],"version":"0.1.0"},{"id":"domains","name":"Domains","lane":"ship","order":5,"line":"Look up a .fxn name: who owns it and what it points at.","site":"https://domains.defxn.com","local":"http://127.0.0.1:4173/","takes":[{"what":"an owner key"}],"gives":[{"what":"names to publish under","to":"bundles"},{"what":"package names","to":"packages"},{"what":"preview-domain bindings","to":"remote"}],"icon":"world","version":"0.1.0"},{"id":"bundles","name":"Bundles","lane":"ship","order":10,"status":"building","line":"Approve one site bundle on this machine, then pin it and point your name at it.","local":"http://127.0.0.1:17831/","takes":[{"what":"a name you own","from":"domains"},{"what":"bundle bytes"}],"gives":[{"what":"a pinned bundle CID","to":"remote"},{"what":"a signed name record","to":"domains"}],"icon":"sign","version":"0.1.0"},{"id":"packages","name":"Packages","lane":"ship","order":20,"line":"Publish and install signed packages by exact version, from any healthy miner.","site":"https://registry.defxn.com","local":"http://127.0.0.1:4175/","takes":[{"what":"a .fxn name you own","from":"domains"},{"what":"release bytes"}],"gives":[{"what":"exact package versions","to":"remote"}],"icon":"layers","version":"0.1.0"},{"id":"remote","name":"Remote","lane":"ship","order":30,"status":"planned","line":"Compose exact versions into a test environment, release it to testers, collect feedback.","site":"https://remote.defxn.com","local":"http://127.0.0.1:4546/","takes":[{"what":"bundle CIDs","from":"bundles"},{"what":"package versions","from":"packages"},{"what":"repository snapshots","from":"repo"}],"gives":[{"what":"identity-gated test environments"},{"what":"version-bound feedback"}],"icon":"cycle","version":"0.1.0"},{"id":"deploy","name":"Deploy","lane":"resolve","order":10,"carries":["ws"],"line":"Launch or upgrade a resolver, or declare a capability, after reviewing the exact record.","site":"https://deploy.defxn.com","local":"http://127.0.0.1:4544/","takes":[{"what":"an Auth Kit identity"},{"what":"offer and grammar manifests"}],"gives":[{"what":"a launched resolver","to":"explore"}],"icon":"resolver","version":"0.1.0"},{"id":"explore","name":"Explore","lane":"resolve","order":20,"carries":["ws"],"line":"Every launched resolver and capability, with its full history, verified in the page.","site":"https://explore.defxn.com","local":"http://127.0.0.1:4541/","takes":[{"what":"launched resolvers","from":"deploy"}],"gives":[{"what":"a resolver to upgrade","to":"deploy"}],"icon":"inspect","version":"0.1.0"},{"id":"node","name":"Node","lane":"resolve","order":30,"carries":["ws"],"line":"Keep a tab open to sign certified segments and earn FXN. No install.","site":"https://nodes.defxn.com","local":"http://127.0.0.1:4539/","takes":[{"what":"pending segments from a chain-server"}],"gives":[{"what":"segment signatures"},{"what":"earned FXN"}],"icon":"peers","version":"0.1.0"},{"id":"storage","name":"Storage","lane":"resolve","order":45,"line":"Run a blind storage provider: capacity, retention contracts and allocation, ciphertext only.","local":"http://127.0.0.1:4564/","status":"building","icon":"account","takes":[{"what":"ciphertext under a holder-signed storage grant"}],"gives":[{"what":"retention contracts and verified storage units"}],"version":"0.1.0"},{"id":"claims","name":"Claims","lane":"resolve","order":50,"icon":"evidence","line":"Read the claims, conflicts and capacity a miner holds, with its verdict on every record and failed ones kept on file.","local":"http://127.0.0.1:4551/","takes":[{"what":"claims and agreements from miners"}],"gives":[{"what":"case files with the miner's verdict on each"}],"version":"0.1.0"},{"id":"dao","name":"DAO","lane":"govern","order":10,"icon":"vote","carries":["ws"],"line":"A roster, a threshold and signed decisions for one network.","site":"https://dao.defxn.com","local":"http://127.0.0.1:4538/","takes":[{"what":"founder identities"},{"what":"a launched DAO resolver","from":"deploy"}],"gives":[{"what":"signed decisions","to":"treasury"}],"version":"0.1.0"},{"id":"treasury","name":"Treasury","lane":"govern","order":20,"icon":"stake","carries":["ws"],"line":"Shared funds for every founded DAO, moving only under that DAO’s rules.","site":"https://treasury.defxn.com","local":"http://127.0.0.1:4540/","takes":[{"what":"founded DAOs and their decisions","from":"dao"},{"what":"FXN supply","from":"genesis"}],"gives":[{"what":"spends a DAO approved"}],"version":"0.1.0"},{"id":"genesis","name":"Genesis","lane":"govern","order":30,"icon":"authority","carries":["ws"],"line":"Mint a network’s FXN genesis supply, once, under the genesis authority.","site":"https://genesis.defxn.com","local":"http://127.0.0.1:4547/","takes":[{"what":"the genesis authority key"}],"gives":[{"what":"the FXN supply","to":"treasury"}],"version":"0.1.0"},{"id":"inbox","name":"Inbox","lane":"social","order":10,"line":"Signed notifications addressed to a key, sorted by topic and sender, each one checked in the tab.","local":"http://127.0.0.1:4561/","status":"building","carries":["ws"],"icon":"transfer","takes":[{"what":"a chain-server to read and write through","from":"node"}],"gives":[{"what":"signed notify records, readable in full","to":"explore"}],"version":"0.1.0"},{"id":"posts","name":"Posts","lane":"social","order":20,"line":"Write posts in content types you publish as grammars; every post shows what the node checked and what your reader checked.","local":"http://127.0.0.1:4563/","status":"building","carries":["ws"],"icon":"open","takes":[{"what":"a content type designed as a grammar","from":"grammar"}],"gives":[{"what":"signed posts on the content chain","to":"explore"}],"version":"0.1.0"},{"id":"play","name":"Play","lane":"social","order":30,"line":"Turn-based matches where every move is signed in your tab and the referee replays the board from the records.","local":"http://127.0.0.1:4562/","status":"building","carries":["ws"],"icon":"check","takes":[{"what":"an opponent's public key"},{"what":"a chain-server to play through"}],"gives":[{"what":"signed match records, readable in full","to":"explore"},{"what":"achievements anyone can recompute"}],"version":"0.1.0"},{"id":"radio","name":"Radio","lane":"social","order":40,"icon":"network","carries":["ws"],"line":"Live peer-to-peer radio and video across the mesh. Stations announce on the chain; every tab listens, watches or broadcasts.","site":"https://radio.defxn.com","local":"http://127.0.0.1:7780/","takes":[{"what":"station presence from the chain"}],"gives":[{"what":"live audio and video between tabs"},{"what":"recordings as verified blobs"}]},{"id":"pva","name":"PVA","lane":"assets","order":5,"icon":"link","line":"Permanent Verifiable Assets: what they are, and the three registries that hold them.","site":"https://pva.defxn.com","local":"http://127.0.0.1:4550/","takes":[],"gives":[{"what":"papers","to":"books"},{"what":"collections","to":"collections"},{"what":"listings","to":"market"}]},{"id":"collections","name":"Collections","lane":"assets","order":10,"icon":"model","line":"Browse upgradeable collections and every item’s signed history.","site":"https://collections.defxn.com","local":"http://127.0.0.1:4548/","takes":[{"what":"the collection registry"}],"gives":[{"what":"items to list","to":"market"}],"version":"0.1.0"},{"id":"market","name":"Market","lane":"assets","order":20,"icon":"swap","line":"Native listings for collection items, read from the registry.","site":"https://market.defxn.com","local":"http://127.0.0.1:4542/","takes":[{"what":"items","from":"collections"}],"gives":[{"what":"listings"}],"version":"0.1.0"},{"id":"books","name":"Books","lane":"assets","order":30,"icon":"document","line":"Read PVA papers from the registry, each one permanent and verifiable.","site":"https://books.defxn.com","local":"http://127.0.0.1:4549/","takes":[{"what":"the papers registry"}],"gives":[{"what":"papers you can verify"}],"version":"0.1.0"},{"id":"launch","name":"Flux Launch","lane":"defi","order":10,"line":"Launch a token on a bonding curve, trade it on the curve, and watch it migrate into a pool.","local":"http://127.0.0.1:8080/","carries":["ws"],"icon":"arrow-right","takes":[{"what":"an Auth Kit identity and a funded creator bond"}],"gives":[{"what":"launched tokens, their curves and pools"}]}],"resolvers":[{"id":"notify","name":"Notify","order":10,"icon":"transfer","status":"building","chain":"notify","line":"Signed notifications to a key: content-free pings or sealed bodies only the recipient opens.","surface":"inbox","dir":"flux-notify"},{"id":"games","name":"Games","order":20,"icon":"check","status":"building","chain":"gtictactoe","chainLabel":"gtictactoe · gconnectfour · gnim · gprogress","line":"Turn-based matches where every move is a signed record, plus achievements recomputed from them.","surface":"play","dir":"flux-games"},{"id":"content","name":"Content","order":30,"icon":"open","status":"building","chain":"content","surface":"posts","line":"Posts in content types you define as grammars; a new type is a published grammar, not code.","dir":"flux-content"},{"id":"data","name":"Data","order":40,"icon":"overview","status":"building","surface":"db","chainLabel":"one chain per table","line":"Typed rows the node checks against each table’s own grammar; recoverable from the chain.","dir":"flux-db-studio"},{"id":"streams","name":"Streams","order":50,"icon":"network","status":"building","surface":"radio","chainLabel":"stream records → cap-signal","line":"Live audio and video: stations announce on the chain, media flows peer to peer.","dir":"defxn-radio"}],"marks":{"repo":{"d":"M12 0 L12 12 L0 12 Z M12 0 L24 0 L24 12 L12 12 Z M28 0 L40 0 L40 12 L28 12 Z M52 12 L40 12 L40 0 A12 12 0 0 1 52 12 Z M0 12 L12 12 L12 24 L0 24 Z","sym":"R"},"code":{"d":"M18 0 L18 6 L12 6 Z M18 0 L24 0 L24 6 L18 6 Z M28 0 L34 0 L34 6 L28 6 Z M40 6 L34 6 L34 0 Z M12 6 L12 12 L6 12 Z M12 6 L18 6 L18 12 L12 12 Z M18 12 L18 6 L24 6 Z M28 6 L34 6 L34 12 Z M34 6 L40 6 L40 12 L34 12 Z M46 12 L40 12 L40 6 Z M6 12 L6 18 L0 18 Z M6 12 L12 12 L12 18 L6 18 Z M12 18 L12 12 L18 12 Z M34 12 L40 12 L40 18 Z M40 12 L46 12 L46 18 L40 18 Z M52 18 L46 18 L46 12 Z M0 18 L6 18 L6 24 L0 24 Z M6 24 L6 18 L12 18 Z M24 18 L24 24 L18 24 Z M34 24 L28 24 L28 18 Z M40 18 L46 18 L46 24 Z M46 18 L52 18 L52 24 L46 24 Z","sym":"R"},"db":{"d":"M12 0 L12 12 L0 12 A12 12 0 0 1 12 0 Z M12 0 L24 0 L24 12 L12 12 Z M28 0 L40 0 L40 12 L28 12 Z M52 12 L40 12 L40 0 A12 12 0 0 1 52 12 Z M0 18 L6 18 L6 24 L0 24 Z M6 18 L12 18 L12 24 L6 24 Z M12 18 L18 18 L18 24 L12 24 Z M18 18 L24 18 L24 24 L18 24 Z M28 18 L34 18 L34 24 L28 24 Z M34 18 L40 18 L40 24 L34 24 Z M40 18 L46 18 L46 24 L40 24 Z M46 24 L46 18 L52 18 Z","sym":"R"},"grammar":{"d":"M0 0 L12 0 L12 12 L0 12 Z M24 12 L12 12 L12 0 Z M40 0 L52 0 L52 12 L40 12 Z M0 12 L12 12 L12 24 L0 24 Z M40 12 L40 24 L28 24 Z M40 24 L40 12 L52 12 A12 12 0 0 0 40 24 Z","sym":"R"},"studio":{"d":"M12 0 L12 12 L0 12 Z M12 0 L24 0 L24 12 L12 12 Z M40 12 L28 12 L28 0 Z M0 12 L12 12 L12 24 L0 24 Z M28 12 L40 12 L40 24 Z M40 12 L52 12 L52 24 L40 24 Z","sym":"R"},"domains":{"d":"M24 0 L24 12 L12 12 A12 12 0 0 1 24 0 Z M12 12 L12 24 L0 24 A12 12 0 0 1 12 12 Z","sym":"P"},"bundles":{"d":"M12 0 L12 12 L0 12 Z M12 0 L24 0 L24 12 L12 12 Z","sym":"P"},"packages":{"d":"M0 0 L12 0 L12 12 L0 12 Z M18 6 L12 6 L12 0 Z M12 6 L18 6 L18 12 L12 12 Z M24 12 L18 12 L18 6 Z M0 12 L6 12 L6 18 Z M6 12 L12 12 L12 18 L6 18 Z M12 12 L18 12 L18 18 L12 18 Z M18 12 L24 12 L24 18 L18 18 Z M6 18 L12 18 L12 24 Z M12 18 L18 18 L18 24 L12 24 Z M18 18 L24 18 L24 24 L18 24 Z","sym":"P"},"remote":{"d":"M24 12 L12 12 L12 0 A12 12 0 0 1 24 12 Z M0 12 L12 12 L12 24 A12 12 0 0 1 0 12 Z M12 12 L18 12 L18 18 L12 18 Z","sym":"P"},"deploy":{"d":"M15 0 L18 0 L18 6 L15 6 Z M18 0 L24 0 L24 6 L18 6 Z M12 6 L12 18 L0 18 A12 12 0 0 1 12 6 Z M15 6 L18 6 L18 12 L15 12 Z M18 6 L24 6 L24 12 L18 12 Z M0 18 L12 18 L12 30 L0 30 Z M12 30 L12 18 L24 18 A12 12 0 0 0 12 30 Z","sym":"M"},"explore":{"d":"M24 0 L24 12 L12 12 A12 12 0 0 1 24 0 Z M12 12 L12 24 L0 24 A12 12 0 0 1 12 12 Z M18 12 L24 12 L24 18 L18 18 Z M12 18 L18 18 L18 24 L12 24 Z","sym":"M"},"node":{"d":"M12 0 L18 0 L18 6 L12 6 Z M18 0 L24 0 L24 6 L18 6 Z M12 6 L18 6 L18 12 L12 12 Z M0 12 L6 12 L6 18 L0 18 Z M6 12 L12 12 L12 18 L6 18 Z M0 18 L6 18 L6 24 L0 24 Z","sym":"M"},"storage":{"d":"M0 0 L12 0 L12 12 L0 12 Z M12 0 L18 0 L18 6 L12 6 Z M12 6 L18 6 L18 12 L12 12 Z M0 12 L6 12 L6 18 L0 18 Z M6 12 L12 12 L12 18 L6 18 Z M18 18 L24 18 L24 24 L18 24 Z","sym":"M"},"claims":{"d":"M12 0 L12 12 L0 12 A12 12 0 0 1 12 0 Z M18 0 L24 0 L24 6 L18 6 Z M18 6 L24 6 L24 12 L18 12 Z M12 24 L12 12 L24 12 A12 12 0 0 0 12 24 Z M0 18 L6 18 L6 24 L0 24 Z M6 18 L12 18 L12 24 L6 24 Z","sym":"M"},"dao":{"d":"M12 0 L24 0 L24 12 L12 12 Z M0 12 L12 12 L12 24 L0 24 Z M18 18 L24 18 L24 24 L18 24 Z","sym":"M"},"treasury":{"d":"M12 0 L12 12 L0 12 Z M12 0 L18 0 L18 6 L12 6 Z M18 0 L24 0 L24 6 L18 6 Z M12 6 L18 6 L18 12 L12 12 Z M0 12 L6 12 L6 18 L0 18 Z M6 12 L12 12 L12 18 L6 18 Z M12 24 L12 12 L24 12 A12 12 0 0 0 12 24 Z M0 18 L6 18 L6 24 L0 24 Z","sym":"M"},"genesis":{"d":"M12 0 L12 12 L0 12 Z M12 0 L24 0 L24 12 L12 12 Z M40 0 L52 0 L52 12 L40 12 Z M0 12 L12 12 L12 24 L0 24 Z M30 12 L30 24 L18 24 Z M40 12 L52 12 L52 24 L40 24 Z","sym":"R"},"inbox":{"d":"M0 0 L6 0 L6 6 L0 6 Z M6 0 L12 0 L12 6 L6 6 Z M12 0 L18 0 L18 6 L12 6 Z M24 6 L18 6 L18 0 Z M12 6 L18 6 L18 12 L12 12 Z M18 6 L24 6 L24 12 L18 12 Z M18 12 L24 12 L24 18 L18 18 Z","sym":"P"},"posts":{"d":"M12 0 L12 12 L0 12 A12 12 0 0 1 12 0 Z M24 12 L12 12 L12 0 A12 12 0 0 1 24 12 Z","sym":"P"},"play":{"d":"M18 0 L18 6 L12 6 Z M18 0 L24 0 L24 6 L18 6 Z M12 6 L12 12 L6 12 Z M12 6 L18 6 L18 12 L12 12 Z M18 6 L24 6 L24 12 L18 12 Z M6 12 L6 18 L0 18 Z M6 12 L12 12 L12 18 L6 18 Z M12 12 L18 12 L18 18 L12 18 Z","sym":"P"},"radio":{"d":"M12 0 L12 12 L0 12 A12 12 0 0 1 12 0 Z M24 12 L24 24 L12 24 A12 12 0 0 1 24 12 Z","sym":"P"},"pva":{"d":"M12 0 L12 12 L0 12 Z M12 0 L24 0 L24 12 L12 12 Z M28 0 L40 0 L40 12 L28 12 Z M46 6 L40 6 L40 0 Z M46 0 L52 0 L52 6 L46 6 Z M40 6 L46 6 L46 12 L40 12 Z M46 6 L52 6 L52 12 L46 12 Z M0 12 L12 12 L12 24 L0 24 Z M34 12 L34 18 L28 18 Z M34 12 L40 12 L40 18 L34 18 Z M28 18 L34 18 L34 24 L28 24 Z M34 18 L40 18 L40 24 L34 24 Z","sym":"R"},"collections":{"d":"M12 0 L12 12 L0 12 A12 12 0 0 1 12 0 Z M40 0 L40 12 L28 12 A12 12 0 0 1 40 0 Z M24 12 L24 24 L12 24 A12 12 0 0 1 24 12 Z M52 12 L52 24 L40 24 A12 12 0 0 1 52 12 Z","sym":"R"},"market":{"d":"M0 0 L12 0 L12 12 L0 12 Z M24 12 L12 12 L12 0 Z M24 12 L24 24 L12 24 Z M28 12 L40 12 L40 24 L28 24 Z","sym":"R"},"books":{"d":"M0 0 L12 0 L12 12 L0 12 Z M28 0 L40 0 L40 12 L28 12 Z M46 6 L40 6 L40 0 Z M40 6 L46 6 L46 12 L40 12 Z M46 6 L52 6 L52 12 L46 12 Z M0 12 L12 12 L12 24 L0 24 Z M12 12 L24 12 L24 24 L12 24 Z","sym":"R"},"launch":{"d":"M52 12 L40 12 L40 0 A12 12 0 0 1 52 12 Z M40 24 L28 24 L28 12 A12 12 0 0 1 40 24 Z M24 30 L12 30 L12 18 A12 12 0 0 1 24 30 Z","sym":"R"}},"markSize":52} /* @end-catalog */;
 
 const THEME_KEY = 'defxn-product-theme';
 const LOCAL_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]']);
@@ -60,7 +61,10 @@ function productIcon(id, { size = 18, className = 'dx-glyph' } = {}) {
   return glyph(product?.icon, { size, className });
 }
 
-function glyph(name, { size = 18, className = 'dx-glyph' } = {}) {
+/* weight: a stroke in screen pixels, the same at every size (the switcher's
+   tiles and scene). Without it the stroke is 1.7 viewBox units, which draws
+   thinner as the icon gets smaller. */
+function glyph(name, { size = 18, className = 'dx-glyph', weight = null } = {}) {
   const paths = name ? CATALOG.icons[name] : null;
   if (!paths) return null;
   const svg = document.createElementNS(SVG_NS, 'svg');
@@ -69,7 +73,7 @@ function glyph(name, { size = 18, className = 'dx-glyph' } = {}) {
   svg.setAttribute('height', String(size));
   svg.setAttribute('fill', 'none');
   svg.setAttribute('stroke', 'currentColor');
-  svg.setAttribute('stroke-width', '1.7');
+  svg.setAttribute('stroke-width', weight ? String(Number((weight * 24 / size).toFixed(2))) : '1.7');
   svg.setAttribute('stroke-linecap', 'round');
   svg.setAttribute('stroke-linejoin', 'round');
   svg.setAttribute('aria-hidden', 'true');
@@ -80,6 +84,40 @@ function glyph(name, { size = 18, className = 'dx-glyph' } = {}) {
     svg.append(node);
   }
   return svg;
+}
+
+/* Product marks (brand/product-marks.mjs, built into CATALOG.marks): a seed
+   path and the symmetry that completes it. Drawn filled, with a thin stroke
+   in the same colour and round joins, so its corners soften the way the two
+   family marks' corners do. */
+const MARK_SIZE = CATALOG.markSize ?? 52;
+const MARK_TURNS = {
+  M: (s) => ['', `translate(${s} 0) scale(-1 1)`, `translate(0 ${s}) scale(1 -1)`, `translate(${s} ${s}) scale(-1 -1)`],
+  R: (s) => ['', `rotate(180 ${s / 2} ${s / 2})`],
+  P: (s) => [0, 90, 180, 270].map((a) => (a ? `rotate(${a} ${s / 2} ${s / 2})` : '')),
+};
+
+function svgNode(tag, attrs, children = []) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+  node.append(...children);
+  return node;
+}
+
+/* The mark's own nodes: one group of the seed, turned or mirrored. */
+function markNodes(id) {
+  const shape = CATALOG.marks?.[id];
+  if (!shape?.d || !MARK_TURNS[shape.sym]) return null;
+  return [svgNode('g', { fill: 'currentColor', stroke: 'currentColor', 'stroke-width': '1.6', 'stroke-linejoin': 'round' },
+    MARK_TURNS[shape.sym](MARK_SIZE).map((transform) => svgNode('path', transform ? { d: shape.d, transform } : { d: shape.d })))];
+}
+
+/** A product's own mark as an inline SVG element; its glyph when it has no
+    mark yet. Decorative: aria-hidden, because a name always sits beside it. */
+function productMark(id, { size = 24, className = 'dx-mark-svg' } = {}) {
+  const nodes = markNodes(id);
+  if (!nodes) return productIcon(id, { size, className });
+  return svgNode('svg', { viewBox: `-2 -2 ${MARK_SIZE + 4} ${MARK_SIZE + 4}`, width: size, height: size, 'aria-hidden': 'true', class: className }, nodes);
 }
 
 function el(tag, attrs = {}, children = []) {
@@ -102,14 +140,166 @@ function isLocalPage() {
   return typeof location !== 'undefined' && LOCAL_HOSTS.has(location.hostname);
 }
 
+/* Dead siblings (Power Design rule 14). A product's `local` names a port on
+   this machine that may not be served right now (Deploy on 4544 and Explore
+   on 4541 refused connections during the 2026-10-20 audit, so every "see it
+   in Explore" went nowhere). An origin that does not answer falls back to
+   the product's public `site` (a product with no site keeps its local
+   address: there is nothing else to offer).
+
+   When a sibling is checked, and when it is not:
+   - Only on a loopback http(s) page. On the public host nothing is checked
+     and nothing changes. A file:// page is not checked either: its origin is
+     "null", so every check reads as a failure there.
+   - Never at page start. Until 2026-10-21 mountShell probed every sibling on
+     load, and each page logged about 52 console errors: the browser logs a
+     policy block, and a refused connection, even when the fetch is caught.
+     A check now runs only when the reader points at or focuses a link to
+     that sibling, once per origin per page. A local answer takes a few
+     milliseconds, so the link is retargeted before the click lands.
+   - Never where the page's own security policy blocks the target. That is
+     read from the page's <meta> policy before any request is made, so a
+     blocked sibling is simply not checked: its link stays as it is.
+   A sibling that is down still makes the browser log one refused
+   connection, at the moment the reader reaches for it, never on load. */
+const SILENT_ORIGINS = new Set();
+const CHECKED_ORIGINS = new Set();
+let watching = false;
+
+function localOrigin(product) {
+  if (!product?.local) return null;
+  try { return new URL(product.local).origin; } catch { return null; }
+}
+
+function probeAllowed() {
+  return isLocalPage() && /^https?:$/.test(location.protocol)
+    && typeof fetch === 'function' && typeof AbortController === 'function';
+}
+
+/* The page's connect policy, from its <meta http-equiv> tags. A policy sent
+   as a response header cannot be read from a page; the products' local
+   servers send none. Each tag is its own policy, and a request must pass
+   every one. */
+function pagePolicies() {
+  const policies = [];
+  for (const meta of document.querySelectorAll('meta[http-equiv]')) {
+    if (meta.getAttribute('http-equiv').toLowerCase() !== 'content-security-policy') continue;
+    const directives = new Map();
+    for (const part of (meta.getAttribute('content') ?? '').split(';')) {
+      const [name, ...sources] = part.trim().split(/\s+/);
+      if (name && !directives.has(name.toLowerCase())) directives.set(name.toLowerCase(), sources);
+    }
+    const sources = directives.get('connect-src') ?? directives.get('default-src');
+    if (sources) policies.push(sources);
+  }
+  return policies;
+}
+
+const DEFAULT_PORT = { 'http:': '80', 'https:': '443', 'ws:': '80', 'wss:': '443' };
+
+/* One CSP source expression against a target URL. Anything this does not
+   recognise counts as a block: a check that is skipped costs nothing, and a
+   check the policy blocks costs a console error. */
+function sourceMatches(source, target) {
+  const s = source.toLowerCase();
+  if (s === "'self'") return target.origin === location.origin;
+  if (s === '*') return /^(https?|wss?):$/.test(target.protocol);
+  if (/^[a-z][a-z0-9+.-]*:$/.test(s)) return target.protocol === s || (s === 'http:' && target.protocol === 'https:');
+  const host = /^(?:([a-z][a-z0-9+.-]*):\/\/)?(\*|(?:\*\.)?[a-z0-9.-]+|\[[0-9a-f:]+\])(?::(\d+|\*))?(\/.*)?$/.exec(s);
+  if (!host) return false;
+  const [, scheme, name, port, path] = host;
+  const wantScheme = scheme ? `${scheme}:` : location.protocol;
+  if (target.protocol !== wantScheme && !(wantScheme === 'http:' && target.protocol === 'https:')) return false;
+  if (name === '*') { /* any host */ } else if (name.startsWith('*.')) {
+    if (!target.hostname.endsWith(name.slice(1))) return false;
+  } else if (target.hostname !== name) return false;
+  const targetPort = target.port || DEFAULT_PORT[target.protocol];
+  if (port !== '*' && targetPort !== (port ?? DEFAULT_PORT[wantScheme])) return false;
+  return !path || path === '/';
+}
+
+function policyAllows(url) {
+  let target;
+  try { target = new URL(url); } catch { return false; }
+  return pagePolicies().every((sources) => sources.some((source) => sourceMatches(source, target)));
+}
+
+/* HEAD, no-cors, 1.5s: resolves (opaque) when anything answers on the
+   origin, rejects on a refused connection or the timeout. */
+function probeOrigin(origin) {
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 1500);
+  return fetch(`${origin}/`, { method: 'HEAD', mode: 'no-cors', cache: 'no-store', signal: abort.signal })
+    .then(() => true, () => false)
+    .finally(() => clearTimeout(timer));
+}
+
+/* Links the shell rendered carry data-dx-to="<product id>" (and
+   data-dx-query for a productLink); after a check each one whose address
+   changed is retargeted in place and says so. */
+function retargetLinks(root) {
+  for (const link of root.querySelectorAll('a[data-dx-to]')) {
+    const product = link.getAttribute('data-dx-to') === HOME?.id ? HOME : productById(link.getAttribute('data-dx-to'));
+    const query = link.getAttribute('data-dx-query');
+    const href = productUrl(product, query ? Object.fromEntries(new URLSearchParams(query)) : null);
+    if (!href || link.getAttribute('href') === href) continue;
+    link.setAttribute('href', href);
+    link.title = `${product.name} runs on its public site`;
+    const where = link.querySelector('.dx-product-link__where');
+    if (where) where.textContent = whereLabel(product);
+  }
+}
+
+/* The local origins this page may check: every sibling's, from the kit's
+   own product list, minus this page's own and the current product's. */
+function siblingOrigins(current) {
+  const origins = new Set();
+  for (const product of [...PRODUCTS, HOME]) {
+    const origin = localOrigin(product);
+    if (origin && origin !== location.origin && product !== current) origins.add(origin);
+  }
+  return origins;
+}
+
+function checkSibling(origin, root) {
+  if (CHECKED_ORIGINS.has(origin)) return;
+  CHECKED_ORIGINS.add(origin);
+  if (!policyAllows(`${origin}/`)) return;
+  probeOrigin(origin).then((answers) => {
+    if (answers) return;
+    SILENT_ORIGINS.add(origin);
+    retargetLinks(root);
+  });
+}
+
+/* Installs the reader-intent listeners; sends nothing itself. */
+function watchSiblings(current, root) {
+  if (watching || !probeAllowed()) return;
+  watching = true;
+  const origins = siblingOrigins(current);
+  if (!origins.size) return;
+  const onIntent = (event) => {
+    const link = event.target?.closest?.('a[href]');
+    if (!link) return;
+    let origin;
+    try { origin = new URL(link.href, location.href).origin; } catch { return; }
+    if (origins.has(origin)) checkSibling(origin, root);
+  };
+  root.addEventListener('pointerover', onIntent, { passive: true });
+  root.addEventListener('focusin', onIntent, { passive: true });
+}
+
 /** Where a product opens from this page: its loopback dev URL when this page
     is itself on loopback, its public site otherwise. A product that carries
     a query parameter (the resolve lane's `ws`) keeps this page's value, so
-    moving between Explore, Deploy and Node stays on the same chain-server. */
+    moving between Explore, Deploy and Node stays on the same chain-server.
+    A local origin a check found silent (see watchSiblings) yields to the
+    product's public site. */
 function productHref(product) {
   if (!product) return null;
   const local = isLocalPage();
-  const base = local ? (product.local ?? product.site) : (product.site ?? null);
+  const silent = local && product.site && SILENT_ORIGINS.has(localOrigin(product));
+  const base = local && !silent ? (product.local ?? product.site) : (product.site ?? null);
   if (!base) return null;
   if (!product.carries?.length || typeof location === 'undefined') return base;
   const here = new URLSearchParams(location.search);
@@ -138,7 +328,7 @@ function productLink(productId, { query = null, label = null } = {}) {
   const product = productById(productId);
   const href = productUrl(product, query);
   if (!href) return null;
-  return el('a', { class: 'dx-btn dx-btn--soft dx-btn--sm dx-onward__link', href }, [
+  return el('a', { class: 'dx-btn dx-btn--soft dx-btn--sm dx-onward__link', href, 'data-dx-to': product.id, 'data-dx-query': query ? new URLSearchParams(query).toString() : null }, [
     label ?? `Open ${product.name}`,
     el('span', { class: 'dx-onward__out', 'aria-hidden': 'true', text: '↗' }),
   ]);
@@ -169,7 +359,7 @@ function productHandoff(productId, { text = '', query = null, label = null } = {
 }
 
 function whereLabel(product) {
-  if (isLocalPage() && product.local) {
+  if (isLocalPage() && product.local && !(product.site && SILENT_ORIGINS.has(localOrigin(product)))) {
     try { return new URL(product.local).host; } catch { return product.local; }
   }
   if (product.site) {
@@ -220,49 +410,256 @@ function themeToggle() {
   return button;
 }
 
-/* Switcher --------------------------------------------------------------- */
+/* Switcher ---------------------------------------------------------------
 
-function switcherLink(product, currentId) {
-  const href = productHref(product);
-  const current = product.id === currentId;
-  const top = el('span', { class: 'dx-product-link__top' }, [
-    productIcon(product.id, { size: 16, className: 'dx-glyph dx-product-link__glyph' }),
-    el('span', { class: 'dx-product-link__name', text: product.name }),
-    product.status && product.status !== 'ready'
-      ? el('span', { class: 'dx-badge', 'data-tone': product.status === 'planned' ? 'warn' : null, text: product.status })
-      : null,
-  ]);
-  const body = [
-    top,
-    el('span', { class: 'dx-product-link__line', text: product.line }),
-    el('span', { class: 'dx-product-link__where', text: whereLabel(product) }),
-  ];
-  if (!href || current) {
-    return el('div', { class: 'dx-product-link', 'aria-current': current ? 'page' : null }, body);
-  }
-  return el('a', { class: 'dx-product-link', href }, body);
+   A command palette (owner layout, 2026-10-22):
+     top      Find a product, the whole width, and a close control
+     rail     the categories, each with its first product's mark
+     list     the chosen category's products: mark, name, one short line
+     preview  the product pointed at: its category, its mark and name, what
+              it is, what it does, its related destinations, and Open
+     foot     the keys (up/down select, return opens, Esc closes) and the
+              family home
+   On a phone the rail and the list are two screens: choosing a category
+   drills in, and "All categories" comes back. The preview and the keys
+   join from 981px.
+
+   Related destinations are the product's own handoffs (what it gives to,
+   then what it takes from); a product with none shows its category's other
+   products. Each one moves the switcher to that product. Nothing animates
+   while idle: each motion is one short transition caused by the reader. */
+
+const LANE_KEY = 'defxn-switch-lane';
+const UNFINISHED = new Set(['building', 'planned']);
+const RESOLVER_PANE = 'resolvers';
+const HOVER_INTENT_MS = 90;
+const ICON_SEARCH = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>';
+const ICON_X = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+const KEY_UP = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg>';
+const KEY_DOWN = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg>';
+const KEY_RETURN = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3v5a2 2 0 0 1-2 2H3M6 7l-3 3 3 3"/></svg>';
+const ICON_NEXT = '<svg class="dx-row__go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+
+function readLane() {
+  try { return localStorage.getItem(LANE_KEY); } catch { return null; }
 }
 
-/* The family home row at the top of the switcher: defxn.com, where every
-   product's brand mark already leads. In home mode it is the current page. */
+function writeLane(value) {
+  try { localStorage.setItem(LANE_KEY, value); } catch { /* storage blocked: the switcher opens on the first category */ }
+}
+
+/* A product's line, taught in two steps: what it is, then the rest. The
+   line breaks only where it already breaks: at a colon, or at the end of
+   its first sentence. Commas and "and" were tried as seams and refused
+   (2026-10-22): they split noun pairs ("role letter and manifest type",
+   "radio and video") and lists ("claims, conflicts and capacity"). A line
+   with neither seam is shown whole. Derived from the line each product
+   declares; nothing here is written per product. */
+function lineParts(line = '') {
+  const colon = line.indexOf(': ');
+  if (colon > 0) {
+    const rest = line.slice(colon + 2);
+    return [`${line.slice(0, colon)}.`, rest ? rest[0].toUpperCase() + rest.slice(1) : ''];
+  }
+  const stop = line.indexOf('. ');
+  if (stop > 0) return [line.slice(0, stop + 1), line.slice(stop + 2)];
+  return [line, ''];
+}
+
+function statusBadge(status) {
+  if (!status || status === 'ready') return null;
+  return el('span', { class: 'dx-badge', 'data-tone': status === 'planned' ? 'warn' : null, text: status });
+}
+
+/* The caveat, last and in plain words: only when the product is not done. */
+function statusNote(item) {
+  if (!UNFINISHED.has(item.status)) return null;
+  const words = item.status === 'planned' ? `${item.name} is planned. It is not built yet.` : `${item.name} is still being built.`;
+  return el('p', { class: 'dx-preview__caveat' }, [statusBadge(item.status), el('span', { text: words })]);
+}
+
+/* Where a product lives on the web: its subdomain when it has a public
+   site, else where it opens from here. */
+function hostOf(product) {
+  if (product?.site) {
+    try { return new URL(product.site).host; } catch { /* fall through */ }
+  }
+  return whereLabel(product);
+}
+
+/* The facts a product declares about itself, in plain words. Each one is
+   derived, never written per product, and a fact a product does not declare
+   is left out (absent is not 0):
+     version   its package's version
+     access    a public site, or only this machine
+     live      it reads live chain data through a chain-server (`carries`)
+     runs on   the resolvers built for it (`surface`) */
+function productFacts(product) {
+  const resolvers = RESOLVERS.filter((r) => r.surface === product.id).map((r) => r.name);
+  return [
+    product.version ? { key: 'Version', value: `v${product.version}` } : null,
+    { key: 'Access', value: product.site ? 'Public site' : 'Your machine', tone: product.site ? 'public' : null },
+    product.carries?.includes('ws') ? { key: 'Data', value: 'Live from the chain', tone: 'live' } : null,
+    resolvers.length ? { key: 'Runs on', value: resolvers.join(', ') } : null,
+  ].filter(Boolean);
+}
+
+/* The card's tags: the same facts, short. */
+function productTags(product) {
+  const facts = Object.fromEntries(productFacts(product).map((f) => [f.key, f]));
+  return [
+    facts.Version ? { text: facts.Version.value } : null,
+    { text: product.site ? 'Public' : 'Local', tone: product.site ? 'public' : null },
+    facts.Data ? { text: 'Live', tone: 'live' } : null,
+    facts['Runs on'] ? { text: `On ${facts['Runs on'].value}` } : null,
+  ].filter(Boolean);
+}
+
+/* A resolver's mark is its glyph; a product's is its own mark. */
+function itemMark(item, size, className) {
+  return productById(item.id) ? productMark(item.id, { size, className }) : glyph(item.icon, { size, className });
+}
+
+/* One row of the list: the mark, the name, what it is, and a chevron. The
+   current product, and a product with no address from here, are not links;
+   they stay focusable so the arrows and the preview reach them. */
+function switcherLink(item, currentId) {
+  const isProduct = Boolean(productById(item.id));
+  const href = isProduct ? productHref(item) : null;
+  const current = item.id === currentId;
+  /* The card: its mark on a tile, the name and what it does, then the
+     facts in plain numbers (where it lives, what it takes, what it gives),
+     and its status last when it is not finished. */
+  const facts = isProduct
+    ? [hostOf(item), `Takes ${item.takes?.length ?? 0} · Gives ${item.gives?.length ?? 0}`]
+    : [item.chainLabel ?? (item.chain ? `chain ${item.chain}` : 'resolver')];
+  const tags = isProduct ? productTags(item) : [];
+  const body = [
+    el('span', { class: 'dx-row__mark', 'aria-hidden': 'true' }, [itemMark(item, 28, 'dx-row__svg')]),
+    el('span', { class: 'dx-row__text' }, [
+      el('span', { class: 'dx-product-link__name', text: item.name }),
+      el('span', { class: 'dx-product-link__line', text: lineParts(item.line)[0] }),
+      el('span', { class: 'dx-row__facts' }, [...facts.filter(Boolean).map((text) => el('span', { text })), statusBadge(item.status)]),
+      tags.length ? el('span', { class: 'dx-row__tags' }, tags.map(({ text, tone }) => el('span', { class: 'dx-tag', 'data-tone': tone ?? null, text }))) : null,
+      isProduct ? el('span', { class: 'dx-product-link__where', text: whereLabel(item) }) : null,
+    ]),
+    current ? el('span', { class: 'dx-row__here', text: 'You are here' }) : null,
+  ];
+  const row = (!href || current)
+    ? el('div', { class: 'dx-product-link', 'data-dx-item': item.id, tabindex: '0', 'aria-current': current ? 'page' : null }, body)
+    : el('a', { class: 'dx-product-link', 'data-dx-item': item.id, href, 'data-dx-to': item.id }, body);
+  if (!current) row.insertAdjacentHTML('beforeend', ICON_NEXT);
+  return row;
+}
+
+/* The family home, in the foot: defxn.com, where every product's brand
+   mark already leads. In home mode it is the current page. */
 function homeRow(atHome) {
   if (!HOME) return null;
   const href = productHref(HOME);
   const body = [
-    el('span', { class: 'dx-switch__home-top' }, [
-      el('span', { class: 'dx-mark', 'aria-hidden': 'true' }),
-      el('span', { class: 'dx-switch__home-name', text: `${HOME.name} home` }),
-      el('span', { class: 'dx-product-link__where', text: whereLabel(HOME) }),
-    ]),
-    el('span', { class: 'dx-switch__home-line', text: HOME.line }),
+    el('span', { class: 'dx-mark', 'aria-hidden': 'true' }),
+    el('span', { class: 'dx-switch__home-name', text: `${HOME.name} home` }),
+    el('span', { class: 'dx-product-link__where', text: whereLabel(HOME) }),
   ];
   if (atHome || !href) return el('div', { class: 'dx-switch__home', 'aria-current': atHome ? 'page' : null }, body);
-  return el('a', { class: 'dx-switch__home', href }, body);
+  return el('a', { class: 'dx-switch__home', href, 'data-dx-to': HOME.id }, body);
 }
+
+/* One category's pane in the list. Its heading shows on a phone, where the
+   rail is not beside it. */
+function lanePane(lane, items, currentId, id = lane.id) {
+  return el('section', { class: id === RESOLVER_PANE ? 'dx-resolvers' : 'dx-lane', id: `dx-pane-${id}`, role: 'tabpanel', 'aria-labelledby': `dx-tab-${id}`, 'data-dx-pane': id, hidden: true }, [
+    el('div', { class: 'dx-lane__head' }, [el('span', { class: 'dx-lane__name', text: lane.name })]),
+    el('ul', { class: 'dx-lane__list' }, items.map((item) => el('li', {}, [switcherLink(item, currentId)]))),
+  ]);
+}
+
+/* A rail tab: the category's mark and its name. */
+function laneTab(id, name, markNode) {
+  return el('button', {
+    type: 'button', class: 'dx-switch__tab', role: 'tab', id: `dx-tab-${id}`,
+    'aria-controls': `dx-pane-${id}`, 'aria-selected': 'false', tabindex: '-1', 'data-dx-lane': id,
+  }, [el('span', { class: 'dx-switch__tab-mark', 'aria-hidden': 'true' }, [markNode]), el('span', { class: 'dx-switch__tab-name', text: name })]);
+}
+
+/* Preview ------------------------------------------------------------------ */
+
+/* What a product leads to: its handoffs, then its category's other products. */
+function relatedOf(product) {
+  const ids = [...(product.gives ?? []).map((g) => g.to), ...(product.takes ?? []).map((t) => t.from)].filter(Boolean);
+  const linked = [...new Set(ids)].map(productById).filter((p) => p && p.id !== product.id);
+  const siblings = PRODUCTS.filter((p) => p.lane === product.lane && p.id !== product.id && !linked.includes(p));
+  return [...linked, ...siblings].slice(0, 3);
+}
+
+function relatedCard(product) {
+  return el('button', { type: 'button', class: 'dx-related__item', 'data-dx-jump': product.id, title: `Show ${product.name}` }, [
+    el('span', { class: 'dx-related__top' }, [
+      productMark(product.id, { size: 16, className: 'dx-related__mark' }),
+      el('span', { class: 'dx-related__name', text: product.name }),
+      el('span', { class: 'dx-related__arrow', 'aria-hidden': 'true', text: '→' }),
+    ]),
+    el('span', { class: 'dx-related__line', text: lineParts(product.line)[0] }),
+  ]);
+}
+
+function previewBody({ eyebrow, item, related, action, facts = null }) {
+  const [what, more] = lineParts(item.line);
+  return [
+    el('span', { class: 'dx-preview__eyebrow', text: eyebrow }),
+    el('div', { class: 'dx-preview__title' }, [
+      el('span', { class: 'dx-preview__tile', 'aria-hidden': 'true' }, [itemMark(item, 40, 'dx-preview__mark')]),
+      el('span', { class: 'dx-preview__name', text: item.name }),
+    ]),
+    el('p', { class: 'dx-preview__what', text: what }),
+    more ? el('p', { class: 'dx-preview__line', text: more }) : null,
+    facts?.length ? el('dl', { class: 'dx-facts' }, facts.flatMap((f) => [el('dt', { text: f.key }), el('dd', { 'data-tone': f.tone ?? null, text: f.value })])) : null,
+    statusNote(item),
+    related.length ? el('div', { class: 'dx-related' }, [
+      el('span', { class: 'dx-related__label', text: 'Related destinations' }),
+      el('div', { class: 'dx-related__list' }, related.map(relatedCard)),
+    ]) : null,
+    action ? el('div', { class: 'dx-preview__foot' }, [action]) : null,
+  ];
+}
+
+function productPreview(product, currentId) {
+  const href = productHref(product);
+  const action = product.id === currentId
+    ? el('span', { class: 'dx-cta dx-cta--here', text: 'You are here' })
+    : href
+      ? el('a', { class: 'dx-cta', href, 'data-dx-to': product.id }, [`Open ${product.name}`, el('span', { class: 'dx-cta__go', 'aria-hidden': 'true', text: '↗' })])
+      : el('span', { class: 'dx-preview__here', text: `${product.name} runs on your own machine; it has no public site yet.` });
+  return previewBody({ eyebrow: laneById(product.lane)?.name ?? '', item: product, related: relatedOf(product), action, facts: productFacts(product) });
+}
+
+function resolverPreview(resolver) {
+  const surface = resolver.surface ? productById(resolver.surface) : null;
+  const explore = productById('explore');
+  const exploreHref = resolver.chain ? productHref(explore) : null;
+  const chainHref = exploreHref ? `${exploreHref.split('#')[0]}#${resolver.chain}` : null;
+  return previewBody({
+    eyebrow: 'Resolvers',
+    item: resolver,
+    related: [surface, explore].filter(Boolean),
+    action: chainHref ? el('a', { class: 'dx-cta', href: chainHref }, ['See it in Explore', el('span', { class: 'dx-cta__go', 'aria-hidden': 'true', text: '↗' })]) : null,
+  });
+}
+
+/* Search ------------------------------------------------------------------- */
+
+function matches(words, ...fields) {
+  const text = fields.filter(Boolean).join(' ').toLowerCase();
+  return words.every((word) => text.includes(word));
+}
+
+/* Panel -------------------------------------------------------------------- */
 
 function switcher(current) {
   /* current: a product, or null on the family home (no product is "current"). */
   const lane = current ? laneById(current.lane) : null;
+  const currentId = current?.id ?? null;
   const panelId = 'dx-switch-panel';
   const trigger = el('button', {
     type: 'button', class: 'dx-switch__trigger',
@@ -270,86 +667,271 @@ function switcher(current) {
     title: current ? 'Switch DEFXN product' : 'DEFXN products',
   }, current ? [
     lane ? el('span', { class: 'dx-switch__lane', text: lane.name }) : null,
-    productIcon(current.id, { size: 18, className: 'dx-glyph dx-switch__glyph' }),
+    productMark(current.id, { size: 22, className: 'dx-glyph dx-switch__glyph' }),
     el('span', { class: 'dx-switch__name', text: current.name }),
   ] : [
     el('span', { class: 'dx-switch__name', text: 'Products' }),
   ]);
   trigger.insertAdjacentHTML('beforeend', ICON_CHEV);
 
-  const panel = el('div', { class: 'dx-switch__panel', id: panelId, hidden: true, role: 'region', 'aria-label': 'DEFXN products' },
-    LANES.map((entry) => el('section', { class: 'dx-lane' }, [
-      el('div', { class: 'dx-lane__head' }, [
-        el('span', { class: 'dx-lane__name', text: entry.name }),
-        el('span', { class: 'dx-lane__line', text: entry.line }),
-      ]),
-      el('ul', { class: 'dx-lane__list' },
-        PRODUCTS.filter((product) => product.lane === entry.id).map((product) => el('li', {}, [switcherLink(product, current?.id ?? null)]))),
-    ])));
+  /* Top: one field, the whole catalog, and the way out. */
+  const find = el('input', {
+    type: 'search', class: 'dx-switch__find-input', placeholder: 'Find a product',
+    'aria-label': 'Find a product or resolver', autocomplete: 'off', spellcheck: 'false',
+  });
+  const findBox = el('label', { class: 'dx-switch__find' }, [find]);
+  findBox.insertAdjacentHTML('afterbegin', ICON_SEARCH);
+  const shut = el('button', { type: 'button', class: 'dx-switch__close', 'aria-label': 'Close products' });
+  shut.insertAdjacentHTML('beforeend', ICON_X);
+  const top = el('div', { class: 'dx-switch__top' }, [findBox, shut]);
 
-  const home = homeRow(!current);
-  if (home) panel.prepend(home);
-  if (RESOLVERS.length) panel.append(resolverBand());
-  /* CSSOM, not a style attribute: a self-only CSP refuses inline style attributes. */
-  panel.style.setProperty('--dx-lanes', String(LANES.length));
-  const wrap = el('div', { class: 'dx-switch' }, [trigger, panel]);
+  /* Rail: each category with its first product's mark. */
+  const tabs = [
+    ...LANES.map((entry) => laneTab(entry.id, entry.name, productMark(PRODUCTS.find((p) => p.lane === entry.id)?.id, { size: 18, className: 'dx-switch__tab-svg' }))),
+    ...(RESOLVERS.length ? [laneTab(RESOLVER_PANE, 'Resolvers', glyph('resolver', { size: 18, className: 'dx-switch__tab-svg' }))] : []),
+  ];
+  const rail = el('div', { class: 'dx-switch__rail' }, [
+    el('div', { class: 'dx-switch__tabs', role: 'tablist', 'aria-orientation': 'vertical', 'aria-label': 'Categories' }, tabs),
+  ]);
+
+  /* List. */
+  const back = el('button', { type: 'button', class: 'dx-switch__back', text: '← All categories' });
+  const panes = [
+    ...LANES.map((entry) => lanePane(entry, PRODUCTS.filter((p) => p.lane === entry.id), currentId)),
+    ...(RESOLVERS.length ? [lanePane({ name: 'Resolvers' }, RESOLVERS, currentId, RESOLVER_PANE)] : []),
+  ];
+  const resultsHead = el('div', { class: 'dx-lane__head dx-switch__results-head' }, [el('span', { class: 'dx-lane__name', text: 'Results' })]);
+  const resultsList = el('ul', { class: 'dx-lane__list' });
+  const results = el('section', { class: 'dx-switch__results', 'aria-label': 'Find results', 'aria-live': 'polite', hidden: true }, [resultsHead, resultsList]);
+  const stage = el('div', { class: 'dx-switch__stage' }, [back, ...panes, results]);
+
+  /* Preview. */
+  const preview = el('aside', { class: 'dx-switch__preview', 'aria-label': 'Preview' });
+
+  /* Foot: the keys that drive it, and the family home. The arrow and return
+     keys are drawn, not typed: the mono face has no return glyph, and a
+     fallback face set it small and low beside the others. */
+  const keyCap = (icon) => {
+    const cap = el('kbd', { class: icon ? 'dx-switch__cap' : 'dx-switch__cap dx-switch__cap--word', text: icon ? null : 'Esc' });
+    if (icon) cap.insertAdjacentHTML('beforeend', icon);
+    return cap;
+  };
+  const key = (caps, text) => el('span', { class: 'dx-switch__key' }, [...caps.map(keyCap), el('span', { text })]);
+  const foot = el('div', { class: 'dx-switch__foot' }, [
+    el('div', { class: 'dx-switch__keys', 'aria-hidden': 'true' }, [key([KEY_UP, KEY_DOWN], 'Select'), key([KEY_RETURN], 'Open'), key([null], 'Close')]),
+    homeRow(!current),
+  ]);
+
+  const panel = el('div', {
+    class: 'dx-switch__panel', id: panelId, hidden: true, role: 'region', 'aria-label': 'DEFXN products',
+    'data-dx-depth': current ? 'stage' : 'rail',
+  }, [top, rail, stage, preview, foot]);
+  /* The overlay under the open panel: the page below the bar, dimmed, so the
+     palette is the one thing in front. A click on it closes the panel.
+     It places itself: a host bar with a backdrop-filter (defxn.com's and the
+     products' glass bars) becomes the frame for anything fixed inside it,
+     and a fixed overlay there measured 0px tall (2026-10-22). So on open it
+     finds where its frame starts and covers the window below the bar from
+     there, through the CSSOM (a self-only CSP refuses style attributes). */
+  const scrim = el('div', { class: 'dx-switch__scrim', hidden: true, 'aria-hidden': 'true' });
+  const placeScrim = () => {
+    if (scrim.hidden || typeof window === 'undefined') return;
+    const barBottom = Math.max(0, trigger.closest('.dx-bar')?.getBoundingClientRect().bottom ?? 0);
+    for (const prop of ['top', 'left']) scrim.style.setProperty(prop, '0px');
+    const origin = scrim.getBoundingClientRect();
+    scrim.style.setProperty('top', `${barBottom - origin.top}px`);
+    scrim.style.setProperty('left', `${-origin.left}px`);
+    scrim.style.setProperty('width', `${window.innerWidth}px`);
+    scrim.style.setProperty('height', `${Math.max(0, window.innerHeight - barBottom)}px`);
+  };
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') window.addEventListener('resize', placeScrim);
+  const wrap = el('div', { class: 'dx-switch' }, [trigger, scrim, panel]);
+
+  /* State ----------------------------------------------------------------- */
+  const remembered = !current ? readLane() : null;
+  const startLane = lane?.id ?? (tabs.some((t) => t.dataset.dxLane === remembered) ? remembered : tabs[0]?.dataset.dxLane);
+  let selected = null;
+  let previewed = null;
+  const visiblePane = () => (results.hidden ? panes.find((pane) => !pane.hidden) : results);
+  const items = () => [...(visiblePane()?.querySelectorAll('[data-dx-item]') ?? [])];
+  const wide = () => typeof matchMedia === 'function' && matchMedia('(min-width: 981px)').matches;
+
+  function showPreview(id) {
+    if (!id || previewed === id) return;
+    const product = productById(id);
+    const resolver = product ? null : RESOLVERS.find((r) => r.id === id);
+    if (!product && !resolver) return;
+    previewed = id;
+    preview.replaceChildren(...(product ? productPreview(product, currentId) : resolverPreview(resolver)).filter(Boolean));
+    for (const item of stage.querySelectorAll('[data-dx-item]')) item.toggleAttribute('data-dx-previewed', item.dataset.dxItem === id);
+  }
+
+  /* The preview a category opens on: the current product if it is here,
+     else the category's first item. */
+  function defaultPreview() {
+    const list = items();
+    const here = list.find((item) => item.dataset.dxItem === currentId);
+    showPreview((here ?? list[0])?.dataset.dxItem);
+  }
+
+  function select(id, { focusTab = false, remember = true } = {}) {
+    if (!id) return;
+    selected = id;
+    for (const tab of tabs) {
+      const on = tab.dataset.dxLane === id;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      if (on && focusTab) tab.focus();
+    }
+    for (const pane of panes) pane.hidden = pane.dataset.dxPane !== id;
+    if (remember && !current && id !== RESOLVER_PANE) writeLane(id);
+    if (results.hidden) defaultPreview();
+  }
+
+  function setDepth(depth) { panel.setAttribute('data-dx-depth', depth); }
+
+  function focusItem(index) {
+    const list = items();
+    if (!list.length) return;
+    const item = list[(index + list.length) % list.length];
+    item.focus({ preventScroll: true });
+    showPreview(item.dataset.dxItem);
+  }
+
+  /* Moves the switcher to a product: its category, its row, its preview. */
+  function jumpTo(id) {
+    const product = productById(id);
+    if (!product) return;
+    if (find.value) { find.value = ''; runSearch(); }
+    select(product.lane);
+    setDepth('stage');
+    const row = items().find((item) => item.dataset.dxItem === id);
+    showPreview(id);
+    row?.focus({ preventScroll: true });
+  }
+
+  function runSearch() {
+    const words = find.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    panel.toggleAttribute('data-dx-searching', words.length > 0);
+    if (!words.length) {
+      results.hidden = true;
+      for (const pane of panes) pane.hidden = pane.dataset.dxPane !== selected;
+      previewed = null;
+      defaultPreview();
+      return;
+    }
+    const found = [
+      ...PRODUCTS.filter((p) => matches(words, p.name, p.line, laneById(p.lane)?.name)),
+      ...RESOLVERS.filter((r) => matches(words, r.name, r.line, 'resolver')),
+    ].map((item) => switcherLink(item, currentId));
+    resultsList.replaceChildren(...found.map((node) => el('li', {}, [node])));
+    resultsHead.firstChild.textContent = found.length ? `${found.length} ${found.length === 1 ? 'match' : 'matches'}` : 'No match';
+    if (!found.length) {
+      resultsList.append(el('li', { class: 'dx-switch__none', text: `No product or resolver name or description contains “${find.value.trim()}”. Try one shorter word, or pick a category.` }));
+    }
+    for (const pane of panes) pane.hidden = true;
+    results.hidden = false;
+    setDepth('stage');
+    previewed = null;
+    showPreview(found[0]?.dataset.dxItem);
+  }
+
+  /* Open and close ---------------------------------------------------------- */
   const close = (focus) => {
     if (panel.hidden) return;
     panel.hidden = true;
+    scrim.hidden = true;
     trigger.setAttribute('aria-expanded', 'false');
     if (focus) trigger.focus();
   };
-  trigger.addEventListener('click', () => {
-    const open = panel.hidden;
-    panel.hidden = !open;
-    trigger.setAttribute('aria-expanded', String(open));
+  const open = () => {
+    panel.hidden = false;
+    scrim.hidden = false;
+    placeScrim();
+    trigger.setAttribute('aria-expanded', 'true');
+    if (wide()) find.focus({ preventScroll: true });
+  };
+  trigger.addEventListener('click', () => (panel.hidden ? open() : close(false)));
+  shut.addEventListener('click', () => close(true));
+  scrim.addEventListener('click', () => close(false));
+
+  /* Pointer: a category opens on hover after a short intent delay, so a
+     pointer crossing the rail on its way to the list does not flip it. */
+  let intent = null;
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => {
+      if (find.value) { find.value = ''; runSearch(); }
+      select(tab.dataset.dxLane);
+      setDepth('stage');
+      if (!wide()) items()[0]?.focus();
+    });
+    tab.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'mouse' || find.value) return;
+      clearTimeout(intent);
+      intent = setTimeout(() => select(tab.dataset.dxLane), HOVER_INTENT_MS);
+    });
+    tab.addEventListener('pointerleave', () => clearTimeout(intent));
+  }
+  back.addEventListener('click', () => { setDepth('rail'); tabs.find((t) => t.dataset.dxLane === selected)?.focus(); });
+  stage.addEventListener('pointerover', (event) => {
+    const item = event.target.closest?.('[data-dx-item]');
+    if (item) showPreview(item.dataset.dxItem);
   });
-  /* Escape closes an open panel and is consumed (preventDefault), so a page
-     that gives Escape its own meaning (defxn.com: "back to the previous
-     page") does not also act on the same key press. A closed panel leaves
-     the key alone. */
+  stage.addEventListener('focusin', (event) => {
+    const item = event.target.closest?.('[data-dx-item]');
+    if (item) showPreview(item.dataset.dxItem);
+  });
+  preview.addEventListener('click', (event) => {
+    const jump = event.target.closest?.('[data-dx-jump]');
+    if (jump) jumpTo(jump.getAttribute('data-dx-jump'));
+  });
+  find.addEventListener('input', runSearch);
+
+  /* Keys -------------------------------------------------------------------- */
+  panel.addEventListener('keydown', (event) => {
+    const inTabs = event.target.closest?.('[role="tablist"]');
+    const inStage = stage.contains(event.target);
+    if (event.key === '/' && event.target !== find) { event.preventDefault(); find.focus(); return; }
+    if (event.target === find) {
+      /* "/" is the key that brings the reader here; it never types itself
+         into an empty field. */
+      if (event.key === '/' && !find.value) { event.preventDefault(); return; }
+      if (event.key === 'ArrowDown') { event.preventDefault(); focusItem(0); }
+      else if (event.key === 'Enter') { const first = items()[0]; if (first?.href) first.click(); }
+      return;
+    }
+    if (inTabs) {
+      const index = tabs.indexOf(event.target);
+      const to = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: tabs.length - 1 }[event.key];
+      if (to !== undefined) { event.preventDefault(); select(tabs[(to + tabs.length) % tabs.length].dataset.dxLane, { focusTab: true }); }
+      else if (event.key === 'ArrowRight') { event.preventDefault(); setDepth('stage'); focusItem(0); }
+      return;
+    }
+    if (inStage && event.target.closest?.('[data-dx-item]') === event.target) {
+      const index = items().indexOf(event.target);
+      const to = { ArrowDown: index + 1, ArrowUp: index - 1, Home: 0, End: -1 }[event.key];
+      if (to !== undefined) { event.preventDefault(); focusItem(to); }
+      else if (event.key === 'ArrowLeft' && results.hidden) { event.preventDefault(); setDepth('rail'); tabs.find((t) => t.dataset.dxLane === selected)?.focus(); }
+    }
+  });
+  /* Escape clears a query first, then closes an open panel, and is consumed
+     (preventDefault), so a page that gives Escape its own meaning (defxn.com:
+     "back to the previous page") does not also act on the same key press.
+     A closed panel leaves the key alone. */
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape' || panel.hidden) return;
     event.preventDefault();
+    if (find.value) { find.value = ''; runSearch(); find.focus(); return; }
     close(true);
   });
-  document.addEventListener('click', (event) => { if (!wrap.contains(event.target)) close(false); });
+  /* composedPath, not contains: a related button is replaced by the preview
+     it opens before this listener runs, so its target is no longer inside. */
+  document.addEventListener('click', (event) => { if (!event.composedPath().includes(wrap)) close(false); });
+
+  /* jsdom and SSR: every pane exists in the document; the start category is
+     chosen now so a closed panel already holds a selected tab. */
+  select(startLane, { remember: false });
   return wrap;
-}
-
-function resolverCard(resolver) {
-  const explore = productById('explore');
-  const exploreHref = resolver.chain ? productHref(explore) : null;
-  const chainHref = exploreHref ? `${exploreHref.split('#')[0]}#${resolver.chain}` : null;
-  const surface = resolver.surface ? productById(resolver.surface) : null;
-  const surfaceHref = surface ? productHref(surface) : null;
-  return el('li', { class: 'dx-resolver' }, [
-    el('span', { class: 'dx-resolver__top' }, [
-      glyph(resolver.icon, { size: 16, className: 'dx-glyph dx-resolver__glyph' }),
-      el('span', { class: 'dx-resolver__name', text: resolver.name }),
-      resolver.status ? el('span', { class: 'dx-badge', 'data-tone': resolver.status === 'planned' ? 'warn' : null, text: resolver.status }) : null,
-    ]),
-    el('span', { class: 'dx-resolver__line', text: resolver.line }),
-    el('span', { class: 'dx-resolver__meta' }, [
-      el('span', { class: 'dx-resolver__chain', text: resolver.chainLabel ?? (resolver.chain ? `chain ${resolver.chain}` : '') }),
-      chainHref ? el('a', { href: chainHref, text: 'Explore' }) : null,
-      surfaceHref ? el('a', { href: surfaceHref, text: `in ${surface.name}` }) : null,
-    ]),
-  ]);
-}
-
-/* The band below the lanes: the network services products are built on. */
-function resolverBand() {
-  const explore = productById('explore');
-  const allHref = explore ? productHref(explore) : null;
-  return el('section', { class: 'dx-resolvers', 'aria-label': 'Resolvers' }, [
-    el('div', { class: 'dx-resolvers__head' }, [
-      el('span', { class: 'dx-lane__name', text: 'Resolvers' }),
-      el('span', { class: 'dx-lane__line', text: 'Network services any product or third party composes, each with its own grammar.' }),
-      allHref ? el('a', { class: 'dx-resolvers__all', href: allHref, text: 'Every launched resolver →' }) : null,
-    ]),
-    el('ul', { class: 'dx-resolvers__list' }, RESOLVERS.map(resolverCard)),
-  ]);
 }
 
 /* Shell ---------------------------------------------------------------------- */
@@ -444,8 +1026,30 @@ function menuMode(bar, menu, toggle, menuAt) {
  *                   and stays where it is in the document.
  * options.home      href for the brand mark (default: the family home's site)
  * options.status    initial [tone, text] for the status pill
+ *
+ * The bar always begins with a "Skip to content" link (visible on focus) that
+ * targets #main, or the page's first <main> (given id "main" if it has none),
+ * and wraps the brand and the product switcher in <nav aria-label="DEFXN">,
+ * so every page has a nav landmark even when its own nav is hidden.
  */
+/* The family's tab icon (2026-10-21): defxn-icon.png, built beside this script and its sheets
+ * (build.mjs deriveIcon; sync copies them together). Added only to a page that declares no icon
+ * of its own, so a product with its own mark keeps it. Found from the kit file that loaded the
+ * page's kit -- not import.meta, which the classic build cannot carry. */
+function ensureFamilyIcon() {
+  if (typeof document === 'undefined' || !document.head || document.querySelector('link[rel~="icon"]')) return;
+  const kitFile = document.querySelector('script[src*="defxn-product."], link[rel="stylesheet"][href*="defxn-product.css"], link[rel="stylesheet"][href*="defxn-components.css"]');
+  const base = kitFile && (kitFile.src || kitFile.href);
+  if (!base) return;
+  const link = document.createElement('link');
+  link.rel = 'icon';
+  link.type = 'image/png';
+  link.href = new URL('defxn-icon.png', base).href;
+  document.head.append(link);
+}
+
 function mountShell(options = {}) {
+  ensureFamilyIcon();
   const atHome = options.mode === 'home';
   const product = atHome ? null : productById(options.product);
   if (!atHome && !product) {
@@ -461,11 +1065,31 @@ function mountShell(options = {}) {
   /* Page stylesheets scope a product's own presentation under this attribute. */
   document.documentElement.setAttribute('data-dx-product', atHome ? (HOME?.id ?? 'home') : product.id);
 
+  /* Skip link (Power Design rule 18): first in the bar, so the first Tab
+     reaches the content instead of twelve bar controls later. */
+  const mainTarget = document.getElementById('main') ?? document.querySelector('main');
+  if (mainTarget && !mainTarget.id) mainTarget.id = 'main';
+  const skip = el('a', { class: 'dx-skip', href: `#${mainTarget?.id ?? 'main'}`, text: 'Skip to content' });
+  skip.addEventListener('click', (event) => {
+    const target = document.getElementById(mainTarget?.id ?? 'main');
+    if (!target) return;
+    event.preventDefault();
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    target.focus();
+    target.scrollIntoView();
+  });
+
   const brandHref = options.home ?? (atHome ? (productHref(HOME) ?? '/') : (HOME?.site ?? 'https://defxn.com'));
   const brand = el('a', { class: 'dx-bar__brand', href: brandHref, title: 'DEFXN' }, [
     el('span', { class: 'dx-mark', 'aria-hidden': 'true' }),
     el('span', { class: 'dx-bar__brand-word', text: 'DEFXN' }),
     options.brandSub ? el('span', { class: 'dx-bar__brand-sub', text: options.brandSub }) : null,
+  ]);
+  /* The family landmark: brand and switcher in one <nav aria-label="DEFXN">. */
+  const family = el('nav', { class: 'dx-bar__family', 'aria-label': 'DEFXN' }, [
+    brand,
+    el('span', { class: 'dx-bar__sep', 'aria-hidden': 'true', text: '/' }),
+    switcher(product),
   ]);
 
   const nav = el('nav', { class: 'dx-bar__nav', 'aria-label': atHome ? `${HOME?.name ?? 'DEFXN'} sections` : `${product.name} sections` });
@@ -491,15 +1115,13 @@ function mountShell(options = {}) {
   const menu = folds ? el('div', { class: 'dx-bar__menu', id: menuId }, [nav.childNodes.length ? nav : null, actionsBox]) : null;
 
   const parts = (folds ? [
-    brand,
-    el('span', { class: 'dx-bar__sep', 'aria-hidden': 'true', text: '/' }),
-    switcher(product),
+    skip,
+    family,
     menu,
     el('div', { class: 'dx-bar__end' }, [menuToggle, ...end.childNodes]),
   ] : [
-    brand,
-    el('span', { class: 'dx-bar__sep', 'aria-hidden': 'true', text: '/' }),
-    switcher(product),
+    skip,
+    family,
     nav.childNodes.length ? nav : null,
     actionsBox ? el('div', { class: 'dx-bar__end' }, [actionsBox, ...end.childNodes]) : end,
   ]).filter(Boolean);
@@ -521,6 +1143,10 @@ function mountShell(options = {}) {
      its titles (its SEO data names every route). */
   if (!atHome && !document.title.includes('DEFXN')) document.title = `${document.title ? `${document.title} · ` : ''}DEFXN`;
   const fold = folds ? menuMode(bar, menu, menuToggle, options.menuAt) : null;
+  /* On a loopback http(s) page only: when the reader reaches for a sibling's
+     link, check that its local port is served, and if not, point its links
+     at its public site. Nothing is sent at page start. */
+  watchSiblings(product ?? HOME, document);
 
   const api = {
     bar,
@@ -551,7 +1177,7 @@ function handoffItem(entry, direction) {
   return el('li', { class: 'dx-handoff__item' }, [
     el('span', { text: entry.what }),
     neighbour
-      ? (href ? el('a', { href, text: `${direction === 'from' ? '←' : '→'} ${label}` }) : el('span', { class: 'dx-faint', text: `${direction === 'from' ? '←' : '→'} ${label}` }))
+      ? (href ? el('a', { href, 'data-dx-to': neighbour.id, text: `${direction === 'from' ? '←' : '→'} ${label}` }) : el('span', { class: 'dx-faint', text: `${direction === 'from' ? '←' : '→'} ${label}` }))
       : null,
   ]);
 }
@@ -583,12 +1209,15 @@ function renderHandoff(target, productId) {
 
 /** A refusal names the failure, what is missing, and the remedy the reader
     can supply. A bare code is a status wearing an answer's badge. */
-function renderRefusal(target, { code, failure, missing, remedy, tone = null, action = null } = {}) {
+function renderRefusal(target, { code, failure, missing, remedy, tone = null, action = null, announce = true } = {}) {
   /* tone 'warn': a known gap (not built yet), not an error. action: one
-     { label, onClick } button the reader can use as the remedy. */
+     { label, onClick } button the reader can use as the remedy.
+     announce false: no live role, for a page that redraws a refusal it
+     already said once through its own live region (WCAG 4.1.3: one message,
+     one channel; Studio audit D8). */
   const button = action ? el('button', { type: 'button', class: 'dx-btn dx-btn--sm dx-refusal__action', text: action.label }) : null;
   if (button && action.onClick) button.addEventListener('click', action.onClick);
-  const block = el('div', { class: 'dx-refusal', role: tone === 'warn' ? 'status' : 'alert', 'data-tone': tone }, [
+  const block = el('div', { class: 'dx-refusal', role: announce ? (tone === 'warn' ? 'status' : 'alert') : null, 'data-tone': tone }, [
     code ? el('span', { class: 'dx-refusal__code', text: code }) : null,
     el('p', { class: 'dx-refusal__failure', text: failure || 'The request was refused.' }),
     (missing || remedy) ? el('dl', {}, [
@@ -669,5 +1298,5 @@ function copyButton(getText, { label = 'Copy' } = {}) {
   return button;
 }
 
-root.DefxnKit = Object.freeze({ LANES, HOME, PRODUCTS, RESOLVERS, productById, productIcon, productHref, productLink, productHandoff, initTheme, mountShell, renderHandoff, renderRefusal, renderFooter, copyButton });
+root.DefxnKit = Object.freeze({ LANES, HOME, PRODUCTS, RESOLVERS, productById, productIcon, productMark, productHref, productLink, productHandoff, initTheme, mountShell, renderHandoff, renderRefusal, renderFooter, copyButton });
 })(typeof window !== 'undefined' ? window : globalThis);
