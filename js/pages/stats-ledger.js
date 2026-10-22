@@ -124,8 +124,16 @@
      panel or an accordion item, whose inside is new. Deep refs are paths inside the tabs block:
      panel n is div n+1 (the tab list is div 1); in it, an accordion's item, panel, body, paragraph. */
   var T = 'page:/div:1/div:1';
+  /* The views were seven tabs until 2026-10-22; "On the wire", "Fleet runs" and "One machine" are now three tabs inside
+     one "Measurements" tab (first-visit audit 2026-10-22, P2). `tab` below is still the OLD tab's number, so each pin reads
+     as it was derived: panel(tab) is where that tab's panel stands now (an outer panel, or a panel of the inner tabs, which
+     are the first block of the Measurements panel). */
+  var MEASURED = { 3: 1, 4: 2, 5: 3 }, OUTER = { 1: 1, 2: 2, 6: 4, 7: 5 };
+  function panel(tab) {
+    return MEASURED[tab] ? ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(' + (MEASURED[tab] + 1) + ')' : ':scope > div:nth-of-type(' + (OUTER[tab] + 1) + ')';
+  }
   function inPanel(tab, accordion, item, rest) {
-    return ':scope > div:nth-of-type(' + (tab + 1) + ') > div:nth-of-type(' + accordion + ') > div:nth-of-type(' + item + ') > div:nth-of-type(1) > div:nth-of-type(1) > ' + rest;
+    return panel(tab) + ' > div:nth-of-type(' + accordion + ') > div:nth-of-type(' + item + ') > div:nth-of-type(1) > div:nth-of-type(1) > ' + rest;
   }
   var WAS = {
     'statsledger-hero': { ':root': { key: T + '/article:1', self: true } },
@@ -147,7 +155,7 @@
       'fact-term#10': T + '/article:3/ul:1/li:1/strong:1', 'fact-term#11': T + '/article:3/ul:1/li:2/strong:1', 'fact-term#12': T + '/article:3/ul:1/li:3/strong:1', 'fact-term#13': T + '/article:3/ul:1/li:4/strong:1', 'fact-term#14': T + '/article:3/ul:1/li:5/strong:1',
       'fact-value#15': T + '/article:1/p:3/span:1', 'fact-value#16': T + '/article:1/p:3/span:2', 'fact-value#17': T + '/article:1/p:3/span:3',
       // On the wire: the sample, now a table, and the TCP tile
-      'tabs-trigger#3': 'id:statsledger-sample-title', 'tabs-content#3': { key: T + '/article:4', self: true }, 'disclosure-panel#3': T + '/article:4/p:2',
+      'tabs-trigger#6': 'id:statsledger-sample-title', 'tabs-content#4': { key: T + '/article:4', self: true }, 'disclosure-panel#3': T + '/article:4/p:2',
       'tbody#2': { key: T + '/article:4/ol:1', self: true },
       'row#7': { key: T + '/article:4/ol:1/li:1', self: true }, 'row#8': { key: T + '/article:4/ol:1/li:2', self: true }, 'row#9': { key: T + '/article:4/ol:1/li:3', self: true },
       'row#10': { key: T + '/article:4/ol:1/li:4', self: true }, 'row#11': { key: T + '/article:4/ol:1/li:5', self: true },
@@ -181,18 +189,18 @@
       [inPanel(5, 1, 2, 'p:nth-of-type(1)')]: T + '/article:9/h2:1', [inPanel(5, 1, 2, 'p:nth-of-type(2)')]: T + '/article:9/p:2', [inPanel(5, 1, 2, 'p:nth-of-type(3)')]: T + '/article:9/p:3',
       'actions': T + '/article:9/p:4', 'button': T + '/article:9/p:4/a:1',
       // Attacks, and fork gossip
-      'tabs-trigger#6': 'id:statsledger-attacks-title', 'tabs-content#6': { key: T + '/article:10', self: true },
+      'tabs-trigger#4': 'id:statsledger-attacks-title', 'tabs-content#7': { key: T + '/article:10', self: true },
       'table-wrap#6': T + '/article:10/div:1', 'disclosure-panel#4': T + '/article:10/p:2',
       'accordion-item#10': { key: T + '/article:12', self: true }, 'accordion-trigger#10': 'id:statsledger-gossip-title',
       [inPanel(6, 3, 1, 'p:nth-of-type(1)')]: T + '/article:12/h2:1', [inPanel(6, 3, 1, 'p:nth-of-type(2)')]: T + '/article:12/p:2', [inPanel(6, 3, 1, 'p:nth-of-type(3)')]: T + '/article:12/p:3',
       // Durability
-      'tabs-content#7': { key: T + '/article:11', self: true }, 'table-wrap#7': T + '/article:11/div:1',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(1)': 'id:statsledger-durability-title',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(2)': T + '/article:11/p:2',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(3)': T + '/article:11/p:3',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(4)': T + '/article:11/p:4',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(5)': T + '/article:11/p:5',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(6)': T + '/article:11/p:6'
+      'tabs-content#8': { key: T + '/article:11', self: true }, 'table-wrap#7': T + '/article:11/div:1',
+      [panel(7) + ' > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(1)']: 'id:statsledger-durability-title',
+      [panel(7) + ' > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(2)']: T + '/article:11/p:2',
+      [panel(7) + ' > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(3)']: T + '/article:11/p:3',
+      [panel(7) + ' > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(4)']: T + '/article:11/p:4',
+      [panel(7) + ' > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(5)']: T + '/article:11/p:5',
+      [panel(7) + ' > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(6)']: T + '/article:11/p:6'
     },
     insert: { key: T + '/div:1', self: true },
     'statsledger-onward': { ':scope > div:nth-of-type(1) > p:nth-of-type(1)': 'id:statsledger-ev-title', 'pager-related': T + '/article:15' }
@@ -236,6 +244,9 @@
             ] }
           ] } }
         ] },
+        /* the three measurement views are one tab, each its own inner tab: seven tabs were more than a first visitor
+           could tell apart (first-visit audit 2026-10-22, P2) */
+        { value: 'measurements', label: 'Measurements', blocks: [{ block: 'tabs', props: { label: 'Measurements', variant: 'segmented', items: [
         { value: 'wire', label: 'On the wire', blocks: [
           note('Generated by cargo test emit_chain_sample in dense-wire: one holder, five entries from genesis to the latest receive. The signatures are real Ed25519 under a known seed; the CIDs are real sha256 of the text. Nothing here is a mockup — paste any entry into a verifier and it holds.', 'How this sample was made'),
           { block: 'table', props: { caption: 'A real chain of 5, byte for byte: what a chain looks like on the wire', maxHeight: 'compact', empty: 'Chain sample not available in this build.',
@@ -288,7 +299,8 @@
                 { block: 'actions', props: { label: 'The record behind it', items: [{ label: 'Read BENCH-005', href: 'doc:docs/evidence/bench-005-million-ops-audit.md', tone: 'link' }] } }
               ] }
           ] } }
-        ] },
+        ] }
+        ] } }] },
         { value: 'attacks', label: 'Attacks', blocks: [
           { block: 'table', props: { caption: 'Attack suite · 7 of 7 refused: what the resolver refuses, and why', maxHeight: 'compact',
             columns: [{ key: 'attack', label: 'Attack' }, { key: 'outcome', label: 'Outcome' }, { key: 'why', label: 'Why' }], rows: rows(ATTACKS, ['attack', 'outcome', 'why']) } },

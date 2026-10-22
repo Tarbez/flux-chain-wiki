@@ -128,7 +128,9 @@ for (const [key] of continuity.readCensus(ROUTE).map((e) => [e.key])) {
   }));
   assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'tabs', 'pager'], 'trail, the answer, the detail as tabs, the way on');
   /* What it closes leads (ledger recheck 2026-10-21, LG-5: the page opened on the mechanism) */
-  assert.deepEqual(seen.tabs, ['What it closes', 'How it works', 'On the wire', 'Fleet runs', 'One machine', 'Attacks', 'Durability']);
+  /* first-visit audit 2026-10-22 (P2): seven tabs were more than a first visitor could tell apart; On the wire, Fleet runs
+     and One machine are one "Measurements" tab, each its own inner tab (listed after the outer five, in document order) */
+  assert.deepEqual(seen.tabs, ['What it closes', 'How it works', 'Measurements', 'Attacks', 'Durability', 'On the wire', 'Fleet runs', 'One machine']);
   assert.deepEqual(seen.meta, ['Sustained, 6 nodes, 5 min', 'Attacks refused', 'Recovery vs live admission'], 'the hero answers with the three numbers that matter');
   assert.equal(seen.h1, 'Ledger benchmark detail', 'the dashboard h1 is its own name, not the article\'s');
   /* The old kicker ("Design, not agreement / a finance resolver by construction") was kept through the conversion; the
