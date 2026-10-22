@@ -314,3 +314,18 @@ two-card switch is Ark tabs; the record kinds and the record dl lists stay the p
 Home W4e / P7 closed as no change, with this reason: `land-panel` and `land-tag` are SVG shapes inside the home's
 isometric drawing, and `flow-panel` is a panel of the animated step scene; they are parts of an illustration, not
 content cards, and Ark's card block would replace the drawing, not dress it.
+
+## Resume point 12 (2026-10-22) — first-visit audit; P0s and the first P1s fixed
+docs/ux-audit/reachability-2026-10-22.tsv: every route loads, no dead or unreachable page (only /not-found has no
+inbound link). docs/ux-audit/first-visit-2026-10-22.md: 69 findings (3 P0, 36 P1, 30 P2) from three read-only agents.
+Merged since point 11: fa0dcb0 (footer credit from 1600px; tests/browser/footer-fit.mjs), 5a8e0e8 (/about tab case),
+8a732db (P0: no "Ready now" / "Start here" for a building product; main action falls back to the first ready product),
+1d76b97 (P0 /deploy wording and pager; footer shows only sections the header does not link, so the kit's 16px text
+fits -- owner kept the 16px rule, relayed by the genesis session; P1 #7 #9 #10 #15 words). All with the FXN ID
+edits kept on top, uncommitted.
+For the genesis session (its socket was gone after the restart): the synced kit puts .dx-skip before .dx-bar__brand,
+so tests/kit-home-shell.cjs fails with the synced kit file and passes with the committed one.
+Open, need the owner: P0 /download (no public code link: where does a visitor get the code, and should the header's
+Run DEFXN point elsewhere until a download exists?); P1 #1-#4 (header network pill, "Products" vs product, the home's
+hero action and destination, one name for /how-deployment-works); background motion; gate credential name.
+Open, in repo: the rest of the P1/P2 list in docs/ux-audit/first-visit-2026-10-22.md.
