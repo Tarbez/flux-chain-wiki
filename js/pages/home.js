@@ -6,7 +6,7 @@
    (docs/ux-audit/pages-ux-a.md /). It is organised by the visitor's next question now, each
    view short enough for the fold rule (<= 1.6 screens) on its own:
 
-     hero        what DEFXN is, in its own words, and the one primary action (Follow the line)
+     hero        what DEFXN is, in its own words, and the one primary action (See how DEFXN works)
      questions   ONE control, Ark tabs: Where do I start? · See it work · How it fits together ·
                  What is measured? · Questions. The first view under the hero is the way in -- the
                  three paths a first-time visitor chooses from -- and the scene is one press away
@@ -88,10 +88,11 @@
       'section-title': 'page:/section:2/div:1/details:1/div:1/section:1/h3:1',
       'section-lede': 'page:/section:2/div:1/details:1/div:1/section:1/p:1',
       'section-title#3': 'page:/section:2/div:1/details:1/div:1/section:2/h3:1',
-      'button#10': 'page:/section:2/div:1/details:1/div:1/section:2/a:1',
+      /* (since 2026-10-22 See it work's "See how a resolver is deployed" is button #10, so the ones after it count on) */
+      'button#11': 'page:/section:2/div:1/details:1/div:1/section:2/a:1',
       'section-title#4': 'page:/section:2/div:1/details:1/div:1/section:3/h3:1',
       'stat-label#4': 'page:/section:2/div:1/details:1/div:1/div:1/p:1',
-      'button#11': 'page:/section:2/div:1/details:1/div:1/div:1/a:1',
+      'button#12': 'page:/section:2/div:1/details:1/div:1/div:1/a:1',
       'section-title#5': 'page:/section:2/div:1/details:1/div:1/section:4/h3:1',
       'accordion-item#5': 'page:/section:2/div:1/details:1/div:1/section:4/div:1/details:2',
       'accordion-item#6': 'page:/section:2/div:1/details:1/div:1/section:4/div:1/details:3',
@@ -112,7 +113,7 @@
       'button': 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/a:1',
       'button#2': 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:1',
       'button#3': 'page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:2',
-      'button#12': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/a:1',
+      'button#13': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/a:1',
       'stat-label#2': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:1',
       'stat-unit#2': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/span:1',
       'stat-label#3': 'page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1',
@@ -260,7 +261,9 @@
     return [
       { block: 'hero', id: 'home-hero', was: WAS['home-hero'], props: {
         eyebrow: 'copy:HOME.EYEBROW', title: 'copy:HOME.TITLE', lede: 'copy:HOME.INTRO', density: 'compact',
-        actions: [{ label: 'Follow the line', href: link('LEARN.HREF'), tone: 'primary' }]
+        /* the owner's call 2026-10-22 (first-visit audit P1): the one action names where it goes and opens the plain
+           overview, not the most technical page (it was "Follow the line" to /how-deployment-works) */
+        actions: [{ label: 'See how DEFXN works', href: link('LEARN.HREF'), tone: 'primary' }]
       } },
       { block: 'tabs', id: 'home-questions', was: WAS['home-questions'], props: { label: 'Your next question', items: [
         /* Where do I start: the three paths, and -- for anyone not sure yet -- the way on. */
@@ -285,7 +288,9 @@
           { block: 'tabs', props: { label: 'Choose an illustrated example', variant: 'segmented', defaultValue: 'transfers', items: ArkUI.chainCases.map(function (c) {
             return { value: c.id, label: c.label, blocks: [{ block: 'figure', props: { kind: 'illustration', slot: 'scene-' + c.id,
               caption: 'Your history begins here: one record joins your chain, you.fxn, in five steps. Illustrative / not live traffic; only what the resolver reads at the end changes between examples.' } }] };
-          }) } }
+          }) } },
+          /* the technical walkthrough the hero used to open, one step later: beside the scene it explains */
+          { block: 'actions', props: { items: [{ label: 'See how a resolver is deployed', href: 'route:deployment', tone: 'ghost' }] } }
         ] },
         /* How it fits together: your chain among the others (the transit map), and the three parts. */
         { value: 'model', label: 'How it fits together', blocks: [

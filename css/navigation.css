@@ -61,6 +61,13 @@
 #scene .ark-header .header-chain-trigger:is(:hover,[aria-expanded="true"]) { background:hsl(var(--raised)); border-color:var(--dx-edge,hsl(var(--border-control))); }
 .header-chain-dot { width:8px; height:8px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
 .header-chain-trigger-label { white-space:nowrap; max-width:112px; overflow:hidden; text-overflow:ellipsis; }
+/* The pill is a choice, not a status: it says "Network: Production" where the row has room (the owner's call
+   2026-10-22; first-visit audit: the green dot and "Production" alone read as a live status). The trigger's
+   accessible name and title say "Network: <name>" at every width (js/resolvers/header.js showNetwork). */
+@media(min-width:1280px) {
+  .header-chain-trigger-label { max-width:184px; }
+  .header-chain-trigger-label::before { content:"Network: "; color:hsl(var(--text-muted)); }
+}
 /* Once pressed, the panel is Ark's popover block (js/resolvers/header.js): ark-blocks.css makes it fixed,
    the block places it under the pill (inline top/left) and on a phone it is a full-width sheet. The
    top/right here are where the plain panel opens before that, and if the popover chunk fails to load. */

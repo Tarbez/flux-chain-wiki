@@ -36,6 +36,8 @@ const SCENE = 'page:/section:1/section:1/div:2/div:1';
 
 /* Why each old key whose words changed shape still lands on its successor. */
 const reshaped = {
+  /* the owner's call 2026-10-22: the hero's one action reads "See how DEFXN works" and opens the overview */
+  'page:/section:1/div:1/div:1/a:1/span:3/strong:1': '"Follow the line" on the button\'s label reads "See how DEFXN works" (the owner\'s call 2026-10-22)',
   'page:/section:1/div:1': 'the hero\'s copy column became the hero block (the same words; the call to action is a button now)',
   'page:/section:1/div:1/div:1': 'the hero\'s action row: the line-shaped call to action is a real primary button now (audit: it did not read as one)',
   'page:/section:1/div:1/div:1/a:1': 'that call to action itself, "Follow the line", now the hero\'s primary button',
@@ -207,7 +209,8 @@ if (require.main === module) (async () => {
   assert.equal(seen.h1.id, 'hl-title', 'the heading keeps the id the old page gave it');
   assert.equal(seen.h1.count, 1, 'one main heading');
   assert.equal(seen.h1.keys, 'HOME.TITLE', 'the heading is the manifest\'s HOME.TITLE (the Content lens binds it)');
-  assert.deepEqual(seen.primary, ['Follow the line→ deployment'], 'one primary action, a real button, to the same place');
+  /* the owner's call 2026-10-22: the action names where it goes, the overview (it was "Follow the line" to /how-deployment-works) */
+  assert.deepEqual(seen.primary, ['See how DEFXN works→ about'], 'one primary action, a real button, to the overview');
   assert.deepEqual(seen.questions, ['Where do I start?', 'See it work', 'How it fits together', 'What is measured?', 'Questions'], 'organised by the visitor\'s next question, not one "More", and the first view under the hero is the way in (the three paths), not the scene (ledger: promote Explore/Build/Operate under the hero)');
   assert.deepEqual(seen.cases, ['Swaps', 'Transfers', 'Staking', 'Governance'], 'every example is still offered');
   assert.deepEqual(seen.paths, ['Explore', 'Build', 'Operate', 'Not sure yet'], 'the three paths, plus the way on for anyone not sure yet');

@@ -2,8 +2,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('scripts/settings-entry.js','utf8');
 const motion=source.slice(source.indexOf('function stopPattern()'),source.indexOf('function persistPattern()'));
-let timer=null,scans=0,settled=0,paused=false;
-const context={meshPattern:{refresh(){settled++;},animate(){scans++;}},values:{animated:false,delay:1.2},motif:'blocks',disposed:false,loopTimer:0,document:{hidden:false},reduced:{matches:false},ArkUI:{sceneState:{get:()=>({paused})}},clearTimeout:()=>{timer=null;},setTimeout:(fn,ms)=>{timer={fn,ms};return 1;}};
+let timer=null,scans=0,settled=0,paused=false,page='zero';
+const context={meshPattern:{refresh(){settled++;},animate(){scans++;}},values:{animated:false,delay:1.2},motif:'blocks',disposed:false,loopTimer:0,document:{hidden:false},reduced:{matches:false},ArkUI:{sceneState:{get:()=>({paused,page})}},clearTimeout:()=>{timer=null;},setTimeout:(fn,ms)=>{timer={fn,ms};return 1;}};
 vm.createContext(context);vm.runInContext(motion,context);
 context.schedulePattern();assert.equal(timer,null,'explicit static preference stays static');
 context.values.animated=true;context.schedulePattern();assert.equal(timer.ms,1200);
@@ -18,6 +18,11 @@ context.values.delay=8;context.schedulePattern();assert.equal(timer.ms,8000);
 context.document.hidden=true;context.schedulePattern();assert.equal(timer,null);
 context.document.hidden=false;context.reduced.matches=true;context.schedulePattern();assert.equal(timer,null);
 context.reduced.matches=false;paused=true;context.schedulePattern();assert.equal(timer,null);
+// The scan plays on the home only (the owner's call 2026-10-22): another route keeps the pattern at rest, and the home
+// plays it again.
+paused=false;page='about';context.schedulePattern();assert.equal(timer,null,'no scan off the home');
+page='zero';context.schedulePattern();assert.equal(timer.ms,8000,'the home scans again');
+assert(/if\(state\.page!==scenePage\)\{scenePage=state\.page;schedulePattern\(\);\}/.test(source),'a route change re-decides the scan (stops it when leaving the home)');
 paused=false;context.schedulePattern();assert.ok(timer);
 context.values.animated=false;context.schedulePattern();assert.equal(timer,null);assert(settled>0);
 context.values.animated=true;context.motif='none';context.schedulePattern();assert.equal(timer,null);
