@@ -77,7 +77,12 @@ const ROUTES = {
       [/^page:\/div:1\/div:2(\/article:1)?$/, 'the two cards: the how-it-works card\'s steps are Ark tabs now (below), so its words are in the tab labels and panels, not the old heading, sentence and numbered buttons'],
       [/^page:\/div:1\/div:2\/article:1\/div:3$/, 'the hand-built stepper is Ark\'s tab strip (the tablist, its panels after it): each numbered button is a tab, its heading and sentence the panel'],
       [/^page:\/div:1\/footer:1\/div:2$/, 'the footer\'s ways on are Ark\'s actions, shown on every width (they were display:none on a phone)'],
-      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the family\'s Explore link is Ark\'s link button, which says it opens another site']
+      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the family\'s Explore link is Ark\'s link button, which says it opens another site'],
+      /* first-visit audit 2026-10-22 (P1): see reworded below */
+      [/^page:\/div:1\/header:1$/, 'the hero: the page\'s name and what it shows (see reworded)'],
+      [/^id:mesh-explorer-title$/, 'the heading names the page (see reworded)'],
+      [/^page:\/div:1\/header:1\/p:1$/, 'the lede says what is shown (see reworded)'],
+      [/^page:\/div:1\/div:1$/, 'the phone\'s switch puts "Live now" first, so a phone opens on the live readings; each button keeps the key it had with its words']
     ],
     retired: [
       [/^page:\/div:1\/header:1\/div:1$/, 'the heading\'s wrapper; the h1 keeps its id key'],
@@ -87,7 +92,14 @@ const ROUTES = {
       [/^page:\/div:2\/div:1\/header:1\/details:1\/summary:1\/span:1$/, 'the connection button\'s status dot: Ark\'s popover button carries a label and an arrow; the Connection figure beside it says live or offline in words'],
       [/^page:\/div:1\/div:2\/article:1\/div:3\/button:\d\/span:1$/, 'the stop\'s number circle; an Ark tab is one label ("01 Shape"), which keeps the button\'s key']
     ],
-    reworded: [] },
+    /* first-visit audit 2026-10-22 (P1): the heading was the home's slogan and the lede sold the network; the page is
+       named for what it is and says what it shows. The family's Explore link says what is there, so it is not read as
+       this page under another name. Each keeps its key (the hero's pins; the link button's pin). */
+    reworded: [
+      [/^id:mesh-explorer-title$/, 'the heading names the page: "Mesh Explorer" (it was the home\'s slogan, "Your idea, live on the mesh.")'],
+      [/^page:\/div:1\/header:1\/p:1$/, 'the lede says what is shown: the records the public machines hold, read live'],
+      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the Explore link says what is there: "Launched resolvers are in the Explore app"']
+    ] },
   '/treasury': { page: 'treasury', ids: ['treasury-'],
     reshaped: [
       [/^page:\/div:1\/header:1$/, 'the header became the hero; its warning line is the callout after it'],

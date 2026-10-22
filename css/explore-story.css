@@ -23,8 +23,8 @@
 #scene .explore-page .explore-panes { display:none; }
 #scene .explore-page .explore-cards > [data-ark-part="tabs-content"] { min-width:0; margin:0; padding:0; }
 
-/* The two cards */
-#scene .explore-page .explore-cards { position:relative; display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:14px; min-height:0; }
+/* The two cards: the live readings first and wider, the tutorial beside them (first-visit audit 2026-10-22) */
+#scene .explore-page .explore-cards { position:relative; display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:14px; min-height:0; }
 #scene .explore-page .explore-cards .how-work-card { cursor:default; }
 #scene .explore-page .explore-cards .how-work-card:hover {
   transform:none; border-color:hsl(var(--border-default)); background:linear-gradient(152deg,hsl(var(--surface) / .42),hsl(var(--canvas) / .92));

@@ -131,10 +131,15 @@
   /* The phone's switch between the two cards is Ark tabs (a hand-built aria-pressed button pair stood here: ledger recheck X5 /
      CP-6): each card is its tab's panel. From 901px both cards stand side by side and the tab strip is not drawn
      (css/explore-story.css), so setup() shows both panels there. `was`: the strip keeps the old button pair's keys, the
-     tabs block the cards' wrapper's; mount() pins the two cards by hand, since the page puts them in the panels. */
+     tabs block the cards' wrapper's; mount() pins the two cards by hand, since the page puts them in the panels.
+     "Live now" comes first (first-visit audit 2026-10-22: a phone opened on the tutorial, so the live readings sat behind
+     the second tab, and on a desktop the tutorial took the left of the page). Each button keeps the key it had with its
+     words: the live one was button:2, the tutorial button:1. PANES is the one order the tabs, the panels and
+     data-explore-pane read. */
+  var PANES = ['live', 'how'];
   function panesSpec() {
-    return { block: 'tabs', id: 'explore-panes', was: { ':root': { key: CARDS, self: true }, 'tabs-list': 'page:/div:1/div:1', 'tabs-trigger': 'page:/div:1/div:1/button:1', 'tabs-trigger#2': 'page:/div:1/div:1/button:2' },
-      props: { label: 'Show', variant: 'segmented', activation: 'automatic', items: [{ value: 'how', label: 'How it works' }, { value: 'live', label: 'Live now' }] } };
+    return { block: 'tabs', id: 'explore-panes', was: { ':root': { key: CARDS, self: true }, 'tabs-list': 'page:/div:1/div:1', 'tabs-trigger': 'page:/div:1/div:1/button:2', 'tabs-trigger#2': 'page:/div:1/div:1/button:1' },
+      props: { label: 'Show', variant: 'segmented', activation: 'automatic', items: [{ value: 'live', label: 'Live now' }, { value: 'how', label: 'How it works' }] } };
   }
   function stepsSpec() {
     return { block: 'tabs', id: 'explore-steps', was: { ':root': STEPPER + '/div:3', 'tabs-trigger': STEPPER + '/div:3/button:1', 'tabs-trigger#2': STEPPER + '/div:3/button:2', 'tabs-trigger#3': STEPPER + '/div:3/button:3' },
@@ -144,11 +149,12 @@
           props: { title: step[0], lede: step[1], level: 2 } }] };
       }) } };
   }
-  /* The family's "Every launched resolver, in Explore" (the Explore product), its address from the kit's catalog. */
+  /* The family's Explore product (launched resolvers and their histories), its address from the kit's catalog. Its label says
+     what the visitor finds there, so the link is not read as this page under another name (first-visit audit 2026-10-22). */
   function exploreProduct() {
     var kit = typeof window !== 'undefined' && window.DefxnKit, product = kit && kit.productById && kit.productById('explore');
     var to = product && kit.productHref(product);
-    return to ? { label: 'Every launched resolver, in Explore', href: /^https?:/.test(to) ? 'url:' + to : to, tone: 'link' } : null;
+    return to ? { label: 'Launched resolvers are in the Explore app', href: /^https?:/.test(to) ? 'url:' + to : to, tone: 'link' } : null;
   }
   /* `was`: the key each element of the hand-built page had, by block id, so a CMS edit saved
      against it still lands. The home and the raw view keep their old keys whole (one pin each:
@@ -183,16 +189,17 @@
       { block: 'custom', id: 'explore-home', was: WAS['explore-home'], mount: function (ctx) {
         var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', '');
         home.appendChild(ctx.render({ block: 'breadcrumb', id: 'explore-crumbs', was: WAS['explore-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Mesh Explorer' }] } }));
-        home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Your idea, live on the mesh.', density: 'compact',
-          lede: 'DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.' } }));
+        home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Mesh Explorer', density: 'compact',
+          lede: 'The records the public DEFXN machines hold right now, read live. Open a kind to see its latest records.' } }));
         var live = node('div'); live.innerHTML = cards();
         live.querySelector('[data-explore-steps]').replaceWith(ctx.render(stepsSpec()));
         var panes = ctx.render(panesSpec()), panels = panes.querySelectorAll('[data-ark-part="tabs-content"]');
         panes.classList.add('explore-cards');
         panes.querySelector('[data-ark-part="tabs-list"]').classList.add('explore-panes');
-        Array.prototype.forEach.call(panes.querySelectorAll('[data-ark-part="tabs-trigger"]'), function (tab, i) { tab.setAttribute('data-explore-pane', i ? 'live' : 'how'); });
-        [['.explore-how-card', '/article:1'], ['.explore-live-card', '/section:1']].forEach(function (card, i) {
-          var el = live.querySelector(card[0]); el.setAttribute('data-ark-layout-pin', CARDS + card[1]); panels[i].appendChild(el);
+        Array.prototype.forEach.call(panes.querySelectorAll('[data-ark-part="tabs-trigger"]'), function (tab, i) { tab.setAttribute('data-explore-pane', PANES[i]); });
+        var CARD = { live: ['.explore-live-card', '/section:1'], how: ['.explore-how-card', '/article:1'] };
+        PANES.forEach(function (pane, i) {
+          var el = live.querySelector(CARD[pane][0]); el.setAttribute('data-ark-layout-pin', CARDS + CARD[pane][1]); panels[i].appendChild(el);
         });
         live.querySelector('.explore-cards').replaceWith(panes);
         while (live.firstChild) home.appendChild(live.firstChild);
@@ -707,7 +714,8 @@
         var icon = node('span', 'explore-kind-icon'); icon.innerHTML = kindIcon(kind[2]);
         var figures = counted(c);
         tile.appendChild(icon); tile.appendChild(node('strong', '', kind[0])); tile.appendChild(node('span', 'explore-kind-text', kind[1]));
-        tile.appendChild(node('small', '', figures.length ? figures.join(' · ') : 'Open to browse'));
+        /* no figure, no line: "Open to browse" on six of eight tiles read as a status (first-visit audit 2026-10-22) */
+        if (figures.length) tile.appendChild(node('small', '', figures.join(' · ')));
         tile.setAttribute('aria-pressed', String(browsing.category === c)); tile.setAttribute('aria-controls', 'explore-browse');
         tile.addEventListener('click', function () { if (browsing.category === c) closeBrowse(); else browseKind(c); });
         return tile;
