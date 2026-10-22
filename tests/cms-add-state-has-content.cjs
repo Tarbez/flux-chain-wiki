@@ -76,7 +76,7 @@ function build(states) {
 }
 {
   const t = build([{ label: 'Default', members: ['k-nav'] }, { label: 'State 1', members: [] }]);
-  const select = t.pane.querySelector('select[aria-label="Block type for state 1"]');
+  const select = t.pane.querySelector('select[aria-label="Block type for state 2"]');
   assert(select, 'state 1 has a block-type <select>');
   select.value = 'RBLOCK_CTA_V1';
   t.button('+ Add content block').click();

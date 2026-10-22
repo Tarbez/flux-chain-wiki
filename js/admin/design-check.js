@@ -283,10 +283,11 @@
     const siteSeo = (state.cmsSourceSite && state.cmsSourceSite.seo && state.cmsSourceSite.seo.site) || {};
     const bots = siteSeo.bots || {};
     const answerBotsOpen = ArkSEO.AI_BOTS.filter(([b, train]) => !train && (bots[b] || 'allow') === 'allow').length, answerBotsTotal = ArkSEO.AI_BOTS.filter((b) => !b[1]).length;
-    add({ law: 'AI', title: 'Answer-ready for AI assistants', status: answerBotsOpen > 0 ? 'pass' : 'warn', detail: `${answerBotsOpen} of ${answerBotsTotal} answer/search bots allowed.`, fix: 'seo-site', fixLabel: 'Open site SEO' });
+    add({ law: 'AI', title: 'Answer-ready for AI assistants', status: answerBotsOpen > 0 ? 'pass' : 'warn', detail: `${answerBotsOpen} of ${answerBotsTotal} AI assistants that answer questions may read the site.`, fix: 'seo-site', fixLabel: 'Open site SEO' });
     // 14 designed for the visitor: needs a stated audience, which no real draft stores
     add({ law: 'Audience', title: 'Designed for the visitor', status: 'notBuilt',
-      detail: 'Not built: this rule compares the design against who the site is for, and no saved draft stores that. The deleted canvas kept an audience note in its own theme; the real theme (js/content/theme.js) and SEO site settings have no such field. Add an audience field to one of them and this rule can be measured.' });
+      /* plain words (docs/ux-audit/cms.md P1-2): what is missing and what would fix it, without the file names */
+      detail: 'Not built: this rule compares the design against who the site is for, and the editor has nowhere to write that down yet. Once the site style or search settings get a field for who the site is for, this rule can be measured.' });
     lastChecks = out;
     const scored = out.filter((c) => c.status === 'pass' || c.status === 'warn' || c.status === 'fail');
     const score = scored.filter((c) => c.status === 'pass').length;

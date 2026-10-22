@@ -32,17 +32,19 @@ var ArkSiteDefaults = (function () {
   var THEME_OPTIONS = ['ember', 'ember-light', 'defxn-tide', 'defxn-tide-light', 'defxn-moss', 'defxn-moss-light', 'defxn-dune', 'defxn-dune-light', 'defxn-dusk', 'defxn-dusk-light'];
   var MOTIFS = ['blocks', 'traces', 'layers', 'nodes', 'routes', 'tiles', 'frames', 'none'];
 
-  /* Exact literal min/max/default from scripts/settings-entry.js's own `controls` object.
+  /* Exact literal label/min/max/default from scripts/settings-entry.js's own `controls` object
+     (the label is what the visitor's settings panel calls the slider, so the editor calls it the
+     same, never by its key: docs/ux-audit/cms.md P1-2).
      This module is the one place those numbers are allowed to move away from that literal --
      settings-entry.js's own copy stays as the fallback-of-the-fallback for a control/motif
      combination this module's data file does not cover. */
   var CONTROLS = {
-    structure: { min: 0, max: 100, def: 50 },
-    visibility: { min: 0, max: 100, def: 72 },
-    scale: { min: 60, max: 180, def: 100 },
-    density: { min: 20, max: 100, def: 60 },
-    softness: { min: 0, max: 100, def: 0 },
-    delay: { min: .3, max: 10, def: 1.2 }
+    structure: { label: 'Structure', min: 0, max: 100, def: 50 },
+    visibility: { label: 'Visibility', min: 0, max: 100, def: 72 },
+    scale: { label: 'Scale', min: 60, max: 180, def: 100 },
+    density: { label: 'Density', min: 20, max: 100, def: 60 },
+    softness: { label: 'Softness', min: 0, max: 100, def: 0 },
+    delay: { label: 'Wave delay (seconds)', min: .3, max: 10, def: 1.2 }
   };
 
   function themeOptions() { return THEME_OPTIONS.slice(); }

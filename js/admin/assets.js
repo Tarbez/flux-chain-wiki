@@ -39,7 +39,7 @@
   function assetDetail(id) {
     var asset = state.assetDrafts[id];
     var box = h('div', { class: 'media-detail' });
-    box.appendChild(panelHead(asset.label || id, 'js/content/assets/' + id + '.js', 'asset', id));
+    box.appendChild(panelHead(asset.label || id, '', 'asset', id, 'js/content/assets/' + id + '.js'));
     var preview = h('img', { src: assetSrc(asset), alt: asset.label, class: 'asset-preview' });
     box.appendChild(preview);
     /* "Alt text" is the image's stored label: it is what the image is called in this list AND what

@@ -1300,10 +1300,12 @@
     var cs = getComputedStyle(element);
     return Math.max(0, element.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0));
   }
+  /* An element named for the editor by its words ("Title"), never by its tag ("h2", "div"): the tag is
+     the code's name for it (docs/ux-audit/cms.md P1-2). An element with no words is "an element". */
   function cmsLabelOf(element) {
-    if (!element) return 'element';
+    if (!element) return 'an element';
     var text = String(element.getAttribute('aria-label') || element.textContent || '').replace(/\s+/g, ' ').trim();
-    return element.tagName.toLowerCase() + (text ? ' "' + text.slice(0, 32) + (text.length > 32 ? '…' : '') + '"' : '');
+    return text ? '"' + text.slice(0, 32) + (text.length > 32 ? '…' : '') + '"' : 'an element';
   }
   function cmsInsertionPoints() {
     if (!window.ArkComponents || !host) return [];

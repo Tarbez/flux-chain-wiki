@@ -58,7 +58,7 @@ const plain = (x) => JSON.parse(JSON.stringify(x));
   points = plain(context.points());
   const after = points.find((p) => p.kind === 'after');
   assert(after && after.after === 'k-title' && after.usable, '"after the selection" is a place, measured by the parent it would land in: ' + JSON.stringify(after));
-  assert.match(after.label, /^After the selection: h2 "Title"/);
+  assert.match(after.label, /^After the selection: "Title"/);   /* by its words, not its tag (cms.md P1-2) */
 
   /* the same rule, not a page list: after a selection inside the 0px section is not offered either */
   const inAbout = doc.createElement('p'); inAbout.setAttribute('data-ark-layout-key', 'k-about-p'); doc.getElementById('about').prepend(inAbout);
@@ -108,11 +108,11 @@ const MASTERS = { m1: { resolver: 'RBLOCK_TEXT_V1', label: 'Hello', props: { hea
   console.log('PASS: no visible place -> Insert disabled, saying why and what to do.');
 }
 {
-  const points = [{ id: 'main', anchorId: 'main', kind: 'anchor', label: 'Page slot "main"', width: 900, usable: true }, { id: 'after:k-h1', after: 'k-h1', kind: 'after', label: 'After the selection: h1 "Start"', width: 900, usable: true }];
+  const points = [{ id: 'main', anchorId: 'main', kind: 'anchor', label: 'Page slot "main"', width: 900, usable: true }, { id: 'after:k-h1', after: 'k-h1', kind: 'after', label: 'After the selection: "Start"', width: 900, usable: true }];
   const lib = library(points, MASTERS);
   lib.button(lib.row('Hello'), 'Insert').click();
   const options = [...lib.pane.querySelectorAll('.lib-picker .lib-point')];
-  assert.deepEqual(options.map((o) => o.textContent), ['Page slot "main"', 'After the selection: h1 "Start"'], 'two places open an in-panel picker (no prompt())');
+  assert.deepEqual(options.map((o) => o.textContent), ['Page slot "main"', 'After the selection: "Start"'], 'two places open an in-panel picker (no prompt())');
   options[1].dispatchEvent(new lib.dom.window.Event('mouseenter'));
   assert.equal(lib.highlights.pop(), 'after:k-h1', 'hovering a place outlines it in the preview');
   options[1].dispatchEvent(new lib.dom.window.Event('mouseleave'));

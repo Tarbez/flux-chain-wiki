@@ -175,7 +175,7 @@ var ArkVersionsPanel = (function () {
       connect.hidden = !!dir || !env.connect;
       if (!dir) {
         entries = []; next = null; paint();
-        note.textContent = 'Connect the project folder to keep version history: versions are written beside the site, in cms-history/, the same way Save writes the site.';
+        note.textContent = 'Connect the project folder to keep version history: each version is saved in your site folder, the same way Save writes the site.';
         return;
       }
       loading = true;

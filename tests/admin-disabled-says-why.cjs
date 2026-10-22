@@ -63,7 +63,7 @@ for (const [what, re] of Object.entries(reasons)) {
     assert(/: /.test(text) && text.length > 30, `${what}'s reason states the failure and the remedy, not a bare status: "${text}"`);
   }
 }
-assert(/refuse\(\$\('publish'\), publishing \? PUBLISHING_NOW : info\.reachable \? '' : 'Cannot publish: the miner is not reachable \(' \+ \(info\.detail/.test(admin), 'Publish names the unreachable miner\'s own detail and what to do');
+assert(/refuse\(\$\('publish'\), publishing \? PUBLISHING_NOW : info\.reachable \? '' : 'Cannot publish: Ark Miner is not reachable \(' \+ \(info\.detail/.test(admin), 'Publish names the unreachable miner\'s own detail and what to do');
 /* Publish stays CLICKABLE while refused (P0-4, docs/ux-audit/cms.md): every refusal of it passes
    explainPublish, so a click opens the reason and its remedy instead of doing nothing */
 for (const call of admin.matchAll(/refuse\(\$\('publish'\),[^;]*;/g)) assert(/, explainPublish\);$/.test(call[0]), 'Publish is refused without its click-to-explain: ' + call[0]);

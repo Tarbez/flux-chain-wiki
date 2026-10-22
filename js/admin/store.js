@@ -40,15 +40,15 @@ var ArkAdminStore = (function () {
     { key: 'manifests', kind: 'items', global: 'ArkManifest', label: 'Page', dir: 'manifests' },
     { key: 'articles', kind: 'items', global: 'LearningContent', label: 'Article', dir: 'articles' },
     { key: 'assets', kind: 'items', global: 'ArkAsset', label: 'Image', dir: 'assets' },
-    { key: 'secrets', kind: 'items', global: 'ArkSecret', label: 'Secret', dir: 'secrets' },
-    { key: 'meshSettings', kind: 'single', global: 'ArkMeshSettings', label: 'Mesh settings', file: 'mesh-settings', title: 'Mesh tuning' },
+    { key: 'secrets', kind: 'items', global: 'ArkSecret', label: 'Private item', dir: 'secrets' },
+    { key: 'meshSettings', kind: 'single', global: 'ArkMeshSettings', label: 'Page shapes', file: 'mesh-settings', title: 'Mesh tuning' },
     { key: 'theme', kind: 'single', global: 'ArkTheme', label: 'Theme', file: 'theme', title: 'Colour theme', needs: ['js/tokens.js', 'js/ark/vendor/backgrounds.js'] },
     { key: 'settingsDefaults', kind: 'single', global: 'ArkSiteDefaults', label: 'Site-wide defaults', file: 'settings-defaults', title: 'Site-wide settings defaults' },
     { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO', needs: ['js/content/site-pages.js'], byItem: { manifests: 'pages', articles: 'articles' } },
     { key: 'layout', kind: 'single', global: 'ArkLayout', label: 'Layout', file: 'layout', title: 'Responsive layout', byRoute: ['routes', 'groups', 'labels', 'alts'] },
     { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components', byRoute: ['routes', 'spots'] },
     { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups', byRoute: ['routes'] },
-    { key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Canvas transitions', file: 'canvas-transitions', title: 'Canvas transitions' },
+    { key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Page transition', file: 'canvas-transitions', title: 'Canvas transitions' },
     { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation', byRoute: ['routes'] }
   ];
   /* a copy, so no caller can edit the list for everyone else */

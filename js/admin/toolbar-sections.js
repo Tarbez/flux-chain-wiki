@@ -178,7 +178,7 @@
     const body = toolbarSection(pane, 'cms-alt', 'Alt text', 'image');
     const alt = state.cmsExactSelection.alt;
     if (!alt) {
-      body.appendChild(h('p', { class: 'hint', text: 'This element has no text alternative of its own to set: alt text belongs on the <img> (or the <svg>, <canvas> or <video>) itself. Select the image inside it in Layers to describe it.' }));
+      body.appendChild(h('p', { class: 'hint', text: 'This element has no description of its own to set: a description belongs on the picture, drawing or video itself. Select the picture inside it in Layers to describe it.' }));
       return;
     }
     /* `page` is the route shown, `route` the scope the edit is stored under (SHELL for the
@@ -189,7 +189,8 @@
       placeholder: alt.own ? 'Page default: ' + alt.own : alt.own === '' || alt.decorative ? 'Page default: decorative (screen readers skip it)' : 'Describe what this image shows' });
     row.classList.add('alt-row');
     body.appendChild(row);
-    body.appendChild(h('p', { class: 'hint', text: (alt.attr === 'alt' ? 'Read aloud by screen readers and shown if the image fails to load.' : 'Sets this ' + (cmsTreeRowForKey(state.cmsExactSelection.key) || {}).tag + "'s accessible name (aria-label)" + (alt.decorative ? ', and stops treating it as decorative' : '') + '.') + ' Blank keeps the page\'s own value. Saved with the layout.' }));
+    /* plain words: "aria-label" and the element's tag are the code's names (docs/ux-audit/cms.md P1-2) */
+    body.appendChild(h('p', { class: 'hint', text: (alt.attr === 'alt' ? 'Read aloud by screen readers and shown if the image fails to load.' : 'Sets what screen readers call this element' + (alt.decorative ? ', and stops them skipping it' : '') + '.') + ' Blank keeps the page\'s own value. Saved with the layout.' }));
   }
   /* A selected element that is a reusable-component instance root (js/content/
      components.js tags it; cmsSelectionInfo in js/main.js reports it as
@@ -295,7 +296,8 @@
     const showing = typeof state.cmsStatesShowing[groupId] === 'number' && state.cmsStatesShowing[groupId] < group.states.length ? state.cmsStatesShowing[groupId] : group.current;
     group.states.forEach((st, i) => {
       const row = document.createElement('div'); row.className = 'row';
-      const l = document.createElement('label'); l.textContent = (i === 0 ? '0 · ' : i + ' · ') + (st.label || (i === 0 ? 'Default' : 'New state'));
+      /* states are counted from 1 where a person reads them; the stored index stays 0-based */
+      const l = document.createElement('label'); l.textContent = (i + 1) + ' · ' + (st.label || (i === 0 ? 'Default' : 'New state'));
       const preview = document.createElement('button'); preview.type = 'button'; preview.className = 'btn small'; preview.textContent = showing === i ? 'Showing' : 'Preview';
       preview.title = 'Show this state here in the editor only -- visitors still see the default state';
       refuse(preview, showing === i ? 'Showing now: this state is the one in the preview. Preview another state to switch.' : '');
@@ -314,8 +316,8 @@
         /* A block-type <select> + button, not the prompt() this used to be: a prompt that
            wanted the exact word "Text" silently did nothing for "text block" or Cancel. */
         const addRow = document.createElement('div'); addRow.className = 'state-add-block'; Object.assign(addRow.style, { display: 'flex', gap: '6px', margin: '0 0 6px 20px' });
-        const kind = document.createElement('select'); kind.className = 'ctl'; kind.setAttribute('aria-label', 'Block type for state ' + i);
-        [{ resolver: CMS_LIKE_STATE_0, label: 'Like state 0' }].concat(CMS_BLOCK_RESOLVERS).forEach((block) => { const o = document.createElement('option'); o.value = block.resolver; o.textContent = block.label; kind.appendChild(o); });
+        const kind = document.createElement('select'); kind.className = 'ctl'; kind.setAttribute('aria-label', 'Block type for state ' + (i + 1));
+        [{ resolver: CMS_LIKE_STATE_0, label: 'Like the first state' }].concat(CMS_BLOCK_RESOLVERS).forEach((block) => { const o = document.createElement('option'); o.value = block.resolver; o.textContent = block.label; kind.appendChild(o); });
         const add = document.createElement('button'); add.type = 'button'; add.className = 'btn small'; add.textContent = '+ Add content block';
         add.addEventListener('click', () => { addStateContent(groupId, i, kind.value, st.label || ('State ' + i)); postCmsStatesCommand({ action: 'preview', groupId, index: i }); });
         addRow.append(kind, add); body.appendChild(addRow);
@@ -324,7 +326,7 @@
     /* The explicit, saved choice of which state visitors see first. Only this writes the
        group's `current`; Preview above never does. */
     const defaultCtx = { get: () => group.current, set: (_key, value) => postCmsStatesCommand({ action: 'set-default', groupId, index: Number(value) }) };
-    const defaultRow = ctlSelectField(defaultCtx, 'Default state', 'current', group.states.map((_st, i) => i), (i) => i + ' · ' + (group.states[i].label || (i === 0 ? 'Default' : 'New state')));
+    const defaultRow = ctlSelectField(defaultCtx, 'Default state', 'current', group.states.map((_st, i) => i), (i) => (i + 1) + ' · ' + (group.states[i].label || (i === 0 ? 'Default' : 'New state')));
     defaultRow.querySelector('select').title = 'The state visitors see first. Saved with the page.';
     body.appendChild(defaultRow);
     /* + Add state creates the state WITH visible content and shows it, instead of an empty
@@ -370,7 +372,7 @@
     const ctx = { get: (key) => cfg[key], set: (key, value) => postCmsElementMotionCommand({ [key]: value }) };
     const body = toolbarSection(pane, 'cms-element-motion', 'In / out animation', 'play');
     const note = document.createElement('p'); note.className = 'hint';
-    note.textContent = `How "${state.cmsExactSelection.label || state.cmsExactSelection.key}" enters and leaves on route change. Overrides the default stagger for this element only; every other element keeps today's behavior.`;
+    note.textContent = `How "${state.cmsExactSelection.label || 'this element'}" comes in and goes out when a visitor changes page. It applies to this element only; every other element keeps the site's default.`;
     body.appendChild(note);
     body.appendChild(ctlSegField(ctx, 'Direction', 'direction', CMS_ELEMENT_MOTION_DIRECTIONS));
     body.appendChild(ctlField(ctx, 'Distance (px)', 'distance', { min: 0, max: 60, step: 1 }));
@@ -382,7 +384,7 @@
     preview.addEventListener('click', () => postCmsElementMotionPreview(state.cmsExactSelection.key));
     body.appendChild(preview);
     const hint = document.createElement('p'); hint.className = 'hint';
-    hint.textContent = 'Previews instantly in the connected site above -- no page navigation. Save still writes it to the project like every other Studio edit.';
+    hint.textContent = 'Preview plays it on the page here, without changing page. Save keeps it, like every other change.';
     body.appendChild(hint);
   }
   /* The Content lens's section: what the selected text IS in the content -- the field it shows
@@ -449,7 +451,8 @@
         const at = A.cmsCopyAddress(content.link.field);
         body.appendChild(A.linkPickerEl('Link target', 'cms-content-link', content.link.value,
           (value) => { content.link.value = value; applyCmsCopyEdit({ field: content.link.field, value, final: true }); },
-          content.link.field, at ? at.kind + ':' + at.id + ':' + at.key : undefined));
+          /* no note: the field's copy key is this popover's Developer details, not a tag beside the picker (P1-2) */
+          undefined, at ? at.kind + ':' + at.id + ':' + at.key : undefined));
       } else if (content.link) {
         body.appendChild(p('hint cms-content-refusal', content.link.refusal));
         if (content.link.remedy) body.appendChild(p('hint', content.link.remedy));
