@@ -402,3 +402,24 @@ Three helper branches were stopped and are NOT merged. Each holds commits; read 
   gate copy (P2-1; the credential name is an owner call).
 Pages still to finish by hand: /concept/depth, /learnings and its notes, /what-is-a-resolver (fold), the glossary
 "swap" entry, and the CMS items above. Home is being redesigned in its own session: docs/home-redesign-brief.md.
+
+## Resume point 17 (2026-10-23) — helper branches merged; main repaired after the 2026-10-22 rsync incident
+The owner asked to merge the three stopped helper branches (site 7 commits, guides 3, CMS 1) into main, losing nothing.
+They are merged at aeaf0a7 with no conflicts; pages and glossary rebuilt; no test run (owner tests).
+The 2026-10-22 ~22:00 incident (a sub-agent rsynced flux/defxn-wt-node-clean, cut from an older main, over main;
+record: /Volumes/PortableSSD/docs/node-production-build-2026-10-21/out/INCIDENT-2026-10-22-main-trees-overwritten.md)
+left 254 changed paths in main. Before touching them, every tracked and untracked file was saved as the commit
+`refs/snapshots/main-tree-20261023` (1e8ca22). Each path was then sorted by content:
+- 222 files equal to a blob already on a branch (old copies) and 15 deleted files: reset to HEAD; nothing lost.
+- 12 files equal to flux/defxn-wt-node-clean's own uncommitted work (publisher, dense-wire parser, mesh.js, tests):
+  reset in main; the work still lives in that worktree. Its mesh.js was written on the old base and would drop
+  committed 9f92b30 (owner-mismatch blocker) if copied to main as is: merge it three-way, never copy it.
+- Kept as uncommitted main work: js/ark/authorization-dialog.js (Escape fix restored by the genesis session),
+  docs/home-redesign/ (home redesign session), and the two untracked node-clean test copies.
+- index.html FXN ID edits (CSP comment and meta, tab icon) re-inserted from the saved text; uncommitted as before.
+Lost and not recoverable here: the uncommitted edits to account.js, css/account.css, admin.css, admin.html,
+js/admin/auth.js (owner unknown), and the helpers' unfinished uncommitted leftovers (the "swap" glossary entry and
+the /learnings duplicate fix): the incident emptied every .claude/worktrees folder; their commits are safe.
+Still to finish by hand: /concept/depth duplicate text, /learnings duplicates, the /what-is-a-resolver fold, the
+"swap" glossary entry, CMS P1-16 (one feedback channel), Ark primitives for the editor's select/Attachment/Command
+picker, gate copy (P2-1).
