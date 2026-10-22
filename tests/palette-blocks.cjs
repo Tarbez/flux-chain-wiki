@@ -28,7 +28,10 @@ const ROUTE = '/palette';
 
 /* Why each old key whose words changed shape still lands on its successor. */
 const reshaped = {
-  'page:/div:1/header:1': 'the page header became the hero block: the same words, with the active theme after the lede',
+  'page:/div:1/header:1': 'the page header became the hero block: the same words, with the active theme after the lede (and, since 2026-10-22, "Switch theme")',
+  /* first-visit audit 2026-10-22 (P2): "lightness and chroma" was not explained and the lede pointed at a settings panel
+     reached only by an unlabelled gear; the lede says it in plain words and the hero opens the panel */
+  'page:/div:1/header:1/p:3': 'the lede says the idea in plain words ("The three roles are equally light and vivid, so only hue tells them apart."); "Switch themes from the settings panel" is the hero\'s Switch theme button',
   'page:/div:1/section:1': 'the Components section became the Components tab panel; its heading is the tab',
   'page:/div:1/section:2': 'the Primary section became a tab panel; its heading is the tab and the section title',
   'page:/div:1/section:3': 'the Secondary section became a tab panel',
@@ -110,7 +113,8 @@ const retired = {
   assert.equal(seen.h1, 'palette-title', 'the heading keeps the id the old page gave it');
   assert.equal(seen.labelledBy, 'palette-title');
   assert(seen.home >= 2, 'the breadcrumb and the way on both lead Home through the router');
-  assert.equal(seen.settings, 1, 'Theme settings is still an action on the page');
+  /* first-visit audit 2026-10-22 (P2): the hero opens the settings panel too ("Switch theme"); the way on keeps "Theme settings" */
+  assert.equal(seen.settings, 2, 'the hero\'s Switch theme and the way on\'s Theme settings both open the settings panel');
   assert.equal(seen.insert, 1, 'the CMS insertion anchor is still there');
   assert.equal(seen.refused, 0, 'no block was refused');
 

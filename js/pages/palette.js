@@ -286,9 +286,13 @@
     return [
       { block: 'breadcrumb', id: 'palette-crumbs', props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Interface palette' }] },
         was: WAS['palette-crumbs'] },
+      /* first-visit audit 2026-10-22 (P2): the lede sent the visitor to "the settings panel", whose only way in was an
+         unlabelled gear in the footer, and "lightness and chroma" went unexplained. The hero opens the panel itself
+         ("Switch theme", the same action as the way on's "Theme settings"), and the lede says the idea in plain words. */
       { block: 'hero', id: 'palette-hero', props: {
           eyebrow: '// Design system', title: 'Palette', density: 'compact',
-          lede: 'Three roles share one lightness and chroma, so only hue tells them apart. Neutrals carry a trace of the primary hue. Every tint on the site is one of the shades below. Switch themes from the settings panel to compare families.',
+          lede: 'The three roles are equally light and vivid, so only hue tells them apart. Neutrals carry a trace of the primary hue. Every tint on the site is one of the shades below.',
+          actions: [{ label: 'Switch theme', action: 'open-theme-settings', tone: 'secondary' }],
           meta: [{ label: 'Active theme', value: family }] },
         was: WAS['palette-hero'] },
       { block: 'tabs', id: 'palette-views', was: WAS['palette-views'], props: { label: 'Palette views', variant: 'segmented', items: [
