@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Network IDs do not currently scope accounts, identities, DAOs, arbitrary records, or treasuries. Do not use them as a security boundary."
+      "value": "A named network currently isolates only miner-presence discovery. Network IDs do not scope accounts, identities, DAOs, arbitrary records, or treasuries. A network is not an authoritative membership list or security boundary; do not use its ID as one."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",
