@@ -388,6 +388,8 @@ var HEADER_LINKS = [
   ['NAV.ACCOUNT', 'account'],
   ['NAV.RUN', 'download']
 ];
+/* the footer leaves these out (js/hero-motion.js) */
+ArkUI.headerPages = HEADER_LINKS.map(function (item) { return item[1]; }).concat(['resolutions']);
 var HEADER_ICONS = { about: 'overview', deployment: 'layers', explorer: 'network', stats: 'evidence', account: 'account', download: 'terminal' };
 function headerLink(item) {
   var key = item[1], link = document.createElement('a');
