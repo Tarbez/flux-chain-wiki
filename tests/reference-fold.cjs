@@ -19,7 +19,14 @@
      breadcrumb each carry the layout key they had (data-ark-layout-pin), checked against the census frozen before the
      conversion (tests/fixtures/layout-keys/reference.tsv).
    - A heading may run to 110 characters and Ark limits a button label to 48: a label built from the heading refused the WHOLE
-     page (found booting every approved document, not the default). The label is fixed. */
+     page (found booting every approved document, not the default). The label is fixed.
+   - First-visit audit 2026-10-22 ("Open a current document by default"): with no ?doc= the reader opened Agreements, whose
+     first line says it was written for a direction that is no longer the direction. The default is derived from the index
+     now (js/pages/reference.js defaultDoc): the protocol's overview. Agreements is still checked here, by naming it: it is
+     the document the census was taken on, and the one every edit saved under the old shared '/reference' scope was made on.
+   - Saved edits are per document (js/content/layout.js, "a page's layout scope"): the continuity check boots Agreements
+     and writes its edits under '/reference?doc=docs/protocol/agreements.md'. tests/layout-document-scope.cjs holds the
+     rest (an edit on one document never shows on another; the old '/reference' edits land on Agreements only). */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -27,6 +34,10 @@ const continuity = require('./lib/layout-continuity.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const ROUTE = '/reference';
+/* the document the census (tests/fixtures/layout-keys/reference.tsv) was taken on, by name: it was the default then */
+const AGREEMENTS = 'docs/protocol/agreements.md';
+const AGREEMENTS_QUERY = 'doc=' + AGREEMENTS;
+const AGREEMENTS_SCOPE = ROUTE + '?' + AGREEMENTS_QUERY;
 
 /* The headings of a Markdown document outside code fences, by level: what the page must derive its contents from. */
 function headingsOf(doc) {
@@ -44,8 +55,24 @@ function headingsOf(doc) {
   const boot = async (query, read) => inspectDocument({ html: await readIndexHtml(ROOT), url: 'https://defxn.com' + ROUTE + query, resources: createLocalResources(ROOT), root: ROOT, timeoutMs: 30000 }, read);
   const clean = (text) => text.replace(/\s+/g, ' ').trim();
 
-  /* ---- the default document: its two sections are folds, their words are all still on the page ---- */
-  const seen = await boot('', (window) => {
+  /* ---- with no ?doc=, a current document: the protocol's overview, derived from the index ---- */
+  const opened = await boot('', (window) => {
+    const page = window.document.querySelector('[data-ark-page="reference"]');
+    const index = window.ArkUI.referenceIndex;
+    return { doc: page && page.dataset.referenceDoc, scope: page && page.getAttribute('data-ark-layout-scope'),
+      overviews: window.ArkUI.referenceDocs.filter((doc) => index[doc] && /\boverview\b/i.test(index[doc].title)),
+      title: clean((page.querySelector('h1') || { textContent: '' }).textContent), text: page ? page.textContent : '' };
+  });
+  assert.deepEqual(opened.overviews, ['docs/overview.md'], 'the index names one overview document: ' + opened.overviews.join(' | '));
+  assert.equal(opened.doc, 'docs/overview.md', 'with no ?doc=, /reference opens the protocol\'s overview');
+  assert.equal(opened.title, 'Flux Protocol overview', 'titled as the index titles it');
+  const opening = fs.readFileSync(path.join(ROOT, opened.doc), 'utf8').split(/\r?\n/).filter((line) => line.trim()).slice(0, 4).join(' ');
+  assert(!/no longer the direction|superseded|historical|retired/i.test(opening), 'and it is current: it does not open on a note that it was written for another direction');
+  assert(!/no longer the direction/.test(opened.text.slice(0, 600)), 'the first thing a visitor reads is not that the document is out of date');
+  assert.equal(opened.scope, 'doc=docs/overview.md', 'the page declares the document it shows as its layout scope');
+
+  /* ---- Agreements (the old default, opened by name): its two sections are folds, their words are all still on the page ---- */
+  const seen = await boot('?' + AGREEMENTS_QUERY, (window) => {
     const page = window.document.querySelector('[data-ark-page="reference"]');
     const folds = [...page.querySelectorAll('.ark-disclosure.reference-fold[data-fold-below="phone"]')];
     return {
@@ -189,13 +216,14 @@ function headingsOf(doc) {
   const retired = {};
   for (const key of ['page:/nav:1/a:1', 'page:/nav:1/a:1/svg:1', 'page:/nav:1/a:1/svg:1/path:1', 'page:/nav:1/a:1/svg:1/path:2']) retired[key] = 'the "← Return to Home" link (and its icon): the breadcrumb above the title is the way back';
   const census = continuity.readCensus(ROUTE);
-  const after = await continuity.pageKeys(ROUTE);
+  const onAgreements = { query: AGREEMENTS_QUERY, scope: AGREEMENTS_SCOPE };
+  const after = await continuity.pageKeys(ROUTE, onAgreements);
   const tally = continuity.assertContinuity(census, after, { reshaped, retired });
   assert.equal(tally.kept + tally.reshaped + tally.retired, census.length, 'every old key is accounted for');
-  const landed = await continuity.assertSavedEditsLand(ROUTE, census, { reshaped, retired });
+  const landed = await continuity.assertSavedEditsLand(ROUTE, census, Object.assign({ reshaped, retired }, onAgreements));
   assert.equal(landed, census.length - 1 - Object.keys(retired).length, 'a saved frame on every old key but page:/ and the retired ones landed');
   assert(after.every((entry) => !/^id:ark-r-/.test(entry.key)), 'no generated (ark-r-) id became a layout key');
   assert(after.every((entry) => !/^id:reference-/.test(entry.key)), 'and no heading id (the contents\' targets) became one: each heading is pinned');
 
-  console.log(`PASS: /reference has a corrected outline, a breadcrumb and (above four headings) a contents list; folds ${seen.folds} sections of the default document and ${math.folds} of resolver-math on a phone, with the glossary's ${terms.length} definitions in a folded lead; ${tally.kept + tally.reshaped} layout keys kept, ${landed} saved edits land.`);
+  console.log(`PASS: /reference opens ${opened.doc} by default and has a corrected outline, a breadcrumb and (above four headings) a contents list; folds ${seen.folds} sections of Agreements and ${math.folds} of resolver-math on a phone, with the glossary's ${terms.length} definitions in a folded lead; ${tally.kept + tally.reshaped} layout keys kept, ${landed} saved edits land.`);
 })().catch((error) => { console.error(error); process.exit(1); });

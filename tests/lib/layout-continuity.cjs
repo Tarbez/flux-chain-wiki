@@ -31,6 +31,12 @@
           const after = await continuity.pageKeys('/palette');
           continuity.assertContinuity(census, after, { reshaped, retired });
           await continuity.assertSavedEditsLand('/palette', census, { reshaped, retired });
+        A page that declares a layout scope finer than its route (/reference: one per document,
+        js/content/layout.js "a page's layout scope") is checked on one document: pass
+        { query: 'doc=<id>', scope: '/reference?doc=<id>' } to pageKeys and assertSavedEditsLand.
+        The boot asserts the page really declares that scope, so the saved edits are written
+        where that document reads them (tests/reference-fold.cjs checks Agreements, the document
+        its census was taken on).
         The first checks every old key still names an element with the same words (loose:
         case, spacing, punctuation and arrows ignored); the second writes a real saved
         layout draft with a frame on EVERY old key and proves ArkLayout applied each one
@@ -73,22 +79,24 @@ function scratchSite(overrides) {
 }
 
 /* Boots `route` through the real server render (jsdom, the real scripts) and returns every
-   page-scope layout key: [{ key, tag, text, block, part }]. `inspect(window, keys)` may look further
-   before the window closes. */
-async function bootRoute(route, { site = ROOT, inspect } = {}) {
+   page-scope layout key: [{ key, tag, text, block, part }]. `inspect(window, keys, scope)` may look
+   further before the window closes. `query` (no '?') is added to the address; `scope` is the layout
+   scope the page shown must declare (default: the route itself) -- asserted, never assumed. */
+async function bootRoute(route, { site = ROOT, inspect, query = '', scope = route } = {}) {
   const { readIndexHtml, inspectDocument, createLocalResources } = await core();
-  return inspectDocument({ html: await readIndexHtml(site), url: 'https://defxn.com' + route, resources: createLocalResources(site), root: site, timeoutMs: 30000 }, async (window) => {
+  return inspectDocument({ html: await readIndexHtml(site), url: 'https://defxn.com' + route + (query ? '?' + query : ''), resources: createLocalResources(site), root: site, timeoutMs: 30000 }, async (window) => {
     // The router applies saved layout one frame after ark:route-ready.
     await new Promise((resolve) => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
     const host = window.document.getElementById('scene') || window.document.body;
-    const keyed = Array.from(window.ArkLayout.annotate(host, route)); // a Node array: jsdom's would fail strict deepEqual
+    assert.equal(window.ArkLayout.scopeFor(route, host), scope, route + (query ? '?' + query : '') + ': the page shown stores its edits under this layout scope');
+    const keyed = Array.from(window.ArkLayout.annotate(host, scope)); // a Node array: jsdom's would fail strict deepEqual
     const keys = keyed
       .filter((el) => el.closest('[data-ark-page]'))
       .map((el) => {
         const block = el.closest('[data-ark-block]');
         return { key: el.getAttribute('data-ark-layout-key'), tag: el.tagName.toLowerCase(), text: clean(ownText(el)), block: block ? block.id || block.getAttribute('data-ark-block') : '', part: el.getAttribute('data-ark-part') || '', el };
       });
-    const extra = inspect ? await inspect(window, keys) : undefined;
+    const extra = inspect ? await inspect(window, keys, scope) : undefined;
     for (const entry of keys) delete entry.el;
     return inspect ? { keys, extra } : keys;
   });
@@ -154,7 +162,7 @@ function assertContinuity(census, after, { reshaped = {}, retired = {}, live: li
    ':root', '[data-ark-slot="name"]', '<part>[#n]', or a :scope path -- relative to the nearest
    Ark block with an authored id (ArkUI.blocks.render / ArkUI.page spec `was`). */
 async function derivePins(route, census, options = {}) {
-  const { extra } = await bootRoute(route, { inspect: (window) => {
+  const { extra } = await bootRoute(route, { query: options.query, scope: options.scope, inspect: (window, _keys, scope) => {
     const { document, ArkLayout } = window;
     const host = document.getElementById('scene');
     const page = document.querySelector('[data-ark-page]:not([hidden])') || document.querySelector('[data-ark-page]');
@@ -180,7 +188,7 @@ async function derivePins(route, census, options = {}) {
     }
     const tried = new Set();
     for (;;) {
-      const now = new Map(ArkLayout.annotate(host, route).filter((el) => page.contains(el)).map((el) => [el.getAttribute('data-ark-layout-key'), el]));
+      const now = new Map(ArkLayout.annotate(host, scope).filter((el) => page.contains(el)).map((el) => [el.getAttribute('data-ark-layout-key'), el]));
       const open = census.filter((old) => old.key !== 'page:/' && old.text && !tried.has(old.key) && !(options.reshaped || {})[old.key] && !(options.retired || {})[old.key]
         && !(now.get(old.key) && words(now.get(old.key)) === loose(old.text)));
       if (!open.length) break;
@@ -225,24 +233,24 @@ async function derivePins(route, census, options = {}) {
    on the element, but its words are not compared -- the census froze one moment of them. Each entry
    is a reason. Found 2026-10-20: /stats' pulse line read "No pulse received yet" when frozen and
    something else while a fetch was in flight, so the check failed only under load. */
-async function assertSavedEditsLand(route, census, { reshaped = {}, retired = {}, live: liveText = {} } = {}) {
+async function assertSavedEditsLand(route, census, { reshaped = {}, retired = {}, live: liveText = {}, query = '', scope = route } = {}) {
   const live = census.filter((entry) => entry.key !== 'page:/' && !retired[entry.key]);
-  const routes = {}; routes[route] = {};
+  const routes = {}; routes[scope] = {};
   // op 80: one of the editor's opacity steps (ArkLayout's sanitize drops any other value)
-  live.forEach((entry) => { routes[route][entry.key] = { desktop: { op: 80 } }; });
+  live.forEach((entry) => { routes[scope][entry.key] = { desktop: { op: 80 } }; });
   const draft = 'ArkLayout.define(' + JSON.stringify({ version: 2, routes, groups: {}, labels: {}, alts: {} }) + ');\n';
   const site = scratchSite({ 'js/content/layout-data.js': draft });
   try {
-    const { extra } = await bootRoute(route, { site, inspect: (window) => {
+    const { extra } = await bootRoute(route, { site, query, scope, inspect: (window) => {
       const host = window.document.getElementById('scene');
       return live.map((entry) => {
-        const el = window.ArkLayout.find(host, entry.key, route);
+        const el = window.ArkLayout.find(host, entry.key, scope);
         const sameWords = !entry.text || reshaped[entry.key] || liveText[entry.key] || (el && words(el) === loose(entry.text));
         return { key: entry.key, text: entry.text, landed: !!el && !!sameWords && el.hasAttribute('data-ark-layout-applied') };
       });
     } });
     const failed = extra.filter((row) => !row.landed).map((row) => row.key + ' "' + row.text.slice(0, 50) + '"');
-    assert.deepEqual(failed, [], 'saved edits that did not land on the converted ' + route);
+    assert.deepEqual(failed, [], 'saved edits that did not land on the converted ' + scope);
     return extra.length;
   } finally {
     fs.rmSync(site, { recursive: true, force: true });

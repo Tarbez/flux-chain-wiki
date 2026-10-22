@@ -472,7 +472,18 @@ nav, background layers -- which every route shows: an edit to a header link, a g
 group of header links, or a component placed after one is stored once and applies on every
 route. `ArkLayout.scopeOf(element, route)` decides it by structure (inside a page root or
 not); a set (group members, a captured selection) is SHELL only when every member is shell.
-The preview reports the scope as `selection.route` and the route shown as `selection.page`.
+A page that shows several documents at one route declares a finer scope on its root
+(`data-ark-layout-scope="doc=<id>"`), and its content's edits are stored under
+`<route>?doc=<id>`: /reference does, so an edit made on one document shows on that document
+only. `ArkLayout.scopeFor(route, host)` is the one answer to "which scope are the edits of the
+page shown": js/main.js's mount and settle passes, the editor (`cmsLayoutScope`) and the
+element-motion lookup ask it; a page that declares nothing is its route, as before. Edits saved
+under the shared `/reference` scope before 2026-10-22 were made on Agreements (then the default
+document): `ArkLayout.MOVED_SCOPES` reads them as Agreements' own when a draft is sanitized, in
+every store, and the next Save writes them forward there. Regression:
+`tests/layout-document-scope.cjs`.
+The preview reports the scope as `selection.route` and the scope of the page shown as
+`selection.page`.
 Rendering a route applies its own scope and SHELL; SHELL entries apply to shell elements only,
 and where both hold the same key SHELL wins field by field. Data saved under a route before
 SHELL existed is never rewritten and still applies on that route. Regression:
