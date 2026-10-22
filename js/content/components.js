@@ -397,6 +397,10 @@ var ArkComponents = (function () {
     return { after: raw.after, replaces: replaces };
   }
 
+  /* Edits saved under a scope that has since been split per document (/reference) are read
+     under the scope they belong to: ArkLayout.moveScopes, the one table (js/content/layout.js,
+     "moved scopes"). Without js/content/layout.js loaded they stay where they were stored. */
+  function moveScopes(map) { return typeof ArkLayout !== 'undefined' && ArkLayout && ArkLayout.moveScopes ? ArkLayout.moveScopes(map) : map; }
   function sanitize(value) {
     var out = { version: 1, masters: {}, routes: {} };
     var rawMasters = value && value.masters;
@@ -405,7 +409,7 @@ var ArkComponents = (function () {
       var clean = cleanMaster(rawMasters[id]);
       if (clean) out.masters[id] = clean;
     });
-    var rawRoutes = value && value.routes;
+    var rawRoutes = moveScopes(value && value.routes);
     if (isPlainObject(rawRoutes)) Object.keys(rawRoutes).slice(0, 500).forEach(function (route) {
       if (!isScope(route)) return;
       var rawAnchors = rawRoutes[route];
@@ -424,7 +428,7 @@ var ArkComponents = (function () {
     });
     /* A spot exists only while something is in it: one with no instance would hide the
        content it replaced and show nothing in its place. */
-    var rawSpots = value && value.spots, spots = {};
+    var rawSpots = moveScopes(value && value.spots), spots = {};
     if (isPlainObject(rawSpots)) Object.keys(rawSpots).slice(0, 500).forEach(function (route) {
       if (!isScope(route) || !isPlainObject(rawSpots[route]) || !out.routes[route]) return;
       var clean = {};

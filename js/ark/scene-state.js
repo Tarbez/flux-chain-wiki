@@ -174,6 +174,8 @@
         var catalogEntry = pageKey && ArkUI.pageCatalog && ArkUI.pageCatalog[pageKey];
         var route = catalogEntry && catalogEntry.path;
         if (!route) return null;
+        /* the scope the page's edits are stored under (one per document on /reference): ArkLayout.pageScope */
+        if (window.ArkLayout && ArkLayout.pageScope) route = ArkLayout.pageScope(pageEl) || route;
         var saved = window.ArkElementMotion.get();
         if (!saved.routes || !saved.routes[route]) return null;
         /* The key computed now, not read off the element: a page shown before ArkLayout's
