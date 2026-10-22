@@ -69,12 +69,6 @@ ArkManifest.define({
     ]
   },
   "fields": {
-    "EYEBROW": {
-      "label": "Eyebrow",
-      "kind": "line",
-      "section": "Page",
-      "value": "DEFXN / RESOLVERS"
-    },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
@@ -409,7 +403,7 @@ ArkManifest.define({
       "label": "Registry page: introduction",
       "kind": "text",
       "section": "Registry page",
-      "value": "A resolver is a rulebook launched as its own chain, built from shared capabilities. This is a dated snapshot of every first-party resolver chain and every capability, read from the code that defines them. Each row opens in Explore, which reads a node directly."
+      "value": "This page is a dated snapshot of every first-party resolver chain and every capability, read from the code that defines them. Each row opens in Explore, which reads a node directly."
     },
     "REGISTRY.BOUNDARY": {
       "label": "Registry page: boundary",

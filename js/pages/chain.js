@@ -4,17 +4,18 @@
    hero         the page's heading, now visible (it was visually hidden, so a visitor landed on a
                 row of tabs with no title: docs/ux-audit/pages-ux-a.md /chain), and the one-line
                 plain intro the manifest already held (CHAIN.LEDE)
-   cases        Ark tabs, one per example -- Swaps / Transfers / Staking / Governance. Switching
-                changes only what the resolver reads at the end (js/pages/home-flow.js CASES): the
-                sign/check/extend/replicate mechanism never changes, which is the point -- the
-                chain has no idea which of these it admitted. Each tab holds the scene in Ark's
-                figure frame; the scene plays once and settles, and only the shown one runs.
-   steps        at the top of each scene's frame, the five steps as Ark tabs (ArkUI.buildChainSteps):
-                the open tab says its step and opens the page that shows that part for real. They
-                replaced the hand-built `flow-record` links. Each record box is an Ark glossary
-                term whose tip is the role letter's meaning (docs/ux-audit/ledger.md /chain).
-   swap         on the Swaps tab only, behind a disclosure under the scene: the swap as one signed
-                resolution (meta.diagrams, drawn by resolver-page-parts.js)
+   scene        ONE example's scene in Ark's figure frame, with its five steps as Ark tabs at the top
+                (ArkUI.buildChainSteps): the open tab says its step and opens the page that shows that
+                part for real -- the account step only to a visitor with an identity, since signed out
+                it opened a sign-in form. Each record box is an Ark glossary term whose tip is the role
+                letter's meaning (docs/ux-audit/ledger.md /chain). The scene plays once and settles.
+   cases        under the scene, an Ark choice: Swaps / Transfers / Staking / Governance. Choosing one
+                redraws the scene for it; only what the resolver reads at the end changes
+                (js/pages/home-flow.js CASES), which is the point -- the chain has no idea which of these
+                it admitted. Until the first-visit audit 2026-10-22 the examples were tabs around the
+                scene, so its step tabs sat inside them: two rows of tabs before a word of the example.
+   swap         with the Swaps example only, behind a disclosure under the choice: the swap as one
+                signed resolution (meta.diagrams, drawn by resolver-page-parts.js)
    onward       what each resolver reads from the chain (CHAIN.NEXT -> CHAIN.NEXT.HREF) and where
                 resolver chains come from (CHAIN.SOURCE.LINK -> CHAIN.SOURCE.HREF): both in the manifest
    anchor       the CMS insertion point
@@ -82,10 +83,21 @@
     was['[data-value="resolve"] > p'] = { key: 'page:/div:2/div:1/strong:1', self: true };
     return was;
   }
+  /* The old case buttons are the choice's options (each keeps its button's key); the scene's keys are
+     pinned on the one scene the page opens with. */
+  function casesWas() {
+    var was = { 'choice-options': { key: 'page:/div:1', self: true } };
+    for (var k = 1; k <= 4; k++) {
+      var sfx = k > 1 ? '#' + k : '', old = 'page:/div:1/button:' + k;
+      was['choice-option' + sfx] = old; was['choice-text' + sfx] = old + '/span:2';   /* as /what-is-a-resolver's choices */
+    }
+    return was;
+  }
   var WAS = {
     'chain-crumbs': { 'breadcrumb-item': 'page:/a:1', ':scope > ol > li:first-child': 'page:/a:1/span:1' },
-    'chain-cases': Object.assign({ 'tabs-list': 'page:/div:1', 'figure-caption': { key: 'page:/div:2/div:1/svg:1/text:1', self: true } },
-      flowWas('[data-ark-slot="flow-swaps"]', 'page:/div:2')),
+    'chain-scene': Object.assign({ 'figure-caption': { key: 'page:/div:2/div:1/svg:1/text:1', self: true } },
+      flowWas('[data-ark-slot="flow"]', 'page:/div:2')),
+    'chain-cases': casesWas(),
     insert: { key: 'page:/div:3', self: true }
   };
 
@@ -105,17 +117,17 @@
         { label: 'Home', href: 'route:' + manifest.meta.back }, { label: 'The chain of chains' }
       ] } },
       { block: 'hero', id: 'chain-hero', was: WAS['chain-hero'], props: { title: manifest.title, lede: 'copy:CHAIN.LEDE', density: 'compact' } },
-      { block: 'tabs', id: 'chain-cases', was: WAS['chain-cases'], props: {
-        label: 'See it from a different resolver', variant: 'segmented', defaultValue: current,
-        items: ArkUI.chainCases.map(function (c) {
-          var blocks = [{ block: 'figure', props: {
-            kind: 'illustration', slot: 'flow-' + c.id,
-            caption: 'Illustrative values · the record shape is the real wire grammar. Only what the resolver reads at the end changes between examples.'
-          } }];
-          if (swap && c.id === 'swaps') blocks.push(swap.spec);
-          return { value: c.id, label: c.label, blocks: blocks };
-        })
+      /* one example, its five steps on top */
+      { block: 'figure', id: 'chain-scene', was: WAS['chain-scene'], props: {
+        kind: 'illustration', slot: 'flow',
+        caption: 'Illustrative values · the record shape is the real wire grammar. Only what the resolver reads at the end changes between examples.'
       } },
+      /* the same record, read by another resolver */
+      { block: 'choice', id: 'chain-cases', was: WAS['chain-cases'], props: {
+        label: 'The same record, read by another resolver', look: 'segmented', value: current,
+        options: ArkUI.chainCases.map(function (c) { return { value: c.id, label: c.label }; })
+      } }
+    ].concat(swap ? [swap.spec] : [], [
       /* The way on: what each resolver reads from the chain (the manifest's next-step line), and where
          resolver chains come from (docs/ux-audit/ledger.md 3.4-x). */
       { block: 'actions', id: 'chain-onward', props: { label: 'Where next', items: [
@@ -123,7 +135,7 @@
         { label: 'copy:CHAIN.SOURCE.LINK', href: ArkCopy.text('CHAIN.SOURCE.HREF'), tone: 'ghost' }
       ] } },
       { insert: 'main', was: WAS.insert }
-    ];
+    ]);
   }
 
   ArkUI.pageModules.chain = {
@@ -135,28 +147,34 @@
     },
     mount: function (host) {
       var manifest = ArkManifest.get('chain');
-      var flows = {}, slots = {}, swap = swapFigure();
+      var slots = {}, swap = swapFigure(), flow = null, flows = {}, current = preparedCase || ArkUI.chainCases[0].id;
       if (swap) slots[swap.slot] = swap.node;
-      ArkUI.chainCases.forEach(function (c) {
-        slots['flow-' + c.id] = function () {
-          var flow = flows[c.id] = ArkUI.buildChainFlow({ caseId: c.id });
-          flow.element.classList.add('chain-flow');
-          /* the five steps at the top of the scene's frame, each opening the page that shows that part for real */
-          ArkUI.buildChainSteps(flow, c.id, { id: 'chain-steps-' + c.id, links: true, was: c.id === ArkUI.chainCases[0].id ? stepsWas() : undefined });
-          return flow.element;
-        };
-      });
-      var current = preparedCase || ArkUI.chainCases[0].id;
-      var page = ArkUI.page(spec(manifest, current, swap), host, { page: 'chain', className: 'chain-page', titleId: 'chain-title', slots: slots });
-      /* A hidden tab's scene schedules nothing; the one a choice shows starts (and settles) again. */
-      var tabs = page.querySelector('#chain-cases');
-      function shown() {
-        var selected = tabs && tabs.querySelector(':scope > [data-ark-part="tabs-list"] > [role="tab"][aria-selected="true"]');
-        var index = selected ? Array.prototype.indexOf.call(selected.parentNode.children, selected) : 0;
-        return flows[ArkUI.chainCases[index].id];
+      /* the scene for one example, with its five steps at the top of the frame, each opening the page
+         that shows that part for real */
+      function build(caseId) {
+        if (flows[caseId]) return flows[caseId];
+        var next = flows[caseId] = ArkUI.buildChainFlow({ caseId: caseId });
+        next.element.classList.add('chain-flow');
+        ArkUI.buildChainSteps(next, caseId, { id: 'chain-steps-' + caseId, links: true, was: caseId === current ? stepsWas() : undefined });
+        return next;
       }
-      if (tabs) tabs.addEventListener('click', function () { var flow = shown(); if (flow) flow.restore(); });
-      page.arkRestore = function () { var flow = shown(); if (flow) flow.restore(); };
+      slots.flow = function () { flow = build(current); return flow.element; };
+      var page = ArkUI.page(spec(manifest, current, swap), host, { page: 'chain', className: 'chain-page', titleId: 'chain-title', slots: slots });
+      var swapBlock = swap && page.querySelector('#chain-swap');
+      function showSwap(caseId) { if (swapBlock) swapBlock.hidden = caseId !== 'swaps'; }
+      showSwap(current);
+      /* Choosing an example puts its scene in the frame (each is built once, so the one the page opened
+         with keeps its saved layout keys); a scene out of the frame is out of view and schedules nothing. */
+      var cases = page.querySelector('#chain-cases');
+      if (cases) cases.addEventListener('change', function (event) {
+        if (!event.target.checked || !flow) return;
+        var slot = flow.element.parentNode, old = flow;
+        flow = build(event.target.value);
+        if (slot && flow !== old) slot.replaceChild(flow.element, old.element);
+        flow.restore();
+        showSwap(event.target.value);
+      });
+      page.arkRestore = function () { if (flow) flow.restore(); };
       page.arkDispose = function () { Object.keys(flows).forEach(function (id) { flows[id].dispose(); }); };
       return page;
     }

@@ -342,6 +342,7 @@
       "key": "page:/nav:1",
       "self": true
      },
+     "breadcrumb-item#2": "page:/nav:1/a:1",
      "breadcrumb-item#3": "page:/nav:1/span:1"
     },
     "how-check-body": {
@@ -400,8 +401,11 @@
 
     var def = {
       page: page, id: 'how-' + id, className: 'story-chapter story-chapter-' + id, titleId: 'how-' + id + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
-      crumbs: [{ label: 'Home', href: 'route:zero' }, { label: ArkManifest.get('deployment').title, href: 'route:deployment' }, { label: 'copy:DEPLOYMENT.SIMPLE.' + id.toUpperCase() + '.TITLE' }],
-      eyebrow: ArkUI.story.position(ArkCopy.text('DEPLOYMENT.SIMPLE.AGREEMENT.TITLE'), index, IDS.length),
+      /* The series is hiring a provider, a part of the agreement path: its parent is the agreement
+         lifecycle (as the hand-built chapters' breadcrumb had it), not "Deploy a resolver", and its
+         eyebrow names the series, not only that it is old (first-visit audit 2026-10-22). */
+      crumbs: [{ label: 'Home', href: 'route:zero' }, { label: 'Agreement lifecycle', href: 'route:lifecycle' }, { label: 'copy:DEPLOYMENT.SIMPLE.' + id.toUpperCase() + '.TITLE' }],
+      eyebrow: ArkUI.story.position(ArkCopy.text('DEPLOYMENT.CHAPTER.SERIES'), index, IDS.length),
       title: copy('TITLE'),
       /* Written for the earlier path: said under the depth control in every view (folded behind
          "Show the status" on a phone), with the way to today's model. */
@@ -426,7 +430,7 @@
       pager: {
         label: 'Continue this story',
         next: index < 2 ? chapter(index + 1) : { label: 'Back to the lifecycle', href: 'route:lifecycle' },
-        relatedLabel: 'copy:DEPLOYMENT.SIMPLE.AGREEMENT.TITLE',
+        relatedLabel: 'copy:DEPLOYMENT.CHAPTER.SERIES',
         related: (index > 0 ? [chapter(index - 1)] : []).concat(index < 2 ? [{ label: 'Agreement lifecycle', href: 'route:lifecycle' }] : [])
           /* the last chapter ends on doing it: the way from reading the path to running it (docs/ux-audit/ledger.md, "Run it yourself") */
           .concat(index === 2 ? [{ label: 'Run it yourself', href: 'route:download' }] : [])

@@ -58,7 +58,7 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "From a grammar to a chain."
+      "value": "Deploy a resolver"
     },
     "BODY1": {
       "label": "First paragraph",
@@ -190,13 +190,13 @@ ArkManifest.define({
       "label": "Title",
       "kind": "line",
       "section": "Simple story",
-      "value": "From a grammar to a chain."
+      "value": "Deploy a resolver"
     },
     "SIMPLE.INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Simple story",
-      "value": "You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities it uses, and publishes the grammar every record must follow. Then a provider serves it."
+      "value": "You deploy a resolver in three stages: write its grammar, sign one launch record, and have a provider serve it."
     },
     "SIMPLE.WRITE.TITLE": {
       "label": "Card 1 title",
@@ -316,13 +316,13 @@ ArkManifest.define({
       "label": "Agreement chapters heading",
       "kind": "line",
       "section": "Deploy cards",
-      "value": "The earlier agreement path"
+      "value": "Hire a provider: the earlier path"
     },
     "SIMPLE.AGREEMENT.TEXT": {
       "label": "Agreement chapters text",
       "kind": "text",
       "section": "Deploy cards",
-      "value": "Request, terms, result: how two parties connected work under the agreement path. It is no longer the direction, and is kept read-only for reference."
+      "value": "Request, terms, result: how a client hired a provider under the earlier agreement path. It is no longer the direction and is kept read-only for reference."
     },
     "SIMPLE.ASK.TITLE": {
       "label": "Ask Title",
@@ -438,11 +438,17 @@ ArkManifest.define({
       "section": "Chapters",
       "value": "route:resolver"
     },
+    "CHAPTER.SERIES": {
+      "label": "Chapters' series name (the eyebrow says \"<name> · n of 3\")",
+      "kind": "line",
+      "section": "Chapters",
+      "value": "Hire a provider"
+    },
     "CHAPTER.ASK.TITLE": {
       "label": "Ask Title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Tell them what you need."
+      "value": "Tell a provider what you need."
     },
     "CHAPTER.ASK.INTRO": {
       "label": "Ask Intro",
@@ -544,7 +550,7 @@ ArkManifest.define({
       "label": "Check Intro",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Finishing the job and checking it are separate steps: the provider returns a result with evidence, then a named checker decides if it meets the agreement."
+      "value": "Finishing the job and checking it are separate steps. The provider returns a result with evidence. A named checker compares it with the agreement, and approvers chosen for this one decision sign off on the outcome."
     },
     "CHAPTER.CHECK.CHOICE1": {
       "label": "Check step 1 title",
@@ -754,7 +760,7 @@ ArkManifest.define({
       "label": "Check why 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "A signature answers “who said this?”, and for a resolver its signature is its result. Whether to rely on that resolver is decided before you send anything: its grammar, its capabilities, who can change it."
+      "value": "A signature proves who submitted a result, not that the result is right. The result is judged against the agreement both sides signed before the work began."
     },
     "CHAPTER.CHECK.WHY2.TITLE": {
       "label": "Check why 2 title",

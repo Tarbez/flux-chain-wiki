@@ -649,7 +649,9 @@ check('the page module mounts and renders every section', () => {
   );
   assert.ok(el.querySelector('[data-ark-block="hero"] [data-ark-part="eyebrow"]'), 'the shared header eyebrow is missing');
   assert.ok(el.querySelector('[data-ark-block="hero"] h1'), 'the shared header title is missing');
-  assert.ok(el.querySelectorAll('#rm-views [role="tab"]').length >= 6, 'the page lost its section structure');
+  /* four views since the first-visit audit 2026-10-22 (seven tabs were too many to read before the page
+     said what it shows); every section is still on the page, which the tables and figures below prove */
+  assert.ok(el.querySelectorAll('#rm-views [role="tab"]').length >= 4, 'the page lost its section structure');
   assert.ok(el.find('rm-say').length >= 10, 'the builder lists what can be said; it is ' +
     'the page\'s one interactive proof that the result is a sum of definitions');
 

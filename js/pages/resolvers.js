@@ -240,8 +240,10 @@
           { label: 'Capabilities launched', value: typeof snap.observation.capabilitiesLaunched === 'number' ? snap.observation.capabilitiesLaunched + ' on the development network · ' + snap.observation.date : 'not in the snapshot' }
         ] : undefined } }
     ].concat(snap ? [
-      /* Where every number comes from: open on a desktop, a press away on a phone. */
-      { block: 'disclosure', id: 'registry-source', was: WAS['registry-source'], props: { foldBelow: 'phone', more: 'About this snapshot', less: 'Fold it',
+      /* Where every number comes from: a press away at every width. Open on a desktop, the repo, the
+         commit and a third sentence repeating them stood before the list, which started at the
+         bottom of a 1280x800 screen (first-visit audit 2026-10-22). */
+      { block: 'disclosure', id: 'registry-source', was: WAS['registry-source'], props: { foldBelow: 'always', more: 'About this snapshot', less: 'Fold it',
         content: words('REGISTRY.BOUNDARY') + '\n\nSnapshot · ' + snap.source.repo.replace(/^flux\//, '') + ' ' + commit + ' · ' + snap.source.commitDate +
           '\n\nDevelopment network · ' + snap.observation.date + '\n\nIn source at ' + commit + '. The development network listed ' + snap.observation.resolverChainsListed + ' resolver chains' + (snap.observation.allNative ? ', all native,' : '') + ' on ' + snap.observation.date + '.' } },
       { block: 'tabs', id: 'registry-views', was: WAS['registry-views'], props: { label: 'Registry views', items: views(snap, apps) } }

@@ -302,8 +302,9 @@
     var figure = el('div', 'resolver-lab-scene');
     var head = el('div', 'resolver-lab-scene-head');
     var address = el('span', 'resolver-lab-address');
-    address.appendChild(el('code', '', ADDRESS));
-    address.appendChild(document.createTextNode(' · runs in your browser'));
+    /* the rule in words; its address is in the caption (first-visit audit 2026-10-22: the head showed
+       only the internal id "policy.doc-size/v1") */
+    address.appendChild(document.createTextNode('Example rule: files up to 5 MB · runs in your browser'));
     head.appendChild(address);
     var again = block({ block: 'actions', was: WAS['resolver-again'], props: { items: [{ label: 'Run again', action: 'resolver-again', tone: 'secondary' }] } });
     head.appendChild(again);
@@ -481,10 +482,14 @@
     var resolutions = ArkUI.journeyLead ? [ArkUI.journeyLead(page)].filter(Boolean).map(function (item) { return { label: item.label, href: item.href }; }) : [];
     return {
       page: page, id: 'resolver', className: 'resolver-lab', titleId: 'resolver-lab-title', was: WAS, insertWas: WAS.insert,
-      crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: 'Resolver' }],
-      eyebrow: copy('EYEBROW'), title: copy('DISPLAY.TITLE'),
+      /* One page name, the one the menu and /resolver-math's trail use; no eyebrow repeating it
+         ("DEFXN / RESOLVERS" over "Home / Resolver"). The Idea is the definition: the three steps were
+         listed there beside the illustration's own three, and How it works opens each (first-visit
+         audit 2026-10-22). */
+      crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
+      title: copy('DISPLAY.TITLE'),
       depth: {
-        focus: { text: copy('DISPLAY.LEDE'), blocks: [{ block: 'steps', props: { label: 'One run', items: steps.map(function (id) { return { title: STEP_COPY[id][0], body: STEP_COPY[id][1] }; }) } }] },
+        focus: { text: copy('DISPLAY.LEDE') },
         /* one step open at a time, as the illustration plays one at a time */
         context: { blocks: [{ block: 'accordion', props: { label: 'How a resolver answers', multiple: false, defaultOpen: ['ask'], headingLevel: 3, items: steps.map(function (id) { return { value: id, title: STEP_COPY[id][0] + ' · ' + STEP_COPY[id][1], content: STEP_COPY[id][2] }; }) } }] },
         reference: { text: copy('LAWS.BODY'), blocks: [
@@ -494,7 +499,7 @@
       },
       /* The trust boundary, in sight in every view; on a phone it folds behind "Show the status". */
       boundary: { tone: 'reference', title: copy('BOUNDARY.LABEL'), body: copy('BOUNDARY') }, boundaryFold: 'phone',
-      figure: { slot: 'lab', kind: 'live', caption: 'A real resolver run, in your browser: ' + ADDRESS + ' applies its 5 MB rule to the document you choose.' },
+      figure: { slot: 'lab', kind: 'live', caption: 'A real resolver run, in your browser: the example rule (' + ADDRESS + ') checks the document you choose against its 5 MB limit.' },
       slots: { lab: figure },
       handlers: handlers,
       pager: { label: 'Continue',
@@ -529,7 +534,7 @@
   var RELATED = function (n) { return ':scope > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(' + n + ') > a:nth-of-type(1)'; };
   var WAS = {
     'resolver-crumbs': { ':root': 'page:/div:1/nav:1', 'breadcrumb-item': 'page:/div:1/nav:1/a:1', 'breadcrumb-item#2': 'page:/div:1/nav:1/span:1' },
-    'resolver-hero': { eyebrow: 'page:/div:1/p:1', 'hero-title': 'id:resolver-lab-title' },
+    'resolver-hero': { 'hero-title': 'id:resolver-lab-title' },
     'resolver-depth': {
       ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/div:1/p:2',
       'accordion-item': { key: 'page:/div:1/div:1', self: true }, 'accordion-content': 'page:/div:1/div:1/p:1',
