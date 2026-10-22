@@ -111,9 +111,11 @@ function stopPattern(){meshPattern.refresh();clearTimeout(loopTimer);loopTimer=0
 // settled frame and stops) and then nothing is scheduled until the next real change. Until
 // 2026-10-19 the wave re-armed itself after every scan, so a settled page still requested ~20
 // frames/s forever; a slider called "Loop delay" set only how long that loop rested.
+// The scan plays on the home only (the owner's call 2026-10-22: motion on every route was noise for a reader);
+// every other route shows the pattern at rest. The visitor's own "animated" choice still decides on the home.
 function schedulePattern(){
  stopPattern();
- if(disposed||!values.animated||motif==='none'||document.hidden||reduced.matches||ArkUI.sceneState.get().paused)return;
+ if(disposed||!values.animated||motif==='none'||document.hidden||reduced.matches||ArkUI.sceneState.get().paused||ArkUI.sceneState.get().page!=='zero')return;
  loopTimer=setTimeout(()=>{loopTimer=0;if(disposed)return;meshPattern.animate();},values.delay*1000);
 }
 function persistPattern(){saved[motif]={...values};save('defxn-pattern-config-v1',JSON.stringify(saved));}
@@ -152,7 +154,8 @@ ready=true;syncPattern();
 for(const [groupName,items] of [['themesDark',darkThemes],['themesLight',lightThemes]])items.forEach((value,i)=>{ui.configureRef(component.getRef(groupName+i),{attrs:{'data-theme-choice':value,'aria-label':themeNames[value]+' '+(groupName==='themesDark'?'dark':'light')}});bind(groupName+i,()=>applyTheme(value,true));});
 bind('pause',()=>ArkUI.sceneState.pause(!ArkUI.sceneState.get().paused));bind('reset',()=>ArkUI.sceneState.orient(0,0));
 let paused;
-const unsubscribeMotion=ArkUI.sceneState.subscribe(state=>{if(state.paused===paused)return;paused=state.paused;const ref=component.getRef('pause');ui.configureRef(ref,{attrs:{'aria-pressed':String(paused)}});ui.update(ref,{text:paused?'Resume motion':'Pause motion'});restoreRangeValues();schedulePattern();});
+let scenePage=ArkUI.sceneState.get().page;
+const unsubscribeMotion=ArkUI.sceneState.subscribe(state=>{if(state.page!==scenePage){scenePage=state.page;schedulePattern();}if(state.paused===paused)return;paused=state.paused;const ref=component.getRef('pause');ui.configureRef(ref,{attrs:{'aria-pressed':String(paused)}});ui.update(ref,{text:paused?'Resume motion':'Pause motion'});restoreRangeValues();schedulePattern();});
 applyTheme(theme);renderer=mountArkBackground(backgroundHost,atmosphereConfig());restoreRangeValues();
 // What js/bootstrap.js paints before first paint for a visitor with no choice of their own: the
 // site default as this browser last saw it (a cache of the owner's setting, never the visitor's

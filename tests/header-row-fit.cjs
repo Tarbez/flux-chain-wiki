@@ -51,6 +51,7 @@ function load(row) {
     requestAnimationFrame: (fn) => { fn(); return 1; },
     CustomEvent: class { constructor(type) { this.type = type; } },
     document: {},
+    ArkUI: {},   /* the slice publishes ArkUI.headerPages (since 2026-10-22); a page always has ArkUI */
   });
   for (const child of row.header.children) child.getBoundingClientRect = () => ({ width: child.width() });
   vm.runInContext(src.slice(start, end), context);

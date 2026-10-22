@@ -21,8 +21,9 @@ assert.equal(manifests[2].meta.next, 'download');
 const home = fs.readFileSync('js/pages/home.js', 'utf8');
 /* Since 2026-10-19 home is a page of Ark blocks (js/pages/home.js, tests/home-blocks.cjs): the Learn
    CTA is the hero's primary action, its target the manifest's LEARN.HREF. */
-assert(home.includes("{ label: 'Follow the line', href: link('LEARN.HREF'), tone: 'primary' }"), 'the Learn CTA is the hero\'s primary action');
-assert.equal(vm.runInContext("ArkManifest.get('home').fields['LEARN.HREF'].value", context), 'route:deployment', 'the Learn CTA opens the interactive walkthrough');
+/* the owner's call 2026-10-22: "See how DEFXN works", to the plain overview (/about), not the technical walkthrough */
+assert(home.includes("{ label: 'See how DEFXN works', href: link('LEARN.HREF'), tone: 'primary' }"), 'the Learn CTA is the hero\'s primary action');
+assert.equal(vm.runInContext("ArkManifest.get('home').fields['LEARN.HREF'].value", context), 'route:about', 'the Learn CTA opens the overview');
 // The pressure-test link's destination is now a manifest field of kind 'link' (js/content/manifest.js),
 // resolved through js/ark/dash-kit.js's linkEl rather than a hardcoded literal/explicit dataset assignment.
 assert(home.includes("{ label: 'Go deeper into the resolver model', href: link('PRESSURETEST.HREF')"), 'the Pressure-test link opens the resolver guide');
