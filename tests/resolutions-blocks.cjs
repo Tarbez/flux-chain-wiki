@@ -45,6 +45,10 @@ const DETAIL = [
   ['reshaped', /^page:\/div:1\/header:1\/p:1$/, 'the position "06 / 20 · Value & finance" reads "Resolution 6 of 20 · Value & finance" (the story pages\' "<sequence> · n of N")'],
   ['reshaped', /^page:\/div:1\/header:1\/div:1$/, 'the actions row keeps the main action; the deeper page beside it is a related page in the pager now, so the hero keeps one row of buttons on a phone'],
   ['reshaped', /^page:\/div:1\/section:1$/, 'the product shelf is Ark tabs'],
+  /* first-visit audit 2026-10-22 (P0) */
+  ['reshaped', /^page:\/div:1\/header:1\/div:1\/a:1$/, 'the main action: "Open <the first ready product>" where Start here opened a product still being built'],
+  ['reshaped', /^page:\/div:1\/section:1\/div:1$/, 'the shelf\'s tab list: its first tab is "Products · N" (it lists building products too), not "Ready now"'],
+  ['reshaped', /^id:resolution-level-tab-[a-z]+-0$/, 'the first shelf tab reads "Products · N": its rows say Ready or Building each'],
   ['reshaped', /^id:resolution-level-[a-z]+$/, 'the one panel that changed in place is the first tab\'s panel; every tab\'s content is in the page now'],
   ['reshaped', /^page:\/div:1\/section:1\/p:1$/, 'the legend is the first line of the tabs it explains ("Ready: ..., Building: ..." opens Ready now, "Ideas: ..." opens Product ideas) and the status link is a related page in the pager'],
   ['reshaped', /^page:\/div:1\/section:1\/div:2\/div:1$/, 'the product tiles are rows of an Ark accordion: each opens to its line and its page'],
@@ -91,7 +95,10 @@ const REWORDED = [
   [/^page:\/section:1\/div:2\/div:1\/div:1\/p:1$/, 'the domain\'s "01 / 05" is its place in the tab list'],
   [/^(page:\/section:1\/div:1\/button:\d\/span:1|page:\/section:1\/div:2\/div:2\/a:\d\/span:1)$/, 'a list number: the place of the tab or card in its list'],
   [/^page:\/header:1\/dl:1/, 'the stat triplet reads "20 resolutions · 05 domains · 01 mesh" in the eyebrow (value before its name, as it was drawn)'],
-  [/^page:\/section:1\/div:1\/button:\d\/span:3$/, 'the domain\'s count reads "· 4" in its tab label']
+  [/^page:\/section:1\/div:1\/button:\d\/span:3$/, 'the domain\'s count reads "· 4" in its tab label'],
+  /* first-visit audit 2026-10-22 (P0): a "Start here" that opened a product still being built is the first ready product's
+     "Open <name>" (js/pages/resolutions.js mainAction); the same button, the same key */
+  [/^page:\/div:1\/header:1\/div:1\/a:1$/, '"Start here" reads "Open <the first ready product>" where its page was a product still being built']
 ];
 
 (async () => {
@@ -130,11 +137,16 @@ const REWORDED = [
         const item = ArkResolutions.find(route.split('/').pop()), shelf = ArkResolutionProducts.forResolution(item.key);
         const all = ArkResolutions.all(), at = all.findIndex((x) => x.slug === item.slug);
         words.push(item.title, item.text, ArkResolutions.shortName(item.title), ArkResolutions.groupFor(item.group).title, 'All resolutions');
-        words.push(shelf.audience, shelf.problem, 'For', 'Problem', 'Ready now', 'usable today', 'Building', 'in source, not released', 'Product ideas', 'proposed, not built');
+        words.push(shelf.audience, shelf.problem, 'For', 'Problem', 'Products', 'usable today', 'Building', 'in source, not released', 'Product ideas', 'proposed, not built');
         for (const p of shelf.ready) { words.push(p.name, p.line, p.status === 'ready' ? 'Ready' : 'Building'); if (p.page && window.ArkUI.pageCatalog[p.page]) words.push('Open ' + p.name); }
         shelf.ideas.forEach((idea, i) => words.push(idea.name, 'Idea 0' + (i + 1), 'not built yet', idea.audience.slice(1), idea.problem, idea.product, ...idea.builds.map((b) => b.name)));
         words.push('How it resolves', 'The shift', item.shift.slice(1), 'Instead of', item.old.slice(1), ...item.steps, 'Define', 'Publish', 'Resolve');
-        words.push(item.start && window.ArkUI.pageCatalog[item.start] ? ArkCopy.text('RESOLUTIONS.START') : 'How resolvers work');
+        /* the hero's one action (js/pages/resolutions.js mainAction, first-visit audit 2026-10-22 P0): Start here unless its
+           page is a product still being built; else the first ready product with a page; else How resolvers work */
+        const products = ArkResolutionProducts.products, catalog = window.ArkUI.pageCatalog;
+        const building = Object.keys(products).some((k) => products[k].page === item.start && products[k].status !== 'ready');
+        const firstReady = shelf.ready.find((p) => p.status === 'ready' && p.page && catalog[p.page]);
+        words.push(item.start && catalog[item.start] && !building ? ArkCopy.text('RESOLUTIONS.START') : firstReady ? 'Open ' + firstReady.name : 'How resolvers work');
         for (const more of [item.also, item.alsoMore]) if (more && window.ArkUI.pageCatalog[more]) words.push(String(window.ArkUI.pageCatalog[more].title).split(' — ')[0]);
         words.push(ArkResolutions.shortName(all[(at - 1 + all.length) % all.length].title), ArkResolutions.shortName(all[(at + 1) % all.length].title), 'Previous', 'Next', 'All 20', ArkCopy.text('RESOLUTIONS.NOTE.LINK'));
       }
@@ -186,7 +198,7 @@ const REWORDED = [
       assert.equal(seen.labelledBy, 'resolution-title-' + slug);
       assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'disclosure', 'tabs', 'insert', 'pager'], route + ': crumbs, hero, who it is for, the shelf, the CMS anchor, the pager');
       assert.equal(seen.shelfTabs.length, 3, route + ': ready, ideas, how it resolves');
-      assert(/^Ready now · \d$/.test(seen.shelfTabs[0]) && seen.shelfTabs[1] === 'Product ideas · 3' && seen.shelfTabs[2] === 'How it resolves', route + ': the shelf tabs keep their labels and counts');
+      assert(/^Products · \d$/.test(seen.shelfTabs[0]) && seen.shelfTabs[1] === 'Product ideas · 3' && seen.shelfTabs[2] === 'How it resolves', route + ': the shelf tabs keep their labels and counts');
       assert.equal(seen.rows[1], 3, route + ': three ideas, each an accordion row');
       assert(seen.rows[0] >= 2, route + ': every ready product is a row');
       assert.equal(seen.steps, 3, route + ': three movements');
