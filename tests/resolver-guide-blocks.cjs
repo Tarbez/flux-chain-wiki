@@ -108,9 +108,14 @@ const ROUTES = {
       [/^page:\/nav:1\/button:1(\/span:1)?$/, '"← Previous" is Ark\'s "Previous step" button (the words /deploy\'s way through uses); its label keeps the inner key']
     ],
     retired: [
-      [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width']
+      [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width'],
+      /* 2026-10-22: the first view shows the apps (the owner's download page) and no longer lists the five step names a
+         second time; each step is How it works' tab and the terminal's step, which keep the step row and its text */
+      [/^page:\/div:1\/section:2\/ol:1\/li:\d\/button:1(\/strong:1|\/span:1)?$/, 'a step row\'s button and its name: the first view\'s step list is gone; the step is its How it works tab']
     ],
     reworded: [
+      /* 2026-10-22: the first view's step list (and its numbers) is gone; each step is How it works' tab, its number its place */
+      [/^page:\/div:1\/section:2\/ol:1\/li:\d\/button:1\/span:1$/, 'a step\'s number ("02"): its place among How it works\' tabs'],
       [/^page:\/header:1\/div:1\/a:1$/, '"Operator guide" reads "Open the full operator guide" (one link for every width)']
     ]
   }
