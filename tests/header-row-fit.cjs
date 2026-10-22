@@ -92,4 +92,4 @@ const LINKS = { resolutions: 135, about: 104, deployment: 124, explorer: 133, st
   fit();
   assert.deepEqual(row.collapsed(), ['stats', 'deployment', 'about', 'explorer', 'resolutions', 'download']);
 }
-console.log('PASS: the header row collapses Stats, How it works, Overview, Mesh Explorer, Resolutions, Run DEFXN in that order until it fits, never Account, and announces each change.');
+console.log('PASS: the header row collapses Stats, Deploy (a resolver), Overview, Mesh Explorer, Resolutions, Run DEFXN in that order until it fits, never Account, and announces each change.');
