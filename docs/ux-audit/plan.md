@@ -381,3 +381,24 @@ Open, needs a file outside a helper's group or an owner call:
 - guides leftovers: /concept/depth duplicate text, /experiments slider below the fold, lifecycle stage buttons
   (js/ark/stage-scenes.js), article URL, learnings duplicates;
 - pre-existing on main: ux-component-census, fold-disclosures (/what-is-a-resolver).
+
+## Resume point 16 (2026-10-22, 16:35) — stopped by the owner: rebrand coming
+The owner stopped all audit work: the site will be rebranded, and the owner finishes the pages below by hand.
+Main is at b6ba331 (+ this note): the /reference per-document scope is merged (overview opens by default;
+old '/reference' edits move to the Agreements document). No test ran after the owner said "skip all tests".
+Three helper branches were stopped and are NOT merged. Each holds commits; read them before reusing:
+- `worktree-agent-a1cb61ce8299a9d31` (site items), 7 commits: resolver-math /stats link "Mesh performance";
+  about link "Deploy a resolver"; header link "Deploy" (fits 1440px); /dao renamed "How DEFXN is governed"
+  (owner call) and its repeating eyebrow dropped; /download eyebrow dropped (studio-flows uses title + actions);
+  /start-from-something-real stays in its journey. Its home.js label change is backed out (home redesign).
+  Uncommitted: docs/glossary.md (the "swap" entry, not finished; `node scripts/build-glossary.cjs` not run).
+  Not done: the two pre-existing failures (ux-component-census, fold-disclosures on /what-is-a-resolver).
+- `worktree-agent-a146ed8625bd51110` (guide pages), 3 commits: /experiments slider in the first screen;
+  lifecycle stage buttons say what they replay; notes answer at an address derived from their title.
+  Uncommitted: two articles, one article glossary file, tests/learnings-blocks.cjs (learnings duplicates, unfinished).
+  Not done: /concept/depth duplicate text.
+- `worktree-agent-aa6b2017d25d50b82` (CMS), 1 commit: internal names move under Developer details (cms.md P1-2).
+  Not done: P1-16 one feedback channel; Ark primitives for the editor's select, Attachment and Command picker;
+  gate copy (P2-1; the credential name is an owner call).
+Pages still to finish by hand: /concept/depth, /learnings and its notes, /what-is-a-resolver (fold), the glossary
+"swap" entry, and the CMS items above. Home is being redesigned in its own session: docs/home-redesign-brief.md.
