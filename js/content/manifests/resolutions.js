@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Everyone is our business partner. Choose what you want to resolve: the mesh is the database, the host and the cloud, with encrypted peer-to-peer hosting that replaces yearly renewals with permanence."
+      "value": "A resolution is a job DEFXN does for you, such as hosting a website. Choose what you want to resolve: the mesh is the database, the host and the cloud, with encrypted peer-to-peer hosting that replaces yearly renewals with permanence."
     },
     "PROMISE": {
       "label": "Promise line",
@@ -126,7 +126,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your website",
-      "value": "Publish straight to the mesh: no database, no hosting, no fees, no cloud."
+      "value": "Publish straight to the mesh: no database, no hosting, no cloud."
     },
     "CONTENT.TITLE": {
       "label": "Title",

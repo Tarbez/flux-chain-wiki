@@ -73,7 +73,7 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / RESOLVERS"
+      "value": "DEFXN / RESOLVERS"
     },
     "TITLE": {
       "label": "Heading",

@@ -236,7 +236,8 @@
           { label: 'First-party chains', value: String(snap.counts.nativeResolverChains) },
           { label: 'Bridge chains', value: String(snap.counts.bridgeChains) },
           { label: 'Capabilities', value: String(snap.counts.capabilities) },
-          { label: 'Launched on devnet', value: typeof snap.observation.capabilitiesLaunched === 'number' ? snap.observation.capabilitiesLaunched + ' · ' + snap.observation.date : 'not in the snapshot' }
+          /* says what it counts (first-visit audit 2026-10-22: "Launched on devnet 0" read as nothing running, beside 12 chains) */
+          { label: 'Capabilities launched', value: typeof snap.observation.capabilitiesLaunched === 'number' ? snap.observation.capabilitiesLaunched + ' on the development network · ' + snap.observation.date : 'not in the snapshot' }
         ] : undefined } }
     ].concat(snap ? [
       /* Where every number comes from: open on a desktop, a press away on a phone. */
