@@ -89,7 +89,7 @@
       root.classList.add('cms-form');
       var a = state.aDrafts[slug];
       if (!a) { root.appendChild(h('p', { class: 'empty-state', text: slug ? 'There is no article "' + slug + '" any more (deleted, or never created). Pick an article in the Pages tab.' : 'Pick an article in the Pages tab.' })); return; }
-      root.appendChild(panelHead(a.title || slug, '/learnings/' + slug + '  ·  js/content/articles/' + slug + '.js', 'article', slug));
+      root.appendChild(panelHead(a.title || slug, '/learnings/' + slug, 'article', slug, 'js/content/articles/' + slug + '.js'));
 
       var card = h('fieldset', {}, h('legend', { text: 'Card' }));
       card.appendChild(articleField(a, 'title', 'Title', 'line'));

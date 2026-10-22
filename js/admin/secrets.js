@@ -67,10 +67,12 @@
   function secretDetail(id) {
     var secret = state.secretDrafts[id];
     var root = h('div', { class: 'vault-detail' });
-    root.appendChild(panelHead(secret.label || id, 'js/content/secrets/' + id + '.js', 'secret', id));
+    root.appendChild(panelHead(secret.label || id, '', 'secret', id, 'js/content/secrets/' + id + '.js'));
 
+    /* plain words first; how it is encrypted is Developer details (docs/ux-audit/cms.md P1-2) */
     var about = h('fieldset', {}, h('legend', { text: 'Encrypted content' }),
-      h('p', { class: 'hint' }, 'The body is AES-GCM ciphertext; the key is wrapped once per recipient with nacl box. Nothing on disk or on the mesh ever holds the plaintext — only what you encrypt here, in this browser, right now.'));
+      h('p', { class: 'hint' }, 'Only the people you add as readers below can open this. Nothing readable is saved or published: you encrypt it here, in this browser.'),
+      A.devDetails([['Body', 'AES-GCM ciphertext'], ['Key', 'wrapped once per recipient with nacl box'], ['Plaintext', 'never on disk or on the mesh']]));
     about.appendChild(textRow('Label', 'sec-' + id + '-label', {}, function () { return secret.label; }, function (v) {
       secret.label = v;
       var name = root.parentNode && root.parentNode.querySelector('[data-cms-item="secret:' + id + '"] .vault-name');

@@ -31,7 +31,9 @@
       p.appendChild(h('p', { class: 'hint', text: 'How this page shows up in search results and when its link is shared. Leave a field blank and it is taken from the page itself and the site\u2019s defaults.' }));
       p.appendChild(seoFieldsPanel(ArkSEO.OVERRIDE_FIELDS, () => seoOverrideTarget(map, id), seoEdited));
     } else {
-      p.appendChild(h('p', { class: 'hint seo-refusal', text: 'No SEO entry for ' + route.path + ': this route has no page id or article slug in js/pages/catalog.js, so there is nothing to store an override under. Give its catalog entry a seoId (pages) or seoArticle (articles) and it gets these fields.' }));
+      /* plain words first; the catalog's field names are Developer details (docs/ux-audit/cms.md P1-2) */
+      p.appendChild(h('p', { class: 'hint seo-refusal', text: 'This page has no search settings of its own, so it uses the defaults for every page. A developer can give it its own.' }));
+      p.appendChild(A.devDetails([['Address', route.path], ['Why', 'this route has no page id or article slug in js/pages/catalog.js, so there is nothing to store an override under'], ['Remedy', 'give its catalog entry a seoId (pages) or seoArticle (articles)']]));
     }
     const site = document.createElement('button'); site.type = 'button'; site.className = 'btn small'; site.textContent = 'Defaults for every page…';
     site.title = 'Site style, Search defaults: what every page falls back to, and which AI assistants may read the site';
@@ -89,14 +91,12 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveSeo(state.cdirs.content, state.seoDraft);
-        status('Saved js/content/seo-data.js', 'ok');
       } else {
         download('seo-data.js', ArkSEO.serialize(state.seoDraft));
-        status('Downloaded seo-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws now that saveEverything() is this function's only caller -- see
        saveThemeDraft's matching comment above. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.seoDraft = ArkSEO.sanitize(state.seoDraft);
     state.seoSaved = JSON.stringify(state.seoDraft);
     ArkSEO.define(state.seoDraft);

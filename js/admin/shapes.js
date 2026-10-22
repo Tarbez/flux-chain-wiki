@@ -37,14 +37,12 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveMeshSettings(state.cdirs.content, state.meshDraft);
-        status('Saved js/content/mesh-settings-data.js', 'ok');
       } else {
         download('mesh-settings-data.js', ArkMeshSettings.serialize(state.meshDraft));
-        status('Downloaded mesh-settings-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws now that saveEverything() is this function's only caller -- see
        saveThemeDraft's matching comment above. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.meshDraft = ArkMeshSettings.sanitize(state.meshDraft);
     state.meshSaved = JSON.stringify(state.meshDraft);
     ArkMeshSettings.define(state.meshDraft);
@@ -112,7 +110,8 @@
             page[modeKey] = 'image';
             notifyPreviewAssets(); notifyPreviewMesh();
             itemsChanged('asset', assetId); shapesChanged();
-            status('Added "' + assetId + '" and set it as this page\u2019s ' + slot + ' image. Save the image and Save this page\u2019s shapes to keep it.', 'ok');
+            /* by the image's name and the shape's name as the form shows them, never the id or the slot key (P1-2) */
+            status('Added "' + ((state.assetDrafts[assetId] && state.assetDrafts[assetId].label) || assetId) + '" as the image for ' + (slot === 'primary' ? 'Shape 1' : 'Shape 2') + '. Save to keep the image and this page\u2019s shapes.', 'ok');
           });
         } });
       box.appendChild(h('div', { class: 'field' },
@@ -223,7 +222,7 @@
         root.appendChild(which);
         return;
       }
-      which.appendChild(h('p', { class: 'hint', text: 'Shown on ' + where + ', which has no Page fields of its own. Saved in js/content/mesh-settings-data.js with the tuning above.' }));
+      which.appendChild(h('p', { class: 'hint', text: 'Shown on ' + where + ', which has no Page fields of its own. Saved with the shared tuning above.' }));
       root.appendChild(which);
       root.appendChild(buildShapePickers(id));
       root.appendChild(buildPlacementPanel(id));

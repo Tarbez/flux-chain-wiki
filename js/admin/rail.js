@@ -35,9 +35,10 @@
      TYPE enum) -- a small, purely cosmetic lookup, not a structural decision, so an unlisted
      tag just falls back to the generic 'box' icon rather than needing every real tag covered. */
   const CMS_TAG_ICON = { header: 'section', main: 'page', footer: 'section', section: 'section', article: 'article', nav: 'row', aside: 'box', div: 'box', h1: 'heading', h2: 'heading', h3: 'heading', h4: 'heading', p: 'text', a: 'link', button: 'button', img: 'image', svg: 'image', canvas: 'spark', video: 'image', picture: 'image', figure: 'image', form: 'field', ul: 'list', ol: 'list', li: 'box', span: 'text', strong: 'text', small: 'text', table: 'list', label: 'field' };
-  /* where a derived layer name came from (ArkLayout.layerName's `from`), for the name's tooltip */
-  const LAYER_NAME_FROM = { group: 'group name', component: 'component block', state: 'state label', aria: 'accessible name (aria-label, alt or title)',
-    landmark: 'landmark and class', role: 'role and class', heading: 'heading', text: 'own words', hint: 'id or class', tag: 'tag' };
+  /* where a derived layer name came from (ArkLayout.layerName's `from`), for the name's tooltip --
+     in plain words: aria-label, class and tag are the code's names (docs/ux-audit/cms.md P1-2) */
+  const LAYER_NAME_FROM = { group: 'group name', component: 'component', state: 'state name', aria: 'label for screen readers',
+    landmark: 'place on the page', role: 'purpose on the page', heading: 'heading', text: 'own words', hint: 'name in the site’s code', tag: 'kind of element' };
   /* Part B of the follow-up Studio plan: the connected-mode equivalent of renderLayers(),
      driven by cmsRealTree's payload (the real rendered DOM, reported by js/main.js) instead of
      the standalone dense-node tree. Deliberately NOT built by extending renderLayers() itself:
@@ -63,7 +64,7 @@
       const nameInput = li.querySelector('.nm-edit');
       nameInput.value = row.label;
       nameInput.dataset.named = row.named ? 'true' : 'false';
-      nameInput.title = row.named ? `Your name for this ${row.tag}. Clear it to go back to the derived name.` : `Named from its ${LAYER_NAME_FROM[row.from] || 'tag'}. Type to rename it.`;
+      nameInput.title = row.named ? 'Your name for this layer. Clear it to go back to the name the editor gave it.' : `Named from its ${LAYER_NAME_FROM[row.from] || 'kind of element'}. Type to rename it.`;
       li.querySelector('.layer-tag').textContent = row.tag;
       nameInput.addEventListener('click', (event) => event.stopPropagation());
       nameInput.addEventListener('change', () => postCmsSetLabel(row.key, nameInput.value.trim()));
@@ -75,7 +76,7 @@
       ul.appendChild(li);
       if (!collapsedLayers.has(row.key)) row.children.forEach((child) => walk(child, depth + 1));
     };
-    if (!state.cmsTree.length) { const empty = document.createElement('li'); empty.className = 'hint'; empty.style.padding = '8px 10px'; empty.textContent = 'No layout-tagged elements on this page yet.'; ul.appendChild(empty); return; }
+    if (!state.cmsTree.length) { const empty = document.createElement('li'); empty.className = 'hint'; empty.style.padding = '8px 10px'; empty.textContent = 'Nothing on this page can be styled yet.'; ul.appendChild(empty); return; }
     /* The layers behind the page (the backdrop, its canvases) came first and took the whole tab
        (docs/ux-audit/cms.md P2-4: "Has particle shapes / Ark layer / Ark background host"). The
        outermost row that holds no words at all -- no row under it is named by its own text, a

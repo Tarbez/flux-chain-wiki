@@ -57,7 +57,7 @@ const { bootForms } = require('./lib/admin-forms-dom.cjs');
   const publish = document.getElementById('publish');
   assert.equal(publish.disabled, false, 'Publish with no miner is not disabled: a click on it must be able to explain');
   assert.equal(publish.getAttribute('aria-disabled'), 'true', 'Publish with no miner reads as unavailable');
-  assert.match(publish.title, /miner is not reachable/);
+  assert.match(publish.title, /Ark Miner is not reachable/);
   publish.click();
   assert.equal(sheetOpened, 1, 'a click on the refused Publish opens the Publish sheet');
 

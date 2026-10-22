@@ -441,7 +441,7 @@
      
       if (event.data.tree) state.cmsTree = event.data.tree;
       applyStudioStatesReplace(event.data.states);
-      if (event.data.created) { state.tbAutoOpen = { key: 'cms-states', at: Date.now() }; toast('Made a state group: the selection is state 0. Use + Add state in the toolbar to add the next state.'); }
+      if (event.data.created) { state.tbAutoOpen = { key: 'cms-states', at: Date.now() }; toast('Made a state group: the selection is its first state. Use + Add state in the toolbar to add the next one.'); }
       renderInspector(); renderLayersPane();
     } else if (event.data.type === 'defxn-cms-preview-canvas-transitions-replace') {
       if (state.cmsSourceSite) state.cmsSourceSite.canvasTransitions = event.data.canvasTransitions;

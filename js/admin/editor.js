@@ -50,8 +50,17 @@
   }
 
   /* ---- reference-doc choices, from the generated allow-list ---------- */
+  /* A document is called by its name, read out of its path ("docs/evidence/bench-001-verification.md"
+     -> "Bench 001 verification (evidence)"), never by the path itself (docs/ux-audit/cms.md P1-2);
+     the path is the value it writes. Derived from the path, so a new document needs no label. */
+  function docLabel(path) {
+    var parts = String(path).replace(/\.md$/i, '').split('/').filter(function (p) { return p && p !== 'docs'; });
+    var name = (parts.pop() || String(path)).replace(/[-_]+/g, ' ').trim();
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    return parts.length ? name + ' (' + parts.join(', ').replace(/[-_]+/g, ' ') + ')' : name;
+  }
   function docOptions() {
-    return (ArkUI.referenceDocs || []).map(function (doc) { return { key: doc, label: doc }; });
+    return (ArkUI.referenceDocs || []).map(function (doc) { return { key: doc, label: docLabel(doc) }; });
   }
 
   /* A select over the site's own data -- its routes, reference docs, shape pages -- takes its
@@ -158,7 +167,7 @@
   function refreshRevertButtons(root) {
     Array.prototype.forEach.call((root || document).querySelectorAll('[data-revert]'), function (revert) {
       var at = revert.dataset.revert.indexOf(':'), kind = revert.dataset.revert.slice(0, at), id = revert.dataset.revert.slice(at + 1);
-      if (kind === 'design') { refuse(revert, A.themeDirty() || A.settingsDefaultsDirty() ? '' : 'Nothing to revert: the theme and settings-gear defaults match their saved copy.'); return; }
+      if (kind === 'design') { refuse(revert, A.themeDirty() || A.settingsDefaultsDirty() ? '' : 'Nothing to revert: Site style matches what is saved.'); return; }
       refuse(revert, neverSaved(kind, id) ? 'Not saved yet: there is no saved version to revert to.' : itemDirty(kind, id) ? '' : 'Nothing to revert: this matches its saved copy.');
     });
   }
@@ -170,10 +179,13 @@
       if (!now && dot) dot.remove();
     });
   }
-  function panelHead(title, path, kind, id) {
+  /* An item's head: its name, its address on the site (when it has one) and Revert. The file that
+     holds it is a name the code uses, so it is the head's Developer details, never the subtitle
+     (docs/ux-audit/cms.md P1-2: "js/content/assets/<id>.js" under an image's name). */
+  function panelHead(title, address, kind, id, file) {
     var revert = h('button', { type: 'button', class: 'btn', text: 'Revert', 'data-revert': kind + ':' + id, onclick: function () { revertItem(kind, id); } });
     return h('div', { class: 'cms-form-head' },
-      h('div', {}, h('h2', { text: title }), h('div', { class: 'route', text: path })),
+      h('div', {}, h('h2', { text: title }), address ? h('div', { class: 'route', text: address }) : null, file ? A.devDetails([['File', file]]) : null),
       h('div', { class: 'editor-actions' }, revert));
   }
 

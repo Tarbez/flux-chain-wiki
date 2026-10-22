@@ -29,18 +29,26 @@
     return h('div', { class: 'mesh-row' }, h('span', { class: 'mesh-row-key', text: label }), h('span', { class: 'mesh-row-val mono', text: value || '—' }));
   }
   /* the essay on what publishing protects: there for whoever asks, folded so it no longer stands
-     between the person and the reason they cannot publish (docs/ux-audit/cms.md P0-4) */
+     between the person and the reason they cannot publish (docs/ux-audit/cms.md P0-4). Said in
+     plain words; the technical names (content address, IPFS, AES-GCM, nacl box, the name record,
+     the file that holds the key) are its Developer details (P1-2), so nothing is lost. */
   function buildMeshSecurityNote() {
     var box = h('details', { class: 'mesh-security' }, h('summary', { text: 'How publishing keeps things private (and what it does not)' }));
     box.appendChild(h('p', {}, h('strong', { text: 'Public: ' }),
-      document.createTextNode('every page, article and image published here is one content-addressed archive on the mesh, unencrypted. Anyone who has the address (or finds the name record) can fetch and read all of it, the same as a public IPFS file. Publishing is distribution, not privacy.')));
-    box.appendChild(h('p', {}, h('strong', { text: 'Encrypted content: ' }),
-      document.createTextNode('an item under Encrypted is published the same way — content-addressed, fetchable by anyone — but its body is AES-GCM ciphertext and the file key is only wrapped for the recipients you chose. Only someone holding a matching secret key can read it; everyone else fetches opaque bytes.')));
+      document.createTextNode('every page, article and image you publish is public and not encrypted. Anyone who has its address can read all of it. Publishing shares the site; it does not hide it.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Private items: ' }),
+      document.createTextNode('an item under Private content is published too, and anyone can fetch it. Only the people you added as readers can open it. Everyone else gets unreadable bytes.')));
     box.appendChild(h('p', {}, h('strong', { text: 'Signed, not secret: ' }),
-      document.createTextNode('the record pointing flux-chain.ark at that address is signed by your identity so no one else can repoint the name — but the signature and the record are public too.')));
-    box.appendChild(h('p', {}, h('strong', { text: 'Actually private: ' }),
-      document.createTextNode('only your signing key, and only in this browser tab’s memory (js/admin/auth.js). It is never sent to the publish host, the miner, or the mesh, and is dropped on reload or sign-out. The sign-in gate protects who can edit and publish — it does not make the content itself confidential.')));
-    box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want permanently public. Once a version is pinned, other peers may already have copied it — publishing a newer version does not erase the old one from the mesh.')));
+      document.createTextNode('your sign-in signs the site’s name, so no one else can point it at another site. The signature is public too.')));
+    box.appendChild(h('p', {}, h('strong', { text: 'Kept private: ' }),
+      document.createTextNode('only your signing key. It stays in this tab and is never sent anywhere. A reload or Sign out drops it. Signing in decides who can edit and publish; it does not make the words themselves private.')));
+    box.appendChild(h('p', { class: 'hint' }, document.createTextNode('Rule of thumb: never put anything in a page, article or image you would not want public for good. Other computers may keep a copy of a version once it is live. Publishing a newer version does not erase the old one.')));
+    box.appendChild(A.devDetails([
+      ['Storage', 'one content-addressed archive (CID) on the mesh, readable like a public IPFS file'],
+      ['Private items', 'body is AES-GCM ciphertext; the file key is wrapped per recipient with nacl box'],
+      ['Name record', 'flux-chain.ark -> the archive address, signed by your identity'],
+      ['Signing key', 'held in memory by js/admin/auth.js; never sent to the publish host, the miner or the mesh'],
+      ['Old versions', 'a pinned version may already be copied by other peers']]));
     return box;
   }
   /* Drawn into the container the shell hands it: the Publishing status sheet, opened on demand
@@ -87,8 +95,8 @@
 
     async function load() {
       if (!mesh) {
-        fill([['Publishing service', 'Not reachable from this copy of the page']]);
-        diffText.textContent = 'Open this page through the publishing service (node scripts/publish-host.mjs) to compare.';
+        fill([['Publishing service', 'Not reachable from this copy of the page']], [['Publishing service command', 'node scripts/publish-host.mjs']]);
+        diffText.textContent = 'This copy of the editor is not connected to the publishing service, so it cannot compare. Open the editor the publishing service serves to compare.';
         liveSummary.textContent = ''; liveList.textContent = '';
         ready(null, null);
         return;
@@ -104,8 +112,11 @@
          "undefined" -- the name is the host's, else plainly "This site" */
       routeLabel.textContent = siteName(info) + ' — Publishing status';
       var rows = [['Publishing service', info.reachable ? 'Answering' : 'Not answering' + (info.detail ? ' — ' + info.detail : '')]];
+      /* the miner's name and network, the address and the keys are names the code uses (P1-2) */
       var devRows = [];
-      if (info.miner) rows.push(['Published through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
+      if (info.miner) devRows.push(['Published through', (info.miner.label || info.miner.statusBase) + (info.miner.networkId ? ' (network ' + info.miner.networkId + ')' : '')]);
+      var me = mesh.identity();
+      if (me && me.publicKeyB64) devRows.push(['Your signing key', me.publicKeyB64]);
       if (info.current) {
         rows.push(['Live version', String(info.current.version)]);
         rows.push(['Last published', info.current.updatedAt]);
@@ -266,17 +277,18 @@
     try {
       var info = await mesh.status();
       var who = mesh.identity();
-      var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'signed in') + ' · ' + short(who.publicKeyB64) : '';
-      if (chip) chip.title = who ? 'Signing key ' + who.publicKeyB64 : '';   /* the full key stays one hover away */
-      refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: the miner is not reachable (' + (info.detail || 'no answer') + '). Start the miner or check its address, then Refresh.', explainPublish);
-    } catch (error) { refuse($('publish'), 'Cannot publish: the miner status could not be read (' + error.message + '). Fix that, then Refresh.', explainPublish); }
+      /* who is signed in, by name; the signing key itself is a Developer detail of Publishing status (P1-2) */
+      var chip = $('who'); if (chip) chip.textContent = who ? (who.displayName || 'Signed in') : '';
+      if (chip) chip.title = who ? 'Signed in as ' + (who.displayName || 'this identity') + '. Your signing key is under Publishing status, Developer details.' : '';
+      refuse($('publish'), publishing ? PUBLISHING_NOW : info.reachable ? '' : 'Cannot publish: Ark Miner is not reachable (' + (info.detail || 'no answer') + '). Start Ark Miner, then press Check again in Publishing status.', explainPublish);
+    } catch (error) { refuse($('publish'), 'Cannot publish: the publishing service did not answer (' + error.message + '). Start Ark Miner, then press Check again in Publishing status.', explainPublish); }
   }
 
   $('publish').addEventListener('click', async function () {
     if (!mesh) return;
     if (!mesh.identity()) {
       // A reload keeps the session but drops the signing key (js/admin/gate.js); get it back without losing this tab's edits.
-      status('Choose your recovery file to unlock signing, then publish again.', 'warn');
+      status('Choose your sign-in file to unlock publishing, then publish again.', 'warn');
       try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (error) { /* the button click above still told them what to do */ }
       return;
     }
@@ -294,9 +306,9 @@
           message: 'This version removes what is live now: ' + what + '.\n\nThis page may be out of date, for example if its saves were only downloaded. If so, cancel, reload this page and publish again.\n\nPublishing is public: what you remove stays off the site until you publish it again.',
           confirmLabel: 'Publish and remove', cancelLabel: 'Cancel', tone: 'danger' });
       });
-      if (result.cancelled) status('Not published. Reload this page to pick up the project files, or run node scripts/pull-site.mjs to bring in the published copy.', 'warn');
+      if (result.cancelled) status('Not published. Reload this page to pick up the saved project files, then publish again.', 'warn');
       else if (result.unchanged) status('Nothing new to publish: version ' + result.version + ' already holds this content.', 'ok');
-      else status('Published version ' + result.published + (result.confirmed ? ', confirmed by the miner reading it back.' : '. The miner has not read it back yet: refresh the Mesh panel.'), result.confirmed ? 'ok' : 'warn');
+      else status('Published version ' + result.published + (result.confirmed ? '. It is live.' : '. The publishing service has not confirmed it yet: press Check again in Publishing status.'), result.confirmed ? 'ok' : 'warn');
       /* The name record keeps no link to the version before it, so this is the only place a
          published address is remembered: a forward 'publish' record in the version history. */
       if (result && result.published) recordVersion(1, { kind: 'publish', published: { version: result.published, cid: result.cid || '' } });

@@ -45,7 +45,12 @@ const { bootForms } = require('./lib/admin-forms-dom.cjs');
 
   const clone = box.cloneNode(true); clone.querySelectorAll('.dev-details, details.mesh-security').forEach((el) => el.remove());
   const visible = clone.textContent;
-  for (const word of ['Deployment status', 'P2P deployment', 'Address (CID)', 'Owner key', 'Reachable']) assert(!visible.includes(word), `"${word}" is jargon outside Developer details: ${visible.slice(0, 200)}`);
+  for (const word of ['Deployment status', 'P2P deployment', 'Address (CID)', 'Owner key', 'Reachable', 'Published through', 'network dev']) assert(!visible.includes(word), `"${word}" is jargon outside Developer details: ${visible.slice(0, 200)}`);
+  assert(dev.textContent.includes('Published through'), 'the miner the site goes through is a Developer detail, not lost');
+  /* the security notes say it plainly; their technical names (IPFS, AES-GCM, the key's file) are their own Developer details */
+  const essay = box.querySelector('details.mesh-security').cloneNode(true); essay.querySelectorAll('.dev-details').forEach((el) => el.remove());
+  for (const word of ['IPFS', 'AES-GCM', 'content-addressed', 'js/admin/auth.js', 'flux-chain.ark']) assert(!essay.textContent.includes(word), `the security notes say "${word}" outside Developer details`);
+  assert(box.querySelector('details.mesh-security .dev-details'), 'and keep those names under Developer details');
   for (const word of ['Publishing status', 'Live version', 'Last published', 'Publishing service', 'Answering']) assert(visible.includes(word), `the sheet says "${word}"`);
 
   /* the warning that lived only in the removed menu block: an identity that does not own the name is told so on the
@@ -60,6 +65,10 @@ const { bootForms } = require('./lib/admin-forms-dom.cjs');
   const other = second.document.createElement('div'); second.document.body.appendChild(other);
   second.A.renderMeshEditor(other);
   for (let i = 0; i < 80 && !other.querySelector('#meshReadiness .notice'); i++) await tick();
+  /* the account menu's chip names who is signed in; their signing key is not printed there (P1-2) */
+  const chip = second.document.getElementById('who');
+  await second.A.refreshMesh();
+  assert.equal(chip.textContent, 'Other', 'the chip shows the name only: ' + chip.textContent);
   const blocker = other.querySelector('#meshReadiness .notice');
   assert(blocker && /does not own the site's name/.test(blocker.textContent) && /Sign in/.test(blocker.textContent), 'another identity is told it does not own the name, with Sign in: ' + (blocker && blocker.textContent.slice(0, 160)));
   console.log('PASS: the Publishing sheet speaks plainly; the address and owner key live under Developer details; it is the one place the state is said, owner mismatch included.');

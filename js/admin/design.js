@@ -23,15 +23,13 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveTheme(state.cdirs.content, state.themeDraft);
-        status('Saved js/content/theme-data.js', 'ok');
       } else {
         download('theme-data.js', ArkTheme.serialize(state.themeDraft));
-        status('Downloaded theme-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws (instead of swallowing and returning) now that saveEverything() is
        this function's only caller -- its own attempt() wrapper needs the rejection to report
        this draft as failed instead of silently treating it as succeeded. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.themeDraft = ArkTheme.sanitize(state.themeDraft);
     state.themeSaved = JSON.stringify(state.themeDraft);
     ArkTheme.define(state.themeDraft);
@@ -62,14 +60,12 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveSettingsDefaults(state.cdirs.content, state.settingsDefaultsDraft);
-        status('Saved js/content/settings-defaults-data.js', 'ok');
       } else {
         download('settings-defaults-data.js', ArkSiteDefaults.serialize(state.settingsDefaultsDraft));
-        status('Downloaded settings-defaults-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws now that saveEverything() is this function's only caller -- see
        saveThemeDraft's matching comment above. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.settingsDefaultsDraft = ArkSiteDefaults.sanitize(state.settingsDefaultsDraft);
     state.settingsDefaultsSaved = JSON.stringify(state.settingsDefaultsDraft);
     ArkSiteDefaults.define(state.settingsDefaultsDraft);
@@ -84,7 +80,7 @@
     reloadPreview();
     repaintPanels('design');
     touch();
-    status('Reverted global design config.', '');
+    status('Site style is back to its saved version.', '');
   }
   /* Theme & defaults is the Theme view, docked beside the live canvas (js/admin/sitemap.js setView) */
   function selectDesign() { setView('theme'); }
@@ -247,13 +243,19 @@
      mechanism, which this deliberately does NOT share state with. */
   function buildSettingsDefaultsPanel() {
     var wrap = h('fieldset', { class: 'relief' }, h('legend', { text: 'What a first-time visitor sees' }));
-    if (!window.ArkSiteDefaults) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Settings-gear defaults editing is unavailable on this page.' })); return wrap; }
+    if (!window.ArkSiteDefaults) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Visitor defaults cannot be edited here: their module did not load. Reload the editor.' })); return wrap; }
     state.settingsDefaultsDraft = ArkSiteDefaults.sanitize(state.settingsDefaultsDraft);
     wrap.appendChild(h('p', { class: 'hint', text: 'What a first-time visitor sees before they ever touch the settings gear (⚙) -- their own later choice, saved to their own browser, always wins over this.' }));
 
+    /* every choice by its name, never its key ("ember-light", "blocks", "delay"): the theme's name
+       is the Colours list's (ArkTheme.themeOptions), a slider's is the visitor panel's
+       (ArkSiteDefaults.controls), a pattern's is its key said as a word (docs/ux-audit/cms.md P1-2) */
+    var themeNames = {};
+    if (window.ArkTheme) ArkTheme.themeOptions().forEach(function (t) { themeNames[t.key] = t.label; });
+    var word = function (key) { key = String(key); return key.charAt(0).toUpperCase() + key.slice(1).replace(/[-_]+/g, ' '); };
     var themeSelect = h('select', { id: 'defaults-theme' });
     ArkSiteDefaults.themeOptions().forEach(function (key) {
-      themeSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.theme, text: key }));
+      themeSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.theme, text: themeNames[key] || word(key) }));
     });
     themeSelect.addEventListener('change', function () {
       state.settingsDefaultsDraft.theme = themeSelect.value;
@@ -263,7 +265,7 @@
 
     var motifSelect = h('select', { id: 'defaults-motif' });
     ArkSiteDefaults.motifs().forEach(function (key) {
-      motifSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: key }));
+      motifSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: word(key) }));
     });
     motifSelect.addEventListener('change', function () {
       state.settingsDefaultsDraft.motif = motifSelect.value;
@@ -273,9 +275,9 @@
 
     var editingSelect = h('select', { id: 'defaults-editing-motif' });
     ArkSiteDefaults.motifs().forEach(function (key) {
-      editingSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: key }));
+      editingSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: word(key) }));
     });
-    wrap.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'defaults-editing-motif', text: 'Editing pattern config for' }), editingSelect));
+    wrap.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'defaults-editing-motif', text: 'Adjust the pattern' }), editingSelect));
 
     var controls = ArkSiteDefaults.controls();
     var fields = h('div', { class: 'relief-fields' });
@@ -295,7 +297,7 @@
         } });
         input.value = row[key];
         fields.appendChild(h('div', { class: 'relief-field' },
-          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: key }), out),
+          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: c.label || word(key) }), out),
           input));
       });
       var animateId = 'defaults-' + motif + '-animated';

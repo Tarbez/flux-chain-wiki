@@ -30,6 +30,8 @@ Object.keys(realControls).forEach((key) => {
   assert.equal(controls[key].min, realControls[key].min, key + ' min mirrors settings-entry.js');
   assert.equal(controls[key].max, realControls[key].max, key + ' max mirrors settings-entry.js');
   assert.equal(controls[key].def, realControls[key].value, key + ' default mirrors settings-entry.js');
+  /* the editor names each slider as the visitor's panel does, never by its key (docs/ux-audit/cms.md P1-2) */
+  assert.equal(controls[key].label, realControls[key].label, key + ' label mirrors settings-entry.js');
 });
 
 // get() is null before define() ever ran.
