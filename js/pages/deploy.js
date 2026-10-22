@@ -33,7 +33,9 @@
     {
       n: '03',
       title: 'Start the miner',
-      body: 'Use the returned network ID when starting the daemon. FLUX_MINER_NETWORK is the preferred name; ARK_MINER_NETWORK remains a legacy alias.',
+      /* the miner is named once, on /download (the flux-miner command); the legacy-alias sentence is gone
+         (first-visit audit 2026-10-22: one piece of software had three names) */
+      body: 'Use the returned network ID when starting the daemon.',
       cmd: 'FLUX_MINER_NETWORK=<network-id> flux-miner start',
       expected: 'Expected: the process remains running and exposes its configured status listener.'
     },
@@ -94,11 +96,12 @@
     return card;
   }
 
-  /* The family's "Open Deploy" (the product that launches resolvers), its address from the kit's catalog. */
+  /* The family's Deploy product (it launches resolvers), its address from the kit's catalog. The label says what happens
+     there, so it is not read as this page under another name (first-visit audit 2026-10-22: "Open Deploy" on /deploy). */
   function productAction(id) {
     var kit = typeof window !== 'undefined' && window.DefxnKit, product = kit && kit.productById && kit.productById(id);
     var href = product && kit.productHref(product);
-    return href ? { label: 'Open ' + product.name, href: /^https?:/.test(href) ? 'url:' + href : href, tone: 'secondary' } : null;
+    return href ? { label: 'Launch a resolver in the ' + product.name + ' app', href: /^https?:/.test(href) ? 'url:' + href : href, tone: 'secondary' } : null;
   }
 
   /* the Open Deploy pin only when the kit names the product (the button is there only then) */

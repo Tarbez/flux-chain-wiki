@@ -25,7 +25,7 @@
     'bundledeployer-views': { ':root': { key: 'page:/div:2', self: true },
       'tabs-trigger': 'id:bundle-workflow-title', 'tabs-trigger#2': 'id:bundle-boundary-title', 'tabs-trigger#3': B + '/figure:1/figcaption:1',
       'tabs-content': { key: W, self: true }, 'tabs-content#2': { key: B, self: true }, 'tabs-content#3': { key: B + '/figure:1', self: true },
-      ':scope > div:nth-of-type(2) > p:nth-of-type(1)': W + '/p:1', ':scope > div:nth-of-type(3) > p:nth-of-type(1)': B + '/p:1', ':scope > div:nth-of-type(4) > p:nth-of-type(1)': B + '/figure:1/p:1',
+      ':scope > div:nth-of-type(3) > p:nth-of-type(1)': B + '/p:1', ':scope > div:nth-of-type(4) > p:nth-of-type(1)': B + '/figure:1/p:1',
       'accordion': { key: W + '/ol:1', self: true }, 'table': { key: B + '/table:1', self: true }, 'thead': B + '/table:1/thead:1', 'tbody': B + '/table:1/tbody:1',
       'stepper': { key: B + '/figure:1/ol:1', self: true } },
     'bundledeployer-release': { 'alert': { key: 'page:/aside:1', self: true }, 'alert-title': 'page:/aside:1/h2:1',
@@ -61,11 +61,14 @@
       /* Explain + hand off (owner decision 2026-10-19): approving and pinning a bundle is the
          Bundles product, which runs on your own machine (no public site: the hand-off says so, and
          links its local address when this page is itself local). The family kit draws it
-         (ArkUI.dash.productHandoff); the boundary table below stays: Bundles does not show it. */
-      { block: 'custom', id: 'bundledeployer-handoff', mount: function () { return ArkUI.dash.productHandoff && ArkUI.dash.productHandoff({ product: 'bundles', text: '' }) || document.createComment('no product kit'); } },
-      /* the page's three parts, by their own headings: the three steps, what becomes public, and the way a bundle travels */
+         (ArkUI.dash.productHandoff); the boundary table below stays: Bundles does not show it. Its sentence
+         (BUNDLEDEPLOYER.HANDOFF) says what happens there: the block was a name and a button with no sentence
+         (first-visit audit 2026-10-22). */
+      { block: 'custom', id: 'bundledeployer-handoff', mount: function () { return ArkUI.dash.productHandoff && ArkUI.dash.productHandoff({ product: 'bundles', text: ArkCopy.text('BUNDLEDEPLOYER.HANDOFF') }) || document.createComment('no product kit'); } },
+      /* the page's three parts, named by what they hold: the steps, what becomes public, and how a bundle travels (the
+         labels were slogans, and the first tab opened on the bare line "Local CLI required": first-visit audit 2026-10-22) */
       { block: 'tabs', id: 'bundledeployer-views', was: WAS['bundledeployer-views'], props: { label: 'The deployer', items: [
-        { value: 'steps', label: copy('WORKFLOW.TITLE'), content: copy('REQUIREMENT'), blocks: [
+        { value: 'steps', label: copy('WORKFLOW.TITLE'), blocks: [
           { block: 'accordion', props: { label: 'How a bundle is published', defaultOpen: ['step-1'], headingLevel: 3, items: [1, 2, 3].map(function (n) { return { value: 'step-' + n, title: copy('POINT' + n + '.TITLE'), content: copy('POINT' + n + '.TEXT') }; }) } }
         ] },
         { value: 'share', label: copy('BOUNDARY.TITLE'), content: copy('BOUNDARY.NOTE'), blocks: [

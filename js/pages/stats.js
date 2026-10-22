@@ -14,8 +14,9 @@
    on a desktop and 20.7x on a phone, a research log under a dashboard title: 20 sections, 7
    hand-built tables, 7+ hand-built bar lists, 31 tiles (docs/ux-audit/pages-ux-b.md /stats P0).
    Now the hero answers -- the fleet's status, nodes online, swaps per second, the last pulse --
-   and the detail is seven tabs by question (Live · Chain · Throughput · Client path · Platform ·
-   Evidence · Readiness), each dated run folded into an accordion. Every number, table, bar and
+   and the detail is tabs by question (Live · Chain · Evidence · Readiness; Evidence holds Throughput ·
+   Client path · Platform · Runs and records as its own tabs since 2026-10-22), each dated run folded
+   into an accordion. Every number, table, bar and
    note is still here; the tiles are Ark's stat (with its absent state: "No reading", never 0 or a
    dash), the tables Ark's table, the bars Ark's meter.
 
@@ -197,7 +198,7 @@
     V['accordion-trigger#6'] = P + '/div:9/h2:1';
     V['[data-ark-part="pager-related"] li:first-child'] = P + '/div:18/section:2/ul:1/li:1';
     V['[data-ark-part="pager-related"] li:first-child > a'] = P + '/div:18/section:2/ul:1/li:1/a:1';
-    [['tabs-content', '/div:1'], ['tabs-content#2', '/div:3'], ['tabs-content#4', '/section:8'], ['tabs-content#5', '/div:14'], ['tabs-content#6', '/div:16'], ['tabs-content#7', '/div:17'],
+    [['tabs-content', '/div:1'], ['tabs-content#2', '/div:3'], ['tabs-content#5', '/section:8'], ['tabs-content#6', '/div:14'], ['tabs-content#7', '/div:16'], ['tabs-content#8', '/div:17'],
      ['accordion-item#2', '/div:2/section:1'], ['accordion-item#3', '/div:2/section:2'], ['accordion-item#4', '/div:7'], ['accordion-item#5', '/div:5'],
      ['accordion-item#6', '/div:9'], ['accordion-item#7', '/div:10/section:1'], ['accordion-item#8', '/div:10/section:2'], ['accordion-item#9', '/section:4'],
      ['accordion-item#10', '/section:5'], ['accordion-item#11', '/section:6'], ['accordion-item#12', '/section:7'], ['accordion-item#16', '/section:10'], ['accordion-item#17', '/section:11'],
@@ -231,46 +232,46 @@
       'accordion-trigger#4': P + '/div:7/h2:1',
       ':scope > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:7/p:1',
       'cell#3': P + '/section:3/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:9/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:9/p:1',
       'accordion-trigger#9': P + '/div:11/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:11/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:4/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:4/p:2',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(4)': P + '/section:4/p:3',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:11/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:4/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:4/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(4)': P + '/section:4/p:3',
       'accordion-trigger#10': P + '/div:12/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:12/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:5/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:5/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(4)': P + '/section:5/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:12/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:5/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:5/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(4)': P + '/section:5/p:2',
       'accordion-trigger#11': P + '/section:6/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:6/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:6/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:6/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:6/p:2',
       'accordion-trigger#12': P + '/section:7/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:7/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:7/p:2',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:8/p:1',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:8/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:7/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:7/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:8/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:8/h2:1',
       'accordion-trigger#13': P + '/section:8/p:2',
       'accordion-trigger#14': P + '/section:8/p:3',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:8/p:4',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:8/p:4',
       'accordion-trigger#15': P + '/section:8/p:5',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:8/p:6',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:8/p:7',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(4)': P + '/section:8/p:8',
-      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(5)': P + '/section:8/p:9',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:14/h2:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:14/p:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:9/p:2',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:10/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:8/p:6',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:8/p:7',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(4)': P + '/section:8/p:8',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(5)': P + '/section:8/p:9',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:14/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:14/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:9/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:10/p:1',
       'accordion-trigger#17': P + '/section:11/p:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:11/h2:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:11/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/section:11/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/section:11/p:2',
       'button': P + '/section:11/a:1',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:16/h2:1',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:16/p:1',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:12/p:1',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:17/h2:1',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/div:17/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:16/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:16/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/section:12/p:1',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:17/h2:1',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(3)': P + '/div:17/p:1',
       'stat-label': P + '/div:2/article:1/p:1',
       'stat-detail': P + '/div:2/article:1/p:3',
       'stat-label#2': P + '/div:2/article:2/p:1',
@@ -328,11 +329,11 @@
       'stat-value#23': P + '/div:10/article:4/p:2',
       'stat-detail#23': P + '/div:10/article:4/p:3',
       'accordion-trigger#7': P + '/div:10/section:1/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:10/section:1/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:10/section:1/p:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:10/section:1/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:10/section:1/p:2',
       'accordion-trigger#8': P + '/div:10/section:2/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:10/section:2/h2:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:10/section:2/p:3',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:10/section:2/h2:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)': P + '/div:10/section:2/p:3',
       'stat-label#25': P + '/div:13/article:1/p:1',
       'stat-value#25': P + '/div:13/article:1/p:2',
       'stat-label#26': P + '/div:13/article:2/p:1',
@@ -349,15 +350,15 @@
       'stat-value#31': P + '/div:15/article:3/p:2',
       'stat-label#32': P + '/div:15/article:4/p:1',
       'stat-value#32': P + '/div:15/article:4/p:2',
-      ':scope > div:nth-of-type(8) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:18/section:1/p:1',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:18/section:2/p:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:1/p:2/strong:1',
+      ':scope > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:18/section:1/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': P + '/div:18/section:2/p:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:1/p:2/strong:1',
       'stat-unit': P + '/div:10/article:1/p:2/span:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:2/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:2/p:2/strong:1',
       'stat-unit#2': P + '/div:10/article:2/p:2/span:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:3/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:3/p:2/strong:1',
       'stat-unit#3': P + '/div:10/article:3/p:2/span:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:4/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/article:4/p:2/strong:1',
       'stat-unit#4': P + '/div:10/article:4/p:2/span:1',
       'row#12': P + '/div:10/section:1/ol:1/li:1',
       'row#13': P + '/div:10/section:1/ol:1/li:2',
@@ -365,14 +366,14 @@
       'row#15': P + '/div:10/section:1/ol:1/li:4',
       'row#16': P + '/div:10/section:1/ol:1/li:5',
       'row#17': P + '/div:10/section:1/ol:1/li:6',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/section:2/p:2/strong:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:1/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:10/section:2/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:1/p:2/strong:1',
       'stat-unit#6': P + '/div:13/article:1/p:2/span:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:2/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:2/p:2/strong:1',
       'stat-unit#7': P + '/div:13/article:2/p:2/span:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:3/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:3/p:2/strong:1',
       'stat-unit#8': P + '/div:13/article:3/p:2/span:1',
-      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:4/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:13/article:4/p:2/strong:1',
       'stat-unit#9': P + '/div:13/article:4/p:2/span:1',
       'meter-label#2': P + '/section:5/ol:1/li:1/p:1',
       'meter-value#2': P + '/section:5/ol:1/li:1/strong:1',
@@ -442,19 +443,19 @@
       'meter-value#36': P + '/section:8/ol:4/li:3/strong:1',
       'meter-label#37': P + '/section:8/ol:4/li:4/p:1',
       'meter-value#37': P + '/section:8/ol:4/li:4/strong:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:1/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:1/p:2/strong:1',
       'stat-unit#10': P + '/div:15/article:1/p:2/span:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:2/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:2/p:2/strong:1',
       'stat-unit#11': P + '/div:15/article:2/p:2/span:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:3/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:3/p:2/strong:1',
       'stat-unit#12': P + '/div:15/article:3/p:2/span:1',
-      ':scope > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:4/p:2/strong:1',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(4) > p:nth-of-type(2) > span:nth-of-type(1)': P + '/div:15/article:4/p:2/strong:1',
       'stat-unit#13': P + '/div:15/article:4/p:2/span:1',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2)': P + '/div:18/section:2/ul:1/li:2',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3)': P + '/div:18/section:2/ul:1/li:3',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4)': P + '/div:18/section:2/ul:1/li:4',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(5)': P + '/div:18/section:2/ul:1/li:5',
-      ':scope > div:nth-of-type(7) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(6)': P + '/div:18/section:2/ul:1/li:6',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(2)': P + '/div:18/section:2/ul:1/li:2',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(3)': P + '/div:18/section:2/ul:1/li:3',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(4)': P + '/div:18/section:2/ul:1/li:4',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(5)': P + '/div:18/section:2/ul:1/li:5',
+      ':scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(5) > div:nth-of-type(3) > div:nth-of-type(1) > nav:nth-of-type(1) > div:nth-of-type(1) > ul:nth-of-type(1) > li:nth-of-type(6)': P + '/div:18/section:2/ul:1/li:6',
       'cell#8': P + '/div:10/section:1/ol:1/li:1/strong:1',
       'cell#11': P + '/div:10/section:1/ol:1/li:2/strong:1',
       'cell#14': P + '/div:10/section:1/ol:1/li:3/strong:1',
@@ -479,7 +480,6 @@
       'fact-term#19': P + '/div:18/section:1/ul:1/li:10/div:1/strong:1'
     },
     'stats-hero': {
-      'eyebrow': P + '/header:1/div:1/p:1',
       'hero-lede': P + '/header:1/div:1/p:2'
     }
   };
@@ -507,8 +507,10 @@
         ] } }
       ] },
       { value: 'chain', label: 'Chain', blocks: [
-        { block: 'disclosure', props: { preview: 1, more: 'Which chain this is, and what is not available', less: 'Fold it',
-          content: 'Chain · dense-wire\n\nnodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to. Live where the wire protocol allows it; named as not-yet-available where it doesn’t.\n\nNot yet available\n\nNamed, not guessed\n\nSigner liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command exposing per-signer vote identity, only the aggregate have/need count above.\n\nSupporters and providers above are distinct live roster identities whose heartbeat has not expired; they are not WebSocket connection counts and are not earning balances.' } },
+        /* first-visit audit 2026-10-22 (P1): the tab opened in internal names (nodes.defxn.com's chain-server, ark-miner-cli,
+           dense-wire). The line in sight says it in plain words; the host and protocol names are the folded details. */
+        { block: 'disclosure', props: { preview: 1, more: 'Details, and what is not available yet', less: 'Fold the details',
+          content: 'This is the chain apps write to, starting with the chat app. It runs on its own machines, separate from the fleet in the Live tab. A figure that the chain cannot report yet is named, never guessed.\n\nChain · dense-wire: nodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to. Live where the wire protocol allows it; named as not-yet-available where it doesn’t.\n\nNot yet available\n\nNamed, not guessed\n\nSigner liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command exposing per-signer vote identity, only the aggregate have/need count above.\n\nSupporters and providers above are distinct live roster identities whose heartbeat has not expired; they are not WebSocket connection counts and are not earning balances.' } },
         { block: 'disclosure', props: { foldBelow: 'phone', more: 'The six chain figures', less: 'Fold the figures', blocks: [live.chain] } },
         { block: 'accordion', props: { label: 'The chain-server mesh', items: [
           { value: 'capacity', title: 'Fleet capacity · chain-server mesh',
@@ -580,6 +582,10 @@
         ] : []) } }
       ] }
     ];
+    /* Seven tabs were more than a first visitor could tell apart (first-visit audit 2026-10-22, P2): Throughput, Client
+       path and Platform are measured runs, so they are tabs inside Evidence, before its runs table and records. The content
+       keeps its order, so every saved key's part ordinal holds; the pins into those panels point one level deeper. */
+    var inner = [views.pop()];
     if ((CP.byConnections || []).length) {
       var first = CP.byConnections[0].swapsPerSecond;
       var cpItems = [];
@@ -589,7 +595,7 @@
         blocks: [meterSpec('Native-token transfers per second, by connections', CP.transfers.byConnections.map(function (p) { return { label: fmt(p.connections) + (p.connections === 1 ? ' connection' : ' connections'), value: p.perSecond, display: fmt(p.perSecond) }; }))] });
       if (CP.transfers && (CP.transfers.byClientProcesses || []).length) cpItems.push({ value: 'processes', title: 'The same transfers with the client split over several processes (64 connections, after the ledger fix)', content: CP.transfers.processesNote,
         blocks: [meterSpec('Transfers per second, by client processes', CP.transfers.byClientProcesses.map(function (p) { return { label: fmt(p.processes) + (p.processes === 1 ? ' client process' : ' client processes'), value: p.perSecond, display: fmt(p.perSecond) }; }))] });
-      views.push({ value: 'client', label: 'Client path', blocks: [
+      inner.push({ value: 'client', label: 'Client path', blocks: [
         { block: 'disclosure', props: { preview: 2, more: 'The verdict, and the method', less: 'Fold it',
           content: 'Client path · swaps over the wire, by concurrent connections · ' + (CP.date || '2026-10-15') + '\n\n' + CP.record + ' (' + (CP.build || 'current build') + '). Accepted swaps/s into ONE node. Not the fleet figure above, and not custodied.\n\n' + CP.verdict +
             (CP.previousBuild ? '\n\nPrevious build: ' + CP.previousBuild.note : '') + '\n\nMetric: ' + CP.metric + '. Mode: ' + CP.mode + '. ' + CP.replicationNote + '. Machine: ' + CP.machine + '. ' + CP.caveats } },
@@ -599,7 +605,7 @@
         { block: 'accordion', props: { label: 'More of the client path', items: cpItems } }
       ] });
     }
-    views.push({ value: 'platform', label: 'Platform', blocks: [
+    inner.push({ value: 'platform', label: 'Platform', blocks: [
       note('Platform & infra resolvers · ' + (INFRA.date || '2026-10-12') + '\n\n' + INFRA.record + ': internal platform systems, not the FLX DeFi chain above — the deployment/preview pipeline, repo storage, and dev tooling, audited and benchmarked with the same discipline (a resolver turns admitted records into a decision; absent is named, never scored as zero).', 'Which systems these are'),
       { block: 'table', props: { caption: 'Resolver audit · six platform systems: does a resolver exist, and if so how fast', maxHeight: 'compact',
         columns: [{ key: 'system', label: 'System' }, { key: 'resolver', label: 'Resolver found?' }, { key: 'rate', label: 'Rate', numeric: true }, { key: 'deployable', label: 'Chain-deployable?' }],
@@ -620,7 +626,7 @@
           ] }
       ] } }
     ] });
-    views.push({ value: 'evidence', label: 'Evidence', blocks: [
+    inner.push({ value: 'runs', label: 'Runs and records', blocks: [
       { block: 'disclosure', props: { preview: 2, more: 'How to read the runs', less: 'Fold it', content: 'Benchmark runs\n\nEvery number above, and the other dated runs, with the record that holds its method and raw output.\n\nEach run measures something different. Do not add rows together, and never add the broadcast to the resolution latency.' } },
       { block: 'table', props: { caption: 'Benchmark runs: what each measured, and its record', maxHeight: 'compact',
         columns: [{ key: 'run', label: 'Run' }, { key: 'scope', label: 'Scope' }, { key: 'result', label: 'Result', numeric: true }, { key: 'window', label: 'Window' }, { key: 'errors', label: 'Errors', numeric: true }, { key: 'record', label: 'Record' }],
@@ -650,6 +656,7 @@
       ] } }
       ] }] } }
     ] });
+    views.push({ value: 'evidence', label: 'Evidence', blocks: [{ block: 'tabs', props: { label: 'Evidence', variant: 'segmented', items: inner } }] });
     var STATES = [['done', 'Done'], ['partial', 'Partial'], ['todo', 'Not yet']];
     views.push({ value: 'readiness', label: 'Readiness', blocks: [
       { block: 'disclosure', props: { preview: 1, more: 'Where the measurements stop', less: 'Fold it',
@@ -667,10 +674,13 @@
       /* The answer: is the fleet up, how many nodes, how fast right now, and when that was
          measured. The details are live (paintHero, below) and announced politely as they change
          (`live`); the next step is a fresh check. */
+      /* first-visit audit 2026-10-22 (P2): the heading is the page's name everywhere else ("Mesh performance": the
+         breadcrumb, the footer, the journey table); the eyebrow repeated the breadcrumb; the document is a quiet link, so
+         the main button no longer takes the visitor off the dashboard */
       { block: 'hero', id: 'stats-hero', was: WAS['stats-hero'], props: {
-        eyebrow: 'DEFXN · Mesh performance', title: 'Fleet dashboard', density: 'compact', live: true,
+        title: 'Mesh performance', density: 'compact', live: true,
         lede: 'Live capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between this and production.',
-        actions: [{ label: 'How every number is measured', href: 'doc:' + WHITEPAPER, tone: 'primary' }, { label: 'Refresh', action: 'refresh', tone: 'secondary' }],
+        actions: [{ label: 'How every number is measured', href: 'doc:' + WHITEPAPER, tone: 'link' }, { label: 'Refresh', action: 'refresh', tone: 'secondary' }],
         meta: [
           { label: 'Status', value: 'Checking fleet' },
           { label: 'Nodes online', value: 'No reading' },

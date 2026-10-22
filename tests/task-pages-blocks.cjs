@@ -35,14 +35,26 @@ const ROUTES = {
       [/^page:\/div:2\/section:2\/figure:1$/, 'the flow figure is the third tab panel; its caption is the tab, its note the panel\'s first line'],
       [/^page:\/div:2\/section:2\/figure:1\/ol:1$/, 'the flow trail is Ark\'s steps'],
       [/^page:\/div:2\/section:2\/table:1$/, 'the same table, now captioned'],
-      [/^page:\/aside:1$/, 'the release aside is Ark\'s callout (in sight from 601px, a press away on a phone); its back link is the pager\'s previous page']
+      [/^page:\/aside:1$/, 'the release aside is Ark\'s callout (in sight from 601px, a press away on a phone); its back link is the pager\'s previous page'],
+      /* first-visit audit 2026-10-22: see reworded */
+      [/^page:\/header:1\/p:1$/, 'the lede starts with the state (see reworded)'],
+      [/^(id:bundle-(workflow|boundary)-title|page:\/div:2\/section:2\/figure:1\/figcaption:1)$/, 'a tab named by what it holds (see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the eyebrow and status row; both keep their keys in the hero'],
       [/^page:\/div:2\/section:1\/ol:1\/li:\d$/, 'the numbered row; its words are the accordion row, which keeps the row\'s copy key'],
-      [/^page:\/div:2\/section:1\/ol:1\/li:\d\/span:1$/, 'the step number; an accordion row is numbered by its place']
+      [/^page:\/div:2\/section:1\/ol:1\/li:\d\/span:1$/, 'the step number; an accordion row is numbered by its place'],
+      [/^page:\/div:2\/section:1\/p:1$/, 'the bare line "Local CLI required" that opened the first tab: the lede and the first step say the tool runs on your machine (first-visit audit 2026-10-22); its copy field is retired']
     ],
-    reworded: [] },
+    /* first-visit audit 2026-10-22: the lede spoke as if the tool existed (P1), and two of the three tab labels were
+       slogans (P2). The words are the manifest's (js/content/manifests/bundledeployer.js); each keeps its key. */
+    reworded: [
+      [/^page:\/header:1\/p:1$/, 'the lede starts with the state: "Not released yet. When it is, you deploy from your own machine. ..."'],
+      [/^id:bundle-workflow-title$/, '"Three steps. One local tool." is the tab "Steps"'],
+      [/^id:bundle-boundary-title$/, '"Choose what you share." is the tab "What becomes public"'],
+      [/^page:\/div:2\/section:2\/figure:1\/figcaption:1$/, '"From your machine to the mesh" is the tab "How a bundle travels"'],
+      [/^page:\/div:2\/section:1\/p:1$/, '"Local CLI required" is gone (see retired)']
+    ] },
   '/deploy': { page: 'deploy', ids: ['deploy-'],
     reshaped: [
       [/^page:\/div:1$/, 'the page\'s content column became the hero (eyebrow, heading, deck); the rest are blocks after it'],
@@ -56,7 +68,8 @@ const ROUTES = {
       [/^page:\/div:1\/details:1$/, 'the scope note is Ark\'s disclosure ("Network scope and source guide"), folded as before'],
       [/^page:\/div:1\/nav:2$/, 'the footer is Ark\'s pager; "Run DEFXN from source" is its previous page'],
       [/^page:\/div:1\/p:2$/, 'the same deck, reworded (see reworded)'],
-      [/^page:\/div:1\/p:3\/a:1$/, 'the same link, named for what it opens: "How deploying a resolver works" (first-visit audit 2026-10-22, see reworded)']
+      [/^page:\/div:1\/p:3\/a:1$/, 'the same link, named for what it opens: "How deploying a resolver works" (first-visit audit 2026-10-22, see reworded)'],
+      [/^page:\/div:1\/div:1\/section:3\/div:1\/p:1$/, 'step 3\'s text without the legacy-alias sentence (first-visit audit 2026-10-22, see reworded)']
     ],
     retired: [
       [/^page:\/div:1\/p:3\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own'],
@@ -67,7 +80,11 @@ const ROUTES = {
     reworded: [[/^page:\/div:1\/p:5$/, 'the position is the selected tab'],
       [/^page:\/div:1\/p:2$/, 'the deck says what a named network does first, then that it is not a security boundary (ledger recheck 2026-10-21: it opened with a list of what networks do not do)'],
       /* first-visit audit 2026-10-22 (P0): the page joins a network; what deploys a resolver is said, not implied */
-      [/^page:\/div:1\/p:3(\/a:1)?$/, 'the resolver note says what this page does ("This page joins your machine to a named network...") and its link names what it opens: "How deploying a resolver works"']] },
+      [/^page:\/div:1\/p:3(\/a:1)?$/, 'the resolver note says what this page does ("This page joins your machine to a named network...") and its link names what it opens: "How deploying a resolver works"'],
+      /* first-visit audit 2026-10-22 (P1): one piece of software had three names; /download names the miner once (the
+         flux-miner command), so step 3 drops "FLUX_MINER_NETWORK is the preferred name; ARK_MINER_NETWORK remains a legacy
+         alias." (the command itself, FLUX_MINER_NETWORK=<network-id> flux-miner start, is unchanged) */
+      [/^page:\/div:1\/div:1\/section:3\/div:1\/p:1$/, 'step 3 reads "Use the returned network ID when starting the daemon."']] },
   '/explore': { page: 'explorer', ids: ['explore-', 'mesh-'],
     reshaped: [
       [/^page:\/div:1$/, 'the home: the same live parts, with Ark\'s crumbs, heading and ways on'],
@@ -77,7 +94,12 @@ const ROUTES = {
       [/^page:\/div:1\/div:2(\/article:1)?$/, 'the two cards: the how-it-works card\'s steps are Ark tabs now (below), so its words are in the tab labels and panels, not the old heading, sentence and numbered buttons'],
       [/^page:\/div:1\/div:2\/article:1\/div:3$/, 'the hand-built stepper is Ark\'s tab strip (the tablist, its panels after it): each numbered button is a tab, its heading and sentence the panel'],
       [/^page:\/div:1\/footer:1\/div:2$/, 'the footer\'s ways on are Ark\'s actions, shown on every width (they were display:none on a phone)'],
-      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the family\'s Explore link is Ark\'s link button, which says it opens another site']
+      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the family\'s Explore link is Ark\'s link button, which says it opens another site'],
+      /* first-visit audit 2026-10-22 (P1): see reworded below */
+      [/^page:\/div:1\/header:1$/, 'the hero: the page\'s name and what it shows (see reworded)'],
+      [/^id:mesh-explorer-title$/, 'the heading names the page (see reworded)'],
+      [/^page:\/div:1\/header:1\/p:1$/, 'the lede says what is shown (see reworded)'],
+      [/^page:\/div:1\/div:1$/, 'the phone\'s switch puts "Live now" first, so a phone opens on the live readings; each button keeps the key it had with its words']
     ],
     retired: [
       [/^page:\/div:1\/header:1\/div:1$/, 'the heading\'s wrapper; the h1 keeps its id key'],
@@ -87,7 +109,14 @@ const ROUTES = {
       [/^page:\/div:2\/div:1\/header:1\/details:1\/summary:1\/span:1$/, 'the connection button\'s status dot: Ark\'s popover button carries a label and an arrow; the Connection figure beside it says live or offline in words'],
       [/^page:\/div:1\/div:2\/article:1\/div:3\/button:\d\/span:1$/, 'the stop\'s number circle; an Ark tab is one label ("01 Shape"), which keeps the button\'s key']
     ],
-    reworded: [] },
+    /* first-visit audit 2026-10-22 (P1): the heading was the home's slogan and the lede sold the network; the page is
+       named for what it is and says what it shows. The family's Explore link says what is there, so it is not read as
+       this page under another name. Each keeps its key (the hero's pins; the link button's pin). */
+    reworded: [
+      [/^id:mesh-explorer-title$/, 'the heading names the page: "Mesh Explorer" (it was the home\'s slogan, "Your idea, live on the mesh.")'],
+      [/^page:\/div:1\/header:1\/p:1$/, 'the lede says what is shown: the records the public machines hold, read live'],
+      [/^page:\/div:1\/footer:1\/div:2\/a:2$/, 'the Explore link says what is there: "Launched resolvers are in the Explore app"']
+    ] },
   '/treasury': { page: 'treasury', ids: ['treasury-'],
     reshaped: [
       [/^page:\/div:1\/header:1$/, 'the header became the hero; its warning line is the callout after it'],
@@ -96,23 +125,44 @@ const ROUTES = {
       [/^page:\/div:1\/section:1\/div:[12]$/, 'an asset line is its tab panel: the line\'s text first, then the code and the amount as a fact'],
       [/^page:\/div:1\/section:1\/div:1\/p:1$/, 'the FXN line keeps its sentence and now ends with what "Tier 1" means (the label was unexplained: docs/ux-audit/ledger.md TR-3)'],
       [/^page:\/div:1\/section:2$/, 'the movement list is the third tab panel: its heading, then each movement as an accordion row'],
-      [/^page:\/div:1\/nav:1$/, 'the way on is Ark\'s pager: Preview a deposit, and the related pages']
+      [/^page:\/div:1\/nav:1$/, 'the way on is Ark\'s pager: Preview a deposit, and the related pages'],
+      /* first-visit audit 2026-10-22 (P1): see reworded */
+      [/^page:\/div:1\/header:1\/p:2$/, 'the lede says what a treasury is, where the real ones are, and what this page shows (see reworded)'],
+      [/^page:\/div:1\/section:1\/div:1(\/p:1)?$/, 'the FXN line drops its own disclaimer (see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the page shell; a block page stacks its blocks in its root'],
+      [/^page:\/div:1\/header:1\/p:1$/, 'the "DESIGN PREVIEW / NOT LIVE" eyebrow: the warning callout is the page\'s one disclaimer (first-visit audit 2026-10-22)'],
       [/^page:\/div:1\/section:[23]\/button:1$/, 'the drill-down\'s back buttons: the movements are a tab, each an accordion row that opens in place'],
       [/^page:\/div:1\/section:2\/button:\d\/(span|strong):\d$/, 'the movement\'s reference, name and amount are one row title now, which keeps the row\'s key'],
       [/^page:\/div:1\/section:3(\/(h2|p:2|dl):?1?)?$/, 'the detail view, filled only once a movement was opened; each row now holds its own evidence (its eyebrow keeps the view\'s "03 / Evidence layer" key)']
     ],
-    reworded: [[/^page:\/div:1\/section:[23]\/button:1$/, 'the back buttons of the old drill-down: nothing needs going back now']] },
+    reworded: [[/^page:\/div:1\/section:[23]\/button:1$/, 'the back buttons of the old drill-down: nothing needs going back now'],
+      /* first-visit audit 2026-10-22 (P1): the page said "not live" three times before its content and never said why to
+         look at a sample when the real treasury is one click away. One disclaimer stays (the callout); "Open the Treasury
+         app" is the hero's action; the lede carries what the hand-off box said. */
+      [/^page:\/div:1\/header:1\/p:1$/, 'the eyebrow "DESIGN PREVIEW / NOT LIVE" is gone: the callout says it'],
+      [/^page:\/div:1\/header:1\/p:2$/, 'the lede: a treasury, where the real ones are (the Treasury app), and that this page shows samples'],
+      [/^page:\/div:1\/section:1\/div:1\/p:1$/, 'the FXN line drops "Not supply, price, or a real treasury balance." (the callout says it)']] },
   '/deposits': { page: 'deposits', ids: ['deposits-'],
     reshaped: [
       [/^page:\/div:1$/, 'the page shell holds the draft now (the form and its local result, the page\'s own); its header is the hero and the callout'],
       [/^page:\/div:1\/header:1$/, 'the header became the hero; its warning line is the callout after it'],
       [/^page:\/div:1\/form:1$/, 'the form is Ark\'s form block (W4-S14): the same two fields and button; the credit note is the amount\'s hint and the purpose list is Ark\'s select field'],
-      [/^page:\/div:1\/nav:1$/, 'the way back is Ark\'s pager: Return to treasury preview, and a related page']
+      [/^page:\/div:1\/nav:1$/, 'the way back is Ark\'s pager: Return to treasury preview, and a related page'],
+      /* first-visit audit 2026-10-22 (P2): see reworded */
+      [/^page:\/div:1\/header:1\/p:2$/, 'the lede says what the visitor can do (see reworded)'],
+      [/^page:\/div:1\/section:1(\/h2:1)?$/, 'the result names what it shows: "Your draft" (see reworded)']
     ],
-    retired: [], reworded: [[/^page:\/div:1\/section:1\/button:1$/, '"← Edit draft" is Ark\'s ghost button "Edit draft" (an arrow is not typed into a label; W4-S14)']] },
+    retired: [
+      [/^page:\/div:1\/header:1\/p:1$/, 'the "DESIGN PREVIEW / NOT LIVE" eyebrow: the warning callout is the page\'s one disclaimer (first-visit audit 2026-10-22)'],
+      [/^page:\/div:1\/section:1\/p:3$/, 'the result\'s "No wallet connection ... was created.": the fifth warning on the page; the callout and the result\'s own "This preview stops here." say it']
+    ],
+    reworded: [[/^page:\/div:1\/section:1\/button:1$/, '"← Edit draft" is Ark\'s ghost button "Edit draft" (an arrow is not typed into a label; W4-S14)'],
+      /* first-visit audit 2026-10-22 (P2): the same caveat came four times before the form and a fifth after Preview;
+         "layout study" is internal language. The callout stays; the lede says what to do. */
+      [/^page:\/div:1\/header:1\/p:[12]$/, 'the eyebrow is gone and the lede says what the visitor can do: "Enter an example FXN amount and a purpose to see what you would review before signing."'],
+      [/^page:\/div:1\/section:1\/(h2:1|p:3)$/, 'the result is titled "Your draft"; its extra warning is gone']] },
   '/experiments': { page: 'proximity', ids: ['lab-', 'work', 'experiments-title', 'study-', 'variable', 'range-'],
     reshaped: [
       [/^id:work$/, 'the model\'s section holds the model alone; its breadcrumb, heading and introduction are blocks before it'],
@@ -142,7 +192,10 @@ const ROUTES = {
   '/account/domains': { page: 'account/domains', ids: ['account-domains-', 'domainsNameInput'],
     reshaped: [[/^page:\/div:1\/header:1$/, 'the header became the hero (its back link is the breadcrumb\'s "Your account"); the form and the hand-off are the block after it'],
       [/^page:\/div:1\/header:1\/form:1$/, 'the form is Ark\'s form block (2026-10-21): the same label and Track, with Ark\'s required mark'],
-      [/^page:\/div:1\/section:1$/, 'the list is Ark\'s list block (2026-10-21); with no names it shows its empty state, why and what to do']],
+      [/^page:\/div:1\/section:1$/, 'the list is Ark\'s list block (2026-10-21); with no names it shows its empty state, why and what to do'],
+      /* first-visit audit 2026-10-22 (P1, the hand-offs): ArkUI.dash.productHandoff (js/ark/dash-kit.js) heads the block with the
+         product's name alone; the family lane ("Ship ·") was a category no page explains. The page's own code is unchanged. */
+      [/^page:\/div:1\/header:1\/div:1$/, 'the Domains hand-off is headed "Domains" without the lane "Ship ·"']],
     retired: [[/^page:\/div:1$/, 'the page shell; a block page stacks its blocks in its root'],
       [/^page:\/div:1\/section:1\/p:1(\/span:1)?$/, 'the "Tracked names (0)" caption and its count: they are the Ark list\'s name now'],
       [/^page:\/div:1\/section:1\/ul:1$/, 'the hand-built rows: Ark\'s list draws its own'],
