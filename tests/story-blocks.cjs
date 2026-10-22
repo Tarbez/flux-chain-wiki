@@ -108,7 +108,8 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
       } else if (route === '/concept') {
         copy('CONCEPT.TITLE'); copy('CONCEPT.DECK');
         ArkManifest.group('theory').forEach((m) => { copy(m.id.toUpperCase() + '.TITLE'); words.push(m.title + ' / open explanation'); });
-        words.push('Start with a question', 'Inspect evidence & activation', 'The math behind a resolver', 'Resolver math / open the page');
+        // 'Evidence & activation' since 2026-10-22 (first-visit audit, P2): 'Inspect evidence & activation' was cut off at 390px
+        words.push('Start with a question', 'Evidence & activation', 'The math behind a resolver', 'Resolver math / open the page');
       } else {
         const area = id.toUpperCase(), m = ArkManifest.get(id);
         Object.keys(m.fields).filter((k) => /^(TITLE|DECK|NEXT|EVIDENCE|STATUS\.(TITLE|TEXT)|LIMIT\.(TITLE|TEXT)|POINT\d+\.(TITLE|TEXT))$/.test(k) || (m.fields[k + '.HREF'] && m.fields[k + '.HREF'].kind === 'link')).forEach((k) => copy(area + '.' + k));

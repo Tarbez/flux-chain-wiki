@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "concept",
-  "title": "The theory",
+  "title": "Operating model",
   "route": "/concept",
   "group": "page",
   "meta": {},

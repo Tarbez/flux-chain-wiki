@@ -11,7 +11,9 @@
    Regression: tests/story-blocks.cjs. */
 (function () {
   'use strict';
-  var GROUPS = [{ value: 'row', label: 'Start with a question' }, { value: 'more', label: 'Inspect evidence & activation' }];
+  /* "Evidence & activation": at 390px "Inspect evidence & activation" was cut to "Inspect evidence & activa" with nothing
+     to show it scrolled (first-visit audit 2026-10-22, P2). */
+  var GROUPS = [{ value: 'row', label: 'Start with a question' }, { value: 'more', label: 'Evidence & activation' }];
   /* `was`: the layout keys of the hand-built index, by block id (tests/lib/layout-continuity.cjs,
      census tests/fixtures/layout-keys/concept.tsv); never typed. */
   var WAS = {
