@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so start from an owner-approved checkout."
+      "value": "The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so start from an owner-approved checkout. Five steps: check the runtime, install the checkout, verify the process, know what success proves, then join a named network."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -48,7 +48,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "In ark-miner-cli, install, copy .env.example to .env, review it, then start. The package exposes flux-miner; ark-miner is a legacy alias."
+      "value": "In ark-miner-cli, install, copy .env.example to .env, review it, then start. The DEFXN miner is the flux-miner command."
     },
     "POINT3.TITLE": {
       "label": "Heading",

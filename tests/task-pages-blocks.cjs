@@ -68,7 +68,8 @@ const ROUTES = {
       [/^page:\/div:1\/details:1$/, 'the scope note is Ark\'s disclosure ("Network scope and source guide"), folded as before'],
       [/^page:\/div:1\/nav:2$/, 'the footer is Ark\'s pager; "Run DEFXN from source" is its previous page'],
       [/^page:\/div:1\/p:2$/, 'the same deck, reworded (see reworded)'],
-      [/^page:\/div:1\/p:3\/a:1$/, 'the same link, named for what it opens: "How deploying a resolver works" (first-visit audit 2026-10-22, see reworded)']
+      [/^page:\/div:1\/p:3\/a:1$/, 'the same link, named for what it opens: "How deploying a resolver works" (first-visit audit 2026-10-22, see reworded)'],
+      [/^page:\/div:1\/div:1\/section:3\/div:1\/p:1$/, 'step 3\'s text without the legacy-alias sentence (first-visit audit 2026-10-22, see reworded)']
     ],
     retired: [
       [/^page:\/div:1\/p:3\/a:2\/span:1$/, 'the kit link\'s ↗ glyph; Ark\'s link button draws its own'],
@@ -79,7 +80,11 @@ const ROUTES = {
     reworded: [[/^page:\/div:1\/p:5$/, 'the position is the selected tab'],
       [/^page:\/div:1\/p:2$/, 'the deck says what a named network does first, then that it is not a security boundary (ledger recheck 2026-10-21: it opened with a list of what networks do not do)'],
       /* first-visit audit 2026-10-22 (P0): the page joins a network; what deploys a resolver is said, not implied */
-      [/^page:\/div:1\/p:3(\/a:1)?$/, 'the resolver note says what this page does ("This page joins your machine to a named network...") and its link names what it opens: "How deploying a resolver works"']] },
+      [/^page:\/div:1\/p:3(\/a:1)?$/, 'the resolver note says what this page does ("This page joins your machine to a named network...") and its link names what it opens: "How deploying a resolver works"'],
+      /* first-visit audit 2026-10-22 (P1): one piece of software had three names; /download names the miner once (the
+         flux-miner command), so step 3 drops "FLUX_MINER_NETWORK is the preferred name; ARK_MINER_NETWORK remains a legacy
+         alias." (the command itself, FLUX_MINER_NETWORK=<network-id> flux-miner start, is unchanged) */
+      [/^page:\/div:1\/div:1\/section:3\/div:1\/p:1$/, 'step 3 reads "Use the returned network ID when starting the daemon."']] },
   '/explore': { page: 'explorer', ids: ['explore-', 'mesh-'],
     reshaped: [
       [/^page:\/div:1$/, 'the home: the same live parts, with Ark\'s crumbs, heading and ways on'],

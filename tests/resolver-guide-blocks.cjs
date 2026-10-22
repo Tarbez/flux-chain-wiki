@@ -105,7 +105,8 @@ const ROUTES = {
       [/^page:\/nav:1$/, 'the footer: its step controls are the terminal\'s way through; its two links are the hero\'s guide action and an Evidence link'],
       /* 2026-10-21 ("/download hand-built", DN7/P8): the hand-built step buttons became Ark's actions row,
          with /deploy's words and tones */
-      [/^page:\/nav:1\/button:1(\/span:1)?$/, '"← Previous" is Ark\'s "Previous step" button (the words /deploy\'s way through uses); its label keeps the inner key']
+      [/^page:\/nav:1\/button:1(\/span:1)?$/, '"← Previous" is Ark\'s "Previous step" button (the words /deploy\'s way through uses); its label keeps the inner key'],
+      [/^id:source-step-2$/, 'step 2 names the miner once (see reworded)']
     ],
     retired: [
       [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width'],
@@ -116,7 +117,10 @@ const ROUTES = {
     reworded: [
       /* 2026-10-22: the first view's step list (and its numbers) is gone; each step is How it works' tab, its number its place */
       [/^page:\/div:1\/section:2\/ol:1\/li:\d\/button:1\/span:1$/, 'a step\'s number ("02"): its place among How it works\' tabs'],
-      [/^page:\/header:1\/div:1\/a:1$/, '"Operator guide" reads "Open the full operator guide" (one link for every width)']
+      [/^page:\/header:1\/div:1\/a:1$/, '"Operator guide" reads "Open the full operator guide" (one link for every width)'],
+      /* first-visit audit 2026-10-22 (P1): one piece of software had three names (DEFXN, ark-miner-cli, flux-miner/ark-miner);
+         step 2 says once that the DEFXN miner is the flux-miner command, and the legacy-alias sentence is gone */
+      [/^id:source-step-2$/, 'step 2 ends "The DEFXN miner is the flux-miner command." (it ended "The package exposes flux-miner; ark-miner is a legacy alias.")']
     ]
   }
 };
