@@ -130,6 +130,12 @@ for (const { key } of continuity.readCensus(ROUTE)) {
 reshaped['page:/div:1/div:9/h2:1'] = 'the section heading "Measured resolver · 2026-10-10" is the accordion row\'s title now, followed by its headline number';
 
 const R = reshaped, X = retired;
+/* first-visit audit 2026-10-22: the heading is the page's name everywhere else (P2); the eyebrow repeated the breadcrumb
+   (P2); the Chain tab opens in plain words, with the host and protocol names in its folded details (P1). */
+R['id:stats-title'] = 'the heading reads "Mesh performance" (it was "Fleet dashboard"; the breadcrumb, footer and journey table call the page Mesh performance)';
+X[P + '/header:1/div:1/p:1'] = 'the eyebrow "DEFXN · Mesh performance": it repeated the breadcrumb';
+R[P + '/div:3/h2:1'] = 'the Chain tab\'s first line says which chain this is in plain words; "Chain · dense-wire" opens the folded details';
+R[P + '/div:3/p:1'] = 'the host and protocol line, now the folded details\' first paragraph, headed "Chain · dense-wire:"';
 R['page:/div:1/section:5/ol:1'] = 'the per-node bars are Ark\'s bar list (each name and core count one label; the census\'s 160-character cut falls later)';
 R['page:/div:1/section:7/ol:1'] = 'the batch-size bars are Ark\'s bar list; each name shortened to fit its 48-character label';
 R['page:/div:1/section:8/ol:1'] = 'the connection bars are Ark\'s bar list (each name one label; the census\'s 160-character cut falls later)';

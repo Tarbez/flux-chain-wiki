@@ -128,7 +128,7 @@
     return ':scope > div:nth-of-type(' + (tab + 1) + ') > div:nth-of-type(' + accordion + ') > div:nth-of-type(' + item + ') > div:nth-of-type(1) > div:nth-of-type(1) > ' + rest;
   }
   var WAS = {
-    'statsledger-hero': { ':root': { key: T + '/article:1', self: true }, 'eyebrow': T + '/article:1/p:1' },
+    'statsledger-hero': { ':root': { key: T + '/article:1', self: true } },
     'statsledger-views': {
       // What it closes (the first tab since 2026-10-21, LG-5), and what it does not do yet
       'tabs-trigger': 'id:statsledger-closes-title', 'tabs-content': { key: T + '/article:2', self: true },
@@ -204,7 +204,9 @@
         { label: 'Home', href: 'route:zero' }, { label: 'Mesh performance', href: 'route:stats' }, { label: 'Ledger benchmark detail' }] } },
       /* The answer: what the design is, in one plain sentence, and the three numbers that matter. */
       { block: 'hero', id: 'statsledger-hero', was: WAS['statsledger-hero'], props: {
-        eyebrow: 'Design, not agreement / a finance resolver by construction', title: 'Ledger benchmark detail', density: 'compact',
+        /* no eyebrow: "Design, not agreement / a finance resolver by construction" was two internal phrases, the first
+           naming the retired agreement direction (first-visit audit 2026-10-22) */
+        title: 'Ledger benchmark detail', density: 'compact',
         lede: 'Every identity keeps its own append-only chain of value moves, so a double-spend is not refused by a referee: it cannot be written twice.',
         meta: [
           { label: 'Sustained, 6 nodes, 5 min', value: '12,403 ops/s, zero failures' },

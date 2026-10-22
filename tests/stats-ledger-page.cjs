@@ -32,7 +32,7 @@ const T = 'page:/div:1/div:1';
 
 /* Why each old key whose words changed shape still lands on its successor. */
 const reshaped = {
-  [T + '/article:1']: 'the hero tile became the hero block: the eyebrow and title kept, a plain one-sentence answer and the three numbers that matter added; its precise statement moved to the "How it works" tab',
+  [T + '/article:1']: 'the hero tile became the hero block: the title kept (the eyebrow until 2026-10-22, see retired), a plain one-sentence answer and the three numbers that matter added; its precise statement moved to the "How it works" tab',
   [T + '/article:2']: 'the "What this closes by construction" tile became the "What it closes" tab panel',
   [T + '/article:3']: 'the "Where this lives in the spec" tile became an accordion item of the "How it works" tab',
   [T + '/article:3/ul:1']: 'the same five spec lines, now facts -- with the old hero chips (date, record type, spec version) added after them; the census\'s 160-character cut falls a character later',
@@ -78,7 +78,9 @@ const retired = {
   [T]: 'the bento grid wrapper (stats-bento); the blocks sit directly in the page root',
   [T + '/article:1/p:3']: 'the hero chip row: its three chips are facts in "Where this lives in the spec" now, each keeping its key',
   [T + '/article:1/a:1']: 'the hero back link: the trail\'s "Mesh performance" and the pager\'s "Back to the main measurements" lead to the same page',
-  [T + '/article:1/a:1/span:1']: 'the hand-drawn "←" glyph of that back link'
+  [T + '/article:1/a:1/span:1']: 'the hand-drawn "←" glyph of that back link',
+  /* first-visit audit 2026-10-22 (P2) */
+  [T + '/article:1/p:1']: 'the eyebrow "Design, not agreement / a finance resolver by construction": two internal phrases, the first naming the retired agreement direction'
 };
 for (const a of [2, 4, 10, 11]) retired[T + '/article:' + a + '/h2:1'] = 'the tile heading is now the caption of the table it introduced (same words); a <caption> is not a layout target (js/content/layout.js KEY_TAGS has no caption), so nothing can carry its key until captions become keyable';
 for (const li of [1, 2, 3, 4, 5]) {
@@ -129,7 +131,11 @@ for (const [key] of continuity.readCensus(ROUTE).map((e) => [e.key])) {
   assert.deepEqual(seen.tabs, ['What it closes', 'How it works', 'On the wire', 'Fleet runs', 'One machine', 'Attacks', 'Durability']);
   assert.deepEqual(seen.meta, ['Sustained, 6 nodes, 5 min', 'Attacks refused', 'Recovery vs live admission'], 'the hero answers with the three numbers that matter');
   assert.equal(seen.h1, 'Ledger benchmark detail', 'the dashboard h1 is its own name, not the article\'s');
-  assert(seen.text.includes('a finance resolver by construction'), 'the old kicker is kept');
+  /* The old kicker ("Design, not agreement / a finance resolver by construction") was kept through the conversion; the
+     first-visit audit 2026-10-22 (P2) removed it: two internal phrases, the first naming the retired agreement direction.
+     The lede says what the design is in plain words. */
+  assert(!seen.text.includes('Design, not agreement'), 'the internal kicker is gone');
+  assert(/cannot be written twice/.test(seen.text), 'the lede still says what the design does');
   assert.deepEqual(seen.tables, [4, 5, 7, 5, 3, 7, 4], 'every table row: what closes, the 5 sample entries, the 6-node burst, the single-pair runs, the one-core modes, the 7 attacks, the 4 replication modes');
   assert.deepEqual(seen.sampleRows, ['pos 0', 'pos 1', 'pos 2', 'pos 3', 'pos 4'], 'the real chain, genesis to the latest receive');
   assert.deepEqual(seen.meter, ['Grammar admit', 'Ed25519 verify', 'Chain head + append'], 'the CPU split');

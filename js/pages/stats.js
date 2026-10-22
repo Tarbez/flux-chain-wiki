@@ -479,7 +479,6 @@
       'fact-term#19': P + '/div:18/section:1/ul:1/li:10/div:1/strong:1'
     },
     'stats-hero': {
-      'eyebrow': P + '/header:1/div:1/p:1',
       'hero-lede': P + '/header:1/div:1/p:2'
     }
   };
@@ -507,8 +506,10 @@
         ] } }
       ] },
       { value: 'chain', label: 'Chain', blocks: [
-        { block: 'disclosure', props: { preview: 1, more: 'Which chain this is, and what is not available', less: 'Fold it',
-          content: 'Chain · dense-wire\n\nnodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to. Live where the wire protocol allows it; named as not-yet-available where it doesn’t.\n\nNot yet available\n\nNamed, not guessed\n\nSigner liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command exposing per-signer vote identity, only the aggregate have/need count above.\n\nSupporters and providers above are distinct live roster identities whose heartbeat has not expired; they are not WebSocket connection counts and are not earning balances.' } },
+        /* first-visit audit 2026-10-22 (P1): the tab opened in internal names (nodes.defxn.com's chain-server, ark-miner-cli,
+           dense-wire). The line in sight says it in plain words; the host and protocol names are the folded details. */
+        { block: 'disclosure', props: { preview: 1, more: 'Details, and what is not available yet', less: 'Fold the details',
+          content: 'This is the chain apps write to, starting with the chat app. It runs on its own machines, separate from the fleet in the Live tab. A figure that the chain cannot report yet is named, never guessed.\n\nChain · dense-wire: nodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to. Live where the wire protocol allows it; named as not-yet-available where it doesn’t.\n\nNot yet available\n\nNamed, not guessed\n\nSigner liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command exposing per-signer vote identity, only the aggregate have/need count above.\n\nSupporters and providers above are distinct live roster identities whose heartbeat has not expired; they are not WebSocket connection counts and are not earning balances.' } },
         { block: 'disclosure', props: { foldBelow: 'phone', more: 'The six chain figures', less: 'Fold the figures', blocks: [live.chain] } },
         { block: 'accordion', props: { label: 'The chain-server mesh', items: [
           { value: 'capacity', title: 'Fleet capacity · chain-server mesh',
@@ -667,10 +668,13 @@
       /* The answer: is the fleet up, how many nodes, how fast right now, and when that was
          measured. The details are live (paintHero, below) and announced politely as they change
          (`live`); the next step is a fresh check. */
+      /* first-visit audit 2026-10-22 (P2): the heading is the page's name everywhere else ("Mesh performance": the
+         breadcrumb, the footer, the journey table); the eyebrow repeated the breadcrumb; the document is a quiet link, so
+         the main button no longer takes the visitor off the dashboard */
       { block: 'hero', id: 'stats-hero', was: WAS['stats-hero'], props: {
-        eyebrow: 'DEFXN · Mesh performance', title: 'Fleet dashboard', density: 'compact', live: true,
+        title: 'Mesh performance', density: 'compact', live: true,
         lede: 'Live capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between this and production.',
-        actions: [{ label: 'How every number is measured', href: 'doc:' + WHITEPAPER, tone: 'primary' }, { label: 'Refresh', action: 'refresh', tone: 'secondary' }],
+        actions: [{ label: 'How every number is measured', href: 'doc:' + WHITEPAPER, tone: 'link' }, { label: 'Refresh', action: 'refresh', tone: 'secondary' }],
         meta: [
           { label: 'Status', value: 'Checking fleet' },
           { label: 'Nodes online', value: 'No reading' },
