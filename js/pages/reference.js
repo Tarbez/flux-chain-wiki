@@ -79,13 +79,20 @@
         var row=ArkUI.el('tr','');line.replace(/^\||\|$/g,'').split('|').forEach(function (cell) {var td=ArkUI.el(header?'th':'td','');if(header)td.setAttribute('scope','col');inline(td,cell.trim(),current);row.appendChild(td);});table.appendChild(row);return;
       }
       table=null;
-      var heading=line.match(/^(#{1,6})\s+(.+)/), item=line.match(/^(?:[-*]|\d+\.)\s+(.+)/);
+      var heading=line.match(/^(#{1,6})\s+(.+)/), item=line.match(/^(?:[-*]|\d+\.)\s+(.+)/), quote=line.match(/^>\s?(.*)/);
       if (item) {if(!list){list=ArkUI.el(/^\d/.test(line)?'ol':'ul','');article.appendChild(list);}var li=ArkUI.el('li','');inline(li,item[1],current);list.appendChild(li);return;}
       list=null;
       if (heading && heading[1] === '#' && heading[2] === current.title) return;
       /* The reader owns the one h1 (the document's title); a document's `##` is the page's h2, its `###` the h3
          (until 2026-10-20 each was one level too deep, so the outline went h1 -> h3). `legacyTag` is the tag the
          element had then: saved layout keys were made under it and are kept by pin (see pinHeadings). */
+      /* A `> ` line is a quote (it showed as a paragraph starting with a literal ">": first-visit audit 2026-10-22): a
+         <blockquote> holding the paragraph it was. The paragraph keeps the key it had (pinQuotes); a blockquote is not a
+         layout target (js/content/layout.js), so the quote counts as that <p> among the article's nodes (legacyTag). */
+      if (quote) {
+        var said=ArkUI.el('blockquote','reference-quote'), words=ArkUI.el('p','');
+        said.legacyTag='p';inline(words,quote[1],current);said.appendChild(words);article.appendChild(said);return;
+      }
       var block=ArkUI.el(heading?'h'+Math.max(2,Math.min(6,heading[1].length)):'p','');
       if(heading)block.legacyTag='h'+Math.min(6,heading[1].length+1);
       inline(block,heading?heading[2]:line,current);article.appendChild(block);
@@ -119,6 +126,18 @@
       while (used[id]) id = base + '-' + (++n);
       used[id] = true; node.id = id;
       node.setAttribute('data-ark-layout-pin', keys.get(node));
+    });
+  }
+  /* A quote is a <blockquote> around the <p> it was: the nodes after it would count differently from the keys they were
+     saved under, so with a quote in the document each of the article's nodes carries its legacy key, and a quote's key is
+     carried by the paragraph inside it. */
+  function isQuote(node) { return String(node.tagName).toLowerCase() === 'blockquote'; }
+  function pinQuotes(article, keys) {
+    var kids = Array.prototype.slice.call(article.children);
+    if (!kids.some(isQuote)) return;
+    kids.forEach(function (node) {
+      var target = isQuote(node) ? node.firstChild : node;
+      if (target && !target.getAttribute('data-ark-layout-pin')) target.setAttribute('data-ark-layout-pin', keys.get(node));
     });
   }
   function textLength(nodes) { return nodes.reduce(function (n, node) { return n + String(node.textContent).length; }, 0); }
@@ -182,7 +201,7 @@
       else if (open) open.body.push(node);
       else intro.push(node);
     });
-    function carry(nodes, host) { nodes.forEach(function (node) { if (!node.hasAttribute('data-ark-layout-pin')) node.setAttribute('data-ark-layout-pin', keys.get(node)); host.appendChild(node); }); }
+    function carry(nodes, host) { nodes.forEach(function (node) { if (!isQuote(node) && !node.hasAttribute('data-ark-layout-pin')) node.setAttribute('data-ark-layout-pin', keys.get(node)); host.appendChild(node); }); }
     function fold(props, slot) { return ArkUI.blocks.render({block: 'disclosure', props: Object.assign({slot: 'slot'}, props)}, {slots: {slot: slot}, onInvalid: 'throw'}); }
     if (intro.length && textLength(intro) > INTRO_LONG) {
       var first = ArkUI.el('div', 'reference-section');
@@ -214,6 +233,9 @@
     try {
       var crumbs = ArkUI.blocks.render({block: 'breadcrumb', props: {label: 'Where this document sits', items: items}}, {onInvalid: 'throw'});
       crumbs.setAttribute('data-ark-layout-pin', 'page:/p:1');
+      /* the link to the page the reader came from returns to it as it was (its query: a view, a step), as the return link did */
+      var at = current.from.indexOf('?'), origin = key !== 'zero' && at >= 0 ? crumbs.querySelector('a[data-scene-link="' + key + '"]') : null;
+      if (origin) { origin.href = ArkUI.route.href(current.from); origin.dataset.routeQuery = current.from.slice(at + 1); }
       return crumbs;
     } catch (error) { if (typeof console !== 'undefined') console.warn('/reference: breadcrumb refused: ' + error.message); return null; }
   }
@@ -221,20 +243,26 @@
     if (current.refusal) return populateRefusal(el, current);
     el.replaceChildren();el.dataset.referenceDoc=current.doc;
     var top=ArkUI.el('nav','reference-orientation');top.setAttribute('aria-label','Reference return');
-    top.appendChild(backLink(current.from));
-    var source=ArkUI.el('a','story-reference','Original Markdown ↗');source.href=current.doc;source.dataset.referenceOriginal='true';source.dataset.icon='open';top.appendChild(source);el.appendChild(top);
     /* the title is the index's: generated from the document's first `# ` line, of the very text rendered below */
     var title=ArkUI.referenceIndex[current.doc].title;
     current.title = title;
     var crumbs = breadcrumb(current);
+    /* With the breadcrumb drawn, it is the way back (its link to the page the reader came from carries that page's query,
+       as the return link did), so "← Return to ..." is not stacked above it (first-visit audit 2026-10-22). A reader
+       booted without Ark's blocks has no breadcrumb and keeps the return link. Original Markdown keeps the key it had as
+       the second link. */
+    if (!crumbs) top.appendChild(backLink(current.from));
+    var source=ArkUI.el('a','story-reference','Original Markdown ↗');source.href=current.doc;source.dataset.referenceOriginal='true';source.dataset.icon='open';top.appendChild(source);el.appendChild(top);
+    if (crumbs) source.setAttribute('data-ark-layout-pin', 'page:/nav:1/a:2');
     if (crumbs) el.appendChild(crumbs);
     el.appendChild(ArkUI.el('h1','',title));
-    var provenance = ArkUI.el('p','reference-provenance','This source provides the detailed contract. Opening it does not establish a live observation or verification result.');
+    var provenance = ArkUI.el('p','reference-provenance','This is the source document. Opening it does not establish a live observation or verification result.');
     /* the provenance note was the second paragraph (the path line was the first): it keeps its key */
     if (crumbs) provenance.setAttribute('data-ark-layout-pin', 'page:/p:2');
     el.appendChild(provenance);
     var article=render(documents.get(current.doc),current), keys = legacyKeys(article);
     pinHeadings(article, keys);
+    pinQuotes(article, keys);
     var toc = hasBlocks() ? contents(article) : null;
     if (toc) el.appendChild(toc);
     el.appendChild(article);

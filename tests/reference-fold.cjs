@@ -63,9 +63,17 @@ function headingsOf(doc) {
       crumbsTag: (page.querySelector('.ark-breadcrumb') || {}).tagName,
       crumbsBeforeTitle: !!(page.querySelector('.ark-breadcrumb') && page.querySelector('h1') && (page.querySelector('.ark-breadcrumb').compareDocumentPosition(page.querySelector('h1')) & 4)),
       refused: page.querySelectorAll('[data-ark-block-refused]').length,
+      quotes: [...page.querySelectorAll('article > blockquote')].map((q) => clean(q.textContent).slice(0, 20)),
+      literalQuote: [...page.querySelectorAll('article p')].filter((p) => /^>/.test(p.textContent.trim())).length,
+      backLinks: [...page.querySelectorAll('.reference-orientation a')].filter((a) => /Return to/.test(a.textContent)).length,
       text: page.textContent
     };
   });
+  /* first-visit audit 2026-10-22 (P2): the document's `> ` note showed as a paragraph starting with a literal ">", and
+     "← Return to Home" stood above a breadcrumb that already goes back */
+  assert.deepEqual(seen.quotes, ['Written for the agre'], 'a `> ` line is a quote: ' + seen.quotes.join(' | '));
+  assert.equal(seen.literalQuote, 0, 'no paragraph starts with a literal ">"');
+  assert.equal(seen.backLinks, 0, 'with the breadcrumb drawn, no "Return to" link is stacked above it');
   assert.equal(seen.folds, 2, 'Evidence and Interpretation each fold');
   assert.deepEqual(seen.outline, ['H1', 'H2', 'H2'], 'the outline is the title, then the document\'s `##` as h2: no level skipped (RF-2)');
   assert.deepEqual(seen.headings, ['Evidence', 'Interpretation'], 'the headings stay where they were, outside the folds');
@@ -158,21 +166,34 @@ function headingsOf(doc) {
   /* ---- a document that was opened from another page: Home, that page, then the document ---- */
   const from = await boot('?doc=' + encodeURIComponent('docs/protocol/agreements.md') + '&from=' + encodeURIComponent('/lifecycle/offer?view=reference'), (window) => {
     const page = window.document.querySelector('[data-ark-page="reference"]');
-    return { crumbs: [...page.querySelectorAll('.ark-breadcrumb a')].map((a) => clean(a.textContent) + '>' + a.getAttribute('data-scene-link')), back: (page.querySelector('.reference-orientation a') || {}).dataset && page.querySelector('.reference-orientation a').dataset.routeQuery };
+    return { crumbs: [...page.querySelectorAll('.ark-breadcrumb a')].map((a) => clean(a.textContent) + '>' + a.getAttribute('data-scene-link')), origin: (page.querySelector('.ark-breadcrumb a[data-scene-link="lifecycle/offer"]') || { dataset: {} }).dataset.routeQuery,
+      backLinks: [...page.querySelectorAll('.reference-orientation a')].filter((a) => /Return to/.test(a.textContent)).length };
   });
   assert.deepEqual(from.crumbs, ['Home>zero', 'Offer: propose the terms>lifecycle/offer'], 'the breadcrumb leads to the page the reader came from: ' + from.crumbs.join(' | '));
-  assert.equal(from.back, 'view=reference', 'and the Return link still carries its exact query');
+  /* the Return link this replaced carried the page's exact query (2026-10-19, tests/reference-reader.cjs); the breadcrumb's link does now */
+  assert.equal(from.origin, 'view=reference', 'and its link to that page carries the exact query the Return link carried');
+  assert.equal(from.backLinks, 0, 'with no "Return to" link stacked above the breadcrumb');
 
   /* ---- saved CMS edits still land: every old key, none retired ---------------------------------------- */
   /* The raw path kicker became the breadcrumb: the same slot on the page, and it takes the kicker's key (a saved edit on the
      kicker lands on the breadcrumb). Everything else keeps its words as well as its key. */
-  const reshaped = { 'page:/p:1': 'the raw "Canonical reference / <path>" kicker became Ark\'s breadcrumb (Home / document), pinned to its key' };
+  const reshaped = { 'page:/p:1': 'the raw "Canonical reference / <path>" kicker became Ark\'s breadcrumb (Home / document), pinned to its key',
+    /* first-visit audit 2026-10-22: "the detailed contract" named the retired agreement direction */
+    'page:/p:2': 'the provenance line says what the document is: "This is the source document." (it said "This source provides the detailed contract.")',
+    'page:/nav:1': 'the orientation row holds Original Markdown alone: the breadcrumb is the way back',
+    /* the census cut the article's words at 160 characters; the quote's ">" is no longer text, so the cut falls one later */
+    'page:/article:1': 'the same document: its `> ` note is a quote now, not a paragraph starting with ">"',
+    'page:/article:1/p:1': 'the same note, inside its quote: the paragraph keeps its key; its words no longer start with a literal ">"' };
+  /* first-visit audit 2026-10-22 (P2): two ways back were stacked; the breadcrumb stays (its link to the page the reader came
+     from carries that page's query), so the Return link and its icon are retired. Original Markdown keeps its key by pin. */
+  const retired = {};
+  for (const key of ['page:/nav:1/a:1', 'page:/nav:1/a:1/svg:1', 'page:/nav:1/a:1/svg:1/path:1', 'page:/nav:1/a:1/svg:1/path:2']) retired[key] = 'the "← Return to Home" link (and its icon): the breadcrumb above the title is the way back';
   const census = continuity.readCensus(ROUTE);
   const after = await continuity.pageKeys(ROUTE);
-  const tally = continuity.assertContinuity(census, after, { reshaped, retired: {} });
-  assert.equal(tally.kept + tally.reshaped, census.length, 'every old key is accounted for');
-  const landed = await continuity.assertSavedEditsLand(ROUTE, census, { reshaped, retired: {} });
-  assert.equal(landed, census.length - 1, 'a saved frame on every old key but page:/ landed');
+  const tally = continuity.assertContinuity(census, after, { reshaped, retired });
+  assert.equal(tally.kept + tally.reshaped + tally.retired, census.length, 'every old key is accounted for');
+  const landed = await continuity.assertSavedEditsLand(ROUTE, census, { reshaped, retired });
+  assert.equal(landed, census.length - 1 - Object.keys(retired).length, 'a saved frame on every old key but page:/ and the retired ones landed');
   assert(after.every((entry) => !/^id:ark-r-/.test(entry.key)), 'no generated (ark-r-) id became a layout key');
   assert(after.every((entry) => !/^id:reference-/.test(entry.key)), 'and no heading id (the contents\' targets) became one: each heading is pinned');
 

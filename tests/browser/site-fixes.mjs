@@ -53,10 +53,13 @@ async function docLinks(context, base) {
     if (!target) { check(false, `${route}: has a visible document link to click`); await page.close(); continue; }
     await page.click('[data-crawl-pick="1"]');
     await settled(page, 'reference');
-    const shown = await page.evaluate(() => { const el = document.querySelector('[data-ark-page="reference"]'); return { doc: el.dataset.referenceDoc, back: el.querySelector('.reference-orientation a[data-scene-link]').dataset.sceneLink, url: location.pathname + location.search }; });
+    /* The way back is the breadcrumb's link to the page the reader came from (its last link): "← Return to ..." stood
+       above that breadcrumb and was removed as a second way back (first-visit audit 2026-10-22, /reference P2). */
+    const BACK = '[data-ark-page="reference"] .ark-breadcrumb a[data-scene-link]:not([data-scene-link="zero"])';
+    const shown = await page.evaluate((BACK) => { const el = document.querySelector('[data-ark-page="reference"]'); return { doc: el.dataset.referenceDoc, back: document.querySelector(BACK).dataset.sceneLink, url: location.pathname + location.search }; }, BACK);
     check(shown.doc === target, `${route}: the doc link opens ${target} (reader shows ${shown.doc})`);
     check(shown.back === key, `${route}: "Return" points back to ${key} (it points to ${shown.back})`);
-    await page.click('.reference-orientation a[data-scene-link]');
+    await page.click(BACK);
     await settled(page, shown.back);
     check(await page.evaluate(() => location.pathname) === route, `${route}: Return lands on ${route}`);
     await page.close();
