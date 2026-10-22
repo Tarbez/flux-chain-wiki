@@ -11,9 +11,9 @@ ArkUI.mountStudio = function (root) {
   })();
   function findById(id) { return root.querySelector('#' + id); }
   var studies = {
-    spacing: { title: 'How can threshold agreement be pictured?', description: 'This model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.', label: 'Visual convergence', start: 'Apart', end: 'Together', note: 'A VISUAL ANALOGY FOR DERIVED, TEMPORARY AUTHORITY.', code: 'FX—001' },
-    rhythm: { title: 'How can one agreement lifecycle be pictured?', description: 'This model moves through intent, offer, agreement, fulfillment, and receipt as an explanatory sequence. It does not load signed manifests, verify CID links, or observe a live agreement.', label: 'Position in the illustrated lifecycle', start: 'INTENT', end: 'RECEIPT', note: 'AN ILLUSTRATION OF FIVE LINKED STAGES, NOT A LIVE TRACE.', code: 'FX—002' },
-    depth: { title: 'How can network boundaries be pictured?', description: 'This model separates four shapes to illustrate named-network scope on one substrate. Current isolation partitions miner presence; the control does not test or imply a security boundary.', label: 'Visual separation', start: 'Shared', end: 'Separated', note: 'PRESENCE SCOPE IS PARTIAL, NOT A SECURITY GUARANTEE.', code: 'FX—003' }
+    spacing: { title: 'How can threshold agreement be pictured?', description: 'This model moves independent groups closer together as a visual analogy for threshold evidence. It does not calculate a real roster, vote, certificate, or transition.', label: 'Visual convergence', start: 'Apart', end: 'Together', note: 'THREE INDEPENDENT GROUPS', code: 'FX—001' },
+    rhythm: { title: 'How can one agreement lifecycle be pictured?', description: 'This model moves through intent, offer, agreement, fulfillment, and receipt as an explanatory sequence. It does not load signed manifests, verify CID links, or observe a live agreement.', label: 'Position in the illustrated lifecycle', start: 'INTENT', end: 'RECEIPT', note: 'FIVE LINKED RECORDS', code: 'FX—002' },
+    depth: { title: 'How can network boundaries be pictured?', description: 'This model separates four shapes to illustrate named-network scope on one substrate. Current isolation partitions miner presence; the control does not test or imply a security boundary.', label: 'Visual separation', start: 'Shared', end: 'Separated', note: 'FOUR NAMED NETWORKS, ONE SUBSTRATE', code: 'FX—003' }
   };
   var mode = ArkUI.studioValues.mode; var values = ArkUI.studioValues;
   var specimen = root.querySelector('.specimen');
@@ -38,7 +38,8 @@ ArkUI.mountStudio = function (root) {
     mode = next; values.mode = next; var study = studies[mode];
     root.querySelector('.lab').dataset.mode = mode;
     root.querySelectorAll('.study-tabs input[type="radio"]').forEach(function (radio) { radio.checked = radio.value === mode; });
-    findById('study-title').textContent = study.title;findById('experiments-title').textContent=study.title;
+    /* the study's question is the model's own heading; the page's h1 stays the page's name (first-visit audit 2026-10-22) */
+    findById('study-title').textContent = study.title;
     findById('study-description').textContent = study.description;
     root.querySelector('label[for="variable"]').textContent = study.label;
     /* The instruction is derived from the study's own end labels, so a new study carries one: "Drag the slider ... from apart to together." */

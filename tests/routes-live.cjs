@@ -73,7 +73,8 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
   assert(!fs.existsSync(path.join(ROOT, 'js/resolvers/experiment.js')) && !fs.existsSync(path.join(ROOT, 'js/pages/experiments.js')), 'the duplicate experiment entry page is gone, merged into the lab');
   assert(read('js/pages/lab.js').includes('How can threshold agreement be pictured?'), 'the old intro question survives in the lab');
   /* the lab is a page of Ark blocks since 2026-10-19 (W3-GUIDE): its h1 is the hero's, given the old id */
-  assert(/block: 'hero', id: 'lab-hero'[^\n]*title: 'Explore three protocol concepts\.'/.test(read('js/pages/lab.js')) && read('js/pages/lab.js').includes("titleId: 'experiments-title'"), 'interactive model has a primary heading');
+  // the hero title names the page as the menu does, and stays (first-visit audit 2026-10-22: it was "Explore three protocol concepts." and then each study's question)
+  assert(/block: 'hero', id: 'lab-hero'[^\n]*title: 'Interactive model: authority, lifecycle and networks'/.test(read('js/pages/lab.js')) && read('js/pages/lab.js').includes("titleId: 'experiments-title'"), 'interactive model has a primary heading');
 
   const summary = await inspectDocument({ html: await readIndexHtml(ROOT), url: HOST + '/', resources, root: ROOT, timeoutMs: STALL_DEADLINE_MS }, async (window) => {
     const { document, ArkUI, ArkCopy, ArkStates, ArkCanvasTransitions, ArkElementMotion } = window;
