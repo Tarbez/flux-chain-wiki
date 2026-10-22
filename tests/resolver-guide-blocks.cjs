@@ -53,7 +53,8 @@ const ROUTES = {
       [/^page:\/div:1\/nav:3\/button:1$/, '"←" is Ark\'s "Previous step" button'],
       [/^page:\/div:1\/nav:3\/a:1\/span:1$/, 'the next step\'s name on the pill ("Resolve") is "Next step": the chosen step is named by the steps row above'],
       [/^page:\/figure:1\/figcaption:1\/button:1\/span:1$/, 'the "↻" glyph of Run again: the Ark button says "Run again"'],
-      [/^page:\/figure:1\/div:2\/div:1\/button:\d\/span:1$/, 'a document\'s name is its Ark choice option, with its size: "Report · 3.2 MB"']
+      [/^page:\/figure:1\/div:2\/div:1\/button:\d\/span:1$/, 'a document\'s name is its Ark choice option, with its size: "Report · 3.2 MB"'],
+      [/^page:\/div:1\/p:1$/, 'the eyebrow, reworded: "DEFXN / RESOLVERS" (see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the left column; a block page stacks its blocks in its root'],
@@ -70,7 +71,8 @@ const ROUTES = {
     reworded: [
       [/^page:\/div:1\/nav:3(\/a:2)?$/, '"Spec →" reads "Wording from the resolver spec" (and "Resolve→" is the illustration\'s next button)'],
       [/^page:\/figure:1\/p:2\/a:[12]$/, '"resolver spec" / "status page" read "Wording from the resolver spec" / "Status from the status page"'],
-      [/^id:resolver-lab-title$/, '"Get a claim you can check" reads "Get an answer you can check": the heading used "claim" before the page defines it (ledger recheck 2026-10-21, WR-4)']
+      [/^id:resolver-lab-title$/, '"Get a claim you can check" reads "Get an answer you can check": the heading used "claim" before the page defines it (ledger recheck 2026-10-21, WR-4)'],
+      [/^page:\/div:1\/p:1$/, 'the eyebrow says "DEFXN / RESOLVERS" like every other page ("FLUX PROTOCOL" was never introduced: first-visit audit 2026-10-22)']
     ]
   },
   '/start-from-something-real': { page: 'references', ids: ['references-'],

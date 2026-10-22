@@ -113,7 +113,7 @@ reshaped['page:/div:1/div:1/article:6/p:2/a:2'] = 'the same "Open Deploy" link; 
   assert.deepEqual(seen.blocks, ['breadcrumb', 'hero', 'disclosure', 'tabs', 'pager'], 'trail, the answer, where the numbers come from, the detail as tabs, the way on');
   assert.deepEqual(seen.tabs, ['Resolver chains', 'Capabilities', 'Bridge chains', 'Deploy your own', 'Applications']);
   const c = snap.counts;
-  assert.deepEqual(seen.meta, ['First-party chains' + c.nativeResolverChains, 'Bridge chains' + c.bridgeChains, 'Capabilities' + c.capabilities, 'Launched on devnet' + snap.observation.capabilitiesLaunched + ' · ' + snap.observation.date], 'the hero answers with the counts, from the snapshot');
+  assert.deepEqual(seen.meta, ['First-party chains' + c.nativeResolverChains, 'Bridge chains' + c.bridgeChains, 'Capabilities' + c.capabilities, 'Capabilities launched' + snap.observation.capabilitiesLaunched + ' on the development network · ' + snap.observation.date], 'the hero answers with the counts, from the snapshot');
   assert.deepEqual(seen.tables.map((t) => t.rows.length), [snap.resolvers.length, snap.capabilities.length, snap.bridges.length], 'every resolver chain, capability and bridge chain has its row (no feature reduction)');
   assert.deepEqual(seen.tables[0].rows.map((r) => r[0]), snap.resolvers.map((r) => r.chainId), 'chain ids come from the snapshot, in its order');
   assert.equal(seen.absentCells, 0, 'no absent cell is drawn: each says why instead (an Ark absent cell escapes the scroll region)');

@@ -45,6 +45,7 @@ const DETAIL = [
   ['reshaped', /^page:\/div:1\/header:1\/p:1$/, 'the position "06 / 20 · Value & finance" reads "Resolution 6 of 20 · Value & finance" (the story pages\' "<sequence> · n of N")'],
   ['reshaped', /^page:\/div:1\/header:1\/div:1$/, 'the actions row keeps the main action; the deeper page beside it is a related page in the pager now, so the hero keeps one row of buttons on a phone'],
   ['reshaped', /^page:\/div:1\/section:1$/, 'the product shelf is Ark tabs'],
+  ['reshaped', /^page:\/div:1\/header:1\/p:2$/, 'the same lede; /resolutions/website\'s drops "no fees", which had no condition (first-visit audit 2026-10-22)'],
   /* first-visit audit 2026-10-22 (P0) */
   ['reshaped', /^page:\/div:1\/header:1\/div:1\/a:1$/, 'the main action: "Open <the first ready product>" where Start here opened a product still being built'],
   ['reshaped', /^page:\/div:1\/section:1\/div:1$/, 'the shelf\'s tab list: its first tab is "Products · N" (it lists building products too), not "Ready now"'],
@@ -63,6 +64,9 @@ const DETAIL = [
 ];
 const INDEX = [
   ['reshaped', /^page:\/header:1$/, 'the header became the hero; the deck is the disclosure after it'],
+  /* first-visit audit 2026-10-22 (P1) */
+  ['reshaped', /^page:\/header:1\/div:1\/p:2$/, 'the deck opens with what a resolution is ("A resolution is a job DEFXN does for you..."); the partner line is gone'],
+  ['reshaped', /^page:\/section:1\/div:2\/div:2\/a:1\/span:2(\/span:1)?$/, 'the Website card\'s line reads "no database, no hosting, no cloud": "no fees" had no condition'],
   ['reshaped', /^page:\/header:1\/div:1\/p:1$/, 'the eyebrow ends with the stat triplet now: "DEFXN / RESOLUTIONS · 20 resolutions · 05 domains · 01 mesh"'],
   ['reshaped', /^page:\/header:1\/dl:1$/, 'the stat triplet (pages-ux-b.md /resolutions P2, a row of its own) is the eyebrow\'s tail, whose text carries this key'],
   ['reshaped', /^page:\/section:1$/, 'the domain browser is Ark tabs'],
@@ -98,7 +102,11 @@ const REWORDED = [
   [/^page:\/section:1\/div:1\/button:\d\/span:3$/, 'the domain\'s count reads "· 4" in its tab label'],
   /* first-visit audit 2026-10-22 (P0): a "Start here" that opened a product still being built is the first ready product's
      "Open <name>" (js/pages/resolutions.js mainAction); the same button, the same key */
-  [/^page:\/div:1\/header:1\/div:1\/a:1$/, '"Start here" reads "Open <the first ready product>" where its page was a product still being built']
+  [/^page:\/div:1\/header:1\/div:1\/a:1$/, '"Start here" reads "Open <the first ready product>" where its page was a product still being built'],
+  /* first-visit audit 2026-10-22 (P1): a claim with no condition ("no fees") is dropped (copy law 9) */
+  [/^page:\/section:1\/div:2\/div:2\/a:1\/span:2\/span:1$/, 'the Website card reads "no database, no hosting, no cloud": "no fees" had no condition'],
+  /* the same line is /resolutions/website's lede (a detail page's lede is its card line) */
+  [/^page:\/div:1\/header:1\/p:2$/, 'on /resolutions/website the lede reads "no database, no hosting, no cloud": "no fees" had no condition']
 ];
 
 (async () => {
