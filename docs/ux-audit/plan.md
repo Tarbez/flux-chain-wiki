@@ -360,3 +360,24 @@ index.html + js/min/manifest.js, merge in .claude/worktrees/merge-pages, `npm ru
 the tab-icon link from the backup, `npm run build:pages`, confirm the uncommitted file list is unchanged.
 Excluded until the owner or its session decides: /account (another session's uncommitted work), the header's
 "Products" switcher (kit), the sign-in gate. Main is at 4e0645a + this note.
+
+## Resume point 15 (2026-10-22, afternoon) — the three helper branches are merged
+Guides (10 commits), explore/money/tools (9) and resolver pages (7) are on main at 7f0f28b. Two test conflicts were
+the shared story tab rename ("Step by step") and the agreement chapters' breadcrumb (now "Agreement lifecycle");
+both were kept. 35 page tests and the browser drivers site-fixes, header-reach, public-header and footer-fit pass on
+the merge. The FXN ID re-insert step is now a script: `python3 .claude/snap/fxn-reinsert.py <backup>/index.html
+index.html`. Run every git command with `git -C <dir>`: a merge once ran in the main checkout by mistake (undone with
+`git merge --abort`; every uncommitted file of the other sessions compared equal to a backup).
+Open, needs a file outside a helper's group or an owner call:
+- glossary entry for "swap" (js/content/glossary.js);
+- /reference default document: saved edits are keyed by address, not by document (owner call);
+- /download hero eyebrow: tests/browser/studio-flows.mjs builds its "Make into component" flow on it;
+- /dao page name ("Network DAO" is also the DAO product's name; owner call) and its breadcrumb/eyebrow repetition;
+- one name for /how-deployment-works on home ("Follow the line", home.js) and /about (about.js);
+- /start-from-something-real off the journeys (site-pages.js); the lede now gives one next step instead;
+- Ark figure kinds: "Live" on /what-is-a-resolver needs a fourth kind in Ark;
+- js/pages/resolver-math.js labels its /stats link "Fleet dashboard"; /stats is now "Mesh performance";
+- header: "Deploy a resolver" is wider than "How it works" and folds into Menu at 1440px;
+- guides leftovers: /concept/depth duplicate text, /experiments slider below the fold, lifecycle stage buttons
+  (js/ark/stage-scenes.js), article URL, learnings duplicates;
+- pre-existing on main: ux-component-census, fold-disclosures (/what-is-a-resolver).
