@@ -138,7 +138,8 @@ if (require.main === module) (async () => {
   assert.equal(seen.h1, 'about-title', 'the heading keeps the id the old page gave it');
   assert.equal(seen.primary, 1, 'one dominant next movement');
   assert(seen.arrows.every((a) => a.endsWith(':in')), 'both hero links are in-site, and say so (no external arrow on an internal route)');
-  assert.deepEqual(seen.views, ['THREE BOUNDED LAYERS', 'How it works', 'The promise', 'What you can resolve', 'Who it is for', 'Evidence & verification']);
+  /* the first view's name is in the case the other five use (it was the one tab in capitals: first-visit walk 2026-10-22) */
+  assert.deepEqual(seen.views, ['Three bounded layers', 'How it works', 'The promise', 'What you can resolve', 'Who it is for', 'Evidence & verification']);
   assert.deepEqual(seen.layers, ['Directory', 'FXN chain', 'Governance'], 'one choice per layer');
   assert.deepEqual(seen.evidence, ['What the source establishes.', 'How to verify it.']);
   assert.equal(seen.slabs, 3, 'three slabs drawn');
