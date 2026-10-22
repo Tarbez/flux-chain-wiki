@@ -442,6 +442,8 @@ async function saveCanvas(app) { await connect(app); await app.click('#save'); }
 async function gotoRoute(app, pv, route) {
   await openRoute(app, pv, route).catch((e) => { throw new StepFailure(e.message); });
 }
+/* the header's link to /how-deployment-works reads "Deploy a resolver", the page's one name, since the
+   first-visit audit 2026-10-22 (it read "How it works", the story pages' middle tab) */
 const navLink = (frame, text) => frame.locator('header nav.header-core-links > a', { hasText: text }).first();
 /* Playwright cannot see that the editor's toolbar covers a point in the preview, so a right-click
    menu item is clicked only once the editor confirms nothing of its own is on top (studio-flows) */
@@ -700,12 +702,12 @@ await surface('toolbar', 'canvas element <canvas>: image sections; Frame scale p
 await surface('toolbar', 'layout group: Frame + Ungroup only; group X persists; Ungroup removes it', async (opened) => {
   const { page, app, pv, shot } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
-  await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
+  await navLink(pv, 'Deploy a resolver').click({ modifiers: ['Shift'] });
   await (await openToolbarSection(app, 'Frame')).locator('button', { hasText: 'Group selection' }).click();
   const key = await until(async () => { const k = await toolbarKey(app); return k && k.startsWith('group:') && k; }, 'Group selection did not select a new group');
   await expectSections(app, ['Frame'], 'a layout group');
   /* grouping must not rearrange what it groups: two links of a header row stay side by side */
-  const boxes = await pv.evaluate(() => ['Overview', 'How it works'].map((t) => { const a = [...document.querySelectorAll('header nav.header-core-links a')].find((x) => x.textContent.includes(t)); const r = a.getBoundingClientRect(); return { top: Math.round(r.top), left: Math.round(r.left), w: r.width }; }));
+  const boxes = await pv.evaluate(() => ['Overview', 'Deploy a resolver'].map((t) => { const a = [...document.querySelectorAll('header nav.header-core-links a')].find((x) => x.textContent.includes(t)); const r = a.getBoundingClientRect(); return { top: Math.round(r.top), left: Math.round(r.left), w: r.width }; }));
   check(boxes.every((b) => b.w > 0) && Math.abs(boxes[0].top - boxes[1].top) < 2 && boxes[0].left < boxes[1].left, 'grouping rearranged the two header links: ' + JSON.stringify(boxes));
   check(await toolbarAction(app, 'Ungroup').count() === 1, 'a group\'s toolbar has no Ungroup');
   check(await app.evaluate(() => /Groups on this page \(1\)/.test(document.getElementById('groupsBrowse').textContent)), 'the Layers tab does not list the new group');
@@ -759,7 +761,7 @@ await surface('toolbar', 'component instance: base sections + Component instance
 await surface('toolbar', 'state group: base sections + States; + Add state persists', async (opened) => {
   const { page, app, pv } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
-  await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
+  await navLink(pv, 'Deploy a resolver').click({ modifiers: ['Shift'] });
   await navLink(pv, 'Overview').click({ button: 'right' });
   await clickMenuItem(page, app, pv, 'Make into states');
   await until(() => pv.evaluate((scope) => Object.keys((ArkStates.get().routes || {})[scope] || {}).length === 1, SHELL), 'Make into states made no group of the header links under the shell scope');
@@ -796,14 +798,14 @@ await surface('canvas', 'undo / redo: buttons and Ctrl+Z / Ctrl+Shift+Z', async 
 await surface('canvas', 'multi-select: shift-click 3, align and distribute act', async (opened) => {
   const { app, pv } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
-  await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
+  await navLink(pv, 'Deploy a resolver').click({ modifiers: ['Shift'] });
   /* not Stats: at the preview's 1280px the header keeps the row by moving Stats into the MENU */
   await navLink(pv, 'Mesh Explorer').click({ modifiers: ['Shift'] });
   const frame = await openToolbarSection(app, 'Frame');
   for (const label of ['Left', 'Center X', 'Right', 'Top', 'Center Y', 'Bottom', 'Group selection', 'Distribute X', 'Distribute Y']) check(await frame.locator('button', { hasText: new RegExp('^' + label + '$') }).count() === 1, `3 selected layers offer no "${label}"`);
   await frame.locator('button', { hasText: /^Top$/ }).click();
   await until(() => app.locator('#btnUndo').isEnabled(), 'Align Top changed nothing (no undo step)');
-  const tops = await pv.evaluate(() => ['Overview', 'How it works', 'Mesh Explorer'].map((t) => [...document.querySelectorAll('header nav.header-core-links > a')].find((a) => a.textContent.includes(t)).getBoundingClientRect().top));
+  const tops = await pv.evaluate(() => ['Overview', 'Deploy a resolver', 'Mesh Explorer'].map((t) => [...document.querySelectorAll('header nav.header-core-links > a')].find((a) => a.textContent.includes(t)).getBoundingClientRect().top));
   check(Math.max(...tops) - Math.min(...tops) < 1.5, 'Align Top did not align the three tops: ' + tops.join(', '));
 });
 
@@ -867,7 +869,7 @@ await surface('canvas', 'edit vs live: Live hides the toolbar and clicks navigat
   await until(async () => !!(await toolbarKey(app)), 'Edit mode: a click did not select');
   await app.click('#mode button[data-m="live"]');
   await until(() => app.evaluate(() => document.getElementById('selToolbar').hidden), 'Live mode still shows the toolbar');
-  await navLink(pv, 'How it works').click();
+  await navLink(pv, 'Deploy a resolver').click();
   await until(() => pv.evaluate(() => ArkUI.route.path() !== '/'), 'Live mode: clicking a link did not navigate like a visitor');
   await app.click('#mode button[data-m="edit"]');
   await until(() => app.evaluate(() => document.querySelector('#mode button[data-m="edit"]').getAttribute('aria-pressed') === 'true'), 'Edit did not switch back');

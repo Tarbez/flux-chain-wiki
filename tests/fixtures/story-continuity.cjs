@@ -311,8 +311,9 @@ module.exports = {
  },
  "/how-deployment-works/ask": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Agreement lifecycle / this part (the parent it had before the conversion; from 2026-10-19 to the first-visit audit 2026-10-22 it read \"Deploy a resolver\", which these request/offer/agreement parts are not)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
+   "id:how-ask-title": "\"Tell them what you need.\" reads \"Tell a provider what you need.\": \"them\" came before any provider was introduced (first-visit audit 2026-10-22)",
    "page:/header:1": "the header is Ark's hero",
    "page:/div:1": "the record beside its explanation: the story body",
    "page:/div:1/section:1": "the record card is the figure: its heading and mesh in Ark's frame, its label the caption, its fields in the Evidence view",
@@ -335,7 +336,7 @@ module.exports = {
  },
  "/how-deployment-works/work": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Agreement lifecycle / this part (the parent it had before the conversion; from 2026-10-19 to the first-visit audit 2026-10-22 it read \"Deploy a resolver\", which these request/offer/agreement parts are not)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
    "page:/header:1": "the header is Ark's hero",
    "page:/div:1": "the record beside its explanation: the story body",
@@ -367,8 +368,12 @@ module.exports = {
  },
  "/how-deployment-works/check": {
   "reshaped": {
-   "page:/nav:1": "the breadcrumb follows the address: Home / Deploy a resolver / this part (the lifecycle it named is in the pager)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Agreement lifecycle / this part (the parent it had before the conversion; from 2026-10-19 to the first-visit audit 2026-10-22 it read \"Deploy a resolver\", which these request/offer/agreement parts are not)",
    "page:/nav:1/span:1": "this part in the breadcrumb, with no ordinal: the eyebrow says \"n of 3\"",
+   "page:/header:1/p:1": "the same intro, reworded: it names the checker and the approvers in its opening, where the approvers first appeared two cards later (first-visit audit 2026-10-22)",
+   "page:/div:1/section:2/div:1": "the same three reasons; the first is reworded (see its paragraph)",
+   "page:/div:1/section:2/div:1/article:1": "the same reason, \"Trust is decided before\"; its paragraph is reworded (see it)",
+   "page:/div:1/section:2/div:1/article:1/p:1": "the paragraph that repeated /what-is-a-resolver's trust boundary word for word now says what this step decides: a signature proves who submitted a result, the agreement judges it (first-visit audit 2026-10-22, one definition of a resolver)",
    "page:/header:1": "the header is Ark's hero",
    "page:/div:1": "the record beside its explanation: the story body",
    "page:/div:1/section:1": "the record card is the figure: its heading and mesh in Ark's frame, its label the caption, its fields in the Evidence view",
@@ -393,13 +398,15 @@ module.exports = {
    "page:/div:1/section:2/ol:1/li:3/button:1": "the step's number is its marker now, its title and text one step item",
    "page:/nav:2/a:2": "\"Previous part\" is the previous part, by name, in the pager's related row"
   },
-  "retired": {
-   "page:/nav:1/a:1": "the old breadcrumb's lifecycle link: this last part's pager leads \"Back to the lifecycle\""
-  }
+  "retired": {}
  },
  "/how-deployment-works": {
   "reshaped": {
    "page:/div:1/article:3/ol:1/li:2/span:1": "step 6 (Watch it) keeps its first sentence unchanged and now ends with the signature framing (W4-S13): the signature on a record is the result, and whether to rely on a resolver is decided from its grammar, capabilities and control before anyone sends it anything",
+   "page:/header:1/p:1": "the intro, reworded to say what deploying is (\"in three stages: write its grammar, sign one launch record, and have a provider serve it\"); it re-defined a resolver, a third wording of /what-is-a-resolver's (first-visit audit 2026-10-22)",
+   "id:deployment-title": "the heading is the page's one name, \"Deploy a resolver\", as the header, the breadcrumb and the links to it say (\"From a grammar to a chain.\" was a fifth name: first-visit audit 2026-10-22)",
+   "page:/div:2/nav:1/strong:1": "\"The earlier agreement path\" reads \"Hire a provider: the earlier path\": it said the path was old, not what it was (first-visit audit 2026-10-22)",
+   "page:/div:2/nav:1/p:1": "the same sentence, reworded: \"how a client hired a provider under the earlier agreement path\"",
    "page:/header:1": "the header is Ark's hero; its hand-offs are the hero's actions",
    "page:/div:1": "the three cards are The idea's three stages (Ark steps)",
    "page:/div:2": "the hazard, the plan and the earlier path are the Evidence view's accordion, each closed until asked for as before",
@@ -424,9 +431,9 @@ module.exports = {
    "page:/div:1/article:3/ol:1/li:1/strong:1": "the step's title, numbered across the page",
    "page:/div:1/article:3/ol:1/li:2": "the step is an accordion item of How it works",
    "page:/div:1/article:3/ol:1/li:2/strong:1": "the step's title, numbered across the page",
-   "page:/footer:1/div:2": "the hand-off is the hero's action; a link that leaves the site now also says so to a screen reader (\"opens another site\")",
+   "page:/footer:1/div:2": "the hero's actions row: since the first-visit audit 2026-10-22 it holds the one action, Open Deploy; Explore and the registry are Evidence's \"What is launched\" links",
    "page:/footer:1/div:2/a:1": "the hand-off is the hero's action; a link that leaves the site now also says so to a screen reader (\"opens another site\")",
-   "page:/footer:1/div:2/a:2": "the hand-off is the hero's action; a link that leaves the site now also says so to a screen reader (\"opens another site\")",
+   "page:/footer:1/div:2/a:2": "the Explore hand-off is a link in Evidence (\"What is launched\"), out of the hero since the first-visit audit 2026-10-22; a link that leaves the site says so to a screen reader (\"opens another site\")",
    "page:/footer:1/div:1": "the boundary block is Ark's callout: an icon before the same words"
   },
   "retired": {

@@ -2,12 +2,13 @@
    /how-deployment-works: "Deploy a resolver" (since 2026-10-19; the URL is kept, its inbound
    links with it), on the story template (js/pages/story.js):
 
-     hero           what deploying is, and the hand-offs: Deploy, Explore, the registry
+     hero           what deploying is, and its one action: Open Deploy
      The idea       what deploying is, and the three stages -- write it, launch it, serve it
      How it works   the six steps, numbered across the page, one open at a time
      Evidence       the one hazard every deployer must hear before signing, what is planned
                     (labelled so, never shown as live), and the earlier agreement path's three
-                    chapters, read-only (the resolver content audit, Q4)
+                    chapters, read-only (the resolver content audit, Q4), then what is launched:
+                    Explore and the registry (out of the hero since the first-visit audit 2026-10-22)
      boundary       launched is not served -- in sight in every view
      figure         each stage keeps its own mesh; pointing at a stage runs its pattern
 
@@ -36,8 +37,7 @@
      "self": true
     },
     "actions": "page:/footer:1/div:2",
-    "button": "page:/footer:1/div:2/a:1",
-    "button#2": "page:/footer:1/div:2/a:2"
+    "button": "page:/footer:1/div:2/a:1"
    },
    "deploy-crumbs": {
     ":root": "page:/nav:1",
@@ -57,6 +57,8 @@
     "accordion-trigger#8": "page:/div:2/details:2/summary:1",
     "accordion-content#8": "page:/div:2/details:2/p:1",
     "accordion-trigger#9": "page:/div:2/nav:1/strong:1",
+    "button#5": "page:/footer:1/div:2/a:2",
+    "button#6": "page:/footer:1/div:2/a:3",
     ":scope > div:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)": "page:/div:2/nav:1/p:1",
     "actions": "page:/div:2/nav:1/p:2",
     "step-marker": "page:/div:1/article:1/div:1/span:1",
@@ -198,10 +200,10 @@
         page: 'deployment', id: 'deploy', className: 'story-deploy', titleId: 'deployment-title', was: WAS, insertWas: WAS.insert,
         crumbs: [{ label: 'Home', href: words('HOME.HREF') }, { label: manifest.title }],
         title: copy('TITLE'),
+        /* one hero action (first-visit audit 2026-10-22): Explore and the registry left the page
+           before the reader learned what deploying is; they are Evidence's way to what is launched */
         actions: [
-          { label: copy('DEPLOYER.LINK'), href: words('DEPLOYER.HREF'), tone: 'primary' },
-          { label: copy('EXPLORE.LINK'), href: words('EXPLORE.HREF'), tone: 'secondary' },
-          { label: copy('REGISTRY.LINK'), href: words('REGISTRY.HREF'), tone: 'link' }
+          { label: copy('DEPLOYER.LINK'), href: words('DEPLOYER.HREF'), tone: 'primary' }
         ],
         /* The idea is the short answer and the three stages; How it works opens the six steps one
            at a time; Evidence holds what to hear before signing, what is planned, and the earlier
@@ -223,6 +225,10 @@
               { value: 'planned', title: copy('PLANNED.TITLE'), content: copy('PLANNED') },
               { value: 'agreement', title: copy('AGREEMENT.TITLE'), content: copy('AGREEMENT.TEXT'),
                 blocks: [{ block: 'actions', props: { label: words('AGREEMENT.TITLE'), items: chapters.map(function (c) { return { label: c.label, href: c.href, tone: 'link' }; }) } }] }
+            ] } },
+            { block: 'actions', props: { label: 'What is launched', items: [
+              { label: copy('EXPLORE.LINK'), href: words('EXPLORE.HREF'), tone: 'link' },
+              { label: copy('REGISTRY.LINK'), href: words('REGISTRY.HREF'), tone: 'link' }
             ] } }
           ]).concat(flow ? [flow.spec] : [], onward) }
         },
