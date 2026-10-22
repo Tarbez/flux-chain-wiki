@@ -18,7 +18,9 @@
     { id: 'DEMO-002', label: 'Deposit inspected', amount: '480 FXN', state: 'Illustrative', explanation: 'A fictional deposit record used to show where a receipt and verification result would appear.' },
     { id: 'DEMO-003', label: 'Allocation noted', amount: '320 FXN', state: 'Illustrative', explanation: 'An example allocation line. It does not describe current network treasury policy.' }
   ];
-  var KICKER = 'DESIGN PREVIEW / NOT LIVE';
+  /* One disclaimer, the warning callout (first-visit audit 2026-10-22: /treasury said "not live" three times before
+     its content and /deposits five times). The hero's "DESIGN PREVIEW / NOT LIVE" eyebrow is gone; its layout key is
+     retired with the reason in tests/task-pages-blocks.cjs. */
   var MOCK = 'Design mock only — no wallet, balance, deposit, transfer, or ledger is connected.';
 
   function node(tag, className, text) {
@@ -34,7 +36,7 @@
      listed with its reason in tests/task-pages-blocks.cjs. */
   var S = 'page:/div:1';
   function headWas(page) {
-    return { ':root': { key: S + '/header:1', self: true }, eyebrow: S + '/header:1/p:1', 'hero-title': 'id:' + page + '-preview-title', 'hero-lede': S + '/header:1/p:2' };
+    return { ':root': { key: S + '/header:1', self: true }, 'hero-title': 'id:' + page + '-preview-title', 'hero-lede': S + '/header:1/p:2' };
   }
   var WAS = {
     treasury: {
@@ -61,28 +63,39 @@
     }
   };
 
-  function head(page, title, deck, crumbs) {
+  /* The family's product as a hero action: its address from the kit's catalog (never a URL written here); none when
+     the kit is not loaded (a headless test), so the page never breaks for want of it. */
+  function productAction(id, label) {
+    var kit = typeof window !== 'undefined' && window.DefxnKit, product = kit && kit.productById && kit.productById(id);
+    var to = product && kit.productHref(product);
+    return to ? { label: label, href: /^https?:/.test(to) ? 'url:' + to : to, tone: 'primary' } : null;
+  }
+  function head(page, title, deck, crumbs, action) {
+    var hero = { title: title, lede: deck, density: 'compact' };
+    if (action) hero.actions = [action];
     return [
       { block: 'breadcrumb', id: page + '-crumbs', props: { label: 'Your place', items: crumbs } },
-      { block: 'hero', id: page + '-hero', was: headWas(page), props: { eyebrow: KICKER, title: title, lede: deck, density: 'compact' } },
+      { block: 'hero', id: page + '-hero', was: headWas(page), props: hero },
       { block: 'callout', id: page + '-mock', was: { '[data-ark-part="alert-description"] > p:nth-of-type(1)': S + '/header:1/p:3' }, props: { tone: 'warning', body: MOCK } }
     ];
   }
 
   function treasurySpec() {
     var was = WAS.treasury;
-    return head('treasury', 'Inspect a treasury before funds move.', 'Preview assets, reserves, and the evidence behind each movement.',
-      [{ label: 'Home', href: 'route:zero' }, { label: 'Treasury preview' }]).concat([
-      /* Explain + hand off (owner decision 2026-10-19): real treasuries -- live balances, spends
-         proposed, approved and claimed under a DAO's rules -- are the Treasury product's. This
-         mock keeps what Treasury does not show: FXN beside Credits, and the deposit preview. */
-      { block: 'custom', id: 'treasury-handoff', mount: function () {
-        return ArkUI.dash.productHandoff && ArkUI.dash.productHandoff({ product: 'treasury', text: 'A treasury is money a group holds together, and it moves only when enough of the group’s named signers approve the same spend. Every founded DAO’s real treasury is in Treasury.' }) || document.createComment('no product kit');
-      } },
+    /* Explain + hand off (owner decision 2026-10-19): real treasuries -- live balances, spends
+       proposed, approved and claimed under a DAO's rules -- are the Treasury product's. This
+       mock keeps what Treasury does not show: FXN beside Credits, and the deposit preview.
+       First-visit audit 2026-10-22 (P1): the page never said why to look at a sample when the
+       real one is one click away. The hand-off is the hero's one action, and the lede says what
+       a treasury is, where the real ones are, and what this page shows (it was a separate box
+       below the warning). */
+    return head('treasury', 'Inspect a treasury before funds move.',
+      'A treasury is money a group holds together. It moves only when enough of the group’s named signers approve the same spend. Every founded DAO’s real treasury is in the Treasury app. This page shows sample assets and movements.',
+      [{ label: 'Home', href: 'route:zero' }, { label: 'Treasury preview' }], productAction('treasury', 'Open the Treasury app')).concat([
       { block: 'tabs', id: 'treasury-tabs', was: was['treasury-tabs'], props: { label: 'Choose a sample asset', items: [
         { value: 'fxn', label: 'FXN / Tier 1', /* "Tier 1" was a bare label (docs/ux-audit/ledger.md TR-3). docs/economy-preview.md is the one place that says what it is:
              the native token, set apart from Credits. Said in plain words in the sentence beside the figure it labels. */
-          content: 'Fictional sample amount for the native token. Not supply, price, or a real treasury balance. “Tier 1” is this preview’s label for FXN, the network’s native token, to tell it apart from Credits: identity-bound units that cannot be transferred.',
+          content: 'Fictional sample amount for the native token. “Tier 1” is this preview’s label for FXN, the network’s native token, to tell it apart from Credits: identity-bound units that cannot be transferred.',
           blocks: [{ block: 'facts', props: { label: 'Sample asset overview', columns: 1, items: [{ term: 'FXN / TIER 1', value: '12,400 FXN', mono: true }] } }] },
         { value: 'credits', label: 'Credits', content: 'Universal name: Credits. Identity-bound and non-transferable; separate from FXN. This quantity is fictional.',
           blocks: [{ block: 'facts', props: { label: 'Sample asset overview', columns: 1, items: [{ term: 'CREDITS', value: '840 Credits', mono: true }] } }] },
@@ -123,10 +136,11 @@
     var result = node('section', 'economy-deposit-result'); result.hidden = true; result.inert = true;
     result.setAttribute('aria-label', 'Mock deposit preview');
     result.appendChild(ArkUI.blocks.render({ block: 'eyebrow', props: { text: '02 / Local draft' } }));
-    var resultTitle = node('h2', '', 'This is only a preview.'); resultTitle.tabIndex = -1; result.appendChild(resultTitle);
+    /* the result names what it shows; the callout above is the one disclaimer (first-visit audit 2026-10-22: "This is
+       only a preview." and "No wallet connection ... was created." were the fourth and fifth warnings) */
+    var resultTitle = node('h2', '', 'Your draft'); resultTitle.tabIndex = -1; result.appendChild(resultTitle);
     var resultText = node('p', 'economy-detail-copy'); result.appendChild(resultText);
     var facts = node('dl', 'economy-detail-facts'); result.appendChild(facts);
-    result.appendChild(node('p', 'economy-warning', 'No wallet connection, signature, transaction, or network record was created.'));
     result.appendChild(ArkUI.blocks.render({ block: 'actions', props: { items: [{ label: 'Edit draft', action: 'deposit-edit', tone: 'ghost' }] } }));
     box.appendChild(result);
     box.addEventListener('ark:action', function (event) {
@@ -152,7 +166,7 @@
   function depositsSpec() {
     var was = WAS.deposits;
     return head('deposits', 'Preview a deposit before any funds move.',
-      'A local-only layout study for a future FXN deposit. Enter an example amount, inspect the proposed intent, then return to edit it. There is no submit action.',
+      'Enter an example FXN amount and a purpose to see what you would review before signing.',
       [{ label: 'Home', href: 'route:zero' }, { label: 'Treasury preview', href: 'route:treasury' }, { label: 'Deposit preview' }]).concat([
       { block: 'custom', id: 'deposits-draft', was: was['deposits-draft'], mount: function () { return draft(); } },
       { insert: 'main', was: was.insert },

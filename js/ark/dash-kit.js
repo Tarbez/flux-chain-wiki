@@ -168,6 +168,11 @@
        page's own elements keep the keys they had before it was inserted (an existing
        aside.bundle-release went from aside:1 to aside:2 without this; js/content/layout.js). */
     if (aside) aside.setAttribute('data-ark-transient', 'hold');
+    /* The kit heads the block with the product's lane and name ("SHIP · BUNDLES"). The lane is a family category
+       no page of this site explains, so here the head names the product alone (first-visit audit 2026-10-22: the
+       visitor could not tell the page from the product). The page's sentence says what happens there. */
+    var head = aside && aside.querySelector('.dx-onward__lane'), product = head && kit.productById && kit.productById(options.product);
+    if (product && product.name) head.textContent = product.name;
     return aside;
   }
   function productLink(options) {

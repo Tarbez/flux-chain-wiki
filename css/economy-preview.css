@@ -4,7 +4,6 @@
    form and its local result. The form is Ark's `form` block (its fields, hints and refusals are Ark's;
    2026-10-20), so this file styles only the frame around it and the result. */
 #scene .economy-draft { max-width:800px; padding-top:24px; border-top:1px solid hsl(var(--border-default)); }
-#scene .economy-warning { margin:0; padding:12px 0 12px 14px; border-left:2px solid hsl(var(--warning)); color:hsl(var(--text-strong)); font:500 14px/1.5 var(--font-sans,sans-serif); }
 #scene .economy-preview-page button { min-height:44px; cursor:pointer; }
 #scene .economy-preview-page :is(button,a):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:4px; }
 #scene .economy-deposit-result h2 { max-width:24ch; margin:0 0 20px; color:hsl(var(--text-strong)); font:500 clamp(26px,3.4vw,40px)/1.14 var(--font-sans,sans-serif); letter-spacing:-.03em; }
