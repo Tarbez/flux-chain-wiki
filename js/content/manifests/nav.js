@@ -19,10 +19,10 @@ ArkManifest.define({
       "value": "Overview"
     },
     "HOW": {
-      "label": "Header link: deploy a resolver (/how-deployment-works)",
+      "label": "Header link: deploy a resolver (/how-deployment-works). The page is named \"Deploy a resolver\"; the header says \"Deploy\" so the row fits at 1440px",
       "kind": "line",
       "section": "Header links",
-      "value": "Deploy a resolver"
+      "value": "Deploy"
     },
     "RUN": {
       "label": "Header link: run DEFXN",

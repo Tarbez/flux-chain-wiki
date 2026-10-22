@@ -505,7 +505,9 @@
       pager: { label: 'Continue',
         next: { label: copy('NEXT'), href: 'route:' + manifest.meta.next },
         related: ['REGISTRY', 'MATH', 'EXPLORE', 'DEPLOYER'].map(function (k) { return { label: copy(k + '.LINK'), href: words(k + '.HREF') }; })
-          .concat([{ label: 'Inspect reference evidence', href: words('INSPECT.HREF') }], resolutions) },
+          /* the reference resolvers by their page's one name: "Inspect reference evidence" promised evidence that page says
+             does not exist yet (first-visit audit 2026-10-22, P1 /start-from-something-real) */
+          .concat([{ label: ArkSitePages.row('references').label, href: words('INSPECT.HREF') }], resolutions) },
       query: function (depth) { return query(depth); },
       onView: function (depth) {
         if (!root) return;

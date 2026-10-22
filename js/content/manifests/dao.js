@@ -1,11 +1,12 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "dao",
-  "title": "Governance",
+  "title": "How DEFXN is governed",
   "route": "/dao",
   "group": "page",
   "meta": {
     "back": "concept",
+    "topic": "Governance",
     "docs": "docs/protocol/governance.md",
     "diagrams": [
       {
@@ -38,12 +39,6 @@ ArkManifest.define({
     ]
   },
   "fields": {
-    "EYEBROW": {
-      "label": "Eyebrow",
-      "kind": "line",
-      "section": "Page",
-      "value": "DEFXN / GOVERNANCE"
-    },
     "TITLE": {
       "label": "Heading",
       "kind": "line",

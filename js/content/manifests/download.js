@@ -8,12 +8,6 @@ ArkManifest.define({
     "next": "deploy"
   },
   "fields": {
-    "EYEBROW": {
-      "label": "Eyebrow",
-      "kind": "line",
-      "section": "Page",
-      "value": "RUN DEFXN / FROM SOURCE"
-    },
     "TITLE": {
       "label": "Heading",
       "kind": "line",

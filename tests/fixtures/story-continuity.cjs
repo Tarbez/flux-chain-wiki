@@ -139,7 +139,8 @@ module.exports = {
   "reshaped": {
    "page:/nav:3": "the hero action is the product, \"Open DAO\"; the notes link (\"Separate approval from activation\") leads the ways on in The idea (first-visit audit 2026-10-22, P1)",
    "page:/nav:3/a:1": "the hero action is \"Open DAO\"; the notes link is the first of the ways on in The idea (first-visit audit 2026-10-22, P1)",
-   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
+   "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept); the page is \"How DEFXN is governed\" (the owner's call 2026-10-22)",
+   "page:/nav:1/span:1": "the page's name in the trail: \"Governance\" reads \"How DEFXN is governed\" (the owner's call 2026-10-22: \"Governance\" was also /resolutions/governance and a /chain tab; \"Network DAO\" names the DAO product only). The eyebrow \"DEFXN / GOVERNANCE\" that repeated it is gone (first-visit audit 2026-10-22, P2); it came after the census, so no old key carried it",
    "page:/nav:2": "the depth buttons are Ark tabs with the one label set: The idea / Step by step / Evidence",
    "page:/nav:2/button:1": "\"The core idea\" is \"The idea\", the one label set on every story page",
    "page:/nav:2/button:2": "\"How it works\" is \"Step by step\" since 2026-10-22 (first-visit audit, P1): the header's \"How it works\" opens /how-deployment-works, so one name opened two things",

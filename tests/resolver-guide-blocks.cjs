@@ -79,6 +79,7 @@ const ROUTES = {
       [/^id:resolver-lab-title$/, '"Get a claim you can check" reads "Get an answer you can check": the heading used "claim" before the page defines it (ledger recheck 2026-10-21, WR-4)'],
       [/^page:\/div:1\/p:1$/, 'the eyebrow is gone: it repeated the breadcrumb (first-visit audit 2026-10-22; before that it read "DEFXN / RESOLVERS", "FLUX PROTOCOL" never being introduced)'],
       [/^page:\/div:1\/nav:1(\/span:1)?$/, '"Resolver" reads "What is a resolver?": one page name (first-visit audit 2026-10-22)'],
+      [/^page:\/div:1\/div:2\/nav:1\/a:6$/, '"Inspect reference evidence" reads "Reference resolvers", the name of the page it opens, which says no reference has public evidence yet (first-visit audit 2026-10-22, P1)'],
       [/^page:\/figure:1\/figcaption:1(\/span:1)?$/, '"policy.doc-size/v1 · runs in your browser" reads "Example rule: files up to 5 MB · runs in your browser": the head showed only an internal id (first-visit audit 2026-10-22)']
     ]
   },
@@ -113,7 +114,7 @@ const ROUTES = {
   '/download': { page: 'download', ids: ['download-'],
     reshaped: [
       [/^page:\/header:1$/, 'the header became the hero (eyebrow, heading, the guide); the deck opens The idea'],
-      [/^page:\/header:1\/div:1$/, 'the kicker row (eyebrow and the phone\'s guide link) is the hero\'s actions row: the one guide link for every width; the eyebrow keeps its own key'],
+      [/^page:\/header:1\/div:1$/, 'the kicker row (eyebrow and the phone\'s guide link) is the hero\'s actions row: the one guide link for every width (the eyebrow is gone since 2026-10-22, see retired)'],
       [/^page:\/div:1$/, 'the terminal beside the steps: the story body'],
       [/^page:\/div:1\/section:1$/, 'the terminal card is the figure\'s slot; its way through (previous, step n of 5, next, the hand-off) moved into it'],
       [/^page:\/div:1\/section:2$/, 'the steps column is the How it works view'],
@@ -129,6 +130,8 @@ const ROUTES = {
     ],
     retired: [
       [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width'],
+      /* first-visit audit 2026-10-22 (P2): "RUN DEFXN / FROM SOURCE" repeated the breadcrumb ("Run DEFXN from source") above it */
+      [/^page:\/header:1\/div:1\/p:1$/, 'the eyebrow: it repeated the breadcrumb above it, so the page has none (DOWNLOAD.EYEBROW is retired with it; tests/browser/studio-flows.mjs makes its component from the title and the guide action now)'],
       /* 2026-10-22: the first view shows the apps (the owner's download page) and no longer lists the five step names a
          second time; each step is How it works' tab and the terminal's step, which keep the step row and its text */
       [/^page:\/div:1\/section:2\/ol:1\/li:\d\/button:1(\/strong:1|\/span:1)?$/, 'a step row\'s button and its name: the first view\'s step list is gone; the step is its How it works tab']
@@ -137,6 +140,7 @@ const ROUTES = {
       /* 2026-10-22: the first view's step list (and its numbers) is gone; each step is How it works' tab, its number its place */
       [/^page:\/div:1\/section:2\/ol:1\/li:\d\/button:1\/span:1$/, 'a step\'s number ("02"): its place among How it works\' tabs'],
       [/^page:\/header:1\/div:1\/a:1$/, '"Operator guide" reads "Open the full operator guide" (one link for every width)'],
+      [/^page:\/header:1\/div:1\/p:1$/, 'the eyebrow is gone (see retired); its words are the breadcrumb\'s last item, "Run DEFXN from source"'],
       /* first-visit audit 2026-10-22 (P1): one piece of software had three names (DEFXN, ark-miner-cli, flux-miner/ark-miner);
          step 2 says once that the DEFXN miner is the flux-miner command, and the legacy-alias sentence is gone */
       [/^id:source-step-2$/, 'step 2 ends "The DEFXN miner is the flux-miner command." (it ended "The package exposes flux-miner; ark-miner is a legacy alias.")']

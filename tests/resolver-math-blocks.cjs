@@ -53,7 +53,8 @@ const reshaped = {
   [P + '/div:14']: 'the "Where this page stops being true" section head became an accordion item of the same name',
   [P + '/div:16/section:1']: 'the "Keep reading" panel became the closing pager under the same label',
   [P + '/div:16/section:1/div:1']: 'the reading links: the pager\'s list now (the deprecation ledger moved to the totals\' links)',
-  [P + '/div:17']: 'the CMS insertion anchor, kept: now its own row after the tabs'
+  [P + '/div:17']: 'the CMS insertion anchor, kept: now its own row after the tabs',
+  [P + '/div:16/section:1/div:1/a:6']: 'the link to /stats reads "Mesh performance" (it was "Fleet dashboard"): one name for that page, its own title since the first-visit audit 2026-10-22'
 };
 for (const wrap of [P + '/div:7/section:1/div:1', P + '/div:7/section:2/div:1', P + '/div:11/section:1/div:1', P + '/div:13/section:2/div:1', P + '/div:15/section:1/div:1']) {
   reshaped[wrap] = 'the same table, now with a caption that says what it shows';

@@ -65,7 +65,7 @@ var ArkSitePages = (function () {
     { key: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle', short: 'Receipt', journey: 'understand' },
     { key: 'chain', path: '/chain', label: 'Every identity, its own chain', journey: 'understand' },
     { key: 'concept', path: '/concept', label: 'The operating model', journey: 'understand', note: 'Choose the mechanism you want to inspect' },
-    { key: 'dao', path: '/dao', label: 'Governance', journey: 'understand' },
+    { key: 'dao', path: '/dao', label: 'How DEFXN is governed', journey: 'understand' },
     { key: 'download', path: '/download', label: 'Run DEFXN from source', journey: 'run', lead: true },
     { key: 'deploy', path: '/deploy', label: 'Create or join a network', journey: 'run' }
   ];

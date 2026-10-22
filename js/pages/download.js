@@ -37,7 +37,7 @@
      listed with its reason in tests/resolver-guide-blocks.cjs. */
   var STEP = function (n) { return 'page:/div:1/section:2/ol:1/li:' + n; };
   var WAS = {
-    'download-hero': { ':root': { key: 'page:/header:1', self: true }, eyebrow: 'page:/header:1/div:1/p:1', 'hero-title': 'id:download-title',
+    'download-hero': { ':root': { key: 'page:/header:1', self: true }, 'hero-title': 'id:download-title',
       'actions': { key: 'page:/header:1/div:1', self: true }, 'button': 'page:/nav:1/a:1' },
     'download-body': { ':root': { key: 'page:/div:1', self: true } },
     'download-depth': { ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/header:1/p:1', 'tabs-content#2': { key: 'page:/div:1/section:2', self: true },
@@ -154,7 +154,8 @@
       var def = {
         page: 'download', id: 'download', titleId: 'download-title', was: WAS, insertWas: WAS.insert,
         crumbs: [{ label: 'Home', href: 'route:zero' }, { label: manifest.title }],
-        eyebrow: copy('EYEBROW'), title: copy('TITLE'),
+        /* no eyebrow: "RUN DEFXN / FROM SOURCE" repeated the breadcrumb above it (first-visit audit 2026-10-22, P2) */
+        title: copy('TITLE'),
         actions: [{ label: guide.label, href: guide.href, tone: 'secondary' }],
         depth: {
           /* the apps first (the owner's call 2026-10-22: this is the download page for the CLI, the desktop apps and the
