@@ -52,7 +52,10 @@ For a full redesign it is slow, and the result is saved layout data, not source 
 - **Fold budget:** the page is at most 1.6x the viewport height at 1440x900 and at 390x844.
 - **Owner laws:** `docs/PRODUCT-DESIGN-LAWS.md` (one dominant action, one idea per section) and
   `docs/COPY-LAWS.md`. Run `cd /Volumes/PortableSSD && npm run -s copy:check -- <files>` on new words.
-- **Theme:** use only the SDK tokens, written as `hsl(var(--token))`. Use no new palette.
+- **Theme and rebrand:** the whole site is about to be rebranded. Pages use only the SDK's semantic
+  tokens, written as `hsl(var(--token))`. A new brand changes the tokens' values in the SDK
+  (`@deadark/sdk/theme`, synced with `deadark-theme sync-consumer .`), never in the page. Ask the owner
+  for the new brand's colours, fonts and mark before you build. Do not invent them.
 - **Built files:** `npm run build:pages` rewrites `js/min/*` and `index.html`. `index.html` holds another
   session's uncommitted FXN ID edits (a CSP comment and meta tag, and the tab-icon link). Never commit
   them, and never overwrite them. The merge routine is in `docs/ux-audit/plan.md`, Resume points 14 and 15.
