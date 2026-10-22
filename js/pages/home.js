@@ -88,7 +88,7 @@
       'section-title': 'page:/section:2/div:1/details:1/div:1/section:1/h3:1',
       'section-lede': 'page:/section:2/div:1/details:1/div:1/section:1/p:1',
       'section-title#3': 'page:/section:2/div:1/details:1/div:1/section:2/h3:1',
-      /* (since 2026-10-22 See it work's "See how a resolver is deployed" is button #10, so the ones after it count on) */
+      /* (since 2026-10-22 See it work's "Deploy a resolver" link to /how-deployment-works is button #10, so the ones after it count on) */
       'button#11': 'page:/section:2/div:1/details:1/div:1/section:2/a:1',
       'section-title#4': 'page:/section:2/div:1/details:1/div:1/section:3/h3:1',
       'stat-label#4': 'page:/section:2/div:1/details:1/div:1/div:1/p:1',
@@ -289,8 +289,8 @@
             return { value: c.id, label: c.label, blocks: [{ block: 'figure', props: { kind: 'illustration', slot: 'scene-' + c.id,
               caption: 'Your history begins here: one record joins your chain, you.fxn, in five steps. Illustrative / not live traffic; only what the resolver reads at the end changes between examples.' } }] };
           }) } },
-          /* the technical walkthrough the hero used to open, one step later: beside the scene it explains */
-          { block: 'actions', props: { items: [{ label: 'See how a resolver is deployed', href: 'route:deployment', tone: 'ghost' }] } }
+          /* the technical walkthrough the hero used to open, one step later: beside the scene it explains, under the page's one name (js/content/site-pages.js) */
+          { block: 'actions', props: { items: [{ label: ArkSitePages.row('deployment').label, href: 'route:deployment', tone: 'ghost' }] } }
         ] },
         /* How it fits together: your chain among the others (the transit map), and the three parts. */
         { value: 'model', label: 'How it fits together', blocks: [

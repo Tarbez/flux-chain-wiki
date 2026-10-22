@@ -69,7 +69,11 @@ const reshaped = {
   'page:/footer:1/details:1/div:1': 'its two parts are Ark segmented tabs, one at a time',
   'page:/footer:1/details:1/div:1/section:1': '"What the source establishes" is the first of them',
   'page:/footer:1/details:1/div:1/section:2': '"How to verify it" is the second',
-  'page:/footer:1/nav:1': 'the closing links are the pager\'s related links'
+  'page:/footer:1/nav:1': 'the closing links are the pager\'s related links',
+  /* first-visit audit 2026-10-22 (P1, "one page has five names"): the link to /how-deployment-works uses that page's
+     one name; "See how DEFXN works" is home's button to this page, so it no longer names two places */
+  'page:/section:1/div:1/div:1': 'the hero\'s actions: "See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens',
+  'page:/section:1/div:1/div:1/a:2': '"See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens (home\'s "See how DEFXN works" opens /about)'
 };
 const retired = {
   'page:/section:1': 'the hero section held the copy and the layer figure; the copy is the hero block, the figure the first view',

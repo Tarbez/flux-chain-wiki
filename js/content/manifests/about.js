@@ -150,7 +150,7 @@ ArkManifest.define({
       "label": "Secondary action",
       "kind": "line",
       "section": "Links",
-      "value": "See how DEFXN works"
+      "value": "Deploy a resolver"
     },
     "ACTION2.HREF": {
       "label": "Secondary action link",
