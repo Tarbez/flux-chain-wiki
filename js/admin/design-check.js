@@ -79,8 +79,10 @@
      animation ended -- an infinite one (the hero's ambient motion) never ends and changes no
      rule. Resolves false if the page is still moving after `budget` ms; the popover says so
      rather than presenting a mid-animation reading as the page's. */
+  const MAX_SETTLE_MS = 20000;
   async function previewSettled(budget) {
-    const end = Date.now() + budget, pause = (ms) => new Promise((r) => setTimeout(r, ms));
+    const start = Date.now(), pause = (ms) => new Promise((r) => setTimeout(r, ms));
+    let end = start + budget;
     while (Date.now() < end) {
       const doc = (() => { try { return cmsPreview.contentDocument; } catch (e) { return null; } })();
       if (state.cmsPreviewReady && doc && doc.readyState === 'complete' && doc.body) {
@@ -88,13 +90,21 @@
         const scene = doc.getElementById('scene');
         const moving = (doc.getAnimations ? doc.getAnimations() : []).filter((a) => a.playState === 'running' && a.effect && Number.isFinite(a.effect.getComputedTiming().endTime));
         if (!(scene && scene.dataset.transition === 'running') && !moving.length) return true;
-        if (moving.length) { await Promise.race([Promise.all(moving.map((a) => a.finished.catch(() => {}))), pause(250)]); continue; }
+        if (moving.length) {
+          /* A page whose scene plays once and settles (no idle loop, by law) can run longer than the
+             budget; wait for the animations actually running when they end within MAX_SETTLE_MS of
+             the start, instead of reporting a mid-play reading as "not settled". */
+          const remaining = Math.max.apply(null, moving.map((a) => { const t = a.effect.getComputedTiming(); return (t.endTime || 0) - (a.currentTime || 0); }));
+          if (Number.isFinite(remaining) && Date.now() + remaining <= start + MAX_SETTLE_MS) end = Math.max(end, Date.now() + remaining + 250);
+          await Promise.race([Promise.all(moving.map((a) => a.finished.catch(() => {}))), pause(250)]); continue;
+        }
       }
       await pause(100);
     }
     return false;
   }
   let lastChecks = [], checkRun = 0, latestRun = null;
+  const scoreByRoute = Object.create(null);   /* the last reading per page: "worse" is against it */
   /* the one way the checks run: settle, then measure. An older run that a newer one superseded
      measures nothing -- and its caller gets the NEWER run's reading, never lastChecks as the
      older run found it. It used to return lastChecks there: the preview's ready message starts
@@ -197,11 +207,27 @@
     /* an undefined token would make var() fall back to the inherited colour -- a false match -- so only defined ones are probed */
     for (const tok of ArkLayout.FILL_TOKENS) { if (!css(doc.documentElement).getPropertyValue('--' + tok).trim()) continue; probe.style.color = `hsl(var(--${tok}))`; const c = parseColor(css(probe).color); if (c) tokenRgb[tok] = c.c; }
     probe.remove();
-    /* 60-30-10 names its three parts itself: the accent token is the 10, the brand pair
-       (primary, and the complement it is paired with) the 30, every surface/meaning fill the
-       60 -- the original rule's own neutral/brand/accent split, mapped onto the SDK's names. */
-    const roleOf = (tok) => tok === 'accent' ? 'accent' : tok === 'primary' || tok === 'complement' ? 'brand' : 'neutral';
-    const nearest = (rgb) => { let best = '', bd = Infinity; for (const [tok, v] of Object.entries(tokenRgb)) { const d = (v[0] - rgb[0]) ** 2 + (v[1] - rgb[1]) ** 2 + (v[2] - rgb[2]) ** 2; if (d < bd) { bd = d; best = tok; } } return best; };
+    /* 60-30-10 counts ROLES by what they are, not token names: the 10 is the action colour on
+       actions, the 30 the brand pair (primary and its complement), the 60 every surface and
+       meaning fill. A palette may give two roles one colour -- the SDK's --accent now IS
+       --complement, the teal of actions -- and then the token name decides nothing: the nearest
+       colour can carry several names (all of them are kept), and a fill the accent shares with the
+       brand pair counts as the 10 on an action (a link, a button) and as the 30 anywhere else. It
+       counted all of that teal as one part or the other by whichever token was listed first. */
+    const isAction = (el) => !!el.matches && el.matches('a[href], button, [role="button"], input[type="submit"], input[type="button"], summary');
+    const roleOf = (toks, el) => {
+      const accent = toks.indexOf('accent') >= 0, brand = toks.indexOf('primary') >= 0 || toks.indexOf('complement') >= 0;
+      if (accent && (!brand || isAction(el))) return 'accent';
+      return brand ? 'brand' : 'neutral';
+    };
+    const nearest = (rgb) => {
+      let bd = Infinity, best = [];
+      for (const [tok, v] of Object.entries(tokenRgb)) {
+        const d = (v[0] - rgb[0]) ** 2 + (v[1] - rgb[1]) ** 2 + (v[2] - rgb[2]) ** 2;
+        if (d < bd - 1) { bd = d; best = [tok]; } else if (Math.abs(d - bd) <= 1) best.push(tok);
+      }
+      return best;
+    };
     const area = { neutral: 0, brand: 0, accent: 0 };
     const measure = (el, inherited) => {
       if (!notStudio(el) || el instanceof win.SVGElement) return;
@@ -209,7 +235,7 @@
       const st = css(el), c = parseColor(st.backgroundColor);
       let mine = inherited;
       if (el.tagName === 'IMG' || el.tagName === 'VIDEO' || el.tagName === 'CANVAS' || (st.backgroundImage && st.backgroundImage !== 'none')) mine = 'skip';
-      else if (c && c.a > 0.5) mine = roleOf(nearest(c.c));
+      else if (c && c.a > 0.5) mine = roleOf(nearest(c.c), el);
       let kids = 0; for (const k of el.children) { const kr = k.getBoundingClientRect(); kids += kr.width * kr.height; measure(k, mine); }
       if (mine !== 'skip') area[mine] += Math.max(0, r.width * r.height - kids);
     };
@@ -257,16 +283,26 @@
     const siteSeo = (state.cmsSourceSite && state.cmsSourceSite.seo && state.cmsSourceSite.seo.site) || {};
     const bots = siteSeo.bots || {};
     const answerBotsOpen = ArkSEO.AI_BOTS.filter(([b, train]) => !train && (bots[b] || 'allow') === 'allow').length, answerBotsTotal = ArkSEO.AI_BOTS.filter((b) => !b[1]).length;
-    add({ law: 'AI', title: 'Answer-ready for AI assistants', status: answerBotsOpen > 0 ? 'pass' : 'warn', detail: `${answerBotsOpen} of ${answerBotsTotal} answer/search bots allowed.`, fix: 'seo-site', fixLabel: 'Open site SEO' });
+    add({ law: 'AI', title: 'Answer-ready for AI assistants', status: answerBotsOpen > 0 ? 'pass' : 'warn', detail: `${answerBotsOpen} of ${answerBotsTotal} AI assistants that answer questions may read the site.`, fix: 'seo-site', fixLabel: 'Open site SEO' });
     // 14 designed for the visitor: needs a stated audience, which no real draft stores
     add({ law: 'Audience', title: 'Designed for the visitor', status: 'notBuilt',
-      detail: 'Not built: this rule compares the design against who the site is for, and no saved draft stores that. The deleted canvas kept an audience note in its own theme; the real theme (js/content/theme.js) and SEO site settings have no such field. Add an audience field to one of them and this rule can be measured.' });
+      /* plain words (docs/ux-audit/cms.md P1-2): what is missing and what would fix it, without the file names */
+      detail: 'Not built: this rule compares the design against who the site is for, and the editor has nowhere to write that down yet. Once the site style or search settings get a field for who the site is for, this rule can be measured.' });
     lastChecks = out;
     const scored = out.filter((c) => c.status === 'pass' || c.status === 'warn' || c.status === 'fail');
     const score = scored.filter((c) => c.status === 'pass').length;
-    const badge = $('scoreBadge'), btn = $('btnCheck'), frac = scored.length ? score / scored.length : 0;
-    badge.textContent = `${score}/${scored.length}`; btn.classList.remove('good', 'mid', 'bad'); btn.classList.add(frac >= 0.85 ? 'good' : frac >= 0.6 ? 'mid' : 'bad');
-    btn.title = `${score} of ${scored.length} measured rules pass` + (out.length > scored.length ? ` · ${out.length - scored.length} not measured (see the list)` : '');
+    /* A quiet count of tips, in the Edit style lens only -- not a pink "7/13" on every page in both
+       lenses (docs/ux-audit/cms.md P1-10). The score itself stays the badge's data-score (passes /
+       measured; drivers and the list read it). Warning tone only when the person's own edits on
+       this page just made the reading worse than the last one. */
+    const badge = $('scoreBadge'), btn = $('btnCheck'), tips = scored.length - score;
+    const prev = scoreByRoute[state.cmsCurrentRoute];
+    scoreByRoute[state.cmsCurrentRoute] = score;
+    badge.dataset.score = `${score}/${scored.length}`;
+    badge.textContent = String(tips);
+    btn.dataset.tone = prev !== undefined && score < prev ? 'worse' : '';
+    btn.setAttribute('aria-label', `Design tips: ${tips} for this page (${score} of ${scored.length} measured rules pass)`);
+    btn.title = `${tips} design tip${tips === 1 ? '' : 's'} for this page: ${score} of ${scored.length} measured rules pass` + (out.length > scored.length ? ` · ${out.length - scored.length} not measured (see the list)` : '') + (btn.dataset.tone ? ' · fewer pass than before your last change' : '');
     return out;
   }
   let checkT = 0;
@@ -276,12 +312,17 @@
     if (c.fix === 'seo-site') { closePop(); openSiteSeo(); return; }
   }
   /* opens on the last reading at once, and repaints when the settled one lands (measureChecks) */
-  $('btnCheck').addEventListener('click', (e) => { const opening = state.popAnchor !== e.currentTarget; openPop(e.currentTarget, (p) => {
+  $('btnCheck').addEventListener('click', (e) => { const opening = state.popAnchor !== e.currentTarget;
+    /* a first open has no reading yet: measure NOW (marked as not settled) so every rule shows at
+       once, and let the settled reading repaint it -- the settle wait can run as long as the page's
+       own animation (up to MAX_SETTLE_MS), and an empty list for that long read as broken */
+    if (opening && !lastChecks.length) { runChecks(); state.lastChecksSettled = false; }
+    openPop(e.currentTarget, (p) => {
     const checks = lastChecks;
     const head = document.createElement('div'); head.className = 'checkhead';
     const measured = checks.filter((c) => c.status === 'pass' || c.status === 'warn' || c.status === 'fail'), unmeasured = checks.length - measured.length;
-    head.innerHTML = `<div><b>Design check · ${esc(state.cmsCurrentRoute)}</b><p>${measured.filter((c) => c.status === 'pass').length} of ${measured.length} measured rules pass${unmeasured ? ` · ${unmeasured} not measured` : ''}</p></div>`;
-    if (!state.lastChecksSettled) head.firstChild.appendChild(h('p', { class: 'hint', text: 'Measured while the page was still moving: it had not finished loading fonts or animating after 6 seconds, so this reading can differ from the next. Check again once it is still.' }));
+    head.innerHTML = `<div><b>Design tips for this page</b><p>${measured.filter((c) => c.status === 'pass').length} of ${measured.length} measured rules pass${unmeasured ? ` · ${unmeasured} not measured` : ''}</p></div>`;
+    if (!state.lastChecksSettled) head.firstChild.appendChild(h('p', { class: 'hint', text: 'Measured while the page was still moving (loading fonts or animating), so this reading can change; it updates by itself once the page is still.' }));
     p.appendChild(head);
     const ul = document.createElement('ul'); ul.className = 'checks';
     for (const c of checks) {

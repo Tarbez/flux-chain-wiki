@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("one-substrate-many-networks", {
   "core": "Flux Protocol is the shared substrate; project material describes DAO Chain as a network on it. Network creation currently partitions miner presence, not a complete security boundary. Live registration of named examples remains unverified here.",
-  "relevance": "Use this note to distinguish the shared protocol from a network using it before relying on network isolation.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Use this note to distinguish the shared protocol from a network using it before relying on network isolation.",
   "reviewed": "2026-09-30",
   "evidenceLabel": "Named-network command and boundary documentation",
   "evidenceHref": "doc:docs/operators/networks.md",

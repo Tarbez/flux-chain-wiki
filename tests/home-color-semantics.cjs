@@ -43,24 +43,36 @@ const scales = [...themes.matchAll(/--secondary-scale:([\d.]+);/g)].map((m) => +
 assert(scales.every((s) => s >= .72 && s <= 1), 'accent scales stay within 0.72..1');
 assert(Math.min(...scales) < Math.max(...scales), 'the scale follows luminance: bright and dark accents must not get the same size');
 
-// The main action's area follows its luminance; the selection and header action stay compact or neutral.
-assert(/\.hl-button\.palette-solid \{[^}]*var\(--secondary-scale/.test(components), 'the home CTA is sized by --secondary-scale');
+// The main action and the selections are Ark's since 2026-10-19 (js/pages/home.js is a page of Ark
+// blocks): one primary button, painted by the Ark component sheet; the selected tab is a reference mark,
+// never a block of action colour. Nothing on the home page repaints them.
+assert(/tone: 'primary'/.test(fs.readFileSync('js/pages/home.js', 'utf8')) && (fs.readFileSync('js/pages/home.js', 'utf8').match(/tone: 'primary'/g) || []).length === 1, 'one primary action on the home page');
+assert(!/\.ark-|hl-button|hl-audience-tab/.test(home), 'css/home-swiss.css repaints no Ark block and no old home control');
 assert(!/hl-audience-tab\[aria-selected="true"\] \{[^}]*--secondary/.test(components), 'the selected audience tab is not a block of action colour');
 // The home page keeps the site's own nav (the one every other page shows): no home-only header rules.
 assert(!/data-page="zero"\] \.(ark-header|header-|nav-toggle)/.test(home + components), 'the home page does not restyle the shared nav');
 
-// Heavy bases: the hero strip, the readout and the closing sit on the anchor.
-for (const sel of ['#scene .hl-signal {', '#scene .hl-closing {', '.land-panel-heavy {'])
+// Heavy bases: the scene's readout sits on the anchor (the old hero strip and closing went with the
+// hand-built home; the fleet signal is an Ark stat tile now).
+for (const sel of ['.land-panel-heavy {'])
   assert(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[^}]*var\\(--anchor\\)').test(home), `${sel} sits on the anchor neutral`);
 
-// The two brand marks are generated masks (scripts/build-brand-marks.cjs), painted with
-// currentColor so they take the ink of every palette. Named regression: a CSS mask loaded
-// from file:// is blocked as cross-origin, so the marks must be embedded, not linked.
-const marks = fs.readFileSync('css/brand-marks.css', 'utf8');
+// The two brand marks are generated masks, painted with currentColor so they take the ink of
+// every palette. Since 2026-10-19 the product kit is their canonical home (defxn-product-kit
+// brand/marks, emitted as defxn-marks.data.css and synced into assets/kit/); this site loads
+// that file. Named regression: a CSS mask loaded from file:// is blocked as cross-origin, so
+// the marks must be embedded, not linked.
+const marks = fs.readFileSync('assets/kit/defxn-marks.data.css', 'utf8');
+assert(/<link rel="stylesheet" href="assets\/kit\/defxn-marks\.data\.css[?"]/.test(fs.readFileSync('index.html', 'utf8')), 'index.html loads the kit\'s data: marks');
 for (const name of ['defxn', 'fxn']) assert(new RegExp('--mark-' + name + ':url\\("data:image/png;base64,').test(marks), `--mark-${name} is embedded as a data: URI`);
 assert(/\.brand-mark \{[^}]*background:currentColor/.test(marks), 'marks are painted with currentColor');
 assert(!/url\((?!"data:)/.test(marks), 'no mark is loaded by file path');
-assert(/brand-mark-defxn ark-brand-mark/.test(fs.readFileSync('js/resolvers/header.js', 'utf8')), 'the header carries the DEFXN mark');
+/* Since 2026-10-19 the header is the family bar (DefxnKit.mountShell, js/resolvers/header.js):
+   its .dx-mark is masked by --dx-mark, which the data: marks sheet points at the DEFXN mark, so
+   the bar's mark is the same embedded PNG (it must still open on file://). */
+assert(/DefxnKit|kit\.mountShell\(\{ mode: 'home'/.test(fs.readFileSync('js/resolvers/header.js', 'utf8')), 'the header is the family bar');
+assert(/--dx-mark:var\(--mark-defxn\)/.test(marks), 'the bar\'s mark is the embedded DEFXN mark');
+assert(/\.dx-mark \{[^}]*mask: var\(--dx-mark\)/.test(fs.readFileSync('assets/kit/defxn-components.css', 'utf8')), 'the bar paints the mark through --dx-mark');
 assert(/\.land-coin \{[^}]*--mark-fxn/.test(home), 'FXN amounts in the landscape carry the FXN coin mark');
 console.log('PASS: home colour is data — neutrals plus role bases only, identity colour on the record in flight, ' +
   'monochrome headline and numbers, luminance-scaled action, anchored bases in all ' + palettes + ' palettes.');

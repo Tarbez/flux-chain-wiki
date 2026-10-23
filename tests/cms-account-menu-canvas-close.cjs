@@ -33,9 +33,16 @@ function boot(supported) {
   const menu = document.getElementById('accountMenu'), btn = document.getElementById('accountBtn');
   btn.click();
   assert.equal(menu.hidden, false, 'the account button opens the menu');
-  /* a press inside the canvas: this document gets no pointerdown, only its window losing focus */
+  /* a press inside the canvas: this document gets no pointerdown -- the canvas reports the press
+     ('defxn-cms-preview-pointerdown', js/admin/bridge.js -> overlay.closeCanvas) */
+  window.ArkAdmin.overlay.closeCanvas();
+  assert.equal(menu.hidden, true, 'the menu stayed open when the canvas was pressed');
+  assert.equal(btn.getAttribute('aria-expanded'), 'false');
+  /* leaving the window closes it too (checked once focus has settled) */
+  btn.click();
   window.dispatchEvent(new window.FocusEvent('blur'));
-  assert.equal(menu.hidden, true, 'the menu stayed open when focus went to the canvas');
+  await new Promise((r) => setTimeout(r, 5));
+  assert.equal(menu.hidden, true, 'the menu stayed open when focus left the window');
   assert.equal(btn.getAttribute('aria-expanded'), 'false');
   btn.click();
   document.body.dispatchEvent(new window.Event('pointerdown', { bubbles: true }));

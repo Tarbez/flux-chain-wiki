@@ -1,0 +1,65 @@
+# key	tag	text -- layout keys of /lifecycle before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeAgreement lifecycleONE SNAPSHOT / FIVE SIGNED RECORDSFrom request to receipt.A client asks a provider to replicate one named dataset snapshot. Each party wr
+page:/nav:1	nav	HomeAgreement lifecycle
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Agreement lifecycle
+page:/div:1	div	ONE SNAPSHOT / FIVE SIGNED RECORDSFrom request to receipt.A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records
+page:/div:1/div:1	div	ONE SNAPSHOT / FIVE SIGNED RECORDSFrom request to receipt.A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records
+page:/div:1/div:1/p:1	p	ONE SNAPSHOT / FIVE SIGNED RECORDS
+page:/div:1/div:1/h1:1	h1	From request to receipt.
+page:/div:1/div:1/div:1	div	A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connect
+page:/div:1/div:1/div:1/p:1	p	A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connect
+page:/div:1/div:1/nav:1	nav	AnswerUnderstand whyEvidence
+page:/div:1/div:1/nav:1/button:1	button	Answer
+page:/div:1/div:1/nav:1/button:1/svg:1	svg	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:2	button	Understand why
+page:/div:1/div:1/nav:1/button:2/svg:1	svg	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3	button	Evidence
+page:/div:1/div:1/nav:1/button:3/svg:1	svg	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:5	path	
+page:/div:1/div:1/aside:1	aside	Status / PartialImplemented in source. Full public production automation and economic settlement remain unverified.
+page:/div:1/div:1/aside:1/strong:1	strong	Status / Partial
+page:/div:1/div:1/aside:1/p:1	p	Implemented in source. Full public production automation and economic settlement remain unverified.
+page:/div:1/button:1	button	Show the illustration
+page:/div:1/figure:1	figure	AGREEMENTS RESOLVERILLUSTRATION05Five records. One reference trail.Each signed record adds a reference to the same agreement.Dataset snapshotReferences persist
+page:/div:1/figure:1/div:1	div	AGREEMENTS RESOLVERILLUSTRATION
+page:/div:1/figure:1/div:1/span:1	span	AGREEMENTS RESOLVER
+page:/div:1/figure:1/div:1/span:2	span	ILLUSTRATION
+page:/div:1/figure:1/strong:1	strong	05
+page:/div:1/figure:1/figcaption:1	figcaption	Five records. One reference trail.
+page:/div:1/figure:1/canvas:1	canvas	
+page:/div:1/figure:1/p:1	p	Each signed record adds a reference to the same agreement.
+page:/div:1/figure:1/div:2	div	Dataset snapshotReferences persist
+page:/div:1/figure:1/div:2/span:1	span	Dataset snapshot
+page:/div:1/figure:1/div:2/span:2	span	References persist
+page:/nav:2	nav	01Intent02Offer03Agreement04Fulfillment05Receipt
+page:/nav:2/a:1	a	01Intent
+page:/nav:2/a:1/span:1	span	01
+page:/nav:2/a:2	a	02Offer
+page:/nav:2/a:2/span:1	span	02
+page:/nav:2/a:3	a	03Agreement
+page:/nav:2/a:3/span:1	span	03
+page:/nav:2/a:4	a	04Fulfillment
+page:/nav:2/a:4/span:1	span	04
+page:/nav:2/a:5	a	05Receipt
+page:/nav:2/a:5/span:1	span	05
+page:/nav:3	nav	Follow Intent
+page:/nav:3/a:1	a	Follow Intent
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

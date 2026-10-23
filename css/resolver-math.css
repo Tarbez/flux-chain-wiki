@@ -1,409 +1,104 @@
-/* /resolver-math — only what the dashboard vocabulary does not already
-   cover. The shell, grid, panels, tables, stats and notes all come from
-   css/stats-dashboard.css, so this page inherits /stats's look instead of
-   carrying a palette of its own. Everything below is one of three things
-   the dashboard has no equivalent for: the algebra block, the status tag,
-   and the block explorer.
+/* /resolver-math -- only this page's own live content. Since the page became Ark blocks
+   (DEFXN polish Wave 3, W3-STATS) the frame, hero, tabs, tables, figures, facts and notes are
+   Ark's (css/ark-blocks.css); what is left here is what Ark has no block for, passed to Ark
+   figures as slots (js/pages/resolver-math.js): the equation and its field, the builder that
+   takes a term out of the sum, the block explorer, and the two drawings' type.
 
-   Colour comes from the shade ladders (--<role>-100 for a soft ground,
-   -400 for a border, -700 for ink), never from an opacity tint on a role
-   ink and never from the action colour — the component layer is the one
-   authority for interactive paint. tests/components.cjs enforces both.
-
-   Two status families share ladders because they never appear together:
-   the census says closed / open / unbounded / relative, and the gaps
-   table says not built / rejected / overstated. */
-
-/* The plain sentence that opens each section, between the heading and the
-   precise note — the page's one carried-over "say it simply first" device
-   after the standalone eight-sentence short version was cut as overload. */
-#scene .stats-dash .dash-section-plain {
-  margin: 4px 0 2px;
-  font-size: .95rem;
-  color: hsl(var(--text));
-  max-width: 76ch;
-}
+   Colour comes from the shade ladders (--<role>-100 for a soft ground, -400 for a border, -700
+   for ink), never from an opacity tint on a role ink and never from the action colour -- the
+   component layer is the one authority for interactive paint. tests/components.cjs enforces
+   both. Nothing here sets type below 12px (the SDK floor Ark keeps); the drawings' labels are
+   SVG units, scaled with the drawing. */
 
 /* ---- the equation: a sum of definitions ----------------------------- */
 
-/* This is the page. It is a sum, so it is set as one: an operator column,
-   a figure column, the term, and what the term buys. Everything aligns on
-   those four columns so the eye reads down the numbers. */
-.rm-equation {
-  border: 1px solid hsl(var(--primary-400));
-  background: hsl(var(--raised));
-  border-radius: 14px;
-  padding: 24px 26px 22px;
-  margin: 0 0 22px;
-}
+/* This is the page. It is a sum, so it is set as one: an operator column, a figure column, the
+   term, and what the term buys, so the eye reads down the numbers. Ark's figure frames it, so it
+   carries no card of its own. On a wide screen the field it buys, the two terms nobody added and
+   the punch line stand to the right of the sum (display:contents lifts the sum and the field into
+   this grid, so the markup -- and every saved layout key in it -- stays as it was). */
+.rm-equation {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:0 24px;align-items:start;}
 .rm-eq-kicker {
-  margin: 0 0 14px;
-  font: 600 9px/1.5 var(--mono-font, ui-monospace, monospace);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: hsl(var(--text-faint));
+  grid-column:1 / -1;
+  margin:0 0 12px;
+  font:600 var(--caption-size,.75rem)/1.5 var(--font-mono, ui-monospace, monospace);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:hsl(var(--text-faint));
 }
-/* Sum on the left, the field it buys on the right. Below 900px the field
-   drops under the sum rather than squeezing beside it. */
-.rm-eq-body {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.78fr);gap:12px 30px;align-items:start;}
-.rm-eq-sum, .rm-eq-zero {display:grid;gap:2px;}
-.rm-eq-zero {margin:16px 0 0;}
+.rm-eq-body {display:contents;}
+.rm-eq-sum {grid-column:1;grid-row:2 / span 3;display:grid;gap:2px;}
+.rm-field {grid-column:2;grid-row:2;display:grid;gap:8px;align-content:start;padding-top:2px;}
+.rm-eq-zero {grid-column:2;grid-row:3;display:grid;gap:2px;margin:14px 0 0;}
+.rm-eq-punch {
+  grid-column:2;grid-row:4;
+  margin:14px 0 0;
+  padding-top:12px;
+  border-top:1px solid hsl(var(--reference-300));
+  font-size:var(--type-cardTitle,1rem);
+  font-weight:600;
+  color:hsl(var(--text-strong));
+}
+/* Set for the reading column the equation sits in (an Ark tab panel, about 70ch): each term on
+   one line, what it buys under it in a quieter tone. */
 .rm-eq-row {
   display:grid;
-  grid-template-columns:18px 72px minmax(0,13rem) minmax(0,1fr);
+  grid-template-columns:16px 48px minmax(0,1fr);
   align-items:baseline;
-  gap:0 12px;
+  gap:0 10px;
   padding:3px 0;
   border-radius:6px;
 }
+.rm-eq-gloss {grid-column:3;font-size:var(--type-nav,.82rem);line-height:1.35;color:hsl(var(--text-muted));}
 /* Each term arrives as its cells land. */
 .rm-eq-sum .rm-eq-row {opacity:.22;transform:translateY(4px);transition:opacity 320ms ease,transform 320ms cubic-bezier(.22,1,.36,1),background-color 160ms;}
 .rm-eq-sum .rm-eq-row[data-in] {opacity:1;transform:none;}
 .rm-equation[data-played] .rm-eq-sum .rm-eq-row {opacity:1;transform:none;}
 .rm-eq-sum .rm-eq-row[data-term]:hover {background:hsl(var(--text-strong) / .05);}
+.rm-eq-rule {grid-column:1 / -1;height:1px;background:hsl(var(--reference-400));margin:8px 0;}
+/* The total has no figure of its own -- it IS the figures above it -- so its label takes the
+   number column rather than leaving a hole. */
+.rm-eq-total .rm-eq-n {display:none;}
+.rm-eq-total .rm-eq-term {grid-column:2 / 4;font-weight:600;font-size:var(--type-cardTitle,1rem);color:hsl(var(--text-strong));}
+.rm-eq-total .rm-eq-gloss {grid-column:2 / 4;}
+.rm-eq-total .rm-eq-op {color:hsl(var(--primary));}
+/* The terms nobody ever added. Same shape, so the absence lines up with the presence. */
+.rm-eq-zero .rm-eq-n {color:hsl(var(--danger));}
+.rm-eq-zero .rm-eq-gloss {color:hsl(var(--danger-700));}
+.rm-eq-note {grid-column:1 / -1;margin:8px 0 0;font-size:var(--type-nav,.82rem);color:hsl(var(--text-muted));max-width:72ch;}
 
-.rm-eq-rule {
-  grid-column: 1 / -1;
-  height: 1px;
-  background: hsl(var(--reference-400));
-  margin: 8px 0;
-}
-/* The total has no figure of its own — it IS the figures above it — so its
-   label takes the number column rather than leaving a hole. */
-.rm-eq-total .rm-eq-n { display: none; }
-.rm-eq-total .rm-eq-term {
-  grid-column: 2 / 4;
-  font-weight: 600;
-  font-size: 1.08rem;
-  color: hsl(var(--text-strong));
-}
-.rm-eq-total .rm-eq-op { color: hsl(var(--primary)); }
-
-/* The terms nobody ever added. Same shape, so the absence lines up with
-   the presence and reads as part of the same sum. */
-.rm-eq-zero .rm-eq-n { color: hsl(var(--danger)); }
-.rm-eq-zero .rm-eq-gloss { color: hsl(var(--danger-700)); }
-.rm-eq-note {
-  margin: 8px 0 0;
-  font-size: .86rem;
-  color: hsl(var(--text-muted));
-  max-width: 72ch;
-}
-.rm-eq-punch {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid hsl(var(--reference-300));
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: hsl(var(--text-strong));
-}
-
-/* ---- the builder ---------------------------------------------------- */
-
-.rm-term {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  padding: 5px 0;
-  line-height: 1.3;
-  cursor: pointer;
-  border-bottom: 1px solid hsl(var(--reference-200));
-}
-/* css/task-page.css gives every input a 44px min-height as a touch target.
-   A checkbox does not need to BE 44px — the row it sits in is the target,
-   and it is clickable because it is a <label>. So the row keeps the 44,
-   the box goes back to its natural size, and eight toggles stop occupying
-   a screen and a half. */
-#scene .resolver-math-page .rm-term { margin: 0; min-height: 44px; padding: 0; }
-#scene .resolver-math-page .rm-term input { min-height: 0; }
-.rm-term:last-of-type { border-bottom: 0; }
-.rm-term-label { font-size: .92rem; color: hsl(var(--text)); }
-.rm-term input { accent-color: hsl(var(--reference-600)); width: 15px; height: 15px; }
-
-.rm-tally {
-  margin: 0 0 10px;
-  font-size: .95rem;
-  font-weight: 600;
-  color: hsl(var(--text-strong));
-}
-.rm-tally[data-state="reduced"] { color: hsl(var(--danger-700)); }
-.rm-say-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
-.rm-say {
-  display: grid;
-  grid-template-columns: 16px minmax(0, 1fr) auto;
-  gap: 2px 10px;
-  align-items: baseline;
-  padding: 6px 0;
-  border-bottom: 1px solid hsl(var(--reference-200));
-}
-.rm-say:last-child { border-bottom: 0; }
-.rm-say-mark { font: 600 .82rem/1.4 var(--mono-font, ui-monospace, monospace); }
-.rm-say[data-state="yes"] .rm-say-mark { color: hsl(var(--success)); }
-.rm-say[data-state="no"] .rm-say-mark { color: hsl(var(--danger)); }
-.rm-say[data-state="no"] .rm-say-text { color: hsl(var(--text-faint)); text-decoration: line-through; }
-.rm-say-text { font-size: .92rem; color: hsl(var(--text-strong)); }
-.rm-say-block {
-  font: 400 .74rem/1.5 var(--mono-font, ui-monospace, monospace);
-  color: hsl(var(--text-faint));
-  justify-self: end;
-}
-.rm-say-needs {
-  grid-column: 2 / -1;
-  font-size: .78rem;
-  color: hsl(var(--text-faint));
-}
-.rm-say[data-state="no"] .rm-say-needs { color: hsl(var(--danger-700)); }
-
-/* ---- the algebra, demoted to a side panel --------------------------- */
-
-.rm-algebra-line { padding: 8px 0; border-bottom: 1px solid hsl(var(--reference-200)); }
-.rm-algebra-line:last-of-type { border-bottom: 0; }
-.rm-equation-form {
-  display: block;
-  font: 500 .92rem/1.35 var(--mono-font, ui-monospace, monospace);
-  color: hsl(var(--text-strong));
-}
-.rm-equation-gloss { margin: 3px 0 0; font-size: .8rem; color: hsl(var(--text-faint)); }
-
-/* ---- prose inside a panel ------------------------------------------ */
-
-.rm-prose p { margin: 0 0 12px; max-width: 72ch; }
-.rm-prose p:last-child { margin-bottom: 0; }
-
-.rm-claim { display: flex; flex-direction: column; justify-content: center; gap: 10px; }
-.rm-claim-text { margin: 0; color: hsl(var(--text-muted)); }
-.rm-claim-strong {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: hsl(var(--text-strong));
-  border-left: 3px solid hsl(var(--primary));
-  padding-left: 12px;
-}
-
-/* ---- status tag ----------------------------------------------------- */
-
-.rm-tag {
-  display: inline-block;
-  font: 600 9px/1.5 var(--mono-font, ui-monospace, monospace);
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-  background: hsl(var(--reference-100));
-  color: hsl(var(--reference-700));
-}
-/* Held in place by a rule or a test. */
-.rm-tag[data-kind="closed"] { background: hsl(var(--success-100)); color: hsl(var(--success-700)); }
-/* Extends at runtime by design. */
-.rm-tag[data-kind="open"] { background: hsl(var(--reference-100)); color: hsl(var(--reference-700)); }
-/* The identity colour: the property the whole design turns on. */
-.rm-tag[data-kind="unbounded"] { background: hsl(var(--primary-100)); color: hsl(var(--primary-700)); }
-/* Read the type first — amber because it means "check before you trust". */
-.rm-tag[data-kind="relative"] { background: hsl(var(--warning-100)); color: hsl(var(--warning-700)); }
-/* Absent, not failed: the same neutral as "open", and never beside it. */
-.rm-tag[data-kind="notbuilt"] { background: hsl(var(--reference-100)); color: hsl(var(--reference-700)); }
-.rm-tag[data-kind="rejected"] { background: hsl(var(--danger-100)); color: hsl(var(--danger-700)); }
-.rm-tag[data-kind="overstated"] { background: hsl(var(--warning-100)); color: hsl(var(--warning-700)); }
-
-/* ---- tables --------------------------------------------------------- */
-
-.rm-layers td:first-child,
-.rm-gaps td:first-child { font-weight: 600; color: hsl(var(--text-strong)); }
-.rm-layers td:last-child,
-.rm-gaps td:last-child { color: hsl(var(--text-muted)); font-size: .86rem; }
-.rm-letter {
-  font: 600 .95rem/1 var(--mono-font, ui-monospace, monospace);
-  color: hsl(var(--primary));
-}
-.rm-source { font: 400 .74rem/1.45 var(--mono-font, ui-monospace, monospace); color: hsl(var(--text-faint)); }
-.rm-observers td:nth-child(3) { font-family: var(--mono-font, ui-monospace, monospace); font-size: .78rem; }
-
-/* ---- the block explorer -------------------------------------------- */
-
-.rm-explorer-label {
-  display: block;
-  font-size: .82rem;
-  color: hsl(var(--text-muted));
-  margin: 0 0 8px;
-}
-.rm-input {
-  width: 100%;
-  padding: 11px 13px;
-  border-radius: 8px;
-  font: 500 1rem/1.3 var(--mono-font, ui-monospace, monospace);
-  background: hsl(var(--canvas));
-  color: hsl(var(--text-strong));
-  border: 1px solid hsl(var(--reference-400));
-}
-/* Interaction state uses the reference ladder: the identity colour is the
-   component layer's to spend, never a page's. */
-.rm-input:focus-visible { outline: 2px solid hsl(var(--reference-600)); outline-offset: 1px; }
-
-.rm-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
-.rm-chip {
-  font: 500 .76rem/1.3 var(--mono-font, ui-monospace, monospace);
-  padding: 5px 9px;
-  border-radius: 6px;
-  cursor: pointer;
-  background: hsl(var(--nested));
-  color: hsl(var(--text-muted));
-  border: 1px solid hsl(var(--reference-300));
-  transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
-}
-.rm-chip:is(:hover, :focus-visible) {
-  color: hsl(var(--text-strong));
-  border-color: hsl(var(--reference-400));
-  background: hsl(var(--reference-200));
-}
-
-.rm-verdict {
-  margin: 16px 0 0;
-  padding: 14px 16px;
-  border-radius: 9px;
-  border: 1px solid hsl(var(--reference-300));
-  background: hsl(var(--nested));
-}
-/* Resolves. */
-.rm-verdict[data-state="real"] { border-color: hsl(var(--success-400)); background: hsl(var(--success-100)); }
-/* Depends on the observer — pick a type and it resolves one way. */
-.rm-verdict[data-state="relative"] { border-color: hsl(var(--warning-400)); background: hsl(var(--warning-100)); }
-/* Refused by name. Not an error on the reader's part. */
-.rm-verdict[data-state="unreal"] { border-color: hsl(var(--reference-400)); background: hsl(var(--reference-100)); }
-/* Resolved AND wrong — the silent collision. The only alarm on the page. */
-.rm-verdict[data-state="hazard"] { border-color: hsl(var(--danger-400)); background: hsl(var(--danger-100)); }
-
-.rm-verdict-head {
-  margin: 0 0 10px;
-  font-weight: 600;
-  color: hsl(var(--text-strong));
-}
-.rm-verdict-lines { margin: 0; display: grid; gap: 6px; }
-.rm-verdict-lines dt {
-  font: 600 9px/1.5 var(--mono-font, ui-monospace, monospace);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: hsl(var(--text-faint));
-}
-.rm-verdict-lines dd {
-  margin: 0 0 4px;
-  font-size: .88rem;
-  color: hsl(var(--text));
-  max-width: 78ch;
-}
-
-/* ---- axioms --------------------------------------------------------- */
-
-.rm-rules .rm-axiom-form {
-  font: 500 .86rem/1.4 var(--mono-font, ui-monospace, monospace);
-  color: hsl(var(--text-strong));
-  white-space: nowrap;
-}
-.rm-row-unbuilt { color: hsl(var(--text-faint)); }
-.rm-tests { display: flex; flex-wrap: wrap; gap: 5px; }
-.rm-tests code {
-  font: 400 .72rem/1.5 var(--mono-font, ui-monospace, monospace);
-  color: hsl(var(--success-700));
-  background: hsl(var(--success-100));
-  padding: 3px 7px;
-  border-radius: 4px;
-}
-
-/* ---- not built, and what follows ----------------------------------- */
-
-
-@media (max-width: 720px) {
-  .rm-equation { padding: 26px 14px 22px; }
-  .rm-equation-rule { margin: 18px auto; }
-}
-
-/* ---- figures -------------------------------------------------------- */
-
-/* Drawn in the same hand as the site's other figures (css/story-diagrams.css
-   owns the stroke classes). Only the label sizes and the one alarm colour
-   are new: the greedy-letter figure needs to read as wrong at a glance,
-   because its whole point is that nothing else about it looks wrong. */
-.rm-fig { margin: 0; }
-.rm-figwrap .story-drawing { margin: 2px 0 10px; }
-.rm-fig-caption {
-  margin: 0;
-  font-size: .86rem;
-  line-height: 1.55;
-  color: hsl(var(--text-muted));
-  max-width: 62ch;
-}
-
-.story-drawing .rm-fig-letter {
-  fill: hsl(var(--text-strong));
-  font: 600 15px var(--mono-font, monospace);
-  text-anchor: middle;
-}
-.story-drawing .rm-fig-mid { font-size: 9px; text-anchor: middle; fill: hsl(var(--text)); }
-.story-drawing .rm-fig-mid-left { font-size: 9px; fill: hsl(var(--text)); }
-.story-drawing .rm-fig-small { font-size: 7.5px; text-anchor: middle; fill: hsl(var(--text-faint)); }
-.story-drawing .rm-fig-small-left { font-size: 7.5px; fill: hsl(var(--text-faint)); }
-
-.story-drawing .rm-fig-danger { stroke: hsl(var(--danger)); stroke-width: 1.5; }
-.story-drawing .rm-fig-small-danger { font-size: 9px; text-anchor: middle; fill: hsl(var(--danger)); }
-.story-drawing .rm-fig-mid-danger { font-size: 9px; text-anchor: middle; fill: hsl(var(--danger)); }
-
-/* Denser everywhere: the first version was a long scroll, and a reader who
-   has to travel to reach the point tends not to reach it. */
-#scene .resolver-math-page .dash-grid { gap: 10px; }
-#scene .resolver-math-page .dash-section { margin-top: 26px; }
-#scene .resolver-math-page .dash-panel { padding: 14px 16px; }
-#scene .resolver-math-page .rm-prose p { margin-bottom: 9px; }
-
-@media (max-width: 760px) {
-  .rm-eq-row { grid-template-columns: 16px 56px minmax(0, 1fr); }
-  .rm-eq-gloss { grid-column: 3; }
-  .rm-say { grid-template-columns: 16px minmax(0, 1fr); }
-  .rm-say-block { grid-column: 2; justify-self: start; }
-}
+/* The swatch ties a line of the sum to its block of cells, so "93 record types" and the blue block
+   are visibly one claim rather than two. */
+.rm-eq-swatch {display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:2px;vertical-align:baseline;}
+.rm-eq-swatch[data-term="0"] {background:hsl(var(--primary-400));}
+.rm-eq-swatch[data-term="1"] {background:hsl(var(--role));}
+.rm-eq-swatch[data-term="2"] {background:hsl(var(--success));}
+.rm-eq-swatch[data-term="3"] {background:hsl(var(--reference-600));}
+.rm-eq-swatch[data-term="4"] {background:hsl(var(--warning));}
+.rm-eq-swatch[data-term="5"] {background:hsl(var(--primary));}
 
 /* ---- the field: one cell per definition ----------------------------- */
 
-/* The sum says "93 record types"; the field shows ninety-three things.
-   Nothing here is sampled or rounded — the cells are counted out of the
-   generated census, which is why the count under the title can be read
-   as a fact rather than a flourish. */
-.rm-field {display:grid;gap:8px;align-content:start;padding-top:2px;}
+/* The sum says "93 record types"; the field shows ninety-three things. Nothing here is sampled or
+   rounded -- the cells are counted out of the generated census, which is why the count under the
+   title can be read as a fact rather than a flourish. */
 .rm-field-head {margin:0;display:flex;align-items:baseline;gap:7px;}
-.rm-field-count {
-  font:600 1.5rem/1 var(--mono-font,ui-monospace,monospace);
-  color:hsl(var(--text-strong));
-  font-variant-numeric:tabular-nums;
-}
-.rm-field-of {font-size:.82rem;color:hsl(var(--text-faint));}
+.rm-field-count {font:600 1.5rem/1 var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-strong));font-variant-numeric:tabular-nums;}
+.rm-field-of {font-size:var(--type-nav,.82rem);color:hsl(var(--text-faint));}
 .rm-field-svg {display:block;width:100%;height:auto;overflow:visible;}
-.rm-field-foot {margin:0;font-size:.76rem;line-height:1.5;color:hsl(var(--text-faint));max-width:44ch;}
-
-.rm-cell {
-  fill:hsl(var(--text-strong) / .07);
-  stroke:none;
-  transition:fill 260ms ease,opacity 200ms ease;
-}
-/* Term order follows the sum in js/pages/resolver-math.js: letters,
-   longer labels, verbs, record types, type-scoped shapes, resolvers. */
+.rm-field-foot {margin:0;font-size:var(--caption-size,.75rem);line-height:1.5;color:hsl(var(--text-faint));max-width:44ch;}
+.rm-cell {fill:hsl(var(--text-strong) / .07);stroke:none;transition:fill 260ms ease,opacity 200ms ease;}
+/* Term order follows the sum in js/pages/resolver-math.js: letters, labels, verbs, types,
+   type-scoped shapes, chains, capabilities. */
 .rm-cell[data-term="0"] {fill:hsl(var(--primary-400));}
 .rm-cell[data-term="1"] {fill:hsl(var(--role));}
 .rm-cell[data-term="2"] {fill:hsl(var(--success));}
 .rm-cell[data-term="3"] {fill:hsl(var(--reference-600));}
 .rm-cell[data-term="4"] {fill:hsl(var(--warning));}
 .rm-cell[data-term="5"] {fill:hsl(var(--primary));}
-
-/* Defined, but nobody ever added it: same size, same place in the field,
-   drawn as a hole rather than left out. Leaving them out entirely is how
-   "not built" quietly becomes "not a thing". */
-.rm-cell-never {
-  fill:hsl(var(--danger-100));
-  stroke:hsl(var(--danger));
-  stroke-width:1.6;
-  stroke-dasharray:2.2 1.8;
-}
-
+/* Defined, but nobody ever added it: same size, same place in the field, drawn as a hole rather
+   than left out. Leaving them out entirely is how "not built" quietly becomes "not a thing". */
+.rm-cell-never {fill:hsl(var(--danger-100));stroke:hsl(var(--danger));stroke-width:1.6;stroke-dasharray:2.2 1.8;}
 /* Hovering a term isolates it: "93 record types" becomes a visible block. */
 .rm-equation[data-only] .rm-cell {opacity:.12;}
 .rm-equation[data-only="0"] .rm-cell[data-term="0"],
@@ -413,7 +108,6 @@
 .rm-equation[data-only="4"] .rm-cell[data-term="4"],
 .rm-equation[data-only="5"] .rm-cell[data-term="5"] {opacity:1;}
 .rm-equation[data-only] .rm-cell-never {opacity:.3;}
-
 /* The play: cells land in the order of the sum, then it is still. */
 .rm-equation.rm-eq-run .rm-cell {animation:rm-cell-in 300ms ease-out both;animation-delay:calc(240ms + var(--i) * 5ms);}
 .rm-equation.rm-eq-run .rm-cell-never {animation:rm-cell-never-in 400ms ease-out both;animation-delay:2.5s;}
@@ -421,25 +115,104 @@
 @keyframes rm-cell-never-in {from{opacity:0;}to{opacity:1;}}
 .rm-field-svg rect {transform-box:fill-box;transform-origin:center;}
 
+/* ---- the builder: take a term out ----------------------------------- */
+
+.rm-build {display:grid;grid-template-columns:minmax(10.5rem,.7fr) minmax(0,2fr);gap:12px 24px;align-items:start;}
+.rm-builder, .rm-says {display:grid;align-content:start;}
+.rm-build-head {
+  margin:0 0 6px;
+  font:600 var(--caption-size,.75rem)/1.5 var(--font-mono, ui-monospace, monospace);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:hsl(var(--text-muted));
+}
+.rm-build-foot {margin:8px 0 0;font-size:var(--type-nav,.82rem);line-height:1.5;color:hsl(var(--text-faint));}
+/* The row is the touch target (a <label>), so the checkbox keeps its natural size. */
+.rm-term {display:flex;align-items:center;gap:9px;margin:0;min-height:34px;padding:0;line-height:1.3;cursor:pointer;border-bottom:1px solid hsl(var(--reference-200));}
+.rm-term:last-of-type {border-bottom:0;}
+.rm-term input {min-height:0;accent-color:hsl(var(--reference-600));width:15px;height:15px;}
+.rm-term-label {font-size:var(--type-cardContent,.92rem);color:hsl(var(--text));}
+.rm-tally {margin:0 0 10px;font-size:var(--type-span,.95rem);font-weight:600;color:hsl(var(--text-strong));}
+.rm-tally[data-state="reduced"] {color:hsl(var(--danger-700));}
+.rm-say-list {list-style:none;margin:0;padding:0;display:grid;gap:1px;}
+/* One line per thing that can be said: mark, words, the block, and what it needs. */
+.rm-say {display:grid;grid-template-columns:16px minmax(0,1fr) auto minmax(0,9rem);gap:2px 10px;align-items:baseline;padding:3px 0;border-bottom:1px solid hsl(var(--reference-200));}
+.rm-say:last-child {border-bottom:0;}
+.rm-say-mark {font:600 var(--type-nav,.82rem)/1.4 var(--font-mono, ui-monospace, monospace);}
+.rm-say[data-state="yes"] .rm-say-mark {color:hsl(var(--success));}
+.rm-say[data-state="no"] .rm-say-mark {color:hsl(var(--danger));}
+.rm-say[data-state="no"] .rm-say-text {color:hsl(var(--text-faint));text-decoration:line-through;}
+.rm-say-text {font-size:var(--type-cardContent,.92rem);color:hsl(var(--text-strong));}
+.rm-say-block {font:400 var(--caption-size,.75rem)/1.5 var(--font-mono, ui-monospace, monospace);color:hsl(var(--text-faint));justify-self:end;}
+.rm-say-needs {font-size:var(--caption-size,.75rem);color:hsl(var(--text-faint));}
+.rm-say[data-state="no"] .rm-say-needs {color:hsl(var(--danger-700));}
+
+/* ---- the block explorer -------------------------------------------- */
+
+.rm-explorer-label {display:block;font-size:var(--type-nav,.82rem);color:hsl(var(--text-muted));margin:0 0 8px;}
+.rm-input {
+  width:100%;
+  box-sizing:border-box;
+  padding:11px 13px;
+  border-radius:8px;
+  font:500 var(--type-body,1rem)/1.3 var(--font-mono, ui-monospace, monospace);
+  background:hsl(var(--canvas));
+  color:hsl(var(--text-strong));
+  border:1px solid hsl(var(--reference-400));
+}
+/* Interaction state uses the reference ladder: the identity colour is the component layer's to
+   spend, never a page's. */
+.rm-input:focus-visible {outline:2px solid hsl(var(--reference-600));outline-offset:1px;}
+.rm-chips {display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;}
+.rm-chip {
+  font:500 var(--caption-size,.75rem)/1.3 var(--font-mono, ui-monospace, monospace);
+  padding:5px 9px;
+  border-radius:6px;
+  cursor:pointer;
+  background:hsl(var(--nested));
+  color:hsl(var(--text-muted));
+  border:1px solid hsl(var(--reference-300));
+  transition:color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+.rm-chip:is(:hover, :focus-visible) {color:hsl(var(--text-strong));border-color:hsl(var(--reference-400));background:hsl(var(--reference-200));}
+.rm-verdict {margin:16px 0 0;padding:14px 16px;border-radius:8px;border:1px solid hsl(var(--reference-300));background:hsl(var(--nested));}
+/* Resolves. */
+.rm-verdict[data-state="real"] {border-color:hsl(var(--success-400));background:hsl(var(--success-100));}
+/* Depends on the observer -- pick a type and it resolves one way. */
+.rm-verdict[data-state="relative"] {border-color:hsl(var(--warning-400));background:hsl(var(--warning-100));}
+/* Refused by name. Not an error on the reader's part. */
+.rm-verdict[data-state="unreal"] {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));}
+/* Resolved AND wrong -- the silent collision. The only alarm on the page. */
+.rm-verdict[data-state="hazard"] {border-color:hsl(var(--danger-400));background:hsl(var(--danger-100));}
+.rm-verdict-head {margin:0 0 10px;font-weight:600;color:hsl(var(--text-strong));}
+/* Each line of the verdict as a label beside its value, so a long verdict stays short. */
+.rm-verdict-lines {margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;align-items:baseline;}
+.rm-verdict-lines dt {font:600 var(--caption-size,.75rem)/1.5 var(--font-mono, ui-monospace, monospace);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-faint));}
+.rm-verdict-lines dd {margin:0;font-size:var(--type-nav,.82rem);color:hsl(var(--text));max-width:78ch;}
+
+/* ---- the drawings' type (SVG units, scaled with the drawing) -------- */
+
+.story-drawing .rm-fig-letter {fill:hsl(var(--text-strong));font:600 15px var(--font-mono, monospace);text-anchor:middle;}
+.story-drawing .rm-fig-mid {font-size:9px;text-anchor:middle;fill:hsl(var(--text));}
+.story-drawing .rm-fig-mid-left {font-size:9px;fill:hsl(var(--text));}
+.story-drawing .rm-fig-small {font-size:7.5px;text-anchor:middle;fill:hsl(var(--text-faint));}
+.story-drawing .rm-fig-small-left {font-size:7.5px;fill:hsl(var(--text-faint));}
+.story-drawing .rm-fig-danger {stroke:hsl(var(--danger));stroke-width:1.5;}
+.story-drawing .rm-fig-small-danger {font-size:9px;text-anchor:middle;fill:hsl(var(--danger));}
+.story-drawing .rm-fig-mid-danger {font-size:9px;text-anchor:middle;fill:hsl(var(--danger));}
+
+/* ---- narrow screens ------------------------------------------------- */
+
 @media (max-width:900px) {
-  .rm-eq-body {grid-template-columns:minmax(0,1fr);}
+  .rm-equation {grid-template-columns:minmax(0,1fr);}
+  .rm-eq-sum, .rm-field, .rm-eq-zero, .rm-eq-punch {grid-column:1;grid-row:auto;}
+  .rm-build {grid-template-columns:minmax(0,1fr);}
+}
+@media (max-width:760px) {
+  .rm-say {grid-template-columns:16px minmax(0,1fr);}
+  .rm-say-block, .rm-say-needs {grid-column:2;justify-self:start;}
+  .rm-verdict-lines {grid-template-columns:minmax(0,1fr);}
 }
 @media (prefers-reduced-motion: reduce) {
-  .rm-equation .rm-cell,.rm-equation .rm-eq-row {animation:none !important;transition:none !important;opacity:1 !important;transform:none !important;}
+  .rm-equation .rm-cell, .rm-equation .rm-eq-row {animation:none !important;transition:none !important;opacity:1 !important;transform:none !important;}
 }
-
-/* The swatch ties a line of the sum to its block of cells, so "93 record
-   types" and the blue block are visibly one claim rather than two. */
-.rm-eq-swatch {
-  display:inline-block;
-  width:7px;height:7px;
-  margin-left:7px;
-  border-radius:2px;
-  vertical-align:baseline;
-}
-.rm-eq-swatch[data-term="0"] {background:hsl(var(--primary-400));}
-.rm-eq-swatch[data-term="1"] {background:hsl(var(--role));}
-.rm-eq-swatch[data-term="2"] {background:hsl(var(--success));}
-.rm-eq-swatch[data-term="3"] {background:hsl(var(--reference-600));}
-.rm-eq-swatch[data-term="4"] {background:hsl(var(--warning));}
-.rm-eq-swatch[data-term="5"] {background:hsl(var(--primary));}

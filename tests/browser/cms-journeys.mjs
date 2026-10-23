@@ -35,7 +35,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { appFrame, copySite, startHost, fakeFolder, watchSignals, previewFrame, until as untilFor, waitForPreviewReady, openRoute,
-  gotoEditor, openRailTab, pageRow, openAccountMenu, setLens, sheetBody, closeSheet, closeToolbarSection } from './harness.mjs';
+  gotoEditor, openRailTab, pageRow, openAccountMenu, setLens, sheetBody, closeSheet, closeToolbarSection, clickHeader, createItem } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.find((a) => a.startsWith('--only=')) || '').slice(7) || (args.includes('--only') ? args[args.indexOf('--only') + 1] : '');
@@ -109,11 +109,11 @@ await step('first-run: with no folder connected, a banner over the canvas says w
 });
 
 await step('first-run: Versions says the folder is needed AND has the button', async () => {
-  await E.app.click('#versionsNav');
+  await clickHeader(E.app, 'versionsNav');
   const connect = E.app.locator('#versionsConnect');
   await until(() => connect.isVisible(), 'Versions has no Connect project folder button while no folder is connected');
   await E.shot('versions-connect');
-  await E.app.click('#versionsNav');
+  await clickHeader(E.app, 'versionsNav');
 });
 
 await step('menu: the account menu closes when the canvas is clicked', async () => {
@@ -152,12 +152,11 @@ await step('save: Connect from the refusal connects the folder and saves -- the 
 /* ---------------------------------------------------------------- add a page */
 await step('page: a new theory page is ON the canvas, from its draft, and its Page fields are open', async () => {
   await setLens(E.app, 'content');
-  await openRailTab(E.app, 'pages');
-  await E.app.locator('#pagesPane summary', { hasText: 'New theory page' }).click();
-  await E.app.fill('#newId', 'journeypage');
-  await E.app.press('#newId', 'Enter');
+  /* asked for by its title; the address is derived from it (docs/ux-audit/cms.md P1-4) */
+  await createItem(E.app, 'page', 'Journey page');
   const pv = await until(async () => { const f = await canvas(E.app); return (await canvasRoute(f)) === '/concept/journeypage' && f; }, 'the canvas never showed /concept/journeypage before Save', 20000);
-  await until(() => pv.evaluate(() => document.body.textContent.includes('New page.')), 'the canvas is on the route but does not show the new page\'s words');
+  /* the title typed is the new page's heading */
+  await until(() => pv.evaluate(() => document.body.textContent.includes('Journey page')), 'the canvas is on the route but does not show the new page\'s title as its heading');
   check(!fs.existsSync(path.join(WORK, 'js/content/manifests/journeypage.js')), 'the new page was written before Save');
   const sheet = await E.app.evaluate(() => ({ open: !document.getElementById('sheet').hidden, key: document.getElementById('sheet').dataset.sheet, title: document.getElementById('sheetTitle').textContent,
     fieldsBtn: document.getElementById('btnPageFields').getAttribute('aria-expanded'), label: document.getElementById('devName').textContent, picker: document.getElementById('btnPage').textContent,
@@ -189,10 +188,7 @@ await step('page: the header\'s Page fields opens the NEW page; an edit there re
 
 /* ---------------------------------------------------------------- add an article */
 await step('article: "hello-world" is named "Hello world" everywhere and shown on the canvas before Save', async () => {
-  await openRailTab(E.app, 'pages');
-  await E.app.locator('#pagesPane summary', { hasText: 'New article' }).click();
-  await E.app.fill('#newSlug', 'hello-world');
-  await E.app.press('#newSlug', 'Enter');
+  await createItem(E.app, 'article', 'Hello world');
   const pv = await until(async () => { const f = await canvas(E.app); return (await canvasRoute(f)) === '/learnings/hello-world' && f; }, 'the canvas never showed /learnings/hello-world', 20000);
   await until(() => pv.evaluate(() => document.body.textContent.includes('Hello world')), 'the canvas does not show the new article\'s title');
   const row = pageRow(E.app, { article: 'hello-world' });
@@ -220,14 +216,14 @@ await step('inline: Enter finishes the home heading with no line break; Escape f
   /* the heading's Content popover opens below it, over the intro (docs/ux-audit/cms.md P1-6, a
      later wave): close it first, as a person would */
   await closeToolbarSection(E.app);
-  pv = await clickToEdit(E.app, '[data-ark-page] p.hl-intro');
+  pv = await clickToEdit(E.app, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   await caretToEnd(pv);
   await E.page.keyboard.type(' Kept.', { delay: 20 });
   await until(async () => (await draft(E.app, 'home', 'INTRO')) === intro + ' Kept.', 'typing in the intro did not reach its draft (it is ' + JSON.stringify(await draft(E.app, 'home', 'INTRO')) + ', canvas: ' + JSON.stringify(await editing(pv)) + ')');
   await E.page.keyboard.press('Escape');
   await until(() => editing(pv).then((t) => t === null), 'Escape did not finish the edit');
   await until(async () => (await draft(E.app, 'home', 'INTRO')) === intro + ' Kept.', 'Escape threw the typing away', 3000);
-  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p.hl-intro').textContent)).endsWith(' Kept.'), 'Escape put the old words back on the canvas');
+  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]').textContent)).endsWith(' Kept.'), 'Escape put the old words back on the canvas');
   await E.shot('inline-kept');
 });
 

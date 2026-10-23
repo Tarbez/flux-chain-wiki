@@ -1,0 +1,233 @@
+# key	tag	text -- layout keys of /account before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	YOUAUTH KITIDENTITYWALLETPUBLISHDEFXN / Your identity↗Your keys.Your world.Signed outOne Auth Kit opens your identity, wallet, domains and publishing.Root key—G
+page:/div:1	div	YOUAUTH KITIDENTITYWALLETPUBLISHDEFXN / Your identity↗Your keys.Your world.Signed outOne Auth Kit opens your identity, wallet, domains and publishing.Root key—G
+page:/div:1/header:1	header	YOUAUTH KITIDENTITYWALLETPUBLISHDEFXN / Your identity↗Your keys.Your world.Signed outOne Auth Kit opens your identity, wallet, domains and publishing.Root key—G
+page:/div:1/header:1/div:1	div	YOUAUTH KITIDENTITYWALLETPUBLISH
+page:/div:1/header:1/div:1/svg:1	svg	YOUAUTH KITIDENTITYWALLETPUBLISH
+page:/div:1/header:1/div:1/svg:1/path:1	path	
+page:/div:1/header:1/div:1/svg:1/path:2	path	
+page:/div:1/header:1/div:1/svg:1/path:3	path	
+page:/div:1/header:1/div:1/svg:1/circle:1	circle	
+page:/div:1/header:1/div:1/svg:1/circle:2	circle	
+page:/div:1/header:1/div:1/svg:1/circle:3	circle	
+page:/div:1/header:1/div:1/svg:1/circle:4	circle	
+page:/div:1/header:1/div:1/svg:1/circle:5	circle	
+page:/div:1/header:1/div:1/svg:1/text:1	text	YOU
+page:/div:1/header:1/div:1/svg:1/text:2	text	AUTH KIT
+page:/div:1/header:1/div:1/svg:1/text:3	text	IDENTITY
+page:/div:1/header:1/div:1/svg:1/text:4	text	WALLET
+page:/div:1/header:1/div:1/svg:1/text:5	text	PUBLISH
+page:/div:1/header:1/p:1	p	DEFXN / Your identity
+page:/div:1/header:1/div:2	div	↗Your keys.Your world.Signed out
+page:/div:1/header:1/div:2/div:1	div	↗
+page:/div:1/header:1/div:2/div:2	div	Your keys.Your world.Signed out
+id:account-title	h1	Your keys.Your world.
+page:/div:1/header:1/div:2/div:2/h1:1/span:1	span	Your keys.
+page:/div:1/header:1/div:2/div:2/h1:1/span:2	span	Your world.
+page:/div:1/header:1/div:2/div:2/span:1	span	Signed out
+page:/div:1/header:1/p:2	p	One Auth Kit opens your identity, wallet, domains and publishing.
+page:/div:1/header:1/section:1	section	Root key—Ghost IDCopy—WalletCopyNot recorded in this kitSecurity—Sign in to verify your identity.
+page:/div:1/header:1/section:1/dl:1	dl	Root key—Ghost IDCopy—WalletCopyNot recorded in this kitSecurity—
+page:/div:1/header:1/section:1/dl:1/div:1	div	Root key—
+page:/div:1/header:1/section:1/dl:1/div:1/dt:1	dt	Root key
+page:/div:1/header:1/section:1/dl:1/div:1/dd:1	dd	—
+page:/div:1/header:1/section:1/dl:1/div:2	div	Ghost IDCopy—
+page:/div:1/header:1/section:1/dl:1/div:2/dt:1	dt	Ghost ID
+page:/div:1/header:1/section:1/dl:1/div:2/button:1	button	Copy
+page:/div:1/header:1/section:1/dl:1/div:2/dd:1	dd	—
+page:/div:1/header:1/section:1/dl:1/div:3	div	WalletCopyNot recorded in this kit
+page:/div:1/header:1/section:1/dl:1/div:3/dt:1	dt	Wallet
+page:/div:1/header:1/section:1/dl:1/div:3/button:1	button	Copy
+page:/div:1/header:1/section:1/dl:1/div:3/dd:1	dd	Not recorded in this kit
+page:/div:1/header:1/section:1/dl:1/div:4	div	Security—
+page:/div:1/header:1/section:1/dl:1/div:4/dt:1	dt	Security
+page:/div:1/header:1/section:1/dl:1/div:4/dd:1	dd	—
+page:/div:1/header:1/section:1/p:1	p	Sign in to verify your identity.
+page:/div:1/section:1	section	DEFXN / AccountSessionWalletKeysContactsNetworkSign inCreate identityChoose your Auth Kit.Open your account on this device.Sign in to DEFXNChoose your recovery 
+page:/div:1/section:1/p:1	p	DEFXN / Account
+page:/div:1/section:1/nav:1	nav	SessionWalletKeysContactsNetwork
+page:/div:1/section:1/nav:1/button:1	button	Session
+page:/div:1/section:1/nav:1/button:2	button	Wallet
+page:/div:1/section:1/nav:1/button:3	button	Keys
+page:/div:1/section:1/nav:1/button:4	button	Contacts
+page:/div:1/section:1/nav:1/button:5	button	Network
+page:/div:1/section:1/section:1	section	Sign inCreate identityChoose your Auth Kit.Open your account on this device.Sign in to DEFXNChoose your recovery file (.auth.flx). It stays on this device and i
+page:/div:1/section:1/section:1/nav:1	nav	Sign inCreate identity
+page:/div:1/section:1/section:1/nav:1/button:1	button	Sign in
+page:/div:1/section:1/section:1/nav:1/button:2	button	Create identity
+page:/div:1/section:1/section:1/div:1	div	Choose your Auth Kit.Open your account on this device.Sign in to DEFXNChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.Choos
+page:/div:1/section:1/section:1/div:1/h2:1	h2	Choose your Auth Kit.
+page:/div:1/section:1/section:1/div:1/p:1	p	Open your account on this device.
+page:/div:1/section:1/section:1/div:1/div:1	div	Sign in to DEFXNChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1	div	Sign in to DEFXNChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1	section	Sign in to DEFXNChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1	div	Sign in to DEFXNChoose your recovery file (.auth.flx). It stays on this device and is never uploaded.Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/h2:1	h2	Sign in to DEFXN
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/p:1	p	Choose your recovery file (.auth.flx). It stays on this device and is never uploaded.
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/form:1	form	Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/form:1/div:1	div	Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/form:1/div:1/button:1	button	Choose Auth Kit
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/form:1/div:1/button:1/svg:1	svg	
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/form:1/div:1/button:1/svg:1/path:1	path	
+page:/div:1/section:1/section:1/div:1/div:1/div:1/section:1/div:1/form:1/div:1/button:1/svg:1/path:2	path	
+page:/div:1/section:1/section:1/div:1/button:1	button	Forget saved identity details
+page:/div:1/section:1/section:1/div:1/p:2	p	
+page:/div:1/section:1/section:1/div:1/p:3	p	
+page:/div:1/section:1/section:1/div:1/div:2	div	Deploy a bundle →Your domains →Open publishing ↗Publishing tools available
+page:/div:1/section:1/section:1/div:1/div:2/a:1	a	Deploy a bundle →
+page:/div:1/section:1/section:1/div:1/div:2/a:2	a	Your domains →
+page:/div:1/section:1/section:1/div:1/div:2/a:3	a	Open publishing ↗
+page:/div:1/section:1/section:1/div:1/div:2/span:1	span	Publishing tools available
+page:/div:1/section:1/section:1/div:1/div:2/span:2	span	
+page:/div:1/section:1/section:1/p:1	p	ON THIS DEVICEYour Auth Kit stays with you.
+page:/div:1/section:1/section:1/p:1/span:1	span	ON THIS DEVICE
+page:/div:1/section:1/section:1/p:1/strong:1	strong	Your Auth Kit stays with you.
+page:/div:1/section:1/section:1/div:2	div	Create your identity.Make a new Auth Kit for your account.
+page:/div:1/section:1/section:1/div:2/h2:1	h2	Create your identity.
+page:/div:1/section:1/section:1/div:2/p:1	p	Make a new Auth Kit for your account.
+page:/div:1/section:1/section:1/div:2/div:1	div	
+page:/div:1/section:1/section:2	section	WalletFXN—Sign in to checkCreditsComing soonCredit balances are not available yet.Your public key—CopyShare this public key to receive FXN. You never need to sh
+id:account-live-title	h2	Wallet
+page:/div:1/section:1/section:2/div:1	div	FXN—Sign in to checkCreditsComing soonCredit balances are not available yet.Your public key—CopyShare this public key to receive FXN. You never need to share yo
+page:/div:1/section:1/section:2/div:1/div:1	div	FXN—Sign in to checkCreditsComing soonCredit balances are not available yet.
+page:/div:1/section:1/section:2/div:1/div:1/article:1	article	FXN—Sign in to check
+page:/div:1/section:1/section:2/div:1/div:1/article:1/span:1	span	FXN
+page:/div:1/section:1/section:2/div:1/div:1/article:1/span:1/img:1	img	
+page:/div:1/section:1/section:2/div:1/div:1/article:1/span:1/small:1	small	FXN
+page:/div:1/section:1/section:2/div:1/div:1/article:1/strong:1	strong	—
+page:/div:1/section:1/section:2/div:1/div:1/article:1/span:2	span	Sign in to check
+page:/div:1/section:1/section:2/div:1/div:1/article:2	article	CreditsComing soonCredit balances are not available yet.
+page:/div:1/section:1/section:2/div:1/div:1/article:2/small:1	small	Credits
+page:/div:1/section:1/section:2/div:1/div:1/article:2/strong:1	strong	Coming soon
+page:/div:1/section:1/section:2/div:1/div:1/article:2/span:1	span	Credit balances are not available yet.
+page:/div:1/section:1/section:2/div:1/div:2	div	Your public key—CopyShare this public key to receive FXN. You never need to share your Auth Kit or PIN.
+page:/div:1/section:1/section:2/div:1/div:2/h3:1	h3	Your public key
+page:/div:1/section:1/section:2/div:1/div:2/p:1	p	—Copy
+page:/div:1/section:1/section:2/div:1/div:2/p:1/span:1	span	—
+page:/div:1/section:1/section:2/div:1/div:2/p:1/span:1/small:1	small	—
+page:/div:1/section:1/section:2/div:1/div:2/p:1/button:1	button	Copy
+page:/div:1/section:1/section:2/div:1/div:2/p:2	p	Share this public key to receive FXN. You never need to share your Auth Kit or PIN.
+page:/div:1/section:1/section:2/div:1/div:3	div	Send FXNRefresh
+page:/div:1/section:1/section:2/div:1/div:3/button:1	button	Send FXN
+page:/div:1/section:1/section:2/div:1/div:3/button:2	button	Refresh
+page:/div:1/section:1/section:2/form:1	form	← WalletSend FXNReview the recipient and amount before signing on this device.Amount (FXN)Recipient keyReview & sign
+page:/div:1/section:1/section:2/form:1/button:1	button	← Wallet
+page:/div:1/section:1/section:2/form:1/h3:1	h3	Send FXN
+page:/div:1/section:1/section:2/form:1/p:1	p	Review the recipient and amount before signing on this device.
+page:/div:1/section:1/section:2/form:1/label:1	label	Amount (FXN)
+page:/div:1/section:1/section:2/form:1/label:2	label	Recipient key
+page:/div:1/section:1/section:2/form:1/button:2	button	Review & sign
+page:/div:1/section:1/section:2/p:1	p	
+page:/div:1/section:1/section:2/div:2	div	Network
+page:/div:1/section:1/section:2/div:2/span:1	span	Network
+page:/div:1/section:1/section:2/div:2/div:1	div	
+page:/div:1/section:1/section:2/p:2	p	Balances update directly from the selected network.
+page:/div:1/section:1/section:3	section	ContactsFind an identitySearchUnlock your Auth Kit to invite or respond to identities.Invites to you 0None pending.Contacts 0No accepted contacts yet.Sent 0None
+page:/div:1/section:1/section:3/div:1	div	ContactsFind an identitySearchUnlock your Auth Kit to invite or respond to identities.Invites to you 0None pending.Contacts 0No accepted contacts yet.Sent 0None
+id:account-contacts-title	h2	Contacts
+page:/div:1/section:1/section:3/div:1/form:1	form	Find an identitySearch
+page:/div:1/section:1/section:3/div:1/form:1/label:1	label	Find an identity
+page:/div:1/section:1/section:3/div:1/form:1/button:1	button	Search
+page:/div:1/section:1/section:3/div:1/p:1	p	Unlock your Auth Kit to invite or respond to identities.
+page:/div:1/section:1/section:3/div:1/ul:1	ul	
+page:/div:1/section:1/section:3/div:1/div:1	div	Invites to you 0None pending.Contacts 0No accepted contacts yet.Sent 0None pending.
+page:/div:1/section:1/section:3/div:1/div:1/div:1	div	Invites to you 0None pending.
+page:/div:1/section:1/section:3/div:1/div:1/div:1/h3:1	h3	Invites to you 0
+page:/div:1/section:1/section:3/div:1/div:1/div:1/ul:1	ul	None pending.
+page:/div:1/section:1/section:3/div:1/div:1/div:1/ul:1/li:1	li	None pending.
+page:/div:1/section:1/section:3/div:1/div:1/div:2	div	Contacts 0No accepted contacts yet.
+page:/div:1/section:1/section:3/div:1/div:1/div:2/h3:1	h3	Contacts 0
+page:/div:1/section:1/section:3/div:1/div:1/div:2/ul:1	ul	No accepted contacts yet.
+page:/div:1/section:1/section:3/div:1/div:1/div:2/ul:1/li:1	li	No accepted contacts yet.
+page:/div:1/section:1/section:3/div:1/div:1/div:3	div	Sent 0None pending.
+page:/div:1/section:1/section:3/div:1/div:1/div:3/h3:1	h3	Sent 0
+page:/div:1/section:1/section:3/div:1/div:1/div:3/ul:1	ul	None pending.
+page:/div:1/section:1/section:3/div:1/div:1/div:3/ul:1/li:1	li	None pending.
+page:/div:1/section:1/section:3/div:1/button:1	button	Refresh
+page:/div:1/section:1/section:3/article:1	article	← All contactsIDIdentityConnectionIdentity ID—Public ID—Visibility—Updated—No public profile details are available for this identity.View network details →
+page:/div:1/section:1/section:3/article:1/button:1	button	← All contacts
+page:/div:1/section:1/section:3/article:1/header:1	header	IDIdentityConnection
+page:/div:1/section:1/section:3/article:1/header:1/div:1	div	ID
+page:/div:1/section:1/section:3/article:1/header:1/div:2	div	IdentityConnection
+page:/div:1/section:1/section:3/article:1/header:1/div:2/h2:1	h2	Identity
+page:/div:1/section:1/section:3/article:1/header:1/div:2/span:1	span	Connection
+page:/div:1/section:1/section:3/article:1/dl:1	dl	Identity ID—Public ID—Visibility—Updated—
+page:/div:1/section:1/section:3/article:1/dl:1/div:1	div	Identity ID—
+page:/div:1/section:1/section:3/article:1/dl:1/div:1/dt:1	dt	Identity ID
+page:/div:1/section:1/section:3/article:1/dl:1/div:1/dd:1	dd	—
+page:/div:1/section:1/section:3/article:1/dl:1/div:2	div	Public ID—
+page:/div:1/section:1/section:3/article:1/dl:1/div:2/dt:1	dt	Public ID
+page:/div:1/section:1/section:3/article:1/dl:1/div:2/dd:1	dd	—
+page:/div:1/section:1/section:3/article:1/dl:1/div:3	div	Visibility—
+page:/div:1/section:1/section:3/article:1/dl:1/div:3/dt:1	dt	Visibility
+page:/div:1/section:1/section:3/article:1/dl:1/div:3/dd:1	dd	—
+page:/div:1/section:1/section:3/article:1/dl:1/div:4	div	Updated—
+page:/div:1/section:1/section:3/article:1/dl:1/div:4/dt:1	dt	Updated
+page:/div:1/section:1/section:3/article:1/dl:1/div:4/dd:1	dd	—
+page:/div:1/section:1/section:3/article:1/p:1	p	No public profile details are available for this identity.
+page:/div:1/section:1/section:3/article:1/a:1	a	View network details →
+page:/div:1/section:1/section:4	section	Identity statusNot verifiedSign in to verify your identity on DEFXN.Verify identityAccount statusNot linkedA verified account link is required to show network s
+page:/div:1/section:1/section:4/div:1	div	Identity statusNot verifiedSign in to verify your identity on DEFXN.Verify identity
+page:/div:1/section:1/section:4/div:1/small:1	small	Identity status
+page:/div:1/section:1/section:4/div:1/strong:1	strong	Not verified
+page:/div:1/section:1/section:4/div:1/p:1	p	Sign in to verify your identity on DEFXN.
+page:/div:1/section:1/section:4/div:1/button:1	button	Verify identity
+page:/div:1/section:1/section:4/div:2	div	Account statusNot linkedA verified account link is required to show network status.
+page:/div:1/section:1/section:4/div:2/small:1	small	Account status
+page:/div:1/section:1/section:4/div:2/strong:1	strong	Not linked
+page:/div:1/section:1/section:4/div:2/span:1	span	A verified account link is required to show network status.
+page:/div:1/section:1/section:4/dl:1	dl	Record—Verification—Updated—Source—
+page:/div:1/section:1/section:4/dl:1/div:1	div	Record—
+page:/div:1/section:1/section:4/dl:1/div:1/dt:1	dt	Record
+page:/div:1/section:1/section:4/dl:1/div:1/dd:1	dd	—
+page:/div:1/section:1/section:4/dl:1/div:2	div	Verification—
+page:/div:1/section:1/section:4/dl:1/div:2/dt:1	dt	Verification
+page:/div:1/section:1/section:4/dl:1/div:2/dd:1	dd	—
+page:/div:1/section:1/section:4/dl:1/div:3	div	Updated—
+page:/div:1/section:1/section:4/dl:1/div:3/dt:1	dt	Updated
+page:/div:1/section:1/section:4/dl:1/div:3/dd:1	dd	—
+page:/div:1/section:1/section:4/dl:1/div:4	div	Source—
+page:/div:1/section:1/section:4/dl:1/div:4/dt:1	dt	Source
+page:/div:1/section:1/section:4/dl:1/div:4/dd:1	dd	—
+page:/div:1/section:1/section:5	section	Create dedicated signing keys and manage each one independently without changing your primary identity.Add a signing walletLabelPINPassword (if set)Add walletRo
+page:/div:1/section:1/section:5/p:1	p	Create dedicated signing keys and manage each one independently without changing your primary identity.
+page:/div:1/section:1/section:5/ul:1	ul	
+page:/div:1/section:1/section:5/form:1	form	Add a signing walletLabelPINPassword (if set)Add wallet
+page:/div:1/section:1/section:5/form:1/h3:1	h3	Add a signing wallet
+page:/div:1/section:1/section:5/form:1/label:1	label	Label
+page:/div:1/section:1/section:5/form:1/label:2	label	PIN
+page:/div:1/section:1/section:5/form:1/label:3	label	Password (if set)
+page:/div:1/section:1/section:5/form:1/button:1	button	Add wallet
+page:/div:1/section:1/section:5/form:1/p:1	p	
+page:/div:1/section:1/section:5/form:2	form	Rotate, revoke or delegateWallet addressNew label (rotate only)RotateRevokeDelegate to identityRevoke delegation
+page:/div:1/section:1/section:5/form:2/h3:1	h3	Rotate, revoke or delegate
+page:/div:1/section:1/section:5/form:2/label:1	label	Wallet address
+page:/div:1/section:1/section:5/form:2/label:2	label	New label (rotate only)
+page:/div:1/section:1/section:5/form:2/div:1	div	RotateRevokeDelegate to identityRevoke delegation
+page:/div:1/section:1/section:5/form:2/div:1/button:1	button	Rotate
+page:/div:1/section:1/section:5/form:2/div:1/button:2	button	Revoke
+page:/div:1/section:1/section:5/form:2/div:1/button:3	button	Delegate to identity
+page:/div:1/section:1/section:5/form:2/div:1/button:4	button	Revoke delegation
+page:/div:1/section:1/section:5/form:2/p:1	p	
+page:/div:1/aside:1	aside	FXN—CreditsComing soonContacts—Invites—Domains0StatusNot verifiedExplore the networkMesh Explorer →
+page:/div:1/aside:1/button:1	button	FXN—
+page:/div:1/aside:1/button:1/small:1	small	FXN
+page:/div:1/aside:1/button:1/strong:1	strong	—
+page:/div:1/aside:1/button:2	button	CreditsComing soon
+page:/div:1/aside:1/button:2/small:1	small	Credits
+page:/div:1/aside:1/button:2/strong:1	strong	Coming soon
+page:/div:1/aside:1/button:3	button	Contacts—
+page:/div:1/aside:1/button:3/small:1	small	Contacts
+page:/div:1/aside:1/button:3/strong:1	strong	—
+page:/div:1/aside:1/button:4	button	Invites—
+page:/div:1/aside:1/button:4/small:1	small	Invites
+page:/div:1/aside:1/button:4/strong:1	strong	—
+page:/div:1/aside:1/a:1	a	Domains0
+page:/div:1/aside:1/a:1/small:1	small	Domains
+page:/div:1/aside:1/a:1/strong:1	strong	0
+page:/div:1/aside:1/button:5	button	StatusNot verified
+page:/div:1/aside:1/button:5/small:1	small	Status
+page:/div:1/aside:1/button:5/strong:1	strong	Not verified
+page:/div:1/aside:1/a:2	a	Explore the networkMesh Explorer →
+page:/div:1/aside:1/a:2/small:1	small	Explore the network
+page:/div:1/div:1	div	

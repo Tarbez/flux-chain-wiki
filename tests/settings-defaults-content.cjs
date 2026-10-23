@@ -3,6 +3,8 @@ function load(context) {
   vm.runInContext(fs.readFileSync('js/content/settings-defaults.js', 'utf8'), context);
 }
 const context = vm.createContext({ window: {} });
+// js/content/theme.js loads first on every page (index.html, admin-app.html) and owns the old-key -> published-id map
+vm.runInContext(fs.readFileSync('js/content/theme.js', 'utf8'), context);
 load(context);
 const { ArkSiteDefaults } = vm.runInContext('({ ArkSiteDefaults })', context);
 
@@ -28,6 +30,8 @@ Object.keys(realControls).forEach((key) => {
   assert.equal(controls[key].min, realControls[key].min, key + ' min mirrors settings-entry.js');
   assert.equal(controls[key].max, realControls[key].max, key + ' max mirrors settings-entry.js');
   assert.equal(controls[key].def, realControls[key].value, key + ' default mirrors settings-entry.js');
+  /* the editor names each slider as the visitor's panel does, never by its key (docs/ux-audit/cms.md P1-2) */
+  assert.equal(controls[key].label, realControls[key].label, key + ' label mirrors settings-entry.js');
 });
 
 // get() is null before define() ever ran.
@@ -36,7 +40,7 @@ assert.equal(ArkSiteDefaults.get(), null, 'get() is null before a data file call
 // defaults() is byte-identical to today's hardcoded fallbacks: an unconfigured site must
 // behave exactly as it did before this module existed.
 const defaults = ArkSiteDefaults.defaults();
-assert.equal(defaults.theme, 'ghost', 'default theme is ghost, same literal as settings-entry.js');
+assert.equal(defaults.theme, 'ember', 'default theme is ember (the SDK id for the old ghost), same literal as settings-entry.js');
 assert.equal(defaults.motif, 'blocks', 'default motif is blocks, same literal as settings-entry.js');
 realMotifs.forEach((motif) => {
   Object.keys(realControls).forEach((key) => {
@@ -47,8 +51,10 @@ realMotifs.forEach((motif) => {
 
 // sanitize(): an invalid theme/motif falls back to the safe default; an out-of-range or
 // non-finite pattern-config number is clamped/refused per field, independently.
-assert.equal(ArkSiteDefaults.sanitize({ theme: 'not-a-theme' }).theme, 'ghost', 'an unknown theme falls back to ghost');
-assert.equal(ArkSiteDefaults.sanitize({ theme: 'marine' }).theme, 'marine', 'a known theme survives sanitize()');
+assert.equal(ArkSiteDefaults.sanitize({ theme: 'not-a-theme' }).theme, 'ember', 'an unknown theme falls back to ember');
+assert.equal(ArkSiteDefaults.sanitize({ theme: 'defxn-dune' }).theme, 'defxn-dune', 'a known theme survives sanitize()');
+assert.equal(ArkSiteDefaults.sanitize({ theme: 'marine' }).theme, 'defxn-dune', 'a saved OLD key reads as its published id (the saved record is not rewritten)');
+assert.equal(ArkSiteDefaults.sanitize({ theme: 'moss' }).theme, 'defxn-moss-light', 'old moss is Moss light');
 assert.equal(ArkSiteDefaults.sanitize({ motif: 'not-a-motif' }).motif, 'blocks', 'an unknown motif falls back to blocks');
 assert.equal(ArkSiteDefaults.sanitize({ motif: 'traces' }).motif, 'traces', 'a known motif survives sanitize()');
 
@@ -67,7 +73,7 @@ realMotifs.filter((m) => m !== 'blocks').forEach((motif) => {
 });
 
 // define()/get() round-trip through sanitize().
-const partial = { theme: 'marine', motif: 'traces', patternConfig: { traces: { structure: 80, visibility: 10, scale: 140, density: 90, softness: 25, delay: 4, animated: false } } };
+const partial = { theme: 'defxn-dune', motif: 'traces', patternConfig: { traces: { structure: 80, visibility: 10, scale: 140, density: 90, softness: 25, delay: 4, animated: false } } };
 ArkSiteDefaults.define(partial);
 assert.equal(JSON.stringify(ArkSiteDefaults.get()), JSON.stringify(ArkSiteDefaults.sanitize(partial)), 'get() returns exactly what define() sanitized');
 

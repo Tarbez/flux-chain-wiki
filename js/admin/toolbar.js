@@ -59,12 +59,16 @@
      holds the roving tab stop. */
   let tbPopBody = null, tbPopTitle = '', tbRoving = '', tbContentAutoKey = '';
   const TB_FOCUSABLE = 'button:not([disabled]), input, select, textarea';
+  /* The three sections used most carry words, not just an icon (docs/ux-audit/cms.md P1-7: 8-10
+     bare icons, labels on hover only); every other one keeps its icon with its name as a tooltip
+     on hover AND keyboard focus, and as its aria-label. */
+  const TB_WORDS = { 'Typography': 'Text', 'Fill and border': 'Colour', 'Spacing': 'Spacing', 'Content': 'Details', 'More': 'More' };
   function toolbarSection(pane, key, title, icon) {
     const name = title.replace(/\s*\(\d+\)$/, ''), count = (/\((\d+)\)$/.exec(title) || [])[1];
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'tb-btn' + (key in TB_IDENTITY ? ' identity' : '');
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tb-btn' + (key in TB_IDENTITY ? ' identity' : '') + (TB_WORDS[name] ? ' labelled' : '');
     b.dataset.tb = key; b.dataset.section = key; b.dataset.name = name; b.dataset.tip = title;
     b.setAttribute('aria-label', title); b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-controls', 'selToolbarPop'); b.setAttribute('aria-expanded', String(state.tbOpen === key));
-    b.innerHTML = ic(icon) + (count ? `<span class="tb-count">${count}</span>` : '');
+    b.innerHTML = ic(icon) + (TB_WORDS[name] ? `<span class="tb-lbl">${TB_WORDS[name]}</span>` : '') + (count ? `<span class="tb-count">${count}</span>` : '');
     b.addEventListener('click', () => setToolbarSection(state.tbOpen === key ? '' : key, true));
     pane.appendChild(b);
     if (state.tbOpen !== key) return document.createElement('div');
@@ -82,13 +86,63 @@
     if (key) { const body = $('selToolbarPop').querySelector('.tb-pop-body'), first = (body && body.querySelector(TB_FOCUSABLE)) || $('selToolbarPop').querySelector('.tb-pop-x'); if (first) first.focus({ preventScroll: true }); }
     else if (was) { const btn = $('selToolbar').querySelector(`[data-tb="${was}"]`); if (btn) btn.focus({ preventScroll: true }); }
   }
-  function toolbarAction(group, id, icon, label, run, refusal) {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'tb-btn tb-act';
+  function toolbarAction(group, id, icon, label, run, refusal, words) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tb-btn tb-act' + (words ? ' labelled' : '');
     b.dataset.tb = id; b.dataset.action = id; b.dataset.tip = refusal ? label + ' -- ' + refusal : label;
-    b.setAttribute('aria-label', label); b.innerHTML = ic(icon);
+    b.setAttribute('aria-label', label); b.innerHTML = ic(icon) + (words ? `<span class="tb-lbl">${words}</span>` : '');
     if (refusal) { b.disabled = true; b.title = refusal; }
     b.addEventListener('click', run);
     group.appendChild(b); return b;
+  }
+  function postToCanvas(message) { if (state.cmsConnected && cmsPreview && cmsPreview.contentWindow) cmsPreview.contentWindow.postMessage(message, window.location.origin); }
+  /* More: every command on the selection -- the canvas's right-click menu's own list (js/main.js
+     cmsSelectionCommands, reported with the selection), so Make into states, Group, Remove, Align
+     and the rest are a click away instead of right-click only (docs/ux-audit/cms.md P1-8). A
+     command that is waiting for a bigger selection (Group with one layer, Space evenly with two) is
+     NOT listed as a greyed-out row: one quiet line under the list says what it needs ("Group: Select
+     2 or more layers ..."), so the reason is still there and the list holds only what works. A
+     command refused for what THIS selection is (Make into component on an inserted block) stays a
+     row with its reason under it -- the person asked for that one, and it is the answer. Align /
+     Distribute are drawn only once two layers are selected. Then the editor's own: the words of this
+     element, Site style. */
+  const MORE_GROUP_HEADS = { select: 'Select', edit: 'This selection', align: 'Line up', site: 'Whole site' };
+  /* A refusal that only more layers would lift: js/main.js marks it `waits` (cmsSelectionCommands). */
+  const commandWaits = (c) => !!c.needs && c.waits === true;
+  function buildMoreSection(pane) {
+    const body = toolbarSection(pane, 'tb-more', 'More', 'more');
+    /* drawn as the editor's existing menu (the header popovers' .menu, .sep and h4), not a new list */
+    const menu = document.createElement('div'); menu.className = 'menu'; body.appendChild(menu);
+    const commands = (state.cmsSelectionCommands || []).length ? state.cmsSelectionCommands
+      : [{ id: 'make-component', label: 'Make into component', needs: state.cmsExactSelections.some((sel) => sel.component || sel.stateGroup) ? 'Select page content, not an inserted block or a state group.' : '', group: 'edit' }];
+    const head = (text) => { if (menu.children.length) { const sep = document.createElement('div'); sep.className = 'sep'; menu.appendChild(sep); } const h4 = document.createElement('h4'); h4.textContent = text; menu.appendChild(h4); };
+    let last = '';
+    const waiting = commands.filter(commandWaits);
+    commands.filter((c) => !commandWaits(c)).forEach((c) => {
+      if (c.group !== last) { if (MORE_GROUP_HEADS[c.group]) head(MORE_GROUP_HEADS[c.group]); last = c.group; }
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.action = c.id; b.setAttribute('aria-label', c.label.replace(/…$/, ''));
+      b.innerHTML = '<span></span>'; b.firstChild.textContent = c.label;
+      if (c.needs) { b.setAttribute('aria-disabled', 'true'); b.title = c.needs; const why = document.createElement('span'); why.className = 'hint'; why.textContent = c.needs; b.appendChild(why); }
+      b.addEventListener('click', () => {
+        if (c.needs) { A.toast(c.label.replace(/…$/, '') + ': ' + c.needs); return; }
+        setToolbarSection('', false);
+        if (c.id === 'make-component' && !(state.cmsSelectionCommands || []).length) postToCanvas({ type: 'defxn-cms-preview-make-component' });
+        else postToCanvas({ type: 'defxn-cms-preview-selection-command', id: c.id });
+      });
+      menu.appendChild(b);
+    });
+    if (waiting.length) {
+      /* one line per reason, naming every command that waits on it */
+      const byReason = new Map();
+      waiting.forEach((c) => { const label = c.label.replace(/…$/, ''); byReason.set(c.needs, (byReason.get(c.needs) || []).concat(label)); });
+      const note = document.createElement('p'); note.className = 'hint'; note.dataset.waits = 'true';   /* a hook, not a class: no style family */
+      note.textContent = [...byReason].map(([needs, labels]) => labels.join(', ') + ': ' + needs).join(' ');
+      menu.appendChild(note);
+    }
+    head('Elsewhere');
+    [['content-cms', 'Edit its words', () => openContentEditor()], ['design-controls', 'Site style…', () => selectDesign()]].forEach(([id, label, run]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.action = id; b.setAttribute('aria-label', label.replace(/…$/, ''));
+      b.textContent = label; b.addEventListener('click', () => { setToolbarSection('', false); run(); }); menu.appendChild(b);
+    });
   }
   /* The type-dispatch itself: given the current selection, decide which sections to show
      (the taxonomy above) and render them into #selToolbar using the consolidated builders.
@@ -103,16 +157,23 @@
       /* the preview's right-click menu hides the bar only while it is open; anything else
          (Live, the sitemap, no selection) ends the editing session with it */
       if (!state.cmsContextMenuOpen) state.tbOpen = '';
-      box.hidden = true; pop.hidden = true; return;
+      box.hidden = true; pop.hidden = true; A.overlay.forget(pop); return;
     }
     const key = state.cmsExactSelection.key, kind = selToolbarKind(state.cmsExactSelection);
     const sameEdit = !!state.tbOpen && state.tbOpenKey === key && !pop.hidden;
     if (state.tbOpenKey !== key) state.tbOpen = '';
-    /* Content lens: the Content section is the lens's toolbar, so it opens by itself -- once per
-       selection, so closing it stays closed until something else is selected */
-    if (state.lens === 'content' && kind !== 'group' && !state.tbOpen && tbContentAutoKey !== key) { state.tbOpen = 'cms-content'; state.tbOpenKey = key; tbContentAutoKey = key; }
+    /* Content lens: text that can be edited where it stands gets NO popover -- a second editor on
+       the same words covered them (docs/ux-audit/cms.md P1-6); the bar beside it says which field
+       it is, with Done and All fields. Text that cannot be edited opens its Details by itself, once
+       per selection, because the explanation is the answer (closing it stays closed). */
+    const contentNow = state.cmsContent && (!state.cmsContent.key || state.cmsContent.key === key) ? state.cmsContent : null;
+    let auto = false;   /* this render opened a section by itself, not on a press */
+    if (state.lens === 'content' && kind !== 'group' && !state.tbOpen && tbContentAutoKey !== key && contentNow && !contentNow.bound) { state.tbOpen = 'cms-content'; state.tbOpenKey = key; tbContentAutoKey = key; auto = true; }
     if (state.tbAutoOpen && Date.now() - state.tbAutoOpen.at > 5000) state.tbAutoOpen = null;
-    if (state.tbAutoOpen && kind !== 'group' && state.cmsExactSelection[TB_IDENTITY[state.tbAutoOpen.key]]) { state.tbOpen = state.tbAutoOpen.key; state.tbOpenKey = key; state.tbAutoOpen = null; }
+    if (state.tbAutoOpen && kind !== 'group' && state.cmsExactSelection[TB_IDENTITY[state.tbAutoOpen.key]]) { state.tbOpen = state.tbAutoOpen.key; state.tbOpenKey = key; state.tbAutoOpen = null; auto = true; }
+    /* an automatic open never replaces a popover the person opened (More, a header popover):
+       it is skipped, and stays skipped for this selection (js/admin/overlay.js busy()) */
+    if (auto && A.overlay.busy('popover', pop)) state.tbOpen = '';
     const active = document.activeElement, barFocus = active && box.contains(active) ? active.dataset.tb : '';
     let popFocus = null;
     if (sameEdit && active && pop.contains(active)) {
@@ -125,12 +186,16 @@
     const row = cmsTreeRowForKey(key);
     /* the selection is called what its Layers row is called (a stored name, else the one
        ArkLayout.layerName derives), so the chip and the tree never name one element twice */
-    const selName = (row && row.label) || state.cmsExactSelection.label || key;
+    /* in the Content lens the selection is named by its FIELD ("Heading", "Intro") -- what the person
+       is changing -- never by a layout key; the key is the Details popover's Developer details */
+    const contentName = state.lens === 'content' && contentNow && contentNow.bound && contentNow.label;
+    const selName = contentName || (row && row.label) || state.cmsExactSelection.label || 'Selection';
     box.setAttribute('aria-label', 'Selection: ' + selName);
-    const chip = document.createElement('span'); chip.className = 'tb-chip'; chip.title = key;
+    const chip = document.createElement('span'); chip.className = 'tb-chip'; chip.title = selName;
     chip.innerHTML = ic(kind === 'group' ? 'grid' : CMS_TAG_ICON[row ? row.tag : ''] || 'box', 'sm') + '<span class="tb-chip-name"></span>';
     chip.querySelector('.tb-chip-name').textContent = selName;
-    if (state.device) { const bp = document.createElement('span'); bp.className = 'tb-bp'; bp.textContent = DEVICES[state.device][0] + ' ↓'; bp.title = `Changes apply to ${DEVICES[state.device][0].toLowerCase()} and smaller. Orange dots are overrides; click one to reset it.`; chip.appendChild(bp); }
+    /* a style edit at tablet or phone size applies at that size: said in words on the bar too */
+    if (state.device && state.lens === 'design') { const bp = document.createElement('span'); bp.className = 'tb-bp'; bp.textContent = state.device === 2 ? 'Phone only' : 'Tablet & phone'; bp.title = `Style changes here apply at ${DEVICES[state.device][0].toLowerCase()} size${state.device === 1 ? ' and smaller' : ''}; the desktop page keeps its own. Highlighted controls hold a change for this size; reset one to go back.`; chip.appendChild(bp); }
     box.appendChild(chip);
     tbPopBody = document.createElement('div'); tbPopBody.className = 'tb-pop-body'; tbPopTitle = '';
     const ctx = makeFrameCtx();
@@ -155,21 +220,36 @@
       if (state.cmsExactSelection.stateGroup) buildStateGroupSection(box);
       buildElementMotionSection(box);
     }
-    if (state.tbOpen && !box.querySelector(`[data-section="${state.tbOpen}"]`)) state.tbOpen = '';
     /* two groups that each stay on one row, so a narrow bar wraps between sections and
        actions rather than mid-group; the hairline between them is the sections group's edge */
-    const sections = document.createElement('div'); sections.className = 'tb-group tb-sections'; sections.append(...box.querySelectorAll('[data-section]'));
+    const sections = document.createElement('div'); sections.className = 'tb-group tb-sections'; sections.append(...box.querySelectorAll('[data-section]:not([data-section="tb-more"])'));
     const actions = document.createElement('div'); actions.className = 'tb-group tb-actions';
     box.append(sections, actions);
-    /* Ungroup used to sit at the bottom of a group's Frame section; it is an action on the
-       selection, not a property of it, so it is a bar button beside the others */
-    if (kind === 'group') toolbarAction(actions, 'ungroup', 'layers', 'Ungroup', () => postCmsLayoutOperation('ungroup'));
-    /* the same action as the canvas right-click menu's "Make into component" (js/main.js's
-       cmsMakeComponent decides, and refuses with a reason, against the real selection) */
-    const compRefusal = state.cmsExactSelections.some((sel) => sel.component || sel.stateGroup) ? 'Select page content, not an inserted block or a state group' : '';
-    toolbarAction(actions, 'make-component', 'wand', 'Make into component', () => { if (state.cmsConnected && cmsPreview.contentWindow) cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-make-component' }, window.location.origin); }, compRefusal);
-    toolbarAction(actions, 'content-cms', 'article', 'Open in Content', () => openContentEditor());
-    toolbarAction(actions, 'design-controls', 'palette', 'Theme & defaults', () => selectDesign());
+    /* An image that is one of the site's Media images (the canvas reports which, js/main.js asset) can be
+       replaced from here: Media opens on it with its Replace image button (docs/ux-audit/cms.md P1-11) */
+    const assetId = kind === 'image' && state.cmsExactSelection.asset;
+    if (assetId && state.assetDrafts && state.assetDrafts[assetId]) toolbarAction(actions, 'replace-image', 'image', 'Replace image: opens it in Media', () => { setToolbarSection('', false); A.selectAsset(assetId); }, '', 'Replace image');
+    if (state.lens === 'content' && kind !== 'group') {
+      /* Content lens: what finishing and the rest of the page's words need -- no design actions
+         (docs/ux-audit/cms.md P1-7: "Make into component", "Open in Content" while in Content,
+         "Theme & defaults") */
+      /* how an edit ends, said where the person is looking (docs/ux-audit/cms.md P0-2): the keys
+         are js/main.js's (cmsInlineKey) -- Esc and Enter keep the words; Enter is a new line only
+         in a paragraph whose breaks the page shows */
+      if (contentNow && contentNow.bound) {
+        const keys = document.createElement('span'); keys.className = 'tb-keys cms-content-keys';
+        keys.textContent = contentNow.enterBreaks ? 'Enter: new line · Ctrl/Cmd+Enter or Esc: done' : 'Enter or Esc to finish' + (contentNow.multiline ? ' · Shift+Enter: new line' : '');
+        actions.appendChild(keys);
+      }
+      toolbarAction(actions, 'done-edit', 'check', 'Done: finish editing this text (Esc does too)', () => { postToCanvas({ type: 'defxn-cms-preview-close-menu' }); if (cmsPreview) cmsPreview.blur(); state.cmsExactSelection = null; state.cmsExactSelections = []; renderSelToolbar(); }, '', 'Done');
+      toolbarAction(actions, 'all-fields', 'settings', 'All fields of this page', () => A.openPageFields(contentNow && contentNow.bound && contentNow.kind !== 'component' ? { kind: contentNow.kind, id: contentNow.id, field: contentNow.fieldKey } : {}), '', 'All fields');
+    } else {
+      /* Ungroup used to sit at the bottom of a group's Frame section; it is an action on the
+         selection, not a property of it, so it is a bar button beside the others */
+      if (kind === 'group') toolbarAction(actions, 'ungroup', 'layers', 'Ungroup', () => postCmsLayoutOperation('ungroup'), '', 'Ungroup');
+      buildMoreSection(actions);
+    }
+    if (state.tbOpen && !box.querySelector(`[data-section="${state.tbOpen}"]`)) state.tbOpen = '';
     /* one roving tab stop: Tab lands on the bar once, the arrow keys move along it */
     const buttons = [...box.querySelectorAll('button:not([disabled])')];
     const stop = buttons.find((b) => b.dataset.tb === (barFocus || tbRoving)) || buttons.find((b) => b.dataset.tb === state.tbOpen) || buttons[0];
@@ -179,11 +259,15 @@
       pop.textContent = '';
       pop.setAttribute('aria-label', tbPopTitle);
       const head = document.createElement('div'); head.className = 'tb-pop-head';
-      head.innerHTML = `<span></span><button type="button" class="tb-pop-x" aria-label="Close" title="Close (Esc)">${ic('close', 'sm')}</button>`;
+      /* the editor's one close button (js/admin/overlay.js); .tb-pop-x is the name drivers find it by */
+      const x = A.overlay.closeButton(() => setToolbarSection('', true)); x.classList.add('tb-pop-x');
+      head.append(document.createElement('span'), x);
       head.firstChild.textContent = tbPopTitle;
-      head.lastChild.addEventListener('click', () => setToolbarSection('', true));
       pop.append(head, tbPopBody);
       pop.hidden = false;
+      /* one overlay of the editor's one stack (js/admin/overlay.js): Esc, a press outside the bar
+         and its popover, a press on the canvas, or another popover opening close it */
+      if (!A.overlay.isOpen(pop)) A.overlay.open(pop, { level: 'popover', within: [box], onClose: () => setToolbarSection('', false) });
       tbPopBody.scrollTop = popScroll;
       const again = popFocus && popFocus.i >= 0 ? [...pop.querySelectorAll(TB_FOCUSABLE)][popFocus.i] : null;
       if (again && again.tagName === popFocus.tag) {
@@ -191,7 +275,7 @@
         again.focus({ preventScroll: true });
         try { if (popFocus.typed && popFocus.start != null) again.setSelectionRange(popFocus.start, popFocus.end); } catch (e) { /* number inputs have no selection */ }
       }
-    } else { pop.hidden = true; pop.textContent = ''; delete box.dataset.pop; }
+    } else { pop.hidden = true; pop.textContent = ''; delete box.dataset.pop; A.overlay.forget(pop); }
     placeSelToolbar();
   }
   /* The popover hangs off its button on the side AWAY from the selection when it fits there
@@ -226,10 +310,8 @@
     tbRoving = buttons[j].dataset.tb; buttons[j].focus();
   });
   $('selToolbarPop').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setToolbarSection('', true); } });
-  /* outside click closes; so does a click into the preview, which never reaches this
-     document as a pointer event -- only as this window losing focus to the iframe */
-  document.addEventListener('pointerdown', (e) => { if (state.tbOpen && !$('selToolbarPop').contains(e.target) && !$('selToolbar').contains(e.target)) setToolbarSection('', false); });
-  window.addEventListener('blur', () => setTimeout(() => { if (state.tbOpen && document.activeElement === cmsPreview) setToolbarSection('', false); }, 0));
+  /* an outside press, and a press on the canvas (which reaches this document only as the window
+     losing focus to the iframe), close the popover through the overlay stack (registered above) */
   $('studioRoot').addEventListener('scroll', placeToolbarPop, { passive: true });
   A.provide({ placeToolbarPop: placeToolbarPop, renderSelToolbar: renderSelToolbar,
       toolbarSection: toolbarSection });

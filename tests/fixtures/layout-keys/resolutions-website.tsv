@@ -1,0 +1,70 @@
+# key	tag	text -- layout keys of /resolutions/website before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsWebsite01 / 20 · Build & publishResolve your websitePublish straight to the mesh: no database, no hosting, no fees, no cloud.ForIndie makers, sma
+page:/nav:1	nav	All resolutionsWebsite
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Website
+page:/div:1	div	01 / 20 · Build & publishResolve your websitePublish straight to the mesh: no database, no hosting, no fees, no cloud.ForIndie makers, small businesses and crea
+page:/div:1/header:1	header	01 / 20 · Build & publishResolve your websitePublish straight to the mesh: no database, no hosting, no fees, no cloud.ForIndie makers, small businesses and crea
+page:/div:1/header:1/p:1	p	01 / 20 · Build & publish
+id:resolution-title-website	h1	Resolve your website
+page:/div:1/header:1/p:2	p	Publish straight to the mesh: no database, no hosting, no fees, no cloud.
+page:/div:1/header:1/dl:1	dl	ForIndie makers, small businesses and creators who need a site that does not lapse.ProblemHosting bills, yearly renewals and a domain someone else can take away
+page:/div:1/header:1/dl:1/div:1	div	ForIndie makers, small businesses and creators who need a site that does not lapse.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Indie makers, small businesses and creators who need a site that does not lapse.
+page:/div:1/header:1/dl:1/div:2	div	ProblemHosting bills, yearly renewals and a domain someone else can take away.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Hosting bills, yearly renewals and a domain someone else can take away.
+page:/div:1/header:1/div:1	div	Start here →
+page:/div:1/header:1/div:1/a:1	a	Start here →
+page:/div:1/section:1	section	Ready now5Product ideas3How it resolves.fxn namesReadyA signed name like studio.fxn that points at your site, app or identity.Open →Site gatewayReadyOpens any .
+page:/div:1/section:1/div:1	div	Ready now5Product ideas3How it resolves
+id:resolution-level-tab-website-0	button	Ready now5
+page:/div:1/section:1/div:1/button:1/span:1	span	5
+id:resolution-level-tab-website-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-website-2	button	How it resolves
+id:resolution-level-website	div	.fxn namesReadyA signed name like studio.fxn that points at your site, app or identity.Open →Site gatewayReadyOpens any .fxn site at label.defxn.com after check
+page:/div:1/section:1/div:2/div:1	div	.fxn namesReadyA signed name like studio.fxn that points at your site, app or identity.Open →Site gatewayReadyOpens any .fxn site at label.defxn.com after check
+page:/div:1/section:1/div:2/div:1/a:1	a	.fxn namesReadyA signed name like studio.fxn that points at your site, app or identity.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	.fxn namesReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	.fxn names
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	A signed name like studio.fxn that points at your site, app or identity.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/div:1	div	Site gatewayReadyOpens any .fxn site at label.defxn.com after checking its owner’s signature.
+page:/div:1/section:1/div:2/div:1/div:1/span:1	span	Site gatewayReady
+page:/div:1/section:1/div:2/div:1/div:1/span:1/strong:1	strong	Site gateway
+page:/div:1/section:1/div:2/div:1/div:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:1/span:2	span	Opens any .fxn site at label.defxn.com after checking its owner’s signature.
+page:/div:1/section:1/div:2/div:1/div:2	div	Code managerReadyEdit a deployed site’s code and content; access comes from the signed owner record.
+page:/div:1/section:1/div:2/div:1/div:2/span:1	span	Code managerReady
+page:/div:1/section:1/div:2/div:1/div:2/span:1/strong:1	strong	Code manager
+page:/div:1/section:1/div:2/div:1/div:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:2/span:2	span	Edit a deployed site’s code and content; access comes from the signed owner record.
+page:/div:1/section:1/div:2/div:1/div:3	div	Mesh packagesReadyPublish and install signed packages from the mesh instead of one registry.
+page:/div:1/section:1/div:2/div:1/div:3/span:1	span	Mesh packagesReady
+page:/div:1/section:1/div:2/div:1/div:3/span:1/strong:1	strong	Mesh packages
+page:/div:1/section:1/div:2/div:1/div:3/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:3/span:2	span	Publish and install signed packages from the mesh instead of one registry.
+page:/div:1/section:1/div:2/div:1/a:2	a	Bundle DeployerBuildingReview a site or app locally, then publish it as one signed bundle.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	Bundle DeployerBuilding
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Bundle Deployer
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Building
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Review a site or app locally, then publish it as one signed bundle.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← LogisticsPreviousAll 20Content →Next
+page:/nav:2/a:1	a	← LogisticsPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Content →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

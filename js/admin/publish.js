@@ -36,7 +36,7 @@ var ArkPublish = (function () {
 
     function signInRefusal() {
       var error = new Error('Sign in first: publishing is signed with your DeadArk identity, and no one is signed in.');
-      error.detail = { ok: false, remedy: 'Open the Mesh panel and choose your recovery file (.auth.flx).' };
+      error.detail = { ok: false, remedy: 'Open More, then Publishing status, and press Sign in.' };
       return error;
     }
 
@@ -55,7 +55,7 @@ var ArkPublish = (function () {
       var say = progress || function () {};
       var who = identity();
       if (!who) throw signInRefusal();
-      say('Encoding the site and adding it to the miner...');
+      say('Preparing the site for publishing...');
       var prepared = await api('/api/prepare', { site: site, ownerPublicKey: who.publicKeyB64 });
       if (prepared.unchanged) return { unchanged: true, version: prepared.currentVersion, cid: prepared.cid };
       /* removes is null when the published version could not be read to compare; treat that as worth asking about too */

@@ -1,0 +1,134 @@
+# key	tag	text -- layout keys of /stats/gpu before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Measured, not claimedThe GPU does nothing hereWe rented a box with an RTX PRO 6000 to see whether more hardware would help. It did not, and this time we can say
+page:/div:1	div	Measured, not claimedThe GPU does nothing hereWe rented a box with an RTX PRO 6000 to see whether more hardware would help. It did not, and this time we can say
+page:/div:1/div:1	div	Measured, not claimedThe GPU does nothing hereWe rented a box with an RTX PRO 6000 to see whether more hardware would help. It did not, and this time we can say
+page:/div:1/div:1/article:1	article	Measured, not claimedThe GPU does nothing hereWe rented a box with an RTX PRO 6000 to see whether more hardware would help. It did not, and this time we can say
+page:/div:1/div:1/article:1/p:1	p	Measured, not claimed
+id:statsgpu-title	h1	The GPU does nothing here
+page:/div:1/div:1/article:1/p:2	p	We rented a box with an RTX PRO 6000 to see whether more hardware would help. It did not, and this time we can say exactly why: the protocol never addresses the
+page:/div:1/div:1/article:1/p:3	p	2026-10-07registered grammarmeasured, not production
+page:/div:1/div:1/article:1/p:3/span:1	span	2026-10-07
+page:/div:1/div:1/article:1/p:3/span:2	span	registered grammar
+page:/div:1/div:1/article:1/p:3/span:3	span	measured, not production
+page:/div:1/div:1/article:1/a:1	a	← Back to the measurements
+page:/div:1/div:1/article:1/a:1/span:1	span	←
+page:/div:1/div:1/article:2	article	What touches the GPUNothing of ours, checked four waysCheckedResultHowGPU compute contexts from our processes0nvidia-smi --query-compute-apps, while running fla
+id:statsgpu-proof-title	p	What touches the GPU
+page:/div:1/div:1/article:2/h2:1	h2	Nothing of ours, checked four ways
+page:/div:1/div:1/article:2/div:1	div	CheckedResultHowGPU compute contexts from our processes0nvidia-smi --query-compute-apps, while running flat outCUDA / cuBLAS / nvrtc linked in our binaries0ldd 
+page:/div:1/div:1/article:2/div:1/table:1	table	CheckedResultHowGPU compute contexts from our processes0nvidia-smi --query-compute-apps, while running flat outCUDA / cuBLAS / nvrtc linked in our binaries0ldd 
+page:/div:1/div:1/article:2/div:1/table:1/thead:1	thead	CheckedResultHow
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1	tr	CheckedResultHow
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1/th:1	th	Checked
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1/th:2	th	Result
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1/th:3	th	How
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1	tbody	GPU compute contexts from our processes0nvidia-smi --query-compute-apps, while running flat outCUDA / cuBLAS / nvrtc linked in our binaries0ldd on every binary 
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1	tr	GPU compute contexts from our processes0nvidia-smi --query-compute-apps, while running flat out
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1/td:1	td	GPU compute contexts from our processes
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1/td:2	td	0
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1/td:2/strong:1	strong	0
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1/td:3	td	nvidia-smi --query-compute-apps, while running flat out
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2	tr	CUDA / cuBLAS / nvrtc linked in our binaries0ldd on every binary we ran
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2/td:1	td	CUDA / cuBLAS / nvrtc linked in our binaries
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2/td:2	td	0
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2/td:2/strong:1	strong	0
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2/td:3	td	ldd on every binary we ran
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3	tr	/dev/nvidia* handles held by our processes0walked /proc/*/fd
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3/td:1	td	/dev/nvidia* handles held by our processes
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3/td:2	td	0
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3/td:2/strong:1	strong	0
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3/td:3	td	walked /proc/*/fd
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4	tr	The 99% / 550 W readings seen earlierother tenantsa shared multi-tenant GPU host; load ~11-13 even when we are idle
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4/td:1	td	The 99% / 550 W readings seen earlier
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4/td:2	td	other tenants
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4/td:2/strong:1	strong	other tenants
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4/td:3	td	a shared multi-tenant GPU host; load ~11-13 even when we are idle
+page:/div:1/div:1/article:2/p:2	p	Earlier we wrote "a GPU does not help" and reasoned from idle CPU — but that idle was starved threads, not proof. Fixed, the servers run at 90-95% CPU. The clea
+page:/div:1/div:1/article:3	article	So why was it fast?The CPU. A modern AMD EPYC verifies an ed25519 signature in about half the time of the fleet’s Intel Xeons, and verification is ~55% of a ser
+id:statsgpu-why-title	p	So why was it fast?
+page:/div:1/div:1/article:3/ul:1	ul	The CPU. A modern AMD EPYC verifies an ed25519 signature in about half the time of the fleet’s Intel Xeons, and verification is ~55% of a server’s work.Not the 
+page:/div:1/div:1/article:3/ul:1/li:1	li	The CPU. A modern AMD EPYC verifies an ed25519 signature in about half the time of the fleet’s Intel Xeons, and verification is ~55% of a server’s work.
+page:/div:1/div:1/article:3/ul:1/li:1/strong:1	strong	The CPU.
+page:/div:1/div:1/article:3/ul:1/li:2	li	Not the GPU. It sat idle for us throughout; its power draw was other tenants’ work.
+page:/div:1/div:1/article:3/ul:1/li:2/strong:1	strong	Not the GPU.
+page:/div:1/div:1/article:3/ul:1/li:3	li	Eco by consequence. A resolver shard needs a plain CPU core, not an accelerator.
+page:/div:1/div:1/article:3/ul:1/li:3/strong:1	strong	Eco by consequence.
+page:/div:1/div:1/article:4	article	Per core: one signature verifyHalf the time on EPYCbk2Intel Xeon Gold 6230R @2.1 GHz51.5 µseul-4cAMD EPYC 9355P (dedicated)25.8 µsGPU boxAMD EPYC 9355 (shared, 
+id:statsgpu-sig-title	p	Per core: one signature verify
+page:/div:1/div:1/article:4/h2:1	h2	Half the time on EPYC
+page:/div:1/div:1/article:4/ol:1	ol	bk2Intel Xeon Gold 6230R @2.1 GHz51.5 µseul-4cAMD EPYC 9355P (dedicated)25.8 µsGPU boxAMD EPYC 9355 (shared, 8-core cap)24.6 µs
+page:/div:1/div:1/article:4/ol:1/li:1	li	bk2Intel Xeon Gold 6230R @2.1 GHz51.5 µs
+page:/div:1/div:1/article:4/ol:1/li:1/span:1	span	bk2Intel Xeon Gold 6230R @2.1 GHz
+page:/div:1/div:1/article:4/ol:1/li:1/span:1/small:1	small	Intel Xeon Gold 6230R @2.1 GHz
+page:/div:1/div:1/article:4/ol:1/li:1/span:2	span	
+page:/div:1/div:1/article:4/ol:1/li:1/span:2/span:1	span	
+page:/div:1/div:1/article:4/ol:1/li:1/span:3	span	51.5 µs
+page:/div:1/div:1/article:4/ol:1/li:2	li	eul-4cAMD EPYC 9355P (dedicated)25.8 µs
+page:/div:1/div:1/article:4/ol:1/li:2/span:1	span	eul-4cAMD EPYC 9355P (dedicated)
+page:/div:1/div:1/article:4/ol:1/li:2/span:1/small:1	small	AMD EPYC 9355P (dedicated)
+page:/div:1/div:1/article:4/ol:1/li:2/span:2	span	
+page:/div:1/div:1/article:4/ol:1/li:2/span:2/span:1	span	
+page:/div:1/div:1/article:4/ol:1/li:2/span:3	span	25.8 µs
+page:/div:1/div:1/article:4/ol:1/li:3	li	GPU boxAMD EPYC 9355 (shared, 8-core cap)24.6 µs
+page:/div:1/div:1/article:4/ol:1/li:3/span:1	span	GPU boxAMD EPYC 9355 (shared, 8-core cap)
+page:/div:1/div:1/article:4/ol:1/li:3/span:1/small:1	small	AMD EPYC 9355 (shared, 8-core cap)
+page:/div:1/div:1/article:4/ol:1/li:3/span:2	span	
+page:/div:1/div:1/article:4/ol:1/li:3/span:2/span:1	span	
+page:/div:1/div:1/article:4/ol:1/li:3/span:3	span	24.6 µs
+page:/div:1/div:1/article:4/p:2	p	One ed25519 verify, one core. The whole speed story is here: EPYC does it in ~25 µs, the Xeon in ~52 µs.
+page:/div:1/div:1/article:5	article	Per core: grammar throughput~2.5x the Xeon, same codebk2Intel Xeon Gold 6230R @2.1 GHz3,107 /seul-4cAMD EPYC 9355P (dedicated)7,926 /sGPU boxAMD EPYC 9355 (shar
+id:statsgpu-grammar-title	p	Per core: grammar throughput
+page:/div:1/div:1/article:5/h2:1	h2	~2.5x the Xeon, same code
+page:/div:1/div:1/article:5/ol:1	ol	bk2Intel Xeon Gold 6230R @2.1 GHz3,107 /seul-4cAMD EPYC 9355P (dedicated)7,926 /sGPU boxAMD EPYC 9355 (shared, 8-core cap)10,476 /s
+page:/div:1/div:1/article:5/ol:1/li:1	li	bk2Intel Xeon Gold 6230R @2.1 GHz3,107 /s
+page:/div:1/div:1/article:5/ol:1/li:1/span:1	span	bk2Intel Xeon Gold 6230R @2.1 GHz
+page:/div:1/div:1/article:5/ol:1/li:1/span:1/small:1	small	Intel Xeon Gold 6230R @2.1 GHz
+page:/div:1/div:1/article:5/ol:1/li:1/span:2	span	
+page:/div:1/div:1/article:5/ol:1/li:1/span:2/span:1	span	
+page:/div:1/div:1/article:5/ol:1/li:1/span:3	span	3,107 /s
+page:/div:1/div:1/article:5/ol:1/li:2	li	eul-4cAMD EPYC 9355P (dedicated)7,926 /s
+page:/div:1/div:1/article:5/ol:1/li:2/span:1	span	eul-4cAMD EPYC 9355P (dedicated)
+page:/div:1/div:1/article:5/ol:1/li:2/span:1/small:1	small	AMD EPYC 9355P (dedicated)
+page:/div:1/div:1/article:5/ol:1/li:2/span:2	span	
+page:/div:1/div:1/article:5/ol:1/li:2/span:2/span:1	span	
+page:/div:1/div:1/article:5/ol:1/li:2/span:3	span	7,926 /s
+page:/div:1/div:1/article:5/ol:1/li:3	li	GPU boxAMD EPYC 9355 (shared, 8-core cap)10,476 /s
+page:/div:1/div:1/article:5/ol:1/li:3/span:1	span	GPU boxAMD EPYC 9355 (shared, 8-core cap)
+page:/div:1/div:1/article:5/ol:1/li:3/span:1/small:1	small	AMD EPYC 9355 (shared, 8-core cap)
+page:/div:1/div:1/article:5/ol:1/li:3/span:2	span	
+page:/div:1/div:1/article:5/ol:1/li:3/span:2/span:1	span	
+page:/div:1/div:1/article:5/ol:1/li:3/span:3	span	10,476 /s
+page:/div:1/div:1/article:5/p:2	p	2 server + 2 client cores, burst batch verification, measured on a prototype. eul-4c is a dedicated EPYC and the trustworthy read; the GPU box runs a little hig
+page:/div:1/div:1/article:6	article	Over the real internetBatching beats distanceThe GPU box gave the first genuine wide-area client. Real round trips: 71 ms to bk2, 143 ms to eul-4c. One transfer
+id:statsgpu-wan-title	p	Over the real internet
+page:/div:1/div:1/article:6/h2:1	h2	Batching beats distance
+page:/div:1/div:1/article:6/p:2	p	The GPU box gave the first genuine wide-area client. Real round trips: 71 ms to bk2, 143 ms to eul-4c. One transfer per write is capped by the round trip; five 
+page:/div:1/div:1/article:6/div:1	div	Client → serverRound trip1 transfer / write5 transfers / writeGPU → bk271 ms2,659/s4,980/sGPU → eul-4c143 ms1,786/s5,205/s
+page:/div:1/div:1/article:6/div:1/table:1	table	Client → serverRound trip1 transfer / write5 transfers / writeGPU → bk271 ms2,659/s4,980/sGPU → eul-4c143 ms1,786/s5,205/s
+page:/div:1/div:1/article:6/div:1/table:1/thead:1	thead	Client → serverRound trip1 transfer / write5 transfers / write
+page:/div:1/div:1/article:6/div:1/table:1/thead:1/tr:1	tr	Client → serverRound trip1 transfer / write5 transfers / write
+page:/div:1/div:1/article:6/div:1/table:1/thead:1/tr:1/th:1	th	Client → server
+page:/div:1/div:1/article:6/div:1/table:1/thead:1/tr:1/th:2	th	Round trip
+page:/div:1/div:1/article:6/div:1/table:1/thead:1/tr:1/th:3	th	1 transfer / write
+page:/div:1/div:1/article:6/div:1/table:1/thead:1/tr:1/th:4	th	5 transfers / write
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1	tbody	GPU → bk271 ms2,659/s4,980/sGPU → eul-4c143 ms1,786/s5,205/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:1	tr	GPU → bk271 ms2,659/s4,980/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:1/td:1	td	GPU → bk2
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:1/td:2	td	71 ms
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:1/td:3	td	2,659/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:1/td:4	td	4,980/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:1/td:4/strong:1	strong	4,980/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:2	tr	GPU → eul-4c143 ms1,786/s5,205/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:2/td:1	td	GPU → eul-4c
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:2/td:2	td	143 ms
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:2/td:3	td	1,786/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:2/td:4	td	5,205/s
+page:/div:1/div:1/article:6/div:1/table:1/tbody:1/tr:2/td:4/strong:1	strong	5,205/s
+page:/div:1/div:1/article:7	article	Read and verifyBENCH-003 §16 · the GPU box, measured and correctedBack to the main measurements
+id:statsgpu-ev-title	p	Read and verify
+page:/div:1/div:1/article:7/ul:1	ul	BENCH-003 §16 · the GPU box, measured and correctedBack to the main measurements
+page:/div:1/div:1/article:7/ul:1/li:1	li	BENCH-003 §16 · the GPU box, measured and corrected
+page:/div:1/div:1/article:7/ul:1/li:1/a:1	a	BENCH-003 §16 · the GPU box, measured and corrected
+page:/div:1/div:1/article:7/ul:1/li:2	li	Back to the main measurements
+page:/div:1/div:1/article:7/ul:1/li:2/a:1	a	Back to the main measurements
+page:/div:1/div:1/div:1	div	

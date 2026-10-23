@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("governance-without-a-validator-set", {
-  "core": "The protocol model derives a short-lived authority cell for each contested transition instead of using a standing validator set. A separate mesh-operations policy describes a seven-operator substrate roster; production activation remains unverified.",
-  "relevance": "Use this note to tell transition authority apart from substrate policy and a network's own DAO.",
+  "core": "The protocol model derives a short-lived authority cell for each contested transition instead of using a standing signer set. A separate mesh-operations policy describes a seven-operator substrate roster; production activation remains unverified.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Use this note to tell transition authority apart from substrate policy and a network's own DAO.",
   "reviewed": "2026-09-30",
   "evidenceLabel": "Authority model, thresholds, and current limits",
   "evidenceHref": "doc:docs/protocol/authority.md",
@@ -17,7 +17,7 @@ LearningContent.load("governance-without-a-validator-set", {
   "sections": [
     [
       "No standing roster",
-      "Most chains answer \"who can approve this\" with a fixed list: a validator set, elected or staked, that stays the same until the next election. Flux Protocol answers it differently — there is no roster that governs everything. For a contested transition, a small committee is derived just for that object, does exactly one job, and disappears."
+      "Most chains answer \"who can approve this\" with a fixed list: a standing signer set, elected or staked, that stays the same until the next election. Flux Protocol answers it differently — there is no roster that governs everything. For a contested transition, a small group of signers is derived just for that object, does exactly one job, and disappears."
     ],
     [
       "How a cell is derived",

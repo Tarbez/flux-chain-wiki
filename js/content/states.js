@@ -60,9 +60,13 @@ var ArkStates = (function () {
     return { trigger: trigger, current: current, states: states };
   }
 
+  /* Edits saved under a scope that has since been split per document (/reference) are read
+     under the scope they belong to: ArkLayout.moveScopes, the one table (js/content/layout.js,
+     "moved scopes"). Without js/content/layout.js loaded they stay where they were stored. */
+  function moveScopes(map) { return typeof ArkLayout !== 'undefined' && ArkLayout && ArkLayout.moveScopes ? ArkLayout.moveScopes(map) : map; }
   function sanitize(value) {
     var out = { version: 1, routes: {} };
-    var rawRoutes = value && value.routes;
+    var rawRoutes = moveScopes(value && value.routes);
     if (!isPlainObject(rawRoutes)) rawRoutes = {};
     Object.keys(rawRoutes).slice(0, 500).forEach(function (route) {
       if (!isScope(route)) return;

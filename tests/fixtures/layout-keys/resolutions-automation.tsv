@@ -1,0 +1,61 @@
+# key	tag	text -- layout keys of /resolutions/automation before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsAutomation18 / 20 · Infrastructure & operationsResolve your automationLet agreements trigger work across the mesh on their own.ForSmall businesse
+page:/nav:1	nav	All resolutionsAutomation
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Automation
+page:/div:1	div	18 / 20 · Infrastructure & operationsResolve your automationLet agreements trigger work across the mesh on their own.ForSmall businesses and ops teams automatin
+page:/div:1/header:1	header	18 / 20 · Infrastructure & operationsResolve your automationLet agreements trigger work across the mesh on their own.ForSmall businesses and ops teams automatin
+page:/div:1/header:1/p:1	p	18 / 20 · Infrastructure & operations
+id:resolution-title-automation	h1	Resolve your automation
+page:/div:1/header:1/p:2	p	Let agreements trigger work across the mesh on their own.
+page:/div:1/header:1/dl:1	dl	ForSmall businesses and ops teams automating routine work.ProblemWebhook glue and bots that hold far more access than they need.
+page:/div:1/header:1/dl:1/div:1	div	ForSmall businesses and ops teams automating routine work.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Small businesses and ops teams automating routine work.
+page:/div:1/header:1/dl:1/div:2	div	ProblemWebhook glue and bots that hold far more access than they need.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Webhook glue and bots that hold far more access than they need.
+page:/div:1/header:1/div:1	div	How resolvers work →
+page:/div:1/header:1/div:1/a:1	a	How resolvers work →
+page:/div:1/section:1	section	Ready now3Product ideas3How it resolvesAgreements resolverReadyEach side signs terms, work and receipt on its own chain; the resolver links them.Open →Resolvers
+page:/div:1/section:1/div:1	div	Ready now3Product ideas3How it resolves
+id:resolution-level-tab-automation-0	button	Ready now3
+page:/div:1/section:1/div:1/button:1/span:1	span	3
+id:resolution-level-tab-automation-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-automation-2	button	How it resolves
+id:resolution-level-automation	div	Agreements resolverReadyEach side signs terms, work and receipt on its own chain; the resolver links them.Open →ResolversReadyPublish logic at an address so any
+page:/div:1/section:1/div:2/div:1	div	Agreements resolverReadyEach side signs terms, work and receipt on its own chain; the resolver links them.Open →ResolversReadyPublish logic at an address so any
+page:/div:1/section:1/div:2/div:1/a:1	a	Agreements resolverReadyEach side signs terms, work and receipt on its own chain; the resolver links them.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	Agreements resolverReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Agreements resolver
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Each side signs terms, work and receipt on its own chain; the resolver links them.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:2	a	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	ResolversReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Resolvers
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Publish logic at an address so anyone can run it and get the same claim.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:3	a	Mesh monitorReadyLive health, latency and throughput of the nodes you rely on.Open →
+page:/div:1/section:1/div:2/div:1/a:3/span:1	span	Mesh monitorReady
+page:/div:1/section:1/div:2/div:1/a:3/span:1/strong:1	strong	Mesh monitor
+page:/div:1/section:1/div:2/div:1/a:3/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:3/span:2	span	Live health, latency and throughput of the nodes you rely on.
+page:/div:1/section:1/div:2/div:1/a:3/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← EncryptionsPreviousAll 20Productivity →Next
+page:/nav:2/a:1	a	← EncryptionsPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Productivity →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

@@ -23,15 +23,13 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveTheme(state.cdirs.content, state.themeDraft);
-        status('Saved js/content/theme-data.js', 'ok');
       } else {
         download('theme-data.js', ArkTheme.serialize(state.themeDraft));
-        status('Downloaded theme-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws (instead of swallowing and returning) now that saveEverything() is
        this function's only caller -- its own attempt() wrapper needs the rejection to report
        this draft as failed instead of silently treating it as succeeded. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.themeDraft = ArkTheme.sanitize(state.themeDraft);
     state.themeSaved = JSON.stringify(state.themeDraft);
     ArkTheme.define(state.themeDraft);
@@ -62,14 +60,12 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveSettingsDefaults(state.cdirs.content, state.settingsDefaultsDraft);
-        status('Saved js/content/settings-defaults-data.js', 'ok');
       } else {
         download('settings-defaults-data.js', ArkSiteDefaults.serialize(state.settingsDefaultsDraft));
-        status('Downloaded settings-defaults-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws now that saveEverything() is this function's only caller -- see
        saveThemeDraft's matching comment above. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.settingsDefaultsDraft = ArkSiteDefaults.sanitize(state.settingsDefaultsDraft);
     state.settingsDefaultsSaved = JSON.stringify(state.settingsDefaultsDraft);
     ArkSiteDefaults.define(state.settingsDefaultsDraft);
@@ -84,7 +80,7 @@
     reloadPreview();
     repaintPanels('design');
     touch();
-    status('Reverted global design config.', '');
+    status('Site style is back to its saved version.', '');
   }
   /* Theme & defaults is the Theme view, docked beside the live canvas (js/admin/sitemap.js setView) */
   function selectDesign() { setView('theme'); }
@@ -99,14 +95,34 @@
     return box;
   }
 
+  /* A theme edit is one step of the editor's one undo history (js/admin/history.js; docs/ux-audit/
+     cms.md P1-5): a colour, the active theme, the background, a removal or a reset. `change()` makes
+     the edit on state.themeDraft; the step undoes and redoes by putting a snapshot of the whole
+     theme draft back, then telling the canvas and redrawing Site style. `merge` keeps a colour
+     dragged across a picker (many input events) as ONE step. The draft is the only thing changed:
+     nothing is saved by undoing (Save does that), so undo never rewrites a file. */
+  function themeSnapshot() { return JSON.parse(JSON.stringify(state.themeDraft)); }
+  function putThemeBack(snapshot) {
+    state.themeDraft = JSON.parse(JSON.stringify(snapshot));
+    notifyPreviewTheme(); touch(); repaintPanels('design');
+    return true;
+  }
+  function themeStep(label, merge, change) {
+    var before = themeSnapshot();
+    change();
+    var after = themeSnapshot();
+    if (typeof A.historyAction !== 'function' || JSON.stringify(before) === JSON.stringify(after)) return;
+    A.historyAction({ label: label, merge: merge, undo: function () { return putThemeBack(before); }, redo: function () { return putThemeBack(after); } });
+  }
+
   function buildDesignPanel(options) {
     options = options || {};
     var wrap = h('div', { class: 'page-law-panel' });
     if (!window.ArkTheme) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Theme editing is unavailable on this page.' })); return wrap; }
     state.themeDraft = ArkTheme.sanitize(state.themeDraft);
-    var active = state.themeDraft.activeTheme || 'ghost';
-    var colorsBox = h('fieldset', { class: 'relief theme-core' }, h('legend', { text: 'Theme core' }));
-    colorsBox.appendChild(h('p', { class: 'hint', text: 'Pick a theme and edit the actual core colours the site uses: canvas, surfaces, text, primary, complement and accent.' }));
+    var active = state.themeDraft.activeTheme || 'ember';
+    var colorsBox = h('fieldset', { class: 'relief theme-core' }, h('legend', { text: 'Colours' }));
+    colorsBox.appendChild(h('p', { class: 'hint', text: 'Pick a theme, then change the colours the site is built from: the page, its panels, its text and its accents.' }));
     var themeSelect = h('select', { id: 'theme-active' });
     ArkTheme.themeOptions().forEach(function (theme) {
       themeSelect.appendChild(h('option', { value: theme.key, selected: theme.key === active, text: theme.label }));
@@ -154,18 +170,19 @@
         var inherited = computedThemeValue(active, f.key);
         var current = themeValue(active, f.key);
         var swatch = h('input', { id: id, type: 'color', value: hslToHex(current) });
-        var out = h('output', { text: current });
+        /* the colour as people write it (hex); its raw HSL channels are Developer details (P1-2) */
+        var out = h('output', { text: hslToHex(current), 'data-hsl': current });
         var ALREADY_DEFAULT = 'Already this theme\u2019s default colour.';
         swatch.addEventListener('input', function () {
           var next = hexToHsl(swatch.value);
-          setThemeValue(active, f.key, next);
-          out.textContent = next;
+          themeStep('changing the ' + f.label.toLowerCase() + ' colour', 'theme:' + active + ':' + f.key, function () { setThemeValue(active, f.key, next); });
+          out.textContent = swatch.value; out.dataset.hsl = next;
           refuse(resetOne, '');
           notifyPreviewTheme(); touch();
         });
         var resetOne = h('button', { type: 'button', class: 'btn tiny', text: 'Default', onclick: function () {
-          if (state.themeDraft.themes && state.themeDraft.themes[active]) delete state.themeDraft.themes[active][f.key];
-          swatch.value = hslToHex(inherited); out.textContent = inherited; refuse(resetOne, ALREADY_DEFAULT);
+          themeStep('resetting the ' + f.label.toLowerCase() + ' colour', '', function () { if (state.themeDraft.themes && state.themeDraft.themes[active]) delete state.themeDraft.themes[active][f.key]; });
+          swatch.value = hslToHex(inherited); out.textContent = swatch.value; out.dataset.hsl = inherited; refuse(resetOne, ALREADY_DEFAULT);
           notifyPreviewTheme(); touch();
         } });
         refuse(resetOne, current === inherited ? ALREADY_DEFAULT : '');
@@ -173,17 +190,20 @@
           h('div', { class: 'theme-field-head' }, h('label', { for: id, text: f.label }), resetOne),
           h('div', { class: 'theme-color-row' }, swatch, out)));
       });
+      colorFields.appendChild(A.devDetails([['Theme', active]].concat(ArkTheme.semanticFields().map(function (f) { return [f.label + ' (--' + f.key + ', HSL)', themeValue(active, f.key)]; }))));
     }
     themeSelect.addEventListener('change', function () {
-      state.themeDraft.activeTheme = themeSelect.value;
+      themeStep('changing the editing theme', '', function () { state.themeDraft.activeTheme = themeSelect.value; });
       active = themeSelect.value;
       refreshColors(); notifyPreviewTheme(); touch();
     });
     colorsBox.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'theme-active', text: 'Editing theme' }), themeSelect));
     colorsBox.appendChild(colorFields);
 
+    /* "Background" is this: the layer behind every page. How one page changes into the next is
+       "Page transition" (the More menu), never also called Background (docs/ux-audit/cms.md P1-9). */
     var bgBox = h('fieldset', { class: 'relief' }, h('legend', { text: 'Background' }));
-    bgBox.appendChild(h('p', { class: 'hint', text: 'A layer behind every page (js/ark/vendor/backgrounds.js). None keeps the flat canvas colour.' }));
+    bgBox.appendChild(h('p', { class: 'hint', text: 'A moving layer behind every page. None keeps the plain page colour. (How one page changes into the next is Page transition, in More.)' }));
     var bgGrid = h('div', { class: 'bg-grid' });
     function refreshBackground() {
       bgGrid.textContent = '';
@@ -192,7 +212,7 @@
         var picked = state.themeDraft.background.style === s.key;
         var radio = h('input', { id: id, type: 'radio', name: 'bg-style', checked: picked });
         radio.addEventListener('change', function () {
-          state.themeDraft.background = { style: s.key };
+          themeStep('changing the background', '', function () { state.themeDraft.background = { style: s.key }; });
           notifyPreviewTheme(); touch(); refreshBackground();
         });
         var card = h('label', { for: id, class: 'bg-card' + (picked ? ' picked' : '') },
@@ -204,10 +224,10 @@
     bgBox.appendChild(bgGrid);
 
     function refreshAll() { refreshColors(); refreshBackground(); touch(); }
-    var removeBg = h('button', { type: 'button', class: 'btn', text: 'Remove background layer', onclick: function () { state.themeDraft.background = { style: 'none' }; refreshAll(); notifyPreviewTheme(); } });
-    var removeTheme = h('button', { type: 'button', class: 'btn', text: 'Remove this theme override', onclick: function () { if (state.themeDraft.themes) delete state.themeDraft.themes[active]; refreshAll(); notifyPreviewTheme(); } });
-    var removeAllThemes = h('button', { type: 'button', class: 'btn', text: 'Remove all theme overrides', onclick: function () { state.themeDraft.themes = {}; refreshAll(); notifyPreviewTheme(); } });
-    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset design to defaults', onclick: function () { state.themeDraft = ArkTheme.defaults(); refreshAll(); notifyPreviewTheme(); } });
+    var removeBg = h('button', { type: 'button', class: 'btn', text: 'Remove background layer', onclick: function () { themeStep('removing the background', '', function () { state.themeDraft.background = { style: 'none' }; }); refreshAll(); notifyPreviewTheme(); } });
+    var removeTheme = h('button', { type: 'button', class: 'btn', text: 'Remove this theme override', onclick: function () { themeStep('removing this theme\u2019s colours', '', function () { if (state.themeDraft.themes) delete state.themeDraft.themes[active]; }); refreshAll(); notifyPreviewTheme(); } });
+    var removeAllThemes = h('button', { type: 'button', class: 'btn', text: 'Remove all theme overrides', onclick: function () { themeStep('removing every theme\u2019s colours', '', function () { state.themeDraft.themes = {}; }); refreshAll(); notifyPreviewTheme(); } });
+    var reset = h('button', { type: 'button', class: 'btn', text: 'Reset design to defaults', onclick: function () { themeStep('resetting the design', '', function () { state.themeDraft = ArkTheme.defaults(); }); refreshAll(); notifyPreviewTheme(); } });
     refreshAll();
     wrap.appendChild(colorsBox);
     wrap.appendChild(bgBox);
@@ -222,14 +242,20 @@
      closer analog to ArkMeshSettings (site-wide, not per-page) than to ArkTheme's own
      mechanism, which this deliberately does NOT share state with. */
   function buildSettingsDefaultsPanel() {
-    var wrap = h('fieldset', { class: 'relief' }, h('legend', { text: 'Settings-gear defaults' }));
-    if (!window.ArkSiteDefaults) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Settings-gear defaults editing is unavailable on this page.' })); return wrap; }
+    var wrap = h('fieldset', { class: 'relief' }, h('legend', { text: 'What a first-time visitor sees' }));
+    if (!window.ArkSiteDefaults) { wrap.appendChild(h('p', { class: 'empty-state', text: 'Visitor defaults cannot be edited here: their module did not load. Reload the editor.' })); return wrap; }
     state.settingsDefaultsDraft = ArkSiteDefaults.sanitize(state.settingsDefaultsDraft);
     wrap.appendChild(h('p', { class: 'hint', text: 'What a first-time visitor sees before they ever touch the settings gear (⚙) -- their own later choice, saved to their own browser, always wins over this.' }));
 
+    /* every choice by its name, never its key ("ember-light", "blocks", "delay"): the theme's name
+       is the Colours list's (ArkTheme.themeOptions), a slider's is the visitor panel's
+       (ArkSiteDefaults.controls), a pattern's is its key said as a word (docs/ux-audit/cms.md P1-2) */
+    var themeNames = {};
+    if (window.ArkTheme) ArkTheme.themeOptions().forEach(function (t) { themeNames[t.key] = t.label; });
+    var word = function (key) { key = String(key); return key.charAt(0).toUpperCase() + key.slice(1).replace(/[-_]+/g, ' '); };
     var themeSelect = h('select', { id: 'defaults-theme' });
     ArkSiteDefaults.themeOptions().forEach(function (key) {
-      themeSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.theme, text: key }));
+      themeSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.theme, text: themeNames[key] || word(key) }));
     });
     themeSelect.addEventListener('change', function () {
       state.settingsDefaultsDraft.theme = themeSelect.value;
@@ -239,7 +265,7 @@
 
     var motifSelect = h('select', { id: 'defaults-motif' });
     ArkSiteDefaults.motifs().forEach(function (key) {
-      motifSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: key }));
+      motifSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: word(key) }));
     });
     motifSelect.addEventListener('change', function () {
       state.settingsDefaultsDraft.motif = motifSelect.value;
@@ -249,9 +275,9 @@
 
     var editingSelect = h('select', { id: 'defaults-editing-motif' });
     ArkSiteDefaults.motifs().forEach(function (key) {
-      editingSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: key }));
+      editingSelect.appendChild(h('option', { value: key, selected: key === state.settingsDefaultsDraft.motif, text: word(key) }));
     });
-    wrap.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'defaults-editing-motif', text: 'Editing pattern config for' }), editingSelect));
+    wrap.appendChild(h('div', { class: 'theme-select-row' }, h('label', { for: 'defaults-editing-motif', text: 'Adjust the pattern' }), editingSelect));
 
     var controls = ArkSiteDefaults.controls();
     var fields = h('div', { class: 'relief-fields' });
@@ -271,7 +297,7 @@
         } });
         input.value = row[key];
         fields.appendChild(h('div', { class: 'relief-field' },
-          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: key }), out),
+          h('div', { class: 'relief-field-head' }, h('label', { for: id, text: c.label || word(key) }), out),
           input));
       });
       var animateId = 'defaults-' + motif + '-animated';
@@ -301,21 +327,34 @@
      colour theme, the background, the settings-gear defaults, the site-wide SEO), drawn into
      whatever container the shell's Theme view gives it, with its Revert. A revert or a reset
      redraws every mounted copy (repaintPanels('design')). Returns the container. */
+  var siteStyleTab = 'look';   /* the Site style tab last used: a repaint keeps it */
   function renderDesignEditor(container) {
     var record = { kind: 'design', repaint: function () { renderDesignEditor(container); } };
     paintInto(container, record, function (root) {
       root.classList.add('cms-form', 'cms-theme');
       var revert = h('button', { type: 'button', class: 'btn', text: 'Revert', 'data-revert': 'design:', onclick: revertDesign });
+      /* Site style (was "Theme & defaults", one long scroll of everything site-wide: P1-17), in
+         tabs; the files it writes are Developer details */
       root.appendChild(h('div', { class: 'cms-form-head' },
-        h('div', {}, h('h2', { text: 'Theme & defaults' }), h('div', { class: 'route', text: 'Site-wide · theme-data.js · settings-defaults-data.js · seo-data.js' })),
-        h('div', { class: 'editor-actions' }, revert)));
-      root.appendChild(buildDesignPanel());
-      root.appendChild(buildSettingsDefaultsPanel());
-      root.appendChild(buildSiteSeoPanel());
+        h('div', {}, h('h2', { text: 'Site style' }), h('div', { class: 'route', text: 'For every page' })),
+        h('div', { class: 'editor-actions' }, revert, A.overlay.closeButton(function () { A.later('setView')('design'); }, 'Close Site style'))));
+      root.appendChild(A.arkTabs({ label: 'Site style sections', className: 'page-editor-tabs', value: siteStyleTab,
+        onChange: function (tab) { siteStyleTab = tab; },
+        items: [{ id: 'look', label: 'Colours & background', content: buildDesignPanel() },
+          { id: 'visitors', label: 'Visitor defaults', content: buildSettingsDefaultsPanel() },
+          { id: 'search', label: 'Search defaults', content: buildSiteSeoPanel() }] }));
+      root.appendChild(A.devDetails([['Writes', 'js/content/theme-data.js · js/content/settings-defaults-data.js · js/content/seo-data.js']]));
     });
     return container;
   }
-  A.provide({ renderDesignEditor: renderDesignEditor, renderThemePanel: renderDesignEditor, revertDesign: revertDesign,
+  /* open Site style on a tab (the Design tips' "Open SEO defaults", the harness) */
+  var SITE_STYLE_TABS = ['look', 'visitors', 'search'];
+  function showSiteStyleTab(tab) {
+    siteStyleTab = tab;
+    var t = document.querySelectorAll('#themePanel .page-editor-tabs [role="tab"]')[SITE_STYLE_TABS.indexOf(tab)];
+    if (t && t.getAttribute('aria-selected') !== 'true') t.click();
+  }
+  A.provide({ renderDesignEditor: renderDesignEditor, showSiteStyleTab: showSiteStyleTab, renderThemePanel: renderDesignEditor, revertDesign: revertDesign,
       saveSettingsDefaultsDraft: saveSettingsDefaultsDraft, saveThemeDraft: saveThemeDraft,
       selectDesign: selectDesign, settingsDefaultsDirty: settingsDefaultsDirty, themeDirty: themeDirty });
 })();

@@ -1,11 +1,11 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("why-the-chain-was-retired", {
-  "core": "The first block-and-validator chain was retired and the agreement fabric replaced it. The current design keeps the fabric's lesson, that unrelated work should never wait in one global queue, and brings the chain back as one grammar-only chain per identity, with resolvers on top.",
-  "relevance": "Use this note to see how the architecture got here, what each change kept, and which measurements back the current design.",
+  "core": "The first block-ordered chain was retired and the agreement fabric replaced it. The current design keeps the fabric's lesson, that unrelated work should never wait in one global queue, and brings the chain back as one grammar-only chain per identity, with resolvers on top.",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Use this note to see how the architecture got here, what each change kept, and which measurements back the current design.",
   "reviewed": "2026-10-08",
   "evidenceLabel": "BENCH-003: the measured fleet ceiling",
   "evidenceHref": "doc:docs/evidence/bench-003-rust-fleet-ceiling.md",
-  "relatedPage": "route:concept/depth",
+  "relatedPage": "route:chain",
   "actionLabel": "See every measurement",
   "actionPage": "route:stats",
   "questions": [
@@ -18,7 +18,7 @@ LearningContent.load("why-the-chain-was-retired", {
   "sections": [
     [
       "The earlier architecture",
-      "Project material describes an earlier block-and-validator implementation called flxd-chain. Every transaction waited for one global block order, so unrelated work queued behind everything else.",
+      "Project material describes an earlier block-ordered implementation called flxd-chain. Every transaction waited for one global block order, so unrelated work queued behind everything else.",
       "Earlier copy gave throughput figures for local and network tests. Those figures are not repeated here because the evidence registry does not contain the workload, environment, source revision, raw artifact, and digest needed to inspect them."
     ],
     [
@@ -33,8 +33,8 @@ LearningContent.load("why-the-chain-was-retired", {
     ],
     [
       "What the numbers say now",
-      "The current design has dated, reproducible fleet measurements. On the full ten-node public mesh with Lever A+B+C (TransferAtomic for same-shard, TransferSend/Receive for cross-shard, hot-path cleanup), the DeFi transfer resolver finalized 82,863 cross-shard transfers per second over a ten-second window with zero errors — 108,362 combined with one Mac. A separate soak sustained 12,403 accepted chain records per second for 303 seconds, 3,760,000 in all, with zero failures.",
-      "Finalized transfers, logical operations and replica applications are always reported separately and never merged into one figure. There is still no registered record that compares the retired chain with the current one, so no multiplier is quoted."
+      "The current design has dated, reproducible fleet measurements. On the full ten-node public mesh, after three changes (a transfer inside one shard applied in one atomic step, a transfer across shards split into a send and a receive, and a cleanup of the hot path), the DeFi transfer resolver completed 82,863 cross-shard transfers per second over a ten-second window with zero errors — 108,362 combined with one Mac. A separate soak sustained 12,403 chain records a second for 303 seconds, 3,760,000 in all, with zero failures.",
+      "Completed transfers and logical operations were always reported separately and never merged into one figure; a per-replica figure once shown beside them was arithmetic, not a measurement, and is retired (docs/deprecated.md). There is still no registered record that compares the retired chain with the current one, so no multiplier is quoted."
     ],
     [
       "What remains unproven",

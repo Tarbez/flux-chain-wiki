@@ -51,5 +51,9 @@ function functionSource(name, source = ADMIN) {
 /* the row builders and refuse(), ready to run in a vm context that has `document` */
 const BUILDERS = ['refuse', 'ctlLabel', 'ctlField', 'ctlSegField', 'ctlSelectField', 'ctlSwatchField'];
 function buildersSource(names = BUILDERS) { return names.map((name) => functionSource(name)).join('\n'); }
+/* the Ark behaviour primitives on the light-DOM host (js/admin/ark-host.js): each reads only `h`,
+   window.ArkKit (absent: the click fallback) and the two helpers listed first */
+const ARK_HOST = ['fallbackId', 'arkHost', 'arkTabs', 'arkTabsOn', 'arkDisclosure', 'arkSegGroup', 'arkAccordion'];
+function arkHostSource(names = ARK_HOST) { return names.map((name) => functionSource(name)).join('\n'); }
 
-module.exports = { ADMIN, EDITOR_FILES, SOURCES, locate, functionSource, buildersSource, BUILDERS };
+module.exports = { ADMIN, EDITOR_FILES, SOURCES, locate, functionSource, buildersSource, BUILDERS, arkHostSource, ARK_HOST };

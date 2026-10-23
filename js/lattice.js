@@ -85,19 +85,19 @@
     colors = {
       line: themeColor(theme, 'text-strong', .11),
       dormant: themeColor(theme, 'text-strong', .07),
-      dormantAccent: themeColor(theme, 'accent', .1),
+      dormantAccent: themeColor(theme, 'primary', .1),
       label: themeColor(theme, 'text-muted', .45),
       quietLabel: themeColor(theme, 'text-muted', .28),
       symbol: themeColor(theme, 'text-strong', .31),
       symbolAccent: themeColor(theme, 'text-muted', .4),
       stat: themeColor(theme, 'text-muted', .31),
       active: themeColor(theme, 'text-strong', .48),
-      activeAccent: themeColor(theme, 'accent', .56),
+      activeAccent: themeColor(theme, 'primary', .56),
       activeLabel: themeColor(theme, 'primary', .95),
       strong: themeColor(theme, 'text-strong', .98),
       body: themeColor(theme, 'text-strong', .68),
       muted: themeColor(theme, 'text-muted', .9),
-      accent: themeColor(theme, 'accent', .95),
+      accent: themeColor(theme, 'primary', .95),
       surface: themeColor(theme, 'surface', .77),
       veil: themeColor(theme, 'canvas', .62),
       highlight: themeColor(theme, 'primary', .16)
@@ -688,7 +688,7 @@
     }
     homeMeshFrame=window.requestAnimationFrame(frame);
   }
-  function homeStep(target){var link=target&&target.closest&&target.closest('.home-cycle-step');return link&&scene.contains(link)?link.dataset.stage:'';}
+  function homeStep(target){var link=target&&target.closest&&target.closest('[data-ark-part="tabs-trigger"][data-stage]');return link&&scene.contains(link)?link.dataset.stage:'';}
   function refreshHomeMesh(){
     var next=homeHover||homeFocus;
     if(next===homeMeshStage)return;

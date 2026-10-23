@@ -4,7 +4,7 @@
    scripts/settings-entry.js (compiled to js/settings/panel.js, loaded by
    index.html) is the real settings-gear widget every visitor sees. Before
    (and unless) a visitor ever touches it, every default it shows was a
-   hardcoded literal in that file: theme 'ghost', motif 'blocks', and one
+   hardcoded literal in that file: theme 'ember' (was 'ghost'), motif 'blocks', and one
    shared pattern config (structure/visibility/scale/density/softness/
    delay/animated) applied no matter which motif is active. This module
    holds an OVERRIDE on top of those literals -- settings-entry.js reads
@@ -29,20 +29,22 @@
 var ArkSiteDefaults = (function () {
   'use strict';
 
-  var THEME_OPTIONS = ['clay', 'ochre', 'ghost', 'marine', 'grove', 'moss', 'glacier', 'bone'];
+  var THEME_OPTIONS = ['ember', 'ember-light', 'defxn-tide', 'defxn-tide-light', 'defxn-moss', 'defxn-moss-light', 'defxn-dune', 'defxn-dune-light', 'defxn-dusk', 'defxn-dusk-light'];
   var MOTIFS = ['blocks', 'traces', 'layers', 'nodes', 'routes', 'tiles', 'frames', 'none'];
 
-  /* Exact literal min/max/default from scripts/settings-entry.js's own `controls` object.
+  /* Exact literal label/min/max/default from scripts/settings-entry.js's own `controls` object
+     (the label is what the visitor's settings panel calls the slider, so the editor calls it the
+     same, never by its key: docs/ux-audit/cms.md P1-2).
      This module is the one place those numbers are allowed to move away from that literal --
      settings-entry.js's own copy stays as the fallback-of-the-fallback for a control/motif
      combination this module's data file does not cover. */
   var CONTROLS = {
-    structure: { min: 0, max: 100, def: 50 },
-    visibility: { min: 0, max: 100, def: 72 },
-    scale: { min: 60, max: 180, def: 100 },
-    density: { min: 20, max: 100, def: 60 },
-    softness: { min: 0, max: 100, def: 0 },
-    delay: { min: .3, max: 10, def: 1.2 }
+    structure: { label: 'Structure', min: 0, max: 100, def: 50 },
+    visibility: { label: 'Visibility', min: 0, max: 100, def: 72 },
+    scale: { label: 'Scale', min: 60, max: 180, def: 100 },
+    density: { label: 'Density', min: 20, max: 100, def: 60 },
+    softness: { label: 'Softness', min: 0, max: 100, def: 0 },
+    delay: { label: 'Wave delay (seconds)', min: .3, max: 10, def: 1.2 }
   };
 
   function themeOptions() { return THEME_OPTIONS.slice(); }
@@ -50,7 +52,11 @@ var ArkSiteDefaults = (function () {
   function controls() { return JSON.parse(JSON.stringify(CONTROLS)); }
 
   function sanitizeTheme(value) {
-    return typeof value === 'string' && THEME_OPTIONS.indexOf(value) >= 0 ? value : 'ghost';
+    /* the saved record may still say ghost/clay/... : ArkTheme (js/content/theme.js, loaded first)
+       owns the old-key -> published-id map, read-only; the record itself is not rewritten */
+    var id = typeof ArkTheme !== 'undefined' && ArkTheme.publishedId ? ArkTheme.publishedId(value)
+      : (typeof value === 'string' && THEME_OPTIONS.indexOf(value) >= 0 ? value : null);
+    return id || 'ember';
   }
   function sanitizeMotif(value) {
     return typeof value === 'string' && MOTIFS.indexOf(value) >= 0 ? value : 'blocks';
@@ -84,7 +90,7 @@ var ArkSiteDefaults = (function () {
   function defaults() {
     var patternConfig = {};
     MOTIFS.forEach(function (motif) { patternConfig[motif] = sanitizeMotifConfig({}); });
-    return { theme: 'ghost', motif: 'blocks', patternConfig: patternConfig };
+    return { theme: 'ember', motif: 'blocks', patternConfig: patternConfig };
   }
 
   function problems(whole) {

@@ -9,6 +9,12 @@
  * back.
  *
  * Named regressions:
+ *   - the plain scene (/chain) drew the record as SVG text about 6px tall on
+ *     a phone (docs/ux-audit/pages-ux-a.md /chain): it is HTML now, the record
+ *     a real list a screen reader reads, and only steps not shown are hidden;
+ *   - the scene cycled forever, a frame loop on an idle page (the same audit):
+ *     it plays ONCE and settles on the finished record, scheduling nothing
+ *     more; the play button replays it;
  *   - only the current step's panel may be active (the ending was once
  *     visible from step one, because a dim panel still read);
  *   - the new chain position must be absent until it is extended;
@@ -36,6 +42,7 @@ class Node {
     if (k.startsWith('data-')) this.dataset[k.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = String(v);
   }
   getAttribute(k) { return this.attrs[k]; }
+  removeAttribute(k) { delete this.attrs[k]; }
   toggleAttribute(k, on) { if (on) this.setAttribute(k, ''); else delete this.attrs[k]; }
   addEventListener(t, f) { (this.listeners[t] = this.listeners[t] || []).push(f); }
   removeEventListener() {}
@@ -83,10 +90,20 @@ const panel = (id) => root.all().find((n) => n.dataset.panel === id);
 const on = (n) => n.getAttribute('data-on') === 'true';
 const active = (n) => n.className.split(' ').includes('flow-panel-active');
 
-/* The step links are the accessible content and drive the scene. */
-const links = root.byClass('flow-record');
-assert.equal(links.length, 5, 'five steps, named in the DOM, each linking to the page that shows it for real');
-function goto(i) { links[i].listeners.focus[0](); }
+/* The steps are an Ark tabs block the page places above the scene (ArkUI.chainStepsBlock) and
+   binds to it (ArkUI.bindChainSteps): the flow itself is only the scene, and is driven by hold(i). It
+   used to build its own list of step links/buttons (`flow-record`, `home-cycle-step`), hand-built
+   controls that sat at 1.4:1 and that Ark's tabs now replace. */
+const STEPS = sandbox.ArkUI.chainSteps('swaps');
+assert.deepEqual(Array.from(STEPS.map((s) => s.title)), ['Sign', 'Check', 'Extend', 'Replicate', 'Resolve'], 'five steps, in order');
+assert.deepEqual(Array.from(STEPS.map((s) => s.page)), ['account', 'stats', 'explorer', 'stats', 'resolver'], 'each step still names the page that shows that part for real');
+assert(STEPS.every((s) => s.says.trim()), 'every step has its words');
+assert.notEqual(sandbox.ArkUI.chainSteps('governance')[4].says, STEPS[4].says, 'only the last step\'s words belong to the example');
+assert.equal(sandbox.ArkUI.chainSteps('governance')[0].says, STEPS[0].says, 'the mechanism before it never changes');
+assert.equal(root.byClass('flow-record').length + root.byClass('flow-ledger').length + root.byClass('flow-says').length, 0, 'no hand-built step list or caption inside the scene');
+const heard = [];
+flow.subscribe((i) => heard.push(i));
+function goto(i) { flow.hold(i); }
 
 /* ---- band 1: the record is the real wire grammar --------------------- */
 
@@ -162,21 +179,55 @@ assert(
   'stepping back must hide the resolve panel again — a panel that stays shown tells the story backwards'
 );
 
-/* ---- the tracker moves ------------------------------------------------ */
+/* ---- the picker hears the scene move ----------------------------------- */
 
 goto(0);
-assert(links[0].getAttribute('data-current') !== undefined, 'the tracker marks the current step');
+assert.equal(flow.step(), 0, 'the flow says which step shows');
 goto(4);
-assert(
-  links[4].getAttribute('data-current') !== undefined && links[0].getAttribute('data-current') === undefined,
-  'the tracker must move as the step advances — it is the chain, drawn once, and doubles as the accessible content'
-);
+assert.equal(flow.step(), 4);
+assert.deepEqual(heard.slice(-2), [0, 4], 'every step shown is announced to the step picker, so its tab follows the scene');
+
+/* ---- ArkUI.bindChainSteps joins a rendered picker to the flow ----------- */
+{
+  const tabs = ['sign', 'check', 'extend', 'replicate', 'resolve'].map((id, i) => {
+    const attrs = { 'aria-selected': i === 0 ? 'true' : 'false' }, listeners = {};
+    const tab = {
+      getAttribute: (k) => attrs[k], setAttribute: (k, v) => { attrs[k] = String(v); }, listeners, attrs,
+      addEventListener: (type, fn) => { (listeners[type] = listeners[type] || []).push(fn); },
+      click: () => { tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab))); (listeners.click || []).forEach((fn) => fn()); }
+    };
+    return tab;
+  });
+  const list = { querySelectorAll: () => tabs };
+  const picker = { querySelector: () => list };
+  const driven = sandbox.ArkUI.buildChainFlow({ caseId: 'swaps' });
+  sandbox.ArkUI.bindChainSteps(picker, driven, 'swaps');
+  assert.deepEqual(tabs.map((t) => t.attrs['data-stage']), ['sign', 'check', 'extend', 'replicate', 'resolve'], 'every tab is stamped with its step (js/lattice.js lights the background mesh from it)');
+  const chosen = () => tabs.findIndex((t) => t.attrs['aria-selected'] === 'true');
+  assert.equal(chosen(), 0);
+  tabs[3].listeners.pointerenter[0]();
+  assert.equal(driven.step(), 3, 'pointing at a step shows it');
+  assert.equal(chosen(), 3, 'and the tab follows');
+  tabs[3].listeners.pointerleave[0]();
+  timers.clear(); driven.restore();
+  assert.equal(timers.size, 1, 'moving away lets the scene go on from there');
+  const before = driven.step();
+  tabs[1].click();
+  assert.equal(driven.step(), 1, 'choosing a tab (a press, or an arrow key) holds the scene on that step');
+  tabs[1].listeners.blur[0]();
+  const run1 = () => { const [id, t] = [...timers.entries()][0]; timers.delete(id); t.fn(); };
+  timers.clear(); driven.restore(); run1();
+  assert.equal(driven.step(), 2, 'the scene moving by itself moves the tab, without holding itself');
+  assert.equal(chosen(), 2, 'the tab is the scene\'s own step');
+  assert.equal(driven.element.dataset.held, undefined, 'the scene\'s own move is not a hold (it keeps playing)');
+  driven.dispose();
+}
 
 /* ---- stillness: no timer while paused, hidden or reduced ------------- */
 
 function pendingAfter(fn) { timers.clear(); fn(); return timers.size; }
 
-links[0].listeners.pointerleave[0]();            // release the hold
+goto(0); flow.release();  // release the hold on a step before the last
 assert(pendingAfter(() => flow.restore()) > 0, 'playing schedules the next step');
 
 doc.hidden = true;
@@ -195,21 +246,61 @@ toggle.listeners.click[0]();
 flow.dispose();
 assert.equal(pendingAfter(() => flow.restore()), 0, 'a disposed scene never schedules again');
 
-const rich=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:'transfers',inline:true,rich:true});
-const richRoot=rich.element,choices=richRoot.byClass('flow-record');
+/* ---- the plain scene is HTML: the record is a list, never an SVG at 6px ---- */
+const format = root.byClass('flow-record-format')[0];
+assert(format && format.tagName === 'ol', 'the record is a real list of its fields');
+assert.equal(format.getAttribute('aria-label'), 'The record, field by field');
+assert(!root.all().some((n) => n.tagName === 'svg' && String(n.className).includes('flow-scene')), 'no SVG scene: text drawn in SVG shrinks with the drawing');
+
+/* ---- it plays once and settles ------------------------------------------------- */
+timers.clear();
+const once = sandbox.ArkUI.buildChainFlow({ hrefFor: (k) => '/' + k, caseId: 'transfers' });
+const run = () => { const [id, t] = [...timers.entries()][0]; timers.delete(id); t.fn(); };
+let fired = 0;
+while (timers.size && fired < 50) { run(); fired++; }
+assert.equal(fired, 4, 'four timed advances take the record from Sign to Resolve, and then the scene stops');
+assert.equal(once.element.dataset.step, '4', 'it settles on the finished record');
+assert.equal(once.element.dataset.complete, 'true');
+assert.equal(once.element.dataset.playing, 'false', 'a finished scene is not playing (its CSS motion stops: .flow[data-playing="false"])');
+assert.equal(pendingAfter(() => once.restore()), 0, 'returning to a finished scene does not restart it');
+const replay = once.element.byClass('flow-toggle')[0];
+assert.equal(replay.getAttribute('aria-label'), 'Play the chain animation again', 'the play button says it replays');
+timers.clear(); replay.listeners.click[0]();
+assert.equal(once.element.dataset.step, '0', 'replay starts from Sign');
+assert.equal(timers.size, 1, 'and schedules the next step');
+once.dispose();
+
+const rich=sandbox.ArkUI.buildChainFlow({caseId:'transfers',rich:true});
+const richRoot=rich.element;
 assert.equal(richRoot.byClass('land-history').length,5,'your chain and four independent others');
 assert.equal(richRoot.byClass('land-record-main').length,7,'your chain carries the visual focus: J36..J42');
 assert.equal(richRoot.byClass('land-reference').length,4,'each other chain is tied to one of your records by a reference');
 /* Named regression (2026-10-14): every example drew the same picture, so
    swapping Transfers for Governance changed nothing but a caption. Each
    example now draws its own counterpart, and J42 carries its own mark. */
-const kinds=sandbox.ArkUI.chainCases.map(c=>{const f=sandbox.ArkUI.buildChainFlow({hrefFor:k=>'/'+k,caseId:c.id,inline:true,rich:true});const cp=f.element.byClass('land-counterpart')[0];f.dispose();return cp.getAttribute('data-kind');});
+const kinds=sandbox.ArkUI.chainCases.map(c=>{const f=sandbox.ArkUI.buildChainFlow({caseId:c.id,rich:true});const cp=f.element.byClass('land-counterpart')[0];f.dispose();return cp.getAttribute('data-kind');});
 assert.equal(new Set(kinds).size,kinds.length,'each example draws a different counterpart: '+kinds.join(', '));
-assert(choices.every(choice=>choice.tagName==='button'&&!choice.href),'hero exploration stays on the home page');
+/* Named regression (2026-10-20, docs/ux-audit X11): the landscape's words were drawn at 8-9px, and at the
+   frame's scale on a phone they rendered near 5px. Every text in the drawing is data-ark-label now, so
+   Ark's figure frame draws it at its smallest label size (12px on screen) at any scale. */
+const drawn=richRoot.all().filter(n=>n.tagName==='text');
+assert(drawn.length>20,'the landscape is labelled: '+drawn.length+' texts');
+assert(drawn.every(n=>n.attrs['data-ark-label']!==undefined),'every text in the landscape is a data-ark-label: '+drawn.filter(n=>n.attrs['data-ark-label']===undefined).map(n=>n.className).join(', '));
+/* ...and no rule sets one below 12px any more (css/home-swiss.css had .land-index 8px, .land-meta and .land-tag-text 9px); the
+   frame's size is set by Ark, so these rules name no size at all. */
+for (const file of ['css/home-swiss.css', 'css/about.css']) {
+  const css = fs.readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    if (!/\b(land-|about-slab|world-)/.test(m[1])) continue;
+    for (const size of m[2].matchAll(/(?:font:[^;]*?|font-size:\s*)(\d+(?:\.\d+)?)px/g)) {
+      if (/\bworld-/.test(m[1])) continue; // the transit map's 12px names are in a drawing of their own, not part of this change
+      assert(+size[1] >= 12, file + ' "' + m[1].trim().slice(0, 60) + '" sets ' + size[1] + 'px: a drawing\'s words are Ark\'s label size, 12px or more on screen');
+    }
+  }
+}
+const choices=[0,1,2,3,4].map(i=>({listeners:{click:[()=>rich.hold(i)]}}));
 choices[3].listeners.click[0]();
-assert.equal(choices[3].getAttribute('aria-pressed'),'true');
 assert.equal(richRoot.dataset.step,'3');
-assert(richRoot.byClass('flow-says')[0].getAttribute('aria-hidden')!=='true','the selected explanation remains accessible');
 /* Colour is data in the landscape: exactly one record carries the accent (the one
    whose state the steps change), the head moves onto it only when the chain is
    extended, and the reference its resolution creates appears only at resolve. */
@@ -241,8 +332,35 @@ const lines=world.element.byClass('world-line');
 assert(world.element.byClass('world-mine').length===1,'your chain is one heavy line through the map');
 const selected=()=>lines.filter(l=>l.getAttribute('data-selected')==='true').map(l=>l.getAttribute('data-name'));
 assert.deepEqual(selected(),['alice.fxn'],'transfers highlights alice.fxn');
-world.select('staking');assert.deepEqual(selected(),['validator.fxn'],'staking highlights validator.fxn');
+world.select('staking');assert.deepEqual(selected(),['provider.fxn'],'staking highlights provider.fxn (a provider stakes for its seat; "validator" is retired vocabulary, docs/deprecated.md)');
 assert.equal(world.element.byClass('world-interchange').length,5,'five chains cross yours at interchanges');
-console.log('PASS: hero scene — 7 real grammar blocks, one panel active per step, ' +
+/* Named regression (docs/ux-audit/ledger.md, "How it fits together", 2026-10-20): the transit map's names were set in the
+   drawing's own units, 12 of 560 -- about 7px on a 390px phone. Every word is drawn at 12px ON SCREEN at any width now
+   (its size is 12 / scale), the "you.fxn" pill is sized from its words, names that would touch slide apart along their
+   row, and the drawing gains a margin above and below for the words that grew past it. */
+{
+  const at = (px) => {
+    const w = sandbox.ArkUI.buildChainWorld({ caseId: 'transfers' });
+    w.element.getBoundingClientRect = () => ({ width: px });
+    w.fit();
+    const [x, y, vw, vh] = w.element.getAttribute('viewBox').split(' ').map(Number), scale = px / vw;
+    const words = [...w.element.byClass('world-name'), ...w.element.byClass('world-you-name')].map((t) => {
+      const size = parseFloat(/([\d.]+)px/.exec(t.getAttribute('style'))[1]), left = +t.getAttribute('x'), base = +t.getAttribute('y');
+      return { text: t.textContent, size, onScreen: size * scale, x0: left, x1: left + t.textContent.length * .64 * size, y0: base - .75 * size, y1: base + .25 * size };
+    });
+    const pill = w.element.byClass('world-you')[0].children.find((c) => c.tagName === 'rect');
+    return { x, y, vw, vh, scale, words, pill: { x: +pill.getAttribute('x'), w: +pill.getAttribute('width') } };
+  };
+  for (const px of [560, 430, 358, 330, 300]) {
+    const m = at(px);
+    m.words.forEach((t) => assert(t.onScreen >= 11.99, `${px}px wide: "${t.text}" is ${t.onScreen.toFixed(1)}px on screen (it was about 7px on a phone)`));
+    m.words.forEach((a, i) => m.words.slice(i + 1).forEach((b) => assert(!(a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1), `${px}px wide: "${a.text}" and "${b.text}" do not overlap`)));
+    m.words.forEach((t) => assert(t.x0 >= m.x - .5 && t.x1 <= m.x + m.vw + .5 && t.y0 >= m.y - .5 && t.y1 <= m.y + m.vh + .5, `${px}px wide: "${t.text}" is inside the drawing (a reserved margin holds the words that grew)`));
+    const you = m.words.find((t) => t.text === 'you.fxn');
+    assert(you.x0 > m.pill.x && you.x1 < m.pill.x + m.pill.w && m.pill.x + m.pill.w <= 104, `${px}px wide: the you.fxn pill is sized from its words and ends before your line starts`);
+    if (px === 560) assert.equal([m.x, m.y, m.vw, m.vh].join(' '), '0 0 560 200', 'at the width it was drawn for the map is the same drawing');
+  }
+}
+console.log('PASS: hero scene — 7 real grammar blocks in an HTML list, one panel active per step, ' +
   'checks pass together, partial replication reads partial, the ending stays hidden ' +
-  'until it happens, and the scene is still when paused, hidden or disposed.');
+  'until it happens, it plays once and settles, and it is still when paused, hidden or disposed.');

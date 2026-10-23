@@ -1,5 +1,7 @@
 # Authority
 
+> Written for the agreement-fabric direction, which is no longer the direction (status.md). For resolvers today, read [resolvers](resolvers.md). Kept as written; this note was added 2026-10-19.
+
 An authority cell is the identified set of participants and thresholds permitted to make a specified decision. Authority answers “who may accept this action under these rules?”; it does not silently arise from network presence or possession of a signing key.
 
 Source documentation describes a seven-member policy roster with action-dependent thresholds of three, four, or five approvals. The exact action-to-threshold mapping must be read from the active policy source before it is presented publicly.

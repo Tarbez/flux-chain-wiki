@@ -6,7 +6,7 @@
    shared parts and adds no cryptography of its own:
 
      the panel and the kit envelope   @deadark/ark-ui/flux-auth(-ui)
-     root derivation `flux-bip39-v1`  flux-auth/root-from-mnemonic
+     root derivation `flux-bip39-v1`  fxn-auth/root-from-mnemonic
      root derivation `deadark-profile-v1`
                                       deadark-identity-core/root-signing-handle
 
@@ -32,7 +32,7 @@
    the storage side: `addWalletToAuthKit` (ark-ui.flux-auth.ts) and
    `walletAddresses` (describeAuthKit's summary field) existed with no caller
    anywhere in this workspace until now. `addWallet` mints a real second
-   wallet via `flux-auth/wallet-lifecycle`'s `createWalletForIdentity`, signed
+   wallet via `fxn-auth/wallet-lifecycle`'s `createWalletForIdentity`, signed
    by this session's own root handle (never a raw key -- `signIdentity`, the
    same opaque path `createIdentityWalletLinkWithSigner` exists for), and
    writes it into the vault via `addWalletToAuthKit`. It returns the UPDATED
@@ -61,7 +61,7 @@
    wallet delegate a right its own link record never granted).
 
    `identity.rankWalletsByActivationViaMesh` closes the Discovery Resolver
-   gap the same way: `flux-auth-client/wallet-mesh`'s `rankDiscovery` is
+   gap the same way: `fxn-auth-client/wallet-mesh`'s `rankDiscovery` is
    dependency-free (no `node:crypto`), so it bundles here directly with no
    workaround needed -- ranks this identity's live wallets by whether each
    has an active, unrevoked delegation grant.
@@ -70,14 +70,14 @@
    ===================================================================== */
 import { createAuthKitSession, addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit } from '@deadark/ark-ui/flux-auth';
 import { createArkAuthKitPanel } from '@deadark/ark-ui/flux-auth-ui';
-import { createFluxRootHandle, FLUX_ROOT_DERIVATION } from 'flux-auth/root-from-mnemonic';
+import { createFluxRootHandle, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
 import { createRootIdentitySigningHandle } from 'deadark-identity-core/root-signing-handle';
-import { createWalletSigningHandle } from 'flux-auth/wallet-signing-handle';
-import { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } from 'flux-auth/wallet-lifecycle';
-import { createWalletDelegation, signWalletDelegation } from 'flux-auth/wallet-delegation';
-import { reduceWalletRegistry } from 'flux-auth/wallet-registry';
-import { resolveClaimScope, rightsDimension, delegationDimension } from 'flux-auth/claim-scope-resolver';
-import { rankDiscovery } from 'flux-auth-client/wallet-mesh';
+import { createWalletSigningHandle } from 'fxn-auth/wallet-signing-handle';
+import { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } from 'fxn-auth/wallet-lifecycle';
+import { createWalletDelegation, signWalletDelegation } from 'fxn-auth/wallet-delegation';
+import { reduceWalletRegistry } from 'fxn-auth/wallet-registry';
+import { resolveClaimScope, rightsDimension, delegationDimension } from 'fxn-auth/claim-scope-resolver';
+import { rankDiscovery } from 'fxn-auth-client/wallet-mesh';
 
 const toBase64 = (bytes) => {
   let binary = '';
@@ -195,7 +195,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         },
         // The one fact `signWithWallet` alone doesn't give a caller: the
         // wallet's own raw public key, not its one-way-hashed `walletAddress`
-        // (`flux-auth/identityWallet.mjs`'s `flux-wallet-address-v2`
+        // (`fxn-auth/identityWallet.mjs`'s `flux-wallet-address-v2`
         // derivation cannot be reversed back into it). A consumer building a
         // chain-wire record keyed to this wallet (dense-wire's
         // `G{pubkeyHex}-...` grammar, which verifies a signature against the

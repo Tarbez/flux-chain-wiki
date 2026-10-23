@@ -63,7 +63,11 @@ for (const name of names) {
 
   // Roles: secondary is the main CTA; every action token resolves to it.
   for (const key of ['action','complement','action-bg']) assert.equal(get(key), get('secondary'), `${name} --${key} must be the secondary (main CTA) color`);
-  for (const key of ['signal','accent']) assert.equal(get(key), get('primary'), `${name} --${key} is the primary identity color`);
+  for (const key of ['signal','badge']) assert.equal(get(key), get('primary'), `${name} --${key} is the primary identity color`);
+  /* Named regression (2026-10-19, docs/ux-audit/brand.md 6.3): --accent aliased --primary, so
+     the SDK's action lane (Ark UI / SDK primary buttons) and the CMS's selected states painted
+     in the identity colour. One meaning per name: --accent is the action colour, as in the SDK. */
+  for (const key of ['accent','dak-accent']) assert.equal(get(key), get('secondary'), `${name} --${key} is the action (secondary) color, the SDK meaning`);
   for (const [key, role] of [['trust','success'],['live','success'],['drift','warning'],['role','reference']]) assert.equal(get(key), get(role), `${name} --${key} maps to --${role}`);
 
   const roles = ['primary','secondary','reference','success','warning','danger'];
@@ -130,5 +134,15 @@ darkKeys.forEach((key,i)=>families[key].forEach((h,r)=>assert(hueGap(h,families[
 // Component styles take color from tokens, not literals.
 for (const file of ['css/hero-motion.css','css/fallback.css','css/studio.css','css/color-system.css','css/home-drafting.css','css/guided-page.css','css/explorer.css'])
   assert(!/#[0-9a-f]{3,8}\b(?![^(]*mask)|rgba?\(\s*\d/i.test(fs.readFileSync(file,'utf8').replace(/mask-image:[^;]+;/g,'')), `${file} must not hard-code colors`);
+
+/* Published palette names (docs/ux-audit/brand.md D3): each old key and its published id select the
+   SAME declarations, so a stale cached page or an old stored value paints identically. */
+const published = { ghost:'ember', glacier:'ember-light', clay:'defxn-tide', grove:'defxn-tide-light', ochre:'defxn-moss', moss:'defxn-moss-light', marine:'defxn-dune', bone:'defxn-dune-light', dusk:'defxn-dusk', dawn:'defxn-dusk-light' };
+for (const [oldKey, newKey] of Object.entries(published)) {
+  assert.deepEqual(curatedFor(newKey), curatedFor(oldKey), `${newKey} must declare exactly what ${oldKey} declares`);
+  assert(Object.keys(curatedFor(newKey)).length > 100, `${newKey} is a full palette, not an empty selector`);
+  assert(curated.includes(`.settings-choice[data-theme-choice="${newKey}"]`), `${newKey} has its settings swatch`);
+}
+assert.equal(new Set(Object.values(published)).size, 10, 'ten distinct published ids');
 
 console.log('PASS: one authoritative source; five vivid families with balanced lightness and near-neutral surfaces in dark and light; secondary owns the main CTA; perceptually distinct roles with semantic shades and tonal scales; readable inks, soft-button text, a four-step text ladder and separated surfaces in all ten palettes.');

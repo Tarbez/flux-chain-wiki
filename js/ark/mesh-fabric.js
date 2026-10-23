@@ -1,4 +1,8 @@
-/* Shared local fabric: finite responses on the existing cells, never an idle loop. */
+/* Shared local fabric: finite responses on the existing cells, never an idle loop.
+   animate() is one 3.2 s scan that paints its own settled frame (phase 1 is the static pattern)
+   and schedules nothing after it; whoever calls it owns "when" -- the settings panel
+   (scripts/settings-entry.js schedulePattern) calls it once per real change, never on a timer
+   loop (measured: tests/browser/idle-frames.mjs; memory defxn_animation_must_settle). */
 (function(){
  'use strict';
  ArkUI.createMeshFabric=function(canvas,options){
@@ -17,7 +21,7 @@
    offer:["Start with the request.","The provider adds their proposed terms.","A reply is ready for you to consider."]
   };
   var storyLabels={ask:["YOUR REQUEST","PROVIDER"],goal:["THE JOB","DESIRED RESULT"],limits:["JOB + RULES","BOUNDARIES"],request:["YOUR REQUEST","MEETING POINT"],proposal:["MEETING POINT","THEIR OFFER"],promise:["ACCEPTED RULES","REFERENCE"],result:["RETURNED WORK","SUPPORTING PIECES"],decision:["RULES + WORK","RECORDED OUTCOME"],work:["YOUR REQUEST","THEIR OFFER"],check:["RETURNED PACKAGE","CHECKED TRAIL"],offer:["REQUEST","PROPOSED TERMS"]};
-  var revision=0,frame=0,disposed=false,selected='receipt',previous='receipt',start=0,last=-Infinity,cells=[],width=0,height=0,scale=1,colors={},paused=false,cellWidth=16,cellHeight=12,gap=1,backgroundPaths=null;
+  var revision=0,frame=0,disposed=false,selected='receipt',previous='receipt',start=0,last=-Infinity,cells=[],width=0,height=0,scale=1,colors={},paused=false,cellWidth=16,cellHeight=12,gap=1,backgroundPaths=null,offscreen=false;
   var reduce=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
   function stop(){revision++;if(frame)window.cancelAnimationFrame(frame);frame=0;}
   function ink(style,name,alpha){return 'hsl('+style.getPropertyValue('--'+name).trim()+' / '+alpha+')';}
@@ -170,17 +174,17 @@
     var strength=selected.indexOf('story-')===0?level(selected,progress,cell):level(previous,1,cell)*(1-progress)+level(selected,progress,cell)*progress;
     if(options.background&&typeof motion==='number'){var wave=backgroundMotion(selected,motion,cell);strength=Math.min(.9,strength+wave*(strength>.05?.65:.08));}
     if(strength&&(options.background||cell.hash%5!==1)){ctx.fillStyle='hsl('+colors.primary+' / '+strength+')';ctx.fillRect(x+gap,y+gap,Math.max(1,cellWidth-gap*2),Math.max(1,cellHeight-gap*2));}
-    if(!options.background&&!options.clean&&cell.row%3===1&&cell.col%4===1){ctx.fillStyle=colors.label;ctx.fillText(names[(cell.row+cell.col)%names.length],x+3,y+8,40);}
+    if(!options.background&&!options.clean&&!options.labelMin&&cell.row%3===1&&cell.col%4===1){ctx.fillStyle=colors.label;ctx.fillText(names[(cell.row+cell.col)%names.length],x+3,y+8,40);}
    });
    var key=selected.replace('story-',''),story=stories[key],labels=storyLabels[key];
    if(story&&options.caption){var sentence=story[progress<.3?0:progress<.78?1:2];if(options.caption.textContent!==sentence)options.caption.textContent=sentence;}
-   if(labels&&!options.background&&!options.clean){ctx.fillStyle=colors.storyLabel;ctx.font='500 9px ui-monospace,monospace';ctx.fillText(labels[0],8,12,width*.47);ctx.fillText(labels[1],width*.54,12,width*.44);}
+   if(labels&&!options.background&&!options.clean){var px=Math.max(9,options.labelMin||0);ctx.fillStyle=colors.storyLabel;ctx.font='500 '+px+'px ui-monospace,monospace';ctx.fillText(labels[0],8,px+3,width*.47);ctx.fillText(labels[1],width*.54,px+3,width*.44);}
    canvas.dataset.stage=selected;
   }
   function staticPaint(){stop();if(measure())paint(1);}
   function tick(now,ticket){
    if(disposed||ticket!==revision)return;frame=0;
-   if(paused||document.hidden||reduce&&reduce.matches){paint(1);return;}
+   if(paused||offscreen||document.hidden||reduce&&reduce.matches){paint(1);return;}
    if(start<0)start=now;
    var duration=selected==='story-work'?1600:selected.indexOf('story-')===0?1500:650;
    var p=Math.min(1,(now-start)/duration);
@@ -191,7 +195,7 @@
    if(disposed||animate&&!replay&&stage===selected&&width)return;
    var changed=stage!==selected||replay;previous=replay?'quiet':selected;selected=stage;canvas.dataset.stage=selected;stop();
    if(!measure())return;
-   if(animate&&changed&&!paused&&!document.hidden&&!(reduce&&reduce.matches)&&window.requestAnimationFrame){start=-1;last=-Infinity;var ticket=revision;frame=window.requestAnimationFrame(function(now){tick(now,ticket);});}else paint(1);
+   if(animate&&changed&&!paused&&!offscreen&&!document.hidden&&!(reduce&&reduce.matches)&&window.requestAnimationFrame){start=-1;last=-Infinity;var ticket=revision;frame=window.requestAnimationFrame(function(now){tick(now,ticket);});}else paint(1);
   }
   function animateBackground(){
    if(!options.background||disposed||paused||document.hidden||reduce&&reduce.matches)return;
@@ -205,6 +209,10 @@
   if(document.addEventListener)document.addEventListener('visibilitychange',visibility);
   if(reduce&&reduce.addEventListener)reduce.addEventListener('change',staticPaint);
   var unsubscribe=ArkUI.sceneState&&ArkUI.sceneState.subscribe?ArkUI.sceneState.subscribe(function(state){if(paused===state.paused)return;paused=state.paused;if(paused)staticPaint();}):null;
-  return {select:select,animate:animateBackground,configure:function(config){if(!options.background)return;options.patternScale=config.scale;options.density=config.density;options.structure=config.structure;staticPaint();},refresh:staticPaint,dispose:function(){disposed=true;stop();if(resize)resize.disconnect();if(theme)theme.disconnect();if(unsubscribe)unsubscribe();if(document.removeEventListener)document.removeEventListener('visibilitychange',visibility);if(reduce&&reduce.removeEventListener)reduce.removeEventListener('change',staticPaint);}};
+  /* visible(false): the frame holding this fabric scrolled away (Ark's figure reports it,
+     js/pages/story.js): a running choreography jumps to its settled frame and none starts until
+     it is back. Offscreen diagrams cost no frames (docs/ux-audit/pages-ux-a.md #12). */
+  function visible(on){offscreen=!on;if(offscreen&&frame)staticPaint();}
+  return {select:select,animate:animateBackground,visible:visible,configure:function(config){if(!options.background)return;options.patternScale=config.scale;options.density=config.density;options.structure=config.structure;staticPaint();},refresh:staticPaint,dispose:function(){disposed=true;stop();if(resize)resize.disconnect();if(theme)theme.disconnect();if(unsubscribe)unsubscribe();if(document.removeEventListener)document.removeEventListener('visibilitychange',visibility);if(reduce&&reduce.removeEventListener)reduce.removeEventListener('change',staticPaint);}};
  };
 })();

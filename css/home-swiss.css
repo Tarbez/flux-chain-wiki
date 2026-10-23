@@ -1,189 +1,19 @@
-/* DEFXN homepage: a narrative over the existing, user-controlled fabric.
-   Deliberately isolated from the legacy home selectors; theme roles stay shared. */
-#scene .home-launch {
-  --hl-gutter:64px;
-  position:absolute; inset:80px 0 48px;
-  overflow:auto; overscroll-behavior:contain;
-  padding:0 var(--hl-gutter) 80px;
-  pointer-events:auto;
-  font:400 16px/1.5 "Albert Sans",sans-serif;
-  color:hsl(var(--text-strong));
-  scrollbar-width:thin;
-  scrollbar-color:hsl(var(--border-strong)) transparent;
-  scroll-padding-top:32px;
-}
-#scene .home-launch *,#scene .home-launch *::before,#scene .home-launch *::after {box-sizing:border-box;}
-#scene .home-launch :is(h1,h2,h3,p) {margin:0;}
-#scene .home-launch :is(h1,h2,h3) {font-family:"Albert Sans",sans-serif;}
-#scene .home-launch button {font-family:inherit;cursor:pointer;}
-#scene .home-launch a {text-decoration:none;}
-#scene .home-launch :is(a,button,summary,[tabindex="0"]):focus-visible {outline:2px solid hsl(var(--reference));outline-offset:4px;}
-#scene .home-launch .hl-label {
-  font:500 13px/24px "Albert Sans",sans-serif;
-  letter-spacing:.01em;color:hsl(var(--text-muted));
-}
-#scene .home-launch > * {max-width:1440px;margin-inline:auto;}
-#scene .hero-alive[data-page="zero"] .site-credit {bottom:24px;}
-#scene .hero-alive[data-page="zero"] .site-copyright {bottom:24px;}
+/* The home page's two drawings (js/pages/home-flow.js), their insides only: the transit map of
+   chains (ArkUI.buildChainWorld, "How it fits together") and the landscape the chain scene plays on
+   (drawLandscape, "See it work"). Since Wave 3 the page is Ark blocks (css/ark-blocks.css) in the
+   shared block-page panel (css/block-page.css), each drawing in Ark's figure frame; every hl-*
+   rule of the hand-built home went with the markup it styled. Colour is data: neutrals, plus the
+   identity accent on the one record in flight and what points at it (tests/home-color-semantics.cjs). */
 
-#scene .hl-hero {
-  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
-  gap:32px;align-items:center;min-height:736px;padding:40px 0 56px;
-}
-#scene .hl-hero-copy > .hl-label {margin-bottom:24px;}
-#scene .home-launch .hl-title {font-size:clamp(48px,5.6vw,84px);line-height:.94;font-weight:600;letter-spacing:-.065em;margin-bottom:32px;}
-#scene .hl-title > span {display:block;animation:hl-arrive 650ms cubic-bezier(.22,.72,.22,1) both;}
-#scene .hl-title > span:nth-child(2) {animation-delay:80ms;}
-#scene .hl-title > span:nth-child(3) {animation-delay:160ms;}
-#scene .hl-title > span:nth-child(4) {animation-delay:240ms;}
-/* Monochrome: the rejected idea is grey (inactive), the claim is full ink. */
-#scene .hl-title .hl-title-negation {color:hsl(var(--text-faint));}
-#scene .home-launch .hl-intro {max-width:480px;color:hsl(var(--text));font-size:16px;line-height:24px;}
-#scene .hl-actions {display:flex;align-items:center;flex-wrap:wrap;gap:16px 24px;margin-top:32px;}
-#scene .home-launch .hl-button {
-  display:inline-flex;align-items:center;justify-content:space-between;gap:32px;
-  min-height:56px;padding:16px 24px;border-radius:4px;
-  font-size:14px;font-weight:650;line-height:24px;
-  box-shadow:none !important;transition:background-color 180ms,color 180ms,transform 240ms;
-}
-#scene .home-launch .hl-button:hover {transform:translateY(-4px);}
-#scene .hl-arrow {font-size:20px;line-height:24px;}
-#scene .hero-alive[data-page="zero"] .home-launch .hl-button.palette-solid {box-shadow:none !important;}
-#scene .hl-action-note {font-size:12px;line-height:20px;color:hsl(var(--text-muted));white-space:pre-line;}
-#scene .hl-link {display:inline-flex;align-items:center;min-height:40px;color:hsl(var(--reference));font-size:14px;}
-#scene .hl-link:hover {text-decoration:underline;text-underline-offset:4px;}
-
-/* The original five-stage record illustration, restored at hero scale. */
-#scene .hl-instrument {min-width:0;align-self:center;animation:hl-arrive 800ms 160ms both;}
-#scene .hl-instrument-head {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;}
-#scene .hl-case-label {display:flex;align-items:center;gap:8px;font-size:12px;color:hsl(var(--text-muted));}
-#scene .hl-case-select {max-width:128px;min-height:40px;padding:8px 16px;border:1px solid hsl(var(--border-default));border-radius:24px;background:hsl(var(--surface));color:hsl(var(--text));font:500 13px "Albert Sans",sans-serif;cursor:pointer;}
-#scene .hl-chain-hero .flow {margin-top:16px;gap:24px;}
-#scene .hl-chain-hero .flow-now {padding:16px 16px 24px;background:hsl(var(--canvas) / .8);border-radius:24px;}
-#scene .hl-chain-hero .flow-card {fill:hsl(var(--surface) / .94);stroke:hsl(var(--border-default));}
-#scene .hl-chain-hero .flow-says {min-height:88px;padding:16px 48px 0 8px;font-size:18px;line-height:26px;font-weight:400;}
-#scene .hl-chain-hero .flow-toggle {width:40px;height:40px;right:16px;bottom:24px;}
-#scene .hl-chain-hero .flow-toggle svg {width:16px;height:16px;}
-#scene .hl-chain-hero .flow-ledger .flow-record {width:100%;min-height:64px;padding:8px 0;}
-#scene .hl-chain-hero .flow-ledger .flow-record-num {width:32px;height:32px;}
-#scene .hl-illustration-note {margin-top:16px !important;font-size:12px;line-height:20px;color:hsl(var(--text-muted));max-width:480px;}
-.flow-history-face {fill:hsl(var(--surface));stroke:hsl(var(--border-strong));stroke-width:1;}
-.flow-history-top {fill:hsl(var(--raised));stroke:hsl(var(--border-default));stroke-width:.5;}
-.flow-history-side {fill:hsl(var(--nested));stroke:hsl(var(--border-default));stroke-width:.5;}
-.flow-history-link {stroke:hsl(var(--text-faint));stroke-width:1;opacity:.45;}
-.flow-history-reference {stroke:hsl(var(--reference));stroke-width:1;stroke-dasharray:3 4;opacity:.7;}
-.flow-history-label {font:400 10px "Albert Sans",sans-serif;fill:hsl(var(--text-muted));}
-.flow-replica-wire {stroke:hsl(var(--border-strong));stroke-width:1;stroke-dasharray:3 5;}
-.flow[data-playing="true"]:not([data-held]) .flow-panel-active .flow-replica-wire {animation:flow-reference-travel 2.4s linear infinite;}
-.flow[data-playing="true"]:not([data-held]) .flow-history-block {animation:flow-history-breathe 4.8s ease-in-out infinite;animation-delay:calc(var(--i) * 160ms);}
-.flow[data-playing="true"]:not([data-held]) .flow-history-reference {animation:flow-reference-travel 2.4s linear infinite;}
-@keyframes flow-history-breathe {0%,100% {opacity:.45;}50% {opacity:1;}}
-@keyframes flow-reference-travel {to {stroke-dashoffset:-28;}}
-#scene .hero-still .flow * {animation:none !important;transition:none !important;}
-/* The hero's heavy base: the anchor neutral grounds the light, kinetic hero above it. */
-#scene .hl-signal {display:flex;align-items:center;flex-wrap:wrap;gap:8px 24px;padding:16px 24px;border-top:1px solid hsl(var(--border-strong));border-radius:4px;background:hsl(var(--anchor));color:hsl(var(--anchor-ink));}
-/* Law 8 ("calm is functional") + law 18 ("one scroll"): this used to be a
-   full-bleed coloured banner near the top of the page -- a live fact
-   worth a quiet line once a visitor opens "More", not a banner competing
-   with the hero. */
-#scene .hl-signal-quiet {background:transparent;color:inherit;border-top:0;padding:0;margin-top:40px;}
-#scene .hl-signal-quiet .hl-label {color:hsl(var(--text-faint));}
-#scene .hl-signal-quiet .hl-link {color:hsl(var(--reference));text-decoration:underline;text-decoration-color:hsl(var(--reference-600));text-underline-offset:4px;}
-#scene .hl-signal-quiet[data-state="ok"] .hl-pulse::before {content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:hsl(var(--success));}
-#scene .hl-signal .hl-label {margin-right:auto;color:hsl(var(--anchor-ink) / .64);}
-#scene .hl-pulse {font-size:13px;color:hsl(var(--anchor-ink));font-variant-numeric:tabular-nums;}
-#scene .hl-pulse-time {font-size:11px;color:hsl(var(--anchor-ink) / .64);}
-#scene .hl-signal .hl-link {color:hsl(var(--anchor-ink));text-decoration:underline;text-decoration-color:hsl(var(--anchor-ink) / .4);text-underline-offset:4px;}
-#scene .hl-signal[data-state="ok"] .hl-pulse::before {content:"";display:inline-block;width:6px;height:6px;margin-right:8px;border-radius:50%;background:hsl(var(--success));}
-
-#scene .hl-section {padding:96px 0;border-bottom:1px solid hsl(var(--border-subtle));}
-/* Law 18 ("one scroll, then it ends"): the hero is the only section that
-   gets this full treatment. Everything past it lives inside `.hl-more`
-   (one disclosure, closed by default) instead -- see `.about-more-part`
-   in css/about.css for how each part looks once it's open. */
-#scene .hl-more {padding:40px 0 0;border-bottom:0;}
-#scene .hl-page-more > summary {font-size:20px;}
-#scene .hl-section-head {display:grid;grid-template-columns:1fr 3fr;gap:32px;margin-bottom:48px;}
-#scene .hl-section-head > .hl-label {padding-top:8px;}
-#scene .hl-section h2,#scene .hl-closing h2 {font-size:clamp(32px,4.3vw,64px);line-height:1;letter-spacing:-.05em;font-weight:550;white-space:pre-line;}
-#scene .hl-section .hl-deck {margin-top:16px;max-width:600px;color:hsl(var(--text-muted));font-size:16px;line-height:24px;}
-#scene .hl-audience {border:1px solid hsl(var(--border-default));border-radius:4px;background:hsl(var(--canvas) / .94);overflow:hidden;}
-#scene .hl-audience-tabs {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;padding:0;background:hsl(var(--border-default));}
-#scene .hl-audience-tab {display:flex;align-items:center;gap:24px;padding:24px 32px;border:0;border-radius:0;background:hsl(var(--surface));color:hsl(var(--text-muted));font-size:24px;text-align:left;transition:background 250ms;}
-#scene .hl-audience-tab:last-child {border-right:0;}
-#scene .hl-audience-tab .hl-arrow {margin-left:auto;opacity:.45;}
-#scene .hl-audience-tab[aria-selected="true"] .hl-label {color:inherit;}
-#scene .hl-audience-tab:hover {background:hsl(var(--raised));color:hsl(var(--text-strong));}
-#scene .hl-audience-panel {display:grid;grid-template-columns:1.3fr 1fr;gap:64px;padding:40px;min-height:272px;}
-#scene .hl-audience-panel h3 {font-size:28px;line-height:32px;letter-spacing:-.025em;font-weight:550;margin:16px 0;}
-#scene .hl-audience-panel p:not(.hl-label) {color:hsl(var(--text-muted));max-width:560px;}
-#scene .hl-audience-routes {display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:16px;}
-#scene .hl-neutral-button {background:hsl(var(--text-strong));color:hsl(var(--canvas));}
-#scene .hl-neutral-button:hover {background:hsl(var(--text));}
-#scene .hl-ref-links {display:flex;flex-wrap:wrap;gap:8px 24px;}
-#scene .hl-ref-links .hl-link {font-size:13px;}
-
-#scene .hl-principles {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin:64px 0 24px;border-block:1px solid hsl(var(--border-default));}
-#scene .hl-principles article {padding:32px;border-right:1px solid hsl(var(--border-default));background:hsl(var(--canvas) / .88);}
-#scene .hl-principles article:last-child {border-right:0;}
-#scene .hl-principles h3 {margin:24px 0 16px;font-size:24px;line-height:32px;font-weight:550;letter-spacing:-.025em;}
-#scene .hl-principles p:not(.hl-label) {font-size:15px;line-height:24px;color:hsl(var(--text-muted));}
-#scene .hl-evidence-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;}
-/* Law 16 ("no dashboard thinking") + law 14 ("silence is functional"): one
-   lead metric stays visible; the rest lives behind the <details> below,
-   reusing .hl-faq's own disclosure look rather than a new accordion. */
-#scene .hl-evidence-grid-lead {grid-template-columns:minmax(0,1fr);max-width:360px;}
-#scene .hl-evidence-more {margin-top:8px;}
-#scene .hl-evidence-more summary {padding:16px 0;}
-#scene .hl-evidence-more details[open] .hl-evidence-grid {margin-top:24px;}
-#scene .hl-evidence-grid article {border-top:1px solid hsl(var(--border-strong));padding:24px 0;}
-#scene .hl-metric {display:block;margin:24px 0 0;font-size:clamp(32px,4vw,56px);font-weight:550;letter-spacing:-.04em;line-height:1.1;font-variant-numeric:tabular-nums;}
-#scene .hl-unit {display:block;font-size:13px;color:hsl(var(--text));margin-top:8px;}
-#scene .hl-evidence-grid p:not(.hl-label) {font-size:14px;line-height:24px;color:hsl(var(--text-muted));margin-top:24px;max-width:320px;}
-#scene .hl-evidence-foot {display:flex;align-items:center;justify-content:space-between;gap:32px;padding:16px 24px;background:hsl(var(--surface) / .85);border-radius:4px;}
-#scene .hl-evidence-foot p {max-width:640px;color:hsl(var(--text-muted));font-size:12px;line-height:20px;}
-#scene .hl-evidence-foot a {flex-shrink:0;}
-#scene .hl-faq {max-width:960px;}
-#scene .hl-faq details {border-top:1px solid hsl(var(--border-default));}
-#scene .hl-faq summary {display:flex;justify-content:space-between;gap:24px;cursor:pointer;padding:24px 0;font-size:18px;list-style:none;}
-#scene .hl-faq summary::-webkit-details-marker {display:none;}
-#scene .hl-faq summary::after {content:"+";color:hsl(var(--reference));}
-#scene .hl-faq details[open] summary::after {content:"−";}
-#scene .hl-faq details p {padding:0 32px 24px 0;max-width:720px;color:hsl(var(--text-muted));line-height:24px;}
-/* The page's heavy base: the darkest neutral, so the layout sits on it. */
-#scene .hl-closing {margin-top:96px;padding:80px 64px 32px;border-top:1px solid hsl(var(--border-strong));border-radius:4px;background:hsl(var(--anchor));color:hsl(var(--anchor-ink));}
-#scene .hl-closing .hl-label {color:hsl(var(--anchor-ink) / .64);}
-#scene .hl-closing h2 {margin:32px 0;}
-#scene .hl-footer-links {display:flex;gap:16px 32px;flex-wrap:wrap;padding-top:40px;margin-top:64px;border-top:1px solid hsl(var(--anchor-ink) / .16);}
-#scene .hl-footer-links .hl-link {color:hsl(var(--anchor-ink) / .8);}
-#scene .hl-footer-links .hl-link:hover {color:hsl(var(--anchor-ink));}
-#scene .hero-alive[data-page="zero"] .defxn-brand-field {mask-image:linear-gradient(90deg,rgba(0,0,0,.56),rgba(0,0,0,.08) 24%,transparent 42%,transparent 62%,rgba(0,0,0,.12) 80%,rgba(0,0,0,.56));}
-#scene .hl-hero {grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);}
-#scene .hl-hero-copy {position:relative;z-index:1;}
-#scene .hl-chain-hero {align-self:center;}
-#scene .hl-chain-hero .flow {display:flex;flex-direction:column;gap:0;margin:0;}
-#scene .hl-chain-hero .flow-now {order:0;padding:0;background:none;border:0;border-radius:0;box-shadow:none;}
-#scene .hl-chain-hero .flow-ledger {order:1;margin:24px 0 0;border-top:1px solid hsl(var(--border-default));}
-#scene .hl-chain-hero .flow-ledger::before,#scene .hl-chain-hero .flow-ledger li::before,#scene .hl-chain-hero .flow-ledger li::after {display:none;}
-#scene .hl-chain-hero .flow-ledger .flow-record {display:flex;align-items:center;justify-content:center;min-height:56px;gap:8px;flex-direction:row;border-radius:0;background:transparent;border:0;border-top:2px solid transparent;}
-#scene .hl-chain-hero .flow-ledger .flow-record[data-current] {border-top-color:hsl(var(--reference));}
-#scene .hl-chain-hero .flow-ledger .flow-record-num {width:auto;height:auto;border:0;background:none;font-size:11px;color:hsl(var(--text-muted));}
-#scene .hl-chain-hero .flow-ledger .flow-record[data-current] .flow-record-num,#scene .hl-chain-hero .flow-ledger .flow-record[data-done] .flow-record-num {background:none;box-shadow:none;color:hsl(var(--text-muted));font-size:11px;}
-#scene .hl-chain-hero .flow-ledger .flow-record-num::after {display:none;}
-#scene .hl-chain-hero .flow[data-complete="true"] .flow-ledger .flow-record .flow-record-num {font-size:11px;background:none;box-shadow:none;color:hsl(var(--text-muted));}
-#scene .hl-chain-hero .flow-ledger .flow-record[data-current] .flow-record-name {color:hsl(var(--text-strong));}
-#scene .hl-chain-hero .flow-says {font-size:14px;line-height:24px;min-height:64px;padding:16px 56px 0 0;border-top:1px solid hsl(var(--border-default));font-weight:400;color:hsl(var(--text));}
-#scene .hl-chain-hero .flow-toggle {right:0;bottom:8px;border-radius:4px;background:hsl(var(--surface));color:hsl(var(--text));}
-#scene .hl-case-select {border-radius:4px;background:hsl(var(--surface));}
-#scene .hl-instrument-head {padding:0;}
-#scene .hl-illustration-note {font-size:11px;line-height:16px;margin-top:8px !important;}
-/* The interconnected world (ArkUI.buildChainWorld): a transit map of chains.
-   Your chain is the heavy line; the others cross it at interchanges. The
-   example's counterparty is drawn in full ink. Monochrome by rule. */
-#scene .hl-world {display:block;width:100%;max-width:480px;height:auto;margin:0 0 16px -8px;overflow:visible;}
+/* The world: your chain is the heavy line; the others cross it at interchanges. The example's
+   counterparty is drawn in full ink. Monochrome by rule. The names' size here (12px of a 560-unit
+   drawing) is only the first paint: js/pages/home-flow.js fitWorld() sets each name to 12px ON SCREEN
+   (an inline font-size in drawing units), sizes the "you.fxn" pill from its words, slides names that
+   would touch apart and reserves a margin for them in the viewBox. tests/home-hero-scene.cjs. */
+#scene .hl-world {display:block;width:100%;max-width:560px;height:auto;margin-inline:auto;overflow:visible;}
 .world-track {stroke:hsl(var(--text-faint));stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke 320ms,stroke-width 320ms;}
 .world-station {fill:hsl(var(--canvas));stroke:hsl(var(--text-faint));stroke-width:1.5;}
-.world-name {fill:hsl(var(--text-faint));font:500 10px var(--font-mono,monospace);letter-spacing:.04em;transition:fill 320ms;}
+.world-name {fill:hsl(var(--text-faint));font:500 12px var(--font-mono,monospace);letter-spacing:.04em;transition:fill 320ms;}
 .world-line[data-selected="true"] .world-track {stroke:hsl(var(--text-strong));stroke-width:2;}
 .world-line[data-selected="true"] .world-station {stroke:hsl(var(--text-strong));}
 .world-line[data-selected="true"] .world-name {fill:hsl(var(--text-strong));font-weight:600;}
@@ -191,7 +21,7 @@
 .world-record {fill:hsl(var(--text-strong));}
 .world-interchange {fill:hsl(var(--canvas));stroke:hsl(var(--text-strong));stroke-width:2;}
 .world-you rect {fill:hsl(var(--text-strong));}
-.world-you-name {fill:hsl(var(--canvas));font:600 11px var(--font-mono,monospace);letter-spacing:.02em;}
+.world-you-name {fill:hsl(var(--canvas));font:600 12px var(--font-mono,monospace);letter-spacing:.02em;}
 .world-icon path {fill:none;stroke:hsl(var(--canvas));stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 /* Draws in once, then holds still. With motion off the lines are simply there. */
 .world-track {animation:world-draw 1100ms cubic-bezier(.4,0,.2,1) backwards;animation-delay:calc(200ms + var(--i,0) * 120ms);}
@@ -199,51 +29,16 @@
 @keyframes world-draw {from {stroke-dasharray:1;stroke-dashoffset:1;}to {stroke-dasharray:1;stroke-dashoffset:0;}}
 @keyframes hl-fade {from {opacity:0;}}
 
-/* Icons, sized to their text. */
-#scene .home-launch .hl-label.has-native-icon {display:flex;align-items:center;gap:8px;}
-#scene .home-launch .hl-label .native-icon {width:14px;height:14px;flex-basis:14px;vertical-align:0;color:hsl(var(--text-muted));}
-#scene .home-launch :is(.hl-button,.hl-link) .native-icon {width:16px;height:16px;flex-basis:16px;}
-#scene .home-launch .hl-link.has-native-icon {gap:6px;}
-#scene .hl-audience-tab .native-icon {width:22px;height:22px;flex-basis:22px;}
-#scene .hl-footer-links .hl-link .native-icon {width:15px;height:15px;flex-basis:15px;opacity:.7;}
-#scene .hl-chain-hero .flow-ledger .flow-record .native-icon {width:14px;height:14px;flex-basis:14px;color:hsl(var(--text-muted));}
-#scene .hl-chain-hero .flow-ledger .flow-record[data-current] .native-icon {color:hsl(var(--text-strong));}
-
-/* Example picker: one icon button per example, neutral until chosen. */
-#scene .hl-case-picker {display:flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid hsl(var(--border-default));border-radius:8px;}
-#scene .hl-case {display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:4px 10px;border:0;border-radius:4px;font:500 12px "Albert Sans",sans-serif;}
-#scene .hl-case .native-icon {width:15px;height:15px;flex-basis:15px;}
-
-/* The chain map and its example controls are one instrument in the right
-   column, rather than two competing objects split across the hero. */
-#scene .hl-instrument-overview {
-  position:relative;
-  display:grid;
-  gap:0;
-  width:100%;
-  margin-bottom:22px;
-  padding-bottom:26px;
-  border-bottom:1px solid hsl(var(--border-subtle));
-}
-#scene .hl-chain-hero .hl-instrument-overview .hl-world {
-  width:100%;
-  max-width:none;
-  margin:0;
-}
-#scene .hl-instrument-controls {
-  position:absolute;
-  inset:0 0 26px;
-  z-index:1;
-  margin:0;
-  pointer-events:none;
-}
-
+/* The landscape sits in the scene tile; on a wide screen its height, not its width, is what is
+   scarce (the fold rule), so it is capped and centred. */
+/* (capped by WIDTH at the drawing's 4:3 shape, not by height: a box taller than the drawing leaves the drawing smaller than
+   its box, and Ark's figure frame measures the box -- its 12px label size would come out at about 7px) */
+#scene .flow-rich .flow-landscape {display:block;width:100%;max-width:calc(min(46vh,400px) * 640 / 480);height:auto;margin-inline:auto;overflow:visible;}
 /* The landscape (js/pages/home-flow.js drawLandscape). Colour is data: every
    history is 0% saturation, and only the record whose state changes (J42),
    the head that points at it and the reference its resolution creates carry
    the identity accent. The accent only ever touches neutrals, and its painted
    area is scaled by --primary-scale, derived from its luminance. */
-#scene .flow-landscape {width:100%;max-height:480px;overflow:visible;display:block;}
 .land-grid {stroke:hsl(var(--text-strong));stroke-opacity:.07;stroke-width:.5;}
 .land-history-line {stroke:hsl(var(--text-faint));stroke-width:1;stroke-opacity:.5;}
 .land-reference {stroke:hsl(var(--text-muted));stroke-width:1;stroke-dasharray:3 3;}
@@ -256,14 +51,13 @@
 .land-record-main .land-front {fill:hsl(var(--anchor));stroke:hsl(var(--text-faint));}
 .land-record-main .land-side {fill:hsl(var(--surface));stroke:hsl(var(--text-faint));}
 .land-record-main .land-inscription {stroke:hsl(var(--text-muted));}
-.land-index {fill:hsl(var(--text-muted));font:500 8px var(--font-mono,monospace);letter-spacing:.04em;}
-.land-party {fill:hsl(var(--text-faint));font:500 9px var(--font-mono,monospace);letter-spacing:.04em;}
+/* Every word in the drawing is data-ark-label (js/pages/home-flow.js): Ark's figure frame sets its size, so no rule here does. */
+.land-index {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.04em;}
+.land-party {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.04em;}
 .land-party-mine {fill:hsl(var(--text-strong));font-weight:600;}
-.flow-landscape[data-phase="resolve"] .land-history-party .land-party {fill:hsl(var(--text-strong));}
-.flow-landscape[data-phase="resolve"] .land-history-party .land-record:last-of-type .land-top {stroke:hsl(var(--text-strong));}
-.land-label {fill:hsl(var(--text-strong));font:600 10px var(--font-mono,monospace);letter-spacing:.14em;}
-.land-meta {fill:hsl(var(--text-muted));font:500 9px var(--font-mono,monospace);letter-spacing:.08em;text-transform:uppercase;}
-.land-value {fill:hsl(var(--text-strong));font:500 13px "Albert Sans",sans-serif;}
+.land-label {fill:hsl(var(--text-strong));font-family:var(--font-mono,monospace);font-weight:600;letter-spacing:.14em;}
+.land-meta {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.08em;text-transform:uppercase;}
+.land-value {fill:hsl(var(--text-strong));font-family:var(--font-sans,"Albert Sans",sans-serif);font-weight:500;}
 .land-panel {fill:hsl(var(--canvas));stroke:hsl(var(--border-strong));stroke-width:1;}
 .land-panel-heavy {fill:hsl(var(--anchor));}
 .land-leader {stroke:hsl(var(--text-faint));stroke-width:1;}
@@ -289,7 +83,7 @@
 /* Icons from js/ark/icons.js, upright in tags or laid flat on the floor plane. */
 .land-icon {fill:none;stroke:hsl(var(--text-muted));stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
 .land-tag rect {fill:hsl(var(--canvas));stroke:hsl(var(--border-strong));stroke-width:1;}
-.land-tag-text {fill:hsl(var(--text-muted));font:500 9px var(--font-mono,monospace);letter-spacing:.02em;}
+.land-tag-text {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:500;letter-spacing:.02em;}
 .land-party-mine rect {stroke:hsl(var(--text-strong));}
 .land-party-mine .land-tag-text {fill:hsl(var(--text-strong));font-weight:600;}
 .land-party-mine .land-icon,.land-party-counterpart .land-icon {stroke:hsl(var(--text-strong));}
@@ -317,7 +111,7 @@
 .land-check[data-shown="true"],.land-peer[data-shown="true"] {opacity:1;}
 .land-check rect,.land-peer {fill:none;stroke:hsl(var(--border-strong));}
 .land-check[data-on="true"] rect,.land-peer[data-on="true"] {fill:hsl(var(--text-strong));stroke:hsl(var(--text-strong));}
-.land-check text {fill:hsl(var(--text-muted));font:600 10px var(--font-mono,monospace);}
+.land-check text {fill:hsl(var(--text-muted));font-family:var(--font-mono,monospace);font-weight:600;}
 .land-check[data-on="true"] text {fill:hsl(var(--canvas));}
 .land-check:nth-child(2),.land-peer:nth-child(6) {transition-delay:60ms;}
 .land-check:nth-child(3),.land-peer:nth-child(9) {transition-delay:120ms;}
@@ -330,493 +124,23 @@
 .land-readout .land-check text {fill:hsl(var(--anchor-ink) / .64);}
 .land-readout .land-check[data-on="true"] text {fill:hsl(var(--anchor));}
 .flow[data-playing="true"]:not([data-held]) :is(.flow-landscape[data-phase="extend"] .land-current,.land-resolution[data-shown="true"] .land-resolution-ref) {animation:flow-reference-travel 1.6s linear infinite;}
-/* Principle studies: one accent record per card, on neutral edges only. */
-#scene .hl-record-study {display:flex;gap:8px;align-items:center;height:160px;perspective:600px;}
-#scene .hl-record-study span {display:grid;place-items:center;flex:1;max-width:56px;height:56px;border:1px solid hsl(var(--border-strong));border-bottom:8px solid hsl(var(--anchor));background:hsl(var(--raised));font:500 11px var(--font-mono,monospace);transform:rotateX(40deg) rotateZ(-24deg);color:hsl(var(--text-muted));}
-#scene .hl-record-study[data-study="0"] span:last-child,
-#scene .hl-record-study[data-study="1"] span:nth-child(3) {background:hsl(var(--primary));color:hsl(var(--primary-ink));}
-#scene .hl-record-study[data-study="1"] span:nth-child(3) {transform:translateY(-16px) rotateX(40deg) rotateZ(-24deg);}
-#scene .hl-record-study[data-study="2"] span {border-style:dashed solid solid dashed;}
-#scene .hl-record-study[data-study="2"] span:last-child {border:2px solid hsl(var(--primary));border-bottom:8px solid hsl(var(--anchor));color:hsl(var(--text-strong));}
-@keyframes hl-arrive {from {opacity:0;transform:translateY(16px);}to {opacity:1;transform:none;}}
-@media (min-width:1600px) {#scene .hl-hero {min-height:800px;}}
-@media (max-width:1100px) {
-  #scene .home-launch {--hl-gutter:32px;}
-  #scene .hl-hero {gap:32px;}
-  #scene .home-launch .hl-title {font-size:60px;}
-  #scene .hl-instrument-head {flex-wrap:wrap;}
-  #scene .hl-audience-panel {gap:32px;padding:32px;}
-}
-@media (max-width:960px) {
-  #scene .home-launch {--hl-gutter:24px;}
-  #scene .hl-hero {grid-template-columns:1fr;padding:48px 0;gap:48px;min-height:0;}
-  #scene .home-launch .hl-title {font-size:clamp(48px,9vw,72px);}
-  #scene .hl-intro {max-width:560px;}
-  #scene .hl-instrument {width:100%;}
-  #scene .hl-section {padding:56px 0;}
-  #scene .hl-section-head {grid-template-columns:1fr;gap:16px;margin-bottom:32px;}
-  #scene .hl-audience-tab {padding:16px;gap:16px;font-size:20px;}
-  #scene .hl-audience-tab .hl-label {display:none;}
-  #scene .hl-audience-panel {grid-template-columns:1fr;min-height:352px;gap:24px;padding:24px;}
-  #scene .hl-audience-panel h3 {font-size:24px;}
-  #scene .hl-principles {grid-template-columns:1fr;margin-top:32px;gap:32px;}
-  #scene .hl-principles article {padding:24px;}
-  #scene .hl-principles h3 {margin-top:16px;}
-  #scene .hl-evidence-grid {grid-template-columns:1fr;gap:0;}
-  #scene .hl-metric {font-size:48px;}
-  #scene .hl-evidence-foot {display:block;padding:16px;}
-  #scene .hl-evidence-foot a {margin-top:8px;}
-  #scene .hl-faq {margin-left:0;}
-  #scene .hl-closing {margin-top:56px;padding:48px 24px 24px;}
-}
-/* Below 600px the drawing renders at about half scale: keep the histories and
-   names legible, and let the caption under it carry the step instead of the
-   in-drawing legend, readout and resolver card. */
+/* (it runs only while the scene plays, and the scene plays once and settles: js/pages/home-flow.js) */
+@keyframes flow-reference-travel {to {stroke-dashoffset:-28;}}
+/* Below 600px the drawing renders at about half scale: keep the histories and names legible, and
+   let the quote under it carry the step instead of the in-drawing legend, readout and resolver card
+   (the quote says the same words; nothing is lost). */
 @media (max-width:600px) {
   #scene .flow-landscape :is(.land-legend,.land-readout,.land-resolver,.land-leader) {display:none;}
   #scene .flow-landscape .land-label {display:none;}
-  #scene .flow-landscape :is(.land-party,.land-head-label) {font-size:15px;}
   #scene .flow-landscape .land-index {display:none;}
+  /* At 12px on screen a name is about a quarter of the drawing's width: the other chains' names would sit on each other.
+     Yours and the example's counterparty stay; the other four are named on the map under "How it fits together". */
+  #scene .flow-landscape .land-party:not(.land-party-mine,.land-party-counterpart) {display:none;}
+  #scene .flow-rich .flow-now {padding-bottom:50px;}  /* the play button sits under the drawing, not over a name */
   /* The legend band is empty here, so pull the drawing up into it. */
-  #scene .hl-chain-hero .flow-landscape {margin:-14% 0 -5%;}
-  #scene .hl-chain-hero .flow-ledger .flow-record .native-icon {display:none;}
-  #scene .hl-case-picker {display:grid;grid-template-columns:1fr 1fr;width:100%;}
-  #scene .hl-case {justify-content:center;}
-}
-@media (max-width:400px) {
-  #scene .home-launch {--hl-gutter:16px;}
-  #scene .home-launch .hl-title {font-size:48px;}
-  #scene .hl-chain-hero .flow-now {padding:8px 8px 24px;}
-  #scene .hl-chain-hero .flow-says {font-size:16px;line-height:24px;}
-  #scene .hl-chain-hero .flow-ledger .flow-record-name {font-size:11px;}
-  #scene .hl-audience-tab {gap:8px;padding:16px 8px;font-size:16px;}
-  #scene .hl-audience-tab .hl-arrow {display:none;}
-  #scene .hl-actions {align-items:flex-start;}
-  #scene .hl-action-note {max-width:none;}
+  #scene .flow-rich .flow-landscape {margin:-14% auto -5%;}
 }
 @media (prefers-reduced-motion:reduce) {
-  #scene .home-launch *,#scene .home-launch *::before,#scene .home-launch *::after {animation:none !important;transition:none !important;}
+  #scene :is(.hl-world,.flow-landscape) *,#scene :is(.hl-world,.flow-landscape) *::before,#scene :is(.hl-world,.flow-landscape) *::after {animation:none !important;transition:none !important;}
 }
-#scene .hero-still .home-launch * {animation:none !important;transition:none !important;}
-
-/* ---- The line is the interface -----------------------------------------
-   The hero map is no longer decoration beside a generic button. Its own
-   visual language becomes the action, the example selector and the five
-   stage walkthrough: identity, line, stations, destination. */
-#scene .hl-actions { width:100%; max-width:520px; margin-top:36px; }
-#scene .home-launch .hl-line-cta {
-  display:grid;
-  grid-template-columns:auto minmax(64px,1fr) auto;
-  align-items:center;
-  width:100%;
-  min-height:68px;
-  padding:10px 12px;
-  border:1px solid hsl(var(--text-strong));
-  border-radius:10px;
-  background:hsl(var(--text-strong));
-  color:hsl(var(--canvas));
-  box-shadow:0 10px 32px hsl(var(--canvas) / .18);
-  text-decoration:none;
-  transition:background-color 180ms,border-color 180ms,transform 220ms;
-}
-#scene .hl-line-identity {
-  position:relative;
-  z-index:1;
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  min-height:30px;
-  padding:6px 12px;
-  border:1px solid hsl(var(--canvas));
-  border-radius:999px;
-  background:hsl(var(--canvas));
-  color:hsl(var(--text-strong));
-  font:650 11px/16px var(--mono-font,ui-monospace,monospace);
-  white-space:nowrap;
-}
-#scene .hl-line-identity .native-icon { width:13px; height:13px; flex:0 0 13px; }
-#scene .hl-line-track {
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
-  height:30px;
-}
-#scene .hl-line-track::before {
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  top:50%;
-  height:2px;
-  background:hsl(var(--canvas));
-  transform:translateY(-50%);
-  transition:background-color 180ms,transform 240ms;
-}
-#scene .hl-line-track i {
-  position:relative;
-  z-index:1;
-  width:8px;
-  height:8px;
-  border:2px solid hsl(var(--canvas));
-  border-radius:2px;
-  background:hsl(var(--text-strong));
-  transform:rotate(45deg);
-  transition:background-color 180ms,transform 240ms;
-}
-#scene .hl-line-track i.is-terminal { background:hsl(var(--reference)); border-color:hsl(var(--reference)); }
-#scene .hl-line-words {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  grid-template-rows:auto auto;
-  gap:1px 16px;
-  min-width:160px;
-  padding-left:14px;
-}
-#scene .hl-line-words small {
-  grid-column:1;
-  color:hsl(var(--canvas) / .68);
-  font:500 10px/14px var(--mono-font,ui-monospace,monospace);
-  letter-spacing:.04em;
-}
-#scene .hl-line-words strong { grid-column:1; color:hsl(var(--canvas)); font:650 14px/20px var(--font-sans,"Albert Sans",sans-serif); }
-#scene .hl-line-words .native-icon { grid-column:2; grid-row:1/3; align-self:center; width:16px; height:16px; }
-#scene .hl-line-cta:hover { border-color:hsl(var(--reference)); background:hsl(var(--reference)); transform:translateY(-2px); }
-#scene .hl-line-cta:hover .hl-line-track::before { background:hsl(var(--canvas)); transform:translateY(-50%) scaleX(1.035); }
-#scene .hl-line-cta:hover .hl-line-track i { border-color:hsl(var(--canvas)); transform:rotate(45deg) scale(1.12); }
-#scene .hl-line-cta:hover .hl-line-identity { background:hsl(var(--canvas)); border-color:hsl(var(--canvas)); color:hsl(var(--reference)); }
-#scene .hl-line-cta:hover .hl-line-words strong { color:hsl(var(--canvas)); }
-
-/* Example families are stations on a shared route, not tabs in a box. */
-#scene .hero-alive[data-page="zero"] .hl-case-picker {
-  position:relative;
-  display:grid;
-  grid-template-columns:repeat(4,minmax(84px,1fr));
-  gap:8px;
-  width:100%;
-  padding:0;
-  overflow-x:auto;
-  border:0;
-  border-radius:0;
-  background:transparent;
-  scrollbar-width:none;
-}
-#scene .hero-alive[data-page="zero"] .hl-case-picker::-webkit-scrollbar { display:none; }
-#scene .hl-demo-note {
-  margin:5px 10px 0 !important;
-  color:hsl(var(--text-faint));
-  font:500 9px/14px var(--mono-font,ui-monospace,monospace);
-  letter-spacing:.05em;
-  text-align:right;
-  text-transform:uppercase;
-}
-#scene .hero-alive[data-page="zero"] .hl-case-picker::before {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .home-launch .hl-case {
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:flex-start;
-  gap:7px;
-  min-height:44px;
-  padding:9px 12px;
-  border:1px solid hsl(var(--border-default));
-  border-radius:8px;
-  background:hsl(var(--surface) / .72) !important;
-  box-shadow:none !important;
-  color:hsl(var(--text-muted));
-  font-size:12px;
-  text-align:left;
-}
-#scene .hero-alive[data-page="zero"] .home-launch .hl-case::before {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .home-launch .hl-case[aria-pressed="true"] {
-  border-color:hsl(var(--reference));
-  background:hsl(var(--raised)) !important;
-  color:hsl(var(--text-strong));
-  box-shadow:inset 0 -2px hsl(var(--reference)) !important;
-}
-#scene .hero-alive[data-page="zero"] .home-launch .hl-case[aria-pressed="true"]::before {
-  border-color:hsl(var(--reference));
-  background:hsl(var(--reference));
-  transform:scale(1.2);
-}
-#scene .hero-alive[data-page="zero"] .home-launch .hl-case:hover::before { border-color:hsl(var(--text-strong)); }
-
-/* The route names are now the controls: the map itself is the selector.
-   Keep native buttons for keyboard and screen-reader behaviour, then place
-   them at the four branch terminals instead of in a detached tab row. */
-#scene .hl-instrument-overview .world-name { display:none; }
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case-picker {
-  position:absolute;
-  inset:0;
-  display:block;
-  width:auto;
-  overflow:visible;
-  pointer-events:none;
-}
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case {
-  position:absolute;
-  width:auto;
-  min-width:92px;
-  min-height:30px;
-  padding:5px 10px;
-  border-radius:999px;
-  background:hsl(var(--canvas) / .94) !important;
-  box-shadow:0 0 0 4px hsl(var(--canvas) / .72) !important;
-  pointer-events:auto;
-  font:600 10px/18px var(--mono-font,ui-monospace,monospace);
-}
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="swaps"] { top:0; left:0; }
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="transfers"] { top:0; left:39%; }
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="staking"] { top:8%; right:0; }
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[data-case="governance"] { right:2%; bottom:0; }
-#scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case[aria-pressed="true"] {
-  background:hsl(var(--raised)) !important;
-  box-shadow:0 0 0 4px hsl(var(--canvas) / .78),inset 0 -2px hsl(var(--reference)) !important;
-}
-#scene .hl-instrument-overview .hl-demo-note {
-  position:absolute;
-  right:0;
-  bottom:-22px;
-  margin:0 !important;
-  pointer-events:none;
-}
-
-/* Five clear, clickable stations. The former active-border treatment made
-   one continuous sequence read like five unrelated buttons. */
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger {
-  position:relative;
-  display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:8px;
-  margin:24px 0 0;
-  padding:0;
-  overflow:visible;
-  border:0;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger::before {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger li::before,
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger li::after { display:none; }
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record {
-  position:relative;
-  display:grid;
-  grid-template-columns:auto 1fr;
-  grid-template-rows:16px 20px;
-  align-content:start;
-  align-items:center;
-  justify-items:start;
-  gap:1px 5px;
-  width:100%;
-  min-height:60px;
-  padding:10px 9px;
-  border:1px solid hsl(var(--border-subtle));
-  border-radius:8px;
-  background:hsl(var(--surface) / .5);
-  color:hsl(var(--text-muted)) !important;
-  text-align:left;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record::before {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record-num,
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current] .flow-record-num,
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-done] .flow-record-num {
-  grid-column:1;
-  grid-row:1;
-  display:block;
-  width:auto;
-  height:auto;
-  border:0;
-  border-radius:0;
-  background:none;
-  box-shadow:none;
-  color:hsl(var(--text-faint));
-  font:600 9px/14px var(--mono-font,ui-monospace,monospace);
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record-num::after { display:none; }
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record .native-icon {
-  grid-column:2;
-  grid-row:1;
-  justify-self:start;
-  width:12px;
-  height:12px;
-  color:hsl(var(--text-faint));
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record-name {
-  grid-column:1/-1;
-  grid-row:2;
-  color:hsl(var(--text-muted));
-  font-size:11px;
-  line-height:18px;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current]::before {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-done]::before {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current] {
-  border-color:hsl(var(--reference));
-  background:hsl(var(--raised));
-  box-shadow:inset 0 -2px hsl(var(--reference));
-}
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-done] { border-color:hsl(var(--border-default)); }
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record[data-current] .flow-record-name { color:hsl(var(--text-strong)); font-weight:650; }
-#scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record:is(:hover,:focus-visible) .flow-record-name { color:hsl(var(--reference)); }
-
-/* Closing statement: one composed scene. The network is atmospheric and
-   text-free; the actual message and action sit above it with a protected
-   contrast field. */
-#scene .hl-closing {
-  position:relative;
-  isolation:isolate;
-  min-height:820px;
-  margin-top:112px;
-  padding:0;
-  overflow:hidden;
-  border-top:1px solid hsl(var(--border-strong));
-  border-radius:0;
-  background:hsl(var(--canvas));
-  color:hsl(var(--text-strong));
-}
-#scene .hl-closing::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-  background:
-    linear-gradient(90deg,hsl(var(--canvas) / .98) 0%,hsl(var(--canvas) / .91) 34%,hsl(var(--canvas) / .48) 62%,transparent 88%),
-    linear-gradient(180deg,hsl(var(--canvas) / .32),transparent 44%,hsl(var(--canvas) / .72));
-}
-#scene .hl-closing-copy {
-  position:relative;
-  z-index:2;
-  max-width:940px;
-  padding:88px 64px 150px;
-}
-#scene .hl-closing .hl-label { color:hsl(var(--text-muted)); }
-#scene .hl-closing h2 {
-  max-width:850px;
-  margin:30px 0 42px;
-  font-size:clamp(52px,7vw,100px);
-  line-height:.92;
-  letter-spacing:-.065em;
-}
-#scene .hl-closing .hl-line-cta { max-width:580px; }
-#scene .hl-closing-illustration {
-  position:absolute;
-  inset:0;
-  z-index:0;
-  width:100%;
-  margin:0;
-  padding:0;
-  border:0;
-}
-#scene .hl-closing-art {
-  display:block;
-  width:100%;
-  height:100%;
-  color:hsl(var(--text-muted));
-}
-#scene .hl-closing-field path {
-  fill:none;
-  stroke:hsl(var(--border-subtle) / .72);
-  stroke-width:1;
-  vector-effect:non-scaling-stroke;
-}
-#scene .hl-closing-halos circle {
-  fill:none;
-  stroke:hsl(var(--border-default) / .54);
-  stroke-width:1;
-  stroke-dasharray:2 8;
-  vector-effect:non-scaling-stroke;
-}
-#scene .hl-closing-halos circle.is-bright { stroke:hsl(var(--reference-700)); stroke-dasharray:1 6; }
-#scene .hl-closing-routes path {
-  fill:none;
-  stroke:hsl(var(--text-faint) / .66);
-  stroke-width:1.4;
-  vector-effect:non-scaling-stroke;
-}
-#scene .hl-closing-routes path.is-reference {
-  stroke:hsl(var(--reference-500));
-  stroke-width:1.8;
-}
-#scene .hl-closing-plate .plate-top {
-  fill:hsl(var(--raised) / .92);
-  stroke:hsl(var(--border-strong));
-  stroke-width:1.2;
-  vector-effect:non-scaling-stroke;
-}
-#scene .hl-closing-plate .plate-side {
-  fill:hsl(var(--surface) / .88);
-  stroke:hsl(var(--border-default));
-  stroke-width:1;
-  vector-effect:non-scaling-stroke;
-}
-#scene .hl-closing-plate .plate-side-b { fill:hsl(var(--canvas) / .92); }
-#scene .hl-closing-plate .plate-record {
-  fill:none;
-  stroke:hsl(var(--text-faint));
-  stroke-width:1.2;
-  vector-effect:non-scaling-stroke;
-}
-#scene .hl-closing-plate.is-key .plate-top { stroke:hsl(var(--reference)); fill:hsl(var(--raised)); }
-#scene .hl-closing-plate .plate-core { fill:hsl(var(--reference)); }
-#scene .hl-closing-plate .plate-pulse { fill:none; stroke:hsl(var(--reference-600)); stroke-width:1; }
-#scene .hl-closing-nodes .node-halo { fill:hsl(var(--canvas) / .72); stroke:hsl(var(--border-default)); stroke-width:1; }
-#scene .hl-closing-nodes .node-core { fill:hsl(var(--text-strong)); }
-#scene .hl-closing-nodes .is-reference .node-halo { stroke:hsl(var(--reference)); }
-#scene .hl-closing-nodes .is-reference .node-core { fill:hsl(var(--reference)); }
-#scene .hl-closing-sparks > * { fill:hsl(var(--text-faint) / .74); }
-#scene .hl-closing-sparks > *:nth-child(4n) { fill:hsl(var(--reference-500)); }
-#scene .hl-closing-plates,
-#scene .hl-closing-nodes { filter:drop-shadow(0 16px 28px hsl(var(--canvas) / .62)); }
-#scene .hl-closing .hl-footer-links {
-  position:absolute;
-  z-index:2;
-  right:64px;
-  bottom:30px;
-  left:64px;
-  margin:0;
-  padding-top:24px;
-  border-top:1px solid hsl(var(--border-subtle));
-}
-#scene .hl-closing .hl-footer-links .hl-link { color:hsl(var(--text-muted)); }
-#scene .hl-closing .hl-footer-links .hl-link:hover { color:hsl(var(--text-strong)); }
-
-@media(max-width:760px) {
-  #scene .home-launch .hl-line-cta { grid-template-columns:auto minmax(44px,1fr) auto; }
-  #scene .hl-line-track i:nth-child(even) { display:none; }
-  #scene .hl-line-words { min-width:142px; }
-  #scene .hero-alive[data-page="zero"] .hl-case-picker { grid-template-columns:repeat(4,minmax(88px,1fr)); }
-  #scene .hl-instrument-overview { margin-bottom:18px; padding-bottom:26px; }
-  #scene .hl-instrument-controls { inset:0 0 26px; margin:0; }
-  #scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case-picker { display:block; }
-  #scene .hero-alive[data-page="zero"] .hl-instrument-overview .hl-case { min-width:78px; padding-inline:8px; }
-  #scene .hero-alive[data-page="zero"] .hl-chain-hero .flow-ledger .flow-record .native-icon { display:block; }
-  #scene .hl-closing { min-height:790px; margin-top:72px; padding:0; }
-  #scene .hl-closing::after {
-    background:
-      linear-gradient(180deg,hsl(var(--canvas) / .98) 0%,hsl(var(--canvas) / .91) 42%,hsl(var(--canvas) / .36) 72%,hsl(var(--canvas) / .82) 100%),
-      linear-gradient(90deg,hsl(var(--canvas) / .76),transparent);
-  }
-  #scene .hl-closing-copy { padding:56px 24px 170px; }
-  #scene .hl-closing h2 { font-size:clamp(48px,12vw,72px); }
-  #scene .hl-closing-illustration { inset:180px -34% 0 -16%; width:auto; }
-  #scene .hl-closing .hl-footer-links { right:24px; bottom:24px; left:24px; gap:12px 20px; }
-}
-
-@media(max-width:440px) {
-  #scene .home-launch .hl-line-cta { grid-template-columns:auto minmax(28px,1fr) auto; }
-  #scene .hl-line-identity { padding-inline:9px; font-size:10px; }
-  #scene .hl-line-words { min-width:124px; padding-left:10px; }
-  #scene .hl-line-words small { display:none; }
-  #scene .hl-line-words strong { font-size:13px; }
-}
+#scene .hero-still :is(.hl-world,.flow-landscape) * {animation:none !important;transition:none !important;}

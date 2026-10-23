@@ -23,6 +23,12 @@
    `activeTheme` stays what its control says: the theme the editor is
    editing (and previewing), never the visitor's palette.
 
+   Palette ids (docs/ux-audit/brand.md D3): the page speaks the SDK's published names (ember,
+   defxn-tide, ...). The two data files above are SAVED RECORDS and keep their old keys (ghost,
+   marine, ...): they are mapped on read, never rewritten. A visitor's old choice lives in
+   `flux-chain-theme` (old ids); it is read, written forward ONCE to `defxn-theme-v1`, and the old
+   record is left exactly as it was.
+
    Run:   node tests/browser/theme-owner.mjs [--headed] [--keep]
    Needs: Chromium from `npx playwright install chromium`.
    ===================================================================== */
@@ -48,8 +54,8 @@ const until = (probe, message, timeout = 30000) => untilFor(probe, message, time
 /* the two data files, edited the way a Save writes them (only the one key changes) */
 const DEFAULTS_FILE = path.join(WORK, 'js/content/settings-defaults-data.js');
 const THEME_FILE = path.join(WORK, 'js/content/theme-data.js');
-function setDefaultTheme(name) { fs.writeFileSync(DEFAULTS_FILE, fs.readFileSync(DEFAULTS_FILE, 'utf8').replace(/"theme": "[a-z]+"/, `"theme": "${name}"`)); }
-function setActiveTheme(name) { fs.writeFileSync(THEME_FILE, fs.readFileSync(THEME_FILE, 'utf8').replace(/"activeTheme": "[a-z]+"/, `"activeTheme": "${name}"`)); }
+function setDefaultTheme(name) { fs.writeFileSync(DEFAULTS_FILE, fs.readFileSync(DEFAULTS_FILE, 'utf8').replace(/"theme": "[a-z-]+"/, `"theme": "${name}"`)); }
+function setActiveTheme(name) { fs.writeFileSync(THEME_FILE, fs.readFileSync(THEME_FILE, 'utf8').replace(/"activeTheme": "[a-z-]+"/, `"activeTheme": "${name}"`)); }
 
 copySite(WORK);
 setActiveTheme('clay');     /* the editor was last editing Tide (dark) */
@@ -80,39 +86,57 @@ async function load() {
      the log is read after boot, not at a fixed 300 ms */
   await waitForRouteReady(page.mainFrame()).catch((e) => { throw new StepFailure(e.message); });
   await nextFrames(page.mainFrame());
-  return page.evaluate(() => ({ now: document.documentElement.dataset.theme, log: window.__themeLog(), choice: localStorage.getItem('flux-chain-theme') }));
+  return page.evaluate(() => ({ now: document.documentElement.dataset.theme, log: window.__themeLog(), choice: localStorage.getItem('defxn-theme-v1'), old: localStorage.getItem('flux-chain-theme') }));
 }
 
 try {
   await step('a new visitor sees the site default, and only the site default decides it', async () => {
     const first = await load();
-    check(first.now === 'marine', 'data-theme is ' + first.now + ', not the site default marine');
-    check(!first.log.includes('clay'), 'the colour editor\'s activeTheme (clay) took over data-theme during boot: ' + JSON.stringify(first.log));
+    check(first.now === 'defxn-dune', 'data-theme is ' + first.now + ', not the site default marine (read as defxn-dune)');
+    check(!first.log.includes('defxn-tide') && !first.log.includes('clay'), 'the colour editor\'s activeTheme (clay) took over data-theme during boot: ' + JSON.stringify(first.log));
   });
 
   await step('loading a page is not a choice: nothing is saved as the visitor\'s own theme', async () => {
-    const again = await page.evaluate(() => localStorage.getItem('flux-chain-theme'));
-    check(again === null, 'the visitor\'s localStorage now says flux-chain-theme=' + again + ' although they never chose one');
+    const again = await page.evaluate(() => [localStorage.getItem('defxn-theme-v1'), localStorage.getItem('flux-chain-theme')]);
+    check(again[0] === null && again[1] === null, 'the visitor\'s localStorage now says ' + JSON.stringify(again) + ' although they never chose one');
   });
 
   await step('the owner changes the default: the returning visitor sees the NEW default', async () => {
     setDefaultTheme('grove');
     const second = await load();
-    check(second.now === 'grove', 'a returning visitor who never chose still sees ' + second.now + ' after the default became grove');
+    check(second.now === 'defxn-tide-light', 'a returning visitor who never chose still sees ' + second.now + ' after the default became grove (defxn-tide-light)');
   });
 
   await step('from then on the new default is painted before first paint (no flip on every load)', async () => {
     const third = await load();
-    check(third.log[0] === 'grove' && third.log.every((v) => v === 'grove'), 'data-theme went ' + JSON.stringify(third.log) + ' on a load after the default was already seen');
+    check(third.log[0] === 'defxn-tide-light' && third.log.every((v) => v === 'defxn-tide-light'), 'data-theme went ' + JSON.stringify(third.log) + ' on a load after the default was already seen');
   });
 
   await step('a real choice wins over the site default, and is what bootstrap paints first', async () => {
     /* the panel's own button, clicked the way its click handler receives it */
-    await page.evaluate(() => document.querySelector('.site-settings [data-theme-choice="ochre"]').click());
-    check(await page.evaluate(() => localStorage.getItem('flux-chain-theme')) === 'ochre', 'choosing ochre was not saved');
+    await page.evaluate(() => document.querySelector('.site-settings [data-theme-choice="defxn-moss"]').click());
+    check(await page.evaluate(() => localStorage.getItem('defxn-theme-v1')) === 'defxn-moss', 'choosing defxn-moss was not saved under the published key');
+    check(await page.evaluate(() => localStorage.getItem('flux-chain-theme')) === null, 'a new choice wrote the OLD key (only the published form is written)');
     setDefaultTheme('bone');
     const chosen = await load();
-    check(chosen.now === 'ochre' && chosen.log[0] === 'ochre', 'the visitor\'s choice did not win, or was not painted first: ' + JSON.stringify(chosen));
+    check(chosen.now === 'defxn-moss' && chosen.log[0] === 'defxn-moss', 'the visitor\'s choice did not win, or was not painted first: ' + JSON.stringify(chosen));
+  });
+
+  await step('a visitor who chose under the OLD ids keeps that choice: painted first, written forward once, old record untouched', async () => {
+    /* what a browser that visited before the rename holds: the old key only (old `moss` = Moss LIGHT) */
+    await page.evaluate(() => { localStorage.removeItem('defxn-theme-v1'); localStorage.setItem('flux-chain-theme', 'moss'); });
+    const old = await load();
+    check(old.now === 'defxn-moss-light' && old.log[0] === 'defxn-moss-light' && old.log.every((v) => v === 'defxn-moss-light'), 'an old moss choice painted ' + JSON.stringify(old.log) + ', not defxn-moss-light first and only');
+    check(old.choice === 'defxn-moss-light', 'the old choice was not written forward to defxn-theme-v1: ' + old.choice);
+    check(old.old === 'moss', 'the old record was rewritten or removed: flux-chain-theme=' + old.old);
+    const again = await load();
+    check(again.now === 'defxn-moss-light' && again.choice === 'defxn-moss-light' && again.old === 'moss', 'the second load changed something: ' + JSON.stringify(again));
+  });
+
+  await step('the published key beats a stale old key', async () => {
+    await page.evaluate(() => { localStorage.setItem('defxn-theme-v1', 'defxn-dusk'); localStorage.setItem('flux-chain-theme', 'moss'); });
+    const both = await load();
+    check(both.now === 'defxn-dusk' && both.log.every((v) => v === 'defxn-dusk'), 'published choice lost to the old key: ' + JSON.stringify(both.log));
   });
 } catch { /* reported by step() */ }
 

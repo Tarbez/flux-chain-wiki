@@ -15,7 +15,7 @@ const admin = require('./lib/admin-source.cjs').ADMIN;
 const start = main.indexOf('  function cmsForwardSaveShortcut(event) {');
 const end = main.indexOf("  document.addEventListener('keydown'", start);
 assert(start >= 0 && end > start, 'js/main.js defines cmsForwardSaveShortcut right before its keydown listener');
-assert(/document\.addEventListener\('keydown', function \(event\) \{\n    if \(!cmsPreviewQuery \|\| cmsForwardSaveShortcut\(event\)\) return;/.test(main), 'the preview\'s keydown listener tries the save forward first, in edit AND live mode');
+assert(/document\.addEventListener\('keydown', function \(event\) \{\n    if \(!cmsPreviewQuery \|\| cmsForwardSaveShortcut\(event\)( \|\| cmsContextMenuKey\(event\))?\) return;/.test(main), 'the preview\'s keydown listener tries the save forward first, in edit AND live mode (then the right-click menu\'s own keys)');
 
 function run(inFrame) {
   const posted = [];

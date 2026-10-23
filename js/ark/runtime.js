@@ -25,6 +25,8 @@
      decorate(el, p)   free-form child construction
      onMount(el, p)    runs once the tree is in the document
      emerge     { delay, dur } opacity fade-in, in ms
+     create(p)  builds the element itself instead of `tag` (an Ark block,
+                js/ark/blocks.js); base/style classes are added to its own
    ===================================================================== */
 var ArkUI = (function () {
   'use strict';
@@ -69,14 +71,17 @@ var ArkUI = (function () {
       }
     }
 
-    var el = document.createElement(m.tag || 'div');
+    /* `create(p)` builds the element itself -- an Ark block (js/ark/blocks.js) renders its own
+       root, with its own classes and id, which a tag name cannot say. */
+    var el = m.create ? m.create(p) : document.createElement(m.tag || 'div');
+    if (!el) return null;
     if (copyKeys.length) el.setAttribute('data-ark-copy-keys', copyKeys.join(' '));
 
     var classes = [];
     if (m.base) classes.push(ArkAtomizer.atomize(m.base));
     if (m.style) classes.push(ArkAtomizer.atomize(m.style(p)));
     var cls = classes.filter(Boolean).join(' ');
-    if (cls) el.className = cls;
+    if (cls) el.className = m.create ? (el.className ? el.className + ' ' : '') + cls : cls;
 
     if (m.attrs) {
       var attrs = m.attrs(p) || {};
@@ -96,7 +101,7 @@ var ArkUI = (function () {
     if (m.onMount) ctx.mounts.push({ el: el, p: p, fn: m.onMount });
     if (m.emerge) ctx.emerge.push({ el: el, dur: m.emerge.dur, delay: m.emerge.delay });
 
-    for (var ci = 0; ci < node.children.length; ci++) {
+    for (var ci = 0; ci < (node.children || []).length; ci++) {
       var built = build(node.children[ci], ctx);
       if (built) el.appendChild(built);
     }

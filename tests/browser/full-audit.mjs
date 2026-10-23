@@ -47,7 +47,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, setLens, openRailTab, openPageFields, pageRow, sheetBody, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor } from './harness.mjs';
+import { SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarKey, toolbarSections, answerArkDialog, dismissArkDialogIfOpen, openToolbarSection, toolbarAction, clickHeader, designView, openBackground, setLens, openRailTab, openPageFields, pageRow, sheetBody, until as untilFor, untilStable, waitForPreviewReady, waitForRouteReady, openRoute, openAccountMenu, nextFrames, scaled, layoutKeyOf, gotoEditor, reloadEditor, createItem, MORE_MENU_IDS, siteStyleTab } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const ALL = ['content', 'design', 'toolbar', 'canvas', 'sweep'];
@@ -241,24 +241,25 @@ await surface('content', 'pages: Ctrl/Cmd+S saves', async (opened) => {
 await surface('content', 'pages: create and delete a theory page', async (opened) => {
   const { app } = await openEditor(opened, 'content');
   await connect(app);
-  await openRailTab(app, 'pages');
-  await app.locator('#pagesPane summary', { hasText: 'New theory page' }).click();
-  await app.fill('#newId', 'auditpage');
-  await app.press('#newId', 'Enter');
+  /* asked for by its title; the address is derived (docs/ux-audit/cms.md P1-4) */
+  await createItem(app, 'page', 'Audit page');
   await until(async () => (await pageRow(app, { page: 'auditpage' }).count()) === 1, 'the new page is not in the Pages tab');
   /* an unsaved page is ON the canvas, rendered from its draft (it used to fall back to Home while
      the label named the new page: docs/ux-audit/cms.md P0-1), and its own Page fields are open */
-  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the unsaved new page is not on the canvas: ' + await statusText(app), 15000);
+  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('Audit page'), 'the unsaved new page is not on the canvas: ' + await statusText(app), 15000);
   check(await app.evaluate(() => !!document.querySelector('#sheet:not([hidden]) [data-cms-field^="page:auditpage:"]')), 'creating the page did not open its own Page fields');
   await openPageFields(app, { page: 'auditpage' });
   await app.click('#save');
   await until(() => savedExists('manifests/auditpage.js') && readSaved('manifests/index.js').includes('auditpage'), 'Save did not create manifests/auditpage.js and list it in the index');
   /* ...and once it is saved, it is still the page on the canvas */
-  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('New page.'), 'the saved new page is not on the canvas', 15000);
+  await until(async () => (await frameText(await canvasPreview(app, '/concept/auditpage'))).includes('Audit page'), 'the saved new page is not on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this page' }).click();
+  await answerArkDialog(app, 'accept');   /* Ark's dialog, not a native confirm (cms.md P2-11) */
   await until(() => !savedExists('manifests/auditpage.js') && !readSaved('manifests/index.js').includes('auditpage'), 'Delete did not remove the file and its index entry');
   await until(async () => (await pageRow(app, { page: 'auditpage' }).count()) === 0, 'the deleted page is still in the Pages tab');
+  /* the Delete is async after its dialog: the file goes first, then the other drafts are pruned and the status says Deleted */
+  await until(async () => /^Deleted /.test(await statusText(app)), 'the Delete never reported itself done: ' + await statusText(app));
   /* the Delete takes the page's SEO entry with it, saved copy included: nothing is left unsaved,
      and seo-data.js names no deleted page (regression: tests/delete-prunes-drafts.cjs) */
   check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the Delete a draft shows unsaved: ' + await statusText(app));
@@ -291,10 +292,7 @@ await surface('content', 'articles: edit, preview, Save, Ctrl+S, reload', async 
 await surface('content', 'articles: create and delete', async (opened) => {
   const { app } = await openEditor(opened, 'content');
   await connect(app);
-  await openRailTab(app, 'pages');
-  await app.locator('#pagesPane summary', { hasText: 'New article' }).click(); debug('new article form');
-  await app.fill('#newSlug', 'audit-note');
-  await app.press('#newSlug', 'Enter'); debug('submitted');
+  await createItem(app, 'article', 'Audit note'); debug('submitted');
   await until(async () => (await pageRow(app, { article: 'audit-note' }).count()) === 1, 'the new article is not in the Pages tab');
   /* named from what was typed ("audit-note" -> "Audit note", it was "New note") and on the canvas before Save */
   await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('Audit note'), 'the unsaved new article is not on the canvas: ' + await statusText(app), 15000);
@@ -318,7 +316,10 @@ await surface('content', 'articles: create and delete', async (opened) => {
   await until(async () => (await frameText(await canvasPreview(app, '/learnings/audit-note'))).includes('Audit note'), 'the saved new article does not render on the canvas', 15000);
   dialogPolicy = 'accept';
   await sheetBody(app).locator('button', { hasText: 'Delete this article' }).click();
+  await answerArkDialog(app, 'accept');   /* Ark's dialog, not a native confirm (cms.md P2-11) */
   await until(() => !savedExists('articles/audit-note.js') && !readSaved('article-index.js').includes('audit-note'), 'Delete did not remove the article file and its index entry');
+  /* the file goes first; the SEO draft is pruned and the status says Deleted only when the whole Delete has finished */
+  await until(async () => /^Deleted /.test(await statusText(app)), 'the article Delete never reported itself done: ' + await statusText(app));
   check(!(await app.evaluate(() => window.ArkAdminApp.unsaved())), 'after the article Delete a draft shows unsaved: ' + await statusText(app));
   check(!readSaved('seo-data.js').includes('"audit-note"'), 'seo-data.js still holds the deleted article\'s entry');
 });
@@ -362,6 +363,7 @@ await surface('content', 'images: create and delete', async (opened) => {
   await until(() => savedExists('assets/audit-dot.js') && readSaved('assets/index.js').includes('audit-dot'), 'Save did not create assets/audit-dot.js and index it');
   dialogPolicy = 'accept';
   await media.locator('button', { hasText: 'Delete this image' }).click();
+  await answerArkDialog(app, 'accept');
   await until(() => !savedExists('assets/audit-dot.js') && !readSaved('assets/index.js').includes('audit-dot'), 'Delete did not remove the image file and its index entry');
 });
 
@@ -390,6 +392,7 @@ await surface('content', 'encrypted: create, encrypt, Save, reload, decrypt, del
   await connect(again);
   dialogPolicy = 'accept';
   await vault2.locator('button', { hasText: 'Delete this item' }).click();
+  await answerArkDialog(again, 'accept');   /* the frame after the reload: `app` is the one that was reloaded away */
   await until(() => !savedExists('secrets/audit-secret.js'), 'Delete did not remove secrets/audit-secret.js');
 });
 
@@ -415,11 +418,11 @@ await surface('content', 'shapes: tuning reaches the preview, Save writes it', a
 
 await surface('content', 'mesh: status view opens and refreshes', async (opened) => {
   const { app } = await openEditor(opened, 'content');
-  await app.click('#meshNav');
-  await until(() => app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheetTitle').textContent === 'Mesh'), 'Mesh did not open its status in the sheet');
+  await clickHeader(app, 'meshNav');
+  await until(() => app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheetTitle').textContent === 'Publishing status'), 'Publishing status did not open in the sheet');
   await until(() => app.evaluate(() => !/Checking/.test((document.querySelector('#sheetBody .mesh-rows') || {}).textContent || 'Checking')), 'the mesh status never finished checking');
   check(await app.evaluate(() => document.getElementById('lensContentBtn').getAttribute('aria-pressed') === 'true'), 'opening Mesh changed the lens');
-  await app.click('#meshNav');
+  await clickHeader(app, 'meshNav');
   check(await app.evaluate(() => document.getElementById('sheet').hidden), 'a second press of Mesh did not close its sheet');
 });
 
@@ -439,6 +442,8 @@ async function saveCanvas(app) { await connect(app); await app.click('#save'); }
 async function gotoRoute(app, pv, route) {
   await openRoute(app, pv, route).catch((e) => { throw new StepFailure(e.message); });
 }
+/* the header's link to /how-deployment-works reads "Deploy a resolver", the page's one name, since the
+   first-visit audit 2026-10-22 (it read "How it works", the story pages' middle tab) */
 const navLink = (frame, text) => frame.locator('header nav.header-core-links > a', { hasText: text }).first();
 /* Playwright cannot see that the editor's toolbar covers a point in the preview, so a right-click
    menu item is clicked only once the editor confirms nothing of its own is on top (studio-flows) */
@@ -476,8 +481,11 @@ await surface('design', 'theme & defaults: a colour reaches the preview, Save, r
   await until(async () => (await swatch.count()) > 0, 'Theme & defaults shows no colour fields');
   const id = await swatch.getAttribute('id'), key = id.split('-').slice(2).join('-');
   await swatch.fill('#12ab34');
-  const hsl = (await app.locator(`#${id} + output`).textContent()).trim();
-  check(/^\d+ \d+% \d+%$/.test(hsl), 'the colour field does not show the HSL it stores: ' + hsl);
+  /* the colour reads as people write it (hex); the HSL channels it stores ride on data-hsl and in
+     Developer details (docs/ux-audit/cms.md P1-2) */
+  check(/^#[0-9a-f]{6}$/i.test((await app.locator(`#${id} + output`).textContent()).trim()), 'the colour field does not show a hex colour');
+  const hsl = ((await app.locator(`#${id} + output`).getAttribute('data-hsl')) || '').trim();
+  check(/^\d+ \d+% \d+%$/.test(hsl), 'the colour field does not carry the HSL it stores: ' + hsl);
   const frame = await canvasPreview(app, '/');
   await until(() => frame.evaluate((k) => getComputedStyle(document.documentElement).getPropertyValue('--' + k).trim(), key).then((v) => v === hsl), `the preview's --${key} never became ${hsl}`);
   await app.click('#save');
@@ -485,13 +493,14 @@ await surface('design', 'theme & defaults: a colour reaches the preview, Save, r
   await reloadEditor(page);
   const again = await ready(await appFrame(page));
   await designView(again, 'theme');
-  await until(async () => ((await again.locator(`#${id} + output`).textContent()) || '').trim() === hsl, 'after reload the colour is not the saved one');
+  await until(async () => ((await again.locator(`#${id} + output`).getAttribute('data-hsl')) || '').trim() === hsl, 'after reload the colour is not the saved one');
 });
 
 await surface('design', 'theme & defaults: settings-gear default reaches the preview, Save', async (opened) => {
   const { app } = await openEditor(opened);
   await connect(app);
   await designView(app, 'theme');
+  await siteStyleTab(app, 'Visitor defaults');
   const motif = app.locator('#defaults-motif');
   await until(async () => (await motif.count()) > 0, 'Theme & defaults has no default-pattern control');
   const options = await motif.locator('option').evaluateAll((os) => os.map((o) => o.value));
@@ -541,10 +550,13 @@ await surface('design', 'design check: lists every rule, Show selects, Open SEO 
   /* openEditor already waited for the preview's ready message; the check itself waits for the
      page to settle before it measures (design-check-stable) */
   const { app, shot } = await openEditor(opened);
+  /* Design tips are the Edit style lens's (docs/ux-audit/cms.md P1-10) */
+  await setLens(app, 'design');
   await app.click('#btnCheck');
   const items = app.locator('.pop ul.checks > li');
   await until(async () => (await items.count()) >= 13, 'the design check lists fewer than 13 rules');
-  const badge = (await app.locator('#scoreBadge').textContent()).trim();
+  /* the badge shows a quiet count of tips; the score is its data-score (docs/ux-audit/cms.md P1-10) */
+  const badge = (await app.locator('#scoreBadge').getAttribute('data-score') || '').trim();
   check(/^\d+\/\d+$/.test(badge), 'the score badge is not passes/measured: ' + badge);
   await shot('design-check');
   const show = app.locator('.pop ul.checks .acts button', { hasText: 'Show' }).first();
@@ -609,7 +621,11 @@ await surface('toolbar', 'paragraph <p> (real click): text sections; Fill radius
   const { page, app, pv } = await openEditor(opened);
   await pv.locator('p', { hasText: 'Your own history' }).first().click();
   key = await until(() => toolbarKey(app), 'clicking the paragraph opened no toolbar');
-  check(/\/p:\d+$/.test(key), 'a click on the paragraph selected ' + key);
+  /* the paragraph ITSELF is selected, not a container. Its key is a path (".../p:2") or, for text bound to a
+     field, its copy key ("copy:HOME.INTRO" -- js/content/layout.js prefers it; home's intro is bound since
+     it became Ark blocks), so check the selected element's tag, not the key's shape */
+  const selectedTag = await pv.evaluate((k) => { const el = document.querySelector('[data-ark-layout-key="' + k.replace(/"/g, '\\"') + '"]'); return el ? el.tagName : null; }, key);
+  check(selectedTag === 'P', 'a click on the paragraph selected ' + key + ' (' + selectedTag + ')');
   await expectSections(app, TEXT, 'a <p>');
   await page.close(); opened.pop();
   await controlPersists(opened, { route: '/', key, sectionTitle: 'Fill and border',
@@ -658,9 +674,15 @@ await surface('toolbar', 'container <section>: container sections; Layout, Size 
 
 await surface('toolbar', 'image <svg>: image sections; Alt text persists', async (opened) => {
   const { page, app, pv } = await openEditor(opened);
-  const KEY = await pv.evaluate(() => [...document.querySelectorAll('svg[data-ark-layout-key]')].find((s) => s.getBoundingClientRect().width > 8 && !s.closest('button,a')).getAttribute('data-ark-layout-key'));
+  /* polled: the home page mounts its drawing and the layout keys are stamped a moment after the canvas reports ready -- under a loaded
+     machine (the full run, load factor 3.8) a single read found none and threw on undefined */
+  /* On /about, whose layer drawing is on screen by default. Since 2026-10-20 the home opens on "Where do I start?" and its
+     scene svg sits on the "See it work" tab, which the editor's canvas does not switch (a canvas click SELECTS, by design);
+     a header icon is shell scope ('*'), never this page's, so only page content ([data-ark-page]) counts. */
+  await gotoRoute(app, pv, '/about');
+  const KEY = await until(() => pv.evaluate(() => { const svg = [...document.querySelectorAll('[data-ark-page] svg[data-ark-layout-key]')].find((s) => s.getBoundingClientRect().width > 8 && !s.closest('button,a')); return svg ? svg.getAttribute('data-ark-layout-key') : null; }), 'no visible inline svg with a layout key on the home page', 20000);
   await page.close(); opened.pop();
-  await controlPersists(opened, { route: '/', key: KEY, sectionTitle: 'Alt text',
+  await controlPersists(opened, { route: '/about', key: KEY, sectionTitle: 'Alt text',
     select: async (app) => { await selectKey(app, KEY); await expectSections(app, IMAGE, 'an <svg>'); },
     act: (s) => setValue(s.locator('textarea[name="alt-text"]'), 'Audit diagram'),
     read: 'el.getAttribute("aria-label")', expect: 'Audit diagram', saved: (l) => JSON.stringify(l).includes('Audit diagram') });
@@ -680,12 +702,12 @@ await surface('toolbar', 'canvas element <canvas>: image sections; Frame scale p
 await surface('toolbar', 'layout group: Frame + Ungroup only; group X persists; Ungroup removes it', async (opened) => {
   const { page, app, pv, shot } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
-  await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
+  await navLink(pv, 'Deploy a resolver').click({ modifiers: ['Shift'] });
   await (await openToolbarSection(app, 'Frame')).locator('button', { hasText: 'Group selection' }).click();
   const key = await until(async () => { const k = await toolbarKey(app); return k && k.startsWith('group:') && k; }, 'Group selection did not select a new group');
   await expectSections(app, ['Frame'], 'a layout group');
   /* grouping must not rearrange what it groups: two links of a header row stay side by side */
-  const boxes = await pv.evaluate(() => ['Overview', 'How it works'].map((t) => { const a = [...document.querySelectorAll('header nav.header-core-links a')].find((x) => x.textContent.includes(t)); const r = a.getBoundingClientRect(); return { top: Math.round(r.top), left: Math.round(r.left), w: r.width }; }));
+  const boxes = await pv.evaluate(() => ['Overview', 'Deploy a resolver'].map((t) => { const a = [...document.querySelectorAll('header nav.header-core-links a')].find((x) => x.textContent.includes(t)); const r = a.getBoundingClientRect(); return { top: Math.round(r.top), left: Math.round(r.left), w: r.width }; }));
   check(boxes.every((b) => b.w > 0) && Math.abs(boxes[0].top - boxes[1].top) < 2 && boxes[0].left < boxes[1].left, 'grouping rearranged the two header links: ' + JSON.stringify(boxes));
   check(await toolbarAction(app, 'Ungroup').count() === 1, 'a group\'s toolbar has no Ungroup');
   check(await app.evaluate(() => /Groups on this page \(1\)/.test(document.getElementById('groupsBrowse').textContent)), 'the Layers tab does not list the new group');
@@ -708,8 +730,9 @@ await surface('toolbar', 'component instance: base sections + Component instance
   const { page, app, pv } = await openEditor(opened);
   await gotoRoute(app, pv, '/download');
   await app.click('#tabLib');
-  await app.locator('#libPane select.ctl').first().selectOption('RBLOCK_TEXT_V1');
-  await app.locator('#libPane input[data-prop="heading"]').fill('Audit block');
+  await app.locator('#libPane .lib-block[data-resolver="RBLOCK_TEXT_V1"] button', { hasText: 'Customize' }).click();
+  await app.locator('#libPane .lib-new input[aria-label="New component name"]').fill('Text block');
+  await app.locator('#libPane .lib-new [data-prop="heading"]').fill('Audit block');
   await app.locator('#libPane button', { hasText: 'Create block' }).click();
   const row = app.locator('#libPane .myrow', { hasText: 'Text block' }).first();
   await until(async () => (await row.count()) > 0, 'Create block did not list the new block');
@@ -723,7 +746,7 @@ await surface('toolbar', 'component instance: base sections + Component instance
   const sections = await until(async () => { const s = await toolbarSections(app); return s.includes('Component instance') && s; }, 'the instance\'s toolbar has no Component instance section');
   const base = sections.filter((s) => s !== 'Component instance');
   check([TEXT, CONTAINER, IMAGE].some((t) => JSON.stringify(t) === JSON.stringify(base)), 'the instance\'s other sections are not one taxonomy: ' + sections.join(', '));
-  const heading = (await openToolbarSection(app, 'Component instance')).locator('input[aria-label="heading"]');
+  const heading = (await openToolbarSection(app, 'Component instance')).locator('input[data-prop="heading"]');
   await setValue(heading, 'Audit override');
   await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Audit override')), 'the override did not reach the preview');
   await saveCanvas(app);
@@ -738,7 +761,7 @@ await surface('toolbar', 'component instance: base sections + Component instance
 await surface('toolbar', 'state group: base sections + States; + Add state persists', async (opened) => {
   const { page, app, pv } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
-  await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
+  await navLink(pv, 'Deploy a resolver').click({ modifiers: ['Shift'] });
   await navLink(pv, 'Overview').click({ button: 'right' });
   await clickMenuItem(page, app, pv, 'Make into states');
   await until(() => pv.evaluate((scope) => Object.keys((ArkStates.get().routes || {})[scope] || {}).length === 1, SHELL), 'Make into states made no group of the header links under the shell scope');
@@ -775,14 +798,14 @@ await surface('canvas', 'undo / redo: buttons and Ctrl+Z / Ctrl+Shift+Z', async 
 await surface('canvas', 'multi-select: shift-click 3, align and distribute act', async (opened) => {
   const { app, pv } = await openEditor(opened);
   await navLink(pv, 'Overview').click();
-  await navLink(pv, 'How it works').click({ modifiers: ['Shift'] });
+  await navLink(pv, 'Deploy a resolver').click({ modifiers: ['Shift'] });
   /* not Stats: at the preview's 1280px the header keeps the row by moving Stats into the MENU */
   await navLink(pv, 'Mesh Explorer').click({ modifiers: ['Shift'] });
   const frame = await openToolbarSection(app, 'Frame');
   for (const label of ['Left', 'Center X', 'Right', 'Top', 'Center Y', 'Bottom', 'Group selection', 'Distribute X', 'Distribute Y']) check(await frame.locator('button', { hasText: new RegExp('^' + label + '$') }).count() === 1, `3 selected layers offer no "${label}"`);
   await frame.locator('button', { hasText: /^Top$/ }).click();
   await until(() => app.locator('#btnUndo').isEnabled(), 'Align Top changed nothing (no undo step)');
-  const tops = await pv.evaluate(() => ['Overview', 'How it works', 'Mesh Explorer'].map((t) => [...document.querySelectorAll('header nav.header-core-links > a')].find((a) => a.textContent.includes(t)).getBoundingClientRect().top));
+  const tops = await pv.evaluate(() => ['Overview', 'Deploy a resolver', 'Mesh Explorer'].map((t) => [...document.querySelectorAll('header nav.header-core-links > a')].find((a) => a.textContent.includes(t)).getBoundingClientRect().top));
   check(Math.max(...tops) - Math.min(...tops) < 1.5, 'Align Top did not align the three tops: ' + tops.join(', '));
 });
 
@@ -846,7 +869,7 @@ await surface('canvas', 'edit vs live: Live hides the toolbar and clicks navigat
   await until(async () => !!(await toolbarKey(app)), 'Edit mode: a click did not select');
   await app.click('#mode button[data-m="live"]');
   await until(() => app.evaluate(() => document.getElementById('selToolbar').hidden), 'Live mode still shows the toolbar');
-  await navLink(pv, 'How it works').click();
+  await navLink(pv, 'Deploy a resolver').click();
   await until(() => pv.evaluate(() => ArkUI.route.path() !== '/'), 'Live mode: clicking a link did not navigate like a visitor');
   await app.click('#mode button[data-m="edit"]');
   await until(() => app.evaluate(() => document.querySelector('#mode button[data-m="edit"]').getAttribute('aria-pressed') === 'true'), 'Edit did not switch back');
@@ -867,7 +890,9 @@ async function counters(page, app) {
   const mut = await app.evaluate(() => window.__audit ? window.__audit.mut : 0).catch(() => -1);
   /* a field's value is a property, not an attribute: "Show manifest fields" changes only that */
   const values = await app.evaluate(() => [...document.querySelectorAll('input, textarea, select')].map((el) => el.type === 'checkbox' || el.type === 'radio' ? el.checked : el.value).join('\u0001').length + ':' + [...document.querySelectorAll('textarea')].map((t) => t.value.slice(0, 200)).join('|')).catch(() => '');
-  return { mut, msg, values, nav: navigations, req: requestsSeen, dialogs: dialogsSeen, pages: pagesOpened, downloads, fs: fsEvents, choosers };
+  /* Ark's confirmation dialog is a dialog too (cms.md P2-11): its appearing is an observable change */
+  const arkDialogs = await app.locator('.ark-alert-dialog').count().catch(() => 0);
+  return { mut, msg, values, nav: navigations, req: requestsSeen, dialogs: dialogsSeen + arkDialogs, pages: pagesOpened, downloads, fs: fsEvents, choosers };
 }
 async function quiet(app) {
   /* wait until the editor's DOM stops changing (a toast fading, a debounced check); a DOM that
@@ -921,6 +946,7 @@ async function sweep(name, scope, setup) {
       const after = await untilFor(async () => { const a = await counters(env.page, env.app); return diff(a) && a; }, 'nothing changed', 1000).catch(() => counters(env.page, env.app));
       const changed = Object.keys(before).filter((k) => after[k] !== before[k]);
       if (!changed.length) { dead.push({ surface: name, control: c.label, path: c.path }); deadHere += 1; }
+      await dismissArkDialogIfOpen(env.app);   /* what the sweep opened is answered No, as the native ones were */
       await env.app.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))).catch(() => {});
     }
     dialogPolicy = 'accept';
@@ -956,10 +982,11 @@ const withSelection = (key, sections) => async (env, again) => { await toCanvas(
 
 await sweep('app header (Content lens)', '#appBar', toContent);
 await sweep('account menu', '#accountMenu', async (env) => { await openAccountMenu(env.app); });
-await sweep('page fields: Content tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Content'));
-await sweep('page fields: Shape tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Shape'));
-await sweep('page fields: SEO tab', '#sheet', pageFieldsTab({ page: 'home' }, 'SEO'));
-await sweep('page fields: Code tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Code'));
+/* the tabs in plain words since 2026-10-19: Text / Shapes / Search & sharing / Advanced */
+await sweep('page fields: Text tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Text'));
+await sweep('page fields: Shapes tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Shapes'));
+await sweep('page fields: Search & sharing tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Search & sharing'));
+await sweep('page fields: Advanced tab', '#sheet', pageFieldsTab({ page: 'home' }, 'Advanced'));
 await sweep('rail: Pages', '#pagesPane', async (env) => { await toContent(env); await openRailTab(env.app, 'pages'); });
 await sweep('article fields', '#sheet', async (env) => { const slug = await env.app.evaluate(() => { const b = document.querySelector('#pages .tree-open[data-item^="article:"]'); return b ? b.dataset.item.slice(8) : null; }); return pageFieldsTab({ article: slug })(env); });
 await sweep('rail: Media (an image open)', '#mediaPane', railItem('media', 'asset:'));
@@ -976,7 +1003,7 @@ await sweep('rail: Vault', '#vaultPane', async (env, again) => {
   }
   await until(() => env.app.evaluate(() => !!document.querySelector('#sec-sweep-secret-label')), 'the new encrypted item did not open');
 });
-await sweep('mesh sheet', '#sheet', async (env) => { if (!(await env.app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheet').dataset.sheet === 'mesh'))) { await env.app.click('#meshNav'); await until(() => env.app.evaluate(() => document.getElementById('sheet').dataset.sheet === 'mesh'), 'Mesh did not open'); } });
+await sweep('mesh sheet', '#sheet', async (env) => { if (!(await env.app.evaluate(() => !document.getElementById('sheet').hidden && document.getElementById('sheet').dataset.sheet === 'mesh'))) { await clickHeader(env.app, 'meshNav'); await until(() => env.app.evaluate(() => document.getElementById('sheet').dataset.sheet === 'mesh'), 'Publishing status did not open'); } });
 await sweep('theme view (theme & defaults, mesh tuning, page shapes)', '#themeView', async (env) => { await designView(env.app, 'theme'); await until(() => env.app.evaluate(() => !!document.querySelector('#themeView .theme-fields')), 'the Theme view did not draw'); });
 /* the one header in Design -> Canvas: the Design views and every canvas-only control */
 await sweep('app header (Design lens, Canvas view)', '#appBar', withSelection('id:hl-title'));
@@ -990,9 +1017,10 @@ const firstSection = async (env) => env.sectionKey || (env.sectionKey = await un
 for (const sec of CONTAINER.filter((x) => !TEXT.includes(x))) await sweep('toolbar: container / ' + sec, '#selToolbar, #selToolbarPop', async (env, again) => withSelection(await firstSection(env), [sec])(env, again));
 await sweep('sitemap', '#mapView', async (env) => { if (await env.app.evaluate(() => document.getElementById('studioRoot').hidden || document.getElementById('mapView').hidden)) { await designView(env.app, 'map'); await until(() => env.app.evaluate(() => !document.getElementById('mapView').hidden && document.querySelectorAll('#mapView .smcard').length > 0), 'the sitemap did not draw'); } });
 for (const [name, button] of [['popover: Design check', '#btnCheck'], ['popover: page switcher', '#btnPage'], ['popover: page SEO', '#btnPageSeo'], ['popover: Background', '#backgroundBtn']]) {
-  await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { await env.app.click(button, { timeout: scaled(15000) }); await env.app.locator('.pop').first().waitFor({ state: 'visible', timeout: scaled(5000) }); } });
+  /* page SEO and Page transition are More menu items since 2026-10-19 (clickHeader opens More first) */
+  await sweep(name, '.pop', async (env) => { await toCanvas(env); if (!(await env.app.locator('.pop').count())) { if (MORE_MENU_IDS.includes(button.slice(1))) await clickHeader(env.app, button.slice(1)); else await env.app.click(button, { timeout: scaled(15000) }); await env.app.locator('.pop').first().waitFor({ state: 'visible', timeout: scaled(5000) }); } });
 }
-await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await env.app.click('#versionsNav'); await until(() => env.app.evaluate(() => !document.getElementById('versionsPanel').hidden), 'the versions panel did not open'); } });
+await sweep('versions panel', '#versionsPanel', async (env) => { await connect(env.app); if (await env.app.evaluate(() => document.getElementById('versionsPanel').hidden)) { await clickHeader(env.app, 'versionsNav'); await until(() => env.app.evaluate(() => !document.getElementById('versionsPanel').hidden), 'the versions panel did not open'); } });
 
 /* ================================================================ REPORT (placeholder until the other groups land) */
 await browser.close(); server.close();

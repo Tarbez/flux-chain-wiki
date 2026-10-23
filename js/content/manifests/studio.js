@@ -6,7 +6,7 @@ ArkManifest.define({
   "group": "theory",
   "meta": {
     "placement": "rail",
-    "next": "deploy",
+    "next": "concept/spec",
     "docs": "docs/evidence/registry.md",
     "back": "concept"
   },
@@ -93,13 +93,13 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Every network result must state that accounts, identities, DAOs, arbitrary records, and treasuries are not currently isolated by the network ID."
+      "value": "Every network result must state, beside it, what the network ID does not isolate today. The Networks page lists it."
     },
     "STATUS.TITLE": {
       "label": "Status heading",
       "kind": "line",
       "section": "Evidence",
-      "value": "Evidence record / CAP-003"
+      "value": "Status / Partial"
     },
     "STATUS.TEXT": {
       "label": "Status text",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Named networks remain evidence pending until their identifiers, sources, observation dates, and artifacts are registered."
+      "value": "Named networks remain evidence pending until their identifiers, sources, observation dates, and artifacts are registered. The evidence registry tracks this as CAP-003."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",
@@ -129,7 +129,31 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
+      "value": "NEXT QUESTION: WHAT IS MEASURED"
+    },
+    "LIMITS": {
+      "label": "Network limits link (in Evidence)",
+      "kind": "line",
+      "section": "Links",
+      "value": "WHAT A NETWORK ID DOES NOT ISOLATE"
+    },
+    "LIMITS.HREF": {
+      "label": "Network limits link (in Evidence): where it goes",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:concept/purpose"
+    },
+    "SETUP": {
+      "label": "Setup link (in Evidence)",
+      "kind": "line",
+      "section": "Links",
       "value": "CREATE OR JOIN A NETWORK"
+    },
+    "SETUP.HREF": {
+      "label": "Setup link (in Evidence): where it goes",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:deploy"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

@@ -67,7 +67,7 @@ var F_SCENE_RZERO_V0 = [
   '          .',
    '        . F-LINK-RLINK_V1',
   '            -L-NAV.WORK',
-  '            -H-#/experiments/lab',
+  '            -H-#/experiments',
   '          .',
   '        . F-LINK-RLINK_V1',
   '            -L-NAV.DEPLOY',

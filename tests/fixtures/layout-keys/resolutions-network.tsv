@@ -1,0 +1,61 @@
+# key	tag	text -- layout keys of /resolutions/network before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsNetwork16 / 20 · Infrastructure & operationsResolve your networkCreate or join a named network that scales itself as partners join.ForCommunities
+page:/nav:1	nav	All resolutionsNetwork
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Network
+page:/div:1	div	16 / 20 · Infrastructure & operationsResolve your networkCreate or join a named network that scales itself as partners join.ForCommunities and companies that wa
+page:/div:1/header:1	header	16 / 20 · Infrastructure & operationsResolve your networkCreate or join a named network that scales itself as partners join.ForCommunities and companies that wa
+page:/div:1/header:1/p:1	p	16 / 20 · Infrastructure & operations
+id:resolution-title-network	h1	Resolve your network
+page:/div:1/header:1/p:2	p	Create or join a named network that scales itself as partners join.
+page:/div:1/header:1/dl:1	dl	ForCommunities and companies that want their own network, and the people who run nodes.ProblemCloud accounts, fixed clusters and capacity planning before anyone
+page:/div:1/header:1/dl:1/div:1	div	ForCommunities and companies that want their own network, and the people who run nodes.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Communities and companies that want their own network, and the people who run nodes.
+page:/div:1/header:1/dl:1/div:2	div	ProblemCloud accounts, fixed clusters and capacity planning before anyone joins.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Cloud accounts, fixed clusters and capacity planning before anyone joins.
+page:/div:1/header:1/div:1	div	Start here →
+page:/div:1/header:1/div:1/a:1	a	Start here →
+page:/div:1/section:1	section	Ready now3Product ideas3How it resolvesNamed networksReadyCreate or join a network by name; it grows as nodes join.Open →Mesh monitorReadyLive health, latency a
+page:/div:1/section:1/div:1	div	Ready now3Product ideas3How it resolves
+id:resolution-level-tab-network-0	button	Ready now3
+page:/div:1/section:1/div:1/button:1/span:1	span	3
+id:resolution-level-tab-network-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-network-2	button	How it resolves
+id:resolution-level-network	div	Named networksReadyCreate or join a network by name; it grows as nodes join.Open →Mesh monitorReadyLive health, latency and throughput of the nodes you rely on.
+page:/div:1/section:1/div:2/div:1	div	Named networksReadyCreate or join a network by name; it grows as nodes join.Open →Mesh monitorReadyLive health, latency and throughput of the nodes you rely on.
+page:/div:1/section:1/div:2/div:1/a:1	a	Named networksReadyCreate or join a network by name; it grows as nodes join.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	Named networksReady
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Named networks
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Create or join a network by name; it grows as nodes join.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:2	a	Mesh monitorReadyLive health, latency and throughput of the nodes you rely on.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	Mesh monitorReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Mesh monitor
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Live health, latency and throughput of the nodes you rely on.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:3	a	Mesh ExplorerReadyRead any public record on the mesh and check who signed it.Open →
+page:/div:1/section:1/div:2/div:1/a:3/span:1	span	Mesh ExplorerReady
+page:/div:1/section:1/div:2/div:1/a:3/span:1/strong:1	strong	Mesh Explorer
+page:/div:1/section:1/div:2/div:1/a:3/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:3/span:2	span	Read any public record on the mesh and check who signed it.
+page:/div:1/section:1/div:2/div:1/a:3/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← Rules and patternsPreviousAll 20Encryptions →Next
+page:/nav:2/a:1	a	← Rules and patternsPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Encryptions →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

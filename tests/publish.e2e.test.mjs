@@ -18,7 +18,7 @@ import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
 import { createHost } from '../scripts/publish-host.mjs';
 import { totpAt, base32Decode } from '../scripts/lib/totp.mjs';
-import { createFluxRootHandle } from '../../flux-auth/src/rootFromMnemonic.mjs';
+import { createFluxRootHandle } from '../../fxn-auth/src/rootFromMnemonic.mjs';
 import { buildMarkerFields, publicMarkerSigningMessage } from '../../bundle-deploy/src/public-marker.js';
 import { createPublisher } from '../scripts/lib/publisher.mjs';
 import { readProject, decodeSite, encodeSite, defaultProjectRoot } from '../scripts/lib/site-bundle.mjs';

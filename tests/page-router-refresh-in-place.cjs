@@ -30,7 +30,7 @@ const window = { scrollY: 0, scrollTo(x, y) { this.scrollY = y; }, matchMedia: (
   ArkCanvasTransitions: { apply: (el, phase) => fades.push(phase) } };
 const context = vm.createContext({ console, document, window, location: { protocol: 'https:', pathname: '/', search: '', hash: '', origin: 'https://defxn.test' }, history: { pushState() {}, replaceState() {} }, Event: class { constructor(t) { this.type = t; } },
   getComputedStyle: () => ({ opacity: '1', transform: 'none' }), ArkUI: { prefersReducedMotion: () => false } });
-for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js', 'js/content/article-index.js', 'js/ark/scene-state.js', 'js/pages/catalog.js', 'js/ark/route.js', 'js/ark/page-router.js'])
+for (const file of ['js/ark/vendor/engines.js', 'js/content/learnings.js', 'js/content/article-index.js', 'js/ark/scene-state.js', 'js/content/site-pages.js', 'js/pages/catalog.js', 'js/ark/route.js', 'js/ark/page-router.js'])
   vm.runInContext(fs.readFileSync(file, 'utf8'), context);
 
 (async () => {

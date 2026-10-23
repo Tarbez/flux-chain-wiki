@@ -1,0 +1,75 @@
+# key	tag	text -- layout keys of /start-from-something-real before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeReference resolversDEFXN / REFERENCE RESOLVERSReference resolvers, without the leap of faith.AnswerUnderstand whyEvidenceCR3TV and DeArk are named in the pr
+page:/nav:1	nav	HomeReference resolvers
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Reference resolvers
+page:/p:1	p	DEFXN / REFERENCE RESOLVERS
+id:references-title	h1	Reference resolvers, without the leap of faith.
+page:/nav:2	nav	AnswerUnderstand whyEvidence
+page:/nav:2/button:1	button	Answer
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	Understand why
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	CR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, 
+page:/div:1/div:1	div	CR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, 
+page:/div:1/div:1/div:1	div	CR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, 
+page:/div:1/div:1/div:1/p:1	p	CR3TV and DeArk are named in the project material as reference resolvers. This audit did not establish a public resolver identifier, manifest link, source URL, 
+page:/div:1/div:1/aside:1	aside	Essential boundaryReference evidence pending. Until an inspectable record is registered, these names demonstrate intended examples, not independently verifiable
+page:/div:1/div:1/aside:1/strong:1	strong	Essential boundary
+page:/div:1/div:1/aside:1/p:1	p	Reference evidence pending. Until an inspectable record is registered, these names demonstrate intended examples, not independently verifiable deployment or pro
+page:/div:1/figure:1	figure	Illustration / relationships, not live progressPROVENANCE STAYS WITH THE CLAIMReference nameSource artifactDated observation
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / relationships, not live progress
+page:/div:1/figure:1/svg:1	svg	PROVENANCE STAYS WITH THE CLAIM
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/figure:1/svg:1/path:9	path	
+page:/div:1/figure:1/svg:1/path:10	path	
+page:/div:1/figure:1/svg:1/path:11	path	
+page:/div:1/figure:1/svg:1/rect:3	rect	
+page:/div:1/figure:1/svg:1/path:12	path	
+page:/div:1/figure:1/svg:1/path:13	path	
+page:/div:1/figure:1/svg:1/path:14	path	
+page:/div:1/figure:1/svg:1/rect:4	rect	
+page:/div:1/figure:1/svg:1/path:15	path	
+page:/div:1/figure:1/svg:1/path:16	path	
+page:/div:1/figure:1/svg:1/path:17	path	
+page:/div:1/figure:1/svg:1/text:1	text	PROVENANCE STAYS WITH THE CLAIM
+page:/div:1/figure:1/svg:1/path:18	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/div:1	div	Reference name
+page:/div:1/figure:1/div:2	div	Source artifact
+page:/div:1/figure:1/div:3	div	Dated observation
+page:/nav:3	nav	What is a resolverSee how DEFXN works
+page:/nav:3/a:1	a	What is a resolver
+page:/nav:3/a:2	a	See how DEFXN works
+page:/nav:3/a:2/svg:1	svg	
+page:/nav:3/a:2/svg:1/path:1	path	
+page:/nav:3/a:2/svg:1/path:2	path	
+page:/div:2	div	

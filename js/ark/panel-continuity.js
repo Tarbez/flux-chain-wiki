@@ -27,11 +27,12 @@
       /* top:84 matches every other full-bleed target (account) below --
          64 sat close enough to the 64px header that the box visibly
          crossed through the nav items while animating open or closed. */
-      if (panelPage === 'about') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-132) };
-      if (panelPage === 'chain') return { left:0, top:84, width:box.width, height:Math.max(180,box.height-148) };
+      /* /about and /chain were full-bleed hero pages; since Wave 3 they are Ark block pages and
+         take the same centred panel as every other block page (css/block-page.css). */
       var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
-      var resolutionDetail = String(panelPage).indexOf('resolutions/') === 0;
-      var maxWidth = panelPage === 'about' ? 1920 : panelPage === 'resolutions' ? 1480 : resolutionDetail ? 1280 : panelPage === 'deployment' || panelPage === 'explorer' || panelPage === 'account' ? 1600 : 1080;
+      /* /resolutions and its 20 pages, and /explore, too (W3-GUIDE): the block frame's 1080, not
+         their old 1480 / 1280 / 1600 (docs/ux-audit/pages-ux-b.md cross-page #4, three frame widths). */
+      var maxWidth = panelPage === 'deployment' || panelPage === 'account' ? 1600 : 1080;
       var width = Math.min(maxWidth, box.width - gutter * 2);
       return { left: (box.width - width) / 2, top: 84, width: width, height: Math.max(180, box.height - 148) };
     }

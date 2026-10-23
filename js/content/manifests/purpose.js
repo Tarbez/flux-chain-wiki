@@ -6,7 +6,7 @@ ArkManifest.define({
   "group": "theory",
   "meta": {
     "placement": "row",
-    "next": "deploy",
+    "next": "concept/depth",
     "docs": "docs/operators/networks.md",
     "back": "concept"
   },
@@ -21,13 +21,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "What does a Flux network isolate today?"
+      "value": "What does a DEFXN network do today?"
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "A named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an authoritative membership list or security boundary."
+      "value": "A named network lets a group of miners find each other. Every miner started with the same network ID announces itself in the same place. That is all a network separates today; what it does not separate is under Evidence."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Network IDs do not currently scope accounts, identities, DAOs, arbitrary records, or treasuries. Do not use them as a security boundary."
+      "value": "A named network currently isolates only miner-presence discovery. Network IDs do not scope accounts, identities, DAOs, arbitrary records, or treasuries. A network is not an authoritative membership list or security boundary; do not use its ID as one."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",
@@ -129,7 +129,19 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
+      "value": "NEXT QUESTION: HOW AN AGREEMENT IS CHECKED"
+    },
+    "SETUP": {
+      "label": "Setup link (in Evidence)",
+      "kind": "line",
+      "section": "Links",
       "value": "CREATE OR JOIN A NETWORK"
+    },
+    "SETUP.HREF": {
+      "label": "Setup link (in Evidence): where it goes",
+      "kind": "link",
+      "section": "Links",
+      "value": "route:deploy"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

@@ -1,0 +1,773 @@
+# key	tag	text -- layout keys of /resolver-math before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeWhat is a resolver?Resolver MathDEFXN · Foundational conceptResolver MathEverything this system can do is the sum of what somebody defined. Nothing else is 
+page:/nav:1	nav	HomeWhat is a resolver?Resolver Math
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/a:2	a	What is a resolver?
+page:/nav:1/a:2/svg:1	svg	
+page:/nav:1/a:2/svg:1/path:1	path	
+page:/nav:1/a:2/svg:1/path:2	path	
+page:/nav:1/span:1	span	Resolver Math
+page:/div:1	div	DEFXN · Foundational conceptResolver MathEverything this system can do is the sum of what somebody defined. Nothing else is in there.The equation20role lettersw
+page:/div:1/header:1	header	DEFXN · Foundational conceptResolver MathEverything this system can do is the sum of what somebody defined. Nothing else is in there.
+page:/div:1/header:1/div:1	div	DEFXN · Foundational conceptResolver MathEverything this system can do is the sum of what somebody defined. Nothing else is in there.
+page:/div:1/header:1/div:1/p:1	p	DEFXN · Foundational concept
+id:resolver-math-title	h1	Resolver Math
+page:/div:1/header:1/div:1/p:2	p	Everything this system can do is the sum of what somebody defined. Nothing else is in there.
+page:/div:1/div:1	div	The equation20role letterswhat a box can be+5longer labelsa box named by more than one letter+18action verbswhat can be done+95record typeswhat a record is abou
+page:/div:1/div:1/p:1	p	The equation
+page:/div:1/div:1/div:1	div	20role letterswhat a box can be+5longer labelsa box named by more than one letter+18action verbswhat can be done+95record typeswhat a record is about+12type-sco
+page:/div:1/div:1/div:1/div:1	div	20role letterswhat a box can be+5longer labelsa box named by more than one letter+18action verbswhat can be done+95record typeswhat a record is about+12type-sco
+page:/div:1/div:1/div:1/div:1/div:1	div	20role letterswhat a box can be
+page:/div:1/div:1/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:1/span:2	span	20
+page:/div:1/div:1/div:1/div:1/div:1/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:1/span:3	span	role letters
+page:/div:1/div:1/div:1/div:1/div:1/span:4	span	what a box can be
+page:/div:1/div:1/div:1/div:1/div:2	div	+5longer labelsa box named by more than one letter
+page:/div:1/div:1/div:1/div:1/div:2/span:1	span	+
+page:/div:1/div:1/div:1/div:1/div:2/span:2	span	5
+page:/div:1/div:1/div:1/div:1/div:2/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:2/span:3	span	longer labels
+page:/div:1/div:1/div:1/div:1/div:2/span:4	span	a box named by more than one letter
+page:/div:1/div:1/div:1/div:1/div:3	div	+18action verbswhat can be done
+page:/div:1/div:1/div:1/div:1/div:3/span:1	span	+
+page:/div:1/div:1/div:1/div:1/div:3/span:2	span	18
+page:/div:1/div:1/div:1/div:1/div:3/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:3/span:3	span	action verbs
+page:/div:1/div:1/div:1/div:1/div:3/span:4	span	what can be done
+page:/div:1/div:1/div:1/div:1/div:4	div	+95record typeswhat a record is about
+page:/div:1/div:1/div:1/div:1/div:4/span:1	span	+
+page:/div:1/div:1/div:1/div:1/div:4/span:2	span	95
+page:/div:1/div:1/div:1/div:1/div:4/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:4/span:3	span	record types
+page:/div:1/div:1/div:1/div:1/div:4/span:4	span	what a record is about
+page:/div:1/div:1/div:1/div:1/div:5	div	+12type-scoped shapeswhere meaning bends
+page:/div:1/div:1/div:1/div:1/div:5/span:1	span	+
+page:/div:1/div:1/div:1/div:1/div:5/span:2	span	12
+page:/div:1/div:1/div:1/div:1/div:5/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:5/span:3	span	type-scoped shapes
+page:/div:1/div:1/div:1/div:1/div:5/span:4	span	where meaning bends
+page:/div:1/div:1/div:1/div:1/div:6	div	+17resolver chainswhat can be worked out and signed
+page:/div:1/div:1/div:1/div:1/div:6/span:1	span	+
+page:/div:1/div:1/div:1/div:1/div:6/span:2	span	17
+page:/div:1/div:1/div:1/div:1/div:6/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:6/span:3	span	resolver chains
+page:/div:1/div:1/div:1/div:1/div:6/span:4	span	what can be worked out and signed
+page:/div:1/div:1/div:1/div:1/div:7	div	+5capabilitiesthe mechanisms resolvers are built from
+page:/div:1/div:1/div:1/div:1/div:7/span:1	span	+
+page:/div:1/div:1/div:1/div:1/div:7/span:2	span	5
+page:/div:1/div:1/div:1/div:1/div:7/span:2/span:1	span	
+page:/div:1/div:1/div:1/div:1/div:7/span:3	span	capabilities
+page:/div:1/div:1/div:1/div:1/div:7/span:4	span	the mechanisms resolvers are built from
+page:/div:1/div:1/div:1/div:1/div:8	div	
+page:/div:1/div:1/div:1/div:1/div:9	div	=everything that can be made realtoday, on this registry
+page:/div:1/div:1/div:1/div:1/div:9/span:1	span	=
+page:/div:1/div:1/div:1/div:1/div:9/span:2	span	everything that can be made real
+page:/div:1/div:1/div:1/div:1/div:9/span:3	span	today, on this registry
+page:/div:1/div:1/div:1/div:2	div	172 definitions, one cell eachEvery cell is one real entry in flux-spec/registry. The two outlined at the end are the ones nobody ever added.
+page:/div:1/div:1/div:1/div:2/p:1	p	172 definitions, one cell each
+page:/div:1/div:1/div:1/div:2/p:1/strong:1	strong	172
+page:/div:1/div:1/div:1/div:2/p:1/span:1	span	definitions, one cell each
+page:/div:1/div:1/div:1/div:2/svg:1	svg	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:1	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:2	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:3	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:4	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:5	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:6	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:7	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:8	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:9	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:10	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:11	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:12	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:13	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:14	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:15	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:16	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:17	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:18	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:19	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:20	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:21	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:22	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:23	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:24	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:25	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:26	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:27	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:28	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:29	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:30	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:31	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:32	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:33	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:34	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:35	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:36	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:37	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:38	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:39	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:40	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:41	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:42	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:43	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:44	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:45	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:46	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:47	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:48	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:49	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:50	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:51	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:52	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:53	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:54	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:55	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:56	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:57	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:58	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:59	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:60	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:61	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:62	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:63	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:64	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:65	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:66	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:67	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:68	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:69	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:70	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:71	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:72	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:73	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:74	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:75	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:76	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:77	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:78	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:79	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:80	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:81	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:82	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:83	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:84	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:85	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:86	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:87	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:88	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:89	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:90	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:91	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:92	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:93	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:94	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:95	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:96	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:97	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:98	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:99	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:100	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:101	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:102	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:103	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:104	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:105	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:106	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:107	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:108	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:109	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:110	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:111	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:112	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:113	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:114	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:115	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:116	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:117	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:118	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:119	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:120	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:121	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:122	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:123	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:124	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:125	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:126	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:127	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:128	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:129	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:130	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:131	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:132	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:133	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:134	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:135	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:136	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:137	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:138	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:139	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:140	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:141	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:142	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:143	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:144	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:145	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:146	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:147	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:148	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:149	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:150	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:151	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:152	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:153	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:154	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:155	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:156	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:157	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:158	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:159	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:160	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:161	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:162	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:163	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:164	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:165	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:166	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:167	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:168	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:169	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:170	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:171	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:172	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:173	rect	
+page:/div:1/div:1/div:1/div:2/svg:1/rect:174	rect	
+page:/div:1/div:1/div:1/div:2/p:2	p	Every cell is one real entry in flux-spec/registry. The two outlined at the end are the ones nobody ever added.
+page:/div:1/div:1/div:2	div	+0lending resolversso lending cannot happen+0split-payment verbsso a split payment cannot be said at allNot slowly. At all. A thing nobody defined is not a miss
+page:/div:1/div:1/div:2/div:1	div	+0lending resolversso lending cannot happen
+page:/div:1/div:1/div:2/div:1/span:1	span	+
+page:/div:1/div:1/div:2/div:1/span:2	span	0
+page:/div:1/div:1/div:2/div:1/span:3	span	lending resolvers
+page:/div:1/div:1/div:2/div:1/span:4	span	so lending cannot happen
+page:/div:1/div:1/div:2/div:2	div	+0split-payment verbsso a split payment cannot be said at all
+page:/div:1/div:1/div:2/div:2/span:1	span	+
+page:/div:1/div:1/div:2/div:2/span:2	span	0
+page:/div:1/div:1/div:2/div:2/span:3	span	split-payment verbs
+page:/div:1/div:1/div:2/div:2/span:4	span	so a split payment cannot be said at all
+page:/div:1/div:1/div:2/p:1	p	Not slowly. At all. A thing nobody defined is not a missing feature — it is a sentence the system cannot form.
+page:/div:1/div:1/p:2	p	You are not discovering this. You are writing it.
+page:/div:1/div:2	div	Take a term out and watch something stop existingUntick a definition. The list on the right is recomputed by the real resolver, rebuilt without that definition 
+page:/div:1/div:2/h2:1	h2	Take a term out and watch something stop existing
+page:/div:1/div:2/p:1	p	Untick a definition. The list on the right is recomputed by the real resolver, rebuilt without that definition — nothing here is a mock-up.
+page:/div:1/div:3	div	What you definedmessaging verbssocial verbsregistry verbschain verbsAMM verbstype-scoped shapesthe U letterthe Q letterTwo rows on the right can never be ticked
+page:/div:1/div:3/section:1	section	What you definedmessaging verbssocial verbsregistry verbschain verbsAMM verbstype-scoped shapesthe U letterthe Q letterTwo rows on the right can never be ticked
+page:/div:1/div:3/section:1/p:1	p	What you defined
+page:/div:1/div:3/section:1/label:1	label	messaging verbs
+page:/div:1/div:3/section:1/label:1/span:1	span	messaging verbs
+page:/div:1/div:3/section:1/label:2	label	social verbs
+page:/div:1/div:3/section:1/label:2/span:1	span	social verbs
+page:/div:1/div:3/section:1/label:3	label	registry verbs
+page:/div:1/div:3/section:1/label:3/span:1	span	registry verbs
+page:/div:1/div:3/section:1/label:4	label	chain verbs
+page:/div:1/div:3/section:1/label:4/span:1	span	chain verbs
+page:/div:1/div:3/section:1/label:5	label	AMM verbs
+page:/div:1/div:3/section:1/label:5/span:1	span	AMM verbs
+page:/div:1/div:3/section:1/label:6	label	type-scoped shapes
+page:/div:1/div:3/section:1/label:6/span:1	span	type-scoped shapes
+page:/div:1/div:3/section:1/label:7	label	the U letter
+page:/div:1/div:3/section:1/label:7/span:1	span	the U letter
+page:/div:1/div:3/section:1/label:8	label	the Q letter
+page:/div:1/div:3/section:1/label:8/span:1	span	the Q letter
+page:/div:1/div:3/section:1/p:2	p	Two rows on the right can never be ticked on: nobody ever defined them. That is the whole argument, and it is the only honest way to show it.
+page:/div:1/div:3/section:2	section	What can therefore be said10 of 12 things can be said. The other 2 were never defined, so no amount of ticking brings them back.✓Send a messageASENDmessaging ve
+page:/div:1/div:3/section:2/p:1	p	What can therefore be said
+page:/div:1/div:3/section:2/p:2	p	10 of 12 things can be said. The other 2 were never defined, so no amount of ticking brings them back.
+page:/div:1/div:3/section:2/ul:1	ul	✓Send a messageASENDmessaging verbs✓Follow someoneAFOLLOWsocial verbs✓Cite a paperACITEsocial verbs✓Register a nameAREGISTERregistry verbs✓Buy from a poolABUYAM
+page:/div:1/div:3/section:2/ul:1/li:1	li	✓Send a messageASENDmessaging verbs
+page:/div:1/div:3/section:2/ul:1/li:1/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:1/span:2	span	Send a message
+page:/div:1/div:3/section:2/ul:1/li:1/span:3	span	messaging verbs
+page:/div:1/div:3/section:2/ul:1/li:2	li	✓Follow someoneAFOLLOWsocial verbs
+page:/div:1/div:3/section:2/ul:1/li:2/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:2/span:2	span	Follow someone
+page:/div:1/div:3/section:2/ul:1/li:2/span:3	span	social verbs
+page:/div:1/div:3/section:2/ul:1/li:3	li	✓Cite a paperACITEsocial verbs
+page:/div:1/div:3/section:2/ul:1/li:3/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:3/span:2	span	Cite a paper
+page:/div:1/div:3/section:2/ul:1/li:3/span:3	span	social verbs
+page:/div:1/div:3/section:2/ul:1/li:4	li	✓Register a nameAREGISTERregistry verbs
+page:/div:1/div:3/section:2/ul:1/li:4/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:4/span:2	span	Register a name
+page:/div:1/div:3/section:2/ul:1/li:4/span:3	span	registry verbs
+page:/div:1/div:3/section:2/ul:1/li:5	li	✓Buy from a poolABUYAMM verbs
+page:/div:1/div:3/section:2/ul:1/li:5/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:5/span:2	span	Buy from a pool
+page:/div:1/div:3/section:2/ul:1/li:5/span:3	span	AMM verbs
+page:/div:1/div:3/section:2/ul:1/li:6	li	✓Add liquidityALIQUIDITYADDAMM verbs
+page:/div:1/div:3/section:2/ul:1/li:6/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:6/span:2	span	Add liquidity
+page:/div:1/div:3/section:2/ul:1/li:6/span:3	span	AMM verbs
+page:/div:1/div:3/section:2/ul:1/li:7	li	✓Mint against a proofAMINTchain verbs
+page:/div:1/div:3/section:2/ul:1/li:7/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:7/span:2	span	Mint against a proof
+page:/div:1/div:3/section:2/ul:1/li:7/span:3	span	chain verbs
+page:/div:1/div:3/section:2/ul:1/li:8	li	✓Hold a position in a poolJfootype-scoped shapes
+page:/div:1/div:3/section:2/ul:1/li:8/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:8/span:2	span	Hold a position in a pool
+page:/div:1/div:3/section:2/ul:1/li:8/span:3	span	type-scoped shapes
+page:/div:1/div:3/section:2/ul:1/li:9	li	✓Mark a claim pendingUPENDINGthe U letter
+page:/div:1/div:3/section:2/ul:1/li:9/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:9/span:2	span	Mark a claim pending
+page:/div:1/div:3/section:2/ul:1/li:9/span:3	span	the U letter
+page:/div:1/div:3/section:2/ul:1/li:10	li	✓Name what a claim is aboutQ636f6e63657074the Q letter
+page:/div:1/div:3/section:2/ul:1/li:10/span:1	span	✓
+page:/div:1/div:3/section:2/ul:1/li:10/span:2	span	Name what a claim is about
+page:/div:1/div:3/section:2/ul:1/li:10/span:3	span	the Q letter
+page:/div:1/div:3/section:2/ul:1/li:11	li	✗Lend against collateralALENDneeds a verb nobody defined
+page:/div:1/div:3/section:2/ul:1/li:11/span:1	span	✗
+page:/div:1/div:3/section:2/ul:1/li:11/span:2	span	Lend against collateral
+page:/div:1/div:3/section:2/ul:1/li:11/span:3	span	needs a verb nobody defined
+page:/div:1/div:3/section:2/ul:1/li:12	li	✗Split a paymentASPLITneeds a verb nobody defined
+page:/div:1/div:3/section:2/ul:1/li:12/span:1	span	✗
+page:/div:1/div:3/section:2/ul:1/li:12/span:2	span	Split a payment
+page:/div:1/div:3/section:2/ul:1/li:12/span:3	span	needs a verb nobody defined
+page:/div:1/div:4	div	Two ideas this page cannot show any other way
+page:/div:1/div:4/h2:1	h2	Two ideas this page cannot show any other way
+page:/div:1/div:5	div	A record is a row of boxesONE RECORD — SIX BOXESGwhosigned itYwhat kindof thingMwhenit was madeKKwhichsub-kindCtheaddressSthesignatureTHE DICTIONARYlives out he
+page:/div:1/div:5/section:1	section	A record is a row of boxesONE RECORD — SIX BOXESGwhosigned itYwhat kindof thingMwhenit was madeKKwhichsub-kindCtheaddressSthesignatureTHE DICTIONARYlives out he
+page:/div:1/div:5/section:1/p:1	p	A record is a row of boxes
+page:/div:1/div:5/section:1/figure:1	figure	ONE RECORD — SIX BOXESGwhosigned itYwhat kindof thingMwhenit was madeKKwhichsub-kindCtheaddressSthesignatureTHE DICTIONARYlives out here, not in the recordevery
+page:/div:1/div:5/section:1/figure:1/svg:1	svg	ONE RECORD — SIX BOXESGwhosigned itYwhat kindof thingMwhenit was madeKKwhichsub-kindCtheaddressSthesignatureTHE DICTIONARYlives out here, not in the recordevery
+page:/div:1/div:5/section:1/figure:1/svg:1/text:1	text	ONE RECORD — SIX BOXES
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:2	text	G
+page:/div:1/div:5/section:1/figure:1/svg:1/text:3	text	who
+page:/div:1/div:5/section:1/figure:1/svg:1/text:4	text	signed it
+page:/div:1/div:5/section:1/figure:1/svg:1/path:1	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:5	text	Y
+page:/div:1/div:5/section:1/figure:1/svg:1/text:6	text	what kind
+page:/div:1/div:5/section:1/figure:1/svg:1/text:7	text	of thing
+page:/div:1/div:5/section:1/figure:1/svg:1/path:2	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:3	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:8	text	M
+page:/div:1/div:5/section:1/figure:1/svg:1/text:9	text	when
+page:/div:1/div:5/section:1/figure:1/svg:1/text:10	text	it was made
+page:/div:1/div:5/section:1/figure:1/svg:1/path:3	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:4	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:11	text	KK
+page:/div:1/div:5/section:1/figure:1/svg:1/text:12	text	which
+page:/div:1/div:5/section:1/figure:1/svg:1/text:13	text	sub-kind
+page:/div:1/div:5/section:1/figure:1/svg:1/path:4	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:5	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:14	text	C
+page:/div:1/div:5/section:1/figure:1/svg:1/text:15	text	the
+page:/div:1/div:5/section:1/figure:1/svg:1/text:16	text	address
+page:/div:1/div:5/section:1/figure:1/svg:1/path:5	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:6	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:17	text	S
+page:/div:1/div:5/section:1/figure:1/svg:1/text:18	text	the
+page:/div:1/div:5/section:1/figure:1/svg:1/text:19	text	signature
+page:/div:1/div:5/section:1/figure:1/svg:1/rect:7	rect	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:20	text	THE DICTIONARY
+page:/div:1/div:5/section:1/figure:1/svg:1/text:21	text	lives out here, not in the record
+page:/div:1/div:5/section:1/figure:1/svg:1/path:6	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/path:7	path	
+page:/div:1/div:5/section:1/figure:1/svg:1/text:22	text	every letter points out here
+page:/div:1/div:5/section:1/figure:1/figcaption:1	figcaption	One record. Each box opens with a label — usually one letter, sometimes a few — and then some packed text. The label points at a dictionary kept outside the rec
+page:/div:1/div:5/section:2	section	A wish is not a factWISH × WISH = WISHALICE WANTSBOB WANTSRESOLVERchecks, works it outSIGNED RESULTthis is the factDASHED = A WISH SOLID = A FACTDashed means a 
+page:/div:1/div:5/section:2/p:1	p	A wish is not a fact
+page:/div:1/div:5/section:2/figure:1	figure	WISH × WISH = WISHALICE WANTSBOB WANTSRESOLVERchecks, works it outSIGNED RESULTthis is the factDASHED = A WISH SOLID = A FACTDashed means a wish; solid means a 
+page:/div:1/div:5/section:2/figure:1/svg:1	svg	WISH × WISH = WISHALICE WANTSBOB WANTSRESOLVERchecks, works it outSIGNED RESULTthis is the factDASHED = A WISH SOLID = A FACT
+page:/div:1/div:5/section:2/figure:1/svg:1/text:1	text	WISH × WISH = WISH
+page:/div:1/div:5/section:2/figure:1/svg:1/rect:1	rect	
+page:/div:1/div:5/section:2/figure:1/svg:1/text:2	text	ALICE WANTS
+page:/div:1/div:5/section:2/figure:1/svg:1/rect:2	rect	
+page:/div:1/div:5/section:2/figure:1/svg:1/text:3	text	BOB WANTS
+page:/div:1/div:5/section:2/figure:1/svg:1/path:1	path	
+page:/div:1/div:5/section:2/figure:1/svg:1/path:2	path	
+page:/div:1/div:5/section:2/figure:1/svg:1/rect:3	rect	
+page:/div:1/div:5/section:2/figure:1/svg:1/text:4	text	RESOLVER
+page:/div:1/div:5/section:2/figure:1/svg:1/text:5	text	checks, works it out
+page:/div:1/div:5/section:2/figure:1/svg:1/path:3	path	
+page:/div:1/div:5/section:2/figure:1/svg:1/path:4	path	
+page:/div:1/div:5/section:2/figure:1/svg:1/rect:4	rect	
+page:/div:1/div:5/section:2/figure:1/svg:1/text:6	text	SIGNED RESULT
+page:/div:1/div:5/section:2/figure:1/svg:1/text:7	text	this is the fact
+page:/div:1/div:5/section:2/figure:1/svg:1/circle:1	circle	
+page:/div:1/div:5/section:2/figure:1/svg:1/text:8	text	DASHED = A WISH SOLID = A FACT
+page:/div:1/div:5/section:2/figure:1/figcaption:1	figcaption	Dashed means a wish; solid means a fact. Two people wanting the same trade changes nothing at all. One program works it out and signs its name, and the signatur
+page:/div:1/div:6	div	What is fixed, and the one letter that bendsYou can define new things to say almost without limit. You can almost never define a new kind of box — except one, w
+page:/div:1/div:6/h2:1	h2	What is fixed, and the one letter that bends
+page:/div:1/div:6/p:1	p	You can define new things to say almost without limit. You can almost never define a new kind of box — except one, whose meaning depends on context.
+page:/div:1/div:6/p:2	p	Each layer was decided by a hazard somebody hit, not by taste.
+page:/div:1/div:7	div	DimensionStatusCountWhy it is this wayPositions — the role label that opens a blockclosed20 registered of 26 letters · 5 longer labelsEvery letter of the namesp
+page:/div:1/div:7/section:1	section	DimensionStatusCountWhy it is this wayPositions — the role label that opens a blockclosed20 registered of 26 letters · 5 longer labelsEvery letter of the namesp
+page:/div:1/div:7/section:1/div:1	div	DimensionStatusCountWhy it is this wayPositions — the role label that opens a blockclosed20 registered of 26 letters · 5 longer labelsEvery letter of the namesp
+page:/div:1/div:7/section:1/div:1/table:1	table	DimensionStatusCountWhy it is this wayPositions — the role label that opens a blockclosed20 registered of 26 letters · 5 longer labelsEvery letter of the namesp
+page:/div:1/div:7/section:1/div:1/table:1/thead:1	thead	DimensionStatusCountWhy it is this way
+page:/div:1/div:7/section:1/div:1/table:1/thead:1/tr:1	tr	DimensionStatusCountWhy it is this way
+page:/div:1/div:7/section:1/div:1/table:1/thead:1/tr:1/th:1	th	Dimension
+page:/div:1/div:7/section:1/div:1/table:1/thead:1/tr:1/th:2	th	Status
+page:/div:1/div:7/section:1/div:1/table:1/thead:1/tr:1/th:3	th	Count
+page:/div:1/div:7/section:1/div:1/table:1/thead:1/tr:1/th:4	th	Why it is this way
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1	tbody	Positions — the role label that opens a blockclosed20 registered of 26 letters · 5 longer labelsEvery letter of the namespace is accounted for as registered, re
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:1	tr	Positions — the role label that opens a blockclosed20 registered of 26 letters · 5 longer labelsEvery letter of the namespace is accounted for as registered, re
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:1/td:1	td	Positions — the role label that opens a block
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:1/td:2	td	closed
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:1/td:2/span:1	span	closed
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:1/td:3	td	20 registered of 26 letters · 5 longer labels
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:1/td:4	td	Every letter of the namespace is accounted for as registered, reserved-invalid, reserved-tooling or free. An unaccounted letter is a latent silent-collision bug
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:2	tr	Verbs — what the Action role can sayclosed18An unregistered verb throws rather than resolving to a default. The list must also stay prefix-free, or a future SEN
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:2/td:1	td	Verbs — what the Action role can say
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:2/td:2	td	closed
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:2/td:2/span:1	span	closed
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:2/td:3	td	18
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:2/td:4	td	An unregistered verb throws rather than resolving to a default. The list must also stay prefix-free, or a future SENDER misparses as SEND plus garbage. Groups: 
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:3	tr	Manifest types — what a record can be aboutopen95 cataloguedA catalog, not a gate. Nothing refuses a type outside it; a product with a domain the core has never
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:3/td:1	td	Manifest types — what a record can be about
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:3/td:2	td	open
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:3/td:2/span:1	span	open
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:3/td:3	td	95 catalogued
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:3/td:4	td	A catalog, not a gate. Nothing refuses a type outside it; a product with a domain the core has never heard of registers its own at runtime. That is what keeps t
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:4	tr	Meaning per observer — a letter whose shape depends on the record's typerelative12 declaredThe one strongly observer-relative dimension, and deliberately tiny: 
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:4/td:1	td	Meaning per observer — a letter whose shape depends on the record's type
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:4/td:2	td	relative
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:4/td:2/span:1	span	relative
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:4/td:3	td	12 declared
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:4/td:4	td	The one strongly observer-relative dimension, and deliberately tiny: a letter with no single global shape may be given one per manifest type. Letters involved: 
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:5	tr	Payloads — the content of a blockunboundedalphabet 63Any UTF-8 string enters as hex of its bytes, so the wire alphabet stays at 63 characters while the symbol s
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:5/td:1	td	Payloads — the content of a block
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:5/td:2	td	unbounded
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:5/td:2/span:1	span	unbounded
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:5/td:3	td	alphabet 63
+page:/div:1/div:7/section:1/div:1/table:1/tbody:1/tr:5/td:4	td	Any UTF-8 string enters as hex of its bytes, so the wire alphabet stays at 63 characters while the symbol space has no bound. A symbol is an address, not a para
+page:/div:1/div:7/section:1/p:1	p	Closed in its positions, unbounded in its payloads — adding a position risks a silent collision; adding a payload is just a new address.
+page:/div:1/div:7/section:2	section	One letter, ten real casesLetterWhen the record is a……it meansDefined inATRANSACTION (3)coded-fields (verb-and-flags, mirrors the core A role's own shape)chain-
+page:/div:1/div:7/section:2/p:1	p	One letter, ten real cases
+page:/div:1/div:7/section:2/div:1	div	LetterWhen the record is a……it meansDefined inATRANSACTION (3)coded-fields (verb-and-flags, mirrors the core A role's own shape)chain-manifest-v1.md §3.1JTRANSA
+page:/div:1/div:7/section:2/div:1/table:1	table	LetterWhen the record is a……it meansDefined inATRANSACTION (3)coded-fields (verb-and-flags, mirrors the core A role's own shape)chain-manifest-v1.md §3.1JTRANSA
+page:/div:1/div:7/section:2/div:1/table:1/thead:1	thead	LetterWhen the record is a……it meansDefined in
+page:/div:1/div:7/section:2/div:1/table:1/thead:1/tr:1	tr	LetterWhen the record is a……it meansDefined in
+page:/div:1/div:7/section:2/div:1/table:1/thead:1/tr:1/th:1	th	Letter
+page:/div:1/div:7/section:2/div:1/table:1/thead:1/tr:1/th:2	th	When the record is a…
+page:/div:1/div:7/section:2/div:1/table:1/thead:1/tr:1/th:3	th	…it means
+page:/div:1/div:7/section:2/div:1/table:1/thead:1/tr:1/th:4	th	Defined in
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1	tbody	ATRANSACTION (3)coded-fields (verb-and-flags, mirrors the core A role's own shape)chain-manifest-v1.md §3.1JTRANSACTION (3)opaque-alphanumeric (mirrors C's shap
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:1	tr	ATRANSACTION (3)coded-fields (verb-and-flags, mirrors the core A role's own shape)chain-manifest-v1.md §3.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:1/td:1	td	A
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:1/td:2	td	TRANSACTION (3)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:1/td:3	td	coded-fields (verb-and-flags, mirrors the core A role's own shape)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:1/td:4	td	chain-manifest-v1.md §3.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:2	tr	JTRANSACTION (3)opaque-alphanumeric (mirrors C's shape)chain-manifest-v1.md §3.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:2/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:2/td:2	td	TRANSACTION (3)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:2/td:3	td	opaque-alphanumeric (mirrors C's shape)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:2/td:4	td	chain-manifest-v1.md §3.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:3	tr	JBLOCK (R)opaque-alphanumericchain-manifest-v1.md §6 (second content-address slot)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:3/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:3/td:2	td	BLOCK (R)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:3/td:3	td	opaque-alphanumeric
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:3/td:4	td	chain-manifest-v1.md §6 (second content-address slot)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:4	tr	JVOTE (S)opaque-alphanumericchain-manifest-v1.md §6 (second content-address slot)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:4/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:4/td:2	td	VOTE (S)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:4/td:3	td	opaque-alphanumeric
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:4/td:4	td	chain-manifest-v1.md §6 (second content-address slot)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:5	tr	JPROOF (T)opaque-alphanumeric, repeatablechain-manifest-v1.md §3.3
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:5/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:5/td:2	td	PROOF (T)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:5/td:3	td	opaque-alphanumeric, repeatable
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:5/td:4	td	chain-manifest-v1.md §3.3
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:6	tr	JPOOL (W)coded-fieldsspec/amm-manifest-v1.md §2.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:6/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:6/td:2	td	POOL (W)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:6/td:3	td	coded-fields
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:6/td:4	td	spec/amm-manifest-v1.md §2.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:7	tr	JPOSITION (X)coded-fieldsspec/amm-manifest-v1.md §2.2
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:7/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:7/td:2	td	POSITION (X)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:7/td:3	td	coded-fields
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:7/td:4	td	spec/amm-manifest-v1.md §2.2
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:8	tr	JSWAP (Y)coded-fieldsspec/amm-manifest-v1.md §2.3
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:8/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:8/td:2	td	SWAP (Y)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:8/td:3	td	coded-fields
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:8/td:4	td	spec/amm-manifest-v1.md §2.3
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:9	tr	OAIPCLAIM (0E)coded-fields (tagged claim-stack entries, mirrors dense_v3::Role::Observation/claim_stack::ClaimStack's own O usage)chain-manifest-v1.md's AIP/AIP
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:9/td:1	td	O
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:9/td:2	td	AIPCLAIM (0E)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:9/td:3	td	coded-fields (tagged claim-stack entries, mirrors dense_v3::Role::Observation/claim_stack::ClaimStack's own O usage)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:9/td:4	td	chain-manifest-v1.md's AIP/AIPCLAIM section (chain_v1.rs module docs)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:10	tr	JLEDGERENTRY (1A)coded-fieldsdefxn/docs/finance-ledger-design.md §5.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:10/td:1	td	J
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:10/td:2	td	LEDGERENTRY (1A)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:10/td:3	td	coded-fields
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:10/td:4	td	defxn/docs/finance-ledger-design.md §5.1
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:11	tr	NLEDGERENTRY (1A)lowercase-alphanumeric, 3-32 charactersdense-wire/src/chain.rs::is_chain_id_shape (Phase B.1, chain-of-chains design)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:11/td:1	td	N
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:11/td:2	td	LEDGERENTRY (1A)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:11/td:3	td	lowercase-alphanumeric, 3-32 characters
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:11/td:4	td	dense-wire/src/chain.rs::is_chain_id_shape (Phase B.1, chain-of-chains design)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:12	tr	KLEDGERENTRY (1A)opaque-alphanumericdense-wire/src/chain.rs (23 sub-kind constants: DAO_KIND_FOUND, TREASURY_KIND_SPEND, STAKE_KIND_LOCK, SLASH_KIND_PROVIDER, .
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:12/td:1	td	K
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:12/td:2	td	LEDGERENTRY (1A)
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:12/td:3	td	opaque-alphanumeric
+page:/div:1/div:7/section:2/div:1/table:1/tbody:1/tr:12/td:4	td	dense-wire/src/chain.rs (23 sub-kind constants: DAO_KIND_FOUND, TREASURY_KIND_SPEND, STAKE_KIND_LOCK, SLASH_KIND_PROVIDER, ...)
+page:/div:1/div:7/section:2/p:2	p	A type that declares no shape for a letter carries no meaning for it — undefined, not broken. The type letter Y is always fixed, so every reader agrees which ca
+page:/div:1/div:8	div	Resolve a block yourselfType a box and watch what happens to it. The frightening ones are not the refusals — they are the ones that say “resolved” and are wrong
+page:/div:1/div:8/h2:1	h2	Resolve a block yourself
+page:/div:1/div:8/p:1	p	Type a box and watch what happens to it. The frightening ones are not the refusals — they are the ones that say “resolved” and are wrong.
+page:/div:1/div:9	div	One role label — usually a single letter — then packed textASENDAFOLLOWAREMIXYGHOSTTYPEGHOSTNOTIFYUPENDINGUPDATEQ636f6e63657074QUERYL418400LABELM1760000000V3Jfo
+page:/div:1/div:9/section:1	section	One role label — usually a single letter — then packed textASENDAFOLLOWAREMIXYGHOSTTYPEGHOSTNOTIFYUPENDINGUPDATEQ636f6e63657074QUERYL418400LABELM1760000000V3Jfo
+page:/div:1/div:9/section:1/label:1	label	One role label — usually a single letter — then packed text
+page:/div:1/div:9/section:1/div:1	div	ASENDAFOLLOWAREMIXYGHOSTTYPEGHOSTNOTIFYUPENDINGUPDATEQ636f6e63657074QUERYL418400LABELM1760000000V3JfooZFOONAMEaliceTITLE68656c6c6fKKDAO1KINDDAO1CHAINmychain1
+page:/div:1/div:9/section:1/div:1/button:1	button	ASEND
+page:/div:1/div:9/section:1/div:1/button:2	button	AFOLLOW
+page:/div:1/div:9/section:1/div:1/button:3	button	AREMIX
+page:/div:1/div:9/section:1/div:1/button:4	button	YGHOST
+page:/div:1/div:9/section:1/div:1/button:5	button	TYPEGHOST
+page:/div:1/div:9/section:1/div:1/button:6	button	NOTIFY
+page:/div:1/div:9/section:1/div:1/button:7	button	UPENDING
+page:/div:1/div:9/section:1/div:1/button:8	button	UPDATE
+page:/div:1/div:9/section:1/div:1/button:9	button	Q636f6e63657074
+page:/div:1/div:9/section:1/div:1/button:10	button	QUERY
+page:/div:1/div:9/section:1/div:1/button:11	button	L418400
+page:/div:1/div:9/section:1/div:1/button:12	button	LABEL
+page:/div:1/div:9/section:1/div:1/button:13	button	M1760000000
+page:/div:1/div:9/section:1/div:1/button:14	button	V3
+page:/div:1/div:9/section:1/div:1/button:15	button	Jfoo
+page:/div:1/div:9/section:1/div:1/button:16	button	ZFOO
+page:/div:1/div:9/section:1/div:1/button:17	button	NAMEalice
+page:/div:1/div:9/section:1/div:1/button:18	button	TITLE68656c6c6f
+page:/div:1/div:9/section:1/div:1/button:19	button	KKDAO1
+page:/div:1/div:9/section:1/div:1/button:20	button	KINDDAO1
+page:/div:1/div:9/section:1/div:1/button:21	button	CHAINmychain1
+page:/div:1/div:9/section:1/div:2	div	Resolved — and this is the dangerous case.Position TTarget · pattern group · payload numeric-unit-or-opaque · core profileResolvedas an opaque Target string "YP
+page:/div:1/div:9/section:1/div:2/p:1	p	Resolved — and this is the dangerous case.
+page:/div:1/div:9/section:1/div:2/dl:1	dl	Position TTarget · pattern group · payload numeric-unit-or-opaque · core profileResolvedas an opaque Target string "YPEGHOST".HazardTarget absorbs: it accepts a
+page:/div:1/div:9/section:1/div:2/dl:1/dt:1	dt	Position T
+page:/div:1/div:9/section:1/div:2/dl:1/dd:1	dd	Target · pattern group · payload numeric-unit-or-opaque · core profile
+page:/div:1/div:9/section:1/div:2/dl:1/dt:2	dt	Resolved
+page:/div:1/div:9/section:1/div:2/dl:1/dd:2	dd	as an opaque Target string "YPEGHOST".
+page:/div:1/div:9/section:1/div:2/dl:1/dt:3	dt	Hazard
+page:/div:1/div:9/section:1/div:2/dl:1/dd:3	dd	Target absorbs: it accepts any dash-free alphanumeric text, so this SUCCEEDED and may still be wrong. If you meant a different role, nothing here will ever tell
+page:/div:1/div:9/section:1/div:2/dl:1/dt:4	dt	Why it matters
+page:/div:1/div:9/section:1/div:2/dl:1/dd:4	dd	This is the silent collision the closed position list exists to prevent. A refusal names what it needs; a collision signs something nobody meant.
+page:/div:1/div:10	div	The four rules, and the test that would catch us breaking eachDefinitions decide what can be said. These decide what makes it true.
+page:/div:1/div:10/h2:1	h2	The four rules, and the test that would catch us breaking each
+page:/div:1/div:10/p:1	p	Definitions decide what can be said. These decide what makes it true.
+page:/div:1/div:11	div	RuleIn shortWhat holds it in placeImaginary × Imaginary = ImaginaryNo resolution without a resolver.a_forged_intent_fails_the_whole_batchR × Imaginary = Reality
+page:/div:1/div:11/section:1	section	RuleIn shortWhat holds it in placeImaginary × Imaginary = ImaginaryNo resolution without a resolver.a_forged_intent_fails_the_whole_batchR × Imaginary = Reality
+page:/div:1/div:11/section:1/div:1	div	RuleIn shortWhat holds it in placeImaginary × Imaginary = ImaginaryNo resolution without a resolver.a_forged_intent_fails_the_whole_batchR × Imaginary = Reality
+page:/div:1/div:11/section:1/div:1/table:1	table	RuleIn shortWhat holds it in placeImaginary × Imaginary = ImaginaryNo resolution without a resolver.a_forged_intent_fails_the_whole_batchR × Imaginary = Reality
+page:/div:1/div:11/section:1/div:1/table:1/thead:1	thead	RuleIn shortWhat holds it in place
+page:/div:1/div:11/section:1/div:1/table:1/thead:1/tr:1	tr	RuleIn shortWhat holds it in place
+page:/div:1/div:11/section:1/div:1/table:1/thead:1/tr:1/th:1	th	Rule
+page:/div:1/div:11/section:1/div:1/table:1/thead:1/tr:1/th:2	th	In short
+page:/div:1/div:11/section:1/div:1/table:1/thead:1/tr:1/th:3	th	What holds it in place
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1	tbody	Imaginary × Imaginary = ImaginaryNo resolution without a resolver.a_forged_intent_fails_the_whole_batchR × Imaginary = RealityResolution produces reality.measur
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:1	tr	Imaginary × Imaginary = ImaginaryNo resolution without a resolver.a_forged_intent_fails_the_whole_batch
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:1/td:1	td	Imaginary × Imaginary = Imaginary
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:1/td:2	td	No resolution without a resolver.
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:1/td:3	td	a_forged_intent_fails_the_whole_batch
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:1/td:3/span:1	span	a_forged_intent_fails_the_whole_batch
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2	tr	R × Imaginary = RealityResolution produces reality.measured — BENCH-012
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:1	td	R × Imaginary = Reality
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:2	td	Resolution produces reality.
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:3	td	measured — BENCH-012
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:3/span:1	span	measured — BENCH-012
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:2/td:3/span:1/span:1	span	measured — BENCH-012
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:3	tr	Reality × Reality = RealityReplicas store without change.a_replica_stores_without_verifying
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:3/td:1	td	Reality × Reality = Reality
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:3/td:2	td	Replicas store without change.
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:3/td:3	td	a_replica_stores_without_verifying
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:3/td:3/span:1	span	a_replica_stores_without_verifying
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:4	tr	Imaginary × Reality = ∅You cannot resolve into the past.a_replayed_nonce_is_refused_and_nameda_reordered_batch_fails_the_audit
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:4/td:1	td	Imaginary × Reality = ∅
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:4/td:2	td	You cannot resolve into the past.
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:4/td:3	td	a_replayed_nonce_is_refused_and_nameda_reordered_batch_fails_the_audit
+page:/div:1/div:11/section:1/div:1/table:1/tbody:1/tr:4/td:3/span:1	span	a_replayed_nonce_is_refused_and_nameda_reordered_batch_fails_the_audit
+page:/div:1/div:11/section:2	section	Written as algebraΨ = ⟨s₁, s₂, …, sₙ⟩a record is a row of symbolsS(s, i, O) → mmeaning needs the symbol, its place, and who is readingS undefined → imaginaryund
+page:/div:1/div:11/section:2/p:1	p	Written as algebra
+page:/div:1/div:11/section:2/div:1	div	Ψ = ⟨s₁, s₂, …, sₙ⟩a record is a row of symbols
+page:/div:1/div:11/section:2/div:1/p:1	p	a record is a row of symbols
+page:/div:1/div:11/section:2/div:2	div	S(s, i, O) → mmeaning needs the symbol, its place, and who is reading
+page:/div:1/div:11/section:2/div:2/p:1	p	meaning needs the symbol, its place, and who is reading
+page:/div:1/div:11/section:2/div:3	div	S undefined → imaginaryundecided, not broken
+page:/div:1/div:11/section:2/div:3/p:1	p	undecided, not broken
+page:/div:1/div:11/section:2/p:2	p	A smaller statement than the sum above — “imaginary × imaginary = imaginary” is one line of it.
+page:/div:1/div:12	div	What the sum adds up to today6 audited resolver families have a measured limit. 14 are declared and not built — named, because zero would mean “we measured it a
+page:/div:1/div:12/h2:1	h2	What the sum adds up to today
+page:/div:1/div:12/p:1	p	6 audited resolver families have a measured limit. 14 are declared and not built — named, because zero would mean “we measured it and it scored nothing”. Resolv
+page:/div:1/div:13	div	Audited families built6each with a measured limitDeclared, not built14things that cannot be made real todayExpanding a resolver does not make something faster. 
+page:/div:1/div:13/article:1	article	Audited families built6each with a measured limit
+page:/div:1/div:13/article:1/p:1	p	Audited families built
+page:/div:1/div:13/article:1/p:2	p	6
+page:/div:1/div:13/article:1/p:2/strong:1	strong	6
+page:/div:1/div:13/article:1/p:2/span:1	span	
+page:/div:1/div:13/article:1/p:3	p	each with a measured limit
+page:/div:1/div:13/article:2	article	Declared, not built14things that cannot be made real today
+page:/div:1/div:13/article:2/p:1	p	Declared, not built
+page:/div:1/div:13/article:2/p:2	p	14
+page:/div:1/div:13/article:2/p:2/strong:1	strong	14
+page:/div:1/div:13/article:2/p:2/span:1	span	
+page:/div:1/div:13/article:2/p:3	p	things that cannot be made real today
+page:/div:1/div:13/section:1	section	Expanding a resolver does not make something faster. It makes it possible. A signed result is equally true whether it took 13 ms or 13 seconds — speed decides h
+page:/div:1/div:13/section:1/p:1	p	Expanding a resolver does not make something faster. It makes it possible. A signed result is equally true whether it took 13 ms or 13 seconds — speed decides h
+page:/div:1/div:13/section:1/p:2	p	Read the resolver auditResolvers and capabilities →
+page:/div:1/div:13/section:1/p:2/a:1	a	Read the resolver audit
+page:/div:1/div:13/section:1/p:2/a:2	a	Resolvers and capabilities →
+page:/div:1/div:13/section:2	section	Resolver family (audited)What it turns into a signed resultMeasured limitDeFi-Swap-AMM2 signed swap intents → one cleared batch256 swaps/batch · 13.874 ms · 153
+page:/div:1/div:13/section:2/div:1	div	Resolver family (audited)What it turns into a signed resultMeasured limitDeFi-Swap-AMM2 signed swap intents → one cleared batch256 swaps/batch · 13.874 ms · 153
+page:/div:1/div:13/section:2/div:1/table:1	table	Resolver family (audited)What it turns into a signed resultMeasured limitDeFi-Swap-AMM2 signed swap intents → one cleared batch256 swaps/batch · 13.874 ms · 153
+page:/div:1/div:13/section:2/div:1/table:1/thead:1	thead	Resolver family (audited)What it turns into a signed resultMeasured limit
+page:/div:1/div:13/section:2/div:1/table:1/thead:1/tr:1	tr	Resolver family (audited)What it turns into a signed resultMeasured limit
+page:/div:1/div:13/section:2/div:1/table:1/thead:1/tr:1/th:1	th	Resolver family (audited)
+page:/div:1/div:13/section:2/div:1/table:1/thead:1/tr:1/th:2	th	What it turns into a signed result
+page:/div:1/div:13/section:2/div:1/table:1/thead:1/tr:1/th:3	th	Measured limit
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1	tbody	DeFi-Swap-AMM2 signed swap intents → one cleared batch256 swaps/batch · 13.874 ms · 153.7 batches/sIdentity-Name-Ownership1 signed name record → ownership0.0011
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:1	tr	DeFi-Swap-AMM2 signed swap intents → one cleared batch256 swaps/batch · 13.874 ms · 153.7 batches/s
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:1/td:1	td	DeFi-Swap-AMM
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:1/td:2	td	2 signed swap intents → one cleared batch
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:1/td:3	td	256 swaps/batch · 13.874 ms · 153.7 batches/s
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:2	tr	Identity-Name-Ownership1 signed name record → ownership0.0011 ms per resolution
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:2/td:1	td	Identity-Name-Ownership
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:2/td:2	td	1 signed name record → ownership
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:2/td:3	td	0.0011 ms per resolution
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:3	tr	Device-Enrollment1 signed enroll or revoke → roster0.0011 ms per resolution
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:3/td:1	td	Device-Enrollment
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:3/td:2	td	1 signed enroll or revoke → roster
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:3/td:3	td	0.0011 ms per resolution
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:4	tr	Grammar-Admission-Floor1 dense record → fields715,955 records/s
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:4/td:1	td	Grammar-Admission-Floor
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:4/td:2	td	1 dense record → fields
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:4/td:3	td	715,955 records/s
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:5	tr	Stake-Position1 signed stake lock → positionverifies its own signature · far slower
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:5/td:1	td	Stake-Position
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:5/td:2	td	1 signed stake lock → position
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:5/td:3	td	verifies its own signature · far slower
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:6	tr	Traffic-Gossip2 signed entries, same signer, same position → frozen forkverifies 2 signatures · relays to peers
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:6/td:1	td	Traffic-Gossip
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:6/td:2	td	2 signed entries, same signer, same position → frozen fork
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:6/td:3	td	verifies 2 signatures · relays to peers
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:7	tr	Liquidity-Add1 signed add intent → pool mintnot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:7/td:1	td	Liquidity-Add
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:7/td:2	td	1 signed add intent → pool mint
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:7/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:7/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:8	tr	Liquidity-Remove1 signed remove intent → pool burnnot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:8/td:1	td	Liquidity-Remove
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:8/td:2	td	1 signed remove intent → pool burn
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:8/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:8/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:9	tr	Lending2 signed loan intents → positionnot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:9/td:1	td	Lending
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:9/td:2	td	2 signed loan intents → position
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:9/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:9/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:10	tr	Borrowing2 signed borrow intents → collateral checknot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:10/td:1	td	Borrowing
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:10/td:2	td	2 signed borrow intents → collateral check
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:10/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:10/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:11	tr	Liquidation1 signed liquidate intent → health checknot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:11/td:1	td	Liquidation
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:11/td:2	td	1 signed liquidate intent → health check
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:11/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:11/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:12	tr	Governance-Vote1 signed vote → tallynot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:12/td:1	td	Governance-Vote
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:12/td:2	td	1 signed vote → tally
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:12/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:12/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:13	tr	Treasury-SpendN signed approvals → multisignot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:13/td:1	td	Treasury-Spend
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:13/td:2	td	N signed approvals → multisig
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:13/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:13/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:14	tr	Group-Membership1 signed join or leave → rosternot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:14/td:1	td	Group-Membership
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:14/td:2	td	1 signed join or leave → roster
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:14/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:14/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:15	tr	Content-Publish1 signed content → store and indexnot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:15/td:1	td	Content-Publish
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:15/td:2	td	1 signed content → store and index
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:15/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:15/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:16	tr	Claim-Sign-Then-Approve2 signed halves → both verifiednot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:16/td:1	td	Claim-Sign-Then-Approve
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:16/td:2	td	2 signed halves → both verified
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:16/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:16/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:17	tr	Vault-Encrypt-Store1 signed store → encrypt and pinnot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:17/td:1	td	Vault-Encrypt-Store
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:17/td:2	td	1 signed store → encrypt and pin
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:17/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:17/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:18	tr	Search1 signed query → lookup and ranknot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:18/td:1	td	Search
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:18/td:2	td	1 signed query → lookup and rank
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:18/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:18/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:19	tr	Geometric-6-Types1 signed query → computenot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:19/td:1	td	Geometric-6-Types
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:19/td:2	td	1 signed query → compute
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:19/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:19/td:3/span:1	span	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:20	tr	AI-TLM1 signed query → grounding gate and synthesisnot built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:20/td:1	td	AI-TLM
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:20/td:2	td	1 signed query → grounding gate and synthesis
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:20/td:3	td	not built
+page:/div:1/div:13/section:2/div:1/table:1/tbody:1/tr:20/td:3/span:1	span	not built
+page:/div:1/div:14	div	Where this page stops being true
+page:/div:1/div:14/h2:1	h2	Where this page stops being true
+page:/div:1/div:15	div	Piece of the ideaStatusWhat it would takeA per-peer meaning table — two peers privately holding different meanings for one symbol at one positionNot built, part
+page:/div:1/div:15/section:1	section	Piece of the ideaStatusWhat it would takeA per-peer meaning table — two peers privately holding different meanings for one symbol at one positionNot built, part
+page:/div:1/div:15/section:1/div:1	div	Piece of the ideaStatusWhat it would takeA per-peer meaning table — two peers privately holding different meanings for one symbol at one positionNot built, part
+page:/div:1/div:15/section:1/div:1/table:1	table	Piece of the ideaStatusWhat it would takeA per-peer meaning table — two peers privately holding different meanings for one symbol at one positionNot built, part
+page:/div:1/div:15/section:1/div:1/table:1/thead:1	thead	Piece of the ideaStatusWhat it would take
+page:/div:1/div:15/section:1/div:1/table:1/thead:1/tr:1	tr	Piece of the ideaStatusWhat it would take
+page:/div:1/div:15/section:1/div:1/table:1/thead:1/tr:1/th:1	th	Piece of the idea
+page:/div:1/div:15/section:1/div:1/table:1/thead:1/tr:1/th:2	th	Status
+page:/div:1/div:15/section:1/div:1/table:1/thead:1/tr:1/th:3	th	What it would take
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1	tbody	A per-peer meaning table — two peers privately holding different meanings for one symbol at one positionNot built, partly on purposeThe type-scoped form above i
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:1	tr	A per-peer meaning table — two peers privately holding different meanings for one symbol at one positionNot built, partly on purposeThe type-scoped form above i
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:1/td:1	td	A per-peer meaning table — two peers privately holding different meanings for one symbol at one position
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:1/td:2	td	Not built, partly on purpose
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:1/td:2/span:1	span	Not built, partly on purpose
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:1/td:3	td	The type-scoped form above is built and real. What does not exist is a per-peer override: the type-scoped shapes live in one shared registry every observer read
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:2	tr	Runtime self-registration — a record that defines a new dimension, so the grammar extends itself as it runsNot builtRegistering a dimension today is a signed ch
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:2/td:1	td	Runtime self-registration — a record that defines a new dimension, so the grammar extends itself as it runs
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:2/td:2	td	Not built
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:2/td:2/span:1	span	Not built
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:2/td:3	td	Registering a dimension today is a signed change to the registry, reviewed against absorbing roles for silent collisions. The review is the cost, and it is not 
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:3	tr	Asking a human at parse time for a meaning the table lacksRejected, not pendingDeliberately not a gap to close. Resolution has to be deterministic to be signabl
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:3/td:1	td	Asking a human at parse time for a meaning the table lacks
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:3/td:2	td	Rejected, not pending
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:3/td:2/span:1	span	Rejected, not pending
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:3/td:3	td	Deliberately not a gap to close. Resolution has to be deterministic to be signable: two observers must get the same result from the same bytes, and a parse that
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:4	tr	“Zero cost” for an unbounded spaceOverstatedA lookup is O(1) and a small record parses in O(n); that part holds. What is not free is admitting a new position, w
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:4/td:1	td	“Zero cost” for an unbounded space
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:4/td:2	td	Overstated
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:4/td:2/span:1	span	Overstated
+page:/div:1/div:15/section:1/div:1/table:1/tbody:1/tr:4/td:3	td	A lookup is O(1) and a small record parses in O(n); that part holds. What is not free is admitting a new position, which costs a collision audit against every a
+page:/div:1/div:15/section:1/p:1	p	The resemblance to observation collapsing a superposition is an analogy and is used as one. Nothing here is measured in quantum terms.
+page:/div:1/div:16	div	Keep readingResolver math, in fullResolver auditDeprecation ledgerBENCH-012What is a resolver?Fleet dashboardBrowse resolvers →Two parties sign → a resolver sha
+page:/div:1/div:16/section:1	section	Keep readingResolver math, in fullResolver auditDeprecation ledgerBENCH-012What is a resolver?Fleet dashboardBrowse resolvers →Two parties sign → a resolver sha
+page:/div:1/div:16/section:1/p:1	p	Keep reading
+page:/div:1/div:16/section:1/div:1	div	Resolver math, in fullResolver auditDeprecation ledgerBENCH-012What is a resolver?Fleet dashboardBrowse resolvers →
+page:/div:1/div:16/section:1/div:1/a:1	a	Resolver math, in full
+page:/div:1/div:16/section:1/div:1/a:2	a	Resolver audit
+page:/div:1/div:16/section:1/div:1/a:3	a	Deprecation ledger
+page:/div:1/div:16/section:1/div:1/a:4	a	BENCH-012
+page:/div:1/div:16/section:1/div:1/a:5	a	What is a resolver?
+page:/div:1/div:16/section:1/div:1/a:6	a	Fleet dashboard
+page:/div:1/div:16/section:1/div:1/a:7	a	Browse resolvers →
+page:/div:1/div:16/section:1/p:2	p	Two parties sign → a resolver shard resolves → the shard signs the result → replicas store → anyone audits. Census generated from flux-spec/registry · role-lett
+page:/div:1/div:17	div	

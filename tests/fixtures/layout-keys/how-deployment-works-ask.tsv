@@ -1,0 +1,72 @@
+# key	tag	text -- layout keys of /how-deployment-works/ask before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Agreement lifecycle01 / State the requestTell them what you need.Every job on DEFXN starts as a signed request, called an intent: the fixed point every later re
+page:/nav:1	nav	Agreement lifecycle01 / State the request
+page:/nav:1/a:1	a	Agreement lifecycle
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	01 / State the request
+page:/header:1	header	Tell them what you need.Every job on DEFXN starts as a signed request, called an intent: the fixed point every later record refers back to.
+id:how-ask-title	h1	Tell them what you need.
+page:/header:1/p:1	p	Every job on DEFXN starts as a signed request, called an intent: the fixed point every later record refers back to.
+page:/p:1	p	Written for the earlier agreement path, which is no longer the direction. For resolvers today, read What is a resolver. What is a resolver →
+page:/p:1/a:1	a	What is a resolver →
+page:/div:1	div	THE SIGNED INTENT / EXAMPLEMake a copy of these files.SnapshotThe exact files, by content IDOutcomeWhat the finished copy must matchPolicyThe rules and limits t
+page:/div:1/section:1	section	THE SIGNED INTENT / EXAMPLEMake a copy of these files.SnapshotThe exact files, by content IDOutcomeWhat the finished copy must matchPolicyThe rules and limits t
+page:/div:1/section:1/span:1	span	THE SIGNED INTENT / EXAMPLE
+page:/div:1/section:1/h2:1	h2	Make a copy of these files.
+page:/div:1/section:1/dl:1	dl	SnapshotThe exact files, by content IDOutcomeWhat the finished copy must matchPolicyThe rules and limits that applySigned byYou, the clientProducesAn intent ID 
+page:/div:1/section:1/dl:1/dt:1	dt	Snapshot
+page:/div:1/section:1/dl:1/dd:1	dd	The exact files, by content ID
+page:/div:1/section:1/dl:1/dt:2	dt	Outcome
+page:/div:1/section:1/dl:1/dd:2	dd	What the finished copy must match
+page:/div:1/section:1/dl:1/dt:3	dt	Policy
+page:/div:1/section:1/dl:1/dd:3	dd	The rules and limits that apply
+page:/div:1/section:1/dl:1/dt:4	dt	Signed by
+page:/div:1/section:1/dl:1/dd:4	dd	You, the client
+page:/div:1/section:1/dl:1/dt:5	dt	Produces
+page:/div:1/section:1/dl:1/dd:5	dd	An intent ID that offers must cite
+page:/div:1/section:1/canvas:1	canvas	
+page:/div:1/section:1/p:1	p	
+page:/div:1/section:2	section	How it worksWhy this wayWhat it proves01Name the exact thingPoint at the files by their content ID: a fingerprint computed from the bytes themselves. Change one
+page:/div:1/section:2/nav:1	nav	How it worksWhy this wayWhat it proves
+page:/div:1/section:2/nav:1/button:1	button	How it works
+page:/div:1/section:2/nav:1/button:2	button	Why this way
+page:/div:1/section:2/nav:1/button:3	button	What it proves
+page:/div:1/section:2/ol:1	ol	01Name the exact thingPoint at the files by their content ID: a fingerprint computed from the bytes themselves. Change one byte and the ID changes, so nobody ca
+page:/div:1/section:2/ol:1/li:1	li	01Name the exact thingPoint at the files by their content ID: a fingerprint computed from the bytes themselves. Change one byte and the ID changes, so nobody ca
+page:/div:1/section:2/ol:1/li:1/button:1	button	01Name the exact thing
+page:/div:1/section:2/ol:1/li:1/button:1/span:1	span	01
+page:/div:1/section:2/ol:1/li:1/button:1/strong:1	strong	Name the exact thing
+page:/div:1/section:2/ol:1/li:1/p:1	p	Point at the files by their content ID: a fingerprint computed from the bytes themselves. Change one byte and the ID changes, so nobody can quietly swap in a di
+page:/div:1/section:2/ol:1/li:2	li	02Say what done looks likeDescribe a result someone else can check. For a copy, that can be as simple as "the copy has the same content ID". If done cannot be c
+page:/div:1/section:2/ol:1/li:2/button:1	button	02Say what done looks like
+page:/div:1/section:2/ol:1/li:2/button:1/span:1	span	02
+page:/div:1/section:2/ol:1/li:2/button:1/strong:1	strong	Say what done looks like
+page:/div:1/section:2/ol:1/li:2/p:1	p	Describe a result someone else can check. For a copy, that can be as simple as "the copy has the same content ID". If done cannot be checked, it cannot be verif
+page:/div:1/section:2/ol:1/li:3	li	03Set the limits and signAttach the rules that apply and sign the request with your key. The signed intent gets its own content ID, and every later step cites i
+page:/div:1/section:2/ol:1/li:3/button:1	button	03Set the limits and sign
+page:/div:1/section:2/ol:1/li:3/button:1/span:1	span	03
+page:/div:1/section:2/ol:1/li:3/button:1/strong:1	strong	Set the limits and sign
+page:/div:1/section:2/ol:1/li:3/p:1	p	Attach the rules that apply and sign the request with your key. The signed intent gets its own content ID, and every later step cites it.
+page:/div:1/section:2/div:1	div	Addresses, not locationsDEFXN refers to data by what it is, not where it is stored. A server link can change or disappear; a content ID always means the same by
+page:/div:1/section:2/div:1/article:1	article	Addresses, not locationsDEFXN refers to data by what it is, not where it is stored. A server link can change or disappear; a content ID always means the same by
+page:/div:1/section:2/div:1/article:1/h3:1	h3	Addresses, not locations
+page:/div:1/section:2/div:1/article:1/p:1	p	DEFXN refers to data by what it is, not where it is stored. A server link can change or disappear; a content ID always means the same bytes.
+page:/div:1/section:2/div:1/article:2	article	Nobody is committed yetAn intent is an open request. No provider has promised anything and no work has happened. That changes only when you accept an offer.
+page:/div:1/section:2/div:1/article:2/h3:1	h3	Nobody is committed yet
+page:/div:1/section:2/div:1/article:2/p:1	p	An intent is an open request. No provider has promised anything and no work has happened. That changes only when you accept an offer.
+page:/div:1/section:2/div:1/article:3	article	Your request travels with the workThe offer, the agreement, the result and the receipt all cite this intent, so anyone can follow the trail back to what you act
+page:/div:1/section:2/div:1/article:3/h3:1	h3	Your request travels with the work
+page:/div:1/section:2/div:1/article:3/p:1	p	The offer, the agreement, the result and the receipt all cite this intent, so anyone can follow the trail back to what you actually asked for.
+page:/div:1/section:2/div:2	div	TRUE AFTER THIS STEPOne signed, addressable request exists.NOT YET TRUENo provider has committed and no work has happened.
+page:/div:1/section:2/div:2/p:1	p	TRUE AFTER THIS STEPOne signed, addressable request exists.
+page:/div:1/section:2/div:2/p:1/span:1	span	TRUE AFTER THIS STEP
+page:/div:1/section:2/div:2/p:1/span:2	span	One signed, addressable request exists.
+page:/div:1/section:2/div:2/p:2	p	NOT YET TRUENo provider has committed and no work has happened.
+page:/div:1/section:2/div:2/p:2/span:1	span	NOT YET TRUE
+page:/div:1/section:2/div:2/p:2/span:2	span	No provider has committed and no work has happened.
+page:/nav:2	nav	Explore the signed recordNext: agree on the terms →
+page:/nav:2/a:1	a	Explore the signed record
+page:/nav:2/a:2	a	Next: agree on the terms →
+page:/div:2	div	

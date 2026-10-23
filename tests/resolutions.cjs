@@ -42,14 +42,19 @@ for(const [file,pattern,prefix] of [
 for(const i of [1,2,3,4]) for(const r of ['TITLE','TEXT']) assert(ArkCopy.has(`ABOUT.NO${i}.${r}`));
 for(const i of [1,2,3]) for(const f of ['PILLAR','FLOW']) for(const r of ['TITLE','TEXT']) assert(ArkCopy.has(`ABOUT.${f}${i}.${r}`));
 // The route is registered and opens in the framed panel like About.
-assert(fs.readFileSync('js/pages/catalog.js','utf8').includes("resolutions: { path: '/resolutions'"));
-assert(fs.readFileSync('js/pages/catalog.js','utf8').includes("path: '/resolutions/' + item.slug"),'every resolution receives a nested route');
+{
+  const { catalog } = require('./lib/site-catalog.cjs').loadCatalog();
+  assert.equal(catalog.resolutions.path, '/resolutions');
+  const nested = Object.keys(catalog).filter((key) => key.startsWith('resolutions/'));
+  assert(nested.length > 0 && nested.every((key) => catalog[key].path === '/' + key), 'every resolution receives a nested route');
+}
 assert(!fs.readFileSync('js/resolvers/header.js','utf8').includes("'?r=' + entry.slug"),'the Products menu no longer creates query-string detail links');
 assert(!fs.readFileSync('js/pages/about.js','utf8').includes("'r=' + item.slug"),'About links directly to inner resolution pages');
 assert(fs.readFileSync('js/ark/panel-continuity.js','utf8').includes("indexOf('resolutions/')"),'inner resolution pages stay in the framed panel');
 const resolutionPage=fs.readFileSync('js/pages/resolutions.js','utf8'),resolutionCss=fs.readFileSync('css/resolutions.css','utf8');
-assert(resolutionPage.includes("['Ready now',")&&resolutionPage.includes("['Product ideas',")&&resolutionPage.includes("['How it resolves',"),'inner pages reveal products, ideas and the path one level at a time');
-assert(resolutionPage.includes("view.replaceChildren()")&&resolutionPage.includes("detail.replaceChildren()"),'changing levels or ideas replaces content in place rather than accumulating it');
+// Since 2026-10-19 the pages are Ark blocks (js/pages/resolutions.js; tests/resolutions-blocks.cjs holds their
+// words, layout keys and fold): the products, ideas and path are the three tabs of one shelf.
+assert(resolutionPage.includes("label: 'Products · '")&&resolutionPage.includes("label: 'Product ideas · '")&&resolutionPage.includes("label: 'How it resolves'"),'inner pages reveal products, ideas and the path one tab at a time');
 
 // Every resolution names its audience, problem, ready products and three ideas built on real products.
 vm.runInContext(fs.readFileSync('js/content/resolution-products.js','utf8'),context);
@@ -67,5 +72,7 @@ for(const key of keys){
   assert.equal(Object.values(ArkResolutionProducts.resolutions[key].ideas).flatMap(i=>i.builds).filter(b=>!ArkResolutionProducts.products[b]).length,0,key+' ideas only build on known products');
 }
 for(const [key,product] of Object.entries(ArkResolutionProducts.products)) assert(['ready','building'].includes(product.status),key+' has an honest status');
-assert(/#scene \.resolutions-page[\s\S]*?overflow:hidden/.test(resolutionCss),'resolution pages never introduce a scrolling page surface');
+// The pages sit in the shared block-page frame (css/block-page.css), which scrolls inside its panel: with nothing
+// cut to fit any more, a phone scrolls rather than clipping (the old fixed frame met the fold rule by cutting).
+assert(!/\.resolutions-page/.test(resolutionCss),'no resolution page CSS of its own is left');
 console.log('resolutions ok');

@@ -172,6 +172,9 @@ assert(alphaFor('AGREEMENT LIFECYCLE.')>alphaFor('AGREEMENT'),'canvas header ent
 assert(alphaFor('AGREEMENT')>alphaFor('STAGE HEADLINE'),'stage title enters before the detail copy');
 
 const home = fs.readFileSync('css/home.css', 'utf8');
-assert(home.includes('background:hsl(var(--canvas)) !important;'));
-assert(home.includes('-webkit-text-stroke:1px hsl(var(--text-strong));'));
+/* the home paints the theme canvas (its !important went 2026-10-21: a computed-style snapshot of every route
+   showed the background unchanged without it) */
+assert(/background:hsl\(var\(--canvas\)\)( !important)?;/.test(home), 'the home paints the theme canvas');
+/* (the outlined `.ark-hero-title > em` rule left 2026-10-21 with W5-CSSCLEAN: js/resolvers/body.js sets the
+   title's textContent, so the title never has an <em> and the rule never matched) */
 console.log('PASS: home theme colors, canvas repaint, and routes through populated nodes.');

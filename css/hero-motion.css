@@ -20,7 +20,6 @@
   50% { scale: 1.018; opacity: var(--zero-high, .18); }
 }
 
-
 .ark-field-pill {
   animation: label-breathe 7s ease-in-out 2s infinite;
 }
@@ -45,7 +44,7 @@
   letter-spacing: .28em !important;
 }
 
-.ark-hero-body { pointer-events: none; z-index: 3 !important; }
+.ark-hero-body { pointer-events: none; z-index: 3; }
 .ark-hero-title,.ark-hero-copy,.ark-hero-eyebrow { pointer-events: auto; user-select: text; }
 .ark-hero-title {
   max-width: 8em;
@@ -62,7 +61,7 @@
   font: 300 clamp(12px,1.02cqw,16px)/1.62 var(--ark-font);
   text-wrap: balance;
 }
-.ark-hero-eyebrow { color: var(--field-accent) !important; }
+.ark-hero-eyebrow { color: var(--field-accent); }
 
 .hero-motion-toggle {
   position: absolute;
@@ -85,68 +84,7 @@
 .hero-motion-toggle[hidden] { display: none; }
 
 /* ARK presence owns page transforms/opacity. The persistent scene is a sibling. */
-.hero-experiment-state {
-  position: absolute;
-  left: max(28px, 5.2cqw);
-  top: 25%;
-  z-index: 4;
-  width: min(520px, 41cqw);
-  color: hsl(var(--text-strong));
-  opacity: 1;
-}
 
-.hero-experiment-kicker {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 0 0 clamp(28px,4cqh,52px);
-  color: hsl(var(--text-faint));
-  font: 500 9px/1 var(--ark-font);
-  letter-spacing: .18em;
-}
-.hero-experiment-kicker::after { content: ""; width: 64px; height: 1px; background: hsl(var(--border-default)); }
-.hero-experiment-kicker b { order: 3; color: var(--field-accent); font: inherit; }
-.hero-experiment-index { margin: 0 0 12px; color: var(--field-accent); font: 500 9px/1 var(--ark-font); letter-spacing: .18em; }
-.hero-experiment-copy h1 {
-  margin: 0 0 20px;
-  font: 250 clamp(56px,8.4cqw,132px)/.78 var(--ark-font);
-  letter-spacing: -.075em;
-}
-.hero-experiment-question {
-  max-width: 18em;
-  margin: 0 0 12px;
-  color: hsl(var(--text-strong));
-  font: 300 clamp(18px,1.65cqw,27px)/1.16 var(--ark-font);
-  letter-spacing: -.025em;
-}
-.hero-experiment-note { max-width: 39em; margin: 0 0 28px; color: hsl(var(--text-muted)); font: 300 12px/1.6 var(--ark-font); }
-.hero-experiment-copy a {
-  display: inline-flex;
-  gap: 11px;
-  padding: 11px 0;
-  border-bottom: 1px solid hsl(var(--border-strong));
-  color: hsl(var(--text-strong));
-  font: 500 9px/1 var(--ark-font);
-  letter-spacing: .16em;
-  text-decoration: none;
-  transition: color 180ms ease, border-color 180ms ease, gap 260ms ease;
-}
-.hero-experiment-copy a:hover,
-.hero-experiment-copy a:focus-visible { color: var(--field-accent); border-color: var(--field-accent); gap: 16px; }
-.hero-experiment-meter {
-  position: absolute;
-  left: calc(100% + 7cqw);
-  bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 12cqw;
-  color: hsl(var(--text-faint));
-  font: 500 8px/1 var(--ark-font);
-  letter-spacing: .14em;
-  white-space: nowrap;
-}
-.hero-experiment-meter i { width: 100%; height: 1px; background: hsl(var(--border-default)); }
 .hero-alive.hero-still .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl),
 .hero-alive.hero-still .hero-atmosphere,
 .hero-alive.hero-still .ark-field-pill { animation-play-state: paused !important; }
@@ -154,29 +92,26 @@
 
 @media (max-width:760px) {
   .ark-field-pill::before,.ark-field-pill::after { width: 26px; margin: 0 10px; }
-  .ark-hero-body { left: 20px !important; bottom: 66px !important; max-width: calc(100% - 40px) !important; }
+  .ark-hero-body { left: 20px; bottom: 66px; max-width: calc(100% - 40px); }
   .ark-hero-title { font-size: clamp(34px,10cqw,54px); max-width: 7em; }
   .ark-hero-copy { max-width: 31em; font-size: 12px; }
   .hero-motion-toggle { bottom: 14px; }
-  .hero-experiment-state { left: 20px; top: 24%; width: calc(100% - 40px); }
-  .hero-experiment-copy h1 { font-size: clamp(48px,18cqw,84px); }
-  .hero-experiment-note { max-width: 28em; }
-  .hero-experiment-meter { display: none; }
+
 }
 @media (max-height:680px) and (min-width:761px) {
-  .ark-hero-body { bottom: 24px !important; max-width: 38cqw !important; }
+  .ark-hero-body { bottom: 24px; max-width: 38cqw; }
   .ark-hero-title { font-size: 32px; margin-bottom: 7px; }
-  .ark-hero-eyebrow { margin-bottom: 7px !important; }
+  .ark-hero-eyebrow { margin-bottom: 7px; }
 }
 @media (prefers-reduced-motion:reduce) {
   .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { animation: none; transition: none; translate: 0 0; opacity: .12; }
   .hero-atmosphere,.ark-field-pill { animation: none !important; }
-  .ark-field-pill,.ark-cta,.ark-hero-body,.hero-experiment-state { transition-duration: 1ms !important; transition-delay: 0s !important; }
+  .ark-field-pill,
+.ark-cta,
+.ark-hero-body { transition-duration: 1ms !important; transition-delay: 0s !important; }
 }
 
-.hero-pause { left: max(20px, 5.2cqw); right: auto; color: var(--field-muted); }
-.ark-hero-body { bottom: max(66px, 7cqh) !important; }
-@media (max-width:760px) { .hero-pause { left: 20px; } }
+.ark-hero-body { bottom: max(66px, 7cqh); }
 
 .ark-layer { position: absolute; inset: 0; }
 .ark-layer-persistent { z-index: 0; pointer-events: none; }
@@ -191,4 +126,4 @@
 }
 
 /* Match the enlarged home zero when the GPU renderer is unavailable. */
-.hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { scale:1.2 !important; }
+.hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { scale:1.2; }

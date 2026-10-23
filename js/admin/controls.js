@@ -111,7 +111,7 @@
     Object.keys(opts.data || {}).forEach((k) => { input.dataset[k] = opts.data[k]; });
     input.value = String(ctx.get(key) ?? (textual ? '' : 0)); input.setAttribute('aria-label', opts.ariaLabel || label);
     input.addEventListener(opts.live && textual ? 'input' : 'change', () => { if (textual) { ctx.set(key, input.value); return; } const v = Number(input.value); if (Number.isFinite(v)) ctx.set(key, v); });
-    const note = document.createElement('span'); if (opts.note) { note.className = 'field-key'; note.textContent = opts.note; }
+    const note = document.createElement('span'); if (opts.note) { note.className = 'field-key'; note.textContent = opts.note; } else if (opts.hint) { note.className = 'hint'; note.textContent = opts.hint; }
     row.append(l, input, note); return row;
   }
   /* What a choice is called, derived from the value it writes: 'text-muted' -> "Text muted",
@@ -123,16 +123,36 @@
     const text = String(value).replace(/-/g, ' ');
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
+  /* A segmented control is Ark's toggle group (ArkKit.createArkToggleGroup on a light-DOM host,
+     docs/ux-audit/cms.md (c) "Segmented control / toggle group"): one choice pressed, roving
+     focus (one tab stop, arrows move between the choices, Enter or Space picks one), the pressed
+     state written by Ark. Each control gets its own host, which holds no document listener, so a
+     panel's re-render lets the old one go. Without ArkKit (a test that loads only these builders)
+     the same buttons work by click, with the same aria-pressed. */
   function ctlSegField(ctx, label, key, options, labelOf) {
     const name = labelOf || ctlLabel;
     const row = document.createElement('div'); row.className = 'row'; const l = document.createElement('label'); l.textContent = label;
     const seg = document.createElement('div'); seg.className = 'ctl-seg';
-    options.forEach((opt) => {
+    const buttons = options.map((opt) => {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = name(opt);
       b.setAttribute('aria-pressed', String(ctx.get(key) === opt));
-      b.addEventListener('click', () => { if (ctx.get(key) !== opt) ctx.set(key, opt); });
-      seg.appendChild(b);
+      seg.appendChild(b); return b;
     });
+    const kit = window.ArkKit;
+    if (kit && typeof kit.createArkToggleGroup === 'function' && typeof kit.createArkDomHost === 'function') {
+      const host = kit.createArkDomHost(document);
+      const refs = buttons.map((b) => host.bind(b, 'ctl-seg')), current = options.indexOf(ctx.get(key));
+      let ready = false;
+      kit.createArkToggleGroup(host, { rootRef: host.bind(seg, 'ctl-seg'), itemRefs: refs, selectedRefs: current >= 0 ? [refs[current]] : [],
+        onValueChange: (selected) => {
+          if (!ready) return;   /* Ark reports the starting selection once; that is not a choice */
+          const i = refs.indexOf(selected[0]);
+          if (i >= 0 && ctx.get(key) !== options[i]) ctx.set(key, options[i]);
+        } });
+      ready = true;
+    } else {
+      buttons.forEach((b, i) => b.addEventListener('click', () => { if (ctx.get(key) !== options[i]) ctx.set(key, options[i]); }));
+    }
     row.append(l, seg, document.createElement('span')); return row;
   }
   /* opts.ariaLabel as in ctlField; the value is written as the option's string */
@@ -155,6 +175,64 @@
     tokens.forEach((tok) => { const b = document.createElement('button'); b.type = 'button'; b.title = tok; b.setAttribute('aria-label', tok); b.style.background = `hsl(var(--${tok}))`; b.setAttribute('aria-pressed', String(ctx.get(key) === tok)); b.addEventListener('click', () => pick(tok)); sw.appendChild(b); });
     row.append(l, sw, document.createElement('span')); return row;
   }
+  /* filePicker({ id, accept, label, ariaLabel, hint, onFile }) -> root: the editor's one file
+     chooser, in place of the browser's native "Choose File / No file chosen" input (docs/ux-audit/
+     cms.md P1-11: unstyled, English-only per browser, cut off in the rail). The native <input
+     type=file> stays in the page -- visually hidden, still the tab stop, still carrying `id` and
+     `accept`, so the keyboard, a screen reader and a browser driver reach the same control -- and
+     a real <label class="btn"> is the button drawn over it. It names the chosen file beside the
+     button, and takes a file dropped on it (the same change event, so one handler serves both).
+     `onFile(file, input)` runs for a new choice (not for a cleared one); a caller that listens
+     for `change` on the input itself (assets.js's New image form) needs no onFile. */
+  function filePicker(opts) {
+    opts = opts || {};
+    const root = document.createElement('span'); root.className = 'file-pick'; root.dataset.state = 'empty';
+    const input = document.createElement('input'); input.type = 'file'; input.className = 'file-pick__input';
+    if (opts.id) input.id = opts.id;
+    if (opts.accept) input.accept = opts.accept;
+    const id = input.id || (input.id = 'file-pick-' + (filePicker.n = (filePicker.n || 0) + 1));
+    if (opts.ariaLabel) input.setAttribute('aria-label', opts.ariaLabel);
+    const button = document.createElement('label'); button.className = 'btn file-pick__btn'; button.htmlFor = id; button.textContent = opts.label || 'Choose a file';
+    const name = document.createElement('span'); name.className = 'file-pick__name'; name.textContent = opts.empty || 'or drop a file here';
+    input.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      root.dataset.state = file ? 'chosen' : 'empty';
+      name.textContent = file ? file.name : (opts.empty || 'or drop a file here');
+      if (file && typeof opts.onFile === 'function') opts.onFile(file, input);
+    });
+    root.addEventListener('dragover', (e) => { if (e.dataTransfer) { e.preventDefault(); root.dataset.over = 'true'; } });
+    root.addEventListener('dragleave', () => { delete root.dataset.over; });
+    root.addEventListener('drop', (e) => {
+      delete root.dataset.over;
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (!files || !files.length) return;
+      e.preventDefault();
+      try { input.files = files; } catch (err) { return; }   /* a browser that will not take dropped files: the button still works */
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    root.append(input, button, name);
+    return root;
+  }
+  /* Developer details: the ONE place a surface shows the names the code uses -- a copy key, a
+     file, a layout key, an id, a raw value -- closed, so nothing is lost and nothing shouts
+     (docs/ux-audit/cms.md P1-2: HOME.TITLE, js/content/manifests/home.js, page:/section:1/... and
+     spot ids reached the person on almost every surface). rows: [[name, value], ...]; an empty
+     value is skipped. `extra`: elements placed inside after the list. */
+  function devDetails(rows, extra) {
+    const content = document.createElement('div');
+    const dl = document.createElement('dl');
+    (rows || []).forEach(([name, value]) => {
+      if (value === undefined || value === null || value === '') return;
+      const dt = document.createElement('dt'); dt.textContent = name;
+      const dd = document.createElement('dd'); const code = document.createElement('code'); code.textContent = String(value); dd.appendChild(code);
+      dl.append(dt, dd);
+    });
+    if (dl.children.length) content.appendChild(dl);
+    (extra || []).forEach((el) => { if (el) content.appendChild(el); });
+    /* Ark's disclosure (js/admin/ark-host.js arkDisclosure); .dev-details is the editor's quiet
+       dress for its list of names (css/admin.css) */
+    return A.arkDisclosure({ label: 'Developer details', content, className: 'dev-details' });
+  }
   A.provide({ CMS_ALIGN_TOKENS: CMS_ALIGN_TOKENS, CMS_BLOCK_RESOLVERS: CMS_BLOCK_RESOLVERS,
       CMS_BORDER_TOKENS: CMS_BORDER_TOKENS, CMS_BORDER_VALUES: CMS_BORDER_VALUES,
       CMS_CANVAS_EASINGS: CMS_CANVAS_EASINGS, CMS_CANVAS_EFFECTS: CMS_CANVAS_EFFECTS,
@@ -170,6 +248,7 @@
       CMS_TEXT_TOKENS: CMS_TEXT_TOKENS, CMS_TYPE_SIZE_TOKENS: CMS_TYPE_SIZE_TOKENS,
       CMS_WRAP_VALUES: CMS_WRAP_VALUES, cmsBlockResolverLabel: cmsBlockResolverLabel,
       cmsBlockResolverProps: cmsBlockResolverProps, cmsMasterKind: cmsMasterKind,
-      cmsMasterProps: cmsMasterProps, ctlField: ctlField, ctlSegField: ctlSegField,
-      ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField });
+      cmsMasterProps: cmsMasterProps, ctlField: ctlField, ctlLabel: ctlLabel, ctlSegField: ctlSegField,
+      ctlSelectField: ctlSelectField, ctlSwatchField: ctlSwatchField, devDetails: devDetails,
+      filePicker: filePicker });
 })();

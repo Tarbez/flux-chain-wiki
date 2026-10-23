@@ -48,7 +48,7 @@ assert.ok(L.serialize(layout).includes('"alts"'), 'a layout with an alt override
 // The wiring (admin.js -> js/main.js protocol, main.js mount hooks).
 assert.ok(admin.includes("type: 'defxn-cms-preview-set-alt'") && admin.includes("patch.operation === 'set-alt'"), 'the toolbar posts set-alt and folds the echoed patch into its own layout draft (so Save writes it)');
 assert.ok(main.includes("data.type === 'defxn-cms-preview-set-alt'") && /ArkLayout\.setAlt\(cmsLayoutDraft/.test(main) && /ArkLayout\.applyAlt\(altElement/.test(main), 'the preview stores and applies a set-alt at once');
-const hook = /onMount\(function \(_pageElement, page\) \{\s*var entry = [^\n]*\n\s*ArkLayout\.applyAlts\(host[^\n]*\n\s*\}\);/.exec(main);
+const hook = /onMount\(function \(pageElement, page\) \{\s*ArkLayout\.applyAlts\(host, pageLayoutScope\(pageElement, page\)\);\s*\}\);/.exec(main);
 assert.ok(hook && !hook[0].includes('requestAnimationFrame'), 'saved alts are applied in a synchronous mount hook, before ark:route-ready, not only in the rAF layout pass');
 assert.ok(/applyAlts\(root, route, layout, elements\);/.test(layoutSource), 'ArkLayout.apply() also applies alts, so preview refreshes and undo/redo restore them');
 

@@ -1,4 +1,25 @@
-/* Resolutions: a quiet category index and one canonical page per resolution. */
+/* Resolutions: the category index (/resolutions) and one page per resolution
+   (/resolutions/<slug>, 20 of them), as pages of Ark blocks.
+
+   Converted to data in DEFXN polish Wave 3 (W3-GUIDE). The 20 detail pages are ONE template
+   (detailSpec below), fed by js/content/resolutions.js (which resolutions exist, their shift and
+   three movements) and js/content/resolution-products.js (who each is for, the problem, the
+   products ready today, three proposed ideas). The hand-built pages these replace met the fold
+   rule by cutting: on a phone the lede, the Problem row, the main action and the status legend
+   were display:none and every product line was clamped to one line with no way to read it
+   (docs/ux-audit/pages-ux-b.md "/resolutions/*" P1). Every one of those words is on the page
+   now, at every width; what does not fit a phone's first screens folds behind Ark's tabs and
+   disclosures, a press away. The two hand-built ARIA tablists (and their missing focus ring),
+   the idea rail (a second selection model inside a tab panel), the status mark painted in the
+   identity colour, the breadcrumb and the prev/all/next footer are Ark's tabs, accordion, card
+   status (an SDK meaning tone), breadcrumb and pager.
+
+   Words: the manifest's words go in as copy: keys (the Content lens edits them in place); the
+   structure's words (product lines, ideas, the shift) are read from the content modules above,
+   as before. Layout keys: every element of the old pages with words keeps the key it had (the
+   `was` pins below, derived from the same structure the old page was built from -- see
+   oldKeys()), so a CMS edit saved against an old page still lands. Regression:
+   tests/resolutions-blocks.cjs. */
 (function () {
   'use strict';
 
@@ -9,361 +30,212 @@
     INTELLIGENCE: 'Put data, logic and provenance in the same resolvable fabric so results can be checked.',
     OPERATIONS: 'Run the connective work of a network without handing its keys or continuity to a cloud account.'
   };
+  /* A product's state, said in words beside its name ("Ready" was painted in --primary, the
+     identity colour, where /resolvers paints deployed green: docs/ux-audit/pages-ux-b.md
+     cross-page #8). The tab's first line says what each state means. */
+  var STATUS = { ready: { label: 'Ready' }, building: { label: 'Building' } };
+  var STEP_NAMES = ['Define', 'Publish', 'Resolve'];
+
+  function words(role) { return ArkCopy.text('RESOLUTIONS.' + role); }
+  /* The hero's one action. "Start here" only when its page is not a product still being built (the first-visit
+     audit, 2026-10-22, P0: /resolutions/website's Start here opened the unreleased Bundle Deployer, /resolutions/
+     governance's the unreleased DAO); otherwise the first product this resolution lists as ready that has a page
+     ("Open Auth Kit"); "How resolvers work" only when there is none (it was the button of 11 of the 20). */
+  function mainAction(item, shelf) {
+    var catalog = ArkUI.pageCatalog, products = typeof ArkResolutionProducts !== 'undefined' ? ArkResolutionProducts.products : {};
+    var building = Object.keys(products).some(function (k) { return products[k].page === item.start && products[k].status !== 'ready'; });
+    if (item.start && catalog[item.start] && !building) return { label: 'copy:RESOLUTIONS.START', href: 'route:' + item.start, tone: 'primary' };
+    var first = shelf && shelf.ready.filter(function (p) { return p.status === 'ready' && p.page && catalog[p.page]; })[0];
+    if (first) return { label: 'Open ' + first.name, href: 'route:' + first.page, tone: 'primary' };
+    return { label: 'How resolvers work', href: words('START.FALLBACK.HREF'), tone: 'primary' };
+  }
+  function short(item) { return ArkResolutions.shortName(item.title); }
+  function two(n) { return String(n).padStart(2, '0'); }
+  function lower(text) { return text.charAt(0).toLowerCase() + text.slice(1); }
+
+  /* ---- layout-key pins ------------------------------------------------------------------- */
+  /* `was`: the key each element had on the hand-built pages, so a CMS edit saved against them
+     still lands (docs/cms-architecture.md "Layout keys"). Derived from the same structure the old
+     pages were built from (one crumb trail, one intro, one tile per ready product -- a link tile
+     when the product has a page, a plain one when not -- one legend, one footer), never typed per
+     page: 20 pages, one rule. tests/resolutions-blocks.cjs proves every old key of every page
+     against its frozen census (tests/fixtures/layout-keys/resolutions*.tsv). */
+  var CRUMBS_WAS = { ':root': 'page:/nav:1', 'breadcrumb-item': 'page:/nav:1/a:1', 'breadcrumb-item#2': 'page:/nav:1/span:1' };
+  function indexWas(groups) {
+    var list = 'page:/section:1/div:2/div:2', domains = {
+      ':root': { key: 'page:/section:1', self: true }, 'tabs-list': { key: 'page:/section:1/div:1', self: true },
+      'tabs-content': { key: 'id:resolution-domain-panel', self: true },
+      ':scope > div:nth-of-type(2) > p:nth-of-type(1)': 'page:/section:1/div:2/div:1/p:1',
+      'card-grid': { key: list, self: true }
+    };
+    groups.forEach(function (group, i) { domains['tabs-trigger' + (i ? '#' + (i + 1) : '')] = 'id:resolution-domain-' + group.key.toLowerCase(); });
+    /* the old panel showed the first domain: one entry link per resolution */
+    groups[0].items.forEach(function (item, i) {
+      var n = i ? '#' + (i + 1) : '', entry = list + '/a:' + (i + 1);
+      domains[':scope > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(' + (i + 1) + ')'] = { key: entry, self: true };
+      domains['card' + n] = entry + '/span:2';
+      domains['card-title' + n] = entry + '/span:2/strong:1';
+      domains['card-description' + n] = entry + '/span:2/span:1';
+    });
+    return {
+      'resolutions-crumbs': CRUMBS_WAS,
+      'resolutions-hero': { ':root': { key: 'page:/header:1', self: true }, eyebrow: { key: 'page:/header:1/div:1/p:1', self: true },
+        ':scope > p:nth-of-type(1) > span:nth-of-type(1)': 'page:/header:1/dl:1', 'hero-title': 'id:resolutions-title' },
+      'resolutions-deck': { ':scope > div:nth-of-type(1) > p:nth-of-type(1)': 'page:/header:1/div:1/p:2', 'disclosure-trigger': 'page:/header:1/div:1/button:1' },
+      'resolutions-domains': domains,
+      'resolutions-note-text': { ':root': { key: 'page:/aside:1', self: true }, ':scope > div:nth-of-type(1) > p:nth-of-type(1)': 'page:/aside:1/p:1',
+        'disclosure-trigger': 'page:/aside:1/button:1', 'button': 'page:/aside:1/a:1' },
+      insert: 'page:/div:1'
+    };
+  }
+  function detailWas(item, shelf, hasAlso, related) {
+    var id = 'resolution-' + item.slug, intro = 'page:/div:1/header:1', shelfKey = 'page:/div:1/section:1', was = {};
+    was[id + '-crumbs'] = CRUMBS_WAS;
+    was[id + '-hero'] = { ':root': { key: intro, self: true }, eyebrow: { key: intro + '/p:1', self: true }, 'hero-title': 'id:resolution-title-' + item.slug,
+      'hero-lede': intro + '/p:2', 'actions': { key: intro + '/div:1', self: true }, 'button': intro + '/div:1/a:1' };
+    var pager = { ':root': { key: 'page:/nav:2', self: true }, 'pager-prev': 'page:/nav:2/a:1', 'pager-next': 'page:/nav:2/a:3' };
+    var link = function (n) { return ':scope > div:nth-of-type(2) > ul:nth-of-type(1) > li:nth-of-type(' + n + ') > a:nth-of-type(1)'; };
+    if (hasAlso) pager[link(1)] = intro + '/div:1/a:2';
+    pager[link(related - 1)] = 'page:/nav:2/a:2';
+    pager[link(related)] = shelfKey + '/p:1/a:1';
+    if (shelf) {
+      was[id + '-brief'] = { 'facts': intro + '/dl:1' };
+      var tabs = {
+        ':root': { key: shelfKey, self: true }, 'tabs-list': { key: shelfKey + '/div:1', self: true },
+        'tabs-trigger': 'id:resolution-level-tab-' + item.slug + '-0', 'tabs-trigger#2': 'id:resolution-level-tab-' + item.slug + '-1', 'tabs-trigger#3': 'id:resolution-level-tab-' + item.slug + '-2',
+        'tabs-content': { key: 'id:resolution-level-' + item.slug, self: true },
+        ':scope > div:nth-of-type(2) > p:nth-of-type(1)': shelfKey + '/p:1',
+        ':scope > div:nth-of-type(3) > p:nth-of-type(1)': shelfKey + '/p:1/span:3',
+        'accordion': { key: shelfKey + '/div:2/div:1', self: true }
+      };
+      var seen = { a: 0, div: 0 };
+      shelf.ready.forEach(function (product, i) {
+        var linked = !!(product.page && ArkUI.pageCatalog[product.page]), tag = linked ? 'a' : 'div';
+        var tile = shelfKey + '/div:2/div:1/' + tag + ':' + (++seen[tag]), n = i ? '#' + (i + 1) : '';
+        var body = ':scope > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(' + (i + 1) + ') > div:nth-of-type(1) > div:nth-of-type(1)';
+        tabs['accordion-item' + n] = { key: tile, self: true };
+        /* self: the row title's inner spans are new; the old head's name and state spans are retired */
+        tabs['accordion-trigger' + n] = { key: tile + '/span:1', self: true };
+        tabs[body + ' > p:nth-of-type(1)'] = tile + '/span:2';
+        if (linked) tabs[body + ' > div:nth-of-type(1) > a:nth-of-type(1)'] = tile + '/span:3';
+      });
+      was[id + '-shelf'] = tabs;
+    }
+    was[id + '-pager'] = pager;
+    was.insert = 'page:/div:2';
+    return was;
+  }
+
+  /* ---- the index ------------------------------------------------------------------------- */
+  function indexSpec() {
+    var groups = ArkResolutions.list(), all = ArkResolutions.all(), was = indexWas(groups);
+    return [
+      { block: 'breadcrumb', id: 'resolutions-crumbs', was: was['resolutions-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: words('BACK.HOME.HREF') }, { label: 'Resolutions' }] } },
+      /* The stat triplet (20 resolutions, 05 domains, 01 mesh) was a row of its own; it is the
+         eyebrow's tail now (docs/ux-audit/pages-ux-b.md /resolutions P2), counted from the structure,
+         never typed. */
+      { block: 'hero', id: 'resolutions-hero', was: was['resolutions-hero'], props: { eyebrow: words('EYEBROW') + ' · ' + two(all.length) + ' resolutions · ' + two(groups.length) + ' domains · 01 mesh',
+        title: 'copy:RESOLUTIONS.TITLE', density: 'compact' } },
+      /* The deck is whole from 601px up; a phone keeps its first line in view and offers "More"
+         (it used to end in "..." with no way to read the rest; tests/fold-no-hidden-content.cjs). */
+      { block: 'disclosure', id: 'resolutions-deck', was: was['resolutions-deck'], props: { content: 'copy:RESOLUTIONS.DECK', foldBelow: 'phone', preview: 1, more: 'More', less: 'Less' } },
+      /* The domains as tabs, named on every width (phones showed "01 02 03 04 05"). */
+      { block: 'tabs', id: 'resolutions-domains', was: was['resolutions-domains'], props: { label: 'Resolution domains', items: groups.map(function (group) {
+        return { value: group.key.toLowerCase(), label: group.title + ' · ' + group.items.length,
+          content: groupIntroductions[group.key], blocks: [
+          { block: 'card-grid', props: { label: group.title, columns: 3, items: group.items.map(function (item) {
+            return { title: short(item), description: item.text, href: 'route:resolutions/' + item.slug, headingLevel: 2 };
+          }) } }
+        ] };
+      }) } },
+      /* The status note and the way to the status page: whole from 601px up; a phone keeps the
+         note's first line in view and opens the rest with "More" (a one-line clamp used to cut it
+         mid-sentence, with no way to read on). */
+      { block: 'disclosure', id: 'resolutions-note-text', was: was['resolutions-note-text'], props: { content: 'copy:RESOLUTIONS.NOTE', foldBelow: 'phone', preview: 1, more: 'More', less: 'Less',
+        blocks: [{ block: 'actions', props: { label: 'Status', items: [{ label: 'copy:RESOLUTIONS.NOTE.LINK', href: words('NOTE.LINK.HREF'), tone: 'ghost' }] } }] } },
+      { insert: 'main', was: was.insert }
+    ];
+  }
+
+  /* ---- one resolution -------------------------------------------------------------------- */
+  function detailSpec(item) {
+    var all = ArkResolutions.all();
+    var position = all.findIndex(function (candidate) { return candidate.slug === item.slug; });
+    var group = ArkResolutions.groupFor(item.group);
+    var previous = all[(position - 1 + all.length) % all.length];
+    var next = all[(position + 1) % all.length];
+    var shelf = typeof ArkResolutionProducts !== 'undefined' ? ArkResolutionProducts.forResolution(item.key) : null;
+    var id = 'resolution-' + item.slug;
+
+    /* One main action; the deeper page beside it (`also`) is a related page in the pager, so the
+       hero keeps one row of buttons on a phone. */
+    var main = mainAction(item, shelf);
+    var related = [];
+    var hasAlso = !!(item.also && ArkUI.pageCatalog[item.also]);
+    [item.also, item.alsoMore].forEach(function (page) {
+      if (page && ArkUI.pageCatalog[page]) related.push({ label: String(ArkUI.pageCatalog[page].title).split(' — ')[0], href: 'route:' + page });
+    });
+    related.push({ label: 'All 20', href: words('INDEX.HREF') }, { label: 'copy:RESOLUTIONS.NOTE.LINK', href: words('NOTE.LINK.HREF') });
+    var was = detailWas(item, shelf, hasAlso, related.length);
+
+    /* the shift, then its three movements */
+    var how = { content: 'The shift: ' + lower(item.shift) + ' Instead of ' + lower(item.old),
+      blocks: [{ block: 'steps', props: { label: 'How it resolves', items: item.steps.map(function (step, i) { return { title: STEP_NAMES[i], body: step }; }) } }] };
+
+    var spec = [
+      { block: 'breadcrumb', id: id + '-crumbs', was: was[id + '-crumbs'], props: { label: 'Your place', items: [{ label: 'All resolutions', href: words('INDEX.HREF') }, { label: short(item) }] } },
+      { block: 'hero', id: id + '-hero', was: was[id + '-hero'], props: { eyebrow: 'Resolution ' + (position + 1) + ' of ' + all.length + ' · ' + group.title, title: 'copy:RESOLUTIONS.' + item.key + '.TITLE',
+        lede: 'copy:RESOLUTIONS.' + item.key + '.TEXT', density: 'compact', actions: [main] } }
+    ];
+    if (shelf) {
+      /* Who it is for and the problem: in sight from 601px up; on a phone one press away
+         ("Who it is for"), never removed -- it used to be display:none there. */
+      spec.push({ block: 'disclosure', id: id + '-brief', was: was[id + '-brief'], props: { foldBelow: 'phone', more: 'Who it is for, and the problem', less: 'Hide who it is for',
+        blocks: [{ block: 'facts', props: { label: 'Who it is for', columns: 1, items: [{ term: 'For', value: shelf.audience }, { term: 'Problem', value: shelf.problem }] } }] } });
+      spec.push({ block: 'tabs', id: id + '-shelf', was: was[id + '-shelf'], props: { label: 'Products, ideas and how it works', items: [
+        /* each product opens in place (its line, and its page when it has one): a row per
+           product keeps five products inside a phone's fold, where cards took two screens */
+        /* "Products", not "Ready now": the list holds products still being built too, each row saying which
+           (first-visit audit 2026-10-22, P0); the first line says what the two words mean */
+        { value: 'ready', label: 'Products · ' + shelf.ready.length, content: 'Ready: usable today. Building: in source, not released.', blocks: [
+          { block: 'accordion', props: { label: short(item) + ' products', multiple: true, headingLevel: 3, items: shelf.ready.map(function (product) {
+            var target = product.page && ArkUI.pageCatalog[product.page] ? product.page : null;
+            var row = { value: product.key, title: product.name + ' · ' + (STATUS[product.status] || STATUS.building).label, content: product.line };
+            if (target) row.blocks = [{ block: 'actions', props: { items: [{ label: 'Open ' + product.name, href: 'route:' + target, tone: 'ghost' }] } }];
+            return row;
+          }) } }
+        ] },
+        { value: 'ideas', label: 'Product ideas · ' + shelf.ideas.length, content: 'Ideas: proposed, not built.', blocks: [
+          { block: 'accordion', props: { label: 'Product ideas', headingLevel: 3, items: shelf.ideas.map(function (idea, i) {
+            return { value: 'idea-' + (i + 1), title: idea.name, content: 'Idea ' + two(i + 1) + ' · not built yet. For ' + lower(idea.audience),
+              blocks: [{ block: 'facts', props: { label: idea.name, columns: 1, items: [
+                { term: 'Problem', value: idea.problem }, { term: 'Product', value: idea.product },
+                { term: 'Builds on', value: idea.builds.map(function (p) { return p.name + (p.status === 'ready' ? '' : ' (building)'); }).join(' · ') }] } }] };
+          }) } }
+        ] },
+        { value: 'how', label: 'How it resolves', content: how.content, blocks: how.blocks }
+      ] } });
+    } else {
+      spec.push({ block: 'section-header', id: id + '-how', props: { title: 'How it resolves', lede: how.content } }, how.blocks[0]);
+    }
+    spec.push({ insert: 'main', was: was.insert });
+    spec.push({ block: 'pager', id: id + '-pager', was: was[id + '-pager'], props: { label: 'More resolutions',
+      prev: { label: short(previous), href: 'route:resolutions/' + previous.slug },
+      next: { label: short(next), href: 'route:resolutions/' + next.slug },
+      related: related } });
+    return spec;
+  }
 
   ArkUI.pageModules.resolutions = {
+    indexSpec: indexSpec,
+    detailSpec: detailSpec,
     mount: function (host, pageKey) {
-      var manifest = ArkManifest.get('resolutions');
-      function words(role) { return ArkCopy.text('RESOLUTIONS.' + role); }
-      function el(tag, className, text) { return ArkUI.el(tag, className || '', text); }
-      /* `key` is a real pageCatalog/route key (`resolutions/<slug>`, `item.start`,
-         `product.page`...), already produced by ArkResolutions/ArkResolutionProducts'
-         own structural correspondence (an item's own detail page, a product's page) --
-         not independently hardcoded here, so it is resolved, not stored as a separate
-         manifest field. `fieldLink` is for the handful of call sites that ARE a literal,
-         editorial destination hardcoded in this page module: those get a real manifest
-         field of kind 'link' (js/content/manifest.js) instead. Both go through the one
-         shared resolver, js/ark/dash-kit.js's linkEl. */
-      function routeLink(label, key, className) {
-        return ArkUI.dash.linkEl(label, 'route:' + key, manifest.route, className);
-      }
-      function fieldLink(label, hrefRole, className) {
-        return ArkUI.dash.linkEl(label, words(hrefRole), manifest.route, className);
-      }
-      function short(item) { return ArkResolutions.shortName(item.title); }
-
-      function breadcrumb(page, item) {
-        var path = el('nav', 'content-layer-path resolutions-path');
-        path.setAttribute('aria-label', 'Your place');
-        if (item) {
-          path.appendChild(fieldLink('← All resolutions', 'INDEX.HREF'));
-          var current = el('span', '', short(item));
-          current.setAttribute('aria-current', 'page');
-          path.appendChild(current);
-        } else {
-          path.appendChild(fieldLink('← Home', 'BACK.HOME.HREF'));
-          var here = el('span', '', 'Resolutions');
-          here.setAttribute('aria-current', 'page');
-          path.appendChild(here);
-        }
-        page.appendChild(path);
-      }
-
-      function resolutionLink(item, index) {
-        var key = 'resolutions/' + item.slug;
-        var link = routeLink('', key, 'resolution-entry');
-        link.dataset.resolution = item.slug;
-        link.appendChild(el('span', 'resolution-entry-number', String(index + 1).padStart(2, '0')));
-        var copy = el('span', 'resolution-entry-copy');
-        copy.appendChild(el('strong', '', short(item)));
-        copy.appendChild(el('span', '', item.text));
-        link.appendChild(copy);
-        var arrow = el('span', 'resolution-entry-arrow', '↗');
-        arrow.setAttribute('aria-hidden', 'true');
-        link.appendChild(arrow);
-        return link;
-      }
-
-      function mountIndex() {
-        var page = el('section', 'ark-page resolutions-page resolutions-index');
-        page.dataset.arkPage = 'resolutions';
-        page.setAttribute('aria-labelledby', 'resolutions-title');
-        breadcrumb(page);
-
-        var hero = el('header', 'resolutions-hero');
-        var heroCopy = el('div', 'resolutions-hero-copy');
-        heroCopy.appendChild(el('p', 'resolutions-eyebrow', words('EYEBROW')));
-        var title = el('h1', '', words('TITLE'));
-        title.id = 'resolutions-title';
-        heroCopy.appendChild(title);
-        heroCopy.appendChild(el('p', 'resolutions-deck', words('DECK')));
-        hero.appendChild(heroCopy);
-        var measure = el('dl', 'resolutions-measure');
-        [['20', 'resolutions'], ['05', 'domains'], ['01', 'mesh']].forEach(function (entry) {
-          var cell = el('div');
-          cell.appendChild(el('dt', '', entry[0]));
-          cell.appendChild(el('dd', '', entry[1]));
-          measure.appendChild(cell);
-        });
-        hero.appendChild(measure);
-        page.appendChild(hero);
-
-        var groups = ArkResolutions.list();
-        var browser = el('section', 'resolutions-browser');
-        browser.setAttribute('aria-label', 'Browse resolutions by domain');
-        var tabs = el('div', 'resolutions-domains');
-        tabs.setAttribute('role', 'tablist');
-        tabs.setAttribute('aria-label', 'Resolution domains');
-        var panel = el('div', 'resolutions-domain-panel');
-        panel.id = 'resolution-domain-panel';
-        panel.setAttribute('role', 'tabpanel');
-        panel.tabIndex = 0;
-        var buttons = [];
-
-        function selectGroup(selected) {
-          buttons.forEach(function (button, index) {
-            var active = index === selected;
-            button.setAttribute('aria-selected', String(active));
-            button.tabIndex = active ? 0 : -1;
-          });
-          var group = groups[selected];
-          panel.setAttribute('aria-labelledby', 'resolution-domain-' + group.key.toLowerCase());
-          panel.replaceChildren();
-          var head = el('div', 'resolutions-domain-head');
-          var headingCopy = el('div');
-          headingCopy.appendChild(el('p', 'resolutions-domain-index', String(selected + 1).padStart(2, '0') + ' / ' + String(groups.length).padStart(2, '0')));
-          headingCopy.appendChild(el('h2', '', group.title));
-          head.appendChild(headingCopy);
-          head.appendChild(el('p', '', groupIntroductions[group.key]));
-          panel.appendChild(head);
-          var list = el('div', 'resolutions-list');
-          group.items.forEach(function (item, index) { list.appendChild(resolutionLink(item, index)); });
-          panel.appendChild(list);
-        }
-
-        groups.forEach(function (group, index) {
-          var button = el('button', 'resolutions-domain-tab');
-          button.type = 'button';
-          button.id = 'resolution-domain-' + group.key.toLowerCase();
-          button.setAttribute('role', 'tab');
-          button.setAttribute('aria-label', group.title);
-          button.setAttribute('aria-controls', panel.id);
-          button.appendChild(el('span', 'resolutions-domain-tab-number', String(index + 1).padStart(2, '0')));
-          button.appendChild(el('span', 'resolutions-domain-tab-name', group.title));
-          button.appendChild(el('span', 'resolutions-domain-tab-count', String(group.items.length).padStart(2, '0')));
-          button.addEventListener('click', function () { selectGroup(index); });
-          button.addEventListener('keydown', function (event) {
-            if (event.key !== 'ArrowDown' && event.key !== 'ArrowRight' && event.key !== 'ArrowUp' && event.key !== 'ArrowLeft') return;
-            event.preventDefault();
-            var direction = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1;
-            var next = (index + direction + buttons.length) % buttons.length;
-            selectGroup(next);
-            buttons[next].focus();
-          });
-          buttons.push(button);
-          tabs.appendChild(button);
-        });
-        browser.appendChild(tabs);
-        browser.appendChild(panel);
-        page.appendChild(browser);
-        selectGroup(0);
-
-        var note = el('aside', 'resolutions-note');
-        note.appendChild(el('p', '', words('NOTE')));
-        var status = fieldLink(words('NOTE.LINK') + ' ↗', 'NOTE.LINK.HREF', 'resolutions-note-link');
-        note.appendChild(status);
-        page.appendChild(note);
-        return page;
-      }
-
-      /* One resolution: who it is for and the problem it removes on the left; on the right,
-         one panel that changes state in place (ready products, product ideas, how it resolves)
-         so the page never scrolls. */
-      function mountDetail(item) {
-        var all = ArkResolutions.all();
-        var position = all.findIndex(function (candidate) { return candidate.slug === item.slug; });
-        var group = ArkResolutions.groupFor(item.group);
-        var previous = all[(position - 1 + all.length) % all.length];
-        var next = all[(position + 1) % all.length];
-        var shelf = typeof ArkResolutionProducts !== 'undefined' ? ArkResolutionProducts.forResolution(item.key) : null;
-        var page = el('article', 'ark-page resolutions-page resolution-detail');
-        page.dataset.arkPage = pageKey;
-        page.dataset.resolutionGroup = item.group.toLowerCase();
-        page.setAttribute('aria-labelledby', 'resolution-title-' + item.slug);
-        breadcrumb(page, item);
-
-        var workspace = el('div', 'resolution-detail-workspace');
-        var intro = el('header', 'resolution-detail-intro');
-        intro.appendChild(el('p', 'resolution-detail-index', String(position + 1).padStart(2, '0') + ' / ' + String(all.length).padStart(2, '0') + ' · ' + group.title));
-        var title = el('h1', '', item.title);
-        title.id = 'resolution-title-' + item.slug;
-        intro.appendChild(title);
-        intro.appendChild(el('p', 'resolution-detail-deck', item.text));
-        if (shelf) {
-          var brief = el('dl', 'resolution-brief');
-          [['For', shelf.audience], ['Problem', shelf.problem]].forEach(function (row) {
-            var line = el('div');
-            line.appendChild(el('dt', '', row[0]));
-            line.appendChild(el('dd', '', row[1]));
-            brief.appendChild(line);
-          });
-          intro.appendChild(brief);
-        }
-        var actions = el('div', 'resolution-detail-actions');
-        if (item.start && ArkUI.pageCatalog[item.start]) actions.appendChild(routeLink(words('START') + ' →', item.start, 'resolution-primary-action'));
-        else actions.appendChild(fieldLink('How resolvers work →', 'START.FALLBACK.HREF', 'resolution-primary-action'));
-        intro.appendChild(actions);
-        workspace.appendChild(intro);
-
-        var panel = el('section', 'resolution-shelf');
-        panel.setAttribute('aria-label', short(item) + ' products');
-        var tabs = el('div', 'resolution-level-tabs');
-        tabs.setAttribute('role', 'tablist');
-        tabs.setAttribute('aria-label', 'Products, ideas and how it works');
-        var view = el('div', 'resolution-level');
-        view.id = 'resolution-level-' + item.slug;
-        view.setAttribute('role', 'tabpanel');
-        view.tabIndex = 0;
-        var tabButtons = [];
-        var selectedIdea = 0;
-
-        function statusMark(product) {
-          var mark = el('span', 'resolution-status resolution-status-' + product.status, product.status === 'ready' ? 'Ready' : 'Building');
-          return mark;
-        }
-        function productTile(product) {
-          var target = product.page && ArkUI.pageCatalog[product.page] ? product.page : null;
-          var tile = target ? routeLink('', target, 'resolution-product') : el('div', 'resolution-product');
-          var head = el('span', 'resolution-product-head');
-          head.appendChild(el('strong', '', product.name));
-          head.appendChild(statusMark(product));
-          tile.appendChild(head);
-          tile.appendChild(el('span', 'resolution-product-line', product.line));
-          if (target) tile.appendChild(el('span', 'resolution-product-open', 'Open →'));
-          return tile;
-        }
-        function showReady() {
-          var grid = el('div', 'resolution-products');
-          shelf.ready.forEach(function (product) { grid.appendChild(productTile(product)); });
-          view.appendChild(grid);
-        }
-        function showIdeas() {
-          var ideas = el('div', 'resolution-ideas');
-          var rail = el('div', 'resolution-idea-rail');
-          rail.setAttribute('role', 'group');
-          rail.setAttribute('aria-label', 'Product ideas');
-          var detail = el('div', 'resolution-idea');
-          detail.setAttribute('aria-live', 'polite');
-          var picks = [];
-          function pick(index) {
-            selectedIdea = index;
-            picks.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
-            var idea = shelf.ideas[index];
-            detail.replaceChildren();
-            var head = el('div', 'resolution-idea-head');
-            head.appendChild(el('span', 'resolution-section-label', 'Idea ' + String(index + 1).padStart(2, '0') + ' · not built yet'));
-            head.appendChild(el('h2', '', idea.name));
-            head.appendChild(el('p', 'resolution-idea-audience', 'For ' + idea.audience.charAt(0).toLowerCase() + idea.audience.slice(1)));
-            detail.appendChild(head);
-            var body = el('dl', 'resolution-idea-body');
-            [['Problem', idea.problem], ['Product', idea.product]].forEach(function (row) {
-              var line = el('div');
-              line.appendChild(el('dt', '', row[0]));
-              line.appendChild(el('dd', '', row[1]));
-              body.appendChild(line);
-            });
-            detail.appendChild(body);
-            var builds = el('div', 'resolution-idea-builds');
-            builds.appendChild(el('span', 'resolution-section-label', 'Builds on'));
-            var chips = el('ul', '');
-            idea.builds.forEach(function (product) {
-              var chip = el('li', 'resolution-chip resolution-chip-' + product.status, product.name);
-              chip.title = product.line + (product.status === 'ready' ? '' : ' (building)');
-              chips.appendChild(chip);
-            });
-            builds.appendChild(chips);
-            detail.appendChild(builds);
-          }
-          shelf.ideas.forEach(function (idea, index) {
-            var button = el('button', 'resolution-idea-pick');
-            button.type = 'button';
-            button.appendChild(el('span', '', String(index + 1).padStart(2, '0')));
-            button.appendChild(el('strong', '', idea.name));
-            button.addEventListener('click', function () { pick(index); });
-            picks.push(button);
-            rail.appendChild(button);
-          });
-          ideas.appendChild(rail);
-          ideas.appendChild(detail);
-          view.appendChild(ideas);
-          pick(selectedIdea);
-        }
-        function showHow() {
-          var how = el('div', 'resolution-how');
-          var shift = el('div', 'resolution-how-shift');
-          shift.appendChild(el('span', 'resolution-section-label', 'The shift'));
-          shift.appendChild(el('h2', '', item.shift));
-          shift.appendChild(el('p', '', 'Instead of ' + item.old.charAt(0).toLowerCase() + item.old.slice(1)));
-          how.appendChild(shift);
-          var steps = el('ol', 'resolution-steps');
-          item.steps.forEach(function (step, index) {
-            var row = el('li', 'resolution-step');
-            row.appendChild(el('span', 'resolution-step-number', String(index + 1).padStart(2, '0')));
-            row.appendChild(el('strong', '', ['Define', 'Publish', 'Resolve'][index]));
-            row.appendChild(el('p', '', step));
-            steps.appendChild(row);
-          });
-          how.appendChild(steps);
-          view.appendChild(how);
-        }
-
-        var levels = shelf
-          ? [['Ready now', shelf.ready.length, showReady], ['Product ideas', shelf.ideas.length, showIdeas], ['How it resolves', 0, showHow]]
-          : [['How it resolves', 0, showHow]];
-        function showLevel(selected) {
-          tabButtons.forEach(function (button, index) {
-            var active = index === selected;
-            button.setAttribute('aria-selected', String(active));
-            button.tabIndex = active ? 0 : -1;
-          });
-          view.setAttribute('aria-labelledby', 'resolution-level-tab-' + item.slug + '-' + selected);
-          view.dataset.level = String(selected);
-          view.replaceChildren();
-          levels[selected][2]();
-        }
-        levels.forEach(function (level, index) {
-          var button = el('button', 'resolution-level-tab');
-          button.type = 'button';
-          button.id = 'resolution-level-tab-' + item.slug + '-' + index;
-          button.setAttribute('role', 'tab');
-          button.setAttribute('aria-controls', view.id);
-          button.appendChild(document.createTextNode(level[0]));
-          if (level[1]) button.appendChild(el('span', '', String(level[1])));
-          button.addEventListener('click', function () { showLevel(index); });
-          button.addEventListener('keydown', function (event) {
-            if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-            event.preventDefault();
-            var nextLevel = (index + (event.key === 'ArrowRight' ? 1 : -1) + tabButtons.length) % tabButtons.length;
-            showLevel(nextLevel);
-            tabButtons[nextLevel].focus();
-          });
-          tabButtons.push(button);
-          tabs.appendChild(button);
-        });
-        panel.appendChild(tabs);
-        panel.appendChild(view);
-        var legend = el('p', 'resolution-legend');
-        legend.appendChild(el('span', 'resolution-legend-ready', 'Ready: usable today'));
-        legend.appendChild(el('span', 'resolution-legend-building', 'Building: in source, not released'));
-        legend.appendChild(el('span', 'resolution-legend-idea', 'Ideas: proposed, not built'));
-        var statusLink = fieldLink(words('NOTE.LINK') + ' ↗', 'NOTE.LINK.HREF', 'resolution-boundary-link');
-        legend.appendChild(statusLink);
-        panel.appendChild(legend);
-        workspace.appendChild(panel);
-        page.appendChild(workspace);
-        showLevel(0);
-
-        var footer = el('nav', 'resolution-next');
-        footer.setAttribute('aria-label', 'More resolutions');
-        var previousLink = routeLink('← ' + short(previous), 'resolutions/' + previous.slug, 'resolution-next-link resolution-next-previous');
-        previousLink.appendChild(el('span', '', 'Previous'));
-        var nextLink = routeLink(short(next) + ' →', 'resolutions/' + next.slug, 'resolution-next-link resolution-next-forward');
-        nextLink.appendChild(el('span', '', 'Next'));
-        footer.appendChild(previousLink);
-        footer.appendChild(fieldLink('All 20', 'INDEX.HREF', 'resolution-next-all'));
-        footer.appendChild(nextLink);
-        page.appendChild(footer);
-        return page;
-      }
-
       var slug = String(pageKey || '').indexOf('resolutions/') === 0 ? String(pageKey).slice('resolutions/'.length) : '';
       var item = slug ? ArkResolutions.find(slug) : null;
-      var page = item ? mountDetail(item) : mountIndex();
-      // Anchor for reusable content blocks (js/content/components.js); rendering into it
-      // is centralized in js/main.js's onMount hook, not called here. Added once here,
-      // after either mountIndex() or mountDetail() builds `page`, instead of duplicating
-      // the same three lines in both.
-      var components = el('div', 'resolutions-components'); components.setAttribute('data-ark-insert', 'main'); page.appendChild(components);
-      host.appendChild(page);
+      var page = item
+        ? ArkUI.page(detailSpec(item), host, { page: pageKey, tag: 'article', titleId: 'resolution-title-' + item.slug, terms: 'first-use' })
+        : ArkUI.page(indexSpec(), host, { page: 'resolutions', titleId: 'resolutions-title', terms: 'first-use' });
+      if (item) page.dataset.resolutionGroup = item.group.toLowerCase();
       return page;
     }
   };

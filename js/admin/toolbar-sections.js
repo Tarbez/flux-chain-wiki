@@ -12,12 +12,12 @@
 (function () {
   'use strict';
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
-  var state = A.state, postCmsLayoutCommand = A.postCmsLayoutCommand, ctlField = A.ctlField,
+  var state = A.state, postCmsLayoutCommand = A.postCmsLayoutCommand, ctlField = A.ctlField, devDetails = A.devDetails,
       postCmsLayoutReset = A.postCmsLayoutReset, postCmsLayoutOperation = A.postCmsLayoutOperation,
       ctlSegField = A.ctlSegField, CMS_DISPLAY_TOKENS = A.CMS_DISPLAY_TOKENS,
       CMS_ALIGN_TOKENS = A.CMS_ALIGN_TOKENS, CMS_JUSTIFY_TOKENS = A.CMS_JUSTIFY_TOKENS,
       CMS_WRAP_VALUES = A.CMS_WRAP_VALUES, CMS_FONT_TOKENS = A.CMS_FONT_TOKENS,
-      ctlSelectField = A.ctlSelectField, CMS_TYPE_SIZE_TOKENS = A.CMS_TYPE_SIZE_TOKENS,
+      ctlSelectField = A.ctlSelectField, ctlLabel = A.ctlLabel, CMS_TYPE_SIZE_TOKENS = A.CMS_TYPE_SIZE_TOKENS,
       CMS_FONT_WEIGHT_STEPS = A.CMS_FONT_WEIGHT_STEPS, CMS_LINE_HEIGHT_TOKENS = A.CMS_LINE_HEIGHT_TOKENS,
       CMS_TEXT_ALIGN_VALUES = A.CMS_TEXT_ALIGN_VALUES, ctlSwatchField = A.ctlSwatchField,
       CMS_TEXT_TOKENS = A.CMS_TEXT_TOKENS, CMS_FILL_TOKENS = A.CMS_FILL_TOKENS,
@@ -36,7 +36,8 @@
       postCmsElementMotionPreview = A.postCmsElementMotionPreview;
   /* defined by files loaded after this one: resolved when called */
   var renderSelToolbar = A.later('renderSelToolbar'), toolbarSection = A.later('toolbarSection'),
-      cmsOpenMasterInLibrary = A.later('cmsOpenMasterInLibrary');
+      cmsOpenMasterInLibrary = A.later('cmsOpenMasterInLibrary'), cmsBlockFields = A.later('cmsBlockFields'),
+      cmsFieldsFor = A.later('cmsFieldsFor'), cmsBlockRefusals = A.later('cmsBlockRefusals'), cmsRefusalList = A.later('cmsRefusalList');
 
   /* =========================================================================
      Step 4 (flickering-juggling-donut.md): the smart contextual floating toolbar.
@@ -101,8 +102,8 @@
   function buildFrameSection(pane, ctx, isGroup) {
     const body = toolbarSection(pane, 'cms-frame', 'Frame', 'move');
     body.append(ctlField(ctx, 'X', 'x'), ctlField(ctx, 'Y', 'y'), ctlField(ctx, 'Width', 'width'), ctlField(ctx, 'Height', 'height'), ctlField(ctx, 'Rotation', 'rotation'), ctlField(ctx, 'Scale X', 'scaleX', { step: '0.01' }), ctlField(ctx, 'Scale Y', 'scaleY', { step: '0.01' }));
-    const meta = document.createElement('p'); meta.className = 'hint'; meta.textContent = `${state.cmsExactSelection.breakpoint || 'desktop'} · ${state.cmsExactSelection.key}`; body.appendChild(meta);
-    const reset = document.createElement('button'); reset.className = 'btn small'; reset.type = 'button'; reset.textContent = 'Reset this breakpoint'; reset.addEventListener('click', postCmsLayoutReset); body.appendChild(reset);
+    const reset = document.createElement('button'); reset.className = 'btn small'; reset.type = 'button'; reset.textContent = 'Reset for this screen size'; reset.title = 'Put this element back the way it is at this screen size before your changes'; reset.addEventListener('click', postCmsLayoutReset); body.appendChild(reset);
+    body.appendChild(devDetails([['Screen size', state.cmsExactSelection.breakpoint || 'desktop'], ['Layout key', state.cmsExactSelection.key]]));
     if (state.cmsExactSelections.length > 1) {
       const align = document.createElement('div'); align.style.display = 'grid'; align.style.gridTemplateColumns = 'repeat(3,minmax(0,1fr))'; align.style.gap = '5px'; align.style.marginTop = '8px';
       [['Left', 'left'], ['Center X', 'hcenter'], ['Right', 'right'], ['Top', 'top'], ['Center Y', 'vcenter'], ['Bottom', 'bottom']].forEach(([label, op]) => { const b = document.createElement('button'); b.className = 'btn small'; b.type = 'button'; b.textContent = label; b.addEventListener('click', () => postCmsLayoutOperation(op)); align.appendChild(b); });
@@ -131,14 +132,18 @@
       const input = document.createElement('input'); input.className = 'ctl ' + cls; input.type = 'number'; input.min = '0'; input.value = String(ctx.get(key) ?? 0); input.setAttribute('aria-label', label);
       input.addEventListener('change', () => ctx.set(key, Number(input.value))); bm.appendChild(input);
     });
-    const mid = document.createElement('div'); mid.className = 'mid'; mid.textContent = 'padding'; bm.appendChild(mid);
+    /* one naming for the spacing fields, with their unit (docs/ux-audit/cms.md P2-8: a lowercase "padding"
+       box beside "Margin ↑", and no unit anywhere; js/content/layout.js writes every value in px) */
+    const mid = document.createElement('div'); mid.className = 'mid'; mid.textContent = 'Padding (px)'; bm.appendChild(mid);
     body.appendChild(bm);
-    body.append(ctlField(ctx, 'Margin ↑', 'mt'), ctlField(ctx, 'Margin ↓', 'mb'));
+    body.append(ctlField(ctx, 'Margin above (px)', 'mt'), ctlField(ctx, 'Margin below (px)', 'mb'));
   }
   function buildTypographySection(pane, ctx) {
     const body = toolbarSection(pane, 'cms-type', 'Typography', 'type');
     body.appendChild(ctlSegField(ctx, 'Font', 'font', CMS_FONT_TOKENS));
-    body.appendChild(ctlSelectField(ctx, 'Size', 'textSize', CMS_TYPE_SIZE_TOKENS));
+    /* unset reads "As designed", not the first size (cms.md P2-8: plain text showed "Hero"); choosing it
+       clears the override (js/content/layout.js keeps only a known size) */
+    body.appendChild(ctlSelectField(ctx, 'Size', 'textSize', [''].concat(CMS_TYPE_SIZE_TOKENS), (v) => (v === '' ? 'As designed' : ctlLabel(v))));
     body.appendChild(ctlSegField(ctx, 'Weight', 'fw', CMS_FONT_WEIGHT_STEPS));
     body.appendChild(ctlSegField(ctx, 'Line height', 'lh', CMS_LINE_HEIGHT_TOKENS));
     body.appendChild(ctlSegField(ctx, 'Align', 'ta', CMS_TEXT_ALIGN_VALUES));
@@ -173,7 +178,7 @@
     const body = toolbarSection(pane, 'cms-alt', 'Alt text', 'image');
     const alt = state.cmsExactSelection.alt;
     if (!alt) {
-      body.appendChild(h('p', { class: 'hint', text: 'This element has no text alternative of its own to set: alt text belongs on the <img> (or the <svg>, <canvas> or <video>) itself. Select the image inside it in Layers to describe it.' }));
+      body.appendChild(h('p', { class: 'hint', text: 'This element has no description of its own to set: a description belongs on the picture, drawing or video itself. Select the picture inside it in Layers to describe it.' }));
       return;
     }
     /* `page` is the route shown, `route` the scope the edit is stored under (SHELL for the
@@ -184,47 +189,60 @@
       placeholder: alt.own ? 'Page default: ' + alt.own : alt.own === '' || alt.decorative ? 'Page default: decorative (screen readers skip it)' : 'Describe what this image shows' });
     row.classList.add('alt-row');
     body.appendChild(row);
-    body.appendChild(h('p', { class: 'hint', text: (alt.attr === 'alt' ? 'Read aloud by screen readers and shown if the image fails to load.' : 'Sets this ' + (cmsTreeRowForKey(state.cmsExactSelection.key) || {}).tag + "'s accessible name (aria-label)" + (alt.decorative ? ', and stops treating it as decorative' : '') + '.') + ' Blank keeps the page\'s own value. Saved with the layout.' }));
+    /* plain words: "aria-label" and the element's tag are the code's names (docs/ux-audit/cms.md P1-2) */
+    body.appendChild(h('p', { class: 'hint', text: (alt.attr === 'alt' ? 'Read aloud by screen readers and shown if the image fails to load.' : 'Sets what screen readers call this element' + (alt.decorative ? ', and stops them skipping it' : '') + '.') + ' Blank keeps the page\'s own value. Saved with the layout.' }));
   }
   /* A selected element that is a reusable-component instance root (js/content/
      components.js tags it; cmsSelectionInfo in js/main.js reports it as
      cmsExactSelection.component) gets its own override section, ALONGSIDE -- not instead
      of -- the taxonomy section(s) above, since an instance is both a positioned element and
-     a content block. Each field writes a real setOverride() inside the connected preview
-     iframe via postCmsComponentsCommand, the same draft-mutate-then-post shape every
-     ctl*Field() (js/admin/controls.js) uses, just with its own one-off patch function (no shared ctx needed:
-     there is exactly one control per resolver prop, not several reading/writing the same
-     draft object). */
+     a content block. Its fields are the block's own schema, drawn by THE schema-driven editor
+     (cmsBlockFields, js/admin/library.js) -- an Ark block's props from the SDK's editor fields
+     (lists, links through the link picker, choices as segmented controls, absent kept apart
+     from 0), a legacy block's and a captured component's from ArkComponents.fieldsOf. Each
+     change writes a real setOverride() inside the connected preview iframe via
+     postCmsComponentsCommand. What the instance SHOWS (definition + overrides) is checked as
+     Save will check it, and every refusal is listed under the fields. */
   function buildComponentInstanceSection(pane) {
     const comp = state.cmsExactSelection.component;
     const componentsState = (state.cmsSourceSite && state.cmsSourceSite.components) || { masters: {}, routes: {} };
     const master = componentsState.masters && componentsState.masters[comp.masterId];
-    const anchorList = window.ArkComponents ? ArkComponents.instancesAt(componentsState, state.cmsExactSelection.page || state.cmsExactSelection.route, comp.anchorId) : [];
+    const route = state.cmsExactSelection.page || state.cmsExactSelection.route;
+    const anchorList = window.ArkComponents ? ArkComponents.instancesAt(componentsState, route, comp.anchorId) : [];
     const instance = anchorList.find((item) => item.key === comp.key);
     const overrides = (instance && instance.overrides) || {};
     const body = toolbarSection(pane, 'cms-component', 'Component instance', 'comp');
-    const info = document.createElement('p'); info.className = 'hint'; info.innerHTML = '<b></b><br><code></code>';
-    info.querySelector('b').textContent = master ? master.label : comp.masterId;
-    info.querySelector('code').textContent = master ? cmsMasterKind(master) + ' · ' + comp.anchorId : comp.anchorId;
+    /* named for what it is, never by its ids ("spot-mveixci6q6trc"); the ids are Developer details */
+    const info = document.createElement('p'); info.className = 'hint'; info.innerHTML = '<b></b>';
+    info.querySelector('b').textContent = master ? (/^spot-|^m[a-z0-9]{6,}$/.test(master.label || '') ? 'Made from your selection' : master.label) : 'A component whose definition is missing';
+    if (master) info.appendChild(document.createTextNode(' · ' + cmsMasterKind(master)));
     body.appendChild(info);
+    body.appendChild(devDetails([['Kind', master ? cmsMasterKind(master) : ''], ['Definition id', comp.masterId], ['Placed at', comp.anchorId], ['Instance', comp.key]]));
     const scope = document.createElement('p'); scope.className = 'hint';
     scope.textContent = master && master.detached ? 'Detached: this copy no longer follows any definition.' : 'Fields here override this instance only. Edit definition changes every instance.';
     body.appendChild(scope);
-    /* one text field per prop (the shared ctlField): it shows the override, else the definition's value */
-    const overrideCtx = { get: (prop) => (overrides[prop] !== undefined ? overrides[prop] : ((master && master.props[prop]) || '')),
-      set: (prop, value) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value }) };
-    cmsMasterProps(master).forEach((prop) => {
-      const row = ctlField(overrideCtx, prop, prop, { type: 'text', placeholder: (master && master.props[prop]) || '' });
-      if (overrides[prop] !== undefined) row.classList.add('ovr');
-      body.appendChild(row);
-    });
+    /* One field per prop: it shows the override, else the definition's value. A working copy of
+       the overrides, so a second field changed before the preview relays the first builds on it.
+       Emptying a field the definition fills overrides it with a blank (this instance shows
+       nothing there); Reset overrides goes back to the definition. */
+    const local = Object.assign({}, overrides);
+    const shown = () => Object.assign({}, (master && master.props) || {}, local);
+    const overrideCtx = { get: (prop) => (local[prop] !== undefined ? local[prop] : (master && master.props[prop])),
+      set: (prop, value) => {
+        let v = value;
+        if (v === undefined) v = master && master.props[prop] !== undefined ? '' : null;
+        if (v === null) delete local[prop]; else local[prop] = v;
+        postCmsComponentsCommand({ action: 'set-override', route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: v });
+      } };
+    body.appendChild(cmsBlockFields(cmsFieldsFor(master), overrideCtx, { id: 'cms-inst-' + comp.key, aria: '', all: shown, marked: (prop) => overrides[prop] !== undefined, glossary: !!master && ArkComponents.isArk(master.resolver) }));
+    if (master) body.appendChild(cmsRefusalList(cmsBlockRefusals(master.resolver, shown())));
     const actions = document.createElement('div'); actions.style.display = 'flex'; actions.style.gap = '6px'; actions.style.marginTop = '6px';
     const resetAll = document.createElement('button'); resetAll.className = 'btn small'; resetAll.type = 'button'; resetAll.textContent = 'Reset overrides';
     refuse(resetAll, Object.keys(overrides).length ? '' : 'Nothing to reset: this instance overrides none of its definition\'s fields. Edit a field above to override it here.');
-    resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
+    resetAll.addEventListener('click', () => Object.keys(overrides).forEach((prop) => postCmsComponentsCommand({ action: 'set-override', route, anchorId: comp.anchorId, key: comp.key, propPath: prop, value: null })));
     const removeInst = document.createElement('button'); removeInst.className = 'btn small danger'; removeInst.type = 'button'; removeInst.textContent = 'Remove instance';
     removeInst.addEventListener('click', () => {
-      postCmsComponentsCommand({ action: 'remove-instance', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key });
+      postCmsComponentsCommand({ action: 'remove-instance', route, anchorId: comp.anchorId, key: comp.key });
       state.cmsExactSelection = null; state.cmsExactSelections = []; renderInspector();
     });
     /* Edit definition: the master's own fields, in the Library -- one place, so an edit there
@@ -237,7 +255,7 @@
     const detach = document.createElement('button'); detach.className = 'btn small'; detach.type = 'button'; detach.textContent = 'Detach';
     refuse(detach, !master ? 'Cannot detach: this instance\'s master ' + comp.masterId + ' is missing, so there is no content to copy.' : master.detached ? 'Already detached: this copy follows no definition.' : '');
     detach.addEventListener('click', () => {
-      postCmsComponentsCommand({ action: 'detach-instance', route: state.cmsExactSelection.page || state.cmsExactSelection.route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
+      postCmsComponentsCommand({ action: 'detach-instance', route, anchorId: comp.anchorId, key: comp.key, id: cmsNextComponentId('m') });
       toast('Detached: this instance keeps its content and no longer follows the definition.');
     });
     actions.style.flexWrap = 'wrap';
@@ -278,7 +296,8 @@
     const showing = typeof state.cmsStatesShowing[groupId] === 'number' && state.cmsStatesShowing[groupId] < group.states.length ? state.cmsStatesShowing[groupId] : group.current;
     group.states.forEach((st, i) => {
       const row = document.createElement('div'); row.className = 'row';
-      const l = document.createElement('label'); l.textContent = (i === 0 ? '0 · ' : i + ' · ') + (st.label || (i === 0 ? 'Default' : 'New state'));
+      /* states are counted from 1 where a person reads them; the stored index stays 0-based */
+      const l = document.createElement('label'); l.textContent = (i + 1) + ' · ' + (st.label || (i === 0 ? 'Default' : 'New state'));
       const preview = document.createElement('button'); preview.type = 'button'; preview.className = 'btn small'; preview.textContent = showing === i ? 'Showing' : 'Preview';
       preview.title = 'Show this state here in the editor only -- visitors still see the default state';
       refuse(preview, showing === i ? 'Showing now: this state is the one in the preview. Preview another state to switch.' : '');
@@ -297,8 +316,8 @@
         /* A block-type <select> + button, not the prompt() this used to be: a prompt that
            wanted the exact word "Text" silently did nothing for "text block" or Cancel. */
         const addRow = document.createElement('div'); addRow.className = 'state-add-block'; Object.assign(addRow.style, { display: 'flex', gap: '6px', margin: '0 0 6px 20px' });
-        const kind = document.createElement('select'); kind.className = 'ctl'; kind.setAttribute('aria-label', 'Block type for state ' + i);
-        [{ resolver: CMS_LIKE_STATE_0, label: 'Like state 0' }].concat(CMS_BLOCK_RESOLVERS).forEach((block) => { const o = document.createElement('option'); o.value = block.resolver; o.textContent = block.label; kind.appendChild(o); });
+        const kind = document.createElement('select'); kind.className = 'ctl'; kind.setAttribute('aria-label', 'Block type for state ' + (i + 1));
+        [{ resolver: CMS_LIKE_STATE_0, label: 'Like the first state' }].concat(CMS_BLOCK_RESOLVERS).forEach((block) => { const o = document.createElement('option'); o.value = block.resolver; o.textContent = block.label; kind.appendChild(o); });
         const add = document.createElement('button'); add.type = 'button'; add.className = 'btn small'; add.textContent = '+ Add content block';
         add.addEventListener('click', () => { addStateContent(groupId, i, kind.value, st.label || ('State ' + i)); postCmsStatesCommand({ action: 'preview', groupId, index: i }); });
         addRow.append(kind, add); body.appendChild(addRow);
@@ -307,7 +326,7 @@
     /* The explicit, saved choice of which state visitors see first. Only this writes the
        group's `current`; Preview above never does. */
     const defaultCtx = { get: () => group.current, set: (_key, value) => postCmsStatesCommand({ action: 'set-default', groupId, index: Number(value) }) };
-    const defaultRow = ctlSelectField(defaultCtx, 'Default state', 'current', group.states.map((_st, i) => i), (i) => i + ' · ' + (group.states[i].label || (i === 0 ? 'Default' : 'New state')));
+    const defaultRow = ctlSelectField(defaultCtx, 'Default state', 'current', group.states.map((_st, i) => i), (i) => (i + 1) + ' · ' + (group.states[i].label || (i === 0 ? 'Default' : 'New state')));
     defaultRow.querySelector('select').title = 'The state visitors see first. Saved with the page.';
     body.appendChild(defaultRow);
     /* + Add state creates the state WITH visible content and shows it, instead of an empty
@@ -326,11 +345,12 @@
     body.appendChild(addState);
     const triggerNote = document.createElement('p'); triggerNote.className = 'hint';
     const triggerRow0 = group.trigger === 'self' ? null : cmsTreeRowForKey(group.trigger);
-    triggerNote.textContent = group.trigger === 'self' ? 'Click trigger: the state-zero selection itself.' : 'Click trigger: ' + (triggerRow0 ? '"' + triggerRow0.label + '"' : 'a specific element') + ' (' + group.trigger + '). While another state shows and that element is hidden with state 0, clicking the showing state moves on.';
+    triggerNote.textContent = group.trigger === 'self' ? 'A click on the first state moves it on.' : 'A click on ' + (triggerRow0 ? '"' + triggerRow0.label + '"' : 'the element you chose') + ' moves it on. While another state shows and that element is hidden with the first state, a click on the state showing moves on.';
     body.appendChild(triggerNote);
+    body.appendChild(devDetails([['Group id', groupId], ['Trigger', group.trigger]]));
     const triggerRow = document.createElement('div'); triggerRow.style.display = 'flex'; triggerRow.style.gap = '6px'; triggerRow.style.flexWrap = 'wrap';
-    const useSelf = document.createElement('button'); useSelf.type = 'button'; useSelf.className = 'btn small'; useSelf.textContent = 'Use state-zero selection as trigger';
-    refuse(useSelf, group.trigger === 'self' ? 'Already the trigger: a click on the state-zero selection moves this group on.' : '');
+    const useSelf = document.createElement('button'); useSelf.type = 'button'; useSelf.className = 'btn small'; useSelf.textContent = 'A click on the first state moves it on';
+    refuse(useSelf, group.trigger === 'self' ? 'Already so: a click on the first state moves this group on.' : '');
     useSelf.addEventListener('click', () => postCmsStatesCommand({ action: 'set-trigger', groupId, trigger: 'self' }));
     const useThis = document.createElement('button'); useThis.type = 'button'; useThis.className = 'btn small'; useThis.textContent = 'Use this element as trigger';
     refuse(useThis, !state.cmsExactSelection.key ? 'Select an element on the page first: the selected element becomes the trigger.' : group.trigger === state.cmsExactSelection.key ? 'Already the trigger: this element is what a click moves this group on with. Select another element to use it instead.' : '');
@@ -352,7 +372,7 @@
     const ctx = { get: (key) => cfg[key], set: (key, value) => postCmsElementMotionCommand({ [key]: value }) };
     const body = toolbarSection(pane, 'cms-element-motion', 'In / out animation', 'play');
     const note = document.createElement('p'); note.className = 'hint';
-    note.textContent = `How "${state.cmsExactSelection.label || state.cmsExactSelection.key}" enters and leaves on route change. Overrides the default stagger for this element only; every other element keeps today's behavior.`;
+    note.textContent = `How "${state.cmsExactSelection.label || 'this element'}" comes in and goes out when a visitor changes page. It applies to this element only; every other element keeps the site's default.`;
     body.appendChild(note);
     body.appendChild(ctlSegField(ctx, 'Direction', 'direction', CMS_ELEMENT_MOTION_DIRECTIONS));
     body.appendChild(ctlField(ctx, 'Distance (px)', 'distance', { min: 0, max: 60, step: 1 }));
@@ -364,7 +384,7 @@
     preview.addEventListener('click', () => postCmsElementMotionPreview(state.cmsExactSelection.key));
     body.appendChild(preview);
     const hint = document.createElement('p'); hint.className = 'hint';
-    hint.textContent = 'Previews instantly in the connected site above -- no page navigation. Save still writes it to the project like every other Studio edit.';
+    hint.textContent = 'Preview plays it on the page here, without changing page. Save keeps it, like every other change.';
     body.appendChild(hint);
   }
   /* The Content lens's section: what the selected text IS in the content -- the field it shows
@@ -394,14 +414,19 @@
   function buildContentSection(pane) {
     /* a binding reported for another element (a message that moved the selection without one) is not this one's */
     const content = state.cmsContent && (!state.cmsContent.key || state.cmsContent.key === state.cmsExactSelection.key) ? state.cmsContent : null;
+    /* "Details": the field's name, its words in a box, its link target, Revert -- opened on demand
+       (by itself only for text that cannot be edited in place, whose explanation is the answer) */
     const body = toolbarSection(pane, 'cms-content', 'Content', 'text');
     const applyCmsCopyEdit = A.applyCmsCopyEdit;
     const p = (cls, text) => { const el = document.createElement('p'); el.className = cls; el.textContent = text; return el; };
     if (!content) { body.appendChild(p('hint', 'Nothing reported for this selection yet: click a piece of text on the canvas.')); return; }
     if (content.bound) {
-      const info = document.createElement('p'); info.className = 'hint cms-content-field'; info.innerHTML = '<b></b><br><code></code>';
+      /* the field by its name ("Heading"); its copy key and file are Developer details (P1-2) */
+      const info = document.createElement('p'); info.className = 'hint cms-content-field'; info.innerHTML = '<b></b> <span></span>';
       info.querySelector('b').textContent = content.label;
-      info.querySelector('code').textContent = content.field + '  ·  ' + (content.multiline ? 'paragraph' : 'one line') + '  ·  ' + content.file;
+      info.querySelector('span').textContent = '· ' + (content.multiline ? 'a paragraph' : 'one line');
+      const keyCode = document.createElement('code'); keyCode.textContent = content.field + '  ·  ' + content.file;
+      const dev = devDetails([], [keyCode]); info.appendChild(dev);
       body.appendChild(info);
       /* How an edit on the canvas ends, said where the person is looking: nothing on screen did,
          and Escape threw the typing away (docs/ux-audit/cms.md P0-2). The keys are js/main.js's
@@ -419,22 +444,28 @@
         } };
       const data = component ? {} : { cmsField: content.kind + ':' + content.id + ':' + content.fieldKey };
       body.appendChild(ctlField(ctx, 'Text', 'value',
-        { type: content.multiline ? 'textarea' : 'text', rows: content.multiline ? 4 : undefined, id: 'cmsContentValue', live: !component, data }));
+        { type: content.multiline ? 'textarea' : 'text', rows: content.multiline ? 4 : undefined, id: 'cmsContentValue', live: !component, data, hint: 'The same words as on the page: type here when that is easier.' }));
       if (component) body.appendChild(p('hint', 'This instance\'s override: the definition keeps its own value.'));
       else body.appendChild(revertFieldButton(content));
       if (content.link && content.link.field) {
         const at = A.cmsCopyAddress(content.link.field);
         body.appendChild(A.linkPickerEl('Link target', 'cms-content-link', content.link.value,
           (value) => { content.link.value = value; applyCmsCopyEdit({ field: content.link.field, value, final: true }); },
-          content.link.field, at ? at.kind + ':' + at.id + ':' + at.key : undefined));
-      } else if (content.link) body.appendChild(p('hint cms-content-refusal', content.link.refusal));
+          /* no note: the field's copy key is this popover's Developer details, not a tag beside the picker (P1-2) */
+          undefined, at ? at.kind + ':' + at.id + ':' + at.key : undefined));
+      } else if (content.link) {
+        body.appendChild(p('hint cms-content-refusal', content.link.refusal));
+        if (content.link.remedy) body.appendChild(p('hint', content.link.remedy));
+        if (content.link.detail) body.appendChild(devDetails([['Link', content.link.href]], [p('hint', content.link.detail)]));
+      }
     } else {
       body.appendChild(p('hint cms-content-refusal', content.reason));
-      if (content.reason.indexOf(content.source) < 0) body.appendChild(p('hint', 'Source: ' + content.source + '.'));
       body.appendChild(p('hint', content.remedy));
+      /* what writes the words and how a developer makes them editable (P1-2) */
+      body.appendChild(devDetails([['Written by', content.source]], content.detail ? [p('hint', content.detail)] : []));
     }
     /* the whole form of the item this text belongs to (the page shown, when it belongs to none) */
-    const all = document.createElement('button'); all.type = 'button'; all.className = 'btn small'; all.dataset.action = 'open-page-fields'; all.textContent = 'Open all page fields';
+    const all = document.createElement('button'); all.type = 'button'; all.className = 'btn small'; all.dataset.action = 'open-page-fields'; all.textContent = 'All fields of this page';
     refuse(all, typeof A.openPageFields === 'function' ? '' : 'Page fields are not available in this editor build: js/admin/ provides no openPageFields().');
     all.addEventListener('click', () => A.openPageFields(content.bound && content.kind !== 'component' ? { kind: content.kind, id: content.id, field: content.fieldKey } : {}));
     body.appendChild(all);

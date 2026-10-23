@@ -217,8 +217,20 @@
     note: 'Measured on a Mac mini (Apple M2, 8 GB RAM), Rust release build / Node v24.9.0, median of 5 timed reps with 2 warm-ups discarded. Absent is not zero: bundle-deploy, flux-code-host and flx-blockstore have no resolver by design, reported as absent rather than averaged in as a zero score. Excluded from every row: network transport, record/manifest construction before the timed region, the FXN Compute Rent Resolver (CRR)’s one-shot publish/install/activate pipeline, and the production economic layer, which stays gated closed pending its own authority ceremony and soak test. See docs/evidence/infra-001-platform-resolver-audit.md.'
   });
 
+  // The grammar-only admit path, measured 2026-10-08 (one M-series Mac core, 8 threads,
+  // admit_burst with verify_batch). It lived in js/content/resolver-registry.js until that
+  // hand-written directory was replaced by the generated registry snapshot on 2026-10-19;
+  // moved here verbatim, because /stats is the page that shows it.
+  var GRAMMAR_ONLY_ADMISSION = Object.freeze({
+    label: 'Grammar-only admit path',
+    rate: 83225,
+    unit: 'ledger ops/s',
+    source: 'one M-series Mac core, 8 threads, admit_burst with verify_batch, 2026-10-08'
+  });
+
   window.ArkStatsHighlights = Object.freeze({
     defiShard: DEFI_SHARD,
+    grammarOnlyAdmission: GRAMMAR_ONLY_ADMISSION,
     operations: OPERATIONS,
     clientPath: CLIENT_PATH,
     infraResolvers: INFRA_RESOLVERS,
@@ -239,7 +251,7 @@
       { value: '13.9', unit: 'ms/batch', short: 'DeFi \u00b7 batch resolution latency', label: 'FLX DeFi \u00b7 batch resolution latency', detail: 'Batched Ed25519 verification is 10.403 ms (75% of the batch); the uniform-price auction plus AMM residual is 2.173 ms (15.7%); the shard signing the result \u2014 the thing that makes it true \u2014 is 0.040 ms (0.3%). Shard-only: 153.7 batches/s, 39,349 swaps/s resolved. Broadcast is NOT in this figure: it is 449 ms unpipelined for 10 peers and is the binding constraint on everything.' },
       { value: '180', unit: 'bytes', short: 'DeFi \u00b7 replication per signed result', label: 'FLX DeFi \u00b7 bytes to replicate one signed batch result', detail: '580 bytes of dense FLX, 180 after LZMA2 in a run (3.22x). A single result barely compresses \u2014 it is mostly unique hex \u2014 so LZMA2 pays only across a feed. 1,801 bytes replicates 256 swaps to 10 replicas: about 0.7 bytes per swap per replica. Audit cost is 3 x Ed25519_verify.' },
       { value: '496,278', unit: 'stores/s', short: 'Replica store \u00b7 per replica \u00b7 measured', label: 'Replica store \u00b7 signed results stored per second, per replica', detail: 'BENCH-013, 2026-10-10: 496,278 signed results stored per second by ONE replica, measured. This replaces a previously published 642,128 "replica applications/s" figure that was arithmetic \u2014 logical operations x 4 replicas \u2014 with nothing run. Storing is the fastest operation in the system because a replica stores and does not verify, execute or re-decide. It means one replica can absorb the output of many resolver shards, and read-side services (explorers, indexers, audits) need no re-verification. No row is multiplied by a replica count: a fleet of N does N times the work, but no pipeline moves N x rate.' },  // ALLOW-DEPRECATED-TERM: names the fabricated figure in order to retire it; the line asserts the opposite of the retired concept.
-      { value: '20', unit: 'resolvers', short: 'Resolver registry \u00b7 6 measured', label: 'Resolver registry \u00b7 20 resolvers, 6 measured, 14 not built', detail: 'Every resolver publishes a signed audit manifest, or it is not registered. Not built is recorded as NOT_BUILT, never as zero: zero would mean measured and scored nothing, so reporting absence as zero would make missing work read as slow work. Each unbuilt resolver is a region of intent that cannot be made real yet. See docs/resolver-audit.md.' },
+      { value: '20', unit: 'resolvers', short: 'Resolver families audited \u00b7 6 measured', label: 'Resolver families audited \u00b7 20 families, 6 measured, 14 not built', detail: 'This counts resolver families in the audit (docs/resolver-audit.md), not resolver chains: the chains launched on the network are a different count, generated from the code on /resolvers. Every audited family publishes a signed audit manifest, or it is not audited. Not built is recorded as NOT_BUILT, never as zero: zero would mean measured and scored nothing, so reporting absence as zero would make missing work read as slow work. Each unbuilt resolver is a region of intent that cannot be made real yet. See docs/resolver-audit.md.' },
       { value: '7/7', unit: 'refused', short: 'Attack suite', label: 'Attack suite', detail: 'A forged intent fails the WHOLE batch \u2014 deliberately, since hunting the culprit would let one forgery impose N verifications. A replayed nonce is refused by name. An unmeetable min_out is refused rather than filled badly. A reordered batch fails the audit even though every signature in it is genuine. Plus replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature and equivocation on the record path.' }
     ])
   });

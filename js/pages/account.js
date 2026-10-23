@@ -1,4 +1,54 @@
-/* Local Auth Kit account view. Public account state survives reload; root signing authority stays in memory. */
+/* =====================================================================
+   /account -- the person's identity, wallet, signing keys, contacts and network standing.
+   ---------------------------------------------------------------------
+   Converted to Ark blocks (DEFXN polish Wave 4, W4-S2, 2026-10-20). It was one hand-built
+   `innerHTML` string with two H1-scale headings, "Auth Kit" / "Ghost ID" / "Root key" jargon with
+   no explanation, and two hand-made tab strips. The browser coverage written first
+   (tests/browser/account-flows.mjs, green against the old page) is the safety net; this file keeps
+   every behaviour it checks.
+
+   What is an Ark block now (docs/cms-architecture.md "Pages as data"):
+     hero                one h1 -- "Sign in to DEFXN", or the person's name once signed in; its meta
+                         carries the status. The old second, equally large heading ("Choose your Auth Kit.") is gone
+     figure              the Auth Kit -> identity -> wallet -> publishing map, with a caption that says it
+     facts               the identity details, the public key, the record details
+     disclosure          "What is an Auth Kit?" and "Developer details" (root key, security level,
+                         the technical names) -- jargon explained at first use or folded away
+     tabs                the account views (Session, Wallet, Signing keys, Contacts, Network) and, signed
+                         out, Sign in / Create identity. Rebuilt only when the SESSION STATE changes
+                         (signed out / saved / unlocked), because the set of views changes with it
+     stats               the FXN balance and Credits (an absent balance names its cause -- "No reading",
+                         "Not built yet" -- and is never painted as 0), and the network status
+     actions             Send / Refresh / Copy, Verify, Forget saved details, the two ways on and "Open publishing"
+                         (disabled and busy states are props)
+     form, field         the send form, the signing-wallet forms and the contacts search (Ark's forms chunk,
+                         js/ark/vendor/ark-kit-forms.js, listed in this route's scripts); a form never posts: it
+                         raises ark:action with its values, and refuses an empty or out-of-range entry in the
+                         field's own slot before anything is reviewed or signed
+     list                the contact lists (invites, contacts, sent, search results) and the signing wallets, each
+                         with an empty state that says why and what to do; a row's buttons raise ark:action with
+                         the row's id
+     status-line         every result under a form or a list (polite live regions)
+     stats (interactive) the glance rail: each tile opens the view that owns its number, or the domains page
+     callout             the session view's state (signed out / ready / select your Auth Kit again), the send
+                         form's introduction, and the storage and mesh-authentication notices; no second heading
+                         competes with the h1
+
+   What stays hand-built, because Ark has no part for it: the PIN and password pair of the signing-wallet forms
+   (Ark's field has no password kind), the network options (js/ark/dense-wire-wallet.mjs's shared
+   mountNetworkSelect, which the site header also mounts and which listens for the same change event -- it stays
+   until that shared module renders through Ark's `choice`), and the contact header (avatar, name, state, bio).
+   "Open publishing" is Ark's link but opens through window.open: Ark puts rel="noopener" on every target=_blank
+   link and offers no way to omit it, and the publishing tools need window.opener (js/ark/cms-session.js,
+   js/admin/gate.js).
+
+   Signing surfaces are unchanged: every signature goes through ArkUI.authorizationDialog's full
+   Scoped Claim Authorization review (the Keys actions here; the FXN send and the identity publish in
+   their own modules).
+
+   Layout keys: `was` pins keep every key the old page had (tests/fixtures/layout-keys/account.tsv,
+   tests/account-blocks.cjs). The page's heading keeps the id `account-title`.
+   ===================================================================== */
 (function () {
   'use strict';
   /* A real production endpoint by default -- the hardcoded 127.0.0.1:8766
@@ -13,12 +63,6 @@
   function text(value, fallback) {
     return value == null || value === '' ? (fallback || '—') : String(value);
   }
-
-  /* This page carries no ArkManifest of its own, so there is no manifest
-     field for a 'link' kind value to live in; the destination stays a
-     tagged literal in code, resolved the one shared way every retrofitted
-     call site is -- js/ark/dash-kit.js's resolveLinkField. */
-  function href(key) { return ArkUI.dash.resolveLinkField('route:' + key).href; }
 
   /* The identity card's "Identity" field and the Wallet tab's own key
      display (js/ark/dense-wire-wallet.mjs's `signerFor(who).pubHex`) must
@@ -47,37 +91,425 @@
     return payload.data.record;
   }
 
+  function el(tag, className, html) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (html != null) node.innerHTML = html;
+    return node;
+  }
+  /* A person's own words go into block props: a hero title is one line of at most 120 characters, and
+     Ark reads `[[term]]` in it as glossary markup -- neither may refuse or reshape a name. */
+  function plainLine(value, max) {
+    var line = String(value == null ? '' : value).replace(/\s+/g, ' ').trim().replace(/\[\[/g, '[​[');
+    return line.length > max ? line.slice(0, max - 1) + '…' : line;
+  }
+
+  /* The auth panel and the signer outlive any one mount (the signer is a shared singleton, so a route
+     change alone must not dispose it); the first mount creates them. */
+  function accountSession() {
+    if (ArkUI.accountSession) return ArkUI.accountSession;
+    var container = document.createElement('div');
+    var preservingIdentity = false;
+    var auth = ArkAdminAuth.create({ container: container, product: 'DEFXN', onChange: function (next) {
+      if (!preservingIdentity) {
+        if (next) {
+          ArkUI.localIdentity.set(next);
+          if (ArkUI.cmsSession) ArkUI.cmsSession.connect(next).then(function () { ArkUI.localIdentity.refresh(); });
+          // Unlocking proves the key locally; this is the step that
+          // authenticates the identity to the mesh fleet itself --
+          // publishing it to the directory (skipped if already
+          // published) shows the real scoped-claim authorization
+          // modal before anything is signed. Fire-and-forget: a
+          // cancelled or failed publish must not block sign-in.
+          if (window.ArkUI.meshDirectory) {
+            window.ArkUI.meshDirectory.ensurePublished(next).then(function () {
+              ArkUI.accountSession.meshAuthMessage = '';
+              ArkUI.localIdentity.refresh();
+            }).catch(function (error) {
+              ArkUI.accountSession.meshAuthMessage = (error && error.message) || 'Could not authenticate this identity to the mesh.';
+              ArkUI.localIdentity.refresh();
+            });
+          }
+        }
+        else { ArkUI.localIdentity.clear(); if (ArkUI.cmsSession) ArkUI.cmsSession.revoke(); }
+      }
+      ArkUI.localIdentity.refresh();
+    } });
+    function isUnlocked() {
+      var pointer = ArkUI.localIdentity.current();
+      var signer = auth.current();
+      return !!(pointer && signer && pointer.identityId === (signer.identityId || signer.publicKeyB64) && pointer.publicKeyB64 === signer.publicKeyB64);
+    }
+    function lock() {
+      preservingIdentity = true;
+      try { auth.signOut(); } finally { preservingIdentity = false; }
+    }
+    ArkUI.accountSession = { container: container, isUnlocked: isUnlocked,
+      signOut: function () { auth.signOut(); }, current: function () { return auth.current(); } };
+    ArkUI.localIdentity.subscribe(function () {
+      if (auth.current() && !isUnlocked()) lock();
+      if (ArkUI.refreshAccountNav) ArkUI.refreshAccountNav();
+    });
+    window.addEventListener('pagehide', function () {
+      preservingIdentity = true;
+      try { auth.dispose(); } finally { preservingIdentity = false; }
+      // Disposing a root handle is not signing out of the remembered account.
+      ArkUI.localIdentity.refresh();
+    });
+    return ArkUI.accountSession;
+  }
+
+  /* The Auth Kit -> identity -> wallet -> publishing map, the figure block's live part. */
+  var MAP_SVG = '<svg viewBox="0 0 560 168" role="presentation"><path class="account-map-route account-map-route-main" d="M78 84H213C252 84 253 35 294 35H380"/><path class="account-map-route" d="M213 84C252 84 253 133 294 133H468"/><path class="account-map-route" d="M380 35C418 35 420 84 458 84H514"/><circle class="account-map-origin" cx="50" cy="84" r="27"/><circle class="account-map-node" cx="213" cy="84" r="6"/><circle class="account-map-node" cx="380" cy="35" r="6"/><circle class="account-map-node" cx="294" cy="133" r="6"/><circle class="account-map-node" cx="458" cy="84" r="6"/><text class="account-map-you" data-ark-label x="50" y="88" text-anchor="middle">YOU</text><text data-ark-label x="200" y="68" text-anchor="end">AUTH KIT</text><text data-ark-label x="393" y="20">IDENTITY</text><text data-ark-label x="307" y="151">WALLET</text><text data-ark-label x="514" y="68" text-anchor="end">PUBLISH</text></svg>';
+
+  /* The views of the account card, by value. `signin` and `create` exist only while signed out. */
+  var TAB_LABEL = { signin: 'Sign in', create: 'Create identity', session: 'Session', defi: 'Wallet', keys: 'Signing keys', contacts: 'Contacts', mesh: 'Network' };
+  function tabValues(sessionState) {
+    if (sessionState === 'signed-out') return ['signin', 'create'];
+    if (sessionState === 'remembered') return ['session', 'defi', 'mesh'];
+    return ['session', 'defi', 'keys', 'contacts', 'mesh'];
+  }
+
+  /* `was`: the key each element had on the hand-built page (tests/lib/layout-continuity.cjs against
+     tests/fixtures/layout-keys/account.tsv); the reasons are in tests/account-blocks.cjs. */
+  var CARD = 'page:/div:1/section:1', SESSION = CARD + '/section:1', WALLET = CARD + '/section:2', CONTACTS = CARD + '/section:3', MESH = CARD + '/section:4', KEYS = CARD + '/section:5';
+  var HERO = 'page:/div:1/header:1', STATE = HERO + '/section:1', RAIL = 'page:/div:1/aside:1';
+  var WAS = {
+    'account-shell': { ':root': 'page:/div:1' },
+    'account-map': { ':root': { key: HERO + '/div:1', self: true }, '[data-ark-slot="account-map"]': HERO + '/div:1/svg:1' },
+    'account-headline': { ':root': { key: HERO + '/div:2', self: true }, eyebrow: HERO + '/p:1', 'hero-lede': HERO + '/p:2' },
+    'account-identity': { ':root': { key: STATE + '/dl:1', self: true }, fact: STATE + '/dl:1/div:2', 'fact#2': STATE + '/dl:1/div:3' },
+    'account-copy': { button: STATE + '/dl:1/div:2/button:1', 'button#2': STATE + '/dl:1/div:3/button:1' },
+    'account-developer-facts': { fact: STATE + '/dl:1/div:1', 'fact#2': STATE + '/dl:1/div:4' },
+    'account-session-head': { 'alert-title': SESSION + '/div:1/h2:1', 'alert-description': SESSION + '/div:1/p:1' },
+    'account-forget': { button: SESSION + '/div:1/button:1' },
+    'account-ways': { button: SESSION + '/div:1/div:2/a:1', 'button#2': SESSION + '/div:1/div:2/a:2' },
+    'account-create-head': { 'alert-title': SESSION + '/div:2/h2:1', 'alert-description': SESSION + '/div:2/p:1' },
+    'account-balances': {
+      ':root': { key: WALLET + '/div:1/div:1', self: true },
+      stat: WALLET + '/div:1/div:1/article:1', 'stat-label': WALLET + '/div:1/div:1/article:1/span:1/small:1', 'stat-value': WALLET + '/div:1/div:1/article:1/strong:1', 'stat-detail': WALLET + '/div:1/div:1/article:1/span:2',
+      'stat#2': WALLET + '/div:1/div:1/article:2', 'stat-label#2': WALLET + '/div:1/div:1/article:2/small:1', 'stat-value#2': WALLET + '/div:1/div:1/article:2/strong:1', 'stat-detail#2': WALLET + '/div:1/div:1/article:2/span:1' },
+    'account-pubkey': { ':root': { key: WALLET + '/div:1/div:2', self: true }, fact: WALLET + '/div:1/div:2/p:1', 'fact-term': WALLET + '/div:1/div:2/h3:1', 'fact-value': WALLET + '/div:1/div:2/p:1/span:1/small:1' },
+    'account-wallet-row': { ':root': { key: WALLET + '/div:1/div:3', self: true }, button: WALLET + '/div:1/div:3/button:1', 'button#2': WALLET + '/div:1/div:2/p:1/button:1', 'button#3': WALLET + '/div:1/div:3/button:2' },
+    'account-mesh-stats': {
+      stat: MESH + '/div:1', 'stat-label': MESH + '/div:1/small:1', 'stat-value': MESH + '/div:1/strong:1', 'stat-detail': MESH + '/div:1/p:1',
+      'stat#2': MESH + '/div:2', 'stat-label#2': MESH + '/div:2/small:1', 'stat-value#2': MESH + '/div:2/strong:1', 'stat-detail#2': MESH + '/div:2/span:1' },
+    'account-mesh-actions': { button: MESH + '/div:1/button:1' },
+    'account-mesh-facts': { ':root': MESH + '/dl:1' },
+    'account-cms-status': { ':root': { key: SESSION + '/div:1/div:2/span:2', self: true } },
+    'account-send-intro': { 'alert-title': WALLET + '/form:1/h3:1', 'alert-description': WALLET + '/form:1/p:1' },
+    'account-send-form': { 'field-label': WALLET + '/form:1/label:1', 'field-label#2': WALLET + '/form:1/label:2', 'button': WALLET + '/form:1/button:2', 'button#2': WALLET + '/form:1/button:1' },
+    'account-send-status': { ':root': { key: WALLET + '/p:1', self: true } },
+    'account-contacts-search': { ':root': { key: CONTACTS + '/div:1/form:1', self: true }, 'field-label': CONTACTS + '/div:1/form:1/label:1', button: CONTACTS + '/div:1/form:1/button:1' },
+    'account-contacts-status': { ':root': { key: CONTACTS + '/div:1/p:1', self: true } },
+    'account-contacts-found': { ':root': { key: CONTACTS + '/div:1/ul:1', self: true } },
+    'account-contacts-incoming': { ':root': { key: CONTACTS + '/div:1/div:1/div:1/ul:1', self: true }, 'list-empty': CONTACTS + '/div:1/div:1/div:1/ul:1/li:1' },
+    'account-contacts-accepted': { ':root': { key: CONTACTS + '/div:1/div:1/div:2/ul:1', self: true }, 'list-empty': CONTACTS + '/div:1/div:1/div:2/ul:1/li:1' },
+    'account-contacts-outgoing': { ':root': { key: CONTACTS + '/div:1/div:1/div:3/ul:1', self: true }, 'list-empty': CONTACTS + '/div:1/div:1/div:3/ul:1/li:1' },
+    'account-contacts-refresh': { button: CONTACTS + '/div:1/button:1' },
+    'account-contact-back': { button: CONTACTS + '/article:1/button:1' },
+    'account-contact-facts': { ':root': CONTACTS + '/article:1/dl:1' },
+    'account-contact-explore': { button: CONTACTS + '/article:1/a:1' },
+    'account-keys-list': { ':root': { key: KEYS + '/ul:1', self: true } },
+    'account-keys-add': { ':root': { key: KEYS + '/form:1', self: true }, 'field-label': KEYS + '/form:1/label:1', button: KEYS + '/form:1/button:1' },
+    'account-keys-add-result': { ':root': { key: KEYS + '/form:1/p:1', self: true } },
+    'account-keys-action': { ':root': { key: KEYS + '/form:2', self: true }, 'field-label': KEYS + '/form:2/label:1', 'field-label#2': KEYS + '/form:2/label:2',
+      button: KEYS + '/form:2/div:1/button:1', 'button#2': KEYS + '/form:2/div:1/button:2', 'button#3': KEYS + '/form:2/div:1/button:3', 'button#4': KEYS + '/form:2/div:1/button:4' },
+    'account-keys-action-result': { ':root': { key: KEYS + '/form:2/p:1', self: true } },
+    'account-rail-stats': {
+      stat: RAIL + '/button:1', 'stat-label': RAIL + '/button:1/small:1', 'stat-value': RAIL + '/button:1/strong:1',
+      'stat#2': RAIL + '/button:2', 'stat-label#2': RAIL + '/button:2/small:1', 'stat-value#2': RAIL + '/button:2/strong:1',
+      'stat#3': RAIL + '/button:3', 'stat-label#3': RAIL + '/button:3/small:1', 'stat-value#3': RAIL + '/button:3/strong:1',
+      'stat#4': RAIL + '/button:4', 'stat-label#4': RAIL + '/button:4/small:1', 'stat-value#4': RAIL + '/button:4/strong:1',
+      'stat#5': RAIL + '/a:1', 'stat-label#5': RAIL + '/a:1/small:1', 'stat-value#5': RAIL + '/a:1/strong:1',
+      'stat#6': RAIL + '/button:5', 'stat-label#6': RAIL + '/button:5/small:1', 'stat-value#6': RAIL + '/button:5/strong:1' },
+    'account-rail-link': { button: RAIL + '/a:2' }
+  };
+  /* An element the page builds by hand carries its old key the same way a block's `was` does: the mark
+     js/ark/blocks.js stamps (data-ark-layout-pin; `self` pins the element alone, a pin without it anchors the
+     subtree: key + the path below). */
+  function pin(node, key, self) {
+    node.setAttribute('data-ark-layout-pin', key);
+    if (self) node.setAttribute('data-ark-layout-pin-scope', 'self');
+    return node;
+  }
+  /* The old nav's buttons were Session, Wallet, Keys, Contacts, Network in that order; the sign-in / create pair
+     was its own nav inside the session section. */
+  var OLD_TAB = { session: 1, defi: 2, keys: 3, contacts: 4, mesh: 5 };
+  function tabsWas(state, values) {
+    var was = {};
+    if (state === 'signed-out') {
+      was['tabs-list'] = SESSION + '/nav:1';
+      values.forEach(function (value, index) { was['tabs-trigger' + (index ? '#' + (index + 1) : '')] = SESSION + '/nav:1/button:' + (index + 1); });
+    } else {
+      was['tabs-list'] = CARD + '/nav:1';
+      values.forEach(function (value, index) { was['tabs-trigger' + (index ? '#' + (index + 1) : '')] = CARD + '/nav:1/button:' + OLD_TAB[value]; });
+    }
+    return was;
+  }
+
   ArkUI.pageModules.account = {
     mount: function (host) {
-      var page = document.createElement('section');
-      page.className = 'ark-page task-page account-page';
-      page.setAttribute('aria-labelledby', 'account-title');
-      /* Home's shape: the identity on the left, one card on the right whose
-         views (session, wallet, contacts, mesh) swap in place, and a rail of
-         live numbers along the bottom that opens the matching view. */
-      page.innerHTML = '<div class="account-shell"><header class="account-hero"><div class="account-map" aria-hidden="true"><svg viewBox="0 0 560 168" role="presentation"><path class="account-map-route account-map-route-main" d="M78 84H213C252 84 253 35 294 35H380"/><path class="account-map-route" d="M213 84C252 84 253 133 294 133H468"/><path class="account-map-route" d="M380 35C418 35 420 84 458 84H514"/><circle class="account-map-origin" cx="50" cy="84" r="27"/><circle class="account-map-node" cx="213" cy="84" r="6"/><circle class="account-map-node" cx="380" cy="35" r="6"/><circle class="account-map-node" cx="294" cy="133" r="6"/><circle class="account-map-node" cx="458" cy="84" r="6"/><text class="account-map-you" x="50" y="88" text-anchor="middle">YOU</text><text x="200" y="68" text-anchor="end">AUTH KIT</text><text x="393" y="20">IDENTITY</text><text x="307" y="151">WALLET</text><text x="514" y="68" text-anchor="end">PUBLISH</text></svg></div><p class="account-promise">DEFXN / Your identity</p>' +
-        '<div class="account-profile"><div class="account-avatar" data-account-avatar aria-hidden="true">↗</div><div class="account-heading"><h1 id="account-title"><span class="account-title-muted">Your keys.</span><span>Your world.</span></h1><span class="account-status" data-account-status>Signed out</span></div></div>' +
-        '<p class="account-intro" data-account-intro>One Auth Kit opens your identity, wallet, domains and publishing.</p>' +
-        '<section class="account-state" aria-label="Identity details" hidden><dl>' +
-        '<div class="account-state-secondary"><dt>Root key</dt><dd data-account-root>—</dd></div>' +
-        '<div class="account-state-primary"><dt>Ghost ID</dt><button type="button" class="account-copy" data-account-copy-ghost>Copy</button><dd data-account-id>—</dd></div>' +
-        '<div class="account-state-primary"><dt>Wallet</dt><button type="button" class="account-copy" data-account-copy-wallet>Copy</button><dd data-account-wallet>—</dd></div>' +
-        '<div class="account-state-secondary"><dt>Security</dt><dd data-account-security>—</dd></div></dl>' +
-        '<p data-account-verification>Sign in to verify your identity.</p></section></header>' +
-        '<section class="account-card" aria-label="Account"><p class="account-card-caption">DEFXN / Account</p>' +
-        '<nav class="account-tabs" role="tablist" aria-label="Account views" hidden>' +
-        '<button type="button" role="tab" data-account-tab="session" aria-selected="true">Session</button>' +
-        '<button type="button" role="tab" data-account-tab="defi" aria-selected="false">Wallet</button>' +
-        '<button type="button" role="tab" data-account-tab="keys" aria-selected="false">Keys</button>' +
-        '<button type="button" role="tab" data-account-tab="contacts" aria-selected="false">Contacts</button>' +
-        '<button type="button" role="tab" data-account-tab="mesh" aria-selected="false">Network</button>' +
-        '</nav>' +
-        '<section class="account-auth" data-account-panel="session" aria-label="Account session"><nav class="account-tabs account-signin-tabs" data-account-create-toggle-row aria-label="Sign in or create"><button type="button" aria-pressed="true" data-account-create-back>Sign in</button><button type="button" aria-pressed="false" data-account-create-toggle>Create identity</button></nav><div data-account-session-main><h2 class="account-session-title" data-account-session-title>Choose your Auth Kit.</h2><p class="account-session-description" data-account-session-description>Open your account on this device.</p><div data-account-auth></div>' +
-        '<button type="button" data-account-forget hidden>Sign out</button><p class="account-storage-notice" data-account-storage-notice role="status" hidden></p>' +
-        '<p class="account-storage-notice" data-account-mesh-auth-notice role="status" hidden></p>' +
-        '<div class="account-cms"><a href="' + href('bundledeployer') + '" data-scene-link="bundledeployer">Deploy a bundle →</a><a href="' + href('account/domains') + '" data-scene-link="account/domains">Your domains →</a><a hidden href="/admin" target="_blank" rel="opener" data-account-cms-open>Open publishing ↗</a><span hidden data-account-cms-local>Publishing tools available</span><span data-account-cms-status role="status"></span></div></div>' +
-        '<p class="account-security-signal"><span>ON THIS DEVICE</span><strong>Your Auth Kit stays with you.</strong></p><div class="account-create" data-account-create-view hidden><h2>Create your identity.</h2><p>Make a new Auth Kit for your account.</p><div data-account-create></div></div></section>' +
-        '<section class="account-live" data-account-panel="defi" aria-labelledby="account-live-title" hidden><h2 class="account-visually-hidden" id="account-live-title">Wallet</h2>' +
+      var session = accountSession();
+      /* ---- the page's state: one place each, painted by the paint* functions below ---------- */
+      var identity = ArkUI.localIdentity.current();
+      var sessionState = '';
+      var refs = {};                       // rendered block roots, by name
+      var views = {};                      // the persistent view nodes, moved into whichever tabs exist
+      var cardHost = null, tabsEl = null, tabsValues = [], railEl = null, identityWrap = null, mapWrap = null, offstage = null;
+      var lastProps = Object.create(null); // props each live block was last painted with
+      var wallet = { symbol: 'FXN', logo: null, balance: null, display: '—', message: 'Sign in to check', key: '' };
+      var mesh = null;
+      var page = null;
+      var walletSendable = false, walletBusy = false, meshBusy = false, contactsWorking = false;
+      var rail = { contacts: null, invites: null, domains: ArkUI.localDomains ? ArkUI.localDomains.list().length : 0 };
+      var contactRows = { accepted: [], incoming: [], outgoing: [], found: [] };
+
+      function stateOf(next) {
+        var unlocked = !!(next && session.isUnlocked());
+        return next ? (unlocked ? 'verified-local' : 'remembered') : 'signed-out';
+      }
+      function isAuthenticated(next) { return !!(next && ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(next.publicKeyB64)); }
+      function fromPath() { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog.account; return entry ? entry.path : '/account'; }
+      /* Glossary terms (docs/glossary.md: Auth Kit, Ghost ID, FXN ...) are marked on first use, once for the whole page: this
+         page renders its views in many calls, so they share one first-use state (the page's own spec shares it below). */
+      var termState = ArkUI.blocks.termMarker();
+      function make(spec) { return ArkUI.blocks.render(spec, { from: fromPath(), onInvalid: 'throw', terms: 'first-use', termState: termState, slots: { 'account-map': function () { var d = el('div', null, MAP_SVG); return d.firstChild; } } }); }
+      /* A live block repainted in place (ArkUI.blocks.update: a CMS edit or pin on it survives), only when
+         its props changed; the first update of a page loads Ark's 1.4 KB live chunk. */
+      function paint(name, props) {
+        var json = JSON.stringify(props);
+        if (lastProps[name] === json || !refs[name]) return;
+        lastProps[name] = json;
+        /* if the live chunk could not load, ArkUI.blocks.update REPLACES the element (and says so in the console):
+           find the block again by its id rather than paint a detached one */
+        if (!refs[name].isConnected && refs[name].id) refs[name] = page.querySelector('#' + refs[name].id) || refs[name];
+        refs[name] = ArkUI.blocks.update(refs[name], props, { from: fromPath() }) || refs[name];
+      }
+      function remember(name, props) { lastProps[name] = JSON.stringify(props); }
+
+      /* ---- props: what each block shows for a state ----------------------------------------- */
+      function statusText(next) {
+        var unlocked = !!(next && session.isUnlocked()), authenticated = isAuthenticated(next);
+        return next ? (unlocked ? (authenticated ? 'Session active · identity unlocked' : 'Identity verified') : (authenticated ? 'Session active · identity locked' : 'Identity saved · not signed in')) : 'Signed out';
+      }
+      function heroProps(next) {
+        /* the same parts in every state (a block patched with another SHAPE would replace its children, and a pin or
+           an id on one is lost): the status detail is always there, the verification detail once there is an identity */
+        if (!next) return { eyebrow: 'Your identity', title: 'Sign in to DEFXN', density: 'compact',
+          lede: 'Sign in with your Auth Kit: the recovery file you keep on your own device. It opens your identity, wallet, domains and publishing, and it is never uploaded.',
+          meta: [{ label: 'Status', value: 'Signed out' }] };
+        var unlocked = !!session.isUnlocked();
+        return { eyebrow: 'Your identity', title: plainLine(next.displayName || 'Your account', 48), density: 'compact',
+          lede: unlocked ? 'Your identity is ready across the DEFXN world.' : 'Your identity is saved here. Your Auth Kit is not saved on this device.',
+          meta: [{ label: 'Status', value: plainLine(statusText(next), 64) }, { label: 'Verification', value: unlocked ? 'Identity verified.' : 'Unlock your Auth Kit to continue.' }] };
+      }
+      function identityProps(next) {
+        return { label: 'Identity details', columns: 1, items: [
+          { term: 'Identity ID', value: next && (next.core && next.core.ghostId || next.ghostId || next.identityId) || null, mono: true },
+          { term: 'Wallet address', value: next && next.walletAddress || null, mono: true }
+        ] };
+      }
+      function developerProps(next) {
+        return { label: 'Developer details', columns: 1, items: [
+          { term: 'Public root key', value: next && next.publicKeyB64 ? base64ToHex(next.publicKeyB64) : null, mono: true },
+          { term: 'Security level', value: next && next.securityProfile || null }
+        ] };
+      }
+      var copied = '';
+      function copyProps() {
+        return { label: 'Copy', items: [
+          { label: copied === 'ghost' ? 'Copied' : copied === 'ghost-blocked' ? 'Select to copy' : 'Copy identity ID', action: 'copy-ghost', tone: 'ghost' },
+          { label: copied === 'wallet' ? 'Copied' : copied === 'wallet-blocked' ? 'Select to copy' : 'Copy wallet address', action: 'copy-wallet', tone: 'ghost' }
+        ] };
+      }
+      function sessionHeadProps(next) {
+        var unlocked = !!(next && session.isUnlocked()), authenticated = isAuthenticated(next);
+        /* a callout, not a heading: the tab already names the view, and a second title as big as the page's
+           would be the two-H1 defect this conversion removed. drift = it waits on you; success = done. */
+        return { tone: next ? (unlocked || authenticated ? 'success' : 'drift') : 'info',
+          title: next ? (authenticated ? 'Signed in.' : (unlocked ? 'Ready.' : 'Select your Auth Kit again')) : 'Open your account',
+          body: next ? (authenticated ? 'Publishing is available. Unlock your Auth Kit when you need to approve a signature.' : unlocked ? 'Secure access is available for this session.' : 'Choose your Auth Kit to restore secure access.') : 'Choose your Auth Kit file to unlock your account on this device.' };
+      }
+      function walletStats() {
+        var fxn = { label: plainLine(wallet.symbol || 'FXN', 48), format: 'plain' };
+        if (wallet.balance == null) fxn.absent = { kind: 'unavailable', reason: wallet.message };
+        else { fxn.value = wallet.balance; fxn.detail = wallet.message; }
+        if (wallet.logo) fxn.logo = { image: wallet.logo };
+        return { label: 'Balances', items: [fxn, { label: 'Credits', absent: { kind: 'not-built', reason: 'Credit balances are not available yet.' } }] };
+      }
+      function keyProps() { return { label: 'Your public key', columns: 1, items: [{ term: 'Your public key', value: wallet.key || null, mono: true }] }; }
+      function meshDefaults(message) {
+        return { status: 'Not verified', message: message || 'Verify this identity on the selected DEFXN network.', detail: false,
+          record: '—', verification: '—', updated: '—', provenance: '—', standing: 'Not linked', standingMessage: 'A verified account link is required to show network status.' };
+      }
+      mesh = meshDefaults('Sign in to verify your identity on DEFXN.');
+      function meshStats() {
+        return { label: 'Network status', items: [
+          { label: 'Identity status', value: mesh.status, detail: mesh.message },
+          { label: 'Account status', value: mesh.standing, detail: mesh.standingMessage }
+        ] };
+      }
+      function meshFacts() {
+        return { label: 'Record details', columns: 2, items: [
+          { term: 'Record', value: mesh.record, mono: true }, { term: 'Verification', value: mesh.verification },
+          { term: 'Updated', value: mesh.updated }, { term: 'Source', value: mesh.provenance }
+        ] };
+      }
+
+      function statusProps(message, tone) {
+        var props = { text: plainLine(message || '', 600) };
+        if (props.text && tone) props.tone = tone;
+        return props;
+      }
+      function walletRowProps() {
+        return { label: 'Wallet', items: [
+          { label: 'Send FXN', action: 'wallet-send', tone: 'primary', disabled: !walletSendable },
+          { label: 'Copy public key', action: 'wallet-copy-key', tone: 'ghost', disabled: !walletSendable },
+          { label: 'Refresh', action: 'wallet-refresh', tone: 'ghost' }] };
+      }
+      /* the send form: the values go to the page (the form never posts); a zero or fractional amount is refused in its
+         own field, with what is needed and how to fix it, before anything is reviewed or signed */
+      function sendFormProps() {
+        return { label: 'Send FXN', fields: [
+          { name: 'amount', label: 'Amount (FXN)', type: 'number', min: 1, step: 1, required: true, placeholder: '0', autocomplete: 'off' },
+          { name: 'recipient', label: 'Recipient key', type: 'text', required: true, autocomplete: 'off', placeholder: 'Paste the recipient\u2019s public key' }],
+          submit: { label: 'Review & sign', action: 'wallet-send-submit', tone: 'primary', disabled: !walletSendable || walletBusy, busy: walletBusy, busyLabel: 'Signing\u2026' },
+          actions: [{ label: '\u2190 Wallet', action: 'wallet-back', tone: 'ghost' }] };
+      }
+      function meshActionProps() {
+        return { label: 'Network check', items: [{ label: 'Verify identity', action: 'mesh-verify', tone: 'primary', disabled: !identity || meshBusy, busy: meshBusy, busyLabel: 'Verifying\u2026' }] };
+      }
+      /* The glance rail: each tile opens the view that owns its number (Ark's interactive stat). A number that needs the
+         unlocked key reads "No reading" with why, never a dash and never 0. */
+      function railProps() {
+        var unlocked = !!(identity && session.isUnlocked());
+        var locked = { kind: 'unavailable', reason: 'Unlock your Auth Kit to read this.' };
+        function count(label, value, action, extra) {
+          var tile = { label: label, action: action };
+          if (value == null) tile.absent = locked; else tile.value = String(value);
+          return Object.assign(tile, extra || {});
+        }
+        var standing = mesh.standing, status = mesh.status;
+        var fxn = { label: plainLine(wallet.symbol || 'FXN', 48), action: 'rail-defi', format: 'plain' };
+        if (wallet.balance == null) fxn.absent = { kind: 'unavailable', reason: wallet.message }; else fxn.value = wallet.balance;
+        return { label: 'Your account at a glance', columns: 4, items: [
+          fxn,
+          { label: 'Credits', action: 'rail-defi', absent: { kind: 'not-built', reason: 'Credit balances are not available yet.' } },
+          count('Contacts', unlocked ? rail.contacts : null, 'rail-contacts'),
+          count('Invites', unlocked ? rail.invites : null, 'rail-contacts', unlocked && rail.invites > 0 ? { status: { label: 'Waiting', tone: 'drift' } } : null),
+          { label: 'Domains', value: String(rail.domains), href: 'route:account/domains' },
+          { label: 'Status', value: standing !== 'Not linked' ? standing : (status === 'Identity verified' ? 'Not linked' : status), action: 'rail-mesh' }] };
+      }
+      function localEditing() { return !!(ArkUI.cmsSession && ArkUI.cmsSession.isLocalDevelopment && ArkUI.cmsSession.isLocalDevelopment()); }
+      /* "Open publishing" opens a window that ATTACHES to this tab (js/ark/cms-session.js and js/admin/gate.js read
+         window.opener to receive the signed-in session). Ark's actions put rel="noopener" on every target=_blank link and
+         offer no way to omit it, so this link has no target: publishClick() opens it with window.open(..., '_blank'), which
+         keeps the opener. (Ark would need a link that may keep its opener.) */
+      function waysProps() {
+        var items = [{ label: 'Deploy a bundle', href: 'route:bundledeployer' }, { label: 'Your domains', href: 'route:account/domains' }];
+        if (localEditing()) items.push({ label: 'Open publishing', href: '/admin' });
+        return { label: 'Where next', items: items };
+      }
+      function cmsStatusProps() {
+        var authenticated = isAuthenticated(identity), local = localEditing();
+        var words = [local ? 'Publishing tools available' : '', ArkUI.cmsSession && (local || authenticated) ? ArkUI.cmsSession.status() : ''].filter(Boolean).join(' \u00b7 ');
+        return statusProps(words);
+      }
+      /* a list refuses two rows with one key (and would be replaced by its refusal): the vault may name an address twice
+         (a rotated-from wallet), a person's list shows it once */
+      function once(items) { var seen = Object.create(null); return items.filter(function (item) { if (seen[item.id]) return false; seen[item.id] = true; return true; }); }
+      function keysListProps() {
+        var who = signer();
+        var addresses = (who && who.walletAddresses) || [];
+        var delegations = (who && who.walletDelegations) || {};
+        return { label: 'Signing wallets', empty: { reason: 'No signing wallets yet.', remedy: 'Add one below; each can then be rotated, revoked or delegated on its own.' },
+          items: once(addresses.map(function (address) {
+            var delegation = delegations[address], item = { id: address, title: address };
+            if (delegation) item.meta = delegation.revoked ? 'delegation revoked' : 'delegated to identity';
+            if (address === who.walletAddress) item.status = { label: 'Default', tone: 'trust' };
+            return item;
+          })) };
+      }
+      var LIST_LABEL = { incoming: 'Invites to you', accepted: 'Contacts', outgoing: 'Sent invites', found: 'Search results' };
+      var LIST_EMPTY = { incoming: 'None pending.', accepted: 'No accepted contacts yet.', outgoing: 'None pending.', found: 'No identity matches.' };
+      var TAG_TONE = { connected: 'trust', incoming: 'drift', sent: 'reference' };
+      function contactItem(record, kind) {
+        var id = record.id, tag = record.status || kind, actions = [];
+        if (kind === 'incoming') actions.push({ label: 'Accept', action: 'contact-accept', tone: 'secondary' }, { label: 'Decline', action: 'contact-decline', tone: 'ghost' });
+        if (kind === 'outgoing') actions.push({ label: 'Withdraw', action: 'contact-withdraw', tone: 'ghost' });
+        if (kind === 'found') actions.push({ label: record.direct ? 'Invite directly' : 'Invite', action: 'contact-invite', tone: 'secondary' });
+        actions.push({ label: 'Details', action: 'contact-open', tone: 'ghost' });
+        var item = { id: id, title: plainLine(record.title || contactName(id), 96), meta: plainLine(record.meta || id, 96), actions: actions };
+        if (kind !== 'found') item.status = { label: tag, tone: TAG_TONE[tag] || 'reference' };
+        return item;
+      }
+      function contactListProps(kind) {
+        return { label: LIST_LABEL[kind], items: once(contactRows[kind].map(function (record) { return contactItem(record, kind); })), empty: { reason: LIST_EMPTY[kind] } };
+      }
+      function searchFormProps() {
+        return { label: 'Search identities', fields: [{ name: 'query', label: 'Find an identity', type: 'search', required: true, autocomplete: 'off', placeholder: 'Name or identity ID' }],
+          submit: { label: 'Search', action: 'contacts-search', tone: 'secondary' } };
+      }
+      function contactFactsProps(record, id) {
+        return { label: 'Contact details', columns: 2, items: [
+          { term: 'Identity ID', value: record.identityId || id, mono: true },
+          { term: 'Public ID', value: record.publicId || record.username || 'Not published', mono: true },
+          { term: 'Visibility', value: record.visibility || 'Not reported' },
+          { term: 'Updated', value: record.updatedAt ? new Date(record.updatedAt).toLocaleString() : 'Not reported' }] };
+      }
+      function keysAddProps() {
+        return { label: 'Add a signing wallet', fields: [{ name: 'label', label: 'Label', type: 'text', value: 'Default', autocomplete: 'off' }], submit: { label: 'Add wallet', action: 'keys-add', tone: 'primary' } };
+      }
+      function keysActionProps() {
+        return { label: 'Rotate, revoke or delegate', fields: [
+          { name: 'address', label: 'Wallet address', type: 'text', required: true, autocomplete: 'off', placeholder: 'Paste a wallet address from the list above' },
+          { name: 'rotateLabel', label: 'New label (rotate only)', type: 'text', value: 'Rotated', autocomplete: 'off' }],
+          submit: { label: 'Rotate', action: 'keys-rotate', tone: 'secondary' },
+          actions: [{ label: 'Revoke', action: 'keys-revoke', tone: 'ghost' }, { label: 'Delegate to identity', action: 'keys-delegate', tone: 'ghost' }, { label: 'Revoke delegation', action: 'keys-revoke-delegation', tone: 'ghost' }] };
+      }
+
+      /* ---- the parts Ark has no block for: small hand-built views -------------------------- */
+      function buildSession() {
+        var node = pin(el('div', 'account-session'), SESSION, true);
+        node.setAttribute('data-account-panel', 'session');
+        refs.sessionHead = make({ block: 'callout', id: 'account-session-head', props: sessionHeadProps(identity), was: WAS['account-session-head'] });
+        remember('sessionHead', sessionHeadProps(identity));
+        node.appendChild(refs.sessionHead);
+        var auth = pin(el('div'), SESSION + '/div:1/div:1'); auth.setAttribute('data-account-auth', '');
+        auth.appendChild(session.container);
+        node.appendChild(auth);
+        var forget = el('div', 'account-forget');
+        forget.appendChild(make({ block: 'actions', id: 'account-forget', props: { items: [{ label: 'Forget saved identity details', action: 'forget', tone: 'ghost' }] }, was: WAS['account-forget'] }));
+        forget.querySelector('button').setAttribute('data-account-forget', '');
+        node.appendChild(forget);
+        views.forget = forget;
+        var storage = pin(el('div'), SESSION + '/div:1/p:2', true); storage.setAttribute('data-account-notices', '');
+        node.appendChild(storage);
+        node.appendChild(make({ block: 'disclosure', id: 'account-explain', was: WAS['account-explain'], props: { more: 'What is an Auth Kit?', less: 'Hide this',
+          content: 'An Auth Kit is the recovery file (.auth.flx) that holds your keys. It stays on this device and is never uploaded.\n\nYour identity ID, which developer tools call your Ghost ID, is the public name your Auth Kit unlocks.' } }));
+        var ways = pin(el('div', 'account-cms'), SESSION + '/div:1/div:2', true);
+        refs.ways = make({ block: 'actions', id: 'account-ways', props: waysProps(), was: localEditing() ? Object.assign({ 'button#3': SESSION + '/div:1/div:2/a:3' }, WAS['account-ways']) : WAS['account-ways'] }); remember('ways', waysProps());
+        ways.appendChild(refs.ways);
+        refs.cmsStatus = make({ block: 'status-line', id: 'account-cms-status', props: cmsStatusProps(), was: WAS['account-cms-status'] }); remember('cmsStatus', cmsStatusProps());
+        ways.appendChild(refs.cmsStatus);
+        /* opening publishing while the Auth Kit is locked sends the person to unlock it first */
+        ways.addEventListener('click', function (event) { var link = event.target.closest && event.target.closest('a[href="/admin"]'); if (link) publishClick(event, link); });
+        node.appendChild(ways);
+        return node;
+      }
+      function buildCreate() {
+        var node = pin(el('div', 'account-create'), SESSION + '/div:2', true);
+        node.setAttribute('data-account-create-view', '');
+        node.appendChild(make({ block: 'callout', id: 'account-create-head', props: { tone: 'info', title: 'Create your identity.', body: 'Make a new Auth Kit for your account.' }, was: WAS['account-create-head'] }));
+        var holder = pin(el('div'), SESSION + '/div:2/div:1'); holder.setAttribute('data-account-create', '');
+        node.appendChild(holder);
+        return node;
+      }
+      function buildWallet() {
+        var node = pin(el('section', 'account-live'), WALLET);
+        node.setAttribute('data-account-panel', 'defi'); node.setAttribute('aria-labelledby', 'account-live-title');
+        node.appendChild(el('h2', 'account-visually-hidden', 'Wallet')).id = 'account-live-title';
         /* Wallet: FXN on dense-wire only (js/ark/dense-wire-wallet.mjs).
            Rebuilt 2026-10-16: FXN is now a sovereign chain's own native-
            token balance ("treat FXN like any other chain's native
@@ -86,198 +518,231 @@
            a custody chain deleted from dense-wire the same week this
            broke). Credits have no dense-wire ledger: shown as not built,
            never as 0. */
-        '<div class="account-wallet" data-account-wallet-view="home"><div class="account-balances"><article class="account-balance" data-account-fxn><span class="account-balance-head"><img data-account-fxn-logo alt="" hidden /><small data-account-fxn-label>FXN</small></span><strong data-account-fxn-balance>—</strong><span data-account-fxn-message>Sign in to check</span></article>' +
-        '<article class="account-balance" data-account-credits><small>Credits</small><strong data-account-credits-balance>Coming soon</strong><span data-account-credits-message>Credit balances are not available yet.</span></article></div>' +
-        '<div class="account-transfers"><h3>Your public key</h3><p class="account-transfer"><span><small data-account-fxn-key>—</small></span><button type="button" data-account-fxn-copy-key disabled>Copy</button></p>' +
-        '<p class="account-contacts-empty">Share this public key to receive FXN. You never need to share your Auth Kit or PIN.</p></div>' +
-        '<div class="account-wallet-actions"><button type="button" class="palette-solid" data-account-wallet-open="send" disabled>Send FXN</button><button type="button" class="account-quiet" data-account-fxn-refresh>Refresh</button></div></div>' +
-        '<form data-account-wallet-view="send" data-account-fxn-send-form class="account-wallet-form" hidden><button type="button" class="account-back" data-account-wallet-back>← Wallet</button><h3>Send FXN</h3><p>Review the recipient and amount before signing on this device.</p>' +
-        '<label for="fxnSendAmount">Amount (FXN)</label><input id="fxnSendAmount" type="number" min="1" step="1" autocomplete="off" data-account-fxn-send-amount placeholder="0" />' +
-        '<label for="fxnSendRecipient">Recipient key</label><input id="fxnSendRecipient" type="text" autocomplete="off" spellcheck="false" data-account-fxn-send-recipient placeholder="Paste the recipient’s public key" /><button type="submit" class="palette-solid" data-account-fxn-send-submit disabled>Review &amp; sign</button></form>' +
-        '<p class="account-line" data-account-fxn-send-status role="status" aria-live="polite"></p>' +
-        '<div class="account-wallet-network"><span class="account-wallet-network-label">Network</span><div class="network-options" data-account-fxn-network></div></div>' +
-        '<p class="account-next">Balances update directly from the selected network.</p></section>' +
-        '<section class="account-contacts" data-account-panel="contacts" aria-labelledby="account-contacts-title" hidden><div data-contacts-view="list"><h2 class="account-visually-hidden" id="account-contacts-title">Contacts</h2>' +
-        '<form data-contacts-search-form class="account-contacts-form"><label for="contactsSearchQuery">Find an identity</label><input id="contactsSearchQuery" type="text" autocomplete="off" placeholder="Name or identity ID" /><button type="submit">Search</button></form>' +
-        '<p class="account-line" data-contacts-status role="status" aria-live="polite"></p><ul data-contacts-results class="account-contacts-list account-contacts-results" hidden></ul>' +
-        '<div class="account-contacts-lists"><div><h3>Invites to you <b data-contacts-incoming-count>0</b></h3><ul data-contacts-incoming class="account-contacts-list"><li class="account-contacts-empty">None pending.</li></ul></div><div class="account-contacts-connected"><h3>Contacts <b data-contacts-accepted-count>0</b></h3><ul data-contacts-accepted class="account-contacts-list"><li class="account-contacts-empty">No accepted contacts yet.</li></ul></div><div><h3>Sent <b data-contacts-outgoing-count>0</b></h3><ul data-contacts-outgoing class="account-contacts-list"><li class="account-contacts-empty">None pending.</li></ul></div></div>' +
-        '<button type="button" class="account-quiet" data-contacts-refresh>Refresh</button></div>' +
-        '<article class="account-contact-detail" data-contacts-view="detail" hidden><button type="button" class="account-back" data-contact-back>← All contacts</button><header><div class="account-contact-avatar" data-contact-avatar aria-hidden="true">ID</div><div><h2 data-contact-name>Identity</h2><span data-contact-state>Connection</span></div></header><dl><div><dt>Identity ID</dt><dd data-contact-id>—</dd></div><div><dt>Public ID</dt><dd data-contact-public-id>—</dd></div><div><dt>Visibility</dt><dd data-contact-visibility>—</dd></div><div><dt>Updated</dt><dd data-contact-updated>—</dd></div></dl><p data-contact-bio>No public profile details are available for this identity.</p><a href="' + href('explorer') + '" data-scene-link="explorer">View network details →</a></article></section>' +
-        '<section class="account-mesh" data-account-panel="mesh" aria-label="Network status" hidden><div class="account-mesh-check" aria-live="polite"><small>Identity status</small><strong data-account-mesh-status>Not verified</strong><p data-account-mesh-message>Verify this identity on the selected DEFXN network.</p><button type="button" data-account-mesh-check disabled>Verify identity</button></div>' +
-        '<div class="account-standing"><small>Account status</small><strong data-account-standing>Not linked</strong><span data-account-standing-message>A verified account link is required.</span></div>' +
-        '<dl class="account-mesh-detail" data-account-mesh-detail hidden><div><dt>Record</dt><dd data-account-mesh-record>—</dd></div><div><dt>Verification</dt><dd data-account-mesh-verification>—</dd></div><div><dt>Updated</dt><dd data-account-mesh-updated>—</dd></div><div><dt>Source</dt><dd data-account-mesh-provenance>—</dd></div></dl></section>' +
-        '<section class="account-keys" data-account-panel="keys" aria-label="Signing wallets" hidden><p class="account-field-hint">Create dedicated signing keys and manage each one independently without changing your primary identity.</p>' +
-        '<ul data-account-keys-list class="account-contacts-list"></ul>' +
-        '<form data-account-keys-add-form class="account-wallet-form"><h3>Add a signing wallet</h3><label>Label<input data-account-keys-add-label type="text" value="Default"></label><label>PIN<input data-account-keys-pin type="password" autocomplete="off"></label><label>Password (if set)<input data-account-keys-password type="password" autocomplete="off"></label><button type="submit" data-account-keys-add-submit>Add wallet</button><p data-account-keys-add-result class="inline-status"></p></form>' +
-        '<form data-account-keys-action-form class="account-wallet-form"><h3>Rotate, revoke or delegate</h3><label>Wallet address<input data-account-keys-address type="text" placeholder="Paste a wallet address from the list above"></label><label>New label (rotate only)<input data-account-keys-rotate-label type="text" value="Rotated"></label><div class="account-wallet-actions"><button type="button" data-account-keys-rotate>Rotate</button><button type="button" data-account-keys-revoke>Revoke</button><button type="button" data-account-keys-delegate>Delegate to identity</button><button type="button" data-account-keys-revoke-delegation>Revoke delegation</button></div><p data-account-keys-action-result class="inline-status"></p></form></section></section>' +
-        '<aside class="account-rail" aria-label="Your account at a glance" hidden>' +
-        '<button type="button" class="account-rail-item" data-needs-key data-account-go="defi"><small>FXN</small><strong data-account-rail-fxn>—</strong></button>' +
-        '<button type="button" class="account-rail-item" data-needs-key data-account-go="defi"><small>Credits</small><strong data-account-rail-credits>—</strong></button>' +
-        '<button type="button" class="account-rail-item" data-needs-key data-account-go="contacts"><small>Contacts</small><strong data-account-overview-contacts>—</strong></button>' +
-        '<button type="button" class="account-rail-item" data-needs-key data-account-go="contacts"><small>Invites</small><strong data-account-rail-invites>—</strong></button>' +
-        '<a class="account-rail-item" href="' + href('account/domains') + '" data-scene-link="account/domains"><small>Domains</small><strong data-account-rail-domains>0</strong></a>' +
-        '<button type="button" class="account-rail-item" data-account-go="mesh"><small>Status</small><strong data-account-overview-mesh>Not verified</strong></button>' +
-        '<a class="account-rail-link" href="' + href('explorer') + '" data-scene-link="explorer"><small>Explore the network</small>Mesh Explorer →</a></aside>' +
-        /* Anchor for reusable content blocks (js/content/components.js); rendering into
-           it is centralized in js/main.js's onMount hook, not called here. Baked into the
-           HTML string itself, like the rest of this page, rather than a querySelector()
-           afterward, since this page module builds entirely from one innerHTML write. */
-        '<div data-ark-insert="main"></div>' +
-        '</div>';
-      host.appendChild(page);
-      var fields = {
-        heading: page.querySelector('[data-account-heading]'),
-        id: page.querySelector('[data-account-id]'),
-        root: page.querySelector('[data-account-root]'),
-        wallet: page.querySelector('[data-account-wallet]'),
-        copyGhost: page.querySelector('[data-account-copy-ghost]'),
-        copyWallet: page.querySelector('[data-account-copy-wallet]'),
-        security: page.querySelector('[data-account-security]'),
-        verification: page.querySelector('[data-account-verification]'),
-        check: page.querySelector('[data-account-mesh-check]'),
-        meshStatus: page.querySelector('[data-account-mesh-status]'),
-        meshMessage: page.querySelector('[data-account-mesh-message]'),
-        meshDetail: page.querySelector('[data-account-mesh-detail]'),
-        meshRecord: page.querySelector('[data-account-mesh-record]'),
-        meshVerification: page.querySelector('[data-account-mesh-verification]'),
-        meshUpdated: page.querySelector('[data-account-mesh-updated]'),
-        meshProvenance: page.querySelector('[data-account-mesh-provenance]'),
-        standing: page.querySelector('[data-account-standing]'),
-        standingMessage: page.querySelector('[data-account-standing-message]'),
-        fxnLogo: page.querySelector('[data-account-fxn-logo]'),
-        fxnLabel: page.querySelector('[data-account-fxn-label]'),
-        fxnBalance: page.querySelector('[data-account-fxn-balance]'),
-        fxnMessage: page.querySelector('[data-account-fxn-message]'),
-        fxnKey: page.querySelector('[data-account-fxn-key]'),
-        fxnCopyKey: page.querySelector('[data-account-fxn-copy-key]'),
-        fxnWire: page.querySelector('[data-account-fxn-wire]'),
-        fxnSendForm: page.querySelector('[data-account-fxn-send-form]'),
-        fxnSendAmount: page.querySelector('[data-account-fxn-send-amount]'),
-        fxnSendRecipient: page.querySelector('[data-account-fxn-send-recipient]'),
-        fxnSendSubmit: page.querySelector('[data-account-fxn-send-submit]'),
-        fxnSendStatus: page.querySelector('[data-account-fxn-send-status]'),
-        fxnRefresh: page.querySelector('[data-account-fxn-refresh]'),
-        fxnNetwork: page.querySelector('[data-account-fxn-network]'),
-        creditsBalance: page.querySelector('[data-account-credits-balance]'),
-        creditsMessage: page.querySelector('[data-account-credits-message]'),
-        sendOpen: page.querySelector('[data-account-wallet-open="send"]'),
-        railFxn: page.querySelector('[data-account-rail-fxn]'),
-        railCredits: page.querySelector('[data-account-rail-credits]'),
-        railInvites: page.querySelector('[data-account-rail-invites]'),
-        railDomains: page.querySelector('[data-account-rail-domains]'),
-        overviewMesh: page.querySelector('[data-account-overview-mesh]'),
-        overviewContacts: page.querySelector('[data-account-overview-contacts]')
-      };
-      /* Zero-scroll: the card shows one view at a time (session, wallet,
-         contacts, mesh) and each view's forms and details replace it in
-         place, so nothing past the identity adds height. */
-      var tabNav = page.querySelector('.account-tabs');
-      var tabButtons = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-tab]')) : [];
-      var panels = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-panel]')) : [];
-      var activeTab = 'session';
-      var lastSessionState = '';
+        var home = el('div', 'account-wallet'); home.setAttribute('data-account-wallet-view', 'home');
+        refs.balances = make({ block: 'stats', id: 'account-balances', props: walletStats(), was: WAS['account-balances'] }); remember('balances', walletStats());
+        refs.pubkey = make({ block: 'facts', id: 'account-pubkey', props: keyProps(), was: WAS['account-pubkey'] }); remember('pubkey', keyProps());
+        home.appendChild(refs.balances); home.appendChild(refs.pubkey);
+        home.appendChild(pin(el('p', 'account-hint', 'Share this public key to receive FXN. You never need to share your Auth Kit or PIN.'), WALLET + '/div:1/div:2/p:2', true));
+        refs.walletRow = make({ block: 'actions', id: 'account-wallet-row', props: walletRowProps(), was: WAS['account-wallet-row'] }); remember('walletRow', walletRowProps());
+        home.appendChild(refs.walletRow);
+        node.appendChild(home);
+        var send = pin(el('div', 'account-wallet-form'), WALLET + '/form:1', true); send.setAttribute('data-account-wallet-view', 'send'); send.hidden = true;
+        send.appendChild(make({ block: 'callout', id: 'account-send-intro', props: { tone: 'info', title: 'Send FXN', body: 'Review the recipient and amount before signing on this device.' }, was: WAS['account-send-intro'] }));
+        refs.sendForm = make({ block: 'form', id: 'account-send-form', props: sendFormProps(), was: WAS['account-send-form'] }); remember('sendForm', sendFormProps());
+        send.appendChild(refs.sendForm);
+        node.appendChild(send);
+        refs.sendStatus = make({ block: 'status-line', id: 'account-send-status', props: statusProps(''), was: WAS['account-send-status'] }); remember('sendStatus', statusProps(''));
+        node.appendChild(refs.sendStatus);
+        node.appendChild(pin(el('div', 'account-wallet-network', '<span class="account-wallet-network-label">Network</span><div class="network-options" data-account-fxn-network></div>'), WALLET + '/div:2'));
+        node.appendChild(pin(el('p', 'account-hint', 'Balances update directly from the selected network.'), WALLET + '/p:2', true));
+        return node;
+      }
+      function buildContacts() {
+        var node = pin(el('section', 'account-contacts'), CONTACTS);
+        var list = el('div'); list.setAttribute('data-contacts-view', 'list');
+        list.appendChild(el('h2', 'account-visually-hidden', 'Contacts')).id = 'account-contacts-title';
+        refs.contactSearch = make({ block: 'form', id: 'account-contacts-search', props: searchFormProps(), was: WAS['account-contacts-search'] }); remember('contactSearch', searchFormProps());
+        list.appendChild(refs.contactSearch);
+        refs.contactsStatus = make({ block: 'status-line', id: 'account-contacts-status', props: statusProps(''), was: WAS['account-contacts-status'] }); remember('contactsStatus', statusProps(''));
+        list.appendChild(refs.contactsStatus);
+        views.found = el('div', 'account-contacts-found'); views.found.hidden = true;
+        refs.found = make({ block: 'list', id: 'account-contacts-found', props: contactListProps('found'), was: WAS['account-contacts-found'] }); remember('found', contactListProps('found'));
+        views.found.appendChild(refs.found);
+        list.appendChild(views.found);
+        var groups = pin(el('div', 'account-contacts-lists'), CONTACTS + '/div:1/div:1');
+        [['incoming', 'Invites to you'], ['accepted', 'Contacts'], ['outgoing', 'Sent']].forEach(function (pair, index) {
+          var group = pin(el('div', pair[0] === 'accepted' ? 'account-contacts-connected' : null, '<h3>' + pair[1] + ' <b data-contacts-' + pair[0] + '-count>0</b></h3>'), CONTACTS + '/div:1/div:1/div:' + (index + 1));
+          refs[pair[0]] = make({ block: 'list', id: 'account-contacts-' + pair[0], props: contactListProps(pair[0]), was: WAS['account-contacts-' + pair[0]] }); remember(pair[0], contactListProps(pair[0]));
+          group.appendChild(refs[pair[0]]);
+          groups.appendChild(group);
+        });
+        list.appendChild(groups);
+        refs.contactsRefresh = make({ block: 'actions', id: 'account-contacts-refresh', props: { items: [{ label: 'Refresh', action: 'contacts-refresh', tone: 'ghost' }] }, was: WAS['account-contacts-refresh'] });
+        list.appendChild(refs.contactsRefresh);
+        node.appendChild(list);
+        var detail = el('article', 'account-contact-detail', '<header><div class="account-contact-avatar" data-contact-avatar aria-hidden="true">ID</div><div><h2 data-contact-name>Identity</h2><span data-contact-state>Connection</span></div></header>');
+        detail.setAttribute('data-contacts-view', 'detail'); detail.hidden = true;
+        detail.insertBefore(make({ block: 'actions', id: 'account-contact-back', props: { items: [{ label: '\u2190 All contacts', action: 'contact-back', tone: 'ghost' }] }, was: WAS['account-contact-back'] }), detail.firstChild);
+        refs.contactFacts = make({ block: 'facts', id: 'account-contact-facts', props: contactFactsProps({}, ''), was: WAS['account-contact-facts'] }); remember('contactFacts', contactFactsProps({}, ''));
+        detail.appendChild(refs.contactFacts);
+        detail.appendChild(el('p', null, 'No public profile details are available for this identity.')).setAttribute('data-contact-bio', '');
+        detail.appendChild(make({ block: 'actions', id: 'account-contact-explore', props: { items: [{ label: 'View network details', href: 'route:explorer', tone: 'link' }] }, was: WAS['account-contact-explore'] }));
+        node.appendChild(detail);
+        node.setAttribute('data-account-panel', 'contacts'); node.setAttribute('aria-labelledby', 'account-contacts-title');
+        return node;
+      }
+      function buildMesh() {
+        var node = pin(el('section', 'account-mesh'), MESH, true); node.setAttribute('data-account-panel', 'mesh'); node.setAttribute('aria-label', 'Network status');
+        refs.meshStats = make({ block: 'stats', id: 'account-mesh-stats', props: meshStats(), was: WAS['account-mesh-stats'] }); remember('meshStats', meshStats());
+        node.appendChild(refs.meshStats);
+        refs.meshActions = make({ block: 'actions', id: 'account-mesh-actions', props: meshActionProps(), was: WAS['account-mesh-actions'] }); remember('meshActions', meshActionProps());
+        node.appendChild(refs.meshActions);
+        views.meshDetail = el('div', 'account-mesh-detail'); views.meshDetail.hidden = true; views.meshDetail.setAttribute('data-account-mesh-detail', '');
+        refs.meshFacts = make({ block: 'facts', id: 'account-mesh-facts', props: meshFacts(), was: WAS['account-mesh-facts'] }); remember('meshFacts', meshFacts());
+        views.meshDetail.appendChild(refs.meshFacts);
+        node.appendChild(views.meshDetail);
+        return node;
+      }
+      function buildKeys() {
+        var keys = pin(el('section', 'account-keys'), KEYS);
+        keys.appendChild(el('p', 'account-hint', 'Create dedicated signing keys and manage each one independently without changing your primary identity.'));
+        refs.keysList = make({ block: 'list', id: 'account-keys-list', props: keysListProps(), was: WAS['account-keys-list'] }); remember('keysList', keysListProps());
+        keys.appendChild(refs.keysList);
+        /* Ark's field has no password kind, so the PIN and the password are the one hand-built pair on the page; both
+           actions below read them, and nothing else is typed here that must stay secret */
+        var secret = el('div', 'account-secret', '<label>PIN<input data-account-keys-pin type="password" autocomplete="off"></label><label>Password (if set)<input data-account-keys-password type="password" autocomplete="off"></label>');
+        pin(secret.children[0], KEYS + '/form:1/label:2', true); pin(secret.children[1], KEYS + '/form:1/label:3', true);
+        keys.appendChild(secret);
+        keys.appendChild(pin(el('h3', null, 'Add a signing wallet'), KEYS + '/form:1/h3:1', true));
+        refs.keysAdd = make({ block: 'form', id: 'account-keys-add', props: keysAddProps(), was: WAS['account-keys-add'] });
+        keys.appendChild(refs.keysAdd);
+        refs.keysAddResult = make({ block: 'status-line', id: 'account-keys-add-result', props: statusProps(''), was: WAS['account-keys-add-result'] }); remember('keysAddResult', statusProps(''));
+        keys.appendChild(refs.keysAddResult);
+        keys.appendChild(pin(el('h3', null, 'Rotate, revoke or delegate'), KEYS + '/form:2/h3:1', true));
+        refs.keysAction = make({ block: 'form', id: 'account-keys-action', props: keysActionProps(), was: WAS['account-keys-action'] });
+        keys.appendChild(refs.keysAction);
+        refs.keysActionResult = make({ block: 'status-line', id: 'account-keys-action-result', props: statusProps(''), was: WAS['account-keys-action-result'] }); remember('keysActionResult', statusProps(''));
+        keys.appendChild(refs.keysActionResult);
+        keys.setAttribute('data-account-panel', 'keys'); keys.setAttribute('aria-label', 'Signing wallets');
+        return keys;
+      }
+      /* The glance rail: Ark's interactive stats (each tile opens the view that owns its number), and the way to the explorer. */
+      function buildRail() {
+        var node = el('aside', 'account-rail');
+        node.setAttribute('aria-label', 'Your account at a glance');
+        refs.rail = make({ block: 'stats', id: 'account-rail-stats', props: railProps(), was: WAS['account-rail-stats'] }); remember('rail', railProps());
+        node.appendChild(refs.rail);
+        node.appendChild(make({ block: 'actions', id: 'account-rail-link', props: { label: 'Explore the network', align: 'end', items: [{ label: 'Mesh Explorer', href: 'route:explorer', tone: 'link' }] }, was: WAS['account-rail-link'] }));
+        node.hidden = true;
+        return node;
+      }
+
+      /* ---- the tabs: rebuilt only when the set of views changes (the session state) ---------- */
+      function viewNode(value) {
+        return { signin: views.session, create: views.create, session: views.session, defi: views.wallet, keys: views.keys, contacts: views.contacts, mesh: views.mesh }[value];
+      }
+      function buildTabs(state, open) {
+        var values = tabValues(state);
+        var tabs = make({ block: 'tabs', id: 'account-views', was: tabsWas(state, values), props: { label: state === 'signed-out' ? 'Sign in or create' : 'Account views', variant: 'tabs',
+          defaultValue: values.indexOf(open) >= 0 ? open : values[0], items: values.map(function (value) { return { value: value, label: TAB_LABEL[value] }; }) } });
+        var panels = Array.prototype.filter.call(tabs.children, function (node) { return node.getAttribute('data-ark-part') === 'tabs-content'; });
+        values.forEach(function (value, index) { panels[index].appendChild(viewNode(value)); });
+        /* A view with no tab in this state stays in the page, hidden, as the hand-built page kept every panel
+           (hidden) in every state: the CMS keys its elements, and a saved edit on one lands once its tab exists. */
+        ['session', 'create', 'wallet', 'keys', 'contacts', 'mesh'].forEach(function (name) { if (!tabs.contains(views[name])) offstage.appendChild(views[name]); });
+        /* the primitive handles the click; this only follows its result (js/pages/story.js does the same) */
+        tabs.querySelector('[data-ark-part="tabs-list"]').addEventListener('click', function () { if (selectedTab() === 'create') createOpened(); });
+        tabsEl = tabs; tabsValues = values;
+        return tabs;
+      }
+      function selectedTab() {
+        if (!tabsEl) return '';
+        var triggers = tabsEl.querySelectorAll('[data-ark-part="tabs-trigger"]');
+        for (var i = 0; i < triggers.length; i++) if (triggers[i].getAttribute('aria-selected') === 'true') return tabsValues[i];
+        return '';
+      }
       function panelAvailable(name) {
         if (name === 'session') return true;
         if (name === 'defi' || name === 'mesh') return !!identity;
-        if (name === 'contacts' || name === 'keys') return !!(identity && ArkUI.accountSession.isUnlocked());
+        if (name === 'contacts' || name === 'keys') return !!(identity && session.isUnlocked());
         return false;
       }
-      function applyTabs() {
-        if (!tabButtons.length) {
-          page.querySelector('.account-live').hidden = !identity;
-          return;
-        }
-        var available = tabButtons.filter(function (button) { return panelAvailable(button.getAttribute('data-account-tab')); });
-        tabNav.hidden = available.length < 2;
-        if (!panelAvailable(activeTab)) activeTab = 'session';
-        tabButtons.forEach(function (button) {
-          var name = button.getAttribute('data-account-tab');
-          var open = panelAvailable(name);
-          button.hidden = !open;
-          button.setAttribute('aria-selected', String(open && name === activeTab));
-        });
-        panels.forEach(function (panel) {
-          var name = panel.getAttribute('data-account-panel');
-          panel.hidden = !(panelAvailable(name) && name === activeTab);
-        });
-      }
+      /* A view is opened through the primitive (a click on its tab), never by hand. */
       function openTab(name) {
         if (!panelAvailable(name)) name = 'session';
-        activeTab = name;
-        applyTabs();
-      }
-      tabButtons.forEach(function (button) {
-        button.addEventListener('click', function () { openTab(button.getAttribute('data-account-tab')); });
-      });
-      Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-go]') : [], function (button) {
-        button.addEventListener('click', function () { openTab(button.getAttribute('data-account-go')); });
-      });
-      /* Wallet sub-views: the send and authorize forms take the wallet's place. */
-      var walletViews = page.querySelectorAll ? Array.prototype.slice.call(page.querySelectorAll('[data-account-wallet-view]')) : [];
-      function showWallet(name) {
-        walletViews.forEach(function (view) { view.hidden = view.getAttribute('data-account-wallet-view') !== name; });
-        var first = name === 'home' ? null : page.querySelector('[data-account-wallet-view="' + name + '"] :is(textarea,input)');
-        if (first && first.focus) first.focus();
-      }
-      Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-wallet-open]') : [], function (button) {
-        button.addEventListener('click', function () { showWallet(button.getAttribute('data-account-wallet-open')); });
-      });
-      Array.prototype.forEach.call(page.querySelectorAll ? page.querySelectorAll('[data-account-wallet-back]') : [], function (button) {
-        button.addEventListener('click', function () { showWallet('home'); });
-      });
-      function setSendable(enabled) {
-        fields.fxnSendSubmit.disabled = !enabled;
-        if (fields.sendOpen) fields.sendOpen.disabled = !enabled;
-        if (fields.fxnCopyKey) fields.fxnCopyKey.disabled = !enabled;
-      }
-      function syncRail() {
-        if (fields.railFxn) fields.railFxn.textContent = fields.fxnBalance.textContent;
-        if (fields.railCredits) fields.railCredits.textContent = fields.creditsBalance.textContent;
-        var standing = fields.standing.textContent, mesh = fields.meshStatus.textContent;
-        if (fields.overviewMesh) fields.overviewMesh.textContent = standing !== 'Not linked' ? standing : (mesh === 'Identity verified' ? 'Not linked' : mesh);
+        if (!identity && name === 'session') name = 'signin';
+        var index = tabsValues.indexOf(name);
+        if (index < 0 || !tabsEl) return;
+        if (selectedTab() !== name) tabsEl.querySelectorAll('[data-ark-part="tabs-trigger"]')[index].click();
       }
 
+      /* ---- the page ------------------------------------------------------------------------- */
+      sessionState = stateOf(identity);
+      var spec = [
+        { block: 'custom', id: 'account-shell', was: WAS['account-shell'], mount: function () {
+          var shell = el('div', 'account-shell');
+          var left = pin(el('div', 'account-hero'), HERO, true);
+          refs.hero = make({ block: 'hero', id: 'account-headline', props: heroProps(identity), was: WAS['account-headline'] }); remember('hero', heroProps(identity));
+          left.appendChild(refs.hero);
+          mapWrap = el('div', 'account-map');
+          mapWrap.appendChild(make({ block: 'figure', id: 'account-map', was: WAS['account-map'], props: { kind: 'illustration', slot: 'account-map', aspect: 'auto', labelMin: '12',
+            caption: 'How it fits together: your Auth Kit opens your identity, your wallet and publishing.' } }));
+          mapWrap.hidden = !!identity;
+          left.appendChild(mapWrap);
+          identityWrap = pin(el('div', 'account-identity'), STATE, true);
+          /* On a phone the identity details fold behind a press (Ark's disclosure, foldBelow 'phone'): the page
+             was 1.7x the viewport signed in, past the 1.6x fold budget; wider they are always in sight. */
+          refs.fold = make({ block: 'disclosure', id: 'account-identity-fold', props: { foldBelow: 'phone', more: 'Show identity details', less: 'Hide identity details', blocks: [
+            { block: 'facts', id: 'account-identity', props: identityProps(identity), was: WAS['account-identity'] },
+            { block: 'actions', id: 'account-copy', props: copyProps(), was: WAS['account-copy'] }] } });
+          refs.identity = refs.fold.querySelector('#account-identity'); remember('identity', identityProps(identity));
+          refs.copy = refs.fold.querySelector('#account-copy'); remember('copy', copyProps());
+          refs.dev = make({ block: 'disclosure', id: 'account-developer', was: WAS['account-developer'], props: { more: 'Developer details', less: 'Hide developer details',
+            content: 'Technical names for what you see here: the identity ID is your Ghost ID, and the public root key is the key every signature of yours is checked against.',
+            blocks: [{ block: 'facts', id: 'account-developer-facts', props: developerProps(identity), was: WAS['account-developer-facts'] }] } });
+          refs.devFacts = refs.dev.querySelector('#account-developer-facts'); remember('devFacts', developerProps(identity));
+          identityWrap.appendChild(refs.fold); identityWrap.appendChild(refs.dev);
+          identityWrap.hidden = !identity;
+          left.appendChild(identityWrap);
+          shell.appendChild(left);
+          views.session = buildSession(); views.create = buildCreate(); views.wallet = buildWallet(); views.keys = buildKeys(); views.contacts = buildContacts(); views.mesh = buildMesh();
+          offstage = el('div', 'account-offstage'); offstage.hidden = true;
+          cardHost = el('section', 'account-card'); cardHost.setAttribute('aria-label', 'Account');
+          cardHost.appendChild(buildTabs(sessionState, sessionState === 'verified-local' ? 'defi' : (sessionState === 'signed-out' ? 'signin' : 'session')));
+          shell.appendChild(cardHost);
+          railEl = buildRail(); railEl.hidden = !identity;
+          shell.appendChild(railEl);
+          shell.appendChild(offstage);
+          return shell;
+        } },
+        /* Anchor for reusable content blocks (js/content/components.js); rendering into it is centralized in js/main.js's onMount hook. */
+        { insert: 'main', was: 'page:/div:1/div:1' }
+      ];
+      page = ArkUI.page(spec, host, { page: 'account', className: 'account-page', titleId: 'account-title', terms: 'first-use', termState: termState,
+        slots: { 'account-map': function () { return el('div', null, MAP_SVG).firstChild; } },
+        /* every press that means something to the page raises ark:action (Ark's actions, forms, lists, stats); `item` is a list row's id */
+        actions: {
+          'copy-ghost': function () { copyIdentityField('ghost'); },
+          'copy-wallet': function () { copyIdentityField('wallet'); },
+          'forget': function () { session.signOut(); },
+          'wallet-send': function () { showWallet('send'); },
+          'wallet-back': function () { showWallet('home'); },
+          'wallet-send-submit': function (detail) { runSend(detail.values); },
+          'wallet-copy-key': function () { copyText(wallet.key, 'Key copied.'); },
+          'wallet-refresh': function () { loadWallet(); },
+          'mesh-verify': function () { checkMesh(); },
+          'rail-defi': function () { openTab('defi'); },
+          'rail-contacts': function () { openTab('contacts'); },
+          'rail-mesh': function () { openTab('mesh'); },
+          'contacts-search': function (detail) { searchContacts(detail.values.query); },
+          'contacts-refresh': function () { loadContacts(false); },
+          'contact-open': function (detail) { openContactDetail(detail.item, contactStates[detail.item]); },
+          'contact-back': function () { showContactList(); },
+          'contact-invite': function (detail) { inviteFromRow(detail.item); },
+          'contact-accept': function (detail) { contactAction(detail.item, 'acceptInvite'); },
+          'contact-decline': function (detail) { contactAction(detail.item, 'declineInvite'); },
+          'contact-withdraw': function (detail) { contactAction(detail.item, 'withdrawInvite'); },
+          'keys-add': function (detail) { keysAdd(detail.values); },
+          'keys-rotate': function (detail) { keysRotate(detail.values); },
+          'keys-revoke': function () { keysRevoke(); },
+          'keys-delegate': function () { keysDelegate(); },
+          'keys-revoke-delegation': function () { keysRevokeDelegation(); }
+        } });
+      page.dataset.session = sessionState;
+      var lastSessionState = sessionState;
+      var fields = { fxnNetwork: views.wallet.querySelector('[data-account-fxn-network]') };
       var contactsFields = {
-        section: page.querySelector('.account-contacts'),
-        searchForm: page.querySelector('[data-contacts-search-form]'),
-        searchInput: page.querySelector('#contactsSearchQuery'),
-        results: page.querySelector('[data-contacts-results]'),
-        status: page.querySelector('[data-contacts-status]'),
-        accepted: page.querySelector('[data-contacts-accepted]'),
-        incoming: page.querySelector('[data-contacts-incoming]'),
-        outgoing: page.querySelector('[data-contacts-outgoing]'),
-        refresh: page.querySelector('[data-contacts-refresh]'),
-        acceptedCount: page.querySelector('[data-contacts-accepted-count]'),
-        incomingCount: page.querySelector('[data-contacts-incoming-count]'),
-        outgoingCount: page.querySelector('[data-contacts-outgoing-count]'),
-        listView: page.querySelector('[data-contacts-view="list"]'),
-        detailView: page.querySelector('[data-contacts-view="detail"]'),
-        back: page.querySelector('[data-contact-back]'),
-        detailAvatar: page.querySelector('[data-contact-avatar]'),
-        detailName: page.querySelector('[data-contact-name]'),
-        detailState: page.querySelector('[data-contact-state]'),
-        detailId: page.querySelector('[data-contact-id]'),
-        detailPublicId: page.querySelector('[data-contact-public-id]'),
-        detailVisibility: page.querySelector('[data-contact-visibility]'),
-        detailUpdated: page.querySelector('[data-contact-updated]'),
-        detailBio: page.querySelector('[data-contact-bio]')
+        acceptedCount: views.contacts.querySelector('[data-contacts-accepted-count]'),
+        incomingCount: views.contacts.querySelector('[data-contacts-incoming-count]'),
+        outgoingCount: views.contacts.querySelector('[data-contacts-outgoing-count]'),
+        listView: views.contacts.querySelector('[data-contacts-view="list"]'),
+        detailView: views.contacts.querySelector('[data-contacts-view="detail"]'),
+        detailAvatar: views.contacts.querySelector('[data-contact-avatar]'),
+        detailName: views.contacts.querySelector('[data-contact-name]'),
+        detailState: views.contacts.querySelector('[data-contact-state]'),
+        detailBio: views.contacts.querySelector('[data-contact-bio]')
       };
-      var keysFields = {
-        list: page.querySelector('[data-account-keys-list]'),
-        addForm: page.querySelector('[data-account-keys-add-form]'),
-        addLabel: page.querySelector('[data-account-keys-add-label]'),
-        pin: page.querySelector('[data-account-keys-pin]'),
-        password: page.querySelector('[data-account-keys-password]'),
-        addResult: page.querySelector('[data-account-keys-add-result]'),
-        address: page.querySelector('[data-account-keys-address]'),
-        rotateLabel: page.querySelector('[data-account-keys-rotate-label]'),
-        rotate: page.querySelector('[data-account-keys-rotate]'),
-        revoke: page.querySelector('[data-account-keys-revoke]'),
-        delegate: page.querySelector('[data-account-keys-delegate]'),
-        revokeDelegation: page.querySelector('[data-account-keys-revoke-delegation]'),
-        actionResult: page.querySelector('[data-account-keys-action-result]')
-      };
-      var identity = null;
+      var keysFields = { pin: views.keys.querySelector('[data-account-keys-pin]'), password: views.keys.querySelector('[data-account-keys-password]') };
       var generation = 0;
       var controller = null;
       var contactsGeneration = 0;
@@ -286,18 +751,52 @@
       var contactProfiles = Object.create(null);
       var contactStates = Object.create(null);
 
+      /* Wallet sub-views: the send form takes the wallet's place. */
+      var walletViews = Array.prototype.slice.call(views.wallet.querySelectorAll('[data-account-wallet-view]'));
+      function showWallet(name) {
+        walletViews.forEach(function (view) { view.hidden = view.getAttribute('data-account-wallet-view') !== name; });
+        var first = name === 'home' ? null : views.wallet.querySelector('[data-account-wallet-view="' + name + '"] input');
+        if (first && first.focus) first.focus();
+      }
+      /* The glance rail's tiles are Ark's stats: each is repainted from the page's state. */
+      function paintWalletControls() { paint('walletRow', walletRowProps()); paint('sendForm', sendFormProps()); }
+      function setSendable(enabled) { walletSendable = !!enabled; paintWalletControls(); }
+      function syncRail() { paint('rail', railProps()); }
+      /* a result under a form or a list, said in Ark's polite status line; `tone` is the outcome (trust = done, danger = refused) */
+      function result(name, message, tone) { paint(name, statusProps(message, tone)); }
+      function setWallet(patch) {
+        Object.keys(patch).forEach(function (key) { wallet[key] = patch[key]; });
+        paint('balances', walletStats());
+        paint('pubkey', keyProps());
+        syncRail();
+      }
+      function setMesh(patch) {
+        Object.keys(patch).forEach(function (key) { mesh[key] = patch[key]; });
+        paint('meshStats', meshStats());
+        paint('meshFacts', meshFacts());
+        views.meshDetail.hidden = !mesh.detail;
+        syncRail();
+      }
+      function setMeshBusy(value) { meshBusy = !!value; paint('meshActions', meshActionProps()); }
+      function setNotices() {
+        var holder = views.session.querySelector('[data-account-notices]');
+        var storage = ArkUI.localIdentity.storageError();
+        var meshAuth = (ArkUI.accountSession && ArkUI.accountSession.meshAuthMessage) || '';
+        var json = JSON.stringify([storage, meshAuth]);
+        if (holder.getAttribute('data-notices') === json) return;
+        holder.setAttribute('data-notices', json);
+        holder.replaceChildren();
+        [storage, meshAuth].forEach(function (message) {
+          if (message) holder.appendChild(ArkUI.blocks.render({ block: 'callout', props: { tone: 'warning', body: message, live: 'polite' } }, { from: fromPath(), onInvalid: 'throw' }));
+        });
+      }
+      setSendable(false);
+
       function resetMesh(message) {
         generation += 1;
         if (controller) controller.abort();
         controller = null;
-        fields.meshStatus.textContent = 'Not verified';
-        fields.meshMessage.textContent = message || 'Verify this identity on the selected DEFXN network.';
-        fields.meshDetail.hidden = true;
-        fields.meshRecord.textContent = '—'; fields.meshVerification.textContent = '—';
-        fields.meshUpdated.textContent = '—'; fields.meshProvenance.textContent = '—';
-        fields.standing.textContent = 'Not linked';
-        fields.standingMessage.textContent = 'A verified account link is required to show network status.';
-        syncRail();
+        setMesh(meshDefaults(message));
       }
 
       async function checkMesh() {
@@ -307,11 +806,8 @@
         if (controller) controller.abort();
         controller = new AbortController();
         var timeout = window.setTimeout(function () { controller.abort(); }, 10000);
-        fields.check.disabled = true;
-        fields.meshDetail.hidden = true;
-        fields.meshStatus.textContent = 'Verifying identity…';
-        fields.meshMessage.textContent = 'Checking your public identity and linked account.';
-        syncRail();
+        setMeshBusy(true);
+        setMesh({ detail: false, status: 'Verifying identity…', message: 'Checking your public identity and linked account.' });
         try {
           var response = await fetch(LOCAL_MINER + '/explorer/v1/record', {
             method: 'POST', headers: { accept: 'application/json', 'content-type': 'application/json' },
@@ -339,30 +835,31 @@
             if (account.verification?.state !== 'verified') throw new Error('The bound account record is not verified.');
           }
           if (token !== generation || !page.isConnected || !identity || identity.identityId !== id) return;
-          fields.meshStatus.textContent = 'Identity verified';
-          fields.meshMessage.textContent = account ? 'Your identity and linked account are verified on DEFXN.' : 'Your identity is verified. Link an account to display its network status.';
-          fields.meshRecord.textContent = text(record.id);
-          fields.meshVerification.textContent = text(record.verification && record.verification.state);
-          fields.meshUpdated.textContent = text(record.updatedAt, 'Not dated');
-          fields.meshProvenance.textContent = text(record.provenance && (record.provenance.source || record.provenance.location), 'Not reported');
           var accountBody = account && account.fields && account.fields.sourceRecord && typeof account.fields.sourceRecord === 'object' ? account.fields.sourceRecord : {};
           var standing = accountBody.standing || accountBody.status || '';
-          fields.standing.textContent = account ? (standing ? text(standing) : 'Verified account · no status') : 'Not linked';
-          fields.standingMessage.textContent = account ? ('Account ' + accountId + (standing ? ' · verified status' : ' · verified')) : 'No linked account was found.';
-          fields.meshDetail.hidden = false;
-          syncRail();
+          setMesh({
+            status: 'Identity verified',
+            message: account ? 'Your identity and linked account are verified on DEFXN.' : 'Your identity is verified. Link an account to display its network status.',
+            record: text(record.id),
+            verification: text(record.verification && record.verification.state),
+            updated: text(record.updatedAt, 'Not dated'),
+            provenance: text(record.provenance && (record.provenance.source || record.provenance.location), 'Not reported'),
+            standing: account ? (standing ? text(standing) : 'Verified account · no status') : 'Not linked',
+            standingMessage: account ? ('Account ' + accountId + (standing ? ' · verified status' : ' · verified')) : 'No linked account was found.',
+            detail: true
+          });
         } catch (error) {
           if (token !== generation || !page.isConnected || !identity || identity.identityId !== id) return;
-          fields.meshStatus.textContent = error && error.name === 'AbortError' ? 'Verification timed out' : 'Not connected';
-          fields.meshMessage.textContent = error && error.name === 'AbortError' ? 'The network took too long to respond. Try again.' : error instanceof TypeError ? 'We could not reach the network. Try again.' : text(error && error.message, 'We could not verify this identity.');
-          syncRail();
+          setMesh({
+            status: error && error.name === 'AbortError' ? 'Verification timed out' : 'Not connected',
+            message: error && error.name === 'AbortError' ? 'The network took too long to respond. Try again.' : error instanceof TypeError ? 'We could not reach the network. Try again.' : text(error && error.message, 'We could not verify this identity.')
+          });
         } finally {
           window.clearTimeout(timeout);
-          if (token === generation && page.isConnected) { controller = null; fields.check.disabled = !identity; }
+          if (token === generation && page.isConnected) { controller = null; setMeshBusy(false); }
         }
       }
 
-      function escapeHtml(value) { return String(value).replace(/[&<>"']/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]; }); }
 
       /* ---- FXN on dense-wire ------------------------------------------
          Everything that builds, checks, signs or sends lives in
@@ -396,7 +893,6 @@
       var fxnMeta;
       var wire = null;
       var walletGeneration = 0;
-      var walletBusy = false;
 
       function loadFxnMetaModule() {
         if (!fxnMetaModule) {
@@ -428,21 +924,8 @@
         });
       }
       function paintFxnMeta(meta) {
-        if (!fields.fxnLabel) return;
-        if (meta && meta.doc && meta.doc.body && meta.doc.body.symbol) {
-          fields.fxnLabel.textContent = meta.doc.body.symbol;
-        } else {
-          fields.fxnLabel.textContent = 'FXN';
-        }
-        if (fields.fxnLogo) {
-          if (meta && meta.image) {
-            fields.fxnLogo.src = meta.image;
-            fields.fxnLogo.hidden = false;
-          } else {
-            fields.fxnLogo.hidden = true;
-            fields.fxnLogo.removeAttribute('src');
-          }
-        }
+        var symbol = meta && meta.doc && meta.doc.body && meta.doc.body.symbol;
+        setWallet({ symbol: symbol ? String(symbol) : 'FXN', logo: meta && meta.image || null });
       }
 
       function loadWalletModule() {
@@ -460,7 +943,6 @@
 
       function walletWire(dw) {
         if (!wire) wire = new dw.WalletWire(dw.resolveWireUrl());
-        if (fields.fxnWire) fields.fxnWire.textContent = wire.url;
         return wire;
       }
 
@@ -481,7 +963,8 @@
         });
       }
 
-      function say(message) { fields.fxnSendStatus.textContent = message; }
+      function say(message, tone) { result('sendStatus', message, tone); }
+
 
       function walletError(error, fallback) {
         var message = text(error && error.message, '');
@@ -490,27 +973,23 @@
 
       /* Signing wallets (docs/FLUX-WALLET-DELEGATION-SCOPE-VISION.md) --
          distinct from the dense-wire FXN "Wallet" tab above: these are real
-         flux-auth/wallet-lifecycle wallet-link records stored on the Auth
+         fxn-auth/wallet-lifecycle wallet-link records stored on the Auth
          Kit itself (`identity.walletAddresses`/`addWallet`/`rotateWallet`/
          `revokeWallet`/`delegateWallet`, wired in scripts/auth-entry.js).
          `identity.walletAddresses`/`walletDelegations` are live getters
          (re-derived from the current vault on every read), not frozen
          snapshots, so this list always reflects the latest mutation
          without needing a fresh sign-in. */
-      function renderKeys() {
-        if (!keysFields.list) return;
-        var addresses = (identity && identity.walletAddresses) || [];
-        var delegations = (identity && identity.walletDelegations) || {};
-        if (!addresses.length) {
-          keysFields.list.innerHTML = '<li class="account-contacts-empty">No signing wallets yet.</li>';
-          return;
-        }
-        keysFields.list.innerHTML = addresses.map(function (address) {
-          var delegation = delegations[address];
-          var status = delegation ? (delegation.revoked ? ' · delegation revoked' : ' · delegated to identity') : '';
-          return '<li class="account-contact-item"><span>' + address + (address === identity.walletAddress ? ' (default)' : '') + status + '</span></li>';
-        }).join('');
-      }
+      /* The wallet lifecycle methods and live getters belong to the SIGNER -- the unlocked Auth Kit
+         (ArkUI.accountSession.current()) -- never to `identity`, which is the public pointer
+         ArkUI.localIdentity keeps (six frozen public fields, js/ark/local-identity.js). Reading them
+         off `identity` made this whole view inert in a real browser: the list always said "No signing
+         wallets yet." and every button returned without doing anything, while the jsdom test passed
+         because it stubbed localIdentity with a pass-through of the full object.
+         Regression: tests/browser/account-flows.mjs step 9. */
+      function signer() { return ArkUI.accountSession && ArkUI.accountSession.current(); }
+      /* The list reads the signer's live getters, so it always shows the latest mutation without a fresh sign-in. */
+      function renderKeys() { paint('keysList', keysListProps()); }
 
       /* Every signature site on this page (FXN sends, Credits requests)
          shows ArkUI.authorizationDialog's full scoped-review dialog before
@@ -559,62 +1038,70 @@
         });
       }
 
-      keysFields.addForm && keysFields.addForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        if (!identity || !identity.addWallet) return;
-        var label = keysFields.addLabel.value.trim() || 'Default';
+      function cancelled(message) { var error = new Error(message); error.cancelled = true; return error; }
+      function keysFail(name, fallback) { return function (error) { result(name, text(error && error.message, fallback), error && error.cancelled ? 'drift' : 'danger'); }; }
+      /* the wallet address typed in the rotate / revoke / delegate form (its Revoke, Delegate and Revoke delegation buttons raise no values) */
+      function keysAddress() { var input = views.keys.querySelector('#account-keys-action [name="address"]'); return input ? input.value.trim() : ''; }
+
+      function keysAdd(values) {
+        var who = signer();
+        if (!who || !who.addWallet) return;
+        var label = String(values.label || '').trim() || 'Default';
         confirmWalletAction({
           title: 'Add a signing wallet', scope: 'wallet.add', action: 'wallet.add.sign',
           manifest: { label: label }, facts: [{ label: 'Label', value: label }],
         }).then(function (approved) {
-          if (!approved) throw new Error('Cancelled. No wallet was added.');
-          keysFields.addResult.textContent = 'Adding…';
-          return identity.addWallet({ pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
-        }).then(function (result) {
-          keysFields.addResult.textContent = 'Added ' + result.walletAddress;
+          if (!approved) throw cancelled('Cancelled. No wallet was added.');
+          result('keysAddResult', 'Adding\u2026');
+          return who.addWallet({ pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
+        }).then(function (added) {
+          result('keysAddResult', 'Added ' + added.walletAddress, 'trust');
           keysFields.pin.value = '';
           renderKeys();
-        }).catch(function (error) { keysFields.addResult.textContent = text(error && error.message, 'Could not add a wallet.'); });
-      });
+        }).catch(keysFail('keysAddResult', 'Could not add a wallet.'));
+      }
 
-      keysFields.rotate && keysFields.rotate.addEventListener('click', function () {
-        if (!identity || !identity.rotateWallet) return;
-        var address = keysFields.address.value.trim();
-        var label = keysFields.rotateLabel.value.trim() || undefined;
+      function keysRotate(values) {
+        var who = signer();
+        if (!who || !who.rotateWallet) return;
+        var address = String(values.address || '').trim();
+        var label = String(values.rotateLabel || '').trim() || undefined;
         confirmWalletAction({
           title: 'Rotate wallet', scope: 'wallet.rotate', action: 'wallet.rotate.sign',
           manifest: { walletAddress: address, label: label || null },
           facts: [{ label: 'Wallet', value: address }],
         }).then(function (approved) {
-          if (!approved) throw new Error('Cancelled. This wallet was not rotated.');
-          keysFields.actionResult.textContent = 'Rotating…';
-          return identity.rotateWallet({ walletAddress: address, pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
-        }).then(function (result) {
-          keysFields.actionResult.textContent = 'Rotated ' + address + ' → ' + result.walletAddress;
+          if (!approved) throw cancelled('Cancelled. This wallet was not rotated.');
+          result('keysActionResult', 'Rotating\u2026');
+          return who.rotateWallet({ walletAddress: address, pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
+        }).then(function (rotated) {
+          result('keysActionResult', 'Rotated ' + address + ' \u2192 ' + rotated.walletAddress, 'trust');
           keysFields.pin.value = '';
           renderKeys();
-        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not rotate this wallet.'); });
-      });
+        }).catch(keysFail('keysActionResult', 'Could not rotate this wallet.'));
+      }
 
-      keysFields.revoke && keysFields.revoke.addEventListener('click', function () {
-        if (!identity || !identity.revokeWallet) return;
-        var address = keysFields.address.value.trim();
+      function keysRevoke() {
+        var who = signer();
+        if (!who || !who.revokeWallet) return;
+        var address = keysAddress();
         confirmWalletAction({
           title: 'Revoke wallet', scope: 'wallet.revoke', action: 'wallet.revoke.sign',
           manifest: { walletAddress: address }, facts: [{ label: 'Wallet', value: address }],
         }).then(function (approved) {
-          if (!approved) throw new Error('Cancelled. This wallet was not revoked.');
-          keysFields.actionResult.textContent = 'Revoking…';
-          return identity.revokeWallet({ walletAddress: address });
+          if (!approved) throw cancelled('Cancelled. This wallet was not revoked.');
+          result('keysActionResult', 'Revoking\u2026');
+          return who.revokeWallet({ walletAddress: address });
         }).then(function () {
-          keysFields.actionResult.textContent = 'Revoked ' + address;
+          result('keysActionResult', 'Revoked ' + address, 'trust');
           renderKeys();
-        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this wallet.'); });
-      });
+        }).catch(keysFail('keysActionResult', 'Could not revoke this wallet.'));
+      }
 
-      keysFields.delegate && keysFields.delegate.addEventListener('click', function () {
-        if (!identity || !identity.delegateWallet) return;
-        var address = keysFields.address.value.trim();
+      function keysDelegate() {
+        var who = signer();
+        if (!who || !who.delegateWallet) return;
+        var address = keysAddress();
         // `spend` without a real `maxSpend` is refused at creation by
         // `createWalletDelegation` itself (`WALLET_DELEGATION_SPEND_REQUIRES_CAP`)
         // -- a real bug this exact button shipped with until a real click
@@ -626,45 +1113,41 @@
           manifest: { walletAddress: address, rights: ['receive', 'spend'], maxSpend: maxSpend },
           facts: [{ label: 'Wallet', value: address }, { label: 'Rights', value: 'receive+spend' }, { label: 'Max spend', value: maxSpend.amount + '/' + maxSpend.period }],
         }).then(function (approved) {
-          if (!approved) throw new Error('Cancelled. This wallet was not delegated.');
-          keysFields.actionResult.textContent = 'Delegating…';
-          return identity.delegateWallet({ walletAddress: address, rights: ['receive', 'spend'], maxSpend: maxSpend });
-        }).then(function (result) {
-          keysFields.actionResult.textContent = 'Delegated ' + result.delegatedRights.join('+') + ' to this identity';
+          if (!approved) throw cancelled('Cancelled. This wallet was not delegated.');
+          result('keysActionResult', 'Delegating\u2026');
+          return who.delegateWallet({ walletAddress: address, rights: ['receive', 'spend'], maxSpend: maxSpend });
+        }).then(function (delegated) {
+          result('keysActionResult', 'Delegated ' + delegated.delegatedRights.join('+') + ' to this identity', 'trust');
           renderKeys();
-        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not delegate this wallet.'); });
-      });
+        }).catch(keysFail('keysActionResult', 'Could not delegate this wallet.'));
+      }
 
-      keysFields.revokeDelegation && keysFields.revokeDelegation.addEventListener('click', function () {
-        if (!identity || !identity.revokeWalletDelegation) return;
-        var address = keysFields.address.value.trim();
+      function keysRevokeDelegation() {
+        var who = signer();
+        if (!who || !who.revokeWalletDelegation) return;
+        var address = keysAddress();
         confirmWalletAction({
           title: 'Revoke delegation', scope: 'wallet.revoke-delegation', action: 'wallet.revoke-delegation.sign',
           manifest: { walletAddress: address }, facts: [{ label: 'Wallet', value: address }],
         }).then(function (approved) {
-          if (!approved) throw new Error('Cancelled. This delegation was not revoked.');
-          identity.revokeWalletDelegation({ walletAddress: address });
-          keysFields.actionResult.textContent = 'Revoked the delegation for ' + address;
+          if (!approved) throw cancelled('Cancelled. This delegation was not revoked.');
+          who.revokeWalletDelegation({ walletAddress: address });
+          result('keysActionResult', 'Revoked the delegation for ' + address, 'trust');
           renderKeys();
-        }).catch(function (error) { keysFields.actionResult.textContent = text(error && error.message, 'Could not revoke this delegation.'); });
-      });
+        }).catch(keysFail('keysActionResult', 'Could not revoke this delegation.'));
+      }
 
       function resetWallet(message) {
         walletGeneration += 1;
-        fields.fxnBalance.textContent = '—';
-        fields.fxnMessage.textContent = message || 'Sign in to check';
-        fields.creditsBalance.textContent = 'Coming soon';
-        fields.creditsMessage.textContent = CREDITS_UNAVAILABLE;
-        if (fields.fxnKey) fields.fxnKey.textContent = '—';
+        setWallet({ balance: null, display: '—', message: message || 'Sign in to check', key: '' });
         setSendable(false);
-        syncRail();
       }
 
       async function loadWallet() {
         var who = ArkUI.accountSession.current();
         if (!who || !page.isConnected) return;
         var token = ++walletGeneration;
-        fields.fxnMessage.textContent = 'Updating balance…';
+        setWallet({ message: 'Updating balance…' });
         try {
           var dw = await loadWalletModule();
           if (token !== walletGeneration || !page.isConnected) return;
@@ -672,7 +1155,7 @@
           initNetworkSelect(dw);
           applyFxnMeta(link);
           var key = dw.signerFor(who).pubHex;
-          if (fields.fxnKey) fields.fxnKey.textContent = key;
+          setWallet({ key: key });
           setSendable(!walletBusy);
           // `link.balance` returns a BigInt, or `null` when this chain-
           // server has no FXN ledger to answer from (absent, never a
@@ -680,78 +1163,72 @@
           var amount = await link.balance(key);
           if (token !== walletGeneration || !page.isConnected) return;
           if (amount === null) {
-            fields.fxnBalance.textContent = 'Unavailable';
-            fields.fxnMessage.textContent = 'FXN is not available on this network.';
+            setWallet({ balance: null, display: 'Unavailable', message: 'FXN is not available on this network.' });
           } else {
-            fields.fxnBalance.textContent = amount.toString();
-            fields.fxnMessage.textContent = amount === 0n ? 'No FXN in this account.' : 'Available balance';
+            setWallet({ balance: amount.toString(), display: amount.toString(), message: amount === 0n ? 'No FXN in this account.' : 'Available balance' });
           }
         } catch (error) {
           if (token !== walletGeneration || !page.isConnected) return;
-          fields.fxnBalance.textContent = 'Unavailable';
-          fields.fxnMessage.textContent = walletError(error, 'Balance unavailable. Try again.');
+          setWallet({ balance: null, display: 'Unavailable', message: walletError(error, 'Balance unavailable. Try again.') });
         }
-        syncRail();
       }
 
       /* One send at a time; the review modal is opened by the module.
          After any attempt the balance is re-read, since a send may have
          been admitted (and moved real value) even if this page then hit
          an unrelated error reading the result back. */
-      async function runSend() {
+      async function runSend(values) {
         var who = ArkUI.accountSession.current();
         if (!who || walletBusy) return;
-        var amount = (fields.fxnSendAmount.value || '').trim();
-        var recipient = (fields.fxnSendRecipient.value || '').trim();
+        var amount = String(values && values.amount != null ? values.amount : '').trim();
+        var recipient = String(values && values.recipient || '').trim();
         walletBusy = true;
         setSendable(false);
         try {
           var dw = await loadWalletModule();
           var reply = await dw.sendFxn({ who: who, wire: walletWire(dw), amount: amount, recipient: recipient });
-          say(dw.describeSendReply(reply));
-          if (reply.kind === 'ok') { fields.fxnSendAmount.value = ''; fields.fxnSendRecipient.value = ''; showWallet('home'); }
+          say(dw.describeSendReply(reply), reply.kind === 'ok' ? 'trust' : 'danger');
+          if (reply.kind === 'ok') {
+            Array.prototype.forEach.call(views.wallet.querySelectorAll('#account-send-form input'), function (input) { input.value = ''; });
+            showWallet('home');
+          }
         } catch (error) {
-          say(walletError(error, 'That transfer could not be completed. Nothing was sent.'));
+          say(walletError(error, 'That transfer could not be completed. Nothing was sent.'), 'danger');
         } finally {
           walletBusy = false;
+          paintWalletControls();
           loadWallet();
         }
       }
-
-      if (fields.fxnRefresh) fields.fxnRefresh.addEventListener('click', loadWallet);
-
-      if (fields.fxnSendForm) fields.fxnSendForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        runSend();
-      });
 
       function copyText(value, done) {
         if (!value) return;
         var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(value) : Promise.reject(new Error('no clipboard'));
         clip.then(function () { say(done); }, function () { say('Copy is blocked in this browser. Select the text and copy it by hand.'); });
       }
-      if (fields.fxnCopyKey) fields.fxnCopyKey.addEventListener('click', function () { copyText(fields.fxnKey.textContent, 'Key copied.'); });
-      function copyAccountField(button, field) {
-        if (!button || !field) return;
-        button.addEventListener('click', function () {
-          var value = field.textContent;
-          if (!value || value === '—') return;
-          var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(value) : Promise.reject(new Error('no clipboard'));
-          clip.then(function () {
-            button.textContent = 'Copied';
-            setTimeout(function () { button.textContent = 'Copy'; }, 1400);
-          }, function () { button.textContent = 'Select to copy'; });
-        });
+      /* The identity facts' own copy buttons: the label says "Copied" for a moment (or that the browser
+         blocked the copy), as the old buttons did. */
+      var copyTimer = null;
+      function flashCopy(state) {
+        copied = state;
+        paint('copy', copyProps());
+        window.clearTimeout(copyTimer);
+        copyTimer = window.setTimeout(function () { copied = ''; paint('copy', copyProps()); }, 1400);
       }
-      copyAccountField(fields.copyGhost, fields.id);
-      copyAccountField(fields.copyWallet, fields.wallet);
+      function copyIdentityField(which) {
+        var value = which === 'ghost' ? identityProps(identity).items[0].value : (identity && identity.walletAddress);
+        if (!value) return;
+        var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(value) : Promise.reject(new Error('no clipboard'));
+        clip.then(function () { flashCopy(which); }, function () { flashCopy(which + '-blocked'); });
+      }
 
+
+      function paintContactLists() { ['incoming', 'accepted', 'outgoing', 'found'].forEach(function (kind) { paint(kind, contactListProps(kind)); }); }
       function resetContacts(message) {
         contactsGeneration += 1;
-        if (contactsFields.status) contactsFields.status.textContent = message || '';
-        if (contactsFields.accepted) contactsFields.accepted.innerHTML = '<li class="account-contacts-empty">No accepted contacts yet.</li>';
-        if (contactsFields.incoming) contactsFields.incoming.innerHTML = '<li class="account-contacts-empty">None pending.</li>';
-        if (contactsFields.outgoing) contactsFields.outgoing.innerHTML = '<li class="account-contacts-empty">None pending.</li>';
+        result('contactsStatus', message || '');
+        contactRows.accepted = []; contactRows.incoming = []; contactRows.outgoing = [];
+        paintContactLists();
         setContactCounts(0, 0, 0);
       }
 
@@ -767,23 +1244,8 @@
         if (contactsFields.acceptedCount) contactsFields.acceptedCount.textContent = String(accepted);
         if (contactsFields.incomingCount) contactsFields.incomingCount.textContent = String(incoming);
         if (contactsFields.outgoingCount) contactsFields.outgoingCount.textContent = String(outgoing);
-        var unlocked = !!(identity && ArkUI.accountSession.isUnlocked());
-        if (fields.overviewContacts) fields.overviewContacts.textContent = unlocked ? String(accepted) : '—';
-        if (fields.railInvites) fields.railInvites.textContent = unlocked ? String(incoming) : '—';
-        if (fields.railInvites && fields.railInvites.parentNode && fields.railInvites.parentNode.toggleAttribute) fields.railInvites.parentNode.toggleAttribute('data-attention', unlocked && incoming > 0);
-      }
-
-      function renderContactsList(listEl, records, kind) {
-        if (!listEl) return;
-        if (!records.length) { listEl.innerHTML = '<li class="account-contacts-empty">' + (kind === 'accepted' ? 'No accepted contacts yet.' : 'None pending.') + '</li>'; return; }
-        listEl.innerHTML = records.map(function (record) {
-          var otherId = record.id;
-          var status = record.status || kind;
-          var actions = kind === 'incoming'
-            ? '<button type="button" data-contacts-accept="' + escapeHtml(otherId) + '">Accept</button><button type="button" data-contacts-decline="' + escapeHtml(otherId) + '">Decline</button>'
-            : (kind === 'outgoing' ? '<button type="button" data-contacts-withdraw="' + escapeHtml(otherId) + '">Withdraw</button>' : '');
-          return '<li><button type="button" class="account-contact-main" data-contact-open="' + escapeHtml(otherId) + '" data-contact-state="' + escapeHtml(status) + '"><span class="account-contact-mini-avatar">' + escapeHtml(contactInitials(otherId)) + '</span><span><strong>' + escapeHtml(contactName(otherId)) + '</strong><small>' + escapeHtml(otherId) + '</small></span></button><span class="account-contacts-tag">' + escapeHtml(status) + '</span>' + actions + '</li>';
-        }).join('');
+        rail.contacts = accepted; rail.invites = incoming;
+        syncRail();
       }
 
       async function cacheContactProfiles(directory, who, ids, token) {
@@ -802,7 +1264,7 @@
         var who = ArkUI.accountSession.current();
         if (!who || !window.ArkUI || !window.ArkUI.meshDirectory) return;
         var token = ++contactsGeneration;
-        if (!silent) contactsFields.status.textContent = 'Checking for invites…';
+        if (!silent) result('contactsStatus', 'Checking for invites\u2026');
         try {
           var directory = window.ArkUI.meshDirectory;
           var incoming = await directory.listIncomingInvites(who);
@@ -837,14 +1299,13 @@
           if (token !== contactsGeneration) return;
           contactStates = Object.create(null);
           accepted.concat(incomingPending, outgoingPending).forEach(function (record) { contactStates[record.id] = record.status; });
-          renderContactsList(contactsFields.accepted, accepted, 'accepted');
-          renderContactsList(contactsFields.incoming, incomingPending, 'incoming');
-          renderContactsList(contactsFields.outgoing, outgoingPending, 'outgoing');
+          contactRows.accepted = accepted; contactRows.incoming = incomingPending; contactRows.outgoing = outgoingPending;
+          paintContactLists();
           setContactCounts(accepted.length, incomingPending.length, outgoingPending.length);
-          if (!silent) contactsFields.status.textContent = '';
+          if (!silent) result('contactsStatus', '');
         } catch (error) {
           if (token !== contactsGeneration) return;
-          contactsFields.status.textContent = 'Contacts are temporarily unavailable. Try again.';
+          result('contactsStatus', 'Contacts are temporarily unavailable. Try again.', 'danger');
         }
       }
 
@@ -863,10 +1324,7 @@
           if (contactsFields.detailAvatar) contactsFields.detailAvatar.textContent = contactInitials(id);
           if (contactsFields.detailName) contactsFields.detailName.textContent = name;
           if (contactsFields.detailState) contactsFields.detailState.textContent = state || contactStates[id] || 'DEFXN identity';
-          if (contactsFields.detailId) contactsFields.detailId.textContent = record.identityId || id;
-          if (contactsFields.detailPublicId) contactsFields.detailPublicId.textContent = record.publicId || record.username || 'Not published';
-          if (contactsFields.detailVisibility) contactsFields.detailVisibility.textContent = record.visibility || 'Not reported';
-          if (contactsFields.detailUpdated) contactsFields.detailUpdated.textContent = record.updatedAt ? new Date(record.updatedAt).toLocaleString() : 'Not reported';
+          paint('contactFacts', contactFactsProps(record, id));
           if (contactsFields.detailBio) contactsFields.detailBio.textContent = record.bio || 'No public profile details are available for this identity.';
         }
         render(profile);
@@ -891,235 +1349,127 @@
       async function sendInviteTo(toId) {
         var who = ArkUI.accountSession.current();
         if (!who || !toId) return;
-        contactsFields.status.textContent = 'Sending invite…';
+        result('contactsStatus', 'Sending invite\u2026');
         try {
           await window.ArkUI.meshDirectory.sendInvite(who, toId);
-          contactsFields.status.textContent = 'Invite sent to ' + toId + '.';
+          result('contactsStatus', 'Invite sent to ' + toId + '.', 'trust');
           loadContacts(true);
-        } catch (error) { contactsFields.status.textContent = text(error && error.message, 'Could not send that invite.'); }
+        } catch (error) { result('contactsStatus', text(error && error.message, 'Could not send that invite.'), 'danger'); }
       }
 
-      if (contactsFields.searchForm) contactsFields.searchForm.addEventListener('submit', async function (event) {
-        event.preventDefault();
+      async function searchContacts(query) {
         var who = ArkUI.accountSession.current();
-        var query = contactsFields.searchInput.value.trim();
+        query = String(query || '').trim();
         if (!who || !query) return;
-        contactsFields.status.textContent = 'Searching identities…';
-        contactsFields.results.hidden = false;
+        result('contactsStatus', 'Searching identities\u2026');
+        views.found.hidden = false;
         try {
           var results = await window.ArkUI.meshDirectory.searchIdentities(who, query);
-          contactsFields.status.textContent = results.length ? '' : ('No identity matches "' + query + '". Try their identity ID instead.');
-          var items = results.map(function (result) {
-            var id = result.identityId || result.username || result.publicId;
-            if (id) contactProfiles[id] = profileRecord(result) || result;
-            var label = result.displayUsername || result.username || result.publicId || id;
-            return '<li><button type="button" class="account-contact-main" data-contact-open="' + escapeHtml(id) + '" data-contact-state="directory result"><span class="account-contact-mini-avatar">' + escapeHtml(contactInitials(id)) + '</span><span><strong>' + escapeHtml(label) + '</strong><small>' + escapeHtml(id) + '</small></span></button><button type="button" data-contacts-invite="' + escapeHtml(id) + '">Invite</button></li>';
+          result('contactsStatus', results.length ? '' : ('No identity matches "' + query + '". Try their identity ID instead.'));
+          contactRows.found = results.map(function (found) {
+            var id = found.identityId || found.username || found.publicId;
+            if (id) { contactProfiles[id] = profileRecord(found) || found; contactStates[id] = 'directory result'; }
+            return { id: id, title: found.displayUsername || found.username || found.publicId || id };
           });
-          if (!results.length) items.push('<li><button type="button" class="account-contact-main" data-contact-open="' + escapeHtml(query) + '" data-contact-state="unverified identity"><span class="account-contact-mini-avatar">ID</span><span><strong>' + escapeHtml(query) + '</strong><small>Exact identity ID</small></span></button><button type="button" data-contacts-invite="' + escapeHtml(query) + '">Invite directly</button></li>');
-          contactsFields.results.innerHTML = items.join('');
+          if (!results.length) { contactRows.found = [{ id: query, title: query, meta: 'Exact identity ID', direct: true }]; contactStates[query] = 'unverified identity'; }
+          paint('found', contactListProps('found'));
         } catch (error) {
-          contactsFields.results.hidden = true;
-          contactsFields.status.textContent = 'Search is temporarily unavailable. Try again.';
-        }
-      });
-      if (contactsFields.results) contactsFields.results.addEventListener('click', function (event) {
-        var target = event.target.closest && event.target.closest('[data-contacts-invite]');
-        if (!target) return;
-        target.disabled = true;
-        sendInviteTo(target.getAttribute('data-contacts-invite')).finally(function () { target.disabled = false; });
-      });
-      if (contactsFields.section) contactsFields.section.addEventListener('click', function (event) {
-        var target = event.target.closest && event.target.closest('[data-contact-open]');
-        if (target) openContactDetail(target.getAttribute('data-contact-open'), target.getAttribute('data-contact-state'));
-      });
-      if (contactsFields.back) contactsFields.back.addEventListener('click', showContactList);
-      if (contactsFields.refresh) contactsFields.refresh.addEventListener('click', function () { loadContacts(false); });
-      function contactsActionHandler(attr, fn) {
-        if (contactsFields.incoming) contactsFields.incoming.addEventListener('click', handle);
-        if (contactsFields.outgoing) contactsFields.outgoing.addEventListener('click', handle);
-        function handle(event) {
-          var target = event.target.closest && event.target.closest('[' + attr + ']');
-          if (!target) return;
-          var who = ArkUI.accountSession.current();
-          var otherId = target.getAttribute(attr);
-          if (!who || !otherId) return;
-          target.disabled = true;
-          contactsFields.status.textContent = 'Working…';
-          fn(who, otherId).then(function () { contactsFields.status.textContent = ''; loadContacts(); })
-            .catch(function (error) { target.disabled = false; contactsFields.status.textContent = text(error && error.message, 'That action failed.'); });
+          views.found.hidden = true;
+          result('contactsStatus', 'Search is temporarily unavailable. Try again.', 'danger');
         }
       }
-      contactsActionHandler('data-contacts-accept', function (who, id) { return window.ArkUI.meshDirectory.acceptInvite(who, id); });
-      contactsActionHandler('data-contacts-decline', function (who, id) { return window.ArkUI.meshDirectory.declineInvite(who, id); });
-      contactsActionHandler('data-contacts-withdraw', function (who, id) { return window.ArkUI.meshDirectory.withdrawInvite(who, id); });
+      /* one invite, accept, decline or withdraw at a time: a second press while one is running is ignored */
+      function inviteFromRow(id) {
+        if (contactsWorking || !id) return;
+        contactsWorking = true;
+        sendInviteTo(id).then(function () { contactsWorking = false; });
+      }
+      function contactAction(id, method) {
+        var who = ArkUI.accountSession.current();
+        if (!who || !id || contactsWorking) return;
+        contactsWorking = true;
+        result('contactsStatus', 'Working\u2026');
+        window.ArkUI.meshDirectory[method](who, id).then(function () { contactsWorking = false; result('contactsStatus', ''); loadContacts(); })
+          .catch(function (error) { contactsWorking = false; result('contactsStatus', text(error && error.message, 'That action failed.'), 'danger'); });
+      }
 
-      function renderIdentity(next) {
-        identity = next;
-        var unlocked = identity && ArkUI.accountSession.isUnlocked();
-        var authenticated = identity && ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(identity.publicKeyB64);
-        page.dataset.session = identity ? (unlocked ? 'verified-local' : 'remembered') : 'signed-out';
-        // A new session state picks its natural view: the wallet once the key
-        // is unlocked, the sign-in card otherwise. Later renders keep the
-        // view the person chose.
-        if (page.dataset.session !== lastSessionState) {
-          lastSessionState = page.dataset.session;
-          activeTab = unlocked ? 'defi' : 'session';
-        }
-        page.querySelector('.account-state').hidden = !identity;
-        page.querySelector('.account-rail').hidden = !identity;
-        var accountOpens = page.querySelector('[data-account-opens]');
-        if (accountOpens) accountOpens.hidden = !!identity;
-        page.querySelector('[data-account-create-toggle-row]').hidden = !!identity;
-        if (identity && createView && !createView.hidden) showCreate(false);
-        applyTabs();
-        if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
-        else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
-        if (unlocked) { loadWallet(); renderKeys(); }
-        else { resetWallet(identity ? 'Unlock your Auth Kit to read your FXN balance.' : undefined); if (keysFields.list) keysFields.list.innerHTML = ''; }
-        var name = identity && identity.displayName || 'Your account.';
-        var accountTitle = page.querySelector('#account-title');
-        if (identity) accountTitle.textContent = name;
-        else accountTitle.innerHTML = '<span class="account-title-muted">Your keys.</span><span>Your world.</span>';
-        page.querySelector('[data-account-avatar]').textContent = identity ? name.slice(0, 2).toUpperCase() : '↗';
-        page.querySelector('[data-account-status]').textContent = identity ? (unlocked ? (authenticated ? 'Session active · identity unlocked' : 'Identity verified') : (authenticated ? 'Session active · identity locked' : 'Identity saved · not signed in')) : 'Signed out';
-        page.querySelector('[data-account-intro]').textContent = identity ? (unlocked ? 'Your identity is ready across the DEFXN world.' : 'Your identity is saved here. Your Auth Kit is not saved on this device.') : 'One Auth Kit opens your identity, wallet, domains and publishing.';
-        page.querySelector('[data-account-session-title]').textContent = identity ? (authenticated ? 'Signed in.' : (unlocked ? 'Ready.' : 'Select your Auth Kit again')) : 'Choose your Auth Kit.';
-        page.querySelector('[data-account-session-description]').textContent = identity ? (authenticated ? 'Publishing is available. Unlock your Auth Kit when you need to approve a signature.' : unlocked ? 'Secure access is available for this session.' : 'Choose your Auth Kit to restore secure access.') : 'Open your account on this device.';
-        var localEditor = ArkUI.cmsSession && ArkUI.cmsSession.isLocalDevelopment && ArkUI.cmsSession.isLocalDevelopment();
-        page.querySelector('[data-account-cms-open]').hidden = !localEditor;
-        page.querySelector('[data-account-cms-local]').hidden = !localEditor;
-        page.querySelector('[data-account-cms-status]').textContent = ArkUI.cmsSession && (localEditor || authenticated) ? ArkUI.cmsSession.status() : '';
-        var chooseKit = page.querySelector('[data-account-auth] button');
-        if (chooseKit && /^(Choose Auth Kit|Unlock Auth Kit|Select Auth Kit)$/.test((chooseKit.textContent || '').trim())) {
-          chooseKit.textContent = identity && !unlocked ? 'Select Auth Kit' : 'Choose Auth Kit';
-          chooseKit.setAttribute('aria-label', chooseKit.textContent);
-        }
-        fields.id.textContent = identity && (identity.core && identity.core.ghostId || identity.ghostId || identity.identityId) || '—';
-        fields.root.textContent = identity && identity.publicKeyB64 ? base64ToHex(identity.publicKeyB64) : '—';
-        fields.wallet.textContent = identity && identity.walletAddress || 'Not recorded in this kit';
-        fields.id.title = fields.id.textContent;
-        fields.wallet.title = fields.wallet.textContent;
-        fields.security.textContent = identity && identity.securityProfile || '—';
-        fields.verification.textContent = identity ? (unlocked ? 'Identity verified.' : 'Unlock your Auth Kit to continue.') : 'Sign in to verify your identity.';
-        page.querySelector('[data-account-forget]').hidden = !identity || unlocked;
-        page.querySelector('[data-account-forget]').textContent = 'Forget saved identity details';
-        var storageNotice = page.querySelector('[data-account-storage-notice]');
-        storageNotice.textContent = ArkUI.localIdentity.storageError();
-        storageNotice.hidden = !storageNotice.textContent;
-        // Set by the mesh-authentication step below (onChange), not by this
-        // render itself -- ArkUI.accountSession outlives any one mount(), so
-        // the message is read fresh here on every render instead of being
-        // written through a closure that may be querying a detached page.
-        var meshAuthNotice = page.querySelector('[data-account-mesh-auth-notice]');
-        meshAuthNotice.textContent = (ArkUI.accountSession && ArkUI.accountSession.meshAuthMessage) || '';
-        meshAuthNotice.hidden = !meshAuthNotice.textContent;
-        fields.check.disabled = !identity;
-        resetMesh(identity ? undefined : 'Sign in to verify your identity on DEFXN.');
-      }
-      // One panel owns the signer. A separate public pointer restores account
-      // display state eagerly on every route, like chat.deadark.com's provider.
-      if (!ArkUI.accountSession) {
-        var container = document.createElement('div');
-        var preservingIdentity = false;
-        var auth = ArkAdminAuth.create({ container: container, product: 'DEFXN', onChange: function (next) {
-          if (!preservingIdentity) {
-            if (next) {
-              ArkUI.localIdentity.set(next);
-              if (ArkUI.cmsSession) ArkUI.cmsSession.connect(next).then(function () { ArkUI.localIdentity.refresh(); });
-              // Unlocking proves the key locally; this is the step that
-              // authenticates the identity to the mesh fleet itself --
-              // publishing it to the directory (skipped if already
-              // published) shows the real scoped-claim authorization
-              // modal before anything is signed. Fire-and-forget: a
-              // cancelled or failed publish must not block sign-in.
-              if (window.ArkUI.meshDirectory) {
-                window.ArkUI.meshDirectory.ensurePublished(next).then(function () {
-                  ArkUI.accountSession.meshAuthMessage = '';
-                  ArkUI.localIdentity.refresh();
-                }).catch(function (error) {
-                  ArkUI.accountSession.meshAuthMessage = (error && error.message) || 'Could not authenticate this identity to the mesh.';
-                  ArkUI.localIdentity.refresh();
-                });
-              }
-            }
-            else { ArkUI.localIdentity.clear(); if (ArkUI.cmsSession) ArkUI.cmsSession.revoke(); }
-          }
-          ArkUI.localIdentity.refresh();
-        } });
-        function isUnlocked() {
-          var pointer = ArkUI.localIdentity.current();
-          var signer = auth.current();
-          return !!(pointer && signer && pointer.identityId === (signer.identityId || signer.publicKeyB64) && pointer.publicKeyB64 === signer.publicKeyB64);
-        }
-        function lock() {
-          preservingIdentity = true;
-          try { auth.signOut(); } finally { preservingIdentity = false; }
-        }
-        ArkUI.accountSession = { container: container, isUnlocked: isUnlocked,
-          signOut: function () { auth.signOut(); }, current: function () { return auth.current(); } };
-        ArkUI.localIdentity.subscribe(function () {
-          if (auth.current() && !isUnlocked()) lock();
-          if (ArkUI.refreshAccountNav) ArkUI.refreshAccountNav();
-        });
-        window.addEventListener('pagehide', function () {
-          preservingIdentity = true;
-          try { auth.dispose(); } finally { preservingIdentity = false; }
-          // Disposing a root handle is not signing out of the remembered account.
-          ArkUI.localIdentity.refresh();
-        });
-      }
-      var session = ArkUI.accountSession;
-      page.querySelector('[data-account-auth]').appendChild(session.container);
-      // "Create a new identity" -- the same shared wizard defxn-dao's sign-in
-      // modal uses (js/ark/auth-kit-create-panel.js), not a second copy of it.
-      // It replaces the sign-in view in place rather than growing the card.
-      var createPanelEl = page.querySelector('[data-account-create]');
-      var createView = page.querySelector('[data-account-create-view]');
-      var sessionMain = page.querySelector('[data-account-session-main]');
+      /* ---- sign in / create ---------------------------------------------------------------- */
+      /* "Create a new identity" -- the same shared wizard defxn-dao's sign-in modal uses
+         (js/ark/auth-kit-create-panel.js), not a second copy of it. It is the second tab while signed out. */
       var createPanelHandle = null;
-      var createTab = page.querySelector('[data-account-create-toggle]');
-      var signInTab = page.querySelector('[data-account-create-back]');
-      function showCreate(open) {
-        createView.hidden = !open;
-        sessionMain.hidden = open;
-        createTab.setAttribute('aria-pressed', String(open));
-        signInTab.setAttribute('aria-pressed', String(!open));
-      }
-      createTab.addEventListener('click', function () {
-        if (!createView.hidden) return;
-        showCreate(true);
+      function createOpened() {
+        var holder = views.create.querySelector('[data-account-create]');
         if (!createPanelHandle && window.ArkAuthKitCreatePanel) {
-          createPanelHandle = window.ArkAuthKitCreatePanel.mount(createPanelEl, {
+          createPanelHandle = window.ArkAuthKitCreatePanel.mount(holder, {
             actionClass: 'palette-solid', formClass: 'account-contacts-form',
-            onDownloaded: function () { showCreate(false); if (createPanelHandle) createPanelHandle.reset(); },
+            onDownloaded: function () { openTab('signin'); if (createPanelHandle) createPanelHandle.reset(); },
           });
         } else if (createPanelHandle) { createPanelHandle.reset(); }
-      });
-      signInTab.addEventListener('click', function () { showCreate(false); });
-      // Line icons for the sign-in flow, from the shared set (js/ark/icons.js).
-      if (ArkUI.icon && page.querySelectorAll) Array.prototype.forEach.call(page.querySelectorAll('[data-account-icon]'), function (mark) {
-        mark.appendChild(ArkUI.icon(mark.getAttribute('data-account-icon')));
-      });
+      }
+
+      var chooseKitWords = /^(Choose Auth Kit|Unlock Auth Kit|Select Auth Kit|Sign in with your Auth Kit|Select your Auth Kit)$/;
+      function renderIdentity(next) {
+        identity = next;
+        var unlocked = !!(identity && session.isUnlocked());
+        var state = stateOf(identity);
+        page.dataset.session = state;
+        // A new session state picks its natural view: the wallet once the key is unlocked, the sign-in
+        // card otherwise. Later renders keep the view the person chose. The views that exist change with
+        // the state, so the tabs are built again then, and only then.
+        if (state !== lastSessionState) {
+          lastSessionState = state;
+          cardHost.replaceChildren(buildTabs(state, unlocked ? 'defi' : (identity ? 'session' : 'signin')));
+        }
+        identityWrap.hidden = !identity;
+        mapWrap.hidden = !!identity;
+        railEl.hidden = !unlocked;
+        if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
+        else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
+        if (unlocked) loadWallet();
+        else resetWallet(identity ? 'Unlock your Auth Kit to read your FXN balance.' : undefined);
+        renderKeys();
+        paint('hero', heroProps(identity));
+        paint('identity', identityProps(identity));
+        paint('devFacts', developerProps(identity));
+        paint('sessionHead', sessionHeadProps(identity));
+        paint('ways', waysProps());
+        paint('cmsStatus', cmsStatusProps());
+        var chooseKit = views.session.querySelector('[data-account-auth] button');
+        if (chooseKit && chooseKitWords.test((chooseKit.textContent || '').trim())) {
+          chooseKit.textContent = identity && !unlocked ? 'Select your Auth Kit' : 'Sign in with your Auth Kit';
+          chooseKit.setAttribute('aria-label', chooseKit.textContent);
+        }
+        views.forget.hidden = !identity || unlocked;
+        // Set by the mesh-authentication step (onChange), not by this render itself -- ArkUI.accountSession
+        // outlives any one mount(), so the message is read fresh here on every render instead of being
+        // written through a closure that may be querying a detached page.
+        setNotices();
+        paint('meshActions', meshActionProps());
+        resetMesh(identity ? undefined : 'Sign in to verify your identity on DEFXN.');
+      }
       var unsubscribeDomains = ArkUI.localDomains ? ArkUI.localDomains.subscribe(function (names) {
-        if (fields.railDomains) fields.railDomains.textContent = String(names.length);
+        rail.domains = names.length;
+        syncRail();
       }) : function () {};
       var unsubscribe = ArkUI.localIdentity.subscribe(renderIdentity);
-      page.querySelector('[data-account-cms-open]').addEventListener('click', function (event) {
-        if ((ArkUI.cmsSession && ArkUI.cmsSession.isLocalDevelopment && ArkUI.cmsSession.isLocalDevelopment()) || session.isUnlocked() || (ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(identity && identity.publicKeyB64))) return;
+      function publishClick(event, link) {
+        if (localEditing() || session.isUnlocked() || (ArkUI.cmsSession && ArkUI.cmsSession.isAuthenticated(identity && identity.publicKeyB64))) {
+          /* a plain press opens the publishing tools in a window that keeps its opener; a modified press (new tab, download) is the browser's */
+          if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); window.open(link.href, '_blank'); }
+          return;
+        }
         event.preventDefault();
         openTab('session');
-        page.querySelector('[data-account-cms-status]').textContent = identity
+        result('cmsStatus', identity
           ? 'Unlock your Auth Kit before opening the publishing tools.'
-          : 'Sign in with your Auth Kit before opening the publishing tools.';
+          : 'Sign in with your Auth Kit before opening the publishing tools.');
         var pin = session.container.querySelector('input:not([type="file"])');
         if (pin && pin.focus) { pin.focus(); return; }
         var unlock = session.container.querySelector('button');
         if (unlock && unlock.click) unlock.click();
         else if (unlock && unlock.focus) unlock.focus();
-      });
-      page.querySelector('[data-account-forget]').addEventListener('click', session.signOut);
-      if (fields.check) fields.check.addEventListener('click', checkMesh);
-      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); };
+      }
+      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); };
       return page;
     }
   };

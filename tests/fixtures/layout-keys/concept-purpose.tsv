@@ -1,0 +1,76 @@
+# key	tag	text -- layout keys of /concept/purpose before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Operating modelNetworksWhat does a Flux network isolate today?The core ideaHow it worksEvidence & limitsA named network currently isolates miner-presence discov
+page:/nav:1	nav	Operating modelNetworks
+page:/nav:1/a:1	a	Operating model
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Networks
+id:purpose-title	h1	What does a Flux network isolate today?
+page:/nav:2	nav	The core ideaHow it worksEvidence & limits
+page:/nav:2/button:1	button	The core idea
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	How it works
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence & limits
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	A named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an 
+page:/div:1/div:1	div	A named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an 
+page:/div:1/div:1/div:1	div	A named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an 
+page:/div:1/div:1/div:1/p:1	p	A named network currently isolates miner-presence discovery. It does not isolate accounts, identities, DAOs, arbitrary records, or treasuries, and it is not an 
+page:/div:1/div:1/aside:1	aside	Status / PartialThe create/list command contract and miner-presence namespace are implemented in source. A complete independent live run is not registered in th
+page:/div:1/div:1/aside:1/strong:1	strong	Status / Partial
+page:/div:1/div:1/aside:1/p:1	p	The create/list command contract and miner-presence namespace are implemented in source. A complete independent live run is not registered in this audit.
+page:/div:1/figure:1	figure	Illustration / Networks relationshipsABACCOUNTSSEPARATE PRESENCE / SHARED SUBSTRATENetwork A / miner presenceNetwork B / miner presenceShared accounts / outside
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / Networks relationships
+page:/div:1/figure:1/svg:1	svg	ABACCOUNTSSEPARATE PRESENCE / SHARED SUBSTRATE
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/path:9	path	
+page:/div:1/figure:1/svg:1/path:10	path	
+page:/div:1/figure:1/svg:1/path:11	path	
+page:/div:1/figure:1/svg:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/circle:2	circle	
+page:/div:1/figure:1/svg:1/circle:3	circle	
+page:/div:1/figure:1/svg:1/circle:4	circle	
+page:/div:1/figure:1/svg:1/circle:5	circle	
+page:/div:1/figure:1/svg:1/circle:6	circle	
+page:/div:1/figure:1/svg:1/text:1	text	A
+page:/div:1/figure:1/svg:1/text:2	text	B
+page:/div:1/figure:1/svg:1/rect:3	rect	
+page:/div:1/figure:1/svg:1/text:3	text	ACCOUNTS
+page:/div:1/figure:1/svg:1/path:12	path	
+page:/div:1/figure:1/svg:1/text:4	text	SEPARATE PRESENCE / SHARED SUBSTRATE
+page:/div:1/figure:1/svg:1/path:13	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/button:1	button	Network A / miner presence
+page:/div:1/figure:1/button:2	button	Network B / miner presence
+page:/div:1/figure:1/button:3	button	Shared accounts / outside this isolation
+page:/nav:3	nav	CREATE OR JOIN A NETWORK
+page:/nav:3/a:1	a	CREATE OR JOIN A NETWORK
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

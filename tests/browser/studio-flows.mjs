@@ -11,7 +11,7 @@
    (index.html with no preview flag) served from those files afterwards,
    because a feature that only works inside the editor is not working.
 
-   Run:   node tests/browser/studio-flows.mjs [--only states,single,component,hide,motion,makecomp,points,statesui] [--headed] [--keep]
+   Run:   node tests/browser/studio-flows.mjs [--only states,single,component,arkblock,hide,motion,makecomp,points,statesui] [--headed] [--keep]
           (--keep leaves the scratch site copy, with whatever the flows saved, for inspection)
    Needs: Chromium from `npx playwright install chromium`.
    Screenshots go to $SHOTS (default: a temp folder, printed at the end).
@@ -24,10 +24,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor } from './harness.mjs';
+import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, hasToolbarSection, toolbarSectionIsOpen, openToolbarSection, toolbarKey, clickHeader, openBackground, until as untilFor, waitForPreviewReady, previewReadyCount, setPreviewMode, animationsSettled, openRoute, layoutKeyOf, gotoEditor, openRailTab } from './harness.mjs';
 
 const args = process.argv.slice(2);
-const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'states,single,component,hide,motion,makecomp,points,statesui').split(',');
+const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'states,single,component,arkblock,hide,motion,makecomp,points,statesui').split(',');
 const SHOTS = process.env.SHOTS || fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-shots-'));
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'defxn-site-'));
 fs.mkdirSync(SHOTS, { recursive: true });
@@ -154,7 +154,7 @@ await flow('states', async () => {
   await step('state 1 gets its own words: select its block, edit the heading in Component instance', async () => {
     await pv.locator('[data-ark-state-anchor] [data-ark-component-key]:visible').first().click();
     /* the starter is derived from state 0 -- a nav link, so its text slot is `link` */
-    const heading = (await section(app, 'Component instance')).locator('input[aria-label="link"]');
+    const heading = (await section(app, 'Component instance')).locator('input[data-prop="link"]');
     await heading.fill('Pick a network'); await heading.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(async () => { const v = await visible(pv, group.id); return v.anchors.length === 1 && /Pick a network/.test(v.anchors[0].text); }, 'state 1 did not take the new heading');
     /* the block's root is display:contents (it lays out as its content), so measure what it shows */
@@ -240,11 +240,23 @@ await flow('single', async () => {
   const { page, app, pv, shot } = await openEditor();
   const NAV = await layoutKeyOf(pv, 'header nav.header-core-links');
   let group;
-  await step('click the empty gap inside the nav selects the whole container', async () => {
-    const a = await navLink(pv, 'Overview').boundingBox(), b = await navLink(pv, 'How it works').boundingBox();
-    await pv.locator('header nav.header-core-links').click({ position: { x: (a.x + a.width + b.x) / 2 - (await pv.locator('header nav.header-core-links').boundingBox()).x, y: a.height / 2 } });
+  await step('click the empty gap inside a header control group selects the whole container', async () => {
+    /* Until 2026-10-19 this clicked the 3px gap between two nav links. The nav is now the family
+       bar's segmented group (assets/kit/defxn-components.css .dx-bar__nav): its gaps are 1px
+       dividers that no pointer can land on (clicks are whole screen pixels and the preview is
+       drawn scaled), by design. The same behaviour -- empty space inside a container selects
+       that container, not the page and not a neighbour -- is checked on the bar's other control
+       group, which has real gaps: its actions (Account, Run DEFXN, the network pill, MENU). The
+       nav container itself stays covered by the steps below (Make into states on it, a nested
+       link as its trigger). */
+    const a = await pv.locator('header .header-account-link').boundingBox(), b = await pv.locator('header .header-run-link').boundingBox();
+    await pv.locator('header .dx-bar__actions').click({ position: { x: (a.x + a.width + b.x) / 2 - (await pv.locator('header .dx-bar__actions').boundingBox()).x, y: a.height / 2 } });
     /* asked of the preview, not of the toolbar's text: the outline is drawn around exactly the selection */
-    await until(() => pv.evaluate(() => { const box = document.querySelector('.ark-studio-box'), nav = document.querySelector('header nav.header-core-links'); if (!box || box.hidden) return false; const a = box.getBoundingClientRect(), b = nav.getBoundingClientRect(); return Math.abs(a.left - b.left) < 2 && Math.abs(a.width - b.width) < 2 && Math.abs(a.height - b.height) < 2; }), 'the nav container is not the selection');
+    await until(() => pv.evaluate(() => { const box = document.querySelector('.ark-studio-box'), nav = document.querySelector('header .dx-bar__actions'); if (!box || box.hidden) return false; const a = box.getBoundingClientRect(), b = nav.getBoundingClientRect(); return Math.abs(a.left - b.left) < 2 && Math.abs(a.width - b.width) < 2 && Math.abs(a.height - b.height) < 2; }), 'the nav container is not the selection');
+    /* the next steps work on the nav container: select it the way the Layers list does, by its
+       key, and check the outline is the nav's */
+    await app.evaluate((k) => document.getElementById('cmsPreview').contentWindow.postMessage({ type: 'defxn-cms-preview-select-group', key: k }, location.origin), NAV);
+    await until(() => pv.evaluate(() => { const box = document.querySelector('.ark-studio-box'), nav = document.querySelector('header nav.header-core-links'); if (!box || box.hidden) return false; const a = box.getBoundingClientRect(), b = nav.getBoundingClientRect(); return Math.abs(a.left - b.left) < 2 && Math.abs(a.width - b.width) < 2 && Math.abs(a.height - b.height) < 2; }), 'the nav container could not be selected by its key');
   });
   await step('right-click > Make into states works with exactly one (container) layer', async () => {
     await navLink(pv, 'Overview').click({ button: 'right' });
@@ -275,8 +287,19 @@ await flow('single', async () => {
   await step('the menu explains a disabled item instead of only greying it out', async () => {
     await navLink(pv, 'Overview').click();
     await navLink(pv, 'Overview').click({ button: 'right' });
-    const text = await pv.locator('.ark-studio-menu button', { hasText: 'Distribute horizontally' }).textContent();
-    check(/needs 3\+ layers/.test(text), 'disabled Distribute does not say what it needs: ' + text);
+    /* one layer (docs/ux-audit/cms.md P1-8, 2026-10-20): a command that is only waiting for a bigger selection -- Group, Align,
+       Space evenly -- is NOT a greyed-out row; ONE quiet line under the list says what it needs (js/main.js `waits`). A
+       command refused for what the selection IS stays a disabled row and carries its reason. */
+    await pv.locator('.ark-studio-menu').waitFor({ state: 'visible' });
+    check(await pv.locator('.ark-studio-menu button', { hasText: /^Group/ }).count() === 0, 'Group (waiting for a second layer) is still listed as a row');
+    const waits = await pv.locator('.ark-studio-menu [data-waits]').first().textContent();
+    check(/^Group: Select 2 or more layers to group them/.test(waits), 'the one line does not say what Group needs: ' + waits);
+    check(await pv.locator('.ark-studio-menu button', { hasText: 'Space evenly' }).count() === 0, 'Distribute is offered for one layer');
+    const refused = await pv.locator('.ark-studio-menu button:disabled').evaluateAll((bs) => bs.map((b) => ({ label: b.firstChild ? b.firstChild.textContent : '', why: (b.title || '').trim() || (b.querySelector('small') ? b.querySelector('small').textContent : '') })));
+    for (const r of refused) check(r.why, `the disabled "${r.label}" row does not say why it cannot apply`);
+    /* the menu is placed from its measured size: none of it is cut off by the canvas's edge */
+    const box = await pv.locator('.ark-studio-menu').boundingBox(), vp = await pv.evaluate(() => ({ w: innerWidth, h: innerHeight }));
+    check(box.y >= 0 && box.y + box.height <= vp.h + 1 && box.x >= 0 && box.x + box.width <= vp.w + 1, 'the right-click menu runs past the canvas: ' + JSON.stringify({ box, vp }));
     await page.close();
   });
 });
@@ -295,8 +318,9 @@ await flow('component', async () => {
   await step('Library > New block > Create block makes a master', async () => {
     await app.click('#tabLib');
     const lib = app.locator('#libPane');
-    await lib.locator('select.ctl').first().selectOption('RBLOCK_TEXT_V1');
-    await lib.locator('input[data-prop="heading"]').fill('Hello from a block');
+    await lib.locator('.lib-block[data-resolver="RBLOCK_TEXT_V1"] button', { hasText: 'Customize' }).click();
+    await lib.locator('.lib-new input[aria-label="New component name"]').fill('Text block');
+    await lib.locator('.lib-new [data-prop="heading"]').fill('Hello from a block');
     await lib.locator('button', { hasText: 'Create block' }).click();
     master = await until(async () => { const c = await pv.evaluate(() => ArkComponents.get()); const id = Object.keys(c.masters)[0]; return id && Object.assign({ id }, c.masters[id]); }, 'no master created');
   });
@@ -311,7 +335,7 @@ await flow('component', async () => {
     await pv.locator('[data-ark-component-key]').first().click();
     const sec = await section(app, 'Component instance');
     await checkToolbarClear(app, pv.locator('[data-ark-component-key]').first(), 'the selected instance');
-    const heading = sec.locator('input[aria-label="heading"]');
+    const heading = sec.locator('input[data-prop="heading"]');
     await heading.fill('Overridden heading'); await heading.press('Enter'); await heading.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Overridden heading')), 'the preview did not show the override');
     await animationsSettled(pv); await shot('component-02-override');
@@ -322,7 +346,7 @@ await flow('component', async () => {
   });
   await step('override again, Save, reload: the override persisted', async () => {
     await pv.locator('[data-ark-component-key]').first().click();
-    const heading = (await section(app, 'Component instance')).locator('input[aria-label="heading"]');
+    const heading = (await section(app, 'Component instance')).locator('input[data-prop="heading"]');
     await heading.fill('Saved override'); await heading.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(() => pv.evaluate(() => document.querySelector('[data-ark-component-key]').textContent.includes('Saved override')), 'override not shown');
     await clickHeader(app, 'connect');
@@ -352,6 +376,51 @@ await flow('component', async () => {
     await again.app.click('#save');
     await until(() => { try { return !JSON.stringify(savedJson('components-data.js').routes).includes('"main"'); } catch { return false; } }, 'Save after Remove instance still writes the instance');
     await again.page.close();
+  });
+});
+
+/* ---------------------------------------------------------------- 3b
+   An Ark block from the Library (W2-LIBRARY): the Library lists the Ark registry, Insert puts the
+   real Ark block on the canvas, its props are edited in Component instance (fields from the
+   block's schema), a refused value is listed under the fields, and Save writes it so the public
+   page renders it (js/ark/page-loader.js loads the block scripts for a route holding one). */
+await flow('arkblock', async () => {
+  const { page, app, pv, shot } = await openEditor();
+  const card = () => pv.evaluate(() => { const el = document.querySelector('[data-ark-component-key][data-ark-block="card"]'); return el && el.textContent.trim(); });
+  await step('Library > Card > Insert puts the real Ark card on the page', async () => {
+    await gotoRoute(app, pv, '/download');
+    await app.click('#tabLib');
+    const row = app.locator('#libPane .lib-block[data-resolver="ARK_BLOCK_CARD"]');
+    await until(async () => (await row.count()) > 0, 'the Library does not offer the Ark card block');
+    check(await row.locator('.lib-thumb-inner .ark-block').count() > 0, 'the Card row has no live mini-render');
+    await row.locator('button', { hasText: 'Insert' }).click();
+    const point = app.locator('#libPane .lib-point').first();
+    if (await point.count()) await point.click();
+    await until(card, 'no Ark card instance rendered on /download', 20000);
+    await shot('arkblock-01-inserted');
+  });
+  await step('Component instance edits its Title; an emptied required field is refused, by name', async () => {
+    await pv.locator('[data-ark-component-key][data-ark-block="card"]').first().click();
+    const sec = await section(app, 'Component instance');
+    const title = sec.locator('[data-prop="title"]');
+    await title.fill('Ark card override'); await title.evaluate((i) => i.dispatchEvent(new Event('change')));
+    await until(async () => /Ark card override/.test(await card() || ''), 'the override did not reach the canvas');
+    await title.fill(''); await title.evaluate((i) => i.dispatchEvent(new Event('change')));
+    await until(async () => /Title/.test(await (await section(app, 'Component instance')).locator('.lib-refusals').textContent().catch(() => '')), 'the emptied Title is not listed as a refusal');
+    const again = (await section(app, 'Component instance')).locator('[data-prop="title"]');
+    await again.fill('Ark card saved'); await again.evaluate((i) => i.dispatchEvent(new Event('change')));
+    await until(async () => /Ark card saved/.test(await card() || ''), 'the second override did not reach the canvas');
+    await shot('arkblock-02-override');
+  });
+  await step('Save writes it; the public page renders the Ark card', async () => {
+    await clickHeader(app, 'connect');
+    await until(() => app.evaluate(() => document.getElementById('connect').disabled), 'project folder did not connect');
+    await app.click('#save');
+    await until(() => { try { const text = JSON.stringify(savedJson('components-data.js')); return text.includes('ARK_BLOCK_CARD') && text.includes('Ark card saved'); } catch { return false; } }, 'Save did not write the Ark card to components-data.js');
+    const pub = await context.newPage(); await pub.goto(`${ORIGIN}/download`);
+    await until(() => pub.evaluate(() => { const el = document.querySelector('[data-ark-component-key][data-ark-block="card"]'); return el && el.textContent.includes('Ark card saved'); }), 'the PUBLIC /download page does not render the saved Ark card', 20000);
+    await pub.close();
+    await page.close();
   });
 });
 
@@ -459,6 +528,20 @@ const instanceBox = (frame, key) => frame.evaluate((k) => {
   const left = Math.min(...rects.map((r) => r.left)), top = Math.min(...rects.map((r) => r.top)), right = Math.max(...rects.map((r) => r.right)), bottom = Math.max(...rects.map((r) => r.bottom));
   return { x: left, y: top, w: right - left, h: bottom - top };
 }, key);
+/* What is drawn ON TOP of an instance: each of its text elements is scrolled into view the way a
+   visitor would reach it, then hit-tested at its centre. [] = every one of them is reachable.
+   Why (2026-10-19): on /chain at 1280x720 -- and in the editor's 1280x721 desktop canvas -- the
+   flow scene shrank below its own content and its caption and SVG spilled over the inserted block
+   (css/chain.css); a click on the block landed on `strong.flow-says`. */
+const coveredBy = (frame, key) => frame.evaluate((k) => {
+  const root = [...document.querySelectorAll('[data-ark-component-key]')].find((e) => e.getAttribute('data-ark-component-key') === k);
+  if (!root) return ['(no instance ' + k + ')'];
+  return [...root.querySelectorAll('*')].filter((e) => !e.children.length && e.textContent.trim()).map((e) => {
+    e.scrollIntoView({ block: 'center' });
+    const b = e.getBoundingClientRect(), top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+    return !top || root.contains(top) ? null : e.tagName.toLowerCase() + ' under ' + top.tagName.toLowerCase() + '.' + String(top.getAttribute('class') || '').trim().split(/\s+/).join('.');
+  }).filter(Boolean);
+}, key);
 async function libRow(app, label) {
   await app.click('#tabLib');
   const row = app.locator('#libPane .myrow', { hasText: label }).first();
@@ -468,7 +551,7 @@ async function libRow(app, label) {
 async function setDefinition(app, label, prop, value) {
   const row = await libRow(app, label);
   if ((await row.locator('button', { hasText: 'Edit' }).getAttribute('aria-expanded')) !== 'true') await row.locator('button', { hasText: 'Edit' }).click();
-  const input = app.locator(`#libPane .lib-definition input[aria-label="Definition ${prop}"]`);
+  const input = app.locator(`#libPane .lib-definition [data-prop="${prop}"]`);
   await until(async () => (await input.count()) > 0, `the definition editor has no "${prop}" field`);
   await input.fill(value); await input.evaluate((i) => i.dispatchEvent(new Event('change')));
 }
@@ -477,25 +560,65 @@ async function setDefinition(app, label, prop, value) {
 await flow('makecomp', async () => {
   const { page, app, pv, shot } = await openEditor();
   let master, origin, other;
-  const H1 = '#download-title', P = '#download-title + p';
-  await step('select a heading + paragraph on /download, right-click > Make into component', async () => {
+  /* Since /download became Ark blocks (Wave 3) its title sits in the hero beside the hero's actions row,
+     and the intro paragraph opens The idea view (it kept its layout key from when it followed the
+     title). A selection across the two containers is REFUSED (owner decision 2026-10-20, js/main.js
+     cmsComponentRefusal; tests/cms-component-one-place.cjs): the instance would stand in for both
+     from one place, and the hero silently lost its title. The pair that becomes the component is
+     the hero's title and its actions row (the operator guide link) -- siblings in one container,
+     a heading and a link. It was the eyebrow and the title until the eyebrow left /download
+     (first-visit audit 2026-10-22, P2: "RUN DEFXN / FROM SOURCE" repeated the breadcrumb). */
+  const H1 = '#download-title', ACTIONS = 'header.ark-hero:has(> #download-title) > div.ark-actions', INTRO = '[data-ark-layout-key="page:/header:1/p:1"]';
+  await step('a heading + a paragraph in ANOTHER container: Make into component is refused, saying how to select', async () => {
     await gotoRoute(app, pv, '/download');
-    /* in the preview's own coordinates, like instanceBox() -- a locator's boundingBox() is in the editor page's */
-    const before = await pv.evaluate((s) => document.querySelector(s).getBoundingClientRect().toJSON(), H1);
     await pv.locator(H1).click();
-    await pv.locator(P).click({ modifiers: ['Shift'] });
+    await pv.locator(INTRO).click({ modifiers: ['Shift'] });
     await pv.locator(H1).click({ button: 'right' });
+    await pv.locator('.ark-studio-menu').waitFor({ state: 'visible' });
+    const item = pv.locator('.ark-studio-menu button', { hasText: 'Make into component' }).first();
+    check(await item.isDisabled(), 'Make into component is offered for a selection across two containers');
+    const why = await item.getAttribute('title');
+    check(/side by side in one container/.test(why || '') && /select that container/.test(why || ''), 'the refusal does not say what to select instead: ' + why);
+    check(Object.keys((await componentsIn(pv)).masters || {}).length === 0, 'a component was made anyway');
+    await page.keyboard.press('Escape');
+    await pv.locator('.ark-studio-menu').waitFor({ state: 'hidden' }).catch(() => {});
+  });
+  await step('select the hero\'s heading + actions row on /download (one container), right-click > Make into component', async () => {
+    /* in the preview's own coordinates, like instanceBox() -- a locator's boundingBox() is in the editor
+       page's. The instance takes the place of the FIRST selected layer in the page's order: the heading */
+    const before = await pv.evaluate((s) => document.querySelector(s).getBoundingClientRect().toJSON(), H1);
+    /* A click on the actions row lands on its link, so the row itself is reached the way a person
+       reaches a container: its row in the Layers tab (which also replaces the refused selection still
+       standing from the step before). Then Shift-click adds the title on the canvas. */
+    const actionsKey = await pv.evaluate((s) => document.querySelector(s).getAttribute('data-ark-layout-key'), ACTIONS);
+    await openRailTab(app, 'layers');
+    const actionsRow = app.locator(`#layers li[data-key="${actionsKey}"]`);
+    await until(async () => (await actionsRow.count()) > 0, 'the Layers tab has no row for the hero\'s actions row (' + actionsKey + ')');
+    await actionsRow.locator('svg.ic').first().click();   /* its icon: the eye button floats over the row's tag */
+    await until(() => app.evaluate((k) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).join() === k, actionsKey), 'the Layers row did not select the hero\'s actions row');
+    await pv.locator(H1).click({ modifiers: ['Shift'] });
+    await until(() => app.evaluate(([a, b]) => (window.ArkAdmin.state.cmsExactSelections || []).map((x) => x.key).sort().join() === [a, b].sort().join(), [actionsKey, 'id:download-title']), 'Shift-click did not add the title to the actions row');
+    /* the two-layer label ("2 layers ...") is drawn over the selection, so Playwright refuses the click
+       as intercepted. A person right-clicking there hits that label, and a right-click on the canvas's
+       own selection chrome opens the same context menu (js/main.js, its contextmenu listener) -- so the
+       click is forced: whatever is on top receives it, exactly as for a person. */
+    await pv.locator(H1).click({ button: 'right', force: true });
     await clickMenuItem(page, app, pv, 'Make into component');
     const c = await until(async () => { const c = await componentsIn(pv); const id = Object.keys(c.masters)[0]; return id && c.masters[id].resolver === 'RBLOCK_CAPTURED_V1' && Object.assign(c, { id }); }, 'no captured master after Make into component');
     master = Object.assign({ id: c.id }, c.masters[c.id]);
     const spot = Object.keys((c.spots || {})['/download'] || {})[0];
     check(spot && c.spots['/download'][spot].replaces.length === 2, 'the instance does not stand in for both selected elements: ' + JSON.stringify(c.spots));
     origin = c.routes['/download'][spot][0].key;
-    check(JSON.stringify(Object.keys(master.props)) === JSON.stringify(['heading', 'paragraph']), 'props are not derived from the selection\'s text: ' + JSON.stringify(master.props));
-    const hidden = await pv.evaluate(([a, b]) => [a, b].map((s) => getComputedStyle(document.querySelector(s)).display), [H1, P]);
+    /* the heading, then the link's texts in order: its label (`link`), the arrow Ark draws after it (`link2`) and, for a
+       link that leaves the site, the hidden "(opens another site)" note (`link3`) -- every one taken from the selection */
+    const names = Object.keys(master.props).sort();
+    check(names[0] === 'heading' && names[1] === 'link' && names.slice(2).every((n, i) => n === 'link' + (i + 2)), 'props are not derived from the selection\'s text: ' + JSON.stringify(master.props));
+    check(/operator guide/i.test(master.props.link), 'the link prop is not the guide link\'s label: ' + JSON.stringify(master.props));
+    const hidden = await pv.evaluate(([a, b]) => [a, b].map((s) => getComputedStyle(document.querySelector(s)).display), [H1, ACTIONS]);
     check(hidden.every((d) => d === 'none'), 'the original elements are still showing: ' + hidden);
+    check(await pv.evaluate((s) => getComputedStyle(document.querySelector(s)).display !== 'none', INTRO), 'the intro paragraph (not selected) was hidden too');
     const texts = await instanceTexts(pv);
-    check(/Start a local miner/.test(texts[origin]) && /source packages/.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
+    check(/Start a local miner/.test(texts[origin]) && /operator guide/i.test(texts[origin]), 'the instance does not show the captured text: ' + texts[origin]);
     await animationsSettled(pv); await shot('makecomp-01-made');
     const box = await instanceBox(pv, origin);
     check(box && Math.abs(box.y - before.y) < 4 && Math.abs(box.x - before.x) < 4, `the instance is not where the selection was: ${JSON.stringify(box)} vs ${JSON.stringify(before)} ` + JSON.stringify(c.spots) + JSON.stringify(master.tree).slice(0, 400));
@@ -522,11 +645,15 @@ await flow('makecomp', async () => {
   });
   await step('override one instance (on /chain) from the toolbar', async () => {
     await gotoRoute(app, pv, '/chain');
-    await pv.locator('[data-ark-component-key] p').first().click();
-    const field = (await section(app, 'Component instance')).locator('input[aria-label="paragraph"]');
+    /* say what covers it instead of timing out on the click (the click below is still the real one) */
+    const cover = await coveredBy(pv, other);
+    check(!cover.length, 'the inserted instance on /chain is drawn under the page, so a click on it never reaches it: ' + cover.join(', '));
+    /* the heading, not the link: a click selects the instance either way, and never follows a link */
+    await pv.locator('[data-ark-component-key] h1').first().click();
+    const field = (await section(app, 'Component instance')).locator('input[data-prop="link"]');
     await field.fill('Only on the chain page.'); await field.evaluate((i) => i.dispatchEvent(new Event('change')));
     await until(async () => /Only on the chain page/.test((await instanceTexts(pv))[other]), 'the override did not show');
-    check(/source packages/.test((await componentsIn(pv)).masters[master.id].props.paragraph), 'the override leaked into the definition');
+    check((await componentsIn(pv)).masters[master.id].props.link === master.props.link, 'the override leaked into the definition');
   });
   await step('detach the other one (on /download); a later definition edit no longer reaches it', async () => {
     await gotoRoute(app, pv, '/download');
@@ -556,7 +683,8 @@ await flow('makecomp', async () => {
     await gotoRoute(again.app, again.pv, '/download');
     await until(async () => /Run DEFXN from source/.test(Object.values(await instanceTexts(again.pv)).join()), 'after reload /download lost its (detached) instance');
     await gotoRoute(again.app, again.pv, '/chain');
-    await until(async () => /Third heading.*Only on the chain page/.test(Object.values(await instanceTexts(again.pv)).join()), 'after reload /chain lost its instance or override');
+    /* both words, in either order: the heading and the captured link's override */
+    await until(async () => { const t = Object.values(await instanceTexts(again.pv)).join(); return /Third heading/.test(t) && /Only on the chain page/.test(t); }, 'after reload /chain lost its instance or override');
     await again.page.close();
   });
   await step('PUBLIC pages: /download shows the detached copy in place of the originals, /chain the instance with its override', async () => {
@@ -568,9 +696,48 @@ await flow('makecomp', async () => {
     await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-04-public-download.png') });
     await pub.goto(`${ORIGIN}/chain`);
-    await until(async () => /Third heading.*Only on the chain page/.test(Object.values(await instanceTexts(main)).join()), 'public /chain does not show the instance with its override');
+    await until(async () => { const t = Object.values(await instanceTexts(main)).join(); return /Third heading/.test(t) && /Only on the chain page/.test(t); }, 'public /chain does not show the instance with its override');
     await animationsSettled(main); /* past the route's entrance animation */
     await pub.screenshot({ path: path.join(SHOTS, 'makecomp-05-public-chain.png') });
+    await pub.close();
+  });
+  await step('PUBLIC /chain on a 1280x720 screen: the inserted block is never drawn under the flow scene, whichever step it shows', async () => {
+    /* REGRESSION (2026-10-19). .chain-flow and .flow-now were allowed to shrink below their content
+       (flex:1 1 auto / 0 1 auto, min-height:0). On a page shorter than the scene the box shrank and
+       the scene (sized by 40vh) and its caption did not, so they spilled over the slot that follows
+       -- where CMS-inserted blocks sit -- and, being position:relative, painted over the block and
+       took its clicks. Measured: 1280x720 public, and the editor's desktop canvas once Wave 1's
+       canvas strip made it 1280x721 (it was 1280x746, which is why this stayed hidden). The steps'
+       captions differ in length, so each one is held (the flow's own hover hold) and checked. */
+    const pub = await context.newPage();
+    await pub.setViewportSize({ width: 1280, height: 720 });
+    await pub.goto(`${ORIGIN}/chain`);
+    const main = pub.mainFrame();
+    await until(async () => /Third heading/.test(Object.values(await instanceTexts(main)).join()), 'public /chain does not show the instance', 15000);
+    await animationsSettled(main);
+    /* Since 2026-10-19 /chain is Ark blocks (js/pages/chain.js): one scene per example, each in its own
+       tab panel, and the CMS slot is the page's [data-ark-insert] after the tabs. The shown scene is
+       the one in the open panel. */
+    const F = '#chain-cases [role="tabpanel"]:not([hidden]) .chain-flow';
+    /* The five steps are Ark tabs at the top of the scene's frame now (ArkUI.buildChainSteps; the hand-built `flow-record` links and
+       the caption inside the tile are gone): the open tab's panel is the step's words, above the tile. */
+    const TABS = F + ' > [data-ark-block="tabs"]';
+    const steps = await main.locator(TABS + ' > [data-ark-part="tabs-list"] [role="tab"]').count();
+    check(steps === 5, 'expected the flow\'s 5 step tabs on /chain, found ' + steps);
+    for (let i = 0; i < steps; i++) {
+      await main.evaluate(([t, n]) => document.querySelectorAll(t + ' > [data-ark-part="tabs-list"] [role="tab"]')[n].dispatchEvent(new Event('pointerenter')), [TABS, i]);
+      await until(() => main.evaluate(([f, n]) => document.querySelector(f).dataset.step === String(n), [F, i]), 'the flow did not hold step ' + (i + 1));
+      const box = await main.evaluate(([f, t]) => {
+        const r = (s) => document.querySelector(s).getBoundingClientRect();
+        const now = r(f + ' .flow-now'), scene = r(f + ' .flow-scene');
+        return { says: (document.querySelector(t + ' > [data-ark-part="tabs-content"]:not([hidden]) > p') || {}).textContent, spill: Math.round(scene.bottom - now.bottom), gap: Math.round(r('[data-ark-page="chain"] [data-ark-insert="main"]').top - r(f).bottom) };
+      }, [F, TABS]);
+      check(box.spill <= 0, `step ${i + 1}: the scene or its caption runs ${box.spill}px out of its own panel (caption ${box.says})`);
+      check(box.gap >= 0, `step ${i + 1}: the insertion slot starts ${-box.gap}px inside the flow`);
+      const cover = await coveredBy(main, other);
+      check(!cover.length, `step ${i + 1}: the inserted block is drawn under the flow (${cover.join(', ')}); caption ${box.says}`);
+    }
+    await pub.screenshot({ path: path.join(SHOTS, 'makecomp-06-public-chain-1280x720.png') });
     await pub.close();
   });
   await step('SSR (the bot render, api/lib/render-core.mjs) has the components and not the replaced originals', async () => {
@@ -603,7 +770,16 @@ await flow('points', async () => {
   const collapsePage = (pv) => pv.evaluate(() => {
     const style = document.createElement('style');
     style.setAttribute('data-test-fixture', 'zero-width-page');
-    style.textContent = '.continuity-host{width:0!important;min-width:0!important}';
+    /* collapse the mounted page itself (every page has one, whatever frame it sits in): since Wave 3,
+       /about sits in the standard frame and Ark sizes its page, so zeroing .continuity-host no longer
+       reproduced the original 0px-wide page. Since the block-page conversion the page is a GRID with
+       inline padding: zeroed, it stayed 96px wide and its tracks' minimums still gave the slot 40px
+       (measured 2026-10-20). So the fixture also drops that padding and lays the page out as a block:
+       every child, the slot included, gets the page's 0px content width, as the original defect did.
+       Only the page is collapsed: it is the container the slot's width comes from (zeroing
+       .continuity-host as well is not needed). Nothing in the collapsed page can be clicked on the
+       canvas (it clips what spills out of its 0px column), so the next step selects through Layers. */
+    style.textContent = '[data-ark-page]{width:0!important;min-width:0!important;max-width:0!important;padding-left:0!important;padding-right:0!important;display:block!important}';
     document.head.appendChild(style);
     const slot = document.querySelector('[data-ark-insert="main"]');
     return slot ? slot.getBoundingClientRect().width : null;
@@ -614,8 +790,9 @@ await flow('points', async () => {
     check(slotWidth === 0, 'the fixture did not collapse /about\'s page slot to 0px: ' + slotWidth);
     await app.click('#tabLib');
     const lib = app.locator('#libPane');
-    await lib.locator('select.ctl').first().selectOption('RBLOCK_TEXT_V1');
-    await lib.locator('input[data-prop="heading"]').fill('Point test block');
+    await lib.locator('.lib-block[data-resolver="RBLOCK_TEXT_V1"] button', { hasText: 'Customize' }).click();
+    await lib.locator('.lib-new input[aria-label="New component name"]').fill('Text block');
+    await lib.locator('.lib-new [data-prop="heading"]').fill('Point test block');
     /* the new block's components message re-measures the page's places */
     await lib.locator('button', { hasText: 'Create block' }).click();
     const row = await libRow(app, 'Text block');
@@ -624,8 +801,18 @@ await flow('points', async () => {
     check(/select an element/i.test(await row.locator('button', { hasText: 'Insert' }).getAttribute('title')), 'the disabled Insert does not say what it needs');
   });
   await step('/about collapsed: a place after a selection inside the same 0px-wide layout is not offered either -- the rule is geometry, not a page list', async () => {
-    /* every element in the collapsed page sits in a 0px column; the readable text overflows it */
-    await pv.locator('section.ark-page :is(h1,h2,h3,p,span,a):visible').first().click();
+    /* every element in the collapsed page sits in a 0px column, and the page clips what spills out
+       (measured 2026-10-20: no text in it receives a hit), so it cannot be clicked on the canvas.
+       A person reaches it the other way the editor offers: its row in the Layers tab. */
+    const key = await pv.evaluate(() => { const h = document.querySelector('[data-ark-page] h1'); return h && h.getAttribute('data-ark-layout-key'); });
+    check(key, 'the collapsed /about has no keyed h1 to select');
+    await openRailTab(app, 'layers');
+    const layer = app.locator(`#layers li[data-key="${key}"]`);
+    await until(async () => (await layer.count()) > 0, 'the Layers tab has no row for ' + key);
+    /* the row's icon: its tag at the end has the eye button floating over it */
+    await layer.locator('svg.ic').first().click();
+    await until(() => app.evaluate((k) => !!document.querySelector(`#layers li[data-key="${k}"][aria-selected="true"]`), key), 'choosing the Layers row did not select the heading');
+    await app.click('#tabLib');
     await until(async () => /Not offered:.*After the selection.*0px wide/.test(await pointsNote()), '"after the selection" inside a 0px column is offered: ' + await pointsNote());
     const row = await libRow(app, 'Text block');
     check(await row.locator('button', { hasText: 'Insert' }).isDisabled(), 'Insert is enabled although every place on the collapsed /about is invisible');

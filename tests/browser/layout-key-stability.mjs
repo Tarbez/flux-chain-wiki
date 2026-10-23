@@ -254,13 +254,14 @@ function compare(name, ref, got, target, report, failures) {
   const refByIdent = new Map(ref.map), refOrder = new Map(ref.map.map(([id, , order]) => [id, order])), differ = [], reordered = [], liveOrdered = [], same = comparable(ref.map, got.map), liveIds = new Set(ref.liveIds || []), liveOrder = new Set(ref.liveOrderIds || []);
   const liveSig = new Set([...liveIds].map((id) => id.replace(/ #\d+$/, '')));
   let seen = 0, live = 0;
+  const placedByPage = new Set();   /* identities the page itself moved or regrew: live groups, reordered, live-ordered */
   for (const [id, key, order] of got.map) {
     if (!refByIdent.has(id)) continue;
     seen++;
-    if (!same(id) || liveSig.has(id.replace(/ #\d+$/, ''))) { live++; continue; }
+    if (!same(id) || liveSig.has(id.replace(/ #\d+$/, ''))) { live++; placedByPage.add(id); continue; }
     if (refByIdent.get(id) === key) continue;
-    if (liveOrder.has(id)) liveOrdered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
-    else if (refOrder.get(id) !== order) reordered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
+    if (liveOrder.has(id)) { liveOrdered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`); placedByPage.add(id); }
+    else if (refOrder.get(id) !== order) { reordered.push(`${refByIdent.get(id)} -> ${key}   [${id}]`); placedByPage.add(id); }
     else differ.push(`${refByIdent.get(id)} -> ${key}   [${id}]`);
   }
   if (differ.length) problems.push(`${differ.length} keys differ from the direct load:\n        ` + differ.slice(0, report ? differ.length : 3).join('\n        '));
@@ -283,7 +284,13 @@ function compare(name, ref, got, target, report, failures) {
     const want = target.overrideIds.filter((id) => got.map.some(([i]) => i === id));
     const extra = got.applied.filter(([, key]) => !target.overrides.includes(key)).map(([id, key]) => `${key} [${id}]`);
     const lost = want.filter((id) => !got.applied.some(([i]) => i === id));
-    const missing = lost.filter((id) => !got.fresh.includes(id)), rebuiltTargets = lost.filter((id) => got.fresh.includes(id));
+    /* A target the page itself moved (a /stats node row re-sorted by live data) lost its override
+       because the override follows the KEY -- the place -- not the item: the same missing capability
+       as the moved keys above, so NOT BUILT, never a pass and never a key defect. Found 2026-10-20
+       when /stats became an Ark table: a saved edit on "hel1 #2" stayed on row 2 while hel1 moved. */
+    const movedTargets = lost.filter((id) => !got.fresh.includes(id) && placedByPage.has(id));
+    const missing = lost.filter((id) => !got.fresh.includes(id) && !placedByPage.has(id)), rebuiltTargets = lost.filter((id) => got.fresh.includes(id));
+    if (movedTargets.length) notBuilt.push(`override not on ${movedTargets.join(', ')}: the page moved that content (live order), and a saved edit follows its place, not the item`);
     if (extra.length || missing.length) problems.push(`saved overrides landed wrong: ${missing.length ? 'missing on ' + missing.join(', ') : ''}${extra.length ? ' extra on ' + extra.join(', ') : ''}`);
     if (rebuiltTargets.length) notBuilt.push(`override not on ${rebuiltTargets.join(', ')}: the page built it after the last ArkLayout.apply() (${got.atApply ? got.atApply.rebuilt : '?'} elements replaced since)`);
     if (target.spotId) {

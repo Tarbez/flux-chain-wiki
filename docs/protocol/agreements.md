@@ -1,5 +1,7 @@
 # Agreements
 
+> Written for the agreement-fabric direction, which is no longer the direction (status.md). For resolvers today, read [resolvers](resolvers.md). Kept as written; this note was added 2026-10-19.
+
 Flux models execution as a five-stage lifecycle:
 
 1. **Intent** — a participant describes desired work and constraints.

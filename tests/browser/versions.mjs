@@ -31,7 +31,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { chromium } from 'playwright';
-import { openPageFields, openRailTab, designView, SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor } from './harness.mjs';
+import { openPageFields, openRailTab, designView, siteStyleTab, openVersions, SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor, answerArkDialog } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
 const FLX = require('../../js/admin/vendor/flx-state-grammar.js');
@@ -129,7 +129,7 @@ try {
   });
 
   await step('Versions lists every version, newest first, with summaries derived from the edits', async () => {
-    await app.click('#versionsNav');
+    await clickHeader(app, 'versionsNav');
     await until(async () => (await app.locator('#versionsList > li').count()) === 3, 'the panel does not list 3 versions')
       .catch(async (error) => { await shot('versions-01-list-FAILED'); throw new StepFailure(error.message + ': ' + await app.evaluate(() => { const p = document.getElementById('versionsPanel'); return 'hidden=' + p.hidden + ' items=' + p.querySelectorAll('li.version').length + ' note=' + document.getElementById('versionsNote').textContent; })); });
     const seqs = await app.locator('#versionsList > li').evaluateAll((lis) => lis.map((li) => li.dataset.seq));
@@ -190,6 +190,9 @@ try {
   });
 
   await step('Export version 2 downloads one FLX document that proves itself', async () => {
+    /* Export is a developer's: in the row's Developer details (docs/ux-audit/cms.md P1-15).
+       Open it exactly once -- two agents each added this click, and the second closed it again. */
+    await row(2).locator('.dev-details > .ark-disclosure__trigger').last().click();
     const [download] = await Promise.all([page.waitForEvent('download'), row(2).locator('button[data-action="export"]').click()]);
     check(/^defxn-version-2-[0-9a-f]{12}\.flx$/.test(download.suggestedFilename()), 'export name: ' + download.suggestedFilename());
     const file = path.join(SHOTS, download.suggestedFilename());
@@ -222,7 +225,16 @@ try {
   });
 
   await step('Restore #4 lists exactly the two items #4 never had, and changes nothing yet', async () => {
-    await until(async () => (await app.locator('#versionsList > li').count()) === 5, 'the panel does not list 5 versions');
+    /* Creating the page opened ITS Page settings, and the sheet and Versions share one docked slot
+       (js/admin/overlay.js, level 'sheet'): Versions closed. A closed panel is not refreshed by a
+       Save and still holds the rows it last drew -- 4 here -- so counting them waited 62 s for a
+       5th that only a reopen draws (2026-10-19; driver defect, not the panel's). Reopen it, then
+       hold it to what is on disk: every version record, listed. */
+    await openVersions(app);
+    const onDisk = fs.readdirSync(path.join(HISTORY, 'versions')).length;
+    check(onDisk === 5, 'expected 5 version records on disk, found ' + onDisk);
+    await until(async () => (await app.locator('#versionsList > li').count()) === onDisk, 'the reopened panel does not list the ' + onDisk + ' versions on disk')
+      .catch(async (error) => { throw new StepFailure(error.message + ': lists ' + (await app.locator('#versionsList > li').evaluateAll((lis) => lis.map((li) => li.dataset.seq))).join()); });
     await row(4).locator('button[data-action="restore"]').click();
     await until(() => app.locator('#versionsConfirm').isVisible(), 'Restore of #4 did not ask before removing anything');
     const items = await app.locator('#versionsRemovals li').evaluateAll((lis) => lis.map((li) => li.querySelector('code').textContent));
@@ -283,17 +295,35 @@ try {
   });
 
   /* ---- Preview shows site-wide settings-defaults, live and per version ---- */
-  const docState = (frame) => frame.evaluate(() => ({ theme: document.documentElement.dataset.theme, motif: document.documentElement.dataset.motif, stored: localStorage.getItem('flux-chain-theme'), marker: window.__versionsMarker === 1 }));
-  await step('an unsaved settings-defaults edit previews live, without a reload and without touching the visitor\'s own choice', async () => {
+  const docState = (frame) => frame.evaluate(() => ({ theme: document.documentElement.dataset.theme, motif: document.documentElement.dataset.motif, stored: localStorage.getItem('defxn-theme-v1') + '|' + localStorage.getItem('flux-chain-theme'), marker: window.__versionsMarker === 1 }));
+  await step('Site style chosen while Version history is open is not opened underneath it', async () => {
+    /* REGRESSION (2026-10-19): Site style docks on the right edge and Version history floats over
+       that edge above it; chosen while Versions was open, the dock [1060,1500] lay under the panel
+       [1080,1500] -- a 20px sliver -- and the "Visitor defaults" tab click below timed out behind
+       header.versions-head. Choosing Site style now closes the docked overlays
+       (js/admin/sitemap.js setView; tests/cms-site-style-not-under-sheet.cjs). */
+    await openVersions(app);   /* as the import step left it: open */
     await designView(app, 'theme');
+    await until(() => app.locator('#versionsPanel').isHidden(), 'Version history stayed open over Site style');
+    const reach = await until(() => app.evaluate(() => {
+      const tab = document.querySelector('#themePanel [role="tab"]');
+      if (!tab) return null;
+      const b = tab.getBoundingClientRect(), top = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2);
+      return { onTop: !!top && tab.contains(top), cover: top ? (top.closest('[id]') || top).id || top.className : 'nothing' };
+    }), 'Site style drew no tabs');
+    check(reach.onTop, 'Site style\'s tabs are under ' + reach.cover);
+  });
+
+  await step('an unsaved settings-defaults edit previews live, without a reload and without touching the visitor\'s own choice', async () => {
+    await siteStyleTab(app, 'Visitor defaults');
     await app.locator('#defaults-theme').waitFor({ state: 'visible' });
     const frame = await until(async () => { const f = await (await app.$('#cmsPreview')).contentFrame(); return f && await f.evaluate(() => !!document.querySelector('.site-settings')).catch(() => false) && f; }, 'the design preview never loaded');
-    await until(async () => (await docState(frame)).theme === 'ghost', 'the design preview does not start on the saved default theme');
+    await until(async () => (await docState(frame)).theme === 'ember', 'the design preview does not start on the saved default theme');
     await frame.evaluate(() => { window.__versionsMarker = 1; });
     const storedBefore = (await docState(frame)).stored;
-    await app.selectOption('#defaults-theme', 'marine');
+    await app.selectOption('#defaults-theme', 'defxn-dune');
     await app.selectOption('#defaults-motif', 'traces');
-    const live = await until(async () => { const s = await docState(frame); return s.theme === 'marine' && s.motif === 'traces' && s; }, 'the design preview does not show the unsaved default theme/pattern', 6000);
+    const live = await until(async () => { const s = await docState(frame); return s.theme === 'defxn-dune' && s.motif === 'traces' && s; }, 'the design preview does not show the unsaved default theme/pattern', 6000);
     check(live.marker, 'the preview was reloaded to show the edit (it should arrive by message)');
     check(live.stored === storedBefore, 'previewing wrote the visitor\'s own theme choice into localStorage: ' + storedBefore + ' -> ' + live.stored);
     await shot('versions-09-defaults-live');
@@ -302,14 +332,16 @@ try {
   await step('Save, then Preview #6: the canvas shows #6\'s settings-defaults, and Back shows the current ones', async () => {
     await app.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', ctrlKey: true, bubbles: true, cancelable: true })));
     await until(() => { const x = head(); return x && x.seq === 8; }, 'no version 8 after saving the settings defaults');
-    check(/"theme": "marine"/.test(fs.readFileSync(path.join(WORK, 'js/content/settings-defaults-data.js'), 'utf8')), 'the settings defaults file was not saved');
+    check(/"theme": "defxn-dune"/.test(fs.readFileSync(path.join(WORK, 'js/content/settings-defaults-data.js'), 'utf8')), 'the settings defaults file was not saved');
+    /* choosing Site style closed Version history (the step above): open it again, over Site style */
+    await openVersions(app);
     await until(async () => (await row(6).count()) === 1, 'the panel does not list #6');
     await row(6).locator('button[data-action="preview"]').click();
     const studio = async () => (await app.$('#cmsPreview')).contentFrame();
-    await until(async () => { const s = await docState(await studio()); return s.theme === 'ghost' && s.motif === 'blocks'; }, 'previewing #6 does not show #6\'s default theme/pattern (ghost/blocks)', 15000);
+    await until(async () => { const s = await docState(await studio()); return s.theme === 'ember' && s.motif === 'blocks'; }, 'previewing #6 does not show #6\'s default theme/pattern (ghost/blocks)', 15000);
     await shot('versions-10-preview-old-defaults');
     await app.click('#versionsBack');
-    await until(async () => { const s = await docState(await studio()); return s.theme === 'marine' && s.motif === 'traces'; }, 'Back to current drafts does not show the current default theme/pattern (marine/traces)', 15000);
+    await until(async () => { const s = await docState(await studio()); return s.theme === 'defxn-dune' && s.motif === 'traces'; }, 'Back to current drafts does not show the current default theme/pattern (marine/traces)', 15000);
     await shot('versions-11-back-current-defaults');
   });
 
@@ -330,6 +362,7 @@ try {
     check(/concept\/depth/.test(rootFile('sitemap.xml')) && /concept\/depth/.test(rootFile('llms.txt')), 'the fixture assumes sitemap.xml and llms.txt list /concept/depth');
     await openPageFields(app, { page: 'depth' });
     await app.locator('button', { hasText: /^Delete this page$/ }).click();
+    await answerArkDialog(app, 'accept');   /* Ark's dialog (cms.md P2-11), not a native confirm */
     const h = await until(() => { const x = head(); return x && x.seq === 9 && x; }, 'Delete did not record version 9 by itself (no Save was pressed)');
     check(!fs.existsSync(DEPTH) && !indexIds().includes('depth'), 'the page file or its index entry is still there');
     const rec9 = record(h.head);
@@ -340,7 +373,7 @@ try {
   });
 
   await step('Restore #8, Save: the page returns to ITS place, and the restore is exact to the content address', async () => {
-    if (await app.locator('#versionsPanel').isHidden()) await app.click('#versionsNav');
+    if (await app.locator('#versionsPanel').isHidden()) await clickHeader(app, 'versionsNav');
     await until(async () => (await row(9).count()) === 1, 'the panel does not list #9');
     await row(8).locator('button[data-action="restore"]').click();
     /* the Delete left the SEO draft unsaved (it still names the deleted page until a Save drops
@@ -369,7 +402,7 @@ try {
     await until(() => app2.evaluate(() => !!window.ArkAdminApp), 'admin.js never finished starting after the reload', 30000);
     await clickHeader(app2, 'connect');
     await until(() => app2.evaluate(() => document.getElementById('connect').disabled), 'project folder did not reconnect', 30000);
-    await app2.click('#versionsNav');
+    await clickHeader(app2, 'versionsNav');
     const row2 = (seq) => app2.locator(`#versionsList li[data-seq="${seq}"]`);
     await until(async () => (await row2(10).count()) === 1, 'the reloaded panel does not list #10');
     await row2(10).locator('button[data-action="restore"]').click();
@@ -459,7 +492,7 @@ try {
     const view = await ArkVersions.readHeads(await ArkVersions.historyDir(nodeDir(WORK)));
     check(view.heads.length === 2, 'the store does not derive two heads from the folder');
 
-    await A.frame.click('#versionsNav', CLICK);
+    await clickHeader(A.frame, 'versionsNav', CLICK);
     await until(async () => (await A.frame.locator('#versionsList > li[data-branch]').count()) === 2, 'the panel does not list both versions as branches');
     const branches = await A.frame.locator('#versionsList > li[data-branch]').evaluateAll((lis) => lis.map((li) => [li.dataset.hash, li.dataset.branch, li.querySelector('.version-kind[data-kind="branch"]').textContent]));
     check(branches.map((b) => b[0]).sort().join() === [...tips].sort().join(), 'the branch rows are not the two versions: ' + JSON.stringify(branches));
@@ -473,6 +506,9 @@ try {
     const jr = record(joined);
     check([jr.prev, ...jr.joins].sort().join() === [...tips].sort().join(), 'the join does not follow both branches: ' + JSON.stringify({ prev: jr.prev, joins: jr.joins }));
     check(/^joins #/.test(jr.summary[0]), 'the join does not say what it joins: ' + jr.summary.join(' | '));
+    /* the edit opened Page settings, which closed Version history (one docked slot); a closed panel
+       keeps the rows it last drew, so reopen it before reading them (as in "Restore #4" above) */
+    await openVersions(A.frame);
     await until(async () => (await A.frame.locator(`#versionsList > li[data-hash="${joined}"][data-joins="1"]`).count()) === 1, 'the panel does not list the join with a "joins" marker');
     check(/joins #\d+/.test(await A.frame.locator(`#versionsList > li[data-hash="${joined}"] .version-kind[data-kind="joined"]`).textContent()), 'the join row has no "joins #n" tag');
     check((await A.frame.locator('#versionsList > li[data-branch]').count()) === 2, 'after the join the two branches are no longer listed under it');

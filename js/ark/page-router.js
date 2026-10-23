@@ -60,7 +60,7 @@
     meta('name', 'twitter:image', image);
     meta('name', 'twitter:site', site.handle);
     var robotsParts = [];
-    if (ArkSEO.noindex(map, id)) robotsParts.push('noindex');
+    if (entry.noindex || ArkSEO.noindex(map, id)) robotsParts.push('noindex');
     if (ArkSEO.aiBlocked(map, id)) robotsParts.push('noai', 'noimageai');
     meta('name', 'robots', robotsParts.join(', '));
     var link = document.querySelector('link[rel="canonical"]');
@@ -115,7 +115,7 @@
     function isLifecycleStage(page) { return String(page).indexOf('lifecycle/') === 0; }
     function animateLifecycleInformation(el, immediate) {
       if (immediate || !el || !el.querySelectorAll) return Promise.resolve();
-      var targets = Array.from(el.querySelectorAll('.story-kicker,.lifecycle-answer h1,.lifecycle-view,.lifecycle-boundary,.lifecycle-next'));
+      var targets = Array.from(el.querySelectorAll('.story-lifecycle > [data-ark-block="hero"],.story-lifecycle .story-main,.story-lifecycle > [data-ark-block="pager"]'));
       var runs = targets.filter(function (item) { return typeof item.animate === 'function'; }).map(function (item) {
         return item.animate([{ transform:'translate3d(0,4px,0)' }, { transform:'translate3d(0,0,0)' }], {
           duration:180, easing:'cubic-bezier(.2,.65,.2,1)'
@@ -140,19 +140,22 @@
       } catch (e) {}
     }
     function url(page) { return ArkUI.route.href(catalog[page].path); }
+    /* An address -> the catalog key that answers it: its path, a bare key ('#concept'), or one of
+       the entry's `aliases` (old addresses kept working: /explorer, /monitor, /work,
+       /experiments/lab -- declared on the entry in js/pages/catalog.js, not listed here). An
+       address nothing answers resolves to 'notfound', which names it; until 2026-10-19 it
+       resolved to Home, so a mistyped or retired URL silently showed the home page
+       (docs/ux-audit/pages.md P8; regressions: tests/page-router.cjs,
+       tests/browser/site-fixes.mjs). A catalog without 'notfound' (a test's) keeps Home. */
     function resolve(address) {
       var path = String(address == null || address === '' ? '/' : address).replace(/^#/, '').split('?')[0];
       if (path.length > 1) path = path.replace(/\/+$/, '');
-      /* the explorer used to live at /explorer; /explore is its address now */
-      if (path === '/explorer') return 'explorer';
-      /* the old Work page is the lab now: `#work` and `#/work` both land there instead of on a page that no longer exists */
-      if (path === 'work' || path === '/work') return 'lab';
-      if (path === 'proximity') return 'proximity';
-      if (path === 'concept') return 'concept';
-      /* /monitor was retired 2026-10-10; /stats carries the same live pulse now, plus the dated evidence the old page never had. */
-      if (path === '/monitor') return 'stats';
+      if (path === '') path = '/';
       if (Object.prototype.hasOwnProperty.call(catalog, path)) return path;
-      return Object.keys(catalog).find(function (key) { return catalog[key].path === path; }) || 'zero';
+      var keys = Object.keys(catalog);
+      return keys.find(function (key) { return catalog[key].path === path; })
+        || keys.find(function (key) { return (catalog[key].aliases || []).indexOf(path) >= 0; })
+        || (catalog.notfound ? 'notfound' : 'zero');
     }
     function writeHistory(page, mode, query) {
       if (options.writeHistory) return options.writeHistory(page, mode, query);

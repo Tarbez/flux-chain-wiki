@@ -1,21 +1,16 @@
 /* =====================================================================
    RESOLVE CHECK: does the public gateway agree with what was just published?
    ---------------------------------------------------------------------
-   publisher.publish()'s own `confirmed` field proves the LOCAL miner's names/*
-   registry agrees with itself -- it reads back from the same miner it just wrote
-   to. It says nothing about whether a stranger on the public internet, going
-   through ark-gateway's /resolve/<name> route, would land on the same bytes.
-   This asks that second, independent question.
+   publisher.publish() proves the release is out. It says nothing about whether a
+   stranger on the public internet, going through the Rust flux-gateway's
+   /resolve/<name> route, would land on the same bytes. This asks that second,
+   independent question. The gateway is a verified reader: it resolves the name
+   with DOM_PROOF against dense-wire nodes and the shared verifier
+   (flux-gateway/src/name_resolve.rs), so a 302 from it is the chain's answer,
+   not a node's word. This file reads no name registry itself.
 
-   As of the F-7a/F-7b/F-7c investigation (see flux-claims/docs/
-   ark-gateway-name-source-investigation.md) this always fails with
-   GATEWAY_NOT_FOUND today: no ark-miner-cli node exposes /debug/name-record
-   publicly yet, so ark-gateway resolves nothing. That is a known, disclosed gap
-   (F-7d), not a bug in this file -- it is wired now so the day the fleet-exposure
-   decision lands, this starts working with no code change here.
-
-   FORK DEBT: this file is byte-for-byte identical to SUBZERO's
-   scripts/lib/resolve-check.mjs (this repo is a fork of SUBZERO -- see
+   FORK DEBT: this file mirrors SUBZERO's scripts/lib/resolve-check.mjs (this
+   repo is a fork of SUBZERO -- see
    flux-claims/docs/SUBZERO_FLUX_CHAIN_WIKI_COMPARISON_v0.md). Same reasoning as
    publisher.mjs already being duplicated rather than shared between the two
    repos: there is no shared package either repo currently depends on that both

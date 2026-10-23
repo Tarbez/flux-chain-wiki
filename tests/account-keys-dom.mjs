@@ -1,5 +1,5 @@
 // A real render of the real "Keys" tab in js/pages/account.js -- closes
-// the gap named honestly in flux-auth's own CLAUDE.md: the UI existed,
+// the gap named honestly in fxn-auth's own CLAUDE.md: the UI existed,
 // was syntax-checked and selector-cross-checked, but had never been
 // exercised through a real click in a real DOM. Same jsdom+real-bundle
 // pattern flux-launchpad's auth.dom.live-unlock.test.mjs already
@@ -88,6 +88,9 @@ function settledText(node, what) {
   return until(() => { const text = node.textContent; return text && !/…$/.test(text) ? text : null; }, what);
 }
 
+const tabNamed = (page, name) => [...page.querySelectorAll('[role="tab"]')].find((tab) => tab.textContent.trim() === name);
+const openTab = (dom, page, name) => tabNamed(page, name).dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+
 function setInputValue(window, input, value) {
   const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
   nativeSetter.call(input, value);
@@ -105,35 +108,24 @@ function mountAccountPage() {
   // global `structuredClone` is spec-identical; this is a missing jsdom
   // API, not a mock of any app behavior.
   dom.window.structuredClone = structuredClone;
-  // Minimal real bootstrap -- same defensive `window.ArkUI = window.ArkUI || {}`
-  // shape every real module in this app uses, not a reimplementation of
-  // any of them. `localIdentity` needs a REAL (if tiny) pub-sub, not a
-  // no-op: `account.js`'s own `renderIdentity` is wired as a SUBSCRIBER
-  // (`ArkUI.localIdentity.subscribe(renderIdentity)`), so a stub whose
-  // `subscribe()` never actually calls back would mean `renderIdentity`
-  // never runs at all, and `account.js`'s own `isUnlocked()` separately
-  // compares `ArkUI.localIdentity.current()` against the real signed-in
-  // identity's `{identityId, publicKeyB64}` -- both found by running this
-  // test and reading exactly why the Keys panel never opened, not guessed.
-  let localIdentityCurrent = null;
-  const localIdentitySubscribers = new Set();
-  function notifyLocalIdentity() { for (const fn of localIdentitySubscribers) fn(localIdentityCurrent); }
-  dom.window.ArkUI = {
-    pageModules: {},
-    localIdentity: {
-      set(next) { localIdentityCurrent = next; notifyLocalIdentity(); },
-      clear() { localIdentityCurrent = null; notifyLocalIdentity(); },
-      refresh() { notifyLocalIdentity(); },
-      subscribe(fn) { localIdentitySubscribers.add(fn); return () => localIdentitySubscribers.delete(fn); },
-      current() { return localIdentityCurrent; },
-      storageError() { return ''; },
-    },
-  };
-  for (const source of [BUNDLE_SOURCE, DIRECTORY_TRANSPORT_SOURCE, ED25519_PEM_SOURCE, FLUX_ELEMENTS_SOURCE, AUTHORIZATION_VIEW_SOURCE, AUTHORIZATION_DIALOG_SOURCE, DASH_KIT_SOURCE, ACCOUNT_PAGE_SOURCE]) {
-    const script = dom.window.document.createElement('script');
-    script.textContent = source;
-    dom.window.document.body.appendChild(script);
-  }
+  /* The page as it loads in a browser (W4-S2, 2026-10-20): /account is Ark blocks, so the runtime, the Ark kit and
+     the blocks adapter load first, in the order js/pages/catalog.js lists them -- and the REAL local-identity
+     store, not a stub. The stub this file used to carry passed the full signer object through as the page's
+     identity, which is why the Keys view looked fine here while it was inert in a real browser (the real store keeps
+     six public fields; the wallet list and methods live on the signer; tests/browser/account-flows.mjs step 9 found
+     it). With the real store this file is the proof the Keys actions work. */
+  const w = dom.window;
+  w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  w.eval("var ArkCopy = { isKey: function () { return false; }, resolve: function (v) { return v; }, text: function (k) { throw new Error('no copy key ' + k); } };");
+  const run = (source) => { const script = w.document.createElement('script'); script.textContent = source; w.document.body.appendChild(script); };
+  for (const file of ['js/ark/atomizer.js', 'js/ark/flux.js', 'js/ark/runtime.js', 'js/ark/vendor/engines.js']) run(fs.readFileSync(path.join(HERE, '..', file), 'utf8'));
+  w.eval("ArkUI.pageCatalog = { account: { path: '/account' }, 'account/domains': { path: '/account/domains' }, bundledeployer: { path: '/bundle-deployer' }, explorer: { path: '/explore' }, zero: { path: '/' } }; ArkUI.route = { href: function (p) { return p; } }; ArkUI.pageModules = {};");
+  const blockScripts = JSON.parse(/ArkUI\.blockScripts = (\[[^\]]+\]);/.exec(fs.readFileSync(path.join(HERE, '..', 'js', 'pages', 'catalog.js'), 'utf8'))[1].replace(/'/g, '"'));
+  for (const file of blockScripts.filter((f) => f !== 'js/ark/dash-kit.js').concat(['js/ark/vendor/ark-kit-forms.js'])) run(fs.readFileSync(path.join(HERE, '..', file), 'utf8'));
+  for (const file of ['js/ark/local-identity.js', 'js/ark/local-domains.js']) run(fs.readFileSync(path.join(HERE, '..', file), 'utf8'));
+  const liveChunk = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'vendor', 'ark-kit-live.js'), 'utf8');
+  w.ArkUI.loadScript = () => Promise.resolve().then(() => w.eval(liveChunk)); // the first ArkUI.blocks.update loads Ark's live chunk, as js/ark/page-loader.js does
+  for (const source of [BUNDLE_SOURCE, DIRECTORY_TRANSPORT_SOURCE, ED25519_PEM_SOURCE, FLUX_ELEMENTS_SOURCE, AUTHORIZATION_VIEW_SOURCE, AUTHORIZATION_DIALOG_SOURCE, DASH_KIT_SOURCE, ACCOUNT_PAGE_SOURCE]) run(source);
   const host = dom.window.document.getElementById('host');
   const page = dom.window.ArkUI.pageModules.account.mount(host);
   return { dom, host, page };
@@ -179,36 +171,36 @@ async function signIn(dom, page) {
   await until(() => page.dataset.session === 'verified-local', 'the account page to reach the signed-in, unlocked state');
 }
 
-test('the real "Keys" tab becomes available after a real sign-in, and lists the real wallet already on the kit', async () => {
+test('the real "Signing keys" tab becomes available after a real sign-in, and lists the real wallet already on the kit', async () => {
   const { dom, page } = mountAccountPage();
   await signIn(dom, page);
 
-  const keysTab = page.querySelector('[data-account-tab="keys"]');
-  assert.ok(keysTab, 'the real Keys tab button must render');
-  assert.equal(keysTab.hidden, false, 'the Keys tab must become visible once a real identity is signed in and unlocked');
+  const keysTab = tabNamed(page, 'Signing keys');
+  assert.ok(keysTab, 'the Signing keys tab must exist once a real identity is signed in and unlocked');
 
-  keysTab.dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  openTab(dom, page, 'Signing keys');
   const panel = page.querySelector('[data-account-panel="keys"]');
-  assert.equal(panel.hidden, false, 'clicking the real tab button must show the real Keys panel');
+  assert.equal(keysTab.getAttribute('aria-selected'), 'true', 'clicking the real tab must select it');
+  assert.equal(panel.closest('[role="tabpanel"]').hidden, false, 'and show the real Keys panel');
 
-  const list = panel.querySelector('[data-account-keys-list]');
+  const list = panel.querySelector('#account-keys-list');
   assert.match(list.textContent, /d43kkms26scspdyq92r3fhgmf1kefxra7xcr5vqa62qghh7fdqsmcdczwnm0/, 'the real wallet address already on this kit must appear in the real rendered list');
 });
 
 test('clicking the real "Add wallet" button genuinely mints a new wallet and the list updates live, with no re-sign-in', async () => {
   const { dom, page } = mountAccountPage();
   await signIn(dom, page);
-  page.querySelector('[data-account-tab="keys"]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  openTab(dom, page, 'Signing keys');
 
   const panel = page.querySelector('[data-account-panel="keys"]');
-  setInputValue(dom.window, panel.querySelector('[data-account-keys-add-label]'), 'DOM Test Wallet');
+  setInputValue(dom.window, panel.querySelector('#account-keys-add [name="label"]'), 'DOM Test Wallet');
   setInputValue(dom.window, panel.querySelector('[data-account-keys-pin]'), KIT_PIN);
   setInputValue(dom.window, panel.querySelector('[data-account-keys-password]'), KIT_PASSWORD);
-  panel.querySelector('[data-account-keys-add-form]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+  panel.querySelector('#account-keys-add').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   const approved = await approveAuthorizationDialog(dom);
   assert.ok(approved, 'the real Scoped Claim Authorization dialog must appear before a wallet is minted -- every signing surface shows it, this one is no exception');
 
-  const result = await settledText(panel.querySelector('[data-account-keys-add-result]'), 'the add-wallet result');
+  const result = await settledText(panel.querySelector('#account-keys-add-result'), 'the add-wallet result');
   assert.match(result, /^Added /, `the real add-wallet result must show success, got: ${result}`);
   const newAddress = result.replace('Added ', '').trim();
   assert.notEqual(newAddress, 'd43kkms26scspdyq92r3fhgmf1kefxra7xcr5vqa62qghh7fdqsmcdczwnm0', 'the new wallet must be a genuinely different address from the one already on the kit');
@@ -217,67 +209,67 @@ test('clicking the real "Add wallet" button genuinely mints a new wallet and the
   // with no new sign-in -- proving the getter fix actually does what it
   // was built for, through a real click, not just a unit assertion on the
   // bundle's own exports.
-  const list = panel.querySelector('[data-account-keys-list]');
+  const list = panel.querySelector('#account-keys-list');
   assert.match(list.textContent, new RegExp(newAddress), 'the newly-minted wallet must appear in the list immediately, with no re-sign-in');
   assert.match(list.textContent, /d43kkms26scspdyq92r3fhgmf1kefxra7xcr5vqa62qghh7fdqsmcdczwnm0/, 'the original wallet must still be listed too -- history, never overwritten');
 });
 
 const DEFAULT_ADDRESS = 'd43kkms26scspdyq92r3fhgmf1kefxra7xcr5vqa62qghh7fdqsmcdczwnm0';
 
-test('clicking the real "Rotate" button genuinely supersedes the wallet with a new key, and the default/"(default)" marker moves with it', async () => {
+test('clicking the real "Rotate" button genuinely supersedes the wallet with a new key, and the default marker ("Default" status) moves with it', async () => {
   const { dom, page } = mountAccountPage();
   await signIn(dom, page);
-  page.querySelector('[data-account-tab="keys"]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  openTab(dom, page, 'Signing keys');
   const panel = page.querySelector('[data-account-panel="keys"]');
 
   setInputValue(dom.window, panel.querySelector('[data-account-keys-pin]'), KIT_PIN);
   setInputValue(dom.window, panel.querySelector('[data-account-keys-password]'), KIT_PASSWORD);
-  setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), DEFAULT_ADDRESS);
-  setInputValue(dom.window, panel.querySelector('[data-account-keys-rotate-label]'), 'DOM Rotated');
-  panel.querySelector('[data-account-keys-rotate]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  setInputValue(dom.window, panel.querySelector('#account-keys-action [name="address"]'), DEFAULT_ADDRESS);
+  setInputValue(dom.window, panel.querySelector('#account-keys-action [name="rotateLabel"]'), 'DOM Rotated');
+  panel.querySelector('#account-keys-action').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before a wallet is rotated');
 
-  const result = await settledText(panel.querySelector('[data-account-keys-action-result]'), 'the rotate result');
+  const result = await settledText(panel.querySelector('#account-keys-action-result'), 'the rotate result');
   assert.match(result, /^Rotated /, `the real rotate result must show success, got: ${result}`);
   const newAddress = result.split('→')[1].trim();
   assert.notEqual(newAddress, DEFAULT_ADDRESS);
 
-  const list = panel.querySelector('[data-account-keys-list]');
+  const list = panel.querySelector('#account-keys-list');
   assert.match(list.textContent, new RegExp(newAddress), 'the rotated-to address must appear in the list immediately');
   assert.match(list.textContent, new RegExp(DEFAULT_ADDRESS), 'the superseded address stays in the list -- history, never overwritten');
   // `identity.walletAddress` is itself a live getter (fixed this round,
-  // same reasoning as `walletAddresses`) -- the "(default)" marker must
+  // same reasoning as `walletAddresses`) -- the "Default" marker must
   // move to the NEW address, not keep naming the superseded one.
-  const newAddressLine = [...list.querySelectorAll('li')].find((li) => li.textContent.includes(newAddress));
-  assert.match(newAddressLine.textContent, /\(default\)/, 'the default marker must move to the rotated-to address');
-  const oldAddressLine = [...list.querySelectorAll('li')].find((li) => li.textContent.includes(DEFAULT_ADDRESS) && !li.textContent.includes(newAddress));
-  assert.doesNotMatch(oldAddressLine.textContent, /\(default\)/, 'the superseded address must no longer be marked as default');
+  const newAddressLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(newAddress));
+  assert.match(newAddressLine.textContent, /Default/, 'the default marker must move to the rotated-to address');
+  const oldAddressLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(DEFAULT_ADDRESS) && !li.textContent.includes(newAddress));
+  assert.doesNotMatch(oldAddressLine.textContent, /Default/, 'the superseded address must no longer be marked as default');
 });
 
 test('clicking the real "Revoke" button genuinely retires a wallet, recorded in the real vault', async () => {
   const { dom, page } = mountAccountPage();
   await signIn(dom, page);
-  page.querySelector('[data-account-tab="keys"]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  openTab(dom, page, 'Signing keys');
   const panel = page.querySelector('[data-account-panel="keys"]');
 
   // Add a second wallet first -- revoking the kit's only/default wallet
   // is a real, legal action in the library, but this test only needs to
   // prove the UI wiring, not pick a fight with whatever the library does
   // to a vault's very last wallet.
-  setInputValue(dom.window, panel.querySelector('[data-account-keys-add-label]'), 'ToRevoke');
+  setInputValue(dom.window, panel.querySelector('#account-keys-add [name="label"]'), 'ToRevoke');
   setInputValue(dom.window, panel.querySelector('[data-account-keys-pin]'), KIT_PIN);
   setInputValue(dom.window, panel.querySelector('[data-account-keys-password]'), KIT_PASSWORD);
-  panel.querySelector('[data-account-keys-add-form]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+  panel.querySelector('#account-keys-add').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   assert.ok(await approveAuthorizationDialog(dom), 'the setup add-wallet action must also show the real dialog');
-  const addResult = await settledText(panel.querySelector('[data-account-keys-add-result]'), 'the setup add-wallet result');
+  const addResult = await settledText(panel.querySelector('#account-keys-add-result'), 'the setup add-wallet result');
   // Asserted BEFORE the address is used: an unfinished add once fed "Adding…"
   // to Revoke here and surfaced as a misleading "No such wallet" (see top of file).
   assert.match(addResult, /^Added \S+$/, `the setup add must have produced a real address before Revoke uses it, got: ${addResult}`);
   const addedAddress = addResult.replace('Added ', '').trim();
 
-  const actionResult = panel.querySelector('[data-account-keys-action-result]');
-  setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), addedAddress);
-  panel.querySelector('[data-account-keys-revoke]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  const actionResult = panel.querySelector('#account-keys-action-result');
+  setInputValue(dom.window, panel.querySelector('#account-keys-action [name="address"]'), addedAddress);
+  panel.querySelector('[data-action="keys-revoke"]').click();
   assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before a wallet is revoked');
 
   const result = await settledText(actionResult, 'the revoke result');
@@ -288,7 +280,7 @@ test('clicking the real "Revoke" button genuinely retires a wallet, recorded in 
   // library -- clicking Revoke again must surface that failure, not
   // silently "succeed" a second time. The dialog still appears (approval
   // gates the library call, which is the thing that then refuses it).
-  panel.querySelector('[data-account-keys-revoke]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  panel.querySelector('[data-action="keys-revoke"]').click();
   assert.ok(await approveAuthorizationDialog(dom), 'the dialog must appear again for the second revoke attempt too');
   assert.match(await settledText(actionResult, 'the second revoke result'), /No such wallet on this identity/, 're-revoking an already-revoked wallet through the real UI must surface the real refusal, not silently succeed');
 });
@@ -296,31 +288,31 @@ test('clicking the real "Revoke" button genuinely retires a wallet, recorded in 
 test('clicking the real "Delegate to identity" then "Revoke delegation" buttons genuinely create and revoke a real signed grant', async () => {
   const { dom, page } = mountAccountPage();
   await signIn(dom, page);
-  page.querySelector('[data-account-tab="keys"]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  openTab(dom, page, 'Signing keys');
   const panel = page.querySelector('[data-account-panel="keys"]');
 
-  setInputValue(dom.window, panel.querySelector('[data-account-keys-address]'), DEFAULT_ADDRESS);
-  panel.querySelector('[data-account-keys-delegate]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  setInputValue(dom.window, panel.querySelector('#account-keys-action [name="address"]'), DEFAULT_ADDRESS);
+  panel.querySelector('[data-action="keys-delegate"]').click();
   assert.ok(await approveAuthorizationDialog(dom), 'the real Scoped Claim Authorization dialog must appear before delegating a wallet');
 
-  const actionResult = panel.querySelector('[data-account-keys-action-result]');
+  const actionResult = panel.querySelector('#account-keys-action-result');
   let result = await settledText(actionResult, 'the delegate result');
   assert.match(result, /^Delegated receive\+spend to this identity$/, `the real delegate result must show success, got: ${result}`);
 
   // The real, signed delegation now appears in the live list via
   // `identity.walletDelegations` (also a live getter, added the same
   // round as `walletAddresses`).
-  let list = panel.querySelector('[data-account-keys-list]');
-  const delegatedLine = [...list.querySelectorAll('li')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
+  let list = panel.querySelector('#account-keys-list');
+  const delegatedLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
   assert.match(delegatedLine.textContent, /delegated to identity/);
 
   actionResult.textContent = ''; // read the revoke's own outcome, not the delegate line above
-  panel.querySelector('[data-account-keys-revoke-delegation]').dispatchEvent(new dom.window.Event('click', { bubbles: true }));
+  panel.querySelector('[data-action="keys-revoke-delegation"]').click();
   assert.ok(await approveAuthorizationDialog(dom), 'the real dialog must appear before revoking the delegation too');
   result = await settledText(actionResult, 'the revoke-delegation result');
   assert.match(result, new RegExp('^Revoked the delegation for ' + DEFAULT_ADDRESS));
 
-  list = panel.querySelector('[data-account-keys-list]');
-  const revokedLine = [...list.querySelectorAll('li')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
+  list = panel.querySelector('#account-keys-list');
+  const revokedLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
   assert.match(revokedLine.textContent, /delegation revoked/, 'the live list must reflect the real revoked-delegation state immediately');
 });

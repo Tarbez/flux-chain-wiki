@@ -9,10 +9,14 @@ assert(build.includes(out), 'the build script names js/admin/auth.js, so the tes
 const tmpBuild = path.join(path.dirname(out), 'build.cjs'); fs.writeFileSync(tmpBuild, build);
 execFileSync(process.execPath, [tmpBuild], { cwd: process.cwd(), stdio: 'pipe' });
 assert.equal(fs.readFileSync(out, 'utf8'), fs.readFileSync('js/admin/auth.js', 'utf8'), 'js/admin/auth.js is stale: run node scripts/build-auth.cjs');
+// 1b. The build writes into this repo only. Until 2026-10-23 it wrote the fresh bundle into every sibling site under
+//     flux/, which from a worktree meant other repos' main folders (the owner ruled it out that day). The only
+//     write left is esbuild's --outfile; no fs write call may come back.
+assert(!/\b(writeFileSync|writeFile|copyFileSync|copyFile|cpSync|renameSync|appendFileSync|createWriteStream)\b/.test(fs.readFileSync('scripts/build-auth.cjs', 'utf8')), 'scripts/build-auth.cjs must write nothing but its --outfile');
 
 // 2. The bundle is made of the shared canonical parts and carries no derivation of its own.
 const entry = fs.readFileSync('scripts/auth-entry.js', 'utf8');
-for (const shared of ["'@deadark/ark-ui/flux-auth'", "'@deadark/ark-ui/flux-auth-ui'", "'flux-auth/root-from-mnemonic'", "'deadark-identity-core/root-signing-handle'"]) assert(entry.includes(shared), shared);
+for (const shared of ["'@deadark/ark-ui/flux-auth'", "'@deadark/ark-ui/flux-auth-ui'", "'fxn-auth/root-from-mnemonic'", "'deadark-identity-core/root-signing-handle'"]) assert(entry.includes(shared), shared);
 const code = entry.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 assert(!/bip39|nacl|PBKDF2|HKDF|flux-identity-ed25519/i.test(code), 'the entry composes shared modules; it must not re-derive a root itself');
 
@@ -29,7 +33,10 @@ for (const editorPiece of ['js/admin/admin.js', 'js/admin/store.js', 'js/admin/p
 const app = fs.readFileSync('admin-app.html', 'utf8');
 assert(!app.includes('js/admin/auth.js') && !app.includes('meshAuth'), 'the editor page carries no sign-in bundle');
 assert(app.includes('js/admin/admin.js') && app.includes('js/admin/publish.js'));
-assert(EDITOR_FILES.every((rel) => app.indexOf('js/admin/authorization-view.js') < app.indexOf(rel)), 'admin editor loads the shared authorization view before its consumer (js/admin/mesh.js) and every other editor module');
+// Order by <script src> tags only: a comment that names a module (e.g. js/admin/ark-host.js in the header's
+// segmented-group note) is not a load, and matched first twice before (2026-10-17, 2026-10-19).
+const scriptAt = (rel) => app.indexOf('<script src="' + rel + '"');
+assert(scriptAt('js/admin/authorization-view.js') >= 0 && EDITOR_FILES.every((rel) => scriptAt(rel) > scriptAt('js/admin/authorization-view.js')), 'admin editor loads the shared authorization view before its consumer (js/admin/mesh.js) and every other editor module');
 assert(fs.existsSync('js/admin/authorization-view.js'), 'shared authorization view bundle is missing');
 const authorizationEntry = fs.readFileSync('scripts/authorization-view-entry.js', 'utf8');
 assert(authorizationEntry.includes("'@deadark/ark-ui/flux-authorization-view'"), 'wiki authorization bridge must consume Ark UI shared view data');

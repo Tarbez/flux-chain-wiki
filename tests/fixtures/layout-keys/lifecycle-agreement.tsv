@@ -1,0 +1,81 @@
+# key	tag	text -- layout keys of /lifecycle/agreement before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeAgreement lifecycleAgreement03 / AGREEMENTAgree on what comes next.You and the provider record the same accepted terms for the job.The participants have one
+page:/nav:1	nav	HomeAgreement lifecycleAgreement
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/a:2	a	Agreement lifecycle
+page:/nav:1/a:2/svg:1	svg	
+page:/nav:1/a:2/svg:1/path:1	path	
+page:/nav:1/a:2/svg:1/path:2	path	
+page:/nav:1/span:1	span	Agreement
+page:/div:1	div	03 / AGREEMENTAgree on what comes next.You and the provider record the same accepted terms for the job.The participants have one inspectable set of terms.Answer
+page:/div:1/div:1	div	03 / AGREEMENTAgree on what comes next.You and the provider record the same accepted terms for the job.The participants have one inspectable set of terms.Answer
+page:/div:1/div:1/p:1	p	03 / AGREEMENT
+page:/div:1/div:1/h1:1	h1	Agree on what comes next.
+page:/div:1/div:1/div:1	div	You and the provider record the same accepted terms for the job.The participants have one inspectable set of terms.
+page:/div:1/div:1/div:1/p:1	p	You and the provider record the same accepted terms for the job.
+page:/div:1/div:1/div:1/p:2	p	The participants have one inspectable set of terms.
+page:/div:1/div:1/nav:1	nav	AnswerUnderstand whyEvidence
+page:/div:1/div:1/nav:1/button:1	button	Answer
+page:/div:1/div:1/nav:1/button:1/svg:1	svg	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:2	button	Understand why
+page:/div:1/div:1/nav:1/button:2/svg:1	svg	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3	button	Evidence
+page:/div:1/div:1/nav:1/button:3/svg:1	svg	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:5	path	
+page:/div:1/div:1/aside:1	aside	Not yet establishedaccepted terms do not prove the replication happened or that downstream settlement occurred.
+page:/div:1/div:1/aside:1/strong:1	strong	Not yet established
+page:/div:1/div:1/aside:1/p:1	p	accepted terms do not prove the replication happened or that downstream settlement occurred.
+page:/div:1/button:1	button	Show the illustration
+page:/div:1/figure:1	figure	ILLUSTRATIONNOT A LIVE RECORDThe shared commitmentCLIENTThe requestPROVIDERThe offerONE SHARED RECORDThe accepted terms link both sides.Both sidesThe linkChoose
+page:/div:1/figure:1/div:1	div	ILLUSTRATIONNOT A LIVE RECORD
+page:/div:1/figure:1/div:1/span:1	span	ILLUSTRATION
+page:/div:1/figure:1/div:1/span:2	span	NOT A LIVE RECORD
+page:/div:1/figure:1/figcaption:1	figcaption	The shared commitment
+page:/div:1/figure:1/div:2	div	CLIENTThe requestPROVIDERThe offerONE SHARED RECORDThe accepted terms link both sides.
+page:/div:1/figure:1/div:2/div:1	div	CLIENTThe request
+page:/div:1/figure:1/div:2/div:1/span:1	span	CLIENT
+page:/div:1/figure:1/div:2/div:1/p:1	p	The request
+page:/div:1/figure:1/div:2/div:2	div	PROVIDERThe offer
+page:/div:1/figure:1/div:2/div:2/span:1	span	PROVIDER
+page:/div:1/figure:1/div:2/div:2/p:1	p	The offer
+page:/div:1/figure:1/div:2/div:3	div	ONE SHARED RECORDThe accepted terms link both sides.
+page:/div:1/figure:1/div:2/div:3/span:1	span	ONE SHARED RECORD
+page:/div:1/figure:1/div:2/div:3/p:1	p	The accepted terms link both sides.
+page:/div:1/figure:1/canvas:1	canvas	
+page:/div:1/figure:1/p:1	p	
+page:/div:1/figure:1/nav:1	nav	Both sidesThe link
+page:/div:1/figure:1/nav:1/button:1	button	Both sides
+page:/div:1/figure:1/nav:1/button:2	button	The link
+page:/div:1/figure:1/p:2	p	Choose a label to inspect this part.
+page:/nav:2	nav	01Intent02Offer03Agreement04Fulfillment05Receipt
+page:/nav:2/a:1	a	01Intent
+page:/nav:2/a:1/span:1	span	01
+page:/nav:2/a:2	a	02Offer
+page:/nav:2/a:2/span:1	span	02
+page:/nav:2/a:3	a	03Agreement
+page:/nav:2/a:3/span:1	span	03
+page:/nav:2/a:4	a	04Fulfillment
+page:/nav:2/a:4/span:1	span	04
+page:/nav:2/a:5	a	05Receipt
+page:/nav:2/a:5/span:1	span	05
+page:/nav:3	nav	← OfferContinue to Fulfillment
+page:/nav:3/a:1	a	← Offer
+page:/nav:3/a:2	a	Continue to Fulfillment
+page:/nav:3/a:2/svg:1	svg	
+page:/nav:3/a:2/svg:1/path:1	path	
+page:/nav:3/a:2/svg:1/path:2	path	
+page:/div:2	div	

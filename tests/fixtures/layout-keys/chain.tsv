@@ -1,0 +1,138 @@
+# key	tag	text -- layout keys of /chain before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeEvery identity, its own chainSwapsTransfersStakingGovernance01Sign02Check03Extend04Replicate05ResolveGwhoYLEDGERENTRYwhat kindV3versionM1760…whenJ42position
+page:/a:1	a	Home
+page:/a:1/svg:1	svg	
+page:/a:1/svg:1/path:1	path	
+page:/a:1/svg:1/path:2	path	
+page:/a:1/span:1	span	Home
+id:chain-title	h1	Every identity, its own chain
+page:/div:1	div	SwapsTransfersStakingGovernance
+page:/div:1/button:1	button	Swaps
+page:/div:1/button:2	button	Transfers
+page:/div:1/button:3	button	Staking
+page:/div:1/button:4	button	Governance
+page:/div:2	div	01Sign02Check03Extend04Replicate05ResolveGwhoYLEDGERENTRYwhat kindV3versionM1760…whenJ42positionC2b9d…extendsS9f1…signatureGgrammarSsignatureCheadKpeersmeaning 
+page:/div:2/ol:1	ol	01Sign02Check03Extend04Replicate05Resolve
+page:/div:2/ol:1/li:1	li	01Sign
+page:/div:2/ol:1/li:1/a:1	a	01Sign
+page:/div:2/ol:1/li:1/a:1/span:1	span	01
+page:/div:2/ol:1/li:1/a:1/span:2	span	Sign
+page:/div:2/ol:1/li:2	li	02Check
+page:/div:2/ol:1/li:2/a:1	a	02Check
+page:/div:2/ol:1/li:2/a:1/span:1	span	02
+page:/div:2/ol:1/li:2/a:1/span:2	span	Check
+page:/div:2/ol:1/li:3	li	03Extend
+page:/div:2/ol:1/li:3/a:1	a	03Extend
+page:/div:2/ol:1/li:3/a:1/span:1	span	03
+page:/div:2/ol:1/li:3/a:1/span:2	span	Extend
+page:/div:2/ol:1/li:4	li	04Replicate
+page:/div:2/ol:1/li:4/a:1	a	04Replicate
+page:/div:2/ol:1/li:4/a:1/span:1	span	04
+page:/div:2/ol:1/li:4/a:1/span:2	span	Replicate
+page:/div:2/ol:1/li:5	li	05Resolve
+page:/div:2/ol:1/li:5/a:1	a	05Resolve
+page:/div:2/ol:1/li:5/a:1/span:1	span	05
+page:/div:2/ol:1/li:5/a:1/span:2	span	Resolve
+page:/div:2/div:1	div	GwhoYLEDGERENTRYwhat kindV3versionM1760…whenJ42positionC2b9d…extendsS9f1…signatureGgrammarSsignatureCheadKpeersmeaning is never checked hereJ38J39J40J41J42one c
+page:/div:2/div:1/svg:1	svg	GwhoYLEDGERENTRYwhat kindV3versionM1760…whenJ42positionC2b9d…extendsS9f1…signatureGgrammarSsignatureCheadKpeersmeaning is never checked hereJ38J39J40J41J42one c
+page:/div:2/div:1/svg:1/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1	g	GwhoYLEDGERENTRYwhat kindV3versionM1760…whenJ42positionC2b9d…extendsS9f1…signature
+page:/div:2/div:1/svg:1/g:1/g:1	g	Gwho
+page:/div:2/div:1/svg:1/g:1/g:1/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:1/text:1	text	G
+page:/div:2/div:1/svg:1/g:1/g:1/text:2	text	who
+page:/div:2/div:1/svg:1/g:1/g:1/path:1	path	
+page:/div:2/div:1/svg:1/g:1/g:2	g	YLEDGERENTRYwhat kind
+page:/div:2/div:1/svg:1/g:1/g:2/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:2/text:1	text	YLEDGERENTRY
+page:/div:2/div:1/svg:1/g:1/g:2/text:2	text	what kind
+page:/div:2/div:1/svg:1/g:1/g:2/path:1	path	
+page:/div:2/div:1/svg:1/g:1/g:3	g	V3version
+page:/div:2/div:1/svg:1/g:1/g:3/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:3/text:1	text	V3
+page:/div:2/div:1/svg:1/g:1/g:3/text:2	text	version
+page:/div:2/div:1/svg:1/g:1/g:3/path:1	path	
+page:/div:2/div:1/svg:1/g:1/g:4	g	M1760…when
+page:/div:2/div:1/svg:1/g:1/g:4/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:4/text:1	text	M1760…
+page:/div:2/div:1/svg:1/g:1/g:4/text:2	text	when
+page:/div:2/div:1/svg:1/g:1/g:4/path:1	path	
+page:/div:2/div:1/svg:1/g:1/g:5	g	J42position
+page:/div:2/div:1/svg:1/g:1/g:5/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:5/text:1	text	J42
+page:/div:2/div:1/svg:1/g:1/g:5/text:2	text	position
+page:/div:2/div:1/svg:1/g:1/g:5/path:1	path	
+page:/div:2/div:1/svg:1/g:1/g:6	g	C2b9d…extends
+page:/div:2/div:1/svg:1/g:1/g:6/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:6/text:1	text	C2b9d…
+page:/div:2/div:1/svg:1/g:1/g:6/text:2	text	extends
+page:/div:2/div:1/svg:1/g:1/g:6/path:1	path	
+page:/div:2/div:1/svg:1/g:1/g:7	g	S9f1…signature
+page:/div:2/div:1/svg:1/g:1/g:7/rect:1	rect	
+page:/div:2/div:1/svg:1/g:1/g:7/text:1	text	S9f1…
+page:/div:2/div:1/svg:1/g:1/g:7/text:2	text	signature
+page:/div:2/div:1/svg:1/g:2	g	GgrammarSsignatureCheadKpeersmeaning is never checked here
+page:/div:2/div:1/svg:1/g:2/g:1	g	Ggrammar
+page:/div:2/div:1/svg:1/g:2/g:1/circle:1	circle	
+page:/div:2/div:1/svg:1/g:2/g:1/text:1	text	G
+page:/div:2/div:1/svg:1/g:2/g:1/text:2	text	grammar
+page:/div:2/div:1/svg:1/g:2/g:2	g	Ssignature
+page:/div:2/div:1/svg:1/g:2/g:2/circle:1	circle	
+page:/div:2/div:1/svg:1/g:2/g:2/text:1	text	S
+page:/div:2/div:1/svg:1/g:2/g:2/text:2	text	signature
+page:/div:2/div:1/svg:1/g:2/g:3	g	Chead
+page:/div:2/div:1/svg:1/g:2/g:3/circle:1	circle	
+page:/div:2/div:1/svg:1/g:2/g:3/text:1	text	C
+page:/div:2/div:1/svg:1/g:2/g:3/text:2	text	head
+page:/div:2/div:1/svg:1/g:2/g:4	g	Kpeers
+page:/div:2/div:1/svg:1/g:2/g:4/circle:1	circle	
+page:/div:2/div:1/svg:1/g:2/g:4/text:1	text	K
+page:/div:2/div:1/svg:1/g:2/g:4/text:2	text	peers
+page:/div:2/div:1/svg:1/g:2/text:1	text	meaning is never checked here
+page:/div:2/div:1/svg:1/g:3	g	J38J39J40J41J42one chain per identity · nobody else had to wait
+page:/div:2/div:1/svg:1/g:3/g:1	g	J38
+page:/div:2/div:1/svg:1/g:3/g:1/rect:1	rect	
+page:/div:2/div:1/svg:1/g:3/g:1/text:1	text	J38
+page:/div:2/div:1/svg:1/g:3/path:1	path	
+page:/div:2/div:1/svg:1/g:3/g:2	g	J39
+page:/div:2/div:1/svg:1/g:3/g:2/rect:1	rect	
+page:/div:2/div:1/svg:1/g:3/g:2/text:1	text	J39
+page:/div:2/div:1/svg:1/g:3/path:2	path	
+page:/div:2/div:1/svg:1/g:3/g:3	g	J40
+page:/div:2/div:1/svg:1/g:3/g:3/rect:1	rect	
+page:/div:2/div:1/svg:1/g:3/g:3/text:1	text	J40
+page:/div:2/div:1/svg:1/g:3/path:3	path	
+page:/div:2/div:1/svg:1/g:3/g:4	g	J41
+page:/div:2/div:1/svg:1/g:3/g:4/rect:1	rect	
+page:/div:2/div:1/svg:1/g:3/g:4/text:1	text	J41
+page:/div:2/div:1/svg:1/g:3/path:4	path	
+page:/div:2/div:1/svg:1/g:3/g:5	g	J42
+page:/div:2/div:1/svg:1/g:3/g:5/rect:1	rect	
+page:/div:2/div:1/svg:1/g:3/g:5/text:1	text	J42
+page:/div:2/div:1/svg:1/g:3/text:1	text	one chain per identity · nobody else had to wait
+page:/div:2/div:1/svg:1/g:4	g	
+page:/div:2/div:1/svg:1/g:4/circle:1	circle	
+page:/div:2/div:1/svg:1/g:4/circle:2	circle	
+page:/div:2/div:1/svg:1/g:4/circle:3	circle	
+page:/div:2/div:1/svg:1/g:4/circle:4	circle	
+page:/div:2/div:1/svg:1/g:4/circle:5	circle	
+page:/div:2/div:1/svg:1/g:4/circle:6	circle	
+page:/div:2/div:1/svg:1/g:4/circle:7	circle	
+page:/div:2/div:1/svg:1/g:4/circle:8	circle	
+page:/div:2/div:1/svg:1/g:4/circle:9	circle	
+page:/div:2/div:1/svg:1/g:4/circle:10	circle	
+page:/div:2/div:1/svg:1/g:4/circle:11	circle	
+page:/div:2/div:1/svg:1/g:4/circle:12	circle	
+page:/div:2/div:1/svg:1/g:4/text:1	text	
+page:/div:2/div:1/svg:1/g:5	g	36 FXN → studio.fxnDeFi resolver
+page:/div:2/div:1/svg:1/g:5/rect:1	rect	
+page:/div:2/div:1/svg:1/g:5/text:1	text	36 FXN → studio.fxn
+page:/div:2/div:1/svg:1/g:5/text:2	text	DeFi resolver
+page:/div:2/div:1/svg:1/text:1	text	illustrative values · the record shape is the real wire grammar
+page:/div:2/div:1/strong:1	strong	“An intent to swap. The launch’s signer resolves the batch and signs the result. That signed result is what peers store.”
+page:/div:2/div:1/button:1	button	
+page:/div:2/div:1/button:1/svg:1	svg	
+page:/div:2/div:1/button:1/svg:1/path:1	path	
+page:/div:2/div:1/button:1/svg:2	svg	
+page:/div:2/div:1/button:1/svg:2/path:1	path	
+page:/div:3	div	

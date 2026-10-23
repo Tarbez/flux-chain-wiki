@@ -1,0 +1,855 @@
+# key	tag	text -- layout keys of /stats before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	DEFXN · Mesh performanceFleet dashboardLive capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between thi
+page:/div:1	div	DEFXN · Mesh performanceFleet dashboardLive capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between thi
+page:/div:1/header:1	header	DEFXN · Mesh performanceFleet dashboardLive capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between thi
+page:/div:1/header:1/div:1	div	DEFXN · Mesh performanceFleet dashboardLive capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between thi
+page:/div:1/header:1/div:1/p:1	p	DEFXN · Mesh performance
+id:stats-title	h1	Fleet dashboard
+page:/div:1/header:1/div:1/p:2	p	Live capacity from the fleet’s hourly self-bench, the audited runs behind every number, and what still stands between this and production.
+page:/div:1/header:1/div:2	div	Pulse unreachableNo pulse received yetRefresh
+page:/div:1/header:1/div:2/p:1	p	Pulse unreachable
+page:/div:1/header:1/div:2/p:2	p	No pulse received yet
+page:/div:1/header:1/div:2/p:3	p	
+page:/div:1/header:1/div:2/button:1	button	Refresh
+page:/div:1/div:1	div	LiveHourly self-bench, fleet-wide. Record admission from flx-bk2 against every node; swaps, transfers, stores and stakes from each node’s own hardware, summed h
+page:/div:1/div:1/h2:1	h2	Live
+page:/div:1/div:1/p:1	p	Hourly self-bench, fleet-wide. Record admission from flx-bk2 against every node; swaps, transfers, stores and stakes from each node’s own hardware, summed here.
+page:/div:1/div:2	div	Nodes online–no live value; nothing substitutedRecord admission now–records/sno live value; nothing substitutedOperations in last bench–no live value; nothing s
+page:/div:1/div:2/article:1	article	Nodes online–no live value; nothing substituted
+page:/div:1/div:2/article:1/p:1	p	Nodes online
+page:/div:1/div:2/article:1/p:2	p	–
+page:/div:1/div:2/article:1/p:2/strong:1	strong	–
+page:/div:1/div:2/article:1/p:2/span:1	span	
+page:/div:1/div:2/article:1/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:2	article	Record admission now–records/sno live value; nothing substituted
+page:/div:1/div:2/article:2/p:1	p	Record admission now
+page:/div:1/div:2/article:2/p:2	p	–records/s
+page:/div:1/div:2/article:2/p:2/strong:1	strong	–
+page:/div:1/div:2/article:2/p:2/span:1	span	records/s
+page:/div:1/div:2/article:2/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:3	article	Operations in last bench–no live value; nothing substituted
+page:/div:1/div:2/article:3/p:1	p	Operations in last bench
+page:/div:1/div:2/article:3/p:2	p	–
+page:/div:1/div:2/article:3/p:2/strong:1	strong	–
+page:/div:1/div:2/article:3/p:2/span:1	span	
+page:/div:1/div:2/article:3/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:4	article	Errors in last bench–no live value; nothing substituted
+page:/div:1/div:2/article:4/p:1	p	Errors in last bench
+page:/div:1/div:2/article:4/p:2	p	–
+page:/div:1/div:2/article:4/p:2/strong:1	strong	–
+page:/div:1/div:2/article:4/p:2/span:1	span	
+page:/div:1/div:2/article:4/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:5	article	Swaps / s, fleet-wide–swaps/sno live value; nothing substituted
+page:/div:1/div:2/article:5/p:1	p	Swaps / s, fleet-wide
+page:/div:1/div:2/article:5/p:2	p	–swaps/s
+page:/div:1/div:2/article:5/p:2/strong:1	strong	–
+page:/div:1/div:2/article:5/p:2/span:1	span	swaps/s
+page:/div:1/div:2/article:5/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:6	article	Transfers / s, fleet-wide–transfers/sno live value; nothing substituted
+page:/div:1/div:2/article:6/p:1	p	Transfers / s, fleet-wide
+page:/div:1/div:2/article:6/p:2	p	–transfers/s
+page:/div:1/div:2/article:6/p:2/strong:1	strong	–
+page:/div:1/div:2/article:6/p:2/span:1	span	transfers/s
+page:/div:1/div:2/article:6/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:7	article	Stores / s, fleet-wide–results/sno live value; nothing substituted
+page:/div:1/div:2/article:7/p:1	p	Stores / s, fleet-wide
+page:/div:1/div:2/article:7/p:2	p	–results/s
+page:/div:1/div:2/article:7/p:2/strong:1	strong	–
+page:/div:1/div:2/article:7/p:2/span:1	span	results/s
+page:/div:1/div:2/article:7/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:8	article	Stakes / s, fleet-wide–stakes/sno live value; nothing substituted
+page:/div:1/div:2/article:8/p:1	p	Stakes / s, fleet-wide
+page:/div:1/div:2/article:8/p:2	p	–stakes/s
+page:/div:1/div:2/article:8/p:2/strong:1	strong	–
+page:/div:1/div:2/article:8/p:2/span:1	span	stakes/s
+page:/div:1/div:2/article:8/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/article:9	article	Swaps per core–swaps/sno live value; nothing substituted
+page:/div:1/div:2/article:9/p:1	p	Swaps per core
+page:/div:1/div:2/article:9/p:2	p	–swaps/s
+page:/div:1/div:2/article:9/p:2/strong:1	strong	–
+page:/div:1/div:2/article:9/p:2/span:1	span	swaps/s
+page:/div:1/div:2/article:9/p:3	p	no live value; nothing substituted
+page:/div:1/div:2/section:1	section	NodesThe fleet pulse could not be reached (fetch is not defined). The dated evidence records further down still stand; no live number has been put in their plac
+page:/div:1/div:2/section:1/p:1	p	Nodes
+page:/div:1/div:2/section:1/ul:1	ul	
+page:/div:1/div:2/section:1/p:2	p	The fleet pulse could not be reached (fetch is not defined). The dated evidence records further down still stand; no live number has been put in their place.
+page:/div:1/div:2/section:2	section	Nodes · swaps, transfers, stores, stakesThe fleet pulse could not be reached (fetch is not defined).
+page:/div:1/div:2/section:2/p:1	p	Nodes · swaps, transfers, stores, stakes
+page:/div:1/div:2/section:2/div:1	div	
+page:/div:1/div:2/section:2/p:2	p	The fleet pulse could not be reached (fetch is not defined).
+page:/div:1/div:3	div	Chain · dense-wirenodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to
+page:/div:1/div:3/h2:1	h2	Chain · dense-wire
+page:/div:1/div:3/p:1	p	nodes.defxn.com’s chain-server, a separate mesh from the ark-miner-cli nodes above — the one future apps (starting with the chat app) write to. Live where the w
+page:/div:1/div:4	div	Chain reachableunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Re
+page:/div:1/div:4/article:1	article	Chain reachableunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Re
+page:/div:1/div:4/article:1/p:1	p	Chain reachable
+page:/div:1/div:4/article:1/p:2	p	unavailable
+page:/div:1/div:4/article:1/p:2/strong:1	strong	unavailable
+page:/div:1/div:4/article:1/p:2/span:1	span	
+page:/div:1/div:4/article:1/p:3	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Remedy: check the connection
+page:/div:1/div:4/article:2	article	Peers connected nowunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:2/p:1	p	Peers connected now
+page:/div:1/div:4/article:2/p:2	p	unavailable
+page:/div:1/div:4/article:2/p:2/strong:1	strong	unavailable
+page:/div:1/div:4/article:2/p:2/span:1	span	
+page:/div:1/div:4/article:2/p:3	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:3	article	Pending segment votesunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:3/p:1	p	Pending segment votes
+page:/div:1/div:4/article:3/p:2	p	unavailable
+page:/div:1/div:4/article:3/p:2/strong:1	strong	unavailable
+page:/div:1/div:4/article:3/p:2/span:1	span	
+page:/div:1/div:4/article:3/p:3	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:4	article	Lines in pending segmentunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:4/p:1	p	Lines in pending segment
+page:/div:1/div:4/article:4/p:2	p	unavailable
+page:/div:1/div:4/article:4/p:2/strong:1	strong	unavailable
+page:/div:1/div:4/article:4/p:2/span:1	span	
+page:/div:1/div:4/article:4/p:3	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:5	article	Live supportersunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:5/p:1	p	Live supporters
+page:/div:1/div:4/article:5/p:2	p	unavailable
+page:/div:1/div:4/article:5/p:2/strong:1	strong	unavailable
+page:/div:1/div:4/article:5/p:2/span:1	span	
+page:/div:1/div:4/article:5/p:3	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:6	article	Live providersunavailableChain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/article:6/p:1	p	Live providers
+page:/div:1/div:4/article:6/p:2	p	unavailable
+page:/div:1/div:4/article:6/p:2/strong:1	strong	unavailable
+page:/div:1/div:4/article:6/p:2/span:1	span	
+page:/div:1/div:4/article:6/p:3	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined)
+page:/div:1/div:4/section:1	section	Not yet availableNamed, not guessedSigner liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command 
+page:/div:1/div:4/section:1/p:1	p	Not yet available
+page:/div:1/div:4/section:1/h2:1	h2	Named, not guessed
+page:/div:1/div:4/section:1/p:2	p	Signer liveness (how many of the 10 configured signers are live right now): not available — the wire protocol has no command exposing per-signer vote identity, 
+page:/div:1/div:4/section:1/p:3	p	Supporters and providers above are distinct live roster identities whose heartbeat has not expired; they are not WebSocket connection counts and are not earning
+page:/div:1/div:5	div	Sovereign chains · compute creditedChains launched on top of the base chain above, each with its own 1B-unit native token and its own compute-reward reserve. A 
+page:/div:1/div:5/h2:1	h2	Sovereign chains · compute credited
+page:/div:1/div:5/p:1	p	Chains launched on top of the base chain above, each with its own 1B-unit native token and its own compute-reward reserve. A number here means a real supporter-
+page:/div:1/section:1	section	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Remedy: check the connection
+page:/div:1/section:1/div:1	div	
+page:/div:1/section:1/p:1	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Remedy: check the connection
+page:/div:1/div:6	div	Top contributors · per chainReal per-identity holdings, ranked. The project’s own treasury and compute-reserve accounts are excluded server-side so this list is
+page:/div:1/div:6/h2:1	h2	Top contributors · per chain
+page:/div:1/div:6/p:1	p	Real per-identity holdings, ranked. The project’s own treasury and compute-reserve accounts are excluded server-side so this list is supporters and providers on
+page:/div:1/section:2	section	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Remedy: check the connection
+page:/div:1/section:2/div:1	div	
+page:/div:1/section:2/p:1	p	Chain pulse unavailable: /api/chain-pulse could not be reached (fetch is not defined). Missing: a network path to /api/chain-pulse. Remedy: check the connection
+page:/div:1/div:7	div	Fleet capacity · chain-server meshEvery dense-wire chain-server node, probed directly. Signer nodes can sign and propose segments; peer nodes bootstrap and serv
+page:/div:1/div:7/h2:1	h2	Fleet capacity · chain-server mesh
+page:/div:1/div:7/p:1	p	Every dense-wire chain-server node, probed directly. Signer nodes can sign and propose segments; peer nodes bootstrap and serve but never sign — a real, live re
+page:/div:1/div:8	div	Signers upunavailableFleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined). Missing: a network path to /api/chain-fl
+page:/div:1/div:8/article:1	article	Signers upunavailableFleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined). Missing: a network path to /api/chain-fl
+page:/div:1/div:8/article:1/p:1	p	Signers up
+page:/div:1/div:8/article:1/p:2	p	unavailable
+page:/div:1/div:8/article:1/p:2/strong:1	strong	unavailable
+page:/div:1/div:8/article:1/p:2/span:1	span	
+page:/div:1/div:8/article:1/p:3	p	Fleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined). Missing: a network path to /api/chain-fleet-capacity. Remedy:
+page:/div:1/div:8/article:2	article	Signer floorunavailableFleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined)
+page:/div:1/div:8/article:2/p:1	p	Signer floor
+page:/div:1/div:8/article:2/p:2	p	unavailable
+page:/div:1/div:8/article:2/p:2/strong:1	strong	unavailable
+page:/div:1/div:8/article:2/p:2/span:1	span	
+page:/div:1/div:8/article:2/p:3	p	Fleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined)
+page:/div:1/div:8/article:3	article	Peers upunavailableFleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined)
+page:/div:1/div:8/article:3/p:1	p	Peers up
+page:/div:1/div:8/article:3/p:2	p	unavailable
+page:/div:1/div:8/article:3/p:2/strong:1	strong	unavailable
+page:/div:1/div:8/article:3/p:2/span:1	span	
+page:/div:1/div:8/article:3/p:3	p	Fleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined)
+page:/div:1/div:8/article:4	article	Last probeunavailableFleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined)
+page:/div:1/div:8/article:4/p:1	p	Last probe
+page:/div:1/div:8/article:4/p:2	p	unavailable
+page:/div:1/div:8/article:4/p:2/strong:1	strong	unavailable
+page:/div:1/div:8/article:4/p:2/span:1	span	
+page:/div:1/div:8/article:4/p:3	p	Fleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined)
+page:/div:1/section:3	section	Fleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined). Missing: a network path to /api/chain-fleet-capacity. Remedy:
+page:/div:1/section:3/div:1	div	
+page:/div:1/section:3/p:1	p	Fleet capacity unavailable: /api/chain-fleet-capacity could not be reached (fetch is not defined). Missing: a network path to /api/chain-fleet-capacity. Remedy:
+page:/div:1/div:9	div	Measured resolver · 2026-10-10BENCH-012. Two parties sign their intent; a resolver shard resolves a batch and signs the result — that signature is the truth; re
+page:/div:1/div:9/h2:1	h2	Measured resolver · 2026-10-10
+page:/div:1/div:9/p:1	p	BENCH-012. Two parties sign their intent; a resolver shard resolves a batch and signs the result — that signature is the truth; replicas store it without re-ver
+page:/div:1/div:10	div	Swaps resolved / s39349swaps/s153.7 batch auctions per second x 256 swaps per batch, on one resolver shard. Resolution only — never add the broadcast to this.Sw
+page:/div:1/div:10/article:1	article	Swaps resolved / s39349swaps/s153.7 batch auctions per second x 256 swaps per batch, on one resolver shard. Resolution only — never add the broadcast to this.
+page:/div:1/div:10/article:1/p:1	p	Swaps resolved / s
+page:/div:1/div:10/article:1/p:2	p	39349swaps/s
+page:/div:1/div:10/article:1/p:2/strong:1	strong	39349
+page:/div:1/div:10/article:1/p:2/span:1	span	swaps/s
+page:/div:1/div:10/article:1/p:3	p	153.7 batch auctions per second x 256 swaps per batch, on one resolver shard. Resolution only — never add the broadcast to this.
+page:/div:1/div:10/article:2	article	Swaps per batch auction256swapsEvery intent in a batch clears at one price, so position inside the batch cannot change what anyone pays. 100% matched internally
+page:/div:1/div:10/article:2/p:1	p	Swaps per batch auction
+page:/div:1/div:10/article:2/p:2	p	256swaps
+page:/div:1/div:10/article:2/p:2/strong:1	strong	256
+page:/div:1/div:10/article:2/p:2/span:1	span	swaps
+page:/div:1/div:10/article:2/p:3	p	Every intent in a batch clears at one price, so position inside the batch cannot change what anyone pays. 100% matched internally with zero curve slippage.
+page:/div:1/div:10/article:3	article	Batch latency13.874msBatched signature verification is 10.403 ms of it; the shard signing the result — the thing that makes it true — is 0.0403 ms.
+page:/div:1/div:10/article:3/p:1	p	Batch latency
+page:/div:1/div:10/article:3/p:2	p	13.874ms
+page:/div:1/div:10/article:3/p:2/strong:1	strong	13.874
+page:/div:1/div:10/article:3/p:2/span:1	span	ms
+page:/div:1/div:10/article:3/p:3	p	Batched signature verification is 10.403 ms of it; the shard signing the result — the thing that makes it true — is 0.0403 ms.
+page:/div:1/div:10/article:4	article	Bytes per signed result180bytes580 bytes of dense FLX, 3.22x smaller after LZMA2 across a run. Audit cost: 3 Ed25519 verifications.
+page:/div:1/div:10/article:4/p:1	p	Bytes per signed result
+page:/div:1/div:10/article:4/p:2	p	180bytes
+page:/div:1/div:10/article:4/p:2/strong:1	strong	180
+page:/div:1/div:10/article:4/p:2/span:1	span	bytes
+page:/div:1/div:10/article:4/p:3	p	580 bytes of dense FLX, 3.22x smaller after LZMA2 across a run. Audit cost: 3 Ed25519 verifications.
+page:/div:1/div:10/section:1	section	Resolver registry · 20 resolversWhat can be made real todayDeFi-Swap-AMM2 signers · batch auction + AMM residualmeasuredIdentity-Name-Ownership1 signer · store 
+page:/div:1/div:10/section:1/p:1	p	Resolver registry · 20 resolvers
+page:/div:1/div:10/section:1/h2:1	h2	What can be made real today
+page:/div:1/div:10/section:1/ol:1	ol	DeFi-Swap-AMM2 signers · batch auction + AMM residualmeasuredIdentity-Name-Ownership1 signer · store and index ownershipmeasuredDevice-Enrollment1 signer · rost
+page:/div:1/div:10/section:1/ol:1/li:1	li	DeFi-Swap-AMM2 signers · batch auction + AMM residualmeasured
+page:/div:1/div:10/section:1/ol:1/li:1/p:1	p	DeFi-Swap-AMM2 signers · batch auction + AMM residual
+page:/div:1/div:10/section:1/ol:1/li:1/p:1/span:1	span	2 signers · batch auction + AMM residual
+page:/div:1/div:10/section:1/ol:1/li:1/span:1	span	
+page:/div:1/div:10/section:1/ol:1/li:1/strong:1	strong	measured
+page:/div:1/div:10/section:1/ol:1/li:2	li	Identity-Name-Ownership1 signer · store and index ownershipmeasured
+page:/div:1/div:10/section:1/ol:1/li:2/p:1	p	Identity-Name-Ownership1 signer · store and index ownership
+page:/div:1/div:10/section:1/ol:1/li:2/p:1/span:1	span	1 signer · store and index ownership
+page:/div:1/div:10/section:1/ol:1/li:2/span:1	span	
+page:/div:1/div:10/section:1/ol:1/li:2/strong:1	strong	measured
+page:/div:1/div:10/section:1/ol:1/li:3	li	Device-Enrollment1 signer · roster updatemeasured
+page:/div:1/div:10/section:1/ol:1/li:3/p:1	p	Device-Enrollment1 signer · roster update
+page:/div:1/div:10/section:1/ol:1/li:3/p:1/span:1	span	1 signer · roster update
+page:/div:1/div:10/section:1/ol:1/li:3/span:1	span	
+page:/div:1/div:10/section:1/ol:1/li:3/strong:1	strong	measured
+page:/div:1/div:10/section:1/ol:1/li:4	li	Grammar-Admission-Floorshape only · no signaturemeasured
+page:/div:1/div:10/section:1/ol:1/li:4/p:1	p	Grammar-Admission-Floorshape only · no signature
+page:/div:1/div:10/section:1/ol:1/li:4/p:1/span:1	span	shape only · no signature
+page:/div:1/div:10/section:1/ol:1/li:4/span:1	span	
+page:/div:1/div:10/section:1/ol:1/li:4/strong:1	strong	measured
+page:/div:1/div:10/section:1/ol:1/li:5	li	Stake-Position1 signer · verifies its own signaturemeasured
+page:/div:1/div:10/section:1/ol:1/li:5/p:1	p	Stake-Position1 signer · verifies its own signature
+page:/div:1/div:10/section:1/ol:1/li:5/p:1/span:1	span	1 signer · verifies its own signature
+page:/div:1/div:10/section:1/ol:1/li:5/span:1	span	
+page:/div:1/div:10/section:1/ol:1/li:5/strong:1	strong	measured
+page:/div:1/div:10/section:1/ol:1/li:6	li	15 further resolverslending, governance, vault, search, AI/TLM and morenot built
+page:/div:1/div:10/section:1/ol:1/li:6/p:1	p	15 further resolverslending, governance, vault, search, AI/TLM and more
+page:/div:1/div:10/section:1/ol:1/li:6/p:1/span:1	span	lending, governance, vault, search, AI/TLM and more
+page:/div:1/div:10/section:1/ol:1/li:6/span:1	span	
+page:/div:1/div:10/section:1/ol:1/li:6/strong:1	strong	not built
+page:/div:1/div:10/section:1/p:2	p	Not built is recorded as not built, never as zero: zero would mean measured and scored nothing. Each unbuilt resolver is a region of intent that cannot be made 
+page:/div:1/div:10/section:2	section	The binding constraintBroadcast is not pipelined449.229ms to 10 replicasTo resolve13.874 msTo broadcast449.229 msReplicas reached10Audits passed60/60Serialised,
+page:/div:1/div:10/section:2/p:1	p	The binding constraint
+page:/div:1/div:10/section:2/h2:1	h2	Broadcast is not pipelined
+page:/div:1/div:10/section:2/p:2	p	449.229ms to 10 replicas
+page:/div:1/div:10/section:2/p:2/strong:1	strong	449.229
+page:/div:1/div:10/section:2/p:2/span:1	span	ms to 10 replicas
+page:/div:1/div:10/section:2/dl:1	dl	To resolve13.874 msTo broadcast449.229 msReplicas reached10Audits passed60/60
+page:/div:1/div:10/section:2/dl:1/div:1	div	To resolve13.874 ms
+page:/div:1/div:10/section:2/dl:1/div:1/dt:1	dt	To resolve
+page:/div:1/div:10/section:2/dl:1/div:1/dd:1	dd	13.874 ms
+page:/div:1/div:10/section:2/dl:1/div:2	div	To broadcast449.229 ms
+page:/div:1/div:10/section:2/dl:1/div:2/dt:1	dt	To broadcast
+page:/div:1/div:10/section:2/dl:1/div:2/dd:1	dd	449.229 ms
+page:/div:1/div:10/section:2/dl:1/div:3	div	Replicas reached10
+page:/div:1/div:10/section:2/dl:1/div:3/dt:1	dt	Replicas reached
+page:/div:1/div:10/section:2/dl:1/div:3/dd:1	dd	10
+page:/div:1/div:10/section:2/dl:1/div:4	div	Audits passed60/60
+page:/div:1/div:10/section:2/dl:1/div:4/dt:1	dt	Audits passed
+page:/div:1/div:10/section:2/dl:1/div:4/dd:1	dd	60/60
+page:/div:1/div:10/section:2/p:3	p	Serialised, this caps the fleet near 2.2 batches/s no matter how fast the resolver gets. The resolution figures above are resolution-only — never add the broadc
+page:/div:1/div:11	div	Every operation in its own unit · 2026-10-10BENCH-013. Transfers, swaps, staking and replica storage do different amounts of work, so each is measured in its ow
+page:/div:1/div:11/h2:1	h2	Every operation in its own unit · 2026-10-10
+page:/div:1/div:11/p:1	p	BENCH-013. Transfers, swaps, staking and replica storage do different amounts of work, so each is measured in its own unit. One headline figure hid which operat
+page:/div:1/section:4	section	OperationRateUnitWhat it meansTransfer, same-shard atomic13,476transfers/sOne record per transfer.Transfer, cross-shard6,799transfers/sTwo records (send + recei
+page:/div:1/section:4/div:1	div	OperationRateUnitWhat it meansTransfer, same-shard atomic13,476transfers/sOne record per transfer.Transfer, cross-shard6,799transfers/sTwo records (send + recei
+page:/div:1/section:4/div:1/table:1	table	OperationRateUnitWhat it meansTransfer, same-shard atomic13,476transfers/sOne record per transfer.Transfer, cross-shard6,799transfers/sTwo records (send + recei
+page:/div:1/section:4/div:1/table:1/thead:1	thead	OperationRateUnitWhat it means
+page:/div:1/section:4/div:1/table:1/thead:1/tr:1	tr	OperationRateUnitWhat it means
+page:/div:1/section:4/div:1/table:1/thead:1/tr:1/th:1	th	Operation
+page:/div:1/section:4/div:1/table:1/thead:1/tr:1/th:2	th	Rate
+page:/div:1/section:4/div:1/table:1/thead:1/tr:1/th:3	th	Unit
+page:/div:1/section:4/div:1/table:1/thead:1/tr:1/th:4	th	What it means
+page:/div:1/section:4/div:1/table:1/tbody:1	tbody	Transfer, same-shard atomic13,476transfers/sOne record per transfer.Transfer, cross-shard6,799transfers/sTwo records (send + receive), so about half the atomic 
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:1	tr	Transfer, same-shard atomic13,476transfers/sOne record per transfer.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:1/td:1	td	Transfer, same-shard atomic
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:1/td:2	td	13,476
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:1/td:3	td	transfers/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:1/td:4	td	One record per transfer.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:2	tr	Transfer, cross-shard6,799transfers/sTwo records (send + receive), so about half the atomic rate. The ratio is the record count.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:2/td:1	td	Transfer, cross-shard
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:2/td:2	td	6,799
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:2/td:3	td	transfers/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:2/td:4	td	Two records (send + receive), so about half the atomic rate. The ratio is the record count.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:3	tr	Transfer, batched (1,024/root)362,776records/s27x the unbatched rate: one signature verified per 1,024 records instead of per record. Note the unit changes — a 
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:3/td:1	td	Transfer, batched (1,024/root)
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:3/td:2	td	362,776
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:3/td:3	td	records/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:3/td:4	td	27x the unbatched rate: one signature verified per 1,024 records instead of per record. Note the unit changes — a batch is not a transfer.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:4	tr	Stake lock13,492stakes/sOne signed record per position, signature verified individually.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:4/td:1	td	Stake lock
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:4/td:2	td	13,492
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:4/td:3	td	stakes/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:4/td:4	td	One signed record per position, signature verified individually.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:5	tr	Swap, one per batch15,738swaps/sOne verify and one shard signature per swap, and it pays full curve slippage with no counterparty.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:5/td:1	td	Swap, one per batch
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:5/td:2	td	15,738
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:5/td:3	td	swaps/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:5/td:4	td	One verify and one shard signature per swap, and it pays full curve slippage with no counterparty.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:6	tr	Swap, batched auction46,178swaps/s2.9x faster, and every intent clears at one price so matched flow pays zero curve slippage.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:6/td:1	td	Swap, batched auction
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:6/td:2	td	46,178
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:6/td:3	td	swaps/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:6/td:4	td	2.9x faster, and every intent clears at one price so matched flow pays zero curve slippage.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:7	tr	Replica store, per replica496,278signed results/sThe fastest operation in the system, because a replica stores and does not verify, execute or re-decide.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:7/td:1	td	Replica store, per replica
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:7/td:2	td	496,278
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:7/td:3	td	signed results/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:7/td:4	td	The fastest operation in the system, because a replica stores and does not verify, execute or re-decide.
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:8	tr	Swap, 8 shards in parallel195,643swaps/s4.5x one shard, MEASURED by running eight shards rather than multiplying one. Pools are independent so verification para
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:8/td:1	td	Swap, 8 shards in parallel
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:8/td:2	td	195,643
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:8/td:3	td	swaps/s
+page:/div:1/section:4/div:1/table:1/tbody:1/tr:8/td:4	td	4.5x one shard, MEASURED by running eight shards rather than multiplying one. Pools are independent so verification parallelises — this is the lever, and batch 
+page:/div:1/section:4/p:1	p	Not built, named rather than reported as zero: Split payment, Batched split payment, Lending position, Liquidation. Zero would mean measured and scored nothing,
+page:/div:1/section:4/p:2	p	A swap is VERIFICATION-BOUND and, unlike a transfer, its verification cannot be skipped: a replica may skip it because the shard already attested, but the shard
+page:/div:1/section:4/p:3	p	No row is multiplied by a node or replica count, and rows are not comparable across units — do not rank them against each other.
+page:/div:1/div:12	div	The fleet, measured · all 10 nodes at once643,632 swaps/s across 37 cores, against 274,840 with one shard per node — a 2.34x gain from parallelism alone.
+page:/div:1/div:12/h2:1	h2	The fleet, measured · all 10 nodes at once
+page:/div:1/div:12/p:1	p	643,632 swaps/s across 37 cores, against 274,840 with one shard per node — a 2.34x gain from parallelism alone.
+page:/div:1/div:13	div	Fleet swaps / s643,632swaps/sFleet transfers / s69,895transfers/sFleet stores / s6,044,992results/sPer core17,395swaps/s
+page:/div:1/div:13/article:1	article	Fleet swaps / s643,632swaps/s
+page:/div:1/div:13/article:1/p:1	p	Fleet swaps / s
+page:/div:1/div:13/article:1/p:2	p	643,632swaps/s
+page:/div:1/div:13/article:1/p:2/strong:1	strong	643,632
+page:/div:1/div:13/article:1/p:2/span:1	span	swaps/s
+page:/div:1/div:13/article:1/p:3	p	
+page:/div:1/div:13/article:2	article	Fleet transfers / s69,895transfers/s
+page:/div:1/div:13/article:2/p:1	p	Fleet transfers / s
+page:/div:1/div:13/article:2/p:2	p	69,895transfers/s
+page:/div:1/div:13/article:2/p:2/strong:1	strong	69,895
+page:/div:1/div:13/article:2/p:2/span:1	span	transfers/s
+page:/div:1/div:13/article:2/p:3	p	
+page:/div:1/div:13/article:3	article	Fleet stores / s6,044,992results/s
+page:/div:1/div:13/article:3/p:1	p	Fleet stores / s
+page:/div:1/div:13/article:3/p:2	p	6,044,992results/s
+page:/div:1/div:13/article:3/p:2/strong:1	strong	6,044,992
+page:/div:1/div:13/article:3/p:2/span:1	span	results/s
+page:/div:1/div:13/article:3/p:3	p	
+page:/div:1/div:13/article:4	article	Per core17,395swaps/s
+page:/div:1/div:13/article:4/p:1	p	Per core
+page:/div:1/div:13/article:4/p:2	p	17,395swaps/s
+page:/div:1/div:13/article:4/p:2/strong:1	strong	17,395
+page:/div:1/div:13/article:4/p:2/span:1	span	swaps/s
+page:/div:1/div:13/article:4/p:3	p	
+page:/div:1/section:5	section	Per node · shards set to each node’s core countCore count does NOT predict the resulteul-4c4 cores127,960eug-2c2 cores109,197bk27 cores94,673hel18 cores88,482mk
+page:/div:1/section:5/p:1	p	Per node · shards set to each node’s core count
+page:/div:1/section:5/h2:1	h2	Core count does NOT predict the result
+page:/div:1/section:5/ol:1	ol	eul-4c4 cores127,960eug-2c2 cores109,197bk27 cores94,673hel18 cores88,482mk25 cores82,517ash12 cores44,851hel24 cores44,231sg12 cores26,404bk12 cores15,829mist1
+page:/div:1/section:5/ol:1/li:1	li	eul-4c4 cores127,960
+page:/div:1/section:5/ol:1/li:1/p:1	p	eul-4c4 cores
+page:/div:1/section:5/ol:1/li:1/p:1/span:1	span	4 cores
+page:/div:1/section:5/ol:1/li:1/span:1	span	
+page:/div:1/section:5/ol:1/li:1/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:1/strong:1	strong	127,960
+page:/div:1/section:5/ol:1/li:2	li	eug-2c2 cores109,197
+page:/div:1/section:5/ol:1/li:2/p:1	p	eug-2c2 cores
+page:/div:1/section:5/ol:1/li:2/p:1/span:1	span	2 cores
+page:/div:1/section:5/ol:1/li:2/span:1	span	
+page:/div:1/section:5/ol:1/li:2/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:2/strong:1	strong	109,197
+page:/div:1/section:5/ol:1/li:3	li	bk27 cores94,673
+page:/div:1/section:5/ol:1/li:3/p:1	p	bk27 cores
+page:/div:1/section:5/ol:1/li:3/p:1/span:1	span	7 cores
+page:/div:1/section:5/ol:1/li:3/span:1	span	
+page:/div:1/section:5/ol:1/li:3/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:3/strong:1	strong	94,673
+page:/div:1/section:5/ol:1/li:4	li	hel18 cores88,482
+page:/div:1/section:5/ol:1/li:4/p:1	p	hel18 cores
+page:/div:1/section:5/ol:1/li:4/p:1/span:1	span	8 cores
+page:/div:1/section:5/ol:1/li:4/span:1	span	
+page:/div:1/section:5/ol:1/li:4/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:4/strong:1	strong	88,482
+page:/div:1/section:5/ol:1/li:5	li	mk25 cores82,517
+page:/div:1/section:5/ol:1/li:5/p:1	p	mk25 cores
+page:/div:1/section:5/ol:1/li:5/p:1/span:1	span	5 cores
+page:/div:1/section:5/ol:1/li:5/span:1	span	
+page:/div:1/section:5/ol:1/li:5/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:5/strong:1	strong	82,517
+page:/div:1/section:5/ol:1/li:6	li	ash12 cores44,851
+page:/div:1/section:5/ol:1/li:6/p:1	p	ash12 cores
+page:/div:1/section:5/ol:1/li:6/p:1/span:1	span	2 cores
+page:/div:1/section:5/ol:1/li:6/span:1	span	
+page:/div:1/section:5/ol:1/li:6/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:6/strong:1	strong	44,851
+page:/div:1/section:5/ol:1/li:7	li	hel24 cores44,231
+page:/div:1/section:5/ol:1/li:7/p:1	p	hel24 cores
+page:/div:1/section:5/ol:1/li:7/p:1/span:1	span	4 cores
+page:/div:1/section:5/ol:1/li:7/span:1	span	
+page:/div:1/section:5/ol:1/li:7/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:7/strong:1	strong	44,231
+page:/div:1/section:5/ol:1/li:8	li	sg12 cores26,404
+page:/div:1/section:5/ol:1/li:8/p:1	p	sg12 cores
+page:/div:1/section:5/ol:1/li:8/p:1/span:1	span	2 cores
+page:/div:1/section:5/ol:1/li:8/span:1	span	
+page:/div:1/section:5/ol:1/li:8/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:8/strong:1	strong	26,404
+page:/div:1/section:5/ol:1/li:9	li	bk12 cores15,829
+page:/div:1/section:5/ol:1/li:9/p:1	p	bk12 cores
+page:/div:1/section:5/ol:1/li:9/p:1/span:1	span	2 cores
+page:/div:1/section:5/ol:1/li:9/span:1	span	
+page:/div:1/section:5/ol:1/li:9/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:9/strong:1	strong	15,829
+page:/div:1/section:5/ol:1/li:10	li	mist11 core9,488
+page:/div:1/section:5/ol:1/li:10/p:1	p	mist11 core
+page:/div:1/section:5/ol:1/li:10/p:1/span:1	span	1 core
+page:/div:1/section:5/ol:1/li:10/span:1	span	
+page:/div:1/section:5/ol:1/li:10/span:1/span:1	span	
+page:/div:1/section:5/ol:1/li:10/strong:1	strong	9,488
+page:/div:1/section:5/p:2	p	All ten nodes ran concurrently with shards set to each node’s core count; the total is a sum of concurrent measurements, never one node multiplied by ten. CORE 
+page:/div:1/section:6	section	The route forward · parallel resolver shardsEach point RUN, never multiplied1 shard100% of linear43,6652 shards93% of linear81,6114 shards90% of linear157,2068 
+page:/div:1/section:6/p:1	p	The route forward · parallel resolver shards
+page:/div:1/section:6/h2:1	h2	Each point RUN, never multiplied
+page:/div:1/section:6/ol:1	ol	1 shard100% of linear43,6652 shards93% of linear81,6114 shards90% of linear157,2068 shards56% of linear197,355
+page:/div:1/section:6/ol:1/li:1	li	1 shard100% of linear43,665
+page:/div:1/section:6/ol:1/li:1/p:1	p	1 shard100% of linear
+page:/div:1/section:6/ol:1/li:1/p:1/span:1	span	100% of linear
+page:/div:1/section:6/ol:1/li:1/span:1	span	
+page:/div:1/section:6/ol:1/li:1/span:1/span:1	span	
+page:/div:1/section:6/ol:1/li:1/strong:1	strong	43,665
+page:/div:1/section:6/ol:1/li:2	li	2 shards93% of linear81,611
+page:/div:1/section:6/ol:1/li:2/p:1	p	2 shards93% of linear
+page:/div:1/section:6/ol:1/li:2/p:1/span:1	span	93% of linear
+page:/div:1/section:6/ol:1/li:2/span:1	span	
+page:/div:1/section:6/ol:1/li:2/span:1/span:1	span	
+page:/div:1/section:6/ol:1/li:2/strong:1	strong	81,611
+page:/div:1/section:6/ol:1/li:3	li	4 shards90% of linear157,206
+page:/div:1/section:6/ol:1/li:3/p:1	p	4 shards90% of linear
+page:/div:1/section:6/ol:1/li:3/p:1/span:1	span	90% of linear
+page:/div:1/section:6/ol:1/li:3/span:1	span	
+page:/div:1/section:6/ol:1/li:3/span:1/span:1	span	
+page:/div:1/section:6/ol:1/li:3/strong:1	strong	157,206
+page:/div:1/section:6/ol:1/li:4	li	8 shards56% of linear197,355
+page:/div:1/section:6/ol:1/li:4/p:1	p	8 shards56% of linear
+page:/div:1/section:6/ol:1/li:4/p:1/span:1	span	56% of linear
+page:/div:1/section:6/ol:1/li:4/span:1	span	
+page:/div:1/section:6/ol:1/li:4/span:1/span:1	span	
+page:/div:1/section:6/ol:1/li:4/strong:1	strong	197,355
+page:/div:1/section:6/p:2	p	Fast cores first, shard to the PERFORMANCE-core count, then add nodes. Run ONE resolver shard per PERFORMANCE core, and scale past that by adding nodes, not sha
+page:/div:1/section:7	section	Swap batch size · the lever that is not thereA 64x increase in batch size bought 1.3x64 swaps/batchsignature verification 75.5% of the batch39,023256 swaps/batc
+page:/div:1/section:7/p:1	p	Swap batch size · the lever that is not there
+page:/div:1/section:7/h2:1	h2	A 64x increase in batch size bought 1.3x
+page:/div:1/section:7/ol:1	ol	64 swaps/batchsignature verification 75.5% of the batch39,023256 swaps/batchsignature verification 77.1% of the batch38,7471,024 swaps/batchsignature verificati
+page:/div:1/section:7/ol:1/li:1	li	64 swaps/batchsignature verification 75.5% of the batch39,023
+page:/div:1/section:7/ol:1/li:1/p:1	p	64 swaps/batchsignature verification 75.5% of the batch
+page:/div:1/section:7/ol:1/li:1/p:1/span:1	span	signature verification 75.5% of the batch
+page:/div:1/section:7/ol:1/li:1/span:1	span	
+page:/div:1/section:7/ol:1/li:1/span:1/span:1	span	
+page:/div:1/section:7/ol:1/li:1/strong:1	strong	39,023
+page:/div:1/section:7/ol:1/li:2	li	256 swaps/batchsignature verification 77.1% of the batch38,747
+page:/div:1/section:7/ol:1/li:2/p:1	p	256 swaps/batchsignature verification 77.1% of the batch
+page:/div:1/section:7/ol:1/li:2/p:1/span:1	span	signature verification 77.1% of the batch
+page:/div:1/section:7/ol:1/li:2/span:1	span	
+page:/div:1/section:7/ol:1/li:2/span:1/span:1	span	
+page:/div:1/section:7/ol:1/li:2/strong:1	strong	38,747
+page:/div:1/section:7/ol:1/li:3	li	1,024 swaps/batchsignature verification 71.3% of the batch49,268
+page:/div:1/section:7/ol:1/li:3/p:1	p	1,024 swaps/batchsignature verification 71.3% of the batch
+page:/div:1/section:7/ol:1/li:3/p:1/span:1	span	signature verification 71.3% of the batch
+page:/div:1/section:7/ol:1/li:3/span:1	span	
+page:/div:1/section:7/ol:1/li:3/span:1/span:1	span	
+page:/div:1/section:7/ol:1/li:3/strong:1	strong	49,268
+page:/div:1/section:7/ol:1/li:4	li	4,096 swaps/batchsignature verification 71.2% of the batch50,615
+page:/div:1/section:7/ol:1/li:4/p:1	p	4,096 swaps/batchsignature verification 71.2% of the batch
+page:/div:1/section:7/ol:1/li:4/p:1/span:1	span	signature verification 71.2% of the batch
+page:/div:1/section:7/ol:1/li:4/span:1	span	
+page:/div:1/section:7/ol:1/li:4/span:1/span:1	span	
+page:/div:1/section:7/ol:1/li:4/strong:1	strong	50,615
+page:/div:1/section:7/p:2	p	Verification stays at 71-77% of a batch at every size, because batched Ed25519 is near-linear in signature count. Parallel shards buy 4.5x instead, measured by 
+page:/div:1/section:8	section	Client path · swaps over the wire, by concurrent connections · 2026-10-15BENCH-015 (chain-position build). Accepted swaps/s into ONE node. Not the fleet figure 
+page:/div:1/section:8/p:1	p	Client path · swaps over the wire, by concurrent connections · 2026-10-15
+page:/div:1/section:8/h2:1	h2	BENCH-015 (chain-position build). Accepted swaps/s into ONE node. Not the fleet figure above, and not custodied.
+page:/div:1/section:8/ol:1	ol	1 connection1x one connection4,4254 connections1.2x one connection5,34524 connections2.8x one connection12,197128 connections4.2x one connection18,397256 connec
+page:/div:1/section:8/ol:1/li:1	li	1 connection1x one connection4,425
+page:/div:1/section:8/ol:1/li:1/p:1	p	1 connection1x one connection
+page:/div:1/section:8/ol:1/li:1/p:1/span:1	span	1x one connection
+page:/div:1/section:8/ol:1/li:1/span:1	span	
+page:/div:1/section:8/ol:1/li:1/span:1/span:1	span	
+page:/div:1/section:8/ol:1/li:1/strong:1	strong	4,425
+page:/div:1/section:8/ol:1/li:2	li	4 connections1.2x one connection5,345
+page:/div:1/section:8/ol:1/li:2/p:1	p	4 connections1.2x one connection
+page:/div:1/section:8/ol:1/li:2/p:1/span:1	span	1.2x one connection
+page:/div:1/section:8/ol:1/li:2/span:1	span	
+page:/div:1/section:8/ol:1/li:2/span:1/span:1	span	
+page:/div:1/section:8/ol:1/li:2/strong:1	strong	5,345
+page:/div:1/section:8/ol:1/li:3	li	24 connections2.8x one connection12,197
+page:/div:1/section:8/ol:1/li:3/p:1	p	24 connections2.8x one connection
+page:/div:1/section:8/ol:1/li:3/p:1/span:1	span	2.8x one connection
+page:/div:1/section:8/ol:1/li:3/span:1	span	
+page:/div:1/section:8/ol:1/li:3/span:1/span:1	span	
+page:/div:1/section:8/ol:1/li:3/strong:1	strong	12,197
+page:/div:1/section:8/ol:1/li:4	li	128 connections4.2x one connection18,397
+page:/div:1/section:8/ol:1/li:4/p:1	p	128 connections4.2x one connection
+page:/div:1/section:8/ol:1/li:4/p:1/span:1	span	4.2x one connection
+page:/div:1/section:8/ol:1/li:4/span:1	span	
+page:/div:1/section:8/ol:1/li:4/span:1/span:1	span	
+page:/div:1/section:8/ol:1/li:4/strong:1	strong	18,397
+page:/div:1/section:8/ol:1/li:5	li	256 connections6x one connection26,754
+page:/div:1/section:8/ol:1/li:5/p:1	p	256 connections6x one connection
+page:/div:1/section:8/ol:1/li:5/p:1/span:1	span	6x one connection
+page:/div:1/section:8/ol:1/li:5/span:1	span	
+page:/div:1/section:8/ol:1/li:5/span:1/span:1	span	
+page:/div:1/section:8/ol:1/li:5/strong:1	strong	26,754
+page:/div:1/section:8/ol:1/li:6	li	1,000 connections7x one connection31,009
+page:/div:1/section:8/ol:1/li:6/p:1	p	1,000 connections7x one connection
+page:/div:1/section:8/ol:1/li:6/p:1/span:1	span	7x one connection
+page:/div:1/section:8/ol:1/li:6/span:1	span	
+page:/div:1/section:8/ol:1/li:6/span:1/span:1	span	
+page:/div:1/section:8/ol:1/li:6/strong:1	strong	31,009
+page:/div:1/section:8/p:2	p	Same node, other axes
+page:/div:1/section:8/ol:2	ol	256 connections over 16 tokens16,50064 connections, a curve with 0 holders23,42764 connections, a curve with 1,000 holders22,68464 connections, a curve with 10,
+page:/div:1/section:8/ol:2/li:1	li	256 connections over 16 tokens16,500
+page:/div:1/section:8/ol:2/li:1/p:1	p	256 connections over 16 tokens
+page:/div:1/section:8/ol:2/li:1/span:1	span	
+page:/div:1/section:8/ol:2/li:1/span:1/span:1	span	
+page:/div:1/section:8/ol:2/li:1/strong:1	strong	16,500
+page:/div:1/section:8/ol:2/li:2	li	64 connections, a curve with 0 holders23,427
+page:/div:1/section:8/ol:2/li:2/p:1	p	64 connections, a curve with 0 holders
+page:/div:1/section:8/ol:2/li:2/span:1	span	
+page:/div:1/section:8/ol:2/li:2/span:1/span:1	span	
+page:/div:1/section:8/ol:2/li:2/strong:1	strong	23,427
+page:/div:1/section:8/ol:2/li:3	li	64 connections, a curve with 1,000 holders22,684
+page:/div:1/section:8/ol:2/li:3/p:1	p	64 connections, a curve with 1,000 holders
+page:/div:1/section:8/ol:2/li:3/span:1	span	
+page:/div:1/section:8/ol:2/li:3/span:1/span:1	span	
+page:/div:1/section:8/ol:2/li:3/strong:1	strong	22,684
+page:/div:1/section:8/ol:2/li:4	li	64 connections, a curve with 10,000 holders20,018
+page:/div:1/section:8/ol:2/li:4/p:1	p	64 connections, a curve with 10,000 holders
+page:/div:1/section:8/ol:2/li:4/span:1	span	
+page:/div:1/section:8/ol:2/li:4/span:1/span:1	span	
+page:/div:1/section:8/ol:2/li:4/strong:1	strong	20,018
+page:/div:1/section:8/p:3	p	Native-token transfers on the same node
+page:/div:1/section:8/ol:3	ol	1 connection5,8518 connections15,19364 connections15,286256 connections15,447
+page:/div:1/section:8/ol:3/li:1	li	1 connection5,851
+page:/div:1/section:8/ol:3/li:1/p:1	p	1 connection
+page:/div:1/section:8/ol:3/li:1/span:1	span	
+page:/div:1/section:8/ol:3/li:1/span:1/span:1	span	
+page:/div:1/section:8/ol:3/li:1/strong:1	strong	5,851
+page:/div:1/section:8/ol:3/li:2	li	8 connections15,193
+page:/div:1/section:8/ol:3/li:2/p:1	p	8 connections
+page:/div:1/section:8/ol:3/li:2/span:1	span	
+page:/div:1/section:8/ol:3/li:2/span:1/span:1	span	
+page:/div:1/section:8/ol:3/li:2/strong:1	strong	15,193
+page:/div:1/section:8/ol:3/li:3	li	64 connections15,286
+page:/div:1/section:8/ol:3/li:3/p:1	p	64 connections
+page:/div:1/section:8/ol:3/li:3/span:1	span	
+page:/div:1/section:8/ol:3/li:3/span:1/span:1	span	
+page:/div:1/section:8/ol:3/li:3/strong:1	strong	15,286
+page:/div:1/section:8/ol:3/li:4	li	256 connections15,447
+page:/div:1/section:8/ol:3/li:4/p:1	p	256 connections
+page:/div:1/section:8/ol:3/li:4/span:1	span	
+page:/div:1/section:8/ol:3/li:4/span:1/span:1	span	
+page:/div:1/section:8/ol:3/li:4/strong:1	strong	15,447
+page:/div:1/section:8/p:4	p	Sender-signed token transfers on the event-sourced ledger: signature, chain position, balance check and ledger event per transfer; an overdraft is refused by na
+page:/div:1/section:8/p:5	p	The same transfers with the client split over several processes (64 connections, after the ledger fix)
+page:/div:1/section:8/ol:4	ol	1 client process16,0492 client processes24,5084 client processes25,5236 client processes25,844
+page:/div:1/section:8/ol:4/li:1	li	1 client process16,049
+page:/div:1/section:8/ol:4/li:1/p:1	p	1 client process
+page:/div:1/section:8/ol:4/li:1/span:1	span	
+page:/div:1/section:8/ol:4/li:1/span:1/span:1	span	
+page:/div:1/section:8/ol:4/li:1/strong:1	strong	16,049
+page:/div:1/section:8/ol:4/li:2	li	2 client processes24,508
+page:/div:1/section:8/ol:4/li:2/p:1	p	2 client processes
+page:/div:1/section:8/ol:4/li:2/span:1	span	
+page:/div:1/section:8/ol:4/li:2/span:1/span:1	span	
+page:/div:1/section:8/ol:4/li:2/strong:1	strong	24,508
+page:/div:1/section:8/ol:4/li:3	li	4 client processes25,523
+page:/div:1/section:8/ol:4/li:3/p:1	p	4 client processes
+page:/div:1/section:8/ol:4/li:3/span:1	span	
+page:/div:1/section:8/ol:4/li:3/span:1/span:1	span	
+page:/div:1/section:8/ol:4/li:3/strong:1	strong	25,523
+page:/div:1/section:8/ol:4/li:4	li	6 client processes25,844
+page:/div:1/section:8/ol:4/li:4/p:1	p	6 client processes
+page:/div:1/section:8/ol:4/li:4/span:1	span	
+page:/div:1/section:8/ol:4/li:4/span:1/span:1	span	
+page:/div:1/section:8/ol:4/li:4/strong:1	strong	25,844
+page:/div:1/section:8/p:6	p	With the client split over processes the server reaches ~25,000/s using ~2.9 of 8 cores; past 2 processes the clients and the server share one saturated machine
+page:/div:1/section:8/p:7	p	One connection now gets ~4,400 swaps/s (it was ~300: a lone client no longer waits out two batching windows), and throughput climbs with concurrent connections 
+page:/div:1/section:8/p:8	p	Previous build: Before the chain-position build the same node held ~300 swaps/s on one connection and ~15,000/s at 256-1,500 connections; a curve with 10,000 ho
+page:/div:1/section:8/p:9	p	Metric: accepted swaps/s (CURVE_SWAP_OK replies / wall second). Mode: one local release chain-server, pre-signed swaps, one signing key per connection, one curv
+page:/div:1/div:14	div	Platform & infra resolvers · 2026-10-12INFRA-001: internal platform systems, not the FLX DeFi chain above — the deployment/preview pipeline, repo storage, and d
+page:/div:1/div:14/h2:1	h2	Platform & infra resolvers · 2026-10-12
+page:/div:1/div:14/p:1	p	INFRA-001: internal platform systems, not the FLX DeFi chain above — the deployment/preview pipeline, repo storage, and dev tooling, audited and benchmarked wit
+page:/div:1/section:9	section	Resolver audit · six platform systemsDoes a resolver exist, and if so how fastSystemResolver found?RateChain-deployable?flx-repo (repo storage)yes — ref-chain a
+page:/div:1/section:9/p:1	p	Resolver audit · six platform systems
+page:/div:1/section:9/h2:1	h2	Does a resolver exist, and if so how fast
+page:/div:1/section:9/div:1	div	SystemResolver found?RateChain-deployable?flx-repo (repo storage)yes — ref-chain accept/reject116,192–118,973 lines/sno — unauthenticated, no verification stepr
+page:/div:1/section:9/div:1/table:1	table	SystemResolver found?RateChain-deployable?flx-repo (repo storage)yes — ref-chain accept/reject116,192–118,973 lines/sno — unauthenticated, no verification stepr
+page:/div:1/section:9/div:1/table:1/thead:1	thead	SystemResolver found?RateChain-deployable?
+page:/div:1/section:9/div:1/table:1/thead:1/tr:1	tr	SystemResolver found?RateChain-deployable?
+page:/div:1/section:9/div:1/table:1/thead:1/tr:1/th:1	th	System
+page:/div:1/section:9/div:1/table:1/thead:1/tr:1/th:2	th	Resolver found?
+page:/div:1/section:9/div:1/table:1/thead:1/tr:1/th:3	th	Rate
+page:/div:1/section:9/div:1/table:1/thead:1/tr:1/th:4	th	Chain-deployable?
+page:/div:1/section:9/div:1/table:1/tbody:1	tbody	flx-repo (repo storage)yes — ref-chain accept/reject116,192–118,973 lines/sno — unauthenticated, no verification stepremote-env (preview control plane)yes — acc
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:1	tr	flx-repo (repo storage)yes — ref-chain accept/reject116,192–118,973 lines/sno — unauthenticated, no verification step
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:1/td:1	td	flx-repo (repo storage)
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:1/td:2	td	yes — ref-chain accept/reject
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:1/td:3	td	116,192–118,973 lines/s
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:1/td:4	td	no — unauthenticated, no verification step
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:2	tr	remote-env (preview control plane)yes — access decision12,106 decisions/snot yet — stated gate, non-production
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:2/td:1	td	remote-env (preview control plane)
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:2/td:2	td	yes — access decision
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:2/td:3	td	12,106 decisions/s
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:2/td:4	td	not yet — stated gate, non-production
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:3	tr	flx-db-studio (dev DB console)yes — ACL evaluate1.8M–3.4M queries/sno — client-local only
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:3/td:1	td	flx-db-studio (dev DB console)
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:3/td:2	td	yes — ACL evaluate
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:3/td:3	td	1.8M–3.4M queries/s
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:3/td:4	td	no — client-local only
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:4	tr	bundle-deploynone—no — delegates to name-integrity
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:4/td:1	td	bundle-deploy
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:4/td:2	td	none
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:4/td:3	td	—
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:4/td:4	td	no — delegates to name-integrity
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:5	tr	flux-code-hostnone of its own—no — holds no signing authority
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:5/td:1	td	flux-code-host
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:5/td:2	td	none of its own
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:5/td:3	td	—
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:5/td:4	td	no — holds no signing authority
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:6	tr	flx-blockstorenone—no — deliberately type-blind storage
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:6/td:1	td	flx-blockstore
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:6/td:2	td	none
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:6/td:3	td	—
+page:/div:1/section:9/div:1/table:1/tbody:1/tr:6/td:4	td	no — deliberately type-blind storage
+page:/div:1/section:9/p:2	p	bundle-deploy, flux-code-host and flx-blockstore have no resolver by design — reported as absent, never averaged in as a zero score.
+page:/div:1/div:15	div	Manifest routing3,230,585decisions/sSignature-verified fetch5,893decisions/sWorker dispatch, sequential52,265round-trips/sWorker dispatch, concurrent235,043comm
+page:/div:1/div:15/article:1	article	Manifest routing3,230,585decisions/s
+page:/div:1/div:15/article:1/p:1	p	Manifest routing
+page:/div:1/div:15/article:1/p:2	p	3,230,585decisions/s
+page:/div:1/div:15/article:1/p:2/strong:1	strong	3,230,585
+page:/div:1/div:15/article:1/p:2/span:1	span	decisions/s
+page:/div:1/div:15/article:1/p:3	p	
+page:/div:1/div:15/article:2	article	Signature-verified fetch5,893decisions/s
+page:/div:1/div:15/article:2/p:1	p	Signature-verified fetch
+page:/div:1/div:15/article:2/p:2	p	5,893decisions/s
+page:/div:1/div:15/article:2/p:2/strong:1	strong	5,893
+page:/div:1/div:15/article:2/p:2/span:1	span	decisions/s
+page:/div:1/div:15/article:2/p:3	p	
+page:/div:1/div:15/article:3	article	Worker dispatch, sequential52,265round-trips/s
+page:/div:1/div:15/article:3/p:1	p	Worker dispatch, sequential
+page:/div:1/div:15/article:3/p:2	p	52,265round-trips/s
+page:/div:1/div:15/article:3/p:2/strong:1	strong	52,265
+page:/div:1/div:15/article:3/p:2/span:1	span	round-trips/s
+page:/div:1/div:15/article:3/p:3	p	
+page:/div:1/div:15/article:4	article	Worker dispatch, concurrent235,043commands/s
+page:/div:1/div:15/article:4/p:1	p	Worker dispatch, concurrent
+page:/div:1/div:15/article:4/p:2	p	235,043commands/s
+page:/div:1/div:15/article:4/p:2/strong:1	strong	235,043
+page:/div:1/div:15/article:4/p:2/span:1	span	commands/s
+page:/div:1/div:15/article:4/p:3	p	
+page:/div:1/section:10	section	Native FXN Compute Rent Resolver (CRR) dispatch (manifest routing + signature-verified admission, worker-isolated execution): routing is near-free; real ed25519
+page:/div:1/section:10/p:1	p	Native FXN Compute Rent Resolver (CRR) dispatch (manifest routing + signature-verified admission, worker-isolated execution): routing is near-free; real ed25519
+page:/div:1/section:11	section	remote-env access decision · auto-switching verificationMatches fixed-inline at low concurrency, beats fixed-pooled above itConcurrencyFixed inlineFixed pooledA
+page:/div:1/section:11/p:1	p	remote-env access decision · auto-switching verification
+page:/div:1/section:11/h2:1	h2	Matches fixed-inline at low concurrency, beats fixed-pooled above it
+page:/div:1/section:11/div:1	div	ConcurrencyFixed inlineFixed pooledAuto-switch14,363–4,672/s3,810–3,871/s4,491–4,510/s4—8,671–9,194/s10,447–10,801/s16—12,279–13,302/s14,485–18,238/s64—13,762–1
+page:/div:1/section:11/div:1/table:1	table	ConcurrencyFixed inlineFixed pooledAuto-switch14,363–4,672/s3,810–3,871/s4,491–4,510/s4—8,671–9,194/s10,447–10,801/s16—12,279–13,302/s14,485–18,238/s64—13,762–1
+page:/div:1/section:11/div:1/table:1/thead:1	thead	ConcurrencyFixed inlineFixed pooledAuto-switch
+page:/div:1/section:11/div:1/table:1/thead:1/tr:1	tr	ConcurrencyFixed inlineFixed pooledAuto-switch
+page:/div:1/section:11/div:1/table:1/thead:1/tr:1/th:1	th	Concurrency
+page:/div:1/section:11/div:1/table:1/thead:1/tr:1/th:2	th	Fixed inline
+page:/div:1/section:11/div:1/table:1/thead:1/tr:1/th:3	th	Fixed pooled
+page:/div:1/section:11/div:1/table:1/thead:1/tr:1/th:4	th	Auto-switch
+page:/div:1/section:11/div:1/table:1/tbody:1	tbody	14,363–4,672/s3,810–3,871/s4,491–4,510/s4—8,671–9,194/s10,447–10,801/s16—12,279–13,302/s14,485–18,238/s64—13,762–15,014/s14,780–17,536/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:1	tr	14,363–4,672/s3,810–3,871/s4,491–4,510/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:1	td	1
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:2	td	4,363–4,672/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:3	td	3,810–3,871/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:1/td:4	td	4,491–4,510/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:2	tr	4—8,671–9,194/s10,447–10,801/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:1	td	4
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:2	td	—
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:3	td	8,671–9,194/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:2/td:4	td	10,447–10,801/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:3	tr	16—12,279–13,302/s14,485–18,238/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:1	td	16
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:2	td	—
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:3	td	12,279–13,302/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:3/td:4	td	14,485–18,238/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:4	tr	64—13,762–15,014/s14,780–17,536/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:1	td	64
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:2	td	—
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:3	td	13,762–15,014/s
+page:/div:1/section:11/div:1/table:1/tbody:1/tr:4/td:4	td	14,780–17,536/s
+page:/div:1/section:11/p:2	p	Measured on a Mac mini (Apple M2, 8 GB RAM), Rust release build / Node v24.9.0, median of 5 timed reps with 2 warm-ups discarded. Absent is not zero: bundle-dep
+page:/div:1/section:11/a:1	a	Full record · INFRA-001
+page:/div:1/div:16	div	Benchmark runsEvery number above, and the other dated runs, with the record that holds its method and raw output.
+page:/div:1/div:16/h2:1	h2	Benchmark runs
+page:/div:1/div:16/p:1	p	Every number above, and the other dated runs, with the record that holds its method and raw output.
+page:/div:1/section:12	section	RunScopeResultWindowErrorsRecordResolver batch256 signed intents, one shard256 swaps/batch13.874 ms0BENCH-012Signed-result broadcast10 replicas, store only1,801
+page:/div:1/section:12/div:1	div	RunScopeResultWindowErrorsRecordResolver batch256 signed intents, one shard256 swaps/batch13.874 ms0BENCH-012Signed-result broadcast10 replicas, store only1,801
+page:/div:1/section:12/div:1/table:1	table	RunScopeResultWindowErrorsRecordResolver batch256 signed intents, one shard256 swaps/batch13.874 ms0BENCH-012Signed-result broadcast10 replicas, store only1,801
+page:/div:1/section:12/div:1/table:1/thead:1	thead	RunScopeResultWindowErrorsRecord
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1	tr	RunScopeResultWindowErrorsRecord
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1/th:1	th	Run
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1/th:2	th	Scope
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1/th:3	th	Result
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1/th:4	th	Window
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1/th:5	th	Errors
+page:/div:1/section:12/div:1/table:1/thead:1/tr:1/th:6	th	Record
+page:/div:1/section:12/div:1/table:1/tbody:1	tbody	Resolver batch256 signed intents, one shard256 swaps/batch13.874 ms0BENCH-012Signed-result broadcast10 replicas, store only1,801 bytes/batchnot pipelined0BENCH-
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1	tr	Resolver batch256 signed intents, one shard256 swaps/batch13.874 ms0BENCH-012
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:1	td	Resolver batch
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:2	td	256 signed intents, one shard
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:3	td	256 swaps/batch
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:4	td	13.874 ms
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:6	td	BENCH-012
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:1/td:6/a:1	a	BENCH-012
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2	tr	Signed-result broadcast10 replicas, store only1,801 bytes/batchnot pipelined0BENCH-012
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:1	td	Signed-result broadcast
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:2	td	10 replicas, store only
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:3	td	1,801 bytes/batch
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:4	td	not pipelined
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:6	td	BENCH-012
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:2/td:6/a:1	a	BENCH-012
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3	tr	Resolver registry20 resolvers audited6 measured, 14 not builtaudit—Resolver audit
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:1	td	Resolver registry
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:2	td	20 resolvers audited
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:3	td	6 measured, 14 not built
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:4	td	audit
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:5	td	—
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:6	td	Resolver audit
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:3/td:6/a:1	a	Resolver audit
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4	tr	Grammar-only admissionone Mac core83,225 ops/sbench—Whitepaper §3
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:1	td	Grammar-only admission
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:2	td	one Mac core
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:3	td	83,225 ops/s
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:4	td	bench
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:5	td	—
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:6	td	Whitepaper §3
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:4/td:6/a:1	a	Whitepaper §3
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5	tr	Platform resolver audit6 non-chain systems3 measured, 3 absent by designaudit—INFRA-001
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:1	td	Platform resolver audit
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:2	td	6 non-chain systems
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:3	td	3 measured, 3 absent by design
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:4	td	audit
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:5	td	—
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:6	td	INFRA-001
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:5/td:6/a:1	a	INFRA-001
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6	tr	DAO treasury claim (durable)local, 2 real replicas1174-1357 claims/s3 runs0BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:1	td	DAO treasury claim (durable)
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:2	td	local, 2 real replicas
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:3	td	1174-1357 claims/s
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:4	td	3 runs
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:6	td	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:6/td:6/a:1	a	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7	tr	DAO treasury claim (accepted)local, replication off critical path2882-3017 claims/s3 runs0BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:1	td	DAO treasury claim (accepted)
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:2	td	local, replication off critical path
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:3	td	2882-3017 claims/s
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:4	td	3 runs
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:6	td	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:7/td:6/a:1	a	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8	tr	DAO treasury claim (durable, real WAN)2 real fleet nodes, 2-of-2 signer threshold17 claims/s2 runs0BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:1	td	DAO treasury claim (durable, real WAN)
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:2	td	2 real fleet nodes, 2-of-2 signer threshold
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:3	td	17 claims/s
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:4	td	2 runs
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:6	td	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:8/td:6/a:1	a	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9	tr	DAO treasury claim (accepted, real WAN)2 real fleet nodes, replication off critical path~1003 claims/s1 run0BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:1	td	DAO treasury claim (accepted, real WAN)
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:2	td	2 real fleet nodes, replication off critical path
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:3	td	~1003 claims/s
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:4	td	1 run
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:6	td	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:9/td:6/a:1	a	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10	tr	DAO/treasury devnet dry runfull wire sequence, real standalone chain-server17/17 steps passed1 run0BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:1	td	DAO/treasury devnet dry run
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:2	td	full wire sequence, real standalone chain-server
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:3	td	17/17 steps passed
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:4	td	1 run
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:6	td	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:10/td:6/a:1	a	BENCH-014
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11	tr	Client-path swaps (unbacked)one node, 1-1,000 connections, chain-position build, pre-signed, loopback, store replica requirement 04,400 swaps/s at 1 connection,
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:1	td	Client-path swaps (unbacked)
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:2	td	one node, 1-1,000 connections, chain-position build, pre-signed, loopback, store replica requirement 0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:3	td	4,400 swaps/s at 1 connection, ~31,000 at 1,000
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:4	td	5 timed reps per point; 3 runs at 256 and 1,000
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:5	td	0
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:6	td	BENCH-015
+page:/div:1/section:12/div:1/table:1/tbody:1/tr:11/td:6/a:1	a	BENCH-015
+page:/div:1/section:12/p:1	p	Each run measures something different. Do not add rows together, and never add the broadcast to the resolution latency.
+page:/div:1/div:17	div	Production readinessWhere the measurements stop. Updated with each new evidence record.
+page:/div:1/div:17/h2:1	h2	Production readiness
+page:/div:1/div:17/p:1	p	Where the measurements stop. Updated with each new evidence record.
+page:/div:1/div:18	div	3 done4 partial3 not yetMeasuredResolver throughput (synthetic, not production)256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result,
+page:/div:1/div:18/section:1	section	3 done4 partial3 not yetMeasuredResolver throughput (synthetic, not production)256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result,
+page:/div:1/div:18/section:1/p:1	p	3 done4 partial3 not yet
+page:/div:1/div:18/section:1/p:1/span:1	span	3 done
+page:/div:1/div:18/section:1/p:1/span:2	span	4 partial
+page:/div:1/div:18/section:1/p:1/span:3	span	3 not yet
+page:/div:1/div:18/section:1/ul:1	ul	MeasuredResolver throughput (synthetic, not production)256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live re
+page:/div:1/div:18/section:1/ul:1/li:1	li	MeasuredResolver throughput (synthetic, not production)256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live re
+page:/div:1/div:18/section:1/ul:1/li:1/span:1	span	Measured
+page:/div:1/div:18/section:1/ul:1/li:1/div:1	div	Resolver throughput (synthetic, not production)256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live replicas, 
+page:/div:1/div:18/section:1/ul:1/li:1/div:1/strong:1	strong	Resolver throughput (synthetic, not production)
+page:/div:1/div:18/section:1/ul:1/li:1/div:1/p:1	p	256 swaps per batch auction, 8.920 ms batch latency, 180 bytes per signed result, broadcast to 10 live replicas, 60/60 audits passed (BENCH-012). Not production
+page:/div:1/div:18/section:1/ul:1/li:2	li	PassingAttack suite7 of 7 attacks refused: replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocat
+page:/div:1/div:18/section:1/ul:1/li:2/span:1	span	Passing
+page:/div:1/div:18/section:1/ul:1/li:2/div:1	div	Attack suite7 of 7 attacks refused: replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation.
+page:/div:1/div:18/section:1/ul:1/li:2/div:1/strong:1	strong	Attack suite
+page:/div:1/div:18/section:1/ul:1/li:2/div:1/p:1	p	7 of 7 attacks refused: replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev fork, tampered signature, equivocation.
+page:/div:1/div:18/section:1/ul:1/li:3	li	PartialSustained loadA 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.
+page:/div:1/div:18/section:1/ul:1/li:3/span:1	span	Partial
+page:/div:1/div:18/section:1/ul:1/li:3/div:1	div	Sustained loadA 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.
+page:/div:1/div:18/section:1/ul:1/li:3/div:1/strong:1	strong	Sustained load
+page:/div:1/div:18/section:1/ul:1/li:3/div:1/p:1	p	A 303-second soak accepted 3,760,000 records with zero failures. No 30-minute soak has run across the full mesh.
+page:/div:1/div:18/section:1/ul:1/li:4	li	MeasuredFull 10-node transfer benchBENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 final
+page:/div:1/div:18/section:1/ul:1/li:4/span:1	span	Measured
+page:/div:1/div:18/section:1/ul:1/li:4/div:1	div	Full 10-node transfer benchBENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 finalized tra
+page:/div:1/div:18/section:1/ul:1/li:4/div:1/strong:1	strong	Full 10-node transfer bench
+page:/div:1/div:18/section:1/ul:1/li:4/div:1/p:1	p	BENCH-011 ran on all ten flx-* nodes concurrently (10 s each, mixed topology, segmented-v3). Zero errors across 852,152 finalized transfers.
+page:/div:1/div:18/section:1/ul:1/li:5	li	PartialLive node discoveryThe pulse reads a configured roster; nodes that join are not discovered automatically yet.
+page:/div:1/div:18/section:1/ul:1/li:5/span:1	span	Partial
+page:/div:1/div:18/section:1/ul:1/li:5/div:1	div	Live node discoveryThe pulse reads a configured roster; nodes that join are not discovered automatically yet.
+page:/div:1/div:18/section:1/ul:1/li:5/div:1/strong:1	strong	Live node discovery
+page:/div:1/div:18/section:1/ul:1/li:5/div:1/p:1	p	The pulse reads a configured roster; nodes that join are not discovered automatically yet.
+page:/div:1/div:18/section:1/ul:1/li:6	li	PartialEvidence record for the headline runFiled as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.
+page:/div:1/div:18/section:1/ul:1/li:6/span:1	span	Partial
+page:/div:1/div:18/section:1/ul:1/li:6/div:1	div	Evidence record for the headline runFiled as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.
+page:/div:1/div:18/section:1/ul:1/li:6/div:1/strong:1	strong	Evidence record for the headline run
+page:/div:1/div:18/section:1/ul:1/li:6/div:1/p:1	p	Filed as BENCH-008 with every node’s result. The raw JSON files and source revision still have to be attached.
+page:/div:1/div:18/section:1/ul:1/li:7	li	Not yetPipelined broadcast to replicasA signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which c
+page:/div:1/div:18/section:1/ul:1/li:7/span:1	span	Not yet
+page:/div:1/div:18/section:1/ul:1/li:7/div:1	div	Pipelined broadcast to replicasA signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the
+page:/div:1/div:18/section:1/ul:1/li:7/div:1/strong:1	strong	Pipelined broadcast to replicas
+page:/div:1/div:18/section:1/ul:1/li:7/div:1/p:1	p	A signed result reaches ten of ten replicas, but the broadcast is not pipelined: 449 ms against 8.9 ms to resolve, which caps the fleet near 2.2 batches/s and i
+page:/div:1/div:18/section:1/ul:1/li:8	li	Not yetPublic client trafficEvery client so far was operator-driven.
+page:/div:1/div:18/section:1/ul:1/li:8/span:1	span	Not yet
+page:/div:1/div:18/section:1/ul:1/li:8/div:1	div	Public client trafficEvery client so far was operator-driven.
+page:/div:1/div:18/section:1/ul:1/li:8/div:1/strong:1	strong	Public client traffic
+page:/div:1/div:18/section:1/ul:1/li:8/div:1/p:1	p	Every client so far was operator-driven.
+page:/div:1/div:18/section:1/ul:1/li:9	li	Not yetIndependent security reviewOnly our own tests have looked at the per-identity chain, the resolver launch and grammar checks, and the capability crates.
+page:/div:1/div:18/section:1/ul:1/li:9/span:1	span	Not yet
+page:/div:1/div:18/section:1/ul:1/li:9/div:1	div	Independent security reviewOnly our own tests have looked at the per-identity chain, the resolver launch and grammar checks, and the capability crates.
+page:/div:1/div:18/section:1/ul:1/li:9/div:1/strong:1	strong	Independent security review
+page:/div:1/div:18/section:1/ul:1/li:9/div:1/p:1	p	Only our own tests have looked at the per-identity chain, the resolver launch and grammar checks, and the capability crates.
+page:/div:1/div:18/section:1/ul:1/li:10	li	PartialDAO treasury multisigReal N-of-M threshold-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wir
+page:/div:1/div:18/section:1/ul:1/li:10/span:1	span	Partial
+page:/div:1/div:18/section:1/ul:1/li:10/div:1	div	DAO treasury multisigReal N-of-M threshold-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wire proto
+page:/div:1/div:18/section:1/ul:1/li:10/div:1/strong:1	strong	DAO treasury multisig
+page:/div:1/div:18/section:1/ul:1/li:10/div:1/p:1	p	Real N-of-M threshold-gated DAO founding, treasury binding, and split-payment spend (BENCH-014) — now wired into the live TCP/WS wire protocol and verified end 
+page:/div:1/div:18/section:2	section	Go deeperWhitepaper · how it works, what made it fast, every number’s sourceResolvers · each one’s own measured throughputFinance ledger · double-spend by const
+page:/div:1/div:18/section:2/p:1	p	Go deeper
+page:/div:1/div:18/section:2/ul:1	ul	Whitepaper · how it works, what made it fast, every number’s sourceResolvers · each one’s own measured throughputFinance ledger · double-spend by constructionTh
+page:/div:1/div:18/section:2/ul:1/li:1	li	Whitepaper · how it works, what made it fast, every number’s source
+page:/div:1/div:18/section:2/ul:1/li:1/a:1	a	Whitepaper · how it works, what made it fast, every number’s source
+page:/div:1/div:18/section:2/ul:1/li:2	li	Resolvers · each one’s own measured throughput
+page:/div:1/div:18/section:2/ul:1/li:2/a:1	a	Resolvers · each one’s own measured throughput
+page:/div:1/div:18/section:2/ul:1/li:3	li	Finance ledger · double-spend by construction
+page:/div:1/div:18/section:2/ul:1/li:3/a:1	a	Finance ledger · double-spend by construction
+page:/div:1/div:18/section:2/ul:1/li:4	li	The GPU, and why it is not compute-bound
+page:/div:1/div:18/section:2/ul:1/li:4/a:1	a	The GPU, and why it is not compute-bound
+page:/div:1/div:18/section:2/ul:1/li:5	li	How we got fast, and what we got wrong
+page:/div:1/div:18/section:2/ul:1/li:5/a:1	a	How we got fast, and what we got wrong
+page:/div:1/div:18/section:2/ul:1/li:6	li	Mainnet readiness
+page:/div:1/div:18/section:2/ul:1/li:6/a:1	a	Mainnet readiness
+page:/div:2	div	

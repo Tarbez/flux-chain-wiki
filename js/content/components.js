@@ -24,7 +24,7 @@
    route" means.
 
    CAPTURED components ("Make into component", js/main.js): arbitrary page markup is not
-   any of the 6 typed blocks, so a selection is captured as a master whose resolver is
+   any typed block, so a selection is captured as a master whose resolver is
    RBLOCK_CAPTURED_V1 and whose `tree` is the selection's own sanitized element structure.
    Its props are not a fixed list: every non-blank text node and every <img> src/alt in the
    tree is a slot, named from the element that holds it (propsOf), and the master's props
@@ -40,52 +40,179 @@ var ArkComponents = (function () {
 
   var current = { version: 1, masters: {}, routes: {} };
 
-  /* The 6 generic, document-flow block resolvers (js/resolvers/blocks/*.js),
-     registered the same way as every other ArkUI resolver. A master naming
-     anything else is dropped by sanitize() -- this is the whitelist Part 3's
-     design calls for, so Studio can never write a master pointing at one of
-     the hero-scene's own %/u-space resolvers. RBLOCK_CAPTURED_V1 (a captured
-     selection, see the header) is the 7th; its props come from its own tree. */
+  /* ---- what a master can be. Three kinds, and sanitize() keeps a master only when it is one:
+       an ARK BLOCK  -- resolver ARK_BLOCK_<NAME>: one of @deadark/ark-ui/blocks' premade blocks
+                        (hero, card, stat, table, tabs, ...), registered as an ArkUI resolver by
+                        js/ark/blocks.js looping ArkKit.ARK_BLOCK_NAMES. What the Library offers
+                        to create from nothing (W2-LIBRARY, docs/ux-audit/components.md §5 line 6).
+       a CAPTURED selection -- RBLOCK_CAPTURED_V1, see the header; its props come from its tree.
+       a LEGACY typed block -- RBLOCK_TEXT/CTA/IMAGE/CARD/QUOTE/DIVIDER_V1, the six hand-built
+                        resolvers the Library offered before Ark had blocks (js/resolvers/blocks/).
+                        READ ALIASES, kept as-is (future law: a saved master is never migrated in
+                        place), rendering byte-identically (tests/components-legacy-continuity.cjs).
+     Anything else is dropped by sanitize() -- this is the whitelist Part 3's design calls for,
+     so Studio can never write a master pointing at one of the hero-scene's own %/u-space
+     resolvers. */
   var CAPTURED = 'RBLOCK_CAPTURED_V1';
-  var RESOLVERS = ['RBLOCK_TEXT_V1', 'RBLOCK_CTA_V1', 'RBLOCK_IMAGE_V1', 'RBLOCK_CARD_V1', 'RBLOCK_QUOTE_V1', 'RBLOCK_DIVIDER_V1', CAPTURED];
 
-  /* Each resolver's own real prop names -- not a separate formal schema
-     object (these 6 resolver files just read p.xxx directly, no terse Flux
-     keys, since components are never built through Flux source text). An
-     override or a master's own props naming anything else for that resolver
-     is dropped, the same "validate against the resolver's own schema" rule
-     js/content/manifest.js's 'link' kind already applies to its own value. */
-  var RESOLVER_PROPS = {
-    RBLOCK_TEXT_V1: ['heading', 'body', 'align', 'size'],
-    RBLOCK_CTA_V1: ['label', 'href', 'variant'],
-    RBLOCK_IMAGE_V1: ['src', 'alt', 'caption'],
-    RBLOCK_CARD_V1: ['icon', 'title', 'text'],
-    RBLOCK_QUOTE_V1: ['quote', 'attribution'],
-    RBLOCK_DIVIDER_V1: []
+  /* The legacy blocks, each described ONCE in the Ark prop-schema vocabulary (kind, label,
+     values) so the editor draws their fields with the same schema-driven editor as an Ark
+     block's -- the names and values are what each resolver file reads (p.heading, p.align ===
+     'center', ...). `primary` is the prop each one shows as visible text (starterProps).
+     `successor` names the Ark block that does the same job: while the loaded registry has it,
+     the legacy block is no longer offered for NEW components (it still renders and edits);
+     Ark ships no prose `text` and no `divider` block yet (2026-10-19), so Text and Divider are
+     still offered, and step aside by themselves the day Ark adds them. */
+  var LEGACY = {
+    RBLOCK_TEXT_V1: { label: 'Text', description: 'A heading and a paragraph.', group: 'text', primary: 'heading', successor: 'text',
+      props: { heading: { kind: 'line', label: 'Heading' }, body: { kind: 'text', label: 'Paragraph' }, align: { kind: 'enum', label: 'Alignment', values: ['left', 'center'] }, size: { kind: 'enum', label: 'Heading size', values: ['h2', 'h3'] } } },
+    RBLOCK_CTA_V1: { label: 'Button / link', description: 'One button that opens a page or a site.', group: 'text', primary: 'label', successor: 'actions',
+      props: { label: { kind: 'line', label: 'Button text' }, href: { kind: 'href', label: 'Link' }, variant: { kind: 'enum', label: 'Look', values: ['primary', 'secondary'] } } },
+    RBLOCK_IMAGE_V1: { label: 'Image', description: 'An image with a caption.', group: 'media', primary: 'caption', successor: 'figure',
+      props: { src: { kind: 'line', label: 'Image address' }, alt: { kind: 'line', label: 'Alt text', help: 'what the image shows, read aloud by screen readers' }, caption: { kind: 'text', label: 'Caption' } } },
+    RBLOCK_CARD_V1: { label: 'Card', description: 'An icon, a title and a sentence.', group: 'navigation', primary: 'title', successor: 'card',
+      props: { icon: { kind: 'line', label: 'Icon name' }, title: { kind: 'line', label: 'Title' }, text: { kind: 'text', label: 'Text' } } },
+    RBLOCK_QUOTE_V1: { label: 'Quote', description: 'Someone\'s words and who said them.', group: 'text', primary: 'quote', successor: 'quote',
+      props: { quote: { kind: 'text', label: 'Quote' }, attribution: { kind: 'line', label: 'Who said it' } } },
+    RBLOCK_DIVIDER_V1: { label: 'Divider', description: 'A line between two parts of a page.', group: 'layout', primary: '', successor: 'divider', props: {} }
   };
-  /* What the editor calls each resolver, kept next to its props so a new resolver gets its
-     name where it gets its schema. js/admin/admin.js reads these through blocks()/labelOf();
-     it used to keep its own copy of the list, labels and props, which could only drift. */
-  var RESOLVER_LABELS = {
-    RBLOCK_TEXT_V1: 'Text', RBLOCK_CTA_V1: 'Button / link', RBLOCK_IMAGE_V1: 'Image',
-    RBLOCK_CARD_V1: 'Card', RBLOCK_QUOTE_V1: 'Quote', RBLOCK_DIVIDER_V1: 'Divider'
-  };
-  RESOLVER_LABELS[CAPTURED] = 'Made from a selection';
-  function labelOf(resolver) { return RESOLVER_LABELS[resolver] || String(resolver || ''); }
-  /* the typed blocks a person can create from nothing: every resolver but a captured selection */
-  function blocks() {
-    return RESOLVERS.filter(function (r) { return r !== CAPTURED; }).map(function (r) { return { resolver: r, label: labelOf(r), props: (RESOLVER_PROPS[r] || []).slice() }; });
+  var LEGACY_RESOLVERS = Object.keys(LEGACY);
+  var RESOLVERS = LEGACY_RESOLVERS.concat([CAPTURED]);
+  /* each legacy resolver's real prop names, in the order its master stores them (cleanProps) */
+  var RESOLVER_PROPS = {};
+  LEGACY_RESOLVERS.forEach(function (r) { RESOLVER_PROPS[r] = Object.keys(LEGACY[r].props); });
+
+  /* ---- the Ark block registry. Read from ArkKit (js/ark/vendor/ark-kit.js on the editor,
+     ark-kit-public.js on the site) WHEN it is there: an Ark master is recognised by the SHAPE
+     of its resolver name, never by registry membership, so a components-data.js that loads
+     before ArkKit -- or a record written by a newer Ark with a block this one lacks -- is never
+     dropped by sanitize() (future law: saved records outlive editors). The name is derived:
+     hero -> ARK_BLOCK_HERO, section-header -> ARK_BLOCK_SECTION_HEADER (js/ark/blocks.js
+     registers exactly these). */
+  var ARK_PREFIX = 'ARK_BLOCK_';
+  var ARK_RESOLVER = /^ARK_BLOCK_[A-Z][A-Z0-9_]{0,63}$/;
+  function isArk(resolver) { return typeof resolver === 'string' && ARK_RESOLVER.test(resolver); }
+  function isKnownResolver(resolver) { return RESOLVERS.indexOf(resolver) >= 0 || isArk(resolver); }
+  function arkResolverFor(name) { return ARK_PREFIX + String(name || '').toUpperCase().replace(/[^A-Z0-9]+/g, '_'); }
+  var described = null;
+  function registry() {
+    if (described) return described;
+    var kit = typeof ArkKit !== 'undefined' && ArkKit && typeof ArkKit.describeArkBlocks === 'function' ? ArkKit : null;
+    if (!kit) return [];                                   /* not loaded (yet): asked again next time */
+    try { described = kit.describeArkBlocks() || []; } catch (e) { return []; }
+    return described;
+  }
+  function descriptorOf(resolver) {
+    if (!isArk(resolver)) return null;
+    return registry().find(function (d) { return arkResolverFor(d.name) === resolver; }) || null;
+  }
+  /* the block name an Ark resolver stands for, registry or not ('ARK_BLOCK_CARD_GRID' -> 'card-grid') */
+  function arkBlockName(resolver) {
+    var d = descriptorOf(resolver);
+    if (d) return d.name;
+    return isArk(resolver) ? resolver.slice(ARK_PREFIX.length).toLowerCase().replace(/_/g, '-') : null;
+  }
+  function eachSchema(schemas, visit) {
+    Object.keys(schemas || {}).forEach(function (name) {
+      (function walk(s) {
+        if (!s || typeof s !== 'object') return;
+        visit(s);
+        walk(s.of); if (s.values && !Array.isArray(s.values)) walk(s.values);
+        Object.keys(s.fields || {}).forEach(function (k) { walk(s.fields[k]); });
+      })(schemas[name]);
+    });
   }
 
-  /* The one prop each resolver shows as visible text, so a block created with nothing
-     typed in yet still renders as SOMETHING (regression: tests/components-starter-props.cjs).
-     A Text block with props {} renders an empty <section> of zero size: added as a new
-     state's content it was invisible, and with a 'self' trigger it was also unclickable,
-     so the state group could never be clicked past it. A Divider has no text and needs
-     none (it renders an <hr>). */
-  var PRIMARY_TEXT_PROP = { RBLOCK_TEXT_V1: 'heading', RBLOCK_CTA_V1: 'label', RBLOCK_IMAGE_V1: 'caption', RBLOCK_CARD_V1: 'title', RBLOCK_QUOTE_V1: 'quote' };
+  /* ---- the Library's groups (docs/ux-audit/cms.md P2-5, IA: Text, Media, Layout, Data,
+     Navigation, Captured). A block's group is decided by its STRUCTURE first -- a block that
+     holds other blocks is Layout, one that takes an image or a live slot is Media -- and
+     otherwise by the category Ark gives it, where only Ark's word "content" is renamed (to
+     "Text"); a category Ark adds later becomes its own group, named after itself. */
+  var GROUP_ORDER = ['text', 'media', 'layout', 'data', 'navigation', 'captured'];
+  var GROUP_NAMES = { text: 'Text', media: 'Media', layout: 'Layout', data: 'Data', navigation: 'Navigation', captured: 'Captured' };
+  function groupName(group) { return GROUP_NAMES[group] || (String(group || '').charAt(0).toUpperCase() + String(group || '').slice(1)); }
+  function groupOfDescriptor(d) {
+    var nests = false, media = false;
+    eachSchema(d.props, function (s) {
+      if (s.kind === 'blocks') nests = true;
+      if (s.kind === 'slot' || (s.kind === 'object' && s.fields && s.fields.src)) media = true;
+    });
+    if (nests) return 'layout';
+    if (media) return 'media';
+    return d.category === 'content' ? 'text' : String(d.category || 'text');
+  }
+  function groupOf(resolver) {
+    if (resolver === CAPTURED) return 'captured';
+    if (LEGACY[resolver]) return LEGACY[resolver].group;
+    var d = descriptorOf(resolver);
+    return d ? groupOfDescriptor(d) : 'text';
+  }
+  function groups() { return GROUP_ORDER.map(function (g) { return { group: g, label: groupName(g) }; }); }
+
+  function labelOf(resolver) {
+    if (resolver === CAPTURED) return 'Made from a selection';
+    if (LEGACY[resolver]) return LEGACY[resolver].label;
+    var d = descriptorOf(resolver);
+    if (d) return d.label;
+    var name = arkBlockName(resolver);
+    return name ? name.charAt(0).toUpperCase() + name.slice(1).replace(/-/g, ' ') : String(resolver || '');
+  }
+
+  /* The blocks a person can create from nothing, in group order: every Ark block in the loaded
+     registry, then each legacy block whose successor the registry does not have yet. A captured
+     component is never in this list (it is made from a selection). Each entry:
+     { resolver, name, label, description, group, groupLabel, props: [names], legacy, example } */
+  function blocks() {
+    var out = [];
+    var names = registry().map(function (d) { return d.name; });
+    registry().forEach(function (d) {
+      var group = groupOfDescriptor(d);
+      out.push({ resolver: arkResolverFor(d.name), name: d.name, label: d.label, description: d.description || '', group: group, groupLabel: groupName(group),
+        props: Object.keys(d.props || {}), legacy: false, example: JSON.parse(JSON.stringify(d.example || {})) });
+    });
+    LEGACY_RESOLVERS.forEach(function (r) {
+      if (names.indexOf(LEGACY[r].successor) >= 0) return;
+      out.push({ resolver: r, name: r, label: LEGACY[r].label, description: LEGACY[r].description, group: LEGACY[r].group, groupLabel: groupName(LEGACY[r].group),
+        props: RESOLVER_PROPS[r].slice(), legacy: true, example: {} });
+    });
+    var rank = function (g) { var i = GROUP_ORDER.indexOf(g); return i < 0 ? GROUP_ORDER.length : i; };
+    return out.map(function (b, i) { return { b: b, i: i }; }).sort(function (x, y) { return rank(x.b.group) - rank(y.b.group) || x.i - y.i; }).map(function (x) { return x.b; });
+  }
+
+  /* One editor field per prop, in the Ark prop-schema vocabulary ({ prop, kind, label, ... }):
+     an Ark block's from the registry (the editor prefers the SDK's getCmsArkBlockEditorFields,
+     which is generated from the same registry -- tests/components-library.cjs holds them equal),
+     a legacy block's from LEGACY, a captured component's one text field per slot, named from
+     the slot ('link2' -> "Link 2"). */
+  function slotLabel(name) { var m = /^([a-z]+?)([A-Z][a-z]*)?(\d*)$/.exec(name) || [name, name, '', '']; return (m[1].charAt(0).toUpperCase() + m[1].slice(1) + (m[2] ? ' ' + m[2].toLowerCase() : '') + (m[3] ? ' ' + m[3] : '')); }
+  function fieldsOf(master) {
+    if (!master) return [];
+    var schemas = null;
+    /* a captured slot is one run of text (or an image's address): one line */
+    if (master.resolver === CAPTURED) return slotsOf(master.tree).map(function (name) { return { prop: name, kind: 'line', label: slotLabel(name) }; });
+    if (LEGACY[master.resolver]) schemas = LEGACY[master.resolver].props;
+    else { var d = descriptorOf(master.resolver); if (d) schemas = d.props; }
+    if (!schemas) return Object.keys(master.props || {}).map(function (name) { return { prop: name, kind: 'text', label: slotLabel(name) }; });
+    return Object.keys(schemas).map(function (name) { return Object.assign({ prop: name }, JSON.parse(JSON.stringify(schemas[name]))); });
+  }
+
+  /* The prop each block shows as visible text, so a block created with nothing typed in yet
+     still renders as SOMETHING (regression: tests/components-starter-props.cjs). A Text block
+     with props {} renders an empty <section> of zero size: added as a new state's content it
+     was invisible, and with a 'self' trigger it was also unclickable, so the state group could
+     never be clicked past it. A Divider has no text and needs none (it renders an <hr>).
+     An Ark block starts from its registry example (Ark tests that every example is valid), with
+     the text put into its first required one-line or text prop -- derived from the schema. */
+  function primaryOf(resolver) {
+    if (LEGACY[resolver]) return LEGACY[resolver].primary;
+    var d = descriptorOf(resolver); if (!d) return '';
+    var names = Object.keys(d.props || {}), textual = function (n) { return d.props[n].kind === 'line' || d.props[n].kind === 'text'; };
+    return names.find(function (n) { return textual(n) && d.props[n].required; }) || names.find(textual) || '';
+  }
   function starterProps(resolver, text) {
-    var props = {}, key = PRIMARY_TEXT_PROP[resolver];
+    var props = {}, d = descriptorOf(resolver);
+    if (d) props = JSON.parse(JSON.stringify(d.example || {}));
+    var key = primaryOf(resolver);
     if (key && text) props[key] = String(text).slice(0, 4000);
     return props;
   }
@@ -110,6 +237,30 @@ var ArkComponents = (function () {
 
   function isPlainObject(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
   function okValue(v) { return (typeof v === 'string' && v.length <= 4000) || (typeof v === 'number' && isFinite(v)) || typeof v === 'boolean'; }
+  /* An Ark block's props are structured (an actions list, table rows, a status object), so they
+     are kept by SHAPE: plain data of bounded size -- strings, finite numbers, booleans, null (a
+     stat's null IS its absent reading), lists and plain objects, nested a few levels. Kept even
+     when the loaded registry does not declare the prop: a record written by a newer editor must
+     survive an older one (future law). Whether the props are RIGHT for the block is the save
+     path's question -- problems(), strict -- never sanitize()'s. */
+  var PROP_NAME = /^[A-Za-z_$][A-Za-z0-9_$-]{0,63}$/;
+  function cleanData(value, depth, budget) {
+    if (budget.n++ > 4000 || depth > 8) return undefined;
+    if (value === null || typeof value === 'boolean') return value;
+    if (typeof value === 'string') return value.length <= 4000 ? value : undefined;
+    if (typeof value === 'number') return isFinite(value) ? value : undefined;
+    if (Array.isArray(value)) {
+      var list = [];
+      value.slice(0, 200).forEach(function (item) { var clean = cleanData(item, depth + 1, budget); if (clean !== undefined) list.push(clean); });
+      return list;
+    }
+    if (isPlainObject(value)) {
+      var out = {};
+      Object.keys(value).slice(0, 60).forEach(function (key) { if (!PROP_NAME.test(key)) return; var clean = cleanData(value[key], depth + 1, budget); if (clean !== undefined) out[key] = clean; });
+      return out;
+    }
+    return undefined;
+  }
 
   /* ---- captured trees ("Make into component"). A tree is an array of nodes:
        ' '                         blank text kept between elements (collapsed to one space)
@@ -197,10 +348,12 @@ var ArkComponents = (function () {
     })(tree);
     return out;
   }
-  /* A master's editable props: a typed block's fixed list, a captured one's own slots. */
+  /* A master's editable props: a typed block's fixed list, a captured one's own slots, an Ark
+     block's schema (or, with no registry loaded, the props it holds). */
   function propsOf(master) {
     if (!master) return [];
     if (master.resolver === CAPTURED) return slotsOf(master.tree);
+    if (isArk(master.resolver)) { var d = descriptorOf(master.resolver); return d ? Object.keys(d.props || {}) : Object.keys(master.props || {}); }
     return (RESOLVER_PROPS[master.resolver] || []).slice();
   }
 
@@ -211,12 +364,17 @@ var ArkComponents = (function () {
   function cleanProps(resolver, raw, tree) {
     var allowed = resolver === CAPTURED ? slotsOf(tree) : (RESOLVER_PROPS[resolver] || []), out = {};
     if (!isPlainObject(raw)) return out;
+    if (isArk(resolver)) {
+      var budget = { n: 0 };
+      Object.keys(raw).slice(0, 60).forEach(function (key) { if (!PROP_NAME.test(key)) return; var clean = cleanData(raw[key], 0, budget); if (clean !== undefined) out[key] = clean; });
+      return out;
+    }
     allowed.forEach(function (key) { if (okValue(raw[key])) out[key] = raw[key]; });
     return out;
   }
 
   function cleanMaster(raw) {
-    if (!isPlainObject(raw) || RESOLVERS.indexOf(raw.resolver) < 0) return null;
+    if (!isPlainObject(raw) || !isKnownResolver(raw.resolver)) return null;
     var tree = null;
     if (raw.resolver === CAPTURED) { tree = cleanTree(raw.tree); if (!tree) return null; }
     var out = { resolver: raw.resolver, props: cleanProps(raw.resolver, raw.props, tree), label: String(raw.label || raw.resolver).slice(0, 120) };
@@ -239,6 +397,10 @@ var ArkComponents = (function () {
     return { after: raw.after, replaces: replaces };
   }
 
+  /* Edits saved under a scope that has since been split per document (/reference) are read
+     under the scope they belong to: ArkLayout.moveScopes, the one table (js/content/layout.js,
+     "moved scopes"). Without js/content/layout.js loaded they stay where they were stored. */
+  function moveScopes(map) { return typeof ArkLayout !== 'undefined' && ArkLayout && ArkLayout.moveScopes ? ArkLayout.moveScopes(map) : map; }
   function sanitize(value) {
     var out = { version: 1, masters: {}, routes: {} };
     var rawMasters = value && value.masters;
@@ -247,7 +409,7 @@ var ArkComponents = (function () {
       var clean = cleanMaster(rawMasters[id]);
       if (clean) out.masters[id] = clean;
     });
-    var rawRoutes = value && value.routes;
+    var rawRoutes = moveScopes(value && value.routes);
     if (isPlainObject(rawRoutes)) Object.keys(rawRoutes).slice(0, 500).forEach(function (route) {
       if (!isScope(route)) return;
       var rawAnchors = rawRoutes[route];
@@ -266,7 +428,7 @@ var ArkComponents = (function () {
     });
     /* A spot exists only while something is in it: one with no instance would hide the
        content it replaced and show nothing in its place. */
-    var rawSpots = value && value.spots, spots = {};
+    var rawSpots = moveScopes(value && value.spots), spots = {};
     if (isPlainObject(rawSpots)) Object.keys(rawSpots).slice(0, 500).forEach(function (route) {
       if (!isScope(route) || !isPlainObject(rawSpots[route]) || !out.routes[route]) return;
       var clean = {};
@@ -296,16 +458,89 @@ var ArkComponents = (function () {
     return '/* Reusable content blocks inserted in DEFXN Studio. */\nArkComponents.define(' + JSON.stringify(sanitize(value), null, 2) + ');\n';
   }
 
+  /* ---- the save path's check. Every Ark master's props, and every instance's props as it
+     SHOWS them (the definition with its overrides folded in), go through the SDK's
+     validateCmsArkBlock in STRICT mode (@deadark/sdk/cms; the editor loads it as
+     js/admin/vendor/cms-blocks.js, global ArkCmsBlocks) -- strict also refuses a prop the block
+     does not define, which rendering ignores. Save refuses the components draft while any
+     refusal stands (js/admin/save.js), so nothing invalid is ever written; sanitize() and render
+     stay lenient (future law: a saved record still renders). A refusal names the failure, what
+     is needed and the remedy (scripts/lib/refusal.mjs), plus WHERE in plain words: the
+     component's own name and the field's label path, never only `props.items[2].label`.
+     Legacy and captured masters have no Ark schema and are not checked here. With no check
+     loaded, an Ark master is refused as unchecked -- never passed as checked. `validate(spec)`
+     may be passed in (tests); it returns { ok } or { ok: false, refusals }. */
+  function defaultCheck() {
+    if (typeof ArkCmsBlocks !== 'undefined' && ArkCmsBlocks && typeof ArkCmsBlocks.validateCmsArkBlock === 'function') {
+      return function (spec) { return ArkCmsBlocks.validateCmsArkBlock(spec, { strict: true }); };
+    }
+    return null;
+  }
+  function schemasOf(resolver) {
+    if (LEGACY[resolver]) return LEGACY[resolver].props;
+    var d = descriptorOf(resolver);
+    return d ? d.props : null;
+  }
+  /* 'props.items[2].label' -> "Actions #3 › Button text", from the block's own schema labels */
+  function pathLabel(resolver, path) {
+    var schemas = schemasOf(resolver) || {}, schema = null, out = [];
+    (String(path || '').replace(/^props\.?/, '').match(/\[\d+\]|[^.[\]]+/g) || []).forEach(function (part) {
+      var index = /^\[(\d+)\]$/.exec(part);
+      if (index) { if (out.length) out[out.length - 1] += ' #' + (Number(index[1]) + 1); schema = schema && schema.of; return; }
+      var next = !schema ? schemas[part] : schema.kind === 'object' ? (schema.fields || {})[part] : schema.kind === 'record' ? schema.values : null;
+      out.push(schema && schema.kind === 'record' ? part : (next && next.label) || part);
+      schema = next || null;
+    });
+    return out.join(' › ');
+  }
+  function problems(value, validate) {
+    var draft = sanitize(value), check = validate || defaultCheck(), out = [], refusedPaths = {};
+    function refuse(where, master, refusal, extra) {
+      var field = pathLabel(master.resolver, refusal.path);
+      out.push(Object.assign({ label: master.label, block: arkBlockName(master.resolver), path: refusal.path, field: field, failure: refusal.failure, needs: refusal.needs, remedy: refusal.remedy,
+        sentence: where + (field ? ', ' + field : '') + ': ' + refusal.failure + '. Needs ' + refusal.needs + '. Remedy: ' + refusal.remedy + '.' }, extra));
+    }
+    Object.keys(draft.masters).forEach(function (id) {
+      var master = draft.masters[id];
+      if (!isArk(master.resolver)) return;
+      var where = 'Component "' + master.label + '"';
+      if (!check) {
+        refuse(where, master, { path: '', failure: 'it could not be checked', needs: 'the block check (js/admin/vendor/cms-blocks.js, @deadark/sdk validateCmsArkBlock)', remedy: 'reload the editor so the check loads, then save again' }, { masterId: id });
+        return;
+      }
+      var own = check({ block: arkBlockName(master.resolver), props: master.props });
+      if (own && own.ok === false) own.refusals.forEach(function (r) { refuse(where, master, r, { masterId: id }); });
+      refusedPaths[id] = own && own.ok === false ? own.refusals.map(function (r) { return r.path; }) : [];
+    });
+    if (check) Object.keys(draft.routes).forEach(function (route) {
+      Object.keys(draft.routes[route]).forEach(function (anchorId) {
+        draft.routes[route][anchorId].forEach(function (instance) {
+          var master = draft.masters[instance.masterId];
+          if (!master || !isArk(master.resolver) || !Object.keys(instance.overrides).length) return;
+          var shown = check({ block: arkBlockName(master.resolver), props: Object.assign({}, master.props, instance.overrides) });
+          /* what the definition already refuses is said once, on the definition */
+          if (shown && shown.ok === false) shown.refusals.filter(function (r) { return (refusedPaths[instance.masterId] || []).indexOf(r.path) < 0; }).forEach(function (r) {
+            refuse('"' + master.label + '" on ' + (route === SHELL ? 'every page' : route), master, r, { masterId: instance.masterId, route: route, anchorId: anchorId, key: instance.key });
+          });
+        });
+      });
+    });
+    return out;
+  }
+
   /* ---- mutators: pure, draft-in draft-out, exactly like ArkLayout.set/group/
      ungroup/remove -- the caller (js/main.js's cmsComponentsDraft, admin.js's
      componentsDraft) holds the draft and reassigns it from the return value.
      Each id/key is supplied by the caller, the same way ArkLayout.group()
      takes a caller-generated group id rather than inventing one here. */
 
-  /* `tree` is only read for RBLOCK_CAPTURED_V1 (it IS that master's definition). */
+  /* `tree` is only read for RBLOCK_CAPTURED_V1 (it IS that master's definition). A NEW Ark
+     master must name a block the loaded registry has (a typo would otherwise save a master that
+     renders nothing); with no registry loaded the name's shape is all there is to check. */
   function createMaster(value, id, resolver, props, label, tree) {
     var draft = sanitize(value);
-    if (!ID.test(id || '') || RESOLVERS.indexOf(resolver) < 0) return draft;
+    if (!ID.test(id || '') || !isKnownResolver(resolver)) return draft;
+    if (isArk(resolver) && registry().length && !descriptorOf(resolver)) return draft;
     var master = cleanMaster({ resolver: resolver, props: props, label: label, tree: tree });
     if (master) draft.masters[id] = master;
     return sanitize(draft);
@@ -811,6 +1046,9 @@ var ArkComponents = (function () {
     render: render, renderAll: renderAll, anchorsIn: anchorsIn, instancesAt: instancesAt, SHELL: SHELL,
     capture: capture, starterFrom: starterFrom, buildNode: buildNode, propsOf: propsOf,
     resolvers: RESOLVERS.slice(), resolverProps: RESOLVER_PROPS, starterProps: starterProps, CAPTURED: CAPTURED,
-    blocks: blocks, labelOf: labelOf
+    blocks: blocks, labelOf: labelOf,
+    /* the Ark block registry, as the Library and the save path read it */
+    isArk: isArk, arkResolverFor: arkResolverFor, arkBlockName: arkBlockName, descriptorOf: descriptorOf,
+    groups: groups, groupOf: groupOf, fieldsOf: fieldsOf, pathLabel: pathLabel, problems: problems
   };
 })();

@@ -1,0 +1,75 @@
+# key	tag	text -- layout keys of /concept/studio before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Operating modelNetwork evidenceHow do you verify a named network?The core ideaHow it worksEvidence & limitsA network name or directory row is not sufficient evi
+page:/nav:1	nav	Operating modelNetwork evidence
+page:/nav:1/a:1	a	Operating model
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Network evidence
+id:studio-title	h1	How do you verify a named network?
+page:/nav:2	nav	The core ideaHow it worksEvidence & limits
+page:/nav:2/button:1	button	The core idea
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	How it works
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence & limits
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	A network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or h
+page:/div:1/div:1	div	A network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or h
+page:/div:1/div:1/div:1	div	A network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or h
+page:/div:1/div:1/div:1/p:1	p	A network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or h
+page:/div:1/div:1/aside:1	aside	Evidence record / CAP-003The network command contract is source-backed. A complete independent live create-and-participate artifact remains pending.
+page:/div:1/div:1/aside:1/strong:1	strong	Evidence record / CAP-003
+page:/div:1/div:1/aside:1/p:1	p	The network command contract is source-backed. A complete independent live create-and-participate artifact remains pending.
+page:/div:1/figure:1	figure	Illustration / Network evidence relationshipsPROVENANCE STAYS WITH THE CLAIMSOURCE / REVISION / DATED EVIDENCENamed network IDSource revisionDated observationEv
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / Network evidence relationships
+page:/div:1/figure:1/svg:1	svg	PROVENANCE STAYS WITH THE CLAIMSOURCE / REVISION / DATED EVIDENCE
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/figure:1/svg:1/path:9	path	
+page:/div:1/figure:1/svg:1/path:10	path	
+page:/div:1/figure:1/svg:1/path:11	path	
+page:/div:1/figure:1/svg:1/rect:3	rect	
+page:/div:1/figure:1/svg:1/path:12	path	
+page:/div:1/figure:1/svg:1/path:13	path	
+page:/div:1/figure:1/svg:1/path:14	path	
+page:/div:1/figure:1/svg:1/rect:4	rect	
+page:/div:1/figure:1/svg:1/path:15	path	
+page:/div:1/figure:1/svg:1/path:16	path	
+page:/div:1/figure:1/svg:1/path:17	path	
+page:/div:1/figure:1/svg:1/text:1	text	PROVENANCE STAYS WITH THE CLAIM
+page:/div:1/figure:1/svg:1/text:2	text	SOURCE / REVISION / DATED EVIDENCE
+page:/div:1/figure:1/svg:1/path:18	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/button:1	button	Named network ID
+page:/div:1/figure:1/button:2	button	Source revision
+page:/div:1/figure:1/button:3	button	Dated observation
+page:/div:1/figure:1/button:4	button	Evidence + isolation boundary
+page:/nav:3	nav	CREATE OR JOIN A NETWORK
+page:/nav:3/a:1	a	CREATE OR JOIN A NETWORK
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

@@ -1,0 +1,82 @@
+# key	tag	text -- layout keys of /resolutions before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeResolutionsDEFXN / RESOLUTIONSResolutions for the mesh.Everyone is our business partner. Choose what you want to resolve: the mesh is the database, the host
+page:/nav:1	nav	HomeResolutions
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Resolutions
+page:/header:1	header	DEFXN / RESOLUTIONSResolutions for the mesh.Everyone is our business partner. Choose what you want to resolve: the mesh is the database, the host and the cloud,
+page:/header:1/div:1	div	DEFXN / RESOLUTIONSResolutions for the mesh.Everyone is our business partner. Choose what you want to resolve: the mesh is the database, the host and the cloud,
+page:/header:1/div:1/p:1	p	DEFXN / RESOLUTIONS
+id:resolutions-title	h1	Resolutions for the mesh.
+page:/header:1/div:1/p:2	p	Everyone is our business partner. Choose what you want to resolve: the mesh is the database, the host and the cloud, with encrypted peer-to-peer hosting that re
+page:/header:1/div:1/button:1	button	More
+page:/header:1/dl:1	dl	20resolutions05domains01mesh
+page:/header:1/dl:1/div:1	div	20resolutions
+page:/header:1/dl:1/div:1/dt:1	dt	20
+page:/header:1/dl:1/div:1/dd:1	dd	resolutions
+page:/header:1/dl:1/div:2	div	05domains
+page:/header:1/dl:1/div:2/dt:1	dt	05
+page:/header:1/dl:1/div:2/dd:1	dd	domains
+page:/header:1/dl:1/div:3	div	01mesh
+page:/header:1/dl:1/div:3/dt:1	dt	01
+page:/header:1/dl:1/div:3/dd:1	dd	mesh
+page:/section:1	section	01Build & publish0402Value & finance0203People & organisations0404Intelligence & data0505Infrastructure & operations0501 / 05Build & publishMake, publish and ke
+page:/section:1/div:1	div	01Build & publish0402Value & finance0203People & organisations0404Intelligence & data0505Infrastructure & operations05
+id:resolution-domain-build	button	01Build & publish04
+page:/section:1/div:1/button:1/span:1	span	01
+page:/section:1/div:1/button:1/span:2	span	Build & publish
+page:/section:1/div:1/button:1/span:3	span	04
+id:resolution-domain-value	button	02Value & finance02
+page:/section:1/div:1/button:2/span:1	span	02
+page:/section:1/div:1/button:2/span:2	span	Value & finance
+page:/section:1/div:1/button:2/span:3	span	02
+id:resolution-domain-people	button	03People & organisations04
+page:/section:1/div:1/button:3/span:1	span	03
+page:/section:1/div:1/button:3/span:2	span	People & organisations
+page:/section:1/div:1/button:3/span:3	span	04
+id:resolution-domain-intelligence	button	04Intelligence & data05
+page:/section:1/div:1/button:4/span:1	span	04
+page:/section:1/div:1/button:4/span:2	span	Intelligence & data
+page:/section:1/div:1/button:4/span:3	span	05
+id:resolution-domain-operations	button	05Infrastructure & operations05
+page:/section:1/div:1/button:5/span:1	span	05
+page:/section:1/div:1/button:5/span:2	span	Infrastructure & operations
+page:/section:1/div:1/button:5/span:3	span	05
+id:resolution-domain-panel	div	01 / 05Build & publishMake, publish and keep digital work available without building a server stack around it.01WebsitePublish straight to the mesh: no database
+page:/section:1/div:2/div:1	div	01 / 05Build & publishMake, publish and keep digital work available without building a server stack around it.
+page:/section:1/div:2/div:1/div:1	div	01 / 05Build & publish
+page:/section:1/div:2/div:1/div:1/p:1	p	01 / 05
+page:/section:1/div:2/div:1/div:1/h2:1	h2	Build & publish
+page:/section:1/div:2/div:1/p:1	p	Make, publish and keep digital work available without building a server stack around it.
+page:/section:1/div:2/div:2	div	01WebsitePublish straight to the mesh: no database, no hosting, no fees, no cloud.→02ContentPublish once and keep it addressable and permanent on the mesh.→03Fi
+page:/section:1/div:2/div:2/a:1	a	01WebsitePublish straight to the mesh: no database, no hosting, no fees, no cloud.→
+page:/section:1/div:2/div:2/a:1/span:1	span	01
+page:/section:1/div:2/div:2/a:1/span:2	span	WebsitePublish straight to the mesh: no database, no hosting, no fees, no cloud.
+page:/section:1/div:2/div:2/a:1/span:2/strong:1	strong	Website
+page:/section:1/div:2/div:2/a:1/span:2/span:1	span	Publish straight to the mesh: no database, no hosting, no fees, no cloud.
+page:/section:1/div:2/div:2/a:1/span:3	span	→
+page:/section:1/div:2/div:2/a:2	a	02ContentPublish once and keep it addressable and permanent on the mesh.→
+page:/section:1/div:2/div:2/a:2/span:1	span	02
+page:/section:1/div:2/div:2/a:2/span:2	span	ContentPublish once and keep it addressable and permanent on the mesh.
+page:/section:1/div:2/div:2/a:2/span:2/strong:1	strong	Content
+page:/section:1/div:2/div:2/a:2/span:2/span:1	span	Publish once and keep it addressable and permanent on the mesh.
+page:/section:1/div:2/div:2/a:2/span:3	span	→
+page:/section:1/div:2/div:2/a:3	a	03FilesStore and share files through encrypted peer-to-peer hosting.→
+page:/section:1/div:2/div:2/a:3/span:1	span	03
+page:/section:1/div:2/div:2/a:3/span:2	span	FilesStore and share files through encrypted peer-to-peer hosting.
+page:/section:1/div:2/div:2/a:3/span:2/strong:1	strong	Files
+page:/section:1/div:2/div:2/a:3/span:2/span:1	span	Store and share files through encrypted peer-to-peer hosting.
+page:/section:1/div:2/div:2/a:3/span:3	span	→
+page:/section:1/div:2/div:2/a:4	a	04DeploymentsShip signed bundles to the mesh instead of to a server you rent.→
+page:/section:1/div:2/div:2/a:4/span:1	span	04
+page:/section:1/div:2/div:2/a:4/span:2	span	DeploymentsShip signed bundles to the mesh instead of to a server you rent.
+page:/section:1/div:2/div:2/a:4/span:2/strong:1	strong	Deployments
+page:/section:1/div:2/div:2/a:4/span:2/span:1	span	Ship signed bundles to the mesh instead of to a server you rent.
+page:/section:1/div:2/div:2/a:4/span:3	span	→
+page:/aside:1	aside	Resolutions describe where DEFXN is going. The current status page lists what runs today and what is still being built.MoreCurrent status →
+page:/aside:1/p:1	p	Resolutions describe where DEFXN is going. The current status page lists what runs today and what is still being built.
+page:/aside:1/button:1	button	More
+page:/aside:1/a:1	a	Current status →
+page:/div:1	div	

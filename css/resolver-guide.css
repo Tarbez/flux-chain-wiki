@@ -10,7 +10,7 @@
   align-items:center;
   gap:12px;
   margin:0 0 22px;
-  font:600 10px/1.4 var(--mono-font,ui-monospace,monospace);
+  font:600 10px/1.4 var(--font-mono,ui-monospace,monospace);
   letter-spacing:.13em;
   text-transform:uppercase;
   color:hsl(var(--text-muted));
@@ -19,7 +19,7 @@
   content:"";
   width:28px;
   height:1px;
-  background:hsl(var(--accent));
+  background:hsl(var(--primary));
 }
 .resolver-guide-content .learning-heading {
   max-width:12em;
@@ -58,12 +58,12 @@
   display:inline-flex;
   align-items:center;
   min-height:44px;
-  font:600 10px/1.3 var(--mono-font,ui-monospace,monospace);
+  font:600 10px/1.3 var(--font-mono,ui-monospace,monospace);
   letter-spacing:.06em;
   text-transform:uppercase;
   text-decoration:none;
 }
-.resolver-next-link { color:hsl(var(--text-strong)); border-bottom:1px solid hsl(var(--accent)); }
+.resolver-next-link { color:hsl(var(--text-strong)); border-bottom:1px solid hsl(var(--reference)); }
 .resolver-back-link { color:hsl(var(--text-muted)); }
 .resolver-primary-cta {
   padding:0 20px;
@@ -86,3 +86,20 @@
 @media(prefers-reduced-motion:reduce) {
   .resolver-guide-page :is(.learning-eyebrow,.learning-heading,.resolver-guide-copy,.resolver-guide-links) { animation:none; }
 }
+
+/* =====================================================================
+   Manifest figures (js/pages/resolver-page-parts.js): the content audit's five diagrams, drawn
+   from each manifest's meta.diagrams inside Ark's figure frame. The cards, status chips, eyebrows,
+   steps and facts inside are Ark's own parts and take no rule here; this sheet holds only the
+   layout around them. The layer band and the launched chain's lane are Ark's own `band` and `lane`
+   blocks (@deadark/ark-ui 0.2.11).
+   Nothing moves. Colour is the SDK's semantic tokens; shape (dashed lane, a provider dot) and
+   the words carry every state, never colour alone.
+   ===================================================================== */
+.mfig { display:grid; gap:14px; }
+.mfig-layers { gap:0; }
+.mfig-rule, .mfig-source { margin:0; color:hsl(var(--text-muted)); }
+.mfig-source { margin-top:12px; }
+.mfig-states { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
+.mfig-state { display:grid; align-content:start; gap:8px; }
+.mfig-variant { display:grid; gap:8px; padding:10px 12px; border:1px solid hsl(var(--border-default)); border-radius:8px; }

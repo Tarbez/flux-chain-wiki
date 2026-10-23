@@ -58,6 +58,8 @@ are your limitations.**
 
 ## 2. The resolver layer
 
+> Written before resolver chains and capabilities (2026-10-18). For what a resolver is now — its own chain, built from capabilities, its grammar enforced — read [resolvers](protocol/resolvers.md). Kept as written; this note was added 2026-10-19.
+
 Everything in the system is a resolver: swaps, identity, device
 enrollment, name ownership, stake. A resolver declares what it accepts,
 what it verifies, what it computes, and what it costs — and publishes

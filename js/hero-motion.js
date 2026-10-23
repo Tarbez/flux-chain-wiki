@@ -27,33 +27,16 @@
   persistent.insertBefore(atmosphere, persistent.firstChild);
 
   var header = scene.querySelector('.ark-header');
-  var navToggle = header && header.querySelector('.nav-toggle');
+  /* The MENU opens, closes, takes Escape and an outside press, and returns focus through Ark's popover
+     (header.menuPop, js/resolvers/header.js); what is left here is "close it" for route clicks, a wide
+     window and the plain panel a failed chunk leaves. */
   function closeNavigation(restoreFocus) {
-    if (!navToggle) return;
-    header.classList.remove('nav-open');
-    var menu = header.querySelector('#primary-navigation');
-    if (menu && menu.navLayers) menu.navLayers.reset();
-    navToggle.setAttribute('aria-expanded', 'false');
-    navToggle.setAttribute('aria-label', 'Open all pages');
-    navToggle.title = 'All pages';
-    if (restoreFocus) navToggle.focus();
+    var pop = header && header.menuPop, button = header && header.querySelector('.nav-toggle');
+    if (!pop) return;
+    pop.want(false);
+    if (restoreFocus && button) button.focus();
   }
-  if (navToggle) {
-    navToggle.addEventListener('click', function () {
-      if (header.classList.contains('nav-open')) { closeNavigation(false); return; }
-      header.classList.add('nav-open');
-      navToggle.setAttribute('aria-expanded', 'true');
-      navToggle.setAttribute('aria-label', 'Close all pages');
-      navToggle.title = 'Close all pages';
-    });
-    document.addEventListener('click', function (event) {
-      if (!header.contains(event.target)) closeNavigation(false);
-    });
-    header.addEventListener('focusout', function (event) {
-      if (!header.contains(event.relatedTarget)) closeNavigation(false);
-    });
-    window.matchMedia('(max-width: 1000px)').addEventListener('change', function () { closeNavigation(false); });
-  }
+  window.matchMedia('(max-width: 1000px)').addEventListener('change', function () { closeNavigation(false); });
 
   var wordTimer = 0;
 
@@ -64,32 +47,59 @@
 
   var settings = make('div', 'site-settings');
   scene.appendChild(settings);
-  // Persistent footer chrome: who runs this, and the standing rights line.
-  // Both sit beside the settings gear, the one other thing that is always
-  // on screen regardless of route.
-  var credit = make('p', 'site-credit');
-  credit.textContent = 'Powered, deployed and made by FLX';
-  scene.appendChild(credit);
-  var rights = make('p', 'site-copyright');
-  rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
-  scene.appendChild(rights);
-  var paths = make('nav', 'corner-navigation');
-  paths.setAttribute('aria-label', 'Explore Flux Protocol');
-  [['HOME.CORNER.USECASES', 'concept'], ['HOME.CORNER.TUTORIALS', 'learnings'], ['HOME.CORNER.EXPERIMENTS', 'proximity']].forEach(function (item) {
-    var link = make('a'); link.href = router.url(item[1]); link.dataset.sceneLink = item[1];
-    link.textContent = ArkCopy.text(item[0]) + ' ↗'; paths.appendChild(link);
+  /* The footer: the family footer (DefxnKit.renderFooter, the same one every DEFXN product
+     draws), holding this site's section links, the standing credit and rights line, and the
+     "Back" control, in the bottom chrome band beside the settings gear on every route.
+     The section links are one per journey, to the page where that journey starts, derived from
+     js/content/site-pages.js (the same table the "All pages" menu and the sitemap read). They
+     replaced the scene's corner navigation and theory invitation, which were built on all 69
+     routes and visible on none, yet were the only link to /experiments (docs/ux-audit/pages.md
+     "Footer strip"; regression: tests/site-journeys.cjs, tests/browser/site-fixes.mjs). The
+     Back control sits IN the footer row, after the credit: positioned on its own in the same
+     corner it overlapped the strip's last link on a phone (2026-10-19, "MESH PI ← BACK HOME"). */
+  var paths = make('nav');
+  paths.setAttribute('aria-label', 'Site sections');
+  if (typeof ArkSitePages !== 'undefined') ArkSitePages.journeys().forEach(function (journey) {
+    var lead = ArkSitePages.pages().find(function (row) { return row.journey === journey.id && row.lead && ArkUI.pageCatalog[row.key]; });
+    if (!lead) return;
+    /* A section the header bar already links is left out (ArkUI.headerPages, js/resolvers/header.js; a link the row
+       folds away on a narrow screen is in the MENU): the kit's footer text is 16px since 2026-10-20, and the owner kept
+       it and chose fewer links (2026-10-22), so a page is offered once in the chrome, not twice. */
+    if (ArkUI.headerPages && ArkUI.headerPages.indexOf(lead.key) >= 0) return;
+    var link = make('a', 'site-footer-link'); link.href = router.url(lead.key); link.dataset.sceneLink = lead.key;
+    link.dataset.journey = journey.id;
+    link.title = journey.title + ': ' + journey.note;
+    link.textContent = lead.label; paths.appendChild(link);
   });
-  scene.appendChild(paths);
+  /* the footer's host keeps the strip's name: the aria-current sync below, the drivers and
+     css/navigation.css (its place in the scene) read it */
+  var foot = make('div', 'site-footer-strip');
+  scene.appendChild(foot);
+  var kit = window.DefxnKit;
+  if (kit && typeof kit.renderFooter === 'function' && kit.HOME) {
+    var credit = make('span', 'site-credit'); credit.textContent = 'Powered, deployed and made by FLX';
+    var rights = make('span', 'site-copyright'); rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
+    kit.renderFooter(foot, kit.HOME.id, { links: Array.prototype.slice.call(paths.childNodes), note: [credit, rights, toggle] });
+  } else {
+    /* no kit (it failed to load): the links and the Back control still reach the page */
+    foot.appendChild(paths);
+    foot.appendChild(toggle);
+  }
 
-  var latest = make('a', 'theory-invitation');
-  latest.href = router.url('concept');
-  latest.dataset.sceneLink = 'concept';
-  var latestLabel = make('span', 'theory-invitation-label'); latestLabel.textContent = ArkCopy.text('HOME.INVITE.LABEL');
-  var latestTitle = make('strong'); latestTitle.textContent = ArkCopy.text('HOME.INVITE.TITLE');
-  var latestFoot = make('span', 'theory-invitation-link'); latestFoot.textContent = ArkCopy.text('HOME.INVITE.LINK') + ' ↗';
-  latest.appendChild(latestLabel); latest.appendChild(latestTitle); latest.appendChild(latestFoot);
-  scene.appendChild(latest);
-
+  /* A scene link's query is read by ArkUI.route.linkQuery (js/ark/route.js): its
+     data-route-query, else the query already in its href -- both for the href rewrite on mount
+     and for the click. A doc link that names no `from` is given the page it was clicked on, so
+     the reader's "Return" goes back there (docs/ux-audit/pages.md P1). */
+  var sceneQuery = ArkUI.route.linkQuery;
+  /* The reader returns to the page the link was CLICKED on: that is the source page, whatever
+     `from` the link was built with (a resolution detail page built its doc links with its
+     manifest's route, /resolutions, so "Return" left the page you were reading). A doc link
+     inside the reader itself keeps the origin it already has. */
+  function referenceQuery(query) {
+    var params = new URLSearchParams(query || '');
+    if (ArkUI.route.path() !== '/reference' || !params.get('from')) params.set('from', ArkUI.route.current());
+    return params.toString();
+  }
   router.onMount(function (page, name) {
     var bindings = [];
     if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(page);
@@ -98,7 +108,7 @@
       anchor.removeAttribute('aria-hidden');
       bindings.push(ArkUI.bindMeshDrag(anchor, state));
     });
-    page.querySelectorAll('[data-scene-link]').forEach(function (link) { link.href = router.url(link.dataset.sceneLink)+(link.dataset.routeQuery?'?'+link.dataset.routeQuery:''); });
+    page.querySelectorAll('[data-scene-link]').forEach(function (link) { var query = sceneQuery(link); link.href = router.url(link.dataset.sceneLink) + (query ? '?' + query : ''); });
     var input = page.querySelector('[data-word-input]');
     if (input && state.get().words[name]) input.value = state.get().words[name];
     return function () { bindings.forEach(function (binding) { binding.dispose(); }); };
@@ -128,7 +138,7 @@
     var target = event.target.closest('[data-scene-link], [data-reset-word], [data-section-target]');
     if (!target) {
       var labLink = event.target.closest('a[href="#work"]');
-      if (labLink) { event.preventDefault(); navigate('lab'); }
+      if (labLink) { event.preventDefault(); navigate('proximity'); }
       return;
     }
     if (target.dataset.sceneLink) { event.preventDefault(); navigate(target.dataset.sceneLink, target); }
@@ -156,7 +166,8 @@
   function sync() {
     var current = state.get();
     var isTheory = current.page.indexOf('concept/') === 0;
-    scene.querySelectorAll('.ark-header a').forEach(function (link) {
+    scene.querySelectorAll('.ark-header a, .site-footer-strip nav a').forEach(function (link) {
+      if (link.closest('.dx-switch')) return;   /* product switcher: other sites, its own current */
       if (router.resolve(link.getAttribute('href')) === current.page) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
@@ -164,12 +175,10 @@
     var isEnabled = enabled();
     scene.classList.toggle('hero-still', !isEnabled);
     toggle.hidden = current.page === 'zero';
-    paths.hidden = current.page !== 'zero';
     var isArticle = current.page.indexOf('article/') === 0;
-    toggle.textContent = '← ' + ArkCopy.text(current.page === 'lab' ? 'NAV.BACK.EXPERIMENTS' : isArticle ? 'NAV.BACK.TUTORIALS' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
+    toggle.textContent = '← ' + ArkCopy.text(isArticle ? 'NAV.BACK.NOTES' : isTheory ? 'NAV.BACK.THEORY' : 'NAV.BACK.ZERO');
     toggle.setAttribute('aria-expanded', String(current.page !== 'zero'));
-    toggle.setAttribute('aria-label', current.page === 'lab' ? 'Return to experiments' : current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to learnings' : isTheory ? 'Return to the operating model' : 'Return to the zero hero');
-    latest.hidden = current.page !== 'zero';
+    toggle.setAttribute('aria-label', current.page === 'zero' ? 'Show the experiment' : isArticle ? 'Return to the notes' : isTheory ? 'Return to the operating model' : 'Return to the zero hero');
     var meshControl=scene.querySelector('.mesh-drag-surface.mesh-drag-target');if(meshControl){var decorative=current.page!=='zero';meshControl.inert=decorative;meshControl.tabIndex=decorative?-1:0;meshControl.setAttribute('aria-hidden',String(decorative));}
     var active = pages[current.page];
     if (!active) return;
@@ -187,19 +196,21 @@
   function navigate(page, source) {
     closeNavigation(header && header.contains(document.activeElement) && header.classList.contains('nav-open'));
     window.clearTimeout(wordTimer);
-    return router.navigate(page, { source: source,query:source&&source.dataset.routeQuery||undefined }).then(function (result) { sync(); return result; });
+    var query = source && source.dataset ? sceneQuery(source) : '';
+    if (page === 'reference') query = referenceQuery(query);
+    return router.navigate(page, { source: source, query: query || undefined }).then(function (result) { sync(); return result; });
   }
   toggle.addEventListener('click', function () {
     var page = state.get().page;
-    navigate(page === 'lab' ? 'proximity' : page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
+    navigate(page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
   });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
-    if (header && header.classList.contains('nav-open')) {
+    if (header && header.menuPop && header.menuPop.isOpen()) {
       event.preventDefault(); closeNavigation(true); return;
     }
     if (state.get().page === 'zero') return;
-    navigate(state.get().page === 'lab' ? 'proximity' : state.get().page.indexOf('article/') === 0 ? 'learnings' : state.get().page.indexOf('concept/') === 0 ? 'concept' : 'zero');
+    navigate(state.get().page.indexOf('article/') === 0 ? 'learnings' : state.get().page.indexOf('concept/') === 0 ? 'concept' : 'zero');
     toggle.focus({ preventScroll: true });
   });
   /* An old https://host/#/explore link is opened once, then its address is rewritten to the clean path. */
@@ -213,12 +224,21 @@
   window.addEventListener('popstate', restoreRoute);
   window.addEventListener('hashchange', restoreRoute);
   document.addEventListener('ark:enter', function () { navigate('proximity'); });
+  /* this site's own header links route in place; the product switcher's links leave for the
+     products' own sites, so they are left to the browser */
   scene.querySelectorAll('.ark-header a').forEach(function (link) {
+    if (link.closest('.dx-switch')) return;
     link.addEventListener('click', function (event) { event.preventDefault(); navigate(router.resolve(link.getAttribute('href'))); });
   });
+  /* Skip link (index.html, the first thing Tab reaches): past the header's ~10 controls to the
+     page itself. It used to have no element at all, and this handler navigated to the old lab
+     page (docs/ux-audit/pages-ux-a.md cross-page 7; regression: tests/browser/site-fixes.mjs). */
   var skip = document.querySelector('.skip');
   if (skip) skip.addEventListener('click', function (event) {
-    event.preventDefault(); navigate('lab');
+    var active = router.active && pages[router.active];
+    if (!active) return;
+    event.preventDefault();
+    active.focus({ preventScroll: false });
   });
   reduced.addEventListener('change', sync);
   finePointer.addEventListener('change', sync);

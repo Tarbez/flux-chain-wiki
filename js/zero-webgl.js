@@ -311,7 +311,7 @@
       if (shapeHidden(config)) shapeNow = shapeTarget = [0, 0, 0, 0];
       loadPageShape(pageNow);
       icebergMeasureNeeded = true; // a size/position edit must re-measure even though the anchor box itself did not move
-      requestDraw();
+      wake();
     }
   });
   var surfaceTimeLocation = gl.getUniformLocation(program, 'uSurfaceTime');
@@ -347,6 +347,36 @@
   var lastTime = start;
   var elapsed = 0;
   var surfaceElapsed = 0;
+  /* FRAME CONTRACT (memory defxn_animation_must_settle; measured by
+     tests/browser/idle-frames.mjs, unit-guarded by tests/mesh-state.cjs).
+     A frame is requested only while something on screen is still changing:
+       - a page/shape transition (t < 1), a word blend (wordTime < 1.2),
+       - the pointer parallax easing towards its target,
+       - the home surface travelling to its next rest state (below).
+     Then the final frame is painted and NO frame is requested until a real
+     change: navigation or a shape change (syncScene), pointer movement,
+     the tab or the scene becoming visible again, a theme or admin-settings
+     change, motion being re-enabled. Until 2026-10-19 this loop ran at the
+     display rate for as long as the scene was on screen -- and kept running
+     in the hidden-shape branch on home, drawing nothing -- so every page
+     requested ~20 frames/s forever 18 s after it had settled.
+     The home surface (SurfaceMotion.sample): each 8 s segment is 2 s of
+     fast travel, 3 s of settling and 3 s fully still. "Animated" here means
+     ONE segment of travel per real change: the surface moves to its next
+     rest state and holds there; the still 3 s are visually identical to the
+     segment's end, so the clock jumps there and stops. The ambient shimmer
+     (uTime) advances only while frames run, so a resting frame is a still
+     frame, not a frozen loop. */
+  var SURFACE_SEGMENT = 8, SURFACE_TRAVEL = 5;
+  var surfaceSegmentEnd = SURFACE_SEGMENT;
+  function surfaceRunning() { return pageNow === 'zero' && !currentShapeHidden() && surfaceElapsed < surfaceSegmentEnd; }
+  function pointerSettling() { return Math.abs(pointerTarget.x - pointerNow.x) > .001 || Math.abs(pointerTarget.y - pointerNow.y) > .001; }
+  function stillChanging(t) { return t < 1 || wordTime < 1.2 || pointerSettling() || surfaceRunning(); }
+  /* A real change happened: paint, and let the home surface travel one more segment if it was at rest. */
+  function wake() {
+    if (surfaceElapsed >= surfaceSegmentEnd) surfaceSegmentEnd = surfaceElapsed + SURFACE_SEGMENT;
+    requestDraw();
+  }
   var shapeTarget = [0, 0, 0, 0];
   var shapeNow = [0, 0, 0, 0];
   var shapeFrom = [0, 0, 0, 0];
@@ -451,11 +481,16 @@
     lastTime = now;
     if (motionEnabled && visible && !document.hidden) {
       elapsed += dt;
-      if (pageNow === 'zero' && transitionTime >= duration) surfaceElapsed += dt;
+      if (transitionTime >= duration && surfaceRunning()) {
+        surfaceElapsed += dt;
+        // The segment's last 3 s are still and identical to its end: jump there and rest.
+        if (surfaceElapsed >= surfaceSegmentEnd || surfaceElapsed % SURFACE_SEGMENT >= SURFACE_TRAVEL) surfaceElapsed = surfaceSegmentEnd;
+      }
       wordTime = Math.min(1.2, wordTime + dt);
     }
     pointerNow.x += (pointerTarget.x - pointerNow.x) * .035;
     pointerNow.y += (pointerTarget.y - pointerNow.y) * .035;
+    if (!pointerSettling()) { pointerNow.x = pointerTarget.x; pointerNow.y = pointerTarget.y; }
     if (motionEnabled) transitionTime = Math.min(duration, transitionTime + dt);
     var t = transitionTime / duration;
     var travel = smooth(t);
@@ -481,7 +516,8 @@
     if (currentShapeHidden()) {
       canvas.dataset.drawCalls = '0';
       canvas.dataset.phase = 'hidden';
-      if (motionEnabled && visible && !document.hidden) frame = window.requestAnimationFrame(draw);
+      // Nothing is drawn here; only the placement transform above still travels.
+      if (motionEnabled && visible && !document.hidden && t < 1) frame = window.requestAnimationFrame(draw);
       return;
     }
     var surface = SurfaceMotion.sample(surfaceElapsed);
@@ -530,7 +566,7 @@
     gl.drawArrays(gl.POINTS, 0, count);
     canvas.dataset.drawCalls = String(1 + trailCount);
     canvas.dataset.phase = t >= 1 ? 'settled' : 'travel';
-    if (motionEnabled && visible && !document.hidden) frame = window.requestAnimationFrame(draw);
+    if (motionEnabled && visible && !document.hidden && stillChanging(t)) frame = window.requestAnimationFrame(draw);
   }
 
   function requestDraw() {
@@ -543,7 +579,7 @@
     var parts = token.split(/\s+/);
     lightTheme = parseFloat(parts[2]) > 55;
     canvas.style.mixBlendMode = lightTheme ? 'multiply' : 'screen';
-    requestDraw();
+    wake();
   }
   syncTheme();
   if (typeof MutationObserver !== 'undefined') {
@@ -557,17 +593,20 @@
     var rect = scene.getBoundingClientRect();
     pointerTarget.x = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1));
     pointerTarget.y = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1));
-    requestDraw();
+    wake();
   }, { passive: true });
   scene.addEventListener('pointerleave', function () {
     pointerTarget.x = 0;
     pointerTarget.y = 0;
+    requestDraw();
   });
 
   document.addEventListener('hero:motionchange', function (event) {
-    motionEnabled = !!(event.detail && event.detail.enabled) && !reduced.matches;
+    var enabled = !!(event.detail && event.detail.enabled) && !reduced.matches;
+    var resumed = enabled && !motionEnabled;
+    motionEnabled = enabled;
     canvas.classList.toggle('is-still', !motionEnabled);
-    if (motionEnabled) requestDraw();
+    if (resumed) wake(); else if (motionEnabled) requestDraw();
   });
   function syncScene(current) {
     var target = state.mesh(current);
@@ -599,18 +638,18 @@
         shapeNow = shapeTarget.slice();
         transitionTime = duration;
       }
-      requestDraw();
+      wake();
     }
   }
   state.subscribe(syncScene);
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) requestDraw();
+    if (!document.hidden) wake();
   });
   reduced.addEventListener('change', function () {
     motionEnabled = !reduced.matches;
     canvas.classList.toggle('is-still', reduced.matches);
-    if (reduced.matches) { stateNow = stateTarget; shapeNow = shapeTarget.slice(); transitionTime = duration; wordTime = 1.2; }
-    requestDraw();
+    if (reduced.matches) { stateNow = stateTarget; shapeNow = shapeTarget.slice(); transitionTime = duration; wordTime = 1.2; requestDraw(); }
+    else wake();
   });
   scene.addEventListener('scroll', function () { icebergMeasureNeeded = true; requestDraw(); }, true);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (currentWord) { updateWord(currentWord, true); syncScene(state.get()); requestDraw(); } });
@@ -619,7 +658,7 @@
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (entries) {
       visible = entries[0].isIntersecting;
-      if (visible) requestDraw();
+      if (visible) wake();
     }, { threshold: 0 }).observe(scene);
   }
 
@@ -648,5 +687,5 @@
   canvas.dataset.points = String(count);
   canvas.dataset.primaryPoints = String(primaryCount);
   canvas.dataset.surfacePoints = String(surfaceCount);
-  canvas.dataset.drawCalls = '1';
+  // drawCalls is draw()'s own report ('0' when the admin hid this page's shape): not overwritten here.
 })();

@@ -8,12 +8,12 @@
 // on a real vault -- against the real, already-built modules on disk, not
 // a reimplementation.
 import assert from 'node:assert/strict';
-import nacl from '/Volumes/PortableSSD/flux/flux-auth/node_modules/tweetnacl/nacl-fast.js';
+import nacl from '/Volumes/PortableSSD/flux/fxn-auth/node_modules/tweetnacl/nacl-fast.js';
 
 globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-const { createWalletForIdentity } = await import('/Volumes/PortableSSD/flux/flux-auth/src/walletLifecycle.mjs');
+const { createWalletForIdentity } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletLifecycle.mjs');
 const { addWalletToAuthKit, sealAuthKitEnvelope } = await import('/Volumes/PortableSSD/design/ark-ui/dist/ark-ui.flux-auth.js');
 
 const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
@@ -63,7 +63,7 @@ assert.deepEqual(updatedVault.wallets.map((w) => w.body.walletAddress), [walletA
 
 // The identitySignature is real and verifies against the real root key used to sign it --
 // proves signIdentity's raw-bytes return value actually reached the record correctly.
-const { verifyIdentityWalletLink } = await import('/Volumes/PortableSSD/flux/flux-auth/src/identityWallet.mjs');
+const { verifyIdentityWalletLink } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/identityWallet.mjs');
 const verified = await verifyIdentityWalletLink(record, { expectedIdentityId: identityId, prior: null });
 assert.deepEqual(verified, { valid: true });
 

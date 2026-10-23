@@ -1,0 +1,382 @@
+# key	tag	text -- layout keys of /stats/ledger before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Design, not agreement / a finance resolver by constructionLedger benchmark detailEach identity owns its own append-only chain of value moves. A spend is an appe
+page:/div:1	div	Design, not agreement / a finance resolver by constructionLedger benchmark detailEach identity owns its own append-only chain of value moves. A spend is an appe
+page:/div:1/div:1	div	Design, not agreement / a finance resolver by constructionLedger benchmark detailEach identity owns its own append-only chain of value moves. A spend is an appe
+page:/div:1/div:1/article:1	article	Design, not agreement / a finance resolver by constructionLedger benchmark detailEach identity owns its own append-only chain of value moves. A spend is an appe
+page:/div:1/div:1/article:1/p:1	p	Design, not agreement / a finance resolver by construction
+id:statsledger-title	h1	Ledger benchmark detail
+page:/div:1/div:1/article:1/p:2	p	Each identity owns its own append-only chain of value moves. A spend is an append to the holder's own chain, signed by their own key, at a position their own pr
+page:/div:1/div:1/article:1/p:3	p	2026-10-07LEDGERENTRY Y=1Aflux-spec 0.4.2
+page:/div:1/div:1/article:1/p:3/span:1	span	2026-10-07
+page:/div:1/div:1/article:1/p:3/span:2	span	LEDGERENTRY Y=1A
+page:/div:1/div:1/article:1/p:3/span:3	span	flux-spec 0.4.2
+page:/div:1/div:1/article:1/a:1	a	← Back to the measurements
+page:/div:1/div:1/article:1/a:1/span:1	span	←
+page:/div:1/div:1/article:2	article	What this closes by constructionProblems that stop being problemsProblemWhy it disappearsDouble-spendPosition n can hold exactly one record. A second entry at t
+id:statsledger-closes-title	p	What this closes by construction
+page:/div:1/div:1/article:2/h2:1	h2	Problems that stop being problems
+page:/div:1/div:1/article:2/div:1	div	ProblemWhy it disappearsDouble-spendPosition n can hold exactly one record. A second entry at the same position with a different CID is signed-equivocation evid
+page:/div:1/div:1/article:2/div:1/table:1	table	ProblemWhy it disappearsDouble-spendPosition n can hold exactly one record. A second entry at the same position with a different CID is signed-equivocation evid
+page:/div:1/div:1/article:2/div:1/table:1/thead:1	thead	ProblemWhy it disappears
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1	tr	ProblemWhy it disappears
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1/th:1	th	Problem
+page:/div:1/div:1/article:2/div:1/table:1/thead:1/tr:1/th:2	th	Why it disappears
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1	tbody	Double-spendPosition n can hold exactly one record. A second entry at the same position with a different CID is signed-equivocation evidence under the holder's 
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1	tr	Double-spendPosition n can hold exactly one record. A second entry at the same position with a different CID is signed-equivocation evidence under the holder's 
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1/td:1	td	Double-spend
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:1/td:2	td	Position n can hold exactly one record. A second entry at the same position with a different CID is signed-equivocation evidence under the holder's own key.
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2	tr	MEV / front-runningThere is no mempool. A transfer is a bilateral conversation; the global object is content-addressed and only observable after the fact.
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2/td:1	td	MEV / front-running
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:2/td:2	td	There is no mempool. A transfer is a bilateral conversation; the global object is content-addressed and only observable after the fact.
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3	tr	Transaction privacy leakOnly the counterparties see the record. There is no public tape to index.
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3/td:1	td	Transaction privacy leak
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:3/td:2	td	Only the counterparties see the record. There is no public tape to index.
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4	tr	Missing RECEIPT (0K) semanticsA receive is just a ledger entry whose C[1] references the AGREEMENT. The spec letter is no longer load-bearing.
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4/td:1	td	Missing RECEIPT (0K) semantics
+page:/div:1/div:1/article:2/div:1/table:1/tbody:1/tr:4/td:2	td	A receive is just a ledger entry whose C[1] references the AGREEMENT. The spec letter is no longer load-bearing.
+page:/div:1/div:1/article:2/p:2	p	The honest ones not closed by this: issuance policy (who may originate value) and counterparty discovery (how A finds B). Both remain explicit decisions. See th
+page:/div:1/div:1/article:3	article	Where this lives in the specManifest type: LEDGERENTRY, code 1A, group finance-ledger.Letter extension: J carries the decimal chain position (J0, J1, …). The pi
+id:statsledger-grammar-title	p	Where this lives in the spec
+page:/div:1/div:1/article:3/ul:1	ul	Manifest type: LEDGERENTRY, code 1A, group finance-ledger.Letter extension: J carries the decimal chain position (J0, J1, …). The pinned flux-core predates this
+page:/div:1/div:1/article:3/ul:1/li:1	li	Manifest type: LEDGERENTRY, code 1A, group finance-ledger.
+page:/div:1/div:1/article:3/ul:1/li:1/strong:1	strong	Manifest type:
+page:/div:1/div:1/article:3/ul:1/li:2	li	Letter extension: J carries the decimal chain position (J0, J1, …). The pinned flux-core predates this extension; dense-wire checks J's shape directly.
+page:/div:1/div:1/article:3/ul:1/li:2/strong:1	strong	Letter extension:
+page:/div:1/div:1/article:3/ul:1/li:3	li	Prev CID: C[0]. Pos 0's prev is GENESIS0000000000.
+page:/div:1/div:1/article:3/ul:1/li:3/strong:1	strong	Prev CID:
+page:/div:1/div:1/article:3/ul:1/li:4	li	Payload: C[1+] references an existing registered type (CONSUMEDMARKER for spend, AGREEMENT for receive, VALUEOBJECT I0 for issue, CELLEQUIVOCATION for freeze).
+page:/div:1/div:1/article:3/ul:1/li:4/strong:1	strong	Payload:
+page:/div:1/div:1/article:3/ul:1/li:5	li	Signers: one — the chain owner.
+page:/div:1/div:1/article:3/ul:1/li:5/strong:1	strong	Signers:
+page:/div:1/div:1/article:4	article	A real chain of 5, byte for byteWhat a chain looks like on the wireGenerated by cargo test emit_chain_sample in dense-wire: one holder, five entries from genesi
+id:statsledger-sample-title	p	A real chain of 5, byte for byte
+page:/div:1/div:1/article:4/h2:1	h2	What a chain looks like on the wire
+page:/div:1/div:1/article:4/p:2	p	Generated by cargo test emit_chain_sample in dense-wire: one holder, five entries from genesis to the latest receive. The signatures are real Ed25519 under a kn
+page:/div:1/div:1/article:4/ol:1	ol	pos 0GenesisCID99dc3dc50eff921991d42dc2c8fc2e3c…G8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c-YLEDGERENTRY-V1-M1760000000-H38613838653364643
+page:/div:1/div:1/article:4/ol:1/li:1	li	pos 0GenesisCID99dc3dc50eff921991d42dc2c8fc2e3c…G8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c-YLEDGERENTRY-V1-M1760000000-H38613838653364643
+page:/div:1/div:1/article:4/ol:1/li:1/p:1	p	pos 0Genesis
+page:/div:1/div:1/article:4/ol:1/li:1/p:1/span:1	span	pos 0
+page:/div:1/div:1/article:4/ol:1/li:1/p:1/span:2	span	Genesis
+page:/div:1/div:1/article:4/ol:1/li:1/p:2	p	CID99dc3dc50eff921991d42dc2c8fc2e3c…
+page:/div:1/div:1/article:4/ol:1/li:1/p:2/span:1	span	CID
+page:/div:1/div:1/article:4/ol:1/li:2	li	pos 1IssueCID4156956ff4433e3f500e94c134bc5e78…G8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c-YLEDGERENTRY-V1-M1760000001-H3861383865336464373
+page:/div:1/div:1/article:4/ol:1/li:2/p:1	p	pos 1Issue
+page:/div:1/div:1/article:4/ol:1/li:2/p:1/span:1	span	pos 1
+page:/div:1/div:1/article:4/ol:1/li:2/p:1/span:2	span	Issue
+page:/div:1/div:1/article:4/ol:1/li:2/p:2	p	CID4156956ff4433e3f500e94c134bc5e78…
+page:/div:1/div:1/article:4/ol:1/li:2/p:2/span:1	span	CID
+page:/div:1/div:1/article:4/ol:1/li:3	li	pos 2ReceiveCID291f814ecc8134e87642a7dabac3f178…G8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c-YLEDGERENTRY-V1-M1760000002-H38613838653364643
+page:/div:1/div:1/article:4/ol:1/li:3/p:1	p	pos 2Receive
+page:/div:1/div:1/article:4/ol:1/li:3/p:1/span:1	span	pos 2
+page:/div:1/div:1/article:4/ol:1/li:3/p:1/span:2	span	Receive
+page:/div:1/div:1/article:4/ol:1/li:3/p:2	p	CID291f814ecc8134e87642a7dabac3f178…
+page:/div:1/div:1/article:4/ol:1/li:3/p:2/span:1	span	CID
+page:/div:1/div:1/article:4/ol:1/li:4	li	pos 3SpendCID65f406ed0d7fa0d83107f72f5b908e68…G8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c-YLEDGERENTRY-V1-M1760000003-H3861383865336464373
+page:/div:1/div:1/article:4/ol:1/li:4/p:1	p	pos 3Spend
+page:/div:1/div:1/article:4/ol:1/li:4/p:1/span:1	span	pos 3
+page:/div:1/div:1/article:4/ol:1/li:4/p:1/span:2	span	Spend
+page:/div:1/div:1/article:4/ol:1/li:4/p:2	p	CID65f406ed0d7fa0d83107f72f5b908e68…
+page:/div:1/div:1/article:4/ol:1/li:4/p:2/span:1	span	CID
+page:/div:1/div:1/article:4/ol:1/li:5	li	pos 4ReceiveCID5db94f65f3e211ed60dbe323049d14c6…G8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c-YLEDGERENTRY-V1-M1760000004-H38613838653364643
+page:/div:1/div:1/article:4/ol:1/li:5/p:1	p	pos 4Receive
+page:/div:1/div:1/article:4/ol:1/li:5/p:1/span:1	span	pos 4
+page:/div:1/div:1/article:4/ol:1/li:5/p:1/span:2	span	Receive
+page:/div:1/div:1/article:4/ol:1/li:5/p:2	p	CID5db94f65f3e211ed60dbe323049d14c6…
+page:/div:1/div:1/article:4/ol:1/li:5/p:2/span:1	span	CID
+page:/div:1/div:1/article:5	article	Newest certified resolver fleet · 8 VPS nodes + local1,712,006 combined replica-applications/s · 61,398 all-replica logical ops/sOn 2026-10-08, all nine nodes a
+page:/div:1/div:1/article:5/p:1	p	Newest certified resolver fleet · 8 VPS nodes + local
+page:/div:1/div:1/article:5/h2:1	h2	1,712,006 combined replica-applications/s · 61,398 all-replica logical ops/s
+page:/div:1/div:1/article:5/p:2	p	On 2026-10-08, all nine nodes applied the exact same deterministic 20,000-operation segment root 1399e321…31575 after verifying one 3-of-4 certificate. The run 
+page:/div:1/div:1/article:5/p:2/strong:1	strong	2026-10-08
+page:/div:1/div:1/article:6	article	Historical admission fleet · 6 nodes sustained for 5 minutes12,403 accepted ops/s · 3,760,000 operations · zero failuresOn 2026-10-08, one Apple arm64 client dr
+id:statsledger-soak-title	p	Historical admission fleet · 6 nodes sustained for 5 minutes
+page:/div:1/div:1/article:6/h2:1	h2	12,403 accepted ops/s · 3,760,000 operations · zero failures
+page:/div:1/div:1/article:6/p:2	p	On 2026-10-08, one Apple arm64 client drove all six public :19501 chain-servers concurrently for 303.152 seconds. The run completed 235 batches and every one of
+page:/div:1/div:1/article:6/p:2/strong:1	strong	2026-10-08
+page:/div:1/div:1/article:6/p:3	p	This is the canonical sustained fleet number. It replaces the invalid six-times-single-node extrapolation: the six workers share one client CPU and network orig
+page:/div:1/div:1/article:7	article	Historical short-burst peak · 6 nodes, 868 ms79,654 ops/s across 6 chain-servers, zero errorsOn 2026-10-08, chain-server deployed to six nodes across three regi
+id:statsledger-fleet-title	p	Historical short-burst peak · 6 nodes, 868 ms
+page:/div:1/div:1/article:7/h2:1	h2	79,654 ops/s across 6 chain-servers, zero errors
+page:/div:1/div:1/article:7/p:2	p	On 2026-10-08, chain-server deployed to six nodes across three regions: flx-bk2, flx-mk2, flx-bk1, flx-mist1 (InterServer, US), flx-eug-2c, flx-eul-4c (differen
+page:/div:1/div:1/article:7/p:2/strong:1	strong	2026-10-08
+page:/div:1/div:1/article:7/div:1	div	NodeOps / sRoleNoteflx-mk2 (EPYC, US)21,128biggest EPYC coreLAN hop from bk2, server batches 64 verifies at a timeflx-bk1 (Xeon, US)16,2212 vCPU XeonLAN hopflx-
+page:/div:1/div:1/article:7/div:1/table:1	table	NodeOps / sRoleNoteflx-mk2 (EPYC, US)21,128biggest EPYC coreLAN hop from bk2, server batches 64 verifies at a timeflx-bk1 (Xeon, US)16,2212 vCPU XeonLAN hopflx-
+page:/div:1/div:1/article:7/div:1/table:1/thead:1	thead	NodeOps / sRoleNote
+page:/div:1/div:1/article:7/div:1/table:1/thead:1/tr:1	tr	NodeOps / sRoleNote
+page:/div:1/div:1/article:7/div:1/table:1/thead:1/tr:1/th:1	th	Node
+page:/div:1/div:1/article:7/div:1/table:1/thead:1/tr:1/th:2	th	Ops / s
+page:/div:1/div:1/article:7/div:1/table:1/thead:1/tr:1/th:3	th	Role
+page:/div:1/div:1/article:7/div:1/table:1/thead:1/tr:1/th:4	th	Note
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1	tbody	flx-mk2 (EPYC, US)21,128biggest EPYC coreLAN hop from bk2, server batches 64 verifies at a timeflx-bk1 (Xeon, US)16,2212 vCPU XeonLAN hopflx-bk2 (Xeon, US, self
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:1	tr	flx-mk2 (EPYC, US)21,128biggest EPYC coreLAN hop from bk2, server batches 64 verifies at a time
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:1/td:1	td	flx-mk2 (EPYC, US)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:1/td:2	td	21,128
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:1/td:2/strong:1	strong	21,128
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:1/td:3	td	biggest EPYC core
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:1/td:4	td	LAN hop from bk2, server batches 64 verifies at a time
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:2	tr	flx-bk1 (Xeon, US)16,2212 vCPU XeonLAN hop
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:2/td:1	td	flx-bk1 (Xeon, US)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:2/td:2	td	16,221
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:2/td:2/strong:1	strong	16,221
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:2/td:3	td	2 vCPU Xeon
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:2/td:4	td	LAN hop
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:3	tr	flx-bk2 (Xeon, US, self)15,683submitter itselfloopback: contended with the submitter
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:3/td:1	td	flx-bk2 (Xeon, US, self)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:3/td:2	td	15,683
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:3/td:2/strong:1	strong	15,683
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:3/td:3	td	submitter itself
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:3/td:4	td	loopback: contended with the submitter
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:4	tr	flx-mist1 (Xeon, US)11,1921 vCPU bulk-storagesame silicon as bk2, half the cores
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:4/td:1	td	flx-mist1 (Xeon, US)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:4/td:2	td	11,192
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:4/td:2/strong:1	strong	11,192
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:4/td:3	td	1 vCPU bulk-storage
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:4/td:4	td	same silicon as bk2, half the cores
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:5	tr	flx-eug-2c (EPYC 9355P, BR)8,059different provider~75 ms RTT to US cluster is in the number
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:5/td:1	td	flx-eug-2c (EPYC 9355P, BR)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:5/td:2	td	8,059
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:5/td:2/strong:1	strong	8,059
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:5/td:3	td	different provider
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:5/td:4	td	~75 ms RTT to US cluster is in the number
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:6	tr	flx-eul-4c (EPYC 9355P, BR)7,371different provider~75 ms RTT dominates per-connection; 4 vCPU
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:6/td:1	td	flx-eul-4c (EPYC 9355P, BR)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:6/td:2	td	7,371
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:6/td:2/strong:1	strong	7,371
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:6/td:3	td	different provider
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:6/td:4	td	~75 ms RTT dominates per-connection; 4 vCPU
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7	tr	Historical burst aggregate (sum across 6 short streams)79,654868 ms peak samplenot the sustained fleet headline
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7/td:1	td	Historical burst aggregate (sum across 6 short streams)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7/td:1/strong:1	strong	Historical burst aggregate (sum across 6 short streams)
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7/td:2	td	79,654
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7/td:2/strong:1	strong	79,654
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7/td:3	td	868 ms peak sample
+page:/div:1/div:1/article:7/div:1/table:1/tbody:1/tr:7/td:4	td	not the sustained fleet headline
+page:/div:1/div:1/article:7/p:3	p	This short run proves parallel burst capacity without a global-order bottleneck. The five-minute run above is the sustained headline because it also includes sh
+page:/div:1/div:1/article:7/h3:1	h3	Single-pair detail · bk2 → mk2, 128 chains × 500 interleaved
+page:/div:1/div:1/article:7/p:4	p	On 2026-10-08, with server-side burst batching enabled (admit_burst drains up to 64 pipelined lines per window and calls verify_batch once), the real cross-WAN 
+page:/div:1/div:1/article:7/p:4/strong:1	strong	2026-10-08
+page:/div:1/div:1/article:7/div:2	div	MeasurementOps / sWhat it isbk2 → mk2, 128 chains × 500 (interleaved)22,55964,000 operations, 2,836 ms, zero errors. Server batches 64 verifications at a time.b
+page:/div:1/div:1/article:7/div:2/table:1	table	MeasurementOps / sWhat it isbk2 → mk2, 128 chains × 500 (interleaved)22,55964,000 operations, 2,836 ms, zero errors. Server batches 64 verifications at a time.b
+page:/div:1/div:1/article:7/div:2/table:1/thead:1	thead	MeasurementOps / sWhat it is
+page:/div:1/div:1/article:7/div:2/table:1/thead:1/tr:1	tr	MeasurementOps / sWhat it is
+page:/div:1/div:1/article:7/div:2/table:1/thead:1/tr:1/th:1	th	Measurement
+page:/div:1/div:1/article:7/div:2/table:1/thead:1/tr:1/th:2	th	Ops / s
+page:/div:1/div:1/article:7/div:2/table:1/thead:1/tr:1/th:3	th	What it is
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1	tbody	bk2 → mk2, 128 chains × 500 (interleaved)22,55964,000 operations, 2,836 ms, zero errors. Server batches 64 verifications at a time.bk2 → mk2, 64 chains × 200 (i
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:1	tr	bk2 → mk2, 128 chains × 500 (interleaved)22,55964,000 operations, 2,836 ms, zero errors. Server batches 64 verifications at a time.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:1/td:1	td	bk2 → mk2, 128 chains × 500 (interleaved)
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:1/td:2	td	22,559
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:1/td:2/strong:1	strong	22,559
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:1/td:3	td	64,000 operations, 2,836 ms, zero errors. Server batches 64 verifications at a time.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:2	tr	bk2 → mk2, 64 chains × 200 (interleaved)21,49712,800 operations, 595 ms, zero errors. Same shape, smaller run.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:2/td:1	td	bk2 → mk2, 64 chains × 200 (interleaved)
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:2/td:2	td	21,497
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:2/td:2/strong:1	strong	21,497
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:2/td:3	td	12,800 operations, 595 ms, zero errors. Same shape, smaller run.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:3	tr	bk2 → mk2, single chain (pre-batching)14,9635,000 operations, 334 ms. The pre-batching ceiling the +54% win came from.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:3/td:1	td	bk2 → mk2, single chain (pre-batching)
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:3/td:2	td	14,963
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:3/td:2/strong:1	strong	14,963
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:3/td:3	td	5,000 operations, 334 ms. The pre-batching ceiling the +54% win came from.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:4	tr	bk2 → 127.0.0.1, 128 × 500 (self)20,047Same box as server; LAN beats loopback because mk2's EPYC is faster than bk2's Xeon on batch verify.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:4/td:1	td	bk2 → 127.0.0.1, 128 × 500 (self)
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:4/td:2	td	20,047
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:4/td:2/strong:1	strong	20,047
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:4/td:3	td	Same box as server; LAN beats loopback because mk2's EPYC is faster than bk2's Xeon on batch verify.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:5	tr	Mac → bk2 (home ISP WAN)621WAN-constrained from a residential link, not a server-admit number.
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:5/td:1	td	Mac → bk2 (home ISP WAN)
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:5/td:2	td	621
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:5/td:2/strong:1	strong	621
+page:/div:1/div:1/article:7/div:2/table:1/tbody:1/tr:5/td:3	td	WAN-constrained from a residential link, not a server-admit number.
+page:/div:1/div:1/article:7/p:5	p	The 22,559/s on fleet LAN is the chosen number — a real, multi-chain, zero-error, cross-WAN run. Both nodes see the same chain-head CID for every holder after t
+page:/div:1/div:1/article:7/p:5/strong:1	strong	22,559/s on fleet LAN
+page:/div:1/div:1/article:8	article	Measured today41,762 ops/s, one coreRun on the author's Mac, release build, 32 holders × 1,000 operations each = 32,000 total, interleaved so each burst spans e
+id:statsledger-bench-title	p	Measured today
+page:/div:1/div:1/article:8/h2:1	h2	41,762 ops/s, one core
+page:/div:1/div:1/article:8/p:2	p	Run on the author's Mac, release build, 32 holders × 1,000 operations each = 32,000 total, interleaved so each burst spans every chain. Different silicon from t
+page:/div:1/div:1/article:8/p:2/strong:1	strong	cost split
+page:/div:1/div:1/article:8/p:2/strong:2	strong	size of the batch win
+page:/div:1/div:1/article:8/ol:1	ol	Grammar admitsplit on dash, resolve each letter, enforce required roles3.3%Ed25519 verifyone signature per operation — verify_batch across chains nearly halves 
+page:/div:1/div:1/article:8/ol:1/li:1	li	Grammar admitsplit on dash, resolve each letter, enforce required roles3.3%
+page:/div:1/div:1/article:8/ol:1/li:1/span:1	span	Grammar admitsplit on dash, resolve each letter, enforce required roles
+page:/div:1/div:1/article:8/ol:1/li:1/span:1/small:1	small	split on dash, resolve each letter, enforce required roles
+page:/div:1/div:1/article:8/ol:1/li:1/span:2	span	
+page:/div:1/div:1/article:8/ol:1/li:1/span:2/span:1	span	
+page:/div:1/div:1/article:8/ol:1/li:1/span:3	span	3.3%
+page:/div:1/div:1/article:8/ol:1/li:2	li	Ed25519 verifyone signature per operation — verify_batch across chains nearly halves this94.5%
+page:/div:1/div:1/article:8/ol:1/li:2/span:1	span	Ed25519 verifyone signature per operation — verify_batch across chains nearly halves this
+page:/div:1/div:1/article:8/ol:1/li:2/span:1/small:1	small	one signature per operation — verify_batch across chains nearly halves this
+page:/div:1/div:1/article:8/ol:1/li:2/span:2	span	
+page:/div:1/div:1/article:8/ol:1/li:2/span:2/span:1	span	
+page:/div:1/div:1/article:8/ol:1/li:2/span:3	span	94.5%
+page:/div:1/div:1/article:8/ol:1/li:3	li	Chain head + appendHashMap lookup + per-holder mutex + Vec push2.2%
+page:/div:1/div:1/article:8/ol:1/li:3/span:1	span	Chain head + appendHashMap lookup + per-holder mutex + Vec push
+page:/div:1/div:1/article:8/ol:1/li:3/span:1/small:1	small	HashMap lookup + per-holder mutex + Vec push
+page:/div:1/div:1/article:8/ol:1/li:3/span:2	span	
+page:/div:1/div:1/article:8/ol:1/li:3/span:2/span:1	span	
+page:/div:1/div:1/article:8/ol:1/li:3/span:3	span	2.2%
+page:/div:1/div:1/article:8/p:3	p	Grammar admission is 3.3% of CPU on the chain path, same shape as the 2.1% on the transfer path. Signature verification is still the whole mountain, which is wh
+page:/div:1/div:1/article:8/div:1	div	ModeOps / sNotePer-item verification24,700baseline, one verification per operationBatch verify, burst 6441,762+69% over baselineBatch verify, burst 25646,382kee
+page:/div:1/div:1/article:8/div:1/table:1	table	ModeOps / sNotePer-item verification24,700baseline, one verification per operationBatch verify, burst 6441,762+69% over baselineBatch verify, burst 25646,382kee
+page:/div:1/div:1/article:8/div:1/table:1/thead:1	thead	ModeOps / sNote
+page:/div:1/div:1/article:8/div:1/table:1/thead:1/tr:1	tr	ModeOps / sNote
+page:/div:1/div:1/article:8/div:1/table:1/thead:1/tr:1/th:1	th	Mode
+page:/div:1/div:1/article:8/div:1/table:1/thead:1/tr:1/th:2	th	Ops / s
+page:/div:1/div:1/article:8/div:1/table:1/thead:1/tr:1/th:3	th	Note
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1	tbody	Per-item verification24,700baseline, one verification per operationBatch verify, burst 6441,762+69% over baselineBatch verify, burst 25646,382keeps climbing wit
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:1	tr	Per-item verification24,700baseline, one verification per operation
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:1/td:1	td	Per-item verification
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:1/td:2	td	24,700
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:1/td:3	td	baseline, one verification per operation
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:2	tr	Batch verify, burst 6441,762+69% over baseline
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:2/td:1	td	Batch verify, burst 64
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:2/td:2	td	41,762
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:2/td:2/strong:1	strong	41,762
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:2/td:3	td	+69% over baseline
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:3	tr	Batch verify, burst 25646,382keeps climbing with burst size; cofactored caveat applies
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:3/td:1	td	Batch verify, burst 256
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:3/td:2	td	46,382
+page:/div:1/div:1/article:8/div:1/table:1/tbody:1/tr:3/td:3	td	keeps climbing with burst size; cofactored caveat applies
+page:/div:1/div:1/article:8/p:4	p	A single chain is strictly sequential — position n cannot be verified until n-1 is appended — so the burst must span many chains to pay. In production this is t
+page:/div:1/div:1/article:9	article	Current local resolver audit · Apple M251,065 hot · 279,269 certified · 812,268 transport ops/sMatched release measurement: 20,000 independent-holder operations
+id:statsledger-million-title	p	Current local resolver audit · Apple M2
+page:/div:1/div:1/article:9/h2:1	h2	51,065 hot · 279,269 certified · 812,268 transport ops/s
+page:/div:1/div:1/article:9/p:2	p	Matched release measurement: 20,000 independent-holder operations reached 51,065 ops/s with full per-operation verification and 279,269 ops/s when one signed ro
+page:/div:1/div:1/article:9/p:3	p	The new binary envelope removes the outer W<hex> expansion. Real-shaped 488-byte operations measure 150.9 bytes/op in a segment, 6.47× below the former 976-byte
+page:/div:1/div:1/article:9/p:4	p	Read BENCH-005 →
+page:/div:1/div:1/article:9/p:4/a:1	a	Read BENCH-005 →
+page:/div:1/div:1/article:10	article	Attack suite · 7 of 7 refusedWhat the resolver refuses, and whyAttackOutcomeWhyReplay (same bytes submitted twice)Idempotent, no second entry, no equivocationth
+id:statsledger-attacks-title	p	Attack suite · 7 of 7 refused
+page:/div:1/div:1/article:10/h2:1	h2	What the resolver refuses, and why
+page:/div:1/div:1/article:10/div:1	div	AttackOutcomeWhyReplay (same bytes submitted twice)Idempotent, no second entry, no equivocationthe CID matches on both sides, so the second call returns Ok with
+page:/div:1/div:1/article:10/div:1/table:1	table	AttackOutcomeWhyReplay (same bytes submitted twice)Idempotent, no second entry, no equivocationthe CID matches on both sides, so the second call returns Ok with
+page:/div:1/div:1/article:10/div:1/table:1/thead:1	thead	AttackOutcomeWhy
+page:/div:1/div:1/article:10/div:1/table:1/thead:1/tr:1	tr	AttackOutcomeWhy
+page:/div:1/div:1/article:10/div:1/table:1/thead:1/tr:1/th:1	th	Attack
+page:/div:1/div:1/article:10/div:1/table:1/thead:1/tr:1/th:2	th	Outcome
+page:/div:1/div:1/article:10/div:1/table:1/thead:1/tr:1/th:3	th	Why
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1	tbody	Replay (same bytes submitted twice)Idempotent, no second entry, no equivocationthe CID matches on both sides, so the second call returns Ok with the first CIDDo
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:1	tr	Replay (same bytes submitted twice)Idempotent, no second entry, no equivocationthe CID matches on both sides, so the second call returns Ok with the first CID
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:1/td:1	td	Replay (same bytes submitted twice)
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:1/td:2	td	Idempotent, no second entry, no equivocation
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:1/td:2/strong:1	strong	Idempotent, no second entry, no equivocation
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:1/td:3	td	the CID matches on both sides, so the second call returns Ok with the first CID
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:2	tr	Double-spend of the same inputRejected before signature verify is complete, by payload check walking the chain backwards for the input CIDthe holder cannot undo
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:2/td:1	td	Double-spend of the same input
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:2/td:2	td	Rejected before signature verify is complete, by payload check walking the chain backwards for the input CID
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:2/td:2/strong:1	strong	Rejected before signature verify is complete, by payload check walking the chain backwards for the input CID
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:2/td:3	td	the holder cannot undo their own earlier Spend without producing equivocation
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:3	tr	Concurrent double-append at the same positionExactly one wins; the other produces Equivocation evidence recorded as a (G, pos) → (cidA, cidB) pairthe per-holder
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:3/td:1	td	Concurrent double-append at the same position
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:3/td:2	td	Exactly one wins; the other produces Equivocation evidence recorded as a (G, pos) → (cidA, cidB) pair
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:3/td:2/strong:1	strong	Exactly one wins; the other produces Equivocation evidence recorded as a (G, pos) → (cidA, cidB) pair
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:3/td:3	td	the per-holder mutex serialises the race; whichever lost holds the fork evidence
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:4	tr	Cross-chain confusion (B tries to extend A's chain)Rejected as ChainBreak on B's own chain (B's head is still GENESIS)the chain is keyed by G, so the signer's k
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:4/td:1	td	Cross-chain confusion (B tries to extend A's chain)
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:4/td:2	td	Rejected as ChainBreak on B's own chain (B's head is still GENESIS)
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:4/td:2/strong:1	strong	Rejected as ChainBreak on B's own chain (B's head is still GENESIS)
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:4/td:3	td	the chain is keyed by G, so the signer's key routes the entry to its own chain, not A's
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:5	tr	Wrong prev CID (fork attempt from an older head)Rejected as ChainBreak with the expected position and current headthe chain head is the single source of truth; 
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:5/td:1	td	Wrong prev CID (fork attempt from an older head)
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:5/td:2	td	Rejected as ChainBreak with the expected position and current head
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:5/td:2/strong:1	strong	Rejected as ChainBreak with the expected position and current head
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:5/td:3	td	the chain head is the single source of truth; a stale prev cannot sneak past
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:6	tr	Tampered signature (flip one nibble)Rejected as BadSignatureed25519 verify under G catches it; cofactored batch mode is not enabled on this path
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:6/td:1	td	Tampered signature (flip one nibble)
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:6/td:2	td	Rejected as BadSignature
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:6/td:2/strong:1	strong	Rejected as BadSignature
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:6/td:3	td	ed25519 verify under G catches it; cofactored batch mode is not enabled on this path
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:7	tr	Equivocation (holder signs two entries at the same (G, pos))Second one rejected with Equivocation; the pair is recorded as fraud evidenceboth are signed under t
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:7/td:1	td	Equivocation (holder signs two entries at the same (G, pos))
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:7/td:2	td	Second one rejected with Equivocation; the pair is recorded as fraud evidence
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:7/td:2/strong:1	strong	Second one rejected with Equivocation; the pair is recorded as fraud evidence
+page:/div:1/div:1/article:10/div:1/table:1/tbody:1/tr:7/td:3	td	both are signed under the holder's own key, so the fraud is proven by their own signatures
+page:/div:1/div:1/article:10/p:2	p	Every row above is cargo test chain::, source in dense-wire/src/chain.rs. The one owed next: an IPFS-gossip test that proves equivocation evidence actually reac
+page:/div:1/div:1/article:11	article	Durability · K-of-N peer replication, not disk syncThe fleet is the backing storeIn this stack an entry is durable when K of N peers hold its content-addressed 
+id:statsledger-durability-title	p	Durability · K-of-N peer replication, not disk sync
+page:/div:1/div:1/article:11/h2:1	h2	The fleet is the backing store
+page:/div:1/div:1/article:11/p:2	p	In this stack an entry is durable when K of N peers hold its content-addressed CID. The chain head is gossiped so peers always know what to pull. The resolver's
+page:/div:1/div:1/article:11/div:1	div	ModeOps / sRecord survivesIs lost ifMemory only46,858nothingeverythingLocal cold-start cache44,038process restart on same boxnothing if peers hold the CIDsPeers
+page:/div:1/div:1/article:11/div:1/table:1	table	ModeOps / sRecord survivesIs lost ifMemory only46,858nothingeverythingLocal cold-start cache44,038process restart on same boxnothing if peers hold the CIDsPeers
+page:/div:1/div:1/article:11/div:1/table:1/thead:1	thead	ModeOps / sRecord survivesIs lost if
+page:/div:1/div:1/article:11/div:1/table:1/thead:1/tr:1	tr	ModeOps / sRecord survivesIs lost if
+page:/div:1/div:1/article:11/div:1/table:1/thead:1/tr:1/th:1	th	Mode
+page:/div:1/div:1/article:11/div:1/table:1/thead:1/tr:1/th:2	th	Ops / s
+page:/div:1/div:1/article:11/div:1/table:1/thead:1/tr:1/th:3	th	Record survives
+page:/div:1/div:1/article:11/div:1/table:1/thead:1/tr:1/th:4	th	Is lost if
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1	tbody	Memory only46,858nothingeverythingLocal cold-start cache44,038process restart on same boxnothing if peers hold the CIDsPeers 1-of-1 (simulated)47,462one peer ho
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:1	tr	Memory only46,858nothingeverything
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:1/td:1	td	Memory only
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:1/td:2	td	46,858
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:1/td:2/strong:1	strong	46,858
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:1/td:3	td	nothing
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:1/td:4	td	everything
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:2	tr	Local cold-start cache44,038process restart on same boxnothing if peers hold the CIDs
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:2/td:1	td	Local cold-start cache
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:2/td:2	td	44,038
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:2/td:2/strong:1	strong	44,038
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:2/td:3	td	process restart on same box
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:2/td:4	td	nothing if peers hold the CIDs
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:3	tr	Peers 1-of-1 (simulated)47,462one peer holds the CIDif that peer vanishes before pulling
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:3/td:1	td	Peers 1-of-1 (simulated)
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:3/td:2	td	47,462
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:3/td:2/strong:1	strong	47,462
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:3/td:3	td	one peer holds the CID
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:3/td:4	td	if that peer vanishes before pulling
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:4	tr	Peers 2-of-3 (simulated)45,286any 1 peer may goif 2 peers vanish before pulling
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:4/td:1	td	Peers 2-of-3 (simulated)
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:4/td:2	td	45,286
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:4/td:2/strong:1	strong	45,286
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:4/td:3	td	any 1 peer may go
+page:/div:1/div:1/article:11/div:1/table:1/tbody:1/tr:4/td:4	td	if 2 peers vanish before pulling
+page:/div:1/div:1/article:11/p:3	p	Measured in chain::tests::bench_replication_cost, 32 chains × 500 operations, burst 64. The simulated peer is an in-process channel, so the number above is the 
+page:/div:1/div:1/article:11/p:4	p	A tamper check runs on cold-start: fast replay (default) verifies the head of each chain under the writer's key and uses the hash chain to establish the rest; s
+page:/div:1/div:1/article:11/p:4/strong:1	strong	head
+page:/div:1/div:1/article:11/p:4/strong:2	strong	279,149 ops/s
+page:/div:1/div:1/article:11/p:4/strong:3	strong	27,268 ops/s
+page:/div:1/div:1/article:11/p:4/strong:4	strong	10.2x
+page:/div:1/div:1/article:11/p:5	p	The old transfer path still uses an on-disk log without peer replication; that gap is open in prototype-to-production.md §1.1.
+page:/div:1/div:1/article:11/p:6	p	Recovery is faster than ingestion. Fast replay reads at 279,149/s while hot admission tops out at 22,559/s on fleet LAN today — about 12.4x of slack. A peer tha
+page:/div:1/div:1/article:11/p:6/strong:1	strong	Recovery is faster than ingestion.
+page:/div:1/div:1/article:11/p:6/strong:2	strong	12.4x
+page:/div:1/div:1/article:12	article	Fork gossip · a third observer learns about equivocationSignatures tell on their own holderIf a holder signs two different entries at the same chain position, e
+id:statsledger-gossip-title	p	Fork gossip · a third observer learns about equivocation
+page:/div:1/div:1/article:12/h2:1	h2	Signatures tell on their own holder
+page:/div:1/div:1/article:12/p:2	p	If a holder signs two different entries at the same chain position, each half is self-incriminating evidence under their own key. A third node that only saw one
+page:/div:1/div:1/article:12/p:3	p	Three tests in chain::tests: equivocation_gossip_freezes_the_chain_on_a_third_observer (the live flow), fork_evidence_is_refused_when_shape_is_wrong (different 
+page:/div:1/div:1/article:13	article	TCP server · machine-to-machine ingressShortest conduit that worksThe resolver now has a line-framed TCP endpoint. Each request is <TAG><TAB><MANIFEST><LF>; rep
+id:statsledger-tcp-title	p	TCP server · machine-to-machine ingress
+page:/div:1/div:1/article:13/h2:1	h2	Shortest conduit that works
+page:/div:1/div:1/article:13/p:2	p	The resolver now has a line-framed TCP endpoint. Each request is <TAG><TAB><MANIFEST><LF>; replies are OK<TAB><CID> or ERR<TAB><CODE><TAB><REASON>. A special GO
+page:/div:1/div:1/article:13/p:3	p	Three tests in chain_server::tests: TCP round-trip for a 3-entry chain, named-code refusal on bad signature, gossip delivery. For production the plan is hyperco
+page:/div:1/div:1/article:14	article	What this does not yet doFleet sustained across 6 nodes. Measured 2026-10-08: 3,760,000 operations accepted over 303 seconds, 12,403 ops/s average, zero failure
+id:statsledger-notyet-title	p	What this does not yet do
+page:/div:1/div:1/article:14/ul:1	ul	Fleet sustained across 6 nodes. Measured 2026-10-08: 3,760,000 operations accepted over 303 seconds, 12,403 ops/s average, zero failures. The older 79,654 ops/s
+page:/div:1/div:1/article:14/ul:1/li:1	li	Fleet sustained across 6 nodes. Measured 2026-10-08: 3,760,000 operations accepted over 303 seconds, 12,403 ops/s average, zero failures. The older 79,654 ops/s
+page:/div:1/div:1/article:14/ul:1/li:1/strong:1	strong	Fleet sustained across 6 nodes.
+page:/div:1/div:1/article:14/ul:1/li:2	li	IPFS pin sidecar is wired, off by default. Chain-local durability stays peer replication of CIDs across the chain-server fleet. If CHAIN_SERVER_PIN_URL is set, 
+page:/div:1/div:1/article:14/ul:1/li:2/strong:1	strong	IPFS pin sidecar is wired, off by default.
+page:/div:1/div:1/article:14/ul:1/li:3	li	Automatic fork-evidence broadcaster is built. Broadcaster + on_fraud callback: when a node detects equivocation, it pushes GOSSIP to every peer in its peer list
+page:/div:1/div:1/article:14/ul:1/li:3/strong:1	strong	Automatic fork-evidence broadcaster is built.
+page:/div:1/div:1/article:14/ul:1/li:4	li	Issuance policy is wired. IssuancePolicy::Roster { allowed } refuses Issue payloads whose signer is not in the roster. Default is still Open for tests; producti
+page:/div:1/div:1/article:14/ul:1/li:4/strong:1	strong	Issuance policy is wired.
+page:/div:1/div:1/article:14/ul:1/li:5	li	Chain compaction is wired. Payload::Snapshot commits to a history digest; prune_before(g, pos) drops old entries from RAM once a snapshot covers them.
+page:/div:1/div:1/article:14/ul:1/li:5/strong:1	strong	Chain compaction is wired.
+page:/div:1/div:1/article:14/ul:1/li:6	li	Receiver timeout + Refund is wired. Payload::Refund is admitted only when its M ≥ D, so the sender can only refund after the deadline the counterparty signed.
+page:/div:1/div:1/article:14/ul:1/li:6/strong:1	strong	Receiver timeout + Refund is wired.
+page:/div:1/div:1/article:14/ul:1/li:7	li	Certified binary P2P transport is built locally. /flx-traffic/2 signs raw binary segment envelopes over libp2p TCP + Noise + Yamux; legacy dense/hex traffic rem
+page:/div:1/div:1/article:14/ul:1/li:7/strong:1	strong	Certified binary P2P transport is built locally.
+page:/div:1/div:1/article:14/ul:1/li:8	li	10-node fleet is now the headline. Transfer bench BENCH-011 (2026-10-08) ran on every flx-* node with Lever A+B+C and summed to 82,863 finalized transfers/s, 10
+page:/div:1/div:1/article:14/ul:1/li:8/strong:1	strong	10-node fleet is now the headline.
+page:/div:1/div:1/article:14/ul:1/li:9	li	No independent security review. Same as the main /stats page: nobody but us has looked at this.
+page:/div:1/div:1/article:14/ul:1/li:9/strong:1	strong	No independent security review.
+page:/div:1/div:1/article:15	article	Read and verifyThe design document · why this is the way to prodThe pre-prod checklist · what the design closes, item by itemBack to the main measurements
+id:statsledger-ev-title	p	Read and verify
+page:/div:1/div:1/article:15/ul:1	ul	The design document · why this is the way to prodThe pre-prod checklist · what the design closes, item by itemBack to the main measurements
+page:/div:1/div:1/article:15/ul:1/li:1	li	The design document · why this is the way to prod
+page:/div:1/div:1/article:15/ul:1/li:1/a:1	a	The design document · why this is the way to prod
+page:/div:1/div:1/article:15/ul:1/li:2	li	The pre-prod checklist · what the design closes, item by item
+page:/div:1/div:1/article:15/ul:1/li:2/a:1	a	The pre-prod checklist · what the design closes, item by item
+page:/div:1/div:1/article:15/ul:1/li:3	li	Back to the main measurements
+page:/div:1/div:1/article:15/ul:1/li:3/a:1	a	Back to the main measurements
+page:/div:1/div:1/div:1	div	

@@ -1,0 +1,3 @@
+# fold-contrast allowlist: check<TAB>route<TAB>viewport<TAB>selector<TAB>reason
+# Starts EMPTY (owner brief 2026-10-20). A row needs all five columns; "*" matches any route, viewport or selector.
+# Every row is an exception someone argued for: say why in the reason column, and prefer fixing the page.

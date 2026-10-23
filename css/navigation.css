@@ -1,165 +1,162 @@
-/* DEFXN shared desktop chrome: identity, orientation, then the run action. */
+/* =====================================================================
+   The family bar and footer on defxn.com
+   ---------------------------------------------------------------------
+   Since 2026-10-19 (owner: defxn.com is the DEFXN family HOME, docs/ux-audit/plan.md) the
+   header is the kit bar every DEFXN product wears (assets/kit/defxn-components.css, .dx-bar*,
+   mounted by js/resolvers/header.js with DefxnKit.mountShell mode 'home'), and the footer is
+   the kit footer (.dx-foot, DefxnKit.renderFooter, js/hero-motion.js). This file only DRESSES
+   them for the scene: the bar lives inside the poster (#scene, absolutely placed, pages scroll
+   under it in their own scrollers), and this site keeps its own controls in the bar -- the
+   Resolutions menu, Account, Run DEFXN, the network pill and the all-pages MENU.
+
+   Rules that read like overrides restate the kit against older site sheets that still style
+   .ark-header with !important (css/settings.css, site-direction.css, components.css,
+   focus.css, color-system.css, home-drafting.css, icons.css, resolutions.css); they go when
+   those rules are deleted.
+
+   Palette: tokens only, so the bar follows whichever of the five theme families is active
+   (html[data-theme]); nothing here names a colour.
+   ===================================================================== */
+
+/* ---- The bar --------------------------------------------------------------
+   Placement only: the bar's look and its home-mode behaviour (no part shrinks, one row on a
+   phone, the nav in the MENU from 1040px down, the switcher panel hanging from the bar) are the
+   kit's own rules ([data-dx-mode="home"] in assets/kit/defxn-components.css). Here it is placed
+   in the scene, under the device's safe area. */
 #scene .ark-header {
- display:flex;align-items:center;justify-content:space-between;
- position:absolute;top:0;left:0;right:0;
- gap:12px;height:76px;min-height:0;padding:14px max(20px,3.2cqw);z-index:20;
- border:0;background:transparent !important;box-sizing:border-box;pointer-events:none;
+ position:absolute; top:0; left:0; right:0; z-index:20;
+ height:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px));
+ padding-top:env(safe-area-inset-top,0px);
+ padding-left:max(var(--dx-gutter),env(safe-area-inset-left,0px));
+ padding-right:max(var(--dx-gutter),env(safe-area-inset-right,0px));
+ box-sizing:border-box; pointer-events:auto;
 }
-/* No hairline under the header: the chrome separates by space and fill, not rules. */
-.ark-header::after {content:none;}
-.ark-studio-identity {
- display:inline-flex;align-items:center;justify-content:flex-start;gap:12px;
- width:auto;height:48px;flex:0 0 auto;margin-right:auto;padding:0 4px;text-decoration:none;
- border:0 !important;border-radius:7px;background:transparent !important;box-shadow:none !important;pointer-events:auto;
- color:hsl(var(--text-strong));
-}
-.ark-brand-mark {width:34px;height:34px;color:hsl(var(--text-strong));}
-.ark-brand-lockup {display:flex;flex-direction:column;gap:5px;}
-.ark-brand-wordmark {font:650 24px/.95 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:.13em;color:hsl(var(--text-strong));}
-.ark-brand-descriptor {font:500 8px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.15em;color:hsl(var(--text-muted));}
-.header-core-links {
- display:flex;align-items:center;gap:3px;padding:4px;height:46px;box-sizing:border-box;
- border:0;border-radius:11px;background:hsl(var(--surface) / .72);pointer-events:auto;
-}
-#scene .ark-header .header-core-links a {
- position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;
- padding:0 clamp(9px,1.15cqw,17px);border:0;border-radius:6px;background:transparent;box-shadow:none !important;
- font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:0;text-transform:none;text-decoration:none;
- color:hsl(var(--text-muted)) !important;transition:color 180ms,background-color 180ms;
-}
-#scene .ark-header .header-core-links a::after {content:none;}
-/* Desktop row: nothing shrinks or wraps. A link that does not fit leaves the row instead
-   (js/resolvers/header.js fitHeaderRow measures and sets .header-collapsed; the MENU panel
-   still lists it) -- shrinking wrapped "How it works" onto two lines and cut Account to
-   "Acc..." at 1280px (tests/browser/public-header.mjs). The compact rules below 1040px keep
-   their own shrink behaviour. */
-@media(min-width:1040.02px) {
- #scene .ark-header .header-core-links {flex:0 0 auto;}
- #scene .ark-header .header-core-links > * {flex:0 0 auto;white-space:nowrap;}
-}
-#scene .ark-header .header-core-links .header-collapsed {display:none !important;}
-#scene .ark-header .header-core-links a:is(:hover,:focus-visible,[aria-current="page"]) {
- color:hsl(var(--text-strong)) !important;background:hsl(var(--nested));
-}
-#scene .ark-header .header-core-links a[aria-current="page"] {box-shadow:inset 0 -2px hsl(var(--reference-400)) !important;}
-/* Network/chain switcher, site-wide (directed 2026-10-16; corrected the
-   same day: the first pass lived inside the hamburger menu's own panel
-   and went unnoticed -- now its own standalone pill + popover, next to
-   the MENU button, visible at every header width, never nested inside
-   #primary-navigation). */
-#scene .ark-header .header-chain {position:relative;pointer-events:auto;}
+.ark-header::after { content:none; }
+/* css/focus.css fills every current header link; the brand is the home page's own link, and a
+   current nav segment is the kit's raised segment, not a second fill */
+#scene .ark-header[data-dx-mode] > a[data-scene-link="zero"] { background:none; }
+#scene .ark-header[data-dx-mode] nav a[aria-current="page"] { background-color:hsl(var(--raised)); }
+/* a control the row fit moved out (a nav link, or Run DEFXN in the actions) */
+#scene .ark-header .header-collapsed { display:none; }
+#scene .ark-header .native-icon { width:16px; height:16px; flex-basis:16px; }
+#scene .ark-header .header-core-links .native-icon { opacity:.75; }
+
+/* ---- Actions: Account, Run DEFXN (kit buttons), the network pill, MENU ----- */
+#scene .ark-header .header-account-link { justify-content:flex-start; padding:0 16px 0 12px; color:hsl(var(--text-strong)); font:600 12px/14px var(--dx-font-sans,var(--font-sans,sans-serif)); }
+.header-account-label { display:flex; flex-direction:column; align-items:flex-start; gap:2px; min-width:0; }
+.header-account-name { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.header-account-status { display:flex; align-items:center; gap:4px; font:500 12px/14px var(--dx-font-mono,var(--font-mono,monospace)); color:hsl(var(--text-muted)); }
+.header-account-status::before { content:""; width:4px; height:4px; border-radius:50%; background:currentColor; }
+.header-account-link[data-signed-in="true"] .header-account-status { color:hsl(var(--trust,var(--success))); }
+
+/* Network pill: a status pill that opens a popover, next to MENU at every width (owner,
+   2026-10-16: "outside of the popover and right next to the menu icon itself"). */
+#scene .ark-header .header-chain { position:relative; }
 #scene .ark-header .header-chain-trigger {
- display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 13px;
- border:0;border-radius:var(--size-card-radius,8px);background:hsl(var(--surface) / .72);
- color:hsl(var(--text-strong));cursor:pointer;transition:background-color 180ms ease;
+ display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 12px;
+ border:1px solid var(--dx-edge,hsl(var(--border-control))); border-radius:var(--dx-radius,8px);
+ background:hsl(var(--surface)); color:hsl(var(--text-strong)); cursor:pointer;
+ font:500 12px/1 var(--dx-font-mono,var(--font-mono,monospace)); transition:background-color .15s ease,border-color .15s ease;
 }
-#scene .ark-header .header-chain-trigger:hover,
-#scene .ark-header .header-chain-trigger[aria-expanded="true"] {background:hsl(var(--raised));}
-.header-chain-dot {width:7px;height:7px;border-radius:50%;background:hsl(var(--trust,var(--primary)));flex:0 0 auto;}
-.header-chain-trigger-label {
- font:600 11px/1 var(--font-sans,"Albert Sans",sans-serif);letter-spacing:.01em;white-space:nowrap;
- max-width:96px;overflow:hidden;text-overflow:ellipsis;
+#scene .ark-header .header-chain-trigger:is(:hover,[aria-expanded="true"]) { background:hsl(var(--raised)); border-color:var(--dx-edge,hsl(var(--border-control))); }
+.header-chain-dot { width:8px; height:8px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
+.header-chain-trigger-label { white-space:nowrap; max-width:112px; overflow:hidden; text-overflow:ellipsis; }
+/* The pill is a choice, not a status: it says "Network: Production" where the row has room (the owner's call
+   2026-10-22; first-visit audit: the green dot and "Production" alone read as a live status). The trigger's
+   accessible name and title say "Network: <name>" at every width (js/resolvers/header.js showNetwork). */
+@media(min-width:1280px) {
+  .header-chain-trigger-label { max-width:184px; }
+  .header-chain-trigger-label::before { content:"Network: "; color:hsl(var(--text-muted)); }
 }
+/* Once pressed, the panel is Ark's popover block (js/resolvers/header.js): ark-blocks.css makes it fixed,
+   the block places it under the pill (inline top/left) and on a phone it is a full-width sheet. The
+   top/right here are where the plain panel opens before that, and if the popover chunk fails to load. */
 #scene .ark-header .header-chain-popover {
- position:absolute;top:48px;right:0;z-index:21;min-width:220px;padding:14px;
- border:1px solid hsl(var(--border-strong));border-radius:var(--size-panel-radius,14px);
- background:linear-gradient(145deg,hsl(var(--surface)),hsl(var(--canvas)));
- box-shadow:0 20px 60px hsl(var(--canvas) / .6);
- backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+ position:fixed; top:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px) + 8px); right:max(var(--dx-gutter),env(safe-area-inset-right,0px)); left:auto;
+ z-index:46; display:block; min-width:220px; max-width:min(320px,calc(100vw - 16px)); padding:12px;
+ border:1px solid hsl(var(--border-strong)); border-radius:var(--dx-radius,8px);
+ background:hsl(var(--overlay)); box-shadow:none; color:inherit; font:inherit;
 }
+#scene .ark-header .header-chain-popover[hidden] { display:none; }
+/* a phone: Ark's full-width sheet, so the cap above steps aside */
+@media(max-width:600px) { #scene .ark-header .header-chain-popover { max-width:none; width:auto; } }
+/* an open panel lifts the bar over the page's layers (was .products-open) */
+#scene .ark-header:has(.ark-popover[data-state="open"]) { z-index:60; }
 .header-network-label {
- display:block;margin-bottom:8px;font:600 9px/1 var(--mono-font,ui-monospace,monospace);
- letter-spacing:.07em;text-transform:uppercase;color:hsl(var(--text-muted));white-space:nowrap;
+ display:block; margin-bottom:8px; font:600 11px/1 var(--dx-font-mono,var(--font-mono,monospace));
+ letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); white-space:nowrap;
 }
-/* The real network listbox (js/ark/dense-wire-wallet.mjs::mountNetworkSelect)
-   -- never a native <select>: its open state is unstyleable OS chrome,
-   confirmed live even inside this exact glass-panel popover. Shared by
-   every mount of this control (this popover, the account page's Wallet
-   tab) so there is one real styled option list, not a patched select. */
-.network-options {display:flex;flex-direction:column;gap:3px;}
+/* The real network listbox (js/ark/dense-wire-wallet.mjs::mountNetworkSelect) -- never a native
+   <select>: its open state is unstyleable OS chrome. Shared by every mount of this control (this
+   popover, the account page's Wallet tab), so there is one styled option list, not a patched select. */
+.network-options { display:flex; flex-direction:column; gap:4px; }
 .network-option {
- display:flex;align-items:center;gap:8px;width:100%;height:34px;padding:0 10px;
- border:0;border-radius:6px;background:transparent;color:hsl(var(--text-muted));
- font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif);text-align:left;cursor:pointer;
+ display:flex; align-items:center; gap:8px; width:100%; height:36px; padding:0 10px;
+ border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted));
+ font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif); text-align:left; cursor:pointer;
  transition:background-color 150ms ease,color 150ms ease;
 }
-.network-option::before {content:"";width:6px;height:6px;border-radius:50%;background:transparent;flex:0 0 auto;border:1px solid hsl(var(--text-faint));}
-.network-option:hover {background:hsl(var(--raised));color:hsl(var(--text-strong));}
-.network-option.is-selected {color:hsl(var(--text-strong));background:hsl(var(--nested));}
-.network-option.is-selected::before {background:hsl(var(--trust,var(--primary)));border-color:hsl(var(--trust,var(--primary)));}
-.network-option:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:-2px;}
-#scene .nav-toggle {
- display:inline-flex; align-items:center; justify-content:center; gap:9px; width:auto; min-width:74px; height:40px; padding:0 11px;
- border:0; border-radius:var(--size-card-radius,8px);
- background:hsl(var(--surface) / .72); color:hsl(var(--text-strong)); cursor:pointer;
- pointer-events:auto; transition:background-color 180ms ease,border-color 180ms ease;
+.network-option::before { content:""; width:6px; height:6px; border-radius:50%; background:transparent; flex:0 0 auto; border:1px solid hsl(var(--text-faint)); }
+.network-option:hover { background:hsl(var(--raised)); color:hsl(var(--text-strong)); }
+.network-option.is-selected { color:hsl(var(--text-strong)); background:hsl(var(--reference-100)); }
+.network-option.is-selected::before { background:hsl(var(--trust,var(--success))); border-color:hsl(var(--trust,var(--success))); }
+.network-option:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:-2px; }
+
+/* The Resolutions menu (look: css/resolutions.css) is Ark's popover too: by id, set aside the block's
+   24rem padded grid card for the menu's own width; the block places it and it scrolls inside when the
+   viewport is short, so nothing is cut. top/left: where the plain panel opens (before the first press,
+   or if the chunk fails). */
+#scene .ark-header #products-mega {
+ position:fixed; top:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px) + 8px); left:max(20px,2.8cqmin); right:auto;
+ width:min(1080px,calc(100vw - 2 * max(20px,2.8cqmin))); min-width:0; max-width:none; gap:0;
+ overflow-x:hidden; overflow-y:auto; color:inherit; font:inherit;
 }
-.nav-toggle-label {font:600 9px/1 var(--mono-font,ui-monospace,monospace);letter-spacing:.09em;text-transform:uppercase;}
-#scene .nav-toggle:hover,
-#scene .ark-header.nav-open .nav-toggle { background:hsl(var(--raised)); }
+
+/* MENU: every page of the site, in layers (js/resolvers/header.js onMount). Drawn like the
+   kit's menu control. */
+#scene .ark-header .nav-toggle {
+ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:40px; min-width:0; padding:0 12px;
+ border:1px solid var(--dx-edge,hsl(var(--border-control))); border-radius:var(--dx-radius,8px);
+ background:hsl(var(--surface)); color:hsl(var(--text-strong)); cursor:pointer;
+ transition:background-color .15s ease,border-color .15s ease;
+}
+.nav-toggle-label { font:600 12px/1 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:0; }
+#scene .ark-header .nav-toggle:hover,
+#scene .ark-header.nav-open .nav-toggle { background:hsl(var(--reference-100)); border-color:hsl(var(--reference-300)); color:hsl(var(--reference-700)); }
+
+/* ---- The all-pages MENU panel (RNAV_V1, #primary-navigation) ------------- */
+/* Once pressed, the panel is Ark's popover block (js/resolvers/header.js), which places it under the button;
+   top/right are where the plain panel opens before that, and if the chunk fails to load. */
 #scene .ark-header #primary-navigation {
- display:none; position:absolute; top:75px; right:max(20px,3.2cqw);
- width:min(620px,calc(100vw - 40px)); height:min(540px,calc(100dvh - 96px));
- min-height:min(280px,calc(100dvh - 80px)); padding:0; margin:0; overflow:hidden; box-sizing:border-box;
- border:1px solid hsl(var(--border-strong)); border-top:2px solid hsl(var(--primary-400));
- border-radius:var(--size-panel-radius,18px);
- background:linear-gradient(145deg,hsl(var(--surface)),hsl(var(--canvas)));
- box-shadow:0 28px 80px hsl(var(--canvas) / .7); pointer-events:auto;
- backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+ display:block; position:fixed; top:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px) + 8px); right:max(var(--dx-gutter),env(safe-area-inset-right,0px)); z-index:44;
+ width:min(620px,calc(100vw - 2 * var(--dx-gutter))); height:min(540px,calc(100dvh - var(--dx-bar-h) - 24px));
+ min-height:min(280px,calc(100dvh - var(--dx-bar-h) - 16px)); padding:0; margin:0; overflow:hidden; box-sizing:border-box;
+ border:1px solid hsl(var(--border-strong)); border-radius:var(--dx-radius,8px);
+ background:hsl(var(--overlay)); box-shadow:none; pointer-events:auto;
 }
-#scene .ark-header.nav-open #primary-navigation { display:block; }
+#scene .ark-header #primary-navigation[hidden] { display:none; }
 #scene .ark-header .ark-link {
  position:relative; display:flex; align-items:center; gap:12px;
- min-width:0; min-height:35px; padding:3px 2px; counter-increment:nav-group;
+ min-width:0; min-height:36px; padding:4px 2px; counter-increment:nav-group;
  border-top:1px solid hsl(var(--border-subtle));
- border-radius:var(--size-card-radius,8px); background:none; color:hsl(var(--text-muted));
- font:500 10px/1.3 var(--mono-font,ui-monospace,monospace);
+ border-radius:var(--dx-radius,8px); background:none; color:hsl(var(--text-muted));
+ font:500 11px/1.3 var(--font-mono,ui-monospace,monospace);
  letter-spacing:0; text-transform:uppercase; text-decoration:none;
  transition:color 180ms ease,background-color 180ms ease;
 }
-#scene .ark-header .ark-link::before {
- content:counter(nav-group, decimal-leading-zero);
- color:hsl(var(--text-muted) / .7); font-size:9px;
-}
-#scene .ark-header .ark-link::after { content:"↗"; margin-left:auto; color:hsl(var(--reference)); font-size:12px; }
-:root[data-theme] #scene .ark-header .ark-link { color:hsl(var(--text-muted)) !important; }
+#scene .ark-header .ark-link::before { content:counter(nav-group, decimal-leading-zero); color:hsl(var(--text-muted) / .7); font-size:11px; }
+#scene .ark-header .ark-link::after { content:"→"; margin-left:auto; color:hsl(var(--reference)); font-size:12px; }
+:root[data-theme] #scene .ark-header .ark-link { color:hsl(var(--text-muted)); }
 :root[data-theme] #scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { color:hsl(var(--text-strong)) !important; }
 #scene .ark-header .ark-link[aria-current="page"]::before { color:hsl(var(--reference)); }
-#scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { background:hsl(var(--text-strong) / .045); }
-
-#scene .ark-header a:focus-visible,
-#scene .nav-toggle:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:4px; }
-@media(max-width:1040px) {
- #scene .ark-header .header-core-links {display:flex;min-width:0;height:40px;flex:0 1 auto;margin-left:auto;padding:0;border:0;background:transparent;}
- #scene .ark-header .header-core-links > a:not(.header-account-link) {display:none;}
- #scene .ark-header .header-core-links .header-account-link {display:flex;min-width:0;max-width:154px;height:40px;padding-inline:12px;border:0;background:hsl(var(--surface) / .72);}
- #scene .ark-header .ark-studio-identity {min-width:0;flex:0 1 auto;margin-right:0;}
- #scene .ark-header .ark-brand-lockup,#scene .ark-header .header-account-label {min-width:0;}
- #scene .ark-header :is(.ark-brand-wordmark,.ark-brand-descriptor,.header-account-name,.header-account-status) {max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-}
-@media(max-width:620px) {
- #scene .ark-header {
-  height:calc(76px + env(safe-area-inset-top,0px));
-  padding-top:calc(14px + env(safe-area-inset-top,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-left:max(16px,env(safe-area-inset-left,0px));
- }
- #scene .ark-header #primary-navigation { top:calc(75px + env(safe-area-inset-top,0px)); right:max(16px,env(safe-area-inset-right,0px)); width:min(380px,calc(100vw - 32px)); }
- #scene .ark-header .ark-link { min-height:44px; }
-}
-@media(max-width:560px) { .header-core-links { display:none; } }
-/* Up to 440px (covers 430px phones) MENU is an icon square like Account: with its label the
-   row ran out of room once the network pill read "Local devnet". */
-@media(max-width:440px) {
- #scene .ark-header .nav-toggle {width:40px;min-width:40px;padding:0;}
- #scene .ark-header .nav-toggle-label {display:none;}
-}
+#scene .ark-header .ark-link:is(:hover,[aria-current="page"]) { background:hsl(var(--nested)); }
 @media(prefers-reduced-motion:reduce) { #scene .ark-header .ark-link { transition:none; } }
 
-/* The index is a stack of fixed-size views, never an expanding accordion. */
+/* The index is a stack of fixed-size views, never an expanding accordion. Flat, like every
+   family panel: hairline cards on the overlay, no gradients or shadows; selection is reference. */
 #scene .ark-header .nav-layer {
  position:absolute; inset:0; display:flex; flex-direction:column;
- padding:23px 27px 26px; box-sizing:border-box;
+ padding:24px 28px 24px; box-sizing:border-box;
  overflow-y:auto; overscroll-behavior:contain;
  scrollbar-width:thin; scrollbar-color:hsl(var(--border-strong)) transparent;
 }
@@ -167,115 +164,90 @@
 #scene .ark-header .nav-layer-top { display:flex; align-items:center; justify-content:space-between; min-height:24px; }
 #scene .ark-header .nav-layer-depth {
  margin-left:auto; color:hsl(var(--text-faint));
- font:600 9px/1.2 var(--mono-font,ui-monospace,monospace); letter-spacing:.15em;
+ font:600 11px/1.2 var(--font-mono,ui-monospace,monospace); letter-spacing:.12em;
 }
 #scene .ark-header .nav-layer-back {
- min-height:44px; padding:4px 8px; border:1px solid hsl(var(--border-default));
- border-radius:var(--size-card-radius,8px); background:transparent;
- color:hsl(var(--text-muted)); font:600 10px/1.2 var(--mono-font,ui-monospace,monospace);
+ min-height:44px; padding:4px 12px; border:1px solid hsl(var(--border-default));
+ border-radius:var(--dx-radius,8px); background:transparent;
+ color:hsl(var(--text-muted)); font:600 11px/1.2 var(--font-mono,ui-monospace,monospace);
  letter-spacing:.04em; cursor:pointer;
 }
 #scene .ark-header .nav-layer-back:hover { border-color:hsl(var(--reference-400)); color:hsl(var(--text-strong)); }
 #scene .ark-header .nav-layer-title {
  margin:12px 0 0; color:hsl(var(--text-strong));
- font:700 clamp(27px,3.2cqw,38px)/1.05 "Albert Sans",sans-serif;
- letter-spacing:-.05em;
+ font:600 clamp(28px,3.2cqw,40px)/1.05 var(--font-sans,"Albert Sans",sans-serif);
+ letter-spacing:-.045em;
 }
 #scene .ark-header .nav-layer-note {
- margin:7px 0 16px; color:hsl(var(--text-muted));
- font:400 12px/1.5 "Albert Sans",sans-serif;
+ margin:8px 0 16px; color:hsl(var(--text-muted));
+ font:400 12px/1.5 var(--font-sans,"Albert Sans",sans-serif);
 }
 #scene .ark-header .nav-layer-body {
- display:grid; flex:0 0 auto; min-height:0; gap:9px;
+ display:grid; flex:0 0 auto; min-height:0; gap:8px;
  grid-template-columns:repeat(4,minmax(0,1fr));
  grid-template-rows:none; grid-auto-rows:minmax(104px,auto);
  counter-reset:nav-group;
 }
+/* The index: the first journey large, the rest placed by the grid itself. Hand-placed cells
+   (nth-child 2..5) overlapped once the journeys grew from four to six (2026-10-19: "Run" ran
+   under "Read"); auto-placement fits any count. */
 #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-body {
  grid-template-columns:repeat(3,minmax(0,1fr));
- grid-template-rows:repeat(3,minmax(95px,1fr));
+ grid-template-rows:none; grid-auto-rows:minmax(96px,1fr); grid-auto-flow:row dense;
 }
 #scene .ark-header .nav-layer-choice {
  position:relative; display:flex; flex-direction:column; align-items:flex-start;
- min-width:0; min-height:104px; padding:15px; text-align:left;
- border:1px solid hsl(var(--border-default)); border-radius:var(--size-card-radius,8px);
- background:linear-gradient(145deg,hsl(var(--raised) / .68),hsl(var(--surface) / .48));
- box-shadow:inset 0 1px hsl(var(--text-strong) / .045);
+ min-width:0; min-height:104px; padding:16px; text-align:left;
+ border:1px solid hsl(var(--border-default)); border-radius:var(--dx-radius,8px);
+ background:hsl(var(--surface)); box-shadow:none;
  color:hsl(var(--text-strong)); cursor:pointer;
- transition:background-color 180ms ease,border-color 180ms ease,transform 180ms ease;
+ transition:background-color 180ms ease,border-color 180ms ease;
 }
-#scene .ark-header .nav-layer-choice:is(:hover,:focus-visible) {
- border-color:hsl(var(--reference-400)); background:hsl(var(--reference-100));
- transform:translateY(-2px);
-}
-#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(1) {
- grid-column:1/3; grid-row:1/3; border-color:hsl(var(--primary-300));
- background:radial-gradient(circle at 90% 0,hsl(var(--primary-200)),transparent 58%),hsl(var(--raised) / .5);
-}
-#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(2) { grid-column:3; grid-row:1; }
-#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(3) { grid-column:3; grid-row:2; }
-#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(4) { grid-column:1/4; grid-row:3; }
-#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(5) { grid-column:3; grid-row:3; }
+#scene .ark-header .nav-layer-choice:is(:hover,:focus-visible) { border-color:hsl(var(--reference-400)); background:hsl(var(--reference-100)); }
+#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child { grid-column:1/3; grid-row:1/3; }
 #scene .ark-header .nav-choice-title {
- margin-top:auto; max-width:100%; font:600 16px/1.12 "Albert Sans",sans-serif;
+ margin-top:auto; max-width:100%; font:600 16px/1.12 var(--font-sans,"Albert Sans",sans-serif);
  letter-spacing:-.035em; overflow-wrap:anywhere;
 }
-#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child .nav-choice-title { font-size:clamp(23px,3cqw,31px); }
+#scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child .nav-choice-title { font-size:clamp(24px,3cqw,32px); }
 #scene .ark-header .nav-choice-description {
- margin-top:6px; max-width:27ch; color:hsl(var(--text-muted));
- font:400 11px/1.3 "Albert Sans",sans-serif;
+ margin-top:8px; max-width:27ch; color:hsl(var(--text-muted));
+ font:400 12px/1.3 var(--font-sans,"Albert Sans",sans-serif);
 }
 #scene .ark-header .nav-choice-count {
  order:-1; color:hsl(var(--text-faint)); white-space:nowrap;
- font:600 9px/1.3 var(--mono-font,ui-monospace,monospace);
+ font:600 11px/1.3 var(--font-mono,ui-monospace,monospace);
 }
 #scene .ark-header .nav-layer-choice::after {
- content:"↗"; position:absolute; top:11px; right:14px;
- color:hsl(var(--reference)); font:400 17px/1 "Albert Sans",sans-serif;
+ content:"→"; position:absolute; top:12px; right:16px;
+ color:hsl(var(--reference)); font:400 16px/1 var(--font-sans,"Albert Sans",sans-serif);
 }
 #scene .ark-header .nav-layer-body .nav-route-link {
  display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end;
- min-width:0; min-height:104px; padding:42px 15px 15px; border:1px solid hsl(var(--border-default));
- border-radius:var(--size-card-radius,8px);
- background:linear-gradient(145deg,hsl(var(--raised) / .52),hsl(var(--surface) / .34));
- color:hsl(var(--text-strong)); font:600 15px/1.16 "Albert Sans",sans-serif;
- text-transform:none; letter-spacing:0; white-space:normal;
- box-shadow:inset 0 1px hsl(var(--text-strong) / .035);
- transition:border-color 180ms ease,background-color 180ms ease,transform 180ms ease;
+ min-width:0; min-height:104px; padding:40px 16px 16px; border:1px solid hsl(var(--border-default));
+ border-radius:var(--dx-radius,8px); background:hsl(var(--surface));
+ color:hsl(var(--text-strong)); font:600 14px/1.16 var(--font-sans,"Albert Sans",sans-serif);
+ text-transform:none; letter-spacing:0; white-space:normal; box-shadow:none;
+ transition:border-color 180ms ease,background-color 180ms ease;
 }
-#scene .ark-header .nav-layer-body .nav-route-link:is(:hover,[aria-current="page"]) {
- border-color:hsl(var(--reference-400)); background:hsl(var(--reference-100));
- transform:translateY(-2px);
-}
-#scene .ark-header .nav-layer-body .nav-route-link .ark-link-label {
- display:block; width:100%; min-width:0; overflow-wrap:anywhere; white-space:normal;
-}
+#scene .ark-header .nav-layer-body .nav-route-link:is(:hover,[aria-current="page"]) { border-color:hsl(var(--reference-400)); background:hsl(var(--reference-100)); }
+#scene .ark-header .nav-layer-body .nav-route-link .ark-link-label { display:block; width:100%; min-width:0; overflow-wrap:anywhere; white-space:normal; }
 #scene .ark-header .nav-layer-body .nav-route-link::before {
- position:absolute; top:14px; left:15px;
- color:hsl(var(--text-faint)); font:500 9px/1 var(--mono-font,ui-monospace,monospace);
+ position:absolute; top:16px; left:16px;
+ color:hsl(var(--text-faint)); font:500 11px/1 var(--font-mono,ui-monospace,monospace);
 }
 #scene .ark-header .nav-layer-body .nav-route-link::after {
- position:absolute; top:10px; right:13px; left:auto; bottom:auto;
- width:auto; height:auto; margin:0; background:none; transform:none;
- font-size:15px;
+ position:absolute; top:12px; right:12px; left:auto; bottom:auto;
+ width:auto; height:auto; margin:0; background:none; transform:none; font-size:16px;
 }
+/* the route glyph is a quiet mark, not the identity colour (css/icons.css paints it primary) */
+#scene .ark-header .nav-layer-body .nav-route-link > .native-icon { color:hsl(var(--text-muted)); }
 #scene .ark-header .nav-layer[data-nav-layer="understand"] .nav-route-link:first-child,
-#scene .ark-header .nav-layer[data-nav-layer="evaluate"] .nav-route-link:first-child,
-#scene .ark-header .nav-layer[data-nav-layer="run"] .nav-route-link:first-child { grid-column:span 2; border-color:hsl(var(--border-default)); }
+#scene .ark-header .nav-layer[data-nav-layer="run"] .nav-route-link:first-child,
 #scene .ark-header .nav-layer[data-nav-layer="understand"] .nav-route-link:last-child,
-#scene .ark-header .nav-layer[data-nav-layer="evaluate"] .nav-route-link:last-child,
 #scene .ark-header .nav-layer[data-nav-layer="run"] .nav-route-link:last-child { grid-column:span 2; }
 #scene .ark-header .nav-layer[data-nav-layer="read"] .nav-layer-body { grid-template-columns:repeat(2,minmax(0,1fr)); }
 #scene .ark-header .nav-layer[data-nav-layer="read"] .nav-route-link:first-child { grid-column:1/-1; }
-#scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-layer-body {
- grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:minmax(190px,1fr);
-}
-#scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-route-link { grid-column:span 2; }
-#scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-route-link { border-color:hsl(var(--border-default)); font-size:22px; }
-#scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-layer-choice { border-color:hsl(var(--border-default)); }
-#scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-choice-title { font-size:22px; }
-#scene .ark-header .nav-layer[data-nav-layer="stages"] .nav-layer-body { grid-template-columns:repeat(3,minmax(0,1fr)); }
-#scene .ark-header .nav-layer[data-nav-layer="stages"] .nav-route-link:first-child { grid-column:span 2; }
 @keyframes nav-layer-forward-out { to { opacity:0; transform:translateX(-22px); } }
 @keyframes nav-layer-forward-in { from { opacity:0; transform:translateX(22px); } }
 @keyframes nav-layer-back-out { to { opacity:0; transform:translateX(22px); } }
@@ -284,189 +256,87 @@
 #scene .ark-header .nav-layer-in-forward { animation:nav-layer-forward-in 170ms ease both; }
 #scene .ark-header .nav-layer-out-back { pointer-events:none; animation:nav-layer-back-out 150ms ease both; }
 #scene .ark-header .nav-layer-in-back { animation:nav-layer-back-in 170ms ease both; }
-@media(max-width:620px) {
- #scene .ark-header .nav-layer { padding:17px 17px 21px; }
- #scene .ark-header .nav-layer-title { font-size:29px; }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-body {
-  grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(3,minmax(90px,1fr));
- }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child {
-  grid-column:1/-1; grid-row:1;
- }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(2) { grid-column:1; grid-row:2; }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(3) { grid-column:2; grid-row:2; }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(4) { grid-column:1/-1; grid-row:3; }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:nth-child(5) { grid-column:2; grid-row:3; }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:not(:first-child) .nav-choice-description { display:none; }
- #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child .nav-choice-title { font-size:21px; }
- #scene .ark-header .nav-layer-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; grid-auto-rows:minmax(104px,auto); }
- #scene .ark-header .nav-layer[data-nav-layer="understand"] .nav-route-link:first-child,
- #scene .ark-header .nav-layer[data-nav-layer="evaluate"] .nav-route-link:first-child,
- #scene .ark-header .nav-layer[data-nav-layer="run"] .nav-route-link:first-child,
- #scene .ark-header .nav-layer[data-nav-layer="understand"] .nav-route-link:last-child,
- #scene .ark-header .nav-layer[data-nav-layer="evaluate"] .nav-route-link:last-child,
- #scene .ark-header .nav-layer[data-nav-layer="run"] .nav-route-link:last-child { grid-column:auto; }
- #scene .ark-header .nav-layer-body .nav-route-link { padding:40px 12px 14px; font-size:14px; }
- #scene .ark-header .nav-layer[data-nav-layer="read"] .nav-layer-body { grid-template-rows:none; grid-auto-rows:minmax(120px,auto); }
- #scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-layer-body {
-  grid-template-columns:1fr; grid-template-rows:none; grid-auto-rows:minmax(120px,auto);
- }
- #scene .ark-header .nav-layer[data-nav-layer="lifecycle"] .nav-route-link { grid-column:1; }
- #scene .ark-header .nav-layer[data-nav-layer="stages"] .nav-layer-body {
-  grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:repeat(3,minmax(90px,1fr));
- }
- #scene .ark-header .nav-layer[data-nav-layer="stages"] .nav-route-link:first-child { grid-column:1/-1; }
-}
 @media(prefers-reduced-motion:reduce) {
  #scene .ark-header .nav-layer { animation:none !important; }
- #scene .ark-header .nav-layer-choice,
- #scene .ark-header .nav-layer-body .nav-route-link { transition:none; transform:none !important; }
+ #scene .ark-header :is(.nav-layer-choice,.nav-layer-body .nav-route-link) { transition:none; }
 }
 
-/* One corner: stacked destinations at home, a return control on inner pages. */
-.corner-navigation,.hero-motion-toggle { right:max(20px,2.8cqmin); bottom:max(14px,2cqmin); }
-.corner-navigation { position:absolute; z-index:6; display:flex; flex-direction:column; align-items:flex-end; gap:0; background:none; border:0; }
-.corner-navigation[hidden] { display:none; }
-.corner-navigation a { display:flex; align-items:center; min-height:44px; padding:8px 4px; color:hsl(var(--text-muted)); font:500 10px var(--ark-font); letter-spacing:.1em; text-transform:uppercase; text-decoration:none; }
-.corner-navigation a:hover { color:hsl(var(--text-strong)); }
-@media(max-width:760px) { .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px !important; } }
+/* ---- The footer: the kit's family footer in the scene's bottom chrome band ---
+   Beside the settings gear (css/settings.css, bottom-left), on every route: the site's section
+   links (one per journey), the credit and rights line, and the Back control -- one row (the
+   kit's home footer, [data-dx-mode="home"]), so the last link never runs under "Back" again. It
+   sits in the band the gear already uses, so it costs a one-screen page no fold height. */
+#scene .site-footer-strip {
+ position:absolute; z-index:14; left:72px; right:max(20px,2.8cqmin); bottom:max(14px,2cqmin);
+ height:44px; pointer-events:none;
+}
+#scene .site-footer-strip > * { pointer-events:auto; }
+#scene .site-footer-strip nav a { color:hsl(var(--text-muted)); background:none; }
+#scene .site-footer-strip nav a:is(:hover,[aria-current="page"]) { color:hsl(var(--text-strong)); }
+/* the credit and rights line join the row (css/settings.css still places them on their own) */
+#scene .site-footer-strip :is(.site-credit,.site-copyright) { position:static; }
+/* the Back control (js/hero-motion.js) closes the row */
+#scene .site-footer-strip .hero-motion-toggle {
+ position:static; min-height:44px; padding:0 4px; border:0; background:transparent;
+ color:hsl(var(--text-muted)); font:500 12px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.06em;
+ text-transform:uppercase; white-space:nowrap; cursor:pointer; transition:color .15s ease;
+}
+#scene .site-footer-strip .hero-motion-toggle:hover { color:hsl(var(--text-strong)); letter-spacing:.06em; }
+/* Narrower screens: the credit steps back, then the rights line; the section links and Back
+   always stay (the links scroll sideways when they still do not fit, as the strip did on a
+   phone). css/settings.css drops both on a phone, as before. The credit shows from 1600px: from
+   1280px it was drawn over the last section links up to 1599px (measured 2026-10-22: two boxes
+   overlapped at 1280, one at 1366 and 1440). */
+@media(max-width:1599.98px) { #scene .site-footer-strip .site-credit { display:none; } }
+@media(max-width:1023.98px) { #scene .site-footer-strip .site-copyright { display:none; } }
+@media(max-width:760px) {
+ #scene .site-footer-strip { left:60px; right:16px; bottom:14px; }
+ .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px; }
+}
 @media(max-width:480px) { .ark-studio-label { max-width:85px; line-height:1.5; } }
 
-/* A quiet invitation in the shared layout, without a card surface. */
-.theory-invitation { position:absolute; top:112px; right:max(24px,3cqw); z-index:5; width:220px; padding:8px 0; display:grid; gap:12px; border:0; background:none; box-shadow:none; color:hsl(var(--text)); text-decoration:none; }
-.theory-invitation[hidden] { display:none; }
-.theory-invitation-label { color:hsl(var(--text-muted)); font:400 10px/1.5 var(--ark-font); letter-spacing:.035em; }
-.theory-invitation strong { font:300 24px/1.18 var(--ark-font); letter-spacing:-.035em; }
-.theory-invitation-link { margin-top:4px; color:hsl(var(--text-muted)); font:400 11px/1.5 var(--ark-font); transition:color 180ms ease; }
-.theory-invitation:hover .theory-invitation-link { color:hsl(var(--text-strong)); }
-#scene .theory-invitation:focus-visible { background:none; color:hsl(var(--text-strong)); }
-.theory-invitation:focus-visible .theory-invitation-link { text-decoration:underline; text-underline-offset:5px; }
-@media(max-width:760px) { .theory-invitation { top:94px; right:20px; width:175px; gap:9px; } .theory-invitation strong { font-size:21px; } }
-@media(prefers-reduced-motion:reduce) { .theory-invitation-link { transition:none; } }
-
-/* Identity is a live navigation destination, with status independent of route. */
-.header-account-label{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
-.header-account-name{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.header-account-status{display:flex;align-items:center;gap:4px;font:500 8px/1 var(--mono-font,monospace);color:hsl(var(--text-muted))}
-.header-account-status:before{content:"";height:4px;width:4px;border-radius:50%;background:currentColor}
-.header-account-link[data-signed-in="true"] .header-account-status{color:hsl(var(--trust,var(--primary)))}
-/* Phone row: brand, Account, network pill, MENU -- all at full size, none shrinking.
-   Letting the wordmark and the Account label shrink with an ellipsis cut them to "DE..."
-   and "Ac..." at 360-430px (tests/browser/public-header.mjs), so instead Account goes
-   icon-only (its aria-label and title still name it and its state; Account is also in
-   the MENU's Evaluate layer) and the row's gaps tighten. The network pill stays labelled:
-   the owner asked for it visible next to MENU at every width. */
-@media(max-width:560px){
- #scene .ark-header{gap:8px}
- #scene .ark-header .header-core-links{display:flex;flex:0 0 auto;border:0;background:transparent;padding:0;margin-left:auto}
- #scene .ark-header .header-core-links a:not(.header-account-link){display:none}
- #scene .ark-header .ark-studio-identity{flex:0 0 auto;margin-right:0;padding:0}
- #scene .ark-header :is(.ark-brand-wordmark,.ark-brand-descriptor){max-width:none;overflow:visible;text-overflow:clip;white-space:nowrap}
- #scene .ark-header .header-account-label{display:none}
- #scene .ark-header .nav-toggle{flex:0 0 40px}
- #scene .ark-header .header-chain-trigger{padding:0 12px}
+/* ---- Widths: this site's own controls ----------------------------------------
+   The bar's own widths (its nav from 1040px down, one row on a phone, the sub-brand below
+   1440px) are the kit's home mode. What stays here is this site's controls at phone sizes. */
+@media(max-width:640px) {
+ #scene .ark-header :is(.header-chain-trigger,.nav-toggle) { height:36px; }
+ #scene .ark-header #primary-navigation { right:8px; width:calc(100vw - 16px); }
+ #scene .ark-header .ark-link { min-height:44px; }
+ #scene .ark-header .nav-layer { padding:16px 16px 20px; }
+ #scene .ark-header .nav-layer-title { font-size:28px; }
+ #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-auto-rows:minmax(88px,auto); }
+ #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child { grid-column:1/-1; grid-row:auto; }
+ #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:first-child .nav-choice-title { font-size:20px; }
+ #scene .ark-header .nav-layer-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; grid-auto-rows:minmax(104px,auto); }
+ #scene .ark-header .nav-layer[data-nav-layer="understand"] .nav-route-link:is(:first-child,:last-child),
+ #scene .ark-header .nav-layer[data-nav-layer="run"] .nav-route-link:is(:first-child,:last-child) { grid-column:auto; }
+ #scene .ark-header .nav-layer-body .nav-route-link { padding:40px 12px 12px; font-size:14px; }
+ #scene .ark-header .nav-layer[data-nav-layer="read"] .nav-layer-body { grid-template-rows:none; grid-auto-rows:minmax(120px,auto); }
 }
-/* Below 390px the lockup shrinks and the gaps tighten; the 16px gutter stays so the brand
-   lines up with the page text. */
-@media(max-width:389.98px){
- #scene .ark-header{gap:6px}
- #scene .ark-header .ark-studio-identity{gap:9px}
- #scene .ark-header .ark-brand-mark{width:30px;height:30px}
- #scene .ark-header .ark-brand-wordmark{font-size:20px;letter-spacing:.1em}
- #scene .ark-header .ark-brand-descriptor{font-size:7px;letter-spacing:.1em}
-}
-/* Home chrome follows the hero's line-and-station language. The controls
-   remain global navigation, but lose the stack of unrelated dark pills. */
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links {
-  gap:8px;
-  height:40px;
-  padding:0;
-  border:0;
-  border-radius:0;
-  background:transparent;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a,
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links .header-account-link {
-  position:relative;
-  justify-content:flex-start;
-  gap:7px;
-  height:40px;
-  max-width:none;
-  padding:0 12px;
-  border:1px solid hsl(var(--border-default)) !important;
-  border-radius:8px;
-  background:hsl(var(--surface) / .76) !important;
-  box-shadow:none !important;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a::after {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a:is(:hover,:focus-visible,[aria-current="page"]) {
-  color:hsl(var(--text-strong)) !important;
-  border-color:hsl(var(--border-strong)) !important;
-  background:hsl(var(--raised)) !important;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a:is(:hover,[aria-current="page"])::after {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-core-links a[aria-current="page"] { box-shadow:none !important; }
-#scene .hero-alive[data-page="zero"] .ark-header .header-account-label {
-  flex-direction:row;
-  align-items:center;
-  gap:7px;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-account-name { font-weight:600; }
-#scene .hero-alive[data-page="zero"] .ark-header .header-account-status {
-  gap:5px;
-  color:hsl(var(--text-faint));
-  font-size:8px;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-account-status::before { width:4px; height:4px; }
-#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger,
-#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle {
-  position:relative;
-  height:40px;
-  padding:0 12px;
-  border:1px solid hsl(var(--border-default));
-  border-radius:8px;
-  background:hsl(var(--surface) / .76);
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger::after,
-#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle::after {
-  content:none;
-}
-#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger:hover,
-#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger[aria-expanded="true"],
-#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle:hover,
-#scene .hero-alive[data-page="zero"] .ark-header.nav-open .nav-toggle { border-color:hsl(var(--border-strong)); background:hsl(var(--raised)); color:hsl(var(--text-strong)); }
-#scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger:hover::after,
-#scene .hero-alive[data-page="zero"] .ark-header .nav-toggle:hover::after {
-  border-color:hsl(var(--reference));
-  background:hsl(var(--reference));
-}
-
-/* Icon-only Account on phones (see the phone-row note above). Both selectors, because the
-   home rules above outrank the shared one; a signed-in holder's icon takes the trust colour
-   so the state the hidden label carried still shows. */
+/* Index choices on a phone: the descriptions below the first stay in each journey's own layer
+   (one tap away), so the choices fit one screen. */
+@media(max-width:640px) { #scene .ark-header .nav-layer[data-nav-layer="index"] .nav-layer-choice:not(:first-child) .nav-choice-description { display:none; } }
+/* Phone Account: icon-only (its aria-label and title name it and its state; it is also in the
+   MENU). A signed-in holder's icon takes the trust colour, so the state the label carried
+   still shows. */
 @media(max-width:560px) {
-  #scene .ark-header .header-core-links .header-account-link,
-  #scene .hero-alive[data-page="zero"] .ark-header .header-core-links .header-account-link {
-    justify-content:center;
-    width:40px;
-    min-width:40px;
-    max-width:none;
-    height:40px;
-    padding:0;
-  }
-  #scene .ark-header .header-core-links .header-account-link .native-icon { width:18px; height:18px; flex-basis:18px; opacity:.9; }
-  #scene .ark-header .header-core-links .header-account-link[data-signed-in="true"] .native-icon { color:hsl(var(--trust,var(--primary))); opacity:1; }
+ #scene .ark-header .header-account-link { justify-content:center; width:36px; min-width:36px; padding:0; }
+ #scene .ark-header .header-account-label { display:none; }
+ #scene .ark-header .header-account-link[data-signed-in="true"] .native-icon { color:hsl(var(--trust,var(--success))); opacity:1; }
 }
-/* Below 360px the labelled network pill no longer fits beside a full wordmark (MENU fell
-   off-screen at 320px), so it keeps only its status dot; js/resolvers/header.js mirrors the
-   network name into the trigger's aria-label and title. Last in the file so it outranks the
-   home pill padding above. */
+/* Up to 440px MENU is an icon square like Account: with its label the row ran out of room once
+   the network pill read "Local devnet". */
+@media(max-width:440px) {
+ #scene .ark-header .nav-toggle { width:36px; padding:0; }
+ #scene .ark-header .nav-toggle-label { display:none; }
+}
+/* A 360px phone with the longest network name ("Local devnet") was 1px short: the pill's
+   padding tightens below 400px, with the kit's tighter home gaps (tests/browser/public-header.mjs). */
+@media(max-width:399.98px) { #scene .ark-header .header-chain-trigger { padding:0 8px; } }
+/* Below 360px the labelled network pill no longer fits beside the switcher, so it keeps only its
+   status dot; js/resolvers/header.js mirrors the network name into the trigger's aria-label and
+   title. */
 @media(max-width:359.98px) {
-  #scene .ark-header .header-chain-trigger,
-  #scene .hero-alive[data-page="zero"] .ark-header .header-chain-trigger { justify-content:center; width:40px; padding:0; }
-  #scene .ark-header .header-chain-trigger-label { display:none; }
+ #scene .ark-header .header-chain-trigger { justify-content:center; width:36px; padding:0; }
+ #scene .ark-header .header-chain-trigger-label { display:none; }
 }

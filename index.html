@@ -15,65 +15,62 @@
 <meta name="twitter:description" content="Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network." />
 
 <!-- Tells the stylesheet JS is available, so the fallback copy does not flash before the scene paints. -->
-<script src="js/bootstrap.js?v=20261018-theme-owner"></script>
+<script src="js/bootstrap.js?v=20261020-theme-ids"></script>
 
+<!-- The SHARED stylesheets: the ones every route needs. A route's own sheets are not linked here; the page
+     loader (js/ark/page-loader.js loadStyles) links them, in cascade order, before the page mounts, and
+     the server render's <head> carries them. Which sheet is shared and which is a page's own is DERIVED
+     (node scripts/page-styles.mjs --write rewrites this list and the lists in js/pages/catalog.js;
+     --check fails on drift). Do not add a page's sheet here by hand. -->
 <link rel="stylesheet" href="css/themes.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/flux-themes.css?v=20261014-nav2" />
-<link rel="stylesheet" href="css/fonts.css?v=20261006-system1" />
+<link rel="stylesheet" href="assets/kit/defxn-fonts.css?v=20261019-kit1" />
+<!-- The DEFXN family kit (flux/defxn-product-kit, synced by its npm run sync): the bar, the product
+     switcher and the footer this site shares with every DEFXN product. Components read tokens only,
+     so they follow whichever of the five theme families is active (html[data-theme]). Loaded before
+     the site sheets, so css/navigation.css dresses it for the scene. -->
+<link rel="stylesheet" href="assets/kit/defxn-components.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/fallback.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/studio.css?v=20261006-system1" />
+<link rel="stylesheet" href="css/studio.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/hero-motion.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/zero-webgl.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/lattice.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/learnings.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/navigation.css?v=20261016-interactive-map1" />
-<link rel="stylesheet" href="css/focus.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/settings.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/page-layout.css?v=20261006-system1" />
+<link rel="stylesheet" href="css/navigation.css?v=20261020-w4" />
+<link rel="stylesheet" href="css/focus.css?v=20261020-w4" />
+<link rel="stylesheet" href="css/settings.css?v=20261020-w4" />
+<link rel="stylesheet" href="css/page-layout.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/home.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/resolver-guide.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/site-direction.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/article-reading.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/document-flow.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/experience.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/explorer.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/economy-preview.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/home-drafting.css?v=20261007-nolines1" />
-<link rel="stylesheet" href="css/lifecycle.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/reference.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/guided-page.css?v=20261006-resolver1" />
-<link rel="stylesheet" href="css/about.css?v=20261014-about1" />
-<link rel="stylesheet" href="css/resolutions.css?v=20261007-mega2" />
-  <link rel="stylesheet" href="css/task-page.css?v=20261007-nolines1">
-<link rel="stylesheet" href="css/account.css?v=20261016-account-focus3" />
-<link rel="stylesheet" href="css/account-domains.css?v=20261007-account1" />
-<link rel="stylesheet" href="css/stats.css?v=20261008-fleet1" />
-<link rel="stylesheet" href="css/stats-dashboard.css?v=20261008-dash3" />
-<link rel="stylesheet" href="css/resolver-math.css?v=20261010-rm3" />
-<link rel="stylesheet" href="css/resolvers.css?v=20261008-segmented1" />
+<link rel="stylesheet" href="css/home-drafting.css?v=20261020-w4" />
+<link rel="stylesheet" href="css/lifecycle.css?v=20261019-ark027" />
+<link rel="stylesheet" href="css/resolutions.css?v=20261019-ark027" />
 <link rel="stylesheet" href="css/icons.css?v=20261006-system1">
 <link rel="stylesheet" href="css/story-diagrams.css?v=20261006-system1">
 <link rel="stylesheet" href="css/color-system.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/brand-identity.css?v=20261014-living2" />
-<link rel="stylesheet" href="css/home-flow.css?v=20261008-chain1" />
-<link rel="stylesheet" href="css/chain.css?v=20261011-illustration1" />
-<link rel="stylesheet" href="css/bundle-deployer.css?v=20261006-system1">
-<link rel="stylesheet" href="css/how-overview.css?v=20261006-system1">
-<link rel="stylesheet" href="css/explorer-observatory.css?v=20261006-system1">
-<link rel="stylesheet" href="css/explore-story.css?v=20261007-house1">
+<link rel="stylesheet" href="css/how-overview.css?v=20261020-w4">
 <link rel="stylesheet" href="css/authorization-dialog.css?v=20261006-system1">
-<link rel="stylesheet" href="css/palette.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/resolver-lab.css?v=20261007-footer1" />
-<link rel="stylesheet" href="css/download.css?v=20261007-brand1">
-<link rel="stylesheet" href="css/home-swiss.css?v=20261016-interactive-map1" />
-<link rel="stylesheet" href="css/brand-marks.css?v=20261014-marks1" />
-<link rel="stylesheet" href="css/components.css?v=20261014-nav2" />
+<link rel="stylesheet" href="css/download.css?v=20261020-w4">
+<link rel="stylesheet" href="css/home-swiss.css?v=20261020-w4" />
+<link rel="stylesheet" href="assets/kit/defxn-marks.data.css?v=20261019-kit1" />
+<!-- Ark UI blocks (@deadark/ark-ui/blocks, copied by scripts/build-ark-vendor.cjs): the only styling
+     a block has, static so the server render arrives styled (no injected rules). Shared: every
+     route renders blocks, so it is linked here (~9 KB gz) rather than fetched after the page's
+     scripts; the blocks' JS is lazy (ArkUI.blockScripts, js/pages/catalog.js). Then the frame a
+     page built from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is
+     last. -->
+<link rel="stylesheet" href="css/ark-blocks.css?v=20261020-w5ark" />
+<link rel="stylesheet" href="css/components.css?v=20261020-w4" />
 </head>
 <body>
 
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
      authored by hand. -->
+<!-- Skip link: the first thing Tab reaches, past the header's controls to the page itself
+     (js/hero-motion.js focuses the routed page; with JavaScript off it jumps to the fallback). -->
+<a class="skip" href="#fallback">Skip to content</a>
 <main id="main">
 <div id="scene"></div>
 
@@ -89,10 +86,13 @@
       through applications and signed results you can inspect. Explore the protocol,
       understand resolvers, or follow the instructions to run from source.
     </p>
-    <p><a href="docs/quickstart.md">Read the source</a></p>
-    <nav aria-label="Learn about Flux">
-      <a href="docs/protocol/resolvers.md">What is a resolver?</a>
-      <a href="docs/overview.md">Read the protocol overview</a>
+    <!-- The site's own pages, not raw docs/*.md files (docs/ux-audit/pages.md P10). Once the
+         scene is up, js/main.js makes this block inert as well as aria-hidden: it is visually
+         clipped, so its links must not be Tab stops. -->
+    <p><a href="/download">Run DEFXN from source</a></p>
+    <nav aria-label="Learn about DEFXN">
+      <a href="/what-is-a-resolver">What is a resolver?</a>
+      <a href="/about">Read the overview</a>
     </nav>
   </div>
 </section>
@@ -107,9 +107,9 @@
 <!-- 1. design tokens -->
 <script src="js/tokens.js" defer></script>
 <script src="js/ark/vendor/backgrounds.js" defer></script>
-<script src="js/content/theme.js?v=20261006-families1" defer></script>
+<script src="js/content/theme.js?v=20261020-theme-ids" defer></script>
 <script src="js/content/theme-data.js" defer></script>
-<script src="js/content/settings-defaults.js" defer></script>
+<script src="js/content/settings-defaults.js?v=20261020-theme-ids" defer></script>
 <script src="js/content/settings-defaults-data.js" defer></script>
 <script src="js/content/layout.js" defer></script>
 <script src="js/content/layout-data.js" defer></script>
@@ -126,7 +126,7 @@
 <script src="js/content/manifest.js" defer></script>
 <script src="js/content/manifests/index.js?v=20261014-landscape1"></script>
 <!-- Refresh the editable navigation manifest after the generated manifest list. -->
-<script src="js/content/manifests/nav.js?v=20261006-mega1" defer></script>
+<script src="js/content/manifests/nav.js?v=20261020-w4" defer></script>
 <script src="js/content/assets.js" defer></script>
 <script src="js/content/assets/index.js"></script>
 <script src="js/content/secrets.js" defer></script>
@@ -141,21 +141,23 @@
 <script src="js/ark/vendor/engines.js" defer></script>
 <script src="js/ark/story-diagrams.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/stage-scenes.js?v=20261003-lifecycle103" defer></script>
-<script src="js/ark/mesh-fabric.js?v=20261014-living2" defer></script>
+<script src="js/ark/mesh-fabric.js?v=20261019-settle1" defer></script>
 <script src="js/ark/icons.js?v=20261014-nav2" defer></script>
 <script src="js/content/learnings.js" defer></script>
 <script src="js/content/article-index.js?v=20261008-ops1" defer></script>
 <script src="js/content/stats-highlights.js?v=20261008-ops1" defer></script>
-<script src="js/content/resolutions.js?v=20261004-products2" defer></script>
+<script src="js/content/resolutions.js?v=20261020-w4" defer></script>
 <script src="js/content/resolution-products.js?v=20261007-mega2" defer></script>
+<script src="js/content/site-pages.js" defer></script>
 <script src="js/content/seo.js?v=20261004-products2" defer></script>
-<script src="js/content/seo-data.js?v=20261014-landscape1" defer></script>
+<script src="js/content/seo-data.js?v=20261020-w4" defer></script>
 <script src="js/ark/text-scramble.js" defer></script>
 <script src="js/ark/text-presence.js" defer></script>
-<script src="js/pages/catalog.js?v=20261012-densewire1" defer></script>
+<script src="js/pages/catalog.js?v=20261020-w4" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/ark/page-loader.js?v=20261016-interactive-map1" defer></script>
+<script src="js/min/manifest.js?v=58309c59" defer></script>
+<script src="js/ark/page-loader.js?v=20261020-w5" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261014-launch1" defer></script>
 <script src="js/ark/page-router.js?v=20261003-lifecycle103" defer></script>
@@ -168,7 +170,8 @@
 <script src="js/resolvers/scene.js" defer></script>
 <script src="js/resolvers/halo.js" defer></script>
 <script src="js/resolvers/veil.js" defer></script>
-<script src="js/resolvers/header.js?v=20261007-mega2" defer></script>
+<script src="assets/kit/defxn-product.js?v=20261020-w4" defer></script>
+<script src="js/resolvers/header.js?v=20261019-shell1" defer></script>
 <script src="js/resolvers/nav.js?v=2" defer></script>
 <script src="js/resolvers/body.js" defer></script>
 <script src="js/resolvers/blocks/rblock-text-v1.js" defer></script>
@@ -182,7 +185,7 @@
 <!-- 5. the pattern, then boot. (The header, footer, progress-pill and subtitle
      components live, unloaded, in js/resolvers/optional/. See README.md.) -->
 <script src="js/scene.flux.js" defer></script>
-<script src="js/main.js?v=3" defer></script>
+<script src="js/main.js?v=20261020-w4" defer></script>
 <script src="js/halo/proximity.js" defer></script>
 <script src="js/halo/words.js" defer></script>
 <script src="js/halo/surface-motion.js" defer></script>
@@ -191,9 +194,9 @@
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
-<script src="js/zero-webgl.js?v=12" defer></script>
-<script src="js/hero-motion.js?v=20261004-products2" defer></script>
-<script src="js/lattice.js?v=20261003-alignment98" defer></script>
-<script src="js/settings/panel.js?v=20261018-theme-owner" defer></script>
+<script src="js/zero-webgl.js?v=20261019-settle1" defer></script>
+<script src="js/hero-motion.js?v=20261020-w4" defer></script>
+<script src="js/lattice.js?v=20261020-w4" defer></script>
+<script src="js/settings/panel.js?v=20261020-theme-ids" defer></script>
 </body>
 </html>

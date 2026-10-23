@@ -17,6 +17,14 @@
    itself and moves the lowest-priority links into the MENU instead
    (fitHeaderRow in js/resolvers/header.js).
 
+   Since 2026-10-19 the header is the DEFXN family bar (the product kit's
+   .dx-bar, mounted in home mode by js/resolvers/header.js): brand, product
+   switcher, this site's nav (Resolutions + core links), then Account, Run
+   DEFXN, the network pill and MENU in the bar's actions. The same checks
+   hold for it; on a phone the brand is the kit's (the mark alone, named
+   "DEFXN -- home"), and the bar must stay ONE row (the kit's phone bar would
+   wrap its nav onto a second, pushing the page down).
+
    Per width (360, 390, 430, 1024, 1280, 1440, 1920) and route (home +
    inner pages) it asserts:
    - every visible header control (the identity link, each shown core link,
@@ -65,6 +73,7 @@ export function measureHeader(page) {
     const vw = document.documentElement.clientWidth;
     const header = document.querySelector('#scene .ark-header');
     if (!header) return { problems: ['no .ark-header'], controls: [] };
+    if (!header.classList.contains('dx-bar')) problems.push('the header is not the family bar (.dx-bar)');
     const shown = (el) => {
       if (!el || el.closest('[hidden]')) return false;
       const cs = getComputedStyle(el);
@@ -74,8 +83,8 @@ export function measureHeader(page) {
     };
     const name = (el) => el.getAttribute('aria-label') || el.textContent.trim().replace(/\s+/g, ' ') || el.className;
     /* the row's controls: popovers and the MENU panel are closed while measuring */
-    const candidates = [header.querySelector('.ark-studio-identity'),
-      ...header.querySelectorAll('.header-core-links > a, .header-products-toggle, .header-chain-trigger, .nav-toggle')];
+    const candidates = [header.querySelector('.dx-bar__brand'),
+      ...header.querySelectorAll('.dx-switch__trigger, .header-core-links > a, .header-products-toggle, .header-account-link, .header-run-link, .header-chain-trigger, .nav-toggle')];
     const controls = candidates.filter(shown);
     const rects = controls.map((el) => el.getBoundingClientRect());
 
@@ -113,19 +122,31 @@ export function measureHeader(page) {
     if (rects.length && bandTop >= bandBottom) problems.push('the header controls do not share one row');
     /* the compact layout's breakpoint, the same 1040px css/navigation.css switches at */
     const compact = matchMedia('(max-width:1040px)').matches;
-    const pills = controls.filter((el) => !el.matches('.ark-studio-identity')).map((el) => Math.round(el.getBoundingClientRect().height));
+    const pills = controls.filter((el) => !el.matches('.dx-bar__brand')).map((el) => Math.round(el.getBoundingClientRect().height));
     if (compact && pills.length && Math.max(...pills) - Math.min(...pills) > 1) problems.push(`control heights differ: ${pills.join(', ')}`);
 
-    const wordmark = header.querySelector('.ark-brand-wordmark');
-    if (!shown(wordmark)) problems.push('the wordmark is not shown');
-    else if (wordmark.scrollWidth > wordmark.clientWidth + 1) problems.push(`the wordmark "${wordmark.textContent}" is cut (${wordmark.scrollWidth} > ${wordmark.clientWidth})`);
+    /* the brand: the word in full above the kit's phone width, the named mark on a phone */
+    const phone = matchMedia('(max-width:640px)').matches;
+    const brand = header.querySelector('.dx-bar__brand');
+    const wordmark = header.querySelector('.dx-bar__brand-word');
+    const mark = header.querySelector('.dx-bar__brand .dx-mark');
+    if (!shown(mark)) problems.push('the DEFXN mark is not shown');
+    if (!brand || !/DEFXN/.test(brand.getAttribute('aria-label') || '')) problems.push('the brand link is not named DEFXN');
+    if (!phone && !shown(wordmark)) problems.push('the wordmark is not shown');
+    else if (shown(wordmark) && wordmark.scrollWidth > wordmark.clientWidth + 1) problems.push(`the wordmark "${wordmark.textContent}" is cut (${wordmark.scrollWidth} > ${wordmark.clientWidth})`);
+    if (!controls.some((el) => el.matches('.dx-switch__trigger'))) problems.push('the product switcher is not shown');
+    if (!controls.some((el) => el.matches('.header-account-link'))) problems.push('Account is not shown (it is never collapsed)');
     if (!controls.some((el) => el.matches('.header-chain-trigger')) && !header.querySelector('.header-chain[hidden]')) problems.push('the network pill is not shown');
     if (!controls.some((el) => el.matches('.nav-toggle'))) problems.push('the MENU button is not shown');
+    /* one row: the bar keeps the kit's height (the page below is placed for it) */
+    const barHeight = header.getBoundingClientRect().height - (parseFloat(getComputedStyle(header).paddingTop) || 0);
+    const expected = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dx-bar-h')) || 64;
+    if (Math.abs(barHeight - expected) > 1) problems.push(`the bar is ${Math.round(barHeight)}px tall, not one ${expected}px row`);
 
     /* reachability: a core link the row hides must be in the MENU panel */
     const menu = header.querySelector('#primary-navigation');
     const menuHrefs = new Set([...(menu ? menu.querySelectorAll('a[href]') : [])].map((a) => a.getAttribute('href')));
-    header.querySelectorAll('.header-core-links > a').forEach((a) => {
+    header.querySelectorAll('.header-core-links > a, .header-run-link').forEach((a) => {
       if (!shown(a) && !menuHrefs.has(a.getAttribute('href'))) problems.push(`"${name(a)}" is hidden from the row and missing from the MENU (${a.getAttribute('href')})`);
     });
     const products = header.querySelector('.header-products-toggle');
@@ -134,6 +155,121 @@ export function measureHeader(page) {
     if (hScroll > 1) problems.push(`horizontal page scroll of ${hScroll}px`);
     return { problems, controls: controls.map((el, i) => `${name(el).slice(0, 24)} ${Math.round(rects[i].left)}-${Math.round(rects[i].right)}x${Math.round(rects[i].height)}`) };
   });
+}
+
+/* The header's two floating panels are Ark popovers loaded on their first press (js/resolvers/header.js,
+   lazyHeaderPopover). Checked on /about, not Home, because Escape on any other page means "back to
+   Home" (js/hero-motion.js) -- so Ark must consume the key it handles, and the page must stay put.
+   Per width it asserts: nothing of the popover chunk is requested before a press and exactly one
+   request serves both panels; the pill opens from the keyboard, focus moves into the panel, the
+   panel lies inside the viewport and every option is a visible, focusable control; Escape closes it,
+   returns focus to the pill and leaves the page where it was; where the Resolutions menu is in the
+   row (above the compact breakpoint) it opens the same way, every link in it is reachable and the
+   panel is inside the viewport, opening it closes the pill's panel (one at a time), a mouse resting
+   on its trigger opens it and a press right after does not close it, and moving away closes it. */
+export async function checkPanels(context, base, width) {
+  const page = await context.newPage();
+  const problems = [];
+  let step = 'start';
+  const chunk = [], helper = [];
+  page.on('request', (request) => { if (/ark-kit-popover\.js/.test(request.url())) chunk.push(request.url()); if (/header-popover\.js/.test(request.url())) helper.push(request.url()); });
+  const visible = (selector) => page.evaluate((sel) => { const el = document.querySelector(sel); if (!el || el.closest('[hidden]')) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== 'hidden'; }, selector);
+  const waitOpen = (selector) => page.waitForFunction((sel) => { const el = document.querySelector(sel); return !!el && !el.closest('[hidden]') && el.getBoundingClientRect().height > 0; }, selector, { timeout: scaled(8000) });
+  const waitClosed = (selector) => page.waitForFunction((sel) => { const el = document.querySelector(sel); return !el || !!el.closest('[hidden]') || el.getBoundingClientRect().height === 0; }, selector, { timeout: scaled(3000) });
+  const inside = (selector) => page.evaluate((sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return { left: Math.round(r.left), right: Math.round(r.right), top: Math.round(r.top), bottom: Math.round(r.bottom), vw: document.documentElement.clientWidth, vh: window.innerHeight }; }, selector);
+  try {
+    await page.goto(base + '/', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.ArkUI && ArkUI.pageCatalog, null, { timeout: scaled(20000) });
+    const aboutPath = await page.evaluate(() => ArkUI.pageCatalog.about.path);
+    await page.goto(base + aboutPath, { waitUntil: 'domcontentloaded' });
+    await settled(page, 'about');
+    await page.evaluate(() => document.fonts.ready);
+    const path0 = await page.evaluate(() => location.pathname);
+    if (chunk.length || helper.length) problems.push(`the popover chunk or its swap helper was requested before any press (${chunk.length} + ${helper.length})`);
+
+    /* ---- the network pill, from the keyboard ---- */
+    await page.focus('.header-chain-trigger');
+    await page.keyboard.press('Enter');
+    step = 'waitOpen#1'; await waitOpen('#header-chain-popover');
+    const pill = await page.evaluate(() => { const t = document.querySelector('.header-chain-trigger'); const panel = document.querySelector('#header-chain-popover'); return { expanded: t.getAttribute('aria-expanded'), controls: t.getAttribute('aria-controls'), focusInside: panel.contains(document.activeElement), options: [...panel.querySelectorAll('.network-option')].map((o) => ({ name: o.textContent.trim(), tab: o.tabIndex, shown: o.getBoundingClientRect().height > 0 })) }; });
+    if (pill.expanded !== 'true') problems.push('the pill is open but not aria-expanded');
+    if (pill.controls !== 'header-chain-popover') problems.push(`the pill controls "${pill.controls}", not its panel`);
+    if (!pill.focusInside) problems.push('opening the pill from the keyboard did not move focus into its panel');
+    if (!pill.options.length) problems.push('the network panel lists no network');
+    pill.options.forEach((o) => { if (!o.shown || o.tab < 0) problems.push(`network option "${o.name}" is not a visible, focusable control`); });
+    const box = await inside('#header-chain-popover');
+    if (box.left < -0.5 || box.right > box.vw + 0.5 || box.top < -0.5) problems.push(`the network panel lies outside the viewport (${box.left}-${box.right} of ${box.vw}, top ${box.top})`);
+    if (chunk.length !== 1 || helper.length !== 1) problems.push(`the first press requested the popover chunk ${chunk.length} times and the swap helper ${helper.length}, not once each`);
+
+    await page.keyboard.press('Escape');
+    step = 'waitClosed#6'; await waitClosed('#header-chain-popover');
+    const afterEsc = await page.evaluate(() => ({ onPill: document.activeElement === document.querySelector('.header-chain-trigger'), path: location.pathname, expanded: document.querySelector('.header-chain-trigger').getAttribute('aria-expanded') }));
+    if (!afterEsc.onPill) problems.push('Escape closed the network panel but focus did not return to the pill');
+    if (afterEsc.path !== path0) problems.push(`Escape in the network panel also left the page (${path0} -> ${afterEsc.path})`);
+    if (afterEsc.expanded !== 'false') problems.push('the pill still says aria-expanded after Escape');
+
+    /* ---- the Resolutions menu (in the row above the compact breakpoint) ---- */
+    if (await visible('.header-products-toggle')) {
+      await page.keyboard.press('Enter');                       /* the pill again: it is open when the menu is pressed */
+      step = 'waitOpen#2'; await waitOpen('#header-chain-popover');
+      await page.focus('#products-trigger');
+      await page.keyboard.press('Enter');
+      step = 'waitOpen#3'; await waitOpen('#products-mega');
+      step = 'waitClosed#7'; await waitClosed('#header-chain-popover').catch(() => problems.push('opening the Resolutions menu left the network panel open (one panel at a time)'));
+      const mega = await page.evaluate(() => { const t = document.querySelector('#products-trigger'); const panel = document.querySelector('#products-mega'); const links = [...panel.querySelectorAll('a[href]')]; return { expanded: t.getAttribute('aria-expanded'), focusInside: panel.contains(document.activeElement), links: links.length, unreachable: links.filter((a) => a.tabIndex < 0 || getComputedStyle(a).visibility === 'hidden' || getComputedStyle(a).display === 'none').map((a) => a.textContent.trim().slice(0, 24)), scrolls: panel.scrollHeight > panel.clientHeight + 1, overflow: getComputedStyle(panel).overflowY }; });
+      if (mega.expanded !== 'true') problems.push('the Resolutions trigger is not aria-expanded while its menu is open');
+      if (!mega.focusInside) problems.push('opening the Resolutions menu from the keyboard did not move focus into it');
+      if (mega.links < 10) problems.push(`the Resolutions menu holds ${mega.links} links; every resolution should be there`);
+      if (mega.unreachable.length) problems.push(`Resolutions links not keyboard-reachable: ${mega.unreachable.join(', ')}`);
+      if (mega.scrolls && !/auto|scroll/.test(mega.overflow)) problems.push('the Resolutions menu is taller than the viewport and cannot scroll, so part of it is cut');
+      const mbox = await inside('#products-mega');
+      if (mbox.left < -0.5 || mbox.right > mbox.vw + 0.5 || mbox.top < -0.5) problems.push(`the Resolutions menu lies outside the viewport (${mbox.left}-${mbox.right} of ${mbox.vw}, top ${mbox.top})`);
+      if (mbox.bottom > mbox.vh + 0.5) problems.push(`the Resolutions menu runs below the viewport (${mbox.bottom} > ${mbox.vh})`);
+      /* Tab walks on through the menu's links */
+      const walked = [];
+      for (let i = 0; i < 4; i++) {
+        await page.keyboard.press('Tab');
+        walked.push(await page.evaluate(() => { const a = document.activeElement; return a && a.closest('#products-mega') ? (a.getAttribute('href') || a.tagName) : '(outside)'; }));
+      }
+      if (walked.every((s) => s === '(outside)')) problems.push('Tab from the Resolutions menu never reached one of its links');
+      await page.keyboard.press('Escape');
+      step = 'waitClosed#8'; await waitClosed('#products-mega');
+      const mesc = await page.evaluate(() => ({ onTrigger: document.activeElement === document.querySelector('#products-trigger'), path: location.pathname, expanded: document.querySelector('#products-trigger').getAttribute('aria-expanded') }));
+      if (!mesc.onTrigger) problems.push('Escape closed the Resolutions menu but focus did not return to its trigger');
+      if (mesc.path !== path0) problems.push(`Escape in the Resolutions menu also left the page (${path0} -> ${mesc.path})`);
+      if (mesc.expanded !== 'false') problems.push('the Resolutions trigger still says aria-expanded after Escape');
+      if (chunk.length !== 1 || helper.length !== 1) problems.push(`the popover chunk (${chunk.length}) and swap helper (${helper.length}) were requested for both panels, not once each`);
+
+      /* a mouse resting on the trigger opens the menu; a press within the hover-intent window (400 ms) keeps it open.
+         The window is wall-clock, so the page stamps the hover and the press itself and the keep-open assertion
+         applies only when they really were that close (a loaded machine can delay the press past it, and that
+         press is then an ordinary toggle). Either way the hover must have opened it. */
+      await page.mouse.move(width / 2, 400);
+      const at = await page.evaluate(() => {
+        const trigger = document.querySelector('#products-trigger'), stamp = (name) => () => { window[name] = performance.now(); };
+        window.__hoverAt = window.__pressAt = null;
+        trigger.parentElement.addEventListener('pointerenter', stamp('__hoverAt'), true);
+        trigger.addEventListener('click', stamp('__pressAt'), true);
+        const r = trigger.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      });
+      await page.mouse.move(at.x, at.y);
+      step = 'waitOpen#4'; await waitOpen('#products-mega');
+      await page.mouse.down(); await page.mouse.up();
+      await page.waitForTimeout(250);
+      const gap = await page.evaluate(() => (window.__hoverAt == null || window.__pressAt == null) ? null : window.__pressAt - window.__hoverAt);
+      if (gap != null && gap < 350 && !(await visible('#products-mega'))) problems.push(`a press ${Math.round(gap)} ms after the hover-open closed the Resolutions menu`);
+      await page.mouse.move(width / 2, 600);
+      step = 'waitClosed#9'; await waitClosed('#products-mega').catch(() => problems.push('moving the mouse away did not close the Resolutions menu'));
+      /* a link in it closes it and goes there */
+      await page.hover('#products-trigger');
+      step = 'waitOpen#5'; await waitOpen('#products-mega');
+      await page.click('#products-mega a.products-mega-feature >> nth=0');
+      step = 'waitClosed#10'; await waitClosed('#products-mega').catch(() => problems.push('following a link in the Resolutions menu left it open'));
+    }
+  } catch (error) {
+    problems.push(String(error.message || error).split('\n')[0] + ` (at ${step})`);
+  } finally { await page.close(); }
+  return problems;
 }
 
 async function main() {
@@ -198,6 +334,10 @@ async function main() {
           console.log(`FAIL ${width} ${id}: ${String(error.message || error).split('\n')[0]}`);
         } finally { await page.close(); }
       }
+      const panelProblems = await checkPanels(context, base, width);
+      const panelTag = `${width} floating panels (/about)`;
+      if (panelProblems.length) { failures.push(panelTag); console.log(`FAIL ${panelTag}\n  - ${panelProblems.join('\n  - ')}`); }
+      else console.log(`ok   ${panelTag}: Ark popovers load on the first press, Escape returns focus, one at a time`);
       await context.close();
     }
   } finally {
