@@ -120,10 +120,10 @@ async function findLiveWalletLink(links, walletAddress) {
 async function rootHandle({ mnemonic, derivation, callsign }) {
   if (derivation === FLUX_ROOT_DERIVATION) return createFluxRootHandle(mnemonic);
   if (derivation === 'deadark-profile-v1') {
-    if (!callsign) throw new Error('This Auth Kit names a DeArk profile root but records no callsign, so its key cannot be rebuilt.');
+    if (!callsign) throw new Error('This FXN ID names a DeArk profile root but records no callsign, so its key cannot be rebuilt.');
     return createRootIdentitySigningHandle({ phrase: mnemonic, callsign });
   }
-  throw new Error('This Auth Kit uses a root derivation this page does not know: ' + derivation + '.');
+  throw new Error('This FXN ID uses a root derivation this page does not know: ' + derivation + '.');
 }
 
 /* container: where the sign-in panel is drawn.
@@ -151,14 +151,14 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
 
   createArkAuthKitPanel({
     container, session, product,
-    hint: 'Choose your recovery file (.auth.flx). It stays on this device and is never uploaded.',
+    hint: 'Choose your FXN ID file (.auth.fxn). It stays on this device and is never uploaded.',
     readyHint: 'Signed in. Publishing signs with your identity.',
     onUnlock: async (opened) => {
       // Throwing here is how a panel refuses an identity: the message lands in its notice and no one is signed in.
       if (!opened.rootVerified || !pending) {
         if (pending) pending.dispose();
         pending = null;
-        throw new Error('This Auth Kit opened, but its root could not be proven, so it cannot sign.');
+        throw new Error('This FXN ID opened, but its root could not be proven, so it cannot sign.');
       }
       if (active) { active.handle.dispose(); if (active.walletHandle) active.walletHandle.dispose(); }
       const handle = pending;
