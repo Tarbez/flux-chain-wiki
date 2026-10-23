@@ -1,0 +1,7 @@
+Vendored byte for byte from flux/defxn-defi-rs/dense-wire/web/ (branch fix/one-name-system,
+worktree flux/defxn-defi-rs-wt-names until it merges). Never edit a file here: fix it at the
+source and copy it over. A drift test in this repo fails when any file differs from the source.
+
+Files: flx-domain-proof.mjs (the ONE shared DOM_PROOF verifier), and the files it imports:
+flx-dumb-parser.mjs, flx-builders.mjs, flx-crypto.mjs; plus flx-wire.mjs (the WebSocket line
+protocol client whose domProof() asks a node).

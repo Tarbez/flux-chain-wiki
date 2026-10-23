@@ -3,11 +3,19 @@
    ark-miner-cli/ops/caddy/defxn-wildcard.caddy). No build step, matching this
    project's own convention (see ../scripts/serve-site.mjs).
 
-   Flow: location.hostname -> "<label>.fxn" -> POST /explorer/v1/query (names
-   source, same-origin, proxied to the local miner's :8766 by Caddy) -> an
-   ipfs_cid target -> GET /explorer/v1/content/<cid> (same-origin) -> decode
-   with flx-codec's decodeArchiveAsync (vendored at ./vendor/flx-codec/, see
-   that directory's VENDORED-FROM.txt) -> render.
+   Flow: location.hostname -> "<label>.fxn" -> DOM_PROOF over a name node's
+   WebSocket line protocol (name-config.js) -> verified with the ONE shared
+   verifier (resolve-name.js; vendor/dense-wire/flx-domain-proof.mjs) against the
+   pinned genesis key -> the record's ipfs_cid target -> GET
+   /explorer/v1/content/<cid> (same-origin) -> decode with flx-codec's
+   decodeArchiveAsync (vendored at ./vendor/flx-codec/, see that directory's
+   VENDORED-FROM.txt) -> render.
+
+   Names come only from dense-wire (docs/DEFXN-NAMES-ONE-SYSTEM.md). Until
+   2026-10-23 this shell read the Explorer `names` source (GUN names/*) and
+   checked a self-signed record; that registry is retired and is not a fallback.
+   A proof that does not verify is refused by name; a name the chain does not
+   hold is "no such name", with the remedy.
 
    This renders ONE plain, minimal default template for whatever "flux-chain-
    site/1" archive resolves — it is deliberately not styled like defxn.com's
@@ -19,21 +27,19 @@
    (name a few distinct reasons an honest "nothing here" page can mean, never
    a blank page or a bare 404), reused rather than copied because that file's
    failure set is for a different content shape (dense-encoding-v4 CMS posts)
-   entirely. This shell verifies the name record's Ed25519 signature
-   client-side (verify-name-record.js, a browser-safe port of bundle-deploy's
-   validators) before trusting anything it points at -- closed 2026-10-04.
-   The explorer API is read-only infrastructure, not a trust authority:
-   without this check a misbehaving node could point a name at arbitrary
-   content and this shell would render it. */
+   entirely. */
 import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
-import { verifyNameRecord } from "./verify-name-record.js";
+import { resolveName as resolveOnChain } from "./resolve-name.js";
+import { NAME_NODES, GENESIS_PUB_HEX } from "./name-config.js";
 
 const SITE_SCHEMA = "flux-chain-site/1";
 
 const FAILURE_MESSAGES = {
-  NAME_NOT_FOUND: "This address has nothing published on it.",
-  NAME_UNRESOLVABLE: "Could not reach the mesh to resolve this address.",
-  SIGNATURE_INVALID: "This address's record exists but its signature does not verify. Refusing to render it.",
+  NAME_NOT_FOUND: "No such name. Nothing is claimed at this address.",
+  NAME_NO_RECORD: "This name has an owner but points nowhere yet.",
+  NAME_UNRESOLVABLE: "No name node answered, so this address cannot be read right now.",
+  PROOF_INVALID: "The name node sent an ownership proof that does not verify. This page refuses to render what it points at.",
+  GATEWAY_NOT_CONFIGURED: "This gateway has no genesis key pinned, so it cannot verify any name.",
   CONTENT_UNREACHABLE: "This site's content is not reachable right now.",
   CONTENT_TOO_LARGE: "This site's content is larger than the public gateway will serve.",
   CONTENT_MALFORMED: "This site's content could not be read as a mesh site archive.",
@@ -79,40 +85,7 @@ function renderStatus(reason, detail) {
 }
 
 async function resolveName(name) {
-  let response;
-  try {
-    response = await fetch("/explorer/v1/query", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ sourceId: "names", scope: { name } }),
-    });
-  } catch (error) {
-    return { ok: false, reason: "NAME_UNRESOLVABLE", detail: error.message };
-  }
-  if (!response.ok) {
-    return { ok: false, reason: "NAME_UNRESOLVABLE", detail: `Explorer API returned ${response.status}.` };
-  }
-  let payload;
-  try {
-    payload = await response.json();
-  } catch (error) {
-    return { ok: false, reason: "NAME_UNRESOLVABLE", detail: "Malformed Explorer API response." };
-  }
-  // See ask-server.mjs's matching comment: the live Explorer API nests the
-  // real name record at records[0].fields.sourceRecord, not records[0].record
-  // (ark-gateway's name-sources.ts documents the latter, but that is stale
-  // relative to what this fleet actually runs -- verified live 2026-10-03).
-  const record = payload?.data?.records?.[0]?.fields?.sourceRecord;
-  if (!record) return { ok: false, reason: "NAME_NOT_FOUND" };
-  let verified;
-  try {
-    verified = await verifyNameRecord(record);
-  } catch (error) {
-    return { ok: false, reason: "SIGNATURE_INVALID", detail: error.message };
-  }
-  if (!verified) return { ok: false, reason: "SIGNATURE_INVALID" };
-  if (verified.name !== name) return { ok: false, reason: "SIGNATURE_INVALID", detail: `Record is signed for ${verified.name}, not ${name}.` };
-  return { ok: true, record: verified };
+  return resolveOnChain({ name, nodes: NAME_NODES, genesisPubHex: GENESIS_PUB_HEX });
 }
 
 async function fetchContent(cid) {
@@ -315,8 +288,9 @@ async function main() {
   const resolved = await resolveName(name);
   if (!resolved.ok) return renderStatus(resolved.reason, resolved.detail);
 
-  const target = (resolved.record.targets || []).find((t) => t.type === "ipfs_cid");
-  if (!target) return renderStatus("NAME_NOT_FOUND", "This name has no published content target.");
+  if (!resolved.record) return renderStatus("NAME_NO_RECORD", `Point ${name} at a site at https://domains.defxn.com.`);
+  const target = resolved.record.targets.find((t) => t.type === "ipfs_cid");
+  if (!target) return renderStatus("NAME_NO_RECORD", `${name} points at ${resolved.record.targets.map((t) => t.type).join(", ")}, not at a site archive (ipfs_cid).`);
 
   const content = await fetchContent(target.value);
   if (!content.ok) return renderStatus(content.reason, content.detail);
