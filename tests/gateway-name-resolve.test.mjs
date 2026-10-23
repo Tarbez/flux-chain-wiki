@@ -1,6 +1,6 @@
 /* The *.defxn.com gateway shell reads a name from dense-wire and nothing else. Each case is a
    way a node or the deployment could mislead a visitor, and what the page must show instead:
-   a verified proof renders its ipfs_cid target; "no such name" names the remedy (claim it);
+   a verified proof renders its blake3_cid target; "no such name" names the remedy (claim it);
    a bad proof is refused by name and never rendered; no genesis key pinned renders nothing. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -8,7 +8,7 @@ import { resolveName, askDomainProof } from '../gateway/resolve-name.js';
 import { signer, buildProof, answers, tamper } from './lib/dense-wire-proof.mjs';
 
 const FQDN = 'site.fxn';
-const TARGETS = [{ type: 'ipfs_cid', value: 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi' }];
+const TARGETS = [{ type: 'blake3_cid', value: '6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85' }];
 const genesis = signer();
 let proof;
 test.before(async () => { proof = await buildProof({ fqdn: FQDN, genesis, targets: TARGETS }); });

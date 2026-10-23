@@ -16,6 +16,8 @@ export const DOMAIN_KIND_XFER2 = "KDOMXFER2";
 export const DOMAIN_KIND_BUY = "KDOMBUY1";
 export const RECORD_GENESIS_PREV = "0".repeat(64);
 export const RESOLVER_KIND_LAUNCH = "KRESOLV1";
+/** Round four (r4a): a backed launch's `KCHAIN1` (`chain::chain_launch`). */
+export const CHAIN_KIND_LAUNCH = "KCHAIN1";
 export const RESOLVER_KIND_UPGRADE = "KRESOLVUP1";
 export const CAPABILITY_KIND_LAUNCH = "KCAP1";
 export const CAPABILITY_KIND_UPGRADE = "KCAPUP1";
@@ -139,11 +141,10 @@ export function curveSwapLine(chainId, text, terms, delegationCert = "") {
 
 /** Wave 3H/WP11 — the `SWAP` line for a graduated pool, the same fields as
  *  `CURVE_SWAP` (`chain_server::swap_reply`): field 9 the Terms V2 fund
- *  credit, field 10 (V3 only) `maxFee`. Note: the node's `SWAP` handler
- *  reads field 9 and no field 10 (dense-wire 473a69c), so a V3 pool line
- *  is built faithfully here but the node rebuilds V2 terms from it and
- *  refuses the commitment; a backed launch's pool trades V2 until the
- *  node reads field 10 there. */
+ *  credit, field 10 (V3 only) `maxFee`. Since round two's merge (e167065)
+ *  the node's `SWAP` reads field 10 (`terms_max_fee_field`, the one parser
+ *  `CURVE_SWAP` uses): a fee-charging launch's pool admits V3 only, and a
+ *  V2 pool intent there is refused `TermsV2FeeLaunch`. */
 export function poolSwapLine(chainId, text, terms, delegationCert = "") {
   return swapLine("SWAP", chainId, text, terms, delegationCert);
 }
@@ -284,9 +285,11 @@ export async function buildDomainClaimWithSigner({ signer, pos, prevCid, fqdn, n
   return signDomainEntry(signer, body);
 }
 
-/** The nine record target types and their one-letter codes (Rust
+/** The ten record target types and their one-letter codes (Rust
  *  `name_records::TargetType`). A code is uppercase so it can never read as
- *  the lowercase hex that follows it in its box. */
+ *  the lowercase hex that follows it in its box. `blake3_cid` points a name
+ *  at content in the byte store: the BLAKE3 hash of the bytes, its content
+ *  ID, carried as its own 64 lowercase hex (`B<64 hex>`), not as text. */
 export const TARGET_TYPES = Object.freeze([
   { type: "ipns", code: "I" },
   { type: "ipfs_cid", code: "P" },
@@ -297,6 +300,7 @@ export const TARGET_TYPES = Object.freeze([
   { type: "dns_cname", code: "C" },
   { type: "dns_mx", code: "M" },
   { type: "dns_txt", code: "T" },
+  { type: "blake3_cid", code: "B" },
 ]);
 const TARGET_BY_TYPE = new Map(TARGET_TYPES.map((t) => [t.type, t]));
 const TARGET_BY_CODE = new Map(TARGET_TYPES.map((t) => [t.code, t]));
@@ -334,16 +338,21 @@ export function validateTargetValue(type, value) {
       return 'dns_mx value must be "<priority> <hostname>", e.g. "10 mail.example.com"';
     }
   }
+  if (type === "blake3_cid" && !/^[0-9a-f]{64}$/.test(value)) {
+    return "blake3_cid value must be the content ID: 64 lowercase hex characters (the BLAKE3 hash of the bytes)";
+  }
   return null;
 }
 
 /** One target's C box payload: its code, then the value's padded
- *  hex-of-utf8 (Rust `name_records::encode_target`). */
+ *  hex-of-utf8, or for `blake3_cid` the content ID's own 64 hex (Rust
+ *  `name_records::encode_target`). */
 export function encodeTarget({ type, value }) {
   const why = validateTargetValue(type, value);
   if (why) {
     throw new Error(`That record target is not valid. Missing: ${why}. To fix: correct the ${type} value and build the record again.`);
   }
+  if (type === "blake3_cid") return TARGET_BY_TYPE.get(type).code + value;
   return TARGET_BY_TYPE.get(type).code + encodePriceField(value);
 }
 
@@ -352,8 +361,13 @@ export function encodeTarget({ type, value }) {
  *  and carry only the canonical padding. Throws with the reason otherwise. */
 export function decodeTarget(boxPayload) {
   const entry = TARGET_BY_CODE.get(boxPayload?.[0]);
-  if (!entry) throw new Error(`target code ${JSON.stringify(boxPayload?.[0])} is not one of A Q C M T I P H R`);
+  if (!entry) throw new Error(`target code ${JSON.stringify(boxPayload?.[0])} is not one of A Q C M T I P H R B`);
   const hex = boxPayload.slice(1);
+  if (entry.type === "blake3_cid") {
+    const why = validateTargetValue(entry.type, hex);
+    if (why) throw new Error(why);
+    return { type: entry.type, value: hex };
+  }
   let value;
   try {
     value = decodePriceField(hex);
@@ -544,10 +558,10 @@ export async function buildDomainPurchaseWithSigner({ signer, pos, prevCid, fqdn
  *  roster/K-of-N mechanism every other identity already uses.
  *
  *  `providerSetCid`/`speedParamsCid` must already be published blobs
- *  (`BLOB_PUT`) — `["<pubkey hex>", ...]` and
- *  `{"requiredK":N,"segmentIntervalSecs":N,"maxLinesPerSegment":N}`
- *  respectively, mirroring `chain_registry::parse_provider_set` /
- *  `parse_resolver_speed_params`.
+ *  (`BLOB_PUT`) — `FLX-PROVIDER-SET-V1` and `FLX-SPEED-PARAMS-V1`
+ *  lines (`renderProviderSet` / `renderSpeedParams` in `flx-launch-blobs.mjs`;
+ *  JSON launches on chain still read), mirroring
+ *  `chain_registry::parse_provider_set` / `parse_resolver_speed_params`.
  *
  *  Phase 0 (global resolvers) — `offerManifestCid`/`grammarManifestCid`
  *  must also already be published blobs (`flux.resolver-offer-
@@ -603,6 +617,86 @@ export function resolverLaunchBody({
     `-W${w}-J${pos}-C${prevCid}-C${providerSetCid}-C${speedParamsCid}` +
     `-C${offerManifestCid}-C${grammarManifestCid}-C${controlKeyHex}`
   );
+}
+
+/** Round four (r4a) — the unsigned `KCHAIN1` body, byte for byte the Rust
+ *  `chain::chain_launch` (pinned on both sides:
+ *  `chain::tests::chain_launch_body_is_pinned_for_js_parity` and
+ *  builders.test.mjs). A backed launch: the carrier chain carries it, the
+ *  new chain's genesis is the eight content addresses and keys in this
+ *  order -- the stake it is backed by, the provider set, the speed
+ *  params, the token spec, the split resolver (the program a forfeit is
+ *  routed by), then the bond escrow, the insurance pool and the treasury
+ *  keys. `admit()` checks the structure; whether the stake is large
+ *  enough is the node's launch policy, never decided here. */
+const HEX64 = /^[0-9a-f]{64}$/;
+export function chainLaunchBody({
+  pubHex,
+  pos,
+  prevCid,
+  carrierChainId,
+  newChainId,
+  stakeCid,
+  providerSetCid,
+  speedParamsCid,
+  tokenSpecCid,
+  splitResolverCid,
+  bondEscrowKey,
+  insurancePoolKey,
+  treasuryKey,
+  nowSec,
+}) {
+  if (!isChainIdShape(carrierChainId)) {
+    throw new Error(
+      `That carrier chain-id is not addressable. ` +
+        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(carrierChainId)}). ` +
+        `To fix: pass the chain-id that actually carries this launch record.`,
+    );
+  }
+  if (!isChainIdShape(newChainId)) {
+    throw new Error(
+      `That new chain-id is not addressable. ` +
+        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(newChainId)}). ` +
+        `To fix: choose a chain-id matching [a-z0-9]{3,32}.`,
+    );
+  }
+  if (newChainId === carrierChainId) {
+    throw new Error(
+      `A ChainLaunch cannot be carried by the chain it creates. ` +
+        `Missing: a carrier chain-id different from ${newChainId}. ` +
+        `To fix: carry the launch on the base chain (defxn) or another existing chain.`,
+    );
+  }
+  const fields = { stakeCid, providerSetCid, speedParamsCid, tokenSpecCid, splitResolverCid, bondEscrowKey, insurancePoolKey, treasuryKey };
+  for (const [name, value] of Object.entries(fields)) {
+    if (!HEX64.test(String(value ?? ""))) {
+      throw new Error(
+        `The launch's ${name} is not a content address or key. ` +
+          `Missing: 64 lowercase hex characters (got ${JSON.stringify(value)}). ` +
+          `To fix: BLOB_PUT the descriptor and pass the CID the node returned, or pass the holder's 64-hex public key.`,
+      );
+    }
+  }
+  const h = hexOfUtf8(pubHex);
+  const w = hexOfUtf8(newChainId);
+  return (
+    `G${pubHex}-YLEDGERENTRY-V1-M${nowSec}-H${h}-N${carrierChainId}-K${CHAIN_KIND_LAUNCH}-W${w}-J${pos}` +
+    `-C${prevCid}-C${stakeCid}-C${providerSetCid}-C${speedParamsCid}-C${tokenSpecCid}-C${splitResolverCid}` +
+    `-C${bondEscrowKey}-C${insurancePoolKey}-C${treasuryKey}`
+  );
+}
+
+export async function buildChainLaunch({ privateKey, ...rest }) {
+  const body = chainLaunchBody(rest);
+  const sig = await signHex(privateKey, body);
+  return `${body}-S${sig}`;
+}
+
+/** The same record for an Auth-Kit-shaped signer (`{pubHex, signText}`). */
+export async function buildChainLaunchWithSigner({ signer, ...rest }) {
+  const body = chainLaunchBody({ pubHex: signer.pubHex, ...rest });
+  const sig = await signer.signText(body);
+  return `${body}-S${sig}`;
 }
 
 export async function buildResolverLaunch({ privateKey, ...rest }) {
@@ -750,7 +844,7 @@ export function capabilityLaunchBody({
     throw new Error(
       `That capability manifest CID is not addressable. ` +
         `Missing: 64 lowercase hex chars (got ${JSON.stringify(manifestCid)}). ` +
-        `To fix: BLOB_PUT the flx-capability-manifest/1 document first and pass the CID the node returned.`,
+        `To fix: BLOB_PUT_HEX the FLX-CAPABILITY-MANIFEST-V1 text first and pass the CID the node returned.`,
     );
   }
   if (!isCapabilityControlField(controlField)) {
@@ -817,7 +911,7 @@ export function capabilityUpgradeBody({
     throw new Error(
       `That new capability manifest CID is not addressable. ` +
         `Missing: 64 lowercase hex chars (got ${JSON.stringify(newManifestCid)}). ` +
-        `To fix: BLOB_PUT the new flx-capability-manifest/1 document first and pass the CID the node returned.`,
+        `To fix: BLOB_PUT_HEX the new FLX-CAPABILITY-MANIFEST-V1 text first and pass the CID the node returned.`,
     );
   }
   if (!/^[0-9a-f]{64}$/.test(supersedesCid ?? "")) {
@@ -850,14 +944,20 @@ export async function buildCapabilityUpgradeWithSigner({ signer, ...rest }) {
   return `${body}-S${sig}`;
 }
 
-/** Build and sign a resolver's own generic `ResolverRecord` (Phase 0,
- *  global resolvers). Mirrors the Rust `chain::resolver_record` byte for
+/** The unsigned body of a resolver's own generic `ResolverRecord` (Phase
+ *  0, global resolvers). Mirrors the Rust `chain::resolver_record` byte for
  *  byte. `kindMarker` is whatever `K` value the resolver itself invented
  *  for this record kind — dense-wire never inspects it beyond admitting
  *  the grammar; it must contain no `-` (the grammar's only delimiter).
- *  `inlinePayload` is free text, carried as hex-of-UTF-8 in `C[1]`. */
-export async function buildResolverRecord({
-  privateKey,
+ *  `inlinePayload` is free text, carried as hex-of-UTF-8 in `C[1]`.
+ *
+ *  Wave 4M: one body function for both signers, so the body a browser
+ *  shows in its review dialog is the body that is signed — the same
+ *  preview-then-sign split `resolverLaunchBody` gives the launch panel.
+ *  `buildResolverRecord` (a WebCrypto `CryptoKey`, Node processes) and
+ *  `buildResolverRecordWithSigner` (the Auth Kit bridge, the deployer)
+ *  both call it. */
+export function resolverRecordBody({
   pubHex,
   pos,
   prevCid,
@@ -875,11 +975,58 @@ export async function buildResolverRecord({
   }
   const h = hexOfUtf8(pubHex);
   const payloadHex = hexOfUtf8(inlinePayload);
-  const body =
+  return (
     `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-N${resolverChainId}-K${kindMarker}` +
-    `-J${pos}-C${prevCid}-C${payloadHex}`;
+    `-J${pos}-C${prevCid}-C${payloadHex}`
+  );
+}
+
+/** Build and sign a resolver's own generic `ResolverRecord` with a
+ *  WebCrypto `CryptoKey` — see [`resolverRecordBody`]. */
+export async function buildResolverRecord({ privateKey, ...rest }) {
+  const body = resolverRecordBody(rest);
   const sig = await signHex(privateKey, body);
   return `${body}-S${sig}`;
+}
+
+/** Auth-Kit-signer sibling of `buildResolverRecord` (`{pubHex, signText}`,
+ *  `flx-identity-bridge.mjs`) — the deployer's path: the browser signs,
+ *  the page never holds a key. Byte-identical to `buildResolverRecord`
+ *  for the same key (Ed25519 is deterministic). */
+export async function buildResolverRecordWithSigner({ signer, ...rest }) {
+  const body = resolverRecordBody({ pubHex: signer.pubHex, ...rest });
+  const sig = await signer.signText(body);
+  return `${body}-S${sig}`;
+}
+
+/** Round three (r3u) — a launch's fee claim (`fee_account.rs`, wave 3E/4; D8). The kind marker of the record and the
+ *  magic of its body (`KIND_FEE_CLAIM`, `FEE_CLAIM_BODY_MAGIC`). */
+export const FEE_CLAIM_KIND = "KFEECLM1";
+export const FEE_CLAIM_BODY_MAGIC = "FLX-FEE-CLAIM-V1";
+/** The five fee accounts a claim may name (`flx_cap_custody::FeeAccount::tag`). */
+const FEE_CLAIM_ACCOUNTS = Object.freeze(["mm", "lp", "venue-providers", "venue-insurance", "venue-treasury"]);
+
+/** `FeeClaimBody::render`: `FLX-FEE-CLAIM-V1 TAB chain TAB account TAB credit,credit,...` — the claim names exactly the
+ *  credits it takes (matured FXN fee credits of that account, or for `lp` the token fee entries
+ *  `sha256("fill-fee-tokens:" + result CID)`); nothing is chosen for it. Refuses, by name, what `FeeClaimBody::parse`
+ *  refuses, so a body the node would not read is never signed. */
+export function feeClaimBody({ chainId, account, credits }) {
+  const need = `${FEE_CLAIM_BODY_MAGIC} TAB chain TAB account (mm, lp, venue-providers, venue-insurance, venue-treasury) TAB comma-joined fee credit CIDs`;
+  if (!isChainIdShape(chainId)) throw new Error(`'${chainId}' is not a chain id. Missing: 3-32 lowercase alphanumeric characters (${need}). To fix: claim on the chain whose fees it takes`);
+  if (!FEE_CLAIM_ACCOUNTS.includes(account)) throw new Error(`'${account}' is not a fee account. Missing: one of mm, lp, venue-providers, venue-insurance, venue-treasury. To fix: name the account FEE_ACCOUNT lists the credits in`);
+  if (!Array.isArray(credits) || credits.length === 0) throw new Error("the fee claim names no credit. Missing: the matured fee credit CIDs it takes. To fix: list the account's credits (MANIFEST_CREDITS of its holder) and name those whose hold has ended");
+  for (const c of credits) {
+    if (!/^[0-9a-f]{64}$/.test(String(c))) throw new Error(`'${c}' is not a 64-hex credit CID. Missing: ${need}. To fix: name credits exactly as MANIFEST_CREDITS lists them`);
+  }
+  return `${FEE_CLAIM_BODY_MAGIC}\t${chainId}\t${account}\t${credits.join(",")}`;
+}
+
+/** `fee_account::fee_claim_record`: the claim as a `ResolverRecord` on the launched chain (`N` = the chain,
+ *  `K` = KFEECLM1, `C[1]` = hex of the body), signed by the CLAIMANT at its own holder position (`pos`, `prevCid` its
+ *  head). The body is checked before the signer is asked. Its CID (`cidOf(text)`) is what `FEE_CLAIM_OK` names. */
+export async function buildFeeClaimWithSigner({ signer, pos, prevCid, chainId, account, credits, nowSec }) {
+  const inlinePayload = feeClaimBody({ chainId, account, credits });
+  return buildResolverRecordWithSigner({ signer, pos, prevCid, resolverChainId: chainId, kindMarker: FEE_CLAIM_KIND, inlinePayload, nowSec });
 }
 
 /** Build and sign a KPRV1 provider announce (Phase B.1 / Phase 2 global
@@ -933,7 +1080,7 @@ export async function buildProviderAnnounce({
  *
  *  Mirrors the Rust `chain::acl_evidence` byte for byte. ACR's own record
  *  kind: `aclGrantJson` is the grant's canonical JSON (`{acl, sig}` from
- *  `flux-auth`'s `createAcl`/`signAcl`), hex-of-utf8-encoded and carried
+ *  `fxn-auth`'s `createAcl`/`signAcl`), hex-of-utf8-encoded and carried
  *  inline in `C[1]` — never behind a second content-store CID. This
  *  record's own signature only proves ACR's own chain wrote the entry;
  *  the grant's inner `sig` is verified separately by

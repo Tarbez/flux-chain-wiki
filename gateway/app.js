@@ -6,10 +6,11 @@
    Flow: location.hostname -> "<label>.fxn" -> DOM_PROOF over a name node's
    WebSocket line protocol (name-config.js) -> verified with the ONE shared
    verifier (resolve-name.js; vendor/dense-wire/flx-domain-proof.mjs) against the
-   pinned genesis key -> the record's ipfs_cid target -> GET
-   /explorer/v1/content/<cid> (same-origin) -> decode with flx-codec's
-   decodeArchiveAsync (vendored at ./vendor/flx-codec/, see that directory's
-   VENDORED-FROM.txt) -> render.
+   pinned genesis key -> the record's blake3_cid target -> GET
+   /fxn-store/v1/<cid> (same-origin, answered from the node's byte store) ->
+   refused unless the bytes hash to that ID (content.js) -> decode with
+   flx-codec's decodeArchiveAsync (vendored at ./vendor/flx-codec/, see that
+   directory's VENDORED-FROM.txt) -> render.
 
    Names come only from dense-wire (docs/DEFXN-NAMES-ONE-SYSTEM.md). Until
    2026-10-23 this shell read the Explorer `names` source (GUN names/*) and
@@ -30,9 +31,12 @@
    entirely. */
 import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
 import { resolveName as resolveOnChain } from "./resolve-name.js";
+import { fetchVerifiedContent } from "./content.js";
 import { NAME_NODES, GENESIS_PUB_HEX } from "./name-config.js";
 
 const SITE_SCHEMA = "flux-chain-site/1";
+/* What Bundles packs from a plain folder (bundle-deploy src/folder-archive.js). Not rendered yet. */
+const FOLDER_SITE_SCHEMA = "flux-folder-site/1";
 
 const FAILURE_MESSAGES = {
   NAME_NOT_FOUND: "No such name. Nothing is claimed at this address.",
@@ -43,6 +47,7 @@ const FAILURE_MESSAGES = {
   CONTENT_UNREACHABLE: "This site's content is not reachable right now.",
   CONTENT_TOO_LARGE: "This site's content is larger than the public gateway will serve.",
   CONTENT_MALFORMED: "This site's content could not be read as a mesh site archive.",
+  CONTENT_MISMATCH: "This site's content does not match the address its name points at, so this page refuses to show it.",
   SCHEMA_UNSUPPORTED: "This mesh name does not point at a site this gateway knows how to render.",
 };
 
@@ -86,25 +91,6 @@ function renderStatus(reason, detail) {
 
 async function resolveName(name) {
   return resolveOnChain({ name, nodes: NAME_NODES, genesisPubHex: GENESIS_PUB_HEX });
-}
-
-async function fetchContent(cid) {
-  let response;
-  try {
-    response = await fetch(`/explorer/v1/content/${encodeURIComponent(cid)}`);
-  } catch (error) {
-    return { ok: false, reason: "CONTENT_UNREACHABLE", detail: error.message };
-  }
-  if (response.status === 404) return { ok: false, reason: "CONTENT_UNREACHABLE", detail: "Not marked public, or not pinned by this node." };
-  if (response.status === 413) return { ok: false, reason: "CONTENT_TOO_LARGE" };
-  if (!response.ok) return { ok: false, reason: "CONTENT_UNREACHABLE", detail: `Explorer API returned ${response.status}.` };
-  let bytes;
-  try {
-    bytes = new Uint8Array(await response.arrayBuffer());
-  } catch (error) {
-    return { ok: false, reason: "CONTENT_UNREACHABLE", detail: error.message };
-  }
-  return { ok: true, bytes };
 }
 
 function decodeSite(decoded) {
@@ -289,10 +275,10 @@ async function main() {
   if (!resolved.ok) return renderStatus(resolved.reason, resolved.detail);
 
   if (!resolved.record) return renderStatus("NAME_NO_RECORD", `Point ${name} at a site at https://domains.defxn.com.`);
-  const target = resolved.record.targets.find((t) => t.type === "ipfs_cid");
-  if (!target) return renderStatus("NAME_NO_RECORD", `${name} points at ${resolved.record.targets.map((t) => t.type).join(", ")}, not at a site archive (ipfs_cid).`);
+  const target = resolved.record.targets.find((t) => t.type === "blake3_cid");
+  if (!target) return renderStatus("NAME_NO_RECORD", `${name} points at ${resolved.record.targets.map((t) => t.type).join(", ")}, not at a site in the byte store (blake3_cid). Publish the site with Bundles, then point ${name} at its content ID at https://domains.defxn.com.`);
 
-  const content = await fetchContent(target.value);
+  const content = await fetchVerifiedContent(target.value);
   if (!content.ok) return renderStatus(content.reason, content.detail);
 
   let decoded;
@@ -303,7 +289,11 @@ async function main() {
   }
 
   const site = decodeSite(decoded);
-  if (!site) return renderStatus("SCHEMA_UNSUPPORTED");
+  if (!site) {
+    const schema = (decoded.routes || []).find((route) => route.routeId === "site")?.payload?.schema;
+    if (schema === FOLDER_SITE_SCHEMA) return renderStatus("SCHEMA_UNSUPPORTED", "This name points at a site packed from a folder. This gateway shows only sites published from the defxn editor so far.");
+    return renderStatus("SCHEMA_UNSUPPORTED");
+  }
   if (!site.manifests.length) return renderStatus("CONTENT_MALFORMED", "The site archive lists no pages.");
 
   renderSite(site);

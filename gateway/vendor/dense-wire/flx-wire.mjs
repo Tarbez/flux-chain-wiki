@@ -137,12 +137,16 @@ export const FEE_ACCOUNTS = Object.freeze(["mm", "lp", "venue-providers", "venue
 
 /** `FEE_ACCOUNT<TAB><chain><TAB><account>` -> `FEE_ACCOUNT TAB chain TAB account TAB holder TAB held TAB claimable TAB
  *  credits TAB next maturity|- TAB rule:<legs>|none:<why> TAB pool-kept token0,token1|- TAB now TAB
- *  tokens:<held>:<claimable>:<entries>|-` (`fee_account.rs`, `FeeAccountView::line`, wave 4). `held`/`claimable` are
+ *  tokens:<held>:<claimable>:<entries>:(rule:<legs>|none)|-` (`fee_account.rs`, `FeeAccountView::line`, wave 4; the
+ *  token side's own rule, round three). `held`/`claimable` are
  *  measured sums (a real 0 when the account holds nothing). The rule is who a claim pays, decided by the launch's
  *  records (`FeeRecipients::rule_line`): legs `role:holder:bps`, the holder a key, `waits` (the treasury's share
  *  while no DAO key is bound) or, for `providers`, the size of the provider set the share divides among; or null with
  *  `noRule` the node's reason. `poolKept` (lp only, on a migrated launch) is what the pool's math kept and custody has
- *  not yet received; `tokens` (lp only) the account's TOKEN side, a pool sell's tier fee held in the native ledger. */
+ *  not yet received; `tokens` (lp only) the account's TOKEN side, a pool sell's tier fee held in the native ledger,
+ *  with `tokens.rule` the legs a token claim pays (owner, seventh round: the insurance leg weighs 0 and a token fee is
+ *  divided over the other legs' weights; checked to be the account's own rule with insurance at 0), or null when this
+ *  node holds no recipients. */
 export function parseFeeAccountReply(reply) {
   const line = firstLines(reply)[0] ?? "";
   const f = line.split("\t");
@@ -152,13 +156,14 @@ export function parseFeeAccountReply(reply) {
   if (!FEE_ACCOUNTS.includes(account)) return unreadable(`'${account}' is not a fee account`, line);
   if (!KEY64.test(holder) || !WHOLE.test(held) || !WHOLE.test(claimable) || !WHOLE.test(credits) || !WHOLE.test(now)) return unreadable("a FEE_ACCOUNT field is not a key or a whole number", line);
   if (next !== "-" && !/^-?\d+$/.test(next)) return unreadable("the next maturity is not a time or -", line);
+  const legsOf = (text) => text.split(",").map((leg) => {
+    const [role, legHolder, bps, extra] = leg.split(":");
+    const holderOk = role === "providers" ? WHOLE.test(legHolder ?? "") : KEY64.test(legHolder ?? "") || (role === "treasury" && legHolder === "waits");
+    return extra === undefined && holderOk && WHOLE.test(bps ?? "") ? { role, holder: legHolder, bps: Number(bps) } : null;
+  });
   let rule = null;
   if (who.startsWith("rule:")) {
-    rule = who.slice("rule:".length).split(",").map((leg) => {
-      const [role, legHolder, bps, extra] = leg.split(":");
-      const holderOk = role === "providers" ? WHOLE.test(legHolder ?? "") : KEY64.test(legHolder ?? "") || (role === "treasury" && legHolder === "waits");
-      return extra === undefined && holderOk && WHOLE.test(bps ?? "") ? { role, holder: legHolder, bps: Number(bps) } : null;
-    });
+    rule = legsOf(who.slice("rule:".length));
     if (rule.some((l) => l === null)) return unreadable("the rule is not role:holder:bps legs", line);
     if (rule.reduce((sum, l) => sum + l.bps, 0) !== 10_000) return unreadable("the rule's shares do not sum to 10000 bps", line);
   } else if (!who.startsWith("none:")) {
@@ -166,8 +171,20 @@ export function parseFeeAccountReply(reply) {
   }
   const keptM = /^(\d+),(\d+)$/.exec(kept);
   if (kept !== "-" && !keptM) return unreadable("pool-kept is not token0,token1 or -", line);
-  const tokensM = /^tokens:(\d+):(\d+):(\d+)$/.exec(tokens);
-  if (tokens !== "-" && !tokensM) return unreadable("the token side is not tokens:held:claimable:entries or -", line);
+  // Round three (owner, seventh round): the token side carries its own rule, `rule:<legs>` (the account's rule with the
+  // insurance leg at 0: insurance takes nothing from a fee paid in the launch's own token) or `none` (no recipients here).
+  const tokensM = /^tokens:(\d+):(\d+):(\d+):(none|rule:(.+))$/.exec(tokens);
+  if (tokens !== "-" && !tokensM) return unreadable("the token side is not tokens:held:claimable:entries:rule:<legs>|none or -", line);
+  let tokenRule = null;
+  if (tokensM && tokensM[5] !== undefined) {
+    tokenRule = legsOf(tokensM[5]);
+    if (tokenRule.some((l) => l === null)) return unreadable("the token side's rule is not role:holder:weight legs", line);
+    const same = rule && rule.length === tokenRule.length && rule.every((l, i) => {
+      const t = tokenRule[i];
+      return t.role === l.role && t.holder === l.holder && t.bps === (l.role === "insurance" ? 0 : l.bps);
+    });
+    if (!same) return unreadable("the token side's rule is not the account's rule with the insurance leg at 0", line);
+  }
   if (BigInt(claimable) > BigInt(held)) return unreadable("claimable is above held", line);
   if (tokensM && BigInt(tokensM[2]) > BigInt(tokensM[1])) return unreadable("the token side's claimable is above its held", line);
   return {
@@ -176,7 +193,7 @@ export function parseFeeAccountReply(reply) {
     rule, noRule: rule ? null : who.slice("none:".length),
     poolKept: keptM ? { token0: BigInt(keptM[1]), token1: BigInt(keptM[2]) } : null,
     now: Number(now),
-    tokens: tokensM ? { held: BigInt(tokensM[1]), claimable: BigInt(tokensM[2]), entries: Number(tokensM[3]) } : null,
+    tokens: tokensM ? { held: BigInt(tokensM[1]), claimable: BigInt(tokensM[2]), entries: Number(tokensM[3]), rule: tokenRule } : null,
   };
 }
 
@@ -202,6 +219,37 @@ export function parseInsuranceAccountReply(reply) {
   const live = credits.filter((c) => c.status.kind === "live").reduce((s, c) => s + c.amount, 0n);
   if (live !== BigInt(head[3])) return unreadable(`live ${head[3]} is not the sum of the live rows (${live})`, lines[0]);
   return { kind: "insurance", chainId: head[1], holder: head[2], live, credits };
+}
+
+/** Round three (r3u) — `FEE_CLAIM<TAB><signed KFEECLM1 record>` (`chain_server.rs` `fee_claim_reply`, `fill_record.rs`
+ *  `note_claim_outcome`) -> `FEE_CLAIM_OK TAB record cid TAB claimed TAB amount TAB role:holder:amount:credit,...`: the
+ *  claim was applied and EVERY recipient of the account was paid its share by rule, one custody credit per payee (role
+ *  `key`, `insurance`, or `waits:<account>` for a share held in another fee account until its recipient can be paid,
+ *  e.g. the treasury's share while no DAO key is bound); the legs must sum to the amount. Or `… TAB pending TAB why`
+ *  (a named credit is not folded here yet; retried after the next fold), `… TAB refused TAB why` (custody refused it
+ *  for good; nothing moved), `… TAB admitted; not applied on this node yet`, `FEE_CLAIM_ERR TAB failure TAB missing TAB
+ *  remedy` (refused before it took a chain position) or `ERR TAB class TAB …`. Only `claimed` is a payment. */
+export function parseFeeClaimReply(reply) {
+  const line = firstLines(reply)[0] ?? "";
+  const f = line.split("\t");
+  if (f[0] === "FEE_CLAIM_ERR") return f.length === 4 ? refusalOf(f.slice(1)) : unreadable("a FEE_CLAIM_ERR line has failure, missing and remedy", line);
+  if (f[0] === "ERR") return { ...refusalOf(f.slice(2)), class: f[1] };
+  if (f[0] !== "FEE_CLAIM_OK" || !KEY64.test(f[1] ?? "") || f.length < 3) return unreadable("not a FEE_CLAIM_OK line", line);
+  const recordCid = f[1];
+  const outcome = { kind: "claim", recordCid, amount: null, legs: [], why: null };
+  if (f[2] === "pending" || f[2] === "refused") return f.length === 4 ? { ...outcome, state: f[2], why: f[3] } : unreadable(`a ${f[2]} claim names why`, line);
+  if (f[2] !== "claimed") return f.length === 3 ? { ...outcome, state: "admitted", why: f[2] } : unreadable("not a claim outcome", line);
+  if (f.length !== 5 || !WHOLE.test(f[3])) return unreadable("a claimed outcome is claimed TAB amount TAB legs", line);
+  const roles = /^(key|insurance|waits:(?:mm|lp|venue-providers|venue-insurance|venue-treasury))$/;
+  const legs = f[4].split(",").map((text) => {
+    const m = /^(.+):([0-9a-f]{64}):(\d+):([0-9a-f]{64})$/.exec(text);
+    return m && roles.test(m[1]) ? { role: m[1], holder: m[2], amount: BigInt(m[3]), credit: m[4] } : null;
+  });
+  if (legs.some((l) => l === null)) return unreadable("a claim leg is not role:holder:amount:credit", line);
+  const amount = BigInt(f[3]);
+  const paid = legs.reduce((s, l) => s + l.amount, 0n);
+  if (paid !== amount) return unreadable(`the legs pay ${paid}, the claim names ${amount}`, line);
+  return { ...outcome, state: "claimed", amount, legs };
 }
 
 /** `POOL_UNWIND<TAB><chain>` (Operator) -> `POOL_UNWOUND TAB chain TAB inflow TAB n`, n `REFUND TAB party TAB tokens TAB
@@ -270,6 +318,124 @@ export function parseCreatorVestingReply(reply) {
   };
 }
 
+/** The `mm` modes a launch's economy fixes (D3): one flat rate, the owner's schedule keyed on the share sold, or `none`
+ *  (the launch's economy fixes no fee schedule). */
+export const CURVE_MM_MODES = Object.freeze(["flat", "schedule", "none"]);
+
+/** Round three (r3c) — `CURVE_SOLD<TAB><chain>` -> `CURVE_SOLD TAB chain TAB sold bps TAB mm bps charged now TAB next
+ *  breakpoint bps|- TAB flat|schedule|none` (`chain_server_r3c.rs`, `CurveSold::line`): the share of the curve's
+ *  sellable tokens sold (`BondingCurve::curve_sold_bps`, what the resolver reads before each row), the `mm` rate a row
+ *  pays now, the share at which that rate next changes (`-`: it never changes again, or the mode has no tiers) and the
+ *  launch's own mode. Or `CURVE_SOLD_ERR TAB failure TAB missing TAB remedy` (no such curve, a graduated curve, a
+ *  malformed request). `none` is an answer (the launch charges no `mm`), never a guessed tier; a reply whose fields
+ *  contradict each other (a breakpoint at or below the share sold, a flat or none mode with a breakpoint, a none mode
+ *  charging something) is an error naming why. */
+export function parseCurveSoldReply(reply) {
+  const line = firstLines(reply)[0] ?? "";
+  const f = line.split("\t");
+  if (f[0] === "CURVE_SOLD_ERR") return f.length === 4 ? refusalOf(f.slice(1)) : unreadable("a CURVE_SOLD_ERR line has failure, missing and remedy", line);
+  if (f[0] === "ERR") return { ...refusalOf(f.slice(2)), class: f[1] };
+  if (f[0] !== "CURVE_SOLD" || f.length !== 6) return unreadable("not a CURVE_SOLD line", line);
+  const [, chainId, sold, mm, next, mode] = f;
+  if (chainId === "" || !WHOLE.test(sold) || !WHOLE.test(mm) || (next !== "-" && !WHOLE.test(next))) return unreadable("a CURVE_SOLD field is not a whole number or -", line);
+  if (!CURVE_MM_MODES.includes(mode)) return unreadable(`'${mode}' is not an mm mode (flat, schedule, none)`, line);
+  const soldBps = Number(sold);
+  if (soldBps > 10_000) return unreadable("the share sold is above 10000 bps", line);
+  const nextBreakpointBps = next === "-" ? null : Number(next);
+  if (nextBreakpointBps !== null && (mode !== "schedule" || nextBreakpointBps <= soldBps || nextBreakpointBps > 10_000)) return unreadable("a next breakpoint belongs only to a schedule and lies above the share sold", line);
+  if (mode === "none" && mm !== "0") return unreadable("a launch with no fee schedule charges no mm", line);
+  return { kind: "sold", chainId, soldBps, mmBpsNow: Number(mm), nextBreakpointBps, mode };
+}
+
+/** Round four (r4a) — `TOKEN_FEES<TAB><chain>` -> `TOKEN_FEES TAB chain TAB n TAB hold secs TAB now`, n
+ *  `TOKEN_FEE TAB entry cid TAB result cid TAB earned at TAB matures at TAB tokens TAB open|claimed:<claim cid>` rows
+ *  (earned-at order), `TOKEN_FEES_END TAB chain` (`chain_server_r4a.rs`). Every token LP fee entry the node's lane
+ *  holds for a launch: the entry cid is the name a `FEE_CLAIM` on the lp account uses, so a token-side claim can name
+ *  any held entry, not only those of the results the page saw. `maturesAt` must be `earnedAt + holdSecs`: a row that
+ *  says otherwise is unreadable, never a guessed maturity. */
+export function parseTokenFeesReply(reply) {
+  const lines = firstLines(reply);
+  const head = (lines[0] ?? "").split("\t");
+  if (head[0] === "TOKEN_FEES_ERR") return head.length === 4 ? refusalOf(head.slice(1)) : unreadable("a TOKEN_FEES_ERR line has failure, missing and remedy", lines[0]);
+  if (head[0] === "ERR") return { ...refusalOf(head.slice(2)), class: head[1] };
+  if (head[0] !== "TOKEN_FEES" || head.length !== 5 || head[1] === "" || !WHOLE.test(head[2]) || !WHOLE.test(head[3]) || !WHOLE.test(head[4])) return unreadable("not a TOKEN_FEES head", lines[0]);
+  const [, chainId, count, hold, now] = head;
+  if (lines[lines.length - 1] !== `TOKEN_FEES_END\t${chainId}`) return unreadable("listing without TOKEN_FEES_END", lines[lines.length - 1]);
+  const rows = lines.slice(1, -1);
+  if (rows.length !== Number(count)) return unreadable(`header says ${count} entries, ${rows.length} rows`, lines[0]);
+  const holdSecs = Number(hold);
+  const entries = [];
+  let previous = null;
+  for (const row of rows) {
+    const f = row.split("\t");
+    if (f[0] !== "TOKEN_FEE" || f.length !== 7) return unreadable("not a TOKEN_FEE row", row);
+    const [, entryCid, resultCid, earned, matures, tokens, state] = f;
+    if (!KEY64.test(entryCid) || resultCid === "" || !/^-?\d+$/.test(earned) || !/^-?\d+$/.test(matures) || !WHOLE.test(tokens)) return unreadable("a TOKEN_FEE field is not a cid, a time or a whole number", row);
+    if (Number(matures) !== Number(earned) + holdSecs) return unreadable("the maturity is not the result's clock plus the launch's hold", row);
+    const claimed = /^claimed:(.+)$/.exec(state);
+    if (state !== "open" && !claimed) return unreadable("the state is neither open nor claimed:<claim cid>", row);
+    if (previous !== null && Number(earned) < previous) return unreadable("entries are not in earned-at order", row);
+    previous = Number(earned);
+    entries.push({ entryCid, resultCid, earnedAt: Number(earned), maturesAt: Number(matures), tokens: BigInt(tokens), claimedBy: claimed ? claimed[1] : null });
+  }
+  return { kind: "tokenFees", chainId, holdSecs, now: Number(now), entries };
+}
+
+/** Round four (r4a) — `LAUNCH_PROVIDERS<TAB><chain>` -> `LAUNCH_PROVIDERS TAB chain TAB creator key TAB n`, n
+ *  `LAUNCH_PROVIDER TAB key` rows in the provider-set blob's order (the order the fee rules pay them),
+ *  `LAUNCH_PROVIDERS_END TAB chain`. The launch's GENESIS providers, the keys its venue-providers and lp shares pay;
+ *  `CHAIN_PROVIDERS` answers who is seated and reachable now, a different question. */
+export function parseLaunchProvidersReply(reply) {
+  const lines = firstLines(reply);
+  const head = (lines[0] ?? "").split("\t");
+  if (head[0] === "LAUNCH_PROVIDERS_ERR") return head.length === 4 ? refusalOf(head.slice(1)) : unreadable("a LAUNCH_PROVIDERS_ERR line has failure, missing and remedy", lines[0]);
+  if (head[0] === "ERR") return { ...refusalOf(head.slice(2)), class: head[1] };
+  if (head[0] !== "LAUNCH_PROVIDERS" || head.length !== 4 || head[1] === "" || !KEY64.test(head[2]) || !WHOLE.test(head[3])) return unreadable("not a LAUNCH_PROVIDERS head", lines[0]);
+  const [, chainId, creator, count] = head;
+  if (lines[lines.length - 1] !== `LAUNCH_PROVIDERS_END\t${chainId}`) return unreadable("listing without LAUNCH_PROVIDERS_END", lines[lines.length - 1]);
+  const rows = lines.slice(1, -1);
+  if (rows.length !== Number(count)) return unreadable(`header says ${count} providers, ${rows.length} rows`, lines[0]);
+  const providers = [];
+  for (const row of rows) {
+    const f = row.split("\t");
+    if (f[0] !== "LAUNCH_PROVIDER" || f.length !== 2 || !KEY64.test(f[1])) return unreadable("not a LAUNCH_PROVIDER row", row);
+    providers.push(f[1]);
+  }
+  return { kind: "launchProviders", chainId, creator, providers };
+}
+
+/** Round four (r4a) — `POOL_STATUS<TAB><chain>` -> `POOL_STATUS TAB chain TAB tick TAB fee pips TAB liquidity TAB
+ *  locked liquidity TAB removable segments TAB locked segments`, each segment list `lo:hi:liquidity` comma-joined
+ *  or `-` (the rows `POOL_LIQUIDITY` lists), or `POOL_UNKNOWN TAB chain`. The segments are what a quote walks: a
+ *  swap's output over the pool's own liquidity, not an upper bound from the fee alone. Each list must sum to the
+ *  total it accompanies, else the line is unreadable. */
+export function parsePoolStatusReply(reply) {
+  const line = firstLines(reply)[0] ?? "";
+  const f = line.split("\t");
+  if (f[0] === "POOL_UNKNOWN" && f.length === 2) return { kind: "unknown", chainId: f[1] };
+  if (f[0] === "ERR") return { ...refusalOf(f.slice(2)), class: f[1] };
+  if (f[0] !== "POOL_STATUS" || f.length !== 8) return unreadable("not a POOL_STATUS line with its segments", line);
+  const [, chainId, tick, feePips, total, locked, removableList, lockedList] = f;
+  if (chainId === "" || !/^-?\d+$/.test(tick) || !WHOLE.test(feePips) || !WHOLE.test(total) || !WHOLE.test(locked)) return unreadable("a POOL_STATUS field is not a whole number", line);
+  const segmentsOf = (text) => {
+    if (text === "-") return [];
+    const out = [];
+    for (const part of text.split(",")) {
+      const m = /^(-?\d+):(-?\d+):(\d+)$/.exec(part);
+      if (!m || Number(m[1]) >= Number(m[2]) || BigInt(m[3]) === 0n) return null;
+      out.push({ tickLower: Number(m[1]), tickUpper: Number(m[2]), liquidity: BigInt(m[3]) });
+    }
+    return out;
+  };
+  const removable = segmentsOf(removableList);
+  const lockedSegments = segmentsOf(lockedList);
+  if (removable === null || lockedSegments === null) return unreadable("a segment is not lo:hi:liquidity with lo < hi and liquidity above 0", line);
+  const sum = (segments) => segments.reduce((acc, s) => acc + s.liquidity, 0n);
+  if (sum(removable) !== BigInt(total)) return unreadable("the removable segments do not sum to the pool's liquidity", line);
+  if (sum(lockedSegments) !== BigInt(locked)) return unreadable("the locked segments do not sum to the pool's locked liquidity", line);
+  return { kind: "pool", chainId, currentTick: Number(tick), feePips: Number(feePips), totalLiquidity: BigInt(total), totalLockedLiquidity: BigInt(locked), removable, locked: lockedSegments };
+}
+
 export function parseChainProvidersReply(reply) {
   const frames = reply.split("\n");
   const head = (frames.shift() ?? "").split("\t");
@@ -287,6 +453,8 @@ export function parseChainProvidersReply(reply) {
   }
   return { kind: "providers", chainId: head[1], providers };
 }
+
+const hexOfText = (text) => Array.from(new TextEncoder().encode(text), (b) => b.toString(16).padStart(2, "0")).join("");
 
 export class WireClient {
   /** @param {string} url - wss://nodes.defxn.com/ws (default). */
@@ -658,6 +826,27 @@ export class WireClient {
     return parseInsuranceAccountReply(await this._send(`INSURANCE_ACCOUNT\t${chainId}`));
   }
 
+  /** Round three (r3c) — `CURVE_SOLD<TAB><chain>`: the share of a launch's curve sold, the `mm` rate a row pays now,
+   *  the next breakpoint and the launch's mm mode (`parseCurveSoldReply`), what a tiered quote reads. */
+  async curveSold(chainId) {
+    return parseCurveSoldReply(await this._send(`CURVE_SOLD\t${chainId}`));
+  }
+
+  /** Round four (r4a) — `TOKEN_FEES<TAB><chain>`: every token LP fee entry of a launch (`parseTokenFeesReply`). */
+  async tokenFees(chainId) {
+    return parseTokenFeesReply(await this._send(`TOKEN_FEES\t${chainId}`));
+  }
+
+  /** Round four (r4a) — `LAUNCH_PROVIDERS<TAB><chain>`: a launch's creator and genesis provider keys (`parseLaunchProvidersReply`). */
+  async launchProviders(chainId) {
+    return parseLaunchProvidersReply(await this._send(`LAUNCH_PROVIDERS\t${chainId}`));
+  }
+
+  /** Round four (r4a) — `POOL_STATUS<TAB><chain>`: the pool's tick, fee and liquidity with its segments (`parsePoolStatusReply`). */
+  async poolStatus(chainId) {
+    return parsePoolStatusReply(await this._send(`POOL_STATUS\t${chainId}`));
+  }
+
   /** Wave 3G — `CREATOR_BOND<TAB><chain>`: the creator bond's custody lock and its state (`parseCreatorBondReply`). */
   async creatorBond(chainId) {
     return parseCreatorBondReply(await this._send(`CREATOR_BOND\t${chainId}`));
@@ -666,6 +855,12 @@ export class WireClient {
   /** Wave 3G — `CREATOR_VESTING<TAB><chain>`: the creator allocation's vesting (`parseCreatorVestingReply`). */
   async creatorVesting(chainId) {
     return parseCreatorVestingReply(await this._send(`CREATOR_VESTING\t${chainId}`));
+  }
+
+  /** Round three (r3u) — `FEE_CLAIM<TAB><record>`: submit a claimant-signed `KFEECLM1` record (`buildFeeClaimWithSigner`)
+   *  and read what the node did with it (`parseFeeClaimReply`). */
+  async feeClaim(recordText) {
+    return parseFeeClaimReply(await this._send(`FEE_CLAIM\t${recordText}`));
   }
 
   /** `DAO_PROPOSE<TAB><dao_id><TAB><signers csv><TAB><quorum_threshold><TAB><registered_at>`.
@@ -896,7 +1091,10 @@ export class WireClient {
    *    -> BLOB_OK<TAB><cid>
    *    -> BLOB_ERR<TAB><reason> */
   async blobPut(text) {
-    const reply = await this._send(`BLOB_PUT\t${text}`);
+    // A text that spans lines (a manifest in its own grammar, WARCH19 steps 2-4) cannot ride a line transport:
+    // BLOB_PUT_HEX carries its UTF-8 bytes as hex (same bytes, same CID).
+    const spansLines = /[\r\n]/.test(text);
+    const reply = await this._send(spansLines ? `BLOB_PUT_HEX\t${hexOfText(text)}` : `BLOB_PUT\t${text}`);
     const parts = reply.split("\t");
     if (parts[0] === "BLOB_OK") return { kind: "ok", cid: parts[1] };
     if (parts[0] === "BLOB_ERR") return { kind: "error", reason: parts.slice(1).join("\t") };
@@ -912,6 +1110,33 @@ export class WireClient {
     if (reply === "BLOB_MISS") return { kind: "miss" };
     if (reply.startsWith("BLOB_FOUND\t")) return { kind: "found", text: reply.slice("BLOB_FOUND\t".length) };
     return { kind: "error", raw: reply };
+  }
+
+  /** `BLOB_GET_HEX<TAB><cid>` — read back content-addressed text that may span lines.
+   *    -> BLOB_FOUND_HEX<TAB><hex of the UTF-8 bytes>
+   *    -> BLOB_MISS */
+  async blobGetHex(cid) {
+    const reply = await this._send(`BLOB_GET_HEX\t${cid}`);
+    if (reply === "BLOB_MISS") return { kind: "miss" };
+    if (reply.startsWith("BLOB_FOUND_HEX\t")) {
+      const hex = reply.slice("BLOB_FOUND_HEX\t".length).trim();
+      if (hex.length % 2 === 0 && /^[0-9a-f]*$/.test(hex)) {
+        try {
+          return { kind: "found", text: new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(hex.match(/../g) ?? [], (b) => parseInt(b, 16))) };
+        } catch {
+          // falls through to the error below
+        }
+      }
+    }
+    return { kind: "error", raw: reply };
+  }
+
+  /** A blob's text by CID, whether or not it spans lines: `BLOB_GET_HEX` first, `BLOB_GET` when the node does not
+   *  answer it with the blob (a node that predates it, or a one-line blob it holds the other way). */
+  async blobGetText(cid) {
+    const hexed = await this.blobGetHex(cid).catch(() => ({ kind: "error" }));
+    if (hexed.kind === "found") return hexed;
+    return this.blobGet(cid);
   }
 
   /** `RESOLVER_RECORD_GET<TAB><cid>` — fetch any `ResolverLaunch`/

@@ -1003,6 +1003,7 @@ function archiveToInput(decoded) {
         entry: decoded.manifest.entry,
         generatedBy: decoded.manifest.generatedBy,
         sourceFormat: decoded.manifest.sourceFormat,
+        purpose: decoded.manifest.purpose,
         syncSources: decoded.manifest.syncSources,
         routes: decoded.routes.map((route) => ({
             routeId: route.routeId,
@@ -1091,6 +1092,7 @@ function buildManifestPayload(input, dictionary) {
         })),
         generatedBy: input.generatedBy ? internString(state, input.generatedBy) : undefined,
         sourceFormat: input.sourceFormat ? internString(state, input.sourceFormat) : undefined,
+        purpose: input.purpose ? internString(state, input.purpose) : undefined,
         syncSources: input.syncSources?.length ? encodeStructuredValue(input.syncSources, state) : undefined,
         rawByteLength,
         compressedByteLength: 0,
@@ -1663,6 +1665,7 @@ function decodeArchiveCore(input, assetPayloadDecoder) {
                 })),
                 generatedBy: decodeStringRef(manifestBlock.payload.generatedBy, dictionary),
                 sourceFormat: decodeStringRef(manifestBlock.payload.sourceFormat, dictionary),
+                purpose: decodeStringRef(manifestBlock.payload.purpose, dictionary),
                 syncSources: Array.isArray(decodedSyncSources) ? decodedSyncSources : undefined,
                 rawByteLength: manifestBlock.payload.rawByteLength,
                 compressedByteLength: manifestBlock.payload.compressedByteLength,
@@ -1876,6 +1879,7 @@ export function diffArchives(baseInput, nextInput) {
         entry: next.manifest.entry,
         generatedBy: next.manifest.generatedBy,
         sourceFormat: "flx-archive-delta",
+        purpose: next.manifest.purpose,
         syncSources: [
             {
                 kind: "base-archive",
@@ -2101,6 +2105,7 @@ export function applyDelta(baseInput, deltaInput) {
     next.states = Array.from(stateMap.values());
     next.generatedBy = delta.manifest.generatedBy || next.generatedBy;
     next.sourceFormat = "flx-archive";
+    next.purpose = delta.manifest.purpose || next.purpose;
     next.syncSources = delta.manifest.syncSources || next.syncSources;
     return next;
 }

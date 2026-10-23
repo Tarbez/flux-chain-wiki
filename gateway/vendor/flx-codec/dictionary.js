@@ -154,7 +154,7 @@ export function buildFlxArchiveDictionary(input) {
     const routeTokens = [...baseDictionary.routeTokens];
     const keys = [...baseDictionary.keys];
     pushManyUnique(paths, splitPathLike(input.entry));
-    pushManyUnique(strings, [input.generatedBy, input.sourceFormat]);
+    pushManyUnique(strings, [input.generatedBy, input.sourceFormat, input.purpose]);
     for (const route of input.routes || []) {
         pushUnique(routeIds, route.routeId);
         pushManyUnique(strings, [route.title, route.description, route.layout]);

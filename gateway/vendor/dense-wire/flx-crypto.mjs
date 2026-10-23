@@ -60,24 +60,23 @@ export async function signHex(privateKey, messageAscii) {
   return bytesToHex(new Uint8Array(sig));
 }
 
+/** Verify a detached Ed25519 signature (hex) over an ASCII message under a raw public key (hex). False for any
+ *  malformed key or signature, never a throw: a signature that cannot be read does not verify. */
+export async function verifyHex(pubHex, messageAscii, sigHex) {
+  try {
+    if (!/^[0-9a-f]{64}$/.test(pubHex) || !/^[0-9a-f]{128}$/.test(sigHex)) return false;
+    const key = await crypto.subtle.importKey("raw", hexToBytes(pubHex), KEYGEN_ALG, false, ["verify"]);
+    return await crypto.subtle.verify("Ed25519", key, hexToBytes(sigHex), new TextEncoder().encode(messageAscii));
+  } catch {
+    return false;
+  }
+}
+
 /** Sign arbitrary bytes with a private Ed25519 key. Used for the
  *  segment-covered-bytes signing path. */
 export async function signBytesHex(privateKey, bytes) {
   const sig = await crypto.subtle.sign("Ed25519", privateKey, bytes);
   return bytesToHex(new Uint8Array(sig));
-}
-
-/** Verify an Ed25519 signature (hex) over a UTF-8 message with a raw
- *  32-byte public key given as hex. Native Web Crypto; false on any
- *  malformed key or signature rather than throwing. */
-export async function verifyHex(pubHex, message, sigHex) {
-  if (!/^[0-9a-f]{64}$/.test(pubHex ?? "") || !/^[0-9a-f]{128}$/.test(sigHex ?? "")) return false;
-  try {
-    const key = await crypto.subtle.importKey("raw", hexToBytes(pubHex), { name: "Ed25519" }, false, ["verify"]);
-    return await crypto.subtle.verify({ name: "Ed25519" }, key, hexToBytes(sigHex), new TextEncoder().encode(message));
-  } catch {
-    return false;
-  }
 }
 
 /** SHA-256 CID of an ASCII manifest. Lowercase hex. */
