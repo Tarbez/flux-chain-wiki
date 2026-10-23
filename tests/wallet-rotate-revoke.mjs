@@ -7,14 +7,14 @@
 // bodies exactly, against the real, already-built modules on disk -- same
 // discipline tests/wallet-add.mjs/wallet-delegate.mjs already established.
 import assert from 'node:assert/strict';
-import nacl from '/Volumes/PortableSSD/flux/flux-auth/node_modules/tweetnacl/nacl-fast.js';
+import nacl from '/Volumes/PortableSSD/flux/fxn-auth/node_modules/tweetnacl/nacl-fast.js';
 
 globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-const { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } = await import('/Volumes/PortableSSD/flux/flux-auth/src/walletLifecycle.mjs');
+const { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletLifecycle.mjs');
 const { addWalletToAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, sealAuthKitEnvelope, openAuthKitEnvelope } = await import('/Volumes/PortableSSD/design/ark-ui/dist/ark-ui.flux-auth.js');
-const { verifyIdentityWalletLink } = await import('/Volumes/PortableSSD/flux/flux-auth/src/identityWallet.mjs');
+const { verifyIdentityWalletLink } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/identityWallet.mjs');
 
 const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
 const toHex = (base64Value) => Buffer.from(base64Value, 'base64').toString('hex');

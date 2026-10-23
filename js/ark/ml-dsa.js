@@ -1,6 +1,6 @@
 /* @noble/post-quantum ml-dsa87, bundled for a no-build-step static site.
    Source: @noble/post-quantum/ml-dsa.js (audited, pure-JS, no node:fs) --
-   same primitive flux-auth/src/cryptoAgility.mjs (ark-dao/flux-dao-app) uses
+   same primitive fxn-auth/src/cryptoAgility.mjs (ark-dao/flux-dao-app) uses
    for real hybrid Ed25519+ML-DSA signing. Exposes window.ArkMlDsa =
    {keygen(seed), sign(message, secretKey), verify(signature, message, publicKey)}
    -- same argument order as cryptoAgility.mjs, so callers can read that file

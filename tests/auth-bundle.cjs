@@ -12,7 +12,7 @@ assert.equal(fs.readFileSync(out, 'utf8'), fs.readFileSync('js/admin/auth.js', '
 
 // 2. The bundle is made of the shared canonical parts and carries no derivation of its own.
 const entry = fs.readFileSync('scripts/auth-entry.js', 'utf8');
-for (const shared of ["'@deadark/ark-ui/flux-auth'", "'@deadark/ark-ui/flux-auth-ui'", "'flux-auth/root-from-mnemonic'", "'deadark-identity-core/root-signing-handle'"]) assert(entry.includes(shared), shared);
+for (const shared of ["'@deadark/ark-ui/flux-auth'", "'@deadark/ark-ui/flux-auth-ui'", "'fxn-auth/root-from-mnemonic'", "'deadark-identity-core/root-signing-handle'"]) assert(entry.includes(shared), shared);
 const code = entry.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 assert(!/bip39|nacl|PBKDF2|HKDF|flux-identity-ed25519/i.test(code), 'the entry composes shared modules; it must not re-derive a root itself');
 

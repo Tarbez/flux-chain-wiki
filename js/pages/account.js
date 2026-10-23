@@ -973,7 +973,7 @@
 
       /* Signing wallets (docs/FLUX-WALLET-DELEGATION-SCOPE-VISION.md) --
          distinct from the dense-wire FXN "Wallet" tab above: these are real
-         flux-auth/wallet-lifecycle wallet-link records stored on the Auth
+         fxn-auth/wallet-lifecycle wallet-link records stored on the Auth
          Kit itself (`identity.walletAddresses`/`addWallet`/`rotateWallet`/
          `revokeWallet`/`delegateWallet`, wired in scripts/auth-entry.js).
          `identity.walletAddresses`/`walletDelegations` are live getters

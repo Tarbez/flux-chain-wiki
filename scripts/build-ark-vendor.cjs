@@ -64,7 +64,7 @@
    bytes of every pre-existing output were proven identical across the switch; the
    only differences are the two concatenated files' header/source-label comments.
 
-   js/admin/auth.js is NOT built here: it bundles flux-auth / flux-auth-client /
+   js/admin/auth.js is NOT built here: it bundles fxn-auth / fxn-auth-client /
    deadark-identity-core from sibling flux/ repos, which are not Ark UI packages and
    are not yet delivered through sync-consumer. scripts/build-auth.cjs still owns it
    (and its distribution to sibling sites); its Ark imports resolve here too.

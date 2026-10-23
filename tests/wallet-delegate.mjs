@@ -10,16 +10,16 @@ import assert from 'node:assert/strict';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import nacl from '/Volumes/PortableSSD/flux/flux-auth/node_modules/tweetnacl/nacl-fast.js';
+import nacl from '/Volumes/PortableSSD/flux/fxn-auth/node_modules/tweetnacl/nacl-fast.js';
 
 globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-const { createWalletForIdentity } = await import('/Volumes/PortableSSD/flux/flux-auth/src/walletLifecycle.mjs');
-const { createWalletDelegation, signWalletDelegation } = await import('/Volumes/PortableSSD/flux/flux-auth/src/walletDelegation.mjs');
-const { reduceWalletRegistry } = await import('/Volumes/PortableSSD/flux/flux-auth/src/walletRegistry.mjs');
-const { resolveClaimScope, rightsDimension, delegationDimension } = await import('/Volumes/PortableSSD/flux/flux-auth/src/claimScopeResolver.mjs');
-const { rankDiscovery } = await import('/Volumes/PortableSSD/flux/flux-auth-client/src/wallet-mesh.mjs');
+const { createWalletForIdentity } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletLifecycle.mjs');
+const { createWalletDelegation, signWalletDelegation } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletDelegation.mjs');
+const { reduceWalletRegistry } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletRegistry.mjs');
+const { resolveClaimScope, rightsDimension, delegationDimension } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/claimScopeResolver.mjs');
+const { rankDiscovery } = await import('/Volumes/PortableSSD/flux/fxn-auth-client/src/wallet-mesh.mjs');
 const { addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, sealAuthKitEnvelope } = await import('/Volumes/PortableSSD/design/ark-ui/dist/ark-ui.flux-auth.js');
 
 const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');

@@ -43,7 +43,7 @@ import { populatedDrafts, GROUP, BLOCK_TEXT } from './site-drafts-fixture.mjs';
 import { createPublisher } from '../../scripts/lib/publisher.mjs';
 import { readProject, writeProject, siteDrafts, decodeSite } from '../../scripts/lib/site-bundle.mjs';
 import { cidForBytes } from '../../../../flx/flx-codec/src/blake3.js';
-import { createFluxRootHandle } from '../../../flux-auth/src/rootFromMnemonic.mjs';
+import { createFluxRootHandle } from '../../../fxn-auth/src/rootFromMnemonic.mjs';
 
 const args = process.argv.slice(2);
 const FIVE = ['settingsDefaults', 'components', 'states', 'canvasTransitions', 'elementMotion'];

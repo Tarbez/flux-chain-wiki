@@ -18,7 +18,7 @@ export function signer() {
   return { pubHex, signBytes, signText: (text) => signBytes(new TextEncoder().encode(text)) };
 }
 
-/** A signer over a flux-auth root handle (`publicKeyB64`, `sign(bytes)`), as dense-wire's builders expect. */
+/** A signer over a fxn-auth root handle (`publicKeyB64`, `sign(bytes)`), as dense-wire's builders expect. */
 export function handleSigner(handle) {
   const pubHex = Buffer.from(handle.publicKeyB64, 'base64').toString('hex');
   const signBytes = async (bytes) => Buffer.from(await handle.sign(bytes)).toString('hex');

@@ -2,8 +2,8 @@
 // then hand the fresh bundle to every sibling site that carries it.
 //
 // Ark UI parts (@deadark/ark-ui/flux-auth, -flux-auth-ui) resolve from node_modules/@deadark/*,
-// the packages `npm run sync:ark` delivers; nothing here names a hub path. The flux-auth,
-// flux-auth-client and deadark-identity-core parts are NOT Ark UI packages and are not delivered
+// the packages `npm run sync:ark` delivers; nothing here names a hub path. The fxn-auth,
+// fxn-auth-client and deadark-identity-core parts are NOT Ark UI packages and are not delivered
 // by sync-consumer yet, so they still come from the sibling repos' sources in this site's own
 // parent directory (flux/), found relative to the site -- ARK_FLUX_ROOT overrides it.
 // The other bundles this script used to build (flux-elements, authorization-view,
@@ -20,13 +20,13 @@ const fluxRoot = process.env.ARK_FLUX_ROOT || path.resolve(site, '..');
 const esbuild = path.join(site, 'node_modules', '.bin', 'esbuild');
 execFileSync(esbuild, [
   'scripts/auth-entry.js', '--bundle', '--format=iife', '--global-name=ArkAdminAuth', '--minify', '--legal-comments=none',
-  '--alias:flux-auth/root-from-mnemonic=' + fluxRoot + '/flux-auth/src/rootFromMnemonic.mjs',
-  '--alias:flux-auth/wallet-signing-handle=' + fluxRoot + '/flux-auth/src/walletSigningHandle.mjs',
-  '--alias:flux-auth/wallet-lifecycle=' + fluxRoot + '/flux-auth/src/walletLifecycle.mjs',
-  '--alias:flux-auth/wallet-delegation=' + fluxRoot + '/flux-auth/src/walletDelegation.mjs',
-  '--alias:flux-auth/wallet-registry=' + fluxRoot + '/flux-auth/src/walletRegistry.mjs',
-  '--alias:flux-auth/claim-scope-resolver=' + fluxRoot + '/flux-auth/src/claimScopeResolver.mjs',
-  '--alias:flux-auth-client/wallet-mesh=' + fluxRoot + '/flux-auth-client/src/wallet-mesh.mjs',
+  '--alias:fxn-auth/root-from-mnemonic=' + fluxRoot + '/fxn-auth/src/rootFromMnemonic.mjs',
+  '--alias:fxn-auth/wallet-signing-handle=' + fluxRoot + '/fxn-auth/src/walletSigningHandle.mjs',
+  '--alias:fxn-auth/wallet-lifecycle=' + fluxRoot + '/fxn-auth/src/walletLifecycle.mjs',
+  '--alias:fxn-auth/wallet-delegation=' + fluxRoot + '/fxn-auth/src/walletDelegation.mjs',
+  '--alias:fxn-auth/wallet-registry=' + fluxRoot + '/fxn-auth/src/walletRegistry.mjs',
+  '--alias:fxn-auth/claim-scope-resolver=' + fluxRoot + '/fxn-auth/src/claimScopeResolver.mjs',
+  '--alias:fxn-auth-client/wallet-mesh=' + fluxRoot + '/fxn-auth-client/src/wallet-mesh.mjs',
   '--alias:deadark-identity-core/root-signing-handle=' + fluxRoot + '/deadark-identity-core/dist/identity/root-signing-handle.js',
   '--outfile=js/admin/auth.js',
 ], { stdio: 'inherit' });

@@ -1,5 +1,5 @@
 // A real render of the real "Keys" tab in js/pages/account.js -- closes
-// the gap named honestly in flux-auth's own CLAUDE.md: the UI existed,
+// the gap named honestly in fxn-auth's own CLAUDE.md: the UI existed,
 // was syntax-checked and selector-cross-checked, but had never been
 // exercised through a real click in a real DOM. Same jsdom+real-bundle
 // pattern flux-launchpad's auth.dom.live-unlock.test.mjs already

@@ -49,7 +49,7 @@ for (const gone of ['scripts/sync-ark.cjs', 'scripts/sync-ark-backgrounds.cjs', 
 // 4. No absolute workspace path in the site's own source, scripts, styles or pages. A /Volumes
 //    path builds on exactly one machine and silently reads whatever is at that path today; that
 //    is how the settings bundle came to depend on an unpinned design/ checkout. tests/ and docs/
-//    are not shipped and are out of this rule (some tests still import flux-auth sources that
+//    are not shipped and are out of this rule (some tests still import fxn-auth sources that
 //    sync-consumer does not deliver yet).
 const SKIP = new Set(['node_modules', '.vendor', '.git', '.vercel', 'tests', 'docs']);
 const TEXT = /\.(m?js|cjs|ts|css|html|json|md|txt|command|sh)$/;
