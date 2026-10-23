@@ -21,13 +21,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Who can approve this transition?"
+      "value": "Who can approve a change?"
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and then dissolves."
+      "value": "For each change, the policy names the signers who may approve that one change. Once enough of them sign, their signatures are published as evidence. Their say ends with that change."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -129,7 +129,7 @@ ArkManifest.define({
       "label": "Onward link (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "COMPARE GOVERNANCE ROSTERS"
+      "value": "SEE WHO CAN CHANGE WHAT"
     },
     "BACK": {
       "label": "Link back to the theory (an arrow is added)",

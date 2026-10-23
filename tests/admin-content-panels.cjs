@@ -40,12 +40,13 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
       if (m.fields[role].kind !== 'link') assert.equal(control.value, m.fields[role].value, `page ${id}: ${role} shows its draft value`);
     }
     const tabs = [...box.querySelectorAll('[role="tab"]')].map((t) => t.textContent);
-    assert(tabs.includes('Content') && tabs.includes('SEO') && tabs.includes('Code'), `page ${id}: Content / SEO / Code tabs (${tabs})`);
+    /* the tabs in plain words since 2026-10-19 (docs/ux-audit/cms.md P1-14): Text / Search & sharing / Advanced */
+    assert(tabs.includes('Text') && tabs.includes('Search & sharing') && tabs.includes('Advanced'), `page ${id}: Text / Search & sharing / Advanced tabs (${tabs})`);
     assert(!box.querySelector('#editor'), 'nothing is drawn into a fixed #editor');
   }
   assert(!document.getElementById('editor'), 'the forms never needed an #editor element');
   const homeTabs = [...A.renderPageFields(detached(), 'home').querySelectorAll('[role="tab"]')].map((t) => t.textContent);
-  assert(homeTabs.includes('Shape'), 'a page with a background shape keeps its Shape tab');
+  assert(homeTabs.includes('Shapes'), 'a page with a background shape keeps its Shapes tab');
 
   /* ---- typing: the draft changes, the canvas is asked, the form is not rebuilt ---- */
   const mount = document.getElementById('mount');
@@ -132,6 +133,14 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
   const art = A.renderArticleFields(detached(), slug);
   for (const key of ['title', 'category', 'minutes', 'summary', 'core', 'relevance', 'reviewed', 'evidenceLabel', 'actionLabel']) assert(art.querySelector('#a-' + slug + '-' + key), 'article field ' + key);
   for (const key of ['evidenceHref', 'relatedPage', 'actionPage']) assert(art.querySelector('#lp-type-a-' + slug + '-' + key), 'article link ' + key);
+  /* The read time is derived (LearningContent.readTime) and written on Save; it was a typed field
+     up to three times the real read time (W3-LEARN). It is shown read-only, follows the words, and
+     an edit to it is refused with the reason instead of being silently replaced on Save. */
+  const readTime = art.querySelector('#a-' + slug + '-minutes');
+  assert(readTime.readOnly, 'the reading time is shown, not edited');
+  assert.equal(readTime.value, window.LearningContent.readTime(state.aDrafts[slug]), 'the reading time shown is the one derived from the draft\'s words');
+  const refusedReadTime = A.setItemField('article', slug, 'minutes', '99 MIN READ');
+  assert(!refusedReadTime.ok && /derived from the article's words/.test(refusedReadTime.refusal), 'an edit to the read time is refused, naming why');
   type(window, art.querySelector('#a-' + slug + '-title'), 'Panel title');
   assert.equal(state.aDrafts[slug].title, 'Panel title');
   const hadQuestions = !!state.aDrafts[slug].questions;

@@ -37,14 +37,12 @@
     try {
       if (state.cdirs) {
         await ArkAdminStore.saveMeshSettings(state.cdirs.content, state.meshDraft);
-        status('Saved js/content/mesh-settings-data.js', 'ok');
       } else {
         download('mesh-settings-data.js', ArkMeshSettings.serialize(state.meshDraft));
-        status('Downloaded mesh-settings-data.js. Put it in js/content/, or connect the project folder to save directly.', 'warn');
       }
     /* Step 5: re-throws now that saveEverything() is this function's only caller -- see
        saveThemeDraft's matching comment above. */
-    } catch (error) { status(error.message, 'error'); throw error; }
+    } catch (error) { throw error; }   /* saveEverything's summary says what failed, once (docs/ux-audit/cms.md P1-16) */
     state.meshDraft = ArkMeshSettings.sanitize(state.meshDraft);
     state.meshSaved = JSON.stringify(state.meshDraft);
     ArkMeshSettings.define(state.meshDraft);
@@ -103,24 +101,24 @@
         select.appendChild(h('option', { value: assetId, text: state.assetDrafts[assetId].label || assetId }));
       });
       select.value = page[slot] || '';
-      var upload = h('input', { id: id + '-upload', type: 'file', accept: ArkAsset.mimeTypes.join(',') });
-      upload.addEventListener('change', function () {
-        var file = upload.files && upload.files[0];
-        if (!file) return;
-        quickAddAsset(file, function (assetId) {
-          page[slot] = assetId;
-          page[modeKey] = 'image';
-          notifyPreviewAssets(); notifyPreviewMesh();
-          itemsChanged('asset', assetId); shapesChanged();
-          status('Added "' + assetId + '" and set it as this page’s ' + slot + ' image. Save the image and Save this page’s shapes to keep it.', 'ok');
-        });
-      });
+      /* the editor's one file chooser (controls.js filePicker): a button and a drop target over the
+         native input, whose id stays <slot id>-upload */
+      var upload = A.filePicker({ id: id + '-upload', accept: ArkAsset.mimeTypes.join(','), label: 'Upload a new image', ariaLabel: slot === 'primary' ? 'Upload an image for Shape 1' : 'Upload an image for Shape 2',
+        onFile: function (file, input) {
+          quickAddAsset(file, function (assetId) {
+            page[slot] = assetId;
+            page[modeKey] = 'image';
+            notifyPreviewAssets(); notifyPreviewMesh();
+            itemsChanged('asset', assetId); shapesChanged();
+            /* by the image's name and the shape's name as the form shows them, never the id or the slot key (P1-2) */
+            status('Added "' + ((state.assetDrafts[assetId] && state.assetDrafts[assetId].label) || assetId) + '" as the image for ' + (slot === 'primary' ? 'Shape 1' : 'Shape 2') + '. Save to keep the image and this page\u2019s shapes.', 'ok');
+          });
+        } });
       box.appendChild(h('div', { class: 'field' },
         h('label', { for: modeId, text: slot === 'primary' ? 'Shape 1' : 'Shape 2' }),
         mode,
         h('label', { for: id, class: 'hint', text: slot === 'primary' ? 'Image for Shape 1' : 'Image for Shape 2' }),
         select,
-        h('label', { for: id + '-upload', class: 'hint', text: 'or upload a new image' }),
         upload));
     });
     return box;
@@ -224,7 +222,7 @@
         root.appendChild(which);
         return;
       }
-      which.appendChild(h('p', { class: 'hint', text: 'Shown on ' + where + ', which has no Page fields of its own. Saved in js/content/mesh-settings-data.js with the tuning above.' }));
+      which.appendChild(h('p', { class: 'hint', text: 'Shown on ' + where + ', which has no Page fields of its own. Saved with the shared tuning above.' }));
       root.appendChild(which);
       root.appendChild(buildShapePickers(id));
       root.appendChild(buildPlacementPanel(id));

@@ -12,7 +12,7 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "OPERATE FLUX / NAMED NETWORKS"
+      "value": "OPERATE DEFXN / NAMED NETWORKS"
     },
     "TITLE": {
       "label": "Heading",
@@ -24,13 +24,31 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Named networks partition miner presence only. They do not isolate accounts, identities, DAOs, records, or treasuries, and are not a security boundary."
+      "value": "A named network decides which group of miners your machine shows up in. Accounts, identities, DAOs, records and treasuries are shared by every network, so a network is not a security boundary."
+    },
+    "RESOLVER.NOTE": {
+      "label": "Resolver deployment pointer",
+      "kind": "text",
+      "section": "Page",
+      "value": "This page joins your machine to a named network. Deploying a resolver happens in the Deploy product, and the resolver gets its own chain."
+    },
+    "RESOLVER.LINK": {
+      "label": "Resolver deployment link",
+      "kind": "line",
+      "section": "Page",
+      "value": "How deploying a resolver works"
+    },
+    "RESOLVER.HREF": {
+      "label": "Resolver deployment link target",
+      "kind": "link",
+      "section": "Page",
+      "value": "route:deployment"
     },
     "BACK": {
       "label": "Link back (an arrow is added)",
       "kind": "line",
       "section": "Links",
-      "value": "RUN FLUX FROM SOURCE"
+      "value": "RUN DEFXN FROM SOURCE"
     },
     "BUNDLEDEPLOYER.HREF": {
       "label": "Bundle Deployer link",

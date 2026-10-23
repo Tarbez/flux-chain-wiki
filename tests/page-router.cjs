@@ -23,7 +23,7 @@ const document={head,documentElement,createElement:()=>new Element(),querySelect
 },activeElement:null};
 const window={scrollY:0,scrollTo(x,y){this.scrollY=y;},matchMedia:()=>({matches:true}),dispatchEvent(){}};
 const context=vm.createContext({console,document,window,Event,getComputedStyle:()=>({opacity:'1',transform:'none'}),ArkUI:{prefersReducedMotion:()=>true}});
-for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/pages/catalog.js','js/ark/route.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
+for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/content/site-pages.js','js/pages/catalog.js','js/ark/route.js','js/ark/page-router.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context);
 context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific description':fallback,articleDescription:(id,fallback)=>fallback,
  ogImage:(map,id)=>id==='about'?'https://example.com/about.png':'',canonical:(map,id)=>id==='about'?'https://example.com/about':'',
  site:()=>({name:'Test Site',baseUrl:'https://example.com',org:'Organization',lang:'en',handle:'@teststudio',defaultDescription:'Initial site description'}),
@@ -55,12 +55,19 @@ context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific desc
  assert.equal(scene.children[0],canvas);assert.equal(scene.children[1],header);assert.equal(scene.children[2],outlet);
  assert.equal(router.resolve('#/about'),'about');
 // Reason this case exists: the header link was `#/work`, a catalog route whose page file had been deleted, so WORK opened a
-// page that could never load. Both legacy spellings now resolve to the lab, and the catalog assets check below keeps it so.
-assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.ArkUI.pageCatalog).includes('work'),false);
- assert.equal(router.resolve('#/experiments/lab'),'lab');assert.equal(router.resolve('#work'),'lab');
- assert(!context.ArkUI.pageCatalog.proximity.scripts.includes('js/studio.js'));
- assert(!fs.readFileSync('js/pages/experiments.js','utf8').includes('mountStudio'));
+// page that could never load. Both legacy spellings now resolve to the interactive model.
+// 2026-10-19 (docs/ux-audit/pages.md P3): /experiments and /experiments/lab were two pages for one model with the same h1;
+// they are one page at /experiments (key 'proximity', drawn by the lab module), and the old lab address is an alias of it.
+assert.equal(router.resolve('#/work'),'proximity');assert.equal(Object.keys(context.ArkUI.pageCatalog).includes('work'),false);
+ assert.equal(router.resolve('#/experiments/lab'),'proximity');assert.equal(router.resolve('#work'),'proximity');
+ assert.equal(router.resolve('/experiments/lab'),'proximity','the old lab path opens the merged page');
+ assert.equal(Object.keys(context.ArkUI.pageCatalog).includes('lab'),false,'one catalog entry for the interactive model');
+ assert.equal(context.ArkUI.pageCatalog.proximity.module,'lab','the merged page is the lab');
  assert(fs.readFileSync('js/pages/lab.js','utf8').includes('Interactive model'));
+// 2026-10-19 (docs/ux-audit/pages.md P8): an address nothing answers used to resolve to Home, silently. It resolves to the
+// not-found page, which names it; aliases (/explorer, /monitor) still open their page.
+ assert.equal(router.resolve('/no-such-page'),'notfound');assert.equal(router.resolve('/explorer'),'explorer');assert.equal(router.resolve('/monitor'),'stats');
+ assert.equal(router.resolve('#'),'zero');assert.equal(router.resolve(''),'zero');
  assert.equal(router.resolve('#/experiments'),'proximity');assert.equal(router.resolve('#proximity'),'proximity');
  assert.equal(router.resolve('#/lifecycle'),'lifecycle');assert.equal(router.url('lifecycle'),'#/lifecycle');
  assert.equal(context.ArkUI.sceneState.pages.lifecycle.mesh,'zero');
@@ -74,7 +81,7 @@ assert.equal(router.resolve('#/work'),'lab');assert.equal(Object.keys(context.Ar
  assert.equal(router.resolve('#/learnings/why-the-chain-was-retired?q=3'),'article/why-the-chain-was-retired','question links resolve to the parent article');
 // Clean paths (served over http) resolve exactly like the old #/ forms, and the explorer moved from /explorer to /explore.
 assert.equal(router.resolve('/explore'),'explorer');assert.equal(router.resolve('/explore/'),'explorer','a trailing slash is the same route');assert.equal(router.resolve('/explorer'),'explorer','the old explorer address still lands on the explorer');assert.equal(router.resolve('#/explorer'),'explorer');
-assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.resolve('/'),'zero');assert.equal(router.resolve('/no-such-page'),'zero');
+assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.resolve('/'),'zero');assert.equal(router.resolve('/no-such-page'),'notfound','an unknown address names itself instead of showing Home');
 // /monitor was retired 2026-10-10; a bookmarked link must land on /stats, not silently redirect to home.
 assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link lands on stats, which carries the live pulse now');assert.equal(router.resolve('#/monitor'),'stats');
  assert.equal(writes.at(-1)[1],'none');
@@ -92,7 +99,7 @@ assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link land
  assert.equal(ld['@type'],'AboutPage','an explicit schemaType override wins over the derived WebPage/Article fallback');
  assert.equal(ld.description,'About-specific description');
  assert.equal(head.children.filter(el=>el.attrs['data-ark-ld']==='1').length,1,'the JSON-LD block is written once, not appended again on re-render');
- await router.navigate('lab');assert.equal(router.active,'lab');assert.equal(outlet.children.length,1);assert.equal(context.ArkUI.sceneState.get().page,'lab');
+ await router.navigate('deploy');assert.equal(router.active,'deploy');assert.equal(outlet.children.length,1);assert.equal(context.ArkUI.sceneState.get().page,'deploy');
  assert.equal(description.value,'Initial site description','routes without overrides must not inherit the previous route description');
  for(const selector of ['link[rel="canonical"]','meta[property="og:url"]','meta[property="og:image"]','meta[name="twitter:image"]','meta[name="robots"]']) assert.equal(document.querySelector(selector),null,'stale optional metadata removed: '+selector);
  assert.equal(document.querySelector('meta[name="twitter:card"]').attrs.content,'summary');
@@ -101,13 +108,13 @@ assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link land
  assert.equal(head.children.filter(el=>el.attrs.property==='og:title').length,1,'navigation updates tags without duplicates');
  const savedAboutScene=context.ArkUI.sceneState.pages.about;
  delete context.ArkUI.sceneState.pages.about;
- const preservedPage=router.pages.lab;
+ const preservedPage=router.pages.deploy;
  assert.equal(await router.navigate('about'),false,'missing scene config fails before handoff');
- assert.equal(router.active,'lab');assert.equal(router.pages.lab,preservedPage);
+ assert.equal(router.active,'deploy');assert.equal(router.pages.deploy,preservedPage);
  assert.equal(preservedPage.hidden,false,'failed route leaves current content visible');
  assert.equal(outlet.children.length,1,'failed route does not mount a hidden replacement');
  context.ArkUI.sceneState.pages.about=savedAboutScene;
- for(const key of ['__proto__','constructor','toString']) { assert.equal(router.resolve('#'+key),'zero'); await assert.rejects(router.navigate(key),/Unknown page/); }
+ for(const key of ['__proto__','constructor','toString']) { assert.equal(router.resolve('#'+key),'notfound'); await assert.rejects(router.navigate(key),/Unknown page/); }
 
  const animatedRoot=new Element();animatedRoot.dataset.arkPage='zero';
  animatedRoot.calls=[];animatedRoot.animate=function(frames,timing){this.calls.push({frames,timing});return {finished:Promise.resolve(),cancel(){}};};

@@ -41,10 +41,23 @@ assert(!app.includes('id="btnCmsSave"') && (app.match(/id="save"/g) || []).lengt
 assert(!app.includes('class="right"') && !app.includes('id="tabTheme"') && !app.includes('id="tabSeo"') && !app.includes('id="paneTheme"') && !app.includes('id="paneSeo"'), 'no fixed right panel: its Theme tab was a link to Theme & defaults, its SEO tab moved (page -> #btnPageSeo popover, site -> Theme & defaults)');
 assert(!app.includes('id="btnMore"') && !app.includes('id="view"'), 'the More menu (only a shortcuts hint, now in #accountMenu) and the separate Design/Sitemap toggle (now the Design views) are gone');
 {
+  /* Three tiers since 2026-10-19 (docs/ux-audit/cms.md (b)): the header holds what is used on every
+     screen, the More menu (#accountMenu, inside the header) the occasional, and the canvas's own
+     strip (#canvasTools, above the canvas) the canvas's controls. Every control exists once. */
   const header = app.slice(app.indexOf('<header class="bar" id="appBar">'), app.indexOf('</header>'));
-  for (const id of ['lensContentBtn', 'lensDesignBtn', 'viewCanvasBtn', 'viewMapBtn', 'backgroundBtn', 'viewThemeBtn', 'btnLeftRail', 'btnPage', 'btnPageFields', 'btnPageSeo', 'bpNote', 'devices', 'btnUndo', 'btnRedo', 'btnCheck', 'mode', 'versionsNav', 'meshNav', 'save', 'publish', 'accountBtn', 'connect', 'signOut', 'who', 'status']) {
+  const menu = header.slice(header.indexOf('id="accountMenu"'));
+  const strip = app.slice(app.indexOf('id="canvasTools"'), app.indexOf('id="stage"'));
+  for (const id of ['lensContentBtn', 'lensDesignBtn', 'btnLeftRail', 'btnPage', 'btnPageFields', 'btnUndo', 'btnRedo', 'save', 'publish', 'accountBtn', 'status']) {
     assert.equal((app.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, '#' + id + ' exists once');
-    assert(header.includes('id="' + id + '"'), '#' + id + ' lives in the one header');
+    assert(header.includes('id="' + id + '"') && !menu.includes('id="' + id + '"'), '#' + id + ' is always in the one header');
+  }
+  for (const id of ['viewCanvasBtn', 'viewMapBtn', 'viewThemeBtn', 'btnPageSeo', 'backgroundBtn', 'versionsNav', 'meshNav', 'connect', 'signOut', 'who']) {
+    assert.equal((app.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, '#' + id + ' exists once');
+    assert(menu.includes('id="' + id + '"'), '#' + id + ' lives in the header\'s More menu');
+  }
+  for (const id of ['devices', 'bpNote', 'btnCheck', 'mode']) {
+    assert.equal((app.match(new RegExp('id="' + id + '"', 'g')) || []).length, 1, '#' + id + ' exists once');
+    assert(strip.includes('id="' + id + '"'), '#' + id + ' lives on the canvas strip');
   }
 }
 assert(/function syncHeader\(\) \{[\s\S]*?\$\('canvasTools'\)\.hidden = state\.view === 'map';/.test(admin) && !app.includes('id="canvasNav"'), 'the canvas tools show whenever a canvas is on screen (Canvas and Theme views); the page picker, its fields and its SEO show in every view');
@@ -120,7 +133,7 @@ assert(studio.includes('defxn-cms-preview-mode'), 'Edit and Live modes are forwa
 // still reachable exactly as before (#btnContentCms, #tabSeo).
 assert(!admin.includes('Content, SEO, and routing for this page are edited through the authoritative CMS controls'), 'Step 4: the redirect note that used to sit above the (now-deleted) accordions is gone with them, not orphaned');
 assert(app.includes('id="lensContentBtn"') && app.includes('id="btnPageFields"') && app.includes('id="btnPageSeo"') && admin.includes('function buildSiteSeoPanel'), 'the Content lens, a page\'s every field (#btnPageFields sheet) and SEO (page: #btnPageSeo popover; site: the Theme view) stay reachable -- only the redundant redirect note pointing at them is gone');
-assert(studio.includes("'DEFXN reusable components'"), 'connected Studio library describes the real runtime component system');
+assert(studio.includes("h('h4', { text: 'Components' })") && studio.includes('ArkComponents.groups()'), 'connected Studio library lists the real runtime component system, grouped (tests/components-library.cjs covers it in depth)');
 assert(admin.includes('function notifyPreviewState()') && !app.includes('id="frame"') && (app.match(/<iframe\b/g) || []).length === 1, 'every unsaved content draft reaches the ONE canvas (js/admin/bridge.js notifyPreviewState); Content mode\'s second preview iframe (#frame) is gone');
 assert(!admin.includes("type: 'defxn-studio-preview-state'"), "Step 2: there is no more 'defxn-studio-preview-state' message -- renderStudioEditor() re-reads siteFromState() directly on every entry instead of being pushed a copy");
 assert(main.includes("data.type !== 'defxn-cms-preview-state'"), 'the public runtime accepts full preview state only in preview mode');
@@ -193,7 +206,10 @@ assert(layout.includes('applyGroupDefault') && main.includes('cmsNearestCommonAn
 assert(main.includes('function cmsSnapshotLayout') && main.includes('function cmsUndoLayout') && main.includes('function cmsRedoLayout'), 'the preview iframe keeps a real undo/redo history for layout/style edits, not just content');
 assert(main.includes('cmsSnapshotLayout();') && (main.match(/cmsSnapshotLayout\(\);/g) || []).length >= 5, 'every layout mutation site (field commit, drag, align, distribute, group, ungroup, reset) snapshots before mutating');
 assert(studio.includes('function postCmsLayoutUndo') && studio.includes('function postCmsLayoutRedo'), 'Studio relays undo/redo requests into the preview iframe');
-assert(studio.includes('function undo() { if (state.cmsLayoutCanUndo) postCmsLayoutUndo(); }') && studio.includes('function redo() { if (state.cmsLayoutCanRedo) postCmsLayoutRedo(); }'), 'Step 1 simplified undo()/redo() to the real layout history alone -- the local dense-tree undoStack/redoStack fallback is deleted along with the rest of the standalone engine, since cmsConnected is always true going forward');
+/* ONE history since 2026-10-19 (docs/ux-audit/cms.md P1-5): js/admin/history.js interleaves the
+   canvas's own entries (reported as 'push') with edits made in the editor's forms, and undo()/redo()
+   ask the canvas only when the edit to take back is one of its own */
+assert(studio.includes("if (entry.kind === 'canvas') { if (side === 'before') postCmsLayoutUndo(); else postCmsLayoutRedo(); return; }") && studio.includes("if (event.data.reason === 'push') historyCanvasPush(event.data.label);"), 'undo()/redo() are the one history: canvas entries go back to the canvas, form edits through setItemField');
 // Step 2: the real preview iframe still reports 'defxn-cms-preview-layout-replace' (that
 // boundary is unchanged), but the old second hop -- Studio relaying it up to admin.js via
 // 'defxn-studio-layout-replace' -- is gone; the SAME handler calls applyStudioLayoutReplace
@@ -276,7 +292,7 @@ assert(main.includes('function cmsRemoveSelection'), 'the preview iframe gained 
 assert(/function cmsRemoveSelection[\s\S]{0,1200}cmsComponentsCommand\(\{ action: 'remove-instance'/.test(main), 'a component-instance selection removes through the existing remove-instance command, not a new removal mechanism');
 assert(/function cmsRemoveSelection[\s\S]{0,1200}cmsUngroupSelection\(\)/.test(main), 'a group selection removes through the existing cmsUngroupSelection(), not a new removal mechanism');
 assert(/function cmsRemoveSelection[\s\S]{0,1200}defxn-cms-preview-notice/.test(main), 'a plain real element gets the existing notice postMessage, never a silent no-op or a crash');
-assert(main.includes("add('Remove', cmsRemoveSelection") , 'the connected right-click menu gained a Remove entry wired to the same function');
+assert(main.includes("add('remove', 'Remove', cmsRemoveSelection"), 'the connected right-click menu (and the toolbar\'s More, the same list: cmsSelectionCommands) has a Remove entry wired to the same function');
 assert((main.match(/document\.addEventListener\('keydown'/g) || []).length === 1, 'the preview iframe gained exactly one new keydown listener (none existed in this file before Part A)');
 assert(/addEventListener\('keydown', function \(event\) \{[\s\S]{0,600}cmsRemoveSelection\(\);/.test(main), 'the new keydown listener calls cmsRemoveSelection on Delete/Backspace, guarded against typing the same way Studio\'s own handler (now in js/admin/admin.js) already is');
 assert(main.includes("data.type === 'defxn-cms-preview-remove-selection'"), 'the iframe also accepts a forwarded remove request from the parent document, for the case where keyboard focus stayed there');
@@ -336,8 +352,10 @@ assert(admin.includes("$('backgroundBtn').addEventListener('click', openCanvasTr
 // Entry point: js/main.js posts the SAME unconditional mode-level action up to Studio
 // (that protocol boundary is untouched, per this step's scope) -- only the receiving side
 // changed, from enterRestrictMode('canvas') to the new popover.
-assert(/add\('Edit canvas', function \(\) \{ window\.parent\.postMessage\(\{ type: 'defxn-cms-preview-enter-canvas-mode' \}, location\.origin\); \}, false\)/.test(main), "showCmsContextMenu still has its unconditional 'Edit canvas' entry, never disabled and not gated on any selection -- js/main.js's protocol is untouched by Step 4");
-assert(/function showCmsContextMenu[\s\S]{0,1200}add\('Edit canvas'[\s\S]{0,400}add\('Add this layer to selection'/.test(main), "'Edit canvas' is still added near the top of the menu, before the 'Add this layer to selection' entry");
+/* "Edit canvas" opened the page-transition popover, which its name did not say: it is "Page
+   transition…" since 2026-10-19 (docs/ux-audit/cms.md P1-8), still unconditional, never disabled,
+   in the one command list both menus draw (cmsSelectionCommands) */
+assert(/add\('page-transition', 'Page transition…', function \(\) \{ window\.parent\.postMessage\(\{ type: 'defxn-cms-preview-enter-canvas-mode' \}, location\.origin\); \}, '', 'site'\)/.test(main), "the selection commands end with an unconditional 'Page transition…' entry that is never disabled and not gated on any selection");
 assert(admin.includes("else if (event.data.type === 'defxn-cms-preview-enter-canvas-mode') openCanvasTransitionsPopover();"), "admin.js's message handler for the connected preview iframe now opens the popover on that message, instead of entering the deleted restrictMode");
 
 // Step 4: restrictMode is retired, so every "Step 6" live-guard site that used to thread
@@ -347,7 +365,7 @@ assert(admin.includes("else if (event.data.type === 'defxn-cms-preview-enter-can
 // mistake while touching it, is caught.
 const liveGuardSites = [
   "if (typing || state.live || state.view === 'map') return;",
-  "bn.hidden = state.device === 0 || state.live || state.view === 'map';",
+  "bn.hidden = state.device === 0 || state.live || state.view === 'map' || state.lens !== 'design';",
 ];
 for (const site of liveGuardSites) assert(admin.includes(site), `restrictMode's removal left this live-guard site intact otherwise: ${JSON.stringify(site.slice(0, 70))}`);
 const deletedGuardSites = [
@@ -499,13 +517,17 @@ assert(store.includes('async function saveElementMotion(contentDir, whole)') && 
 // -- and nothing is torn down or swapped when it changes.
 assert(!/\bstate\.mode\b/.test(admin) && !admin.includes('function kindMode') && !admin.includes('function syncMode') && !admin.includes('function setMode'), 'no app mode is left: no state.mode, kindMode(), syncMode() or setMode()');
 assert(/state\.lens = 'content';/.test(admin) && admin.includes("localStorage.getItem('defxn-cms-lens')"), "the lens opens on 'content' (most edits are text) and is remembered per browser");
-assert(admin.includes('function setLens(lens)') && admin.includes("$('lensContentBtn').addEventListener('click', function () { setLens('content'); });") && admin.includes("$('lensDesignBtn').addEventListener('click', function () { setLens('design'); });"), 'both lens buttons are wired to setLens()');
+/* the lens is Ark's toggle group (js/admin/ark-host.js arkSegGroup) since W3-EDITOR: one pressed, one tab stop, a pick calls setLens */
+assert(admin.includes('function setLens(lens)') && /A\.arkSegGroup\(\$\('lensSwitch'\), \[\$\('lensContentBtn'\), \$\('lensDesignBtn'\)\],\s*\{ selected: LENSES\.indexOf\(state\.lens\), onPick: function \(i\) \{ setLens\(LENSES\[i\]\); \} \}\)/.test(admin), 'both lens buttons are one Ark toggle group whose pick calls setLens()');
 assert(/function setLens\(lens\) \{[\s\S]*?postCmsPreviewLens\(\)/.test(admin) && admin.includes("type: 'defxn-cms-preview-lens', lens: state.lens"), 'a lens change is posted to the canvas (defxn-cms-preview-lens)');
 assert(/addEventListener\('load', \(\) => \{[^}]*postCmsPreviewLens\(\)/.test(admin) && /'defxn-cms-preview-ready'\) \{[\s\S]{0,900}postCmsPreviewLens\(\);/.test(admin), 'the lens is re-sent on every canvas load and after every ready, like Edit/Live');
 assert(app.includes('id="lensSwitch"') && app.includes('id="viewSwitch"') && !app.includes('id="modeSwitch"') && !app.includes('id="designSubSwitch"'), 'the header has a lens switch and a view switch, not a mode switch and a Design-only sub-switch');
 assert(app.includes('id="viewCanvasBtn"') && app.includes('id="viewMapBtn"') && app.includes('id="viewThemeBtn"') && app.includes('id="backgroundBtn"'), 'the views of the one site -- Canvas, Sitemap, Theme -- and the Background popover are ONE segmented control, in either lens');
-assert((app.match(/class="ark-tab"/g) || []).length >= 6, 'the lens and view buttons reuse the existing .ark-tab tab-trigger style already used for in-editor tabs, not a new button convention');
-assert(/for \(const b of \$\('viewSwitch'\)\.querySelectorAll\('\[data-view\]'\)\) b\.addEventListener\('click', \(\) => setView\(b\.dataset\.view\)\);/.test(admin) && /function setView\(v\) \{[\s\S]*?\$\('themeView'\)\.hidden = v !== 'theme';/.test(admin), 'every view button calls the one setView(), which also shows the Theme dock beside the live canvas');
+/* one segmented-control convention: the lens is the same .seg as the canvas strip's screen size and
+   Edit / Preview groups (the editor's .ark-tab class collided with Ark's own tab classes and went
+   with js/admin/primitives.js, W3-EDITOR 2026-10-19) */
+assert(/<div class="seg seg-text lens-switch" id="lensSwitch"/.test(app) && !/class="ark-tab"/.test(app) && !/primitives\.js/.test(app) && !/ArkAdminPrimitives/.test(admin), 'the lens buttons are a .seg group like the strip\'s, and the editor neither loads nor calls local tabs/disclosure primitives');
+assert(/A\.arkSegGroup\(\$\('viewSwitch'\), viewButtons, \{ selected: VIEWS\.indexOf\(state\.view\), onPick: \(i\) => setView\(VIEWS\[i\]\) \}\);/.test(admin) && /function setView\(v\) \{[\s\S]*?\$\('themeView'\)\.hidden = v !== 'theme';/.test(admin), 'every view pick (Ark\'s toggle group, 2026-10-20) calls the one setView(), which also shows the Theme dock beside the live canvas');
 // One rail and one site list: Content's sidebar list (#pageList, #contentNav) and Studio's
 // Pages tab merged into the rail's Pages tab; images and encrypted items are its Media / Vault.
 assert(!app.includes('id="contentNav"') && !app.includes('id="pageList"') && !app.includes('id="cmsShell"') && !app.includes('id="editor"'), 'the old Content layout (#cmsShell, its #pageList sidebar and #editor column) is gone');
@@ -617,7 +639,8 @@ assert(!/saveThemeDraft[\s\S]{0,400}catch \(error\) \{ status\(error\.message, '
 // saves every dirty draft, so the button must enable for a dirty draft anywhere, not only
 // for whatever section happens to be on screen); Revert stays scoped to the current section
 // (it only ever reverts what's on screen), so it keeps using currentDirty().
-assert(admin.includes("function refreshSaveButton() { refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE); }") && /function touch\([^)]*\) \{[\s\S]{0,600}refreshSaveButton\(\);/.test(admin), "the Save button's disabled state uses the fixed anyDirty(), not currentDirty() -- a dirty theme/canvas draft must not leave the Save button looking disabled just because the page on screen is clean");
+/* (since 2026-10-21 the function also paints the unsaved count, cms.md P1-16; its refusal is the same line) */
+assert(/function refreshSaveButton\(\) \{[\s\S]{0,1600}?refuse\(\$\('save'\), anyDirty\(\) \? '' : NOTHING_TO_SAVE\);\n  \}/.test(admin) && /function touch\([^)]*\) \{[\s\S]{0,600}refreshSaveButton\(\);/.test(admin), "the Save button's disabled state uses the fixed anyDirty(), not currentDirty() -- a dirty theme/canvas draft must not leave the Save button looking disabled just because the page on screen is clean");
 // Since the one-workspace unification each form panel carries its own Revert (data-revert="kind:id"),
 // so "scoped to the current section" now means scoped to that panel's item: itemDirty(kind, id).
 assert(/refuse\(revert, neverSaved\(kind, id\) \? '[^']+' : itemDirty\(kind, id\) \? '' : /.test(admin), "Revert's disabled state is scoped to its own item (itemDirty(kind, id)) -- Revert only reverts the item its panel edits, unlike the unified Save button");

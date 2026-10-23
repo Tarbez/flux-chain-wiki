@@ -1,116 +1,157 @@
 # defxn hand-built UI census baseline -- scripts/ux-component-census.mjs --check fails if a value rises.
 # Values only go down (--ratchet). "-" = not measured for that family. See docs/ux-audit/components.md §2.
+# ark-overrides / ark-override-files (css), added 2026-10-19 (W2-ADAPTER): site rules that restyle an Ark
+# block (an Ark class or a block spec id in a selector) -- a per-page variant of a shared block forming.
+# Lowered by hand 2026-10-19 (coordinator), field uses 45 -> 40: an instrument fix, not progress. The literal
+# tokenizer split 'a.b' on the dot and counted property accesses (e.g. stage.title) as class uses; re-measured
+# at 5a1ac71 with the corrected tokenizer. No UI changed.
+# Raised by hand 2026-10-19 (coordinator, W1-SITE-FIXES), three real additions with reasons, each replaced by an
+# Ark block in Wave 2/3 (values have since fallen): button +1 resolution-secondary-action (the onward link the
+# pages.md audit asked for on /resolutions/rules, /algorithms, /finance); stat +1 stats-bar-detail (bar-row detail
+# made visible text when bar rows stopped being inert Tab stops); toggle +1 fold-toggle (the 'More' control that
+# replaced display:none / line-clamp hiding on phones; replaced by the Ark disclosure block in Wave 2).
+# (Restored 2026-10-19 after --ratchet dropped the header comments; the ratchet now keeps them.)
+# Known undercount 2026-10-19 (coordinator): W3-STATS renamed css/resolver-math.css .rm-build-label -> .rm-build-head
+# and .rm-build-note -> .rm-build-foot, which takes one eyebrow-like and one callout-like hand-built element of the
+# /resolver-math term builder out of the name-based count without replacing them. The builder stays hand-built
+# (pinned whole for layout-key continuity); treat eyebrow and callout as one higher than measured until it is
+# converted. Renaming to leave a family is not a reduction.
+# Raised by hand 2026-10-20 (W4-S1, CMS editor), classes field +1 (38 -> 39): file-pick__input (css/admin.css), the
+# visually hidden native <input type=file> half of controls.js filePicker -- the styled file chooser that replaced
+# the browser's bare "Choose File" box in Media (docs/ux-audit/cms.md P1-11). It matches the family's /input/ because
+# it IS an input; the button, the file name and the drop edge are file-pick__btn / __name and the .btn already
+# counted. One chooser for the Media panel, New image and a page's Shape pickers (three bare inputs before).
+# Raised by hand 2026-10-20 (coordinator, W4-S2 /account), used-classes card 7 -> 8 and uses card 9 -> 10:
+# account-card is NOT new -- the old /account page built it inside one innerHTML string the census never read
+# (an undercount). The Ark-block rewrite makes it an el() call, so it is now counted. A measurement correction,
+# not new hand-built UI; it shrinks when the account panels move to an Ark card/list block (missing today).
+# Raised by hand 2026-10-20 (coordinator, Wave 4 close-out):
+# - step (classes 20 -> 22, used-classes 4 -> 8, uses 4 -> 8, signatures 7 -> 8): palette-step, -sample, -meta,
+#   -probe (css/palette.css) are the rows of /palette's Type tab -- one per SDK type-scale STEP
+#   (DEADARK_TYPE_SCALE), derived from the SDK. They match the step family by name, but no stepper or
+#   progress UI is drawn. Net of W4-S6 deleting home-cycle-step/flow-record (those were real steppers, now Ark tabs).
+# - card (classes 28 -> 29, used-classes 8 -> 9, uses 10 -> 11, css-files 15 -> 16): deploy-command-card
+#   (css/page-layout.css) only positions the one shared Copy control (ArkUI.copyCommand, js/ark/page-kit.js)
+#   over a command block on /deploy. Ark has no `code` block yet (ledger S11); it goes when one ships.
+# Raised by hand 2026-10-20 (coordinator, Wave 5 merge): uses toggle 5 -> 6, used-classes modal 1 -> 2, uses modal 3 -> 5.
+# No new hand-built toggle or modal: nav-toggle (the existing MENU button) is referenced once more by the header
+# (the Resolutions menu closes on a delegated .nav-toggle click since the MENU moved onto Ark's popover);
+# header-chain-popover is kept on purpose when the network pill swaps onto Ark's popover block (classes, id and
+# layout key move with it); `sheet` is the word "sheet" in a page-loader message string (the per-route CSS loader),
+# which the census reads as the CMS's .sheet class. Measured with scripts/ux-component-census.mjs at 50fa86c..d99c5ca.
 measure	family	value
-classes	hero	44
-used-classes	hero	21
-uses	hero	34
-css-files	hero	31
-classes	eyebrow	62
-used-classes	eyebrow	36
-uses	eyebrow	65
-css-files	eyebrow	36
-classes	pill	27
-used-classes	pill	16
-uses	pill	18
-css-files	pill	12
-classes	button	38
-used-classes	button	14
-uses	button	21
-css-files	button	23
-classes	card	38
-used-classes	card	16
-uses	card	43
-css-files	card	19
-classes	stat	107
-used-classes	stat	26
-uses	stat	95
-css-files	stat	13
-classes	step	36
-used-classes	step	21
-uses	step	27
-css-files	step	21
-classes	table	9
-used-classes	table	5
-uses	table	20
-css-files	table	5
-classes	code	4
-used-classes	code	2
-uses	code	3
-css-files	code	4
-classes	diagram	6
-used-classes	diagram	5
-uses	diagram	7
-css-files	diagram	5
-classes	tabs	31
-used-classes	tabs	21
-uses	tabs	25
-css-files	tabs	19
-classes	accordion	7
-used-classes	accordion	3
-uses	accordion	8
-css-files	accordion	5
-classes	callout	39
-used-classes	callout	15
-uses	callout	49
-css-files	callout	21
-classes	ctaRow	22
-used-classes	ctaRow	10
-uses	ctaRow	15
-css-files	ctaRow	21
-classes	sectionHead	11
-used-classes	sectionHead	9
-uses	sectionHead	17
-css-files	sectionHead	16
-classes	breadcrumb	13
-used-classes	breadcrumb	11
-uses	breadcrumb	21
-css-files	breadcrumb	17
-classes	nextLinks	27
-used-classes	nextLinks	23
-uses	nextLinks	40
-css-files	nextLinks	18
-classes	field	42
-used-classes	field	23
-uses	field	45
-css-files	field	23
-classes	toggle	12
-used-classes	toggle	5
-uses	toggle	8
-css-files	toggle	8
+classes	hero	14
+used-classes	hero	5
+uses	hero	6
+css-files	hero	17
+classes	eyebrow	37
+used-classes	eyebrow	19
+uses	eyebrow	35
+css-files	eyebrow	24
+classes	pill	16
+used-classes	pill	10
+uses	pill	12
+css-files	pill	8
+classes	button	18
+used-classes	button	3
+uses	button	3
+css-files	button	12
+classes	card	27
+used-classes	card	8
+uses	card	10
+css-files	card	15
+classes	stat	4
+used-classes	stat	3
+uses	stat	4
+css-files	stat	3
+classes	step	16
+used-classes	step	8
+uses	step	8
+css-files	step	11
+classes	table	0
+used-classes	table	0
+uses	table	0
+css-files	table	0
+classes	code	3
+used-classes	code	1
+uses	code	1
+css-files	code	2
+classes	diagram	2
+used-classes	diagram	2
+uses	diagram	2
+css-files	diagram	2
+classes	tabs	7
+used-classes	tabs	3
+uses	tabs	7
+css-files	tabs	9
+classes	accordion	2
+used-classes	accordion	0
+uses	accordion	0
+css-files	accordion	1
+classes	callout	18
+used-classes	callout	4
+uses	callout	8
+css-files	callout	5
+classes	ctaRow	11
+used-classes	ctaRow	3
+uses	ctaRow	4
+css-files	ctaRow	11
+classes	sectionHead	5
+used-classes	sectionHead	2
+uses	sectionHead	5
+css-files	sectionHead	9
+classes	breadcrumb	8
+used-classes	breadcrumb	7
+uses	breadcrumb	11
+css-files	breadcrumb	7
+classes	nextLinks	9
+used-classes	nextLinks	6
+uses	nextLinks	7
+css-files	nextLinks	9
+classes	field	36
+used-classes	field	17
+uses	field	31
+css-files	field	16
+classes	toggle	8
+used-classes	toggle	3
+uses	toggle	6
+css-files	toggle	5
 classes	toast	1
 used-classes	toast	0
 uses	toast	0
 css-files	toast	1
-classes	modal	9
-used-classes	modal	3
-uses	modal	9
-css-files	modal	3
-classes	empty	6
-used-classes	empty	4
-uses	empty	12
-css-files	empty	5
-signatures	hero	40
-signatures	eyebrow	58
-signatures	pill	14
+classes	modal	7
+used-classes	modal	2
+uses	modal	5
+css-files	modal	2
+classes	empty	4
+used-classes	empty	2
+uses	empty	3
+css-files	empty	3
+signatures	hero	11
+signatures	eyebrow	30
+signatures	pill	6
 signatures	button	-
-signatures	card	29
-signatures	stat	21
-signatures	step	25
-signatures	table	4
+signatures	card	15
+signatures	stat	2
+signatures	step	4
+signatures	table	0
 signatures	code	-
 signatures	diagram	-
-signatures	tabs	34
+signatures	tabs	3
 signatures	accordion	-
-signatures	callout	22
+signatures	callout	8
 signatures	ctaRow	-
-signatures	sectionHead	11
-signatures	breadcrumb	16
-signatures	nextLinks	24
+signatures	sectionHead	3
+signatures	breadcrumb	3
+signatures	nextLinks	10
 signatures	field	-
 signatures	toggle	-
 signatures	toast	-
 signatures	modal	-
 signatures	empty	-
-uppercase-rules	css	117
-px-radius-values	css	17
-px-font-sizes	css	66
+uppercase-rules	css	60
+ark-overrides	css	0
+ark-override-files	css	0
+px-radius-values	css	15
+px-font-sizes	css	39

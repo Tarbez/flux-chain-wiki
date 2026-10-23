@@ -1,11 +1,17 @@
-/* Content and screen-reader equivalent for the interactive lattice view. */
+/* /lifecycle and its five stages: one request (copying a dataset snapshot) followed through five
+   signed records, on the story template (js/pages/story.js). The words are this file's own
+   (ArkUI.lifecycleContent; js/lattice.js reads them too) -- it carries no manifest, and adding one
+   now would grow a JSON-in-JS store (docs/ux-audit/components.md R12). Regression:
+   tests/story-blocks.cjs (the page as data, continuity of every saved layout key). */
 (function () {
   'use strict';
 
+  /* A stage's heading names the state its record makes true ("The request is signed."), not a command: the stages are
+     read-only pages, and "Say what you need." sent a visitor looking for a field (first-visit audit 2026-10-22, P2). */
   ArkUI.lifecycleContent = {
     intent: {
       lead: 'Example: you ask someone to copy one named snapshot of a dataset.',
-      heading: 'Say what you need.',
+      heading: 'The request is signed.',
       body: 'The client signs an intent that identifies the snapshot, desired outcome, and applicable constraints. It lands on the client’s own chain, admitted like any record, and later records can refer to it by CID instead of relying on a conversation or a shared queue.',
       note: 'What is still not true: no provider has committed, no work has occurred, and no result has been checked.',
       facts: [
@@ -17,7 +23,7 @@
     },
     offer: {
       lead: 'A provider offers to copy the snapshot and explains the proposed terms.',
-      heading: 'Consider their proposal.',
+      heading: 'A provider offers terms.',
       body: 'The provider signs an offer that references the intent CID. The terms stay attached to the request they answer, so the client can inspect capability, constraints, and proposed evidence before accepting anything.',
       note: 'What is still not true: a signed offer is a proposal, not a shared agreement or proof of capacity.',
       facts: [
@@ -29,7 +35,7 @@
     },
     agreement: {
       lead: 'You and the provider record the same accepted terms for the job.',
-      heading: 'Agree on what comes next.',
+      heading: 'Both sides sign the same terms.',
       body: 'The signed agreement links the accepted intent and offer. It defines what fulfillment will be checked against while unrelated agreements continue independently.',
       note: 'What is still not true: accepted terms do not prove the replication happened or that downstream settlement occurred.',
       facts: [
@@ -41,7 +47,7 @@
     },
     fulfillment: {
       lead: 'The provider shares the result and the evidence required by the agreed terms.',
-      heading: 'Open the result package.',
+      heading: 'The provider hands over the result.',
       body: 'The fulfillment record references the agreement and carries the result evidence defined by its terms. The work remains attached to the request, provider, and policy that gave it meaning.',
       note: 'What is still not true: submission is not acceptance, semantic truth, or proof of every downstream effect.',
       facts: [
@@ -53,7 +59,7 @@
     },
     receipt: {
       lead: 'The checking participant records the outcome under the identified rules and authority.',
-      heading: 'Read the checking decision.',
+      heading: 'The check is recorded.',
       body: 'The receipt links the fulfillment to the agreement, offer, and intent. An auditor can follow one continuous path from request to verification across the participants’ own chains; the agreements resolver reads the links.',
       note: 'What is still not true: a receipt is not universal truth, legally binding settlement, treasury settlement, or production-readiness evidence.',
       facts: [
@@ -65,138 +71,575 @@
     }
   };
 
+  /* `was`: the layout key each element had on the old page, by block id, so a CMS edit saved
+     against it still lands. Derived by tests/lib/layout-continuity.cjs from each route's frozen
+     census (tests/fixtures/layout-keys/lifecycle*.tsv); never typed. */
+  var WAS = {
+   "lifecycle": {
+    "lifecycle-overview-crumbs": {
+     ":root": "page:/nav:1",
+     "breadcrumb-item": "page:/nav:1/a:1",
+     "breadcrumb-item#2": "page:/nav:1/span:1"
+    },
+    "lifecycle-overview-figure": {
+     "disclosure-trigger": "page:/div:1/button:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > strong:nth-of-type(1)": "page:/div:1/figure:1/strong:1",
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)": "page:/div:1/figure:1/p:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2)": "page:/div:1/figure:1/div:2",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)": "page:/div:1/figure:1/div:1/span:1",
+     "canvas": "page:/div:1/figure:1/canvas:1",
+     ".lifecycle-object": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     ".lifecycle-fabric-top": "page:/div:1/figure:1/div:1"
+    },
+    "lifecycle-overview-depth": {
+     "tabs-content": "page:/div:1/div:1/div:1",
+     "tabs-trigger#3": "page:/div:1/div:1/nav:1/button:3",
+     "tabs-list": {
+      "key": "page:/div:1/div:1/nav:1",
+      "self": true
+     },
+     "tabs-trigger": "page:/div:1/div:1/nav:1/button:1",
+     "tabs-trigger#2": "page:/div:1/div:1/nav:1/button:2"
+    },
+    "lifecycle-overview-hero": {
+     "eyebrow": "page:/div:1/div:1/p:1",
+     "hero-title": "page:/div:1/div:1/h1:1"
+    },
+    "lifecycle-overview-boundary": {
+     ":root": "page:/div:1/div:1/aside:1",
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1"
+    },
+    "lifecycle-overview-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "lifecycle-overview-pager": {
+     "[data-ark-part=\"pager-related\"]": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     ":root": {
+      "key": "page:/nav:3",
+      "self": true
+     },
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/intent\"]": "page:/nav:2/a:1",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/offer\"]": "page:/nav:2/a:2",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/agreement\"]": "page:/nav:2/a:3",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/fulfillment\"]": "page:/nav:2/a:4",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/receipt\"]": "page:/nav:2/a:5",
+     "pager-next": "page:/nav:3/a:1"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "lifecycle/intent": {
+    "lifecycle-intent-crumbs": {
+     ":root": "page:/nav:1",
+     "breadcrumb-item": "page:/nav:1/a:1",
+     "breadcrumb-item#2": "page:/nav:1/a:2",
+     "breadcrumb-item#3": "page:/nav:1/span:1"
+    },
+    "lifecycle-intent-figure": {
+     "disclosure-trigger": "page:/div:1/button:1",
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)": "page:/div:1/figure:1/div:2",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)": "page:/div:1/figure:1/nav:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)": "page:/div:1/figure:1/p:2",
+     "canvas": "page:/div:1/figure:1/canvas:1",
+     ".stage-scene": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-kind": "page:/div:1/figure:1/div:1",
+     "p.mesh-story-cue": "page:/div:1/figure:1/p:1"
+    },
+    "lifecycle-intent-hero": {
+     "hero-title": "page:/div:1/div:1/h1:1",
+     "eyebrow": "page:/div:1/div:1/p:1"
+    },
+    "lifecycle-intent-depth": {
+     "tabs-trigger#3": "page:/div:1/div:1/nav:1/button:3",
+     "tabs-list": {
+      "key": "page:/div:1/div:1/nav:1",
+      "self": true
+     },
+     "tabs-trigger": "page:/div:1/div:1/nav:1/button:1",
+     "tabs-trigger#2": "page:/div:1/div:1/nav:1/button:2",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "fact-value": "page:/div:1/div:1/div:1/p:2",
+     "[data-ark-part=\"tabs-content\"] > p": "page:/div:1/div:1/div:1/p:1"
+    },
+    "lifecycle-intent-boundary": {
+     ":scope > div:nth-of-type(1)": "page:/div:1/div:1/aside:1",
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1"
+    },
+    "lifecycle-intent-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "lifecycle-intent-pager": {
+     "[data-ark-part=\"pager-related\"]": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     ":root": {
+      "key": "page:/nav:3",
+      "self": true
+     },
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/offer\"]": "page:/nav:2/a:2",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/agreement\"]": "page:/nav:2/a:3",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/fulfillment\"]": "page:/nav:2/a:4",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/receipt\"]": "page:/nav:2/a:5",
+     "pager-next": "page:/nav:3/a:1"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "lifecycle/offer": {
+    "lifecycle-offer-crumbs": {
+     ":root": "page:/nav:1",
+     "breadcrumb-item": "page:/nav:1/a:1",
+     "breadcrumb-item#2": "page:/nav:1/a:2",
+     "breadcrumb-item#3": "page:/nav:1/span:1"
+    },
+    "lifecycle-offer-figure": {
+     "disclosure-trigger": "page:/div:1/button:1",
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)": "page:/div:1/figure:1/div:2",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)": "page:/div:1/figure:1/nav:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)": "page:/div:1/figure:1/p:2",
+     "canvas": "page:/div:1/figure:1/canvas:1",
+     ".stage-scene": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-kind": "page:/div:1/figure:1/div:1",
+     "p.mesh-story-cue": "page:/div:1/figure:1/p:1"
+    },
+    "lifecycle-offer-hero": {
+     "hero-title": "page:/div:1/div:1/h1:1",
+     "eyebrow": "page:/div:1/div:1/p:1"
+    },
+    "lifecycle-offer-depth": {
+     "tabs-trigger#3": "page:/div:1/div:1/nav:1/button:3",
+     "tabs-list": {
+      "key": "page:/div:1/div:1/nav:1",
+      "self": true
+     },
+     "tabs-trigger": "page:/div:1/div:1/nav:1/button:1",
+     "tabs-trigger#2": "page:/div:1/div:1/nav:1/button:2",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "fact-value": "page:/div:1/div:1/div:1/p:2",
+     "[data-ark-part=\"tabs-content\"] > p": "page:/div:1/div:1/div:1/p:1"
+    },
+    "lifecycle-offer-boundary": {
+     ":scope > div:nth-of-type(1)": "page:/div:1/div:1/aside:1",
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1"
+    },
+    "lifecycle-offer-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "lifecycle-offer-pager": {
+     "[data-ark-part=\"pager-related\"]": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     ":root": {
+      "key": "page:/nav:3",
+      "self": true
+     },
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/intent\"]": "page:/nav:2/a:1",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/agreement\"]": "page:/nav:2/a:3",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/fulfillment\"]": "page:/nav:2/a:4",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/receipt\"]": "page:/nav:2/a:5",
+     "pager-next": "page:/nav:3/a:2"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "lifecycle/agreement": {
+    "lifecycle-agreement-crumbs": {
+     ":root": "page:/nav:1",
+     "breadcrumb-item": "page:/nav:1/a:1",
+     "breadcrumb-item#2": "page:/nav:1/a:2",
+     "breadcrumb-item#3": "page:/nav:1/span:1"
+    },
+    "lifecycle-agreement-figure": {
+     "disclosure-trigger": "page:/div:1/button:1",
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)": "page:/div:1/figure:1/div:2",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)": "page:/div:1/figure:1/nav:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)": "page:/div:1/figure:1/p:2",
+     "canvas": "page:/div:1/figure:1/canvas:1",
+     ".stage-scene": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-kind": "page:/div:1/figure:1/div:1",
+     "p.mesh-story-cue": "page:/div:1/figure:1/p:1"
+    },
+    "lifecycle-agreement-hero": {
+     "hero-title": "page:/div:1/div:1/h1:1",
+     "eyebrow": "page:/div:1/div:1/p:1"
+    },
+    "lifecycle-agreement-depth": {
+     "tabs-trigger#3": "page:/div:1/div:1/nav:1/button:3",
+     "tabs-list": {
+      "key": "page:/div:1/div:1/nav:1",
+      "self": true
+     },
+     "tabs-trigger": "page:/div:1/div:1/nav:1/button:1",
+     "tabs-trigger#2": "page:/div:1/div:1/nav:1/button:2",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "fact-value": "page:/div:1/div:1/div:1/p:2",
+     "[data-ark-part=\"tabs-content\"] > p": "page:/div:1/div:1/div:1/p:1"
+    },
+    "lifecycle-agreement-boundary": {
+     ":scope > div:nth-of-type(1)": "page:/div:1/div:1/aside:1",
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1"
+    },
+    "lifecycle-agreement-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "lifecycle-agreement-pager": {
+     "[data-ark-part=\"pager-related\"]": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     ":root": {
+      "key": "page:/nav:3",
+      "self": true
+     },
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/intent\"]": "page:/nav:2/a:1",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/offer\"]": "page:/nav:2/a:2",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/fulfillment\"]": "page:/nav:2/a:4",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/receipt\"]": "page:/nav:2/a:5",
+     "pager-next": "page:/nav:3/a:2"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "lifecycle/fulfillment": {
+    "lifecycle-fulfillment-crumbs": {
+     ":root": "page:/nav:1",
+     "breadcrumb-item": "page:/nav:1/a:1",
+     "breadcrumb-item#2": "page:/nav:1/a:2",
+     "breadcrumb-item#3": "page:/nav:1/span:1"
+    },
+    "lifecycle-fulfillment-figure": {
+     "disclosure-trigger": "page:/div:1/button:1",
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)": "page:/div:1/figure:1/div:2",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)": "page:/div:1/figure:1/nav:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)": "page:/div:1/figure:1/p:2",
+     "canvas": "page:/div:1/figure:1/canvas:1",
+     ".stage-scene": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-kind": "page:/div:1/figure:1/div:1",
+     "p.mesh-story-cue": "page:/div:1/figure:1/p:1"
+    },
+    "lifecycle-fulfillment-hero": {
+     "hero-title": "page:/div:1/div:1/h1:1",
+     "eyebrow": "page:/div:1/div:1/p:1"
+    },
+    "lifecycle-fulfillment-depth": {
+     "tabs-trigger#3": "page:/div:1/div:1/nav:1/button:3",
+     "tabs-list": {
+      "key": "page:/div:1/div:1/nav:1",
+      "self": true
+     },
+     "tabs-trigger": "page:/div:1/div:1/nav:1/button:1",
+     "tabs-trigger#2": "page:/div:1/div:1/nav:1/button:2",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "fact-value": "page:/div:1/div:1/div:1/p:2",
+     "[data-ark-part=\"tabs-content\"] > p": "page:/div:1/div:1/div:1/p:1"
+    },
+    "lifecycle-fulfillment-boundary": {
+     ":scope > div:nth-of-type(1)": "page:/div:1/div:1/aside:1",
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1"
+    },
+    "lifecycle-fulfillment-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "lifecycle-fulfillment-pager": {
+     "[data-ark-part=\"pager-related\"]": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     ":root": {
+      "key": "page:/nav:3",
+      "self": true
+     },
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/intent\"]": "page:/nav:2/a:1",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/offer\"]": "page:/nav:2/a:2",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/agreement\"]": "page:/nav:2/a:3",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/receipt\"]": "page:/nav:2/a:5",
+     "pager-next": "page:/nav:3/a:2"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   },
+   "lifecycle/receipt": {
+    "lifecycle-receipt-crumbs": {
+     ":root": "page:/nav:1",
+     "breadcrumb-item": "page:/nav:1/a:1",
+     "breadcrumb-item#2": "page:/nav:1/a:2",
+     "breadcrumb-item#3": "page:/nav:1/span:1"
+    },
+    "lifecycle-receipt-figure": {
+     "disclosure-trigger": "page:/div:1/button:1",
+     "figure-caption": "page:/div:1/figure:1/figcaption:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)": "page:/div:1/figure:1/div:2",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > nav:nth-of-type(1)": "page:/div:1/figure:1/nav:1",
+     ":scope > div:nth-of-type(1) > figure:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)": "page:/div:1/figure:1/p:2",
+     "canvas": "page:/div:1/figure:1/canvas:1",
+     ".stage-scene": {
+      "key": "page:/div:1/figure:1",
+      "self": true
+     },
+     "figure-kind": "page:/div:1/figure:1/div:1",
+     "p.mesh-story-cue": "page:/div:1/figure:1/p:1"
+    },
+    "lifecycle-receipt-hero": {
+     "hero-title": "page:/div:1/div:1/h1:1",
+     "eyebrow": "page:/div:1/div:1/p:1"
+    },
+    "lifecycle-receipt-depth": {
+     "tabs-trigger#3": "page:/div:1/div:1/nav:1/button:3",
+     "tabs-list": {
+      "key": "page:/div:1/div:1/nav:1",
+      "self": true
+     },
+     "tabs-trigger": "page:/div:1/div:1/nav:1/button:1",
+     "tabs-trigger#2": "page:/div:1/div:1/nav:1/button:2",
+     "tabs-content": {
+      "key": "page:/div:1/div:1/div:1",
+      "self": true
+     },
+     "fact-value": "page:/div:1/div:1/div:1/p:2",
+     "[data-ark-part=\"tabs-content\"] > p": "page:/div:1/div:1/div:1/p:1"
+    },
+    "lifecycle-receipt-boundary": {
+     ":scope > div:nth-of-type(1)": "page:/div:1/div:1/aside:1",
+     "alert-title": "page:/div:1/div:1/aside:1/strong:1",
+     "alert-description": "page:/div:1/div:1/aside:1/p:1"
+    },
+    "lifecycle-receipt-body": {
+     ":root": {
+      "key": "page:/div:1",
+      "self": true
+     },
+     ".story-main": {
+      "key": "page:/div:1/div:1",
+      "self": true
+     }
+    },
+    "lifecycle-receipt-pager": {
+     "[data-ark-part=\"pager-related\"]": {
+      "key": "page:/nav:2",
+      "self": true
+     },
+     ":root": {
+      "key": "page:/nav:3",
+      "self": true
+     },
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/intent\"]": "page:/nav:2/a:1",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/offer\"]": "page:/nav:2/a:2",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/agreement\"]": "page:/nav:2/a:3",
+     "[data-ark-part=\"pager-related\"] a[href$=\"/lifecycle/fulfillment\"]": "page:/nav:2/a:4",
+     "pager-next": "page:/nav:3/a:2"
+    },
+    "insert": {
+     "key": "page:/div:2",
+     "self": true
+    }
+   }
+  };
+
+  function two(n) { return String(n).padStart(2, '0'); }
+
+  /* The overview's illustration: the agreements resolver's fabric, one reference trail for five
+     records. Pointing at or focusing a stage (Step by step, the pager) previews that record on it. */
+  function trailFigure() {
+    var box = ArkUI.el('div', 'lifecycle-object');
+    var top = ArkUI.el('div', 'lifecycle-fabric-top'); top.appendChild(ArkUI.el('span', '', 'AGREEMENTS RESOLVER')); box.appendChild(top);
+    /* the number says what it counts ("5 / records", "2 / of 5 records"): a bare "05" read as nothing (first-visit audit
+       2026-10-22, P1). The words are a span of their own beside the number, so the number keeps its size and its key. */
+    var total = ArkUI.lifecycleStages.length;
+    var count = ArkUI.el('strong', 'lifecycle-fabric-count', String(total)); box.appendChild(count);
+    var unit = ArkUI.el('span', 'lifecycle-fabric-unit', 'records'); box.appendChild(unit);
+    var mesh = ArkUI.el('canvas', 'lifecycle-fabric-mesh'); mesh.setAttribute('aria-hidden', 'true'); box.appendChild(mesh);
+    var preview = ArkUI.el('p', 'lifecycle-fabric-preview', 'Each signed record adds a reference to the same agreement.'); box.appendChild(preview);
+    var foot = ArkUI.el('div', 'lifecycle-fabric-foot'); foot.appendChild(ArkUI.el('span', '', 'Dataset snapshot')); foot.appendChild(ArkUI.el('span', '', 'References persist')); box.appendChild(foot);
+    var fabric = ArkUI.createMeshFabric(mesh, { labelMin: 12 }), shown = 'receipt', caption = null;
+    function paint(stage, at, title, text) {
+      if (shown === stage && at) return;
+      shown = stage; fabric.select(stage, !!at);
+      count.textContent = at ? at : String(total); unit.textContent = at ? 'of ' + total + ' records' : 'records'; preview.textContent = text;
+      if (caption) caption.textContent = title;
+    }
+    var all = 'Five records. One reference trail.';
+    return {
+      element: box, caption: all,
+      bind: function (page) { caption = page.querySelector('[data-ark-part="figure-caption"] p'); },
+      preview: function (stage) {
+        var i = ArkUI.lifecycleStages.findIndex(function (s) { return s.id === stage; });
+        paint(stage, String(i + 1), ArkUI.lifecycleStages[i].title + ' / same snapshot', ArkUI.lifecycleContent[stage].facts[2][1]);
+      },
+      reset: function () { paint('receipt', '', all, 'Each signed record adds a reference to the same agreement.'); },
+      start: function () { fabric.select('receipt', false); },
+      visible: function (on) { fabric.visible(on); },
+      dispose: function () { fabric.dispose(); }
+    };
+  }
+
   ArkUI.pageModules.lifecycle = {
     mount: function (host, page) {
-      var id = page.split('/')[1], index = Math.max(0, ArkUI.lifecycleStages.findIndex(function (stage) { return stage.id === id; }));
-      var stage = ArkUI.lifecycleStages[index], copy = ArkUI.lifecycleContent[stage.id];
+      var id = page.split('/')[1] || '';
       if (id && !ArkUI.lifecycleContent[id]) throw new Error('Unknown lifecycle stage: ' + id);
-      var el = ArkUI.el('section', 'ark-page lifecycle-page');
-      el.dataset.arkPage = page;
-      /* This page carries no ArkManifest of its own (ArkUI.lifecycleContent
-         above is a standalone content object, not a manifest), so there is
-         no manifest field for a 'link' kind value to live in; a destination
-         stays a tagged literal in code, resolved the one shared way every
-         retrofitted call site is -- js/ark/dash-kit.js's linkEl. */
-      function link(label, key, cls) {
-        return ArkUI.dash.linkEl(label, 'route:' + key, undefined, cls);
+      var stages = ArkUI.lifecycleStages, index = Math.max(0, stages.findIndex(function (s) { return s.id === id; }));
+      var stage = stages[index], copy = ArkUI.lifecycleContent[stage.id];
+      var guide = { label: 'Read the agreement guide', href: 'doc:docs/protocol/agreements.md', tone: 'link' };
+      /* Block ids carry the stage: two stages are mounted at once while one hands over to the next. */
+      var prefix = 'lifecycle-' + (id || 'overview');
+      var picture = id ? ArkUI.createStageScene(id, copy) : trailFigure();
+      /* The five stages, as links: the pager's related row (the old trail). */
+      var related = stages.filter(function (s) { return s.id !== id; }).map(function (s) { return { label: s.title, href: 'route:lifecycle/' + s.id }; });
+      /* Out of the lifecycle, not only along it: the ways on from this page's journey (ArkUI.nextSteps, js/ark/page-kit.js),
+         in sight in The idea -- on the overview and the last stage only. In the middle of the story they pushed the visitor
+         out while the way on ("Continue to Offer") sat below the fold (first-visit audit 2026-10-22, P1); there the next
+         stage is the hero's one action, as on the theory sheets. */
+      var last = id && index === stages.length - 1, following = id ? stages[index + 1] : stage;
+      var ways = !id || last ? ArkUI.nextSteps(page) : [], onward = ways.length ? [{ block: 'actions', props: { label: 'Where next', items: ways } }] : [];
+      var action = following ? [{ label: (id ? 'Next stage: ' : 'Follow the first stage: ') + following.title, href: 'route:lifecycle/' + following.id, tone: 'primary' }] : undefined;
+      var def = {
+        page: page, id: prefix, className: 'story-lifecycle', titleId: prefix + '-title', was: WAS[page] || {}, insertWas: (WAS[page] || {}).insert,
+        crumbs: [{ label: 'Home', href: 'route:zero' }].concat(id ? [{ label: 'Agreement lifecycle', href: 'route:lifecycle' }, { label: stage.title }] : [{ label: 'Agreement lifecycle' }]),
+        eyebrow: id ? ArkUI.story.position('Agreement lifecycle', index, stages.length) : 'One snapshot / five signed records',
+        title: id ? copy.heading : 'From request to receipt.',
+        actions: action,
+        /* The idea is the short answer: the example, then what becomes true. How it works opens one
+           fact at a time, as the old fact chips did (an accordion now: one ARIA model, one look). */
+        depth: id ? {
+          focus: { text: copy.lead, blocks: [{ block: 'facts', props: { label: stage.title, columns: 1, items: [{ term: copy.facts[2][0], value: copy.facts[2][1] }] } }].concat(onward) },
+          /* "Becomes true" is the idea's answer and "References" opens the evidence: each fact is
+             shown once, labelled, where it answers its view's question. */
+          context: { blocks: [{ block: 'accordion', props: { label: 'Inspect ' + stage.title, defaultOpen: ['why'], items: [
+            { value: 'why', title: 'Why it matters', content: copy.body },
+            { value: 'who', title: copy.facts[0][0], content: copy.facts[0][1] },
+            { value: 'next', title: copy.facts[3][0] === 'Next' ? 'What follows' : copy.facts[3][0], content: copy.facts[3][1] }
+          ] } }] },
+          reference: { text: 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.',
+            blocks: [{ block: 'facts', props: { label: stage.title + ' evidence', columns: 1, items: [{ term: copy.facts[1][0], value: copy.facts[1][1] }] } }, { block: 'actions', props: { items: [guide] } }] }
+        } : {
+          /* The idea is the first paragraph's two sentences; how the records link (CID, grammar, admission) opens Step by step,
+             above the stages (first-visit audit 2026-10-22, P1: 95 words ended "Choose a stage..." with no stage in view). */
+          focus: { text: 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification.', blocks: onward },
+          context: { text: 'Each stage answers a different question. Each record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.', blocks: [{ block: 'accordion', props: { label: 'Agreement stages', items: stages.map(function (s, i) {
+              var c = ArkUI.lifecycleContent[s.id];
+              return { value: s.id, title: two(i + 1) + ' · ' + s.title, content: c.facts[2][1] + '\n\n' + c.note, blocks: [{ block: 'actions', props: { items: [{ label: 'Open ' + s.title, href: 'route:lifecycle/' + s.id, tone: 'link' }] } }] };
+            }) } }] },
+          reference: { text: 'The canonical agreement guide describes the record types and their reference chain. This is an illustrative walkthrough, not a live agreement or a verified production run.', blocks: [{ block: 'actions', props: { items: [guide] } }] }
+        },
+        boundary: id
+          ? { tone: 'info', title: 'Not yet established', body: copy.note.replace('What is still not true: ', '').replace(/^./, function (c) { return c.toUpperCase(); }) }
+          : { tone: 'drift', title: 'Status / Partial', body: 'Implemented in source. Full public production automation and economic settlement remain unverified.' },
+        figure: { slot: 'illustration', caption: id ? picture.title : picture.caption },
+        slots: { illustration: picture.element },
+        /* Onward: the next stage (the main path), and every other stage one press away -- the old
+           five-stage trail. The previous stage is among them. */
+        pager: {
+          label: 'Continue the story',
+          next: !id ? { label: 'Follow ' + stage.title, href: 'route:lifecycle/' + stage.id }
+            : stages[index + 1] ? { label: 'Continue to ' + stages[index + 1].title, href: 'route:lifecycle/' + stages[index + 1].id }
+            : { label: 'Return to the full trail', href: 'route:lifecycle' },
+          relatedLabel: id ? 'The other stages' : 'The five stages',
+          related: related
+        },
+        onFigureVisibility: function (figure, visible) { picture.visible(visible); },
+        dispose: function () { picture.dispose(); }
+      };
+      var el = ArkUI.story.mount(def, null);
+      el.dataset.stage = id || 'overview';
+      if (picture.bind) picture.bind(el);
+      /* Preview a stage on the illustration from any link or step that names it. */
+      function previewOn(node, stageId) {
+        var show = function () { picture.preview(stageId); };
+        var back = function () { if (id) picture.preview(id); else picture.reset(); };
+        node.addEventListener('pointerenter', show); node.addEventListener('focus', show);
+        node.addEventListener('pointerleave', back); node.addEventListener('blur', back);
       }
-      var path = ArkUI.el('nav', 'content-layer-path'); path.setAttribute('aria-label', 'Your place');
-      path.appendChild(link('← Home', 'zero'));
-      if (id) path.appendChild(link('02 / Agreement lifecycle', 'lifecycle'));
-      var current = ArkUI.el('span', '', id ? '03 / ' + id.charAt(0).toUpperCase() + id.slice(1) : '02 / Agreement lifecycle');
-      current.setAttribute('aria-current', 'page'); path.appendChild(current); el.appendChild(path);
-      el.dataset.stage=id||'overview';
-      var heading=ArkUI.el('h1','',id?copy.heading:'From request to receipt.');
-      var trail = ArkUI.el('nav', 'lifecycle-trail'); trail.setAttribute('aria-label', 'Agreement stages');
-      ArkUI.lifecycleStages.forEach(function (item, i) {
-        var a = link(item.title, 'lifecycle/' + item.id, 'lifecycle-trail-item');
-        a.dataset.stage = item.id;
-        var number = ArkUI.el('span', 'story-index', String(i + 1).padStart(2, '0')); a.insertBefore(number, a.firstChild);
-        a.dataset.position=i<index&&id?'earlier':id===item.id?'current':'next';
-        if (id === item.id) a.setAttribute('aria-current', 'step');
-        trail.appendChild(a);
-      });
-      var body = ArkUI.el('div', 'lifecycle-dashboard-body');
-      var answer = ArkUI.el('div', 'lifecycle-answer');
-      answer.appendChild(ArkUI.el('p','story-kicker',id?String(index+1).padStart(2,'0')+' / '+stage.title.toUpperCase():'ONE SNAPSHOT / FIVE SIGNED RECORDS'));
-      answer.appendChild(heading);
-      var view = ArkUI.el('div', 'lifecycle-view'); view.setAttribute('aria-live', 'polite');
-      var modes = ArkUI.el('nav', 'story-depth'); modes.setAttribute('aria-label', 'Explanation depth');
-      var controls = [];
-      ['Answer', 'Understand why', 'Evidence'].forEach(function (label, i) {
-        var button = ArkUI.el('button', '', label); button.type = 'button';button.dataset.icon=['overview','layers','evidence'][i];
-        button.addEventListener('click', function () { select(i, true); });
-        controls.push(button); modes.appendChild(button);
-      }); answer.appendChild(view);answer.appendChild(modes);
-      var boundary = ArkUI.el('aside', 'lifecycle-boundary');
-      boundary.appendChild(ArkUI.el('strong', '', id ? 'Not yet established' : 'Status / Partial'));
-      boundary.appendChild(ArkUI.el('p', '', id ? copy.note.replace('What is still not true: ', '') : 'Implemented in source. Full public production automation and economic settlement remain unverified.'));
-      answer.appendChild(boundary); body.appendChild(answer);
-      var unique=id&&ArkUI.createStageScene?ArkUI.createStageScene(id,copy):null;
-      var previewStage=id||'receipt';
-      if(unique){
-        el.classList.add('lifecycle-unique');body.appendChild(unique.element);el.appendChild(body);el.appendChild(trail);
-        ArkUI.lifecycleStages.forEach(function(item,i){var a=trail.children[i];a.addEventListener('pointerenter',function(){unique.preview(item.id);});a.addEventListener('focus',function(){unique.preview(item.id);});});
-        trail.addEventListener('pointerleave',function(){unique.preview(id);});
-        trail.addEventListener('focusout',function(event){if(!trail.contains||!trail.contains(event.relatedTarget))unique.preview(id);});
-      }else{
-      var illustration = ArkUI.el('figure', 'lifecycle-object');
-      illustration.setAttribute('aria-label', 'Illustrative reference fabric, not a live agreement');
-      var figureTop=ArkUI.el('div','lifecycle-fabric-top');
-      figureTop.appendChild(ArkUI.el('span','', 'AGREEMENTS RESOLVER'));
-      figureTop.appendChild(ArkUI.el('span','', 'ILLUSTRATION'));
-      illustration.appendChild(figureTop);
-      var count=ArkUI.el('strong','lifecycle-fabric-count',id?String(index+1).padStart(2,'0'):'05');illustration.appendChild(count);
-      var figureTitle=ArkUI.el('figcaption','',id?stage.title+' / linked to the same snapshot':'Five records. One reference trail.');illustration.appendChild(figureTitle);
-      var mesh=ArkUI.el('canvas','lifecycle-fabric-mesh');mesh.setAttribute('aria-hidden','true');illustration.appendChild(mesh);
-      var preview=ArkUI.el('p','lifecycle-fabric-preview',id?copy.facts[2][1]:'Each signed record adds a reference to the same agreement.');illustration.appendChild(preview);
-      var foot=ArkUI.el('div','lifecycle-fabric-foot');foot.appendChild(ArkUI.el('span','','Dataset snapshot'));foot.appendChild(ArkUI.el('span','','References persist'));illustration.appendChild(foot);
-      body.appendChild(illustration);el.appendChild(body);el.appendChild(trail);
-      var fabric=ArkUI.createMeshFabric(mesh),previewStage=id||'receipt';
-      function paintFabric(selected,animate){fabric.select(selected,!!animate);}
-      function previewRecord(selected){
-        if(previewStage===selected)return;previewStage=selected;paintFabric(selected,true);
-        var item=ArkUI.lifecycleContent[selected],selectedIndex=ArkUI.lifecycleStages.findIndex(function(s){return s.id===selected;});
-        count.textContent=String(selectedIndex+1).padStart(2,'0');
-        figureTitle.textContent=ArkUI.lifecycleStages[selectedIndex].title+' / same snapshot';
-        preview.textContent=item.facts[2][1];
-      }
-      ArkUI.lifecycleStages.forEach(function(item,i){
-        var a=trail.children[i];
-        a.addEventListener('pointerenter',function(){previewRecord(item.id);});
-        a.addEventListener('focus',function(){previewRecord(item.id);});
-      });
-      function resetPreview(){previewRecord(id||'receipt');if(!id){count.textContent='05';figureTitle.textContent='Five records. One reference trail.';preview.textContent='Each signed record adds a reference to the same agreement.';}}
-      trail.addEventListener('pointerleave',resetPreview);
-      trail.addEventListener('focusout',function(event){if(!trail.contains||!trail.contains(event.relatedTarget))resetPreview();});
-
-      }
-      var next = ArkUI.el('nav', 'lifecycle-next'); next.setAttribute('aria-label', 'Continue the story');
-      if (id && index > 0) next.appendChild(link('← ' + ArkUI.lifecycleStages[index - 1].title, 'lifecycle/' + ArkUI.lifecycleStages[index - 1].id));
-      var nextStage = id ? ArkUI.lifecycleStages[index + 1] : stage;
-      next.appendChild(link(nextStage ? (id ? 'Continue to ' : 'Follow ') + nextStage.title + ' →' : 'Return to the full trail →', nextStage ? 'lifecycle/' + nextStage.id : 'lifecycle', 'story-primary'));
-      el.appendChild(next);
-      function select(depth, write) {
-        controls.forEach(function (control, i) { control.setAttribute('aria-pressed', String(i === depth)); });
-        el.dataset.depth = ['focus', 'context', 'reference'][depth];
-        view.replaceChildren();
-        if (depth === 0) {
-          view.appendChild(ArkUI.el('p', 'lifecycle-scenario', id ? copy.lead : 'A client asks a provider to replicate one named dataset snapshot. Each party writes its signed records to its own FXN chain, and the agreements resolver connects the request, terms, work, and policy-bound verification. Each stage answers a different question.'));
-          if (id) view.appendChild(ArkUI.el('p', 'story-result', copy.facts[2][1]));
-        } else if (depth === 1) {
-          if(!id)view.appendChild(ArkUI.el('p', '', 'Each record sits on its writer’s own chain and refers to the preceding request or result by CID. The chain admits it on grammar, signature and position alone; the agreements resolver reads what the links mean. Choose a stage to inspect what becomes true and what remains unproven.'));
-          if (id) {
-            var facts = ArkUI.el('div', 'lifecycle-facts'), choices = ArkUI.el('nav', ''); choices.setAttribute('aria-label', 'Inspect ' + stage.title);
-            var factAnswer = ArkUI.el('p', '', copy.body); factAnswer.setAttribute('aria-live', 'polite');
-            var buttons = [];
-            [['Why it matters',copy.body]].concat(copy.facts).forEach(function (fact, i) {
-              var button = ArkUI.el('button', 'mechanism-step', fact[0] === 'Next' ? 'What follows' : fact[0]); button.type = 'button'; button.setAttribute('aria-pressed', String(i === 0));
-              button.addEventListener('click', function () { factAnswer.textContent = fact[1]; buttons.forEach(function (b, j) { b.setAttribute('aria-pressed', String(i === j)); }); });
-              buttons.push(button); choices.appendChild(button);
-            }); facts.appendChild(choices); facts.appendChild(factAnswer); view.appendChild(facts);
-          }
-        } else {
-          view.appendChild(ArkUI.el('p', '', id ? copy.facts[1][1] : 'The canonical agreement guide describes the record types and their reference chain. This is an illustrative walkthrough, not a live agreement or a verified production run.'));
-          var guide = ArkUI.dash.linkEl('Read the agreement guide ↗', 'doc:docs/protocol/agreements.md', ArkUI.pageCatalog[page].path, 'story-reference'); view.appendChild(guide);
-          if (id) view.appendChild(ArkUI.el('p', '', 'The diagram does not supply real CIDs or result artifacts. Inspect actual signed records before drawing a verification conclusion.'));
-        }
-        if(ArkUI.decorateActionIcons)ArkUI.decorateActionIcons(view);
-        if (write) {
-          var query = depth ? 'view=' + ['focus', 'context', 'reference'][depth] : '';
-          ArkUI.route.write(ArkUI.pageCatalog[page].path, query, 'push');
-        }
-      }
-      function restore() {
-        var route = ArkUI.route.path();
-        if (route !== ArkUI.pageCatalog[page].path) return;
-        var selected = new URLSearchParams(ArkUI.route.search()).get('view');
-        select(selected === 'context' ? 1 : selected === 'reference' ? 2 : 0, false);
-      }
-      select(0, false); restore();
-      window.addEventListener('popstate', restore); window.addEventListener('hashchange', restore);
-      el.arkDispose = function () { if(unique)unique.dispose();else fabric.dispose();window.removeEventListener('popstate', restore); window.removeEventListener('hashchange', restore); };
-      var components = ArkUI.el('div', 'lifecycle-components'); components.setAttribute('data-ark-insert', 'main'); el.appendChild(components);
-      host.appendChild(el);if(unique)unique.start();else fabric.select(previewStage,false);return el;
+      Array.prototype.forEach.call(el.querySelectorAll('#' + prefix + '-pager a[data-scene-link^="lifecycle/"]'), function (a) { previewOn(a, a.getAttribute('data-scene-link').split('/')[1]); });
+      if (!id) Array.prototype.forEach.call(el.querySelectorAll('[data-ark-part="accordion-trigger"]'), function (button, i) { previewOn(button, stages[i].id); });
+      host.appendChild(el);
+      picture.start();
+      return el;
     }
   };
 })();

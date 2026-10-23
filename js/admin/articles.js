@@ -49,6 +49,18 @@
   function articleField(article, key, label, kind) {
     return boundField('article', article.slug, key, label, { type: kind === 'text' ? 'textarea' : 'text', rows: 3, id: 'a-' + article.slug + '-' + key });
   }
+  /* The read time, shown and never edited: LearningContent.readTime derives it from the draft's
+     words and the serializer writes it on Save (W3-LEARN, 2026-10-19 -- it was a typed field, up to
+     three times the real read time). It follows the words as they are typed. */
+  function readTimeField(article, root) {
+    var derived = function () { return LearningContent.readTime(article) || ''; };
+    var row = A.ctlField({ get: derived, set: function () {} }, 'Reading time', 'minutes',
+      { type: 'text', readOnly: true, id: 'a-' + article.slug + '-minutes', hint: 'Derived from the words; written on Save' });
+    var control = row.children[1];
+    control.dataset.derived = 'readTime';
+    root.addEventListener('input', function () { control.value = derived(); });
+    return row;
+  }
   /* relatedPage/actionPage/evidenceHref are link data in spirit (a page key, a page key, a
      reference-doc path) even though LearningContent is not ArkManifest, so they get the same
      tagged route:/doc: picker -- see linkPickerEl (js/admin/editor.js) and
@@ -77,12 +89,12 @@
       root.classList.add('cms-form');
       var a = state.aDrafts[slug];
       if (!a) { root.appendChild(h('p', { class: 'empty-state', text: slug ? 'There is no article "' + slug + '" any more (deleted, or never created). Pick an article in the Pages tab.' : 'Pick an article in the Pages tab.' })); return; }
-      root.appendChild(panelHead(a.title || slug, '/learnings/' + slug + '  ·  js/content/articles/' + slug + '.js', 'article', slug));
+      root.appendChild(panelHead(a.title || slug, '/learnings/' + slug, 'article', slug, 'js/content/articles/' + slug + '.js'));
 
       var card = h('fieldset', {}, h('legend', { text: 'Card' }));
       card.appendChild(articleField(a, 'title', 'Title', 'line'));
       card.appendChild(articleField(a, 'category', 'Category', 'line'));
-      card.appendChild(articleField(a, 'minutes', 'Reading time', 'line'));
+      card.appendChild(readTimeField(a, root));
       card.appendChild(articleField(a, 'summary', 'Summary', 'text'));
       root.appendChild(card);
 
@@ -151,7 +163,7 @@
     if (!a) { status('Nothing deleted: there is no article "' + slug + '".', 'error'); return; }
     if (state.slugs.length <= 1) { status('Keep at least one article: the site links each note to the next.', 'warn'); return; }
     if (!state.cdirs && state.aSaved[slug] !== null) { status('Connect the project folder to delete an article: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + a.title + '"? This removes its file and its card on the Learnings page.')) return;
+    if (!(await A.confirmDelete('article', a.title, 'This removes its file and its card on the Learnings page.', state.aSaved[slug] === null))) return;
     var routesBefore = studioRoutes().map(function (r) { return r.path; });
     try { await removeItemFile('article', slug); }
     catch (error) { status(error.message, 'error'); return; }
@@ -159,6 +171,7 @@
     if (state.aCurrent === slug) state.aCurrent = state.slugs[0];
     afterItemRemoved('article', slug, '/learnings/' + slug);
     status('Deleted ' + a.title + '.' + forgot + await afterDelete(), 'ok');
+    if (typeof A.deletedNotice === 'function') A.deletedNotice(a.title);
   }
 
   /* An article is named from what was typed ("hello-world" -> "Hello world"): it was "New note"
@@ -173,12 +186,15 @@
   }
   /* createArticle(slug) -> { ok, id } | { ok: false, refusal }: a new article draft (written by
      the next Save, which refuses it until its editorial fields are filled), made current. */
-  function createArticle(slug) {
+  function createArticle(slug, opts) {
     slug = String(slug || '').trim();
-    var refusal = !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(slug) ? 'An article name is lowercase words joined by hyphens, starting with a letter.'
-      : state.aDrafts[slug] ? 'There is already an article called ' + slug + '.' : '';
-    if (refusal) { status(refusal, 'error'); return { ok: false, refusal: refusal }; }
+    var title = opts && opts.title ? String(opts.title).trim() : '';
+    var refusal = !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(slug) ? (title ? 'The title "' + title + '" gives no address: it needs at least one letter (a-z). Add one, or set the address under Developer details.' : 'An article address is lowercase words joined by hyphens, starting with a letter.')
+      : state.aDrafts[slug] ? 'There is already an article at /learnings/' + slug + ' (“' + (state.aDrafts[slug].title || slug) + '”). Change the title, or the address under Developer details.' : '';
+    if (refusal) { status(refusal, 'error'); document.dispatchEvent(new CustomEvent('ark-cms-create-refused', { detail: { refusal: refusal } })); return { ok: false, refusal: refusal }; }
     state.slugs.push(slug); state.aDrafts[slug] = articleBlueprint(slug); state.aSaved[slug] = null;
+    /* asked for by its title (rail.js, the New panel): its name in every list and on its page */
+    if (title) state.aDrafts[slug].title = title;
     state.kind = 'article'; state.aCurrent = slug;
     itemsChanged('article', slug); touch({ kind: 'article', id: slug });
     createdNotice('article', slug);

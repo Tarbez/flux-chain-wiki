@@ -1,0 +1,71 @@
+# key	tag	text -- layout keys of /resolutions/deployments before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsDeployments04 / 20 · Build & publishResolve your deploymentsShip signed bundles to the mesh instead of to a server you rent.ForDevelopers and sma
+page:/nav:1	nav	All resolutionsDeployments
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Deployments
+page:/div:1	div	04 / 20 · Build & publishResolve your deploymentsShip signed bundles to the mesh instead of to a server you rent.ForDevelopers and small teams shipping web apps
+page:/div:1/header:1	header	04 / 20 · Build & publishResolve your deploymentsShip signed bundles to the mesh instead of to a server you rent.ForDevelopers and small teams shipping web apps
+page:/div:1/header:1/p:1	p	04 / 20 · Build & publish
+id:resolution-title-deployments	h1	Resolve your deployments
+page:/div:1/header:1/p:2	p	Ship signed bundles to the mesh instead of to a server you rent.
+page:/div:1/header:1/dl:1	dl	ForDevelopers and small teams shipping web apps and services.ProblemRelease servers, registry accounts and artifacts nobody can verify after the fact.
+page:/div:1/header:1/dl:1/div:1	div	ForDevelopers and small teams shipping web apps and services.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Developers and small teams shipping web apps and services.
+page:/div:1/header:1/dl:1/div:2	div	ProblemRelease servers, registry accounts and artifacts nobody can verify after the fact.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Release servers, registry accounts and artifacts nobody can verify after the fact.
+page:/div:1/header:1/div:1	div	Start here →
+page:/div:1/header:1/div:1/a:1	a	Start here →
+page:/div:1/section:1	section	Ready now5Product ideas3How it resolvesBundle DeployerBuildingReview a site or app locally, then publish it as one signed bundle.Open →Mesh packagesReadyPublish
+page:/div:1/section:1/div:1	div	Ready now5Product ideas3How it resolves
+id:resolution-level-tab-deployments-0	button	Ready now5
+page:/div:1/section:1/div:1/button:1/span:1	span	5
+id:resolution-level-tab-deployments-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-deployments-2	button	How it resolves
+id:resolution-level-deployments	div	Bundle DeployerBuildingReview a site or app locally, then publish it as one signed bundle.Open →Mesh packagesReadyPublish and install signed packages from the m
+page:/div:1/section:1/div:2/div:1	div	Bundle DeployerBuildingReview a site or app locally, then publish it as one signed bundle.Open →Mesh packagesReadyPublish and install signed packages from the m
+page:/div:1/section:1/div:2/div:1/a:1	a	Bundle DeployerBuildingReview a site or app locally, then publish it as one signed bundle.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	Bundle DeployerBuilding
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Bundle Deployer
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Building
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	Review a site or app locally, then publish it as one signed bundle.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/div:1	div	Mesh packagesReadyPublish and install signed packages from the mesh instead of one registry.
+page:/div:1/section:1/div:2/div:1/div:1/span:1	span	Mesh packagesReady
+page:/div:1/section:1/div:2/div:1/div:1/span:1/strong:1	strong	Mesh packages
+page:/div:1/section:1/div:2/div:1/div:1/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:1/span:2	span	Publish and install signed packages from the mesh instead of one registry.
+page:/div:1/section:1/div:2/div:1/div:2	div	Code managerReadyEdit a deployed site’s code and content; access comes from the signed owner record.
+page:/div:1/section:1/div:2/div:1/div:2/span:1	span	Code managerReady
+page:/div:1/section:1/div:2/div:1/div:2/span:1/strong:1	strong	Code manager
+page:/div:1/section:1/div:2/div:1/div:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/div:2/span:2	span	Edit a deployed site’s code and content; access comes from the signed owner record.
+page:/div:1/section:1/div:2/div:1/a:2	a	ResolversReadyPublish logic at an address so anyone can run it and get the same claim.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	ResolversReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Resolvers
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Publish logic at an address so anyone can run it and get the same claim.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:3	a	Mesh monitorReadyLive health, latency and throughput of the nodes you rely on.Open →
+page:/div:1/section:1/div:2/div:1/a:3/span:1	span	Mesh monitorReady
+page:/div:1/section:1/div:2/div:1/a:3/span:1/strong:1	strong	Mesh monitor
+page:/div:1/section:1/div:2/div:1/a:3/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:3/span:2	span	Live health, latency and throughput of the nodes you rely on.
+page:/div:1/section:1/div:2/div:1/a:3/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← FilesPreviousAll 20Payments →Next
+page:/nav:2/a:1	a	← FilesPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Payments →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

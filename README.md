@@ -14,8 +14,8 @@ HTML does not contain the experiment lab or article bodies.
 Canonical routes use hashes so static hosting does not need rewrite rules:
 
 - `#/`: home.
-- `#/experiments`: the filament experiment introduction.
-- `#/experiments/lab`: the standalone interactive lab.
+- `#/experiments`: the interactive model (the old `#/experiments/lab` address opens it too).
+- Any other address: a not-found page that names it and offers the closest pages.
 - `#/learnings`: three article previews.
 - `#/learnings/<slug>`: an individual article.
 - `#/about`: the Flux Protocol overview and current capability boundary.
@@ -34,7 +34,9 @@ Canonical routes use hashes so static hosting does not need rewrite rules:
 Legacy `#zero`, `#proximity`, `#work`, `#learnings`, and `#article/<slug>` links
 also resolve. Back/Forward and direct links use the same router.
 
-`js/pages/catalog.js` supplies route metadata and dependency lists.
+`js/content/site-pages.js` is the one page table (path, name, journey); `js/pages/catalog.js`
+adds each page's module and dependency list, and the "All pages" menu, footer strip, sitemap and
+llms.txt are derived from the journeys.
 `js/ark/page-router.js` loads each page's scripts only when requested and caches
 successful modules and data. Only the active page and pages finishing their exit
 are mounted. After transitions, outgoing DOM and its subscriptions are removed.
@@ -58,8 +60,11 @@ article questions, procedure step/review, and model selection/value.
 Canonical reference links open the in-shell `/reference` reader with the exact
 originating route/query and an Original Markdown link. Run
 `node scripts/sync-reference-docs.cjs` after editing a linked canonical document.
-It regenerates the approved-document list and lazy text/hash snapshot from the
-source files; do not hand-edit the generated copies. The reader uses the existing
+It regenerates the approved-document list, a small index (title, sha256, origins)
+and one text/hash file per document under `js/content/reference/` from the source
+files; the reader loads only the file of the document it shows. Do not hand-edit
+the generated copies. `node scripts/sync-reference-docs.cjs --check` writes nothing
+and fails naming what is stale; `tests/reference-reader.cjs` runs it. The reader uses the existing
 local script policy, including `file://`, without broadening `connect-src`.
 
 `css/color-system.css` enforces three color roles: primary for critical page
@@ -264,6 +269,17 @@ Ark UI reaches this site one way, and no file here names a hub path:
    `js/ark/local-identity.js`. It first proves `node_modules` holds exactly the pinned tarballs.
    `npm run check:ark` (`--check`) writes nothing and fails on any drift; `tests/ark-vendor.cjs` runs it.
    `css/ark-blocks.css` is reported as not built until the synced Ark UI ships `dist/ark-ui.blocks.css`.
+
+**Page scripts are served minified** (W5-MIN, 2026-10-20). The commented source under `js/pages/`,
+`js/ark/` and `js/content/` stays canonical -- edit it, read it, test it. The same `npm run build:ark`
+writes a minified, source-mapped copy of every script `js/pages/catalog.js` lists (except what
+another pipeline or generator already owns) to `js/min/<same path under js/>`, plus
+`js/min/manifest.js` (each copy's hash) and the stamp of that manifest in `index.html`;
+`js/ark/page-loader.js` requests the copy as `?v=<its hash>`. After editing a page script run
+`npm run build:ark` (or `npm run build:pages`, which needs only esbuild); `npm run check:pages`
+and `tests/page-scripts-min.cjs` refuse a stale or hand-edited copy. A page opened with
+`?ark-source=1` reads the source, and jsdom (server rendering, the unit tests) always does.
+Which files and why: `scripts/lib/page-scripts.cjs`.
 
 `js/admin/auth.js` stays with `scripts/build-auth.cjs`: its flux-auth parts are sibling `flux/`
 sources, not Ark UI packages, and are not delivered by sync-consumer yet.

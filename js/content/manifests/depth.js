@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "depth",
-  "title": "Agreement lifecycle",
+  "title": "Checkable agreements",
   "route": "/concept/depth",
   "group": "theory",
   "meta": {
@@ -21,7 +21,7 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "How does one agreement become verifiable?"
+      "value": "How does an agreement become checkable?"
     },
     "DECK": {
       "label": "Intro",
@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "The verifying participant closes the trail under identified checker and authority rules. A receipt is evidence of that decision, not universal truth or legal finality."
+      "value": "The verifying participant closes the trail under identified checker and authority rules. A receipt is evidence of that decision, not universal truth or a legal settlement."
     },
     "STATUS.TITLE": {
       "label": "Status heading",

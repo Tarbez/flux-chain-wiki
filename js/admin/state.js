@@ -173,6 +173,9 @@
      versionPreviewSite: a past version shown read-only from the Versions panel, which every
      preview reload keeps showing until "Back to current drafts" clears it
      (js/admin/versions-glue.js). */
+  /* the selection's commands as the canvas reports them (js/main.js cmsSelectionCommands): the
+     toolbar's More menu draws them, the same list as the canvas's right-click menu */
+  state.cmsSelectionCommands = [];
   state.popEl = null;
   state.popAnchor = null;
   state.tbOpen = '';
@@ -232,7 +235,17 @@
      The single-object drafts now come from ArkAdminStore.drafts('single') (js/admin/store.js),
      the same list Save and Publish use, so this cannot miss a draft a fourth time. */
   function anyDirty() { return state.ids.some(dirty) || state.slugs.some(dirtyA) || state.assetIds.some(dirtyI) || state.secretIds.some(dirtyS) || ArkAdminStore.drafts('single').some(function (d) { return singleDraftHandle(d.key).dirty(); }) || restoreRemovalsPending() || restoreReorderPending(); }
-  A.provide({ anyDirty: anyDirty, canvasTransitionsDirty: canvasTransitionsDirty,
+  /* What is unsaved, counted the way a person names it, for the Save button (docs/ux-audit/cms.md P1-16: Save
+     only went enabled or disabled, and no place said how much was waiting). The same drafts as anyDirty(). */
+  function unsavedSummary() {
+    var singles = ArkAdminStore.drafts('single').filter(function (d) { return singleDraftHandle(d.key).dirty(); }).length;
+    var parts = [[state.ids.filter(dirty).length, 'page', 'pages'], [state.slugs.filter(dirtyA).length, 'article', 'articles'],
+      [state.assetIds.filter(dirtyI).length, 'image', 'images'], [state.secretIds.filter(dirtyS).length, 'encrypted item', 'encrypted items'],
+      [singles, 'site-wide setting', 'site-wide settings'], [restoreRemovalsPending() || restoreReorderPending() ? 1 : 0, 'restored version', 'restored versions']]
+      .filter(function (p) { return p[0] > 0; });
+    return { count: parts.reduce(function (n, p) { return n + p[0]; }, 0), words: parts.map(function (p) { return p[0] + ' ' + (p[0] === 1 ? p[1] : p[2]); }).join(', ') };
+  }
+  A.provide({ anyDirty: anyDirty, unsavedSummary: unsavedSummary, canvasTransitionsDirty: canvasTransitionsDirty,
       componentsDirty: componentsDirty, currentDirty: currentDirty, dirty: dirty, dirtyA: dirtyA,
       dirtyI: dirtyI, dirtyS: dirtyS, elementMotionDirty: elementMotionDirty, hasShape: hasShape,
       layoutDirty: layoutDirty, orphanShapeIds: orphanShapeIds, shapePageId: shapePageId, state: state,

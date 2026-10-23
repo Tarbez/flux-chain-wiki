@@ -6,6 +6,7 @@ function load(context) {
   vm.runInContext(fs.readFileSync('js/content/resolutions.js', 'utf8'), context, { filename: 'resolutions.js' });
   vm.runInContext(fs.readFileSync('js/content/learnings.js', 'utf8'), context, { filename: 'learnings.js' });
   vm.runInContext(fs.readFileSync('js/content/article-index.js', 'utf8'), context, { filename: 'article-index.js' });
+  vm.runInContext(fs.readFileSync('js/content/site-pages.js', 'utf8'), context, { filename: 'site-pages.js' });
   vm.runInContext(fs.readFileSync('js/content/seo.js', 'utf8'), context, { filename: 'seo.js' });
 }
 const context = vm.createContext({});
@@ -15,7 +16,7 @@ const { ArkManifest, LearningContent, ArkResolutions, ArkSEO } = vm.runInContext
 // pageEntries(): every non-'site'-group manifest plus every catalog-only SEO identity, and never 'nav'.
 const pageIds = ArkSEO.pageIds();
 assert(pageIds.indexOf('nav') < 0, 'group "site" (shared chrome, e.g. nav) is not a route and is excluded');
-const extraIds = ['proximity', 'lab', 'learnings', 'explorer', 'palette', 'resolvers', 'account', 'account/domains', 'treasury', 'deposits', 'stats', 'stats/gpu', 'stats/ledger', 'how/ask', 'how/work', 'how/check', 'reference', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
+const extraIds = ['proximity', 'learnings', 'explorer', 'palette', 'resolvers', 'account', 'account/domains', 'treasury', 'deposits', 'stats', 'stats/gpu', 'stats/ledger', 'how/ask', 'how/work', 'how/check', 'reference', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
 assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site').map((m) => m.id).concat(extraIds).sort()), 'pageIds includes manifest-less lifecycle and nested resolution pages');
 assert.equal(JSON.stringify(ArkSEO.articleSlugs()), JSON.stringify(LearningContent.articles.map((a) => a.slug)), 'articleSlugs is every article, in order');
 
@@ -123,6 +124,7 @@ const llms = ArkSEO.llmsTxt({ site: { baseUrl: 'https://example.com', defaultDes
 assert(llms.startsWith('# DEFXN\n\n> What this site is.'), 'llms.txt opens with the site name and summary');
 assert(llms.includes('## Pages') && llms.includes('https://example.com/about'), 'a visible page is listed under Pages');
 if (articles.length) assert(llms.includes('## Articles') && llms.includes('https://example.com/learnings/' + articles[0].slug), 'a visible article is listed under Articles');
+if (articles.length && articles[0].title) assert(llms.includes('- [' + articles[0].title + ' — DEFXN](https://example.com/learnings/' + articles[0].slug + ')'), 'an article is listed by its title, not its slug: until 2026-10-19 every article line read as its slug, and the published slug governance-without-a-validator-set reached llms.txt as a title carrying a retired word');
 const llmsHidden = ArkSEO.llmsTxt({ site: { baseUrl: 'https://example.com' }, pages: { about: { noindex: true } } }, manifests, articles);
 assert(!llmsHidden.includes('https://example.com/about'), 'a noindex page is left out of llms.txt too');
 
@@ -171,4 +173,29 @@ assert.equal(shipped.site.baseUrl,'https://defxn.com','production origin, confir
 const html=fs.readFileSync('index.html','utf8');
 assert(html.includes('<title>'+shipped.pages.home.title+'</title>'),'static home title matches editable metadata');
 assert(html.includes('name="description" content="'+shipped.pages.home.description+'"'),'static home description matches editable metadata');
+/* Regression (2026-10-20): an article's SEO description quoted "25,232 ops/s" after its note and its
+   card said 51,065. A figure in a description is the note's figure, not a second one typed beside it:
+   every number a shipped article description or AI summary quotes must be one the article's own body
+   (or the evidence registry) states, by the same LearningContent.ungrounded rule the card excerpts
+   obey (tests/learnings-blocks.cjs). llms.txt is generated from the same overrides, so it must carry
+   the same text. */
+{
+  const bodies = vm.createContext({});
+  vm.runInContext(fs.readFileSync('js/content/learnings.js', 'utf8'), bodies);
+  vm.runInContext(fs.readFileSync('js/content/article-index.js', 'utf8'), bodies);
+  vm.runInContext(fs.readFileSync('js/content/evidence-registry.js', 'utf8'), bodies);
+  const registryText = Object.values(bodies.ArkEvidence.benchmarks).map((b) => b.claim + ' ' + b.evidence);
+  const llmsText = fs.readFileSync('llms.txt', 'utf8');
+  for (const slug of Object.keys(shipped.articles)) {
+    vm.runInContext(fs.readFileSync('js/content/articles/' + slug + '.js', 'utf8'), bodies);
+    const body = bodies.LearningContent.find ? bodies.LearningContent.find(slug) : null;
+    const known = [bodies.LearningContent.bodyText(body)].concat(registryText);
+    for (const field of ['description', 'aiSummary']) {
+      const text = shipped.articles[slug][field];
+      if (!text) continue;
+      assert.deepEqual(Array.from(bodies.LearningContent.ungrounded(text, known)), [], slug + ' ' + field + ': every figure it quotes is one the note or the evidence registry states');
+      if (field === 'description') assert(llmsText.includes(text), slug + ': llms.txt carries the description as shipped (regenerate the root files after an SEO edit)');
+    }
+  }
+}
 console.log('PASS: complete route metadata, overrides, sitemap/robots, and serialization.');

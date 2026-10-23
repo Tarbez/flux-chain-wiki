@@ -66,6 +66,12 @@ function setup() {
       const button = doc.createElement('button'); button.type = 'button'; button.textContent = title + ' action'; body.appendChild(button);
     };
   }
+  /* the editor's one overlay stack (js/admin/overlay.js), real, in this window: the popover
+     registers there, and Esc / an outside press / the close button go through it */
+  w.ArkAdmin = { h: (tag, props) => { const n = doc.createElement(tag); Object.entries(props || {}).forEach(([k, v]) => { if (k === 'class') n.className = v; else n.setAttribute(k, v); }); return n; }, ic: ctx.ic, provide(names) { Object.assign(this, names); } };
+  vm.runInContext(fs.readFileSync('js/admin/overlay.js', 'utf8'), vm.createContext({ window: w, document: doc }));
+  ctx.A = Object.assign(w.ArkAdmin, { toast: (m) => calls.push('toast:' + m), openPageFields: (o) => calls.push('fields:' + JSON.stringify(o)) });
+  ctx.openContentEditor = () => calls.push('content');
   vm.createContext(ctx);
   vm.runInContext(code + '\nthis.tb = () => ({ tbOpen: state.tbOpen, tbOpenKey: state.tbOpenKey, tbAutoOpen: state.tbAutoOpen }); this.setAutoOpen = (v) => { state.tbAutoOpen = v; };', ctx);
   const bar = doc.getElementById('selToolbar'), pop = doc.getElementById('selToolbarPop');
@@ -86,8 +92,13 @@ const P = { key: 'path:p:1', label: 'p', tag: 'p' };
   assert(t.bar.hidden && t.pop.hidden, 'nothing selected: no bar, no popover');
   t.select(P);
   assert(!t.bar.hidden && t.pop.hidden, 'a selection shows the bar with every popover closed');
-  assert.deepEqual(t.names(), ['Typography', 'Fill and border', 'Spacing', 'Frame', 'In / out animation'], 'a text element gets the text sections, in the taxonomy\'s order');
-  assert.deepEqual(t.actions(), ['Make into component', 'Open in Content', 'Theme & defaults'], 'then the actions');
+  assert.deepEqual(t.names(), ['Typography', 'Fill and border', 'Spacing', 'Frame', 'In / out animation', 'More'], 'a text element gets the text sections, in the taxonomy\'s order, then More');
+  assert.deepEqual(t.actions(), [], 'no bare action icons: they are in More');
+  /* the three sections used most carry words (docs/ux-audit/cms.md P1-7) */
+  assert.deepEqual([...t.bar.querySelectorAll('.tb-lbl')].map((l) => l.textContent), ['Text', 'Colour', 'Spacing', 'More'], 'Text, Colour, Spacing and More are labelled');
+  t.button('More').click();
+  assert.deepEqual([...t.pop.querySelectorAll('[data-action]')].map((b) => b.getAttribute('aria-label')), ['Make into component', 'Edit its words', 'Site style'], 'More holds the selection\'s commands, then the editor\'s own');
+  t.button('More').click();
   for (const b of t.bar.querySelectorAll('button')) {
     assert(b.getAttribute('aria-label'), 'every bar button has a name a screen reader reads');
     assert(b.dataset.tip, 'every bar button has a tooltip');
@@ -216,23 +227,48 @@ const P = { key: 'path:p:1', label: 'p', tag: 'p' };
   t.key('ArrowRight');
   assert.equal(t.doc.activeElement.dataset.name, 'Fill and border', 'ArrowRight moves to the next icon');
   t.key('ArrowLeft'); t.key('ArrowLeft');
-  assert.equal(t.doc.activeElement.getAttribute('aria-label'), 'Theme & defaults', 'ArrowLeft from the first wraps to the last');
+  assert.equal(t.doc.activeElement.dataset.name, 'More', 'ArrowLeft from the first wraps to the last');
   t.key('Home');
   assert.equal(t.doc.activeElement.dataset.name, 'Typography', 'Home goes to the first');
   t.key('End');
-  assert.equal(t.doc.activeElement.getAttribute('aria-label'), 'Theme & defaults', 'End goes to the last');
+  assert.equal(t.doc.activeElement.dataset.name, 'More', 'End goes to the last');
   assert.equal([...t.bar.querySelectorAll('button')].filter((b) => b.tabIndex === 0).length, 1, 'still one tab stop');
   assert.equal(t.doc.activeElement.tabIndex, 0, 'the tab stop follows focus');
   t.ctx.renderSelToolbar();
-  assert.equal(t.doc.activeElement.getAttribute('aria-label'), 'Theme & defaults', 'a re-render keeps focus on the same bar button');
+  assert.equal(t.doc.activeElement.dataset.name, 'More', 'a re-render keeps focus on the same bar button');
 
   const g = setup();
   g.select({ key: 'group:abc', label: 'Group', tag: '' });
-  assert.deepEqual(g.names(), ['Frame'], 'a layout group shows Frame only');
-  assert.deepEqual(g.actions(), ['Ungroup', 'Make into component', 'Open in Content', 'Theme & defaults'], 'Ungroup is an action in the bar');
+  assert.deepEqual(g.names(), ['Frame', 'More'], 'a layout group shows Frame only, then More');
+  assert.deepEqual(g.actions(), ['Ungroup'], 'Ungroup is an action in the bar');
   g.bar.querySelector('[data-action="ungroup"]').click();
   assert.deepEqual(g.calls, ['layout:ungroup'], 'Ungroup posts the ungroup operation');
   console.log('PASS: arrows/Home/End walk the bar with one tab stop; a group\'s Ungroup is a bar action.');
+}
+
+/* the Content lens: no second editor over the words, no design actions (docs/ux-audit/cms.md
+   P1-6, P1-7). Text that can be edited where it stands opens no popover; the bar names its field
+   and offers Done and All fields. Text that cannot be edited opens its Details by itself: the
+   explanation is the answer. */
+{
+  const t = setup();
+  t.ctx.buildContentSection = (pane) => { const body = t.ctx.toolbarSection(pane, 'cms-content', 'Content', 'text'); body.appendChild(t.doc.createElement('textarea')); };
+  t.ctx.state.lens = 'content';
+  t.ctx.state.cmsContent = { key: P.key, bound: true, label: 'Heading', kind: 'page', id: 'home', fieldKey: 'TITLE' };
+  t.select(P);
+  assert(t.pop.hidden, 'bound text: no popover covers the words being edited');
+  assert.equal(t.bar.querySelector('.tb-chip-name').textContent, 'Heading', 'the chip names the field, not the element');
+  assert.deepEqual(t.actions(), ['Done: finish editing this text (Esc does too)', 'All fields of this page'], 'the Content lens offers Done and All fields, and no design action');
+  assert.deepEqual(t.names(), ['Content'], 'and only the content sections (no style section, no More)');
+  t.bar.querySelector('[data-action="all-fields"]').click();
+  assert(t.calls.includes('fields:' + JSON.stringify({ kind: 'page', id: 'home', field: 'TITLE' })), 'All fields opens this field\'s page settings');
+  const u = setup();
+  u.ctx.buildContentSection = (pane) => { u.ctx.toolbarSection(pane, 'cms-content', 'Content', 'text'); };
+  u.ctx.state.lens = 'content';
+  u.ctx.state.cmsContent = { key: P.key, bound: false, reason: 'written by the page module' };
+  u.select(P);
+  assert.deepEqual(u.expanded(), ['Content'], 'unbound text opens its explanation by itself');
+  console.log('PASS: the Content lens edits words in place with Done / All fields beside them; only text that cannot be edited opens a popover.');
 }
 
 /* no accordion shell left behind for the toolbar */

@@ -1,0 +1,886 @@
+# key	tag	text -- layout keys of / before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	DEFXN / A chain of chainsNot one chain.A worldof them.Your own history. A network of possibilities. DEFXN connects independent identity chains through applicati
+page:/section:1	section	DEFXN / A chain of chainsNot one chain.A worldof them.Your own history. A network of possibilities. DEFXN connects independent identity chains through applicati
+page:/section:1/div:1	div	DEFXN / A chain of chainsNot one chain.A worldof them.Your own history. A network of possibilities. DEFXN connects independent identity chains through applicati
+page:/section:1/div:1/p:1	p	DEFXN / A chain of chains
+page:/section:1/div:1/p:1/svg:1	svg	
+page:/section:1/div:1/p:1/svg:1/path:1	path	
+page:/section:1/div:1/p:1/svg:1/path:2	path	
+page:/section:1/div:1/p:1/svg:1/path:3	path	
+page:/section:1/div:1/p:1/svg:1/path:4	path	
+id:hl-title	h1	Not one chain.A worldof them.
+page:/section:1/div:1/h1:1/span:1	span	Not one chain.
+page:/section:1/div:1/h1:1/span:2	span	A world
+page:/section:1/div:1/h1:1/span:3	span	of them.
+page:/section:1/div:1/p:2	p	Your own history. A network of possibilities. DEFXN connects independent identity chains through applications and signed results you can inspect.
+page:/section:1/div:1/div:1	div	you.fxnYour history begins hereFollow the line
+page:/section:1/div:1/div:1/a:1	a	you.fxnYour history begins hereFollow the line
+page:/section:1/div:1/div:1/a:1/span:1	span	you.fxn
+page:/section:1/div:1/div:1/a:1/span:1/svg:1	svg	
+page:/section:1/div:1/div:1/a:1/span:1/svg:1/path:1	path	
+page:/section:1/div:1/div:1/a:1/span:1/svg:1/path:2	path	
+page:/section:1/div:1/div:1/a:1/span:2	span	
+page:/section:1/div:1/div:1/a:1/span:3	span	Your history begins hereFollow the line
+page:/section:1/div:1/div:1/a:1/span:3/small:1	small	Your history begins here
+page:/section:1/div:1/div:1/a:1/span:3/strong:1	strong	Follow the line
+page:/section:1/div:1/div:1/a:1/span:3/svg:1	svg	
+page:/section:1/div:1/div:1/a:1/span:3/svg:1/path:1	path	
+page:/section:1/div:1/div:1/a:1/span:3/svg:1/path:2	path	
+page:/section:1/section:1	section	nova.fxnalice.fxnstudio.fxnprovider.fxndao.fxnyou.fxnSwapsTransfersStakingGovernanceIllustrative / not live traffic01Sign02Check03Extend04Replicate05ResolveJ36J
+page:/section:1/section:1/div:1	div	nova.fxnalice.fxnstudio.fxnprovider.fxndao.fxnyou.fxnSwapsTransfersStakingGovernanceIllustrative / not live traffic
+page:/section:1/section:1/div:1/svg:1	svg	nova.fxnalice.fxnstudio.fxnprovider.fxndao.fxnyou.fxn
+page:/section:1/section:1/div:1/svg:1/g:1	g	nova.fxnalice.fxnstudio.fxnprovider.fxndao.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:1	g	nova.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:1/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:1/g:1/circle:1	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:1/circle:2	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:1/circle:3	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:1/circle:4	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:1/text:1	text	nova.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:2	g	alice.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:2/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:1/g:2/circle:1	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:2/circle:2	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:2/circle:3	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:2/text:1	text	alice.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:3	g	studio.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:3/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:1/g:3/circle:1	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:3/circle:2	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:3/circle:3	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:3/text:1	text	studio.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:4	g	provider.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:4/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:1/g:4/circle:1	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:4/circle:2	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:4/circle:3	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:4/text:1	text	provider.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:5	g	dao.fxn
+page:/section:1/section:1/div:1/svg:1/g:1/g:5/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:1/g:5/circle:1	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:5/circle:2	circle	
+page:/section:1/section:1/div:1/svg:1/g:1/g:5/text:1	text	dao.fxn
+page:/section:1/section:1/div:1/svg:1/g:2	g	you.fxn
+page:/section:1/section:1/div:1/svg:1/g:2/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:1	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:2	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:3	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:4	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:5	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:6	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:7	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:8	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:9	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:10	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/rect:11	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/g:1	g	you.fxn
+page:/section:1/section:1/div:1/svg:1/g:2/g:1/rect:1	rect	
+page:/section:1/section:1/div:1/svg:1/g:2/g:1/g:1	g	
+page:/section:1/section:1/div:1/svg:1/g:2/g:1/g:1/path:1	path	
+page:/section:1/section:1/div:1/svg:1/g:2/g:1/g:1/path:2	path	
+page:/section:1/section:1/div:1/svg:1/g:2/g:1/text:1	text	you.fxn
+page:/section:1/section:1/div:1/div:1	div	SwapsTransfersStakingGovernanceIllustrative / not live traffic
+page:/section:1/section:1/div:1/div:1/div:1	div	SwapsTransfersStakingGovernance
+page:/section:1/section:1/div:1/div:1/div:1/button:1	button	Swaps
+page:/section:1/section:1/div:1/div:1/div:1/button:1/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/div:1/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:1/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:1/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:1/svg:1/path:4	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:2	button	Transfers
+page:/section:1/section:1/div:1/div:1/div:1/button:2/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/div:1/button:2/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:2/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:2/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:3	button	Staking
+page:/section:1/section:1/div:1/div:1/div:1/button:3/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/div:1/button:3/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:3/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:3/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:4	button	Governance
+page:/section:1/section:1/div:1/div:1/div:1/button:4/svg:1	svg	
+page:/section:1/section:1/div:1/div:1/div:1/button:4/svg:1/path:1	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:4/svg:1/path:2	path	
+page:/section:1/section:1/div:1/div:1/div:1/button:4/svg:1/path:3	path	
+page:/section:1/section:1/div:1/div:1/p:1	p	Illustrative / not live traffic
+page:/section:1/section:1/div:2	div	01Sign02Check03Extend04Replicate05ResolveJ36J42nova.fxnorbit.fxnyou.fxnmira.fxnkai.fxnalice.fxnHEAD−120 FXN+120 FXNTransfers resolver120 FXN → alice.fxnA CHAIN 
+page:/section:1/section:1/div:2/div:1	div	01Sign02Check03Extend04Replicate05ResolveJ36J42nova.fxnorbit.fxnyou.fxnmira.fxnkai.fxnalice.fxnHEAD−120 FXN+120 FXNTransfers resolver120 FXN → alice.fxnA CHAIN 
+page:/section:1/section:1/div:2/div:1/ol:1	ol	01Sign02Check03Extend04Replicate05Resolve
+page:/section:1/section:1/div:2/div:1/ol:1/li:1	li	01Sign
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1	button	01Sign
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1/span:1	span	01
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1/svg:1	svg	
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1/svg:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1/svg:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:1/button:1/span:2	span	Sign
+page:/section:1/section:1/div:2/div:1/ol:1/li:2	li	02Check
+page:/section:1/section:1/div:2/div:1/ol:1/li:2/button:1	button	02Check
+page:/section:1/section:1/div:2/div:1/ol:1/li:2/button:1/span:1	span	02
+page:/section:1/section:1/div:2/div:1/ol:1/li:2/button:1/svg:1	svg	
+page:/section:1/section:1/div:2/div:1/ol:1/li:2/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:2/button:1/span:2	span	Check
+page:/section:1/section:1/div:2/div:1/ol:1/li:3	li	03Extend
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1	button	03Extend
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1/span:1	span	03
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1/svg:1	svg	
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1/svg:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1/svg:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:3/button:1/span:2	span	Extend
+page:/section:1/section:1/div:2/div:1/ol:1/li:4	li	04Replicate
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1	button	04Replicate
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/span:1	span	04
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1	svg	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/svg:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:4/button:1/span:2	span	Replicate
+page:/section:1/section:1/div:2/div:1/ol:1/li:5	li	05Resolve
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1	button	05Resolve
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/span:1	span	05
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/svg:1	svg	
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/svg:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/svg:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/svg:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/ol:1/li:5/button:1/span:2	span	Resolve
+page:/section:1/section:1/div:2/div:1/div:1	div	J36J42nova.fxnorbit.fxnyou.fxnmira.fxnkai.fxnalice.fxnHEAD−120 FXN+120 FXNTransfers resolver120 FXN → alice.fxnA CHAIN OF CHAINSRecord in flightSigned historyRe
+page:/section:1/section:1/div:2/div:1/div:1/svg:1	svg	J36J42nova.fxnorbit.fxnyou.fxnmira.fxnkai.fxnalice.fxnHEAD−120 FXN+120 FXNTransfers resolver120 FXN → alice.fxnA CHAIN OF CHAINSRecord in flightSigned historyRe
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:7	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:8	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:9	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:10	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:11	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:12	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:13	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:14	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:15	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/path:16	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:2/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:3/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:2/g:4/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:2/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:3/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:3/g:4/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4	g	J36J42
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1	g	J36
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:1/text:1	text	J36
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:2/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:3/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:4/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:5/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:6/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7	g	J42
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/path:7	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/g:7/text:1	text	J42
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:2/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:3/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:5/g:4/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:2/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:3/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:6/g:4/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:1/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:2/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3/path:5	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:3/path:6	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:4	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:4/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:4/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:7/g:4/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8	g	nova.fxnorbit.fxnyou.fxnmira.fxnkai.fxnalice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:1	g	nova.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:1/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:1/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:1/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:1/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:1/text:1	text	nova.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:2	g	orbit.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:2/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:2/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:2/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:2/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:2/text:1	text	orbit.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:3	g	you.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:3/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:3/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:3/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:3/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:3/text:1	text	you.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:4	g	mira.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:4/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:4/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:4/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:4/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:4/text:1	text	mira.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:5	g	kai.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:5/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:5/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:5/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:5/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:5/text:1	text	kai.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:6	g	alice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:6/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:6/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:6/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:6/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:8/g:6/text:1	text	alice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:9	g	HEAD
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:9/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:9/circle:1	circle	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:9/text:1	text	HEAD
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10	g	−120 FXN+120 FXNTransfers resolver120 FXN → alice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:1	g	−120 FXN
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:1/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:1/rect:2	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:1/text:1	text	−120 FXN
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:2	g	+120 FXN
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:2/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:2/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:2/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:2/text:1	text	+120 FXN
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3	g	Transfers resolver120 FXN → alice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/text:1	text	Transfers resolver
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/rect:2	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:10/g:3/text:2	text	120 FXN → alice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/text:1	text	A CHAIN OF CHAINS
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11	g	Record in flightSigned historyReference
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11/text:1	text	Record in flight
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11/rect:2	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11/text:2	text	Signed history
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:11/text:3	text	Reference
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12	g	05 / RESOLVEA reference to alice.fxnGSCK
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:1/g:1	g	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:1/g:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:1/g:1/path:2	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:1/g:1/path:3	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:1/g:1/path:4	path	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/text:1	text	05 / RESOLVE
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/text:2	text	A reference to alice.fxn
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2	g	GSCK
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:1	g	G
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:1/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:1/text:1	text	G
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:2	g	S
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:2/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:2/text:1	text	S
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:3	g	C
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:3/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:3/text:1	text	C
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:4	g	K
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:4/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/g:4/text:1	text	K
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:1	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:2	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:3	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:4	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:5	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:6	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:7	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:8	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:9	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:10	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:11	rect	
+page:/section:1/section:1/div:2/div:1/div:1/svg:1/g:12/g:2/rect:12	rect	
+page:/section:1/section:1/div:2/div:1/div:1/strong:1	strong	“The transfers resolver reads the payload: 120 FXN to alice.fxn.”
+page:/section:1/section:1/div:2/div:1/div:1/button:1	button	
+page:/section:1/section:1/div:2/div:1/div:1/button:1/svg:1	svg	
+page:/section:1/section:1/div:2/div:1/div:1/button:1/svg:1/path:1	path	
+page:/section:1/section:1/div:2/div:1/div:1/button:1/svg:2	svg	
+page:/section:1/section:1/div:2/div:1/div:1/button:1/svg:2/path:1	path	
+page:/section:2	section	More: find your place, the architecture, measured evidence and open questionsDifferent ambitions. Common ground.Explore the idea, build with it, or help run it.
+page:/section:2/div:1	div	More: find your place, the architecture, measured evidence and open questionsDifferent ambitions. Common ground.Explore the idea, build with it, or help run it.
+page:/section:2/div:1/details:1	details	More: find your place, the architecture, measured evidence and open questionsDifferent ambitions. Common ground.Explore the idea, build with it, or help run it.
+page:/section:2/div:1/details:1/summary:1	summary	More: find your place, the architecture, measured evidence and open questions
+page:/section:2/div:1/details:1/div:1	div	Different ambitions. Common ground.Explore the idea, build with it, or help run it. Choose your way into DEFXN.01Explore02Build03OperateFor the curiousSee what 
+id:hl-start	section	Different ambitions. Common ground.Explore the idea, build with it, or help run it. Choose your way into DEFXN.01Explore02Build03OperateFor the curiousSee what 
+page:/section:2/div:1/details:1/div:1/section:1/h3:1	h3	Different ambitions. Common ground.
+page:/section:2/div:1/details:1/div:1/section:1/p:1	p	Explore the idea, build with it, or help run it. Choose your way into DEFXN.
+page:/section:2/div:1/details:1/div:1/section:1/div:1	div	01Explore02Build03OperateFor the curiousSee what makes DEFXN different.Start with the idea. Follow a record, see what a resolver does, and explore the network a
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1	div	01Explore02Build03Operate
+id:hl-audience-0	button	01Explore
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/svg:1/path:4	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/span:1	span	01
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:1/span:2	span	Explore
+id:hl-audience-1	button	02Build
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:2/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:2/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:2/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:2/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:2/span:1	span	02
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:2/span:2	span	Build
+id:hl-audience-2	button	03Operate
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/svg:1/path:4	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/svg:1/path:5	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/span:1	span	03
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:1/button:3/span:2	span	Operate
+id:hl-audience-panel	div	For the curiousSee what makes DEFXN different.Start with the idea. Follow a record, see what a resolver does, and explore the network at your own pace.Explore t
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:1	div	For the curiousSee what makes DEFXN different.Start with the idea. Follow a record, see what a resolver does, and explore the network at your own pace.
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:1/p:1	p	For the curious
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:1/h3:1	h3	See what makes DEFXN different.
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:1/p:2	p	Start with the idea. Follow a record, see what a resolver does, and explore the network at your own pace.
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2	div	Explore the protocolWalk the chainInspect the evidence
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/a:1	a	Explore the protocol
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/a:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/a:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/a:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1	nav	Walk the chainInspect the evidence
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:1	a	Walk the chain
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:2	a	Inspect the evidence
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:2/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:2/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:1/div:1/div:2/div:2/nav:1/a:2/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:2	section	Independent histories. Shared possibilities.Identity, execution and evidence are distinct parts of the same story.01 / Identity0102030405A history with an autho
+page:/section:2/div:1/details:1/div:1/section:2/h3:1	h3	Independent histories. Shared possibilities.
+page:/section:2/div:1/details:1/div:1/section:2/p:1	p	Identity, execution and evidence are distinct parts of the same story.
+page:/section:2/div:1/details:1/div:1/section:2/div:1	div	01 / Identity0102030405A history with an author.Each identity has its own signed records. Authorship can be checked without treating every record as the same ki
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1	article	01 / Identity0102030405A history with an author.Each identity has its own signed records. Authorship can be checked without treating every record as the same ki
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/p:1	p	01 / Identity
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/div:1	div	0102030405
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/div:1/span:1	span	01
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/div:1/span:2	span	02
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/div:1/span:3	span	03
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/div:1/span:4	span	04
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/div:1/span:5	span	05
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/h3:1	h3	A history with an author.
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:1/p:2	p	Each identity has its own signed records. Authorship can be checked without treating every record as the same kind of work.
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2	article	02 / Resolution0102030405Rules that do useful work.Transfers, swaps and governance have different rules. Resolvers make those rules explicit and attach a signat
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:1	p	02 / Resolution
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:1/svg:1/path:4	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/div:1	div	0102030405
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/div:1/span:1	span	01
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/div:1/span:2	span	02
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/div:1/span:3	span	03
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/div:1/span:4	span	04
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/div:1/span:5	span	05
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/h3:1	h3	Rules that do useful work.
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:2/p:2	p	Transfers, swaps and governance have different rules. Resolvers make those rules explicit and attach a signature to the result.
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3	article	03 / Evidence0102030405A claim you can inspect.The signed result links back to its inputs. Auditing makes the resolver’s decisions inspectable; it does not remo
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1	p	03 / Evidence
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:4	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:1/svg:1/path:5	path	
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/div:1	div	0102030405
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/div:1/span:1	span	01
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/div:1/span:2	span	02
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/div:1/span:3	span	03
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/div:1/span:4	span	04
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/div:1/span:5	span	05
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/h3:1	h3	A claim you can inspect.
+page:/section:2/div:1/details:1/div:1/section:2/div:1/article:3/p:2	p	The signed result links back to its inputs. Auditing makes the resolver’s decisions inspectable; it does not remove the need to trust its authority.
+page:/section:2/div:1/details:1/div:1/section:2/a:1	a	Go deeper into the resolver model
+page:/section:2/div:1/details:1/div:1/section:2/a:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:2/a:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:2/a:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:3	section	Put the claims under a microscope.Published results from the DEFXN benchmark fleet. The conditions matter as much as the numbers.Swap resolution643,632swaps/sCo
+page:/section:2/div:1/details:1/div:1/section:3/h3:1	h3	Put the claims under a microscope.
+page:/section:2/div:1/details:1/div:1/section:3/p:1	p	Published results from the DEFXN benchmark fleet. The conditions matter as much as the numbers.
+page:/section:2/div:1/details:1/div:1/section:3/div:1	div	Swap resolution643,632swaps/sConcurrent resolver capacity across 10 nodes. Network transport excluded.
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1	article	Swap resolution643,632swaps/sConcurrent resolver capacity across 10 nodes. Network transport excluded.
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:1	p	Swap resolution
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:1/svg:1/path:4	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/strong:1	strong	643,632
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/span:1	span	swaps/s
+page:/section:2/div:1/details:1/div:1/section:3/div:1/article:1/p:2	p	Concurrent resolver capacity across 10 nodes. Network transport excluded.
+page:/section:2/div:1/details:1/div:1/section:3/div:2	div	See the other benchmarks & methodologyTransfer resolution69,895transfers/sConcurrent resolver capacity across 10 nodes. Network transport excluded.Signed-result
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1	details	See the other benchmarks & methodologyTransfer resolution69,895transfers/sConcurrent resolver capacity across 10 nodes. Network transport excluded.Signed-result
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/summary:1	summary	See the other benchmarks & methodology
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1	div	Transfer resolution69,895transfers/sConcurrent resolver capacity across 10 nodes. Network transport excluded.Signed-result storage6,044,992signed results / seco
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1	div	Transfer resolution69,895transfers/sConcurrent resolver capacity across 10 nodes. Network transport excluded.Signed-result storage6,044,992signed results / seco
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1	article	Transfer resolution69,895transfers/sConcurrent resolver capacity across 10 nodes. Network transport excluded.
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:1	p	Transfer resolution
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/strong:1	strong	69,895
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/span:1	span	transfers/s
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:1/p:2	p	Concurrent resolver capacity across 10 nodes. Network transport excluded.
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2	article	Signed-result storage6,044,992signed results / secondFleet-wide storage. Replicas store the signed result without repeating the resolution.
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1	p	Signed-result storage
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/strong:1	strong	6,044,992
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/span:1	span	signed results / second
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:1/article:2/p:2	p	Fleet-wide storage. Replicas store the signed result without repeating the resolution.
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2	div	BENCH-013 · 10 nodes · 37 cores · 2026-10-10. These are resolution and storage benchmarks, not end-to-end transaction rates.Read methodology & limits
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/p:1	p	BENCH-013 · 10 nodes · 37 cores · 2026-10-10. These are resolution and storage benchmarks, not end-to-end transaction rates.
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/a:1	a	Read methodology & limits
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/a:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/a:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/section:3/div:2/details:1/div:1/div:2/a:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/div:1	div	A network you can inspectLive fleet measurement unavailableDated benchmark evidence below remains available.Open the explorer
+page:/section:2/div:1/details:1/div:1/div:1/p:1	p	A network you can inspect
+page:/section:2/div:1/details:1/div:1/div:1/p:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/div:1/p:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/div:1/p:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/div:1/p:1/svg:1/path:3	path	
+page:/section:2/div:1/details:1/div:1/div:1/p:1/svg:1/path:4	path	
+page:/section:2/div:1/details:1/div:1/div:1/p:1/svg:1/path:5	path	
+page:/section:2/div:1/details:1/div:1/div:1/span:1	span	Live fleet measurement unavailable
+page:/section:2/div:1/details:1/div:1/div:1/span:2	span	Dated benchmark evidence below remains available.
+page:/section:2/div:1/details:1/div:1/div:1/a:1	a	Open the explorer
+page:/section:2/div:1/details:1/div:1/div:1/a:1/svg:1	svg	
+page:/section:2/div:1/details:1/div:1/div:1/a:1/svg:1/path:1	path	
+page:/section:2/div:1/details:1/div:1/div:1/a:1/svg:1/path:2	path	
+page:/section:2/div:1/details:1/div:1/section:4	section	Clarity comes first.What is a “chain of chains”?It is the identity model: each identity has its own signed history. Applications connect those histories through
+page:/section:2/div:1/details:1/div:1/section:4/h3:1	h3	Clarity comes first.
+page:/section:2/div:1/details:1/div:1/section:4/div:1	div	What is a “chain of chains”?It is the identity model: each identity has its own signed history. Applications connect those histories through records and referen
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:1	details	What is a “chain of chains”?It is the identity model: each identity has its own signed history. Applications connect those histories through records and referen
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:1/summary:1	summary	What is a “chain of chains”?
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:1/p:1	p	It is the identity model: each identity has its own signed history. Applications connect those histories through records and references. The current execution m
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:2	details	What can I do today?Explore the protocol, inspect published measurements and resolver definitions, and follow the instructions to run from source. Availability 
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:2/summary:1	summary	What can I do today?
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:2/p:1	p	Explore the protocol, inspect published measurements and resolver definitions, and follow the instructions to run from source. Availability and deployment requi
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:3	details	Does a signature guarantee a correct result?A signature proves who signed a result. Correctness depends on the resolver’s rules and checks. Audits can expose a 
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:3/summary:1	summary	Does a signature guarantee a correct result?
+page:/section:2/div:1/details:1/div:1/section:4/div:1/details:3/p:1	p	A signature proves who signed a result. Correctness depends on the resolver’s rules and checks. Audits can expose a wrong resolution; they do not prevent every 
+page:/footer:1	footer	DEFXN / Independent histories. Connected possibilities.Start with the idea. Follow the evidence.you.fxnEvery possibility starts with a historyExplore DEFXNProto
+page:/footer:1/div:1	div	
+page:/footer:1/div:1/svg:1	svg	
+page:/footer:1/div:1/svg:1/g:1	g	
+page:/footer:1/div:1/svg:1/g:1/path:1	path	
+page:/footer:1/div:1/svg:1/g:1/path:2	path	
+page:/footer:1/div:1/svg:1/g:1/path:3	path	
+page:/footer:1/div:1/svg:1/g:1/path:4	path	
+page:/footer:1/div:1/svg:1/g:1/path:5	path	
+page:/footer:1/div:1/svg:1/g:1/path:6	path	
+page:/footer:1/div:1/svg:1/g:1/path:7	path	
+page:/footer:1/div:1/svg:1/g:1/path:8	path	
+page:/footer:1/div:1/svg:1/g:1/path:9	path	
+page:/footer:1/div:1/svg:1/g:1/path:10	path	
+page:/footer:1/div:1/svg:1/g:2	g	
+page:/footer:1/div:1/svg:1/g:2/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:2/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:2/circle:3	circle	
+page:/footer:1/div:1/svg:1/g:2/circle:4	circle	
+page:/footer:1/div:1/svg:1/g:3	g	
+page:/footer:1/div:1/svg:1/g:3/path:1	path	
+page:/footer:1/div:1/svg:1/g:3/path:2	path	
+page:/footer:1/div:1/svg:1/g:3/path:3	path	
+page:/footer:1/div:1/svg:1/g:3/path:4	path	
+page:/footer:1/div:1/svg:1/g:4	g	
+page:/footer:1/div:1/svg:1/g:4/g:1	g	
+page:/footer:1/div:1/svg:1/g:4/g:1/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:1/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:1/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:1/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:2	g	
+page:/footer:1/div:1/svg:1/g:4/g:2/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:2/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:2/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:2/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:3	g	
+page:/footer:1/div:1/svg:1/g:4/g:3/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:3/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:3/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:3/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:4	g	
+page:/footer:1/div:1/svg:1/g:4/g:4/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:4/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:4/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:4/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:4/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:4/g:4/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:4/g:5	g	
+page:/footer:1/div:1/svg:1/g:4/g:5/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:5/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:5/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:5/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:6	g	
+page:/footer:1/div:1/svg:1/g:4/g:6/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:6/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:6/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:6/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:7	g	
+page:/footer:1/div:1/svg:1/g:4/g:7/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:7/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:7/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:7/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:8	g	
+page:/footer:1/div:1/svg:1/g:4/g:8/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:8/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:8/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:8/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:9	g	
+page:/footer:1/div:1/svg:1/g:4/g:9/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:9/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:9/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:9/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:10	g	
+page:/footer:1/div:1/svg:1/g:4/g:10/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:10/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:10/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:10/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:11	g	
+page:/footer:1/div:1/svg:1/g:4/g:11/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:11/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:11/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:11/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:12	g	
+page:/footer:1/div:1/svg:1/g:4/g:12/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:12/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:12/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:12/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:13	g	
+page:/footer:1/div:1/svg:1/g:4/g:13/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:13/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:13/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:13/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:14	g	
+page:/footer:1/div:1/svg:1/g:4/g:14/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:14/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:14/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:14/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:15	g	
+page:/footer:1/div:1/svg:1/g:4/g:15/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:15/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:15/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:15/path:1	path	
+page:/footer:1/div:1/svg:1/g:4/g:16	g	
+page:/footer:1/div:1/svg:1/g:4/g:16/polygon:1	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:16/polygon:2	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:16/polygon:3	polygon	
+page:/footer:1/div:1/svg:1/g:4/g:16/path:1	path	
+page:/footer:1/div:1/svg:1/g:5	g	
+page:/footer:1/div:1/svg:1/g:5/g:1	g	
+page:/footer:1/div:1/svg:1/g:5/g:1/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:1/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:2	g	
+page:/footer:1/div:1/svg:1/g:5/g:2/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:2/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:3	g	
+page:/footer:1/div:1/svg:1/g:5/g:3/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:3/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:4	g	
+page:/footer:1/div:1/svg:1/g:5/g:4/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:4/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:5	g	
+page:/footer:1/div:1/svg:1/g:5/g:5/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:5/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:6	g	
+page:/footer:1/div:1/svg:1/g:5/g:6/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:6/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:7	g	
+page:/footer:1/div:1/svg:1/g:5/g:7/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:7/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:8	g	
+page:/footer:1/div:1/svg:1/g:5/g:8/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:8/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:9	g	
+page:/footer:1/div:1/svg:1/g:5/g:9/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:9/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:10	g	
+page:/footer:1/div:1/svg:1/g:5/g:10/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:10/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:11	g	
+page:/footer:1/div:1/svg:1/g:5/g:11/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:11/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:12	g	
+page:/footer:1/div:1/svg:1/g:5/g:12/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:12/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:13	g	
+page:/footer:1/div:1/svg:1/g:5/g:13/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:13/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:14	g	
+page:/footer:1/div:1/svg:1/g:5/g:14/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:14/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:15	g	
+page:/footer:1/div:1/svg:1/g:5/g:15/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:15/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:16	g	
+page:/footer:1/div:1/svg:1/g:5/g:16/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:16/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:5/g:17	g	
+page:/footer:1/div:1/svg:1/g:5/g:17/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:5/g:17/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:6	g	
+page:/footer:1/div:1/svg:1/g:6/rect:1	rect	
+page:/footer:1/div:1/svg:1/g:6/circle:1	circle	
+page:/footer:1/div:1/svg:1/g:6/circle:2	circle	
+page:/footer:1/div:1/svg:1/g:6/rect:2	rect	
+page:/footer:1/div:1/svg:1/g:6/circle:3	circle	
+page:/footer:1/div:1/svg:1/g:6/circle:4	circle	
+page:/footer:1/div:1/svg:1/g:6/rect:3	rect	
+page:/footer:1/div:1/svg:1/g:6/circle:5	circle	
+page:/footer:1/div:1/svg:1/g:6/circle:6	circle	
+page:/footer:1/div:1/svg:1/g:6/rect:4	rect	
+page:/footer:1/div:1/svg:1/g:6/circle:7	circle	
+page:/footer:1/div:1/svg:1/g:6/circle:8	circle	
+page:/footer:1/div:2	div	DEFXN / Independent histories. Connected possibilities.Start with the idea. Follow the evidence.you.fxnEvery possibility starts with a historyExplore DEFXN
+page:/footer:1/div:2/p:1	p	DEFXN / Independent histories. Connected possibilities.
+page:/footer:1/div:2/p:1/svg:1	svg	
+page:/footer:1/div:2/p:1/svg:1/path:1	path	
+page:/footer:1/div:2/p:1/svg:1/path:2	path	
+page:/footer:1/div:2/p:1/svg:1/path:3	path	
+page:/footer:1/div:2/p:1/svg:1/path:4	path	
+page:/footer:1/div:2/h2:1	h2	Start with the idea. Follow the evidence.
+page:/footer:1/div:2/a:1	a	you.fxnEvery possibility starts with a historyExplore DEFXN
+page:/footer:1/div:2/a:1/span:1	span	you.fxn
+page:/footer:1/div:2/a:1/span:1/svg:1	svg	
+page:/footer:1/div:2/a:1/span:1/svg:1/path:1	path	
+page:/footer:1/div:2/a:1/span:1/svg:1/path:2	path	
+page:/footer:1/div:2/a:1/span:2	span	
+page:/footer:1/div:2/a:1/span:3	span	Every possibility starts with a historyExplore DEFXN
+page:/footer:1/div:2/a:1/span:3/small:1	small	Every possibility starts with a history
+page:/footer:1/div:2/a:1/span:3/strong:1	strong	Explore DEFXN
+page:/footer:1/div:2/a:1/span:3/svg:1	svg	
+page:/footer:1/div:2/a:1/span:3/svg:1/path:1	path	
+page:/footer:1/div:2/a:1/span:3/svg:1/path:2	path	
+page:/footer:1/nav:1	nav	ProtocolResolversExplorerRun from sourceGovernance
+page:/footer:1/nav:1/a:1	a	Protocol
+page:/footer:1/nav:1/a:1/svg:1	svg	
+page:/footer:1/nav:1/a:1/svg:1/path:1	path	
+page:/footer:1/nav:1/a:1/svg:1/path:2	path	
+page:/footer:1/nav:1/a:1/svg:1/path:3	path	
+page:/footer:1/nav:1/a:1/svg:1/path:4	path	
+page:/footer:1/nav:1/a:2	a	Resolvers
+page:/footer:1/nav:1/a:2/svg:1	svg	
+page:/footer:1/nav:1/a:2/svg:1/path:1	path	
+page:/footer:1/nav:1/a:2/svg:1/path:2	path	
+page:/footer:1/nav:1/a:2/svg:1/path:3	path	
+page:/footer:1/nav:1/a:2/svg:1/path:4	path	
+page:/footer:1/nav:1/a:3	a	Explorer
+page:/footer:1/nav:1/a:3/svg:1	svg	
+page:/footer:1/nav:1/a:3/svg:1/path:1	path	
+page:/footer:1/nav:1/a:3/svg:1/path:2	path	
+page:/footer:1/nav:1/a:3/svg:1/path:3	path	
+page:/footer:1/nav:1/a:3/svg:1/path:4	path	
+page:/footer:1/nav:1/a:3/svg:1/path:5	path	
+page:/footer:1/nav:1/a:4	a	Run from source
+page:/footer:1/nav:1/a:4/svg:1	svg	
+page:/footer:1/nav:1/a:4/svg:1/path:1	path	
+page:/footer:1/nav:1/a:4/svg:1/path:2	path	
+page:/footer:1/nav:1/a:4/svg:1/path:3	path	
+page:/footer:1/nav:1/a:5	a	Governance
+page:/footer:1/nav:1/a:5/svg:1	svg	
+page:/footer:1/nav:1/a:5/svg:1/path:1	path	
+page:/footer:1/nav:1/a:5/svg:1/path:2	path	
+page:/footer:1/nav:1/a:5/svg:1/path:3	path	

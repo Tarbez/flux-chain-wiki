@@ -21,10 +21,40 @@
      js/admin/authorization-view.js             scoped authorization view
      js/ark/local-identity.js                   the local identity session pointer
      js/ark/vendor/ark-kit.js                   ArkKit: the primitives/blocks the site uses
-                                                (scripts/ark-kit-entry.js), provenance header
-     css/ark-blocks.css                         Ark's static block CSS -- only once the synced
-                                                @deadark/ark-ui ships dist/ark-ui.blocks.css;
-                                                until then reported as NOT BUILT, never as empty
+                                                (scripts/ark-kit-entry.js), provenance header,
+                                                with the createArkUI runtime (the editor)
+     js/ark/vendor/ark-kit-forms.js             the form blocks, registered into the public kit's registry
+                                                (scripts/ark-kit-forms-entry.js)
+     js/ark/vendor/ark-kit-popover.js           the popover block alone (scripts/ark-kit-popover-entry.js)
+     js/ark/vendor/ark-kit-figures.js           the lane and band blocks alone (scripts/ark-kit-figures-entry.js)
+     js/ark/vendor/ark-kit-public.js            the same entry with what no block uses refused
+                                                (createArkUI, createArkPopover, createArkToggleGroup,
+                                                patchArkBlock), the blocks' demo examples dropped and
+                                                the prop schemas' editor help/description text
+                                                stripped: public pages that render blocks
+     js/ark/vendor/ark-kit-live.js              patchArkBlock alone (scripts/ark-kit-live-entry.js):
+                                                js/ark/blocks.js loads it on a page's first live
+                                                update, so only / and /stats pay for the morph
+     js/ark/blocks.js                           the blocks adapter, minified from its commented
+                                                source scripts/ark-blocks-adapter.js (a classic
+                                                script; no bundling): 6.4 -> 3.9 KB gz per block route
+     js/admin/vendor/cms-blocks.js              ArkCmsBlocks: @deadark/sdk/cms's validateCmsArkBlock and
+                                                editor fields (scripts/cms-blocks-entry.js) -- the
+                                                editor only: it bundles zod (~39 KB gz)
+     css/ark-blocks.css                         Ark's static block CSS (dist/ark-ui.blocks.css),
+                                                minified by esbuild -- the same rules, selectors and
+                                                order, measured 7.5 -> 7.2 KB gz (W3-BUDGET); only
+                                                once the synced @deadark/ark-ui ships it; until then
+                                                reported as NOT BUILT, never as empty
+
+     js/min/**, js/min/manifest.js, index.html's manifest stamp
+                                                the site's page scripts (the ones js/pages/catalog.js lists)
+                                                served minified, with source maps: the commented source
+                                                stays canonical. Derived from the catalog, not listed
+                                                here -- scripts/lib/page-scripts.cjs says which files and
+                                                why; `--pages` builds or checks only these (npm run
+                                                build:pages / check:pages), `npm run build:ark` does all.
+                                                A copy no catalog script builds is deleted (or DRIFT).
 
    It replaced, on 2026-10-19 (DEFXN polish Wave 0, docs/ux-audit/components.md §5.3):
    scripts/sync-ark.cjs and scripts/sync-ark-backgrounds.cjs (which read
@@ -44,6 +74,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const zlib = require('node:zlib');
 const { execFileSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -54,11 +85,52 @@ const sha512 = (bytes) => 'sha512-' + crypto.createHash('sha512').update(bytes).
 
 /* ---------- provenance: node_modules must be exactly the pinned tarballs ---------- */
 
+/* The files a .tgz holds: { 'src/x.js': Buffer } (npm pack's package/ prefix dropped). ustar headers
+   with the prefix field, and pax 'path=' records, which npm pack writes for long names. */
+function tarballFiles(tgz) {
+  const tar = zlib.gunzipSync(tgz);
+  const files = {};
+  let pax = null;
+  for (let at = 0; at + 512 <= tar.length;) {
+    const header = tar.subarray(at, at + 512);
+    if (header.every((byte) => byte === 0)) break;
+    const field = (start, length) => header.subarray(start, start + length).toString('utf8').replace(/\0.*$/s, '');
+    const size = parseInt(field(124, 12).trim() || '0', 8);
+    const type = field(156, 1);
+    const prefix = field(345, 155);
+    const body = tar.subarray(at + 512, at + 512 + size);
+    if (type === 'x') {
+      const match = /\d+ path=([^\n]*)\n/.exec(body.toString('utf8'));
+      pax = match ? match[1] : null;
+    } else {
+      const name = pax || (prefix ? prefix + '/' : '') + field(0, 100);
+      pax = null;
+      if (type === '0' || type === '') files[name.replace(/^package\//, '')] = Buffer.from(body);
+    }
+    at += 512 + Math.ceil(size / 512) * 512;
+  }
+  return files;
+}
+
+/* Files whose installed bytes differ from the pinned tarball's. Found 2026-10-19: npm leaves a
+   file: dependency in place when its version and lock integrity are unchanged, so after a sync
+   that repacked the same version (ark-ui 0.2.0, ark-primitives 0.2.0) node_modules kept the OLD
+   files while .package-lock.json recorded the NEW tarball's integrity -- the integrity check above
+   passed, and ark-kit.js and js/settings/panel.js were built from code the pin did not name. */
+function staleInstalledFiles(name, tgz) {
+  const files = tarballFiles(tgz);
+  return Object.keys(files).filter((file) => {
+    const installedFile = path.join(packageDir(name), file);
+    return !fs.existsSync(installedFile) || Buffer.compare(fs.readFileSync(installedFile), files[file]) !== 0;
+  });
+}
+
 /* Every @deadark/* dependency pinned as file:.vendor/<tgz>, with the installed copy proven to be
    that tarball: npm records the integrity of what it installed in node_modules/.package-lock.json,
    and the sync recorded the tarball's sha256 in .vendor/<slug>-manifest.json. Building from a
    node_modules that `npm install` has not refreshed would otherwise pass --check against stale
-   code while the pinned tarball says something else. */
+   code while the pinned tarball says something else. The lock alone is not proof (see
+   staleInstalledFiles): every installed file is compared with the tarball's bytes too. */
 function vendoredPackages() {
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   const installedLock = path.join(ROOT, 'node_modules', '.package-lock.json');
@@ -80,7 +152,11 @@ function vendoredPackages() {
       const lockEntry = installed['node_modules/' + name];
       if (!lockEntry) problems.push(name + ': not installed in node_modules; run npm install');
       else if (lockEntry.integrity !== sha512(bytes)) problems.push(name + ': node_modules holds a different build than ' + entry.tarball + '; run npm install');
-      else entry.version = lockEntry.version;
+      else {
+        entry.version = lockEntry.version;
+        const stale = staleInstalledFiles(name, bytes);
+        if (stale.length) problems.push(name + ': node_modules/' + name + ' is not the bytes of ' + entry.tarball + ' (' + stale.slice(0, 3).join(', ') + (stale.length > 3 ? ', +' + (stale.length - 3) + ' more' : '') + ') although the install lock says it is; reinstall it: rm -rf node_modules/' + name + ' && npm install');
+      }
       return entry;
     });
   if (!packages.some((entry) => entry.name === '@deadark/ark-ui')) problems.push('@deadark/ark-ui is not pinned in package.json dependencies; add "@deadark/ark-ui": "file:.vendor/deadark-ark-ui-<version>.tgz" and run npm run sync:ark');
@@ -146,17 +222,22 @@ function buildBackgrounds() {
 /* ---------- SDK theme, through the SDK CLI (AGENTS.md: theme behaviour comes from the SDK) ---------- */
 
 const THEME_CLI = () => path.join(packageDir('@deadark/sdk'), 'bin', 'deadark-theme.mjs');
-// Curated for the lattice direction; only names the SDK catalog really has are kept.
-const ALLOWED_THEMES = ['clay', 'ochre', 'ghost', 'marine', 'grove', 'moss', 'glacier', 'bone'];
-
 function buildThemeCss() {
   return execFileSync(process.execPath, [THEME_CLI(), 'css']);
 }
 
+/* The site's palette ids, from the SDK's role-ladder module (@deadark/sdk/theme): the published
+   names, in family order, and the map from the old stored keys (ghost, glacier, ...) that the
+   settings panel reads once and writes forward. Nothing here is curated by hand. */
 function buildThemeOptions() {
-  const themes = JSON.parse(execFileSync(process.execPath, [THEME_CLI(), 'themes'], { encoding: 'utf8' }));
-  return '// Generated from the SDK theme catalog; curated for the lattice direction.\nexport default ' +
-    JSON.stringify(ALLOWED_THEMES.filter((name) => themes.some((theme) => theme.name === name))) + ';\n';
+  const script = "import('@deadark/sdk/theme').then((sdk)=>{const f=sdk.DEADARK_ROLE_LADDER_FAMILIES;" +
+    "console.log(JSON.stringify({options:f.flatMap((x)=>[sdk.getDeadArkRoleLadderPublishedName(x,'dark'),sdk.getDeadArkRoleLadderPublishedName(x,'light')])," +
+    "legacy:sdk.DEADARK_ROLE_LADDER_LEGACY_TO_PUBLISHED}));})";
+  const { options, legacy } = JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8', cwd: ROOT }));
+  return '// Generated from the SDK role-ladder palettes (@deadark/sdk/theme getDeadArkRoleLadderPublishedName).\n' +
+    'export default ' + JSON.stringify(options) + ';\n' +
+    '// Old stored key -> published id, for READING a visitor\'s earlier choice only.\n' +
+    'export const legacyThemeIds = ' + JSON.stringify(legacy) + ';\n';
 }
 
 /* ---------- esbuild bundles (classic IIFE scripts) ---------- */
@@ -165,9 +246,48 @@ function buildThemeOptions() {
 // must reuse it instead of carrying a second copy that hands out colliding dynamic ids.
 const SHARED_STYLE_REGISTRY = { '@deadark/ark-a11y/element-style': './scripts/ark-style-bridge.js' };
 
-function bundle({ entry, globalName, legalComments, alias, banner }) {
+/* Module replacements: swap one module of a synced @deadark package for a local stand-in, for an
+   import written as a relative path inside that package's dist -- which `alias` (package paths
+   only) cannot reach. Strips: drop named string members (`help: "..."`, `description: "..."`)
+   from the modules a pattern names. Both need an esbuild plugin, and esbuild runs plugins only in
+   its async API, so such a bundle is built in a child process and returned synchronously like
+   every other. */
+// The public kit drops the blocks' demo examples (scripts/ark-blocks-no-examples.js says why).
+const PUBLIC_KIT_REPLACEMENTS = [{ pattern: '[\\\\/]blocks[\\\\/]examples\\.js$', within: '@deadark/ark-ui', file: 'scripts/ark-blocks-no-examples.js' }];
+/* The public kit strips the prop schemas' editor text from the block modules: `help` (shown next
+   to a field in the editor, and quoted in a refusal's remedy) and a block's `description` (the
+   Library row). Public pages only render; the validation shape (kind, required, maxLength, enum
+   values, labels -- a refusal's failure and needs) stays whole. Measured 2026-10-19 (W3-BUDGET,
+   gzip -9): 78 help + 21 description strings, 6.3 KB raw, 2.1 KB gz of a 26.9 KB public kit. The
+   member must be a double-quoted string (tsc's output form) that opens an object or follows a
+   comma, so `description: { kind: "text" }` (a prop named description) and `props.description`
+   in render code are untouched. The full kit keeps every word. */
+// `member` is the regex source (data, not code: the child build gets it through JSON, so its
+// backslashes survive); its two groups keep the opener and its whitespace.
+const stripMember = (keys) => '(^|[{,])(\\s*)(?:' + keys.join('|') + '):\\s*"(?:[^"\\\\\\n]|\\\\.)*"\\s*,?';
+const PUBLIC_KIT_STRIPS = [{ pattern: '[\\\\/]ark-ui[\\\\/]dist[\\\\/]blocks[\\\\/][a-z-]+\\.js$', member: stripMember(['help', 'description']) }];
+
+const REPLACING_BUILD = `
+const esbuild = require(process.argv[1]);
+const fs = require('node:fs');
+const path = require('node:path');
+const { options, replacements, strips, root } = JSON.parse(process.argv[2]);
+options.plugins = [{ name: 'replace-modules', setup(build) {
+  for (const r of replacements || []) {
+    const within = path.join('node_modules', ...r.within.split('/'));
+    build.onResolve({ filter: new RegExp(r.pattern) }, (args) => (args.importer.includes(within) ? { path: path.join(root, r.file) } : undefined));
+  }
+  for (const s of strips || []) {
+    const member = new RegExp(s.member, 'g');
+    build.onLoad({ filter: new RegExp(s.pattern) }, (args) => ({ contents: fs.readFileSync(args.path, 'utf8').replace(member, '$1$2'), loader: 'js' }));
+  }
+} }];
+esbuild.build(options).then((result) => process.stdout.write(Buffer.from(result.outputFiles[0].contents)), (error) => { console.error(error); process.exit(1); });
+`;
+
+function bundle({ entry, globalName, legalComments, alias, banner, replacements, strips, define }) {
   const esbuild = require('esbuild');
-  const result = esbuild.buildSync({
+  const options = {
     absWorkingDir: ROOT,
     entryPoints: [entry],
     bundle: true,
@@ -179,12 +299,60 @@ function bundle({ entry, globalName, legalComments, alias, banner }) {
     ...(legalComments ? { legalComments } : {}),
     ...(alias ? { alias } : {}),
     ...(banner ? { banner: { js: banner } } : {}),
+    ...(define ? { define } : {}),
     outfile: path.join(ROOT, 'ark-vendor.out.js'), // never written (write: false); names the output
-  });
-  return Buffer.from(result.outputFiles[0].contents);
+  };
+  if ((replacements && replacements.length) || (strips && strips.length)) {
+    return execFileSync(process.execPath, ['-e', REPLACING_BUILD, require.resolve('esbuild'), JSON.stringify({ options, replacements, strips, root: ROOT })], { maxBuffer: 1 << 26 });
+  }
+  return Buffer.from(esbuild.buildSync(options).outputFiles[0].contents);
 }
 
-function arkKitBanner(packages) {
+/* A site classic script served minified (the blocks adapter): esbuild renames local names only --
+   every property, string, global (ArkUI, ArkKit, ArkKitLive) and data-ark-* name stays as written.
+   target es2018: the floor the page loader itself already needs (async functions, for...of), so
+   the minifier never introduces newer syntax than the site already ships. */
+function minifyClassicScript(source, from) {
+  const esbuild = require('esbuild');
+  const code = esbuild.transformSync(fs.readFileSync(path.join(ROOT, source), 'utf8'), { loader: 'js', minify: true, legalComments: 'none', target: 'es2018' }).code;
+  return '/* Generated by scripts/build-ark-vendor.cjs from ' + source + ' (minified). Do not edit: edit ' + source + ', then npm run build:ark. */\n' + code;
+}
+
+/* Ark's block stylesheet, minified (esbuild's CSS minifier: whitespace and shorthand only; every
+   selector, rule and order kept), behind a one-line provenance header. tests/ark-vendor.cjs proves
+   css/ark-blocks.css is exactly this transform of the synced package's file. */
+function minifyBlocksCss(source, version) {
+  const esbuild = require('esbuild');
+  const css = esbuild.transformSync(source, { loader: 'css', minify: true, legalComments: 'none' }).code;
+  return '/* @deadark/ark-ui@' + version + ' ' + ARK_BLOCKS_CSS_SOURCE + ', minified by scripts/build-ark-vendor.cjs. Do not edit; styles live in ark-ui blocks/styles.ts. */\n' + css;
+}
+
+// The public kit leaves out what no block uses (the createArkUI runtime, the popover and toggle
+// group the editor drives) and the live morph only / and /stats use (its own chunk,
+// js/ark/vendor/ark-kit-live.js); a page that calls one is told what to load (R2 budget).
+const PUBLIC_KIT_REFUSES = {
+  '@deadark/ark-ui/runtime': './scripts/ark-kit-public-refused.js',
+  '@deadark/ark-primitives/dialog': './scripts/ark-kit-public-refused.js',
+  '@deadark/ark-primitives/toggle': './scripts/ark-kit-public-refused.js',
+  '@deadark/ark-ui/blocks/patch': './scripts/ark-kit-public-refused.js',
+  '@deadark/ark-ui/blocks/confirm': './scripts/ark-kit-public-refused.js',
+  // The public kit's registry is ark-ui's CORE (21 blocks); the form blocks are js/ark/vendor/ark-kit-forms.js.
+  // esbuild matches the longest alias, so the two entries above keep their own targets.
+  '@deadark/ark-ui/blocks': '@deadark/ark-ui/blocks/core',
+};
+// scripts/ark-kit-entry.js exports PUBLIC_KIT from this constant: js/ark/blocks.js reads it.
+const KIT_DEFINE = (isPublic) => ({ __ARK_KIT_PUBLIC__: String(isPublic) });
+
+function arkKitBanner(packages, variant) {
+  // The public kit is paid for by every visitor of a block route: its header names ark-ui's version
+  // and where the rest is recorded (package.json pins every package; sha256 in
+  // .vendor/<slug>-manifest.json; tests/ark-vendor.cjs proves the bytes). Measured 2026-10-19:
+  // the full list cost 0.26 KB gz of it, this line 0.08 (W3-BUDGET).
+  if (variant) {
+    const arkUi = packages.find((p) => p.name === '@deadark/ark-ui') || {};
+    return '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-entry.js (' + variant + '). Do not edit.\n' +
+      ' * @deadark/ark-ui@' + arkUi.version + ' and its closure as pinned in package.json (npm run sync:ark; sha256 in .vendor/*-manifest.json). */';
+  }
   const lines = packages.map((p) => ' *   ' + p.name + '@' + p.version + '  ' + p.tarball + '  sha256 ' + p.sha256);
   return '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-entry.js. Do not edit.\n' +
     ' * Built only from these synced packages (npm run sync:ark):\n' + lines.join('\n') + '\n */';
@@ -207,22 +375,55 @@ function targets(packages) {
     { out: 'js/admin/vendor/flux-elements.js', build: () => bundle({ entry: 'scripts/elements-entry.js', globalName: 'ArkFluxElements', legalComments: 'none' }) },
     { out: 'js/admin/authorization-view.js', build: () => bundle({ entry: 'scripts/authorization-view-entry.js', globalName: 'ArkAuthorizationView', legalComments: 'none' }) },
     { out: 'js/ark/local-identity.js', build: () => bundle({ entry: 'scripts/local-identity-entry.js', globalName: 'ArkLocalIdentityBuild', legalComments: 'none' }) },
-    { out: 'js/ark/vendor/ark-kit.js', build: () => bundle({ entry: 'scripts/ark-kit-entry.js', globalName: 'ArkKit', legalComments: 'none', alias: SHARED_STYLE_REGISTRY, banner: arkKitBanner(packages) }) },
+    { out: 'js/ark/vendor/ark-kit.js', build: () => bundle({ entry: 'scripts/ark-kit-entry.js', globalName: 'ArkKit', legalComments: 'none', alias: SHARED_STYLE_REGISTRY, define: KIT_DEFINE(false), banner: arkKitBanner(packages) }) },
+    // The same entry for public pages: createArkUI, createArkPopover, createArkToggleGroup, patchArkBlock refused, not bundled;
+    // examples and editor help stripped (R2 budget).
+    { out: 'js/ark/vendor/ark-kit-public.js', build: () => bundle({ entry: 'scripts/ark-kit-entry.js', globalName: 'ArkKit', legalComments: 'none', alias: Object.assign({}, SHARED_STYLE_REGISTRY, PUBLIC_KIT_REFUSES), replacements: PUBLIC_KIT_REPLACEMENTS, strips: PUBLIC_KIT_STRIPS, define: KIT_DEFINE(true), banner: arkKitBanner(packages, 'public: createArkUI, createArkPopover, createArkToggleGroup, patchArkBlock refused; block examples and editor help dropped') }) },
+    // The form blocks alone (ark-ui blocks/forms), registered into the public kit's registry by a page that takes input.
+    { out: 'js/ark/vendor/ark-kit-forms.js', build: () => bundle({ entry: 'scripts/ark-kit-forms-entry.js', globalName: 'ArkKitForms', legalComments: 'none', strips: PUBLIC_KIT_STRIPS, banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-forms-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' blocks/forms; editor help dropped). Do not edit. */' }) },
+    // The popover block alone (ark-ui blocks/popover), for a page that floats one panel and takes no input.
+    { out: 'js/ark/vendor/ark-kit-popover.js', build: () => bundle({ entry: 'scripts/ark-kit-popover-entry.js', globalName: 'ArkKitPopover', legalComments: 'none', strips: PUBLIC_KIT_STRIPS, banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-popover-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' blocks/popover; editor help dropped). Do not edit. */' }) },
+    // The lane and band blocks alone (ark-ui blocks/figures), for the pages that draw a manifest figure.
+    { out: 'js/ark/vendor/ark-kit-figures.js', build: () => bundle({ entry: 'scripts/ark-kit-figures-entry.js', globalName: 'ArkKitFigures', legalComments: 'none', strips: PUBLIC_KIT_STRIPS, banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-figures-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' blocks/figures; editor help dropped). Do not edit. */' }) },
+    // The live morph alone, for js/ark/blocks.js to load on a page's first live update.
+    { out: 'js/ark/vendor/ark-kit-live.js', build: () => bundle({ entry: 'scripts/ark-kit-live-entry.js', globalName: 'ArkKitLive', legalComments: 'none', banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-live-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' blocks/patch). Do not edit. */' }) },
+    // The blocks adapter every block route loads (ArkUI.blockScripts), served minified from its commented source.
+    { out: 'js/ark/blocks.js', build: () => minifyClassicScript('scripts/ark-blocks-adapter.js') },
+    // The editor's block check and prop-editor fields (@deadark/sdk/cms). Admin-only: it
+    // bundles zod (~39 KB gz), which the public site, rendering only, never needs.
+    { out: 'js/admin/vendor/cms-blocks.js', build: () => bundle({ entry: 'scripts/cms-blocks-entry.js', globalName: 'ArkCmsBlocks', legalComments: 'none' }) },
     fs.existsSync(blocksCss)
-      ? { out: 'css/ark-blocks.css', build: () => fs.readFileSync(blocksCss) }
+      ? { out: 'css/ark-blocks.css', build: () => minifyBlocksCss(fs.readFileSync(blocksCss, 'utf8'), (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version) }
       : { out: 'css/ark-blocks.css', notBuilt: '@deadark/ark-ui ' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' ships no ' + ARK_BLOCKS_CSS_SOURCE + ' yet (components.md Wave 1, U1)' },
   ];
 }
 
+/* The page scripts served minified (js/min/*, its manifest, and the manifest's stamp in index.html):
+   scripts/lib/page-scripts.cjs derives the files from the catalog and builds them. They need esbuild
+   and the site's own source only -- not the pinned Ark packages -- so `--pages` builds or checks
+   just these (npm run build:pages / check:pages) without the provenance proof. */
+function pageTargets() {
+  const pages = require('./lib/page-scripts.cjs');
+  const plan = pages.plan(ROOT);
+  for (const item of plan.exempt) console.log('[build-ark-vendor] served as written ' + item.script + ': ' + item.exempt);
+  return { targets: plan.outputs.map((output) => ({ out: output.out, build: () => output.bytes })), orphans: pages.orphans(ROOT, plan.outputs) };
+}
+
 function main() {
   const check = process.argv.includes('--check');
-  const { packages, problems } = vendoredPackages();
-  if (problems.length) {
-    for (const problem of problems) console.error('[build-ark-vendor] ' + problem);
-    process.exit(1);
+  const pagesOnly = process.argv.includes('--pages');
+  let packages = [];
+  if (!pagesOnly) {
+    const proof = vendoredPackages();
+    if (proof.problems.length) {
+      for (const problem of proof.problems) console.error('[build-ark-vendor] ' + problem);
+      process.exit(1);
+    }
+    packages = proof.packages;
   }
   let drift = 0;
-  for (const target of targets(packages)) {
+  const pages = pageTargets();
+  for (const target of (pagesOnly ? [] : targets(packages)).concat(pages.targets)) {
     const file = path.join(ROOT, target.out);
     if (target.notBuilt) {
       // Absent is not empty: say what is missing instead of writing a zero-byte stylesheet.
@@ -241,12 +442,17 @@ function main() {
     if (!same) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, bytes); }
     console.log('[build-ark-vendor] ' + (same ? 'unchanged ' : 'wrote ') + target.out + ' (' + bytes.length + ' bytes, sha256 ' + sha256(bytes).slice(0, 12) + ')');
   }
+  // A copy no output names (its script left the catalog, or became exempt) would be served stale forever.
+  for (const orphan of pages.orphans) {
+    if (check) { console.error('[build-ark-vendor] DRIFT ' + orphan + ': no catalog script builds it; run node scripts/build-ark-vendor.cjs'); drift += 1; }
+    else { fs.unlinkSync(path.join(ROOT, orphan)); console.log('[build-ark-vendor] removed ' + orphan + ' (no catalog script builds it)'); }
+  }
   if (check && drift) {
-    console.error('[build-ark-vendor] ' + drift + ' output(s) drifted from the synced packages');
+    console.error('[build-ark-vendor] ' + drift + ' output(s) drifted from their sources');
     process.exit(1);
   }
 }
 
-module.exports = { vendoredPackages, targets };
+module.exports = { vendoredPackages, targets, tarballFiles, staleInstalledFiles, minifyBlocksCss };
 
 if (require.main === module) main();

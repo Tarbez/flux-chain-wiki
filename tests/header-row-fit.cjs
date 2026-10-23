@@ -51,6 +51,7 @@ function load(row) {
     requestAnimationFrame: (fn) => { fn(); return 1; },
     CustomEvent: class { constructor(type) { this.type = type; } },
     document: {},
+    ArkUI: {},   /* the slice publishes ArkUI.headerPages (since 2026-10-22); a page always has ArkUI */
   });
   for (const child of row.header.children) child.getBoundingClientRect = () => ({ width: child.width() });
   vm.runInContext(src.slice(start, end), context);
@@ -91,4 +92,4 @@ const LINKS = { resolutions: 135, about: 104, deployment: 124, explorer: 133, st
   fit();
   assert.deepEqual(row.collapsed(), ['stats', 'deployment', 'about', 'explorer', 'resolutions', 'download']);
 }
-console.log('PASS: the header row collapses Stats, How it works, Overview, Mesh Explorer, Resolutions, Run DEFXN in that order until it fits, never Account, and announces each change.');
+console.log('PASS: the header row collapses Stats, Deploy (a resolver), Overview, Mesh Explorer, Resolutions, Run DEFXN in that order until it fits, never Account, and announces each change.');

@@ -1,4 +1,4 @@
-import themeOptions from './theme-options.js';
+import themeOptions, { legacyThemeIds } from './theme-options.js';
 // Ark UI comes from the synced packages (node_modules/@deadark/*, filled by `npm run sync:ark`);
 // build: node scripts/build-ark-vendor.cjs -> js/settings/panel.js.
 import { createArkUI } from '@deadark/ark-ui/runtime';
@@ -12,7 +12,7 @@ const outsidePointer = event => { if (event.target instanceof Node) ui.handleOut
 document.addEventListener('pointerdown', outsidePointer, true);
 const themes=themeOptions;
 const atmosphereFixed=Object.freeze({intensity:37,grain:90});
-const controls={structure:{label:'Structure',min:0,max:100,value:50},visibility:{label:'Visibility',min:0,max:100,value:72},scale:{label:'Scale',min:60,max:180,value:100},density:{label:'Density',min:20,max:100,value:60},softness:{label:'Softness',min:0,max:100,value:0},delay:{label:'Loop delay (seconds)',min:.3,max:10,value:1.2}};
+const controls={structure:{label:'Structure',min:0,max:100,value:50},visibility:{label:'Visibility',min:0,max:100,value:72},scale:{label:'Scale',min:60,max:180,value:100},density:{label:'Density',min:20,max:100,value:60},softness:{label:'Softness',min:0,max:100,value:0},delay:{label:'Wave delay (seconds)',min:.3,max:10,value:1.2}};
 ui.register('ATMOSPHERERANGE|BUTTON',{tag:'input',attrs:{type:'range'}});
 const root=document.documentElement;
 // Site-wide owner-set defaults (js/content/settings-defaults.js + -data.js), consulted only
@@ -23,8 +23,18 @@ const root=document.documentElement;
 let SITE_DEFAULTS=(window.ArkSiteDefaults&&ArkSiteDefaults.get())||{},previewOnly=false;
 const read=(key,fallback)=>{try{return localStorage.getItem(key)||fallback;}catch{return fallback;}};
 const save=(key,value)=>{if(previewOnly)return;try{localStorage.setItem(key,value);}catch{}};
-let theme=read('flux-chain-theme',SITE_DEFAULTS.theme||'ghost'),renderer,frame=0;
-if(!themes.includes(theme))theme='ghost';
+// Palette ids are the SDK's published names (generated scripts/theme-options.js). Stored choices
+// live in two vocabularies in SEPARATE keys (legacy `moss` = Moss light, published `defxn-moss` =
+// Moss dark): THEME_KEY holds published ids and is the only one written; the old keys
+// (flux-chain-theme, defxn-site-theme-default) are READ once, mapped, and never rewritten or removed.
+// The visitor's own choice, old or new, beats the site default (precedence unchanged).
+const THEME_KEY='defxn-theme-v1',SITE_THEME_KEY='defxn-theme-default-v1';
+const publishedNow=value=>value&&themes.includes(value)?value:null;
+const publishedOld=value=>value&&Object.prototype.hasOwnProperty.call(legacyThemeIds,value)?legacyThemeIds[value]:null;
+const publishedAny=value=>publishedNow(value)||publishedOld(value);
+const ownTheme=publishedNow(read(THEME_KEY,''))||publishedOld(read('flux-chain-theme',''));
+if(ownTheme&&!publishedNow(read(THEME_KEY,'')))save(THEME_KEY,ownTheme);
+let theme=ownTheme||publishedAny(SITE_DEFAULTS.theme)||'ember',renderer,frame=0;
 let saved={};try{saved=JSON.parse(read('defxn-pattern-config-v1','{}'))||{};}catch{}
 let values={};
 function patternValues(name){const stored=saved[name]||{};const siteDefault=(SITE_DEFAULTS.patternConfig&&SITE_DEFAULTS.patternConfig[name])||{};const result={animated:stored.animated!==undefined?stored.animated!==false:typeof siteDefault.animated==='boolean'?siteDefault.animated:true};for(const [key,c] of Object.entries(controls)){result[key]=typeof stored[key]==='number'&&Number.isFinite(stored[key])?Math.max(c.min,Math.min(c.max,stored[key])):typeof siteDefault[key]==='number'&&Number.isFinite(siteDefault[key])?Math.max(c.min,Math.min(c.max,siteDefault[key])):c.value;}for(const [key,choices] of Object.entries({scale:[80,100,140],density:[35,60,90]}))result[key]=choices.reduce((a,b)=>Math.abs(a-result[key])<Math.abs(b-result[key])?a:b);return result;}
@@ -36,8 +46,8 @@ const brandField=document.createElement('div');brandField.className='defxn-brand
 const meshCanvas=document.createElement('canvas');meshCanvas.className='defxn-brand-mesh';brandField.append(meshCanvas);
 const meshPattern=ArkUI.createMeshFabric(meshCanvas,{background:true});
 // Five relaxed families, each in a dark and a light palette (css/flux-themes.css).
-const themeNames={ghost:'Ember',clay:'Tide',ochre:'Moss',marine:'Dune',dusk:'Dusk',glacier:'Ember',grove:'Tide',moss:'Moss',bone:'Dune',dawn:'Dusk'};
-const darkThemes=['ghost','clay','ochre','marine','dusk'],lightThemes=['glacier','grove','moss','bone','dawn'];
+const themeNames={'ember':'Ember','defxn-tide':'Tide','defxn-moss':'Moss','defxn-dune':'Dune','defxn-dusk':'Dusk','ember-light':'Ember','defxn-tide-light':'Tide','defxn-moss-light':'Moss','defxn-dune-light':'Dune','defxn-dusk-light':'Dusk'};
+const darkThemes=['ember','defxn-tide','defxn-moss','defxn-dune','defxn-dusk'],lightThemes=['ember-light','defxn-tide-light','defxn-moss-light','defxn-dune-light','defxn-dusk-light'];
 const motifs=['blocks','traces','layers','nodes','routes','tiles','frames','none'];
 const motifMigration={wave:'traces',weave:'traces',rosette:'blocks',arches:'layers',survey:'traces'};
 let motif=read('defxn-motif-v1',SITE_DEFAULTS.motif||'blocks');motif=motifMigration[motif]||motif;if(!motifs.includes(motif))motif='blocks';
@@ -52,7 +62,7 @@ function group(name,items){
  slots[name]={ref:'SZ'+name.toUpperCase(),pattern:'R-SZ'+name.toUpperCase()+'-F-GROUP-D-COLUMN',config:{attrs:{class:'settings-choices',role:'group','aria-label':name}}};return {slot:name,children};
 }
 const presets={scale:{compact:80,standard:100,wide:140},density:{sparse:35,balanced:60,full:90}};
-const rangeCopy={structure:{label:'Structure',hint:'Shape the selected pattern.',ends:['Simple','Detailed']},visibility:{label:'Visibility',hint:'Set how strongly the pattern appears.',ends:['Hidden','Clear']},delay:{label:'Pause between loops',hint:'Time to rest after each gentle pulse.',ends:['300 ms','10 seconds']}};
+const rangeCopy={structure:{label:'Structure',hint:'Shape the selected pattern.',ends:['Simple','Detailed']},visibility:{label:'Visibility',hint:'Set how strongly the pattern appears.',ends:['Hidden','Clear']},delay:{label:'Wave delay',hint:'How long the pattern rests before its wave, after it appears or a setting changes.',ends:['300 ms','10 seconds']}};
 const rangeValue=key=>key==='delay'?(values[key]<1?Math.round(values[key]*1000)+' ms':values[key]+' s'):values[key]+'%';
 const sliders=['structure','visibility','delay'].map(key=>{
  const control=controls[key],copy=rangeCopy[key];
@@ -63,7 +73,7 @@ const sliders=['structure','visibility','delay'].map(key=>{
  const ref='SZ'+key.toUpperCase();slots[key]={ref,pattern:'R-'+ref+'-M-ATMOSPHERERANGE-A-INPUT',state:{text:String(values[key])},config:{label:copy.label,attrs:{class:'settings-range',min:control.min,max:control.max,step:key==='delay'?.1:1,value:String(values[key])}}};
  return {slot:key+'Card',children:[{slot:key+'Header',children:[label,value]},slot(key+'Hint',copy.hint,false,'settings-slider-hint'),{slot:key},{slot:key+'Ends',children:[slot(key+'Min',copy.ends[0]),slot(key+'Max',copy.ends[1])]}]};
 });
-const contents=[slot('label','Your space',false,'settings-title'),slot('description','A few ways to make it yours.',false,'settings-description'),slot('themeLabel','Theme',false,'settings-label'),slot('darkLabel','Dark',false,'settings-control-label'),group('themesDark',darkThemes),slot('lightLabel','Light',false,'settings-control-label'),group('themesLight',lightThemes),slot('motifLabel','Pattern',false,'settings-label'),group('motifs',motifs),slot('backgroundLabel','Active pattern',false,'settings-label'),slot('sizeLabel','Cell size',false,'settings-control-label'),group('scale',Object.keys(presets.scale)),slot('spacingLabel','Cell spacing',false,'settings-control-label'),group('density',Object.keys(presets.density)),...sliders,slot('animate','Enable pattern animation',true,'settings-action'),slot('animationNote','Visible waves follow the shape of each pattern. Pause anytime; reduced motion is respected.',false,'settings-description'),slot('remove','Remove pattern',true,'settings-action'),slot('restore','Reset this pattern',true,'settings-action'),slot('motionLabel','Motion',false,'settings-label'),slot('pause','Pause motion',true,'settings-action'),slot('reset','Reset viewing angle',true,'settings-action')];
+const contents=[slot('label','Your space',false,'settings-title'),slot('description','A few ways to make it yours.',false,'settings-description'),slot('themeLabel','Theme',false,'settings-label'),slot('darkLabel','Dark',false,'settings-control-label'),group('themesDark',darkThemes),slot('lightLabel','Light',false,'settings-control-label'),group('themesLight',lightThemes),slot('palette','See the full palette →',true,'settings-action settings-palette-link'),slot('motifLabel','Pattern',false,'settings-label'),group('motifs',motifs),slot('backgroundLabel','Active pattern',false,'settings-label'),slot('sizeLabel','Cell size',false,'settings-control-label'),group('scale',Object.keys(presets.scale)),slot('spacingLabel','Cell spacing',false,'settings-control-label'),group('density',Object.keys(presets.density)),...sliders,slot('animate','Enable pattern animation',true,'settings-action'),slot('animationNote','One wave follows the shape of the pattern when it appears or a setting changes, then rests. Pause anytime; reduced motion is respected.',false,'settings-description'),slot('remove','Remove pattern',true,'settings-action'),slot('restore','Reset this pattern',true,'settings-action'),slot('motionLabel','Motion',false,'settings-label'),slot('pause','Pause motion',true,'settings-action'),slot('reset','Reset viewing angle',true,'settings-action')];
 slots.root={ref:'SZROOT',pattern:'R-SZROOT-F-ROOT-D-COLUMN',config:{attrs:{class:'settings-root'}}};
 slots.trigger={ref:'SZTRIGGER',pattern:'R-SZTRIGGER-X-SECONDARY-M-SETTINGS-A-CLICK',state:{text:'⚙'},config:{label:'Open settings',attrs:{class:'settings-trigger'}}};
 slots.content={ref:'SZCONTENT',pattern:'R-SZCONTENT-F-POPOVER-D-COLUMN',state:{open:false,hidden:true},config:{attrs:{class:'settings-panel'}}};
@@ -80,7 +90,7 @@ function selected(group,values,current){values.forEach((value,i)=>{const ref=com
 // load saved the current site default here as if chosen, so a visitor who never touched the
 // theme kept their first visit's default forever and never saw the owner change it
 // (regression: tests/browser/theme-owner.mjs). The same holds for the pattern (motif).
-function applyTheme(value,chosen){theme=value;root.dataset.theme=value;if(chosen)save('flux-chain-theme',value);selected('themesDark',darkThemes,value);selected('themesLight',lightThemes,value);}
+function applyTheme(value,chosen){theme=value;root.dataset.theme=value;if(chosen)save(THEME_KEY,value);selected('themesDark',darkThemes,value);selected('themesLight',lightThemes,value);}
 function applyMotif(value,chosen){motif=value;root.dataset.motif=value;if(chosen)save('defxn-motif-v1',value);selected('motifs',motifs,value);values=patternValues(value);meshPattern.select({blocks:'network',traces:'logic',layers:'story-check',nodes:'mesh-nodes',routes:'mesh-routes',tiles:'mesh-tiles',frames:'mesh-frames'}[value]||'quiet',false);if(ready)syncPattern();}
 motifs.forEach((value,i)=>bind('motifs'+i,()=>applyMotif(value,true)));
 let ready=false;applyMotif(motif);
@@ -93,10 +103,20 @@ function atmosphereConfig(){
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 let loopTimer=0,disposed=false;
 function stopPattern(){meshPattern.refresh();clearTimeout(loopTimer);loopTimer=0;}
+// "Animated pattern" is ONE bounded wave per real change, never a loop (memory
+// defxn_animation_must_settle; measured by tests/browser/idle-frames.mjs). schedulePattern() is
+// called by exactly the real changes: the pattern or one of its settings changing (syncPattern),
+// the tab becoming visible, reduced motion lifting, motion being resumed. After `delay` seconds
+// of rest it plays the fabric's 3.2 s scan (js/ark/mesh-fabric.js animate(), which paints its own
+// settled frame and stops) and then nothing is scheduled until the next real change. Until
+// 2026-10-19 the wave re-armed itself after every scan, so a settled page still requested ~20
+// frames/s forever; a slider called "Loop delay" set only how long that loop rested.
+// The scan plays on the home only (the owner's call 2026-10-22: motion on every route was noise for a reader);
+// every other route shows the pattern at rest. The visitor's own "animated" choice still decides on the home.
 function schedulePattern(){
  stopPattern();
- if(disposed||!values.animated||motif==='none'||document.hidden||reduced.matches||ArkUI.sceneState.get().paused)return;
- loopTimer=setTimeout(()=>{loopTimer=0;if(disposed)return;meshPattern.animate();loopTimer=setTimeout(schedulePattern,3200);},values.delay*1000);
+ if(disposed||!values.animated||motif==='none'||document.hidden||reduced.matches||ArkUI.sceneState.get().paused||ArkUI.sceneState.get().page!=='zero')return;
+ loopTimer=setTimeout(()=>{loopTimer=0;if(disposed)return;meshPattern.animate();},values.delay*1000);
 }
 function persistPattern(){saved[motif]={...values};save('defxn-pattern-config-v1',JSON.stringify(saved));}
 function restoreRangeValues(){for(const key of ['structure','visibility','delay']){const input=ui.getElement(component.getRef(key));if(!input)continue;input.value=String(values[key]);input.style.setProperty('--range-fill',((values[key]-controls[key].min)/(controls[key].max-controls[key].min)*100)+'%');input.setAttribute('aria-valuetext',rangeValue(key));const output=ui.getElement(component.getRef(key+'Value'));if(output&&output.textContent!==rangeValue(key))output.textContent=rangeValue(key);}}
@@ -121,6 +141,10 @@ for(const key of ['structure','visibility','delay']){const c=controls[key];
  ui.bindRefEvent(component.getRef(key),'input',(event,element)=>{const value=Number(element.value);if(!Number.isFinite(value))return;values[key]=Math.max(c.min,Math.min(c.max,value));syncPattern(true);persistPattern();});
 }
 for(const [key,options] of Object.entries(presets)){ui.configureRef(component.getRef(key),{attrs:{role:'radiogroup','aria-label':key==='scale'?'Cell size':'Cell spacing'}});Object.entries(options).forEach(([name,value],i)=>{bind(key+i,()=>{values[key]=value;persistPattern();syncPattern();});ui.bindRefEvent(component.getRef(key+i),'keydown',event=>{const keys=Object.keys(options);let next;if(['ArrowRight','ArrowDown'].includes(event.key))next=(i+1)%keys.length;else if(['ArrowLeft','ArrowUp'].includes(event.key))next=(i+keys.length-1)%keys.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=keys.length-1;else return;event.preventDefault();values[key]=options[keys[next]];persistPattern();syncPattern();ui.getElement(component.getRef(key+next))?.focus();});});}
+// "See the full palette": /palette, the design-system reference for these themes, had no inbound
+// link anywhere (docs/ux-audit/pages.md P2). It goes through the page router like every in-site
+// link, then closes this popover so the page is not covered (regression: tests/site-exits.cjs).
+bind('palette',()=>{const router=window.ArkUI&&ArkUI.pageRouter;if(!router)return;router.navigate('palette');const trigger=ui.getElement(component.getRef('trigger'));if(trigger&&trigger.getAttribute('aria-expanded')==='true')trigger.click();});
 bind('remove',()=>applyMotif('none',true));
 bind('animate',()=>{values.animated=!values.animated;persistPattern();syncPattern();});
 bind('restore',()=>{delete saved[motif];values=patternValues(motif);persistPattern();syncPattern();});
@@ -130,12 +154,13 @@ ready=true;syncPattern();
 for(const [groupName,items] of [['themesDark',darkThemes],['themesLight',lightThemes]])items.forEach((value,i)=>{ui.configureRef(component.getRef(groupName+i),{attrs:{'data-theme-choice':value,'aria-label':themeNames[value]+' '+(groupName==='themesDark'?'dark':'light')}});bind(groupName+i,()=>applyTheme(value,true));});
 bind('pause',()=>ArkUI.sceneState.pause(!ArkUI.sceneState.get().paused));bind('reset',()=>ArkUI.sceneState.orient(0,0));
 let paused;
-const unsubscribeMotion=ArkUI.sceneState.subscribe(state=>{if(state.paused===paused)return;paused=state.paused;const ref=component.getRef('pause');ui.configureRef(ref,{attrs:{'aria-pressed':String(paused)}});ui.update(ref,{text:paused?'Resume motion':'Pause motion'});restoreRangeValues();schedulePattern();});
+let scenePage=ArkUI.sceneState.get().page;
+const unsubscribeMotion=ArkUI.sceneState.subscribe(state=>{if(state.page!==scenePage){scenePage=state.page;schedulePattern();}if(state.paused===paused)return;paused=state.paused;const ref=component.getRef('pause');ui.configureRef(ref,{attrs:{'aria-pressed':String(paused)}});ui.update(ref,{text:paused?'Resume motion':'Pause motion'});restoreRangeValues();schedulePattern();});
 applyTheme(theme);renderer=mountArkBackground(backgroundHost,atmosphereConfig());restoreRangeValues();
 // What js/bootstrap.js paints before first paint for a visitor with no choice of their own: the
 // site default as this browser last saw it (a cache of the owner's setting, never the visitor's
 // choice). A changed default shows from the next load on with no flash.
-if(SITE_DEFAULTS.theme&&themes.includes(SITE_DEFAULTS.theme))save('defxn-site-theme-default',SITE_DEFAULTS.theme);
+if(publishedAny(SITE_DEFAULTS.theme))save(SITE_THEME_KEY,publishedAny(SITE_DEFAULTS.theme));
 // CMS preview hook. js/main.js fires this only inside the editor's preview iframe, after it
 // re-defines ArkSiteDefaults from an unsaved edit or from a past version (Versions panel). The
 // preview shows what an UNCONFIGURED visitor lands on, so the defaults apply over this browser's
@@ -146,7 +171,7 @@ if(SITE_DEFAULTS.theme&&themes.includes(SITE_DEFAULTS.theme))save('defxn-site-th
 let previewShown='';
 window.addEventListener('ark-site-defaults-preview',event=>{
  const next=event.detail||{};previewOnly=true;
- applyTheme(themes.includes(next.theme)?next.theme:'ghost');
+ applyTheme(publishedAny(next.theme)||'ember');
  const key=JSON.stringify(next);if(key===previewShown)return;previewShown=key;
  SITE_DEFAULTS=next;saved={};
  let nextMotif=motifMigration[next.motif]||next.motif;if(!motifs.includes(nextMotif))nextMotif='blocks';

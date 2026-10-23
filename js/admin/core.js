@@ -78,12 +78,35 @@
     explainers.get(button)(button.dataset.refusal);
   }, true);
 
+  /* Ask before something that cannot be taken back, or that throws work away: Ark's AlertDialog
+     (ArkKit.arkConfirm, @deadark/ark-ui 0.2.8), never the browser's window.confirm (docs/ux-audit/
+     cms.md P2-11: unstyled, English-only per browser, no tone, one sentence for the whole decision).
+     confirmDialog({ title, message, confirmLabel, cancelLabel, tone, initialFocus }) -> Promise<boolean>.
+     The CALLER words every part -- what will happen, and whether it can be undone; tone 'danger' is for a
+     destructive action; focus starts on Cancel unless the caller says initialFocus: 'confirm'. Without
+     ArkKit (a jsdom test of one panel) it asks window.confirm with the same words, so a test's stub still
+     answers. One dialog at a time (the kit queues them). */
+  function confirmDialog(options) {
+    var kit = window.ArkKit;
+    if (kit && typeof kit.arkConfirm === 'function') return kit.arkConfirm(options);
+    var text = options.title + (options.message ? '\n\n' + options.message : '');
+    return Promise.resolve(!!window.confirm(text));
+  }
+
   var statusTimer = 0;
   function status(message, tone) {
     var el = $('status'); el.textContent = message || ''; el.dataset.tone = tone || '';
     window.clearTimeout(statusTimer);
     el.title = message || '';
     if (message && tone === 'ok') statusTimer = window.setTimeout(function () { el.textContent = ''; }, 6000);
+    /* The header's line is a fixed slot, and a sentence longer than it is cut ("New page. Edit it, th...").
+       When what was said does not fit, the same words ALSO go to the editor's one notice, which can
+       be read in full (docs/ux-audit/cms.md P1-16: four channels, the important one cut off). A short
+       message stays where it is, and a new message that fits retires the notice of the last long one. */
+    if (typeof A !== 'undefined' && A && typeof A.notice === 'function') {
+      if (message && el.scrollWidth > el.clientWidth + 1) A.notice({ tone: tone || 'info', key: 'status', body: message });
+      else if (A.notice.close) A.notice.close('status');
+    }
   }
 
   /* a file the browser saves: how Save writes when no project folder is connected */
@@ -122,6 +145,7 @@
     }
   };
 
+  if (typeof gate.useConfirm === 'function') gate.useConfirm(confirmDialog);   /* the locked page asks about unsaved work through the editor's own dialog */
   A.provide({ $: $, NOTHING_TO_SAVE: NOTHING_TO_SAVE, clone: clone, download: download, esc: esc,
-      gate: gate, h: h, ic: ic, refuse: refuse, status: status, toast: toast });
+      confirmDialog: confirmDialog, gate: gate, h: h, ic: ic, refuse: refuse, status: status, toast: toast });
 })();

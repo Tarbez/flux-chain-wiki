@@ -25,7 +25,8 @@
   /* =========================================================================
      Left rail: layers and pages
      ========================================================================= */
-  const collapsedLayers = new Set();
+  const collapsedLayers = new Set(), seededLayers = new Set();
+  let revealedKey = '';
   /* STEP 1 CLEANUP: renderLayers() (the dense-array walker, with its own drag-to-reorder via
      commitSeq) is deleted outright. renderLayersPane() below now always calls
      renderConnectedLayers() -- the real, connected-mode Layers tree (Part B) that already
@@ -34,9 +35,10 @@
      TYPE enum) -- a small, purely cosmetic lookup, not a structural decision, so an unlisted
      tag just falls back to the generic 'box' icon rather than needing every real tag covered. */
   const CMS_TAG_ICON = { header: 'section', main: 'page', footer: 'section', section: 'section', article: 'article', nav: 'row', aside: 'box', div: 'box', h1: 'heading', h2: 'heading', h3: 'heading', h4: 'heading', p: 'text', a: 'link', button: 'button', img: 'image', svg: 'image', canvas: 'spark', video: 'image', picture: 'image', figure: 'image', form: 'field', ul: 'list', ol: 'list', li: 'box', span: 'text', strong: 'text', small: 'text', table: 'list', label: 'field' };
-  /* where a derived layer name came from (ArkLayout.layerName's `from`), for the name's tooltip */
-  const LAYER_NAME_FROM = { group: 'group name', component: 'component block', state: 'state label', aria: 'accessible name (aria-label, alt or title)',
-    landmark: 'landmark and class', role: 'role and class', heading: 'heading', text: 'own words', hint: 'id or class', tag: 'tag' };
+  /* where a derived layer name came from (ArkLayout.layerName's `from`), for the name's tooltip --
+     in plain words: aria-label, class and tag are the code's names (docs/ux-audit/cms.md P1-2) */
+  const LAYER_NAME_FROM = { group: 'group name', component: 'component', state: 'state name', aria: 'label for screen readers',
+    landmark: 'place on the page', role: 'purpose on the page', heading: 'heading', text: 'own words', hint: 'name in the site’s code', tag: 'kind of element' };
   /* Part B of the follow-up Studio plan: the connected-mode equivalent of renderLayers(),
      driven by cmsRealTree's payload (the real rendered DOM, reported by js/main.js) instead of
      the standalone dense-node tree. Deliberately NOT built by extending renderLayers() itself:
@@ -62,7 +64,7 @@
       const nameInput = li.querySelector('.nm-edit');
       nameInput.value = row.label;
       nameInput.dataset.named = row.named ? 'true' : 'false';
-      nameInput.title = row.named ? `Your name for this ${row.tag}. Clear it to go back to the derived name.` : `Named from its ${LAYER_NAME_FROM[row.from] || 'tag'}. Type to rename it.`;
+      nameInput.title = row.named ? 'Your name for this layer. Clear it to go back to the name the editor gave it.' : `Named from its ${LAYER_NAME_FROM[row.from] || 'kind of element'}. Type to rename it.`;
       li.querySelector('.layer-tag').textContent = row.tag;
       nameInput.addEventListener('click', (event) => event.stopPropagation());
       nameInput.addEventListener('change', () => postCmsSetLabel(row.key, nameInput.value.trim()));
@@ -74,8 +76,27 @@
       ul.appendChild(li);
       if (!collapsedLayers.has(row.key)) row.children.forEach((child) => walk(child, depth + 1));
     };
-    if (!state.cmsTree.length) { const empty = document.createElement('li'); empty.className = 'hint'; empty.style.padding = '8px 10px'; empty.textContent = 'No layout-tagged elements on this page yet.'; ul.appendChild(empty); return; }
+    if (!state.cmsTree.length) { const empty = document.createElement('li'); empty.className = 'hint'; empty.style.padding = '8px 10px'; empty.textContent = 'Nothing on this page can be styled yet.'; ul.appendChild(empty); return; }
+    /* The layers behind the page (the backdrop, its canvases) came first and took the whole tab
+       (docs/ux-audit/cms.md P2-4: "Has particle shapes / Ark layer / Ark background host"). The
+       outermost row that holds no words at all -- no row under it is named by its own text, a
+       heading or an accessible name -- is the backdrop: it starts folded, once per row, so a row
+       the person opens stays open. The selected layer is never folded away: its rows open. */
+    const WORDS = { text: 1, heading: 1, aria: 1, group: 1, component: 1, state: 1 };
+    const holdsWords = (row) => !!WORDS[row.from] || row.named || row.children.some(holdsWords);
+    const seed = (row) => {
+      if (!row.hasChildren) return;
+      if (!holdsWords(row)) { if (!seededLayers.has(row.key)) { seededLayers.add(row.key); collapsedLayers.add(row.key); } return; }
+      row.children.forEach(seed);
+    };
+    state.cmsTree.forEach(seed);
+    const opened = (row) => { if (isSelectedKey(row.key)) return true; const hit = row.children.some(opened); if (hit) collapsedLayers.delete(row.key); return hit; };
+    /* once per new selection, so a row the person folds afterwards stays folded */
+    const selKey = state.cmsExactSelection && state.cmsExactSelection.key;
+    if (selKey && selKey !== revealedKey) { revealedKey = selKey; state.cmsTree.forEach(opened); }
     state.cmsTree.forEach((row) => walk(row, 0));
+    /* the selected layer is in view (it sat at the bottom edge, or below it) */
+    const sel = ul.querySelector('li[aria-selected="true"]'); if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: 'nearest' });
   }
   /* The Layers tab (and the main render loop below) always goes through this one dispatcher
      instead of calling renderConnectedLayers() directly -- room for a future second branch
@@ -104,7 +125,7 @@
       const row = document.createElement('button'); row.type = 'button'; row.className = 'myrow'; row.style.width = '100%'; row.style.marginBottom = '4px'; row.style.cursor = 'pointer';
       row.innerHTML = `${ic('box', 'sm')}<span></span><small></small>`;
       row.querySelector('span').textContent = g.label; row.querySelector('small').textContent = `${g.members} layers`;
-      if (g.id === currentGroupId) { row.style.borderColor = 'var(--accent)'; row.style.color = 'var(--accent)'; }
+      if (g.id === currentGroupId) { row.style.borderColor = 'var(--reference)'; row.style.color = 'var(--reference)'; }
       row.addEventListener('click', () => postCmsSelectGroup(g.id));
       box.appendChild(row);
     }
@@ -130,39 +151,91 @@
     }
     return out;
   }
-  /* ---- Pages: the one site tree -------------------------------------------------------------
-     Groups derived from the drafts, in the manifests' own group order (ArkManifest.groups: the
-     site chrome, the pages, the theory pages), then the articles, then every other route the
-     site serves (a page module with no manifest: its words are in code, so it has no fields).
-     A row's main button shows its page on the canvas; Fields opens its whole form in the Page
-     fields sheet; Delete is offered where deleting is possible (theory pages, articles). */
-  const GROUP_NAMES = { site: 'Site chrome', page: 'Pages', theory: 'Theory pages' };
+  /* ---- Pages: THE page list -------------------------------------------------------------
+     siteList() derives every page the editor can open, grouped and named ONCE; the rail's Pages
+     tab draws it as a tree and the header's page switcher (js/admin/header.js) searches it, so a
+     page has one name everywhere (docs/ux-audit/cms.md P1-3) and one list to find it in (P1-4).
+     The name is the draft's own title (what Page settings edits), else the page module's
+     catalog title, else its address in words -- never a raw slug, never the H1 of the moment.
+     Groups, in the order a person looks for them: the main pages, the guides (the manifests'
+     theory group, /concept/...), the articles, the header & footer (the site chrome), then every
+     other route the site serves (a page module with no fields: its words are in code), folded. */
+  const GROUP_NAMES = { site: 'Header & footer', page: 'Main pages', theory: 'Guides' };
+  const ORPHAN_SAYS = 'Not linked: no menu entry and no page links here';
+  const GROUP_ORDER = ['page', 'theory', 'article', 'site', 'other'];
+  /* "community" -> "Community", "/concept/state-of-the-art" -> "State of the art" */
+  const words = (s) => { const t = String(s || '').replace(/^.*\//, '').replace(/[-_]+/g, ' ').trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Home'; };
+  function routeName(route) { return route.title && route.title !== route.key ? route.title : words(route.path); }
+  function siteList() {
+    const inbound = new Map(); for (const l of realLinkIndex()) if (l.ok && l.tgt !== l.src) inbound.set(l.tgt, (inbound.get(l.tgt) || 0) + 1);
+    /* The site menu links every catalog page that has a journey (js/resolvers/header.js `listed`: journey and
+       not hiddenFromNavigation, which catalog.js sets exactly when a page has no journey). Counting only the
+       manifests' link fields marked menu pages as orphans and missed nothing real (ledger recheck 2026-10-21,
+       pages.md P7c): "not linked" now means no menu entry and no link field. */
+    const catalog = (window.ArkUI && window.ArkUI.pageCatalog) || {};
+    const inMenu = new Set(Object.keys(catalog).filter((k) => catalog[k].journey && !catalog[k].hiddenFromNavigation).map((k) => catalog[k].path));
+    const orphanOf = (path) => path !== '/' && !inbound.get(path) && !inMenu.has(path);
+    const covered = new Set(), byGroup = { page: [], theory: [], article: [], site: [], other: [] };
+    const groups = (window.ArkManifest && window.ArkManifest.groups) || ['site', 'page', 'theory'];
+    groups.forEach((group) => {
+      state.ids.filter((id) => state.drafts[id] && state.drafts[id].group === group).forEach((id) => {
+        const m = state.drafts[id], path = m.route || '/';
+        covered.add(path);
+        /* the site chrome is called what it is to a reader: its header and footer (its stored
+           title, "Site chrome", is data and stays as it is) */
+        (byGroup[group] || byGroup.other).push({ key: 'page:' + id, path, title: group === 'site' ? GROUP_NAMES.site : m.title || words(id), icon: group === 'site' ? 'section' : m.route === '/' ? 'home' : 'page',
+          on: state.kind === 'page' && state.current === id && m.route === state.cmsCurrentRoute,
+          dirty: dirty(id), dirtyTitle: hasShape(id) ? 'Unsaved changes, including its images or shared shape tuning' : 'Unsaved changes',
+          orphan: group !== 'site' && orphanOf(m.route), fields: { kind: 'page', id }, del: group === 'theory' ? { kind: 'page', id } : null,
+          onOpen: () => { closeDrawer(); select(id); } });
+      });
+    });
+    state.slugs.forEach((slug) => {
+      const a = state.aDrafts[slug] || {}, path = '/learnings/' + slug;
+      covered.add(path);
+      byGroup.article.push({ key: 'article:' + slug, path, title: a.title || words(slug), icon: 'article',
+        on: state.kind === 'article' && state.aCurrent === slug && path === state.cmsCurrentRoute,
+        dirty: dirtyA(slug), orphan: orphanOf(path), fields: { kind: 'article', id: slug }, del: { kind: 'article', id: slug },
+        onOpen: () => { closeDrawer(); selectArticle(slug); } });
+    });
+    state.cmsRoutes.filter((r) => !covered.has(r.path)).sort((x, y) => x.path.localeCompare(y.path)).forEach((route) => {
+      byGroup.other.push({ key: 'route:' + route.path, path: route.path, title: routeName(route), icon: route.seoArticle ? 'article' : 'page',
+        on: route.path === state.cmsCurrentRoute, orphan: orphanOf(route.path),
+        onOpen: () => { closeDrawer(); openRoute(route.path); } });
+    });
+    const out = GROUP_ORDER.filter((g) => byGroup[g].length).map((g) => ({ id: g, name: g === 'article' ? 'Articles' : g === 'other' ? 'More pages' : GROUP_NAMES[g], icon: g === 'article' ? 'article' : 'page', rows: byGroup[g] }));
+    return { groups: out, rows: out.reduce((all, g) => all.concat(g.rows), []) };
+  }
+  /* which groups are folded (a convenience, per browser); More pages starts folded */
+  const folded = new Set(['other']);
+  try { const f = JSON.parse(localStorage.getItem('defxn-cms-folded') || 'null'); if (Array.isArray(f)) { folded.clear(); f.forEach((g) => folded.add(g)); } } catch (e) { /* default */ }
   function renderPages() {
     const ul = $('pages'); if ($('pagesPane').hidden) return;
-    const keepFocus = ul.contains(document.activeElement) ? document.activeElement.dataset.row : null;
+    const keepFocus = ul.contains(document.activeElement) ? document.activeElement.dataset.row || (document.activeElement.dataset.group && 'group:' + document.activeElement.dataset.group) : null;
     ul.textContent = '';
-    const inbound = new Map(); for (const l of realLinkIndex()) if (l.ok && l.tgt !== l.src) inbound.set(l.tgt, (inbound.get(l.tgt) || 0) + 1);
-    const covered = new Set();
-    const groupHead = (text, icon) => { const li = h('li', { class: 'side-group', 'data-icon': icon, role: 'presentation', text }); ul.appendChild(li); };
+    const q = ($('pageSearch') && $('pageSearch').value.trim().toLowerCase()) || '';
+    const list = siteList();
+    let shown = 0;
     const row = (r) => {
-      covered.add(r.path);
       const li = h('li', { class: 'tree-row', 'aria-selected': String(r.on) });
-      const open = h('button', { type: 'button', class: 'tree-open', 'data-row': r.key, 'data-item': r.fields ? r.fields.kind + ':' + r.fields.id : null, 'data-path': r.path, title: 'Open ' + r.path + ' on the canvas' });
+      const open = h('button', { type: 'button', class: 'tree-open', 'data-row': r.key, 'data-item': r.fields ? r.fields.kind + ':' + r.fields.id : null, 'data-path': r.path, title: 'Open ' + r.title + ' (' + r.path + ') on the canvas' });
       open.innerHTML = `${ic(r.icon)}<span class="nm"></span><span class="sub"></span>`;
       open.querySelector('.nm').textContent = r.title; open.querySelector('.sub').textContent = r.path;
       open.addEventListener('click', r.onOpen);
       li.appendChild(open);
-      if (r.orphan) li.appendChild(h('span', { class: 'tag orphan', role: 'img', 'aria-label': 'Orphan: no page links here', title: 'Orphan: no page links here', text: 'orphan' }));
-      if (r.dirty) li.appendChild(h('span', { class: 'dot', title: r.dirtyTitle || 'Unsaved changes' }));
+      if (r.orphan) li.appendChild(h('span', { class: 'tag orphan', role: 'img', 'aria-label': ORPHAN_SAYS, title: ORPHAN_SAYS, text: 'not linked' }));
+      if (r.dirty) li.appendChild(h('span', { class: 'dot', role: 'img', 'aria-label': r.dirtyTitle || 'Unsaved changes', title: r.dirtyTitle || 'Unsaved changes' }));
+      /* the row's own actions are one tab stop each only while the row is reached: the list is
+         walked by its rows (P2-7: every row had two tab stops, ~140 Tabs past the rail) */
       const acts = h('span', { class: 'row-acts' });
       if (r.fields) {
-        const f = h('button', { type: 'button', class: 'btn icon quiet row-act', 'aria-label': 'Fields of ' + r.title, title: 'Page fields: every field of ' + r.title });
-        f.innerHTML = ic('list', 'sm');
+        const f = h('button', { type: 'button', class: 'btn icon quiet row-act', tabindex: '-1', 'aria-label': 'Fields of ' + r.title, title: 'Page settings: every field of ' + r.title });
+        f.innerHTML = ic('settings', 'sm');
         f.addEventListener('click', () => { r.onOpen(); openPageFields({ kind: r.fields.kind, id: r.fields.id, anchor: f }); });
         acts.appendChild(f);
       }
       if (r.del) {
-        const d = h('button', { type: 'button', class: 'btn icon quiet row-act danger', 'aria-label': 'Delete ' + r.title, title: 'Delete ' + r.title + ' (asks first)' });
+        const d = h('button', { type: 'button', class: 'btn icon quiet row-act danger', tabindex: '-1', 'aria-label': 'Delete ' + r.title, title: 'Delete ' + r.title + ' (asks first)' });
         d.innerHTML = ic('trash', 'sm');
         d.addEventListener('click', () => deleteItem(r.del.kind, r.del.id));
         acts.appendChild(d);
@@ -170,38 +243,104 @@
       li.appendChild(acts);
       ul.appendChild(li);
     };
-    const orphanOf = (path) => path !== '/' && !inbound.get(path);
-    const groups = (window.ArkManifest && window.ArkManifest.groups) || ['site', 'page', 'theory'];
-    groups.forEach((group) => {
-      const ids = state.ids.filter((id) => state.drafts[id] && state.drafts[id].group === group);
-      if (!ids.length) return;
-      groupHead(GROUP_NAMES[group] || group, 'page');
-      ids.forEach((id) => {
-        const m = state.drafts[id];
-        row({ key: 'page:' + id, path: m.route || '/', title: m.title || id, icon: group === 'site' ? 'section' : m.route === '/' ? 'home' : 'page',
-          on: state.kind === 'page' && state.current === id && m.route === state.cmsCurrentRoute,
-          dirty: dirty(id), dirtyTitle: hasShape(id) ? 'Unsaved changes, including its images or shared shape tuning' : 'Unsaved changes',
-          orphan: group !== 'site' && orphanOf(m.route), fields: { kind: 'page', id }, del: group === 'theory' ? { kind: 'page', id } : null,
-          onOpen: () => { closeDrawer(); select(id); } });
-      });
+    list.groups.forEach((group) => {
+      const rows = q ? group.rows.filter((r) => r.title.toLowerCase().includes(q) || r.path.toLowerCase().includes(q)) : group.rows;
+      if (!rows.length) return;
+      /* searching opens every group; the group holding the page on the canvas never hides it */
+      const open = !!q || !folded.has(group.id) || rows.some((r) => r.on);
+      /* the group head folds with the rail's own expand/collapse control (Layers' .layer-toggle),
+         not a second one; the whole head is its target */
+      const head = h('li', { class: 'side-group', 'data-icon': group.icon, role: 'presentation' });
+      const toggle = h('button', { type: 'button', class: 'layer-toggle', 'data-group': group.id, 'aria-expanded': String(open), 'aria-label': (open ? 'Fold ' : 'Show ') + group.name + ' (' + rows.length + ')', title: (open ? 'Fold ' : 'Show ') + group.name });
+      const flip = () => {
+        if (folded.has(group.id)) folded.delete(group.id); else folded.add(group.id);
+        try { localStorage.setItem('defxn-cms-folded', JSON.stringify([...folded])); } catch (e) { /* a convenience only */ }
+        renderPages();
+      };
+      toggle.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
+      head.append(toggle, h('span', { text: group.name }), h('small', { text: String(rows.length) }));
+      head.addEventListener('click', flip);
+      ul.appendChild(head);
+      if (open) { rows.forEach(row); shown += rows.length; }
     });
-    if (state.slugs.length) groupHead('Articles', 'article');
-    state.slugs.forEach((slug) => {
-      const a = state.aDrafts[slug] || {}, path = '/learnings/' + slug;
-      row({ key: 'article:' + slug, path, title: a.title || slug, icon: 'article',
-        on: state.kind === 'article' && state.aCurrent === slug && path === state.cmsCurrentRoute,
-        dirty: dirtyA(slug), orphan: orphanOf(path), fields: { kind: 'article', id: slug }, del: { kind: 'article', id: slug },
-        onOpen: () => { closeDrawer(); selectArticle(slug); } });
-    });
-    const others = state.cmsRoutes.filter((r) => !covered.has(r.path)).sort((a, b) => a.path.localeCompare(b.path));
-    if (others.length) groupHead('Other pages', 'page');
-    for (const route of others) {
-      row({ key: 'route:' + route.path, path: route.path, title: route.title || route.path, icon: route.seoArticle ? 'article' : 'page',
-        on: route.path === state.cmsCurrentRoute, orphan: orphanOf(route.path),
-        onOpen: () => { closeDrawer(); openRoute(route.path); } });
+    if (q && !shown) ul.appendChild(h('li', { class: 'hint', text: 'No page matches "' + q + '". Try part of its name or its address (like /about).' }));
+    /* what the row marks mean, said once under the list while a mark is on screen (cms.md P2-6: they had only
+       a tooltip) */
+    const marks = list.rows.filter((r) => r.orphan || r.dirty);
+    if (marks.length) {
+      const legend = h('li', { class: 'tree-legend hint', role: 'note' });
+      if (list.rows.some((r) => r.dirty)) legend.appendChild(h('span', {}, h('span', { class: 'dot', 'aria-hidden': 'true' }), h('span', { text: 'Unsaved changes' })));
+      if (list.rows.some((r) => r.orphan)) legend.appendChild(h('span', {}, h('span', { class: 'tag orphan', 'aria-hidden': 'true' }), h('span', { text: 'Not linked: ' + ORPHAN_SAYS.replace(/^Not linked: /, '') })));
+      ul.appendChild(legend);
     }
+    if ($('pagesCount')) $('pagesCount').textContent = list.rows.length + ' pages';
     /* a row repainted under the keyboard keeps the focus (a dirty dot appearing re-draws the tree) */
-    if (keepFocus) { const again = ul.querySelector(`[data-row="${CSS.escape(keepFocus)}"]`); if (again) again.focus({ preventScroll: true }); }
+    if (keepFocus) { const again = keepFocus.indexOf('group:') === 0 ? ul.querySelector(`[data-group="${CSS.escape(keepFocus.slice(6))}"]`) : ul.querySelector(`[data-row="${CSS.escape(keepFocus)}"]`); if (again) again.focus({ preventScroll: true }); }
+  }
+  if ($('pageSearch')) $('pageSearch').addEventListener('input', () => renderPages());
+  /* arrow keys walk the rows (one Tab into the list, not two per row) */
+  $('pages').addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const items = [...$('pages').querySelectorAll('.tree-open, .side-group > .layer-toggle')], i = items.indexOf(document.activeElement);
+    if (i < 0) return;
+    e.preventDefault();
+    const next = items[i + (e.key === 'ArrowDown' ? 1 : -1)]; if (next) next.focus();
+  });
+
+  /* ---- New page or article: asked for by its TITLE -------------------------------------------
+     The address is derived from the title and shown; it can be changed under Developer details.
+     It was a slug field ("A page name is lowercase letters and digits ...") under the last of 70
+     rows, and a plain page was never offered (docs/ux-audit/cms.md P1-4). The forms are the ones
+     js/admin/editor.js already handles by id (#newForm / #newId, #newArticleForm / #newSlug), so
+     there is still one create path. */
+  const slugFor = (kind, title) => {
+    const base = String(title || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, kind === 'article' ? '-' : '').replace(/^-+|-+$/g, '').replace(/^[^a-z]+/, '');
+    return base.slice(0, 48).replace(/-+$/, '');
+  };
+  let newKind = 'page', slugTouched = false, kindGroup = null;
+  const kindButtons = $('newItemPanel') ? [...$('newItemPanel').querySelectorAll('[data-new-kind]')] : [];
+  function syncNewItem() {
+    const panel = $('newItemPanel'); if (!panel) return;
+    if (kindGroup) kindGroup.select(kindButtons.findIndex((b) => b.dataset.newKind === newKind));
+    $('newForm').hidden = newKind !== 'page'; $('newArticleForm').hidden = newKind !== 'article';
+    const slugInput = newKind === 'page' ? $('newId') : $('newSlug');
+    if (!slugTouched) slugInput.value = slugFor(newKind, $('newTitle').value);
+    $('newAddress').textContent = slugInput.value ? (newKind === 'page' ? '/concept/' : '/learnings/') + slugInput.value : 'the address follows the title';
+  }
+  function openNewItem(kind) {
+    const panel = $('newItemPanel'); if (!panel) return;
+    if (kind) newKind = kind;
+    showLeft('pages');
+    if (window.matchMedia('(max-width: 860px)').matches) setLeftRail(true);
+    panel.hidden = false; $('btnNewItem').setAttribute('aria-expanded', 'true');
+    syncNewItem();
+    $('newTitle').focus({ preventScroll: false });
+  }
+  function closeNewItem() {
+    const panel = $('newItemPanel'); if (!panel) return;
+    panel.hidden = true; $('btnNewItem').setAttribute('aria-expanded', 'false');
+    $('newTitle').value = ''; $('newId').value = ''; $('newSlug').value = ''; slugTouched = false;
+  }
+  if ($('newItemPanel')) {
+    /* the address forms are its Developer details (the editor's one disclosure, controls.js) */
+    const devHolder = $('newItemDev'); devHolder.replaceWith(A.devDetails([], [$('newForm'), $('newArticleForm')]));
+    $('btnNewItem').addEventListener('click', () => { if ($('newItemPanel').hidden) openNewItem(); else closeNewItem(); });
+    /* the kind picker is Ark's toggle group (js/admin/ark-host.js arkSegGroup) */
+    kindGroup = A.arkSegGroup($('newItemPanel').querySelector('.new-kind'), kindButtons, { selected: kindButtons.findIndex((b) => b.dataset.newKind === newKind),
+      onPick: (_i, b) => { newKind = b.dataset.newKind; syncNewItem(); $('newTitle').focus(); } });
+    $('newTitle').addEventListener('input', syncNewItem);
+    for (const id of ['newId', 'newSlug']) $(id).addEventListener('input', () => { slugTouched = $(id).value.trim() !== ''; syncNewItem(); });
+    /* Enter in the title submits the kind's own form (the editor's one create path) */
+    $('newTitle').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('newItemCreate').click(); } });
+    $('newItemCreate').addEventListener('click', () => {
+      if (!$('newTitle').value.trim() && !(newKind === 'page' ? $('newId') : $('newSlug')).value.trim()) { $('newItemError').textContent = 'Give it a title first: it becomes its heading and its name in every list.'; $('newTitle').focus(); return; }
+      $('newItemError').textContent = '';
+      (newKind === 'page' ? $('newForm') : $('newArticleForm')).requestSubmit();
+    });
+    $('newItemCancel').addEventListener('click', closeNewItem);
+    /* a create that went through closes the panel (the person lands on the new page) */
+    document.addEventListener('ark-cms-created', closeNewItem);
+    document.addEventListener('ark-cms-create-refused', (e) => { $('newItemError').textContent = e.detail && e.detail.refusal ? e.detail.refusal : ''; });
   }
   /* an edit anywhere changes a dirty dot: repaint the tree once per frame (js/admin/editor.js
      announces every draft edit as `ark-cms-drafts`) */
@@ -212,8 +351,15 @@
      Which tab each lens opens is remembered (state.railTab, per browser): Pages in the Content
      lens and Layers in the Design lens until changed. */
   const TABS = { pages: ['tabPages', 'pagesPane'], layers: ['tabLayers', 'layersPane'], lib: ['tabLib', 'libPane'], media: ['tabMedia', 'mediaPane'], vault: ['tabVault', 'vaultPane'] };
+  /* The five tabs are Ark's tabs (js/admin/ark-host.js arkTabsOn) over the buttons and panes in
+     admin-app.html, ids unchanged: roles, aria-selected, the one tab stop and the arrow keys are
+     Ark's; a pick (a click, an arrow) comes here as showLeft, and showLeft moves Ark's selection
+     for a tab chosen by another route (the lens, a Media link). */
+  const TAB_KEYS = Object.keys(TABS);
+  let railTabs = null;
   function showLeft(which, opts) {
     if (!TABS[which]) which = 'pages';
+    if (railTabs) railTabs.select(which);
     for (const [key, ids] of Object.entries(TABS)) { $(ids[0]).setAttribute('aria-selected', String(key === which)); $(ids[0]).tabIndex = key === which ? 0 : -1; $(ids[1]).hidden = key !== which; }
     if (!opts || opts.remember !== false) {
       state.railTab[state.lens] = which;
@@ -223,15 +369,8 @@
     if (which === 'pages') renderPages();
     schedule();
   }
-  for (const [key, ids] of Object.entries(TABS)) $(ids[0]).addEventListener('click', () => showLeft(key));
-  /* arrow keys move between the tabs (one tab stop) */
-  $('studioLeft').querySelector('.tabs').addEventListener('keydown', (e) => {
-    const keys = Object.keys(TABS), i = keys.findIndex((k) => $(TABS[k][0]) === document.activeElement);
-    if (i < 0 || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
-    e.preventDefault();
-    const next = keys[(i + (e.key === 'ArrowRight' ? 1 : keys.length - 1)) % keys.length];
-    showLeft(next); $(TABS[next][0]).focus();
-  });
+  railTabs = A.arkTabsOn({ list: $('studioLeft').querySelector('.tabs'), triggers: TAB_KEYS.map((k) => $(TABS[k][0])), panels: TAB_KEYS.map((k) => $(TABS[k][1])),
+    values: TAB_KEYS, value: state.railTab[state.lens] || 'pages', onChange: (key) => showLeft(key) });
 
   /* ---- folding the rail -------------------------------------------------------------------
      Wide: the rail folds away so the canvas takes the full width (remembered per browser, a
@@ -241,7 +380,7 @@
   function syncRailButton() {
     const open = narrow.matches ? $('shell').classList.contains('drawer-open') : !$('shell').classList.contains('rail-closed');
     const b = $('btnLeftRail'); b.setAttribute('aria-pressed', String(open));
-    b.title = (open ? 'Hide' : 'Show') + ' the Pages / Layers / Library / Media / Vault panel';
+    b.title = (open ? 'Hide' : 'Show') + ' the side panel (pages, layers, components, images, private content)';
     $('railScrim').hidden = !(narrow.matches && open);
   }
   function setLeftRail(open) {
@@ -259,6 +398,6 @@
   narrow.addEventListener('change', () => { $('shell').classList.remove('drawer-open'); syncRailButton(); layoutStage(); });
   try { if (localStorage.getItem('defxn-studio-rail') === 'closed') $('shell').classList.add('rail-closed'); } catch (e) {}
   syncRailButton();
-  A.provide({ CMS_TAG_ICON: CMS_TAG_ICON, realLinkIndex: realLinkIndex, renderLayersPane: renderLayersPane,
-      renderPages: renderPages, setLeftRail: setLeftRail, showLeft: showLeft });
+  A.provide({ CMS_TAG_ICON: CMS_TAG_ICON, openNewItem: openNewItem, realLinkIndex: realLinkIndex, renderLayersPane: renderLayersPane,
+      renderPages: renderPages, setLeftRail: setLeftRail, showLeft: showLeft, siteList: siteList });
 })();

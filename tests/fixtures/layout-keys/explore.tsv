@@ -1,0 +1,195 @@
+# key	tag	text -- layout keys of /explore before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeMesh ExplorerYour idea, live on the mesh.DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing 
+page:/div:1	div	HomeMesh ExplorerYour idea, live on the mesh.DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing 
+page:/div:1/nav:1	nav	HomeMesh Explorer
+page:/div:1/nav:1/a:1	a	Home
+page:/div:1/nav:1/a:1/svg:1	svg	
+page:/div:1/nav:1/a:1/svg:1/path:1	path	
+page:/div:1/nav:1/a:1/svg:1/path:2	path	
+page:/div:1/nav:1/span:1	span	Mesh Explorer
+page:/div:1/header:1	header	Your idea, live on the mesh.DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.
+page:/div:1/header:1/div:1	div	Your idea, live on the mesh.
+id:mesh-explorer-title	h1	Your idea, live on the mesh.
+page:/div:1/header:1/p:1	p	DEFXN is a shared network of machines that stores, hosts and checks what people build. No servers to rent, nothing to renew.
+page:/div:1/div:1	div	How it worksLive now
+page:/div:1/div:1/button:1	button	How it works
+page:/div:1/div:1/button:2	button	Live now
+page:/div:1/div:2	div	01 / 03HOW IT WORKSShape the ideaWrite a resolver: the small set of rules that turns a question into an answer.01Shape02Publish03UseLIVEREAD FROM THE PUBLIC MES
+page:/div:1/div:2/article:1	article	01 / 03HOW IT WORKSShape the ideaWrite a resolver: the small set of rules that turns a question into an answer.01Shape02Publish03Use
+page:/div:1/div:2/article:1/div:1	div	01 / 03HOW IT WORKS
+page:/div:1/div:2/article:1/div:1/span:1	span	01 / 03
+page:/div:1/div:2/article:1/div:1/span:2	span	HOW IT WORKS
+id:explore-step-title	h2	Shape the idea
+page:/div:1/div:2/article:1/p:1	p	Write a resolver: the small set of rules that turns a question into an answer.
+page:/div:1/div:2/article:1/div:2	div	
+page:/div:1/div:2/article:1/div:2/canvas:1	canvas	
+page:/div:1/div:2/article:1/div:3	div	01Shape02Publish03Use
+page:/div:1/div:2/article:1/div:3/button:1	button	01Shape
+page:/div:1/div:2/article:1/div:3/button:1/span:1	span	01
+page:/div:1/div:2/article:1/div:3/button:2	button	02Publish
+page:/div:1/div:2/article:1/div:3/button:2/span:1	span	02
+page:/div:1/div:2/article:1/div:3/button:3	button	03Use
+page:/div:1/div:2/article:1/div:3/button:3/span:1	span	03
+page:/div:1/div:2/section:1	section	LIVEREAD FROM THE PUBLIC MESHRunning on the mesh now
+page:/div:1/div:2/section:1/div:1	div	LIVEREAD FROM THE PUBLIC MESH
+page:/div:1/div:2/section:1/div:1/span:1	span	LIVE
+page:/div:1/div:2/section:1/div:1/span:2	span	READ FROM THE PUBLIC MESH
+id:explore-live-title	h2	Running on the mesh now
+page:/div:1/div:2/section:1/div:2	div	
+page:/div:1/div:2/section:1/div:2/div:1	div	
+page:/div:1/div:2/section:1/div:2/div:2	div	
+page:/div:1/div:2/section:1/p:1	p	
+page:/div:1/footer:1	footer	PUBLIC MESHNot connectedfetch is not definedWhat is a resolver?Every launched resolver, in Explore↗Browse the raw records →
+page:/div:1/footer:1/div:1	div	PUBLIC MESHNot connectedfetch is not defined
+page:/div:1/footer:1/div:1/span:1	span	PUBLIC MESH
+page:/div:1/footer:1/div:1/span:1/span:1	span	
+page:/div:1/footer:1/div:1/strong:1	strong	Not connected
+page:/div:1/footer:1/div:1/span:2	span	fetch is not defined
+page:/div:1/footer:1/div:2	div	What is a resolver?Every launched resolver, in Explore↗Browse the raw records →
+page:/div:1/footer:1/div:2/a:1	a	What is a resolver?
+page:/div:1/footer:1/div:2/a:2	a	Every launched resolver, in Explore↗
+page:/div:1/footer:1/div:2/a:2/span:1	span	↗
+page:/div:1/footer:1/div:2/button:1	button	Browse the raw records →
+page:/div:2	div	← Mesh ExplorerRaw recordsConnectionOfflineDeclared sources—Observed—Coverage—Public meshOBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766R
+page:/div:2/nav:1	nav	← Mesh ExplorerRaw records
+page:/div:2/nav:1/button:1	button	← Mesh Explorer
+page:/div:2/nav:1/span:1	span	Raw records
+page:/div:2/div:1	div	ConnectionOfflineDeclared sources—Observed—Coverage—Public meshOBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766ReconnectRefreshDisconnectO
+page:/div:2/div:1/header:1	header	ConnectionOfflineDeclared sources—Observed—Coverage—Public meshOBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766ReconnectRefreshDisconnectO
+page:/div:2/div:1/header:1/aside:1	aside	ConnectionOfflineDeclared sources—Observed—Coverage—
+page:/div:2/div:1/header:1/aside:1/div:1	div	ConnectionOfflineDeclared sources—Observed—Coverage—
+page:/div:2/div:1/header:1/aside:1/div:1/div:1	div	ConnectionOffline
+page:/div:2/div:1/header:1/aside:1/div:1/div:1/span:1	span	Connection
+page:/div:2/div:1/header:1/aside:1/div:1/div:1/strong:1	strong	Offline
+page:/div:2/div:1/header:1/aside:1/div:1/div:2	div	Declared sources—
+page:/div:2/div:1/header:1/aside:1/div:1/div:2/span:1	span	Declared sources
+page:/div:2/div:1/header:1/aside:1/div:1/div:2/strong:1	strong	—
+page:/div:2/div:1/header:1/aside:1/div:1/div:3	div	Observed—
+page:/div:2/div:1/header:1/aside:1/div:1/div:3/span:1	span	Observed
+page:/div:2/div:1/header:1/aside:1/div:1/div:3/strong:1	strong	—
+page:/div:2/div:1/header:1/aside:1/div:1/div:4	div	Coverage—
+page:/div:2/div:1/header:1/aside:1/div:1/div:4/span:1	span	Coverage
+page:/div:2/div:1/header:1/aside:1/div:1/div:4/strong:1	strong	—
+page:/div:2/div:1/header:1/details:1	details	Public meshOBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766ReconnectRefreshDisconnectOperator accessOptional key memory only
+page:/div:2/div:1/header:1/details:1/summary:1	summary	Public mesh
+page:/div:2/div:1/header:1/details:1/summary:1/span:1	span	
+page:/div:2/div:1/header:1/details:1/summary:1/span:2	span	Public mesh
+page:/div:2/div:1/header:1/details:1/section:1	section	OBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766ReconnectRefreshDisconnectOperator accessOptional key memory only
+page:/div:2/div:1/header:1/details:1/section:1/div:1	div	OBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766ReconnectRefreshDisconnectOperator accessOptional key memory only
+page:/div:2/div:1/header:1/details:1/section:1/div:1/label:1	label	OBSERVE FROMPublic mesh · public.defxn.comLocal Miner · 127.0.0.1:8766
+page:/div:2/div:1/header:1/details:1/section:1/div:1/label:1/span:1	span	OBSERVE FROM
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1	div	ReconnectRefreshDisconnect
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1	button	Reconnect
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1/svg:1	svg	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1/svg:1/path:1	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1/svg:1/path:2	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1/svg:1/path:3	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1/svg:1/path:4	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:1/svg:1/path:5	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:2	button	Refresh
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:2/svg:1	svg	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:2/svg:1/path:1	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:2/svg:1/path:2	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:2/svg:1/path:3	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:2/svg:1/path:4	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:3	button	Disconnect
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:3/svg:1	svg	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:3/svg:1/path:1	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/div:1/button:3/svg:1/path:2	path	
+page:/div:2/div:1/header:1/details:1/section:1/div:1/details:1	details	Operator accessOptional key memory only
+page:/div:2/div:1/header:1/details:1/section:1/div:1/details:1/summary:1	summary	Operator access
+page:/div:2/div:1/header:1/details:1/section:1/div:1/details:1/label:1	label	Optional key memory only
+page:/div:2/div:1/header:1/details:1/section:1/div:1/details:1/label:1/span:1	span	memory only
+page:/div:2/div:1/section:1	section	01What this node exposes—Filter sourcesWaiting for the source catalog.02 / INSPECTORNo source selectedConnect to inspect the catalog returned by a Miner.Categor
+page:/div:2/div:1/section:1/div:1	div	01What this node exposes—Filter sourcesWaiting for the source catalog.
+page:/div:2/div:1/section:1/div:1/div:1	div	01What this node exposes—
+id:mesh-glance-title	h2	01What this node exposes
+page:/div:2/div:1/section:1/div:1/div:1/h2:1/span:1	span	01
+page:/div:2/div:1/section:1/div:1/div:1/div:1	div	
+page:/div:2/div:1/section:1/div:1/div:1/span:1	span	—
+page:/div:2/div:1/section:1/div:1/div:2	div	Filter sources
+page:/div:2/div:1/section:1/div:1/div:2/label:1	label	Filter sources
+page:/div:2/div:1/section:1/div:1/div:2/label:1/span:1	span	Filter sources
+page:/div:2/div:1/section:1/div:1/div:2/div:1	div	
+page:/div:2/div:1/section:1/div:1/div:3	div	
+page:/div:2/div:1/section:1/div:1/div:4	div	Waiting for the source catalog.
+page:/div:2/div:1/section:1/div:1/div:4/p:1	p	Waiting for the source catalog.
+page:/div:2/div:1/section:1/aside:1	aside	02 / INSPECTORNo source selectedConnect to inspect the catalog returned by a Miner.Category—State—Access—Selected sourceConnect to load sourcesExact record IDIn
+page:/div:2/div:1/section:1/aside:1/p:1	p	02 / INSPECTOR
+id:mesh-source-inspector-title	h2	No source selected
+page:/div:2/div:1/section:1/aside:1/p:2	p	Connect to inspect the catalog returned by a Miner.
+page:/div:2/div:1/section:1/aside:1/div:1	div	
+page:/div:2/div:1/section:1/aside:1/dl:1	dl	Category—State—Access—
+page:/div:2/div:1/section:1/aside:1/dl:1/div:1	div	Category—
+page:/div:2/div:1/section:1/aside:1/dl:1/div:1/dt:1	dt	Category
+page:/div:2/div:1/section:1/aside:1/dl:1/div:1/dd:1	dd	—
+page:/div:2/div:1/section:1/aside:1/dl:1/div:2	div	State—
+page:/div:2/div:1/section:1/aside:1/dl:1/div:2/dt:1	dt	State
+page:/div:2/div:1/section:1/aside:1/dl:1/div:2/dd:1	dd	—
+page:/div:2/div:1/section:1/aside:1/dl:1/div:3	div	Access—
+page:/div:2/div:1/section:1/aside:1/dl:1/div:3/dt:1	dt	Access
+page:/div:2/div:1/section:1/aside:1/dl:1/div:3/dd:1	dd	—
+page:/div:2/div:1/section:1/aside:1/div:2	div	Selected sourceConnect to load sourcesExact record IDInspect
+page:/div:2/div:1/section:1/aside:1/div:2/label:1	label	Selected sourceConnect to load sources
+page:/div:2/div:1/section:1/aside:1/div:2/form:1	form	Exact record IDInspect
+page:/div:2/div:1/section:1/aside:1/div:2/form:1/label:1	label	Exact record ID
+page:/div:2/div:1/section:1/aside:1/div:2/form:1/button:1	button	Inspect
+page:/div:2/div:1/section:1/aside:1/div:2/div:1	div	
+page:/div:2/div:1/section:1/aside:1/p:3	p	A returned record is evidence from this Miner, not automatic proof of a production deployment.
+page:/div:2/div:1/nav:1	nav	03 Node pulse03 / NODE PULSEPublic observation pointsREACHABILITY / RESPONSEpublic.defxn.comUnreachablecannot be reachedst1.defxn.comUnreachablecannot be reache
+page:/div:2/div:1/nav:1/details:1	details	03 Node pulse03 / NODE PULSEPublic observation pointsREACHABILITY / RESPONSEpublic.defxn.comUnreachablecannot be reachedst1.defxn.comUnreachablecannot be reache
+page:/div:2/div:1/nav:1/details:1/summary:1	summary	03 Node pulse
+page:/div:2/div:1/nav:1/details:1/summary:1/span:1	span	03
+page:/div:2/div:1/nav:1/details:1/section:1	section	03 / NODE PULSEPublic observation pointsREACHABILITY / RESPONSEpublic.defxn.comUnreachablecannot be reachedst1.defxn.comUnreachablecannot be reachedst2.defxn.co
+page:/div:2/div:1/nav:1/details:1/section:1/div:1	div	03 / NODE PULSEPublic observation pointsREACHABILITY / RESPONSE
+page:/div:2/div:1/nav:1/details:1/section:1/div:1/div:1	div	03 / NODE PULSEPublic observation points
+page:/div:2/div:1/nav:1/details:1/section:1/div:1/div:1/p:1	p	03 / NODE PULSE
+id:mesh-nodes-title	h2	Public observation points
+page:/div:2/div:1/nav:1/details:1/section:1/div:1/span:1	span	REACHABILITY / RESPONSE
+page:/div:2/div:1/nav:1/details:1/section:1/div:2	div	public.defxn.comUnreachablecannot be reachedst1.defxn.comUnreachablecannot be reachedst2.defxn.comUnreachablecannot be reachedst3.defxn.comUnreachablecannot be 
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:1	div	public.defxn.comUnreachablecannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:1/strong:1	strong	public.defxn.com
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:1/span:1	span	Unreachable
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:1/span:2	span	cannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:2	div	st1.defxn.comUnreachablecannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:2/strong:1	strong	st1.defxn.com
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:2/span:1	span	Unreachable
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:2/span:2	span	cannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:3	div	st2.defxn.comUnreachablecannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:3/strong:1	strong	st2.defxn.com
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:3/span:1	span	Unreachable
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:3/span:2	span	cannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:4	div	st3.defxn.comUnreachablecannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:4/strong:1	strong	st3.defxn.com
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:4/span:1	span	Unreachable
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:4/span:2	span	cannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:5	div	st4.defxn.comUnreachablecannot be reached
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:5/strong:1	strong	st4.defxn.com
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:5/span:1	span	Unreachable
+page:/div:2/div:1/nav:1/details:1/section:1/div:2/div:5/span:2	span	cannot be reached
+page:/div:2/div:1/nav:1/details:2	details	04 Record ledger04 / RECORD LEDGERRecords from the selected sourceREFRESHES EVERY 10 SECONDSConnect to see records. No sample data is substituted.
+page:/div:2/div:1/nav:1/details:2/summary:1	summary	04 Record ledger
+page:/div:2/div:1/nav:1/details:2/summary:1/span:1	span	04
+page:/div:2/div:1/nav:1/details:2/section:1	section	04 / RECORD LEDGERRecords from the selected sourceREFRESHES EVERY 10 SECONDSConnect to see records. No sample data is substituted.
+page:/div:2/div:1/nav:1/details:2/section:1/div:1	div	04 / RECORD LEDGERRecords from the selected sourceREFRESHES EVERY 10 SECONDS
+page:/div:2/div:1/nav:1/details:2/section:1/div:1/div:1	div	04 / RECORD LEDGERRecords from the selected source
+page:/div:2/div:1/nav:1/details:2/section:1/div:1/div:1/p:1	p	04 / RECORD LEDGER
+id:mesh-data-title	h2	Records from the selected source
+page:/div:2/div:1/nav:1/details:2/section:1/div:1/span:1	span	REFRESHES EVERY 10 SECONDS
+page:/div:2/div:1/nav:1/details:2/section:1/p:1	p	Connect to see records. No sample data is substituted.
+page:/div:2/div:1/nav:1/details:2/section:1/div:2	div	
+page:/div:2/div:1/nav:1/details:2/section:1/div:3	div	
+page:/div:2/div:1/nav:1/details:3	details	05 Observation details
+page:/div:2/div:1/nav:1/details:3/summary:1	summary	05 Observation details
+page:/div:2/div:1/nav:1/details:3/summary:1/span:1	span	05
+page:/div:2/div:1/nav:1/details:3/div:1	div	
+page:/div:2/div:1/nav:1/details:4	details	06 Operator topologyTopology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh
+page:/div:2/div:1/nav:1/details:4/summary:1	summary	06 Operator topology
+page:/div:2/div:1/nav:1/details:4/summary:1/span:1	span	06
+page:/div:2/div:1/nav:1/details:4/div:1	div	Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.Connect wi
+page:/div:2/div:1/nav:1/details:4/div:1/p:1	p	Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.
+page:/div:2/div:1/nav:1/details:4/div:1/div:1	div	Connect with an operator key to inspect topology.
+page:/div:2/div:1/nav:1/details:4/div:1/p:2	p	How to verify an observation → · Evidence registry →
+page:/div:2/div:1/nav:1/details:4/div:1/p:2/a:1	a	How to verify an observation →
+page:/div:2/div:1/nav:1/details:4/div:1/p:2/a:2	a	Evidence registry →
+page:/div:2/div:1/div:1	div	

@@ -369,6 +369,20 @@ export async function getRouteCatalog(options) {
   }
 }
 
+/* Boots the real site exactly like renderDocument, hands the live window to `inspect` (which may
+   be async -- e.g. wait a frame for the router's rAF layout pass), and returns what it returns.
+   Used by the layout-key continuity helper (tests/lib/layout-continuity.cjs): a saved CMS edit is
+   applied by ArkLayout one frame AFTER ark:route-ready, so the serialized HTML alone cannot show
+   that it landed. */
+export async function inspectDocument(options, inspect) {
+  const dom = await bootDocument(options);
+  try {
+    return await inspect(dom.window);
+  } finally {
+    dom.window.close();
+  }
+}
+
 /* Reads the deployed index.html once. Both api/render.mjs and
    scripts/ssr-preview.mjs call this rather than each doing their own
    fs.readFile, so there is one answer to "what is the static shell". */

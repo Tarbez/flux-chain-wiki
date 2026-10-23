@@ -127,8 +127,10 @@ function setup(route) {
   const t = setup('/elsewhere');
   const info = t.info(t.$('[data-ark-layout-key="page:/p:2"]'));
   assert.equal(info.bound, false);
-  assert.match(info.reason, /2 fields \(HOME\.SHARED, ABOUT\.SHARED\)/);
-  assert.match(info.remedy, /Page fields/);
+  /* in plain words; the candidates are named for a developer in `detail` (Developer details) */
+  assert.match(info.reason, /used by 2 fields at once/);
+  assert.match(info.detail, /HOME\.SHARED, ABOUT\.SHARED/);
+  assert.match(info.remedy, /Page settings/);
   const owned = setup('/');
   assert.equal(owned.info(owned.$('[data-ark-layout-key="page:/p:2"]')).field, 'HOME.SHARED', 'on its own route the page owns it');
   assert.equal(owned.info(owned.$('[data-ark-layout-key="page:/p:2"]')).multiline, true, 'a text field edits as a paragraph');
@@ -155,17 +157,19 @@ function setup(route) {
   const t = setup('/');
   const page = t.info(t.$('[data-ark-layout-key="page:/p:3"]'));
   assert.equal(page.bound, false);
-  assert.match(page.reason, /page module "zero" \(js\/pages\/home\.js\)/, 'the page module\'s own file, from the catalog');
-  assert.match(page.remedy, /ArkCopy\.text/);
+  assert.match(page.reason, /come from the site template/, 'the person is told in plain words');
+  assert.match(page.detail, /page module "zero" \(js\/pages\/home\.js\)/, 'the page module\'s own file, from the catalog, for a developer');
+  assert.match(page.detail, /ArkCopy\.text/, 'and how to make it editable');
   const span = t.$('[data-ark-layout-key="path:span:1"]');
   /* two Site chrome fields with the same words (the real NAV.OVERVIEW / NAV.ABOUT): refused ... */
-  assert.match(t.info(span).reason, /2 fields \(NAV\.OVERVIEW, NAV\.ABOUT\)/);
+  assert.match(t.info(span).detail, /NAV\.OVERVIEW, NAV\.ABOUT/);
   /* ... until the render shows which one code read by name (ArkCopy.text, recorded in the preview) */
   t.run('cmsCopyRead["NAV.OVERVIEW"] = true');
   assert.equal(t.info(span).field, 'NAV.OVERVIEW');
   span.textContent = 'Typed in js';
   const shell = t.info(span);
-  assert.match(shell.reason, /F_SCENE_RZERO_V0/);
+  assert.doesNotMatch(shell.reason, /F_SCENE_RZERO_V0/, 'no resolver id in what the person reads');
+  assert.match(shell.detail, /F_SCENE_RZERO_V0/, 'the resolver that writes it is in Developer details');
   const box = t.info(t.$('[data-ark-layout-key="page:/div:1"]'));
   assert.match(box.reason, /holds 2 separate pieces of text/);
 }
@@ -178,7 +182,10 @@ function setup(route) {
   assert.equal(info.link.field, 'HOME.CLOSING.HREF');
   assert.equal(info.link.value, 'route:about');
   const nav = t.info(t.$('.nav-docs'));
-  assert.match(nav.link.refusal, /no link field holds/, 'a link target written in code is refused with its source');
+  assert.match(nav.link.refusal, /no link field holds/, 'a link target written in code is refused');
+  /* in plain words (cms.md P1-2): the pattern name and the field grammar are Developer details */
+  assert(!/F_SCENE|route:<|doc:<|\.js/.test(nav.link.refusal + nav.link.remedy), 'the refusal and remedy name no pattern, grammar or file');
+  assert.match(nav.link.detail, /written by .+route:<page>/, 'the detail names what writes the target and how to make it editable');
 }
 {
   /* the click picks the innermost keyed element that binds, climbing past what does not */

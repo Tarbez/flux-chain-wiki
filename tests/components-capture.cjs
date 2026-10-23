@@ -156,7 +156,8 @@ function boot(html) {
 /* ---- 4. js/main.js wires both: the context-menu item and the state seed */
 {
   const main = fs.readFileSync('js/main.js', 'utf8');
-  assert(/add\('Make into component', cmsMakeComponent, !!componentRefusal, componentRefusal\)/.test(main), 'the right-click menu offers Make into component, and a disabled one says what it needs');
+  /* one command list for the right-click menu and the toolbar's More (cmsSelectionCommands) */
+  assert(/add\('make-component', 'Make into component', cmsMakeComponent, componentRefusal \|\| ''\)/.test(main), 'the right-click menu (and the toolbar\'s More) offers Make into component, and a refused one says what it needs');
   assert(/ArkComponents\.starterFrom\(members, label\)/.test(main), 'a new state is seeded from its state-0 members');
   console.log('PASS: js/main.js offers Make into component and seeds new states from state 0.');
 }

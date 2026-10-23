@@ -394,10 +394,16 @@
     }
   }
 
+  /* Asking about unsaved work: the editor (a frame of this page) hands over its own confirmation dialog -- Ark's
+     AlertDialog, styled and worded by the editor (ArkGate.useConfirm, js/admin/core.js) -- because this page loads
+     no Ark kit of its own. Until it does (the locked screen has nothing unsaved to lose) the browser's own box asks. */
+  var asker = null;
+  function ask(options) { return asker ? asker(options) : Promise.resolve(window.confirm(options.title + '\n\n' + (options.message || ''))); }
   /* Bring back the locked screen to unlock the signing key, WITHOUT touching the host's session: used when
      Publish finds no identity in memory (a reload, or straight after opening on an already-valid session). */
-  function reauthenticate() {
-    if (unsavedInEditor() && !window.confirm('You have unsaved changes. Unlock your identity and lose them?')) return false;
+  async function reauthenticate() {
+    if (unsavedInEditor() && !(await ask({ title: 'Unlock your identity?', message: 'You have unsaved changes in the editor. Unlocking restarts sign-in on this page, and they are lost; they cannot be brought back.\n\nCancel and Save first to keep them.',
+      confirmLabel: 'Unlock and lose changes', cancelLabel: 'Keep editing', tone: 'danger' }))) return false;
     if (frame) { frame.remove(); frame = null; }
     identity = null;
     document.body.classList.add('locked'); $('gate').hidden = false;
@@ -418,8 +424,10 @@
     },
     unsaved: unsavedInEditor,
     reauthenticate: reauthenticate,
-    signOut: function () {
-      if (unsavedInEditor() && !window.confirm('You have unsaved changes. Sign out and lose them?')) return false;
+    useConfirm: function (fn) { asker = typeof fn === 'function' ? fn : null; },
+    signOut: async function () {
+      if (unsavedInEditor() && !(await ask({ title: 'Sign out?', message: 'You have unsaved changes in the editor. Signing out discards them; they cannot be brought back.\n\nCancel and Save first to keep them.',
+        confirmLabel: 'Sign out and lose changes', cancelLabel: 'Keep editing', tone: 'danger' }))) return false;
       try {
         var source = window.opener;
         if (source && source.location.origin === location.origin && source.ArkUI && source.ArkUI.accountSession) source.ArkUI.accountSession.signOut();

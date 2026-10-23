@@ -8,10 +8,12 @@ The block mesh is the brand foundation. Backgrounds, lifecycle illustrations and
 
 | Role | Token | Where it may appear |
 | --- | --- | --- |
-| Primary | `--primary` | Identity: the hero accent and a few small brand marks. Never a button, a heading color, or a hover/selected state |
-| Secondary | `--secondary` (= `--action`, `--complement`) | The main call to action, and nothing else |
-| Reference | `--reference` | Secondary actions, links, and every hover/selected/current state |
-| Success / Warning / Danger | `--success`, `--warning`, `--danger` | State only |
+| Primary | `--primary` (= `--badge`, `--signal`) | Identity: the hero accent and a few small brand marks. Never a button, a heading color, or a hover/selected state |
+| Secondary | `--secondary` (= `--action`, `--complement`, `--accent`) | The main call to action, and nothing else |
+| Reference | `--reference` (= `--role`) | Secondary actions, links, and every hover/selected/current state |
+| Success / Warning / Danger | `--success` (= `--trust`, `--live`), `--warning` (= `--drift`), `--danger` | State only |
+
+One meaning per name. The SDK names in brackets keep their SDK meaning, pointed at the DEFXN role: `--accent` is the SDK's action lane, so it is the action colour. Until 2026-10-19 `--accent` aliased `--primary`, which painted every SDK and Ark UI primary button and the CMS's selected states in the identity colour. Identity is read as `--primary`; selection as `--reference`.
 
 Everything else (headings, record numbers, labels, captions, rules) is neutral, so the few colored things keep their weight.
 

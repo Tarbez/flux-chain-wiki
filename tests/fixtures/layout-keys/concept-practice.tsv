@@ -1,0 +1,76 @@
+# key	tag	text -- layout keys of /concept/practice before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Operating modelAuthorityWho can approve this transition?The core ideaHow it worksEvidence & limitsThe applicable policy derives an authority cell for one object
+page:/nav:1	nav	Operating modelAuthority
+page:/nav:1/a:1	a	Operating model
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Authority
+id:practice-title	h1	Who can approve this transition?
+page:/nav:2	nav	The core ideaHow it worksEvidence & limits
+page:/nav:2/button:1	button	The core idea
+page:/nav:2/button:1/svg:1	svg	
+page:/nav:2/button:1/svg:1/path:1	path	
+page:/nav:2/button:1/svg:1/path:2	path	
+page:/nav:2/button:1/svg:1/path:3	path	
+page:/nav:2/button:1/svg:1/path:4	path	
+page:/nav:2/button:2	button	How it works
+page:/nav:2/button:2/svg:1	svg	
+page:/nav:2/button:2/svg:1/path:1	path	
+page:/nav:2/button:2/svg:1/path:2	path	
+page:/nav:2/button:2/svg:1/path:3	path	
+page:/nav:2/button:3	button	Evidence & limits
+page:/nav:2/button:3/svg:1	svg	
+page:/nav:2/button:3/svg:1/path:1	path	
+page:/nav:2/button:3/svg:1/path:2	path	
+page:/nav:2/button:3/svg:1/path:3	path	
+page:/nav:2/button:3/svg:1/path:4	path	
+page:/nav:2/button:3/svg:1/path:5	path	
+page:/div:1	div	The applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and 
+page:/div:1/div:1	div	The applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and 
+page:/div:1/div:1/div:1	div	The applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and 
+page:/div:1/div:1/div:1/p:1	p	The applicable policy derives an authority cell for one object and transition. The cell may certify only that bounded action, publishes threshold evidence, and 
+page:/div:1/div:1/aside:1	aside	Status / PartialAuthority policy structure and threshold concepts are documented in source. Independent production activation remains unverified.
+page:/div:1/div:1/aside:1/strong:1	strong	Status / Partial
+page:/div:1/div:1/aside:1/p:1	p	Authority policy structure and threshold concepts are documented in source. Independent production activation remains unverified.
+page:/div:1/figure:1	figure	Illustration / Authority relationshipsOBJONE OBJECT / BOUNDED AUTHORITYObject + applicable policyBounded authority cellThreshold evidenceCell dissolves
+page:/div:1/figure:1/figcaption:1	figcaption	Illustration / Authority relationships
+page:/div:1/figure:1/svg:1	svg	OBJONE OBJECT / BOUNDED AUTHORITY
+page:/div:1/figure:1/svg:1/path:1	path	
+page:/div:1/figure:1/svg:1/path:2	path	
+page:/div:1/figure:1/svg:1/path:3	path	
+page:/div:1/figure:1/svg:1/path:4	path	
+page:/div:1/figure:1/svg:1/path:5	path	
+page:/div:1/figure:1/svg:1/rect:1	rect	
+page:/div:1/figure:1/svg:1/rect:2	rect	
+page:/div:1/figure:1/svg:1/text:1	text	OBJ
+page:/div:1/figure:1/svg:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/path:6	path	
+page:/div:1/figure:1/svg:1/circle:2	circle	
+page:/div:1/figure:1/svg:1/path:7	path	
+page:/div:1/figure:1/svg:1/circle:3	circle	
+page:/div:1/figure:1/svg:1/path:8	path	
+page:/div:1/figure:1/svg:1/circle:4	circle	
+page:/div:1/figure:1/svg:1/path:9	path	
+page:/div:1/figure:1/svg:1/circle:5	circle	
+page:/div:1/figure:1/svg:1/path:10	path	
+page:/div:1/figure:1/svg:1/path:11	path	
+page:/div:1/figure:1/svg:1/circle:6	circle	
+page:/div:1/figure:1/svg:1/rect:3	rect	
+page:/div:1/figure:1/svg:1/path:12	path	
+page:/div:1/figure:1/svg:1/rect:4	rect	
+page:/div:1/figure:1/svg:1/text:2	text	ONE OBJECT / BOUNDED AUTHORITY
+page:/div:1/figure:1/svg:1/path:13	path	
+page:/div:1/figure:1/svg:1/g:1	g	
+page:/div:1/figure:1/svg:1/g:1/circle:1	circle	
+page:/div:1/figure:1/svg:1/g:1/circle:2	circle	
+page:/div:1/figure:1/button:1	button	Object + applicable policy
+page:/div:1/figure:1/button:2	button	Bounded authority cell
+page:/div:1/figure:1/button:3	button	Threshold evidence
+page:/div:1/figure:1/button:4	button	Cell dissolves
+page:/nav:3	nav	COMPARE GOVERNANCE ROSTERS
+page:/nav:3/a:1	a	COMPARE GOVERNANCE ROSTERS
+page:/nav:3/a:1/svg:1	svg	
+page:/nav:3/a:1/svg:1/path:1	path	
+page:/nav:3/a:1/svg:1/path:2	path	
+page:/div:2	div	

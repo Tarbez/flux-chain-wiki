@@ -117,7 +117,7 @@ function remount(markup) { host.innerHTML = markup; }
    Studio adopts it -- the end-to-end case is tests/browser/studio-flows.mjs `makecomp` */
 const remountPath = slice(main, 'var keptRefs = cmsSelectionRefs();', '}).catch(');
 assert(remountPath.indexOf('var keptRefs = cmsSelectionRefs();') < remountPath.indexOf('ArkUI.pageRouter.refresh'), 'the selection is remembered before the remount rebuilds it');
-const refresh = slice(main, "if (window.ArkStates) ArkStates.renderAll(host, cmsRoutePath(), cmsStatesView(cmsRoutePath()), cmsComponentsDraft);", '}).catch(');
+const refresh = slice(main, "if (window.ArkStates) ArkStates.renderAll(host, cmsLayoutScope(), cmsStatesView(cmsLayoutScope()), cmsComponentsDraft);", '}).catch(');
 assert(/reselected = cmsRestoreSelection\(keptRefs\)/.test(refresh), 'the preview-state remount re-finds the selection');
 assert(refresh.indexOf('cmsRestoreSelection') < refresh.indexOf("type: 'defxn-cms-preview-ready'"), 'it is restored before the ready report is built (points depend on it)');
 assert(/ready\.selections = cmsSelectionPayload\(\)/.test(refresh), 'the ready report carries the selection as it is after the remount');

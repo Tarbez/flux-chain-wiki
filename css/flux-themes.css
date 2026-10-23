@@ -5,9 +5,9 @@
    tokens live in css/components.css; the /palette page shows every scale. */
 
 /* Ember dark · split-complementary · hues 45/192/250 */
-:root,:root[data-theme="ghost"] {
+:root,:root[data-theme="ghost"],:root[data-theme="ember"] {
  --canvas:18 7.5% 3.6%; --depth:18 4.4% 6.9%; --surface:18 2.9% 11.2%; --raised:18 2.1% 16%; --nested:18 1.6% 21.4%; --overlay:18 3.6% 8.6%; --text-strong:18 11.8% 96.1%; --text:18 2.3% 80.6%; --text-muted:18 1.3% 65.7%; --text-faint:18 0.9% 55.5%; --text-inverse:18 7.5% 3.6%;
- --border-subtle:18 35.4% 87.4% / .1; --border-default:18 35.4% 87.4% / .22; --border-strong:18 35.4% 87.4% / .36;
+ --border-subtle:18 35.4% 87.4% / .1; --border-default:18 35.4% 87.4% / .22; --border-strong:18 35.4% 87.4% / .36; --border-control:18 35.4% 51.1%;
  --primary:19 99.8% 67.5%; --primary-100:19 52.4% 12.1%; --primary-200:19 51.1% 16.2%; --primary-300:19 43.4% 26.7%; --primary-400:19 36.6% 42%; --primary-500:19 99.8% 67.5%; --primary-600:19 98.8% 76.2%; --primary-700:18 74.3% 83.8%; --primary-ink:18 7.5% 3.6%;
  --primary-tone-50:18 99.7% 97%; --primary-tone-100:18 95.3% 92.7%; --primary-tone-200:18 98.9% 85.1%; --primary-tone-300:19 99.8% 74%; --primary-tone-400:21 99.6% 59.1%; --primary-tone-500:25 98.7% 44.5%; --primary-tone-600:24 99.4% 37.1%; --primary-tone-700:23 96% 29.7%; --primary-tone-800:23 98.5% 22.7%; --primary-tone-900:21 98.4% 15.5%; --primary-tone-950:18 98.8% 10.3%;
  --secondary:179 95.2% 40.7%; --secondary-100:178 81.7% 7.9%; --secondary-200:178 89.5% 10.2%; --secondary-300:178 67.9% 18.5%; --secondary-400:178 47.6% 32.3%; --secondary-500:179 95.2% 40.7%; --secondary-600:179 83.5% 47.5%; --secondary-700:177 44.4% 77.9%; --secondary-ink:18 7.5% 3.6%;
@@ -24,9 +24,9 @@
  --theme-shadow:11 81.6% 1.6% / .6; --theme-shadow-color:11 81.6% 1.6%; --theme-shadow-alpha:.6; color-scheme:dark;
 }
 /* Ember light · split-complementary · hues 45/192/250 */
-:root[data-theme="glacier"] {
+:root[data-theme="glacier"],:root[data-theme="ember-light"] {
  --canvas:18 6.2% 92.6%; --depth:18 3.7% 87.7%; --surface:18 23.9% 98.1%; --raised:0 0% 100%; --nested:18 3.2% 85.7%; --overlay:18 14.2% 96.8%; --text-strong:18 2.6% 12.3%; --text:18 1.5% 24.5%; --text-muted:18 1.1% 35%; --text-faint:18 1% 40.6%; --text-inverse:0 0% 100%;
- --border-subtle:19 36.1% 13.2% / .12; --border-default:19 36.1% 13.2% / .26; --border-strong:19 36.1% 13.2% / .4;
+ --border-subtle:19 36.1% 13.2% / .12; --border-default:19 36.1% 13.2% / .26; --border-strong:19 36.1% 13.2% / .4; --border-control:19 36.1% 49.1%;
  --primary:24 96.2% 34.9%; --primary-100:18 70% 91.9%; --primary-200:18 71.5% 87.6%; --primary-300:18 61.8% 77.4%; --primary-400:19 46.3% 62.2%; --primary-500:24 96.2% 34.9%; --primary-600:23 95.8% 30.1%; --primary-700:20 62.7% 24.7%; --primary-ink:0 0% 100%;
  --primary-tone-50:18 99.7% 97%; --primary-tone-100:18 95.3% 92.7%; --primary-tone-200:18 98.9% 85.1%; --primary-tone-300:19 99.8% 74%; --primary-tone-400:21 99.6% 59.1%; --primary-tone-500:25 98.7% 44.5%; --primary-tone-600:24 99.4% 37.1%; --primary-tone-700:23 96% 29.7%; --primary-tone-800:23 98.5% 22.7%; --primary-tone-900:21 98.4% 15.5%; --primary-tone-950:18 98.8% 10.3%;
  --secondary:179 99% 21.9%; --secondary-100:176 40.9% 89.3%; --secondary-200:176 42.3% 83.3%; --secondary-300:177 39.5% 70.4%; --secondary-400:178 33.5% 52.5%; --secondary-500:179 99% 21.9%; --secondary-600:179 95.2% 18.8%; --secondary-700:179 91.9% 15.7%; --secondary-ink:0 0% 100%;
@@ -43,9 +43,9 @@
  --theme-shadow:18 18.5% 18.1% / .14; --theme-shadow-color:18 18.5% 18.1%; --theme-shadow-alpha:.14; color-scheme:light;
 }
 /* Tide dark · analogous · hues 232/282/190 */
-:root[data-theme="clay"] {
+:root[data-theme="clay"],:root[data-theme="defxn-tide"] {
  --canvas:202 7.7% 3.5%; --depth:202 4.5% 6.9%; --surface:202 2.9% 11.1%; --raised:202 2.2% 16%; --nested:202 1.7% 21.4%; --overlay:202 3.7% 8.6%; --text-strong:202 11.8% 96%; --text:202 2.3% 80.6%; --text-muted:202 1.3% 65.7%; --text-faint:202 0.9% 55.5%; --text-inverse:202 7.7% 3.5%;
- --border-subtle:202 35.1% 86.8% / .1; --border-default:202 35.1% 86.8% / .22; --border-strong:202 35.1% 86.8% / .36;
+ --border-subtle:202 35.1% 86.8% / .1; --border-default:202 35.1% 86.8% / .22; --border-strong:202 35.1% 86.8% / .36; --border-control:202 35.1% 48%;
  --primary:197 99.3% 56.9%; --primary-100:199 72.3% 10.7%; --primary-200:199 73.3% 14.1%; --primary-300:199 59% 24.1%; --primary-400:200 46.9% 39%; --primary-500:197 99.3% 56.9%; --primary-600:200 99.3% 71.9%; --primary-700:201 72.7% 82.2%; --primary-ink:202 7.7% 3.5%;
  --primary-tone-50:202 91.5% 96.6%; --primary-tone-100:201 100% 91.7%; --primary-tone-200:201 99.9% 82.9%; --primary-tone-300:199 99.5% 68.8%; --primary-tone-400:196 93.9% 48.4%; --primary-tone-500:195 99.6% 40.3%; --primary-tone-600:196 98.1% 33.9%; --primary-tone-700:196 94.3% 27.1%; --primary-tone-800:197 96.6% 20.7%; --primary-tone-900:197 98.8% 14%; --primary-tone-950:199 100% 9.2%;
  --secondary:239 99.8% 82.2%; --secondary-100:238 26.4% 15.1%; --secondary-200:239 25.6% 20.2%; --secondary-300:238 22.6% 32.3%; --secondary-400:238 19.8% 49.3%; --secondary-500:239 99.8% 82.2%; --secondary-600:237 98.1% 86%; --secondary-700:236 69.7% 88.7%; --secondary-ink:202 7.7% 3.5%;
@@ -62,9 +62,9 @@
  --theme-shadow:209 98.5% 1.5% / .6; --theme-shadow-color:209 98.5% 1.5%; --theme-shadow-alpha:.6; color-scheme:dark;
 }
 /* Tide light · analogous · hues 232/282/190 */
-:root[data-theme="grove"] {
+:root[data-theme="grove"],:root[data-theme="defxn-tide-light"] {
  --canvas:202 6.2% 92.5%; --depth:202 3.7% 87.6%; --surface:202 23.7% 98%; --raised:0 0% 100%; --nested:202 3.2% 85.7%; --overlay:202 14.2% 96.7%; --text-strong:202 2.7% 12.2%; --text:202 1.5% 24.4%; --text-muted:202 1.1% 35%; --text-faint:202 1% 40.5%; --text-inverse:0 0% 100%;
- --border-subtle:200 43.6% 12.4% / .12; --border-default:200 43.6% 12.4% / .26; --border-strong:200 43.6% 12.4% / .4;
+ --border-subtle:200 43.6% 12.4% / .12; --border-default:200 43.6% 12.4% / .26; --border-strong:200 43.6% 12.4% / .4; --border-control:200 43.6% 45%;
  --primary:196 94.8% 30.7%; --primary-100:201 67.1% 91.3%; --primary-200:201 69.2% 86.5%; --primary-300:201 62.2% 75.5%; --primary-400:200 49.1% 59.4%; --primary-500:196 94.8% 30.7%; --primary-600:196 91.8% 26.6%; --primary-700:197 97.9% 19.8%; --primary-ink:0 0% 100%;
  --primary-tone-50:202 91.5% 96.6%; --primary-tone-100:201 100% 91.7%; --primary-tone-200:201 99.9% 82.9%; --primary-tone-300:199 99.5% 68.8%; --primary-tone-400:196 93.9% 48.4%; --primary-tone-500:195 99.6% 40.3%; --primary-tone-600:196 98.1% 33.9%; --primary-tone-700:196 94.3% 27.1%; --primary-tone-800:197 96.6% 20.7%; --primary-tone-900:197 98.8% 14%; --primary-tone-950:199 100% 9.2%;
  --secondary:244 45.2% 54.3%; --secondary-100:235 62.9% 94.1%; --secondary-200:236 65.4% 91.1%; --secondary-300:236 54.4% 83.3%; --secondary-400:237 37.6% 70.1%; --secondary-500:244 45.2% 54.3%; --secondary-600:245 42.9% 47.4%; --secondary-700:240 28.4% 32.8%; --secondary-ink:0 0% 100%;
@@ -81,9 +81,9 @@
  --theme-shadow:201 20.4% 17.7% / .14; --theme-shadow-color:201 20.4% 17.7%; --theme-shadow-alpha:.14; color-scheme:light;
 }
 /* Moss dark · earth analogous · hues 132/46/236 */
-:root[data-theme="ochre"] {
+:root[data-theme="ochre"],:root[data-theme="defxn-moss"] {
  --canvas:96 4.4% 3.5%; --depth:95 2.6% 6.8%; --surface:95 1.7% 11%; --raised:95 1.2% 15.9%; --nested:95 1% 21.3%; --overlay:95 2.1% 8.5%; --text-strong:95 6.6% 95.9%; --text:95 1.3% 80.5%; --text-muted:95 0.7% 65.6%; --text-faint:95 0.5% 55.4%; --text-inverse:96 4.4% 3.5%;
- --border-subtle:95 18.4% 85.6% / .1; --border-default:95 18.4% 85.6% / .22; --border-strong:95 18.4% 85.6% / .36;
+ --border-subtle:95 18.4% 85.6% / .1; --border-default:95 18.4% 85.6% / .22; --border-strong:95 18.4% 85.6% / .36; --border-control:95 18.4% 45%;
  --primary:90 52.7% 53.3%; --primary-100:92 41.5% 9.8%; --primary-200:92 40.3% 13.2%; --primary-300:92 33% 22.5%; --primary-400:93 26.8% 36.4%; --primary-500:90 52.7% 53.3%; --primary-600:91 62% 60.5%; --primary-700:95 34.9% 79.2%; --primary-ink:96 4.4% 3.5%;
  --primary-tone-50:95 98.5% 93%; --primary-tone-100:94 80.6% 85.6%; --primary-tone-200:93 67.4% 74%; --primary-tone-300:91 59.1% 58.6%; --primary-tone-400:84 100% 37%; --primary-tone-500:84 94.9% 32.3%; --primary-tone-600:85 93.7% 27.1%; --primary-tone-700:85 100% 20.6%; --primary-tone-800:86 95.1% 16.1%; --primary-tone-900:88 98.8% 10.6%; --primary-tone-950:91 97.7% 6.9%;
  --secondary:20 99.3% 67.1%; --secondary-100:19 49.7% 12%; --secondary-200:19 48.3% 16.2%; --secondary-300:19 41.1% 26.7%; --secondary-400:19 34.7% 41.9%; --secondary-500:20 99.3% 67.1%; --secondary-600:19 99.8% 75.9%; --secondary-700:19 69.7% 83.6%; --secondary-ink:96 4.4% 3.5%;
@@ -100,9 +100,9 @@
  --theme-shadow:98 69.9% 1% / .6; --theme-shadow-color:98 69.9% 1%; --theme-shadow-alpha:.6; color-scheme:dark;
 }
 /* Moss light · earth analogous · hues 132/46/236 */
-:root[data-theme="moss"] {
+:root[data-theme="moss"],:root[data-theme="defxn-moss-light"] {
  --canvas:95 3.5% 92.4%; --depth:95 2.1% 87.5%; --surface:95 12.8% 97.9%; --raised:0 0% 100%; --nested:95 1.8% 85.6%; --overlay:95 7.9% 96.6%; --text-strong:95 1.6% 12.1%; --text:95 0.9% 24.3%; --text-muted:95 0.6% 34.9%; --text-faint:95 0.6% 40.4%; --text-inverse:0 0% 100%;
- --border-subtle:94 26% 11.4% / .12; --border-default:94 26% 11.4% / .26; --border-strong:94 26% 11.4% / .4;
+ --border-subtle:94 26% 11.4% / .12; --border-default:94 26% 11.4% / .26; --border-strong:94 26% 11.4% / .4; --border-control:94 26% 41.4%;
  --primary:85 94.1% 23.7%; --primary-100:95 32.6% 89.7%; --primary-200:95 33.5% 84.1%; --primary-300:94 30.5% 72.1%; --primary-400:94 24.6% 55.7%; --primary-500:85 94.1% 23.7%; --primary-600:85 98.9% 19.7%; --primary-700:90 53.9% 19.2%; --primary-ink:0 0% 100%;
  --primary-tone-50:95 98.5% 93%; --primary-tone-100:94 80.6% 85.6%; --primary-tone-200:93 67.4% 74%; --primary-tone-300:91 59.1% 58.6%; --primary-tone-400:84 100% 37%; --primary-tone-500:84 94.9% 32.3%; --primary-tone-600:85 93.7% 27.1%; --primary-tone-700:85 100% 20.6%; --primary-tone-800:86 95.1% 16.1%; --primary-tone-900:88 98.8% 10.6%; --primary-tone-950:91 97.7% 6.9%;
  --secondary:25 98% 33.1%; --secondary-100:19 65.5% 91.9%; --secondary-200:19 67% 87.5%; --secondary-300:19 58.2% 77.3%; --secondary-400:19 43.7% 62.1%; --secondary-500:25 98% 33.1%; --secondary-600:24 96.9% 28.5%; --secondary-700:20 58.8% 24.8%; --secondary-ink:0 0% 100%;
@@ -119,9 +119,9 @@
  --theme-shadow:95 12.1% 16.8% / .14; --theme-shadow-color:95 12.1% 16.8%; --theme-shadow-alpha:.14; color-scheme:light;
 }
 /* Dune dark · complementary · hues 66/248/318 */
-:root[data-theme="marine"] {
+:root[data-theme="marine"],:root[data-theme="defxn-dune"] {
  --canvas:28 7.6% 3.5%; --depth:29 4.4% 6.8%; --surface:29 2.9% 11.1%; --raised:29 2.1% 15.9%; --nested:29 1.7% 21.3%; --overlay:29 3.6% 8.6%; --text-strong:29 11.5% 96%; --text:29 2.3% 80.5%; --text-muted:29 1.2% 65.6%; --text-faint:29 0.9% 55.4%; --text-inverse:28 7.6% 3.5%;
- --border-subtle:29 33% 86.3% / .1; --border-default:29 33% 86.3% / .22; --border-strong:29 33% 86.3% / .36;
+ --border-subtle:29 33% 86.3% / .1; --border-default:29 33% 86.3% / .22; --border-strong:29 33% 86.3% / .36; --border-control:29 33% 47%;
  --primary:36 94.4% 49.9%; --primary-100:31 66.9% 10.4%; --primary-200:32 66% 13.9%; --primary-300:31 54% 23.6%; --primary-400:31 43.7% 38%; --primary-500:36 94.4% 49.9%; --primary-600:31 99.5% 67.3%; --primary-700:29 64.9% 80.9%; --primary-ink:28 7.6% 3.5%;
  --primary-tone-50:29 91.6% 96.2%; --primary-tone-100:29 99.6% 90.6%; --primary-tone-200:30 99.6% 80.4%; --primary-tone-300:32 99.9% 63%; --primary-tone-400:36 98.1% 45.6%; --primary-tone-500:36 100% 38.7%; --primary-tone-600:36 96.9% 32.7%; --primary-tone-700:35 100% 25.4%; --primary-tone-800:35 99.8% 19.6%; --primary-tone-900:33 100% 13.3%; --primary-tone-950:31 99.5% 8.8%;
  --secondary:209 99% 70.7%; --secondary-100:209 50.4% 12.6%; --secondary-200:209 49.3% 16.9%; --secondary-300:209 42% 27.7%; --secondary-400:209 35.4% 43.3%; --secondary-500:209 99% 70.7%; --secondary-600:209 98.3% 78.1%; --secondary-700:210 75.4% 84.6%; --secondary-ink:28 7.6% 3.5%;
@@ -138,9 +138,9 @@
  --theme-shadow:21 92.9% 1.3% / .6; --theme-shadow-color:21 92.9% 1.3%; --theme-shadow-alpha:.6; color-scheme:dark;
 }
 /* Dune light · complementary · hues 66/248/318 */
-:root[data-theme="bone"] {
+:root[data-theme="bone"],:root[data-theme="defxn-dune-light"] {
  --canvas:29 6.1% 92.5%; --depth:29 3.6% 87.6%; --surface:29 22.7% 98%; --raised:0 0% 100%; --nested:29 3.1% 85.6%; --overlay:29 13.8% 96.6%; --text-strong:29 2.7% 12.2%; --text:29 1.5% 24.4%; --text-muted:29 1.1% 35%; --text-faint:29 1% 40.5%; --text-inverse:0 0% 100%;
- --border-subtle:30 42% 12% / .12; --border-default:30 42% 12% / .26; --border-strong:30 42% 12% / .4;
+ --border-subtle:30 42% 12% / .12; --border-default:30 42% 12% / .26; --border-strong:30 42% 12% / .4; --border-control:30 42% 44.5%;
  --primary:36 100% 30%; --primary-100:29 60.8% 90.6%; --primary-200:29 62.3% 85.5%; --primary-300:30 55.8% 74%; --primary-400:30 44% 57.9%; --primary-500:36 100% 30%; --primary-600:35 94% 26.5%; --primary-700:34 95.1% 19.2%; --primary-ink:0 0% 100%;
  --primary-tone-50:29 91.6% 96.2%; --primary-tone-100:29 99.6% 90.6%; --primary-tone-200:30 99.6% 80.4%; --primary-tone-300:32 99.9% 63%; --primary-tone-400:36 98.1% 45.6%; --primary-tone-500:36 100% 38.7%; --primary-tone-600:36 96.9% 32.7%; --primary-tone-700:35 100% 25.4%; --primary-tone-800:35 99.8% 19.6%; --primary-tone-900:33 100% 13.3%; --primary-tone-950:31 99.5% 8.8%;
  --secondary:204 98.3% 33.8%; --secondary-100:210 69.3% 92.3%; --secondary-200:210 71.6% 88.2%; --secondary-300:210 62.8% 78.4%; --secondary-400:209 47.4% 63.6%; --secondary-500:204 98.3% 33.8%; --secondary-600:205 95.2% 29.2%; --secondary-700:208 61% 26%; --secondary-ink:0 0% 100%;
@@ -157,9 +157,9 @@
  --theme-shadow:30 20% 17.3% / .14; --theme-shadow-color:30 20% 17.3%; --theme-shadow-alpha:.14; color-scheme:light;
 }
 /* Dusk dark · analogous · hues 300/350/228 */
-:root[data-theme="dusk"] {
+:root[data-theme="dusk"],:root[data-theme="defxn-dusk"] {
  --canvas:258 4.7% 3.7%; --depth:258 2.7% 7%; --surface:258 1.8% 11.3%; --raised:258 1.3% 16.1%; --nested:258 1% 21.5%; --overlay:258 2.2% 8.7%; --text-strong:258 7.7% 96.2%; --text:258 1.5% 80.8%; --text-muted:258 0.8% 65.9%; --text-faint:258 0.6% 55.7%; --text-inverse:258 4.7% 3.7%;
- --border-subtle:258 25.2% 88.8% / .1; --border-default:258 25.2% 88.8% / .22; --border-strong:258 25.2% 88.8% / .36;
+ --border-subtle:258 25.2% 88.8% / .1; --border-default:258 25.2% 88.8% / .22; --border-strong:258 25.2% 88.8% / .36; --border-control:258 25.2% 57.7%;
  --primary:262 99% 80.2%; --primary-100:262 28% 14.5%; --primary-200:262 27.3% 19.5%; --primary-300:262 23.9% 31.2%; --primary-400:261 20.6% 47.9%; --primary-500:262 99% 80.2%; --primary-600:261 98.3% 84.9%; --primary-700:259 63.6% 87.9%; --primary-ink:258 4.7% 3.7%;
  --primary-tone-50:258 92.3% 98%; --primary-tone-100:259 97.2% 95.2%; --primary-tone-200:260 96.9% 90.3%; --primary-tone-300:261 99% 83.7%; --primary-tone-400:263 99.9% 76.6%; --primary-tone-500:265 90.4% 68%; --primary-tone-600:266 62.9% 57.1%; --primary-tone-700:267 52% 45%; --primary-tone-800:267 53.2% 34.5%; --primary-tone-900:267 58.1% 23.4%; --primary-tone-950:266 60.3% 15.1%;
  --secondary:330 93.1% 74.8%; --secondary-100:331 30.9% 13.4%; --secondary-200:331 30.1% 17.9%; --secondary-300:331 26.1% 29.1%; --secondary-400:331 22.4% 45.2%; --secondary-500:330 93.1% 74.8%; --secondary-600:331 99.8% 81.4%; --secondary-700:334 57.6% 86.1%; --secondary-ink:258 4.7% 3.7%;
@@ -176,9 +176,9 @@
  --theme-shadow:258 52.9% 2% / .6; --theme-shadow-color:258 52.9% 2%; --theme-shadow-alpha:.6; color-scheme:dark;
 }
 /* Dusk light · analogous · hues 300/350/228 */
-:root[data-theme="dawn"] {
+:root[data-theme="dawn"],:root[data-theme="defxn-dusk-light"] {
  --canvas:258 3.9% 92.7%; --depth:258 2.3% 87.8%; --surface:258 16.2% 98.2%; --raised:0 0% 100%; --nested:258 2% 85.9%; --overlay:258 9.3% 96.9%; --text-strong:258 1.6% 12.4%; --text:258 0.9% 24.6%; --text-muted:258 0.7% 35.2%; --text-faint:258 0.6% 40.7%; --text-inverse:0 0% 100%;
- --border-subtle:261 20.5% 15% / .12; --border-default:261 20.5% 15% / .26; --border-strong:261 20.5% 15% / .4;
+ --border-subtle:261 20.5% 15% / .12; --border-default:261 20.5% 15% / .26; --border-strong:261 20.5% 15% / .4; --border-control:261 20.5% 54.7%;
  --primary:265 46.1% 52.4%; --primary-100:259 57.4% 93.8%; --primary-200:259 59.7% 90.6%; --primary-300:260 50.5% 82.3%; --primary-400:261 35.9% 68.7%; --primary-500:265 46.1% 52.4%; --primary-600:266 47.9% 45.5%; --primary-700:263 31.4% 31.2%; --primary-ink:0 0% 100%;
  --primary-tone-50:258 92.3% 98%; --primary-tone-100:259 97.2% 95.2%; --primary-tone-200:260 96.9% 90.3%; --primary-tone-300:261 99% 83.7%; --primary-tone-400:263 99.9% 76.6%; --primary-tone-500:265 90.4% 68%; --primary-tone-600:266 62.9% 57.1%; --primary-tone-700:267 52% 45%; --primary-tone-800:267 53.2% 34.5%; --primary-tone-900:267 58.1% 23.4%; --primary-tone-950:266 60.3% 15.1%;
  --secondary:327 50.2% 43.9%; --secondary-100:335 53.8% 93%; --secondary-200:334 55.1% 89.2%; --secondary-300:333 46.7% 80.1%; --secondary-400:332 33.7% 65.7%; --secondary-500:327 50.2% 43.9%; --secondary-600:326 60% 36.6%; --secondary-700:330 34.9% 28.3%; --secondary-ink:0 0% 100%;
@@ -196,29 +196,29 @@
 }
 
 /* Theme picker swatches: each palette's own primary and secondary. */
-.settings-choice[data-theme-choice="ghost"]{--choice-ink:19 99.8% 67.5%;--choice-ink-2:179 95.2% 40.7%;}
-.settings-choice[data-theme-choice="glacier"]{--choice-ink:24 96.2% 34.9%;--choice-ink-2:179 99% 21.9%;}
-.settings-choice[data-theme-choice="clay"]{--choice-ink:197 99.3% 56.9%;--choice-ink-2:239 99.8% 82.2%;}
-.settings-choice[data-theme-choice="grove"]{--choice-ink:196 94.8% 30.7%;--choice-ink-2:244 45.2% 54.3%;}
-.settings-choice[data-theme-choice="ochre"]{--choice-ink:90 52.7% 53.3%;--choice-ink-2:20 99.3% 67.1%;}
-.settings-choice[data-theme-choice="moss"]{--choice-ink:85 94.1% 23.7%;--choice-ink-2:25 98% 33.1%;}
-.settings-choice[data-theme-choice="marine"]{--choice-ink:36 94.4% 49.9%;--choice-ink-2:209 99% 70.7%;}
-.settings-choice[data-theme-choice="bone"]{--choice-ink:36 100% 30%;--choice-ink-2:204 98.3% 33.8%;}
-.settings-choice[data-theme-choice="dusk"]{--choice-ink:262 99% 80.2%;--choice-ink-2:330 93.1% 74.8%;}
-.settings-choice[data-theme-choice="dawn"]{--choice-ink:265 46.1% 52.4%;--choice-ink-2:327 50.2% 43.9%;}
+.settings-choice[data-theme-choice="ghost"],.settings-choice[data-theme-choice="ember"]{--choice-ink:19 99.8% 67.5%;--choice-ink-2:179 95.2% 40.7%;}
+.settings-choice[data-theme-choice="glacier"],.settings-choice[data-theme-choice="ember-light"]{--choice-ink:24 96.2% 34.9%;--choice-ink-2:179 99% 21.9%;}
+.settings-choice[data-theme-choice="clay"],.settings-choice[data-theme-choice="defxn-tide"]{--choice-ink:197 99.3% 56.9%;--choice-ink-2:239 99.8% 82.2%;}
+.settings-choice[data-theme-choice="grove"],.settings-choice[data-theme-choice="defxn-tide-light"]{--choice-ink:196 94.8% 30.7%;--choice-ink-2:244 45.2% 54.3%;}
+.settings-choice[data-theme-choice="ochre"],.settings-choice[data-theme-choice="defxn-moss"]{--choice-ink:90 52.7% 53.3%;--choice-ink-2:20 99.3% 67.1%;}
+.settings-choice[data-theme-choice="moss"],.settings-choice[data-theme-choice="defxn-moss-light"]{--choice-ink:85 94.1% 23.7%;--choice-ink-2:25 98% 33.1%;}
+.settings-choice[data-theme-choice="marine"],.settings-choice[data-theme-choice="defxn-dune"]{--choice-ink:36 94.4% 49.9%;--choice-ink-2:209 99% 70.7%;}
+.settings-choice[data-theme-choice="bone"],.settings-choice[data-theme-choice="defxn-dune-light"]{--choice-ink:36 100% 30%;--choice-ink-2:204 98.3% 33.8%;}
+.settings-choice[data-theme-choice="dusk"],.settings-choice[data-theme-choice="defxn-dusk"]{--choice-ink:262 99% 80.2%;--choice-ink-2:330 93.1% 74.8%;}
+.settings-choice[data-theme-choice="dawn"],.settings-choice[data-theme-choice="defxn-dusk-light"]{--choice-ink:265 46.1% 52.4%;--choice-ink-2:327 50.2% 43.9%;}
 
 /* Role aliases and legacy SDK names, shared by every palette. */
-:root,:root[data-theme="ghost"],:root[data-theme="glacier"],:root[data-theme="clay"],:root[data-theme="grove"],:root[data-theme="ochre"],:root[data-theme="moss"],:root[data-theme="marine"],:root[data-theme="bone"],:root[data-theme="dusk"],:root[data-theme="dawn"] {
+:root,:root[data-theme="ghost"],:root[data-theme="ember"],:root[data-theme="glacier"],:root[data-theme="ember-light"],:root[data-theme="clay"],:root[data-theme="defxn-tide"],:root[data-theme="grove"],:root[data-theme="defxn-tide-light"],:root[data-theme="ochre"],:root[data-theme="defxn-moss"],:root[data-theme="moss"],:root[data-theme="defxn-moss-light"],:root[data-theme="marine"],:root[data-theme="defxn-dune"],:root[data-theme="bone"],:root[data-theme="defxn-dune-light"],:root[data-theme="dusk"],:root[data-theme="defxn-dusk"],:root[data-theme="dawn"],:root[data-theme="defxn-dusk-light"] {
  --action:var(--secondary); --action-ink:var(--secondary-ink); --action-hover:var(--secondary-600);
  --complement:var(--secondary); --signal:var(--primary);
- --accent:var(--primary); --accent-strong:var(--primary-600); --accent-subtle:var(--primary-100);
- --trust:var(--success); --live:var(--success); --role:var(--reference); --badge:var(--primary);
+ --accent:var(--secondary); --accent-strong:var(--secondary-600); --accent-subtle:var(--secondary-100);
+ --trust:var(--success); --live:var(--trust); --role:var(--reference); --badge:var(--primary);
  --drift:var(--warning); --hidden:var(--text-faint); --info:var(--reference);
  --border:var(--border-default); --border-soft:var(--border-subtle);
  --canvas-glow-primary:var(--primary) / .03; --canvas-glow-secondary:var(--secondary) / .02; --canvas-glow-edge:var(--reference) / .015;
  --dak-canvas:var(--canvas); --dak-surface-1:var(--surface); --dak-surface-2:var(--raised); --dak-surface-3:var(--nested);
  --dak-text-strong:var(--text-strong); --dak-text:var(--text); --dak-text-muted:var(--text-muted); --dak-text-faint:var(--text-faint); --dak-text-inverse:var(--text-inverse);
- --dak-accent:var(--primary); --dak-accent-subtle:var(--primary-100); --dak-accent-strong:var(--primary-600);
+ --dak-accent:var(--accent); --dak-accent-subtle:var(--accent-subtle); --dak-accent-strong:var(--accent-strong);
  --dak-border-subtle:var(--border-subtle); --dak-border-default:var(--border-default); --dak-border-strong:var(--border-strong);
  --surface-canvas:var(--canvas); --surface-1:var(--surface); --surface-2:var(--raised); --surface-3:var(--nested); --surface-overlay:var(--overlay);
  --surface-01:var(--surface); --surface-02:var(--raised); --surface-03:var(--nested);
@@ -227,6 +227,6 @@
  --action-muted-bg:var(--secondary-100); --action-muted-fg:var(--secondary-700);
  --page-background:var(--canvas); --background-depth:var(--depth); --surface-base:var(--surface); --surface-raised:var(--raised);
  --overlay-soft:var(--nested); --overlay-strong:var(--overlay); --divider-soft:var(--border-subtle); --divider-strong:var(--border-strong);
- --theme-glow:var(--primary); --primary-light:var(--primary-700); --primary-standard:var(--primary); --primary-bold:var(--primary-600); --accent-medium:var(--primary-400);
+ --theme-glow:var(--primary); --primary-light:var(--primary-700); --primary-standard:var(--primary); --primary-bold:var(--primary-600); --accent-medium:var(--secondary-400);
  --success-standard:var(--success); --warning-standard:var(--warning); --error-standard:var(--danger); --danger-bold:var(--danger); --info-standard:var(--reference);
 }

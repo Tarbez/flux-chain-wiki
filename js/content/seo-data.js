@@ -26,7 +26,7 @@ ArkSEO.define({
     },
     "chain": {
       "title": "Every identity, its own chain — DEFXN",
-      "description": "Walk the record that joins a chain: signed, checked for grammar and signature only, replicated to peers, then read by a resolver. The chain of chains, end to end.",
+      "description": "Walk the record that joins a chain: signed, checked against its grammar and signature, replicated to peers, then read by a resolver. Every identity and every resolver runs its own chain.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -36,12 +36,12 @@ ArkSEO.define({
     },
     "resolver": {
       "title": "What is a resolver? — DEFXN",
-      "description": "Understand how resolver logic turns inputs into checkable claims, where verification applies, and which evidence to inspect before running Flux.",
+      "description": "A resolver is a rulebook with its own chain: launched by one signed record, built from shared capabilities anyone can check, and refusing any record that does not fit its grammar.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
       "noindex": false,
-      "aiSummary": "",
+      "aiSummary": "A DEFXN resolver is launched by one signed record that gives it its own chain, names the capabilities it composes, and publishes the grammar every record must follow. It is immutable unless a control key was named at launch, and launched is not served: it answers only while a provider announces for it. Its signature is its result; whether to rely on it is decided before sending anything: its grammar, its capabilities, who can change it.",
       "aiBlocked": false
     },
     "resolvermath": {
@@ -55,7 +55,7 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "references": {
-      "title": "Source evidence and current limits — DEFXN",
+      "title": "Reference resolvers — DEFXN",
       "description": "Inspect source-backed reference evidence and its limits. Separate documented behavior from verified live operation before choosing an operator path.",
       "ogImage": "",
       "canonical": "",
@@ -65,13 +65,13 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "deployment": {
-      "title": "From network ID to receipt — DEFXN",
-      "description": "Follow network discovery, signed agreements, and verification from a network ID to a receipt. See the steps and their current evidence boundaries.",
+      "title": "Deploy a resolver — DEFXN",
+      "description": "Deploy a resolver in six steps: write its grammar, name its capabilities, choose who can change it, review and sign one launch record, serve it, and watch it in the explorer.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
       "noindex": false,
-      "aiSummary": "",
+      "aiSummary": "You deploy a DEFXN resolver by signing one launch record, which gives it its own chain, names the capabilities it uses and publishes its grammar; then a provider serves it. The explorer and deployer run on the development network; public hosting is not established.",
       "aiBlocked": false
     },
     "concept": {
@@ -85,7 +85,7 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "about": {
-      "title": "About: everyone is our business partner — DEFXN",
+      "title": "Overview — DEFXN",
       "description": "DEFXN is a self-scaling fractal network where everyone is a business partner. The mesh is the database, the host and the cloud: no database, no hosting, no fees, no cloud.",
       "ogImage": "",
       "canonical": "",
@@ -356,7 +356,7 @@ ArkSEO.define({
     },
     "spec": {
       "title": "Benchmark evidence and limits — DEFXN",
-      "description": "No complete public benchmark artifact is registered here. Inspect the workload, environment, method, and raw evidence required to verify a result.",
+      "description": "Six benchmark records are verified at stated boundaries; the rest remain partial, historical or superseded. A result counts only with its workload, environment, method and raw evidence.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -395,7 +395,7 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "dao": {
-      "title": "Governance boundaries — DEFXN",
+      "title": "How DEFXN is governed — DEFXN",
       "description": "Compare shared-substrate governance with network DAO governance. Explore separate rosters, thresholds, activation rules, and evidence limits.",
       "ogImage": "",
       "canonical": "",
@@ -405,18 +405,8 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "proximity": {
-      "title": "Explore the interactive model — DEFXN",
-      "description": "Explore an illustrative model of Flux interactions, then open the lab for hands-on controls. The model is not a live network or performance benchmark.",
-      "ogImage": "",
-      "canonical": "",
-      "schemaType": "",
-      "noindex": false,
-      "aiSummary": "",
-      "aiBlocked": false
-    },
-    "lab": {
-      "title": "Interactive model lab — DEFXN",
-      "description": "Adjust the illustrative model and inspect its behavior. Use the lab to explore concepts, not as evidence of live execution or measured performance.",
+      "title": "Interactive model — DEFXN",
+      "description": "An illustrative model of threshold agreement, authority, lifecycle and network boundaries. Hands-on controls; not live network data or a benchmark.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -455,13 +445,13 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "resolvers": {
-      "title": "FXN resolvers — DEFXN",
-      "description": "Browse the available resolver families, their inputs, outputs, evidence boundaries, and implementation status before choosing logic for a network.",
+      "title": "Resolvers and capabilities — DEFXN",
+      "description": "Every first-party resolver chain and the capabilities resolvers are built from, read from a dated snapshot of the code: chain ids, compositions, grammar state, links into Explore.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
       "noindex": false,
-      "aiSummary": "",
+      "aiSummary": "A DEFXN resolver is a rulebook with its own chain, launched by one signed record and built from shared capabilities. This page lists the first-party resolver chains and capability manifests from a dated snapshot of the code, with the commit and date it was read at; the live view is explore.defxn.com.",
       "aiBlocked": false
     },
     "account": {
@@ -515,8 +505,8 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "stats/gpu": {
-      "title": "",
-      "description": "",
+      "title": "GPU benchmark detail — DEFXN",
+      "description": "Why a rented RTX PRO 6000 box was fast: its CPU. The protocol never addresses the GPU; it is signatures and hashing, measured and corrected.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -525,8 +515,8 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "stats/ledger": {
-      "title": "",
-      "description": "",
+      "title": "Ledger benchmark detail — DEFXN",
+      "description": "The finance ledger, measured: each identity appends to its own chain of value moves, and one position holds one record. Real signed samples.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -535,8 +525,8 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "how/ask": {
-      "title": "",
-      "description": "",
+      "title": "State the request — DEFXN",
+      "description": "Chapter one of how DEFXN works: state the request as a signed intent, and see the record it produces and what that record does not prove.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -545,8 +535,8 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "how/work": {
-      "title": "",
-      "description": "",
+      "title": "Agree on the terms — DEFXN",
+      "description": "Chapter two of how DEFXN works: a provider offers terms, both sides accept them, and the agreement links both records by content address.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -555,8 +545,8 @@ ArkSEO.define({
       "aiBlocked": false
     },
     "how/check": {
-      "title": "",
-      "description": "",
+      "title": "Verify the result — DEFXN",
+      "description": "Chapter three of how DEFXN works: check the fulfillment against the agreement and close the trail with a policy-bound receipt.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -688,7 +678,7 @@ ArkSEO.define({
     },
     "a-resolver-by-construction": {
       "title": "",
-      "description": "See how a finance resolver makes double-spend unrepresentable using one registered letter, a chain per identity, six resolver steps, and a measured 25,232 ops/s result.",
+      "description": "See how a finance resolver makes double-spend unrepresentable using one registered letter, a chain per identity, six resolver steps, and a measured 51,065 ops/s result.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -698,7 +688,7 @@ ArkSEO.define({
     },
     "the-chain-prototype-is-the-chosen-path": {
       "title": "",
-      "description": "Review the sustained six-node chain benchmark, its 12,403 accepted operations per second result, and the limits on what that run establishes.",
+      "description": "Review the sustained six-node benchmark from the retired chain direction, what that run measured, and the limits on what it establishes.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",

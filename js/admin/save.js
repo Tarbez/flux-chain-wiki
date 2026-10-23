@@ -71,6 +71,11 @@
         state.layoutDraft = ArkLayout.sanitize(state.layoutDraft); state.layoutSaved = JSON.stringify(state.layoutDraft); ArkLayout.define(state.layoutDraft);
       } },
       components: { draft: function () { return state.componentsDraft; }, set: function (v) { state.componentsDraft = v; }, saved: function () { return state.componentsSaved; }, dirty: componentsDirty, save: async function () {
+        /* every Ark block, as saved and as each instance shows it, passes the SDK's strict
+           validateCmsArkBlock first -- refused, nothing is written, and each refusal says which
+           component, which field, what it needs (js/content/components.js problems()) */
+        var refused = ArkComponents.problems(state.componentsDraft);
+        if (refused.length) throw new Error('Not saved: ' + refused.length + ' thing' + (refused.length > 1 ? 's' : '') + ' to fix in your components (Library, or the toolbar\'s Component instance). ' + refused.map(function (p) { return p.sentence; }).join(' '));
         if (state.cdirs) await ArkAdminStore.saveComponents(state.cdirs.content, state.componentsDraft);
         else download('components-data.js', ArkComponents.serialize(state.componentsDraft));
         state.componentsDraft = ArkComponents.sanitize(state.componentsDraft); state.componentsSaved = JSON.stringify(state.componentsDraft); ArkComponents.define(state.componentsDraft);
@@ -128,11 +133,15 @@
     // below are sanitized and written (SEO keeps one entry per page in ArkManifest, for one).
     await removeRestoredExtras(attempt);
 
+    /* what the Save summary calls an item: its name, as every list shows it ("About"), never its id
+       ("about") -- the id is the file's name, which the summary does not need (docs/ux-audit/cms.md P1-2) */
+    function itemName(item, id) { return (item && (item.title || item.label)) || id; }
+
     // pages (manifests) -- js/content/manifests/*.js
     var changedPages = state.ids.filter(dirty);
     for (var i = 0; i < changedPages.length; i++) {
       var pid = changedPages[i];
-      await attempt('Page "' + pid + '"', true, async function (id) {
+      await attempt('Page "' + itemName(state.drafts[pid], pid) + '"', true, async function (id) {
         var manifest = state.drafts[id], problems = ArkManifest.problems(manifest);
         if (problems.length) throw new Error(problems.join('; '));
         var isNew = state.saved[id] === null;
@@ -146,7 +155,7 @@
     var changedArticles = state.slugs.filter(dirtyA);
     for (var j = 0; j < changedArticles.length; j++) {
       var aslug = changedArticles[j];
-      await attempt('Article "' + aslug + '"', true, async function (slug) {
+      await attempt('Article "' + itemName(state.aDrafts[aslug], aslug) + '"', true, async function (slug) {
         var article = state.aDrafts[slug], problems = LearningContent.problems(article);
         if (problems.length) throw new Error(problems.join('; '));
         var list = articleList(article);
@@ -160,7 +169,7 @@
     var changedAssets = state.assetIds.filter(dirtyI);
     for (var k = 0; k < changedAssets.length; k++) {
       var assetId = changedAssets[k];
-      await attempt('Image "' + assetId + '"', true, async function (id) {
+      await attempt('Image "' + itemName(state.assetDrafts[assetId], assetId) + '"', true, async function (id) {
         var asset = state.assetDrafts[id], problems = ArkAsset.problems(asset);
         if (problems.length) throw new Error(problems.join('; '));
         var isNew = state.assetSaved[id] === null;
@@ -174,7 +183,7 @@
     var changedSecrets = state.secretIds.filter(dirtyS);
     for (var m = 0; m < changedSecrets.length; m++) {
       var secretId = changedSecrets[m];
-      await attempt('Secret "' + secretId + '"', true, async function (id) {
+      await attempt('Private item "' + itemName(state.secretDrafts[secretId], secretId) + '"', true, async function (id) {
         var secret = state.secretDrafts[id], problems = ArkSecret.problems(secret);
         if (problems.length) throw new Error('encrypt the content first (' + problems.join('; ') + ')');
         var isNew = state.secretSaved[id] === null;

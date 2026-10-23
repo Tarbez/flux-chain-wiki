@@ -1,10 +1,13 @@
-/* Distinct reading objects for each stage; all describe an illustration, never a live record. */
+/* Distinct reading objects for each stage; all describe an illustration, never a live record.
+   Since 2026-10-19 (the story template, js/pages/story.js) the scene sits in Ark's figure frame,
+   which already says "Illustration -- not live data" and carries the caption: the scene draws
+   neither its own top bar ("ILLUSTRATION / NOT A LIVE RECORD") nor its own figcaption (its title
+   is returned for the frame's caption); its labels are 12px or more (css/lifecycle.css; they were
+   8-9px) and its mesh labels 12px (createMeshFabric labelMin). */
 (function(){
- ArkUI.createStageScene=function(id,copy){
-  var scene=ArkUI.el('figure','stage-scene stage-scene-'+id);scene.setAttribute('aria-label',id+' illustration');
-  var top=ArkUI.el('div','stage-scene-top');top.appendChild(ArkUI.el('span','','ILLUSTRATION'));top.appendChild(ArkUI.el('span','','NOT A LIVE RECORD'));scene.appendChild(top);
-  var titles={intent:'The request brief',offer:'A reply to the brief',agreement:'The shared commitment',fulfillment:'The evidence package',receipt:'The decision trail'};
-  scene.appendChild(ArkUI.el('figcaption','stage-scene-title',titles[id]));
+ var TITLES={intent:'The request brief',offer:'A reply to the brief',agreement:'The shared commitment',fulfillment:'The evidence package',receipt:'The decision trail'};
+ ArkUI.createStageScene=function(id){
+  var scene=ArkUI.el('div','stage-scene stage-scene-'+id);
   var object=ArkUI.el('div','stage-scene-object');
   function item(label,text,cls){var row=ArkUI.el('div',cls||'stage-object-row');row.appendChild(ArkUI.el('span','stage-object-label',label));row.appendChild(ArkUI.el('p','',text));return row;}
   if(id==='intent'){
@@ -27,14 +30,20 @@
   }
   scene.appendChild(object);
   var canvas=ArkUI.el('canvas','stage-scene-mesh');canvas.setAttribute('aria-hidden','true');scene.appendChild(canvas);var motion=ArkUI.el('p','mesh-story-cue');scene.appendChild(motion);
-  var controls=ArkUI.el('nav','stage-scene-choices');controls.setAttribute('aria-label','Inspect the '+id+' illustration');
-  var detail=ArkUI.el('p','stage-scene-detail','Choose a label to inspect this part.');detail.setAttribute('aria-live','polite');var buttons=[];
+  /* The buttons replay one part of the picture above them; the line under the picture (the mesh's own caption) narrates it.
+     They used to print the stage's facts ("Who writes it", "References") a third time -- the same words The idea and Step by
+     step already give (first-visit audit 2026-10-22, P2). Now each label says what it shows, in plain words, and the facts
+     live in the tabs alone. The canvas behaviour is unchanged: each button selects the same mesh pattern as before. */
+  var controls=ArkUI.el('nav','stage-scene-choices');controls.setAttribute('aria-label','Replay part of the picture');
+  var detail=ArkUI.el('p','stage-scene-detail','Each button below replays one part of the picture.');var buttons=[];
   var inspectionPatterns={intent:['story-ask','story-limits'],offer:['story-proposal','story-request'],agreement:['story-work','story-promise'],fulfillment:['story-result','story-request'],receipt:['story-decision','story-check']}[id];
-  var options=id==='intent'?['Who asks','What travels']:id==='offer'?['Who replies','What it answers']:id==='agreement'?['Both sides','The link']:id==='fulfillment'?['Who submits','What it follows']:['Who checks','The trail'];
-  options.forEach(function(label,i){var button=ArkUI.el('button','',label);button.type='button';button.setAttribute('aria-pressed','false');button.addEventListener('click',function(){buttons.forEach(function(b,j){b.setAttribute('aria-pressed',String(i===j));});detail.textContent=copy.facts[i][1];fabric.select(inspectionPatterns[i],true,true);});buttons.push(button);controls.appendChild(button);});scene.appendChild(controls);scene.appendChild(detail);
-  var patterns={intent:'story-ask',offer:'story-offer',agreement:'story-work',fulfillment:'story-result',receipt:'story-check'},pattern=patterns[id];var fabric=ArkUI.createMeshFabric(canvas,{caption:motion});
+  var options={intent:['Show who asks','Show what goes with the request'],offer:['Show the reply','Show the request it answers'],agreement:['Show both sides meet','Show the shared terms'],fulfillment:['Show the returned work','Show the request it follows'],receipt:['Show the check','Show the checked trail']}[id];
+  options.forEach(function(label,i){var button=ArkUI.el('button','',label);button.type='button';button.setAttribute('aria-pressed','false');button.addEventListener('click',function(){buttons.forEach(function(b,j){b.setAttribute('aria-pressed',String(i===j));});
+   /* the caption narrates the replay; it is announced only once a visitor asks for one, never on arrival */
+   motion.setAttribute('aria-live','polite');fabric.select(inspectionPatterns[i],true,true);});buttons.push(button);controls.appendChild(button);});scene.appendChild(detail);scene.appendChild(controls);
+  var patterns={intent:'story-ask',offer:'story-offer',agreement:'story-work',fulfillment:'story-result',receipt:'story-check'},pattern=patterns[id];var fabric=ArkUI.createMeshFabric(canvas,{caption:motion,labelMin:12});
   scene.arkStageActivate=function(){fabric.select(pattern,true,true);};
-  return {element:scene,start:function(){fabric.select(pattern,false);},preview:function(stage){fabric.select(patterns[stage]||pattern,true,true);},dispose:function(){fabric.dispose();}};
+  return {element:scene,title:TITLES[id],start:function(){fabric.select(pattern,false);},preview:function(stage){fabric.select(patterns[stage]||pattern,true,true);},visible:function(on){if(fabric.visible)fabric.visible(on);},dispose:function(){fabric.dispose();}};
  };
 })();
 

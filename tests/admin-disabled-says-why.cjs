@@ -45,7 +45,7 @@ for (const call of ["refuse($('save'), anyDirty() ? '' : NOTHING_TO_SAVE)", "ref
    would enable the control, and the 20 is ArkStates.MAX_STATES, not a second copy of the cap. */
 for (const [name, site] of [['Reset overrides', /\bresetAll\.disabled\s*=/], ['+ Add state', /\baddState\.disabled\s*=/], ['Use this element as trigger', /\buseThis\.disabled\s*=/],
   ['Use state-zero selection as trigger', /\buseSelf\.disabled\s*=/], ['Showing', /\bpreview\.disabled\s*=/], ['Edit definition', /\beditDef\.disabled\s*=/], ['Detach', /\bdetach\.disabled\s*=/],
-  ['Publish', /\$\('publish'\)\.disabled\s*=|\bbutton\.disabled\s*=\s*(true|false); publishing/], ['Refresh', /\$\('meshRefresh'\)\.disabled\s*=/]]) {
+  ['Publish', /\$\('publish'\)\.disabled\s*=|\bbutton\.disabled\s*=\s*(true|false); publishing/]]) {
   assert(!site.test(code), `${name}'s disabled state is set directly again, without a stated reason -- use refuse()`);
 }
 /* each reason, evaluated where it can be: it says what is wrong AND what to do */
@@ -63,11 +63,13 @@ for (const [what, re] of Object.entries(reasons)) {
     assert(/: /.test(text) && text.length > 30, `${what}'s reason states the failure and the remedy, not a bare status: "${text}"`);
   }
 }
-assert(/refuse\(\$\('publish'\), publishing \? PUBLISHING_NOW : info\.reachable \? '' : 'Cannot publish: the miner is not reachable \(' \+ \(info\.detail/.test(admin), 'Publish names the unreachable miner\'s own detail and what to do');
+assert(/refuse\(\$\('publish'\), publishing \? PUBLISHING_NOW : info\.reachable \? '' : 'Cannot publish: Ark Miner is not reachable \(' \+ \(info\.detail/.test(admin), 'Publish names the unreachable miner\'s own detail and what to do');
 /* Publish stays CLICKABLE while refused (P0-4, docs/ux-audit/cms.md): every refusal of it passes
    explainPublish, so a click opens the reason and its remedy instead of doing nothing */
 for (const call of admin.matchAll(/refuse\(\$\('publish'\),[^;]*;/g)) assert(/, explainPublish\);$/.test(call[0]), 'Publish is refused without its click-to-explain: ' + call[0]);
-assert(/refuse\(\$\('publish'\), PUBLISH_NEEDS_HOST, explainPublish\)/.test(admin) && /refuse\(\$\('meshRefresh'\), PUBLISH_NEEDS_HOST\)/.test(admin), 'a copy opened from disk says how to reach a miner on both Publish and Refresh');
+/* (the account menu's own Refresh went with its duplicate "Publishing service" block, 2026-10-21; the sheet's
+   Check again is the one) */
+assert(/refuse\(\$\('publish'\), PUBLISH_NEEDS_HOST, explainPublish\)/.test(admin), 'a copy opened from disk says how to reach a miner on Publish');
 /* the cap is read, and the reason a person sees names the real number */
 const states = vm.createContext({});
 vm.runInContext(fs.readFileSync('js/content/states.js', 'utf8') + ';this.S = ArkStates;', states);

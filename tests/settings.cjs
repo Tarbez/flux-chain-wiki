@@ -3,7 +3,7 @@ const root={dataset:{},style:{setProperty(){},removeProperty(){}}},data={paused:
 const documentEvents={},windowEvents={},outsideTargets=[];class TestNode {}
 const ui={handleOutsidePointer(target){outsideTargets.push(target);},register(){},bindRefEvent(ref,event,fn){events[ref+event]=fn;},configureRef(ref,c){configs[ref]={...configs[ref],...c,attrs:{...configs[ref]?.attrs,...c.attrs}};},update(ref,state){refs[ref]={...state,attrs:{...configs[ref]?.attrs}};},onAction(ref,fn){actions[ref]=fn;},getElement(){return null;}};
 class TestMutationObserver{constructor(fn){this.fn=fn;}observe(){}disconnect(){}}
-const context=vm.createContext({Node:TestNode,MutationObserver:TestMutationObserver,themeOptions:['ghost','bone'],createArkUI:()=>ui,defineArkHeadlessComponent:s=>s,
+const context=vm.createContext({Node:TestNode,MutationObserver:TestMutationObserver,themeOptions:['ember','defxn-dune-light'],legacyThemeIds:{ghost:'ember',bone:'defxn-dune-light'},createArkUI:()=>ui,defineArkHeadlessComponent:s=>s,
  createArkHeadlessComponent:(runtime,s)=>{spec=s;return {render(){for(const slot of Object.values(s.slots)){ui.configureRef(slot.ref,slot.config||{});ui.update(slot.ref,slot.state||{});}},mount(){s.mount(runtime,this);},getRef:k=>s.slots[k].ref};},createArkPopover:(runtime,o)=>{options=o;},
  ARK_BACKGROUND_PRESETS:{quiet:{}},createArkBackgroundConfig:()=>({base:{},grain:{},complementary:{},shapes:[{size:72}],extras:[]}),requestAnimationFrame:fn=>{frame=fn;return 1;},cancelAnimationFrame(){},mountArkBackground:(host,o)=>{mounts.push(o);return {destroy(){destroyed++;},update(o){updates.push(o);}};},
  document:{addEventListener(name,fn,capture){documentEvents[name]={fn,capture};},removeEventListener(name){delete documentEvents[name];},querySelector:()=>({prepend(){},append(){}}),documentElement:root,createElement:()=>({setAttribute(){},append(){},style:{}})},window:{addEventListener(name,fn){windowEvents[name]=fn;},removeEventListener(){}},localStorage:{getItem:()=>'<invalid>',setItem(){}},matchMedia:()=>({matches:false,addEventListener(){},removeEventListener(){}}),setTimeout:()=>0,clearTimeout(){},
@@ -13,7 +13,7 @@ const outside=new TestNode();documentEvents.pointerdown.fn({target:outside});ass
 const click=ref=>actions[ref](ref,{action:'CLICK'});
 click('SZPAUSE');assert(data.paused);assert.equal(refs.SZPAUSE.text,'Resume motion');
 click('SZPAUSE');assert(!data.paused);
-assert.equal(root.dataset.theme,'ghost','invalid saved themes fall back to Night Signal');click('SZTHEMESLIGHT3');assert.equal(root.dataset.theme,'bone');
+assert.equal(root.dataset.theme,'ember','invalid saved themes fall back to ember (the SDK id of the old Night Signal ghost)');click('SZTHEMESLIGHT3');assert.equal(root.dataset.theme,'defxn-dune-light');
 assert.equal(root.dataset.background,'atmosphere');assert.equal(mounts.length,1);
 assert.equal(mounts[0].canvas,'hsl(var(--canvas))');assert.equal(mounts[0].sub.opacity,.37);
 assert.equal(mounts[0].sub.blur,155);assert.equal(mounts[0].grain.opacity,.09);

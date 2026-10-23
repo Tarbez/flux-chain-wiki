@@ -1,0 +1,67 @@
+# key	tag	text -- layout keys of /resolutions/governance before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	All resolutionsGovernance10 / 20 · People & organisationsResolve your governanceWrite your network’s rules and decide on them together.ForCo-ops, associations, 
+page:/nav:1	nav	All resolutionsGovernance
+page:/nav:1/a:1	a	All resolutions
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/span:1	span	Governance
+page:/div:1	div	10 / 20 · People & organisationsResolve your governanceWrite your network’s rules and decide on them together.ForCo-ops, associations, DAOs and project steering
+page:/div:1/header:1	header	10 / 20 · People & organisationsResolve your governanceWrite your network’s rules and decide on them together.ForCo-ops, associations, DAOs and project steering
+page:/div:1/header:1/p:1	p	10 / 20 · People & organisations
+id:resolution-title-governance	h1	Resolve your governance
+page:/div:1/header:1/p:2	p	Write your network’s rules and decide on them together.
+page:/div:1/header:1/dl:1	dl	ForCo-ops, associations, DAOs and project steering groups.ProblemDecisions happen in chat threads and nobody can say who approved what.
+page:/div:1/header:1/dl:1/div:1	div	ForCo-ops, associations, DAOs and project steering groups.
+page:/div:1/header:1/dl:1/div:1/dt:1	dt	For
+page:/div:1/header:1/dl:1/div:1/dd:1	dd	Co-ops, associations, DAOs and project steering groups.
+page:/div:1/header:1/dl:1/div:2	div	ProblemDecisions happen in chat threads and nobody can say who approved what.
+page:/div:1/header:1/dl:1/div:2/dt:1	dt	Problem
+page:/div:1/header:1/dl:1/div:2/dd:1	dd	Decisions happen in chat threads and nobody can say who approved what.
+page:/div:1/header:1/div:1	div	Start here →
+page:/div:1/header:1/div:1/a:1	a	Start here →
+page:/div:1/section:1	section	Ready now4Product ideas3How it resolvesNetwork DAOBuildingA roster, a threshold and signed decisions for one network.Open →Agreements resolverReadyEach side sig
+page:/div:1/section:1/div:1	div	Ready now4Product ideas3How it resolves
+id:resolution-level-tab-governance-0	button	Ready now4
+page:/div:1/section:1/div:1/button:1/span:1	span	4
+id:resolution-level-tab-governance-1	button	Product ideas3
+page:/div:1/section:1/div:1/button:2/span:1	span	3
+id:resolution-level-tab-governance-2	button	How it resolves
+id:resolution-level-governance	div	Network DAOBuildingA roster, a threshold and signed decisions for one network.Open →Agreements resolverReadyEach side signs terms, work and receipt on its own c
+page:/div:1/section:1/div:2/div:1	div	Network DAOBuildingA roster, a threshold and signed decisions for one network.Open →Agreements resolverReadyEach side signs terms, work and receipt on its own c
+page:/div:1/section:1/div:2/div:1/a:1	a	Network DAOBuildingA roster, a threshold and signed decisions for one network.Open →
+page:/div:1/section:1/div:2/div:1/a:1/span:1	span	Network DAOBuilding
+page:/div:1/section:1/div:2/div:1/a:1/span:1/strong:1	strong	Network DAO
+page:/div:1/section:1/div:2/div:1/a:1/span:1/span:1	span	Building
+page:/div:1/section:1/div:2/div:1/a:1/span:2	span	A roster, a threshold and signed decisions for one network.
+page:/div:1/section:1/div:2/div:1/a:1/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:2	a	Agreements resolverReadyEach side signs terms, work and receipt on its own chain; the resolver links them.Open →
+page:/div:1/section:1/div:2/div:1/a:2/span:1	span	Agreements resolverReady
+page:/div:1/section:1/div:2/div:1/a:2/span:1/strong:1	strong	Agreements resolver
+page:/div:1/section:1/div:2/div:1/a:2/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:2/span:2	span	Each side signs terms, work and receipt on its own chain; the resolver links them.
+page:/div:1/section:1/div:2/div:1/a:2/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:3	a	Mesh ExplorerReadyRead any public record on the mesh and check who signed it.Open →
+page:/div:1/section:1/div:2/div:1/a:3/span:1	span	Mesh ExplorerReady
+page:/div:1/section:1/div:2/div:1/a:3/span:1/strong:1	strong	Mesh Explorer
+page:/div:1/section:1/div:2/div:1/a:3/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:3/span:2	span	Read any public record on the mesh and check who signed it.
+page:/div:1/section:1/div:2/div:1/a:3/span:3	span	Open →
+page:/div:1/section:1/div:2/div:1/a:4	a	Auth KitReadyYour keys and recovery phrase, held by you. No password on a server.Open →
+page:/div:1/section:1/div:2/div:1/a:4/span:1	span	Auth KitReady
+page:/div:1/section:1/div:2/div:1/a:4/span:1/strong:1	strong	Auth Kit
+page:/div:1/section:1/div:2/div:1/a:4/span:1/span:1	span	Ready
+page:/div:1/section:1/div:2/div:1/a:4/span:2	span	Your keys and recovery phrase, held by you. No password on a server.
+page:/div:1/section:1/div:2/div:1/a:4/span:3	span	Open →
+page:/div:1/section:1/p:1	p	Ready: usable todayBuilding: in source, not releasedIdeas: proposed, not builtCurrent status →
+page:/div:1/section:1/p:1/span:1	span	Ready: usable today
+page:/div:1/section:1/p:1/span:2	span	Building: in source, not released
+page:/div:1/section:1/p:1/span:3	span	Ideas: proposed, not built
+page:/div:1/section:1/p:1/a:1	a	Current status →
+page:/nav:2	nav	← CollaborationsPreviousAll 20Intelligence →Next
+page:/nav:2/a:1	a	← CollaborationsPrevious
+page:/nav:2/a:1/span:1	span	Previous
+page:/nav:2/a:2	a	All 20
+page:/nav:2/a:3	a	Intelligence →Next
+page:/nav:2/a:3/span:1	span	Next
+page:/div:2	div	

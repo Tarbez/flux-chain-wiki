@@ -100,20 +100,35 @@ async function main() {
     page.on('pageerror', (e) => errors.push(e.message));
 
     /* 1-2. capture on /download */
-    await page.goto(base + '/download', { waitUntil: 'domcontentloaded' });
-    await settled(page, 'download');
-    const title = await captureIn(page, ['#download-title'], true);
-    const header = await captureIn(page, ['.how-chapter-header'], true);
-    const control = await captureIn(page, ['#download-title'], false);
+    /* The source must be a heading that takes its look from ANCESTOR rules -- or the control below
+       cannot show the defect. /download was that source until Wave 3 made it Ark blocks, whose title
+       styling travels with its own classes (good: that removed the defect there); /account was next
+       (hand-built, `#scene .account-hero h1`) until Wave 4 converted it the same way (2026-10-20,
+       W4-S2). The reader (/reference, js/pages/reference.js) is hand-built and styles its title by
+       `#scene .reference-page h1`, so it is the source now: the title alone, and the title with the
+       return nav above it (two siblings, as /download's chapter header was). (A paragraph in the selection was tried first: a <p> is 16px-margined at the reader and reset to 0 on /chain, a
+       different matter from ancestor styling -- not this test's subject; reported, not asserted here.) */
+    await page.goto(base + '/stats', { waitUntil: 'domcontentloaded' });
+    await settled(page, 'stats');
+    const doc = await page.evaluate(() => { const a = [...document.querySelectorAll('a[data-scene-link="reference"]')].find((link) => link.getClientRects().length); return a && a.getAttribute('href'); });
+    assert.ok(doc, 'the stats page has a visible document link to open in the reader');
+    await page.goto(base + doc, { waitUntil: 'domcontentloaded' });
+    await settled(page, 'reference');
+    const TITLE = '[data-ark-page="reference"] h1', ORIENTATION = '[data-ark-page="reference"] .reference-orientation';
+    const title = await captureIn(page, [TITLE], true);
+    const header = await captureIn(page, [ORIENTATION, TITLE], true);
+    const control = await captureIn(page, [TITLE], false);
     assert.ok(title.captured && header.captured && control.captured, 'all three selections capture');
     assert.ok(title.captured.tree[0].x, 'the title carries the styling its ancestors gave it (x)');
     assert.equal(control.captured.tree[0].x, undefined, 'the control capture has none');
     console.log('title x:', title.captured.tree[0].x);
     /* tokens where a token reproduces the value */
     assert.match(title.captured.tree[0].x, /color:hsl\(var\(--text-strong\)\)/, 'colour is stored as the text-strong token, not a literal rgb');
-    assert.match(title.captured.tree[0].x, /font-family:var\(--font-sans\)/, 'family as the sans font token');
-    assert.match(title.captured.tree[0].x, /letter-spacing:-0\.04em/, 'letter-spacing in em, so it scales with the font');
-    if (shotDir) await page.screenshot({ path: path.join(shotDir, 'source-download.png') });
+    // Since W1-BRAND the display and sans slots are both Albert Sans, so a heading's family is
+    // reproduced by --font-display first; either slot token proves it is a token, not a literal.
+    assert.match(title.captured.tree[0].x, /font-family:var\(--font-(display|sans)\)/, 'family as a font slot token, not a literal');
+    assert.match(title.captured.tree[0].x, /letter-spacing:-?\d*\.?\d+em/, 'letter-spacing in em, so it scales with the font (the value is the page\'s own: -0.04em on the old /download header, -0.025em on the Ark hero)');
+    if (shotDir) await page.screenshot({ path: path.join(shotDir, 'source-reference.png') });
 
     /* 3. definitions + instances on /chain, written the way a Save writes them */
     const data = await page.evaluate(({ title, header, control }) => {
@@ -142,7 +157,7 @@ async function main() {
     const titleDiff = differences(title.styles, builtTitle), headerDiff = differences(header.styles, builtHeader);
     assert.deepEqual(titleDiff, [], 'the captured title looks the same on /chain');
     assert.deepEqual(headerDiff, [], 'every element of the captured header looks the same on /chain');
-    console.log(`PASS: /download title and header (${header.styles.length} elements) match on /chain at 1280 (${PROPS.length} properties each).`);
+    console.log(`PASS: the reader's title and header (${header.styles.length} elements) match on /chain at 1280 (${PROPS.length} properties each).`);
 
     /* 4. phone width: the destination reflows; the pinned look holds */
     await page.setViewportSize({ width: 390, height: 844 });

@@ -1,12 +1,12 @@
 const fs = require('node:fs');
 const vm = require('node:vm');
 const assert = require('node:assert/strict');
-function harness({reduced=false, webgl=true, words=true}={}) {
+function harness({reduced=false, webgl=true, words=true, hiddenHome=false}={}) {
  let fontReady=()=>{};
  let conceptAnchorVisible=false, anchorReads=0;
  let themeChange=()=>{}, canvasToken='180 9% 2%';
  let meshData;
- const uniforms={}, events={}, canvasEvents={}, callbacks=new Map(); let time=0, id=0, draws=0;
+ const uniforms={}, events={}, canvasEvents={}, sceneEvents={}, callbacks=new Map(); let time=0, id=0, draws=0, requests=0;
  const classes=()=>({values:new Set(),add(v){this.values.add(v)},remove(v){this.values.delete(v)},toggle(v,on){on?this.add(v):this.remove(v)}});
  const fallback={classList:classes(),insertAdjacentElement(){}};
  const gl=new Proxy({bufferData:(_,data)=>{if(!meshData)meshData=Array.from(data)},getShaderParameter:()=>true,getProgramParameter:()=>true,getUniformLocation:(_,name)=>name,uniform1f:(name,value)=>uniforms[name]=value,uniform2f:(name,x,y)=>uniforms[name]=[x,y],uniform3f:(name,x,y,z)=>uniforms[name]=[x,y,z],uniform4f:(name,x,y,z,w)=>uniforms[name]=[x,y,z,w],drawArrays:()=>draws++,getExtension:()=>null},{get:(o,k)=>o[k]||(()=>({}))});
@@ -16,16 +16,18 @@ function harness({reduced=false, webgl=true, words=true}={}) {
  const article={querySelector:()=>anchor};
  const conceptAnchor={getBoundingClientRect(){anchorReads++;return {left:730,top:125,width:380,height:550}}};
  const conceptPage={querySelector:()=>conceptAnchor};
- const scene={clientWidth:1200,clientHeight:800,getBoundingClientRect:()=>({left:0,top:0,width:1200,height:800}),classList:classes(),appendChild(){},querySelector:q=>q.includes('data-ark-page=\"concept\"')?(conceptAnchorVisible?conceptPage:null):(q.includes('article/') || q.includes('learnings'))?article:persistent,addEventListener(){}};
+ const scene={clientWidth:1200,clientHeight:800,getBoundingClientRect:()=>({left:0,top:0,width:1200,height:800}),classList:classes(),appendChild(){},querySelector:q=>q.includes('data-ark-page=\"concept\"')?(conceptAnchorVisible?conceptPage:null):(q.includes('article/') || q.includes('learnings'))?article:persistent,addEventListener(n,fn){sceneEvents[n]=fn}};
  const media={matches:reduced,addEventListener(n,fn){this.change=fn}};
  const document={fonts:{ready:{then(fn){fontReady=fn;}}},querySelector:()=>scene,createElement:tag=>tag==='div'?{style:{},classList:classes(),setAttribute(){},remove(){}}:canvas,hidden:false,addEventListener:(n,fn)=>events[n]=fn};
- const window={matchMedia:q=>q.includes('reduced')?media:{matches:false},devicePixelRatio:2,requestAnimationFrame:fn=>{callbacks.set(++id,fn);return id},cancelAnimationFrame:n=>callbacks.delete(n),addEventListener(){}};
- const context=vm.createContext({getComputedStyle:()=>({getPropertyValue:()=>canvasToken}),MutationObserver:class {constructor(fn){themeChange=fn}observe(){}disconnect(){}},WordGeometry:{create:(text,n)=>{if(!words)return null;const a=new Float32Array(n*3);a.fill(text.length*.001);return a;}},ArkUI:{bindMeshDrag:()=>({cancel(){}})},document,window,navigator:{hardwareConcurrency:8},performance:{now:()=>time},Float32Array,Math,Number,String});
+ const window={matchMedia:q=>q.includes('reduced')?media:{matches:false},devicePixelRatio:2,requestAnimationFrame:fn=>{requests++;callbacks.set(++id,fn);return id},cancelAnimationFrame:n=>callbacks.delete(n),addEventListener(){}};
+ const context=vm.createContext({getComputedStyle:()=>({getPropertyValue:()=>canvasToken}),MutationObserver:class {constructor(fn){themeChange=fn}observe(){}disconnect(){}},WordGeometry:{create:(text,n)=>{if(!words)return null;const a=new Float32Array(n*3);a.fill(text.length*.001);return a;}},ArkUI:{bindMeshDrag:()=>({cancel(){}})},document,window,navigator:{hardwareConcurrency:8},performance:{now:()=>time},Float32Array,Math,Number,String,
+  // the admin hid the home shape (js/content/mesh-settings.js): zero-webgl's hidden-shape branch
+  ...(hiddenHome?{ArkMeshSettings:{get:()=>({pages:{zero:{hidden:true}}})}}:{})});
  for(const file of ['js/ark/vendor/engines.js','js/content/learnings.js','js/content/article-index.js','js/ark/scene-state.js','js/halo/proximity.js','js/halo/surface-motion.js','js/halo/iceberg.js','js/halo/shaders.js','js/zero-webgl.js']) vm.runInContext(fs.readFileSync(file,'utf8'),context);
  const state=context.ArkUI.sceneState;
  state.subscribe(current=>{ if(events['hero:motionchange']) events['hero:motionchange']({detail:{enabled:!current.paused}}); });
 
- return {showConceptAnchor(value){conceptAnchorVisible=value;},get anchorReads(){return anchorReads;},setTheme(token){canvasToken=token;themeChange();},get meshData(){return meshData},setWordsAvailable(value){words=value;},fontReady(){fontReady();},state,canvas,fallback,uniforms,media,events,canvasEvents,callbacks,get draws(){return draws},advance(seconds){for(let i=0;i<seconds*60;i++){time+=1000/60;const pending=[...callbacks.values()];callbacks.clear();pending.forEach(fn=>fn(time));}}};
+ return {showConceptAnchor(value){conceptAnchorVisible=value;},get anchorReads(){return anchorReads;},setTheme(token){canvasToken=token;themeChange();},get meshData(){return meshData},setWordsAvailable(value){words=value;},fontReady(){fontReady();},state,canvas,fallback,uniforms,media,events,canvasEvents,sceneEvents,callbacks,get draws(){return draws},get frameRequests(){return requests},advance(seconds){for(let i=0;i<seconds*60;i++){time+=1000/60;const pending=[...callbacks.values()];callbacks.clear();pending.forEach(fn=>fn(time));}}};
 }
 const h=harness();const canvas=h.canvas;assert(h.fallback.classList.values.has('zero-fallback-hidden'));
 h.advance(30);assert.equal(h.uniforms.uDissolve,0);
@@ -75,8 +77,12 @@ const w=harness({words:false});w.state.pages['article/why-the-chain-was-retired'
 const cycle=harness();
 assert.equal(cycle.canvas.dataset.surfaceState,'full');
 cycle.advance(8.1);assert.equal(cycle.canvas.dataset.surfaceState,'inside');
-cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'full-screen');
-cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'full');
+// One segment of travel per real change, then rest (the frame contract in js/zero-webgl.js):
+// the surface reaches its next state and holds it; the next state needs the next real change.
+assert.equal(cycle.callbacks.size,0,'the surface rests at its next state instead of cycling on');
+cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'inside','no change, no travel');
+cycle.events.visibilitychange();cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'full-screen','the tab coming back travels one segment');
+cycle.sceneEvents.pointermove({pointerType:'mouse',clientX:900,clientY:200});cycle.advance(8);assert.equal(cycle.canvas.dataset.surfaceState,'full','a pointer travels one segment');
 cycle.state.pause(true);cycle.advance(.1);const frozenSurface=cycle.uniforms.uSurface.slice();
 cycle.advance(12);assert.deepEqual(cycle.uniforms.uSurface,frozenSurface);
 assert.deepEqual(r.uniforms.uSurface,[1,0,0,0],'reduced motion holds the first surface');
@@ -137,3 +143,35 @@ assert.deepEqual(exit.uniforms.uSurface,held,'home destination holds still durin
 exit.advance(3);
 assert.notDeepEqual(exit.uniforms.uSurface,held,'home cycle resumes after the return settles');
 console.log('PASS: retained iceberg exit anchor, bounded layout reads, frozen morph destination and resumed home cycle.');
+
+/* REGRESSION (2026-10-19): the frame loop STOPS. Measured in headless Chromium 18 s after every
+   page had settled: / 21 rAF/s, /about 20-26, /chain 19-26 -- this loop ran at the display rate
+   for as long as the scene was on screen, and kept running in the hidden-shape branch on home
+   while drawing nothing. Every other check passed: the page looked still, the router was idle.
+   A frame is requested only while something is changing; then one final frame and silence until
+   a real change. Browser-side: tests/browser/idle-frames.mjs. Memory: defxn_animation_must_settle. */
+const settle=harness();
+settle.advance(6);
+assert.equal(settle.callbacks.size,0,'home with a visible shape: one surface travel (5 s), then no frame is pending');
+assert.equal(settle.canvas.dataset.phase,'settled');assert.equal(settle.canvas.dataset.drawCalls,'1','the resting frame was painted');
+let idleStart=settle.frameRequests;settle.advance(18);
+assert.equal(settle.frameRequests,idleStart,'18 s idle on home: zero frames requested');
+const restingTime=settle.uniforms.uTime;settle.advance(5);assert.equal(settle.uniforms.uTime,restingTime,'the shimmer clock does not advance at rest: a still frame, not a frozen loop');
+settle.sceneEvents.pointermove({pointerType:'mouse',clientX:1200,clientY:800});
+assert.equal(settle.callbacks.size,1,'a pointer is a real change: one frame is requested');
+settle.advance(.5);assert(settle.uniforms.uPointer[0]>0&&settle.uniforms.uPointer[0]<1,'the parallax eases towards the pointer');
+settle.advance(10);assert.equal(settle.callbacks.size,0,'the easing converges and the loop stops');
+assert.deepEqual(settle.uniforms.uPointer,[1,1],'the final frame carries the exact target, not a 0.999');
+settle.sceneEvents.pointerleave();settle.advance(10);assert.equal(settle.callbacks.size,0);assert.deepEqual(settle.uniforms.uPointer,[0,0],'leaving eases back and stops');
+settle.state.navigate('about');settle.advance(.5);assert.equal(settle.callbacks.size,1,'a page transition requests frames while it travels');
+settle.advance(3);assert.equal(settle.callbacks.size,0,'the inner page settles and requests nothing');assert.equal(settle.canvas.dataset.phase,'settled');
+idleStart=settle.frameRequests;settle.advance(18);assert.equal(settle.frameRequests,idleStart,'18 s idle on an inner page: zero frames requested');
+settle.setTheme('40 20% 98%');assert.equal(settle.callbacks.size,1,'a theme change paints');settle.advance(.5);assert.equal(settle.callbacks.size,0,'one frame, then silence: inner pages have no surface travel');
+const hid=harness({hiddenHome:true});
+assert.equal(hid.canvas.dataset.phase,'hidden');assert.equal(hid.canvas.dataset.drawCalls,'0');
+hid.advance(1/60);assert.equal(hid.callbacks.size,0,'hidden-shape home: nothing to draw, nothing requested after the first paint');
+idleStart=hid.frameRequests;hid.advance(18);assert.equal(hid.frameRequests,idleStart,'18 s idle on a hidden-shape home: zero frames requested');
+hid.sceneEvents.pointermove({pointerType:'mouse',clientX:600,clientY:400});hid.advance(1);assert.equal(hid.callbacks.size,0,'a pointer over a hidden shape paints once and stops');
+hid.state.navigate('about');hid.advance(.5);assert.equal(hid.canvas.dataset.phase,'travel');hid.advance(3);
+assert.equal(hid.callbacks.size,0);assert.equal(hid.canvas.dataset.phase,'settled');assert.equal(hid.canvas.dataset.drawCalls,'1','the inner page shows its reference shape and rests');
+console.log('PASS: the frame loop stops -- home surface travels once then rests, pointer easing converges, inner pages and the hidden-shape home request zero frames over 18 s idle, and every real change wakes a bounded run.');

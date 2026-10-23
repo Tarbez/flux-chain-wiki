@@ -1,5 +1,7 @@
 # Before the registered-grammar notebook goes to production
 
+> Written for the agreement-fabric direction, which is no longer the direction (status.md). For resolvers today, read [resolvers](protocol/resolvers.md). Kept as written; this note was added 2026-10-19.
+
 Written 2026-10-07, the same evening the prototype was measured (BENCH-003 §14-16).
 This is a checklist, not a plan: it lists what stands between `defxn-defi-rs/dense-wire`
 and something that can hold real value, ordered by whether it blocks. Status

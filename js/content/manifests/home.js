@@ -187,10 +187,10 @@ ArkManifest.define({
       "value": "Interactive model"
     },
     "LEARN.HREF": {
-      "label": "\"Follow the line\" link target",
+      "label": "\"See how DEFXN works\" link target",
       "kind": "link",
       "section": "Links",
-      "value": "route:deployment"
+      "value": "route:about"
     },
     "CLOSING.HREF": {
       "label": "\"Explore DEFXN\" closing link target",

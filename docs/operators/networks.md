@@ -1,6 +1,6 @@
 # Named networks
 
-A named network is currently a namespace for miner-presence discovery. It partitions `miners/*` presence records. It does not partition accounts, identities, DAOs, or arbitrary records, and it is not a security boundary.
+A named network is currently a namespace for miner-presence discovery. It partitions `miners/*` presence records. It does not partition accounts, identities, DAOs, or arbitrary records, and it is not a security boundary. It is not a resolver chain either: a resolver gets its own chain from a launch record ([resolvers](../protocol/resolvers.md)).
 
 ## Inspect networks
 

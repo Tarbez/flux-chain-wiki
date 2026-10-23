@@ -28,7 +28,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
 import { appFrame, SITE, copySite, startHost, fakeFolder, previewFrame, until as untilFor, waitForPreviewReady, previewReadyCount,
-  statusCount, waitForSave, gotoEditor, reloadEditor, clickHeader, waitForRouteReady, setLens as setLensButton, sheetBody, closeSheet, openPageFields, closeToolbarSection } from './harness.mjs';
+  statusCount, waitForSave, gotoEditor, reloadEditor, clickHeader, waitForRouteReady, setLens as setLensButton, sheetBody, closeSheet, openPageFields, closeToolbarSection, openToolbarSection } from './harness.mjs';
 import { readIndexHtml, renderDocument, createLocalResources } from '../../api/lib/render-core.mjs';
 
 const args = process.argv.slice(2);
@@ -84,19 +84,40 @@ const toolbarContent = (app) => app.evaluate(() => {
   return { title: (pop.querySelector('.tb-pop-head span') || {}).textContent || '', field: field ? field.textContent : null, value: value ? value.value : null, refusal: refusal ? refusal.textContent : null, text: pop.textContent };
 });
 /* click an element in the canvas by a selector evaluated there, at the end of its text */
-async function clickText(pv, selector, index = 0) {
+/* at: 'end' (default) clicks near the line's right end so the caret lands at the end of the words;
+   'start' clicks near its left end -- needed while the Page fields sheet is open, because the sheet
+   overlays the canvas's right edge and Playwright cannot see an overlay in the parent document. */
+/* Playwright's actionability check hit-tests inside the canvas frame only, so a point the editor's
+   own overlay covers (the Page fields sheet docks over the canvas's right ~480px) is "clickable" and
+   the press lands on the sheet. REGRESSION (2026-10-20, the "race" step): its line-end click at
+   1440x900 hit the sheet's Title textarea (1100,462 inside the sheet at x 952-1432), so the canvas
+   never saw a click and no inline edit started -- read as a product race until measured. Every
+   click therefore hit-tests the EDITOR document first: the asked-for end of the line when the canvas
+   is really there, else the other end; both covered is a failure naming what covers the text. */
+async function clickText(pv, selector, index = 0, at = 'end') {
+  const editorDoc = pv.parentFrame();
   /* the canvas remounts after a committed edit (the editor re-sends the site): an element found
      just before that can be replaced under the click, so a detached target is found again */
+  let covered = '';
   return until(async () => {
     const loc = pv.locator(selector).nth(index);
     try {
       await loc.scrollIntoViewIfNeeded({ timeout: 2000 });
       const box = await loc.boundingBox();
       if (!box) return false;
-      await loc.click({ position: { x: Math.max(2, box.width - 4), y: Math.min(box.height - 2, 12) }, timeout: 2000 });
+      const y = Math.min(box.height - 2, 12), ends = { start: Math.min(12, box.width - 2), end: Math.max(2, box.width - 4) };
+      const order = at === 'start' ? ['start', 'end'] : ['end', 'start'];
+      let x = null; covered = '';
+      for (const end of order) {
+        const hit = await editorDoc.evaluate(([px, py]) => { const e = document.elementFromPoint(px, py); return !e ? 'nothing' : e.id === 'cmsPreview' ? '' : e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + ' in ' + ((e.closest('[id]') || {}).id || 'the editor'); }, [box.x + ends[end], box.y + y]);
+        if (!hit) { x = ends[end]; break; }
+        covered += (covered ? '; ' : '') + end + ' of the line under ' + hit;
+      }
+      if (x === null) return false;
+      await loc.click({ position: { x, y }, timeout: 2000 });
       return loc;
     } catch (error) { if (/not attached|not stable|Timeout/.test(error.message)) return false; throw error; }
-  }, 'could not click ' + selector, 10000);
+  }, 'could not click ' + selector, 10000).catch((error) => { throw new StepFailure(error.message + (covered ? ' -- the editor covers it: ' + covered : '')); });
 }
 const editing = (pv) => pv.evaluate(() => { const el = document.querySelector('[data-ark-inline-editing]'); return el ? el.textContent : null; });
 async function typeAtEnd(page, pv, text) {
@@ -149,12 +170,18 @@ await step('home: click the H1, type, and the draft field follows each keystroke
   await shot(page, 'home-typing');
 });
 
-await step('home: the toolbar Content section names the field and shows the value', async () => {
-  const content = await until(async () => { const c = await toolbarContent(app); return c && c.field && c; }, 'the Content section never opened for the H1');
-  check(/HOME\.TITLE/.test(content.field), 'the Content section names ' + content.field + ', not HOME.TITLE');
-  check(content.value === original.title + NEW.title, 'the Content section shows "' + content.value + '"');
+/* The bar beside the words names their field and says how to finish; NO second editor covers
+   them (docs/ux-audit/cms.md P1-6: a Content popover with the same words in a textarea opened over
+   the heading). The field's key and the textarea are its Details, on demand (next step). */
+await step('home: the bar names the field and how to finish; nothing covers the words', async () => {
+  const bar = await until(() => app.evaluate(() => { const b = document.getElementById('selToolbar'); const keys = b && !b.hidden && b.querySelector('.cms-content-keys'); return keys && { chip: b.querySelector('.tb-chip-name').textContent, keys: keys.textContent, field: (window.ArkAdmin.state.cmsContent || {}).field, label: (window.ArkAdmin.state.cmsContent || {}).label, pop: !document.getElementById('selToolbarPop').hidden }; }), 'the Content lens bar never named the H1\'s field');
+  check(bar.field === 'HOME.TITLE', 'the H1 is bound to ' + bar.field + ', not HOME.TITLE');
+  check(bar.chip === bar.label, 'the bar calls the field "' + bar.chip + '", not its name "' + bar.label + '"');
+  check(/Enter or Esc to finish/.test(bar.keys), 'the bar says "' + bar.keys + '"');
+  check(!bar.pop, 'a popover opened over the words being edited');
   const sections = await app.evaluate(() => [...document.querySelectorAll('#selToolbar:not([hidden]) [data-section]')].map((b) => b.dataset.name));
-  check(!sections.includes('Typography'), 'the Content lens still offers style sections: ' + sections.join(', '));
+  check(!sections.includes('Typography') && !sections.includes('More'), 'the Content lens still offers style sections or design commands: ' + sections.join(', '));
+  check(await app.evaluate(() => !document.querySelector('#selToolbar [data-action="make-component"]')), 'the Content lens offers Make into component');
 });
 
 await step('home: Enter commits in place -- no re-render, no transition, no blank frame', async () => {
@@ -172,6 +199,15 @@ await step('home: Enter commits in place -- no re-render, no transition, no blan
   check((await previewReadyCount(app)) === readyBefore, 'the commit re-sent the site and the canvas re-rendered');
   check(await pv.evaluate(() => document.querySelector('[data-ark-page] h1').__beforeCommit === true), 'the heading is a new node: the page was rebuilt under the edit');
   check((await draft(app, 'page', 'home', 'TITLE')) === original.title + NEW.title, 'the commit did not keep the typed heading in the draft');
+});
+
+await step('home: Details holds the key, the same words in a box, and All fields', async () => {
+  const body = await openToolbarSection(app, 'Content');
+  const content = await until(async () => { const c = await toolbarContent(app); return c && c.field && c; }, 'the Details popover never drew for the H1');
+  check(/HOME\.TITLE/.test(content.field), 'Details names ' + content.field + ', not HOME.TITLE');
+  check(await app.evaluate(() => { const r = document.querySelector('#selToolbarPop .cms-content-field code').closest('[role="region"]'); return !!r && r.hidden; }), 'the copy key shows outright instead of under the closed Developer details');
+  check(content.value === original.title + NEW.title, 'Details shows "' + content.value + '"');
+  check(await body.locator('[data-action="open-page-fields"]').count() === 1, 'Details has no All fields');
 });
 
 await step('home: Page fields shows the same value; a sheet edit reaches the canvas in place', async () => {
@@ -199,7 +235,12 @@ await step('home: Page fields shows the same value; a sheet edit reaches the can
   await closeSheet(app);
 });
 
-await step('home: Ctrl/Cmd+Z on the canvas undoes the inline edit, Shift redoes it', async () => {
+/* ONE history (js/admin/history.js, docs/ux-audit/cms.md P1-5): the sheet's eyebrow edit came
+   after the inline heading edit, so Ctrl/Cmd+Z on the canvas takes it back first, then the heading */
+await step('home: Ctrl/Cmd+Z on the canvas walks back the sheet edit, then the inline edit; Shift redoes', async () => {
+  await pv.locator('body').press(MOD + '+z').catch(() => {});
+  await until(async () => (await draft(app, 'page', 'home', 'EYEBROW')) === original.eyebrow, 'the first undo did not take back the newest edit (the eyebrow typed in Page settings)');
+  check((await draft(app, 'page', 'home', 'TITLE')) === original.title + NEW.title, 'the first undo took back the heading before the newer eyebrow edit');
   await pv.locator('body').press(MOD + '+z').catch(() => {});
   await until(async () => (await draft(app, 'page', 'home', 'TITLE')) === original.title, 'undo did not put HOME.TITLE back');
   await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] h1').textContent.replace(/\s+/g, '') === t.replace(/\s+/g, ''), original.title), 'the canvas does not show the undone heading');
@@ -211,19 +252,20 @@ await step('home: Ctrl/Cmd+Z on the canvas undoes the inline edit, Shift redoes 
 
 await step('escape: typing then Escape finishes the edit and KEEPS the words', async () => {
   original.intro = await draft(app, 'page', 'home', 'INTRO');
-  await clickText(pv, '[data-ark-page] p.hl-intro');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   const before = await editing(pv);
   await typeAtEnd(page, pv, ' zzz');
   await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'the intro draft did not follow the typing');
   await page.keyboard.press('Escape');
   await until(() => editing(pv).then((t) => t === null), 'Escape did not end the edit');
   check((await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'Escape threw the typed words away: the draft is "' + await draft(app, 'page', 'home', 'INTRO') + '"');
-  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p.hl-intro').textContent)) === before + ' zzz', 'Escape changed the words on the canvas');
+  check((await pv.evaluate(() => document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]').textContent)) === before + ' zzz', 'Escape changed the words on the canvas');
   await shot(page, 'escape-kept');
 });
 
 await step('revert: "Revert to saved" puts the saved words back, and Undo brings the typing back', async () => {
-  await clickText(pv, '[data-ark-page] p.hl-intro');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
+  await openToolbarSection(app, 'Content');
   const revert = app.locator('#selToolbarPop:not([hidden]) [data-action="revert-field"]');
   await until(async () => (await revert.count()) && (await revert.isEnabled()), 'the Content section offers no enabled "Revert to saved"');
   await revert.click();
@@ -233,20 +275,20 @@ await step('revert: "Revert to saved" puts the saved words back, and Undo brings
   await shot(page, 'revert-notice');
   await reverted.locator('button', { hasText: 'Undo' }).click();
   await until(async () => (await draft(app, 'page', 'home', 'INTRO')) === original.intro + ' zzz', 'the notice\'s Undo did not bring the typed words back');
-  await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] p.hl-intro').textContent === t, original.intro + ' zzz'), 'the canvas does not show the words Undo brought back', 10000);
+  await until(() => pv.evaluate((t) => document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]').textContent === t, original.intro + ' zzz'), 'the canvas does not show the words Undo brought back', 10000);
   original.intro += ' zzz';
 });
 
 await step('enter: plain Enter finishes the home heading and the intro -- no line break inside', async () => {
-  for (const [selector, field] of [['[data-ark-page] h1', 'TITLE'], ['[data-ark-page] p.hl-intro', 'INTRO']]) {
+  for (const [selector, field] of [['[data-ark-page] h1', 'TITLE'], ['[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]', 'INTRO']]) {
     const was = await draft(app, 'page', 'home', field);
     /* the previous field's Content popover opens over the text below it (docs/ux-audit/cms.md
        P1-6, a later wave): close it, as a person would, so the click reaches the text */
     await closeToolbarSection(app);
     await clickText(pv, selector);
     await until(() => editing(pv).then((t) => t !== null), field + ': the click did not start an edit');
-    const hint = await until(() => app.evaluate((f) => { const el = document.querySelector('#selToolbarPop:not([hidden]) .cms-content-keys'), code = document.querySelector('#selToolbarPop:not([hidden]) .cms-content-field code'); return el && code && code.textContent.includes('HOME.' + f) && el.textContent; }, field), field + ': the Content section does not say how to finish an edit');
-    check(/Enter or Esc to finish/.test(hint), field + ': the Content section says "' + hint + '"');
+    const hint = await until(() => app.evaluate((f) => { const el = document.querySelector('#selToolbar:not([hidden]) .cms-content-keys'), c = window.ArkAdmin.state.cmsContent; return el && c && c.field === 'HOME.' + f && el.textContent; }, field), field + ': the bar does not say how to finish an edit');
+    check(/Enter or Esc to finish/.test(hint), field + ': the bar says "' + hint + '"');
     await page.keyboard.press('Enter');
     await until(() => editing(pv).then((t) => t === null), field + ': Enter did not finish the edit');
     check((await draft(app, 'page', 'home', field)) === was, field + ': Enter changed the words (a line break went in): "' + await draft(app, 'page', 'home', field) + '"');
@@ -256,9 +298,9 @@ await step('enter: plain Enter finishes the home heading and the intro -- no lin
 
 await step('copies: every element showing the edited field takes the words on commit, without a re-render', async () => {
   /* a second copy of the intro on the page (a fixture: the same field drawn twice) */
-  await pv.evaluate(() => { const p = document.querySelector('[data-ark-page] p.hl-intro'); const copy = p.cloneNode(true); copy.classList.add('test-intro-copy'); p.after(copy); });
+  await pv.evaluate(() => { const p = document.querySelector('[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]'); const copy = p.cloneNode(true); copy.classList.add('test-intro-copy'); p.after(copy); });
   const readyBefore = await previewReadyCount(app);
-  await clickText(pv, '[data-ark-page] p.hl-intro:not(.test-intro-copy)');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]:not(.test-intro-copy)', 0, 'start');
   await typeAtEnd(page, pv, ' (twice)');
   await page.keyboard.press(MOD + '+Enter');
   await until(() => editing(pv).then((t) => t === null), 'the edit did not end');
@@ -278,7 +320,7 @@ await step('race: a Page fields edit just before an inline commit -- both reach 
   await page.keyboard.type(' (race)', { delay: 5 });
   /* straight to the canvas: the sheet's send is still waiting in its 180 ms window, or arrives
      while the words are typed -- either way it must not be lost */
-  await clickText(pv, '[data-ark-page] p.hl-intro:not(.test-intro-copy)');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]:not(.test-intro-copy)');
   await typeAtEnd(page, pv, '!');
   await page.keyboard.press(MOD + '+Enter');
   original.introFinal += '!';
@@ -300,7 +342,8 @@ await step('nav: a header link label edits Site chrome (NAV.*)', async () => {
   check(text, 'no header link shows a Site chrome field');
   await clickText(pv, '[data-test-nav]');
   /* which field it is, as the canvas derived it (two Site chrome fields can hold the same words) */
-  const content = await until(async () => { const c = await toolbarContent(app); return c && c.field && /^NAV\./.test(c.field) && c; }, 'the Content section never named a NAV field for "' + text + '"');
+  /* the field the canvas bound the click to (the bar names it; its key is in Details) */
+  const content = await until(() => app.evaluate(() => { const c = window.ArkAdmin.state.cmsContent; return c && c.field && /^NAV\./.test(c.field) && { field: c.field }; }), 'the canvas never bound "' + text + '" to a NAV field');
   const role = content.field.split(/\s/)[0].slice(4);
   const others = await app.evaluate(([t, r]) => { const f = window.ArkAdmin.state.drafts.nav.fields; return Object.keys(f).filter((k) => k !== r && f[k].value === t); }, [text, role]);
   original.nav = { role, text };
@@ -329,15 +372,17 @@ await step('refusal: text no field holds says why and names its source', async (
   await clickText(pv, '[data-test-unbound]');
   const key = await pv.evaluate(() => document.querySelector('[data-test-unbound]').getAttribute('data-ark-layout-key'));
   /* the bar is drawn for THIS selection (not still showing the last one's section) */
-  const content = await until(async () => { const c = await toolbarContent(app); const barKey = await app.evaluate(() => document.getElementById('selToolbar').dataset.key); return barKey === key && c && c.refusal && /not read from any field|separate pieces|no text/.test(c.refusal) && c; }, 'the Content section never explained why the unbound text "' + found + '" cannot be edited');
+  const content = await until(async () => { const c = await toolbarContent(app); const barKey = await app.evaluate(() => document.getElementById('selToolbar').dataset.key); return barKey === key && c && c.refusal && /site template|separate pieces|no words/.test(c.refusal) && c; }, 'the Details never explained why the unbound text "' + found + '" cannot be edited');
+  /* the source is named for a developer, under Developer details (pop.textContent includes the closed region) */
   check(/js\/pages\/|F_SCENE_RZERO_V0|component/.test(content.text), 'the refusal names no source: ' + content.text);
+  check(!/js\/pages\/|F_SCENE_RZERO_V0/.test(content.refusal), 'the plain reason carries a file or resolver id: ' + content.refusal);
   check((await editing(pv)) === null, 'unbound text became editable');
   await shot(page, 'unbound-refusal');
 });
 
 await step('design lens: the same click selects and styles, and never edits the words', async () => {
   await setLens(app, pv, 'design');
-  await clickText(pv, '[data-ark-page] p.hl-intro');
+  await clickText(pv, '[data-ark-page] p[data-ark-copy-keys~="HOME.INTRO"]');
   await until(async () => { const names = await app.evaluate(() => [...document.querySelectorAll('#selToolbar:not([hidden]) [data-section]')].map((b) => b.dataset.name)); return names.includes('Typography') && !names.includes('Content'); }, 'the Design lens toolbar does not offer Typography (or still offers Content)');
   check((await editing(pv)) === null, 'a Design-lens click made text editable');
   check(await pv.evaluate(() => [...document.querySelectorAll('.ark-studio-handle')].some((h) => !h.hidden)), 'the Design lens shows no resize handles');
@@ -352,8 +397,9 @@ await step('article: its title edits on its own route', async () => {
   const since = await previewReadyCount(app);
   await app.evaluate((route) => window.ArkAdmin.openRoute(route), '/learnings/' + slug);
   await waitForPreviewReady(app, { since, path: '/learnings/' + slug });
-  await until(() => pv.evaluate(() => !!document.querySelector('[data-ark-page] h1.article-title')), 'the article page never rendered its title');
-  await clickText(pv, '[data-ark-page] h1.article-title');
+  /* the note is the story template now (Wave 3): its title is the Ark hero's h1, not the old h1.article-title */
+  await until(() => pv.evaluate(() => !!document.querySelector('[data-ark-page] [data-ark-block="hero"] h1')), 'the article page never rendered its title');
+  await clickText(pv, '[data-ark-page] [data-ark-block="hero"] h1');
   await typeAtEnd(page, pv, NEW.article);
   await page.keyboard.press('Enter');
   await until(async () => (await draft(app, 'article', slug, 'title')) === original.article + NEW.article, 'the article title draft did not change');
@@ -388,7 +434,7 @@ await step('public: the visitor\'s page and the server render show the new words
   await pub.screenshot({ path: path.join(SHOTS, 'public-home.png') });
   await pub.goto(ORIGIN + '/learnings/' + slug);
   await waitForRouteReady(pub.mainFrame(), { path: '/learnings/' + slug, timeout: 15000 });
-  const title = await until(() => pub.evaluate(() => { const h = document.querySelector('h1.article-title'); return h && h.textContent; }), 'the public article has no title');
+  const title = await until(() => pub.evaluate(() => { const h = document.querySelector('[data-ark-page] [data-ark-block="hero"] h1'); return h && h.textContent; }), 'the public article has no title');
   check(title === original.article + NEW.article, 'the public article title is "' + title + '"');
   await pub.close();
   const html = await renderDocument({ html: await readIndexHtml(WORK), url: 'https://defxn.com/', resources: createLocalResources(WORK), timeoutMs: 60000 });

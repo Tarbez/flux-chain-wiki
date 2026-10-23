@@ -1,0 +1,132 @@
+# key	tag	text -- layout keys of /learnings/how-we-got-fast-and-what-we-got-wrong before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	article	ALL NOTESBENCHMARKS / 004 / 9 MIN READCOREHow we got fast, and everything we got wrongTHE COREA value transfer on the first version of this protocol ran at unde
+page:/header:1	header	ALL NOTESBENCHMARKS / 004 / 9 MIN READCOREHow we got fast, and everything we got wrongTHE COREA value transfer on the first version of this protocol ran at unde
+page:/header:1/div:1	div	ALL NOTESBENCHMARKS / 004 / 9 MIN READCORE
+page:/header:1/div:1/a:1	a	ALL NOTES
+page:/header:1/div:1/a:1/svg:1	svg	
+page:/header:1/div:1/a:1/svg:1/path:1	path	
+page:/header:1/div:1/a:1/svg:1/path:2	path	
+page:/header:1/div:1/span:1	span	BENCHMARKS / 004 / 9 MIN READ
+page:/header:1/div:1/button:1	button	CORE
+page:/header:1/div:1/button:1/svg:1	svg	
+page:/header:1/div:1/button:1/svg:1/path:1	path	
+page:/header:1/div:1/button:1/svg:1/path:2	path	
+page:/header:1/h1:1	h1	How we got fast, and everything we got wrong
+page:/header:1/div:2	div	THE COREA value transfer on the first version of this protocol ran at under 7 a second. The same idea, written in the registered grammar and sent over a plain s
+page:/header:1/div:2/span:1	span	THE CORE
+page:/header:1/div:2/p:1	p	A value transfer on the first version of this protocol ran at under 7 a second. The same idea, written in the registered grammar and sent over a plain socket, n
+page:/header:1/div:2/p:2	p	Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver (/what-is-a-resolv
+page:/div:1	div	QUESTIONS / 110001Where did it start?02What did Rust change?03Is durable the same as accepted?04When did a good idea lose?05Did the GPU help?06What cost hours?0
+page:/div:1/nav:1	nav	QUESTIONS / 110001Where did it start?02What did Rust change?03Is durable the same as accepted?04When did a good idea lose?05Did the GPU help?06What cost hours?0
+page:/div:1/nav:1/p:1	p	QUESTIONS / 11
+page:/div:1/nav:1/button:1	button	00
+page:/div:1/nav:1/button:2	button	01Where did it start?
+page:/div:1/nav:1/button:2/span:1	span	01
+page:/div:1/nav:1/button:2/span:2	span	Where did it start?
+page:/div:1/nav:1/button:3	button	02What did Rust change?
+page:/div:1/nav:1/button:3/span:1	span	02
+page:/div:1/nav:1/button:3/span:2	span	What did Rust change?
+page:/div:1/nav:1/button:4	button	03Is durable the same as accepted?
+page:/div:1/nav:1/button:4/span:1	span	03
+page:/div:1/nav:1/button:4/span:2	span	Is durable the same as accepted?
+page:/div:1/nav:1/button:5	button	04When did a good idea lose?
+page:/div:1/nav:1/button:5/span:1	span	04
+page:/div:1/nav:1/button:5/span:2	span	When did a good idea lose?
+page:/div:1/nav:1/button:6	button	05Did the GPU help?
+page:/div:1/nav:1/button:6/span:1	span	05
+page:/div:1/nav:1/button:6/span:2	span	Did the GPU help?
+page:/div:1/nav:1/button:7	button	06What cost hours?
+page:/div:1/nav:1/button:7/span:1	span	06
+page:/div:1/nav:1/button:7/span:2	span	What cost hours?
+page:/div:1/nav:1/button:8	button	07What did not work?
+page:/div:1/nav:1/button:8/span:1	span	07
+page:/div:1/nav:1/button:8/span:2	span	What did not work?
+page:/div:1/nav:1/button:9	button	08Where did the time actually go?
+page:/div:1/nav:1/button:9/span:1	span	08
+page:/div:1/nav:1/button:9/span:2	span	Where did the time actually go?
+page:/div:1/nav:1/button:10	button	09What changed with the grammar?
+page:/div:1/nav:1/button:10/span:1	span	09
+page:/div:1/nav:1/button:10/span:2	span	What changed with the grammar?
+page:/div:1/nav:1/button:11	button	10What did batch verification add?
+page:/div:1/nav:1/button:11/span:1	span	10
+page:/div:1/nav:1/button:11/span:2	span	What did batch verification add?
+page:/div:1/nav:1/button:12	button	11What does it still not prove?
+page:/div:1/nav:1/button:12/span:1	span	11
+page:/div:1/nav:1/button:12/span:2	span	What does it still not prove?
+page:/div:1/div:1	div	Where it startedThe first measurement of value transfers on the real fleet was 6.82 a second, with each transfer taking almost three seconds. The miner process 
+id:how-we-got-fast-and-what-we-got-wrong-section-0	section	Where it startedThe first measurement of value transfers on the real fleet was 6.82 a second, with each transfer taking almost three seconds. The miner process 
+page:/div:1/div:1/section:1/span:1	span	
+page:/div:1/div:1/section:1/h2:1	h2	Where it started
+page:/div:1/div:1/section:1/p:1	p	The first measurement of value transfers on the real fleet was 6.82 a second, with each transfer taking almost three seconds. The miner process was doing everyt
+page:/div:1/div:1/section:1/p:2	p	The lesson was the cheapest one in this note, and it came first: before tuning anything, find out what else the process is doing.
+id:how-we-got-fast-and-what-we-got-wrong-section-1	section	What Rust changed, and the first surpriseThe Rust rebuild started out three times slower than Node: 46.88 a second, because it forced the disk to flush after ev
+page:/div:1/div:1/section:2/span:1	span	
+page:/div:1/div:1/section:2/h2:1	h2	What Rust changed, and the first surprise
+page:/div:1/div:1/section:2/p:1	p	The Rust rebuild started out three times slower than Node: 46.88 a second, because it forced the disk to flush after every single write. Batching the flushes of
+page:/div:1/div:1/section:2/p:2	p	The accepted path, which stops at a signed certificate and writes nothing, reached about 3,250 a second per signer group. Four independent signer groups run sid
+id:how-we-got-fast-and-what-we-got-wrong-section-2	section	Accepted is not durableAccepted meant the signer group had signed. Durable meant every replica had committed it and the successor was registered. They are diffe
+page:/div:1/div:1/section:3/span:1	span	
+page:/div:1/div:1/section:3/h2:1	h2	Accepted is not durable
+page:/div:1/div:1/section:3/p:1	p	Accepted meant the signer group had signed. Durable meant every replica had committed it and the successor was registered. They are different promises, and the 
+page:/div:1/div:1/section:3/p:2	p	Three separate problems were hiding in it. A routing bug: a node that joined the signer group broke the durable path for any client that had not heard of it. Th
+page:/div:1/div:1/section:3/p:3	p	The same starvation was in the single-node server too: 7 threads gave about 90 a second with the CPU 97 percent idle, and 256 gave around 820. Idle CPU with fla
+id:how-we-got-fast-and-what-we-got-wrong-section-3	section	A good idea that lost, then wonThe durable path took four round trips. Collapsing them into one, with the first server doing the rest, should have been faster. 
+page:/div:1/div:1/section:4/span:1	span	
+page:/div:1/div:1/section:4/h2:1	h2	A good idea that lost, then won
+page:/div:1/div:1/section:4/p:1	p	The durable path took four round trips. Collapsing them into one, with the first server doing the rest, should have been faster. On the signer group measured it
+page:/div:1/div:1/section:4/p:2	p	The idea was right and the map was wrong. Fewer round trips only help when a round trip costs something.
+id:how-we-got-fast-and-what-we-got-wrong-section-4	section	The GPU that changed nothing, and the conclusion we got wrongA rented GPU box joined the fleet to see whether more compute would raise the total. A laptop and t
+page:/div:1/div:1/section:5/span:1	span	
+page:/div:1/div:1/section:5/h2:1	h2	The GPU that changed nothing, and the conclusion we got wrong
+page:/div:1/div:1/section:5/p:1	p	A rented GPU box joined the fleet to see whether more compute would raise the total. A laptop and the GPU box, each running the same standalone signer group, la
+page:/div:1/div:1/section:5/p:2	p	But the conclusion written down that night, that the protocol is not compute-bound, was wrong. The CPUs looked idle because the servers were starved of threads.
+id:how-we-got-fast-and-what-we-got-wrong-section-5	section	The mistakes that cost hours, none of them in the protocolA single missing firewall rule on one machine looked like an architectural ceiling for hours. A kill c
+page:/div:1/div:1/section:6/span:1	span	
+page:/div:1/div:1/section:6/h2:1	h2	The mistakes that cost hours, none of them in the protocol
+page:/div:1/div:1/section:6/p:1	p	A single missing firewall rule on one machine looked like an architectural ceiling for hours. A kill command scoped too broadly once took the production signer 
+page:/div:1/div:1/section:6/p:2	p	Each one produced a believable number that was wrong. The fix every time was the same: write down what was held constant, and check the machine before blaming t
+id:how-we-got-fast-and-what-we-got-wrong-section-6	section	What did not workPipelining the replica confirmation was expected to make durable writes nearly as fast as accepted ones. Measured against a control on the same
+page:/div:1/div:1/section:7/span:1	span	
+page:/div:1/div:1/section:7/h2:1	h2	What did not work
+page:/div:1/div:1/section:7/p:1	p	Pipelining the replica confirmation was expected to make durable writes nearly as fast as accepted ones. Measured against a control on the same box it did nothi
+page:/div:1/div:1/section:7/p:2	p	A result that goes the wrong way is still a result. These stayed in the log with their numbers.
+id:how-we-got-fast-and-what-we-got-wrong-section-7	section	Where the time actually wentA profile of the HTTP server under load, with call stacks, put 40 percent of its CPU in the HTTP layer and the kernel network calls 
+page:/div:1/div:1/section:8/span:1	span	
+page:/div:1/div:1/section:8/h2:1	h2	Where the time actually went
+page:/div:1/div:1/section:8/p:1	p	A profile of the HTTP server under load, with call stacks, put 40 percent of its CPU in the HTTP layer and the kernel network calls beneath it, 21 percent in si
+page:/div:1/div:1/section:8/p:2	p	Then came the wrong turn that mattered most. The first test of the idea that dense patterns beat JSON used the vocabulary codec in the learning library, which t
+id:how-we-got-fast-and-what-we-got-wrong-section-8	section	The grammar, on a socketRebuilt on the real grammar, a transfer is five signed records with six signatures, sent as lines of text over a raw TCP socket, with no
+page:/div:1/div:1/section:9/span:1	span	
+page:/div:1/div:1/section:9/h2:1	h2	The grammar, on a socket
+page:/div:1/div:1/section:9/p:1	p	Rebuilt on the real grammar, a transfer is five signed records with six signatures, sent as lines of text over a raw TCP socket, with no HTTP and no JSON. On th
+page:/div:1/div:1/section:9/p:2	p	Across the whole fleet, running together for 20 seconds, it reached 21,199 a second with no failures. An earlier fleet run with a simpler private frame format h
+page:/div:1/div:1/section:9/p:3	p	The fleet run itself failed first. Two clients lost their connections because several hundred connected in the same instant and overflowed a listen queue of 128
+id:how-we-got-fast-and-what-we-got-wrong-section-9	section	Batch verification, and a result that was smaller than hopedSignature checking was 55 percent of the server, so checking many signatures in one batch was the ob
+page:/div:1/div:1/section:10/span:1	span	
+page:/div:1/div:1/section:10/h2:1	h2	Batch verification, and a result that was smaller than hoped
+page:/div:1/div:1/section:10/p:1	p	Signature checking was 55 percent of the server, so checking many signatures in one batch was the obvious lever. Measured, batching is slower for a single signa
+page:/div:1/div:1/section:10/p:2	p	There is a catch that travels with the number. Batch verification can accept a signature that checking one at a time would reject, if the signer builds it that 
+id:how-we-got-fast-and-what-we-got-wrong-section-10	section	What none of this provesThis is the accepted path only: nothing is replicated or flushed, so a crash loses it. There is no threshold certificate, so no toleranc
+page:/div:1/div:1/section:11/span:1	span	
+page:/div:1/div:1/section:11/h2:1	h2	What none of this proves
+page:/div:1/div:1/section:11/p:1	p	This is the accepted path only: nothing is replicated or flushed, so a crash loses it. There is no threshold certificate, so no tolerance of faulty or hostile s
+page:/div:1/div:1/section:11/p:2	p	The next gains are in the cryptography, not the parser: standing intents and offers that remove two of the six signatures, and a holder field that is not the he
+page:/div:1/div:1/div:1	div	← THE CORENEXT QUESTION →
+page:/div:1/div:1/div:1/button:1	button	← THE CORE
+page:/div:1/div:1/div:1/span:1	span	
+page:/div:1/div:1/div:1/button:2	button	NEXT QUESTION →
+page:/div:1/div:1/a:1	a	NEXT NOTE / The grammar does almost no work →
+page:/div:1/nav:2	nav	Related mechanism →Watch the fleet right now →
+page:/div:1/nav:2/a:1	a	Related mechanism →
+page:/div:1/nav:2/a:2	a	Watch the fleet right now →
+page:/div:1/details:1	details	Evidence & editorial reviewEditorial review: 2026-10-07. This is not live capability verification.BENCH-003: the full investigation log, sections 1 to 15
+page:/div:1/details:1/summary:1	summary	Evidence & editorial review
+page:/div:1/details:1/p:1	p	Editorial review: 2026-10-07. This is not live capability verification.
+page:/div:1/details:1/a:1	a	BENCH-003: the full investigation log, sections 1 to 15
+page:/div:1/details:1/a:1/svg:1	svg	
+page:/div:1/details:1/a:1/svg:1/path:1	path	
+page:/div:1/details:1/a:1/svg:1/path:2	path	
+page:/div:1/details:1/a:1/svg:1/path:3	path	
+page:/div:1/details:1/a:1/svg:1/path:4	path	
+page:/div:1/details:1/a:1/svg:1/path:5	path	
+page:/div:2	div	

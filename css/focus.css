@@ -1,19 +1,31 @@
 /* Focus uses the sage field, never a browser-white ring. Selected and focused
    controls stay distinct: persistent selection is quieter than keyboard focus. */
 #scene :is(a,button,input,[tabindex]):focus { outline:none; }
-#scene :is(a,button,input):focus-visible {
-  outline:none;
+/* Not inside an Ark block: a block paints its own focus (a --reference ring, css/ark-blocks.css),
+   and this tint turned a focused primary button's fill grey -- an id-weight rule over the
+   block's class rule (docs/ux-audit/components.md risk R8). */
+/* The tint adds to the ring and never removes it: this rule out-ranks components.css's ring (id + :not(.class)),
+   and with `outline:none` here the header and page links lost their ring once components.css dropped
+   !important (style snapshot 2026-10-21: 740 focused controls, solid -> none). */
+#scene :is(a,button,input):not(.ark-block *):focus-visible {
   color:hsl(var(--text-strong));
   background-color:hsl(var(--raised));
 }
 #scene .ark-header a[aria-current="page"] { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }
 #scene .ark-header a:focus-visible { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--overlay)); }
 #scene .study-tabs button { border:0; }
-#scene .study-tabs button[aria-pressed="true"] { color:hsl(var(--text-strong)); background-color:hsl(var(--nested)); }
+#scene .study-tabs button[aria-pressed="true"] { color:hsl(var(--text-strong)); background-color:hsl(var(--nested)); box-shadow:inset 0 0 0 1px hsl(var(--border-control)); }
 #scene .study-tabs button:focus-visible { color:hsl(var(--text-strong)); background-color:hsl(var(--overlay)); }
 #scene .mesh-drag-target:focus-visible { background:hsl(var(--nested)); }
 #scene input[type="range"]:focus-visible { accent-color:hsl(var(--reference)); background-color:hsl(var(--overlay)); }
-#scene .learning-entry:focus-visible h2 { color:hsl(var(--text-strong)); }
+/* Anything made focusable with tabindex that is not a link, button or field -- a tabpanel, a
+   region -- had no visible focus at all (the :focus rule above removes the outline and the tint
+   below covers only a/button/input): the resolutions tabpanel took focus invisibly on 21 routes
+   (docs/ux-audit/pages-ux-b.md /resolutions P1; regression: tests/a11y-chrome.cjs). */
+#scene [tabindex]:not(a,button,input,select,textarea,[tabindex="-1"]):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:2px; }
+/* Custom controls built on buttons keep the tint above and gain a ring, so focus never depends on
+   a background a palette may flatten. */
+#scene :is(button,[role="tab"],summary):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:2px; }
 /* High-contrast palettes may suppress backgrounds; retain a system indicator. */
 @media(forced-colors:active) {
   #scene :is(a,button,input,[tabindex]):focus-visible { outline:2px solid Highlight; outline-offset:3px; }

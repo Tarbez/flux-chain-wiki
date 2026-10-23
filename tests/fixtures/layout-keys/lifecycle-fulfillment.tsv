@@ -1,0 +1,78 @@
+# key	tag	text -- layout keys of /lifecycle/fulfillment before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	HomeAgreement lifecycleFulfillment04 / FULFILLMENTOpen the result package.The provider shares the result and the evidence required by the agreed terms.A signed 
+page:/nav:1	nav	HomeAgreement lifecycleFulfillment
+page:/nav:1/a:1	a	Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/a:2	a	Agreement lifecycle
+page:/nav:1/a:2/svg:1	svg	
+page:/nav:1/a:2/svg:1/path:1	path	
+page:/nav:1/a:2/svg:1/path:2	path	
+page:/nav:1/span:1	span	Fulfillment
+page:/div:1	div	04 / FULFILLMENTOpen the result package.The provider shares the result and the evidence required by the agreed terms.A signed result is available for checking.A
+page:/div:1/div:1	div	04 / FULFILLMENTOpen the result package.The provider shares the result and the evidence required by the agreed terms.A signed result is available for checking.A
+page:/div:1/div:1/p:1	p	04 / FULFILLMENT
+page:/div:1/div:1/h1:1	h1	Open the result package.
+page:/div:1/div:1/div:1	div	The provider shares the result and the evidence required by the agreed terms.A signed result is available for checking.
+page:/div:1/div:1/div:1/p:1	p	The provider shares the result and the evidence required by the agreed terms.
+page:/div:1/div:1/div:1/p:2	p	A signed result is available for checking.
+page:/div:1/div:1/nav:1	nav	AnswerUnderstand whyEvidence
+page:/div:1/div:1/nav:1/button:1	button	Answer
+page:/div:1/div:1/nav:1/button:1/svg:1	svg	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:1/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:2	button	Understand why
+page:/div:1/div:1/nav:1/button:2/svg:1	svg	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:2/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3	button	Evidence
+page:/div:1/div:1/nav:1/button:3/svg:1	svg	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:1	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:2	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:3	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:4	path	
+page:/div:1/div:1/nav:1/button:3/svg:1/path:5	path	
+page:/div:1/div:1/aside:1	aside	Not yet establishedsubmission is not acceptance, semantic truth, or proof of every downstream effect.
+page:/div:1/div:1/aside:1/strong:1	strong	Not yet established
+page:/div:1/div:1/aside:1/p:1	p	submission is not acceptance, semantic truth, or proof of every downstream effect.
+page:/div:1/button:1	button	Show the illustration
+page:/div:1/figure:1	figure	ILLUSTRATIONNOT A LIVE RECORDThe evidence package01 / RESULTWhat the provider produced.02 / EVIDENCEThe supporting material required by the terms.Who submitsWha
+page:/div:1/figure:1/div:1	div	ILLUSTRATIONNOT A LIVE RECORD
+page:/div:1/figure:1/div:1/span:1	span	ILLUSTRATION
+page:/div:1/figure:1/div:1/span:2	span	NOT A LIVE RECORD
+page:/div:1/figure:1/figcaption:1	figcaption	The evidence package
+page:/div:1/figure:1/div:2	div	01 / RESULTWhat the provider produced.02 / EVIDENCEThe supporting material required by the terms.
+page:/div:1/figure:1/div:2/div:1	div	01 / RESULTWhat the provider produced.
+page:/div:1/figure:1/div:2/div:1/span:1	span	01 / RESULT
+page:/div:1/figure:1/div:2/div:1/p:1	p	What the provider produced.
+page:/div:1/figure:1/div:2/div:2	div	02 / EVIDENCEThe supporting material required by the terms.
+page:/div:1/figure:1/div:2/div:2/span:1	span	02 / EVIDENCE
+page:/div:1/figure:1/div:2/div:2/p:1	p	The supporting material required by the terms.
+page:/div:1/figure:1/canvas:1	canvas	
+page:/div:1/figure:1/p:1	p	
+page:/div:1/figure:1/nav:1	nav	Who submitsWhat it follows
+page:/div:1/figure:1/nav:1/button:1	button	Who submits
+page:/div:1/figure:1/nav:1/button:2	button	What it follows
+page:/div:1/figure:1/p:2	p	Choose a label to inspect this part.
+page:/nav:2	nav	01Intent02Offer03Agreement04Fulfillment05Receipt
+page:/nav:2/a:1	a	01Intent
+page:/nav:2/a:1/span:1	span	01
+page:/nav:2/a:2	a	02Offer
+page:/nav:2/a:2/span:1	span	02
+page:/nav:2/a:3	a	03Agreement
+page:/nav:2/a:3/span:1	span	03
+page:/nav:2/a:4	a	04Fulfillment
+page:/nav:2/a:4/span:1	span	04
+page:/nav:2/a:5	a	05Receipt
+page:/nav:2/a:5/span:1	span	05
+page:/nav:3	nav	← AgreementContinue to Receipt
+page:/nav:3/a:1	a	← Agreement
+page:/nav:3/a:2	a	Continue to Receipt
+page:/nav:3/a:2/svg:1	svg	
+page:/nav:3/a:2/svg:1/path:1	path	
+page:/nav:3/a:2/svg:1/path:2	path	
+page:/div:2	div	

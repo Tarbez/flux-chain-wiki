@@ -19,39 +19,64 @@ behind a Content | Design switch -- Content was a page list, a form column and a
 of its own (`#cmsShell`, `#editor`, `#frame`, `js/admin/preview.js`); Design was the canvas.
 All four are deleted. Exactly one site iframe exists in the document: `#cmsPreview`.
 
-**Header** (`#appBar`, one row from 1280px; `js/admin/header.js`, `nav.js`):
+**Three tiers** (2026-10-19, docs/ux-audit/cms.md (b): 23 header controls, 16 of them bare icons,
+became 11): what is used on every screen is in the header and labelled; what belongs to the
+canvas is on the canvas's own strip; what is occasional is one click away in **More**. Every
+feature kept its id and its behaviour; only where it sits changed.
 
-- the page: `#btnLeftRail` (fold the rail), `#btnPage` (page picker), `#btnPageFields` (the
-  Page fields sheet, below), `#btnPageSeo` (this page's SEO popover, `seo.js`) -- in every view;
-- the views of the one site, in either lens (`#viewSwitch`; `setView()`, `js/admin/sitemap.js`):
-  **Canvas** (`#viewCanvasBtn`, `#designView`), **Sitemap** (`#viewMapBtn`, `#mapView`) and
-  **Theme** (`#viewThemeBtn`): the site-wide settings docked beside the canvas (`#themeView`),
-  which stays live so a colour or a font shows on the real page as it is picked. `#backgroundBtn`
-  opens the page-transition popover (`ArkCanvasTransitions`);
-- the **lens** (`#lensSwitch`: `#lensContentBtn` / `#lensDesignBtn`; `setLens()` in `nav.js`):
-  what a click on the canvas edits. `state.lens` opens on `content` (most edits are text) and is
-  remembered per browser (`defxn-cms-lens`); a change is posted to the canvas
-  (`defxn-cms-preview-lens`), redraws the toolbar for the lens and opens the rail tab last used
-  in that lens. Nothing is torn down: the selection, the drafts and an open sheet stay. The
-  [Content lens](#the-content-lens) edits text in place; the Design lens selects and styles;
-- the canvas tools, shown while a canvas is on screen (Canvas and Theme): breakpoints
-  `#devices`, undo/redo, Design check `#btnCheck`, Edit/Live `#mode`;
-- `#versionsNav`, `#meshNav`, the one `#save`, `#publish`, and `#accountMenu` behind
-  `#accountBtn` (folder connect, who is signed in, the publish host's status `#mesh`, sign out;
-  `js/admin/project.js`, `mesh.js`). The menu closes on a press anywhere, the canvas included
-  (focus leaving the editor's window for the iframe; `tests/cms-account-menu-canvas-close.cjs`).
-  While no project folder is connected, a banner above the canvas says what connecting does,
-  with the button (`connectProject()`, the one connect flow behind every Connect button: the
-  menu, the banner, Save's refusal, Versions). `#publish` refused (no miner, a copy opened from
-  disk) stays clickable: a click opens the Publish sheet with the reason (`refuse(button, reason,
-  explain)`, `js/admin/core.js`; `tests/cms-refusal-explains.cjs`).
+**Header** (`#appBar`, one row from 1100px; `js/admin/header.js`, `nav.js`): `#btnLeftRail` (the
+side panel), `#btnPage` (the page switcher: a search over the one page list, below),
+`#btnPageFields` ("Page settings": the sheet with the page's every field), the lens
+(`#lensSwitch`: **Edit words** `#lensContentBtn` / **Edit style** `#lensDesignBtn`; `setLens()` in
+`nav.js`; `state.lens` stays `content` / `design`, remembered per browser as `defxn-cms-lens`),
+`#btnUndo` / `#btnRedo` (the ONE history, `js/admin/history.js`, below), `#status` (a slot of its
+own width: a message never moves a control), `#save`, `#publish`, and `#accountBtn` -- **More** --
+whose menu `#accountMenu` holds:
 
-Below 760px the header is two rows (the page, lens and views; the canvas tools and actions) and
-below 600px three (the page with Save and Publish; the lens and views with Versions and Mesh;
-the canvas tools with the account), cut by explicit row breaks (`#appBar::before/::after`,
-`css/admin.css`); on a phone the status line takes the screen's bottom strip while it has
-something to say. Measured 2026-10-19: 121px at 390px (159px in four rows before), 83px at 760px
-(121px).
+- the views of the one site (`#viewSwitch`; `setView()`, `js/admin/sitemap.js`): **The page**
+  (`#viewCanvasBtn`), **Site map** (`#viewMapBtn`, `#mapView`, with its own "Back to the page") and
+  **Site style** (`#viewThemeBtn`, `#themeView`, docked beside the live canvas; tabs Colours &
+  background / Visitor defaults / Search defaults; its own close button);
+- **Search & sharing for this page** (`#btnPageSeo`, the page SEO popover, `seo.js`; canonical
+  URL and structured data under its Advanced), **Page transition** (`#backgroundBtn`, the
+  `ArkCanvasTransitions` popover -- it was called "Background", which is the backdrop layer in
+  Site style), **Version history** (`#versionsNav`) and **Publishing status** (`#meshNav`, the
+  sheet);
+- the account: who is signed in (`#who`), `#connect` (`connectProject()`, the one connect flow
+  behind every Connect button: the menu, the banner, Save's refusal, Versions), the publishing
+  service's status (`#mesh`), keyboard shortcuts, `#signOut` (`js/admin/project.js`, `mesh.js`).
+
+While no project folder is connected, a banner above the canvas says what connecting does, with
+the button. `#publish` refused (no publishing service, a copy opened from disk) stays clickable:
+a click opens the Publish sheet with the reason (`refuse(button, reason, explain)`,
+`js/admin/core.js`; `tests/cms-refusal-explains.cjs`).
+
+**The canvas strip** (`#canvasTools`, above the stage, also in Preview -- it is the way back to
+Edit): screen size `#devices`; the size note `#bpNote` (Edit style at tablet or phone size only,
+in words: "Phone only" / "Tablet and phone only"); the page's name and size (`#devName`,
+`#devScale`); **Design tips** `#btnCheck` (`.ibtn.score`; Edit style only: a quiet count of tips, the score in
+`#scoreBadge`'s `data-score`, warning tone only when the reading just got worse on that page);
+Edit / Preview (`#mode`). It is hidden in the Site map, where there is no canvas.
+
+On a phone (below 600px) the header is two rows -- the side panel, the page, Save, Publish, More;
+then Page settings, the lens, undo, redo -- every control at least 44px; the status line takes the
+screen's bottom strip while it has something to say. `tests/browser/header-reach.mjs` measures it
+(at most 11 header controls, two phone rows, 44px targets, a status message moving nothing).
+
+**Overlays** (`js/admin/overlay.js`): everything that floats over the workspace registers with
+ONE dismissable-layer stack -- the header popovers (`openPop`), the More menu and the toolbar's
+section popover (level `popover`: one at a time; Esc, a press outside, leaving the window, or a
+press on the canvas closes them -- the canvas reports the press, `defxn-cms-preview-pointerdown`,
+because losing focus to it is not enough: it also takes focus by itself), and the sheet and
+Versions (level `sheet`: one docked slot, opening one closes the other; Esc or their close
+button). Choosing **Site style** closes them as well: its dock is on the edge they float over,
+and chosen under an open Versions it showed as a 20px sliver (`setView()`, `js/admin/sitemap.js`;
+`tests/cms-site-style-not-under-sheet.cjs`). The page and the Site map leave them open. A closed
+Versions panel is not refreshed by a Save; opening it lists the history again. Esc closes the
+topmost only. One close button (`overlay.closeButton`, `.ov-close`). It
+mirrors Ark UI's popover / dismissable-layer shape. `js/ark/vendor/ark-kit.js` now carries
+`createArkUI`, and `createArkDomHost` runs non-modal focus scopes and dismissable layers over
+existing elements (ark-ui 0.2.2), so `createArkPopover` can drive this markup on either host.
 
 **The canvas** (`js/admin/canvas.js`, `layoutStage()`): the stage is the breakpoint's width,
 zoomed down when the area is narrower, and exactly as tall as the area under its size label --
@@ -61,22 +86,28 @@ else the one the editor's own screen is by the site's thresholds (`ArkLayout.bre
 phone opens on the phone layout at 100%, a 760px window on tablet, a desktop on desktop. A resize
 afterwards never switches it.
 
-**Rail** (`#studioLeft`, `js/admin/rail.js`): tabs **Pages** (the one site tree -- Site chrome,
-Pages, Theory pages, Articles, then every other route; Content mode's page list and the old
-Studio's Pages tab merged into it. A row's button shows its page on the canvas, Fields opens its
-Page fields, Delete is offered for theory pages and articles; New theory page / New article sit
-under the tree), **Layers** (the page's real element tree; each row is named by
-`ArkLayout.layerName` in `js/content/layout.js` -- the element's group, block or state name, its
-accessible name, landmark, the heading it owns, its own words, an id/class hint, its tag last --
-with the tag beside it as metadata; a name typed over it is stored and wins, and clearing it goes
-back to the derived one; the toolbar's chip uses the same name; `tests/layer-names.cjs`),
-**Library** (`library.js`), **Media** and **Vault** (the forms' own panels). The Content lens opens on Pages and the Design lens on Layers; the last tab used in
-each lens is remembered (`defxn-cms-rail-tab`). Below 860px the rail is a drawer over the canvas
-(`#railScrim`; Esc or choosing a page closes it).
+**Rail** (`#studioLeft`, `js/admin/rail.js`): tabs **Pages**, **Layers**, **Blocks** (`#tabLib`,
+`library.js`), **Images** (`#tabMedia`) and **Private** (`#tabVault`, encrypted content). Pages
+draws THE page list, `siteList()`: every page named once -- its draft's title, else its catalog
+title, else its address in words, never a raw slug -- in the groups a person looks for: Main
+pages, Guides (the theory pages, `/concept/...`), Articles, Header & footer (the site chrome),
+More pages (routes with no fields, folded). The header's page switcher searches the same list and
+the canvas strip, Page settings and the page SEO popover use the same names
+(`tests/cms-pages-rows-are-buttons.cjs`). `#pageSearch` filters it; **+ New** (`#btnNewItem`) asks
+"Guide page or Article?" and a **title**; the address is derived and shown, and can be changed
+under Developer details (`#newForm` / `#newId`, `#newArticleForm` / `#newSlug`, the forms
+`editor.js` already handles). A row opens its page on the canvas; its Page settings and Delete
+buttons are not extra tab stops (the arrow keys walk the rows). **Layers** is the page's real
+element tree; each row is named by `ArkLayout.layerName` in `js/content/layout.js`, and a typed
+name wins (`tests/layer-names.cjs`). The Content lens opens on Pages and the Design lens on
+Layers; the last tab used in each lens is remembered (`defxn-cms-rail-tab`). Below 860px the rail
+is a drawer over the canvas (`#railScrim`; Esc or choosing a page closes it).
 
 **The sheet** (`#sheet`, `js/admin/panels.js`): one form panel at a time, on demand -- a page's
-or an article's every field (**Page fields**: every manifest field including those the canvas
-does not show, the Shape / SEO / Code tabs), or the **Mesh** deploy status. It is never open on
+or an article's every field (**Page settings**: every manifest field including those the canvas
+does not show, called by its label; fields whose label says the page no longer shows them wait
+under "Unused fields"; the copy keys and the file are its Developer details; tabs Text / Shapes /
+Search & sharing / Advanced), or **Publishing status**. It is never open on
 load or on a selection, and never a fixed right column: it overlays the canvas's right edge (the
 canvas keeps its width) and closes on Esc or its close button. Opened from the header or a Pages
 row it follows the canvas to the next page; opened transiently (the toolbar's and the Library's
@@ -309,8 +340,13 @@ keeps the page showing until its rebuilt replacement is shown in the same task, 
 entrance, no background fade and the scroll kept. A same-route re-render is not a navigation; it
 replayed the route-change transition and flashed the canvas blank on every edit (regression:
 `tests/page-router-refresh-in-place.cjs`; the browser driver samples every frame for a blank one). A committed edit is an entry
-in the canvas's one undo history (`cmsLayoutUndo`, beside layout snapshots): the header's
-undo/redo and Ctrl/Cmd+Z with focus in the canvas re-post its other side. Ctrl/Cmd+S commits first.
+in the canvas's undo history (`cmsLayoutUndo`, beside layout snapshots), which reports each new
+entry (`layout-history`, reason `push`) to the editor's ONE history (`js/admin/history.js`). It
+interleaves those entries with fields written from the editor's own forms (`setItemField`, one
+entry per field until a pause) and owns Undo / Redo and Ctrl/Cmd+Z in the editor and on the canvas
+(the canvas forwards the key, `defxn-cms-preview-undo-key`): a canvas entry is undone by the
+canvas, a form entry through `setItemField`. The canvas's snapshots end when it loads another page
+(`historyCanvasReset`); form entries stay. Ctrl/Cmd+S commits first.
 
 **The Content section** shows the field's label, address, kind and file; its value (a textarea
 for a paragraph field) carries the form's `data-cms-field` address, so the canvas, the Page fields
@@ -338,12 +374,21 @@ preview's Layers tree (`selToolbarKind()` in `toolbar-sections.js`):
 | a layout group (`group:` key) | Frame, plus the Ungroup action |
 | a component instance / a state-group member | its kind's sections plus Component instance / States |
 
-The actions are Make into component, Open in Content and Theme & defaults; a disabled action
-carries its reason in its title. Component instance and States are identity sections: they
-open by themselves on the selection that created them. A control edit re-renders the open
-popover in place, keeping focus and an uncommitted typed value. The browser drivers name a
-section and act inside it; every assumption about how the shell is drawn lives in
-`tests/browser/harness.mjs` (`openToolbarSection`, `toolbarSections`, `toolbarKey`).
+The bar is lens-aware (docs/ux-audit/cms.md P1-6, P1-7, P1-8). **Edit style**: the sections --
+the three used most labelled (Text, Colour, Spacing), the rest icons named by tooltip and
+aria-label -- then **More** (`data-section="tb-more"`): the selection's commands, the SAME list the
+canvas's right-click menu draws (`cmsSelectionCommands()` in `js/main.js`, reported with every
+selection as `commands` and run by `defxn-cms-preview-selection-command`): Make into states, Make
+into component, Group, Ungroup, Remove, Align and Distribute once two layers are selected, Page
+transition. A command that cannot apply stays listed with the reason under it. Then the editor's
+own: Edit its words, Site style. A group's Ungroup is also a bar button. **Edit words**: nothing
+opens over the words being edited; the chip names the field ("Heading"), the bar says how an edit
+ends ("Enter or Esc to finish") and offers Done and All fields; the field's Details (its words in
+a box, its link target, Revert to saved, its key under Developer details) open on demand -- and by
+themselves only for text that cannot be edited in place, whose explanation is the answer. The
+right-click menu reads SDK tokens and is placed from its measured size, so the canvas edge never
+cuts it off. Frame, Component instance and States show ids and keys only under Developer details
+(`devDetails()`, `js/admin/controls.js`).
 
 The bar is placed in the stage's own (zoomed) coordinates and moves with it by CSS; the popover
 is `position: fixed` and placed from the bar's on-screen box. `canvas.js` re-places the bar on
@@ -361,9 +406,26 @@ their DOM on every mount, so an instance is rebuilt from the current master each
 definition edit shows everywhere on the next render, with no copy to resync. Detach gives an
 instance its own master.
 
-- **Typed blocks**: six whitelisted resolvers (`RBLOCK_TEXT_V1`, `_CTA_`, `_IMAGE_`, `_CARD_`,
-  `_QUOTE_`, `_DIVIDER_V1`), each with its own prop names; anything else is dropped by
-  `sanitize()`. Created from the Library tab (`js/admin/library.js`).
+- **Ark blocks** (Wave 2, since 2026-10-19): resolver `ARK_BLOCK_<UPPER_SNAKE(name)>`, one per
+  block of `@deadark/ark-ui/blocks`, registered by `js/ark/blocks.js`. The Library
+  (`js/admin/library.js`) is DERIVED from the registry: `ArkComponents.blocks()` reads
+  `ArkKit.describeArkBlocks()`, groups each block by its structure (holds blocks: Layout; takes an
+  image or slot: Media; otherwise Ark's category, "content" read as Text), shows each as a live
+  mini-render of the real block, and draws its fields from the SDK's
+  `getCmsArkBlockEditorFields` (`js/admin/vendor/cms-blocks.js`, editor only: it bundles zod).
+  `sanitize()` keeps an Ark master by the SHAPE of its resolver and its props as plain data of
+  bounded size -- never by registry membership, so `components-data.js` loading before the kit,
+  or a block from a newer Ark, never loses a record. Save checks every Ark master, and every
+  instance as it shows (definition + overrides), with the SDK's `validateCmsArkBlock` in strict
+  mode (`ArkComponents.problems`, `js/admin/save.js`); a refusal names the component, the field
+  by its label path, what it needs and the remedy. Tests: `tests/components-library.cjs`.
+- **Legacy typed blocks**: `RBLOCK_TEXT_V1`, `_CTA_`, `_IMAGE_`, `_CARD_`, `_QUOTE_`, `_DIVIDER_V1`
+  -- the hand-built resolvers the Library offered before Ark had blocks. Read aliases, kept as-is
+  and never rewritten; their renders are pinned byte-for-byte by
+  `tests/components-legacy-continuity.cjs`. Each names its Ark successor (`actions`, `figure`,
+  `card`, `quote`; Ark has no prose `text` or `divider` block yet), and is offered for NEW
+  components only while the registry lacks that successor. Anything that is none of these three
+  kinds is dropped by `sanitize()`.
 - **Captured components** ("Make into component"): a selection is stored as a master with
   resolver `RBLOCK_CAPTURED_V1` and `tree`, the selection's sanitized element structure. Its
   props are derived: every non-blank text node and every image `src`/`alt` in the tree is a
@@ -410,7 +472,18 @@ nav, background layers -- which every route shows: an edit to a header link, a g
 group of header links, or a component placed after one is stored once and applies on every
 route. `ArkLayout.scopeOf(element, route)` decides it by structure (inside a page root or
 not); a set (group members, a captured selection) is SHELL only when every member is shell.
-The preview reports the scope as `selection.route` and the route shown as `selection.page`.
+A page that shows several documents at one route declares a finer scope on its root
+(`data-ark-layout-scope="doc=<id>"`), and its content's edits are stored under
+`<route>?doc=<id>`: /reference does, so an edit made on one document shows on that document
+only. `ArkLayout.scopeFor(route, host)` is the one answer to "which scope are the edits of the
+page shown": js/main.js's mount and settle passes, the editor (`cmsLayoutScope`) and the
+element-motion lookup ask it; a page that declares nothing is its route, as before. Edits saved
+under the shared `/reference` scope before 2026-10-22 were made on Agreements (then the default
+document): `ArkLayout.MOVED_SCOPES` reads them as Agreements' own when a draft is sanitized, in
+every store, and the next Save writes them forward there. Regression:
+`tests/layout-document-scope.cjs`.
+The preview reports the scope as `selection.route` and the scope of the page shown as
+`selection.page`.
 Rendering a route applies its own scope and SHELL; SHELL entries apply to shell elements only,
 and where both hold the same key SHELL wins field by field. Data saved under a route before
 SHELL existed is never rewritten and still applies on that route. Regression:
@@ -421,6 +494,459 @@ history of a route -- direct load, arrival from another route, phone width, afte
 insertion, and in the editor's preview; `tests/browser/layout-key-stability.mjs` checks that.
 Layout keys were being reworked when this page was written; check `layout.js` before relying
 on the exact prefixes.
+
+**Pinned keys** (2026-10-19). A page converted to blocks ([Pages as data](#pages-as-data)) keeps
+the keys its old markup had: an element carrying `data-ark-layout-pin="<old key>"` is keyed by
+it, ahead of its copy key or id, and its subtree inherits `<old key>/<path below it>` -- one pin
+on a moved swatch grid keeps every swatch's key. `data-ark-layout-pin-scope="self"` pins the
+element alone (a section that became a tab panel, whose inside is new). A NEW element whose
+computed path equals a key the page pinned to another element is keyed `<path>@new`, so it never
+inherits an edit that was saved for something else (on /palette the old CMS anchor's path became
+the new tab list's). Pins are stamped by `js/ark/blocks.js` from a spec's `was`; saved records are
+never rewritten. A table's `caption` is keyed like any other element (`KEY_TAGS`, 2026-10-19), so
+the heading a conversion moved into a caption can carry its old key: the page tests that retired
+those keys "until captions become keyable" can pin them now (`'table-caption[#n]'`).
+
+## Pages as data
+
+Since 2026-10-19 (Wave 2) a page can be a list of Ark blocks instead of hand-built DOM. Wave 3
+converts the site page by page this way; `/palette` is the worked pilot (`js/pages/palette.js`,
+`tests/palette-blocks.cjs`).
+
+**Two runtimes, one adapter.** `ArkUI` is defxn's resolver engine (`js/ark/runtime.js`:
+`register`/`build`); `ArkKit` is Ark UI itself, built from the synced packages by
+`scripts/build-ark-vendor.cjs` from ONE export list (`scripts/ark-kit-entry.js`) into two files:
+
+| file | where | carries |
+|---|---|---|
+| `js/ark/vendor/ark-kit-public.js` | public pages that render a block | the block registry and renderers, `createArkDomHost`, the primitives blocks use. `createArkUI`, `createArkPopover`, `createArkToggleGroup`, `patchArkBlock`, `arkConfirm`, `createArkAlertDialog` and `createArkModalHost` are refusals (a public page's floating panel is the `popover` block, from the forms chunk, not `createArkPopover`) that name what to load (the full kit; the live chunk), the blocks' demo `example`s are left out (`scripts/ark-blocks-no-examples.js`), and the prop schemas' editor text (`help`, a block's `description`) is stripped at build time while the validation shape (kind, required, maxLength, enum values, labels) stays. `ArkKit.PUBLIC_KIT` is `true`. Its registry is ark-ui's CORE (21 blocks; `@deadark/ark-ui/blocks/core`; `createArkDomHost` is the core host, no focus scopes or dismissable layers). 25.1 KB gz (26.9 before W3-BUDGET, 24.0 before W4-ARK, 24.5 before W5-ARK) |
+| `js/ark/vendor/ark-kit-forms.js` | a page that takes input (listed after the kit in the route's scripts; the loader adds it in the editor's canvas and for a saved form block the kit has no resolver for) | ark-ui's `@deadark/ark-ui/blocks/forms` alone (`field`, `form`, `list`, `status-line`, `choice`), registered into the public kit's registry by `ArkKit.registerArkBlocks`, then `ArkUI.blocks.sync()` registers their resolvers (so it may load before or after `js/ark/blocks.js`). A second load registers nothing twice. Editor help stripped like the kit's. Global `ArkKitForms`. 4.8 KB gz |
+| `js/ark/vendor/ark-kit-popover.js` | a page that floats a panel and takes no input (`/explore`); the same loading rules | ark-ui's `@deadark/ark-ui/blocks/popover` alone: the `popover` block and `withArkOverlays` (the host's focus scope and dismissable layer). Global `ArkKitPopover`. 3.2 KB gz. A page that uses both lists both (the overlay half is then in the popover chunk only). The loader loads the forms chunk, asks the kit again, then the popover chunk: derived from the kit's resolvers, never a name list |
+| `js/ark/vendor/ark-kit-live.js` | a page's first `ArkUI.blocks.update` (today / and /stats) | `patchArkBlock` alone (ark-ui 0.2.7's `blocks/patch`, `patchArkBlockIn(registry, …)`, bound to the loaded `ArkKit.ARK_BLOCKS`), global `ArkKitLive`. Loaded by the adapter, never listed by a route. 1.4 KB gz |
+| `js/ark/vendor/ark-kit.js` | the editor (`admin-app.html`), any page that needs an overlay | all of the above plus `createArkUI`, the form blocks, the examples, the help text, the morph, and `arkConfirm` (the editor's `window.confirm()` replacement: `createArkAlertDialog` on `createArkModalHost`, modal with a focus trap; the public kit refuses it, naming the full kit). All 27 blocks. `ArkKit.PUBLIC_KIT` is `false`. 59.3 KB gz |
+
+**Live update** (`ArkUI.blocks.update(el, props, options)`): `el` is re-rendered through the
+adapter (copy keys, scene links) and patched in place with Ark's `patchArkBlock`, so a CMS edit, a
+pin or a style on it survives each refresh; invalid props replace it with the refusal callout. On
+public pages the morph is the live chunk above: the first update of a page loads it through
+`ArkUI.loadScript` (`js/ark/page-loader.js`), queues the refresh per element (the latest props
+win) and lands it when the chunk arrives, returning the same root at once; every later update is
+in place synchronously. Liveness is derived from behaviour, never declared: a page that updates
+is live, and a block route that never updates never pays the 1.4 KB. If the chunk cannot load
+(it failed, or the page has no `ArkUI.loadScript`), the queued readings still show, by
+replacement -- what hung on the old elements is lost -- the console names the failure, what is
+needed and the remedy, and the next update tries again: a live tile never breaks its page. The
+editor's full kit carries the morph itself and loads nothing.
+
+`js/ark/blocks.js` (served minified; source `scripts/ark-blocks-adapter.js`, built by
+`npm run build:ark`) joins them: every block in `ArkKit.ARK_BLOCK_NAMES` is registered as the
+resolver `ARK_BLOCK_<UPPER_SNAKE(name)>` (`hero` -> `ARK_BLOCK_HERO`, `section-header` ->
+`ARK_BLOCK_SECTION_HEADER`), by that rule and never by a list, so a block Ark adds is a resolver
+and a Library block the moment the kit is rebuilt. `ArkUI.build({ resolver, props, children })`
+returns the block's own root (the `create(p)` manifest hook in `runtime.js`); props go to the
+block as given, `from` is the return-to of `doc:` links, `tree` is ignored, and invalid props
+render Ark's refusal callout (`data-ark-block-refused`) -- a saved record never throws.
+
+**Loading** (`js/pages/catalog.js`, `js/ark/page-loader.js`). `ArkUI.blockScripts` = dash-kit
+(the link resolver), the public kit, the adapter: a page built from blocks lists them first
+(`scripts: ArkUI.blockScripts.concat(['js/pages/<page>.js'])`). The loader adds them by itself
+to a route holding a saved `ARK_BLOCK_*` instance (its own or the shell's) and to every route in
+the editor's canvas. The glossary is separate and PER ROUTE (see the Budget): a route whose words carry terms lists
+`ArkUI.glossaryScript` and `js/pages/catalog.js` swaps in the route's own file by one rule,
+`ArkUI.glossaryFor(key)` = `js/content/glossary/<key with / as ->.js`, carrying only the terms that route renders
+(generated from `docs/glossary.md` by `node scripts/build-glossary.cjs`). `ArkUI.glossaryScript` itself is the WHOLE
+glossary (`js/content/glossary.js`, 58 terms, 4.0 KB gz): the loader adds it for saved term blocks or `[[` markup and in the
+canvas, and a draft route the editor adds keeps it until it is saved and built. A route's file adds to whatever glossary is
+already loaded and never takes a term away, so the two may load in either order. Every other route loads none of it. Styling is `css/ark-blocks.css` (Ark's,
+static, linked on every route so the server render is styled; minified by the vendor build,
+7.3 KB gz) and `css/block-page.css` (the frame every block page sits in).
+
+**Budget** (components.md R2: +30 KB gz of added JS; CSS net-negative). Method, every number
+below: `gzip -9 -c <file> | wc -c` on the shipped file, 2026-10-19, this Mac (the same method as
+the earlier readings; esbuild's metafile gives the per-module shares). Wave 2 measured kit 25.9 +
+adapter 3.8 = 29.6 KB; Wave 3's page work (W3-ARK-FOLLOWUPS) took it to kit 26.9 + adapter 6.1
+= 33.0, 3.0 over. W3-BUDGET, same day: kit 24.0 + adapter 4.0 = **28.1 KB** on a route that
+renders blocks; +0 on a route with no block; +1.4 (the live chunk) where a page updates a block
+(29.5); +2.9 (`js/content/glossary.js`, which grows with `docs/glossary.md`) where words carry
+terms (31.0); /stats carries all three (32.4). Every one of these files is new since 5a1ac71, so
+each figure is the route's added JS (re-measured 2026-10-20 at 45d6b1a, adapter with `whenLive`). What moved: the editor text stripped from the
+public kit's prop schemas (78 `help` + 21 `description` strings: -2.1 KB), the morph into the
+live chunk (-0.7 from the kit, paid only by live routes), the public banner cut to ark-ui's
+version and where the pins are (-0.2), and the adapter served minified (-2.4: its commented
+source is `scripts/ark-blocks-adapter.js`; build-ark-vendor writes `js/ark/blocks.js` from it,
+and `npm run check:ark` refuses a hand-edited copy). Measured and rejected: `charset: 'utf8'`
+(+0.02), `target` es2020/es2022 (0), stripping the definitions' `parts` arrays (~-0.4, but the
+`card-grid`/`stats` getters would throw a bare TypeError instead of refusing). The next lever,
+not taken (an Ark host redesign): the light-DOM host's focus-scope and dismissable-layer code,
+which only `createArkPopover` drives and the public kit refuses, ~0.8 KB gz inside `blocks/host`. (Taken by W4-ARK: `blocks/host-overlay.ts`.)
+A block route's bill also carries `js/ark/dash-kit.js` (3.9 KB, the link resolver blocks need),
+which existed at 5a1ac71 but loaded only on the stats family then.
+
+**W5-REF (2026-10-20): /reference loads the document it shows.** `js/content/reference-text.js` held every approved
+document (43) in one file: 150.8 KB gz on every visit to /reference. `scripts/sync-reference-docs.cjs` now writes
+`js/content/reference-index.js` (per document: text file, title, sha256, origins; 4.1 KB gz, loaded by the route) and
+one `js/content/reference/<document>.js` each; `js/pages/reference.js` loads the one it shows through `ArkUI.loadScript`
+and checks its sha256 against the index (a failure is a refusal naming failure, missing and remedy). Method:
+`gzip -9 -c <file> | wc -c`, 2026-10-20, this Mac. Default document (agreements): 4.1 + 0.9 = 5.0 KB (was 150.8);
+largest (bench-003): 4.1 + 24.8 = 28.9 KB. The server render needs no change: jsdom boots the same page and
+`loadScript` is answered from the file tree. `--check` fails naming the remedy command; tests/reference-reader.cjs runs it.
+
+**W4-ARK (2026-10-20): the form blocks.** `field`, `form`, `list`, `status-line`, `choice` and `popover`
+(plus interactive `stat`, `actions` link/disabled/busy, which stay in the core) were measured IN the public
+kit at +4.5 KB gz (field + form 1.8, popover 0.6, list 0.6, choice 0.5, status-line 0.1, stat 0.4,
+actions ~0.3, engine ~0.3): a block route would have been 32.6 KB, 2.6 over R2, for every page, to pay for
+blocks only two pages use. So the public kit imports ark-ui's CORE registry and the six are
+`js/ark/vendor/ark-kit-forms.js`. Host redesign (the lever named below, taken): the light-DOM host's focus
+scopes and dismissable layers moved to `withArkOverlays`, which only the popover (in the chunk) and the
+modal host use, taking ~0.8 KB gz out of the core. gzip -9, this Mac, 2026-10-20, shipped files:
+
+| route bill (added JS) | files | gz | vs R2 (+30.0) |
+|---|---|---|---|
+| a block route | kit 24.49 + adapter 4.08 | **28.58** | -1.42 (was 28.08 before W4-ARK) |
+| block + live (`/`, a page that updates a block) | + live 1.42 | **30.00** (29,999 B) | -0.001: 1 byte of headroom (was 29.5, then 29.99) |
+| block + terms | + the route's own glossary, 0.22-1.44 (median 0.44) | **28.8-30.0**: `/resolvers` 29.99, `/stats/ledger` 29.59, `/resolutions` 29.32, `/deploy` 29.28, `/resolver-math` 28.96 | **inside R2 on every one of them** (was 31.45 on all of them) |
+| `/stats` (live + terms) | + live + its glossary 1.27 | 31.23 | +1.23 (was 32.87) |
+| block + popover (`/explore`: one popover, no input) | + popover 3.20 + its glossary 0.22 | **31.96** | +1.96 (was 35.33 with the whole forms chunk: -3.55) |
+| block + forms (`/account`) | + forms 4.85 + its glossary 0.32 | **33.70** | +3.70: the new capability's bill; the hand-built JS the conversion deletes is the offset (measure per route when converted) |
+| block + forms + popover | both chunks | 36.63 | +6.63 (the popover and forms chunks each carry their own copy of the small shared helpers: +1.2 over the old single chunk, paid only by a page using both) |
+| block + forms + live | + forms + live | 34.84 | +4.84 |
+| the editor | `ark-kit.js` 60.19 (was 49.7: all 27 blocks, `arkConfirm`) | n/a (editor, not a public route) | |
+
+CSS (`css/ark-blocks.css`, linked on every route): 8.85 KB gz, +1.5 over 7.3 (the form blocks and the alert
+dialog's static rules). The CSS ledger below becomes -44.5 KB gz net. The forms chunk costs 4.8 KB and the popover chunk 3.2 as their own
+files against 3.8 for all six inside the kit: a separate gzip stream shares no dictionary with the kit, and
+each carries its own copy of the small events helper (the popover chunk also `withArkOverlays`, 0.8).
+**Popover split (0.2.10, measured):** `/explore` loaded the whole 6.76 KB chunk for one popover; as its own
+chunk it loads 3.20 (-3.55). A page that uses both pays +1.2 over the old single chunk. Measured and rejected: all six in
+`createArkPopover`'s form (a popover through the primitive is +1.4 KB gz in a public bundle alone).
+
+**W5-ARK (2026-10-20): @deadark/ark-ui 0.2.12, @deadark/sdk 0.2.43** (0.2.11 put `lane` and `band` in the core registry; 0.2.12 moved them to `js/ark/vendor/ark-kit-figures.js`, see the end of this entry). Five parts, all in the core kit except where noted:
+`field` number `step: 'any'` (the page no longer sets the attribute by hand); a styled `select` arrow on SDK tokens (the
+control stays a native `<select>`; forced colours keep the system's); `disclosure` breakpoint folds (`foldBelow` tablet or
+phone) carry `hidden="until-found"` while closed where the browser has `onbeforematch`, so find-in-page reaches their text and
+a match opens the fold (the sheet draws it only at the fold's width; elsewhere `display:none` stands and the text is in the
+HTML either way: tests/fold-no-hidden-content.cjs is unchanged); `card-grid` `alignRows` (subgrid, four tracks per card,
+behind `@supports`); and the `lane` and `band` blocks that replace `mfig-lane`, `mfig-band`, `mfig-row`, `mfig-tick` and
+`mfig-provider` in `css/resolver-guide.css` (-0.2 KB there). Measured `gzip -9`, this Mac, 2026-10-20, shipped files:
+kit-public 24.48 -> 25.08 (+0.61), forms chunk 4.83 -> 4.93 (+0.10, the `step` schema and check), `css/ark-blocks.css`
+8.84 -> 9.35 (+0.51), `css/resolver-guide.css` 1.67 -> 1.46 (-0.21), the adapter, live, popover chunks and glossary +0.
+Only the kit and the forms chunk moved, so each route of the minified-scripts table below shifts by the kit's +0.61 (and
+`/account` by +0.10 more), the changed page scripts net -0.02:
+
+| route | after (minified), W5-MIN | after W5-ARK | added vs 5a1ac71 |
+|---|---|---|---|
+| `/` | 48.95 | 49.56 | **+24.07** |
+| `/account` | 188.89 | 189.60 | **+22.31** |
+| `/explore` | 49.19 | 49.80 | **+26.96** |
+| `/stats` | 53.37 | 53.98 | **+26.92** |
+| `/lifecycle` (a story page) | 41.03 | 41.64 | +33.75 (over, as before: the glossary exception and the story template) |
+
+The component bills of the W4-ARK table move the same way: a block route 28.58 -> 29.19, block + live 29.99 -> 30.60
+(0.60 over the +30 component sum; the route totals above are the budget and stay inside it).
+
+**W5-ARK 0.2.12: lane and band are a lazy chunk.** In 0.2.11 the core kit grew 0.61 KB and ten block+terms routes landed at
+30.04-30.62 (`tests/glossary-routes.cjs`). `lane` and `band` are drawn only by `js/pages/resolver-page-parts.js` (/what-is-a-resolver,
+/how-deployment-works, /dao, /chain), so they are now `@deadark/ark-ui/blocks/figures` -> `js/ark/vendor/ark-kit-figures.js`
+(`scripts/ark-kit-figures-entry.js`, `ArkUI.blocks.figuresScript`, in the page loader's optional chunks, listed in those four routes'
+scripts before the parts). Measured `gzip -9`, this Mac, 2026-10-20: kit-public 24.66 (24.48 at 3588f78; +0.18 is the findable
+folds and `alignRows`), adapter 4.09, figures chunk 1.35, forms 4.93, `ark-blocks.css` 9.32. Block route (kit + adapter) 28.75.
+Block + terms: 10 routes were over, now two are: resolvers 30.18 and stats 30.02 (glossary 1.44 and 1.27). Without any 0.2.11 feature the
+same routes measure 30.01 (the glossary files grew on main), so the remaining 0.18 is not this work's; closing it needs ~0.19 KB out of the
+kit, adapter or those glossaries. Figure routes pay their chunk: /chain 30.10, /what-is-a-resolver 31.01, /how-deployment-works 31.03,
+/dao 31.12 (kit + adapter + glossary + figures), 0.9 more than with `lane`/`band` in the core (the chunk carries its own copies of the
+eyebrow renderer and the block objects: 2.9 KB raw, 1.35 gz, against 0.43 marginal in the core).
+
+**W5-MIN (2026-10-20): page scripts are served minified.** Owner decision after `/account` measured +42.8 KB
+gz of added JS and `/explore` was over R2. The commented source (`js/pages/*.js`, the per-route `js/ark/*` and
+`js/content/*` files the catalog lists) stays canonical: humans, tests and server rendering read it. The one build
+that already writes `js/ark/blocks.js` (`scripts/build-ark-vendor.cjs`, `npm run build:ark`) now also writes, for
+every script `js/pages/catalog.js` lists, a minified copy with a source map to `js/min/<same path under js/>`, a
+`js/min/manifest.js` (`ArkUI.minScripts = { "pages/account": "<8 hex of the copy's bytes>" }`) and the manifest's
+own hash into the `?v=` of its tag in `index.html`. `js/ark/page-loader.js` requests a listed file as
+`js/min/pages/account.js?v=<hash>`, so a URL changes exactly when its bytes do, and any file the manifest does not
+list as written, so an exempt file can never break a route. `npm run check:ark` / `check:pages` (`--pages` builds
+or checks only these, needing esbuild but not the pinned Ark packages) refuse a stale or hand-edited copy, a hand
+change to the stamp and an orphan under `js/min/`; `tests/page-scripts-min.cjs` proves each of those in a copy of
+the site. The files are derived from the catalog (`scripts/lib/page-scripts.cjs`), not listed. Served as written:
+`js/ark/vendor/*` and `js/admin/*` (their own esbuild pipelines), `js/content/articles/*` (the CMS publisher writes
+them, so a built copy would go stale on publish), generated files (`Generated by ...` / `do not edit`: the glossary,
+registry snapshot, resolver algebra, reference text, `js/ark/blocks.js`) and files whose shipped copy is not under 95% of the
+source (`js/ark/ml-dsa.js`, `js/content/chain-sample.js`, the tiny `theory.js` and `procedure-state.js`). jsdom (server rendering, every unit test)
+and a page opened with `?ark-source=1` read the source; the editor's preview serves the copies like the site. A
+developer who edits a page script runs `npm run build:ark`; until then `check:ark` (and so `tests/ark-vendor.cjs` and
+`tests/page-scripts-min.cjs`) fails and a real browser still shows the previous build. The copies are 0.58 MB raw and
+the maps 0.47 MB, committed (the deploy is `rsync`/Vercel of the tree: no build runs there). Measured `gzip -9` of
+each file the loader requests, summed, this Mac, 2026-10-20 (esbuild 0.27.7, target es2020: `es2018` costs 0.17 KB
+more across the whole site). "5a1ac71" is the same sum at that commit; the manifest (0.79 KB gz, one tag on every
+route) is counted in the after column; `/` and `/stats` include the live chunk (1.42):
+
+| route | 5a1ac71 | before (source) | after (minified) | added vs 5a1ac71, before | added vs 5a1ac71, after |
+|---|---|---|---|---|---|
+| `/` | 25.49 | 59.97 | 48.95 | +34.48 | **+23.46** |
+| `/account` | 167.30 | 207.93 | 188.89 | +40.63 | **+21.60** |
+| `/explore` | 22.84 | 57.64 | 49.19 | +34.80 | **+26.35** |
+| `/stats` | 27.05 | 61.11 | 53.37 | +34.05 | **+26.31** |
+| `/lifecycle` (a story page) | 7.89 | 48.01 | 41.03 | +40.12 | +33.14 |
+
+`/account` and `/explore` are now inside R2's +30. The story pages (`/lifecycle`, `/what-is-a-resolver`, `/how/*`,
+concepts, articles) stay 1-4 KB over: they are the block route plus the glossary (per route since W5-GLOSS, below) plus the
+story template and `page-kit`, and their page modules are small, so there is little left to minify. The biggest
+single wins: `account.js` 26.5 -> 15.1 KB gz, `explorer.js` 23.4 -> 16.5, `stats.js` 21.6 -> 16.7, `home-flow.js`
+14.8 -> 8.7, `resolver-math.js` 14.9 -> 10.2. The 5a1ac71 column counts the scripts the catalog loaded then, so it
+differs a little from the earlier "+42.8" reading of `/account` (this method gives +40.6 for the same state). Since
+then (W5-REF) `/reference` loads only the document it shows (5.0 KB gz by default, was 150.8); `index.html`'s own 84
+static scripts are not in the catalog, so they are still served as written.
+
+**The glossary is per route** (owner decision 2026-10-20; measured the same way, this Mac). Until then every route
+that glossed a word shipped the whole glossary: `js/content/glossary.js` was 2.88 KB gz for 44 terms (31.45 on a block+terms
+route, /stats 32.87), and the 14 terms the pages were missing (mesh, resolution, FXN, FXN chain, bundle, tier, ops/s, DAO,
+roster, threshold, substrate, Auth Kit, Ghost ID, miner presence) take it to 4.03 KB for 58 -- 32.6 and 34.0 if every route
+still shipped all of it. The definitions alone compress to 3.08 KB, so the words could not be repacked into the room left
+(the tightest form saves 0.14), and shortening them would have made the definitions worse. What changed is who pays for which:
+`scripts/build-glossary.cjs` renders every route that loads a glossary (jsdom, the real scripts, the whole glossary behind its
+file), reads which terms the page actually rendered -- the first-use marking and any hand `[[word|key]]` -- and writes one
+small file per route, `js/content/glossary/<route>.js`: **58 files, 0.22-1.44 KB gz, 0.44 median, 31.5 KB in all but a visitor
+loads one**. Nothing is shortened and no word is listed by hand; a route's set is whatever its own text uses.
+
+- *Accessibility is unchanged.* A route's file loads with the route, before its module, so the definition is in the tip at
+  mount, is the trigger's accessible description, and is in the crawler's HTML (`tests/glossary-routes.cjs` checks all three on
+  /stats and /resolvers). Lazy loading stays refused, on Ark's term contract (`@deadark/ark-ui` `blocks/term`).
+- *One rule maps a route to its file* (`ArkUI.glossaryFor` in `js/pages/catalog.js`); a route lists `ArkUI.glossaryScript`
+  as before and a pass at the end of the catalog swaps in its file. The whole glossary stays for the editor, for a page with a
+  saved term block, and for a draft route the editor adds before it is saved and built.
+- *A file adds to what is loaded and takes nothing away*, so it may load before or after the whole glossary.
+- *A shared core plus per-route additions* was measured and is larger: with the four terms used by 30% of routes as the core
+  the sum over routes is 54.1 KB against 36.6 KB for per-route files (a second gzip stream shares no dictionary, and a route
+  using the core pays for all of it). The row form `[key, definition, term?]` saves 8% over objects, and a route file carries no header comment (39 B gz: `/resolvers` had 8 B of room).
+- *Drift is a failure.* `node scripts/build-glossary.cjs --check --routes` renders every route twice (the whole glossary behind
+  its file, then its own file) and fails when a page uses a glossary word its file does not carry, ships one it no longer
+  uses, or marks differently with only its own terms. `--check` alone (the doc against the generated files, no render) runs in
+  `tests/ark-blocks-adapter.cjs`. Adding an article or a theory page through the editor therefore needs the build before it is
+  published, or its route would name a file that does not exist.
+
+*What is still over R2, honestly* (measured on source scripts, before W5-MIN landed; with the minified page scripts above, `/explore` and `/account` are inside R2 and story pages gain the per-route glossary's saving): `/stats` by 1.23 (the live chunk alone is 1.42), and `/explore` and `/account` (+1.96, +3.70),
+which were already over for their popover and forms chunks and each gained a small glossary. `/resolvers` fits with a few bytes
+to spare, so the next term added to its text can push it over: `tests/glossary-routes.cjs` fails then, naming the route. What would
+close the rest: Ark's live chunk or kit shedding about 1.4 KB, or leaving a word unglossed on those pages.
+A limit of deriving from the rendered page: a view built only after an action (the signed-in views of `/account`) glosses the
+words its first view had; the rest stay plain, never a broken tooltip.
+
+**CSS ledger** (`gzip -9 < file | wc -c`, every stylesheet `index.html` links, 5a1ac71 vs 45d6b1a,
+2026-10-20): 160.4 KB gz (51 files) -> 114.3 KB gz (44 files), **-46.0 KB gz net** (-189 KB raw).
+Added: ark-blocks 7.3, block-page 1.2, themes +2.6 (the SDK sheet grew). Deleted: brand-marks
+-12.6, stats -5.3, article-reading -2.5, learnings -2.3, chain -1.7, bundle-deployer -1.3,
+resolvers -0.9, document-flow -0.4, fonts -0.4; shrunk as pages became blocks: home-swiss
+-6.7, resolutions -3.0, stats-dashboard -2.7, home-drafting -2.4, about -1.8, resolver-lab -1.7,
+home -1.2, home-flow -1.1, resolver-math -1.1, lifecycle -1.0, and smaller cuts across 20 more.
+Without brand-marks (a token move, not block work) the ledger is still -33.4. `ark-overrides` in
+the census counts site rules over Ark blocks; nothing still used was deleted.
+
+**Per-route stylesheets** (owner decision 2026-10-20, W5-CSS). `index.html` no longer links every sheet: it
+links the SHARED ones (30 of 46) and each route adds its own, so a page pays for its CSS and the shared sheets,
+not for every other page's. Nothing is listed per page by hand:
+
+- `node scripts/page-styles.mjs --write` derives the lists. A sheet is parsed into rules; a rule needs the
+  classes, ids, `data-*` attributes and `[data-page]` route values its selector names (nothing inside
+  `:not()/:is()`, no tag). A module's vocabulary is three independent sources: the DOM its routes really mount
+  (every route rendered through the server render's jsdom), the string literals of the scripts only that module
+  loads, and the shell's own words that no page file also uses (the header, settings panel, scene). A sheet is the
+  module's when any rule finds all its names; the sheet that provides an `@keyframes`/`@font-face` a needed rule
+  uses comes with it. A sheet every module needs is shared and stays linked in `index.html`; the rest is written
+  into `js/pages/catalog.js` (`ArkUI.pageStyles`, between the BEGIN/END markers) and onto each catalog entry as
+  `styles`. `--check` fails on drift (stale block, `index.html` links, an unplaced or orphan sheet);
+  `--why css/x.css` says which rule put a sheet where it is; `--sizes` prints the table below.
+- The one hand-kept fact is the cascade order (`ArkUI.styleOrder`, the order the sheets used to be linked in).
+- `js/ark/page-loader.js` `loadStyles` links a route's sheets before the page mounts and awaits their `load`
+  (the way it awaits scripts), each inserted at its place in the cascade, so `css/components.css` is still last.
+  A sheet that fails or stalls (8 s) never blocks the page: the console names it. Same `?v=` tag as the scripts
+  (`pageAssetVersion`). An entry with no `styles` list gets every sheet the shell does not link (heavy, correct).
+- The server render serializes the live document, so a bot's `<head>` carries the route's `<link>`s (checked by
+  `tests/page-styles-routes.cjs`). The editor's canvas is the same page in an iframe: the previewed route loads
+  its own list, a draft article/theory route carries its module's, and the Library's blocks are Ark blocks
+  (`css/ark-blocks.css`, shared) or legacy resolvers whose classes are shell words.
+- Proof: `tests/page-styles.cjs` (lists coherent, no orphan sheet, the selector reading, the loader) and
+  `tests/page-styles-routes.cjs` (every route rendered; no sheet it does NOT load has a rule matching an element
+  of the mounted page, asked of the DOM with the browser's own selector matching).
+- `css/stats-dashboard.css` was the first orphan the check found (no page draws a dashboard shell since the Ark
+  conversion) and is deleted (-1.0 KB gz).
+
+Cold-load CSS per route (`node scripts/page-styles.mjs --sizes`; every sheet `gzip -9` separately and summed, as
+a cold load fetches them; byte counts do not depend on the machine, measured on an Apple M2 8 GB, 2026-10-20):
+
+| route | before (all 47 sheets) | after | saved | requests |
+|---|---|---|---|---|
+| `/` | 134.3 KB gz | 103.4 | -30.9 | 47 -> 32 |
+| a story page (`/lifecycle`, `/concept`) | 134.3 | 100.6 | -33.7 | 47 -> 31 |
+| `/account` | 134.3 | 103.8 | -30.5 | 47 -> 32 |
+| `/stats` | 134.3 | 100.6 | -33.7 | 47 -> 31 |
+| `/explore` | 134.3 | 111.8 | -22.5 | 47 -> 34 |
+| mean of 65 routes | 134.3 | 101.4 | -32.9 (-24%) | |
+
+The saving is smaller than the page-specific sheets' total because 30 sheets stay shared: 14 are global by
+construction (themes, kit, fonts, `:root` token rules), and the home/scene sheets (`home`, `home-drafting`,
+`home-swiss`, `experience`, `lifecycle`, `download`, `how-overview` ...) are shared because their rules also name
+classes the shell or every route's DOM carries. Moving those out is a CSS refactor (their shared rules into the
+sheets that own them), not a loader change; `--why` names the rule for each.
+
+**The spec.** A page module returns `ArkUI.page(spec, host, options)`:
+
+```js
+ArkUI.pageModules.palette = { mount: function (host) {
+  return ArkUI.page([
+    { block: 'breadcrumb', id: 'palette-crumbs', props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Interface palette' }] } },
+    { block: 'hero', id: 'palette-hero', props: { eyebrow: '// Design system', title: 'Palette', lede: 'copy:PALETTE.LEDE' } },
+    { block: 'tabs', id: 'palette-views', props: { label: 'Palette views', items: [
+      { value: 'neutrals', label: 'Neutrals', blocks: [{ block: 'figure', props: { kind: 'live', slot: 'neutrals', caption: '...' } }] } ] } },
+    { insert: 'main' },                                  // the CMS anchor (data-ark-insert)
+    { block: 'actions', id: 'palette-onward', props: { items: [{ label: 'Theme settings', action: 'open-theme-settings' }] } }
+  ], host, { page: 'palette', className: 'palette-page', titleId: 'palette-title',
+             slots: { neutrals: function () { return swatchGrid(); } },
+             actions: { 'open-theme-settings': function (detail, event) { /* ... */ } } });
+} };
+```
+
+- **Entries**: `{ block, id, props, was }` -- an Ark block (props per `design/ark-ui/BLOCKS.md`);
+  `id` is authored (never `ark-r-`) and becomes the root id, so its layout key is `id:<id>`. A
+  block nested in a tab or an accordion item (`blocks: [...]`) may carry its own `id` and `was`, its
+  refs relative to it, as `derive` prints them; a nested `was` without an `id` is refused.
+  `{ insert: '<anchor>', was }` -- a CMS insertion anchor (keep the old anchor id).
+  `{ block: 'custom', id, mount(ctx), was }` -- the escape hatch for a bespoke scene; `ctx` is
+  `{ document, from, render(spec) }`; it returns a node.
+- **Options**: `page` (catalog key; derives `from`), `className`, `titleId` (given to the first
+  h1, else h2, and named by the page's `aria-labelledby` -- keep the old page's heading id and its
+  layout key needs no pin), `labelledBy`, `from`, `slots`, `actions`, `tag`, `onInvalid`
+  (authored specs default to `'throw'`: a missing copy key is a code defect the router and the
+  tests report, not a box on the page), `onFigureVisibility(figure, visible)` (a figure scrolled
+  in or out of view: pause the drawing it holds), `terms: 'first-use'` (the first time a glossary
+  word appears in the page's prose -- a block prop of schema kind `text`, never a `line` such as a
+  title or a button -- it becomes Ark's glossary term; derived from `ArkGlossary`, never a word
+  list; the copy key is still stamped on the element, its tooltip excluded from its words). Only
+  whole words count, and a hyphen is part of a word: "HTTP-served" and "same-shard" are not
+  "served" and "shard"; a word joined to more letters by a dot is another token ("Node.js" is not
+  the fleet's "node", "studio.fxn" not a "studio" -- 2026-10-19, W3-GUIDE: /download's "Use
+  Node.js 22" had become a term for a fleet machine). An entry is glossed only in its own sense: `context: [words]` (the text
+  must also say one of them; an entry whose glossary term carries a qualifier takes its last word,
+  so "Signer (of a launch)" applies where "launch" is said and "signer rotations" stays plain) and
+  `except: [phrases]` (never inside them). `glossary` (option) replaces `ArkGlossary` for the page,
+  tooltips included.
+- **Values**: `copy:AREA.ROLE` resolves through `ArkCopy`, and the element that shows it gets
+  `data-ark-copy-keys` (its layout key becomes `copy:AREA.ROLE`, stable however the page is
+  restructured; the Content lens binds it). `route:<key>`, `doc:<path>`, `url:<address>` resolve
+  through dash-kit's `resolveLinkField`, and in-site links get `data-scene-link` so the router
+  follows them. Anything else is used as written. A page with no manifest keeps literal words:
+  adding a manifest would grow a JSON-in-JS store (components.md R12).
+- **Slots**: a `figure` or `disclosure` prop `slot: '<name>'` places `options.slots[name]` (a node
+  or a function returning one) -- the page's own live content (a swatch grid, a stage scene).
+  The node is stamped `data-ark-slot="<name>"`. In a figure, a drawing (svg, canvas, img) fills
+  the frame as media does; any other node takes the frame's width below the kind label.
+- **Frame**: `css/block-page.css` is the panel every block page sits in (the task-page panel:
+  below the header, canvas at .97) and its reading column; a converted page adds no frame CSS.
+- **Actions**: an `actions` item with `action` and no `href` is a button that dispatches
+  `ark:action`; `options.actions[name](detail, event)` handles it.
+- **Folding** (the fold rule): `tabs` and `accordion` for views and topics; `disclosure` for one
+  piece of content -- `preview: 1-3` keeps that many lines in view with "More" (offered only when
+  the clamp cuts), `foldBelow: 'tablet' | 'phone'` folds only at 900 / 600 px and narrower.
+  Closed content stays in the DOM (`hidden="until-found"` where it is fully folded). It replaced
+  the local `ArkUI.dash.foldToggle` on /resolutions and /lifecycle.
+- `ArkUI.blocks.render(spec, { from, slots, onInvalid })` renders one block into hand-built markup
+  (a page not yet converted); `spec.was` works there too.
+- `ArkUI.blocks.update(el, props, { from, slots, glossary, onInvalid, keep })` patches a block it
+  rendered IN PLACE with new props (Ark's `patchArkBlock`, `design/ark-ui/BLOCKS.md` "Updating a
+  live block"): an element whose shape did not change keeps its identity, so a saved CMS edit, a
+  pin and a style stay applied between a live page's polls; copy keys and scene links are stamped
+  again. Tabs, accordions and disclosures are refused (a primitive holds their open state): update
+  the blocks inside them. Invalid props replace the block with Ark's refusal, in place. `/stats`
+  refreshes its live tiles, bars and tables this way.
+- A `line` prop's `maxLength` is checked on the words a `copy:` key resolves to, not on the key,
+  so a tab label may be a copy key.
+
+**The story template** (`js/pages/story.js`, Wave 3). The guided pages -- the theory sheets
+(`/concept/*`, `/dao`), the agreement chapters (`/how-deployment-works/ask|work|check`), "Deploy a
+resolver" (`/how-deployment-works`), the agreement lifecycle (`/lifecycle` and its five stages), and
+the resolver guide (`/what-is-a-resolver`, whose live illustration is its figure, and
+`/start-from-something-real`) with `/download` (its terminal is the figure) -- are one template
+over `ArkUI.page`: breadcrumb (no ordinals) / hero (the eyebrow is the page's
+position in its sequence, `ArkUI.story.position('Agreement lifecycle', i, 5)` -> "Agreement
+lifecycle · 2 of 5"; the hero's actions are the page's hand-offs) / an optional notice / the body:
+ONE depth control -- Ark tabs, `variant: 'segmented'`, labels **The idea · How it works ·
+Evidence** on every page, values `focus | context | reference`, addressed `?view=context`,
+`?view=reference` (the idea has none) and restored from history -- with the page's boundary
+callout under it (in sight in every view; `boundaryFold: 'phone'` folds a long one behind "Show
+the status" at 600px and narrower), and beside it wider than 900px the page's figure (Ark's
+figure frame in Ark's disclosure, `foldBelow: 'tablet'`, "Show the illustration") and side
+blocks / the CMS anchor / the pager. A page module describes its page as data (`def`, documented
+at the top of `story.js`) and calls `ArkUI.story.mount(def, host)`; `ArkUI.story.bindTabs` binds
+any tabs block to the address the same way (`/concept`'s question groups). The idea holds the
+short answer -- the page's plain-language lede -- so every view stays inside the fold rule on a
+phone (measured: docs/ux-audit, W3-STORY). Route scripts: `ArkUI.storyScripts`. Layout: the
+story body's two columns in `css/block-page.css`; a story page adds no layout CSS of its own,
+only its drawing's insides (`css/lifecycle.css`, `css/story-diagrams.css`). Regression:
+`tests/story-blocks.cjs` (every word the old page showed is still on it, one depth control,
+continuity of every saved layout key, per route), `tests/story-ssr.cjs` (the server render, by
+`tests/lib/block-page-checks.cjs`), `tests/routes-live.cjs` (the behaviour in a real DOM).
+
+**The family home, /about and /chain** (Wave 3, W3-HOME). Each was a hero followed by one
+undivided "More" disclosure (or, on /chain, a scene with a visually hidden heading); each is now a
+hero and ONE Ark tabs control organised by the visitor's next question, every view inside the fold
+rule on its own (`js/pages/home.js`, `about.js`, `chain.js`). Their drawings stay the page's own,
+passed in as figure slots (`js/pages/home-flow.js`: the landscape and transit map; /chain's plain
+scene is HTML so its record stays >= 12px on a phone; the layer drawing in `about.js`), and the
+chain scene plays once and settles. The home page's benchmark tiles read the generated evidence
+registry (`js/content/evidence-registry.js`, `docs/content-sources.md`): a figure no verified
+record carries is absent, never a number. A tile that updates later (the live fleet signal) is
+patched with `ArkUI.blocks.update`. Regression: `tests/home-blocks.cjs`, `tests/about-page.cjs`,
+`tests/chain-blocks.cjs`, `tests/home-launch.cjs`, `tests/home-hero-scene.cjs`.
+
+**Form blocks and the confirm dialog** (W4-ARK, 2026-10-20; the props are `design/ark-ui/BLOCKS.md`).
+A page that takes input lists the chunk with its scripts, anywhere after `ArkUI.blockScripts` (the chunk
+and the adapter may load in either order): `scripts: ArkUI.blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/pages/<page>.js'])`.
+`ArkUI.blocks.formsScript` names it; the `popover` block is its own chunk, `ArkUI.blocks.popoverScript` (a page that floats a panel and takes no input lists only that). Every press that means something to the page raises `ark:action`, so
+the page's `options.actions[name](detail, event)` hears it: a form's `detail` is `{ action, values, block }`
+(the form never posts), a list row's button adds `item` (the row's `id`), a `choice`/`field` with `action`
+adds `value`. A refusal the page makes goes back as `ArkUI.blocks.update(formEl, props-with-error)` --
+`error: { failure, needs, remedy }` on the field -- and a result under the form as
+`ArkUI.blocks.update(statusEl, { text, tone })` (the `status-line` is a polite live region that is in the
+DOM before it has anything to say). `actions` items take `disabled`, `busy` (+ `busyLabel`), `target`
+and `rel`; a `stat` takes `href` or `action` (one control, described by the reading) and `logo: { image, alt }`.
+`ArkKit.arkConfirm({ title, message, confirmLabel, cancelLabel, tone })` (the editor's full kit) replaces
+`window.confirm()`: it resolves true or false, Esc cancels, the page behind is inert; it sits at
+`z-index: var(--z-modal, 100)`, so add `['--z-modal', 100]` to the ladder in `js/admin/overlay.js` to place it
+in `tests/cms-overlay-z-ladder.cjs`'s order.
+
+**Layout-key continuity: required for every conversion.** Saved CMS edits are keyed by layout
+key, and most hand-built elements have path keys, so a conversion re-keys them. The workflow
+(`tests/lib/layout-continuity.cjs`):
+1. BEFORE touching the page: `node tests/lib/layout-continuity.cjs capture /route` freezes its key
+   census (`tests/fixtures/layout-keys/<route>.tsv`, TSV). It refuses to overwrite one: the old
+   page cannot re-derive it.
+2. Convert the page.
+3. `node tests/lib/layout-continuity.cjs derive /route` pins, on the converted page, each old key
+   whose words now sit elsewhere, and prints the `was` maps to paste, by spec entry id: refs are
+   `':root'`, `'<part>[#n]'` (the n-th element with that `data-ark-part` in the block),
+   `'[data-ark-slot="name"]'`, or a `:scope` path. A value is the old key, or
+   `{ key, self: true }` for the element alone. Words that are on no element any more are listed:
+   pin each by hand as **reshaped** (same content, new shape) or declare it **retired**, with the
+   reason, in the page's test.
+4. The page's test: `assertContinuity(census, await pageKeys(route), { reshaped, retired })`
+   (every old key still names an element with the same words; no two elements share a key) and
+   `await assertSavedEditsLand(route, census, { reshaped, retired })` (a real saved layout draft
+   with a frame on every old key, booted through the server render, lands on each one).
+   Examples: `tests/palette-blocks.cjs`, `tests/resolutions-blocks.cjs` (one template, 20 pages: the pins
+   derived in code from the structure the old pages were built from, the reasons as one rule table).
+   `tests/lib/converted-page.cjs` runs the whole check for one route from rule tables
+   (`[RegExp, reason]` for reshaped, retired and reworded keys) and adds two more: every leaf the old
+   page showed (its census) is in the new page's words, and no new element takes a retired key --
+   a new element whose computed path equals a retired key would inherit an edit saved for
+   something else, so such a key must be pinned (reshaped) instead (`tests/resolver-guide-blocks.cjs`,
+   `tests/task-pages-blocks.cjs`).
+
+**Server render.** Blocks render synchronously into light DOM before `ark:route-ready`, styled
+only by the static sheet: no style attributes, no injected rules (`tests/ssr-ark-blocks.cjs`).
+Generated ids (`ark-r-<scope>--<n>`) come from a counter that restarts in every document, so two
+server renders are byte-identical -- and a browser's ids differ from the server's by design.
+Nothing hydrates (people get `index.html` and the router mounts fresh; only crawlers get server
+HTML); if server nodes are ever reused in a browser, a block's whole subtree must be replaced,
+never patched.
 
 ## Versions
 
@@ -491,9 +1017,12 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | file | owns |
 |---|---|
 | `core.js` | the `ArkAdmin` namespace and its vocabulary (`$`, `h`, `status`, `toast`, `refuse`, ...); refuses to run outside `admin.html` |
+| `overlay.js` | the one dismissable-layer stack (`overlay.open/close/forget/closeLevel/isOpen`), the one close button, and the one stacking order: every floating layer's level, published as `--z-<layer>` custom properties that `css/admin.css` and `css/studio-embed.css` read (`overlay.layers`) |
+| `history.js` | the ONE undo history: canvas entries and form-field entries, in order; `undo()`, `redo()`, `historyState()` |
 | `notice.js` | `notice({ tone, title, body, actions, persist, key, into })`: the one toast / banner / inline alert (Ark UI's alert and toast-region shape, so a later wave swaps its internals); `toast()` is a notice; `tests/cms-notice.cjs` |
 | `state.js` | `A.state`: the lens and its rail tabs, the view, the item a form edits, every draft and its saved copy, dirty checks (`anyDirty`) |
-| `controls.js` | the control-row builders every panel draws with |
+| `ark-host.js` | Ark's behaviour primitives on its light-DOM host (`ArkKit.createArkDomHost`) over elements the editor builds: `arkTabs` (Page settings, Site style), `arkDisclosure` (Developer details, SEO's Advanced, Unused fields, a version row's longer list), `arkSegGroup` (the lens, screen size, Edit / Preview, the new item's kind, Media's Grid / List), `arkAccordion` (the Library's groups). Ark writes the ARIA and the hidden state; the markup carries Ark's block classes so `css/ark-blocks.css` draws the tabs and the disclosure. Without ArkKit each works by click. Replaced `primitives.js` (W3-EDITOR, 2026-10-19), whose `.ark-tabs` / `.ark-disclosure` classes collided with Ark's own |
+| `controls.js` | the control-row builders every panel draws with, and `devDetails()` -- the one "Developer details" disclosure where keys, files, ids and raw values live |
 | `save.js` | `saveEverything`, `singleDraftHandle`, `siteFromState`, the one removal path |
 | `nav.js` | the lens (`setLens`), the `select*()` entry points (a page or article is also shown on the canvas), `renderList()` (the repaint after a draft change: header dots, Save, the Pages tree), `--app-bar-h` |
 | `editor.js` | page fields (`renderPageFields`), the one field write (`setItemField`), touch / Revert / create / delete, the panel registry ([Content forms](#content-forms-and-the-one-field-write)) |
@@ -510,7 +1039,7 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | `admin.js` | starts the editor: the save shortcut, the unsaved-work warning, `window.ArkAdminApp`, the first load |
 
 Loaded before them and not part of the split: `store.js` (`ArkAdminStore`), `versions.js`,
-`versions-panel.js`, `publish.js` (`ArkPublish`), `primitives.js`, `crypto.js`; and in
+`versions-panel.js`, `publish.js` (`ArkPublish`), `crypto.js`; and in
 `admin.html`, `auth.js` and `gate.js`.
 
 `window.ArkAdminApp` is the editor's public test surface: `unsaved()`, `site()` (what Publish
@@ -565,3 +1094,11 @@ is the out-of-memory pattern.
   `pageRow` (a Pages-tree row), `openPageFields` / `sheetBody` / `closeSheet`, `openPageSeo`,
   `openSiteSeo`, `openBackground`, `clickHeader`. `appFrame` waits for `#lensDesignBtn` and
   `window.ArkAdminApp`.
+
+**Named exception (coordinator, 2026-10-20, after Ark 0.2.12):** `/resolvers` (30.18 KB gz: kit + adapter +
+its glossary) and `/stats` (30.02) stay over the +30 sub-budget that `tests/glossary-routes.cjs` measures. Ark
+0.2.12 moved `lane`/`band` into a figures-only chunk and brought the other eight routes back under; these two were
+at 30.01 and ~29.9 before any 0.2.11 feature, and the findable folds and aligned card rows that stay in the core kit
+cost ~0.17. The test holds them to ceilings (30.25, 30.10) so neither can grow unnoticed. Measured on the whole
+minified route against 5a1ac71 (the R2 definition), both are well inside (`/stats` +26.9). What would close them:
+about 0.2 KB out of the core kit, the adapter or these two pages' glossaries, or a smaller live chunk.

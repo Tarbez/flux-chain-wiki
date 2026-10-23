@@ -1,0 +1,38 @@
+# key	tag	text -- layout keys of /reference before conversion, captured 2026-10-20 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Return to HomeOriginal MarkdownCanonical reference / docs/protocol/agreements.mdAgreementsThis source provides the detailed contract. Opening it does not establ
+page:/nav:1	nav	Return to HomeOriginal Markdown
+page:/nav:1/a:1	a	Return to Home
+page:/nav:1/a:1/svg:1	svg	
+page:/nav:1/a:1/svg:1/path:1	path	
+page:/nav:1/a:1/svg:1/path:2	path	
+page:/nav:1/a:2	a	Original Markdown
+page:/nav:1/a:2/svg:1	svg	
+page:/nav:1/a:2/svg:1/path:1	path	
+page:/nav:1/a:2/svg:1/path:2	path	
+page:/nav:1/a:2/svg:1/path:3	path	
+page:/p:1	p	Canonical reference / docs/protocol/agreements.md
+page:/h1:1	h1	Agreements
+page:/p:2	p	This source provides the detailed contract. Opening it does not establish a live observation or verification result.
+page:/article:1	article	> Written for the agreement-fabric direction, which is no longer the direction (status.md). For resolvers today, read resolvers. Kept as written; this note was 
+page:/article:1/p:1	p	> Written for the agreement-fabric direction, which is no longer the direction (status.md). For resolvers today, read resolvers. Kept as written; this note was 
+page:/article:1/p:1/a:1	a	resolvers
+page:/article:1/p:2	p	Flux models execution as a five-stage lifecycle:
+page:/article:1/ol:1	ol	Intent — a participant describes desired work and constraints.Offer — a provider proposes terms and capability.Agreement — accepted terms become an addressed ag
+page:/article:1/ol:1/li:1	li	Intent — a participant describes desired work and constraints.
+page:/article:1/ol:1/li:1/strong:1	strong	Intent
+page:/article:1/ol:1/li:2	li	Offer — a provider proposes terms and capability.
+page:/article:1/ol:1/li:2/strong:1	strong	Offer
+page:/article:1/ol:1/li:3	li	Agreement — accepted terms become an addressed agreement.
+page:/article:1/ol:1/li:3/strong:1	strong	Agreement
+page:/article:1/ol:1/li:4	li	Fulfillment — the provider submits the result and supporting evidence.
+page:/article:1/ol:1/li:4/strong:1	strong	Fulfillment
+page:/article:1/ol:1/li:5	li	Receipt — verification records what was accepted or rejected.
+page:/article:1/ol:1/li:5/strong:1	strong	Receipt
+page:/article:1/p:3	p	The lifecycle is implemented in source. That does not establish that every admission, installation, activation, checking, or compensation path is automatic in p
+page:/article:1/h3:1	h3	Evidence
+page:/article:1/p:4	p	Agreement-fabric status, agreement data, and evidence are exposed through the fixed inspection endpoints listed in verification. An evidence record should ident
+page:/article:1/p:4/a:1	a	verification
+page:/article:1/h3:2	h3	Interpretation
+page:/article:1/p:5	p	A receipt records a verification outcome under identified rules. It should not be described as universal truth or as legally binding settlement. See authority f
+page:/article:1/p:5/a:1	a	authority
+page:/div:1	div	

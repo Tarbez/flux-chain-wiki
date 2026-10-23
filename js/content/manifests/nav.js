@@ -19,13 +19,13 @@ ArkManifest.define({
       "value": "Overview"
     },
     "HOW": {
-      "label": "Header link: how Flux works",
+      "label": "Header link: deploy a resolver (/how-deployment-works). The page is named \"Deploy a resolver\"; the header says \"Deploy\" so the row fits at 1440px",
       "kind": "line",
       "section": "Header links",
-      "value": "How it works"
+      "value": "Deploy"
     },
     "RUN": {
-      "label": "Header link: run Flux",
+      "label": "Header link: run DEFXN",
       "kind": "line",
       "section": "Header links",
       "value": "Run DEFXN"
@@ -52,7 +52,7 @@ ArkManifest.define({
       "label": "Header link: what is a resolver",
       "kind": "line",
       "section": "Header links",
-      "value": "Resolver"
+      "value": "What is a resolver?"
     },
     "REFERENCES": {
       "label": "Header link: reference resolvers",
@@ -64,7 +64,7 @@ ArkManifest.define({
       "label": "Header link: how deployment works",
       "kind": "line",
       "section": "Header links",
-      "value": "How it works"
+      "value": "Deploy a resolver"
     },
     "THEORY": {
       "label": "Header link: manifest",
@@ -132,11 +132,11 @@ ArkManifest.define({
       "section": "Back button",
       "value": "EXPERIMENTS"
     },
-    "BACK.TUTORIALS": {
-      "label": "Back to tutorials",
+    "BACK.NOTES": {
+      "label": "Back to the notes",
       "kind": "line",
       "section": "Back button",
-      "value": "TUTORIALS"
+      "value": "NOTES"
     },
     "BACK.THEORY": {
       "label": "Back to the theory",

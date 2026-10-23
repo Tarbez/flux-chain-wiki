@@ -1,0 +1,337 @@
+# key	tag	text -- layout keys of /resolvers before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	Every resolver runs its own chain · built from shared capabilitiesResolvers and capabilitiesA dated snapshot of every first-party resolver chain and every capab
+page:/div:1	div	Every resolver runs its own chain · built from shared capabilitiesResolvers and capabilitiesA dated snapshot of every first-party resolver chain and every capab
+page:/div:1/div:1	div	Every resolver runs its own chain · built from shared capabilitiesResolvers and capabilitiesA dated snapshot of every first-party resolver chain and every capab
+page:/div:1/div:1/article:1	article	Every resolver runs its own chain · built from shared capabilitiesResolvers and capabilitiesA dated snapshot of every first-party resolver chain and every capab
+page:/div:1/div:1/article:1/p:1	p	Every resolver runs its own chain · built from shared capabilities
+id:resolvers-title	h1	Resolvers and capabilities
+page:/div:1/div:1/article:1/p:2	p	A dated snapshot of every first-party resolver chain and every capability a resolver can be built from, read from the code that defines them. Each row opens in 
+page:/div:1/div:1/article:1/p:3	p	Snapshot · defxn-defi-rs e167065 · 2026-10-19Development network · 2026-10-18Live view · explore.defxn.com ↗
+page:/div:1/div:1/article:1/p:3/span:1	span	Snapshot · defxn-defi-rs e167065 · 2026-10-19
+page:/div:1/div:1/article:1/p:3/span:2	span	Development network · 2026-10-18
+page:/div:1/div:1/article:1/p:3/a:1	a	Live view · explore.defxn.com ↗
+page:/div:1/div:1/article:2	article	12native resolver chains5bridge chains5capability manifestsIn source at e167065. The development network listed 12 resolver chains, all native, on 2026-10-18.
+page:/div:1/div:1/article:2/p:1	p	12native resolver chains
+page:/div:1/div:1/article:2/p:1/strong:1	strong	12
+page:/div:1/div:1/article:2/p:1/span:1	span	native resolver chains
+page:/div:1/div:1/article:2/p:2	p	5bridge chains
+page:/div:1/div:1/article:2/p:2/strong:1	strong	5
+page:/div:1/div:1/article:2/p:2/span:1	span	bridge chains
+page:/div:1/div:1/article:2/p:3	p	5capability manifests
+page:/div:1/div:1/article:2/p:3/strong:1	strong	5
+page:/div:1/div:1/article:2/p:3/span:1	span	capability manifests
+page:/div:1/div:1/article:2/p:4	p	In source at e167065. The development network listed 12 resolver chains, all native, on 2026-10-18.
+page:/div:1/div:1/article:3	article	Resolver chains12 first-party resolver chains, each launched by one recordEach resolver below is its own chain, launched by one signed record. “Grammar enforced
+id:registry-chains-label	p	Resolver chains
+page:/div:1/div:1/article:3/h2:1	h2	12 first-party resolver chains, each launched by one record
+page:/div:1/div:1/article:3/p:2	p	Each resolver below is its own chain, launched by one signed record. “Grammar enforced” means every record is checked against the grammar the resolver published
+page:/div:1/div:1/article:3/div:1	div	Resolver chains in the snapshotChain idResolverBuilt fromGrammarControlaclACL (ACR)—Grammar enforced—Open in Explore ↗balresBalancesignerGrammar enforced—Open i
+page:/div:1/div:1/article:3/div:1/table:1	table	Resolver chains in the snapshotChain idResolverBuilt fromGrammarControlaclACL (ACR)—Grammar enforced—Open in Explore ↗balresBalancesignerGrammar enforced—Open i
+page:/div:1/div:1/article:3/div:1/table:1/thead:1	thead	Chain idResolverBuilt fromGrammarControl
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1	tr	Chain idResolverBuilt fromGrammarControl
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1/th:1	th	Chain id
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1/th:2	th	Resolver
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1/th:3	th	Built from
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1/th:4	th	Grammar
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1/th:5	th	Control
+page:/div:1/div:1/article:3/div:1/table:1/thead:1/tr:1/th:6	th	
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1	tbody	aclACL (ACR)—Grammar enforced—Open in Explore ↗balresBalancesignerGrammar enforced—Open in Explore ↗computeCompute rentledgerUnspecified (legacy)—Open in Explor
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1	tr	aclACL (ACR)—Grammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/th:1	th	acl
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:1	td	ACL (ACR)
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:2	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:2/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:1/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2	tr	balresBalancesignerGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/th:1	th	balres
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:1	td	Balance
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:2	td	signer
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:2/span:1	span	signer
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:2/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3	tr	computeCompute rentledgerUnspecified (legacy)—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/th:1	th	compute
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:1	td	Compute rent
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:2	td	ledger
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:2/span:1	span	ledger
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:3	td	Unspecified (legacy)
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:3/span:1	span	Unspecified (legacy)
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:3/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4	tr	custodyCustodycustodyGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/th:1	th	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:1	td	Custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:2	td	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:2/span:1	span	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:4/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5	tr	daoDAOmultisigGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/th:1	th	dao
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:1	td	DAO
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:2	td	multisig
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:2/span:1	span	multisig
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:5/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6	tr	domainDomaincustodyGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/th:1	th	domain
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:1	td	Domain
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:2	td	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:2/span:1	span	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:6/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7	tr	payoutPayout—Grammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/th:1	th	payout
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:1	td	Payout
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:2	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:2/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:7/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8	tr	recordsName records—Grammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/th:1	th	records
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:1	td	Name records
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:2	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:2/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:8/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9	tr	slashSlashcustodyGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/th:1	th	slash
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:1	td	Slash
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:2	td	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:2/span:1	span	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:9/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10	tr	stakeStakecustodyGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/th:1	th	stake
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:1	td	Stake
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:2	td	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:2/span:1	span	custody
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:10/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11	tr	storageStorage rentledgerUnspecified (legacy)—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/th:1	th	storage
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:1	td	Storage rent
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:2	td	ledger
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:2/span:1	span	ledger
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:3	td	Unspecified (legacy)
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:3/span:1	span	Unspecified (legacy)
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:11/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12	tr	treasuryTreasurycustodymultisigGrammar enforced—Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/th:1	th	treasury
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:1	td	Treasury
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:2	td	custodymultisig
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:2/span:1	span	custodymultisig
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:3	td	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:3/span:1	span	Grammar enforced
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:4	td	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:4/span:1	span	—
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:5	td	Open in Explore ↗
+page:/div:1/div:1/article:3/div:1/table:1/tbody:1/tr:12/td:5/a:1	a	Open in Explore ↗
+page:/div:1/div:1/article:3/p:3	p	Grammar state is the source manifest at e167065; the development network was launched before it and was not re-read. Control key and announcing providers are no
+page:/div:1/div:1/article:4	article	Capabilities5 capability manifests, derived from their crates’ own testsA capability is one shared mechanism, published with the tests that define it. A provide
+id:registry-caps-label	p	Capabilities
+page:/div:1/div:1/article:4/h2:1	h2	5 capability manifests, derived from their crates’ own tests
+page:/div:1/div:1/article:4/p:2	p	A capability is one shared mechanism, published with the tests that define it. A provider must pass those tests before it may serve any resolver that uses it.
+page:/div:1/div:1/article:4/p:3	p	Launched on the development network at its last recorded restart: none. That is a measured zero, not a missing feature; the manifests below are ready to launch.
+page:/div:1/div:1/article:4/div:1	div	Capability manifests in the snapshotCapabilityVersionTest vectorsSource hashUsed bycustody0.1.0216443c11b46d4custodydomainslashstaketreasuryescrow0.1.066c6021bc
+page:/div:1/div:1/article:4/div:1/table:1	table	Capability manifests in the snapshotCapabilityVersionTest vectorsSource hashUsed bycustody0.1.0216443c11b46d4custodydomainslashstaketreasuryescrow0.1.066c6021bc
+page:/div:1/div:1/article:4/div:1/table:1/thead:1	thead	CapabilityVersionTest vectorsSource hashUsed by
+page:/div:1/div:1/article:4/div:1/table:1/thead:1/tr:1	tr	CapabilityVersionTest vectorsSource hashUsed by
+page:/div:1/div:1/article:4/div:1/table:1/thead:1/tr:1/th:1	th	Capability
+page:/div:1/div:1/article:4/div:1/table:1/thead:1/tr:1/th:2	th	Version
+page:/div:1/div:1/article:4/div:1/table:1/thead:1/tr:1/th:3	th	Test vectors
+page:/div:1/div:1/article:4/div:1/table:1/thead:1/tr:1/th:4	th	Source hash
+page:/div:1/div:1/article:4/div:1/table:1/thead:1/tr:1/th:5	th	Used by
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1	tbody	custody0.1.0216443c11b46d4custodydomainslashstaketreasuryescrow0.1.066c6021bc917b—ledger0.1.07ad9593083fbecomputestoragemultisig0.1.04269bf8cf1c8adaotreasurysig
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1	tr	custody0.1.0216443c11b46d4custodydomainslashstaketreasury
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1/th:1	th	custody
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1/td:1	td	0.1.0
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1/td:2	td	21
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1/td:3	td	6443c11b46d4
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1/td:4	td	custodydomainslashstaketreasury
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:1/td:4/span:1	span	custodydomainslashstaketreasury
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2	tr	escrow0.1.066c6021bc917b—
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2/th:1	th	escrow
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2/td:1	td	0.1.0
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2/td:2	td	6
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2/td:3	td	6c6021bc917b
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2/td:4	td	—
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:2/td:4/span:1	span	—
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3	tr	ledger0.1.07ad9593083fbecomputestorage
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3/th:1	th	ledger
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3/td:1	td	0.1.0
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3/td:2	td	7
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3/td:3	td	ad9593083fbe
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3/td:4	td	computestorage
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:3/td:4/span:1	span	computestorage
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4	tr	multisig0.1.04269bf8cf1c8adaotreasury
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4/th:1	th	multisig
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4/td:1	td	0.1.0
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4/td:2	td	4
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4/td:3	td	269bf8cf1c8a
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4/td:4	td	daotreasury
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:4/td:4/span:1	span	daotreasury
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5	tr	signer0.1.0638019e704447balres
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5/th:1	th	signer
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5/td:1	td	0.1.0
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5/td:2	td	6
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5/td:3	td	38019e704447
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5/td:4	td	balres
+page:/div:1/div:1/article:4/div:1/table:1/tbody:1/tr:5/td:4/span:1	span	balres
+page:/div:1/div:1/article:5	article	Bridge chains · 5These products also write their records to resolver chains of their own, beside the older paths they still use.Bridge chains in the snapshotCha
+page:/div:1/div:1/article:5/details:1	details	Bridge chains · 5These products also write their records to resolver chains of their own, beside the older paths they still use.Bridge chains in the snapshotCha
+page:/div:1/div:1/article:5/details:1/summary:1	summary	Bridge chains · 5
+page:/div:1/div:1/article:5/details:1/p:1	p	These products also write their records to resolver chains of their own, beside the older paths they still use.
+page:/div:1/div:1/article:5/details:1/div:1	div	Bridge chains in the snapshotChain idProductThroughRecordsNotepkgresolverlivePackagemesh-registry bridgeKPKGV1additive bridge; GUN path still livebundleresolver
+page:/div:1/div:1/article:5/details:1/div:1/table:1	table	Bridge chains in the snapshotChain idProductThroughRecordsNotepkgresolverlivePackagemesh-registry bridgeKPKGV1additive bridge; GUN path still livebundleresolver
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1	thead	Chain idProductThroughRecordsNote
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1/tr:1	tr	Chain idProductThroughRecordsNote
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1/tr:1/th:1	th	Chain id
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1/tr:1/th:2	th	Product
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1/tr:1/th:3	th	Through
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1/tr:1/th:4	th	Records
+page:/div:1/div:1/article:5/details:1/div:1/table:1/thead:1/tr:1/th:5	th	Note
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1	tbody	pkgresolverlivePackagemesh-registry bridgeKPKGV1additive bridge; GUN path still livebundleresolverliveBundlebundle-deploy bridgeKBUNDLE1additive bridgeenvresolv
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1	tr	pkgresolverlivePackagemesh-registry bridgeKPKGV1additive bridge; GUN path still live
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1/th:1	th	pkgresolverlive
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1/td:1	td	Package
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1/td:2	td	mesh-registry bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1/td:3	td	KPKGV1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1/td:3/span:1	span	KPKGV1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:1/td:4	td	additive bridge; GUN path still live
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2	tr	bundleresolverliveBundlebundle-deploy bridgeKBUNDLE1additive bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2/th:1	th	bundleresolverlive
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2/td:1	td	Bundle
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2/td:2	td	bundle-deploy bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2/td:3	td	KBUNDLE1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2/td:3/span:1	span	KBUNDLE1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:2/td:4	td	additive bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3	tr	envresolverliveEnvremote-env bridgeKREMOTEENV1additive bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3/th:1	th	envresolverlive
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3/td:1	td	Env
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3/td:2	td	remote-env bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3/td:3	td	KREMOTEENV1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3/td:3/span:1	span	KREMOTEENV1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:3/td:4	td	additive bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4	tr	fluxcode<pid>Repoflux-code-host bridgeKEDITINTENT1additive; throwaway per-process key
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4/th:1	th	fluxcode<pid>
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4/td:1	td	Repo
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4/td:2	td	flux-code-host bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4/td:3	td	KEDITINTENT1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4/td:3/span:1	span	KEDITINTENT1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:4/td:4	td	additive; throwaway per-process key
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5	tr	dbresolverliveDBflux-db-studio bridgeKDBROW1additive
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5/th:1	th	dbresolverlive
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5/td:1	td	DB
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5/td:2	td	flux-db-studio bridge
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5/td:3	td	KDBROW1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5/td:3/span:1	span	KDBROW1
+page:/div:1/div:1/article:5/details:1/div:1/table:1/tbody:1/tr:5/td:4	td	additive
+page:/div:1/div:1/article:6	article	Deploy your ownWrite your grammar. Derive it from your own sample records.Name the capabilities you build on.Choose: immutable, or upgradeable by one key.Review
+id:registry-deploy-label	p	Deploy your own
+page:/div:1/div:1/article:6/ol:1	ol	Write your grammar. Derive it from your own sample records.Name the capabilities you build on.Choose: immutable, or upgradeable by one key.Review the exact reco
+page:/div:1/div:1/article:6/ol:1/li:1	li	Write your grammar. Derive it from your own sample records.
+page:/div:1/div:1/article:6/ol:1/li:2	li	Name the capabilities you build on.
+page:/div:1/div:1/article:6/ol:1/li:3	li	Choose: immutable, or upgradeable by one key.
+page:/div:1/div:1/article:6/ol:1/li:4	li	Review the exact record and sign it at deploy.defxn.com.
+page:/div:1/div:1/article:6/ol:1/li:5	li	Run a provider for it. If you compose capabilities, prove them first.
+page:/div:1/div:1/article:6/p:2	p	Full walkthrough →Open Deploy ↗What is a resolver? →Resolver math →Reference resolvers →Create or join a network →
+page:/div:1/div:1/article:6/p:2/a:1	a	Full walkthrough →
+page:/div:1/div:1/article:6/p:2/a:2	a	Open Deploy ↗
+page:/div:1/div:1/article:6/p:2/a:3	a	What is a resolver? →
+page:/div:1/div:1/article:6/p:2/a:4	a	Resolver math →
+page:/div:1/div:1/article:6/p:2/a:5	a	Reference resolvers →
+page:/div:1/div:1/article:6/p:2/a:6	a	Create or join a network →
+page:/div:1/div:1/article:6/p:3	p	Explore and Deploy run on the development network; public hosting is not established yet.
+page:/div:1/div:1/article:7	article	Applications that read records but are not resolver chains yet · 6Listed on this page before resolver chains existed. None of them is launched as a resolver cha
+page:/div:1/div:1/article:7/details:1	details	Applications that read records but are not resolver chains yet · 6Listed on this page before resolver chains existed. None of them is launched as a resolver cha
+page:/div:1/div:1/article:7/details:1/summary:1	summary	Applications that read records but are not resolver chains yet · 6
+page:/div:1/div:1/article:7/details:1/p:1	p	Listed on this page before resolver chains existed. None of them is launched as a resolver chain; each keeps its own figures and open issues, dated where they w
+page:/div:1/div:1/article:7/details:1/ul:1	ul	DeFi · cross-shard transfer resolverIn serviceInterprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-s
+page:/div:1/div:1/article:7/details:1/ul:1/li:1	li	DeFi · cross-shard transfer resolverIn serviceInterprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-s
+page:/div:1/div:1/article:7/details:1/ul:1/li:1/p:1	p	DeFi · cross-shard transfer resolverIn service
+page:/div:1/div:1/article:7/details:1/ul:1/li:1/p:1/strong:1	strong	DeFi · cross-shard transfer resolver
+page:/div:1/div:1/article:7/details:1/ul:1/li:1/p:1/span:1	span	In service
+page:/div:1/div:1/article:7/details:1/ul:1/li:1/p:2	p	Interprets three transfer shapes: Lever A TransferAtomic (same-shard, 1 op), Lever B TransferSend/Receive (cross-shard, 2 ops; the production path), and the leg
+page:/div:1/div:1/article:7/details:1/ul:1/li:1/p:3	p	Swaps per batch auction · one resolver shard · 10 replicas: 256 swaps/batch · BENCH-012 (2026-10-10): two parties sign their intent, the shard resolves a batch 
+page:/div:1/div:1/article:7/details:1/ul:1/li:1/p:4	p	Open issues: No independent security review
+page:/div:1/div:1/article:7/details:1/ul:1/li:2	li	PVA · signed books, citations and reviewsIn serviceInterprets paper-asset LEDGERENTRYs: title + abstract, citations/cited-by graph, rating and reviews. Produces
+page:/div:1/div:1/article:7/details:1/ul:1/li:2/p:1	p	PVA · signed books, citations and reviewsIn service
+page:/div:1/div:1/article:7/details:1/ul:1/li:2/p:1/strong:1	strong	PVA · signed books, citations and reviews
+page:/div:1/div:1/article:7/details:1/ul:1/li:2/p:1/span:1	span	In service
+page:/div:1/div:1/article:7/details:1/ul:1/li:2/p:2	p	Interprets paper-asset LEDGERENTRYs: title + abstract, citations/cited-by graph, rating and reviews. Produces downloadable archive bundles (.book.zip) from a pa
+page:/div:1/div:1/article:7/details:1/ul:1/li:2/p:3	p	Record lookups per second (local registry): — · not yet published; the pva-registry is HTTP-serve under one process. A pulse is pending.
+page:/div:1/div:1/article:7/details:1/ul:1/li:2/p:4	p	Open issues: No published throughput benchmark; In-browser signing not available (read-only browse)
+page:/div:1/div:1/article:7/details:1/ul:1/li:3	li	Collections · upgradeable NFT-style assetsDraftCollection creation, asset mint, in-place upgrade with reason + timestamp, ownership transfer, native listings. 2
+page:/div:1/div:1/article:7/details:1/ul:1/li:3/p:1	p	Collections · upgradeable NFT-style assetsDraft
+page:/div:1/div:1/article:7/details:1/ul:1/li:3/p:1/strong:1	strong	Collections · upgradeable NFT-style assets
+page:/div:1/div:1/article:7/details:1/ul:1/li:3/p:1/span:1	span	Draft
+page:/div:1/div:1/article:7/details:1/ul:1/li:3/p:2	p	Collection creation, asset mint, in-place upgrade with reason + timestamp, ownership transfer, native listings. 24/24 tests passing locally; registry not yet de
+page:/div:1/div:1/article:7/details:1/ul:1/li:3/p:3	p	Registry writes per second (local): — · not measured on the fleet; the registry has not been deployed yet
+page:/div:1/div:1/article:7/details:1/ul:1/li:3/p:4	p	Open issues: Registry not yet deployed to any flx-* node; No signing in the browser; CLI-only mint/transfer; Image content bytes not stored (CID shown as text)
+page:/div:1/div:1/article:7/details:1/ul:1/li:4	li	Market · native marketplace listingsDraftLists active listings across collections; joins each listing with its referenced asset. Reads only — purchases happen t
+page:/div:1/div:1/article:7/details:1/ul:1/li:4/p:1	p	Market · native marketplace listingsDraft
+page:/div:1/div:1/article:7/details:1/ul:1/li:4/p:1/strong:1	strong	Market · native marketplace listings
+page:/div:1/div:1/article:7/details:1/ul:1/li:4/p:1/span:1	span	Draft
+page:/div:1/div:1/article:7/details:1/ul:1/li:4/p:2	p	Lists active listings across collections; joins each listing with its referenced asset. Reads only — purchases happen through CLI-signed transactions, not brows
+page:/div:1/div:1/article:7/details:1/ul:1/li:4/p:3	p	Measured: — · read-only aggregator over nft-cli; speed is bounded by nft-cli, not by the chain.
+page:/div:1/div:1/article:7/details:1/ul:1/li:4/p:4	p	Open issues: Depends on nft-cli deployment
+page:/div:1/div:1/article:7/details:1/ul:1/li:5	li	Stream · live media / radio hostingDraftLive media / radio hosting on the FXN mesh — real identity, signed invite flow, no central server. STREAM_OPEN declares 
+page:/div:1/div:1/article:7/details:1/ul:1/li:5/p:1	p	Stream · live media / radio hostingDraft
+page:/div:1/div:1/article:7/details:1/ul:1/li:5/p:1/strong:1	strong	Stream · live media / radio hosting
+page:/div:1/div:1/article:7/details:1/ul:1/li:5/p:1/span:1	span	Draft
+page:/div:1/div:1/article:7/details:1/ul:1/li:5/p:2	p	Live media / radio hosting on the FXN mesh — real identity, signed invite flow, no central server. STREAM_OPEN declares a stream on the host’s chain; STREAM_INV
+page:/div:1/div:1/article:7/details:1/ul:1/li:5/p:3	p	Metadata path (chain-backed open/invite/close): — · Resolver semantics tests pass (3/3). No throughput of its own has been measured; the figure once shown here 
+page:/div:1/div:1/article:7/details:1/ul:1/li:5/p:4	p	Open issues: Reticulum/RNS packet transport not yet integrated — HTTP fallback only; Chain feeder (subscribe to flx-* chain-server for STREAM_* records) stubbed
+page:/div:1/div:1/article:7/details:1/ul:1/li:6	li	DAO · governance log and proposal resolutionIn serviceInterprets governance log entries pinned to IPFS: TLM proposals, signer rotations, roster changes. Backs d
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:1	p	DAO · governance log and proposal resolutionIn service
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:1/strong:1	strong	DAO · governance log and proposal resolution
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:1/span:1	span	In service
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:2	p	Interprets governance log entries pinned to IPFS: TLM proposals, signer rotations, roster changes. Backs dao.defxn.com. Resolver is HTTP-served; log is append-o
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:3	p	Not the dao resolver chain listed above: this is the governance log read by ark-miner-cli.
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:4	p	Governance log appends per second: — · low-volume by design; not benchmarked.
+page:/div:1/div:1/article:7/details:1/ul:1/li:6/p:5	p	Open issues: Measured throughput not published (very low volume by design)
+page:/div:1/div:1/article:8	article	A snapshot, not a live read. Every count here comes from the commit and the dated development-network observation named above; what a node holds right now is in
+page:/div:1/div:1/article:8/p:1	p	A snapshot, not a live read. Every count here comes from the commit and the dated development-network observation named above; what a node holds right now is in
+page:/div:1/div:1/div:1	div	

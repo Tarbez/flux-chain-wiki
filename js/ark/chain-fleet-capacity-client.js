@@ -41,7 +41,8 @@
     var timer = setTimeout(function () { controller.abort(); }, options.timeoutMs || 6000);
     try {
       var response = await fetch(endpoint, { cache: 'no-store', signal: controller.signal });
-      if (!response.ok) throw new Error('HTTP ' + response.status + ' from ' + endpoint);
+      // Status rides on the error: see chain-pulse-client.js, same reason.
+      if (!response.ok) { var http = new Error('HTTP ' + response.status + ' from ' + endpoint); http.status = response.status; http.endpoint = endpoint; throw http; }
       return { endpoint: endpoint, data: validate(await response.json()) };
     } finally {
       clearTimeout(timer);

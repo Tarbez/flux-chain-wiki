@@ -67,10 +67,12 @@
   function secretDetail(id) {
     var secret = state.secretDrafts[id];
     var root = h('div', { class: 'vault-detail' });
-    root.appendChild(panelHead(secret.label || id, 'js/content/secrets/' + id + '.js', 'secret', id));
+    root.appendChild(panelHead(secret.label || id, '', 'secret', id, 'js/content/secrets/' + id + '.js'));
 
+    /* plain words first; how it is encrypted is Developer details (docs/ux-audit/cms.md P1-2) */
     var about = h('fieldset', {}, h('legend', { text: 'Encrypted content' }),
-      h('p', { class: 'hint' }, 'The body is AES-GCM ciphertext; the key is wrapped once per recipient with nacl box. Nothing on disk or on the mesh ever holds the plaintext — only what you encrypt here, in this browser, right now.'));
+      h('p', { class: 'hint' }, 'Only the people you add as readers below can open this. Nothing readable is saved or published: you encrypt it here, in this browser.'),
+      A.devDetails([['Body', 'AES-GCM ciphertext'], ['Key', 'wrapped once per recipient with nacl box'], ['Plaintext', 'never on disk or on the mesh']]));
     about.appendChild(textRow('Label', 'sec-' + id + '-label', {}, function () { return secret.label; }, function (v) {
       secret.label = v;
       var name = root.parentNode && root.parentNode.querySelector('[data-cms-item="secret:' + id + '"] .vault-name');
@@ -164,7 +166,7 @@
     var secret = state.secretDrafts[id];
     if (!secret) { status('Nothing deleted: there is no encrypted item "' + id + '".', 'error'); return; }
     if (!state.secretDir && state.secretSaved[id] !== null) { status('Connect the project folder to delete encrypted content: this removes its file.', 'warn'); return; }
-    if (!window.confirm('Delete "' + (secret.label || id) + '"? This cannot be undone.')) return;
+    if (!(await A.confirmDelete('encrypted item', secret.label || id, 'This removes its file. Anyone it was shared with loses it from the site.', state.secretSaved[id] === null))) return;
     try { await removeItemFile('secret', id); }
     catch (error) { status(error.message, 'error'); return; }
     if (state.secretCurrent === id) state.secretCurrent = state.secretIds[0] || null;

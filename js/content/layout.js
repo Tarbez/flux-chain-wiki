@@ -68,6 +68,52 @@ var ArkLayout = (function () {
   var SHELL = '*';
   function isScope(route) { return route === SHELL || (typeof route === 'string' && route[0] === '/' && route.length <= 300); }
 
+  /* ---- moved scopes: edits saved under a scope that has since been split ------------------------
+     A page that shows several documents at one route declares a scope per document (see "a page's
+     layout scope" below). Edits saved before it did are stored under the bare route, and they were
+     made on the one document the route opened by default then. They belong to that document: they
+     are read as stored under its scope, and nowhere else. The stored record is not edited by hand
+     (future law); this mapping runs when a draft is sanitized, so the next Save writes them forward
+     under the scope they belong to. Where both exist, the newer scope's own entry wins, field by
+     field for a layout frame.
+       '/reference'  -> '/reference?doc=docs/protocol/agreements.md'
+         Until 2026-10-22 /reference with no ?doc= opened docs/protocol/agreements.md, and every
+         /reference document shared the one '/reference' bucket, so all edits saved there were made
+         on Agreements (the census tests/fixtures/layout-keys/reference.tsv was taken on it). The
+         default is now a current document (js/pages/reference.js, defaultDoc).
+     One table, here: js/content/states.js, components.js and element-motion.js sanitize through
+     ArkLayout.moveScopes when this file is loaded (it loads first in index.html and admin-app.html).
+     Regression: tests/layout-document-scope.cjs. */
+  var MOVED_SCOPES = { '/reference': '/reference?doc=docs/protocol/agreements.md' };
+  function movedScope(route) { return Object.prototype.hasOwnProperty.call(MOVED_SCOPES, route) ? MOVED_SCOPES[route] : route; }
+  /* `map` (scope -> key -> entry) with every moved scope's entries under the scope it moved to.
+     `mergeEntry(older, newer)` combines two entries for one key (default: the newer one). The input
+     is not changed. */
+  function moveScopes(map, mergeEntry) {
+    if (!map || typeof map !== 'object' || Array.isArray(map)) return map;
+    var moved = Object.keys(map).filter(function (route) { return movedScope(route) !== route; });
+    if (!moved.length) return map;
+    var out = {};
+    Object.keys(map).forEach(function (route) { if (moved.indexOf(route) < 0) out[route] = map[route]; });
+    moved.forEach(function (route) {
+      var older = map[route], target = movedScope(route), newer = out[target];
+      if (!older || typeof older !== 'object') return;
+      if (!newer || typeof newer !== 'object') { out[target] = older; return; }
+      var both = Object.assign({}, older);
+      Object.keys(newer).forEach(function (key) { both[key] = mergeEntry && Object.prototype.hasOwnProperty.call(older, key) ? mergeEntry(older[key], newer[key]) : newer[key]; });
+      out[target] = both;
+    });
+    return out;
+  }
+  /* two stored layout entries ({ desktop, tablet, phone }) for one key: the newer one's fields over the older */
+  function mergeFrames(older, newer) {
+    if (!older || typeof older !== 'object') return newer;
+    if (!newer || typeof newer !== 'object') return older;
+    var out = {};
+    ['desktop', 'tablet', 'phone'].forEach(function (bp) { if (older[bp] || newer[bp]) out[bp] = Object.assign({}, older[bp], newer[bp]); });
+    return out;
+  }
+
   function finite(value, min, max) {
     value = Number(value);
     return Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : null;
@@ -101,7 +147,7 @@ var ArkLayout = (function () {
     return out;
   }
   function sanitize(value) {
-    var out = { version: 2, routes: {}, groups: {}, labels: {} }, routes = value && value.routes;
+    var out = { version: 2, routes: {}, groups: {}, labels: {} }, routes = moveScopes(value && value.routes, mergeFrames);
     if (!routes || typeof routes !== 'object') routes = {};
     Object.keys(routes).slice(0, 500).forEach(function (route) {
       if (!isScope(route)) return;
@@ -115,7 +161,7 @@ var ArkLayout = (function () {
       });
       if (Object.keys(cleanNodes).length) out.routes[route] = cleanNodes;
     });
-    var groups = value && value.groups;
+    var groups = moveScopes(value && value.groups);
     if (groups && typeof groups === 'object') Object.keys(groups).slice(0, 500).forEach(function (route) {
       if (!isScope(route) || !groups[route] || typeof groups[route] !== 'object') return;
       var cleanGroups = {};
@@ -130,7 +176,7 @@ var ArkLayout = (function () {
        Caps mirror routes' own exact numbers (500 routes, 3000 keys per route -- the same
        per-route key namespace labels share with routes, not groups' separate id namespace),
        and the 120-char cap mirrors group()'s own label field below. */
-    var labels = value && value.labels;
+    var labels = moveScopes(value && value.labels);
     if (labels && typeof labels === 'object') Object.keys(labels).slice(0, 500).forEach(function (route) {
       if (!isScope(route) || !labels[route] || typeof labels[route] !== 'object') return;
       var cleanLabels = {};
@@ -146,7 +192,7 @@ var ArkLayout = (function () {
        is the only stable identity they have, and it is the one every other per-element
        edit is already stored under. Emitted only when something is set, so a layout with
        no alt overrides serializes byte-for-byte as it did before this field existed. */
-    var alts = value && value.alts, cleanAlts = {};
+    var alts = moveScopes(value && value.alts), cleanAlts = {};
     if (alts && typeof alts === 'object') Object.keys(alts).slice(0, 500).forEach(function (route) {
       if (!isScope(route) || !alts[route] || typeof alts[route] !== 'object') return;
       var routeAlts = {};
@@ -197,6 +243,8 @@ var ArkLayout = (function () {
        component:<instance>[/<path>]  inside a component instance, from the instance root
        insert:<anchor id>         an anchor the editor/runtime inserted (a state's or a spot's)
        group:<id>                 a layout group wrapper (set when the group is built)
+       <pinned key>[/<path>]      an element (and its subtree) a converted page pinned to the key
+                                  it had before conversion (data-ark-layout-pin; js/ark/blocks.js)
 
      A <path> is tag:n segments, n counting same-tag siblings among the AUTHORED children only.
      What the runtime and the editor insert is never counted and never adds a segment:
@@ -222,7 +270,12 @@ var ArkLayout = (function () {
   /* Tag list derived from actual usage across js/pages/*.js and js/ark/runtime.js (grep
      counted span 48x, strong 13x, small/summary/details 6x each, dl/dt/dd, table parts --
      all real content units a selection/grouping tool needs to see, not a guessed list. */
-  var KEY_TAGS = 'header,main,footer,section,article,nav,aside,div,h1,h2,h3,h4,p,a,button,img,canvas,svg,g,path,rect,circle,ellipse,line,polyline,polygon,text,figure,figcaption,picture,video,form,ul,ol,li,span,strong,small,summary,details,dl,dt,dd,table,thead,tbody,tr,th,td,label';
+  /* caption (2026-10-19, W3-ARK-FOLLOWUPS): a table's caption is the words that introduce it --
+     converted pages moved a panel heading into Ark's table caption, and with no key it could
+     carry neither an edit nor a pin. Adding a tag adds keys: path segments count siblings by tag,
+     so no path key moves (a caption showing a copy: key would take its place in that key's #n
+     numbering; no caption shows one, and each page's continuity test holds the census). */
+  var KEY_TAGS = 'header,main,footer,section,article,nav,aside,div,h1,h2,h3,h4,p,a,button,img,canvas,svg,g,path,rect,circle,ellipse,line,polyline,polygon,text,figure,figcaption,picture,video,form,ul,ol,li,span,strong,small,summary,details,dl,dt,dd,table,caption,thead,tbody,tr,th,td,label';
   function hasAttr(node, name) { return !!(node && node.hasAttribute && node.hasAttribute(name)); }
   function isHeld(node) { return !!(node && node.getAttribute && node.getAttribute('data-ark-transient') === 'hold'); }
   function isPageRoot(node) { return hasAttr(node, 'data-ark-page'); }
@@ -247,12 +300,13 @@ var ArkLayout = (function () {
     authoredChildren(parent, cache).some(function (child) { if (child.tagName === tag) index++; return child === node; });
     return tag.toLowerCase() + ':' + index;
   }
-  /* -> { kind: 'page'|'shell'|'component'|'insert', scope: node, path: 'tag:n/...' } or null
+  /* -> { kind: 'page'|'shell'|'component'|'insert'|'pinned', scope: node, path: 'tag:n/...' } or null
      (inside a held node, or not under `root`) */
   function placeOf(element, root, cache) {
     var parts = [], node = element;
     while (node && node.nodeType === 1) {
       if (isHeld(node)) return null;
+      if (node !== element && hasAttr(node, 'data-ark-layout-pin') && node.getAttribute('data-ark-layout-pin-scope') !== 'self') return { kind: 'pinned', scope: node, path: parts.join('/') };
       if (isPageRoot(node)) return { kind: 'page', scope: node, path: parts.join('/') };
       if (node === root) return { kind: 'shell', scope: node, path: parts.join('/') };
       if (isInstanceRoot(node)) return { kind: 'component', scope: node, path: parts.join('/') };
@@ -274,14 +328,42 @@ var ArkLayout = (function () {
     if (place.kind === 'component') return 'component:' + place.scope.getAttribute('data-ark-component-key') + (place.path ? '/' + place.path : '');
     if (place.kind === 'insert') return 'insert:' + place.scope.getAttribute('data-ark-insert') + (place.path ? '/' + place.path : '');
     if (place.kind === 'page' && !place.path) return 'page:/';
+    /* A pinned key: the key this element had before its page was converted to data
+       (js/ark/blocks.js stamps it from a block spec's `was`), so edits saved against the old
+       structure still land on the same content -- saved records are never rewritten
+       (docs/cms-architecture.md, "Layout keys"; tests/lib/layout-continuity.cjs). A pin anchors
+       its subtree: a descendant with no copy key or id of its own is keyed by the pin plus its
+       path below it, which is its old key wherever the moved subtree kept its inner structure
+       (a swatch grid moved into a tab keeps all 19 of its swatches' keys with one pin) -- unless
+       the pin is for itself only (data-ark-layout-pin-scope="self": a section that became a tab
+       panel, whose inside is new). */
+    var pin = isPinned(element) && element.getAttribute('data-ark-layout-pin');
+    if (pin) return pin;
     /* an editor-only text binding (js/main.js annotateCmsPreviewCopy marks it) is not a key:
        the public page never has it, so a key from it would name nothing there */
     var copy = hasAttr(element, 'data-ark-copy-preview') ? '' : String(element.getAttribute('data-ark-copy-keys') || '').split(/\s+/).filter(Boolean)[0];
     if (copy) return 'copy:' + copy;
     if (element.id && !/^ark-r-/.test(element.id)) return 'id:' + element.id;
-    return place.kind === 'page' ? 'page:/' + place.path : 'path:' + place.path;
+    if (place.kind === 'pinned') return place.scope.getAttribute('data-ark-layout-pin') + '/' + place.path;
+    if (place.kind !== 'page') return 'path:' + place.path;
+    /* A new element whose path happens to be a key the page pinned to another element (the old
+       CMS anchor's path is now the tab list's) must not take that element's saved edits: it is
+       keyed apart, '@new'. Measured on /palette's conversion (tests/palette-blocks.cjs). */
+    var key = 'page:/' + place.path;
+    return pinsOf(place.scope, cache)[key] ? key + '@new' : key;
   }
   function repeatable(base) { return base.indexOf('copy:') === 0 || base.indexOf('id:') === 0; }
+  /* every key pinned inside a page, once per pass (`cache` is the pass's Map; null = no cache) */
+  function pinsOf(page, cache) {
+    var memo = cache && (cache.pins || (cache.pins = new Map()));
+    var known = memo && memo.get(page); if (known) return known;
+    var out = Object.create(null);
+    if (page.querySelectorAll) Array.prototype.forEach.call(page.querySelectorAll('[data-ark-layout-pin]'), function (el) { out[el.getAttribute('data-ark-layout-pin')] = true; });
+    if (memo) memo.set(page, out);
+    return out;
+  }
+  /* a pinned key is already the exact (numbered) key it had: never numbered again */
+  function isPinned(element) { return hasAttr(element, 'data-ark-layout-pin') && !!pageOf(element); }
   function pageOf(element) {
     for (var node = element; node && node.nodeType === 1; node = node.parentNode) if (isPageRoot(node)) return node;
     return null;
@@ -292,14 +374,40 @@ var ArkLayout = (function () {
     var id = page && page.getAttribute('data-ark-page'), catalog = typeof ArkUI !== 'undefined' && ArkUI && ArkUI.pageCatalog;
     return id && catalog && catalog[id] && catalog[id].path ? catalog[id].path : null;
   }
+  /* ---- a page's layout scope ----------------------------------------------------------------
+     A page's edits are stored under its route. A page that shows different documents at one route
+     (/reference?doc=...) declares a finer scope on its root: data-ark-layout-scope="doc=<id>", and
+     its edits are stored under '<route>?doc=<id>'. Without it every document shared one bucket, so
+     an edit made on one document landed on whatever element had the same key in every other one.
+     The page names only the qualifier: the route part is always its own catalog route, so a page
+     cannot declare a scope outside its route. A page that declares nothing behaves as before.
+     Everything that asks "which scope are the edits of the page shown" asks scopeFor: js/main.js's
+     mount/settle passes and the editor (cmsLayoutScope), and js/ark/scene-state.js's motion lookup
+     (pageScope). Regression: tests/layout-document-scope.cjs. */
+  var SCOPE_ATTR = 'data-ark-layout-scope';
+  function pageScope(page) {
+    var route = routeOfPage(page), qualifier = page && page.getAttribute && page.getAttribute(SCOPE_ATTR);
+    if (!route || !qualifier || /[\s?#]/.test(qualifier)) return route;
+    return isScope(route + '?' + qualifier) ? route + '?' + qualifier : route;
+  }
+  /* The scope the edits on `route` are stored under, for the page shown in `where` (that page's root,
+     or a root holding the mounted pages, e.g. #scene): the scope its page declares, else `route`.
+     A scope given as `route` (or SHELL) comes back as it is. */
+  function scopeFor(route, where) {
+    if (!route || route === SHELL || !where) return route;
+    var pages = isPageRoot(where) ? [where] : where.querySelectorAll ? where.querySelectorAll('[data-ark-page]') : [];
+    for (var i = pages.length - 1; i >= 0; i--) if (routeOfPage(pages[i]) === route) return pageScope(pages[i]) || route;
+    return route;
+  }
   /* Whether `element` belongs to `route`'s scope: the shell always, a page only if it is that
      route's page. While one route replaces another both pages are mounted and both have a
      'page:/' -- without this, the outgoing page (first in the outlet) took the incoming route's
-     edits. No route, or a page whose route cannot be told, is in scope. */
+     edits. No route, or a page whose route cannot be told, is in scope. `route` may be a page's
+     declared scope ('/reference?doc=X'): then only the page showing that document is in it. */
   function inRoute(element, route) {
     if (!route) return true;
     var page = pageOf(element), pageRoute = page && routeOfPage(page);
-    return !page || !pageRoute || pageRoute === route;
+    return !page || !pageRoute || pageRoute === route || pageScope(page) === route;
   }
   /* The scope an element's edits are stored under: its route when it is page content, SHELL
      when it is part of the persistent shell. A set (a group's or a state group's members, a
@@ -350,7 +458,7 @@ var ArkLayout = (function () {
     }
     var items = all.map(function (element) { return { element: element, page: pageOf(element), base: baseKey(element, root, cache), key: '' }; });
     var shellSeen = {}, pageSeen = new Map();
-    function number(item, seen) { if (!repeatable(item.base)) return item.base; var n = seen[item.base] = (seen[item.base] || 0) + 1; return n > 1 ? item.base + '#' + n : item.base; }
+    function number(item, seen) { if (!repeatable(item.base) || isPinned(item.element)) return item.base; var n = seen[item.base] = (seen[item.base] || 0) + 1; return n > 1 ? item.base + '#' + n : item.base; }
     items.forEach(function (item) { if (item.base && !item.page) item.key = number(item, shellSeen); });
     items.forEach(function (item) {
       if (!item.base || !item.page) return;
@@ -363,7 +471,7 @@ var ArkLayout = (function () {
   function keyFor(element, root) {
     if (!element || element.nodeType !== 1) return '';
     var base = baseKey(element, root, null);
-    if (!base || !repeatable(base) || !root || !root.querySelectorAll) return base;
+    if (!base || !repeatable(base) || isPinned(element) || !root || !root.querySelectorAll) return base;
     var mine = keyedList(root, null, element).filter(function (item) { return item.element === element; })[0];
     return mine ? mine.key : base;
   }
@@ -544,7 +652,12 @@ var ArkLayout = (function () {
     var parent = element.parentElement, view = element.ownerDocument && element.ownerDocument.defaultView;
     if (!parent || !view || typeof view.getComputedStyle !== 'function') return;
     var around = view.getComputedStyle(parent);
-    if (/flex$/.test(around.display) && /^row/.test(around.flexDirection || 'row')) {
+    /* A grid that places its children in columns (grid-auto-flow: column) lays them out in a row
+       too: the family bar's nav is one (assets/kit/defxn-components.css .dx-bar__nav, since
+       2026-10-19), and a group of two of its links stacked in one cell (full-audit layout-group
+       surface; regression: tests/layout-group-follows-parent.cjs). */
+    var gridRow = /grid$/.test(around.display) && /^column/.test(around.gridAutoFlow || '');
+    if (gridRow || (/flex$/.test(around.display) && /^row/.test(around.flexDirection || 'row'))) {
       element.style.flexDirection = 'row';
       if (around.alignItems) element.style.alignItems = around.alignItems;
       var gap = around.columnGap && around.columnGap !== 'normal' ? around.columnGap : around.gap;
@@ -781,6 +894,7 @@ var ArkLayout = (function () {
     return sanitize(layout);
   }
   return { define: define, get: get, sanitize: sanitize, serialize: serialize, breakpoint: breakpoint, merged: merged, annotate: annotate, keyFor: keyFor, find: find, index: index, inRoute: inRoute, apply: apply,
+    scopeFor: scopeFor, pageScope: pageScope, moveScopes: moveScopes, MOVED_SCOPES: MOVED_SCOPES,
     SHELL: SHELL, isScope: isScope, scopeOf: scopeOf, scopeOfAll: scopeOfAll, entryFor: entryFor, groupsFor: groupsFor, applyFrame: applyFrame, applyGroupDefault: applyGroupDefault, set: set, remove: remove, group: group, ungroup: ungroup, setLabel: setLabel, labelFor: labelFor, layerName: layerName,
     setAlt: setAlt, altFor: altFor, applyAlt: applyAlt, applyAlts: applyAlts, altAttribute: altAttribute, altOwn: altOwn, ALT_MAX: ALT_MAX,
     TEXT_TOKENS: TEXT_TOKENS, FILL_TOKENS: FILL_TOKENS, BORDER_TOKENS: BORDER_TOKENS, FONT_TOKENS: FONT_TOKENS, TYPE_SIZE_TOKENS: TYPE_SIZE_TOKENS, RADIUS_TOKENS: RADIUS_TOKENS, RADIUS_CSS: RADIUS_CSS,

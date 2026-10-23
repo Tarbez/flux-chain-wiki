@@ -21,7 +21,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
-import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarButton, toolbarAction, toolbarPopover, toolbarSections, toolbarKey, toolbarSectionIsOpen, openToolbarSection, until as untilFor, untilStable, waitForPreviewReady, nextFrames, animationsSettled, gotoEditor } from './harness.mjs';
+import { setLens, SITE, copySite, startHost, fakeFolder, appFrame, previewFrame, toolbarButton, toolbarAction, clickToolbarAction, toolbarPopover, toolbarSections, toolbarKey, toolbarSectionIsOpen, openToolbarSection, until as untilFor, untilStable, waitForPreviewReady, nextFrames, animationsSettled, gotoEditor } from './harness.mjs';
 
 const args = process.argv.slice(2);
 const only = (args.includes('--only') ? args[args.indexOf('--only') + 1] : 'paragraph,container,image,instance,states,narrow').split(',');
@@ -88,7 +88,10 @@ const selectKey = (app, key) => app.evaluate((k) => document.getElementById('cms
 /* the bar is on `key` and has been painted there (it is placed in a rAF after it renders) */
 async function selected(app, key) { await until(async () => (await toolbarKey(app)) === key, `the toolbar is not editing ${key} (it shows ${await toolbarKey(app)})`); await nextFrames(app); }
 const computed = (pv, key, prop) => pv.evaluate(([k, p]) => { const el = document.querySelector(`[data-ark-layout-key="${CSS.escape(k)}"]`); return el ? getComputedStyle(el)[p] : null; }, [key, prop]);
-const ACTIONS = ['Make into component', 'Open in Content', 'Theme & defaults'];
+/* no bare action icons in the Edit style bar since 2026-10-19: the selection's commands (Make into
+   component, Make into states, Group, Remove, Align ...) are behind More, the same list as the
+   right-click menu (docs/ux-audit/cms.md P1-7, P1-8) */
+const ACTIONS = [];
 
 /* the bar holds exactly these section icons in this order, then the actions; every icon has a
    name a screen reader reads and a tooltip a sighted user sees */
@@ -202,7 +205,7 @@ await flow('paragraph', async () => {
     await page.keyboard.press('ArrowRight');
     check(await app.evaluate(() => document.activeElement.dataset.name) === 'Fill and border', 'ArrowRight did not move to Fill and border');
     await page.keyboard.press('ArrowLeft'); await page.keyboard.press('ArrowLeft');
-    check(await app.evaluate(() => document.activeElement.getAttribute('aria-label')) === 'Theme & defaults', 'ArrowLeft from the first icon did not wrap to the last');
+    check(await app.evaluate(() => document.activeElement.dataset.name) === 'More', 'ArrowLeft from the first icon did not wrap to the last (More)');
     await page.keyboard.press('Home');
     check(await app.evaluate(() => document.activeElement.dataset.name) === 'Typography', 'Home did not go to the first icon');
     await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight');
@@ -315,11 +318,15 @@ await flow('instance', async () => {
   let instKey;
   await step('Make into component (bar action): the new instance\'s section opens by itself', async () => {
     await byKey(pv, P).click(); await selected(app, P);
-    await toolbarAction(app, 'Make into component').click();
+    await clickToolbarAction(app, 'Make into component');
     instKey = await until(() => pv.evaluate(() => { const el = document.querySelector('[data-ark-component-key]'); return el && el.getAttribute('data-ark-component-key'); }), 'no instance after Make into component');
     await until(() => toolbarSectionIsOpen(app, 'Component instance'), 'the Component instance popover did not open by itself');
     check(await app.evaluate(() => document.querySelector('#selToolbar [data-name="Component instance"]').classList.contains('identity')), 'the Component instance icon has no identity mark');
-    check(await toolbarAction(app, 'Make into component').isDisabled(), 'Make into component is still enabled on an instance');
+    /* the command stays listed in More, saying why it cannot apply (checked after the auto-open) */
+    const more = await openToolbarSection(app, 'More');
+    await until(async () => (await more.locator('[data-action="make-component"]').getAttribute('aria-disabled')) === 'true', 'Make into component is still offered on an instance');
+    check(/inserted block|component/i.test(await more.locator('[data-action="make-component"] .hint').textContent()), 'the refused Make into component does not say why');
+    await toolbarButton(app, 'More').click();
     const names = await toolbarSections(app);
     check(names.includes('Component instance') && names.includes('In / out animation'), 'instance sections: ' + names.join(', '));
     await animationsSettled(app); await shot('after-1280-instance-autoopen');

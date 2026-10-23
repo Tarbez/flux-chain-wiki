@@ -1,7 +1,8 @@
 /* =====================================================================
    ADMIN EDITOR · LENS AND ITEM SELECTION (js/admin/nav.js)
    ---------------------------------------------------------------------
-   Owns: the Content / Design lens (setLens: what a click on the canvas edits), the
+   Owns: the lens -- Edit words / Edit style (state.lens 'content' / 'design'; setLens: what a
+   click on the canvas edits) -- the
    select*() entry points that make one page / article / image / encrypted item the item a
    form edits (and, for a page or article, show it on the canvas), renderList() -- the
    repaint after anything that changes "is it dirty" (header dots, Save, the Pages tree) --
@@ -22,28 +23,30 @@
       renderPages = A.later('renderPages'), openRoute = A.later('openRoute'), showLeft = A.later('showLeft'),
       postCmsPreviewLens = A.later('postCmsPreviewLens'), schedule = A.later('schedule'),
       refreshPanels = A.later('refreshPanels'), openMeshSheet = A.later('openMeshSheet'),
-      refreshCanvasSite = A.later('refreshCanvasSite');
+      refreshCanvasSite = A.later('refreshCanvasSite'), renderInspector = A.later('renderInspector');
 
   /* ---- the repaint after a draft changed -------------------------------------------------
      Every form calls it (it was the Content sidebar's list): the header (lens, views, the
      Theme view's dirty dot), the one Save button, and the rail's Pages tree with its dots. */
   function renderList() {
     syncLensButtons();
-    var themeBtn = $('viewThemeBtn');
-    if (themeBtn) {
-      var dot = themeBtn.querySelector('.dot'); if (dot) dot.remove();
-      if (themeDirty() || settingsDefaultsDirty()) themeBtn.appendChild(h('span', { class: 'dot', title: 'Unsaved theme or settings-default changes' }));
-    }
+    /* Site style is in the More menu: its unsaved dot shows on More too, so it is seen closed */
+    ['viewThemeBtn', 'accountBtn'].forEach(function (id) {
+      var btn = $(id); if (!btn) return;
+      var dot = btn.querySelector('.dot'); if (dot) dot.remove();
+      if (themeDirty() || settingsDefaultsDirty()) btn.appendChild(h('span', { class: 'dot', role: 'img', 'aria-label': 'Unsaved Site style changes', title: 'Unsaved Site style changes' }));
+    });
     syncHeader(); refreshSaveButton(); renderPages();
   }
 
-  /* ---- the lens ------------------------------------------------------------------------ */
-  function syncLensButtons() {
-    ['content', 'design'].forEach(function (lens) {
-      var b = $(lens === 'content' ? 'lensContentBtn' : 'lensDesignBtn');
-      if (b) b.setAttribute('aria-pressed', String(state.lens === lens));
-    });
-  }
+  /* ---- the lens ------------------------------------------------------------------------
+     #lensSwitch is Ark's toggle group (js/admin/ark-host.js arkSegGroup): one pressed, one tab
+     stop, arrows between Edit words and Edit style; a pick calls setLens, and a lens set by
+     another route (the saved choice at startup) moves the pressed state through select(). */
+  var LENSES = ['content', 'design'];
+  var lensGroup = A.arkSegGroup($('lensSwitch'), [$('lensContentBtn'), $('lensDesignBtn')],
+    { selected: LENSES.indexOf(state.lens), onPick: function (i) { setLens(LENSES[i]); } });
+  function syncLensButtons() { lensGroup.select(LENSES.indexOf(state.lens)); }
   /* Nothing is torn down: the selection, every draft and the open sheet stay. The canvas is told
      (defxn-cms-preview-lens, js/admin/bridge.js), the toolbar re-draws its sections for the lens
      (schedule()), and the rail opens the tab last used in this lens (Pages in Content, Layers in
@@ -54,12 +57,11 @@
     state.lens = lens;
     try { localStorage.setItem('defxn-cms-lens', lens); } catch (e) { /* a convenience only */ }
     syncLensButtons();
+    syncHeader(); renderInspector();   /* what each lens shows: Design tips and the size note are Edit style's */
     if (!changed) return;
     showLeft(state.railTab[lens] || (lens === 'content' ? 'pages' : 'layers'), { remember: false });
     postCmsPreviewLens(); schedule();
   }
-  $('lensContentBtn').addEventListener('click', function () { setLens('content'); });
-  $('lensDesignBtn').addEventListener('click', function () { setLens('design'); });
 
   /* ---- the item a form edits -------------------------------------------------------------
      A page or an article is also a place: selecting it shows it on the canvas. An image or an

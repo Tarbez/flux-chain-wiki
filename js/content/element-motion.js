@@ -90,8 +90,12 @@ var ArkElementMotion = (function () {
   }
   function defaultEntry() { return cleanEntry({}); }
 
+  /* Edits saved under a scope that has since been split per document (/reference) are read
+     under the scope they belong to: ArkLayout.moveScopes, the one table (js/content/layout.js,
+     "moved scopes"). Without js/content/layout.js loaded they stay where they were stored. */
+  function moveScopes(map) { return typeof ArkLayout !== 'undefined' && ArkLayout && ArkLayout.moveScopes ? ArkLayout.moveScopes(map) : map; }
   function sanitize(whole) {
-    var out = { version: 1, routes: {} }, routes = whole && whole.routes;
+    var out = { version: 1, routes: {} }, routes = moveScopes(whole && whole.routes);
     if (!routes || typeof routes !== 'object') routes = {};
     Object.keys(routes).slice(0, ROUTE_CAP).forEach(function (route) {
       if (route !== SHELL && (route[0] !== '/' || route.length > ROUTE_LEN)) return;

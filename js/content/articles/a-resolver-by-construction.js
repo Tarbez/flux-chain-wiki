@@ -1,7 +1,7 @@
 /* Loaded only when this article is requested. */
 LearningContent.load("a-resolver-by-construction", {
   "core": "The finance resolver makes double-spend self-incriminating: each identity owns an append-only chain and a second record at the same position is signed equivocation. Current local measurements are 51,065 ops/s for full hot admission and 279,269 ops/s when one certified segment root is verified before eight holder-sharded workers apply the segment—a measured 5.47× gain.",
-  "relevance": "Read this to understand why the finance surface is going from 'a notebook that logs transfers' to 'a chain per identity, and the chain decides.'",
+  "relevance": "Written before resolver chains and capabilities (2026-10-18) and kept as dated history. For how a resolver works now, read What is a resolver. Read this to understand why the finance surface is going from 'a notebook that logs transfers' to 'a chain per identity, and the chain decides.'",
   "reviewed": "2026-10-07",
   "evidenceLabel": "The design document — LEDGERENTRY, J, and the resolver's six steps",
   "evidenceHref": "doc:docs/finance-ledger-design.md",
@@ -24,7 +24,7 @@ LearningContent.load("a-resolver-by-construction", {
   "sections": [
     [
       "Preventing is the wrong verb",
-      "Every chain built so far spends most of its design budget on preventing two users from spending the same input at the same time. Validators, mempools, consensus rounds, fork-choice rules — all of it is machinery to decide, in a race, which claim wins. The notebook had its own version of this: a local atomic 'has this input been spent?' marker, which could be lost on crash.",
+      "Every chain built so far spends most of its design budget on preventing two users from spending the same input at the same time. Standing approver sets, mempools, agreement rounds, fork-choice rules — all of it is machinery to decide, in a race, which claim wins. The notebook had its own version of this: a local atomic 'has this input been spent?' marker, which could be lost on crash.",
       "A simpler question: what if there is no race? What if the ledger is shaped so a double-spend attempt cannot even be rendered as a well-formed record?"
     ],
     [
@@ -61,7 +61,7 @@ LearningContent.load("a-resolver-by-construction", {
     ],
     [
       "MEV disappears structurally",
-      "MEV needs three things: a public pending pool, a party that can reorder it before finalization, and extractable value from the reorder. The chain-local design removes the first one. There is no pool. A transfer is a bilateral conversation; the only global object is the content-addressed set of records, visible only after the fact. Front-running and sandwiching are not prevented. They are unrepresentable."
+      "MEV needs three things: a public pending pool, a party that can reorder it before the result is signed, and extractable value from the reorder. The chain-local design removes the first one. There is no pool. A transfer is a bilateral conversation; the only global object is the content-addressed set of records, visible only after the fact. Front-running and sandwiching are not prevented. They are unrepresentable."
     ],
     [
       "What this does not solve",
@@ -69,9 +69,9 @@ LearningContent.load("a-resolver-by-construction", {
     ],
     [
       "Measured",
-      "The current matched release run used 20,000 independently signed holder operations. Full per-operation admission reached 51,065 ops/s; certified application verified one segment root and quorum, then preserved per-holder order across eight workers at 279,269 ops/s, a 5.47× gain.",
+      "The current matched release run used 20,000 independently signed holder operations. Full per-operation admission reached 51,065 ops/s; certified application verified one segment root and its signer threshold, then preserved per-holder order across eight workers at 279,269 ops/s, a 5.47× gain.",
       "A separate two-peer release test transported and reconstructed one 1,024-operation compact binary segment at 812,268 effective ops/s. Real-shaped 488-byte operations measured 150.9 bytes/op versus the former 976-byte outer-hex payload, a 6.47× wire reduction. Both are local measurements, not eight-node projections.",
-      "The attack suite still refuses replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev forks, tampered signatures and equivocation. Segment tests additionally refuse root tampering, missing quorum and replayed sequence numbers."
+      "The attack suite still refuses replay, double-spend, concurrent double-append, cross-chain confusion, wrong-prev forks, tampered signatures and equivocation. Segment tests additionally refuse root tampering, a missing signer threshold and replayed sequence numbers."
     ]
   ],
   "numbers": true

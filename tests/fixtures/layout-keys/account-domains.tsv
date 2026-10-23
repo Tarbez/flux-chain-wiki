@@ -1,0 +1,19 @@
+# key	tag	text -- layout keys of /account/domains before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	← Your accountNames you trackYour domains.This browser keeps the list of names you follow. Who owns each one and where it points is checked in Domains, against 
+page:/div:1	div	← Your accountNames you trackYour domains.This browser keeps the list of names you follow. Who owns each one and where it points is checked in Domains, against 
+page:/div:1/header:1	header	← Your accountNames you trackYour domains.This browser keeps the list of names you follow. Who owns each one and where it points is checked in Domains, against 
+page:/div:1/header:1/a:1	a	← Your account
+page:/div:1/header:1/p:1	p	Names you track
+id:account-domains-title	h1	Your domains.
+page:/div:1/header:1/p:2	p	This browser keeps the list of names you follow. Who owns each one and where it points is checked in Domains, against the name’s signed records.
+page:/div:1/header:1/form:1	form	Track an exact nameTrack
+page:/div:1/header:1/form:1/label:1	label	Track an exact name
+page:/div:1/header:1/form:1/button:1	button	Track
+page:/div:1/header:1/p:3	p	
+page:/div:1/header:1/div:1	div	Ship · DomainsA .fxn name points people to your site or app. Looking a name up, claiming it and pointing it happen in Domains, where every answer is checked.Ope
+page:/div:1/section:1	section	Tracked names (0)No names tracked yet. Add one to keep it one step from Domains.
+page:/div:1/section:1/p:1	p	Tracked names (0)
+page:/div:1/section:1/p:1/span:1	span	(0)
+page:/div:1/section:1/ul:1	ul	
+page:/div:1/section:1/p:2	p	No names tracked yet. Add one to keep it one step from Domains.
+page:/div:1/div:1	div	

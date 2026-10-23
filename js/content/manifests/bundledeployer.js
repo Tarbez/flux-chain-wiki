@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Deploy from your own machine. Review what becomes public, then publish with your identity."
+      "value": "Not released yet. When it is, you deploy from your own machine. You review what becomes public, then publish with your identity."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -60,7 +60,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access."
+      "value": "Sign the site’s mesh ownership record. The current verified mesh owner becomes the site maintainer and controls deployed CMS access. A bridge also writes bundle records to the bundle resolver chain; the mesh path above is still the one in use."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -80,23 +80,23 @@ ArkManifest.define({
       "section": "Links",
       "value": "Back to your account"
     },
+    "HANDOFF": {
+      "label": "Bundles hand-off",
+      "kind": "text",
+      "section": "Links",
+      "value": "In the Bundles app you approve a site bundle on your own machine, pin it, and point your name at it."
+    },
     "STATUS": {
       "label": "Status",
       "kind": "text",
       "section": "Deployer layout",
       "value": "CLI in development"
     },
-    "REQUIREMENT": {
-      "label": "Requirement",
-      "kind": "text",
-      "section": "Deployer layout",
-      "value": "Local CLI required"
-    },
     "FLOW.TITLE": {
       "label": "Flow / Title",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "From your machine to the mesh"
+      "value": "How a bundle travels"
     },
     "FLOW.LOCAL": {
       "label": "Flow / Local",
@@ -126,13 +126,13 @@ ArkManifest.define({
       "label": "Workflow / Title",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Three steps. One local tool."
+      "value": "Steps"
     },
     "BOUNDARY.TITLE": {
       "label": "Boundary / Title",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Choose what you share."
+      "value": "What becomes public"
     },
     "BOUNDARY.PUBLIC": {
       "label": "Boundary / Public",
@@ -192,7 +192,7 @@ ArkManifest.define({
       "label": "Release / Note",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Browsing this site or signing in does not deploy a bundle."
+      "value": "Browsing this site or signing in does not deploy a bundle. Planned: sites and apps will deploy from deploy.defxn.com as signed records on the bundle resolver chain. Not built yet."
     }
   }
 });

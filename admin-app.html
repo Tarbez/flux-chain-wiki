@@ -13,14 +13,17 @@
 <script src="js/bootstrap.js"></script>
 <link rel="stylesheet" href="css/themes.css" />
 <link rel="stylesheet" href="css/flux-themes.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="assets/kit/defxn-fonts.css" />
 <link rel="stylesheet" href="css/admin.css" />
 <link rel="stylesheet" href="css/authorization-dialog.css" />
 <!-- The workspace's stylesheet (rail, canvas, toolbar, sheet), scoped under #studioRoot. It reads
      the same SDK tokens as css/admin.css, whose top block is the editor's one token block. -->
 <link rel="stylesheet" href="css/studio-embed.css" />
+<link rel="stylesheet" href="css/ark-blocks.css" />
 </head>
 <body>
+<!-- Keyboard: one Tab from the top of the editor reaches the canvas past the header and the rail (docs/ux-audit/cms.md P2-7). -->
+<a class="cms-skip" href="#canvasWrap">Skip to the page</a>
 <!-- ONE workspace (2026-10-18, owner: "I only want to see ONE CMS, unified."). There used to be
      two apps behind a Content | Design switch: Content was a page list, a form and a preview frame
      of its own (#frame); Design was the canvas. Now there is one header, one rail, one canvas
@@ -29,74 +32,78 @@
      apps; Canvas / Sitemap / Theme are views of the same site (#viewSwitch) in either lens.
      Every control here appears exactly once. The header is outside #studioRoot so nothing that
      hides a part of the workspace can hide the controls that bring it back. -->
+<!-- THE HEADER, three tiers (docs/ux-audit/cms.md (b), 2026-10-19): what a person editing words
+     needs on every screen is labelled and always here -- the page, its settings, Edit words /
+     Edit style, undo, Save, Publish. What belongs to the canvas (its size, Edit / Preview, Design
+     tips) sits on the canvas's own strip above it (#canvasBar). Everything occasional -- the site
+     map, Site style, the page transition, this page's search & sharing, version history,
+     publishing status, the project folder, sign-out -- is one click away in the More menu
+     (#accountMenu). Ids are the ones every test and caller already use: features moved, none went. -->
 <header class="bar" id="appBar">
   <div class="bar-brand" title="Flux Protocol editor"><strong>Flux Protocol</strong></div>
-  <!-- the page being edited: rail, picker, its fields, its SEO -->
+  <!-- the page being edited: the side panel, the page switcher, its settings -->
   <div class="bar-group" id="pageNav">
-    <button type="button" class="ibtn" id="btnLeftRail" aria-pressed="true" aria-controls="studioLeft" aria-label="Site panel" title="Hide the Pages / Layers / Library / Media / Vault panel"><svg class="ic" aria-hidden="true"><use href="#i-sidebar"/></svg></button>
-    <button type="button" class="bar-page" id="btnPage" aria-haspopup="dialog" aria-expanded="false" title="Switch page"></button>
-    <button type="button" class="ibtn" id="btnPageFields" aria-haspopup="dialog" aria-expanded="false" aria-controls="sheet" aria-label="Page fields" title="Page fields: every field of this page, including the ones the canvas does not show"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></button>
-    <button type="button" class="ibtn" id="btnPageSeo" aria-haspopup="dialog" aria-expanded="false" aria-label="SEO for this page" title="Search and AI: this page's title, description and share preview"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
+    <button type="button" class="ibtn" id="btnLeftRail" aria-pressed="true" aria-controls="studioLeft" aria-label="Pages and side panel" title="Show or hide the side panel (pages, layers, components, images)"><svg class="ic" aria-hidden="true"><use href="#i-sidebar"/></svg><span class="rail-lbl">Pages</span></button>
+    <button type="button" class="bar-page" id="btnPage" aria-haspopup="dialog" aria-expanded="false" title="Switch page (search every page)"></button>
+    <button type="button" class="btn quiet bar-labelled" id="btnPageFields" aria-haspopup="dialog" aria-expanded="false" aria-controls="sheet" aria-label="Page settings" title="Page settings: every field of this page, its search &amp; sharing, its shapes"><svg class="ic" aria-hidden="true"><use href="#i-settings"/></svg><span class="lbl">Page settings</span></button>
   </div>
+  <!-- what a click on the canvas edits: the words, or how they look. Same canvas, same selection. -->
   <div class="bar-nav">
-    <!-- Views of the one site, in either lens. Background is not a view: it is the site-wide
-         page-transition popover, previewed on the canvas, so it opens a popover anchored here.
-         Unselected views collapse to their icon (label in the tooltip). -->
-    <div class="mode-switch sub-switch" id="viewSwitch" role="group" aria-label="View">
-      <button type="button" class="ark-tab" id="viewCanvasBtn" aria-pressed="true" data-view="design" title="Canvas: the real pages, edited in place"><svg class="ic" aria-hidden="true"><use href="#i-design"/></svg><span class="lbl">Canvas</span></button>
-      <button type="button" class="ark-tab" id="viewMapBtn" aria-pressed="false" data-view="map" title="Sitemap: every page and how they link"><svg class="ic" aria-hidden="true"><use href="#i-sitemap"/></svg><span class="lbl">Sitemap</span></button>
-      <button type="button" class="ark-tab" id="viewThemeBtn" aria-pressed="false" data-view="theme" title="Theme: palette, fonts, settings defaults, site-wide SEO, mesh tuning and page shapes -- beside the live canvas"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span class="lbl">Theme</span></button>
-      <button type="button" class="ark-tab" id="backgroundBtn" aria-haspopup="dialog" aria-expanded="false" title="Background: the transition between pages (site-wide)"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg><span class="lbl">Background</span></button>
-    </div>
-    <!-- The lens: what a click on the canvas edits. Content: the text's own field, inline.
-         Design: its style, layers, groups, states, components. Same canvas, same selection. -->
-    <div class="mode-switch lens-switch" id="lensSwitch" role="group" aria-label="Lens: what a click on the canvas edits">
-      <button type="button" class="ark-tab" id="lensContentBtn" aria-pressed="true" data-lens="content" title="Content lens: click text on the canvas to edit its words">Content</button>
-      <button type="button" class="ark-tab" id="lensDesignBtn" aria-pressed="false" data-lens="design" title="Design lens: click anything on the canvas to edit its style, layout and structure">Design</button>
+    <!-- one segmented control (.seg) for every group of one-pressed choices: this lens, the
+         canvas strip's screen size and Edit / Preview, the new item's kind; each is Ark's toggle
+         group (js/admin/ark-host.js arkSegGroup) -->
+    <div class="seg seg-text lens-switch" id="lensSwitch" role="group" aria-label="What a click on the page edits">
+      <button type="button" id="lensContentBtn" aria-pressed="true" data-lens="content" title="Edit words: click any text on the page to change it">Edit words</button>
+      <button type="button" id="lensDesignBtn" aria-pressed="false" data-lens="design" title="Edit style: click anything on the page to change its look, size and layout">Edit style</button>
     </div>
   </div>
-  <!-- the canvas's own controls: shown while a canvas is on screen (Canvas and Theme views) -->
-  <div class="bar-group bar-tools" id="canvasTools">
-    <span class="bp-note" id="bpNote" hidden></span>
-    <div class="seg" id="devices" role="group" aria-label="Preview size">
-      <button type="button" data-d="0" aria-pressed="true" title="Desktop · 1280 px" aria-label="Desktop"><svg class="ic" aria-hidden="true"><use href="#i-desktop"/></svg></button>
-      <button type="button" data-d="1" aria-pressed="false" title="Tablet · 820 px" aria-label="Tablet"><svg class="ic" aria-hidden="true"><use href="#i-tablet"/></svg></button>
-      <button type="button" data-d="2" aria-pressed="false" title="Phone · 390 px" aria-label="Phone"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></button>
-    </div>
-    <button type="button" class="ibtn" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></button>
-    <button type="button" class="ibtn" id="btnRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg class="ic" aria-hidden="true"><use href="#i-redo"/></svg></button>
-    <button type="button" class="ibtn score" id="btnCheck" aria-haspopup="dialog" aria-expanded="false" aria-label="Design check" title="Check this page against the design rules"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><b id="scoreBadge">–</b></button>
-    <div class="seg" id="mode" role="group" aria-label="Edit or use the site">
-      <button type="button" data-m="edit" aria-pressed="true" title="Edit: select and change elements" aria-label="Edit"><svg class="ic" aria-hidden="true"><use href="#i-cursor"/></svg></button>
-      <button type="button" data-m="live" aria-pressed="false" title="Live: use the site like a visitor" aria-label="Live"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></button>
-    </div>
+  <!-- ONE history: text, style and layout edits, in the order they were made (the history module, loaded below) -->
+  <div class="bar-group bar-history" id="historyTools">
+    <button type="button" class="ibtn" id="btnUndo" title="Undo (Ctrl/Cmd+Z)" aria-label="Undo"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg></button>
+    <button type="button" class="ibtn" id="btnRedo" title="Redo (Ctrl/Cmd+Shift+Z)" aria-label="Redo"><svg class="ic" aria-hidden="true"><use href="#i-redo"/></svg></button>
   </div>
   <div class="bar-actions">
+    <!-- the save state and the last event, in a slot of its own width: a message never moves a control -->
     <span id="status" class="status" role="status" aria-live="polite"></span>
-    <!-- Version history (versions.js) and Mesh span every draft. -->
-    <button id="versionsNav" type="button" class="ibtn" aria-expanded="false" aria-controls="versionsPanel" aria-label="Versions" title="Versions: every saved version of the site -- preview, restore, export"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg></button>
-    <button id="meshNav" type="button" class="ibtn" aria-expanded="false" aria-controls="sheet" aria-label="Mesh" title="Mesh: publish and deploy status"><svg class="ic" aria-hidden="true"><use href="#i-mesh"/></svg></button>
     <button id="save" type="button" class="btn" title="Save every unsaved change (Ctrl/Cmd+S)">Save</button>
-    <button id="publish" type="button" class="btn primary" title="Publish every page and article to the mesh">Publish</button>
-    <!-- identity, project folder, the publish host, shortcuts and sign-out: occasional, so one compact menu -->
+    <button id="publish" type="button" class="btn primary" title="Publish the site">Publish</button>
+    <!-- More: the occasional things, one menu. Its id is the account menu's: identity, folder and
+         sign-out are its last section. -->
     <div class="account" id="account">
-      <button id="accountBtn" type="button" class="ibtn" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu" aria-label="Account and project folder" title="Account and project folder"><svg class="ic" aria-hidden="true"><use href="#i-user"/></svg></button>
-      <div class="account-menu" id="accountMenu" hidden>
-        <span id="who" class="who" title="The identity you are signed in as"></span>
-        <button id="connect" type="button" class="btn">Connect project folder</button>
-        <details id="mesh" class="mesh">
-          <summary>Publish host</summary>
-          <p id="meshState" class="hint">Checking the publish host&hellip;</p>
-          <p id="meshOwner" class="hint mono"></p>
-          <div class="tools"><button id="meshRefresh" type="button" class="btn">Refresh</button></div>
-          <p class="hint">Publishing is signed by the DeadArk identity you signed in with. Its key stays in the sign-in page&rsquo;s memory and is dropped when you sign out or reload.</p>
-        </details>
-        <p class="hint"><b>Shortcuts</b> · Ctrl/Cmd+S save · Ctrl+Z undo · Ctrl+Shift+Z redo · Esc closes a menu or panel</p>
-        <button id="signOut" type="button" class="btn" title="Lock the admin and drop the signing key">Sign out</button>
+      <button id="accountBtn" type="button" class="btn quiet bar-labelled" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu" aria-label="More" title="More: site map, site style, history, publishing, project folder, sign out"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg><span class="lbl">More</span></button>
+      <div class="account-menu" id="accountMenu" role="dialog" aria-label="More" hidden>
+        <div class="menu-group" role="group" aria-label="Show">
+          <p class="menu-head">Show</p>
+          <div class="menu-views" id="viewSwitch" role="group" aria-label="Show">
+            <button type="button" class="menu-item" id="viewCanvasBtn" aria-pressed="true" data-view="design" title="The page, edited in place"><svg class="ic" aria-hidden="true"><use href="#i-design"/></svg><span>The page</span></button>
+            <button type="button" class="menu-item" id="viewMapBtn" aria-pressed="false" data-view="map" title="Every page and how they link"><svg class="ic" aria-hidden="true"><use href="#i-sitemap"/></svg><span>Site map</span></button>
+            <button type="button" class="menu-item" id="viewThemeBtn" aria-pressed="false" data-view="theme" title="Colours, fonts, background, search defaults -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span>Site style</span></button>
+          </div>
+        </div>
+        <div class="menu-group" role="group" aria-label="This page and the site">
+          <button type="button" class="menu-item" id="btnPageSeo" aria-haspopup="dialog" aria-expanded="false" title="This page's title, description and share preview in search results and links"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><span>Search &amp; sharing for this page</span></button>
+          <button type="button" class="menu-item" id="backgroundBtn" aria-haspopup="dialog" aria-expanded="false" title="How one page changes into the next (site-wide)"><svg class="ic" aria-hidden="true"><use href="#i-sparkle"/></svg><span>Page transition</span></button>
+          <button type="button" class="menu-item" id="versionsNav" aria-expanded="false" aria-controls="versionsPanel" title="Every saved version of the site: look at one, bring one back"><svg class="ic" aria-hidden="true"><use href="#i-history"/></svg><span>Version history</span></button>
+          <button type="button" class="menu-item" id="meshNav" aria-expanded="false" aria-controls="sheet" title="Whether the site can be published right now, and what is live"><svg class="ic" aria-hidden="true"><use href="#i-mesh"/></svg><span>Publishing status</span></button>
+        </div>
+        <div class="menu-group menu-account" role="group" aria-label="You and your project">
+          <span id="who" class="who" title="The identity you are signed in as"></span>
+          <button id="connect" type="button" class="btn">Connect project folder</button>
+          <details class="menu-keys">
+            <summary>Keyboard shortcuts</summary>
+            <p class="hint">Ctrl/Cmd+S save &middot; Ctrl/Cmd+Z undo &middot; Ctrl/Cmd+Shift+Z redo &middot; Enter finishes a heading &middot; Esc closes a menu or panel</p>
+          </details>
+          <button id="signOut" type="button" class="btn" title="Lock the editor and drop the signing key">Sign out</button>
+        </div>
       </div>
     </div>
   </div>
 </header>
+<!-- A phone's action bar (docs/ux-audit/cms.md P1-13): below 600px js/admin/header.js MOVES the side-panel
+     button, the Edit words / Edit style switch, Save and Publish in here, to where a thumb rests, and
+     moves them back above that width. They are the same elements (same ids, same handlers): every
+     control still appears exactly once. Empty and hidden on a wide screen. -->
+<nav class="phone-bar" id="phoneBar" aria-label="Pages, edit, save and publish" hidden></nav>
 <!-- The icon sprite sits at body level: the header above and the workspace below both use it. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
@@ -179,37 +186,48 @@
   <div class="work">
     <aside class="left" id="studioLeft" aria-label="Site">
       <div class="tabs" role="tablist" aria-label="Site panel">
-        <button role="tab" id="tabPages" aria-selected="true" aria-controls="pagesPane" data-tab="pages" title="Pages: every page and article; open one on the canvas"><svg class="ic" aria-hidden="true"><use href="#i-page"/></svg><span>Pages</span></button>
-        <button role="tab" id="tabLayers" aria-selected="false" aria-controls="layersPane" data-tab="layers" title="Layers: the elements of the page on the canvas"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></button>
-        <button role="tab" id="tabLib" aria-selected="false" aria-controls="libPane" data-tab="lib" title="Library: components and blocks to insert"><svg class="ic" aria-hidden="true"><use href="#i-comp"/></svg><span>Library</span></button>
-        <button role="tab" id="tabMedia" aria-selected="false" aria-controls="mediaPane" data-tab="media" title="Media: images -- upload, replace, label, delete"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg><span>Media</span></button>
-        <button role="tab" id="tabVault" aria-selected="false" aria-controls="vaultPane" data-tab="vault" title="Vault: encrypted content and its recipients"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span>Vault</span></button>
+        <button role="tab" id="tabPages" aria-selected="true" aria-controls="pagesPane" data-tab="pages" title="Pages: find a page and open it, or add one"><svg class="ic" aria-hidden="true"><use href="#i-page"/></svg><span>Pages</span></button>
+        <button role="tab" id="tabLayers" aria-selected="false" aria-controls="layersPane" data-tab="layers" title="Layers: everything on this page, in order"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg><span>Layers</span></button>
+        <button role="tab" id="tabLib" aria-selected="false" aria-controls="libPane" data-tab="lib" title="Blocks: blocks to add, and the components you made"><svg class="ic" aria-hidden="true"><use href="#i-comp"/></svg><span>Blocks</span></button>
+        <button role="tab" id="tabMedia" aria-selected="false" aria-controls="mediaPane" data-tab="media" title="Images: add, replace, describe, delete"><svg class="ic" aria-hidden="true"><use href="#i-image"/></svg><span>Images</span></button>
+        <button role="tab" id="tabVault" aria-selected="false" aria-controls="vaultPane" data-tab="vault" title="Private content: encrypted items and who can open them"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><span>Private</span></button>
       </div>
-      <!-- Pages: the one site tree (Site chrome, Pages, Theory pages, Articles, every other
-           route). A row opens its page on the canvas; its own buttons open its fields or delete
-           it. rail.js renderPages(). -->
+      <!-- Pages: THE page list (rail.js siteList: main pages, guides, articles, header & footer,
+           more pages), searchable; the header's page switcher searches the same list. A row opens
+           its page on the canvas; its own buttons open its settings or delete it. + New asks for
+           a title; the address is derived and shown (Developer details to change it). -->
       <div id="pagesPane" class="rail-pane" role="tabpanel" aria-labelledby="tabPages">
+        <div class="pages-top">
+          <input id="pageSearch" type="search" placeholder="Find a page" aria-label="Find a page by name or address" autocomplete="off" spellcheck="false" />
+          <button type="button" class="btn small" id="btnNewItem" aria-expanded="false" aria-controls="newItemPanel" title="Add a page or an article"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg><span>New</span></button>
+        </div>
+        <section class="new-item" id="newItemPanel" aria-label="New page or article" hidden>
+          <div class="seg seg-text new-kind" role="group" aria-label="What are you adding?">
+            <button type="button" data-new-kind="page" aria-pressed="true" title="A guide page, under /concept/, linked from the guides page">Guide page</button>
+            <button type="button" data-new-kind="article" aria-pressed="false" title="An article, under /learnings/, listed last among the articles">Article</button>
+          </div>
+          <div class="field"><label for="newTitle">Title</label>
+          <input id="newTitle" type="text" autocomplete="off" placeholder="e.g. Pricing" /></div>
+          <p class="hint new-where">Address: <span id="newAddress">the address follows the title</span></p>
+          <div id="newItemDev">
+            <form id="newForm" class="new-form" autocomplete="off" novalidate>
+              <div class="field"><label for="newId">Page address (after /concept/)</label>
+              <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="pricing" spellcheck="false" /></div>
+              <p class="hint">Lowercase letters and digits, starting with a letter.</p>
+            </form>
+            <form id="newArticleForm" class="new-form" autocomplete="off" novalidate hidden>
+              <div class="field"><label for="newSlug">Article address (after /learnings/)</label>
+              <input id="newSlug" type="text" inputmode="latin" placeholder="hello-world" spellcheck="false" /></div>
+              <p class="hint">Lowercase words joined by hyphens, starting with a letter.</p>
+            </form>
+          </div>
+          <p class="new-error" id="newItemError" role="alert"></p>
+          <div class="tools">
+            <button type="button" class="btn primary small" id="newItemCreate">Create</button>
+            <button type="button" class="btn small" id="newItemCancel">Cancel</button>
+          </div>
+        </section>
         <ul class="list site-tree" id="pages" aria-label="Pages"></ul>
-        <details class="add-toggle">
-          <summary>New theory page</summary>
-          <form id="newForm" class="new-form" autocomplete="off" novalidate>
-            <div class="new-row">
-              <input id="newId" type="text" inputmode="latin" pattern="[a-z][a-z0-9]*" placeholder="page-name" spellcheck="false" aria-label="New page name" />
-              <button type="submit" class="btn">Add</button>
-            </div>
-            <p class="hint">Lowercase letters and digits. It gets its own route and a link on the theory page.</p>
-          </form>
-        </details>
-        <details class="add-toggle">
-          <summary>New article</summary>
-          <form id="newArticleForm" class="new-form" autocomplete="off" novalidate>
-            <div class="new-row">
-              <input id="newSlug" type="text" inputmode="latin" placeholder="article-name" spellcheck="false" aria-label="New article name" />
-              <button type="submit" class="btn">Add</button>
-            </div>
-            <p class="hint">Lowercase words joined by hyphens. It becomes the last article and gets its own route.</p>
-          </form>
-        </details>
       </div>
       <!-- Layers: the real tree of the page on the canvas, and its groups (rail.js) -->
       <div id="layersPane" class="rail-pane" role="tabpanel" aria-labelledby="tabLayers" hidden>
@@ -227,13 +245,29 @@
       </div>
     </aside>
 
-    <main class="canvas-wrap" id="canvasWrap">
+    <main class="canvas-wrap" id="canvasWrap" tabindex="-1">
       <!-- Conditions that hold until they are fixed (no project folder, a page not saved yet):
            the notice banners (notice(), loaded below), above the canvas, which gives them the room
            (layoutStage). Toasts for passing events stack at the bottom. -->
       <div id="noticeBanners" class="notice-region notice-banners" aria-label="Notices"></div>
       <div id="designView">
-        <div class="devlabel"><span id="devName">Desktop · 1280 px</span><span id="devScale"></span></div>
+        <!-- The canvas's own strip: what the canvas shows (its screen size, Edit or Preview), what
+             a style edit applies to at that size, and -- in Edit style -- the Design tips. These
+             belong to the canvas, not to the page, so they sit on it instead of in the header. -->
+        <div class="devlabel canvas-bar" id="canvasTools">
+          <div class="seg" id="devices" role="group" aria-label="Screen size">
+            <button type="button" data-d="0" aria-pressed="true" title="Desktop · 1280 px" aria-label="Desktop"><svg class="ic" aria-hidden="true"><use href="#i-desktop"/></svg></button>
+            <button type="button" data-d="1" aria-pressed="false" title="Tablet · 820 px" aria-label="Tablet"><svg class="ic" aria-hidden="true"><use href="#i-tablet"/></svg></button>
+            <button type="button" data-d="2" aria-pressed="false" title="Phone · 390 px" aria-label="Phone"><svg class="ic" aria-hidden="true"><use href="#i-phone"/></svg></button>
+          </div>
+          <span class="bp-note" id="bpNote" role="note" hidden></span>
+          <span class="dev-text"><span id="devName">Desktop · 1280 px</span><span id="devScale"></span></span>
+          <button type="button" class="ibtn score" id="btnCheck" aria-haspopup="dialog" aria-expanded="false" title="Design tips: this page checked against the design rules" hidden><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><span class="lbl">Design tips</span><b id="scoreBadge">–</b></button>
+          <div class="seg seg-text" id="mode" role="group" aria-label="Edit the page, or use it as a visitor">
+            <button type="button" data-m="edit" aria-pressed="true" title="Edit: clicks select and change the page"><svg class="ic" aria-hidden="true"><use href="#i-cursor"/></svg><span>Edit</span></button>
+            <button type="button" data-m="live" aria-pressed="false" title="Preview: use the page as a visitor would"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><span>Preview</span></button>
+          </div>
+        </div>
         <div class="stage" id="stage">
           <iframe class="cms-preview" id="cmsPreview" title="The site, editable"></iframe>
           <!-- the contextual floating toolbar for the canvas selection (toolbar.js),
@@ -266,7 +300,7 @@
 <aside class="sheet" id="sheet" role="dialog" aria-modal="false" aria-labelledby="sheetTitle" hidden>
   <div class="sheet-head">
     <div class="sheet-titles"><span class="sheet-kicker" id="sheetKicker"></span><h2 id="sheetTitle"></h2></div>
-    <button type="button" class="ibtn" id="sheetClose" aria-label="Close" title="Close (Esc)"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <button type="button" class="ov-close" id="sheetClose" data-part="popover-close" aria-label="Close" title="Close (Esc)"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button>
   </div>
   <div class="sheet-body" id="sheetBody"></div>
 </aside>
@@ -294,6 +328,14 @@
 <script src="js/content/settings-defaults-data.js" defer></script>
 <script src="js/content/layout.js" defer></script>
 <script src="js/content/layout-data.js" defer></script>
+<!-- The CMS Library's blocks are the Ark block registry (W2-LIBRARY): ArkKit (the full kit, with the
+     createArkUI runtime the editor's overlays run on; it binds to engines.js's style registry at load),
+     the glossary its [[term]] previews read, and the SDK's block check -- all before
+     components.js, whose blocks() the editor reads at load (js/admin/controls.js). -->
+<script src="js/ark/vendor/engines.js" defer></script>
+<script src="js/ark/vendor/ark-kit.js" defer></script>
+<script src="js/content/glossary.js" defer></script>
+<script src="js/admin/vendor/cms-blocks.js" defer></script>
 <script src="js/content/components.js" defer></script>
 <script src="js/content/components-data.js" defer></script>
 <script src="js/content/states.js" defer></script>
@@ -307,6 +349,7 @@
 <script src="js/admin/env.js" defer></script>
 <script src="js/content/learnings.js" defer></script>
 <script src="js/content/article-index.js" defer></script>
+<script src="js/content/site-pages.js" defer></script>
 <script src="js/content/seo.js" defer></script>
 <script src="js/content/seo-data.js" defer></script>
 <script src="js/pages/catalog.js" defer></script>
@@ -315,7 +358,6 @@
      and a new article could never be saved (regression: tests/admin-reference-docs-loaded.cjs). -->
 <script src="js/ark/reference-docs.js" defer></script>
 <script src="js/admin/store.js" defer></script>
-<script src="js/admin/primitives.js" defer></script>
 <script src="js/admin/vendor/tweetnacl.js" defer></script>
 <script src="js/admin/crypto.js" defer></script>
 <script src="js/admin/publish.js" defer></script>
@@ -332,6 +374,9 @@
      and anything later through ArkAdmin.later(). -->
 <script src="js/admin/core.js" defer></script>
 <script src="js/admin/notice.js" defer></script>
+<script src="js/admin/overlay.js" defer></script>
+<!-- Ark's tabs, disclosure and toggle group on the light-DOM host, for every module after it -->
+<script src="js/admin/ark-host.js" defer></script>
 <script src="js/admin/state.js" defer></script>
 <script src="js/admin/controls.js" defer></script>
 <script src="js/admin/save.js" defer></script>
@@ -345,6 +390,7 @@
 <script src="js/admin/shapes.js" defer></script>
 <script src="js/admin/studio.js" defer></script>
 <script src="js/admin/bridge.js" defer></script>
+<script src="js/admin/history.js" defer></script>
 <script src="js/admin/canvas.js" defer></script>
 <script src="js/admin/header.js" defer></script>
 <script src="js/admin/rail.js" defer></script>

@@ -174,7 +174,19 @@
   }
   function restoreVersion(entry, snapshot, options) {
     options = options || {};
-    if (!options.confirmed && anyDirty() && !window.confirm('Restoring #' + entry.record.seq + ' replaces your unsaved changes with that version, as unsaved drafts. Continue?')) return false;
+    /* asked first only when this call was not already confirmed (the panel asks for itself, with the exact list of what
+       a restore removes): then the answer is a Promise, which the panel awaits; a confirmed call answers at once */
+    if (!options.confirmed && anyDirty()) {
+      return A.confirmDialog({ title: 'Restore version #' + entry.record.seq + '?', message: 'Your unsaved changes are replaced by that version, as unsaved changes. Nothing is written until you Save, and you can undo the restore with Ctrl/Cmd+Z.',
+        confirmLabel: 'Restore', cancelLabel: 'Keep my changes' })
+        .then(function (yes) { return yes ? restoreVersion(entry, snapshot, Object.assign({}, options, { confirmed: true })) : false; });
+    }
+    /* Restore is a step of the one undo history (js/admin/history.js; docs/ux-audit/cms.md P1-5):
+       the drafts as they are now are kept, and Undo restores THEM the same way (the restore code
+       is the one path), with this restore's bookkeeping put back. Not when an earlier restore's
+       removals are still waiting for Save: undoing past them would need that list too. */
+    var recordUndo = options.record !== false && !options.undoOf && typeof A.historyAction === 'function' && !restoreRemovalsPending();
+    var before = recordUndo ? { site: siteFromState(), pending: pendingRestore, reorder: Object.assign({}, restoreReorder) } : null;
     undoRestoreRemovals();
     var kept = [], removing = [];
     function apply(kind, values, idOf) {
@@ -217,13 +229,25 @@
     if (state.slugs.indexOf(state.aCurrent) < 0) state.aCurrent = state.slugs[0] || null;
     if (state.assetIds.indexOf(state.assetCurrent) < 0) state.assetCurrent = state.assetIds[0] || null;
     if (state.secretIds.indexOf(state.secretCurrent) < 0) state.secretCurrent = state.secretIds[0] || null;
-    pendingRestore = entry.hash;
+    pendingRestore = options.undoOf ? options.pending : entry.hash;
+    if (options.undoOf) Object.keys(options.reorder).forEach(function (kind) { restoreReorder[kind] = options.reorder[kind]; });
     state.cmsSourceSite = siteFromState(); state.cmsRoutes = studioRoutes();
     renderList(); refreshPanels(); reloadPreview(); touch();
+    if (options.undoOf) { status('Undid the restore: your drafts are back as they were before it.', ''); return true; }
     var message = 'Loaded version #' + entry.record.seq + ' as unsaved drafts. Save to make it current: it is recorded as a new version, and every version stays in the history.';
     if (removing.length) message += ' Save also removes ' + removing.length + ' file' + (removing.length === 1 ? '' : 's') + ' #' + entry.record.seq + ' never had (the history keeps them): ' + removing.join(', ') + '.';
     if (kept.length) message += ' Kept, as you chose (not in #' + entry.record.seq + '): ' + kept.join(', ') + '.';
     status(message, 'warn');
+    /* the whole sentence where it can be read: the status line cut it to "Loaded ..." (P1-15) */
+    if (A.notice) A.notice({ tone: 'info', key: 'version-restored', title: 'Restored version #' + entry.record.seq + ' as unsaved changes', body: message.replace(/^Loaded version #\d+ as unsaved drafts\. /, ''),
+      actions: [{ label: 'Save now', run: function () { A.later('saveEverything')(); } }] });
+    if (recordUndo) {
+      var seq = entry.record.seq, hash = entry.hash;
+      A.historyAction({ label: 'restoring version #' + seq,
+        can: function (way) { return way === 'undo' && pendingRestore !== hash ? 'Version #' + seq + ' has been saved (or another restore came after it), so undoing it here would leave the site half-way. Restore the version you want from Versions instead.' : ''; },
+        undo: function () { return restoreVersion({ hash: before.pending, record: { seq: 0 } }, before.site, { confirmed: true, removeExtras: false, undoOf: true, pending: before.pending, reorder: before.reorder }); },
+        redo: function () { return restoreVersion(entry, snapshot, Object.assign({}, options, { confirmed: true, record: false })); } });
+    }
     return true;
   }
   var versionsPanel = window.ArkVersionsPanel && $('versionsPanel') ? ArkVersionsPanel.create({
@@ -231,11 +255,23 @@
     dir: function () { return Promise.resolve(state.historyDir || null); },
     savedSnapshot: savedSnapshot, anyDirty: anyDirty, status: status, download: download, connect: connectProject,
     preview: previewVersion, exitPreview: exitVersionPreview, restore: restoreVersion, restorePlan: restorePlan,
-    onToggle: function (open) { $('versionsNav').setAttribute('aria-expanded', String(open)); }
+    /* one close button, and Versions shares the docked slot with the sheet: opening one closes
+       the other (js/admin/overlay.js, level 'sheet'; docs/ux-audit/cms.md P1-12) */
+    closeButton: A.overlay.closeButton, devDetails: A.devDetails, disclosure: A.arkDisclosure,
+    itemName: function (draft, id) {
+      if (draft === 'manifests') return state.drafts[id] && state.drafts[id].title ? state.drafts[id].title : '';
+      if (draft === 'articles') return state.aDrafts[id] && state.aDrafts[id].title ? state.aDrafts[id].title : '';
+      return '';
+    },
+    onToggle: function (open) {
+      $('versionsNav').setAttribute('aria-expanded', String(open));
+      if (open) A.overlay.open($('versionsPanel'), { anchor: $('versionsNav'), level: 'sheet', onClose: function () { if (versionsPanel && !$('versionsPanel').hidden) versionsPanel.close(); } });
+      else A.overlay.forget($('versionsPanel'));
+    }
   }) : null;
   if (versionsPanel) $('versionsNav').addEventListener('click', versionsPanel.toggle);
   A.provide({ ensureVersionBaseline: ensureVersionBaseline, recordVersion: recordVersion,
-      removeRestoredExtras: removeRestoredExtras, restoreRemovalsPending: restoreRemovalsPending,
+      removeRestoredExtras: removeRestoredExtras, restoreRemovalsPending: restoreRemovalsPending, restoreVersion: restoreVersion,
       restoreReorderPending: restoreReorderPending, versionsPanel: versionsPanel,
       writeRestoredOrder: writeRestoredOrder, writeSearchFiles: writeSearchFiles });
 })();

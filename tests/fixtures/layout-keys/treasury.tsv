@@ -1,0 +1,49 @@
+# key	tag	text -- layout keys of /treasury before conversion, captured 2026-10-19 by tests/lib/layout-continuity.cjs. Frozen: never regenerate.
+page:/	section	DESIGN PREVIEW / NOT LIVEInspect a treasury before funds move.Preview assets, reserves, and the evidence behind each movement.Design mock only — no wallet, bala
+page:/div:1	div	DESIGN PREVIEW / NOT LIVEInspect a treasury before funds move.Preview assets, reserves, and the evidence behind each movement.Design mock only — no wallet, bala
+page:/div:1/header:1	header	DESIGN PREVIEW / NOT LIVEInspect a treasury before funds move.Preview assets, reserves, and the evidence behind each movement.Design mock only — no wallet, bala
+page:/div:1/header:1/p:1	p	DESIGN PREVIEW / NOT LIVE
+id:treasury-preview-title	h1	Inspect a treasury before funds move.
+page:/div:1/header:1/p:2	p	Preview assets, reserves, and the evidence behind each movement.
+page:/div:1/header:1/p:3	p	Design mock only — no wallet, balance, deposit, transfer, or ledger is connected.
+page:/div:1/div:1	div	FXN / Tier 1Credits
+page:/div:1/div:1/button:1	button	FXN / Tier 1
+page:/div:1/div:1/button:2	button	Credits
+page:/div:1/section:1	section	FXN / TIER 112,400 FXNFictional sample amount for the native token. Not supply, price, or a real treasury balance.CREDITS840 CreditsUniversal name: Credits. Ide
+page:/div:1/section:1/div:1	div	FXN / TIER 112,400 FXNFictional sample amount for the native token. Not supply, price, or a real treasury balance.
+page:/div:1/section:1/div:1/span:1	span	FXN / TIER 1
+page:/div:1/section:1/div:1/strong:1	strong	12,400 FXN
+page:/div:1/section:1/div:1/p:1	p	Fictional sample amount for the native token. Not supply, price, or a real treasury balance.
+page:/div:1/section:1/div:2	div	CREDITS840 CreditsUniversal name: Credits. Identity-bound and non-transferable; separate from FXN. This quantity is fictional.
+page:/div:1/section:1/div:2/span:1	span	CREDITS
+page:/div:1/section:1/div:2/strong:1	strong	840 Credits
+page:/div:1/section:1/div:2/p:1	p	Universal name: Credits. Identity-bound and non-transferable; separate from FXN. This quantity is fictional.
+page:/div:1/button:1	button	Inspect sample movements
+page:/div:1/button:1/svg:1	svg	
+page:/div:1/button:1/svg:1/path:1	path	
+page:/div:1/button:1/svg:1/path:2	path	
+page:/div:1/section:2	section	← Back to overview02 / SAMPLE MOVEMENTSChoose one movement.DEMO-001Reserve proposed1,200 FXNDEMO-002Deposit inspected480 FXNDEMO-003Allocation noted320 FXN
+page:/div:1/section:2/button:1	button	← Back to overview
+page:/div:1/section:2/p:1	p	02 / SAMPLE MOVEMENTS
+page:/div:1/section:2/h2:1	h2	Choose one movement.
+page:/div:1/section:2/button:2	button	DEMO-001Reserve proposed1,200 FXN
+page:/div:1/section:2/button:2/span:1	span	DEMO-001
+page:/div:1/section:2/button:2/strong:1	strong	Reserve proposed
+page:/div:1/section:2/button:2/span:2	span	1,200 FXN
+page:/div:1/section:2/button:3	button	DEMO-002Deposit inspected480 FXN
+page:/div:1/section:2/button:3/span:1	span	DEMO-002
+page:/div:1/section:2/button:3/strong:1	strong	Deposit inspected
+page:/div:1/section:2/button:3/span:2	span	480 FXN
+page:/div:1/section:2/button:4	button	DEMO-003Allocation noted320 FXN
+page:/div:1/section:2/button:4/span:1	span	DEMO-003
+page:/div:1/section:2/button:4/strong:1	strong	Allocation noted
+page:/div:1/section:2/button:4/span:2	span	320 FXN
+page:/div:1/section:3	section	← Back to movements03 / EVIDENCE LAYER
+page:/div:1/section:3/button:1	button	← Back to movements
+page:/div:1/section:3/p:1	p	03 / EVIDENCE LAYER
+page:/div:1/section:3/h2:1	h2	
+page:/div:1/section:3/p:2	p	
+page:/div:1/section:3/dl:1	dl	
+page:/div:1/nav:1	nav	Preview a deposit →
+page:/div:1/nav:1/a:1	a	Preview a deposit →
+page:/div:1/div:2	div	
