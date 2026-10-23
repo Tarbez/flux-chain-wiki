@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- The frame a folder site's page runs in (app.js, folder-site.js). app.js loads it in an
+     <iframe sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox">, so it has an opaque origin.
+     This policy outlives document.write, so it binds the site's own page: no request to any host, this one
+     included, only data: URLs made from the verified archive. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' data:; style-src 'unsafe-inline' data:; img-src data:; font-src data:; media-src data:; connect-src 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'" />
+<meta name="referrer" content="no-referrer" />
+<title>Site page</title>
+</head>
+<body>
+<script>
+(function () {
+  /* Only ever a sandboxed frame inside this gateway's own shell. Opened any other way, it does nothing. */
+  if (self.origin !== "null" || window.parent === window) return;
+  addEventListener("message", function showPage(event) {
+    if (event.source !== window.parent || event.origin !== location.origin) return;
+    var data = event.data;
+    if (!data || data.type !== "fxn-folder-site:page" || typeof data.html !== "string") return;
+    removeEventListener("message", showPage);
+    document.open();
+    document.write(data.html);
+    document.close();
+    if (typeof data.hash === "string" && data.hash.length > 1) {
+      var id;
+      try { id = decodeURIComponent(data.hash.slice(1)); } catch (_) { id = data.hash.slice(1); }
+      var target = document.getElementById(id);
+      if (target) target.scrollIntoView();
+    }
+  });
+  window.parent.postMessage({ type: "fxn-folder-site:ready" }, location.origin);
+})();
+</script>
+</body>
+</html>

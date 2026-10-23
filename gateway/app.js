@@ -10,7 +10,10 @@
    /fxn-store/v1/<cid> (same-origin, answered from the node's byte store) ->
    refused unless the bytes hash to that ID (content.js) -> decode with
    flx-codec's decodeArchiveAsync (vendored at ./vendor/flx-codec/, see that
-   directory's VENDORED-FROM.txt) -> render.
+   directory's VENDORED-FROM.txt) -> render. A "flux-chain-site/1" archive (a
+   defxn CMS site) gets the template below. A "flux-folder-site/1" archive (a
+   plain folder, bundle-deploy pack) runs as its own pages in a sandboxed frame
+   with no network (folder-site.js, site-frame.html).
 
    Names come only from dense-wire (docs/DEFXN-NAMES-ONE-SYSTEM.md). Until
    2026-10-23 this shell read the Explorer `names` source (GUN names/*) and
@@ -33,10 +36,9 @@ import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
 import { resolveName as resolveOnChain } from "./resolve-name.js";
 import { fetchVerifiedContent } from "./content.js";
 import { NAME_NODES, GENESIS_PUB_HEX } from "./name-config.js";
+import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml } from "./folder-site.js";
 
 const SITE_SCHEMA = "flux-chain-site/1";
-/* What Bundles packs from a plain folder (bundle-deploy src/folder-archive.js). Not rendered yet. */
-const FOLDER_SITE_SCHEMA = "flux-folder-site/1";
 
 const FAILURE_MESSAGES = {
   NAME_NOT_FOUND: "No such name. Nothing is claimed at this address.",
@@ -49,6 +51,9 @@ const FAILURE_MESSAGES = {
   CONTENT_MALFORMED: "This site's content could not be read as a mesh site archive.",
   CONTENT_MISMATCH: "This site's content does not match the address its name points at, so this page refuses to show it.",
   SCHEMA_UNSUPPORTED: "This mesh name does not point at a site this gateway knows how to render.",
+  PAGE_NOT_FOUND: "This site has no page at this address.",
+  NOT_A_PAGE: "This address holds a file of the site, not a page.",
+  SITE_LEFT_ARCHIVE: "This page tried to show something from outside its site, so the gateway stopped it.",
 };
 
 const app = document.getElementById("app");
@@ -65,6 +70,7 @@ function labelFromHostname(hostname) {
 function renderStatus(reason, detail) {
   const message = FAILURE_MESSAGES[reason] || "Something went wrong reading this address.";
   app.innerHTML = "";
+  footer.hidden = false;
   footer.textContent = "Served from the Flux mesh";
   const wrap = document.createElement("div");
   wrap.className = "status-page";
@@ -267,7 +273,68 @@ function renderSite(site) {
   render();
 }
 
+/* A folder site's pages, one sandboxed frame per page (folder-site.js says why). The shell keeps the
+   address bar: a link inside the site asks for its page by message, and the shell shows it. A frame that
+   loads anything after its page (a script sent it to another address) is replaced by a refusal. */
+function renderFolderSite(site) {
+  let current = null;
+
+  function show(pathname, hash) {
+    const page = pageForAddress(site, pathname);
+    if (!page.ok) {
+      current = null;
+      return renderStatus(page.reason, `${page.detail} Go to ${location.origin}/ for its first page.`);
+    }
+    if (!/^text\/html\b/i.test(page.file.contentType)) {
+      current = null;
+      return renderStatus("NOT_A_PAGE", `${pathname} is ${page.file.contentType}. A page of the site can show it.`);
+    }
+    const doc = new DOMParser().parseFromString(new TextDecoder().decode(page.file.bytes), "text/html");
+    const { html, title } = buildPageHtml(site, page.path, doc);
+    document.title = title || location.hostname;
+
+    const frame = document.createElement("iframe");
+    frame.className = "folder-site";
+    frame.title = title || location.hostname;
+    frame.setAttribute("sandbox", "allow-scripts allow-popups allow-popups-to-escape-sandbox");
+    frame.setAttribute("referrerpolicy", "no-referrer");
+    frame.src = "/site-frame.html";
+    const state = { frame, html, hash, sent: false, loads: 0 };
+    /* Measured in Chromium 2026-10-23: site-frame.html's load, then the load document.close() ends with.
+       A third means the frame went somewhere else. */
+    frame.addEventListener("load", () => {
+      state.loads += 1;
+      if (current === state && state.loads > 2) {
+        current = null;
+        renderStatus("SITE_LEFT_ARCHIVE", "A script or link on the page sent its frame to an address outside the site's archive. Only what the site's name points at is shown here. Reload to start again.");
+      }
+    });
+    current = state;
+    footer.hidden = true;
+    app.replaceChildren(frame);
+  }
+
+  window.addEventListener("message", (event) => {
+    if (!current || event.source !== current.frame.contentWindow) return;
+    const data = event.data;
+    if (data?.type === "fxn-folder-site:ready" && !current.sent) {
+      current.sent = true;
+      /* "*": an opaque origin cannot be named. What is sent is the site's own public page. */
+      current.frame.contentWindow.postMessage({ type: "fxn-folder-site:page", html: current.html, hash: current.hash }, "*");
+    } else if (data?.type === "fxn-folder-site:navigate" && typeof data.href === "string") {
+      const url = new URL(data.href, location.origin);
+      if (url.origin !== location.origin) return;
+      history.pushState(null, "", url.pathname + url.search + url.hash);
+      show(url.pathname, url.hash);
+    }
+  });
+  window.addEventListener("popstate", () => show(location.pathname, location.hash));
+  show(location.pathname, location.hash);
+}
+
 async function main() {
+  /* A folder site's frame sent to one of this gateway's own addresses would load the shell inside it. */
+  if (window.top !== window) return;
   const label = labelFromHostname(location.hostname);
   const name = `${label}.fxn`;
 
@@ -288,12 +355,15 @@ async function main() {
     return renderStatus("CONTENT_MALFORMED", error.message);
   }
 
-  const site = decodeSite(decoded);
-  if (!site) {
-    const schema = (decoded.routes || []).find((route) => route.routeId === "site")?.payload?.schema;
-    if (schema === FOLDER_SITE_SCHEMA) return renderStatus("SCHEMA_UNSUPPORTED", "This name points at a site packed from a folder. This gateway shows only sites published from the defxn editor so far.");
-    return renderStatus("SCHEMA_UNSUPPORTED");
+  const schema = (decoded.routes || []).find((route) => route.routeId === "site")?.payload?.schema;
+  if (schema === FOLDER_SITE_SCHEMA) {
+    const folder = readFolderSite(decoded);
+    if (!folder.ok) return renderStatus(folder.reason, folder.detail);
+    return renderFolderSite(folder.site);
   }
+
+  const site = decodeSite(decoded);
+  if (!site) return renderStatus("SCHEMA_UNSUPPORTED");
   if (!site.manifests.length) return renderStatus("CONTENT_MALFORMED", "The site archive lists no pages.");
 
   renderSite(site);
