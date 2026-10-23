@@ -17,8 +17,26 @@
    proven is refused, never used to sign.
 
    The signing key is held by a handle that never exposes its bytes, lives only
-   in this page's memory, and is disposed on sign-out. Nothing is written to
-   storage: reloading the page signs you out.
+   in this page's memory, and is disposed on sign-out. By default nothing is
+   written to storage, so reloading the page signs you out.
+
+   "Keep me signed in" (owner, 2026-10-24: "every auth create the session of
+   that 1 day, 3 day, 7 day and 14 days ... on reload your auth still works but
+   that's your own risk"). After an open, the panel offers ark-ui's remember
+   picker, set to "Only this tab". Choosing a window saves what reopens the
+   identity into ark-ui's persisted-secret vault (a non-extractable AES-GCM key
+   in IndexedDB, expiry checked on every read), one vault per `product` on this
+   origin. What is saved is the opened identity's material, the same things
+   flux-db-studio's auth-kit mode keeps: the FXN ID file as it was opened, the
+   recovery phrase it opened to, and the wallet secret keys inside it. The PIN,
+   password, key word, icon and v10 Secret Key are never saved; this file never
+   receives them. On load, an unexpired record reopens the identity without the
+   file: the root is rebuilt from the phrase and must equal the file's root key,
+   or the record is deleted. Sign-out and "Forget now" delete it. An expired
+   record is deleted by the vault on read. The risk note says the honest limit
+   from the vault's own header: it stops a copy of the disk, not a harmful
+   script running on this site during the window. The record is written in its
+   own grammar (see REMEMBER_LABELS below), never as JSON.
 
    `identity.signWithWallet` closes a real gap: `openAuthKit`'s decrypted
    secret already carries the wallet's own key (`AuthKitSecret.walletSecretKey`)
@@ -68,8 +86,10 @@
 
    Build: node scripts/build-auth.cjs  ->  js/admin/auth.js (a classic script).
    ===================================================================== */
-import { createAuthKitSession, addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit } from '@deadark/ark-ui/flux-auth';
+import { createAuthKitSession, addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, parseAuthKit, encodeAuthKitEnvelope, canonicalAuthKitRootKey } from '@deadark/ark-ui/flux-auth';
 import { createArkAuthKitPanel } from '@deadark/ark-ui/flux-auth-ui';
+import { createPersistedSecretVault, rememberMeDurationMs } from '@deadark/ark-ui/flux-auth-persisted-secret';
+import { createArkRememberMePicker, ARK_AUTH_SESSION_STYLES } from '@deadark/ark-ui/flux-auth-session-dom';
 import { createFluxRootHandle, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
 import { createRootIdentitySigningHandle } from 'deadark-identity-core/root-signing-handle';
 import { createWalletSigningHandle } from 'fxn-auth/wallet-signing-handle';
@@ -116,6 +136,75 @@ async function findLiveWalletLink(links, walletAddress) {
   return null;
 }
 
+/* ---- The remembered sign-in: one record in this store's own grammar ----
+   Boxes are joined by '-'. A box takes the longest label it starts with, and its payload must
+   match that label's rule. Free text enters as hex of its UTF-8 bytes, so no payload holds a '-'.
+     FXR  the record's version, the digit 1                 first box, once
+     K    the FXN ID file as it was opened                   once
+     M    the recovery phrase the file opened to             once
+     W    the preferred wallet's secret key                  at most once
+     S    one wallet's secret key: hex address '.' hex key   any number
+   The record exists only inside the persisted-secret vault, encrypted under its non-extractable
+   key. Nothing else reads it, so nothing here is reserved for any other resolver. */
+const HEX = '(?:[0-9a-f]{2})+';
+const REMEMBER_LABELS = {
+  FXR: /^1$/,
+  K: new RegExp('^' + HEX + '$'),
+  M: new RegExp('^' + HEX + '$'),
+  W: new RegExp('^' + HEX + '$'),
+  S: new RegExp('^' + HEX + '\\.' + HEX + '$'),
+};
+const REMEMBER_LABEL_ORDER = Object.keys(REMEMBER_LABELS).sort((a, b) => b.length - a.length);
+const utf8Hex = (text) => Array.from(new TextEncoder().encode(text), (byte) => byte.toString(16).padStart(2, '0')).join('');
+const hexUtf8 = (hex) => new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(hex.match(/../g), (pair) => parseInt(pair, 16)));
+
+function encodeRemembered({ kitText, mnemonic, walletSecretKey, walletSecretKeys }) {
+  const boxes = ['FXR1', 'K' + utf8Hex(kitText), 'M' + utf8Hex(mnemonic)];
+  if (walletSecretKey) boxes.push('W' + utf8Hex(walletSecretKey));
+  for (const [address, key] of Object.entries(walletSecretKeys || {})) boxes.push('S' + utf8Hex(address) + '.' + utf8Hex(key));
+  return boxes.join('-');
+}
+
+function decodeRemembered(record) {
+  const boxes = String(record).split('-');
+  if (boxes[0] !== 'FXR1') throw new Error('The kept sign-in is not a version this page reads.');
+  const out = { kitText: '', mnemonic: '', walletSecretKey: '', walletSecretKeys: {} };
+  for (const box of boxes.slice(1)) {
+    const label = REMEMBER_LABEL_ORDER.find((name) => box.startsWith(name));
+    const payload = label ? box.slice(label.length) : '';
+    if (!label || label === 'FXR' || !REMEMBER_LABELS[label].test(payload)) throw new Error('The kept sign-in has a part this page does not read.');
+    if (label === 'K') out.kitText = hexUtf8(payload);
+    else if (label === 'M') out.mnemonic = hexUtf8(payload);
+    else if (label === 'W') out.walletSecretKey = hexUtf8(payload);
+    else { const [address, key] = payload.split('.'); out.walletSecretKeys[hexUtf8(address)] = hexUtf8(key); }
+  }
+  if (!out.kitText || !out.mnemonic) throw new Error('The kept sign-in is missing its FXN ID file or its phrase.');
+  return out;
+}
+
+/* Words for the remember block. One idea per sentence (docs/COPY-LAWS.md). */
+const KEEP_WORDS = {
+  keptUntil: (when) => 'Kept on this browser until ' + when + '.',
+  forget: 'Forget now',
+  forgotten: 'Forgotten on this browser. A reload signs you out.',
+  saveRefused: 'This browser could not keep your sign-in. Its site storage is off or full. You stay signed in on this tab. Allow storage for this site, then choose a time again.',
+  restoreRefused: 'Your kept sign-in could not be opened, so this browser deleted it. Choose your FXN ID file to sign in again.',
+};
+
+const KEEP_STYLES = '.ark-session-keep { display: grid; gap: 8px; margin-top: 12px; } .ark-session-keep[hidden] { display: none; }';
+
+function installKeepStyles() {
+  if (typeof document === 'undefined' || document.getElementById('ark-session-keep-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'ark-session-keep-styles';
+  style.textContent = ARK_AUTH_SESSION_STYLES + KEEP_STYLES;
+  (document.head || document.documentElement).appendChild(style);
+}
+
+function formatUntil(at) {
+  return new Date(at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
 /* One root handle for a phrase, by the derivation the kit names. */
 async function rootHandle({ mnemonic, derivation, callsign }) {
   if (derivation === FLUX_ROOT_DERIVATION) return createFluxRootHandle(mnemonic);
@@ -132,7 +221,7 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
 export function create({ container, onChange = () => {}, product = 'Flux Protocol' }) {
   // No default stylesheet: the panel's own `data-ark-auth` hooks are styled entirely by css/admin.css,
   // so its look is one thing with the rest of the gate, not two stylesheets negotiating a cascade.
-  let active = null;   // { handle, walletHandle, identity }
+  let active = null;   // { handle, walletHandle, identity, vault, secret }
   let pending = null;  // the handle the verifier just derived, not yet admitted
 
   function drop() {
@@ -141,13 +230,388 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
     onChange(null);
   }
 
-  const session = createAuthKitSession({
+  /* Builds the signed-in identity from an opened FXN ID and the root handle proven to match it.
+     A fresh open and a kept sign-in both come through here, so they sign the same way. */
+  async function admit(opened, handle) {
+    // Present only once a wallet exists and first-time setup produced a usable secret. A kit with no wallet
+    // yet, or one still pending standalone/delegate setup, has no walletSecretKey here -- signWithWallet below
+    // names that explicitly rather than quietly signing with the root key instead.
+    // Awaited: fxn-auth's createWalletSigningHandle became async on 2026-10-23 (native Ed25519 derives the
+    // public key asynchronously). Unawaited, walletHandle was a Promise: walletPublicKeyB64 read undefined,
+    // signWithWallet threw, and Sign out threw on `dispose` before it could sign anyone out.
+    const walletHandle = opened.secret?.walletSecretKey ? await createWalletSigningHandle(opened.secret.walletSecretKey) : null;
+    if (active) { active.handle.dispose(); if (active.walletHandle) active.walletHandle.dispose(); }
+    const identity = Object.freeze({
+      publicKeyB64: handle.publicKeyB64,
+      displayName: opened.summary?.displayName || '',
+      identityId: opened.summary?.identityId || '',
+      // Also a GETTER, same reasoning as `walletAddresses` below --
+      // `rotateWallet` moves the preferred pointer to the new address
+      // when the rotated wallet was preferred, so a frozen snapshot
+      // would keep naming a superseded address as "the" wallet forever.
+      get walletAddress() {
+        return active?.vault ? describeAuthKit(active.vault).walletAddress || '' : (opened.summary?.walletAddress || '');
+      },
+      // A GETTER, not a frozen snapshot: `addWallet`/`rotateWallet`/
+      // `revokeWallet` all mutate `active.vault` in place, so a one-time
+      // value captured at unlock would silently go stale the moment any
+      // of those ran -- this re-derives from whatever `active.vault`
+      // currently is, every time a caller reads it (`Object.freeze` only
+      // locks property DESCRIPTORS; a getter function itself still runs
+      // fresh on each access).
+      get walletAddresses() {
+        return active?.vault ? describeAuthKit(active.vault).walletAddresses : (opened.summary?.walletAddresses || []);
+      },
+      /** Same live-getter reasoning as `walletAddresses` above -- `{walletAddress: {revoked: boolean}}`, read-only, for a caller that wants to show delegation status without re-deriving it itself. */
+      get walletDelegations() {
+        const delegations = active?.vault?.walletDelegations || {};
+        return Object.fromEntries(Object.entries(delegations).map(([address, entry]) => [address, { revoked: entry.revoked }]));
+      },
+      // The one fact `signWithWallet` alone doesn't give a caller: the
+      // wallet's own raw public key, not its one-way-hashed `walletAddress`
+      // (`fxn-auth/identityWallet.mjs`'s `flux-wallet-address-v2`
+      // derivation cannot be reversed back into it). A consumer building a
+      // chain-wire record keyed to this wallet (dense-wire's
+      // `G{pubkeyHex}-...` grammar, which verifies a signature against the
+      // real public key, never the address) needs this to build a valid
+      // wallet-signed record at all -- `createWalletSigningHandle` already
+      // derives it in memory for `signWithWallet` itself; this only
+      // surfaces what already exists, no new derivation. `null` exactly
+      // when `signWithWallet` would also refuse, for the same reason.
+      walletPublicKeyB64: walletHandle ? walletHandle.publicKeyB64 : null,
+      securityProfile: opened.summary?.securityProfile || '',
+      rootVerified: true,
+      sign: async (text) => toBase64(await handle.sign(new TextEncoder().encode(text))),
+      // Raw bytes, not text: dense-wire records are signed over their exact bytes. genesis's
+      // and defxn-dao's signers (js/dense-wire/flx-identity-bridge.mjs) and defxn-dao's DAO
+      // voting call this; it was in the earlier bundle and was lost when this entry was
+      // rewritten, so those sites could not sign once they picked up a current build.
+      signBytes: async (bytes) => toBase64(await handle.sign(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes))),
+      signWithWallet: async (text) => {
+        if (!walletHandle) throw new Error('This identity has no wallet set up yet, so there is nothing to sign with -- create a wallet and complete its first-time setup first.');
+        return toBase64(await walletHandle.sign(new TextEncoder().encode(text)));
+      },
+      /**
+       * Mints and persists a real additional wallet, signed by this
+       * session's own root handle (never a raw key). Returns the
+       * UPDATED vault -- see this file's own header for why the caller,
+       * not this function, decides what happens to it next (there is no
+       * session API to replace a loaded vault in place).
+       * @param {{pin:string,password?:string,label?:string,rights?:string[]}} input
+       */
+      addWallet: async ({ pin, password = '', label = 'Default', rights = ['receive', 'hold', 'spend', 'present'] }) => {
+        if (!active?.vault) throw new Error('Sign in before adding a wallet.');
+        const existing = active.vault.wallet?.body;
+        const identityId = existing?.identityId || toHex(handle.publicKeyB64);
+        const identityPublicKey = existing?.identityPublicKey || toHex(handle.publicKeyB64);
+        const { record, walletSecretKey, walletAddress } = await createWalletForIdentity({
+          identityId,
+          identityPublicKey,
+          signIdentity: (message) => handle.sign(message),
+          label,
+          rights,
+          preferred: !active.vault.wallet,
+          issuedAt: Date.now(),
+        });
+        const updatedVault = await addWalletToAuthKit(active.vault, { pin, password }, record, toBase64(walletSecretKey));
+        active.vault = updatedVault;
+        return { vault: updatedVault, walletAddress };
+      },
+      /**
+       * The wallet grants its ROOT real, live signing power over itself
+       * (vision doc §3 "capability, never secret-sharing"), signed with
+       * the wallet's OWN secret key (never root's) -- the preferred
+       * wallet's key is already an in-memory handle (`walletHandle`); any
+       * other wallet's key is read from `opened.secret.walletSecretKeys`.
+       * Returns the UPDATED vault, same "caller decides what happens to
+       * it next" posture `addWallet` already has.
+       * @param {{walletAddress:string, rights?:string[], maxSpend?:object|null, ttlMs?:number}} input
+       */
+      delegateWallet: async ({ walletAddress, rights = ['receive', 'spend'], maxSpend = null, ttlMs }) => {
+        if (!active?.vault) throw new Error('Sign in before delegating a wallet.');
+        const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
+        const walletLink = walletLinks.find((w) => w.body.walletAddress === walletAddress);
+        if (!walletLink) throw new Error('No such wallet on this identity.');
+        const walletSecretKeyB64 = active.secret?.walletSecretKeys?.[walletAddress]
+          ?? (active.vault.wallet?.body.walletAddress === walletAddress ? active.secret?.walletSecretKey : undefined);
+        if (!walletSecretKeyB64) throw new Error('This wallet has no usable secret key in this session.');
+        const walletSecretKey = Uint8Array.from(atob(walletSecretKeyB64), (character) => character.charCodeAt(0));
+        const grant = createWalletDelegation({
+          walletPublicKey: walletLink.body.walletPublicKey,
+          rootPublicKey: toHex(handle.publicKeyB64),
+          rights,
+          maxSpend,
+          ...(ttlMs ? { ttlMs } : {}),
+        });
+        const signedDelegation = await signWalletDelegation(grant, walletSecretKey);
+        const updatedVault = addWalletDelegationToAuthKit(active.vault, walletAddress, signedDelegation);
+        active.vault = updatedVault;
+        return { vault: updatedVault, walletAddress, delegatedRights: grant.rights, maxSpend: grant.maxSpend, expiresAt: grant.expiresAt };
+      },
+      /** Independently revocable without rotating or killing the wallet -- flips only this wallet's own grant. */
+      revokeWalletDelegation: ({ walletAddress }) => {
+        if (!active?.vault) throw new Error('Sign in before revoking a delegation.');
+        const updatedVault = revokeWalletDelegationInAuthKit(active.vault, walletAddress);
+        active.vault = updatedVault;
+        return { vault: updatedVault, walletAddress, revoked: true };
+      },
+      /**
+       * Root signs with its OWN key (never the wallet's secret); the
+       * Claim Scope Resolver (`rights` + `delegation` dimensions) decides
+       * whether that signature is actually covered.
+       * @param {string} walletAddress
+       * @param {string} message
+       * @param {'receive'|'hold'|'spend'|'present'} right
+       * @param {number|null} [amount]
+       */
+      signWithDelegatedRoot: async (walletAddress, message, right, amount = null) => {
+        if (!active?.vault) throw new Error('Sign in before signing as delegated root.');
+        const entry = active.vault.walletDelegations?.[walletAddress];
+        if (!entry) throw new Error('No delegation exists for this wallet.');
+        const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
+        const walletLink = walletLinks.find((w) => w.body.walletAddress === walletAddress);
+        if (!walletLink) throw new Error('No such wallet on this identity.');
+        const registry = await reduceWalletRegistry(walletLinks);
+        const rootPublicKey = toHex(handle.publicKeyB64);
+        const dimensions = {
+          rights: rightsDimension(registry),
+          delegation: delegationDimension({
+            signedDelegation: entry.signedDelegation,
+            now: Date.now(),
+            isRevoked: (_walletPublicKey, nonce) => Boolean(entry.revoked && entry.signedDelegation.grant.nonce === nonce),
+          }),
+        };
+        const decision = await resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey, right, amount }, dimensions, ['rights', 'delegation']);
+        if (!decision.authorized) throw new Error(`Delegated action refused: ${decision.reason}`);
+        return toBase64(await handle.sign(new TextEncoder().encode(message)));
+      },
+      /**
+       * Supersedes `walletAddress` with a brand-new wallet key in the
+       * same slot's rotation lineage (vision doc §2) -- the last
+       * remaining Portable Auth Kit gap: every other wallet-feature
+       * surface in this workspace already had rotate/revoke; this
+       * lineage had neither until the delegation work above landed the
+       * `walletDelegations` storage pattern it reuses. Returns the
+       * UPDATED vault, same "caller decides what happens to it next"
+       * posture every other wallet mutation here already has.
+       * @param {{walletAddress:string, pin:string, password?:string, label?:string, rights?:string[]}} input
+       */
+      rotateWallet: async ({ walletAddress, pin, password = '', label, rights }) => {
+        if (!active?.vault) throw new Error('Sign in before rotating a wallet.');
+        const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
+        const prior = await findLiveWalletLink(walletLinks, walletAddress);
+        if (!prior || prior.body.action === 'revoke') throw new Error('No such wallet on this identity.');
+        const { record, walletSecretKey, walletAddress: newAddress } = await createWalletRotation({
+          prior,
+          identityId: active.vault.wallet?.body.identityId || toHex(handle.publicKeyB64),
+          identityPublicKey: active.vault.wallet?.body.identityPublicKey || toHex(handle.publicKeyB64),
+          signIdentity: (message) => handle.sign(message),
+          label,
+          rights,
+          issuedAt: Date.now(),
+        });
+        const updatedVault = await rotateWalletInAuthKit(active.vault, { pin, password }, walletAddress, record, toBase64(walletSecretKey));
+        active.vault = updatedVault;
+        return { vault: updatedVault, walletAddress: newAddress, replacesWalletAddress: walletAddress };
+      },
+      /**
+       * Retires a wallet outright, no successor (vision doc §2).
+       * @param {{walletAddress:string, reason?:string}} input
+       */
+      revokeWallet: async ({ walletAddress, reason = null }) => {
+        if (!active?.vault) throw new Error('Sign in before revoking a wallet.');
+        const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
+        const prior = await findLiveWalletLink(walletLinks, walletAddress);
+        if (!prior || prior.body.action === 'revoke') throw new Error('No such wallet on this identity.');
+        const { record } = await createWalletRevocation({
+          prior,
+          identityId: active.vault.wallet?.body.identityId || toHex(handle.publicKeyB64),
+          identityPublicKey: active.vault.wallet?.body.identityPublicKey || toHex(handle.publicKeyB64),
+          signIdentity: (message) => handle.sign(message),
+          reason,
+          issuedAt: Date.now(),
+        });
+        const updatedVault = revokeWalletInAuthKit(active.vault, record);
+        active.vault = updatedVault;
+        return { vault: updatedVault, walletAddress, revoked: true };
+      },
+      /**
+       * Ranks this identity's own live wallets via the LIVE
+       * `flxd-discovery` group's `/api/discovery/rank` -- a genuinely
+       * delegated wallet is boosted to the front. Ranking is an
+       * enhancement, never a requirement: this throws on a mesh failure,
+       * the caller decides whether an unranked list is an acceptable
+       * fallback.
+       * @param {{discoveryUrl?:string}} [options]
+       */
+      rankWalletsByActivationViaMesh: async ({ discoveryUrl = 'http://127.0.0.1:8779' } = {}) => {
+        if (!active?.vault) throw new Error('Sign in before ranking wallets.');
+        const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
+        const registry = await reduceWalletRegistry(walletLinks);
+        const live = registry.wallets.filter((w) => !w.revoked);
+        const items = live.map((w, index) => ({
+          id: w.walletAddress,
+          taxonomyIds: active.vault.walletDelegations?.[w.walletAddress] && !active.vault.walletDelegations[w.walletAddress].revoked ? ['activated'] : [],
+          baseScore: live.length - index,
+        }));
+        const response = await rankDiscovery(discoveryUrl, { items, weights: { activated: 5 }, explorationFloor: 0.25 });
+        if (!(response.status === 200 && Array.isArray(response.order))) {
+          throw new Error(`Discovery resolver unavailable: ${response.status} ${response.error || JSON.stringify(response)}`);
+        }
+        const byAddress = new Map(live.map((w) => [w.walletAddress, w]));
+        return response.order.map((address) => byAddress.get(address)).filter(Boolean);
+      },
+    });
+    active = { handle, walletHandle, identity, vault: opened.vault, secret: opened.secret };
+    onChange(identity);
+  }
+
+  const realSession = createAuthKitSession({
     verifyRoot: async (input) => {
       if (pending) pending.dispose();
       pending = await rootHandle(input);
       return { rootPublicKey: pending.publicKeyB64 };
     },
   });
+
+  /* The panel reads its screen from the session. A kept sign-in reopens with no file loaded, so the
+     panel is handed this session: it reports the kept identity as open until sign-out, and is the
+     real session in every other state. The panel then shows its usual signed-in screen and its own
+     Sign out. */
+  let keptState = null;
+  const keptListeners = new Set();
+  const session = {
+    ...realSession,
+    getState: () => keptState || realSession.getState(),
+    subscribe(listener) {
+      keptListeners.add(listener);
+      const stop = realSession.subscribe(listener);
+      return () => { keptListeners.delete(listener); stop(); };
+    },
+    clear() { keptState = null; realSession.clear(); },
+  };
+
+  /* ---- Keep me signed in ---- */
+  const kept = createPersistedSecretVault({ scope: 'fxn-id-web-sign-in/' + product });
+  let keeping = Promise.resolve(); // saves and clears run one at a time, in the order chosen
+  let picker = null;
+  installKeepStyles();
+  const keepBox = document.createElement('div');
+  keepBox.className = 'ark-session-keep';
+  keepBox.setAttribute('data-ark-session', 'keep');
+  const pickerSlot = document.createElement('div');
+  const keepStatus = document.createElement('p');
+  keepStatus.className = 'ark-session-remember-note';
+  keepStatus.setAttribute('data-ark-session', 'keep-status');
+  keepStatus.setAttribute('role', 'status');
+  const keepActions = document.createElement('div');
+  keepActions.className = 'ark-auth-actions';
+  keepActions.setAttribute('data-ark-auth', 'actions');
+  const forgetButton = document.createElement('button');
+  forgetButton.type = 'button';
+  forgetButton.textContent = KEEP_WORDS.forget;
+  forgetButton.setAttribute('data-kind', 'quiet');
+  forgetButton.setAttribute('data-action', 'forget');
+  keepActions.appendChild(forgetButton);
+  keepBox.append(pickerSlot, keepStatus, keepActions);
+
+  // `hidden` alone can lose to a site's own display rule for buttons, so the inline style says it too.
+  function shown(node, yes) {
+    node.hidden = !yes;
+    node.style.display = yes ? '' : 'none';
+  }
+
+  function showKeep({ status = '', canForget = false } = {}) {
+    shown(keepBox, true);
+    keepStatus.textContent = status;
+    shown(keepStatus, Boolean(status));
+    shown(keepActions, canForget);
+  }
+
+  function hideKeep() {
+    if (picker) { picker.destroy(); picker = null; }
+    shown(keepBox, false);
+    keepStatus.textContent = '';
+    shown(keepActions, false);
+  }
+
+  function queue(work) {
+    keeping = keeping.then(work, work);
+    return keeping;
+  }
+
+  function keepFor(value) {
+    return queue(async () => {
+      const ms = rememberMeDurationMs(value);
+      if (!ms) {
+        try { await kept.clear(); } catch { /* no storage means nothing is kept */ }
+        if (active) showKeep();
+        return;
+      }
+      if (!active) return;
+      try {
+        await kept.save(encodeRemembered({
+          kitText: encodeAuthKitEnvelope(active.vault),
+          mnemonic: active.secret.mnemonic,
+          walletSecretKey: active.secret.walletSecretKey,
+          walletSecretKeys: active.secret.walletSecretKeys,
+        }), ms);
+        if (active) showKeep({ status: KEEP_WORDS.keptUntil(formatUntil(Date.now() + ms)), canForget: true });
+      } catch {
+        if (picker) picker.setValue('none');
+        if (active) showKeep({ status: KEEP_WORDS.saveRefused });
+      }
+    });
+  }
+
+  function forgetKept() {
+    return queue(async () => {
+      try { await kept.clear(); } catch { /* no storage means nothing is kept */ }
+    });
+  }
+
+  forgetButton.addEventListener('click', () => {
+    void forgetKept().then(() => {
+      if (picker) picker.setValue('none');
+      if (active) showKeep({ status: KEEP_WORDS.forgotten });
+    });
+  });
+
+  /* After a fresh open: offer the windows, starting at "Only this tab". */
+  function offerKeep() {
+    if (picker) picker.destroy();
+    picker = createArkRememberMePicker({ container: pickerSlot, value: 'none', onChange: (value) => { void keepFor(value); } });
+    showKeep();
+  }
+
+  /* On load: reopen a kept identity without the file, or delete a record that cannot be used. */
+  async function reopenKept() {
+    let record = null;
+    try { record = await kept.load(); } catch { return; } // no storage here: nothing was kept
+    if (!record || active) return;
+    let handle = null;
+    try {
+      const material = decodeRemembered(record);
+      const vault = parseAuthKit(material.kitText);
+      const summary = describeAuthKit(vault);
+      handle = await rootHandle({ mnemonic: material.mnemonic, derivation: summary.rootDerivation, callsign: summary.callsign });
+      if (canonicalAuthKitRootKey(handle.publicKeyB64) !== canonicalAuthKitRootKey(vault.rootPublicKey)) throw new Error('The kept phrase does not make this FXN ID root.');
+      if (active) { handle.dispose(); return; } // someone opened a file while this was reading
+      const secret = { mnemonic: material.mnemonic };
+      if (material.walletSecretKey) secret.walletSecretKey = material.walletSecretKey;
+      if (Object.keys(material.walletSecretKeys).length) secret.walletSecretKeys = material.walletSecretKeys;
+      const opened = { vault, summary, secret, rootVerified: true };
+      await admit(opened, handle);
+      keptState = { status: 'open', summary, opened, error: null, unverified: false, gateClient: false };
+      for (const listener of keptListeners) listener(keptState);
+      const remaining = await kept.remainingMs();
+      if (active) showKeep({ status: remaining ? KEEP_WORDS.keptUntil(formatUntil(Date.now() + remaining)) : '', canForget: true });
+    } catch {
+      if (handle && !active) handle.dispose();
+      await forgetKept();
+      showKeep({ status: KEEP_WORDS.restoreRefused });
+    }
+  }
 
   createArkAuthKitPanel({
     container, session, product,
@@ -160,243 +624,21 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         pending = null;
         throw new Error('This FXN ID opened, but its root could not be proven, so it cannot sign.');
       }
-      if (active) { active.handle.dispose(); if (active.walletHandle) active.walletHandle.dispose(); }
       const handle = pending;
       pending = null;
-      // Present only once a wallet exists and first-time setup produced a usable secret. A kit with no wallet
-      // yet, or one still pending standalone/delegate setup, has no walletSecretKey here -- signWithWallet below
-      // names that explicitly rather than quietly signing with the root key instead.
-      const walletHandle = opened.secret?.walletSecretKey ? createWalletSigningHandle(opened.secret.walletSecretKey) : null;
-      const identity = Object.freeze({
-        publicKeyB64: handle.publicKeyB64,
-        displayName: opened.summary?.displayName || '',
-        identityId: opened.summary?.identityId || '',
-        // Also a GETTER, same reasoning as `walletAddresses` below --
-        // `rotateWallet` moves the preferred pointer to the new address
-        // when the rotated wallet was preferred, so a frozen snapshot
-        // would keep naming a superseded address as "the" wallet forever.
-        get walletAddress() {
-          return active?.vault ? describeAuthKit(active.vault).walletAddress || '' : (opened.summary?.walletAddress || '');
-        },
-        // A GETTER, not a frozen snapshot: `addWallet`/`rotateWallet`/
-        // `revokeWallet` all mutate `active.vault` in place, so a one-time
-        // value captured at unlock would silently go stale the moment any
-        // of those ran -- this re-derives from whatever `active.vault`
-        // currently is, every time a caller reads it (`Object.freeze` only
-        // locks property DESCRIPTORS; a getter function itself still runs
-        // fresh on each access).
-        get walletAddresses() {
-          return active?.vault ? describeAuthKit(active.vault).walletAddresses : (opened.summary?.walletAddresses || []);
-        },
-        /** Same live-getter reasoning as `walletAddresses` above -- `{walletAddress: {revoked: boolean}}`, read-only, for a caller that wants to show delegation status without re-deriving it itself. */
-        get walletDelegations() {
-          const delegations = active?.vault?.walletDelegations || {};
-          return Object.fromEntries(Object.entries(delegations).map(([address, entry]) => [address, { revoked: entry.revoked }]));
-        },
-        // The one fact `signWithWallet` alone doesn't give a caller: the
-        // wallet's own raw public key, not its one-way-hashed `walletAddress`
-        // (`fxn-auth/identityWallet.mjs`'s `flux-wallet-address-v2`
-        // derivation cannot be reversed back into it). A consumer building a
-        // chain-wire record keyed to this wallet (dense-wire's
-        // `G{pubkeyHex}-...` grammar, which verifies a signature against the
-        // real public key, never the address) needs this to build a valid
-        // wallet-signed record at all -- `createWalletSigningHandle` already
-        // derives it in memory for `signWithWallet` itself; this only
-        // surfaces what already exists, no new derivation. `null` exactly
-        // when `signWithWallet` would also refuse, for the same reason.
-        walletPublicKeyB64: walletHandle ? walletHandle.publicKeyB64 : null,
-        securityProfile: opened.summary?.securityProfile || '',
-        rootVerified: true,
-        sign: async (text) => toBase64(await handle.sign(new TextEncoder().encode(text))),
-        // Raw bytes, not text: dense-wire records are signed over their exact bytes. genesis's
-        // and defxn-dao's signers (js/dense-wire/flx-identity-bridge.mjs) and defxn-dao's DAO
-        // voting call this; it was in the earlier bundle and was lost when this entry was
-        // rewritten, so those sites could not sign once they picked up a current build.
-        signBytes: async (bytes) => toBase64(await handle.sign(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes))),
-        signWithWallet: async (text) => {
-          if (!walletHandle) throw new Error('This identity has no wallet set up yet, so there is nothing to sign with -- create a wallet and complete its first-time setup first.');
-          return toBase64(await walletHandle.sign(new TextEncoder().encode(text)));
-        },
-        /**
-         * Mints and persists a real additional wallet, signed by this
-         * session's own root handle (never a raw key). Returns the
-         * UPDATED vault -- see this file's own header for why the caller,
-         * not this function, decides what happens to it next (there is no
-         * session API to replace a loaded vault in place).
-         * @param {{pin:string,password?:string,label?:string,rights?:string[]}} input
-         */
-        addWallet: async ({ pin, password = '', label = 'Default', rights = ['receive', 'hold', 'spend', 'present'] }) => {
-          if (!active?.vault) throw new Error('Sign in before adding a wallet.');
-          const existing = active.vault.wallet?.body;
-          const identityId = existing?.identityId || toHex(handle.publicKeyB64);
-          const identityPublicKey = existing?.identityPublicKey || toHex(handle.publicKeyB64);
-          const { record, walletSecretKey, walletAddress } = await createWalletForIdentity({
-            identityId,
-            identityPublicKey,
-            signIdentity: (message) => handle.sign(message),
-            label,
-            rights,
-            preferred: !active.vault.wallet,
-            issuedAt: Date.now(),
-          });
-          const updatedVault = await addWalletToAuthKit(active.vault, { pin, password }, record, toBase64(walletSecretKey));
-          active.vault = updatedVault;
-          return { vault: updatedVault, walletAddress };
-        },
-        /**
-         * The wallet grants its ROOT real, live signing power over itself
-         * (vision doc §3 "capability, never secret-sharing"), signed with
-         * the wallet's OWN secret key (never root's) -- the preferred
-         * wallet's key is already an in-memory handle (`walletHandle`); any
-         * other wallet's key is read from `opened.secret.walletSecretKeys`.
-         * Returns the UPDATED vault, same "caller decides what happens to
-         * it next" posture `addWallet` already has.
-         * @param {{walletAddress:string, rights?:string[], maxSpend?:object|null, ttlMs?:number}} input
-         */
-        delegateWallet: async ({ walletAddress, rights = ['receive', 'spend'], maxSpend = null, ttlMs }) => {
-          if (!active?.vault) throw new Error('Sign in before delegating a wallet.');
-          const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
-          const walletLink = walletLinks.find((w) => w.body.walletAddress === walletAddress);
-          if (!walletLink) throw new Error('No such wallet on this identity.');
-          const walletSecretKeyB64 = active.secret?.walletSecretKeys?.[walletAddress]
-            ?? (active.vault.wallet?.body.walletAddress === walletAddress ? active.secret?.walletSecretKey : undefined);
-          if (!walletSecretKeyB64) throw new Error('This wallet has no usable secret key in this session.');
-          const walletSecretKey = Uint8Array.from(atob(walletSecretKeyB64), (character) => character.charCodeAt(0));
-          const grant = createWalletDelegation({
-            walletPublicKey: walletLink.body.walletPublicKey,
-            rootPublicKey: toHex(handle.publicKeyB64),
-            rights,
-            maxSpend,
-            ...(ttlMs ? { ttlMs } : {}),
-          });
-          const signedDelegation = await signWalletDelegation(grant, walletSecretKey);
-          const updatedVault = addWalletDelegationToAuthKit(active.vault, walletAddress, signedDelegation);
-          active.vault = updatedVault;
-          return { vault: updatedVault, walletAddress, delegatedRights: grant.rights, maxSpend: grant.maxSpend, expiresAt: grant.expiresAt };
-        },
-        /** Independently revocable without rotating or killing the wallet -- flips only this wallet's own grant. */
-        revokeWalletDelegation: ({ walletAddress }) => {
-          if (!active?.vault) throw new Error('Sign in before revoking a delegation.');
-          const updatedVault = revokeWalletDelegationInAuthKit(active.vault, walletAddress);
-          active.vault = updatedVault;
-          return { vault: updatedVault, walletAddress, revoked: true };
-        },
-        /**
-         * Root signs with its OWN key (never the wallet's secret); the
-         * Claim Scope Resolver (`rights` + `delegation` dimensions) decides
-         * whether that signature is actually covered.
-         * @param {string} walletAddress
-         * @param {string} message
-         * @param {'receive'|'hold'|'spend'|'present'} right
-         * @param {number|null} [amount]
-         */
-        signWithDelegatedRoot: async (walletAddress, message, right, amount = null) => {
-          if (!active?.vault) throw new Error('Sign in before signing as delegated root.');
-          const entry = active.vault.walletDelegations?.[walletAddress];
-          if (!entry) throw new Error('No delegation exists for this wallet.');
-          const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
-          const walletLink = walletLinks.find((w) => w.body.walletAddress === walletAddress);
-          if (!walletLink) throw new Error('No such wallet on this identity.');
-          const registry = await reduceWalletRegistry(walletLinks);
-          const rootPublicKey = toHex(handle.publicKeyB64);
-          const dimensions = {
-            rights: rightsDimension(registry),
-            delegation: delegationDimension({
-              signedDelegation: entry.signedDelegation,
-              now: Date.now(),
-              isRevoked: (_walletPublicKey, nonce) => Boolean(entry.revoked && entry.signedDelegation.grant.nonce === nonce),
-            }),
-          };
-          const decision = await resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey, right, amount }, dimensions, ['rights', 'delegation']);
-          if (!decision.authorized) throw new Error(`Delegated action refused: ${decision.reason}`);
-          return toBase64(await handle.sign(new TextEncoder().encode(message)));
-        },
-        /**
-         * Supersedes `walletAddress` with a brand-new wallet key in the
-         * same slot's rotation lineage (vision doc §2) -- the last
-         * remaining Portable Auth Kit gap: every other wallet-feature
-         * surface in this workspace already had rotate/revoke; this
-         * lineage had neither until the delegation work above landed the
-         * `walletDelegations` storage pattern it reuses. Returns the
-         * UPDATED vault, same "caller decides what happens to it next"
-         * posture every other wallet mutation here already has.
-         * @param {{walletAddress:string, pin:string, password?:string, label?:string, rights?:string[]}} input
-         */
-        rotateWallet: async ({ walletAddress, pin, password = '', label, rights }) => {
-          if (!active?.vault) throw new Error('Sign in before rotating a wallet.');
-          const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
-          const prior = await findLiveWalletLink(walletLinks, walletAddress);
-          if (!prior || prior.body.action === 'revoke') throw new Error('No such wallet on this identity.');
-          const { record, walletSecretKey, walletAddress: newAddress } = await createWalletRotation({
-            prior,
-            identityId: active.vault.wallet?.body.identityId || toHex(handle.publicKeyB64),
-            identityPublicKey: active.vault.wallet?.body.identityPublicKey || toHex(handle.publicKeyB64),
-            signIdentity: (message) => handle.sign(message),
-            label,
-            rights,
-            issuedAt: Date.now(),
-          });
-          const updatedVault = await rotateWalletInAuthKit(active.vault, { pin, password }, walletAddress, record, toBase64(walletSecretKey));
-          active.vault = updatedVault;
-          return { vault: updatedVault, walletAddress: newAddress, replacesWalletAddress: walletAddress };
-        },
-        /**
-         * Retires a wallet outright, no successor (vision doc §2).
-         * @param {{walletAddress:string, reason?:string}} input
-         */
-        revokeWallet: async ({ walletAddress, reason = null }) => {
-          if (!active?.vault) throw new Error('Sign in before revoking a wallet.');
-          const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
-          const prior = await findLiveWalletLink(walletLinks, walletAddress);
-          if (!prior || prior.body.action === 'revoke') throw new Error('No such wallet on this identity.');
-          const { record } = await createWalletRevocation({
-            prior,
-            identityId: active.vault.wallet?.body.identityId || toHex(handle.publicKeyB64),
-            identityPublicKey: active.vault.wallet?.body.identityPublicKey || toHex(handle.publicKeyB64),
-            signIdentity: (message) => handle.sign(message),
-            reason,
-            issuedAt: Date.now(),
-          });
-          const updatedVault = revokeWalletInAuthKit(active.vault, record);
-          active.vault = updatedVault;
-          return { vault: updatedVault, walletAddress, revoked: true };
-        },
-        /**
-         * Ranks this identity's own live wallets via the LIVE
-         * `flxd-discovery` group's `/api/discovery/rank` -- a genuinely
-         * delegated wallet is boosted to the front. Ranking is an
-         * enhancement, never a requirement: this throws on a mesh failure,
-         * the caller decides whether an unranked list is an acceptable
-         * fallback.
-         * @param {{discoveryUrl?:string}} [options]
-         */
-        rankWalletsByActivationViaMesh: async ({ discoveryUrl = 'http://127.0.0.1:8779' } = {}) => {
-          if (!active?.vault) throw new Error('Sign in before ranking wallets.');
-          const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
-          const registry = await reduceWalletRegistry(walletLinks);
-          const live = registry.wallets.filter((w) => !w.revoked);
-          const items = live.map((w, index) => ({
-            id: w.walletAddress,
-            taxonomyIds: active.vault.walletDelegations?.[w.walletAddress] && !active.vault.walletDelegations[w.walletAddress].revoked ? ['activated'] : [],
-            baseScore: live.length - index,
-          }));
-          const response = await rankDiscovery(discoveryUrl, { items, weights: { activated: 5 }, explorationFloor: 0.25 });
-          if (!(response.status === 200 && Array.isArray(response.order))) {
-            throw new Error(`Discovery resolver unavailable: ${response.status} ${response.error || JSON.stringify(response)}`);
-          }
-          const byAddress = new Map(live.map((w) => [w.walletAddress, w]));
-          return response.order.map((address) => byAddress.get(address)).filter(Boolean);
-        },
-      });
-      active = { handle, walletHandle, identity, vault: opened.vault, secret: opened.secret };
-      onChange(identity);
+      await admit(opened, handle);
+      offerKeep();
     },
-    onSignOut: () => { if (pending) { pending.dispose(); pending = null; } drop(); },
+    onSignOut: () => { if (pending) { pending.dispose(); pending = null; } hideKeep(); void forgetKept(); drop(); },
   });
+  hideKeep();
+  container.appendChild(keepBox);
+  void reopenKept();
 
   return {
     current: () => (active ? active.identity : null),
-    signOut: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } drop(); },
-    dispose: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } drop(); },
+    // Signing out also deletes a kept sign-in. Disposing does not: a page that is going away has not signed out.
+    signOut: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } hideKeep(); void forgetKept(); drop(); },
+    dispose: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } hideKeep(); drop(); },
   };
 }
