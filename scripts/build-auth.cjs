@@ -1,5 +1,5 @@
-// Bundle the shared Auth Kit sign-in into a classic script for admin.html (js/admin/auth.js),
-// then hand the fresh bundle to every sibling site that carries it.
+// Bundle the shared Auth Kit sign-in into a classic script for admin.html (js/admin/auth.js).
+// It writes into THIS repo only. Other sites that carry the bundle are listed when stale, never written.
 //
 // Ark UI parts (@deadark/ark-ui/flux-auth, -flux-auth-ui) resolve from node_modules/@deadark/*,
 // the packages `npm run sync:ark` delivers; nothing here names a hub path. The fxn-auth,
@@ -30,23 +30,24 @@ execFileSync(esbuild, [
   '--alias:deadark-identity-core/root-signing-handle=' + fluxRoot + '/deadark-identity-core/dist/identity/root-signing-handle.js',
   '--outfile=js/admin/auth.js',
 ], { stdio: 'inherit' });
-// Every other site that carries this Auth Kit bundle gets the one just built. They used to be
-// hand copies (genesis/README: "no automated sync wired up yet"), and genesis, defxn-dao and
-// treasury all froze on an Oct 12 build whose reader accepted only `version: 1` -- every v9
-// kit failed there with "not a valid Auth Kit JSON or FLX envelope" (2026-10-16) while
-// defxn.com, rebuilt, read the same file fine. The consumer list is derived, not written
-// down: any sibling site with a js/admin/auth.js that is this bundle (`var ArkAdminAuth=`).
+// Other sites that carry this Auth Kit bundle are LISTED when their copy differs, never written.
+// Until 2026-10-23 this step wrote the fresh bundle into every sibling site under flux/. Run from
+// a worktree, flux/ is the parent, so it wrote into other repos' MAIN folders, where other sessions
+// keep unsaved work: the same kind of write that destroyed work in nine main trees on 2026-10-22.
+// The owner ruled (2026-10-23) that this script writes only into its own repo. Each consumer takes
+// a new bundle in a change of its own. Why the list still matters: genesis, defxn-dao and treasury
+// once froze on an Oct 12 build whose reader accepted only `version: 1`, and every v9 kit failed
+// there (2026-10-16). The consumer list is derived, not written down: any sibling site whose
+// js/admin/auth.js (or ARK Browser's renderer vendor copy) is this bundle (`var ArkAdminAuth=`).
 {
   const built = fs.readFileSync('js/admin/auth.js');
   for (const sibling of fs.readdirSync(fluxRoot)) {
-    // A static site carries it at js/admin/auth.js; ARK Browser in its renderer's vendor dir.
     for (const rel of ['js/admin/auth.js', 'src/renderer/vendor/ark-admin-auth.js']) {
       const target = path.join(fluxRoot, sibling, rel);
       if (path.join(fluxRoot, sibling) === site || !fs.existsSync(target)) continue;
       if (!fs.readFileSync(target, 'utf8').startsWith('var ArkAdminAuth=')) continue;
       if (Buffer.compare(fs.readFileSync(target), built) === 0) continue;
-      fs.writeFileSync(target, built);
-      console.log('[build-auth] refreshed ' + path.relative(fluxRoot, target));
+      console.log('[build-auth] differs, not written: ' + path.relative(fluxRoot, target) + '. Remedy: take the new bundle in that repo, in a change of its own.');
     }
   }
 }

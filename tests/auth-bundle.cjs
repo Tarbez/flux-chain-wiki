@@ -9,6 +9,10 @@ assert(build.includes(out), 'the build script names js/admin/auth.js, so the tes
 const tmpBuild = path.join(path.dirname(out), 'build.cjs'); fs.writeFileSync(tmpBuild, build);
 execFileSync(process.execPath, [tmpBuild], { cwd: process.cwd(), stdio: 'pipe' });
 assert.equal(fs.readFileSync(out, 'utf8'), fs.readFileSync('js/admin/auth.js', 'utf8'), 'js/admin/auth.js is stale: run node scripts/build-auth.cjs');
+// 1b. The build writes into this repo only. Until 2026-10-23 it wrote the fresh bundle into every sibling site under
+//     flux/, which from a worktree meant other repos' main folders (the owner ruled it out that day). The only
+//     write left is esbuild's --outfile; no fs write call may come back.
+assert(!/\b(writeFileSync|writeFile|copyFileSync|copyFile|cpSync|renameSync|appendFileSync|createWriteStream)\b/.test(fs.readFileSync('scripts/build-auth.cjs', 'utf8')), 'scripts/build-auth.cjs must write nothing but its --outfile');
 
 // 2. The bundle is made of the shared canonical parts and carries no derivation of its own.
 const entry = fs.readFileSync('scripts/auth-entry.js', 'utf8');
