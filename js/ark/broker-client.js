@@ -90,7 +90,13 @@
     if (data.type === 'flux-broker:pong') { ready = true; return; }
     if (data.type === 'flux-broker:identity') {
       var waiter = pendingIdentity.shift();
-      if (waiter) { try { popup.focus(); } catch (_) {} waiter.resolve(data.identity || null); }
+      if (!waiter) return;
+      try { popup.focus(); } catch (_) {}
+      /* The person said no to this site in the broker (js/broker/broker.js, SHARING).
+         Resolving null here made the page say "sign in and try again", which was wrong:
+         the person was signed in, and chose not to share. */
+      if (data.error) waiter.reject(Object.assign(new Error(identityErrorMessage(data.error)), { code: data.error }));
+      else waiter.resolve(data.identity || null);
       return;
     }
     if (data.type === 'flux-broker:signed' && pendingSigns[data.requestId]) {
@@ -101,6 +107,11 @@
     }
   });
 
+  function identityErrorMessage(code) {
+    if (code === 'denied') return 'You chose not to share your identity with this site. To use it here, sign in again and choose Share in the defxn identity window.';
+    return 'The defxn identity window did not share your identity: ' + code + '.';
+  }
+
   function brokerErrorMessage(code) {
     if (code === 'denied') return 'Signing was not approved in the defxn identity window.';
     if (code === 'busy') return 'The defxn identity window is already waiting on a different request. Try again once it is answered.';
@@ -108,7 +119,8 @@
   }
 
   window.ArkBroker = {
-    /* -> Promise<{publicKeyB64, displayName} | null> */
+    /* -> Promise<{publicKeyB64, displayName} | null>; rejects with code 'denied' when the
+       person chooses not to share with this site. */
     getIdentity: function () {
       return new Promise(function (resolve, reject) {
         pendingIdentity.push({ resolve: resolve, reject: reject });
