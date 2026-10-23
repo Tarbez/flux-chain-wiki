@@ -46,8 +46,8 @@
     box.appendChild(A.devDetails([
       ['Storage', 'one content-addressed archive (CID) on the mesh, readable like a public IPFS file'],
       ['Private items', 'body is AES-GCM ciphertext; the file key is wrapped per recipient with nacl box'],
-      ['Public marker', 'signed by your identity; lets the archive be read at its own address'],
-      ['Name record', 'a dense-wire name record points the name at an archive address; bound at domains.defxn.com, never by Publish'],
+      ['Public marker', 'signed by your identity. It lets anyone read the archive at its own address.'],
+      ['Name record', 'a dense-wire name record points the name at an archive address. You bind it at domains.defxn.com. Publish never does.'],
       ['Signing key', 'held in memory by js/admin/auth.js; never sent to the publish host, the miner or the mesh'],
       ['Old versions', 'a pinned version may already be copied by other peers']]));
     return box;
