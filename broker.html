@@ -33,12 +33,13 @@
   <section class="gate">
     <div class="gate-card">
       <p class="gate-eyebrow">SHARED SIGN-IN</p>
-      <h1 id="brokerHeading">Unlock your identity</h1>
+      <h1 id="brokerHeading">Open your identity file</h1>
       <p id="brokerLead" class="gate-lead">A defxn site is asking to use your identity. Choose your recovery file
-        (.auth.flx) below; it stays on this device. Every request to sign something is shown to you first, naming
-        the exact site and the exact bytes, before anything is signed.</p>
+        (.auth.fxn) below. It stays on this device. A site gets your public key only after you say yes to that
+        site. Every signature is shown to you first, with the exact site and the exact bytes.</p>
       <div id="brokerAuthContainer"></div>
       <p id="brokerStatus" class="hint" role="status" aria-live="polite"></p>
+      <section id="brokerShare" class="broker-share" role="alertdialog" aria-labelledby="brokerShareQuestion" hidden></section>
     </div>
     <p class="gate-safety">This tab holds your signing key only in memory, for every defxn site, until you close it.
       Closing this tab signs you out everywhere. Nothing here is ever saved to disk or sent anywhere but the
@@ -49,6 +50,6 @@
 <script src="js/admin/auth.js?v=broker1" defer></script>
 <script src="js/admin/vendor/flux-elements.js?v=broker1" defer></script>
 <script src="js/admin/authorization-view.js?v=broker1" defer></script>
-<script src="js/broker/broker.js?v=broker3" defer></script>
+<script src="js/broker/broker.js?v=broker4" defer></script>
 </body>
 </html>

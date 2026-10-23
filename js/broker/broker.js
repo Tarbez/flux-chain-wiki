@@ -14,6 +14,13 @@
                  publishing (js/admin/vendor/flux-elements.js), naming the
                  exact requesting origin and the exact bytes. Being on the
                  allowlist lets a site ASK; it never lets a site sign.
+     SHARING     a site learns the public key and name only after the person
+                 says yes to that exact origin (askToShare). Until 2026-10-23
+                 any allowlisted origin got them with no prompt, and the
+                 allowlist holds every <label>.defxn.com, where the gateway
+                 serves other people's sites. A yes lasts for this tab and
+                 this identity only: it is never stored, and unlocking a
+                 different identity forgets every yes.
 
    There is no "sign everything from this origin" switch and none should be
    added here -- that would turn the allowlist into the consent, which is
@@ -31,6 +38,10 @@
   var queuedIdentityRequests = []; /* [event, ...] held while the person unlocks -- see
     handleIdentityRequest's own comment for why this exists and isn't a single slot
     the way queuedSignRequest is. */
+  var sharedWith = Object.create(null); /* origin -> true: the person said yes to sharing
+    the CURRENT identity with that origin, in this tab. Cleared on every identity change. */
+  var shareQueue = []; /* identity requests from origins with no yes yet, asked one at a time */
+  var shareAsking = null; /* the request the share prompt shows now */
   var everReceivedRequest = false; /* has ANY *.defxn.com page ever actually asked
     this tab for anything? Drives the "nothing to do here" notice below -- without
     it, a tab opened by typing the URL directly (no site on the other end ever
@@ -156,21 +167,66 @@
      unlock happens -- no first-caller-wins, no silent drop. */
   function handleIdentityRequest(event) {
     everReceivedRequest = true;
-    if (who) {
-      reply(event, { type: 'flux-broker:identity', identity: publicFields(who) });
-      $('brokerStatus').textContent = event.origin + ' has your identity now -- switch back to that tab to continue.';
-      return;
-    }
+    if (who) { askToShare(event); return; }
     queuedIdentityRequests.push(event);
-    $('brokerStatus').textContent = event.origin + ' is waiting for you to unlock an identity above to continue.';
+    $('brokerStatus').textContent = event.origin + ' is waiting. Open your identity file above to continue.';
   }
 
   function flushQueuedIdentityRequests() {
     if (!queuedIdentityRequests.length) return;
     var waiters = queuedIdentityRequests; queuedIdentityRequests = [];
-    waiters.forEach(function (waitingEvent) { reply(waitingEvent, { type: 'flux-broker:identity', identity: publicFields(who) }); });
-    var origins = waiters.map(function (waitingEvent) { return waitingEvent.origin; });
-    $('brokerStatus').textContent = origins.join(', ') + ' now has your identity -- switch back to that tab to continue.';
+    waiters.forEach(askToShare);
+  }
+
+  function shareIdentity(event) {
+    reply(event, { type: 'flux-broker:identity', identity: publicFields(who) });
+    $('brokerStatus').textContent = event.origin + ' has your identity now -- switch back to that tab to continue.';
+  }
+
+  /* Every origin asks once per identity per tab (see SHARING in the header).
+     The prompt names the exact origin, because a <label>.defxn.com page
+     may be someone else's site. */
+  function askToShare(event) {
+    if (sharedWith[event.origin]) { shareIdentity(event); return; }
+    shareQueue.push(event);
+    showNextShare();
+  }
+
+  function showNextShare() {
+    if (shareAsking) return;
+    while (shareQueue.length && sharedWith[shareQueue[0].origin]) shareIdentity(shareQueue.shift());
+    var box = $('brokerShare');
+    if (!shareQueue.length) { box.hidden = true; box.textContent = ''; return; }
+    var event = shareAsking = shareQueue.shift();
+    box.textContent = '';
+    box.appendChild(h('p', { class: 'gate-eyebrow', text: 'SHARE YOUR IDENTITY' }));
+    box.appendChild(h('p', { id: 'brokerShareQuestion', text: event.origin + ' asks for your public key and name.' }));
+    box.appendChild(h('p', { class: 'hint', text: 'It cannot sign with them. Each signature asks you again. Share only with a site you opened yourself.' }));
+    var deny = h('button', { type: 'button', class: 'btn', text: 'Don’t share' });
+    var allow = h('button', { type: 'button', class: 'btn primary', text: 'Share with ' + event.origin });
+    box.appendChild(h('div', { class: 'gate-actions' }, deny, allow));
+    deny.addEventListener('click', function () { answerShare(false); });
+    allow.addEventListener('click', function () { answerShare(true); });
+    box.hidden = false;
+    allow.focus();
+  }
+
+  function answerShare(yes) {
+    var event = shareAsking; shareAsking = null;
+    if (!event) return;
+    if (!who) { queuedIdentityRequests.push(event); showNextShare(); return; }
+    if (yes) {
+      sharedWith[event.origin] = true;
+      shareIdentity(event);
+    } else {
+      /* One no answers every waiting request from that origin, so a page
+         that asks twice does not ask the person twice. */
+      var refused = [event].concat(shareQueue.filter(function (e) { return e.origin === event.origin; }));
+      shareQueue = shareQueue.filter(function (e) { return e.origin !== event.origin; });
+      refused.forEach(function (e) { reply(e, { type: 'flux-broker:identity', identity: null, error: 'denied' }); });
+      $('brokerStatus').textContent = 'You did not share your identity with ' + event.origin + '.';
+    }
+    showNextShare();
   }
 
   function handleSignRequest(event, data) {
@@ -181,7 +237,7 @@
          not silently dropped or silently overwritten. */
       if (queuedSignRequest) { reply(event, { type: 'flux-broker:signed', requestId: data.requestId, ok: false, error: 'busy' }); return; }
       queuedSignRequest = { event: event, data: data };
-      $('brokerStatus').textContent = (event.origin) + ' is waiting for you to unlock an identity above to continue.';
+      $('brokerStatus').textContent = (event.origin) + ' is waiting. Open your identity file above to continue.';
       return;
     }
     authorizeAndSign(event, data);
@@ -196,11 +252,12 @@
     if (data.type === 'flux-broker:sign' && typeof data.requestId === 'string') { handleSignRequest(event, data); return; }
   });
 
-  if (!window.ArkAdminAuth) { $('brokerStatus').textContent = 'Auth Kit did not load; identity unlock is unavailable here.'; return; }
+  if (!window.ArkAdminAuth) { $('brokerStatus').textContent = 'The sign-in part of this page did not load. Reload the page.'; return; }
   window.ArkAdminAuth.create({
     container: $('brokerAuthContainer'),
     product: 'defxn',
     onChange: function (identity) {
+      if (!identity || !who || identity.publicKeyB64 !== who.publicKeyB64) sharedWith = Object.create(null);
       who = identity || null;
       renderStatus();
       if (who) {
